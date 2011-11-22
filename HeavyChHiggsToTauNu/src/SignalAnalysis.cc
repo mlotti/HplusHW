@@ -428,7 +428,7 @@ namespace HPlus {
       iEvent.put(saveBJets, "selectedBJets");
     }
     fSFUncertaintiesAfterBTagging.setScaleFactorUncertainties(fEventWeight.getWeight(),
-                                                              triggerWeight.getEventWeight(), triggerWeight.getEventAbsoluteUncertainty(),
+                                                              triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
                                                               btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
 
 //------ Fill transverse mass histograms    
@@ -448,7 +448,7 @@ namespace HPlus {
       hSelectionFlow->Fill(kSignalOrderDeltaPhi160Selection, fEventWeight.getWeight());
       fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi160Selection, tauData);
       fSFUncertaintiesAfterDeltaPhi160.setScaleFactorUncertainties(fEventWeight.getWeight(),
-                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventAbsoluteUncertainty(),
+                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
                                                                   btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
       // Fill transverse mass histograms after Deltaphi cut
       hTransverseMassAfterDeltaPhi160->Fill(transverseMass, fEventWeight.getWeight());
@@ -460,7 +460,7 @@ namespace HPlus {
       fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi130Selection, tauData);
       hSelectionFlow->Fill(kSignalOrderDeltaPhi130Selection, fEventWeight.getWeight());
       fSFUncertaintiesAfterDeltaPhi130.setScaleFactorUncertainties(fEventWeight.getWeight(),
-                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventAbsoluteUncertainty(),
+                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
                                                                   btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
       // Fill transverse mass histograms after Deltaphi cut
       hTransverseMassAfterDeltaPhi130->Fill(transverseMass, fEventWeight.getWeight());
@@ -472,7 +472,7 @@ namespace HPlus {
       fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi90Selection, tauData);
       hSelectionFlow->Fill(kSignalOrderDeltaPhi90Selection, fEventWeight.getWeight());
       fSFUncertaintiesAfterDeltaPhi90.setScaleFactorUncertainties(fEventWeight.getWeight(),
-                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventAbsoluteUncertainty(),
+                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
                                                                   btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
       // Fill transverse mass histograms after Deltaphi cut
       hTransverseMassAfterDeltaPhi90->Fill(transverseMass, fEventWeight.getWeight());
