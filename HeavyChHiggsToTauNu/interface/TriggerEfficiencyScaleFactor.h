@@ -32,11 +32,11 @@ namespace HPlus {
       double getEventWeight() const {
         return fTesf->fWeight;
       }
-      double getEventRelativeUncertainty() const { return fTesf->fRelativeUncertainty; }
-      double getEventAbsoluteUncertainty() const { return fTesf->fAbsoluteUncertainty; }
-
       double getEventWeightAbsoluteUncertainty() const {
         return fTesf->fWeightAbsUnc;
+      }
+      double getEventWeightRelativeUncertainty() const {
+        return fTesf->fWeightRelUnc;
       }
 
     private:
@@ -96,9 +96,6 @@ namespace HPlus {
 
     EventWeight& fEventWeight;
 
-    double fAbsoluteUncertainty;
-    double fRelativeUncertainty;
-
     const DataValue *fCurrentRunData;
 
     TH1 *hScaleFactor;
@@ -108,6 +105,7 @@ namespace HPlus {
     Mode fMode;
     double fWeight;
     double fWeightAbsUnc;
+    double fWeightRelUnc;
   };
 }
 

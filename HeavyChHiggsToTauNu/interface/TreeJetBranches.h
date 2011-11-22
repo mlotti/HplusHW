@@ -32,6 +32,8 @@ namespace HPlus {
     void setValues(const edm::Event& iEvent);
     void reset();
 
+    const edm::InputTag& getInputTag() const { return fJetSrc; }
+
   private:
     void setValues(const edm::View<pat::Jet>& muons);
 
