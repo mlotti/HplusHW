@@ -426,8 +426,10 @@ def counterEfficiency(counterTable):
     return result
 
 def efficiencyColumn(name, column):
-    result = column.clone()
-    result.setName(name)
+    origRownames = column.getRowNames()
+    rows = []
+    rowNames = []
+
     prev = None
     for irow in xrange(0, column.getNrows()):
         count = column.getCount(irow)
@@ -441,8 +443,10 @@ def efficiencyColumn(name, column):
             except ZeroDivisionError:
                 pass
         prev = count
-        result.setCount(irow, value)
-    return result
+        if value != None:
+            rows.append(value)
+            rowNames.append(origRownames[irow])
+    return CounterColumn(name, rowNames, rows)
 
 def sumColumn(name, columns):
     """Create a new CounterColumn as the sum of the columns."""

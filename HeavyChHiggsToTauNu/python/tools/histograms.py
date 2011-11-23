@@ -411,7 +411,11 @@ class CanvasFrame:
     # is taken from the histograms, i.e. \a ymax keyword argument is
     # \b not given.
     def __init__(self, histoManager, name, **kwargs):
-        histos = histoManager.getHistos()
+        histos = []
+        if isinstance(histoManager, list):
+            histos = histoManager[:]
+        else:
+            histos = histoManager.getHistos()
         if len(histos) == 0:
             raise Exception("Empty set of histograms!")
 
@@ -522,7 +526,11 @@ class CanvasFrameTwo:
             def getYmax(self):
                 return self.histo.GetMaximum()
 
-        histos1 = histoManager1.getHistos()
+        histos1 = []
+        if isinstance(histoManager1, list):
+            histos1 = histoManager1[:]
+        else:
+            histos1 = histoManager1.getHistos()
         if len(histos1) == 0:
             raise Exception("Empty set of histograms for first pad!")
         if len(histos2) == 0:

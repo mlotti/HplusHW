@@ -400,6 +400,9 @@ class TreeDraw:
                 selection = self.weight
 
         tree = rootFile.Get(self.tree)
+        if tree == None:
+            raise Exception("No tree '%s' in file %s" % (self.tree, rootFile.GetName()))
+
         if self.varexp == "":
             nentries = tree.GetEntries(selection)
             h = ROOT.TH1F("nentries", "Number of entries by selection %s"%selection, 1, 0, 1)
@@ -467,7 +470,7 @@ class TreeDrawCompound:
             ret.datasetMap[name] = td.clone(**kwargs)
         return ret
 
-def treeDrawToNumEntries(treeDraw):
+def _treeDrawToNumEntriesSingle(treeDraw):
     var = treeDraw.weight
     if var == "":
         var = treeDraw.selection
@@ -475,6 +478,15 @@ def treeDrawToNumEntries(treeDraw):
         var += ">>dist(1,0,2)" # the binning is arbitrary, as the under/overflow bins are counted too
     # if selection and weight are "", TreeDraw.draw() returns a histogram with the number of entries
     return treeDraw.clone(varexp=var)
+
+def treeDrawToNumEntries(treeDraw):
+    if isinstance(treeDraw, TreeDrawCompound):
+        td = TreeDrawCompound(_treeDrawToNumEntriesSingle(treeDraw.default))
+        for name, td2 in treeDraw.datasetMap.iteritems():
+            td.add(name, _treeDrawToNumEntriesSingle(td2))
+        return td
+    else:
+        return _treeDrawToNumEntriesSingle(treeDraw)
 
 class DatasetRootHistoBase:
     """Base class for DatasetRootHisto classes.
@@ -686,6 +698,9 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
         """
         hsum = self.histoWrappers[0].getHistogram() # we get a clone
         for h in self.histoWrappers[1:]:
+            if h.getHistogram().GetNbinsX() != hsum.GetNbinsX():
+                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.GetName(), self.histoWrappers[0].getDataset().getName(), h.getDataset().getName(), hsum.GetNbinsX(), h.getHistogram().GetNbinsX()))
+
             hsum.Add(h.getHistogram())
         return hsum
 
@@ -810,6 +825,9 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
 
         hsum = self.histoWrappers[0].getHistogram() # we get a clone
         for h in self.histoWrappers[1:]:
+            if h.getHistogram().GetNbinsX() != hsum.GetNbinsX():
+                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.getHistogram().GetName(), self.histoWrappers[0].getHistogram().getName(), h.getDataset().getName(), hsum.GetNbinsX(), h.getHistogram().GetNbinsX()))
+
             hsum.Add(h.getHistogram())
 
         if self.normalization == "toOne":
@@ -1438,7 +1456,7 @@ class DatasetManager:
         for newName, nameList in toMerge.iteritems():
             self.merge(newName, nameList)
 
-    def merge(self, newName, nameList):
+    def merge(self, newName, nameList, keepSources=False):
         """Merge Datasets.
 
         Parameters:
@@ -1453,10 +1471,11 @@ class DatasetManager:
         elif len(selected) == 1:
             print >> sys.stderr, "Dataset merge: one dataset '" + selected[0].getName() + "' found from list '" + ", ".join(nameList)+"', renaming it to '%s'" % newName
             self.rename(selected[0].getName(), newName)
-            return 
+            return
 
-        notSelected.insert(firstIndex, DatasetMerged(newName, selected))
-        self.datasets = notSelected
+        if not keepSources:
+            self.datasets = notSelected
+        self.datasets.insert(firstIndex, DatasetMerged(newName, selected))
         self._populateMap()
 
     def loadLuminosities(self, fname="lumi.json"):

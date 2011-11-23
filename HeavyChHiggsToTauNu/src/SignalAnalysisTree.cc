@@ -12,6 +12,10 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 
+#include "RecoEgamma/EgammaTools/interface/ConversionFinder.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+#include "MagneticField/Engine/interface/MagneticField.h"
+#include "FWCore/Framework/interface/ESHandle.h"
 
 #include "TTree.h"
 
@@ -48,9 +52,7 @@ namespace HPlus {
 
     fTree = dir.make<TTree>("tree", "Tree");
 
-    fTree->Branch("event", &fEvent);
-    fTree->Branch("lumi", &fLumi);
-    fTree->Branch("run", &fRun);
+    fEventBranches.book(fTree);
 
     fTree->Branch("weightPrescale", &fPrescaleWeight);
     fTree->Branch("weightPileup", &fPileupWeight);
@@ -68,6 +70,7 @@ namespace HPlus {
     fTree->Branch("tau_leadPFChargedHadrCand_p4", &fTauLeadingChCand);
     fTree->Branch("tau_signalPFChargedHadrCands_n", &fTauSignalChCands);
     fTree->Branch("tau_emFraction", &fTauEmFraction);
+    fTree->Branch("tau_decayMode", &fTauDecayMode);
     for(size_t i=0; i<fTauIds.size(); ++i) {
       fTree->Branch( ("tau_id_"+fTauIds[i].name).c_str(), &(fTauIds[i].value) );
     }
@@ -196,14 +199,13 @@ namespace HPlus {
     if(taus.size() != 1)
       throw cms::Exception("LogicError") << "Expected tau collection size to be 1, was " << taus.size() << " at " << __FILE__ << ":" << __LINE__ << std::endl;
 
-    fEvent = iEvent.id().event();
-    fLumi = iEvent.id().luminosityBlock();
-    fRun = iEvent.id().run();
+    fEventBranches.setValues(iEvent);
 
     fTau = taus[0]->p4();
     fTauLeadingChCand = taus[0]->leadPFChargedHadrCand()->p4();
     fTauSignalChCands = taus[0]->signalPFChargedHadrCands().size();
     fTauEmFraction = taus[0]->emFraction();
+    fTauDecayMode = taus[0]->decayMode();
     for(size_t i=0; i<fTauIds.size(); ++i) {
       fTauIds[i].value = taus[0]->tauID(fTauIds[i].name) > 0.5;
     }
@@ -554,9 +556,7 @@ namespace HPlus {
   void SignalAnalysisTree::reset() {
     double nan = std::numeric_limits<double>::quiet_NaN();
 
-    fEvent = 0;
-    fLumi = 0;
-    fRun = 0;
+    fEventBranches.reset();
 
     fPrescaleWeight = 1.0;
     fPileupWeight = 1.0;
@@ -574,6 +574,7 @@ namespace HPlus {
     fTauLeadingChCand.SetXYZT(nan, nan, nan, nan);
     fTauSignalChCands = 0;
     fTauEmFraction = nan;
+    fTauDecayMode = -9999;
     for(size_t i=0; i<fTauIds.size(); ++i)
       fTauIds[i].reset();
 

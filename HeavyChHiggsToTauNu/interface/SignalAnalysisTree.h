@@ -13,13 +13,10 @@
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/TriggerObject.h"
 
-#include "DataFormats/PatCandidates/interface/Electron.h"
-#include "RecoEgamma/EgammaTools/interface/ConversionFinder.h"
-#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
-#include <MagneticField/Engine/interface/MagneticField.h>
-#include "FWCore/Framework/interface/ESHandle.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeEventBranches.h"
 
 #include<vector>
 
@@ -99,9 +96,7 @@ namespace HPlus {
     TTree *fTree;
 
     bool fillNonIsoLeptonVars;
-    unsigned int fEvent;
-    unsigned int fLumi;
-    unsigned int fRun;
+    TreeEventBranches fEventBranches;
 
     double fPrescaleWeight;
     double fPileupWeight;
@@ -119,6 +114,7 @@ namespace HPlus {
     XYZTLorentzVector fTauLeadingChCand;
     unsigned int fTauSignalChCands;
     double fTauEmFraction;
+    int fTauDecayMode;
     std::vector<TauId> fTauIds;
 
     std::vector<XYZTLorentzVector> fJets;

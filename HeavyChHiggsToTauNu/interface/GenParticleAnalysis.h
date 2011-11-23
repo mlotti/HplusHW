@@ -102,6 +102,10 @@ namespace HPlus {
     TH1 *hBquarkNotFromTopDeltaRTau;
     TH1 *hTopPt;
     TH1 *hTopPt_wrongB;
+    TH1 *hGenMET;
+    TH1 *hWPt;
+    TH1 *hWEta;
+    TH1 *hWPhi;
 
     edm::Ptr<reco::GenMET> fGenMet;
   };

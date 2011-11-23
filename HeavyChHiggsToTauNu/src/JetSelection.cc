@@ -53,24 +53,24 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("JetSelection");
     
-    hPt = makeTH<TH1F>(myDir, "jet_pt", "het_pt", 400, 0., 400.);
-    hPtCentral = makeTH<TH1F>(myDir, "jet_pt_central", "het_pt_central", 100, 0., 200.);
-    hEta = makeTH<TH1F>(myDir, "jet_eta", "jet_eta", 400, -5., 5.);
-    hPhi = makeTH<TH1F>(myDir, "jet_phi", "jet_phi", 400, -3.2, 3.2);
+    hPt = makeTH<TH1F>(myDir, "jet_pt", "het_pt", 300, 0., 600.);
+    hPtCentral = makeTH<TH1F>(myDir, "jet_pt_central", "het_pt_central", 300, 0., 600.);
+    hEta = makeTH<TH1F>(myDir, "jet_eta", "jet_eta", 250, -5., 5.);
+    hPhi = makeTH<TH1F>(myDir, "jet_phi", "jet_phi", 320, -3.2, 3.2);
     hNumberOfSelectedJets = makeTH<TH1F>(myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
     hjetEMFraction = makeTH<TH1F>(myDir, "jetEMFraction", "jetEMFraction", 400, 0., 1.0);
     hjetChargedEMFraction = makeTH<TH1F>(myDir, "chargedJetEMFraction", "chargedJetEMFraction", 400, 0., 1.0);
     hjetMaxEMFraction = makeTH<TH1F>(myDir, "jetMaxEMFraction", "jetMaxEMFraction", 400, 0., 1.0);  
     hMinDeltaRToOppositeDirectionOfTau = makeTH<TH1F>(myDir, "jet_MinDeltaRToOppositeDirectionOfTau", "jet_MinDeltaRToOppositeDirectionOfTau", 50, 0., 5.);
 
-    hFirstJetPt = makeTH<TH1F>(myDir, "firstJet_pt", "firstJet_pt", 400, 0., 400.);
-    hFirstJetEta = makeTH<TH1F>(myDir, "firstJet_eta", "firstJet_eta", 60, -3., 3.); 
+    hFirstJetPt = makeTH<TH1F>(myDir, "firstJet_pt", "firstJet_pt", 300, 0., 600.);
+    hFirstJetEta = makeTH<TH1F>(myDir, "firstJet_eta", "firstJet_eta", 250, -5., 5.); 
     hFirstJetPhi = makeTH<TH1F>(myDir, "firstJet_phi", "firstJet_phi", 72, -3.14159, 3.14159); 
-    hSecondJetPt = makeTH<TH1F>(myDir, "secondJet_pt", "secondJet_pt", 400, 0., 400.);
-    hSecondJetEta = makeTH<TH1F>(myDir, "secondJet_eta", "secondJet_eta", 60, -3., 3.); 
+    hSecondJetPt = makeTH<TH1F>(myDir, "secondJet_pt", "secondJet_pt", 300, 0., 600.);
+    hSecondJetEta = makeTH<TH1F>(myDir, "secondJet_eta", "secondJet_eta", 250, -5., 5.); 
     hSecondJetPhi = makeTH<TH1F>(myDir, "secondJet_phi", "secondJet_phi", 72, -3.14159, 3.14159); 
-    hThirdJetPt = makeTH<TH1F>(myDir, "thirdJet_pt", "thirdJet_pt", 400, 0., 400.);
-    hThirdJetEta = makeTH<TH1F>(myDir, "thirdJet_eta", "thirdJet_eta", 60, -3., 3.); 
+    hThirdJetPt = makeTH<TH1F>(myDir, "thirdJet_pt", "thirdJet_pt", 300, 0., 600.);
+    hThirdJetEta = makeTH<TH1F>(myDir, "thirdJet_eta", "thirdJet_eta", 250, -5., 5.); 
     hThirdJetPhi = makeTH<TH1F>(myDir, "thirdJet_phi", "thirdJet_phi", 72, -3.14159, 3.14159); 
 
     // Histograms for excluded jets (i.e. matching in DeltaR to tau jet)

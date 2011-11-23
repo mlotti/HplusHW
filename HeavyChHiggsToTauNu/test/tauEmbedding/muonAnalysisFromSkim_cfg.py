@@ -23,9 +23,9 @@ options, dataVersion = getOptionsDataVersion(dataVersion, options, useDefaultSig
 process = cms.Process("HChMuonAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -37,8 +37,7 @@ process.source = cms.Source('PoolSource',
         #dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
-    #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v10/b3c16f1ee121445edb6d9b12e0772d8e/skim_104_1_sYD.root"
-    "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_skim_v11/50e9a4e9bac98baa56423a829b7f0fda/skim_113_1_B6e.root"
+    "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_2_X/TTJets_TuneZ2_Summer11_1/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_skim_v13_2/6ce8de2c5b6c0c9ed414998577b7e28d/skim_982_1_xgs.root"
   )
 )
 
@@ -74,29 +73,29 @@ if options.doPat == 0:
     )
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
-# Pileup weighting
-weight = None
-if dataVersion.isMC():
-    import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+# Pileup weights
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+process.pileupWeightEPS = cms.EDProducer("HPlusVertexWeightProducer",
+    alias = cms.string("pileupWeightEPS"),
+)
+process.pileupWeightRun2011AnoEPS = process.pileupWeightEPS.clone(
+    alias = "pileupWeightRun2011AnoEPS"
+)
+process.pileupWeightRun2011A = process.pileupWeightEPS.clone(
+    alias = "pileupWeightRun2011A"
+)
+param.setPileupWeightFor2011(dataVersion, era="EPS")
+insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeightEPS)
+param.setPileupWeightFor2011(dataVersion, era="Run2011A-EPS")
+insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeightRun2011AnoEPS)
+param.setPileupWeightFor2011(dataVersion, era="Run2011A")
+insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeightRun2011A)
 
-    # Pileup weighting
-    process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
-        alias = cms.string("pileupWeight"),
-    )
-    puweight = "Run2011A"
-    if len(options.puWeightEra) > 0:
-        puweight = options.puWeightEra
-    param.setPileupWeightFor2011(dataVersion, era=puweight)
-    insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeight)
-
-    # Vertex weighting
-    process.vertexWeight = cms.EDProducer("HPlusVertexWeightProducer",
-        alias = cms.string("vertexWeight"),
-    )
-    param.setVertexWeightFor2011()
-    insertPSetContentsTo(param.vertexWeight.clone(), process.vertexWeight)
-
-    process.commonSequence *= (process.pileupWeight*process.vertexWeight)
+process.commonSequence *= (
+    process.pileupWeightEPS *
+    process.pileupWeightRun2011AnoEPS *
+    process.pileupWeightRun2011A
+)
     
 # Add the muon selection counters, as this is done after the skim
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
@@ -115,89 +114,149 @@ process.commonSequence *= process.firstPrimaryVertex
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
 muons = customisations.addMuonIsolationEmbedding(process, process.commonSequence, "selectedPatMuons")
 
-
-
-
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
+process.preselectedMuons = cms.EDFilter("PATMuonSelector",
+    src = cms.InputTag(muons),
+    cut = cms.string(
+        "isGlobalMuon() && isTrackerMuon()"
+        "&& muonID('GlobalMuonPromptTight')"
+        "&& innerTrack().numberOfValidHits() > 10"
+        "&& innerTrack().hitPattern().pixelLayersWithMeasurement() >= 1"
+        "&& numberOfMatches() > 1"
+    )
+)
+process.commonSequence *= process.preselectedMuons
 
 # Configuration
-trigger = options.trigger
-if len(trigger) == 0:
-#    trigger = "HLT_Mu9"
-    trigger = "HLT_Mu20_v1"
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
+ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
+    patTriggerEvent = cms.InputTag("patTriggerEvent"),
+    genParticleSrc = cms.InputTag("genParticles"),
+    muonSrc = cms.InputTag("preselectedMuons"),
+    muonFunctions = cms.PSet(
+        dB = cms.string("dB()")
+        #name = cms.string("function")
+    ),
+    jetSrc = cms.InputTag("goodJets"),
+    jetFunctions = cms.PSet(
+    ),
+    mets = cms.VPSet(
+        cms.PSet(
+            name = cms.string("met"),
+            src = cms.InputTag("pfMet"),
+        ),
+    ),
+    doubles = cms.VPSet(
+        cms.PSet(
+            src = cms.InputTag("pileupWeightEPS"),
+            name = cms.string("weightPileup_EPS")
+        ),
+        cms.PSet(
+            src = cms.InputTag("pileupWeightRun2011AnoEPS"),
+            name = cms.string("weightPileup_Run2011AnoEPS")
+        ),
+        cms.PSet(
+            src = cms.InputTag("pileupWeightRun2011A"),
+            name = cms.string("weightPileup_Run2011A")
+        )
+    ),
+)
+#isolations = muonAnalysis.isolations.keys()
+isolations = ["trackIso", "caloIso", "pfChargedIso", "pfNeutralIso", "pfGammaIso", "tauTightIc04ChargedIso", "tauTightIc04GammaIso"]
+#print isolations
+for name in isolations:
+    setattr(ntuple.muonFunctions, name, cms.string(muonAnalysis.isolations[name]))
 
-def createAnalysis(name, postfix="", weightSrc=None, **kwargs):
-    wSrc = weightSrc
-    if dataVersion.isData():
-        wSrc = None
-    def create(**kwargs):
-        muonAnalysis.createAnalysis(process, dataVersion, additionalCounters, name=name,
-                                    trigger=trigger, jets="goodJets", met="pfMet",
-                                    weightSrc = wSrc,
-                                    **kwargs)
+addAnalysis(process, "muonNtuple", ntuple,
+            preSequence=process.commonSequence,
+            additionalCounters=additionalCounters,
+            signalAnalysisCounters=False)
+process.muonNtupleCounters.printMainCounter = True
 
-    prefix = name+postfix
-    create(prefix=prefix, **kwargs)
-    if not "doIsolationWithTau" in kwargs:
-        for iso in [
-#            "VLoose",
-#            "Loose",
-#            "Medium",
-#            "Tight",
-#            "TightSc015",
-#            "TightSc02",
-            "TightIc04",
-#            "TightSc015Ic04",
-#            "TightSc02Ic04",
-            ]:
-            create(prefix=prefix+"IsoTauLike"+iso, doMuonIsolation=True, muonIsolation="tau%sIso"%iso, muonIsolationCut=0.5, **kwargs)
+# Replace all event counters with the weighted one
+eventCounters = []
+for label, module in process.producers_().iteritems():
+    if module.type_() == "EventCountProducer":
+        eventCounters.append(label)
+prototype = cms.EDProducer("HPlusEventCountProducer",
+    weightSrc = cms.InputTag("pileupWeightRun2011A")
+)
+for label in eventCounters:
+    process.globalReplace(label, prototype.clone())
 
+
+
+# def createAnalysis(name, postfix="", weightSrc=None, **kwargs):
+#     wSrc = weightSrc
+#     if dataVersion.isData():
+#         wSrc = None
+#     def create(**kwargs):
+#         muonAnalysis.createAnalysis(process, dataVersion, additionalCounters, name=name,
+#                                     trigger=trigger, jets="goodJets", met="pfMet",
+#                                     weightSrc = wSrc,
+#                                     **kwargs)
+
+#     prefix = name+postfix
+#     create(prefix=prefix, **kwargs)
+#     if not "doIsolationWithTau" in kwargs:
 #         for iso in [
-#             "Tight",
-#             "TightSc0",
-#             "TightSc0Ic04",
-#             "TightSc0Ic04Noq",
-#             create(prefix=prefix+"IsoTauLikeRel"+iso, doMuonIsolation=True, muonIsolation="tau%sIsoRel"%iso, muonIsolationCut=
+# #            "VLoose",
+# #            "Loose",
+# #            "Medium",
+# #            "Tight",
+# #            "TightSc015",
+# #            "TightSc02",
+#             "TightIc04",
+# #            "TightSc015Ic04",
+# #            "TightSc02Ic04",
+#             ]:
+#             create(prefix=prefix+"IsoTauLike"+iso, doMuonIsolation=True, muonIsolation="tau%sIso"%iso, muonIsolationCut=0.5, **kwargs)
 
-#    if not "doIsolationWithTau" in kwargs:
-#        for iso in [
-#            "VLoose",
-#            "Loose",
-#            "Medium",
-#            "Tight",
-#            ]:
-#            create(prefix=prefix+"IsoTau"+iso, doIsolationWithTau=True, isolationWithTauDiscriminator="by%sIsolation"%iso, **kwargs)
+# #         for iso in [
+# #             "Tight",
+# #             "TightSc0",
+# #             "TightSc0Ic04",
+# #             "TightSc0Ic04Noq",
+# #             create(prefix=prefix+"IsoTauLikeRel"+iso, doMuonIsolation=True, muonIsolation="tau%sIsoRel"%iso, muonIsolationCut=
+
+# #    if not "doIsolationWithTau" in kwargs:
+# #        for iso in [
+# #            "VLoose",
+# #            "Loose",
+# #            "Medium",
+# #            "Tight",
+# #            ]:
+# #            create(prefix=prefix+"IsoTau"+iso, doIsolationWithTau=True, isolationWithTauDiscriminator="by%sIsolation"%iso, **kwargs)
         
-    create(prefix=prefix+"Aoc", afterOtherCuts=True, **kwargs)
+#     create(prefix=prefix+"Aoc", afterOtherCuts=True, **kwargs)
 
-def createAnalysis2(**kwargs):
-#    createAnalysis("topMuJetRefMet", doIsolationWithTau=False, **kwargs)
+# def createAnalysis2(**kwargs):
+# #    createAnalysis("topMuJetRefMet", doIsolationWithTau=False, **kwargs)
 
-    args = {}
-    args.update(kwargs)
-    postfix = kwargs.get("postfix", "")
-    for pt, met, njets in [
-#        (30, 20, 2),
-#        (30, 20, 3),
-#        (40, 20, 2),
-        (40, 20, 3)
-        ]:
-        args["postfix"] = "Pt%dMet%dNJets%d%s" % (pt, met, njets, postfix)
-        args["muonPtCut"] = pt
-        args["metCut"] = met
-        args["njets"] = njets
-        createAnalysis("muonSelectionPF", **args)
+#     args = {}
+#     args.update(kwargs)
+#     postfix = kwargs.get("postfix", "")
+#     for pt, met, njets in [
+# #        (30, 20, 2),
+# #        (30, 20, 3),
+# #        (40, 20, 2),
+#         (40, 20, 3)
+#         ]:
+#         args["postfix"] = "Pt%dMet%dNJets%d%s" % (pt, met, njets, postfix)
+#         args["muonPtCut"] = pt
+#         args["metCut"] = met
+#         args["njets"] = njets
+#         createAnalysis("muonSelectionPF", **args)
 
-createAnalysis2(muons=muons, allMuons=muons)
-createAnalysis2(muons=muons, allMuons=muons, weightSrc="vertexWeight", postfix="VertexWeight")
-#createAnalysis2(muons=muons, allMuons=muons, weightSrc="pileupWeight", postfix="PileupWeight")
-#createAnalysis2(muons="tightMuonsZ")
+# createAnalysis2(muons=muons, allMuons=muons)
+# createAnalysis2(muons=muons, allMuons=muons, weightSrc="vertexWeight", postfix="VertexWeight")
+# #createAnalysis2(muons=muons, allMuons=muons, weightSrc="pileupWeight", postfix="PileupWeight")
+# #createAnalysis2(muons="tightMuonsZ")
 
-# process.out = cms.OutputModule("PoolOutputModule",
-#     fileName = cms.untracked.string('foo.root'),
-#     outputCommands = cms.untracked.vstring(["keep *_*MuonVeto*_*_*"])
-# )
-# process.endPath = cms.EndPath(
-#     process.out
-# )
+# # process.out = cms.OutputModule("PoolOutputModule",
+# #     fileName = cms.untracked.string('foo.root'),
+# #     outputCommands = cms.untracked.vstring(["keep *_*MuonVeto*_*_*"])
+# # )
+# # process.endPath = cms.EndPath(
+# #     process.out
+# # )
 
