@@ -614,8 +614,6 @@ class CounterTable:
                     icount += 1
                     found = True
                     break
-                else:
-                    self.table[i].insert(icol, None)
             if found:
                 continue
 
@@ -636,12 +634,20 @@ class CounterTable:
             self.table.append(row)
 
         for irow, row in enumerate(self.table):
+            def value(count):
+                if count == None:
+                    return count
+                else:
+                    return count.value()
             # Append None to row if column didn't have 
             if len(row) == beginColumns:
                 row.insert(icol, None)
             # Sanity check
             elif len(row) < beginColumns:
-                print [c.value() for c in row]
+                print [value(c) for c in row]
+                raise Exception("Internal error at row %d: len(row) = %d, beginColumns = %d" % (irow, len(row), beginColumns))
+            elif len(row) > beginColumns+1:
+                print [value(c) for c in row]
                 raise Exception("Internal error at row %d: len(row) = %d, beginColumns = %d" % (irow, len(row), beginColumns))
 
         self.columnNames.insert(icol, column.getName())
