@@ -1046,13 +1046,16 @@ class ComparisonPlot(PlotBase):
     # \param createRatio  Create also the ratio pad?
     # \param coverPadOpts Options for cover TPad, forwarded to _createCoverPad()
     # \param kwargs       Keyword arguments, forwarded to PlotBase.createFrame() or histograms.CanvasFrameTwo.__init__()
-    def createFrame(self, filename, createRatio=False, coverPadOpts={}, **kwargs):
+    def createFrame(self, filename, createRatio=False, invertRatio=False, coverPadOpts={}, **kwargs):
         if not createRatio:
             PlotBase.createFrame(self, filename, **kwargs)
         else:
             histos = self.histoMgr.getHistos()
-            self.ratio = _createRatio(histos[0].getRootHisto(), histos[1].getRootHisto(),
-                                      "%s/%s" % (histos[0].getName(), histos[1].getName()))
+            (numerator, denominator) = (histos[0], histos[1])
+            if invertRatio:
+                (numerator, denominator) = (denominator, numerator)
+            self.ratio = _createRatio(numerator.getRootHisto(), denominator.getRootHisto(),
+                                      "%s/%s" % (numerator.getName(), denominator.getName()))
 
             self.cf = histograms.CanvasFrameTwo(self.histoMgr, [self.ratio], filename, **kwargs)
             self.frame = self.cf.frame
