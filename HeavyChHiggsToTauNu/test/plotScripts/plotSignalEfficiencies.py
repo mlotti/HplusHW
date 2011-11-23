@@ -114,18 +114,36 @@ def main():
         gr.SetMarkerColor(2)
         gr.SetMarkerSize(0.9)
         gr.SetLineStyle(1)
-        gr.SetLineWidth(1)
+        gr.SetLineWidth(2)
         return gr
 
     gtrig = createErrors("Trigger and HLT_MET cut")
+    gtrig.SetLineColor(38)
+    gtrig.SetMarkerColor(38)
+    gtrig.SetLineStyle(2) 
     gtau = createErrors("taus == 1")
+    gtau.SetLineColor(7)
+    gtau.SetMarkerColor(7)
+    gtau.SetLineStyle(3)  
     #gtau = createErrors("trigger scale factor")
     gveto = createErrors("muon veto")
+    gveto.SetLineColor(1)
+    gveto.SetMarkerColor(1)
+    gveto.SetLineStyle(4) 
     gjets = createErrors("njets")
+    gjets.SetLineColor(2)
+    gjets.SetMarkerColor(2)
+    gjets.SetLineStyle(1) 
     gmet = createErrors("MET")
+    gmet.SetLineColor(3)
+    gmet.SetMarkerColor(3)
+    gmet.SetLineStyle(5) 
     gbtag = createErrors("btagging")
+    gbtag.SetLineColor(6)
+    gbtag.SetMarkerColor(6)
+    gbtag.SetLineStyle(6) 
     #gtau = createErrors("trigger scale factor")
-    gbtag.SetLineColor(1)
+
                         
     glist = [gtrig, gtau, gjets, gmet, gbtag]
     
