@@ -109,8 +109,26 @@ root -b -q mkBrLimits_plots.cxx
 # remove LandS and clean directory from files created by LandS
 tar -cf output_Lands.tar output_LandS_*
 rm output_LandS_*
-rm -r CMSSW_*
+rm -r CMSSW_*/src/UserCode
 rm -r LSFJOB_*
 rm *Hybrid*root
 
-echo Ready!
+echo Br limit plots ready!
+
+cd CMSSW_4_1_4/src
+#git clone http://cmsdoc.cern.ch/~slehti/HiggsAnalysis.git
+git clone ~slehti/public/html/HiggsAnalysis.git
+cmsenv
+source /afs/cern.ch/cms/LCG/LCG-2/UI/cms_ui_env.csh
+source /afs/cern.ch/cms/ccs/wm/scripts/Crab/crab.csh
+# -- following not needed since not running cmsRun --
+#./HiggsAnalysis/HeavyChHiggsToTauNu/test/checkoutTags.sh
+scram b -j 4
+cmsenv
+cd ../..
+./mkBrLimits_mssmLimit.py
+
+# rm unnecessary code
+rm -r CMSSW_*/src
+
+echo MSSM limit plots ready!

@@ -1,88 +1,67 @@
-To run the analysis in lxplus, afs-visible area (not tmp directory):
-====================================================================
+To run the analysis in lxplus, in afs-visible area (not tmp directory):
+========================================================================
 
-*****  These lines give additional instructions for running the "shapes" version
+These instructions describe how to run the "shapes" version with LandS.
 
-0) Modifications:
-------------------
+0) Requirements:
+--------------------
 
-Modify the following files, if needed:
+The following files are needed to a separate working directory with a unique name, 
+replace "*" by the mass points 80/100/120/140/150/155/160:
 
-* HPlusHadronic_x.txt	rates & uncertainties for mH=x for studies without shapes
-* input_luminosity	luminosity shown in plots
-***** HPlusHadronicShapes_x.txt	rates & uncertainties for mH=x for studies with shapes
-***** These files: fromAlexandros.root, mt_ewk_lands.root, mt_lands_ritva3.root, mt_matti.root
+-datacard*.txt (LandS datacard files)
+-hplus*.txt    (LandS shapes histograms)
 
-You may also want to use other datacards than HPlusHadronic_x.txt; in this 
-case copy them to the directory and write the names to script_run_LandS 
-
-1) compile the modified LandS software
-------------------------------------------------------------------------
-
-go to the current directory (test/brlimit)
-cvs co UserCode/mschen/LandS OR cvs co -r t3-03-10_ChargedHiggs UserCode/mschen/LandS
-****** check out instead the version V3-04-01_eps
-cd UserCode/mschen/LandS  
-cmsenv
-gmake clean; gmake all;
-cd ../../..
-
-Sidenote:
- LandS version t3-03-10_ChargedHiggs is modified by Mingshui 5.7.2011
- Suggested use:
-
-==
-lands.exe  --PhysicsModel ChargedHiggs  -M Hybrid
---bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.05  -d
-HPlusHadronic_120.txt
- 
-To calculate expectation bands:
-add option "--doExpectation 1 -t xxx"  where xxx is the number of toys
-(1000 recommended ).
-***** use initialRmax of 0.09 instead
-==
+The working directory should have a unique name to make possible
+running several analysis jobs simultaneously.  The name of the
+directory is used as the name of the LSF job, and a new job cannot be
+started if a job with the same name is still running. 
 
 
-2) run LandS (takes some time; you may skip this and directly make 
-the plots with the presaved values in output files if you want don't want 
-to run LandS again).  Note that you can start one LandS job, then change
-the datacard name, and restart another job without waiting.
--------------------------------------------------------------
+1) Setup:
+----------
 
-(Recommendation: "rm output*" before running the script)
+In addition to the files mentioned in 0), copy the running files to the working 
+directory:
 
-./script_run_LandS
-
-*As a result, files output_LandS_HPlusHadronic_* are (re)generated
+ cp ??/brlimit/mkBrLimits* .
 
 
-3) run the ROOT analysis to obtain Br limit (mH,Br)
----------------------------------------------------
+2) Set number of MC toys and luminosity:
+-----------------------------------------
 
-root -l -b -q brlimit.cxx
-you have to insert by hand the name of the output files to use 
-(e.g. output_LandS_HPlusHadronicShapes)
+By default, 500 toy MC runs are performed.  This takes about 4 hours.  You can
+change the number of toys in the file mkBrLimits_runExp .
 
-*As a result, the br limit plot brlimits.png/eps is generated
-
-*if no appropriate data exists, a point in BR=0 is plotted; to remove this,
-hard-coded values of nData and mH
+Type the integrated luminosity as a plain number to a file "input_luminosity".
 
 
-4) run the python analysis to obtain MSSM limit (mH,tanB)
----------------------------------------------------------
+3) Running
+-------------
 
-cmsenv
-./mssmLimit.py
+Just type the following command to launch the jobs:
 
-*As a result, the tanb limit plots mssmLimits.png/eps and mssmLimits_mus.png/eps are generated
-*you may want to toggle the setting "useMA" to show results in mA,tanb space, or the setting
- "showTeva" and "showLEP" to show/hide Tevatron and LEP results
+ ./mkBrLimits
+
+Jobs are submitted LSF, and as a result, the following limit plots are
+generated:
+
+ -brlimits.png,          limit plot (mH,Br)
+ -mssmLimits_mh.png,     limit plot (mH,tanB)
+ -mssmLimits_mus_mh.png, limit plot (mH,tanB) with various mu values 
+
+Also the corresponding eps files are generated.
+
+In "mkBrLimits_mssmLimit.py", you may want to toggle the setting
+"useMA" to show results in mA,tanb space, or the setting "showTeva"
+and "showLEP" to show/hide Tevatron and LEP results.
 
 
 Possible problems:
-------------------
+===================
 
 * no output files: 
   -check that you are in lxplus, and your working area can be 
    accessed by afs:  do not use a /tmp/ directory
+
+===========================================================================
