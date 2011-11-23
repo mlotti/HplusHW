@@ -64,6 +64,9 @@ def addPatOnTheFly(process, options, dataVersion,
         if dataVersion.isMC() and doMcPreselection:
             process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
             seq *= process.eventPreSelection
+        if options.doTauHLTMatchingInAnalysis != 0:
+            process.patTausHpsPFTauTauTriggerMatched = HChTriggerMatching.createTauTriggerMatchingInAnalysis(options.trigger, "selectedPatTausHpsPFTau")
+            seq *= process.patTausHpsPFTauTauTriggerMatched
         return (seq, counters)
 
     print "Running PAT on the fly"
