@@ -13,10 +13,7 @@ int mkBrLimits_plots()
   tdrStyle->SetTitleFontSize(0.05);
   tdrStyle->SetTitleX(0.3); // Set the position of the title box
 
-  // --- Read initial values from input files ---
-  // "rest" contains dibosons, single top and Drell-Yan 
-  double L;
-  ifstream fileLumi(  "input_luminosity",ios::in); fileLumi   >> L;
+  char temp[200];
 
   // --- Data: mass points and efficiencies  --- 
    const int nData = 7; // 90 not yet ready
@@ -29,10 +26,26 @@ int mkBrLimits_plots()
       155, 
       160};
 
+   // --- Read initial values from input files ---
+   // Check that all datacards have the same luminosity
+  double L;
+  for (int index=0; index<nData; index++){
+    sprintf(temp,"input_luminosity_%d",mH[index]);
+
+    ifstream fileLumi(temp,ios::in); 
+    double tmpL;
+    fileLumi >> tmpL;
+    if (index==0)
+      L = tmpL;
+    else if (tmpL != L){
+      cout << "Different luminosity value in datacards, now exit!" << endl;
+      exit(-1);
+    }
+  }
+
   // --- Read values from LandS files ---
   // obs, exp, exp+-1sigma, exp+-2sigma
   char fileName[500];   
-  char temp[200];
   double valueLandS_obs[nData];
   double valueLandS_exp[nData][5];
   //  cout << "----- give name of LandS files to be read -----" << endl;
@@ -40,7 +53,7 @@ int mkBrLimits_plots()
   //  cout << "     output_LandS_HPlusHadronic_M80/100/120/etc." << endl;
   //  cin >> fileName;
 
-  sprintf(fileName,"output_LandS_datacard");
+  sprintf(fileName,"output_LandS_datacard_hplushadronic");
   cout << endl << "File name is " << fileName << endl;
 
   for (int i=0; i<nData; i++){
@@ -230,7 +243,7 @@ void plotTxt(double lumi) {
   l.DrawLatex(x,y,"CMS Preliminary");
 
   x = 0.45;
-  sprintf(temp,"%.2f fb^{-1}",lumi);
+  sprintf(temp,"%.1f fb^{-1}",lumi);
   l.DrawLatex(x, y, temp);
 
   x = 0.2;

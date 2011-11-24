@@ -9,11 +9,11 @@ set outputfile = output_LandS_`basename ${datacard1} .txt`_exp
 echo "Calculating exp value with datacard ${datacard1} ${datacard2} ${datacard3}, output is ${outputfile}"
 echo
 
-cd ${odir}/CMSSW_4_1_4/src
+cd ${odir}/mycmsswlink/src
 cmsenv
 
 # Set number of toys after "-t "
 cd ${odir}
-${odir}/CMSSW_4_1_4/src/UserCode/mschen/LandS/test/lands.exe --PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09  -d ${datacard1} --doExpectation 1 -t 500 | tail -5 >& ${outputfile}
+${odir}/mycmsswlink/src/UserCode/mschen/LandS/test/lands.exe --PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09  -d ${datacard1} --doExpectation 1 -t 500 | tail -5 >& ${outputfile}
 
 exit 0

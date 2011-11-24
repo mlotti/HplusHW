@@ -6,7 +6,7 @@
 set odir = `pwd`
 #set nameJobs = datacard_fullyhadronic_skenA1
 set nameJobs = `basename ${odir}`
-set nameDataCard = datacard
+set nameDataCard = datacard_hplushadronic
 
 # check if jobs producing same output files are running
 # NOTE: a job with longer name containing the name of this job might block this 
@@ -36,8 +36,11 @@ set j6 = ${jobname}155
 set j7 = ${jobname}160
 
 # prepare LandS
-cmsrel CMSSW_4_1_4
-cd CMSSW_4_1_4/src/
+#cmsrel CMSSW_4_1_4
+set MYCMSSWVER = CMSSW_4_2_8_patch7
+cmsrel ${MYCMSSWVER}
+ln -s ${MYCMSSWVER} mycmsswlink
+cd mycmsswlink/src/
 cvs co -r V3-04-01_eps UserCode/mschen/LandS
 cd UserCode/mschen/LandS  
 cmsenv
@@ -47,25 +50,33 @@ cd ../../../../..
 
 cd ${odir}
 
-# set outputfile = output_LandS_`basename ${nameDataCard} .txt`
+#Find out integrated luminosities from datacard files
+head -1 ${f1}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! input_luminosity_80
+head -1 ${f2}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! input_luminosity_100
+head -1 ${f3}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! input_luminosity_120
+head -1 ${f4}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! input_luminosity_140
+head -1 ${f5}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! input_luminosity_150
+head -1 ${f6}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! input_luminosity_155
+head -1 ${f7}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! input_luminosity_160
+
 
 # generates the files output_LandS_HPlusHadronic_*_obs
-bsub -q cmscaf1nh -J ${j1}_o ${odir}/mkBrLimits_runObs ${odir} ${f1}.txt
-bsub -q cmscaf1nh -J ${j2}_o ${odir}/mkBrLimits_runObs ${odir} ${f2}.txt
-bsub -q cmscaf1nh -J ${j3}_o ${odir}/mkBrLimits_runObs ${odir} ${f3}.txt
-bsub -q cmscaf1nh -J ${j4}_o ${odir}/mkBrLimits_runObs ${odir} ${f4}.txt
-bsub -q cmscaf1nh -J ${j5}_o ${odir}/mkBrLimits_runObs ${odir} ${f5}.txt
-bsub -q cmscaf1nh -J ${j6}_o ${odir}/mkBrLimits_runObs ${odir} ${f6}.txt
-bsub -q cmscaf1nh -J ${j7}_o ${odir}/mkBrLimits_runObs ${odir} ${f7}.txt
+bsub -q 1nh -J ${j1}_o ${odir}/mkBrLimits_runObs ${odir} ${f1}.txt
+bsub -q 1nh -J ${j2}_o ${odir}/mkBrLimits_runObs ${odir} ${f2}.txt
+bsub -q 1nh -J ${j3}_o ${odir}/mkBrLimits_runObs ${odir} ${f3}.txt
+bsub -q 1nh -J ${j4}_o ${odir}/mkBrLimits_runObs ${odir} ${f4}.txt
+bsub -q 1nh -J ${j5}_o ${odir}/mkBrLimits_runObs ${odir} ${f5}.txt
+bsub -q 1nh -J ${j6}_o ${odir}/mkBrLimits_runObs ${odir} ${f6}.txt
+bsub -q 1nh -J ${j7}_o ${odir}/mkBrLimits_runObs ${odir} ${f7}.txt
 
 # generates the files output_LandS_HPlusHadronic_*_exp
-bsub -q cmscaf1nd -J ${j1}_e ${odir}/mkBrLimits_runExp ${odir} ${f1}.txt
-bsub -q cmscaf1nd -J ${j2}_e ${odir}/mkBrLimits_runExp ${odir} ${f2}.txt
-bsub -q cmscaf1nd -J ${j3}_e ${odir}/mkBrLimits_runExp ${odir} ${f3}.txt
-bsub -q cmscaf1nd -J ${j4}_e ${odir}/mkBrLimits_runExp ${odir} ${f4}.txt
-bsub -q cmscaf1nd -J ${j5}_e ${odir}/mkBrLimits_runExp ${odir} ${f5}.txt
-bsub -q cmscaf1nd -J ${j6}_e ${odir}/mkBrLimits_runExp ${odir} ${f6}.txt
-bsub -q cmscaf1nd -J ${j7}_e ${odir}/mkBrLimits_runExp ${odir} ${f7}.txt
+bsub -q 1nd -J ${j1}_e ${odir}/mkBrLimits_runExp ${odir} ${f1}.txt
+bsub -q 1nd -J ${j2}_e ${odir}/mkBrLimits_runExp ${odir} ${f2}.txt
+bsub -q 1nd -J ${j3}_e ${odir}/mkBrLimits_runExp ${odir} ${f3}.txt
+bsub -q 1nd -J ${j4}_e ${odir}/mkBrLimits_runExp ${odir} ${f4}.txt
+bsub -q 1nd -J ${j5}_e ${odir}/mkBrLimits_runExp ${odir} ${f5}.txt
+bsub -q 1nd -J ${j6}_e ${odir}/mkBrLimits_runExp ${odir} ${f6}.txt
+bsub -q 1nd -J ${j7}_e ${odir}/mkBrLimits_runExp ${odir} ${f7}.txt
 
 # here check if jobs with same name are running
 echo Checking jobs with name $jobname.
@@ -105,17 +116,9 @@ ls -al output_LandS_*
 
 root -b -q mkBrLimits_plots.cxx
 
-# compress LandS output files,
-# remove LandS and clean directory from files created by LandS
-tar -cf output_Lands.tar output_LandS_*
-rm output_LandS_*
-rm -r CMSSW_*/src/UserCode
-rm -r LSFJOB_*
-rm *Hybrid*root
-
 echo Br limit plots ready!
 
-cd CMSSW_4_1_4/src
+cd mycmsswlink/src
 #git clone http://cmsdoc.cern.ch/~slehti/HiggsAnalysis.git
 git clone ~slehti/public/html/HiggsAnalysis.git
 cmsenv
@@ -128,7 +131,13 @@ cmsenv
 cd ../..
 ./mkBrLimits_mssmLimit.py
 
-# rm unnecessary code
-rm -r CMSSW_*/src
+# compress LandS output files,
+# remove LandS and clean directory from files created by LandS
+tar -cf output_Lands.tar output_LandS_*
+rm output_LandS_*
+rm -r LSFJOB_*
+rm *Hybrid*root
+#rm input_luminosity_*
+rm -r CMSSW_*
 
 echo MSSM limit plots ready!
