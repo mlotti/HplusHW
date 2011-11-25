@@ -17,7 +17,7 @@ mu = 200
 # since the corresponding mH values have not been calculated
 # in Feynhiggs
 useMA = 0
-showTeva = 1
+showTeva = 0
 showLEP = 1
 plotTwoSigmaBands = 0
 
@@ -191,10 +191,14 @@ def keepOnlyMassPoints(graph, massPoints):
 
 # Remove mass points lower than 100 since
 # statisticalFunctions.tanbForBR cannot handle them (they are unphysical)
+# also remove points lower than 115 since excluded by LEP
 def cleanGraph(graph):
-    for i in xrange(0, graph.GetN()):
-        if int(graph.GetX()[i])<100:
+    i=0
+    while (i<graph.GetN()):
+        if (graph.GetX()[i]<115):
             graph.RemovePoint(i)
+        else:
+            i=i+1        
 
 # Remove points with tanb value larger than 100, both upper and lower
 # (not necessary to show them for lower limit plot)
@@ -335,7 +339,7 @@ def main():
     expected_2s_tanb = graphToTanBeta(expected_2s, mu, removeNotValid=False)
 
  
-    showLow = 1
+    showLow = 0
     if showLow:
         observed_tanb_low = graphToTanBetaLow(observed,mu)
         expected_tanb_low = graphToTanBetaLow(expected,mu)
