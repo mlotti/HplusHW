@@ -32,7 +32,8 @@ def writeTitleTexts(lumi):
     x = 0.2
     l.DrawLatex(x, y, "#sqrt{s} = 7 TeV")
     x = 0.45
-    l.DrawLatex(x, y, lumi + " fb^{-1}")
+    mystring = '%.1f' % float(lumi)
+    l.DrawLatex(x, y, mystring + " fb^{-1}")
     return 0
 
 def writeText( myText, y ):
@@ -465,9 +466,10 @@ def main():
     top = 0.9
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
+# --- chose text for final state description --
 #    writeText("Fully hadronic final state",   top - lineSpace)
 #    writeText("hadr. + ltau final states",   top - lineSpace)
-    writeText("hadr. + ltau + emu final states",   top - lineSpace)
+#    writeText("hadr. + ltau + emu final states",   top - lineSpace)
 
 #    writeText("Bayesian CL limit",           top - 2*lineSpace)
     writeText("MSSM m_{h}^{max}",           top - 2*lineSpace)
