@@ -110,7 +110,15 @@ namespace HPlus {
     Count fTriggerCounter;
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
+    Count fBaselineTauIDCounter;
+    Count fBaselineEvetoCounter;
+    Count fBaselineMuvetoCounter;
+    Count fBaselineJetsCounter;
+    Count fBaselineMetCounter;
+    Count fBaselineBtagCounter;
+    Count fBaselineDphi160Counter;
     Count fOneTauCounter;
+    Count fTriggerScaleFactorCounter;
     Count fTauVetoAfterTauIDCounter;
     Count fNprongsAfterTauIDCounter;
     Count fRtauAfterTauIDCounter;
