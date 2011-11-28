@@ -312,7 +312,7 @@ def main():
     style = tdrstyle.TDRStyle()
 
     # Open ROOT file
-    f = ROOT.TFile.Open("brlimits.root")
+    f = ROOT.TFile.Open("limits.root")
 
     # Get TGraphs
     observed = f.Get("tg_obs")
@@ -386,9 +386,9 @@ def main():
 
     # Create the TCanvas, frame, etc
     if useMA:
-        canvas = ROOT.TCanvas("mssmLimits_ma")
+        canvas = ROOT.TCanvas("limitsTanb_ma")
     else:
-        canvas = ROOT.TCanvas("mssmLimits_mh")
+        canvas = ROOT.TCanvas("limitsTanb_mh")
     frame = canvas.DrawFrame(massMin, 0, massMax, tanbMax)
 
     # Draw the graphs
@@ -497,9 +497,9 @@ def main():
 
     # Create the TCanvas, frame, etc
     if useMA:
-        canvas2 = ROOT.TCanvas("mssmLimits_mus_ma")
+        canvas2 = ROOT.TCanvas("limitsTanb_mus_ma")
     else:
-        canvas2 = ROOT.TCanvas("mssmLimits_mus_mh")
+        canvas2 = ROOT.TCanvas("limitsTanb_mus_mh")
     frame2 = canvas.DrawFrame(massMin, 0, massMax, tanbMax)
 
     # Axis labels

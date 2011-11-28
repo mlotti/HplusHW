@@ -4,9 +4,9 @@ void plotTxtMh(double lumi, int mH);
 void plotTxt(double lumi);
 void readValuesFromLandsFile(char * temp, double &my_obs,double * my_exp);
 
-int mkBrLimits_plots()
+int mkBrLimits_processBrPlots()
 {
-  gROOT->ProcessLine(".L mkBrLimits_plotstyle.cxx");
+  gROOT->ProcessLine(".L mkBrLimits_processBrPlots_plotstyle.cxx");
   setTDRStyle();
 
   tdrStyle->SetTitleFillColor(0);
@@ -136,16 +136,16 @@ int mkBrLimits_plots()
   if (0) plotTevatronResults(pl);
 
   // Save TGraphs and plots
-  TFile myfi("brlimits.root","recreate");
+  TFile myfi("limits.root","recreate");
   tg_obs->SetName("tg_obs"); tg_obs->Write();
   tg_exp->SetName("tg_exp"); tg_exp->Write();
   tg_exp_cont1->SetName("tg_exp_cont1"); tg_exp_cont1->Write();
   tg_exp_cont2->SetName("tg_exp_cont2"); tg_exp_cont2->Write();
   can_br->Write();
   myfi.Close();
-  can_br->SaveAs("brlimits.eps");
-  can_br->SaveAs("brlimits.png");
-  can_br->SaveAs("brlimits.C");
+  can_br->SaveAs("limitsBr.eps");
+  can_br->SaveAs("limitsBr.png");
+  can_br->SaveAs("limitsBr.C");
   
   return 0;
 }
