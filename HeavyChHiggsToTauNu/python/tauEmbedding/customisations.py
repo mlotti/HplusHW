@@ -635,11 +635,22 @@ def addGeneratorTauFilter(process, sequence, filterInaccessible=False, prefix="g
 def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLikePreselection"):
     counters = []
 
+    # Create PU weight producer
+    pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
+        alias = cms.string("pileupWeight"),
+    )
+    HChTools.insertPSetContentsTo(param.vertexWeight.clone(), pileupWeight)
+    setattr(process, prefix+"PileupWeight", pileupWeight)
+
+    counterPrototype = cms.EDProducer("HPlusEventCountProducer",
+        weightSrc = cms.InputTag(prefix+"PileupWeight")
+    )
+
     # Disable trigger
     param.trigger.selectionType = "disabled"
     param.triggerEfficiencyScaleFactor.mode = "disabled"
 
-    allCount = cms.EDProducer("EventCountProducer")
+    allCount = counterPrototype.clone()
     setattr(process, prefix+"AllCount", allCount)
     counters.append(prefix+"AllCount")
 
@@ -649,7 +660,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
         minNumber = cms.uint32(1),
         maxNumber = cms.uint32(999)
     )
-    pvFilterCount = cms.EDProducer("EventCountProducer")
+    pvFilterCount = counterPrototype.clone()
     setattr(process, prefix+"PrimaryVertex", pvFilter)
     setattr(process, prefix+"PrimaryVertexCount", pvFilterCount)
     counters.append(prefix+"PrimaryVertexCount")
@@ -668,7 +679,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     )
     setattr(process, prefix+"GenTauFilter", genTausFilter)
 
-    genTausCount = cms.EDProducer("EventCountProducer")
+    genTausCount = counterPrototype.clone()
     setattr(process, prefix+"GenTauCount", genTausCount)
     counters.append(prefix+"GenTauCount")
 
@@ -725,9 +736,9 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
 
     # Electron and muon veto
     eveto = ElectronVeto.hPlusGlobalElectronVetoFilter.clone()
-    evetoCount = cms.EDProducer("EventCountProducer")
+    evetoCount = counterPrototype.clone()
     muveto = MuonVeto.hPlusGlobalMuonVetoFilter.clone() 
-    muvetoCount = cms.EDProducer("EventCountProducer")
+    muvetoCount = counterPrototype.clone()
     setattr(process, prefix+"ElectronVeto", eveto)
     setattr(process, prefix+"ElectronVetoCount", evetoCount)
     setattr(process, prefix+"MuonVeto", muveto)
@@ -752,11 +763,12 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     )
     setattr(process, cleanedJetsName+"Filter", cleanedJetsFilter)
 
-    cleanedJetsCount = cms.EDProducer("EventCountProducer")
+    cleanedJetsCount = counterPrototype.clone()
     setattr(process, cleanedJetsName+"Count", cleanedJetsCount)
     counters.append(cleanedJetsName+"Count")
 
     genTauSequence = cms.Sequence(
+        pileupWeight *
         allCount *
         pvFilter * pvFilterCount *
         genTaus * genTausFilter * genTausCount * genTauFirst * genTauReco *
