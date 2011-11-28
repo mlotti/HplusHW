@@ -54,14 +54,16 @@ HPlusMetNtupleAnalyzer::HPlusMetNtupleAnalyzer(const edm::ParameterSet& iConfig)
   fPatTriggerSrc(iConfig.getParameter<edm::InputTag>("patTriggerEvent")),
   fL1MetCollection("l1extraParticles:MET")
 {
-  std::vector<edm::ParameterSet> mets = iConfig.getParameter<std::vector<edm::ParameterSet> >("mets");
-  for(size_t i=0; i<mets.size(); ++i) {
-    fMets.push_back(MetItem(mets[i].getParameter<std::string>("name"), mets[i].getParameter<edm::InputTag>("src")));
+  edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("mets");
+  std::vector<std::string> names = pset.getParameterNames();
+  for(size_t i=0; i<names.size(); ++i) {
+    fMets.push_back(MetItem(names[i], pset.getParameter<edm::InputTag>(names[i])));
   }
 
-  std::vector<edm::ParameterSet> doubles = iConfig.getParameter<std::vector<edm::ParameterSet> >("doubles");
-  for(size_t i=0; i<doubles.size(); ++i) {
-    fDoubles.push_back(DoubleItem(doubles[i].getParameter<std::string>("name"), doubles[i].getParameter<edm::InputTag>("src")));
+  pset = iConfig.getParameter<edm::ParameterSet>("doubles");
+  names = pset.getParameterNames();
+  for(size_t i=0; i<names.size(); ++i) {
+    fDoubles.push_back(DoubleItem(names[i], pset.getParameter<edm::InputTag>(names[i])));
   }
 
 
@@ -69,7 +71,7 @@ HPlusMetNtupleAnalyzer::HPlusMetNtupleAnalyzer(const edm::ParameterSet& iConfig)
   fTree = fs->make<TTree>("tree", "Tree");
   fEventBranches.book(fTree);
 
-  fTree->Branch("l1Met", &fL1Met);
+  fTree->Branch("l1Met_p4", &fL1Met);
 
   for(size_t i=0; i<fMets.size(); ++i) {
     fTree->Branch(fMets[i].name.c_str(), &(fMets[i].value));

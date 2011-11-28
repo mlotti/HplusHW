@@ -107,13 +107,21 @@ process.firstPrimaryVertex = cms.EDProducer("HPlusFirstVertexSelector",
 process.commonSequence *= process.firstPrimaryVertex
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
-process.muonIsolationSequence = cms.Sequence()
-muons = customisations.addMuonIsolationEmbedding(process, process.muonIsolationSequence, muons="tightMuons")
-process.commonSequence *= process.muonIsolationSequence
+muons = customisations.addMuonIsolationEmbedding(process, process.commonSequence, muons="tightMuons")
 
 process.tightenedMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag(muons),
-    cut = cms.string("pt() > 40 && abs(eta()) < 2.1")
+#    cut = cms.string("pt() > 40 && abs(eta()) < 2.1")
+    cut = cms.string(
+        "pt() > 40 && abs(eta()) < 2.1 &&"
+        "isGlobalMuon() && isTrackerMuon()"
+        "&& muonID('GlobalMuonPromptTight')"
+        "&& innerTrack().numberOfValidHits() > 10"
+        "&& innerTrack().hitPattern().pixelLayersWithMeasurement() >= 1"
+        "&& numberOfMatches() > 1"
+        "&& abs(dB()) < 0.02"
+    )
+
 )
 process.tightenedMuonsFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("tightenedMuons"),
@@ -124,13 +132,18 @@ process.tauEmbeddingMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag("tightenedMuons"),
     cut = cms.string("(userInt('byTightIc04ChargedOccupancy') + userInt('byTightIc04GammaOccupancy')) == 0")
 )
-process.tauEmbeddingMuonsFilter = cms.EDFilter("CandViewCountFilter",
-                                       src = cms.InputTag("tauEmbeddingMuons"),
-                                       minNumber = cms.uint32(1))
+process.tauEmbeddingMuonsFilter = cms.EDFilter("PATCandViewCountFilter",
+    src = cms.InputTag("tauEmbeddingMuons"),
+    minNumber = cms.uint32(1),
+    maxNumber = cms.uint32(1)
+)
 process.tauEmbeddingMuonsCount = cms.EDProducer("EventCountProducer")
+process.selectedPatMuonsEmbeddingMuonCleaned = customisations.selectedMuonCleanedMuons("tauEmbeddingMuons") # needed for muon veto
 process.commonSequence *= (
     process.tightenedMuons * process.tightenedMuonsFilter * process.tightenedMuonsCount *
-    process.tauEmbeddingMuons * process.tauEmbeddingMuonsFilter * process.tauEmbeddingMuonsCount)
+    process.tauEmbeddingMuons * process.tauEmbeddingMuonsFilter * process.tauEmbeddingMuonsCount *
+    process.selectedPatMuonsEmbeddingMuonCleaned
+)
 additionalCounters.extend(["tightenedMuonsCount", "tauEmbeddingMuonsCount"])
 
 
@@ -149,33 +162,15 @@ additionalCounters.append("btaggingCount")
 
 ntuple = cms.EDAnalyzer("HPlusMetNtupleAnalyzer",
     patTriggerEvent = cms.InputTag("patTriggerEvent"),
-    mets = cms.VPSet(
-        cms.PSet(
-            src = cms.InputTag("met"),
-            name = cms.string("caloMet"),
-        ),
-        cms.PSet(
-            src = cms.InputTag("metNoHF"),
-            name = cms.string("caloMetNoHF"),
-        ),
-        cms.PSet(
-            src = cms.InputTag("pfMet"),
-            name = cms.string("pfMet"),
-        )
+    mets = cms.PSet(
+        caloMet_p4 = cms.InputTag("met"),
+        caloMetNoHF_p4 = cms.InputTag("metNoHF"),
+        pfMet_p4 = cms.InputTag("pfMet"),
     ),
-    doubles = cms.VPSet(
-        cms.PSet(
-            src = cms.InputTag("pileupWeightEPS"),
-            name = cms.string("weightPileup_EPS")
-        ),
-        cms.PSet(
-            src = cms.InputTag("pileupWeightRun2011AnoEPS"),
-            name = cms.string("weightPileup_Run2011AnoEPS")
-        ),
-        cms.PSet(
-            src = cms.InputTag("pileupWeightRun2011A"),
-            name = cms.string("weightPileup_Run2011A")
-        )
+    doubles = cms.PSet(
+        pileupWeightEPS = cms.InputTag("pileupWeightEPS"),
+        weightPileup_Run2011AnoEPS = cms.InputTag("pileupWeightRun2011AnoEPS"),
+        weightPileup_Run2011A = cms.InputTag("pileupWeightRun2011A")
     ),
 )
 
@@ -183,6 +178,7 @@ addAnalysis(process, "metNtuple", ntuple,
             preSequence=process.commonSequence,
             additionalCounters=additionalCounters,
             signalAnalysisCounters=False)
+process.metNtupleCounters.printMainCounter = True
 
 # Replace all event counters with the weighted one
 eventCounters = []
