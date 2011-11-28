@@ -51,7 +51,7 @@ vispt = ""
 #vispt = "_vispt40"
 if step in ["embedding", "analysis", "signalAnalysis"]:
     dirPrefix += vispt
-if step == "signalAnalysis":
+if step in ["analysis", "signalAnalysis"]:
     dirPrefix += "_"+era
 
 if step == "signalAnalysis":
@@ -125,11 +125,11 @@ datasetsTest = [
 
 # Select the datasets based on the processing step and data era
 datasets = []
-if step in ["analysis", "analysisTau"]:
+if step == "analysisTau":
     datasets.extend(datasetsMCnoQCD)
 else:
 #    datasets.extend(datasetsData2010)
-    if step == "signalAnalysis":
+    if step in ["analysis", "signalAnalysis"]:
         if era == "EPS":
             datasets.extend(datasetsData2011_EPS)
         elif era == "Run2011A-EPS":
