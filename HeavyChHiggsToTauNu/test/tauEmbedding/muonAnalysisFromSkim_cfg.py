@@ -114,6 +114,13 @@ process.commonSequence *= process.firstPrimaryVertex
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
 muons = customisations.addMuonIsolationEmbedding(process, process.commonSequence, "selectedPatMuons")
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as ElectronVeto
+process.eveto = cms.EDFilter("HPlusGlobalElectronVetoFilter",
+    GlobalElectronVeto = param.GlobalElectronVeto.clone(),
+    filter = cms.bool(False)
+)
+process.commonSequence *= process.eveto
+
 process.preselectedMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag(muons),
     cut = cms.string(
@@ -124,7 +131,43 @@ process.preselectedMuons = cms.EDFilter("PATMuonSelector",
         "&& numberOfMatches() > 1"
     )
 )
-process.commonSequence *= process.preselectedMuons
+process.preselectedMuons40 = cms.EDFilter("PATMuonSelector",
+    src = cms.InputTag("preselectedMuons"),
+    cut = cms.string("pt() > 40 && abs(eta) < 2.1")
+)
+process.preselectedMuons40Filter = cms.EDFilter("CandViewCountFilter",
+    src = cms.InputTag("preselectedMuons40"),
+    minNumber = cms.uint32(1)
+)
+process.preselectedMuons40Count = cms.EDProducer("EventCountProducer")
+process.commonSequence *= (
+    process.preselectedMuons *
+    process.preselectedMuons40 *
+    process.preselectedMuons40Filter *
+    process.preselectedMuons40Count
+)
+additionalCounters.append("preselectedMuons40Count")
+
+process.preselectedJets = cms.EDFilter("PATJetSelector",
+    src = cms.InputTag("goodJets"),
+    cut = cms.string(
+    "pt() > 30 && abs(eta()) < 2.4"
+    "&& numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99"
+    "&& neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFraction < 0.99"
+    "&& chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0" # eta < 2.4, so don't need the requirement here
+    ),
+)
+process.preselectedJetsFilter = cms.EDFilter("CandViewCountFilter",
+    src = cms.InputTag("preselectedJets"),
+    minNumber = cms.uint32(3)
+)
+process.preselectedJetsCount = cms.EDProducer("EventCountProducer")
+process.commonSequence *= (
+    process.preselectedJets *
+#    process.preselectedJetsFilter * 
+    process.preselectedJetsCount
+)
+additionalCounters.append("preselectedJetsCount")
 
 # Configuration
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
@@ -136,28 +179,22 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
         dB = cms.string("dB()")
         #name = cms.string("function")
     ),
-    jetSrc = cms.InputTag("goodJets"),
+    jetSrc = cms.InputTag("preselectedJets"),
     jetFunctions = cms.PSet(
+        tche = cms.string("bDiscriminator('trackCountingHighEffBJetTags')"),
     ),
-    mets = cms.VPSet(
-        cms.PSet(
-            name = cms.string("met"),
-            src = cms.InputTag("pfMet"),
-        ),
+    mets = cms.PSet(
+        caloMet_p4 = cms.InputTag("met"),
+        caloMetNoHF_p4 = cms.InputTag("metNoHF"),
+        pfMet_p4 = cms.InputTag("pfMet"),
     ),
-    doubles = cms.VPSet(
-        cms.PSet(
-            src = cms.InputTag("pileupWeightEPS"),
-            name = cms.string("weightPileup_EPS")
-        ),
-        cms.PSet(
-            src = cms.InputTag("pileupWeightRun2011AnoEPS"),
-            name = cms.string("weightPileup_Run2011AnoEPS")
-        ),
-        cms.PSet(
-            src = cms.InputTag("pileupWeightRun2011A"),
-            name = cms.string("weightPileup_Run2011A")
-        )
+    doubles = cms.PSet(
+        pileupWeightEPS = cms.InputTag("pileupWeightEPS"),
+        weightPileup_Run2011AnoEPS = cms.InputTag("pileupWeightRun2011AnoEPS"),
+        weightPileup_Run2011A = cms.InputTag("pileupWeightRun2011A")
+    ),
+    bools = cms.PSet(
+        ElectronVetoPassed = cms.InputTag("eveto")
     ),
 )
 #isolations = muonAnalysis.isolations.keys()
