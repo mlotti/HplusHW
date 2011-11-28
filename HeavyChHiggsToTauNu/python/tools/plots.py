@@ -547,8 +547,8 @@ def copyStyle(src, dst):
 # \param xmax  Maximum x value
 #
 # \return TGraph of line from (xmin, 1.0) to (xmax, 1.0)
-def _createRatioLine(xmin, xmax):
-    line = ROOT.TGraph(2, array.array("d", [xmin, xmax]), array.array("d", [1.0, 1.0]))
+def _createRatioLine(xmin, xmax, yvalue=1.0):
+    line = ROOT.TGraph(2, array.array("d", [xmin, xmax]), array.array("d", [yvalue, yvalue]))
 #    line.SetLineColor(ROOT.kBlack)
     line.SetLineColor(ROOT.kRed)
     line.SetLineWidth(2)
@@ -656,11 +656,11 @@ class PlotBase:
     def removeLegend(self):
         delattr(self, "legend")
 
-    def prependPlotObject(self, obj):
-        self.plotObjectsBefore.append(obj)
+    def prependPlotObject(self, obj, option=""):
+        self.plotObjectsBefore.append( (obj, option) )
 
-    def appendPlotObject(self, obj):
-        self.plotObjectsAfter.append(obj)
+    def appendPlotObject(self, obj, option=""):
+        self.plotObjectsAfter.append( (obj, options) )
 
     def addCutBoxAndLine(self, cutValue, fillColor=18, box=True, line=True, **kwargs):
         xmin = self.getFrame().GetXaxis().GetXmin()
@@ -709,15 +709,15 @@ class PlotBase:
     #
     # Draw also the legend if one has been associated
     def draw(self):
-        for obj in self.plotObjectsBefore:
-            obj.Draw("same")
+        for obj, option in self.plotObjectsBefore:
+            obj.Draw(option+"same")
 
         self.histoMgr.draw()
         if hasattr(self, "legend"):
             self.legend.Draw()
 
-        for obj in self.plotObjectsAfter:
-            obj.Draw("same")
+        for obj, option in self.plotObjectsAfter:
+            obj.Draw(option+"same")
 
         # Redraw the axes in order to get the tick marks on top of the
         # histogram
