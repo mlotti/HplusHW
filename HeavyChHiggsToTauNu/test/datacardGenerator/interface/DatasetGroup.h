@@ -26,6 +26,7 @@ public:
   double getValueByExtractable(Extractable* e, NormalisationInfo* info) const;
   double getUpperValueByExtractable(Extractable* e, NormalisationInfo* info) const;
   TH1F* getTransverseMassPlot(NormalisationInfo* info, std::string name, int bins, double min, double max);
+  TH1F* getTransverseMassPlot(std::string counterHisto, std::string counterName, NormalisationInfo* info, std::string name, std::string file, std::string source, int bins, double min, double max);
   bool hasExtractable(Extractable* e) const;
   bool hasMassPoint(double mass) const;
   void print();

@@ -206,6 +206,7 @@ void QCDMeasurementCalculator::doCalculate() {
     myFile->Close();
     std::cout << "Control histograms written to " << myQCDCtrlName << std::endl;
     std::cout << "... QCD Measurement done ..." << std::endl;
+
   }
 }
 

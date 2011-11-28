@@ -148,7 +148,7 @@ TH1F* DatasetGroup::getTransverseMassPlot(NormalisationInfo* info, std::string n
   if (sTransverseMassPlotNameWithPath == "empty") return myPlot;
   if (sExternalFileForTransverseMassPlot.size()) {
     // Obtain plot from external file
-    std::cout << "Obtaining plot '" << sTransverseMassPlotNameWithPath << "' from file '" << sExternalFileForTransverseMassPlot << "'";
+    std::cout << "Obtaining plot '" << sTransverseMassPlotNameWithPath << "' from file '" << sExternalFileForTransverseMassPlot << "'" << std::endl;
     TFile* f = TFile::Open(sExternalFileForTransverseMassPlot.c_str());
     if (!f) {
       std::cout << "\033[0;41m\033[1;37mError:\033[0;0m Could not open file " << sExternalFileForTransverseMassPlot << "!" << std::endl;
@@ -165,8 +165,11 @@ TH1F* DatasetGroup::getTransverseMassPlot(NormalisationInfo* info, std::string n
       //std::cout << "bins " << myHisto->GetNbinsX() << "->" << myPlot->GetNbinsX() << " ratio=" << myHisto->GetNbinsX() / myPlot->GetNbinsX() << std::endl;
       myHisto->Rebin(myHisto->GetNbinsX() / myPlot->GetNbinsX());
       //std::cout << "new bins " << myHisto->GetNbinsX() << "->" << myPlot->GetNbinsX() << " ratio=" << myHisto->GetNbinsX() / myPlot->GetNbinsX() << std::endl;
+    } else if (myHisto->GetNbinsX() < myPlot->GetNbinsX()) {
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m You asked for " << myPlot->GetNbinsX() << ", but the provided histogram for " << sLabel << " has only " << myHisto->GetNbinsX() << " bins!" << std::endl;
     }
     myPlot->Add(myHisto);
+    f->Close();
     return myPlot;
   }
     
@@ -183,6 +186,84 @@ TH1F* DatasetGroup::getTransverseMassPlot(NormalisationInfo* info, std::string n
     if (myHisto->GetNbinsX() > myPlot->GetNbinsX())
       myHisto->Rebin(myHisto->GetNbinsX() / myPlot->GetNbinsX());
     myPlot->Add(myHisto);
+  }
+  return myPlot; // empty histogram, if no datasets
+}
+
+TH1F* DatasetGroup::getTransverseMassPlot(std::string counterHisto, std::string counterName, NormalisationInfo* info, std::string name, std::string file, std::string source, int bins, double min, double max) {
+  TH1F* myPlot = new TH1F(name.c_str(), name.c_str(), bins, min, max);
+  /*for (int i = 1; i <= myPlot->GetNbinsX(); ++i) {
+    myPlot->SetBinContent(i,0);
+    myPlot->SetBinError(i,0);
+  }*/
+  myPlot->Sumw2();
+  
+  if (file.size()) {
+    // Obtain plot from external file
+    std::cout << "Obtaining plot '" << source << "' from file '" << file << "'" << std::endl;
+    TFile* f = TFile::Open(file.c_str());
+    if (!f) {
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m Could not open file " << file << "!" << std::endl;
+      return myPlot;
+    }
+    TH1* myHisto = dynamic_cast<TH1*>(f->Get(source.c_str()));
+    if (!myHisto) {
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m Could not open histogram " << source << " in file " 
+                << file << "!" << std::endl;
+      //std::cout << f << ", " << myHisto << std::endl;
+      return myPlot;
+    }
+    if (myHisto->GetNbinsX() > myPlot->GetNbinsX()) {
+      //std::cout << "bins " << myHisto->GetNbinsX() << "->" << myPlot->GetNbinsX() << " ratio=" << myHisto->GetNbinsX() / myPlot->GetNbinsX() << std::endl;
+      myHisto->Rebin(myHisto->GetNbinsX() / myPlot->GetNbinsX());
+      //std::cout << "new bins " << myHisto->GetNbinsX() << "->" << myPlot->GetNbinsX() << " ratio=" << myHisto->GetNbinsX() / myPlot->GetNbinsX() << std::endl;
+    } else if (myHisto->GetNbinsX() < myPlot->GetNbinsX()) {
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m You asked for " << myPlot->GetNbinsX() << ", but the provided histogram for " << sLabel << " has only " << myHisto->GetNbinsX() << " bins!" << std::endl;
+    }
+    myPlot->Add(myHisto);
+    f->Close();
+    return myPlot;
+  } else {
+    // Obtain plot from datasets
+    for (size_t i = 0; i < vDatasets.size(); ++i) {
+      std::cout << "Obtaining plot '" << source << "' from file '" << vDatasets[i]->getFilename() << "'" << std::endl;
+      // Obtain normalisation from counter
+      TH1* myCounterHisto = dynamic_cast<TH1*>(vDatasets[i]->getFile()->Get(counterHisto.c_str()));
+      if (!myCounterHisto) {
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m Could not find histogram " << counterHisto << " in file " << vDatasets[i]->getFilename() << "!" << std::endl;
+        return myPlot;
+      }
+      // Find counter item
+      bool myFoundStatus = false;
+      double myCount = 0.;
+      for (int k = 1; k <= myCounterHisto->GetNbinsX(); ++k) {
+        std::string myBinLabel = myCounterHisto->GetXaxis()->GetBinLabel(k);
+        if (myBinLabel == counterName) {
+          myFoundStatus = true;
+          myCount = myCounterHisto->GetBinContent(k) * info->getNormalisationFactor(vDatasets[i]->getFile());
+        }
+      }
+      if (!myFoundStatus) {
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m Could not find counter name " << counterName << " in histogram " << counterHisto << " in file " << vDatasets[i]->getFilename() << "!" << std::endl;
+        return myPlot;
+      }
+      // Find histogram by name
+      TH1* h = dynamic_cast<TH1*>(vDatasets[i]->getFile()->Get(source.c_str()));
+      if (!h) {
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m Could not find histogram " << source << " in file " << vDatasets[i]->getFilename() << "!" << std::endl;
+        return myPlot;
+      }
+      // Normalise to counts
+      if (h->Integral() > 0)
+        h->Scale(myCount / h->Integral());
+      // Rebin if necessary
+      if (h->GetNbinsX() > myPlot->GetNbinsX()) {
+        h->Rebin(h->GetNbinsX() / myPlot->GetNbinsX());
+      }
+      // Add to result histogram
+      std::cout << "... plot found with rate of " << myCount << std::endl;
+      myPlot->Add(h);
+    }
   }
   return myPlot; // empty histogram, if no datasets
 }
