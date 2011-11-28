@@ -30,7 +30,7 @@ int mkBrLimits_processBrPlots()
    // Check that all datacards have the same luminosity
   double L;
   for (int index=0; index<nData; index++){
-    sprintf(temp,"input_luminosity_%d",mH[index]);
+    sprintf(temp,"outputs/input_luminosity_%d",mH[index]);
 
     ifstream fileLumi(temp,ios::in); 
     double tmpL;
@@ -53,7 +53,7 @@ int mkBrLimits_processBrPlots()
   //  cout << "     output_LandS_HPlusHadronic_M80/100/120/etc." << endl;
   //  cin >> fileName;
 
-  sprintf(fileName,"output_LandS_datacard_hplushadronic");
+  sprintf(fileName,"outputs/output_LandS_datacard_hplushadronic");
   cout << endl << "File name is " << fileName << endl;
 
   for (int i=0; i<nData; i++){

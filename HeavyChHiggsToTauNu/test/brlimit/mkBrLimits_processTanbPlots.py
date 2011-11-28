@@ -459,7 +459,7 @@ def main():
     #     ifstream fileLumi("input_luminosity",ios::in); fileLumi>>L;
     #     ifstream fileLumi("input_luminosity",ios::in);
     #     fileLumi>>L;
-    lumifile = open("input_luminosity_100","r")
+    lumifile = open("outputs/input_luminosity_100","r")
     lumi = lumifile.readline()
 #    print("Lumi is %d",(L))
     writeTitleTexts(lumi)
