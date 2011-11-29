@@ -47,7 +47,7 @@ def main():
     # Take QCD from data
     datasetsQCD = None
     if QCDfromData:
-        datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_8_patch2/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_111024_175451/multicrab.cfg", counters=counters)
+        datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_8_patch2/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_111123_132128/multicrab.cfg", counters=counters)
         datasetsQCD.loadLuminosities()
         datasetsQCD.mergeData()
         datasetsQCD.remove(datasetsQCD.getMCDatasetNames())

@@ -572,7 +572,8 @@ namespace HPlus {
     if ( tauData.getCleanedTauCandidates()[0]->pt() > 100 && tauData.getCleanedTauCandidates()[0]->pt() < 120 ) hMETInvertedTauIdJets100120->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     if ( tauData.getCleanedTauCandidates()[0]->pt() > 80 && tauData.getCleanedTauCandidates()[0]->pt() < 100 ) hMETInvertedTauIdJets80100->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     if ( tauData.getCleanedTauCandidates()[0]->pt() > 70 && tauData.getCleanedTauCandidates()[0]->pt() < 80 ) hMETInvertedTauIdJets7080->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());  																	     																	     
-    if ( tauData.getCleanedTauCandidates()[0]->pt() > 60 && tauData.getCleanedTauCandidates()[0]->pt() < 70 ) hMETInvertedTauIdJets6070->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    if ( tauData.getCleanedTauCandidates()
+[0]->pt() > 60 && tauData.getCleanedTauCandidates()[0]->pt() < 70 ) hMETInvertedTauIdJets6070->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     if ( tauData.getCleanedTauCandidates()[0]->pt() > 50 && tauData.getCleanedTauCandidates()[0]->pt() < 60 ) hMETInvertedTauIdJets5060->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 
     if ( tauData.getCleanedTauCandidates()[0]->pt() > 40 && tauData.getCleanedTauCandidates()[0]->pt() < 50 ) hMETInvertedTauIdJets4050->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());																		
 
