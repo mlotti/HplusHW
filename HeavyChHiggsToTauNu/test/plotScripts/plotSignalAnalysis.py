@@ -68,6 +68,7 @@ def main():
     plots.mergeRenameReorderForDataMC(datasets)
 
     # Remove signals other than M120
+    #datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     
@@ -130,8 +131,8 @@ def doPlots(datasets):
     # functions to be formatted, drawn and saved to files
 #    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesBeforeWeight", normalizeToOne=True), postfix="BeforeWeight")
 #    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesAfterWeight", normalizeToOne=True), postfix="AfterWeight")
-#    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredBeforeWeight", normalizeToOne=True), postfix="BeforeWeightTriggered")
-#    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredAfterWeight", normalizeToOne=True), postfix="AfterWeightTriggered")
+    vertexCount(plots.DataMCPlot(datasets, analysis+"/Vertices/verticesTriggeredBeforeWeight", normalizeToOne=True), postfix="BeforeWeightTriggered")
+    vertexCount(plots.DataMCPlot(datasets, analysis+"/Vertices/verticesTriggeredAfterWeight", normalizeToOne=True), postfix="AfterWeightTriggered")
 #    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredBeforeWeight", normalizeToOne=False), postfix="BeforeWeightTriggeredNorm")
 #    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredAfterWeight", normalizeToOne=False), postfix="AfterWeightTriggeredNorm")
 #    tauPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPt"), ratio=False)
@@ -439,7 +440,8 @@ def vertexCount(h, prefix="", postfix="", ratio=True):
         opts_log.update(opts)
 
         opts2 = {"ymin": 0.5, "ymax": 3}
-        opts2_log = {"ymin": 5e-2, "ymax": 5e2}
+        opts2_log = opts2
+        #opts2_log = {"ymin": 5e-2, "ymax": 5e2}
         
         h.createFrame(prefix+"vertices"+postfix, opts=opts, createRatio=ratio, opts2=opts2)
         h.frame.GetXaxis().SetTitle(xlabel)
@@ -458,7 +460,7 @@ def vertexCount(h, prefix="", postfix="", ratio=True):
         h.frame.GetXaxis().SetTitle(xlabel)
         h.frame.GetYaxis().SetTitle(ylabel)
         h.getPad1().SetLogy(True)
-        h.getPad2().SetLogy(True)
+        #h.getPad2().SetLogy(True)
         h.setLegend(histograms.createLegend())
         h.draw()
         histograms.addCmsPreliminaryText()
