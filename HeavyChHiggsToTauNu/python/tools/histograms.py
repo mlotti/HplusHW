@@ -122,7 +122,22 @@ def addEnergyText(x=None, y=None, s="7 TeV"):
 # \param unit  Unit of the integrated luminosity value
 def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
     (x, y) = textDefaults.getValues("lumi", x, y)
-    addText(x, y, "%.2f %s" % (lumi/1000., unit), textDefaults.getSize("lumi"), bold=False)
+    lumiInFb = lumi/1000.
+    log = math.log10(lumiInFb)
+    ndigis = int(log)
+    format = "%.0f" # ndigis >= 1, 10 <= lumiInFb
+    if ndigis == 0: 
+        if log >= 0: # 1 <= lumiInFb < 10
+            format = "%.1f"
+        else: # 0.1 < lumiInFb < 1
+            format = "%.2f"
+    elif ndigis <= -1:
+        format = ".%df" % (abs(ndigis)+1)
+        format = "%"+format
+    format += " %s"
+    
+
+    addText(x, y, format % (lumi/1000., unit), textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
 #    l.DrawLatex(x, y, "L=%.0f %s" % (lumi, unit))
 
