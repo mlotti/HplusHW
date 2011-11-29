@@ -47,7 +47,21 @@ def main():
 ###    datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
 
     # Set the signal cross sections to a given BR(t->H), BR(h->taunu)
-    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
+##    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
+
+    # Print counters
+    doCounters(datasets)
+
+def doCounters(datasets):
+    eventCounter = counter.EventCounter(datasets)
+
+    eventCounter.normalizeMCByLuminosity()
+#    eventCounter.normalizeMCToLuminosity(73)
+    print "============================================================"
+    print "Main counter (MC normalized by collision data luminosity)"
+    print eventCounter.getMainCounterTable().format()
+
+
 
     # Set the signal cross sections to a value from MSSM
 #    xsect.setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=200)
@@ -97,13 +111,37 @@ def main():
 
         # Get the counts (returned objects are of type dataset.Count,
         # and have both value and uncertainty
-        allCount = column.getCount(column.getRowNames().index("All events"))
+#        allCount = column.getCount(column.getRowNames().index("All events"))
 
         for cut in cuts:
             cutCount = column.getCount(column.getRowNames().index(cut))
+            if column.getRowNames().index(cut) == 1: ## trigger
+                allCount = column.getCount(column.getRowNames().index("All events"))
+                
+            if column.getRowNames().index(cut) == 4: ## tau id
+                allCount = column.getCount(column.getRowNames().index("Trigger and HLT_MET cut"))
+                
+            if column.getRowNames().index(cut) == 7: ## electron veto
+                allCount = column.getCount(column.getRowNames().index("taus == 1"))
+                
+            if column.getRowNames().index(cut) == 8:  ## muon veto
+                ## muon veto for lepton veto
+                allCount = column.getCount(column.getRowNames().index("taus == 1"))
+#                allCount = column.getCount(column.getRowNames().index("electron veto"))
+
+            if column.getRowNames().index(cut) == 9: ## njets
+                allCount = column.getCount(column.getRowNames().index("muon veto"))
+                
+            if column.getRowNames().index(cut) == 10: ## MET
+                allCount = column.getCount(column.getRowNames().index("njets"))
+                
+            if column.getRowNames().index(cut) == 11: ## btagging
+                allCount = column.getCount(column.getRowNames().index("MET"))
+                                 
             eff = cutCount.clone()
             eff.divide(allCount) # N(cut) / N(all)
-        
+#            print "cutCount ",cutCount.value(),"allCount  ",allCount.value()
+                                           
             yvalues[cut].append(eff.value())
             yerrs[cut].append(eff.uncertainty())
 
@@ -147,8 +185,8 @@ def main():
                         
     glist = [gtrig, gtau, gveto, gjets, gmet, gbtag]
     
-    opts = {"xmin": 75, "xmax": 165, "ymin": 0.001}
-    canvasFrame = histograms.CanvasFrame([histograms.HistoGraph(g, "", "") for g in glist], "SignalEfficiency", **opts)
+    opts = {"xmin": 75, "xmax": 165, "ymin": 0.03}
+    canvasFrame = histograms.CanvasFrame([histograms.HistoGraph(g, "", "") for g in glist], "SignalEfficiencyConseq", **opts)
     canvasFrame.frame.GetYaxis().SetTitle("Selection efficiency")
     canvasFrame.frame.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
     canvasFrame.canvas.SetLogy(True)

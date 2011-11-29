@@ -295,7 +295,7 @@ namespace HPlus {
 
     // For plotting Rtau                                                                                                                                                                                
     //    if (!tauData.selectedTauPassedRtau()) return false;                                                                                                                                           
-    if (tauData.getRtauOfSelectedTau() < 0.7) return false;                                                                                                                                       
+    //    if (tauData.getRtauOfSelectedTau() < 0.7) return false;                                                                                                                                       
     increment(fRtauAfterTauIDCounter);
 
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->pt(), fEventWeight.getWeight());

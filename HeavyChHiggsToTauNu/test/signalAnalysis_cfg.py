@@ -46,7 +46,7 @@ doSystematics = False
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
-doJESVariation = False
+doJESVariation = True
 JESVariation = 0.03
 JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10

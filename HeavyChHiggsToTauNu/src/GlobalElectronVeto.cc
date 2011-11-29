@@ -54,14 +54,14 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("GlobalElectronVeto");
     
-    hElectronPt  = makeTH<TH1F>(myDir, "GlobalElectronPt", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 80, 0.0, 400.0);
-    hElectronEta = makeTH<TH1F>(myDir, "GlobalElectronEta", "GlobalElectronEta;isolated electron #eta;N_{electrons} / 0.1", 60, -3.0, 3.0);
+    hElectronPt  = makeTH<TH1F>(myDir, "GlobalElectronPt", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 400, 0.0, 400.0);
+    hElectronEta = makeTH<TH1F>(myDir, "GlobalElectronEta", "GlobalElectronEta;isolated electron #eta;N_{electrons} / 0.1", 300, -3.0, 3.0);
     hElectronPt_matchingMCelectron  = makeTH<TH1F>(myDir, "GlobalElectronPt_matchingMCelectron", "GlobalElectronPt_matchingMCelectron", 400, 0.0, 400.0);
     hElectronEta_matchingMCelectron = makeTH<TH1F>(myDir, "GlobalElectronEta_matchingMCelectron", "GlobalElectronEta_matchingMCelectron", 400, -3.0, 3.0);
     hElectronPt_matchingMCelectronFromW  = makeTH<TH1F>(myDir, "GlobalElectronPt_matchingMCelectronFromW", "GlobalElectronPt_matchingMCelectronFromW", 400, 0.0, 400.0);
     hElectronEta_matchingMCelectronFromW = makeTH<TH1F>(myDir, "GlobalElectronEta_matchingMCelectronFromW", "GlobalElectronEta_matchingMCelectronFromW", 400, -3.0, 3.0);
-    hElectronPt_gsfTrack  = makeTH<TH1F>(myDir, "GlobalElectronPt_gsfTrack", "GlobalElectronPt_gsfTrack", 100, 0.0, 200.0);
-    hElectronEta_gsfTrack = makeTH<TH1F>(myDir, "GlobalElectronEta_gsfTrack", "GlobalElectronEta_gsfTrack", 60, -3.0, 3.0);
+    hElectronPt_gsfTrack  = makeTH<TH1F>(myDir, "GlobalElectronPt_gsfTrack", "GlobalElectronPt_gsfTrack", 400, 0.0, 400.0);
+    hElectronEta_gsfTrack = makeTH<TH1F>(myDir, "GlobalElectronEta_gsfTrack", "GlobalElectronEta_gsfTrack", 300, -3.0, 3.0);
     hElectronEta_superCluster = makeTH<TH1F>(myDir, "GlobalElectronEta_superCluster", "GlobalElectronEta_superCluster", 60, -3.0, 3.0);
     hElectronPt_AfterSelection = makeTH<TH1F>(myDir, "GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 100, 0.0, 200.0);
     hElectronEta_AfterSelection = makeTH<TH1F>(myDir, "GlobalElectronPt_AfterSelection", "GlobalElectronEta_AfterSelection", 60, -3.0, 3.0);
