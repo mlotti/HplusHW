@@ -184,7 +184,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
 addPrimaryVertexSelection(process, process.commonSequence)
 
-# Pileup weighting
 # Pileup weights
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 process.pileupWeightEPS = cms.EDProducer("HPlusVertexWeightProducer",
@@ -209,14 +208,6 @@ process.commonSequence *= (
     process.pileupWeightRun2011A
 )
 
-# histoMuonPt = Histo("pt", "pt()", min=0., max=200., nbins=200, description="muon pt (GeV/c)")
-# histoMuonEta = Histo("eta", "eta()", min=-3, max=3, nbins=60, description="muon eta")
-
-# histoTauPt = Histo("pt", "pt()", min=0., max=200., nbins=200, description="tau pt (GeV/c)")
-# histoTauEta = Histo("eta", "eta()", min=-3, max=3, nbins=60, description="tau eta")
-
-# histoMet = Histo("et", "et()", min=0., max=300., nbins=300, description="MET (GeV)")
-
 
 muons = cms.InputTag("tauEmbeddingMuons")
 #taus = cms.InputTag("selectedPatTausShrinkingConePFTau")
@@ -236,34 +227,6 @@ muons = cms.InputTag(tauEmbeddingCustomisations.addMuonIsolationEmbedding(proces
 additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param))
 taus = cms.InputTag("patTausHpsPFTauTauEmbeddingMuonMatched")
 
-
-# analysis = Analysis(process, "analysis", additionalCounters=additionalCounters, weightSrc=weight)
-# analysis.getCountAnalyzer().verbose = cms.untracked.bool(True)
-
-# selectedTaus = analysis.addSelection("LooseTauId", taus,
-#                                      "abs(eta) < 2.5 "
-#                                      "&& leadPFChargedHadrCand().isNonnull() "
-#                                      "&& tauID('againstMuonLoose') > 0.5 && tauID('againstElectronLoose') > 0.5"
-# #                                     "&& tauID('byIsolation') > 0.5 && tauID('ecalIsolation') > 0.5"
-#                                      , selector="PATTauSelector")
-
-# selectedTausPt = analysis.addSelection("LooseTauPtId", taus,
-#                                        "pt > 40"
-#                                        "&& abs(eta) < 2.5 "
-#                                        "&& leadPFChargedHadrCand().isNonnull() "
-#                                        "&& leadPFChargedHadrCand().pt() > 20 "
-#                                        "&& tauID('againstMuonLoose') > 0.5 && tauID('againstElectronLoose') > 0.5"
-# #                                       "&& tauID('byIsolation') > 0.5 && tauID('ecalIsolation') > 0.5"
-#                                        , selector="PATTauSelector")
-
-# histoAnalyzer = analysis.addMultiHistoAnalyzer("All", [
-#         ("muon_", muons, [histoMuonPt, histoMuonEta]),
-#         ("tau_", selectedTaus, [histoTauPt, histoTauEta]),
-#         ("pfmet_", pfMET, [histoMet]),
-#         ("pfmetOriginal_", pfMETOriginal, [histoMet])])
-
-# process.tauSelectionSequence = analysis.getSequence()
-# process.commonSequence *= process.tauSelectionSequence
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
 ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
@@ -290,9 +253,11 @@ muonIsolations = ["trackIso", "caloIso", "pfChargedIso", "pfNeutralIso", "pfGamm
 #print isolations
 for name in muonIsolations:
     setattr(ntuple.muonFunctions, name, cms.string(muonAnalysis.isolations[name]))
-tauIds = ["againstMuonLoose", "againstMuonTight", "againstElectronLoose", "againstElectronMedium", "againstElectronTight",
-          "byVLooseIsolation", "byLooseIsolation", "byMediumIsolation", "byTightIsolation"
-          ]
+tauIds = [
+    "decayModeFinding",
+    "againstMuonLoose", "againstMuonTight", "againstElectronLoose", "againstElectronMedium", "againstElectronTight",
+    "byVLooseIsolation", "byLooseIsolation", "byMediumIsolation", "byTightIsolation"
+    ]
 for name in tauIds:
     setattr(ntuple.tauFunctions, name, cms.string("tauID('%s')"%name))
 if dataVersion.isMC():
