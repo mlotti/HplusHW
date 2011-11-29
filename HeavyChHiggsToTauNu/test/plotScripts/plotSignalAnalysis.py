@@ -282,7 +282,7 @@ def doPlots(datasets):
 #    transverseMass2(plots.DataMCPlot(datasets, treeDraw.clone(varexp=mt+">>dist(40,0,400)", selection=pasJuly)), "transverseMass_metRaw", rebin=1)
 #    transverseMass2(plots.DataMCPlot(datasets, treeDraw.clone(varexp=mt.replace("met", "metType1")+">>dist(40,0,400)", selection=pasJuly.replace("met", "metType1"))), "transverseMass_metType1", rebin=1)
 
-#    genComparison(datasets)
+    genComparison(datasets)
 #    zMassComparison(datasets)
 #    topMassComparison(datasets)
 #    topPtComparison(datasets) 
@@ -342,7 +342,28 @@ def mtComparison(datasets):
     mt._setLegendLabels()
 #    mt.histoMgr.setHistoDrawStyleAll("P")
     rtauGen(mt, "transverseMass_vs_mH", rebin=20)
+
+
           
+def genComparison(datasets):
+    rtau = plots.PlotBase([
+        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genRtau1ProngHp"),
+        datasets.getDataset("TTJets").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genRtau1ProngW")
+        ])
+    rtau.histoMgr.normalizeToOne()
+#    rtau.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    rtau._setLegendStyles()
+    rtau._setLegendLabels()
+    st1 = styles.getDataStyle().clone()
+    st2 = st1.clone()
+    st2.append(styles.StyleLine(lineColor=ROOT.kRed))
+    rtau.histoMgr.forHisto(datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genRtau1ProngHp"), st1)
+    rtau.histoMgr.forHisto(datasets.getDataset("TTJets").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genRtau1ProngW"), st2)
+    
+#    rtau.histoMgr.setHistoDrawStyleAll("P")
+    rtauGen(rtau, "RtauGenerated", rebin=1)
+
+
     
 #def genComparison(datasets):
 #    signal = "TTToHplusBWB_M120"
@@ -478,31 +499,37 @@ def rtauGen(h, name, rebin=5, ratio=False):
     h.histoMgr.forEachHisto(styles.generator())
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "R_{#tau}"
+    xlabel = "p^{leading track} / p^{#tau jet}"
+    ylabel = "Events / %.2f" % h.binWidth()
     if "Mass" in name:
         xlabel = "m (GeV/c^{2})"
+    if "Rtau" in name:
+        ylabel = "A.u."
     elif "Pt" in name:
         xlabel = "p_{T}(GeV/c)"
     elif "vertices" in name:
         xlabel = "N_{vertices}"
-    ylabel = "Events / %.2f" % h.binWidth()
+        
+    kwargs = {"ymin": 0.1, "xmax": 300}
 
-    if "gen" in name:
-        kwargs = {"ymin": 0.1, "xmax": 1.1}        
+  
+    if "Rtau" in name:
+        kwargs = {"ymin": 0.0001, "xmax": 1.1}        
     elif "Pt" in name:
         kwargs = {"ymin": 0.1, "xmax": 400}
     elif "Mass" in name:
         kwargs = {"ymin": 0.1, "xmax": 300}
         
-    kwargs = {"ymin": 0.1, "xmax": 300}
 #    kwargs["opts"] = {"ymin": 0, "xmax": 14, "ymaxfactor": 1.1}}
     if ratio:
         kwargs["opts2"] = {"ymin": 0.5, "ymax": 1.5}
         kwargs["createRatio"] = True
 #    name = name+"_log"
 
+
+
     h.createFrame(name, **kwargs)
-#    h.getPad().SetLogy(True)
+    h.getPad().SetLogy(True)
     h.setLegend(histograms.createLegend(0.2, 0.75, 0.4, 0.9))
     common(h, xlabel, ylabel, addLuminosityText=False)
 
