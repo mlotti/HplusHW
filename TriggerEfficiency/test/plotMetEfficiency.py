@@ -23,61 +23,88 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 # Configuration
 # No weighting to keep TEfficiency happy
 #weight = ""
+#styles.mcStyle.styles[0].marker = 34
+#styles.mcStyle2.styles[0].marker = ROOT.kFullSquare
 plotStyles = [
     styles.dataStyle,
-    styles.mcStyle
+    styles.mcStyle,
+    styles.mcStyle2
     ]
 
 l1met = False # for runs 165970-167913
-l1met = True # for runs 170722-173692
+#l1met = True # for runs 170722-173692
 
-runs = "165970-167913"
+runs = "165970-167913"; lumi = 98.171999999999997+4.2910000000000004+445.12599999999998+243.08099999999999
 if l1met:
-    runs = "170722-173692"
+    runs = "170722-173692"; lumi = 373.25900000000001+412.35899999999998+246.52699999999999
+    #runs = "170722-172619"; lumi = 373.25900000000001
+    #runs = "172620-173692"; lumi = 412.35899999999998+246.52699999999999
 
 # main function
 def main():
     file = ROOT.TFile.Open("histograms-%s.root"%runs)
     tree = file.Get("triggerEfficiency/tree")
 
+    l1Bit = "(L1_SingleTauJet52 || L1_SingleJet68)"
     l1metsel = ""
-#    if l1met:
-#        l1metsel = "&& L1MET > 30"
+    if l1met:
+        l1metsel = "&& L1MET > 30"
 
     offlineSelection = "MET >= 0"
     #offlineSelection += "&& MET > 70"
+    offlineSelection += "&& ElectronVetoPassed && MuonVetoPassed"
     offlineSelection += "&& JetSelectionPassed && BTaggingPassed"
-    caloMet = "CaloMETnoHF"
+    caloMetNoHF = "CaloMETnoHF"
+    caloMet = "CaloMET"
     if l1met:
         # Handle the bug in the L1 seed of HLT_PFTau35_Trk20, it was
         # supposed to be OR, but it was AND
-        offlineSelection += "&& Max$(L1TauJet_p4.Et()) > 51 && Max$(L1CenJet_p4.Et()) > 51"
-#        caloMet = "CaloMET"
-
+        # But we don't actully need this, because the events are already triggered by it
+#        offlineSelection += "&& Max$(L1TauJet_p4.Et()) > 51 && Max$(L1CenJet_p4.Et()) > 51"
+        l1Bit = "L1_Jet52_Central_ETM30"
+        pass
 
     #binning = "(40,0,200)"
-    bins = range(0, 60, 5) + range(60, 80, 10) + range(80, 120, 20) + range(120, 200, 40) + [200]
+    bins = range(0, 60, 10) + range(60, 80, 10) + range(80, 120, 20) + range(120, 200, 40) + [200]
     h = ROOT.TH1F("h1", "h1", len(bins)-1, array.array("d", bins))
     
     tree.Draw("MET>>h1", offlineSelection, "goff")
     pfMET = h.Clone("AllMET")
 
-    tree.Draw("MET>>h1", offlineSelection+"&& TriggerBit"+l1metsel, "goff")
+    tree.Draw("MET>>h1", offlineSelection+"&&"+l1Bit, "goff")
+    pfMETL1bit = h.Clone("METL1bit")
+
+    tree.Draw("MET>>h1", offlineSelection+l1metsel, "goff")
+    pfMETL1cut = h.Clone("METL1cut")
+
+    tree.Draw("MET>>h1", offlineSelection+"&& TriggerBit", "goff")
     pfMETbit = h.Clone("METbit")
 
-    tree.Draw("MET>>h1", offlineSelection+"&& %s > 60" % caloMet, "goff")
+    tree.Draw("MET>>h1", offlineSelection+("&& %s > 60" % caloMetNoHF)+l1metsel, "goff")
+    pfMETcutNoHF = h.Clone("METcut")
+
+    tree.Draw("MET>>h1", offlineSelection+("&& %s > 60" % caloMet)+l1metsel, "goff")
     pfMETcut = h.Clone("METcut")
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    
-    legs = ["MET60 bit", "Calo E_{T}^{miss} > 60 GeV"]
+
+    #legs = ["MET60 bit", "CaloMETnoHF > 60 GeV", "CaloMET > 60 GeV"]
+    #if l1met:
+    #    legs = ["L1_ETM30 & MET60 bits", "L1 MET > 30 & CaloMETnoHF > 60 GeV", "L1 MET > 30 & CaloMET > 60 GeV"]
+    #plotTurnOn(pfMET, [pfMETbit, pfMETcutNoHF, pfMETcut], legs)
+
+    legs = ["MET60 bit", "CaloMETnoHF > 60 GeV"]
+    pfMETcut2 = pfMETcutNoHF
     if l1met:
-        legs = ["L1_ETM30 & MET60 bits", "L1 MET > 30 & Calo E_{T}^{miss} > 60 GeV"]
-    plotTurnOn(pfMET, [pfMETbit, pfMETcut], legs)
+        legs = ["L1_ETM30 & MET60 bits", "L1 MET > 30 & CaloMET > 60 GeV"]
+        pfMETcut2 = pfMETcut
+    plotTurnOn(pfMET, [pfMETbit, pfMETcut2], legs)
+
+    plotTurnOn(pfMET, [pfMETL1bit, pfMETL1cut], ["L1_ETM30", "L1 MET > 30"], "calomet_l1bit_turnon")
 
 
-def plotTurnOn(hall, passed, passedLegends):
+def plotTurnOn(hall, passed, passedLegends, name="calomet_bit_turnon"):
     graphs = []
     for hpass, leg in zip(passed, passedLegends):
         eff = Eff(hall.GetEntries(), hpass.GetEntries(), leg)
@@ -86,10 +113,18 @@ def plotTurnOn(hall, passed, passedLegends):
 
         gr = ROOT.TGraphAsymmErrors(hpass, hall, "cp")
         graphs.append(histograms.HistoGraph(gr, leg, "p", "P"))
+    #p = plots.ComparisonManyPlot(graphs[0], graphs[1:]) 
+    #p.histoMgr.forEachHisto(styles.generator2(styles.StyleMarker(markerSizes=[1.0, 2.0, 1.5]), plotStyles))
     p = plots.ComparisonPlot(graphs[0], graphs[1])
-    p.histoMgr.forEachHisto(styles.generator2(styles.StyleMarker(markerSizes=[1.2, 1.5]), plotStyles))
+    p.histoMgr.forEachHisto(styles.generator2(styles.StyleMarker(markerSizes=[1.0, 1.5]), plotStyles))
+    p.setLuminosity(lumi)
 
-    p.createFrame("calomet_bit_turnon_%s"%runs, createRatio=True, opts1={"xmin":0, "xmax":200, "ymin": 0}, opts2={"ymin": 0.6, "ymax": 1.2})
+    p.createFrame(name+"_"+runs, createRatio=True, invertRatio=True,
+                  opts1={"xmin":0, "xmax":200, "ymin": 0, "ymax": 1.2},
+                  #opts2={"ymin": 0.5, "ymax": 2.0}
+                  opts2={"ymin": 0, "ymax": 3.0}
+                  )
+    p.getFrame2().GetYaxis().SetTitle("Cut / bit")
     p.setLegend(histograms.moveLegend(histograms.createLegend(y1=0.95, y2=0.85), dx=-0.55, dy=-0.05))
 
     def text():

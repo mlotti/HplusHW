@@ -46,7 +46,7 @@ doSystematics = False
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
-doJESVariation = True
+doJESVariation = False
 JESVariation = 0.03
 JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
@@ -77,10 +77,11 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
+    "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v18/pattuple_v18_TTJets_TuneZ2_Summer11_9_1_bfN.root"
     # For testing in lxplus
-    # dataVersion.getAnalysisDefaultFileCastor()
+    #dataVersion.getAnalysisDefaultFileCastor()
     # For testing in jade
-    dataVersion.getAnalysisDefaultFileMadhatter()
+    #dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
     )
 )

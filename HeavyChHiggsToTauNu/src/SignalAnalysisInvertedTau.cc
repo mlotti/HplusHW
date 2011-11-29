@@ -406,6 +406,7 @@ namespace HPlus {
 
   // baseline tau-id
     if (tauData.applyDiscriminatorOnBestTauCandidate(myTauIsolation)) {
+      hMETBaselineTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
       increment(fBaselineTauIDCounter);
       if (electronVetoData.passedEvent()) {
 	increment(fBaselineEvetoCounter);
@@ -463,7 +464,7 @@ namespace HPlus {
     // veto was successfull
     increment(fTauVetoAfterTauIDCounter);
 
-  
+    hMETInvertedTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());  
 
     //    if(!tauData.passedEvent()) return false; // Require at least one tau candidate
     // plot leading track without pt cut

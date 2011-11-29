@@ -547,8 +547,8 @@ def copyStyle(src, dst):
 # \param xmax  Maximum x value
 #
 # \return TGraph of line from (xmin, 1.0) to (xmax, 1.0)
-def _createRatioLine(xmin, xmax):
-    line = ROOT.TGraph(2, array.array("d", [xmin, xmax]), array.array("d", [1.0, 1.0]))
+def _createRatioLine(xmin, xmax, yvalue=1.0):
+    line = ROOT.TGraph(2, array.array("d", [xmin, xmax]), array.array("d", [yvalue, yvalue]))
 #    line.SetLineColor(ROOT.kBlack)
     line.SetLineColor(ROOT.kRed)
     line.SetLineWidth(2)
@@ -656,24 +656,24 @@ class PlotBase:
     def removeLegend(self):
         delattr(self, "legend")
 
-    def prependPlotObject(self, obj):
-        self.plotObjectsBefore.append(obj)
+    def prependPlotObject(self, obj, option=""):
+        self.plotObjectsBefore.append( (obj, option) )
 
-    def appendPlotObject(self, obj):
-        self.plotObjectsAfter.append(obj)
+    def appendPlotObject(self, obj, option=""):
+        self.plotObjectsAfter.append( (obj, option) )
 
     def addCutBoxAndLine(self, cutValue, fillColor=18, box=True, line=True, **kwargs):
         xmin = self.getFrame().GetXaxis().GetXmin()
         xmax = self.getFrame().GetXaxis().GetXmax()
         ymin = self.getFrame().GetYaxis().GetXmin()
         ymax = self.getFrame().GetYaxis().GetXmax()
-
-        if histograms.isLessThan(**kwargs):
-            xmin = cutValue
-        else:
-            xmax = cutValue
     
         if box:
+            if histograms.isLessThan(**kwargs):
+                xmin = cutValue
+            else:
+                xmax = cutValue
+
             b = ROOT.TBox(xmin, ymin, xmax, ymax)
             b.SetFillColor(fillColor)
             self.prependPlotObject(b)
@@ -709,15 +709,15 @@ class PlotBase:
     #
     # Draw also the legend if one has been associated
     def draw(self):
-        for obj in self.plotObjectsBefore:
-            obj.Draw("same")
+        for obj, option in self.plotObjectsBefore:
+            obj.Draw(option+"same")
 
         self.histoMgr.draw()
         if hasattr(self, "legend"):
             self.legend.Draw()
 
-        for obj in self.plotObjectsAfter:
-            obj.Draw("same")
+        for obj, option in self.plotObjectsAfter:
+            obj.Draw(option+"same")
 
         # Redraw the axes in order to get the tick marks on top of the
         # histogram
@@ -1046,13 +1046,16 @@ class ComparisonPlot(PlotBase):
     # \param createRatio  Create also the ratio pad?
     # \param coverPadOpts Options for cover TPad, forwarded to _createCoverPad()
     # \param kwargs       Keyword arguments, forwarded to PlotBase.createFrame() or histograms.CanvasFrameTwo.__init__()
-    def createFrame(self, filename, createRatio=False, coverPadOpts={}, **kwargs):
+    def createFrame(self, filename, createRatio=False, invertRatio=False, coverPadOpts={}, **kwargs):
         if not createRatio:
             PlotBase.createFrame(self, filename, **kwargs)
         else:
             histos = self.histoMgr.getHistos()
-            self.ratio = _createRatio(histos[0].getRootHisto(), histos[1].getRootHisto(),
-                                      "%s/%s" % (histos[0].getName(), histos[1].getName()))
+            (numerator, denominator) = (histos[0], histos[1])
+            if invertRatio:
+                (numerator, denominator) = (denominator, numerator)
+            self.ratio = _createRatio(numerator.getRootHisto(), denominator.getRootHisto(),
+                                      "%s/%s" % (numerator.getName(), denominator.getName()))
 
             self.cf = histograms.CanvasFrameTwo(self.histoMgr, [self.ratio], filename, **kwargs)
             self.frame = self.cf.frame

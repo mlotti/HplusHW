@@ -78,6 +78,9 @@ class DataVersion:
     def isS4(self):
         return self.isMC() and "S4" in self.version
 
+    def isS6(self):
+        return self.isMC() and "S6" in self.version
+
     def getTriggerProcess(self):
         return self.trigger
 

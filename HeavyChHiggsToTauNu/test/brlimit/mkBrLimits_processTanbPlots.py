@@ -17,7 +17,7 @@ mu = 200
 # since the corresponding mH values have not been calculated
 # in Feynhiggs
 useMA = 0
-showTeva = 1
+showTeva = 0
 showLEP = 1
 plotTwoSigmaBands = 0
 
@@ -32,7 +32,8 @@ def writeTitleTexts(lumi):
     x = 0.2
     l.DrawLatex(x, y, "#sqrt{s} = 7 TeV")
     x = 0.45
-    l.DrawLatex(x, y, lumi + " fb^{-1}")
+    mystring = '%.1f' % float(lumi)
+    l.DrawLatex(x, y, mystring + " fb^{-1}")
     return 0
 
 def writeText( myText, y ):
@@ -191,10 +192,14 @@ def keepOnlyMassPoints(graph, massPoints):
 
 # Remove mass points lower than 100 since
 # statisticalFunctions.tanbForBR cannot handle them (they are unphysical)
+# also remove points lower than 115 since excluded by LEP
 def cleanGraph(graph):
-    for i in xrange(0, graph.GetN()):
-        if int(graph.GetX()[i])<100:
+    i=0
+    while (i<graph.GetN()):
+        if (graph.GetX()[i]<115):
             graph.RemovePoint(i)
+        else:
+            i=i+1        
 
 # Remove points with tanb value larger than 100, both upper and lower
 # (not necessary to show them for lower limit plot)
@@ -307,7 +312,7 @@ def main():
     style = tdrstyle.TDRStyle()
 
     # Open ROOT file
-    f = ROOT.TFile.Open("brlimits.root")
+    f = ROOT.TFile.Open("limits.root")
 
     # Get TGraphs
     observed = f.Get("tg_obs")
@@ -335,7 +340,7 @@ def main():
     expected_2s_tanb = graphToTanBeta(expected_2s, mu, removeNotValid=False)
 
  
-    showLow = 1
+    showLow = 0
     if showLow:
         observed_tanb_low = graphToTanBetaLow(observed,mu)
         expected_tanb_low = graphToTanBetaLow(expected,mu)
@@ -381,9 +386,9 @@ def main():
 
     # Create the TCanvas, frame, etc
     if useMA:
-        canvas = ROOT.TCanvas("mssmLimits_ma")
+        canvas = ROOT.TCanvas("limitsTanb_ma")
     else:
-        canvas = ROOT.TCanvas("mssmLimits_mh")
+        canvas = ROOT.TCanvas("limitsTanb_mh")
     frame = canvas.DrawFrame(massMin, 0, massMax, tanbMax)
 
     # Draw the graphs
@@ -454,16 +459,17 @@ def main():
     #     ifstream fileLumi("input_luminosity",ios::in); fileLumi>>L;
     #     ifstream fileLumi("input_luminosity",ios::in);
     #     fileLumi>>L;
-    lumifile = open("input_luminosity","r")
+    lumifile = open("outputs/input_luminosity_100","r")
     lumi = lumifile.readline()
 #    print("Lumi is %d",(L))
     writeTitleTexts(lumi)
     top = 0.9
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
+# --- chose text for final state description --
 #    writeText("Fully hadronic final state",   top - lineSpace)
 #    writeText("hadr. + ltau final states",   top - lineSpace)
-    writeText("hadr. + ltau + emu final states",   top - lineSpace)
+#    writeText("hadr. + ltau + emu final states",   top - lineSpace)
 
 #    writeText("Bayesian CL limit",           top - 2*lineSpace)
     writeText("MSSM m_{h}^{max}",           top - 2*lineSpace)
@@ -491,9 +497,9 @@ def main():
 
     # Create the TCanvas, frame, etc
     if useMA:
-        canvas2 = ROOT.TCanvas("mssmLimits_mus_ma")
+        canvas2 = ROOT.TCanvas("limitsTanb_mus_ma")
     else:
-        canvas2 = ROOT.TCanvas("mssmLimits_mus_mh")
+        canvas2 = ROOT.TCanvas("limitsTanb_mus_mh")
     frame2 = canvas.DrawFrame(massMin, 0, massMax, tanbMax)
 
     # Axis labels

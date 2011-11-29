@@ -51,7 +51,7 @@ vispt = ""
 #vispt = "_vispt40"
 if step in ["embedding", "analysis", "signalAnalysis"]:
     dirPrefix += vispt
-if step == "signalAnalysis":
+if step in ["analysis", "signalAnalysis"]:
     dirPrefix += "_"+era
 
 if step == "signalAnalysis":
@@ -120,16 +120,31 @@ datasetsMCQCD = [
     "QCD_Pt20_MuEnriched_TuneZ2_Summer11",
 ]
 datasetsTest = [
-    "TTToHplusBWB_M120_Summer11"
+    "TTToHplusBWB_M80_Summer11",
+    "TTToHplusBWB_M90_Summer11",
+    "TTToHplusBWB_M100_Summer11",
+    "TTToHplusBWB_M120_Summer11",
+    "TTToHplusBWB_M140_Summer11",
+    "TTToHplusBWB_M150_Summer11",
+    "TTToHplusBWB_M155_Summer11",
+    "TTToHplusBWB_M160_Summer11",
+    "TTToHplusBHminusB_M80_Summer11",
+    "TTToHplusBHminusB_M90_Summer11",
+    "TTToHplusBHminusB_M100_Summer11",
+    "TTToHplusBHminusB_M120_Summer11",
+    "TTToHplusBHminusB_M140_Summer11",
+    "TTToHplusBHminusB_M150_Summer11",
+    "TTToHplusBHminusB_M155_Summer11",
+    "TTToHplusBHminusB_M160_Summer11",
 ]
 
 # Select the datasets based on the processing step and data era
 datasets = []
-if step in ["analysis", "analysisTau"]:
+if step == "analysisTau":
     datasets.extend(datasetsMCnoQCD)
 else:
 #    datasets.extend(datasetsData2010)
-    if step == "signalAnalysis":
+    if step in ["analysis", "signalAnalysis"]:
         if era == "EPS":
             datasets.extend(datasetsData2011_EPS)
         elif era == "Run2011A-EPS":
@@ -143,8 +158,8 @@ else:
     datasets.extend(datasetsMCnoQCD)
     datasets.extend(datasetsMCQCD)
 
-#    if step in ["skim", "generation", "embedding", "caloMetEfficiency"]:
-#        datasets.extend(datasetsTest)
+if step in ["skim", "embedding", "signalAnalysis"]:
+    datasets.extend(datasetsTest)
 
 multicrab.extendDatasets(config[step]["input"], datasets)
 

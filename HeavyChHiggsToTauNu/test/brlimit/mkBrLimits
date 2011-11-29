@@ -1,134 +1,30 @@
 #!/bin/tcsh
 
-# write name of datacard here
-# remove .txt
-#---set filename = HPlusHadronic_120
 set odir = `pwd`
-#set nameJobs = datacard_fullyhadronic_skenA1
-set nameJobs = `basename ${odir}`
-set nameDataCard = datacard
 
-# check if jobs producing same output files are running
-# NOTE: a job with longer name containing the name of this job might block this 
-# job, even though it would not produce output files with same name
-while (`bjobs -w |& grep $nameJobs` != "") 
-  echo Waiting for previous jobs to end.  You might want to bkill these jobs...
-  sleep 10
-end
-
-#input file names
-set f1 = ${nameDataCard}80
-set f2 = ${nameDataCard}100
-set f3 = ${nameDataCard}120
-set f4 = ${nameDataCard}140
-set f5 = ${nameDataCard}150
-set f6 = ${nameDataCard}155
-set f7 = ${nameDataCard}160
-
-#individual names for jobs with date and time
-set jobname = ${nameJobs}_`date +"%H%M%S"`
-set j1 = ${jobname}80
-set j2 = ${jobname}100
-set j3 = ${jobname}120
-set j4 = ${jobname}140
-set j5 = ${jobname}150
-set j6 = ${jobname}155
-set j7 = ${jobname}160
-
-# prepare LandS
-cmsrel CMSSW_4_1_4
-cd CMSSW_4_1_4/src/
-cvs co -r V3-04-01_eps UserCode/mschen/LandS
-cd UserCode/mschen/LandS  
-cmsenv
-gmake clean
-gmake all
-cd ../../../../..
+# prepare CMSSW
+set MYCMSSWVER = CMSSW_4_2_8_patch7
+cmsrel ${MYCMSSWVER}
+ln -s ${MYCMSSWVER} mycmsswlink
 
 cd ${odir}
 
-# set outputfile = output_LandS_`basename ${nameDataCard} .txt`
+source ${odir}/mkBrLimits_submit
+echo done with jobs! 
 
-# generates the files output_LandS_HPlusHadronic_*_obs
-bsub -q cmscaf1nh -J ${j1}_o ${odir}/mkBrLimits_runObs ${odir} ${f1}.txt
-bsub -q cmscaf1nh -J ${j2}_o ${odir}/mkBrLimits_runObs ${odir} ${f2}.txt
-bsub -q cmscaf1nh -J ${j3}_o ${odir}/mkBrLimits_runObs ${odir} ${f3}.txt
-bsub -q cmscaf1nh -J ${j4}_o ${odir}/mkBrLimits_runObs ${odir} ${f4}.txt
-bsub -q cmscaf1nh -J ${j5}_o ${odir}/mkBrLimits_runObs ${odir} ${f5}.txt
-bsub -q cmscaf1nh -J ${j6}_o ${odir}/mkBrLimits_runObs ${odir} ${f6}.txt
-bsub -q cmscaf1nh -J ${j7}_o ${odir}/mkBrLimits_runObs ${odir} ${f7}.txt
+source ${odir}/mkBrLimits_process
+echo done with plotting!
 
-# generates the files output_LandS_HPlusHadronic_*_exp
-bsub -q cmscaf1nd -J ${j1}_e ${odir}/mkBrLimits_runExp ${odir} ${f1}.txt
-bsub -q cmscaf1nd -J ${j2}_e ${odir}/mkBrLimits_runExp ${odir} ${f2}.txt
-bsub -q cmscaf1nd -J ${j3}_e ${odir}/mkBrLimits_runExp ${odir} ${f3}.txt
-bsub -q cmscaf1nd -J ${j4}_e ${odir}/mkBrLimits_runExp ${odir} ${f4}.txt
-bsub -q cmscaf1nd -J ${j5}_e ${odir}/mkBrLimits_runExp ${odir} ${f5}.txt
-bsub -q cmscaf1nd -J ${j6}_e ${odir}/mkBrLimits_runExp ${odir} ${f6}.txt
-bsub -q cmscaf1nd -J ${j7}_e ${odir}/mkBrLimits_runExp ${odir} ${f7}.txt
+# TODO: remove LandS and clean
 
-# here check if jobs with same name are running
-echo Checking jobs with name $jobname.
-while (`bjobs -w |& grep $jobname` != "") # check if job name exists
-  echo Waiting for jobs to end `date`
-  sleep 60
-end
-
-set output1 = output_LandS_${f1}
-set output2 = output_LandS_${f2}
-set output3 = output_LandS_${f3}
-set output4 = output_LandS_${f4}
-set output5 = output_LandS_${f5}
-set output6 = output_LandS_${f6}
-set output7 = output_LandS_${f7}
-
-# collect observed values
-head -3 ${output1}_obs | tail -1 | awk '{print $12 }' >&! ${output1}
-head -3 ${output2}_obs | tail -1 | awk '{print $12 }' >&! ${output2}
-head -3 ${output3}_obs | tail -1 | awk '{print $12 }' >&! ${output3}
-head -3 ${output4}_obs | tail -1 | awk '{print $12 }' >&! ${output4}
-head -3 ${output5}_obs | tail -1 | awk '{print $12 }' >&! ${output5}
-head -3 ${output6}_obs | tail -1 | awk '{print $12 }' >&! ${output6}
-head -3 ${output7}_obs | tail -1 | awk '{print $12 }' >&! ${output7}
-
-head -3 ${output1}_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> ${output1}
-head -3 ${output2}_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> ${output2}
-head -3 ${output3}_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> ${output3}
-head -3 ${output4}_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> ${output4}
-head -3 ${output5}_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> ${output5}
-head -3 ${output6}_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> ${output6}
-head -3 ${output7}_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> ${output7}
-
-#ls ${odir}/output_LandS_*
-cd ${odir}
-ls -al output_LandS_*
-
-root -b -q mkBrLimits_plots.cxx
-
-# compress LandS output files,
-# remove LandS and clean directory from files created by LandS
-tar -cf output_Lands.tar output_LandS_*
-rm output_LandS_*
-rm -r CMSSW_*/src/UserCode
-rm -r LSFJOB_*
-rm *Hybrid*root
-
-echo Br limit plots ready!
-
-cd CMSSW_4_1_4/src
-#git clone http://cmsdoc.cern.ch/~slehti/HiggsAnalysis.git
-git clone ~slehti/public/html/HiggsAnalysis.git
-cmsenv
-source /afs/cern.ch/cms/LCG/LCG-2/UI/cms_ui_env.csh
-source /afs/cern.ch/cms/ccs/wm/scripts/Crab/crab.csh
-# -- following not needed since not running cmsRun --
-#./HiggsAnalysis/HeavyChHiggsToTauNu/test/checkoutTags.sh
-scram b -j 4
-cmsenv
-cd ../..
-./mkBrLimits_mssmLimit.py
-
-# rm unnecessary code
-rm -r CMSSW_*/src
-
-echo MSSM limit plots ready!
+# # compress LandS output files,
+# # remove LandS and clean directory from files created by LandS
+# tar -cf output_Lands.tar output_LandS_*
+# rm output_LandS_*
+# rm -r LSFJOB_*
+# rm *Hybrid*root
+# #rm input_luminosity_*
+# rm -r CMSSW_*
+rm -r mycmsswlink/src/HiggsAnalysis
+rm -r mycmsswlink/src/UserCode
+rm -r mycmsswlink/tmp

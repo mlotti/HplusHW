@@ -5,7 +5,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # Configuration
 
 # Select the version of the data (needed only for interactice running,
-dataVersion = "42Xmc"
+dataVersion = "42XmcS4"
 #dataVersion = "42Xdata"   # Run2011 data
 
 
@@ -13,14 +13,14 @@ dataVersion = "42Xmc"
 # Flags for additional signal analysis modules
 # Perform the signal analysis with all tau ID algorithms in addition
 # to the "golden" analysis
-doAllTauIds = True #for QCD control plots
+doAllTauIds = False #for QCD control plots
 
 # Perform b tagging scanning
 doBTagScan = False
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
-doJESVariation = False
+doJESVariation = True
 JESVariation = 0.03
 JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
@@ -47,15 +47,15 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-#    "file:/media/disk/attikis/PATTuples/v18/pattuple_v18_Run2011A_PromptReco_v4_AOD_166374_9_1_jHG.root"
-    #"file:/media/disk/attikis/PATTuples/v18/pattuple_v18_TTJets_TuneZ2_Summer11_9_1_bfN.root"
+    #"file:/media/disk/attikis/PATTuples/v18/pattuple_v18_Run2011A_PromptReco_v4_AOD_166374_9_1_jHG.root"
+    "file:/media/disk/attikis/PATTuples/v18/pattuple_v18_TTJets_TuneZ2_Summer11_9_1_bfN.root"
     #
     #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v18/pattuple_v18_Run2011A_PromptReco_v4_AOD_166374_9_1_jHG.root"
     #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v18/pattuple_v18_TTJets_TuneZ2_Summer11_9_1_bfN.root"
     #
     # dataVersion.getAnalysisDefaultFileCastor()
     # For testing in jade
-    dataVersion.getAnalysisDefaultFileMadhatter()
+    #dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
     )
 )
@@ -265,7 +265,7 @@ if doJESVariation:
     JESe = "%02d" % int(JESEtaVariation*100)
     JESm = "%02d" % int(JESUnclusteredMETVariation*100)
     module = process.QCDMeasurement.clone()
-    module.Tree.fill = False
+    module.Tree.fill = True
     module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
 
     addJESVariationAnalysis(process, dataVersion, "QCDMeasurement", "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, module, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation)

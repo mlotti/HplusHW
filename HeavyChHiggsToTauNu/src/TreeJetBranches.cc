@@ -3,10 +3,6 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
-#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleTools.h"
-
 #include "TTree.h"
 
 #include<string>
@@ -67,15 +63,18 @@ namespace HPlus {
       // for some reason the muonEnergyFraction is calculated w.r.t. *corrected* energy in pat::Jet
       double muf = jet.muonEnergy() / (jet.jecFactor(0) * jet.energy());
 
-      double sum = chf+nhf+elf+phf+muf;
-      if(std::abs(sum - 1.0) > 0.000001) {
-        throw cms::Exception("Assert") << "The assumption that chf+nhf+elf+phf+muf=1 failed, the sum was " << (chf+nhf+elf+phf+muf)
-                                       << " the sum-1 was " << (sum-1.0)
-                                       << std::endl;
-      }
       int chm = jet.chargedHadronMultiplicity();
       int npr = jet.chargedMultiplicity() + jet.neutralMultiplicity();
       if(fJetComposition) {
+        double sum = chf+nhf+elf+phf+muf;
+        if(std::abs(sum - 1.0) > 0.000001) {
+          throw cms::Exception("Assert") << "The assumption that chf+nhf+elf+phf+muf=1 failed, the sum was " << (chf+nhf+elf+phf+muf)
+                                         << " the sum-1 was " << (sum-1.0)
+                                         << " Jet " << i << " pt " << jet.pt() << " eta " << eta
+                                         << " chf " << chf << " nhf " << nhf << " elf " << elf << " phf " << phf << " muf " << muf
+                                         << std::endl;
+        }
+
         fJetsChf.push_back(chf);
         fJetsNhf.push_back(nhf);
         fJetsElf.push_back(elf);

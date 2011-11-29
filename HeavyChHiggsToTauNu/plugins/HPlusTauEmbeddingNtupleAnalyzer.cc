@@ -8,27 +8,31 @@
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 
-#include "DataFormats/METReco/interface/MET.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
-#include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
-#include "DataFormats/PatCandidates/interface/TriggerEvent.h"
-#include "DataFormats/PatCandidates/interface/TriggerObject.h"
+#include "DataFormats/METReco/interface/MET.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeEventBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeFunctionBranch.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventItem.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeMuonBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeTauBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeJetBranches.h"
 
 #include "TTree.h"
 
 #include <limits>
 
-class HPlusMetNtupleAnalyzer: public edm::EDAnalyzer {
+class HPlusTauEmbeddingNtupleAnalyzer: public edm::EDAnalyzer {
 public:
-  HPlusMetNtupleAnalyzer(const edm::ParameterSet& iConfig);
+  HPlusTauEmbeddingNtupleAnalyzer(const edm::ParameterSet& iConfig);
 
-  ~HPlusMetNtupleAnalyzer();
+  ~HPlusTauEmbeddingNtupleAnalyzer();
 
 private:
   void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
@@ -41,19 +45,26 @@ private:
   typedef HPlus::EventItem<XYZTLorentzVector> MetItem;
   typedef HPlus::EventItem<double> DoubleItem;
 
-  edm::InputTag fPatTriggerSrc;
-  std::string fL1MetCollection;
-  XYZTLorentzVector fL1Met;
-  std::vector<MetItem> fMets;
-  std::vector<DoubleItem> fDoubles;
+  edm::InputTag fGenParticleOriginalSrc;
+  edm::InputTag fGenParticleEmbeddedSrc;
 
   HPlus::TreeEventBranches fEventBranches;
+  HPlus::TreeMuonBranches fMuonBranches;
+  HPlus::TreeTauBranches fTauBranches;
+  HPlus::TreeJetBranches fJetBranches;
+
+  std::vector<MetItem> fMets;
+  std::vector<DoubleItem> fDoubles;
 };
 
-HPlusMetNtupleAnalyzer::HPlusMetNtupleAnalyzer(const edm::ParameterSet& iConfig):
-  fPatTriggerSrc(iConfig.getParameter<edm::InputTag>("patTriggerEvent")),
-  fL1MetCollection("l1extraParticles:MET")
+HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::ParameterSet& iConfig):
+  fGenParticleOriginalSrc(iConfig.getParameter<edm::InputTag>("genParticleOriginalSrc")),
+  fGenParticleEmbeddedSrc(iConfig.getParameter<edm::InputTag>("genParticleEmbeddedSrc")),
+  fMuonBranches(iConfig),
+  fTauBranches(iConfig),
+  fJetBranches(iConfig, false)
 {
+
   edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("mets");
   std::vector<std::string> names = pset.getParameterNames();
   for(size_t i=0; i<names.size(); ++i) {
@@ -66,12 +77,13 @@ HPlusMetNtupleAnalyzer::HPlusMetNtupleAnalyzer(const edm::ParameterSet& iConfig)
     fDoubles.push_back(DoubleItem(names[i], pset.getParameter<edm::InputTag>(names[i])));
   }
 
-
   edm::Service<TFileService> fs;
   fTree = fs->make<TTree>("tree", "Tree");
-  fEventBranches.book(fTree);
 
-  fTree->Branch("l1Met_p4", &fL1Met);
+  fEventBranches.book(fTree);
+  fMuonBranches.book(fTree);
+  fTauBranches.book(fTree);
+  fJetBranches.book(fTree);
 
   for(size_t i=0; i<fMets.size(); ++i) {
     fTree->Branch(fMets[i].name.c_str(), &(fMets[i].value));
@@ -81,13 +93,16 @@ HPlusMetNtupleAnalyzer::HPlusMetNtupleAnalyzer(const edm::ParameterSet& iConfig)
   }
 }
 
-HPlusMetNtupleAnalyzer::~HPlusMetNtupleAnalyzer() {}
+HPlusTauEmbeddingNtupleAnalyzer::~HPlusTauEmbeddingNtupleAnalyzer() {}
 
-void HPlusMetNtupleAnalyzer::reset() {
+void HPlusTauEmbeddingNtupleAnalyzer::reset() {
   double nan = std::numeric_limits<double>::quiet_NaN();
  
   fEventBranches.reset();
-  fL1Met.SetXYZT(nan, nan, nan, nan);
+  fMuonBranches.reset();
+  fTauBranches.reset();
+  fJetBranches.reset();
+
   for(size_t i=0; i<fMets.size(); ++i) {
     fMets[i].value.SetXYZT(nan, nan, nan, nan);
   }
@@ -96,36 +111,25 @@ void HPlusMetNtupleAnalyzer::reset() {
   }
 }
 
-void HPlusMetNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+void HPlusTauEmbeddingNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   fEventBranches.setValues(iEvent);
 
-  edm::Handle<pat::TriggerEvent> htrigger;
-  iEvent.getByLabel(fPatTriggerSrc, htrigger);
+  edm::Handle<edm::View<reco::GenParticle> > hgenparticlesOriginal;
+  edm::Handle<edm::View<reco::GenParticle> > hgenparticlesEmbedded;
+  if(!iEvent.isRealData())
+    iEvent.getByLabel(fGenParticleOriginalSrc, hgenparticlesOriginal);
+  iEvent.getByLabel(fGenParticleEmbeddedSrc, hgenparticlesEmbedded);
 
-  // L1 MET
-  pat::TriggerObjectRefVector l1mets = htrigger->objects(trigger::TriggerL1ETM);
-  if(!l1mets.empty()) {
-    if(l1mets.size() != 1) {
-      bool found = false;
-      for(size_t i=0; i<l1mets.size(); ++i) {
-        if(l1mets[i]->coll(fL1MetCollection)) {
-          fL1Met = l1mets[i]->p4();
-          found = true;
-          break;
-        }
-      }
-      if(!found) {
-        std::stringstream ss;
-        for(size_t i=0; i<l1mets.size(); ++i) {
-          ss << l1mets[i]->collection() << " " << l1mets[i]->et() << " ";
-        }
-        throw cms::Exception("Assert") << "No L1 MET from collection " << fL1MetCollection 
-                                       << ", have " << l1mets.size() << " L1 MET objects: " << ss.str()
-                                       << " at " << __FILE__ << ":" << __LINE__ << std::endl;
-      }
-    }
-    fL1Met = l1mets[0]->p4();
+  // Muons
+  if(iEvent.isRealData()) {
+    fMuonBranches.setValues(iEvent);
   }
+  else {
+    fMuonBranches.setValues(iEvent, *hgenparticlesOriginal);
+  }
+  fTauBranches.setValues(iEvent, *hgenparticlesEmbedded);
+
+  fJetBranches.setValues(iEvent);
 
   for(size_t i=0; i<fMets.size(); ++i) {
     edm::Handle<edm::View<reco::MET> > hmet;
@@ -142,4 +146,4 @@ void HPlusMetNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventS
   reset();
 }
 
-DEFINE_FWK_MODULE(HPlusMetNtupleAnalyzer);
+DEFINE_FWK_MODULE(HPlusTauEmbeddingNtupleAnalyzer);
