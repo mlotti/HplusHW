@@ -54,7 +54,7 @@ namespace HPlus {
     TFileDirectory myDir = fs->mkdir("JetSelection");
     
     hPt = makeTH<TH1F>(myDir, "jet_pt", "het_pt", 300, 0., 600.);
-    hPtCentral = makeTH<TH1F>(myDir, "jet_pt_central", "het_pt_central", 300, 0., 600.);
+    hPtCentral = makeTH<TH1F>(myDir, "jet_pt_central", "jet_pt_central", 300, 0., 600.);
     hEta = makeTH<TH1F>(myDir, "jet_eta", "jet_eta", 250, -5., 5.);
     hPhi = makeTH<TH1F>(myDir, "jet_phi", "jet_phi", 320, -3.2, 3.2);
     hNumberOfSelectedJets = makeTH<TH1F>(myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
