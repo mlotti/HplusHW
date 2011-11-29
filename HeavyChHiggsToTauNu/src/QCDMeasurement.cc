@@ -279,11 +279,9 @@ namespace HPlus {
     increment(fGlobalElectronVetoCounter);
     hSelectionFlow->Fill(kQCDOrderElectronVeto, fEventWeight.getWeight());
 
-    // std::cout << "*** nonIsolatedElectronVetoData" << std::endl;
     NonIsolatedElectronVeto::Data nonIsolatedElectronVetoData = fNonIsolatedElectronVeto.analyze(iEvent, iSetup);
-    if (!nonIsolatedElectronVetoData.passedEvent())  return;
-    increment(fNonIsolatedElectronVetoCounter);
-    // std::cout << "*** nonIsolatedElectronVetoData called" << std::endl;
+    // if (!nonIsolatedElectronVetoData.passedEvent())  return;
+    if (!nonIsolatedElectronVetoData.passedEvent()) increment(fNonIsolatedElectronVetoCounter);
 
 ///////// Start global muon veto
     // MuonVeto
@@ -293,8 +291,8 @@ namespace HPlus {
     hSelectionFlow->Fill(kQCDOrderMuonVeto, fEventWeight.getWeight());
 
     NonIsolatedMuonVeto::Data nonIsolatedMuonVetoData = fNonIsolatedMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
-    if (!nonIsolatedMuonVetoData.passedEvent()) return; 
-    increment(fNonIsolatedMuonVetoCounter);
+    // if (!nonIsolatedMuonVetoData.passedEvent()) return; 
+    if (!nonIsolatedMuonVetoData.passedEvent()) increment(fNonIsolatedMuonVetoCounter);
 
 
 ///////// Jet selection
