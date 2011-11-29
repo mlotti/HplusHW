@@ -198,7 +198,7 @@ class LegendCreator:
         self.y2 += dy
 
         self.x2 += dw
-        self.y2 += dh
+        self.y1 -= dh # we want to move the lower edge, and negative dh should shrink the legend
 
     ## Create a new TLegend object (function call syntax)
     #
@@ -260,7 +260,7 @@ def moveLegend(legend, dx=0, dy=0, dw=0, dh=0):
     legend.SetY2(legend.GetY2() + dy)
 
     legend.SetX1(legend.GetX1() + dw)
-    legend.SetY1(legend.GetY1() + dh)
+    legend.SetY1(legend.GetY1() - dh) # negative dh should shrink the legend
     
     return legend
     
