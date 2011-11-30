@@ -215,9 +215,6 @@ namespace HPlus {
 
   // Get MET object 
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
-    double Met = metData.getSelectedMET()->et();
-    //    std::cout << " weight before  = " << fEventWeight.getWeight() << " met " << Met <<  std::endl; 
- 
     hMETBeforeTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());    
 
                                                                                                                                                                       
