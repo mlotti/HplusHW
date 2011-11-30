@@ -56,6 +56,9 @@ namespace HPlus {
     
     hElectronPt  = makeTH<TH1F>(myDir, "GlobalElectronPt", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 400, 0.0, 400.0);
     hElectronEta = makeTH<TH1F>(myDir, "GlobalElectronEta", "GlobalElectronEta;isolated electron #eta;N_{electrons} / 0.1", 300, -3.0, 3.0);
+    hElectronEta_identified = makeTH<TH1F>(myDir, "GlobalElectronEta_identified", "GlobalElectronEta_identified;isolated electron #eta;N_{electrons} / 0.1", 300, -3.0, 3.0);
+    hElectronPt_identified_eta  = makeTH<TH1F>(myDir, "GlobalElectronPt_identified_eta", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 400, 0.0, 400.0);
+
     hElectronPt_matchingMCelectron  = makeTH<TH1F>(myDir, "GlobalElectronPt_matchingMCelectron", "GlobalElectronPt_matchingMCelectron", 400, 0.0, 400.0);
     hElectronEta_matchingMCelectron = makeTH<TH1F>(myDir, "GlobalElectronEta_matchingMCelectron", "GlobalElectronEta_matchingMCelectron", 400, -3.0, 3.0);
     hElectronPt_matchingMCelectronFromW  = makeTH<TH1F>(myDir, "GlobalElectronPt_matchingMCelectronFromW", "GlobalElectronPt_matchingMCelectronFromW", 400, 0.0, 400.0);
@@ -246,15 +249,16 @@ namespace HPlus {
       else if( (bUseSimpleEleId70relIsoID) && (fElecIDSimpleEleId70relIso == 7) ) thisPassedID = true;
       else if( (bUseSimpleEleId60relIsoID) && (fElecIDSimpleEleId60relIso == 7) ) thisPassedID = true;
       
-      if(thisPassedID) {
-        fSelectedElectrons.push_back(*iElectron);
-        bPassedElecID = true;
-      }
+      if(!thisPassedID) continue;
+      fSelectedElectrons.push_back(*iElectron);
+      bPassedElecID = true;
 
-      // FIXME: Should one add here a continue statement for electrons that have not passed ID?
+      hElectronEta_identified->Fill(myElectronEta);
 
-      if(std::abs(myElectronEta) < fElecEtaCut)
+      if(std::abs(myElectronEta) < fElecEtaCut) {
         myHighestElecPtBeforePtCut = std::max(myHighestElecPtBeforePtCut, myElectronPt);
+      hElectronPt_identified_eta->Fill(myElectronPt);
+      }
 
       // 2) Apply Pt cut requirement
       if (myElectronPt < fElecPtCut) continue;

@@ -569,17 +569,17 @@ def main():
     observed_mkl.Draw("LP")
 
     # Legends
-    legeX = 0.58
+    legeX = 0.52
     legeY = 0.20
     pl2  = ROOT.TLegend(legeX,legeY,legeX+0.35,legeY+0.24)
     pl2.SetTextSize(0.03)
     pl2.SetFillStyle(4000)
     pl2.SetTextFont(132)
     pl2.SetBorderSize(0)
-    pl2.AddEntry(observed_pk,     "Observed, mu=1000", "lp")
-    pl2.AddEntry(observed_p2,     "Observed, mu=200", "lp")
-    pl2.AddEntry(observed_m2,     "Observed, mu=-200", "lp")
-    pl2.AddEntry(observed_mk,     "Observed, mu=-1000", "lp")
+    pl2.AddEntry(observed_pk,     "Observed, mu=1000 GeV/c^{2}", "lp")
+    pl2.AddEntry(observed_p2,     "Observed, mu=200 GeV/c^{2}", "lp")
+    pl2.AddEntry(observed_m2,     "Observed, mu=-200 GeV/c^{2}", "lp")
+    pl2.AddEntry(observed_mk,     "Observed, mu=-1000 GeV/c^{2}", "lp")
                 
 
     pl2.Draw()
@@ -590,7 +590,7 @@ def main():
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
 #    writeText("Fully hadronic final state",   top - lineSpace)
 #    writeText("hadr. + ltau final states",   top - lineSpace)
-    writeText("hadr. + ltau + emu final states",   top - lineSpace)
+#    writeText("hadr. + ltau + emu final states",   top - lineSpace)
 
 
 #    writeText("Bayesian CL limit",           top - 2*lineSpace)

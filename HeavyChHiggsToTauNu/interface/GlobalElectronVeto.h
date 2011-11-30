@@ -110,6 +110,8 @@ namespace HPlus {
     // Histograms
     TH1 *hElectronPt;
     TH1 *hElectronEta;
+    TH1 *hElectronPt_identified_eta;
+    TH1 *hElectronEta_identified;
     TH1 *hElectronPt_matchingMCelectron;
     TH1 *hElectronEta_matchingMCelectron;
     TH1 *hElectronPt_matchingMCelectronFromW;

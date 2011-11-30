@@ -133,11 +133,11 @@ namespace HPlus {
     Count fdeltaPhiTauMET130Counter;
     Count fFakeMETVetoCounter;
     Count fdeltaPhiTauMET160FakeMetCounter;
-    Count fRtauAfterCutsCounter;
-    Count fForwardJetVetoCounter;
     Count fTopRtauDeltaPhiFakeMETCounter;
     Count fRtauDeltaPhiFakeMETCounter;
     Count fBtag33RtauDeltaPhiFakeMETCounter;
+    Count fRtauAfterCutsCounter;
+    Count fForwardJetVetoCounter;
     Count ftransverseMassCut80Counter;
     Count ftransverseMassCut100Counter;
     Count ftransverseMassCut80NoRtauCounter;
