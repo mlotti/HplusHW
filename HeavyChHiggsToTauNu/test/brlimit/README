@@ -56,6 +56,13 @@ In "mkBrLimits_mssmLimit.py", you may want to toggle the setting
 "useMA" to show results in mA,tanb space, or the setting "showTeva"
 and "showLEP" to show/hide Tevatron and LEP results.
 
+Tip: if you have already run the jobs, and want to simpley regenerate plots 
+(change plotting style or some other reason), you can do this quickly with 
+the following command, which reads the output files from the directory 
+"outputs" and producess the plots:
+
+ ./mkBrLimits_process 
+
 
 Possible problems:
 ===================
