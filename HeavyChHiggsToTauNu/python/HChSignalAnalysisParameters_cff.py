@@ -48,7 +48,7 @@ tauSelectionBase = cms.untracked.PSet(
     ptCut = cms.untracked.double(40), # jet pt > value
     etaCut = cms.untracked.double(2.1), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
-    rtauCut = cms.untracked.double(0.0), # rtau > value
+    rtauCut = cms.untracked.double(0.7), # rtau > value
     antiRtauCut = cms.untracked.double(0.0), # rtau < value
     invMassCut = cms.untracked.double(999.), # m(vis.tau) < value; FIXME has no effect in TauSelection.cc 
     maximumEMFractionCut = cms.untracked.double(999.), # disable cut
@@ -151,7 +151,7 @@ MET = cms.untracked.PSet(
     caloSrc = cms.untracked.InputTag("patMETs"),
     tcSrc = cms.untracked.InputTag("patMETsTC"),
     select = cms.untracked.string("raw"), # raw, type1, type2
-    METCut = cms.untracked.double(40.0)
+    METCut = cms.untracked.double(50.0)
 )
 
 bTagging = cms.untracked.PSet(

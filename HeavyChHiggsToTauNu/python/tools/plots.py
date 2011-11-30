@@ -660,20 +660,20 @@ class PlotBase:
         self.plotObjectsBefore.append( (obj, option) )
 
     def appendPlotObject(self, obj, option=""):
-        self.plotObjectsAfter.append( (obj, options) )
+        self.plotObjectsAfter.append( (obj, option) )
 
     def addCutBoxAndLine(self, cutValue, fillColor=18, box=True, line=True, **kwargs):
         xmin = self.getFrame().GetXaxis().GetXmin()
         xmax = self.getFrame().GetXaxis().GetXmax()
         ymin = self.getFrame().GetYaxis().GetXmin()
         ymax = self.getFrame().GetYaxis().GetXmax()
-
-        if histograms.isLessThan(**kwargs):
-            xmin = cutValue
-        else:
-            xmax = cutValue
     
         if box:
+            if histograms.isLessThan(**kwargs):
+                xmin = cutValue
+            else:
+                xmax = cutValue
+
             b = ROOT.TBox(xmin, ymin, xmax, ymax)
             b.SetFillColor(fillColor)
             self.prependPlotObject(b)

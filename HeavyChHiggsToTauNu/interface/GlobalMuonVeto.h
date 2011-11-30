@@ -121,6 +121,8 @@ namespace HPlus {
     // Histograms
     TH1 *hMuonPt;
     TH1 *hMuonEta;
+    TH1 *hMuonPt_identified_eta;
+    TH1 *hMuonEta_identified;
     TH1 *hMuonPt_matchingMCmuon;
     TH1 *hMuonEta_matchingMCmuon;
     TH1 *hMuonPt_matchingMCmuonFromW;
