@@ -19,7 +19,7 @@ mu = 200
 useMA = 0
 showAN = 1
 showTeva = 0
-showLEP = 1
+showLEP = 0
 plotTwoSigmaBands = 0
 
 # write text to plot
@@ -461,8 +461,8 @@ def main():
 
     # Legends
     legeX = 0.60
-    legeY = 0.25
-    pl  = ROOT.TLegend(legeX,legeY,legeX+0.30,legeY+0.25)
+    legeY = 0.17
+    pl  = ROOT.TLegend(legeX,legeY,legeX+0.30,legeY+0.2)
     pl.SetTextSize(0.03)
     pl.SetFillStyle(4000)
     pl.SetTextFont(132)
@@ -497,7 +497,7 @@ def main():
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
 # --- chose text for final state description --
-#    writeText("Fully hadronic final state",   top - lineSpace)
+    writeText("Fully hadronic final state",   top - lineSpace)
 #    writeText("hadr. + ltau final states",   top - lineSpace)
 #    writeText("hadr. + ltau + emu final states",   top - lineSpace)
 
@@ -618,7 +618,8 @@ def main():
     top = 0.83
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
-#    writeText("Fully hadronic final state",   top - lineSpace)
+# --- chose text for final state description --
+    writeText("Fully hadronic final state",   top - lineSpace)
 #    writeText("hadr. + ltau final states",   top - lineSpace)
 #    writeText("hadr. + ltau + emu final states",   top - lineSpace)
 
