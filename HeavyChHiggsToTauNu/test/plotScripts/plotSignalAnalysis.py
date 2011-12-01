@@ -435,7 +435,7 @@ def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, a
         for line in lst:
             h.addCutBoxAndLine(line, box=False, line=True)
     if cutBox != None:
-        lst = cutLine
+        lst = cutBox
         if not isinstance(lst, list):
             lst = [lst]
 
