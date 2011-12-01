@@ -190,10 +190,10 @@ def dataEwkDiff(mT,name):
 
 def plotDataEwkDiff(mT, name):
     data = dataEwkDiff(mT, name)
+    data.SetName("Data-EWK")
 
     # Draw the subtracted plot
-    plot = plots.PlotBase()
-    plot.histoMgr.appendHisto(histograms.Histo(data, "Data-EWK"))
+    plot = plots.PlotBase([data])
     plot.createFrame(name, opts={"ymin": 1e-1, "ymaxfactor": 10})
     plot.frame.GetXaxis().SetTitle("MET (GeV)")
     plot.frame.GetYaxis().SetTitle("Data - EWK")
