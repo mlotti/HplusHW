@@ -617,7 +617,20 @@ class PlotBase:
     # \param saveFormats        List of suffixes for formats for which to save the plot
     def __init__(self, datasetRootHistos=[], saveFormats=[".png", ".eps", ".C"]):
         # Create the histogram manager
-        self.histoMgr = histograms.HistoManager(datasetRootHistos = datasetRootHistos)
+        if len(datasetRootHistos) > 0:
+            if isinstance(datasetRootHistos[0], dataset.DatasetRootHistoBase):
+                for i, drh in enumerate(datasetRootHistos[1:]):
+                    if not isinstance(drh, dataset.DatasetRootHistoBase):
+                        raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, datasetRootHistos[%d] is %s" % (i, type(drh).__name__))
+
+                    self.histoMgr = histograms.HistoManager(datasetRootHistos = datasetRootHistos)
+            else:
+                self.histoMgr = histograms.HistoManager()
+                for histo in datasetRootHistos:
+                    self.histoMgr.appendHisto(histo)
+        else:
+            self.histoMgr = histograms.HistoManager()
+
 
         # Save the format
         self.saveFormats = saveFormats
@@ -1099,18 +1112,7 @@ class ComparisonPlot(PlotBase, PlotRatioBase):
     #
     # The possible ratio is calculated as datasetRootHisto1/datasetRootHisto2
     def __init__(self, datasetRootHisto1, datasetRootHisto2, **kwargs):
-        if isinstance(datasetRootHisto1, dataset.DatasetRootHistoBase) and isinstance(datasetRootHisto2, dataset.DatasetRootHistoBase):
-            PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2], **kwargs)
-        else:
-            # assume datasetRootHisto* arguments are HistoBase objects instead
-            if isinstance(datasetRootHisto1, dataset.DatasetRootHistoBase):
-                raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, datasetRootHisto2 is %s" % type(datasetRootHisto2).__name__)
-            if isinstance(datasetRootHisto2, dataset.DatasetRootHistoBase):
-                raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, datasetRootHisto1 is %s" % type(datasetRootHisto1).__name__)
-            PlotBase.__init__(self, **kwargs)
-            self.histoMgr.appendHisto(datasetRootHisto1)
-            self.histoMgr.appendHisto(datasetRootHisto2)
-
+        PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2], **kwargs)
         PlotRatioBase.__init__(self)
 
     ## Create TCanvas and frames for the histogram and a data/MC ratio
@@ -1148,16 +1150,7 @@ class ComparisonPlot(PlotBase, PlotRatioBase):
 
 class ComparisonManyPlot(PlotBase, PlotRatioBase):
     def __init__(self, histoReference, histoCompares, **kwargs):
-        if isinstance(histoReference, dataset.DatasetRootHistoBase):
-            PlotBase.__init__(self, [histoReference]+histoCompares, **kwargs)
-        else:
-            # assume all argumetns are HistoBase objects instead
-            for i, hc in enumerate(histoCompares):
-                if isinstance(hc, dataset.DatasetRootHistoBase):
-                    raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, histoReference is %s, histoCompare %d is %s" % (type(histoReference).__name__, i, type(hc).__name__))
-            PlotBase.__init__(self, **kwargs)
-            for h in [histoReference]+histoCompares:
-                self.histoMgr.appendHisto(h)
+        PlotBase.__init__(self, [histoReference]+histoCompares, **kwargs)
         PlotRatioBase.__init__(self)
 
     def createFrame(self, filename, createRatio=False, invertRatio=False, coverPadOpts={}, **kwargs):

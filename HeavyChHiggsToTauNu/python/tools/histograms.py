@@ -1238,9 +1238,12 @@ class HistoManager:
     #       not done yet for backward compatibility.
     def __init__(self, *args, **kwargs):
         if len(args) == 0:
-            if len(kwargs) != 1:
-                raise Exception("If positional arguments are not given, there must be exactly 1 keyword argument")
-            self.datasetRootHistos = kwargs["datasetRootHistos"]
+            if len(kwargs) == 0:
+                self.datasetRootHistos = []
+            elif len(kwargs) == 1:
+                self.datasetRootHistos = kwargs["datasetRootHistos"]
+            else:
+                raise Exception("If positional arguments are not given, there must be ither 0 or 1 keyword argument (got %d)"%len(kwargs))
         else:
             if len(args) != 2:
                 raise Exception("Must give exactly 2 positional arguments (got %d)" % len(args))
