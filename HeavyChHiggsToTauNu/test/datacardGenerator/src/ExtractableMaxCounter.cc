@@ -20,7 +20,7 @@ ExtractableMaxCounter::~ExtractableMaxCounter() {
   }
 }
 
-double ExtractableMaxCounter::doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info) {
+double ExtractableMaxCounter::doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info, double additionalNormalisation) {
   // First item should contain the nominal results
   double myNominalResult = vCounters[0]->doExtract(datasets, info);
   double myMaxRatio = 0.0;

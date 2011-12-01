@@ -17,6 +17,7 @@ mu = 200
 # since the corresponding mH values have not been calculated
 # in Feynhiggs
 useMA = 0
+showAN = 1
 showTeva = 0
 showLEP = 1
 plotTwoSigmaBands = 0
@@ -209,6 +210,26 @@ def removeLargeValues(graph):
             graph.RemovePoint( graph.GetN()-1-i)
             graph.RemovePoint(i)
 
+# Draw AN exclusion
+# picked by eye from CMS-PAS-HIG-11-008
+def getANCurve():
+# ------ this plots an area
+    curve = TGraph(4)
+    curve.Set(4)
+#    curve.SetPoint(0,100,17.5) # do not show the lower part of area
+    curve.SetPoint(0,120,25.5)
+    curve.SetPoint(1,140,42)
+    curve.SetPoint(2,147,60)
+    curve.SetPoint(3,120,100)
+    if useMA==1:
+        graphToMa(curve)
+    myColor = 809
+    curve.SetFillColor(myColor)
+    curve.SetFillStyle(4)
+    curve.SetLineColor(myColor)
+    curve.SetMarkerColor(myColor)
+    return curve
+
 # Draw Tevatron exclusion
 # picked from Physics Letters B
 # Volume 682, Issue 3, 7 December 2009, Pages 278-286 
@@ -399,6 +420,10 @@ def main():
     observed_tanb.SetLineWidth(804)
     observed_tanb.Draw("LP")
 
+    if showAN:
+        ANCurve = getANCurve()
+        ANCurve.Draw("F")
+
     if showTeva:
         TevaCurve = getTevaCurve()
         TevaCurve.Draw("F")
@@ -422,6 +447,9 @@ def main():
         LepCurve.SetFillStyle(3004);
 #        LepCurve.Draw("FP")
         LepCurve.Draw("F")
+
+# ensure that these are on top
+    observed_tanb.Draw("LP")
 
     # Axis labels
     if useMA:
@@ -449,6 +477,8 @@ def main():
         pl.AddEntry(LepCurve,  "LEP exclusion", "f")
     if showTeva:
         pl.AddEntry(TevaCurve,  "Tevatron exclusion", "f")
+    if showAN:
+        pl.AddEntry(ANCurve,  "Exclusion with 1.1 fb^{-1}", "f")
 #    if showLow:
 #        pl.AddEntry(observed_tanb_low,     "Observed", "lp")
     pl.Draw()
@@ -569,17 +599,17 @@ def main():
     observed_mkl.Draw("LP")
 
     # Legends
-    legeX = 0.58
+    legeX = 0.52
     legeY = 0.20
     pl2  = ROOT.TLegend(legeX,legeY,legeX+0.35,legeY+0.24)
     pl2.SetTextSize(0.03)
     pl2.SetFillStyle(4000)
     pl2.SetTextFont(132)
     pl2.SetBorderSize(0)
-    pl2.AddEntry(observed_pk,     "Observed, mu=1000", "lp")
-    pl2.AddEntry(observed_p2,     "Observed, mu=200", "lp")
-    pl2.AddEntry(observed_m2,     "Observed, mu=-200", "lp")
-    pl2.AddEntry(observed_mk,     "Observed, mu=-1000", "lp")
+    pl2.AddEntry(observed_pk,     "Observed, mu=1000 GeV/c^{2}", "lp")
+    pl2.AddEntry(observed_p2,     "Observed, mu=200 GeV/c^{2}", "lp")
+    pl2.AddEntry(observed_m2,     "Observed, mu=-200 GeV/c^{2}", "lp")
+    pl2.AddEntry(observed_mk,     "Observed, mu=-1000 GeV/c^{2}", "lp")
                 
 
     pl2.Draw()
@@ -590,7 +620,7 @@ def main():
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
 #    writeText("Fully hadronic final state",   top - lineSpace)
 #    writeText("hadr. + ltau final states",   top - lineSpace)
-    writeText("hadr. + ltau + emu final states",   top - lineSpace)
+#    writeText("hadr. + ltau + emu final states",   top - lineSpace)
 
 
 #    writeText("Bayesian CL limit",           top - 2*lineSpace)
