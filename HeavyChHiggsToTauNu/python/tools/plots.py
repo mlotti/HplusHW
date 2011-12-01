@@ -625,8 +625,15 @@ class PlotBase:
 
                     self.histoMgr = histograms.HistoManager(datasetRootHistos = datasetRootHistos)
             else:
+                histoList = datasetRootHistos
+                if isinstance(datasetRootHistos[0], ROOT.TH1):
+                    for i, h in enumerate(datasetRootHistos[1:]):
+                        if not isinstance(h, ROOT.TH1):
+                            raise Exception("Input types can't be a mixture of ROOT.TH1 and something, datasetRootHistos[%d] is %s" % (i, type(h).__name__))
+                    histoList = [histograms.Histo(th1, th1.GetName()) for th1 in datasetRootHistos]
+
                 self.histoMgr = histograms.HistoManager()
-                for histo in datasetRootHistos:
+                for histo in histoList:
                     self.histoMgr.appendHisto(histo)
         else:
             self.histoMgr = histograms.HistoManager()
