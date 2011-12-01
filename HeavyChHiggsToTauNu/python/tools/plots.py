@@ -742,11 +742,12 @@ class PlotBase:
             obj.Draw(option+"same")
 
         self.histoMgr.draw()
-        if hasattr(self, "legend"):
-            self.legend.Draw()
 
         for obj, option in self.plotObjectsAfter:
             obj.Draw(option+"same")
+
+        if hasattr(self, "legend"):
+            self.legend.Draw()
 
         # Redraw the axes in order to get the tick marks on top of the
         # histogram
