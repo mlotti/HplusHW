@@ -139,24 +139,24 @@ class InvertedTauID:
 	h2.Draw("same")
 
 #        tex1 = TLatex(0.6,0.9,"Inverted TauID")
-	tex1 = TLatex(0.6,0.9,h1.GetTitle())
+	tex1 = TLatex(0.4,0.9,h1.GetTitle())
         tex1.SetNDC()
-	tex1.SetTextSize(20)
+	tex1.SetTextSize(15)
         tex1.Draw()
 
-	marker1 = TMarker(0.58,0.915,h1.GetMarkerStyle())
+	marker1 = TMarker(0.38,0.915,h1.GetMarkerStyle())
 	marker1.SetNDC()
 	marker1.SetMarkerColor(h1.GetMarkerColor())
 	marker1.SetMarkerSize(0.5*h1.GetMarkerSize())
 	marker1.Draw()
 
 #	tex2 = TLatex(0.6,0.85,"Baseline TauID")
-	tex2 = TLatex(0.6,0.85,h2.GetTitle())
+	tex2 = TLatex(0.4,0.85,h2.GetTitle())
         tex2.SetNDC()
-	tex2.SetTextSize(20)
+	tex2.SetTextSize(15)
         tex2.Draw()
 
-        marker2 = TMarker(0.58,0.865,h2.GetMarkerStyle())
+        marker2 = TMarker(0.38,0.865,h2.GetMarkerStyle())
         marker2.SetNDC()
         marker2.SetMarkerColor(h2.GetMarkerColor())
         marker2.SetMarkerSize(0.5*h2.GetMarkerSize())
@@ -166,23 +166,43 @@ class InvertedTauID:
 	comp.Print("comparison"+self.label+".C")
         comp.Print("comparison"+self.label+".png")
 
-	## cut vs eff
+    def cutefficiency(self,histo1,histo2):
 
-        cuteff = TCanvas("cuteff","",500,500)
-        cuteff.cd()
-        cuteff.SetLogy()
+        h1 = histo1.Clone("h1")
+        h2 = histo2.Clone("h2")
 
-	h1cut = histo1.Clone("h1cut")
+        h1.Scale(1/h1.GetMaximum())
+        h2.Scale(1/h2.GetMaximum())
+
+        # check that no bin has negative value, negative values possible after subtracting EWK from data
+        iBin = 1
+        nBins = h1.GetNbinsX()
+        while iBin < nBins:
+            value1 = h1.GetBinContent(iBin)
+            value2 = h2.GetBinContent(iBin)
+        
+            if value1 < 0:
+                h1.SetBinContent(iBin,0)
+        
+            if value2 < 0:
+                h2.SetBinContent(iBin,0)
+        
+            iBin = iBin + 1
+
+	h1cut = h1.Clone("h1cut")
 	h1cut.Reset()
 	h1cut.GetYaxis().SetTitle("Efficiency")
         h1cut.GetXaxis().SetTitle("PF MET cut (GeV)")
 
-        h2cut = histo2.Clone("h2cut")
+        h2cut = h2.Clone("h2cut")
         h2cut.Reset()
 	h2cut.SetLineColor(2)
  
         h1_integral = h1.Integral()
 	h2_integral = h2.Integral()
+
+	hError = h1.Clone("hError")
+	hError.Reset()
 
 	iBin = 1
 	nBins = h1cut.GetNbinsX()
@@ -195,13 +215,58 @@ class InvertedTauID:
             efficiency2 = selected2/h2_integral
             h2cut.SetBinContent(iBin,efficiency2)
 
+	    error = 0
+	    if efficiency1 > 0:
+		error = (efficiency1-efficiency2)/efficiency1
+            print "    Cut",histo1.GetBinLowEdge(iBin),efficiency1,efficiency2,error
+	    hError.SetBinContent(iBin,error)
+
 	    iBin = iBin + 1
 
-	h1cut.Draw()
-	h2cut.Draw("same")
 
-	cuteff.Print("cuteff"+self.label+".eps")
-        cuteff.Print("cuteff"+self.label+".png")
+        plot = plots.ComparisonPlot(
+            histograms.Histo(h2cut, "Inv"),
+            histograms.Histo(h1cut, "Base"),
+            )
+            # Set the styles
+        st1 = styles.getDataStyle().clone()
+        st2 = st1.clone()
+        st2.append(styles.StyleLine(lineColor=ROOT.kRed))
+        plot.histoMgr.forHisto("Base", st1)
+        plot.histoMgr.forHisto("Inv", st2)
+
+        # Set the legend labels
+        plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted tau ID",
+                                               "Base": "Baseline tau ID"})
+        # Set the legend styles
+        plot.histoMgr.setHistoLegendStyleAll("L")
+        #plot.histoMgr.setHistoLegendStyle("afterTauID", "P") # exception to the general rule
+
+        # Set the drawing styles
+        plot.histoMgr.setHistoDrawStyleAll("HIST")
+        #plot.histoMgr.setHistoDrawStyleAll("afterTauID", "EP") # exception to the general rule
+
+        # Create frame with a ratio pad
+        plot.createFrame("cuteff"+self.label, opts={"ymin":1e-5, "ymaxfactor": 2},
+                         createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
+                         )
+
+        # Set Y axis of the upper pad to logarithmic
+        plot.getPad1().SetLogy(True)
+
+        plot.draw()
+        plot.save()
+
+        ######
+
+        plot2 = plots.PlotBase()
+        plot2.histoMgr.appendHisto(histograms.Histo(hError,"ShapeUncertainty"))
+        plot2.histoMgr.forHisto("ShapeUncertainty", st1)
+        plot2.histoMgr.setHistoDrawStyleAll("HIST")
+        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-1, "ymaxfactor": 1})
+        plot2.draw()
+        plot2.save()
+
 
     def fitQCD(self,histo): 
 
@@ -728,18 +793,25 @@ def main():
     metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets")  
 
     # Rebin before subtracting
-    metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
-    metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     
     metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets")
     metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets") 
     metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets")
     metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets")
 
+    metBase_data.SetTitle("Data: BaseLine TauID")
+    metInverted_data.SetTitle("Data: Inverted TauID")
     metBase_QCD = metBase_data.Clone("QCD")
     metBase_QCD.Add(metBase_EWK,-1)
+    metBase_QCD.SetTitle("Data - EWK MC: BaseLine TauID")
 
+    invertedQCD.setLabel("BaseVsInverted")
+    invertedQCD.comparison(metInverted_data,metBase_data)
+    invertedQCD.setLabel("BaseMinusEWKVsInverted")
     invertedQCD.comparison(metInverted_data,metBase_QCD)
+
 
     invertedQCD.setLabel("inclusive")   
     invertedQCD.fitQCD(metInverted_data)
