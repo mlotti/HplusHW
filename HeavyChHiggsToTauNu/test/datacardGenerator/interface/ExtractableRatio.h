@@ -10,7 +10,7 @@ class ExtractableRatio : public Extractable {
                    std::string counterHisto, std::string nominatorCounter, std::string denominatorCounter, double scale);
   ~ExtractableRatio();
   
-  double doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info);
+  double doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info, double additionalNormalisation = 1.0);
   void print();
 
  private:

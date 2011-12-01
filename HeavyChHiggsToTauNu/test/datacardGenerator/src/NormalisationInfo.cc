@@ -28,6 +28,11 @@ double NormalisationInfo::getNormalisationFactor(TFile* f) {
               << sCounterHisto << "'!" << std::endl;
     return -1.;
   }
+  // Check if the file is data
+  std::string myBinLabel = myConfigInfoHisto->GetXaxis()->GetBinLabel(2);
+  if (myBinLabel == "isData")
+    return 1.0;
+  
   // Calculate normalisation factor
   double myXsection = myConfigInfoHisto->GetBinContent(2) / myConfigInfoHisto->GetBinContent(1);
   //std::cout << myXsection << std::endl;

@@ -4,6 +4,8 @@
 #include "ExtractableConstant.h"
 #include "ExtractableRatio.h"
 #include "ExtractableScaleFactor.h"
+#include "ExtractableShape.h"
+#include "QCDMeasurementCalculator.h"
 
 #include <fstream>
 #include <iostream>
@@ -12,6 +14,7 @@
 
 ConfigManager::ConfigManager(bool verbose)
 : fNormalisationInfo(0),
+  fNormalisationInfoQCD(0),
   sDescription(""),
   fLuminosity(-1.0),
   bVerbose(verbose) {
@@ -374,6 +377,17 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
   std::string myInput2;
   std::string myFilePath;
   std::string myMTPlot;
+  std::vector< std::string > myQCDDataSource;
+  std::vector< std::string > myQCDEWKSource;
+  std::string myQCDHistoPrefix;
+  std::string myQCDBasicSelectionsHisto;
+  std::string myQCDMETLegHisto;
+  std::string myQCDTauLegHisto;
+  std::string myQCDMode;
+  std::string myQCDBasicMtHisto;
+  std::string myShapeHistoName;
+  std::string myShapeUpPrefix;
+  std::string myShapeDownPrefix;
   double myValue = -1;
   double myValue2 = -1;
   std::string myLabel = "default";
@@ -410,6 +424,30 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
         myMTPlot = parseString(str, myPos);
       } else if (myLabel == "files" || myLabel == "counterPaths") {
         parseVectorString(str, myPos, myFiles);
+      // QCD measurement related
+      } else if (myLabel == "dataFiles") {
+        parseVectorString(str, myPos, myQCDDataSource);
+      } else if (myLabel == "EWKMCFiles") {
+        parseVectorString(str, myPos, myQCDEWKSource);
+      } else if (myLabel == "histoName") {
+        myShapeHistoName = parseString(str, myPos);
+      } else if (myLabel == "upPrefix") {
+        myShapeUpPrefix = parseString(str, myPos);
+      } else if (myLabel == "downPrefix") {
+        myShapeDownPrefix = parseString(str, myPos);
+      } else if (myLabel == "histoPrefix") {
+        myQCDHistoPrefix = parseString(str, myPos);
+      } else if (myLabel == "QCDBasicSelectionsHisto") {
+        myQCDBasicSelectionsHisto = parseString(str, myPos);
+      } else if (myLabel == "QCDMETLegHisto") {
+        myQCDMETLegHisto = parseString(str, myPos);
+      } else if (myLabel == "QCDTauLegHisto") {
+        myQCDTauLegHisto = parseString(str, myPos);
+      } else if (myLabel == "QCDMode") {
+        myQCDMode = parseString(str, myPos);
+      } else if (myLabel == "QCDBasicMtHisto") {
+        myQCDBasicMtHisto = parseString(str, myPos);
+      // Unknown label
       } else {
         std::cout << "\033[0;41m\033[1;37mError:\033[0;0m unknown label in config: '" << myLabel << "'!" << std::endl;
         std::cout << "  Parsed string: " << str << std::endl;
@@ -526,7 +564,44 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
       } else if (!myInput2.size()) {
         std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'normHisto' for function 'ScaleFactor'!" << std::endl;
         myFunctionStatus = false;
-      }      
+      }
+    } else if (myFunction == "Shape") {
+      if (!myShapeHistoName.size()) {
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'histoName' for function 'Shape'!" << std::endl;
+        myFunctionStatus = false;
+      } else if (!myShapeUpPrefix.size()) {
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'upPrefix' for function 'Shape'!" << std::endl;
+        myFunctionStatus = false;
+      } else if (!myShapeDownPrefix.size()) {
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'downPrefix' for function 'Shape'!" << std::endl;
+        myFunctionStatus = false;
+      }
+    } else if (myFunction == "QCDMeasurement") {
+      if (!myCounterHisto.size()) {
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'counterHisto' for function 'QCDMeasurement'!" << std::endl;
+        myFunctionStatus = false;
+      } else if (!myQCDDataSource.size()) {
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'dataFiles' for function 'QCDMeasurement'!" << std::endl;
+        myFunctionStatus = false;
+      } else if (!myQCDEWKSource.size()) {
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'EWKMCFiles' for function 'QCDMeasurement'!" << std::endl;
+        myFunctionStatus = false;
+      } else if (!myQCDHistoPrefix.size()) {
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'histoPrefix' for function 'QCDMeasurement'!" << std::endl;
+        myFunctionStatus = false;
+      } else if (!myQCDBasicSelectionsHisto.size()) {
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'QCDBasicSelectionsHisto' for function 'QCDMeasurement'!" << std::endl;
+        myFunctionStatus = false;
+      } else if (!myQCDMETLegHisto.size()) {
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'QCDMETLegHisto' for function 'QCDMeasurement'!" << std::endl;
+        myFunctionStatus = false;
+      } else if (!myQCDTauLegHisto.size()) {
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'QCDTauLegHisto' for function 'QCDMeasurement'!" << std::endl;
+        myFunctionStatus = false;
+      } else if (type == Extractable::kExtractableNuisance && !myQCDMode.size()) {
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'QCDMode' for function 'QCDMeasurement'!" << std::endl;
+        myFunctionStatus = false;
+      }
     } else {
       std::cout << "\033[0;41m\033[1;37mError:\033[0;0m specified function is unknown! (valid functions are 'Constant', 'Counter', 'Ratio', 'ScaleFactor', you tried '" << myFunction << "')" << std::endl;
       myFunctionStatus = false;
@@ -553,6 +628,21 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
                 << ", counterHisto=" << '"' << "counterHisto" << '"'
                 << ", histogram=" << '"' << "scaleFactorAbsUncertaintyHistogramNameWithPath" << '"'
                 << ", histogram=" << '"' << "scaleFactorAbsUncertaintyCountsHistogramNameWithPath" << '"' << std::endl;
+      std::cout << "  function=" << '"' << "Shape" << '"' 
+                << ", histoName=" << '"' << "histoName" << '"'
+                << ", upPrefix=" << '"' << "pathToUpHisto" << '"'
+                << ", downPrefix=" << '"' << "pathToDownHisto" << '"' << std::endl;
+      std::cout << "  function=" << '"' << "QCDMeasurement" << '"' 
+                << ", counterHisto=" << '"' << "counterHisto" << '"'
+                << ", histoPrefix=" << '"' << "prefixForHistogram" << '"'
+                << ", QCDBasicSelectionsHisto=" << '"' << "histoName" << '"'
+                << ", QCDMETLegHisto=" << '"' << "histoName" << '"'
+                << ", QCDTauLegHisto=" << '"' << "histoName" << '"'
+                << ", QCDBasicMtHisto=" << '"' << "histoName" << '"'
+                << ", [QCDMode=" << '"' << "stat || syst" << '"' << "]"
+                << ", filePath=" << '"' << "path to directory" << '"'
+                << ", dataFiles={" << '"' << "file1.root" << '"' << ", ... }"
+                << ", EWKMCFiles={" << '"' << "file1.root" << '"' << ", ... }" << std::endl;
     }
   }
   if (!myFunctionStatus)
@@ -601,6 +691,27 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
       std::cout << "\033[0;41m\033[1;37mError:\033[0;0m function 'ScaleFactor' is only available for nuisance!" << std::endl;
       return false;
     }
+  } else if (myFunction == "Shape") {
+    if (type == Extractable::kExtractableNuisance)
+      myExtractable = new ExtractableShape(myId, myDistribution, myDescription, myShapeHistoName, myShapeUpPrefix, myShapeDownPrefix);
+    else {
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m function 'Shape' is only available for nuisance!" << std::endl;
+      return false;
+    }
+  } else if (myFunction == "QCDMeasurement") {
+    if (type == Extractable::kExtractableRate) {
+      myExtractable = new QCDMeasurementCalculator(myId);
+    } else if (type == Extractable::kExtractableNuisance) {
+      myExtractable = new QCDMeasurementCalculator(myQCDMode, myId, myDistribution, myDescription);
+    } else {
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m function 'QCDMeasurement' is only available for rate and nuisance!" << std::endl;
+      return false;
+    }
+    // Setup QCD measurement
+    dynamic_cast<QCDMeasurementCalculator*>(myExtractable)->addDatasets(myFilePath, myQCDEWKSource, myQCDDataSource);
+    dynamic_cast<QCDMeasurementCalculator*>(myExtractable)->setMeasurementInfo(myQCDHistoPrefix, myQCDBasicSelectionsHisto, myQCDTauLegHisto, myQCDMETLegHisto);
+    dynamic_cast<QCDMeasurementCalculator*>(myExtractable)->setNormalisationInfo(fNormalisationInfo, myCounterHisto);
+    dynamic_cast<QCDMeasurementCalculator*>(myExtractable)->setTransverseMassInfo(myQCDHistoPrefix, myQCDBasicMtHisto);
   }
   if (myExtractable)
     vExtractables.push_back(myExtractable);
@@ -626,6 +737,7 @@ bool ConfigManager::addDataGroup ( std::string str ) {
   std::string myLabelItem = "default";
   std::string myRate;
   std::string myFilePath;
+  double myAdditionalNormalisationFactor = 1.0;
   std::string myMTPlot = "";
   std::string myMTFile = "";
   // Obtain items
@@ -645,6 +757,8 @@ bool ConfigManager::addDataGroup ( std::string str ) {
       myLabel = parseString(str, myPos);
     } else if (myLabelItem == "rate") {
       myRate = parseString(str, myPos);
+    } else if (myLabelItem == "additionalNormalisationFactor") {
+      myAdditionalNormalisationFactor = parseNumber(str, myPos);
     } else if (myLabelItem == "nuisances") {
       parseVectorString(str, myPos, myNuisances);
     } else if (myLabelItem == "filePath") {
@@ -691,6 +805,7 @@ bool ConfigManager::addDataGroup ( std::string str ) {
     std::cout << "Example of correct syntax:" << std::endl;
     std::cout << "column = { channel=1, process=1, mass={100}, label=" << '"' 
               <<  "name" << '"' <<  ", rate=" << '"' << "IdOfRate" << "'"
+              << "[, additionalNormalisationFactor=value] "
               << "[, nuisances={" << '"' << "IdOfNuisance1" << '"' << ", " << '"' << "IdOfNuisance2"
               << '"' << " ... }] [filePath=" << '"' << "path" << '"' << ",] [, files={" 
               << '"' << "file1.root" << '"' << ", " << '"' << "file2.root"
@@ -700,7 +815,7 @@ bool ConfigManager::addDataGroup ( std::string str ) {
     return false;
   }
   // Create dataset group
-  DatasetGroup* myDataGroup = new DatasetGroup(myChannel, myProcess, myLabel, myMasses, myMTPlot, myMTFile);
+  DatasetGroup* myDataGroup = new DatasetGroup(myChannel, myProcess, myLabel, myMasses, myMTPlot, myMTFile, myAdditionalNormalisationFactor);
   if (!myDataGroup->addDatasets(myFilePath, myFiles, fNormalisationInfo))
     return false;
   // Register extractables
