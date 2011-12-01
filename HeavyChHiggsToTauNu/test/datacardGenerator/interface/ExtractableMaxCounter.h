@@ -10,7 +10,7 @@ public:
   ExtractableMaxCounter(std::string id, std::string distribution, std::string description, std::vector< std::string > counterHistos, std::string counterItem);
   ~ExtractableMaxCounter();
   
-  double doExtract(std::vector<Dataset*> datasets, NormalisationInfo* info);
+  double doExtract(std::vector<Dataset*> datasets, NormalisationInfo* info, double additionalNormalisation = 1.0);
   void print();
   
 private:

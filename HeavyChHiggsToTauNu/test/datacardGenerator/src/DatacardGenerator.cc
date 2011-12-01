@@ -235,6 +235,7 @@ void DatacardGenerator::generateProcessLines(std::vector< DatasetGroup* >& datas
 void DatacardGenerator::generateRateLine(std::vector< DatasetGroup* >& datasetGroups,
                                              std::vector< Extractable* >& extractables,
                                              bool useShapes) {
+  if (useShapes) std::cout << "Generating rates and rate histograms" << std::endl;
   sResult << "rate\t";
   for (size_t j = 0; j < datasetGroups.size(); ++j) {
     double myValue = 0;
@@ -243,14 +244,21 @@ void DatacardGenerator::generateRateLine(std::vector< DatasetGroup* >& datasetGr
       if (!extractables[i]->isRate()) continue;
       if (datasetGroups[j]->hasExtractable(extractables[i])) {
         myValue = datasetGroups[j]->getValueByExtractable(extractables[i], fNormalisationInfo);
+        //myValue *= 4.7/2.2; // FIXME for 2011B
         //std::cout << "datagroup=" << datasetGroups[j]->getLabel() << ", value=" << myValue << std::endl;
         if (useShapes) {
           fFile->cd();
-          TH1F* h = datasetGroups[j]->getTransverseMassPlot(fNormalisationInfo, datasetGroups[j]->getLabel(),20,0.,400.);
-          if (!h) return;
-          if (h->Integral() > 0) // normalise only histograms that have entries
-            h->Scale(myValue / h->Integral());
-          h->SetDirectory(fFile);
+          if (datasetGroups[j]->getLabel() == "QCD") {
+            extractables[i]->addHistogramsToFile(datasetGroups[j]->getLabel(),"",fFile);
+          } else {
+            TH1F* h = datasetGroups[j]->getTransverseMassPlot(fNormalisationInfo, datasetGroups[j]->getLabel(),20,0.,400.);
+            if (!h) return;
+            double mySum = h->Integral() + h->GetBinContent(0) + h->GetBinContent(h->GetNbinsX()+1);
+            if (mySum > 0) // normalise only histograms that have entries
+              h->Scale(myValue / mySum);
+            h->SetDirectory(fFile);
+            std::cout << "  Created histogram " << h->GetTitle() << " with normalisation " << myValue << " source=" << datasetGroups[j]->getMtPlotName() << std::endl;
+          }
         }
       }
     }
@@ -262,6 +270,7 @@ void DatacardGenerator::generateRateLine(std::vector< DatasetGroup* >& datasetGr
 void DatacardGenerator::generateNuisanceLines(std::vector< DatasetGroup* >& datasetGroups,
                                               std::vector< Extractable* >& extractables,
                                               bool useShapes) {
+  if (useShapes) std::cout << "Generating nuisances and shape histograms" << std::endl;
   for (size_t i = 0; i < extractables.size(); ++i) {
     if ((extractables[i]->isNuisance() || extractables[i]->isNuisanceAsymmetric()) && 
         (!extractables[i]->isShapeNuisance() || useShapes) && !extractables[i]->isMerged()) {
@@ -274,55 +283,21 @@ void DatacardGenerator::generateNuisanceLines(std::vector< DatasetGroup* >& data
           if (extractables[i]->isNuisanceAsymmetric()) {
             myUpperValue = datasetGroups[j]->getUpperValueByExtractable(extractables[i], fNormalisationInfo);
           }
-          if (extractables[i]->getDistribution() == "shapeQ") {
-            if (myValue > 1.0) {
+          if (extractables[i]->isShapeNuisance()) {
+            if (myValue > 0) {
               sResult << "1\t";
-              int myDeltaPhi = 130;
-              std::cout << "\033[0;41m\033[1;37mDelta phi: " << myDeltaPhi << "\033[0;0m!" << std::endl;
-              std::string sourceHisto;
-              std::string sourceCounter;
-              if (datasetGroups[j]->getProcess() <= 0) {
-                if (myDeltaPhi == 180) { sourceHisto = "transverseMass"; sourceCounter = "btagging"; }
-                if (myDeltaPhi == 160) { sourceHisto = "transverseMassAfterDeltaPhi160"; sourceCounter = "deltaPhiTauMET<160"; }
-                if (myDeltaPhi == 130) { sourceHisto = "transverseMassAfterDeltaPhi130"; sourceCounter = "deltaPhiTauMET<130"; }
-                if (myDeltaPhi == 90) { sourceHisto = "transverseMassAfterDeltaPhi90"; sourceCounter = "deltaPhiTauMET<90"; }
-              } else if (datasetGroups[j]->getProcess() == 1 || datasetGroups[j]->getProcess() >= 5) {
-                if (myDeltaPhi == 180) { sourceHisto = "NonQCDTypeIITransverseMass"; sourceCounter = "nonQCDType2:btagging"; }
-                if (myDeltaPhi == 160) { sourceHisto = "NonQCDTypeIITransverseMassAfterDeltaPhi160"; sourceCounter = "nonQCDType2:deltaphi160"; }
-                if (myDeltaPhi == 130) { sourceHisto = "NonQCDTypeIITransverseMassAfterDeltaPhi130"; sourceCounter = "nonQCDType2:deltaphi130"; }
-                if (myDeltaPhi == 90) { sourceHisto = "NonQCDTypeIITransverseMassAfterDeltaPhi90"; sourceCounter = "nonQCDType2:deltaphi90"; }
+              // doextractable has been called, store histograms
+              std::vector<Extractable*> myMerged = extractables[i]->getMergedExtractables();
+              for (size_t k = 0; k < myMerged.size(); ++k) {
+                if (datasetGroups[j]->hasExtractable(myMerged[k])) {
+                 myMerged[k]->addHistogramsToFile(datasetGroups[j]->getLabel(), extractables[i]->getId(), fFile);
+                }
               }
-              // Get shape uncertainty from file for signal or fakes
-              if (sourceHisto.size()) {
-                std::stringstream myShape;
-                myShape << datasetGroups[j]->getLabel() << "_JESUp";
-                std::string myUpPrefix = "signalAnalysisJESPlus03eta02METMinus10";
-                TH1* h = datasetGroups[j]->getTransverseMassPlot(myUpPrefix+"Counters/weighted/counter", sourceCounter, fNormalisationInfo, myShape.str(), "", myUpPrefix+"/"+sourceHisto,20,0.,400.);
-                h->SetDirectory(fFile);
-                myShape.str("");
-                myShape << datasetGroups[j]->getLabel() << "_JESDown";
-                std::string myDownPrefix = "signalAnalysisJESMinus03eta02METPlus10";
-                h = datasetGroups[j]->getTransverseMassPlot(myDownPrefix+"Counters/weighted/counter", sourceCounter, fNormalisationInfo, myShape.str(), "", myDownPrefix+"/"+sourceHisto, 20,0.,400.);
-                h->SetDirectory(fFile);
-              }
-              if (datasetGroups[j]->getProcess() == 4) {
-                // EWK taus, obtain from external file
-                std::string myEWKFile = "mt_variated_ewk-20111125.root";
-                std::stringstream myShape;
-                myShape << datasetGroups[j]->getLabel() << "_JESDown";
-                std::stringstream myEWKSourceHisto;
-                myEWKSourceHisto << "EWKtau_JESDown_Dphi" << myDeltaPhi;
-                TH1* h = datasetGroups[j]->getTransverseMassPlot("", "", fNormalisationInfo, myShape.str(), myEWKFile, myEWKSourceHisto.str(),20,0.,400.);
-                h->SetDirectory(fFile);
-                myShape.str("");
-                myShape << datasetGroups[j]->getLabel() << "_JESUp";
-                myEWKSourceHisto.str("");
-                myEWKSourceHisto << "EWKtau_JESUp_Dphi" << myDeltaPhi;
-                h = datasetGroups[j]->getTransverseMassPlot("", "", fNormalisationInfo, myShape.str(), myEWKFile, myEWKSourceHisto.str(),20,0.,400.);
-                h->SetDirectory(fFile);
-              }
-            } else
+              if (datasetGroups[j]->hasExtractable(extractables[i]))
+                extractables[i]->addHistogramsToFile(datasetGroups[j]->getLabel(), extractables[i]->getId(), fFile);
+            } else {
               sResult << "0\t";
+            }
           } else {
             if (TMath::Abs(myValue - 1.0) < 0.0001) {
               sResult << std::fixed << std::setprecision(0) << myValue << "\t";

@@ -21,16 +21,19 @@ public:
   virtual ~QCDMeasurementCalculator();
 
   /// No datasets should be supplied here
-  double doExtract(std::vector<Dataset*> datasets, NormalisationInfo* info);
-
+  double doExtract(std::vector<Dataset*> datasets, NormalisationInfo* info, double additionalNormalisation = 1.0);
+  void addHistogramsToFile(std::string label, std::string id, TFile* f);
+  
   bool addDatasets(std::string path, std::vector< std::string > mcEWKnames, std::vector< std::string > dataNames);
   void setMeasurementInfo(std::string histoPrefix, std::string bigboxHisto, std::string afterTauLegHisto, std::string afterMETLegHisto);
+  void setTransverseMassInfo(std::string histoPrefix, std::string basicMtHisto);
   void setNormalisationInfo(NormalisationInfo* info, std::string counterHisto);
   
 private:
   void reset();
   void doCalculate();
   TH1* getHistogram(TFile* f, std::string name);
+  bool getMergedMtHistogramForAPtBin(int bin, std::string histoName, TH1* h, TH2* dataStat, TH2* ewkStat, TH2* ewkSyst);
   double getMeasurementCounts(std::vector<Dataset*>& datasets, int bin, std::string histoName, bool isData = false);
   double getMeasurementAbsUncertaintySquared(std::vector<Dataset*>& datasets, int bin, std::string histoName, bool isData = false);
   
@@ -53,6 +56,7 @@ private:
   std::string sBigboxHisto;
   std::string sAfterTauLegHisto;
   std::string sAfterMETLegHisto;
+  std::string sBasicMtHisto;
   
   // Control histograms for systematics
   TH2* hCtrlSystematics;
@@ -61,9 +65,15 @@ private:
   TH1* hBigboxPurity;
   TH1* hMETLegPurity;
   TH1* hTauLegPurity;
+  // Control histograms for mT
+  std::vector<TH1*> hBinnedMtShape;
+  TH1* hBasicMtShape;
+  TH2* hBasicMtShapeDataStat;
+  TH2* hBasicMtShapeEWKStat;
+  TH2* hBasicMtShapeEWKSyst;
 
-  // FIXME add mT histograms
-
+  
+  TH1* hMtShapeForResult;
   // FIXME add data-driven control plots
   
   

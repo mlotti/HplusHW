@@ -39,18 +39,19 @@ Extractable::Extractable(std::string id, std::string distribution, std::string d
   
 }
 
-
 Extractable::~Extractable() {
 
 }
 
-double Extractable::doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info) {
+double Extractable::doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info, double additionalNormalisation) {
   return 0.;
 }
 
-double Extractable::doExtractAsymmetricUpperValue(std::vector< Dataset* > datasets, NormalisationInfo* info) {
+double Extractable::doExtractAsymmetricUpperValue(std::vector< Dataset* > datasets, NormalisationInfo* info, double additionalNormalisation) {
   return 0.;
 }
+
+void Extractable::addHistogramsToFile(std::string label, std::string id, TFile* f) { }
 
 void Extractable::print() {
   std::cout << "type=" << fType << std::endl;

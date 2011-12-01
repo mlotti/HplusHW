@@ -15,7 +15,7 @@ ExtractableScaleFactor::~ExtractableScaleFactor() {
 
 }
 
-double ExtractableScaleFactor::doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info) {
+double ExtractableScaleFactor::doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info, double additionalNormalisation) {
     // Only defined for nuisance
   if (isObservation() || isRate())
     return -1.0;
