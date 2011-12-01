@@ -1136,6 +1136,10 @@ class ComparisonPlot(PlotBase, PlotRatioBase):
             self._createFrameRatio(filename, histos[0].getRootHisto(), histos[1].getRootHisto(), "Ratio",
                                    invertRatio=invertRatio, coverPadOpts=coverPadOpts, **kwargs)
 
+    def addCutBoxAndLine(self, *args, **kwargs):
+        PlotBase.addCutBoxAndLine(self, *args, **kwargs)
+        PlotRatioBase.addCutBoxAndLineToRatio(self, *args, **kwargs)
+
     def draw(self):
         PlotBase.draw(self)
         PlotRatioBase._draw(self)
@@ -1167,6 +1171,10 @@ class ComparisonManyPlot(PlotBase, PlotRatioBase):
             histos = self.histoMgr.getHistos()
             self._createFrameRatioMany(filename, [h.getRootHisto() for h in histos[1:]], histos[0].getRootHisto(),
                                        invertRatio=invertRatio, coverPadOpts={}, **kwargs)
+
+    def addCutBoxAndLine(self, *args, **kwargs):
+        PlotBase.addCutBoxAndLine(self, *args, **kwargs)
+        PlotRatioBase.addCutBoxAndLineToRatio(self, *args, **kwargs)
 
     def draw(self):
         PlotBase.draw(self)
