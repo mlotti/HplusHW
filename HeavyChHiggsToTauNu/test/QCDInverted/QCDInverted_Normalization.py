@@ -29,6 +29,9 @@ counters = analysis+"Counters/weighted"
 def Linear(x,par):
     return par[0]*x[0] + par[1]
 
+def ErrorFunction(x,par):
+    return 0.5*(1 + TMath.Erf(par[0]*(x[0] - par[1])))
+
 def ExpFunction(x,par):
     if (x[0] > 280 and x[0] < 300) or x[0] > 360:
         TF1.RejectPoint()
@@ -321,38 +324,45 @@ class InvertedTauID:
         iBin = 1
         nBins = hError.GetNbinsX()
         while iBin < nBins:
-	    hError.SetBinContent(iBin,hError.GetBinContent(iBin) - 1)
+	    hError.SetBinContent(iBin,abs(hError.GetBinContent(iBin) - 1))
 	    iBin = iBin + 1
 
-        hError.GetYaxis().SetTitle("(#varepsilon^{Inverted} - #varepsilon^{Baseline})/#varepsilon^{Baseline}")
+        hError.GetYaxis().SetTitle("abs( (#varepsilon^{Inverted} - #varepsilon^{Baseline})/#varepsilon^{Baseline} )")
         hError.GetXaxis().SetTitle("PF MET cut (GeV)")
 
         plot2 = plots.PlotBase()
         plot2.histoMgr.appendHisto(histograms.Histo(hError,"ShapeUncertainty"))
         plot2.histoMgr.forHisto("ShapeUncertainty", st1)
         plot2.histoMgr.setHistoDrawStyleAll("EP")
-        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-1, "ymax": 1})
+#        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-1, "ymax": 1})
+	plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-0.1, "ymax": 1.1})
 
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
         histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
 
-#        plot2.draw()
 
 	rangeMin = hError.GetXaxis().GetXmin()
         rangeMax = hError.GetXaxis().GetXmax()
-	rangeMax = 80
+#	rangeMax = 80
+	rangeMax = 120
+#	rangeMax = 380
         
         numberOfParameters = 2
 
         class FitFunction:
             def __call__( self, x, par ):
-                return Linear(x,par)
+#                return Linear(x,par)
+		return ErrorFunction(x,par)
 
         theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
-        #theFit.SetParLimits(1,0,0.5)
+        theFit.SetParLimits(0,0.01,0.03)
+        theFit.SetParLimits(1,50,150)
 
-	hError.Fit(theFit,"RN")
+#	theFit.FixParameter(0,0.02)
+#	theFit.FixParameter(1,100)
+
+	hError.Fit(theFit,"LRN")
 	print "Error MET > 40",theFit.Eval(40)
 	print "Error MET > 50",theFit.Eval(50)
 	print "Error MET > 70",theFit.Eval(70)
