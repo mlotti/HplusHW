@@ -75,6 +75,7 @@ def main():
     style = tdrstyle.TDRStyle()
     #histograms.createLegend.moveDefaults(dx=-0.15)
     plots._legendLabels["QCD_Pt20_MuEnriched"] = "QCD"
+    histograms.createLegend.moveDefaults(dx=-0.02)
 
     doPlots(datasets)
     #printCounters(datasets)
@@ -87,21 +88,21 @@ def doPlots(datasets):
     selections = [
         ("Full_", "&&".join([muonSelection, muonVeto, electronVeto, jetSelection])),
         ("FullNoIso_", "&&".join([muonSelectionNoIso, muonVetoNoIso, electronVeto, jetSelectionNoIso])),
-        ("Analysis_", "&&".join([muonSelection, muonVeto, electronVeto, jetSelection, metcut, btagging])),
+#        ("Analysis_", "&&".join([muonSelection, muonVeto, electronVeto, jetSelection, metcut, btagging])),
         ]
 
     for name, selection in selections:
         tdMuon = treeDraw.clone(selection=selection)
 
 
-        td = tdMuon.clone(varexp="muons_p4.Pt() >>tmp(36,40,400)")
-        muonPt(createPlot(td), prefix=name, rebin=1)
+        td = tdMuon.clone(varexp="muons_p4.Pt() >>tmp(40,0,400)")
+        muonPt(createPlot(td), prefix=name, ratio=True, cutBox={"cutValue":40, "greaterThan":True})
 
         td = tdMuon.clone(varexp="pfMet_p4.Pt() >>tmp(40,0,400)")
-        met(createPlot(td), prefix=name, rebin=1)
+        met(createPlot(td), prefix=name, ratio=True)
 
         td = tdMuon.clone(varexp="sqrt(2 * muons_p4.Pt() * pfMet_p4.Et() * (1-cos(muons_p4.Phi()-pfMet_p4.Phi()))) >>tmp(40,0,400)")
-        transverseMass(createPlot(td), prefix=name, rebin=1)
+        transverseMass(createPlot(td), prefix=name, ratio=True)
 
 
 def printCounters(datasets):
@@ -411,9 +412,9 @@ def vertexCount(h, prefix="", postfix=""):
     
 
 
-def muonPt(h, prefix="", rebin=1, ratio=False):
+def muonPt(h, prefix="", rebin=1, ratio=False, cutBox=None):
     xlabel = "Muon p_{T} (GeV/c)"
-    ylabel = "Number of muons / %.0f GeV/c"
+    ylabel = "Events / %.0f GeV/c"
     #ylabel = "Number of events / 5.0 GeV/c"
 
     _optsLin  = {}
@@ -434,6 +435,8 @@ def muonPt(h, prefix="", rebin=1, ratio=False):
 #    print "Muon pt Data/MC = %f/%f = %f" % (dataEvents, mcEvents, dataEvents/mcEvents)
 
     h.createFrame(prefix+"muon_pt", opts=_optsLin)
+    if cutBox != None:
+        h.addCutBoxAndLine(**cutBox)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(histograms.createLegend())
@@ -444,6 +447,8 @@ def muonPt(h, prefix="", rebin=1, ratio=False):
     h.save()
 
     h.createFrame(prefix+"muon_pt_log", createRatio=ratio, opts=_optsLog, opts2=_opts2)
+    if cutBox != None:
+        h.addCutBoxAndLine(**cutBox)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(histograms.moveLegend(histograms.createLegend()))
@@ -677,8 +682,8 @@ class PrintNumEvents:
                 #print "Fraction of name of all MC %.1f %%" % (value/s*100)
 
 def met(h, prefix="", rebin=1, ratio=False):
-    xlabel = "MET (GeV)"
-    ylabel = "Number of events / %.0f GeV"
+    xlabel = "E_{T}^{miss} (GeV)"
+    ylabel = "Events / %.0f GeV"
 
     _optsLin  = {}
     _optsLog  = {"ymin": 0.1, "ymaxfactor": 2}
@@ -713,8 +718,8 @@ def met(h, prefix="", rebin=1, ratio=False):
     h.save()
 
 def transverseMass(h, prefix="", rebin=1, ratio=False):
-    xlabel = "m_{T}(#mu, MET) (GeV)"
-    ylabel = "Number of events / %.0f GeV"
+    xlabel = "m_{T}(#mu, E_{T}^{miss}) (GeV)"
+    ylabel = "Events / %.0f GeV"
 
     _optsLin  = {}
     _optsLog  = {"ymin": 0.1, "ymaxfactor": 2}
