@@ -12,6 +12,7 @@ jetVariation = cms.EDProducer("HPlusJetEnergyScaleVariation",
     payloadName = cms.string("AK5PF"),
     uncertaintyTag = cms.string("Uncertainty"),
     defaultPlusVariation = cms.bool(True),
+    doVariation = cms.bool(True),
     etaBins = cms.VPSet(
     )
 )
@@ -23,7 +24,7 @@ metVariation = cms.EDProducer("HPlusMetEnergyScaleVariation",
     unclusteredVariation = cms.double(0.1)
 )
 
-def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, additionalCounters, variation, etaVariation, unclusteredEnergyVariationForMET, jetVariationMode="all"):
+def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, additionalCounters, variation, etaVariation, unclusteredEnergyVariationForMET, doJetVariation=True):
     variationName = name
     tauVariationName = name+"TauVariation"
     jetVariationName = name+"JetVariation"
@@ -57,6 +58,7 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     jetv = jetVariation.clone(
         src = prototype.jetSelection.src.value(),
         defaultPlusVariation = variation > 0,
+        doVariation = doJetVariation,
     )
     setattr(process, jetVariationName, jetv)
 

@@ -17,7 +17,6 @@ singleTauMetTriggerPaths = [
     "HLT_IsoPFTau35_Trk20_MET60_v6",
     "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
 ]
-
 # WARNING: the trigger path is modified in signalAnalysis_cfg.py depending on
 # the data version
 trigger = cms.untracked.PSet(
@@ -49,9 +48,11 @@ tauSelectionBase = cms.untracked.PSet(
     ptCut = cms.untracked.double(40), # jet pt > value
     etaCut = cms.untracked.double(2.1), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
-    rtauCut = cms.untracked.double(0.0), # rtau > value
+    rtauCut = cms.untracked.double(0.7), # rtau > value
     antiRtauCut = cms.untracked.double(0.0), # rtau < value
     invMassCut = cms.untracked.double(999.), # m(vis.tau) < value; FIXME has no effect in TauSelection.cc 
+    maximumEMFractionCut = cms.untracked.double(999.), # disable cut
+    #maximumEMFractionCut = cms.untracked.double(0.8), # emfraction < value
     nprongs = cms.untracked.uint32(1) # not used at the moment FIXME: has no effect in TauSelection.cc
 )
 
@@ -137,6 +138,7 @@ jetSelection = cms.untracked.PSet(
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(3),
+#   EMfractionCut = cms.untracked.double(0.8)
     EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )
 
@@ -149,7 +151,7 @@ MET = cms.untracked.PSet(
     caloSrc = cms.untracked.InputTag("patMETs"),
     tcSrc = cms.untracked.InputTag("patMETsTC"),
     select = cms.untracked.string("raw"), # raw, type1, type2
-    METCut = cms.untracked.double(70.0)
+    METCut = cms.untracked.double(50.0)
 )
 
 bTagging = cms.untracked.PSet(
@@ -242,7 +244,12 @@ tree = cms.untracked.PSet(
     tauIDs = cms.untracked.vstring(
         "byTightIsolation",
         "byMediumIsolation",
-        "byLooseIsolation"
+        "byLooseIsolation",
+        "againstElectronLoose",
+        "againstElectronMedium",
+        "againstElectronTight",
+        "againstMuonLoose",
+        "againstMuonTight",
     )
 )
 
@@ -258,14 +265,11 @@ vertexWeight = cms.untracked.PSet(
     shiftMeanAmount = cms.double(0),    
 )
 
-
-def triggerBin(pt, dataEff, dataUnc, mcEff, mcUnc):
+def triggerBin(pt, efficiency, uncertainty):
     return cms.PSet(
         pt = cms.double(pt),
-        dataEff = cms.double(dataEff),
-        dataUncertainty = cms.double(dataUnc),
-        mcEff = cms.double(mcEff),
-        mcUncertainty = cms.double(mcUnc)
+        efficiency = cms.double(efficiency),
+        uncertainty = cms.double(uncertainty)
     )
 triggerEfficiencyScaleFactor = cms.untracked.PSet(
     # The selected triggers for the efficiency. If one trigger is
@@ -281,12 +285,62 @@ triggerEfficiencyScaleFactor = cms.untracked.PSet(
     # ),
     # The parameters of the trigger efficiency parametrizations,
     # looked dynamically from TriggerEfficiency_cff.py
-    parameters = cms.untracked.VPSet(
-        triggerBin(40, 0.4035088, 0.06502412, 0.406639,  0.02247143),
-        triggerBin(50, 0.7857143, 0.1164651,  0.6967213, 0.04239523),
-        triggerBin(60, 0.8,       0.1108131,  0.8235294, 0.04892095),
-        triggerBin(80, 1,         0.2496484,  0.7916667, 0.08808045),
+    dataParameters = cms.PSet(
+        # L1_SingleTauJet52 OR L1_SingleJet68 + HLT_IsoPFTau35_Trk20
+        runs_160431_167913 = cms.PSet(
+            firstRun = cms.uint32(160431),
+            lastRun = cms.uint32(167913),
+            luminosity = cms.double(1145.897000), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(40, 0.515873,  0.04844569),
+                triggerBin(50, 0.8571429, 0.1583514),
+                triggerBin(60, 0.8571429, 0.2572427),
+                triggerBin(80, 0.8571429, 0.2572427)
+            ),
+        ),
+        # L1_Jet52_Central + HLT_IsoPFTau35_Trk20_MET60
+        runs_170722_173198 = cms.PSet(
+            firstRun = cms.uint32(170722),
+            lastRun = cms.uint32(173198),
+            luminosity = cms.double(780.396000), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(40, 0.666667, 0.101509),
+                triggerBin(50, 1,        0.369032),
+                triggerBin(60, 1,        0.369032),
+                triggerBin(80, 1,        0.8415)
+            ),
+        ),
+        # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011A)
+        runs_173236_173692 = cms.PSet(
+            firstRun = cms.uint32(173236),
+            lastRun = cms.uint32(173692),
+            luminosity = cms.double(246.527000), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(40, 0.6, 0.204692),
+                triggerBin(50, 1,   0.458818),
+                triggerBin(60, 1,   0.369032),
+                triggerBin(80, 1,   0.8415)
+            ),
+        ),
+        # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)
+        runs_175860_180252 = cms.PSet(
+        ),
     ),
+    mcParameters = cms.PSet(
+        Summer11 = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(40, 0.6168224, 0.03608822),
+                triggerBin(50, 0.8809524, 0.07255525),
+                triggerBin(60, 0.8125,    0.1494758),
+                triggerBin(80, 1,         0.1682306)
+            ),
+        ),
+        # Placeholder until efficiencies have been measured
+        Fall11 = cms.PSet(
+        ), 
+    ),
+    dataSelect = cms.vstring(),
+    mcSelect = cms.string("Summer11"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -313,70 +367,27 @@ def _getTriggerVertexArgs(kwargs):
         vargs["pset"] = module.vertexWeight
     return (effargs, vargs)
 
-# def setTriggerPileupFor2010(**kwargs):
-#     (effargs, vargs) = _getTriggerVertexArgs(kwargs)
-#     setEfficiencyTriggersFor2010(**effargs)
-#     setPileupWeightFor2010(**vargs)
-
-# def setTriggerPileupFor2011(**kwargs):
-#     (effargs, vargs) = _getTriggerVertexArgs(kwargs)
-#     setEfficiencyTriggersFor2011(**effargs)
-#     setPileupWeightFor2011All(**vargs)
-
-# # One trigger
-# def setEfficiencyTrigger(trigger, pset=triggerEfficiency):
-#     pset.selectTriggers = [cms.PSet(trigger = cms.string(trigger), luminosity = cms.double(-1))]
-
-# # Many triggers in  (trigger, lumi) pairs
-# def setEfficiencyTriggers(triggers, pset=triggerEfficiency):
-#     pset.selectTriggers = [cms.PSet(trigger=cms.string(t), luminosity=cms.double(l)) for t,l in triggers]
-
-# # Triggers and lumis from task names
-# def setEfficiencyTriggersFromMulticrabDatasets(tasknames, datasetType="pattuple_v10", **kwargs):
-#     from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabDatasets import datasets
-#     triggers = []
-#     for name in tasknames:
-#         if not name in datasets:
-#             raise Exception("No configuration fragment for datasets '%s' in multicrabDatasets.py" % name)
-#         conf = datasets[name]
-#         if not "trigger" in conf:
-#             raise Exception("No trigger field in configuration fragment of dataset '%s'" % name)
-
-#         if not datasetType in conf["data"]:
-#             raise Exception("No definition for datasetType '%s' for dataset '%s', required to deduce the integrated luminosity" % (datasetType, name))
-#         data = conf["data"][datasetType]
-#         while "fallback" in data:
-#             data = conf["data"][ data["fallback"] ]
-
-#         if not "luminosity" in data:
-#             raise Exception("No luminosity for dataset '%s' with datasetType '%s'" % (name, datasetType))
-
-#         triggers.append( (
-#                 conf["trigger"],
-#                 data["luminosity"]
-#             ) )
-#     setEfficiencyTriggers(triggers, **kwargs)
-
-# def setEfficiencyTriggersFor2010(datasetType="pattuple_v10", **kwargs):
-#     raise Exception("This function is not supported at the moment")
-#     setEfficiencyTriggersFromMulticrabDatasets([
-#             "BTau_146428-148058_Dec22",
-#             "BTau_148822-149182_Dec22",
-#             "BTau_149291-149294_Dec22",
-#             ], datasetType, **kwargs)
-# def setEfficiencyTriggersFor2011(datasetType="pattuple_v10", **kwargs):
-#     raise Exception("This function is not supported at the moment")
-#     setEfficiencyTriggersFromMulticrabDatasets([
-#             "Tau_160431-161016_Prompt",
-#             "Tau_162803-163261_Prompt",
-#             "Tau_163270-163369_Prompt",
-#             ], **kwargs)
-
-# def formatEfficiencyTrigger(pset):
-#     if pset.luminosity.value() < 0:
-#         return pset.trigger.value()
-#     else:
-#         return "%s (%f)" % (pset.trigger.value(), pset.luminosity.value())
+def setDataTriggerEfficiency(dataVersion, era):
+    if dataVersion.isMC():
+        if dataVersion.isS4():
+            triggerEfficiencyScaleFactor.mcSelect = "Summer11"
+        elif dataVersion.isS6():
+            triggerEfficiencyScaleFactor.mcSelect = "Fall11"
+        else:
+            raise Exception("MC trigger efficencies are available only for Summer11 and Fall11")
+    
+    if era == "EPS":
+        triggerEfficiencyScaleFactor.dataSelect = ["runs_160431_167913"]
+    elif era == "Run2011A":
+        triggerEfficiencyScaleFactor.dataSelect = ["runs_160431_167913", "runs_170722_173198", "runs_173236_173692"]
+    elif era == "Run2011A-EPS":
+        triggerEfficiencyScaleFactor.dataSelect = ["runs_170722_173198", "runs_173236_173692"]
+    elif era == "Run2011B":
+        raise Exception("Tau trigger efficiencies are not yet measured for Run2011B")
+    elif era == "Run2011A+B":
+        raise Exception("Tau trigger efficiencies are not yet measured for Run2011B")
+    else:
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011A+B'")
 
 
 # Weighting by instantaneous luminosity, and the number of true
@@ -400,7 +411,7 @@ def setPileupWeightFor2010(pset=vertexWeight):
     pset.useSimulatedPileup = True
     raise Exception("Data PU distribution for 2010 is not yet available")
 
-def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="EPS", method="intime"):
+def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="Run2011A", method="3D"):
     if dataVersion.isData():
         return
 
@@ -409,8 +420,6 @@ def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="EPS", method="in
         pset.mcDist3D = Summer11_PU_S4_3D
         pset.weightFile3D = cms.string("")
         pset.method = method
-        if method != "intime":
-            raise Exception("For the moment only 'intime' PU weighting is supported (it gives the best data/MC matching)")
     else:
         raise Exception("No PU reweighting support for anything else than Summer11 S4 scenario at the moment")
     pset.enabled = True
@@ -426,6 +435,15 @@ def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="EPS", method="in
         pset.dataDist3D = cms.vdouble(0.00000000, 179221.81250000, 3814551.00000000, 25772300.00000000, 172987680.00000000, 356233824.00000000, 353649024.00000000, 175073792.00000000, 47863632.00000000, 10613712.00000000, 1599420.50000000, 243314.20312500, 26479.34960938, 4621.37011719, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000)
         pset.weightFile3D = "HiggsAnalysis/HeavyChHiggsToTauNu/data/Weight3D_160404-167913.root"
 
+    elif era == "Run2011A-EPS":
+        # Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.pileup_v2.root
+        # Cert_172620-173692_PromptReco_JSON.pileup_v2.root
+        pset.dataDistIntime = cms.vdouble(4848892.97584991, 20529438.23677765, 47643960.96635760, 79748005.00045094, 108048133.88826957, 125969058.25675932, 130969086.58619121, 124083438.16256833, 108566913.20788163, 88480612.19331141, 67568311.67310232, 48566962.00574034, 32981250.33882020, 21230236.06722812, 12993001.81115350, 7581174.99149259, 4228179.23819536, 2259416.79477907, 1159379.56732899, 572440.97021515, 272480.69068092, 125257.93731902, 55699.30297723, 23995.56380003, 10029.20958816, 4072.25946078, 1608.34820338, 618.60207560, 231.95871764, 84.88525826, 30.34623619, 10.60798240, 3.62908322, 1.21605912, 0.58696811)
+        # Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.pileupTruth_v2.root
+        # Cert_172620-173692_PromptReco_JSON.pileupTruth_v2.root
+        pset.dataDist3D = cms.vdouble(0.00000000, 73351.21789568, 1924055.52206460, 24791818.40420207, 95209585.87688106, 156742968.69022515, 167816555.37041527, 200587495.86714596, 193603251.43905830, 132536767.53925066, 52232333.43499182, 11569144.56335005, 1264254.55759395, 106947.66097234, 6537.93290332, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000)
+        pset.weightFile3D = "HiggsAnalysis/HeavyChHiggsToTauNu/data/Weight3D_170249-173692.root"
+
     elif era == "Run2011A":
         # Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_v3.pileup_v2.root
         # Cert_165088-167913_7TeV_PromptReco_JSON.pileup_v2.root
@@ -437,6 +455,7 @@ def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="EPS", method="in
         # Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.pileupTruth_v2.root
         # Cert_172620-173692_PromptReco_JSON.pileupTruth_v2.root
         pset.dataDist3D = cms.vdouble(0.00000000, 252573.03125000, 5738606.50000000, 50564120.00000000, 268197264.00000000, 512976800.00000000, 521465600.00000000, 375661280.00000000, 241466880.00000000, 143150480.00000000, 53831752.00000000, 11812459.00000000, 1290734.00000000, 111569.03125000, 6537.93310547, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000)
+        pset.weightFile3D = "HiggsAnalysis/HeavyChHiggsToTauNu/data/Weight3D_160404-173692.root"
 
     elif era == "Run2011B":
         # Cert_175832-177515_PromptReco_JSON.pileup_v2.root
@@ -444,9 +463,11 @@ def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="EPS", method="in
         pset.dataDistIntime = cms.vdouble(288839.53915556, 1944213.26515934, 7048893.23414854, 17866609.95292950, 35426386.30411588, 58569220.47460749, 84109732.81887844, 107913437.32744664, 126207015.92123026, 136532056.99027678, 138111301.86270767, 131696668.90145068, 119102716.65215862, 102637515.42847806, 84591412.32094480, 66875650.26462977, 50838721.28147475, 37240033.46912239, 26333217.71488850, 18004589.36255783, 11920512.70239508, 7653181.43074327, 4770835.32761546, 2891324.00292016, 1705583.78483189, 980459.54751395, 549865.64067858, 301180.84548916, 161286.57232955, 84529.11170115, 43397.75678300, 21846.03128374, 10791.61205329, 5235.31386353, 4645.12031734)
         # Cert_175832-177515_PromptReco_JSON.pileupTruth_v2.root
         # Cert_177718_178078_7TeV_PromptReco_Collisons11_JSON.pileupTruth_v2.root
-        pset.dataDist3D = ms.vdouble(0.00000000, 27267.43951180, 35590.01162089, 74493.32615900, 574589.87278601, 2906478.58801937, 33631126.33142464, 93666084.68744215, 138283180.67404377, 187623897.42037976, 215647291.26482403, 211729949.14499977, 187001951.98512825, 146693123.78931406, 94437211.96536994, 46031697.28833491, 16923096.85784976, 5181606.42557313, 1428052.42465751, 437008.14233306, 102694.05116599, 6516.19593707, 0.00000000, 0.00000000, 0.00000000)
+        pset.dataDist3D = cms.vdouble(0.00000000, 27267.43951180, 35590.01162089, 74493.32615900, 574589.87278601, 2906478.58801937, 33631126.33142464, 93666084.68744215, 138283180.67404377, 187623897.42037976, 215647291.26482403, 211729949.14499977, 187001951.98512825, 146693123.78931406, 94437211.96536994, 46031697.28833491, 16923096.85784976, 5181606.42557313, 1428052.42465751, 437008.14233306, 102694.05116599, 6516.19593707, 0.00000000, 0.00000000, 0.00000000)
+        if method == "3D":
+            raise Exception("No 3D weight file yet for Run2011B")
 
-    elif era == "all":
+    elif era == "Run2011A+B":
         # Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_v3.pileup_v2.root
         # Cert_165088-167913_7TeV_PromptReco_JSON.pileup_v2.root
         # Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.pileup_v2.root
@@ -459,9 +480,11 @@ def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="EPS", method="in
         # Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.pileupTruth.root
         # Cert_172620-173692_PromptReco_JSON.pileupTruth.root
         pset.dataDist3D = cms.vdouble(0.00000000, 279840.46875000, 5774196.50000000, 50638612.00000000, 268771872.00000000, 515883296.00000000, 555096704.00000000, 469327360.00000000, 379750048.00000000, 330774368.00000000, 269479040.00000000, 223542416.00000000, 188292688.00000000, 146804688.00000000, 94443744.00000000, 46031696.00000000, 16923096.00000000, 5181606.50000000, 1428052.50000000, 437008.12500000, 102694.04687500, 6516.19580078, 0.00000000, 0.00000000, 0.00000000)
+        if method == "3D":
+            raise Exception("No 3D weight file yet for Run2011A+B")
 
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS', 'Run2011A', 'Run2011B', 'all'" % era)
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS', 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011A+B'" % era)
 
 # Weighting by number of reconstructed vertices
 def setVertexWeightFor2010(pset=vertexWeight):
@@ -574,8 +597,3 @@ def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processNa
 def changeJetCollection(**kwargs):
     _changeCollection([jetSelection.src, forwardJetVeto.src], **kwargs)
 
-def changeMetCollection(**kwargs):
-    _changeCollection([
-            MET.rawSrc,
-            forwardJetVeto.src_met
-            ], **kwargs)

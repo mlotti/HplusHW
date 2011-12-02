@@ -35,6 +35,11 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.int,
                      "Do tau trigger matching? (default: 1)")
+    options.register("doTauHLTMatchingInAnalysis",
+                     0,
+                     options.multiplicity.singleton,
+                     options.varType.int,
+                     "Do tau trigger mathching with the InAnalysis method? (default: 0")
     options.register("triggerThrow",
                      1,
                      options.multiplicity.singleton,
@@ -51,7 +56,7 @@ def getOptions(options=None):
                      options.varType.int,
                      "Input is from tau embedding (default: 0)")
     options.register("tauEmbeddingCaloMet",
-                     "metNoHF",
+                     "caloMetNoHFSum",
                      options.multiplicity.singleton, options.varType.string,
                      "What calo MET object to use in signal analysis of tau embedded samples")
     options.register("tauEmbeddingTauTrigger",
@@ -63,6 +68,11 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.int,
                      "Set to 1 if job will be run with crab. Typically you don't have to set it by yourself, since it is set in crab.cfg/multicrab.cfg")
+    options.register("puWeightEra",
+                     "",
+                     options.multiplicity.singleton,
+                     options.varType.string,
+                     "Select specific PU reweighting era (Default: use the one in configuration)")
 
     # Protection in case sys.argv is missing due to various edm tools
     if not hasattr(sys, "argv"):
@@ -74,6 +84,9 @@ def getOptions(options=None):
         sys.argv.extend(last.split(":"))
 
     options.parseArguments()
+
+    if options.doPat != 0 and options.doTauHLTMatchingInAnalysis != 0:
+        raise Exception("doTauHLTMatchingInAnalysis may not be used with doPat=1 (use PAT trigger matching instead)")
 
     return options
 

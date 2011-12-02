@@ -523,7 +523,6 @@ class MulticrabDataset:
             for key, value in self.data["args"].iteritems():
                 args.append("%s=%s" % (key, str(value)))
             del dataKeys[dataKeys.index("args")]
-
         args += self.args
 
         ret = "[%s]\n" % self.name

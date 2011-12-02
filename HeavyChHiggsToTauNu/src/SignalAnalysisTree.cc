@@ -12,6 +12,10 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 
+#include "RecoEgamma/EgammaTools/interface/ConversionFinder.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+#include "MagneticField/Engine/interface/MagneticField.h"
+#include "FWCore/Framework/interface/ESHandle.h"
 
 #include "TTree.h"
 
@@ -28,6 +32,7 @@ namespace HPlus {
     if(fTauEmbeddingInput) {
       fTauEmbeddingMuonSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingMuonSource");
       fTauEmbeddingMetSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingMetSource");
+      fTauEmbeddingCaloMetNoHFSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingCaloMetNoHFSource");
       fTauEmbeddingCaloMetSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingCaloMetSource");
     }
 
@@ -47,14 +52,14 @@ namespace HPlus {
 
     fTree = dir.make<TTree>("tree", "Tree");
 
-    fTree->Branch("event", &fEvent);
-    fTree->Branch("lumi", &fLumi);
-    fTree->Branch("run", &fRun);
+    fEventBranches.book(fTree);
 
     fTree->Branch("weightPrescale", &fPrescaleWeight);
     fTree->Branch("weightPileup", &fPileupWeight);
     fTree->Branch("weightTrigger", &fTriggerWeight);
+    fTree->Branch("weightTriggerAbsUnc", &fTriggerWeightAbsUnc);
     fTree->Branch("weightBTagging", &fBTaggingWeight);
+    fTree->Branch("weightBTaggingAbsUnc", &fBTaggingWeightAbsUnc);
     fTree->Branch("weightAtFill", &fFillWeight);
 
     fTree->Branch("goodPrimaryVertices_n", &fNVertices);
@@ -64,6 +69,8 @@ namespace HPlus {
     fTree->Branch("tau_p4", &fTau);
     fTree->Branch("tau_leadPFChargedHadrCand_p4", &fTauLeadingChCand);
     fTree->Branch("tau_signalPFChargedHadrCands_n", &fTauSignalChCands);
+    fTree->Branch("tau_emFraction", &fTauEmFraction);
+    fTree->Branch("tau_decayMode", &fTauDecayMode);
     for(size_t i=0; i<fTauIds.size(); ++i) {
       fTree->Branch( ("tau_id_"+fTauIds[i].name).c_str(), &(fTauIds[i].value) );
     }
@@ -100,6 +107,7 @@ namespace HPlus {
 
     fTree->Branch("alphaT", &fAlphaT);
 
+    fTree->Branch("deltaPhi", &fDeltaPhi);
     fTree->Branch("passedBTagging", &fPassedBTagging);
 
     fTree->Branch("genMet_p4", &fGenMet);
@@ -107,6 +115,7 @@ namespace HPlus {
     if(fTauEmbeddingInput) {
       fTree->Branch("temuon_p4", &fTauEmbeddingMuon);
       fTree->Branch("temet_p4", &fTauEmbeddingMet);
+      fTree->Branch("tecalometNoHF_p4", &fTauEmbeddingCaloMetNoHF);
       fTree->Branch("tecalomet_p4", &fTauEmbeddingCaloMet);
     }
 
@@ -183,21 +192,20 @@ namespace HPlus {
   }
  
   void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
-                                const edm::PtrVector<pat::Jet>& jets,
-				double alphaT) {
+                                const edm::PtrVector<pat::Jet>& jets) {
     if(!fDoFill)
       return;
 
     if(taus.size() != 1)
       throw cms::Exception("LogicError") << "Expected tau collection size to be 1, was " << taus.size() << " at " << __FILE__ << ":" << __LINE__ << std::endl;
 
-    fEvent = iEvent.id().event();
-    fLumi = iEvent.id().luminosityBlock();
-    fRun = iEvent.id().run();
+    fEventBranches.setValues(iEvent);
 
     fTau = taus[0]->p4();
     fTauLeadingChCand = taus[0]->leadPFChargedHadrCand()->p4();
     fTauSignalChCands = taus[0]->signalPFChargedHadrCands().size();
+    fTauEmFraction = taus[0]->emFraction();
+    fTauDecayMode = taus[0]->decayMode();
     for(size_t i=0; i<fTauIds.size(); ++i) {
       fTauIds[i].value = taus[0]->tauID(fTauIds[i].name) > 0.5;
     }
@@ -247,7 +255,6 @@ namespace HPlus {
 
       fJetsArea.push_back(jets[i]->jetArea());
     }
-    fAlphaT = alphaT;
 
     if(fTauEmbeddingInput) {
       edm::Handle<edm::View<pat::Muon> > hmuon;
@@ -260,6 +267,11 @@ namespace HPlus {
       if(hmet->size() != 1)
         throw cms::Exception("Assert") << "The assumption that tau embedding met collection size is 1 failed, the size was " << hmet->size() << std::endl;
 
+      edm::Handle<edm::View<reco::MET> > hcalometnohf;
+      iEvent.getByLabel(fTauEmbeddingCaloMetNoHFSource, hcalometnohf);
+      if(hcalometnohf->size() != 1)
+        throw cms::Exception("Assert") << "The assumption that tau embedding calometnohf collection size is 1 failed, the size was " << hcalometnohf->size() << std::endl;
+
       edm::Handle<edm::View<reco::MET> > hcalomet;
       iEvent.getByLabel(fTauEmbeddingCaloMetSource, hcalomet);
       if(hcalomet->size() != 1)
@@ -267,6 +279,7 @@ namespace HPlus {
 
       fTauEmbeddingMuon = hmuon->at(0).p4();
       fTauEmbeddingMet = hmet->at(0).p4();
+      fTauEmbeddingCaloMetNoHF = hcalometnohf->at(0).p4();
       fTauEmbeddingCaloMet = hcalomet->at(0).p4();
     }
 
@@ -275,13 +288,9 @@ namespace HPlus {
   }
 
 
-  void SignalAnalysisTree::setNonIsoLeptons(const edm::Event& iEvent, edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons) {
+  void SignalAnalysisTree::setNonIsoLeptons(edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons) {
     if(!fDoFill)
       return;
-
-    fEvent = iEvent.id().event();
-    fLumi = iEvent.id().luminosityBlock();
-    fRun = iEvent.id().run();
 
     if(nonIsoMuons.size() >= 1){
       // throw cms::Exception("LogicError") << "Expected nonIsoMuon collection size to be >=1, but  was " << nonIsoMuons.size() << " instead at " << __FILE__ << ":" << __LINE__ << std::endl;
@@ -545,25 +554,27 @@ namespace HPlus {
 
 
   void SignalAnalysisTree::reset() {
-    fEvent = 0;
-    fLumi = 0;
-    fRun = 0;
+    double nan = std::numeric_limits<double>::quiet_NaN();
+
+    fEventBranches.reset();
 
     fPrescaleWeight = 1.0;
     fPileupWeight = 1.0;
     fTriggerWeight = 1.0;
+    fTriggerWeightAbsUnc = nan;
     fBTaggingWeight = 1.0;
+    fBTaggingWeightAbsUnc = nan;
     fFillWeight = 1.0;
 
     fNVertices = 0;
-
-    double nan = std::numeric_limits<double>::quiet_NaN();
 
     fHltTaus.clear();
 
     fTau.SetXYZT(nan, nan, nan, nan);
     fTauLeadingChCand.SetXYZT(nan, nan, nan, nan);
     fTauSignalChCands = 0;
+    fTauEmFraction = nan;
+    fTauDecayMode = -9999;
     for(size_t i=0; i<fTauIds.size(); ++i)
       fTauIds[i].reset();
 
@@ -602,6 +613,7 @@ namespace HPlus {
     fTop.SetXYZT(nan, nan, nan, nan);
 
     fAlphaT = nan;
+    fDeltaPhi = nan;
 
     fPassedBTagging = false;
 
@@ -609,6 +621,7 @@ namespace HPlus {
 
     fTauEmbeddingMuon.SetXYZT(nan, nan, nan, nan);
     fTauEmbeddingMet.SetXYZT(nan, nan, nan, nan);
+    fTauEmbeddingCaloMetNoHF.SetXYZT(nan, nan, nan, nan);
     fTauEmbeddingCaloMet.SetXYZT(nan, nan, nan, nan);
 
     // nonIsoMuons

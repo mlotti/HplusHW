@@ -265,8 +265,8 @@ namespace HPlus {
     // The offline tau which is used to derive the trigger scale
     // factor is required to pass the full tau ID, including isolation
     // etc, but the tau object here is not (yet) isolated.
-    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauCandidateData.getCleanedTauCandidates()[0]));
-    fTree.setTriggerWeight(triggerWeight.getEventWeight());
+    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauCandidateData.getCleanedTauCandidates()[0]), iEvent.isRealData());
+    fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
 
     double mySelectedTauPt = tauCandidateData.getCleanedTauCandidates()[0]->pt();
     int myFactorizationTableIndex = fFactorizationTable.getCoefficientTableIndexByPtAndEta(mySelectedTauPt,0.);
@@ -322,10 +322,10 @@ namespace HPlus {
     mySelectedTauFirst.push_back(tauCandidateData.getCleanedTauCandidates()[0]);
     // FIXME: how to handle the top reco in QCD measurement?
     fTree.setFillWeight(fEventWeight.getWeight());
-    fTree.setNonIsoLeptons(iEvent, nonIsolatedMuonVetoData.getAllMuonswithTrkRef(), nonIsolatedElectronVetoData.getElectronswithGSFTrk());
+    fTree.setNonIsoLeptons(nonIsolatedMuonVetoData.getAllMuonswithTrkRef(), nonIsolatedElectronVetoData.getElectronswithGSFTrk());
     if(metData.getRawMET().isNonnull())
       fTree.setRawMET(metData.getRawMET());
-    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), evtTopologyData.alphaT().fAlphaT);
+    //    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), evtTopologyData.alphaT().fAlphaT);
 
 ///////// MET selection (factorise out)
     if (metData.passedEvent()) {

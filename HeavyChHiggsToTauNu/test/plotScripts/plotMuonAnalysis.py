@@ -23,315 +23,117 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
-def findSelection(lst, name):
-    for n in lst:
-        if name in n:
-            return n
-#    raise Exception("Did not find '%s' from the following list\n%s" % (name, "\n".join(lst)))
-    return None
+# These are per-muon cuts
+muonKinematics = "(muons_p4.Pt() > 40 && abs(muons_p4.Eta()) < 2.1)"
+muondB = "(abs(muons_f_dB) < 0.02)"
+muonIsolation = "((muons_f_tauTightIc04ChargedIso + muons_f_tauTightIc04GammaIso) == 0)"
+muonSelection = "(%s && %s && %s)" % (muonKinematics, muondB, muonIsolation)
+muonSelectionNoIso = "(%s && %s)" % (muonKinematics, muondB)
 
-def replaceSelection(name, new):
-    return name.split("_")[0]+"_"+new
+# Construct muon veto, first the muons accepted as veto muons
+muonVeto = "muons_p4.Pt() > 15 && abs(muons_p4.Eta()) < 2.4 && abs(muons_f_dB) < 0.02 && (muons_f_trackIso+muons_f_caloIso)/muons_p4.Pt() < 0.15"
+# then exclude the selected muon (this will work only after the 'one selected muon' requirement)
+muonVetoNoIso = muonVeto + " && !"+muonSelectionNoIso
+muonVeto += " && !"+muonSelection
+# then make it a sum cut
+muonVeto = "Sum$(%s) == 0" % muonVeto
+muonVetoNoIso = "Sum$(%s) == 0" % muonVetoNoIso
 
-class Selections:
-    def __init__(self, analysisPrefix):
-        self.topMuJetRefMet = [analysisPrefix+x for x in [
-                "h00_AllMuons",
-                "h01_Triggered",
-                "h02_PrimaryVertex",
-                "h03_GlobalTrackerMuon",
-                "h04_MuonKin",
-                "h05_MuonJetDR",
-                "h06_MuonQuality",
-                "h07_MuonIP",
-                "h08_MuonIsolation",
-                "h09_MuonVertexDiff",
-                "h10_MuonVeto",
-                "h11_ElectronVeto",
-                "h12_JetMultiplicityCut",
-                "h13_METCut"]]
-        self.topMuJetRefMetAoc = []
-        
-        self.noIsoNoVetoMet = [analysisPrefix+x for x in [
-                "h00_AllMuons",
-                "h01_Triggered",
-                "h02_PrimaryVertex",
-                "h03_GlobalTrackerMuon",
-                "h04_MuonKin",
-                "h05_MuonJetDR",
-                "h06_MuonQuality",
-                "h07_MuonIP",
-                "h08_MuonVertexDiff",
-                "h09_JetMultiplicityCut",
-                "h10_METCut"]]
-        self.noIsoNoVetoMetAoc = [analysisPrefix+"Aoc"+x+"AfterOtherCuts" for x in [
-                "h07_MuonLargestPt",
-                "h08_JetMultiplicityCut",
-                "h09_METCut"]]
-        
-        self.muonSelectionPF = [analysisPrefix+x for x in [
-                "h00_AllMuons",
-                "h01_Triggered",
-                "h02_PrimaryVertex",
-                "h03_GlobalTrackerMuon",
-                "h04_MuonKin",
-                "h05_MuonQuality",
-                "h06_MuonIP",
-#                "h07_MuonVertexDiff",
-        #        "h07_MuonLargestPt",
-        #        "h07_JetSelection",
-        #        "h07_JetId",
-                "h07_MuonVeto",
-#                "h09_JetMultiplicityCut",
-#                "h10_METCut"]]
-                "h08_ElectronVeto",
-                "h09_JetMultiplicityCut",
-                "h10_METCut"]]
-        self.muonSelectionPFAoc = [analysisPrefix+"Aoc"+x+"AfterOtherCuts" for x in [
-                "h07_MuonLargestPt",
-                "h08_JetMultiplicityCut",
-                "h09_METCut"]]
-        
-        self.muonSelectionPFIsoTau = [analysisPrefix+x for x in [
-                "h00_AllMuons",
-                "h01_Triggered",
-                "h02_PrimaryVertex",
-                "h03_GlobalTrackerMuon",
-                "h04_MuonKin",
-                "h05_MuonQuality",
-                "h06_MuonIP",
-#                "h07_MuonVertexDiff",
-#                "h07_MuonIsolationWithTau",
-                "h07_MuonIsolation",
-                "h08_MuonExactlyOne",
-                "h09_MuonVeto",
-#                "h10_JetMultiplicityCut",
-#                "h11_METCut"
-                "h10_ElectronVeto",
-                "h11_JetMultiplicityCut",
-                "h12_METCut"
-                ]]
-        self.muonSelectionPFIsoTauAoc = [analysisPrefix+"Aoc"+x+"AfterOtherCuts" for x in [
-                "h08_MuonLargestPt",
-                "h09_JetMultiplicityCut",
-                "h10_METCut"]]
+electronVeto = "ElectronVetoPassed"
 
-        self.selections = self.noIsoNoVetoMet
-        self.selectionsAoc = self.noIsoNoVetoMetAoc
-        if "muonSelectionPF" in analysisPrefix:
-            if "IsoTau" in analysisPrefix:
-                self.selections = self.muonSelectionPFIsoTau
-                self.selectionsAoc = self.muonSelectionPFIsoTauAoc
-            else:
-                self.selections = self.muonSelectionPF
-                self.selectionsAoc = self.muonSelectionPFAoc
-        elif "topMuJetRefMet" in analysisPrefix:
-            self.selections = self.topMuJetRefMet
-            self.selectionsAoc = self.topMuJetRefMetAoc
-        
-        self.selectionAll = self.selections[0]
-        self.selectionTrigger = self.selections[1]
-        self.selectionPrimaryVertex = self.selections[2]
-        self.selectionMuon = findSelection(self.selections, "MuonVeto")
-        self.selectionMuonIso = findSelection(self.selections, "MuonIsolation")
-        self.selectionJetId = findSelection(self.selections, "JetId")
-        self.selectionJet = findSelection(self.selections, "JetMultiplicityCut")
-        self.selectionMet = findSelection(self.selections, "METCut")
-        self.selectionElectronVeto = findSelection(self.selections, "ElectronVeto")
-        
-        self.multipMuon = replaceSelection(self.selectionMuon, "Multiplicity")
-        #multipMuonJetSelection = replaceSelection(selectionMuon, "MultiplicityAfterJetId")
-        
-        self.vertexAll = replaceSelection(self.selectionAll, "VertexCount")
-        self.vertexTrigger = replaceSelection(self.selectionTrigger, "VertexCount")
+# Jet selection as per-event cut
+#jetSelection = "(jets_p4.Pt() > 30 && abs(jets_p4.Eta()) < 2.4 && jets_looseId)"
+# Jet cleaning
+#jetSelection += ""
+# Construct per-event cut
+#jetSelection = "Sum$(%s) >= 3" % jetSelection
+jetSelection = "jets_p4@.size() >= (3+Sum$(%s && muons_jetMinDR < 0.1))" % muonSelection
+jetSelectionNoIso = "jets_p4@.size() >= (3+Sum$(%s && muons_jetMinDR < 0.1))" % muonSelectionNoIso
 
-        self.lastSelection = self.selections[-1]
-        self.lastSelectionBeforeMet = self.selections[-2]
-        self.lastSelectionOther = self.selectionsAoc[-1]
-        self.lastSelectionOtherIso = self.selectionsAoc[-1]+"Iso"
-        self.lastSelectionBeforeMetOther = self.selectionsAoc[-2]
-        self.lastSelectionBeforeMetOtherIso = self.selectionsAoc[-2]+"Iso"
-        self.lastMuonSelection = findSelection(self.selections, "MuonExactlyOne")
+metcut = "pfMet_p4.Pt() > 40"
 
-        self.jetCleaningMultip = replaceSelection(self.selectionElectronVeto, "MultiplicityJetCleaning")
-        
+btagging = "Sum$(jets_f_tche > 1.7 && sqrt((jets_p4.Phi()-muons_p4.Phi())^2+(jets_p4.Eta()-muons_p4.Eta())^2) > 0.5) >= 1"
+
+analysis = "muonNtuple"
+weight = "weightPileup_Run2011A"
+treeDraw = dataset.TreeDraw(analysis+"/tree", weight=weight)
+
 def main():
-#    weight = ""
-    weight = "VertexWeight"
-#    weight = "PileupWeight"
+    counters = analysis+"Counters"
+    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
 
-    #analysisPrefix = "noIsoNoVetoMetNJets3"
-    #analysisPrefix = "noIsoNoVetoMetPFPt30Met20NJets3"
-    #analysisPrefix = "topMuJetRefMet"
-    #analysisPrefix = "muonSelectionPFPt30Met20NJets2"
-    #analysisPrefix = "muonSelectionPFPt30Met20NJets3"
-    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTau"
-    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauVLoose"
-    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLoose"
-    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauMedium"
-    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauTight"
-    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLikeVLoose"
-    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLikeLoose"
-    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLikeMedium"
-    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLikeTight"
-    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLikeTightSc015"
-    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLikeTightSc02"
-    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLikeTightSc015Ic04"
-    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLikeTightSc02Ic04"
-
-    #analysisPrefix = "muonSelectionPFPt40Met20NJets3%s" % weight
-    analysisPrefix = "muonSelectionPFPt40Met20NJets3%sIsoTauLikeTightIc04" % weight
-
-    selections = Selections(analysisPrefix)
-
-    WdecaySeparate = False
-    #WdecaySeparate = True
-
-    counters=analysisPrefix+"countAnalyzer"
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters,
-#                                                   weightedCounters=counters+"/weighted", firstWeightedCount=analysisPrefix+"countAll"
-                                                   )
-#    datasets.remove(["Mu_136035-144114_Dec22", "Mu_147196-149294_Dec22", "SingleMu_160431-161016_Prompt", "SingleMu_160431-161016_Prompt"])
-    datasets.remove([
-#        "SingleMu_160431-163261_May10",
-#        "SingleMu_161119-161119_May10_Wed",
-#        "SingleMu_163270-163869_May10",
-#        "SingleMu_165088-166150_Prompt",
-#        "SingleMu_166161-166164_Prompt",
-#        "SingleMu_166346-166346_Prompt",
-#        "SingleMu_166374-167043_Prompt",
-#        "SingleMu_167078-167784_Prompt",
-#        "SingleMu_167786-167913_Prompt_Wed"
-        ])
+    #datasets.remove(filter(lambda name: name != "SingleMu_Mu_166374-167043_Prompt" and name != "TTJets_TuneZ2_Summer11", datasets.getAllDatasetNames()))
     datasets.loadLuminosities()
 
-    datasets41x = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/mkortela/hplus/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/multicrab_muonAnalysis_chargedGamma_110617_002143/multicrab.cfg", counters=counters)
-    datasets41x.selectAndReorder(["TToBLNu_s-channel_TuneZ2_Spring11", "TToBLNu_t-channel_TuneZ2_Spring11", "TToBLNu_tW-channel_TuneZ2_Spring11",
-                                  "WW_TuneZ2_Spring11", "WZ_TuneZ2_Spring11", "ZZ_TuneZ2_Spring11"])
-    datasets.extend(datasets41x)
-    
     datasetsMC = datasets.deepCopy()
     datasetsMC.remove(datasets.getDataDatasetNames())
     
     plots.mergeRenameReorderForDataMC(datasets)
     
     styleGenerator = styles.generator(fill=True)
-    wmunu = ["WJets", "TTJets", "SingleTop"]
-    if WdecaySeparate:
-        for i, name in enumerate(wmunu):
-            d = datasets.getDataset(name)
-            dc = d.deepCopy()
-    
-            d.setPrefix("WMuNu")
-            dc.setPrefix("WOther")
-            datasets.rename(name, name+"WMuNu")
-            dc.setName(name+"WOther")
-            datasets.append(dc)
-            legendLabels[name+"WMuNu"] = legendLabels[name]+" (W#rightarrow#mu#nu)"
-            legendLabels[name+"WOther"] = legendLabels[name]+" (W#rightarrow X)"
-            del legendLabels[name]
-            
-        inds = range(0,len(wmunu)) + range(len(wmunu)+2, 2*len(wmunu)+2) + range(len(wmunu), len(wmunu)+2)
-        styleGenerator.reorder(inds)
-    
-        wmunu = [x+"WMuNu" for x in wmunu] + [x+"WOther" for x in wmunu]
-    
-    #datasets.selectAndReorder(
-    #    ["Data"] + wmunu + [
-    #        "DYJetsToLL",
-    #        "QCD_Pt20_MuEnriched"
-    #])
-    #datasets.selectAndReorder(["Data", "TTJets", "WJets", "QCD_Pt20_MuEnriched"])
 
     style = tdrstyle.TDRStyle()
-    histograms.createLegend.moveDefaults(dx=-0.15)
+    #histograms.createLegend.moveDefaults(dx=-0.15)
+    plots._legendLabels["QCD_Pt20_MuEnriched"] = "QCD"
 
-    normalizeToLumi = None
-    if not datasets.hasDataset("Data"):
-        normalizeToLumi = 36
+    doPlots(datasets)
+    #printCounters(datasets)
 
+
+def doPlots(datasets):
     def createPlot(name, **kwargs):
-        return plots.DataMCPlot(datasets, name, normalizeToLumi=normalizeToLumi, **kwargs)
+        return plots.DataMCPlot(datasets, name, **kwargs)
 
-    plotMet = PlotMet(datasets, rebin=10, normalizeToLumi=normalizeToLumi)
-    
-    def plotVertex(vertex):
-        vs = selections.vertexTrigger
-        prefix = vs+"_"
-        postfix = "_"+vertex
-        vertexCount(createPlot(vs+"/"+vertex), prefix, postfix)
-    plotVertex("offlinePrimaryVertices")
-    plotVertex("goodPrimaryVertices")
-    plotVertex("goodPrimaryVertices10")
+    selections = [
+        ("Full_", "&&".join([muonSelection, muonVeto, electronVeto, jetSelection])),
+        ("FullNoIso_", "&&".join([muonSelectionNoIso, muonVetoNoIso, electronVeto, jetSelectionNoIso])),
+        ("Analysis_", "&&".join([muonSelection, muonVeto, electronVeto, jetSelection, metcut, btagging])),
+        ]
 
-    #for sel in selections:
-    #for sel in [selectionMuon, selectionJet, selectionMet]:
-    #for isel, sel in enumerate([selectionMuon, selectionJetId, selectionJet, selectionMet]):
-    for isel, sel in enumerate([
-#        selections.lastMuonSelection,
-        selections.selectionJet,
-        ]):
-        if sel == None:
-            continue
-    
-        prefix = sel+"_"
-    
-        printFraction = isel in [0, 2, 3]
-    
-        muonPt(createPlot(sel+"/muon_pt"), prefix, rebin=10, ratio=False)
-        muonEta(createPlot(sel+"/muon_eta"), prefix, rebin=5)
-        muonPhi(createPlot(sel+"/muon_phi"), prefix, rebin=1)
-    
-        isoPassed = []
-        isoNames = ["sumIsoRel", "pfSumIsoRel"]
-        for iso in isoNames:
-            isoPassed.append(muonIso(createPlot(sel+"/muon_"+iso), prefix, iso, printFraction=printFraction))
-        muonIsoQcd(PlotIso(isoPassed, isoNames), prefix)
-    
-        jetPt(createPlot(sel+"/jet_pt"), prefix)
-    
-        plotMet.plotLog("met", selection=sel)
-    
-        wTransMass(createPlot(sel+"/wmumet_tmass"), prefix)
+    for name, selection in selections:
+        tdMuon = treeDraw.clone(selection=selection)
 
-    jetMultiplicity(createPlot(selections.jetCleaningMultip+"/jets_multiplicity"), prefix)
-    
-    #for sel in [multipMuon, multipMuonJetSelection]:
-    #    prefix = sel+"_"
-    #
-    #    jetMultiplicity(createPlot(datasets, sel+"/jets_multiplicity"), prefix)
-    
-    
-    # jetMultiplicity()
-    # muonPt(createPlot(datasets, lastSelectionOther+"/pt"), lastSelectionOther+"_")
-    # muonPt(createPlot(datasets, lastSelectionBeforeMetOther+"/pt"), lastSelectionBeforeMetOther+"_")
-    # muonPt(createPlot(datasets, lastSelection+"/muon_pt"), lastSelection+"_")
-    # muonEta(createPlot(datasets, lastSelection+"/muon_eta"), lastSelection+"_")
-    # muonPhi(createPlot(datasets, lastSelection+"/muon_phi"), lastSelection+"_")
-    # muonD0()
-    # muonIso(createPlot(datasets, lastSelectionBeforeMetOtherIso+"/relIso"), lastSelectionBeforeMetOtherIso+"_")
-    # muonIso(createPlot(datasets, lastSelectionOtherIso+"/relIso"), lastSelectionOtherIso+"_")
-    # muonIso(createPlot(datasets, lastSelection+"/muon_relIso"), lastSelection+"_")
-     
-    # plotMet.plot("calomet")
-    # plotMet.plot("pfmet")
-    # plotMet.plot("tcmet")
-    # plotMet.plot("pfmet", selection=lastSelectionBeforeMet, calcNumEvents=True)
-    
-    #for x in selections[:-1]:
-    #for x in selections:
-    #    plotMet.plotLog("pfmet", selection=x)
-    #    #for met in ["calomet", "pfmet", "tcmet"]:
-    #    #    plotMet.plotLog(met, selection=x)
-    
-    #for rebin in [1, 2, 4, 5, 8, 10, 15, 16, 20]:
-    #    pm = PlotMet(rebin, postfix="%d"%rebin)
-    #    for sel in [noIsoNoVetoMet[-3], lastSelectionBeforeMet]:
-    #        pm.plotLog("pfmet", selection=sel)
 
-    printMuonOrigin(datasetsMC, selections.selectionJet)
+        td = tdMuon.clone(varexp="muons_p4.Pt() >>tmp(36,40,400)")
+        muonPt(createPlot(td), prefix=name, rebin=1)
 
-    printCounters(datasets, datasetsMC, analysisPrefix, normalizeToLumi)
+        td = tdMuon.clone(varexp="pfMet_p4.Pt() >>tmp(40,0,400)")
+        met(createPlot(td), prefix=name, rebin=1)
+
+        td = tdMuon.clone(varexp="sqrt(2 * muons_p4.Pt() * pfMet_p4.Et() * (1-cos(muons_p4.Phi()-pfMet_p4.Phi()))) >>tmp(40,0,400)")
+        transverseMass(createPlot(td), prefix=name, rebin=1)
+
+
+def printCounters(datasets):
+    print "============================================================"
+    print "Dataset info: "
+    datasets.printInfo()
+
+    eventCounter = counter.EventCounter(datasets)
+    selection = "Sum$(%s) >= 1" % muonKinematics
+    eventCounter.getMainCounter().appendRow("Muon kinematics", treeDraw.clone(selection=selection))
+    selection = "Sum$(%s && %s) >= 1" % (muonKinematics, muondB)
+    eventCounter.getMainCounter().appendRow("Muon IP", treeDraw.clone(selection=selection))
+    selection = "Sum$(%s && %s && %s) >= 1" % (muonKinematics, muondB, muonIsolation)
+    eventCounter.getMainCounter().appendRow("Muon isolation", treeDraw.clone(selection=selection))
+    selection = "Sum$(%s && %s && %s) == 1" % (muonKinematics, muondB, muonIsolation)
+    eventCounter.getMainCounter().appendRow("One selected muon", treeDraw.clone(selection=selection))
+    selection += "&&" +muonVeto
+    eventCounter.getMainCounter().appendRow("Muon veto", treeDraw.clone(selection=selection))
+    selection += "&&" +electronVeto
+    eventCounter.getMainCounter().appendRow("Electron veto", treeDraw.clone(selection=selection))
+    selection += "&&" +jetSelection
+    eventCounter.getMainCounter().appendRow("Jet selection", treeDraw.clone(selection=selection))
+
+    eventCounter.normalizeMCByLuminosity()
+
+    table = eventCounter.getMainCounterTable()
+    addSumColumn(table)
+    print table.format()
+
+
+
+
 
 class SetTH1Directory:
     def __init__(self, value):
@@ -609,60 +411,39 @@ def vertexCount(h, prefix="", postfix=""):
     
 
 
-def muonPt(h, prefix="", plotAll=False, rebin=5, ratio=False):
+def muonPt(h, prefix="", rebin=1, ratio=False):
     xlabel = "Muon p_{T} (GeV/c)"
     ylabel = "Number of muons / %.0f GeV/c"
     #ylabel = "Number of events / 5.0 GeV/c"
-    ptcut = 40
 
-    _opts  = {"xmax": 400, "ymin":0.1, "ymaxfactor": 2}
+    _optsLin  = {}
+    _optsLog  = {"ymin": 0.1, "ymaxfactor": 2}
     _opts2 = {"ymin": 0, "ymax": 2}
 
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-#    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetBarWidth(2))
+    if rebin > 1:
+        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     ylabel = ylabel % h.binWidth()
 
     h.stackMCHistograms()
     h.addMCUncertainty()
 
-    tmp = h.histoMgr.getHisto("Data").getRootHisto()
-    dataEvents = tmp.Integral(0, tmp.GetNbinsX()+1)
-    tmp = h.histoMgr.getHisto("StackedMC").getSumRootHisto()
-    mcEvents = tmp.Integral(0, tmp.GetNbinsX()+1)
-    print "Muon pt Data/MC = %f/%f = %f" % (dataEvents, mcEvents, dataEvents/mcEvents)
+#    tmp = h.histoMgr.getHisto("Data").getRootHisto()
+#    dataEvents = tmp.Integral(0, tmp.GetNbinsX()+1)
+#    tmp = h.histoMgr.getHisto("StackedMC").getSumRootHisto()
+#    mcEvents = tmp.Integral(0, tmp.GetNbinsX()+1)
+#    print "Muon pt Data/MC = %f/%f = %f" % (dataEvents, mcEvents, dataEvents/mcEvents)
 
-    if plotAll:
-        h.createFrame(prefix+"muon_pt", opts=_opts)
-        h.frame.GetXaxis().SetTitle(xlabel)
-        h.frame.GetYaxis().SetTitle(ylabel)
-        h.setLegend(histograms.createLegend())
-        h.draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.histoMgr.addLuminosityText()
-        h.save()
+    h.createFrame(prefix+"muon_pt", opts=_optsLin)
+    h.frame.GetXaxis().SetTitle(xlabel)
+    h.frame.GetYaxis().SetTitle(ylabel)
+    h.setLegend(histograms.createLegend())
+    h.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    h.histoMgr.addLuminosityText()
+    h.save()
 
-        h.createFrame(prefix+"muon_pt_log", ymin=0.01, yfactor=2, xmax=_opts["xmax"])
-        h.frame.GetXaxis().SetTitle(xlabel)
-        h.frame.GetYaxis().SetTitle(ylabel)
-        ROOT.gPad.SetLogy(True)
-        h.draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.histoMgr.addLuminosityText()
-        h.save()
-
-        h.createFrame(prefix+"muon_pt_cut%d"%ptcut, xmin=ptcut, xmax=_opts["xmax"], ymax=200)
-        h.frame.GetXaxis().SetTitle(xlabel)
-        h.frame.GetYaxis().SetTitle(ylabel)
-        h.draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.histoMgr.addLuminosityText()
-        h.save()
-
-    _opts["xmin"] =  ptcut
-    h.createFrame(prefix+"muon_pt_cut%d_log"%ptcut, createRatio=ratio, opts=_opts, opts2=_opts2)
+    h.createFrame(prefix+"muon_pt_log", createRatio=ratio, opts=_optsLog, opts2=_opts2)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(histograms.moveLegend(histograms.createLegend()))
@@ -894,7 +675,80 @@ class PrintNumEvents:
             else:
                 print "Dataset %s: %.1f passes, %.1f %%" % (name, value, value/s*100)
                 #print "Fraction of name of all MC %.1f %%" % (value/s*100)
-        
+
+def met(h, prefix="", rebin=1, ratio=False):
+    xlabel = "MET (GeV)"
+    ylabel = "Number of events / %.0f GeV"
+
+    _optsLin  = {}
+    _optsLog  = {"ymin": 0.1, "ymaxfactor": 2}
+    _opts2 = {"ymin": 0, "ymax": 2}
+
+    if rebin > 1:
+        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    ylabel = ylabel % h.binWidth()
+
+    h.stackMCHistograms()
+    h.addMCUncertainty()
+
+    h.createFrame(prefix+"met", opts=_optsLin)
+    h.frame.GetXaxis().SetTitle(xlabel)
+    h.frame.GetYaxis().SetTitle(ylabel)
+    h.setLegend(histograms.createLegend())
+    h.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    h.histoMgr.addLuminosityText()
+    h.save()
+
+    h.createFrame(prefix+"met_log", createRatio=ratio, opts=_optsLog, opts2=_opts2)
+    h.frame.GetXaxis().SetTitle(xlabel)
+    h.frame.GetYaxis().SetTitle(ylabel)
+    h.setLegend(histograms.moveLegend(histograms.createLegend()))
+    ROOT.gPad.SetLogy(True)
+    h.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    h.histoMgr.addLuminosityText()
+    h.save()
+
+def transverseMass(h, prefix="", rebin=1, ratio=False):
+    xlabel = "m_{T}(#mu, MET) (GeV)"
+    ylabel = "Number of events / %.0f GeV"
+
+    _optsLin  = {}
+    _optsLog  = {"ymin": 0.1, "ymaxfactor": 2}
+    _opts2 = {"ymin": 0, "ymax": 2}
+
+    if rebin > 1:
+        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    ylabel = ylabel % h.binWidth()
+
+    h.stackMCHistograms()
+    h.addMCUncertainty()
+
+    h.createFrame(prefix+"mt", opts=_optsLin)
+    h.frame.GetXaxis().SetTitle(xlabel)
+    h.frame.GetYaxis().SetTitle(ylabel)
+    h.setLegend(histograms.createLegend())
+    h.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    h.histoMgr.addLuminosityText()
+    h.save()
+
+    h.createFrame(prefix+"mt_log", createRatio=ratio, opts=_optsLog, opts2=_opts2)
+    h.frame.GetXaxis().SetTitle(xlabel)
+    h.frame.GetYaxis().SetTitle(ylabel)
+    h.setLegend(histograms.moveLegend(histograms.createLegend()))
+    ROOT.gPad.SetLogy(True)
+    h.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    h.histoMgr.addLuminosityText()
+    h.save()
+
+
 # MET
 class PlotMet:
     def __init__(self, datasets, normalizeToLumi=None, rebin=2, postfix=""):
@@ -1090,8 +944,7 @@ def reorderCounterTable(table):
     table.removeColumn(6)
     table.insertColumn(4, tmp)
 
-
-def printCounters(datasets, datasetsMC, analysisPrefix, normalizeToLumi=None):
+def printCountersOld(datasets, datasetsMC, analysisPrefix, normalizeToLumi=None):
     print "============================================================"
     print "Dataset info: "
     datasets.printInfo()

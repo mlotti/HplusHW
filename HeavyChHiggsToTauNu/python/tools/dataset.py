@@ -137,9 +137,16 @@ def getDatasetsFromRootFiles(rootFileList, **kwargs):
                   event counter histograms (default: 'signalAnalysisCounters').
     """
     counters = kwargs.get("counters", "signalAnalysisCounters")
+    dataQcd = kwargs.get("dataQcdMode", False)
+    dataQcdNorm = kwargs.get("dataQcdNormalization", 1.0)
     datasets = DatasetManager()
     for name, f in rootFileList:
-        datasets.append(Dataset(name, f, counters))
+        dset = None
+        if dataQcd:
+            dset = DatasetQCDData(name, f, counters, dataQcdNorm)
+        else:
+            dset = Dataset(name, f, counters)
+        datasets.append(dset)
     return datasets
 
 def addOptions(parser):
@@ -162,6 +169,9 @@ class Count:
     def copy(self):
         return Count(self._value, self._uncertainty)
 
+    def clone(self):
+        return self.copy()
+
     def value(self):
         return self._value
 
@@ -171,7 +181,7 @@ class Count:
     def uncertaintyLow(self):
         return self.uncertainty()
 
-    def uncertaintyUp(self):
+    def uncertaintyHigh(self):
         return self.uncertainty()
 
     def add(self, count):
@@ -194,6 +204,27 @@ class Count:
         self._uncertainty = math.sqrt( (self._uncertainty / count._value)**2 +
                                        (self._value*count._uncertainty / (count._value**2) )**2 )
         self._value = self._value / count._value
+
+class CountAsymmetric:
+    def __init__(self, value, uncertaintyLow, uncertaintyHigh):
+        self._value = value
+        self._uncertaintyLow = uncertaintyLow
+        self._uncertaintyHigh = uncertaintyHigh
+
+    def clone(self):
+        return CountAsymmetric(self._value, self._uncertaintyLow, self._uncertaintyHigh)
+
+    def value(self):
+        return self._value
+
+    def uncertainty(self):
+        return max(self._uncertaintyLow, self._uncertaintyHigh)
+
+    def uncertaintyLow(self):
+        return self._uncertaintyLow
+
+    def uncertaintyHigh(self):
+        return self._uncertaintyHigh
 
 ## Transform histogram (TH1) to a list of (name, Count) pairs.
 #
@@ -341,6 +372,7 @@ def _mergeStackHelper(datasetList, nameList, task):
 
 
 th1_re = re.compile(">>\s*(?P<name>\S+)\s*\((?P<nbins>\S+)\s*,\s*(?P<min>\S+)\s*,\s*(?P<max>\S+)\s*\)")
+th1name_re = re.compile(">>\s*(?P<name>\S+)")
 class TreeDraw:
     def __init__(self, tree, varexp="", selection="", weight=""):
         self.tree = tree
@@ -368,6 +400,9 @@ class TreeDraw:
                 selection = self.weight
 
         tree = rootFile.Get(self.tree)
+        if tree == None:
+            raise Exception("No tree '%s' in file %s" % (self.tree, rootFile.GetName()))
+
         if self.varexp == "":
             nentries = tree.GetEntries(selection)
             h = ROOT.TH1F("nentries", "Number of entries by selection %s"%selection, 1, 0, 1)
@@ -380,22 +415,34 @@ class TreeDraw:
         varexp = self.varexp
         m = th1_re.search(varexp)
         h = None
-        if m:
-            varexp = th1_re.sub(">>"+m.group("name"), varexp)
-            h = ROOT.TH1D(m.group("name"), varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
-            
+        #if m:
+        #    varexp = th1_re.sub(">>"+m.group("name"), varexp)
+        #    h = ROOT.TH1D(m.group("name"), varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
         
         # e to have TH1.Sumw2() to be called before filling the histogram
         # goff to not to draw anything on the screen
         nentries = tree.Draw(varexp, selection, "e goff")
-        #h = tree.GetHistogram()
+        h = tree.GetHistogram()
         if h != None:
             h = h.Clone(h.GetName()+"_cloned")
         else:
             m = th1_re.search(varexp)
-            if not m:
-                raise Exception("Got null histogram for TTree::Draw(), and unable to infer the histogram limits from the varexp %s" % varexp)
-            h = ROOT.TH1F("tmp", varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
+            if m:
+                h = ROOT.TH1F("tmp", varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
+            else:
+                m = th1name_re.search(varexp)
+                if m:
+                    h = ROOT.gDirectory.Get(m.group("name"))
+                    h = h.Clone(h.GetName()+"_cloned")
+                    if nentries == 0:
+                        h.Scale(0)
+
+                    if h == None:
+                        raise Exception("Got null histogram for TTree::Draw() from file %s with selection '%s', unable to infer the histogram limits,  and did not find objectr from gDirectory, from the varexp %s" % (rootFile.GetName(), selection, varexp))
+                else:
+                    raise Exception("Got null histogram for TTree::Draw() from file %s with selection '%s', and unable to infer the histogram limits or name from the varexp %s" % (rootFile.GetName(), selection, varexp))
+
+        h.SetName(datasetName+"_"+h.GetName())
         h.SetDirectory(0)
         return h
 
@@ -408,12 +455,22 @@ class TreeDrawCompound:
         self.datasetMap[datasetName] = treeDraw
 
     def draw(self, rootFile, datasetName):
+        h = None
         if datasetName in self.datasetMap:
-            self.datasetMap[datasetName].draw(rootFile, datasetName)
+            #print "Dataset %s in datasetMap" % datasetName, self.datasetMap[datasetName].selection
+            h = self.datasetMap[datasetName].draw(rootFile, datasetName)
         else:
-            self.default.draw(rootFile, datasetName)
+            #print "Dataset %s with default" % datasetName, self.default.selection
+            h = self.default.draw(rootFile, datasetName)
+        return h
 
-def treeDrawToNumEntries(treeDraw):
+    def clone(self, **kwargs):
+        ret = TreeDrawCompound(self.default.clone(**kwargs))
+        for name, td in self.datasetMap.iteritems():
+            ret.datasetMap[name] = td.clone(**kwargs)
+        return ret
+
+def _treeDrawToNumEntriesSingle(treeDraw):
     var = treeDraw.weight
     if var == "":
         var = treeDraw.selection
@@ -421,6 +478,15 @@ def treeDrawToNumEntries(treeDraw):
         var += ">>dist(1,0,2)" # the binning is arbitrary, as the under/overflow bins are counted too
     # if selection and weight are "", TreeDraw.draw() returns a histogram with the number of entries
     return treeDraw.clone(varexp=var)
+
+def treeDrawToNumEntries(treeDraw):
+    if isinstance(treeDraw, TreeDrawCompound):
+        td = TreeDrawCompound(_treeDrawToNumEntriesSingle(treeDraw.default))
+        for name, td2 in treeDraw.datasetMap.iteritems():
+            td.add(name, _treeDrawToNumEntriesSingle(td2))
+        return td
+    else:
+        return _treeDrawToNumEntriesSingle(treeDraw)
 
 class DatasetRootHistoBase:
     """Base class for DatasetRootHisto classes.
@@ -516,6 +582,7 @@ class DatasetRootHisto(DatasetRootHistoBase):
     def _normalizedHistogram(self):
         # Always return a clone of the original
         h = self.histo.Clone()
+        h.SetDirectory(0)
         h.SetName(h.GetName()+"_cloned")
         if self.normalization == "none":
             return h
@@ -631,6 +698,9 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
         """
         hsum = self.histoWrappers[0].getHistogram() # we get a clone
         for h in self.histoWrappers[1:]:
+            if h.getHistogram().GetNbinsX() != hsum.GetNbinsX():
+                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.GetName(), self.histoWrappers[0].getDataset().getName(), h.getDataset().getName(), hsum.GetNbinsX(), h.getHistogram().GetNbinsX()))
+
             hsum.Add(h.getHistogram())
         return hsum
 
@@ -755,6 +825,9 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
 
         hsum = self.histoWrappers[0].getHistogram() # we get a clone
         for h in self.histoWrappers[1:]:
+            if h.getHistogram().GetNbinsX() != hsum.GetNbinsX():
+                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.getHistogram().GetName(), self.histoWrappers[0].getHistogram().getName(), h.getDataset().getName(), hsum.GetNbinsX(), h.getHistogram().GetNbinsX()))
+
             hsum.Add(h.getHistogram())
 
         if self.normalization == "toOne":
@@ -975,6 +1048,8 @@ class Dataset:
         """
 
         d = self.file.Get(self.prefix+directory)
+        if d == None:
+            raise Exception("No object %s in file %s" % (self.prefix+directory, self.file.GetName()))
         dirlist = d.GetListOfKeys()
 
         # Suppress the warning message of missing dictionary for some iterator
@@ -1000,7 +1075,11 @@ class DatasetQCDData(Dataset):
     def deepCopy(self):
         d = DatasetQCDData(self.name, self.file.GetName(), self.counterDir, self.normfactor)
         d.info.update(self.info)
+        d._isData = self._isData
         return d
+
+    def changeTypeToMC(self):
+        self._isData = False
 
     def getDatasetRootHisto(self, name):
         drh = Dataset.getDatasetRootHisto(self, name)
@@ -1014,6 +1093,13 @@ class DatasetQCDData(Dataset):
         drh = Dataset.getDatasetRootHisto(self, treeDrawToNumEntries(treeDraw))
         nevents = drh.histo.Integral(0, drh.histo.GetNbinsX()+1)
         self.setNormFactor(targetNumEvents/nevents)
+
+    # Overloads needed for this ugly hack
+    def getCrossSection(self):
+        return 0
+
+    def setCrossSection(self):
+        raise Exception("Assert that this is not called for DatasetQCDData")
         
 
 class DatasetMerged:
@@ -1370,7 +1456,7 @@ class DatasetManager:
         for newName, nameList in toMerge.iteritems():
             self.merge(newName, nameList)
 
-    def merge(self, newName, nameList):
+    def merge(self, newName, nameList, keepSources=False):
         """Merge Datasets.
 
         Parameters:
@@ -1385,10 +1471,11 @@ class DatasetManager:
         elif len(selected) == 1:
             print >> sys.stderr, "Dataset merge: one dataset '" + selected[0].getName() + "' found from list '" + ", ".join(nameList)+"', renaming it to '%s'" % newName
             self.rename(selected[0].getName(), newName)
-            return 
+            return
 
-        notSelected.insert(firstIndex, DatasetMerged(newName, selected))
-        self.datasets = notSelected
+        if not keepSources:
+            self.datasets = notSelected
+        self.datasets.insert(firstIndex, DatasetMerged(newName, selected))
         self._populateMap()
 
     def loadLuminosities(self, fname="lumi.json"):

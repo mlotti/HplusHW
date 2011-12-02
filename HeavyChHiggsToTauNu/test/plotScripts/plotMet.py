@@ -12,7 +12,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters"
+counters = analysis+"Counters/weighted"
 
 def main():
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)

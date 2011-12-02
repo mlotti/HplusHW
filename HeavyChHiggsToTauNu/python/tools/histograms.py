@@ -122,7 +122,22 @@ def addEnergyText(x=None, y=None, s="7 TeV"):
 # \param unit  Unit of the integrated luminosity value
 def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
     (x, y) = textDefaults.getValues("lumi", x, y)
-    addText(x, y, "%.2f %s" % (lumi/1000., unit), textDefaults.getSize("lumi"), bold=False)
+    lumiInFb = lumi/1000.
+    log = math.log10(lumiInFb)
+    ndigis = int(log)
+    format = "%.0f" # ndigis >= 1, 10 <= lumiInFb
+    if ndigis == 0: 
+        if log >= 0: # 1 <= lumiInFb < 10
+            format = "%.1f"
+        else: # 0.1 < lumiInFb < 1
+            format = "%.2f"
+    elif ndigis <= -1:
+        format = ".%df" % (abs(ndigis)+1)
+        format = "%"+format
+    format += " %s"
+    
+
+    addText(x, y, format % (lumi/1000., unit), textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
 #    l.DrawLatex(x, y, "L=%.0f %s" % (lumi, unit))
 
@@ -183,7 +198,7 @@ class LegendCreator:
         self.y2 += dy
 
         self.x2 += dw
-        self.y2 += dh
+        self.y1 -= dh # we want to move the lower edge, and negative dh should shrink the legend
 
     ## Create a new TLegend object (function call syntax)
     #
@@ -245,7 +260,7 @@ def moveLegend(legend, dx=0, dy=0, dw=0, dh=0):
     legend.SetY2(legend.GetY2() + dy)
 
     legend.SetX1(legend.GetX1() + dw)
-    legend.SetY1(legend.GetY1() + dh)
+    legend.SetY1(legend.GetY1() - dh) # negative dh should shrink the legend
     
     return legend
     
@@ -270,6 +285,7 @@ def updatePaletteStyle(histo):
 # \param postfix     Postfix for the sum histo name
 def sumRootHistos(rootHistos, postfix="_sum"):
     h = rootHistos[0].Clone()
+    h.SetDirectory(0)
     h.SetName(h.GetName()+"_sum")
     for a in rootHistos[1:]:
         h.Add(a)
@@ -385,6 +401,26 @@ def _boundsArgs(histos, kwargs):
     if not "xmax" in kwargs:
         kwargs["xmax"] = max([h.getXmax() for h in histos])
 
+def _drawFrame(pad, xmin, ymin, xmax, ymax, nbins=None):
+    if nbins == None:
+        return pad.DrawFrame(xmin, ymin, xmax, ymax)
+    else:
+        pad.cd()
+        # From TPad.cc
+        frame = pad.FindObject("hframe")
+        if frame != None:
+            frame.Delete()
+            frame = None
+        frame = ROOT.TH1F("hframe", "hframe", nbins, xmin, xmax)
+        frame.SetBit(ROOT.TH1.kNoStats)
+        frame.SetBit(ROOT.kCanDelete)
+        frame.SetMinimum(ymin)
+        frame.SetMaximum(ymax)
+        frame.GetYaxis().SetLimits(ymin, ymax)
+        frame.SetDirectory(0)
+        frame.Draw(" ")
+        return frame
+
 ## Create TCanvas and frame for one TPad.
 class CanvasFrame:
     ## Create TCanvas and TH1 for the frame.
@@ -410,7 +446,11 @@ class CanvasFrame:
     # is taken from the histograms, i.e. \a ymax keyword argument is
     # \b not given.
     def __init__(self, histoManager, name, **kwargs):
-        histos = histoManager.getHistos()
+        histos = []
+        if isinstance(histoManager, list):
+            histos = histoManager[:]
+        else:
+            histos = histoManager.getHistos()
         if len(histos) == 0:
             raise Exception("Empty set of histograms!")
 
@@ -434,7 +474,7 @@ class CanvasFrame:
 
         _boundsArgs(histos, opts)
 
-        self.frame = self.canvas.DrawFrame(opts["xmin"], opts["ymin"], opts["xmax"], opts["ymax"])
+        self.frame = _drawFrame(self.canvas, opts["xmin"], opts["ymin"], opts["xmax"], opts["ymax"], opts.get("nbins", None))
         self.frame.GetXaxis().SetTitle(histos[0].getRootHisto().GetXaxis().GetTitle())
         self.frame.GetYaxis().SetTitle(histos[0].getRootHisto().GetYaxis().GetTitle())
 
@@ -521,7 +561,11 @@ class CanvasFrameTwo:
             def getYmax(self):
                 return self.histo.GetMaximum()
 
-        histos1 = histoManager1.getHistos()
+        histos1 = []
+        if isinstance(histoManager1, list):
+            histos1 = histoManager1[:]
+        else:
+            histos1 = histoManager1.getHistos()
         if len(histos1) == 0:
             raise Exception("Empty set of histograms for first pad!")
         if len(histos2) == 0:
@@ -542,13 +586,13 @@ class CanvasFrameTwo:
         opts2 = {}
         opts2.update(kwargs.get("opts2", {}))
 
-        if "xmin" in opts2 or "xmax" in opts2:
-            raise Exception("No 'xmin' or 'xmax' allowed in opts2, values are taken from opts/opts1")
-        
+        if "xmin" in opts2 or "xmax" in opts2 or "nbins" in opts2:
+            raise Exception("No 'xmin', 'xmax', or 'nbins' allowed in opts2, values are taken from opts/opts1")
 
         _boundsArgs(histos1, opts1)
         opts2["xmin"] = opts1["xmin"]
         opts2["xmax"] = opts1["xmax"]
+        opts2["nbins"] = opts1.get("nbins", None)
         _boundsArgs([HistoWrapper(h) for h in histos2], opts2)
 
         # Create the canvas, divide it to two
@@ -579,7 +623,8 @@ class CanvasFrameTwo:
         #xoffsetFactor = canvasFactor*2
         xoffsetFactor = 0.5*canvasFactor/(canvasFactor-1) * 1.3
 
-        self.frame1 = self.pad1.DrawFrame(opts1["xmin"], opts1["ymin"], opts1["xmax"], opts1["ymax"])
+
+        self.frame1 = _drawFrame(self.pad1, opts1["xmin"], opts1["ymin"], opts1["xmax"], opts1["ymax"], opts1.get("nbins", None))
         (labelSize, titleSize) = (self.frame1.GetXaxis().GetLabelSize(), self.frame1.GetXaxis().GetTitleSize())
         self.frame1.GetXaxis().SetLabelSize(0)
         self.frame1.GetXaxis().SetTitleSize(0)
@@ -587,7 +632,7 @@ class CanvasFrameTwo:
         self.frame1.GetYaxis().SetTitleOffset(self.frame1.GetYaxis().GetTitleOffset()*yoffsetFactor)
 
         self.canvas.cd(2)
-        self.frame2 = self.pad2.DrawFrame(opts2["xmin"], opts2["ymin"], opts2["xmax"], opts2["ymax"])
+        self.frame2 = _drawFrame(self.pad2, opts2["xmin"], opts2["ymin"], opts2["xmax"], opts2["ymax"], opts2.get("nbins", None))
         self.frame2.GetXaxis().SetTitle(histos1[0].getRootHisto().GetXaxis().GetTitle())
         self.frame2.GetYaxis().SetTitle(histos2[0].GetYaxis().GetTitle())
         self.frame2.GetYaxis().SetTitleOffset(self.frame2.GetYaxis().GetTitleOffset()*yoffsetFactor)
@@ -666,6 +711,7 @@ class HistoBase:
         # Hack to get the black border to the legend, only if the legend style is fill
         if "f" in self.legendStyle.lower():
             h = self.rootHisto.Clone(self.rootHisto.GetName()+"_forLegend")
+            h.SetDirectory(0)
             h.SetLineWidth(1)
             if self.rootHisto.GetLineColor() == self.rootHisto.GetFillColor():
                 h.SetLineColor(ROOT.kBlack)
@@ -765,6 +811,16 @@ class HistoWithDataset(Histo):
     ## \var dataset
     # The histogram is from this dataset.Dataset object
 
+class HistoWithDatasetFakeMC(HistoWithDataset):
+    def __init__(self, dataset, rootHisto, name):
+        HistoWithDataset.__init__(self, dataset, rootHisto, name)
+
+    def isMC(self):
+        return True
+
+    def isData(self):
+        return False
+
 ## Represents combined (statistical) uncertainties of multiple histograms.
 class HistoTotalUncertainty(HistoBase):
     ## Constructor
@@ -779,7 +835,9 @@ class HistoTotalUncertainty(HistoBase):
             else:
                 rootHistos.append(h.getRootHisto())
 
-        HistoBase.__init__(self, rootHistos[0].Clone(), name, "F", "E2")
+        tmp = rootHistos[0].Clone()
+        tmp.SetDirectory(0)
+        HistoBase.__init__(self, tmp, name, "F", "E2")
         self.rootHisto.SetName(self.rootHisto.GetName()+"_errors")
         self.histos = histos
 
@@ -976,6 +1034,19 @@ class HistoManagerImpl:
         for i, h in enumerate(self.legendList):
             if h.getName() == name:
                 del self.legendList[i]
+                break
+
+    def replaceHisto(self, name, histo):
+        if not name in self.nameHistoMap:
+            raise Exception("Histogram %s doesn't exist" % name)
+        self.nameHistoMap[name] = histo
+        for i, h in enumerate(self.drawList):
+            if h.getName() == name:
+                self.drawList[i] = histo
+                break
+        for i, h in enumerate(self.legendList):
+            if h.getName() == name:
+                self.legendList[i] = histo
                 break
 
     ## Call a function for a named histograms.HistoBase object.
@@ -1188,9 +1259,12 @@ class HistoManager:
     #       not done yet for backward compatibility.
     def __init__(self, *args, **kwargs):
         if len(args) == 0:
-            if len(kwargs) != 1:
-                raise Exception("If positional arguments are not given, there must be exactly 1 keyword argument")
-            self.datasetRootHistos = kwargs["datasetRootHistos"]
+            if len(kwargs) == 0:
+                self.datasetRootHistos = []
+            elif len(kwargs) == 1:
+                self.datasetRootHistos = kwargs["datasetRootHistos"]
+            else:
+                raise Exception("If positional arguments are not given, there must be ither 0 or 1 keyword argument (got %d)"%len(kwargs))
         else:
             if len(args) != 2:
                 raise Exception("Must give exactly 2 positional arguments (got %d)" % len(args))
@@ -1322,7 +1396,7 @@ class HistoManager:
     ## Stack all MC histograms to one named <i>StackedMC</i>.
     def stackMCHistograms(self):
         histos = self.getHistos()
-        
+
         self.stackHistograms("StackedMC", [h.getName() for h in filter(lambda h: h.isMC(), self.getHistos())])
 
     ## \var datasetRootHistos

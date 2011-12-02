@@ -23,6 +23,9 @@
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeEventBranches.h"
+
 #include "TTree.h"
 
 namespace {
@@ -58,12 +61,18 @@ class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
         virtual void endJob();
         virtual void endRun(const edm::Run&,const edm::EventSetup&);
 
+  struct TriggerBit {
+    TriggerBit(const std::string& n): name(n), value(false) {}
+    std::string name;
+    bool value;
+  };
+
   edm::InputTag triggerResults;
   edm::InputTag l1ReadoutSrc;
   edm::InputTag l1ObjectSrc;
   edm::InputTag patTriggerEventSrc;
   std::string   triggerBitName;
-  std::string   l1BitName;
+  std::vector<TriggerBit> l1Bits;
   std::string hltPath;
   edm::InputTag tauSrc;
   edm::InputTag metSrc;
@@ -80,8 +89,9 @@ class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
 
   typedef math::XYZTLorentzVector LorentzVector;
 
+  HPlus::TreeEventBranches eventBranches;
+
   bool triggerBit;
-  bool l1Bit;
   int ntaus;
   float taupt,taueta,met,metType1;
   float caloMet, caloMetNoHF;
@@ -100,7 +110,6 @@ TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iC
     l1ObjectSrc(iConfig.getParameter<edm::InputTag>("l1ObjectSrc")),
     patTriggerEventSrc(iConfig.getParameter<edm::InputTag>("patTriggerEvent")),
     triggerBitName(iConfig.getParameter<std::string>("triggerBit")),
-    l1BitName(iConfig.getParameter<std::string>("l1Bit")),
     hltPath(iConfig.getParameter<std::string>("hltPath")),
     tauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
     metSrc(iConfig.getUntrackedParameter<edm::InputTag>("metRawSrc")),
@@ -122,6 +131,11 @@ TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iC
     }
   }
 
+  std::vector<std::string> l1names = iConfig.getParameter<std::vector<std::string> >("l1Bits");
+  for(size_t i=0; i<l1names.size(); ++i) {
+    l1Bits.push_back(l1names[i]);
+  }
+
 	std::cout << "Trigger table : " << triggerResults.label() << std::endl;
 	std::cout << "          bit : " << triggerBitName << std::endl;
 	std::cout << "Tau src : " << tauSrc.label() << std::endl;
@@ -130,8 +144,13 @@ TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iC
 	edm::Service<TFileService> fs;
 	tree = fs->make<TTree>("tree", triggerBitName.c_str(),1);
 
+        eventBranches.book(tree);
+
 	tree->Branch("TriggerBit", &triggerBit);
-        tree->Branch("L1Bit", &l1Bit);
+        for(size_t i=0; i<l1Bits.size(); ++i) {
+          tree->Branch(l1Bits[i].name.c_str(), &(l1Bits[i].value));
+        }
+
 	tree->Branch("NTaus", &ntaus);
 	tree->Branch("TauPt", &taupt);
 	tree->Branch("TauEta", &taueta);
@@ -159,8 +178,11 @@ void TriggerEfficiencyAnalyzer::beginJob(){}
 
 void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
+  eventBranches.reset();
 	triggerBit = false;
-        l1Bit = false;
+        for(size_t i=0; i<l1Bits.size(); ++i) {
+          l1Bits[i].value = false;
+        }
         ntaus = 0;
 	taupt      = 0;
 	taueta     = 0;
@@ -177,6 +199,8 @@ void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::Ev
         for(size_t i=0; i<bools.size(); ++i) {
           bools[i].value = false;
         }
+
+        eventBranches.setValues(iEvent);
 
 // Trigger bit
 	edm::Handle<edm::TriggerResults> hltHandle;
@@ -195,7 +219,7 @@ void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::Ev
         edm::Handle<pat::TriggerEvent> htrigger;
         iEvent.getByLabel(patTriggerEventSrc, htrigger);
 
-        // L1 bit
+        // L1 bits
         // Simplify to use PAT trigger when we have the algorithms available
         edm::Handle<L1GlobalTriggerReadoutRecord> l1Readout;
         iEvent.getByLabel(l1ReadoutSrc, l1Readout);
@@ -205,11 +229,13 @@ void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::Ev
 
         const DecisionWord& gtDecisionWord = l1Readout->decisionWord();
         const std::vector<L1GlobalTriggerObjectMap>& objMapVec = l1Objects->gtObjectMap();
-        for (std::vector<L1GlobalTriggerObjectMap>::const_iterator itMap = objMapVec.begin();
-             itMap != objMapVec.end(); ++itMap) {
-          if(itMap->algoName() == l1BitName) {
-            l1Bit = gtDecisionWord[itMap->algoBitNumber()];
-            break;
+        for(size_t i=0; i<l1Bits.size(); ++i) {
+          for (std::vector<L1GlobalTriggerObjectMap>::const_iterator itMap = objMapVec.begin();
+               itMap != objMapVec.end(); ++itMap) {
+            if(l1Bits[i].name == itMap->algoName()) {
+              l1Bits[i].value = gtDecisionWord[itMap->algoBitNumber()];
+              break;
+            }
           }
         }
 

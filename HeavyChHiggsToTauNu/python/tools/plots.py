@@ -540,6 +540,7 @@ def replaceQCDFromData(datasetMgr, datasetQCDdata):
 def _createRatio(rootHisto1, rootHisto2, ytitle):
     if isinstance(rootHisto1, ROOT.TH1) and isinstance(rootHisto2, ROOT.TH1):
         ratio = rootHisto1.Clone()
+        ratio.SetDirectory(0)
         ratio.Divide(rootHisto2)
         styles.getDataStyle().apply(ratio)
         ratio.GetYaxis().SetTitle(ytitle)
@@ -568,14 +569,27 @@ def _createRatio(rootHisto1, rootHisto2, ytitle):
     else:
         raise Exception("Arguments are of unsupported type, rootHisto1 is %s and rootHisto2 is %s" % (type(rootHisto1).__name__, type(rootHisto2).__name__))
 
+def copyStyle(src, dst):
+    properties = []
+    if hasattr(src, "GetLineColor") and hasattr(dst, "SetLineColor"):
+        properties.extend(["LineColor", "LineStyle", "LineWidth"])
+    if hasattr(src, "GetFillColor") and hasattr(dst, "SetFillColor"):
+        properties.extend(["FillColor", "FillStyle"])
+    if hasattr(src, "GetMarkerColor") and hasattr(dst, "SetMarkerColor"):
+        properties.extend(["MarkerColor", "MarkerSize", "MarkerStyle"])
+
+    for prop in properties:
+        getattr(dst, "Set"+prop)(getattr(src, "Get"+prop)())
+
+
 ## Creates a 1-line for ratio plots
 #
 # \param xmin  Minimum x value
 # \param xmax  Maximum x value
 #
 # \return TGraph of line from (xmin, 1.0) to (xmax, 1.0)
-def _createRatioLine(xmin, xmax):
-    line = ROOT.TGraph(2, array.array("d", [xmin, xmax]), array.array("d", [1.0, 1.0]))
+def _createRatioLine(xmin, xmax, yvalue=1.0):
+    line = ROOT.TGraph(2, array.array("d", [xmin, xmax]), array.array("d", [yvalue, yvalue]))
 #    line.SetLineColor(ROOT.kBlack)
     line.SetLineColor(ROOT.kRed)
     line.SetLineWidth(2)
@@ -608,7 +622,34 @@ def _createCoverPad(xmin=0.065, ymin=0.285, xmax=0.165, ymax=0.33):
     coverPad = ROOT.TPad("coverpad", "coverpad", xmin, ymin, xmax, ymax)
     coverPad.SetBorderMode(0)
     return coverPad
- 
+
+def _createCutBoxAndLine(frame, cutValue, fillColor=18, box=True, line=True, **kwargs):
+    xmin = frame.GetXaxis().GetXmin()
+    xmax = frame.GetXaxis().GetXmax()
+    ymin = frame.GetYaxis().GetXmin()
+    ymax = frame.GetYaxis().GetXmax()
+    
+    ret = []
+
+    if box:
+        if histograms.isLessThan(**kwargs):
+            xmin = cutValue
+        else:
+            xmax = cutValue
+
+        b = ROOT.TBox(xmin, ymin, xmax, ymax)
+        b.SetFillColor(fillColor)
+        ret.append(b)
+
+    if line:
+        l = ROOT.TLine(cutValue, ymin, cutValue, ymax)
+        l.SetLineWidth(3)
+        l.SetLineStyle(ROOT.kDashed)
+        l.SetLineColor(ROOT.kBlack)
+        ret.append(l)
+
+    return ret
+
 ## Base class for plots
 class PlotBase:
     ## Construct plot from DatasetManager and histogram name
@@ -617,7 +658,27 @@ class PlotBase:
     # \param saveFormats        List of suffixes for formats for which to save the plot
     def __init__(self, datasetRootHistos=[], saveFormats=[".png", ".eps", ".C"]):
         # Create the histogram manager
-        self.histoMgr = histograms.HistoManager(datasetRootHistos = datasetRootHistos)
+        if len(datasetRootHistos) > 0:
+            if isinstance(datasetRootHistos[0], dataset.DatasetRootHistoBase):
+                for i, drh in enumerate(datasetRootHistos[1:]):
+                    if not isinstance(drh, dataset.DatasetRootHistoBase):
+                        raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, datasetRootHistos[%d] is %s" % (i, type(drh).__name__))
+
+                    self.histoMgr = histograms.HistoManager(datasetRootHistos = datasetRootHistos)
+            else:
+                histoList = datasetRootHistos
+                if isinstance(datasetRootHistos[0], ROOT.TH1):
+                    for i, h in enumerate(datasetRootHistos[1:]):
+                        if not isinstance(h, ROOT.TH1):
+                            raise Exception("Input types can't be a mixture of ROOT.TH1 and something, datasetRootHistos[%d] is %s" % (i, type(h).__name__))
+                    histoList = [histograms.Histo(th1, th1.GetName()) for th1 in datasetRootHistos]
+
+                self.histoMgr = histograms.HistoManager()
+                for histo in histoList:
+                    self.histoMgr.appendHisto(histo)
+        else:
+            self.histoMgr = histograms.HistoManager()
+
 
         # Save the format
         self.saveFormats = saveFormats
@@ -683,34 +744,16 @@ class PlotBase:
     def removeLegend(self):
         delattr(self, "legend")
 
-    def prependPlotObject(self, obj):
-        self.plotObjectsBefore.append(obj)
+    def prependPlotObject(self, obj, option=""):
+        self.plotObjectsBefore.append( (obj, option) )
 
-    def appendPlotObject(self, obj):
-        self.plotObjectsAfter.append(obj)
+    def appendPlotObject(self, obj, option=""):
+        self.plotObjectsAfter.append( (obj, option) )
 
-    def addCutBoxAndLine(self, cutValue, fillColor=18, box=True, line=True, **kwargs):
-        xmin = self.getFrame().GetXaxis().GetXmin()
-        xmax = self.getFrame().GetXaxis().GetXmax()
-        ymin = self.getFrame().GetYaxis().GetXmin()
-        ymax = self.getFrame().GetYaxis().GetXmax()
-
-        if histograms.isLessThan(**kwargs):
-            xmin = cutValue
-        else:
-            xmax = cutValue
-    
-        if box:
-            b = ROOT.TBox(xmin, ymin, xmax, ymax)
-            b.SetFillColor(fillColor)
-            self.prependPlotObject(b)
-
-        if line:
-            l = ROOT.TLine(cutValue, ymin, cutValue, ymax)
-            l.SetLineWidth(3)
-            l.SetLineStyle(ROOT.kDashed)
-            l.SetLineColor(ROOT.kBlack)
-            self.appendPlotObject(l)
+    def addCutBoxAndLine(self, *args, **kwargs):
+        objs = _createCutBoxAndLine(self.getFrame(), *args, **kwargs)
+        for o in objs:
+            self.appendPlotObject(o)
 
     ## Add MC uncertainty histogram
     def addMCUncertainty(self):
@@ -736,15 +779,16 @@ class PlotBase:
     #
     # Draw also the legend if one has been associated
     def draw(self):
-        for obj in self.plotObjectsBefore:
-            obj.Draw("same")
+        for obj, option in self.plotObjectsBefore:
+            obj.Draw(option+"same")
 
         self.histoMgr.draw()
+
+        for obj, option in self.plotObjectsAfter:
+            obj.Draw(option+"same")
+
         if hasattr(self, "legend"):
             self.legend.Draw()
-
-        for obj in self.plotObjectsAfter:
-            obj.Draw("same")
 
         # Redraw the axes in order to get the tick marks on top of the
         # histogram
@@ -785,6 +829,114 @@ class PlotBase:
     ## \var frame
     # TH1 object for the frame (from the cf object)
 
+## Base class for plots with ratio (intended for multiple inheritance)
+class PlotRatioBase:
+    def __init__(self):
+        self.ratioPlotObjectsBefore = []
+        self.ratioPlotObjectsAfter = []
+
+    def prependPlotObjectToRatio(self, obj, option=""):
+        self.ratioPlotObjectsBefore.append( (obj, option) )
+
+    def appendPlotObjectToRatio(self, obj, option=""):
+        self.ratioPlotObjectsAfter.append( (obj, option) )
+
+    def addCutBoxAndLineToRatio(self, *args, **kwargs):
+        if not hasattr(self, "ratios"):
+            return
+
+        objs = _createCutBoxAndLine(self.getFrame2(), *args, **kwargs)
+        for o in objs:
+            self.prependPlotObjectToRatio(o)
+
+    ## Get the upper frame TH1
+    def getFrame1(self):
+        return self.cf.frame1
+
+    ## Get the lower frame TH1
+    def getFrame2(self):
+        return self.cf.frame2
+
+    ## Get the upper TPad
+    def getPad1(self):
+        return self.cf.pad1
+
+    ## Get the lower TPad
+    def getPad2(self):
+        return self.cf.pad2
+
+    def _createFrameRatio(self, filename, numerator, denominator, ytitle, invertRatio=False, **kwargs):
+        (num, denom) = (numerator, denominator)
+        if invertRatio:
+            (num, denom) = (denom, num)
+
+        self.ratios = [
+            _createRatio(num, denom, ytitle)
+            ]
+        self._createFrame(filename, **kwargs)
+
+    def _createFrameRatioMany(self, filename, numerators, denominator, invertRatio=False, **kwargs):
+        self.ratios = []
+        for numer in numerators:
+            (num, denom) = (numer, denominator)
+            if invertRatio:
+                (num, denom) = (denom, num)
+            ratio = _createRatio(num, denom, "Ratio")
+            copyStyle(num, ratio)
+            self.ratios.append(ratio)
+
+        self._createFrame(filename, **kwargs)
+
+    def _createFrame(self, filename, coverPadOpts={}, **kwargs):
+        self.cf = histograms.CanvasFrameTwo(self.histoMgr, self.ratios, filename, **kwargs)
+        self.frame = self.cf.frame
+        self.cf.frame2.GetYaxis().SetNdivisions(505)
+        self.coverPadOpts = coverPadOpts
+
+    def _draw(self):
+        if not hasattr(self, "ratios"):
+            return
+
+        self.cf.canvas.cd(2)
+
+        for obj, option in self.ratioPlotObjectsBefore:
+            obj.Draw(option+"same")
+
+        self.ratioLine = _createRatioLine(self.cf.frame.getXmin(), self.cf.frame.getXmax())
+        self.ratioLine.Draw("L")
+       
+        ratios = self.ratios[:]
+        ratios.reverse()
+        for r in ratios:
+            r.Draw("EP same")
+
+        for obj, option in self.ratioPlotObjectsAfter:
+            obj.Draw(option+"same")
+
+        # Redraw the axes in order to get the tick marks on top of the
+        # histogram
+        self.getPad2().RedrawAxis()
+        self.getPad1().RedrawAxis()
+
+        self.cf.canvas.cd()
+
+        # Create an empty, white-colored pad to hide the topmost
+        # label of the y-axis of the lower pad. Then move the
+        # upper pad on top, so that the lowest label of the y-axis
+        # of it is shown
+        self.ratioCoverPad = _createCoverPad(**self.coverPadOpts)
+        self.ratioCoverPad.Draw()
+
+        self.cf.canvas.cd(1)
+        self.cf.pad1.Pop() # Move the first pad on top
+
+    ## \var ratios
+    # Holds the TH1 for data/MC ratio, if exists
+    ## \var ratioLine
+    # Holds the TGraph for ratio line, if ratio exists
+    ## \var ratioCoverPad
+    # Holds TPad to cover the larget Y axis value of the ratio TPad,
+    # if ratio exists
 
 ## Base class for plots with same histogram from many datasets.
 class PlotSameBase(PlotBase):
@@ -810,8 +962,9 @@ class PlotSameBase(PlotBase):
     #
     # Signal histograms are identified by checking if the name contains "TTToHplus"
     def stackMCHistograms(self, stackSignal=False):
-        mcNames = self.datasetMgr.getMCDatasetNames()
-        mcNamesNoSignal = filter(lambda n: not isSignal(n), mcNames)
+        #mcNames = self.datasetMgr.getMCDatasetNames()
+        mcNames = [h.getName() for h in filter(lambda h: h.isMC(), self.histoMgr.getHistos())]
+        mcNamesNoSignal = filter(lambda n: not isSignal(n) and not "StackedMCSignal" in n, mcNames)
         if not stackSignal:
             mcNames = mcNamesNoSignal
 
@@ -944,7 +1097,7 @@ class MCPlot(PlotSameBase):
 #     unit area while the ratios of the individual datasets is
 #     determined from the cross sections. The support is in the base class.
 #
-class DataMCPlot(PlotSameBase):
+class DataMCPlot(PlotSameBase, PlotRatioBase):
     ## Construct from DatasetManager and a histogram path
     #
     # \param datasetMgr      DatasetManager for datasets
@@ -952,6 +1105,7 @@ class DataMCPlot(PlotSameBase):
     # \param kwargs          Keyword arguments, forwarded to PlotSameBase.__init__()
     def __init__(self, datasetMgr, name, normalizeToLumi=None, **kwargs):
         PlotSameBase.__init__(self, datasetMgr, name, **kwargs)
+        PlotRatioBase.__init__(self)
         
         # Normalize the MC histograms to the data luminosity
         if normalizeToLumi == None:
@@ -972,80 +1126,33 @@ class DataMCPlot(PlotSameBase):
         if not createRatio:
             PlotSameBase.createFrame(self, filename, **kwargs)
         else:
-            self.createFrameFraction(filename, **kwargs)
+            if not self.histoMgr.hasHisto("StackedMC"):
+                raise Exception("Must call stackMCHistograms() before createFrameFraction()")
+
+            self._normalizeToOne()
+            self._createFrameRatio(filename,
+                                   self.histoMgr.getHisto("Data").getRootHisto(),
+                                   self.histoMgr.getHisto("StackedMC").getSumRootHisto(),
+                                   "Data/MC", **kwargs)
 
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
     # \param filename   Name for TCanvas (becomes the file name)
     # \param kwargs     Keyword arguments, forwarded to histograms.CanvasFrameTwo.__init__()
     def createFrameFraction(self, filename, **kwargs):
-        if not self.histoMgr.hasHisto("StackedMC"):
-            raise Exception("Must call stackMCHistograms() before createFrameFraction()")
+        self.createFrame(filename, createRatio=True, **kwargs)
 
-        self._normalizeToOne()
-
-        self.ratio = _createRatio(self.histoMgr.getHisto("Data").getRootHisto(),
-                                  self.histoMgr.getHisto("StackedMC").getSumRootHisto(),
-                                  "Data/MC")
-
-        self.cf = histograms.CanvasFrameTwo(self.histoMgr, [self.ratio], filename, **kwargs)
-        self.frame = self.cf.frame
-        self.cf.frame2.GetYaxis().SetNdivisions(505)
-
-    ## Get the upper frame TH1
-    def getFrame1(self):
-        return self.cf.frame1
-
-    ## Get the lower frame TH1
-    def getFrame2(self):
-        return self.cf.frame2
-
-    ## Get the upper TPad
-    def getPad1(self):
-        return self.cf.pad1
-
-    ## Get the lower TPad
-    def getPad2(self):
-        return self.cf.pad2
+    def addCutBoxAndLine(self, *args, **kwargs):
+        PlotSameBase.addCutBoxAndLine(self, *args, **kwargs)
+        PlotRatioBase.addCutBoxAndLineToRatio(self, *args, **kwargs)
 
     def draw(self):
         PlotSameBase.draw(self)
-        if hasattr(self, "ratio"):
-            self.cf.canvas.cd(2)
-
-            self.line = _createRatioLine(self.cf.frame.getXmin(), self.cf.frame.getXmax())
-            self.line.Draw("L")
-
-            self.ratio.Draw("EP same")
-            # Redraw the axes in order to get the tick marks on top of the
-            # histogram
-            self.getPad1().RedrawAxis()
-
-            self.cf.canvas.cd()
-
-            # Create an empty, white-colored pad to hide the topmost
-            # label of the y-axis of the lower pad. Then move the
-            # upper pad on top, so that the lowest label of the y-axis
-            # of it is shown
-            self.coverPad = _createCoverPad()
-            self.coverPad.Draw()
-
-            self.cf.canvas.cd(1)
-            self.cf.pad1.Pop() # Move the first pad on top
-
-
-    ## \var ratio
-    # Holds the TH1 for data/MC ratio, if exists
-    ## \var line
-    # Holds the TGraph for ratio line, if ratio exists
-    ## \var coverPad
-    # Holds TPad to cover the larget Y axis value of the ratio TPad,
-    # if ratio exists
-
+        PlotRatioBase._draw(self)
 
 
 ## Class to create comparison plots of two quantities.
-class ComparisonPlot(PlotBase):
+class ComparisonPlot(PlotBase, PlotRatioBase):
 
     ## Constructor.
     #
@@ -1054,17 +1161,8 @@ class ComparisonPlot(PlotBase):
     #
     # The possible ratio is calculated as datasetRootHisto1/datasetRootHisto2
     def __init__(self, datasetRootHisto1, datasetRootHisto2, **kwargs):
-        if isinstance(datasetRootHisto1, dataset.DatasetRootHistoBase) and isinstance(datasetrootHisto2, dataset.DatasetRootHistoBase):
-            PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2], **kwargs)
-        else:
-            # assume datasetRootHisto* arguments are HistoBase objects instead
-            if isinstance(datasetRootHisto1, dataset.DatasetRootHistoBase):
-                raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, datasetRootHisto2 is %s" % type(datasetRootHisto2).__name__)
-            if isinstance(datasetRootHisto2, dataset.DatasetRootHistoBase):
-                raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, datasetRootHisto1 is %s" % type(datasetRootHisto1).__name__)
-            PlotBase.__init__(self, **kwargs)
-            self.histoMgr.appendHisto(datasetRootHisto1)
-            self.histoMgr.appendHisto(datasetRootHisto2)
+        PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2], **kwargs)
+        PlotRatioBase.__init__(self)
 
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
@@ -1072,63 +1170,28 @@ class ComparisonPlot(PlotBase):
     # \param createRatio  Create also the ratio pad?
     # \param coverPadOpts Options for cover TPad, forwarded to _createCoverPad()
     # \param kwargs       Keyword arguments, forwarded to PlotBase.createFrame() or histograms.CanvasFrameTwo.__init__()
-    def createFrame(self, filename, createRatio=False, coverPadOpts={}, **kwargs):
+    def createFrame(self, filename, createRatio=False, invertRatio=False, coverPadOpts={}, **kwargs):
         if not createRatio:
             PlotBase.createFrame(self, filename, **kwargs)
         else:
             histos = self.histoMgr.getHistos()
-            self.ratio = _createRatio(histos[0].getRootHisto(), histos[1].getRootHisto(),
-                                      "%s/%s" % (histos[0].getName(), histos[1].getName()))
+            self._createFrameRatio(filename, histos[0].getRootHisto(), histos[1].getRootHisto(), "Ratio",
+                                   invertRatio=invertRatio, coverPadOpts=coverPadOpts, **kwargs)
 
-            self.cf = histograms.CanvasFrameTwo(self.histoMgr, [self.ratio], filename, **kwargs)
-            self.frame = self.cf.frame
-            self.cf.frame2.GetYaxis().SetNdivisions(505)
-
-            self.coverPadOpts = coverPadOpts
-
-    ## Get the upper frame TH1
-    def getFrame1(self):
-        return self.cf.frame1
-
-    ## Get the lower frame TH1
-    def getFrame2(self):
-        return self.cf.frame2
-
-    ## Get the upper TPad
-    def getPad1(self):
-        return self.cf.pad1
-
-    ## Get the lower TPad
-    def getPad2(self):
-        return self.cf.pad2
+    def addCutBoxAndLine(self, *args, **kwargs):
+        PlotBase.addCutBoxAndLine(self, *args, **kwargs)
+        PlotRatioBase.addCutBoxAndLineToRatio(self, *args, **kwargs)
 
     def draw(self):
         PlotBase.draw(self)
-        if hasattr(self, "ratio"):
-            self.cf.canvas.cd(2)
+        PlotRatioBase._draw(self)
 
-            self.line = _createRatioLine(self.cf.frame.getXmin(), self.cf.frame.getXmax())
-            self.line.Draw("L")
+    def setLuminosity(self, lumi):
+        self.luminosity = lumi
 
-            self.ratio.Draw("EP same")
-            # Redraw the axes in order to get the tick marks on top of the
-            # histogram
-            self.getPad1().RedrawAxis()
-
-            self.cf.canvas.cd()
-
-            # Create an empty, white-colored pad to hide the topmost
-            # label of the y-axis of the lower pad. Then move the
-            # upper pad on top, so that the lowest label of the y-axis
-            # of it is shown
-            self.coverPad = _createCoverPad(**self.coverPadOpts)
-            self.coverPad.Draw()
-
-            self.cf.canvas.cd(1)
-            self.cf.pad1.Pop() # Move the first pad on top
-
-    def addLuminosityText(self, *args, **kwargs):
-        pass
+    def addLuminosityText(self, x=None, y=None):
+        if hasattr(self, "luminosity"):
+            histograms.addLuminosityText(x, y, self.luminosity)
 
     ## \var ratio
     # Holds the TH1 for data/MC ratio, if exists
@@ -1137,3 +1200,31 @@ class ComparisonPlot(PlotBase):
     ## \var coverPad
     # Holds TPad to cover the larget Y axis value of the ratio TPad,
     # if ratio exists
+
+class ComparisonManyPlot(PlotBase, PlotRatioBase):
+    def __init__(self, histoReference, histoCompares, **kwargs):
+        PlotBase.__init__(self, [histoReference]+histoCompares, **kwargs)
+        PlotRatioBase.__init__(self)
+
+    def createFrame(self, filename, createRatio=False, invertRatio=False, coverPadOpts={}, **kwargs):
+        if not createRatio:
+            PlotBase.createFrame(self, filename, **kwargs)
+        else:
+            histos = self.histoMgr.getHistos()
+            self._createFrameRatioMany(filename, [h.getRootHisto() for h in histos[1:]], histos[0].getRootHisto(),
+                                       invertRatio=invertRatio, coverPadOpts={}, **kwargs)
+
+    def addCutBoxAndLine(self, *args, **kwargs):
+        PlotBase.addCutBoxAndLine(self, *args, **kwargs)
+        PlotRatioBase.addCutBoxAndLineToRatio(self, *args, **kwargs)
+
+    def draw(self):
+        PlotBase.draw(self)
+        PlotRatioBase._draw(self)
+
+    def setLuminosity(self, lumi):
+        self.luminosity = lumi
+
+    def addLuminosityText(self, x=None, y=None):
+        if hasattr(self, "luminosity"):
+            histograms.addLuminosityText(x, y, self.luminosity)

@@ -25,7 +25,7 @@ tauPathLastFilter = {
     "HLT_IsoPFTau35_Trk20_MET60_v3":        "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
     "HLT_IsoPFTau35_Trk20_MET60_v4":        "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
     "HLT_IsoPFTau35_Trk20_MET60_v6":        "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
-    "HLT_MediumIsoPFTau35_Trk20_MET60_v1": " hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_MediumIsoPFTau35_Trk20_MET60_v1":  "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
     "HLT_MediumIsoPFTau35_Trk20_MET60_v5": " hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
     "HLT_MediumIsoPFTau35_Trk20_MET60_v6": " hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
 
@@ -153,7 +153,6 @@ def addMuonTriggerMatching(process, muons="patMuons"):
     return (sequence, "patMuonsWithTrigger")
     
 
-
 ################################################################################
 # Do tau -> HLT tau trigger matching and tau -> HLT jet trigger matching
 # Produces:
@@ -202,3 +201,24 @@ def addTauHLTMatching(process, tauTrigger, jetTrigger=None, collections=_patTauC
         ])
 
     return getattr(process, "triggerMatchingSequence"+postfix)
+
+
+def createTauTriggerMatchingInAnalysis(trigger, taus, pathFilterMap=tauPathLastFilter, throw=True):
+    if isinstance(trigger, basestring):
+        trigger = [trigger]
+
+    matched = []
+    for path in trigger:
+        if path in pathFilterMap:
+            filt = pathFilterMap[path]
+            matched.append(filt)
+        elif throw:
+            raise Exception("No filter found for path %s" % path)
+
+    module = cms.EDProducer("HPlusTauTriggerMatchSelector",
+        tauSrc = cms.InputTag(taus),
+        patTriggerEventSrc = cms.InputTag("patTriggerEvent"),
+        deltaR = cms.double(0.4),
+        filterNames = cms.vstring(matched)
+    )
+    return module

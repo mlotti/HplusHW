@@ -83,6 +83,10 @@ namespace HPlus {
         return fTriggerSelection->fHltMet;
       }
 
+      bool hasTriggerPath() const {
+        return fTriggerPath;
+      }
+
       size_t getTriggerTauSize() const {
         return fTriggerPath->getTauObjects().size();
       }

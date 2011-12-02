@@ -69,6 +69,10 @@ namespace HPlus {
     hBquarkNotFromTopDeltaRTau = makeTH<TH1F>(myDir, "genBquark_NotFromTop_DeltaRTau", "genBquark_NotFromTop_DeltaRTau", 300, 0., 8.);
     hTopPt = makeTH<TH1F>(myDir, "genTopPt", "genTopPt", 300, 0., 600);
     hTopPt_wrongB = makeTH<TH1F>(myDir, "genTopPt_wrongB", "genTopPt_wrongB", 300, 0., 600);
+    hGenMET = makeTH<TH1F>(myDir, "genMET", "genMET", 40, 0., 400);
+    hWPt  = makeTH<TH1F>(myDir, "genWPt", "genWPt", 120, 0., 600);
+    hWEta = makeTH<TH1F>(myDir, "genWEta", "genWEta", 100, -5., 5.);    
+    hWPhi = makeTH<TH1F>(myDir, "genWPhi", "genWPhi", 64, -3.2, 3.2);    
   }
 
   GenParticleAnalysis::Data GenParticleAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
@@ -92,6 +96,30 @@ namespace HPlus {
     edm::Handle<edm::View<reco::GenMET> > hmet;
     iEvent.getByLabel(fMetSrc, hmet);
     fGenMet = hmet->ptrAt(0);
+
+    hGenMET->Fill(fGenMet->et(), fEventWeight.getWeight());
+
+
+    // loop over all genParticles
+    for (size_t i=0; i < genParticles->size(); ++i){
+      const reco::Candidate & p = (*genParticles)[i];
+      int id = p.pdgId();
+      if ( abs(id) != 24 ) continue;
+      bool hasDaughter = false;
+      // Check whether the genParticle decays to itself. If yes do not consider in counting
+      if ( p.numberOfDaughters() != 0 ){
+        // Loop over all 1st daughters of genParticle
+        for(size_t j = 0; j < p.numberOfDaughters() ; ++ j) {
+          const reco::Candidate *d = p.daughter( j );
+          if( p.pdgId() == d->pdgId() ) hasDaughter = true;
+        }
+      }
+      if(hasDaughter) continue;
+      hWPt->Fill(p.pt(), fEventWeight.getWeight());
+      hWEta->Fill(p.eta(), fEventWeight.getWeight());
+      hWPhi->Fill(p.phi(), fEventWeight.getWeight());
+    }
+
 
     // One-prong tau jets
     double Rtau = -1;
@@ -149,7 +177,7 @@ namespace HPlus {
       if (tauFromHiggs ) {
 	hptVisibleTau1pHp->Fill(tau->pt(), fEventWeight.getWeight());
 	hEtaVisibleTau1pHp->Fill(tau->eta(), fEventWeight.getWeight());
-	if ( tau->pt() > 40 && fabs(tau->eta()) < 2.3 ) {
+	if ( tau->pt() > 40 && ptmax > 20 && fabs(tau->eta()) < 2.3 ) {
 	  hRtau1pHp->Fill(Rtau, fEventWeight.getWeight());
 	  hLeadingTrack1pHp->Fill(ptmax, fEventWeight.getWeight());
 	  hThetaCM1pHp->Fill(thetaCM, fEventWeight.getWeight()); 
@@ -160,7 +188,7 @@ namespace HPlus {
       if (tauFromW) {
 	hptVisibleTau1pW->Fill(tau->pt(), fEventWeight.getWeight());
 	hEtaVisibleTau1pW->Fill(tau->eta(), fEventWeight.getWeight());
-	if ( tau->pt() > 40 && fabs(tau->eta()) < 2.3 ) {
+	if ( tau->pt() > 40 && ptmax > 20 && fabs(tau->eta()) < 2.3 ) {
 	  hRtau1pW->Fill(Rtau, fEventWeight.getWeight());
 	  hLeadingTrack1pW->Fill(ptmax, fEventWeight.getWeight());
 	  hThetaCM1pW->Fill(thetaCM, fEventWeight.getWeight()); 
@@ -218,13 +246,13 @@ namespace HPlus {
       }
 
       if (tauFromHiggs ) {
-	if ( tau->pt() > 40 && fabs(tau->eta()) < 2.3 ) {
+	if ( tau->pt() > 40 && ptmax > 20 && fabs(tau->eta()) < 2.3 ) {
 	  hRtau13pHp->Fill(Rtau, fEventWeight.getWeight());
 	  hptVisibleTau13pHp->Fill(tau->pt(), fEventWeight.getWeight());
 	}
       }
       if (tauFromW) {
-	if ( tau->pt() > 40 && fabs(tau->eta()) < 2.3 ) {
+	if ( tau->pt() > 40 && ptmax > 20 && fabs(tau->eta()) < 2.3 ) {
 	  hRtau13pW->Fill(Rtau, fEventWeight.getWeight());
 	  hptVisibleTau13pW->Fill(tau->pt(), fEventWeight.getWeight());
 	}
@@ -277,13 +305,13 @@ namespace HPlus {
       //     std::cout << " pion 1/3 prong " <<  ptmax << " Rtau  " <<  Rtau << std::endl;
       
       if (tauFromHiggs ) {
-	if ( tau->pt() > 40 && fabs(tau->eta()) < 2.3 ) {
+	if ( tau->pt() > 40 && ptmax > 20 && fabs(tau->eta()) < 2.3 ) {
 	  hRtau3pHp->Fill(Rtau, fEventWeight.getWeight());
 	  hptVisibleTau3pHp->Fill(tau->pt(), fEventWeight.getWeight());
 	}
       }
       if (tauFromW) {
-	if ( tau->pt() > 40 && fabs(tau->eta()) < 2.3 ) {
+	if ( tau->pt() > 40 && ptmax > 20 && fabs(tau->eta()) < 2.3 ) {
 	  hRtau3pW->Fill(Rtau, fEventWeight.getWeight());
 	  hptVisibleTau3pW->Fill(tau->pt(), fEventWeight.getWeight());
 	}

@@ -9,7 +9,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters"
+counters = analysis+"Counters/weighted"
 outputFile = "lands.root"
 
 def main():
@@ -27,8 +27,13 @@ def main():
     plots.mergeRenameReorderForDataMC(datasets)
 
     # Set the signal cross sections to a given BR(t->H), BR(h->taunu)
+
     #xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.2, br_Htaunu=1)
+    # LandS assumes ttbar cross section  for both HW and HH
+    #xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
+
     # LandS expects that HW and HH are normalized to top cross section
+
     xsect.setHplusCrossSectionsToTop(datasets)
 
     # Create data-MC comparison plot to get the proper normalization

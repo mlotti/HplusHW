@@ -30,13 +30,15 @@ private:
   std::vector<double> etaBins;
   std::vector<bool> plusVariations;
   bool defaultPlusVariation;
+  bool doVariation;
 };
 
 HPlusJetEnergyScaleVariation::HPlusJetEnergyScaleVariation(const edm::ParameterSet& iConfig):
   src(iConfig.getParameter<edm::InputTag>("src")),
   payloadName(iConfig.getParameter<std::string>("payloadName")),
   uncertaintyTag(iConfig.getParameter<std::string>("uncertaintyTag")),
-  defaultPlusVariation(iConfig.getParameter<bool>("defaultPlusVariation"))
+  defaultPlusVariation(iConfig.getParameter<bool>("defaultPlusVariation")),
+  doVariation(iConfig.getParameter<bool>("doVariation"))
 {
   std::vector<edm::ParameterSet> bins = iConfig.getParameter<std::vector<edm::ParameterSet> >("etaBins");
   etaBins.reserve(bins.size());
@@ -67,10 +69,35 @@ void HPlusJetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventS
   iSetup.get<JetCorrectionsRecord>().get(payloadName, jetCorParColl); 
   JetCorrectorParameters const &jetCorPar = (*jetCorParColl)[uncertaintyTag];
   JetCorrectionUncertainty jecUnc(jetCorPar);
+  /*
+  std::cout << "JetCorrectorParameters "
+            << " (0)xmin(0) " << jetCorPar.record(0).xMin(0)
+            << " (0)xmax(0) " << jetCorPar.record(0).xMax(0)
+            << " (-1)xmin(0) " << jetCorPar.record(jetCorPar.size()-1).xMin(0)
+            << " (-1)xmax(0) " << jetCorPar.record(jetCorPar.size()-1).xMax(0)
+            << " binVars " << jetCorPar.definitions().binVar().size()
+            << " binVar(0) " << jetCorPar.definitions().binVar(0)
+            << " parVar(0) " << jetCorPar.definitions().parVar(0)
+            << std::endl;
+  */
+
+  // Hack to be able to work with jets with |eta| > 5.5
+  const size_t etaIndex = 0;
+  if(jetCorPar.definitions().binVar(etaIndex) != "JetEta") {
+    throw cms::Exception("Assert") << "Assumption that JetEta has the index " << etaIndex << " in jetCorPar failed at " << __FILE__ << ":" << __LINE__ << std::endl;
+  }
+  const float etaMin = jetCorPar.record(0).xMin(etaIndex);
+  const float etaMax = jetCorPar.record(jetCorPar.size()-1).xMax(etaIndex);
+  if(etaMin >= etaMax)
+    throw cms::Exception("Assert") << "etaMin (" << etaMin << ") >= etaMax (" << etaMax << ") at " << __FILE__ << ":" << __LINE__ << std::endl;
   
   for(edm::View<pat::Jet>::const_iterator iJet = hjets->begin(); iJet != hjets->end(); ++iJet) {
     // JEC uncertainty is a function of corrected jet eta and pt
-    jecUnc.setJetEta(iJet->eta());
+    double eta = iJet->eta();
+    if(eta < etaMin) eta = etaMin + 1e-5;
+    else if(eta > etaMax) eta = etaMax - 1e-5;
+               
+    jecUnc.setJetEta(eta);
     jecUnc.setJetPt(iJet->pt());
     
     bool plusVariation = defaultPlusVariation;
@@ -84,15 +111,30 @@ void HPlusJetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventS
       //std::cout << "Jet eta " << iJet->eta() << " using default " << std::endl;
     }
 
+    /*
+    std::cout << "Jet i " << (iJet-hjets->begin()) 
+              << " pt " << iJet->pt() 
+              << " eta " << eta
+              << " variation " << plusVariation
+              << std::endl;
+    */
+
     // argument controls plus/minus variation (asymmetric uncertainty)
     double myChange = jecUnc.getUncertainty(plusVariation);
     double myFactor = 1. + myChange;
     LorentzVector p4 = iJet->p4()*myFactor; 
 
     pat::Jet jet = *iJet;
-    jet.setP4(iJet->p4()*myFactor);
+    if(doVariation)
+      jet.setP4(iJet->p4()*myFactor);
     jet.addUserFloat("originalPx", iJet->px());
     jet.addUserFloat("originalPy", iJet->py());
+    /*
+    std::cout << "Jet i " << (iJet-hjets->begin()) 
+              << " original " << iJet->pt() << " " << iJet->p4()
+              << " variated " << jet.pt() << " " << jet.p4()
+              << std::endl;
+    */
     rescaledJets->push_back(jet);
   }
   iEvent.put(rescaledJets);

@@ -265,8 +265,8 @@ namespace HPlus {
     // The offline tau which is used to derive the trigger scale
     // factor is required to pass the full tau ID, including isolation
     // etc, but the tau object here is not (yet) isolated.
-    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauCandidateData.getCleanedTauCandidates()[0]));
-    fTree.setTriggerWeight(triggerWeight.getEventWeight());
+    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauCandidateData.getCleanedTauCandidates()[0]), iEvent.isRealData());
+    fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
 
     double mySelectedTauPt = tauCandidateData.getCleanedTauCandidates()[0]->pt();
     int myFactorizationTableIndex = fFactorizationTable.getCoefficientTableIndexByPtAndEta(mySelectedTauPt,0.);
@@ -279,11 +279,9 @@ namespace HPlus {
     increment(fGlobalElectronVetoCounter);
     hSelectionFlow->Fill(kQCDOrderElectronVeto, fEventWeight.getWeight());
 
-    // std::cout << "*** nonIsolatedElectronVetoData" << std::endl;
     NonIsolatedElectronVeto::Data nonIsolatedElectronVetoData = fNonIsolatedElectronVeto.analyze(iEvent, iSetup);
-    if (!nonIsolatedElectronVetoData.passedEvent())  return;
-    increment(fNonIsolatedElectronVetoCounter);
-    // std::cout << "*** nonIsolatedElectronVetoData called" << std::endl;
+    // if (!nonIsolatedElectronVetoData.passedEvent())  return;
+    if (!nonIsolatedElectronVetoData.passedEvent()) increment(fNonIsolatedElectronVetoCounter);
 
 ///////// Start global muon veto
     // MuonVeto
@@ -293,8 +291,8 @@ namespace HPlus {
     hSelectionFlow->Fill(kQCDOrderMuonVeto, fEventWeight.getWeight());
 
     NonIsolatedMuonVeto::Data nonIsolatedMuonVetoData = fNonIsolatedMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
-    if (!nonIsolatedMuonVetoData.passedEvent()) return; 
-    increment(fNonIsolatedMuonVetoCounter);
+    // if (!nonIsolatedMuonVetoData.passedEvent()) return; 
+    if (!nonIsolatedMuonVetoData.passedEvent()) increment(fNonIsolatedMuonVetoCounter);
 
 
 ///////// Jet selection
@@ -312,6 +310,8 @@ namespace HPlus {
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauCandidateData.getCleanedTauCandidates()[0]), jetData.getSelectedJets());
     // increment(fEvtTopologyCounter);
 
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    
     if(metData.getRawMET().isNonnull())
       fTree.setRawMET(metData.getRawMET());
     if(metData.getType1MET().isNonnull())
@@ -326,11 +326,17 @@ namespace HPlus {
     // FIXME: how is jet selection affected by this? Sometimes there
     // is effectively a requirement of 5 jets?
     edm::PtrVector<pat::Tau> mySelectedTauFirst;
+
     mySelectedTauFirst.push_back(tauCandidateData.getCleanedTauCandidates()[0]);
+
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedTauFirst[0], jetData.getSelectedJets(), metData.getSelectedMET());
+
     // FIXME: how to handle the top reco in QCD measurement?
     fTree.setFillWeight(fEventWeight.getWeight());
-    fTree.setNonIsoLeptons(iEvent, nonIsolatedMuonVetoData.getAllMuonswithTrkRef(), nonIsolatedElectronVetoData.getElectronswithGSFTrk());
-    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), evtTopologyData.alphaT().fAlphaT);
+    fTree.setNonIsoLeptons(nonIsolatedMuonVetoData.getAllMuonswithTrkRef(), nonIsolatedElectronVetoData.getElectronswithGSFTrk());
+    fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
+    fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
+    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets());
 
 ///////// MET selection (factorise out)
     if (metData.passedEvent()) {
@@ -341,7 +347,7 @@ namespace HPlus {
       ///////// btag selection (factorise out)
       double myWeightWithoutBTagScale = fEventWeight.getWeight(); // needed because of btag scale factor 
       double EventWeightWithoutBTag = fEventWeight.getWeight(); // needed because of btag scale factor //attikis
-      BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+      // BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
       double EventWeightWithBTag = fEventWeight.getWeight(); // needed because of btag scale factor //attikis
       // Apply scale factor as weight to event
       fEventWeight.multiplyWeight(btagData.getScaleFactor());

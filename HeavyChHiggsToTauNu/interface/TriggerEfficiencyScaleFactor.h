@@ -18,7 +18,7 @@ namespace HPlus {
 
   class TriggerEfficiencyScaleFactor {
     enum Mode {
-      kDataEfficiency,
+      kEfficiency,
       kScaleFactor,
       kDisabled
     };
@@ -32,6 +32,12 @@ namespace HPlus {
       double getEventWeight() const {
         return fTesf->fWeight;
       }
+      double getEventWeightAbsoluteUncertainty() const {
+        return fTesf->fWeightAbsUnc;
+      }
+      double getEventWeightRelativeUncertainty() const {
+        return fTesf->fWeightRelUnc;
+      }
 
     private:
       const TriggerEfficiencyScaleFactor *fTesf;
@@ -40,34 +46,57 @@ namespace HPlus {
     TriggerEfficiencyScaleFactor(const edm::ParameterSet& iConfig, EventWeight& eventWeight);
     ~TriggerEfficiencyScaleFactor();
 
+    void setRun(unsigned run);
+
     double dataEfficiency(const pat::Tau& tau) const;
     double dataEfficiencyRelativeUncertainty(const pat::Tau& tau) const;
     double dataEfficiencyAbsoluteUncertainty(const pat::Tau& tau) const;
+
+    double mcEfficiency(const pat::Tau& tau) const;
+    double mcEfficiencyRelativeUncertainty(const pat::Tau& tau) const;
+    double mcEfficiencyAbsoluteUncertainty(const pat::Tau& tau) const;
 
     double scaleFactor(const pat::Tau& tau) const;
     double scaleFactorRelativeUncertainty(const pat::Tau& tau) const;
     double scaleFactorAbsoluteUncertainty(const pat::Tau& tau) const;
 
-    Data applyEventWeight(const pat::Tau& tau);
+    Data applyEventWeight(const pat::Tau& tau, bool isData);
 
   private:
+    struct DataValue {
+      unsigned firstRun;
+      unsigned lastRun;
+      double luminosity;
+      std::vector<double> values;
+      std::vector<double> uncertainties;
+    };
+
     size_t index(const pat::Tau& tau) const;
     size_t index(double pt) const;
 
     double dataEfficiency(size_t i) const;
     double dataEfficiencyAbsoluteUncertainty(size_t i) const;
 
+    double mcEfficiency(size_t i) const;
+    double mcEfficiencyAbsoluteUncertainty(size_t i) const;
+
     double scaleFactor(size_t i) const;
-    double scaleFactorRelativeUncertainty(size_t i) const;
     double scaleFactorAbsoluteUncertainty(size_t i) const;
 
     std::vector<double> fPtBinLowEdges;
+    std::vector<DataValue> fDataValues;
+
     std::vector<double> fEffDataValues;
     std::vector<double> fEffDataUncertainties;
     std::vector<double> fEffMCValues;
     std::vector<double> fEffMCUncertainties;
 
+    std::vector<double> fScaleValues;
+    std::vector<double> fScaleUncertainties;
+
     EventWeight& fEventWeight;
+
+    const DataValue *fCurrentRunData;
 
     TH1 *hScaleFactor;
     TH1 *hScaleFactorRelativeUncertainty;
@@ -75,6 +104,8 @@ namespace HPlus {
 
     Mode fMode;
     double fWeight;
+    double fWeightAbsUnc;
+    double fWeightRelUnc;
   };
 }
 

@@ -65,6 +65,9 @@ def addPatOnTheFly(process, options, dataVersion,
             process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
             seq *= process.eventPreSelection
         HChPrimaryVertex.addPrimaryVertexSelection(process, seq)
+        if options.doTauHLTMatchingInAnalysis != 0:
+            process.patTausHpsPFTauTauTriggerMatched = HChTriggerMatching.createTauTriggerMatchingInAnalysis(options.trigger, "selectedPatTausHpsPFTau")
+            seq *= process.patTausHpsPFTauTauTriggerMatched
         return (seq, counters)
 
     print "Running PAT on the fly"
@@ -85,8 +88,7 @@ def addPatOnTheFly(process, options, dataVersion,
                              "doTauHLTMatching": False,
                              "doPatCalo": False,
                              "doBTagging": True,
-                             "doPatElectronID": False,
-                             "doPatMET": False})
+                             "doPatElectronID": False})
 
         process.patSequence = addPat(process, dataVersion, plainPatArgs=plainPatArgs)
         # FIXME: this is broken at the moment
@@ -479,15 +481,9 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
                            ])
 
     # MET
-    if doPatMET:
+    addPfMET(process, 'PF')
+    if doPatCalo:
         addTcMET(process, 'TC')
-        addPfMET(process, 'PF')
-        outputCommands.extend([
-                "keep *_patMETs_*_*",
-                "keep *_patMETsTC_*_*",
-                "keep *_patMETsPF_*_*",
-                "keep *_genMetTrue_*_*",
-        ])
     else:
         # FIXME: This is broken at the moment...
         #removeSpecificPATObjects(process, ["METs"], outputInProcess= out != None)
@@ -496,6 +492,13 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
         process.patDefaultSequence.remove(process.patMETs)
         del process.patMETCorrections
         del process.patMETs
+
+    outputCommands.extend([
+            "keep *_patMETs_*_*",
+            "keep *_patMETsTC_*_*",
+            "keep *_patMETsPF_*_*",
+            "keep *_genMetTrue_*_*",
+            ])
 
     # Muons
     setPatLeptonDefaults(process.patMuons, includePFCands)

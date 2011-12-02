@@ -215,9 +215,6 @@ namespace HPlus {
 
   // Get MET object 
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
-    double Met = metData.getSelectedMET()->et();
-    //    std::cout << " weight before  = " << fEventWeight.getWeight() << " met " << Met <<  std::endl; 
- 
     hMETBeforeTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());    
 
                                                                                                                                                                       
@@ -370,7 +367,7 @@ namespace HPlus {
 
     
     // Fake MET veto a.k.a. further QCD suppression
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET());
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus()[0], jetData.getSelectedJets(), metData.getSelectedMET());
     if (!fakeMETData.passedEvent()) return true;
     increment(fFakeMETVetoCounter);
     //hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());

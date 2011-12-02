@@ -16,6 +16,9 @@ dataVersion="42XmcS4"     # Summer11 MC
 # to the "golden" analysis
 doAllTauIds = False
 
+# Apply summer PAS style cuts
+doSummerPAS = True
+
 # Perform b tagging scanning
 doBTagScan = False
 
@@ -31,11 +34,10 @@ tauEmbeddingFinalizeMuonSelection = True
 doTauEmbeddingMuonSelectionScan = False
 # Do tau id scan for tau embedding normalisation (no tau embedding input required)
 doTauEmbeddingTauSelectionScan = False
+# Do embedding-like preselection for signal analysis
+doTauEmbeddingLikePreselection = False
 
 applyTriggerScaleFactor = True
-
-filterGenTaus = False
-filterGenTausInaccessible = False
 
 ### Systematic uncertainty flags ###
 # Running of systematic variations is controlled by the global flag
@@ -75,8 +77,9 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
+#    "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v18/pattuple_v18_TTJets_TuneZ2_Summer11_9_1_bfN.root"
     # For testing in lxplus
-    # dataVersion.getAnalysisDefaultFileCastor()
+    #dataVersion.getAnalysisDefaultFileCastor()
     # For testing in jade
     dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
@@ -88,7 +91,7 @@ if options.tauEmbeddingInput != 0:
         raise Exception("In tau embedding input mode, set also doPat=1")
 
     process.source.fileNames = [
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/SingleMu_160431-163261_May10/SingleMu/Run2011A_May10ReReco_v1_AOD_160431_tauembedding_embedding_v11_8_pt40/ac085343fdb44ba8377c1f709923eacd/embedded_RECO_2_1_Jik.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_2_X/SingleMu_165088-166150_Prompt/SingleMu/PromptReco_v4_AOD_165088_tauembedding_embedding_v13/9a509078f648b588515c15f2e17e813c/embedded_19_1_YAU.root"
         ]
     process.maxEvents.input = 10
 
@@ -115,12 +118,6 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
 process.infoPath = addConfigInfo(process, options, dataVersion)
 
-###
-# MC Filter
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
-if filterGenTaus:
-    additionalCounters.extend(tauEmbeddingCustomisations.addGeneratorTauFilter(process, process.commonSequence, filterInaccessible=filterGenTausInaccessible))
-
 ################################################################################
 # The "golden" version of the signal analysis
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
@@ -139,19 +136,25 @@ if applyTriggerScaleFactor and dataVersion.isMC():
     param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
 
 # Set the data scenario for vertex/pileup weighting
-#param.setVertexWeightFor2011() # Reweight by reconstructed vertices
-param.setPileupWeightFor2011(dataVersion) # Reweight by true PU distribution 
+puweight = "Run2011A"
+if len(options.puWeightEra) > 0:
+    puweight = options.puWeightEra
+param.setPileupWeightFor2011(dataVersion, era=puweight) # Reweight by true PU distribution 
+param.setDataTriggerEfficiency(dataVersion, era=puweight)
 
 #param.trigger.selectionType = "disabled"
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 if options.tauEmbeddingInput != 0:
-    tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
+    #tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
     tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, options, dataVersion)
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, options, dataVersion)
     if tauEmbeddingFinalizeMuonSelection:
         applyIsolation = not doTauEmbeddingMuonSelectionScan
         additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
                                                                                    enableIsolation=applyIsolation))
+if doTauEmbeddingLikePreselection:
+    additionalCounters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.commonSequence, param))
 
 # Signal analysis module for the "golden analysis"
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilter",
@@ -160,6 +163,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilter",
     primaryVertexSelection = param.primaryVertexSelection,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
+#    GlobalMuonVeto = param.NonIsolatedMuonVeto,
     # Change default tau algorithm here as needed
     tauSelection = param.tauSelectionHPSTightTauBased,
     jetSelection = param.jetSelection,
@@ -225,8 +229,20 @@ if doMETResolution:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.METResolutionAnalysis_cfi")
     process.signalAnalysisPath += process.metResolutionAnalysis
 
-# b tagging testing
+# Summer PAS cuts
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
+if doSummerPAS:
+    module = process.signalAnalysis.clone()
+    module.tauSelection.rtauCut = 0
+    module.MET.METCut = 70
+    module.jetSelection.EMfractionCut = 999 # disable
+    addAnalysis(process, "signalAnalysisRtau0MET70", module,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+
+
+# b tagging testing
 if doBTagScan:
     module = process.signalAnalysis.clone()
 #    module.bTagging.discriminator = "trackCountingHighPurBJetTags"
@@ -259,20 +275,25 @@ if doRtauScan:
                     signalAnalysisCounters=True)
 
 if options.tauEmbeddingInput:
-    module = process.signalAnalysis.clone()
-    module.Tree.fill = False
-    module.trigger.caloMetSelection.metEmulationCut = 60.0
-    addAnalysis(process, "signalAnalysisCaloMet60", module,
-                preSequence=process.commonSequence,
-                additionalCounters=additionalCounters,
-                signalAnalysisCounters=True)
+    prototypes = ["signalAnalysis"]
+    if doSummerPAS:
+        prototypes.append("signalAnalysisRtau0MET70")
 
-    module = module.clone()
-    module.triggerEfficiencyScaleFactor.mode = "dataEfficiency"
-    addAnalysis(process, "signalAnalysisCaloMet60TEff", module,
-                preSequence=process.commonSequence,
-                additionalCounters=additionalCounters,
-                signalAnalysisCounters=True)
+    for name in prototypes:
+        module = getattr(process, name).clone()
+#        module.Tree.fill = False
+        module.trigger.caloMetSelection.metEmulationCut = 60.0
+        addAnalysis(process, name+"CaloMet60", module,
+                    preSequence=process.commonSequence,
+                    additionalCounters=additionalCounters,
+                    signalAnalysisCounters=True)
+
+        module = module.clone()
+        module.triggerEfficiencyScaleFactor.mode = "efficiency"
+        addAnalysis(process, name+"CaloMet60TEff", module,
+                    preSequence=process.commonSequence,
+                    additionalCounters=additionalCounters,
+                    signalAnalysisCounters=True)
 
 
 ################################################################################
@@ -311,27 +332,36 @@ if doAllTauIds:
 # signalAnalysisJESPlus05
 # signalAnalysisJESMinus05
 from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVariationAnalysis
-if doJESVariation or doSystematics:
-    # Exceptions for tau embedding
+def addJESVariation(name, doJetVariation, metVariation):
     jetVariationMode="all"
-    name = "signalAnalysis"
-    module = process.signalAnalysis
-    if options.tauEmbeddingInput != 0:
-        JESUnclusteredMETVariation=0
-        jetVariationMode="onlyTauMatching"
-        name = "signalAnalysisCaloMet60TEff"
-        module = process.signalAnalysisCaloMet60TEff
+    module = getattr(process, name)
+
     module = module.clone()
     module.Tree.fill = False        
     module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
 
     JESs = "%02d" % int(JESVariation*100)
     JESe = "%02d" % int(JESEtaVariation*100)
-    JESm = "%02d" % int(JESUnclusteredMETVariation*100)
-    addJESVariationAnalysis(process, dataVersion, name, "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm,   module, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation, jetVariationMode)
-    addJESVariationAnalysis(process, dataVersion, name, "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm,  module, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation, jetVariationMode)
-    addJESVariationAnalysis(process, dataVersion, name, "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm,  module, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
-    addJESVariationAnalysis(process, dataVersion, name, "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
+    JESm = "%02d" % int(metVariation*100)
+    addJESVariationAnalysis(process, dataVersion, name, "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm,   module, additionalCounters, JESVariation, JESEtaVariation, metVariation, doJetVariation)
+    addJESVariationAnalysis(process, dataVersion, name, "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm,  module, additionalCounters, -JESVariation, JESEtaVariation, metVariation, doJetVariation)
+    addJESVariationAnalysis(process, dataVersion, name, "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm,  module, additionalCounters, JESVariation, JESEtaVariation, -metVariation, doJetVariation)
+    addJESVariationAnalysis(process, dataVersion, name, "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, -metVariation, doJetVariation)
+
+if doJESVariation or doSystematics:
+    doJetVariation = True
+    module = "signalAnalysis"
+    modulePas = "signalAnalysisRtau0MET70"
+    if options.tauEmbeddingInput != 0:
+        doJetVariation = False
+        module = "signalAnalysisCaloMet60TEff"
+        modulePas = "signalAnalysisRtau0MET70CaloMet60TEff"
+        JESUnclusteredMETVariation=0
+
+    addJESVariation(module, doJetVariation, JESUnclusteredMETVariation)
+    if doSummerPAS:
+        addJESVariation(modulePas, doJetVariation, JESUnclusteredMETVariation)
+
 
 if doPUWeightVariation or doSystematics:
     module = process.signalAnalysis.clone()

@@ -21,7 +21,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters"
+counters = analysis+"Counters/weighted"
 
 def main():
     # Create all datasets from a multicrab task
@@ -32,6 +32,7 @@ def main():
 
     # Include only 120 mass bin of HW and HH datasets
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
 
     # Default merging nad ordering of data and MC datasets
     # All data datasets to "Data"
@@ -85,10 +86,10 @@ def dataEwkDiff(mT):
 
     # Subtract ewk from data
     data.Add(ewk, -1)
+    data.SetName("Data-EWK")
 
     # Draw the subtracted plot
-    plot = plots.PlotBase()
-    plot.histoMgr.appendHisto(histograms.Histo(data, "Data-EWK"))
+    plot = plots.PlotBase([data])
     plot.createFrame("transverseMass_data-ewk")
     plot.frame.GetXaxis().SetTitle("m_{T}(#tau, MET) (GeV)")
     plot.frame.GetYaxis().SetTitle("Data - EWK")

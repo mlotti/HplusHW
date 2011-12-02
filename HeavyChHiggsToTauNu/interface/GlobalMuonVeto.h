@@ -42,9 +42,17 @@ namespace HPlus {
       const float getSelectedMuonPt() const { return fGlobalMuonVeto->fSelectedMuonPt; }
       const float getSelectedMuonEta() const { return fGlobalMuonVeto->fSelectedMuonEta; }
 
+      const float getSelectedMuonPtBeforePtCut() const { return fGlobalMuonVeto->fSelectedMuonPtBeforePtCut; }
+
+      /// Muon collection after all selections - size should be zero if veto condition is passed
       const edm::PtrVector<pat::Muon>& getSelectedMuons() { return fGlobalMuonVeto->fSelectedMuons; }
+      /// Muon collection after all selections except pt and eta cuts
+      const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforePtAndEtaCuts() { return fGlobalMuonVeto->fSelectedMuonsBeforePtAndEtaCuts; }
+      /// Muon collection after all selections except isolation and pt and eta cuts
+      const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforeIsolationAndPtAndEtaCuts() { return fGlobalMuonVeto->fSelectedMuonsBeforeIsolationAndPtAndEtaCuts; }
+      /// Muon collection after all selections except isolation
       const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforeIsolation() { return fGlobalMuonVeto->fSelectedMuonsBeforeIsolation; }
-    
+
     private:
       const GlobalMuonVeto *fGlobalMuonVeto;
       const bool fPassedEvent;
@@ -54,10 +62,11 @@ namespace HPlus {
     ~GlobalMuonVeto();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
+    Data analyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
     void debug(void);
 
   private:
-    bool MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
+    void MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
 
     // Input parameters
     edm::InputTag fMuonCollectionName;
@@ -112,6 +121,8 @@ namespace HPlus {
     // Histograms
     TH1 *hMuonPt;
     TH1 *hMuonEta;
+    TH1 *hMuonPt_identified_eta;
+    TH1 *hMuonEta_identified;
     TH1 *hMuonPt_matchingMCmuon;
     TH1 *hMuonEta_matchingMCmuon;
     TH1 *hMuonPt_matchingMCmuonFromW;
@@ -131,6 +142,7 @@ namespace HPlus {
     // pt and eta of muon with highest pt passing the selections
     float fSelectedMuonPt;
     float fSelectedMuonEta;
+    float fSelectedMuonPtBeforePtCut;
 
     // booleans
     bool bMuonPresent;
@@ -150,7 +162,13 @@ namespace HPlus {
     bool bMuonMatchingMCmuon;
     bool bMuonMatchingMCmuonFromW;
 
+    /// Muon collection after all selections
     edm::PtrVector<pat::Muon> fSelectedMuons;
+    /// Muon collection after all selections except pt and eta cuts
+    edm::PtrVector<pat::Muon> fSelectedMuonsBeforePtAndEtaCuts;
+    /// Muon collection after all selections except isolation and pt and eta cuts
+    edm::PtrVector<pat::Muon> fSelectedMuonsBeforeIsolationAndPtAndEtaCuts;
+    /// Muon collection after all selections except isolation
     edm::PtrVector<pat::Muon> fSelectedMuonsBeforeIsolation;
   };
 }

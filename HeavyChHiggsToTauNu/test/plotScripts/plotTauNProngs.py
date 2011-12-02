@@ -23,7 +23,7 @@ legendLabels = {
     "TTbar_Htaunu_M80":    "H^{#pm} M=80",
     "TTToHpmToTauNu_M90":  "H^{#pm} M=90",
     "TTToHpmToTauNu_M100": "H^{#pm} M=100",
-    "TTToHpmToTauNu_M120": "H^{#pm} M=120",
+    "TTToHplusBWB_M120_Summer11": "H^{#pm} M=120",
     "TTbar_Htaunu_M140":   "H^{#pm} M=140",
     "TTbar_Htaunu_M160":   "H^{#pm} M=160",
     "TTbar":               "t#bar{t}",
@@ -58,7 +58,8 @@ style = TDRStyle()
 #datasets = getDatasetsFromRootFiles([("WJets", "WJets/res/histograms_32_1_f4s.root")])
 #datasets = getDatasetsFromRootFiles([("TTbar", "TTbar/res/histograms_3_1_oN4.root")])
 #datasets = getDatasetsFromRootFiles([("TTToHpmToTauNu_M100", "TTToHpmToTauNu_M100/res/histograms_1_1_6Ac.root")])
-datasets = getDatasetsFromRootFiles([("TTToHpmToTauNu_M120", "TTToHpmToTauNu_M120/res/histograms_1_1_nRc.root")]) ## comment me
+datasets = getDatasetsFromRootFiles([("TTToHpmToTauNu_M120", "TTToHpmToTauNu_M120/res/histograms_1_1_nRc.root")], counters="signalAnalysisCounters/weighted") ## comment me
+
 
 ############################### MERGING ###############################
 ### Example how to merge histograms of several datasets
@@ -69,7 +70,7 @@ datasets = getDatasetsFromRootFiles([("TTToHpmToTauNu_M120", "TTToHpmToTauNu_M12
 ### type HistoManager, which contains a histogram from each dataset in
 ### DatasetManager. The histograms can be e.g. merged/stacked or normalized
 ### in various ways before drawing.
-tauNProngs = HistoManager(datasets, "signalAnalysis/tau_nProngs")
+tauNProngs = HistoManager(datasets, "signalAnalysis/transverseMassBeforeFakeMet")
 
 ### Print the list of datasets in the given HistoManager
 #print "\n".join(tauNProngs.getDatasetNames())

@@ -32,7 +32,7 @@ class CellFormatBase:
     The deriving classes must implement
     _formatValue(value)
     _formatValuePlusMinus(value, uncertainty)
-    _formatValuePlusUpMinusLow(value, uncertaintyUp, uncertaintyLow)
+    _formatValuePlusHighMinusLow(value, uncertaintyHigh, uncertaintyLow)
 
     The value, uncertainty(Up|Low) are strings formatted with the
     value/uncertaintyFormats. The deriving class may then apply
@@ -62,7 +62,7 @@ class CellFormatBase:
     def format(self, count):
         """Format the Count object."""
         value = self._valueFormat % count.value()
-        uUp = count.uncertaintyUp()
+        uUp = count.uncertaintyHigh()
         uLow = count.uncertaintyLow()
 
         if self._valueOnly or (uLow == None and uUp == None):
@@ -71,7 +71,7 @@ class CellFormatBase:
         if (uLow == 0.0 and uUp == 0.0) or (abs(uUp-uLow)/uUp < self._uncertaintyEpsilon):
             return self._formatValuePlusMinus(value, self._uncertaintyFormat % uLow)
         else:
-            return self._formatValuePlusUpMinusLow(value, self._uncertaintyFormat % uUp, self._uncertaintyFormat % uLow)
+            return self._formatValuePlusHighMinusLow(value, self._uncertaintyFormat % uUp, self._uncertaintyFormat % uLow)
 
 
 class CellFormatText(CellFormatBase):
@@ -90,8 +90,8 @@ class CellFormatText(CellFormatBase):
     def _formatValuePlusMinus(self, value, uncertainty):
         return value + " +- " + uncertainty
 
-    def _formatValuePlusUpMinusLow(self, value, uncertaintyUp, uncertaintyLow):
-        return value + " +"+uncertaintyUp + " -"+uncertaintyLow
+    def _formatValuePlusHighMinusLow(self, value, uncertaintyHigh, uncertaintyLow):
+        return value + " +"+uncertaintyHigh + " -"+uncertaintyLow
 
 class CellFormatTeX(CellFormatBase):
     """TeX cell format."""
@@ -113,8 +113,8 @@ class CellFormatTeX(CellFormatBase):
         (v, u) = self._texify([value, uncertainty])
         return v + " \\pm " + u
 
-    def _formatValuePlusUpMinusLow(self, value, uncertaintyUp, uncertaintyLow):
-        (v, ul, uh) = self._texify([value, uncertaintyUp, uncertaintyLow])
+    def _formatValuePlusHighMinusLow(self, value, uncertaintyHigh, uncertaintyLow):
+        (v, ul, uh) = self._texify([value, uncertaintyHigh, uncertaintyLow])
         return "%s^{+ %s}_{- %s}" % (v, ul, uh)
 
     def _texify(self, numbers):
@@ -410,7 +410,7 @@ class TableSplitter:
 
 def counterEfficiency(counterTable):
     """Create a new counter table with the counter efficiencies."""
-    result = counterTable.deepCopy()
+    result = counterTable.clone()
     for icol in xrange(0, counterTable.getNcolumns()):
         prev = None
         for irow in xrange(0, counterTable.getNrows()):
@@ -424,6 +424,29 @@ def counterEfficiency(counterTable):
             prev = count
             result.setCount(irow, icol, value)
     return result
+
+def efficiencyColumn(name, column):
+    origRownames = column.getRowNames()
+    rows = []
+    rowNames = []
+
+    prev = None
+    for irow in xrange(0, column.getNrows()):
+        count = column.getCount(irow)
+        value = None
+        if count != None and prev != None:
+            try:
+                eff = count.value() / prev.value()
+                relUnc = math.sqrt((count.uncertainty()/count.value())**2 + (prev.uncertainty()/prev.value())**2)
+
+                value = dataset.Count(eff, eff*relUnc)
+            except ZeroDivisionError:
+                pass
+        prev = count
+        if value != None:
+            rows.append(value)
+            rowNames.append(origRownames[irow])
+    return CounterColumn(name, rowNames, rows)
 
 def sumColumn(name, columns):
     """Create a new CounterColumn as the sum of the columns."""
@@ -451,7 +474,7 @@ def divideColumn(name, column1, column2):
     rows = []
     rowNames = []
     for irow in xrange(nrows):
-        count = column1.getCount(irow).copy()
+        count = column1.getCount(irow).clone()
         dcount = column2.getCount(irow)
         if dcount.value() == 0:
             continue
@@ -473,8 +496,8 @@ class CounterColumn:
         if len(rowNames) != len(values):
             raise Exception("len(rowNames) != len(values) (%d != %d)" % (len(rowNames), len(values)))
 
-    def copy(self):
-        return CounterColumn(self.name, self.rowNames[:], [v.copy() for v in self.values])
+    def clone(self):
+        return CounterColumn(self.name, self.rowNames[:], [v.clone() for v in self.values])
 
     def getName(self):
         return self.name
@@ -493,6 +516,9 @@ class CounterColumn:
 
     def getCount(self, irow):
         return self.values[irow]
+
+    def setCount(self, irow, count):
+        self.values[irow] = count
 
     def removeRow(self, irow):
         del self.values[irow]
@@ -518,6 +544,9 @@ class CounterTable:
     def deepCopy(self):
         return copy.deepcopy(self)
 
+    def clone(self):
+        return self.deepCopy()
+
     def getNrows(self):
         return len(self.table)
 
@@ -531,6 +560,9 @@ class CounterTable:
 
     def setCount(self, irow, icol, value):
         self.table[irow][icol] = value
+
+    def getRowNames(self):
+        return self.rowNames
 
     def renameRows(self, mapping):
         for irow, row in enumerate(self.rowNames):
@@ -562,6 +594,9 @@ class CounterTable:
         if len(self.table) > 0:
             beginColumns = len(self.table[0])
 
+        if icol > beginColumns:
+            raise Exception("Unable to insert column %d, table has only %d columns (may not insert to index larger than size)")
+
         while iname < len(self.rowNames)  and icount < column.getNrows():
             # Check if the current indices give the same counter name for both
             if self.rowNames[iname] == column.getRowName(icount):
@@ -579,8 +614,6 @@ class CounterTable:
                     icount += 1
                     found = True
                     break
-                else:
-                    self.table[i].insert(icol, None)
             if found:
                 continue
 
@@ -601,12 +634,20 @@ class CounterTable:
             self.table.append(row)
 
         for irow, row in enumerate(self.table):
+            def value(count):
+                if count == None:
+                    return count
+                else:
+                    return count.value()
             # Append None to row if column didn't have 
             if len(row) == beginColumns:
                 row.insert(icol, None)
             # Sanity check
             elif len(row) < beginColumns:
-                print [c.value() for c in row]
+                print [value(c) for c in row]
+                raise Exception("Internal error at row %d: len(row) = %d, beginColumns = %d" % (irow, len(row), beginColumns))
+            elif len(row) > beginColumns+1:
+                print [value(c) for c in row]
                 raise Exception("Internal error at row %d: len(row) = %d, beginColumns = %d" % (irow, len(row), beginColumns))
 
         self.columnNames.insert(icol, column.getName())
@@ -675,6 +716,23 @@ class CounterTable:
                 irow -= 1
 
             irow += 1
+
+    def removeRow(self, index=None, name=None):
+        if index == None and name == None:
+            raise Exception("Give either index or name, neither was given")
+        if index != None and name != None:
+            raise Exception("Give either index or name, not both")
+
+        if index == None:
+            index = self.rowNames.index(name)
+
+        del self.rowNames[index]
+        del self.table[index]
+
+    def keepOnlyRows(self, names):
+        for name in self.getRowNames()[:]:
+            if not name in names:
+                self.removeRow(name=name)
 
     def _getColumnWidth(self, icol):
         return self.columnWidths[icol]
