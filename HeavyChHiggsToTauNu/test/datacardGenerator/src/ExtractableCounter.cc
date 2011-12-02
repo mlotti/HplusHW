@@ -31,7 +31,7 @@ ExtractableCounter::~ExtractableCounter() {
   
 }
 
-double ExtractableCounter::doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info) {
+double ExtractableCounter::doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info, double additionalNormalisation) {
   // Loop over histograms to obtain result
   double fCounterValue = 0.; // result in number of events
   double fCounterUncertainty = 0.; // result in number of events
@@ -56,7 +56,7 @@ double ExtractableCounter::doExtract(std::vector< Dataset* > datasets, Normalisa
   fCounterUncertainty = TMath::Sqrt(fCounterUncertainty);
   
   if (isObservation() || isRate())
-    return fCounterValue;
+    return fCounterValue * additionalNormalisation;
   else if (isNuisance())
     return fCounterUncertainty / fCounterValue; // Relative uncertainty
   return -1.;

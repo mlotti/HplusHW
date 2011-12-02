@@ -457,7 +457,7 @@ def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, a
         for line in lst:
             h.addCutBoxAndLine(line, box=False, line=True)
     if cutBox != None:
-        lst = cutLine
+        lst = cutBox
         if not isinstance(lst, list):
             lst = [lst]
 
@@ -588,20 +588,26 @@ def selectionFlow(h, name, rebin=1, ratio=False):
     h.addMCUncertainty()
     scaleMCfromWmunu(h)
 
+    njets = 5
+    lastSelection = njets
     
-    opts = {"xmax": 9, "ymin": 0.1, "ymaxfactor": 2}
+    opts = {"xmax": lastSelection, "ymin": 0.1, "ymaxfactor": 2, "nbins": lastSelection}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
 
-    if ratio:
-        h.createFrameFraction(name, opts=opts, opts2=opts2)
-    else:
-        h.createFrame(name, opts=opts)
+    h.createFrame(name, opts=opts, createRatio=ratio, opts2=opts2)
+    xaxis = h.getFrame().GetXaxis()
+    xaxis.SetBinLabel(1, "Trigger")
+    xaxis.SetBinLabel(2, "#tau ID+R_{#tau}")
+    xaxis.SetBinLabel(3, "e veto")
+    xaxis.SetBinLabel(4, "#mu veto")
+    xaxis.SetBinLabel(5, "N_{jets}")
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend(0.65, 0.65, 0.9, 0.92))
+    h.setLegend(histograms.createLegend())
     h.draw()
     histograms.addCmsPreliminaryText()
     histograms.addEnergyText()
     h.addLuminosityText()
+    addMassBRText(x=0.4, y=0.87)
     h.save()    
 
 def tauCandPt(h, step="", rebin=2):

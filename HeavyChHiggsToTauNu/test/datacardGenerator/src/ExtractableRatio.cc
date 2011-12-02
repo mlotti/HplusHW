@@ -16,7 +16,7 @@ ExtractableRatio::~ExtractableRatio() {
 
 }
 
-double ExtractableRatio::doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info) {
+double ExtractableRatio::doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info, double additionalNormalisation) {
   // Only defined for nuisance
   if (isObservation() || isRate())
     return -1.0;

@@ -27,18 +27,31 @@ bool DatacardGenerator::generateDataCard(std::string description, double luminos
                                          std::vector< Extractable* >& extractables, 
                                          std::vector< DatasetGroup* >& datasetGroups,
                                          NormalisationInfo* info) {
-  
-  sDirectory = "datacards_" + sDirectory + "_" + description;
-  if (useShapes)
-    sDirectory += "_withShapes";
-  
   // Initialise
   fNormalisationInfo = info;
   sResult.str("");
 
+  // Ask once the rate values to make control plots into their separate root files
+  for (size_t j = 0; j < datasetGroups.size(); ++j) {
+    if (datasetGroups[j]->isData() || !datasetGroups[j]->hasMassPoint(fMassPoint)) continue;
+    for (size_t i = 0; i < extractables.size(); ++i) {
+      if (!extractables[i]->isRate()) continue;
+      if (datasetGroups[j]->hasExtractable(extractables[i])) {
+        datasetGroups[j]->getValueByExtractable(extractables[i], fNormalisationInfo);
+      }
+    }
+  }
+
+  std::cout << "Generating datacard for mass point " << fMassPoint << std::endl;
+
+  // Construct name of directory
+  sDirectory = "datacards_" + sDirectory + "_" + description;
+  if (useShapes)
+    sDirectory += "_withShapes";
+  
   // Make directory if it doesn't already exist
   std::stringstream s;
-  s << sDirectory+"/datacard_" << fMassPoint << ".txt";
+  s << sDirectory+"/datacard" << fMassPoint << ".txt";
   
   std::ofstream myFile(s.str().c_str());
   if (myFile.bad() || myFile.fail()) {
@@ -146,7 +159,7 @@ void DatacardGenerator::generateObservationLine(std::vector< DatasetGroup* >& da
           sResult << "\t" << std::fixed << std::setprecision(0) << myRate;
           if (useShapes) {
             fFile->cd();
-            TH1F* h = datasetGroups[j]->getTransverseMassPlot(fNormalisationInfo, "data_obs",40,0.,400.);
+            TH1F* h = datasetGroups[j]->getTransverseMassPlot(fNormalisationInfo, "data_obs",20,0.,400.);
             if (!h) return;
             if (TMath::Abs(myRate - h->Integral()) > 0.0001) {
               std::cout << "WARNING: Signal rate=" << myRate << " is not same as mT shape integral=" << h->Integral() << "; check mT plot source!" << std::endl;
@@ -222,6 +235,7 @@ void DatacardGenerator::generateProcessLines(std::vector< DatasetGroup* >& datas
 void DatacardGenerator::generateRateLine(std::vector< DatasetGroup* >& datasetGroups,
                                              std::vector< Extractable* >& extractables,
                                              bool useShapes) {
+  if (useShapes) std::cout << "Generating rates and rate histograms" << std::endl;
   sResult << "rate\t";
   for (size_t j = 0; j < datasetGroups.size(); ++j) {
     double myValue = 0;
@@ -230,12 +244,21 @@ void DatacardGenerator::generateRateLine(std::vector< DatasetGroup* >& datasetGr
       if (!extractables[i]->isRate()) continue;
       if (datasetGroups[j]->hasExtractable(extractables[i])) {
         myValue = datasetGroups[j]->getValueByExtractable(extractables[i], fNormalisationInfo);
+        //myValue *= 4.7/2.2; // FIXME for 2011B
+        //std::cout << "datagroup=" << datasetGroups[j]->getLabel() << ", value=" << myValue << std::endl;
         if (useShapes) {
           fFile->cd();
-          TH1F* h = datasetGroups[j]->getTransverseMassPlot(fNormalisationInfo, datasetGroups[j]->getLabel(),40,0.,400.);
-          if (!h) return;
-          if (h->Integral() > 0) // normalise only histograms that have entries
-            h->Scale(myValue / h->Integral());
+          if (datasetGroups[j]->getLabel() == "QCD") {
+            extractables[i]->addHistogramsToFile(datasetGroups[j]->getLabel(),"",fFile);
+          } else {
+            TH1F* h = datasetGroups[j]->getTransverseMassPlot(fNormalisationInfo, datasetGroups[j]->getLabel(),20,0.,400.);
+            if (!h) return;
+            double mySum = h->Integral() + h->GetBinContent(0) + h->GetBinContent(h->GetNbinsX()+1);
+            if (mySum > 0) // normalise only histograms that have entries
+              h->Scale(myValue / mySum);
+            h->SetDirectory(fFile);
+            std::cout << "  Created histogram " << h->GetTitle() << " with normalisation " << myValue << " source=" << datasetGroups[j]->getMtPlotName() << std::endl;
+          }
         }
       }
     }
@@ -247,6 +270,7 @@ void DatacardGenerator::generateRateLine(std::vector< DatasetGroup* >& datasetGr
 void DatacardGenerator::generateNuisanceLines(std::vector< DatasetGroup* >& datasetGroups,
                                               std::vector< Extractable* >& extractables,
                                               bool useShapes) {
+  if (useShapes) std::cout << "Generating nuisances and shape histograms" << std::endl;
   for (size_t i = 0; i < extractables.size(); ++i) {
     if ((extractables[i]->isNuisance() || extractables[i]->isNuisanceAsymmetric()) && 
         (!extractables[i]->isShapeNuisance() || useShapes) && !extractables[i]->isMerged()) {
@@ -259,15 +283,39 @@ void DatacardGenerator::generateNuisanceLines(std::vector< DatasetGroup* >& data
           if (extractables[i]->isNuisanceAsymmetric()) {
             myUpperValue = datasetGroups[j]->getUpperValueByExtractable(extractables[i], fNormalisationInfo);
           }
-          if (TMath::Abs(myValue - 1.0) < 0.0001) {
-            sResult << std::fixed << std::setprecision(0) << myValue << "\t";
-          } else {
-            if (extractables[i]->isNuisanceAsymmetric()) {
-              // asymmetric uncertainties
-              sResult << std::fixed << std::setprecision(3) << TMath::Abs(myValue-2.0) 
-                      << "/" << std::setprecision(3) << myUpperValue << "\t";
+          if (extractables[i]->isShapeNuisance()) {
+            if (myValue > 0) {
+              sResult << "1\t";
+              // doextractable has been called, store histograms
+              std::vector<Extractable*> myMerged = extractables[i]->getMergedExtractables();
+              for (size_t k = 0; k < myMerged.size(); ++k) {
+                if (datasetGroups[j]->hasExtractable(myMerged[k])) {
+                 myMerged[k]->addHistogramsToFile(datasetGroups[j]->getLabel(), extractables[i]->getId(), fFile);
+                }
+              }
+              if (datasetGroups[j]->hasExtractable(extractables[i]))
+                extractables[i]->addHistogramsToFile(datasetGroups[j]->getLabel(), extractables[i]->getId(), fFile);
             } else {
-              sResult << std::fixed << std::setprecision(3) << myValue << "\t";
+              sResult << "0\t";
+            }
+          } else {
+            if (TMath::Abs(myValue - 1.0) < 0.0001) {
+              sResult << std::fixed << std::setprecision(0) << myValue << "\t";
+            } else {
+              if (extractables[i]->isNuisanceAsymmetric()) {
+                // asymmetric uncertainties
+                sResult << std::fixed << std::setprecision(3) << TMath::Abs(myValue-2.0) 
+                        << "/" << std::setprecision(3) << myUpperValue << "\t";
+              } else {
+                // Tweak for trigger SF MET leg (add 10 % in quadrature)
+                if ((datasetGroups[j]->getProcess() <= 1 || datasetGroups[j]->getProcess() >= 5) && extractables[i]->getId() == "1") {
+                  double myNuisance = myValue - 1.0;
+                  myNuisance = TMath::Sqrt(myNuisance*myNuisance + 0.1*0.1);
+                  myValue = myNuisance + 1.0;
+                  std::cout << "Warning: added 10 % in quadrature for trigger in datagroup " << datasetGroups[j]->getLabel() << std::endl;
+                }
+                sResult << std::fixed << std::setprecision(3) << myValue << "\t";
+              }
             }
           }
         }

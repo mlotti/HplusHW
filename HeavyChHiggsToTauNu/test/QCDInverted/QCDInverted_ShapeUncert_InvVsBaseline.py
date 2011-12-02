@@ -10,7 +10,10 @@
 ###########################################################################
 
 import ROOT
-ROOT.gROOT.SetBatch(True)
+#ROOT.gROOT.SetBatch(True)
+from ROOT import *
+import math
+import sys
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
@@ -20,8 +23,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
-analysis = "signalAnalysis"
-counters = analysis+"Counters/weighted"
+from QCDInverted_Normalization import *
 
 def main():
     # Create all datasets from a multicrab task
@@ -32,7 +34,6 @@ def main():
 
     # Include only 120 mass bin of HW and HH datasets
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
-    datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
 
     # Default merging nad ordering of data and MC datasets
     # All data datasets to "Data"
@@ -41,17 +42,16 @@ def main():
     # WW, WZ, ZZ to "Diboson"
     plots.mergeRenameReorderForDataMC(datasets)
 
-    # Set BR(t->H) to 0.2, keep BR(H->tau) in 1
+    # Set BR(t->H) to 0.05, keep BR(H->tau) in 1
     xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
 
     # Merge WH and HH datasets to one (for each mass bin)
     # TTToHplusBWB_MXXX and TTToHplusBHminusB_MXXX to "TTToHplus_MXXX"
     plots.mergeWHandHH(datasets)
 
-    # Merge EWK datasets
     datasets.merge("EWK", [
+	    "TTJets",
             "WJets",
-            "TTJets",
             "DYJetsToLL",
             "SingleTop",
             "Diboson"
@@ -60,52 +60,32 @@ def main():
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
-    # Create the normalized plot of transverse mass
-    # Read the histogram from the file
-    #mT = plots.DataMCPlot(datasets, analysis+"/transverseMass")
+    invertedQCD = InvertedTauID()
 
-    # Create the histogram from the tree (and see the selections explicitly)
-    td = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger*weightPrescale",
-                             selection="met_p4.Et() > 70 && Max$(jets_btag) > 1.7")
-    mT = plots.DataMCPlot(datasets, td.clone(varexp="sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))>>dist(400, 0, 400)"))
+    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets")
+    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets")  
 
     # Rebin before subtracting
-    mT.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
-
-    # Create the data-EWK histogram and draw it
-    dataEwkDiff(mT)
-
-    # Draw the mT distribution
-    transverseMass(mT)
-
-def dataEwkDiff(mT):
-    # Get the normalized TH1 histograms
-    # Clone the data one, because we subtract the EWK from it
-    data = mT.histoMgr.getHisto("Data").getRootHisto().Clone("Data")
-    ewk = mT.histoMgr.getHisto("EWK").getRootHisto()
-
-    # Subtract ewk from data
-    data.Add(ewk, -1)
-    data.SetName("Data-EWK")
-
-    # Draw the subtracted plot
-    plot = plots.PlotBase([data])
-    plot.createFrame("transverseMass_data-ewk")
-    plot.frame.GetXaxis().SetTitle("m_{T}(#tau, MET) (GeV)")
-    plot.frame.GetYaxis().SetTitle("Data - EWK")
-    plot.draw()
-    plot.save()
-
-def transverseMass(plot):
-    plot.histoMgr.forHisto("EWK", styles.StyleFill(styles.ttStyle))
-    plot.stackMCHistograms()
-    plot.setLegend(histograms.createLegend(0.7, 0.68, 0.9, 0.93))
-    plot.createFrame("transverseMass")
-    plot.frame.GetXaxis().SetTitle("m_{T}(#tau, MET) (GeV)")
-    plot.frame.GetYaxis().SetTitle("Events / %.0f GeV" % plot.binWidth())
-    plot.draw()
-    plot.save()
+    metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     
+    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets")
+    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets") 
+    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets")
+    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets")
+
+    metBase_data.SetTitle("Data: BaseLine TauID")
+    metInverted_data.SetTitle("Data: Inverted TauID")
+    metBase_QCD = metBase_data.Clone("QCD")
+    metBase_QCD.Add(metBase_EWK,-1)
+    metBase_QCD.SetTitle("Data - EWK MC: BaseLine TauID")
+
+    invertedQCD.setLabel("BaseVsInverted")
+    invertedQCD.comparison(metInverted_data,metBase_data)
+    invertedQCD.setLabel("BaseMinusEWKVsInverted")
+    invertedQCD.comparison(metInverted_data,metBase_QCD)
+
+    invertedQCD.cutefficiency(metInverted_data,metBase_QCD)
 
 if __name__ == "__main__":
     main()

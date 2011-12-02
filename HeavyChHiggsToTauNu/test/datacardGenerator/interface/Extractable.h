@@ -15,7 +15,8 @@ public:
     kExtractableObservation,
     kExtractableRate,
     kExtractableNuisance,
-    kExtractableNuisanceAsymmetric
+    kExtractableNuisanceAsymmetric,
+    kExtractableShapeNuisance
   };
   
   /// Constructor for observation
@@ -26,12 +27,16 @@ public:
   Extractable(std::string id, std::string distribution, std::string description);
   /// Constructor for nuisance with asymmetric errors
   Extractable(std::string id, std::string distribution, std::string description, bool isAsymmetric);
+  /// Constructor for shape nuisance
+  Extractable(std::string id, std::string distribution, std::string description, std::string counterHisto, std::string upPrefix, std::string downPrefix);
 
   virtual ~Extractable();
   /// Mines result from datasets and merges dataset results together
-  virtual double doExtract(std::vector<Dataset*> datasets, NormalisationInfo* info);
+  virtual double doExtract(std::vector<Dataset*> datasets, NormalisationInfo* info, double additionalNormalisation = 1.0);
   
-  virtual double doExtractAsymmetricUpperValue(std::vector<Dataset*> datasets, NormalisationInfo* info);
+  virtual double doExtractAsymmetricUpperValue(std::vector<Dataset*> datasets, NormalisationInfo* info, double additionalNormalisation = 1.0);
+
+  virtual void addHistogramsToFile(std::string label, std::string id, TFile* f);
   
   /// For debugging
   virtual void print();
