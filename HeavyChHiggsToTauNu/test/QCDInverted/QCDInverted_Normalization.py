@@ -26,6 +26,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 analysis = "signalAnalysis"
 counters = analysis+"Counters/weighted"
 
+def Linear(x,par):
+    return par[0]*x[0] + par[1]
+
 def ExpFunction(x,par):
     if (x[0] > 280 and x[0] < 300) or x[0] > 360:
         TF1.RejectPoint()
@@ -98,15 +101,15 @@ class InvertedTauID:
 	self.labels = []
 	self.normFactors = []
 
+	self.lumi = 0
 
     def setLabel(self, label):
 	self.label = label
 
-    def comparison(self,histo1,histo2,norm=1):
+    def setLumi(self, lumi):
+	self.lumi = lumi
 
-        comp = TCanvas("comp","",500,500)
-        comp.cd()
-        comp.SetLogy()
+    def comparison(self,histo1,histo2,norm=1):
 
 	h1 = histo1.Clone("h1")
 	h2 = histo2.Clone("h2")
@@ -131,40 +134,46 @@ class InvertedTauID:
 
 	if norm > 0:
 	    h1.GetYaxis().SetTitle("Arbitrary units")
-	h1.SetMarkerStyle(20)
-	h1.GetYaxis().SetTitleOffset(1.5)
-        h1.Draw()
-	h2.SetMarkerStyle(20)
-	h2.SetMarkerColor(2)
-	h2.Draw("same")
 
-#        tex1 = TLatex(0.6,0.9,"Inverted TauID")
-	tex1 = TLatex(0.4,0.9,h1.GetTitle())
-        tex1.SetNDC()
-	tex1.SetTextSize(15)
-        tex1.Draw()
+        plot = plots.ComparisonPlot(
+            histograms.Histo(h1, "Inv"),
+            histograms.Histo(h2, "Base"),
+            )
+            # Set the styles
+        st1 = styles.getDataStyle().clone()
+        st2 = st1.clone()
+        st2.append(styles.StyleMarker(markerColor=ROOT.kRed))
+	plot.histoMgr.forHisto("Base", st1)
+        plot.histoMgr.forHisto("Inv", st2)
+        
+        # Set the legend labels
+        plot.histoMgr.setHistoLegendLabelMany({"Inv": h1.GetTitle(),
+                                               "Base": h2.GetTitle()})
+        # Set the legend styles
+        plot.histoMgr.setHistoLegendStyleAll("P")
+        
+        # Set the drawing styles
+        plot.histoMgr.setHistoDrawStyleAll("EP")
+        
+        # Create frame with a ratio pad
+        plot.createFrame("comparison"+self.label, opts={"ymin":1e-5, "ymaxfactor": 2},
+                         createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
+                         )
+        
+        # Set Y axis of the upper pad to logarithmic
+        plot.getPad1().SetLogy(True)
 
-	marker1 = TMarker(0.38,0.915,h1.GetMarkerStyle())
-	marker1.SetNDC()
-	marker1.SetMarkerColor(h1.GetMarkerColor())
-	marker1.SetMarkerSize(0.5*h1.GetMarkerSize())
-	marker1.Draw()
+	plot.setLegend(histograms.createLegend(0.4,0.82,0.9,0.93))
 
-#	tex2 = TLatex(0.6,0.85,"Baseline TauID")
-	tex2 = TLatex(0.4,0.85,h2.GetTitle())
-        tex2.SetNDC()
-	tex2.SetTextSize(15)
-        tex2.Draw()
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+ 
+           
+        plot.draw()
+        plot.save()
 
-        marker2 = TMarker(0.38,0.865,h2.GetMarkerStyle())
-        marker2.SetNDC()
-        marker2.SetMarkerColor(h2.GetMarkerColor())
-        marker2.SetMarkerSize(0.5*h2.GetMarkerSize())
-        marker2.Draw()
 
-        comp.Print("comparison"+self.label+".eps")
-	comp.Print("comparison"+self.label+".C")
-        comp.Print("comparison"+self.label+".png")
 
     def cutefficiency(self,histo1,histo2):
 
@@ -194,57 +203,98 @@ class InvertedTauID:
 	h1cut.GetYaxis().SetTitle("Efficiency")
         h1cut.GetXaxis().SetTitle("PF MET cut (GeV)")
 
+        h1_PlusError = h1.Clone("h1_PlusError")
+        h1_PlusError.Reset()
+        h1_MinusError = h1.Clone("h1_MinusError")
+        h1_MinusError.Reset()
+
+        h1cutPlusError = h1.Clone("h1cutPlusError")
+        h1cutPlusError.Reset()
+        h1cutMinusError = h1.Clone("h1cutMinusError")
+        h1cutMinusError.Reset()
+
+
         h2cut = h2.Clone("h2cut")
         h2cut.Reset()
 	h2cut.SetLineColor(2)
- 
+
+        h2_PlusError = h2.Clone("h2_PlusError")    
+        h2_PlusError.Reset()  
+        h2_MinusError = h2.Clone("h2_MinusError")    
+        h2_MinusError.Reset()
+
+        h2cutPlusError = h2.Clone("h2cutPlusError")
+        h2cutPlusError.Reset()
+        h2cutMinusError = h2.Clone("h2cutMinusError")
+        h2cutMinusError.Reset()
+
+        iBin = 1
+        nBins = h1cut.GetNbinsX()
+        while iBin < nBins:
+	    h1_PlusError.SetBinContent(iBin,h1.GetBinContent(iBin) + h1.GetBinError(iBin))
+	    h1_MinusError.SetBinContent(iBin,h1.GetBinContent(iBin) - h1.GetBinError(iBin)) 
+            h2_PlusError.SetBinContent(iBin,h2.GetBinContent(iBin) + h2.GetBinError(iBin))
+            h2_MinusError.SetBinContent(iBin,h2.GetBinContent(iBin) - h2.GetBinError(iBin))
+	    iBin = iBin + 1
+
+        integralError = ROOT.Double(0.0)
+	integralValue = h1.IntegralAndError(1,h1cut.GetNbinsX(),integralError)
+
         h1_integral = h1.Integral()
 	h2_integral = h2.Integral()
-
-	hError = h1.Clone("hError")
-	hError.Reset()
+        h1Plus_integral = h1_PlusError.Integral()
+	h1Minus_integral = h1_MinusError.Integral()
+        h2Plus_integral = h2_PlusError.Integral()
+        h2Minus_integral = h2_MinusError.Integral()
 
 	iBin = 1
 	nBins = h1cut.GetNbinsX()
 	while iBin < nBins:
-	    selected1 = h1.Integral(iBin,nBins)
+	    error = ROOT.Double(0.0)
+	    selected1 = h1.IntegralAndError(iBin,nBins,error)
+	    if selected1 > 0:
+		error = error/selected1
+	    else:
+		error = integralError/integralValue
 	    efficiency1 = selected1/h1_integral
 	    h1cut.SetBinContent(iBin,efficiency1)
+	    h1cut.SetBinError(iBin,error)
 
-            selected2 = h2.Integral(iBin,nBins)
+            error = ROOT.Double(0.0)
+            selected2 = h2.IntegralAndError(iBin,nBins,error)
+	    if selected2 > 0:
+		error = error/selected2
+	    else:
+		error = integralError/integralValue
             efficiency2 = selected2/h2_integral
             h2cut.SetBinContent(iBin,efficiency2)
-
-	    error = 0
-	    if efficiency1 > 0:
-		error = (efficiency1-efficiency2)/efficiency1
-            print "    Cut",histo1.GetBinLowEdge(iBin),efficiency1,efficiency2,error
-	    hError.SetBinContent(iBin,error)
+	    h2cut.SetBinError(iBin,error)
 
 	    iBin = iBin + 1
 
 
         plot = plots.ComparisonPlot(
-            histograms.Histo(h2cut, "Inv"),
-            histograms.Histo(h1cut, "Base"),
+            histograms.Histo(h1cut, "Inv"),
+            histograms.Histo(h2cut, "Base"),
             )
             # Set the styles
         st1 = styles.getDataStyle().clone()
         st2 = st1.clone()
         st2.append(styles.StyleLine(lineColor=ROOT.kRed))
+	st2.append(styles.StyleMarker(markerColor=ROOT.kRed))
         plot.histoMgr.forHisto("Base", st1)
         plot.histoMgr.forHisto("Inv", st2)
 
         # Set the legend labels
-        plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted tau ID",
-                                               "Base": "Baseline tau ID"})
+        plot.histoMgr.setHistoLegendLabelMany({"Inv": h1.GetTitle(),
+                                               "Base": h2.GetTitle()})
         # Set the legend styles
-        plot.histoMgr.setHistoLegendStyleAll("L")
-        #plot.histoMgr.setHistoLegendStyle("afterTauID", "P") # exception to the general rule
+        #plot.histoMgr.setHistoLegendStyleAll("L")
+	plot.histoMgr.setHistoLegendStyleAll("P")
 
         # Set the drawing styles
-        plot.histoMgr.setHistoDrawStyleAll("HIST")
-        #plot.histoMgr.setHistoDrawStyleAll("afterTauID", "EP") # exception to the general rule
+        #plot.histoMgr.setHistoDrawStyleAll("HIST")
+        plot.histoMgr.setHistoDrawStyleAll("EP")
 
         # Create frame with a ratio pad
         plot.createFrame("cuteff"+self.label, opts={"ymin":1e-5, "ymaxfactor": 2},
@@ -254,17 +304,62 @@ class InvertedTauID:
         # Set Y axis of the upper pad to logarithmic
         plot.getPad1().SetLogy(True)
 
+        plot.setLegend(histograms.createLegend(0.4,0.82,0.9,0.93))
+        
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText() 
+        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+
         plot.draw()
         plot.save()
 
         ######
 
+        hError = h1cut.Clone("hError")
+	hError.Divide(h2cut)
+
+        iBin = 1
+        nBins = hError.GetNbinsX()
+        while iBin < nBins:
+	    hError.SetBinContent(iBin,hError.GetBinContent(iBin) - 1)
+	    iBin = iBin + 1
+
+        hError.GetYaxis().SetTitle("(#varepsilon^{Inverted} - #varepsilon^{Baseline})/#varepsilon^{Baseline}")
+        hError.GetXaxis().SetTitle("PF MET cut (GeV)")
+
         plot2 = plots.PlotBase()
         plot2.histoMgr.appendHisto(histograms.Histo(hError,"ShapeUncertainty"))
         plot2.histoMgr.forHisto("ShapeUncertainty", st1)
-        plot2.histoMgr.setHistoDrawStyleAll("HIST")
-        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-1, "ymaxfactor": 1})
-        plot2.draw()
+        plot2.histoMgr.setHistoDrawStyleAll("EP")
+        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-1, "ymax": 1})
+
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+
+#        plot2.draw()
+
+	rangeMin = hError.GetXaxis().GetXmin()
+        rangeMax = hError.GetXaxis().GetXmax()
+	rangeMax = 80
+        
+        numberOfParameters = 2
+
+        class FitFunction:
+            def __call__( self, x, par ):
+                return Linear(x,par)
+
+        theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
+        #theFit.SetParLimits(1,0,0.5)
+
+	hError.Fit(theFit,"RN")
+	print "Error MET > 40",theFit.Eval(40)
+	print "Error MET > 50",theFit.Eval(50)
+	print "Error MET > 70",theFit.Eval(70)
+
+	plot2.histoMgr.appendHisto(histograms.Histo(theFit,"Fit"))
+
+	plot2.draw()
         plot2.save()
 
 
