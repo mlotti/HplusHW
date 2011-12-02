@@ -556,6 +556,12 @@ datasets = {
                 "number_of_jobs": 490, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011B_PromptReco_v1_AOD_175860_pattuple_v19b-5b285a19b88713a4f3b85b4f19938315/USER",
+                "luminosity": 357.895000,
+                "number_of_jobs": 14
+            },
         }
     },
     "SingleMu_176545-177053_Prompt": { # split because of much data (in the boundary of /cdaq/physics/Run2011/3e33/v2.3/HLT/V2 and /cdaq/physics/Run2011/3e33/v3.0/HLT/V2)
@@ -572,6 +578,12 @@ datasets = {
                 "datasetpath": "/SingleMu/Run2011B-PromptReco-v1/AOD",
                 "number_of_jobs": 490, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
+            },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011B_PromptReco_v1_AOD_176545_pattuple_v19b-5b285a19b88713a4f3b85b4f19938315/USER",
+                "luminosity": 392.293000,
+                "number_of_jobs": 16
             },
         }
     },
@@ -590,6 +602,12 @@ datasets = {
                 "number_of_jobs": 440, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011B_PromptReco_v1_AOD_177074_pattuple_v19b-5b285a19b88713a4f3b85b4f19938315/USER",
+                "luminosity": 283.916000,
+                "number_of_jobs": 11
+            },
         }
     },
     "SingleMu_177718-178380_Prompt": {
@@ -606,6 +624,12 @@ datasets = {
                 "datasetpath": "/SingleMu/Run2011B-PromptReco-v1/AOD",
                 "number_of_jobs": 490, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
+            },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011B_PromptReco_v1_AOD_177718_pattuple_v19b-5b285a19b88713a4f3b85b4f19938315/USER",
+                "luminosity": 663.691000,
+                "number_of_jobs": 24
             },
         }
     },
@@ -624,6 +648,12 @@ datasets = {
                 "number_of_jobs": 500,  # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011B_PromptReco_v1_AOD_178420_pattuple_v19b-e466cead0017a3c7a344c43d743deffb/USER",
+                "luminosity": 333.930000,
+                "number_of_jobs": 11
+            },
         }
     },
     "SingleMu_178871-179889_Prompt": { # split because of too much data (in the middle of /cdaq/physics/Run2011/5e33/v1.4/HLT/V5, splitting at the boundaries did not make sense)
@@ -641,6 +671,12 @@ datasets = {
                 "number_of_jobs": 500,  # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011B_PromptReco_v1_AOD_178871_pattuple_v19b-e466cead0017a3c7a344c43d743deffb/USER",
+                "luminosity": 359.936000,
+                "number_of_jobs": 12
+            },
         }
     },
     "SingleMu_179959-180252_Prompt": { # split because of too much data (in the middle of /cdaq/physics/Run2011/5e33/v1.4/HLT/V5, splitting at the boundaries did not make sense)
@@ -657,6 +693,12 @@ datasets = {
                 "datasetpath": "/SingleMu/Run2011B-PromptReco-v1/AOD",
                 "number_of_jobs": 300,  # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
+            },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011B_PromptReco_v1_AOD_179959_pattuple_v19b-3fee4f8acdeab3658ad87fd5630c41a5/USER",
+                "luminosity": 117.644000,
+                "number_of_jobs": 42
             },
         }
     },
