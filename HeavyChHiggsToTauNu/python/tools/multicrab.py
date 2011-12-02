@@ -24,9 +24,13 @@ defaultSeBlacklist = [
     "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout, also jobs can queue long times
     "unl.edu", # Jobs can wait in queues for a looong time
     "wisc.edu", # Stageout failures,
-    "ingrid.pt", # Stageout failures
+#    "ingrid.pt", # Stageout failures
     "ucsd.edu", # Stageout failures
     "pi.infn.it", # Stageout failures
+    "lnl.infn.it", # Stageout failures
+    "mit.edu", # MIT has some problems?
+    "sprace.org.br", # Stageout failures
+    "knu.ac.kr", # Stageout failures
     ]
 
 def getTaskDirectories(opts, filename="multicrab.cfg"):
