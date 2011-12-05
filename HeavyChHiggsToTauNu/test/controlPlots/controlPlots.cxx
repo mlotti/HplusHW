@@ -17,6 +17,7 @@ using namespace std;
 class ControlPlot {
 public:
   ControlPlot(string label, string sourceHisto);
+  ControlPlot(string label, TH1* h);
   virtual ~ControlPlot();
   /// Extract plot from supplied info
   virtual bool extract(vector<TFile*> data, vector<TFile*> mc, TH1* frameHisto);
@@ -48,11 +49,20 @@ ControlPlot::ControlPlot(string label, string sourceHisto)
   fLuminosityInPb(0) {
 
 }
+ControlPlot::ControlPlot(string label, TH1* h)
+: sSourceHisto(""),
+  hPlot(h),
+  sDatasetLabel(label),
+  fLuminosityInPb(0) {
+  
+}
+
 ControlPlot::~ControlPlot() {
 
 }
 
 bool ControlPlot::extract(std::vector< TFile* > data, std::vector< TFile* > mc, TH1* frameHisto) {
+  if (!sSourceHisto.size()) return true;
   hPlot = dynamic_cast<TH1F*>(frameHisto->Clone());
   hPlot->Sumw2();
   // Loop over data
@@ -275,17 +285,20 @@ vector<TFile*> openFiles(string path, vector<string> names) {
 class Manager {
 public:
   Manager(string label, TH1* frame, QCDControlPlot* qcd, EWKControlPlot* ewk, string fakeSource, string signalSource);
+  Manager(string label, TH1* frame, TH1* qcd, TH1* ewk, TH1* fakes, TH1* hh, TH1* hw, TH1* data);
   ~Manager();
 
   void setNormalisationInfo(string configInfo, string qcdCounter, string ewkCounter, string fakeCounter, string signalCounter, double lumiPb);
   bool extract(vector<TFile*>& qcdData, vector<TFile*>& qcdMCEWK, vector<TFile*>& ewkData, vector<TFile*>& fakes, vector<TFile*>& hh, vector<TFile*>& hw, vector<TFile*>& signalData);
-  void makePlot(double min, double max, double delta, string xtitle, string ytitle, double br, double mass);
+  void getIntegral(double& nqcd, double& newk, double& nfakes, double& nhh, double& nhw, double& ndata, double min = -1, double max = -1);
+  void getIntegralUncert(double& nqcd, double& newk, double& nfakes, double& nhh, double& nhw, double &ndata, double min = -1, double max = -1);
+  void makePlot(double min, double max, double delta, string xtitle, string ytitle, double br, double mass, bool logy = true);
   
 private:
   string sLabel;
   TH1* hFrame;
-  QCDControlPlot* fQCD;
-  EWKControlPlot* fEWK;
+  ControlPlot* fQCD;
+  ControlPlot* fEWK;
   ControlPlot* fFakes;
   ControlPlot* fHH;
   ControlPlot* fHW;
@@ -303,7 +316,64 @@ Manager::Manager(string label, TH1* frame, QCDControlPlot* qcd, EWKControlPlot* 
   fData = new ControlPlot("Data", signalSource);
 }
 
+Manager::Manager(string label, TH1* frame, TH1* qcd, TH1* ewk, TH1* fakes, TH1* hh, TH1* hw, TH1* data)
+: sLabel(label),
+  hFrame(frame),
+  fQCD(new ControlPlot("QCD", qcd)),
+  fEWK(new ControlPlot("EWK", ewk)),
+  fFakes(new ControlPlot("EWKfakesfakes", fakes)),
+  fHH(new ControlPlot("HH", hh)),
+  fHW(new ControlPlot("HW", hw)),
+  fData(new ControlPlot("Data", data)) { }
+
 Manager::~Manager() { }
+
+void Manager::getIntegral(double& nqcd, double& newk, double& nfakes, double& nhh, double& nhw, double &ndata, double min, double max) {
+  nqcd = 0.;
+  newk = 0.;
+  nfakes = 0.;
+  nhh = 0.;
+  nhw = 0.;
+  ndata = 0.;
+  int nbins = fQCD->getPlot()->GetNbinsX();
+  for (int i = 0; i <= nbins+1; ++i) {
+    if ((min < 0 || fQCD->getPlot()->GetXaxis()->GetBinLowEdge(i) >= min) && (max < 0 || fQCD->getPlot()->GetXaxis()->GetBinUpEdge(i) <= max)) {
+      nqcd += fQCD->getPlot()->GetBinContent(i);
+      newk += fEWK->getPlot()->GetBinContent(i);
+      nfakes += fFakes->getPlot()->GetBinContent(i);
+      nhh += fHH->getPlot()->GetBinContent(i);
+      nhw += fHW->getPlot()->GetBinContent(i);
+      ndata += fData->getPlot()->GetBinContent(i);
+    }
+  }
+}
+
+void Manager::getIntegralUncert(double& nqcd, double& newk, double& nfakes, double& nhh, double& nhw, double& ndata, double min, double max) {
+  nqcd = 0.;
+  newk = 0.;
+  nfakes = 0.;
+  nhh = 0.;
+  nhw = 0.;
+  ndata = 0.;
+  int nbins = fQCD->getPlot()->GetNbinsX();
+  for (int i = 0; i <= nbins+1; ++i) {
+    if ((min < 0 || fQCD->getPlot()->GetXaxis()->GetBinLowEdge(i) >= min) && (max < 0 || fQCD->getPlot()->GetXaxis()->GetBinUpEdge(i) <= max)) {
+      nqcd += TMath::Power(fQCD->getPlot()->GetBinError(i),2);
+      newk += TMath::Power(fEWK->getPlot()->GetBinError(i),2);
+      nfakes += TMath::Power(fFakes->getPlot()->GetBinError(i),2);
+      nhh += TMath::Power(fHH->getPlot()->GetBinError(i),2);
+      nhw += TMath::Power(fHW->getPlot()->GetBinError(i),2);
+      ndata += TMath::Power(fData->getPlot()->GetBinError(i),2);
+    }
+  }
+  nqcd = TMath::Sqrt(nqcd);
+  newk = TMath::Sqrt(newk);
+  nfakes = TMath::Sqrt(nfakes);
+  nhh = TMath::Sqrt(nhh);
+  nhw = TMath::Sqrt(nhw);
+  ndata = TMath::Sqrt(ndata);
+}
+
 
 void Manager::setNormalisationInfo(string configInfo, string qcdCounter, string ewkCounter, string fakeCounter, string signalCounter, double lumiPb) {
   fQCD->setNormalisationInfo(configInfo, qcdCounter, lumiPb);
@@ -326,7 +396,7 @@ bool Manager::extract(std::vector< TFile* >& qcdData, std::vector< TFile* >& qcd
   return true;
 }
 
-void Manager::makePlot(double min, double max, double delta, string xtitle, string ytitle, double br, double mass) {
+void Manager::makePlot(double min, double max, double delta, string xtitle, string ytitle, double br, double mass, bool logy) {
   stringstream s;
   // Make canvas
   TCanvas* c = new TCanvas(sLabel.c_str(), sLabel.c_str(), 600, 600);
@@ -393,7 +463,7 @@ void Manager::makePlot(double min, double max, double delta, string xtitle, stri
   hSignal->SetLineStyle(2);
   hSignal->SetLineWidth(2);
   THStack* hBkg = new THStack();
-  //hBkg->Add(hFakes);
+  hBkg->Add(hFakes);
   hBkg->Add(hEWK);
   hBkg->Add(hQCD);
   hBkg->Add(hSignal);
@@ -493,7 +563,8 @@ void Manager::makePlot(double min, double max, double delta, string xtitle, stri
   plotpad->SetFillStyle(4000);
   plotpad->SetBorderMode(0);
   plotpad->SetBorderSize(2);
-  plotpad->SetLogy();
+  if (logy)
+    plotpad->SetLogy();
   plotpad->SetTickx(1);
   plotpad->SetTicky(1);
   plotpad->SetLeftMargin(0.16);
@@ -534,7 +605,7 @@ void Manager::makePlot(double min, double max, double delta, string xtitle, stri
   entry = leg->AddEntry(hSignal, s.str().c_str(), "L");
   entry = leg->AddEntry(hQCD, "QCD (meas.)", "F");
   entry = leg->AddEntry(hEWK, "EWK w. taus (meas.)", "F");
-  //entry = leg->AddEntry(hFakes, "EWK fake taus (MC)", "F");
+  entry = leg->AddEntry(hFakes, "EWK fake taus (MC)", "F");
   entry = leg->AddEntry(hBkgUncert, "stat. uncert", "F");
   leg->Draw();
 
@@ -573,9 +644,33 @@ void Manager::makePlot(double min, double max, double delta, string xtitle, stri
   c->Print(s.str().c_str());
 }
 
+void addEntryToSelectionFlow(Manager* m, int bin, TH1* hqcd, TH1* hewk, TH1* hfakes, TH1* hhh, TH1* hhw, TH1* hdata, double min, double max) {
+  double nQCD = 0;
+  double nEWK = 0;
+  double nFakes = 0;
+  double nHH = 0;
+  double nHW = 0;
+  double nData = 0;
+  // Get event counts
+  m->getIntegral(nQCD, nEWK, nFakes, nHH, nHW, nData, min, max);
+  hqcd->SetBinContent(bin, nQCD);
+  hewk->SetBinContent(bin, nEWK);
+  hfakes->SetBinContent(bin, nFakes);
+  hhh->SetBinContent(bin, nHH);
+  hhw->SetBinContent(bin, nHW);
+  hdata->SetBinContent(bin, nData);
+  // Get stat. uncertainty
+  m->getIntegralUncert(nQCD, nEWK, nFakes, nHH, nHW, nData, min, max);
+  hqcd->SetBinError(bin, nQCD);
+  hewk->SetBinError(bin, nEWK);
+  hfakes->SetBinError(bin, nFakes);
+  hhh->SetBinError(bin, nHH);
+  hhw->SetBinError(bin, nHW);
+  hdata->SetBinError(bin, nData);
+}
 
 int main() {
-  int myMassPoint = 100;
+  int myMassPoint = 120;
   
   // Define data sample names
   vector<string> myDataNames;
@@ -629,7 +724,7 @@ int main() {
   vector<TFile*> myQCDDataFiles = openFiles("qcdpath", myDataNames);
   vector<TFile*> myQCDMCEWKFiles = openFiles("qcdpath", myMCEWKNames);
   vector<TFile*> myEWKDataFiles = openFiles("ewkpath", myEWKDataNames);
-  vector<TFile*> myEWKFakeFiles = openFiles("signalpath", myMCEWKNames);
+  vector<TFile*> myEWKFakeFiles = openFiles("fakespath", myMCEWKNames);
   vector<TFile*> mySignalHHFiles = openFiles("signalpath", mySignalHHNames);
   vector<TFile*> mySignalHWFiles = openFiles("signalpath", mySignalHWNames);
   vector<TFile*> myDataFiles = openFiles("signalpath", myDataNames);
@@ -647,7 +742,7 @@ int main() {
   double myLuminosityInPb = 2177;
   double myBr = 0.05;
   
-  string QCDprefix = "QCDMeasurement/QCDMeasurementVariation_METcut40_DeltaPhiTauMETCut180_tauIsol1/";
+  string QCDprefix = "QCDMeasurement/QCDMeasurementVariation_METcut50_DeltaPhiTauMETCut180_tauIsol1/";
   string EWKprefix = "signalAnalysisCaloMet60TEff/ControlPlots/";
   string signalprefix = "signalAnalysis/ControlPlots/";
   string configInfo = "configInfo/configinfo";
@@ -744,6 +839,29 @@ int main() {
   myMet->makePlot(5e-1, 2e2, 0.5, "PF MET, GeV", "N_{events} / 10 GeV/c", myBr, myMassPoint);
   myNBjets->makePlot(5e-1, 2e2, 0.5, "N_{b jets}", "N_{events}", myBr, myMassPoint);
   myDeltaPhi->makePlot(5e-1, 2e2, 0.5, "#Delta#phi(#tau,MET), ^{o}", "N_{events} / 10^{o}", myBr, myMassPoint);
+
+  
+  // Make selection flow plot
+  int nbins = 4;
+  TH1* hSelectionFlowFrame = new TH1F("SelectionFlow","SelectionFlow",nbins,0,nbins);
+  hSelectionFlowFrame->GetXaxis()->SetBinLabel(1, "E_{T}^{miss}");
+  hSelectionFlowFrame->GetXaxis()->SetBinLabel(2, "N_{b jets}");
+  hSelectionFlowFrame->GetXaxis()->SetBinLabel(3, "#Delta#phi<160^{o}");
+  if (nbins >= 4)
+    hSelectionFlowFrame->GetXaxis()->SetBinLabel(4, "#Delta#phi<130^{o}");
+  TH1* hSelectionFlowQCD = dynamic_cast<TH1*>(hSelectionFlowFrame->Clone("SelectionFlowQCD"));
+  TH1* hSelectionFlowEWK = dynamic_cast<TH1*>(hSelectionFlowFrame->Clone("SelectionFlowEWK"));
+  TH1* hSelectionFlowFakes = dynamic_cast<TH1*>(hSelectionFlowFrame->Clone("SelectionFlowFakes"));
+  TH1* hSelectionFlowHH = dynamic_cast<TH1*>(hSelectionFlowFrame->Clone("SelectionFlowHH"));
+  TH1* hSelectionFlowHW = dynamic_cast<TH1*>(hSelectionFlowFrame->Clone("SelectionFlowHW"));
+  TH1* hSelectionFlowData = dynamic_cast<TH1*>(hSelectionFlowFrame->Clone("SelectionFlowData"));
+  addEntryToSelectionFlow(myMet,1,hSelectionFlowQCD,hSelectionFlowEWK,hSelectionFlowFakes,hSelectionFlowHH,hSelectionFlowHW,hSelectionFlowData, -1, -1);
+  addEntryToSelectionFlow(myNBjets,2,hSelectionFlowQCD,hSelectionFlowEWK,hSelectionFlowFakes,hSelectionFlowHH,hSelectionFlowHW,hSelectionFlowData, -1, -1);
+  addEntryToSelectionFlow(myDeltaPhi,3,hSelectionFlowQCD,hSelectionFlowEWK,hSelectionFlowFakes,hSelectionFlowHH,hSelectionFlowHW,hSelectionFlowData, 0., 160.);
+  if (nbins >= 4)
+    addEntryToSelectionFlow(myDeltaPhi,4,hSelectionFlowQCD,hSelectionFlowEWK,hSelectionFlowFakes,hSelectionFlowHH,hSelectionFlowHW,hSelectionFlowData, 0., 130.);
+  Manager* mySelectionFlow = new Manager("SelectionFlow",hSelectionFlowFrame,hSelectionFlowQCD,hSelectionFlowEWK,hSelectionFlowFakes,hSelectionFlowHH,hSelectionFlowHW,hSelectionFlowData);
+  mySelectionFlow->makePlot(0, 650, 0.5, "", "N_{events}", myBr, myMassPoint, !false);
   
   /*
   TFile* myOutFile = TFile::Open("controlPlots.root","RECREATE");
