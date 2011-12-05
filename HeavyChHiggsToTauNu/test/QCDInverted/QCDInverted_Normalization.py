@@ -86,7 +86,7 @@ def QCDFunctionFixed(x,par):
 
 class InvertedTauID:
 
-    def __init__( self):
+    def __init__(self):
 	self.parInvQCD  = []
 	self.parMCEWK   = []
 	self.parBaseQCD = []
@@ -106,11 +106,16 @@ class InvertedTauID:
 
 	self.lumi = 0
 
+	self.errorBars = False
+
     def setLabel(self, label):
 	self.label = label
 
     def setLumi(self, lumi):
 	self.lumi = lumi
+
+    def useErrorBars(self, useHistoErrors):
+	self.errorBars = useHistoErrors
 
     def comparison(self,histo1,histo2,norm=1):
 
@@ -206,49 +211,49 @@ class InvertedTauID:
 	h1cut.GetYaxis().SetTitle("Efficiency")
         h1cut.GetXaxis().SetTitle("PF MET cut (GeV)")
 
-        h1_PlusError = h1.Clone("h1_PlusError")
-        h1_PlusError.Reset()
-        h1_MinusError = h1.Clone("h1_MinusError")
-        h1_MinusError.Reset()
-
-        h1cutPlusError = h1.Clone("h1cutPlusError")
-        h1cutPlusError.Reset()
-        h1cutMinusError = h1.Clone("h1cutMinusError")
-        h1cutMinusError.Reset()
+#        h1_PlusError = h1.Clone("h1_PlusError")
+#        h1_PlusError.Reset()
+#        h1_MinusError = h1.Clone("h1_MinusError")
+#        h1_MinusError.Reset()
+#
+#        h1cutPlusError = h1.Clone("h1cutPlusError")
+#        h1cutPlusError.Reset()
+#        h1cutMinusError = h1.Clone("h1cutMinusError")
+#        h1cutMinusError.Reset()
 
 
         h2cut = h2.Clone("h2cut")
         h2cut.Reset()
 	h2cut.SetLineColor(2)
 
-        h2_PlusError = h2.Clone("h2_PlusError")    
-        h2_PlusError.Reset()  
-        h2_MinusError = h2.Clone("h2_MinusError")    
-        h2_MinusError.Reset()
+#        h2_PlusError = h2.Clone("h2_PlusError")    
+#        h2_PlusError.Reset()  
+#        h2_MinusError = h2.Clone("h2_MinusError")    
+#        h2_MinusError.Reset()
+#
+#        h2cutPlusError = h2.Clone("h2cutPlusError")
+#        h2cutPlusError.Reset()
+#        h2cutMinusError = h2.Clone("h2cutMinusError")
+#        h2cutMinusError.Reset()
 
-        h2cutPlusError = h2.Clone("h2cutPlusError")
-        h2cutPlusError.Reset()
-        h2cutMinusError = h2.Clone("h2cutMinusError")
-        h2cutMinusError.Reset()
-
-        iBin = 1
-        nBins = h1cut.GetNbinsX()
-        while iBin < nBins:
-	    h1_PlusError.SetBinContent(iBin,h1.GetBinContent(iBin) + h1.GetBinError(iBin))
-	    h1_MinusError.SetBinContent(iBin,h1.GetBinContent(iBin) - h1.GetBinError(iBin)) 
-            h2_PlusError.SetBinContent(iBin,h2.GetBinContent(iBin) + h2.GetBinError(iBin))
-            h2_MinusError.SetBinContent(iBin,h2.GetBinContent(iBin) - h2.GetBinError(iBin))
-	    iBin = iBin + 1
+#        iBin = 1
+#        nBins = h1cut.GetNbinsX()
+#        while iBin < nBins:
+#	    h1_PlusError.SetBinContent(iBin,h1.GetBinContent(iBin) + h1.GetBinError(iBin))
+#	    h1_MinusError.SetBinContent(iBin,h1.GetBinContent(iBin) - h1.GetBinError(iBin)) 
+#            h2_PlusError.SetBinContent(iBin,h2.GetBinContent(iBin) + h2.GetBinError(iBin))
+#            h2_MinusError.SetBinContent(iBin,h2.GetBinContent(iBin) - h2.GetBinError(iBin))
+#	    iBin = iBin + 1
 
         integralError = ROOT.Double(0.0)
 	integralValue = h1.IntegralAndError(1,h1cut.GetNbinsX(),integralError)
 
         h1_integral = h1.Integral()
 	h2_integral = h2.Integral()
-        h1Plus_integral = h1_PlusError.Integral()
-	h1Minus_integral = h1_MinusError.Integral()
-        h2Plus_integral = h2_PlusError.Integral()
-        h2Minus_integral = h2_MinusError.Integral()
+#        h1Plus_integral = h1_PlusError.Integral()
+#	h1Minus_integral = h1_MinusError.Integral()
+#        h2Plus_integral = h2_PlusError.Integral()
+#        h2Minus_integral = h2_MinusError.Integral()
 
 	iBin = 1
 	nBins = h1cut.GetNbinsX()
@@ -261,7 +266,8 @@ class InvertedTauID:
 		error = integralError/integralValue
 	    efficiency1 = selected1/h1_integral
 	    h1cut.SetBinContent(iBin,efficiency1)
-	    h1cut.SetBinError(iBin,error)
+	    if self.errorBars:
+   	        h1cut.SetBinError(iBin,error)
 
             error = ROOT.Double(0.0)
             selected2 = h2.IntegralAndError(iBin,nBins,error)
@@ -271,7 +277,8 @@ class InvertedTauID:
 		error = integralError/integralValue
             efficiency2 = selected2/h2_integral
             h2cut.SetBinContent(iBin,efficiency2)
-	    h2cut.SetBinError(iBin,error)
+	    if self.errorBars:
+	        h2cut.SetBinError(iBin,error)
 
 	    iBin = iBin + 1
 
