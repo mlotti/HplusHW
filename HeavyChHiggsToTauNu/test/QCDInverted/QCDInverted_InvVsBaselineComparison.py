@@ -23,7 +23,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
-from QCDInverted_Normalization import *
+from InvertedTauID import *
 
 def main():
     # Create all datasets from a multicrab task
