@@ -32,13 +32,18 @@ class StyleCompound(StyleBase):
         return StyleCompound(self.styles[:])
 
 class StyleFill(StyleBase):
-    def __init__(self, style, fillStyle=1001):
-        self.style = style
+    def __init__(self, style=None, fillStyle=1001, fillColor=None):
+        self.style     = style
         self.fillStyle = fillStyle
+	self.fillColor = fillColor
 
     def apply(self, h):
-        self.style.apply(h)
-        h.SetFillColor(self.style.color)
+	if self.style != None:
+            self.style.apply(h)
+	if self.fillColor != None:
+	    h.SetFillColor(self.fillColor)
+	else:
+	    h.SetFillColor(self.style.color)
         #h.SetFillStyle(3002)
         h.SetFillStyle(self.fillStyle)
 
