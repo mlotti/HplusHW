@@ -226,34 +226,11 @@ class InvertedTauID:
         h2cut.Reset()
 	h2cut.SetLineColor(2)
 
-#        h2_PlusError = h2.Clone("h2_PlusError")    
-#        h2_PlusError.Reset()  
-#        h2_MinusError = h2.Clone("h2_MinusError")    
-#        h2_MinusError.Reset()
-#
-#        h2cutPlusError = h2.Clone("h2cutPlusError")
-#        h2cutPlusError.Reset()
-#        h2cutMinusError = h2.Clone("h2cutMinusError")
-#        h2cutMinusError.Reset()
-
-#        iBin = 1
-#        nBins = h1cut.GetNbinsX()
-#        while iBin < nBins:
-#	    h1_PlusError.SetBinContent(iBin,h1.GetBinContent(iBin) + h1.GetBinError(iBin))
-#	    h1_MinusError.SetBinContent(iBin,h1.GetBinContent(iBin) - h1.GetBinError(iBin)) 
-#            h2_PlusError.SetBinContent(iBin,h2.GetBinContent(iBin) + h2.GetBinError(iBin))
-#            h2_MinusError.SetBinContent(iBin,h2.GetBinContent(iBin) - h2.GetBinError(iBin))
-#	    iBin = iBin + 1
-
         integralError = ROOT.Double(0.0)
 	integralValue = h1.IntegralAndError(1,h1cut.GetNbinsX(),integralError)
 
-        h1_integral = h1.Integral()
-	h2_integral = h2.Integral()
-#        h1Plus_integral = h1_PlusError.Integral()
-#	h1Minus_integral = h1_MinusError.Integral()
-#        h2Plus_integral = h2_PlusError.Integral()
-#        h2Minus_integral = h2_MinusError.Integral()
+        h1_integral = h1.Integral(0,h1.GetNbinsX())
+	h2_integral = h2.Integral(0,h2.GetNbinsX())
 
 	iBin = 1
 	nBins = h1cut.GetNbinsX()
@@ -432,7 +409,7 @@ class InvertedTauID:
         cqcd.SetLogy()
 	gStyle.SetOptFit(0)
 
-	self.normInvQCD = histo.Integral()
+	self.normInvQCD = histo.Integral(0,histo.GetNbinsX())
 
 	histo.Scale(1/self.normInvQCD)
         histo.Fit(theFit,"LR")         
@@ -559,7 +536,7 @@ class InvertedTauID:
         cewk.cd()
         cewk.SetLogy()
 
-	self.normEWK = histo.Integral()
+	self.normEWK = histo.Integral(0,histo.GetNbinsX())
 
 	histo.Scale(1/self.normEWK)
 
@@ -626,7 +603,7 @@ class InvertedTauID:
         c = TCanvas("c","",500,500)
         c.cd()
         c.SetLogy()
-	print "data events ",histo.Integral()
+	print "data events ",histo.Integral(0,histo.GetNbinsX())
 
         histo.Fit(theFit,"R")
 
@@ -741,7 +718,7 @@ class InvertedTauID:
         cshape = TCanvas("cshape","",500,500)
         cshape.cd()
         cshape.SetLogy()
-#        print "data events ",histo.Integral()   
+#        print "data events ",histo.Integral(0,histo.GetNbinsX())   
 
         histoInv.Scale(histoBase.GetMaximum()/histoInv.GetMaximum())
         histoInv.SetMarkerColor(4)
