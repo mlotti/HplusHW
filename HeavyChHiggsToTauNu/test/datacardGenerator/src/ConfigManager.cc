@@ -915,21 +915,12 @@ bool ConfigManager::doExtract() {
   return true;
 }
 
-void ConfigManager::generateCards() {
+void ConfigManager::generateCards(bool useShapes) {
   // Loop over mass points
-  /*for (size_t i = 0; i < vDatacardGenerators.size(); ++i) {
-    vDatacardGenerators[i]->generateDataCard(sDescription, fLuminosity, 
-                                             sShapeSource, false,
+  for (size_t i = 0; i < vDatacardGenerators.size(); ++i) {
+    vDatacardGenerators[i]->generateDataCard(sDescription, fLuminosity,
+                                             sShapeSource, useShapes,
                                              vExtractables, vDatasetGroups,
                                              fNormalisationInfo);
-  }*/
-  //  Generate datacards with shapes
-  if (sShapeSource.size()) {
-    for (size_t i = 0; i < vDatacardGenerators.size(); ++i) {
-      vDatacardGenerators[i]->generateDataCard(sDescription, fLuminosity,
-                                              sShapeSource, true,
-                                              vExtractables, vDatasetGroups,
-                                               fNormalisationInfo);
-    }
   }
 }

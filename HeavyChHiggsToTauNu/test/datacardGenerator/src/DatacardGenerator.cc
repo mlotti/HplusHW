@@ -317,11 +317,29 @@ void DatacardGenerator::generateNuisanceLines(std::vector< DatasetGroup* >& data
               std::vector<Extractable*> myMerged = extractables[i]->getMergedExtractables();
               for (size_t k = 0; k < myMerged.size(); ++k) {
                 if (datasetGroups[j]->hasExtractable(myMerged[k])) {
-                 myMerged[k]->addHistogramsToFile(datasetGroups[j]->getLabel(), extractables[i]->getId(), fFile);
+                  myMerged[k]->addHistogramsToFile(datasetGroups[j]->getLabel(), extractables[i]->getId(), fFile);
                 }
               }
               if (datasetGroups[j]->hasExtractable(extractables[i]))
                 extractables[i]->addHistogramsToFile(datasetGroups[j]->getLabel(), extractables[i]->getId(), fFile);
+              // begin code for normalising shape uncertainty to rate
+              /*std::string myNameUp = datasetGroups[j]->getLabel() + "_" + extractables[i]->getId() + "Up";
+              std::string myNameDown = datasetGroups[j]->getLabel() + "_" + extractables[i]->getId() + "Down";
+              TH1* hup = dynamic_cast<TH1*>(fFile->Get(myNameUp.c_str()));
+              TH1* hdown = dynamic_cast<TH1*>(fFile->Get(myNameDown.c_str()));
+              if (hup && hdown) {
+                double myRate = 0.;
+                for (size_t x = 0; x < extractables.size(); ++x) {
+                  if (extractables[x]->isRate() && datasetGroups[j]->hasExtractable(extractables[x]))
+                    myRate = datasetGroups[j]->getValueByExtractable(extractables[x], fNormalisationInfo);
+                }
+                if (myRate > 0.0) {
+                  hup->Scale(myRate / hup->Integral());
+                  hdown->Scale(myRate / hdown->Integral());
+                  std::cout << "\033[0;43m\033[1;37mWarning:\033[0;0m shape nuisance " << myNameUp << " and " << myNameDown << " normalised to measured rate " << myRate << std::endl;
+                }
+              }*/
+              // end code for normalising shape uncertainty to rate
             } else {
               sResult << "0\t";
             }
@@ -347,10 +365,25 @@ void DatacardGenerator::generateNuisanceLines(std::vector< DatasetGroup* >& data
                 } else if (datasetGroups[j]->getProcess() == 4 && (extractables[i]->getId() == "1" || extractables[i]->getId() == "19")) {
                   // Tweak for EWK tau trg eff and stat downscaling for lumi forecast
                   if (info->getLuminosityScaling() > 1) {
+                    myValue -= 1.0;
                     myValue /= TMath::Sqrt(info->getLuminosityScaling());
                     std::cout << "\033[0;43m\033[1;37mWarning:\033[0;0m EWKTau trg / stat. uncertainty scaled for lumi forecast" << std::endl;
+                    myValue += 1.0;
                   }
                 }
+// FIXME remove
+/*
+                if ((datasetGroups[j]->getProcess() <= 1 || datasetGroups[j]->getProcess() >= 5)) {
+                  if (extractables[i]->getId() == "1") myValue = 1.25;
+                  if (extractables[i]->getId() == "10") myValue = 1.15;
+                  if (extractables[i]->getId() == "11") myValue = 1.11;
+                }
+                if ((datasetGroups[j]->getProcess() == 4)) {
+                  if (extractables[i]->getId() == "1") myValue = 1.096;
+                  if (extractables[i]->getId() == "7") myValue = 1.176;
+                }
+*/
+// FIXME end remove
                 sResult << std::fixed << std::setprecision(3) << myValue << "\t";
               }
             }

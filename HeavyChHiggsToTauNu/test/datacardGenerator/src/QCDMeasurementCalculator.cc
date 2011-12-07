@@ -11,7 +11,7 @@
 
 QCDMeasurementCalculator::QCDMeasurementCalculator(std::string id)
 : Extractable(id) {
-  bDebug = false;
+  bDebug = !false;
   reset();
 }
 
@@ -291,8 +291,8 @@ void QCDMeasurementCalculator::doCalculate() {
   hBasicMtShape->Scale(myResultNQCD / (hBasicMtShape->GetBinContent(0) + hBasicMtShape->GetBinContent(hBasicMtShape->GetNbinsX()+1) + hBasicMtShape->Integral()));
   hMtShapeForResult = dynamic_cast<TH1F*>(hBasicMtShape->Clone("QCDMt"));
   std::cout << "  QCD measurement result: NQCD = " << fResultValue
-            << " +- " << fResultRelativeStatisticalUncertainty << " % stat."
-            << " +- " << fResultRelativeSystematicalUncertainty << " % syst." << std::endl;
+            << " +- " << fResultRelativeStatisticalUncertainty*100.0 << " % stat."
+            << " +- " << fResultRelativeSystematicalUncertainty*100.0 << " % syst." << std::endl;
   if (fNormalisationInfo->getLuminosityScaling() > 1)
     std::cout << "\033[0;43m\033[1;37mWarning:\033[0;0m QCD measurement rate and data stat. uncertainty scaled for lumi forecast" << std::endl;
 
@@ -406,8 +406,8 @@ double QCDMeasurementCalculator::getMeasurementAbsUncertaintySquared(std::vector
     }
     double a = myHisto->GetBinError(bin);
     if (isData) {
-      //sqrt(a^2 + b^2)* 1/sqrt(2) = sqrt(a^2/2 + b^2/2) = sqrt((a/sqrt(2))^2 + (b/sqrt(2))^2)
-      a *= TMath::Sqrt(1.0/fNormalisationInfo->getLuminosityScaling());
+      //sqrt(a^2 + b^2)* sqrt(2) = sqrt(a^2*2 + b^2*2) = sqrt((a*sqrt(2))^2 + (b*sqrt(2))^2)
+      a *= TMath::Sqrt(fNormalisationInfo->getLuminosityScaling());
     } else {
       a *= fNormalisationInfo->getNormalisationFactor(datasets[i]->getFile());
     }
