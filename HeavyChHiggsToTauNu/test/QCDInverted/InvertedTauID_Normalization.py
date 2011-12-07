@@ -26,6 +26,10 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 from InvertedTauID import *
 
 def main():
+
+    HISTONAME = "TauIdJets"
+#    HISTONAME = "TauIdBtag"
+    
     # Create all datasets from a multicrab task
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
 
@@ -49,12 +53,6 @@ def main():
     # TTToHplusBWB_MXXX and TTToHplusBHminusB_MXXX to "TTToHplus_MXXX"
     plots.mergeWHandHH(datasets)
 
-    ttjets2 = datasets.getDataset("TTJets").deepCopy()
-    ttjets2.setCrossSection(ttjets2.getCrossSection()-datasets.getDataset("TTToHplus_M120").getCrossSection())
-    print "Set TTJets2 cross section to %f" % ttjets2.getCrossSection()
-    ttjets2.setName("TTJets2")
-    datasets.append(ttjets2)
-
     datasets.merge("EWK", [
 	    "TTJets",
             "WJets",
@@ -67,18 +65,19 @@ def main():
     style = tdrstyle.TDRStyle()
 
     invertedQCD = InvertedTauID()
+    invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
 
-    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets")
-    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets")  
+    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLine"+HISTONAME)
+    metInver = plots.DataMCPlot(datasets, analysis+"/MET_Inverted"+HISTONAME)  
 
     # Rebin before subtracting
     metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     
-    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets")
-    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets") 
-    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets")
-    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets")
+    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_Inverted"+HISTONAME)
+    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_Inverted"+HISTONAME) 
+    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_Baseline"+HISTONAME)
+    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_Baseline"+HISTONAME)
 
     metBase_data.SetTitle("Data: BaseLine TauID")
     metInverted_data.SetTitle("Data: Inverted TauID")
@@ -86,15 +85,17 @@ def main():
     metBase_QCD.Add(metBase_EWK,-1)
     metBase_QCD.SetTitle("Data - EWK MC: BaseLine TauID")
 
-    invertedQCD.setLabel("BaseVsInverted")
-    invertedQCD.comparison(metInverted_data,metBase_data)
-    invertedQCD.setLabel("BaseMinusEWKVsInverted")
-    invertedQCD.comparison(metInverted_data,metBase_QCD)
+#    invertedQCD.setLabel("BaseVsInverted")
+#    invertedQCD.comparison(metInverted_data,metBase_data)
+#    invertedQCD.setLabel("BaseMinusEWKVsInverted")
+#    invertedQCD.comparison(metInverted_data,metBase_QCD)
 
 
-    invertedQCD.setLabel("inclusive")   
+    invertedQCD.setLabel("inclusive")
+    invertedQCD.plotHisto(metInverted_data,"inverted")
+    invertedQCD.plotHisto(metBase_data,"baseline")
     invertedQCD.fitQCD(metInverted_data)
-    invertedQCD.fitEWK(metBase_EWK)  
+    invertedQCD.fitEWK(metBase_EWK,"LR")  
     invertedQCD.fitData(metBase_data)
     normalizationWithEWK = invertedQCD.getNormalization()
 
@@ -105,7 +106,6 @@ def main():
     for bin in bins:
 
         metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets"+bin)
-#        metBase.createFrame("MET", opts={"ymin": 1e-6, "ymaxfactor": 10})
         metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets"+bin)
         # Rebin before subtracting
         metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
