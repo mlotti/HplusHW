@@ -2,8 +2,9 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <sstream>
 #include <TFile.h>
-#include <TH1F.h>
+#include <TH1D.h>
 #include <TMath.h>
 #include <TCanvas.h>
 #include <TStyle.h>
@@ -63,7 +64,7 @@ ControlPlot::~ControlPlot() {
 
 bool ControlPlot::extract(std::vector< TFile* > data, std::vector< TFile* > mc, TH1* frameHisto) {
   if (!sSourceHisto.size()) return true;
-  hPlot = dynamic_cast<TH1F*>(frameHisto->Clone());
+  hPlot = dynamic_cast<TH1D*>(frameHisto->Clone());
   hPlot->Sumw2();
   // Loop over data
   if (!loopOverFiles(data, sSourceHisto, hPlot, true)) return false;
@@ -74,7 +75,7 @@ bool ControlPlot::extract(std::vector< TFile* > data, std::vector< TFile* > mc, 
 
 bool ControlPlot::loopOverFiles(std::vector< TFile* > files, string source, TH1* histo, bool isData) {
   for (size_t i = 0; i < files.size(); ++i) {
-    // No normalisation needed
+    double myNormFactor = 1.0;
     // Obtain plot
     TH1* h = dynamic_cast<TH1*>(files[i]->Get(source.c_str()));
     if (!h) {
@@ -83,10 +84,17 @@ bool ControlPlot::loopOverFiles(std::vector< TFile* > files, string source, TH1*
     }
     if (!isData) {
       // Obtain normalisation
-      double myNormFactor = getNormFactor(files[i]);
+      myNormFactor = getNormFactor(files[i]);
       if (myNormFactor < 0) return false;
-      h->Scale(myNormFactor);
     }
+    // Check axis scale
+    if (TMath::Abs(h->GetXaxis()->GetXmax() - histo->GetXaxis()->GetXmax()) > 0.0001 ||
+        TMath::Abs(h->GetXaxis()->GetXmin() - histo->GetXaxis()->GetXmin()) > 0.0001){
+      cout << "Error: " << source << ": Range in histograms is different! Asked for " << h->GetXaxis()->GetXmin() << " - " << h->GetXaxis()->GetXmax() 
+           << " but input has " << histo->GetXaxis()->GetXmin() << " - " << histo->GetXaxis()->GetXmax() << endl;
+      return false;
+    }
+    
     // Check binning   
     if (h->GetNbinsX() > histo->GetNbinsX()) {
       h->Rebin(h->GetNbinsX() / histo->GetNbinsX());
@@ -99,7 +107,7 @@ bool ControlPlot::loopOverFiles(std::vector< TFile* > files, string source, TH1*
       cout << "Error: asked for " << histo->GetNbinsX() << " but only " << h->GetNbinsX() << " available in histogram " << source << "!" << endl;
       return false;
     }
-    histo->Add(h);
+    histo->Add(h, myNormFactor);
   }
   return true;
 }
@@ -121,6 +129,7 @@ double ControlPlot::getNormFactor(TFile* f) {
   double myXsection = myConfigHisto->GetBinContent(2) / myConfigHisto->GetBinContent(1);
   //std::cout << myXsection << std::endl;
   double myAllEvents = myCounterHisto->GetBinContent(1);
+  //cout << "    xsec=" << myXsection << " all evt = " << myAllEvents << " norm. fact=" << myXsection * fLuminosityInPb / myAllEvents << endl;
   if (myAllEvents > 0)
     return myXsection * fLuminosityInPb / myAllEvents;
   return 0;
@@ -150,11 +159,15 @@ QCDControlPlot::QCDControlPlot(string sourceHisto, bool sourceIsBinned, string b
 QCDControlPlot::~QCDControlPlot() { }
   
 bool QCDControlPlot::extract(vector<TFile*> data, vector<TFile*> mc, TH1* frameHisto) {
-  TH1F* myPtHisto = new TH1F("pthisto","pthisto",9,0,9);
-  TH1F* hBeforeData = dynamic_cast<TH1F*>(myPtHisto->Clone());
-  TH1F* hBeforeEWK = dynamic_cast<TH1F*>(myPtHisto->Clone());
-  TH1F* hAfterData = dynamic_cast<TH1F*>(myPtHisto->Clone());
-  TH1F* hAfterEWK = dynamic_cast<TH1F*>(myPtHisto->Clone());
+  static int n = 0;
+  stringstream s;
+  s << "pthisto" << ++n;
+  
+  TH1D* myPtHisto = new TH1D(s.str().c_str(),s.str().c_str(),9,0,9);
+  TH1D* hBeforeData = dynamic_cast<TH1D*>(myPtHisto->Clone());
+  TH1D* hBeforeEWK = dynamic_cast<TH1D*>(myPtHisto->Clone());
+  TH1D* hAfterData = dynamic_cast<TH1D*>(myPtHisto->Clone());
+  TH1D* hAfterEWK = dynamic_cast<TH1D*>(myPtHisto->Clone());
   if (sBeforeTauID.size()) {
     // Obtain normalisation in bins of tau pT
     if (!loopOverFiles(data, sBeforeTauID, hBeforeData, true)) return false;
@@ -166,7 +179,7 @@ bool QCDControlPlot::extract(vector<TFile*> data, vector<TFile*> mc, TH1* frameH
   if (bSourceIsBinned) {
     // Source is not binned, need to weight each histogram by separate weight
     // Clone frame histo
-    TH1F* myResultPlot = dynamic_cast<TH1F*>(frameHisto->Clone());
+    TH1D* myResultPlot = dynamic_cast<TH1D*>(frameHisto->Clone());
     myResultPlot->Sumw2();
 
     for (int j = 1; j <= myResultPlot->GetNbinsX(); ++j) {
@@ -183,8 +196,8 @@ bool QCDControlPlot::extract(vector<TFile*> data, vector<TFile*> mc, TH1* frameH
         myWeightUncertainty = TMath::Sqrt(TMath::Power(hAfterData->GetBinError(i),2) + TMath::Power(hAfterEWK->GetBinError(i),2)) / myBeforeCount;
       }
       //cout << "Weight = " << myWeight << " +- " << myWeightUncertainty << endl;
-      TH1F* myTmpDataPlot = dynamic_cast<TH1F*>(frameHisto->Clone());
-      TH1F* myTmpEWKPlot = dynamic_cast<TH1F*>(frameHisto->Clone());
+      TH1D* myTmpDataPlot = dynamic_cast<TH1D*>(frameHisto->Clone());
+      TH1D* myTmpEWKPlot = dynamic_cast<TH1D*>(frameHisto->Clone());
       myTmpDataPlot->Sumw2();
       myTmpEWKPlot->Sumw2();
       stringstream s;
@@ -220,10 +233,10 @@ bool QCDControlPlot::extract(vector<TFile*> data, vector<TFile*> mc, TH1* frameH
     }
     //cout << "Weight = " << myWeight << " +- " << myWeightUncertainty << endl;
     // Clone frame histo
-    TH1F* myResultPlot = dynamic_cast<TH1F*>(frameHisto->Clone());
+    TH1D* myResultPlot = dynamic_cast<TH1D*>(frameHisto->Clone());
     myResultPlot->Sumw2();
-    TH1F* myTmpDataPlot = dynamic_cast<TH1F*>(frameHisto->Clone());
-    TH1F* myTmpEWKPlot = dynamic_cast<TH1F*>(frameHisto->Clone());
+    TH1D* myTmpDataPlot = dynamic_cast<TH1D*>(frameHisto->Clone());
+    TH1D* myTmpEWKPlot = dynamic_cast<TH1D*>(frameHisto->Clone());
     myTmpDataPlot->Sumw2();
     myTmpEWKPlot->Sumw2();
     if (!loopOverFiles(data, sSourceHisto, myTmpDataPlot, true)) return false;
@@ -262,7 +275,7 @@ EWKControlPlot::EWKControlPlot(string sourceHisto, double additionalEWKNormalisa
 EWKControlPlot::~EWKControlPlot() { }
 
 bool EWKControlPlot::extract(std::vector< TFile* > data, std::vector< TFile* > mc, TH1* frameHisto) {
-  hPlot = dynamic_cast<TH1F*>(frameHisto->Clone());
+  hPlot = dynamic_cast<TH1D*>(frameHisto->Clone());
   hPlot->Sumw2();
   // Loop over data
   if (!loopOverFiles(data, sSourceHisto, hPlot, true)) return false;
@@ -293,6 +306,7 @@ public:
   void getIntegral(double& nqcd, double& newk, double& nfakes, double& nhh, double& nhw, double& ndata, double min = -1, double max = -1);
   void getIntegralUncert(double& nqcd, double& newk, double& nfakes, double& nhh, double& nhw, double &ndata, double min = -1, double max = -1);
   void makePlot(double min, double max, double delta, string xtitle, string ytitle, double br, double mass, bool logy = true);
+  string getLabel() { return sLabel; }
   
 private:
   string sLabel;
@@ -374,7 +388,6 @@ void Manager::getIntegralUncert(double& nqcd, double& newk, double& nfakes, doub
   ndata = TMath::Sqrt(ndata);
 }
 
-
 void Manager::setNormalisationInfo(string configInfo, string qcdCounter, string ewkCounter, string fakeCounter, string signalCounter, double lumiPb) {
   fQCD->setNormalisationInfo(configInfo, qcdCounter, lumiPb);
   fEWK->setNormalisationInfo(configInfo, ewkCounter, lumiPb);
@@ -388,11 +401,17 @@ bool Manager::extract(std::vector< TFile* >& qcdData, std::vector< TFile* >& qcd
   // Make plots
   vector<TFile*> myDummyList;
   if (!fQCD->extract(qcdData, qcdMCEWK, hFrame)) return false;
+  cout << "QCD " << fQCD->getPlot()->Integral() << endl;
   if (!fEWK->extract(ewkData, myDummyList, hFrame)) return false;
+  cout << "EWK " << fEWK->getPlot()->Integral() << endl;
   if (!fFakes->extract(myDummyList, fakes, hFrame)) return false;
-  if (!fHH->extract(myDummyList, fakes, hFrame)) return false;
-  if (!fHW->extract(myDummyList, fakes, hFrame)) return false;
+  cout << "fakes " << fFakes->getPlot()->Integral() << endl;
+  if (!fHH->extract(myDummyList, hh, hFrame)) return false;
+  cout << "hh " << fHH->getPlot()->Integral() << endl;
+  if (!fHW->extract(myDummyList, hw, hFrame)) return false;
+  cout << "hw " << fHW->getPlot()->Integral() << endl;
   if (!fData->extract(signalData, myDummyList, hFrame)) return false;
+  cout << "data " << fData->getPlot()->Integral() << endl;
   return true;
 }
 
@@ -448,16 +467,15 @@ void Manager::makePlot(double min, double max, double delta, string xtitle, stri
   hFakes->SetFillColor(ci);
   hFakes->SetLineWidth(0);
   TH1* hHH = fHH->getPlot();
-  hHH->Scale(TMath::Power(1.0 - br,2));
   TH1* hHW = fHW->getPlot();
-  hHW->Scale((1.0 - br)*br*2.0);
   TH1* hData = fData->getPlot();
   hData->SetLineWidth(2);
   hData->SetMarkerStyle(20);
   hData->SetMarkerSize(1.2);
   // Make stacks
   TH1* hSignal = dynamic_cast<TH1*>(hHH->Clone());
-  hSignal->Add(hHW);
+  hSignal->Scale(TMath::Power(1.0 - br,2));
+  hSignal->Add(hHW, (1.0 - br)*br*2.0);
   ci = TColor::GetColor("#ff3399");
   hSignal->SetLineColor(ci);
   hSignal->SetLineStyle(2);
@@ -753,68 +771,77 @@ int main() {
   vector<Manager*> myManagers;
   
   // tau pT
-  TH1F* myTauPtFrame = new TH1F("tauPt","tauPt",40,0,400);
+/*
+  //TH1D* myTauPtFrame = new TH1D("tauPt","tauPt",40,0,400);
+  TH1D* myTauPtFrame = new TH1D("tauPt","tauPt",1,0,400);
   QCDControlPlot myTauPtQCD(QCDprefix+"ControlPlots/SelectedTau_pT_AfterStandardSelections", false, "", "");
   EWKControlPlot myTauPtEWK(EWKprefix+"SelectedTau_pT_AfterStandardSelections", EWKeff1*EWKeff2);
   Manager* myTauPt = new Manager("TauPt", myTauPtFrame, &myTauPtQCD, &myTauPtEWK, signalprefix+"SelectedTau_pT_AfterStandardSelections", signalprefix+"SelectedTau_pT_AfterStandardSelections");
   myManagers.push_back(myTauPt);
   // tau eta
-  TH1F* myTauEtaFrame = new TH1F("TauEta","TauEta",30,-3.,3.);
+  TH1D* myTauEtaFrame = new TH1D("TauEta","TauEta",30,-3.,3.);
   QCDControlPlot myTauEtaQCD(QCDprefix+"ControlPlots/SelectedTau_eta_AfterStandardSelections", false, "", "");
   EWKControlPlot myTauEtaEWK(EWKprefix+"SelectedTau_eta_AfterStandardSelections", EWKeff1*EWKeff2);
   Manager* myTauEta = new Manager("TauEta", myTauEtaFrame, &myTauEtaQCD, &myTauEtaEWK, signalprefix+"SelectedTau_eta_AfterStandardSelections", signalprefix+"SelectedTau_eta_AfterStandardSelections");
   myManagers.push_back(myTauEta);
+*/
   // tau phi
-  TH1F* myTauPhiFrame = new TH1F("TauPhi","TauPhi",18,0.,180.);
+  /*
+  TH1D* myTauPhiFrame = new TH1D("TauPhi","TauPhi",18,0.,180.);
   QCDControlPlot myTauPhiQCD(QCDprefix+"ControlPlots/SelectedTau_phi_AfterStandardSelections", false, "", "");
   EWKControlPlot myTauPhiEWK(EWKprefix+"SelectedTau_phi_AfterStandardSelections", EWKeff1*EWKeff2);
   Manager* myTauPhi = new Manager("TauPhi", myTauPhiFrame, &myTauPhiQCD, &myTauPhiEWK, signalprefix+"SelectedTau_phi_AfterStandardSelections", signalprefix+"SelectedTau_phi_AfterStandardSelections");
-  myManagers.push_back(myTauPhi);
+  myManagers.push_back(myTauPhi);*/
   // rtau
-  TH1F* myTauRtauFrame = new TH1F("TauRtau","TauRtau",24,0.,1.2);
+/*
+  TH1D* myTauRtauFrame = new TH1D("TauRtau","TauRtau",24,0.,1.2);
   QCDControlPlot myTauRtauQCD(QCDprefix+"ControlPlots/SelectedTau_Rtau_AfterStandardSelections", false, "", "");
   EWKControlPlot myTauRtauEWK(EWKprefix+"SelectedTau_Rtau_AfterStandardSelections", EWKeff1*EWKeff2);
   Manager* myTauRtau = new Manager("TauRtau", myTauRtauFrame, &myTauRtauQCD, &myTauRtauEWK, signalprefix+"SelectedTau_Rtau_AfterStandardSelections", signalprefix+"SelectedTau_Rtau_AfterStandardSelections");
   myManagers.push_back(myTauRtau);
   // leading track pt
-  TH1F* myTauLeadingTrackPtFrame = new TH1F("TauLeadingTrackPt","TauLeadingTrackPt",40,0.,400.);
+  TH1D* myTauLeadingTrackPtFrame = new TH1D("TauLeadingTrackPt","TauLeadingTrackPt",40,0.,400.);
   QCDControlPlot myTauLeadingTrackPtQCD(QCDprefix+"ControlPlots/SelectedTau_LeadingTrackPt_AfterStandardSelections", false, "", "");
   EWKControlPlot myTauLeadingTrackPtEWK(EWKprefix+"SelectedTau_LeadingTrackPt_AfterStandardSelections", EWKeff1*EWKeff2);
   Manager* myTauLeadingTrackPt = new Manager("TauLeadingTrackPt", myTauLeadingTrackPtFrame, &myTauLeadingTrackPtQCD, &myTauLeadingTrackPtEWK, signalprefix+"SelectedTau_LeadingTrackPt_AfterStandardSelections", signalprefix+"SelectedTau_LeadingTrackPt_AfterStandardSelections");
   myManagers.push_back(myTauLeadingTrackPt);
   // identified electron pt
-  TH1F* myElectronPtFrame = new TH1F("ElectronPt","ElectronPt",20,0.,20.);
+  TH1D* myElectronPtFrame = new TH1D("ElectronPt","ElectronPt",20,0.,20.);
   QCDControlPlot myElectronPtQCD(QCDprefix+"ControlPlots/IdentifiedElectronPt_AfterStandardSelections", false, "", "");
   EWKControlPlot myElectronPtEWK(EWKprefix+"IdentifiedElectronPt_AfterStandardSelections", EWKeff1*EWKeff2);
   Manager* myElectronPt = new Manager("ElectronPt", myElectronPtFrame, &myElectronPtQCD, &myElectronPtEWK, signalprefix+"IdentifiedElectronPt_AfterStandardSelections", signalprefix+"IdentifiedElectronPt_AfterStandardSelections");
   myManagers.push_back(myElectronPt);
   // identified muon pt
-  TH1F* myMuonPtFrame = new TH1F("MuonPt","MuonPt",20,0.,20.);
+  TH1D* myMuonPtFrame = new TH1D("MuonPt","MuonPt",20,0.,20.);
   QCDControlPlot myMuonPtQCD(QCDprefix+"ControlPlots/IdentifiedMuonPt_AfterStandardSelections", false, "", "");
   EWKControlPlot myMuonPtEWK(EWKprefix+"IdentifiedMuonPt_AfterStandardSelections", EWKeff1*EWKeff2);
   Manager* myMuonPt = new Manager("MuonPt", myMuonPtFrame, &myMuonPtQCD, &myMuonPtEWK, signalprefix+"IdentifiedMuonPt_AfterStandardSelections", signalprefix+"IdentifiedMuonPt_AfterStandardSelections");
   myManagers.push_back(myMuonPt);
   
   // MET
-  TH1F* myMetFrame = new TH1F("MET","MET",50,0,500);
+  TH1D* myMetFrame = new TH1D("MET","MET",50,0,500);
   QCDControlPlot myMetQCD(QCDprefix+"ControlPlots/MET", false, "QCDMeasurement/QCDStandardSelections/AfterJetSelection", QCDprefix+"Leg2AfterTauIDWithRtau");
   EWKControlPlot myMetEWK(EWKprefix+"MET", EWKeff1*EWKeff2);
   Manager* myMet = new Manager("MET", myMetFrame, &myMetQCD, &myMetEWK, signalprefix+"MET", signalprefix+"MET");
   myManagers.push_back(myMet);
   
   // btag
-  TH1F* myNBjetsFrame = new TH1F("btag","btag",10,0,10);
+  //TH1D* myNBjetsFrame = new TH1D("btag","btag",10,0,10);
+  TH1D* myNBjetsFrame = new TH1D("btag","btag",1,0,10);
   QCDControlPlot myNBjetsQCD(QCDprefix+"ControlPlots/NBjets_taupT", true, "QCDMeasurement/QCDStandardSelections/AfterJetSelection", QCDprefix+"Leg2AfterTauIDWithRtau");
   EWKControlPlot myNBjetsEWK(EWKprefix+"NBjets", EWKeff1*EWKeff2);
   Manager* myNBjets = new Manager("NBjets", myNBjetsFrame, &myNBjetsQCD, &myNBjetsEWK, signalprefix+"NBjets", signalprefix+"NBjets");
   myManagers.push_back(myNBjets);
-  
+  */
   // delta phi
-  TH1F* myDeltaPhiFrame = new TH1F("deltaphi","deltaphi",18,0,180);
+  //TH1D* myDeltaPhiFrame = new TH1D("deltaphi","deltaphi",18,0,180);
+  TH1D* myDeltaPhiFrame = new TH1D("deltaphi","deltaphi",1,0,180);
   QCDControlPlot myDeltaPhiQCD(QCDprefix+"ControlPlots/DeltaPhi_taupT", true, "QCDMeasurement/QCDStandardSelections/AfterJetSelection", QCDprefix+"Leg2AfterTauIDWithRtau");
   EWKControlPlot myDeltaPhiEWK("signalAnalysisCaloMet60TEff/deltaPhi", EWKeff1*EWKeff2);
   Manager* myDeltaPhi = new Manager("DeltaPhi", myDeltaPhiFrame, &myDeltaPhiQCD, &myDeltaPhiEWK, "signalAnalysis/deltaPhi", "signalAnalysis/deltaPhi");
   myManagers.push_back(myDeltaPhi);
+  
+  
   
   // Do normalisation
   for (size_t i = 0; i < myManagers.size(); ++i) {
@@ -824,26 +851,29 @@ int main() {
                                         "signalAnalysisCounters/weighted/counter", myLuminosityInPb);
   }
   // Extract plots
+  //for (size_t i = 0; i < 1; ++i) {
   for (size_t i = 0; i < myManagers.size(); ++i) {
+    cout << endl << myManagers[i]->getLabel() << endl;
     if (!myManagers[i]->extract(myQCDDataFiles, myQCDMCEWKFiles, myEWKDataFiles, myEWKFakeFiles, mySignalHHFiles, mySignalHWFiles, myDataFiles))
       return -1;
   }
   // Make plots 
-  myTauPt->makePlot(5e-1, 2e2, 0.5, "Selected #tau p_{T}, GeV/c", "N_{events} / 10 GeV/c", myBr, myMassPoint);
+/*  myTauPt->makePlot(5e-1, 2e2, 0.5, "Selected #tau p_{T}, GeV/c", "N_{events} / 10 GeV/c", myBr, myMassPoint);
   myTauEta->makePlot(5e-1, 2e2, 0.5, "Selected #tau #eta", "N_{events} / 0.2", myBr, myMassPoint);
-  myTauPhi->makePlot(5e-1, 2e2, 0.5, "Selected #tau #phi, ^{o}", "N_{events} / 10^{o}", myBr, myMassPoint);
+  //myTauPhi->makePlot(5e-1, 2e2, 0.5, "Selected #tau #phi, ^{o}", "N_{events} / 10^{o}", myBr, myMassPoint);
   myTauRtau->makePlot(5e-1, 1e3, 0.5, "Selected #tau R_{#tau}", "N_{events} / 0.1", myBr, myMassPoint);
   myTauLeadingTrackPt->makePlot(5e-1, 1e3, 0.5, "Selected #tau leading ch. hadron p_{T}, GeV/c", "N_{events} / 10 GeV/c", myBr, myMassPoint);
   myElectronPt->makePlot(5e-1, 1e3, 0.5, "Identified isolated electron p_{T}, GeV/c", "N_{events} / 2 GeV/c", myBr, myMassPoint);
   myMuonPt->makePlot(5e-1, 1e3, 0.5, "Identified isolated muon p_{T}, GeV/c", "N_{events} / 2 GeV/c", myBr, myMassPoint);
   myMet->makePlot(5e-1, 2e2, 0.5, "PF MET, GeV", "N_{events} / 10 GeV/c", myBr, myMassPoint);
   myNBjets->makePlot(5e-1, 2e2, 0.5, "N_{b jets}", "N_{events}", myBr, myMassPoint);
+*/
   myDeltaPhi->makePlot(5e-1, 2e2, 0.5, "#Delta#phi(#tau,MET), ^{o}", "N_{events} / 10^{o}", myBr, myMassPoint);
 
-  
+  /*
   // Make selection flow plot
   int nbins = 4;
-  TH1* hSelectionFlowFrame = new TH1F("SelectionFlow","SelectionFlow",nbins,0,nbins);
+  TH1* hSelectionFlowFrame = new TH1D("SelectionFlow","SelectionFlow",nbins,0,nbins);
   hSelectionFlowFrame->GetXaxis()->SetBinLabel(1, "E_{T}^{miss}");
   hSelectionFlowFrame->GetXaxis()->SetBinLabel(2, "N_{b jets}");
   hSelectionFlowFrame->GetXaxis()->SetBinLabel(3, "#Delta#phi<160^{o}");
@@ -861,8 +891,8 @@ int main() {
   if (nbins >= 4)
     addEntryToSelectionFlow(myDeltaPhi,4,hSelectionFlowQCD,hSelectionFlowEWK,hSelectionFlowFakes,hSelectionFlowHH,hSelectionFlowHW,hSelectionFlowData, 0., 130.);
   Manager* mySelectionFlow = new Manager("SelectionFlow",hSelectionFlowFrame,hSelectionFlowQCD,hSelectionFlowEWK,hSelectionFlowFakes,hSelectionFlowHH,hSelectionFlowHW,hSelectionFlowData);
-  mySelectionFlow->makePlot(0, 650, 0.5, "", "N_{events}", myBr, myMassPoint, !false);
-  
+  mySelectionFlow->makePlot(0, 650, 0.5, "", "N_{events}", myBr, myMassPoint, false);
+  */
   /*
   TFile* myOutFile = TFile::Open("controlPlots.root","RECREATE");
   myOutFile->cd();
