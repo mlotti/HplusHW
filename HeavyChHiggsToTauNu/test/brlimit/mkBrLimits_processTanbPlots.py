@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import sys
+#import getopt
+
 import ROOT
 ROOT.gROOT.SetBatch(True) # batch mode
 from ROOT import TLatex, TLegend, TLegendEntry, TGraph
@@ -16,7 +19,7 @@ mu = 200
 ## NOTE Tevatron results cannot be shown in some values of mA, 
 # since the corresponding mH values have not been calculated
 # in Feynhiggs
-useMA = 0
+useMA = 0 # use mH space by default, override with parameter "-ma"
 showAN = 1
 showTeva = 0
 showLEP = 0
@@ -219,7 +222,11 @@ def getANCurve():
 #    curve.SetPoint(0,100,17.5) # do not show the lower part of area
     curve.SetPoint(0,120,25.5)
     curve.SetPoint(1,140,42)
-    curve.SetPoint(2,147,60)
+    # point at maxY would be (mH=147,tanb=60)
+    # this point however cannot be converted to mA
+    # space (only points 90/100/120/140/150/155/160 allowed)
+    # curve.SetPoint(2,147,60)
+    curve.SetPoint(2,150,67.7)
     curve.SetPoint(3,120,100)
     if useMA==1:
         graphToMa(curve)
@@ -329,6 +336,13 @@ def getLepCurve():
     
 # Main function, called explicilty from the end of the script
 def main():
+    # if parameter "-ma" specified, make plots in mA-space
+    if len(sys.argv)>1 :
+        if sys.argv[1]=='-ma':
+            print "ma print"
+            global useMA
+            useMA = 1
+
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
