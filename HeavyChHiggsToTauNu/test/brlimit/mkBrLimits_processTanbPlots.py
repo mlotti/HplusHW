@@ -20,6 +20,7 @@ mu = 200
 # since the corresponding mH values have not been calculated
 # in Feynhiggs
 useMA = 0 # use mH space by default, override with parameter "-ma"
+showLow = 0
 showAN = 1
 showTeva = 0
 showLEP = 0
@@ -375,7 +376,6 @@ def main():
     expected_2s_tanb = graphToTanBeta(expected_2s, mu, removeNotValid=False)
 
  
-    showLow = 0
     if showLow:
         observed_tanb_low = graphToTanBetaLow(observed,mu)
         expected_tanb_low = graphToTanBetaLow(expected,mu)
@@ -403,8 +403,8 @@ def main():
         removeLargeValues(expected_2s_tanb_low)
 
     # Define the axis ranges
-    massMin = valid_mp[0] - 5
-    massMax = valid_mp[-1] + 5
+    massMin = valid_mp[0]
+    massMax = valid_mp[-1] + 3
     tanbMax = 60#200
 
     # Upper edges of the uncertainty bands to the plot edges
@@ -534,8 +534,8 @@ def main():
 ####################
 
             # Define the axis ranges
-    massMin = valid_mp[0] - 5
-    massMax = valid_mp[-1] + 5
+    massMin = valid_mp[0]
+    massMax = valid_mp[-1] + 3
     tanbMax = 60
 
 
@@ -607,15 +607,16 @@ def main():
     observed_pk.Draw("LP")
     observed_mk.Draw("LP")
 
-    observed_pkl.Draw("LP")
-    observed_p2l.Draw("LP")
-    observed_m2l.Draw("LP")    
-    observed_mkl.Draw("LP")
+    if showLow:
+        observed_pkl.Draw("LP")
+        observed_p2l.Draw("LP")
+        observed_m2l.Draw("LP")    
+        observed_mkl.Draw("LP")
 
     # Legends
     legeX = 0.52
-    legeY = 0.20
-    pl2  = ROOT.TLegend(legeX,legeY,legeX+0.35,legeY+0.24)
+    legeY = 0.15
+    pl2  = ROOT.TLegend(legeX,legeY,legeX+0.35,legeY+0.2)
     pl2.SetTextSize(0.03)
     pl2.SetFillStyle(4000)
     pl2.SetTextFont(132)
