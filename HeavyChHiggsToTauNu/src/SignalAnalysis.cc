@@ -282,7 +282,6 @@ namespace HPlus {
       fTriggerEfficiencyScaleFactor.setRun(iEvent.id().run());
     // Apply trigger scale factor here, because it depends only on tau
     TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauData.getSelectedTaus()[0]), iEvent.isRealData());
-    double myTauTriggerWeight = triggerWeight.getEventWeight();
     fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
     increment(fTriggerScaleFactorCounter);
     hSelectionFlow->Fill(kSignalOrderTauID, fEventWeight.getWeight());
@@ -295,7 +294,7 @@ namespace HPlus {
 
     // For plotting Rtau                                                                                                                                                                                
     //    if (!tauData.selectedTauPassedRtau()) return false;                                                                                                                                           
-    if (tauData.getRtauOfSelectedTau() < 0.7) return false;                                                                                                                                       
+    //    if (tauData.getRtauOfSelectedTau() < 0.7) return false;                                                                                                                                       
     increment(fRtauAfterTauIDCounter);
 
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->pt(), fEventWeight.getWeight());

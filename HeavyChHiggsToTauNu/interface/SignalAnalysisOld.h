@@ -120,10 +120,10 @@ namespace HPlus {
     Count fFakeMETVetoCounter;
     Count fRtauAfterCutsCounter;
     Count fForwardJetVetoCounter;
-    Count ftransverseMassCut80Counter;
-    Count ftransverseMassCut100Counter;
     Count ftransverseMassCut80NoRtauCounter;
     Count ftransverseMassCut100NoRtauCounter;
+    Count ftransverseMassCut80Counter;
+    Count ftransverseMassCut100Counter;
     Count fZmassVetoCounter;
     Count fTopSelectionCounter;
     Count ftransverseMassCut100TopCounter;

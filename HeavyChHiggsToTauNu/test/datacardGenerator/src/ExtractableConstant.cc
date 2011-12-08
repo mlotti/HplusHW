@@ -33,12 +33,12 @@ ExtractableConstant::~ExtractableConstant() {
 
 }
 
-double ExtractableConstant::doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info) {
+double ExtractableConstant::doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info, double additionalNormalisation) {
   // As simple as returning the constant value :)
   return fValue;
 }
 
-double ExtractableConstant::doExtractAsymmetricUpperValue(std::vector< Dataset* > datasets, NormalisationInfo* info) {
+double ExtractableConstant::doExtractAsymmetricUpperValue(std::vector< Dataset* > datasets, NormalisationInfo* info, double additionalNormalisation) {
   return fUpperValue;
 }
 

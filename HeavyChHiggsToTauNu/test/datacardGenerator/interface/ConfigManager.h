@@ -36,6 +36,7 @@ private:
   std::vector<DatasetGroup*> vDatasetGroups; // Owner
   std::vector<DatacardGenerator*> vDatacardGenerators; // Owner
   NormalisationInfo* fNormalisationInfo; // Owner
+  NormalisationInfo* fNormalisationInfoQCD; // Owner
 
   std::string sDescription;
   std::string sShapeSource;

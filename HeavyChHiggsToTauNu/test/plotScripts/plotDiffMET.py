@@ -71,19 +71,34 @@ def main():
     metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets")
     metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets")
 
-    metBase4070 = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets4070")
-    metInver4070 = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets4070")
+    metBase4050 = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJet4070")
+    metInver4050 = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets4070")
+    metBase5060 = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets5060")
+    metInver5060 = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets5060")
+    metBase6070 = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets6070")
+    metInver6070 = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets6070")
+    metBase7080 = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets7080")
+    metInver7080 = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets7080")
+    metBase80100 = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets80100")
+    metInver80100 = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets80100")
+    metBase100120 = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets100120")
+    metInver100120 = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets100120")
+    metBase120150 = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets120150")
+    metInver120150 = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets120150")
+    metBase150 = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets150")
+    metInver150 = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets150")
+    
 #    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdLoose")
       
     # Rebin before subtracting
     metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
-    metBase4070.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
-    metInver4070.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    metBase4050.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    metInver4050.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
 
     
     metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets")
-    metInverted_data4070 = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets4070")
+    metInverted_data4050 = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets4050")
     print "print inverted met"
     print metInverted_data.GetEntries()
 
@@ -92,16 +107,16 @@ def main():
 #    diffInverted = dataEwkDiff(metInver,"MET_inverted_data-ewk")
     diffInverted = dataEwkNoDiff(metInver,"MET_inverted_data-ewk")
     
-    diffBase4070 = dataEwkDiff(metBase, "MET_base_data-ewk-4070")
+    diffBase4050 = dataEwkDiff(metBase, "MET_base_data-ewk-4050")
 #    diffInverted4070 = dataEwkDiff(metInver,"MET_inverted_data-ewk-4070")
-    diffInverted4070 = dataEwkNoDiff(metInver,"MET_inverted_data-ewk-4070")
+    diffInverted4050 = dataEwkNoDiff(metInver,"MET_inverted_data-ewk-4050")
 
     # Draw the MET distribution
     transverseMass(metBase,"MET_base")
     transverseMass(metInver,"MET_inverted")
     # Draw the MET distribution
-    transverseMass(metBase4070,"MET_base4070")
-    transverseMass(metInver4070,"MET_inverted4070")
+    transverseMass(metBase4050,"MET_base4050")
+    transverseMass(metInver4050,"MET_inverted4050")
   
     # Set the styles
     dataset._normalizeToOne(diffBase)
@@ -110,11 +125,11 @@ def main():
         histograms.Histo(diffBase, "Baseline"),
         histograms.Histo(diffInverted, "Inverted"))
 
-    dataset._normalizeToOne(diffBase4070)
-    dataset._normalizeToOne(diffInverted4070)
+    dataset._normalizeToOne(diffBase4050)
+    dataset._normalizeToOne(diffInverted4050)
     plot2 = plots.ComparisonPlot(
-        histograms.Histo(diffBase4070, "Baseline4070"),
-        histograms.Histo(diffInverted4070, "Inverted4070"))
+        histograms.Histo(diffBase4050, "Baseline4050"),
+        histograms.Histo(diffInverted4050, "Inverted4050"))
 
     
     st1 = styles.getDataStyle().clone()
