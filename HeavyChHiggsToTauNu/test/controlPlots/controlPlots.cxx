@@ -187,13 +187,13 @@ bool QCDControlPlot::extract(vector<TFile*> data, vector<TFile*> mc, TH1* frameH
       myResultPlot->SetBinError(j, 0);
     }
     for (int i = 0; i < myPtHisto->GetNbinsX(); ++i) {
-      double myBeforeCount = hBeforeData->GetBinContent(i) - hBeforeEWK->GetBinContent(i);
-      double myAfterCount = hAfterData->GetBinContent(i) - hAfterEWK->GetBinContent(i);
+      double myBeforeCount = hBeforeData->GetBinContent(i+1) - hBeforeEWK->GetBinContent(i+1);
+      double myAfterCount = hAfterData->GetBinContent(i+1) - hAfterEWK->GetBinContent(i+1);
       double myWeight = 0.0;
       double myWeightUncertainty = 0.0;
       if (myAfterCount > 0) {
         myWeight = myAfterCount / myBeforeCount;
-        myWeightUncertainty = TMath::Sqrt(TMath::Power(hAfterData->GetBinError(i),2) + TMath::Power(hAfterEWK->GetBinError(i),2)) / myBeforeCount;
+        myWeightUncertainty = TMath::Sqrt(TMath::Power(hAfterData->GetBinError(i+1),2) + TMath::Power(hAfterEWK->GetBinError(i+1),2)) / myBeforeCount;
       }
       //cout << "Weight = " << myWeight << " +- " << myWeightUncertainty << endl;
       TH1D* myTmpDataPlot = dynamic_cast<TH1D*>(frameHisto->Clone());
@@ -468,14 +468,16 @@ void Manager::makePlot(double min, double max, double delta, string xtitle, stri
   hFakes->SetLineWidth(0);
   TH1* hHH = fHH->getPlot();
   TH1* hHW = fHW->getPlot();
+  hHH->Scale(TMath::Power(br,2));
+  hHW->Scale((1.0 - br)*br*2.0);
   TH1* hData = fData->getPlot();
   hData->SetLineWidth(2);
   hData->SetMarkerStyle(20);
   hData->SetMarkerSize(1.2);
   // Make stacks
   TH1* hSignal = dynamic_cast<TH1*>(hHH->Clone());
-  hSignal->Scale(TMath::Power(1.0 - br,2));
-  hSignal->Add(hHW, (1.0 - br)*br*2.0);
+  hSignal->Add(hHW);
+  cout << "signal: " << hSignal->Integral() << endl;
   ci = TColor::GetColor("#ff3399");
   hSignal->SetLineColor(ci);
   hSignal->SetLineStyle(2);
@@ -757,7 +759,7 @@ int main() {
   // Empty list
   vector<TFile*> myEmptyFiles;
   
-  double myLuminosityInPb = 2177;
+  double myLuminosityInPb = 2177.9;
   double myBr = 0.05;
   
   string QCDprefix = "QCDMeasurement/QCDMeasurementVariation_METcut50_DeltaPhiTauMETCut180_tauIsol1/";
@@ -771,9 +773,8 @@ int main() {
   vector<Manager*> myManagers;
   
   // tau pT
-/*
-  //TH1D* myTauPtFrame = new TH1D("tauPt","tauPt",40,0,400);
-  TH1D* myTauPtFrame = new TH1D("tauPt","tauPt",1,0,400);
+
+  TH1D* myTauPtFrame = new TH1D("tauPt","tauPt",40,0,400);
   QCDControlPlot myTauPtQCD(QCDprefix+"ControlPlots/SelectedTau_pT_AfterStandardSelections", false, "", "");
   EWKControlPlot myTauPtEWK(EWKprefix+"SelectedTau_pT_AfterStandardSelections", EWKeff1*EWKeff2);
   Manager* myTauPt = new Manager("TauPt", myTauPtFrame, &myTauPtQCD, &myTauPtEWK, signalprefix+"SelectedTau_pT_AfterStandardSelections", signalprefix+"SelectedTau_pT_AfterStandardSelections");
@@ -784,7 +785,7 @@ int main() {
   EWKControlPlot myTauEtaEWK(EWKprefix+"SelectedTau_eta_AfterStandardSelections", EWKeff1*EWKeff2);
   Manager* myTauEta = new Manager("TauEta", myTauEtaFrame, &myTauEtaQCD, &myTauEtaEWK, signalprefix+"SelectedTau_eta_AfterStandardSelections", signalprefix+"SelectedTau_eta_AfterStandardSelections");
   myManagers.push_back(myTauEta);
-*/
+
   // tau phi
   /*
   TH1D* myTauPhiFrame = new TH1D("TauPhi","TauPhi",18,0.,180.);
@@ -793,7 +794,7 @@ int main() {
   Manager* myTauPhi = new Manager("TauPhi", myTauPhiFrame, &myTauPhiQCD, &myTauPhiEWK, signalprefix+"SelectedTau_phi_AfterStandardSelections", signalprefix+"SelectedTau_phi_AfterStandardSelections");
   myManagers.push_back(myTauPhi);*/
   // rtau
-/*
+
   TH1D* myTauRtauFrame = new TH1D("TauRtau","TauRtau",24,0.,1.2);
   QCDControlPlot myTauRtauQCD(QCDprefix+"ControlPlots/SelectedTau_Rtau_AfterStandardSelections", false, "", "");
   EWKControlPlot myTauRtauEWK(EWKprefix+"SelectedTau_Rtau_AfterStandardSelections", EWKeff1*EWKeff2);
@@ -826,22 +827,18 @@ int main() {
   myManagers.push_back(myMet);
   
   // btag
-  //TH1D* myNBjetsFrame = new TH1D("btag","btag",10,0,10);
-  TH1D* myNBjetsFrame = new TH1D("btag","btag",1,0,10);
+  TH1D* myNBjetsFrame = new TH1D("btag","btag",10,0,10);
   QCDControlPlot myNBjetsQCD(QCDprefix+"ControlPlots/NBjets_taupT", true, "QCDMeasurement/QCDStandardSelections/AfterJetSelection", QCDprefix+"Leg2AfterTauIDWithRtau");
   EWKControlPlot myNBjetsEWK(EWKprefix+"NBjets", EWKeff1*EWKeff2);
   Manager* myNBjets = new Manager("NBjets", myNBjetsFrame, &myNBjetsQCD, &myNBjetsEWK, signalprefix+"NBjets", signalprefix+"NBjets");
   myManagers.push_back(myNBjets);
-  */
+  
   // delta phi
-  //TH1D* myDeltaPhiFrame = new TH1D("deltaphi","deltaphi",18,0,180);
-  TH1D* myDeltaPhiFrame = new TH1D("deltaphi","deltaphi",1,0,180);
+  TH1D* myDeltaPhiFrame = new TH1D("deltaphi","deltaphi",9,0,180);
   QCDControlPlot myDeltaPhiQCD(QCDprefix+"ControlPlots/DeltaPhi_taupT", true, "QCDMeasurement/QCDStandardSelections/AfterJetSelection", QCDprefix+"Leg2AfterTauIDWithRtau");
   EWKControlPlot myDeltaPhiEWK("signalAnalysisCaloMet60TEff/deltaPhi", EWKeff1*EWKeff2);
   Manager* myDeltaPhi = new Manager("DeltaPhi", myDeltaPhiFrame, &myDeltaPhiQCD, &myDeltaPhiEWK, "signalAnalysis/deltaPhi", "signalAnalysis/deltaPhi");
   myManagers.push_back(myDeltaPhi);
-  
-  
   
   // Do normalisation
   for (size_t i = 0; i < myManagers.size(); ++i) {
@@ -851,14 +848,13 @@ int main() {
                                         "signalAnalysisCounters/weighted/counter", myLuminosityInPb);
   }
   // Extract plots
-  //for (size_t i = 0; i < 1; ++i) {
   for (size_t i = 0; i < myManagers.size(); ++i) {
     cout << endl << myManagers[i]->getLabel() << endl;
     if (!myManagers[i]->extract(myQCDDataFiles, myQCDMCEWKFiles, myEWKDataFiles, myEWKFakeFiles, mySignalHHFiles, mySignalHWFiles, myDataFiles))
       return -1;
   }
   // Make plots 
-/*  myTauPt->makePlot(5e-1, 2e2, 0.5, "Selected #tau p_{T}, GeV/c", "N_{events} / 10 GeV/c", myBr, myMassPoint);
+  myTauPt->makePlot(5e-1, 2e2, 0.5, "Selected #tau p_{T}, GeV/c", "N_{events} / 10 GeV/c", myBr, myMassPoint);
   myTauEta->makePlot(5e-1, 2e2, 0.5, "Selected #tau #eta", "N_{events} / 0.2", myBr, myMassPoint);
   //myTauPhi->makePlot(5e-1, 2e2, 0.5, "Selected #tau #phi, ^{o}", "N_{events} / 10^{o}", myBr, myMassPoint);
   myTauRtau->makePlot(5e-1, 1e3, 0.5, "Selected #tau R_{#tau}", "N_{events} / 0.1", myBr, myMassPoint);
@@ -867,10 +863,9 @@ int main() {
   myMuonPt->makePlot(5e-1, 1e3, 0.5, "Identified isolated muon p_{T}, GeV/c", "N_{events} / 2 GeV/c", myBr, myMassPoint);
   myMet->makePlot(5e-1, 2e2, 0.5, "PF MET, GeV", "N_{events} / 10 GeV/c", myBr, myMassPoint);
   myNBjets->makePlot(5e-1, 2e2, 0.5, "N_{b jets}", "N_{events}", myBr, myMassPoint);
-*/
+
   myDeltaPhi->makePlot(5e-1, 2e2, 0.5, "#Delta#phi(#tau,MET), ^{o}", "N_{events} / 10^{o}", myBr, myMassPoint);
 
-  /*
   // Make selection flow plot
   int nbins = 4;
   TH1* hSelectionFlowFrame = new TH1D("SelectionFlow","SelectionFlow",nbins,0,nbins);
@@ -892,7 +887,6 @@ int main() {
     addEntryToSelectionFlow(myDeltaPhi,4,hSelectionFlowQCD,hSelectionFlowEWK,hSelectionFlowFakes,hSelectionFlowHH,hSelectionFlowHW,hSelectionFlowData, 0., 130.);
   Manager* mySelectionFlow = new Manager("SelectionFlow",hSelectionFlowFrame,hSelectionFlowQCD,hSelectionFlowEWK,hSelectionFlowFakes,hSelectionFlowHH,hSelectionFlowHW,hSelectionFlowData);
   mySelectionFlow->makePlot(0, 650, 0.5, "", "N_{events}", myBr, myMassPoint, false);
-  */
   /*
   TFile* myOutFile = TFile::Open("controlPlots.root","RECREATE");
   myOutFile->cd();
