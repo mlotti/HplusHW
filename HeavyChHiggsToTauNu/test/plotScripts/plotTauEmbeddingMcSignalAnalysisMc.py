@@ -79,7 +79,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
 
     opts2 = {"ymin": 0, "ymax": 2}
     def drawControlPlot(path, xlabel, **kwargs):
-        drawPlot(createPlot("ControlPlots/"+path), "mcembsig_"+datasetName+"_"+path, xlabel, ratio=True, opts2=opts2, **kwargs)
+        drawPlot(createPlot("ControlPlots/"+path), "mcembsig_"+datasetName+"_"+path, xlabel, opts2=opts2, **kwargs)
 
     drawControlPlot("SelectedTau_pT_AfterStandardSelections", "#tau-jet p_{T} (GeV/c)", opts={"xmax": 250}, rebin=2, cutBox={"cutValue": 40, "greaterThan": 40})
     drawControlPlot("SelectedTau_eta_AfterStandardSelections", "#tau-jet #eta", opts={"xmin": -2.2, "xmax": 2.2}, ylabel="Events / %.1f", rebin=4, log=False, moveLegend={"dy":-0.6, "dx":-0.2})
@@ -104,10 +104,10 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
     def customDeltaPhi(h):
         yaxis = h.getFrame().GetYaxis()
         yaxis.SetTitleOffset(0.8*yaxis.GetTitleOffset())
-    drawPlot(createPlot(tdDeltaPhi.clone()), "mcembsig_"+datasetName+"_deltaPhi_1AfterTauID", xlabel, log=False, ratio=True, opts2=opts2, ylabel="Events / %.0f^{#circ}", function=customDeltaPhi, moveLegend={"dx":-0.22}, cutLine=[130, 160])
+    drawPlot(createPlot(tdDeltaPhi.clone()), "mcembsig_"+datasetName+"_deltaPhi_1AfterTauID", xlabel, log=False, opts2=opts2, ylabel="Events / %.0f^{#circ}", function=customDeltaPhi, moveLegend={"dx":-0.22}, cutLine=[130, 160])
 
     xlabel = "m_{T} (#tau jet, E_{T}^{miss}) (GeV/c^{2})"
-    drawPlot(createPlot(tdMt.clone()), "mcembsig_"+datasetName+"_transverseMass_1AfterTauID", xlabel, ratio=True, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}")
+    drawPlot(createPlot(tdMt.clone()), "mcembsig_"+datasetName+"_transverseMass_1AfterTauID", xlabel, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}")
 
 
     eventCounterEmb = counter.EventCounter(datasetsEmb, counters=analysisEmb+"Counters")
@@ -184,7 +184,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
 
 
 
-def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, ratio=False, opts={}, opts2={}, moveLegend={}, cutLine=None, cutBox=None, function=None):
+def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, ratio=True, opts={}, opts2={}, moveLegend={}, cutLine=None, cutBox=None, function=None):
     if rebin > 1:
         h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     ylab = ylabel

@@ -30,12 +30,13 @@ import plotMuonAnalysis as muonAnalysis
 #analysis = "signalAnalysisRtau70"
 #analysis = "signalAnalysisRtau80"
 
-postfix = ""
+#postfix = ""
 #postfix = "CaloMet60"
-#postfix = "CaloMet60TEff"
+postfix = "CaloMet60TEff"
 
 analysis = "signalAnalysis"+postfix
-analysisNoRtau = "signalAnalysisRtau0MET70"+postfix
+#analysis = "signalAnalysisRtau0MET50"+postfix
+analysisNoRtau = "signalAnalysisRtau0MET50"+postfix
 #analysis = analysisNoRtau
 
 #analysis = "signalAnalysisTauSelectionHPSTightTauBased"
@@ -64,8 +65,8 @@ analysisNoRtau = "signalAnalysisRtau0MET70"+postfix
 #analysis = "signalAnalysisJESMinus03eta02METMinus10"
 counters = analysis+"Counters"
 
-#normalize = True
-normalize = False
+normalize = True
+#normalize = False
 
 #era = "EPS"
 #era = "Run2011A-EPS"
@@ -95,16 +96,16 @@ def main():
     elif era == "Run2011A-EPS":
         datasets.remove([
             "SingleMu_Mu_160431-163261_May10",
-            "SingleMu_Mu_163270-163869_May10",
+#            "SingleMu_Mu_163270-163869_May10",
             "SingleMu_Mu_165088-166150_Prompt",
             "SingleMu_Mu_166161-166164_Prompt",
             "SingleMu_Mu_166346-166346_Prompt",
             "SingleMu_Mu_166374-167043_Prompt",
             "SingleMu_Mu_167078-167913_Prompt",
 
-            #"SingleMu_Mu_170722-172619_Aug05",
-            #"SingleMu_Mu_172620-173198_Prompt",
-            #"SingleMu_Mu_173236-173692_Prompt",
+            "SingleMu_Mu_170722-172619_Aug05",
+            "SingleMu_Mu_172620-173198_Prompt",
+            "SingleMu_Mu_173236-173692_Prompt",
 
             ])
     elif era == "Run2011A":
@@ -199,44 +200,44 @@ def main():
 
     # Tau pt
     xlabel = "p_{T}^{#tau jet} (GeV/c)"
-    drawPlot(createPlot("SelectedTau/SelectedTau_pT_AfterTauID"), "selectedTauPt_1AfterTauID", xlabel, opts=opts, rebin=rebin)
-    drawPlot(createPlot(tdTauPt.clone()), "selectedTauPt_1AfterTauID_crosscheck", xlabel, opts=opts)
-    drawPlot(createPlot(tdTauPt.clone(selection=metCut)), "selectedTauPt_2AfterMET", xlabel, opts=opts)
+    drawPlot(createPlot("SelectedTau/SelectedTau_pT_AfterTauID"), "selectedTauPt_1AfterTauID", xlabel, opts=opts, rebin=rebin, addMCUncertainty=False, ratio=False)
+    drawPlot(createPlot(tdTauPt.clone()), "selectedTauPt_1AfterTauID_crosscheck", xlabel, opts=opts, addMCUncertainty=False, ratio=False)
+    drawPlot(createPlot(tdTauPt.clone(selection=metCut)), "selectedTauPt_2AfterMET", xlabel, opts=opts, addMCUncertainty=False, ratio=False)
 
     optstmp = {}
     optstmp.update(opts)
     del optstmp["ymaxfactor"]
     optstmp["ymax"] = 60
     drawPlot(createPlot(tdTauPt.clone(selection=metCut+"&&"+bTaggingCut, weight=weightBTagging)),
-             "selectedTauPt_3AfterBTagging", xlabel, opts=optstmp, addMCUncertainty=True, ratio=True)
+             "selectedTauPt_3AfterBTagging", xlabel, opts=optstmp)
     drawPlot(createPlot(tdTauPt.clone(selection=metCut+"&&"+bTaggingCut+"&&"+deltaPhi160Cut, weight=weightBTagging)),
-             "selectedTauPt_4AfterDeltaPhi160", xlabel, opts=optstmp, addMCUncertainty=True, ratio=True)
+             "selectedTauPt_4AfterDeltaPhi160", xlabel, opts=optstmp)
     drawPlot(createPlot(tdTauPt.clone(selection=metCut+"&&"+bTaggingCut+"&&"+deltaPhi130Cut, weight=weightBTagging)),
-             "selectedTauPt_4AfterDeltaPhi130", xlabel, opts=optstmp, addMCUncertainty=True, ratio=True)
+             "selectedTauPt_4AfterDeltaPhi130", xlabel, opts=optstmp)
 
     drawPlot(createPlot(tdTauPt.clone(selection=metCut+"&&"+bTaggingCut, weight="")),
-             "selectedTauPt_3AfterBTagging_notNormalized", xlabel, opts=optstmp, normalize=False, addMCUncertainty=True, ratio=True)
+             "selectedTauPt_3AfterBTagging_notNormalized", xlabel, opts=optstmp, normalize=False)
     drawPlot(createPlot(tdTauPt.clone(selection=metCut+"&&"+bTaggingCut+"&&"+deltaPhi160Cut, weight="")),
-             "selectedTauPt_4AfterDeltaPhi160_notNormalized", xlabel, opts=optstmp, normalize=False, addMCUncertainty=True, ratio=True)
+             "selectedTauPt_4AfterDeltaPhi160_notNormalized", xlabel, opts=optstmp, normalize=False)
     drawPlot(createPlot(tdTauPt.clone(selection=metCut+"&&"+bTaggingCut+"&&"+deltaPhi130Cut, weight="")),
-             "selectedTauPt_4AfterDeltaPhi130_notNormalized", xlabel, opts=optstmp, normalize=False, addMCUncertainty=True, ratio=True)
+             "selectedTauPt_4AfterDeltaPhi130_notNormalized", xlabel, opts=optstmp, normalize=False)
 
 
     # Tau leading track pt
     xlabel = "p_{T}^{#tau leading track} (GeV/c)"
-    drawPlot(createPlot(tdTauLeadPt.clone()), "selectedTauLeadPt_1AfterTauID", xlabel, opts=opts)
+    drawPlot(createPlot(tdTauLeadPt.clone()), "selectedTauLeadPt_1AfterTauID", xlabel, opts=opts, addMCUncertainty=False, ratio=False)
 
     # Tau p
     xlabel = "p^{#tau jet} (GeV/c)"
-    drawPlot(createPlot(tdTauP.clone()), "selectedTauP_1AfterTauID", xlabel, opts=opts)
+    drawPlot(createPlot(tdTauP.clone()), "selectedTauP_1AfterTauID", xlabel, opts=opts, addMCUncertainty=False, ratio=False)
 
     # Tau leading track pt
     xlabel = "p^{#tau leading track} (GeV/c)"
-    drawPlot(createPlot(tdTauLeadP.clone()), "selectedTauLeadP_1AfterTauID", xlabel, opts=opts)
+    drawPlot(createPlot(tdTauLeadP.clone()), "selectedTauLeadP_1AfterTauID", xlabel, opts=opts, addMCUncertainty=False, ratio=False)
     
     # Rtau
     xlabel = "R_{#tau}"
-    drawPlot(createPlot(tdRtau.clone()), "selectedTauRtau_1AfterTauID", xlabel, ylabel="Events / %.f", opts={"ymin": 1e-1})
+    drawPlot(createPlot(tdRtau.clone()), "selectedTauRtau_1AfterTauID", xlabel, ylabel="Events / %.f", opts={"ymin": 1e-1}, addMCUncertainty=False, ratio=False)
 
     # Decay modes (after tau candidate selection, before isolation)
     #createPlot("
@@ -246,11 +247,11 @@ def main():
     def customDeltaPhi(h):
         yaxis = h.getFrame().GetYaxis()
         yaxis.SetTitleOffset(0.8*yaxis.GetTitleOffset())
-    drawPlot(createPlot(tdDeltaPhi.clone()), "deltaPhi_1AfterTauID", xlabel, ylabel="Events / %.f^{#circ}", opts={"ymin": 1e-1, "ymaxfactor": 5}, ratio=True, addMCUncertainty=True, opts2=opts2, moveLegend={"dx": -0.22, "dy":0.01, "dh": -0.03}, function=customDeltaPhi, cutLine=[130, 160])
+    drawPlot(createPlot(tdDeltaPhi.clone()), "deltaPhi_1AfterTauID", xlabel, ylabel="Events / %.f^{#circ}", opts={"ymin": 1e-1, "ymaxfactor": 5}, opts2=opts2, moveLegend={"dx": -0.22, "dy":0.01, "dh": -0.03}, function=customDeltaPhi, cutLine=[130, 160])
 
     # Data-driven control plots
     def drawControlPlot(path, xlabel, **kwargs):
-        drawPlot(createPlot("ControlPlots/"+path), "controlPlots_"+path, xlabel, ratio=True, opts2=opts2, addMCUncertainty=True, **kwargs)
+        drawPlot(createPlot("ControlPlots/"+path), "controlPlots_"+path, xlabel, opts2=opts2, **kwargs)
     drawControlPlot("SelectedTau_pT_AfterStandardSelections", "#tau-jet p_{T} (GeV/c)", opts={"xmax": 250}, rebin=2, cutBox={"cutValue": 40, "greaterThan": True})
     drawControlPlot("SelectedTau_eta_AfterStandardSelections", "#tau-jet #eta", opts={"xmin": -2.2, "xmax": 2.2}, ylabel="Events / %.1f", rebin=4, moveLegend={"dy":-0.5, "dx":-0.1})
     drawControlPlot("SelectedTau_phi_AfterStandardSelections", "#tau-jet #phi", rebin=10, ylabel="Events / %.2f")
@@ -338,9 +339,9 @@ def main():
     f = ROOT.TFile.Open(mtOutput, "RECREATE")
 
     ratio = True
-    if normalize:
+    if normalize and not "Rtau0MET" in analysis:
         opts["ymax"] = 40
-    else:
+    elif not normalize:
         opts["xmax"] = 200
     for name, selection in [
         ("1AfterTauID", ""),
@@ -681,7 +682,7 @@ def common(h, xlabel, ylabel):
 # Functions below are for plot-specific formattings. They all take the
 # plot object as an argument, then apply some formatting to it, draw
 # it and finally save it to files.
-def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, addMCUncertainty=False, ratio=False, opts={}, opts2={}, moveLegend={}, normalize=True, cutLine=None, cutBox=None, function=None):
+def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, addMCUncertainty=True, ratio=True, opts={}, opts2={}, moveLegend={}, normalize=True, cutLine=None, cutBox=None, function=None):
     if rebin > 1:
         h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     ylab = ylabel
