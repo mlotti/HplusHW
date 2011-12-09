@@ -31,7 +31,7 @@ muonSelection = "(%s && %s && %s)" % (muonKinematics, muondB, muonIsolation)
 muonSelectionNoIso = "(%s && %s)" % (muonKinematics, muondB)
 
 # Construct muon veto, first the muons accepted as veto muons
-muonVeto = "muons_p4.Pt() > 15 && abs(muons_p4.Eta()) < 2.4 && abs(muons_f_dB) < 0.02 && (muons_f_trackIso+muons_f_caloIso)/muons_p4.Pt() < 0.15"
+muonVeto = "muons_p4.Pt() > 15 && abs(muons_p4.Eta()) < 2.5 && abs(muons_f_dB) < 0.02 && (muons_f_trackIso+muons_f_caloIso)/muons_p4.Pt() <= 0.15"
 # then exclude the selected muon (this will work only after the 'one selected muon' requirement)
 muonVetoNoIso = muonVeto + " && !"+muonSelectionNoIso
 muonVeto += " && !"+muonSelection
@@ -55,7 +55,16 @@ metcut = "pfMet_p4.Pt() > 40"
 btagging = "Sum$(jets_f_tche > 1.7 && sqrt((jets_p4.Phi()-muons_p4.Phi())^2+(jets_p4.Eta()-muons_p4.Eta())^2) > 0.5) >= 1"
 
 analysis = "muonNtuple"
-weight = "weightPileup_Run2011A"
+
+#era = "EPS"
+era = "Run2011A-EPS"
+#era = "Run2011A"
+
+weight = {"EPS": "pileupWeightEPS",
+          "Run2011A-EPS": "weightPileup_Run2011AnoEPS",
+          "Run2011A": "weightPileup_Run2011A",
+          }[era]
+
 treeDraw = dataset.TreeDraw(analysis+"/tree", weight=weight)
 
 def main():
@@ -63,10 +72,35 @@ def main():
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
 
     #datasets.remove(filter(lambda name: name != "SingleMu_Mu_166374-167043_Prompt" and name != "TTJets_TuneZ2_Summer11", datasets.getAllDatasetNames()))
+    if era == "EPS":
+        datasets.remove([
+            "SingleMu_Mu_170722-172619_Aug05",
+            "SingleMu_Mu_172620-173198_Prompt",
+            "SingleMu_Mu_173236-173692_Prompt",
+        ])
+    elif era == "Run2011A-EPS":
+        datasets.remove([
+            "SingleMu_Mu_160431-163261_May10",
+#            "SingleMu_Mu_163270-163869_May10",
+            "SingleMu_Mu_165088-166150_Prompt",
+            "SingleMu_Mu_166161-166164_Prompt",
+            "SingleMu_Mu_166346-166346_Prompt",
+            "SingleMu_Mu_166374-167043_Prompt",
+            "SingleMu_Mu_167078-167913_Prompt",
+
+            "SingleMu_Mu_170722-172619_Aug05",
+            "SingleMu_Mu_172620-173198_Prompt",
+            "SingleMu_Mu_173236-173692_Prompt",
+
+            ])
+    elif era == "Run2011A":
+        pass
+
+    datasets.remove(datasets.getMCDatasetNames())
     datasets.loadLuminosities()
 
-    datasetsMC = datasets.deepCopy()
-    datasetsMC.remove(datasets.getDataDatasetNames())
+    #datasetsMC = datasets.deepCopy()
+    #datasetsMC.remove(datasets.getDataDatasetNames())
     
     plots.mergeRenameReorderForDataMC(datasets)
     
@@ -77,8 +111,8 @@ def main():
     plots._legendLabels["QCD_Pt20_MuEnriched"] = "QCD"
     histograms.createLegend.moveDefaults(dx=-0.02)
 
-    doPlots(datasets)
-    #printCounters(datasets)
+    #doPlots(datasets)
+    printCounters(datasets)
 
 
 def doPlots(datasets):
@@ -118,19 +152,25 @@ def printCounters(datasets):
     selection = "Sum$(%s && %s && %s) >= 1" % (muonKinematics, muondB, muonIsolation)
     eventCounter.getMainCounter().appendRow("Muon isolation", treeDraw.clone(selection=selection))
     selection = "Sum$(%s && %s && %s) == 1" % (muonKinematics, muondB, muonIsolation)
+    print selection
     eventCounter.getMainCounter().appendRow("One selected muon", treeDraw.clone(selection=selection))
     selection += "&&" +muonVeto
+    print selection
     eventCounter.getMainCounter().appendRow("Muon veto", treeDraw.clone(selection=selection))
     selection += "&&" +electronVeto
+    print selection
     eventCounter.getMainCounter().appendRow("Electron veto", treeDraw.clone(selection=selection))
     selection += "&&" +jetSelection
+    print selection
     eventCounter.getMainCounter().appendRow("Jet selection", treeDraw.clone(selection=selection))
 
     eventCounter.normalizeMCByLuminosity()
 
     table = eventCounter.getMainCounterTable()
-    addSumColumn(table)
-    print table.format()
+    #addSumColumn(table)
+
+    cellFormat = counter.TableFormatText(counter.CellFormatText(valueFormat='%.0f'))
+    print table.format(cellFormat)
 
 
 
