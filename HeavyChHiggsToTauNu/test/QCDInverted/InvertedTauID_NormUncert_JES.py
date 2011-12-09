@@ -21,7 +21,7 @@ analysisPlusMinus  = "signalAnalysisJESPlus03eta02METMinus10"
 analysisMinusMinus = "signalAnalysisJESMinus03eta02METMinus10"
 
 
-from QCDInverted_Normalization import *
+from InvertedTauID import *
 
 def main():
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
