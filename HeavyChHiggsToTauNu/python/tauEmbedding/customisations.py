@@ -259,7 +259,8 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
     import muonSelectionPF_cff as muonSelection
     from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
     m1 = cleanPatJets.clone(
-        src = "selectedPatJets",
+#        src = "selectedPatJets",
+        src = "goodJets", # we should use the pat::Jets constructed in the 
         preselection = cms.string(jetSelection),
         checkOverlaps = cms.PSet(
             muons = cms.PSet(
@@ -535,7 +536,7 @@ def selectedMuonCleanedMuons(selectedMuon, allMuons="selectedPatMuons"):
                 src                 = cms.InputTag(selectedMuon),
                 algorithm           = cms.string("byDeltaR"),
                 preselection        = cms.string(""),
-                deltaR              = cms.double(0.01),
+                deltaR              = cms.double(0.0001),
                 checkRecoComponents = cms.bool(False),
                 pairCut             = cms.string(""),
                 requireNoOverlaps   = cms.bool(True),
