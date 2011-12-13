@@ -23,9 +23,12 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
-from QCDInverted_Normalization import *
+from InvertedTauID import *
 
 def main():
+
+    errorBars = False
+
     # Create all datasets from a multicrab task
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
 
@@ -61,6 +64,8 @@ def main():
     style = tdrstyle.TDRStyle()
 
     invertedQCD = InvertedTauID()
+    invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
+    invertedQCD.useErrorBars(errorBars)
 
     metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets")
     metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets")  
@@ -80,10 +85,12 @@ def main():
     metBase_QCD.Add(metBase_EWK,-1)
     metBase_QCD.SetTitle("Data - EWK MC: BaseLine TauID")
 
+    metInverted_data.GetXaxis().SetTitle("PFMET (GeV)")
+
     invertedQCD.setLabel("BaseVsInverted")
-    invertedQCD.comparison(metInverted_data,metBase_data)
+#    invertedQCD.comparison(metInverted_data,metBase_data)
     invertedQCD.setLabel("BaseMinusEWKVsInverted")
-    invertedQCD.comparison(metInverted_data,metBase_QCD)
+#    invertedQCD.comparison(metInverted_data,metBase_QCD)
 
     invertedQCD.cutefficiency(metInverted_data,metBase_QCD)
 

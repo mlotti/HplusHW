@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import sys
+#import getopt
+
 import ROOT
 ROOT.gROOT.SetBatch(True) # batch mode
 from ROOT import TLatex, TLegend, TLegendEntry, TGraph
@@ -16,10 +19,10 @@ mu = 200
 ## NOTE Tevatron results cannot be shown in some values of mA, 
 # since the corresponding mH values have not been calculated
 # in Feynhiggs
-useMA = 0
+useMA = 0 # use mH space by default, override with parameter "-ma"
 showAN = 1
 showTeva = 0
-showLEP = 1
+showLEP = 0
 plotTwoSigmaBands = 0
 
 # write text to plot
@@ -219,7 +222,11 @@ def getANCurve():
 #    curve.SetPoint(0,100,17.5) # do not show the lower part of area
     curve.SetPoint(0,120,25.5)
     curve.SetPoint(1,140,42)
-    curve.SetPoint(2,147,60)
+    # point at maxY would be (mH=147,tanb=60)
+    # this point however cannot be converted to mA
+    # space (only points 90/100/120/140/150/155/160 allowed)
+    # curve.SetPoint(2,147,60)
+    curve.SetPoint(2,150,67.7)
     curve.SetPoint(3,120,100)
     if useMA==1:
         graphToMa(curve)
@@ -329,6 +336,13 @@ def getLepCurve():
     
 # Main function, called explicilty from the end of the script
 def main():
+    # if parameter "-ma" specified, make plots in mA-space
+    if len(sys.argv)>1 :
+        if sys.argv[1]=='-ma':
+            print "ma print"
+            global useMA
+            useMA = 1
+
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
@@ -461,8 +475,8 @@ def main():
 
     # Legends
     legeX = 0.60
-    legeY = 0.25
-    pl  = ROOT.TLegend(legeX,legeY,legeX+0.30,legeY+0.25)
+    legeY = 0.17
+    pl  = ROOT.TLegend(legeX,legeY,legeX+0.30,legeY+0.2)
     pl.SetTextSize(0.03)
     pl.SetFillStyle(4000)
     pl.SetTextFont(132)
@@ -497,7 +511,7 @@ def main():
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
 # --- chose text for final state description --
-#    writeText("Fully hadronic final state",   top - lineSpace)
+    writeText("Fully hadronic final state",   top - lineSpace)
 #    writeText("hadr. + ltau final states",   top - lineSpace)
 #    writeText("hadr. + ltau + emu final states",   top - lineSpace)
 
@@ -618,7 +632,8 @@ def main():
     top = 0.83
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
-#    writeText("Fully hadronic final state",   top - lineSpace)
+# --- chose text for final state description --
+    writeText("Fully hadronic final state",   top - lineSpace)
 #    writeText("hadr. + ltau final states",   top - lineSpace)
 #    writeText("hadr. + ltau + emu final states",   top - lineSpace)
 

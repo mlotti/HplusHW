@@ -726,6 +726,9 @@ class PlotBase:
         self.cf = histograms.CanvasFrame(self.histoMgr, filename, **kwargs)
         self.frame = self.cf.frame
 
+    def setFrameName(self, filename):
+        self.cf.canvas.SetName(filename)
+
     ## Get the frame TH1
     def getFrame(self):
         return self.frame
