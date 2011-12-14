@@ -66,7 +66,7 @@ config = {"skim":           {"input": "AOD",                           "config":
           "embedding":      {"input": "tauembedding_skim_v13", "config": "embed.py",   "output": "embedded.root"},
 #          "analysis":       {"input": "tauembedding_embedding_v13"+pt,  "config": "embeddingAnalysis_cfg.py"},
           "analysis":       {"input": "tauembedding_embedding_v13_1"+vispt,  "config": "embeddingAnalysis_cfg.py"},
-#          "analysisTau":    {"input": "pattuple_v17",                  "config": "tauAnalysis_cfg.py"},
+          "analysisTau":    {"input": "pattuple_v18",                       "config": "tauAnalysis_cfg.py"},
 #          "signalAnalysis": {"input": "tauembedding_embedding_v13"+pt,  "config": "../signalAnalysis_cfg.py"},
           "signalAnalysis": {"input": "tauembedding_embedding_v13_1"+vispt,  "config": "../signalAnalysis_cfg.py"},
           "muonAnalysis":   {"input": "tauembedding_skim_v13",          "config": "muonAnalysisFromSkim_cfg.py"},
@@ -119,7 +119,7 @@ datasetsMCnoQCD = [
 datasetsMCQCD = [
     "QCD_Pt20_MuEnriched_TuneZ2_Summer11",
 ]
-datasetsTest = [
+datasetsSignal = [
     "TTToHplusBWB_M80_Summer11",
     "TTToHplusBWB_M90_Summer11",
     "TTToHplusBWB_M100_Summer11",
@@ -159,7 +159,7 @@ else:
     datasets.extend(datasetsMCQCD)
 
 if step in ["skim", "embedding", "signalAnalysis"]:
-    datasets.extend(datasetsTest)
+    datasets.extend(datasetsSignal)
 
 multicrab.extendDatasets(config[step]["input"], datasets)
 
@@ -170,7 +170,7 @@ if step != "skim":
 
 # Define the processing version number, meaningful for skim/embedding
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v13_1" % step
+tauname = "_tauembedding_%s_v13_2" % step
 #if step in ["generation", "embedding"]:
 #    tauname += pt
 if step == "embedding":
@@ -227,9 +227,13 @@ muonAnalysisNjobs = { # goal: 30k events/job
 def modify(dataset):
     name = ""
 
-    if dataset.isData():
+    if dataset.isData() or step != "skim":
         dataset.appendLine("CMSSW.total_number_of_lumis = -1")
     else:
+        # split by events can only be used for MC and in skim step
+        # embedding step is impossible, because the counters are saved
+        # in the lumi sections, and will get doubly counted in split
+        # by events mode
         dataset.appendLine("CMSSW.total_number_of_events = -1")
 
     path = dataset.getDatasetPath().split("/")
