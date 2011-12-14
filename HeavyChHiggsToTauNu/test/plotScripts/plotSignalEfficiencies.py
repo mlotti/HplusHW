@@ -103,7 +103,8 @@ def main():
             cutCount = column.getCount(column.getRowNames().index(cut))
             eff = cutCount.clone()
             eff.divide(allCount) # N(cut) / N(all)
-        
+            if column.getRowNames().index(cut) == 9: ## btagging             
+                print cut,eff.value()
             yvalues[cut].append(eff.value())
             yerrs[cut].append(eff.uncertainty())
 
@@ -118,6 +119,7 @@ def main():
         return gr
 
     gtrig = createErrors("Trigger and HLT_MET cut")
+    print gtrig
     gtrig.SetLineColor(38)
     gtrig.SetMarkerColor(38)
     gtrig.SetLineStyle(2) 
@@ -141,7 +143,8 @@ def main():
     gbtag = createErrors("btagging")
     gbtag.SetLineColor(1)
     gbtag.SetMarkerColor(1)
-    gbtag.SetLineStyle(6) 
+    gbtag.SetLineStyle(6)
+    print gbtag
     #gtau = createErrors("trigger scale factor")
 
                         

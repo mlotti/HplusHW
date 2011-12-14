@@ -784,7 +784,7 @@ def main():
             "Diboson"
             ])
 
-    # Apply TDR style
+     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
     invertedQCD = InvertedTauID()
@@ -796,10 +796,10 @@ def main():
     metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     
-    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets")
-    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets") 
-    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets")
-    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets")
+    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBtag")
+    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBtag") 
+    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_BaselineTauIdBtag")
+    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_BaselineTauIdBtag")
 
     metBase_data.SetTitle("Data: BaseLine TauID")
     metInverted_data.SetTitle("Data: Inverted TauID")

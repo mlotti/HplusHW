@@ -135,7 +135,7 @@ def doCounters(datasets):
             if column.getRowNames().index(cut) == 10: ## MET
                 allCount = column.getCount(column.getRowNames().index("njets"))
                 
-            if column.getRowNames().index(cut) == 11: ## btagging
+            if column.getRowNames().index(cut) == 12: ## btagging
                 allCount = column.getCount(column.getRowNames().index("MET"))
                                  
             eff = cutCount.clone()
@@ -144,6 +144,8 @@ def doCounters(datasets):
                                            
             yvalues[cut].append(eff.value())
             yerrs[cut].append(eff.uncertainty())
+            if column.getRowNames().index(cut) == 9: ## btagging             
+                print cut,eff.value()
 
     def createErrors(cutname):
         gr = ROOT.TGraphErrors(len(xvalues), array.array("d", xvalues), array.array("d", yvalues[cutname]),
@@ -158,32 +160,44 @@ def doCounters(datasets):
     gtrig = createErrors("Trigger and HLT_MET cut")
     gtrig.SetLineColor(38)
     gtrig.SetMarkerColor(38)
+    gtrig.SetMarkerStyle(20)
+    gtrig.SetMarkerSize(2)
     gtrig.SetLineStyle(8)
     gtrig.SetLineWidth(4) 
     gtau = createErrors("taus == 1")
     gtau.SetLineColor(2)
     gtau.SetMarkerColor(2)
+    gtau.SetMarkerStyle(21)
+    gtau.SetMarkerSize(2)
     gtau.SetLineStyle(3)
     gtau.SetLineWidth(4)  
     #gtau = createErrors("trigger scale factor")
     gveto = createErrors("muon veto")
     gveto.SetLineColor(1)
     gveto.SetMarkerColor(1)
+    gveto.SetMarkerStyle(22)
+    gveto.SetMarkerSize(2)
     gveto.SetLineStyle(5)
     gveto.SetLineWidth(4) 
     gjets = createErrors("njets")
     gjets.SetLineColor(4)
     gjets.SetMarkerColor(4)
+    gjets.SetMarkerStyle(23)
+    gjets.SetMarkerSize(2)
     gjets.SetLineStyle(1)
     gjets.SetLineWidth(4) 
     gmet = createErrors("MET")
     gmet.SetLineColor(2)
     gmet.SetMarkerColor(2)
+    gmet.SetMarkerStyle(24)
+    gmet.SetMarkerSize(2)
     gmet.SetLineStyle(2)
     gmet.SetLineWidth(4) 
     gbtag = createErrors("btagging")
     gbtag.SetLineColor(1)
     gbtag.SetMarkerColor(1)
+    gbtag.SetMarkerStyle(25)
+    gbtag.SetMarkerSize(2)
     gbtag.SetLineStyle(6)
     gbtag.SetLineWidth(4) 
     #gtau = createErrors("trigger scale factor")
@@ -206,12 +220,12 @@ def doCounters(datasets):
 
     legend = histograms.createLegend(x1=0.5, y1=0.53, x2=0.85, y2=0.75)
 
-    legend.AddEntry(gtrig,"Trigger", "l"); 
-    legend.AddEntry(gtau, "#tau identification", "l"); 
-    legend.AddEntry(gveto ,"lepton vetoes", "l"); 
-    legend.AddEntry(gjets ,"3 jets", "l"); 
-    legend.AddEntry(gmet,"MET ", "l")
-    legend.AddEntry(gbtag,"b tagging ", "l")
+    legend.AddEntry(gtrig,"Trigger", "lp"); 
+    legend.AddEntry(gtau, "#tau identification", "lp"); 
+    legend.AddEntry(gveto ,"lepton vetoes", "lp"); 
+    legend.AddEntry(gjets ,"3 jets", "lp"); 
+    legend.AddEntry(gmet,"MET ", "lp")
+    legend.AddEntry(gbtag,"b tagging ", "lp")
     legend.Draw()
     
     canvasFrame.canvas.SaveAs(".png")

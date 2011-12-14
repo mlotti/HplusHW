@@ -623,7 +623,7 @@ class PlotBase:
                     if not isinstance(drh, dataset.DatasetRootHistoBase):
                         raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, datasetRootHistos[%d] is %s" % (i, type(drh).__name__))
 
-                    self.histoMgr = histograms.HistoManager(datasetRootHistos = datasetRootHistos)
+                self.histoMgr = histograms.HistoManager(datasetRootHistos = datasetRootHistos)
             else:
                 histoList = datasetRootHistos
                 if isinstance(datasetRootHistos[0], ROOT.TH1):
@@ -637,7 +637,6 @@ class PlotBase:
                     self.histoMgr.appendHisto(histo)
         else:
             self.histoMgr = histograms.HistoManager()
-
 
         # Save the format
         self.saveFormats = saveFormats

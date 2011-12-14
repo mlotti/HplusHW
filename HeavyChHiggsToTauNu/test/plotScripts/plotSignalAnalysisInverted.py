@@ -291,7 +291,7 @@ def mtComparison(datasets):
 #    mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauId130Phi")])
 
 
- ## After standard cuts
+ ## After b tagging 
     mt4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet4050")])
     mt5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet5060")])
     mt6070 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet6070")])
@@ -303,8 +303,16 @@ def mtComparison(datasets):
     mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet")])
 
 
-  
-    
+## After b tagging
+#    mt4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag4050")])
+#    mt5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag5060")])
+#    mt6070 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag6070")])
+#    mt7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag7080")])
+#    mt80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag80100")])
+#    mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag100120")])
+#    mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag120150")])
+#    mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag150")])
+#    mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag")])    
 #        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet5060"),
 #        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet6070"),
 #        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet7080"),
@@ -314,6 +322,9 @@ def mtComparison(datasets):
 #        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet150")
 
 #    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+#    mt4050._setLegend(histograms.createLegend())
+
+
     mt4050._setLegendStyles()
     mt4050._setLegendLabels()
     mt4050.histoMgr.setHistoDrawStyleAll("P")
@@ -376,7 +387,11 @@ def mtComparison(datasets):
     mt.histoMgr.setHistoDrawStyleAll("P")
     mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
     hmt = mt.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet")
-    hmt.Scale(0.0068684)
+# with b tagging
+    hmt.Scale(0.006436)
+# after 3 jets
+#    hmt.Scale(0.007245)
+
     
     hmtSum = hmt4050.Clone("mtSum")
     hmtSum.SetName("mtSum")
