@@ -289,13 +289,13 @@ namespace HPlus {
 
     // Uncertainties after standard selections
     fSFUncertaintyAfterStandardSelections.setScaleFactorUncertainties(fEventWeight.getWeight(),
-                                                                      triggerWeight.getEventWeight(), triggerWeight.getEventAbsoluteUncertainty(),
+                                                                      triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
                                                                       1.0, 0.0); // these values are valid because btagging is not yet applied at this stage
 
     // Loop over analysis variations (that's where the rest of the tau pT spectrum plots and mT shapes are obtained ...)
     double transverseMass = TransverseMass::reconstruct(*(tauCandidateData.getCleanedTauCandidates()[0]), *(metData.getSelectedMET()));
     for(std::vector<AnalysisVariation>::iterator it = fAnalyses.begin(); it != fAnalyses.end(); ++it) {
-      (*it).analyse(iEvent.isRealData(), electronVetoData.getSelectedElectronPt(), muonVetoData.getSelectedMuonPt(), jetData.getHadronicJetCount(),
+      (*it).analyse(iEvent.isRealData(), electronVetoData.getSelectedElectronPtBeforePtCut(), muonVetoData.getSelectedMuonPtBeforePtCut(), jetData.getHadronicJetCount(),
                     metData, tauCandidateData, btagData, myTauPtBinIndex, myWeightBeforeTauID, triggerWeight, myTauMatch, getMtBinIndex(transverseMass));
     }
 
@@ -465,7 +465,7 @@ namespace HPlus {
           hLeg1AfterDeltaPhiTauMET->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight()*myBTagSF);
           if (myFakeTauStatus) hFakeTauLeg1AfterDeltaPhiTauMET->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight()*myBTagSF);
           fSFUncertaintyAfterMetLeg->setScaleFactorUncertainties(weightAfterVertexReweight*trgEffData.getEventWeight()*myBTagSF,
-                                                                 trgEffData.getEventWeight(), trgEffData.getEventAbsoluteUncertainty(),
+                                                                 trgEffData.getEventWeight(), trgEffData.getEventWeightAbsoluteUncertainty(),
                                                                  btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
         }
       }
@@ -481,7 +481,7 @@ namespace HPlus {
         hLeg2AfterTauIDWithRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
         if (myFakeTauStatus) hFakeTauLeg2AfterTauIDWithRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
         fSFUncertaintyAfterTauLeg->setScaleFactorUncertainties(weightAfterVertexReweight*trgEffData.getEventWeight(),
-                                                               trgEffData.getEventWeight(), trgEffData.getEventAbsoluteUncertainty(),
+                                                               trgEffData.getEventWeight(), trgEffData.getEventWeightAbsoluteUncertainty(),
                                                                1.0, 0.0);
         // Fill control plots here for point "standard selections with full tauID"
         hCtrlSelectedTauRtauAfterStandardSelections->Fill(tauCandidateData.getRtauOfSelectedTau(), weightAfterVertexReweight*trgEffData.getEventWeight());
@@ -512,7 +512,7 @@ namespace HPlus {
         hMtShapesAfterMETAndDeltaPhi[tauPtBinIndex]->Fill(transverseMass, weightAfterVertexReweight*trgEffData.getEventWeight());
         if (myFakeTauStatus) hFakeTauMtShapesAfterMETAndDeltaPhi[tauPtBinIndex]->Fill(transverseMass, weightAfterVertexReweight*trgEffData.getEventWeight());
         fSFUncertaintyMtAfterMETAndDeltaPhi->setScaleFactorUncertainties(weightAfterVertexReweight*trgEffData.getEventWeight(),
-                                                                         trgEffData.getEventWeight(), trgEffData.getEventAbsoluteUncertainty(),
+                                                                         trgEffData.getEventWeight(), trgEffData.getEventWeightAbsoluteUncertainty(),
                                                                          1.0, 0.0);
         // Obtain mT shape for inverted tau isolation
         if (myPassedInvertedTauIsol) {
@@ -522,7 +522,7 @@ namespace HPlus {
           if (myFakeTauStatus) hFakeTauMtShapesAfterMETAndDeltaPhiAndInvertedTau[tauPtBinIndex]->Fill(transverseMass, weightAfterVertexReweight*trgEffData.getEventWeight());
           h2DMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau->Fill(tauPtBinIndex, mTBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
           fSFUncertaintyMtAfterMETAndDeltaPhiAndInvertedTauID->setScaleFactorUncertainties(weightAfterVertexReweight*trgEffData.getEventWeight(),
-                                                                                           trgEffData.getEventWeight(), trgEffData.getEventAbsoluteUncertainty(),
+                                                                                           trgEffData.getEventWeight(), trgEffData.getEventWeightAbsoluteUncertainty(),
                                                                                            1.0, 0.0);
         }
       }
@@ -538,7 +538,7 @@ namespace HPlus {
         if (myFakeTauStatus) hFakeTauMtLegAfterMETAndTauIDWithRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
         h2DMtLegAfterMETAndTauIDWithRtau->Fill(tauPtBinIndex, mTBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
         fSFUncertaintyMtAfterTauID->setScaleFactorUncertainties(weightAfterVertexReweight*trgEffData.getEventWeight(),
-                                                                trgEffData.getEventWeight(), trgEffData.getEventAbsoluteUncertainty(),
+                                                                trgEffData.getEventWeight(), trgEffData.getEventWeightAbsoluteUncertainty(),
                                                                 1.0, 0.0);
       }
     }

@@ -20,8 +20,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
-analysis = "QCDMeasurement"
-counters = analysis+"Counters"
+analysis = "signalAnalysis"
+counters = analysis+"Counters/weighted"
 
 def main():
     # Create all datasets from a multicrab task

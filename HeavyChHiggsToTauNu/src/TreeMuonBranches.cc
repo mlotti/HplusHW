@@ -66,7 +66,7 @@ namespace HPlus {
 
       fMuonsPdgId.push_back(pdgId);
       fMuonsMotherPdgId.push_back(motherPdgId);
-      fMuonsGrandMotherPdgId.push_back(motherPdgId);
+      fMuonsGrandMotherPdgId.push_back(grandMotherPdgId);
     }
   }
 

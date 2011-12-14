@@ -137,8 +137,6 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory dir = fs->mkdir("TriggerScaleFactor");
     hScaleFactor = makeTH<TH1F>(dir, "TriggerScaleFactor", "TriggerScaleFactor;TriggerScaleFactor;N_{events}/0.01", 200., 0., 2.0);
-    hScaleFactorRelativeUncertainty = makeTH<TH1F>(dir, "TriggerScaleFactorRelativeUncertainty", "TriggerScaleFactorRelativeUncertainty;TriggerScaleFactorRelativeUncertainty;N_{events}/0.001", 2000., 0., 2.0);
-    hScaleFactorAbsoluteUncertainty = makeTH<TH1F>(dir, "TriggerScaleFactorAbsoluteUncertainty", "TriggerScaleFactorAbsoluteUncertainty;TriggerScaleFactorAbsoluteUncertainty;N_{events}/0.001", 2000., 0., 2.0);
 
     const size_t NBUF = 10;
     char buf[NBUF];
@@ -249,16 +247,13 @@ namespace HPlus {
   TriggerEfficiencyScaleFactor::Data TriggerEfficiencyScaleFactor::applyEventWeight(const pat::Tau& tau, bool isData) {
     fWeight = 1.0;
     fWeightAbsUnc = 0.0;
-    fRelativeUncertainty = 0.0;
-    fAbsoluteUncertainty = 0.0;
+    fWeightRelUnc = 0.0;
     if(fMode == kScaleFactor) {
       fWeight = scaleFactor(tau);
-      fRelativeUncertainty = scaleFactorRelativeUncertainty(tau);
-      fAbsoluteUncertainty = scaleFactorAbsoluteUncertainty(tau);
+      fWeightAbsUnc = scaleFactorAbsoluteUncertainty(tau);
+      fWeightRelUnc = scaleFactorRelativeUncertainty(tau);
 
       hScaleFactor->Fill(fWeight, fEventWeight.getWeight());
-      hScaleFactorRelativeUncertainty->Fill(scaleFactorRelativeUncertainty(tau), fEventWeight.getWeight());
-      hScaleFactorAbsoluteUncertainty->Fill(fWeightAbsUnc, fEventWeight.getWeight());
     }
     else if(fMode == kEfficiency) {
       if(isData) {
@@ -266,10 +261,12 @@ namespace HPlus {
           throw cms::Exception("LogicError") << "TriggerEfficiencyScaleFactor: With efficiency mode and data input, must call setRun() before applyEventWeight()" << std::endl;
         fWeight = dataEfficiency(tau);
         fWeightAbsUnc = dataEfficiencyAbsoluteUncertainty(tau);
+        fWeightRelUnc = dataEfficiencyRelativeUncertainty(tau);
       }
       else {
         fWeight = mcEfficiency(tau);
         fWeightAbsUnc = mcEfficiencyAbsoluteUncertainty(tau);
+        fWeightRelUnc = mcEfficiencyRelativeUncertainty(tau);
       }
     }
     fEventWeight.multiplyWeight(fWeight);

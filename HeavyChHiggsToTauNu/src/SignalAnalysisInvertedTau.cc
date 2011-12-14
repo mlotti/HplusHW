@@ -49,7 +49,15 @@ namespace HPlus {
     fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),
     fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
+    fBaselineTauIDCounter(eventCounter.addCounter("Baseline,taus == 1")),
+    fBaselineEvetoCounter(eventCounter.addCounter("Baseline,electron veto")),
+    fBaselineMuvetoCounter(eventCounter.addCounter("Baseline,muon veto")),
+    fBaselineJetsCounter(eventCounter.addCounter("Baseline, njets")),
+    fBaselineMetCounter(eventCounter.addCounter("Baseline, MET")),
+    fBaselineBtagCounter(eventCounter.addCounter("Baseline, btagging")),
+    fBaselineDphi160Counter(eventCounter.addCounter("Baseline, deltaPhi160")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
+    fTriggerScaleFactorCounter(eventCounter.addCounter("trigger scale factor")),
     fTauVetoAfterTauIDCounter(eventCounter.addCounter("Veto on isolated taus")),
     fNprongsAfterTauIDCounter(eventCounter.addCounter("Nprongs for best candidate")),
     fRtauAfterTauIDCounter(eventCounter.addCounter("RtauAfterTauID")),
@@ -62,9 +70,9 @@ namespace HPlus {
     fdeltaPhiTauMET160Counter(eventCounter.addCounter("deltaPhiTauMET upper limit")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
     fdeltaPhiTauMET160FakeMetCounter(eventCounter.addCounter("deltaPhi160 and fake MET veto")),
+    fTopRtauDeltaPhiFakeMETCounter(eventCounter.addCounter("TopRtauDeltaPhiFakeMET cuts")),
     fRtauDeltaPhiFakeMETCounter(eventCounter.addCounter("RtauDeltaPhiFakeMET cuts")),
     fBtag33RtauDeltaPhiFakeMETCounter(eventCounter.addCounter("Btag33RtauDeltaPhiFakeMET cuts")),
-    fTopRtauDeltaPhiFakeMETCounter(eventCounter.addCounter("TopRtauDeltaPhiFakeMET cuts")),
     fRtauAfterCutsCounter(eventCounter.addCounter("RtauAfterCuts")),
     fForwardJetVetoCounter(eventCounter.addCounter("forward jet veto")),
     ftransverseMassCut80Counter(eventCounter.addCounter("transverseMass > 60")),
@@ -189,6 +197,16 @@ namespace HPlus {
     hMTInvertedTauIdJet5060 = makeTH<TH1F>(*fs, "MTInvertedTauIdJet5060", "MTInvertedTauIdJet5060", 400, 0., 400.);
     hMTInvertedTauIdJet4050 = makeTH<TH1F>(*fs, "MTInvertedTauIdJet4050", "MTInvertedTauIdJet4050", 400, 0., 400.);
 
+    hMTInvertedTauIdMet = makeTH<TH1F>(*fs, "MTInvertedTauIdMet", "MTInvertedTauIdMet", 400, 0., 400.);
+    hMTInvertedTauIdMet150 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet150", "MTInvertedTauIdMet150", 400, 0., 400.);
+    hMTInvertedTauIdMet120150 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet120150", "MTInvertedTauIdMet120150", 400, 0., 400.);
+    hMTInvertedTauIdMet100120 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet100120", "MTInvertedTauIdMet100120", 400, 0., 400.);
+    hMTInvertedTauIdMet80100 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet80100", "MTInvertedTauIdMet80100", 400, 0., 400.);
+    hMTInvertedTauIdMet7080 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet7080", "MTInvertedTauIdMet7080", 400, 0., 400.);
+    hMTInvertedTauIdMet6070 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet6070", "MTInvertedTauIdMet6070", 400, 0., 400.);
+    hMTInvertedTauIdMet5060 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet5060", "MTInvertedTauIdMet5060", 400, 0., 400.);
+    hMTInvertedTauIdMet4050 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet4050", "MTInvertedTauIdMet4050", 400, 0., 400.);
+
     hMTInvertedTauIdJetPhi = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi", "MTInvertedTauIdJetPhi", 400, 0., 400.);
     hMTInvertedTauIdJetPhi150 = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi150", "MTInvertedTauIdJetPhi150", 400, 0., 400.);
     hMTInvertedTauIdJetPhi120150 = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi120150", "MTInvertedTauIdJetPhi120150", 400, 0., 400.);
@@ -198,6 +216,16 @@ namespace HPlus {
     hMTInvertedTauIdJetPhi6070 = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi6070", "MTInvertedTauIdJetPhi6070", 400, 0., 400.);
     hMTInvertedTauIdJetPhi5060 = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi5060", "MTInvertedTauIdJetPhi5060", 400, 0., 400.);
     hMTInvertedTauIdJetPhi4050 = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi4050", "MTInvertedTauIdJetPhi4050", 400, 0., 400.);
+
+    hMTInvertedTauId130Phi = makeTH<TH1F>(*fs, "MTInvertedTauId130Phi", "MTInvertedTauId130Phi", 400, 0., 400.);
+    hMTInvertedTauId130Phi150 = makeTH<TH1F>(*fs, "MTInvertedTauId130Phi150", "MTInvertedTauId130Phi150", 400, 0., 400.);
+    hMTInvertedTauId130Phi120150 = makeTH<TH1F>(*fs, "MTInvertedTauId130Phi120150", "MTInvertedTauId130Phi120150", 400, 0., 400.);
+    hMTInvertedTauId130Phi100120 = makeTH<TH1F>(*fs, "MTInvertedTauId130Phi100120", "MTInvertedTauId130Phi100120", 400, 0., 400.);
+    hMTInvertedTauId130Phi80100 = makeTH<TH1F>(*fs, "MTInvertedTauId130Phi80100", "MTInvertedTauId130Phi80100", 400, 0., 400.);
+    hMTInvertedTauId130Phi7080 = makeTH<TH1F>(*fs, "MTInvertedTauId130Phi7080", "MTInvertedTauId130Phi7080", 400, 0., 400.);
+    hMTInvertedTauId130Phi6070 = makeTH<TH1F>(*fs, "MTInvertedTauId130Phi6070", "MTInvertedTauId130Phi6070", 400, 0., 400.);
+    hMTInvertedTauId130Phi5060 = makeTH<TH1F>(*fs, "MTInvertedTauId130Phi5060", "MTInvertedTauId130Phi5060", 400, 0., 400.);
+    hMTInvertedTauId130Phi4050 = makeTH<TH1F>(*fs, "MTInvertedTauId130Phi4050", "MTInvertedTauId130Phi4050", 400, 0., 400.);
 
 
     hDeltaPhi = makeTH<TH1F>(*fs, "deltaPhi", "deltaPhi;#Delta#phi(tau,MET);N_{events", 360, 0.0, 360.0);
@@ -308,10 +336,10 @@ namespace HPlus {
     //hSelectionFlow->Fill(kSignalOrderVertexSelection, fEventWeight.getWeight());
 
   // Get MET object 
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+    //    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     //double Met = metData.getSelectedMET()->et();
     //    std::cout << " weight before  = " << fEventWeight.getWeight() << " met " << Met <<  std::endl;
-    hMETBeforeTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());  
+    //    hMETBeforeTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());  
 
 
 
@@ -339,9 +367,26 @@ namespace HPlus {
     // now tau ID has been applied
 
 
+    if(iEvent.isRealData())
+      fTriggerEfficiencyScaleFactor.setRun(iEvent.id().run());
+    // Apply trigger scale factor here, because it depends only on tau
+    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauData.getCleanedTauCandidates()[0]), iEvent.isRealData());
+    fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
+    increment(fTriggerScaleFactorCounter);
+    hSelectionFlow->Fill(kSignalOrderTauID, fEventWeight.getWeight());
+
+
 
 
     std::string myTauIsolation = "byTightIsolation";
+
+
+ // Get MET object 
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+    //double Met = metData.getSelectedMET()->et();
+    //    std::cout << " weight before  = " << fEventWeight.getWeight() << " met " << Met <<  std::endl;
+    hMETBeforeTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());  
+
 
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     // Global muon veto
@@ -356,13 +401,26 @@ namespace HPlus {
 
   // baseline tau-id
     if (tauData.applyDiscriminatorOnBestTauCandidate(myTauIsolation)) {
+      hMETBaselineTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      increment(fBaselineTauIDCounter);
       if (electronVetoData.passedEvent()) {
+	increment(fBaselineEvetoCounter);
 	if (muonVetoData.passedEvent()) {
+	  increment(fBaselineMuvetoCounter);
 	  if(jetData.passedEvent()) {
-	    if(btagData.passedEvent()) {
-	      if ( deltaPhi*57.3 < 135) {
-		hMETBaselineTauIdBtagDphi->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 	      
+	    increment(fBaselineJetsCounter);
+	    // Count baseline events
+	    if(metData.passedEvent()) {	
+	      increment(fBaselineMetCounter);   
+	      if(btagData.passedEvent()) {
+		increment(fBaselineBtagCounter);
+		if ( deltaPhi*57.3 < 160) {
+		  increment(fBaselineDphi160Counter);
+		  hMETBaselineTauIdBtagDphi->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 	      
+		}
 	      }
+	    }
+	    if(btagData.passedEvent()) {
 	      hMETBaselineTauIdBtag->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 
 	      hMTBaselineTauIdBtag->Fill(transverseMass, fEventWeight.getWeight());   
 	     
@@ -395,12 +453,12 @@ namespace HPlus {
       }
     }
 
-    // TauID inverted TauID
+    // TauID, inverted TauID, veto on isolated taus
     if(!tauData.applyVetoOnTauCandidates(myTauIsolation))  return false; 
     // veto was successfull
     increment(fTauVetoAfterTauIDCounter);
 
-  
+    hMETInvertedTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());  
 
     //    if(!tauData.passedEvent()) return false; // Require at least one tau candidate
     // plot leading track without pt cut
@@ -410,9 +468,9 @@ namespace HPlus {
     //    increment(fTausExistCounter);
     //    if(tauData.getCleanedTauCandidates().size() == 0) return false; // Require exactly one tau
     // Apply trigger scale factor here, because it depends only on tau
-    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauData.getCleanedTauCandidates()[0]), iEvent.isRealData());
-    fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
-    increment(fOneTauCounter);
+    //    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauData.getCleanedTauCandidates()[0]), iEvent.isRealData());
+    //    fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
+    //    increment(fOneTauCounter);
     hSelectionFlow->Fill(kSignalOrderTauID, fEventWeight.getWeight());
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Tau> > saveTaus(new std::vector<pat::Tau>());
@@ -484,7 +542,7 @@ namespace HPlus {
       iEvent.put(saveMuons, "selectedVetoMuons");
     }
 
-    // Hadronic jet selection
+   
     if (tauData.getCleanedTauCandidates().size())
       myBestTauCandidate.push_back(tauData.getCleanedTauCandidates()[0]);
 
@@ -507,9 +565,6 @@ namespace HPlus {
    
 // plots for inverted isolation
 
-//    if(tauData.applyVetoOnTauCandidates(myTauIsolation)) {
-      // veto was successfull
-
     // inverted MET before b tagging
     hMETInvertedTauIdJets->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     if ( tauData.getCleanedTauCandidates()[0]->pt() > 150  ) hMETInvertedTauIdJets150->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
@@ -517,12 +572,17 @@ namespace HPlus {
     if ( tauData.getCleanedTauCandidates()[0]->pt() > 100 && tauData.getCleanedTauCandidates()[0]->pt() < 120 ) hMETInvertedTauIdJets100120->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     if ( tauData.getCleanedTauCandidates()[0]->pt() > 80 && tauData.getCleanedTauCandidates()[0]->pt() < 100 ) hMETInvertedTauIdJets80100->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     if ( tauData.getCleanedTauCandidates()[0]->pt() > 70 && tauData.getCleanedTauCandidates()[0]->pt() < 80 ) hMETInvertedTauIdJets7080->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());  																	     																	     
-    if ( tauData.getCleanedTauCandidates()[0]->pt() > 60 && tauData.getCleanedTauCandidates()[0]->pt() < 70 ) hMETInvertedTauIdJets6070->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    if ( tauData.getCleanedTauCandidates()
+[0]->pt() > 60 && tauData.getCleanedTauCandidates()[0]->pt() < 70 ) hMETInvertedTauIdJets6070->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     if ( tauData.getCleanedTauCandidates()[0]->pt() > 50 && tauData.getCleanedTauCandidates()[0]->pt() < 60 ) hMETInvertedTauIdJets5060->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 
     if ( tauData.getCleanedTauCandidates()[0]->pt() > 40 && tauData.getCleanedTauCandidates()[0]->pt() < 50 ) hMETInvertedTauIdJets4050->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());																		
 
 
-
+ // Get MET object 
+    //    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+    //double Met = metData.getSelectedMET()->et();
+    //    std::cout << " weight before  = " << fEventWeight.getWeight() << " met " << Met <<  std::endl;
+    //    hMETBeforeTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());  
 															      
     hMTInvertedTauIdJets->Fill(transverseMass, fEventWeight.getWeight());
     if(btagData.passedEvent()) {
@@ -619,7 +679,22 @@ namespace HPlus {
     if ( tauData.getCleanedTauCandidates()[0]->pt() > 60 && tauData.getCleanedTauCandidates()[0]->pt() < 70 ) hMTInvertedTauIdJet6070->Fill(transverseMass, fEventWeight.getWeight()); 
     if ( tauData.getCleanedTauCandidates()[0]->pt() > 50 && tauData.getCleanedTauCandidates()[0]->pt() < 60 ) hMTInvertedTauIdJet5060->Fill(transverseMass, fEventWeight.getWeight()); 
     if ( tauData.getCleanedTauCandidates()[0]->pt() > 40 && tauData.getCleanedTauCandidates()[0]->pt() < 50 ) hMTInvertedTauIdJet4050->Fill(transverseMass, fEventWeight.getWeight()); 
+
+
+   // mt for inverted tau with MET>70 cut   
+    if (metData.getSelectedMET()->et() > 70) {
+      hMTInvertedTauIdMet->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 150  ) hMTInvertedTauIdJet150->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 120 && tauData.getCleanedTauCandidates()[0]->pt() < 150 ) hMTInvertedTauIdMet120150->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 100 && tauData.getCleanedTauCandidates()[0]->pt() < 120 ) hMTInvertedTauIdMet100120->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 80 && tauData.getCleanedTauCandidates()[0]->pt() < 100 ) hMTInvertedTauIdMet80100->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 70 && tauData.getCleanedTauCandidates()[0]->pt() < 80 ) hMTInvertedTauIdMet7080->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 60 && tauData.getCleanedTauCandidates()[0]->pt() < 70 ) hMTInvertedTauIdMet6070->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 50 && tauData.getCleanedTauCandidates()[0]->pt() < 60 ) hMTInvertedTauIdMet5060->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 40 && tauData.getCleanedTauCandidates()[0]->pt() < 50 ) hMTInvertedTauIdMet4050->Fill(transverseMass, fEventWeight.getWeight());
+    }
    // mt for inverted tau with deltaphi cut
+
     if ( deltaPhi*57.3 < 160 ) {
       hMTInvertedTauIdJetPhi->Fill(transverseMass, fEventWeight.getWeight()); 
       if ( tauData.getCleanedTauCandidates()[0]->pt() > 150  ) hMTInvertedTauIdJetPhi150->Fill(transverseMass, fEventWeight.getWeight()); 
@@ -632,12 +707,24 @@ namespace HPlus {
       if ( tauData.getCleanedTauCandidates()[0]->pt() > 40 && tauData.getCleanedTauCandidates()[0]->pt() < 50 ) hMTInvertedTauIdJetPhi4050->Fill(transverseMass, fEventWeight.getWeight()); 
     }
 
+    if ( deltaPhi*57.3 < 130 ) {
+      hMTInvertedTauId130Phi->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 150  ) hMTInvertedTauIdJetPhi150->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 120 && tauData.getCleanedTauCandidates()[0]->pt() < 150 ) hMTInvertedTauId130Phi120150->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 100 && tauData.getCleanedTauCandidates()[0]->pt() < 120 ) hMTInvertedTauId130Phi100120->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 80 && tauData.getCleanedTauCandidates()[0]->pt() < 100 ) hMTInvertedTauId130Phi80100->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 70 && tauData.getCleanedTauCandidates()[0]->pt() < 80 ) hMTInvertedTauId130Phi7080->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 60 && tauData.getCleanedTauCandidates()[0]->pt() < 70 ) hMTInvertedTauId130Phi6070->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 50 && tauData.getCleanedTauCandidates()[0]->pt() < 60 ) hMTInvertedTauId130Phi5060->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 40 && tauData.getCleanedTauCandidates()[0]->pt() < 50 ) hMTInvertedTauId130Phi4050->Fill(transverseMass, fEventWeight.getWeight()); 
+    }
+
 
     //    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getCleanedTauCandidates()[0]), *(metData.getSelectedMET()));
     hDeltaPhi->Fill(deltaPhi*57.3, fEventWeight.getWeight());
     if ( deltaPhi*57.3 > 10) increment(fdeltaPhiTauMET10Counter); 
  
-    if ( deltaPhi*57.3 < 135) {
+    if ( deltaPhi*57.3 < 130) {
       increment(fdeltaPhiTauMET160Counter);
       hTransverseMassDeltaPhiUpperCut->Fill(transverseMass, fEventWeight.getWeight());  
     }     
@@ -653,6 +740,10 @@ namespace HPlus {
     hSelectedTauEtAfterCuts->Fill(tauData.getCleanedTauCandidates()[0]->pt(), fEventWeight.getWeight());
     hSelectedTauEtaAfterCuts->Fill(tauData.getCleanedTauCandidates()[0]->eta(), fEventWeight.getWeight());
     hMetAfterCuts->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+
+    if(tauData.getRtauOfSelectedTau() < 0.8 ) return true;
+
+
 
    // top mass with possible event cuts
     if (TopSelectionData.passedEvent() ) {
@@ -703,7 +794,8 @@ namespace HPlus {
     if(transverseMass > 80 ) increment(ftransverseMassCut100NoRtauCounter);
 
  
-    if(!tauData.getBestTauCandidatePassedRtauStatus()  ) return false;
+    if(tauData.getRtauOfBestTauCandidate()  < 0.8 ) return false;
+    //    if(tauData.getBestTauCandidatePassedRtauStatus()  ) return false;
     increment(fRtauAfterCutsCounter);
     hTransverseMassWithRtau->Fill(transverseMass, fEventWeight.getWeight());
 

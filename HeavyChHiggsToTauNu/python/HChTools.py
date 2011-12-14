@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
 import subprocess
+import  errno
 
 def addConfigInfo(process, options, dataVersion):
     process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer",

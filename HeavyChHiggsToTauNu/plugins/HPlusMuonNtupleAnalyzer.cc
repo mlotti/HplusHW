@@ -46,16 +46,20 @@ private:
 
   typedef HPlus::EventItem<XYZTLorentzVector> MetItem;
   typedef HPlus::EventItem<double> DoubleItem;
+  typedef HPlus::EventItem<bool> BoolItem;
 
   edm::InputTag fPatTriggerSrc;
   edm::InputTag fGenParticleSrc;
 
   HPlus::TreeEventBranches fEventBranches;
   HPlus::TreeMuonBranches fMuonBranches;
+  std::vector<double> fMuonJetMinDR;
+
   HPlus::TreeJetBranches fJetBranches;
 
   std::vector<MetItem> fMets;
   std::vector<DoubleItem> fDoubles;
+  std::vector<BoolItem> fBools;
 };
 
 HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfig):
@@ -65,14 +69,22 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
   fJetBranches(iConfig, false)
 {
 
-  std::vector<edm::ParameterSet> mets = iConfig.getParameter<std::vector<edm::ParameterSet> >("mets");
-  for(size_t i=0; i<mets.size(); ++i) {
-    fMets.push_back(MetItem(mets[i].getParameter<std::string>("name"), mets[i].getParameter<edm::InputTag>("src")));
+  edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("mets");
+  std::vector<std::string> names = pset.getParameterNames();
+  for(size_t i=0; i<names.size(); ++i) {
+    fMets.push_back(MetItem(names[i], pset.getParameter<edm::InputTag>(names[i])));
   }
 
-  std::vector<edm::ParameterSet> doubles = iConfig.getParameter<std::vector<edm::ParameterSet> >("doubles");
-  for(size_t i=0; i<doubles.size(); ++i) {
-    fDoubles.push_back(DoubleItem(doubles[i].getParameter<std::string>("name"), doubles[i].getParameter<edm::InputTag>("src")));
+  pset = iConfig.getParameter<edm::ParameterSet>("doubles");
+  names = pset.getParameterNames();
+  for(size_t i=0; i<names.size(); ++i) {
+    fDoubles.push_back(DoubleItem(names[i], pset.getParameter<edm::InputTag>(names[i])));
+  }
+
+  pset = iConfig.getParameter<edm::ParameterSet>("bools");
+  names = pset.getParameterNames();
+  for(size_t i=0; i<names.size(); ++i) {
+    fBools.push_back(BoolItem(names[i], pset.getParameter<edm::InputTag>(names[i])));
   }
 
   edm::Service<TFileService> fs;
@@ -80,6 +92,8 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
 
   fEventBranches.book(fTree);
   fMuonBranches.book(fTree);
+  fTree->Branch("muons_jetMinDR", &fMuonJetMinDR);
+
   fJetBranches.book(fTree);
 
   for(size_t i=0; i<fMets.size(); ++i) {
@@ -87,6 +101,9 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
   }
   for(size_t i=0; i<fDoubles.size(); ++i) {
     fTree->Branch(fDoubles[i].name.c_str(), &(fDoubles[i].value));
+  }
+  for(size_t i=0; i<fBools.size(); ++i) {
+    fTree->Branch(fBools[i].name.c_str(), &(fBools[i].value));
   }
 }
 
@@ -97,6 +114,7 @@ void HPlusMuonNtupleAnalyzer::reset() {
  
   fEventBranches.reset();
   fMuonBranches.reset();
+  fMuonJetMinDR.clear();
   fJetBranches.reset();
 
   for(size_t i=0; i<fMets.size(); ++i) {
@@ -104,6 +122,9 @@ void HPlusMuonNtupleAnalyzer::reset() {
   }
   for(size_t i=0; i<fDoubles.size(); ++i) {
     fDoubles[i].value = nan;
+  }
+  for(size_t i=0; i<fBools.size(); ++i) {
+    fBools[i].value = false;
   }
 }
 
@@ -125,6 +146,18 @@ void HPlusMuonNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::Event
 
   fJetBranches.setValues(iEvent);
 
+  edm::Handle<edm::View<pat::Muon> > hmuons;
+  iEvent.getByLabel(fMuonBranches.getInputTag(), hmuons);
+  edm::Handle<edm::View<pat::Jet> > hjets;
+  iEvent.getByLabel(fJetBranches.getInputTag(), hjets);
+  for(size_t i=0; i<hmuons->size(); ++i) {
+    double minDR = 9999;
+    for(size_t j=0; j<hjets->size(); ++j) {
+      minDR = std::min(minDR, reco::deltaR(hmuons->at(i), hjets->at(j)));
+    }
+    fMuonJetMinDR.push_back(minDR);
+  }
+
   for(size_t i=0; i<fMets.size(); ++i) {
     edm::Handle<edm::View<reco::MET> > hmet;
     iEvent.getByLabel(fMets[i].src, hmet);
@@ -134,6 +167,11 @@ void HPlusMuonNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::Event
     edm::Handle<double> hnum;
     iEvent.getByLabel(fDoubles[i].src, hnum);
     fDoubles[i].value = *hnum;
+  }
+  for(size_t i=0; i<fBools.size(); ++i) {
+    edm::Handle<bool> hnum;
+    iEvent.getByLabel(fBools[i].src, hnum);
+    fBools[i].value = *hnum;
   }
 
   fTree->Fill();

@@ -54,14 +54,17 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("GlobalElectronVeto");
     
-    hElectronPt  = makeTH<TH1F>(myDir, "GlobalElectronPt", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 80, 0.0, 400.0);
-    hElectronEta = makeTH<TH1F>(myDir, "GlobalElectronEta", "GlobalElectronEta;isolated electron #eta;N_{electrons} / 0.1", 60, -3.0, 3.0);
+    hElectronPt  = makeTH<TH1F>(myDir, "GlobalElectronPt", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 400, 0.0, 400.0);
+    hElectronEta = makeTH<TH1F>(myDir, "GlobalElectronEta", "GlobalElectronEta;isolated electron #eta;N_{electrons} / 0.1", 300, -3.0, 3.0);
+    hElectronEta_identified = makeTH<TH1F>(myDir, "GlobalElectronEta_identified", "GlobalElectronEta_identified;isolated electron #eta;N_{electrons} / 0.1", 300, -3.0, 3.0);
+    hElectronPt_identified_eta  = makeTH<TH1F>(myDir, "GlobalElectronPt_identified_eta", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 400, 0.0, 400.0);
+
     hElectronPt_matchingMCelectron  = makeTH<TH1F>(myDir, "GlobalElectronPt_matchingMCelectron", "GlobalElectronPt_matchingMCelectron", 400, 0.0, 400.0);
     hElectronEta_matchingMCelectron = makeTH<TH1F>(myDir, "GlobalElectronEta_matchingMCelectron", "GlobalElectronEta_matchingMCelectron", 400, -3.0, 3.0);
     hElectronPt_matchingMCelectronFromW  = makeTH<TH1F>(myDir, "GlobalElectronPt_matchingMCelectronFromW", "GlobalElectronPt_matchingMCelectronFromW", 400, 0.0, 400.0);
     hElectronEta_matchingMCelectronFromW = makeTH<TH1F>(myDir, "GlobalElectronEta_matchingMCelectronFromW", "GlobalElectronEta_matchingMCelectronFromW", 400, -3.0, 3.0);
-    hElectronPt_gsfTrack  = makeTH<TH1F>(myDir, "GlobalElectronPt_gsfTrack", "GlobalElectronPt_gsfTrack", 100, 0.0, 200.0);
-    hElectronEta_gsfTrack = makeTH<TH1F>(myDir, "GlobalElectronEta_gsfTrack", "GlobalElectronEta_gsfTrack", 60, -3.0, 3.0);
+    hElectronPt_gsfTrack  = makeTH<TH1F>(myDir, "GlobalElectronPt_gsfTrack", "GlobalElectronPt_gsfTrack", 400, 0.0, 400.0);
+    hElectronEta_gsfTrack = makeTH<TH1F>(myDir, "GlobalElectronEta_gsfTrack", "GlobalElectronEta_gsfTrack", 300, -3.0, 3.0);
     hElectronEta_superCluster = makeTH<TH1F>(myDir, "GlobalElectronEta_superCluster", "GlobalElectronEta_superCluster", 60, -3.0, 3.0);
     hElectronPt_AfterSelection = makeTH<TH1F>(myDir, "GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 100, 0.0, 200.0);
     hElectronEta_AfterSelection = makeTH<TH1F>(myDir, "GlobalElectronPt_AfterSelection", "GlobalElectronEta_AfterSelection", 60, -3.0, 3.0);
@@ -105,6 +108,7 @@ namespace HPlus {
   GlobalElectronVeto::Data GlobalElectronVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Reset data variables
     fSelectedElectronPt = -1.0;
+    fSelectedElectronPtBeforePtCut = -1.0;
     fSelectedElectronEta = -999.99;
     fSelectedElectrons.clear();
 
@@ -118,6 +122,7 @@ namespace HPlus {
   GlobalElectronVeto::Data GlobalElectronVeto::analyzeCustomElecID(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Reset data variables
     fSelectedElectronPt = -1.0;
+    fSelectedElectronPtBeforePtCut = -1.0;
     fSelectedElectronEta = -999.99;
     fSelectedElectrons.clear();
     
@@ -142,6 +147,7 @@ namespace HPlus {
     
     // Reset/initialise variables
     float myHighestElecPt = -1.0;
+    float myHighestElecPtBeforePtCut = -1.0;
     float myHighestElecEta = -999.99;
     // 
     bool bElecPresent = false;
@@ -243,12 +249,16 @@ namespace HPlus {
       else if( (bUseSimpleEleId70relIsoID) && (fElecIDSimpleEleId70relIso == 7) ) thisPassedID = true;
       else if( (bUseSimpleEleId60relIsoID) && (fElecIDSimpleEleId60relIso == 7) ) thisPassedID = true;
       
-      if(thisPassedID) {
-        fSelectedElectrons.push_back(*iElectron);
-        bPassedElecID = true;
-      }
+      if(!thisPassedID) continue;
+      fSelectedElectrons.push_back(*iElectron);
+      bPassedElecID = true;
 
-      // FIXME: Should one add here a continue statement for electrons that have not passed ID?
+      hElectronEta_identified->Fill(myElectronEta);
+
+      if(std::abs(myElectronEta) < fElecEtaCut) {
+        myHighestElecPtBeforePtCut = std::max(myHighestElecPtBeforePtCut, myElectronPt);
+      hElectronPt_identified_eta->Fill(myElectronPt);
+      }
 
       // 2) Apply Pt cut requirement
       if (myElectronPt < fElecPtCut) continue;
@@ -256,7 +266,7 @@ namespace HPlus {
 
 
       // 3) Apply Eta cut requirement      
-      if (std::fabs(myElectronEta) > fElecEtaCut) continue;
+      if (std::abs(myElectronEta) >= fElecEtaCut) continue;
       bElecEtaCut = true;
 
 

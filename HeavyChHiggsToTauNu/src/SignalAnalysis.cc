@@ -282,7 +282,6 @@ namespace HPlus {
       fTriggerEfficiencyScaleFactor.setRun(iEvent.id().run());
     // Apply trigger scale factor here, because it depends only on tau
     TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauData.getSelectedTaus()[0]), iEvent.isRealData());
-    double myTauTriggerWeight = triggerWeight.getEventWeight();
     fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
     increment(fTriggerScaleFactorCounter);
     hSelectionFlow->Fill(kSignalOrderTauID, fEventWeight.getWeight());
@@ -295,7 +294,7 @@ namespace HPlus {
 
     // For plotting Rtau                                                                                                                                                                                
     //    if (!tauData.selectedTauPassedRtau()) return false;                                                                                                                                           
-    if (tauData.getRtauOfSelectedTau() < 0.7) return false;                                                                                                                                       
+    //    if (tauData.getRtauOfSelectedTau() < 0.7) return false;                                                                                                                                       
     increment(fRtauAfterTauIDCounter);
 
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->pt(), fEventWeight.getWeight());
@@ -314,7 +313,7 @@ namespace HPlus {
 
 //------ Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
-    hCtrlIdentifiedElectronPt->Fill(electronVetoData.getSelectedElectronPt(), fEventWeight.getWeight());
+    hCtrlIdentifiedElectronPt->Fill(electronVetoData.getSelectedElectronPtBeforePtCut(), fEventWeight.getWeight());
     if (!electronVetoData.passedEvent()) return false;
     increment(fElectronVetoCounter);
     hSelectionFlow->Fill(kSignalOrderElectronVeto, fEventWeight.getWeight());
@@ -328,7 +327,7 @@ namespace HPlus {
 
 //------ Global muon veto
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
-    hCtrlIdentifiedMuonPt->Fill(muonVetoData.getSelectedMuonPt(), fEventWeight.getWeight());
+    hCtrlIdentifiedMuonPt->Fill(muonVetoData.getSelectedMuonPtBeforePtCut(), fEventWeight.getWeight());
     if (!muonVetoData.passedEvent()) return false;
     increment(fMuonVetoCounter);
     hSelectionFlow->Fill(kSignalOrderMuonVeto, fEventWeight.getWeight());
@@ -396,8 +395,8 @@ namespace HPlus {
     hCtrlSelectedTauEtaVsPhiAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->eta(), tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
     hCtrlSelectedTauPAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->p(), fEventWeight.getWeight());
     hCtrlSelectedTauLeadingTrkPAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p(), fEventWeight.getWeight());
-    hCtrlIdentifiedElectronPtAfterStandardSelections->Fill(electronVetoData.getSelectedElectronPt(), fEventWeight.getWeight());
-    hCtrlIdentifiedMuonPtAfterStandardSelections->Fill(muonVetoData.getSelectedMuonPt(), fEventWeight.getWeight());
+    hCtrlIdentifiedElectronPtAfterStandardSelections->Fill(electronVetoData.getSelectedElectronPtBeforePtCut(), fEventWeight.getWeight());
+    hCtrlIdentifiedMuonPtAfterStandardSelections->Fill(muonVetoData.getSelectedMuonPtBeforePtCut(), fEventWeight.getWeight());
     hCtrlNjetsAfterStandardSelections->Fill(jetData.getHadronicJetCount(), fEventWeight.getWeight());
 
 
@@ -428,7 +427,7 @@ namespace HPlus {
       iEvent.put(saveBJets, "selectedBJets");
     }
     fSFUncertaintiesAfterBTagging.setScaleFactorUncertainties(fEventWeight.getWeight(),
-                                                              triggerWeight.getEventWeight(), triggerWeight.getEventAbsoluteUncertainty(),
+                                                              triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
                                                               btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
 
 //------ Fill transverse mass histograms    
@@ -448,7 +447,7 @@ namespace HPlus {
       hSelectionFlow->Fill(kSignalOrderDeltaPhi160Selection, fEventWeight.getWeight());
       fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi160Selection, tauData);
       fSFUncertaintiesAfterDeltaPhi160.setScaleFactorUncertainties(fEventWeight.getWeight(),
-                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventAbsoluteUncertainty(),
+                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
                                                                   btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
       // Fill transverse mass histograms after Deltaphi cut
       hTransverseMassAfterDeltaPhi160->Fill(transverseMass, fEventWeight.getWeight());
@@ -460,7 +459,7 @@ namespace HPlus {
       fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi130Selection, tauData);
       hSelectionFlow->Fill(kSignalOrderDeltaPhi130Selection, fEventWeight.getWeight());
       fSFUncertaintiesAfterDeltaPhi130.setScaleFactorUncertainties(fEventWeight.getWeight(),
-                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventAbsoluteUncertainty(),
+                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
                                                                   btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
       // Fill transverse mass histograms after Deltaphi cut
       hTransverseMassAfterDeltaPhi130->Fill(transverseMass, fEventWeight.getWeight());
@@ -472,7 +471,7 @@ namespace HPlus {
       fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi90Selection, tauData);
       hSelectionFlow->Fill(kSignalOrderDeltaPhi90Selection, fEventWeight.getWeight());
       fSFUncertaintiesAfterDeltaPhi90.setScaleFactorUncertainties(fEventWeight.getWeight(),
-                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventAbsoluteUncertainty(),
+                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
                                                                   btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
       // Fill transverse mass histograms after Deltaphi cut
       hTransverseMassAfterDeltaPhi90->Fill(transverseMass, fEventWeight.getWeight());

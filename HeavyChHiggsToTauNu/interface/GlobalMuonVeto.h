@@ -42,6 +42,8 @@ namespace HPlus {
       const float getSelectedMuonPt() const { return fGlobalMuonVeto->fSelectedMuonPt; }
       const float getSelectedMuonEta() const { return fGlobalMuonVeto->fSelectedMuonEta; }
 
+      const float getSelectedMuonPtBeforePtCut() const { return fGlobalMuonVeto->fSelectedMuonPtBeforePtCut; }
+
       /// Muon collection after all selections - size should be zero if veto condition is passed
       const edm::PtrVector<pat::Muon>& getSelectedMuons() { return fGlobalMuonVeto->fSelectedMuons; }
       /// Muon collection after all selections except pt and eta cuts
@@ -119,6 +121,8 @@ namespace HPlus {
     // Histograms
     TH1 *hMuonPt;
     TH1 *hMuonEta;
+    TH1 *hMuonPt_identified_eta;
+    TH1 *hMuonEta_identified;
     TH1 *hMuonPt_matchingMCmuon;
     TH1 *hMuonEta_matchingMCmuon;
     TH1 *hMuonPt_matchingMCmuonFromW;
@@ -138,6 +142,7 @@ namespace HPlus {
     // pt and eta of muon with highest pt passing the selections
     float fSelectedMuonPt;
     float fSelectedMuonEta;
+    float fSelectedMuonPtBeforePtCut;
 
     // booleans
     bool bMuonPresent;

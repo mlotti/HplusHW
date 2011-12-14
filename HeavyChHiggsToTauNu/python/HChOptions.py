@@ -35,6 +35,11 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.int,
                      "Do tau trigger mathching? (default: 1")
+    options.register("doTauHLTMatchingInAnalysis",
+                     0,
+                     options.multiplicity.singleton,
+                     options.varType.int,
+                     "Do tau trigger mathching with the InAnalysis method? (default: 0")
     options.register("tauEmbeddingInput",
                      0,
                      options.multiplicity.singleton,
@@ -74,6 +79,9 @@ def getOptions(options=None):
         sys.argv.extend(last.split(":"))
 
     options.parseArguments()
+
+    if options.doPat != 0 and options.doTauHLTMatchingInAnalysis != 0:
+        raise Exception("doTauHLTMatchingInAnalysis may not be used with doPat=1 (use PAT trigger matching instead)")
 
     return options
 

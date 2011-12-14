@@ -70,6 +70,8 @@ namespace HPlus {
     
     hMuonPt = makeTH<TH1F>(myDir, "GlobalMuonPt", "GlobalMuonPt;isolated muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 80, 0., 400.);
     hMuonEta = makeTH<TH1F>(myDir, "GlobalMuonEta", "GlobalMuonEta;isolated muon #eta;N_{muons} / 0.1", 60, -3., 3.);
+    hMuonEta_identified = makeTH<TH1F>(myDir, "GlobalMuonEta_identified", "GlobalMuonEta;isolated muon #eta;N_{muons} / 0.1", 60, -3., 3.);
+    hMuonPt_identified_eta = makeTH<TH1F>(myDir, "GlobalMuonPt_identified_eta", "GlobalMuonPt;isolated muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 80, 0., 400.);
     hMuonPt_matchingMCmuon = makeTH<TH1F>(myDir, "GlobalMuonPtmatchingMCmuon", "GlobalMuonPtmatchingMCmuon", 400, 0., 400.);
     hMuonEta_matchingMCmuon = makeTH<TH1F>(myDir, "GlobalMuonEtamatchingMCmuon", "GlobalMuonEtamatchingMCmuon", 400, -3., 3.);
     hMuonPt_matchingMCmuonFromW = makeTH<TH1F>(myDir, "GlobalMuonPtmatchingMCmuonFromW", "GlobalMuonPtmatchingMCmuonFromW", 400, 0., 400.);
@@ -132,6 +134,7 @@ namespace HPlus {
   void GlobalMuonVeto::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex){
     // Reset data variables
     fSelectedMuonPt = -1.0;
+    fSelectedMuonPtBeforePtCut = -1.0;
     fSelectedMuonEta = -999.99;
     fSelectedMuons.clear();
     fSelectedMuonsBeforePtAndEtaCuts.clear();
@@ -190,6 +193,7 @@ namespace HPlus {
 
     // Reset/initialise variables
     float myHighestMuonPt = -1.0;
+    float myHighestMuonPtBeforePtCut = -1.0;
     float myHighestMuonEta = -999.99;
     // 
     bool bMuonPresent = false;
@@ -255,15 +259,12 @@ namespace HPlus {
       bMuonHasGlobalOrInnerTrk = true;
       
       // Muon Variables (Pt, Eta etc..)
-      // float myMuonPt  = myInnerTrackRef->pt();
-      // float myMuonEta = myInnerTrackRef->eta();
-      // float myMuonPhi = myInnerTrackRef->phi();
       float myMuonPt  = (*iMuon)->pt();
       float myMuonEta = (*iMuon)->eta();
-      float myMuonPhi = (*iMuon)->phi();
       int myInnerTrackNTrkHits   = myInnerTrackRef->hitPattern().numberOfValidTrackerHits();
       int myInnerTrackNPixelHits = myInnerTrackRef->hitPattern().numberOfValidPixelHits();
-      int myGlobalTrackNMuonHits  = myGlobalTrackRef->hitPattern().numberOfValidMuonHits(); 
+      //int myGlobalTrackNMuonHits  = myGlobalTrackRef->hitPattern().numberOfValidMuonHits(); 
+      int myMatchedSegments = (*iMuon)->numberOfMatches();
       // Note: It is possible for a Global Muon to have zero muon hits. This happens because once the inner and outter tracks used to create
       // global fit to the muon track that covers all of the detector, hits that are incompatible to the new trajectory are removed 
       // (i.e. de-associated from the muon). This is the so called "outlier rejection". 
@@ -292,7 +293,7 @@ namespace HPlus {
       if ( myInnerTrackNPixelHits < 1) continue;
       bMuonNPixelHitsCut = true;
       // std::cout << "myGlobalTrackNMuonHits = " << myGlobalTrackNMuonHits << std::endl;
-      if ( myGlobalTrackNMuonHits < 1) continue;
+      if(myMatchedSegments < 2) continue;
       bMuonNMuonlHitsCut = true;
 
       // 4) Global Track Chi Square / ndof must be less than 10
@@ -300,8 +301,9 @@ namespace HPlus {
       bMuonGlobalTrkChiSqCut = true;
 
       // 5) Impact Paremeter (d0) wrt beam spot < 0.02cm (applied to track from the inner tracker)
-      hMuonImpactParameter->Fill((*iMuon)->dB(),fEventWeight.getWeight());
-      if ((*iMuon)->dB() > 0.02) continue; // This is the transverse IP w.r.t to beamline.
+      double muonIp = std::abs((*iMuon)->dB());
+      hMuonImpactParameter->Fill(muonIp, fEventWeight.getWeight());
+      if (muonIp >= 0.02) continue; // This is the transverse IP w.r.t to beamline.
       bMuonImpactParCut = true;
 
       // 6) Check that muon has good PV (i.e diff between muon track at its vertex and the PV along the Z position < 1cm)
@@ -327,10 +329,17 @@ namespace HPlus {
       bMuonRelIsolationR03Cut = true;
       fSelectedMuonsBeforePtAndEtaCuts.push_back(*iMuon);
 
+      hMuonEta_identified->Fill(myMuonEta);
+
+      if(std::abs(myMuonEta) < fMuonEtaCut) {
+        myHighestMuonPtBeforePtCut = std::max(myHighestMuonPtBeforePtCut, myMuonPt);
+        hMuonPt_identified_eta->Fill(myMuonPt);
+      }
+
       // 8) Apply Pt and Eta cut requirements
       if (myMuonPt < fMuonPtCut) continue;
       bMuonPtCut = true;
-      if (std::fabs(myMuonEta) > fMuonEtaCut) continue;
+      if (std::abs(myMuonEta) >= fMuonEtaCut) continue;
       bMuonEtaCut = true;
       fSelectedMuons.push_back(*iMuon);
 
@@ -428,6 +437,7 @@ namespace HPlus {
     }
     // Store the highest Muon Pt and Eta
     fSelectedMuonPt  = myHighestMuonPt;
+    fSelectedMuonPtBeforePtCut  = myHighestMuonPtBeforePtCut;
     fSelectedMuonEta = myHighestMuonEta;
     // std::cout << "fSelectedMuonPt = " << fSelectedMuonsPt << ", fSelectedMuonsEta = " << fSelectedMuonsEta << std::endl;   
   }//eof: bool GlobalMuonVeto::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
