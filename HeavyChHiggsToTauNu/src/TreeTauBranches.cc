@@ -40,6 +40,7 @@ namespace HPlus {
     tree->Branch("taus_pdgid", &fTausPdgId);
     tree->Branch("taus_mother_pdgid", &fTausMotherPdgId);
     tree->Branch("taus_grandmother_pdgid", &fTausGrandMotherPdgId);
+    tree->Branch("taus_daughter_pdgid", &fTausDaughterPdgId);
   }
 
   void TreeTauBranches::setValues(const edm::Event& iEvent) {
@@ -66,6 +67,7 @@ namespace HPlus {
       int pdgId = 0;
       int motherPdgId = 0;
       int grandMotherPdgId = 0;
+      int daughterPdgId = 0;
       if(gen) {
         pdgId = gen->pdgId();
         const reco::GenParticle *mother = GenParticleTools::findMother(gen);
@@ -75,11 +77,40 @@ namespace HPlus {
           if(grandMother)
             grandMotherPdgId = grandMother->pdgId();
         }
+
+        size_t nDaughters = gen->numberOfDaughters();
+        for(size_t j=0; j<nDaughters; ++j) {
+          int id = gen->daughter(j)->pdgId();
+          int ida = std::abs(id);
+          // ignore neutrinos
+          if(ida == 12 || ida == 14 || ida == 16)
+            continue;
+
+          // if e/mu, take it
+          if(ida == 11 || ida == 13) {
+            daughterPdgId = id;
+            break;
+          }
+
+          // if W, look for it's non-neutrino daughter
+          if(ida == 24) {
+            const reco::GenParticle *daugh = GenParticleTools::findMaxNonNeutrinoDaughter(dynamic_cast<const reco::GenParticle *>(gen->daughter(j)));
+            if(daugh != 0) {
+              daughterPdgId = daugh->pdgId();
+              break;
+            }
+          }
+          
+          // else, take the one with largest id number, and continue
+          if(ida > std::abs(daughterPdgId))
+            daughterPdgId = id;
+        }
       }
 
       fTausPdgId.push_back(pdgId);
       fTausMotherPdgId.push_back(motherPdgId);
       fTausGrandMotherPdgId.push_back(grandMotherPdgId);
+      fTausDaughterPdgId.push_back(daughterPdgId);
     }
   }
 
@@ -113,5 +144,6 @@ namespace HPlus {
     fTausPdgId.clear();
     fTausMotherPdgId.clear();
     fTausGrandMotherPdgId.clear();
+    fTausDaughterPdgId.clear();
   }
 }
