@@ -65,10 +65,10 @@ if step == "signalAnalysis":
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
           "embedding":      {"input": "tauembedding_skim_v13", "config": "embed.py",   "output": "embedded.root"},
 #          "analysis":       {"input": "tauembedding_embedding_v13"+pt,  "config": "embeddingAnalysis_cfg.py"},
-          "analysis":       {"input": "tauembedding_embedding_v13_1"+vispt,  "config": "embeddingAnalysis_cfg.py"},
+          "analysis":       {"input": "tauembedding_embedding_v13_2"+vispt,  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau":    {"input": "pattuple_v18",                       "config": "tauAnalysis_cfg.py"},
 #          "signalAnalysis": {"input": "tauembedding_embedding_v13"+pt,  "config": "../signalAnalysis_cfg.py"},
-          "signalAnalysis": {"input": "tauembedding_embedding_v13_1"+vispt,  "config": "../signalAnalysis_cfg.py"},
+          "signalAnalysis": {"input": "tauembedding_embedding_v13_2"+vispt,  "config": "../signalAnalysis_cfg.py"},
           "muonAnalysis":   {"input": "tauembedding_skim_v13",          "config": "muonAnalysisFromSkim_cfg.py"},
           "caloMetEfficiency": {"input": "tauembedding_skim_v13",         "config": "caloMetEfficiency_cfg.py"},
           }
