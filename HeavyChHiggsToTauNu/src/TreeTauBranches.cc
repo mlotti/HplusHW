@@ -78,33 +78,9 @@ namespace HPlus {
             grandMotherPdgId = grandMother->pdgId();
         }
 
-        size_t nDaughters = gen->numberOfDaughters();
-        for(size_t j=0; j<nDaughters; ++j) {
-          int id = gen->daughter(j)->pdgId();
-          int ida = std::abs(id);
-          // ignore neutrinos
-          if(ida == 12 || ida == 14 || ida == 16)
-            continue;
-
-          // if e/mu, take it
-          if(ida == 11 || ida == 13) {
-            daughterPdgId = id;
-            break;
-          }
-
-          // if W, look for it's non-neutrino daughter
-          if(ida == 24) {
-            const reco::GenParticle *daugh = GenParticleTools::findMaxNonNeutrinoDaughter(dynamic_cast<const reco::GenParticle *>(gen->daughter(j)));
-            if(daugh != 0) {
-              daughterPdgId = daugh->pdgId();
-              break;
-            }
-          }
-          
-          // else, take the one with largest id number, and continue
-          if(ida > std::abs(daughterPdgId))
-            daughterPdgId = id;
-        }
+        const reco::GenParticle *daughter = GenParticleTools::findTauDaughter(gen);
+        if(daughter)
+          daughterPdgId = daughter->pdgId();
       }
 
       fTausPdgId.push_back(pdgId);
