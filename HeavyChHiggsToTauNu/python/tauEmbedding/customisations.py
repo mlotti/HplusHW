@@ -52,10 +52,19 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
 
     # Set the analyzer
     param.tree.tauEmbeddingInput = cms.untracked.bool(True)
-    param.tree.tauEmbeddingMuonSource = cms.untracked.InputTag(tauEmbeddingMuons)
-    param.tree.tauEmbeddingMetSource = cms.untracked.InputTag("pfMet", "", dataVersion.getRecoProcess())
-    param.tree.tauEmbeddingCaloMetNoHFSource = cms.untracked.InputTag("caloMetNoHFSum")
-    param.tree.tauEmbeddingCaloMetSource = cms.untracked.InputTag("caloMetSum")
+    param.tree.tauEmbedding = cms.untracked.PSet(
+        muonSrc = cms.InputTag(tauEmbeddingMuons),
+        muonFunctions = cms.PSet(),
+        genParticleOriginalSrc = cms.InputTag("genParticles", "", dataVersion.getTriggerProcess()),
+        metSrc = cms.InputTag("pfMet", "", dataVersion.getRecoProcess()),
+        caloMetNoHFSrc = cms.InputTag("caloMetNoHFSum"),
+        caloMetSrc = cms.InputTag("caloMetSum"),
+    )
+    import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
+    muonIsolations = ["trackIso", "caloIso", "pfChargedIso", "pfNeutralIso", "pfGammaIso", "tauTightIc04ChargedIso", "tauTightIc04GammaIso"]
+    for name in muonIsolations:
+        setattr(param.tree.tauEmbedding.muonFunctions, name, cms.string(muonAnalysis.isolations[name]))
+    
 
 def setCaloMetSum(process, sequence, options, dataVersion):
     name = "caloMetNoHFSum"

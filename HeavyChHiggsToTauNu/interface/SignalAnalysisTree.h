@@ -17,8 +17,11 @@
 #include "DataFormats/PatCandidates/interface/TriggerObject.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeEventBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeMuonBranches.h"
 
+#include <boost/utility.hpp>
 #include<vector>
+#include<memory>
 
 namespace edm {
   class ParameterSet;
@@ -31,7 +34,7 @@ class TTree;
 
 
 namespace HPlus {
-  class SignalAnalysisTree {
+  class SignalAnalysisTree: private boost::noncopyable {
   public:
     typedef math::XYZTLorentzVector XYZTLorentzVector;
 
@@ -88,7 +91,7 @@ namespace HPlus {
     const bool fTauEmbeddingInput;
     const bool fFillJetEnergyFractions;
 
-    edm::InputTag fTauEmbeddingMuonSource;
+    edm::InputTag fTauEmbeddingGenParticleOriginalSource;
     edm::InputTag fTauEmbeddingMetSource;
     edm::InputTag fTauEmbeddingCaloMetNoHFSource;
     edm::InputTag fTauEmbeddingCaloMetSource;
@@ -215,7 +218,7 @@ namespace HPlus {
     XYZTLorentzVector fGenMet;
 
     // Tau embedding stuff
-    XYZTLorentzVector fTauEmbeddingMuon;
+    std::auto_ptr<TreeMuonBranches> fTauEmbeddingMuon;
     XYZTLorentzVector fTauEmbeddingMet;
     XYZTLorentzVector fTauEmbeddingCaloMetNoHF;
     XYZTLorentzVector fTauEmbeddingCaloMet;
