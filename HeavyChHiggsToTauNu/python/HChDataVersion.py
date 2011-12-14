@@ -15,7 +15,7 @@ config = {
         "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2011A-PromptReco-v4/AOD/FCF1CBDD-878F-E011-885B-003048F118D4.root",
 #        "patMadhatter": "file:/mnt/flustre/mkortela/data/SingleMu/PromptReco-v4/AOD/F2B6FB32-7AA3-E011-BCAF-BCAEC5329710.root",
 #        "analysisCastor": "",
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_166374-167043_Prompt/Tau/Run2011A_PromptReco_v4_AOD_166374_pattuple_v18/76121191f925a13de2aa415b27ca9123/pattuple_48_1_C3w.root",
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_160431-163869_May10/Tau/Run2011A_May10ReReco_v1_AOD_160431_pattuple_v19/95bdfb89e63988c1ffa2ad610b62da8e/pattuple_101_1_cDq.root",
     },
     "42XmcS3": {
         "triggerProcess": "HLT",
@@ -30,7 +30,7 @@ config = {
         "signalTrigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
 #        "patMadhatter": "/store/mc/Summer11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/0428EC7E-F199-E011-B474-002618943861.root",
         "patMadhatter": "file:/mnt/flustre/mkortela/data//TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/F498AD1D-8298-E011-BFB9-003048678F92.root",
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v18/8eea754df021b160abed50fa738aa521/pattuple_19_2_514.root"
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M120_Summer11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v19b/9436cd413e1f831f4594f528a53faac6/pattuple_10_1_TsT.root"
     },
     "42XmcS6": {
         "triggerProcess": "HLT",
