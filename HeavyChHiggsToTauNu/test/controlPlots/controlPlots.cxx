@@ -401,7 +401,7 @@ bool Manager::extract(std::vector< TFile* >& qcdData, std::vector< TFile* >& qcd
   // Make plots
   vector<TFile*> myDummyList;
   if (!fQCD->extract(qcdData, qcdMCEWK, hFrame)) return false;
-  cout << "QCD " << fQCD->getPlot()->Integral() << endl;
+  cout << "QCD " << fQCD->getPlot()->Integral() << " +- " << fQCD->getPlot()->GetBinError(1) << endl;
   if (!fEWK->extract(ewkData, myDummyList, hFrame)) return false;
   cout << "EWK " << fEWK->getPlot()->Integral() << endl;
   if (!fFakes->extract(myDummyList, fakes, hFrame)) return false;
@@ -468,15 +468,16 @@ void Manager::makePlot(double min, double max, double delta, string xtitle, stri
   hFakes->SetLineWidth(0);
   TH1* hHH = fHH->getPlot();
   TH1* hHW = fHW->getPlot();
-  hHH->Scale(TMath::Power(br,2));
-  hHW->Scale((1.0 - br)*br*2.0);
+  //hHH->Scale(TMath::Power(br,2));
+  //hHW->Scale((1.0 - br)*br*2.0);
   TH1* hData = fData->getPlot();
   hData->SetLineWidth(2);
   hData->SetMarkerStyle(20);
   hData->SetMarkerSize(1.2);
   // Make stacks
   TH1* hSignal = dynamic_cast<TH1*>(hHH->Clone());
-  hSignal->Add(hHW);
+  hSignal->Scale(TMath::Power(br,2));
+  hSignal->Add(hHW, (1.0 - br)*br*2.0);
   cout << "signal: " << hSignal->Integral() << endl;
   ci = TColor::GetColor("#ff3399");
   hSignal->SetLineColor(ci);
@@ -575,7 +576,7 @@ void Manager::makePlot(double min, double max, double delta, string xtitle, stri
   //controlPlots_SelectedTau_eta_AfterStandardSelections_log->cd();
   
   // plot pad
-  TPad* plotpad = new TPad("plotpad", "plotpad",0,0.3,1,1);
+  TPad* plotpad = new TPad("plotpad", "plotpad",0,0.3,1.,1.);
   plotpad->Draw();
   plotpad->cd();
   plotpad->Range(0,0,1,1);
@@ -607,7 +608,7 @@ void Manager::makePlot(double min, double max, double delta, string xtitle, stri
   hBkg->Draw("hist same");
   hBkgUncert->Draw("E2 same");
   hData->Draw("same");
-  plotpad->RedrawAxis();
+
 
   // Legend
   TLegend *leg = new TLegend(0.50,0.63,0.87,0.91,NULL,"brNDC");
@@ -641,7 +642,7 @@ void Manager::makePlot(double min, double max, double delta, string xtitle, stri
   tex->SetTextSize(27);
   tex->SetLineWidth(2);
   tex->Draw();
-  tex = new TLatex(0.43,0.945,"2.18 fb^{-1}");
+  tex = new TLatex(0.43,0.945,"2.2 fb^{-1}");
   tex->SetNDC();
   tex->SetTextFont(43);
   tex->SetTextSize(27);
@@ -827,7 +828,7 @@ int main() {
   myManagers.push_back(myMet);
   
   // btag
-  TH1D* myNBjetsFrame = new TH1D("btag","btag",10,0,10);
+  TH1D* myNBjetsFrame = new TH1D("btag","btag",10,0,10); // FIXME
   QCDControlPlot myNBjetsQCD(QCDprefix+"ControlPlots/NBjets_taupT", true, "QCDMeasurement/QCDStandardSelections/AfterJetSelection", QCDprefix+"Leg2AfterTauIDWithRtau");
   EWKControlPlot myNBjetsEWK(EWKprefix+"NBjets", EWKeff1*EWKeff2);
   Manager* myNBjets = new Manager("NBjets", myNBjetsFrame, &myNBjetsQCD, &myNBjetsEWK, signalprefix+"NBjets", signalprefix+"NBjets");
@@ -855,19 +856,19 @@ int main() {
   }
   // Make plots 
   myTauPt->makePlot(5e-1, 2e2, 0.5, "Selected #tau p_{T}, GeV/c", "N_{events} / 10 GeV/c", myBr, myMassPoint);
-  myTauEta->makePlot(5e-1, 2e2, 0.5, "Selected #tau #eta", "N_{events} / 0.2", myBr, myMassPoint);
+  myTauEta->makePlot(5e-1, 5e2, 0.5, "Selected #tau #eta", "N_{events} / 0.2", myBr, myMassPoint);
   //myTauPhi->makePlot(5e-1, 2e2, 0.5, "Selected #tau #phi, ^{o}", "N_{events} / 10^{o}", myBr, myMassPoint);
   myTauRtau->makePlot(5e-1, 1e3, 0.5, "Selected #tau R_{#tau}", "N_{events} / 0.1", myBr, myMassPoint);
   myTauLeadingTrackPt->makePlot(5e-1, 1e3, 0.5, "Selected #tau leading ch. hadron p_{T}, GeV/c", "N_{events} / 10 GeV/c", myBr, myMassPoint);
   myElectronPt->makePlot(5e-1, 1e3, 0.5, "Identified isolated electron p_{T}, GeV/c", "N_{events} / 2 GeV/c", myBr, myMassPoint);
   myMuonPt->makePlot(5e-1, 1e3, 0.5, "Identified isolated muon p_{T}, GeV/c", "N_{events} / 2 GeV/c", myBr, myMassPoint);
-  myMet->makePlot(5e-1, 2e2, 0.5, "PF MET, GeV", "N_{events} / 10 GeV/c", myBr, myMassPoint);
+  //myMet->makePlot(5e-1, 2e2, 0.5, "PF MET, GeV", "N_{events} / 10 GeV/c", myBr, myMassPoint);
   myNBjets->makePlot(5e-1, 2e2, 0.5, "N_{b jets}", "N_{events}", myBr, myMassPoint);
 
   myDeltaPhi->makePlot(5e-1, 2e2, 0.5, "#Delta#phi(#tau,MET), ^{o}", "N_{events} / 10^{o}", myBr, myMassPoint);
 
   // Make selection flow plot
-  int nbins = 4;
+  int nbins = 3;
   TH1* hSelectionFlowFrame = new TH1D("SelectionFlow","SelectionFlow",nbins,0,nbins);
   hSelectionFlowFrame->GetXaxis()->SetBinLabel(1, "E_{T}^{miss}");
   hSelectionFlowFrame->GetXaxis()->SetBinLabel(2, "N_{b jets}");
