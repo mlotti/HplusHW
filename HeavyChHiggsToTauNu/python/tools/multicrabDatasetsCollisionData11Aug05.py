@@ -18,6 +18,11 @@ datasets = {
                 "luminosity": 370.826000,
                 "number_of_jobs": 1,
             },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_05Aug2011_v1_AOD_170722_pattuple_v19-4c1de2b1b331a58336df02ae39c0b25d/USER",
+                "number_of_jobs": 1,
+            },
         }
     },
 
@@ -45,6 +50,11 @@ datasets = {
             },
             "pattuple_v18": {
                 "fallback": "pattuple_v18_1"
+            },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_05Aug2011_v1_AOD_Single_170722_pattuple_v19-91bfbcc06bd99fc8caf522eeea084d33/USER",
+                "number_of_jobs": 1,
             },
         }
     },
