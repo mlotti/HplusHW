@@ -30,7 +30,9 @@ analysisSig = "signalAnalysis"
 dirEmb = "."
 #dirSig = "../../multicrab_compareEmbedding_Run2011A_111117_155815"
 #dirSig = "../../multicrab_compareEmbedding_Run2011A_111122_130104"
-dirSig = "../../multicrab_compareEmbedding_Run2011A_111124_154038"
+#dirSig = "../../multicrab_compareEmbedding_Run2011A_111124_154038"
+dirSig = "../../multicrab_compareEmbedding_Run2011A_111201_143238"
+
 
 def main():
     datasetsEmb = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirEmb+"/multicrab.cfg", counters=analysisEmb+"Counters")
@@ -77,20 +79,20 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
 
     opts2 = {"ymin": 0, "ymax": 2}
     def drawControlPlot(path, xlabel, **kwargs):
-        drawPlot(createPlot("ControlPlots/"+path), "mcembsig_"+datasetName+"_"+path, xlabel, ratio=True, opts2=opts2, **kwargs)
+        drawPlot(createPlot("ControlPlots/"+path), "mcembsig_"+datasetName+"_"+path, xlabel, opts2=opts2, **kwargs)
 
-    drawControlPlot("SelectedTau_pT_AfterStandardSelections", "#tau jet p_{T} (GeV/c)", opts={"xmin": 40, "xmax": 300}, rebin=2)
-    drawControlPlot("SelectedTau_eta_AfterStandardSelections", "#tau jet #eta", opts={"xmin": -2.2, "xmax": 2.2}, ylabel="Events / %.2f", rebin=4, log=False)
-    drawControlPlot("SelectedTau_phi_AfterStandardSelections", "#tau jet #phi", rebin=10, ylabel="Events / %.2f", log=False)
-    drawControlPlot("SelectedTau_LeadingTrackPt_AfterStandardSelections", "#tau jet leading track p_{T} (GeV/c)", opts={"xmin": 20, "xmax": 300}, rebin=2)
-    drawControlPlot("SelectedTau_Rtau_AfterStandardSelections", "R_{#tau}", opts={"xmin": 0.65, "xmax": 1.05}, rebin=2, ylabel="Events / %.2f")
-    drawControlPlot("SelectedTau_p_AfterStandardSelections", "#tau jet p (GeV/c)", rebin=2)
-    drawControlPlot("SelectedTau_LeadingTrackP_AfterStandardSelections", "#tau jet leading track p (GeV/c)", rebin=2)
+    drawControlPlot("SelectedTau_pT_AfterStandardSelections", "#tau-jet p_{T} (GeV/c)", opts={"xmax": 250}, rebin=2, cutBox={"cutValue": 40, "greaterThan": 40})
+    drawControlPlot("SelectedTau_eta_AfterStandardSelections", "#tau-jet #eta", opts={"xmin": -2.2, "xmax": 2.2}, ylabel="Events / %.1f", rebin=4, log=False, moveLegend={"dy":-0.6, "dx":-0.2})
+    drawControlPlot("SelectedTau_phi_AfterStandardSelections", "#tau-jet #phi", rebin=10, ylabel="Events / %.2f", log=False)
+    drawControlPlot("SelectedTau_LeadingTrackPt_AfterStandardSelections", "#tau-jet ldg. charged particle p_{T} (GeV/c)", opts={"xmax": 300}, rebin=2, cutBox={"cutValue": 20, "greaterThan": True})
+    drawControlPlot("SelectedTau_Rtau_AfterStandardSelections", "R_{#tau} = p^{ldg. charged particle}/p^{#tau jet}", opts={"xmin": 0.65, "xmax": 1.05, "ymin": 1e-1, "ymaxfactor": 5}, rebin=5, ylabel="Events / %.2f", moveLegend={"dx":-0.3}, cutBox={"cutValue":0.7, "greaterThan":True})
+    drawControlPlot("SelectedTau_p_AfterStandardSelections", "#tau-jet p (GeV/c)", rebin=2)
+    drawControlPlot("SelectedTau_LeadingTrackP_AfterStandardSelections", "#tau-jet ldg. charged particle p (GeV/c)", rebin=2)
     #drawControlPlot("IdentifiedElectronPt_AfterStandardSelections", "Electron p_{T} (GeV/c)")
     #drawControlPlot("IdentifiedMuonPt_AfterStandardSelections", "Muon p_{T} (GeV/c)")
     drawControlPlot("Njets_AfterStandardSelections", "Number of jets", ylabel="Events")
-    drawControlPlot("MET", "MET (GeV)", rebin=4, opts={"xmax": 400})
-    drawControlPlot("NBjets", "Number of b jets", opts={"xmax": 6}, ylabel="Events")
+    drawControlPlot("MET", "Raw PF E_{T}^{miss} (GeV)", rebin=5, opts={"xmax": 400}, cutLine=50)
+    drawControlPlot("NBjets", "Number of selected b jets", opts={"xmax": 6}, ylabel="Events", moveLegend={"dx":-0.3, "dy":-0.5}, cutLine=1)
 
     treeDraw = dataset.TreeDraw("dummy", weight="weightPileup")
 
@@ -99,10 +101,13 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
     tdMt = treeDraw.clone(varexp="sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi()))) >>tmp(20,0,200)")
 
     xlabel = "#Delta#phi(#tau, MET) (^{#circ})"
-    drawPlot(createPlot(tdDeltaPhi.clone()), "mcembsig_"+datasetName+"_deltaPhi_1AfterTauID", xlabel, ratio=True, opts2=opts2, ylabel="Events / %.0f^{#circ}")
+    def customDeltaPhi(h):
+        yaxis = h.getFrame().GetYaxis()
+        yaxis.SetTitleOffset(0.8*yaxis.GetTitleOffset())
+    drawPlot(createPlot(tdDeltaPhi.clone()), "mcembsig_"+datasetName+"_deltaPhi_1AfterTauID", xlabel, log=False, opts2=opts2, ylabel="Events / %.0f^{#circ}", function=customDeltaPhi, moveLegend={"dx":-0.22}, cutLine=[130, 160])
 
-    xlabel = "m_{T} (#tau, MET) (GeV/c^{2})"
-    drawPlot(createPlot(tdMt.clone()), "mcembsig_"+datasetName+"_transverseMass_0AfterTauID", xlabel, ratio=True, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}")
+    xlabel = "m_{T} (#tau jet, E_{T}^{miss}) (GeV/c^{2})"
+    drawPlot(createPlot(tdMt.clone()), "mcembsig_"+datasetName+"_transverseMass_1AfterTauID", xlabel, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}")
 
 
     eventCounterEmb = counter.EventCounter(datasetsEmb, counters=analysisEmb+"Counters")
@@ -179,7 +184,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
 
 
 
-def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, ratio=False, opts={}, opts2={}, moveLegend={}):
+def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, ratio=True, opts={}, opts2={}, moveLegend={}, cutLine=None, cutBox=None, function=None):
     if rebin > 1:
         h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     ylab = ylabel
@@ -214,15 +219,37 @@ def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, r
         name = name + "_log"
     h.createFrame(name, createRatio=ratio, opts=_opts, opts2=_opts2)
     h.getPad().SetLogy(log)
-    yaxis = h.getFrame2().GetYaxis()
-    yaxis.SetTitleSize(yaxis.GetTitleSize()*0.7)
-    yaxis.SetTitleOffset(yaxis.GetTitleOffset()*1.5)
+    if ratio:
+        h.getFrame2().GetYaxis().SetTitle("Ratio")
+    #yaxis = h.getFrame2().GetYaxis()
+    #yaxis.SetTitleSize(yaxis.GetTitleSize()*0.7)
+    #yaxis.SetTitleOffset(yaxis.GetTitleOffset()*1.5)
     h.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
     tmp = embErr.Clone("tmp")
     tmp.SetFillColor(ROOT.kBlack)
     tmp.SetFillStyle(3013)
     tmp.SetLineColor(ROOT.kWhite)
     h.legend.AddEntry(tmp, "Stat. unc.", "F")
+
+    # Add cut line and/or box
+    if cutLine != None:
+        lst = cutLine
+        if not isinstance(lst, list):
+            lst = [lst]
+
+        for line in lst:
+            h.addCutBoxAndLine(line, box=False, line=True)
+    if cutBox != None:
+        lst = cutBox
+        if not isinstance(lst, list):
+            lst = [lst]
+
+        for box in lst:
+            h.addCutBoxAndLine(**box)
+
+    if function != None:
+        function(h)
+
     common(h, xlabel, ylab)
 
 def common(h, xlabel, ylabel):

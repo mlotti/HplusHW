@@ -291,11 +291,20 @@ def doCounters(datasets):
     # append row from the tree to the main counter
     eventCounter.getMainCounter().appendRow("MET > 70", treeDraw.clone(selection="met_p4.Et() > 70"))
 
+    ewkDatasets = [
+        "WJets", "TTJets",
+        "DYJetsToLL", "SingleTop", "Diboson"
+        ]
+
     eventCounter.normalizeMCByLuminosity()
 #    eventCounter.normalizeMCToLuminosity(73)
     print "============================================================"
     print "Main counter (MC normalized by collision data luminosity)"
-    print eventCounter.getMainCounterTable().format()
+    mainTable = eventCounter.getMainCounterTable()
+    mainTable.insertColumn(2, counter.sumColumn("EWKMCsum", [mainTable.getColumn(name=name) for name in ewkDatasets]))
+    print mainTable.format()
+
+
 
 #    print eventCounter.getSubCounterTable("GlobalMuon_ID").format()
 

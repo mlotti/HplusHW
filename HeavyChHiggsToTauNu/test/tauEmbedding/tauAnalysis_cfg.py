@@ -88,18 +88,19 @@ process.commonSequence *= (
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 additionalCounters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.commonSequence, param))
 
-ntuple = cms.EDAnalyzer(
-    "HPlusTauNtupleAnalyzer",
+ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
     tauSrc = cms.InputTag(param.tauSelection.src.value()), # this is set in addEmbeddingLikePreselection()
     tauFunctions = cms.PSet(),
     jetSrc = cms.InputTag(param.jetSelection.src.value()),
-    jetFunctions = cms.PSet(),
+    jetFunctions = cms.PSet(
+        tche = cms.string("bDiscriminator('trackCountingHighEffBJetTags')"),
+    ),
     genParticleSrc = cms.InputTag("genParticles"),
     mets = cms.PSet(
         pfMet_p4 = cms.InputTag("patMETsPF"),
     ),
     doubles = cms.PSet(
-        pileupWeightEPS = cms.InputTag("pileupWeightEPS"),
+        weightPileup_EPS = cms.InputTag("pileupWeightEPS"),
         weightPileup_Run2011AnoEPS = cms.InputTag("pileupWeightRun2011AnoEPS"),
         weightPileup_Run2011A = cms.InputTag("pileupWeightRun2011A")
     ),

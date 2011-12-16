@@ -235,7 +235,9 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     tauSrc = cms.InputTag(taus.value()),
     tauFunctions = cms.PSet(),
     jetSrc = cms.InputTag("selectedPatJets"),
-    jetFunctions = cms.PSet(),
+    jetFunctions = cms.PSet(
+        tche = cms.string("bDiscriminator('trackCountingHighEffBJetTags')"),
+    ),
     genParticleOriginalSrc = cms.InputTag("genParticles", "", "HLT"),
     genParticleEmbeddedSrc = cms.InputTag("genParticles"),
     mets = cms.PSet(
@@ -244,7 +246,7 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
         pfMetOriginalNoMuon_p4 = cms.InputTag("pfMETOriginalNoMuon"),
     ),
     doubles = cms.PSet(
-        pileupWeightEPS = cms.InputTag("pileupWeightEPS"),
+        weightPileup_EPS = cms.InputTag("pileupWeightEPS"),
         weightPileup_Run2011AnoEPS = cms.InputTag("pileupWeightRun2011AnoEPS"),
         weightPileup_Run2011A = cms.InputTag("pileupWeightRun2011A")
     ),

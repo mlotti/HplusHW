@@ -664,7 +664,7 @@ class PlotBase:
                     if not isinstance(drh, dataset.DatasetRootHistoBase):
                         raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, datasetRootHistos[%d] is %s" % (i, type(drh).__name__))
 
-                    self.histoMgr = histograms.HistoManager(datasetRootHistos = datasetRootHistos)
+                self.histoMgr = histograms.HistoManager(datasetRootHistos = datasetRootHistos)
             else:
                 histoList = datasetRootHistos
                 if isinstance(datasetRootHistos[0], ROOT.TH1):
@@ -766,6 +766,9 @@ class PlotBase:
     def createFrame(self, filename, **kwargs):
         self.cf = histograms.CanvasFrame(self.histoMgr, filename, **kwargs)
         self.frame = self.cf.frame
+
+    def setFrameName(self, filename):
+        self.cf.canvas.SetName(filename)
 
     ## Get the frame TH1
     def getFrame(self):

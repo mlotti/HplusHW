@@ -250,7 +250,8 @@ tree = cms.untracked.PSet(
         "againstElectronTight",
         "againstMuonLoose",
         "againstMuonTight",
-    )
+    ),
+    genParticleSrc = cms.untracked.InputTag("genParticles")
 )
 
 vertexWeight = cms.untracked.PSet(

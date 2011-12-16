@@ -16,9 +16,9 @@ class PickEventsDumper: public edm::EDAnalyzer {
 
     private:
 	struct Info {
-		int Run;
-		int Lumi;
-		int Event;
+          unsigned int Run;
+          unsigned int Lumi;
+          unsigned int Event;
 	};
 
   	virtual void beginJob();

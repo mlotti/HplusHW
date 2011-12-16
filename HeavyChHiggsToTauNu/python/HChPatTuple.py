@@ -95,13 +95,26 @@ def addPatOnTheFly(process, options, dataVersion,
         #removeSpecificPATObjects(process, ["Muons", "Electrons", "Photons"], False)
         process.patDefaultSequence.remove(process.patMuons)
         process.patDefaultSequence.remove(process.selectedPatMuons)
+        #process.selectedPatCandidates.remove(process.selectedPatMuons)
         process.patDefaultSequence.remove(process.muonMatch)
         process.patDefaultSequence.remove(process.patElectrons)
         process.patDefaultSequence.remove(process.selectedPatElectrons)
+        #process.selectedPatCandidates.remove(process.selectedPatElectrons)
         process.patDefaultSequence.remove(process.electronMatch)
         process.patDefaultSequence.remove(process.patPhotons)
         process.patDefaultSequence.remove(process.selectedPatPhotons)
+        #process.selectedPatCandidates.remove(process.selectedPatPhotons)
         process.patDefaultSequence.remove(process.photonMatch)
+
+        del process.patMuons
+        del process.selectedPatMuons
+        del process.muonMatch
+        del process.patElectrons
+        del process.selectedPatElectrons
+        del process.electronMatch
+        del process.patPhotons
+        del process.selectedPatPhotons
+        del process.photonMatch
 
         # Remove soft muon b tagging discriminators as they are not
         # well defined, cause technical problems and we don't use

@@ -27,9 +27,9 @@ normalize=True
 #normalize=False
 
 #count = "btagging"
-#count = "deltaPhiTauMET<160"
+count = "deltaPhiTauMET<160"
 #count = "deltaPhiTauMET<130"
-count = "deltaPhiTauMET<90"
+#count = "deltaPhiTauMET<90"
 
 def main():
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=baseline+"Counters")
@@ -105,8 +105,9 @@ def main():
 
 
     style = tdrstyle.TDRStyle()
+    histograms.createLegend.moveDefaults(dx=-0.32, dh=-0.15)
 
-    metCut = "(met_p4.Et() > 40)"
+    metCut = "(met_p4.Et() > 50)"
     bTaggingCut = "passedBTagging"
     tdMt = dataset.TreeDraw("dummy",
                             weight="weightPileup*weightTrigger*weightBTagging",
@@ -126,6 +127,9 @@ def main():
 
 def doPlot(datasets, analyses, path, name, rootFile=None, rootHistoName=None):
     histos = []
+    legends = {"Plus": "#tau-jet energy scale variated by +3 %",
+               "Minus": "#tau-jet energy scale variated by -3 %"}
+
     for aname, analysis in analyses:
         p = None
         if isinstance(path, basestring):
@@ -138,7 +142,7 @@ def doPlot(datasets, analyses, path, name, rootFile=None, rootHistoName=None):
         
         h = p.histoMgr.getHisto("Data")
         h.setName(aname)
-        h.setLegendLabel(aname)
+        h.setLegendLabel(legends.get(aname, aname))
         histos.append(h)
 
     p = plots.ComparisonManyPlot(histos[0], histos[1:])
@@ -158,15 +162,16 @@ def doPlot(datasets, analyses, path, name, rootFile=None, rootHistoName=None):
 
     styles.mcStyle(p.histoMgr.getHisto("Plus"))
     styles.mcStyle2(p.histoMgr.getHisto("Minus"))
+    p.histoMgr.getHisto("Minus").getRootHisto().SetMarkerSize(2)
     p.setLuminosity(datasets.getDataset("Data").getLuminosity())
-    p.createFrame(name, createRatio=True, invertRatio=True, opts2={"ymax": 2}, opts={"ymax": 40})
+    p.createFrame(name, createRatio=True, opts2={"ymax": 2}, opts={"ymax": 40})
     yaxis = p.getFrame2().GetYaxis()
-    yaxis.SetTitle("Variated/baseline")
-    yaxis.SetTitleSize(yaxis.GetTitleSize()*0.8)
+    yaxis.SetTitle("Ratio")
+    #yaxis.SetTitleSize(yaxis.GetTitleSize()*0.8)
     p.setLegend(histograms.moveLegend(histograms.createLegend()))
     
-    p.frame.GetXaxis().SetTitle("m_{T} (GeV/c^{2})")
-    p.frame.GetYaxis().SetTitle("Number of events / 20 GeV/c^{2}")
+    p.frame.GetXaxis().SetTitle("m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})")
+    p.frame.GetYaxis().SetTitle("Events / 20 GeV/c^{2}")
     p.draw()
     histograms.addCmsPreliminaryText()
     histograms.addEnergyText()
