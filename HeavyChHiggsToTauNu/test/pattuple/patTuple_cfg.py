@@ -88,6 +88,7 @@ options.doPat=1
                                    doPlainPat=True, doPF2PAT=False,
                                    plainPatArgs={"doTauHLTMatching": doTauHLTMatching,
                                                  "matchingTauTrigger": myTrigger},
+                                   doHBHENoiseFilter=False, # Only save the HBHE result to event, don't filter
                                    )
 
 process.out.outputCommands.extend([

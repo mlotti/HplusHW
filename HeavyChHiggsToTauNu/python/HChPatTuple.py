@@ -170,6 +170,7 @@ def addPatOnTheFly(process, options, dataVersion,
     else:
         if dataVersion.isData():
             process.eventPreSelection = HChDataSelection.addDataSelection(process, dataVersion, options)
+
         elif dataVersion.isMC() and doMcPreselection:
             process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
 
@@ -194,6 +195,26 @@ def addPatOnTheFly(process, options, dataVersion,
                                      doPlainPat=doPlainPat, doPF2PAT=doPF2PAT,
                                      plainPatArgs=pargs, pf2patArgs=pargs2,)
     
+    if dataVersion.isData() and doHBHENoiseFilter:
+        counters.extend(HChDataSelection.addHBHENoiseFilter(process, process.eventPreSelection))
+    elif dataVersion.isMC() and doTotalKinematicsFilter:
+        # TotalKinematicsFilter for managing with buggy LHE+Pythia samples
+        # https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1489.html
+        # For pattuples, this is implemented in patTuple_cfg.py, and saved in the event via TriggerResults
+        process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
+        process.totalKinematicsFilter.src.setProcessName(dataVersion.getTriggerProcess())
+        process.totalKinematicsFilterAllEvents = cms.EDproducer("EventCountProcucer")
+        process.totalKinematicsFilterPassed = cms.EDProducer("EventCountProducer")
+        process.eventPreSelection *= (
+            process.totalKinematicsFilterAllEvents *
+            process.totalKinematicsFilter *
+            process.totalKinematicsFilterPassed
+        )
+        counters.extend([
+                "totalKinematicsFilterAllEvents",
+                "totalKinematicsFilterPassed"
+                ])                    
+
     HChPrimaryVertex.addPrimaryVertexSelection(process, process.eventPreSelection)
     dataPatSequence = cms.Sequence(
         process.eventPreSelection *
