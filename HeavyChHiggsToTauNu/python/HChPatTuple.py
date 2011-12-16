@@ -89,17 +89,8 @@ def addPatOnTheFly(process, options, dataVersion,
                 seq *= process.eventPreSelection
         else:
             # HBHE noise filter
-            process.HBHENoiseFilter = cms.EDFilter("HPlusBoolFilter",
-                src = cms.InputTag("HBHENoiseFilterResultProducer"),
-            )
-            process.HBHENoiseFilterAllEvents = cms.EDProducer("EventCountProducer")
-            process.HBHENoiseFilterPassed = cms.EDProducer("EventCountProducer")
-            seq *= (
-                process.HBHENoiseFilterAllEvents *
-                process.HBHENoiseFilter *
-                process.HBHENoiseFilterPassed
-            )
-            counters.extend(["HBHENoiseFilterAllEvents", "HBHENoiseFilterPassed"])
+            if doHBHENoiseFilter:
+                counters.extend(HChDataSelection.addHBHENoiseFilter(process, seq))
 
         # Add primary vertex selection
         HChPrimaryVertex.addPrimaryVertexSelection(process, seq)

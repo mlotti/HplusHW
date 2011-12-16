@@ -78,3 +78,20 @@ dataSelectionCounters = [
     "allEvents", "passedPhysicsDeclared", "passedTrigger", "passedScrapingVeto"
 #    "passedPrimaryVertexFilter"
     ]
+
+
+def addHBHENoiseFilter(process, sequence):
+    process.HBHENoiseFilter = cms.EDFilter("HPlusBoolFilter",
+        src = cms.InputTag("HBHENoiseFilterResultProducer", "HBHENoiseFilterResult")
+    )
+    process.HBHENoiseFilterAllEvents = cms.EDProducer("EventCountProducer")
+    process.HBHENoiseFilterPassed = cms.EDProducer("EventCountProducer")
+    sequence *= (
+        process.HBHENoiseFilterAllEvents *
+        process.HBHENoiseFilter *
+        process.HBHENoiseFilterPassed
+    )
+    counters = ["HBHENoiseFilterAllEvents", "HBHENoiseFilterPassed"]
+    return counters
+
+
