@@ -8,10 +8,13 @@ cfg = "signalAnalysis_cfg.py"
 multicrab = Multicrab("crab_analysis.cfg", cfg)
 
 # Select the pattuple version to use as an input
-pattupleVersion = "pattuple_v18"
+#pattupleVersion = "pattuple_v18"
+pattupleVersion = "pattuple_v19"
 
 #era = "EPS"
 era = "Run2011A"
+#era = "Run2011B"
+#era = "Run2011A+B"
 
 # Change this to true if you want to run the PAT on the fly (for
 # datasets where no pattuples are produced, or for testing something
@@ -26,7 +29,7 @@ if runPatOnTheFly:
 # The dataset definitions are in python/tools/multicrabDatasets.py
 
 # Data: single tau + MET
-datasetsEPS = [
+datasetsEPS_v18 = [
         "Tau_160431-161176_May10",           # HLT_IsoPFTau35_Trk20_MET45_v1
         "Tau_161217-163261_May10",           # HLT_IsoPFTau35_Trk20_MET45_v2
         "Tau_163270-163869_May10",           # HLT_IsoPFTau35_Trk20_MET45_v4
@@ -36,10 +39,27 @@ datasetsEPS = [
         "Tau_166374-167043_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v2
         "Tau_167078-167913_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v4
 ]
-datasetsRun2011A = datasetsEPS + [
+datasetsRun2011A_v18 = datasetsEPS_v18 + [
         "Tau_170722-172619_Aug05",           # HLT_IsoPFTau35_Trk20_MET60_v6
         "Tau_172620-173198_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v6
         "Tau_173236-173692_Prompt",          # HLT_MediumIsoPFTau35_Trk20_MET60_v1
+]
+
+datasetsEPS_v19 = [
+       "Tau_160431-163869_May10",           # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4}
+       "Tau_165088-165633_Prompt",          # 2011A HLT_IsoPFTau35_Trk20_MET45_v6
+       "Tau_165970-167913_Prompt",          # 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
+]
+datasetsRun2011A_v19 = datasetsEPS_v19 + [
+       "Tau_170722-172619_Aug05",           # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
+       "Tau_172620-173198_Prompt",          # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
+       "Tau_173236-173692_Prompt",          # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
+]
+datasetsRun2011B_v19 = [
+       "Tau_175860-177452_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v1
+       "Tau_177718-178380_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v1
+       "Tau_178420-179889_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v5
+       "Tau_179959-180252_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v6
 ]
 
 datasetsMC = [
@@ -94,9 +114,15 @@ datasetsMC = [
 
 datasets = []
 if era == "EPS":
-    datasets += datasetsEPS
+    if "v18" in pattupleVersion:
+        datasets += datasetsEPS_v18
+    elif "v19" in pattupleVersion:
+        datasets += datasetsEPS_v19
 elif era == "Run2011A":
-    datasets += datasetsRun2011A
+    if "v18" in pattupleVersion:
+        datasets += datasetsRun2011A_v18
+    elif "v19" in pattupleVersion:
+        datasets += datasetsRun2011A_v19
 else:
     raise Exception("Wrong value for 'era' %s, supported are 'EPS', 'Run2011A'" % era)
 datasets += datasetsMC
