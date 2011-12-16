@@ -39,7 +39,8 @@ jetPreSelection = ""
 def addPatOnTheFly(process, options, dataVersion,
                    doPlainPat=True, doPF2PAT=False,
                    plainPatArgs={}, pf2patArgs={},
-                   doMcPreselection=False):
+                   doMcPreselection=False,
+                   doTotalKinematicsFilter=False, doHBHENoiseFilter=True):
     def setPatArg(args, name, value):
         if name in args:
             print "Overriding PAT arg '%s' from '%s' to '%s'" % (name, str(args[name]), str(value))
@@ -61,10 +62,48 @@ def addPatOnTheFly(process, options, dataVersion,
     
     if options.doPat == 0:
         seq = cms.Sequence()
-        if dataVersion.isMC() and doMcPreselection:
-            process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
-            seq *= process.eventPreSelection
+    
+        if dataVersion.isMC():
+            # First apply total kinematics filter
+            if doTotalKinematicsFilter:
+                import HLTrigger.HLTfilters.hltHighLevel_cfi as hltHighLevel
+                process.totalKinematicsFilter = hltHighLevel.hltHighLevel.clone(
+                    TriggerResultsTag = cms.InputTag("TriggerResults", "", "HChPatTuple"),
+                    HLTPaths = cms.vstring("totalKinematicsFilterPath")
+                )
+                process.totalKinematicsFilterAllEvents = cms.EDproducer("EventCountProcucer")
+                process.totalKinematicsFilterPassed = cms.EDProducer("EventCountProducer")
+                seq *= (
+                    process.totalKinematicsFilterAllEvents *
+                    process.totalKinematicsFilter *
+                    process.totalKinematicsFilterPassed
+                )
+                counters.extend([
+                        "totalKinematicsFilterAllEvents",
+                        "totalKinematicsFilterPassed"
+                        ])                    
+    
+            # Then apply MC preselection if wanted
+            if doMcPreselection:
+                process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
+                seq *= process.eventPreSelection
+        else:
+            # HBHE noise filter
+            process.HBHENoiseFilter = cms.EDFilter("HPlusBoolFilter",
+                src = cms.InputTag("HBHENoiseFilterResultProducer"),
+            )
+            process.HBHENoiseFilterAllEvents = cms.EDProducer("EventCountProducer")
+            process.HBHENoiseFilterPassed = cms.EDProducer("EventCountProducer")
+            seq *= (
+                process.HBHENoiseFilterAllEvents *
+                process.HBHENoiseFilter *
+                process.HBHENoiseFilterPassed
+            )
+            counters.extend(["HBHENoiseFilterAllEvents", "HBHENoiseFilterPassed"])
+
+        # Add primary vertex selection
         HChPrimaryVertex.addPrimaryVertexSelection(process, seq)
+
         if options.doTauHLTMatchingInAnalysis != 0:
             process.patTausHpsPFTauTauTriggerMatched = HChTriggerMatching.createTauTriggerMatchingInAnalysis(options.trigger, "selectedPatTausHpsPFTau")
             seq *= process.patTausHpsPFTauTauTriggerMatched
