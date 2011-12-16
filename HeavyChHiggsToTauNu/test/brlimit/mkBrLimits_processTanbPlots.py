@@ -20,6 +20,7 @@ mu = 200
 # since the corresponding mH values have not been calculated
 # in Feynhiggs
 useMA = 0 # use mH space by default, override with parameter "-ma"
+showLow = 0
 showAN = 1
 showTeva = 0
 showLEP = 0
@@ -213,6 +214,25 @@ def removeLargeValues(graph):
             graph.RemovePoint( graph.GetN()-1-i)
             graph.RemovePoint(i)
 
+def getObservedMinus(graph):
+    curve = graph.Clone()
+    for i in xrange(0, graph.GetN()):
+        curve.SetPoint(i,
+                       graph.GetX()[i],
+                       graph.GetY()[i]*0.77)
+    print "todo: CHECK minus coefficient f(m)"
+    return curve
+
+def getObservedPlus(graph):
+    curve = graph.Clone()
+    for i in xrange(0, graph.GetN()):
+        curve.SetPoint(i,
+                       graph.GetX()[i],
+                       graph.GetY()[i]*1.22)
+    print "todo: CHECK plus coefficient f(m)"
+    return curve
+
+
 # Draw AN exclusion
 # picked by eye from CMS-PAS-HIG-11-008
 def getANCurve():
@@ -228,7 +248,7 @@ def getANCurve():
     # curve.SetPoint(2,147,60)
     curve.SetPoint(2,150,67.7)
     curve.SetPoint(3,120,100)
-    if useMA==1:
+    if useMA:
         graphToMa(curve)
     myColor = 809
     curve.SetFillColor(myColor)
@@ -250,7 +270,7 @@ def getTevaCurve():
     curve.SetPoint(3,130,68.5)
     curve.SetPoint(4,140,103)
     curve.SetPoint(5,100,110)
-    if useMA==1:
+    if useMA:
         graphToMa(curve)
     curve.SetFillStyle(4)
     curve.SetFillColor(618)
@@ -362,6 +382,9 @@ def main():
     cleanGraph(expected_1s)
     cleanGraph(expected_2s)
 
+    observed_minus = getObservedMinus(observed)
+    observed_plus = getObservedPlus(observed)
+
     # Create tan beta graphs
     # Convention: begin with low mH, lower limit for 1/2s band
     # then go counterclockwise: increase mH, then switch to upper limit, decrease mH
@@ -369,13 +392,18 @@ def main():
     observed_tanb = graphToTanBeta(observed,mu)
     print "Constructing expected"
     expected_tanb = graphToTanBeta(expected,mu)
+    observed_minus_tanb = graphToTanBeta(observed_minus,mu)
+    observed_plus_tanb = graphToTanBeta(observed_plus,mu)
+    observed_minus_tanb.SetLineWidth(3)
+    observed_minus_tanb.SetLineStyle(2)
+    observed_plus_tanb.SetLineStyle(2)
+    observed_plus_tanb.SetLineWidth(3)
     print "Constructing expected 1 sigma"
     expected_1s_tanb = graphToTanBeta(expected_1s, mu, removeNotValid=False)
     print "Constructing expected 2 sigma"
     expected_2s_tanb = graphToTanBeta(expected_2s, mu, removeNotValid=False)
 
  
-    showLow = 0
     if showLow:
         observed_tanb_low = graphToTanBetaLow(observed,mu)
         expected_tanb_low = graphToTanBetaLow(expected,mu)
@@ -403,8 +431,8 @@ def main():
         removeLargeValues(expected_2s_tanb_low)
 
     # Define the axis ranges
-    massMin = valid_mp[0] - 5
-    massMax = valid_mp[-1] + 5
+    massMin = valid_mp[0]
+    massMax = valid_mp[-1] + 3
     tanbMax = 60#200
 
     # Upper edges of the uncertainty bands to the plot edges
@@ -431,7 +459,9 @@ def main():
         expected_2s_tanb.Draw("F")
     expected_1s_tanb.Draw("F")
     expected_tanb.Draw("LP")
-    observed_tanb.SetLineWidth(804)
+    observed_minus_tanb.Draw("L")
+    observed_plus_tanb.Draw("L")
+#    observed_tanb.SetLineWidth(804)
     observed_tanb.Draw("LP")
 
     if showAN:
@@ -464,6 +494,8 @@ def main():
 
 # ensure that these are on top
     observed_tanb.Draw("LP")
+    observed_minus_tanb.Draw("L")
+    observed_plus_tanb.Draw("L")
 
     # Axis labels
     if useMA:
@@ -483,7 +515,10 @@ def main():
     pl.SetBorderSize(0)
     ple = ROOT.TLegendEntry()
     pl.AddEntry(observed_tanb,     "Observed", "lp")
+    pl.AddEntry(observed_minus_tanb,     "Observed #pm1 #sigma", "L")
     pl.AddEntry(expected_tanb,     "Expected median", "lp")
+#    pl.AddEntry(observed_plus_tanb,     "Expected median, th+", "l")
+    expected_1s_tanb.SetLineColor( expected_1s_tanb.GetFillColor() ) 
     pl.AddEntry(expected_1s_tanb,  "Expected median #pm1 #sigma", "f")
     if plotTwoSigmaBands:
         pl.AddEntry(expected_2s_tanb,  "Expected median #pm2 #sigma", "f")
@@ -534,8 +569,8 @@ def main():
 ####################
 
             # Define the axis ranges
-    massMin = valid_mp[0] - 5
-    massMax = valid_mp[-1] + 5
+    massMin = valid_mp[0]
+    massMax = valid_mp[-1] + 3
     tanbMax = 60
 
 
@@ -607,15 +642,16 @@ def main():
     observed_pk.Draw("LP")
     observed_mk.Draw("LP")
 
-    observed_pkl.Draw("LP")
-    observed_p2l.Draw("LP")
-    observed_m2l.Draw("LP")    
-    observed_mkl.Draw("LP")
+    if showLow:
+        observed_pkl.Draw("LP")
+        observed_p2l.Draw("LP")
+        observed_m2l.Draw("LP")    
+        observed_mkl.Draw("LP")
 
     # Legends
     legeX = 0.52
     legeY = 0.20
-    pl2  = ROOT.TLegend(legeX,legeY,legeX+0.35,legeY+0.24)
+    pl2  = ROOT.TLegend(legeX,legeY,legeX+0.35,legeY+0.2)
     pl2.SetTextSize(0.03)
     pl2.SetFillStyle(4000)
     pl2.SetTextFont(132)
