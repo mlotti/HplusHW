@@ -8,14 +8,14 @@
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
-#include "DataFormats/METReco/interface/MET.h"
-#include "DataFormats/PatCandidates/interface/Muon.h"
-#include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
 #include "RecoEgamma/EgammaTools/interface/ConversionFinder.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "FWCore/Framework/interface/ESHandle.h"
+
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleTools.h"
 
 #include "TTree.h"
 
@@ -27,13 +27,17 @@ namespace HPlus {
     fDoFill(iConfig.getUntrackedParameter<bool>("fill")),
     fTauEmbeddingInput(iConfig.getUntrackedParameter<bool>("tauEmbeddingInput", false)),
     fFillJetEnergyFractions(iConfig.getUntrackedParameter<bool>("fillJetEnergyFractions", true)),
+    fGenParticleSource(iConfig.getUntrackedParameter<edm::InputTag>("genParticleSrc")),
     fTree(0)
   {
     if(fTauEmbeddingInput) {
-      fTauEmbeddingMuonSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingMuonSource");
-      fTauEmbeddingMetSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingMetSource");
-      fTauEmbeddingCaloMetNoHFSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingCaloMetNoHFSource");
-      fTauEmbeddingCaloMetSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingCaloMetSource");
+      edm::ParameterSet pset = iConfig.getUntrackedParameter<edm::ParameterSet>("tauEmbedding");
+      fTauEmbeddingMuon.reset(new TreeMuonBranches(pset, "temuon"));
+
+      fTauEmbeddingGenParticleOriginalSource = pset.getParameter<edm::InputTag>("genParticleOriginalSrc");
+      fTauEmbeddingMetSource = pset.getParameter<edm::InputTag>("metSrc");
+      fTauEmbeddingCaloMetNoHFSource = pset.getParameter<edm::InputTag>("caloMetNoHFSrc");
+      fTauEmbeddingCaloMetSource = pset.getParameter<edm::InputTag>("caloMetSrc");
     }
 
     std::vector<std::string> tauIds = iConfig.getUntrackedParameter<std::vector<std::string> >("tauIDs");
@@ -74,7 +78,11 @@ namespace HPlus {
     for(size_t i=0; i<fTauIds.size(); ++i) {
       fTree->Branch( ("tau_id_"+fTauIds[i].name).c_str(), &(fTauIds[i].value) );
     }
-      
+    fTree->Branch("tau_pdgid", &fTauPdgId);
+    fTree->Branch("tau_mother_pdgid", &fTauMotherPdgId);
+    fTree->Branch("tau_grandmother_pdgid", &fTauGrandMotherPdgId);
+    fTree->Branch("tau_daughter_pdgid", &fTauDaughterPdgId);
+     
     fTree->Branch("jets_p4", &fJets);
     fTree->Branch("jets_btag", &fJetsBtags);
     if(fFillJetEnergyFractions) {
@@ -113,7 +121,7 @@ namespace HPlus {
     fTree->Branch("genMet_p4", &fGenMet);
 
     if(fTauEmbeddingInput) {
-      fTree->Branch("temuon_p4", &fTauEmbeddingMuon);
+      fTauEmbeddingMuon->book(fTree);
       fTree->Branch("temet_p4", &fTauEmbeddingMet);
       fTree->Branch("tecalometNoHF_p4", &fTauEmbeddingCaloMetNoHF);
       fTree->Branch("tecalomet_p4", &fTauEmbeddingCaloMet);
@@ -180,6 +188,7 @@ namespace HPlus {
       fTree->Branch("nonIsoElectrons_ElectronMuonDeltaR" , & fNonIsoElectrons_ElectronMuonDeltaR);
     }
   
+    reset();
   }
 
 
@@ -199,17 +208,54 @@ namespace HPlus {
     if(taus.size() != 1)
       throw cms::Exception("LogicError") << "Expected tau collection size to be 1, was " << taus.size() << " at " << __FILE__ << ":" << __LINE__ << std::endl;
 
+    // General event information
     fEventBranches.setValues(iEvent);
 
-    fTau = taus[0]->p4();
-    fTauLeadingChCand = taus[0]->leadPFChargedHadrCand()->p4();
-    fTauSignalChCands = taus[0]->signalPFChargedHadrCands().size();
-    fTauEmFraction = taus[0]->emFraction();
-    fTauDecayMode = taus[0]->decayMode();
+    // Selected tau
+    const pat::Tau& tau = *(taus[0]);
+    fTau = tau.p4();
+    fTauLeadingChCand = tau.leadPFChargedHadrCand()->p4();
+    fTauSignalChCands = tau.signalPFChargedHadrCands().size();
+    fTauEmFraction = tau.emFraction();
+    fTauDecayMode = tau.decayMode();
     for(size_t i=0; i<fTauIds.size(); ++i) {
-      fTauIds[i].value = taus[0]->tauID(fTauIds[i].name) > 0.5;
+      fTauIds[i].value = tau.tauID(fTauIds[i].name) > 0.5;
     }
 
+    // MC matching of tau
+    if(!iEvent.isRealData()) {
+      edm::Handle<edm::View<reco::GenParticle> > hgenparticles;
+      iEvent.getByLabel(fGenParticleSource, hgenparticles);
+
+      // Try first genuine tau
+      const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 15, tau, 0.5);
+      if(!gen) { // then muon
+        const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 13, tau, 0.5);
+      }
+      if(!gen) { // finally electron
+        const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 11, tau, 0.5);
+      }
+
+      if(gen) {
+        fTauPdgId = gen->pdgId();
+        const reco::GenParticle *mother = GenParticleTools::findMother(gen);
+        if(mother) {
+          fTauMotherPdgId = mother->pdgId();
+          const reco::GenParticle *grandMother = GenParticleTools::findMother(mother);
+          if(grandMother)
+            fTauGrandMotherPdgId = grandMother->pdgId();
+        }
+
+        // Look for daughter
+        const reco::GenParticle *daughter = GenParticleTools::findTauDaughter(gen);
+        if(daughter)
+          fTauDaughterPdgId = daughter->pdgId();
+
+      }
+    }
+
+
+    // Selected jets
     for(size_t i=0; i<jets.size(); ++i) {
       fJets.push_back(jets[i]->p4());
       fJetsBtags.push_back(jets[i]->bDiscriminator(fBdiscriminator));
@@ -256,12 +302,8 @@ namespace HPlus {
       fJetsArea.push_back(jets[i]->jetArea());
     }
 
+    // Tau embedding (muon, mets) information
     if(fTauEmbeddingInput) {
-      edm::Handle<edm::View<pat::Muon> > hmuon;
-      iEvent.getByLabel(fTauEmbeddingMuonSource, hmuon);
-      if(hmuon->size() != 1)
-        throw cms::Exception("Assert") << "The assumption that tau embedding muon collection size is 1 failed, the size was " << hmuon->size() << std::endl;
-
       edm::Handle<edm::View<reco::MET> > hmet;
       iEvent.getByLabel(fTauEmbeddingMetSource, hmet);
       if(hmet->size() != 1)
@@ -277,12 +319,24 @@ namespace HPlus {
       if(hcalomet->size() != 1)
         throw cms::Exception("Assert") << "The assumption that tau embedding calomet collection size is 1 failed, the size was " << hcalomet->size() << std::endl;
 
-      fTauEmbeddingMuon = hmuon->at(0).p4();
+      size_t nmuons = 0;
+      if(iEvent.isRealData()) {
+        nmuons = fTauEmbeddingMuon->setValues(iEvent);
+      }
+      else {
+        edm::Handle<edm::View<reco::GenParticle> > hgenparticlesOriginal;
+        iEvent.getByLabel(fTauEmbeddingGenParticleOriginalSource, hgenparticlesOriginal);
+        nmuons = fTauEmbeddingMuon->setValues(iEvent, *hgenparticlesOriginal);
+      }
+      if(nmuons != 1)
+        throw cms::Exception("Assert") << "The assumption that tau embedding muon collection size is 1 failed, the size was " << nmuons << std::endl;
+
       fTauEmbeddingMet = hmet->at(0).p4();
       fTauEmbeddingCaloMetNoHF = hcalometnohf->at(0).p4();
       fTauEmbeddingCaloMet = hcalomet->at(0).p4();
     }
 
+    // Fill the TTree, and reset branch variables to wait the next event
     fTree->Fill();
     reset();
   }
@@ -577,6 +631,10 @@ namespace HPlus {
     fTauDecayMode = -9999;
     for(size_t i=0; i<fTauIds.size(); ++i)
       fTauIds[i].reset();
+    fTauPdgId = 0;
+    fTauMotherPdgId = 0; 
+    fTauGrandMotherPdgId = 0;
+    fTauDaughterPdgId = 0;
 
     fJets.clear();
     fJetsBtags.clear();
@@ -619,7 +677,8 @@ namespace HPlus {
 
     fGenMet.SetXYZT(nan, nan, nan, nan);
 
-    fTauEmbeddingMuon.SetXYZT(nan, nan, nan, nan);
+    if(fTauEmbeddingMuon.get())
+      fTauEmbeddingMuon->reset();
     fTauEmbeddingMet.SetXYZT(nan, nan, nan, nan);
     fTauEmbeddingCaloMetNoHF.SetXYZT(nan, nan, nan, nan);
     fTauEmbeddingCaloMet.SetXYZT(nan, nan, nan, nan);
