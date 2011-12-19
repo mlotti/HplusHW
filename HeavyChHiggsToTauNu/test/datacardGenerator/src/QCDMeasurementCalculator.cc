@@ -170,11 +170,19 @@ void QCDMeasurementCalculator::doCalculate() {
   double myResultNQCD = 0.0;
   double myStatUncertaintySqNQCD = 0.0;
   double mySystUncertaintySqNQCD = 0.0;
+  double myTotalDataBB = 0.0;
+  double myTotalDataMinusEWKTauLeg = 0.0;
+  double myTotalDataTauLeg = 0.0;
+  double myTotalDataMETLeg = 0.0;
   for (int i = 1; i <= nBins; ++i) {
     double myBigBoxCounts = getMeasurementCounts(vData, i, sBigboxHisto, true) - getMeasurementCounts(vMCEWK, i, sBigboxHisto);
+    myTotalDataBB += getMeasurementCounts(vData, i, sBigboxHisto, true);
     if (myBigBoxCounts < 0.0001) continue;
     double myMETLegCounts = getMeasurementCounts(vData, i, sAfterMETLegHisto, true) - getMeasurementCounts(vMCEWK, i, sAfterMETLegHisto);
+    myTotalDataMETLeg += getMeasurementCounts(vData, i, sAfterMETLegHisto, true);
     double myTauLegCounts = getMeasurementCounts(vData, i, sAfterTauLegHisto, true) - getMeasurementCounts(vMCEWK, i, sAfterTauLegHisto);
+    myTotalDataTauLeg += getMeasurementCounts(vData, i, sAfterTauLegHisto, true);
+    myTotalDataMinusEWKTauLeg += myTauLegCounts;
     //std::cout << "bin=" << i << " bb=" << myBigBoxCounts << " metleg=" << myMETLegCounts << " tauleg=" << myTauLegCounts << " nQCD=" << myTauLegCounts * myMETLegCounts / myBigBoxCounts << std::endl;
     //std::cout << "bin=" << i << " met leg DATA = " << getMeasurementCounts(vData, i, sAfterMETLegHisto, true) << "+-" << getMeasurementAbsUncertaintySquared(vData, i, sAfterMETLegHisto, true) << " tau leg DATA = " << getMeasurementCounts(vData, i, sAfterTauLegHisto, true) << "+-" << getMeasurementAbsUncertaintySquared(vData, i, sAfterTauLegHisto, true) << std::endl;
     if (bDebug) {
@@ -274,7 +282,12 @@ void QCDMeasurementCalculator::doCalculate() {
     // multiply by 1/(1-eff(tight isolation))
   }
 
-  // Store result
+std::cout << "Data events after bigbox: " << myTotalDataBB << std::endl;
+std::cout << "Data events after tauleg: " << myTotalDataTauLeg << std::endl;
+std::cout << "Data events after metleg: " << myTotalDataMETLeg << std::endl;
+std::cout << "Data-EWK events after tauleg: " << myTotalDataMinusEWKTauLeg << std::endl;
+
+// Store result
   fResultValue = myResultNQCD;
   fResultRelativeStatisticalUncertainty = TMath::Sqrt(myStatUncertaintySqNQCD) / myResultNQCD;
   fResultRelativeSystematicalUncertainty = TMath::Sqrt(mySystUncertaintySqNQCD) / myResultNQCD;
