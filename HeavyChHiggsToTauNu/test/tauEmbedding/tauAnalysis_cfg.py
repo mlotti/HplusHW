@@ -89,6 +89,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbed
 additionalCounters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.commonSequence, param))
 
 ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
+    selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
+    goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
     tauSrc = cms.InputTag(param.tauSelection.src.value()), # this is set in addEmbeddingLikePreselection()
     tauFunctions = cms.PSet(),
     jetSrc = cms.InputTag(param.jetSelection.src.value()),

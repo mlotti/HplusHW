@@ -44,6 +44,8 @@ private:
   typedef HPlus::EventItem<double> DoubleItem;
 
   edm::InputTag fGenParticleSrc;
+  edm::InputTag fSelectedPrimaryVertexSrc;
+  edm::InputTag fGoodPrimaryVertexSrc;
 
   HPlus::TreeEventBranches fEventBranches;
   HPlus::TreeTauBranches fTauBranches;
@@ -51,10 +53,15 @@ private:
 
   std::vector<MetItem> fMets;
   std::vector<DoubleItem> fDoubles;
+
+  int fNSelectedPrimaryVertices;
+  int fNGoodPrimaryVertices;
 };
 
 HPlusTauNtupleAnalyzer::HPlusTauNtupleAnalyzer(const edm::ParameterSet& iConfig):
   fGenParticleSrc(iConfig.getParameter<edm::InputTag>("genParticleSrc")),
+  fSelectedPrimaryVertexSrc(iConfig.getParameter<edm::InputTag>("selectedPrimaryVertexSrc")),
+  fGoodPrimaryVertexSrc(iConfig.getParameter<edm::InputTag>("goodPrimaryVertexSrc")),
   fTauBranches(iConfig),
   fJetBranches(iConfig, false)
 {
@@ -84,6 +91,9 @@ HPlusTauNtupleAnalyzer::HPlusTauNtupleAnalyzer(const edm::ParameterSet& iConfig)
   for(size_t i=0; i<fDoubles.size(); ++i) {
     fTree->Branch(fDoubles[i].name.c_str(), &(fDoubles[i].value));
   }
+
+  fTree->Branch("selectedPrimaryVertices_n", &fNSelectedPrimaryVertices);
+  fTree->Branch("goodPrimaryVertices_n", &fNGoodPrimaryVertices);
 }
 
 HPlusTauNtupleAnalyzer::~HPlusTauNtupleAnalyzer() {}
@@ -101,10 +111,20 @@ void HPlusTauNtupleAnalyzer::reset() {
   for(size_t i=0; i<fDoubles.size(); ++i) {
     fDoubles[i].value = nan;
   }
+
+  fNSelectedPrimaryVertices = -1;
+  fNGoodPrimaryVertices = -1;
 }
 
 void HPlusTauNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   fEventBranches.setValues(iEvent);
+
+  edm::Handle<edm::View<reco::Vertex> > hselectedvert;
+  edm::Handle<edm::View<reco::Vertex> > hgoodvert;
+  iEvent.getByLabel(fSelectedPrimaryVertexSrc, hselectedvert);
+  iEvent.getByLabel(fGoodPrimaryVertexSrc, hgoodvert);
+  fNSelectedPrimaryVertices = hselectedvert->size();
+  fNGoodPrimaryVertices = hgoodvert->size();
 
   edm::Handle<edm::View<reco::GenParticle> > hgenparticles;
   if(!iEvent.isRealData())
