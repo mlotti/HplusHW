@@ -97,6 +97,7 @@ class TauValidation : public edm::EDAnalyzer
   	MonitorElement *TauPt, *TauEta, *TauPhi,
                        *VisibleTauPt, *VisibleTauEta, *VisibleTauPhi,                           
                        *TauPtW, *TauEtaW, *TauPhiW,
+	               *VisibleTauPtW, *VisibleTauEtaW, *VisibleTauPhiW,
                        *MuPtW, *MuEtaW, *MuPhiW,
                        *TauProngs, *TauDecayChannels, *TauMothers, 
                        *TauRtauW, *TauRtauHpm,
@@ -161,6 +162,9 @@ void TauValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup)
     MuEtaW           = dbe->book1D("MuEtaW","Mu (from W) eta", 100 ,-2.5,2.5);
     MuPhiW           = dbe->book1D("MuPhiW","Mu (from W) phi", 100 ,-3.14,3.14);
 
+    VisibleTauPtW    = dbe->book1D("VisibleTauPtW","Visible Tau (from W) pT", 100 ,0,100);
+    VisibleTauEtaW   = dbe->book1D("VisibleTauEtaW","Visible Tau (from W) eta", 100 ,-2.5,2.5);
+    VisibleTauPhiW   = dbe->book1D("VisibleTauPhiW","Visible Tau (from W) phi", 100 ,-3.14,3.14);
 /*
     TauProngs        = dbe->book1D("TauProngs","Tau n prongs", 7 ,0,7);
     TauDecayChannels = dbe->book1D("TauDecayChannels","Tau decay channels", 12 ,0,12);
@@ -252,6 +256,11 @@ void TauValidation::analyze(const edm::Event& iEvent,const edm::EventSetup& iSet
         VisibleTauPt->Fill(visibleTau.Pt());
         VisibleTauEta->Fill(visibleTau.Eta());
         VisibleTauPhi->Fill(visibleTau.Phi());
+	if(abs(mother) == 24){
+	  VisibleTauPtW->Fill(visibleTau.Pt());
+	  VisibleTauEtaW->Fill(visibleTau.Eta());
+	  VisibleTauPhiW->Fill(visibleTau.Phi());
+	}
       }
       if(abs(p.pdgId())==13 || abs(p.pdgId())==15){
         if(abs(mother) == 24){ // W
