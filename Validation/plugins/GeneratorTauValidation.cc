@@ -98,7 +98,6 @@ class TauValidation : public edm::EDAnalyzer
                        *VisibleTauPt, *VisibleTauEta, *VisibleTauPhi,                           
                        *TauPtW, *TauEtaW, *TauPhiW,
 	               *VisibleTauPtW, *VisibleTauEtaW, *VisibleTauPhiW,
-                       *MuPtW, *MuEtaW, *MuPhiW,
                        *TauProngs, *TauDecayChannels, *TauMothers, 
                        *TauRtauW, *TauRtauHpm,
                        *TauSpinEffectsW, *TauSpinEffectsHpm, *TauSpinEffectsZ,
@@ -157,10 +156,6 @@ void TauValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup)
     TauPtW           = dbe->book1D("TauPtW","Tau (from W) pT", 100 ,0,100);
     TauEtaW          = dbe->book1D("TauEtaW","Tau (from W) eta", 100 ,-2.5,2.5);
     TauPhiW          = dbe->book1D("TauPhiW","Tau (from W) phi", 100 ,-3.14,3.14);
-
-    MuPtW            = dbe->book1D("MuPtW","Mu (from W) pT", 100 ,0,100);
-    MuEtaW           = dbe->book1D("MuEtaW","Mu (from W) eta", 100 ,-2.5,2.5);
-    MuPhiW           = dbe->book1D("MuPhiW","Mu (from W) phi", 100 ,-3.14,3.14);
 
     VisibleTauPtW    = dbe->book1D("VisibleTauPtW","Visible Tau (from W) pT", 100 ,0,100);
     VisibleTauEtaW   = dbe->book1D("VisibleTauEtaW","Visible Tau (from W) eta", 100 ,-2.5,2.5);
@@ -256,24 +251,13 @@ void TauValidation::analyze(const edm::Event& iEvent,const edm::EventSetup& iSet
         VisibleTauPt->Fill(visibleTau.Pt());
         VisibleTauEta->Fill(visibleTau.Eta());
         VisibleTauPhi->Fill(visibleTau.Phi());
-	if(abs(mother) == 24){
+	if(abs(mother) == 24){ // W
+          TauPtW->Fill(p.pt());
+	  TauEtaW->Fill(p.eta());
+	  TauPhiW->Fill(p.phi());
 	  VisibleTauPtW->Fill(visibleTau.Pt());
 	  VisibleTauEtaW->Fill(visibleTau.Eta());
 	  VisibleTauPhiW->Fill(visibleTau.Phi());
-	}
-      }
-      if(abs(p.pdgId())==13 || abs(p.pdgId())==15){
-        if(abs(mother) == 24){ // W
-	  if(abs(p.pdgId())==13){
-	    MuPtW->Fill(p.pt());
-	    MuEtaW->Fill(p.eta());
-	    MuPhiW->Fill(p.phi());
-	  }
-          if(abs(p.pdgId())==15){
-            TauPtW->Fill(p.pt());
-            TauEtaW->Fill(p.eta());
-            TauPhiW->Fill(p.phi());
-          }
 	}
       }
     }
@@ -322,7 +306,7 @@ int TauValidation::findMother(const reco::GenParticle& tau){
 
 int TauValidation::tauMother(const reco::GenParticle& tau){
 
-  if(abs(tau.pdgId()) != 15 && abs(tau.pdgId()) != 13) return -1;
+  if(abs(tau.pdgId()) != 15) return -1;
 
 	int mother_pid = findMother(tau);
 	if(mother_pid == -1) return -1;
@@ -336,7 +320,7 @@ int TauValidation::tauMother(const reco::GenParticle& tau){
 	if(abs(mother_pid) == 36) label = A0;
 	if(abs(mother_pid) == 37) label = Hpm;
 
-	if(abs(tau.pdgId()) == 15) TauMothers->Fill(label);
+	TauMothers->Fill(label);
 
 	return mother_pid;
 }
