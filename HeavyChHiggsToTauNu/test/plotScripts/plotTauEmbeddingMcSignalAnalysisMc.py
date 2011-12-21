@@ -81,6 +81,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
     def drawControlPlot(path, xlabel, **kwargs):
         drawPlot(createPlot("ControlPlots/"+path), "mcembsig_"+datasetName+"_"+path, xlabel, opts2=opts2, **kwargs)
 
+    # Control plots
     drawControlPlot("SelectedTau_pT_AfterStandardSelections", "#tau-jet p_{T} (GeV/c)", opts={"xmax": 250}, rebin=2, cutBox={"cutValue": 40, "greaterThan": 40})
     drawControlPlot("SelectedTau_eta_AfterStandardSelections", "#tau-jet #eta", opts={"xmin": -2.2, "xmax": 2.2}, ylabel="Events / %.1f", rebin=4, log=False, moveLegend={"dy":-0.6, "dx":-0.2})
     drawControlPlot("SelectedTau_phi_AfterStandardSelections", "#tau-jet #phi", rebin=10, ylabel="Events / %.2f", log=False)
@@ -96,18 +97,29 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
 
     treeDraw = dataset.TreeDraw("dummy", weight="weightPileup")
 
-
     tdDeltaPhi = treeDraw.clone(varexp="acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 >>tmp(18, 0, 180)")
     tdMt = treeDraw.clone(varexp="sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi()))) >>tmp(20,0,200)")
 
+    # DeltaPhi
     xlabel = "#Delta#phi(#tau, MET) (^{#circ})"
     def customDeltaPhi(h):
         yaxis = h.getFrame().GetYaxis()
         yaxis.SetTitleOffset(0.8*yaxis.GetTitleOffset())
     drawPlot(createPlot(tdDeltaPhi.clone()), "mcembsig_"+datasetName+"_deltaPhi_1AfterTauID", xlabel, log=False, opts2=opts2, ylabel="Events / %.0f^{#circ}", function=customDeltaPhi, moveLegend={"dx":-0.22}, cutLine=[130, 160])
 
+    # mT
     xlabel = "m_{T} (#tau jet, E_{T}^{miss}) (GeV/c^{2})"
     drawPlot(createPlot(tdMt.clone()), "mcembsig_"+datasetName+"_transverseMass_1AfterTauID", xlabel, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}")
+
+
+    # After all cuts
+    metCut = "(met_p4.Et() > 50)"
+    bTaggingCut = "passedBTagging"
+    selection = "&&".join([metCut, bTaggingCut])
+    drawPlot(createPlot(treeDraw.clone(varexp="tau_p4.Pt() >>tmp(20,0,200)", selection=selection)), "mcembsig_"+datasetName+"_selectedTauPt_3AfterBTagging", "#tau-jet p_{T} (GeV/c)", opts2={"ymin": 0, "ymax": 2})
+    drawPlot(createPlot(treeDraw.clone(varexp="met_p4.Pt() >>tmp(16,0,400)", selection=selection)), "mcembsig_"+datasetName+"_MET_3AfterBTagging", "E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", opts2={"ymin": 0, "ymax": 2})
+    drawPlot(createPlot(tdMt.clone(selection=selection)), "mcembsig_"+datasetName+"_transverseMass_3AfterBTagging", xlabel, opts2={"ymin": 0, "ymax": 2}, ylabel="Events / %.0f GeV/c^{2}")
+                        
 
 
     eventCounterEmb = counter.EventCounter(datasetsEmb, counters=analysisEmb+"Counters")

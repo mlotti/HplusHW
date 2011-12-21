@@ -37,11 +37,12 @@ decayModeExp = "(taus_decayMode<=2)*taus_decayMode + (taus_decayMode==10)*3 +(ta
 rtauExp = "(taus_leadPFChargedHadrCand_p4.P() / taus_p4.P() -1e-10)"
 
 # tau candidate selection
-decayModeFinding = "taus_decayMode >= 0" # replace with discriminator after re-running ntuples
+#decayModeFinding = "taus_decayMode >= 0" # replace with discriminator after re-running ntuples
+decayModeFinding = "taus_f_decayModeFinding > 0.5" # replace with discriminator after re-running ntuples
 tauPtCut = "(taus_p4.Pt() > 40)"
 tauEtaCut = "(abs(taus_p4.Eta()) < 2.1)"
 tauLeadPt = "(taus_leadPFChargedHadrCand_p4.Pt() > 20)"
-ecalFiducial = "(!( abs(taus_p4.Eta()) < 0.18 || (0.423 < abs(taus_p4.Eta()) && abs(taus_p4.Eta()) < 0.461)"
+ecalFiducial = "(!( abs(taus_p4.Eta()) < 0.018 || (0.423 < abs(taus_p4.Eta()) && abs(taus_p4.Eta()) < 0.461)"
 ecalFiducial += " || (0.770 < abs(taus_p4.Eta()) && abs(taus_p4.Eta()) < 0.806)"
 ecalFiducial += " || (1.127 < abs(taus_p4.Eta()) && abs(taus_p4.Eta()) < 1.163)"
 ecalFiducial += " || (1.460 < abs(taus_p4.Eta()) && abs(taus_p4.Eta()) < 1.558)" # gap
@@ -56,6 +57,28 @@ rtau = "(%s > 0.7)" % rtauExp
 
 tauCandidateSelection = "("+ "&&".join([decayModeFinding, tightIsolation, tauPtCut, tauEtaCut, tauLeadPt, ecalFiducial, electronRejection, muonRejection]) + ")"
 tauID = "("+ "&&".join([tightIsolation, oneProng, rtau]) +")"
+
+# Rest of the selection
+pvSelection = "(selectedPrimaryVertices_n >= 1)"
+metSelection = "(pfMet_p4.Pt() > 50)"
+jetSelection = "(jets_looseId && jets_p4.Pt() > 30 && abs(jets_p4.Eta()) < 2.4 && sqrt((jets_p4.Eta()-taus_p4[0].Eta())^2+(jets_p4.Phi()-taus_p4[0].Phi())^2) > 0.5)"
+jetEventSelection = "(Sum$(%s) >= 3)" % jetSelection
+btagSelection = "(jets_f_tche > 1.7)"
+btagEventSelection = "(Sum$(%s && %s) >= 1)" % (jetSelection, btagSelection)
+deltaPhi160Selection = "(acos( (taus_p4.Px()*pfMet_p4.Px()+taus_p4.Py()*pfMet_p4.Py())/(taus_p4.Pt()*pfMet_p4.Et()) )*57.3 <= 160)"
+
+caloMetNoHF = "(tecalometNoHF_p4.Pt() > 60)"
+caloMet = "(tecalomet_p4.Pt() > 60)"
+
+weight = "weightPileup_Run2011A"
+if era == "EPS":
+    weight = "pileupWeightEPS"
+elif era == "Run2011A-EPS":
+    weight = "pileupWeight_Run2011AnoEPS"
+treeDraw = dataset.TreeDraw(analysis+"/tree", weight=weight)
+
+tauEmbedding.normalize=True
+tauEmbedding.era=era
 
 def main():
     # Read the datasets
@@ -98,21 +121,16 @@ def main():
     #datasets.remove(["QCD_Pt20_MuEnriched"])
     #histograms.createLegend.moveDefaults(dh=-0.05)
 
+#    doPlots(datasets)
+    doCounters(datasets)
+
+def doPlots(datasets):
     def createPlot(name):
         name2 = name
         if isinstance(name, basestring):
             name2 = analysis+"/"+name
         return plots.DataMCPlot(datasets, name2)
 
-    weight = "weightPileup_Run2011A"
-    if era == "EPS":
-        weight = "pileupWeightEPS"
-    elif era == "Run2011A-EPS":
-        weight = "pileupWeight_Run2011AnoEPS"
-    treeDraw = dataset.TreeDraw(analysis+"/tree", weight=weight)
-
-    tauEmbedding.normalize=True
-    tauEmbedding.era=era
     drawPlot = tauEmbedding.drawPlot
 
     if datasets.hasDataset("QCD_Pt20_MuEnriched"):
@@ -168,6 +186,96 @@ def main():
     postfix = "_6AfterTauID"
     drawPlot(createPlot(td.clone(varexp=decayModeExp)),
              "tauDecayMode"+postfix+"", "", opts={"ymin": 1e-2, "ymaxfactor": 20, "nbins":5}, opts2={"ymin":0, "ymax":3}, moveLegend={"dy": 0.02, "dh": -0.02}, function=decayModeCustomize)
+
+
+
+def doCounters(datasets):
+    # Counters
+    eventCounter = counter.EventCounter(datasets, counters=counters)
+    mainCounter = eventCounter.getMainCounter();
+
+    selectionsCumulative = []
+    tauSelectionsCumulative = []
+    td = treeDraw.clone(weight="")
+    def sel(name, selection):
+        selectionsCumulative.append(selection)
+        sel = selectionsCumulative[:]
+        if len(tauSelectionsCumulative) > 0:
+            sel += ["Sum$(%s) >= 1" % "&&".join(tauSelectionsCumulative)]
+        mainCounter.appendRow(name, td.clone(selection="&&".join(sel)))
+    def tauSel(name, selection):
+        tauSelectionsCumulative.append(selection)
+        sel = selectionsCumulative[:]
+        if len(tauSelectionsCumulative) > 0:
+            sel += ["Sum$(%s) >= 1" % "&&".join(tauSelectionsCumulative)]
+        mainCounter.appendRow(name, td.clone(selection="&&".join(sel)))
+
+    sel("Primary vertex", pvSelection)
+
+    sel(">= 1 tau candidate", "Length$(taus_p4) >= 1")
+    tauSel("Decay mode finding", decayModeFinding)
+    tauSel("pT > 15", "(taus_p4.Pt() > 15)")
+    tauSel("pT > 40", tauPtCut) #
+    tauSel("eta < 2.1", tauEtaCut)
+    tauSel("leading track pT > 20", tauLeadPt)
+    tauSel("ECAL fiducial", ecalFiducial)
+    tauSel("againstElectron", electronRejection) #
+    tauSel("againstMuon", muonRejection)
+    tauSel("isolation", tightIsolation) #
+    tauSel("oneProng", oneProng) #
+    tauSel("Rtau", rtau) #
+
+    sel("3 jets", jetEventSelection)
+    sel("MET", metSelection)
+    sel("btag", btagEventSelection)
+    sel("deltaPhi<160", deltaPhi160Selection)
+
+    fullSelection = "&&".join(selectionsCumulative+["Sum$(%s) >= 1" % "&&".join(tauSelectionsCumulative)])
+    fullSelectionCaloMetNoHF = fullSelection+"&&"+caloMetNoHF
+    fullSelectionCaloMet = fullSelection+"&&"+caloMet
+    #print fullSelection
+    f = open("pickEvents.txt", "w")
+    def printPickEvent(tree):
+        f.write("%d:%d:%d\n" % (tree.run, tree.lumi, tree.event))
+
+    ts = dataset.TreeScan(td.tree, function=printPickEvent, selection=fullSelection)
+    ts2 = dataset.TreeScan(td.tree, function=printPickEvent, selection=fullSelectionCaloMetNoHF)
+    ts3 = dataset.TreeScan(td.tree, function=printPickEvent, selection=fullSelectionCaloMet)
+    ts4 = dataset.TreeDrawCompound(ts2, {
+            "SingleMu_Mu_170722-172619_Aug05": ts3,
+            "SingleMu_Mu_172620-173198_Prompt": ts3,
+            "SingleMu_Mu_173236-173692_Prompt": ts3,
+            })
+    datasets.getDataset("Data").getDatasetRootHisto(ts4)
+    f.close()
+
+
+    ewkDatasets = [
+        "WJets", "TTJets",
+#        "DYJetsToLL", "SingleTop", "Diboson"
+        ]
+
+    eventCounter.normalizeMCByLuminosity()
+    mainTable = eventCounter.getMainCounterTable()
+    #mainTable.insertColumn(2, counter.sumColumn("EWKMCsum", [mainTable.getColumn(name=name) for name in ewkDatasets]))
+    cellFormat = counter.TableFormatText(counter.CellFormatText(valueFormat='%.3f',
+                                                                #valueOnly=True
+                                                                ),
+#                                         columnSeparator = ";",
+                                         )
+    print mainTable.format(cellFormat)
+
+    return
+
+    effFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.4f'))
+    effTable = counter.CounterTable()
+    col = table.getColumn(name="Data")
+    effTable.appendColumn(col)
+    effTable.appendColumn(counter.efficiencyColumn(col.getName()+" eff", col))
+    col = table.getColumn(name="EWKMCsum")
+    effTable.appendColumn(col)
+    effTable.appendColumn(counter.efficiencyColumn(col.getName()+" eff", col))
+    print effTable.format(effFormat)
 
 
 def decayModeCheckCustomize(h):
