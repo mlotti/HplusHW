@@ -501,6 +501,15 @@ namespace HPlus {
        hTransverseMassTopSelection->Fill(transverseMass, fEventWeight.getWeight());     
     } 
 
+    int njets30 = 0;
+    for(edm::PtrVector<pat::Jet>::const_iterator iter = jetData.getSelectedJets().begin(); iter != jetData.getSelectedJets().end(); ++iter) {
+      edm::Ptr<pat::Jet> iJet = *iter;
+      if (iJet->pt() < 30) continue;
+      njets30++;
+    }
+
+
+
     /*   
     // Fake MET veto a.k.a. further QCD suppression
     //    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup,  tauData.getSelectedTaus()[0], jetData.getSelectedJets(), metData.getSelectedMET());

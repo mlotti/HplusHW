@@ -150,7 +150,7 @@ def main():
                         
     glist = [gtrig, gtau, gveto, gjets, gmet, gbtag]
     
-    opts = {"xmin": 75, "xmax": 165, "ymin": 0.001}
+    opts = {"xmin": 75, "xmax": 165, "ymin": 0.0007}
     canvasFrame = histograms.CanvasFrame([histograms.HistoGraph(g, "", "") for g in glist], "SignalEfficiency", **opts)
     canvasFrame.frame.GetYaxis().SetTitle("Selection efficiency")
     canvasFrame.frame.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")

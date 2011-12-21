@@ -52,6 +52,7 @@ namespace HPlus {
     // Input parameters
     const double fTopMassLow;
     const double fTopMassHigh;
+    edm::InputTag fSrc;
 
     // Counters
     Count fTopMassCount;

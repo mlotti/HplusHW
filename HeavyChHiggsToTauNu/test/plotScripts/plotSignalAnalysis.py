@@ -69,8 +69,8 @@ def main():
 
     # Remove signals other than M120
     #datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
-####    datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
-####    datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     
     # Remove QCD
 #    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
@@ -92,17 +92,17 @@ def main():
 
 
     # Replace signal dataset with EWK+signal
-    if True:
+    if False:
         ttjets2 = datasets.getDataset("TTJets").deepCopy()
         ttjets2.setName("TTJets2")
         ttjets2.setCrossSection(ttjets2.getCrossSection() - datasets.getDataset("TTToHplus_M120").getCrossSection())
         datasets.append(ttjets2)
         datasets.merge("EWKnoTT", ["WJets", "DYJetsToLL", "SingleTop", "Diboson"], keepSources=True)
         datasets.merge("TTToHplus_M120", ["TTToHplus_M120", "EWKnoTT", "TTJets2"])
-#        plots._legendLabels["TTToHplus_M120"] = "with H^{#pm}#rightarrow#tau^{#pm}#nu"
-        plots._legendLabels["TTToHplus_M120"] = "m_{H^{#pm}} = 120 GeV/c^{2}"
-        plots._legendLabels["TTToHplus_M80"] = "m_{H^{#pm}} = 80 GeV/c^{2}"
-        plots._legendLabels["TTToHplus_M160"] = "m_{H^{#pm}} = 160 GeV/c^{2}"
+        plots._legendLabels["TTToHplus_M120"] = "with H^{#pm}#rightarrow#tau^{#pm}#nu"
+#        plots._legendLabels["TTToHplus_M120"] = "m_{H^{#pm}} = 120 GeV/c^{2}"
+#        plots._legendLabels["TTToHplus_M80"] = "m_{H^{#pm}} = 80 GeV/c^{2}"
+#        plots._legendLabels["TTToHplus_M160"] = "m_{H^{#pm}} = 160 GeV/c^{2}"
       
         
     # Apply TDR style
@@ -157,9 +157,17 @@ def doPlots(datasets):
     
     rtau(createPlot("tauID/TauID_RtauCut"), "TauID_Rtau", rebin=2, opts={"ymin": 1e-2, "ymaxfactor": 15, "xmax": 1.1}, moveLegend={"dx": -0.5,"dy": 0.02}, textFunction=lambda: addMassBRText(x=0.31, y=0.22), cutLine=0.7)
     
+    if True:
+        rtau(createPlot("tauID/TauID_Rtau_DecayModeOneProng_ZeroPiZero"), "TauID_Rtau_DecayModeOneProng_ZeroPiZero", rebin=2, opts={"ymin": 1e-2, "ymaxfactor": 15, "xmax": 1.1}, moveLegend={"dx": -0.5,"dy": 0.02}, textFunction=lambda: addMassBRText(x=0.31, y=0.22), cutLine=0.7)
+        rtau(createPlot("tauID/TauID_Rtau_DecayModeOneProng_OnePiZero"), "TauID_Rtau_DecayModeOneProng_OnePiZero", rebin=2, opts={"ymin": 1e-2, "ymaxfactor": 15, "xmax": 1.1}, moveLegend={"dx": -0.5,"dy": 0.02}, textFunction=lambda: addMassBRText(x=0.31, y=0.22), cutLine=0.7)
+        rtau(createPlot("tauID/TauID_Rtau_DecayModeOneProng_TwoPiZero"), "TauID_Rtau_DecayModeOneProng_TwoPiZero", rebin=2, opts={"ymin": 1e-2, "ymaxfactor": 15, "xmax": 1.1}, moveLegend={"dx": -0.5,"dy": 0.02}, textFunction=lambda: addMassBRText(x=0.31, y=0.22), cutLine=0.7)
+        rtau(createPlot("tauID/TauID_Rtau_DecayModeOneProng_Other"), "TauID_Rtau_DecayModeOneProng_Other", rebin=2, opts={"ymin": 1e-2, "ymaxfactor": 15, "xmax": 1.1}, moveLegend={"dx": -0.5,"dy": 0.02}, textFunction=lambda: addMassBRText(x=0.31, y=0.22), cutLine=0.7)
+
+        
     tauPt(createPlot("SelectedTau/SelectedTau_pT_AfterCuts"), "SelectedTau_pT_AfterCuts", rebin=1, opts={"ymin": 1e-4})
     tauEta(createPlot("SelectedTau/SelectedTau_eta_AfterCuts"),"SelectedTau_eta_AfterCuts", rebin=1)
     rtau(createPlot("SelectedTau/SelectedTau_Rtau_AfterCuts"), "SelectedTau_Rtau_AfterCuts", rebin=10, opts={"ymin": 1e-2, "ymaxfactor": 5, "xmax": 1.1}, moveLegend={"dx": -0.5}, textFunction=lambda: addMassBRText(x=0.31, y=0.22), cutLine=0.7)
+    
 #    leadingTrack(createPlot("TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"), ratio=True)
     
     selectionFlow(createPlot("SignalSelectionFlow"), "SignalSelectionFlow", rebin=1)
@@ -200,7 +208,7 @@ def doPlots(datasets):
 #    transverseMass(createPlot("TauEmbeddingAnalysis_afterTauId_TransverseMass"))
     transverseMass2(createPlot("transverseMass"), "transverseMass_standard", rebin=20)
     transverseMass2(createPlot("transverseMassMET70"), "transverseMassMET70", rebin=20)
-    transverseMass2(createPlot("transverseMassAfterDeltaPhi"), "transverseMassAfterDeltaPhi", rebin=20)
+    transverseMass2(createPlot("transverseMassAfterDeltaPhi"), "transverseMassAfterDeltaPhi", rebin=20)    
 #    transverseMass2(createPlot("transverseMassAfterDeltaPhi160"), "transverseMassAfterDeltaPhi160", rebin=20)
 #    transverseMass2(createPlot("transverseMassAfterDeltaPhi130"), "transverseMassAfterDeltaPhi130", rebin=20)
 #    transverseMass2(createPlot("transverseMassBeforeFakeMet"), "transverseMassBeforeFakeMet", rebin=20)
@@ -209,6 +217,7 @@ def doPlots(datasets):
 #    transverseMass2(createPlot("transverseMassWithTopCut"), "transverseMassWithTopCut")
 
     transverseMass2(createPlot("transverseMass"), "transverseMass", rebin=20, log=False, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    transverseMass2(createPlot("transverseMassTopSelection"), "transverseMassTopSelection", rebin=20, log=False, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
 
     if QCDfromData:
         plot = replaceQCDfromData(createPlot("transverseMass"), datasetsQCD, analysis+"/transverseMass")
@@ -261,7 +270,7 @@ def doPlots(datasets):
 #    etSumRatio(createPlot("ForwardJetVeto/EtSumRatio"), "etSumRatio")
 #    tauJetMass(createPlot("TauJetMass"), "TauJetMass")
 #    topMass(createPlot("TopSelection/jjbMass"), "jjbMass")
-#    topMass(createPlot("TopSelection/Mass_jjbMax"), "topMass_old")
+    topMass(createPlot("TopSelection/Mass_jjbMax"), "topMass_old")
 
 #    topMass(createPlot("TopSelection/Mass_Top"), "topMass_realTop")
 #    topMass(createPlot("TopSelection/Mass_bFromTop"), "topMass_bFromTop") 
@@ -286,11 +295,11 @@ def doPlots(datasets):
 
 #    genComparison(datasets)
 #    zMassComparison(datasets)
-#    topMassComparison(datasets)
+    topMassComparison(datasets)
 #    topPtComparison(datasets) 
 #    vertexComparison(datasets)
-    mtComparison(datasets)
-    mtComparisonHist(datasets)
+#    mtComparison(datasets)
+    rtauComparison(datasets)
     
 def doCounters(datasets):
     eventCounter = counter.EventCounter(datasets)
@@ -312,6 +321,7 @@ def doCounters(datasets):
     print eventCounter.getSubCounterTable("b-tagging").format()
     print eventCounter.getSubCounterTable("Jet selection").format()
     print eventCounter.getSubCounterTable("Jet main").format()    
+
 
     
 #    latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.2f"))
@@ -351,59 +361,50 @@ def mtComparison(datasets):
 #    mt.histoMgr.setHistoDrawStyleAll("P")
     rtauGen(mt, "transverseMass_vs_mH", rebin=20, defaultStyles=False)
 
+def rtauComparison(datasets):
+    mt = plots.PlotBase([
+        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/tauID/TauID_Rtau_DecayModeOneProng_ZeroPiZero"),
+        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/tauID/TauID_Rtau_DecayModeOneProng_OnePiZero"),
+        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/tauID/TauID_Rtau_DecayModeOneProng_TwoPiZero"),
+        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/tauID/TauID_Rtau_DecayModeOneProng_Other")])
+    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    mt._setLegendStyles()
+    mt._setLegendLabels()
+    st1 = styles.StyleCompound([styles.styles[2]])
+    st2 = styles.StyleCompound([styles.styles[1]])
+    st3 = styles.StyleCompound([styles.styles[0]])
+    st1.append(styles.StyleLine(lineWidth=3))
+    st2.append(styles.StyleLine(lineStyle=2, lineWidth=3))
+    st3.append(styles.StyleLine(lineStyle=3, lineWidth=3))
+    mt.histoMgr.forHisto("TTToHplus_M80", st1)
+    mt.histoMgr.forHisto("TTToHplus_M120", st2)
+    mt.histoMgr.forHisto("TTToHplus_M160", st3)
+#    mt.histoMgr.setHistoDrawStyleAll("P")
+    rtauGen(mt, "rtau_vs_DecayModes", rebin=1, defaultStyles=False)
 
 
-def mtComparisonHist(datasets):
-    ## After standard cuts
-    mt80 = plots.PlotBase([datasets.getDataset("TTToHplus_M80").getDatasetRootHisto(analysis+"/transverseMass")])
-    mt120 = plots.PlotBase([datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/transverseMass")])
-    mt160 = plots.PlotBase([datasets.getDataset("TTToHplus_M160").getDatasetRootHisto(analysis+"/transverseMass")])
-    mt80.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-    mt120.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-    mt160.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
 
-        
-    mt80._setLegendStyles()
-    mt80._setLegendLabels()
-#    mt80.histoMgr.setHistoDrawStyleAll("P")
-    mt80.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))     
-    hmt80 = mt80.histoMgr.getHisto("TTToHplus_M80").getRootHisto().Clone(analysis+"/transverseMass")
+def topMassComparison(datasets):
+    top = plots.PlotBase([
+        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/TopSelection/Mass_jjbMax"),
+        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/TopSelection/Mass_bFromTop"),
+        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/TopSelection/MassMax_Top")])
+    top.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    top._setLegendStyles()
+    top._setLegendLabels()
+    st1 = styles.StyleCompound([styles.styles[2]])
+    st2 = styles.StyleCompound([styles.styles[1]])
+    st3 = styles.StyleCompound([styles.styles[0]])
+    st1.append(styles.StyleLine(lineColor=4, lineWidth=3))
+    st2.append(styles.StyleLine(lineStyle=2, lineWidth=3))
+    st3.append(styles.StyleLine(lineStyle=3, lineWidth=3))
+    top.histoMgr.forHisto(analysis+"/TopSelection/Mass_jjbMax", st1)
+    top.histoMgr.forHisto("TTToHplus_M120", st2)
+#    top.histoMgr.forHisto(analysis+"/TopSelection/Mass_bFromTop", st2)
+    top.histoMgr.forHisto(datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/TopSelection/MassMax_Top"), st3)
+#    mt.histoMgr.setHistoDrawStyleAll("P")
+    rtauGen(top, "topMass120", rebin=10, defaultStyles=False)
 
-    
-    mt120._setLegendStyles()
-    mt120._setLegendLabels()
-#    mt120.histoMgr.setHistoDrawStyleAll("P")
-    mt120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))     
-    hmt120 = mt120.histoMgr.getHisto("TTToHplus_M120").getRootHisto().Clone(analysis+"/transverseMass")
-
-    mt160._setLegendStyles()
-    mt160._setLegendLabels()
-    mt160.histoMgr.setHistoDrawStyleAll("P")
-    mt160.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))     
-    hmt160 = mt160.histoMgr.getHisto("TTToHplus_M160").getRootHisto().Clone(analysis+"/transverseMass")
-
-    canvas3 = ROOT.TCanvas("canvas3","",500,500)
-#    canvas3.SetLogy()
-#    hmt80.SetMarkerColor(2)
-#    hmt80.SetMarkerSize(1)
-#    hmt80.SetMarkerStyle(21)
-    hmt80.SetLineStyle(2)
-    hmt80.SetLineColor(2)
-    hmt80.Draw()
-    
-    hmt120.SetMarkerColor(4)
-    hmt120.SetMarkerSize(1)
-    hmt120.SetMarkerStyle(21)
-    hmt120.Draw("same")
-
-    
-    hmt160.SetMarkerColor(6)
-    hmt160.SetMarkerSize(1)
-    hmt160.SetMarkerStyle(21)
-    hmt160.Draw("same")
-
-    canvas3.Print("mt_vs_mh.png")
-    canvas3.Print("mt_vs_mh.C")  
 
     
 ##############def genComparison(datasets):
@@ -441,13 +442,6 @@ def mtComparisonHist(datasets):
 #                                 datasets.getDataset(background).getDatasetRootHisto(analysis+"/TauJetMass")),
 #            "TauJetMass_Hp_vs_Zll")
     
-#def topMassComparison(datasets):
-#    signal = "TTToHplusBWB_M120"
-#    background = "TTToHplusBWB_M120"
-#    rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/TopSelection/Mass_jjbMax"),
-#                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/Mass_Top"),
-#                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/TopSelection/MassMax_Top")]),
-#             "topMass_all_vs_real")
 
 #def topPtComparison(datasets):
 #    signal = "TTToHplusBWB_M120"
@@ -630,12 +624,15 @@ def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
 
   
     if "Rtau" in name:
-        kwargs = {"ymin": 0.0001, "xmax": 1.1}        
+        kwargs = {"ymin": 0.0001, "xmax": 1.1}
+        h.getPad().SetLogy(True)
     elif "Pt" in name:
         kwargs = {"ymin": 0.1, "xmax": 400}
+        h.getPad().SetLogy(True)
     elif "Mass" in name:
         kwargs = {"ymin": 0.1, "xmax": 400}
-        
+    elif "DecayMode" in name:
+        kwargs = {"ymin": 0.1, "xmax": 1.1}        
 #    kwargs["opts"] = {"ymin": 0, "xmax": 14, "ymaxfactor": 1.1}}
     if ratio:
         kwargs["opts2"] = {"ymin": 0.5, "ymax": 1.5}
@@ -644,7 +641,8 @@ def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
 
     h.createFrame(name, **kwargs)
     histograms.addText(0.65, 0.7, "BR(t #rightarrow bH^{#pm})=0.05", 20)
-    h.getPad().SetLogy(True)
+#    h.getPad().SetLogy(True)
+    
     h.setLegend(histograms.createLegend(0.65, 0.75, 0.9, 0.9))
     common(h, xlabel, ylabel, addLuminosityText=False)
 

@@ -135,9 +135,9 @@ jetSelection = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"), # JPT jets 
     src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
     cleanTauDR = cms.untracked.double(0.5), #no change
-    ptCut = cms.untracked.double(20.0),
+    ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
-    minNumber = cms.untracked.uint32(4),
+    minNumber = cms.untracked.uint32(3),
 #   EMfractionCut = cms.untracked.double(0.8)
     EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )
