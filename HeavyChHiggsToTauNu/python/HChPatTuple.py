@@ -40,7 +40,9 @@ def addPatOnTheFly(process, options, dataVersion,
                    doPlainPat=True, doPF2PAT=False,
                    plainPatArgs={}, pf2patArgs={},
                    doMcPreselection=False,
-                   doTotalKinematicsFilter=False, doHBHENoiseFilter=True):
+                   doTotalKinematicsFilter=False,
+                   doHBHENoiseFilter=True, doPhysicsDeclared=False,
+                   ):
     def setPatArg(args, name, value):
         if name in args:
             print "Overriding PAT arg '%s' from '%s' to '%s'" % (name, str(args[name]), str(value))
@@ -88,7 +90,8 @@ def addPatOnTheFly(process, options, dataVersion,
                 process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
                 seq *= process.eventPreSelection
         else:
-            # HBHE noise filter
+            if doPhysicsDeclared:
+                counters.extend(HChDataSelection.addPhysicsDeclaredBit(process, seq))
             if doHBHENoiseFilter:
                 counters.extend(HChDataSelection.addHBHENoiseFilter(process, seq))
 
@@ -195,8 +198,11 @@ def addPatOnTheFly(process, options, dataVersion,
                                      doPlainPat=doPlainPat, doPF2PAT=doPF2PAT,
                                      plainPatArgs=pargs, pf2patArgs=pargs2,)
     
-    if dataVersion.isData() and doHBHENoiseFilter:
-        counters.extend(HChDataSelection.addHBHENoiseFilter(process, process.eventPreSelection))
+    if dataVersion.isData():
+        if doPhysicsDeclared:
+            counters.extend(HChDataSelection.addPhysicsDeclaredBit(process, seq))
+        if doHBHENoiseFilter:
+            counters.extend(HChDataSelection.addHBHENoiseFilter(process, process.eventPreSelection))
     elif dataVersion.isMC() and doTotalKinematicsFilter:
         # TotalKinematicsFilter for managing with buggy LHE+Pythia samples
         # https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1489.html
@@ -576,6 +582,23 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     process.patDefaultSequence.replace(process.selectedPatMuons,
                                        process.muonIsolationEmbeddingSequence*process.selectedPatMuons)
     process.selectedPatMuons.src = muons
+
+    # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Cosmic_ID
+    process.cosmicCompatibility = cms.EDProducer("HPlusCosmicID",
+        src=cms.InputTag("cosmicsVeto"),
+        result = cms.string("cosmicCompatibility")
+    )
+    process.timeCompatibility = process.cosmicCompatibility.clone(result = 'timeCompatibility')
+    process.backToBackCompatibility = process.cosmicCompatibility.clone(result = 'backToBackCompatibility')
+    process.overlapCompatibility = process.cosmicCompatibility.clone(result = 'overlapCompatibility')
+    sequence *= (
+        process.cosmicCompatibility *
+        process.timeCompatibility *
+        process.backToBackCompatibility *
+        process.overlapCompatibility
+    )
+    for name in ["cosmicCompatibility", 'timeCompatibility','backToBackCompatibility','overlapCompatibility']:
+        setattr(process.patMuons.userData.userFloats, name, cms.InputTag(name))
 
     outputCommands.extend([
             "keep *_selectedPatMuons_*_*"
