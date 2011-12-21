@@ -27,8 +27,8 @@ from InvertedTauID import *
 
 def main():
 
-    HISTONAME = "TauIdJets"
-#    HISTONAME = "TauIdBtag"
+#    HISTONAME = "TauIdJets"
+    HISTONAME = "TauIdBtag"
     
     # Create all datasets from a multicrab task
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
@@ -67,62 +67,38 @@ def main():
     invertedQCD = InvertedTauID()
     invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
 
-    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLine"+HISTONAME)
-    metInver = plots.DataMCPlot(datasets, analysis+"/MET_Inverted"+HISTONAME)  
-
-    # Rebin before subtracting
-    metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
-    metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
-    
-    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_Inverted"+HISTONAME)
-    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_Inverted"+HISTONAME) 
-    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_Baseline"+HISTONAME)
-    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_Baseline"+HISTONAME)
-
-    metBase_data.SetTitle("Data: BaseLine TauID")
-    metInverted_data.SetTitle("Data: Inverted TauID")
-    metBase_QCD = metBase_data.Clone("QCD")
-    metBase_QCD.Add(metBase_EWK,-1)
-    metBase_QCD.SetTitle("Data - EWK MC: BaseLine TauID")
-
-#    invertedQCD.setLabel("BaseVsInverted")
-#    invertedQCD.comparison(metInverted_data,metBase_data)
-#    invertedQCD.setLabel("BaseMinusEWKVsInverted")
-#    invertedQCD.comparison(metInverted_data,metBase_QCD)
 
 
-    invertedQCD.setLabel("inclusive")
-    invertedQCD.plotHisto(metInverted_data,"inverted")
-    invertedQCD.plotHisto(metBase_data,"baseline")
-    invertedQCD.fitQCD(metInverted_data)
-    invertedQCD.fitEWK(metBase_EWK,"LR")  
-    invertedQCD.fitData(metBase_data)
-    normalizationWithEWK = invertedQCD.getNormalization()
-
+    bins = ["inclusive"]
 #    bins = ["4050","5060","6070","7080","80100","100120","120150","150"]
-#    bins = ["4050","5060","6070","7080","80100","120150","150"]
-    bins = []
+#    bins = ["4050"]
+
 
     for bin in bins:
 
-        metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets"+bin)
-        metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets"+bin)
-        # Rebin before subtracting
-        metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
-        metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+	invertedQCD.setLabel(bin)
 
-        metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets"+bin)
-        metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets"+bin)
-        metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets"+bin)
-        metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets"+bin)
+	if bin == "inclusive":
+	    bin = ""
+
+        metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLine"+HISTONAME+bin)
+        metInver = plots.DataMCPlot(datasets, analysis+"/MET_Inverted"+HISTONAME+bin)
+        # Rebin before subtracting
+        metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+
+        metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_Inverted"+HISTONAME+bin)
+        metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_Inverted"+HISTONAME+bin)
+        metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_Baseline"+HISTONAME+bin)
+        metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_Baseline"+HISTONAME+bin)
 
         metBase_QCD = metBase_data.Clone("QCD")
         metBase_QCD.Add(metBase_EWK,-1)
 
-	invertedQCD.setLabel(bin)
-#        invertedQCD.comparison(metInverted_data,metBase_QCD)
+        invertedQCD.plotHisto(metInverted_data,"inverted")
+        invertedQCD.plotHisto(metBase_data,"baseline")
         invertedQCD.fitQCD(metInverted_data)
-        invertedQCD.fitEWK(metBase_EWK)
+        invertedQCD.fitEWK(metBase_EWK,"LR")
         invertedQCD.fitData(metBase_data)
         invertedQCD.getNormalization()
 

@@ -70,6 +70,8 @@ def main():
 
     plots.mergeRenameReorderForDataMC(datasets)
 
+    print "Int.Lumi",datasets.getDataset("Data").getLuminosity()
+
     # Remove signals other than M120
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
