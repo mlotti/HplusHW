@@ -189,7 +189,7 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
         pfMet_p4 = cms.InputTag("pfMet"),
     ),
     doubles = cms.PSet(
-        pileupWeightEPS = cms.InputTag("pileupWeightEPS"),
+        weightPileup_EPS = cms.InputTag("pileupWeightEPS"),
         weightPileup_Run2011AnoEPS = cms.InputTag("pileupWeightRun2011AnoEPS"),
         weightPileup_Run2011A = cms.InputTag("pileupWeightRun2011A")
     ),
