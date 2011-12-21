@@ -26,6 +26,7 @@
 
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
 
 #include "SimGeneral/HepPDTRecord/interface/ParticleDataTable.h"
 #include "TLorentzVector.h"
@@ -67,19 +68,20 @@ class TauValidation : public edm::EDAnalyzer
 	virtual void endRun(const edm::Run&, const edm::EventSetup&);
 
     private:
-	int tauMother(const HepMC::GenParticle*);
+	int tauMother(const reco::GenParticle&);
 	int tauProngs(const HepMC::GenParticle*);
 	int tauDecayChannel(const HepMC::GenParticle*);
-	int findMother(const HepMC::GenParticle*);
+        int findMother(const reco::GenParticle&);
 	int findTauDecayChannel(const HepMC::GenParticle*);
 	void rtau(const HepMC::GenParticle*,int,int);
 	void spinEffects(const HepMC::GenParticle*,int,int);
 	void spinEffectsZ(const HepMC::GenParticle*);
 	double leadingPionMomentum(const HepMC::GenParticle*);
-	double visibleTauEnergy(const HepMC::GenParticle*);
+  //	double visibleTauEnergy(const HepMC::GenParticle*);
+        TLorentzVector visibleTauP4(const reco::Candidate&);
 	TLorentzVector leadingPionP4(const HepMC::GenParticle*);
 	TLorentzVector motherP4(const HepMC::GenParticle*);
-	void photons(const HepMC::GenParticle*);
+  //	void photons(const HepMC::GenParticle*);
 
     	edm::InputTag src;
 
@@ -92,7 +94,11 @@ class TauValidation : public edm::EDAnalyzer
   	DQMStore *dbe;
 
         MonitorElement *nEvt;
-  	MonitorElement *TauPt, *TauEta, *TauPhi, *TauProngs, *TauDecayChannels, *TauMothers, 
+  	MonitorElement *TauPt, *TauEta, *TauPhi,
+                       *VisibleTauPt, *VisibleTauEta, *VisibleTauPhi,                           
+                       *TauPtW, *TauEtaW, *TauPhiW,
+                       *MuPtW, *MuEtaW, *MuPhiW,
+                       *TauProngs, *TauDecayChannels, *TauMothers, 
                        *TauRtauW, *TauRtauHpm,
                        *TauSpinEffectsW, *TauSpinEffectsHpm, *TauSpinEffectsZ,
 	               *TauPhotonsN,*TauPhotonsPt;
@@ -142,6 +148,19 @@ void TauValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup)
     TauPt            = dbe->book1D("TauPt","Tau pT", 100 ,0,100);
     TauEta           = dbe->book1D("TauEta","Tau eta", 100 ,-2.5,2.5);
     TauPhi           = dbe->book1D("TauPhi","Tau phi", 100 ,-3.14,3.14);
+
+    VisibleTauPt     = dbe->book1D("VisibleTauPt","Visible Tau pT", 100 ,0,100);                
+    VisibleTauEta    = dbe->book1D("VisibleTauEta","Visible Tau eta", 100 ,-2.5,2.5);
+    VisibleTauPhi    = dbe->book1D("VisibleTauPhi","Visible Tau phi", 100 ,-3.14,3.14);
+
+    TauPtW           = dbe->book1D("TauPtW","Tau (from W) pT", 100 ,0,100);
+    TauEtaW          = dbe->book1D("TauEtaW","Tau (from W) eta", 100 ,-2.5,2.5);
+    TauPhiW          = dbe->book1D("TauPhiW","Tau (from W) phi", 100 ,-3.14,3.14);
+
+    MuPtW            = dbe->book1D("MuPtW","Mu (from W) pT", 100 ,0,100);
+    MuEtaW           = dbe->book1D("MuEtaW","Mu (from W) eta", 100 ,-2.5,2.5);
+    MuPhiW           = dbe->book1D("MuPhiW","Mu (from W) phi", 100 ,-3.14,3.14);
+
 /*
     TauProngs        = dbe->book1D("TauProngs","Tau n prongs", 7 ,0,7);
     TauDecayChannels = dbe->book1D("TauDecayChannels","Tau decay channels", 12 ,0,12);
@@ -158,7 +177,7 @@ void TauValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup)
 	TauDecayChannels->setBinLabel(1+K,"K");
 	TauDecayChannels->setBinLabel(1+Kstar,"K^{*}");
 	TauDecayChannels->setBinLabel(1+stable,"Stable");
-
+*/
     TauMothers        = dbe->book1D("TauMothers","Tau mother particles", 10 ,0,10);
 	TauMothers->setBinLabel(1+other,"?");
 	TauMothers->setBinLabel(1+gamma,"#gamma");
@@ -168,7 +187,7 @@ void TauValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup)
 	TauMothers->setBinLabel(1+H0,"H^{0}");
 	TauMothers->setBinLabel(1+A0,"A^{0}");
 	TauMothers->setBinLabel(1+Hpm,"H^{#pm}");
-
+	/*
     TauRtauW          = dbe->book1D("TauRtauW","W->Tau p(leading track)/E(visible tau)", 50 ,0,1);
 	TauRtauW->setAxisTitle("rtau");
     TauRtauHpm        = dbe->book1D("TauRtauHpm","Hpm->Tau p(leading track)/E(visible tau)", 50 ,0,1);
@@ -205,6 +224,7 @@ void TauValidation::analyze(const edm::Event& iEvent,const edm::EventSetup& iSet
   nEvt->Fill(0.5);
 
   // find taus
+  /*
   Handle<reco::GenParticleCollection> genParticles;
   iEvent.getByLabel(src, genParticles);
   if(genParticles.isValid()){
@@ -215,6 +235,38 @@ void TauValidation::analyze(const edm::Event& iEvent,const edm::EventSetup& iSet
 	  TauEta->Fill(p.eta());
 	  TauPhi->Fill(p.phi());
 	}
+    }
+  }
+*/
+  Handle<reco::GenParticleCollection> genParticles;
+  iEvent.getByLabel(src, genParticles);
+  if(genParticles.isValid()){
+    for(size_t i = 0; i < genParticles->size(); ++ i) {
+      const reco::GenParticle & p = (*genParticles)[i];
+      int mother  = tauMother(p);
+      if(abs(p.pdgId())==15 && abs(mother) != 15){
+	TauPt->Fill(p.pt());
+	TauEta->Fill(p.eta());
+	TauPhi->Fill(p.phi());
+        TLorentzVector visibleTau = visibleTauP4(p);
+        VisibleTauPt->Fill(visibleTau.Pt());
+        VisibleTauEta->Fill(visibleTau.Eta());
+        VisibleTauPhi->Fill(visibleTau.Phi());
+      }
+      if(abs(p.pdgId())==13 || abs(p.pdgId())==15){
+        if(abs(mother) == 24){ // W
+	  if(abs(p.pdgId())==13){
+	    MuPtW->Fill(p.pt());
+	    MuEtaW->Fill(p.eta());
+	    MuPhiW->Fill(p.phi());
+	  }
+          if(abs(p.pdgId())==15){
+            TauPtW->Fill(p.pt());
+            TauEtaW->Fill(p.eta());
+            TauPhiW->Fill(p.phi());
+          }
+	}
+      }
     }
   }
 /*
@@ -238,24 +290,30 @@ void TauValidation::analyze(const edm::Event& iEvent,const edm::EventSetup& iSet
 */
 }//analyze
 
-int TauValidation::findMother(const HepMC::GenParticle* tau){
-        int mother_pid = 0;
 
-        if ( tau->production_vertex() ) {
+int TauValidation::findMother(const reco::GenParticle& tau){
+        return tau.mother()->pdgId();
+        /*
+        int mother_pid = 0;
+        const mothers& moms = tau.
+	
+        if ( tau.production_vertex() ) {
                 HepMC::GenVertex::particle_iterator mother;
-                for (mother = tau->production_vertex()->particles_begin(HepMC::parents);
-                     mother!= tau->production_vertex()->particles_end(HepMC::parents); ++mother ) {
+                for (mother = tau.production_vertex()->particles_begin(HepMC::parents);
+                     mother!= tau.production_vertex()->particles_end(HepMC::parents); ++mother ) {
                         mother_pid = (*mother)->pdg_id();
 			if(mother_pid == tau->pdg_id()) mother_pid = -1;//findMother(*mother);
                         //std::cout << " parent " << mother_pid << std::endl;
                 }
         }
+	
 	return mother_pid;
+        */
 }
 
-int TauValidation::tauMother(const HepMC::GenParticle* tau){
+int TauValidation::tauMother(const reco::GenParticle& tau){
 
-	if(abs(tau->pdg_id()) != 15 ) return -1;
+  if(abs(tau.pdgId()) != 15 && abs(tau.pdgId()) != 13) return -1;
 
 	int mother_pid = findMother(tau);
 	if(mother_pid == -1) return -1;
@@ -269,7 +327,7 @@ int TauValidation::tauMother(const HepMC::GenParticle* tau){
 	if(abs(mother_pid) == 36) label = A0;
 	if(abs(mother_pid) == 37) label = Hpm;
 
-	TauMothers->Fill(label);
+	if(abs(tau.pdgId()) == 15) TauMothers->Fill(label);
 
 	return mother_pid;
 }
@@ -302,7 +360,7 @@ int TauValidation::findTauDecayChannel(const HepMC::GenParticle* tau){
 
 	int channel = undetermined;
 	if(tau->status() == 1) channel = stable;
-
+	/*
 	int allCount   = 0,
             eCount     = 0,
 	    muCount    = 0,
@@ -353,7 +411,7 @@ int TauValidation::findTauDecayChannel(const HepMC::GenParticle* tau){
 
 	if(eCount == 1)                   channel = electron;
 	if(muCount == 1)                  channel = muon;
-
+	*/
 	return channel;
 }
 
@@ -364,7 +422,7 @@ int TauValidation::tauDecayChannel(const HepMC::GenParticle* tau){
 }
 
 void TauValidation::rtau(const HepMC::GenParticle* tau,int mother, int decay){
-
+  /*
 	if(decay != pi1pi0) return; // polarization only for 1-prong hadronic taus with one neutral pion to make a clean case
 
 	if(tau->momentum().perp() < tauEtCut) return; // rtau visible only for boosted taus
@@ -377,10 +435,11 @@ void TauValidation::rtau(const HepMC::GenParticle* tau,int mother, int decay){
 
 	if(abs(mother) == 24) TauRtauW->Fill(rTau);
         if(abs(mother) == 37) TauRtauHpm->Fill(rTau); 
+  */
 }
 
 void TauValidation::spinEffects(const HepMC::GenParticle* tau,int mother, int decay){
-
+  /*
 	if(decay != pi) return; // polarization only for 1-prong hadronic taus with no neutral pions
 
 	TLorentzVector momP4 = motherP4(tau);
@@ -392,10 +451,11 @@ void TauValidation::spinEffects(const HepMC::GenParticle* tau,int mother, int de
 
 	if(abs(mother) == 24) TauSpinEffectsW->Fill(energy);	
 	if(abs(mother) == 37) TauSpinEffectsHpm->Fill(energy);
+  */
 }
 
 void TauValidation::spinEffectsZ(const HepMC::GenParticle* boson){
-
+  /*
         TLorentzVector tautau(0,0,0,0);
 	TLorentzVector pipi(0,0,0,0);
 
@@ -406,12 +466,12 @@ void TauValidation::spinEffectsZ(const HepMC::GenParticle* boson){
                   des!= boson->end_vertex()->particles_end(HepMC::descendants);++des ) {
 
                         int pid = (*des)->pdg_id();
-                        /*std::cout << " barcode=" << (*des)->barcode() << " pid="
-                                  << pid << " mom=" << findMother(*des) << " status="
-                                  << (*des)->status() << " px="
-                                  << (*des)->momentum().px() << " decay=" 
-                                  << findTauDecayChannel(*des) << std::endl;
-			*/
+                        //std::cout << " barcode=" << (*des)->barcode() << " pid="
+                        //          << pid << " mom=" << findMother(*des) << " status="
+                        //          << (*des)->status() << " px="
+                        //          << (*des)->momentum().px() << " decay=" 
+                        //          << findTauDecayChannel(*des) << std::endl;
+			//
                         if(abs(findMother(*des)) != 15 &&
                            abs(pid) == 15 && findTauDecayChannel(*des) == pi){
                           nSinglePionDecays++;
@@ -426,6 +486,7 @@ void TauValidation::spinEffectsZ(const HepMC::GenParticle* boson){
         if(nSinglePionDecays == 2 && tautau.M() != 0) {
           TauSpinEffectsZ->Fill(pipi.M()/tautau.M());
         }
+*/
 }
 
 double TauValidation::leadingPionMomentum(const HepMC::GenParticle* tau){
@@ -477,33 +538,52 @@ TLorentzVector TauValidation::motherP4(const HepMC::GenParticle* tau){
 
 	return p4;
 }
-
+/*
 double TauValidation::visibleTauEnergy(const HepMC::GenParticle* tau){
-	TLorentzVector p4(tau->momentum().px(),
-                          tau->momentum().py(),
-                          tau->momentum().pz(),
-                          tau->momentum().e());
+        return visibleTauP4(*tau).E();
+}
+*/
+TLorentzVector TauValidation::visibleTauP4(const reco::Candidate& tau){
+	TLorentzVector p4(tau.px(),
+                          tau.py(),
+                          tau.pz(),
+                          tau.energy());
 
-        if ( tau->end_vertex() ) {
+        size_t nDaughters = tau.numberOfDaughters();
+
+        for(size_t i = 0; i < nDaughters; ++i){
+            const reco::Candidate * daughter = tau.daughter(i);
+            int pid = daughter->pdgId();
+            if(abs(pid) == 15) return visibleTauP4(*daughter);
+
+            if(abs(pid) == 12 || abs(pid) == 14 || abs(pid) == 16) {
+                p4 -= TLorentzVector(daughter->px(),
+		   	             daughter->py(),
+			             daughter->pz(),
+			             daughter->energy());
+            }
+        }
+ /*
+        if ( tau.end_vertex() ) {
               HepMC::GenVertex::particle_iterator des;
-              for(des = tau->end_vertex()->particles_begin(HepMC::descendants);
-                  des!= tau->end_vertex()->particles_end(HepMC::descendants);++des ) {
+              for(des = tau.end_vertex()->particles_begin(HepMC::descendants);
+                  des!= tau.end_vertex()->particles_end(HepMC::descendants);++des ) {
                         int pid = (*des)->pdg_id();
 
                         if(abs(pid) == 15) return visibleTauEnergy(*des);
 
                         if(abs(pid) == 12 || abs(pid) == 14 || abs(pid) == 16) {
-				p4 -= TLorentzVector((*des)->momentum().px(),
-			                             (*des)->momentum().py(),
-			                             (*des)->momentum().pz(),
-			                             (*des)->momentum().e());
+				p4 -= TLorentzVector((*des)->p4().px(),
+			                             (*des)->p4().py(),
+			                             (*des)->p4().pz(),
+			                             (*des)->p4().e());
 			}
                 }
         }
-
-	return p4.E();
+ */
+	return p4;
 }
-
+/*
 void TauValidation::photons(const HepMC::GenParticle* tau){
 
         if ( tau->end_vertex() ) {
@@ -527,6 +607,6 @@ void TauValidation::photons(const HepMC::GenParticle* tau){
 	      }
         }
 }
-
+*/
 //define this as a plug-in
 DEFINE_FWK_MODULE(TauValidation);

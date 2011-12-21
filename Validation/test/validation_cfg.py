@@ -66,38 +66,38 @@ process.load("HiggsAnalysis.Validation.PFTauChHadronCandidateValidation_cfi")
 process.load("HiggsAnalysis.Validation.PrimaryVertexValidation_cfi")
 process.load("HiggsAnalysis.Validation.TauTriggerEfficiencyValidation_cfi")
 
-if "HLT_SingleIsoTau20_Trk15_MET25" in trigger:
-    pass
-elif "HLT_IsoPFTau35_Trk20_MET45" in trigger:
-    process.L2TauMET.triggerBit = trigger
-    process.L2TauMET.hltPathFilter.setModuleLabel("hltFilterL2EtCutSingleIsoPFTau35Trk20MET45")
-
-    process.L3TauMET.triggerBit = trigger
-    process.L3TauMET.hltPathFilter.setModuleLabel("hltFilterSingleIsoPFTau35Trk20LeadTrackPt20")
-    process.L3TauMETnoHLTFilter.hltPathFilter.setModuleLabel("hltFilterSingleIsoPFTau35Trk20LeadTrackPt20")
-
-    process.L3TauMETIsolation = process.L3TauMET.clone()
-    process.L3TauMETIsolation.hltPathFilter.setModuleLabel("hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched")
-    process.L3TauMETIsolationnoHLTFilter = process.L3TauMETIsolation.clone()
-    process.L3TauMETIsolationnoHLTFilter.triggerBit = ""
-    process.TriggerValidation *= (process.L3TauMETIsolation * process.L3TauMETIsolationnoHLTFilter)
-
-    process.TauTriggerEfficiencyValidation.triggerBit = trigger
-    process.TauTriggerEfficiencyValidation.hltPathFilter = cms.InputTag("hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched", "", dataVersion.getTriggerProcess())
-    
-
-elif "HLT_QuadJet40_IsoPFTau40" in trigger:
-    process.L3TauMET.triggerBit = trigger
-    process.L3TauMET.hltPathFilter.setModuleLabel("hltQuadJet40IsoPFTau40")
-    process.L3TauMETnoHLTFilter.hltPathFilter.setModuleLabel("hltQuadJet40IsoPFTau40")
-
-    process.TriggerValidation.remove(process.L2TauMET)
-
-    process.TauTriggerEfficiencyValidation.triggerBit = trigger
-    process.TauTriggerEfficiencyValidation.hltPathFilter = cms.InputTag("hltQuadJet40IsoPFTau40", "", dataVersion.getTriggerProcess())
-
-else:
-    raise Exception("Unsupported trigger bit %s" % trigger)
+#if "HLT_SingleIsoTau20_Trk15_MET25" in trigger:
+#    pass
+#elif "HLT_IsoPFTau35_Trk20_MET45" in trigger:
+#    process.L2TauMET.triggerBit = trigger
+#    process.L2TauMET.hltPathFilter.setModuleLabel("hltFilterL2EtCutSingleIsoPFTau35Trk20MET45")
+#
+#    process.L3TauMET.triggerBit = trigger
+#    process.L3TauMET.hltPathFilter.setModuleLabel("hltFilterSingleIsoPFTau35Trk20LeadTrackPt20")
+#    process.L3TauMETnoHLTFilter.hltPathFilter.setModuleLabel("hltFilterSingleIsoPFTau35Trk20LeadTrackPt20")
+#
+#    process.L3TauMETIsolation = process.L3TauMET.clone()
+#    process.L3TauMETIsolation.hltPathFilter.setModuleLabel("hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched")
+#    process.L3TauMETIsolationnoHLTFilter = process.L3TauMETIsolation.clone()
+#    process.L3TauMETIsolationnoHLTFilter.triggerBit = ""
+#    process.TriggerValidation *= (process.L3TauMETIsolation * process.L3TauMETIsolationnoHLTFilter)
+#
+#    process.TauTriggerEfficiencyValidation.triggerBit = trigger
+#    process.TauTriggerEfficiencyValidation.hltPathFilter = cms.InputTag("hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched", "", dataVersion.getTriggerProcess())
+#    
+#
+#elif "HLT_QuadJet40_IsoPFTau40" in trigger:
+#    process.L3TauMET.triggerBit = trigger
+#    process.L3TauMET.hltPathFilter.setModuleLabel("hltQuadJet40IsoPFTau40")
+#    process.L3TauMETnoHLTFilter.hltPathFilter.setModuleLabel("hltQuadJet40IsoPFTau40")
+#
+#    process.TriggerValidation.remove(process.L2TauMET)
+#
+#    process.TauTriggerEfficiencyValidation.triggerBit = trigger
+#    process.TauTriggerEfficiencyValidation.hltPathFilter = cms.InputTag("hltQuadJet40IsoPFTau40", "", dataVersion.getTriggerProcess())
+#
+#else:
+#    raise Exception("Unsupported trigger bit %s" % trigger)
 
 
 ANALYSISEventContent = cms.PSet(
