@@ -7,6 +7,7 @@ import OrderedDict
 
 import multicrabDatasets
 import certifiedLumi
+import git
 
 defaultSeBlacklist = [
     # blacklist before v13
@@ -795,6 +796,19 @@ class Multicrab:
         dirname = createTaskDir(**kwargs)
 
         self._writeConfig(os.path.join(dirname, "multicrab.cfg"))
+
+        # Create code versions
+        version = git.getCommitId()
+        if version != None:
+            f = open(os.path.join(dirname, "codeVersion.txt"), "w")
+            f.write(version+"\n")
+            f.close()
+            f = open(os.path.join(dirname, "codeStatus.txt"), "w")
+            f.write(git.getStatus()+"\n")
+            f.close()
+            f = open(os.path.join(dirname, "codeDiff.txt"), "w")
+            f.write(git.getDiff()+"\n")
+            f.close()
 
         files = self.filesToCopy[:]
         for d in self.datasets:

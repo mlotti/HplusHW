@@ -57,13 +57,14 @@ btagging = "Sum$(jets_f_tche > 1.7 && sqrt((jets_p4.Phi()-muons_p4.Phi())^2+(jet
 analysis = "muonNtuple"
 
 #era = "EPS"
-era = "Run2011A-EPS"
-#era = "Run2011A"
+#era = "Run2011A-EPS"
+era = "Run2011A"
 
 weight = {"EPS": "pileupWeightEPS",
           "Run2011A-EPS": "weightPileup_Run2011AnoEPS",
           "Run2011A": "weightPileup_Run2011A",
           }[era]
+#weight = ""
 
 treeDraw = dataset.TreeDraw(analysis+"/tree", weight=weight)
 
@@ -81,22 +82,21 @@ def main():
     elif era == "Run2011A-EPS":
         datasets.remove([
             "SingleMu_Mu_160431-163261_May10",
-#            "SingleMu_Mu_163270-163869_May10",
+            "SingleMu_Mu_163270-163869_May10",
             "SingleMu_Mu_165088-166150_Prompt",
             "SingleMu_Mu_166161-166164_Prompt",
             "SingleMu_Mu_166346-166346_Prompt",
             "SingleMu_Mu_166374-167043_Prompt",
             "SingleMu_Mu_167078-167913_Prompt",
 
-            "SingleMu_Mu_170722-172619_Aug05",
-            "SingleMu_Mu_172620-173198_Prompt",
-            "SingleMu_Mu_173236-173692_Prompt",
-
+#            "SingleMu_Mu_170722-172619_Aug05",
+#            "SingleMu_Mu_172620-173198_Prompt",
+#            "SingleMu_Mu_173236-173692_Prompt",
             ])
     elif era == "Run2011A":
         pass
 
-    datasets.remove(datasets.getMCDatasetNames())
+    #datasets.remove(datasets.getMCDatasetNames())
     datasets.loadLuminosities()
 
     #datasetsMC = datasets.deepCopy()
@@ -145,31 +145,32 @@ def printCounters(datasets):
     datasets.printInfo()
 
     eventCounter = counter.EventCounter(datasets)
-    selection = "Sum$(%s) >= 1" % muonKinematics
-    eventCounter.getMainCounter().appendRow("Muon kinematics", treeDraw.clone(selection=selection))
-    selection = "Sum$(%s && %s) >= 1" % (muonKinematics, muondB)
-    eventCounter.getMainCounter().appendRow("Muon IP", treeDraw.clone(selection=selection))
-    selection = "Sum$(%s && %s && %s) >= 1" % (muonKinematics, muondB, muonIsolation)
-    eventCounter.getMainCounter().appendRow("Muon isolation", treeDraw.clone(selection=selection))
-    selection = "Sum$(%s && %s && %s) == 1" % (muonKinematics, muondB, muonIsolation)
-    print selection
-    eventCounter.getMainCounter().appendRow("One selected muon", treeDraw.clone(selection=selection))
-    selection += "&&" +muonVeto
-    print selection
-    eventCounter.getMainCounter().appendRow("Muon veto", treeDraw.clone(selection=selection))
-    selection += "&&" +electronVeto
-    print selection
-    eventCounter.getMainCounter().appendRow("Electron veto", treeDraw.clone(selection=selection))
-    selection += "&&" +jetSelection
-    print selection
-    eventCounter.getMainCounter().appendRow("Jet selection", treeDraw.clone(selection=selection))
+    if True:
+        selection = "Sum$(%s) >= 1" % muonKinematics
+        eventCounter.getMainCounter().appendRow("Muon kinematics", treeDraw.clone(selection=selection))
+        selection = "Sum$(%s && %s) >= 1" % (muonKinematics, muondB)
+        eventCounter.getMainCounter().appendRow("Muon IP", treeDraw.clone(selection=selection))
+        selection = "Sum$(%s && %s && %s) >= 1" % (muonKinematics, muondB, muonIsolation)
+        eventCounter.getMainCounter().appendRow("Muon isolation", treeDraw.clone(selection=selection))
+        selection = "Sum$(%s && %s && %s) == 1" % (muonKinematics, muondB, muonIsolation)
+        print selection
+        eventCounter.getMainCounter().appendRow("One selected muon", treeDraw.clone(selection=selection))
+        selection += "&&" +muonVeto
+        print selection
+        eventCounter.getMainCounter().appendRow("Muon veto", treeDraw.clone(selection=selection))
+        selection += "&&" +electronVeto
+        print selection
+        eventCounter.getMainCounter().appendRow("Electron veto", treeDraw.clone(selection=selection))
+        selection += "&&" +jetSelection
+        print selection
+        eventCounter.getMainCounter().appendRow("Jet selection", treeDraw.clone(selection=selection))
 
     eventCounter.normalizeMCByLuminosity()
 
     table = eventCounter.getMainCounterTable()
     #addSumColumn(table)
 
-    cellFormat = counter.TableFormatText(counter.CellFormatText(valueFormat='%.0f'))
+    cellFormat = counter.TableFormatText(counter.CellFormatText(valueFormat='%.3f'))
     print table.format(cellFormat)
 
 

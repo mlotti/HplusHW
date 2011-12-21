@@ -51,8 +51,14 @@ def main():
     doPlots(datasetsEmb, datasetsSig, "TTJets")
     doPlots(datasetsEmb, datasetsSig, "WJets")
 
-def doPlots(datasetsEmb, datasetsSig, datasetName):
-    lumi = datasetsEmb.getDataset("Data").getLuminosity()
+def doPlots(datasetsEmb2, datasetsSig2, datasetName):
+    lumi = datasetsEmb2.getDataset("Data").getLuminosity()
+
+    datasetsEmb = datasetsEmb2.deepCopy()
+    datasetsSig = datasetsSig2.deepCopy()
+
+    datasetsEmb.remove(filter(lambda name: name != datasetName, datasetsEmb.getAllDatasetNames()))
+    datasetsSig.remove(filter(lambda name: name != datasetName, datasetsSig.getAllDatasetNames()))
 
     plots._legendLabels[datasetName+"_Embedded"] = "Embedded "+plots._legendLabels[datasetName]
     plots._legendLabels[datasetName+"_Normal"]   = "Normal "+plots._legendLabels[datasetName]
@@ -139,7 +145,81 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
     drawPlot(createPlot(td.clone(varexp=tauPlot.decayModeExp)),
              "tauDecayMode"+postfix+"", "", opts={"ymin": 1e-2, "ymaxfactor": 20, "nbins":5}, opts2={"ymin":0, "ymax":3}, moveLegend={"dy": 0.02, "dh": -0.02}, function=tauPlot.decayModeCustomize)
 
-    
+
+    # Rest of the selections
+    #td = treeDraw.clone(selection="&&".join([tauPlot.tauCandidateSelection, tauPlot.tauID, tauPlot.jetEventSelection, tauPlot.metSelection, tauPlot.btagEventSelection]))
+    #postfix = "_10AfterBTagging"
+    #drawPlot(createPlot(td.clone(varexp="taus_p4.Pt()>>tmp(25,0,250)")),
+    #         "tauPt"+postfix, "#tau-jet candidate p_{T} (GeV/c)", opts2={"ymin": 0, "ymax": 2})
+
+    # Counters
+    eventCounterEmb = counter.EventCounter(datasetsEmb, counters=analysisEmb+"Counters")
+    eventCounterSig = counter.EventCounter(datasetsSig, counters=analysisSig+"Counters")
+    eventCounterEmb.normalizeMCToLuminosity(lumi)
+    eventCounterSig.normalizeMCToLuminosity(lumi)
+
+    #effFormat = counter.TableFormatText(counter.CellFormatText(valueFormat='%.4f'))
+    #effFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat='%.4f'))
+    effFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.4f'))
+
+    counterEmb = eventCounterEmb.getMainCounter()
+    counterSig = eventCounterSig.getMainCounter()
+    tdEmb = treeDraw.clone(tree=analysisEmb+"/tree")
+    tdSig = treeDraw.clone(tree=analysisSig+"/tree")
+    selectionsCumulative = []
+    tauSelectionsCumulative = []
+    def sel(name, selection):
+        selectionsCumulative.append(selection)
+        sel = selectionsCumulative[:]
+        if len(tauSelectionsCumulative) > 0:
+            sel += ["Sum$(%s) >= 1" % "&&".join(tauSelectionsCumulative)]
+        sel = "&&".join(sel)
+        counterEmb.appendRow(name, tdEmb.clone(selection=sel))
+        counterSig.appendRow(name, tdSig.clone(selection=sel))
+    def tauSel(name, selection):
+        tauSelectionsCumulative.append(selection)
+        sel = selectionsCumulative[:]
+        if len(tauSelectionsCumulative) > 0:
+            sel += ["Sum$(%s) >= 1" % "&&".join(tauSelectionsCumulative)]
+        sel = "&&".join(sel)
+        counterEmb.appendRow(name, tdEmb.clone(selection=sel))
+        counterSig.appendRow(name, tdSig.clone(selection=sel))
+
+#    sel("Primary vertex", tauPlot.pvSelection)
+    sel(">= 1 tau candidate", "Length$(taus_p4) >= 1")
+    tauSel("Decay mode finding", tauPlot.decayModeFinding)
+    tauSel("pT > 15", "(taus_p4.Pt() > 15)")
+    tauSel("pT > 40", tauPlot.tauPtCut)
+    tauSel("eta < 2.1", tauPlot.tauEtaCut)
+    tauSel("leading track pT > 20", tauPlot.tauLeadPt)
+    tauSel("ECAL fiducial", tauPlot.ecalFiducial)
+    tauSel("againstElectron", tauPlot.electronRejection)
+    tauSel("againstMuon", tauPlot.muonRejection)
+    tauSel("isolation", tauPlot.tightIsolation)
+    tauSel("oneProng", tauPlot.oneProng)
+    tauSel("Rtau", tauPlot.rtau)
+    sel("3 jets", tauPlot.jetEventSelection)
+    sel("MET", tauPlot.metSelection)
+    sel("btag", tauPlot.btagEventSelection)
+
+
+
+    table = counter.CounterTable()
+    col = counterEmb.getTable().getColumn(name=datasetName)
+    col.setName("Embedded")
+    table.appendColumn(col)
+    col = counterSig.getTable().getColumn(name=datasetName)
+    col.setName("Normal")
+    table.appendColumn(col)
+
+    col = table.getColumn(name="Embedded")
+    table.insertColumn(1, counter.efficiencyColumn(col.getName()+" eff", col))
+    col = table.getColumn(name="Normal")
+    table.appendColumn(counter.efficiencyColumn(col.getName()+" eff", col))
+
+    print "%s counters" % datasetName
+    print table.format(effFormat)
+
 
 
 if __name__ == "__main__":

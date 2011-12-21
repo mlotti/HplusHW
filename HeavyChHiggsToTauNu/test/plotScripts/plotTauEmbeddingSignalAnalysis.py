@@ -80,6 +80,24 @@ if normalize:
 tauPtOutput ="tauPt_ewk.root"
 mtOutput = "mt_ewk_lands.root"
 
+weight = "weightPileup"
+weightBTagging = weight+"*weightBTagging"
+#weight = ""
+#weightBTagging = weight
+if normalize:
+    weight = "weightPileup*weightTrigger"
+    weightBTagging = weight+"*weightBTagging"
+treeDraw = dataset.TreeDraw(analysis+"/tree", weight=weight)
+
+caloMetCut = "(tecalomet_p4.Et() > 60)"
+caloMetNoHFCut = "(tecalometNoHF_p4.Et() > 60)"
+metCut = "(met_p4.Et() > 50)"
+bTaggingCut = "passedBTagging"
+deltaPhi160Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 160)"
+deltaPhi130Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 130)"
+deltaPhi90Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 90)"
+
+
 # main function
 def main():
     # Read the datasets
@@ -96,16 +114,16 @@ def main():
     elif era == "Run2011A-EPS":
         datasets.remove([
             "SingleMu_Mu_160431-163261_May10",
-#            "SingleMu_Mu_163270-163869_May10",
+            "SingleMu_Mu_163270-163869_May10",
             "SingleMu_Mu_165088-166150_Prompt",
             "SingleMu_Mu_166161-166164_Prompt",
             "SingleMu_Mu_166346-166346_Prompt",
             "SingleMu_Mu_166374-167043_Prompt",
             "SingleMu_Mu_167078-167913_Prompt",
 
-            "SingleMu_Mu_170722-172619_Aug05",
-            "SingleMu_Mu_172620-173198_Prompt",
-            "SingleMu_Mu_173236-173692_Prompt",
+#            "SingleMu_Mu_170722-172619_Aug05",
+#            "SingleMu_Mu_172620-173198_Prompt",
+#            "SingleMu_Mu_173236-173692_Prompt",
 
             ])
     elif era == "Run2011A":
@@ -116,35 +134,46 @@ def main():
     #print datasets.getAllDatasetNames()
     #return
 
+    apply_v13_1_bugfix(datasets)
+
     plots.mergeRenameReorderForDataMC(datasets)
 
+#    datasets.remove(["DYJetsToLL", "SingleTop", "Diboson", "QCD_Pt20_MuEnriched"])
+
     # Signal
-    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
     #keepSignal = "M80"
-    keepSignal = "M90"
+    #keepSignal = "M90"
     #keepSignal = "M100"
     #keepSignal = "M120"
+    #keepSignal = "M140"
+    #keepSignal = "M150"
+    keepSignal = "M155"
     #keepSignal = "M160"
-    datasets.remove(filter(lambda name: "TTToHplus" in name and not keepSignal in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
-    #xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
-    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.1, br_Htaunu=1)
-    plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section
     # Replace signal dataset with EWK+signal
     if False:
+        datasets.remove(filter(lambda name: "TTToHplus" in name and not keepSignal in name, datasets.getAllDatasetNames()))
+        xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
+        #xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.1, br_Htaunu=1)
+        plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section
+
         ttjets2 = datasets.getDataset("TTJets").deepCopy()
         ttjets2.setName("TTJets2")
         ttjets2.setCrossSection(ttjets2.getCrossSection() - datasets.getDataset("TTToHplus_"+keepSignal).getCrossSection())
         datasets.append(ttjets2)
         datasets.merge("EWKnoTT", ["WJets", "DYJetsToLL", "SingleTop", "Diboson"], keepSources=True)
-        datasets.merge("TTToHplus_"+keepSignal, ["TTToHplus_"+keepSignal, "EWKnoTT", "TTJets2"])
-        #datasets.merge("EWK with signal", ["EWKnoTT", "TTJets2"])
+        #datasets.merge("TTToHplus_"+keepSignal, ["TTToHplus_"+keepSignal, "EWKnoTT", "TTJets2"])
+        datasets.merge("EWKScaled", ["EWKnoTT", "TTJets2"])
+        datasets.merge("EWKSignal", ["TTToHplus_"+keepSignal, "EWKScaled"], keepSources=True)
         plots._legendLabels["TTToHplus_"+keepSignal] = "with H^{#pm}#rightarrow#tau^{#pm}#nu"
+    else:
+        datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
 
-    mcOnly = not datasets.hasDataset("Data")
-    mcLumi = 1141
-#    mcLumi = 199.7
-                                     
+    #datasets.remove(filter(lambda name: "TTJets" not in name, datasets.getAllDatasetNames()))
+
+    mcLumi = None
+    if not datasets.hasDataset("Data"):
+        mcLumi = 2173
 
 #    scaleLumi.signalLumi = 43.4024599650000037
 #    scaleLumi.ewkLumi = datasets.getDataset("Data").getLuminosity()
@@ -153,31 +182,51 @@ def main():
     style = tdrstyle.TDRStyle()
 
     histograms.createLegend.moveDefaults(dx=-0.04)
-    datasets.remove(["QCD_Pt20_MuEnriched"])
+    #datasets.remove(["QCD_Pt20_MuEnriched"])
     plots._legendLabels["QCD_Pt20_MuEnriched"] = "QCD"
     histograms.createLegend.moveDefaults(dh=-0.05)
     #histograms.createLegend.moveDefaults(dx=-0.18, dy=0.05, dh=-0.05)
 
-    # Create the plot objects and pass them to the formatting
-    # functions to be formatted, drawn and saved to files
-    def createPlot(name):
-        kwargs = {}
-        if mcOnly:
-            kwargs["normalizeToLumi"] = mcLumi
-        name2 = name
-        if isinstance(name, basestring):
-            name2 = analysis+"/"+name
-        return plots.DataMCPlot(datasets, name2, **kwargs)
+    doPlots(datasets, mcLumi)
+    doCounters(datasets, mcLumi)
 
-    weight = "weightPileup"
-    weightBTagging = weight+"*weightBTagging"
-    #weight = ""
-    #weightBTagging = weight
-    if normalize:
-        weight = "weightPileup*weightTrigger"
-        weightBTagging = weight+"*weightBTagging"
-    treeDraw = dataset.TreeDraw(analysis+"/tree", weight=weight)
 
+def apply_v13_1_bugfix(datasets):
+    d = {
+        "DYJetsToLL_M50_TuneZ2_Summer11": 36277956,
+        "TTJets_TuneZ2_Summer11": 3701947,
+        "T_s-channel_TuneZ2_Summer11": 259971,
+        "T_t-channel_TuneZ2_Summer11": 3900171,
+        "T_tW-channel_TuneZ2_Summer11": 814390,
+        "Tbar_s-channel_TuneZ2_Summer11": 137980,
+        "Tbar_t-channel_TuneZ2_Summer11": 1944826,
+        "Tbar_tW-channel_TuneZ2_Summer11": 809984,
+        "T_tW-channel_TuneZ2_Summer11": 814390,
+        "Tbar_s-channel_TuneZ2_Summer11": 137980,
+        "Tbar_t-channel_TuneZ2_Summer11": 1944826,
+        "Tbar_tW-channel_TuneZ2_Summer11": 809984,
+        "WJets_TuneZ2_Summer11": 81352576,
+        "WW_TuneZ2_Summer11": 4225916,
+        "WZ_TuneZ2_Summer11": 4265243,
+        "ZZ_TuneZ2_Summer11": 4187885
+        }
+    for name, nevents in d.iteritems():
+        datasets.getDataset(name).setNAllEvents(nevents)
+
+
+# Create the plot objects and pass them to the formatting
+# functions to be formatted, drawn and saved to files
+def createPlotCommon(name, datasets, mcLumi=None):
+    kwargs = {}
+    if mcLumi != None:
+        kwargs["normalizeToLumi"] = mcLumi
+    name2 = name
+    if isinstance(name, basestring):
+        name2 = analysis+"/"+name
+    return plots.DataMCPlot(datasets, name2, **kwargs)
+
+def doPlots(datasets, mcLumi=None):
+    createPlot = lambda name: createPlotCommon(name, datasets, mcLumi)
     #opts = {"xmin": 40, "xmax": 200, "ymaxfactor":10, "ymin": 1e-1}
     opts = {"xmin": 40, "xmax": 200, "ymaxfactor":2, "ymin": 1e-1}
     opts2 = {"ymin": 0, "ymax": 2}
@@ -189,20 +238,11 @@ def main():
     tdRtau = treeDraw.clone(varexp="tau_leadPFChargedHadrCand_p4.P() / tau_p4.P() -1e-10 >>tmp(11, 0, 1.1)")
     tdDeltaPhi = treeDraw.clone(varexp="acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 >>tmp(18, 0, 180)")
 
-    caloMetCut = "(tecalomet_p4.Et() > 60)"
-    caloMetNoHFCut = "(tecalometNoHF_p4.Et() > 60)"
-    metCut = "(met_p4.Et() > 50)"
-    bTaggingCut = "passedBTagging"
-    #deltaPhi160Cut = "abs(tau_p4.Phi() - met_p4.Phi())*57.3 <= 160"
-    deltaPhi160Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 160)"
-    deltaPhi130Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 130)"
-    deltaPhi90Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 90)"
-
     # Tau pt
     xlabel = "p_{T}^{#tau jet} (GeV/c)"
-    drawPlot(createPlot("SelectedTau/SelectedTau_pT_AfterTauID"), "selectedTauPt_1AfterTauID", xlabel, opts=opts, rebin=rebin, addMCUncertainty=False, ratio=False)
-    drawPlot(createPlot(tdTauPt.clone()), "selectedTauPt_1AfterTauID_crosscheck", xlabel, opts=opts, addMCUncertainty=False, ratio=False)
-    drawPlot(createPlot(tdTauPt.clone(selection=metCut)), "selectedTauPt_2AfterMET", xlabel, opts=opts, addMCUncertainty=False, ratio=False)
+    drawPlot(createPlot("SelectedTau/SelectedTau_pT_AfterTauID"), "selectedTauPt_1AfterTauID", xlabel, opts=opts, rebin=rebin, ratio=False)
+    drawPlot(createPlot(tdTauPt.clone()), "selectedTauPt_1AfterTauID_crosscheck", xlabel, opts=opts, ratio=False)
+    drawPlot(createPlot(tdTauPt.clone(selection=metCut)), "selectedTauPt_2AfterMET", xlabel, opts=opts, ratio=False)
 
     optstmp = {}
     optstmp.update(opts)
@@ -225,22 +265,20 @@ def main():
 
     # Tau leading track pt
     xlabel = "p_{T}^{#tau leading track} (GeV/c)"
-    drawPlot(createPlot(tdTauLeadPt.clone()), "selectedTauLeadPt_1AfterTauID", xlabel, opts=opts, addMCUncertainty=False, ratio=False)
+    drawPlot(createPlot(tdTauLeadPt.clone()), "selectedTauLeadPt_1AfterTauID", xlabel, opts=opts, ratio=False)
 
     # Tau p
     xlabel = "p^{#tau jet} (GeV/c)"
-    drawPlot(createPlot(tdTauP.clone()), "selectedTauP_1AfterTauID", xlabel, opts=opts, addMCUncertainty=False, ratio=False)
+    drawPlot(createPlot(tdTauP.clone()), "selectedTauP_1AfterTauID", xlabel, opts=opts, ratio=False)
 
     # Tau leading track pt
     xlabel = "p^{#tau leading track} (GeV/c)"
-    drawPlot(createPlot(tdTauLeadP.clone()), "selectedTauLeadP_1AfterTauID", xlabel, opts=opts, addMCUncertainty=False, ratio=False)
+    drawPlot(createPlot(tdTauLeadP.clone()), "selectedTauLeadP_1AfterTauID", xlabel, opts=opts,ratio=False)
     
     # Rtau
     xlabel = "R_{#tau}"
-    drawPlot(createPlot(tdRtau.clone()), "selectedTauRtau_1AfterTauID", xlabel, ylabel="Events / %.f", opts={"ymin": 1e-1}, addMCUncertainty=False, ratio=False)
+    drawPlot(createPlot(tdRtau.clone()), "selectedTauRtau_1AfterTauID", xlabel, ylabel="Events / %.f", opts={"ymin": 1e-1}, ratio=False)
 
-    # Decay modes (after tau candidate selection, before isolation)
-    #createPlot("
 
     # DeltaPhi
     xlabel = "#Delta#phi(#tau jet, E_{T}^{miss}) (^{#circ})"
@@ -262,7 +300,7 @@ def main():
     #drawControlPlot("IdentifiedElectronPt_AfterStandardSelections", "Electron p_{T} (GeV/c)")
     #drawControlPlot("IdentifiedMuonPt_AfterStandardSelections", "Muon p_{T} (GeV/c)")
     drawControlPlot("Njets_AfterStandardSelections", "Number of jets", ylabel="Events")
-    drawControlPlot("MET", "Raw PF E_{T}^{miss} (GeV)", rebin=5, opts={"xmax": 400}, cutLine=50)
+    drawControlPlot("MET", "Uncorrected PF E_{T}^{miss} (GeV)", rebin=5, opts={"xmax": 400}, cutLine=50)
     drawControlPlot("NBjets", "Number of selected b jets", opts={"xmax": 6}, ylabel="Events", cutLine=1)
 
     # Number of EWK events for QCD measurement (not needed at the moment
@@ -336,7 +374,7 @@ def main():
 
     #tdMt = treeDraw.clone(varexp="sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi()))) >>tmp(40,0,400)")
     tdMt = treeDraw.clone(varexp="sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi()))) >>tmp(20,0,400)")
-    f = ROOT.TFile.Open(mtOutput, "RECREATE")
+    #f = ROOT.TFile.Open(mtOutput, "RECREATE")
 
     ratio = True
     if normalize and not "Rtau0MET" in analysis:
@@ -353,18 +391,23 @@ def main():
         ("4AfterDeltaPhi130", metCut+"&&"+bTaggingCut+"&&"+deltaPhi130Cut),
         ("4AfterDeltaPhi90", metCut+"&&"+bTaggingCut+"&&"+deltaPhi90Cut),
         ]:
-        td = tdMt.clone(selection=selection, weight=weightBTagging)
+        w = weight
+        if bTaggingCut in selection:
+            w = weightBTagging
+        td = tdMt.clone(selection=selection, weight=w)
         transverseMass(createPlot(td.clone()), "transverseMass_"+name, opts=opts, ratio=ratio)
-        mt = createPlot(td.clone())
-        scaleNormalization(mt)
-        mt_data = mt.histoMgr.getHisto("Data").getRootHisto().Clone("mt_ewk_"+name)
-        mt_data.SetDirectory(f)
-        mt_data.Write()
 
-    path = ROOT.TNamed("producedInDirectory", os.getcwd())
-    path.Write()
+        drawPlot(createPlot(td.clone(varexp="jets_btag >>tmp(30, 0, 3)")), "btagDiscriminator_"+name, "TCHE", ylabel="Jets / %.1f", ratio=ratio, opts={"ymin": 1e-1, "ymax": 1e2})
 
-    f.Close()
+        #mt = createPlot(td.clone())
+        #scaleNormalization(mt)
+        #mt_data = mt.histoMgr.getHisto("Data").getRootHisto().Clone("mt_ewk_"+name)
+        #mt_data.SetDirectory(f)
+        #mt_data.Write()
+
+    #path = ROOT.TNamed("producedInDirectory", os.getcwd())
+    #path.Write()
+    #f.Close()
     
     #transverseMass(createPlot("TauEmbeddingAnalysis_afterBTagging_TransverseMass"), opts=opts, rebin=rebin)
     #transverseMass(createPlot("TauEmbeddingAnalysis_afterFakeMetVeto_TransverseMass"), opts=opts, rebin=rebin)
@@ -381,16 +424,24 @@ def main():
 
 
 
+def doCounters(datasets, mcLumi=None):
+    createPlot = lambda name: createPlotCommon(name, datasets, mcLumi)
     eventCounter = counter.EventCounter(datasets, counters=countersWeighted)
    
 
+    sels = [
+#        "(sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi()))) < 20)",
+#        "(20 < sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi()))))", "(sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi()))) < 80)",
+#        "(80 < sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi()))))", "(sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi()))) < 120)",
+#        "(120 < sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi()))))",
+        ]
     tdCount = treeDraw.clone(weight=weightBTagging)
-    tdCountMET = tdCount.clone(weight=weight, selection=metCut)
-    tdCountBTagging = tdCount.clone(selection=metCut+"&&"+bTaggingCut)
-    tdCountDeltaPhi160 = tdCount.clone(selection=metCut+"&&"+bTaggingCut+"&&"+deltaPhi160Cut)
-    tdCountDeltaPhi130 = tdCount.clone(selection=metCut+"&&"+bTaggingCut+"&&"+deltaPhi130Cut)
-    tdCountDeltaPhi90 = tdCount.clone(selection=metCut+"&&"+bTaggingCut+"&&"+deltaPhi90Cut)
-    eventCounter.getMainCounter().appendRow("JetsForEffs", tdCountMET.clone(selection=""))
+    tdCountMET = tdCount.clone(weight=weight, selection="&&".join(sels+[metCut]))
+    tdCountBTagging = tdCount.clone(selection="&&".join(sels+[metCut, bTaggingCut]))
+    tdCountDeltaPhi160 = tdCount.clone(selection="&&".join(sels+[metCut, bTaggingCut, deltaPhi160Cut]))
+    tdCountDeltaPhi130 = tdCount.clone(selection="&&".join(sels+[metCut, bTaggingCut, deltaPhi130Cut]))
+    tdCountDeltaPhi90 = tdCount.clone(selection="&&".join(sels+[metCut, bTaggingCut, deltaPhi90Cut]))
+    eventCounter.getMainCounter().appendRow("JetsForEffs", tdCount.clone(weight=weight, selection="&&".join(sels)))
     eventCounter.getMainCounter().appendRow("METForEffs", tdCountMET)
     eventCounter.getMainCounter().appendRow("BTagging", tdCountBTagging)
     eventCounter.getMainCounter().appendRow("DeltaPhi < 160", tdCountDeltaPhi160)
@@ -408,7 +459,7 @@ def main():
     eventCounter.getMainCounter().appendRow("BTagging+CaloMet", td2)
     eventCounter.getMainCounter().appendRow("BTagging+CaloMet(NoHF)", td3)
 
-    if mcOnly:
+    if mcLumi != None:
         eventCounter.normalizeMCToLuminosity(mcLumi)
     else:
         eventCounter.normalizeMCByLuminosity()
@@ -416,30 +467,34 @@ def main():
 
     ewkDatasets = [
         "WJets", "TTJets",
-        "DYJetsToLL", "SingleTop", "Diboson"
+#        "DYJetsToLL", "SingleTop", "Diboson"
         ]
 
     table = eventCounter.getMainCounterTable()
     mainTable = table
-    muonAnalysis.addSumColumn(table)
+    #muonAnalysis.addSumColumn(table)
     mainTable.insertColumn(2, counter.sumColumn("EWKMCsum", [mainTable.getColumn(name=name) for name in ewkDatasets]))
 #    table = eventCounter.getSubCounterTable("Trigger")
     #    muonAnalysis.reorderCounterTable(table)
 #    muonAnalysis.addDataMcRatioColumn(table)
+    if datasets.hasDataset("EWKSignal"):
+        mainTable.insertColumn(7, counter.divideColumn("SignalFraction", mainTable.getColumn(name="TTToHplus_"+keepSignal), mainTable.getColumn(name="EWKSignal")))
+
     datasets.printInfo()
     print "============================================================"
     print "Main counter (%s)" % eventCounter.getNormalizationString()
-    cellFormat = counter.TableFormatText(counter.CellFormatText(valueFormat='%.3f'))
+    cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.3f'))
     print table.format(cellFormat)
 
     tauTable = eventCounter.getSubCounterTable("TauIDPassedEvt::tauID_HPSTight")
     muonAnalysis.addSumColumn(tauTable)
     tauTable.insertColumn(2, counter.sumColumn("EWKMCsum", [tauTable.getColumn(name=name) for name in ewkDatasets]))
     print tauTable.format(cellFormat)
+
 #    print eventCounter.getSubCounterTable("TauIDPassedJets::tauID_HPSTight").format()
-    table = eventCounter.getSubCounterTable("Trigger")
-    muonAnalysis.addSumColumn(table)
-    print table.format(cellFormat)
+#    table = eventCounter.getSubCounterTable("Trigger")
+#    muonAnalysis.addSumColumn(table)
+#    print table.format(cellFormat)
 
     mainTable.keepOnlyRows([
             "All events",
@@ -580,6 +635,8 @@ def scaleHistosCounters(obj, plotFunc, counterFunc, scale):
         scaleHistos(obj, plotFunc, scale)
     elif isinstance(obj, counter.EventCounter):
         scaleCounters(obj, counterFunc, scale)
+    else:
+        plotFunc(obj, scale)
 
 def scaleMCfromWmunu(obj):
     # Data/MC scale factor from AN 2011/053, BR correction factor= 1/0.6479

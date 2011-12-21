@@ -124,6 +124,7 @@ def main():
     mtOriginal = "sqrt(2 * temuon_p4.Pt() * temet_p4.Et() * (1-cos(temuon_p4.Phi()-temet_p4.Phi())))"
     #mtCut = " (0 <= %s)" % mt
     mtCut = "(80 < %s && %s < 120)" % (mt, mt)
+    #mtCut = "(60 < tau_p4.Pt() && tau_p4.Pt() < 80)"
 
     td = treeDraw.clone(selection="&&".join([metCut, bTaggingCut, mtCut]))
     drawPlot(createPlot(td.clone(varexp="met_p4.Pt() >>tmp(40,0,400)")),
