@@ -1540,7 +1540,7 @@ class DatasetManager:
         c1fmt = "%%-%ds" % (maxlen+2)
         c2fmt = "%%%d.4g" % (len(col2hdr)+2)
         c3fmt = "%%%d.4g" % (len(col3hdr)+2)
-        c4fmt = "%%%d.4g" % (len(col4hdr)+2)
+        c4fmt = "%%%d.10g" % (len(col4hdr)+2)
 
         c2skip = " "*(len(col2hdr)+2)
         c3skip = " "*(len(col3hdr)+2)
