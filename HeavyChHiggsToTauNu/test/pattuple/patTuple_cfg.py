@@ -70,6 +70,7 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep *_HBHENoiseFilterResultProducer*_*_*", # keep the resulf of HBHENoiseFilterResultProducer*
         "keep *_ecalDeadCellTPfilter_*_*",
         "keep *_EcalDeadCellEventFilter_*_*",
+        "keep *_trackingFailureFilter_*_*",
         ),
     dropMetaData = cms.untracked.string("ALL")
 )

@@ -684,6 +684,14 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     # Build sequence
     sequence *= process.patDefaultSequence
 
+    # Event cleaning steps which require pat objects
+    # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Tracking_failure_filter
+    process.load('SandBox.Skims.trackingFailureFilter_cfi')
+    process.trackingFailureFilter.taggingMode = True
+    process.trackingFailureFilter.JetSource = "selectedPatJetsAK5PF"
+    process.trackingFailureFilter.VertexSource = "goodPrimaryVertices"
+    sequence *= process.trackingFailureFilter
+
     # Tau+HLT matching
     if doTauHLTMatching:
         sequence *= HChTriggerMatching.addTauHLTMatching(process, matchingTauTrigger, matchingJetTrigger)
