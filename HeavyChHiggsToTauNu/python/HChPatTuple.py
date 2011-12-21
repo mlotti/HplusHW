@@ -499,6 +499,10 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
                          typeLabel = "PFTau")
         if not doPatTauIsoDeposits:
             process.patTausHpsPFTau.isoDeposits = cms.PSet()
+        # Continous isolation
+        process.patTausHpsPFTau.tauIDSources.byRawCombinedIsolationDeltaBetaCorr = cms.InputTag("hpsPFTauDiscriminationByRawCombinedIsolationDBSumPtCorr")
+        process.patTausHpsPFTau.tauIDSources.byRawChargedIsolationDeltaBetaCorr = cms.InputTag("hpsPFTauDiscriminationByRawChargedIsolationDBSumPtCorr")
+        process.patTausHpsPFTau.tauIDSources.byRawGammaIsolationDeltaBetaCorr = cms.InputTag("hpsPFTauDiscriminationByRawGammaIsolationDBSumPtCorr")
         addPatTauIsolationEmbedding(process, process.patDefaultSequence, "HpsPFTau")
 
         tauTools.addTauCollection(process,cms.InputTag('hpsTancTaus'),
