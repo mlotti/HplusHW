@@ -57,6 +57,7 @@ set -e
 # 14.10.2011/M.Kortelainen CMSSW_4_2_8_patch6 Updated PAT tags
 # 17.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Updated PU reweight tag for the updated recipe, lumi tag for minor bugfix (which is probably not relevant to us)
 # 17.10.2011/M.Kortelainen CMSSW_4_2_8_patch6 Updated type I/II MET tags
+# 21.12.2011/M.Kortelainen CMSSW_4_2_8_patch7 Updated PAT, tau and lumi tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -70,12 +71,13 @@ eval $(scram runtime -sh)
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTauAnalysis#CMSSW_4_1_X_NOTE_Experimental_ve
 #
 # Tau
-addpkg RecoTauTag/Configuration   V01-02-03
-addpkg RecoTauTag/RecoTau         V01-02-07
+addpkg RecoTauTag/RecoTau         V01-02-14 # These two contain the continous HPS isolation
+addpkg RecoTauTag/Configuration   V01-02-10 # source: private e-mails
 addpkg RecoTauTag/TauTagTools     V01-02-00
 # PAT
 addpkg DataFormats/PatCandidates  V06-04-19-02
-addpkg PhysicsTools/PatAlgos      V08-06-46
+addpkg PhysicsTools/PatAlgos      V08-06-50
+addpkg PhysicsTools/PatUtils      V03-09-18
 addpkg PhysicsTools/PatExamples   V00-05-24
 addpkg CommonTools/ParticleFlow   B4_2_X_V00-03-00
 addpkg PhysicsTools/SelectorUtils V00-03-24
@@ -106,7 +108,7 @@ addpkg JetMETCorrections/Objects V03-01-00
 
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc
-addpkg RecoLuminosity/LumiDB      V03-03-02
+addpkg RecoLuminosity/LumiDB      V03-03-12
 
 # Electron ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
@@ -114,4 +116,3 @@ addpkg RecoLuminosity/LumiDB      V03-03-02
 
 # Higgs skimms
 cvs co HiggsAnalysis/Skimming
-rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
