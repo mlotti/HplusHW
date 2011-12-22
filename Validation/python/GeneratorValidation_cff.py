@@ -6,6 +6,6 @@ from HiggsAnalysis.Validation.GeneratorMassValidation_cfi import *
 
 GeneratorValidation = cms.Sequence(
 	generatorTauValidation *
-	generatorMuonValidation *
+	generatorMuonValidationSequence *
 	generatorMassValidation
 )
