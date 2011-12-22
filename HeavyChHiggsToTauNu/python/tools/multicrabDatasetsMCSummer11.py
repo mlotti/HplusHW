@@ -712,6 +712,36 @@ datasets = {
             },
         },
     },
+    "W1Jet_TuneZ2_Summer11": {
+        "dataVersion": "42XmcS4",
+        "crossSection": 0, # Not known yet
+        "data": {
+            "AOD": {
+                "datasetpath": "/W1Jet_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 5000, # Adjusted for PATtuple file size.
+            },
+        },
+    },
+    "W3Jets_TuneZ2_Summer11": {
+        "dataVersion": "42XmcS4",
+        "crossSection": 0, # Not known yet
+        "data": {
+            "AOD": {
+                "datasetpath": "/W3Jets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 490, # Adjusted for PATtuple file size.
+            },
+        },
+    },
+    "W4Jets_TuneZ2_Summer11": {
+        "dataVersion": "42XmcS4",
+        "crossSection": 0, # Not known yet
+        "data": {
+            "AOD": {
+                "datasetpath": "/W4Jets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 1000, # Adjusted for PATtuple file size.
+            },
+        },
+    },
     "DYJetsToLL_M50_TuneZ2_Summer11": { # Z+jets
         "dataVersion": "42XmcS4",
         "crossSection": 3048, # [2], NNLO
