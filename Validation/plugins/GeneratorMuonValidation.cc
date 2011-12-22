@@ -18,6 +18,8 @@
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
+#include "DataFormats/Common/interface/Ptr.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
 
 //DQM services
 #include "DQMServices/Core/interface/DQMStore.h"
@@ -30,6 +32,7 @@
 
 #include "SimGeneral/HepPDTRecord/interface/ParticleDataTable.h"
 #include "TLorentzVector.h"
+#include "Math/VectorUtil.h"
 
 class MuonValidation : public edm::EDAnalyzer
 {
@@ -56,9 +59,10 @@ class MuonValidation : public edm::EDAnalyzer
     private:
 	int particleMother(const reco::GenParticle&);
         int findMother(const reco::GenParticle&);
-  //	TLorentzVector motherP4(const HepMC::GenParticle*);
+        bool genMuonMatchingRecoMuon(const reco::GenParticle&,const edm::Event&);
 
-    	edm::InputTag src;
+    	edm::InputTag src,recoMuonSrc;
+	double DRmin;
 
   	/// PDT table
   	edm::ESHandle<HepPDT::ParticleDataTable> fPDGTable ;
@@ -69,6 +73,7 @@ class MuonValidation : public edm::EDAnalyzer
         MonitorElement *nEvt;
         MonitorElement *MuPt, *MuEta, *MuPhi,
 	  *MuPtW, *MuEtaW, *MuPhiW,
+          *MuPtReco, *MuEtaReco, *MuPhiReco,
           *MuonMothers;
 };
 
@@ -82,7 +87,9 @@ class MuonValidation : public edm::EDAnalyzer
 using namespace edm;
 
 MuonValidation::MuonValidation(const edm::ParameterSet& iPSet):  
-  src(iPSet.getParameter<edm::InputTag>("src"))
+  src(iPSet.getParameter<edm::InputTag>("src")),
+  recoMuonSrc(iPSet.getParameter<edm::InputTag>("RecoMuons")),
+  DRmin(iPSet.getParameter<double>("MCRecoMatchingCone"))
 {    
   dbe = 0;
   dbe = edm::Service<DQMStore>().operator->();
@@ -120,6 +127,11 @@ void MuonValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup
     MuEtaW           = dbe->book1D("MuEtaW","Mu (from W) eta", 100 ,-2.5,2.5);
     MuPhiW           = dbe->book1D("MuPhiW","Mu (from W) phi", 100 ,-3.14,3.14);
 
+    std::string label = "Mu (matching " + recoMuonSrc.label() + ")";
+    MuPtReco         = dbe->book1D("MuPtReco",(label+" pT").c_str(), 100 ,0,100);
+    MuEtaReco        = dbe->book1D("MuEtaReco",(label+" eta").c_str(), 100 ,-2.5,2.5);
+    MuPhiReco        = dbe->book1D("MuPhiReco",(label+" phi").c_str(), 100 ,-3.14,3.14);
+
     MuonMothers        = dbe->book1D("MuonMothers","Muon mother particles", 10 ,0,10);
 	MuonMothers->setBinLabel(1+other,"?");
 	MuonMothers->setBinLabel(1+gamma,"#gamma");
@@ -153,30 +165,20 @@ void MuonValidation::analyze(const edm::Event& iEvent,const edm::EventSetup& iSe
 	  MuEtaW->Fill(p.eta());
 	  MuPhiW->Fill(p.phi());
 	}
+
+	if(genMuonMatchingRecoMuon(p,iEvent)){
+	  MuPtReco->Fill(p.pt());
+	  MuEtaReco->Fill(p.eta());
+	  MuPhiReco->Fill(p.phi());
+	}
       }
     }
   }
 }//analyze
 
 
-int MuonValidation::findMother(const reco::GenParticle& tau){
-        return tau.mother()->pdgId();
-        /*
-        int mother_pid = 0;
-        const mothers& moms = tau.
-	
-        if ( tau.production_vertex() ) {
-                HepMC::GenVertex::particle_iterator mother;
-                for (mother = tau.production_vertex()->particles_begin(HepMC::parents);
-                     mother!= tau.production_vertex()->particles_end(HepMC::parents); ++mother ) {
-                        mother_pid = (*mother)->pdg_id();
-			if(mother_pid == tau->pdg_id()) mother_pid = -1;//findMother(*mother);
-                        //std::cout << " parent " << mother_pid << std::endl;
-                }
-        }
-	
-	return mother_pid;
-        */
+int MuonValidation::findMother(const reco::GenParticle& particle){
+        return particle.mother()->pdgId();
 }
 
 int MuonValidation::particleMother(const reco::GenParticle& particle){
@@ -199,26 +201,22 @@ int MuonValidation::particleMother(const reco::GenParticle& particle){
 
 	return mother_pid;
 }
-/*
-TLorentzVector MuonValidation::motherP4(const HepMC::GenParticle* particle){
 
-	TLorentzVector p4(0,0,0,0);
+bool MuonValidation::genMuonMatchingRecoMuon(const reco::GenParticle& particle, const edm::Event& iEvent){
 
-        if ( particle->production_vertex() ) {
-                HepMC::GenVertex::particle_iterator mother;
-                for (mother = particle->production_vertex()->particles_begin(HepMC::parents);
-                     mother!= particle->production_vertex()->particles_end(HepMC::parents); ++mother ) {
-                        //mother_pid = (*mother)->pdg_id();
-                        //std::cout << " parent " << mother_pid << std::endl;
-                        p4 = TLorentzVector((*mother)->momentum().px(),
-                                            (*mother)->momentum().py(),
-                                            (*mother)->momentum().pz(),
-                                            (*mother)->momentum().e());
-                }
-        }
+    bool match = false;
 
-	return p4;
+    edm::Handle<edm::View<pat::Muon> > myMuonHandle;
+    iEvent.getByLabel(recoMuonSrc, myMuonHandle);
+    edm::PtrVector<pat::Muon> muons = myMuonHandle->ptrVector();
+
+    for(edm::PtrVector<pat::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
+	double DR = ROOT::Math::VectorUtil::DeltaR(particle.p4(),(*iMuon)->p4());
+	if(DR < DRmin) match = true;
+    }
+
+    return match;
 }
-*/
+
 //define this as a plug-in
 DEFINE_FWK_MODULE(MuonValidation);
