@@ -49,8 +49,7 @@ double ExtractableShape::doExtract(std::vector< Dataset* > datasets, Normalisati
       std::cout << "\033[0;41m\033[1;37mError:\033[0;0m You asked for " << hUp->GetNbinsX() << ", but the mT histogram " << s.str() << " has only " << h->GetNbinsX() << " bins!" << std::endl;
     }
     // Normalise
-    //h->Scale(info->getNormalisationFactor(datasets[i]->getFile()) * additionalNormalisation);
-    hUp->Add(h, info->getNormalisationFactor(datasets[i]->getFile()) * additionalNormalisation); // FIXME for 2011B
+    hUp->Add(h, info->getNormalisationFactor(datasets[i]->getFile()) * additionalNormalisation);
 
     s.str("");
     s << sDownPrefix+"/"+sHistoName;
@@ -68,7 +67,7 @@ double ExtractableShape::doExtract(std::vector< Dataset* > datasets, Normalisati
       std::cout << "\033[0;41m\033[1;37mError:\033[0;0m You asked for " << hDown->GetNbinsX() << ", but the mT histogram " << s.str() << " has only " << h->GetNbinsX() << " bins!" << std::endl;
     }
     // Normalise
-    hDown->Add(h, info->getNormalisationFactor(datasets[i]->getFile()) * additionalNormalisation); // FIXME for 2011B
+    hDown->Add(h, info->getNormalisationFactor(datasets[i]->getFile()) * additionalNormalisation);
   }
   return 0.;
 }
@@ -86,12 +85,12 @@ void ExtractableShape::addHistogramsToFile(std::string label, std::string id, TF
   h->Sumw2();
   h->Add(hUp);
   h->SetDirectory(f);
-  std::cout << "  Created histo " << s.str() << " with normalisation " << h->Integral() <<  std::endl;
+  std::cout << "  Shape nuisance: Created histo " << s.str() << " with normalisation " << h->Integral() <<  std::endl;
   s.str("");
   s << label << "_" << id << "Down";
   h = new TH1F(s.str().c_str(), s.str().c_str(), 20, 0, 400);
   h->Sumw2();
   h->Add(hDown);
   h->SetDirectory(f);
-  std::cout << "  Created histo " << s.str() << " with normalisation " << h->Integral() << std::endl;
+  std::cout << "  Shape nuisance: Created histo " << s.str() << " with normalisation " << h->Integral() << std::endl;
 }

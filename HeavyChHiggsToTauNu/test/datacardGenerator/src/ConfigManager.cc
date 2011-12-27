@@ -44,6 +44,7 @@ bool ConfigManager::initialize(std::string configFile) {
   std::string myLine;
   std::string myConfigInfoHisto;
   std::string myCounterHisto;
+  double myLuminosityScaling = 1;
   myLine.reserve(2048);
   std::string myCommand;
   myCommand.reserve(100);
@@ -78,6 +79,9 @@ bool ConfigManager::initialize(std::string configFile) {
     } else if (myCommand == "luminosity") {
       fLuminosity = parseNumber(myLine, myDummyPos);
       if ( bVerbose) std::cout << "Luminosity set to " << fLuminosity << std::endl;
+    } else if (myCommand == "luminosityScaling") {
+      myLuminosityScaling = parseNumber(myLine, myDummyPos);
+      if ( bVerbose) std::cout << "Luminosity scaling set to " << myLuminosityScaling << std::endl;
     } else if (myCommand == "observation") {
       if (!fNormalisationInfo) {
         std::cout << "\033[0;41m\033[1;37mError:\033[0;0m provide configInfoHisto, counterHisto, and luminosity before observation!" << std::endl;
@@ -112,7 +116,10 @@ bool ConfigManager::initialize(std::string configFile) {
     if (!fNormalisationInfo) {
       if (myConfigInfoHisto.size()>0 && myCounterHisto.size()>0 && fLuminosity > 0) {
         // Create normalisation info object
-        fNormalisationInfo = new NormalisationInfo(myConfigInfoHisto, myCounterHisto, fLuminosity);
+        fNormalisationInfo = new NormalisationInfo(myConfigInfoHisto, myCounterHisto, fLuminosity, myLuminosityScaling);
+        std::cout << "Luminosity set to \033[1;37m" << fLuminosity << " 1/fb\033[0;0m" << std::endl;
+        if (myLuminosityScaling > 1)
+          std::cout << "Warning: Luminosity is artificially scaled to \033[1;37m" << fLuminosity*myLuminosityScaling << " 1/fb\033[0;0m" << std::endl;
       }
     }
   }
@@ -908,21 +915,12 @@ bool ConfigManager::doExtract() {
   return true;
 }
 
-void ConfigManager::generateCards() {
+void ConfigManager::generateCards(bool useShapes) {
   // Loop over mass points
-  /*for (size_t i = 0; i < vDatacardGenerators.size(); ++i) {
-    vDatacardGenerators[i]->generateDataCard(sDescription, fLuminosity, 
-                                             sShapeSource, false,
+  for (size_t i = 0; i < vDatacardGenerators.size(); ++i) {
+    vDatacardGenerators[i]->generateDataCard(sDescription, fLuminosity,
+                                             sShapeSource, useShapes,
                                              vExtractables, vDatasetGroups,
                                              fNormalisationInfo);
-  }*/
-  //  Generate datacards with shapes
-  if (sShapeSource.size()) {
-    for (size_t i = 0; i < vDatacardGenerators.size(); ++i) {
-      vDatacardGenerators[i]->generateDataCard(sDescription, fLuminosity,
-                                              sShapeSource, true,
-                                              vExtractables, vDatasetGroups,
-                                               fNormalisationInfo);
-    }
   }
 }

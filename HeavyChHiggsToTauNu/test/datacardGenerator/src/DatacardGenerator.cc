@@ -42,17 +42,20 @@ bool DatacardGenerator::generateDataCard(std::string description, double luminos
     }
   }
 
-  std::cout << "Generating datacard for mass point " << fMassPoint << std::endl;
+  std::cout << std::endl << "\033[0;44m\033[1;37mGenerating datacard for mass point" << fMassPoint << "\033[0;0m" << std::endl;
 
   // Construct name of directory
   sDirectory = "datacards_" + sDirectory + "_" + description;
   if (useShapes)
     sDirectory += "_withShapes";
-  
+
+  if (info->getLuminosityScaling() > 1)
+    sDirectory += "_forecastByLumiScaling";
+
   // Make directory if it doesn't already exist
   std::stringstream s;
-  s << sDirectory+"/datacard" << fMassPoint << ".txt";
-  
+  s << sDirectory+"/datacard_fullyhadronic_m" << fMassPoint << ".txt";
+
   std::ofstream myFile(s.str().c_str());
   if (myFile.bad() || myFile.fail()) {
     std::string myDirCommand = "mkdir " + sDirectory;
@@ -60,7 +63,7 @@ bool DatacardGenerator::generateDataCard(std::string description, double luminos
     if (myResult) return false; // could not create directory
     myFile.open(s.str().c_str());
     if (myFile.bad() || myFile.fail()) {
-      std::cout << "Error: Cannot open file '" << s.str() << "' for output!" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m Cannot open file '" << s.str() << "' for output!" << std::endl;
       return false;
     }
   }
@@ -75,7 +78,7 @@ bool DatacardGenerator::generateDataCard(std::string description, double luminos
   
   // Construct result
   std::string mySeparator = generateSeparatorLine(datasetGroups, extractables, useShapes);
-  generateHeader(description, luminosity);
+  generateHeader(description, info);
   sResult << mySeparator << std::endl;
   generateParameterLines(datasetGroups, extractables, useShapes);
   sResult << mySeparator << std::endl;
@@ -83,13 +86,13 @@ bool DatacardGenerator::generateDataCard(std::string description, double luminos
     generateShapeHeader(shapeSource);
     sResult << mySeparator << std::endl;
   }
-  generateObservationLine(datasetGroups, extractables, useShapes);
+  generateObservationLine(datasetGroups, extractables, info, useShapes);
   sResult << mySeparator << std::endl;
   generateProcessLines(datasetGroups);
   sResult << mySeparator << std::endl;
-  generateRateLine(datasetGroups, extractables, useShapes);
+  generateRateLine(datasetGroups, extractables, info, useShapes);
   sResult << mySeparator << std::endl;
-  generateNuisanceLines(datasetGroups, extractables, useShapes);
+  generateNuisanceLines(datasetGroups, extractables, info, useShapes);
   
   // dummy
   std::cout << std::endl << sResult.str() << std::endl;
@@ -102,14 +105,26 @@ bool DatacardGenerator::generateDataCard(std::string description, double luminos
     fFile->Close();
     std::cout << "Written shape root file to: " << myOutName.str() << std::endl;
   }
+
+std::cout << "Datacard was generated for luminosity \033[0;44m\033[1;37m" << info->getLuminosity() << " 1/fb\033[0;0m" << std::endl;
+  if (info->getLuminosityScaling() > 1)
+    std::cout << "\033[0;43m\033[1;37mWarning: Luminosity is artificially scaled to " << info->getLuminosity()*info->getLuminosityScaling()  << " 1/fb\033[0;0m" << std::endl;
+
   return true;
 }
 
-void DatacardGenerator::generateHeader(std::string description, double luminosity) {
+void DatacardGenerator::generateHeader(std::string description, NormalisationInfo* info) {
   // Description line
-  sResult << "Description: LandS datacard (auto generated) mass=" << fMassPoint 
-          << ", lumi=" << std::fixed << std::setprecision(3) << luminosity
-          << " fb-1, " << description << std::endl;
+  sResult << "Description: LandS datacard (auto generated) mass=" << fMassPoint;
+  if (info->getLuminosityScaling() > 1)
+    sResult << ", luminosity artificially scaled from " 
+            << std::fixed << std::setprecision(3) << info->getLuminosity()
+            << " to " 
+            << std::fixed << std::setprecision(3) << info->getLuminosity() * info->getLuminosityScaling() << " 1/fb";
+  else
+    sResult << ", luminosity=" << std::fixed << std::setprecision(3) << info->getLuminosity()
+          << " 1/fb";
+  sResult << ", " << description << std::endl;
   // Time stamp
   time_t myRawTime = 0;
   std::time (&myRawTime);
@@ -149,6 +164,7 @@ void DatacardGenerator::generateShapeHeader(std::string source) {
 
 void DatacardGenerator::generateObservationLine(std::vector< DatasetGroup* >& datasetGroups,
                                                 std::vector< Extractable* >& extractables,
+                                                NormalisationInfo* info,
                                                 bool useShapes) {
   sResult << "Observation";
   for (size_t i = 0; i < extractables.size(); ++i) {
@@ -158,13 +174,17 @@ void DatacardGenerator::generateObservationLine(std::vector< DatasetGroup* >& da
           double myRate = datasetGroups[j]->getValueByExtractable(extractables[i], fNormalisationInfo);
           sResult << "\t" << std::fixed << std::setprecision(0) << myRate;
           if (useShapes) {
-            fFile->cd();
             TH1F* h = datasetGroups[j]->getTransverseMassPlot(fNormalisationInfo, "data_obs",20,0.,400.);
             if (!h) return;
             if (TMath::Abs(myRate - h->Integral()) > 0.0001) {
               std::cout << "WARNING: Signal rate=" << myRate << " is not same as mT shape integral=" << h->Integral() << "; check mT plot source!" << std::endl;
             }
-            // do not scale data !!!
+            // do not scale data except for lumi forecast
+            if (info->getLuminosityScaling() > 1) {
+              for (int k = 1; k <= h->GetNbinsX(); ++k)
+                h->SetBinError(k, h->GetBinError(k)*TMath::Sqrt(1.0/info->getLuminosityScaling()));
+            }
+            h->SetDirectory(fFile);
           }
         }
       }
@@ -234,6 +254,7 @@ void DatacardGenerator::generateProcessLines(std::vector< DatasetGroup* >& datas
 
 void DatacardGenerator::generateRateLine(std::vector< DatasetGroup* >& datasetGroups,
                                              std::vector< Extractable* >& extractables,
+                                             NormalisationInfo* info,
                                              bool useShapes) {
   if (useShapes) std::cout << "Generating rates and rate histograms" << std::endl;
   sResult << "rate\t";
@@ -244,7 +265,6 @@ void DatacardGenerator::generateRateLine(std::vector< DatasetGroup* >& datasetGr
       if (!extractables[i]->isRate()) continue;
       if (datasetGroups[j]->hasExtractable(extractables[i])) {
         myValue = datasetGroups[j]->getValueByExtractable(extractables[i], fNormalisationInfo);
-        //myValue *= 4.7/2.2; // FIXME for 2011B
         //std::cout << "datagroup=" << datasetGroups[j]->getLabel() << ", value=" << myValue << std::endl;
         if (useShapes) {
           fFile->cd();
@@ -253,9 +273,15 @@ void DatacardGenerator::generateRateLine(std::vector< DatasetGroup* >& datasetGr
           } else {
             TH1F* h = datasetGroups[j]->getTransverseMassPlot(fNormalisationInfo, datasetGroups[j]->getLabel(),20,0.,400.);
             if (!h) return;
-            double mySum = h->Integral() + h->GetBinContent(0) + h->GetBinContent(h->GetNbinsX()+1);
+            double mySum = h->Integral();// + h->GetBinContent(0) + h->GetBinContent(h->GetNbinsX()+1);
             if (mySum > 0) // normalise only histograms that have entries
               h->Scale(myValue / mySum);
+            // Scale down uncertainties for EWK since they come from data (scaling does not change the relative uncertainty)
+            if (datasetGroups[j]->getLabel() == "EWKTau" && info->getLuminosityScaling() > 1) {
+              for (int k = 1; k <= h->GetNbinsX(); ++k)
+                h->SetBinError(k, h->GetBinError(k)*TMath::Sqrt(1.0/info->getLuminosityScaling()));
+              std::cout << "\033[0;43m\033[1;37mWarning:\033[0;0m EWKTau rate uncertainty scaled for lumi forecast" << std::endl;
+            }
             h->SetDirectory(fFile);
             std::cout << "  Created histogram " << h->GetTitle() << " with normalisation " << myValue << " source=" << datasetGroups[j]->getMtPlotName() << std::endl;
           }
@@ -269,6 +295,7 @@ void DatacardGenerator::generateRateLine(std::vector< DatasetGroup* >& datasetGr
 
 void DatacardGenerator::generateNuisanceLines(std::vector< DatasetGroup* >& datasetGroups,
                                               std::vector< Extractable* >& extractables,
+                                              NormalisationInfo* info,
                                               bool useShapes) {
   if (useShapes) std::cout << "Generating nuisances and shape histograms" << std::endl;
   for (size_t i = 0; i < extractables.size(); ++i) {
@@ -290,11 +317,29 @@ void DatacardGenerator::generateNuisanceLines(std::vector< DatasetGroup* >& data
               std::vector<Extractable*> myMerged = extractables[i]->getMergedExtractables();
               for (size_t k = 0; k < myMerged.size(); ++k) {
                 if (datasetGroups[j]->hasExtractable(myMerged[k])) {
-                 myMerged[k]->addHistogramsToFile(datasetGroups[j]->getLabel(), extractables[i]->getId(), fFile);
+                  myMerged[k]->addHistogramsToFile(datasetGroups[j]->getLabel(), extractables[i]->getId(), fFile);
                 }
               }
               if (datasetGroups[j]->hasExtractable(extractables[i]))
                 extractables[i]->addHistogramsToFile(datasetGroups[j]->getLabel(), extractables[i]->getId(), fFile);
+              // begin code for normalising shape uncertainty to rate
+              /*std::string myNameUp = datasetGroups[j]->getLabel() + "_" + extractables[i]->getId() + "Up";
+              std::string myNameDown = datasetGroups[j]->getLabel() + "_" + extractables[i]->getId() + "Down";
+              TH1* hup = dynamic_cast<TH1*>(fFile->Get(myNameUp.c_str()));
+              TH1* hdown = dynamic_cast<TH1*>(fFile->Get(myNameDown.c_str()));
+              if (hup && hdown) {
+                double myRate = 0.;
+                for (size_t x = 0; x < extractables.size(); ++x) {
+                  if (extractables[x]->isRate() && datasetGroups[j]->hasExtractable(extractables[x]))
+                    myRate = datasetGroups[j]->getValueByExtractable(extractables[x], fNormalisationInfo);
+                }
+                if (myRate > 0.0) {
+                  hup->Scale(myRate / hup->Integral());
+                  hdown->Scale(myRate / hdown->Integral());
+                  std::cout << "\033[0;43m\033[1;37mWarning:\033[0;0m shape nuisance " << myNameUp << " and " << myNameDown << " normalised to measured rate " << myRate << std::endl;
+                }
+              }*/
+              // end code for normalising shape uncertainty to rate
             } else {
               sResult << "0\t";
             }
@@ -309,11 +354,36 @@ void DatacardGenerator::generateNuisanceLines(std::vector< DatasetGroup* >& data
               } else {
                 // Tweak for trigger SF MET leg (add 10 % in quadrature)
                 if ((datasetGroups[j]->getProcess() <= 1 || datasetGroups[j]->getProcess() >= 5) && extractables[i]->getId() == "1") {
-                  double myNuisance = myValue - 1.0;
+                  double myNuisance = (myValue - 1.0);
+                  if (info->getLuminosityScaling() > 1) {
+                    myNuisance /= TMath::Sqrt(info->getLuminosityScaling());
+                    std::cout << "\033[0;43m\033[1;37mWarning:\033[0;0m trg uncertainty scaled for lumi forecast for sample " << datasetGroups[j]->getLabel() << std::endl;
+                  }
                   myNuisance = TMath::Sqrt(myNuisance*myNuisance + 0.1*0.1);
                   myValue = myNuisance + 1.0;
-                  std::cout << "Warning: added 10 % in quadrature for trigger in datagroup " << datasetGroups[j]->getLabel() << std::endl;
+                  std::cout << "\033[0;43m\033[1;37mWarning:\033[0;0m added 10 % in quadrature for trigger in datagroup " << datasetGroups[j]->getLabel() << std::endl;
+                } else if (datasetGroups[j]->getProcess() == 4 && (extractables[i]->getId() == "1" || extractables[i]->getId() == "19")) {
+                  // Tweak for EWK tau trg eff and stat downscaling for lumi forecast
+                  if (info->getLuminosityScaling() > 1) {
+                    myValue -= 1.0;
+                    myValue /= TMath::Sqrt(info->getLuminosityScaling());
+                    std::cout << "\033[0;43m\033[1;37mWarning:\033[0;0m EWKTau trg / stat. uncertainty scaled for lumi forecast" << std::endl;
+                    myValue += 1.0;
+                  }
                 }
+// FIXME remove
+/*
+                if ((datasetGroups[j]->getProcess() <= 1 || datasetGroups[j]->getProcess() >= 5)) {
+                  if (extractables[i]->getId() == "1") myValue = 1.25;
+                  if (extractables[i]->getId() == "10") myValue = 1.15;
+                  if (extractables[i]->getId() == "11") myValue = 1.11;
+                }
+                if ((datasetGroups[j]->getProcess() == 4)) {
+                  if (extractables[i]->getId() == "1") myValue = 1.096;
+                  if (extractables[i]->getId() == "7") myValue = 1.176;
+                }
+*/
+// FIXME end remove
                 sResult << std::fixed << std::setprecision(3) << myValue << "\t";
               }
             }
@@ -323,5 +393,16 @@ void DatacardGenerator::generateNuisanceLines(std::vector< DatasetGroup* >& data
       sResult << extractables[i]->getDescription() << std::endl;
     }
   }
-
+  // Tweak for EWKTau JES error bars in case of lumi scaling
+  if (useShapes && info->getLuminosityScaling() > 1) {
+    TH1* h = dynamic_cast<TH1*>(fFile->Get("EWKTau_7Up"));
+    if (h)
+      for (int k = 1; k < h->GetNbinsX(); ++k)
+        h->SetBinError(k, h->GetBinError(k) / TMath::Sqrt(info->getLuminosityScaling()));
+    h = dynamic_cast<TH1*>(fFile->Get("EWKTau_7Down"));
+    if (h)
+      for (int k = 1; k < h->GetNbinsX(); ++k)
+        h->SetBinError(k, h->GetBinError(k) / TMath::Sqrt(info->getLuminosityScaling()));
+    std::cout << "\033[0;43m\033[1;37mWarning:\033[0;0m EWKTau JES uncertainty shape errors scaled for lumi forecast" << std::endl;
+  }
 }

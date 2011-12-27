@@ -3,10 +3,11 @@
 
 #include "TH1F.h"
 
-NormalisationInfo::NormalisationInfo(std::string configInfoHisto, std::string counterHisto, double luminosity)
+NormalisationInfo::NormalisationInfo(std::string configInfoHisto, std::string counterHisto, double luminosity, double luminosityScaling)
 : sConfigInfoHisto(configInfoHisto),
   sCounterHisto(counterHisto),
-  fLuminosity(luminosity) {
+  fLuminosity(luminosity),
+  fLuminosityScaling(luminosityScaling) {
 
 }
 
@@ -31,7 +32,7 @@ double NormalisationInfo::getNormalisationFactor(TFile* f) {
   // Check if the file is data
   std::string myBinLabel = myConfigInfoHisto->GetXaxis()->GetBinLabel(2);
   if (myBinLabel == "isData")
-    return 1.0;
+    return fLuminosityScaling;
   
   // Calculate normalisation factor
   double myXsection = myConfigInfoHisto->GetBinContent(2) / myConfigInfoHisto->GetBinContent(1);
@@ -39,6 +40,6 @@ double NormalisationInfo::getNormalisationFactor(TFile* f) {
   double myAllEvents = myCounterHisto->GetBinContent(1);
   
   if (myAllEvents > 0)
-    return myXsection * fLuminosity * 1000.0 / myAllEvents;
+    return myXsection * fLuminosity * fLuminosityScaling * 1000.0 / myAllEvents;
   return 0;
 }
