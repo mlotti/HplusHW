@@ -403,6 +403,7 @@ def mtComparison(datasets):
         
     hmtSum = hmt4050.Clone("mtSum")
     hmtSum.SetName("mtSum")
+    hmtSum.SetTitle("Inverted tau ID")
     hmtSum.Add(hmt5060)
     hmtSum.Add(hmt6070)
     hmtSum.Add(hmt7080)
@@ -561,6 +562,12 @@ def mtComparison(datasets):
         if(deltaPhi130):
             canvas3.Print("mtInverted_3jets_dphi130.png")
             canvas3.Print("mtInverted_3jets_dphi130.C")
+
+
+    fOUT = ROOT.TFile.Open("transverseMassQCDInverted.root", "RECREATE")
+    hmtSum.SetDirectory(fOUT)
+    fOUT.Write()
+    fOUT.Close()
             
 ##  write histograms to file
 def writeTransverseMass(datasets_lands):
