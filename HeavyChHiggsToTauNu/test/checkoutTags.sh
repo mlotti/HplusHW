@@ -55,6 +55,7 @@ set -e
 # 5.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Updated LumiDB tag (bugfix)
 # 6.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Another bugfix from Christian for type I/II MEt
 # 17.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Updated PU reweight tag for the updated recipe, lumi tag for minor bugfix (which is probably not relevant to us)
+# 29.12.2011/S.Lehti       CMSSW_4_2_8_patch2 Commented removal of HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -109,4 +110,4 @@ addpkg RecoLuminosity/LumiDB      V03-03-02
 
 # Higgs skimms
 cvs co HiggsAnalysis/Skimming
-rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
+#rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
