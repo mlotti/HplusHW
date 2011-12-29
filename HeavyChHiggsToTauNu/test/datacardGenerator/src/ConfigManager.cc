@@ -6,6 +6,7 @@
 #include "ExtractableScaleFactor.h"
 #include "ExtractableShape.h"
 #include "QCDMeasurementCalculator.h"
+#include "QCDInverted.h"
 
 #include <fstream>
 #include <iostream>
@@ -609,6 +610,14 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
         std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'QCDMode' for function 'QCDMeasurement'!" << std::endl;
         myFunctionStatus = false;
       }
+    } else if (myFunction == "QCDInverted") {
+      if (!myCounterHisto.size()) {
+	std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'counterHisto' for function 'Counter'!" << std::endl;
+        myFunctionStatus = false;
+      } else if (!myInput1.size()) {
+	std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'counter' for function 'Counter'!" << std::endl;
+        myFunctionStatus = false;
+      }
     } else {
       std::cout << "\033[0;41m\033[1;37mError:\033[0;0m specified function is unknown! (valid functions are 'Constant', 'Counter', 'Ratio', 'ScaleFactor', you tried '" << myFunction << "')" << std::endl;
       myFunctionStatus = false;
@@ -654,7 +663,7 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
   }
   if (!myFunctionStatus)
     return false;
-  
+
   // All available parameters have been defined; now create the objects
   // Create extractable
   Extractable* myExtractable = 0;
@@ -719,7 +728,19 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
     dynamic_cast<QCDMeasurementCalculator*>(myExtractable)->setMeasurementInfo(myQCDHistoPrefix, myQCDBasicSelectionsHisto, myQCDTauLegHisto, myQCDMETLegHisto);
     dynamic_cast<QCDMeasurementCalculator*>(myExtractable)->setNormalisationInfo(fNormalisationInfo, myCounterHisto);
     dynamic_cast<QCDMeasurementCalculator*>(myExtractable)->setTransverseMassInfo(myQCDHistoPrefix, myQCDBasicMtHisto);
+  } else if (myFunction == "QCDInverted") {
+    if (type == Extractable::kExtractableObservation){
+      myExtractable = new QCDInverted(myChannel, myCounterHisto, myInput1, myFilePath);
+    }else if (type == Extractable::kExtractableRate){
+      myExtractable = new QCDInverted(myId, myCounterHisto, myInput1, myFilePath);
+    }else if (type == Extractable::kExtractableNuisance){
+      myExtractable = new QCDInverted(myId, myDistribution, myDescription, myCounterHisto, myInput1, myFilePath);
+    }else {
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m function 'QCDInverted' is only available for rate and nuisance!" << std::endl;
+      return false;
+    }
   }
+
   if (myExtractable)
     vExtractables.push_back(myExtractable);
   // Create dataset group for observation (for rate and nuisance they are created via addDataGroup)

@@ -268,7 +268,7 @@ void DatacardGenerator::generateRateLine(std::vector< DatasetGroup* >& datasetGr
         //std::cout << "datagroup=" << datasetGroups[j]->getLabel() << ", value=" << myValue << std::endl;
         if (useShapes) {
           fFile->cd();
-          if (datasetGroups[j]->getLabel() == "QCD") {
+          if (datasetGroups[j]->getLabel() == "QCD" || datasetGroups[j]->getLabel() == "QCDInv") {
             extractables[i]->addHistogramsToFile(datasetGroups[j]->getLabel(),"",fFile);
           } else {
             TH1F* h = datasetGroups[j]->getTransverseMassPlot(fNormalisationInfo, datasetGroups[j]->getLabel(),20,0.,400.);
