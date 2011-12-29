@@ -1,6 +1,7 @@
 #include "QCDInverted.h"
 
 #include "TMath.h"
+#include "TSystem.h"
 #include <iostream>
 
 QCDInverted::QCDInverted(int channel, std::string counterHisto, std::string counterItem, std::string filePath):
@@ -63,7 +64,14 @@ void QCDInverted::addHistogramsToFile(std::string label, std::string id, TFile* 
 
 
         std::string filePlusPath = path + "transverseMassQCDInverted.root";
-        TFile* fIN = TFile::Open(filePlusPath.c_str());
+
+	TFile* fIN = 0;
+	fIN = TFile::Open(filePlusPath.c_str());
+	if(!fIN){
+		std::cout << "\033[0;41m\033[1;37mError:\033[0;0m file " << filePlusPath 
+                          << " not found. Did you remember to run plotSignalAnalysisInverted.py in " << path <<  "?" << std::endl;
+		exit(0);
+	}
 
         TH1F* hOUT = (TH1F*)fIN->Get("mtSum");
 	hOUT->SetName(label.c_str());
