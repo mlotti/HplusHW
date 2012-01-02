@@ -16,37 +16,82 @@ dataVersion = "42Xdata"
 
 # Command line arguments (options) and DataVersion object
 options, dataVersion = getOptionsDataVersion(dataVersion, useDefaultSignalTrigger=False)
-options.doPat=1
 
+inputFiles = []
+trigger = ""
 if len(options.trigger) == 0:
-    #options.trigger = "HLT_Mu9"
-    options.trigger = "HLT_Mu20_v1"
-trigger = options.trigger
+    #(trg, inputFiles) = ("HLT_IsoMu12_v1", ["/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/SingleMu_160431-163261_May10/SingleMu/Run2011A_May10ReReco_v1_AOD_160431_pattuple_v19b/c0ae6cd4b6a7f4894060bf4c50b6b08b/pattuple_91_1_NEp.root"])
+    #(trg, inputFiles) = ("HLT_IsoMu17_v6", ["/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/SingleMu_163270-163869_May10/SingleMu/Run2011A_May10ReReco_v1_AOD_163270_pattuple_v19b/4be8b2cd98e864fb2d0886a3cbadb57d/pattuple_273_1_DZW.root"])
+    #(trg, inputFiles) = ("HLT_IsoMu24_v5", ["/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/SingleMu_165970-166150_Prompt/SingleMu/Run2011A_PromptReco_v4_AOD_165970_pattuple_v19b/a6e4aebe0f8be894b90b6ef44bce7d28/pattuple_99_1_1co.root"])
+    #(trg, inputFiles) = ("HLT_IsoMu24_v8", ["/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/SingleMu_172620-173198_Prompt/SingleMu/Run2011A_PromptReco_v6_AOD_172620_pattuple_v19b/3a653e1bd941d76d28bcbdfed0228b46/pattuple_93_1_7kA.root"])
+    (trg, inputFiles) = ("HLT_IsoMu30_eta2p1_v3", ["/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/SingleMu_173236-173692_Prompt/SingleMu/Run2011A_PromptReco_v6_AOD_173236_pattuple_v19b/4c451d8c6536329916254ceeac99b134/pattuple_101_2_hJS.root"])
 
-#mu9filter = "hltSingleL3MuonPre9"
-#mu15filter = "hltSingleL3MuonPre15"
+    if dataVersion.isMC():
+        (trg, inputFiles) = ("HLT_IsoMu12_v1", ["/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/DYJetsToLL_M50_TuneZ2_Summer11/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v19b/9436cd413e1f831f4594f528a53faac6/pattuple_1001_2_sEX.root"])
+
+    options.trigger = [trg]
+elif len(options.trigger) > 1:
+    raise Exception("Only one trigger can be given!")
+
+trigger = options.trigger[0]
+
+# Run2011 up to 1e33/V2.5/V2, Summer11
 mu9filter = "hltSingleMu9L3Filtered9"
 mu15filter = "hltSingleMu15L3Filtered15"
 mu20filter = "hltSingleMu20L3Filtered20"
 mu24filter = "hltSingleMu24L3Filtered24"
 mu30filter = "hltSingleMu30L3Filtered30"
 mu40filter = "hltSingleMu40L3Filtered40"
+isomu12filter = "hltSingleMuIsoL3IsoFiltered12"
+isomu15filter = "hltSingleMuIsoL3IsoFiltered15"
+isomu17filter = "hltSingleMuIsoL3IsoFiltered17"
+isomu24filter = "hltSingleMuIsoL3IsoFiltered24"
+isomu30filter = "hltSingleMuIsoL3IsoFiltered30"
 
-triggerFilter = ""
-if "HLT_Mu9" in trigger:
-    triggerFilter = mu9filter
-elif "HLT_Mu15" in trigger:
-    triggerFilter = mu15filter
-elif "HLT_Mu20" in trigger:
-    triggerFilter = mu20filter
-elif "HLT_Mu24" in trigger:
-    triggerFilter = mu24filter
-elif "HLT_Mu30" in trigger:
-    triggerFilter = mu30filter
-elif "HLT_Mu40" in trigger:
-    triggerFilter = mu40filter
-    
-else:
+# Run2011 2e33
+mu30filter_v7 = "hltSingleMu30L2QualL3Filtered30"
+mu40filter_v5 = "hltSingleMu40L2QualL3Filtered40"
+isomu17filter_v13 = "hltSingleMuL2QualIsoL3IsoFiltered17"
+isomu20filter_v8 = "hltSingleMuL2QualIsoL3IsoFiltered20"
+isomu24filter_v8 = "hltSingleMuL2QualIsoL3IsoFiltered24"
+isomu30filter_v8 = "hltSingleMuL2QualIsoL3IsoFiltered30"
+
+# Run2011 3e33
+mu24filter_v8 = "hltSingleMu24L2QualL3Filtered24"
+mu24eta2p1filter = "hltL3fL1sMu14Eta2p1L1f0L2f14QL3Filtered24"
+mu30eta2p1filter = "hltL3fL1sMu14Eta2p1L1f0L2f14QL3Filtered30"
+mu40eta2p1filter = "hltL3fL1sMu16Eta2p1L1f0L2f16QL3Filtered40"
+isomu15eta2p1filter = "hltSingleMuIsoL1s14L3IsoFiltered15eta2p1"
+isomu24eta2p1filter = "hltL3IsoL1sMu14Eta2p1L1f0L2f14QL2IsoL3f24L3IsoFiltered"
+isomu30eta2p1filter = "hltL3IsoL1sMu14Eta2p1L1f0L2f14QL2IsoL3f30L3IsoFiltered"
+
+#triggerFilter = ""
+# if "HLT_Mu9" in trigger:
+#     triggerFilter = mu9filter
+# elif "HLT_Mu15" in trigger:
+#     triggerFilter = mu15filter
+# elif "HLT_Mu20" in trigger:
+#     triggerFilter = mu20filter
+# elif "HLT_Mu24" in trigger:
+#     triggerFilter = mu24filter
+# elif "HLT_Mu30" in trigger:
+#     triggerFilter = mu30filter
+# elif "HLT_Mu40" in trigger:
+#     triggerFilter = mu40filter
+filters = [
+    ("HLT_IsoMu12",        isomu12filter),    # 160431-163261
+    ("HLT_IsoMu17",        isomu17filter),    # 163270-165633
+    ("HLT_IsoMu24",        isomu24filter),    # 165970-167913
+    ("HLT_IsoMu24_v8",     isomu24filter_v8), # 170722-173198 
+    ("HLT_IsoMu30_eta2p1", isomu30eta2p1filter)  # 173236-178380
+]
+filters.reverse()
+triggerFilter = None
+for f, t in filters:
+    if f in trigger:
+        triggerFilter = t
+        break
+if triggerFilter == None:
     raise Exception("Trigger '%s' not recognized" % trigger)
 
 print "Trigger %s, filter %s" % (trigger, triggerFilter)
@@ -68,7 +113,8 @@ process.source = cms.Source('PoolSource',
     #"file:/mnt/flustre/mkortela/data/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM/E28BCD86-B311-E011-A953-E0CB4E19F95B.root"
     #"file:/mnt/flustre/mkortela/data/TT_TuneZ2_7TeV-pythia6-tauola/Summer11-PU_S3_START42_V11-v1/AODSIM/84A5EB09-0A77-E011-A8C3-00266CF252D4.root"
     #"/store/data/Run2011A/SingleMu/AOD/PromptReco-v1/000/160/431/7A229484-EB4F-E011-B173-0030487CD7B4.root"
-    "/store/data/Run2011A/SingleMu/AOD/PromptReco-v4/000/165/088/BC7C8339-E47F-E011-8FE0-003048F1C58C.root"
+    #"/store/data/Run2011A/SingleMu/AOD/PromptReco-v4/000/165/088/BC7C8339-E47F-E011-8FE0-003048F1C58C.root"
+        inputFiles
     )
 )
 
@@ -76,16 +122,16 @@ process.source = cms.Source('PoolSource',
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
+#process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
 ################################################################################
 
-# PAT
-process.out = cms.OutputModule("PoolOutputModule",
-    fileName = cms.untracked.string('dummy.root'),
-    outputCommands = cms.untracked.vstring()
-)
+# Add configuration information to histograms.root
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
+process.infoPath = addConfigInfo(process, options, dataVersion)
 
+# PAT, if requested
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 patArgs = {
 #    "doPatTaus": False,
@@ -96,19 +142,45 @@ patArgs = {
     "doTauHLTMatching": False,
     }
 process.commonSequence, counters = addPatOnTheFly(process, options, dataVersion, plainPatArgs=patArgs, doMcPreselection=False)
-del process.out
-process.patDefaultSequence.remove(process.countPatTaus)
+
+# Pileup weighting
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+
+process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
+    alias = cms.string("pileupWeight"),
+)
+puweight = "Run2011A"
+if len(options.puWeightEra) > 0:
+        puweight = options.puWeightEra
+param.setPileupWeightFor2011(dataVersion, era=puweight)
+insertPSetContentsTo(param.vertexWeight, process.pileupWeight)
+
+# Vertex weighting
+#process.vertexWeight = cms.EDProducer("HPlusVertexWeightProducer",
+#    alias = cms.string("vertexWeight"),
+#)
+#param.setVertexWeightFor2011()
+#insertPSetContentsTo(param.vertexWeight, process.vertexWeight)
+
+process.commonSequence *= process.pileupWeight#*process.vertexWeight)
+
+if dataVersion.isData():
+    process.pileupWeight.enabled = False
+#    process.vertexWeight.enabled = False
+
+# All events
+process.allEventsCount = cms.EDProducer("EventCountProducer")
+process.commonSequence *= process.allEventsCount
+counters.append("allEventsCount")
 
 # Triggering
-if dataVersion.isMC():
-    process.load("HLTrigger.HLTfilters.triggerResultsFilter_cfi")
-    process.triggerResultsFilter.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
-    process.triggerResultsFilter.l1tResults = cms.InputTag("") # dummy
-    process.triggerResultsFilter.throw = cms.bool(True)
-    process.triggerResultsFilter.triggerConditions = cms.vstring(trigger)
-    process.commonSequence *= process.triggerResultsFilter
-else:
-    process.TriggerFilter.triggerConditions = [trigger]
+process.load("HLTrigger.HLTfilters.triggerResultsFilter_cfi")
+process.triggerResultsFilter.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
+process.triggerResultsFilter.l1tResults = cms.InputTag("") # dummy
+process.triggerResultsFilter.throw = cms.bool(True)
+process.triggerResultsFilter.triggerConditions = cms.vstring(trigger)
+process.commonSequence *= process.triggerResultsFilter
 
 process.triggeredCount = cms.EDProducer("EventCountProducer")
 process.commonSequence *= process.triggeredCount
@@ -139,50 +211,24 @@ counters.append("goodPrimaryVertexCount")
 
 
 # HLT matching and embedding
-import MuonAnalysis.MuonAssociators.patMuonsWithTrigger_cff as muonTrigger
-process.load("MuonAnalysis.MuonAssociators.patMuonsWithTrigger_cff")
-muonTrigger.useExistingPATMuons(process, "patMuons")
-process.patTrigger.onlyStandAlone = False
-process.commonSequence *= process.patMuonsWithTriggerSequence
-muons = "patMuonsWithTrigger"
+#import MuonAnalysis.MuonAssociators.patMuonsWithTrigger_cff as muonTrigger
+#process.load("MuonAnalysis.MuonAssociators.patMuonsWithTrigger_cff")
+#muonTrigger.useExistingPATMuons(process, "patMuons")
+#process.patTrigger.onlyStandAlone = False
+#process.commonSequence *= process.patMuonsWithTriggerSequence
+#muons = "patMuons"
 
 # Isolation embedding
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
-muons = customisations.addMuonIsolationEmbedding(process, process.commonSequence, muons=muons)
-
-# Pileup weighting
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-
-# Pileup weighting
-process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
-    alias = cms.string("pileupWeight"),
-)
-puweight = "Run2011A"
-if len(options.puWeightEra) > 0:
-        puweight = options.puWeightEra
-param.setPileupWeightFor2011(dataVersion, era="puweight")
-insertPSetContentsTo(param.vertexWeight, process.pileupWeight)
-
-# Vertex weighting
-#process.vertexWeight = cms.EDProducer("HPlusVertexWeightProducer",
-#    alias = cms.string("vertexWeight"),
-#)
-#param.setVertexWeightFor2011()
-#insertPSetContentsTo(param.vertexWeight, process.vertexWeight)
-
-process.commonSequence *= process.pileupWeight#*process.vertexWeight)
-
-if dataVersion.isData():
-    process.pileupWeight.enabled = False
-#    process.vertexWeight.enabled = False
-
+#import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
+#muons = customisations.addMuonIsolationEmbedding(process, process.commonSequence, muons=muons)
+muons = "selectedPatMuons"
 
 
 # Preselection by tracks
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 process.goodTracks = cms.EDFilter("TrackSelector",
-    src = cms.InputTag("generalTracks"), # or cms.InputTag("standAloneMuons","UpdatedAtVtx"), 
+#    src = cms.InputTag("generalTracks"), # or cms.InputTag("standAloneMuons","UpdatedAtVtx"), 
+    src = cms.InputTag("generalTracks20eta2p5"),
 #    cut = cms.string("pt > 25 && abs(eta) < 2.1 && numberOfValidHits >= 12"),
     cut = cms.string("pt > 25 && abs(eta) < 2.1"),
     filter = cms.bool(True)
@@ -331,6 +377,12 @@ for key, value in muonAnalysis.isolations.iteritems():
         continue
     setattr(variables, key, cms.string(value))
 
+
+def matchString(filters):
+    if not isinstance(filters, list):
+        filters = [filters]
+    return " || ".join(["!triggerObjectMatchesByFilter('%s').empty()" % f for f in filters])
+
 # Tag and Probe tree
 process.tnpTree = cms.EDAnalyzer("TagProbeFitTreeProducer",
     # choice of tag and probe pairs, and arbitration
@@ -342,14 +394,21 @@ process.tnpTree = cms.EDAnalyzer("TagProbeFitTreeProducer",
     flags = cms.PSet(
         isGlobalMuon = cms.string("isGlobalMuon"),
         isTrackerMuon = cms.string("isTrackerMuon"),
-        #isHLTMu9     = cms.string("!triggerObjectMatchesByFilter('hltSingleL3MuonPre9').empty()"),  
-        #isHLTMu15    = cms.string("!triggerObjectMatchesByFilter('hltSingleL3MuonPre15').empty()"),  
-        isHLTMu9     = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu9filter),
-        isHLTMu15    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu15filter),
-        isHLTMu20    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu20filter),
-        isHLTMu24    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu24filter),
-        isHLTMu30    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu30filter),
-        isHLTMu40    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu40filter),
+#        isHLTMu9     = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu9filter),
+#        isHLTMu15    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu15filter),
+#        isHLTMu20    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu20filter),
+#        isHLTMu24    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu24filter),
+#        isHLTMu30    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu30filter),
+#        isHLTMu40    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu40filter),
+        isHLTMu15       = cms.string(matchString(mu15filter)),
+        isHLTMu20       = cms.string(matchString(mu20filter)),
+        isHLTMu24       = cms.string(matchString([mu24filter, mu24filter_v8])),
+        isHLTMu30       = cms.string(matchString([mu30filter, mu30filter_v7])),
+        isHLTMu40       = cms.string(matchString([mu40filter, mu40filter_v5])),
+        isHLTMu24eta2p1 = cms.string(matchString(mu24eta2p1filter)),
+        isHLTMu30eta2p1 = cms.string(matchString(mu30eta2p1filter)),
+        isHLTMu40eta2p1 = cms.string(matchString(mu40eta2p1filter)),
+        
         isID         = cms.string("muonID('GlobalMuonPromptTight')"),
         hitQuality   = cms.string("innerTrack().numberOfValidHits() > 10 && innerTrack().hitPattern.pixelLayersWithMeasurement() >= 1 && numberOfMatches() > 1"),
         dB           = cms.string("abs(dB()) < 0.02"),
@@ -390,6 +449,7 @@ process.tnpCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
 #                                     printMainCounter = cms.untracked.bool(True),
 )
 
+
 # Path
 process.tagAndProbeSequence *= (process.tnpTree * process.tnpCounters)
 
@@ -397,3 +457,15 @@ process.path = cms.Path(
     process.commonSequence *
     process.tagAndProbeSequence
 )
+
+
+# Replace all event counters with the weighted one
+eventCounters = []
+for label, module in process.producers_().iteritems():
+    if module.type_() == "EventCountProducer":
+        eventCounters.append(label)
+prototype = cms.EDProducer("HPlusEventCountProducer",
+    weightSrc = cms.InputTag("pileupWeight")
+)
+for label in eventCounters:
+    process.globalReplace(label, prototype.clone())
