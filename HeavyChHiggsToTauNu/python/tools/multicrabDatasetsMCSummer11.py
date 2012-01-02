@@ -85,6 +85,11 @@ datasets = {
                 "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v19b-9436cd413e1f831f4594f528a53faac6/USER",
                 "number_of_jobs": 1
             },
+            "pattuple_v20_test1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v20_test1-88557732962dcf8166a136160b7c6f9d/USER",
+                "number_of_jobs": 1
+            },
         }
     },
     "TTToHplusBWB_M140_Summer11": {

@@ -29,7 +29,7 @@ multicrab.extendDatasets(
 #       "Tau_165970-167913_Prompt",          # 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
 #       "Tau_170722-172619_Aug05",           # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
 #       "Tau_172620-173198_Prompt",          # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
-#       "Tau_173236-173692_Prompt",          # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
+       "Tau_173236-173692_Prompt",          # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
 #       "Tau_175860-177452_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v1
 #       "Tau_177718-178380_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v1
 #       "Tau_178420-179889_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v5
@@ -69,7 +69,7 @@ multicrab.extendDatasets(
 #        "TTToHplusBWB_M80_Summer11",
 #        "TTToHplusBWB_M90_Summer11",
 #        "TTToHplusBWB_M100_Summer11",
-#        "TTToHplusBWB_M120_Summer11",
+        "TTToHplusBWB_M120_Summer11",
 #        "TTToHplusBWB_M140_Summer11",
 #        "TTToHplusBWB_M150_Summer11",
 #        "TTToHplusBWB_M155_Summer11",
@@ -164,7 +164,7 @@ def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
-    name += "_pattuple_v19"
+    name += "_pattuple_v20_test1"
 
     # Add the begin run in the dataset name to the publish name in
     # order to distinguish pattuple datasets from the same PD
