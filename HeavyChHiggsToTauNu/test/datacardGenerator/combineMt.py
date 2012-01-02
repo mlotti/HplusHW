@@ -12,15 +12,13 @@ import ROOT
 if not drawToScreen:
     ROOT.gROOT.SetBatch(True)
 
-#import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
-#import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-#import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
-lumi = 2.2
+lumi     = 2.2
+Top2HpBR = 0.05
 
 def main():
 
@@ -59,21 +57,22 @@ def makePlot(file):
 	frame = Frame(1000,0,400)
         frame.SetXTitle("m_{T}(#tau-jet,MET) [GeV/c^{2}]")
         frame.SetYTitle("N_{events} / 10 GeV/c^{2}")
-        frame.SetTop2HpBR(0.05)
+        frame.SetTop2HpBR(Top2HpBR)
 
 	frame.SetHistograms(histos)
 
 	frame.DataHisto("Data","data_obs", )
-        frame.BackgrHisto("EWK","EWKTau")
-        frame.BackgrHisto("EWK (fake tau)","fakett+fakeW+faket")
+        frame.BackgrHisto("EWK w. taus (meas.)","EWKTau")
+        frame.BackgrHisto("EWK fake taus (MC)","fakett+fakeW+faket")
 #	frame.BackgrHisto("QCD","QCD")
 	frame.BackgrHisto("QCD","QCDInv")
 	frame.SignalHisto("H^{#pm}","HH*_1+HW*_1")
 
-	frame.SetColor("EWK",ROOT.TColor.GetColor("#993399"))
-	frame.SetColor("EWK (fake tau)", ROOT.TColor.GetColor("#669900"))
-	frame.SetColor("QCD", ROOT.TColor.GetColor("#ffcc33"))
-	frame.SetColor("H^{#pm}", ROOT.TColor.GetColor("#ff3399"))
+	frame.SetFillColor("EWK w. taus (meas.)",ROOT.TColor.GetColor("#993399"))
+	frame.SetFillColor("EWK fake taus (MC)", ROOT.TColor.GetColor("#669900"))
+	frame.SetFillColor("QCD", ROOT.TColor.GetColor("#ffcc33"))
+	frame.SetLineColor("H^{#pm}", ROOT.TColor.GetColor("#ff3399"))
+	frame.SetLineStyle("H^{#pm}", 2)
 
 #	frame.Save(fOUT)
 
@@ -117,12 +116,27 @@ class Frame:
     def SetHistograms(self, histograms):
 	self.histograms = histograms
 
-    def SetColor(self, histoName, color):
+    def SetFillColor(self, histoName, color):
 	if self.Exists(histoName):
 	    self.histograms[self.FindHistoIndex(histoName)].SetFillColor(color)
 	else:
 	    print "Histogram",histoName,"not found, exiting.."
 	    sys.exit()
+
+    def SetLineColor(self, histoName, color):
+        if self.Exists(histoName):
+            self.histograms[self.FindHistoIndex(histoName)].SetLineColor(color)
+        else:
+            print "Histogram",histoName,"not found, exiting.."
+            sys.exit()
+
+    def SetLineStyle(self, histoName, style):
+        if self.Exists(histoName):
+            self.histograms[self.FindHistoIndex(histoName)].SetLineStyle(style)
+	    self.histograms[self.FindHistoIndex(histoName)].SetLineWidth(2)
+        else:
+            print "Histogram",histoName,"not found, exiting.."
+            sys.exit()
 
     def Exists(self, histoName):
 	for histo in self.histograms:
@@ -208,37 +222,58 @@ class Frame:
 	for histo in self.dataHistos:
             hObserved.Add(self.histograms[self.FindHistoIndex(histo.label)])
 
-	hEstimated = self.histograms[self.FindHistoIndex(self.dataHistos[0].name)].Clone("Backgr")
-	hEstimated.Reset()
-        for histo in self.backgrHistos:
-            hEstimated.Add(self.histograms[self.FindHistoIndex(histo.label)])
+	hEstimatedEWKfake = self.histograms[self.FindHistoIndex("EWK fake taus (MC)")]
+	hEstimatedEWK     = self.histograms[self.FindHistoIndex("EWK w. taus (meas.)")]
+	hEstimatedEWK.Add(hEstimatedEWKfake)
+	hEstimatedQCD     = self.histograms[self.FindHistoIndex("QCD")]
+	hEstimatedQCD.Add(hEstimatedEWK)
+	hUncertainty = hEstimatedQCD.Clone("BackgrUncertainty")
+	hUncertainty.SetFillColor(1)
+	hUncertainty.SetFillStyle(3354)
+	hUncertainty.SetLineColor(0)
+	hUncertainty.SetLineStyle(0)
+	hUncertainty.SetLineWidth(0)
+	hUncertainty.SetMarkerColor(0)
+	hUncertainty.SetMarkerSize(0)
+	hSignal           = self.histograms[self.FindHistoIndex("H^{#pm}")]
+	hSignal.Add(hEstimatedQCD)
 
-        hEstimatedWSignal = self.histograms[self.FindHistoIndex(self.signalHistos[0].label)].Clone("SB")
-	hEstimatedWSignal.Reset()
-        for histo in self.signalHistos:
-            hEstimatedWSignal.Add(self.histograms[self.FindHistoIndex(histo.label)])
-	hEstimatedWSignal.Add(hEstimated)
-
-	comparosonHistos = []
-	comparosonHistos.append(hEstimatedWSignal)
-	comparosonHistos.append(hEstimated)
 
 	style = tdrstyle.TDRStyle()
 
-        xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
-#        plots.mergeWHandHH(datasets)
 
 	plot = plots.ComparisonManyPlot(
 	    histograms.Histo(hObserved, "Data"),
-	    [histograms.Histo(hEstimated, "Backgr"),histograms.Histo(hEstimatedWSignal, "SB")]
+	    [
+	     histograms.Histo(hUncertainty, "Backgr.Uncert"),
+	     histograms.Histo(hEstimatedEWKfake, "EWK fake taus (MC)"),
+             histograms.Histo(hEstimatedEWK, "EWK w. taus (meas.)"),
+             histograms.Histo(hEstimatedQCD, "QCD"),
+             histograms.Histo(hSignal, "H^{#pm}")
+             ]
 	)
-	dataStyle = styles.getDataStyle().clone()
-	plot.histoMgr.forHisto("Data", dataStyle)
-	plot.histoMgr.setHistoDrawStyle("Data", "EP")
 
-        plot.createFrame(name, opts={"ymin":0, "ymaxfactor": 2})
+        plot.histoMgr.forHisto("Data", styles.getDataStyle())
+
+	plot.histoMgr.forHisto("EWK w. taus (meas.)",styles.getEWKStyle())
+	plot.histoMgr.forHisto("EWK fake taus (MC)",styles.getEWKFakeStyle())
+	plot.histoMgr.forHisto("QCD",styles.getQCDStyle())
+	plot.histoMgr.forHisto("H^{#pm}",styles.getSignalStyle())
+	plot.histoMgr.forHisto("Backgr.Uncert",styles.getErrorStyle())
+
+	plot.histoMgr.setHistoDrawStyleAll("HIST")
+	plot.histoMgr.setHistoDrawStyle("Data", "EP")
+	plot.histoMgr.setHistoDrawStyle("Backgr.Uncert", "E2")
+
+	plot.histoMgr.setHistoLegendStyleAll("F")
+	plot.histoMgr.setHistoLegendStyle("Data", "P")
+	plot.histoMgr.setHistoLegendStyle("H^{#pm}", "L")
+
+        plot.createFrame(name, opts={"ymin":0, "ymaxfactor": 1.2})
 	plot.frame.GetXaxis().SetTitle(self.xtitle)
 	plot.frame.GetYaxis().SetTitle(self.ytitle)
+
+	plot.setLegend(histograms.createLegend(0.55,0.68,0.9,0.93))
 	
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
