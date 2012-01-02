@@ -45,7 +45,8 @@ def makePlot(file):
 	fIN  = ROOT.TFile.Open(file)
 	fOUT = match.group("rootfile")
 
-	mass_re = re.compile("hplushadronic(?P<mass>(\d+))")
+#	mass_re = re.compile("hplushadronic(?P<mass>(\d+))")
+	mass_re = re.compile("(?P<mass>(\d+))")
 	mass_match = mass_re.search(fOUT)
 
 	signalLabel = "Signal"
