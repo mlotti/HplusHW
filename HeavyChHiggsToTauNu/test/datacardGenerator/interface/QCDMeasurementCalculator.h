@@ -43,6 +43,7 @@ private:
   std::vector<Dataset*> vMCEWK;
   std::vector<Dataset*> vData;
   
+  bool bDebug;
   bool bIsCalculated;
   bool bStatisticsMode;
   bool bSystematicsMode;
@@ -74,10 +75,6 @@ private:
 
   
   TH1* hMtShapeForResult;
-  // FIXME add data-driven control plots
-  
-  
-  
 };
 
 #endif // QCDMEASUREMENT_H
