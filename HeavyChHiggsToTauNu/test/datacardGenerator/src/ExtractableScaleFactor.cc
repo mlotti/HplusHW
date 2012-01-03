@@ -33,20 +33,6 @@ double ExtractableScaleFactor::doExtract(std::vector< Dataset* > datasets, Norma
       TH1F* hNorm = getCounterHistogram((*it)->getFile(), sNormHisto);
       if (!hNorm) return -1.;
       // Obtain result
-/*      std::cout << "ScaleFactor: \033[0;44m\033[1;37mwarning check code!\033[0;0m" << std::endl;
-      double myNormFactor = info->getNormalisationFactor((*it)->getFile());
-      for (int i = 1; i <= hUncertainty->GetNbinsX(); ++i) {
-        if (sId == "1" && hUncertainty->GetBinContent(i) / (double)hUncertainty->GetEntries() > 0.1) { // trg scale factor
-          double myCount = hUncertainty->GetBinContent(i) * myNormFactor;
-          mySum += myCount * myCount * hUncertainty->GetBinCenter(i) * hUncertainty->GetBinCenter(i);
-        } else if (sId != "1") {
-          double myCount = hUncertainty->GetBinContent(i) * myNormFactor;
-          mySum += myCount * myCount * hUncertainty->GetBinCenter(i) * hUncertainty->GetBinCenter(i);
-        }
-      }
-      myTotal += hNorm->GetBinContent(1) * myNormFactor / 2.0;
-*/
-      // this is the correct code
       double myNormFactor = info->getNormalisationFactor((*it)->getFile());
       for (int i = 1; i <= hUncertainty->GetNbinsX(); ++i) {
         double myCount = hUncertainty->GetBinContent(i) * myNormFactor;

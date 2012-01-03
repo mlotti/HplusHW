@@ -1049,6 +1049,27 @@ class HistoManagerImpl:
                 self.legendList[i] = histo
                 break
 
+    ## Reorder the legend
+    #
+    # \param histoNames  List of histogram names
+    #
+    # The legend list is reordered as specified by histoNames.
+    # Histograms not mentioned in histoNames are kept in the original
+    # order at the end of the legend.
+    def reorderLegend(self, histoNames):
+        def index_(list_, name_):
+            for i, o in enumerate(list_):
+                if o.getName() == name_:
+                    return i
+            raise Exception("No such histogram %s" % name_)
+
+        src = self.legendList[:]
+        dst = []
+        for name in histoNames:
+            dst.append(src.pop(index_(src, name)))
+        dst.extend(src)
+        self.legendList = dst
+
     ## Call a function for a named histograms.HistoBase object.
     #
     # \param name   Name of histogram

@@ -461,6 +461,9 @@ class MulticrabDataset:
 
         self.lines.append(line)
 
+    def appendCopyFile(self, fileName):
+        self.filesToCopy.append(fileName)
+
     def extendBlackWhiteList(self, blackWhiteList, sites):
         """Extend the CE/SE black/white list with a list of sites.
 
@@ -852,3 +855,6 @@ class Multicrab:
             print "Created multicrab task to subdirectory "+dirname
             print
 
+            os.chdir("..")
+
+        return dirname
