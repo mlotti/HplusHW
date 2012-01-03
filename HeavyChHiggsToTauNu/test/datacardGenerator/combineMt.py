@@ -42,17 +42,22 @@ def makePlot(file):
     root_re = re.compile("(?P<rootfile>([^/]*))\.root")
     match = root_re.search(file)
     if match:
-	fIN  = ROOT.TFile.Open(file)
 	fOUT = match.group("rootfile")
 
-#	mass_re = re.compile("hplushadronic(?P<mass>(\d+))")
-	mass_re = re.compile("(?P<mass>(\d+))")
+	mass_re = re.compile("hplushadronic(?P<mass>(\d+))")
+#	mass_re = re.compile("(?P<mass>(\d+))")
 	mass_match = mass_re.search(fOUT)
 
-	signalLabel = "Signal"
-        if mass_match:
-	    mass = mass_match.group("mass")
-	    signalLabel = "H^{#pm}, m_{H^{#pm}} = " + mass + " GeV/c^{2}"
+        if not mass_match:
+	    print "File",file,"not matching"
+	    return
+
+	fIN  = ROOT.TFile.Open(file)
+
+	mass = mass_match.group("mass")
+	signalLabel = "H^{#pm}, m_{H^{#pm}} = " + mass + " GeV/c^{2}"
+
+	print "Higgs mass",mass,"GeV"
 
 	histos = []
 
@@ -70,6 +75,7 @@ def makePlot(file):
 
 	frame.SetHistograms(histos)
 
+	#     DataHisto("new name","input histos","legend label")
 	frame.DataHisto("Data", "data_obs", "Data")
         frame.BackgrHisto("EWK","EWKTau", "EWK w.taus (meas.)")
         frame.BackgrHisto("EWKfake","fakett+fakeW+faket", "EWK fake taus (MC)")
@@ -237,11 +243,14 @@ class Frame:
         hObserved.Reset()
 	for histo in self.dataHistos:
             hObserved.Add(self.histograms[self.FindHistoIndex(histo.label)])
-
+	print "    Data:    ", hObserved.Integral(0,hObserved.GetNbinsX()),"events"
 	hEstimatedEWKfake = self.histograms[self.FindHistoIndex("EWKfake")].Clone("hEstimatedEWKfake")
+	print "    EWKfake: ",hEstimatedEWKfake.Integral(0,hEstimatedEWKfake.GetNbinsX()),"events"
 	hEstimatedEWK     = self.histograms[self.FindHistoIndex("EWK")].Clone("hEstimatedEWK")
+	print "    EWK:     ",hEstimatedEWK.Integral(0,hEstimatedEWK.GetNbinsX()),"events"
 	hEstimatedEWK.Add(hEstimatedEWKfake)
 	hEstimatedQCD     = self.histograms[self.FindHistoIndex("QCD")].Clone("hEstimatedQCD")
+	print "    QCD:     ",hEstimatedQCD.Integral(0,hEstimatedQCD.GetNbinsX()),"events"
 	hEstimatedQCD.Add(hEstimatedEWK)
 	hUncertainty = hEstimatedQCD.Clone("BackgrUncertainty")
 	hUncertainty.SetFillColor(1)
@@ -252,6 +261,7 @@ class Frame:
 	hUncertainty.SetMarkerColor(0)
 	hUncertainty.SetMarkerSize(0)
 	hSignal           = self.histograms[self.FindHistoIndex("Signal")].Clone("hSignal")
+	print "    Signal:  ",hSignal.Integral(0,hSignal.GetNbinsX()),"events"
 	hSignal.Add(hEstimatedQCD)
 
 
