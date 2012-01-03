@@ -4,7 +4,7 @@ set odir = $1
 set datacard1 = ${odir}/$2 
 set datacard2 = ${odir}/$3
 set datacard3 = ${odir}/$4 
-set outputfile = outputs/output_LandS_`basename ${datacard1} .txt`_exp
+set outputfile = outputs/output_`basename ${datacard1} .txt`_exp
 
 echo "Calculating exp value with datacard ${datacard1} ${datacard2} ${datacard3}, output is ${outputfile}"
 echo
