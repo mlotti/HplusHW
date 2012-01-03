@@ -155,22 +155,16 @@ if len(options.puWeightEra) > 0:
         puweight = options.puWeightEra
 param.setPileupWeightFor2011(dataVersion, era=puweight)
 insertPSetContentsTo(param.vertexWeight, process.pileupWeight)
-
-# Vertex weighting
-#process.vertexWeight = cms.EDProducer("HPlusVertexWeightProducer",
-#    alias = cms.string("vertexWeight"),
-#)
-#param.setVertexWeightFor2011()
-#insertPSetContentsTo(param.vertexWeight, process.vertexWeight)
-
-process.commonSequence *= process.pileupWeight#*process.vertexWeight)
-
 if dataVersion.isData():
     process.pileupWeight.enabled = False
-#    process.vertexWeight.enabled = False
+
+process.commonSequence *= process.pileupWeight
+counterProto = cms.EDProducer( "HPlusEventCountProducer",
+    weightSrc = cms.InputTag("pileupWeight")
+)
 
 # All events
-process.allEventsCount = cms.EDProducer("EventCountProducer")
+process.allEventsCount = counterProto.clone()
 process.commonSequence *= process.allEventsCount
 counters.append("allEventsCount")
 
@@ -182,7 +176,7 @@ process.triggerResultsFilter.throw = cms.bool(True)
 process.triggerResultsFilter.triggerConditions = cms.vstring(trigger)
 process.commonSequence *= process.triggerResultsFilter
 
-process.triggeredCount = cms.EDProducer("EventCountProducer")
+process.triggeredCount = counterProto.clone()
 process.commonSequence *= process.triggeredCount
 counters.append("triggeredCount")
 
@@ -200,7 +194,7 @@ process.goodPrimaryVertexFilter = cms.EDFilter("VertexCountFilter",
     minNumber = cms.uint32(1),
     maxNumber = cms.uint32(999)
 )
-process.goodPrimaryVertexCount = cms.EDProducer("EventCountProducer")
+process.goodPrimaryVertexCount = counterProto.clone()
 process.commonSequence *= (
     process.firstPrimaryVertex *
     process.goodPrimaryVertex *
@@ -233,7 +227,7 @@ process.goodTracks = cms.EDFilter("TrackSelector",
     cut = cms.string("pt > 25 && abs(eta) < 2.1"),
     filter = cms.bool(True)
 )
-process.goodTracksCount = cms.EDProducer("EventCountProducer")
+process.goodTracksCount = counterProto.clone()
 counters.append("goodTracksCount")
 process.trackCands = cms.EDProducer("ConcreteChargedCandidateProducer",
     src = cms.InputTag("goodTracks"),
@@ -254,7 +248,7 @@ process.zCandsFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("zCands"),
     minNumber = cms.uint32(1)
 )
-process.zCandsCount = cms.EDProducer("EventCountProducer")
+process.zCandsCount = counterProto.clone()
 counters.append("zCandsCount")
 process.commonSequence *= (process.zCands * process.zCandsFilter * process.zCandsCount)
 
@@ -460,12 +454,12 @@ process.path = cms.Path(
 
 
 # Replace all event counters with the weighted one
-eventCounters = []
-for label, module in process.producers_().iteritems():
-    if module.type_() == "EventCountProducer":
-        eventCounters.append(label)
-prototype = cms.EDProducer("HPlusEventCountProducer",
-    weightSrc = cms.InputTag("pileupWeight")
-)
-for label in eventCounters:
-    process.globalReplace(label, prototype.clone())
+# eventCounters = []
+# for label, module in process.producers_().iteritems():
+#     if module.type_() == "EventCountProducer":
+#         eventCounters.append(label)
+# prototype = cms.EDProducer("HPlusEventCountProducer",
+#     weightSrc = cms.InputTag("pileupWeight")
+# )
+# for label in eventCounters:
+#     process.globalReplace(label, prototype.clone())
