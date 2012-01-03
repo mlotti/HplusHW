@@ -1,7 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
-import subprocess
-import  errno
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 
 def addConfigInfo(process, options, dataVersion):
     process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer",
@@ -12,19 +11,9 @@ def addConfigInfo(process, options, dataVersion):
         process.configInfo.crossSection = cms.untracked.double(options.crossSection)
         print "Dataset cross section has been set to %g pb" % options.crossSection
 
-    cmd = ["git", "show", "--pretty=format:%H"]
-    try:
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        (output, error) = p.communicate()
-        ret = p.returncode
-        if ret != 0:
-            raise Exception("Ran %s, got exit code %d with output\n%s\n%s" % (" ".join(cmd), ret, output, error))
-
-        process.configInfo.codeVersion = cms.untracked.string(output.split("\n")[0])
-    except OSError, e:
-        # ENOENT is given if git is not found from path
-        if e.errno != errno.ENOENT:
-            raise e
+    codeVersion = git.getCommitId()
+    if codeVersion != None:
+        process.configInfo.codeVersion = cms.untracked.string(codeVersion)
 
     return cms.Path(process.configInfo)
 

@@ -52,6 +52,10 @@ namespace HPlus {
     double dataEfficiencyRelativeUncertainty(const pat::Tau& tau) const;
     double dataEfficiencyAbsoluteUncertainty(const pat::Tau& tau) const;
 
+    double dataAverageEfficiency(const pat::Tau& tau) const;
+    double dataAverageEfficiencyRelativeUncertainty(const pat::Tau& tau) const;
+    double dataAverageEfficiencyAbsoluteUncertainty(const pat::Tau& tau) const;
+
     double mcEfficiency(const pat::Tau& tau) const;
     double mcEfficiencyRelativeUncertainty(const pat::Tau& tau) const;
     double mcEfficiencyAbsoluteUncertainty(const pat::Tau& tau) const;
@@ -77,6 +81,9 @@ namespace HPlus {
     double dataEfficiency(size_t i) const;
     double dataEfficiencyAbsoluteUncertainty(size_t i) const;
 
+    double dataAverageEfficiency(size_t i) const;
+    double dataAverageEfficiencyAbsoluteUncertainty(size_t i) const;
+
     double mcEfficiency(size_t i) const;
     double mcEfficiencyAbsoluteUncertainty(size_t i) const;
 
@@ -86,8 +93,8 @@ namespace HPlus {
     std::vector<double> fPtBinLowEdges;
     std::vector<DataValue> fDataValues;
 
-    std::vector<double> fEffDataValues;
-    std::vector<double> fEffDataUncertainties;
+    std::vector<double> fEffDataAverageValues;
+    std::vector<double> fEffDataAverageUncertainties;
     std::vector<double> fEffMCValues;
     std::vector<double> fEffMCUncertainties;
 

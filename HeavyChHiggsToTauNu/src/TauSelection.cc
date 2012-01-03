@@ -441,7 +441,7 @@ namespace HPlus {
         hIsolationPFChargedHadrCandsPtSum->Fill(iTau->isolationPFChargedHadrCandsPtSum(), fEventWeight.getWeight());
         hIsolationPFGammaCandsEtSum->Fill(iTau->isolationPFGammaCandsEtSum(), fEventWeight.getWeight());
 
-        hHPSDecayMode->Fill(iTau->tauID("decayModeFinding"), fEventWeight.getWeight());
+        hHPSDecayMode->Fill(iTau->decayMode(), fEventWeight.getWeight());
 
         if (!fTauID->passIsolation(iTau)) continue;
 	hTightChargedMaxPt->Fill(iTau->userFloat("byTightChargedMaxPt"), fEventWeight.getWeight());

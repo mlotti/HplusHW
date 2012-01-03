@@ -18,8 +18,15 @@ step = "signalAnalysis"
 #era = "Run2011A-EPS"
 era = "Run2011A"
 
+#version = "v13_1"
+#version = "v13_2"
+#version = "v13_2_seedTest1"
+#version = "v13_2_seedTest2"
+version = "v14"
+
 # "Midfix" for multicrab directory name
 dirPrefix = ""
+#dirPrefix += "_Met50"
 #dirPrefix += "_caloMet45"
 #dirPrefix += "_caloMet60"
 #dirPrefix += "_taueff"
@@ -34,7 +41,8 @@ dirPrefix = ""
 #dirPrefix = "_TauIdScan"
 #dirPrefix = "_iso05"
 #dirPrefix = "_test"
-#dirPrefix = "_systematics"
+#dirPrefix += "_systematics"
+#dirPrefix += "_debug"
 
 # Visible pt cut
 #
@@ -44,13 +52,13 @@ dirPrefix = ""
 #
 # For analysis/signalAnalysis, select the embedded dataset with this
 # visible pt cut
-vispt = ""
+#vispt = ""
 #vispt = "_vispt10"
 #vispt = "_vispt20"
 #vispt = "_vispt30"
 #vispt = "_vispt40"
 if step in ["embedding", "analysis", "signalAnalysis"]:
-    dirPrefix += vispt
+    dirPrefix += "_"+version
 if step in ["analysis", "signalAnalysis"]:
     dirPrefix += "_"+era
 
@@ -65,10 +73,10 @@ if step == "signalAnalysis":
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
           "embedding":      {"input": "tauembedding_skim_v13", "config": "embed.py",   "output": "embedded.root"},
 #          "analysis":       {"input": "tauembedding_embedding_v13"+pt,  "config": "embeddingAnalysis_cfg.py"},
-          "analysis":       {"input": "tauembedding_embedding_v13_1"+vispt,  "config": "embeddingAnalysis_cfg.py"},
-#          "analysisTau":    {"input": "pattuple_v17",                  "config": "tauAnalysis_cfg.py"},
+          "analysis":       {"input": "tauembedding_embedding_"+version,  "config": "embeddingAnalysis_cfg.py"},
+          "analysisTau":    {"input": "pattuple_v18",                       "config": "tauAnalysis_cfg.py"},
 #          "signalAnalysis": {"input": "tauembedding_embedding_v13"+pt,  "config": "../signalAnalysis_cfg.py"},
-          "signalAnalysis": {"input": "tauembedding_embedding_v13_1"+vispt,  "config": "../signalAnalysis_cfg.py"},
+          "signalAnalysis": {"input": "tauembedding_embedding_"+version,  "config": "../signalAnalysis_cfg.py"},
           "muonAnalysis":   {"input": "tauembedding_skim_v13",          "config": "muonAnalysisFromSkim_cfg.py"},
           "caloMetEfficiency": {"input": "tauembedding_skim_v13",         "config": "caloMetEfficiency_cfg.py"},
           }
@@ -119,7 +127,7 @@ datasetsMCnoQCD = [
 datasetsMCQCD = [
     "QCD_Pt20_MuEnriched_TuneZ2_Summer11",
 ]
-datasetsTest = [
+datasetsSignal = [
     "TTToHplusBWB_M80_Summer11",
     "TTToHplusBWB_M90_Summer11",
     "TTToHplusBWB_M100_Summer11",
@@ -159,7 +167,7 @@ else:
     datasets.extend(datasetsMCQCD)
 
 if step in ["skim", "embedding", "signalAnalysis"]:
-    datasets.extend(datasetsTest)
+    datasets.extend(datasetsSignal)
 
 multicrab.extendDatasets(config[step]["input"], datasets)
 
@@ -170,11 +178,7 @@ if step != "skim":
 
 # Define the processing version number, meaningful for skim/embedding
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v13_1" % step
-#if step in ["generation", "embedding"]:
-#    tauname += pt
-if step == "embedding":
-    tauname += vispt
+tauname = "_tauembedding_%s_%s" % (step, version)
 
 reco_re = re.compile("^Run[^_]+_(?P<reco>[^_]+_v\d+_[^_]+_)")
 
@@ -227,9 +231,13 @@ muonAnalysisNjobs = { # goal: 30k events/job
 def modify(dataset):
     name = ""
 
-    if dataset.isData():
+    if dataset.isData() or step != "skim":
         dataset.appendLine("CMSSW.total_number_of_lumis = -1")
     else:
+        # split by events can only be used for MC and in skim step
+        # embedding step is impossible, because the counters are saved
+        # in the lumi sections, and will get doubly counted in split
+        # by events mode
         dataset.appendLine("CMSSW.total_number_of_events = -1")
 
     path = dataset.getDatasetPath().split("/")
@@ -287,7 +295,8 @@ def modifyMuonAnalysis(dataset):
     
 # Apply the modifications
 if step in ["analysis", "analysisTau","signalAnalysis"]:
-    multicrab.appendLineAll("CMSSW.output_file = histograms.root")
+    if step != "signalAnalysis":
+        multicrab.appendLineAll("CMSSW.output_file = histograms.root")
     multicrab.forEachDataset(modifyAnalysis)
 elif step in ["muonAnalysis", "caloMetEfficiency"]:
     multicrab.appendLineAll("CMSSW.output_file = histograms.root")

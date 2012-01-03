@@ -27,7 +27,7 @@ public:
   
 private:
   /// Generates first lines of config
-  void generateHeader(std::string description, double luminosity);
+  void generateHeader(std::string description, NormalisationInfo* info);
   /// Generates parameter lines
   void generateParameterLines(std::vector<DatasetGroup*>& datasetGroups,
                               std::vector< Extractable* >& extractables,
@@ -37,16 +37,19 @@ private:
   /// Generates observation line
   void generateObservationLine(std::vector<DatasetGroup*>& datasetGroups,
                                std::vector< Extractable* >& extractables,
+                               NormalisationInfo* info,
                                bool useShapes);
   /// Generates process lines
   void generateProcessLines(std::vector<DatasetGroup*>& datasetGroups);
   /// Generates rate line
   void generateRateLine(std::vector<DatasetGroup*>& datasetGroups,
                         std::vector< Extractable* >& extractables,
+                        NormalisationInfo* info,
                         bool useShapes);
   /// Generates nuisance lines (incl. shapes)
   void generateNuisanceLines(std::vector<DatasetGroup*>& datasetGroups,
                              std::vector<Extractable*>& extractables,
+                             NormalisationInfo* info,
                              bool useShapes);
   /// Generate separator line
   std::string generateSeparatorLine(std::vector<DatasetGroup*>& datasetGroups,

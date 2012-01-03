@@ -401,7 +401,7 @@ class TreeDraw:
 
         tree = rootFile.Get(self.tree)
         if tree == None:
-            raise Exception("No tree '%s' in file %s" % (self.tree, rootFile.GetName()))
+            raise Exception("No TTree '%s' in file %s" % (self.tree, rootFile.GetName()))
 
         if self.varexp == "":
             nentries = tree.GetEntries(selection)
@@ -445,6 +445,30 @@ class TreeDraw:
         h.SetName(datasetName+"_"+h.GetName())
         h.SetDirectory(0)
         return h
+
+class TreeScan:
+    def __init__(self, tree, function, selection=""):
+        self.tree = tree
+        self.function = function
+        self.selection = selection
+
+    def clone(self, **kwargs):
+        args = {"tree": self.tree,
+                "function": self.function,
+                "selection": self.selection}
+        args.update(kwargs)
+        return TreeScan(**args)
+
+    def draw(self, rootFile, datasetName):
+        tree = rootFile.Get(self.tree)
+        if tree == None:
+            raise Exception("No TTree '%s' in file %s" % (self.tree, rootFile.GetName()))
+
+        tree.Draw(">>elist", self.selection)
+        elist = ROOT.gDirectory.Get("elist")
+        for ientry in xrange(elist.GetN()):
+            tree.GetEntry(elist.GetEntry(ientry))
+            self.function(tree)
 
 class TreeDrawCompound:
     def __init__(self, default, datasetMap={}):
@@ -1516,7 +1540,7 @@ class DatasetManager:
         c1fmt = "%%-%ds" % (maxlen+2)
         c2fmt = "%%%d.4g" % (len(col2hdr)+2)
         c3fmt = "%%%d.4g" % (len(col3hdr)+2)
-        c4fmt = "%%%d.4g" % (len(col4hdr)+2)
+        c4fmt = "%%%d.10g" % (len(col4hdr)+2)
 
         c2skip = " "*(len(col2hdr)+2)
         c3skip = " "*(len(col3hdr)+2)
