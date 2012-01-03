@@ -44,7 +44,7 @@ def makePlot(file):
     if match:
 	fOUT = match.group("rootfile")
 
-	mass_re = re.compile("hplushadronic(?P<mass>(\d+))")
+	mass_re = re.compile("lands_histograms_hplushadronic_m(?P<mass>(\d+))")
 #	mass_re = re.compile("(?P<mass>(\d+))")
 	mass_match = mass_re.search(fOUT)
 
