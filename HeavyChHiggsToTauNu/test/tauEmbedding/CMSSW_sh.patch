@@ -1,6 +1,6 @@
---- CMSSW_original.sh	2012-01-02 16:27:54.000000000 +0200
-+++ CMSSW.sh	2012-01-02 12:17:30.000000000 +0200
-@@ -701,6 +700,17 @@
+--- CMSSW_original.sh	2012-01-03 09:13:49.000000000 +0200
++++ CMSSW.sh	2012-01-03 09:16:07.000000000 +0200
+@@ -701,6 +701,21 @@
  job_exit_code=$executable_exit_status
  
  
@@ -9,6 +9,10 @@
 +if [ -e %%INPUT%%.root ]; then
 +    mv %%INPUT%%.root %%INPUT%%_original.root
 +    /usr/bin/time -f "%U %S %P" $executable copy_cfg.py inputFiles=file:%%INPUT%%_original.root outputFile=%%INPUT%%.root
++    MK_EXIT_CODE=$?
++    if [ "x$MK_EXIT_CODE" != "x0" ]; then
++        rm %%INPUT%%.root
++    fi
 +    rm %%INPUT%%_original.root
 +fi
 +
