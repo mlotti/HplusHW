@@ -42,8 +42,22 @@ def makePlot(file):
     root_re = re.compile("(?P<rootfile>([^/]*))\.root")
     match = root_re.search(file)
     if match:
-	fIN  = ROOT.TFile.Open(file)
 	fOUT = match.group("rootfile")
+
+	mass_re = re.compile("hplushadronic(?P<mass>(\d+))")
+#	mass_re = re.compile("(?P<mass>(\d+))")
+	mass_match = mass_re.search(fOUT)
+
+        if not mass_match:
+	    print "File",file,"not matching"
+	    return
+
+	fIN  = ROOT.TFile.Open(file)
+
+	mass = mass_match.group("mass")
+	signalLabel = "H^{#pm}, m_{H^{#pm}} = " + mass + " GeV/c^{2}"
+
+	print "Higgs mass",mass,"GeV"
 
 	histos = []
 
@@ -54,48 +68,37 @@ def makePlot(file):
 	    histo = fIN.Get(histoName)
 	    histos.append(histo)
 
-	frame = Frame(1000,0,400)
+	frame = Frame()
         frame.SetXTitle("m_{T}(#tau-jet,MET) [GeV/c^{2}]")
         frame.SetYTitle("N_{events} / 10 GeV/c^{2}")
         frame.SetTop2HpBR(Top2HpBR)
 
 	frame.SetHistograms(histos)
 
-	frame.DataHisto("Data","data_obs", )
-        frame.BackgrHisto("EWK w. taus (meas.)","EWKTau")
-        frame.BackgrHisto("EWK fake taus (MC)","fakett+fakeW+faket")
-#	frame.BackgrHisto("QCD","QCD")
-	frame.BackgrHisto("QCD","QCDInv")
-	frame.SignalHisto("H^{#pm}","HH*_1+HW*_1")
+	#     DataHisto("new name","input histos","legend label")
+	frame.DataHisto("Data", "data_obs", "Data")
+        frame.BackgrHisto("EWK","EWKTau", "EWK w.taus (meas.)")
+        frame.BackgrHisto("EWKfake","fakett+fakeW+faket", "EWK fake taus (MC)")
+	frame.BackgrHisto("QCD","QCD", "QCD (meas.)")
+	frame.SignalHisto("Signal","HH*_1+HW*_1", signalLabel)
 
-	frame.SetFillColor("EWK w. taus (meas.)",ROOT.TColor.GetColor("#993399"))
-	frame.SetFillColor("EWK fake taus (MC)", ROOT.TColor.GetColor("#669900"))
-	frame.SetFillColor("QCD", ROOT.TColor.GetColor("#ffcc33"))
-	frame.SetLineColor("H^{#pm}", ROOT.TColor.GetColor("#ff3399"))
-	frame.SetLineStyle("H^{#pm}", 2)
+	frame.Save(fOUT)
 
-#	frame.Save(fOUT)
-
-#        frame.DataHisto("Data","data_obs")
-#        frame.BackgrHisto("EWK","EWKTau") 
-#        frame.BackgrHisto("EWK (fake tau)","fakett+fakeW+faket") 
-#        frame.BackgrHisto("QCD","QCDInv")
-#	frame.SignalHisto("H^{#pm}","HH*_1+HW*_1")
+        frame.BackgrHisto("QCD","QCDInv", "QCD (meas.)")
 
 	frame.Save(fOUT+"Inv")
+	fIN.Close()
 
 
 class Frame:
     class Histo:
-	def __init__(self, name, label):
+	def __init__(self, name, label, legend):
 	    self.name = name
 	    self.label = label
+	    self.legend = legend
 
-    def __init__(self, nbins, xmin, xmax):
+    def __init__(self):
 	self.lumi	  = 1000*lumi # pb-1
-	self.nbins        = nbins
-	self.xmin         = xmin
-	self.xmax         = xmax
 	self.xtitle       = ""
 	self.ytitle       = ""
 	self.Top2HpBR     = 0.
@@ -103,6 +106,17 @@ class Frame:
 	self.dataHistos   = []
 	self.backgrHistos = []
 	self.signalHistos = []
+	self.histogramsNotFound   = []
+
+    def setLegendLabels(self, plot):
+	for histo in self.dataHistos:
+	    plot.histoMgr.getHisto(histo.label).setLegendLabel(histo.legend)
+
+	for histo in self.backgrHistos:
+            plot.histoMgr.getHisto(histo.label).setLegendLabel(histo.legend)
+
+	for histo in self.signalHistos:
+            plot.histoMgr.getHisto(histo.label).setLegendLabel(histo.legend)
 
     def SetXTitle(self, title):
 	self.xtitle = title
@@ -116,27 +130,28 @@ class Frame:
     def SetHistograms(self, histograms):
 	self.histograms = histograms
 
+    def AddMissingHisto(self, histoName):
+	if self.histogramsNotFound.count(histoName) == 0:
+	    self.histogramsNotFound.append(histoName)
+
     def SetFillColor(self, histoName, color):
 	if self.Exists(histoName):
 	    self.histograms[self.FindHistoIndex(histoName)].SetFillColor(color)
 	else:
-	    print "Histogram",histoName,"not found, exiting.."
-	    sys.exit()
+	    self.AddMissingHisto(histoName)
 
     def SetLineColor(self, histoName, color):
         if self.Exists(histoName):
             self.histograms[self.FindHistoIndex(histoName)].SetLineColor(color)
         else:
-            print "Histogram",histoName,"not found, exiting.."
-            sys.exit()
+	    self.AddMissingHisto(histoName)
 
     def SetLineStyle(self, histoName, style):
         if self.Exists(histoName):
             self.histograms[self.FindHistoIndex(histoName)].SetLineStyle(style)
 	    self.histograms[self.FindHistoIndex(histoName)].SetLineWidth(2)
         else:
-            print "Histogram",histoName,"not found, exiting.."
-            sys.exit()
+	    self.AddMissingHisto(histoName)
 
     def Exists(self, histoName):
 	for histo in self.histograms:
@@ -149,21 +164,22 @@ class Frame:
 		if histo.GetName() == histoName:
 		    return i
 	print "Histogram",histoName,"not found"
+	self.histogramsNotFound.append(histoName)
 	return -1
 
-    def DataHisto(self, label, histoName):
+    def DataHisto(self, label, histoName, legendName):
 	self.CreateHisto(label, histoName)
-	histoInfo = self.Histo(histoName,label)
+	histoInfo = self.Histo(histoName,label,legendName)
 	self.dataHistos.append(histoInfo)
 
-    def BackgrHisto(self, label, histoName):
+    def BackgrHisto(self, label, histoName, legendName):
 	self.CreateHisto(label, histoName)
-	histoInfo = self.Histo(histoName,label)
+	histoInfo = self.Histo(histoName,label,legendName)
 	self.backgrHistos.append(histoInfo)
 
-    def SignalHisto(self, label, histoName):
+    def SignalHisto(self, label, histoName, legendName):
 	self.CreateHisto(label, histoName)
-	histoInfo = self.Histo(histoName,label)
+	histoInfo = self.Histo(histoName,label,legendName)
 	self.signalHistos.append(histoInfo)
 
     def CreateHisto(self, label, histoName):
@@ -184,8 +200,7 @@ class Frame:
 		histo.SetTitle(histoName)
 	        self.histograms.append(histo)
 	    else:
-		print "Histo",histoName,"not found, exiting.."
-		sys.exit()
+		self.AddMissingHisto(histoName)
 
     def Scale(self, histo):
 	name = histo.GetName()
@@ -217,15 +232,25 @@ class Frame:
 		
     def Save(self, name):
 
+	if len(self.histogramsNotFound) > 0:
+	    for name in self.histogramsNotFound:
+		print "Histo",name,"not found"
+	    self.histogramsNotFound = []
+	    return
+	    
+
 	hObserved = self.histograms[self.FindHistoIndex(self.dataHistos[0].name)].Clone("Data")
         hObserved.Reset()
 	for histo in self.dataHistos:
             hObserved.Add(self.histograms[self.FindHistoIndex(histo.label)])
-
-	hEstimatedEWKfake = self.histograms[self.FindHistoIndex("EWK fake taus (MC)")]
-	hEstimatedEWK     = self.histograms[self.FindHistoIndex("EWK w. taus (meas.)")]
+	print "    Data:    ", hObserved.Integral(0,hObserved.GetNbinsX()),"events"
+	hEstimatedEWKfake = self.histograms[self.FindHistoIndex("EWKfake")].Clone("hEstimatedEWKfake")
+	print "    EWKfake: ",hEstimatedEWKfake.Integral(0,hEstimatedEWKfake.GetNbinsX()),"events"
+	hEstimatedEWK     = self.histograms[self.FindHistoIndex("EWK")].Clone("hEstimatedEWK")
+	print "    EWK:     ",hEstimatedEWK.Integral(0,hEstimatedEWK.GetNbinsX()),"events"
 	hEstimatedEWK.Add(hEstimatedEWKfake)
-	hEstimatedQCD     = self.histograms[self.FindHistoIndex("QCD")]
+	hEstimatedQCD     = self.histograms[self.FindHistoIndex("QCD")].Clone("hEstimatedQCD")
+	print "    QCD:     ",hEstimatedQCD.Integral(0,hEstimatedQCD.GetNbinsX()),"events"
 	hEstimatedQCD.Add(hEstimatedEWK)
 	hUncertainty = hEstimatedQCD.Clone("BackgrUncertainty")
 	hUncertainty.SetFillColor(1)
@@ -235,7 +260,8 @@ class Frame:
 	hUncertainty.SetLineWidth(0)
 	hUncertainty.SetMarkerColor(0)
 	hUncertainty.SetMarkerSize(0)
-	hSignal           = self.histograms[self.FindHistoIndex("H^{#pm}")]
+	hSignal           = self.histograms[self.FindHistoIndex("Signal")].Clone("hSignal")
+	print "    Signal:  ",hSignal.Integral(0,hSignal.GetNbinsX()),"events"
 	hSignal.Add(hEstimatedQCD)
 
 
@@ -245,34 +271,36 @@ class Frame:
 	plot = plots.ComparisonManyPlot(
 	    histograms.Histo(hObserved, "Data"),
 	    [
-	     histograms.Histo(hUncertainty, "Backgr.Uncert"),
-	     histograms.Histo(hEstimatedEWKfake, "EWK fake taus (MC)"),
-             histograms.Histo(hEstimatedEWK, "EWK w. taus (meas.)"),
+	     histograms.Histo(hUncertainty, "Backgr.Uncertainty"),
+	     histograms.Histo(hEstimatedEWKfake, "EWKfake"),
+             histograms.Histo(hEstimatedEWK, "EWK"),
              histograms.Histo(hEstimatedQCD, "QCD"),
-             histograms.Histo(hSignal, "H^{#pm}")
+             histograms.Histo(hSignal, "Signal")
              ]
 	)
 
         plot.histoMgr.forHisto("Data", styles.getDataStyle())
 
-	plot.histoMgr.forHisto("EWK w. taus (meas.)",styles.getEWKStyle())
-	plot.histoMgr.forHisto("EWK fake taus (MC)",styles.getEWKFakeStyle())
+	plot.histoMgr.forHisto("EWK",styles.getEWKStyle())
+	plot.histoMgr.forHisto("EWKfake",styles.getEWKFakeStyle())
 	plot.histoMgr.forHisto("QCD",styles.getQCDStyle())
-	plot.histoMgr.forHisto("H^{#pm}",styles.getSignalStyle())
-	plot.histoMgr.forHisto("Backgr.Uncert",styles.getErrorStyle())
+	plot.histoMgr.forHisto("Signal",styles.getSignalStyle())
+	plot.histoMgr.forHisto("Backgr.Uncertainty",styles.getErrorStyle())
 
 	plot.histoMgr.setHistoDrawStyleAll("HIST")
 	plot.histoMgr.setHistoDrawStyle("Data", "EP")
-	plot.histoMgr.setHistoDrawStyle("Backgr.Uncert", "E2")
+	plot.histoMgr.setHistoDrawStyle("Backgr.Uncertainty", "E2")
 
 	plot.histoMgr.setHistoLegendStyleAll("F")
 	plot.histoMgr.setHistoLegendStyle("Data", "P")
-	plot.histoMgr.setHistoLegendStyle("H^{#pm}", "L")
+	plot.histoMgr.setHistoLegendStyle("Signal", "L")
 
         plot.createFrame(name, opts={"ymin":0, "ymaxfactor": 1.2})
 	plot.frame.GetXaxis().SetTitle(self.xtitle)
 	plot.frame.GetYaxis().SetTitle(self.ytitle)
 
+	plot.histoMgr.reorderLegend(["Data", "Signal", "QCD", "EWK", "EWKfake", "Backgr.Uncertainty"])
+	self.setLegendLabels(plot)
 	plot.setLegend(histograms.createLegend(0.55,0.68,0.9,0.93))
 	
         histograms.addCmsPreliminaryText()
