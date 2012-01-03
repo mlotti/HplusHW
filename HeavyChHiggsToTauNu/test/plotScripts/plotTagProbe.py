@@ -11,30 +11,33 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 def getEfficiency(postfix, lumi):
     f = ROOT.TFile.Open("tagprobe_output_%s.root" % postfix)
 
-    trig = ""
-    if "Mu20" in postfix:
-        trig = "HLT_Mu20"
-    elif "Mu24" in postfix:
-        trig = "HLT_Mu24"
-    elif "Mu30" in postfix:
-        trig = "HLT_Mu30"
-    elif "Mu40" in postfix:
-        trig = "HLT_Mu40"
+    (trig, runs) = {
+        "Run2011A_Mu20": ("HLT_Mu20", "160431-163261"),
+        "Run2011A_Mu24": ("HLT_Mu24", "163270-163869"),
+        "Run2011A_Mu30": ("HLT_Mu30", "165088-166150"),
+        "Run2011A_Mu40": ("HLT_Mu40", "166161-167913, 172620-173198"),
+        "Run2011A_Mu40eta2p1": ("HLT_Mu40eta2p1", "173236-173692"),
+        "DY_Mu20": ("HLT_Mu20", "DY+jets MC"),
+        }[postfix]
 
     l = ROOT.TLatex()
     l.SetNDC()
     l.SetTextFont(l.GetTextFont()-20) # bold -> normal
 
-#    cntfit = "cnt"
-    cntfit = "fit"
+    cntfit = "cnt"
+#    cntfit = "fit"
 
     path = "tnpTree/All/%s_eff_plots" % cntfit
-    plot = "pt_PLOT"
+    plot = "pt_PLOT_abseta_bin0"
     graph = "hxy_%s_eff" % cntfit
 
     pathPt = "tnpTree/All_pt/%s_eff_plots" % cntfit
-    grahpPt = "hxy_%s_eff" % cntfit 
+    plotPt = "pt_PLOT_abseta_bin0"
 
+    pathEta = "tnpTree/All_abseta/%s_eff_plots" % cntfit
+    plotEta = "abseta_PLOT_pt_bin0"
+
+    ## Overall value
     canv = f.Get(path+"/"+plot)
     canv.SetName("TagProbe_%s_%s_%s" % (postfix, plot, graph))
 #    canv.SaveAs(".eps")
@@ -46,12 +49,14 @@ def getEfficiency(postfix, lumi):
     eff_plus = eff.GetErrorYhigh(0)
     eff_minus = eff.GetErrorYlow(0)
 
-    canv = f.Get(pathPt+"/"+plot)
+    ## As a function of pT
+    canv = f.Get(pathPt+"/"+plotPt)
     gr = canv.FindObject(graph).Clone()
 
-    name = "TagProbe_Pt100_%s_%s_%s" % (postfix, plot, graph)
+    # 0-100
+    name = "TagProbe_%s_%s_%s_Pt100" % (postfix, plot, graph)
     c = ROOT.TCanvas(name, name)
-    frame = c.DrawFrame(40, 0, 100, 1.1)
+    frame = c.DrawFrame(0, 0, 100, 1.1)
     gr.Draw("EP")
     frame.GetXaxis().SetTitle("Probe muon p_{T} (GeV/c)")
     frame.GetYaxis().SetTitle("Trigger and ID efficiency")
@@ -59,12 +64,14 @@ def getEfficiency(postfix, lumi):
     histograms.addEnergyText()
     histograms.addLuminosityText(None, None, lumi)
     l.DrawLatex(0.2, 0.4, trig)
-    c.SaveAs(".png")                 
+    l.DrawLatex(0.2, 0.35, runs)
+    c.SaveAs(".png")
 
+    # 0-400
     gr = canv.FindObject(graph).Clone()
-    name = "TagProbe_Pt400_%s_%s_%s" % (postfix, plot, graph)
+    name = "TagProbe_%s_%s_%s_Pt400" % (postfix, plot, graph)
     c = ROOT.TCanvas(name, name)
-    frame = c.DrawFrame(40, 0, 400, 1.1)
+    frame = c.DrawFrame(0, 0, 400, 1.1)
     gr.Draw("EP")
     frame.GetXaxis().SetTitle("Probe muon p_{T} (GeV/c)")
     frame.GetYaxis().SetTitle("Trigger and ID efficiency")
@@ -72,11 +79,25 @@ def getEfficiency(postfix, lumi):
     histograms.addEnergyText()
     histograms.addLuminosityText(None, None, lumi)
     l.DrawLatex(0.2, 0.4, trig)
-    c.SaveAs(".png")                 
+    l.DrawLatex(0.2, 0.35, runs)
+    c.SaveAs(".png")
 
-#    if postfix == "Run2011A_Mu40":
-#        eff_plus = 0.006
-#       eff_minus = 0.006
+    ## As a function of eta
+    canv = f.Get(pathEta+"/"+plotEta)
+    gr = canv.FindObject(graph).Clone()
+    name = "TagProbe_%s_%s_%s_Eta" % (postfix, plot, graph)
+    c = ROOT.TCanvas(name, name)
+    frame = c.DrawFrame(0, 0, 2.2, 1.1)
+    gr.Draw("EP")
+    frame.GetXaxis().SetTitle("Probe muon |#eta|")
+    frame.GetYaxis().SetTitle("Trigger and ID efficiency")
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    histograms.addLuminosityText(None, None, lumi)
+    l.DrawLatex(0.2, 0.4, trig)
+    l.DrawLatex(0.2, 0.35, runs)
+    c.SaveAs(".png")
+    
 
     print "%s overall efficiency %f + %f - %f" % (postfix, eff_value, eff_plus, eff_minus)
     return (eff_value, eff_plus, eff_minus)
@@ -96,9 +117,9 @@ def main():
         #("Run2011A_Mu40", 3.381858+4.153168+424.330775+109.639076+105.026041, 3.3818575699999998+4.153168108+424.33077485900003+83.549892354000008+95.750128408000009),
         # after lumi DB update
         ("Run2011A_Mu20", 20.300513+0.490643, 47.008000000000003),
-        ("Run2011A_Mu24", 77.851037, 164.5),
-        ("Run2011A_Mu30", 53.748971+0.000176, 233.78800000000001),
-        ("Run2011A_Mu40", 3.381858+4.153168+424.330775+109.639076+105.026041, 3.4630000000000001+4.2910000000000004+445.12599999999998+243.08099999999999+373.21600000000001+412.35899999999998+246.52699999999999),
+#        ("Run2011A_Mu24", 77.851037, 164.5),
+#        ("Run2011A_Mu30", 53.748971+0.000176, 233.78800000000001),
+#        ("Run2011A_Mu40", 3.381858+4.153168+424.330775+109.639076+105.026041, 3.4630000000000001+4.2910000000000004+445.12599999999998+243.08099999999999+373.21600000000001+412.35899999999998+246.52699999999999),
         ]
     mc = "DY_Mu20"
     doMC = False

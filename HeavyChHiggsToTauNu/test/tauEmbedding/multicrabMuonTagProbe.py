@@ -37,14 +37,32 @@ triggers = {
 
     "DYJetsToLL_M50_TuneZ2_Summer11": "HLT_IsoMu12_v1",
 }
+numberOfJobs = {
+    "SingleMu_160431-163261_May10":    5,
+    "SingleMu_163270-163869_May10":    5,
+    "SingleMu_165088-165633_Prompt":   4,
+    "SingleMu_165970-166150_Prompt":   2,
+    "SingleMu_166374-166967_Prompt":  10,
+    "SingleMu_167039-167043_Prompt":   1,
+    "SingleMu_167078-167913_Prompt":   6,
+    "SingleMu_172620-173198_Prompt":   7,
+    "SingleMu_173236-173692_Prompt":   4,
+    "DYJetsToLL_M50_TuneZ2_Summer11": 24,
+}
 
 multicrab.extendDatasets("pattuple_v19", patDatasets)
 multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 def modify(dataset):
     dataset.setTrigger("trigger", triggers[dataset.getName()])
+    try:
+        njobs = numberOfJobs[dataset.getName()]
+        dataset.setNumberOfJobs(njobs)
+    except KeyError:
+        pass
 
 multicrab.forEachDataset(modify)
+multicrab.appendLineAll("CMSSW.output_file = histograms.root")
 multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
 
 prefix="multicrab_tagprobe"

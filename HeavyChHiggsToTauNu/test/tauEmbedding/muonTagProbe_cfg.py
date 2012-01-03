@@ -281,7 +281,7 @@ process.probeMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag(muons),
     cut = cms.string(
         "isTrackerMuon()"
-        "&& pt() > 40"
+        "&& pt() > 30"
     )
 )
 process.probeMuonsVertexZ = cms.EDProducer("HPlusCandViewVertexZDiffComputer",
