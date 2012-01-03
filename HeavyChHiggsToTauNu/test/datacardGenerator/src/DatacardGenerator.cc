@@ -54,7 +54,7 @@ bool DatacardGenerator::generateDataCard(std::string description, double luminos
 
   // Make directory if it doesn't already exist
   std::stringstream s;
-  s << sDirectory+"/datacard_fullyhadronic_m" << fMassPoint << ".txt";
+  s << sDirectory+"/lands_datacard_hplushadronic_m" << fMassPoint << ".txt";
 
   std::ofstream myFile(s.str().c_str());
   if (myFile.bad() || myFile.fail()) {
@@ -72,6 +72,7 @@ bool DatacardGenerator::generateDataCard(std::string description, double luminos
   std::stringstream myOutName;
   if (useShapes) {
     myOutName << sDirectory << "/" << shapeSource << fMassPoint << ".root";
+std::cout << "check myOutName " << myOutName.str() << std::endl;
     fFile = TFile::Open(myOutName.str().c_str(), "RECREATE");
     if (!fFile) return false;
   }
