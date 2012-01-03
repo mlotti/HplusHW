@@ -1,0 +1,20 @@
+--- CMSSW_original.sh	2012-01-02 16:27:54.000000000 +0200
++++ CMSSW.sh	2012-01-02 12:17:30.000000000 +0200
+@@ -701,6 +700,17 @@
+ job_exit_code=$executable_exit_status
+ 
+ 
++## MK begin: re-run cmsRun to copy the file
++
++if [ -e %%INPUT%%.root ]; then
++    mv %%INPUT%%.root %%INPUT%%_original.root
++    /usr/bin/time -f "%U %S %P" $executable copy_cfg.py inputFiles=file:%%INPUT%%_original.root outputFile=%%INPUT%%.root
++    rm %%INPUT%%_original.root
++fi
++
++## MK end
++
++
+ #
+ # PROCESS THE PRODUCED RESULTS
+ #
