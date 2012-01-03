@@ -25,6 +25,7 @@ showAN = 1
 showTeva = 0
 showLEP = 0
 plotTwoSigmaBands = 0
+textFullyHadronic = 1 # 0 for the combined result  
 
 # write text to plot
 def writeTitleTexts(lumi):
@@ -390,8 +391,10 @@ def main():
     # then go counterclockwise: increase mH, then switch to upper limit, decrease mH
     print "Constructing observed"
     observed_tanb = graphToTanBeta(observed,mu)
+    observed_tanb.SetLineWidth(3)
     print "Constructing expected"
     expected_tanb = graphToTanBeta(expected,mu)
+    expected_tanb.SetLineWidth(3)
     observed_minus_tanb = graphToTanBeta(observed_minus,mu)
     observed_plus_tanb = graphToTanBeta(observed_plus,mu)
     observed_minus_tanb.SetLineWidth(3)
@@ -515,7 +518,7 @@ def main():
     pl.SetBorderSize(0)
     ple = ROOT.TLegendEntry()
     pl.AddEntry(observed_tanb,     "Observed", "lp")
-    pl.AddEntry(observed_minus_tanb,     "Observed #pm1 #sigma", "L")
+    pl.AddEntry(observed_minus_tanb,     "Observed #pm1 #sigma (th.)", "L")
     pl.AddEntry(expected_tanb,     "Expected median", "lp")
 #    pl.AddEntry(observed_plus_tanb,     "Expected median, th+", "l")
     expected_1s_tanb.SetLineColor( expected_1s_tanb.GetFillColor() ) 
@@ -545,12 +548,10 @@ def main():
     top = 0.9
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
-# --- chose text for final state description --
-    writeText("Fully hadronic final state",   top - lineSpace)
-#    writeText("hadr. + ltau final states",   top - lineSpace)
-#    writeText("hadr. + ltau + emu final states",   top - lineSpace)
-
-#    writeText("Bayesian CL limit",           top - 2*lineSpace)
+    if textFullyHadronic:
+        writeText("Fully hadronic final state",   top - lineSpace)
+    else:
+        writeText("hadr. + ltau + emu final states",   top - lineSpace)
     writeText("MSSM m_{h}^{max}",           top - 2*lineSpace)
     writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
     writeText("#mu=%d GeV"%mu, top - 4*lineSpace)
@@ -668,12 +669,10 @@ def main():
     top = 0.83
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
-# --- chose text for final state description --
-    writeText("Fully hadronic final state",   top - lineSpace)
-#    writeText("hadr. + ltau final states",   top - lineSpace)
-#    writeText("hadr. + ltau + emu final states",   top - lineSpace)
-
-
+    if textFullyHadronic:
+        writeText("Fully hadronic final state",   top - lineSpace)
+    else:
+        writeText("hadr. + ltau + emu final states",   top - lineSpace)
 #    writeText("Bayesian CL limit",           top - 2*lineSpace)
     writeText("MSSM m_{h}^{max}",           top - 2*lineSpace)
     writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)

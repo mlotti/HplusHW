@@ -9,8 +9,8 @@ These instructions describe how to run the "shapes" version with LandS.
 The following files are needed to a separate working directory with a unique name, 
 replace "*" by the mass points 80/100/120/140/150/155/160:
 
--datacard*.txt (LandS datacard files)
--hplus*.txt    (LandS shapes histograms)
+-lands_datacard_hplushadronic_m*.txt (LandS datacard files)
+-lands_histograms_hplushadronic_m*.txt    (LandS shapes histograms)
 
 The working directory should have a unique name to make possible
 running several analysis jobs simultaneously.  The name of the
@@ -27,13 +27,14 @@ directory:
  cp ??/brlimit/mkBrLimits* .
 
 
-2) Set number of MC toys and luminosity:
+2) Optional: set number of MC toys:
 -----------------------------------------
 
-By default, 500 toy MC runs are performed.  This takes about 4 hours.  You can
-change the number of toys in the file mkBrLimits_runExp .
+By default, 500 toy MC runs are performed.  This takes about 4 hours
+(future plan is to split the jobs in a couple of parallel jobs).  You
+can change the number of toys in the file mkBrLimits_runExp .
 
-Type the integrated luminosity as a plain number to a file "input_luminosity".
+The integrated luminosity is now read from the datacards.
 
 
 3) Running
@@ -69,6 +70,7 @@ Possible problems:
 
 * no output files: 
   -check that you are in lxplus, and your working area can be 
-   accessed by afs:  do not use a /tmp/ directory
+   accessed by afs (for instance scratch directory). 
+   DO NOT use a /tmp/ directory since it cannot be accessed by LSF jobs.
 
 ===========================================================================
