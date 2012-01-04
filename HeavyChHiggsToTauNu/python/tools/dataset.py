@@ -297,7 +297,11 @@ def _normalizeToOne(h):
     Returns the normalized histogram (which is the same as the
     parameter, i.e. no copy is made).
     """
-    return _normalizeToFactor(h, 1.0/h.Integral(0, h.GetNbinsX()+1))
+    integral = h.Integral(0, h.GetNbinsX()+1)
+    if integral == 0:
+        return h
+    else:
+        return _normalizeToFactor(h, 1.0/integral)
 
 def _normalizeToFactor(h, f):
     """Scale TH1 with a given factor.
