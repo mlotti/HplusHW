@@ -6,10 +6,11 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 # Processing step
 #step = "skim"
-#step = "embedding"
+step = "embedding"
+#step = "embedding_copy"
 #step = "analysis"
 #step = "analysisTau"
-step = "signalAnalysis"
+#step = "signalAnalysis"
 #step = "muonAnalysis"
 #step = "caloMetEfficiency"
 
@@ -23,7 +24,8 @@ era = "Run2011A"
 #version = "v13_2_seedTest1"
 #version = "v13_2_seedTest2"
 #version = "v13_2_seedTest3"
-version = "v13_3_seedTest4"
+#version = "v13_3_seedTest4"
+version = "v13_3_seedTest5"
 #version = "v13_3_seedTest6"
 #version = "v14"
 
@@ -60,7 +62,7 @@ dirPrefix = ""
 #vispt = "_vispt20"
 #vispt = "_vispt30"
 #vispt = "_vispt40"
-if step in ["embedding", "analysis", "signalAnalysis"]:
+if step in ["embedding", "embedding_copy", "analysis", "signalAnalysis"]:
     dirPrefix += "_"+version
 if step in ["analysis", "signalAnalysis"]:
     dirPrefix += "_"+era
@@ -75,6 +77,7 @@ if step == "signalAnalysis":
 # Define the processing steps: input dataset, configuration file, output file
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
           "embedding":      {"input": "tauembedding_skim_v13", "config": "embed.py",   "output": "embedded.root"},
+          "embedding_copy": {"input": "tauembedding_embedding_"+version, "config": "copy_cfg.py"},
 #          "analysis":       {"input": "tauembedding_embedding_v13"+pt,  "config": "embeddingAnalysis_cfg.py"},
           "analysis":       {"input": "tauembedding_embedding_"+version,  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau":    {"input": "pattuple_v18",                       "config": "tauAnalysis_cfg.py"},
@@ -268,14 +271,23 @@ def modify(dataset):
     else:
         name = path_re.sub(tauname, path[2])
         name = name.replace("local-", "")
+        if step == "embedding_copy":
+            name = name.replace("v13_2", "v13_3")
+            import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabDatasetsTauEmbedding as tauEmbeddingDatasets
+            njobs = tauEmbeddingDatasets.njobs[dataset.getName()]["skim"]
+            dataset.setNumberOfJobs(njobs)
 
     if dataset.isData() and step in ["generation", "embedding"]:
         dataset.appendArg("overrideBeamSpot=1")
 
     dataset.appendLine("USER.publish_data_name = "+name)
-    dataset.appendLine("CMSSW.output_file = "+config[step]["output"])
-    dataset.appendLine("USER.additional_input_files = copy_cfg.py")
-    dataset.appendCopyFile("copy_cfg.py")
+    if step == "embedding_copy":
+        dataset.appendArg("outputFile=embedded_copy.root")
+        dataset.appendLine("CMSSW.output_file = embedded_copy.root")
+    else:
+        dataset.appendLine("CMSSW.output_file = "+config[step]["output"])
+        dataset.appendLine("USER.additional_input_files = copy_cfg.py")
+        dataset.appendCopyFile("copy_cfg.py")
 
 # Modification step for analysis steps
 def modifyAnalysis(dataset):
