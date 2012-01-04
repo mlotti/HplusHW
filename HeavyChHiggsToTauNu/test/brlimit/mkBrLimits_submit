@@ -53,7 +53,7 @@ head -1 ${f5}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! outputs/input_lu
 head -1 ${f6}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! outputs/input_luminosity_155
 head -1 ${f7}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! outputs/input_luminosity_160
 
-# generates the files output_LandS_HPlusHadronic_*_obs
+# generates the files output__HPlusHadronic_*_obs
 bsub -q 1nh -J ${j1}_o ${odir}/mkBrLimits_submitObs ${odir} ${f1}.txt
 bsub -q 1nh -J ${j2}_o ${odir}/mkBrLimits_submitObs ${odir} ${f2}.txt
 bsub -q 1nh -J ${j3}_o ${odir}/mkBrLimits_submitObs ${odir} ${f3}.txt
@@ -62,7 +62,7 @@ bsub -q 1nh -J ${j5}_o ${odir}/mkBrLimits_submitObs ${odir} ${f5}.txt
 bsub -q 1nh -J ${j6}_o ${odir}/mkBrLimits_submitObs ${odir} ${f6}.txt
 bsub -q 1nh -J ${j7}_o ${odir}/mkBrLimits_submitObs ${odir} ${f7}.txt
 
-# generates the files output_LandS_HPlusHadronic_*_exp
+# generates the files output__HPlusHadronic_*_exp
 bsub -q 1nd -J ${j1}_e ${odir}/mkBrLimits_submitExp ${odir} ${f1}.txt
 bsub -q 1nd -J ${j2}_e ${odir}/mkBrLimits_submitExp ${odir} ${f2}.txt
 bsub -q 1nd -J ${j3}_e ${odir}/mkBrLimits_submitExp ${odir} ${f3}.txt
@@ -78,13 +78,13 @@ while (`bjobs -w |& grep $jobname` != "") # check if job name exists
   sleep 60
 end
 
-set output1 = outputs/output_LandS_${f1}
-set output2 = outputs/output_LandS_${f2}
-set output3 = outputs/output_LandS_${f3}
-set output4 = outputs/output_LandS_${f4}
-set output5 = outputs/output_LandS_${f5}
-set output6 = outputs/output_LandS_${f6}
-set output7 = outputs/output_LandS_${f7}
+set output1 = outputs/output_${f1}
+set output2 = outputs/output_${f2}
+set output3 = outputs/output_${f3}
+set output4 = outputs/output_${f4}
+set output5 = outputs/output_${f5}
+set output6 = outputs/output_${f6}
+set output7 = outputs/output_${f7}
 
 # collect observed values
 head -3 ${output1}_obs | tail -1 | awk '{print $12 }' >&! ${output1}
