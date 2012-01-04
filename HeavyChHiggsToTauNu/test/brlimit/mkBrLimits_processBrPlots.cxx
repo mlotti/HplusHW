@@ -53,7 +53,7 @@ int mkBrLimits_processBrPlots()
   //  cout << "     output_LandS_HPlusHadronic_M80/100/120/etc." << endl;
   //  cin >> fileName;
 
-  sprintf(fileName,"outputs/output_LandS_datacard_hplushadronic");
+  sprintf(fileName,"outputs/output_lands_datacard_hplushadronic_m");
   cout << endl << "File name is " << fileName << endl;
 
   for (int i=0; i<nData; i++){
