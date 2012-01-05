@@ -6,7 +6,8 @@ import sys
 import random
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
-LandS_tag           = "t3-04-13"
+#LandS_tag           = "t3-04-13"
+LandS_tag	    = "HEAD"
 LandS_options       = "--PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09"
 LandS_nToysPerJob   = 50
 number_of_jobs      = 10	# used only for making the expected limits, making the observed limits does not need splitting 
