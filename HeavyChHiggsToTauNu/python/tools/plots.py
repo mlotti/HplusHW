@@ -516,8 +516,8 @@ def _createRatio(rootHisto1, rootHisto2, ytitle):
             yvalues.append(rootHisto1.GetY()[i] / yval)
             err1 = max(rootHisto1.GetErrorYhigh(i), rootHisto1.GetErrorYlow(i))
             err2 = max(rootHisto2.GetErrorYhigh(i), rootHisto2.GetErrorYlow(i))
-            yerrs.append( yvalues[i]* math.sqrt( (err1/rootHisto1.GetY()[i])**2 +
-                                                 (err2/rootHisto2.GetY()[i])**2 ) )
+            yerrs.append( yvalues[i]* math.sqrt( _divideOrZero(err1, rootHisto1.GetY()[i])**2 +
+                                                 _divideOrZero(err2, rootHisto2.GetY()[i])**2 ) )
 
         gr = ROOT.TGraphAsymmErrors()
         if len(xvalues) > 0:
@@ -527,6 +527,12 @@ def _createRatio(rootHisto1, rootHisto2, ytitle):
         return gr
     else:
         raise Exception("Arguments are of unsupported type, rootHisto1 is %s and rootHisto2 is %s" % (type(rootHisto1).__name__, type(rootHisto2).__name__))
+
+def _divideOrZero(numerator, denominator):
+    if denominator == 0:
+        return 0
+    return numerator/denominator
+
 
 def copyStyle(src, dst):
     properties = []
