@@ -466,6 +466,9 @@ class CanvasFrame:
             if len(tmp) != 1:
                 raise Exception("If giving 'opts' as keyword argument, no other keyword arguments can be given (except opts2, which is ignored)")
             opts = kwargs["opts"]
+        tmp = opts
+        opts = {}
+        opts.update(tmp)
 
         if "yfactor" in opts:
             if "ymaxfactor" in opts:
