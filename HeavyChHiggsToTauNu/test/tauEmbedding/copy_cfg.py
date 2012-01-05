@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 import FWCore.ParameterSet.VarParsing as VarParsing
+import sys
 
 options = VarParsing.VarParsing('analysis')
 options.maxEvents = -1
@@ -22,7 +23,13 @@ options.register("trigger",
                  options.multiplicity.list, options.varType.string,
                  "Triggers to use (logical OR if multiple given")
 
-options.parseArguments()
+# Hack to be able to pass multiple arguments from multicrab.cfg
+if hasattr(sys, "argv"):
+    if len(sys.argv) > 0:
+        last = sys.argv.pop()
+        sys.argv.extend(last.split(":"))
+
+    options.parseArguments()
 
 process = cms.Process('TAUEMBEDDINGCOPY')
 
@@ -40,3 +47,5 @@ process.output = cms.OutputModule("PoolOutputModule",
 )
 
 process.ep = cms.EndPath(process.output)
+
+#print process.dumpPython()
