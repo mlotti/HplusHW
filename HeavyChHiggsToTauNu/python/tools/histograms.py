@@ -88,13 +88,14 @@ class TextDefaults:
 # histograms.addEnergyText(), histograms.addLuminosityText().
 textDefaults = TextDefaults()
 
-def addText(x, y, text, size=None, bold=True):
+def addText(x, y, text, size=None, bold=True, color=ROOT.kBlack):
     l = ROOT.TLatex()
     l.SetNDC()
     if not bold:
         l.SetTextFont(l.GetTextFont()-20) # bold -> normal
     if size != None:
         l.SetTextSize(size)
+    l.SetTextColor(color)
     l.DrawLatex(x, y, text)
 
 ## Add the "CMS Preliminary" text to the pad
