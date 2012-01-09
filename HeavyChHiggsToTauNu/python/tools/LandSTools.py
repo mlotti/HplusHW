@@ -371,6 +371,9 @@ class ParseLandsOutput:
                        str(result.expectedPlus2Sigma))
 	    fOUT.close()
 
+    def Data(self):
+	return self.results
+
 def install_lands():
     exe = execute("ls ${PWD}/LandS/test/lands.exe 2> /dev/null")
     if len(exe) == 0:
