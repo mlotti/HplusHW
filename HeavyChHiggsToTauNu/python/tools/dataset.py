@@ -240,6 +240,21 @@ def _histoToCounter(histo):
 
     return ret
 
+## Transfor a list of (name, Count) pairs to a histogram (TH1)
+def _counterToHisto(name, counter):
+    histo = ROOT.TH1F(name, name, len(counter), 0, len(counter))
+    histo.Sumw2()
+
+    bin = 1
+    for name, count in counter:
+        histo.GetXaxis().SetBinLabel(bin, name)
+        histo.SetBinContent(bin, count.value())
+        histo.SetBinError(bin, count.uncertainty())
+        bin += 1
+
+    return histo
+
+
 ## Transform histogram (TH1) to a list of values
 def histoToList(histo):
     return [histo.GetBinContent(bin) for bin in xrange(1, histo.GetNbinsX()+1)]
@@ -1036,6 +1051,12 @@ class Dataset:
 
         return self.getCrossSection() / self.nAllEvents
 
+    def hasRootHisto(self, name):
+        if hasattr(name, "draw"):
+            return True
+        pname = self.prefix+name
+        return self.file.Get(pname) != None
+
     def getDatasetRootHisto(self, name):
         """Get the DatasetRootHisto object for a named histogram.
 
@@ -1242,6 +1263,12 @@ class DatasetMerged:
 
     def getNormFactor(self):
         return None
+
+    def hasRootHisto(self, name):
+        has = True
+        for d in self.datasets:
+            has = has and d.hasRootHisto(name)
+        return has
 
     def getDatasetRootHisto(self, name):
         """Get the DatasetRootHistoMergedMC/DatasetRootHistoMergedData object for a named histogram.
