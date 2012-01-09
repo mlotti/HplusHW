@@ -463,6 +463,22 @@ def sumColumn(name, columns):
 
     return CounterColumn(name, columns[0].getRowNames(), rows)
 
+## Create a CounterColumn as column1-column2
+def subtractColumn(name, column1, column2):
+    nrows = column1.getNrows()
+    if nrows != column2.getNrows():
+        raise Exception("Unable to divide the columns, column1 has '%d' rows, column2 has '%d'." % (nrows, column2.getNrows()))
+
+    rows = []
+    for irow in xrange(nrows):
+        count = column1.getCount(irow).clone()
+        dcount = column2.getCount(irow)
+            
+        count.subtract(dcount)
+        rows.append(count)
+
+    return CounterColumn(name, column1.getRowNames(), rows)
+
 def divideColumn(name, column1, column2):
     """Create a CounterColumn as column1/column2."""
     nrows = column1.getNrows()
@@ -498,6 +514,9 @@ class CounterColumn:
 
     def clone(self):
         return CounterColumn(self.name, self.rowNames[:], [v.clone() for v in self.values])
+
+    def getPairList(self):
+        return [(self.rowNames[i], self.values[i]) for i in xrange(0, len(self.values))]
 
     def getName(self):
         return self.name
@@ -792,6 +811,39 @@ class CounterTable:
         lines.append(formatter.endTable())
         return "\n".join(lines)
 
+## Counter from one histogram, can not be normalized/scaled further
+class HistoCounter:
+    def __init__(self, name, rootHisto, countNameFunction=None):
+        self.name = name
+        cntr = dataset._histoToCounter(rootHisto)
+        self.countNames = [x[0] for x in cntr]
+        self.counter = [x[1] for x in cntr]
+
+        if countNameFunction != None:
+            self.countNames = [countNameFunction(x) for x in self.countNames]
+
+    def getName(self):
+        return self.name
+
+    def getNrows(self):
+        return len(self.countNames)
+
+    def getRowName(self, icount):
+        return self.countNames[icount]
+
+    def getCount(self, icount):
+        if self.counter == None:
+            self._createCounter()
+        return self.counter[icount]
+
+    def getCountByName(self, name):
+        if self.counter == None:
+            self._createCounter()
+        for i, cn in enumerate(self.countNames):
+            if cn == name:
+                return self.counter[i]
+        raise Exception("No count '%s' in counter '%s'" % (name, self.getName()))
+
 class SimpleCounter:
     """Counter for one dataset."""
     def __init__(self, datasetRootHisto, countNameFunction):
@@ -858,7 +910,7 @@ class SimpleCounter:
         for i, cn in enumerate(self.countNames):
             if cn == name:
                 return self.counter[i]
-        raise Exception("No counter '%s'" % name)
+        raise Exception("No count '%s' in counter '%s'" % (name, self.getName()))
 
 class Counter:
     """Counter for many datasets."""
