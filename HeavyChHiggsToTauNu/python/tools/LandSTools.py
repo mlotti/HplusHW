@@ -22,7 +22,7 @@ script_re   = re.compile("runLandS_(?P<label>(Observed|Expected)_m)(?P<mass>(\d+
 class MultiCrabLandS:
     def __init__(self):
 
-        self.exe = execute("which lands.exe 2> dummy.out && rm dummy.out")
+        self.exe = execute("which lands.exe 2> /dev/null")
 
         if len(self.exe) == 0:
 	    self.exe = install_lands()
@@ -372,11 +372,11 @@ class ParseLandsOutput:
 	    fOUT.close()
 
 def install_lands():
-    exe = execute("ls ${PWD}/LandS/test/lands.exe")
+    exe = execute("ls ${PWD}/LandS/test/lands.exe 2> /dev/null")
     if len(exe) == 0:
         os.system("cvs co -r " + LandS_tag + " -d LandS UserCode/mschen/LandS")
         os.system("cd LandS && make")
-        exe = execute("ls ${PWD}/LandS/test/lands.exe")
+        exe = execute("ls ${PWD}/LandS/test/lands.exe 2> /dev/null")
     return exe
 
 def execute(cmd):
