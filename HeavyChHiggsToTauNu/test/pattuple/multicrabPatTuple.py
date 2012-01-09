@@ -54,6 +54,7 @@ multicrab.extendDatasets(
 #       "SingleMu_166374-166967_Prompt",     # 2011A
 #       "SingleMu_167039-167043_Prompt",     # 2011A
 #       "SingleMu_167078-167913_Prompt",     # 2011A
+#       "SingleMu_170722-172619_Aug05",      # 2011A
 #       "SingleMu_172620-173198_Prompt",     # 2011A
 #       "SingleMu_173236-173692_Prompt",     # 2011A
 #       "SingleMu_175860-176469_Prompt",     # 2011B
