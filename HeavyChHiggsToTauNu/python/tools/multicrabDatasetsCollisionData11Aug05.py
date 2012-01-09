@@ -62,6 +62,7 @@ datasets = {
     # Single Mu
     "SingleMu_170722-172619_Aug05": {
         "dataVersion": "42Xdata",
+        "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_v5", "HLT_IsoMu24_v8", # not prescaled
             "HLT_Mu15_v8", "HLT_Mu20_v7", "HLT_Mu24_v7", "HLT_Mu30_v7", "HLT_IsoMu15_v13", "HLT_IsoMu17_v13", # prescaled
@@ -72,6 +73,11 @@ datasets = {
                 "datasetpath": "/SingleMu/Run2011A-05Aug2011-v1/AOD",
                 "number_of_jobs": 490, # Adjusted for PATtuple file size
                 "lumiMask": "Aug05ReReco"
+            },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_05Aug2011_v1_AOD_170722_pattuple_v19-3a653e1bd941d76d28bcbdfed0228b46/USER",
+                "number_of_jobs": 15,
             },
         }
     },
