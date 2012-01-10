@@ -18,6 +18,7 @@ LandSRootFileNaming = "lands_histograms_hplushadronic_m"
 datacard_re = re.compile(LandSDataCardNaming+"(?P<mass>(\d+))\.txt$")
 root_re     = re.compile(LandSRootFileNaming+"(?P<mass>(\d+))\.root$")
 script_re   = re.compile("runLandS_(?P<label>(Observed|Expected)_m)(?P<mass>(\d+))")
+luminosity_re = re.compile("luminosity=[\S| ]*(?P<lumi>(\d+\.\d+))")
 
 class MultiCrabLandS:
     def __init__(self):
@@ -202,6 +203,7 @@ def ConvertToErrorBands(result):
 class ParseLandsOutput:
     def __init__(self, path):
 	self.path = path
+	self.lumi = 0
 
 	self.results = []
 	self.subdir_re         = re.compile("(?P<label>(Expected|Observed)_m)(?P<mass>(\d*$))")
@@ -215,6 +217,9 @@ class ParseLandsOutput:
 	dirs = execute("ls %s"%self.path)
 	for dir in dirs:
 	    dir = path + dir
+	    datacard_match = datacard_re.search(dir)
+	    if datacard_match:
+		self.ReadLuminosity(dir)
 	    if os.path.isdir(dir):
 		match = self.subdir_re.search(dir)
 		if match:
@@ -224,6 +229,20 @@ class ParseLandsOutput:
 	    sys.exit()
 
 	self.Read(subdirs)
+
+    def ReadLuminosity(self, dir):
+	if self.lumi == 0:
+	    fIN = open(dir,"r")
+	    for line in fIN:
+		match = luminosity_re.search(line)
+		if match:
+		    print line
+		    self.lumi = match.group("lumi")
+		    return
+		print line
+
+    def GetLuminosity(self):
+	return self.lumi
 
     def Read(self,dirs):
 	for dir in dirs:

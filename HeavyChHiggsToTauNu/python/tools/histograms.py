@@ -711,7 +711,8 @@ class HistoBase:
         # Hack to get the black border to the legend, only if the legend style is fill
         if "f" in self.legendStyle.lower():
             h = self.rootHisto.Clone(self.rootHisto.GetName()+"_forLegend")
-            h.SetDirectory(0)
+            if hasattr(h, "SetDirectory"):
+                h.SetDirectory(0)
             h.SetLineWidth(1)
             if self.rootHisto.GetLineColor() == self.rootHisto.GetFillColor():
                 h.SetLineColor(ROOT.kBlack)
