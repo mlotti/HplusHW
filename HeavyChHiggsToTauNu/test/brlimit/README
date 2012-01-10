@@ -30,9 +30,12 @@ directory:
 2) Optional: set number of MC toys:
 -----------------------------------------
 
-By default, 500 toy MC runs are performed.  This takes about 4 hours
-(future plan is to split the jobs in a couple of parallel jobs).  You
-can change the number of toys in the file mkBrLimits_runExp .
+By default, in total 500 toy MC runs are performed.  They are split to 20 parallel
+jobs (with 25 toy MCs each) and run in the queue 1nh of LSF.  This takes about
+30 minutes to run, if LSF is not full.
+
+You can adjust the number of toys in the file mkBrLimits_submitExpSplit and the number
+of parallel jobs in mkBrLimits_submit .
 
 The integrated luminosity is now read from the datacards.
 
@@ -49,18 +52,19 @@ generated:
 
  -brlimits.png,          limit plot (mH,Br)
  -mssmLimits_mh.png,     limit plot (mH,tanB)
+ -mssmLimits_ma.png,     limit plot (mA,tanB)
  -mssmLimits_mus_mh.png, limit plot (mH,tanB) with various mu values 
+ -mssmLimits_mus_ma.png, limit plot (mA,tanB) with various mu values 
 
-Also the corresponding eps files are generated.
+Also the corresponding eps and C files are generated.
 
 In "mkBrLimits_mssmLimit.py", you may want to toggle the setting
-"useMA" to show results in mA,tanb space, or the setting "showTeva"
-and "showLEP" to show/hide Tevatron and LEP results.
+the setting "showTeva" and "showLEP" to show/hide Tevatron and LEP results.
 
-Tip: if you have already run the jobs, and want to simpley regenerate plots 
+Tip: if you have already run the jobs, and want to simply regenerate plots 
 (change plotting style or some other reason), you can do this quickly with 
 the following command, which reads the output files from the directory 
-"outputs" and producess the plots:
+"outputs" and produces the plots:
 
  ./mkBrLimits_process 
 
@@ -72,5 +76,10 @@ Possible problems:
   -check that you are in lxplus, and your working area can be 
    accessed by afs (for instance scratch directory). 
    DO NOT use a /tmp/ directory since it cannot be accessed by LSF jobs.
+
+* running takes longer than expected
+  -possible reason: LSF is crowded and jobs are pending
+  -possible reason if you have run already many jobs: you have exhausted
+   you LSF FairShare quota and jobs are pending
 
 ===========================================================================
