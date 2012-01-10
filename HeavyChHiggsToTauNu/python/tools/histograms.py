@@ -88,15 +88,27 @@ class TextDefaults:
 # histograms.addEnergyText(), histograms.addLuminosityText().
 textDefaults = TextDefaults()
 
-def addText(x, y, text, size=None, bold=True, color=ROOT.kBlack):
-    l = ROOT.TLatex()
-    l.SetNDC()
-    if not bold:
-        l.SetTextFont(l.GetTextFont()-20) # bold -> normal
-    if size != None:
-        l.SetTextSize(size)
-    l.SetTextColor(color)
-    l.DrawLatex(x, y, text)
+def addText(x, y, text, *args, **kwargs):
+    t = PlotText(x, y, text, *args, **kwargs)
+    t.Draw()
+
+class PlotText:
+    def __init__(self, x, y, text, size=None, bold=True, color=ROOT.kBlack):
+        self.x = x
+        self.y = y
+        self.text = text
+
+        self.l = ROOT.TLatex()
+        self.l.SetNDC()
+        if not bold:
+            self.l.SetTextFont(self.l.GetTextFont()-20) # bold -> normal
+        if size != None:
+            self.l.SetTextSize(size)
+        self.l.SetTextColor(color)
+
+    def Draw(self, options=None):
+        self.l.DrawLatex(self.x, self.y, self.text)        
+        
 
 ## Add the "CMS Preliminary" text to the pad
 #
