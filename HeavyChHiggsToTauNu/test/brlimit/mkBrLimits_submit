@@ -37,7 +37,7 @@ rm split*.root
 
 #Find out integrated luminosities from datacard files, one for each mass point
 foreach xmas ($massPoints)
-head -1 ${nameDataCard}${xmas}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! outputs/input_luminosity_${xmas}
+head -1 ${nameDataCard}${xmas}.txt | awk '{print strtonum(substr($7,12,5)) }' >&! outputs/input_luminosity_${xmas}
 end
 
 # jobs for observed limits, one for each mass point
