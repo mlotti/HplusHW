@@ -1,10 +1,18 @@
 #!/bin/tcsh
 
-set odir = `pwd`
-
+# ------------------  modify these values --------------
 # write name of datacard here (remove .txt)
-set nameJobs = `basename ${odir}`
 set nameDataCard = lands_datacard_hplushadronic_m
+# jobs have 25 toy MC events each
+set nJobs = "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20"
+# todo: massPoints not yet used everywhere 
+set massPoints = "80 100 120 140 150 155 160"
+# ----------------------------------------------
+
+# do not modify these
+set odir = `pwd`
+set nameJobs = `basename ${odir}`
+set jobname = ${nameJobs}_`date +"%H%M%S"`
 
 # check if jobs producing same output files are running
 # NOTE: a job with longer name containing the name of this job might block this 
@@ -13,25 +21,6 @@ while (`bjobs -w |& grep $nameJobs` != "")
   echo Waiting for previous jobs to end.  You might want to bkill these jobs...
   sleep 10
 end
-
-#input file names
-set f1 = ${nameDataCard}80
-set f2 = ${nameDataCard}100
-set f3 = ${nameDataCard}120
-set f4 = ${nameDataCard}140
-set f5 = ${nameDataCard}150
-set f6 = ${nameDataCard}155
-set f7 = ${nameDataCard}160
-
-#individual names for jobs with date and time
-set jobname = ${nameJobs}_`date +"%H%M%S"`
-set j1 = ${jobname}80
-set j2 = ${jobname}100
-set j3 = ${jobname}120
-set j4 = ${jobname}140
-set j5 = ${jobname}150
-set j6 = ${jobname}155
-set j7 = ${jobname}160
 
 # prepare LandS
 cd mycmsswlink/src/
@@ -44,32 +33,26 @@ gmake all
 cd ${odir}
 mkdir outputs
 
-#Find out integrated luminosities from datacard files
-head -1 ${f1}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! outputs/input_luminosity_80
-head -1 ${f2}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! outputs/input_luminosity_100
-head -1 ${f3}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! outputs/input_luminosity_120
-head -1 ${f4}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! outputs/input_luminosity_140
-head -1 ${f5}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! outputs/input_luminosity_150
-head -1 ${f6}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! outputs/input_luminosity_155
-head -1 ${f7}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! outputs/input_luminosity_160
+rm split*.root
 
-# generates the files output__HPlusHadronic_*_obs
-bsub -q 1nh -J ${j1}_o ${odir}/mkBrLimits_submitObs ${odir} ${f1}.txt
-bsub -q 1nh -J ${j2}_o ${odir}/mkBrLimits_submitObs ${odir} ${f2}.txt
-bsub -q 1nh -J ${j3}_o ${odir}/mkBrLimits_submitObs ${odir} ${f3}.txt
-bsub -q 1nh -J ${j4}_o ${odir}/mkBrLimits_submitObs ${odir} ${f4}.txt
-bsub -q 1nh -J ${j5}_o ${odir}/mkBrLimits_submitObs ${odir} ${f5}.txt
-bsub -q 1nh -J ${j6}_o ${odir}/mkBrLimits_submitObs ${odir} ${f6}.txt
-bsub -q 1nh -J ${j7}_o ${odir}/mkBrLimits_submitObs ${odir} ${f7}.txt
+#Find out integrated luminosities from datacard files, one for each mass point
+foreach xmas ($massPoints)
+head -1 ${nameDataCard}${xmas}.txt | awk '{print strtonum(substr($7,6,5)) }' >&! outputs/input_luminosity_${xmas}
+end
 
-# generates the files output__HPlusHadronic_*_exp
-bsub -q 1nd -J ${j1}_e ${odir}/mkBrLimits_submitExp ${odir} ${f1}.txt
-bsub -q 1nd -J ${j2}_e ${odir}/mkBrLimits_submitExp ${odir} ${f2}.txt
-bsub -q 1nd -J ${j3}_e ${odir}/mkBrLimits_submitExp ${odir} ${f3}.txt
-bsub -q 1nd -J ${j4}_e ${odir}/mkBrLimits_submitExp ${odir} ${f4}.txt
-bsub -q 1nd -J ${j5}_e ${odir}/mkBrLimits_submitExp ${odir} ${f5}.txt
-bsub -q 1nd -J ${j6}_e ${odir}/mkBrLimits_submitExp ${odir} ${f6}.txt
-bsub -q 1nd -J ${j7}_e ${odir}/mkBrLimits_submitExp ${odir} ${f7}.txt
+# jobs for observed limits, one for each mass point
+foreach xmas ($massPoints)
+bsub -q 1nh -J ${jobname}${xmas}_o ${odir}/mkBrLimits_submitObs ${odir} ${nameDataCard}${xmas}.txt
+end
+
+# jobs for expected limits, several jobs for each mass point 
+# parameters for mkBrLimits_submitExpSplit:
+# workdir, job number (seed), mass point, datacard file name(s)
+foreach xmas ($massPoints)
+foreach xjob ($nJobs)
+bsub -q 1nh -J ${jobname}${xmas}_e_$xjob ${odir}/mkBrLimits_submitExpSplit ${odir} $xjob $xmas ${nameDataCard}${xmas}.txt
+end
+end
 
 # here check if jobs with same name are running
 echo Checking jobs with name $jobname.
@@ -78,30 +61,17 @@ while (`bjobs -w |& grep $jobname` != "") # check if job name exists
   sleep 60
 end
 
-set output1 = outputs/output_${f1}
-set output2 = outputs/output_${f2}
-set output3 = outputs/output_${f3}
-set output4 = outputs/output_${f4}
-set output5 = outputs/output_${f5}
-set output6 = outputs/output_${f6}
-set output7 = outputs/output_${f7}
+# todo : rename for mass
+foreach xmas ($massPoints)
+hadd split${xmas}_Combined_limits_tree.root split${xmas}_*limits_tree.root
+./mycmsswlink/src/UserCode/mschen/LandS/test/lands.exe --doExpectation 1 --readLimitsFromFile split${xmas}_Combined_limits_tree.root | tail -5 >&! outputs/output_${nameDataCard}${xmas}_exp
+end
 
 # collect observed values
-head -3 ${output1}_obs | tail -1 | awk '{print $12 }' >&! ${output1}
-head -3 ${output2}_obs | tail -1 | awk '{print $12 }' >&! ${output2}
-head -3 ${output3}_obs | tail -1 | awk '{print $12 }' >&! ${output3}
-head -3 ${output4}_obs | tail -1 | awk '{print $12 }' >&! ${output4}
-head -3 ${output5}_obs | tail -1 | awk '{print $12 }' >&! ${output5}
-head -3 ${output6}_obs | tail -1 | awk '{print $12 }' >&! ${output6}
-head -3 ${output7}_obs | tail -1 | awk '{print $12 }' >&! ${output7}
-
-head -3 ${output1}_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> ${output1}
-head -3 ${output2}_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> ${output2}
-head -3 ${output3}_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> ${output3}
-head -3 ${output4}_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> ${output4}
-head -3 ${output5}_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> ${output5}
-head -3 ${output6}_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> ${output6}
-head -3 ${output7}_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> ${output7}
+foreach xmas ($massPoints)
+head -3 outputs/output_${nameDataCard}${xmas}_obs | tail -1 | awk '{print $12 }' >&! outputs/output_${nameDataCard}${xmas}
+head -3 outputs/output_${nameDataCard}${xmas}_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> outputs/output_${nameDataCard}${xmas}
+end
 
 cd ${odir}
 rm -r LSFJOB_*
