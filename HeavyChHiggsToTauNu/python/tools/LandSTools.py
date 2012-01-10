@@ -156,43 +156,50 @@ class MultiCrabLandS:
 	print "Multicrab cfg created. Type"
         print "cd",self.dirname,"&& multicrab -create"
 
+class Result:
+    def __init__(self, mass = 0, observed = 0, expected = 0, expectedPlus1Sigma = 0, expectedPlus2Sigma = 0, expectedMinus1Sigma = 0, expectedMinus2Sigma = 0):
+        self.mass                = float(mass)
+        self.observed            = float(observed)
+        self.expected            = float(expected)
+        self.expectedPlus1Sigma  = float(expectedPlus1Sigma)
+        self.expectedPlus2Sigma  = float(expectedPlus2Sigma)
+        self.expectedMinus1Sigma = float(expectedMinus1Sigma)
+        self.expectedMinus2Sigma = float(expectedMinus2Sigma)
+        
+    def Exists(self, result):
+        if self.mass == result.mass:
+            return True
+        return False
+        
+    def Add(self, result):
+        if self.mass == result.mass:
+            if self.observed == 0:
+                self.observed = float(result.observed)   
+            if self.expected == 0:
+                self.expected            = float(result.expected)
+                self.expectedPlus1Sigma  = float(result.expectedPlus1Sigma)
+                self.expectedPlus2Sigma  = float(result.expectedPlus2Sigma)
+                self.expectedMinus1Sigma = float(result.expectedMinus1Sigma)
+                self.expectedMinus2Sigma = float(result.expectedMinus2Sigma)
+  
+    def Print(self):
+        print "Mass = ",self.mass
+        print "    Observed = ",self.observed
+        print "    Expected = ",self.expected
+        print "     +1sigma = ",self.expectedPlus1Sigma," -1sigma = ",self.expectedMinus1Sigma
+        print "     +2sigma = ",self.expectedPlus2Sigma," -2sigma = ",self.expectedMinus2Sigma
 
 
+def ConvertToErrorBands(result):
+    return Result(float(result.mass),
+                  float(result.observed),
+                  float(result.expected),
+                  float(result.expectedPlus1Sigma) - float(result.expected),
+                  float(result.expectedPlus2Sigma) - float(result.expected), 
+                  float(result.expected) - float(result.expectedMinus1Sigma),
+                  float(result.expected) - float(result.expectedMinus2Sigma))
 
 class ParseLandsOutput:
-    class Result:
-	def __init__(self, mass = 0, observed = 0, expected = 0, expectedPlus1Sigma = 0, expectedPlus2Sigma = 0, expectedMinus1Sigma = 0, expectedMinus2Sigma = 0):
-	    self.mass		     = mass
-	    self.observed            = observed
-	    self.expected            = expected
-	    self.expectedPlus1Sigma  = expectedPlus1Sigma
-	    self.expectedPlus2Sigma  = expectedPlus2Sigma
-	    self.expectedMinus1Sigma = expectedMinus1Sigma
-	    self.expectedMinus2Sigma = expectedMinus2Sigma
-
-	def Exists(self, result):
-	    if self.mass == result.mass:
-		return True
-	    return False
-
-	def Add(self, result):
-	    if self.mass == result.mass:
-		if self.observed == 0:
-		    self.observed = result.observed
-		if self.expected == 0:
-		    self.expected            = result.expected
-		    self.expectedPlus1Sigma  = result.expectedPlus1Sigma
-		    self.expectedPlus2Sigma  = result.expectedPlus2Sigma
-		    self.expectedMinus1Sigma = result.expectedMinus1Sigma
-		    self.expectedMinus2Sigma = result.expectedMinus2Sigma
-
-	def Print(self):
-	    print "Mass = ",self.mass
-	    print "    Observed = ",self.observed
-	    print "    Expected = ",self.expected
-	    print "     +1sigma = ",self.expectedPlus1Sigma," -1sigma = ",self.expectedMinus1Sigma
-	    print "     +2sigma = ",self.expectedPlus2Sigma," -2sigma = ",self.expectedMinus2Sigma
-
     def __init__(self, path):
 	self.path = path
 
@@ -235,7 +242,7 @@ class ParseLandsOutput:
 	    i = i - 1
 
     def Compare(self, results1, results2):
-	return results1.mass > results2.mass
+	return results1.mass < results2.mass
 	
     def Swap(self, i, j):
 	tmp = self.results[i]
@@ -253,7 +260,7 @@ class ParseLandsOutput:
 	match = self.subdir_re.search(dir)
 	if match:
 	    mass  = match.group("mass")
-	    result = self.Result(mass) # filling the mass
+	    result = Result(mass) # filling the mass
 	    label = match.group("label")
 	    if label.find("Observed") == 0:
 		result = self.ParseObsFile(result,dir)
