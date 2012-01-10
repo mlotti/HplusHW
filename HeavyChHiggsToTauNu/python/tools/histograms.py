@@ -243,7 +243,7 @@ class LegendCreator:
     # Y2 coordinate
     ## \var textSize
     # Text size
-    ## \var boderSize
+    ## \var borderSize
     # Border size
     ## \var _keys
     # List of valid coordinate names for __call__() function
