@@ -1,8 +1,12 @@
 #!/bin/tcsh
 
+# Set here number of toy MC (default 25)
+set nToys = 25
+
+# parameters for mkBrLimits_submitExpSplit:
+# workdir, job number (seed), mass point, datacard file name(s)
 set odir = $1
 set myseed = $2 
-#todo needs name by mass
 set myjobname = split$3_$2
 set datacard1 = ${odir}/$4 
 set datacard2 = ${odir}/$5
@@ -15,8 +19,7 @@ echo
 cd ${odir}/mycmsswlink/src
 cmsenv
 
-# Set number of toys after "-t "
 cd ${odir}
-${odir}/mycmsswlink/src/UserCode/mschen/LandS/test/lands.exe --PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09  -d ${datacard1} --doExpectation 1 -t 25 --seed ${myseed} -n ${myjobname} | tail -5 >& ${outputfile}
+${odir}/mycmsswlink/src/UserCode/mschen/LandS/test/lands.exe --PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09  -d ${datacard1} --doExpectation 1 -t ${nToys} --seed ${myseed} -n ${myjobname} | tail -5 >& ${outputfile}
 
 exit 0

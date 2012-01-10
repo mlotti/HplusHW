@@ -12,6 +12,7 @@ set massPoints = "80 100 120 140 150 155 160"
 # do not modify these
 set odir = `pwd`
 set nameJobs = `basename ${odir}`
+set jobname = ${nameJobs}_`date +"%H%M%S"`
 
 # check if jobs producing same output files are running
 # NOTE: a job with longer name containing the name of this job might block this 
@@ -45,10 +46,11 @@ bsub -q 1nh -J ${jobname}${xmas}_o ${odir}/mkBrLimits_submitObs ${odir} ${nameDa
 end
 
 # jobs for expected limits, several jobs for each mass point 
+# parameters for mkBrLimits_submitExpSplit:
+# workdir, job number (seed), mass point, datacard file name(s)
 foreach xmas ($massPoints)
 foreach xjob ($nJobs)
 bsub -q 1nh -J ${jobname}${xmas}_e_$xjob ${odir}/mkBrLimits_submitExpSplit ${odir} $xjob $xmas ${nameDataCard}${xmas}.txt
-  echo "submit jobs " $xmas ", "  $xjob
 end
 end
 

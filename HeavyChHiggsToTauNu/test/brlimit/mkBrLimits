@@ -27,5 +27,6 @@ rm spli*root
 #rm -r mycmsswlink/tmp
 rm -r mycmsswlink
 rm -r CMSSW_*
+rm __limitbands.root
 
 echo mkBrLimits done!
