@@ -1,0 +1,22 @@
+#!/bin/tcsh
+
+set odir = $1
+set myseed = $2 
+#todo needs name by mass
+set myjobname = split$3_$2
+set datacard1 = ${odir}/$4 
+set datacard2 = ${odir}/$5
+set datacard3 = ${odir}/$6 
+set outputfile = outputs/output_`basename ${datacard1} .txt`_exp
+
+echo "Calculating exp value with datacard ${datacard1} ${datacard2} ${datacard3}, output is ${outputfile}"
+echo
+
+cd ${odir}/mycmsswlink/src
+cmsenv
+
+# Set number of toys after "-t "
+cd ${odir}
+${odir}/mycmsswlink/src/UserCode/mschen/LandS/test/lands.exe --PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09  -d ${datacard1} --doExpectation 1 -t 25 --seed ${myseed} -n ${myjobname} | tail -5 >& ${outputfile}
+
+exit 0

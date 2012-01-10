@@ -15,16 +15,17 @@ echo done with jobs!
 source ${odir}/mkBrLimits_process
 echo done with plotting!
 
-# TODO: remove LandS and clean
+# Finally, remove LandS and clean directory
 
 # # compress LandS output files,
 # # remove LandS and clean directory from files created by LandS
-# tar -cf output_Lands.tar output_LandS_*
-# rm output_LandS_*
 # rm -r LSFJOB_*
 # rm *Hybrid*root
-# #rm input_luminosity_*
-# rm -r CMSSW_*
-rm -r mycmsswlink/src/HiggsAnalysis
-rm -r mycmsswlink/src/UserCode
-rm -r mycmsswlink/tmp
+rm spli*root
+#rm -r mycmsswlink/src/HiggsAnalysis
+#rm -r mycmsswlink/src/UserCode
+#rm -r mycmsswlink/tmp
+rm -r mycmsswlink
+rm -r CMSSW_*
+
+echo mkBrLimits done!
