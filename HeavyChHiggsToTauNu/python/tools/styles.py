@@ -43,7 +43,7 @@ class StyleFill(StyleBase):
 	if self.fillColor != None:
 	    h.SetFillColor(self.fillColor)
 	else:
-	    h.SetFillColor(self.style.color)
+	    h.SetFillColor(h.GetLineColor())
         #h.SetFillStyle(3002)
         h.SetFillStyle(self.fillStyle)
 
