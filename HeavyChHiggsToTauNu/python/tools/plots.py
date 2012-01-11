@@ -637,6 +637,13 @@ class PlotBase:
                         if not isinstance(h, ROOT.TH1):
                             raise Exception("Input types can't be a mixture of ROOT.TH1 and something, datasetRootHistos[%d] is %s" % (i, type(h).__name__))
                     histoList = [histograms.Histo(th1, th1.GetName()) for th1 in datasetRootHistos]
+                elif isinstance(datasetRootHistos[0], ROOT.TGraph):
+                    for i, h in enumerate(datasetRootHistos[1:]):
+                        if not isinstance(h, ROOT.TGraph):
+                            raise Exception("Input types can't be a mixture of ROOT.TGraph and someting, datasetRootHistos[%d] is %s" % (i, type(h).__name__))
+                        if len(h.GetName()) == 0:
+                            raise Exception("For TGraph input, the graph name must be set with TGraph.SetName() (name for datasetRootHistos[%d] is empty)" % i)
+                    histoList = [histograms.HistoGraph(gr, gr.GetName()) for gr in datasetRootHistos]
 
                 self.histoMgr = histograms.HistoManager()
                 for histo in histoList:
