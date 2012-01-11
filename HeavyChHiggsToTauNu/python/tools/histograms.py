@@ -708,6 +708,22 @@ class HistoBase:
     def setName(self, name):
         self.name = name
 
+    def setIsDataMC(self, isData, isMC):
+        self._isData = isData
+        self._isMC = isMC
+
+    ## Is the histogram from MC?
+    def isMC(self):
+        if not hasattr(self, "_isMC"):
+            raise Exception("setIsDataMC() has not been called, don't know if the histogram is from data or MC")
+        return self._isMC
+
+    ## Is the histogram from collision data?
+    def isData(self):
+        if not hasattr(self, "_isData"):
+            raise Exception("setIsDataMC() has not been called, don't know if the histogram is from data or MC")
+        return self._isData
+
     ## Set the legend label
     #
     # \param label  New histogram label for TLegend
@@ -811,14 +827,7 @@ class HistoWithDataset(Histo):
     def __init__(self, dataset, rootHisto, name):
         Histo.__init__(self, rootHisto, name)
         self.dataset = dataset
-
-    ## Is the histogram from MC?
-    def isMC(self):
-        return self.dataset.isMC()
-
-    ## Is the histogram from collision data?
-    def isData(self):
-        return self.dataset.isData()
+        self.setIsDataMC(self.dataset.isData(), self.dataset.isMC())
 
     ## Get the dataset.Dataset object
     def getDataset(self):
@@ -830,12 +839,7 @@ class HistoWithDataset(Histo):
 class HistoWithDatasetFakeMC(HistoWithDataset):
     def __init__(self, dataset, rootHisto, name):
         HistoWithDataset.__init__(self, dataset, rootHisto, name)
-
-    def isMC(self):
-        return True
-
-    def isData(self):
-        return False
+        self.setIsDataMC(False, True)
 
 ## Represents combined (statistical) uncertainties of multiple histograms.
 class HistoTotalUncertainty(HistoBase):
@@ -859,14 +863,7 @@ class HistoTotalUncertainty(HistoBase):
 
         for h in rootHistos[1:]:
             self.rootHisto.Add(h)
-
-    ## Is the histogram from MC?
-    def isMC(self):
-        return self.histos[0].isMC()
-
-    ## Is the histogram from collision data?
-    def isData(self):
-        return self.histos[0].isData()
+        self.setIsDataMC(self.histos[0].isData(), self.histos[0].isMC())
 
     ## \var histos
     # List of histograms.HistoBase objects from which the total uncertaincy is calculated
@@ -888,6 +885,8 @@ class HistoStacked(HistoBase):
         for h in rootHistos:
             self.rootHisto.Add(h)
 
+        self.setIsDataMC(self.histos[0].isData(), self.histos[0].isMC())
+
     ## Get the list of original TH1 histograms.
     def getAllRootHistos(self):
         return [x.getRootHisto() for x in self.histos]
@@ -895,14 +894,6 @@ class HistoStacked(HistoBase):
     ## Get the sum of the original histograms.
     def getSumRootHisto(self):
         return sumRootHistos([d.getRootHisto() for d in self.histos])
-
-    ## Is the histogram from MC?
-    def isMC(self):
-        return self.histos[0].isMC()
-
-    ## Is the histogram from collision data?
-    def isData(self):
-        return self.histos[0].isData()
 
     def setLegendLabel(self, label):
         for h in self.histos:
@@ -967,12 +958,7 @@ class HistoGraphWithDataset(HistoGraph):
     def __init__(self, dataset, *args, **kwargs):
         HistoGraph.__init__(self, *args, **kwargs)
         self.dataset = dataset
-
-    def isMC(self):
-        return self.dataset.isMC()
-
-    def isData(self):
-        return self.dataset.isData()
+        self.setIsDataMC(self.dataset.isData(), self.dataset.isMC())
 
     def getDataset(self):
         return self.dataset
