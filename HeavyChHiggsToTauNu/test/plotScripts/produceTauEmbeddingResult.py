@@ -36,9 +36,13 @@ analysisSig = "signalAnalysisGenuineTau"
 output = "histograms-ewk.root"
 
 dirEmbs = [
-    "multicrab_signalAnalysis_v13_3_Run2011A_120104_150358",
-    "multicrab_signalAnalysis_Met50_v13_2_seedTest1_Run2011A_111219_213247",
-    "multicrab_signalAnalysis_v13_2_seedTest2_Run2011A_111220_000831",
+#    "multicrab_signalAnalysis_v13_3_Run2011A_120104_150358",
+#    "multicrab_signalAnalysis_Met50_v13_2_seedTest1_Run2011A_111219_213247",
+#    "multicrab_signalAnalysis_v13_2_seedTest2_Run2011A_111220_000831",
+
+    "multicrab_signalAnalysis_Met50_systematics_v13_3_Run2011A_120109_140527",
+    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest1_Run2011A_120109_141906",
+    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest2_Run2011A_120109_143132",
     "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest3_Run2011A_120108_112224",
     "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest4_Run2011A_120108_144749",
     "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest5_Run2011A_120108_151542",
@@ -81,8 +85,6 @@ def main():
     adder.dyCorrectionOnly()
     addHistos("signalAnalysisDYCorrection")
 
-    # aeh, for counters we need something else
-
     of.Close()
 
 
@@ -100,7 +102,7 @@ def addConfigInfo(of, datasetsEmb, dirEmbs, dirSig):
 
     setValue(1, "control", 1)
     setValue(2, "isData", 1)
-    setValue(3, "luminosity", datasetsEmb.getLumi())
+    setValue(3, "luminosity", datasetsEmb.getLuminosity())
 
     configinfo.Write()
 
@@ -180,7 +182,7 @@ class RootHistoAdder:
         (embDataHisto, tmp) = self.datasetsEmb.getHistogram("Data", srcEmbName)
         (embDyHisto, tmp) = self.datasetsEmb.getHistogram("DYJetsToLL", srcEmbName)
         sigDyHisto = self.dySig.getDatasetRootHisto(srcSigName) # DatasetRootHisto
-        sigDyHisto.normalizeToLuminosity(self.datasetsEmb.getLumi())
+        sigDyHisto.normalizeToLuminosity(self.datasetsEmb.getLuminosity())
         sigDyHisto = sigDyHisto.getHistogram() # ROOT.TH1
     
         histo = None
@@ -194,21 +196,7 @@ class RootHistoAdder:
             table.appendColumn(embDyCounter)
             table.appendColumn(sigDyCounter)
 
-            nrows = table.getNrows()
-            ncolumns = table.getNcolumns()
-            removeRows = []
-
-            for irow in xrange(0, nrows):
-                allFull = True
-                for icol in xrange(0, ncolumns):
-                    if table.getCount(irow, icol) == None:
-                        allFull = False
-                        break
-                if not allFull:
-                    removeRows.append(irow-len(removeRows)) # hack to take into account the change in indices when removing a row
-            for irow in removeRows:
-                table.removeRow(index=irow)
-
+            table.removeNonFullRows()
             if table.getNrows() == 0:
                 return
 
@@ -263,6 +251,9 @@ class DatasetsMany:
     def remove(self, *args, **kwargs):
         self.forEach(lambda d: d.remove(*args, **kwargs))
 
+    def getAllDatasetNames(self):
+        return self.datasetManagers[0].getAllDatasetNames()
+
     # End of compatibility methods
     def getDatasetFromFirst(self, name):
         return self.datasetManagers[0].getDataset(name)
@@ -270,7 +261,7 @@ class DatasetsMany:
     def setLumiFromData(self):
         self.lumi = self.getDatasetFromFirst("Data").getLuminosity()
 
-    def getLumi(self):
+    def getLuminosity(self):
         return self.lumi
 
     def getHistogram(self, datasetName, name):
@@ -330,6 +321,108 @@ class DatasetsMany:
             histos.append(h)
 
         return histos # list of individual histograms
+
+    def getCounter(self, datasetName, name):
+        (embDataHisto, tmp) = self.getHistogram(datasetName, name)
+        return counter.HistoCounter(datasetName, embDataHisto)
+
+
+class DatasetsDYCorrection:
+    def __init__(self, datasetsEmb, datasetsSig, analsysisEmb, analysisSig):
+        self.datasetsEmb = datasetsEmb
+        self.datasetsSig = datasetsSig
+
+        # For an ugly hack
+        self.analysisEmb = analysisEmb
+        self.analysisSig = analysisSig
+
+    def forEach(self, function):
+        self.datasetsEmb.forEach(function)
+        function(self.datasetsSig)
+
+    # Compatibility with dataset.DatasetManager
+    def remove(self, *args, **kwargs):
+        self.forEach(lambda d: d.remove(*args, **kwargs))
+
+    def getAllDatasetNames(self):
+        return self.datasetsEmb.getAllDatasetNames()
+
+    # End of compatibility methods
+    
+    def getLuminosity(self):
+        return self.datasetsEmb.getLuminosity()
+
+    def hasHistogram(self, datasetName, name):
+        return self.datasetsEmb.hasHistogram(datasetName, name) and self.datasetsSig.getDataset(datasetName).hasHistogram(name)
+
+
+    def getHistogram(self, datasetName, name):
+        if not datasetName in ["Data", "EWKMC", "DYJetsToLL"]:
+            return self.datasetsEmb.getHistogram(datasetName, name)
+
+        # Ugly hack
+        sigName = name
+        if isinstance(sigName, basestring):
+            sigName = sigName.replace(self.analysisEmb, self.analysisSig)
+        else:
+            sigName = sigName.clone(tree=sigName.tree.replace(self.analysisEmb, self.analysisSig))
+
+        # Get properly normalized embedded data, embedded DY and normal DY histograms
+        (embDataHisto, tmp) = self.datasetsEmb.getHistogram(datasetName, name)
+        (embDyHisto, tmp) = self.datasetsEmb.getHistogram("DYJetsToLL", name)
+        sigDyHisto = self.datasetsSig.getDataset("DYJetsToLL").getDatasetRootHisto(sigName) # DatasetRootHisto
+        sigDyHisto.normalizeToLuminosity(self.datasetsEmb.getLuminosity())
+        sigDyHisto = sigDyHisto.getHistogram() # ROOT.TH1
+
+        histo = embDataHisto
+        # DY: normal-embedded
+        sigDyHisto.Add(embDyHisto, -1)
+
+        # data(Embedded) + DY(normal-embeded)
+        histo.Add(sigDyHisto)
+        
+        histo.SetName(histo.GetName()+"DYCorrected")
+
+        return (histo, None)
+
+    def getCounter(self, datasetName, name):
+        if not datasetName in ["Data", "EWKMC", "DYJetsToLL"]:
+            (embDataHisto, tmp) = self.datasetsEmb.getHistogram(datasetName, name)
+            return counter.HistoCounter(datasetName, embDataHisto)
+
+        # Ugly hack
+        sigName = name
+        if isinstance(sigName, basestring):
+            sigName = sigName.replace(self.analysisEmb, self.analysisSig)
+        else:
+            sigName = sigName.clone(tree=sigName.tree.replace(self.analysisEmb, self.analysisSig))
+
+        # Get properly normalized embedded data, embedded DY and normal DY histograms
+        (embDataHisto, tmp) = self.datasetsEmb.getHistogram(datasetName, name)
+        (embDyHisto, tmp) = self.datasetsEmb.getHistogram("DYJetsToLL", name)
+        sigDyHisto = self.datasetsSig.getDataset("DYJetsToLL").getDatasetRootHisto(sigName) # DatasetRootHisto
+        sigDyHisto.normalizeToLuminosity(self.datasetsEmb.getLuminosity())
+        sigDyHisto = sigDyHisto.getHistogram() # ROOT.TH1
+
+        embDataCounter = counter.HistoCounter("EmbData", embDataHisto)
+        embDyCounter = counter.HistoCounter("EmbDy", embDyHisto)
+        sigDyCounter = counter.HistoCounter("SigDy", sigDyHisto)
+
+        table = counter.CounterTable()
+        table.appendColumn(embDataCounter)
+        table.appendColumn(embDyCounter)
+        table.appendColumn(sigDyCounter)
+
+        table.removeNonFullRows()
+
+        column = table.getColumn(name="EmbData")
+        embDyColumn = table.getColumn(name="EmbDy")
+        sigDyColumn = table.getColumn(name="SigDy")
+        dyCorrection = counter.subtractColumn("Correction", sigDyColumn, embDyColumn)
+        column = counter.sumColumn(datasetName, [column, dyCorrection])
+
+        return column
+
 
 if __name__ == "__main__":
     main()

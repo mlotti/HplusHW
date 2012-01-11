@@ -37,14 +37,12 @@ def main():
     dirEmbs = ["."] + [os.path.join("..", d) for d in result.dirEmbs[1:]]
     dirSig = "../"+result.dirSig
     
-    print dirEmbs
-
     datasetsEmb = result.DatasetsMany(dirEmbs, analysisEmb+"Counters")
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
 
-    datasetsEmb.forEach(plots.mergeRenameReorderForDataMC)
+    datasetsEmb.forEach(lambda mgr: plots.mergeRenameReorderForDataMC(mgr, keepSourcesMC=True))
     datasetsEmb.setLumiFromData()
-    plots.mergeRenameReorderForDataMC(datasetsSig)
+    plots.mergeRenameReorderForDataMC(datasetsSig, keepSourcesMC=True)
 
     def mergeEWK(datasets):
         datasets.merge("EWKMC", ["WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson"], keepSources=True)
@@ -60,17 +58,27 @@ def main():
     tauEmbedding.normalize=True
     tauEmbedding.era = "Run2011A"
 
+    datasetsEmbCorrected = result.DatasetsDYCorrection(datasetsEmb, datasetsSig, analysisEmb, analysisSig)
+
     doPlots(datasetsEmb, datasetsSig, "TTJets")
     doPlots(datasetsEmb, datasetsSig, "WJets")
     doPlots(datasetsEmb, datasetsSig, "DYJetsToLL")
-    #doPlots(datasetsEmb, datasetsSig, "Data")
+    doPlots(datasetsEmb, datasetsSig, "SingleTop")
+    doPlots(datasetsEmb, datasetsSig, "Diboson")
+    doPlots(datasetsEmb, datasetsSig, "WW")
+    doPlots(datasetsEmb, datasetsSig, "WZ")
+    doPlots(datasetsEmb, datasetsSig, "ZZ")
     doPlots(datasetsEmb, datasetsSig, "EWKMC")
     doPlots(datasetsEmb, datasetsSig, "EWKMC", doData=True, postfix="_data")
+    ##doPlots(datasetsEmb, datasetsSig, "Data")
+
+    doPlots(datasetsEmbCorrected, datasetsSig, "EWKMC", postfix="_dycorrected")
+    doPlots(datasetsEmbCorrected, datasetsSig, "EWKMC", doData=True, postfix="_dycorrected_data")
 
     doPlotsData(datasetsEmb)
 
 def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
-    lumi = datasetsEmb.getLumi()
+    lumi = datasetsEmb.getLuminosity()
     
     def createPlot(name):
         name2Emb = name
@@ -105,20 +113,23 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
             p = plots.ComparisonPlot(emb, sig)
             sty = styles.styles
 
+        legLabel = plots._legendLabels.get(datasetName, datasetName)
         p.histoMgr.setHistoLegendLabelMany({
-                "Embedded":     "Embedded "+plots._legendLabels[datasetName],
-                "Normal":       "Normal "+plots._legendLabels[datasetName],
+                "Embedded":     "Embedded " + legLabel,
+                "Normal":       "Normal " + legLabel,
                 "EmbeddedData": "Embedded data",
                 })
         p.histoMgr.forEachHisto(styles.Generator(sty))
         if doData:
-            plots.copyStyle(p.histoMgr.getHisto("EmbeddedData").getRootHisto(), embDataVar)
-            embDataVar.SetMarkerStyle(2)
-            p.embeddingDataVariation = embDataVar
+            if embDataVar != None:
+                plots.copyStyle(p.histoMgr.getHisto("EmbeddedData").getRootHisto(), embDataVar)
+                embDataVar.SetMarkerStyle(2)
+                p.embeddingDataVariation = embDataVar
         else:
-            plots.copyStyle(p.histoMgr.getHisto("Embedded").getRootHisto(), embVar)
-            embVar.SetMarkerStyle(2)
-            p.embeddingVariation = embVar
+            if embVar != None:
+                plots.copyStyle(p.histoMgr.getHisto("Embedded").getRootHisto(), embVar)
+                embVar.SetMarkerStyle(2)
+                p.embeddingVariation = embVar
 
         return p
 
@@ -129,6 +140,12 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
     treeDraw = dataset.TreeDraw("dummy", weight="weightPileup*weightTrigger*weightBTagging")
     tdMt = treeDraw.clone(varexp="sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi()))) >>tmp(20,0,400)")
 
+    textFunction = None
+    if isinstance(datasetsEmb, result.DatasetsDYCorrection):
+        def dyLabel():
+            histograms.addText(0.55, 0.7, "Embedded is DY corrected", size=15)
+        textFunction = dyLabel
+
     # After all cuts
     metCut = "(met_p4.Et() > 50)"
     bTaggingCut = "passedBTagging"
@@ -136,10 +153,13 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
     selection = "&&".join([metCut, bTaggingCut, deltaPhi160Cut])
     prefix = "mcembsig_"+datasetName+postfix
 
-    drawPlot(createPlot(treeDraw.clone(varexp="tau_p4.Pt() >>tmp(20,0,200)", selection=selection)), prefix+"_selectedTauPt_4AfterDeltaPhi160", "#tau-jet p_{T} (GeV/c)", opts2={"ymin": 0, "ymax": 3})
-    drawPlot(createPlot(treeDraw.clone(varexp="met_p4.Pt() >>tmp(16,0,400)", selection=selection)), prefix+"_MET_4AfterDeltaPhi160", "E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", opts2={"ymin": 0, "ymax": 3})
-    drawPlot(createPlot(tdMt.clone(selection=selection)), prefix+"_transverseMass_4AfterDeltaPhi160", "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts2={"ymin": 0, "ymax": 3}, ylabel="Events / %.0f GeV/c^{2}", log=False)
+    drawPlot(createPlot(treeDraw.clone(varexp="tau_p4.Pt() >>tmp(20,0,200)", selection=selection)), prefix+"_selectedTauPt_4AfterDeltaPhi160", "#tau-jet p_{T} (GeV/c)", opts2={"ymin": 0, "ymax": 3}, textFunction=textFunction)
+    drawPlot(createPlot(treeDraw.clone(varexp="met_p4.Pt() >>tmp(16,0,400)", selection=selection)), prefix+"_MET_4AfterDeltaPhi160", "E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", opts2={"ymin": 0, "ymax": 3}, textFunction=textFunction)
 
+    opts = {}
+    if datasetName == "EWKMC":
+        opts["ymax"] = 40
+    drawPlot(createPlot(tdMt.clone(selection=selection)), prefix+"_transverseMass_4AfterDeltaPhi160", "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts2={"ymin": 0, "ymax": 3}, opts=opts, ylabel="Events / %.0f GeV/c^{2}", log=False, textFunction=textFunction)
 
 def doPlotsData(datasetsEmb):
     def createPlot(name):
@@ -154,7 +174,7 @@ def doPlotsData(datasetsEmb):
         embHistos = datasetsEmb.getHistograms("Data", name2Emb)
 
         p = plots.ComparisonManyPlot(embData, embHistos)
-        p.setLuminosity(datasetsEmb.getLumi())
+        p.setLuminosity(datasetsEmb.getLuminosity())
 
         p.histoMgr.forEachHisto(styles.Generator([styles.dataStyle] + styles.styles))
         #p.histoMgr.setHistoDrawStyleAll("P")
@@ -178,8 +198,7 @@ def doPlotsData(datasetsEmb):
 #    drawPlot(createPlot(treeDraw.clone(varexp="met_p4.Pt() >>tmp(16,0,400)", selection=selection)), prefix+"_MET_4AfterDeltaPhi160", "E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", opts2={"ymin": 0, "ymax": 3})
     drawPlotData(createPlot(tdMt.clone(selection=selection)), prefix+"_transverseMass_4AfterDeltaPhi160", "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts2={"ymin": 0, "ymax": 3}, ylabel="Events / %.0f GeV/c^{2}", log=False)
 
-
-def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, ratio=True, opts={}, opts2={}, moveLegend={}, cutLine=None, cutBox=None, function=None):
+def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, ratio=True, opts={}, opts2={}, moveLegend={}, **kwargs):
     if rebin > 1:
         h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     ylab = ylabel
@@ -243,10 +262,10 @@ def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, r
     if hasattr(h, "embeddingVariation"):
         h.legend.AddEntry(h.embeddingVariation, "Embedded MC min/max", "p")
 
-    common(h, xlabel, ylab, cutLine, cutBox, function)
+    common(h, xlabel, ylab, **kwargs)
 
 
-def drawPlotData(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, ratio=True, opts={}, opts2={}, moveLegend={}, cutLine=None, cutBox=None, function=None):
+def drawPlotData(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, ratio=True, opts={}, opts2={}, moveLegend={}, **kwargs):
     if rebin > 1:
         h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     ylab = ylabel
@@ -275,9 +294,9 @@ def drawPlotData(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=Tru
     #yaxis.SetTitleOffset(yaxis.GetTitleOffset()*1.5)
     h.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
 
-    common(h, xlabel, ylab, cutLine, cutBox, function)
+    common(h, xlabel, ylab, **kwargs)
 
-def common(h, xlabel, ylabel, cutLine=None, cutBox=None, function=None):
+def common(h, xlabel, ylabel, cutLine=None, cutBox=None, function=None, textFunction=None):
     # Add cut line and/or box
     if cutLine != None:
         lst = cutLine
@@ -303,6 +322,8 @@ def common(h, xlabel, ylabel, cutLine=None, cutBox=None, function=None):
     histograms.addCmsPreliminaryText()
     histograms.addEnergyText()
     h.addLuminosityText()
+    if textFunction != None:
+        textFunction()
     h.save()
 
 

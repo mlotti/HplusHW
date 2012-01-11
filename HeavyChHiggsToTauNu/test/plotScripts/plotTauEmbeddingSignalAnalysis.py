@@ -134,7 +134,7 @@ def main():
     #print datasets.getAllDatasetNames()
     #return
 
-    apply_v13_1_bugfix(datasets)
+#    apply_v13_1_bugfix(datasets)
 
     plots.mergeRenameReorderForDataMC(datasets)
 
@@ -467,7 +467,7 @@ def doCounters(datasets, mcLumi=None):
 
     ewkDatasets = [
         "WJets", "TTJets",
-#        "DYJetsToLL", "SingleTop", "Diboson"
+        "DYJetsToLL", "SingleTop", "Diboson"
         ]
 
     table = eventCounter.getMainCounterTable()
