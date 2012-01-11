@@ -1489,15 +1489,15 @@ class DatasetManager:
                     raise Exception("Trying to rename dataset '%s' to '%s', but '%s' doesn't exist!" % (oldName, newName, oldName))
         self._populateMap()
 
-    def mergeData(self):
+    def mergeData(self, *args, **kwargs):
         """Merge all data Datasets to one with a name 'Data'."""
-        self.merge("Data", self.getDataDatasetNames())
+        self.merge("Data", self.getDataDatasetNames(), *args, **kwargs)
 
-    def mergeMC(self):
+    def mergeMC(self, *args, **kwargs):
         """Merge all MC Datasets to one with a name 'MC'."""
-        self.merge("MC", self.getMCDatasetNames())
+        self.merge("MC", self.getMCDatasetNames(), *args, **kwargs)
 
-    def mergeMany(self, mapping):
+    def mergeMany(self, mapping, *args, **kwargs):
         """Merge datasets according to the mapping."""
         toMerge = {}
         for d in self.datasets:
@@ -1509,7 +1509,7 @@ class DatasetManager:
                     toMerge[newName] = [d.getName()]
 
         for newName, nameList in toMerge.iteritems():
-            self.merge(newName, nameList)
+            self.merge(newName, nameList, *args, **kwargs)
 
     def merge(self, newName, nameList, keepSources=False):
         """Merge Datasets.
