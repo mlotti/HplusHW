@@ -50,7 +50,7 @@ end
 # workdir, job number (seed), mass point, datacard file name(s)
 foreach xmas ($massPoints)
 foreach xjob ($nJobs)
-bsub -o output_expected${xmas}.txt -q 1nh -J ${jobname}${xmas}_e_$xjob ${odir}/mkBrLimits_submitExpSplit ${odir} $xjob $xmas ${nameDataCard}${xmas}.txt
+bsub -o output_expected${xmas}_${xjob}.txt -q 1nh -J ${jobname}${xmas}_e_$xjob ${odir}/mkBrLimits_submitExpSplit ${odir} $xjob $xmas ${nameDataCard}${xmas}.txt
 end
 end
 
