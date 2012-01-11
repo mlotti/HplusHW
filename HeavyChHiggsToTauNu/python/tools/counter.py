@@ -450,18 +450,21 @@ def efficiencyColumn(name, column):
 
 def sumColumn(name, columns):
     """Create a new CounterColumn as the sum of the columns."""
-    nrows = columns[0].getNrows()
-    for i, c in enumerate(columns[1:]):
-        if nrows != c.getNrows():
-            raise Exception("Unable to sum the columns, column 0 has '%d' rows, column %d has '%d'." % (nrows, i, c.getNrows()))
+    table = CounterTable()
+    for c in columns:
+        table.appendColumn(c)
+    table.removeNonFullRows()
+    nrows = table.getNrows()
+    ncols = table.getNcolumns()
+
     rows = []
     for irow in xrange(nrows):
         count = dataset.Count(0,0)
-        for c in columns:
-            count.add(c.getCount(irow))
+        for icol in xrange(ncols):
+            count.add(table.getCount(irow, icol))
         rows.append(count)
 
-    return CounterColumn(name, columns[0].getRowNames(), rows)
+    return CounterColumn(name, table.getRowNames(), rows)
 
 ## Create a CounterColumn as column1-column2
 def subtractColumn(name, column1, column2):
@@ -752,6 +755,22 @@ class CounterTable:
         for name in self.getRowNames()[:]:
             if not name in names:
                 self.removeRow(name=name)
+
+    def removeNonFullRows(self):
+        nrows = self.getNrows()
+        ncolumns = self.getNcolumns()
+        removeRows = []
+
+        for irow in xrange(0, nrows):
+            allFull = True
+            for icol in xrange(0, ncolumns):
+                if self.getCount(irow, icol) == None:
+                    allFull = False
+                    break
+            if not allFull:
+                removeRows.append(irow-len(removeRows)) # hack to take into account the change in indices when removing a row
+        for irow in removeRows:
+            self.removeRow(index=irow)
 
     def _getColumnWidth(self, icol):
         return self.columnWidths[icol]
