@@ -42,7 +42,7 @@ end
 
 # jobs for observed limits, one for each mass point
 foreach xmas ($massPoints)
-bsub -q 1nh -J ${jobname}${xmas}_o ${odir}/mkBrLimits_submitObs ${odir} ${nameDataCard}${xmas}.txt
+bsub -o output_observed${xmas}.txt -q 1nh -J ${jobname}${xmas}_o ${odir}/mkBrLimits_submitObs ${odir} ${nameDataCard}${xmas}.txt
 end
 
 # jobs for expected limits, several jobs for each mass point 
@@ -50,7 +50,7 @@ end
 # workdir, job number (seed), mass point, datacard file name(s)
 foreach xmas ($massPoints)
 foreach xjob ($nJobs)
-bsub -q 1nh -J ${jobname}${xmas}_e_$xjob ${odir}/mkBrLimits_submitExpSplit ${odir} $xjob $xmas ${nameDataCard}${xmas}.txt
+bsub -o output_expected${xmas}.txt -q 1nh -J ${jobname}${xmas}_e_$xjob ${odir}/mkBrLimits_submitExpSplit ${odir} $xjob $xmas ${nameDataCard}${xmas}.txt
 end
 end
 
@@ -76,5 +76,6 @@ end
 cd ${odir}
 rm -r LSFJOB_*
 rm *Hybrid*root
+rm output_??????ed*.txt
 
 echo Ready with LSF jobs!

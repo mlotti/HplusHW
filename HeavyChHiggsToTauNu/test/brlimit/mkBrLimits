@@ -20,7 +20,7 @@ echo done with plotting!
 # # compress LandS output files,
 # # remove LandS and clean directory from files created by LandS
 # rm -r LSFJOB_*
-# rm *Hybrid*root
+rm *Hybrid*root
 rm spli*root
 #rm -r mycmsswlink/src/HiggsAnalysis
 #rm -r mycmsswlink/src/UserCode
