@@ -1125,6 +1125,98 @@ class DataMCPlot(PlotSameBase, PlotRatioBase):
         PlotSameBase.draw(self)
         PlotRatioBase._draw(self)
 
+## Same goal as DataMCPlot, but with explicit histograms instead of construction from DatasetManager
+class DataMCPlot2(PlotBase, PlotRatioBase):
+    def __init__(self, histos, normalizeToOne=False, **kwargs):
+        PlotBase.__init__(self, histos, **kwargs)
+        PlotRatioBase.__init__(self)
+        self.normalizeToOne = normalizeToOne
+
+    def setDefaultStyles(self):
+        self._setLegendStyles()
+        self._setLegendLabels()
+        self._setPlotStyles()
+
+    def stackMCHistograms(self, stackSignal=False):
+        mcNames = filter(lambda n: n != "Data", [h.getName() for h in self.histoMgr.getHistos()])
+        mcNamesNoSignal = filter(lambda n: not isSignal(n) and not "StackedMCSignal" in n, mcNames)
+        if not stackSignal:
+            mcNames = mcNamesNoSignal
+
+        # Leave the signal datasets unfilled
+        self.histoMgr.forEachHisto(UpdatePlotStyleFill( _plotStyles, mcNamesNoSignal))
+        self.histoMgr.stackHistograms("StackedMC", mcNames)
+
+    def stackMCSignalHistograms(self):
+        mcSignal = filter(lambda n: isSignal(n), self.datasetMgr.getMCDatasetNames())
+        self.histoMgr.stackHistograms("StackedMCSignal", mcSignal)
+
+    ## Add MC uncertainty band
+    def addMCUncertainty(self):
+        if not self.histoMgr.hasHisto("StackedMC"):
+            raise Exception("Must call stackMCHistograms() before addMCUncertainty()")
+        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"])
+
+    def createFrame(self, filename, createRatio=False, **kwargs):
+        self._normalizeToOne()
+        if not createRatio:
+            PlotBase.createFrame(self, filename, **kwargs)
+        else:
+            if not self.histoMgr.hasHisto("StackedMC"):
+                raise Exception("Must call stackMCHistograms() before createFrameFraction()")
+
+            self._normalizeToOne()
+            self._createFrameRatio(filename,
+                                   self.histoMgr.getHisto("Data").getRootHisto(),
+                                   self.histoMgr.getHisto("StackedMC").getSumRootHisto(),
+                                   "Data/MC", **kwargs)
+
+    def setLuminosity(self, lumi):
+        self.luminosity = lumi
+
+    def addLuminosityText(self, x=None, y=None):
+        if hasattr(self, "luminosity"):
+            histograms.addLuminosityText(x, y, self.luminosity)
+
+    def addCutBoxAndLine(self, *args, **kwargs):
+        PlotSameBase.addCutBoxAndLine(self, *args, **kwargs)
+        PlotRatioBase.addCutBoxAndLineToRatio(self, *args, **kwargs)
+
+    def draw(self):
+        PlotBase.draw(self)
+        PlotRatioBase._draw(self)
+
+    ## Helper function to do the work for "normalization to one"
+    def _normalizeToOne(self):
+        # First check that the normalizeToOne is enabled
+        if not self.normalizeToOne:
+            return
+
+        # If the MC histograms have not been stacked, the
+        # normalization is straighforward (normalize all histograms to
+        # one)
+        if not self.histoMgr.hasHisto("StackedMC"):
+            self.histoMgr.forEachHisto(lambda h: dataset._normalizeToOne(h.getRootHisto()))
+            return
+
+        # Normalize the stacked histograms
+        handled = []
+        h = self.histoMgr.getHisto("StackedMC")
+        sumInt = h.getSumRootHisto().Integral()
+        for th1 in h.getAllRootHistos():
+            dataset._normalizeToFactor(th1, 1.0/sumInt)
+        handled.append("StackedMC")
+
+        # Normalize the the uncertainty histogram if it exists
+        if self.histoMgr.hasHisto("MCuncertainty"):
+            dataset._normalizeToFactor(self.histoMgr.getHisto("MCuncertainty").getRootHisto(), 1.0/sumInt)
+            handled.append("MCuncertainty")
+        
+        # Normalize the rest
+        for h in self.histoMgr.getHistos():
+            if not h.getName() in handled:
+                dataset._normalizeToOne(h.getRootHisto())
+
 
 ## Class to create comparison plots of two quantities.
 class ComparisonPlot(PlotBase, PlotRatioBase):
