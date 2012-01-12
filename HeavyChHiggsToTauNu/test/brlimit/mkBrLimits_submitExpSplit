@@ -1,7 +1,7 @@
 #!/bin/tcsh
 
-# Set here number of toy MC (default 25)
-set nToys = 25
+# Set here number of toy MC (default 10)
+set nToys = 10
 
 # parameters for mkBrLimits_submitExpSplit:
 # workdir, job number (seed), mass point, datacard file name(s)
