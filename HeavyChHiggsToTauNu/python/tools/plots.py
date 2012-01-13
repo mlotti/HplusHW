@@ -1131,14 +1131,18 @@ class DataMCPlot2(PlotBase, PlotRatioBase):
         PlotBase.__init__(self, histos, **kwargs)
         PlotRatioBase.__init__(self)
         self.normalizeToOne = normalizeToOne
+        self.dataDatasetNames = ["Data"]
 
     def setDefaultStyles(self):
         self._setLegendStyles()
         self._setLegendLabels()
         self._setPlotStyles()
 
+    def setDataDatasetNames(self, names):
+        self.dataDatasetNames = names
+
     def stackMCHistograms(self, stackSignal=False):
-        mcNames = filter(lambda n: n != "Data", [h.getName() for h in self.histoMgr.getHistos()])
+        mcNames = filter(lambda n: not n in self.dataDatasetNames, [h.getName() for h in self.histoMgr.getHistos()])
         mcNamesNoSignal = filter(lambda n: not isSignal(n) and not "StackedMCSignal" in n, mcNames)
         if not stackSignal:
             mcNames = mcNamesNoSignal
