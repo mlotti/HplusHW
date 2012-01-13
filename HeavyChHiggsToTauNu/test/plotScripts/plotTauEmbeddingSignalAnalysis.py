@@ -467,7 +467,7 @@ def doCounters(datasets, mcLumi=None):
 
     ewkDatasets = [
         "WJets", "TTJets",
-#        "DYJetsToLL", "SingleTop", "Diboson"
+        "DYJetsToLL", "SingleTop", "Diboson"
         ]
 
     table = eventCounter.getMainCounterTable()

@@ -240,6 +240,21 @@ def _histoToCounter(histo):
 
     return ret
 
+## Transfor a list of (name, Count) pairs to a histogram (TH1)
+def _counterToHisto(name, counter):
+    histo = ROOT.TH1F(name, name, len(counter), 0, len(counter))
+    histo.Sumw2()
+
+    bin = 1
+    for name, count in counter:
+        histo.GetXaxis().SetBinLabel(bin, name)
+        histo.SetBinContent(bin, count.value())
+        histo.SetBinError(bin, count.uncertainty())
+        bin += 1
+
+    return histo
+
+
 ## Transform histogram (TH1) to a list of values
 def histoToList(histo):
     return [histo.GetBinContent(bin) for bin in xrange(1, histo.GetNbinsX()+1)]
@@ -297,7 +312,11 @@ def _normalizeToOne(h):
     Returns the normalized histogram (which is the same as the
     parameter, i.e. no copy is made).
     """
-    return _normalizeToFactor(h, 1.0/h.Integral())
+    integral = h.Integral(0, h.GetNbinsX()+1)
+    if integral == 0:
+        return h
+    else:
+        return _normalizeToFactor(h, 1.0/integral)
 
 def _normalizeToFactor(h, f):
     """Scale TH1 with a given factor.
@@ -1032,6 +1051,12 @@ class Dataset:
 
         return self.getCrossSection() / self.nAllEvents
 
+    def hasRootHisto(self, name):
+        if hasattr(name, "draw"):
+            return True
+        pname = self.prefix+name
+        return self.file.Get(pname) != None
+
     def getDatasetRootHisto(self, name):
         """Get the DatasetRootHisto object for a named histogram.
 
@@ -1238,6 +1263,12 @@ class DatasetMerged:
 
     def getNormFactor(self):
         return None
+
+    def hasRootHisto(self, name):
+        has = True
+        for d in self.datasets:
+            has = has and d.hasRootHisto(name)
+        return has
 
     def getDatasetRootHisto(self, name):
         """Get the DatasetRootHistoMergedMC/DatasetRootHistoMergedData object for a named histogram.
@@ -1458,15 +1489,15 @@ class DatasetManager:
                     raise Exception("Trying to rename dataset '%s' to '%s', but '%s' doesn't exist!" % (oldName, newName, oldName))
         self._populateMap()
 
-    def mergeData(self):
+    def mergeData(self, *args, **kwargs):
         """Merge all data Datasets to one with a name 'Data'."""
-        self.merge("Data", self.getDataDatasetNames())
+        self.merge("Data", self.getDataDatasetNames(), *args, **kwargs)
 
-    def mergeMC(self):
+    def mergeMC(self, *args, **kwargs):
         """Merge all MC Datasets to one with a name 'MC'."""
-        self.merge("MC", self.getMCDatasetNames())
+        self.merge("MC", self.getMCDatasetNames(), *args, **kwargs)
 
-    def mergeMany(self, mapping):
+    def mergeMany(self, mapping, *args, **kwargs):
         """Merge datasets according to the mapping."""
         toMerge = {}
         for d in self.datasets:
@@ -1478,7 +1509,7 @@ class DatasetManager:
                     toMerge[newName] = [d.getName()]
 
         for newName, nameList in toMerge.iteritems():
-            self.merge(newName, nameList)
+            self.merge(newName, nameList, *args, **kwargs)
 
     def merge(self, newName, nameList, keepSources=False):
         """Merge Datasets.

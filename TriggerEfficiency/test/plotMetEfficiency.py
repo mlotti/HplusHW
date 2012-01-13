@@ -27,8 +27,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 #styles.mcStyle2.styles[0].marker = ROOT.kFullSquare
 plotStyles = [
     styles.dataStyle,
+    styles.mcStyle2,
     styles.mcStyle,
-    styles.mcStyle2
     ]
 
 l1met = False # for runs 165970-167913
@@ -94,10 +94,10 @@ def main():
     #    legs = ["L1_ETM30 & MET60 bits", "L1 MET > 30 & CaloMETnoHF > 60 GeV", "L1 MET > 30 & CaloMET > 60 GeV"]
     #plotTurnOn(pfMET, [pfMETbit, pfMETcutNoHF, pfMETcut], legs)
 
-    legs = ["MET60 bit", "CaloMETnoHF > 60 GeV"]
+    legs = ["HLT_MET60 bit", "Offline calo E_{T}^{miss} (excl. HF) > 60 GeV"]
     pfMETcut2 = pfMETcutNoHF
     if l1met:
-        legs = ["L1_ETM30 & MET60 bits", "L1 MET > 30 & CaloMET > 60 GeV"]
+        legs = ["L1_ETM30 & HLT_MET60 bits", "L1 E_{T}^{miss} > 30 & offline calo E_{T}^{miss} (incl. HF) > 60 GeV"]
         pfMETcut2 = pfMETcut
     plotTurnOn(pfMET, [pfMETbit, pfMETcut2], legs)
 
@@ -114,18 +114,24 @@ def plotTurnOn(hall, passed, passedLegends, name="calomet_bit_turnon"):
         gr = ROOT.TGraphAsymmErrors(hpass, hall, "cp")
         graphs.append(histograms.HistoGraph(gr, leg, "p", "P"))
     #p = plots.ComparisonManyPlot(graphs[0], graphs[1:]) 
-    #p.histoMgr.forEachHisto(styles.generator2(styles.StyleMarker(markerSizes=[1.0, 2.0, 1.5]), plotStyles))
+    #p.histoMgr.forEachHisto(styles.generator2(styles.StyleMarker(markerSizes=[1.0, 1.5, 2.0]), plotStyles))
     p = plots.ComparisonPlot(graphs[0], graphs[1])
-    p.histoMgr.forEachHisto(styles.generator2(styles.StyleMarker(markerSizes=[1.0, 1.5]), plotStyles))
+    p.histoMgr.forEachHisto(styles.generator2(styles.StyleMarker(markerSizes=[1.0, 2.2]), plotStyles))
     p.setLuminosity(lumi)
 
     p.createFrame(name+"_"+runs, createRatio=True, invertRatio=True,
                   opts1={"xmin":0, "xmax":200, "ymin": 0, "ymax": 1.2},
                   #opts2={"ymin": 0.5, "ymax": 2.0}
-                  opts2={"ymin": 0, "ymax": 3.0}
+                  opts2={"ymin": 0, "ymax": 2.5}
                   )
-    p.getFrame2().GetYaxis().SetTitle("Cut / bit")
-    p.setLegend(histograms.moveLegend(histograms.createLegend(y1=0.95, y2=0.85), dx=-0.55, dy=-0.05))
+    p.getFrame2().GetYaxis().SetTitle("Ratio")
+    p.setLegend(histograms.moveLegend(histograms.createLegend(y1=0.95, y2=0.85), dx=-0.55, dy=-0.02))
+    p.appendPlotObject(histograms.PlotText(0.2, 0.79, "Runs %s"%runs, size=17))
+    if not l1met:
+        hltMetHF = "excluded from"
+    else:
+        hltMetHF = "included in"
+    p.appendPlotObject(histograms.PlotText(0.2, 0.75, "HF %s HLT E_{T}^{miss}" % hltMetHF, size=17))
 
     def text():
         l = ROOT.TLatex()
@@ -134,7 +140,7 @@ def plotTurnOn(hall, passed, passedLegends, name="calomet_bit_turnon"):
         l.SetTextSize(l.GetTextSize()*0.8)
         l.DrawLatex(0.4, 0.4, "Calo E_{T}^{miss} > 45 GeV")
     #common(p, "PF E_{T}^{miss} (GeV)", "Efficiency / %.0f GeV"%hall.GetBinWidth(1), False)#, afterDraw=text)
-    common(p, "PF E_{T}^{miss} (GeV)", "Efficiency")#, afterDraw=text)
+    common(p, "Uncorrected PF E_{T}^{miss} (GeV)", "Efficiency of E_{T}^{miss} cut")#, afterDraw=text)
 
 
 class Eff:
