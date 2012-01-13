@@ -62,10 +62,11 @@ class StyleLine(StyleBase):
             h.SetLineColor(self.lineColor)
 
 class StyleMarker(StyleBase):
-    def __init__(self, markerSize=1.2, markerColor=None, markerSizes=None):
+    def __init__(self, markerSize=1.2, markerColor=None, markerSizes=None, markerStyle=None):
         self.markerSize = markerSize
         self.markerColor = markerColor
         self.markerSizes = markerSizes
+	self.markerStyle = markerStyle
         self.markerSizeIndex = 0
 
     def apply(self, h):
@@ -76,6 +77,8 @@ class StyleMarker(StyleBase):
             self.markerSizeIndex = (self.markerSizeIndex+1)%len(self.markerSizes)
         if self.markerColor != None:
             h.SetMarkerColor(self.markerColor)
+	if self.markerStyle != None:
+	    h.SetMarkerStyle(self.markerStyle)
 
 class StyleError(StyleBase):
     def __init__(self, color, style=3004, linecolor=None):

@@ -26,4 +26,4 @@ cd ../..
 ./mkBrLimits_processTanbPlots.py
 ./mkBrLimits_processTanbPlots.py -ma
 
-echo Tan(beta) plots ready!
+echo TanB plots ready!

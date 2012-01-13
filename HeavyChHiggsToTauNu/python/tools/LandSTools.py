@@ -18,11 +18,12 @@ LandSRootFileNaming = "lands_histograms_hplushadronic_m"
 datacard_re = re.compile(LandSDataCardNaming+"(?P<mass>(\d+))\.txt$")
 root_re     = re.compile(LandSRootFileNaming+"(?P<mass>(\d+))\.root$")
 script_re   = re.compile("runLandS_(?P<label>(Observed|Expected)_m)(?P<mass>(\d+))")
+luminosity_re = re.compile("luminosity=[\S| ]*(?P<lumi>(\d+\.\d+))")
 
 class MultiCrabLandS:
     def __init__(self):
 
-        self.exe = execute("which lands.exe 2> dummy.out && rm dummy.out")
+        self.exe = execute("which lands.exe 2> /dev/null")
 
         if len(self.exe) == 0:
 	    self.exe = install_lands()
@@ -156,45 +157,53 @@ class MultiCrabLandS:
 	print "Multicrab cfg created. Type"
         print "cd",self.dirname,"&& multicrab -create"
 
+class Result:
+    def __init__(self, mass = 0, observed = 0, expected = 0, expectedPlus1Sigma = 0, expectedPlus2Sigma = 0, expectedMinus1Sigma = 0, expectedMinus2Sigma = 0):
+        self.mass                = float(mass)
+        self.observed            = float(observed)
+        self.expected            = float(expected)
+        self.expectedPlus1Sigma  = float(expectedPlus1Sigma)
+        self.expectedPlus2Sigma  = float(expectedPlus2Sigma)
+        self.expectedMinus1Sigma = float(expectedMinus1Sigma)
+        self.expectedMinus2Sigma = float(expectedMinus2Sigma)
+        
+    def Exists(self, result):
+        if self.mass == result.mass:
+            return True
+        return False
+        
+    def Add(self, result):
+        if self.mass == result.mass:
+            if self.observed == 0:
+                self.observed = float(result.observed)   
+            if self.expected == 0:
+                self.expected            = float(result.expected)
+                self.expectedPlus1Sigma  = float(result.expectedPlus1Sigma)
+                self.expectedPlus2Sigma  = float(result.expectedPlus2Sigma)
+                self.expectedMinus1Sigma = float(result.expectedMinus1Sigma)
+                self.expectedMinus2Sigma = float(result.expectedMinus2Sigma)
+  
+    def Print(self):
+        print "Mass = ",self.mass
+        print "    Observed = ",self.observed
+        print "    Expected = ",self.expected
+        print "     +1sigma = ",self.expectedPlus1Sigma," -1sigma = ",self.expectedMinus1Sigma
+        print "     +2sigma = ",self.expectedPlus2Sigma," -2sigma = ",self.expectedMinus2Sigma
 
 
+def ConvertToErrorBands(result):
+    return Result(float(result.mass),
+                  float(result.observed),
+                  float(result.expected),
+                  float(result.expectedPlus1Sigma) - float(result.expected),
+                  float(result.expectedPlus2Sigma) - float(result.expected), 
+                  float(result.expected) - float(result.expectedMinus1Sigma),
+                  float(result.expected) - float(result.expectedMinus2Sigma))
 
 class ParseLandsOutput:
-    class Result:
-	def __init__(self, mass = 0, observed = 0, expected = 0, expectedPlus1Sigma = 0, expectedPlus2Sigma = 0, expectedMinus1Sigma = 0, expectedMinus2Sigma = 0):
-	    self.mass		     = mass
-	    self.observed            = observed
-	    self.expected            = expected
-	    self.expectedPlus1Sigma  = expectedPlus1Sigma
-	    self.expectedPlus2Sigma  = expectedPlus2Sigma
-	    self.expectedMinus1Sigma = expectedMinus1Sigma
-	    self.expectedMinus2Sigma = expectedMinus2Sigma
-
-	def Exists(self, result):
-	    if self.mass == result.mass:
-		return True
-	    return False
-
-	def Add(self, result):
-	    if self.mass == result.mass:
-		if self.observed == 0:
-		    self.observed = result.observed
-		if self.expected == 0:
-		    self.expected            = result.expected
-		    self.expectedPlus1Sigma  = result.expectedPlus1Sigma
-		    self.expectedPlus2Sigma  = result.expectedPlus2Sigma
-		    self.expectedMinus1Sigma = result.expectedMinus1Sigma
-		    self.expectedMinus2Sigma = result.expectedMinus2Sigma
-
-	def Print(self):
-	    print "Mass = ",self.mass
-	    print "    Observed = ",self.observed
-	    print "    Expected = ",self.expected
-	    print "     +1sigma = ",self.expectedPlus1Sigma," -1sigma = ",self.expectedMinus1Sigma
-	    print "     +2sigma = ",self.expectedPlus2Sigma," -2sigma = ",self.expectedMinus2Sigma
-
     def __init__(self, path):
 	self.path = path
+	self.lumi = 0
 
 	self.results = []
 	self.subdir_re         = re.compile("(?P<label>(Expected|Observed)_m)(?P<mass>(\d*$))")
@@ -208,6 +217,9 @@ class ParseLandsOutput:
 	dirs = execute("ls %s"%self.path)
 	for dir in dirs:
 	    dir = path + dir
+	    datacard_match = datacard_re.search(dir)
+	    if datacard_match:
+		self.ReadLuminosity(dir)
 	    if os.path.isdir(dir):
 		match = self.subdir_re.search(dir)
 		if match:
@@ -217,6 +229,20 @@ class ParseLandsOutput:
 	    sys.exit()
 
 	self.Read(subdirs)
+
+    def ReadLuminosity(self, dir):
+	if self.lumi == 0:
+	    fIN = open(dir,"r")
+	    for line in fIN:
+		match = luminosity_re.search(line)
+		if match:
+		    print line
+		    self.lumi = match.group("lumi")
+		    return
+		print line
+
+    def GetLuminosity(self):
+	return self.lumi
 
     def Read(self,dirs):
 	for dir in dirs:
@@ -235,7 +261,7 @@ class ParseLandsOutput:
 	    i = i - 1
 
     def Compare(self, results1, results2):
-	return results1.mass > results2.mass
+	return results1.mass < results2.mass
 	
     def Swap(self, i, j):
 	tmp = self.results[i]
@@ -253,7 +279,7 @@ class ParseLandsOutput:
 	match = self.subdir_re.search(dir)
 	if match:
 	    mass  = match.group("mass")
-	    result = self.Result(mass) # filling the mass
+	    result = Result(mass) # filling the mass
 	    label = match.group("label")
 	    if label.find("Observed") == 0:
 		result = self.ParseObsFile(result,dir)
@@ -371,12 +397,15 @@ class ParseLandsOutput:
                        str(result.expectedPlus2Sigma))
 	    fOUT.close()
 
+    def Data(self):
+	return self.results
+
 def install_lands():
-    exe = execute("ls ${PWD}/LandS/test/lands.exe")
+    exe = execute("ls ${PWD}/LandS/test/lands.exe 2> /dev/null")
     if len(exe) == 0:
         os.system("cvs co -r " + LandS_tag + " -d LandS UserCode/mschen/LandS")
         os.system("cd LandS && make")
-        exe = execute("ls ${PWD}/LandS/test/lands.exe")
+        exe = execute("ls ${PWD}/LandS/test/lands.exe 2> /dev/null")
     return exe
 
 def execute(cmd):
