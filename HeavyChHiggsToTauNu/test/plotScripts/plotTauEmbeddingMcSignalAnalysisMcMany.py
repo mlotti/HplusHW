@@ -49,7 +49,7 @@ def main():
         #datasets.merge("EWKMC", ["WJets", "TTJets"], keepSources=True)
     mergeEWK(datasetsSig)
     datasetsEmb.forEach(mergeEWK)
-    plots._legendLabels["EWKMC"] = "EWK MC"
+    plots._legendLabels["EWKMC"] = "EWK"
 
     style = tdrstyle.TDRStyle()
     ROOT.gStyle.SetEndErrorSize(5)
@@ -114,6 +114,8 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
             sty = styles.styles
 
         legLabel = plots._legendLabels.get(datasetName, datasetName)
+        if legLabel != "Data":
+            legLabel += " MC"
         p.histoMgr.setHistoLegendLabelMany({
                 "Embedded":     "Embedded " + legLabel,
                 "Normal":       "Normal " + legLabel,
@@ -153,12 +155,25 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
     selection = "&&".join([metCut, bTaggingCut, deltaPhi160Cut])
     prefix = "mcembsig_"+datasetName+postfix
 
-    drawPlot(createPlot(treeDraw.clone(varexp="tau_p4.Pt() >>tmp(20,0,200)", selection=selection)), prefix+"_selectedTauPt_4AfterDeltaPhi160", "#tau-jet p_{T} (GeV/c)", opts2={"ymin": 0, "ymax": 3}, textFunction=textFunction)
-    drawPlot(createPlot(treeDraw.clone(varexp="met_p4.Pt() >>tmp(16,0,400)", selection=selection)), prefix+"_MET_4AfterDeltaPhi160", "E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", opts2={"ymin": 0, "ymax": 3}, textFunction=textFunction)
+    #opts = {"ymaxfactor": 1.4}
+    opts = {}
+
+    drawPlot(createPlot(treeDraw.clone(varexp="tau_p4.Pt() >>tmp(20,0,200)", selection=selection)), prefix+"_selectedTauPt_4AfterDeltaPhi160", "#tau-jet p_{T} (GeV/c)", opts=opts, opts2={"ymin": 0, "ymax": 3}, textFunction=textFunction)
+    drawPlot(createPlot(treeDraw.clone(varexp="met_p4.Pt() >>tmp(16,0,400)", selection=selection)), prefix+"_MET_4AfterDeltaPhi160", "E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", opts=opts, opts2={"ymin": 0, "ymax": 3}, textFunction=textFunction)
 
     opts = {}
     if datasetName == "EWKMC":
-        opts["ymax"] = 40
+        opts["ymax"] = 46
+    elif datasetName == "TTJets":
+        opts["ymax"] = 12
+    elif datasetName == "SingleTop":
+        opts["ymax"] = 2.2
+    elif datasetName == "DYJetsToLL":
+        opts["ymax"] = 6.5
+    elif datasetName == "Diboson":
+        opts["ymax"] = 0.9
+    elif datasetName == "WJets":
+        opts["ymax"] = 35
     drawPlot(createPlot(tdMt.clone(selection=selection)), prefix+"_transverseMass_4AfterDeltaPhi160", "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts2={"ymin": 0, "ymax": 3}, opts=opts, ylabel="Events / %.0f GeV/c^{2}", log=False, textFunction=textFunction)
 
 def doPlotsData(datasetsEmb):
@@ -243,24 +258,27 @@ def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, r
     #yaxis = h.getFrame2().GetYaxis()
     #yaxis.SetTitleSize(yaxis.GetTitleSize()*0.7)
     #yaxis.SetTitleOffset(yaxis.GetTitleOffset()*1.5)
-    dh = 0
-    if hasattr(h, "embeddingVariation"):
-        dh += 0.02
-    if hasattr(h, "embeddingDataVariation"):
-        dh += 0.02
-    h.setLegend(histograms.moveLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend),
-                                      dh=dh
-                                      ))
+    h.setLegend(histograms.moveLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend)))
     tmp = sigErr.Clone("tmp")
     tmp.SetFillColor(ROOT.kBlack)
     tmp.SetFillStyle(3013)
     tmp.SetLineColor(ROOT.kWhite)
     h.legend.AddEntry(tmp, "Stat. unc.", "F")
 
+    x = h.legend.GetX1()
+    y = h.legend.GetY1()
+    x += 0.05; y -= 0.03
     if hasattr(h, "embeddingDataVariation"):
-        h.legend.AddEntry(h.embeddingDataVariation, "Embedded data min/max", "p")
+        histograms.addText(x, y, "[  ]", size=17, color=h.embeddingDataVariation.GetMarkerColor()); x += 0.05
+        histograms.addText(x, y, "Embedded data min/max", size=17); y-= 0.03
     if hasattr(h, "embeddingVariation"):
-        h.legend.AddEntry(h.embeddingVariation, "Embedded MC min/max", "p")
+        histograms.addText(x, y, "[  ]", size=17, color=h.embeddingVariation.GetMarkerColor()); x += 0.05
+        histograms.addText(x, y, "Embedded MC min/max", size=17); y-= 0.03
+
+    #if hasattr(h, "embeddingDataVariation"):
+    #    h.legend.AddEntry(h.embeddingDataVariation, "Embedded data min/max", "p")
+    #if hasattr(h, "embeddingVariation"):
+    #    h.legend.AddEntry(h.embeddingVariation, "Embedded MC min/max", "p")
 
     common(h, xlabel, ylab, **kwargs)
 

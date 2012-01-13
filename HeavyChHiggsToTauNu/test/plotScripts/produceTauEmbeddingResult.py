@@ -33,6 +33,9 @@ import plotTauEmbeddingSignalAnalysis as tauEmbedding
 analysisEmb = "signalAnalysisCaloMet60TEff"
 analysisSig = "signalAnalysisGenuineTau"
 
+#analysisEmb = analysisEmb+"JESPlus03eta02METPlus00"
+#analysisEmb = analysisEmb+"JESMinus03eta02METPlus00"
+
 output = "histograms-ewk.root"
 
 dirEmbs = [
