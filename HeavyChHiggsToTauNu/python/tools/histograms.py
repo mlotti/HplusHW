@@ -394,7 +394,7 @@ def dist2rej(hdist, **kwargs):
 
 ## Infer the frame bounds from the histograms and keyword arguments
 #
-# \param histos  List of histograms.HistoBase objects
+# \param histos  List of histograms.Histo objects
 # \param kwargs  Dictionary of keyword arguments to parse
 #
 # Used e.g. in histograms.CanvasFrame and histograms.CanvasFrameTwo
@@ -678,7 +678,7 @@ class CanvasFrameTwo:
     # xa xis from the lower frame.
 
 ## Base class for all Histo classes.
-class HistoBase:
+class Histo:
     ## Constructor
     #
     # \todo test draw style "9"
@@ -687,7 +687,7 @@ class HistoBase:
     # \param name         Name of the histogram
     # \param legendStyle  Style string for TLegend (third parameter for TLegend.AddEntry())
     # \param drawStyle    Style string for Draw (string parameter for TH1.Draw())
-    def __init__(self, rootHisto, name, legendStyle, drawStyle):
+    def __init__(self, rootHisto, name, legendStyle="l", drawStyle="HIST"):
         self.rootHisto = rootHisto
         self.name = name
         self.legendLabel = name
@@ -723,6 +723,9 @@ class HistoBase:
         if not hasattr(self, "_isData"):
             raise Exception("setIsDataMC() has not been called, don't know if the histogram is from data or MC")
         return self._isData
+
+    def setDrawStyle(self, drawStyle):
+        self.drawStyle = drawStyle
 
     ## Set the legend label
     #
@@ -804,17 +807,6 @@ class HistoBase:
     ## \var drawStyle
     # Style string for Draw()
 
-## Represents one (TH1/TH2) histogram
-class Histo(HistoBase):
-    ## Constructor
-    #
-    # \param rootHisto  TH1 object
-    # \param name       Name of the Histo
-    #
-    #    The default legend label is the dataset name
-    def __init__(self, rootHisto, name):
-        HistoBase.__init__(self, rootHisto, name, "l", "HIST")
-
 ## Represents one (TH1/TH2) histogram associated with a dataset.Dataset object
 class HistoWithDataset(Histo):
     ## Constructor
@@ -842,10 +834,10 @@ class HistoWithDatasetFakeMC(HistoWithDataset):
         self.setIsDataMC(False, True)
 
 ## Represents combined (statistical) uncertainties of multiple histograms.
-class HistoTotalUncertainty(HistoBase):
+class HistoTotalUncertainty(Histo):
     ## Constructor
     #
-    # \param histos  List of histograms.HistoBase objects
+    # \param histos  List of histograms.Histo objects
     # \param name    Name of the uncertainty histogram
     def __init__(self, histos, name):
         rootHistos = []
@@ -857,7 +849,7 @@ class HistoTotalUncertainty(HistoBase):
 
         tmp = rootHistos[0].Clone()
         tmp.SetDirectory(0)
-        HistoBase.__init__(self, tmp, name, "F", "E2")
+        Histo.__init__(self, tmp, name, "F", "E2")
         self.rootHisto.SetName(self.rootHisto.GetName()+"_errors")
         self.histos = histos
 
@@ -866,18 +858,18 @@ class HistoTotalUncertainty(HistoBase):
         self.setIsDataMC(self.histos[0].isData(), self.histos[0].isMC())
 
     ## \var histos
-    # List of histograms.HistoBase objects from which the total uncertaincy is calculated
+    # List of histograms.Histo objects from which the total uncertaincy is calculated
 
 ## Represents stacked TH1 histograms
 #
 # Stacking is done with the help of THStack object
-class HistoStacked(HistoBase):
+class HistoStacked(Histo):
     ## Constructor.
     #
     # \param histos  List of Histo objects to stack
     # \param name    Name of the stacked histogram
     def __init__(self, histos, name):
-        HistoBase.__init__(self, ROOT.THStack(name+"stackHist", name+"stackHist"), name, None, "HIST")
+        Histo.__init__(self, ROOT.THStack(name+"stackHist", name+"stackHist"), name, None, "HIST")
         self.histos = histos
 
         rootHistos = [d.getRootHisto() for d in self.histos]
@@ -929,9 +921,9 @@ class HistoStacked(HistoBase):
     ## \var histos
     # List of histograms.Histo objects which are stacked
 
-class HistoGraph(HistoBase):
+class HistoGraph(Histo):
     def __init__(self, rootGraph, name, legendStyle="l", drawStyle="L"):
-        HistoBase.__init__(self, rootGraph, name, legendStyle, drawStyle)
+        Histo.__init__(self, rootGraph, name, legendStyle, drawStyle)
 
     def getRootGraph(self):
         return self.getRootHisto()
@@ -970,7 +962,7 @@ class HistoGraphWithDataset(HistoGraph):
 class HistoManagerImpl:
     ## Constructor.
     #
-    # \param histos    List of histograms.HistoBase objects
+    # \param histos    List of histograms.Histo objects
     def __init__(self, histos=[]):
 
         # List for the Draw() order, keep it reversed in order to draw
@@ -984,32 +976,32 @@ class HistoManagerImpl:
         # Dictionary for accessing the histograms by name
         self._populateMap()
 
-    ## Get the number of managed histograms.HistoBase objects
+    ## Get the number of managed histograms.Histo objects
     def __len__(self):
         return len(self.drawList)
 
-    ## Populate the name -> histograms.HistoBase map
+    ## Populate the name -> histograms.Histo map
     def _populateMap(self):
         self.nameHistoMap = {}
         for h in self.drawList:
             self.nameHistoMap[h.getName()] = h
 
-    ## Append a histograms.HistoBase object.
+    ## Append a histograms.Histo object.
     def appendHisto(self, histo):
         self.drawList.append(histo)
         self.legendList.append(histo)
         self._populateMap()
 
-    ## Extend with a list of histograms.HistoBase objects.
+    ## Extend with a list of histograms.Histo objects.
     def extendHistos(self, histos):
         self.drawList.extend(histos)
         self.legendList.extend(histos)
         self._populateMap()
 
-    ## Insert histograms.HistoBase to position i.
+    ## Insert histograms.Histo to position i.
     #
     # \param i      Index of the position to insert the histogram
-    # \param histo  histograms.HistoBase object to insert
+    # \param histo  histograms.Histo object to insert
     # \param kwargs Keyword arguments
     # 
     # <b>Keyword arguments</b>
@@ -1072,19 +1064,19 @@ class HistoManagerImpl:
         dst.extend(src)
         self.legendList = dst
 
-    ## Call a function for a named histograms.HistoBase object.
+    ## Call a function for a named histograms.Histo object.
     #
     # \param name   Name of histogram
-    # \param func   Function taking one parameter (histograms.HistoBase), return value is not used
+    # \param func   Function taking one parameter (histograms.Histo), return value is not used
     def forHisto(self, name, func):
         try:
             self.nameHistoMap[name].call(func)
         except KeyError:
             print >> sys.stderr, "WARNING: Tried to call a function for histogram '%s', which doesn't exist." % name
 
-    ## Call each MC histograms.HistoBase with a function.
+    ## Call each MC histograms.Histo with a function.
     #
-    # \param func   Function taking one parameter (histograms.HistoBase), return value is not used
+    # \param func   Function taking one parameter (histograms.Histo), return value is not used
     def forEachMCHisto(self, func):
         def forMC(histo):
             if histo.isMC():
@@ -1092,7 +1084,7 @@ class HistoManagerImpl:
 
         self.forEachHisto(forMC)
 
-    ## Call each collision data histograms.HistoBase with a function.
+    ## Call each collision data histograms.Histo with a function.
     #
     # \param func  Function taking one parameter (Histo, return value is not used
     def forEachDataHisto(self, func):
@@ -1101,26 +1093,26 @@ class HistoManagerImpl:
                 func(histo)
         self.forEachHisto(forData)
 
-    ## Call each histograms.HistoBase with a function.
+    ## Call each histograms.Histo with a function.
     #
     # \param func  Function taking one parameter (Histo), return value is not used
     def forEachHisto(self, func):
         for d in self.drawList:
             d.call(func)
 
-    ## Check if a histograms.HistoBase with a given name exists
+    ## Check if a histograms.Histo with a given name exists
     #
-    # \param name   Name of histograms.HistoBase to check
+    # \param name   Name of histograms.Histo to check
     def hasHisto(self, name):
         return name in self.nameHistoMap
 
-    ## Get histograms.HistoBase of a given name
+    ## Get histograms.Histo of a given name
     #
-    # \param name  Name of histograms.HistoBase to get
+    # \param name  Name of histograms.Histo to get
     def getHisto(self, name):
         return self.nameHistoMap[name]
 
-    ## Get all histograms.HistoBase objects
+    ## Get all histograms.Histo objects
     def getHistos(self):
         return self.drawList[:]
 
@@ -1157,7 +1149,7 @@ class HistoManagerImpl:
     # \param style  Style for obj.Draw() call
     def setHistoDrawStyle(self, name, style):
         try:
-            self.nameHistoMap[name].drawStyle = style
+            self.nameHistoMap[name].setDrawStyle(style)
         except KeyError:
             print >> sys.stderr, "WARNING: Tried to set draw style for histogram '%s', which doesn't exist." % name
 
@@ -1166,7 +1158,7 @@ class HistoManagerImpl:
     # \param style  Style for obj.Draw() call
     def setHistoDrawStyleAll(self, style):
         for d in self.drawList:
-            d.drawStyle = style
+            d.setDrawStyle(style)
 
     ## Add histograms to a given TLegend.
     #
@@ -1233,20 +1225,20 @@ class HistoManagerImpl:
         self.insertHisto(firstMcIndex, hse, legendIndex=len(self.drawList))
         
     ## \var drawList
-    # List of histograms.HistoBase objects for drawing
+    # List of histograms.Histo objects for drawing
     #
     # The histograms are drawn in the <i>reverse</i> order, i.e. the
     # first histogram is on the top, anbd the last histogram is on the
     # bottom.
     #
     ## \var legendList
-    # List of histograms.HistoBase objects for TLegend
+    # List of histograms.Histo objects for TLegend
     #
     # The histograms are added to the TLegend in the order they are in
     # the list.
     #
     ## \var nameHistoMap
-    # Dictionary from histograms.HistoBase names to the objects
+    # Dictionary from histograms.Histo names to the objects
 
 
 ## Collection of histograms which are managed together.
@@ -1256,7 +1248,7 @@ class HistoManagerImpl:
 # The implementation is divided to this and HistoManagerImpl class.
 # The idea is that here are the methods, which don't require Histo
 # objects (namely setting the normalization), and HistoManagerImpl has
-# all the methods which require the histograms.HistoBase objects. User
+# all the methods which require the histograms.Histo objects. User
 # can set freely the normalization scheme as many times as (s)he
 # wants, and at the first time some method not implemented in
 # HistoManagerBase is called, the Histo objects are created and the
@@ -1301,7 +1293,7 @@ class HistoManager:
         self.impl = None
         self.luminosity = None
 
-    ## Delegate the calls which require the histograms.HistoBase objects to the implementation class.
+    ## Delegate the calls which require the histograms.Histo objects to the implementation class.
     #
     # \param name  Name of the attribute to get
     def __getattr__(self, name):
