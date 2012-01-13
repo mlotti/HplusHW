@@ -27,11 +27,9 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-#        'rfio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/test_H120_100_1_08t_RAW_RECO.root'
-#	'file:/tmp/slehti/test_H120_100_1_08t_RAW_RECO.root'
+	dataVersion.getAnalysisDefaultFileMadhatter()
 #	dataVersion.getAnalysisDefaultFileCastor()
 #	dataVersion.getPatDefaultFileCastor()
-	'file:/tmp/slehti/TTJets_TuneZ2_Summer11_pattuple_266_1_at8.root'
     )
 )
 

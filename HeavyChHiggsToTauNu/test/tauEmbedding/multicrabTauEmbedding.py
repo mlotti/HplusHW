@@ -22,7 +22,10 @@ era = "Run2011A"
 #version = "v13_2"
 #version = "v13_2_seedTest1"
 #version = "v13_2_seedTest2"
-version = "v14"
+#version = "v13_2_seedTest3"
+version = "v13_3_seedTest4"
+#version = "v13_3_seedTest6"
+#version = "v14"
 
 # "Midfix" for multicrab directory name
 dirPrefix = ""
@@ -271,6 +274,8 @@ def modify(dataset):
 
     dataset.appendLine("USER.publish_data_name = "+name)
     dataset.appendLine("CMSSW.output_file = "+config[step]["output"])
+    dataset.appendLine("USER.additional_input_files = copy_cfg.py")
+    dataset.appendCopyFile("copy_cfg.py")
 
 # Modification step for analysis steps
 def modifyAnalysis(dataset):
@@ -301,7 +306,7 @@ if step in ["analysis", "analysisTau","signalAnalysis"]:
 elif step in ["muonAnalysis", "caloMetEfficiency"]:
     multicrab.appendLineAll("CMSSW.output_file = histograms.root")
     multicrab.forEachDataset(modifyMuonAnalysis)
-else:
+else: # skim or embedding
     multicrab.forEachDataset(modify)
 
 multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
@@ -309,5 +314,19 @@ multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
 # Create the multicrab task
 prefix = "multicrab_"+step+dirPrefix
 
-multicrab.createTasks(prefix=prefix)
-#multicrab.createTasks(configOnly=True,prefix=prefix)
+configOnly=False
+#configOnly=True
+taskDir = multicrab.createTasks(configOnly=configOnly, prefix=prefix)
+
+# patch CMSSW.sh
+class Wrapper:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+if not configOnly and step in ["skim", "embedding"]:
+    import patchSkimEmbedding as patch
+    import os
+    os.chdir(taskDir)
+    patch.main(Wrapper(dirs=datasets, input={"skim": "skim",
+                                             "embedding": "embedded"}[step]))
+    os.chdir("..")

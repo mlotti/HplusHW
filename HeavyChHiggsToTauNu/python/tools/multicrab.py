@@ -461,6 +461,9 @@ class MulticrabDataset:
 
         self.lines.append(line)
 
+    def appendCopyFile(self, fileName):
+        self.filesToCopy.append(fileName)
+
     def extendBlackWhiteList(self, blackWhiteList, sites):
         """Extend the CE/SE black/white list with a list of sites.
 
@@ -476,6 +479,20 @@ class MulticrabDataset:
             self.data[blackWhiteList].extend(sites)
         else:
             self.data[blackWhiteList] = sites[:]
+
+    def setTrigger(self, name, content):
+        if name != "trigger" and name != "triggerOR":
+            raise Exception("name can be either 'trigger' or 'triggerOR', was '%s'" % name)
+        try:
+            del self.data["trigger"]
+        except KeyError:
+            pass
+        try:
+            del self.data["triggerOR"]
+        except KeyError:
+            pass
+
+        self.data[name] = content
 
     def _writeGeneratedFiles(self, directory):
         """Write generated files to a directory.
@@ -838,3 +855,6 @@ class Multicrab:
             print "Created multicrab task to subdirectory "+dirname
             print
 
+            os.chdir("..")
+
+        return dirname

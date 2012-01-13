@@ -2,7 +2,9 @@
 <use   name="DQMServices/Core"/>
 <use   name="FWCore/ServiceRegistry"/>
 <use   name="DataFormats/TauReco"/>
+<use   name="DataFormats/MuonReco"/>
 <use   name="DataFormats/HLTReco"/>
+<use   name="DataFormats/PatCandidates"/>
 <use   name="SimDataFormats/GeneratorProducts"/>
 <use   name="SimGeneral/HepPDTRecord"/>
 <library   file="*.cc" name="HiggsAnalysisValidationPlugins">
