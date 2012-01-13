@@ -841,6 +841,9 @@ class HistoCounter:
         if countNameFunction != None:
             self.countNames = [countNameFunction(x) for x in self.countNames]
 
+    def setName(self, name):
+        self.name = name
+
     def getName(self):
         return self.name
 
