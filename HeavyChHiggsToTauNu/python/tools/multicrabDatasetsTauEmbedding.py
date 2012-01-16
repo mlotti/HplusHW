@@ -373,6 +373,13 @@ def addTo(datasets):
                 "number_of_jobs": 100 # ~5 kev/job
             },
             })
+    datasets["W3Jets_TuneZ2_Summer11"]["data"].update({
+            "tauembedding_skim_v13": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W3Jets_TuneZ2_7TeV-madgraph-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_skim_v13_2-84f25f495c5d27ed442aae803bfc12e6/USER",
+                "number_of_jobs": 140 # ~5 kev/job
+            },
+            })
     datasets["DYJetsToLL_M50_TuneZ2_Summer11"]["data"].update({
             "tauembedding_skim_v13": {
                 "dbs_url": common.pattuple_dbs,
