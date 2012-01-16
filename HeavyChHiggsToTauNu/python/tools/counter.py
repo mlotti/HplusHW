@@ -466,35 +466,40 @@ def sumColumn(name, columns):
 
     return CounterColumn(name, table.getRowNames(), rows)
 
+
 ## Create a CounterColumn as column1-column2
 def subtractColumn(name, column1, column2):
-    nrows = column1.getNrows()
-    if nrows != column2.getNrows():
-        raise Exception("Unable to divide the columns, column1 has '%d' rows, column2 has '%d'." % (nrows, column2.getNrows()))
+    table = CounterTable()
+    table.appendColumn(column1)
+    table.appendColumn(column2)
+    table.removeNonFullRows()
+    nrows = table.getNrows()
 
     rows = []
     for irow in xrange(nrows):
-        count = column1.getCount(irow).clone()
-        dcount = column2.getCount(irow)
+        count = table.getCount(irow, 0).clone() # column1
+        dcount = table.getCount(irow, 1) # column2
             
         count.subtract(dcount)
         rows.append(count)
 
-    return CounterColumn(name, column1.getRowNames(), rows)
+    return CounterColumn(name, table.getRowNames(), rows)
 
+## Crete a CounterColumn as column1/column2.
 def divideColumn(name, column1, column2):
-    """Create a CounterColumn as column1/column2."""
-    nrows = column1.getNrows()
-    if nrows != column2.getNrows():
-        raise Exception("Unable to divide the columns, column1 has '%d' rows, column2 has '%d'." % (nrows, column2.getNrows()))
+    table = CounterTable()
+    table.appendColumn(column1)
+    table.appendColumn(column2)
+    table.removeNonFullRows()
+    nrows = table.getNrows()
 
-    origRownames = column1.getRowNames()
+    origRownames = table.getRowNames()
 
     rows = []
     rowNames = []
     for irow in xrange(nrows):
-        count = column1.getCount(irow).clone()
-        dcount = column2.getCount(irow)
+        count = table.getCount(irow, 0).clone() # column1
+        dcount = table.getCount(irow, 1) # column2
         if dcount.value() == 0:
             continue
             
