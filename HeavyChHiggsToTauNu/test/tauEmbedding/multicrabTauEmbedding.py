@@ -79,6 +79,7 @@ datasetsMCnoQCD = [
     "TTJets_TuneZ2_Summer11",
     "WJets_TuneZ2_Summer11",
     "DYJetsToLL_M50_TuneZ2_Summer11",
+    "W3Jets_TuneZ2_Summer11",
     "T_t-channel_TuneZ2_Summer11",
     "Tbar_t-channel_TuneZ2_Summer11",
     "T_tW-channel_TuneZ2_Summer11",
