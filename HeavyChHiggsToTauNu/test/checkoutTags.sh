@@ -75,7 +75,7 @@ eval $(scram runtime -sh)
 # Tau
 addpkg RecoTauTag/RecoTau         V01-02-14 # These two contain the continous HPS isolation
 addpkg RecoTauTag/Configuration   V01-02-10 # source: private e-mails
-addpkg RecoTauTag/TauTagTools     V01-02-00
+addpkg RecoTauTag/TauTagTools     V01-02-01
 # PAT
 ####addpkg DataFormats/PatCandidates  V06-04-19-02 # V06-04-27 in CMSSW_4_4_2_patch9
 ####addpkg PhysicsTools/PatAlgos      V08-06-50
