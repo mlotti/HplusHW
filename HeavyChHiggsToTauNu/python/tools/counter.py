@@ -504,6 +504,62 @@ def divideColumn(name, column1, column2):
 
     return CounterColumn(name, rowNames, rows)
 
+## Create a new CounterTable as the average of the tables
+def meanTable(tables):
+    if len(tables) == 0:
+        raise Exception("Got 0 tables")
+
+    # Remove columns which are not in all tables
+    tablesCopy = [t.clone() for t in tables]
+    maxNcols = max([t.getNcolumns() for t in tables])
+    iCol = 0
+    while iCol < maxNcols:
+        colName = tablesCopy[0].getColumnNames()[iCol]
+        for table in tablesCopy[1:]:
+            if colName != table.getColumnNames()[iCol]:
+                for t in tablesCopy:
+                    t.removeColumn(iCol)
+                maxNcols -= 1
+                continue
+        iCol += 1
+
+    # Remove rows which are not in all tables
+    maxNrows = max([t.getNrows() for t in tables])
+    iRow = 0
+    while iRow < maxNrows:
+        rowName = tablesCopy[0].getRowNames()[iRow]
+        for table in tablesCopy[1:]:
+            if rowName != table.getRowNames()[iRow]:
+                for t in tablesCopy:
+                    t.remoteRow(index=iRow)
+                maxNrows -= 1
+                continue
+        iRow += 1
+    
+    # Calculate the sums
+    table = tablesCopy[0]
+    nrows = table.getNrows()
+    ncolumns = table.getNcolumns()
+    for t in tablesCopy[1:]:
+        for iRow in xrange(nrows):
+            for iCol in xrange(ncolumns):
+                count1 = table.getCount(iRow, iCol)
+                count2 = t.getCount(iRow, iCol)
+                if count1 != None and count2 != None:
+                    count = dataset.Count(count1.value()+count2.value(), count1.uncertainty()+count2.uncertainty())
+                    table.setCount(iRow, iCol, count)
+
+    # Do the average
+    N = len(tablesCopy)
+    for iRow in xrange(nrows):
+        for iCol in xrange(ncolumns):
+            count = table.getCount(iRow, iCol)
+            if count != None:
+                table.setCount(iRow, iCol, dataset.Count(count.value()/N, count.uncertainty()/N))
+
+    return table
+
+
 
 class CounterColumn:
     """Class represring a column in CounterTable."""
