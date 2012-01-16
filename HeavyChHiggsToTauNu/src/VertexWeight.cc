@@ -58,8 +58,6 @@ namespace HPlus {
       std::copy(dataDist.begin(), dataDist.end(), std::back_inserter(dataDistF));
 
       // std::cout << "mcDistF.size() " << mcDistF.size() << " dataDistF.size() " << dataDistF.size() << std::endl;
-      fLumiWeights = edm::LumiReWeighting(mcDistF, dataDistF);
-
       if(fMethod == k3D) {
 	fLumi3DWeights = edm::Lumi3DReWeighting(mcDistF, dataDistF, "pileup");
         std::string fileName = iConfig.getParameter<std::string>("weightFile3D");
@@ -70,6 +68,8 @@ namespace HPlus {
         }
         edm::FileInPath fip(fileName);
         fLumi3DWeights.weight3D_init(fip.fullPath());
+      }else{
+	fLumiWeights = edm::LumiReWeighting(mcDistF, dataDistF);
       }
     }
     else {
