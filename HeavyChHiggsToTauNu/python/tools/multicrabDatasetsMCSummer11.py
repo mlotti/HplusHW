@@ -778,7 +778,9 @@ datasets = {
     },
     "W3Jets_TuneZ2_Summer11": {
         "dataVersion": "42XmcS4",
-        "crossSection": 0, # now known yet
+        "crossSection": 304.2*31314/27770.0, # value from PREP multiplied by the NNLO/PREP of inclusive WJets, see the following hypernews threads for more informatio
+        # https://hypernews.cern.ch/HyperNews/CMS/get/generators/1313.html
+        # https://hypernews.cern.ch/HyperNews/CMS/get/generators/1324.html
         "data": {
             "AOD": {
                 "datasetpath": "/W3Jets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
