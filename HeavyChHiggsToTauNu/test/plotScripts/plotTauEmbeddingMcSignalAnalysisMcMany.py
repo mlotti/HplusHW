@@ -13,6 +13,7 @@
 #
 ######################################################################
 
+import os
 import array
 
 import ROOT
@@ -25,6 +26,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import plotTauEmbeddingSignalAnalysis as tauEmbedding
+import produceTauEmbeddingResult as result
 
 #analysisEmb = "signalAnalysis"
 #analysisSig = "signalAnalysis"
@@ -32,30 +34,22 @@ analysisEmb = "signalAnalysisCaloMet60TEff"
 analysisSig = "signalAnalysisGenuineTau"
 
 def main():
-    dirEmbs = [
-        ".",
-        "../multicrab_signalAnalysis_Met50_debug_seedTest1_Run2011A_111216_104833",
-        "../multicrab_signalAnalysis_Met50_debug_seedTest2_Run2011A_111216_121911",
-#        "../multicrab_signalAnalysis_Met50_v13_2_seedTest1_Run2011A_111219_213247",
-#        "../multicrab_signalAnalysis_v13_2_seedTest2_Run2011A_111220_000831",
-        ]
-
-#    dirSig = "../../multicrab_compareEmbedding_Run2011A_111201_143238"
-    dirSig = "../../multicrab_compareEmbedding_Run2011A_111219_185818"
+    dirEmbs = ["."] + [os.path.join("..", d) for d in result.dirEmbs[1:]]
+    dirSig = "../"+result.dirSig
     
-    datasetsEmb = DatasetsMany(dirEmbs, analysisEmb+"Counters")
+    datasetsEmb = result.DatasetsMany(dirEmbs, analysisEmb+"Counters")
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
 
-    datasetsEmb.forEach(plots.mergeRenameReorderForDataMC)
+    datasetsEmb.forEach(lambda mgr: plots.mergeRenameReorderForDataMC(mgr, keepSourcesMC=True))
     datasetsEmb.setLumiFromData()
-    plots.mergeRenameReorderForDataMC(datasetsSig)
+    plots.mergeRenameReorderForDataMC(datasetsSig, keepSourcesMC=True)
 
     def mergeEWK(datasets):
         datasets.merge("EWKMC", ["WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson"], keepSources=True)
         #datasets.merge("EWKMC", ["WJets", "TTJets"], keepSources=True)
     mergeEWK(datasetsSig)
     datasetsEmb.forEach(mergeEWK)
-    plots._legendLabels["EWKMC"] = "EWK MC"
+    plots._legendLabels["EWKMC"] = "EWK"
 
     style = tdrstyle.TDRStyle()
     ROOT.gStyle.SetEndErrorSize(5)
@@ -64,17 +58,27 @@ def main():
     tauEmbedding.normalize=True
     tauEmbedding.era = "Run2011A"
 
-    #doPlots(datasetsEmb, datasetsSig, "TTJets")
-    #doPlots(datasetsEmb, datasetsSig, "WJets")
-    #doPlots(datasetsEmb, datasetsSig, "DYJetsToLL")
-    #doPlots(datasetsEmb, datasetsSig, "Data")
-    #doPlots(datasetsEmb, datasetsSig, "EWKMC")
-    #doPlots(datasetsEmb, datasetsSig, "EWKMC", doData=True, postfix="_data")
+    datasetsEmbCorrected = result.DatasetsDYCorrection(datasetsEmb, datasetsSig, analysisEmb, analysisSig)
+
+    doPlots(datasetsEmb, datasetsSig, "TTJets")
+    doPlots(datasetsEmb, datasetsSig, "WJets")
+    doPlots(datasetsEmb, datasetsSig, "DYJetsToLL")
+    doPlots(datasetsEmb, datasetsSig, "SingleTop")
+    doPlots(datasetsEmb, datasetsSig, "Diboson")
+    doPlots(datasetsEmb, datasetsSig, "WW")
+    doPlots(datasetsEmb, datasetsSig, "WZ")
+    doPlots(datasetsEmb, datasetsSig, "ZZ")
+    doPlots(datasetsEmb, datasetsSig, "EWKMC")
+    doPlots(datasetsEmb, datasetsSig, "EWKMC", doData=True, postfix="_data")
+    ##doPlots(datasetsEmb, datasetsSig, "Data")
+
+    doPlots(datasetsEmbCorrected, datasetsSig, "EWKMC", postfix="_dycorrected")
+    doPlots(datasetsEmbCorrected, datasetsSig, "EWKMC", doData=True, postfix="_dycorrected_data")
 
     doPlotsData(datasetsEmb)
 
 def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
-    lumi = datasetsEmb.getLumi()
+    lumi = datasetsEmb.getLuminosity()
     
     def createPlot(name):
         name2Emb = name
@@ -109,20 +113,25 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
             p = plots.ComparisonPlot(emb, sig)
             sty = styles.styles
 
+        legLabel = plots._legendLabels.get(datasetName, datasetName)
+        if legLabel != "Data":
+            legLabel += " MC"
         p.histoMgr.setHistoLegendLabelMany({
-                "Embedded":     "Embedded "+plots._legendLabels[datasetName],
-                "Normal":       "Normal "+plots._legendLabels[datasetName],
+                "Embedded":     "Embedded " + legLabel,
+                "Normal":       "Normal " + legLabel,
                 "EmbeddedData": "Embedded data",
                 })
         p.histoMgr.forEachHisto(styles.Generator(sty))
         if doData:
-            plots.copyStyle(p.histoMgr.getHisto("EmbeddedData").getRootHisto(), embDataVar)
-            embDataVar.SetMarkerStyle(2)
-            p.embeddingDataVariation = embDataVar
+            if embDataVar != None:
+                plots.copyStyle(p.histoMgr.getHisto("EmbeddedData").getRootHisto(), embDataVar)
+                embDataVar.SetMarkerStyle(2)
+                p.embeddingDataVariation = embDataVar
         else:
-            plots.copyStyle(p.histoMgr.getHisto("Embedded").getRootHisto(), embVar)
-            embVar.SetMarkerStyle(2)
-            p.embeddingVariation = embVar
+            if embVar != None:
+                plots.copyStyle(p.histoMgr.getHisto("Embedded").getRootHisto(), embVar)
+                embVar.SetMarkerStyle(2)
+                p.embeddingVariation = embVar
 
         return p
 
@@ -133,6 +142,12 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
     treeDraw = dataset.TreeDraw("dummy", weight="weightPileup*weightTrigger*weightBTagging")
     tdMt = treeDraw.clone(varexp="sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi()))) >>tmp(20,0,400)")
 
+    textFunction = None
+    if isinstance(datasetsEmb, result.DatasetsDYCorrection):
+        def dyLabel():
+            histograms.addText(0.55, 0.7, "Embedded is DY corrected", size=15)
+        textFunction = dyLabel
+
     # After all cuts
     metCut = "(met_p4.Et() > 50)"
     bTaggingCut = "passedBTagging"
@@ -140,10 +155,26 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
     selection = "&&".join([metCut, bTaggingCut, deltaPhi160Cut])
     prefix = "mcembsig_"+datasetName+postfix
 
-    drawPlot(createPlot(treeDraw.clone(varexp="tau_p4.Pt() >>tmp(20,0,200)", selection=selection)), prefix+"_selectedTauPt_4AfterDeltaPhi160", "#tau-jet p_{T} (GeV/c)", opts2={"ymin": 0, "ymax": 3})
-    drawPlot(createPlot(treeDraw.clone(varexp="met_p4.Pt() >>tmp(16,0,400)", selection=selection)), prefix+"_MET_4AfterDeltaPhi160", "E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", opts2={"ymin": 0, "ymax": 3})
-    drawPlot(createPlot(tdMt.clone(selection=selection)), prefix+"_transverseMass_4AfterDeltaPhi160", "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts2={"ymin": 0, "ymax": 3}, ylabel="Events / %.0f GeV/c^{2}", log=False)
+    #opts = {"ymaxfactor": 1.4}
+    opts = {}
 
+    drawPlot(createPlot(treeDraw.clone(varexp="tau_p4.Pt() >>tmp(20,0,200)", selection=selection)), prefix+"_selectedTauPt_4AfterDeltaPhi160", "#tau-jet p_{T} (GeV/c)", opts=opts, opts2={"ymin": 0, "ymax": 3}, textFunction=textFunction)
+    drawPlot(createPlot(treeDraw.clone(varexp="met_p4.Pt() >>tmp(16,0,400)", selection=selection)), prefix+"_MET_4AfterDeltaPhi160", "E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", opts=opts, opts2={"ymin": 0, "ymax": 3}, textFunction=textFunction)
+
+    opts = {}
+    if datasetName == "EWKMC":
+        opts["ymax"] = 46
+    elif datasetName == "TTJets":
+        opts["ymax"] = 12
+    elif datasetName == "SingleTop":
+        opts["ymax"] = 2.2
+    elif datasetName == "DYJetsToLL":
+        opts["ymax"] = 6.5
+    elif datasetName == "Diboson":
+        opts["ymax"] = 0.9
+    elif datasetName == "WJets":
+        opts["ymax"] = 35
+    drawPlot(createPlot(tdMt.clone(selection=selection)), prefix+"_transverseMass_4AfterDeltaPhi160", "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts2={"ymin": 0, "ymax": 3}, opts=opts, ylabel="Events / %.0f GeV/c^{2}", log=False, textFunction=textFunction)
 
 def doPlotsData(datasetsEmb):
     def createPlot(name):
@@ -158,7 +189,7 @@ def doPlotsData(datasetsEmb):
         embHistos = datasetsEmb.getHistograms("Data", name2Emb)
 
         p = plots.ComparisonManyPlot(embData, embHistos)
-        p.setLuminosity(datasetsEmb.getLumi())
+        p.setLuminosity(datasetsEmb.getLuminosity())
 
         p.histoMgr.forEachHisto(styles.Generator([styles.dataStyle] + styles.styles))
         #p.histoMgr.setHistoDrawStyleAll("P")
@@ -182,80 +213,7 @@ def doPlotsData(datasetsEmb):
 #    drawPlot(createPlot(treeDraw.clone(varexp="met_p4.Pt() >>tmp(16,0,400)", selection=selection)), prefix+"_MET_4AfterDeltaPhi160", "E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", opts2={"ymin": 0, "ymax": 3})
     drawPlotData(createPlot(tdMt.clone(selection=selection)), prefix+"_transverseMass_4AfterDeltaPhi160", "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts2={"ymin": 0, "ymax": 3}, ylabel="Events / %.0f GeV/c^{2}", log=False)
 
-    
-
-class DatasetsMany:
-    def __init__(self, dirs, counters):
-        self.datasetManagers = []
-        for d in dirs:
-            datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=d+"/multicrab.cfg", counters=counters)
-            datasets.loadLuminosities()
-            self.datasetManagers.append(datasets)
-
-    def forEach(self, function):
-        for dm in self.datasetManagers:
-            function(dm)
-
-    def setLumiFromData(self):
-        self.lumi = self.datasetManagers[0].getDataset("Data").getLuminosity()
-
-    def getLumi(self):
-        return self.lumi
-
-    def getHistogram(self, datasetName, name):
-        histos = self.getHistograms(datasetName, name)
-
-        histo = histos[0]
-        histo_low = histo.Clone(histo.GetName()+"_low")
-        histo_high = histo.Clone(histo.GetName()+"_high")
-        for h in histos[1:]:
-            for bin in xrange(0, histo.GetNbinsX()+2):
-                histo.SetBinContent(bin, histo.GetBinContent(bin)+h.GetBinContent(bin))
-                histo.SetBinError(bin, histo.GetBinError(bin)+h.GetBinError(bin))
-
-                histo_low.SetBinContent(bin, min(histo_low.GetBinContent(bin), h.GetBinContent(bin)))
-                histo_high.SetBinContent(bin, max(histo_high.GetBinContent(bin), h.GetBinContent(bin)))
-
-        for bin in xrange(0, histo.GetNbinsX()+2):
-            histo.SetBinContent(bin, histo.GetBinContent(bin)/len(histos))
-            histo.SetBinError(bin, histo.GetBinError(bin)/len(histos))
-
-        binCenters = []
-        values = []
-        errLow = []
-        errHigh = []
-        for bin in xrange(1, histo.GetNbinsX()+1):
-            binCenters.append(histo.GetXaxis().GetBinCenter(bin))
-            values.append(histo.GetBinContent(bin))
-            errLow.append(histo.GetBinContent(bin) - histo_low.GetBinContent(bin))
-            errHigh.append(histo_high.GetBinContent(bin) - histo.GetBinContent(bin))
-
-        gr = ROOT.TGraphAsymmErrors(len(binCenters),
-                                    array.array("d", binCenters), array.array("d", values),
-                                    array.array("d", [0]*len(binCenters)), array.array("d", [0]*len(binCenters)),
-                                    array.array("d", errLow), array.array("d", errHigh))
-
-        histo.SetName("Average")
-
-        return (histo, gr)
-
-    def getHistograms(self, datasetName, name):
-        histos = []
-        for i, dm in enumerate(self.datasetManagers):
-            ds = dm.getDataset(datasetName)
-            h = ds.getDatasetRootHisto(name)
-            if h.isMC():
-                h.normalizeToLuminosity(self.lumi)
-            h = histograms.HistoWithDataset(ds, h.getHistogram(), "dummy") # only needed for scaleNormalization()
-            tauEmbedding.scaleNormalization(h)
-            h = h.getRootHisto()
-            h.SetName("Trial %d"%(i+1))
-            histos.append(h)
-
-        return histos
-
-
-def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, ratio=True, opts={}, opts2={}, moveLegend={}, cutLine=None, cutBox=None, function=None):
+def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, ratio=True, opts={}, opts2={}, moveLegend={}, **kwargs):
     if rebin > 1:
         h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     ylab = ylabel
@@ -300,29 +258,32 @@ def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, r
     #yaxis = h.getFrame2().GetYaxis()
     #yaxis.SetTitleSize(yaxis.GetTitleSize()*0.7)
     #yaxis.SetTitleOffset(yaxis.GetTitleOffset()*1.5)
-    dh = 0
-    if hasattr(h, "embeddingVariation"):
-        dh += 0.02
-    if hasattr(h, "embeddingDataVariation"):
-        dh += 0.02
-    h.setLegend(histograms.moveLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend),
-                                      dh=dh
-                                      ))
+    h.setLegend(histograms.moveLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend)))
     tmp = sigErr.Clone("tmp")
     tmp.SetFillColor(ROOT.kBlack)
     tmp.SetFillStyle(3013)
     tmp.SetLineColor(ROOT.kWhite)
     h.legend.AddEntry(tmp, "Stat. unc.", "F")
 
+    x = h.legend.GetX1()
+    y = h.legend.GetY1()
+    x += 0.05; y -= 0.03
     if hasattr(h, "embeddingDataVariation"):
-        h.legend.AddEntry(h.embeddingDataVariation, "Embedded data min/max", "p")
+        histograms.addText(x, y, "[  ]", size=17, color=h.embeddingDataVariation.GetMarkerColor()); x += 0.05
+        histograms.addText(x, y, "Embedded data min/max", size=17); y-= 0.03
     if hasattr(h, "embeddingVariation"):
-        h.legend.AddEntry(h.embeddingVariation, "Embedded MC min/max", "p")
+        histograms.addText(x, y, "[  ]", size=17, color=h.embeddingVariation.GetMarkerColor()); x += 0.05
+        histograms.addText(x, y, "Embedded MC min/max", size=17); y-= 0.03
 
-    common(h, xlabel, ylab, cutLine, cutBox, function)
+    #if hasattr(h, "embeddingDataVariation"):
+    #    h.legend.AddEntry(h.embeddingDataVariation, "Embedded data min/max", "p")
+    #if hasattr(h, "embeddingVariation"):
+    #    h.legend.AddEntry(h.embeddingVariation, "Embedded MC min/max", "p")
+
+    common(h, xlabel, ylab, **kwargs)
 
 
-def drawPlotData(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, ratio=True, opts={}, opts2={}, moveLegend={}, cutLine=None, cutBox=None, function=None):
+def drawPlotData(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, ratio=True, opts={}, opts2={}, moveLegend={}, **kwargs):
     if rebin > 1:
         h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     ylab = ylabel
@@ -351,9 +312,9 @@ def drawPlotData(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=Tru
     #yaxis.SetTitleOffset(yaxis.GetTitleOffset()*1.5)
     h.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
 
-    common(h, xlabel, ylab, cutLine, cutBox, function)
+    common(h, xlabel, ylab, **kwargs)
 
-def common(h, xlabel, ylabel, cutLine=None, cutBox=None, function=None):
+def common(h, xlabel, ylabel, cutLine=None, cutBox=None, function=None, textFunction=None):
     # Add cut line and/or box
     if cutLine != None:
         lst = cutLine
@@ -379,6 +340,8 @@ def common(h, xlabel, ylabel, cutLine=None, cutBox=None, function=None):
     histograms.addCmsPreliminaryText()
     histograms.addEnergyText()
     h.addLuminosityText()
+    if textFunction != None:
+        textFunction()
     h.save()
 
 

@@ -53,7 +53,11 @@ def main(opts, args):
             if not opts.test:
                 ret = subprocess.call(command)
                 if ret != 0:
-                    raise Exception("Command '%s' failed with exit code %d" % (" ".join(command), ret))
+                    message = "Command '%s' failed with exit code %d" % (" ".join(command), ret)
+                    if opts.allowFails:
+                        print message
+                    else:
+                        raise Exception()
         if njobsSubmitted < maxJobs:
             print "Submitted, sleeping %f seconds" % opts.sleep
             time.sleep(opts.sleep)
@@ -77,6 +81,8 @@ if __name__ == "__main__":
                       help="Number of seconds to sleep between submissions (default: 900 s= 15 min)")
     parser.add_option("--test", dest="test", default=False, action="store_true",
                       help="Test only, do not submit anything")
+    parser.add_option("--allowFails", dest="allowFails", default=False, action="store_true",
+                      help="Continue submissions even if crab -submit fails for any reason")
     (opts, args) = parser.parse_args()
 
     sys.exit(main(opts, args))

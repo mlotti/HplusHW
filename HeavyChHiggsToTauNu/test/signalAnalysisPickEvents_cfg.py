@@ -90,28 +90,10 @@ param.setDataTriggerEfficiency(dataVersion, era=puweight)
 
    
 # Signal analysis module for the "golden analysis"
-process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilterNew",
-    trigger = param.trigger,
-    primaryVertexSelection = param.primaryVertexSelection,
-    GlobalElectronVeto = param.GlobalElectronVeto,
-    GlobalMuonVeto = param.GlobalMuonVeto,
-    # Change default tau algorithm here as needed
-    tauSelection = param.tauSelectionHPSTightTauBased,
-    jetSelection = param.jetSelection,
-    MET = param.MET,
-    bTagging = param.bTagging,
-    fakeMETVeto = param.fakeMETVeto,
-    jetTauInvMass = param.jetTauInvMass,
-    topSelection = param.topSelection,
-    forwardJetVeto = param.forwardJetVeto,
-    transverseMassCut = param.transverseMassCut,
-    EvtTopology = param.EvtTopology,
-    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
-    vertexWeight = param.vertexWeight,
-    tauEmbedding = param.TauEmbeddingAnalysis,
-    GenParticleAnalysis = param.GenParticleAnalysis,
-    produceCollections = cms.untracked.bool(True)
-)
+import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
+process.signalAnalysis = signalAnalysis.createEDFilter(param)
+del process.signalAnalysis.tree
+process.produceCollections = cms.untracked.bool(True)
 
 # Prescale fetching done automatically for data
 if dataVersion.isData():
