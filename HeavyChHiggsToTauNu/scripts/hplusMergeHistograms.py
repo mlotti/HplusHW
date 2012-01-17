@@ -21,8 +21,6 @@ def getHistogramFile(stdoutFile):
             histoFile = m.group("file")
             continue
     f.close()
-    if histoFile == None:
-        raise Exception("Internal error, histoFile is None in file "+stdoutFile)
     return histoFile
 
 def main(opts, args):
@@ -39,7 +37,11 @@ def main(opts, args):
         files = []
         for f in stdoutFiles:
             try:
-                files.append(os.path.join(os.path.dirname(f), getHistogramFile(f)))
+                histoFile = getHistogramFile(f)
+                if histoFile != None:
+                    files.append(os.path.join(os.path.dirname(f), histoFile))
+                else:
+                    print "Skipping task %s, job %s: input root file not found" % (d, f)
             except multicrab.ExitCodeException, e:
                 print "Skipping task %s, job %s: %s" % (d, f, str(e))
             

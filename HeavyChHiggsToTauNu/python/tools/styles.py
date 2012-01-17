@@ -43,7 +43,7 @@ class StyleFill(StyleBase):
 	if self.fillColor != None:
 	    h.SetFillColor(self.fillColor)
 	else:
-	    h.SetFillColor(self.style.color)
+	    h.SetFillColor(h.GetLineColor())
         #h.SetFillStyle(3002)
         h.SetFillStyle(self.fillStyle)
 
@@ -62,10 +62,11 @@ class StyleLine(StyleBase):
             h.SetLineColor(self.lineColor)
 
 class StyleMarker(StyleBase):
-    def __init__(self, markerSize=1.2, markerColor=None, markerSizes=None):
+    def __init__(self, markerSize=1.2, markerColor=None, markerSizes=None, markerStyle=None):
         self.markerSize = markerSize
         self.markerColor = markerColor
         self.markerSizes = markerSizes
+	self.markerStyle = markerStyle
         self.markerSizeIndex = 0
 
     def apply(self, h):
@@ -76,6 +77,8 @@ class StyleMarker(StyleBase):
             self.markerSizeIndex = (self.markerSizeIndex+1)%len(self.markerSizes)
         if self.markerColor != None:
             h.SetMarkerColor(self.markerColor)
+	if self.markerStyle != None:
+	    h.SetMarkerStyle(self.markerStyle)
 
 class StyleError(StyleBase):
     def __init__(self, color, style=3004, linecolor=None):
@@ -136,6 +139,9 @@ signal300Style = signalStyle.clone()
 
 qcdStyle = Style(ROOT.kFullTriangleUp, ROOT.kOrange-2)
 ewkStyle = Style(ROOT.kFullTriangleDown, ROOT.kRed-4)
+qcdFillStyle = StyleCompound([StyleFill(fillColor=ROOT.kOrange-2)])
+ewkFillStyle = StyleCompound([StyleFill(fillColor=ROOT.kMagenta-2)])
+ewkfakeFillStyle = StyleCompound([StyleFill(fillColor=ROOT.kGreen+2)])
 ttStyle = Style(ROOT.kFullSquare, ROOT.kMagenta-2)
 wStyle = Style(ROOT.kFullTriangleDown, ROOT.kOrange+9)
 
@@ -175,6 +181,21 @@ def applyStyle(h, ind):
 
 def getDataStyle():
     return dataStyle
+
+def getEWKStyle():
+    return ewkFillStyle
+
+def getEWKFakeStyle():
+    return ewkfakeFillStyle
+
+def getQCDStyle():
+    return qcdFillStyle
+
+def getSignalStyle():
+    return signalStyle
+
+def getErrorStyle():
+    return errorStyle
 
 def getErrorStyle():
     return errorStyle

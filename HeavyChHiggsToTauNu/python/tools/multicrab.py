@@ -58,6 +58,9 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
                 ret.append(d)
         return ret
     else:
+        if not os.path.exists(filename):
+            raise Exception("Multicrab configuration file '%s' does not exist" % filename)
+
         directory = os.path.dirname(filename)
 
         mc_ignore = ["MULTICRAB", "COMMON"]
@@ -461,6 +464,9 @@ class MulticrabDataset:
 
         self.lines.append(line)
 
+    def appendCopyFile(self, fileName):
+        self.filesToCopy.append(fileName)
+
     def extendBlackWhiteList(self, blackWhiteList, sites):
         """Extend the CE/SE black/white list with a list of sites.
 
@@ -838,3 +844,6 @@ class Multicrab:
             print "Created multicrab task to subdirectory "+dirname
             print
 
+            os.chdir("..")
+
+        return dirname

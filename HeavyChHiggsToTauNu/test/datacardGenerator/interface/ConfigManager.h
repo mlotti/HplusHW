@@ -17,7 +17,7 @@ public:
 
   bool initialize(std::string configFile);
   bool doExtract();
-  void generateCards();
+  void generateCards(bool useShapes);
 
 private:
   bool checkValidity();
