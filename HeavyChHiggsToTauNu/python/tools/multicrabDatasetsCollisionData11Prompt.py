@@ -149,6 +149,7 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v6_AOD_173236_pattuple_v20_test1-ffd00eb3f262c07dc29d261d6126a908/USER",
                 "number_of_jobs": 1,
+                "lumiMask": "PromptReco"
             },
         }
     },
