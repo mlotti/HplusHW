@@ -15,6 +15,7 @@
 
 import os
 import array
+import math
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -31,6 +32,18 @@ import produceTauEmbeddingResult as result
 #analysisEmb = "signalAnalysis"
 analysisEmb = "signalAnalysisCaloMet60TEff"
 analysisSig = "signalAnalysisGenuineTau"
+
+weight = "weightPileup*weightTrigger"
+weightBTagging = weight+"*weightBTagging"
+treeDraw = dataset.TreeDraw(analysisEmb+"/tree", weight=weight)
+
+caloMetCut = "(tecalomet_p4.Et() > 60)"
+caloMetNoHFCut = "(tecalometNoHF_p4.Et() > 60)"
+metCut = "(met_p4.Et() > 50)"
+bTaggingCut = "passedBTagging"
+deltaPhi160Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 160)"
+deltaPhi130Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 130)"
+deltaPhi90Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 90)"
 
 def main():
     dirEmbs = ["."] + [os.path.join("..", d) for d in result.dirEmbs[1:]]
@@ -58,8 +71,10 @@ def main():
     doPlots(datasetsEmb)
     doPlots(datasetsEmbCorrected)
 
-    #doCounters(datasetsEmb)
-    doCounters(datasetsEmbCorrected)
+    doCounters(datasetsEmb)
+    #doCounters(datasetsEmbCorrected)
+
+    #doCountersOld(datasetsEmb)
 
 
 def drawPlot(*args, **kwargs):
@@ -138,7 +153,158 @@ def doPlots(datasetsEmb):
     drawPlot(p, prefix+"_transverseMass_4AfterDeltaPhi160", "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts=opts, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}", log=False)
             
 
-def doCounters(datasetsEmb, counterName="counter"):
+def doCounters(datasetsEmb):
+    isCorrected = isinstance(datasetsEmb, result.DatasetsDYCorrection)
+    if isCorrected:
+        eventCounter = result.EventCounterDYCorrection(datasetsEmb, counters=analysisEmb+"Counters/weighted")
+    else:
+        eventCounter = result.EventCounterMany(datasetsEmb, counters=analysisEmb+"Counters/weighted")
+
+    # Add counts
+    sels = []
+    tdCount = treeDraw.clone(weight=weightBTagging)
+    tdCountMET = tdCount.clone(weight=weight, selection="&&".join(sels+[metCut]))
+    tdCountBTagging = tdCount.clone(selection="&&".join(sels+[metCut, bTaggingCut]))
+    tdCountDeltaPhi160 = tdCount.clone(selection="&&".join(sels+[metCut, bTaggingCut, deltaPhi160Cut]))
+    tdCountDeltaPhi130 = tdCount.clone(selection="&&".join(sels+[metCut, bTaggingCut, deltaPhi130Cut]))
+    tdCountDeltaPhi90 = tdCount.clone(selection="&&".join(sels+[metCut, bTaggingCut, deltaPhi90Cut]))
+    eventCounter.mainCounterAppendRow("JetsForEffs", tdCount.clone(weight=weight, selection="&&".join(sels)))
+    eventCounter.mainCounterAppendRow("METForEffs", tdCountMET)
+    eventCounter.mainCounterAppendRow("BTagging", tdCountBTagging)
+    eventCounter.mainCounterAppendRow("DeltaPhi < 160", tdCountDeltaPhi160)
+    eventCounter.mainCounterAppendRow("DeltaPhi < 130", tdCountDeltaPhi130)
+    eventCounter.mainCounterAppendRow("DeltaPhi < 90", tdCountDeltaPhi90)
+
+    if not isCorrected:
+        td1 = tdCount.clone(selection=metCut+"&&"+bTaggingCut+"&& (tecalometNoHF_p4.Pt() > 60)")
+        td2 = tdCount.clone(selection=metCut+"&&"+bTaggingCut+"&& (tecalomet_p4.Pt() > 60)")
+        td3 = dataset.TreeDrawCompound(td1, {
+                "SingleMu_Mu_170722-172619_Aug05": td2,
+                "SingleMu_Mu_172620-173198_Prompt": td2,
+                "SingleMu_Mu_173236-173692_Prompt": td2,
+                })
+        eventCounter.mainCounterAppendRow("BTagging+CaloMetNoHF", td1)
+        eventCounter.mainCounterAppendRow("BTagging+CaloMet", td2)
+        eventCounter.mainCounterAppendRow("BTagging+CaloMet(NoHF)", td3)
+
+    mainTable = eventCounter.getMainCounterTable()
+
+    ewkDatasets = ["WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson"]
+    def ewkSum(table):
+        table.insertColumn(1, counter.sumColumn("EWKMCsum", [table.getColumn(name=name) for name in ewkDatasets]))
+    ewkSum(mainTable)
+    cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.3f'))
+    print mainTable.format(cellFormat)
+
+    tauTable = eventCounter.getSubCounterTable("TauIDPassedEvt::tauID_HPSTight")
+    ewkSum(tauTable)
+    print tauTable.format(cellFormat)
+
+    # Efficiencies
+    mainTable.keepOnlyRows([
+            "All events",
+            "Trigger and HLT_MET cut",
+            "taus == 1",
+#            "trigger scale factor",
+            "electron veto",
+            "muon veto",
+            "MET",
+            "njets",
+            "btagging",
+            "btagging scale factor",
+            "JetsForEffs",
+            "METForEffs",
+            "BTagging",
+            "DeltaPhi < 160",
+            "DeltaPhi < 130"
+            ])
+    tauTable.keepOnlyRows([
+            "AllTauCandidates",
+            "DecayModeFinding",
+            "TauJetPt",
+            "TauJetEta",
+            "TauLdgTrackExists",
+            "TauLdgTrackPtCut",
+            "TauECALFiducialCutsCracksAndGap",
+            "TauAgainstElectronCut",
+            "TauAgainstMuonCut",
+            #"EMFractionCut",
+            "HPS",
+            "TauOneProngCut",
+            "TauRtauCut",
+            ])
+
+    effFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.4f'))
+    #effFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat='%.4f'))
+    for name, table in [("Main", mainTable), ("Tau ID", tauTable)]:
+        effTable = counter.CounterTable()
+        col = table.getColumn(name="Data")
+        effTable.appendColumn(col)
+        effTable.appendColumn(counter.efficiencyColumn(col.getName()+" eff", col))
+        col = table.getColumn(name="EWKMCsum")
+        effTable.appendColumn(col)
+        effTable.appendColumn(counter.efficiencyColumn(col.getName()+" eff", col))
+        print "%s counter efficiencies" % name
+        print effTable.format(effFormat)
+
+
+    if isCorrected:
+        return
+
+    print "Trigger uncertainties"
+    bins = [40, 50, 60, 80]
+    tauPtPrototype = ROOT.TH1F("tauPtTrigger", "Tau pt", len(bins)-1, array.array("d", bins))
+    runs = [
+        "(160431 <= run && run <= 167913)",
+        "(170722 <= run && run <= 173198)",
+        "(173236 <= run && run <= 173692)",
+        #"(160431 <= run && run <= 173692)",
+        ]
+    for name, td in [
+        ("BTagging", tdCountBTagging),
+        ("DeltaPhi160", tdCountDeltaPhi160),
+        ("DeltaPhi130", tdCountDeltaPhi130),
+        ("DeltaPhi90", tdCountDeltaPhi90)
+        ]:
+        t = td.clone(varexp="tau_p4.Pt() >>tauPtTrigger")
+        
+        NallSum = 0
+        NSum = 0
+        absUncSquareSum = 0
+
+        for runRegion in runs:
+            #neventsPlot = createPlot(dataset.treeDrawToNumEntries(t.clone(weight="weightTrigger")))
+            #uncertaintyPlot = createPlot(dataset.treeDrawToNumEntries(t.clone(weight="weightTriggerAbsUnc*weightTriggerAbsUnc/(weightTrigger*weightTrigger)")))
+            tmp = t.clone(selection=t.selection+"&&"+runRegion)
+            (th1all, gr) = datasetsEmb.getHistogram("Data", tmp.clone(weight="")) # Nall
+            (th1, gr) = datasetsEmb.getHistogram("Data", tmp.clone(weight="weightTrigger")) # Nevents
+            (th12, gr) = datasetsEmb.getHistogram("Data", tmp.clone(weight="weightTriggerAbsUnc")) # uncertainty
+
+            Nall = th1all.Integral(0, th1all.GetNbinsX()+1)
+            N = th1.Integral(0, th1.GetNbinsX()+1)
+            #absSum2 = th12.Integral(0, th12.GetNbinsX()+1)
+            #absUnc = math.sqrt(absSum2)
+            #absUnc = th12.Integral(0, 2)
+            NallSum += Nall
+            NSum += N
+            absUnc = tauEmbedding.squareSum(th12)
+            absUncSquareSum += absUnc
+            absUnc = math.sqrt(absUnc)
+            relUnc = 0
+            if N > 0:
+                relUnc = absUnc/N
+
+            print "%-15s for runs %s Nall = %.2f, N = %.2f, absolute uncertainty %.2f, relative uncertainty %.4f" % (name, runRegion, Nall, N, absUnc, relUnc)
+
+
+        absUnc = math.sqrt(absUncSquareSum)
+        relUnc = absUnc/NSum
+
+        print "%-15s Nall = %.2f, N = %.2f, absolute uncertainty %.2f, relative uncertainty %.4f" % (name, NallSum, NSum, absUnc, relUnc)
+        print
+
+
+def doCountersOld(datasetsEmb, counterName="counter"):
     datasetNames = datasetsEmb.getAllDatasetNames()
 
     table = counter.CounterTable()
@@ -151,9 +317,9 @@ def doCounters(datasetsEmb, counterName="counter"):
     print "============================================================"
     if isinstance(datasetsEmb, result.DatasetsDYCorrection):
         print "DY correction applied"
-
     cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.3f'))
     print table.format(cellFormat)
+
 
 
 if __name__ == "__main__":
