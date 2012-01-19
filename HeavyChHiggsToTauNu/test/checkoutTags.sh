@@ -60,33 +60,32 @@ set -e
 # 21.12.2011/M.Kortelainen CMSSW_4_2_8_patch7 Updated PAT, tau and lumi tags
 # 29.12.2011/S.Lehti       CMSSW_4_2_8_patch2 Commented removal of HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
 # 16.1.2012/S.Lehti        CMSSW_4_4_2_patch9 Updated tags to 44x
+# 19.1.2012/M.Kortelainen CMSSW_4_4_2_patch9 Updated PAT and tau tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
 
 # PAT
-# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATReleaseNotes42X
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATReleaseNotes44X
 
 # Tau+PAT
 # https://hypernews.cern.ch/HyperNews/CMS/get/tauid/83/1/1/1/1.html
-# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePFTauID#Recommended_tags_for_2011_data_t
-# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTauAnalysis#CMSSW_4_1_X_NOTE_Experimental_ve
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePFTauID#CMSSW_4_4_2
 #
 # Tau
 addpkg RecoTauTag/RecoTau         V01-02-14 # These two contain the continous HPS isolation
 addpkg RecoTauTag/Configuration   V01-02-10 # source: private e-mails
-addpkg RecoTauTag/TauTagTools     V01-02-01
 # PAT
-####addpkg DataFormats/PatCandidates  V06-04-19-02 # V06-04-27 in CMSSW_4_4_2_patch9
-####addpkg PhysicsTools/PatAlgos      V08-06-50
-####addpkg PhysicsTools/PatUtils      V03-09-18
-####addpkg PhysicsTools/PatExamples   V00-05-24
-####addpkg CommonTools/ParticleFlow   B4_2_X_V00-03-00
-####addpkg PhysicsTools/SelectorUtils V00-03-24
-####addpkg PhysicsTools/UtilAlgos     V08-02-14
+addpkg DataFormats/PatCandidates   V06-04-30
+addpkg PhysicsTools/PatAlgos       V08-07-36-01
+addpkg PhysicsTools/PatExamples    V00-05-29
+addpkg PhysicsTools/PatUtils       V03-09-18-02
+addpkg PhysicsTools/SelectorUtils  V00-03-24-01
+addpkg CommonTools/ParticleFlow    V00-03-04
+addpkg RecoParticleFlow/PFProducer V14-07-13
 ##### New tau discriminators
-##### https://hypernews.cern.ch/HyperNews/CMS/get/tauid/164/1.html
-####cvs co -r 1.43 PhysicsTools/PatAlgos/python/tools/tauTools.py
+# https://hypernews.cern.ch/HyperNews/CMS/get/tauid/164/1.html
+cvs co -r 1.46 PhysicsTools/PatAlgos/python/tools/tauTools.py
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 ####addpkg RecoJets/Configuration     V02-04-17
@@ -97,16 +96,7 @@ addpkg PhysicsTools/Utilities     V08-03-17
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis#HeadingFive
 addpkg JetMETCorrections/Type1MET V04-05-07
 addpkg PhysicsTools/PatUtils      b4_2_X_cvMEtCorr_30Nov11
-
-
 addpkg DataFormats/METReco        V03-03-07
-####cvs up -r 1.28 DataFormats/METReco/src/classes.h
-####cvs up -r 1.25 DataFormats/METReco/src/classes_def.xml
-
-####addpkg JetMETCorrections/Algorithms V02-03-00
-####rm -f JetMETCorrections/Algorithms/interface/L1JPTOffsetCorrector.h
-####rm -f JetMETCorrections/Algorithms/src/L1JPTOffsetCorrector.cc
-####addpkg JetMETCorrections/Objects V03-01-00
 
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc
@@ -114,7 +104,6 @@ addpkg RecoLuminosity/LumiDB      V03-03-12
 
 # Electron ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
-#cvs co -r V00-03-01 ElectroWeakAnalysis/WENu
 
 # Higgs skimms
 cvs co HiggsAnalysis/Skimming
