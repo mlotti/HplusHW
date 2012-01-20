@@ -60,6 +60,25 @@ if len(options.trigger) == 0:
 #options.trigger = ["HLT_IsoPFTau35_Trk20_v6"]
 
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, plainPatArgs={"doTauHLTMatching":False})
+process.makePatTaus.remove(process.tauGenJets)
+process.makePatTaus.remove(process.tauGenJetsSelectorAllHadrons)
+process.makePatTaus.remove(process.tauGenJetMatch)
+process.patDefaultSequence.remove(process.tauGenJets)
+process.patDefaultSequence.remove(process.tauGenJetsSelectorAllHadrons)
+process.patDefaultSequence.remove(process.tauGenJetMatch)
+process.patDefaultSequence.remove(process.tauGenJetMatchHpsPFTau)
+process.patDefaultSequence.remove(process.tauGenJetMatchHpsTancPFTau)
+del process.tauGenJets
+del process.tauGenJetsSelectorAllHadrons
+del process.tauGenJetMatch
+del process.tauGenJetMatchHpsPFTau
+del process.tauGenJetMatchHpsTancPFTau
+process.patTaus.addGenJetMatch = False
+process.patTaus.embedGenJetMatch = False
+process.patTausHpsPFTau.addGenJetMatch = False
+process.patTausHpsPFTau.embedGenJetMatch = False
+process.patTausHpsTancPFTau.addGenJetMatch = False
+process.patTausHpsTancPFTau.embedGenJetMatch = False
 
 if options.doPat != 0:
 #    process.patDefaultSequence.remove(process.patElectrons)
