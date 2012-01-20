@@ -9,9 +9,9 @@
 #include <iostream>
 #include <sstream>
 
-QCDMeasurementCalculator::QCDMeasurementCalculator(std::string id)
+QCDMeasurementCalculator::QCDMeasurementCalculator(std::string id, bool verboseStatus)
 : Extractable(id) {
-  bDebug = !false;
+  bDebug = verboseStatus;
   reset();
 }
 

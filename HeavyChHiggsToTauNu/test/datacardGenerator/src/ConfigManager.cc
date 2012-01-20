@@ -12,12 +12,13 @@
 #include <sstream>
 #include <ctime>
 
-ConfigManager::ConfigManager(bool verbose)
+ConfigManager::ConfigManager(bool verbose, bool optionQCDVerbose)
 : fNormalisationInfo(0),
   fNormalisationInfoQCD(0),
   sDescription(""),
   fLuminosity(-1.0),
-  bVerbose(verbose) {
+  bVerbose(verbose),
+  bOptionQCDVerbose(optionQCDVerbose) {
   
 }
 
@@ -707,7 +708,7 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
     }
   } else if (myFunction == "QCDMeasurement") {
     if (type == Extractable::kExtractableRate) {
-      myExtractable = new QCDMeasurementCalculator(myId);
+      myExtractable = new QCDMeasurementCalculator(myId, bOptionQCDVerbose);
     } else if (type == Extractable::kExtractableNuisance) {
       myExtractable = new QCDMeasurementCalculator(myQCDMode, myId, myDistribution, myDescription);
     } else {
