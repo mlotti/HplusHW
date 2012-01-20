@@ -38,11 +38,11 @@ config = {
         "signalTrigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/A87958F4-92F3-E011-9CBC-0018F3D0966C.root",
     },
-    "44Xmc": {                                                                                                                                                                                      
+    "44XmcS4": {                                                                                                                                                                                      
         "triggerProcess": "HLT",                                                                                                                                                                      
         "recoProcess": "RECO",                                                                                                                                                                        
-        "signalTrigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",                                                                                                                                       
-        "patMadhatter": "file:/mnt/flustre/slehti/Fall11_TTToHplusBWB_M-90_7TeV-pythia6-tauola_B2AD85E1-D520-E111-B5AC-001A928116EA.root",         
+        "signalTrigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v6",
+        "analysisMadhatter": "file:/mnt/flustre/slehti/Fall11_TTToHplusBWB_M-90_7TeV-pythia6-tauola_B2AD85E1-D520-E111-B5AC-001A928116EA.root",         
     }
 }
 
@@ -51,6 +51,9 @@ class DataVersion:
     def __init__(self, dataVersion):
         if dataVersion == "42Xmc":
             dataVersion = "42XmcS4"
+
+        if dataVersion == "44Xmc":
+            dataVersion = "44XmcS4"
         
         if not dataVersion in config:
             names = config.keys()

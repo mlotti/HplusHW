@@ -33,7 +33,8 @@ process.source = cms.Source('PoolSource',
 #        dataVersion.getAnalysisDefaultFileMadhatter()
 #        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_166374-167043_Prompt/Tau/Run2011A_PromptReco_v4_AOD_Single_166374_pattuple_v18/a074e5725328b3ec89273a9ce844bc40/pattuple_5_1_Med.root"
 #        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_166374-167043_Prompt/Tau/PromptReco_v4_AOD_Single_166374_pattuple_v18_1/fdd51a0468635b24b4e8e11496951f46/pattuple_58_3_tsm.root"
-	"file:/mnt/flustre/slehti/Fall11_TTToHplusBWB_M-90_7TeV-pythia6-tauola_B2AD85E1-D520-E111-B5AC-001A928116EA.root"
+#	"file:/mnt/flustre/slehti/Fall11_TTToHplusBWB_M-90_7TeV-pythia6-tauola_B2AD85E1-D520-E111-B5AC-001A928116EA.root"
+	"file:/tmp/slehti/Fall11_TTToHplusBWB_M-90_7TeV-pythia6-tauola_B2AD85E1-D520-E111-B5AC-001A928116EA.root"
         #"file:/home/mkortela/hplus/CMSSW_4_2_8_patch2/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple/pattuple.root"
     )
 )
@@ -61,23 +62,23 @@ if len(options.trigger) == 0:
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, plainPatArgs={"doTauHLTMatching":False})
 
 if options.doPat != 0:
-    process.patDefaultSequence.remove(process.patElectrons)
-    process.patDefaultSequence.remove(process.selectedPatElectrons)
-    process.patDefaultSequence.remove(process.electronMatch)
-    process.patDefaultSequence.remove(process.cleanPatElectrons)
+#    process.patDefaultSequence.remove(process.patElectrons)
+#    process.patDefaultSequence.remove(process.selectedPatElectrons)
+#    process.patDefaultSequence.remove(process.electronMatch)
+#    process.patDefaultSequence.remove(process.cleanPatElectrons)
     process.patDefaultSequence.remove(process.cleanPatPhotons)
     process.patDefaultSequence.remove(process.cleanPatTaus)
     process.patDefaultSequence.remove(process.cleanPatTausHpsTancPFTau)
     process.patDefaultSequence.remove(process.cleanPatTausHpsPFTau)
-    process.patDefaultSequence.remove(process.cleanPatTausShrinkingConePFTau)
-    process.patDefaultSequence.remove(process.cleanPatTausCaloRecoTau)
+#    process.patDefaultSequence.remove(process.cleanPatTausShrinkingConePFTau)
+#    process.patDefaultSequence.remove(process.cleanPatTausCaloRecoTau)
     process.patDefaultSequence.remove(process.cleanPatJets)
     process.patDefaultSequence.remove(process.countPatElectrons)
     process.patDefaultSequence.remove(process.countPatLeptons)
 
 
-    process.commonSequence.remove(process.collisionDataSelection)
-    del process.collisionDataSelection
+#    process.commonSequence.remove(process.collisionDataSelection)
+#    del process.collisionDataSelection
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
@@ -167,11 +168,11 @@ process.triggerEfficiency = cms.EDAnalyzer("TriggerEfficiencyAnalyzer",
     caloMetSrc          = cms.untracked.InputTag("patMETs"),
     caloMetNoHFSrc      = cms.untracked.InputTag("metNoHF"),
     bools = cms.PSet(
-        TauIDPassed = cms.InputTag("tauSelectionFilter"),
-        ElectronVetoPassed = cms.InputTag("eVetoFilter"),
-        MuonVetoPassed = cms.InputTag("muVetoFilter"),
-        JetSelectionPassed = cms.InputTag("jetSelectionFilter"),
-        BTaggingPassed = cms.InputTag("btagSelectionFilter"),
+#        TauIDPassed = cms.InputTag("tauSelectionFilter"),
+#        ElectronVetoPassed = cms.InputTag("eVetoFilter"),
+#        MuonVetoPassed = cms.InputTag("muVetoFilter"),
+#        JetSelectionPassed = cms.InputTag("jetSelectionFilter"),
+#        BTaggingPassed = cms.InputTag("btagSelectionFilter"),
     )
 )
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
@@ -181,7 +182,6 @@ process.triggerEfficiency.metType1Src = cms.untracked.InputTag(type1Met)
 
 process.triggerEfficiencyPath = cms.Path(
     process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
-    process.eventFilter *
     process.signalAnalysisFilter *
     process.triggerEfficiency
 )
@@ -203,6 +203,9 @@ process.out = cms.OutputModule("PoolOutputModule",
 #	"drop *",
 #	"keep *",
 #        "keep edmMergeableCounter_*_*_*"
+    ),
+    SelectEvents = cms.untracked.PSet(
+	SelectEvents = cms.vstring('signalAnalysisFilter')
     )
 )
 
