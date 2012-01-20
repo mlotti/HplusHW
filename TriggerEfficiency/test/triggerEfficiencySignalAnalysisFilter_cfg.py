@@ -24,8 +24,8 @@ options.doPat=1
 # Define the process
 process = cms.Process("HChTriggerEfficiency")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
@@ -180,10 +180,12 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
 process.commonSequence *= sequence
 process.triggerEfficiency.metType1Src = cms.untracked.InputTag(type1Met)
 
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
 process.triggerEfficiencyPath = cms.Path(
     process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
     process.signalAnalysisFilter *
-    process.triggerEfficiency
+    process.triggerEfficiency *
+    process.PickEvents
 )
 
 
@@ -203,9 +205,9 @@ process.out = cms.OutputModule("PoolOutputModule",
 #	"drop *",
 #	"keep *",
 #        "keep edmMergeableCounter_*_*_*"
-    ),
-    SelectEvents = cms.untracked.PSet(
-	SelectEvents = cms.vstring('signalAnalysisFilter')
+#    ),
+#    SelectEvents = cms.untracked.PSet(
+#	SelectEvents = cms.vstring('signalAnalysisFilter')
     )
 )
 
