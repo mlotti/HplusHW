@@ -18,6 +18,7 @@ config = {
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_173236-173692_Prompt/Tau/Run2011A_PromptReco_v6_AOD_173236_pattuple_v20_test1/ffd00eb3f262c07dc29d261d6126a908/pattuple_11_1_tdz.root",
     },
     "42XmcS3": {
+        "simProcess": "HLT",
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
         "signalTrigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
@@ -25,6 +26,7 @@ config = {
 #        "patMadhatter": "file:/mnt/flustre/mkortela/data/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM/FE47C9F3-C97D-E011-B103-003048670B66.root",
     },
     "42XmcS4": {
+        "simProcess": "HLT",
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
         "signalTrigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
@@ -33,16 +35,33 @@ config = {
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M120_Summer11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v20_test1/88557732962dcf8166a136160b7c6f9d/pattuple_10_1_5mL.root"
     },
     "42XmcS6": {
+        "simProcess": "HLT",
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
         "signalTrigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/A87958F4-92F3-E011-9CBC-0018F3D0966C.root",
     },
-    "44Xmc": {                                                                                                                                                                                      
-        "triggerProcess": "HLT",                                                                                                                                                                      
-        "recoProcess": "RECO",                                                                                                                                                                        
-        "signalTrigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",                                                                                                                                       
-        "patMadhatter": "file:/mnt/flustre/slehti/Fall11_TTToHplusBWB_M-90_7TeV-pythia6-tauola_B2AD85E1-D520-E111-B5AC-001A928116EA.root",         
+    "44Xdata": {
+        "triggerProcess": "HLT",
+        "recoProcess": "RECO",
+#        "signalTrigger": "HLT_IsoPFTau35_Trk20_MET60_v2",
+        "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2011A-08Nov2011-v1/AOD/E8B13C66-A70B-E111-B8C5-001EC9B09F59.root"
+    },
+    "44Xmc": {
+        "simProcess": "HLT",
+        "triggerProcess": "HLT",
+        "recoProcess": "RECO",
+        "signalTrigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
+        #"patMadhatter": "file:/mnt/flustre/slehti/Fall11_TTToHplusBWB_M-90_7TeV-pythia6-tauola_B2AD85E1-D520-E111-B5AC-001A928116EA.root",
+        "patMadhatter": "file:/mnt/flustre/mkortela/data/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM/28ACFF78-0237-E111-97C7-00261894397B.root"
+    },
+    "44XmcAve32": {
+        "simProcess": "SIM",
+        "triggerProcess": "HLT",
+        "recoProcess": "RECO",
+        "globalTag": "START44_V12::All",
+        "signalTrigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
+        "patMadhatter": "file:/mnt/flustre/slehti/Fall11_TTToHplusBWB_M-90_7TeV-pythia6-tauola_B2AD85E1-D520-E111-B5AC-001A928116EA.root",
     }
 }
 
@@ -61,6 +80,7 @@ class DataVersion:
 
         self.trigger = conf["triggerProcess"]
         self.recoProcess = conf.get("recoProcess", None)
+        self.simProcess = conf.get("simProcess", None)
         self.version = dataVersion
 
         for f in ["patCastor", "patMadhatter", "analysisCastor", "analysisMadhatter"]:
@@ -75,8 +95,8 @@ class DataVersion:
         # MC
         else:
             self.is_data = False
-            self.globalTag = "START44_V12::All"
-
+            self.globalTag = conf.get("globalTag", "START44_V9C::All")
+                
             try:
                 self.signalTrigger = conf["signalTrigger"]
             except KeyError:
@@ -108,6 +128,11 @@ class DataVersion:
         if not self.recoProcess:
             raise Exception("Reco process name is not available for %s" % self.version)
         return self.recoProcess
+
+    def getSimProcess(self):
+        if not self.simProcess:
+            raise Exception("Sim process name is not available for %s" % self.version)
+        return self.simProcess
 
     def getGlobalTag(self):
         return self.globalTag
