@@ -1,3 +1,4 @@
+
 import multicrabDatasetsCommon as common
 
 # For pattuples: ~10kev/job (~20-30 kB/event on average, depending on the process)
@@ -772,6 +773,23 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v18-8eea754df021b160abed50fa738aa521/USER",
                 "number_of_jobs": 65
+            },
+        },
+    },
+    "W3Jets_TuneZ2_Summer11": {
+        "dataVersion": "42XmcS4",
+        "crossSection": 304.2*31314/27770.0, # value from PREP multiplied by the NNLO/PREP of inclusive WJets, see the following hypernews threads for more informatio
+        # https://hypernews.cern.ch/HyperNews/CMS/get/generators/1313.html
+        # https://hypernews.cern.ch/HyperNews/CMS/get/generators/1324.html
+        "data": {
+            "AOD": {
+                "datasetpath": "/W3Jets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 490, # Adjusted for PATtuple file size.
+            },
+            "pattuple_v18": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W3Jets_TuneZ2_7TeV-madgraph-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v18_1-5c1fe2e0ac511ee6db9df3b7fb33ca32/USER",
+                "number_of_jobs": 16
             },
         },
     },
