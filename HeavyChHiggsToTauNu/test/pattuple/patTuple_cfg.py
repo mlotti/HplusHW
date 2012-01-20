@@ -1,8 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
-dataVersion="42XmcS4"
-#dataVersion="42Xdata"
+dataVersion="44Xmc"
+#dataVersion="44Xdata"
 
 # Command line arguments (options) and DataVersion object
 options, dataVersion = getOptionsDataVersion(dataVersion)
@@ -36,6 +36,8 @@ process.source = cms.Source('PoolSource',
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 del process.TFileService
+#process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
+#process.Tracer = cms.Service("Tracer")
 
 ################################################################################
 # In case of data, add trigger
@@ -165,7 +167,7 @@ process.heavyChHiggsToTauNuHLTFilter.throw = False
 # https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1489.html
 if dataVersion.isMC():
     process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
-    process.totalKinematicsFilter.src.setProcessName(dataVersion.getTriggerProcess())
+    process.totalKinematicsFilter.src.setProcessName(dataVersion.getSimProcess())
     process.totalKinematicsFilterPath = cms.Path(
         process.totalKinematicsFilter
     )
