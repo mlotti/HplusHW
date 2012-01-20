@@ -61,6 +61,7 @@ set -e
 # 29.12.2011/S.Lehti       CMSSW_4_2_8_patch2 Commented removal of HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
 # 16.1.2012/S.Lehti        CMSSW_4_4_2_patch9 Updated tags to 44x
 # 19.1.2012/M.Kortelainen CMSSW_4_4_2_patch9 Updated PAT and tau tags
+# 20.1.2012/M.Kortelainen CMSSW_4_4_2_patch10 Updated and fixed PAT tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -76,12 +77,12 @@ eval $(scram runtime -sh)
 addpkg RecoTauTag/RecoTau         V01-02-14 # These two contain the continous HPS isolation
 addpkg RecoTauTag/Configuration   V01-02-10 # source: private e-mails
 # PAT
-addpkg DataFormats/PatCandidates   V06-04-30
-addpkg PhysicsTools/PatAlgos       V08-07-36-01
+addpkg DataFormats/PatCandidates   V06-04-31
+addpkg PhysicsTools/PatAlgos       V08-07-31-06
 addpkg PhysicsTools/PatExamples    V00-05-29
 addpkg PhysicsTools/PatUtils       V03-09-18-02
 addpkg PhysicsTools/SelectorUtils  V00-03-24-01
-addpkg CommonTools/ParticleFlow    V00-03-04
+addpkg CommonTools/ParticleFlow    V00-03-05
 addpkg RecoParticleFlow/PFProducer V14-07-13
 ##### New tau discriminators
 # https://hypernews.cern.ch/HyperNews/CMS/get/tauid/164/1.html
