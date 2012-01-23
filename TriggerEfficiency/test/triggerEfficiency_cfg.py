@@ -22,15 +22,16 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChTriggerEfficiency")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
     # dataVersion.getAnalysisDefaultFileCastor()
         #dataVersion.getAnalysisDefaultFileMadhatter()
 #        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_166374-167043_Prompt/Tau/Run2011A_PromptReco_v4_AOD_Single_166374_pattuple_v18/a074e5725328b3ec89273a9ce844bc40/pattuple_5_1_Med.root"
-        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_166374-167043_Prompt/Tau/PromptReco_v4_AOD_Single_166374_pattuple_v18_1/fdd51a0468635b24b4e8e11496951f46/pattuple_58_3_tsm.root"
+        #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_166374-167043_Prompt/Tau/PromptReco_v4_AOD_Single_166374_pattuple_v18_1/fdd51a0468635b24b4e8e11496951f46/pattuple_58_3_tsm.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_165970-167913_Prompt/Tau/Run2011A_PromptReco_v4_AOD_165970_pattuple_v19/04da9855e84c6c7decb23d071a74faa6/pattuple_64_1_IFM.root"
         #"file:/home/mkortela/hplus/CMSSW_4_2_8_patch2/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple/pattuple.root"
     )
 )
@@ -141,8 +142,6 @@ triggerBit = {
 
 process.triggerEfficiency = cms.EDAnalyzer("TriggerEfficiencyAnalyzer", 
     triggerResults      = cms.InputTag("TriggerResults","","HLT"),
-    l1ReadoutSrc        = cms.InputTag("gtDigis"),
-    l1ObjectSrc         = cms.InputTag("hltL1GtObjectMap"),
     patTriggerEvent     = cms.InputTag("patTriggerEvent"),
 #    triggerBit		= cms.string("HLT_IsoPFTau35_Trk20_MET45_v4"),
 #    triggerBit		= cms.string("HLT_IsoPFTau35_Trk20_MET60_v2"),
@@ -168,7 +167,7 @@ process.triggerEfficiency = cms.EDAnalyzer("TriggerEfficiencyAnalyzer",
     )
 )
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
-(sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.tauSelectionFilter.tauSelection, process.jetSelectionFilter.jetSelection)
+(sequence, type1Met, type2Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.tauSelectionFilter.tauSelection, process.jetSelectionFilter.jetSelection)
 process.commonSequence *= sequence
 process.triggerEfficiency.metType1Src = cms.untracked.InputTag(type1Met)
 

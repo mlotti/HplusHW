@@ -15,9 +15,6 @@
 #include "DataFormats/METReco/interface/MET.h"
 
 #include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
-#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
-#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMapRecord.h"
-#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMap.h"
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
 #include "DataFormats/PatCandidates/interface/TriggerObject.h"
 
@@ -68,8 +65,6 @@ class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
   };
 
   edm::InputTag triggerResults;
-  edm::InputTag l1ReadoutSrc;
-  edm::InputTag l1ObjectSrc;
   edm::InputTag patTriggerEventSrc;
   std::string   triggerBitName;
   std::vector<TriggerBit> l1Bits;
@@ -106,8 +101,6 @@ class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
 
 TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iConfig) :
     triggerResults(iConfig.getParameter<edm::InputTag>("triggerResults")),
-    l1ReadoutSrc(iConfig.getParameter<edm::InputTag>("l1ReadoutSrc")),
-    l1ObjectSrc(iConfig.getParameter<edm::InputTag>("l1ObjectSrc")),
     patTriggerEventSrc(iConfig.getParameter<edm::InputTag>("patTriggerEvent")),
     triggerBitName(iConfig.getParameter<std::string>("triggerBit")),
     hltPath(iConfig.getParameter<std::string>("hltPath")),
@@ -220,31 +213,15 @@ void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::Ev
         iEvent.getByLabel(patTriggerEventSrc, htrigger);
 
         // L1 bits
-        // Simplify to use PAT trigger when we have the algorithms available
-        edm::Handle<L1GlobalTriggerReadoutRecord> l1Readout;
-        iEvent.getByLabel(l1ReadoutSrc, l1Readout);
-
-        edm::Handle<L1GlobalTriggerObjectMapRecord> l1Objects;
-        iEvent.getByLabel(l1ObjectSrc, l1Objects);
-
-        const DecisionWord& gtDecisionWord = l1Readout->decisionWord();
-        const std::vector<L1GlobalTriggerObjectMap>& objMapVec = l1Objects->gtObjectMap();
+        const pat::TriggerAlgorithmRefVector l1algos = htrigger->acceptedAlgorithms();
         for(size_t i=0; i<l1Bits.size(); ++i) {
-          for (std::vector<L1GlobalTriggerObjectMap>::const_iterator itMap = objMapVec.begin();
-               itMap != objMapVec.end(); ++itMap) {
-            if(l1Bits[i].name == itMap->algoName()) {
-              l1Bits[i].value = gtDecisionWord[itMap->algoBitNumber()];
+          for(size_t j=0; j<l1algos.size(); ++j) {
+            if(l1Bits[i].name == l1algos[j]->name()) {
+              l1Bits[i].value = l1algos[j]->decision();
               break;
             }
           }
         }
-
-        /*
-        const pat::TriggerAlgorithmRefVector& l1algos = htrigger->algorithmRefs();
-        for(size_t i=0; i<l1algos.size(); ++i) {
-          std::cout << l1algos[i]->name() << std::endl;
-        }
-        */
 
         // L1 MET
         pat::TriggerObjectRefVector l1mets = htrigger->objects(trigger::TriggerL1ETM);
