@@ -42,6 +42,7 @@ def addPatOnTheFly(process, options, dataVersion,
                    doMcPreselection=False,
                    doTotalKinematicsFilter=False,
                    doHBHENoiseFilter=True, doPhysicsDeclared=False,
+                   calculateEventCleaning=False,
                    ):
     def setPatArg(args, name, value):
         if name in args:
@@ -172,13 +173,15 @@ def addPatOnTheFly(process, options, dataVersion,
 #            process.patSequence *= process.goodPrimaryVertices
     else:
         if dataVersion.isData():
-            process.eventPreSelection = HChDataSelection.addDataSelection(process, dataVersion, options)
+            process.eventPreSelection = HChDataSelection.addDataSelection(process, dataVersion, options, calculateEventCleaning)
 
         elif dataVersion.isMC() and doMcPreselection:
             process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
 
         pargs = plainPatArgs.copy()
         pargs2 = pf2patArgs.copy()
+
+        pargs["calculateEventCleaning"] = calculateEventCleaning
 
         argsList = []
         if doPlainPat:
@@ -319,7 +322,8 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
                 doPatCalo=True, doBTagging=True, doPatTauIsoDeposits=False,
                 doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None,
                 doMuonHLTMatching=True,
-                includePFCands=False):
+                includePFCands=False,
+                calculateEventCleaning=False):
     out = None
     outdict = process.outputModules_()
     if outdict.has_key("out"):
@@ -685,13 +689,14 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     # Build sequence
     sequence *= process.patDefaultSequence
 
-    # Event cleaning steps which require pat objects
-    # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Tracking_failure_filter
-    process.load('SandBox.Skims.trackingFailureFilter_cfi')
-    process.trackingFailureFilter.taggingMode = True
-    process.trackingFailureFilter.JetSource = "selectedPatJetsAK5PF"
-    process.trackingFailureFilter.VertexSource = "goodPrimaryVertices"
-    sequence *= process.trackingFailureFilter
+    if calculateEventCleaning:
+        # Event cleaning steps which require pat objects
+        # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Tracking_failure_filter
+        process.load('SandBox.Skims.trackingFailureFilter_cfi')
+        process.trackingFailureFilter.taggingMode = True
+        process.trackingFailureFilter.JetSource = "selectedPatJetsAK5PF"
+        process.trackingFailureFilter.VertexSource = "goodPrimaryVertices"
+        sequence *= process.trackingFailureFilter
 
     # Tau+HLT matching
     if doTauHLTMatching:

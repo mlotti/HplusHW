@@ -96,6 +96,7 @@ options.doPat=1
                                    plainPatArgs={"doTauHLTMatching": doTauHLTMatching,
                                                  "matchingTauTrigger": myTrigger},
                                    doHBHENoiseFilter=False, # Only save the HBHE result to event, don't filter
+                                   calculateEventCleaning=True, # This requires the tags from test/pattuple/checkoutTags.sh
                                    )
 
 process.out.outputCommands.extend([
