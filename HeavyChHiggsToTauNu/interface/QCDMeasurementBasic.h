@@ -67,7 +67,8 @@ namespace HPlus {
       TH1* hCtrlIdentifiedElectronPtAfterStandardSelections;
       TH1* hCtrlIdentifiedMuonPtAfterStandardSelections;
       TH1* hCtrlNjetsAfterStandardSelections;
-      TH1* hCtrlMET; // MET distribution
+      std::vector<TH1*> hCtrlNjets; // Nbjets in bins of tau pT
+      std::vector<TH1*> hCtrlMET; // Nbjets in bins of tau pT
       std::vector<TH1*> hCtrlNbjets; // Nbjets in bins of tau pT
       std::vector<TH1*> hCtrlDeltaPhi; // DeltaPhi in bins of tau pT
 

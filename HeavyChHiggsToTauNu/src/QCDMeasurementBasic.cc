@@ -343,9 +343,14 @@ namespace HPlus {
     hCtrlIdentifiedElectronPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "IdentifiedElectronPt_AfterStandardSelections", "IdentifiedElectronPt_AfterStandardSelections;Identified electron p_{T}, GeV/c;N_{events} / 1 GeV", 20, 0., 20.);;
     hCtrlIdentifiedMuonPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "IdentifiedMuonPt_AfterStandardSelections", "IdentifiedMuonPt_AfterStandardSelections;Identified muon p_{T}, GeV/c;N_{events} / 1 GeV", 20, 0., 20.);
     hCtrlNjetsAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "Njets_AfterStandardSelections", "Njets_AfterStandardSelections;Number of selected jets;N_{events}", 7, 3., 10.);
-    hCtrlMET = makeTH<TH1F>(myCtrlDir, "MET", "MET", 100, 0., 500.);
     std::stringstream myLabel;
     for (int i = 0; i < nTauPtBins; ++i) {
+      myLabel.str("");
+      myLabel << "Njets_taupTbin" << i;
+      hCtrlNjets.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 10, 0., 10.));
+      myLabel.str("");
+      myLabel << "MET_taupTbin" << i;
+      hCtrlMET.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 100, 0., 500.));
       myLabel.str("");
       myLabel << "NBjets_taupTbin" << i;
       hCtrlNbjets.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 10, 0., 10.));
@@ -448,9 +453,10 @@ namespace HPlus {
         tauCandidateData.getBestTauCandidateProngCount() == iTauIsolation;
     bool myPassedRtau = tauCandidateData.getBestTauCandidatePassedRtauStatus();
 
+    hCtrlNjets[tauPtBinIndex]->Fill(njets, weightAfterVertexReweight*trgEffData.getEventWeight());
     // MET leg ---------------------------------------------------------------
     // MET cut
-    hCtrlMET->Fill(METData.getSelectedMET()->et(), weightAfterVertexReweight*trgEffData.getEventWeight());
+    hCtrlMET[tauPtBinIndex]->Fill(METData.getSelectedMET()->et(), weightAfterVertexReweight*trgEffData.getEventWeight());
     if (METData.getSelectedMET()->et() > fMETCut) {
       hLeg1AfterMET->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
       if (myFakeTauStatus) hFakeTauLeg1AfterMET->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
