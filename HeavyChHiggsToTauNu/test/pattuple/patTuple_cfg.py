@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
-dataVersion="44Xmc"
+dataVersion="44XmcS6"
 #dataVersion="44Xdata"
 
 # Command line arguments (options) and DataVersion object
@@ -59,7 +59,7 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep edmTriggerResults_*_*_*",
 #        "keep triggerTriggerEvent_*_*_*", # the information is alread in full PAT trigger
         "keep L1GlobalTriggerReadoutRecord_*_*_*",   # needed for prescale provider
-        "keep L1GlobalTriggerObjectMapRecord_*_*_*", # needed for prescale provider
+#        "keep L1GlobalTriggerObjectMapRecord_*_*_*", # needed for prescale provider
         "keep *_conditionsInEdm_*_*",
         "keep edmMergeableCounter_*_*_*", # in lumi block
         "keep PileupSummaryInfos_*_*_*", # only in MC
