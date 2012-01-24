@@ -19,7 +19,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
-
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 
 def main():
     style = tdrstyle.TDRStyle()
@@ -32,22 +32,6 @@ def main():
     doPlots(2)
     doPlots(3)
 
-def isNotEmpty(string):
-    return string != ""
-
-def And(*args):
-    lst = filter(isNotEmpty, args)
-    return "("+"&&".join(lst)+")"
-
-def Not(arg):
-    if isNotEmpty(arg):
-        return "(!(%s))"%arg
-    else:
-        return ""
-
-def Or(*args):
-    lst = filter(isNotEmpty, args)
-    return "("+"||".join(lst)+")"
 
 def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
     ### Offline selection definition
