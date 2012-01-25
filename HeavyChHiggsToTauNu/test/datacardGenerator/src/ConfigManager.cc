@@ -387,6 +387,8 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
   std::string myMTPlot;
   std::vector< std::string > myQCDDataSource;
   std::vector< std::string > myQCDEWKSource;
+  std::vector< std::string > myScaleFactorHistoSource;
+  std::vector< std::string > myScaleFactorNormSource; 
   std::string myQCDHistoPrefix;
   std::string myQCDBasicSelectionsHisto;
   std::string myQCDMETLegHisto;
@@ -416,10 +418,14 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
         myFunction = parseString(str, myPos);
       } else if (myLabel == "counterHisto") {
         myCounterHisto = parseString(str, myPos);
-      } else if (myLabel == "histogram" || myLabel == "nominatorCounter" || myLabel == "counter") {
+      } else if (myLabel == "nominatorCounter" || myLabel == "counter") {
         myInput1 = parseString(str, myPos);
-      } else if (myLabel == "denominatorCounter" || myLabel == "normHisto") {
+      } else if (myLabel == "histograms") {
+        parseVectorString(str, myPos, myScaleFactorHistoSource);
+      } else if (myLabel == "denominatorCounter") {
         myInput2 = parseString(str, myPos);
+      } else if (myLabel == "normHistos") {
+        parseVectorString(str, myPos, myScaleFactorNormSource);
       } else if (myLabel == "lowerValue" || myLabel == "value" || myLabel == "scale") {
         myValue = parseNumber(str, myPos);
       } else if (myLabel == "upperValue") {
@@ -563,14 +569,14 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
         myFunctionStatus = false;
       }
     } else if (myFunction == "ScaleFactor") {
-      if (!myCounterHisto.size()) {
-        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'counterHisto' for function 'ScaleFactor'!" << std::endl;
+      if (!myScaleFactorHistoSource.size()) {
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'histograms' for function 'ScaleFactor'!" << std::endl;
         myFunctionStatus = false;
-      } else if (!myInput1.size()) {
-        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'histogram' for function 'ScaleFactor'!" << std::endl;
+      } else if (!myScaleFactorNormSource.size()) {
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'normHistos' for function 'ScaleFactor'!" << std::endl;
         myFunctionStatus = false;
-      } else if (!myInput2.size()) {
-        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'normHisto' for function 'ScaleFactor'!" << std::endl;
+      } else if (myScaleFactorHistoSource.size() != myScaleFactorNormSource.size()) {
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m Need to provide equal amount of arguments for 'histograms' and 'normHistos' for function 'ScaleFactor'!" << std::endl;
         myFunctionStatus = false;
       }
     } else if (myFunction == "Shape") {
@@ -633,9 +639,8 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
                 << ", nominatorCounter=" << '"' << "counterName" << '"'
                 << ", denominatorCounter=" << '"' << "counterName" << '"' << std::endl;
       std::cout << "  function=" << '"' << "ScaleFactor" << '"' 
-                << ", counterHisto=" << '"' << "counterHisto" << '"'
-                << ", histogram=" << '"' << "scaleFactorAbsUncertaintyHistogramNameWithPath" << '"'
-                << ", histogram=" << '"' << "scaleFactorAbsUncertaintyCountsHistogramNameWithPath" << '"' << std::endl;
+                << ", histograms={" << '"' << "scaleFactorAbsUncertaintyHistogramNameWithPath" << '"' << "[, ...]}, "
+                << ", normHistos={" << '"' << "scaleFactorAbsUncertaintyCountsHistogramNameWithPath" << '"' << "[, ...]} " <<  std::endl;
       std::cout << "  function=" << '"' << "Shape" << '"' 
                 << ", histoName=" << '"' << "histoName" << '"'
                 << ", upPrefix=" << '"' << "pathToUpHisto" << '"'
@@ -694,7 +699,7 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
     }
   } else if (myFunction == "ScaleFactor") {
     if (type == Extractable::kExtractableNuisance)
-      myExtractable = new ExtractableScaleFactor(myId, myDistribution, myDescription, myCounterHisto, myInput1, myInput2);
+      myExtractable = new ExtractableScaleFactor(myId, myDistribution, myDescription, myScaleFactorHistoSource, myScaleFactorNormSource);
     else {
       std::cout << "\033[0;41m\033[1;37mError:\033[0;0m function 'ScaleFactor' is only available for nuisance!" << std::endl;
       return false;

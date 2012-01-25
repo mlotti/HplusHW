@@ -288,7 +288,7 @@ void DatacardGenerator::generateRateLine(std::vector< DatasetGroup* >& datasetGr
         }
       }
     }
-    sResult << "\t" << std::fixed << std::setprecision(2) << myValue;
+    sResult << "\t" << std::fixed << std::setprecision(3) << myValue;
   }
   sResult << std::endl;
 }
