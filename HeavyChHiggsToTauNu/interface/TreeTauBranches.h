@@ -50,6 +50,7 @@ namespace HPlus {
     std::vector<int> fTausPdgId;
     std::vector<int> fTausMotherPdgId;
     std::vector<int> fTausGrandMotherPdgId;
+    std::vector<int> fTausDaughterPdgId;
   };
 }
 

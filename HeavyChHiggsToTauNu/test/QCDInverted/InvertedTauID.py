@@ -47,17 +47,18 @@ def SumFunction(x,par):
     return par[0]*TMath.Gaus(x[0],par[1],par[2],1) + par[3]*TMath.Exp(-x[0]*par[4])
 
 def EWKFunction(x,par,norm = 1,rejectPoints = 0):
-#    if not rejectPoints == 0:
-#        if (x[0] > 280 and x[0] < 300) or x[0] > 360:
+    if not rejectPoints == 0:
+#        if (x[0] > 280 and x[0] < 300):
+	if (x[0] > 400):
 #	if x[0] > 40 and x[0] < 60 :
 #	if x[0] > 240 and x[0] < 260:
 #	if  (x[0] > 180 and x[0] < 200) or (x[0] > 260 and x[0] < 320):
 #	if  (x[0] > 100 and x[0] < 120) or (x[0] > 180 and x[0] < 200):
 #	if  (x[0] > 60 and x[0] < 80) or (x[0] > 140 and x[0] < 160) or (x[0] > 180 and x[0] < 220) or (x[0] > 240 and x[0] < 360):
 #	if  (x[0] > 40 and x[0] < 60) or (x[0] > 80 and x[0] < 100) or (x[0] > 120 and x[0] < 140) or (x[0] > 160 and x[0] < 180):
-#            TF1.RejectPoint()
-#            return 0
-    value = 130
+            TF1.RejectPoint()
+            return 0
+    value = 150
     if x[0] < value:
 	return norm*par[0]*TMath.Gaus(x[0],par[1],par[2],1)
     C = norm*par[0]*TMath.Gaus(value,par[1],par[2],1)*TMath.Exp(value*par[3])
@@ -512,24 +513,24 @@ class InvertedTauID:
 	if self.label == "5060":
             theFit.SetParLimits(0,5,20)     
             theFit.SetParLimits(1,90,120)   
-            theFit.SetParLimits(2,30,50)
+            theFit.SetParLimits(2,20,50)
             theFit.SetParLimits(3,0.001,1)
 
         if self.label == "6070":
-            theFit.SetParLimits(0,5,20)
+            theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,90,150)
             theFit.SetParLimits(2,20,50)
             theFit.SetParLimits(3,0.001,1)
 
         if self.label == "7080":
-            theFit.SetParLimits(0,5,40)
-            theFit.SetParLimits(1,90,170)
-            theFit.SetParLimits(2,20,60)
+            theFit.SetParLimits(0,5,60)
+            theFit.SetParLimits(1,90,200)
+            theFit.SetParLimits(2,20,100)
             theFit.SetParLimits(3,0.001,1)
 
         if self.label == "80100":
             theFit.SetParLimits(0,5,50)
-            theFit.SetParLimits(1,90,170)
+            theFit.SetParLimits(1,50,170)
             theFit.SetParLimits(2,20,60)
             theFit.SetParLimits(3,0.001,1)
 
@@ -542,13 +543,13 @@ class InvertedTauID:
         if self.label == "120150":
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,60,170)
-            theFit.SetParLimits(2,10,60)
+            theFit.SetParLimits(2,10,100)
             theFit.SetParLimits(3,0.001,1)
 
         if self.label == "150":
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,70,170)
-            theFit.SetParLimits(2,20,60)
+            theFit.SetParLimits(2,20,100)
             theFit.SetParLimits(3,0.001,1)
 
 

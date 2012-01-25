@@ -56,6 +56,7 @@ namespace HPlus {
     fBaselineMetCounter(eventCounter.addCounter("Baseline, MET")),
     fBaselineBtagCounter(eventCounter.addCounter("Baseline, btagging")),
     fBaselineDphi160Counter(eventCounter.addCounter("Baseline, deltaPhi160")),
+    fBaselineDphi130Counter(eventCounter.addCounter("Baseline, deltaPhi130")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
     fTriggerScaleFactorCounter(eventCounter.addCounter("trigger scale factor")),
     fTauVetoAfterTauIDCounter(eventCounter.addCounter("Veto on isolated taus")),
@@ -67,7 +68,8 @@ namespace HPlus {
     fMETCounter(eventCounter.addCounter("MET")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fdeltaPhiTauMET10Counter(eventCounter.addCounter("deltaPhiTauMET lower limit")),
-    fdeltaPhiTauMET160Counter(eventCounter.addCounter("deltaPhiTauMET upper limit")),
+    fdeltaPhiTauMET160Counter(eventCounter.addCounter("deltaPhiTauMET160 limit")),
+    fdeltaPhiTauMET130Counter(eventCounter.addCounter("deltaPhiTauMET130 limit")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
     fdeltaPhiTauMET160FakeMetCounter(eventCounter.addCounter("deltaPhi160 and fake MET veto")),
     fTopRtauDeltaPhiFakeMETCounter(eventCounter.addCounter("TopRtauDeltaPhiFakeMET cuts")),
@@ -138,8 +140,10 @@ namespace HPlus {
     hTransverseMassDeltaPhiUpperCut = makeTH<TH1F>(*fs, "transverseMassDeltaPhiUpperCut", "transverseMassDeltaPhiUpperCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassWithRtauFakeMet = makeTH<TH1F>(*fs, "transverseMassWithRtauFakeMet", "transverseMassWithRtauFakeMet;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassWithRtau = makeTH<TH1F>(*fs, "transverseMassWithRtau", "transverseMassWithRtau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
-    hTransverseMassDeltaPhiUpperCutFakeMet =  makeTH<TH1F>(*fs, "transverseMassDeltaPhiUpperCutFakeMet", "transverseMassDeltaPhiUpperCutFakeMet;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.); 
-    hTransverseMassTopRtauDeltaPhiFakeMET =  makeTH<TH1F>(*fs, "transverseMassTopRtauDeltaPhiFakeMET", "transverseMassTopRtauDeltaPhiFakeMET;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassNoMetBtagRtauFakeMet = makeTH<TH1F>(*fs, "transverseMassNoMetBtagRtauFakeMet", "transverseMassNoMetBtagRtauFakeMet;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassNoMetBtagRtauFakeMetPhi = makeTH<TH1F>(*fs, "transverseMassNoMetBtagRtauFakeMetPhi", "transverseMassNoMetBtagRtauFakeMetPhi;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassDeltaPhi160 =  makeTH<TH1F>(*fs, "transverseMassDeltaPhi160", "transverseMassDeltaPhi160;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.); 
+    hTransverseMassDeltaPhi130 =  makeTH<TH1F>(*fs, "transverseMassDeltaPhi130", "transverseMassDeltaPhi130;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassTopDeltaPhiFakeMET =  makeTH<TH1F>(*fs, "transverseMassTopDeltaPhiFakeMET", "transverseMassTopDeltaPhiFakeMET;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassRtauDeltaPhiFakeMET = makeTH<TH1F>(*fs, "transverseMassRtauDeltaPhiFakeMET", "transverseMassRtauDeltaPhiFakeMET;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassBtag33RtauDeltaPhiFakeMET = makeTH<TH1F>(*fs, "transverseMassBtag33RtauDeltaPhiFakeMET", "transverseMassBtag33RtauDeltaPhiFakeMET;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
@@ -416,6 +420,7 @@ namespace HPlus {
 		increment(fBaselineBtagCounter);
 		if ( deltaPhi*57.3 < 160) {
 		  increment(fBaselineDphi160Counter);
+		if ( deltaPhi*57.3 < 130) increment(fBaselineDphi130Counter);
 		  hMETBaselineTauIdBtagDphi->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 	      
 		}
 	      }
@@ -637,8 +642,8 @@ namespace HPlus {
       if (tauData.getBestTauCandidatePassedRtauStatus() ) {
 	hTransverseMassNoMetBtagRtau->Fill(transverseMass, fEventWeight.getWeight());
 	if(fakeMETData.passedEvent()) {
-	  hTransverseMassNoMetBtagRtauFakeMet->Fill(transverseMass, fEventWeight.getWeight());
-	  if(deltaPhi*57.3 < 135 ) hTransverseMassNoMetBtagRtauFakeMetPhi->Fill(transverseMass, fEventWeight.getWeight());
+	  //      	  hTransverseMassNoMetBtagRtauFakeMet->Fill(transverseMass, fEventWeight.getWeight());
+	  //       	  if(deltaPhi*57.3 < 135 ) hTransverseMassNoMetBtagRtauFakeMetPhi->Fill(transverseMass, fEventWeight.getWeight());
 	}
       }
     } 
@@ -697,6 +702,7 @@ namespace HPlus {
 
     if ( deltaPhi*57.3 < 160 ) {
       hMTInvertedTauIdJetPhi->Fill(transverseMass, fEventWeight.getWeight()); 
+      increment(fdeltaPhiTauMET160Counter);
       if ( tauData.getCleanedTauCandidates()[0]->pt() > 150  ) hMTInvertedTauIdJetPhi150->Fill(transverseMass, fEventWeight.getWeight()); 
       if ( tauData.getCleanedTauCandidates()[0]->pt() > 120 && tauData.getCleanedTauCandidates()[0]->pt() < 150 ) hMTInvertedTauIdJetPhi120150->Fill(transverseMass, fEventWeight.getWeight()); 
       if ( tauData.getCleanedTauCandidates()[0]->pt() > 100 && tauData.getCleanedTauCandidates()[0]->pt() < 120 ) hMTInvertedTauIdJetPhi100120->Fill(transverseMass, fEventWeight.getWeight()); 
@@ -708,7 +714,8 @@ namespace HPlus {
     }
 
     if ( deltaPhi*57.3 < 130 ) {
-      hMTInvertedTauId130Phi->Fill(transverseMass, fEventWeight.getWeight()); 
+      hMTInvertedTauId130Phi->Fill(transverseMass, fEventWeight.getWeight());
+      increment(fdeltaPhiTauMET130Counter); 
       if ( tauData.getCleanedTauCandidates()[0]->pt() > 150  ) hMTInvertedTauIdJetPhi150->Fill(transverseMass, fEventWeight.getWeight()); 
       if ( tauData.getCleanedTauCandidates()[0]->pt() > 120 && tauData.getCleanedTauCandidates()[0]->pt() < 150 ) hMTInvertedTauId130Phi120150->Fill(transverseMass, fEventWeight.getWeight()); 
       if ( tauData.getCleanedTauCandidates()[0]->pt() > 100 && tauData.getCleanedTauCandidates()[0]->pt() < 120 ) hMTInvertedTauId130Phi100120->Fill(transverseMass, fEventWeight.getWeight()); 
@@ -720,12 +727,12 @@ namespace HPlus {
     }
 
 
+
     //    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getCleanedTauCandidates()[0]), *(metData.getSelectedMET()));
     hDeltaPhi->Fill(deltaPhi*57.3, fEventWeight.getWeight());
     if ( deltaPhi*57.3 > 10) increment(fdeltaPhiTauMET10Counter); 
  
-    if ( deltaPhi*57.3 < 130) {
-      increment(fdeltaPhiTauMET160Counter);
+    if ( deltaPhi*57.3 < 160) {
       hTransverseMassDeltaPhiUpperCut->Fill(transverseMass, fEventWeight.getWeight());  
     }     
 
@@ -735,15 +742,15 @@ namespace HPlus {
       hDeltaPhiJetMet->Fill(deltaPhi*57.3, fEventWeight.getWeight());
     }
 
-    hTransverseMassBeforeFakeMet->Fill(transverseMass, fEventWeight.getWeight());
+    //    hTransverseMassBeforeFakeMet->Fill(transverseMass, fEventWeight.getWeight());
     hSelectedTauRtauAfterCuts->Fill(tauData.getRtauOfBestTauCandidate(), fEventWeight.getWeight());
     hSelectedTauEtAfterCuts->Fill(tauData.getCleanedTauCandidates()[0]->pt(), fEventWeight.getWeight());
     hSelectedTauEtaAfterCuts->Fill(tauData.getCleanedTauCandidates()[0]->eta(), fEventWeight.getWeight());
     hMetAfterCuts->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
-    if(tauData.getRtauOfSelectedTau() < 0.8 ) return true;
+    if(tauData.getRtauOfSelectedTau() < 0.8 ) return false;
 
-
+    return false;
 
    // top mass with possible event cuts
     if (TopSelectionData.passedEvent() ) {
@@ -764,7 +771,7 @@ namespace HPlus {
       hTransverseMass->Fill(transverseMass, fEventWeight.getWeight());
       if ( deltaPhi*57.3 < 135) {
 	increment(fdeltaPhiTauMET160FakeMetCounter);
-	hTransverseMassDeltaPhiUpperCutFakeMet->Fill(transverseMass, fEventWeight.getWeight());  
+	//	hTransverseMassDeltaPhiUpperCutFakeMet->Fill(transverseMass, fEventWeight.getWeight());  
       } 
     }
     //hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());

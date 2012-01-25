@@ -119,6 +119,9 @@ namespace HPlus {
         dataValue = dataValue / totalLuminosity;
         dataUncertaintySquared = dataUncertaintySquared / (totalLuminosity*totalLuminosity);
       }
+      fEffDataAverageValues.push_back(dataValue);
+      fEffDataAverageUncertainties.push_back(std::sqrt(dataUncertaintySquared));
+
       double dataRelativeUncertainty = std::sqrt(dataUncertaintySquared)/dataValue;
 
       double mcValue = fEffMCValues[i];
@@ -210,6 +213,24 @@ namespace HPlus {
     return fCurrentRunData->uncertainties[i];
   }
 
+  double TriggerEfficiencyScaleFactor::dataAverageEfficiency(const pat::Tau& tau) const {
+    return dataAverageEfficiency(index(tau));
+  }
+  double TriggerEfficiencyScaleFactor::dataAverageEfficiency(size_t i) const {
+    return fEffDataAverageValues[i];
+  }
+  double TriggerEfficiencyScaleFactor::dataAverageEfficiencyRelativeUncertainty(const pat::Tau& tau) const {
+    size_t i = index(tau);
+    return fEffDataAverageUncertainties[i] / fEffDataAverageValues[i];
+  }
+  double TriggerEfficiencyScaleFactor::dataAverageEfficiencyAbsoluteUncertainty(const pat::Tau& tau) const {
+    return dataAverageEfficiencyAbsoluteUncertainty(index(tau.pt()));
+  }
+  double TriggerEfficiencyScaleFactor::dataAverageEfficiencyAbsoluteUncertainty(size_t i) const {
+    return fEffDataAverageUncertainties[i];
+  }
+
+
   double TriggerEfficiencyScaleFactor::mcEfficiency(const pat::Tau& tau) const {
     return mcEfficiency(index(tau));
   }
@@ -264,9 +285,19 @@ namespace HPlus {
         fWeightRelUnc = dataEfficiencyRelativeUncertainty(tau);
       }
       else {
+        // Efficiency mode is needed only for embedding, and in there
+        // for MC using the luminosity-averaged efficiency from data
+        // makes more sense than the efficiency of MC, because the
+        // comparison will always be with respect to the efficiency of
+        // data.
+        fWeight = dataAverageEfficiency(tau);
+        fWeightAbsUnc = dataAverageEfficiencyAbsoluteUncertainty(tau);
+        fWeightRelUnc = dataAverageEfficiencyRelativeUncertainty(tau);
+        /*
         fWeight = mcEfficiency(tau);
         fWeightAbsUnc = mcEfficiencyAbsoluteUncertainty(tau);
         fWeightRelUnc = mcEfficiencyRelativeUncertainty(tau);
+        */
       }
     }
     fEventWeight.multiplyWeight(fWeight);

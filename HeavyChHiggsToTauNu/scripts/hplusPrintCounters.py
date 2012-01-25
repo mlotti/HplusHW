@@ -47,7 +47,7 @@ def main(opts):
         print "Printing mode '%s' doesn't exist! The following ones are available 'events', 'xsect', 'eff'" % opts.mode
         return 1
 
-    cellFormat = counter.CellFormatText(valueOnly=opts.valueOnly)
+    cellFormat = counter.CellFormatText(valueOnly=opts.valueOnly, valueFormat=opts.format)
     formatFunc = lambda table: table.format(counter.TableFormatText(cellFormat))
     csvSplitter = counter.TableSplitter([" +- ", " +", " -"])
     if opts.csv:
@@ -91,6 +91,8 @@ if __name__ == "__main__":
 #                      help="Output format; available: 'text' (default: 'text')")
     parser.add_option("--mainCounterOnly", dest="mainCounterOnly", action="store_true", default=False,
                       help="By default the main counter and the subcounters are all printed. With this option only the main counter is printed")
+    parser.add_option("--format", dest="format", default="%.1f",
+                       help="Value format string (default: '%.1f')")
     parser.add_option("--lumifile", dest="lumifile", type="string", default="lumi.json",
                       help="The JSON file to contain the dataset integrated luminosities")
     parser.add_option("--noinfo", dest="printInfo", action="store_false", default=True,

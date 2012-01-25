@@ -3,6 +3,12 @@
 # run here ROOT script to produce br limit plots 
 # and Python script to produce tan(beta) plots
 
+if ( !(-e mycmsswlink) ) then
+  set MYCMSSWVER = CMSSW_4_2_8_patch7
+  cmsrel ${MYCMSSWVER}
+  ln -s ${MYCMSSWVER} mycmsswlink
+endif
+
 # set CMSSW variables to make possible to run ROOT
 cd mycmsswlink/src
 cmsenv
@@ -26,4 +32,4 @@ cd ../..
 ./mkBrLimits_processTanbPlots.py
 ./mkBrLimits_processTanbPlots.py -ma
 
-echo Tan(beta) plots ready!
+echo TanB plots ready!

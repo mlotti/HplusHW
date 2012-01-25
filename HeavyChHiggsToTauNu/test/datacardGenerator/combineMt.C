@@ -3,7 +3,7 @@ void plot(int mass) {
   //std::string infile = "EPS_data_nodeltaphi/hplus_100.root";
   //std::string infile = "EPS_data_deltaphi160/hplus_100.root";
   std::stringstream s;
-  s << "hplus" << mass << ".root";
+  s << "hplushadronic" << mass << ".root";
 
   std::string infile = s.str();
   double br = 0.05;
@@ -28,7 +28,7 @@ void plot(int mass) {
   ci = TColor::GetColor("#993399");
   ewktau->SetFillColor(ci);
   ewktau->SetLineWidth(0);
-  TH1* qcd = (TH1*)f->Get("QCD");
+  TH1* qcd = (TH1*)f->Get("QCDInv");
   ci = TColor::GetColor("#ffcc33");
   qcd->SetFillColor(ci);
   qcd->SetLineWidth(0);

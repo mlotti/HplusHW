@@ -25,7 +25,6 @@ namespace {
     // Do first comparisons of the isolation discriminators, because
     // they are bullet proof way of using exactly the same isolation
     // defitions as in the discriminators
-
     if(a->tauID("byTightIsolation") > 0.5 && b->tauID("byTightIsolation") < 0.5)
       return true;
 
@@ -56,6 +55,56 @@ namespace {
     // us, it should be more or less the same as the official
     // discriminators, but it's possible that it's not.
     return a->userFloat("byTightChargedMaxPt") < b->userFloat("byTightChargedMaxPt");
+  }
+
+  bool isolationProngRtauLessThan(const edm::Ptr<pat::Tau>& a, const edm::Ptr<pat::Tau>& b) {
+    // Return true if a becomes before b, false if b becomes before a
+    
+    // Do first comparisons of the isolation discriminators, because
+    // they are bullet proof way of using exactly the same isolation
+    // defitions as in the discriminators
+    if(a->tauID("byTightIsolation") > 0.5 && b->tauID("byTightIsolation") < 0.5)
+      return true;
+
+    if(a->tauID("byMediumIsolation") > 0.5) {
+      if(b->tauID("byTightIsolation") > 0.5)
+        return false;
+      if(b->tauID("byMediumIsolation") < 0.5)
+        return true;
+    }
+
+    if(a->tauID("byLooseIsolation") > 0.5) {
+      // assume that if tau is medium isolated, it is also tight isolated
+      if(b->tauID("byMediumIsolation") > 0.5)
+        return false;
+      if(b->tauID("byLooseIsolation") < 0.5)
+        return true;
+    }
+
+    if(a->tauID("byVLooseIsolation") > 0.5) {
+      if(b->tauID("byLooseIsolation") > 0.5)
+        return false;
+      if(b->tauID("byVLooseIsolation") < 0.5)
+        return true;
+
+    }
+
+    // At this point bot a and b are in the same isolation class. Next
+    // see, if either is one prong
+    size_t aProng = a->signalPFChargedHadrCands().size();
+    size_t bProng = b->signalPFChargedHadrCands().size();
+
+    if(aProng == 1 && bProng != 1)
+      return true;
+    if(aProng != 1 && bProng == 1)
+      return false;
+
+    // Either a and b are both one prong, or neither is. Do final
+    // comparison with Rtau.
+    double aRtau = a->leadPFChargedHadrCand()->p() / a->p();
+    double bRtau = b->leadPFChargedHadrCand()->p() / b->p();
+
+    return aRtau < bRtau;
   }
 }
 
@@ -471,8 +520,10 @@ namespace HPlus {
       tmpSelectedTaus.push_back(iTau);
     }
     // Sort taus in an order of isolation, most isolated first
-    //std::sort(tmpCleanedTauCandidates.begin(), tmpCleanedTauCandidates.end(), isolationLessThan);
-    //std::sort(tmpSelectedTaus.begin(), tmpSelectedTaus.end(), isolationLessThan);
+    std::sort(tmpCleanedTauCandidates.begin(), tmpCleanedTauCandidates.end(), isolationLessThan); // sort by isolation only
+    std::sort(tmpSelectedTaus.begin(), tmpSelectedTaus.end(), isolationLessThan);
+    //std::sort(tmpCleanedTauCandidates.begin(), tmpCleanedTauCandidates.end(), isolationProngRtauLessThan); // sort by isolation, prong and Rtau
+    //std::sort(tmpSelectedTaus.begin(), tmpSelectedTaus.end(), isolationProngRtauLessThan);
     for(size_t i=0; i<tmpCleanedTauCandidates.size(); ++i)
       fCleanedTauCandidates.push_back(tmpCleanedTauCandidates[i]);
     for(size_t i=0; i<tmpSelectedTaus.size(); ++i)

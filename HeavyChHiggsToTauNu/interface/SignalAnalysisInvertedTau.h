@@ -117,6 +117,7 @@ namespace HPlus {
     Count fBaselineMetCounter;
     Count fBaselineBtagCounter;
     Count fBaselineDphi160Counter;
+    Count fBaselineDphi130Counter;
     Count fOneTauCounter;
     Count fTriggerScaleFactorCounter;
     Count fTauVetoAfterTauIDCounter;
@@ -129,6 +130,7 @@ namespace HPlus {
     Count fBTaggingCounter;
     Count fdeltaPhiTauMET10Counter;
     Count fdeltaPhiTauMET160Counter;
+    Count fdeltaPhiTauMET130Counter;
     Count fFakeMETVetoCounter;
     Count fdeltaPhiTauMET160FakeMetCounter;
     Count fTopRtauDeltaPhiFakeMETCounter;
@@ -188,6 +190,8 @@ namespace HPlus {
     TH1 *hTransverseMassRtauDeltaPhiFakeMET;
     TH1 *hTransverseMassBtag33RtauDeltaPhiFakeMET;
     TH1 *hTransverseMassBtag33;
+    TH1 *hTransverseMassDeltaPhi130;
+    TH1 *hTransverseMassDeltaPhi160;
     TH1 *hDeltaPhi;
     TH1 *hDeltaPhiJetMet;
     TH1 *hAlphaT;

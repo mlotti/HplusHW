@@ -77,11 +77,11 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-    "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v18/pattuple_v18_TTJets_TuneZ2_Summer11_9_1_bfN.root"
+#    "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v18/pattuple_v18_TTJets_TuneZ2_Summer11_9_1_bfN.root"
     # For testing in lxplus
     #dataVersion.getAnalysisDefaultFileCastor()
     # For testing in jade
-    #dataVersion.getAnalysisDefaultFileMadhatter()
+    dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
     )
 )
@@ -161,28 +161,13 @@ if doTauEmbeddingLikePreselection:
     additionalCounters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.commonSequence, param))
 
 # Signal analysis module for the "golden analysis"
-process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilter",
-    trigger = param.trigger,
-    triggerEfficiencyScaleFactor = param.triggerEfficiencyScaleFactor,
-    primaryVertexSelection = param.primaryVertexSelection,
-    GlobalElectronVeto = param.GlobalElectronVeto,
-    GlobalMuonVeto = param.GlobalMuonVeto,
-#    GlobalMuonVeto = param.NonIsolatedMuonVeto,
-    # Change default tau algorithm here as needed
-    tauSelection = param.tauSelectionHPSTightTauBased,
-    jetSelection = param.jetSelection,
-    MET = param.MET,
-    bTagging = param.bTagging,
-    fakeMETVeto = param.fakeMETVeto,
-    jetTauInvMass = param.jetTauInvMass,
-    topSelection = param.topSelection,
-    forwardJetVeto = param.forwardJetVeto,
-    transverseMassCut = param.transverseMassCut,
-    EvtTopology = param.EvtTopology,
-    vertexWeight = param.vertexWeight,
-    GenParticleAnalysis = param.GenParticleAnalysis,
-    Tree = param.tree,
-)
+import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
+process.signalAnalysis = signalAnalysis.createEDFilter(param)
+# process.signalAnalysis.GlobalMuonVeto = param.NonIsolatedMuonVeto
+# Change default tau algorithm here if needed
+#process.signalAnalysis.tauSelection.tauSelectionHPSTightTauBased # HPS Tight is the default
+
+# Add type 1 MET
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
 (sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.signalAnalysis.tauSelection, process.signalAnalysis.jetSelection)
 process.commonSequence *= sequence

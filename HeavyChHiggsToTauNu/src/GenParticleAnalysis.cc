@@ -177,7 +177,7 @@ namespace HPlus {
       if (tauFromHiggs ) {
 	hptVisibleTau1pHp->Fill(tau->pt(), fEventWeight.getWeight());
 	hEtaVisibleTau1pHp->Fill(tau->eta(), fEventWeight.getWeight());
-	if ( tau->pt() > 40 && fabs(tau->eta()) < 2.3 ) {
+	if ( tau->pt() > 40 && ptmax > 20 && fabs(tau->eta()) < 2.3 ) {
 	  hRtau1pHp->Fill(Rtau, fEventWeight.getWeight());
 	  hLeadingTrack1pHp->Fill(ptmax, fEventWeight.getWeight());
 	  hThetaCM1pHp->Fill(thetaCM, fEventWeight.getWeight()); 
@@ -188,7 +188,7 @@ namespace HPlus {
       if (tauFromW) {
 	hptVisibleTau1pW->Fill(tau->pt(), fEventWeight.getWeight());
 	hEtaVisibleTau1pW->Fill(tau->eta(), fEventWeight.getWeight());
-	if ( tau->pt() > 40 && fabs(tau->eta()) < 2.3 ) {
+	if ( tau->pt() > 40 && ptmax > 20 && fabs(tau->eta()) < 2.3 ) {
 	  hRtau1pW->Fill(Rtau, fEventWeight.getWeight());
 	  hLeadingTrack1pW->Fill(ptmax, fEventWeight.getWeight());
 	  hThetaCM1pW->Fill(thetaCM, fEventWeight.getWeight()); 
@@ -246,13 +246,13 @@ namespace HPlus {
       }
 
       if (tauFromHiggs ) {
-	if ( tau->pt() > 40 && fabs(tau->eta()) < 2.3 ) {
+	if ( tau->pt() > 40 && ptmax > 20 && fabs(tau->eta()) < 2.3 ) {
 	  hRtau13pHp->Fill(Rtau, fEventWeight.getWeight());
 	  hptVisibleTau13pHp->Fill(tau->pt(), fEventWeight.getWeight());
 	}
       }
       if (tauFromW) {
-	if ( tau->pt() > 40 && fabs(tau->eta()) < 2.3 ) {
+	if ( tau->pt() > 40 && ptmax > 20 && fabs(tau->eta()) < 2.3 ) {
 	  hRtau13pW->Fill(Rtau, fEventWeight.getWeight());
 	  hptVisibleTau13pW->Fill(tau->pt(), fEventWeight.getWeight());
 	}
@@ -305,13 +305,13 @@ namespace HPlus {
       //     std::cout << " pion 1/3 prong " <<  ptmax << " Rtau  " <<  Rtau << std::endl;
       
       if (tauFromHiggs ) {
-	if ( tau->pt() > 40 && fabs(tau->eta()) < 2.3 ) {
+	if ( tau->pt() > 40 && ptmax > 20 && fabs(tau->eta()) < 2.3 ) {
 	  hRtau3pHp->Fill(Rtau, fEventWeight.getWeight());
 	  hptVisibleTau3pHp->Fill(tau->pt(), fEventWeight.getWeight());
 	}
       }
       if (tauFromW) {
-	if ( tau->pt() > 40 && fabs(tau->eta()) < 2.3 ) {
+	if ( tau->pt() > 40 && ptmax > 20 && fabs(tau->eta()) < 2.3 ) {
 	  hRtau3pW->Fill(Rtau, fEventWeight.getWeight());
 	  hptVisibleTau3pW->Fill(tau->pt(), fEventWeight.getWeight());
 	}
