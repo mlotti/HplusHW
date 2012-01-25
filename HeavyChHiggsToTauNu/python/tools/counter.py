@@ -1004,6 +1004,14 @@ class Counter:
         for c in self.counters:
             func(c)
 
+    def removeColumns(self, datasetNames):
+        i = 0
+        while i < len(self.counters):
+            if self.counters[i].getName() in datasetNames:
+                del self.counters[i]
+            else:
+                i += 1
+
     def appendRow(self, rowName, treeDraw):
         self.forEachDataset(lambda x: x.appendRow(rowName, treeDraw))
 
@@ -1086,6 +1094,9 @@ class EventCounter:
                 pass
 
         self.normalization = "None"
+
+    def removeColumns(self, datasetNames):
+        self._forEachCounter(lambda c: c.removeColumns(datasetNames))
 
     def _forEachCounter(self, func):
         func(self.mainCounter)
