@@ -56,7 +56,8 @@ dirEmbs = [
     ]
 
 #    dirSig = "../../multicrab_compareEmbedding_Run2011A_111201_143238
-dirSig = "../multicrab_compareEmbedding_Run2011A_111219_185818"
+#dirSig = "../multicrab_compareEmbedding_Run2011A_111219_185818"
+dirSig = "../multicrab_compareEmbedding_Run2011A_120116_154158"
 
 def main():
     datasetsEmb = DatasetsMany(dirEmbs, analysisEmb+"Counters")
@@ -339,6 +340,12 @@ class DatasetsDYCorrection:
         self.analysisEmb = analysisEmb
         self.analysisSig = analysisSig
 
+    def _replaceSigName(self, name):
+        if isinstance(name, basestring):
+            return name.replace(self.analysisEmb, analysisSig)
+        else:
+            return name.clone(tree=lambda name: name.replace(self.analysisEmb, self.analysisSig))
+
     def forEach(self, function):
         self.datasetsEmb.forEach(function)
         function(self.datasetsSig)
@@ -364,11 +371,7 @@ class DatasetsDYCorrection:
             return self.datasetsEmb.getHistogram(datasetName, name)
 
         # Ugly hack
-        sigName = name
-        if isinstance(sigName, basestring):
-            sigName = sigName.replace(self.analysisEmb, self.analysisSig)
-        else:
-            sigName = sigName.clone(tree=sigName.tree.replace(self.analysisEmb, self.analysisSig))
+        sigName = self._replaceSigName(name)
 
         # Get properly normalized embedded data, embedded DY and normal DY histograms
         (embDataHisto, tmp) = self.datasetsEmb.getHistogram(datasetName, name)
@@ -426,6 +429,94 @@ class DatasetsDYCorrection:
 
         return column
 
+
+class EventCounterMany:
+    def __init__(self, datasetsMany, *args, **kwargs):
+        self.eventCounters = []
+        for dsMgr in datasetsMany.datasetManagers:
+            ec = counter.EventCounter(dsMgr, *args, **kwargs)
+            ec.normalizeMCToLuminosity(datasetsMany.getLuminosity())
+            tauEmbedding.scaleNormalization(ec)
+            self.eventCounters.append(ec)
+
+    def mainCounterAppendRow(self, *args, **kwargs):
+        for ec in self.eventCounters:
+            ec.getMainCounter().appendRow(*args, **kwargs)
+
+    def subCounterAppendRow(self, name, *args, **kwargs):
+        for ec in self.eventCounters:
+            ec.getSubCounter(name).appendRow(*args, **kwargs)
+
+    def getMainCounterTable(self):
+        table = counter.meanTable([ec.getMainCounterTable() for ec in self.eventCounters])
+        return table
+
+    def getSubCounterTable(self, name):
+        table = counter.meanTable([ec.getSubCounterTable(name) for ec in self.eventCounters])
+        return table
+
+    def getNormalizationString(self):
+        return self.eventCounters[0].getNormalizationString()
+    
+
+class EventCounterDYCorrection:
+    def __init__(self, datasetsDYCorrection, counters=None, **kwargs):
+        self.datasetsDYCorrection = datasetsDYCorrection
+
+        countersSig = counters
+        if countersSig != None:
+            countersSig = datasetsDYCorrection._replaceSigName(countersSig)
+
+        self.eventCounterEmb = EventCounterMany(datasetsDYCorrection.datasetsEmb, counters=counters, **kwargs)
+        self.eventCounterSig = counter.EventCounter(datasetsDYCorrection.datasetsSig, counters=countersSig, **kwargs)
+        self.eventCounterSig.normalizeMCToLuminosity(datasetsDYCorrection.datasetsEmb.getLuminosity())
+
+    def mainCounterAppendRow(self, rowName, treeDraw):
+        treeDrawSig = self.datasetsDYCorrection._replaceSigName(treeDraw)
+        self.eventCounterEmb.mainCounterAppendRow(rowName, treeDraw)
+        self.eventCounterSig.getMainCounter().appendRow(rowName, treeDrawSig)
+
+    def subCounterAppendRow(self, name, rowName, treeDraw):
+        treeDrawSig = self.datasetsDYCorrection._replaceSigName(treeDraw)
+        self.eventCounterEmb.subCounterAppendRow(name, rowName, treeDraw)
+        self.eventCounterSig.getSubCounter(name).appendRow(rowName, treeDrawSig)
+
+    def _correctColumn(self, table, name, correction):
+        columnNames = table.getColumnNames()
+        i = columnNames.index(name)
+        col = table.getColumn(index=i)
+        table.removeColumn(i)
+        col = counter.sumColumn(name, [col, correction])
+        table.insertColumn(i, col)
+
+    def getMainCounterTable(self):
+        table = self.eventCounterEmb.getMainCounterTable()
+        sigTable = self.eventCounterSig.getMainCounterTable()
+        
+        sigDyColumn = sigTable.getColumn(name="DYJetsToLL")
+        embDyColumn = table.getColumn(name="DYJetsToLL")
+        dyCorrection = counter.subtractColumn("Correction", sigDyColumn, embDyColumn)
+
+        if "Data" in table.getColumnNames():
+            self._correctColumn(table, "Data", dyCorrection)
+        self._correctColumn(table, "DYJetsToLL", dyCorrection)
+
+        return table
+
+    def getSubCounterTable(self, name):
+        table = self.eventCounterEmb.getSubCounterTable(name)
+        sigTable = self.eventCounterSig.getSubCounterTable(name)
+        
+        sigDyColumn = sigTable.getColumn(name="DYJetsToLL")
+        embDyColumn = table.getColumn(name="DYJetsToLL")
+        dyCorrection = counter.subtractColumn("Correction", sigDyColumn, embDyColumn)
+
+        if "Data" in table.getColumnNames():
+            self._correctColumn(table, "Data", dyCorrection)
+        self._correctColumn(table, "DYJetsToLL", dyCorrection)
+
+        return table
+            
 
 if __name__ == "__main__":
     main()

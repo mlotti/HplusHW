@@ -78,15 +78,15 @@ namespace HPlus {
         if (reco::deltaR(p, tau.p4()) < 0.1) {
           if (p.pt() > 10.) {
             //std::cout << "  match found, pid=" << p.pdgId() << " eta=" << std::abs(p.eta()) << " pt=" << p.pt() << std::endl;
-            if (std::abs(p.pdgId()) == 11) {
+            if (std::abs(p.pdgId()) == 15) {
+              isMCTau = true;
+              myTauIndex = i;
+            } else if (std::abs(p.pdgId()) == 11) {
               isMCElectron = true;
               myElectronIndex = i;
             } else if (std::abs(p.pdgId()) == 13) {
               isMCMuon = true;
               myMuIndex = i;
-            } else if (std::abs(p.pdgId()) == 15) {
-              isMCTau = true;
-              myTauIndex = i;
             }
           }
         }

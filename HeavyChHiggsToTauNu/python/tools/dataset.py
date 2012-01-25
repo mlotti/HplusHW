@@ -405,6 +405,12 @@ class TreeDraw:
                 "selection": self.selection,
                 "weight": self.weight}
         args.update(kwargs)
+
+        # Allow modification functions
+        for name, value in args.items():
+            if hasattr(value, "__call__"):
+                args[name] = value(getattr(self, name))
+
         return TreeDraw(**args)
 
     def draw(self, rootFile, datasetName):

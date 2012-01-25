@@ -62,6 +62,7 @@ def main():
 
     doPlots(datasetsEmb, datasetsSig, "TTJets")
     doPlots(datasetsEmb, datasetsSig, "WJets")
+    doPlots(datasetsEmb, datasetsSig, "W3Jets")
     doPlots(datasetsEmb, datasetsSig, "DYJetsToLL")
     doPlots(datasetsEmb, datasetsSig, "SingleTop")
     doPlots(datasetsEmb, datasetsSig, "Diboson")
@@ -174,6 +175,8 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
         opts["ymax"] = 0.9
     elif datasetName == "WJets":
         opts["ymax"] = 35
+    elif datasetName == "W3Jets":
+        opts["ymax"] = 10
     drawPlot(createPlot(tdMt.clone(selection=selection)), prefix+"_transverseMass_4AfterDeltaPhi160", "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts2={"ymin": 0, "ymax": 3}, opts=opts, ylabel="Events / %.0f GeV/c^{2}", log=False, textFunction=textFunction)
 
 def doPlotsData(datasetsEmb):
