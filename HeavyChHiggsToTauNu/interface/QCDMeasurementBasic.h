@@ -56,17 +56,16 @@ namespace HPlus {
       double fDeltaPhiTauMETCut;
       int iTauIsolation;
       // Control plots
-      TH1* hCtrlSelectedTauPtAfterStandardSelections;
-      TH1* hCtrlSelectedTauEtaAfterStandardSelections;
-      TH1* hCtrlSelectedTauPhiAfterStandardSelections;
-      TH2* hCtrlSelectedTauEtaVsPhiAfterStandardSelections;
-      TH1* hCtrlSelectedTauLeadingTrkPtAfterStandardSelections;
-      TH1* hCtrlSelectedTauRtauAfterStandardSelections;
-      TH1* hCtrlSelectedTauPAfterStandardSelections;
-      TH1* hCtrlSelectedTauLeadingTrkPAfterStandardSelections;
-      TH1* hCtrlIdentifiedElectronPtAfterStandardSelections;
-      TH1* hCtrlIdentifiedMuonPtAfterStandardSelections;
-      TH1* hCtrlNjetsAfterStandardSelections;
+      std::vector<TH1*> hCtrlSelectedTauPtAfterStandardSelections;
+      std::vector<TH1*> hCtrlSelectedTauEtaAfterStandardSelections;
+      std::vector<TH1*> hCtrlSelectedTauPhiAfterStandardSelections;
+      std::vector<TH2*> hCtrlSelectedTauEtaVsPhiAfterStandardSelections;
+      std::vector<TH1*> hCtrlSelectedTauLeadingTrkPtAfterStandardSelections;
+      std::vector<TH1*> hCtrlSelectedTauRtauAfterStandardSelections;
+      std::vector<TH1*> hCtrlSelectedTauPAfterStandardSelections;
+      std::vector<TH1*> hCtrlSelectedTauLeadingTrkPAfterStandardSelections;
+      std::vector<TH1*> hCtrlIdentifiedElectronPtAfterStandardSelections;
+      std::vector<TH1*> hCtrlIdentifiedMuonPtAfterStandardSelections;
       std::vector<TH1*> hCtrlNjets; // Nbjets in bins of tau pT
       std::vector<TH1*> hCtrlMET; // Nbjets in bins of tau pT
       std::vector<TH1*> hCtrlNbjets; // Nbjets in bins of tau pT
