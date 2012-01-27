@@ -473,12 +473,12 @@ namespace HPlus {
     bool myPassedRtau = tauCandidateData.getBestTauCandidatePassedRtauStatus();
 
     // Fill control plots here for point "standard selections with full tauID"
-    hCtrlSelectedTauRtauAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getRtauOfSelectedTau(), weightAfterVertexReweight*trgEffData.getEventWeight());
+    hCtrlSelectedTauRtauAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getRtauOfBestTauCandidate(), weightAfterVertexReweight*trgEffData.getEventWeight());
     hCtrlSelectedTauLeadingTrkPtAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getCleanedTauCandidates()[0]->leadPFChargedHadrCand()->pt(), weightAfterVertexReweight*trgEffData.getEventWeight());
     hCtrlSelectedTauPtAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getCleanedTauCandidates()[0]->pt(), weightAfterVertexReweight*trgEffData.getEventWeight());
     hCtrlSelectedTauEtaAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getCleanedTauCandidates()[0]->eta(), weightAfterVertexReweight*trgEffData.getEventWeight());
-    hCtrlSelectedTauPhiAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getCleanedTauCandidates()[0]->phi(), weightAfterVertexReweight*trgEffData.getEventWeight());
-    hCtrlSelectedTauEtaVsPhiAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getCleanedTauCandidates()[0]->eta(), tauCandidateData.getCleanedTauCandidates()[0]->phi(), weightAfterVertexReweight*trgEffData.getEventWeight());
+    hCtrlSelectedTauPhiAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getCleanedTauCandidates()[0]->phi()*180.0/3.1415926, weightAfterVertexReweight*trgEffData.getEventWeight());
+    hCtrlSelectedTauEtaVsPhiAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getCleanedTauCandidates()[0]->eta(), tauCandidateData.getCleanedTauCandidates()[0]->phi()*180.0/3.1415926, weightAfterVertexReweight*trgEffData.getEventWeight());
     hCtrlSelectedTauPAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getCleanedTauCandidates()[0]->p(), weightAfterVertexReweight*trgEffData.getEventWeight());
     hCtrlSelectedTauLeadingTrkPAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getCleanedTauCandidates()[0]->leadPFChargedHadrCand()->p(), weightAfterVertexReweight*trgEffData.getEventWeight());
     hCtrlIdentifiedElectronPtAfterStandardSelections[tauPtBinIndex]->Fill(maxElectronPt, weightAfterVertexReweight*trgEffData.getEventWeight());
