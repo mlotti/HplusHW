@@ -30,9 +30,9 @@ import plotMuonAnalysis as muonAnalysis
 #analysis = "signalAnalysisRtau70"
 #analysis = "signalAnalysisRtau80"
 
-#postfix = ""
+postfix = ""
 #postfix = "CaloMet60"
-postfix = "CaloMet60TEff"
+#postfix = "CaloMet60TEff"
 
 analysis = "signalAnalysis"+postfix
 #analysis = "signalAnalysisRtau0MET50"+postfix
@@ -65,8 +65,8 @@ analysisNoRtau = "signalAnalysisRtau0MET50"+postfix
 #analysis = "signalAnalysisJESMinus03eta02METMinus10"
 counters = analysis+"Counters"
 
-normalize = True
-#normalize = False
+#normalize = True
+normalize = False
 
 #era = "EPS"
 #era = "Run2011A-EPS"
@@ -187,7 +187,7 @@ def main():
     histograms.createLegend.moveDefaults(dh=-0.05)
     #histograms.createLegend.moveDefaults(dx=-0.18, dy=0.05, dh=-0.05)
 
-    doPlots(datasets, mcLumi)
+#    doPlots(datasets, mcLumi)
     doCounters(datasets, mcLumi)
 
 

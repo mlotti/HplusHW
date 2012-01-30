@@ -80,10 +80,12 @@ def main():
     style = tdrstyle.TDRStyle()
     histograms.createLegend.moveDefaults(dx=-0.32, dh=-0.15)
 
-    doPlot(datasetsEmb, analyses, "transverseMassAfterDeltaPhi160", "mt_variated_deltaPhi160")
+    doPlot(datasetsEmb, analyses, "transverseMass", "mt_variated_btagging", "Without #Delta#phi(#tau jet, E_{T}^{miss}) cut")
+    doPlot(datasetsEmb, analyses, "transverseMassAfterDeltaPhi160", "mt_variated_deltaPhi160", "#Delta#phi(#tau jet, E_{T}^{miss}) < 160^{o}")
+    doPlot(datasetsEmb, analyses, "transverseMassAfterDeltaPhi130", "mt_variated_deltaPhi130", "#Delta#phi(#tau jet, E_{T}^{miss}) < 130^{o}")
 
 
-def doPlot(datasetsEmb, analyses, path, name):
+def doPlot(datasetsEmb, analyses, path, name, text):
     histos = []
     legends = {"Plus": "#tau-jet energy scale variated by +3 %",
                "Minus": "#tau-jet energy scale variated by -3 %"}
@@ -104,11 +106,13 @@ def doPlot(datasetsEmb, analyses, path, name):
     styles.mcStyle2(p.histoMgr.getHisto("Minus"))
     p.histoMgr.getHisto("Minus").getRootHisto().SetMarkerSize(2)
     p.setLuminosity(datasetsEmb.getLuminosity())
-    p.createFrame(name, createRatio=True, opts2={"ymax": 2}, opts={"ymax": 40})
+    p.createFrame(name, createRatio=True, opts2={"ymax": 2}, opts={"ymax": 35})
     yaxis = p.getFrame2().GetYaxis()
     yaxis.SetTitle("Ratio")
     #yaxis.SetTitleSize(yaxis.GetTitleSize()*0.8)
     p.setLegend(histograms.moveLegend(histograms.createLegend()))
+
+    p.appendPlotObject(histograms.PlotText(0.5, 0.55, text, size=20))
     
     p.frame.GetXaxis().SetTitle("m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})")
     p.frame.GetYaxis().SetTitle("Events / 20 GeV/c^{2}")

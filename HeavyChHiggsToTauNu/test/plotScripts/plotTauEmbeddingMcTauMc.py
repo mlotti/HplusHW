@@ -23,7 +23,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 import plotTauEmbeddingMcSignalAnalysisMc as tauEmbedding
 import plotTauEmbeddingTau as tauPlot
 
@@ -93,7 +93,7 @@ def doPlots(datasetsEmb2, datasetsSig2, datasetName):
         tauEmbedding.drawPlot(plot, "mcembsig_"+datasetName+"_"+name, *args, **kwargs)
 
     # Decay mode finding
-    td=treeDraw.clone(selection="&&".join([tauPlot.decayModeFinding, tauPlot.tightIsolation]))
+    td=treeDraw.clone(selection=And(tauPlot.decayModeFinding, tauPlot.tightIsolation))
     postfix = "_1AfterDecayModeFindingIsolation"
     drawPlot(createPlot(td.clone(varexp="taus_p4.Pt()>>tmp(25,0,250)")),
              "tauPt"+postfix, "#tau-jet candidate p_{T} (GeV/c)", cutLine=40)
@@ -104,7 +104,7 @@ def doPlots(datasetsEmb2, datasetsSig2, datasetName):
 
     # Pt
     postfix = "_2AfterPtCut"
-    td=treeDraw.clone(selection="&&".join([tauPlot.decayModeFinding, tauPlot.tightIsolation, tauPlot.tauPtCut]))
+    td=treeDraw.clone(selection=And(tauPlot.decayModeFinding, tauPlot.tightIsolation, tauPlot.tauPtCut))
     drawPlot(createPlot(td.clone(varexp=tauPlot.decayModeExp)),
              "tauDecayMode"+postfix+"", "", opts={"ymin": 1, "ymaxfactor": 20, "nbins":5}, opts2={"ymin":0.9, "ymax":1.4}, moveLegend={"dy": 0.02, "dh": -0.02}, function=tauPlot.decayModeCustomize)
     drawPlot(createPlot(td.clone(varexp="taus_p4.Eta()>>tmp(25,-2.5,2.5")),
@@ -114,7 +114,7 @@ def doPlots(datasetsEmb2, datasetsSig2, datasetName):
 
 
     # Eta
-    td=treeDraw.clone(selection="&&".join([tauPlot.decayModeFinding, tauPlot.tightIsolation, tauPlot.tauPtCut, tauPlot.tauEtaCut]))
+    td=treeDraw.clone(selection=And(tauPlot.decayModeFinding, tauPlot.tightIsolation, tauPlot.tauPtCut, tauPlot.tauEtaCut))
     postfix = "_3AfterEtaCut"
     drawPlot(createPlot(td.clone(varexp="taus_leadPFChargedHadrCand_p4.Pt()>>tmp(25,0,250)")),
              "tauLeadingTrackPt"+postfix, "#tau-jet ldg. charged particle p_{T} (GeV/c)", opts2={"ymin":0, "ymax": 2}, cutLine=20)
@@ -126,7 +126,7 @@ def doPlots(datasetsEmb2, datasetsSig2, datasetName):
              "tauDecayMode"+postfix+"", "", opts={"ymin": 1e-2, "ymaxfactor": 20, "nbins":5}, opts2={"ymin":0, "ymax":2}, moveLegend={"dy": 0.02, "dh": -0.02}, function=tauPlot.decayModeCustomize)
 
     # Isolation + one prong
-    td = treeDraw.clone(selection="&&".join([tauPlot.tauCandidateSelection, tauPlot.oneProng]))
+    td = treeDraw.clone(selection=And(tauPlot.tauCandidateSelection, tauPlot.oneProng))
     postfix = "_5AfterOneProng"
     drawPlot(createPlot(td.clone(varexp="taus_p4.Pt()>>tmp(25,0,250)")),
              "tauPt"+postfix, "#tau-jet candidate p_{T} (GeV/c)", opts2={"ymin": 0, "ymax": 2})
@@ -140,7 +140,7 @@ def doPlots(datasetsEmb2, datasetsSig2, datasetName):
              "rtau"+postfix, "R_{#tau} = p^{ldg. charged particle}/p^{#tau jet}", ylabel="Events / %.1f", opts={"ymin": 1e-2, "ymaxfactor": 5}, moveLegend={"dx":-0.4}, cutLine=0.7)
 
     # Full id
-    td = treeDraw.clone(selection="&&".join([tauPlot.tauCandidateSelection, tauPlot.tauID]))
+    td = treeDraw.clone(selection=And(tauPlot.tauCandidateSelection, tauPlot.tauID))
     postfix = "_6AfterTauID"
     drawPlot(createPlot(td.clone(varexp=tauPlot.decayModeExp)),
              "tauDecayMode"+postfix+"", "", opts={"ymin": 1e-2, "ymaxfactor": 20, "nbins":5}, opts2={"ymin":0, "ymax":3}, moveLegend={"dy": 0.02, "dh": -0.02}, function=tauPlot.decayModeCustomize)
