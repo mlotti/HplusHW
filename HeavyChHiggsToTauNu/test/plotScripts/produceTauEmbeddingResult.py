@@ -427,6 +427,9 @@ class DatasetsMany:
     def getAllDatasetNames(self):
         return self.datasetManagers[0].getAllDatasetNames()
 
+    def close(self):
+        self.forEach(lambda d: d.close())
+
     # End of compatibility methods
     def getDatasetFromFirst(self, name):
         return self.datasetManagers[0].getDataset(name)
@@ -536,6 +539,9 @@ class DatasetsResidual:
     def getAllDatasetNames(self):
         return self.datasetsEmb.getAllDatasetNames()
 
+    def close(self):
+        self.forEach(self, lambda d: d.close())
+
     # End of compatibility methods
     
     def getLuminosity(self):
@@ -629,6 +635,10 @@ class DatasetsDYCorrection:
 
     def getAllDatasetNames(self):
         return self.datasetsEmb.getAllDatasetNames()
+
+    def forEach(self, function):
+        self.datasetsEmb.forEach(function)
+        function(self.datasetsSig)
 
     # End of compatibility methods
     

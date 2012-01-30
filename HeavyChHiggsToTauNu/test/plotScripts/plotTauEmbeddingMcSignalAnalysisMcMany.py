@@ -84,16 +84,16 @@ def main():
     datasetsEmbCorrected = result.DatasetsResidual(datasetsEmb, datasetsSig, analysisEmb, analysisSig, ["DYJetsToLL", "WW"], totalNames=["Data", "EWKMC"])
 
     def dop(datasetName):
-        doPlots(datasetsEmb, datasetsSig, datasetName)
+        #doPlots(datasetsEmb, datasetsSig, datasetName)
         doCounters(datasetsEmb, datasetsSig, datasetName)
         print "%s done" % datasetName
 
 
     #doPlots(datasetsEmbCorrected, datasetsSig, "EWKMC", doData=True, postfix="_residual")
-    doCounters(datasetsEmb, datasetsSig, "EWKMC")
-    return
-    dop("TTJets")
+    #doCounters(datasetsEmb, datasetsSig, "EWKMC")
     #return
+    dop("TTJets")
+    return
     dop("WJets")
     #dop("W3Jets")
     dop("DYJetsToLL")

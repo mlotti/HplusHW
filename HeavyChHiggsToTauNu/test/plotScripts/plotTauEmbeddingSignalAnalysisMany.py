@@ -58,6 +58,9 @@ def main():
     datasetsEmb = result.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
 
+    datasetsEmb.remove(filter(lambda name: "HplusTB" in name, datasetsEmb.getAllDatasetNames()))
+    datasetsEmb.remove(filter(lambda name: "TTToHplus" in name, datasetsEmb.getAllDatasetNames()))
+
 #    del plots._datasetMerge["WW"]
 #    del plots._datasetMerge["WZ"]
 #    del plots._datasetMerge["ZZ"]
@@ -65,29 +68,6 @@ def main():
     datasetsEmb.forEach(plots.mergeRenameReorderForDataMC)
     datasetsEmb.setLumiFromData()
     plots.mergeRenameReorderForDataMC(datasetsSig)
-
-    # Signal contamination
-    datasetsEmb.remove(filter(lambda name: "HplusTB" in name, datasetsEmb.getAllDatasetNames()))
-    datasetsEmb.remove(filter(lambda name: "TTToHplus" in name and "M155" not in name, datasetsEmb.getAllDatasetNames()))
-    if True:
-#        xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
-
-        def addSignal(datasetMgr):
-            xsect.setHplusCrossSectionsToBR(datasetMgr, br_tH=0.03, br_Htaunu=1) # agreed to use 3 % as with QCD
-            plots.mergeWHandHH(datasetMgr)
-
-            ttjets2 = datasetMgr.getDataset("TTJets").deepCopy()
-            ttjets2.setName("TTJets2")
-            ttjets2.setCrossSection(ttjets2.getCrossSection() - datasetMgr.getDataset("TTToHplus_M155").getCrossSection())
-            datasetMgr.append(ttjets2)
-            datasetMgr.merge("EWKnoTT", ["WJets", "DYJetsToLL", "SingleTop", "Diboson"], keepSources=True)
-            datasetMgr.merge("EWKScaled", ["EWKnoTT", "TTJets2"])
-            #for mass in [80, 90, 100, 120, 140, 150, 155, 160]:
-            for mass in [155]:
-                datasetMgr.merge("EWKSignal_M%d"%mass, ["TTToHplus_M%d"%mass, "EWKScaled"], keepSources=True)
-        datasetsEmb.forEach(addSignal)
-    else:
-        datasetsEmb.remove(filter(lambda name: "TTToHplus" in name, datasetsEmb.getAllDatasetNames()))
 
     style = tdrstyle.TDRStyle()
     histograms.createLegend.moveDefaults(dx=-0.04)
@@ -257,12 +237,12 @@ def doCounters(datasetsEmb):
     tdCountDeltaPhi160 = tdCount.clone(selection="&&".join(sels+[metCut, bTaggingCut, deltaPhi160Cut]))
     tdCountDeltaPhi130 = tdCount.clone(selection="&&".join(sels+[metCut, bTaggingCut, deltaPhi130Cut]))
     tdCountDeltaPhi90 = tdCount.clone(selection="&&".join(sels+[metCut, bTaggingCut, deltaPhi90Cut]))
-#    eventCounter.mainCounterAppendRow("JetsForEffs", tdCount.clone(weight=weight, selection="&&".join(sels)))
-#    eventCounter.mainCounterAppendRow("METForEffs", tdCountMET)
-#    eventCounter.mainCounterAppendRow("BTagging", tdCountBTagging)
-#    eventCounter.mainCounterAppendRow("DeltaPhi < 160", tdCountDeltaPhi160)
-#    eventCounter.mainCounterAppendRow("DeltaPhi < 130", tdCountDeltaPhi130)
-#    eventCounter.mainCounterAppendRow("DeltaPhi < 90", tdCountDeltaPhi90)
+    eventCounter.mainCounterAppendRow("JetsForEffs", tdCount.clone(weight=weight, selection="&&".join(sels)))
+    eventCounter.mainCounterAppendRow("METForEffs", tdCountMET)
+    eventCounter.mainCounterAppendRow("BTagging", tdCountBTagging)
+    eventCounter.mainCounterAppendRow("DeltaPhi < 160", tdCountDeltaPhi160)
+    eventCounter.mainCounterAppendRow("DeltaPhi < 130", tdCountDeltaPhi130)
+    eventCounter.mainCounterAppendRow("DeltaPhi < 90", tdCountDeltaPhi90)
 
     if not isCorrected:
         td1 = tdCount.clone(selection=metCut+"&&"+bTaggingCut+"&& (tecalometNoHF_p4.Pt() > 60)")
@@ -272,9 +252,9 @@ def doCounters(datasetsEmb):
                 "SingleMu_Mu_172620-173198_Prompt": td2,
                 "SingleMu_Mu_173236-173692_Prompt": td2,
                 })
-#        eventCounter.mainCounterAppendRow("BTagging+CaloMetNoHF", td1)
-#        eventCounter.mainCounterAppendRow("BTagging+CaloMet", td2)
-#        eventCounter.mainCounterAppendRow("BTagging+CaloMet(NoHF)", td3)
+        eventCounter.mainCounterAppendRow("BTagging+CaloMetNoHF", td1)
+        eventCounter.mainCounterAppendRow("BTagging+CaloMet", td2)
+        eventCounter.mainCounterAppendRow("BTagging+CaloMet(NoHF)", td3)
 
     mainTable = eventCounter.getMainCounterTable()
 
