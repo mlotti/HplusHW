@@ -939,6 +939,12 @@ class Dataset:
             self.originalCounterDir = counterDir
             self._readCounter(counterDir)
 
+    def close(self):
+#        print "Closing", self.file.GetName()
+        self.file.Close("R")
+        self.file.Delete()
+        del self.file
+
     def _readCounter(self, counterDir):
         """Read the number of all events from the event counters.
 
@@ -1194,6 +1200,10 @@ class DatasetMerged:
                 lumiSum += d.getLuminosity()
             self.info["luminosity"] = lumiSum
 
+    def close(self):
+        for d in self.datasets:
+            d.close()
+
     def setPrefix(self, prefix):
         """Set a prefix for the directory access.
 
@@ -1331,6 +1341,10 @@ class DatasetManager:
     def _setBaseDirectory(self, base):
         self.basedir = base
 
+    def close(self):
+        for d in self.datasets:
+            d.close()
+
     def append(self, dataset):
         """Append a Dataset object to the set.
 
@@ -1444,7 +1458,7 @@ class DatasetManager:
         self.datasets = selected
         self._populateMap()
 
-    def remove(self, nameList):
+    def remove(self, nameList, close=True):
         """Remove Datasets.
 
         Parameters:
@@ -1457,6 +1471,8 @@ class DatasetManager:
         for d in self.datasets:
             if not d.getName() in nameList:
                 selected.append(d)
+            else:
+                d.close()
         self.datasets = selected
         self._populateMap()
 
