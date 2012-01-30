@@ -1188,7 +1188,7 @@ class DataMCPlot2(PlotBase, PlotRatioBase):
             histograms.addLuminosityText(x, y, self.luminosity)
 
     def addCutBoxAndLine(self, *args, **kwargs):
-        PlotSameBase.addCutBoxAndLine(self, *args, **kwargs)
+        PlotBase.addCutBoxAndLine(self, *args, **kwargs)
         PlotRatioBase.addCutBoxAndLineToRatio(self, *args, **kwargs)
 
     def draw(self):
