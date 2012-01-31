@@ -168,7 +168,7 @@ def printCounters(datasets):
     eventCounter.normalizeMCByLuminosity()
 
     table = eventCounter.getMainCounterTable()
-    #addSumColumn(table)
+    addSumColumn(table)
 
     cellFormat = counter.TableFormatText(counter.CellFormatText(valueFormat='%.3f'))
     print table.format(cellFormat)
