@@ -17,7 +17,9 @@ dataVersion="42XmcS4"     # Summer11 MC
 doAllTauIds = False
 
 # Apply summer PAS style cuts
-doSummerPAS = True
+doSummerPAS = False # Rtau>0, MET>70
+# Disable Rtau
+doRtau0 = False # Rtau>0, MET>50
 
 # Perform b tagging scanning
 doBTagScan = False
@@ -157,9 +159,6 @@ if options.tauEmbeddingInput != 0:
         applyIsolation = not doTauEmbeddingMuonSelectionScan
         additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
                                                                                    enableIsolation=applyIsolation))
-if doTauEmbeddingLikePreselection:
-    additionalCounters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.commonSequence, param))
-
 # Signal analysis module for the "golden analysis"
 import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
 process.signalAnalysis = signalAnalysis.createEDFilter(param)
@@ -262,10 +261,66 @@ if doRtauScan:
                     additionalCounters=additionalCounters,
                     signalAnalysisCounters=True)
 
+# Without Rtau cut (check that Rtau0 case is not covered by doRtauScan
+if doRtau0 and not hasattr(process, "signalAnalysisRtau0"):
+    module = process.signalAnalysis.clone()
+    module.tauSelection.rtauCut = 0
+    addAnalysis(process, "signalAnalysisRtau0", module,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+
+
+def getSignalAnalysisModuleNames():
+    modules = ["signalAnalysis"]
+    if doSummerPAS:
+        modules.append("signalAnalysisRtau0MET70")
+    if doRtau0:
+        modules.append("signalAnalysisRtau0")
+    return modules
+
+# To have tau embedding like preselection
+if doTauEmbeddingLikePreselection:
+    # Preselection similar to tau embedding selection (genuine tau+3 jets+lepton vetoes), no tau+MET trigger required
+    process.tauEmbeddingLikeSequence = cms.Sequence(process.commonSequence)
+    module = process.signalAnalysis.clone()
+    counters = additionalCounters[:]
+    counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.tauEmbeddingLikeSequence, module))
+    addAnalysis(process, "signalAnalysisTauEmbeddingLikePreselection", module,
+                preSequence=process.tauEmbeddingLikeSequence,
+                additionalCounters=counters, signalAnalysisCounters=True)
+
+    # Preselection similar to tau embedding selection (genuine tau+3 jets+lepton vetoes), tau+MET trigger required
+    process.tauEmbeddingLikeTriggeredSequence = cms.Sequence(process.commonSequence)
+    module = process.signalAnalysis.clone()
+    counters = additionalCounters[:]
+    counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.tauEmbeddingLikeTriggeredSequence, module, prefix="embeddingLikeTriggeredPreselection", disableTrigger=False))
+    addAnalysis(process, "signalAnalysisTauEmbeddingLikeTriggeredPreselection", module,
+                preSequence=process.tauEmbeddingLikeTriggeredSequence,
+                additionalCounters=counters, signalAnalysisCounters=True)    
+
+    process.genuineTauSequence = cms.Sequence(process.commonSequence)
+    module = process.signalAnalysis.clone()
+    counters = additionalCounters[:]
+    counters.extend(tauEmbeddingCustomisations.addGenuineTauPreselection(process, process.genuineTauSequence, module))
+    addAnalysis(process, "signalAnalysisGenuineTauPreselection", module,
+                preSequence=process.genuineTauSequence,
+                additionalCounters=counters, signalAnalysisCounters=True)
+
+    for name in getSignalAnalysisModuleNames():
+        module = getattr(process, name).clone()
+        module.onlyGenuineTaus = cms.untracked.bool(True)
+        addAnalysis(process, name+"GenuineTau", module,
+                    preSequence=process.commonSequence,
+                    additionalCounters=additionalCounters, signalAnalysisCounters=True)
+
+# With tau embedding input
 if options.tauEmbeddingInput:
     prototypes = ["signalAnalysis"]
     if doSummerPAS:
         prototypes.append("signalAnalysisRtau0MET70")
+    if doRtau0:
+        prototypes.append("signalAnalysisRtau0")
 
     for name in prototypes:
         module = getattr(process, name).clone()
@@ -338,35 +393,52 @@ def addJESVariation(name, doJetVariation, metVariation):
 
 if doJESVariation or doSystematics:
     doJetVariation = True
-    module = "signalAnalysis"
-    modulePas = "signalAnalysisRtau0MET70"
+
+    modules = getSignalAnalysisModuleNames()
+    if doTauEmbeddingLikePreselection:
+        if options.tauEmbeddingInput != 0:
+            raise Exception("tauEmbegginInput clashes with doTauEmbeddingLikePreselection")
+        modules.extend([n+"GenuineTau" for n in modules])
+
     if options.tauEmbeddingInput != 0:
-        doJetVariation = False
-        module = "signalAnalysisCaloMet60TEff"
-        modulePas = "signalAnalysisRtau0MET70CaloMet60TEff"
-        JESUnclusteredMETVariation=0
+        modules = [n+"CaloMet60TEff" for n in modules]
+        if dataVersion.isData():
+            doJetVariation = False
+            JESUnclusteredMETVariation=0
 
-    addJESVariation(module, doJetVariation, JESUnclusteredMETVariation)
-    if doSummerPAS:
-        addJESVariation(modulePas, doJetVariation, JESUnclusteredMETVariation)
+    for name in modules:
+        addJESVariation(name, doJetVariation, JESUnclusteredMETVariation)
 
 
-if doPUWeightVariation or doSystematics:
-    module = process.signalAnalysis.clone()
+def addPUWeightVariation(name):
+    module = getattr(process, name).clone()
     module.Tree.fill = False
     module.vertexWeight.shiftMean = True
     module.vertexWeight.shiftMeanAmount = PUWeightVariation
-    addAnalysis(process, "signalAnalysisPUWeightPlus", module,
+    addAnalysis(process, name+"PUWeightPlus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
 
     module = module.clone()
     module.vertexWeight.shiftMeanAmount = -PUWeightVariation
-    addAnalysis(process, "signalAnalysisPUWeightMinus", module,
+    addAnalysis(process, name+"PUWeightMinus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
+
+if doPUWeightVariation or doSystematics:
+    modules = getSignalAnalysisModuleNames()
+    if doTauEmbeddingLikePreselection:
+        if options.tauEmbeddingInput != 0:
+            raise Exception("tauEmbegginInput clashes with doTauEmbeddingLikePreselection")
+        modules.extend([n+"GenuineTau" for n in modules])
+
+    if options.tauEmbeddingInput != 0:
+        modules = [n+"CaloMet60TEff" for n in modules]
+
+    for name in modules:
+        addPUWeightVariation(name)
 
 
 # Signal analysis with various tightened muon selections for tau embedding
