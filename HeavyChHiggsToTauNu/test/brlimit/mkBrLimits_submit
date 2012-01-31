@@ -27,7 +27,7 @@ set nameJobs = `basename ${odir}`
 set jobname = ${nameJobs}_`date +"%H%M%S"`
 
 if (${combinedAnalysis} == 1) then 
- echo "-------- Running combined analysis (remember to fix label in limit plot)"
+ echo "-------- Running combined analysis (remember to fix label in mkBrLimits_processBrPlots.cxx and mkBrLimits_processTanbPlots.py)"
 else
  echo "-------- Running analysis for fully hadronic channel only"
 endif
@@ -35,7 +35,7 @@ endif
 # NOTE: a job with longer name containing the name of this job might block this 
 # job, even though it would not produce output files with same name
 while (`bjobs -w |& grep $nameJobs` != "") 
-  echo Waiting for previous jobs to end.  You might want to bkill these jobs...
+  echo Waiting for previous jobs using this directory to end.  You might want to bkill these jobs...
   sleep 10
 end
 
@@ -95,9 +95,9 @@ foreach xmas ($massPoints)
 end
 
 # here check if jobs with same name are running
-echo Checking jobs with name $jobname.
+echo Reporting jobs of this directory with name $jobname.
 while (`bjobs -w |& grep $jobname` != "") # check if job name exists
-  echo `date +"%H:%M"` ": Waiting jobs, " `bjobs|grep RUN|wc|awk '{print $1}'` " running, " `bjobs|grep PEND|wc|awk '{print $1}'` " pending. (do no modify scripts yet.)"
+  echo `date +"%H:%M"` ": Waiting jobs, " `bjobs -w|grep ${jobname}|grep RUN|wc|awk '{print $1}'` " running, " `bjobs -w|grep ${jobname}|grep PEND|wc|awk '{print $1}'` " pending. (do no modify scripts yet.)"
   sleep 60
 end
 
