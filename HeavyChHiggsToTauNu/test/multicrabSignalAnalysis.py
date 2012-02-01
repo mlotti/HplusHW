@@ -9,7 +9,8 @@ multicrab = Multicrab("crab_analysis.cfg", cfg)
 
 # Select the pattuple version to use as an input
 #pattupleVersion = "pattuple_v18"
-pattupleVersion = "pattuple_v19"
+#pattupleVersion = "pattuple_v19"
+pattupleVersion = "pattuple_v20_test1"
 
 #era = "EPS"
 era = "Run2011A"
@@ -127,6 +128,12 @@ else:
     raise Exception("Wrong value for 'era' %s, supported are 'EPS', 'Run2011A'" % era)
 datasets += datasetsMC
 
+if "v20_test1" in pattupleVersion:
+    datasets = [
+        "TTToHplusBWB_M120_Summer11",
+        "Tau_173236-173692_Prompt",
+    ]
+
 # Add the datasest to the multicrab system
 multicrab.extendDatasets(pattupleVersion, datasets)
 
@@ -163,8 +170,8 @@ prefix = "multicrab"
 if "QCD" in cfg:
     prefix += "_QCD"
 
-# Generate configuration only
-#multicrab.createTasks(prefix=prefix, configOnly=True)
-
+# Generate configuration only?
+#configOnly=True
+configOnly=False
 # Genenerate configuration and create the crab tasks
-multicrab.createTasks(prefix=prefix)
+multicrab.createTasks(prefix=prefix, configOnly=configOnly)

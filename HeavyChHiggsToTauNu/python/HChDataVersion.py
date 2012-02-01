@@ -10,12 +10,12 @@ config = {
     "42Xdata": {
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
-#        "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET20",
+#        "signalTrigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1"
 #        "patCastor": "",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2011A-PromptReco-v4/AOD/FCF1CBDD-878F-E011-885B-003048F118D4.root",
 #        "patMadhatter": "file:/mnt/flustre/mkortela/data/SingleMu/PromptReco-v4/AOD/F2B6FB32-7AA3-E011-BCAF-BCAEC5329710.root",
 #        "analysisCastor": "",
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_160431-163869_May10/Tau/Run2011A_May10ReReco_v1_AOD_160431_pattuple_v19/95bdfb89e63988c1ffa2ad610b62da8e/pattuple_101_1_cDq.root",
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_173236-173692_Prompt/Tau/Run2011A_PromptReco_v6_AOD_173236_pattuple_v20_test1/ffd00eb3f262c07dc29d261d6126a908/pattuple_11_1_tdz.root",
     },
     "42XmcS3": {
         "triggerProcess": "HLT",
@@ -30,7 +30,7 @@ config = {
         "signalTrigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
 #        "patMadhatter": "/store/mc/Summer11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/0428EC7E-F199-E011-B474-002618943861.root",
         "patMadhatter": "file:/mnt/flustre/mkortela/data//TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/F498AD1D-8298-E011-BFB9-003048678F92.root",
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M120_Summer11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v19b/9436cd413e1f831f4594f528a53faac6/pattuple_10_1_TsT.root"
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M120_Summer11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v20_test1/88557732962dcf8166a136160b7c6f9d/pattuple_10_1_5mL.root"
     },
     "42XmcS6": {
         "triggerProcess": "HLT",

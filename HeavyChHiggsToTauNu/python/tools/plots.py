@@ -115,6 +115,8 @@ _physicalToLogical = {
     "WJets_TuneZ2_Fall11": "WJets",
     "WToTauNu_TuneZ2_Summer11": "WToTauNu",
 
+    "W3Jets_TuneZ2_Summer11": "W3Jets",
+
     "DYJetsToLL_TuneZ2_Winter10":          "DYJetsToLL_M50",
     "DYJetsToLL_M50_TuneZ2_Winter10":      "DYJetsToLL_M50",
     "DYJetsToLL_M10to50_TuneD6T_Winter10": "DYJetsToLL_M10to50",
@@ -260,6 +262,7 @@ _datasetOrder = [
     "QCDdata",
     "QCD_Pt20_MuEnriched",
     "WJets",
+    "W3Jets",
     "WToTauNu",
     "TTJets",
     "TT",
@@ -311,6 +314,7 @@ _legendLabels = {
 
     "WJets":                 "W+jets",
     "WToTauNu":              "W#to#tau#nu",
+    "W3Jets":                "W+3 jets",
 
     "QCD_Pt30to50":          "QCD, 30 < #hat{p}_{T} < 50",
     "QCD_Pt50to80":          "QCD, 50 < #hat{p}_{T} < 80",
@@ -379,6 +383,7 @@ _plotStyles = {
 
     "WJets":                 styles.wStyle,
     "WToTauNu":              styles.wStyle,
+    "W3Jets":                styles.wStyle,
 
     "QCD":                   styles.qcdStyle,
     "QCDdata":               styles.qcdStyle,

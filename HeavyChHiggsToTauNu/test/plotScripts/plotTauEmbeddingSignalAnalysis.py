@@ -134,7 +134,7 @@ def main():
     #print datasets.getAllDatasetNames()
     #return
 
-    apply_v13_1_bugfix(datasets)
+#    apply_v13_1_bugfix(datasets)
 
     plots.mergeRenameReorderForDataMC(datasets)
 
