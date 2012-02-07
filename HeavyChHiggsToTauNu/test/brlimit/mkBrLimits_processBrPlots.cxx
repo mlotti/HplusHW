@@ -1,6 +1,5 @@
 #include "TF1.h"
 
-void plotTxtMh(double lumi, int mH); 
 void plotTxt(double lumi);
 void readValuesFromLandsFile(char * temp, double &my_obs,double * my_exp);
 
@@ -87,6 +86,14 @@ int mkBrLimits_processBrPlots()
   tg_obs->GetYaxis()->SetRangeUser(0,0.2);
   tg_obs->GetYaxis()->SetTitle("95\% CL limit for Br(t#rightarrow bH^{#pm})");
   tg_obs->GetXaxis()->SetTitle("m_{H^{+}} (GeV/c^{2})");
+  tg_obs->  GetXaxis()->SetTitleFont(43);
+  tg_obs->  GetYaxis()->SetTitleFont(43);
+  tg_obs->  GetXaxis()->SetTitleSize(33);
+  tg_obs->  GetYaxis()->SetTitleSize(33);
+  tg_obs->  GetXaxis()->SetLabelFont(43);
+  tg_obs->  GetYaxis()->SetLabelFont(43);
+  tg_obs->  GetXaxis()->SetLabelSize(27);
+  tg_obs->  GetYaxis()->SetLabelSize(27);
   TGraph * tg_exp = new TGraph(nData, mH, BR_95_exp);
   tg_exp->SetLineColor(2);
   tg_exp->SetMarkerColor(2);
@@ -111,10 +118,11 @@ int mkBrLimits_processBrPlots()
   tg_exp_cont2->Draw("F");
   tg_exp_cont1->Draw("F");
 
-  TLegend *pl = new TLegend(0.5,0.70,0.8,0.92);
+  TLegend *pl = new TLegend(0.5,0.60,0.82,0.82);
   pl->SetTextSize(0.03);
   pl->SetFillStyle(4000);
-  pl->SetTextFont(132);
+  pl->SetTextFont(62);
+  pl->SetTextSize(0.03);
   pl->SetBorderSize(0);
   TLegendEntry *ple;
   ple = pl->AddEntry(tg_obs, "Observed", "lp");
@@ -217,65 +225,80 @@ void readValuesFromLandsFile(char * fileName, double &my_obs,double * my_exp)
 
 
 void plotTxt(double lumi) {
+  // Text describing 
+  //  1) decay channel
+  //  2) final state
+  //  3) assumption that Br(H->tau nu) = 1 
   Double_t linePos       = 0.9;
   Double_t lineSpace = 0.038;
   Double_t left      = 0.185;
   TLatex text;
   text.SetTextAlign(12);
   text.SetNDC();
-  text.SetTextSize(0.03);
+  text.SetTextFont(63);
+  text.SetTextSize(20);
   text.DrawLatex(left,linePos,"t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu");
-
   text.DrawLatex(left,linePos -= lineSpace,"Fully hadronic final state");
+  // --- Other possible final states --
   //  text.DrawLatex(left,linePos -= lineSpace,"hadr. + ltau final states");
   //text.DrawLatex(left,linePos -= lineSpace,"hadr. + ltau + emu final states");
-  char temp[300];
-  //  sprintf(temp,"#sqrt{s}=7 TeV, %.0d pb^{-1}",lumi);
-  //  text.DrawLatex(left,linePos -= lineSpace,temp);
-  //  text.DrawLatex(left,linePos -= lineSpace,"Bayesian CL limit");
   text.DrawLatex(left,linePos -= lineSpace,"Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1");
 
-  // Style copied from python/tools/histograms.py
-  double x = 0.62; double y= 0.96;
-  TLatex l;
-  l.SetNDC();
-  l.SetTextFont(l.GetTextFont()-20); //# bold -> normal;
-  l.DrawLatex(x,y,"CMS Preliminary");
 
-  x = 0.45;
-  sprintf(temp,"%.1f fb^{-1}",lumi);
-  l.DrawLatex(x, y, temp);
+  // "CMS Preliminary" / "CMS" text
+  TLatex *tex = new TLatex(0.62,0.96,"CMS Preliminary");
+  //  TLatex *tex = new TLatex(0.62,0.96,"CMS");
+  tex->SetNDC();
+  tex->SetTextFont(43);
+  tex->SetTextSize(27);
+  tex->SetLineWidth(2);
+  tex->Draw();
 
-  x = 0.2;
-  l.DrawLatex(x, y, "#sqrt{s} = 7 TeV");
+  // "Sqrt(s) = 7 TeV" text
+  tex = new TLatex(0.2,0.96,"#sqrt{s} = 7 TeV");
+  tex->SetNDC();
+  tex->SetTextFont(43);
+  tex->SetTextSize(27);
+  tex->SetLineWidth(2);
+  tex->Draw();
 
-  return;
-}
-
-
-void plotTxtMh(double lumi, int mH) {
-  Double_t top       = 0.85;
-  Double_t lineSpace = 0.038;
-  Double_t left      = 0.185;
-  TLatex text;
-  text.SetTextAlign(12);
-  text.SetTextSize(0.04);
-  text.SetNDC();
-  text.DrawLatex(left,0.9,"CMS preliminary");
-
-  text.SetTextSize(0.03);
-  text.DrawLatex(left,top,"t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu");
-
-  text.DrawLatex(left,top -  lineSpace,"Fully hadronic final state");
-  //  text.DrawLatex(left,top -  lineSpace,"hadr. + ltau final states");
-  // text.DrawLatex(left,top -  lineSpace,"hadr. + ltau +emu final states");
+  // Integrated luminosity text
   char temp[300];
-  sprintf(temp,"#sqrt{s}=7 TeV, %.0d pb^{-1}",lumi);
-  text.DrawLatex(left,top -2*lineSpace,temp);
-  text.DrawLatex(left,top -3*lineSpace,"Bayesian CL limit");
-  text.DrawLatex(left,top -4*lineSpace,"Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1");
-  sprintf(temp,"M_{H}=%i",mH);
-  text.DrawLatex(left,top -5*lineSpace,temp);
+  sprintf(temp,"%.1f fb^{-1}",lumi);
+  tex = new TLatex(0.43,0.96,temp);
+  tex->SetNDC();
+  tex->SetTextFont(43);
+  tex->SetTextSize(27);
+  tex->SetLineWidth(2);
+  tex->Draw();
 
   return;
 }
+
+
+// void plotTxtMh(double lumi, int mH) {
+//   Double_t top       = 0.85;
+//   Double_t lineSpace = 0.038;
+//   Double_t left      = 0.185;
+//   TLatex text;
+//   text.SetTextAlign(12);
+//   text.SetTextSize(0.04);
+//   text.SetNDC();
+//   text.DrawLatex(left,0.9,"CMS preliminary");
+
+//   text.SetTextSize(0.03);
+//   text.DrawLatex(left,top,"t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu");
+
+//   text.DrawLatex(left,top -  lineSpace,"Fully hadronic final state");
+//   //  text.DrawLatex(left,top -  lineSpace,"hadr. + ltau final states");
+//   // text.DrawLatex(left,top -  lineSpace,"hadr. + ltau +emu final states");
+//   char temp[300];
+//   sprintf(temp,"#sqrt{s}=7 TeV, %.0d pb^{-1}",lumi);
+//   text.DrawLatex(left,top -2*lineSpace,temp);
+//   text.DrawLatex(left,top -3*lineSpace,"Bayesian CL limit");
+//   text.DrawLatex(left,top -4*lineSpace,"Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1");
+//   sprintf(temp,"M_{H}=%i",mH);
+//   text.DrawLatex(left,top -5*lineSpace,temp);
+
+//   return;
+// }
