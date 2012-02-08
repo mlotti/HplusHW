@@ -14,7 +14,7 @@ int mkBrLimits_processBrPlots()
 
   char temp[200];
 
-  // --- Data: mass points and efficiencies  --- 
+  // --- Data: mass points and efficiencies hard-coded --- 
    const int nData = 7; // 90 not yet ready
    double mH[nData]   = 
      {80,
@@ -42,8 +42,7 @@ int mkBrLimits_processBrPlots()
     }
   }
 
-  // --- Read values from LandS files ---
-  // obs, exp, exp+-1sigma, exp+-2sigma
+  // --- Read obs and exp values from LandS files ---
   char fileName[500];   
   double valueLandS_obs[nData];
   double valueLandS_exp[nData][5];
@@ -139,7 +138,7 @@ int mkBrLimits_processBrPlots()
 
   plotTxt(L);
 
-  // --- Plot LIP and Tevatron results, obs(black) ---
+  // --- Plot LIP and Tevatron observed results (in black) ---
   if (0) plotLipResults(pl);
   if (0) plotTevatronResults(pl);
 
@@ -206,6 +205,8 @@ void plotLipResults(TLegend * pl){
 
 void readValuesFromLandsFile(char * fileName, double &my_obs,double * my_exp)
 {
+  // First line : obs
+  // Second line: exp, exp+-1sigma, exp+-2sigma
   cout << fileName << endl;
   ifstream logFile(fileName,ios::in);    
   if (!logFile) {
@@ -238,10 +239,10 @@ void plotTxt(double lumi) {
   text.SetTextFont(63);
   text.SetTextSize(20);
   text.DrawLatex(left,linePos,"t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu");
-  text.DrawLatex(left,linePos -= lineSpace,"Fully hadronic final state");
+  text.DrawLatex(left,linePos -= lineSpace,"#tau_{h}+jets final state");
   // --- Other possible final states --
   //  text.DrawLatex(left,linePos -= lineSpace,"hadr. + ltau final states");
-  //text.DrawLatex(left,linePos -= lineSpace,"hadr. + ltau + emu final states");
+  //text.DrawLatex(left,linePos -= lineSpace,"#tau_{h}+jets, e#tau_{h}, #mu#tau_{h}, and e#mu final states");
   text.DrawLatex(left,linePos -= lineSpace,"Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1");
 
 
@@ -275,30 +276,3 @@ void plotTxt(double lumi) {
   return;
 }
 
-
-// void plotTxtMh(double lumi, int mH) {
-//   Double_t top       = 0.85;
-//   Double_t lineSpace = 0.038;
-//   Double_t left      = 0.185;
-//   TLatex text;
-//   text.SetTextAlign(12);
-//   text.SetTextSize(0.04);
-//   text.SetNDC();
-//   text.DrawLatex(left,0.9,"CMS preliminary");
-
-//   text.SetTextSize(0.03);
-//   text.DrawLatex(left,top,"t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu");
-
-//   text.DrawLatex(left,top -  lineSpace,"Fully hadronic final state");
-//   //  text.DrawLatex(left,top -  lineSpace,"hadr. + ltau final states");
-//   // text.DrawLatex(left,top -  lineSpace,"hadr. + ltau +emu final states");
-//   char temp[300];
-//   sprintf(temp,"#sqrt{s}=7 TeV, %.0d pb^{-1}",lumi);
-//   text.DrawLatex(left,top -2*lineSpace,temp);
-//   text.DrawLatex(left,top -3*lineSpace,"Bayesian CL limit");
-//   text.DrawLatex(left,top -4*lineSpace,"Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1");
-//   sprintf(temp,"M_{H}=%i",mH);
-//   text.DrawLatex(left,top -5*lineSpace,temp);
-
-//   return;
-// }

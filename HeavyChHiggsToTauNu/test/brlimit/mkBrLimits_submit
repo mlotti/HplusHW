@@ -17,7 +17,7 @@ set nJobs = "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 2
 # and cpu time in root:
 # n=60; m=8; cout << "time="<<n/60.0+3.6+0.82*(m) << ", tot ev="<<n*m<<", cpu="<<n*(3.6+0.82*m)
 #
-# ----- Masspoints: hard-coded in plotting scripts also
+# ----- Masspoints: NOTE:hard-coded in plotting scripts also
 set massPoints = "80 100 120 140 150 155 160"
 # ----------------------------------------------
 
@@ -40,12 +40,14 @@ while (`bjobs -w |& grep $nameJobs` != "")
 end
 
 # prepare LandS
-cd mycmsswlink/src/
-cvs co -r V3-04-01_eps UserCode/mschen/LandS
-cd UserCode/mschen/LandS  
-cmsenv
-gmake clean
-gmake all
+if ( !(-e mycmsswlink/src/UserCode) ) then
+  cd mycmsswlink/src/
+  cvs co -r V3-04-01_eps UserCode/mschen/LandS
+  cd UserCode/mschen/LandS  
+  cmsenv
+  gmake clean
+  gmake all
+endif
 
 cd ${odir}
 mkdir outputs
@@ -111,8 +113,6 @@ end
 foreach xmas ($massPoints)
 head -3 outputs/output_${nameDataCard}${xmas}_obs | tail -1 | awk '{print $12 }' >&! outputs/output_${nameDataCard}${xmas}
 head -3 outputs/output_${nameDataCard}${xmas}_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> outputs/output_${nameDataCard}${xmas}
-#grep 'Observed Upper' outputs/output_${nameDataCard}${xmas}_exp | awk '{print $12}' >&! outputs/output_${nameDataCard}${xmas}                 
-#grep 'BANDS' outputs/output_${nameDataCard}${xmas}_exp | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> outputs/output_${nameDataCard}${xmas}
 end
 
 cd ${odir}

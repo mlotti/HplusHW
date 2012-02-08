@@ -567,9 +567,9 @@ def main():
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
     if textFullyHadronic:
-        writeText("Fully hadronic final state",   top - lineSpace)
+        writeText("#tau_{h}+jets final state",   top - lineSpace)
     else:
-        writeText("hadr. + ltau + emu final states",   top - lineSpace)
+        writeText("#tau_{h}+jets, e#tau_{h}, #mu#tau_{h}, and e#mu final states",   top - lineSpace)
     writeText("MSSM m_{h}^{max}",           top - 2*lineSpace)
     writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
     writeText("#mu=%d GeV"%mu, top - 4*lineSpace)
@@ -696,10 +696,9 @@ def main():
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
     if textFullyHadronic:
-        writeText("Fully hadronic final state",   top - lineSpace)
+        writeText("#tau_{h}+jets final state",   top - lineSpace)
     else:
-        writeText("hadr. + ltau + emu final states",   top - lineSpace)
-#    writeText("Bayesian CL limit",           top - 2*lineSpace)
+        writeText("#tau_{h}+jets, e#tau_{h}, #mu#tau_{h}, and e#mu final states",   top - lineSpace)
     writeText("MSSM m_{h}^{max}",           top - 2*lineSpace)
     writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
 
