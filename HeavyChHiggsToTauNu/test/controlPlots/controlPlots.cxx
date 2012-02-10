@@ -491,7 +491,7 @@ void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, doubl
   gStyle->SetOptStat(0);
   gStyle->SetOptTitle(0);
   gStyle->SetTitleFont(43, "xyz");
-  gStyle->SetTitleSize(27, "xyz");
+  gStyle->SetTitleSize(33, "xyz");
   gStyle->SetLabelFont(43, "xyz");
   gStyle->SetLabelSize(27, "xyz");
 
@@ -781,14 +781,9 @@ void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, doubl
   tex->SetTextSize(20);
   tex->SetLineWidth(2);
   tex->Draw();
-
   
   plotpad->RedrawAxis();
-  
 
-  
-  
-  
   s.str("");
   s << "dataDrivenControlPlot_" << sLabel << mass << ".png";
   c->Print(s.str().c_str());
