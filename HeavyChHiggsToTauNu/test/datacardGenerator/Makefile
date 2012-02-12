@@ -17,3 +17,7 @@ all: $(OBJS)
 #	@echo $(OBJS)
 	$(CXX) $(OPT) $(INC) $(LIBS) $(OBJS) -o datacardgenerator
 	@echo "Program compiled"
+
+clean:
+	@rm src/*o datacardgenerator
+	@echo "object files removed"
