@@ -28,8 +28,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
-import plotTauEmbeddingSignalAnalysis as tauEmbedding
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 import produceTauEmbeddingResult as result
+import plotTauEmbeddingSignalAnalysis as tauEmbeddingPlot
 
 #analysisEmb = "signalAnalysis"
 #analysisEmb = "signalAnalysisCaloMet60"
@@ -83,19 +84,82 @@ def main():
     datasetsEmbCorrected = result.DatasetsDYCorrection(datasetsEmb, datasetsSig, analysisEmb, analysisSig)
     datasetsResidual = result.DatasetsResidual(datasetsEmb, datasetsSig, analysisEmb, analysisSig, ["DYJetsToLL", "WW"])
 
-    #doPlots(datasetsEmb)
+    doPlots(datasetsEmb)
     #doPlots(datasetsEmbCorrected)
+    doPlotsWTauMu(datasetsEmb, "TTJets", True)
+    doPlotsWTauMu(datasetsEmb, "TTJets", False)
 
-    doCounters(datasetsEmb)
+    #doCounters(datasetsEmb)
     #doCounters(datasetsEmbCorrected)
 
     #doCountersResidual(datasetsResidual)
 
     #doCountersOld(datasetsEmb)
 
+def doPlotsWTauMu(datasetsEmb, name, btag=True):
+    
+    if btag:
+        selection = And(metCut, bTaggingCut, deltaPhi130Cut)
+        treeDraw = dataset.TreeDraw(analysisEmb+"/tree", weight="weightPileup*weightTrigger*weightBTagging")
+    else:
+        selection = And(metCut, deltaPhi130Cut)
+        treeDraw = dataset.TreeDraw(analysisEmb+"/tree", weight="weightPileup*weightTrigger")
+    tdMt = treeDraw.clone(varexp="sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi()))) >>tmp(20,0,400)")
+
+    (hall, tmp) = datasetsEmb.getHistogram(name, tdMt.clone(selection=selection))
+    (hpure, tmp) = datasetsEmb.getHistogram(name, tdMt.clone(selection=And(selection, "abs(temuon_mother_pdgid) == 24")))
+
+    hall.SetName("All")
+    hpure.SetName("Pure")
+
+    nall = hall.Integral(0, hall.GetNbinsX())
+    npure = hpure.Integral(0, hall.GetNbinsX())
+
+    print {True: "Btagging", False: "NoBTag"}[btag], npure/nall, (1-npure/nall)*100
+
+    p = plots.ComparisonPlot(hall, hpure)
+    p.histoMgr.setHistoLegendLabelMany({
+            "All": "All muons",
+            "Pure": "W#rightarrow#mu"
+            })
+    p.histoMgr.forEachHisto(styles.generator())
+    if btag:
+        fname = "transverseMass_4AfterDeltaPhi160_wtaumu_"+name
+    else:
+        fname = "transverseMass_4AfterDeltaPhi160NoBTag_wtaumu_"+name
+
+    hallErr = hall.Clone("AllError")
+    hallErr.SetFillColor(ROOT.kBlue-7)
+    hallErr.SetFillStyle(3004)
+    hallErr.SetMarkerSize(0)
+    p.prependPlotObject(hallErr, "E2")
+
+    hpureErr = hpure.Clone("PureErr")
+    hpureErr.SetFillColor(ROOT.kRed-7)
+    hpureErr.SetFillStyle(3004)
+    hpureErr.SetMarkerSize(0)
+    p.prependPlotObject(hpureErr, "E2")
+
+
+    p.createFrame(fname, createRatio=True, invertRatio=True, ratioIsBinomial=True, opts2={"ymin": 0.9, "ymax": 1.05})
+    p.getFrame2().GetYaxis().SetTitle("W#rightarrow#mu fraction")
+    p.setLegend(histograms.moveLegend(histograms.createLegend()))
+    tmp = hpureErr.Clone("tmp")
+    tmp.SetFillColor(ROOT.kBlack)
+    tmp.SetFillStyle(3013)
+    tmp.SetLineColor(ROOT.kWhite)
+    p.legend.AddEntry(tmp, "Stat. unc.", "F")
+
+    p.frame.GetXaxis().SetTitle("m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})")
+    p.frame.GetYaxis().SetTitle("Events / %.0f GeV/c^{2}" % p.binWidth())
+    p.appendPlotObject(histograms.PlotText(0.5, 0.9, name, size=18))
+    p.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    p.save()
 
 def drawPlot(*args, **kwargs):
-    tauEmbedding.drawPlot(*args, normalize=False, **kwargs)
+    tauEmbeddingPlot.drawPlot(*args, normalize=False, **kwargs)
 
 def doPlots(datasetsEmb):
     datasetNames = datasetsEmb.getAllDatasetNames()
@@ -256,7 +320,7 @@ def doCounters(datasetsEmb):
         eventCounter.mainCounterAppendRow("BTagging+CaloMet", td2)
         eventCounter.mainCounterAppendRow("BTagging+CaloMet(NoHF)", td3)
 
-    mainTable = eventCounter.getMainCounterTable()
+    (mainTable, mainTableChi2) = eventCounter.getMainCounterTableFit()
 
     ewkDatasets = ["WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson"]
     allDatasets = None
@@ -268,6 +332,7 @@ def doCounters(datasetsEmb):
             table.insertColumn(2, counter.sumColumn("MCSum", [table.getColumn(name=name) for name in allDatasets]))
     ewkSum(mainTable)
     cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.3f'))
+    print mainTableChi2.format(cellFormat)
     print mainTable.format(cellFormat)
 
     tauTable = eventCounter.getSubCounterTable("TauIDPassedEvt::tauID_HPSTight")
@@ -361,7 +426,7 @@ def doCounters(datasetsEmb):
             #absUnc = th12.Integral(0, 2)
             NallSum += Nall
             NSum += N
-            absUnc = tauEmbedding.squareSum(th12)
+            absUnc = tauEmbeddingPlot.squareSum(th12)
             absUncSquareSum += absUnc
             absUnc = math.sqrt(absUnc)
             relUnc = 0

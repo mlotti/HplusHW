@@ -15,6 +15,7 @@
 ######################################################################
 
 import os
+import math
 import array
 
 import ROOT
@@ -28,7 +29,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
-import plotTauEmbeddingSignalAnalysis as tauEmbedding
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 
 #analysisEmb = "signalAnalysis"
 #analysisSig = "signalAnalysis"
@@ -81,15 +82,30 @@ dirEmbs_120126 = [
     "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest8_Run2011A_120126_125610",
     "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest9_Run2011A_120126_131446",
 ]
+dirEmbs_120131 = [
+    "multicrab_signalAnalysis_Met50_systematics_v13_3_Run2011A_120131_123142",
+    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest1_Run2011A_120131_133727",
+    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest2_Run2011A_120131_135817",
+    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest3_Run2011A_120131_141821",
+    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest4_Run2011A_120131_143855",
+    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest5_Run2011A_120131_145907",
+    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest6_Run2011A_120131_152041",
+    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest7_Run2011A_120131_154149",
+    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest8_Run2011A_120131_160339",
+    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest9_Run2011A_120131_162422",
+]
 
 #dirEmbs = dirEmbs_120109
 #dirEmbs = dirEmbs_120118
-dirEmbs = dirEmbs_120126
+#dirEmbs = dirEmbs_120126
+dirEmbs = dirEmbs_120131
 
 #    dirSig = "../../multicrab_compareEmbedding_Run2011A_111201_143238
 #dirSig = "../multicrab_compareEmbedding_Run2011A_111219_185818"
 #dirSig = "../multicrab_compareEmbedding_Run2011A_120116_154158" # for 120109
-dirSig = "../multicrab_compareEmbedding_Run2011A_120118_122555" # for 120118, 120126
+dirSig = "../multicrab_compareEmbedding_Run2011A_120118_122555" # for 120118, 120126, 120131
+
+uncertaintyByAverage = False
 
 def main():
     datasetsEmb = DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=False)
@@ -412,6 +428,7 @@ class DatasetsMany:
         for d in dirs:
             datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=d+"/multicrab.cfg", counters=counters)
             datasets.loadLuminosities()
+            tauEmbedding.updateAllEventsToWeighted(datasets)
             self.datasetManagers.append(datasets)
 
         self.normalizeMCByLuminosity=normalizeMCByLuminosity
@@ -443,20 +460,27 @@ class DatasetsMany:
     def getHistogram(self, datasetName, name, rebin=1):
         histos = self.getHistograms(datasetName, name)
 
+        # Averaging is done here
         histo = histos[0]
         histo_low = histo.Clone(histo.GetName()+"_low")
         histo_high = histo.Clone(histo.GetName()+"_high")
         for h in histos[1:]:
             for bin in xrange(0, histo.GetNbinsX()+2):
                 histo.SetBinContent(bin, histo.GetBinContent(bin)+h.GetBinContent(bin))
-                histo.SetBinError(bin, histo.GetBinError(bin)+h.GetBinError(bin))
+                if uncertaintyByAverage:
+                    histo.SetBinError(bin, histo.GetBinError(bin)+h.GetBinError(bin))
+                else:
+                    histo.SetBinError(bin, math.sqrt(histo.GetBinError(bin)**2+h.GetBinError(bin)**2))
 
                 histo_low.SetBinContent(bin, min(histo_low.GetBinContent(bin), h.GetBinContent(bin)))
                 histo_high.SetBinContent(bin, max(histo_high.GetBinContent(bin), h.GetBinContent(bin)))
 
         for bin in xrange(0, histo.GetNbinsX()+2):
             histo.SetBinContent(bin, histo.GetBinContent(bin)/len(histos))
-            histo.SetBinError(bin, histo.GetBinError(bin)/len(histos))
+            if uncertaintyByAverage:
+                histo.SetBinError(bin, histo.GetBinError(bin)/len(histos))
+            else:
+                histo.SetBinError(bin, histo.GetBinError(bin)/len(histos))
 
         if rebin > 1:
             histo.Rebin(rebin)
@@ -740,12 +764,16 @@ class EventCounterMany:
             ec.getSubCounter(name).appendRow(*args, **kwargs)
 
     def getMainCounterTable(self):
-        table = counter.meanTable([ec.getMainCounterTable() for ec in self.eventCounters])
-        return table
+        return counter.meanTable([ec.getMainCounterTable() for ec in self.eventCounters], uncertaintyByAverage)
 
     def getSubCounterTable(self, name):
-        table = counter.meanTable([ec.getSubCounterTable(name) for ec in self.eventCounters])
-        return table
+        return counter.meanTable([ec.getSubCounterTable(name) for ec in self.eventCounters], uncertaintyByAverage)
+
+    def getMainCounterTableFit(self):
+        return counter.meanTableFit([ec.getMainCounterTable() for ec in self.eventCounters])
+
+    def getSubCounterTableFit(self, name):
+        return counter.meanTableFit([ec.getSubCounterTable(name) for ec in self.eventCounters])
 
     def getNormalizationString(self):
         return self.eventCounters[0].getNormalizationString()
@@ -753,7 +781,7 @@ class EventCounterMany:
 class EventCounterResidual:
     def __init__(self, datasetsResidual, counters=None, **kwargs):
         self.datasetsResidual = datasetsResidual
-        self.datasetNames = datasetsResidual.datasetNames
+        self.residualNames = datasetsResidual.residualNames
 
         countersSig = counters
         if countersSig != None:
@@ -776,7 +804,7 @@ class EventCounterResidual:
     def _calculateResidual(self, table, sigTable):
         columnNames = table.getColumnNames()
         for name in columnNames:
-            if name in self.datasetNames:
+            if name in self.residualNames:
                 i = columnNames.index(name)
                 col = table.getColumn(index=i)
                 table.removeColumn(i)
