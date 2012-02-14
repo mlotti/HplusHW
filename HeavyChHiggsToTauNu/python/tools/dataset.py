@@ -1049,6 +1049,9 @@ class Dataset:
         """
         self.nAllEvents = nAllEvents
 
+    def getNAllEvents(self):
+        return self.nAllEvents
+
     def getNormFactor(self):
         """Get the cross section normalization factor.
 

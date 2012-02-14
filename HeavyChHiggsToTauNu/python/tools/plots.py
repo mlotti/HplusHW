@@ -501,15 +501,22 @@ def replaceQCDFromData(datasetMgr, datasetQCDdata):
 # \param ytitle      Y axis title of the final ratio histogram
 #
 # \return TH1 of rootHisto1/rootHisto2
-def _createRatio(rootHisto1, rootHisto2, ytitle):
+def _createRatio(rootHisto1, rootHisto2, ytitle, isBinomial=False):
     if isinstance(rootHisto1, ROOT.TH1) and isinstance(rootHisto2, ROOT.TH1):
-        ratio = rootHisto1.Clone()
-        ratio.SetDirectory(0)
-        ratio.Divide(rootHisto2)
-        styles.getDataStyle().apply(ratio)
-        ratio.GetYaxis().SetTitle(ytitle)
-        return ratio
+        if isBinomial:
+            eff = ROOT.TGraphAsymmErrors(rootHisto1, rootHisto2)
+            styles.getDataStyle().apply(eff)
+            return eff
+        else:
+            ratio = rootHisto1.Clone()
+            ratio.SetDirectory(0)
+            ratio.Divide(rootHisto2)
+            styles.getDataStyle().apply(ratio)
+            ratio.GetYaxis().SetTitle(ytitle)
+            return ratio
     elif isinstance(rootHisto1, ROOT.TGraph) and isinstance(rootHisto2, ROOT.TGraph):
+        if isBinomial:
+            raise Exception("isBinomial is not supported for TGraph input")
         xvalues = []
         yvalues = []
         yerrs = []
@@ -845,23 +852,23 @@ class PlotRatioBase:
     def getPad2(self):
         return self.cf.pad2
 
-    def _createFrameRatio(self, filename, numerator, denominator, ytitle, invertRatio=False, **kwargs):
+    def _createFrameRatio(self, filename, numerator, denominator, ytitle, invertRatio=False, ratioIsBinomial=False, **kwargs):
         (num, denom) = (numerator, denominator)
         if invertRatio:
             (num, denom) = (denom, num)
 
         self.ratios = [
-            _createRatio(num, denom, ytitle)
+            _createRatio(num, denom, ytitle, isBinomial=ratioIsBinomial)
             ]
         self._createFrame(filename, **kwargs)
 
-    def _createFrameRatioMany(self, filename, numerators, denominator, invertRatio=False, **kwargs):
+    def _createFrameRatioMany(self, filename, numerators, denominator, invertRatio=False, ratioIsBinomial=False, **kwargs):
         self.ratios = []
         for numer in numerators:
             (num, denom) = (numer, denominator)
             if invertRatio:
                 (num, denom) = (denom, num)
-            ratio = _createRatio(num, denom, "Ratio")
+            ratio = _createRatio(num, denom, "Ratio", isBinomial=ratioIsBinomial)
             copyStyle(num, ratio)
             self.ratios.append(ratio)
 

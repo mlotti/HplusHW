@@ -4,6 +4,7 @@ import re
 import ROOT
 
 import dataset
+import utilities
 
 def _counterTh1AddBinFromTh1(counter, name, th1):
     new = ROOT.TH1F(counter.GetName(), counter.GetTitle(), counter.GetNbinsX()+1, 0, counter.GetNbinsX()+1)
@@ -543,9 +544,16 @@ def accumulateRow(table, function):
     return row
 
 ## Calculate row with averages of the table
-def meanRow(table):
+def meanRow(table, uncertaintyByAverage=False):
     # Sum
-    row = accumulateRow(table, lambda a, b: dataset.Count(a.value()+b.value(), a.uncertainty()+b.uncertainty()))
+    if uncertaintyByAverage:
+        row = accumulateRow(table, lambda a, b: dataset.Count(a.value()+b.value(), a.uncertainty()+b.uncertainty()))
+    else:
+        def f(a, b):
+            c = a.clone()
+            c.add(b)
+            return c
+        row = accumulateRow(table, f)
     row.setName("Mean")
 
     # Average
@@ -556,6 +564,30 @@ def meanRow(table):
             row.setCount(icol, dataset.Count(count.value()/N, count.uncertainty()/N))
 
     return row
+
+## Calculate row with a least square fit of the table
+def meanRowFit(table):
+    valueRow = table.getRow(0).clone()
+    valueRow.setName("Fit")
+    chiRow = valueRow.clone()
+    chiRow.setName("Chi2/ndof")
+    for icol in xrange(table.getNcolumns()):
+        values = []
+        for irow in xrange(table.getNrows()):
+            count = table.getCount(irow, icol)
+            if count != None:
+                values.append(count)
+
+
+        (m, dm, chi2, ndof) = utilities.leastSquareFitPoly0([v.value() for v in values], [v.uncertainty() for v in values])
+        if m != None:
+            valueRow.setCount(icol, dataset.Count(m, dm))
+            chiRow.setCount(icol, dataset.Count(chi2, ndof))
+        else:
+            valueRow.setCount(icol, None)
+            chiRow.setCount(icol, None)
+
+    return (valueRow, chiRow)
 
 ## Calculate the maximum of each column
 def maxRow(table):
@@ -569,11 +601,7 @@ def minRow(table):
     row.setName("Min")
     return row
 
-## Create a new CounterTable as the average of the tables
-def meanTable(tables):
-    if len(tables) == 0:
-        raise Exception("Got 0 tables")
-
+def removeColumnsRowsNotInAll(tables):
     # Remove columns which are not in all tables
     tablesCopy = [t.clone() for t in tables]
     maxNcols = max([t.getNcolumns() for t in tables])
@@ -600,6 +628,15 @@ def meanTable(tables):
                 maxNrows -= 1
                 continue
         iRow += 1
+
+    return tablesCopy
+
+## Create a new CounterTable as the average of the tables
+def meanTable(tables, uncertaintyByAverage=False):
+    if len(tables) == 0:
+        raise Exception("Got 0 tables")
+
+    tablesCopy = removeColumnsRowsNotInAll(tables)
     
     # Calculate the sums
     table = tablesCopy[0]
@@ -611,7 +648,11 @@ def meanTable(tables):
                 count1 = table.getCount(iRow, iCol)
                 count2 = t.getCount(iRow, iCol)
                 if count1 != None and count2 != None:
-                    count = dataset.Count(count1.value()+count2.value(), count1.uncertainty()+count2.uncertainty())
+                    if uncertaintyByAverage:
+                        count = dataset.Count(count1.value()+count2.value(), count1.uncertainty()+count2.uncertainty())
+                    else:
+                        count = count1.clone()
+                        count.add(count2)
                     table.setCount(iRow, iCol, count)
                 else:
                     table.setCount(iRow, iCol, None)
@@ -625,6 +666,34 @@ def meanTable(tables):
                 table.setCount(iRow, iCol, dataset.Count(count.value()/N, count.uncertainty()/N))
 
     return table
+
+## Create a new CounterTable as the fitted value of the tables
+def meanTableFit(tables):
+    if len(tables) == 0:
+        raise Exception("Got 0 tables")
+
+    tablesCopy = removeColumnsRowsNotInAll(tables)
+    valueTable = tablesCopy[0].clone()
+    chi2Table = valueTable.clone()
+    nrows = valueTable.getNrows()
+    ncolumns = valueTable.getNcolumns()
+    for iRow in xrange(nrows):
+        for iCol in xrange(ncolumns):
+            values = []
+            for t in tablesCopy:
+                count = t.getCount(iRow, iCol)
+                if count != None:
+                    values.append(count)
+            (m, dm, chi2, ndof) = utilities.leastSquareFitPoly0([v.value() for v in values], [v.uncertainty() for b in values])
+            if m != None:
+                valueTable.setCount(iRow, iCol, dataset.Count(m, dm))
+                chi2Table.setCount(iRow, iCol, dataset.Count(chi2, ndof))
+            else:
+                valueTable.setCount(iRow, iCol, None)
+                chi2Table.setCount(iRow, iCol, None)
+
+    return (valueTable, chi2Table)
+                
 
 
 ## Class representing a column in CounterTable.
