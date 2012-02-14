@@ -42,7 +42,7 @@ void plot(int mass) {
   gStyle->SetOptStat(0);
   gStyle->SetOptTitle(0);
   gStyle->SetTitleFont(43, "xyz");
-  gStyle->SetTitleSize(27, "xyz");
+  gStyle->SetTitleSize(33, "xyz");
   gStyle->SetLabelFont(43, "xyz");
   gStyle->SetLabelSize(27, "xyz");
   
@@ -242,6 +242,8 @@ void plot(int mass) {
   hAgreement->GetYaxis()->SetNdivisions(505);
   hAgreement->GetXaxis()->SetTitleFont(43);
   hAgreement->GetYaxis()->SetTitleFont(43);
+  hAgreement->GetXaxis()->SetTitleSize(33);
+  hAgreement->GetYaxis()->SetTitleSize(33);
   hAgreement->SetTitleSize(27, "xyz");
   hAgreement->GetXaxis()->SetTitleOffset(3.2);
   hAgreement->GetYaxis()->SetTitleOffset(1.3);
@@ -286,7 +288,7 @@ void plot(int mass) {
   hFrame->GetXaxis()->SetTitleSize(0);
   hFrame->GetXaxis()->SetLabelSize(0);
   hFrame->GetYaxis()->SetTitleFont(43);
-  hFrame->GetYaxis()->SetTitleSize(27);
+  hFrame->GetYaxis()->SetTitleSize(33);
   hFrame->GetYaxis()->SetTitleOffset(1.3);
   
   // Draw objects
