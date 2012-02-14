@@ -114,7 +114,7 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
     l1Selection2 = l1Selection1
 
     if runrange >= 2:
-        l1TriggerName2 = "Jet52_Central"
+        l1TriggerName1 = "Jet52_Central"
         l1CenEta = 52
         l1Selection1 = "L1JetEt > 52 && hasMatchedL1Jet"
         if sameTrigger12:
@@ -318,11 +318,13 @@ class EfficiencyCalculator:
     def getRootHisto(self, varexp, selection, weight=None):
         if weight != None:
             selection = "%s*(%s)" % (weight, selection)
-        #print selection
         self.chain.Draw(varexp, selection, "goff e")
         h = self.chain.GetHistogram().Clone()
         h.SetDirectory(0)
         return h
+
+    def getEntries(self, selection):
+        return self.chain.GetEntries(selection)
 
 class Plotter:
     def __init__(self, calc1, calc2, plotDir, lumi):
