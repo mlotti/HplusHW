@@ -13,6 +13,8 @@
 #include <sstream>
 
 
+double paperStatus = true;
+
 using namespace std;
 
 void plot(int mass) {
@@ -121,7 +123,9 @@ void plot(int mass) {
   hFrame->SetLineStyle(0);
   hFrame->SetMarkerStyle(20);
   hFrame->SetXTitle("Transverse mass (#tau jet, E_{T}^{miss}), (GeV/c^{2})");
-  hFrame->SetYTitle("N_{events} / 20 GeV/c^{2}");
+  if (paperStatus)
+    hFrame->SetXTitle("Transverse mass (#tau_{h}, E_{T}^{miss}), (GeV/c^{2})");
+  hFrame->SetYTitle("Events / 20 GeV/c^{2}");
   hFrame->GetXaxis()->SetTitleSize(0);
   hFrame->GetXaxis()->SetLabelSize(0);
   hFrame->GetYaxis()->SetTitleFont(43);
@@ -314,7 +318,11 @@ void plot(int mass) {
   entry = leg->AddEntry(hExpBkgTotalUncert, "stat. #oplus syst. uncert.", "F");
   leg->Draw();
   
-  TLatex *tex = new TLatex(0.62,0.945,"CMS Preliminary");
+  string myTitle = "CMS Preliminary";
+  if (paperStatus)
+    myTitle = "CMS";
+
+  TLatex *tex = new TLatex(0.62,0.945,myTitle.c_str());
   tex->SetNDC();
   tex->SetTextFont(43);
   tex->SetTextSize(27);
