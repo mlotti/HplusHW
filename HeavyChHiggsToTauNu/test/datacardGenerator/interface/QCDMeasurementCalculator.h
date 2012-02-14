@@ -14,7 +14,7 @@ class QCDMeasurementCalculator : public Extractable {
 
 public:
   /// Constructor for rate
-  QCDMeasurementCalculator(std::string id);
+  QCDMeasurementCalculator(std::string id, bool verboseStatus);
   /// Constructor foNormalisationInfo* infor systematics
   QCDMeasurementCalculator(std::string mode, std::string id, std::string distribution, std::string description);
   /// Default desctructor

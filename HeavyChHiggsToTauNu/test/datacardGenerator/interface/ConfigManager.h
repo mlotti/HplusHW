@@ -12,7 +12,7 @@
 class ConfigManager {
 
 public:
-  ConfigManager(bool verbose);
+  ConfigManager(bool verbose, bool optionQCDVerbose);
   virtual ~ConfigManager();
 
   bool initialize(std::string configFile);
@@ -42,6 +42,7 @@ private:
   std::string sShapeSource;
   double fLuminosity; // in fb-1
   bool bVerbose;
+  bool bOptionQCDVerbose;
   
 };
 

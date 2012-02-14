@@ -6,16 +6,15 @@
 class ExtractableScaleFactor : public Extractable {
 
  public:
-  ExtractableScaleFactor(std::string id, std::string distribution, std::string description, std::string counterHisto, std::string scaleFactorUncertaintyHisto, std::string normHisto);
+  ExtractableScaleFactor(std::string id, std::string distribution, std::string description, std::vector<std::string> scaleFactorUncertaintyHisto, std::vector<std::string> scaleFactorNormHisto);
   ~ExtractableScaleFactor();
   
   double doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info, double additionalNormalisation = 1.0);
   void print();
 
  private:
-  std::string sCounterHisto;
-  std::string sScaleFactorUncertaintyHistogram;
-  std::string sNormHisto;
+  std::vector<std::string> sScaleFactorUncertaintyHistogram;
+  std::vector<std::string> sScaleFactorNormHisto;
 };
 
 #endif // EXTRACTABLESCALEFACTOR_H

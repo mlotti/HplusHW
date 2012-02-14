@@ -22,7 +22,6 @@ cd ${odir}/mycmsswlink/src
 cmsenv
 
 cd ${odir}
-#./mycmsswlink/src/UserCode/mschen/LandS/test/lands.exe --PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09  -d ${datacard1} ${datacard2} ${datacard3} ${datacard4} --doExpectation 1 -t ${nToys} --seed ${myseed} -n ${myjobname} | tail -5 >& ${outputfile}
 ./mycmsswlink/src/UserCode/mschen/LandS/test/lands.exe --PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09  -d ${datacard1} ${datacard2} ${datacard3} ${datacard4} --doExpectation 1 -t ${nToys} --seed ${myseed} -n ${myjobname} >& ${outputfile}
 
 exit 0
