@@ -16,6 +16,8 @@
 
 using namespace std;
 
+bool bPaperStatus = true; // Set to true if you want paper style figures
+
 class ControlPlot {
 public:
   ControlPlot(string label, string sourceHisto);
@@ -542,6 +544,7 @@ void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, doubl
   //hHW->Scale((1.0 - br)*br*2.0);
   TH1* hData = fData->getPlot();
   hData->SetLineWidth(2);
+  hData->SetLineColor(kBlack);
   hData->SetMarkerStyle(20);
   hData->SetMarkerSize(1.2);
   // Make stacks
@@ -751,7 +754,10 @@ void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, doubl
     entry = leg->AddEntry(hBkgRelUncert, "stat. #oplus syst. uncert.", "F");
   leg->Draw();
 
-  TLatex* tex = new TLatex(0.62,0.945,"CMS Preliminary");
+  string myTitle = "CMS Preliminary";
+  if (bPaperStatus)
+    myTitle = "CMS";
+  TLatex* tex = new TLatex(0.62,0.945,myTitle.c_str());
   tex->SetNDC();
   tex->SetTextFont(43);
   tex->SetTextSize(27);
@@ -909,7 +915,7 @@ int main() {
   vector<Manager*> myManagers;
   
   // tau pT
-
+  /*
   TH1D* myTauPtFrame = new TH1D("tauPt","tauPt",40,0,400);
   QCDControlPlot myTauPtQCD(QCDprefix+"ControlPlots/SelectedTau_pT_AfterStandardSelections_taupT", true, "QCDMeasurement/QCDStandardSelections/AfterJetSelection", QCDprefix+"Leg2AfterTauIDWithRtau");
   EWKControlPlot myTauPtEWK(EWKprefix+"SelectedTau_pT_AfterStandardSelections", EWKeff1*EWKeff2);
@@ -921,6 +927,7 @@ int main() {
   EWKControlPlot myTauEtaEWK(EWKprefix+"SelectedTau_eta_AfterStandardSelections", EWKeff1*EWKeff2);
   Manager* myTauEta = new Manager("TauEta", myTauEtaFrame, &myTauEtaQCD, &myTauEtaEWK, signalprefix+"SelectedTau_eta_AfterStandardSelections", signalprefix+"SelectedTau_eta_AfterStandardSelections");
   myManagers.push_back(myTauEta);
+*/
   // tau phi
   /*TH1D* myTauPhiFrame = new TH1D("TauPhi","TauPhi",18,0.,180.);
   QCDControlPlot myTauPhiQCD(QCDprefix+"ControlPlots/SelectedTau_phi_AfterStandardSelections_taupT", true, "QCDMeasurement/QCDStandardSelections/AfterJetSelection", QCDprefix+"Leg2AfterTauIDWithRtau");
@@ -928,7 +935,7 @@ int main() {
   Manager* myTauPhi = new Manager("TauPhi", myTauPhiFrame, &myTauPhiQCD, &myTauPhiEWK, signalprefix+"SelectedTau_phi_AfterStandardSelections", signalprefix+"SelectedTau_phi_AfterStandardSelections");
   myManagers.push_back(myTauPhi);*/
   // rtau
-  TH1D* myTauRtauFrame = new TH1D("TauRtau","TauRtau",24,0.,1.2);
+  /*  TH1D* myTauRtauFrame = new TH1D("TauRtau","TauRtau",24,0.,1.2);
   QCDControlPlot myTauRtauQCD(QCDprefix+"ControlPlots/SelectedTau_Rtau_AfterStandardSelections_taupT", true, "QCDMeasurement/QCDStandardSelections/AfterJetSelection", QCDprefix+"Leg2AfterTauIDWithRtau");
   EWKControlPlot myTauRtauEWK(EWKprefix+"SelectedTau_Rtau_AfterStandardSelections", EWKeff1*EWKeff2);
   Manager* myTauRtau = new Manager("TauRtau", myTauRtauFrame, &myTauRtauQCD, &myTauRtauEWK, signalprefix+"SelectedTau_Rtau_AfterStandardSelections", signalprefix+"SelectedTau_Rtau_AfterStandardSelections");
@@ -951,7 +958,7 @@ int main() {
   EWKControlPlot myMuonPtEWK(EWKprefix+"IdentifiedMuonPt_AfterStandardSelections", EWKeff1*EWKeff2);
   Manager* myMuonPt = new Manager("MuonPt", myMuonPtFrame, &myMuonPtQCD, &myMuonPtEWK, signalprefix+"IdentifiedMuonPt_AfterStandardSelections", signalprefix+"IdentifiedMuonPt_AfterStandardSelections");
   myManagers.push_back(myMuonPt);
-
+*/
   // btag
   TH1D* myNjetsFrame = new TH1D("jets","jets",10,0,10); // FIXME
   QCDControlPlot myNjetsQCD(QCDprefix+"ControlPlots/Njets_taupT", true, "QCDMeasurement/QCDStandardSelections/AfterJetSelection", QCDprefix+"Leg2AfterTauIDWithRtau");
@@ -994,13 +1001,14 @@ int main() {
       return -1;
   }
   // Make plots 
-  myTauPt->makePlot(40, 249, 8e-2, 5e2, 1.2, "#tau-jet p_{T} (GeV/c)", "Events / 10 GeV/c", myBr, myMassPoint);
+  /*myTauPt->makePlot(40, 249, 8e-2, 5e2, 1.2, "#tau-jet p_{T} (GeV/c)", "Events / 10 GeV/c", myBr, myMassPoint);
   myTauEta->makePlot(-2.3, 2.3, 8e-2, 9e2, 0.9, "#tau-jet #eta", "Events / 0.2", myBr, myMassPoint);
   //myTauPhi->makePlot(0, 180, 5e-1, 2e2, 0.5, "#tau #phi, ^{o}", "Events / 10^{o}", myBr, myMassPoint);
   myTauRtau->makePlot(0.0, 1.04, 5e-2, 5e4, 0.3, "#tau-jet R_{#tau}", "Events / 0.1", myBr, myMassPoint);
   myTauLeadingTrackPt->makePlot(20, 249, 5e-2, 1e3, 0.5, "#tau-jet leading charged particle p_{T} (GeV/c)", "Events / 10 GeV/c", myBr, myMassPoint);
   myElectronPt->makePlot(0, 250, 5e-3, 1e3, 0.5, "Identified isolated electron p_{T}, GeV/c", "Events / 2 GeV/c", myBr, myMassPoint);
   myMuonPt->makePlot(0, 250, 5e-3, 1e3, 0.5, "Identified isolated muon p_{T}, GeV/c", "Events / 2 GeV/c", myBr, myMassPoint);
+  */
   myMet->makePlot(0, 449, 2e-2, 5e2, 0.7, "Uncorrected PF E_{T}^{miss} (GeV)", "Events / 25 GeV", myBr, myMassPoint);
   myNjets->makePlot(3, 7.9, 5e-3, 5e3, 0.7, "Number of selected jets", "Events", myBr, myMassPoint);
   myNBjets->makePlot(0, 4.9, 2e-1, 1.1e3, 0.5, "Number of selected b jets", "Events", myBr, myMassPoint);
@@ -1008,11 +1016,15 @@ int main() {
 
   // Make selection flow plot
   int nbins = 5;
+  if (bPaperStatus)
+    nbins = 4;
+
   TH1* hSelectionFlowFrame = new TH1D("SelectionFlow","SelectionFlow",nbins,0,nbins);
-  hSelectionFlowFrame->GetXaxis()->SetBinLabel(1, "N_{jets}");
-  hSelectionFlowFrame->GetXaxis()->SetBinLabel(2, "E_{T}^{miss}");
-  hSelectionFlowFrame->GetXaxis()->SetBinLabel(3, "N_{b jets}");
+  hSelectionFlowFrame->GetXaxis()->SetBinLabel(1, "#tau_{h}+#geq3j"); //"N_{jets}");
+  hSelectionFlowFrame->GetXaxis()->SetBinLabel(2, "E_{T}^{miss}>50");
+  hSelectionFlowFrame->GetXaxis()->SetBinLabel(3, "#geq1 btags");//"N_{b jets}");
   hSelectionFlowFrame->GetXaxis()->SetBinLabel(4, "#Delta#phi<160^{o}");
+  hSelectionFlowFrame->SetXTitle("Step");
   if (nbins >= 5)
     hSelectionFlowFrame->GetXaxis()->SetBinLabel(5, "#Delta#phi<130^{o}");
   TH1* hSelectionFlowQCD = dynamic_cast<TH1*>(hSelectionFlowFrame->Clone("SelectionFlowQCD"));
@@ -1029,7 +1041,7 @@ int main() {
     addEntryToSelectionFlow(myDeltaPhi,5,hSelectionFlowQCD,hSelectionFlowEWK,hSelectionFlowFakes,hSelectionFlowHH,hSelectionFlowHW,hSelectionFlowData, 0., 130.);
   Manager* mySelectionFlow = new Manager("SelectionFlow",hSelectionFlowFrame,hSelectionFlowQCD,hSelectionFlowEWK,hSelectionFlowFakes,hSelectionFlowHH,hSelectionFlowHW,hSelectionFlowData);
   mySelectionFlow->setRelativeUncertainty(-1, 0.038, 0.131, 0.241, 0., 0.); // removing btag uncertainty makes very little difference
-  mySelectionFlow->makePlot(0, nbins, 1, 2e3*1.5, 0.3, "", "Events", myBr, myMassPoint, !false);
+  mySelectionFlow->makePlot(0, nbins, 1, 4e3*1.5, 0.3, "Step", "Events", myBr, myMassPoint, !false);
   /*
   TFile* myOutFile = TFile::Open("controlPlots.root","RECREATE");
   myOutFile->cd();
