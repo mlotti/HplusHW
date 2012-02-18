@@ -33,7 +33,7 @@ dirEmbs_120110 = [
     "../multicrab_analysis_v13_3_seedTest3_Run2011A_120110_210157",
     "../multicrab_analysis_v13_3_seedTest4_Run2011A_120110_211348",
     "../multicrab_analysis_v13_3_seedTest5_Run2011A_120110_212548",
-    "../multicrab_analysis_v13_3_seedTest6_Run2011A_120126_211602"
+    "../multicrab_analysis_v13_3_seedTest6_Run2011A_120126_211602",
     "../multicrab_analysis_v13_3_seedTest7_Run2011A_120110_214901",
     "../multicrab_analysis_v13_3_seedTest8_Run2011A_120110_220005",
     "../multicrab_analysis_v13_3_seedTest9_Run2011A_120110_221143",

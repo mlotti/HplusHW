@@ -506,6 +506,22 @@ class DatasetsMany:
 
         return (histo, gr) # Average histogram, min/max graph
 
+    def getEfficiency(self, datasetName, numerator, denominator):
+        effs = []
+        for dm in self.datasetManagers:
+            ds = dm.getDataset(datasetName)
+            num = ds.getDatasetRootHisto(numerator).getHistogram()
+            den = ds.getDatasetRootHisto(denominator).getHistogram()
+
+            eff = ROOT.TEfficiency(num, den)
+            effs.append(eff)
+
+        # Here we use merging, as the trials are just about extending statistics
+        result = effs[0]
+        for e in effs[1:]:
+            result.Add(e)
+        return result
+
     def hasHistogram(self, datasetName, name):
         has = True
         for dm in self.datasetManagers:

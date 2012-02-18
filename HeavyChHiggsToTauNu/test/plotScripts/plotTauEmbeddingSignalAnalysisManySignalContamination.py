@@ -58,8 +58,8 @@ def main():
         datasetMgr.append(ttjets2)
         datasetMgr.merge("EWKnoTT", ["WJets", "DYJetsToLL", "SingleTop", "Diboson"], keepSources=True)
         datasetMgr.merge("EWKScaled", ["EWKnoTT", "TTJets2"])
-        for mass in [80, 100]:
-#        for mass in [80, 90, 100, 120, 140, 150, 155, 160]:
+#        for mass in [80, 100]:
+        for mass in [80, 90, 100, 120, 140, 150, 155, 160]:
             datasetMgr.merge("EWKSignal_M%d"%mass, ["TTToHplus_M%d"%mass, "EWKScaled"], keepSources=True)
     datasetsEmb.forEach(addSignal)
 
