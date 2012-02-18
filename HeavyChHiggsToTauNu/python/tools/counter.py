@@ -426,7 +426,7 @@ def counterEfficiency(counterTable):
             result.setCount(irow, icol, value)
     return result
 
-def efficiencyColumn(name, column):
+def efficiencyColumnErrorPropagation(name, column):
     origRownames = column.getRowNames()
     rows = []
     rowNames = []
@@ -448,6 +448,38 @@ def efficiencyColumn(name, column):
             rows.append(value)
             rowNames.append(origRownames[irow])
     return CounterColumn(name, rowNames, rows)
+
+def efficiencyColumnNormalApproximation(name, column):
+    # also approximate that p is small, so sigma = sqrt(Npassed)/sqrt(Ntotal)
+    origRownames = column.getRowNames()
+    rows = []
+    rowNames = []
+
+    prev = None
+    for irow in xrange(0, column.getNrows()):
+        count = column.getCount(irow)
+        value = None
+        if count != None and prev != None:
+            try:
+                eff = count.value() / prev.value()
+                unc = count.uncertainty() / prev.value()
+
+                value = dataset.Count(eff, unc)
+            except ZeroDivisionError:
+                pass
+        prev = count
+        if value != None:
+            rows.append(value)
+            rowNames.append(origRownames[irow])
+    return CounterColumn(name, rowNames, rows)
+    
+
+def efficiencyColumn(name, column, method="normalApproximation"):
+    return {
+        "normalApproximation": efficiencyColumnNormalApproximation,
+        "errorPropagation": efficiencyColumnErrorPropagation
+    }[method](name, column)
+
 
 def sumColumn(name, columns):
     """Create a new CounterColumn as the sum of the columns."""

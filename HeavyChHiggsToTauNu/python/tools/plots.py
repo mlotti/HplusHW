@@ -821,6 +821,7 @@ class PlotRatioBase:
     def __init__(self):
         self.ratioPlotObjectsBefore = []
         self.ratioPlotObjectsAfter = []
+        self.ratios = []
 
     def prependPlotObjectToRatio(self, obj, option=""):
         self.ratioPlotObjectsBefore.append( (obj, option) )
@@ -829,7 +830,7 @@ class PlotRatioBase:
         self.ratioPlotObjectsAfter.append( (obj, option) )
 
     def addCutBoxAndLineToRatio(self, *args, **kwargs):
-        if not hasattr(self, "ratios"):
+        if len(self.ratios) == 0:
             return
 
         objs = _createCutBoxAndLine(self.getFrame2(), *args, **kwargs)
@@ -852,14 +853,21 @@ class PlotRatioBase:
     def getPad2(self):
         return self.cf.pad2
 
+    def setRatios(self, ratios):
+        self.ratios = ratios
+
+    def appendRatio(self, ratio):
+        self.ratios.append(ratio)
+
+    def extendRatios(self, ratios):
+        self.ratios.extend(ratios)
+
     def _createFrameRatio(self, filename, numerator, denominator, ytitle, invertRatio=False, ratioIsBinomial=False, **kwargs):
         (num, denom) = (numerator, denominator)
         if invertRatio:
             (num, denom) = (denom, num)
 
-        self.ratios = [
-            _createRatio(num, denom, ytitle, isBinomial=ratioIsBinomial)
-            ]
+        self.setRatios([_createRatio(num, denom, ytitle, isBinomial=ratioIsBinomial)])
         self._createFrame(filename, **kwargs)
 
     def _createFrameRatioMany(self, filename, numerators, denominator, invertRatio=False, ratioIsBinomial=False, **kwargs):
@@ -870,7 +878,7 @@ class PlotRatioBase:
                 (num, denom) = (denom, num)
             ratio = _createRatio(num, denom, "Ratio", isBinomial=ratioIsBinomial)
             copyStyle(num, ratio)
-            self.ratios.append(ratio)
+            self.appendRatio(ratio)
 
         self._createFrame(filename, **kwargs)
 
@@ -881,7 +889,7 @@ class PlotRatioBase:
         self.coverPadOpts = coverPadOpts
 
     def _draw(self):
-        if not hasattr(self, "ratios"):
+        if len(self.ratios) == 0:
             return
 
         self.cf.canvas.cd(2)
