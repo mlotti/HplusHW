@@ -22,6 +22,9 @@ doSummerPAS = True
 # Perform b tagging scanning
 doBTagScan = False
 
+# fill tree for btagging eff study
+doBTagTree = False
+
 # Perform Rtau scanning
 doRtauScan = False
 
@@ -159,6 +162,13 @@ if options.tauEmbeddingInput != 0:
                                                                                    enableIsolation=applyIsolation))
 if doTauEmbeddingLikePreselection:
     additionalCounters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.commonSequence, param))
+
+if doBTagTree:
+    param.tree.fillNonIsoLeptonVars = cms.untracked.bool(True)
+    param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
+    param.MET.METCut = cms.untracked.double(0.0)
+    param.bTagging.discriminatorCut = cms.untracked.double(-999)
+    param.GlobalMuonVeto.MuonPtCut = cms.untracked.double(999)
 
 # Signal analysis module for the "golden analysis"
 import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
