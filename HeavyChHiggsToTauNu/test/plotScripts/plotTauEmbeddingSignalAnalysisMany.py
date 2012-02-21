@@ -79,20 +79,27 @@ def main():
     #histograms.createLegend.moveDefaults(dx=-0.18, dy=0.05, dh=-0.05)
 
     tauEmbedding.normalize=True
+    #tauEmbedding.normalize=False
     tauEmbedding.era = "Run2011A"
+
+    def mergeEWK(datasets):
+        datasets.merge("EWKMC", ["WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson", "WW"], keepSources=True)
+        #datasets.merge("EWKMC", ["WJets", "TTJets"], keepSources=True)
+#    mergeEWK(datasetsSig)
+#    datasetsEmb.forEach(mergeEWK)
 
     datasetsEmbCorrected = result.DatasetsDYCorrection(datasetsEmb, datasetsSig, analysisEmb, analysisSig)
     datasetsResidual = result.DatasetsResidual(datasetsEmb, datasetsSig, analysisEmb, analysisSig, ["DYJetsToLL", "WW"])
 
     doPlots(datasetsEmb)
     #doPlots(datasetsEmbCorrected)
-    doPlotsWTauMu(datasetsEmb, "TTJets", True)
-    doPlotsWTauMu(datasetsEmb, "TTJets", False)
+#    doPlotsWTauMu(datasetsEmb, "TTJets", True)
+#    doPlotsWTauMu(datasetsEmb, "TTJets", False)
 
-    #doCounters(datasetsEmb)
+#    doCounters(datasetsEmb)
     #doCounters(datasetsEmbCorrected)
 
-    #doCountersResidual(datasetsResidual)
+#    doCountersResidual(datasetsResidual)
 
     #doCountersOld(datasetsEmb)
 
@@ -108,6 +115,9 @@ def doPlotsWTauMu(datasetsEmb, name, btag=True):
 
     (hall, tmp) = datasetsEmb.getHistogram(name, tdMt.clone(selection=selection))
     (hpure, tmp) = datasetsEmb.getHistogram(name, tdMt.clone(selection=And(selection, "abs(temuon_mother_pdgid) == 24")))
+
+    tdEff = tdMt.clone(weight="", varexp=tdMt.varexp.replace("tmp", "tmpeff"))
+    heff = datasetsEmb.getEfficiency(name, tdEff.clone(selection=And(selection, "abs(temuon_mother_pdgid) == 24")), tdEff.clone(selection=selection))
 
     hall.SetName("All")
     hpure.SetName("Pure")
@@ -136,13 +146,24 @@ def doPlotsWTauMu(datasetsEmb, name, btag=True):
 
     hpureErr = hpure.Clone("PureErr")
     hpureErr.SetFillColor(ROOT.kRed-7)
-    hpureErr.SetFillStyle(3004)
+    hpureErr.SetFillStyle(3005)
     hpureErr.SetMarkerSize(0)
     p.prependPlotObject(hpureErr, "E2")
 
-
-    p.createFrame(fname, createRatio=True, invertRatio=True, ratioIsBinomial=True, opts2={"ymin": 0.9, "ymax": 1.05})
+    p.createFrame(fname, createRatio=True, opts2={"ymin": 0.9, "ymax": 1.05})
+    styles.getDataStyle().apply(heff)
+    p.setRatios([heff])
+    xmin = p.frame.GetXaxis().GetXmin()
+    xmax = p.frame.GetXaxis().GetXmax()
+    val = 1-0.038479
+    l = ROOT.TLine(xmin, val, xmax, val)
+    l.SetLineWidth(2)
+    l.SetLineColor(ROOT.kBlue)
+    l.SetLineStyle(4)
+    p.prependPlotObjectToRatio(l)
+    p.appendPlotObjectToRatio(histograms.PlotText(0.65, 0.61, "1-0.038", size=18, color=ROOT.kBlue))
     p.getFrame2().GetYaxis().SetTitle("W#rightarrow#mu fraction")
+
     p.setLegend(histograms.moveLegend(histograms.createLegend()))
     tmp = hpureErr.Clone("tmp")
     tmp.SetFillColor(ROOT.kBlack)
@@ -152,14 +173,14 @@ def doPlotsWTauMu(datasetsEmb, name, btag=True):
 
     p.frame.GetXaxis().SetTitle("m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})")
     p.frame.GetYaxis().SetTitle("Events / %.0f GeV/c^{2}" % p.binWidth())
-    p.appendPlotObject(histograms.PlotText(0.5, 0.9, name, size=18))
+    p.appendPlotObject(histograms.PlotText(0.5, 0.9, plots._legendLabels.get(name, name), size=18))
     p.draw()
     histograms.addCmsPreliminaryText()
     histograms.addEnergyText()
     p.save()
 
 def drawPlot(*args, **kwargs):
-    tauEmbeddingPlot.drawPlot(*args, normalize=False, **kwargs)
+    tauEmbeddingPlot.drawPlot(normalize=False, *args, **kwargs)
 
 def doPlots(datasetsEmb):
     datasetNames = datasetsEmb.getAllDatasetNames()
@@ -239,8 +260,19 @@ def doPlots(datasetsEmb):
         ("5AfterDeltaPhi130", "#Delta#phi(#tau jet, E_{T}^{miss}) < 130^{o}", [metCut, bTaggingCut, deltaPhi130Cut])]:
 
         p = createPlot(tdMt.clone(selection=And(*selection)))
-        p.appendPlotObject(histograms.PlotText(0.5, 0.55, label, size=20))
-        drawPlot(p, prefix+"transverseMass_"+name, "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts={"ymax": 36}, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}", log=False)
+        h = p.histoMgr.getHisto("Data").getRootHisto()
+        s = ""
+        for bin in xrange(1, h.GetNbinsX()+1):
+            val = h.GetBinContent(bin)
+            err = h.GetBinError(bin)
+            if val != 0:
+                s += "%.2f " % (err/val*100)
+            else:
+                s += "0 "
+        print "%s rel. stat. unc. %s" % (name, s)
+                
+        p.appendPlotObject(histograms.PlotText(0.5, 0.62, label, size=20))
+        drawPlot(p, prefix+"transverseMass_"+name, "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts={"ymax": 32}, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}", log=False)
 
     return
 
@@ -320,7 +352,8 @@ def doCounters(datasetsEmb):
         eventCounter.mainCounterAppendRow("BTagging+CaloMet", td2)
         eventCounter.mainCounterAppendRow("BTagging+CaloMet(NoHF)", td3)
 
-    (mainTable, mainTableChi2) = eventCounter.getMainCounterTableFit()
+    #(mainTable, mainTableChi2) = eventCounter.getMainCounterTableFit()
+    mainTable = eventCounter.getMainCounterTable()
 
     ewkDatasets = ["WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson"]
     allDatasets = None
@@ -332,7 +365,7 @@ def doCounters(datasetsEmb):
             table.insertColumn(2, counter.sumColumn("MCSum", [table.getColumn(name=name) for name in allDatasets]))
     ewkSum(mainTable)
     cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.3f'))
-    print mainTableChi2.format(cellFormat)
+    #print mainTableChi2.format(cellFormat)
     print mainTable.format(cellFormat)
 
     tauTable = eventCounter.getSubCounterTable("TauIDPassedEvt::tauID_HPSTight")
@@ -450,6 +483,10 @@ def doCountersResidual(datasetsResidual):
 
     names = ["Data", "DYJetsToLL residual", "WW residual"]
     mainTable.insertColumn(1, counter.sumColumn("Data+residual", [mainTable.getColumn(name=name) for name in names]))
+
+    if "EWKMC" in datasetsResidual.getAllDatasetNames():
+        names = ["EWKMC", "DYJetsToLL residual", "WW residual"]
+        mainTable.insertColumn(3, counter.sumColumn("EWKMC+residual", [mainTable.getColumn(name=name) for name in names]))
 
     cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.3f'))
     print mainTable.format(cellFormat)

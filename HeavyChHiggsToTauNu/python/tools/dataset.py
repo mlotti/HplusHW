@@ -432,7 +432,8 @@ class TreeDraw:
             nentries = tree.GetEntries(selection)
             h = ROOT.TH1F("nentries", "Number of entries by selection %s"%selection, 1, 0, 1)
             h.SetDirectory(0)
-            h.Sumw2()
+            if len(self.weight) > 0:
+                h.Sumw2()
             h.SetBinContent(1, nentries)
             h.SetBinError(1, math.sqrt(nentries))
             return h
@@ -446,7 +447,10 @@ class TreeDraw:
         
         # e to have TH1.Sumw2() to be called before filling the histogram
         # goff to not to draw anything on the screen
-        nentries = tree.Draw(varexp, selection, "e goff")
+        opt = ""
+        if len(self.weight) > 0:
+            opt = "e "
+        nentries = tree.Draw(varexp, selection, opt+"goff")
         h = tree.GetHistogram()
         if h != None:
             h = h.Clone(h.GetName()+"_cloned")

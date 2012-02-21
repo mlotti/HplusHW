@@ -53,12 +53,12 @@ dirEmbsWjets = [
     "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest29_Run2011A_120212_112610",
 ]
 
-onlyWjets = True
-#onlyWjets = False
-normalize = True
-#normalize = False
-#mcEvents = True
-mcEvents = False
+#onlyWjets = True
+onlyWjets = False
+#normalize = True
+normalize = False
+mcEvents = True
+#mcEvents = False
 lumi = 2173.395000
 
 analysisEmb = "signalAnalysisCaloMet60TEff"
@@ -94,7 +94,7 @@ def main():
             datasets.remove(filter(lambda n: n != "WJets_TuneZ2_Summer11", datasets.getAllDatasetNames()))
         else:
             if mcEvents:
-                datasets.remove(filter(lambda n: n != "WJets_TuneZ2_Summer11" and n != "TTJets_TuneZ2_Summer11" and n != "Data", datasets.getAllDatasetNames()))
+                datasets.remove(filter(lambda n: n != "WJets_TuneZ2_Summer11" and n != "TTJets_TuneZ2_Summer11" and not "SingleMu" in n, datasets.getAllDatasetNames()))
             datasets.loadLuminosities()
         datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
         datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
@@ -182,14 +182,18 @@ def doPlots(table):
     for icol in xrange(table.getNcolumns()):
         name = table.getColumnNames()[icol]
         label = plots._legendLabels.get(name, name)
+        if name != "Data":
+            label += " MC"
         h = ROOT.TH1F(name, name, nrows, 0, nrows)
         h2 = ROOT.TH1F(name+"_dist", name, *(binning.get(name, (10, 0, 100))))
+        mean = dataset.Count(0, 0)
         for irow in xrange(nrows):
             count = table.getCount(irow, icol)
             h.SetBinContent(irow+1, count.value())
             h.SetBinError(irow+1, count.uncertainty())
             h2.Fill(count.value())
-
+            mean.add(count)
+        mean = dataset.Count(mean.value()/nrows, mean.uncertainty()/nrows)
 
         h.Fit("fitFunction")
 
@@ -221,7 +225,11 @@ def doPlots(table):
         p.histoMgr.setHistoDrawStyle(name, "EP")
         p.createFrame("fluctuation_"+name, opts={"ymin": 0, "ymaxfactor": 1.2, "nbins": nrows})
         p.frame.GetXaxis().SetTitle("Embedding trial number")
-        p.frame.GetYaxis().SetTitle("Event yield")
+        ylabel = "MC"
+        if name == "Data":
+            ylabel = "Data"
+        ylabel += " events"
+        p.frame.GetYaxis().SetTitle(ylabel)
         for irow in xrange(nrows):
             p.frame.GetXaxis().SetBinLabel(irow+1, "%d"%(irow+1))
 
@@ -231,26 +239,36 @@ def doPlots(table):
         leg = histograms.moveLegend(histograms.createLegend(), dx=-0.05, dy=-0.6, dh=-0.15)
         leg.AddEntry(h, "Trial values", "P")
 
-        def createLine(val, st=1):
+        def createLine(val, st=1, col=ROOT.kRed):
             l = ROOT.TLine(xmin, val, xmax, val)
             l.SetLineWidth(2)
-            l.SetLineColor(ROOT.kRed)
             l.SetLineStyle(st)
+            l.SetLineColor(col)
             return l
 
         fv = createLine(value)
         leg.AddEntry(fv, "Fitted value", "L")
         p.appendPlotObject(fv)
-        fe = createLine(value+error, ROOT.kDashed)
-        leg.AddEntry(fe, "Fit uncertainty", "L")
-        p.appendPlotObject(fe)
-        p.appendPlotObject(createLine(value-error, ROOT.kDashed))
+        # fe = createLine(value+error, ROOT.kDashed)
+        # leg.AddEntry(fe, "Fit uncertainty", "L")
+        # p.appendPlotObject(fe)
+        # p.appendPlotObject(createLine(value-error, ROOT.kDashed))
+        v = createLine(mean.value(), col=ROOT.kBlue)
+        leg.AddEntry(v, "Mean", "L")
+        p.appendPlotObject(v)
+        ve = createLine(mean.value()+mean.uncertainty(), st=ROOT.kDashed, col=ROOT.kBlue)
+        leg.AddEntry(ve, "Mean uncertainty", "L")
+        p.appendPlotObject(ve)
+        p.appendPlotObject(createLine(mean.value()-mean.uncertainty(), st=ROOT.kDashed, col=ROOT.kBlue))
+
         p.legend = leg
 
         p.appendPlotObject(histograms.PlotText(0.5, 0.2, label, size=20))
         p.draw()
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
+        if name == "Data":
+            histograms.addLuminosityText(None, None, lumi)
         p.save()
 
         ###############
@@ -272,7 +290,7 @@ def doPlots(table):
         p = plots.PlotBase([h2])
         p.histoMgr.setHistoDrawStyle(name+"_dist", "HIST")
         p.createFrame("fluctuation_"+name+"_dist", opts={"ymin": 0, "ymaxfactor": 1.4, "nbins": nrows})
-        p.frame.GetXaxis().SetTitle("Event yield")
+        p.frame.GetXaxis().SetTitle(ylabel)
         p.frame.GetYaxis().SetTitle("Occurrances")
 
         ymin = p.frame.GetYaxis().GetXmin()
@@ -291,14 +309,14 @@ def doPlots(table):
 
         p.appendPlotObject(h2, "FUNC")
         p.appendPlotObject(stat)
-        p.appendPlotObject(histograms.PlotText(0.78, 0.88, label, size=20))
-        fv = createLine2(value)
-        leg.AddEntry(fv, "Fit of values", "L")
-        p.appendPlotObject(fv)
-        fe = createLine2(value+error, ROOT.kDashed)
-        leg.AddEntry(fe, "Fit of values unc.", "L")
-        p.appendPlotObject(fe)
-        p.appendPlotObject(createLine2(value-error, ROOT.kDashed))
+        p.appendPlotObject(histograms.PlotText(0.75, 0.88, label, size=20))
+        # fv = createLine2(value)
+        # leg.AddEntry(fv, "Fit of values", "L")
+        # p.appendPlotObject(fv)
+        # fe = createLine2(value+error, ROOT.kDashed)
+        # leg.AddEntry(fe, "Fit of values unc.", "L")
+        # p.appendPlotObject(fe)
+        # p.appendPlotObject(createLine2(value-error, ROOT.kDashed))
         p.legend = leg
 
         p.draw()

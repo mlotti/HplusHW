@@ -24,6 +24,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
+import plotMuonAnalysis as muonAnalysis
 
 # Configuration
 #analysis = "signalAnalysisRtau0"
@@ -76,9 +77,9 @@ tauEmbedding.normalize = normalize
 tauEmbedding.era = era
 
 countersWeighted = counters
-#countersWeighted = counters+"/weighted"
 if normalize:
     countersWeighted = counters+"/weighted"
+#countersWeighted = counters+"/weighted"
 
 tauPtOutput ="tauPt_ewk.root"
 mtOutput = "mt_ewk_lands.root"
@@ -139,7 +140,9 @@ def main():
 
 #    apply_v13_1_bugfix(datasets)
 
+    tauEmbedding.updateAllEventsToWeighted(datasets)
     plots.mergeRenameReorderForDataMC(datasets)
+    datasets.remove(["W3Jets"])
 
 #    datasets.remove(["DYJetsToLL", "SingleTop", "Diboson", "QCD_Pt20_MuEnriched"])
 
@@ -475,11 +478,11 @@ def doCounters(datasets, mcLumi=None):
 
     table = eventCounter.getMainCounterTable()
     mainTable = table
-    #muonAnalysis.addSumColumn(table)
+    muonAnalysis.addSumColumn(table)
     mainTable.insertColumn(2, counter.sumColumn("EWKMCsum", [mainTable.getColumn(name=name) for name in ewkDatasets]))
 #    table = eventCounter.getSubCounterTable("Trigger")
     #    muonAnalysis.reorderCounterTable(table)
-#    muonAnalysis.addDataMcRatioColumn(table)
+    muonAnalysis.addDataMcRatioColumn(table)
     if datasets.hasDataset("EWKSignal"):
         mainTable.insertColumn(7, counter.divideColumn("SignalFraction", mainTable.getColumn(name="TTToHplus_"+keepSignal), mainTable.getColumn(name="EWKSignal")))
 
@@ -490,7 +493,7 @@ def doCounters(datasets, mcLumi=None):
     print table.format(cellFormat)
 
     tauTable = eventCounter.getSubCounterTable("TauIDPassedEvt::tauID_HPSTight")
-    muonAnalysis.addSumColumn(tauTable)
+    #muonAnalysis.addSumColumn(tauTable)
     tauTable.insertColumn(2, counter.sumColumn("EWKMCsum", [tauTable.getColumn(name=name) for name in ewkDatasets]))
     print tauTable.format(cellFormat)
 

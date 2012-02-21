@@ -48,8 +48,13 @@ def main():
     tauEmbedding.normalize=False
     tauEmbedding.era="Run2011A"
 
-    doPlots(datasetsEmb, datasetsSig, "TTJets")
-    doPlots(datasetsEmb, datasetsSig, "WJets")
+#    doPlots(datasetsEmb, datasetsSig, "TTJets")
+#    doPlots(datasetsEmb, datasetsSig, "WJets")
+#    doCounters(datasetsEmb, datasetsSig, "TTJets")
+#    doCounters(datasetsEmb, datasetsSig, "WJets")
+#    doCounters(datasetsEmb, datasetsSig, "DYJetsToLL")
+#    doCounters(datasetsEmb, datasetsSig, "SingleTop")
+    doCounters(datasetsEmb, datasetsSig, "Diboson")
 
 def doPlots(datasetsEmb2, datasetsSig2, datasetName):
     lumi = datasetsEmb2.getDataset("Data").getLuminosity()
@@ -152,6 +157,15 @@ def doPlots(datasetsEmb2, datasetsSig2, datasetName):
     #drawPlot(createPlot(td.clone(varexp="taus_p4.Pt()>>tmp(25,0,250)")),
     #         "tauPt"+postfix, "#tau-jet candidate p_{T} (GeV/c)", opts2={"ymin": 0, "ymax": 2})
 
+
+def doCounters(datasetsEmb2, datasetsSig2, datasetName):
+    lumi = datasetsEmb2.getDataset("Data").getLuminosity()
+
+    datasetsEmb = datasetsEmb2.deepCopy()
+    datasetsSig = datasetsSig2.deepCopy()
+
+    datasetsEmb.remove(filter(lambda name: name != datasetName, datasetsEmb.getAllDatasetNames()))
+    datasetsSig.remove(filter(lambda name: name != datasetName, datasetsSig.getAllDatasetNames()))
     # Counters
     eventCounterEmb = counter.EventCounter(datasetsEmb, counters=analysisEmb+"Counters")
     eventCounterSig = counter.EventCounter(datasetsSig, counters=analysisSig+"Counters")
@@ -164,6 +178,7 @@ def doPlots(datasetsEmb2, datasetsSig2, datasetName):
 
     counterEmb = eventCounterEmb.getMainCounter()
     counterSig = eventCounterSig.getMainCounter()
+    treeDraw = dataset.TreeDraw("dummy")
     tdEmb = treeDraw.clone(tree=analysisEmb+"/tree")
     tdSig = treeDraw.clone(tree=analysisSig+"/tree")
     selectionsCumulative = []

@@ -48,46 +48,46 @@ style6 = styles.StyleCompound([styles.Style(34, ROOT.kOrange-2), styles.StyleMar
 #    (base % (90, 32), "M=90, PU=32", style90_32)
 #]
 
+# base = "/mnt/flustre/mkortela/TTEffNtuples/tteffAnalysis_TTToHplusBWB_M-%s_7TeV-pythia6-tauola_Fall11_E7TeV_Ave%s_50ns_v2_v443_V00_09_16/"+pickEvents+"tteffAnalysis-hltpftaumedium-hpspftau.root"
+# dict_09_16 = {
+#     "M90_PU32" : (base % (90, 32), "M=90, PU=32", style90_32),
+#     "M160_PU32": (base % (160, 32), "M=160, PU=32", style160_32),
+#     "M90_PU23" : (base % (90, 23), "M=90, PU=23", style90_23),
+#     "M160_PU23": (base % (160, 23), "M=160, PU=23", style160_23),
+# }
+
+# base = "/mnt/flustre/mkortela/TTEffNtuples/tteffAnalysis_TTToHplusBWB_M-%s_7TeV-pythia6-tauola_Fall11_E7TeV_Ave%s_50ns_v2_v443_V00_09_16_noVertex/"+pickEvents+"tteffAnalysis-hltpftaumedium-hpspftau.root"
+# dict_09_16_noPV = {
+#     "M90_PU32" : (base % (90, 32), "M=90, PU=32", style90_32),
+#     "M160_PU32": (base % (160, 32), "M=160, PU=32", style160_32),
+#     "M90_PU23" : (base % (90, 23), "M=90, PU=23", style90_23),
+#     "M160_PU23": (base % (160, 23), "M=160, PU=23", style160_23),
+# }
+# base = "/mnt/flustre/mkortela/TTEffNtuples/tteffAnalysis_TTToHplusBWB_M-%s_7TeV-pythia6-tauola_Fall11_E7TeV_Ave%s_50ns_v2_v443_V00_09_16_vertexSelector/"+pickEvents+"tteffAnalysis-hltpftaumedium-hpspftau.root"
+# dict_09_16_vertexSelector = {
+#     "M90_PU32" : (base % (90, 32), "M=90, PU=32", style90_32),
+#     "M160_PU32": (base % (160, 32), "M=160, PU=32", style160_32),
+#     "M90_PU23" : (base % (90, 23), "M=90, PU=23", style90_23),
+#     "M160_PU23": (base % (160, 23), "M=160, PU=23", style160_23),
+# }
+
+# base = "/mnt/flustre/mkortela/TTEffNtuples/tteffAnalysis_TTToHplusBWB_M-%s_7TeV-pythia6-tauola_Fall11_E7TeV_Ave%s_50ns_v2_v443_V00_09_17_noVertex/"+pickEvents+"tteffAnalysis-hltpftaumedium-hpspftau.root"
+# dict_09_17_noPV = {
+#     "M90_PU32" : (base % (90, 32), "M=90, PU=32", style90_32),
+#     "M160_PU32": (base % (160, 32), "M=160, PU=32", style160_32),
+#     "M90_PU23" : (base % (90, 23), "M=90, PU=23", style90_23),
+#     "M160_PU23": (base % (160, 23), "M=160, PU=23", style160_23),
+# }
+# base = "/mnt/flustre/mkortela/TTEffNtuples/tteffAnalysis_TTToHplusBWB_M-%s_7TeV-pythia6-tauola_Fall11_E7TeV_Ave%s_50ns_v2_v443_V00_09_17_noVertex/"+pickEvents+"tteffAnalysis-hltpftau-hpspftau.root"
+# dict_09_17_loose = {
+#     "M90_PU32" : (base % (90, 32), "M=90, PU=32", style90_32),
+#     "M160_PU32": (base % (160, 32), "M=160, PU=32", style160_32),
+#     "M90_PU23" : (base % (90, 23), "M=90, PU=23", style90_23),
+#     "M160_PU23": (base % (160, 23), "M=160, PU=23", style160_23),
+# }
+
 pickEvents=""
 #pickEvents="picked_"
-base = "/mnt/flustre/mkortela/TTEffNtuples/tteffAnalysis_TTToHplusBWB_M-%s_7TeV-pythia6-tauola_Fall11_E7TeV_Ave%s_50ns_v2_v443_V00_09_16/"+pickEvents+"tteffAnalysis-hltpftaumedium-hpspftau.root"
-dict_09_16 = {
-    "M90_PU32" : (base % (90, 32), "M=90, PU=32", style90_32),
-    "M160_PU32": (base % (160, 32), "M=160, PU=32", style160_32),
-    "M90_PU23" : (base % (90, 23), "M=90, PU=23", style90_23),
-    "M160_PU23": (base % (160, 23), "M=160, PU=23", style160_23),
-}
-
-base = "/mnt/flustre/mkortela/TTEffNtuples/tteffAnalysis_TTToHplusBWB_M-%s_7TeV-pythia6-tauola_Fall11_E7TeV_Ave%s_50ns_v2_v443_V00_09_16_noVertex/"+pickEvents+"tteffAnalysis-hltpftaumedium-hpspftau.root"
-dict_09_16_noPV = {
-    "M90_PU32" : (base % (90, 32), "M=90, PU=32", style90_32),
-    "M160_PU32": (base % (160, 32), "M=160, PU=32", style160_32),
-    "M90_PU23" : (base % (90, 23), "M=90, PU=23", style90_23),
-    "M160_PU23": (base % (160, 23), "M=160, PU=23", style160_23),
-}
-base = "/mnt/flustre/mkortela/TTEffNtuples/tteffAnalysis_TTToHplusBWB_M-%s_7TeV-pythia6-tauola_Fall11_E7TeV_Ave%s_50ns_v2_v443_V00_09_16_vertexSelector/"+pickEvents+"tteffAnalysis-hltpftaumedium-hpspftau.root"
-dict_09_16_vertexSelector = {
-    "M90_PU32" : (base % (90, 32), "M=90, PU=32", style90_32),
-    "M160_PU32": (base % (160, 32), "M=160, PU=32", style160_32),
-    "M90_PU23" : (base % (90, 23), "M=90, PU=23", style90_23),
-    "M160_PU23": (base % (160, 23), "M=160, PU=23", style160_23),
-}
-
-base = "/mnt/flustre/mkortela/TTEffNtuples/tteffAnalysis_TTToHplusBWB_M-%s_7TeV-pythia6-tauola_Fall11_E7TeV_Ave%s_50ns_v2_v443_V00_09_17_noVertex/"+pickEvents+"tteffAnalysis-hltpftaumedium-hpspftau.root"
-dict_09_17_noPV = {
-    "M90_PU32" : (base % (90, 32), "M=90, PU=32", style90_32),
-    "M160_PU32": (base % (160, 32), "M=160, PU=32", style160_32),
-    "M90_PU23" : (base % (90, 23), "M=90, PU=23", style90_23),
-    "M160_PU23": (base % (160, 23), "M=160, PU=23", style160_23),
-}
-base = "/mnt/flustre/mkortela/TTEffNtuples/tteffAnalysis_TTToHplusBWB_M-%s_7TeV-pythia6-tauola_Fall11_E7TeV_Ave%s_50ns_v2_v443_V00_09_17_noVertex/"+pickEvents+"tteffAnalysis-hltpftau-hpspftau.root"
-dict_09_17_loose = {
-    "M90_PU32" : (base % (90, 32), "M=90, PU=32", style90_32),
-    "M160_PU32": (base % (160, 32), "M=160, PU=32", style160_32),
-    "M90_PU23" : (base % (90, 23), "M=90, PU=23", style90_23),
-    "M160_PU23": (base % (160, 23), "M=160, PU=23", style160_23),
-}
-
 def make_09_18(version="", iso=""):
     base = "/mnt/flustre/mkortela/TTEffNtuples/tteffAnalysis_TTToHplusBWB_M-%d_7TeV-pythia6-tauola_Fall11_E7TeV_Ave%d_50ns_v2_v443_V00_09_18%s/"+pickEvents+"tteffAnalysis-hltpftau%s-hpspftau.root"
     return {
@@ -124,7 +124,7 @@ outputDir = "triggerDevelopmentPlotsMediumCombined"
 
 offlineSelectionNoPt = And(
     "abs(PFTauEta) < 2.1",
-    "PFTauLeadChargedHadrCandPt > 20",
+#    "PFTauLeadChargedHadrCandPt > 20",
     "PFTauProng == 1",
     "PFTau_decayModeFinding > 0.5",
     "PFTau_againstElectronMedium > 0.5 && PFTau_againstMuonTight > 0.5",
@@ -141,6 +141,8 @@ offlineSelection40 = And(
     offlineSelectionNoPt,
     "PFTauPt > 40",
 )
+#offlineRtau = "PFTauLeadChargedHadrCandPt / PFTauPt > 0.7"
+offlineRtau = "PFTauLeadChargedHadrCandPt > 20"
 
 offlineEventSelection = And(
     "Sum$(%s) >= 1" % offlineSelection40,
@@ -219,15 +221,20 @@ def main():
         doPlots(25, 35, 20, 40, 70, l25Prongs=3)
         doPlots(25, 35, 20, 40, 70, l25Prongs=2)
 
-        doPlots(25, 35, 20, 40, 70, useMHT=True)
-        doPlots(25, 35, 20, 40, 75, useMHT=True)
+        doPlots(25, 35, 20, 40, 40, l25Prongs=4, hltMht=60)
+        doPlots(25, 35, 20, 40, 45, l25Prongs=4, hltMht=60)
+        doPlots(25, 35, 20, 40, 50, l25Prongs=4, hltMht=60)
+        doPlots(25, 35, 20, 40, 55, l25Prongs=4, hltMht=60)
+        doPlots(25, 35, 20, 40, 60, l25Prongs=4, hltMht=60)
+#        doPlots(25, 35, 20, 40, 70, useMHT=True)
+#        doPlots(25, 35, 20, 40, 75, useMHT=True)
     else:
         doPlots2("M90_PU32")
         doPlots2("M160_PU32")
         doPlots2("M90_PU23")
         doPlots2("M160_PU23")
 
-def doPlots(l2JetPt, l25TauPt, l25TrackPt, l1Met, hltMet, useMHT=False, l25Prongs=None, mediumIsolation=False):
+def doPlots(l2JetPt, l25TauPt, l25TrackPt, l1Met, hltMet, hltMht=None, l25Prongs=None, mediumIsolation=False):
     # offlineSelectionOther = And(
     #     "PFMET_ET > 50",
     #     "Sum$(PFJetPt > 30) >= (3+Sum$(%s && PFTauJetMinDR < 0.5))" % offlineSelection
@@ -242,8 +249,8 @@ def doPlots(l2JetPt, l25TauPt, l25TrackPt, l1Met, hltMet, useMHT=False, l25Prong
     if l25Prongs != None:
         trigger += "_Prong%d" % l25Prongs
     triggerMet = "L1_ETM%d_%s_MET%d" % (l1Met, trigger, hltMet)
-    if useMHT:
-        triggerMet = triggerMet.replace("MET", "PFMHT")
+    if hltMht != None:
+        triggerMet += "_PFMHT%d"%hltMht
 
     l2Selection = l2Selection_template % l2JetPt
 
@@ -256,8 +263,9 @@ def doPlots(l2JetPt, l25TauPt, l25TrackPt, l1Met, hltMet, useMHT=False, l25Prong
 
     l1MetSelection = l1MetSelection_template % l1Met
     l2MetSelection = l2MetSelection_template % hltMet
-    if useMHT:
-        l2MetSelection = l2MhtSelection_template % hltMet
+    l3MetSelection = ""
+    if hltMht != None:
+        l3MetSelection = l2MhtSelection_template % hltMet
 
     if mediumIsolation:
         plotter = Plotter([(tauEfficiency.EfficiencyCalculator([f]), l, p) for f, l, p in files_medium], outputDir)
@@ -351,7 +359,7 @@ def doPlots(l2JetPt, l25TauPt, l25TrackPt, l1Met, hltMet, useMHT=False, l25Prong
         for p in [plotter,
 #                  plotter_noPV, plotter_vertexSelector
                   ]:
-            p.printEfficiency("Sum$(%s)>=1" % And(offlineSelection, l1Selection, l2Selection, l25Selection, l3Selection, l3SelectionProngs, l1MetSelection, l2MetSelection),
+            p.printEfficiency("Sum$(%s)>=1" % And(offlineSelection, l1Selection, l2Selection, l25Selection, isoToMedium(l3Selection, mediumIsolation), l3SelectionProngs, l1MetSelection, l2MetSelection, l3MetSelection),
                               "Sum$(%s)>=1" % offlineSelection)
 
 #    dopTau("PFTauPt>>hnumpt", "PFTauPt", xlabel_pt, offlineSelection, opts={"xmin": 0}, cutLine=[40])
@@ -438,13 +446,39 @@ def doPlots2(sample):
         (And(denom, l25Selection_trackPt_template%15), denom, "L2.5 leading track p_{T} < 15", style160_32),
         (And(denom, l25Selection_trackPt_template%20), denom, "L2.5 leading track p_{T} < 20", style5),
         ],
-                           xlabel=xlabel_pt, ylabel="Prong eff", opts={"xmin": 0, "ymin": 0.8, "ymax": 1.05}, cutLine=[40])
-    plotter.plotEfficiency(sample+"LeadTrackPt_NPV", "numGoodOfflinePV>>hnumpt", [
+                           xlabel=xlabel_pt, ylabel="Leading track pT eff", opts={"xmin": 0, "ymin": 0.8, "ymax": 1.05}, cutLine=[40])
+    denom = And(denom, "PFTauPt>40")
+    plotter.plotEfficiency(sample+"LeadTrackPt_NPV", "numGoodOfflinePV>>hnumpv", [
         (And(denom, l25Selection_trackPt_template%10), denom, "L2.5 leading track p_{T} < 10", style90_32),
         (And(denom, l25Selection_trackPt_template%15), denom, "L2.5 leading track p_{T} < 15", style160_32),
         (And(denom, l25Selection_trackPt_template%20), denom, "L2.5 leading track p_{T} < 20", style5),
         ],
-                           xlabel=xlabel_npv, ylabel="Leading track pT eff", opts={"xmin": 0, "ymin": 0.8, "ymax": 1.05}, cutLine=[40])
+                           xlabel=xlabel_npv, ylabel="Leading track pT eff", opts={"xmin": 0, "ymin": 0.8, "ymax": 1.05})
+
+    denom = And(offlineSelection, offlineRtau, l1Selection, l2Selection_template%25, l25Selection_reco, l25Selection_pt_template%35, l25Selection_trackFound, l3Selection)
+    plotter.plotEfficiency(sample+"LeadTrackPtRtau07_PFTauPt", "PFTauPt>>hnumpt", [
+        (And(denom, l25Selection_trackPt_template%10), denom, "L2.5 leading track p_{T} < 10", style90_32),
+        (And(denom, l25Selection_trackPt_template%15), denom, "L2.5 leading track p_{T} < 15", style160_32),
+        (And(denom, l25Selection_trackPt_template%20), denom, "L2.5 leading track p_{T} < 20", style5),
+        ],
+                           xlabel=xlabel_pt, ylabel="Leading track pT eff", opts={"xmin": 0, "ymin": 0.8, "ymax": 1.05}, cutLine=[40])
+
+    # denom = offlineSelection
+    # num = And(denom, l1Selection, l2Selection_template%25, l25Selection_reco, l25Selection_pt_template%35, l25Selection_trackFound, l3Selection)
+    # plotter.plotEfficiency(sample+"LeadTrackPt_L1HLT_PFTauPt", "PFTauPt>>hnumpt", [
+    #     (And(num, l25Selection_trackPt_template%10), denom, "L2.5 leading track p_{T} < 10", style90_32),
+    #     (And(num, l25Selection_trackPt_template%15), denom, "L2.5 leading track p_{T} < 15", style160_32),
+    #     (And(num, l25Selection_trackPt_template%20), denom, "L2.5 leading track p_{T} < 20", style5),
+    #     ],
+    #                        xlabel=xlabel_pt, ylabel="L1+HLT eff", opts={"xmin": 0, "ymin": 0.8, "ymax": 1.05}, cutLine=[40], moveLegend={"dy": -0.2})
+    # denom = And(denom, "PFTauPt>40")
+    # num = And(num, "PFTauPt>40")
+    # plotter.plotEfficiency(sample+"LeadTrackPt_L1HLT_NPV", "numGoodOfflinePV>>hnumpv", [
+    #     (And(num, l25Selection_trackPt_template%10), denom, "L2.5 leading track p_{T} < 10", style90_32),
+    #     (And(num, l25Selection_trackPt_template%15), denom, "L2.5 leading track p_{T} < 15", style160_32),
+    #     (And(num, l25Selection_trackPt_template%20), denom, "L2.5 leading track p_{T} < 20", style5),
+    #     ],
+    #                        xlabel=xlabel_npv, ylabel="L1+HLT eff", opts={"xmin": 0, "ymin": 0.8, "ymax": 1.05}, moveLegend={"dy": -0.2})
 
 
     # Vertex tests
@@ -544,7 +578,7 @@ def doPlots2(sample):
             (And(denom2, "L1MET>40 && HLTMHT_ET>60"), denom2, "L1_ETM40 & PFMHT > 60", style5),
             (And(denom2, "L1MET>40 && HLTMHT_ET>70"), denom2, "L1_ETM40 & PFMHT > 70", style6),
             ],
-                           xlabel=xlabel_npv, ylabel="MET/PFMHT eff",
+                           xlabel=xlabel_npv, ylabel="MET/PFMHT eff", opts={"ymin": 0, "ymax": 1.0},
                            moveLegend={"dy": -0.1}
                            )
 
@@ -561,18 +595,45 @@ def doPlots2(sample):
             (And(denom2, "L1MET>36 && HLTMET_ET>70"), denom2, "L1_ETM36 & MET > 70", style160_32),
             (And(denom2, "L1MET>40 && HLTMET_ET>70"), denom2, "L1_ETM40 & MET > 70", style5),
             ],
-                           xlabel=xlabel_npv, ylabel="MET/PFMHT eff",
+                           xlabel=xlabel_npv, ylabel="MET/PFMHT eff", opts={"ymin": 0, "ymax": 1.0},
                            moveLegend={"dy": -0.1}
                            )
-
-    plotter.plotEfficiency(sample+"L1ETM_METPFMHT_PFMET", "PFMET_ET>>hnummet",[
-            (And(denom, "L1MET>40 && HLTMET_ET>20 && HLTMHT_ET > 60"), denom, "L1_ETM40 & MET20 & PFMHT60", style90_32),
-            (And(denom, "L1MET>40 && HLTMET_ET>30 && HLTMHT_ET > 60"), denom, "L1_ETM40 & MET30 & PFMHT60", style160_32),
-            (And(denom, "L1MET>40 && HLTMET_ET>40 && HLTMHT_ET > 60"), denom, "L1_ETM40 & MET40 & PFMHT60", style5),
-            (And(denom, "L1MET>40 && HLTMET_ET>70"), denom, "L1_ETM40 & MET70 (ref)", style6),
+    plotter.plotEfficiency(sample+"L1ETM_MET_PFMHT3_PFMET", "PFMET_ET>>hnummet",[
+            (And(denom, "L1MET>30 && HLTMET_ET>50 && HLTMHT_ET>60"), denom, "L1_ETM30 & MET50 & PFMHT60", style90_32),
+            (And(denom, "L1MET>36 && HLTMET_ET>50 && HLTMHT_ET>60"), denom, "L1_ETM36 & MET50 & PFMHT60", style160_32),
+            (And(denom, "L1MET>40 && HLTMET_ET>50 && HLTMHT_ET>60"), denom, "L1_ETM40 & MET50 & PFMHT60", style5),
             ],
                            xlabel=xlabel_met, ylabel="MET/PFMHT eff",
                            cutLine=[50], moveLegend={"dy": -0.1}
+                           )
+    plotter.plotEfficiency(sample+"L1ETM_MET_PFMHT3_NPV", "numGoodOfflinePV>>hnumpv",[
+            (And(denom2, "L1MET>30 && HLTMET_ET>50 && HLTMHT_ET>60"), denom2, "L1_ETM30 & MET50 & PFMHT60", style90_32),
+            (And(denom2, "L1MET>36 && HLTMET_ET>50 && HLTMHT_ET>60"), denom2, "L1_ETM36 & MET50 & PFMHT60", style160_32),
+            (And(denom2, "L1MET>40 && HLTMET_ET>50 && HLTMHT_ET>60"), denom2, "L1_ETM40 & MET50 & PFMHT60", style5),
+            ],
+                           xlabel=xlabel_npv, ylabel="MET/PFMHT eff", opts={"ymin": 0, "ymax": 1.0},
+                           moveLegend={"dy": -0.1}
+                           )
+
+
+
+    plotter.plotEfficiency(sample+"L1ETM_METPFMHT_PFMET", "PFMET_ET>>hnummet",[
+            (And(denom, "L1MET>40 && HLTMET_ET>50 && HLTMHT_ET > 60"), denom, "L1_ETM40 & MET50 & PFMHT60", style90_32),
+            (And(denom, "L1MET>40 && HLTMET_ET>55 && HLTMHT_ET > 60"), denom, "L1_ETM40 & MET55 & PFMHT60", style160_32),
+            (And(denom, "L1MET>40 && HLTMET_ET>60 && HLTMHT_ET > 60"), denom, "L1_ETM40 & MET60 & PFMHT60", style5),
+            (And(denom, "L1MET>40 && HLTMET_ET>70"), denom, "L1_ETM40 & MET70", style6),
+            ],
+                           xlabel=xlabel_met, ylabel="MET/PFMHT eff",
+                           cutLine=[50], moveLegend={"dy": -0.1}
+                           )
+    plotter.plotEfficiency(sample+"L1ETM_METPFMHT_NPV", "numGoodOfflinePV>>hnumpv",[
+            (And(denom, "L1MET>40 && HLTMET_ET>50 && HLTMHT_ET > 60"), denom, "L1_ETM40 & MET50 & PFMHT60", style90_32),
+            (And(denom, "L1MET>40 && HLTMET_ET>55 && HLTMHT_ET > 60"), denom, "L1_ETM40 & MET55 & PFMHT60", style160_32),
+            (And(denom, "L1MET>40 && HLTMET_ET>60 && HLTMHT_ET > 60"), denom, "L1_ETM40 & MET60 & PFMHT60", style5),
+            (And(denom, "L1MET>40 && HLTMET_ET>70"), denom, "L1_ETM40 & MET70", style6),
+            ],
+                           xlabel=xlabel_npv, ylabel="MET/PFMHT eff",
+                           moveLegend={"dy": -0.1}
                            )
 
     denom = And(denom, "L1MET>40")

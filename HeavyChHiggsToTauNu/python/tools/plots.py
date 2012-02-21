@@ -627,6 +627,16 @@ def _createCutBoxAndLine(frame, cutValue, fillColor=18, box=True, line=True, **k
 
     return ret
 
+def _createHisto(rootObject, **kwargs):
+    if isinstance(rootObject, ROOT.TH1):
+        return histograms.Histo(rootObject, rootObject.GetName(), **kwargs)
+    elif isinstance(rootObject, ROOT.TGraph):
+        return histograms.HistoGraph(rootObject, rootObject.GetName(), **kwargs)
+    elif not isinstance(rootObject, histograms.Histo):
+        raise Exception("rootObject is not TH1, TGraph, nor histograms.Histo, it is %s" % type(rootObject).__name__)
+
+    return rootObject
+
 ## Base class for plots
 class PlotBase:
     ## Construct plot from DatasetManager and histogram name
@@ -821,6 +831,7 @@ class PlotRatioBase:
     def __init__(self):
         self.ratioPlotObjectsBefore = []
         self.ratioPlotObjectsAfter = []
+        self.ratios = []
 
     def prependPlotObjectToRatio(self, obj, option=""):
         self.ratioPlotObjectsBefore.append( (obj, option) )
@@ -829,7 +840,7 @@ class PlotRatioBase:
         self.ratioPlotObjectsAfter.append( (obj, option) )
 
     def addCutBoxAndLineToRatio(self, *args, **kwargs):
-        if not hasattr(self, "ratios"):
+        if len(self.ratios) == 0:
             return
 
         objs = _createCutBoxAndLine(self.getFrame2(), *args, **kwargs)
@@ -852,14 +863,27 @@ class PlotRatioBase:
     def getPad2(self):
         return self.cf.pad2
 
+    def setRatios(self, ratios):
+        self.ratios = []
+        self.extendRatios(ratios)
+
+    def _createRatioObject(self, ratio):
+        r = _createHisto(ratio)
+        r.setDrawStyle("EP")
+        return r
+
+    def appendRatio(self, ratio):
+        self.ratios.append(self._createRatioObject(ratio))
+
+    def extendRatios(self, ratios):
+        self.ratios.extend([self._createRatioObject(r) for r in ratios])
+
     def _createFrameRatio(self, filename, numerator, denominator, ytitle, invertRatio=False, ratioIsBinomial=False, **kwargs):
         (num, denom) = (numerator, denominator)
         if invertRatio:
             (num, denom) = (denom, num)
 
-        self.ratios = [
-            _createRatio(num, denom, ytitle, isBinomial=ratioIsBinomial)
-            ]
+        self.setRatios([_createRatio(num, denom, ytitle, isBinomial=ratioIsBinomial)])
         self._createFrame(filename, **kwargs)
 
     def _createFrameRatioMany(self, filename, numerators, denominator, invertRatio=False, ratioIsBinomial=False, **kwargs):
@@ -870,7 +894,7 @@ class PlotRatioBase:
                 (num, denom) = (denom, num)
             ratio = _createRatio(num, denom, "Ratio", isBinomial=ratioIsBinomial)
             copyStyle(num, ratio)
-            self.ratios.append(ratio)
+            self.appendRatio(ratio)
 
         self._createFrame(filename, **kwargs)
 
@@ -881,7 +905,7 @@ class PlotRatioBase:
         self.coverPadOpts = coverPadOpts
 
     def _draw(self):
-        if not hasattr(self, "ratios"):
+        if len(self.ratios) == 0:
             return
 
         self.cf.canvas.cd(2)
@@ -895,7 +919,7 @@ class PlotRatioBase:
         ratios = self.ratios[:]
         ratios.reverse()
         for r in ratios:
-            r.Draw("EP same")
+            r.draw("same")
 
         for obj, option in self.ratioPlotObjectsAfter:
             obj.Draw(option+"same")
@@ -1289,12 +1313,18 @@ class ComparisonManyPlot(PlotBase, PlotRatioBase):
         PlotBase.__init__(self, [histoReference]+histoCompares, **kwargs)
         PlotRatioBase.__init__(self)
 
+        # To allow reordering of histograms within histogram manager,
+        # only assume the name of the reference histogram stays the
+        # same
+        self.referenceName = self.histoMgr.getHistos()[0].getName()
+
     def createFrame(self, filename, createRatio=False, invertRatio=False, coverPadOpts={}, **kwargs):
         if not createRatio:
             PlotBase.createFrame(self, filename, **kwargs)
         else:
-            histos = self.histoMgr.getHistos()
-            self._createFrameRatioMany(filename, [h.getRootHisto() for h in histos[1:]], histos[0].getRootHisto(),
+            histos = filter(lambda h: h.getName() != self.referenceName, self.histoMgr.getHistos())
+            reference = self.histoMgr.getHisto(self.referenceName)
+            self._createFrameRatioMany(filename, [h.getRootHisto() for h in histos], reference.getRootHisto(),
                                        invertRatio=invertRatio, coverPadOpts={}, **kwargs)
 
     def addCutBoxAndLine(self, *args, **kwargs):

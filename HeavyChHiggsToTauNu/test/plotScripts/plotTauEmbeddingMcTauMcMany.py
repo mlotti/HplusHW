@@ -59,14 +59,14 @@ def main():
 
     def dop(datasetName):
         doPlots(datasetsEmb, datasetsSig, datasetName)
-        doCounters(datasetsEmb, datasetsSig, datasetName)
+#        doCounters(datasetsEmb, datasetsSig, datasetName)
         print "%s done" % datasetName
     dop("TTJets")
     dop("WJets")
     dop("DYJetsToLL")
     dop("SingleTop")
     dop("Diboson")
-#    dop("EWKMC")
+    dop("EWKMC")
 
 def doPlots(datasetsEmb, datasetsSig, datasetName):
     lumi = datasetsEmb.getLuminosity()

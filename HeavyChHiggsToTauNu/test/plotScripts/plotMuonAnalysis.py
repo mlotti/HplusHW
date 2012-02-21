@@ -114,10 +114,10 @@ def main():
     plots._legendLabels["QCD_Pt20_MuEnriched"] = "QCD"
     histograms.createLegend.moveDefaults(dx=-0.02)
 
-#    doPlots(datasets)
-#    printCounters(datasets)
-    doPlotsWTauMu(datasets, "TTJets")
-    doPlotsWTauMu(datasets, "WJets")
+    doPlots(datasets)
+    printCounters(datasets)
+#    doPlotsWTauMu(datasets, "TTJets")
+#    doPlotsWTauMu(datasets, "WJets")
 
 
 def doPlots(datasets):
@@ -149,13 +149,18 @@ def doPlotsWTauMu(datasets, name):
     td = treeDraw.clone(varexp="muons_p4.Pt() >> tmp(40,0,400)")
 
     ds = datasets.getDataset(name)
+    # Take first unweighted histograms for the fraction plot
+    drh_all = ds.getDatasetRootHisto(td.clone(selection=selection, weight=""))
+    drh_pure = ds.getDatasetRootHisto(td.clone(selection=And(selection, "abs(muons_mother_pdgid) == 24"), weight=""))
+    hallUn = drh_all.getHistogram()
+    hpureUn = drh_pure.getHistogram()
+
+    # Then the correctly weighted for the main plot
     drh_all = ds.getDatasetRootHisto(td.clone(selection=selection))
     drh_pure = ds.getDatasetRootHisto(td.clone(selection=And(selection, "abs(muons_mother_pdgid) == 24")))
-
     lumi = datasets.getDataset("Data").getLuminosity()
     drh_all.normalizeToLuminosity(lumi)
     drh_pure.normalizeToLuminosity(lumi)
-
     hall = drh_all.getHistogram()
     hpure = drh_pure.getHistogram()
 
@@ -165,7 +170,8 @@ def doPlotsWTauMu(datasets, name):
     p = plots.ComparisonPlot(hall, hpure)
     p.histoMgr.setHistoLegendLabelMany({
             "All": "All muons",
-            "Pure": "W#rightarrow#mu"
+            "Pure": "W#rightarrow#tau#rightarrow#mu"
+#            "Pure": "W#rightarrow#mu"
             })
     p.histoMgr.forEachHisto(styles.generator())
 
@@ -177,12 +183,25 @@ def doPlotsWTauMu(datasets, name):
 
     hpureErr = hpure.Clone("PureErr")
     hpureErr.SetFillColor(ROOT.kRed-7)
-    hpureErr.SetFillStyle(3004)
+    hpureErr.SetFillStyle(3005)
     hpureErr.SetMarkerSize(0)
     p.prependPlotObject(hpureErr, "E2")
 
-    p.createFrame("muonPt_wtaumu_"+name, createRatio=True, invertRatio=True, ratioIsBinomial=True, opts={"ymin": 1e-1, "ymaxfactor": 2}, opts2={"ymin": 0.9, "ymax": 1.05})
+    p.createFrame("muonPt_wtaumu_"+name, createRatio=True, opts={"ymin": 1e-1, "ymaxfactor": 2}, opts2={"ymin": 0.9, "ymax": 1.05}
+                  )
+    p.setRatios([plots._createRatio(hpureUn, hallUn, "", isBinomial=True)])
+    xmin = p.frame.GetXaxis().GetXmin()
+    xmax = p.frame.GetXaxis().GetXmax()
+    val = 1-0.038479
+    l = ROOT.TLine(xmin, val, xmax, val)
+    l.SetLineWidth(2)
+    l.SetLineColor(ROOT.kBlue)
+    l.SetLineStyle(4)
+    p.prependPlotObjectToRatio(l)
+    #p.appendPlotObjectToRatio(histograms.PlotText(0.18, 0.61, "1-0.038", size=18, color=ROOT.kBlue))
+    p.appendPlotObjectToRatio(histograms.PlotText(0.18, 0.61, "0.038", size=18, color=ROOT.kBlue))
     p.getFrame2().GetYaxis().SetTitle("W#rightarrow#mu fraction")
+
     p.getPad().SetLogy(True)
     p.setLegend(histograms.moveLegend(histograms.createLegend()))
     tmp = hpureErr.Clone("tmp")
@@ -193,7 +212,8 @@ def doPlotsWTauMu(datasets, name):
 
     p.frame.GetXaxis().SetTitle("Muon p_{T} (GeV/c)")
     p.frame.GetYaxis().SetTitle("Events / %.0f GeV/c" % p.binWidth())
-    p.appendPlotObject(histograms.PlotText(0.5, 0.9, name, size=18))
+    p.appendPlotObject(histograms.PlotText(0.5, 0.9, plots._legendLabels.get(name, name), size=18))
+
     p.draw()
     histograms.addCmsPreliminaryText()
     histograms.addEnergyText()
