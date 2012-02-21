@@ -13,6 +13,7 @@
 #include "DataFormats/METReco/interface/MET.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -47,6 +48,8 @@ private:
 
   edm::InputTag fGenParticleOriginalSrc;
   edm::InputTag fGenParticleEmbeddedSrc;
+  edm::InputTag fSelectedPrimaryVertexSrc;
+  edm::InputTag fGoodPrimaryVertexSrc;
 
   HPlus::TreeEventBranches fEventBranches;
   HPlus::TreeMuonBranches fMuonBranches;
@@ -55,11 +58,16 @@ private:
 
   std::vector<MetItem> fMets;
   std::vector<DoubleItem> fDoubles;
+
+  int fNSelectedPrimaryVertices;
+  int fNGoodPrimaryVertices;
 };
 
 HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::ParameterSet& iConfig):
   fGenParticleOriginalSrc(iConfig.getParameter<edm::InputTag>("genParticleOriginalSrc")),
   fGenParticleEmbeddedSrc(iConfig.getParameter<edm::InputTag>("genParticleEmbeddedSrc")),
+  fSelectedPrimaryVertexSrc(iConfig.getParameter<edm::InputTag>("selectedPrimaryVertexSrc")),
+  fGoodPrimaryVertexSrc(iConfig.getParameter<edm::InputTag>("goodPrimaryVertexSrc")),
   fMuonBranches(iConfig),
   fTauBranches(iConfig),
   fJetBranches(iConfig, false)
@@ -91,6 +99,9 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   for(size_t i=0; i<fDoubles.size(); ++i) {
     fTree->Branch(fDoubles[i].name.c_str(), &(fDoubles[i].value));
   }
+
+  fTree->Branch("selectedPrimaryVertices_n", &fNSelectedPrimaryVertices);
+  fTree->Branch("goodPrimaryVertices_n", &fNGoodPrimaryVertices);
 }
 
 HPlusTauEmbeddingNtupleAnalyzer::~HPlusTauEmbeddingNtupleAnalyzer() {}
@@ -109,10 +120,20 @@ void HPlusTauEmbeddingNtupleAnalyzer::reset() {
   for(size_t i=0; i<fDoubles.size(); ++i) {
     fDoubles[i].value = nan;
   }
+
+  fNSelectedPrimaryVertices = -1;
+  fNGoodPrimaryVertices = -1;
 }
 
 void HPlusTauEmbeddingNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   fEventBranches.setValues(iEvent);
+
+  edm::Handle<edm::View<reco::Vertex> > hselectedvert;
+  edm::Handle<edm::View<reco::Vertex> > hgoodvert;
+  iEvent.getByLabel(fSelectedPrimaryVertexSrc, hselectedvert);
+  iEvent.getByLabel(fGoodPrimaryVertexSrc, hgoodvert);
+  fNSelectedPrimaryVertices = hselectedvert->size();
+  fNGoodPrimaryVertices = hgoodvert->size();
 
   edm::Handle<edm::View<reco::GenParticle> > hgenparticlesOriginal;
   edm::Handle<edm::View<reco::GenParticle> > hgenparticlesEmbedded;

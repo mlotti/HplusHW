@@ -40,6 +40,7 @@ namespace HPlus {
     tree->Branch("taus_pdgid", &fTausPdgId);
     tree->Branch("taus_mother_pdgid", &fTausMotherPdgId);
     tree->Branch("taus_grandmother_pdgid", &fTausGrandMotherPdgId);
+    tree->Branch("taus_daughter_pdgid", &fTausDaughterPdgId);
   }
 
   void TreeTauBranches::setValues(const edm::Event& iEvent) {
@@ -66,6 +67,7 @@ namespace HPlus {
       int pdgId = 0;
       int motherPdgId = 0;
       int grandMotherPdgId = 0;
+      int daughterPdgId = 0;
       if(gen) {
         pdgId = gen->pdgId();
         const reco::GenParticle *mother = GenParticleTools::findMother(gen);
@@ -75,11 +77,16 @@ namespace HPlus {
           if(grandMother)
             grandMotherPdgId = grandMother->pdgId();
         }
+
+        const reco::GenParticle *daughter = GenParticleTools::findTauDaughter(gen);
+        if(daughter)
+          daughterPdgId = daughter->pdgId();
       }
 
       fTausPdgId.push_back(pdgId);
       fTausMotherPdgId.push_back(motherPdgId);
       fTausGrandMotherPdgId.push_back(grandMotherPdgId);
+      fTausDaughterPdgId.push_back(daughterPdgId);
     }
   }
 
@@ -113,5 +120,6 @@ namespace HPlus {
     fTausPdgId.clear();
     fTausMotherPdgId.clear();
     fTausGrandMotherPdgId.clear();
+    fTausDaughterPdgId.clear();
   }
 }

@@ -25,7 +25,10 @@ namespace HPlus {
       return found;
     }
 
-  const reco::GenParticle *findMother(const reco::GenParticle *particle);
+    const reco::GenParticle *findMother(const reco::GenParticle *particle);
+    const reco::GenParticle *findMaxNonNeutrinoDaughter(const reco::GenParticle *particle);
+
+    const reco::GenParticle *findTauDaughter(const reco::GenParticle *tau);
   }
 }
 

@@ -91,6 +91,8 @@ _physicalToLogical = {
     "WJets_TuneZ2_Summer11": "WJets",
     "WToTauNu_TuneZ2_Summer11": "WToTauNu",
 
+    "W3Jets_TuneZ2_Summer11": "W3Jets",
+
     "DYJetsToLL_TuneZ2_Winter10":          "DYJetsToLL_M50",
     "DYJetsToLL_M50_TuneZ2_Winter10":      "DYJetsToLL_M50",
     "DYJetsToLL_M10to50_TuneD6T_Winter10": "DYJetsToLL_M10to50",
@@ -219,6 +221,7 @@ _datasetOrder = [
     "QCDdata",
     "QCD_Pt20_MuEnriched",
     "WJets",
+    "W3Jets",
     "WToTauNu",
     "TTJets",
     "TT",
@@ -270,6 +273,7 @@ _legendLabels = {
 
     "WJets":                 "W+jets",
     "WToTauNu":              "W#to#tau#nu",
+    "W3Jets":                "W+3 jets",
 
     "QCD_Pt30to50":          "QCD, 30 < #hat{p}_{T} < 50",
     "QCD_Pt50to80":          "QCD, 50 < #hat{p}_{T} < 80",
@@ -338,6 +342,7 @@ _plotStyles = {
 
     "WJets":                 styles.wStyle,
     "WToTauNu":              styles.wStyle,
+    "W3Jets":                styles.wStyle,
 
     "QCD":                   styles.qcdStyle,
     "QCDdata":               styles.qcdStyle,
@@ -456,11 +461,11 @@ def UpdatePlotStyleFill(styleMap, namesToFilled):
 # Finally orders the datasets as specified in plots._datasetOrder. The
 # datasets not in the plots._datasetOrder list are left at the end in
 # the same order they were originally.
-def mergeRenameReorderForDataMC(datasetMgr):
+def mergeRenameReorderForDataMC(datasetMgr, keepSourcesMC=False):
     datasetMgr.mergeData()
     datasetMgr.renameMany(_physicalToLogical, silent=True)
 
-    datasetMgr.mergeMany(_datasetMerge)
+    datasetMgr.mergeMany(_datasetMerge, keepSources=keepSourcesMC)
 
     mcNames = datasetMgr.getAllDatasetNames()
     newOrder = []
@@ -496,15 +501,22 @@ def replaceQCDFromData(datasetMgr, datasetQCDdata):
 # \param ytitle      Y axis title of the final ratio histogram
 #
 # \return TH1 of rootHisto1/rootHisto2
-def _createRatio(rootHisto1, rootHisto2, ytitle):
+def _createRatio(rootHisto1, rootHisto2, ytitle, isBinomial=False):
     if isinstance(rootHisto1, ROOT.TH1) and isinstance(rootHisto2, ROOT.TH1):
-        ratio = rootHisto1.Clone()
-        ratio.SetDirectory(0)
-        ratio.Divide(rootHisto2)
-        styles.getDataStyle().apply(ratio)
-        ratio.GetYaxis().SetTitle(ytitle)
-        return ratio
+        if isBinomial:
+            eff = ROOT.TGraphAsymmErrors(rootHisto1, rootHisto2)
+            styles.getDataStyle().apply(eff)
+            return eff
+        else:
+            ratio = rootHisto1.Clone()
+            ratio.SetDirectory(0)
+            ratio.Divide(rootHisto2)
+            styles.getDataStyle().apply(ratio)
+            ratio.GetYaxis().SetTitle(ytitle)
+            return ratio
     elif isinstance(rootHisto1, ROOT.TGraph) and isinstance(rootHisto2, ROOT.TGraph):
+        if isBinomial:
+            raise Exception("isBinomial is not supported for TGraph input")
         xvalues = []
         yvalues = []
         yerrs = []
@@ -516,8 +528,8 @@ def _createRatio(rootHisto1, rootHisto2, ytitle):
             yvalues.append(rootHisto1.GetY()[i] / yval)
             err1 = max(rootHisto1.GetErrorYhigh(i), rootHisto1.GetErrorYlow(i))
             err2 = max(rootHisto2.GetErrorYhigh(i), rootHisto2.GetErrorYlow(i))
-            yerrs.append( yvalues[i]* math.sqrt( (err1/rootHisto1.GetY()[i])**2 +
-                                                 (err2/rootHisto2.GetY()[i])**2 ) )
+            yerrs.append( yvalues[i]* math.sqrt( _divideOrZero(err1, rootHisto1.GetY()[i])**2 +
+                                                 _divideOrZero(err2, rootHisto2.GetY()[i])**2 ) )
 
         gr = ROOT.TGraphAsymmErrors()
         if len(xvalues) > 0:
@@ -527,6 +539,12 @@ def _createRatio(rootHisto1, rootHisto2, ytitle):
         return gr
     else:
         raise Exception("Arguments are of unsupported type, rootHisto1 is %s and rootHisto2 is %s" % (type(rootHisto1).__name__, type(rootHisto2).__name__))
+
+def _divideOrZero(numerator, denominator):
+    if denominator == 0:
+        return 0
+    return numerator/denominator
+
 
 def copyStyle(src, dst):
     properties = []
@@ -609,6 +627,16 @@ def _createCutBoxAndLine(frame, cutValue, fillColor=18, box=True, line=True, **k
 
     return ret
 
+def _createHisto(rootObject, **kwargs):
+    if isinstance(rootObject, ROOT.TH1):
+        return histograms.Histo(rootObject, rootObject.GetName(), **kwargs)
+    elif isinstance(rootObject, ROOT.TGraph):
+        return histograms.HistoGraph(rootObject, rootObject.GetName(), **kwargs)
+    elif not isinstance(rootObject, histograms.Histo):
+        raise Exception("rootObject is not TH1, TGraph, nor histograms.Histo, it is %s" % type(rootObject).__name__)
+
+    return rootObject
+
 ## Base class for plots
 class PlotBase:
     ## Construct plot from DatasetManager and histogram name
@@ -631,6 +659,13 @@ class PlotBase:
                         if not isinstance(h, ROOT.TH1):
                             raise Exception("Input types can't be a mixture of ROOT.TH1 and something, datasetRootHistos[%d] is %s" % (i, type(h).__name__))
                     histoList = [histograms.Histo(th1, th1.GetName()) for th1 in datasetRootHistos]
+                elif isinstance(datasetRootHistos[0], ROOT.TGraph):
+                    for i, h in enumerate(datasetRootHistos[1:]):
+                        if not isinstance(h, ROOT.TGraph):
+                            raise Exception("Input types can't be a mixture of ROOT.TGraph and someting, datasetRootHistos[%d] is %s" % (i, type(h).__name__))
+                        if len(h.GetName()) == 0:
+                            raise Exception("For TGraph input, the graph name must be set with TGraph.SetName() (name for datasetRootHistos[%d] is empty)" % i)
+                    histoList = [histograms.HistoGraph(gr, gr.GetName()) for gr in datasetRootHistos]
 
                 self.histoMgr = histograms.HistoManager()
                 for histo in histoList:
@@ -725,6 +760,9 @@ class PlotBase:
         self.cf = histograms.CanvasFrame(self.histoMgr, filename, **kwargs)
         self.frame = self.cf.frame
 
+    def setFrameName(self, filename):
+        self.cf.canvas.SetName(filename)
+
     ## Get the frame TH1
     def getFrame(self):
         return self.frame
@@ -792,6 +830,7 @@ class PlotRatioBase:
     def __init__(self):
         self.ratioPlotObjectsBefore = []
         self.ratioPlotObjectsAfter = []
+        self.ratios = []
 
     def prependPlotObjectToRatio(self, obj, option=""):
         self.ratioPlotObjectsBefore.append( (obj, option) )
@@ -800,7 +839,7 @@ class PlotRatioBase:
         self.ratioPlotObjectsAfter.append( (obj, option) )
 
     def addCutBoxAndLineToRatio(self, *args, **kwargs):
-        if not hasattr(self, "ratios"):
+        if len(self.ratios) == 0:
             return
 
         objs = _createCutBoxAndLine(self.getFrame2(), *args, **kwargs)
@@ -823,25 +862,38 @@ class PlotRatioBase:
     def getPad2(self):
         return self.cf.pad2
 
-    def _createFrameRatio(self, filename, numerator, denominator, ytitle, invertRatio=False, **kwargs):
+    def setRatios(self, ratios):
+        self.ratios = []
+        self.extendRatios(ratios)
+
+    def _createRatioObject(self, ratio):
+        r = _createHisto(ratio)
+        r.setDrawStyle("EP")
+        return r
+
+    def appendRatio(self, ratio):
+        self.ratios.append(self._createRatioObject(ratio))
+
+    def extendRatios(self, ratios):
+        self.ratios.extend([self._createRatioObject(r) for r in ratios])
+
+    def _createFrameRatio(self, filename, numerator, denominator, ytitle, invertRatio=False, ratioIsBinomial=False, **kwargs):
         (num, denom) = (numerator, denominator)
         if invertRatio:
             (num, denom) = (denom, num)
 
-        self.ratios = [
-            _createRatio(num, denom, ytitle)
-            ]
+        self.setRatios([_createRatio(num, denom, ytitle, isBinomial=ratioIsBinomial)])
         self._createFrame(filename, **kwargs)
 
-    def _createFrameRatioMany(self, filename, numerators, denominator, invertRatio=False, **kwargs):
+    def _createFrameRatioMany(self, filename, numerators, denominator, invertRatio=False, ratioIsBinomial=False, **kwargs):
         self.ratios = []
         for numer in numerators:
             (num, denom) = (numer, denominator)
             if invertRatio:
                 (num, denom) = (denom, num)
-            ratio = _createRatio(num, denom, "Ratio")
+            ratio = _createRatio(num, denom, "Ratio", isBinomial=ratioIsBinomial)
             copyStyle(num, ratio)
-            self.ratios.append(ratio)
+            self.appendRatio(ratio)
 
         self._createFrame(filename, **kwargs)
 
@@ -852,7 +904,7 @@ class PlotRatioBase:
         self.coverPadOpts = coverPadOpts
 
     def _draw(self):
-        if not hasattr(self, "ratios"):
+        if len(self.ratios) == 0:
             return
 
         self.cf.canvas.cd(2)
@@ -866,7 +918,7 @@ class PlotRatioBase:
         ratios = self.ratios[:]
         ratios.reverse()
         for r in ratios:
-            r.Draw("EP same")
+            r.draw("same")
 
         for obj, option in self.ratioPlotObjectsAfter:
             obj.Draw(option+"same")
@@ -1108,6 +1160,102 @@ class DataMCPlot(PlotSameBase, PlotRatioBase):
         PlotSameBase.draw(self)
         PlotRatioBase._draw(self)
 
+## Same goal as DataMCPlot, but with explicit histograms instead of construction from DatasetManager
+class DataMCPlot2(PlotBase, PlotRatioBase):
+    def __init__(self, histos, normalizeToOne=False, **kwargs):
+        PlotBase.__init__(self, histos, **kwargs)
+        PlotRatioBase.__init__(self)
+        self.normalizeToOne = normalizeToOne
+        self.dataDatasetNames = ["Data"]
+
+    def setDefaultStyles(self):
+        self._setLegendStyles()
+        self._setLegendLabels()
+        self._setPlotStyles()
+
+    def setDataDatasetNames(self, names):
+        self.dataDatasetNames = names
+
+    def stackMCHistograms(self, stackSignal=False):
+        mcNames = filter(lambda n: not n in self.dataDatasetNames, [h.getName() for h in self.histoMgr.getHistos()])
+        mcNamesNoSignal = filter(lambda n: not isSignal(n) and not "StackedMCSignal" in n, mcNames)
+        if not stackSignal:
+            mcNames = mcNamesNoSignal
+
+        # Leave the signal datasets unfilled
+        self.histoMgr.forEachHisto(UpdatePlotStyleFill( _plotStyles, mcNamesNoSignal))
+        self.histoMgr.stackHistograms("StackedMC", mcNames)
+
+    def stackMCSignalHistograms(self):
+        mcSignal = filter(lambda n: isSignal(n), self.datasetMgr.getMCDatasetNames())
+        self.histoMgr.stackHistograms("StackedMCSignal", mcSignal)
+
+    ## Add MC uncertainty band
+    def addMCUncertainty(self):
+        if not self.histoMgr.hasHisto("StackedMC"):
+            raise Exception("Must call stackMCHistograms() before addMCUncertainty()")
+        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"])
+
+    def createFrame(self, filename, createRatio=False, **kwargs):
+        self._normalizeToOne()
+        if not createRatio:
+            PlotBase.createFrame(self, filename, **kwargs)
+        else:
+            if not self.histoMgr.hasHisto("StackedMC"):
+                raise Exception("Must call stackMCHistograms() before createFrameFraction()")
+
+            self._normalizeToOne()
+            self._createFrameRatio(filename,
+                                   self.histoMgr.getHisto("Data").getRootHisto(),
+                                   self.histoMgr.getHisto("StackedMC").getSumRootHisto(),
+                                   "Data/MC", **kwargs)
+
+    def setLuminosity(self, lumi):
+        self.luminosity = lumi
+
+    def addLuminosityText(self, x=None, y=None):
+        if hasattr(self, "luminosity"):
+            histograms.addLuminosityText(x, y, self.luminosity)
+
+    def addCutBoxAndLine(self, *args, **kwargs):
+        PlotBase.addCutBoxAndLine(self, *args, **kwargs)
+        PlotRatioBase.addCutBoxAndLineToRatio(self, *args, **kwargs)
+
+    def draw(self):
+        PlotBase.draw(self)
+        PlotRatioBase._draw(self)
+
+    ## Helper function to do the work for "normalization to one"
+    def _normalizeToOne(self):
+        # First check that the normalizeToOne is enabled
+        if not self.normalizeToOne:
+            return
+
+        # If the MC histograms have not been stacked, the
+        # normalization is straighforward (normalize all histograms to
+        # one)
+        if not self.histoMgr.hasHisto("StackedMC"):
+            self.histoMgr.forEachHisto(lambda h: dataset._normalizeToOne(h.getRootHisto()))
+            return
+
+        # Normalize the stacked histograms
+        handled = []
+        h = self.histoMgr.getHisto("StackedMC")
+        sumInt = h.getSumRootHisto().Integral()
+        for th1 in h.getAllRootHistos():
+            dataset._normalizeToFactor(th1, 1.0/sumInt)
+        handled.append("StackedMC")
+
+        # Normalize the the uncertainty histogram if it exists
+        if self.histoMgr.hasHisto("MCuncertainty"):
+            dataset._normalizeToFactor(self.histoMgr.getHisto("MCuncertainty").getRootHisto(), 1.0/sumInt)
+            handled.append("MCuncertainty")
+        
+        # Normalize the rest
+        for h in self.histoMgr.getHistos():
+            if not h.getName() in handled:
+                dataset._normalizeToOne(h.getRootHisto())
+
 
 ## Class to create comparison plots of two quantities.
 class ComparisonPlot(PlotBase, PlotRatioBase):
@@ -1164,12 +1312,18 @@ class ComparisonManyPlot(PlotBase, PlotRatioBase):
         PlotBase.__init__(self, [histoReference]+histoCompares, **kwargs)
         PlotRatioBase.__init__(self)
 
+        # To allow reordering of histograms within histogram manager,
+        # only assume the name of the reference histogram stays the
+        # same
+        self.referenceName = self.histoMgr.getHistos()[0].getName()
+
     def createFrame(self, filename, createRatio=False, invertRatio=False, coverPadOpts={}, **kwargs):
         if not createRatio:
             PlotBase.createFrame(self, filename, **kwargs)
         else:
-            histos = self.histoMgr.getHistos()
-            self._createFrameRatioMany(filename, [h.getRootHisto() for h in histos[1:]], histos[0].getRootHisto(),
+            histos = filter(lambda h: h.getName() != self.referenceName, self.histoMgr.getHistos())
+            reference = self.histoMgr.getHisto(self.referenceName)
+            self._createFrameRatioMany(filename, [h.getRootHisto() for h in histos], reference.getRootHisto(),
                                        invertRatio=invertRatio, coverPadOpts={}, **kwargs)
 
     def addCutBoxAndLine(self, *args, **kwargs):

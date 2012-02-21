@@ -36,6 +36,7 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
 
     # Use the muons where the original muon is removed in global muon veto
     param.GlobalMuonVeto.MuonCollectionName.setModuleLabel("selectedPatMuonsEmbeddingMuonCleaned")
+    param.GlobalElectronVeto.ElectronCollectionName.setProcessName("MUONSKIM")
 
     # Use the taus matched to the original muon in tau selections
     postfix = "TauEmbeddingMuonMatched"
@@ -52,10 +53,19 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
 
     # Set the analyzer
     param.tree.tauEmbeddingInput = cms.untracked.bool(True)
-    param.tree.tauEmbeddingMuonSource = cms.untracked.InputTag(tauEmbeddingMuons)
-    param.tree.tauEmbeddingMetSource = cms.untracked.InputTag("pfMet", "", dataVersion.getRecoProcess())
-    param.tree.tauEmbeddingCaloMetNoHFSource = cms.untracked.InputTag("caloMetNoHFSum")
-    param.tree.tauEmbeddingCaloMetSource = cms.untracked.InputTag("caloMetSum")
+    param.tree.tauEmbedding = cms.untracked.PSet(
+        muonSrc = cms.InputTag(tauEmbeddingMuons),
+        muonFunctions = cms.PSet(),
+        genParticleOriginalSrc = cms.InputTag("genParticles", "", dataVersion.getTriggerProcess()),
+        metSrc = cms.InputTag("pfMet", "", dataVersion.getRecoProcess()),
+        caloMetNoHFSrc = cms.InputTag("caloMetNoHFSum"),
+        caloMetSrc = cms.InputTag("caloMetSum"),
+    )
+    import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
+    muonIsolations = ["trackIso", "caloIso", "pfChargedIso", "pfNeutralIso", "pfGammaIso", "tauTightIc04ChargedIso", "tauTightIc04GammaIso"]
+    for name in muonIsolations:
+        setattr(param.tree.tauEmbedding.muonFunctions, name, cms.string(muonAnalysis.isolations[name]))
+    
 
 def setCaloMetSum(process, sequence, options, dataVersion):
     name = "caloMetNoHFSum"
@@ -259,7 +269,8 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
     import muonSelectionPF_cff as muonSelection
     from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
     m1 = cleanPatJets.clone(
-        src = "selectedPatJets",
+#        src = "selectedPatJets",
+        src = "goodJets", # we should use the pat::Jets constructed in the 
         preselection = cms.string(jetSelection),
         checkOverlaps = cms.PSet(
             muons = cms.PSet(
@@ -535,7 +546,7 @@ def selectedMuonCleanedMuons(selectedMuon, allMuons="selectedPatMuons"):
                 src                 = cms.InputTag(selectedMuon),
                 algorithm           = cms.string("byDeltaR"),
                 preselection        = cms.string(""),
-                deltaR              = cms.double(0.01),
+                deltaR              = cms.double(0.0001),
                 checkRecoComponents = cms.bool(False),
                 pairCut             = cms.string(""),
                 requireNoOverlaps   = cms.bool(True),
@@ -632,10 +643,57 @@ def addGeneratorTauFilter(process, sequence, filterInaccessible=False, prefix="g
 
     return counters
 
-def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLikePreselection"):
+def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPreselection"):
     counters = []
 
-    # Create PU weight producer
+    # Create PU weight producer for the counters
+    pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
+        alias = cms.string("pileupWeight"),
+    )
+    HChTools.insertPSetContentsTo(param.vertexWeight.clone(), pileupWeight)
+    setattr(process, prefix+"PileupWeight", pileupWeight)
+
+    counterPrototype = cms.EDProducer("HPlusEventCountProducer",
+        weightSrc = cms.InputTag(prefix+"PileupWeight")
+    )
+
+    allCount = counterPrototype.clone()
+    setattr(process, prefix+"AllCount", allCount)
+    counters.append(prefix+"AllCount")
+
+    # Generator taus (if you modify this, remember to modify similar in below)
+    genTaus = cms.EDFilter("GenParticleSelector",
+        src = cms.InputTag("genParticles"),
+        cut = cms.string("abs(pdgId()) == 15 && pt() > 40 && abs(eta()) < 2.1")
+    )
+    genTausName = prefix+"GenTau"
+    setattr(process, genTausName, genTaus)
+
+    genTausFilter = cms.EDFilter("CandViewCountFilter",
+        src = cms.InputTag(genTausName),
+        minNumber = cms.uint32(1),
+    )
+    setattr(process, prefix+"GenTauFilter", genTausFilter)
+
+    genTausCount = counterPrototype.clone()
+    setattr(process, prefix+"GenTauCount", genTausCount)
+    counters.append(prefix+"GenTauCount")
+
+    genTauSequence = cms.Sequence(
+        pileupWeight *
+        allCount *
+        genTaus * genTausFilter * genTausCount
+    )
+    setattr(process, prefix+"Sequence", genTauSequence)
+    sequence *= genTauSequence
+
+    return counters
+
+
+def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLikePreselection", disableTrigger=True):
+    counters = []
+
+    # Create PU weight producer for the counters
     pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
         alias = cms.string("pileupWeight"),
     )
@@ -647,8 +705,9 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     )
 
     # Disable trigger
-    param.trigger.selectionType = "disabled"
-    param.triggerEfficiencyScaleFactor.mode = "disabled"
+    if disableTrigger:
+        param.trigger.selectionType = "disabled"
+        param.triggerEfficiencyScaleFactor.mode = "disabled"
 
     allCount = counterPrototype.clone()
     setattr(process, prefix+"AllCount", allCount)
@@ -665,7 +724,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     setattr(process, prefix+"PrimaryVertexCount", pvFilterCount)
     counters.append(prefix+"PrimaryVertexCount")
 
-    # Generator taus
+    # Generator taus (if you modify this, remember to modify similar in above)
     genTaus = cms.EDFilter("GenParticleSelector",
         src = cms.InputTag("genParticles"),
         cut = cms.string("abs(pdgId()) == 15 && pt() > 40 && abs(eta()) < 2.1")
@@ -696,6 +755,8 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
         refSrc = cms.InputTag(genTauFirstName),
         deltaR = cms.double(0.5),
     )
+    if not disableTrigger:
+        genTauReco.src = param.tauSelection.src.value()
     genTauRecoName = prefix+"Reco"
     setattr(process, genTauRecoName, genTauReco)
     param.tauSelection.src = genTauRecoName

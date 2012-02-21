@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import sys
+#import getopt
+
 import ROOT
 ROOT.gROOT.SetBatch(True) # batch mode
 from ROOT import TLatex, TLegend, TLegendEntry, TGraph
@@ -16,34 +19,46 @@ mu = 200
 ## NOTE Tevatron results cannot be shown in some values of mA, 
 # since the corresponding mH values have not been calculated
 # in Feynhiggs
-useMA = 0
+useMA = 0 # use mH space by default, override with parameter "-ma"
+showLow = 0
 showAN = 1
 showTeva = 0
-showLEP = 1
+showLEP = 0
 plotTwoSigmaBands = 0
+textFullyHadronic = 1 # 0 for the combined result  
 
 # write text to plot
 def writeTitleTexts(lumi):
-    x = 0.62
-    y = 0.96
-    l = TLatex()
-    l.SetNDC()
-    l.SetTextFont(l.GetTextFont()-20) # bold -> normal
-    l.DrawLatex(x, y, "CMS Preliminary")
-    x = 0.2
-    l.DrawLatex(x, y, "#sqrt{s} = 7 TeV")
-    x = 0.45
+# Texts for 
+# 1) "CMS Preliminary"
+# 2) "sqrt(s) = 7"
+# 3) integrated luminosity
+    tex = TLatex()
+    tex.SetNDC()
+    tex.SetTextFont(43)
+    tex.SetTextSize(27)
+    tex.SetLineWidth(2)
+    tex.DrawLatex(0.62,0.96,"CMS Preliminary")
+    tex2 = TLatex()
+    tex2.SetNDC()
+    tex2.SetTextFont(43)
+    tex2.SetTextSize(27)
+    tex2.SetLineWidth(2)
+    tex2.DrawLatex(0.2,0.96,"#sqrt{s} = 7 TeV")
     mystring = '%.1f' % float(lumi)
-    l.DrawLatex(x, y, mystring + " fb^{-1}")
+    tex = TLatex()
+    tex.SetNDC()
+    tex.SetTextFont(43)
+    tex.SetTextSize(27)
+    tex.SetLineWidth(2)
+    tex.DrawLatex(0.43,0.96,mystring + " fb^{-1}")
     return 0
 
 def writeText( myText, y ):
     text = TLatex()
-#    text.SetTextColor(1)
-#    text.SetTextAlign(12)
-    text.SetTextSize(20)
-#    text.SetTextFont(1)
     text.SetNDC()
+    text.SetTextFont(63)
+    text.SetTextSize(20)
     text.DrawLatex(0.185,y,myText)
     return 0
 
@@ -210,6 +225,25 @@ def removeLargeValues(graph):
             graph.RemovePoint( graph.GetN()-1-i)
             graph.RemovePoint(i)
 
+def getObservedMinus(graph):
+    curve = graph.Clone()
+    for i in xrange(0, graph.GetN()):
+        curve.SetPoint(i,
+                       graph.GetX()[i],
+                       graph.GetY()[i]*0.77)
+    print "todo: CHECK minus coefficient f(m)"
+    return curve
+
+def getObservedPlus(graph):
+    curve = graph.Clone()
+    for i in xrange(0, graph.GetN()):
+        curve.SetPoint(i,
+                       graph.GetX()[i],
+                       graph.GetY()[i]*1.22)
+    print "todo: CHECK plus coefficient f(m)"
+    return curve
+
+
 # Draw AN exclusion
 # picked by eye from CMS-PAS-HIG-11-008
 def getANCurve():
@@ -219,9 +253,13 @@ def getANCurve():
 #    curve.SetPoint(0,100,17.5) # do not show the lower part of area
     curve.SetPoint(0,120,25.5)
     curve.SetPoint(1,140,42)
-    curve.SetPoint(2,147,60)
+    # point at maxY would be (mH=147,tanb=60)
+    # this point however cannot be converted to mA
+    # space (only points 90/100/120/140/150/155/160 allowed)
+    # curve.SetPoint(2,147,60)
+    curve.SetPoint(2,150,67.7)
     curve.SetPoint(3,120,100)
-    if useMA==1:
+    if useMA:
         graphToMa(curve)
     myColor = 809
     curve.SetFillColor(myColor)
@@ -243,7 +281,7 @@ def getTevaCurve():
     curve.SetPoint(3,130,68.5)
     curve.SetPoint(4,140,103)
     curve.SetPoint(5,100,110)
-    if useMA==1:
+    if useMA:
         graphToMa(curve)
     curve.SetFillStyle(4)
     curve.SetFillColor(618)
@@ -329,6 +367,13 @@ def getLepCurve():
     
 # Main function, called explicilty from the end of the script
 def main():
+    # if parameter "-ma" specified, make plots in mA-space
+    if len(sys.argv)>1 :
+        if sys.argv[1]=='-ma':
+            print "ma print"
+            global useMA
+            useMA = 1
+
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
@@ -348,20 +393,30 @@ def main():
     cleanGraph(expected_1s)
     cleanGraph(expected_2s)
 
+    observed_minus = getObservedMinus(observed)
+    observed_plus = getObservedPlus(observed)
+
     # Create tan beta graphs
     # Convention: begin with low mH, lower limit for 1/2s band
     # then go counterclockwise: increase mH, then switch to upper limit, decrease mH
     print "Constructing observed"
     observed_tanb = graphToTanBeta(observed,mu)
+    observed_tanb.SetLineWidth(3)
     print "Constructing expected"
     expected_tanb = graphToTanBeta(expected,mu)
+    expected_tanb.SetLineWidth(3)
+    observed_minus_tanb = graphToTanBeta(observed_minus,mu)
+    observed_plus_tanb = graphToTanBeta(observed_plus,mu)
+    observed_minus_tanb.SetLineWidth(3)
+    observed_minus_tanb.SetLineStyle(2)
+    observed_plus_tanb.SetLineStyle(2)
+    observed_plus_tanb.SetLineWidth(3)
     print "Constructing expected 1 sigma"
     expected_1s_tanb = graphToTanBeta(expected_1s, mu, removeNotValid=False)
     print "Constructing expected 2 sigma"
     expected_2s_tanb = graphToTanBeta(expected_2s, mu, removeNotValid=False)
 
  
-    showLow = 0
     if showLow:
         observed_tanb_low = graphToTanBetaLow(observed,mu)
         expected_tanb_low = graphToTanBetaLow(expected,mu)
@@ -389,8 +444,8 @@ def main():
         removeLargeValues(expected_2s_tanb_low)
 
     # Define the axis ranges
-    massMin = valid_mp[0] - 5
-    massMax = valid_mp[-1] + 5
+    massMin = valid_mp[0]
+    massMax = valid_mp[-1] + 3
     tanbMax = 60#200
 
     # Upper edges of the uncertainty bands to the plot edges
@@ -417,7 +472,9 @@ def main():
         expected_2s_tanb.Draw("F")
     expected_1s_tanb.Draw("F")
     expected_tanb.Draw("LP")
-    observed_tanb.SetLineWidth(804)
+    observed_minus_tanb.Draw("L")
+    observed_plus_tanb.Draw("L")
+#    observed_tanb.SetLineWidth(804)
     observed_tanb.Draw("LP")
 
     if showAN:
@@ -450,8 +507,18 @@ def main():
 
 # ensure that these are on top
     observed_tanb.Draw("LP")
+    observed_minus_tanb.Draw("L")
+    observed_plus_tanb.Draw("L")
 
-    # Axis labels
+    # Axis style and labels
+    frame.GetXaxis().SetTitleFont(43);
+    frame.GetYaxis().SetTitleFont(43);
+    frame.GetXaxis().SetTitleSize(33);
+    frame.GetYaxis().SetTitleSize(33);
+    frame.GetXaxis().SetLabelFont(43);
+    frame.GetYaxis().SetLabelFont(43);
+    frame.GetXaxis().SetLabelSize(27);
+    frame.GetYaxis().SetLabelSize(27);
     if useMA:
         frame.GetXaxis().SetTitle("m_{A} (GeV/c^{2})")
     else:
@@ -460,16 +527,19 @@ def main():
 #    frame.GetXaxis().SetLimits(72,166)
 
     # Legends
-    legeX = 0.60
-    legeY = 0.25
-    pl  = ROOT.TLegend(legeX,legeY,legeX+0.30,legeY+0.25)
+    legeX = 0.55
+    legeY = 0.17
+    pl  = ROOT.TLegend(legeX,legeY,legeX+0.30,legeY+0.2)
+    pl.SetTextFont(62)
     pl.SetTextSize(0.03)
     pl.SetFillStyle(4000)
-    pl.SetTextFont(132)
     pl.SetBorderSize(0)
     ple = ROOT.TLegendEntry()
     pl.AddEntry(observed_tanb,     "Observed", "lp")
+    pl.AddEntry(observed_minus_tanb,     "Observed #pm1 #sigma (th.)", "L")
     pl.AddEntry(expected_tanb,     "Expected median", "lp")
+#    pl.AddEntry(observed_plus_tanb,     "Expected median, th+", "l")
+    expected_1s_tanb.SetLineColor( expected_1s_tanb.GetFillColor() ) 
     pl.AddEntry(expected_1s_tanb,  "Expected median #pm1 #sigma", "f")
     if plotTwoSigmaBands:
         pl.AddEntry(expected_2s_tanb,  "Expected median #pm2 #sigma", "f")
@@ -496,12 +566,10 @@ def main():
     top = 0.9
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
-# --- chose text for final state description --
-#    writeText("Fully hadronic final state",   top - lineSpace)
-#    writeText("hadr. + ltau final states",   top - lineSpace)
-#    writeText("hadr. + ltau + emu final states",   top - lineSpace)
-
-#    writeText("Bayesian CL limit",           top - 2*lineSpace)
+    if textFullyHadronic:
+        writeText("#tau_{h}+jets final state",   top - lineSpace)
+    else:
+        writeText("#tau_{h}+jets, e#tau_{h}, #mu#tau_{h}, and e#mu final states",   top - lineSpace)
     writeText("MSSM m_{h}^{max}",           top - 2*lineSpace)
     writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
     writeText("#mu=%d GeV"%mu, top - 4*lineSpace)
@@ -520,8 +588,8 @@ def main():
 ####################
 
             # Define the axis ranges
-    massMin = valid_mp[0] - 5
-    massMax = valid_mp[-1] + 5
+    massMin = valid_mp[0]
+    massMax = valid_mp[-1] + 3
     tanbMax = 60
 
 
@@ -532,7 +600,15 @@ def main():
         canvas2 = ROOT.TCanvas("limitsTanb_mus_mh")
     frame2 = canvas.DrawFrame(massMin, 0, massMax, tanbMax)
 
-    # Axis labels
+    # Axis style and labels
+    frame2.GetXaxis().SetTitleFont(43);
+    frame2.GetYaxis().SetTitleFont(43);
+    frame2.GetXaxis().SetTitleSize(33);
+    frame2.GetYaxis().SetTitleSize(33);
+    frame2.GetXaxis().SetLabelFont(43);
+    frame2.GetYaxis().SetLabelFont(43);
+    frame2.GetXaxis().SetLabelSize(27);
+    frame2.GetYaxis().SetLabelSize(27);
     if useMA:
         frame2.GetXaxis().SetTitle("m_{A} (GeV/c^{2})")
     else:
@@ -593,18 +669,19 @@ def main():
     observed_pk.Draw("LP")
     observed_mk.Draw("LP")
 
-    observed_pkl.Draw("LP")
-    observed_p2l.Draw("LP")
-    observed_m2l.Draw("LP")    
-    observed_mkl.Draw("LP")
+    if showLow:
+        observed_pkl.Draw("LP")
+        observed_p2l.Draw("LP")
+        observed_m2l.Draw("LP")    
+        observed_mkl.Draw("LP")
 
     # Legends
-    legeX = 0.52
+    legeX = 0.47
     legeY = 0.20
-    pl2  = ROOT.TLegend(legeX,legeY,legeX+0.35,legeY+0.24)
+    pl2  = ROOT.TLegend(legeX,legeY,legeX+0.35,legeY+0.2)
+    pl2.SetTextFont(62)
     pl2.SetTextSize(0.03)
     pl2.SetFillStyle(4000)
-    pl2.SetTextFont(132)
     pl2.SetBorderSize(0)
     pl2.AddEntry(observed_pk,     "Observed, mu=1000 GeV/c^{2}", "lp")
     pl2.AddEntry(observed_p2,     "Observed, mu=200 GeV/c^{2}", "lp")
@@ -618,12 +695,10 @@ def main():
     top = 0.83
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
-#    writeText("Fully hadronic final state",   top - lineSpace)
-#    writeText("hadr. + ltau final states",   top - lineSpace)
-#    writeText("hadr. + ltau + emu final states",   top - lineSpace)
-
-
-#    writeText("Bayesian CL limit",           top - 2*lineSpace)
+    if textFullyHadronic:
+        writeText("#tau_{h}+jets final state",   top - lineSpace)
+    else:
+        writeText("#tau_{h}+jets, e#tau_{h}, #mu#tau_{h}, and e#mu final states",   top - lineSpace)
     writeText("MSSM m_{h}^{max}",           top - 2*lineSpace)
     writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
 

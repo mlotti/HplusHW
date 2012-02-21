@@ -35,8 +35,12 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_2_X/TTJets_TuneZ2_Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_embedding_v13_1/22559ec2c5e66c0c33625ecb67add84e/embedded_89_1_QHO.root"
-        )
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_2_X/TTJets_TuneZ2_Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_embedding_v13_1/22559ec2c5e66c0c33625ecb67add84e/embedded_13_1_Ha1.root"
+    ),
+    inputCommands = cms.untracked.vstring(
+        "keep *",
+        "drop *_genFilterEfficiencyProducer_*_*" # in lumi
+    )
 )
 if dataVersion.isData():
     process.source.fileNames = [
@@ -230,12 +234,16 @@ taus = cms.InputTag("patTausHpsPFTauTauEmbeddingMuonMatched")
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
 ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
+    selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
+    goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
     muonSrc = cms.InputTag(muons.value()),
     muonFunctions = cms.PSet(),
     tauSrc = cms.InputTag(taus.value()),
     tauFunctions = cms.PSet(),
     jetSrc = cms.InputTag("selectedPatJets"),
-    jetFunctions = cms.PSet(),
+    jetFunctions = cms.PSet(
+        tche = cms.string("bDiscriminator('trackCountingHighEffBJetTags')"),
+    ),
     genParticleOriginalSrc = cms.InputTag("genParticles", "", "HLT"),
     genParticleEmbeddedSrc = cms.InputTag("genParticles"),
     mets = cms.PSet(
@@ -244,7 +252,7 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
         pfMetOriginalNoMuon_p4 = cms.InputTag("pfMETOriginalNoMuon"),
     ),
     doubles = cms.PSet(
-        pileupWeightEPS = cms.InputTag("pileupWeightEPS"),
+        weightPileup_EPS = cms.InputTag("pileupWeightEPS"),
         weightPileup_Run2011AnoEPS = cms.InputTag("pileupWeightRun2011AnoEPS"),
         weightPileup_Run2011A = cms.InputTag("pileupWeightRun2011A")
     ),

@@ -19,5 +19,7 @@ HChEventContent = cms.PSet(
         "keep *_towerMaker_*_*",
         "keep *_electronGsfTracks_*_*",
         "keep recoTracks_*_*_*",
+        "keep recoBeamHaloSummary_*_*_*", # keep beam halo summaries
+        "keep recoGlobalHaloData_*_*_*",
     )
 )

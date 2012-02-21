@@ -182,10 +182,18 @@ namespace HPlus {
     TH1 *hIsolationPFChargedHadrCandsPtSum;
     TH1 *hIsolationPFGammaCandsEtSum;
 
-    TH1 *hTightChargedMaxPt;
-    TH1 *hTightChargedSumPt;
-    TH1 *hTightChargedOccupancy;
-    TH1 *hTightGammaOccupancy;
+    TH1 *hTightChargedMaxPtBeforeIsolation;
+    TH1 *hTightChargedSumPtBeforeIsolation;
+    TH1 *hTightChargedOccupancyBeforeIsolation;
+    TH1 *hTightGammaMaxPtBeforeIsolation;
+    TH1 *hTightGammaSumPtBeforeIsolation;
+    TH1 *hTightGammaOccupancyBeforeIsolation;
+    TH1 *hTightChargedMaxPtAfterIsolation;
+    TH1 *hTightChargedSumPtAfterIsolation;
+    TH1 *hTightChargedOccupancyAfterIsolation;
+    TH1 *hTightGammaMaxPtAfterIsolation;
+    TH1 *hTightGammaSumPtAfterIsolation;
+    TH1 *hTightGammaOccupancyAfterIsolation;
     TH1 *hHPSDecayMode;
 
     TH1 *hVLooseIsoNcands;

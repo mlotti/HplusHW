@@ -4,6 +4,7 @@ import re
 import ROOT
 
 import dataset
+import utilities
 
 def _counterTh1AddBinFromTh1(counter, name, th1):
     new = ROOT.TH1F(counter.GetName(), counter.GetTitle(), counter.GetNbinsX()+1, 0, counter.GetNbinsX()+1)
@@ -425,7 +426,7 @@ def counterEfficiency(counterTable):
             result.setCount(irow, icol, value)
     return result
 
-def efficiencyColumn(name, column):
+def efficiencyColumnErrorPropagation(name, column):
     origRownames = column.getRowNames()
     rows = []
     rowNames = []
@@ -448,34 +449,90 @@ def efficiencyColumn(name, column):
             rowNames.append(origRownames[irow])
     return CounterColumn(name, rowNames, rows)
 
+def efficiencyColumnNormalApproximation(name, column):
+    # also approximate that p is small, so sigma = sqrt(Npassed)/sqrt(Ntotal)
+    origRownames = column.getRowNames()
+    rows = []
+    rowNames = []
+
+    prev = None
+    for irow in xrange(0, column.getNrows()):
+        count = column.getCount(irow)
+        value = None
+        if count != None and prev != None:
+            try:
+                eff = count.value() / prev.value()
+                unc = count.uncertainty() / prev.value()
+
+                value = dataset.Count(eff, unc)
+            except ZeroDivisionError:
+                pass
+        prev = count
+        if value != None:
+            rows.append(value)
+            rowNames.append(origRownames[irow])
+    return CounterColumn(name, rowNames, rows)
+    
+
+def efficiencyColumn(name, column, method="normalApproximation"):
+    return {
+        "normalApproximation": efficiencyColumnNormalApproximation,
+        "errorPropagation": efficiencyColumnErrorPropagation
+    }[method](name, column)
+
+
 def sumColumn(name, columns):
     """Create a new CounterColumn as the sum of the columns."""
-    nrows = columns[0].getNrows()
-    for i, c in enumerate(columns[1:]):
-        if nrows != c.getNrows():
-            raise Exception("Unable to sum the columns, column 0 has '%d' rows, column %d has '%d'." % (nrows, i, c.getNrows()))
+    table = CounterTable()
+    for c in columns:
+        table.appendColumn(c)
+    table.removeNonFullRows()
+    nrows = table.getNrows()
+    ncols = table.getNcolumns()
+
     rows = []
     for irow in xrange(nrows):
         count = dataset.Count(0,0)
-        for c in columns:
-            count.add(c.getCount(irow))
+        for icol in xrange(ncols):
+            count.add(table.getCount(irow, icol))
         rows.append(count)
 
-    return CounterColumn(name, columns[0].getRowNames(), rows)
+    return CounterColumn(name, table.getRowNames(), rows)
 
+
+## Create a CounterColumn as column1-column2
+def subtractColumn(name, column1, column2):
+    table = CounterTable()
+    table.appendColumn(column1)
+    table.appendColumn(column2)
+    table.removeNonFullRows()
+    nrows = table.getNrows()
+
+    rows = []
+    for irow in xrange(nrows):
+        count = table.getCount(irow, 0).clone() # column1
+        dcount = table.getCount(irow, 1) # column2
+            
+        count.subtract(dcount)
+        rows.append(count)
+
+    return CounterColumn(name, table.getRowNames(), rows)
+
+## Crete a CounterColumn as column1/column2.
 def divideColumn(name, column1, column2):
-    """Create a CounterColumn as column1/column2."""
-    nrows = column1.getNrows()
-    if nrows != column2.getNrows():
-        raise Exception("Unable to divide the columns, column1 has '%d' rows, column2 has '%d'." % (nrows, column2.getNrows()))
+    table = CounterTable()
+    table.appendColumn(column1)
+    table.appendColumn(column2)
+    table.removeNonFullRows()
+    nrows = table.getNrows()
 
-    origRownames = column1.getRowNames()
+    origRownames = table.getRowNames()
 
     rows = []
     rowNames = []
     for irow in xrange(nrows):
-        count = column1.getCount(irow).clone()
-        dcount = column2.getCount(irow)
+        count = table.getCount(irow, 0).clone() # column1
+        dcount = table.getCount(irow, 1) # column2
         if dcount.value() == 0:
             continue
             
@@ -485,9 +542,194 @@ def divideColumn(name, column1, column2):
 
     return CounterColumn(name, rowNames, rows)
 
+## Create CounterRow as row1-row2
+def subtractRow(name, row1, row2):
+    table = CounterTable()
+    table.appendRow(row1)
+    table.appendRow(row2)
+    table.removeNonFullColumns()
+    ncols = table.getNcolumns()
 
+    cols = []
+    for icol in xrange(ncols):
+        count = table.getCount(0, icol).clone() # row1
+        dcount = table.getCount(1, icol) # row2
+
+        count.subtract(dcount)
+        cols.append(count)
+
+    return CounterRow(name, table.getColumnNames(), cols)
+    
+
+## Helper function for row operations
+def accumulateRow(table, function):
+    row = table.getRow(0).clone()
+    for irow in xrange(1, table.getNrows()):
+        for icol in xrange(table.getNcolumns()):
+            count1 = row.getCount(icol)
+            count2 = table.getCount(irow, icol)
+            if count1 != None and count2 != None:
+                count = function(count1, count2)
+                row.setCount(icol, count)
+            else:
+                row.setCount(icol, None)
+    return row
+
+## Calculate row with averages of the table
+def meanRow(table, uncertaintyByAverage=False):
+    # Sum
+    if uncertaintyByAverage:
+        row = accumulateRow(table, lambda a, b: dataset.Count(a.value()+b.value(), a.uncertainty()+b.uncertainty()))
+    else:
+        def f(a, b):
+            c = a.clone()
+            c.add(b)
+            return c
+        row = accumulateRow(table, f)
+    row.setName("Mean")
+
+    # Average
+    for icol in xrange(row.getNcolumns()):
+        count = row.getCount(icol)
+        if count != None:
+            N = table.getNrows()
+            row.setCount(icol, dataset.Count(count.value()/N, count.uncertainty()/N))
+
+    return row
+
+## Calculate row with a least square fit of the table
+def meanRowFit(table):
+    valueRow = table.getRow(0).clone()
+    valueRow.setName("Fit")
+    chiRow = valueRow.clone()
+    chiRow.setName("Chi2/ndof")
+    for icol in xrange(table.getNcolumns()):
+        values = []
+        for irow in xrange(table.getNrows()):
+            count = table.getCount(irow, icol)
+            if count != None:
+                values.append(count)
+
+
+        (m, dm, chi2, ndof) = utilities.leastSquareFitPoly0([v.value() for v in values], [v.uncertainty() for v in values])
+        if m != None:
+            valueRow.setCount(icol, dataset.Count(m, dm))
+            chiRow.setCount(icol, dataset.Count(chi2, ndof))
+        else:
+            valueRow.setCount(icol, None)
+            chiRow.setCount(icol, None)
+
+    return (valueRow, chiRow)
+
+## Calculate the maximum of each column
+def maxRow(table):
+    row = accumulateRow(table, lambda a, b: max(a, b, key=lambda x: x.value()))
+    row.setName("Max")
+    return row
+
+## Calculate the minimum of each column
+def minRow(table):
+    row = accumulateRow(table, lambda a, b: min(a, b, key=lambda x: x.value()))
+    row.setName("Min")
+    return row
+
+def removeColumnsRowsNotInAll(tables):
+    # Remove columns which are not in all tables
+    tablesCopy = [t.clone() for t in tables]
+    maxNcols = max([t.getNcolumns() for t in tables])
+    iCol = 0
+    while iCol < maxNcols:
+        colName = tablesCopy[0].getColumnNames()[iCol]
+        for table in tablesCopy[1:]:
+            if colName != table.getColumnNames()[iCol]:
+                for t in tablesCopy:
+                    t.removeColumn(iCol)
+                maxNcols -= 1
+                continue
+        iCol += 1
+
+    # Remove rows which are not in all tables
+    maxNrows = max([t.getNrows() for t in tables])
+    iRow = 0
+    while iRow < maxNrows:
+        rowName = tablesCopy[0].getRowNames()[iRow]
+        for table in tablesCopy[1:]:
+            if rowName != table.getRowNames()[iRow]:
+                for t in tablesCopy:
+                    t.remoteRow(index=iRow)
+                maxNrows -= 1
+                continue
+        iRow += 1
+
+    return tablesCopy
+
+## Create a new CounterTable as the average of the tables
+def meanTable(tables, uncertaintyByAverage=False):
+    if len(tables) == 0:
+        raise Exception("Got 0 tables")
+
+    tablesCopy = removeColumnsRowsNotInAll(tables)
+    
+    # Calculate the sums
+    table = tablesCopy[0]
+    nrows = table.getNrows()
+    ncolumns = table.getNcolumns()
+    for t in tablesCopy[1:]:
+        for iRow in xrange(nrows):
+            for iCol in xrange(ncolumns):
+                count1 = table.getCount(iRow, iCol)
+                count2 = t.getCount(iRow, iCol)
+                if count1 != None and count2 != None:
+                    if uncertaintyByAverage:
+                        count = dataset.Count(count1.value()+count2.value(), count1.uncertainty()+count2.uncertainty())
+                    else:
+                        count = count1.clone()
+                        count.add(count2)
+                    table.setCount(iRow, iCol, count)
+                else:
+                    table.setCount(iRow, iCol, None)
+
+    # Do the average
+    N = len(tablesCopy)
+    for iRow in xrange(nrows):
+        for iCol in xrange(ncolumns):
+            count = table.getCount(iRow, iCol)
+            if count != None:
+                table.setCount(iRow, iCol, dataset.Count(count.value()/N, count.uncertainty()/N))
+
+    return table
+
+## Create a new CounterTable as the fitted value of the tables
+def meanTableFit(tables):
+    if len(tables) == 0:
+        raise Exception("Got 0 tables")
+
+    tablesCopy = removeColumnsRowsNotInAll(tables)
+    valueTable = tablesCopy[0].clone()
+    chi2Table = valueTable.clone()
+    nrows = valueTable.getNrows()
+    ncolumns = valueTable.getNcolumns()
+    for iRow in xrange(nrows):
+        for iCol in xrange(ncolumns):
+            values = []
+            for t in tablesCopy:
+                count = t.getCount(iRow, iCol)
+                if count != None:
+                    values.append(count)
+            (m, dm, chi2, ndof) = utilities.leastSquareFitPoly0([v.value() for v in values], [v.uncertainty() for b in values])
+            if m != None:
+                valueTable.setCount(iRow, iCol, dataset.Count(m, dm))
+                chi2Table.setCount(iRow, iCol, dataset.Count(chi2, ndof))
+            else:
+                valueTable.setCount(iRow, iCol, None)
+                chi2Table.setCount(iRow, iCol, None)
+
+    return (valueTable, chi2Table)
+                
+
+
+## Class representing a column in CounterTable.
 class CounterColumn:
-    """Class represring a column in CounterTable."""
     def __init__(self, name, rowNames, values):
         self.name = name
         self.rowNames = rowNames
@@ -498,6 +740,9 @@ class CounterColumn:
 
     def clone(self):
         return CounterColumn(self.name, self.rowNames[:], [v.clone() for v in self.values])
+
+    def getPairList(self):
+        return [(self.rowNames[i], self.values[i]) for i in xrange(0, len(self.values))]
 
     def getName(self):
         return self.name
@@ -528,6 +773,45 @@ class CounterColumn:
         count = dataset.Count(value, uncertainty)
         for v in self.values:
             v.multiply(count)
+
+## Class representing a row in CounterTable
+class CounterRow:
+    def __init__(self, name, columnNames, values):
+        self.name = name
+        self.columnNames = columnNames
+        self.values = values
+
+        if len(columnNames) != len(values):
+            raise Exception("len(columnNames) != len(values) ( %d! = %d)" % (len(columnNames), len(values)))
+    
+    def clone(self):
+        return CounterRow(self.name, self.columnNames[:], [v.clone() for v in self.values])
+
+    def getName(self):
+        return self.name
+
+    def setName(self, name):
+        self.name = name
+
+    def getNcolumns(self):
+        return len(self.values)
+
+    def getColumnName(self, icol):
+        return self.columnNames[icol]
+
+    def getColumnNames(self):
+        return self.columnNames
+
+    def getCount(self, icol):
+        return self.values[icol]
+
+    def setCount(self, icol, count):
+        self.values[icol] = count
+
+    def removeColumn(self, icol):
+        del self.values[icol]
+        del self.columnNames[icol]
+                          
 
 class CounterTable:
     """Class to represent a table of counts.
@@ -587,16 +871,15 @@ class CounterTable:
         self.insertColumn(self.getNcolumns(), column)
 
     def insertColumn(self, icol, column):
-        iname = 0
-        icount = 0
-
         beginColumns = 0
         if len(self.table) > 0:
             beginColumns = len(self.table[0])
 
         if icol > beginColumns:
-            raise Exception("Unable to insert column %d, table has only %d columns (may not insert to index larger than size)")
+            raise Exception("Unable to insert column %d, table has only %d columns (may not insert to index larger than size)" % (icol, beginColumns))
 
+        iname = 0
+        icount = 0
         while iname < len(self.rowNames)  and icount < column.getNrows():
             # Check if the current indices give the same counter name for both
             if self.rowNames[iname] == column.getRowName(icount):
@@ -717,6 +1000,70 @@ class CounterTable:
 
             irow += 1
 
+    def indexRow(self, name):
+        try:
+            return self.rowNames.index(name)
+        except ValueError:
+            raise Exception("Row '%s' not found" % name)
+
+    ## Append row
+    def appendRow(self, row):
+        self.insertRow(self.getNrows(), row)
+
+    ## Insert row
+    def insertRow(self, irow, row):
+        beginRows = len(self.table)
+
+        if irow > beginRows:
+            raise Exception("Unable to insert row %d, table has only %d rows (may not insert to index larger than size)" % (row, beginRows))
+
+
+        # The columns which already exist in the table
+        rowCells = [None]*self.getNcolumns()
+        colNamesLeft = row.getColumnNames()[:]
+        for icount in xrange(0, row.getNcolumns()):
+            colName = row.getColumnName(icount)
+            if colName in self.columnNames:
+                rowCells[self.columnNames.index(colName)] = row.getCount(icount)
+                del colNamesLeft[colNamesLeft.index(colName)]
+
+        # The columns which are new
+        if len(colNamesLeft) > 0:
+            for name in colNamesLeft:
+                rowCells.append(row.getCount(row.getColumnNames().index(name)))
+            for i in xrange(0, self.getNrows()):
+                self.table[i].extend([None]*len(colNamesLeft))
+            self.columnNames.extend(colNamesLeft)
+
+        self.table.insert(irow, rowCells)
+        self.rowNames.insert(irow, row.getName())
+
+    ## Get row by index or by name
+    def getRow(self, index=None, name=None):
+        if index == None and name == None:
+            raise Exception("Must give either index or name (got neither)")
+        if index != None and name != None:
+            raise Exception("Must give only either index or name (got both)")
+
+        irow = index
+        if index == None:
+            irow = self.indexRow(name)
+    
+        colNames = self.columnNames[:]
+        rowValues = self.table[irow][:]
+
+        # Filter out Nones
+        i = 0
+        while i < len(rowValues):
+            if rowValues[i] == None:
+                del colNames[i]
+                del rowValues[i]
+                i -= 1
+            i += 1
+
+        # Constructo the row object
+        return CounterRow(self.rowNames[irow], colNames, rowValues)
+
     def removeRow(self, index=None, name=None):
         if index == None and name == None:
             raise Exception("Give either index or name, neither was given")
@@ -733,6 +1080,38 @@ class CounterTable:
         for name in self.getRowNames()[:]:
             if not name in names:
                 self.removeRow(name=name)
+
+    def removeNonFullRows(self):
+        nrows = self.getNrows()
+        ncolumns = self.getNcolumns()
+        removeRows = []
+
+        for irow in xrange(0, nrows):
+            allFull = True
+            for icol in xrange(0, ncolumns):
+                if self.getCount(irow, icol) == None:
+                    allFull = False
+                    break
+            if not allFull:
+                removeRows.append(irow-len(removeRows)) # hack to take into account the change in indices when removing a row
+        for irow in removeRows:
+            self.removeRow(index=irow)
+
+    def removeNonFullColumns(self):
+        nrows = self.getNrows()
+        ncolumns = self.getNcolumns()
+        removeColumns = []
+
+        for icol in xrange(0, ncolumns):
+            allFull = True
+            for irow in xrange(0, nrows):
+                if self.getCount(irow, icol) == None:
+                    allFull = False
+                    break
+            if not allFull:
+                removeColumns.append(icol-len(removeColumns)) # hack to take into account the change in indices when removing a column
+        for icol in removeColumns:
+            self.removeColumn(icol)
 
     def _getColumnWidth(self, icol):
         return self.columnWidths[icol]
@@ -791,6 +1170,42 @@ class CounterTable:
 
         lines.append(formatter.endTable())
         return "\n".join(lines)
+
+## Counter from one histogram, can not be normalized/scaled further
+class HistoCounter:
+    def __init__(self, name, rootHisto, countNameFunction=None):
+        self.name = name
+        cntr = dataset._histoToCounter(rootHisto)
+        self.countNames = [x[0] for x in cntr]
+        self.counter = [x[1] for x in cntr]
+
+        if countNameFunction != None:
+            self.countNames = [countNameFunction(x) for x in self.countNames]
+
+    def setName(self, name):
+        self.name = name
+
+    def getName(self):
+        return self.name
+
+    def getNrows(self):
+        return len(self.countNames)
+
+    def getRowName(self, icount):
+        return self.countNames[icount]
+
+    def getCount(self, icount):
+        if self.counter == None:
+            self._createCounter()
+        return self.counter[icount]
+
+    def getCountByName(self, name):
+        if self.counter == None:
+            self._createCounter()
+        for i, cn in enumerate(self.countNames):
+            if cn == name:
+                return self.counter[i]
+        raise Exception("No count '%s' in counter '%s'" % (name, self.getName()))
 
 class SimpleCounter:
     """Counter for one dataset."""
@@ -858,7 +1273,7 @@ class SimpleCounter:
         for i, cn in enumerate(self.countNames):
             if cn == name:
                 return self.counter[i]
-        raise Exception("No counter '%s'" % name)
+        raise Exception("No count '%s' in counter '%s'" % (name, self.getName()))
 
 class Counter:
     """Counter for many datasets."""
@@ -868,6 +1283,14 @@ class Counter:
     def forEachDataset(self, func):
         for c in self.counters:
             func(c)
+
+    def removeColumns(self, datasetNames):
+        i = 0
+        while i < len(self.counters):
+            if self.counters[i].getName() in datasetNames:
+                del self.counters[i]
+            else:
+                i += 1
 
     def appendRow(self, rowName, treeDraw):
         self.forEachDataset(lambda x: x.appendRow(rowName, treeDraw))
@@ -951,6 +1374,9 @@ class EventCounter:
                 pass
 
         self.normalization = "None"
+
+    def removeColumns(self, datasetNames):
+        self._forEachCounter(lambda c: c.removeColumns(datasetNames))
 
     def _forEachCounter(self, func):
         func(self.mainCounter)

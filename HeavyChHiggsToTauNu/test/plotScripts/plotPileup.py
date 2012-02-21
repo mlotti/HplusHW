@@ -75,7 +75,7 @@ def main():
     print "weights = cms.vdouble(%s)" % ", ".join(["%.8f" % weightHisto.GetBinContent(bin) for bin in xrange(1, min(maxVtx, weightHisto.GetNbinsX())+1)])
 
     h = histograms.HistoManager(datasetRootHistos=[])
-    h.appendHisto(histograms.HistoBase(weightHisto, "Weight", "", "HIST"))
+    h.appendHisto(histograms.Histo(weightHisto, "Weight", "", "HIST"))
     h.forEachHisto(styles.generator())
 
     cf = histograms.CanvasFrame(h, "vertex_weight_%s_%s" % (data, mc), xmax=maxVtx)

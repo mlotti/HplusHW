@@ -7,6 +7,7 @@ import OrderedDict
 
 import multicrabDatasets
 import certifiedLumi
+import git
 
 defaultSeBlacklist = [
     # blacklist before v13
@@ -50,6 +51,9 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
                 ret.append(d)
         return ret
     else:
+        if not os.path.exists(filename):
+            raise Exception("Multicrab configuration file '%s' does not exist" % filename)
+
         directory = os.path.dirname(filename)
 
         mc_ignore = ["MULTICRAB", "COMMON"]
@@ -453,6 +457,9 @@ class MulticrabDataset:
 
         self.lines.append(line)
 
+    def appendCopyFile(self, fileName):
+        self.filesToCopy.append(fileName)
+
     def extendBlackWhiteList(self, blackWhiteList, sites):
         """Extend the CE/SE black/white list with a list of sites.
 
@@ -789,6 +796,19 @@ class Multicrab:
 
         self._writeConfig(os.path.join(dirname, "multicrab.cfg"))
 
+        # Create code versions
+        version = git.getCommitId()
+        if version != None:
+            f = open(os.path.join(dirname, "codeVersion.txt"), "w")
+            f.write(version+"\n")
+            f.close()
+            f = open(os.path.join(dirname, "codeStatus.txt"), "w")
+            f.write(git.getStatus()+"\n")
+            f.close()
+            f = open(os.path.join(dirname, "codeDiff.txt"), "w")
+            f.write(git.getDiff()+"\n")
+            f.close()
+
         files = self.filesToCopy[:]
         for d in self.datasets:
             files.extend(d._getCopyFiles())
@@ -817,3 +837,6 @@ class Multicrab:
             print "Created multicrab task to subdirectory "+dirname
             print
 
+            os.chdir("..")
+
+        return dirname

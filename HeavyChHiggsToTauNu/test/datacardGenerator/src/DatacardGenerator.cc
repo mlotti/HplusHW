@@ -54,7 +54,7 @@ bool DatacardGenerator::generateDataCard(std::string description, double luminos
 
   // Make directory if it doesn't already exist
   std::stringstream s;
-  s << sDirectory+"/datacard_fullyhadronic_m" << fMassPoint << ".txt";
+  s << sDirectory+"/lands_datacard_hplushadronic_m" << fMassPoint << ".txt";
 
   std::ofstream myFile(s.str().c_str());
   if (myFile.bad() || myFile.fail()) {
@@ -268,7 +268,7 @@ void DatacardGenerator::generateRateLine(std::vector< DatasetGroup* >& datasetGr
         //std::cout << "datagroup=" << datasetGroups[j]->getLabel() << ", value=" << myValue << std::endl;
         if (useShapes) {
           fFile->cd();
-          if (datasetGroups[j]->getLabel() == "QCD") {
+          if (datasetGroups[j]->getLabel() == "QCD" || datasetGroups[j]->getLabel() == "QCDInv") {
             extractables[i]->addHistogramsToFile(datasetGroups[j]->getLabel(),"",fFile);
           } else {
             TH1F* h = datasetGroups[j]->getTransverseMassPlot(fNormalisationInfo, datasetGroups[j]->getLabel(),20,0.,400.);
@@ -288,7 +288,7 @@ void DatacardGenerator::generateRateLine(std::vector< DatasetGroup* >& datasetGr
         }
       }
     }
-    sResult << "\t" << std::fixed << std::setprecision(2) << myValue;
+    sResult << "\t" << std::fixed << std::setprecision(3) << myValue;
   }
   sResult << std::endl;
 }

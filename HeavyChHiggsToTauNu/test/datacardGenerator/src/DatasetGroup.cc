@@ -213,6 +213,17 @@ TH1F* DatasetGroup::getTransverseMassPlot(NormalisationInfo* info, std::string n
       myHisto->Rebin(myHisto->GetNbinsX() / myPlot->GetNbinsX());
     myPlot->Add(myHisto, myNormFactor);
   }
+  // Set negative bins to zero prior to normalisation (occurs in EWK residual channels)
+  for (int i = 0; i < myPlot->GetNbinsX()+1; ++i) {
+    if (myPlot->GetBinContent(i) < 0) {
+      std::cout << "\033[0;43m\033[1;37mWarning:\033[0;0m mT plot negative value (" << myPlot->GetBinContent(i) << "+-" << myPlot->GetBinError(i)
+                << ") in bin " << myPlot->GetXaxis()->GetBinLowEdge(i) << "-" << myPlot->GetXaxis()->GetBinUpEdge(i)
+                << " set to 0+-0 prior to normalisation in column " << sLabel << std::endl;
+      myPlot->SetBinContent(i, 0);
+      myPlot->SetBinError(i, 0);
+    }
+  }
+  // Normalise
   myPlot->Scale(fAdditionaNormalisationFactor);
   return myPlot; // empty histogram, if no datasets
 }

@@ -14,6 +14,8 @@ import ROOT
 from ROOT import *
 import math
 import sys
+import copy
+import re
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
@@ -25,6 +27,12 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
 counters = analysis+"Counters/weighted"
+
+def Linear(x,par):
+    return par[0]*x[0] + par[1]
+
+def ErrorFunction(x,par):
+    return 0.5*(1 + TMath.Erf(par[0]*(x[0] - par[1])))
 
 def ExpFunction(x,par):
     if (x[0] > 280 and x[0] < 300) or x[0] > 360:
@@ -39,17 +47,18 @@ def SumFunction(x,par):
     return par[0]*TMath.Gaus(x[0],par[1],par[2],1) + par[3]*TMath.Exp(-x[0]*par[4])
 
 def EWKFunction(x,par,norm = 1,rejectPoints = 0):
-#    if not rejectPoints == 0:
-#        if (x[0] > 280 and x[0] < 300) or x[0] > 360:
+    if not rejectPoints == 0:
+#        if (x[0] > 280 and x[0] < 300):
+	if (x[0] > 400):
 #	if x[0] > 40 and x[0] < 60 :
 #	if x[0] > 240 and x[0] < 260:
 #	if  (x[0] > 180 and x[0] < 200) or (x[0] > 260 and x[0] < 320):
 #	if  (x[0] > 100 and x[0] < 120) or (x[0] > 180 and x[0] < 200):
 #	if  (x[0] > 60 and x[0] < 80) or (x[0] > 140 and x[0] < 160) or (x[0] > 180 and x[0] < 220) or (x[0] > 240 and x[0] < 360):
 #	if  (x[0] > 40 and x[0] < 60) or (x[0] > 80 and x[0] < 100) or (x[0] > 120 and x[0] < 140) or (x[0] > 160 and x[0] < 180):
-#            TF1.RejectPoint()
-#            return 0
-    value = 130
+            TF1.RejectPoint()
+            return 0
+    value = 150
     if x[0] < value:
 	return norm*par[0]*TMath.Gaus(x[0],par[1],par[2],1)
     C = norm*par[0]*TMath.Gaus(value,par[1],par[2],1)*TMath.Exp(value*par[3])
@@ -80,14 +89,15 @@ def QCDFunctionFixed(x,par):
 
 class InvertedTauID:
 
-    def __init__( self):
+    def __init__(self):
 	self.parInvQCD  = []
 	self.parMCEWK   = []
 	self.parBaseQCD = []
 
-	self.nInvQCD  = 0
-	self.nMCEWK   = 0
-	self.nBaseQCD = 0
+	self.nInvQCD    = 0
+        self.nFitInvQCD = 0
+	self.nMCEWK     = 0
+	self.nBaseQCD   = 0
 
 	self.normInvQCD  = 1
 	self.normEWK     = 1
@@ -98,15 +108,37 @@ class InvertedTauID:
 	self.labels = []
 	self.normFactors = []
 
+	self.lumi = 0
+
+	self.errorBars = False
 
     def setLabel(self, label):
 	self.label = label
 
-    def comparison(self,histo1,histo2,norm=1):
+    def setLumi(self, lumi):
+	self.lumi = lumi
 
-        comp = TCanvas("comp","",500,500)
-        comp.cd()
-        comp.SetLogy()
+    def useErrorBars(self, useHistoErrors):
+	self.errorBars = useHistoErrors
+
+    def plotIntegral(self, plot_orig, objectName, canvasName = "Integral"):
+
+#        plot = copy.deepcopy(plot_orig)
+        plot = plot_orig
+ 
+        st = styles.getDataStyle().clone()
+        st.append(styles.StyleFill(fillColor=ROOT.kYellow))
+
+	plot.histoMgr.forHisto(objectName, st)
+	plot.setFrameName(plot.cf.canvas.GetName()+canvasName)
+        
+	plot.draw()
+        plot.save()
+
+        st.append(styles.StyleFill(fillColor=0))
+        plot.histoMgr.forHisto(objectName, st)
+
+    def comparison(self,histo1,histo2,norm=1):
 
 	h1 = histo1.Clone("h1")
 	h2 = histo2.Clone("h2")
@@ -131,40 +163,46 @@ class InvertedTauID:
 
 	if norm > 0:
 	    h1.GetYaxis().SetTitle("Arbitrary units")
-	h1.SetMarkerStyle(20)
-	h1.GetYaxis().SetTitleOffset(1.5)
-        h1.Draw()
-	h2.SetMarkerStyle(20)
-	h2.SetMarkerColor(2)
-	h2.Draw("same")
 
-#        tex1 = TLatex(0.6,0.9,"Inverted TauID")
-	tex1 = TLatex(0.4,0.9,h1.GetTitle())
-        tex1.SetNDC()
-	tex1.SetTextSize(15)
-        tex1.Draw()
+        plot = plots.ComparisonPlot(
+            histograms.Histo(h1, "Inv"),
+            histograms.Histo(h2, "Base"),
+            )
+            # Set the styles
+        st1 = styles.getDataStyle().clone()
+        st2 = st1.clone()
+        st2.append(styles.StyleMarker(markerColor=ROOT.kRed))
+	plot.histoMgr.forHisto("Base", st1)
+        plot.histoMgr.forHisto("Inv", st2)
+        
+        # Set the legend labels
+        plot.histoMgr.setHistoLegendLabelMany({"Inv": h1.GetTitle(),
+                                               "Base": h2.GetTitle()})
+        # Set the legend styles
+        plot.histoMgr.setHistoLegendStyleAll("P")
+        
+        # Set the drawing styles
+        plot.histoMgr.setHistoDrawStyleAll("EP")
+        
+        # Create frame with a ratio pad
+        plot.createFrame("comparison"+self.label, opts={"ymin":1e-5, "ymaxfactor": 2},
+                         createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
+                         )
+        
+        # Set Y axis of the upper pad to logarithmic
+        plot.getPad1().SetLogy(True)
 
-	marker1 = TMarker(0.38,0.915,h1.GetMarkerStyle())
-	marker1.SetNDC()
-	marker1.SetMarkerColor(h1.GetMarkerColor())
-	marker1.SetMarkerSize(0.5*h1.GetMarkerSize())
-	marker1.Draw()
+	plot.setLegend(histograms.createLegend(0.4,0.82,0.9,0.93))
 
-#	tex2 = TLatex(0.6,0.85,"Baseline TauID")
-	tex2 = TLatex(0.4,0.85,h2.GetTitle())
-        tex2.SetNDC()
-	tex2.SetTextSize(15)
-        tex2.Draw()
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+ 
+           
+        plot.draw()
+        plot.save()
 
-        marker2 = TMarker(0.38,0.865,h2.GetMarkerStyle())
-        marker2.SetNDC()
-        marker2.SetMarkerColor(h2.GetMarkerColor())
-        marker2.SetMarkerSize(0.5*h2.GetMarkerSize())
-        marker2.Draw()
 
-        comp.Print("comparison"+self.label+".eps")
-	comp.Print("comparison"+self.label+".C")
-        comp.Print("comparison"+self.label+".png")
 
     def cutefficiency(self,histo1,histo2):
 
@@ -197,54 +235,63 @@ class InvertedTauID:
         h2cut = h2.Clone("h2cut")
         h2cut.Reset()
 	h2cut.SetLineColor(2)
- 
-        h1_integral = h1.Integral()
-	h2_integral = h2.Integral()
 
-	hError = h1.Clone("hError")
-	hError.Reset()
+        integralError = ROOT.Double(0.0)
+	integralValue = h1.IntegralAndError(1,h1cut.GetNbinsX(),integralError)
+
+        h1_integral = h1.Integral(0,h1.GetNbinsX())
+	h2_integral = h2.Integral(0,h2.GetNbinsX())
 
 	iBin = 1
 	nBins = h1cut.GetNbinsX()
 	while iBin < nBins:
-	    selected1 = h1.Integral(iBin,nBins)
+	    error = ROOT.Double(0.0)
+	    selected1 = h1.IntegralAndError(iBin,nBins,error)
+	    if selected1 > 0:
+		error = error/selected1
+	    else:
+		error = integralError/integralValue
 	    efficiency1 = selected1/h1_integral
 	    h1cut.SetBinContent(iBin,efficiency1)
+	    if self.errorBars:
+   	        h1cut.SetBinError(iBin,error)
 
-            selected2 = h2.Integral(iBin,nBins)
+            error = ROOT.Double(0.0)
+            selected2 = h2.IntegralAndError(iBin,nBins,error)
+	    if selected2 > 0:
+		error = error/selected2
+	    else:
+		error = integralError/integralValue
             efficiency2 = selected2/h2_integral
             h2cut.SetBinContent(iBin,efficiency2)
-
-	    error = 0
-	    if efficiency1 > 0:
-		error = (efficiency1-efficiency2)/efficiency1
-            print "    Cut",histo1.GetBinLowEdge(iBin),efficiency1,efficiency2,error
-	    hError.SetBinContent(iBin,error)
+	    if self.errorBars:
+	        h2cut.SetBinError(iBin,error)
 
 	    iBin = iBin + 1
 
 
         plot = plots.ComparisonPlot(
-            histograms.Histo(h2cut, "Inv"),
-            histograms.Histo(h1cut, "Base"),
+            histograms.Histo(h1cut, "Inv"),
+            histograms.Histo(h2cut, "Base"),
             )
             # Set the styles
         st1 = styles.getDataStyle().clone()
         st2 = st1.clone()
         st2.append(styles.StyleLine(lineColor=ROOT.kRed))
+	st2.append(styles.StyleMarker(markerColor=ROOT.kRed))
         plot.histoMgr.forHisto("Base", st1)
         plot.histoMgr.forHisto("Inv", st2)
 
         # Set the legend labels
-        plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted tau ID",
-                                               "Base": "Baseline tau ID"})
+        plot.histoMgr.setHistoLegendLabelMany({"Inv": h1.GetTitle(),
+                                               "Base": h2.GetTitle()})
         # Set the legend styles
-        plot.histoMgr.setHistoLegendStyleAll("L")
-        #plot.histoMgr.setHistoLegendStyle("afterTauID", "P") # exception to the general rule
+        #plot.histoMgr.setHistoLegendStyleAll("L")
+	plot.histoMgr.setHistoLegendStyleAll("P")
 
         # Set the drawing styles
-        plot.histoMgr.setHistoDrawStyleAll("HIST")
-        #plot.histoMgr.setHistoDrawStyleAll("afterTauID", "EP") # exception to the general rule
+        #plot.histoMgr.setHistoDrawStyleAll("HIST")
+        plot.histoMgr.setHistoDrawStyleAll("EP")
 
         # Create frame with a ratio pad
         plot.createFrame("cuteff"+self.label, opts={"ymin":1e-5, "ymaxfactor": 2},
@@ -252,23 +299,100 @@ class InvertedTauID:
                          )
 
         # Set Y axis of the upper pad to logarithmic
-        plot.getPad1().SetLogy(True)
+        plot.getPad().SetLogy(True)
+
+        plot.setLegend(histograms.createLegend(0.4,0.82,0.9,0.93))
+        
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText() 
+        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
 
         plot.draw()
         plot.save()
 
         ######
 
+        hError = h1cut.Clone("hError")
+	hError.Divide(h2cut)
+
+        iBin = 1
+        nBins = hError.GetNbinsX()
+        while iBin < nBins:
+	    hError.SetBinContent(iBin,abs(hError.GetBinContent(iBin) - 1))
+	    iBin = iBin + 1
+
+        hError.GetYaxis().SetTitle("abs( (#varepsilon^{Inverted} - #varepsilon^{Baseline})/#varepsilon^{Baseline} )")
+        hError.GetXaxis().SetTitle("PF MET cut (GeV)")
+
         plot2 = plots.PlotBase()
         plot2.histoMgr.appendHisto(histograms.Histo(hError,"ShapeUncertainty"))
         plot2.histoMgr.forHisto("ShapeUncertainty", st1)
-        plot2.histoMgr.setHistoDrawStyleAll("HIST")
-        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-1, "ymaxfactor": 1})
-        plot2.draw()
+        plot2.histoMgr.setHistoDrawStyleAll("EP")
+#        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-1, "ymax": 1})
+	plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-0.1, "ymax": 1.1})
+
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+
+
+	rangeMin = hError.GetXaxis().GetXmin()
+        rangeMax = hError.GetXaxis().GetXmax()
+#	rangeMax = 80
+	rangeMax = 120
+#	rangeMax = 380
+        
+        numberOfParameters = 2
+
+        class FitFunction:
+            def __call__( self, x, par ):
+#                return Linear(x,par)
+		return ErrorFunction(x,par)
+
+        theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
+        theFit.SetParLimits(0,0.01,0.03)
+        theFit.SetParLimits(1,50,150)
+
+#	theFit.FixParameter(0,0.02)
+#	theFit.FixParameter(1,100)
+
+	hError.Fit(theFit,"LRN")
+	print "Error MET > 40",theFit.Eval(40)
+	print "Error MET > 50",theFit.Eval(50)
+	print "Error MET > 70",theFit.Eval(70)
+
+	plot2.histoMgr.appendHisto(histograms.Histo(theFit,"Fit"))
+
+	plot2.draw()
         plot2.save()
 
+    def plotHisto(self,histo,canvasName):
+        plot = plots.PlotBase()
+        plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
+        plot.createFrame(canvasName+self.label, opts={"ymin": 0.1, "ymaxfactor": 2.})
 
-    def fitQCD(self,histo): 
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+
+        plot.getPad().SetLogy(True)
+
+        integralValue = int(0.5 + histo.Integral(0,histo.GetNbinsX(),"width"))
+        print histo.GetName(),"Integral",histo.Integral(0,histo.GetNbinsX(),"width")
+        histograms.addText(0.4,0.7,"Integral = %s ev"% integralValue)
+
+        match = re.search("aseline",histo.GetName())
+        if match:
+            self.nBaseQCD = integralValue
+        match = re.search("nverted",histo.GetName())
+        if match:
+            self.nInvQCD = integralValue
+            
+        self.plotIntegral(plot, histo.GetName())
+        
+    def fitQCD(self,origHisto): 
+
+	histo = origHisto.Clone("histo")
 
         rangeMin = histo.GetXaxis().GetXmin()
         rangeMax = histo.GetXaxis().GetXmax()
@@ -283,22 +407,16 @@ class InvertedTauID:
 
         theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
 
-#        theFit.SetParLimits(0,1,200)
-#        theFit.SetParLimits(1,-200,150)
-#        theFit.SetParLimits(2,50,250)
-
-        theFit.SetParLimits(0,10,20)
+        theFit.SetParLimits(0,1,20)
         theFit.SetParLimits(1,20,40)
         theFit.SetParLimits(2,10,25)
 
         theFit.SetParLimits(3,1,10)
         theFit.SetParLimits(4,0,150)
-        theFit.SetParLimits(5,20,100)
+        theFit.SetParLimits(5,10,100)
 
         theFit.SetParLimits(6,0.0001,1)
         theFit.SetParLimits(7,0.001,0.05)
-#	theFit.SetParLimits(3,0.001,1)
-#	theFit.SetParLimits(4,0.001,0.05)
 
 	if self.label == "Baseline":
 	    rangeMax = 240
@@ -315,12 +433,18 @@ class InvertedTauID:
             theFit.SetParLimits(0,1,20)
             theFit.SetParLimits(3,0.1,5)
 
-        cqcd = TCanvas("c","",500,500)
-        cqcd.cd()                     
-        cqcd.SetLogy()
+
 	gStyle.SetOptFit(0)
 
-	self.normInvQCD = histo.Integral()
+	plot = plots.PlotBase()
+	plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
+	plot.createFrame("qcdfit"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
+
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+
+	self.normInvQCD = histo.Integral(0,histo.GetNbinsX())
 
 	histo.Scale(1/self.normInvQCD)
         histo.Fit(theFit,"LR")         
@@ -329,14 +453,16 @@ class InvertedTauID:
         theFit.SetLineStyle(2)                                                
         theFit.Draw("same")
 
-        tex = TLatex(0.4,0.8,"Inverted TauID")
-	tex.SetNDC()
-	tex.Draw()
 
-        cqcd.Print("qcdfit"+self.label+".eps")
-        cqcd.Print("qcdfit"+self.label+".png")
+        histograms.addText(0.4,0.8,"Inverted TauID")
 
-                                                                              
+	plot.histoMgr.appendHisto(histograms.Histo(theFit,"Fit"))
+
+        plot.getPad().SetLogy(True) 
+        
+        plot.draw()
+        plot.save()
+
         self.parInvQCD = theFit.GetParameters()                               
                                                                               
         fitPars = "fit parameters "                                           
@@ -345,8 +471,9 @@ class InvertedTauID:
             fitPars = fitPars + " " + str(self.parInvQCD[i])
             i = i + 1
         print fitPars
-	self.nInvQCD = theFit.Integral(0,1000,self.parInvQCD)
-        print "Integral ",self.normInvQCD*self.nInvQCD
+	self.nFitInvQCD = theFit.Integral(0,1000,self.parInvQCD)
+        print "Integral ",self.normInvQCD*self.nFitInvQCD
+
 
     def fitEWK(self,histo,options="R"):
 
@@ -359,18 +486,6 @@ class InvertedTauID:
 
         print "Fit range ",rangeMin, " - ",rangeMax
 
-#	class Function1:
-#            def __call__( self, x, par ):  
-#                return Gaussian(x,par)
-#
-#	fit1 = TF1('fit1',Function1(),0,150,3)
-#	
-#        class Function2:
-#            def __call__( self, x, par ):
-#                return ExpFunction(x,par)        
-#        
-#        fit2 = TF1('fit2',Function2(),150,400,2)
-#        
         class FitFunction:
             def __call__( self, x, par ):
                 return EWKFunction(x,par,1,1)
@@ -388,12 +503,6 @@ class InvertedTauID:
         theFit.SetParLimits(2,30,50) 
         theFit.SetParLimits(3,0.001,1)
 
-#    	theFit.SetParLimits(0,10,20)
-#    	theFit.SetParLimits(1,80,120)
-#    	theFit.SetParLimits(2,30,60)
-#    	theFit.SetParLimits(3,1,10)
-#	theFit.SetParLimits(4,100,250)
-#	theFit.SetParLimits(5,50,100)
 
         if self.label == "4050":
             theFit.SetParLimits(0,5,20) 
@@ -404,24 +513,24 @@ class InvertedTauID:
 	if self.label == "5060":
             theFit.SetParLimits(0,5,20)     
             theFit.SetParLimits(1,90,120)   
-            theFit.SetParLimits(2,30,50)
+            theFit.SetParLimits(2,20,50)
             theFit.SetParLimits(3,0.001,1)
 
         if self.label == "6070":
-            theFit.SetParLimits(0,5,20)
+            theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,90,150)
             theFit.SetParLimits(2,20,50)
             theFit.SetParLimits(3,0.001,1)
 
         if self.label == "7080":
-            theFit.SetParLimits(0,5,40)
-            theFit.SetParLimits(1,90,170)
-            theFit.SetParLimits(2,20,60)
+            theFit.SetParLimits(0,5,60)
+            theFit.SetParLimits(1,90,200)
+            theFit.SetParLimits(2,20,100)
             theFit.SetParLimits(3,0.001,1)
 
         if self.label == "80100":
             theFit.SetParLimits(0,5,50)
-            theFit.SetParLimits(1,90,170)
+            theFit.SetParLimits(1,50,170)
             theFit.SetParLimits(2,20,60)
             theFit.SetParLimits(3,0.001,1)
 
@@ -434,25 +543,28 @@ class InvertedTauID:
         if self.label == "120150":
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,60,170)
-            theFit.SetParLimits(2,10,60)
+            theFit.SetParLimits(2,10,100)
             theFit.SetParLimits(3,0.001,1)
 
         if self.label == "150":
             theFit.SetParLimits(0,5,50)
             theFit.SetParLimits(1,70,170)
-            theFit.SetParLimits(2,20,60)
+            theFit.SetParLimits(2,20,100)
             theFit.SetParLimits(3,0.001,1)
 
-        cewk = TCanvas("cewk","",500,500)
-        cewk.cd()
-        cewk.SetLogy()
 
-	self.normEWK = histo.Integral()
+        plot = plots.PlotBase()
+        plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
+        plot.createFrame("ewkfit"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
+
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+                        
+	self.normEWK = histo.Integral(0,histo.GetNbinsX())
 
 	histo.Scale(1/self.normEWK)
 
-#        histo.Fit(theFit,"R")
-#        histo.Fit(theFit,"LR")
 	histo.Fit(theFit,options) 
        
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
@@ -470,38 +582,36 @@ class InvertedTauID:
 	    i = i + 1
 	thePlot.Draw("same")
 
-        tex = TLatex(0.2,0.2,"EWK MC, baseline TauID")
-        tex.SetNDC()
-        tex.Draw()
+        histograms.addText(0.2,0.2,"EWK MC, baseline TauID")
 
-        cewk.Print("ewkfit"+self.label+".eps")
-        cewk.Print("ewkfit"+self.label+".png")
-        
+        plot.histoMgr.appendHisto(histograms.Histo(theFit,"Fit"))
+
+        plot.getPad().SetLogy(True)
+
+        plot.draw()
+        plot.save()
+                           
         self.parMCEWK = theFit.GetParameters()
         
-#        fitPars = "fit parameters "
-#        i = 0
-#        while i < numberOfParameters:
-#            fitPars = fitPars + " " + str(self.parMCEWK[i])
-#            i = i + 1
         print fitPars
         self.nMCEWK = theFit.Integral(0,1000,self.parMCEWK)
         print "Integral ",self.normEWK*self.nMCEWK
 
     def fitData(self,histo):
 
-	parInvQCD = self.parInvQCD
-	parMCEWK  = self.parMCEWK
-	nInvQCD   = self.nInvQCD
-        nMCEWK    = self.nMCEWK
+	parInvQCD  = self.parInvQCD
+	parMCEWK   = self.parMCEWK
+	nInvQCD    = self.nInvQCD
+        nFitInvQCD = self.nFitInvQCD
+        nMCEWK     = self.nMCEWK
 
         class FitFunction:
             def __call__( self, x, par ):
-                return par[0]*(par[1] * QCDFunction(x,parInvQCD,1/nInvQCD) + ( 1 - par[1] ) * EWKFunction(x,parMCEWK,1/nMCEWK))
+                return par[0]*(par[1] * QCDFunction(x,parInvQCD,1/nFitInvQCD) + ( 1 - par[1] ) * EWKFunction(x,parMCEWK,1/nMCEWK))
 
 	class QCDOnly:
 	    def __call__( self, x, par ):
-		return par[0]*par[1] * QCDFunction(x,parInvQCD,1/nInvQCD)
+		return par[0]*par[1] * QCDFunction(x,parInvQCD,1/nFitInvQCD)
 
         rangeMin = histo.GetXaxis().GetXmin()
         rangeMax = histo.GetXaxis().GetXmax()
@@ -511,10 +621,15 @@ class InvertedTauID:
         
         theFit = TF1("theFit",FitFunction(),rangeMin,rangeMax,numberOfParameters)
         
-        c = TCanvas("c","",500,500)
-        c.cd()
-        c.SetLogy()
-	print "data events ",histo.Integral()
+        plot = plots.PlotBase()
+        plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
+        plot.createFrame("combinedfit"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
+
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+                                        
+	print "data events ",histo.Integral(0,histo.GetNbinsX())
 
         histo.Fit(theFit,"R")
 
@@ -530,29 +645,28 @@ class InvertedTauID:
 	qcdOnly.SetLineStyle(2)
 	qcdOnly.Draw("same")
 
-        tex = TLatex(0.35,0.8,"Data, Baseline TauID")
-        tex.SetNDC()
-        tex.Draw()
+        histograms.addText(0.35,0.8,"Data, Baseline TauID")
+        histograms.addText(0.4,0.3,"QCD",15)
 
-        texq = TLatex(0.4,0.3,"QCD")
-        texq.SetNDC() 
-	texq.SetTextSize(15)
-        texq.Draw()
 
-        c.Print("combinedfit"+self.label+".eps")
-        c.Print("combinedfit"+self.label+".png")        
+        plot.histoMgr.appendHisto(histograms.Histo(qcdOnly,"qcdOnly"))
+        
+        plot.getPad().SetLogy(True)
 
+        plot.draw()
+        plot.save()
+                                        
         fitPars = "fit parameters "
         i = 0
         while i < numberOfParameters:
             fitPars = fitPars + " " + str(par[i])
             i = i + 1
         print fitPars
-	self.nBaseQCD = par[0]
+	nBaseQCD = par[0]
 	self.QCDfraction = par[1]
 	if len(self.label) > 0:
 	    print "Bin ",self.label
-        print "Integral     ", self.nBaseQCD
+        print "Integral     ", nBaseQCD
 	print "QCD fraction ",self.QCDfraction
 
         return theFit
@@ -629,7 +743,7 @@ class InvertedTauID:
         cshape = TCanvas("cshape","",500,500)
         cshape.cd()
         cshape.SetLogy()
-#        print "data events ",histo.Integral()   
+#        print "data events ",histo.Integral(0,histo.GetNbinsX())   
 
         histoInv.Scale(histoBase.GetMaximum()/histoInv.GetMaximum())
         histoInv.SetMarkerColor(4)
@@ -715,7 +829,7 @@ class InvertedTauID:
 
     def getNormalization(self):
 	nQCDbaseline = self.nBaseQCD
-	nQCDinverted = self.normInvQCD*self.nInvQCD
+	nQCDinverted = self.nInvQCD
 	QCDfractionInBaseLineEvents = self.QCDfraction
 	normalizationForInvertedEvents = nQCDbaseline*QCDfractionInBaseLineEvents/nQCDinverted
 
@@ -745,110 +859,3 @@ class InvertedTauID:
 	    print "    Label",label,", normalization",self.normFactors[i]
 	    i = i + 1
 
-
-def main():
-    # Create all datasets from a multicrab task
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-
-    # Read integrated luminosities of data datasets from lumi.json
-    datasets.loadLuminosities()
-
-    # Include only 120 mass bin of HW and HH datasets
-    datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
-
-    # Default merging nad ordering of data and MC datasets
-    # All data datasets to "Data"
-    # All QCD datasets to "QCD"
-    # All single top datasets to "SingleTop"
-    # WW, WZ, ZZ to "Diboson"
-    plots.mergeRenameReorderForDataMC(datasets)
-
-    # Set BR(t->H) to 0.05, keep BR(H->tau) in 1
-    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
-
-    # Merge WH and HH datasets to one (for each mass bin)
-    # TTToHplusBWB_MXXX and TTToHplusBHminusB_MXXX to "TTToHplus_MXXX"
-    plots.mergeWHandHH(datasets)
-
-    ttjets2 = datasets.getDataset("TTJets").deepCopy()
-    ttjets2.setCrossSection(ttjets2.getCrossSection()-datasets.getDataset("TTToHplus_M120").getCrossSection())
-    print "Set TTJets2 cross section to %f" % ttjets2.getCrossSection()
-    ttjets2.setName("TTJets2")
-    datasets.append(ttjets2)
-
-    datasets.merge("EWK", [
-	    "TTJets",
-            "WJets",
-            "DYJetsToLL",
-            "SingleTop",
-            "Diboson"
-            ])
-
-     # Apply TDR style
-    style = tdrstyle.TDRStyle()
-
-    invertedQCD = InvertedTauID()
-
-    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets")
-    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets")  
-
-    # Rebin before subtracting
-    metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
-    metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
-    
-    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBtag")
-    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBtag") 
-    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_BaselineTauIdBtag")
-    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_BaselineTauIdBtag")
-
-    metBase_data.SetTitle("Data: BaseLine TauID")
-    metInverted_data.SetTitle("Data: Inverted TauID")
-    metBase_QCD = metBase_data.Clone("QCD")
-    metBase_QCD.Add(metBase_EWK,-1)
-    metBase_QCD.SetTitle("Data - EWK MC: BaseLine TauID")
-
-    invertedQCD.setLabel("BaseVsInverted")
-    invertedQCD.comparison(metInverted_data,metBase_data)
-    invertedQCD.setLabel("BaseMinusEWKVsInverted")
-    invertedQCD.comparison(metInverted_data,metBase_QCD)
-
-
-    invertedQCD.setLabel("inclusive")   
-    invertedQCD.fitQCD(metInverted_data)
-    invertedQCD.fitEWK(metBase_EWK)  
-    invertedQCD.fitData(metBase_data)
-    normalizationWithEWK = invertedQCD.getNormalization()
-
-#    bins = ["4050","5060","6070","7080","80100","100120","120150","150"]
-#    bins = ["4050","5060","6070","7080","80100","120150","150"]
-    bins = []
-
-    for bin in bins:
-
-        metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets"+bin)
-#        metBase.createFrame("MET", opts={"ymin": 1e-6, "ymaxfactor": 10})
-        metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets"+bin)
-        # Rebin before subtracting
-        metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
-        metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
-
-        metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets"+bin)
-        metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets"+bin)
-        metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets"+bin)
-        metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets"+bin)
-
-        metBase_QCD = metBase_data.Clone("QCD")
-        metBase_QCD.Add(metBase_EWK,-1)
-
-	invertedQCD.setLabel(bin)
-#        invertedQCD.comparison(metInverted_data,metBase_QCD)
-        invertedQCD.fitQCD(metInverted_data)
-        invertedQCD.fitEWK(metBase_EWK)
-        invertedQCD.fitData(metBase_data)
-        invertedQCD.getNormalization()
-
-    invertedQCD.Summary()
-
-
-if __name__ == "__main__":
-    main()

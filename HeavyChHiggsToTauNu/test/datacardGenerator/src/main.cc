@@ -26,6 +26,7 @@ void printUsage() {
 int main(int argc, char** argv) {
   std::string myConfigName;
   bool myVerboseStatus = false;
+  bool myQCDVerboseStatus = false;
   bool myUseShapesStatus = true;
   // Loop over arguments
   for (int i = 1; i < argc; ++i) {
@@ -42,6 +43,8 @@ int main(int argc, char** argv) {
         return 0;
       } else if (myArg == "-v") {
         myVerboseStatus = true;
+      } else if (myArg == "--debugQCD") {
+        myQCDVerboseStatus = true;
       } else if (myArg == "--noshapes") {
         myUseShapesStatus = false;
       } else {
@@ -57,7 +60,7 @@ int main(int argc, char** argv) {
     return 0;
   }
   // Initiate config manager and generate datacards
-  ConfigManager myManager(myVerboseStatus);
+  ConfigManager myManager(myVerboseStatus, myQCDVerboseStatus);
   if (!myManager.initialize(myConfigName)) return 0;
   myManager.generateCards(myUseShapesStatus);
   return 0;

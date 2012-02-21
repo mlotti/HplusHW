@@ -17,6 +17,11 @@ def main(opts, args):
         # Go to task directory (in order to get the paths in the archive correctly easily)
         os.chdir(d)
 
+        # Remove default.tgz
+        tmp = os.path.join("share", "default.tgz")
+        if os.path.exists(tmp):
+            os.remove(tmp)
+
         # Create the tar archive
         tar = tarfile.open("task.tar.gz", mode="w:gz")
         files = []
