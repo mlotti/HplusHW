@@ -27,6 +27,7 @@ namespace HPlus {
     fDoFill(iConfig.getUntrackedParameter<bool>("fill")),
     fTauEmbeddingInput(iConfig.getUntrackedParameter<bool>("tauEmbeddingInput", false)),
     fFillJetEnergyFractions(iConfig.getUntrackedParameter<bool>("fillJetEnergyFractions", true)),
+    fillNonIsoLeptonVars(iConfig.getUntrackedParameter<bool>("fillNonIsoLeptonVars", false)),
     fGenParticleSource(iConfig.getUntrackedParameter<edm::InputTag>("genParticleSrc")),
     fTree(0)
   {
