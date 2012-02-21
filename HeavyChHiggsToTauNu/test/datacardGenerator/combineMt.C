@@ -120,8 +120,9 @@ void plot(int mass) {
   hFrame->SetStats(0);
   hFrame->SetLineStyle(0);
   hFrame->SetMarkerStyle(20);
-  hFrame->SetXTitle("Transverse mass (#tau jet, E_{T}^{miss}), (GeV/c^{2})");
-  hFrame->SetYTitle("N_{events} / 20 GeV/c^{2}");
+  //hFrame->SetXTitle("Transverse mass (#tau jet, E_{T}^{miss}) (GeV/c^{2})");
+  hFrame->SetXTitle("Transverse mass (#kern[-0.4]{#tau_{h}}, E_{T}^{miss}) (GeV/c^{2})");
+  hFrame->SetYTitle("Events / 20 GeV/c^{2}");
   hFrame->GetXaxis()->SetTitleSize(0);
   hFrame->GetXaxis()->SetLabelSize(0);
   hFrame->GetYaxis()->SetTitleFont(43);
@@ -317,6 +318,7 @@ void plot(int mass) {
   leg->Draw();
   
   TLatex *tex = new TLatex(0.62,0.945,"CMS Preliminary");
+  //TLatex *tex = new TLatex(0.62,0.945,"CMS");
   tex->SetNDC();
   tex->SetTextFont(43);
   tex->SetTextSize(27);
