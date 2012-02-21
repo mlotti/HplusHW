@@ -62,7 +62,7 @@ def main():
     datasetsEmb.remove(filter(lambda name: "HplusTB" in name, datasetsEmb.getAllDatasetNames()))
     datasetsEmb.remove(filter(lambda name: "TTToHplus" in name, datasetsEmb.getAllDatasetNames()))
 
-    del plots._datasetMerge["WW"]
+#    del plots._datasetMerge["WW"]
 #    del plots._datasetMerge["WZ"]
 #    del plots._datasetMerge["ZZ"]
 
@@ -82,10 +82,16 @@ def main():
     #tauEmbedding.normalize=False
     tauEmbedding.era = "Run2011A"
 
+    def mergeEWK(datasets):
+        datasets.merge("EWKMC", ["WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson", "WW"], keepSources=True)
+        #datasets.merge("EWKMC", ["WJets", "TTJets"], keepSources=True)
+#    mergeEWK(datasetsSig)
+#    datasetsEmb.forEach(mergeEWK)
+
     datasetsEmbCorrected = result.DatasetsDYCorrection(datasetsEmb, datasetsSig, analysisEmb, analysisSig)
     datasetsResidual = result.DatasetsResidual(datasetsEmb, datasetsSig, analysisEmb, analysisSig, ["DYJetsToLL", "WW"])
 
- #   doPlots(datasetsEmb)
+    doPlots(datasetsEmb)
     #doPlots(datasetsEmbCorrected)
 #    doPlotsWTauMu(datasetsEmb, "TTJets", True)
 #    doPlotsWTauMu(datasetsEmb, "TTJets", False)
@@ -93,7 +99,7 @@ def main():
 #    doCounters(datasetsEmb)
     #doCounters(datasetsEmbCorrected)
 
-    doCountersResidual(datasetsResidual)
+#    doCountersResidual(datasetsResidual)
 
     #doCountersOld(datasetsEmb)
 
@@ -265,8 +271,8 @@ def doPlots(datasetsEmb):
                 s += "0 "
         print "%s rel. stat. unc. %s" % (name, s)
                 
-        p.appendPlotObject(histograms.PlotText(0.5, 0.55, label, size=20))
-        drawPlot(p, prefix+"transverseMass_"+name, "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts={"ymax": 36}, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}", log=False)
+        p.appendPlotObject(histograms.PlotText(0.5, 0.62, label, size=20))
+        drawPlot(p, prefix+"transverseMass_"+name, "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts={"ymax": 32}, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}", log=False)
 
     return
 
@@ -477,6 +483,10 @@ def doCountersResidual(datasetsResidual):
 
     names = ["Data", "DYJetsToLL residual", "WW residual"]
     mainTable.insertColumn(1, counter.sumColumn("Data+residual", [mainTable.getColumn(name=name) for name in names]))
+
+    if "EWKMC" in datasetsResidual.getAllDatasetNames():
+        names = ["EWKMC", "DYJetsToLL residual", "WW residual"]
+        mainTable.insertColumn(3, counter.sumColumn("EWKMC+residual", [mainTable.getColumn(name=name) for name in names]))
 
     cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.3f'))
     print mainTable.format(cellFormat)

@@ -53,8 +53,8 @@ dirEmbsWjets = [
     "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest29_Run2011A_120212_112610",
 ]
 
-onlyWjets = True
-#onlyWjets = False
+#onlyWjets = True
+onlyWjets = False
 #normalize = True
 normalize = False
 mcEvents = True
@@ -227,7 +227,7 @@ def doPlots(table):
         p.frame.GetXaxis().SetTitle("Embedding trial number")
         ylabel = "MC"
         if name == "Data":
-            xlabel = "Data"
+            ylabel = "Data"
         ylabel += " events"
         p.frame.GetYaxis().SetTitle(ylabel)
         for irow in xrange(nrows):

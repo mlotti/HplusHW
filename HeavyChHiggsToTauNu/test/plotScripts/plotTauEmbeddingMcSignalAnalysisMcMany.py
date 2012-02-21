@@ -48,6 +48,9 @@ weight = "weightPileup*weightTrigger"
 #weightBTagging = weight # don't apply b-tagging scale factor
 weightBTagging = weight+"*weightBTagging"
 
+plotStyles = styles.styles[0:2]
+plotStyles[0] = styles.StyleCompound([plotStyles[0], styles.StyleMarker(markerStyle=21, markerSize=1.2)])
+
 def main():
     dirEmbs = ["."] + [os.path.join("..", d) for d in result.dirEmbs[1:]]
     dirSig = "../"+result.dirSig
@@ -89,7 +92,7 @@ def main():
         print "%s done" % datasetName
 
 
-    doPlots(datasetsEmbCorrected, datasetsSig, "EWKMC", doData=True, postfix="_residual")
+    doPlots(datasetsEmbCorrected, datasetsSig, "EWKMC", addData=True, postfix="_residual")
     #doCounters(datasetsEmb, datasetsSig, "EWKMC")
     return
     dop("TTJets")
@@ -108,7 +111,7 @@ def main():
 
     doPlots(datasetsEmbCorrected, datasetsSig, "EWKMC", postfix="_dycorrected")
 
-def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
+def doPlots(datasetsEmb, datasetsSig, datasetName, addData=False, postfix=""):
     lumi = datasetsEmb.getLuminosity()
     isCorrected = isinstance(datasetsEmb, result.DatasetsDYCorrection) or isinstance(datasetsEmb, result.DatasetsResidual)
     
@@ -133,44 +136,54 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
         sig.SetName("Normal")
 
         p = None
-        sty = None
-        if doData:
+        sty = plotStyles
+        if addData:
             (embData, embDataVar) = datasetsEmb.getHistogram("Data", name2Emb, rebin=rebin)
             embData.SetName("EmbeddedData")
             #p = plots.ComparisonManyPlot(embData, [emb, sig])
-            p = plots.ComparisonPlot(embData, sig)
+            #p = plots.ComparisonPlot(embData, sig)
+            p = plots.ComparisonManyPlot(sig, [embData, emb])
+            p.histoMgr.reorderDraw(["EmbeddedData", "Embedded", "Normal"])
+            p.histoMgr.reorderLegend(["EmbeddedData", "Embedded", "Normal"])
             p.histoMgr.setHistoDrawStyle("EmbeddedData", "EP")
             p.histoMgr.setHistoLegendStyle("EmbeddedData", "P")
+            p.histoMgr.setHistoLegendStyle("Embedded", "PL")
             p.setLuminosity(lumi)
-            sty = [styles.dataStyle, styles.styles[1]]
+#            sty = [styles.dataStyle, styles.styles[1]]
+            #sty = [sty[0], styles.dataStyle, sty[1]]
+            sty = [styles.dataStyle]+sty
         else:
             p = plots.ComparisonPlot(emb, sig)
             sty = styles.styles
 
+        embedded = "Embedded "
         legLabel = plots._legendLabels.get(datasetName, datasetName)
+        legLabelEmb = legLabel
         if legLabel != "Data":
             legLabel += " MC"
         residual = ""
         if isCorrected:
+            embedded = "Emb. "
             residual =" + res. MC"
+        else:
+            lebLabelEmb += " MC"
         p.histoMgr.setHistoLegendLabelMany({
-                "Embedded":     "Embedded " + legLabel,
+                "Embedded":     embedded + legLabelEmb + residual,
                 "Normal":       "Normal " + legLabel,
                 #"EmbeddedData": "Embedded data"+residual,
-                "EmbeddedData": "Emb. data"+residual,
+                "EmbeddedData": embedded+"data"+residual,
                 })
         p.histoMgr.forEachHisto(styles.Generator(sty))
         if addVariation:
-            if doData:
+            if addData:
                 if embDataVar != None:
                     plots.copyStyle(p.histoMgr.getHisto("EmbeddedData").getRootHisto(), embDataVar)
                     embDataVar.SetMarkerStyle(2)
                     p.embeddingDataVariation = embDataVar
-            else:
-                if embVar != None:
-                    plots.copyStyle(p.histoMgr.getHisto("Embedded").getRootHisto(), embVar)
-                    embVar.SetMarkerStyle(2)
-                    p.embeddingVariation = embVar
+            if embVar != None:
+                plots.copyStyle(p.histoMgr.getHisto("Embedded").getRootHisto(), embVar)
+                embVar.SetMarkerStyle(2)
+                p.embeddingVariation = embVar
     
         return p
 
@@ -179,7 +192,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
         drawPlot(p, *args, **kwargs)
 
     prefix = "mcembsig"
-    if doData:
+    if addData:
         prefix = "embdatasigmc"
     prefix = prefix+postfix+"_"+datasetName+"_"
 
@@ -248,7 +261,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
     tdMt = treeDraw.clone(varexp="sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi()))) >>tmp(20,0,400)")
 
     # DeltapPhi
-    xlabel = "#Delta#phi(#tau jet, E_{T}^{miss}) (^{#circ})"
+    xlabel = "#Delta#phi(#tau jet, E_{T}^{miss}) (^{o})"
     def customDeltaPhi(h):
         yaxis = h.getFrame().GetYaxis()
         yaxis.SetTitleOffset(0.8*yaxis.GetTitleOffset())
@@ -268,7 +281,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
         opts2 = {
             "WJets": {"ymin": 0, "ymax": 3}
             }.get(datasetName, opts2def)
-    drawPlot(createPlot(tdDeltaPhi.clone(selection=And(metCut, bTaggingCut))), prefix+"deltaPhi_3AfterBTagging", xlabel, log=False, opts=opts, opts2=opts2, ylabel="Events / %.0f^{#circ}", function=customDeltaPhi, moveLegend={"dx":-0.22}, cutLine=[130, 160])
+    drawPlot(createPlot(tdDeltaPhi.clone(selection=And(metCut, bTaggingCut))), prefix+"deltaPhi_3AfterBTagging", xlabel, log=False, opts=opts, opts2=opts2, ylabel="Events / %.0f^{o}", function=customDeltaPhi, moveLegend={"dx":-0.22}, cutLine=[130, 160])
 
 
     # After all cuts
@@ -290,7 +303,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
     opts2 = {"ymin": 0, "ymax": 2}
     if analysisEmb != "signalAnalysis":
         opts = {
-            "EWKMC": {"ymax": 46},
+            "EWKMC": {"ymax": 40},
             "TTJets": {"ymax": 12},
             #"WJets": {"ymax": 35},
             "WJets": {"ymax": 25},
@@ -306,7 +319,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, doData=False, postfix=""):
             }.get(datasetName, opts2)
     
     p = createPlot(tdMt.clone(selection=selection))
-    p.appendPlotObject(histograms.PlotText(0.5, 0.55, "#Delta#phi(#tau jet, E_{T}^{miss}) < 160^{#circ}", size=20))
+    p.appendPlotObject(histograms.PlotText(0.6, 0.7, "#Delta#phi(#tau jet, E_{T}^{miss}) < 160^{o}", size=20))
     drawPlot(p, prefix+"transverseMass_4AfterDeltaPhi160", "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts=opts, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}", log=False)
 
 
@@ -495,6 +508,20 @@ def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, r
     h.getPad().SetLogy(log)
     if ratio:
         h.getFrame2().GetYaxis().SetTitle("Ratio")
+        # Very, very ugly hack
+        if h.histoMgr.hasHisto("EmbeddedData"):
+            if h.ratios[1].getName() != "Embedded":
+                raise Exception("Assumption failed")
+            h.ratios[1].setDrawStyle("PE2")
+            rh = h.ratios[1].getRootHisto()
+            rh.SetFillColor(ROOT.kBlue-7)
+            rh.SetFillStyle(3004)
+            # err = h.ratios[1].getRootHisto().Clone("Embedded_ratio_err")
+            # err.SetFillColor(ROOT.kBlue-7)
+            # err.SetFillStyle(3004)
+            # err.SetMarkerSize(0)
+            # h.prependPlotObjectToRatio(err, "E2")
+
     #yaxis = h.getFrame2().GetYaxis()
     #yaxis.SetTitleSize(yaxis.GetTitleSize()*0.7)
     #yaxis.SetTitleOffset(yaxis.GetTitleOffset()*1.5)
@@ -502,7 +529,7 @@ def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, r
     tmp = sigErr.Clone("tmp")
     tmp.SetFillColor(ROOT.kBlack)
     tmp.SetFillStyle(3013)
-    tmp.SetFillStyle(sigErr.GetFillStyle()); tmp.SetFillColor(sigErr.GetFillColor())
+    #tmp.SetFillStyle(sigErr.GetFillStyle()); tmp.SetFillColor(sigErr.GetFillColor())
     tmp.SetLineColor(ROOT.kWhite)
     h.legend.AddEntry(tmp, "Stat. unc.", "F")
 
