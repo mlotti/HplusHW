@@ -506,7 +506,7 @@ class CanvasFrameTwo:
     ## Create TCanvas and TH1 for the frame.
     #
     # \param histoManager1 HistoManager object to take the histograms for automatic axis ranges for upper pad
-    # \param histos2       List of TH1s to take the histograms for automatic axis ranges for lower pad
+    # \param histos2       List of Histo objects to take the histograms for automatic axis ranges for lower pad
     # \param name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
     # \param kwargs        Keyword arguments (see below)
     #
@@ -650,7 +650,7 @@ class CanvasFrameTwo:
         self.canvas.cd(2)
         self.frame2 = _drawFrame(self.pad2, opts2["xmin"], opts2["ymin"], opts2["xmax"], opts2["ymax"], opts2.get("nbins", None))
         self.frame2.GetXaxis().SetTitle(histos1[0].getRootHisto().GetXaxis().GetTitle())
-        self.frame2.GetYaxis().SetTitle(histos2[0].GetYaxis().GetTitle())
+        self.frame2.GetYaxis().SetTitle(histos2[0].getRootHisto().GetYaxis().GetTitle())
         self.frame2.GetYaxis().SetTitleOffset(self.frame2.GetYaxis().GetTitleOffset()*yoffsetFactor)
         self.frame2.GetXaxis().SetTitleOffset(self.frame2.GetXaxis().GetTitleOffset()*xoffsetFactor)
         self.frame2.GetYaxis().SetLabelSize(int(self.frame2.GetYaxis().GetLabelSize()*0.8))
@@ -1064,6 +1064,27 @@ class HistoManagerImpl:
             dst.append(src.pop(index_(src, name)))
         dst.extend(src)
         self.legendList = dst
+
+    ## Reorder the draw list
+    #
+    # \param histoNames  List of histogram names
+    #
+    # The draw list is reordered as specified by histoNames.
+    # Histograms not mentioned in histoNames are kept in the original
+    # order at the end of the draw list.
+    def reorderDraw(self, histoNames):
+        def index_(list_, name_):
+            for i, o in enumerate(list_):
+                if o.getName() == name_:
+                    return i
+            raise Exception("No such histogram %s" % name_)
+
+        src = self.drawList[:]
+        dst = []
+        for name in histoNames:
+            dst.append(src.pop(index_(src, name)))
+        dst.extend(src)
+        self.drawList = dst
 
     ## Call a function for a named histograms.Histo object.
     #

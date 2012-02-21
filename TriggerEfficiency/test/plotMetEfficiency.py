@@ -31,8 +31,8 @@ plotStyles = [
     styles.mcStyle,
     ]
 
-l1met = False # for runs 165970-167913
-#l1met = True # for runs 170722-173692
+#l1met = False # for runs 165970-167913
+l1met = True # for runs 170722-173692
 
 runs = "165970-167913"; lumi = 98.171999999999997+4.2910000000000004+445.12599999999998+243.08099999999999
 if l1met:
@@ -47,8 +47,12 @@ def main():
 
     l1Bit = "(L1_SingleTauJet52 || L1_SingleJet68)"
     l1metsel = ""
+    l1metsel36 = ""
+    l1metsel40 = ""
     if l1met:
         l1metsel = "&& L1MET > 30"
+        l1metsel36 = "&& L1MET > 36"
+        l1metsel40 = "&& L1MET > 40"
 
     offlineSelection = "MET >= 0"
     #offlineSelection += "&& MET > 70"
@@ -77,6 +81,12 @@ def main():
     tree.Draw("MET>>h1", offlineSelection+l1metsel, "goff")
     pfMETL1cut = h.Clone("METL1cut")
 
+    tree.Draw("MET>>h1", offlineSelection+l1metsel36, "goff")
+    pfMETL1cut36 = h.Clone("METL1cut")
+
+    tree.Draw("MET>>h1", offlineSelection+l1metsel40, "goff")
+    pfMETL1cut40 = h.Clone("METL1cut")
+
     tree.Draw("MET>>h1", offlineSelection+"&& TriggerBit", "goff")
     pfMETbit = h.Clone("METbit")
 
@@ -101,10 +111,12 @@ def main():
         pfMETcut2 = pfMETcut
     plotTurnOn(pfMET, [pfMETbit, pfMETcut2], legs)
 
-    plotTurnOn(pfMET, [pfMETL1bit, pfMETL1cut], ["L1_ETM30", "L1 MET > 30"], "calomet_l1bit_turnon")
+    plotTurnOn(pfMET, [pfMETL1bit, pfMETL1cut], ["L1_ETM30", "L1 MET > 30"], "calomet_l1bit_turnon", opts2={"ymin": 0.4, "ymax": 1.1})
+    plotTurnOn(pfMET, [pfMETL1bit, pfMETL1cut36], ["L1_ETM30", "L1 MET > 36"], "calomet_l1bit36_turnon", opts2={"ymin": 0.4, "ymax": 1.1})
+    plotTurnOn(pfMET, [pfMETL1bit, pfMETL1cut40], ["L1_ETM30", "L1 MET > 40"], "calomet_l1bit40_turnon", opts2={"ymin": 0.4, "ymax": 1.1})
 
 
-def plotTurnOn(hall, passed, passedLegends, name="calomet_bit_turnon"):
+def plotTurnOn(hall, passed, passedLegends, name="calomet_bit_turnon", opts2={}):
     graphs = []
     for hpass, leg in zip(passed, passedLegends):
         eff = Eff(hall.GetEntries(), hpass.GetEntries(), leg)
@@ -119,11 +131,11 @@ def plotTurnOn(hall, passed, passedLegends, name="calomet_bit_turnon"):
     p.histoMgr.forEachHisto(styles.generator2(styles.StyleMarker(markerSizes=[1.0, 2.2]), plotStyles))
     p.setLuminosity(lumi)
 
+    opts2_ = {"ymin": 0, "ymax": 2.5}
+    opts2_.update(opts2)
+
     p.createFrame(name+"_"+runs, createRatio=True, invertRatio=True,
-                  opts1={"xmin":0, "xmax":200, "ymin": 0, "ymax": 1.2},
-                  #opts2={"ymin": 0.5, "ymax": 2.0}
-                  opts2={"ymin": 0, "ymax": 2.5}
-                  )
+                  opts1={"xmin":0, "xmax":200, "ymin": 0, "ymax": 1.2}, opts2=opts2_)
     p.getFrame2().GetYaxis().SetTitle("Ratio")
     p.setLegend(histograms.moveLegend(histograms.createLegend(y1=0.95, y2=0.85), dx=-0.55, dy=-0.02))
     p.appendPlotObject(histograms.PlotText(0.2, 0.79, "Runs %s"%runs, size=17))
