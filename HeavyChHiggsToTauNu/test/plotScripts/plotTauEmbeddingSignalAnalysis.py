@@ -617,21 +617,19 @@ class PlotDrawer2(plots.PlotDrawer):
     def __init__(self, **kwargs):
         plots.PlotDrawer.__init__(self, **kwargs)
 
-    def __call__(self, p, name, xlabel, addMCUncertainty=True, normalize=True, **kwargs):
+    def __call__(self, p, name, xlabel, normalize=True, **kwargs):
         self.rebin(p, **kwargs)
 
         if normalize:
             tauEmbedding.scaleNormalization(p)
-        p.stackMCHistograms()
-        if addMCUncertainty:
-            p.addMCUncertainty()
 
+        self.stackMCHistograms(p, **kwargs)
         self.createFrame(p, name, **kwargs)
         self.setLegend(p, **kwargs)
         self.addCutLineBox(p, **kwargs)
         self.finish(p, xlabel, **kwargs)
 
-drawPlot = PlotDrawer2(ylabel="Events / %.0f GeV/c", log=True)
+drawPlot = PlotDrawer2(ylabel="Events / %.0f GeV/c", log=True, stackMCHistograms=True, addMCUncertainty=True)
   
 # Call the main function if the script is executed (i.e. not imported)
 if __name__ == "__main__":
