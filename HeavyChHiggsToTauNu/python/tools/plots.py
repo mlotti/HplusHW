@@ -1421,11 +1421,16 @@ class PlotDrawer:
         if reb > 1:
             p.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(reb))
 
+    def customise(self, p, **kwargs):
+        if "customise" in kwargs:
+            kwargs["customise"](p)
+
     def __call__(self, p, name, xlabel, **kwargs):
         self.rebin(p, **kwargs)
         self.createFrame(p, name, **kwargs)
         self.setLegend(p, **kwargs)
         self.addCutLineBox(p, **kwargs)
+        self.customise(p, **kwargs)
         self.finish(p, xlabel, **kwargs)
 
 drawPlot = PlotDrawer()
