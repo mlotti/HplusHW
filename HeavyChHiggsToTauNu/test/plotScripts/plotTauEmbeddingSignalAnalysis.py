@@ -193,7 +193,7 @@ def main():
     histograms.createLegend.moveDefaults(dh=-0.05)
     #histograms.createLegend.moveDefaults(dx=-0.18, dy=0.05, dh=-0.05)
 
-#    doPlots(datasets, mcLumi)
+    doPlots(datasets, mcLumi)
     doCounters(datasets, mcLumi)
 
 
@@ -291,7 +291,7 @@ def doPlots(datasets, mcLumi=None):
     def customDeltaPhi(h):
         yaxis = h.getFrame().GetYaxis()
         yaxis.SetTitleOffset(0.8*yaxis.GetTitleOffset())
-    drawPlot(createPlot(tdDeltaPhi.clone()), "deltaPhi_1AfterTauID", xlabel, ylabel="Events / %.f^{#circ}", opts={"ymin": 1e-1, "ymaxfactor": 5}, opts2=opts2, moveLegend={"dx": -0.22, "dy":0.01, "dh": -0.03}, function=customDeltaPhi, cutLine=[130, 160])
+    drawPlot(createPlot(tdDeltaPhi.clone()), "deltaPhi_1AfterTauID", xlabel, ylabel="Events / %.f^{#circ}", opts={"ymin": 1e-1, "ymaxfactor": 5}, opts2=opts2, moveLegend={"dx": -0.22, "dy":0.01, "dh": -0.03}, customise=customDeltaPhi, cutLine=[130, 160])
 
     # Data-driven control plots
     def drawControlPlot(path, xlabel, **kwargs):
@@ -332,49 +332,11 @@ def doPlots(datasets, mcLumi=None):
         
     # f.Close()
 
-#    tauPt(createPlot("TauEmbeddingAnalysis_afterFakeMetVeto_selectedTauPt"), opts=opts, rebin=rebin, ratio=False)
-#    tauEta(createPlot("TauEmbeddingAnalysis_afterTauId_selectedTauEta"), ratio=True)
-#    tauPhi(createPlot("TauEmbeddingAnalysis_afterTauId_selectedTauPhi"), ratio=True)
-#    leadingTrack(createPlot("TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"), ratio=True)
-#    rtau(createPlot("tauID/TauID_RtauCut"), "TauIdRtau_afterTauId")
-   
-#    tauCandPt(createPlot("tauID/TauSelection_all_tau_candidates_pt"), "tauCandidatePt", ratio=False)
-#    tauCandEta(createPlot("tauID/TauSelection_all_tau_candidates_eta"), "tauCandidateEta" , ratio=False)
-#    tauCandPhi(createPlot("tauID/TauSelection_all_tau_candidates_phi"), "tauCandidatePhi" , ratio=False)
-    
-#    muonPt(createPlot("TauEmbeddingAnalysis_begin_originalMuonPt"), ratio=True)
-#    muonPt(createPlot("TauEmbeddingAnalysis_afterTauId_originalMuonPt"), ratio=True)
-#    muonPt(createPlot("TauEmbeddingAnalysis_afterMetCut_originalMuonPt"), ratio=True)
-    
-#    muonEta(createPlot("TauEmbeddingAnalysis_begin_originalMuonEta"), ratio=True)
-#    muonEta(createPlot("TauEmbeddingAnalysis_afterTauId_originalMuonEta"), ratio=True)
-#    muonEta(createPlot("TauEmbeddingAnalysis_afterMetCut_originalMuonEta"), ratio=True)
-
- #   met(createPlot("TauEmbeddingAnalysis_begin_originalMet"), ratio=True)
- #   met(createPlot("TauEmbeddingAnalysis_afterTauId_originalMet"), ratio=True)
- #   met(createPlot("TauEmbeddingAnalysis_afterTauId_embeddingMet"), ratio=True)
- #   met(createPlot("TauEmbeddingAnalysis_begin_embeddingMet"), ratio=True)
-
     opts = {"xmin": 70, "ymaxfactor": 10}
     rebin = 10
 
     tdMet = treeDraw.clone(varexp="met_p4.Et()>>tmp(20,0,200)")
     tdMetOrig = treeDraw.clone(varexp="temet_p4.Et()>>tmp(20,0,200)")
-
-#    met(createPlot("MET/met"))
-#    met(createPlot("TauEmbeddingAnalysis_afterMetCut_originalMet"))
-#    met(createPlot("TauEmbeddingAnalysis_afterBTagging_originalMet"))
-#    met(createPlot("TauEmbeddingAnalysis_afterFakeMetVeto_originalMet"))
-#    met(createPlot("TauEmbeddingAnalysis_afterMetCut_embeddingMet"))
-#    met(createPlot("TauEmbeddingAnalysis_afterBTagging_embeddingMet"), opts=opts, rebin=rebin, ratio=False)
-#    met(createPlot("TauEmbeddingAnalysis_afterFakeMetVeto_embeddingMet"), opts=opts, rebin=rebin, ratio=False)
-
-#    deltaPhi(createPlot("TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
-#    deltaPhi(createPlot("TauEmbeddingAnalysis_afterTauId_DeltaPhiOriginal"))
-
-    #transverseMass(createPlot("TauEmbeddingAnalysis_begin_TransverseMass"))
-    #transverseMass(createPlot("TauEmbeddingAnalysis_afterTauId_TransverseMass"))
-    #transverseMass(createPlot("TauEmbeddingAnalysis_afterTauId_TransverseMassOriginal"))
 
     opts = {}
 
@@ -387,21 +349,24 @@ def doPlots(datasets, mcLumi=None):
         opts["ymax"] = 40
     elif not normalize:
         opts["xmax"] = 200
-    for name, selection in [
-        ("1AfterTauID", ""),
-        ("2AfterMETCut", metCut),
-        ("3AfterBTagging", metCut+"&&"+bTaggingCut),
+    deltaPhiLabel = "#Delta#phi(#tau jet, E_{T}^{miss})"
+    for name, label, selection in [
+        ("1AfterTauID", "", ""),
+        ("2AfterMETCut", "", metCut),
+        ("3AfterBTagging", "Without %s cut"%deltaPhiLabel, metCut+"&&"+bTaggingCut),
         #("3AfterBTagging_calo", caloMetCut+"&&"+metCut+"&&"+bTaggingCut),
         #("3AfterBTagging_caloNoHF", caloMetNoHFCut+"&&"+metCut+"&&"+bTaggingCut),
-        ("4AfterDeltaPhi160", metCut+"&&"+bTaggingCut+"&&"+deltaPhi160Cut),
-        ("4AfterDeltaPhi130", metCut+"&&"+bTaggingCut+"&&"+deltaPhi130Cut),
-        ("4AfterDeltaPhi90", metCut+"&&"+bTaggingCut+"&&"+deltaPhi90Cut),
+        ("4AfterDeltaPhi160", "%s < 160^{o}" % deltaPhiLabel, metCut+"&&"+bTaggingCut+"&&"+deltaPhi160Cut),
+        ("4AfterDeltaPhi130", "%s < 130^{o}" % deltaPhiLabel, metCut+"&&"+bTaggingCut+"&&"+deltaPhi130Cut),
+        ("4AfterDeltaPhi90", "%s < 90^{o}" % deltaPhiLabel, metCut+"&&"+bTaggingCut+"&&"+deltaPhi90Cut),
         ]:
         w = weight
         if bTaggingCut in selection:
             w = weightBTagging
         td = tdMt.clone(selection=selection, weight=w)
-        transverseMass(createPlot(td.clone()), "transverseMass_"+name, opts=opts, ratio=ratio)
+        p = createPlot(td.clone())
+        p.appendPlotObject(histograms.PlotText(0.5, 0.55, label, size=20))
+        drawPlot(p, "transverseMass_"+name, "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", ylabel="Events / %.0f GeV/c^{2}", opts=opts, ratio=ratio, log=False)
 
         drawPlot(createPlot(td.clone(varexp="jets_btag >>tmp(30, 0, 3)")), "btagDiscriminator_"+name, "TCHE", ylabel="Jets / %.1f", ratio=ratio, opts={"ymin": 1e-1, "ymax": 1e2})
 
@@ -415,21 +380,6 @@ def doPlots(datasets, mcLumi=None):
     #path.Write()
     #f.Close()
     
-    #transverseMass(createPlot("TauEmbeddingAnalysis_afterBTagging_TransverseMass"), opts=opts, rebin=rebin)
-    #transverseMass(createPlot("TauEmbeddingAnalysis_afterFakeMetVeto_TransverseMass"), opts=opts, rebin=rebin)
-
-#    jetPt(createPlot("JetSelection/jet_pt"), "jetPtEmb")
-#    jetEta(createPlot("JetSelection/jet_eta"), "jetEtaEmb")
-#    jetPhi(createPlot("JetSelection/jet_phi"), "jetPhiEmb")
-#    numberOfJets(createPlot("JetSelection/NumberOfSelectedJets"), "NumberOfJetsEmb")
-
-#    jetPt(createPlot("Btagging/bjet1_pt"), "bjetPtEmb")
-#    jetEta(createPlot("Btagging/bjet1_eta"), "bjetEtaEmb")
-    #jetPhi(createPlot("Btagging/bjet_phi"), "bjetPhiEmb")
-#    numberOfJets(createPlot("Btagging/NumberOfBtaggedJets"), "NumberOfBJetsEmb")
-
-
-
 def doCounters(datasets, mcLumi=None):
     createPlot = lambda name: createPlotCommon(name, datasets, mcLumi)
     eventCounter = counter.EventCounter(datasets, counters=countersWeighted)
@@ -618,533 +568,71 @@ def squareSum(th1):
         s += value*value
     return s
 
-def scaleMCfromWmunu(obj):
-    # Data/MC scale factor from AN 2011/053, BR correction factor= 1/0.6479
-    rho = 0.9509/0.6479
-    scaleHistosCounters(obj, scaleMCHisto, "scaleMC", rho)
+# def scaleMCfromWmunu(obj):
+#     # Data/MC scale factor from AN 2011/053, BR correction factor= 1/0.6479
+#     rho = 0.9509/0.6479
+#     scaleHistosCounters(obj, scaleMCHisto, "scaleMC", rho)
 
-def scaleTauBR(obj):
-    # tau -> hadrons branching fraction
-    fraction = 0.648
-    scaleHistosCounters(obj, scaleHisto, "scale", fraction)
+# def scaleTauBR(obj):
+#     # tau -> hadrons branching fraction
+#     fraction = 0.648
+#     scaleHistosCounters(obj, scaleHisto, "scale", fraction)
 
-def scaleMuTriggerEff(obj):
-    # muon trigger efficiency
-    #data = 0.9 # this is from teh hat
-    #mc = 0.9 # this is from teh hat
+# def scaleMuTriggerEff(obj):
+#     # muon trigger efficiency
+#     #data = 0.9 # this is from teh hat
+#     #mc = 0.9 # this is from teh hat
 
-    #data = 1 # this is from teh hat
-    #mc = 1 # this is from teh hat
+#     #data = 1 # this is from teh hat
+#     #mc = 1 # this is from teh hat
 
-    # From all
-    lumis = [3.1308106110000002, 5.0948740340000001, 27.696517908000001, 5.0667150779999997, 4.6417244929999999]
-    data = (lumis[0]*0.840278 + lumis[1]*0.872416 + lumis[2]*0.886409 + (lumis[3]+lumis[4])*0.872181) / sum(lumis)
+#     # From all
+#     lumis = [3.1308106110000002, 5.0948740340000001, 27.696517908000001, 5.0667150779999997, 4.6417244929999999]
+#     data = (lumis[0]*0.840278 + lumis[1]*0.872416 + lumis[2]*0.886409 + (lumis[3]+lumis[4])*0.872181) / sum(lumis)
 
-    # From 2011A only
-#    data = 0.872181
-    mc = 0.913055
+#     # From 2011A only
+# #    data = 0.872181
+#     mc = 0.913055
 
-    scaleHistosCounters(obj, scaleDataHisto, "scaleData", 1/data)
-    scaleHistosCounters(obj, scaleMCHisto, "scaleMC", 1/mc)
+#     scaleHistosCounters(obj, scaleDataHisto, "scaleData", 1/data)
+#     scaleHistosCounters(obj, scaleMCHisto, "scaleMC", 1/mc)
 
-class LumiScaler:
-    def __init__(self, signalLumi=1, ewkLumi=1):
-        self.signalLumi = signalLumi
-        self.ewkLumi = ewkLumi
+# class LumiScaler:
+#     def __init__(self, signalLumi=1, ewkLumi=1):
+#         self.signalLumi = signalLumi
+#         self.ewkLumi = ewkLumi
 
-    def getRho(self):
-        return self.signalLumi / self.ewkLumi
+#     def getRho(self):
+#         return self.signalLumi / self.ewkLumi
 
-    def __call__(self, obj):
-        scaleHistosCounters(obj, scaleHisto, "scale", self.getRho())
+#     def __call__(self, obj):
+#         scaleHistosCounters(obj, scaleHisto, "scale", self.getRho())
 
-scaleLumi = LumiScaler()   
-
-# Helper function to flip the last two parts of the histogram name
-# e.g. ..._afterTauId_DeltaPhi -> DeltaPhi_afterTauId
-def flipName(name):
-    if "_" in name:
-        tmp = name.split("_")
-        return tmp[-1] + "_" + tmp[-2]
-    return name.replace("/", "_")
-
-# Common formatting
-def common(h, xlabel, ylabel):
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.addLuminosityText()
-    h.save()
+# scaleLumi = LumiScaler()   
 
 # Functions below are for plot-specific formattings. They all take the
 # plot object as an argument, then apply some formatting to it, draw
 # it and finally save it to files.
-def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, addMCUncertainty=True, ratio=True, opts={}, opts2={}, moveLegend={}, normalize=True, cutLine=None, cutBox=None, function=None):
-    if rebin > 1:
-        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    ylab = ylabel
-    if "%" in ylabel:
-        ylab = ylabel % h.binWidth()
+class PlotDrawer2(plots.PlotDrawer):
+    def __init__(self, **kwargs):
+        plots.PlotDrawer.__init__(self, **kwargs)
 
-    if normalize:
-        tauEmbedding.scaleNormalization(h)
-    h.stackMCHistograms()
-    if addMCUncertainty:
-        h.addMCUncertainty()
+    def __call__(self, p, name, xlabel, addMCUncertainty=True, normalize=True, **kwargs):
+        self.rebin(p, **kwargs)
 
-    _opts = {"ymin": 0.01, "ymaxfactor": 2}
-    if not log:
-        _opts["ymin"] = 0
-        _opts["ymaxfactor"] = 2
-    _opts2 = {"ymin": 0.5, "ymax": 1.5}
-    _opts.update(opts)
-    _opts2.update(opts2)
+        if normalize:
+            tauEmbedding.scaleNormalization(p)
+        p.stackMCHistograms()
+        if addMCUncertainty:
+            p.addMCUncertainty()
 
-    if log:
-        name = name + "_log"
-    h.createFrame(name, createRatio=ratio, opts=_opts, opts2=_opts2)
-    h.getPad().SetLogy(log)
-    h.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
+        self.createFrame(p, name, **kwargs)
+        self.setLegend(p, **kwargs)
+        self.addCutLineBox(p, **kwargs)
+        self.finish(p, xlabel, **kwargs)
 
-    # Add cut line and/or box
-    if cutLine != None:
-        lst = cutLine
-        if not isinstance(lst, list):
-            lst = [lst]
-
-        for line in lst:
-            h.addCutBoxAndLine(line, box=False, line=True)
-    if cutBox != None:
-        lst = cutBox
-        if not isinstance(lst, list):
-            lst = [lst]
-
-        for box in lst:
-            h.addCutBoxAndLine(**box)
-
-    if function != None:
-        function(h)
-
-    common(h, xlabel, ylab)
-
-def tauPt(h, name, rebin=1, ratio=False, opts={}, opts2={}):
-    if rebin > 1:
-        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "p_{T}^{#tau jet} (GeV/c)"
-    ylabel = "Events / %.0f GeV/c" % h.binWidth()
-    
-    tauEmbedding.scaleNormalization(h)
-    h.stackMCHistograms()
-#    h.addMCUncertainty()
-
-#    if h.histoMgr.hasHisto("Data"):
-#        th1 = h.histoMgr.getHisto("Data").getRootHisto()
-#        print name
-#        for bin in xrange(1, th1.GetNbinsX()+1):
-#            print "Bin %d, low edge %.0f, content %.3f" % (bin, th1.GetXaxis().GetBinLowEdge(bin), th1.GetBinContent(bin))
-#        print
-
-    _opts = {"ymin": 0.01, "ymaxfactor": 2}
-    _opts2 = {"ymin": 0.5, "ymax": 1.5}
-    _opts.update(opts)
-    _opts2.update(opts2)
-    
-    name = name+"_log"
-    #h.createFrameFraction(name, opts=opts)
-#    h.createFrame(name, opts=opts)
-    if ratio:
-        h.createFrameFraction(name, opts=_opts, opts2=_opts2)
-    else:
-        h.createFrame(name, opts=_opts)
-    h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
-    common(h, xlabel, ylabel)
-    
-def tauEta(h, rebin=5, ratio=True):
-    name = flipName(h.getRootHistoPath())
-
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "#eta^{#tau jet}"
-    ylabel = "Events"
-    tauEmbedding.scaleNormalization(h)
-#    h.stackMCHistograms()
-#    h.addMCUncertainty()
-
-    opts = {"ymin": 0.01, "ymaxfactor": 2}
-    opts2 = {"ymin": 0.05, "ymax": 2.5}
-
-    name = name+"_log"
-    #h.createFrameFraction(name, opts=opts)
-#    h.createFrame(name, opts=opts)
-    if ratio:
-        h.createFrameFraction(name, opts=opts, opts2=opts2)
-    else:
-        h.createFrame(name, opts=opts)
-    h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
-    common(h, xlabel, ylabel)
-    
-def tauPhi(h, rebin=5, ratio=True):
-    name = flipName(h.getRootHistoPath())
-
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "#phi^{#tau jet}"
-    ylabel = "Events"
-    tauEmbedding.scaleNormalization(h)   
-#    h.stackMCHistograms()
-#    h.addMCUncertainty()
-
-    opts = {"ymin": 0.01, "ymaxfactor": 2}
-    opts2 = {"ymin": 0.5, "ymax": 1.5}
-
-    name = name+"_log"
-    #h.createFrameFraction(name, opts=opts)
-#    h.createFrame(name, opts=opts)
-    if ratio:
-        h.createFrameFraction(name, opts=opts, opts2=opts2)
-    else:
-        h.createFrame(name, opts=opts)
-    h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend(0.2, 0.6, 0.4, 0.9))
-    common(h, xlabel, ylabel)
-    
-def leadingTrack(h, rebin=5, ratio=True):
-    name = flipName(h.getRootHistoPath())
-
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "p_{T}^{leading track} (GeV/c)"
-    ylabel = "Events / %.0f GeV/c" % h.binWidth()
-    tauEmbedding.scaleNormalization(h)
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-    opts = {"ymin": 0.01, "ymaxfactor": 2}
-
-    name = name+"_log"
-    #h.createFrameFraction(name, opts=opts)
-    h.createFrame(name, opts=opts)
-    h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
-    common(h, xlabel, ylabel)
-
-def rtau(h, name, rebin=2, ratio=True):
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "R_{#tau}"
-    ylabel = "Events / %.2f" % h.binWidth()
-    tauEmbedding.scaleNormalization(h)    
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-    opts = {"ymin": 0.01, "ymaxfactor": 10}
-    opts2 = {"ymin": 0.5, "ymax": 1.5}
-    name = name+"_log"
-    if ratio:
-        h.createFrameFraction(name, opts=opts, opts2=opts2)
-    else:
-        h.createFrame(name, opts=opts)
-#    h.createFrame(name, opts=opts)
-    #h.createFrameFraction(name, opts=opts)
-    h.getPad().SetLogy(True)
-    #h.setLegend(histograms.createLegend())
-    common(h, xlabel, ylabel)
-
-def muonPt(h, rebin=5, ratio=False):
-    name = flipName(h.getRootHistoPath())
-
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "p_{T}^{#mu} (GeV/c)"
-    ylabel = "Events / %.0f GeV" % h.binWidth()
-    
-    tauEmbedding.scaleNormalization(h)
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-    opts = {"ymin": 0.01, "ymaxfactor": 2}
-    opts2 = {"ymin": 0.5, "ymax": 1.5}
-
-    name = name+"_log"
-    if ratio:
-        h.createFrameFraction(name, opts=opts, opts2=opts2)
-    else:
-        h.createFrame(name, opts=opts)
-    h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
-    common(h, xlabel, ylabel)
-    
-def muonEta(h, rebin=5, ratio=False):
-    name = flipName(h.getRootHistoPath())
-
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "#eta^{#mu}"
-    ylabel = "Events"
-    
-    tauEmbedding.scaleNormalization(h)
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-    opts = {"ymin": 0.01, "ymaxfactor": 2}
-    opts2 = {"ymin": 0.5, "ymax": 1.5}
-
-    name = name+"_log"
-    if ratio:
-        h.createFrameFraction(name, opts=opts, opts2=opts2)
-    else:
-        h.createFrame(name, opts=opts)
-    h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
-    common(h, xlabel, ylabel)
-
-def met(h, rebin=5, ratio=True, opts={}, opts2={}):
-    name = flipName(h.getRootHistoPath())
-
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "MET (GeV)"
-    if "embedding" in name:
-        xlabel = "Embedded "+xlabel
-    elif "original" in name:
-        xlabel = "Original "+xlabel
-    ylabel = "Events / %.0f GeV" % h.binWidth()
-
-    tauEmbedding.scaleNormalization(h)
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-    _opts = {"ymin": 0.001, "ymaxfactor": 2}
-    _opts2 = {"ymin": 0.5, "ymax": 1.5}
-
-    _opts.update(opts)
-    _opts2.update(opts2)
-
-    name = name+"_log"
-    if ratio:
-        h.createFrameFraction(name, opts=_opts, opts2=_opts2)
-    else:
-        h.createFrame(name, opts=_opts)
-    h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
-    common(h, xlabel, ylabel)
-
-def deltaPhi(h, rebin=40):
-    name = flipName(h.getRootHistoPath())
-
-    particle = "#tau jet"
-    if "Original" in name:
-        particle = "#mu"
-
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "#Delta#phi(%s, MET) (rad)" % particle
-    ylabel = "Events / %.2f rad" % h.binWidth()
-    
-    tauEmbedding.scaleNormalization(h)    
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-    #h.createFrameFraction(name)
-    h.createFrame(name)
-    h.setLegend(histograms.createLegend(0.2, 0.6, 0.4, 0.9))
-    common(h, xlabel, ylabel)
-
-def transverseMass(h, name, rebin=1, opts={}, opts_log={}, ratio=False):
-    if rebin > 1:
-        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})"
-    ylabel = "Events / %.0f GeV/c^{2}" % h.binWidth()
-    
-    tauEmbedding.scaleNormalization(h)
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-    _opts = {"ymaxfactor": 1.5}
-    _opts.update(opts)
-
-    _opts_log = {"ymin": 1e-2, "ymaxfactor": 2}
-    _opts_log.update(_opts)
-    _opts_log.update(opts_log)
-
-    _opts2 = {"ymin": 0, "ymax": 2}
-
-    h.createFrame(name, opts=_opts, opts2=_opts2, createRatio=ratio)
-    h.setLegend(histograms.createLegend())
-    deltaPhi = "#Delta#phi(#tau jet, E_{T}^{miss})"
-    coord = {"x": 0.5, "y": 0.55, "size": 20}
-    if "AfterBTagging" in name:
-        histograms.addText(text="Without %s cut"%deltaPhi, **coord)
-    elif "AfterDeltaPhi160" in name:
-        histograms.addText(text="%s < 160^{#circ}"%deltaPhi, **coord)
-    elif "AfterDeltaPhi130" in name:
-        histograms.addText(text="%s < 130^{#circ}"%deltaPhi, **coord)
-    common(h, xlabel, ylabel)
-
-    name += "_log"
-    h.createFrame(name, opts=_opts_log, opts2=_opts2, createRatio=ratio)
-    h.setLegend(histograms.createLegend())
-    ROOT.gPad.SetLogy(True)
-    common(h, xlabel, ylabel)
-    
-def tauCandPt(h, name, rebin=1, ratio=True):
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-
-    xlabel = "p_{T}^{#tau-jet candidate} (GeV/c)"
-    ylabel = "Events /%.0f GeV/c" % h.binWidth()
-    
-    tauEmbedding.scaleNormalization(h)
-    h.stackMCHistograms()
-#    h.addMCUncertainty()
-
-    opts = {"ymin": 0.01, "ymaxfactor": 5}
-    opts2 = {"ymin": 0.5, "ymax": 1.5}
-    name = name+"_log"
-    if ratio:
-        h.createFrameFraction(name, opts=opts, opts2=opts2)
-    else:
-        h.createFrame(name, opts=opts)
-#    h.createFrame(name, opts=opts)
-    #h.createFrameFraction(name, opts=opts)
-    h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
-    common(h, xlabel, ylabel)
-
-    
-def tauCandEta(h, name, rebin=1, ratio=True):
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-
-    xlabel = "#eta^{#tau-jet candidate}" 
-    ylabel = "Events / %.2f" % h.binWidth()
-    
-    tauEmbedding.scaleNormalization(h)
-    h.stackMCHistograms()
- #   h.addMCUncertainty()
-
-    opts = {"ymin": 0.1, "ymaxfactor": 5}
-    opts2 = {"ymin": 0.5, "ymax": 1.5}
-    name = name+"_log"
-    if ratio:
-        h.createFrameFraction(name, opts=opts, opts2=opts2)
-    else:
-        h.createFrame(name, opts=opts)
-    h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
-    common(h, xlabel, ylabel)
-
-def tauCandPhi(h, name, rebin=1, ratio=True):
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-
-    xlabel = "#phi^{#tau-jet candidate}"
-    ylabel = "Events / %.2f" % h.binWidth()
-    
-    tauEmbedding.scaleNormalization(h)
-    h.stackMCHistograms()
- #   h.addMCUncertainty()
-
-    opts = {"ymin": 1.0, "ymaxfactor": 5}
-    opts2 = {"ymin": 0.5, "ymax": 1.5}
-    name = name+"_log"
-    if ratio:
-        h.createFrameFraction(name, opts=opts, opts2=opts2)
-    else:
-        h.createFrame(name, opts=opts)
-    h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
-    common(h, xlabel, ylabel)
-    
-def jetPt(h, name, rebin=2, ratio=True):
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    particle = "jet"
-    if "bjet" in name:
-        particle = "bjet"
-#        name = name.replace("jetPt", "bjetPt")
-
-    xlabel = "p_{T}^{%s} (GeV/c)" % particle
-    ylabel = "Events /%.0f GeV/c" % h.binWidth()
-    
-    tauEmbedding.scaleNormalization(h)
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-    opts = {"ymin": 0.01, "ymaxfactor": 10}
-    opts2 = {"ymin": 0.5, "ymax": 1.5}
-    name = name+"_log"
-    if ratio:
-        h.createFrameFraction(name, opts=opts, opts2=opts2)
-    else:
-        h.createFrame(name, opts=opts)
-#    h.createFrame(name, opts=opts)
-    #h.createFrameFraction(name, opts=opts)
-    h.getPad().SetLogy(True)
-    #h.setLegend(histograms.createLegend())
-    common(h, xlabel, ylabel)
-
-    
-def jetEta(h, name, rebin=2, ratio=True):
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    particle = "jet"
-    if "bjet" in name:
-        particle = "bjet"
-    xlabel = "#eta^{%s}" % particle
-    ylabel = "Events / %.2f" % h.binWidth()
-    tauEmbedding.scaleNormalization(h)
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-    opts = {"ymin": 10.0, "ymaxfactor": 5}
-    opts2 = {"ymin": 0.5, "ymax": 1.5}
-    name = name+"_log"
-    if ratio:
-        h.createFrameFraction(name, opts=opts, opts2=opts2)
-    else:
-        h.createFrame(name, opts=opts)
-    h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
-    common(h, xlabel, ylabel)
-
-def jetPhi(h, name, rebin=2, ratio=True):
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    particle = "jet"
-    if "bjet" in name:
-        particle = "bjet"
-    xlabel = "#phi^{%s}" % particle
-    ylabel = "Events / %.2f" % h.binWidth()
-    tauEmbedding.scaleNormalization(h)
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-    opts = {"ymin": 10.0, "ymaxfactor": 5}
-    opts2 = {"ymin": 0.5, "ymax": 1.5}
-    name = name+"_log"
-    if ratio:
-        h.createFrameFraction(name, opts=opts, opts2=opts2)
-    else:
-        h.createFrame(name, opts=opts)
-    h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
-    common(h, xlabel, ylabel)
-
-def numberOfJets(h, name, rebin=1, ratio=True):
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    particle = "jet"
-    if "Btagged" in name:
-        particle = "bjet"
-    xlabel = "Number of %ss" % particle
-    ylabel = "Events / %.2f" % h.binWidth()
-    tauEmbedding.scaleNormalization(h)
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-    opts = {"ymin": 0.0, "ymaxfactor": 1.2}
-    opts2 = {"ymin": 0.5, "ymax": 1.5}
-#    name = name+"_log"
-    if ratio:
-        h.createFrameFraction(name, opts=opts, opts2=opts2)
-    else:
-        h.createFrame(name, opts=opts)
-#    h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
-    common(h, xlabel, ylabel)
-
-
-   
+drawPlot = PlotDrawer2(ylabel="Events / %.0f GeV/c", log=True)
+  
 # Call the main function if the script is executed (i.e. not imported)
 if __name__ == "__main__":
     main()
