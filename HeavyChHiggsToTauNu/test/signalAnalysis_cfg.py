@@ -24,6 +24,9 @@ doRtau0 = False # Rtau>0, MET>50
 # Perform b tagging scanning
 doBTagScan = False
 
+# fill tree for btagging eff study
+doBTagTree = False
+
 # Perform Rtau scanning
 doRtauScan = False
 
@@ -159,6 +162,13 @@ if options.tauEmbeddingInput != 0:
         applyIsolation = not doTauEmbeddingMuonSelectionScan
         additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
                                                                                    enableIsolation=applyIsolation))
+if doBTagTree:
+    param.tree.fillNonIsoLeptonVars = cms.untracked.bool(True)
+    param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
+    param.MET.METCut = cms.untracked.double(0.0)
+    param.bTagging.discriminatorCut = cms.untracked.double(-999)
+    param.GlobalMuonVeto.MuonPtCut = cms.untracked.double(999)
+
 # Signal analysis module for the "golden analysis"
 import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
 process.signalAnalysis = signalAnalysis.createEDFilter(param)
