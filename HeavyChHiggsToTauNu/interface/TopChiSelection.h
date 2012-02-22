@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_TopSelection_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_TopSelection_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_TopChiSelection_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_TopChiSelection_h
 
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
@@ -16,9 +16,9 @@ namespace edm {
 class TH1;
 
 namespace HPlus {
-  class TopSelection;
+  class TopChiSelection;
 
-  class TopSelection {
+  class TopChiSelection {
   public:
     typedef math::XYZTLorentzVector XYZTLorentzVector;
     /**
@@ -31,26 +31,26 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const TopSelection *TopSelection, bool passedEvent);
+      Data(const TopChiSelection *TopChiSelection, bool passedEvent);
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
-      const double getTopMass() const { return fTopSelection->topMass; }
-      const XYZTLorentzVector& getTopP4() const { return fTopSelection->top; }
+      const double getTopMass() const { return fTopChiSelection->topMass; }
+      const XYZTLorentzVector& getTopP4() const { return fTopChiSelection->top; }
 
     private:
-      const TopSelection *fTopSelection;
+      const TopChiSelection *fTopChiSelection;
       const bool fPassedEvent;
     };
     
-    TopSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
-    ~TopSelection();
+    TopChiSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    ~TopChiSelection();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
 
   private:
     void init();
-    /*
+    /*    
     std::vector<const reco::GenParticle*> getImmediateMothers(const reco::Candidate&);
     std::vector<const reco::GenParticle*> getMothers(const reco::Candidate&);
     bool hasImmediateMother(const reco::Candidate&, int);
@@ -63,36 +63,39 @@ namespace HPlus {
     bool hasDaughter(const reco::Candidate&, int);
     void printImmediateDaughters(const reco::Candidate& );
     void printDaughters(const reco::Candidate& );
-    */
+    */   
     // Input parameters
     const double fTopMassLow;
     const double fTopMassHigh;
+    const double fChi2Cut;
 
     // Counters
-    Count fTopMassCount;
+    Count fTopChiMassCount;
 
     // EventWeight object
     EventWeight& fEventWeight;
     edm::InputTag fSrc;
     
     // Histograms
-    TH1 *hPtjjb;
-    TH1 *hPtmax;
-    TH1 *hPtmaxMatch;
-    TH1 *hPtmaxBMatch;
-    TH1 *hPtmaxQMatch;
-    TH1 *hPtmaxMatchWrongB;
+    
+    TH1 *hPtTopChiCut;
+    TH1 *hPtTop;
     TH1 *hjjbMass;
     TH1 *htopMass;
     TH1 *htopMassMatch;
+    TH1 *htopMassChiCut;
     TH1 *hWMass;
     TH1 *hWMassMatch;
+    TH1 *hWMassChiCut;
+    TH1 *hChi2Min;
     TH1 *htopMassBMatch;
     TH1 *hWMassBMatch;
     TH1 *htopMassQMatch;
     TH1 *hWMassQMatch;
     TH1 *htopMassMatchWrongB;
-    TH1 *hWMassMatchWrongB;  
+    TH1 *hWMassMatchWrongB;
+
+  
     // Variables
     double topMass;
     double wMass;

@@ -94,7 +94,7 @@ def main():
 
 
     # Replace signal dataset with EWK+signal
-    if True:
+    if False:
         ttjets2 = datasets.getDataset("TTJets").deepCopy()
         ttjets2.setName("TTJets2")
         ttjets2.setCrossSection(ttjets2.getCrossSection() - datasets.getDataset("TTToHplus_M120").getCrossSection())
@@ -191,7 +191,13 @@ def doPlots(datasets):
     drawPlot(createPlot("Btagging/bjet_eta"), "bjetEta", rebin=8, xlabel="#eta^{b-tagged jet}", ylabel="b-tagged jets / %.1f", opts={"ymaxfactor": 30, "xmin": -2.4, "xmax": 2.4}, moveLegend={"dy":0.01, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
     drawPlot(createPlot("Btagging/NumberOfBtaggedJets"), "NumberOfBJets", xlabel="Number of selected b jets", ylabel="Events / %.0f", opts={"xmax": 6}, textFunction=lambda: addMassBRText(x=0.45, y=0.87), cutLine=1)
 
-     
+  # top mass
+#    drawPlot(createPlot("TopChiSelection/TopMass"), "TopMassWithChi", rebin=25, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=50)
+    drawPlot(createPlot("TopChiSelection/WMass"), "WMassWithChi", rebin=25, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=50)
+    drawPlot(createPlot("TopWithBSelection/TopMass"), "TopMassWithBsel", rebin=25, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=50)
+    drawPlot(createPlot("TopWithBSelection/WMass"), "WMassWithBsel", rebin=25, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=50)
+    
+    topMass(createPlot("TopChiSelection/TopMass"), "TopMassWithChi", rebin=10)   
     # Transverse mass
 #    transverseMass(createPlot("TauEmbeddingAnalysis_afterTauId_TransverseMass"))
     transverseMass2(createPlot("transverseMass"), "transverseMass_standard", rebin=20)
@@ -286,6 +292,8 @@ def doPlots(datasets):
 #    topPtComparison(datasets) 
 #    vertexComparison(datasets)
 #    mtComparison(datasets)
+    
+
 
 def doCounters(datasets):
     eventCounter = counter.EventCounter(datasets)
@@ -347,7 +355,8 @@ def mtComparison(datasets):
     rtauGen(mt, "transverseMass_vs_mH", rebin=20)
 
 
-          
+
+    
 ##############def genComparison(datasets):
 #    rtau = plots.PlotBase([
 #        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genRtau1ProngHp"),
@@ -557,6 +566,8 @@ def rtauGen(h, name, rebin=5, ratio=False):
     ylabel = "Events / %.2f" % h.binWidth()
     if "Mass" in name:
         xlabel = "m (GeV/c^{2})"
+    if "vertex" in name:
+        xlabel = "Raw PF E_{T}^{miss} (GeV)"
     if "Rtau" in name:
         ylabel = "A.u."
     elif "Pt" in name:
@@ -580,11 +591,12 @@ def rtauGen(h, name, rebin=5, ratio=False):
         kwargs["createRatio"] = True
 #    name = name+"_log"
 
-
-
     h.createFrame(name, **kwargs)
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend(0.2, 0.75, 0.4, 0.9))
+    h.setLegend(histograms.createLegend(0.4, 0.75, 0.6, 0.9))
+    if  "vertex" in name:
+        histograms.addText(0.75, 0.9, "Data", 22) 
+        plots._legendLabels["Data"] = "vertex3"
     common(h, xlabel, ylabel, addLuminosityText=False)
 
 def selectionFlow(h, name, rebin=1, ratio=False):
@@ -1092,7 +1104,7 @@ def topMass(h, name, rebin=20, ratio=False):
 
     opts = {"ymin": 0.0001, "ymaxfactor": 1.1}
     opts2 = {"ymin": 0.01, "ymax": 1.5}
-    name = name+"_log"
+#    name = name+"_log"
     if ratio:
         h.createFrameFraction(name, opts=opts, opts2=opts2)
     else:

@@ -14,6 +14,21 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
+std::vector<const reco::GenParticle*>   getImmediateMothers(const reco::Candidate&);
+std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
+bool  hasImmediateMother(const reco::Candidate& p, int id);
+bool  hasMother(const reco::Candidate& p, int id);
+void  printImmediateMothers(const reco::Candidate& p);
+void  printMothers(const reco::Candidate& p);
+std::vector<const reco::GenParticle*>  getImmediateDaughters(const reco::Candidate& p);
+std::vector<const reco::GenParticle*>   getDaughters(const reco::Candidate& p);
+bool  hasImmediateDaughter(const reco::Candidate& p, int id);
+bool  hasDaughter(const reco::Candidate& p, int id);
+void  printImmediateDaughters(const reco::Candidate& p);
+void printDaughters(const reco::Candidate& p);
+
+
+
 namespace HPlus {
   GenParticleAnalysis::Data::Data(const GenParticleAnalysis *analysis): fAnalysis(analysis) {}
   GenParticleAnalysis::Data::~Data() {}
@@ -66,7 +81,14 @@ namespace HPlus {
     hBquarkFromTopPt = makeTH<TH1F>(myDir, "genBquark_FromTop_Pt", "genBquark_FromTop_Pt", 400, 0., 800.);
     hBquarkNotFromTopPt = makeTH<TH1F>(myDir, "genBquark_NotFromTop_Pt", "genBquark_NotFromTop_Pt", 400, 0., 800.);
     hBquarkFromTopDeltaRTau = makeTH<TH1F>(myDir, "genBquark_FromTop_DeltaRTau", "genBquark_FromTop_DeltaRTau", 300, 0., 8.);
-    hBquarkNotFromTopDeltaRTau = makeTH<TH1F>(myDir, "genBquark_NotFromTop_DeltaRTau", "genBquark_NotFromTop_DeltaRTau", 300, 0., 8.);
+    hBquarkNotFromTopDeltaRTau = makeTH<TH1F>(myDir, "genBquark_NotFromTop_DeltaRTau", "genBquark_NotFromTop_DeltaRTau", 400, 0., 8.);
+    hGenDeltaRHiggsSide= makeTH<TH1F>(myDir, "genBquark_FromHiggsSide_DeltaRTau", "genBquark_FromHiggsSide_DeltaRTau", 350, 0., 7.);
+    hGenBquarkFromHiggsSideEta= makeTH<TH1F>(myDir, "genBquark_FromHiggsSide_Eta", "genBquark_FromHiggsSide_Eta", 250, -5.0, 5.0);
+    hGenBquarkFromHiggsSidePt= makeTH<TH1F>(myDir, "genBquark_FromHiggsSide_Pt", "genBquark_FromHiggsSide_Pt", 200, 0., 400.);
+    hGenDeltaRTopSide= makeTH<TH1F>(myDir, "genBquark_FromTopSide_DeltaRTau", "genBquark_FromTopSide_DeltaRTau", 350, 0., 7.);
+    hGenBquarkFromTopSideEta= makeTH<TH1F>(myDir, "genBquark_FromTopSide_Eta", "genBquark_FromTopSide_Eta", 250, -5.0, 5.0);
+    hGenBquarkFromTopSidePt= makeTH<TH1F>(myDir, "genBquark_FromTopSide_Pt", "genBquark_FromTopSide_Pt", 200, 0., 400.);
+    
     hTopPt = makeTH<TH1F>(myDir, "genTopPt", "genTopPt", 300, 0., 600);
     hTopPt_wrongB = makeTH<TH1F>(myDir, "genTopPt_wrongB", "genTopPt_wrongB", 300, 0., 600);
     hGenMET = makeTH<TH1F>(myDir, "genMET", "genMET", 40, 0., 400);
@@ -319,8 +341,87 @@ namespace HPlus {
     }
 
 
+    /////////////////////////////////////////////////////////////////////
+    // correlations in the signal event
+
+    int tauFromHiggsId = 0;
+    int ntaus = 0;
+    bool tauHiggsSideFound = false;
+    // Generate a vector of all taus from H+
+    std::vector<LorentzVector> tausFromHp;
+    for (size_t i=0; i < genParticles->size(); ++i){
+      const reco::Candidate & p = (*genParticles)[i];
+      int id = p.pdgId();
+      if ( abs(id) != 15 || hasImmediateMother(p,15) || hasImmediateMother(p,-15) ) continue;
+      if( hasImmediateMother(p,37) || hasImmediateMother(p,-37) ) {
+	tausFromHp.push_back(p.p4());
+	tauFromHiggsId = id;
+	ntaus++;
+	tauHiggsSideFound = true;	  
+      }
+    }
+
+    // t(6) -> H+(37) -> tau(-15) 
+ 
+  
+    double bPt, bEta;
+    if (tauHiggsSideFound && ntaus == 1) {
     
-    // b-quark analysis
+      for (size_t i=0; i < genParticles->size(); ++i){
+	const reco::Candidate & p = (*genParticles)[i];
+	int id = p.pdgId();
+	// b from Higgs side
+	if ( abs(id) != 5 || hasImmediateMother(p,5) || hasImmediateMother(p,-5) )continue;
+	bEta = p.eta();
+	bPt = p.pt();
+	
+	if(hasImmediateMother(p,6) || hasImmediateMother(p,-6)) {
+
+	  for( LorentzVectorCollection::const_iterator tau = oneAndThreeProngTaus->begin();tau!=oneAndThreeProngTaus->end();++tau) {
+	    bool tauFromHp = false;
+	    for(size_t itau=0; itau<tausFromHp.size(); ++itau) {
+	      if(ROOT::Math::VectorUtil::DeltaR(*tau, tausFromHp[itau]) < 0.4){
+		tauFromHp=true;
+		break;
+	      }
+	    }
+	    if(tauFromHp) {
+	      double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() ,*tau );
+	      if ( id * tauFromHiggsId  < 0 ) {
+		//		std::cout << " H+ side  " << id <<  " tauFromHiggsId " <<   tauFromHiggsId << " deltaR " << deltaR << " pT " << bPt << std::endl;
+		hGenDeltaRHiggsSide->Fill(deltaR, fEventWeight.getWeight());
+		hGenBquarkFromHiggsSideEta->Fill(bEta, fEventWeight.getWeight());
+		hGenBquarkFromHiggsSidePt->Fill(bPt, fEventWeight.getWeight());
+       
+	      }
+	      if ( id * tauFromHiggsId  > 0 ) {
+		//		std::cout << " Top side  " << id <<  " tauFromHiggsId " <<   tauFromHiggsId << " deltaR " << deltaR << " pT " << bPt <<std::endl;
+		hGenDeltaRTopSide->Fill(deltaR, fEventWeight.getWeight());
+		hGenBquarkFromTopSideEta->Fill(bEta, fEventWeight.getWeight());
+		hGenBquarkFromTopSidePt->Fill(bPt, fEventWeight.getWeight());
+	      }
+	    }
+	  }
+	}
+      }
+      
+    }
+
+
+
+
+
+    // b-quark analysis for gg -> tbH+
+   
+    //    std::vector<LorentzVector> tausFromHp;
+    for (size_t i=0; i < genParticles->size(); ++i){
+      const reco::Candidate & p = (*genParticles)[i];
+      int id = p.pdgId();
+      if(abs(id) == 15 && (hasImmediateMother(p,37) || hasImmediateMother(p,-37))) tausFromHp.push_back(p.p4());
+    }
+
+
+
     int nBquarks = 0;
     // loop over all genParticles
     for (size_t i=0; i < genParticles->size(); ++i){  
@@ -342,14 +443,8 @@ namespace HPlus {
     hBquarkMultiplicity->Fill(nBquarks, fEventWeight.getWeight());
     
     
-    double bPt, bEta;
-    // Generate a vector of all taus from H+
-    std::vector<LorentzVector> tausFromHp;
-    for (size_t i=0; i < genParticles->size(); ++i){
-      const reco::Candidate & p = (*genParticles)[i];
-      int id = p.pdgId();
-      if(abs(id) == 15 && (hasImmediateMother(p,37) || hasImmediateMother(p,-37))) tausFromHp.push_back(p.p4());
-    }
+    //    double bPt, bEta;
+
     // loop over all genParticles
     for (size_t i=0; i < genParticles->size(); ++i){
       const reco::Candidate & p = (*genParticles)[i];
@@ -452,6 +547,10 @@ namespace HPlus {
   }
    //eof: void GenParticleAnalysis::analyze()
 
+
+
+
+  /*
 
   std::vector<const reco::GenParticle*> GenParticleAnalysis::getImmediateMothers(const reco::Candidate& p){ 
     std::vector<const reco::GenParticle*> mothers;
@@ -596,6 +695,6 @@ namespace HPlus {
     
     return genBquarks;
   }
-
+  */
   
 }

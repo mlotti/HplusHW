@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_TopSelection_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_TopSelection_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_TopWithBSelection_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_TopWithBSelection_h
 
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
@@ -16,9 +16,9 @@ namespace edm {
 class TH1;
 
 namespace HPlus {
-  class TopSelection;
+  class TopWithBSelection;
 
-  class TopSelection {
+  class TopWithBSelection {
   public:
     typedef math::XYZTLorentzVector XYZTLorentzVector;
     /**
@@ -31,22 +31,22 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const TopSelection *TopSelection, bool passedEvent);
+      Data(const TopWithBSelection *TopWithBSelection, bool passedEvent);
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
-      const double getTopMass() const { return fTopSelection->topMass; }
-      const XYZTLorentzVector& getTopP4() const { return fTopSelection->top; }
+      const double getTopMass() const { return fTopWithBSelection->topMass; }
+      const XYZTLorentzVector& getTopP4() const { return fTopWithBSelection->top; }
 
     private:
-      const TopSelection *fTopSelection;
+      const TopWithBSelection *fTopWithBSelection;
       const bool fPassedEvent;
     };
     
-    TopSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
-    ~TopSelection();
+    TopWithBSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    ~TopWithBSelection();
 
-    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> bjet);
 
   private:
     void init();
@@ -64,35 +64,37 @@ namespace HPlus {
     void printImmediateDaughters(const reco::Candidate& );
     void printDaughters(const reco::Candidate& );
     */
+    
     // Input parameters
     const double fTopMassLow;
     const double fTopMassHigh;
+    const double fChi2Cut;
 
     // Counters
-    Count fTopMassCount;
+    Count fTopWithBMassCount;
 
     // EventWeight object
     EventWeight& fEventWeight;
     edm::InputTag fSrc;
     
     // Histograms
-    TH1 *hPtjjb;
-    TH1 *hPtmax;
-    TH1 *hPtmaxMatch;
-    TH1 *hPtmaxBMatch;
-    TH1 *hPtmaxQMatch;
-    TH1 *hPtmaxMatchWrongB;
+    TH1 *hPtTopChiCut;
+    TH1 *hPtTop;
     TH1 *hjjbMass;
     TH1 *htopMass;
     TH1 *htopMassMatch;
+    TH1 *htopMassChiCut;
     TH1 *hWMass;
     TH1 *hWMassMatch;
+    TH1 *hWMassChiCut;
+    TH1 *hChi2Min;
     TH1 *htopMassBMatch;
     TH1 *hWMassBMatch;
     TH1 *htopMassQMatch;
     TH1 *hWMassQMatch;
     TH1 *htopMassMatchWrongB;
-    TH1 *hWMassMatchWrongB;  
+    TH1 *hWMassMatchWrongB;    
+  
     // Variables
     double topMass;
     double wMass;
