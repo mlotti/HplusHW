@@ -37,7 +37,8 @@ else:
         "isHLTMu20": ([result("SingleMu_160431-163261_May10")], "Run2011A_Mu20"),
         "isHLTMu24": ([result("SingleMu_163270-163869_May10")], "Run2011A_Mu24"),
         "isHLTMu30": ([result("SingleMu_165088-165633_Prompt"), result("SingleMu_165970-166150_Prompt")], "Run2011A_Mu30"),
-        "isHLTMu40": ([result("SingleMu_166161-166164_Prompt"), result("SingleMu_166346-166346_Prompt"), result("SingleMu_166374-166967_Prompt"), result("SingleMu_167039-167043_Prompt"), result("SingleMu_167078-167913_Prompt"), result("SingleMu_172620-173198_Prompt")], "Run2011A_Mu40"),
+        "isHLTMu40": ([result("SingleMu_166161-166164_Prompt"), result("SingleMu_166346-166346_Prompt"), result("SingleMu_166374-166967_Prompt"),
+                       result("SingleMu_167039-167043_Prompt"), result("SingleMu_167078-167913_Prompt"), result("SingleMu_170722-172619_Aug05"), result("SingleMu_172620-173198_Prompt")], "Run2011A_Mu40"),
         "isHLTMu40eta2p1": ([result("SingleMu_173236-173692_Prompt")], "Run2011A_Mu40eta2p1")
         }[trigger]
 

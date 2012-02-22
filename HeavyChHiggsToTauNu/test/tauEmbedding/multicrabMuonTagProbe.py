@@ -14,7 +14,7 @@ patDatasets = [
     "SingleMu_166374-166967_Prompt", # HLT_Mu40_v1
     "SingleMu_167039-167043_Prompt", # HLT_Mu40_v1
     "SingleMu_167078-167913_Prompt", # HLT_Mu40_v3
-    # Aug05 is missing!
+    "SingleMu_170722-172619_Aug05",  # HLT_Mu40_v5
     "SingleMu_172620-173198_Prompt", # HLT_Mu40_v5
     "SingleMu_173236-173692_Prompt", # HLT_Mu40_eta2p1_v1
 
@@ -31,7 +31,7 @@ triggers = {
     "SingleMu_166374-166967_Prompt": "HLT_IsoMu24_v5",
     "SingleMu_167039-167043_Prompt": "HLT_IsoMu24_v5",
     "SingleMu_167078-167913_Prompt": "HLT_IsoMu24_v7",
-
+    "SingleMu_170722-172619_Aug05":  "HLT_IsoMu24_v8",
     "SingleMu_172620-173198_Prompt": "HLT_IsoMu24_v8",
     "SingleMu_173236-173692_Prompt": "HLT_IsoMu30_eta2p1_v3",
 
@@ -45,6 +45,7 @@ numberOfJobs = {
     "SingleMu_166374-166967_Prompt":  10,
     "SingleMu_167039-167043_Prompt":   1,
     "SingleMu_167078-167913_Prompt":   6,
+    "SingleMu_170722-172619_Aug05":    6,
     "SingleMu_172620-173198_Prompt":   7,
     "SingleMu_173236-173692_Prompt":   4,
     "DYJetsToLL_M50_TuneZ2_Summer11": 24,
