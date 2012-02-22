@@ -1,16 +1,18 @@
 #!/usr/bin/env python
 
 import re
+from optparse import OptionParser
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 # Processing step
 #step = "skim"
-step = "embedding"
+#step = "skim_copy"
+#step = "embedding"
 #step = "embedding_copy"
 #step = "analysis"
 #step = "analysisTau"
-#step = "signalAnalysis"
+step = "signalAnalysis"
 #step = "muonAnalysis"
 #step = "caloMetEfficiency"
 
@@ -19,19 +21,38 @@ step = "embedding"
 #era = "Run2011A-EPS"
 era = "Run2011A"
 
+#version = "v13"
 #version = "v13_1"
 #version = "v13_2"
 #version = "v13_2_seedTest1"
 #version = "v13_2_seedTest2"
 #version = "v13_2_seedTest3"
+#version = "v13_3"
+#version = "v13_3_seedTest1"
+#version = "v13_3_seedTest2"
+#version = "v13_3_seedTest3"
 #version = "v13_3_seedTest4"
-version = "v13_3_seedTest5"
+#version = "v13_3_seedTest5"
 #version = "v13_3_seedTest6"
+#version = "v13_3_seedTest7"
+#version = "v13_3_seedTest8"
+#version = "v13_3_seedTest9"
+version = "v13_3_seedTest10"
 #version = "v14"
+
+parser = OptionParser(usage="Usage: %prog [options]")
+parser.add_option("--step", dest="step", default=step,
+                  help="Processing step (default: %s)"%step)
+parser.add_option("--version", dest="version", default=version,
+                  help="Data version to use as an input (default: %s)"%version)
+(opts, args) = parser.parse_args()
+step = opts.step
+version = opts.version
+print "Processing step %s, datasets %s as input" % (step, version)
 
 # "Midfix" for multicrab directory name
 dirPrefix = ""
-#dirPrefix += "_Met50"
+dirPrefix += "_Met50"
 #dirPrefix += "_caloMet45"
 #dirPrefix += "_caloMet60"
 #dirPrefix += "_taueff"
@@ -46,7 +67,7 @@ dirPrefix = ""
 #dirPrefix = "_TauIdScan"
 #dirPrefix = "_iso05"
 #dirPrefix = "_test"
-#dirPrefix += "_systematics"
+dirPrefix += "_systematics"
 #dirPrefix += "_debug"
 
 # Visible pt cut
@@ -62,6 +83,7 @@ dirPrefix = ""
 #vispt = "_vispt20"
 #vispt = "_vispt30"
 #vispt = "_vispt40"
+
 if step in ["embedding", "embedding_copy", "analysis", "signalAnalysis"]:
     dirPrefix += "_"+version
 if step in ["analysis", "signalAnalysis"]:
@@ -76,6 +98,7 @@ if step == "signalAnalysis":
 
 # Define the processing steps: input dataset, configuration file, output file
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
+          "skim_copy":      {"input": "tauembedding_skim_v13",         "config": "copy_cfg.py"}, 
           "embedding":      {"input": "tauembedding_skim_v13", "config": "embed.py",   "output": "embedded.root"},
           "embedding_copy": {"input": "tauembedding_embedding_"+version, "config": "copy_cfg.py"},
 #          "analysis":       {"input": "tauembedding_embedding_v13"+pt,  "config": "embeddingAnalysis_cfg.py"},
@@ -277,6 +300,11 @@ def modify(dataset):
             import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabDatasetsTauEmbedding as tauEmbeddingDatasets
             njobs = tauEmbeddingDatasets.njobs[dataset.getName()]["skim"]
             dataset.setNumberOfJobs(njobs)
+        elif step == "skim_copy":
+            import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabDatasetsTauEmbedding as tauEmbeddingDatasets
+            njobs = tauEmbeddingDatasets.njobs[dataset.getName()]["skim"]
+            dataset.setNumberOfJobs(njobs*2)
+          
 
     if dataset.isData() and step in ["generation", "embedding"]:
         dataset.appendArg("overrideBeamSpot=1")
@@ -285,6 +313,9 @@ def modify(dataset):
     if step == "embedding_copy":
         dataset.appendArg("outputFile=embedded_copy.root")
         dataset.appendLine("CMSSW.output_file = embedded_copy.root")
+    elif step == "skim_copy":
+        dataset.appendArg("outputFile=skim_copy.root")
+        dataset.appendLine("CMSSW.output_file = skim_copy.root")
     else:
         dataset.appendLine("CMSSW.output_file = "+config[step]["output"])
         dataset.appendLine("USER.additional_input_files = copy_cfg.py")

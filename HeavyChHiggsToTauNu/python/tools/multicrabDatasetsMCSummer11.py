@@ -800,8 +800,8 @@ datasets = {
             },
             "pattuple_v18": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/T_TuneZ2_s-channel_7TeV-powheg-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v18-8eea754df021b160abed50fa738aa521/USER",
-                "number_of_jobs": 1
+                "datasetpath": "/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v18-8eea754df021b160abed50fa738aa521/USER",
+                "number_of_jobs": 4
             },
             "pattuple_v19": {
                 "dbs_url": common.pattuple_dbs,
