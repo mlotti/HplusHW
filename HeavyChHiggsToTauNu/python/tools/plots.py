@@ -1341,3 +1341,91 @@ class ComparisonManyPlot(PlotBase, PlotRatioBase):
     def addLuminosityText(self, x=None, y=None):
         if hasattr(self, "luminosity"):
             histograms.addLuminosityText(x, y, self.luminosity)
+
+## Base class for plot drawing functions
+class PlotDrawer:
+    # Set defaults here
+    def __init__(self, ylabel="Occurrances / %.0f", log=False, ratio=False, opts={"ymin": 0, "ymaxfactor": 1.1}, optsLog={"ymin": 0.01, "ymaxfactor": 2}, opts2={"ymin": 0.5, "ymax": 1.5}):
+        self.ylabelDefault = ylabel
+        self.logDefault = log
+        self.ratioDefault = ratio
+        self.optsDefault = {}
+        self.optsDefault.update(opts)
+        self.optsLogDefault = {}
+        self.optsLogDefault.update(optsLog)
+        self.opts2Default = {}
+        self.opts2Default.update(opts2)
+
+    def addCutLineBox(self, p, **kwargs):
+        cutLine = kwargs.get("cutLine", None)
+        cutBox = kwargs.get("cutBox", None)
+        if cutLine != None and cutBox != None:
+            raise Exception("Both cutLine and cutBox were given, only either one can exist")
+
+        # Add cut line and/or box
+        if cutLine != None:
+            lst = cutLine
+            if not isinstance(lst, list):
+                lst = [lst]
+    
+            for line in lst:
+                p.addCutBoxAndLine(line, box=False, line=True)
+        if cutBox != None:
+            lst = cutBox
+            if not isinstance(lst, list):
+                lst = [lst]
+    
+            for box in lst:
+                p.addCutBoxAndLine(**box)
+
+    def finish(self, p, xlabel, **kwargs):
+        ylab = kwargs.get("ylabel", self.ylabelDefault)
+        if "%" in ylab:
+            ylab = ylab % p.binWidth()
+
+        p.frame.GetXaxis().SetTitle(xlabel)
+        p.frame.GetYaxis().SetTitle(ylab)
+        p.draw()
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        if kwargs.get("addLuminosityText", False):
+            p.addLuminosityText()
+        p.save()
+
+    def createFrame(self, p, name, **kwargs):
+        log = kwargs.get("log", self.logDefault)
+
+        # Default values
+        _opts = {}
+        if log:
+            _opts.update(self.optsLogDefault)
+        else:
+            _opts.update(self.optsDefault)
+        _opts2 = {}
+        _opts2.update(self.opts2Default)
+
+        # Update from arg
+        _opts.update(kwargs.get("opts", {}))
+        _opts2.update(kwargs.get("opts2", {}))
+
+        # Create frame
+        p.createFrame(name, createRatio=kwargs.get("ratio", self.ratioDefault), opts=_opts, opts2=_opts2)
+        if log:
+            p.getPad().SetLogy(log)
+
+    def setLegend(self, p, **kwargs):
+        p.setLegend(histograms.moveLegend(histograms.createLegend(), **(kwargs.get("moveLegend", {}))))
+
+    def rebin(self, p, **kwargs):
+        reb = kwargs.get("rebin", 1)
+        if reb > 1:
+            p.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(reb))
+
+    def __call__(self, p, name, xlabel, **kwargs):
+        self.rebin(p, **kwargs)
+        self.createFrame(p, name, **kwargs)
+        self.setLegend(p, **kwargs)
+        self.addCutLineBox(p, **kwargs)
+        self.finish(p, xlabel, **kwargs)
+
+drawPlot = PlotDrawer()
