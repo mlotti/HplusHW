@@ -63,6 +63,7 @@ namespace HPlus {
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
     fTriggerScaleFactorCounter(eventCounter.addCounter("trigger scale factor")),
+    fGenuineTauCounter(eventCounter.addCounter("Tau is genuine")),
     fRtauAfterTauIDCounter(eventCounter.addCounter("RtauAfterTauID")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
@@ -127,7 +128,9 @@ namespace HPlus {
     fMuonToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "mu->tau with tau outside acceptance"),
     fGenuineToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "tau->tau with tau outside acceptance"),
     fJetToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "jet->tau with tau outside acceptance"),
-    fProduce(iConfig.getUntrackedParameter<bool>("produceCollections", false))
+    fModuleLabel(iConfig.getParameter<std::string>("@module_label")),
+    fProduce(iConfig.getUntrackedParameter<bool>("produceCollections", false)),
+    fOnlyGenuineTaus(iConfig.getUntrackedParameter<bool>("onlyGenuineTaus", false))
   {
     edm::Service<TFileService> fs;
     // Save the module configuration to the output ROOT file as a TNamed object
@@ -300,19 +303,24 @@ namespace HPlus {
       iEvent.put(saveTaus, "selectedTaus");
     }
     //    hSelectedTauRtau->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());  
+    // Obtain MC matching - for EWK without genuine taus
+    FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTaus()[0]));
+    bool myTypeIIStatus = fFakeTauIdentifier.isFakeTau(myTauMatch); // True if the selected tau is a fake
+    if(fOnlyGenuineTaus && myTypeIIStatus) return false;
+    increment(fGenuineTauCounter);
 
-    // For plotting Rtau                                                                                                                                                                                
-    //    if (!tauData.selectedTauPassedRtau()) return false;                                                                                                                                           
-    //    if (tauData.getRtauOfSelectedTau() < 0.7) return false;                                                                                                                                       
+
+    // For plotting Rtau
+    //    if (!tauData.selectedTauPassedRtau()) return false;
+    //    if (tauData.getRtauOfSelectedTau() < 0.7) return false;
     increment(fRtauAfterTauIDCounter);
 
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->pt(), fEventWeight.getWeight());
     hSelectedTauEt->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
     hSelectedTauEta->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hSelectedTauPhi->Fill(tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
-    // Obtain MC matching - for EWK without genuine taus
-    FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTaus()[0]));
-    bool myTypeIIStatus = fFakeTauIdentifier.isFakeTau(myTauMatch); // True if the selected tau is a fake
+
+
     fAllTausCounterGroup.incrementOneTauCounter();
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderTauID, tauData);
     if (myTauMatch == FakeTauIdentifier::kkElectronToTau)

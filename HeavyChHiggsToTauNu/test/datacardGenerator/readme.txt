@@ -84,6 +84,10 @@ and the other ones are the reference ones. counterName is the name of the counte
 - Ratio: counterHisto="string", nominatorCounter="string", denominatorCounter="string", scale=double : Calculates the ratio of two different rates 
 and scales them to the scale (tip: usable for lepton veto uncertainty). counterHisto is the path and name of the counter histogram. nominatorCounter 
 and denominatorCounter are the names of the counter (a label in the counter histogram). scale is the factor which is used to scale the ratio.
+- ScaleFactor: histograms={"string", ...}, normHistos={"string", ...} : Calculates the uncertainty of scale factors from two histograms (histogram
+with the actual weighted event counts for each scaleFactorUncertainty value and their total weight, first bin of normHisto, for calculating the
+absolute uncertainty). One can supply multiple (histogram, normHisto) pairs to combine different sources of scale factor uncertainty into one number
+(such as uncertainty of tau trigger leg + MET trigger leg -> trigger scale factor uncertainty)
 - QCDMeasurement: counterHisto="string", histoPrefix="string", QCDBasicSelectionsHisto="string", QCDMETLegHisto="string", QCDTauLegHisto="string", 
 QCDBasicMtHisto="string", filePath="string", dataFiles={"string", "string", ... }, EWKMCFiles={"string", "string", ... } : Dedicated function to 
 extract the rate or the stat. or syst. uncertainty of the factorised QCD measurement. counterHisto is the name of the counter histogram (incl. path) 

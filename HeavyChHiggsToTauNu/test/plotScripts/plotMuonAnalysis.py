@@ -22,6 +22,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 
 # These are per-muon cuts
 muonKinematics = "(muons_p4.Pt() > 40 && abs(muons_p4.Eta()) < 2.1)"
@@ -71,6 +73,7 @@ treeDraw = dataset.TreeDraw(analysis+"/tree", weight=weight)
 def main():
     counters = analysis+"Counters"
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    tauEmbedding.updateAllEventsToWeighted(datasets)
 
     #datasets.remove(filter(lambda name: name != "SingleMu_Mu_166374-167043_Prompt" and name != "TTJets_TuneZ2_Summer11", datasets.getAllDatasetNames()))
     if era == "EPS":
@@ -111,8 +114,10 @@ def main():
     plots._legendLabels["QCD_Pt20_MuEnriched"] = "QCD"
     histograms.createLegend.moveDefaults(dx=-0.02)
 
-    #doPlots(datasets)
+    doPlots(datasets)
     printCounters(datasets)
+#    doPlotsWTauMu(datasets, "TTJets")
+#    doPlotsWTauMu(datasets, "WJets")
 
 
 def doPlots(datasets):
@@ -120,8 +125,8 @@ def doPlots(datasets):
         return plots.DataMCPlot(datasets, name, **kwargs)
 
     selections = [
-        ("Full_", "&&".join([muonSelection, muonVeto, electronVeto, jetSelection])),
-        ("FullNoIso_", "&&".join([muonSelectionNoIso, muonVetoNoIso, electronVeto, jetSelectionNoIso])),
+        ("Full_", And(muonSelection, muonVeto, electronVeto, jetSelection)),
+        ("FullNoIso_", And(muonSelectionNoIso, muonVetoNoIso, electronVeto, jetSelectionNoIso)),
 #        ("Analysis_", "&&".join([muonSelection, muonVeto, electronVeto, jetSelection, metcut, btagging])),
         ]
 
@@ -137,6 +142,82 @@ def doPlots(datasets):
 
         td = tdMuon.clone(varexp="sqrt(2 * muons_p4.Pt() * pfMet_p4.Et() * (1-cos(muons_p4.Phi()-pfMet_p4.Phi()))) >>tmp(40,0,400)")
         transverseMass(createPlot(td), prefix=name, ratio=True)
+
+
+def doPlotsWTauMu(datasets, name):
+    selection = And(muonSelection, muonVeto, electronVeto, jetSelection)
+    td = treeDraw.clone(varexp="muons_p4.Pt() >> tmp(40,0,400)")
+
+    ds = datasets.getDataset(name)
+    # Take first unweighted histograms for the fraction plot
+    drh_all = ds.getDatasetRootHisto(td.clone(selection=selection, weight=""))
+    drh_pure = ds.getDatasetRootHisto(td.clone(selection=And(selection, "abs(muons_mother_pdgid) == 24"), weight=""))
+    hallUn = drh_all.getHistogram()
+    hpureUn = drh_pure.getHistogram()
+
+    # Then the correctly weighted for the main plot
+    drh_all = ds.getDatasetRootHisto(td.clone(selection=selection))
+    drh_pure = ds.getDatasetRootHisto(td.clone(selection=And(selection, "abs(muons_mother_pdgid) == 24")))
+    lumi = datasets.getDataset("Data").getLuminosity()
+    drh_all.normalizeToLuminosity(lumi)
+    drh_pure.normalizeToLuminosity(lumi)
+    hall = drh_all.getHistogram()
+    hpure = drh_pure.getHistogram()
+
+    hall.SetName("All")
+    hpure.SetName("Pure")
+
+    p = plots.ComparisonPlot(hall, hpure)
+    p.histoMgr.setHistoLegendLabelMany({
+            "All": "All muons",
+            "Pure": "W#rightarrow#tau#rightarrow#mu"
+#            "Pure": "W#rightarrow#mu"
+            })
+    p.histoMgr.forEachHisto(styles.generator())
+
+    hallErr = hall.Clone("AllError")
+    hallErr.SetFillColor(ROOT.kBlue-7)
+    hallErr.SetFillStyle(3004)
+    hallErr.SetMarkerSize(0)
+    p.prependPlotObject(hallErr, "E2")
+
+    hpureErr = hpure.Clone("PureErr")
+    hpureErr.SetFillColor(ROOT.kRed-7)
+    hpureErr.SetFillStyle(3005)
+    hpureErr.SetMarkerSize(0)
+    p.prependPlotObject(hpureErr, "E2")
+
+    p.createFrame("muonPt_wtaumu_"+name, createRatio=True, opts={"ymin": 1e-1, "ymaxfactor": 2}, opts2={"ymin": 0.9, "ymax": 1.05}
+                  )
+    p.setRatios([plots._createRatio(hpureUn, hallUn, "", isBinomial=True)])
+    xmin = p.frame.GetXaxis().GetXmin()
+    xmax = p.frame.GetXaxis().GetXmax()
+    val = 1-0.038479
+    l = ROOT.TLine(xmin, val, xmax, val)
+    l.SetLineWidth(2)
+    l.SetLineColor(ROOT.kBlue)
+    l.SetLineStyle(4)
+    p.prependPlotObjectToRatio(l)
+    #p.appendPlotObjectToRatio(histograms.PlotText(0.18, 0.61, "1-0.038", size=18, color=ROOT.kBlue))
+    p.appendPlotObjectToRatio(histograms.PlotText(0.18, 0.61, "0.038", size=18, color=ROOT.kBlue))
+    p.getFrame2().GetYaxis().SetTitle("W#rightarrow#mu fraction")
+
+    p.getPad().SetLogy(True)
+    p.setLegend(histograms.moveLegend(histograms.createLegend()))
+    tmp = hpureErr.Clone("tmp")
+    tmp.SetFillColor(ROOT.kBlack)
+    tmp.SetFillStyle(3013)
+    tmp.SetLineColor(ROOT.kWhite)
+    p.legend.AddEntry(tmp, "Stat. unc.", "F")
+
+    p.frame.GetXaxis().SetTitle("Muon p_{T} (GeV/c)")
+    p.frame.GetYaxis().SetTitle("Events / %.0f GeV/c" % p.binWidth())
+    p.appendPlotObject(histograms.PlotText(0.5, 0.9, plots._legendLabels.get(name, name), size=18))
+
+    p.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    p.save()
 
 
 def printCounters(datasets):
@@ -168,7 +249,7 @@ def printCounters(datasets):
     eventCounter.normalizeMCByLuminosity()
 
     table = eventCounter.getMainCounterTable()
-    #addSumColumn(table)
+    addSumColumn(table)
 
     cellFormat = counter.TableFormatText(counter.CellFormatText(valueFormat='%.3f'))
     print table.format(cellFormat)

@@ -240,6 +240,21 @@ def _histoToCounter(histo):
 
     return ret
 
+## Transfor a list of (name, Count) pairs to a histogram (TH1)
+def _counterToHisto(name, counter):
+    histo = ROOT.TH1F(name, name, len(counter), 0, len(counter))
+    histo.Sumw2()
+
+    bin = 1
+    for name, count in counter:
+        histo.GetXaxis().SetBinLabel(bin, name)
+        histo.SetBinContent(bin, count.value())
+        histo.SetBinError(bin, count.uncertainty())
+        bin += 1
+
+    return histo
+
+
 ## Transform histogram (TH1) to a list of values
 def histoToList(histo):
     return [histo.GetBinContent(bin) for bin in xrange(1, histo.GetNbinsX()+1)]
@@ -297,7 +312,11 @@ def _normalizeToOne(h):
     Returns the normalized histogram (which is the same as the
     parameter, i.e. no copy is made).
     """
-    return _normalizeToFactor(h, 1.0/h.Integral())
+    integral = h.Integral(0, h.GetNbinsX()+1)
+    if integral == 0:
+        return h
+    else:
+        return _normalizeToFactor(h, 1.0/integral)
 
 def _normalizeToFactor(h, f):
     """Scale TH1 with a given factor.
@@ -386,6 +405,12 @@ class TreeDraw:
                 "selection": self.selection,
                 "weight": self.weight}
         args.update(kwargs)
+
+        # Allow modification functions
+        for name, value in args.items():
+            if hasattr(value, "__call__"):
+                args[name] = value(getattr(self, name))
+
         return TreeDraw(**args)
 
     def draw(self, rootFile, datasetName):
@@ -407,7 +432,8 @@ class TreeDraw:
             nentries = tree.GetEntries(selection)
             h = ROOT.TH1F("nentries", "Number of entries by selection %s"%selection, 1, 0, 1)
             h.SetDirectory(0)
-            h.Sumw2()
+            if len(self.weight) > 0:
+                h.Sumw2()
             h.SetBinContent(1, nentries)
             h.SetBinError(1, math.sqrt(nentries))
             return h
@@ -421,7 +447,10 @@ class TreeDraw:
         
         # e to have TH1.Sumw2() to be called before filling the histogram
         # goff to not to draw anything on the screen
-        nentries = tree.Draw(varexp, selection, "e goff")
+        opt = ""
+        if len(self.weight) > 0:
+            opt = "e "
+        nentries = tree.Draw(varexp, selection, opt+"goff")
         h = tree.GetHistogram()
         if h != None:
             h = h.Clone(h.GetName()+"_cloned")
@@ -914,6 +943,12 @@ class Dataset:
             self.originalCounterDir = counterDir
             self._readCounter(counterDir)
 
+    def close(self):
+#        print "Closing", self.file.GetName()
+        self.file.Close("R")
+        self.file.Delete()
+        del self.file
+
     def _readCounter(self, counterDir):
         """Read the number of all events from the event counters.
 
@@ -1018,6 +1053,9 @@ class Dataset:
         """
         self.nAllEvents = nAllEvents
 
+    def getNAllEvents(self):
+        return self.nAllEvents
+
     def getNormFactor(self):
         """Get the cross section normalization factor.
 
@@ -1031,6 +1069,12 @@ class Dataset:
             raise Exception("Number of all events is 0 for dataset %s" % self.name)
 
         return self.getCrossSection() / self.nAllEvents
+
+    def hasRootHisto(self, name):
+        if hasattr(name, "draw"):
+            return True
+        pname = self.prefix+name
+        return self.file.Get(pname) != None
 
     def getDatasetRootHisto(self, name):
         """Get the DatasetRootHisto object for a named histogram.
@@ -1163,6 +1207,10 @@ class DatasetMerged:
                 lumiSum += d.getLuminosity()
             self.info["luminosity"] = lumiSum
 
+    def close(self):
+        for d in self.datasets:
+            d.close()
+
     def setPrefix(self, prefix):
         """Set a prefix for the directory access.
 
@@ -1239,6 +1287,12 @@ class DatasetMerged:
     def getNormFactor(self):
         return None
 
+    def hasRootHisto(self, name):
+        has = True
+        for d in self.datasets:
+            has = has and d.hasRootHisto(name)
+        return has
+
     def getDatasetRootHisto(self, name):
         """Get the DatasetRootHistoMergedMC/DatasetRootHistoMergedData object for a named histogram.
 
@@ -1293,6 +1347,10 @@ class DatasetManager:
 
     def _setBaseDirectory(self, base):
         self.basedir = base
+
+    def close(self):
+        for d in self.datasets:
+            d.close()
 
     def append(self, dataset):
         """Append a Dataset object to the set.
@@ -1407,7 +1465,7 @@ class DatasetManager:
         self.datasets = selected
         self._populateMap()
 
-    def remove(self, nameList):
+    def remove(self, nameList, close=True):
         """Remove Datasets.
 
         Parameters:
@@ -1420,6 +1478,8 @@ class DatasetManager:
         for d in self.datasets:
             if not d.getName() in nameList:
                 selected.append(d)
+            else:
+                d.close()
         self.datasets = selected
         self._populateMap()
 
@@ -1458,15 +1518,15 @@ class DatasetManager:
                     raise Exception("Trying to rename dataset '%s' to '%s', but '%s' doesn't exist!" % (oldName, newName, oldName))
         self._populateMap()
 
-    def mergeData(self):
+    def mergeData(self, *args, **kwargs):
         """Merge all data Datasets to one with a name 'Data'."""
-        self.merge("Data", self.getDataDatasetNames())
+        self.merge("Data", self.getDataDatasetNames(), *args, **kwargs)
 
-    def mergeMC(self):
+    def mergeMC(self, *args, **kwargs):
         """Merge all MC Datasets to one with a name 'MC'."""
-        self.merge("MC", self.getMCDatasetNames())
+        self.merge("MC", self.getMCDatasetNames(), *args, **kwargs)
 
-    def mergeMany(self, mapping):
+    def mergeMany(self, mapping, *args, **kwargs):
         """Merge datasets according to the mapping."""
         toMerge = {}
         for d in self.datasets:
@@ -1478,7 +1538,7 @@ class DatasetManager:
                     toMerge[newName] = [d.getName()]
 
         for newName, nameList in toMerge.iteritems():
-            self.merge(newName, nameList)
+            self.merge(newName, nameList, *args, **kwargs)
 
     def merge(self, newName, nameList, keepSources=False):
         """Merge Datasets.

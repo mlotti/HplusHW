@@ -58,6 +58,9 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
                 ret.append(d)
         return ret
     else:
+        if not os.path.exists(filename):
+            raise Exception("Multicrab configuration file '%s' does not exist" % filename)
+
         directory = os.path.dirname(filename)
 
         mc_ignore = ["MULTICRAB", "COMMON"]

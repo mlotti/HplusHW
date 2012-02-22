@@ -29,6 +29,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
 
+#include<string>
 
 namespace edm {
   class ParameterSet;
@@ -124,6 +125,7 @@ namespace HPlus {
     Count fTausExistCounter;
     Count fOneTauCounter;
     Count fTriggerScaleFactorCounter;
+    Count fGenuineTauCounter;
     Count fRtauAfterTauIDCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
@@ -259,7 +261,10 @@ namespace HPlus {
     TH1 *hEMFractionAll;
     TH1 *hEMFractionElectrons;
 
+    std::string fModuleLabel;
+
     bool fProduce;
+    bool fOnlyGenuineTaus;
   };
 }
 

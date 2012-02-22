@@ -37,8 +37,8 @@ counters = "metNtupleCounters"
 #cutText = "Calo E_{T}^{miss} > 45 GeV"
 #cutText = "Calo E_{T}^{miss} > 60 GeV"
 
-runRegion = 1
-#runRegion = 2
+#runRegion = 1
+runRegion = 2
 
 #mcDataDefinition = True
 mcDataDefinition = False
@@ -102,13 +102,14 @@ def main():
 
     bins = range(0, 170, 10) + [180, 200, 250, 300, 400]
     th1 = ROOT.TH1D("foo", "foo", len(bins)-1, array.array("d", bins))
+    th1.Sumw2()
     #th1 = ROOT.TH1D("foo", "foo", 40, 0, 400)
 
     binning=">>tmp(40,0,400)"
     #binning=binningDist
     binningEff=">>foo"
     treeDraw = dataset.TreeDraw(analysis+"/tree",
-                                #weight="weightPileup",
+                                #weight="pileupWeightEPS",
                                 varexp="pfMet_p4.Et()"+binning)
 
     # Apply TDR style
@@ -117,25 +118,27 @@ def main():
 
     print "Runs", runs
     passed = treeDraw.clone(selection="caloMetNoHF_p4.Et() > 60")
-    commonText = "CaloMETnoHF > 60 GeV"
-    dataText = None
-    mcText = None
+    dataText = "offline calo E_{T}^{miss} (excl. HF) > 60 GeV"
+    mcText = "offline calo E_{T}^{miss} (excl. HF) > 60 GeV"
     if runRegion == 1:
         #printEfficienciesCalo(datasets, treeDraw.clone(varexp="caloMetNoHF.Et()"+binning))
         pass
     elif runRegion == 2:
         passedData = treeDraw.clone(selection="l1Met.Et() > 30 && caloMet_p4.Et() > 60")
         #passedData = passed.clone()
-        cut = "L1 MET > 30 & CaloMET > 60 GeV"
+        cut = "L1 E_{T}^{miss} > 30 &\n offline calo E_{T}^{miss} "
         if caloMetNoHF:
             passedData = treeDraw.clone(selection="l1Met.Et() > 30 && caloMetNoHF_p4.Et() > 60")
-            cut = "L1 MET > 30 & CaloMETnoHF > 60 GeV"
+            cut += "(excl. HF) > 60 GeV"
+        else:
+            cut += "(incl. HF) > 60 GeV"
+
         if mcDataDefinition:
             passed = passedData
-            commonText = cut
+            dataText = cut
+            mcText = cut
         else:
             dataText = cut
-            mcText = commonText
             tmp = {}
             for name in dataNames:
                 tmp[name] = passedData
@@ -151,19 +154,38 @@ def main():
     plotTurnOn(datasets,
                pathAll=treeDraw.clone(varexp="pfMet_p4.Et()"+binningEff),
                pathPassed=passed.clone(varexp="pfMet_p4.Et()"+binningEff),
-               commonText=commonText,
+               commonText=None,
                dataText=dataText,
                mcText=mcText,
                ratio=True
                )
+
     pfmet = treeDraw.clone(varexp="pfMet_p4.Et()"+binningEff)
     plotTurnOnData(datasets,
                    name="l1met",
                    pathAll=pfmet.clone(),
+                   pathPassed1=pfmet.clone(selection="caloMet_p4.Et() > 60"),
+                   pathPassed2=pfmet.clone(selection="l1Met.Et() > 30 && caloMet_p4.Et() > 60"),
+                   dataText1="CaloMET > 60 GeV",
+                   dataText2="L1 MET > 30 & CaloMET > 60 GeV",
+                   ratio=True
+                   )
+    plotTurnOnData(datasets,
+                   name="l1met36",
+                   pathAll=pfmet.clone(),
                    pathPassed1=pfmet.clone(selection="l1Met.Et() > 30 && caloMet_p4.Et() > 60"),
-                   pathPassed2=pfmet.clone(selection="caloMet_p4.Et() > 60"),
+                   pathPassed2=pfmet.clone(selection="l1Met.Et() > 36 && caloMet_p4.Et() > 60"),
                    dataText1="L1 MET > 30 & CaloMET > 60 GeV",
-                   dataText2="CaloMET > 60 GeV",
+                   dataText2="L1 MET > 36 & CaloMET > 60 GeV",
+                   ratio=True
+                   )
+    plotTurnOnData(datasets,
+                   name="l1met40",
+                   pathAll=pfmet.clone(),
+                   pathPassed1=pfmet.clone(selection="l1Met.Et() > 30 && caloMet_p4.Et() > 60"),
+                   pathPassed2=pfmet.clone(selection="l1Met.Et() > 40 && caloMet_p4.Et() > 60"),
+                   dataText1="L1 MET > 30 & CaloMET > 60 GeV",
+                   dataText2="L1 MET > 40 & CaloMET > 60 GeV",
                    ratio=True
                    )
 
@@ -178,10 +200,28 @@ def main():
     # Set the signal cross sections to a value from MSSM
 #    xsect.setHplusCrossSections(datasets, tanbeta=20, mu=200)
 
+    # Per-event weighting doesn't work with TEfficiency
+    weight = "pileupWeightEPS"
+    if runRegion == 2:
+        weight = "weightPileup_Run2011AnoEPS"
+    treeDraw = treeDraw.clone(weight=weight)
+    passed = passed.clone(weight=weight)
+
     l1Met(plots.DataMCPlot(datasets, treeDraw.clone(varexp="l1Met.Et()"+binning)), "l1Met")
-    caloMet(plots.DataMCPlot(datasets, treeDraw.clone(varexp="caloMetNoHF_p4.Et()"+binning)), "caloMetNoHF")
-    caloMet(plots.DataMCPlot(datasets, treeDraw.clone(varexp="caloMet_p4.Et()"+binning)), "caloMet")
-    pfMet(plots.DataMCPlot(datasets, treeDraw.clone(varexp="pfMet_p4.Et()"+binning)), "pfMet", ratio=True, opts2={"ymin":0.5,"ymax":1.5})
+    caloMet(plots.DataMCPlot(datasets, treeDraw.clone(varexp="caloMetNoHF_p4.Et()"+binning)), "caloMetNoHF", hf=False)
+    caloMet(plots.DataMCPlot(datasets, treeDraw.clone(varexp="caloMet_p4.Et()"+binning)), "caloMet", hf=True)
+
+    pfMet(plots.DataMCPlot(datasets, treeDraw.clone(varexp="pfMet_p4.Et()"+binning)), "pfMet", ratio=True, opts={"ymax": 3e3}, opts2={"ymin":0.5,"ymax":1.5})
+
+    p = plots.DataMCPlot(datasets, passed.clone(varexp="pfMet_p4.Et()"+binning))
+    x=0.2
+    y=0.27
+    p.appendPlotObject(histograms.PlotText(x, y, "Data:", size=17)); y -= 0.03
+    p.appendPlotObject(histograms.PlotText(x, y, dataText, size=17)); y -= 0.04
+    p.appendPlotObject(histograms.PlotText(x, y, "Simulation:", size=17)); y -= 0.03
+    p.appendPlotObject(histograms.PlotText(x, y, mcText, size=17)); y -= 0.03
+    pfMet(p, "pfMet_afterCut", ratio=True, opts={"ymax": 3e3}, opts2={"ymin":0.5,"ymax":1.5})
+    
 
     #caloMet(plots.DataMCPlot(datasets, analysis+"/calomet_et"))
     #caloMet(plots.DataMCPlot(datasets, analysis+"/calometNoHF_et"))
@@ -332,9 +372,9 @@ def plotTurnOn(datasets, pathAll, pathPassed, commonText, dataText=None, mcText=
         raise Exception("mcText must not be None when dataText is not")
     if dataText == None and mcText != None:
         raise Exception("dataText must not be None when mcText is not")
-    if dataText != None:
-        dataLabel += ": "+dataText
-        mcLabel += ": "+mcText
+#    if dataText != None:
+#        dataLabel += ": "+dataText
+#        mcLabel += ": "+mcText
 
     mc_effs = []
     data_eff_gr = None
@@ -398,8 +438,23 @@ def plotTurnOn(datasets, pathAll, pathPassed, commonText, dataText=None, mcText=
 
     p.setLegend(histograms.moveLegend(histograms.createLegend(y1=0.95, y2=0.85),
                                       #dx=-0.55, dy=-0.05
-                                      dx=-0.44, dy=-0.58
+                                      #dx=-0.44, dy=-0.58
+                                      dx=-0.3, dy=-0.4
                                       ))
+
+    x = 0.25
+    y = 0.3
+    dy = 0.035
+    mcColor = mc_eff_gr.GetMarkerColor()
+    size = 17
+    p.appendPlotObject(histograms.PlotText(x, y, "Data (runs %s):"%runs, size=size)); y -= dy
+    p.appendPlotObject(histograms.PlotText(x, y, dataText, size=size)); y -= dy
+
+    y -= 0.01
+    p.appendPlotObject(histograms.PlotText(x, y, "Simulation:", size=size, color=mcColor)); y -= dy
+    p.appendPlotObject(histograms.PlotText(x, y, mcText, size=size, color=mcColor)); y -= dy
+                       
+
 
     def text():
         l = ROOT.TLatex()
@@ -412,7 +467,7 @@ def plotTurnOn(datasets, pathAll, pathPassed, commonText, dataText=None, mcText=
     if dataText != None:
         textFunction = None
     #common(p, "PF E_{T}^{miss} (GeV)", "Efficiency / %.0f GeV"%binWidth, afterDraw=textFunction)
-    common(p, "PF E_{T}^{miss} (GeV)", "Efficiency", afterDraw=textFunction)
+    common(p, "Uncorrected PF E_{T}^{miss} (GeV)", "Efficiency", afterDraw=textFunction)
 
 
 def plotTurnOnData(datasets, name, pathAll, pathPassed1, pathPassed2, dataText1, dataText2, rebin=1, ratio=False):
@@ -443,7 +498,7 @@ def plotTurnOnData(datasets, name, pathAll, pathPassed1, pathPassed2, dataText1,
     opts2 = {"ymin": 0.8, "ymax": 1.2}
 
     name = "calomet_turnon_"+runs+"_data_"+name
-    p.createFrame(name, createRatio=ratio, opts=opts, opts2=opts2)
+    p.createFrame(name, createRatio=ratio, invertRatio=True, opts=opts, opts2=opts2)
     if ratio:
         p.getFrame2().GetYaxis().SetTitle("Ratio")
 
@@ -452,19 +507,23 @@ def plotTurnOnData(datasets, name, pathAll, pathPassed1, pathPassed2, dataText1,
                                       dx=-0.44, dy=-0.58
                                       ))
 
-    common(p, "PF E_{T}^{miss} (GeV)", "Efficiency")
+    common(p, "Uncorrected PF E_{T}^{miss} (GeV)", "Efficiency")
 
 
 def l1Met(h, name, **kwargs):
-    plotMet(h, name, "L1 MET (GeV)", **kwargs)
+    plotMet(h, name, "L1 E_{T}^{miss} (GeV)", **kwargs)
 
-def caloMet(h, name, **kwargs):
-    plotMet(h, name, "Calo MET (GeV)", **kwargs)
+def caloMet(h, name, hf, **kwargs):
+    txt = "HF excluded"
+    if hf:
+        txt = "HF included"
+    h.appendPlotObject(histograms.PlotText(0.42, 0.85, txt, size=17))
+    plotMet(h, name, "Uncorrected calo E_{T}^{miss} (GeV)", **kwargs)
 
 def pfMet(h, name, **kwargs):
-    plotMet(h, name, "PF MET (GeV)", **kwargs)
+    plotMet(h, name, "Uncorrected PF E_{T}^{miss} (GeV)", **kwargs)
 
-def plotMet(h, name, xlabel, rebin=1, ratio=False, opts2={}):
+def plotMet(h, name, xlabel, rebin=1, ratio=False, opts={}, opts2={}):
     if rebin > 1:
         h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
 
@@ -473,12 +532,14 @@ def plotMet(h, name, xlabel, rebin=1, ratio=False, opts2={}):
     h.stackMCHistograms(stackSignal=False)
     h.addMCUncertainty()
 
-    opts = {"ymin": 1e-2, "ymaxfactor": 2} #10}
+    opts_ = {"ymin": 1e-2, "ymaxfactor": 2} #10}
+    opts_.update(opts)
 
     #h.createFrameFraction(name, opts=opts)
-    h.createFrame(name+"_"+runs, opts=opts, createRatio=ratio, opts2=opts2)
+    h.createFrame(name+"_"+runs, opts=opts_, createRatio=ratio, opts2=opts2)
     ROOT.gPad.SetLogy(True)
     h.setLegend(histograms.moveLegend(histograms.createLegend())) #, dx=-0.12))
+    h.appendPlotObject(histograms.PlotText(0.42, 0.89, "Runs %s"%runs, size=17))
     common(h, xlabel, ylabel)
 
 def common(h, xlabel, ylabel, addLuminosityText=True, afterDraw=None):

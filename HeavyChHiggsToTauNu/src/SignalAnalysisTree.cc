@@ -27,6 +27,7 @@ namespace HPlus {
     fDoFill(iConfig.getUntrackedParameter<bool>("fill")),
     fTauEmbeddingInput(iConfig.getUntrackedParameter<bool>("tauEmbeddingInput", false)),
     fFillJetEnergyFractions(iConfig.getUntrackedParameter<bool>("fillJetEnergyFractions", true)),
+    fillNonIsoLeptonVars(iConfig.getUntrackedParameter<bool>("fillNonIsoLeptonVars", false)),
     fGenParticleSource(iConfig.getUntrackedParameter<edm::InputTag>("genParticleSrc")),
     fTree(0)
   {
@@ -45,7 +46,7 @@ namespace HPlus {
     for(size_t i=0; i<tauIds.size(); ++i) {
       fTauIds.push_back(TauId(tauIds[i]));
     }
-    fillNonIsoLeptonVars = false;
+//    fillNonIsoLeptonVars = false;
     reset();    
   }
   SignalAnalysisTree::~SignalAnalysisTree() {}

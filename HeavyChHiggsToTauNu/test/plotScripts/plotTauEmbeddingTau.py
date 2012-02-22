@@ -22,6 +22,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 import plotTauEmbeddingSignalAnalysis as tauEmbedding
 
 
@@ -39,6 +40,7 @@ rtauExp = "(taus_leadPFChargedHadrCand_p4.P() / taus_p4.P() -1e-10)"
 # tau candidate selection
 #decayModeFinding = "taus_decayMode >= 0" # replace with discriminator after re-running ntuples
 decayModeFinding = "taus_f_decayModeFinding > 0.5" # replace with discriminator after re-running ntuples
+tauPtPreCut = "(taus_p4.Pt() > 15)"
 tauPtCut = "(taus_p4.Pt() > 40)"
 tauEtaCut = "(abs(taus_p4.Eta()) < 2.1)"
 tauLeadPt = "(taus_leadPFChargedHadrCand_p4.Pt() > 20)"
@@ -55,8 +57,8 @@ tightIsolation = "(taus_f_byTightIsolation > 0.5)"
 oneProng = "(taus_signalPFChargedHadrCands_n == 1)"
 rtau = "(%s > 0.7)" % rtauExp
 
-tauCandidateSelection = "("+ "&&".join([decayModeFinding, tightIsolation, tauPtCut, tauEtaCut, tauLeadPt, ecalFiducial, electronRejection, muonRejection]) + ")"
-tauID = "("+ "&&".join([tightIsolation, oneProng, rtau]) +")"
+tauCandidateSelection = And(decayModeFinding, tightIsolation, tauPtCut, tauEtaCut, tauLeadPt, ecalFiducial, electronRejection, muonRejection)
+tauID = And(tightIsolation, oneProng, rtau)
 
 # Rest of the selection
 pvSelection = "(selectedPrimaryVertices_n >= 1)"

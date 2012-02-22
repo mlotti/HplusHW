@@ -44,7 +44,7 @@ def makePlot(file):
     if match:
 	fOUT = match.group("rootfile")
 
-	mass_re = re.compile("hplushadronic(?P<mass>(\d+))")
+	mass_re = re.compile("lands_histograms_hplushadronic_m(?P<mass>(\d+))")
 #	mass_re = re.compile("(?P<mass>(\d+))")
 	mass_match = mass_re.search(fOUT)
 
@@ -129,6 +129,26 @@ class Frame:
 
     def SetHistograms(self, histograms):
 	self.histograms = histograms
+	self.CheckBinning(self.histograms)
+
+    def CheckBinning(self, histograms):
+	differentBinningFound = False
+	binning = histograms[0].GetNbinsX()
+	for histo in histograms:
+	    if not histo.GetNbinsX() == binning:
+		differentBinningFound = True
+	if differentBinningFound:
+	    print "Found inconsistent histogram binning:"
+            print "     GetName()         GetNbinsX()"
+            for histo in histograms:
+                name = histo.GetName()
+                while len(name) < 20:
+                    name = name + " "
+                if histo.GetNbinsX() == binning:
+		    print "    ",name,histo.GetNbinsX()
+                else:
+                    print "    ",name,histo.GetNbinsX(), "<-- number of bins differ"
+	    sys.exit()
 
     def AddMissingHisto(self, histoName):
 	if self.histogramsNotFound.count(histoName) == 0:

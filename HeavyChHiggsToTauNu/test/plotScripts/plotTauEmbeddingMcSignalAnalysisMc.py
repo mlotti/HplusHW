@@ -25,13 +25,15 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
 analysisEmb = "signalAnalysis"
-analysisSig = "signalAnalysis"
+#analysisSig = "signalAnalysis"
+analysisSig = "signalAnalysisTauEmbeddingLikePreselection"
 
 dirEmb = "."
 #dirSig = "../../multicrab_compareEmbedding_Run2011A_111117_155815"
 #dirSig = "../../multicrab_compareEmbedding_Run2011A_111122_130104"
 #dirSig = "../../multicrab_compareEmbedding_Run2011A_111124_154038"
-dirSig = "../../multicrab_compareEmbedding_Run2011A_111201_143238"
+#dirSig = "../../multicrab_compareEmbedding_Run2011A_111201_143238"
+dirSig = "../../multicrab_compareEmbedding_Run2011A_120118_122555"
 
 
 def main():
@@ -92,7 +94,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
     #drawControlPlot("IdentifiedElectronPt_AfterStandardSelections", "Electron p_{T} (GeV/c)")
     #drawControlPlot("IdentifiedMuonPt_AfterStandardSelections", "Muon p_{T} (GeV/c)")
     drawControlPlot("Njets_AfterStandardSelections", "Number of jets", ylabel="Events")
-    drawControlPlot("MET", "Raw PF E_{T}^{miss} (GeV)", rebin=5, opts={"xmax": 400}, cutLine=50)
+    drawControlPlot("MET", "Uncorredted PF E_{T}^{miss} (GeV)", rebin=5, opts={"xmax": 400}, cutLine=50)
     drawControlPlot("NBjets", "Number of selected b jets", opts={"xmax": 6}, ylabel="Events", moveLegend={"dx":-0.3, "dy":-0.5}, cutLine=1)
 
     treeDraw = dataset.TreeDraw("dummy", weight="weightPileup")
@@ -175,7 +177,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
                         "DecayModeFinding",
                         "TauJetPt",
                         "TauJetEta",
-                        "TauLdgTrackExists",
+                        #"TauLdgTrackExists",
                         "TauLdgTrackPtCut",
                         "TauECALFiducialCutsCracksAndGap",
                         "TauAgainstElectronCut",

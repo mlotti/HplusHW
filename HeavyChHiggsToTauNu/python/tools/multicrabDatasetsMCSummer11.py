@@ -728,6 +728,23 @@ datasets = {
             },
         },
     },
+    "W3Jets_TuneZ2_Summer11": {
+        "dataVersion": "42XmcS4",
+        "crossSection": 304.2*31314/27770.0, # value from PREP multiplied by the NNLO/PREP of inclusive WJets, see the following hypernews threads for more informatio
+        # https://hypernews.cern.ch/HyperNews/CMS/get/generators/1313.html
+        # https://hypernews.cern.ch/HyperNews/CMS/get/generators/1324.html
+        "data": {
+            "AOD": {
+                "datasetpath": "/W3Jets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 490, # Adjusted for PATtuple file size.
+            },
+            "pattuple_v18": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W3Jets_TuneZ2_7TeV-madgraph-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v18_1-5c1fe2e0ac511ee6db9df3b7fb33ca32/USER",
+                "number_of_jobs": 16
+            },
+        },
+    },
     "DYJetsToLL_M50_TuneZ2_Summer11": { # Z+jets
         "dataVersion": "42XmcS4",
         "crossSection": 3048, # [2], NNLO

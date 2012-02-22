@@ -23,6 +23,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 import plotMuonAnalysis as muonAnalysis
 
 # Configuration
@@ -72,10 +73,13 @@ normalize = True
 #era = "Run2011A-EPS"
 era = "Run2011A"
 
+tauEmbedding.normalize = normalize
+tauEmbedding.era = era
+
 countersWeighted = counters
-#countersWeighted = counters+"/weighted"
 if normalize:
     countersWeighted = counters+"/weighted"
+#countersWeighted = counters+"/weighted"
 
 tauPtOutput ="tauPt_ewk.root"
 mtOutput = "mt_ewk_lands.root"
@@ -134,9 +138,11 @@ def main():
     #print datasets.getAllDatasetNames()
     #return
 
-    apply_v13_1_bugfix(datasets)
+#    apply_v13_1_bugfix(datasets)
 
+    tauEmbedding.updateAllEventsToWeighted(datasets)
     plots.mergeRenameReorderForDataMC(datasets)
+    datasets.remove(["W3Jets"])
 
 #    datasets.remove(["DYJetsToLL", "SingleTop", "Diboson", "QCD_Pt20_MuEnriched"])
 
@@ -187,7 +193,7 @@ def main():
     histograms.createLegend.moveDefaults(dh=-0.05)
     #histograms.createLegend.moveDefaults(dx=-0.18, dy=0.05, dh=-0.05)
 
-    doPlots(datasets, mcLumi)
+#    doPlots(datasets, mcLumi)
     doCounters(datasets, mcLumi)
 
 
@@ -463,20 +469,20 @@ def doCounters(datasets, mcLumi=None):
         eventCounter.normalizeMCToLuminosity(mcLumi)
     else:
         eventCounter.normalizeMCByLuminosity()
-    scaleNormalization(eventCounter)
+    tauEmbedding.scaleNormalization(eventCounter)
 
     ewkDatasets = [
         "WJets", "TTJets",
-#        "DYJetsToLL", "SingleTop", "Diboson"
+        "DYJetsToLL", "SingleTop", "Diboson"
         ]
 
     table = eventCounter.getMainCounterTable()
     mainTable = table
-    #muonAnalysis.addSumColumn(table)
+    muonAnalysis.addSumColumn(table)
     mainTable.insertColumn(2, counter.sumColumn("EWKMCsum", [mainTable.getColumn(name=name) for name in ewkDatasets]))
 #    table = eventCounter.getSubCounterTable("Trigger")
     #    muonAnalysis.reorderCounterTable(table)
-#    muonAnalysis.addDataMcRatioColumn(table)
+    muonAnalysis.addDataMcRatioColumn(table)
     if datasets.hasDataset("EWKSignal"):
         mainTable.insertColumn(7, counter.divideColumn("SignalFraction", mainTable.getColumn(name="TTToHplus_"+keepSignal), mainTable.getColumn(name="EWKSignal")))
 
@@ -487,7 +493,7 @@ def doCounters(datasets, mcLumi=None):
     print table.format(cellFormat)
 
     tauTable = eventCounter.getSubCounterTable("TauIDPassedEvt::tauID_HPSTight")
-    muonAnalysis.addSumColumn(tauTable)
+    #muonAnalysis.addSumColumn(tauTable)
     tauTable.insertColumn(2, counter.sumColumn("EWKMCsum", [tauTable.getColumn(name=name) for name in ewkDatasets]))
     print tauTable.format(cellFormat)
 
@@ -612,32 +618,6 @@ def squareSum(th1):
         s += value*value
     return s
 
-def scaleMCHisto(histo, scale):
-    if histo.isMC():
-        scaleHisto(histo, scale)
-
-def scaleDataHisto(histo, scale):
-    if histo.isData():
-        scaleHisto(histo, scale)
-
-def scaleHisto(histo, scale):
-    th1 = histo.getRootHisto()
-    th1.Scale(scale)
-
-def scaleHistos(plot, function, scale):
-    plot.histoMgr.forEachHisto(lambda histo: function(histo, scale))
-
-def scaleCounters(eventCounter, methodName, scale):
-    getattr(eventCounter, methodName)(scale)
-
-def scaleHistosCounters(obj, plotFunc, counterFunc, scale):
-    if isinstance(obj, plots.PlotBase):
-        scaleHistos(obj, plotFunc, scale)
-    elif isinstance(obj, counter.EventCounter):
-        scaleCounters(obj, counterFunc, scale)
-    else:
-        plotFunc(obj, scale)
-
 def scaleMCfromWmunu(obj):
     # Data/MC scale factor from AN 2011/053, BR correction factor= 1/0.6479
     rho = 0.9509/0.6479
@@ -667,31 +647,6 @@ def scaleMuTriggerEff(obj):
     scaleHistosCounters(obj, scaleDataHisto, "scaleData", 1/data)
     scaleHistosCounters(obj, scaleMCHisto, "scaleMC", 1/mc)
 
-def scaleMuTriggerIdEff(obj):
-    # From 2011A only
-    #data = 0.508487
-    #mc = 0.541083
-    # May10 in 41X
-    #data = 0.891379
-    #mc = 0.931707
-    # 1fb in 42X
-    data = None
-    if era == "EPS":
-        data = 0.884462
-    elif era == "Run2011A-EPS":
-        data = 0.879
-    elif era == "Run2011A":
-        data = 0.881705
-    mc = 0.919829
-
-    scaleHistosCounters(obj, scaleDataHisto, "scaleData", 1/data)
-    scaleHistosCounters(obj, scaleMCHisto, "scaleMC", 1/mc)
-
-def scaleWmuFraction(obj):
-    Wtaumu = 0.038479
-
-    scaleHistosCounters(obj, scaleHisto, "scale", 1-Wtaumu)
-
 class LumiScaler:
     def __init__(self, signalLumi=1, ewkLumi=1):
         self.signalLumi = signalLumi
@@ -704,19 +659,6 @@ class LumiScaler:
         scaleHistosCounters(obj, scaleHisto, "scale", self.getRho())
 
 scaleLumi = LumiScaler()   
-
-def scaleNormalization(obj):
-    if not normalize:
-        return
-
-    #scaleMCfromWmunu(obj) # data/MC trigger correction
-    scaleMuTriggerIdEff(obj)
-    scaleWmuFraction(obj)
-    return
-
-    scaleMuTriggerEff(obj)
-    scaleTauBR(obj)
-    scaleLumi(obj)
 
 # Helper function to flip the last two parts of the histogram name
 # e.g. ..._afterTauId_DeltaPhi -> DeltaPhi_afterTauId
@@ -747,7 +689,7 @@ def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, a
         ylab = ylabel % h.binWidth()
 
     if normalize:
-        scaleNormalization(h)
+        tauEmbedding.scaleNormalization(h)
     h.stackMCHistograms()
     if addMCUncertainty:
         h.addMCUncertainty()
@@ -793,7 +735,7 @@ def tauPt(h, name, rebin=1, ratio=False, opts={}, opts2={}):
     xlabel = "p_{T}^{#tau jet} (GeV/c)"
     ylabel = "Events / %.0f GeV/c" % h.binWidth()
     
-    scaleNormalization(h)
+    tauEmbedding.scaleNormalization(h)
     h.stackMCHistograms()
 #    h.addMCUncertainty()
 
@@ -826,7 +768,7 @@ def tauEta(h, rebin=5, ratio=True):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "#eta^{#tau jet}"
     ylabel = "Events"
-    scaleNormalization(h)
+    tauEmbedding.scaleNormalization(h)
 #    h.stackMCHistograms()
 #    h.addMCUncertainty()
 
@@ -850,7 +792,7 @@ def tauPhi(h, rebin=5, ratio=True):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "#phi^{#tau jet}"
     ylabel = "Events"
-    scaleNormalization(h)   
+    tauEmbedding.scaleNormalization(h)   
 #    h.stackMCHistograms()
 #    h.addMCUncertainty()
 
@@ -874,7 +816,7 @@ def leadingTrack(h, rebin=5, ratio=True):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "p_{T}^{leading track} (GeV/c)"
     ylabel = "Events / %.0f GeV/c" % h.binWidth()
-    scaleNormalization(h)
+    tauEmbedding.scaleNormalization(h)
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -891,7 +833,7 @@ def rtau(h, name, rebin=2, ratio=True):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "R_{#tau}"
     ylabel = "Events / %.2f" % h.binWidth()
-    scaleNormalization(h)    
+    tauEmbedding.scaleNormalization(h)    
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -915,7 +857,7 @@ def muonPt(h, rebin=5, ratio=False):
     xlabel = "p_{T}^{#mu} (GeV/c)"
     ylabel = "Events / %.0f GeV" % h.binWidth()
     
-    scaleNormalization(h)
+    tauEmbedding.scaleNormalization(h)
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -938,7 +880,7 @@ def muonEta(h, rebin=5, ratio=False):
     xlabel = "#eta^{#mu}"
     ylabel = "Events"
     
-    scaleNormalization(h)
+    tauEmbedding.scaleNormalization(h)
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -965,7 +907,7 @@ def met(h, rebin=5, ratio=True, opts={}, opts2={}):
         xlabel = "Original "+xlabel
     ylabel = "Events / %.0f GeV" % h.binWidth()
 
-    scaleNormalization(h)
+    tauEmbedding.scaleNormalization(h)
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -995,7 +937,7 @@ def deltaPhi(h, rebin=40):
     xlabel = "#Delta#phi(%s, MET) (rad)" % particle
     ylabel = "Events / %.2f rad" % h.binWidth()
     
-    scaleNormalization(h)    
+    tauEmbedding.scaleNormalization(h)    
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -1010,7 +952,7 @@ def transverseMass(h, name, rebin=1, opts={}, opts_log={}, ratio=False):
     xlabel = "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})"
     ylabel = "Events / %.0f GeV/c^{2}" % h.binWidth()
     
-    scaleNormalization(h)
+    tauEmbedding.scaleNormalization(h)
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -1047,7 +989,7 @@ def tauCandPt(h, name, rebin=1, ratio=True):
     xlabel = "p_{T}^{#tau-jet candidate} (GeV/c)"
     ylabel = "Events /%.0f GeV/c" % h.binWidth()
     
-    scaleNormalization(h)
+    tauEmbedding.scaleNormalization(h)
     h.stackMCHistograms()
 #    h.addMCUncertainty()
 
@@ -1071,7 +1013,7 @@ def tauCandEta(h, name, rebin=1, ratio=True):
     xlabel = "#eta^{#tau-jet candidate}" 
     ylabel = "Events / %.2f" % h.binWidth()
     
-    scaleNormalization(h)
+    tauEmbedding.scaleNormalization(h)
     h.stackMCHistograms()
  #   h.addMCUncertainty()
 
@@ -1092,7 +1034,7 @@ def tauCandPhi(h, name, rebin=1, ratio=True):
     xlabel = "#phi^{#tau-jet candidate}"
     ylabel = "Events / %.2f" % h.binWidth()
     
-    scaleNormalization(h)
+    tauEmbedding.scaleNormalization(h)
     h.stackMCHistograms()
  #   h.addMCUncertainty()
 
@@ -1117,7 +1059,7 @@ def jetPt(h, name, rebin=2, ratio=True):
     xlabel = "p_{T}^{%s} (GeV/c)" % particle
     ylabel = "Events /%.0f GeV/c" % h.binWidth()
     
-    scaleNormalization(h)
+    tauEmbedding.scaleNormalization(h)
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -1142,7 +1084,7 @@ def jetEta(h, name, rebin=2, ratio=True):
         particle = "bjet"
     xlabel = "#eta^{%s}" % particle
     ylabel = "Events / %.2f" % h.binWidth()
-    scaleNormalization(h)  
+    tauEmbedding.scaleNormalization(h)
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -1164,7 +1106,7 @@ def jetPhi(h, name, rebin=2, ratio=True):
         particle = "bjet"
     xlabel = "#phi^{%s}" % particle
     ylabel = "Events / %.2f" % h.binWidth()
-    scaleNormalization(h)
+    tauEmbedding.scaleNormalization(h)
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -1186,7 +1128,7 @@ def numberOfJets(h, name, rebin=1, ratio=True):
         particle = "bjet"
     xlabel = "Number of %ss" % particle
     ylabel = "Events / %.2f" % h.binWidth()
-    scaleNormalization(h)
+    tauEmbedding.scaleNormalization(h)
     h.stackMCHistograms()
     h.addMCUncertainty()
 
