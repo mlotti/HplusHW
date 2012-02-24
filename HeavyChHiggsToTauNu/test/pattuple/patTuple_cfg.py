@@ -47,7 +47,6 @@ doTauHLTMatching = options.doTauHLTMatching != 0
 if doTauHLTMatching:
     if len(myTrigger) == 0:
         myTrigger = dataVersion.getDefaultSignalTrigger()
-    print "Trigger used for tau matching: "+str(myTrigger)
 
 ################################################################################
 # Output module
@@ -66,6 +65,7 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep *_offlinePrimaryVertices_*_*",
         "keep *_l1GtTriggerMenuLite_*_*", # in run block, needed for prescale provider
         "keep recoCaloMETs_*_*_*", # keep all calo METs (metNoHF is needed!)
+        "keep *_genMetTrue_*_*", # keep generator level MET
         "keep *_kt6PFJets_rho_HChPatTuple", # keep the rho of the event
         "keep recoBeamHaloSummary_*_*_*", # keep beam halo summaries
         "keep recoGlobalHaloData_*_*_*",
@@ -92,9 +92,9 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 
 options.doPat=1
 (process.sPAT, c) = addPatOnTheFly(process, options, dataVersion,
-                                   doPlainPat=True, doPF2PAT=False,
-                                   plainPatArgs={"doTauHLTMatching": doTauHLTMatching,
-                                                 "matchingTauTrigger": myTrigger},
+                                   doPlainPat=False, doPF2PAT=True,
+                                   patArgs={"doTauHLTMatching": doTauHLTMatching,
+                                            "matchingTauTrigger": myTrigger},
                                    doHBHENoiseFilter=False, # Only save the HBHE result to event, don't filter
                                    calculateEventCleaning=True, # This requires the tags from test/pattuple/checkoutTags.sh
                                    )

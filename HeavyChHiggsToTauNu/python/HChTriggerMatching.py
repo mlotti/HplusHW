@@ -112,7 +112,7 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
 
     return seq
 
-def addMuonTriggerMatching(process, muons="patMuons"):
+def addMuonTriggerMatching(process, muons="patMuons", postfix=""):
     # See MuonAnalysis/MuonAssociators/python/patMuonsWithTrigger_cff.py V01-15-01
     # http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/CMSSW/MuonAnalysis/MuonAssociators/python/patMuonsWithTrigger_cff.py?view=log
 
@@ -125,32 +125,35 @@ def addMuonTriggerMatching(process, muons="patMuons"):
         resolveAmbiguities    = cms.bool(True),
         resolveByMatchQuality = cms.bool(True)
     )
-    process.muonMatchHLTL2 = matcherPrototype.clone(
+    muonMatchHLTL2 = matcherPrototype.clone(
         matchedCuts = cms.string('coll("hltL2MuonCandidates")'),
         maxDeltaR = 0.3, #maxDeltaR Changed accordingly to Zoltan tuning. It was: 1.2
         maxDPtRel = 10.0
     )
-    process.muonMatchHLTL3 = matcherPrototype.clone(
+    setattr(process, "muonMatchHLTL2"+postfix, muonMatchHLTL2)
+    muonMatchHLTL3 = matcherPrototype.clone(
         matchedCuts = cms.string('coll("hltL3MuonCandidates")'),
         maxDeltaR = 0.1, #maxDeltaR Changed accordingly to Zoltan tuning. It was: 0.5
         maxDPtRel = 10.0
     )
+    setattr(process, "muonMatchHLTL3"+postfix, muonMatchHLTL3)
 
-    process.patMuonsWithTrigger = cms.EDProducer("PATTriggerMatchMuonEmbedder",
+    patMuonsWithTrigger = cms.EDProducer("PATTriggerMatchMuonEmbedder",
         src     = cms.InputTag(muons),
         matches = cms.VInputTag(
-            cms.InputTag("muonMatchHLTL2"),
-            cms.InputTag("muonMatchHLTL3"),
+            cms.InputTag("muonMatchHLTL2"+postfix),
+            cms.InputTag("muonMatchHLTL3"+postfix),
         )
     )
+    setattr(process, "patMuonsWithTrigger"+postfix, patMuonsWithTrigger)
 
     sequence = cms.Sequence(
-        process.muonMatchHLTL2 *
-        process.muonMatchHLTL3 *
-        process.patMuonsWithTrigger
+        muonMatchHLTL2 *
+        muonMatchHLTL3 *
+        patMuonsWithTrigger
     )
 
-    return (sequence, "patMuonsWithTrigger")
+    return (sequence, "patMuonsWithTrigger"+postfix)
     
 
 ################################################################################
