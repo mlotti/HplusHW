@@ -831,6 +831,22 @@ class CounterTable:
     def clone(self):
         return self.deepCopy()
 
+    def transpose(self):
+        colNames = self.rowNames
+        rowNames = self.columnNames
+
+        table = []
+        if len(self.table) > 0:
+            for icol in xrange(len(self.table[0])):
+                row = []
+                for irow in xrange(len(self.table)):
+                    row.append(self.table[irow][icol])
+                table.append(row)
+
+        self.table = table
+        self.rowNames = rowNames
+        self.columnNames = colNames
+
     def getNrows(self):
         return len(self.table)
 
