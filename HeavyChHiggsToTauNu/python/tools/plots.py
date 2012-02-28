@@ -1349,23 +1349,31 @@ class PlotDrawer:
                  ylabel="Occurrances / %.0f",
                  log=False,
                  ratio=False,
-                 opts={"ymin": 0, "ymaxfactor": 1.1},
-                 optsLog={"ymin": 0.01, "ymaxfactor": 2},
-                 opts2={"ymin": 0.5, "ymax": 1.5},
+                 opts={},
+                 optsLog={},
+                 opts2={},
+                 addLuminosityText=False,
                  stackMCHistograms=False,
                  addMCUncertainty=False,
                  ):
         self.ylabelDefault = ylabel
         self.logDefault = log
         self.ratioDefault = ratio
-        self.optsDefault = {}
+        self.optsDefault = {"ymin": 0, "ymaxfactor": 1.1}
         self.optsDefault.update(opts)
-        self.optsLogDefault = {}
+        self.optsLogDefault = {"ymin": 0.01, "ymaxfactor": 2}
         self.optsLogDefault.update(optsLog)
-        self.opts2Default = {}
+        self.opts2Default = {"ymin": 0.5, "ymax": 1.5}
         self.opts2Default.update(opts2)
+        self.addLuminosityTextDefault = addLuminosityText
         self.stackMCHistogramsDefault = stackMCHistograms
         self.addMCUncertainty = addMCUncertainty
+
+    def setDefaults(self, **kwargs):
+        for name, value in kwargs.iteritems():
+            if not hasattr(self, name+"Default"):
+                raise Exception("No default value for '%s'"%name)
+            setattr(self, name+"Default", value)
 
     def __call__(self, p, name, xlabel, **kwargs):
         self.rebin(p, **kwargs)
@@ -1448,7 +1456,7 @@ class PlotDrawer:
         p.draw()
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
-        if kwargs.get("addLuminosityText", False):
+        if kwargs.get("addLuminosityText", self.addLuminosityTextDefault):
             p.addLuminosityText()
         p.save()
 
