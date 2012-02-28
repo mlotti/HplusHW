@@ -244,6 +244,8 @@ def doPlots(datasets, mcLumi=None):
     tdRtau = treeDraw.clone(varexp="tau_leadPFChargedHadrCand_p4.P() / tau_p4.P() -1e-10 >>tmp(11, 0, 1.1)")
     tdDeltaPhi = treeDraw.clone(varexp="acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 >>tmp(18, 0, 180)")
 
+    drawPlot = tauEmbedding.drawPlot
+
     # Tau pt
     xlabel = "p_{T}^{#tau jet} (GeV/c)"
     drawPlot(createPlot("SelectedTau/SelectedTau_pT_AfterTauID"), "selectedTauPt_1AfterTauID", xlabel, opts=opts, rebin=rebin, ratio=False)
@@ -539,7 +541,7 @@ def doCounters(datasets, mcLumi=None):
             #absUnc = th12.Integral(0, 2)
             NallSum += Nall
             NSum += N
-            absUnc = squareSum(th12)
+            absUnc = tauEmbedding.squareSum(th12)
             absUncSquareSum += absUnc
             absUnc = math.sqrt(absUnc)
             relUnc = 0
@@ -559,14 +561,6 @@ def doCounters(datasets, mcLumi=None):
     #latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.2f", ))
 #    latexFormat = counter.TableFormatLaTeX(counter.CellFormatTeX(valueFormat="%.2f"))
 #    print table.format(latexFormat)
-
-def squareSum(th1):
-    s = 0
-    for bin in xrange(0, th1.GetNbinsX()+2):
-        #print "Bin %d, low edge %.1f, value %f" % (bin, th1.GetBinLowEdge(bin), th1.GetBinContent(bin))
-        value = th1.GetBinContent(bin)
-        s += value*value
-    return s
 
 # def scaleMCfromWmunu(obj):
 #     # Data/MC scale factor from AN 2011/053, BR correction factor= 1/0.6479
@@ -610,27 +604,7 @@ def squareSum(th1):
 
 # scaleLumi = LumiScaler()   
 
-# Functions below are for plot-specific formattings. They all take the
-# plot object as an argument, then apply some formatting to it, draw
-# it and finally save it to files.
-class PlotDrawer2(plots.PlotDrawer):
-    def __init__(self, **kwargs):
-        plots.PlotDrawer.__init__(self, **kwargs)
-
-    def __call__(self, p, name, xlabel, normalize=True, **kwargs):
-        self.rebin(p, **kwargs)
-
-        if normalize:
-            tauEmbedding.scaleNormalization(p)
-
-        self.stackMCHistograms(p, **kwargs)
-        self.createFrame(p, name, **kwargs)
-        self.setLegend(p, **kwargs)
-        self.addCutLineBox(p, **kwargs)
-        self.finish(p, xlabel, **kwargs)
-
-drawPlot = PlotDrawer2(ylabel="Events / %.0f GeV/c", log=True, stackMCHistograms=True, addMCUncertainty=True)
-  
+ 
 # Call the main function if the script is executed (i.e. not imported)
 if __name__ == "__main__":
     main()

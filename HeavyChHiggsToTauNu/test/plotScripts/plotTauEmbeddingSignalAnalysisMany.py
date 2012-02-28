@@ -56,7 +56,7 @@ def main():
     dirEmbs = ["."] + [os.path.join("..", d) for d in result.dirEmbs[1:]]
     dirSig = "../"+result.dirSig
   
-    datasetsEmb = result.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
+    datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
 
     datasetsEmb.remove(filter(lambda name: "HplusTB" in name, datasetsEmb.getAllDatasetNames()))
@@ -180,7 +180,7 @@ def doPlotsWTauMu(datasetsEmb, name, btag=True):
     p.save()
 
 def drawPlot(*args, **kwargs):
-    tauEmbeddingPlot.drawPlot(normalize=False, *args, **kwargs)
+    tauEmbedding.drawPlot(normalize=False, *args, **kwargs)
 
 def doPlots(datasetsEmb):
     datasetNames = datasetsEmb.getAllDatasetNames()
@@ -323,7 +323,7 @@ def doCounters(datasetsEmb):
         eventCounter = result.EventCounterDYCorrection(datasetsEmb, counters=analysisEmb+counters)
     else:
         scaleNormalization = analysisEmb != "signalAnalysis"
-        eventCounter = result.EventCounterMany(datasetsEmb, counters=analysisEmb+counters, scaleNormalization=scaleNormalization)
+        eventCounter = tauEmbedding.EventCounterMany(datasetsEmb, counters=analysisEmb+counters, normalize=scaleNormalization)
 
     # Add counts
     sels = []
@@ -459,7 +459,7 @@ def doCounters(datasetsEmb):
             #absUnc = th12.Integral(0, 2)
             NallSum += Nall
             NSum += N
-            absUnc = tauEmbeddingPlot.squareSum(th12)
+            absUnc = tauEmbedding.squareSum(th12)
             absUncSquareSum += absUnc
             absUnc = math.sqrt(absUnc)
             relUnc = 0
