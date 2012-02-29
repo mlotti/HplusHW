@@ -26,7 +26,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
-import plotTauEmbeddingSignalAnalysis as tauEmbedding
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 import produceTauEmbeddingResult as result
 
 # Without trigger
@@ -52,19 +52,19 @@ plotStyles = styles.styles[0:2]
 plotStyles[0] = styles.StyleCompound([plotStyles[0], styles.StyleMarker(markerStyle=21, markerSize=1.2)])
 
 def main():
-    dirEmbs = ["."] + [os.path.join("..", d) for d in result.dirEmbs[1:]]
-    dirSig = "../"+result.dirSig
+    dirEmbs = ["."] + [os.path.join("..", d) for d in tauEmbedding.dirEmbs[1:]]
+    dirSig = "../"+tauEmbedding.dirSig
     
-    datasetsEmb = result.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
+    datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
+
+    del plots._datasetMerge["WW"]
+#    del plots._datasetMerge["WZ"]
+#    del plots._datasetMerge["ZZ"]
 
     datasetsEmb.forEach(lambda mgr: plots.mergeRenameReorderForDataMC(mgr, keepSourcesMC=True))
     datasetsEmb.setLumiFromData()
     plots.mergeRenameReorderForDataMC(datasetsSig, keepSourcesMC=True)
-
-#    del plots._datasetMerge["WW"]
-#    del plots._datasetMerge["WZ"]
-#    del plots._datasetMerge["ZZ"]
 
     def mergeEWK(datasets):
         datasets.merge("EWKMC", ["WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson", "WW"], keepSources=True)
@@ -83,8 +83,8 @@ def main():
     tauEmbedding.normalize=True
     tauEmbedding.era = "Run2011A"
 
-    #datasetsEmbCorrected = result.DatasetsDYCorrection(datasetsEmb, datasetsSig, analysisEmb, analysisSig)
-    datasetsEmbCorrected = result.DatasetsResidual(datasetsEmb, datasetsSig, analysisEmb, analysisSig, ["DYJetsToLL", "WW"], totalNames=["Data", "EWKMC"])
+    #datasetsEmbCorrected = tauEmbedding.DatasetsDYCorrection(datasetsEmb, datasetsSig, analysisEmb, analysisSig)
+    datasetsEmbCorrected = tauEmbedding.DatasetsResidual(datasetsEmb, datasetsSig, analysisEmb, analysisSig, ["DYJetsToLL", "WW"], totalNames=["Data", "EWKMC"])
 
     def dop(datasetName):
         doPlots(datasetsEmb, datasetsSig, datasetName)
@@ -92,8 +92,8 @@ def main():
         print "%s done" % datasetName
 
 
-    doPlots(datasetsEmbCorrected, datasetsSig, "EWKMC", addData=True, postfix="_residual")
-    #doCounters(datasetsEmb, datasetsSig, "EWKMC")
+    #doPlots(datasetsEmbCorrected, datasetsSig, "EWKMC", addData=True, postfix="_residual")
+    doCounters(datasetsEmb, datasetsSig, "EWKMC")
     return
     dop("TTJets")
     dop("WJets")
@@ -113,7 +113,7 @@ def main():
 
 def doPlots(datasetsEmb, datasetsSig, datasetName, addData=False, postfix=""):
     lumi = datasetsEmb.getLuminosity()
-    isCorrected = isinstance(datasetsEmb, result.DatasetsDYCorrection) or isinstance(datasetsEmb, result.DatasetsResidual)
+    isCorrected = isinstance(datasetsEmb, result.DatasetsDYCorrection) or isinstance(datasetsEmb, tauEmbedding.DatasetsResidual)
     
     def createPlot(name, rebin=1, addVariation=False):
         name2Emb = name
@@ -328,11 +328,16 @@ def doCounters(datasetsEmb, datasetsSig, datasetName):
     lumi = datasetsEmb.getLuminosity()
 
     # Counters
-    eventCounterEmb = result.EventCounterMany(datasetsEmb, counters=analysisEmb+"Counters/weighted")
+    eventCounterEmb = tauEmbedding.EventCounterMany(datasetsEmb, counters=analysisEmb+"Counters/weighted")
     eventCounterSig = counter.EventCounter(datasetsSig, counters=analysisSig+"Counters/weighted")
 
     def isNotThis(name):
         return name != datasetName
+
+
+    #eventCounterSig.normalizeMCToLuminosity(lumi)
+    #print eventCounterSig.getMainCounterTable().format()
+    #return
 
     eventCounterEmb.removeColumns(filter(isNotThis, datasetsEmb.getAllDatasetNames()))
     eventCounterSig.removeColumns(filter(isNotThis, datasetsSig.getAllDatasetNames()))
