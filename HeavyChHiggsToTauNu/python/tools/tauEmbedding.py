@@ -10,6 +10,7 @@ import dataset
 import histograms
 import plots
 import counter
+import styles
 
 # Apply embedding normalization (muon efficiency, W->tau->mu factor
 normalize = True
@@ -284,6 +285,111 @@ class DatasetsMany:
         (embDataHisto, tmp) = self.getHistogram(datasetName, name)
         return counter.HistoCounter(datasetName, embDataHisto)
 
+class DatasetsResidual:
+    def __init__(self, datasetsEmb, datasetsSig, analysisEmb, analysisSig, residualNames, totalNames=[]):
+        self.datasetsEmb = datasetsEmb
+        self.datasetsSig = datasetsSig
+
+        # For an ugly hack
+        self.analysisEmb = analysisEmb
+        self.analysisSig = analysisSig
+
+        self.residualNames = residualNames
+        self.totalNames = totalNames
+        for name in totalNames:
+            if name in residualNames:
+                raise Exception("residualNames and totalNames must be disjoint (dataset '%s' was given in both)")
+
+    def _replaceSigName(self, name):
+        if isinstance(name, basestring):
+            return name.replace(self.analysisEmb, self.analysisSig)
+        else:
+            return name.clone(tree=lambda name: name.replace(self.analysisEmb, self.analysisSig))
+
+    def forEach(self, function):
+        self.datasetsEmb.forEach(function)
+        function(self.datasetsSig)
+
+    # Compatibility with dataset.DatasetManager
+    def remove(self, *args, **kwargs):
+        self.forEach(lambda d: d.remove(*args, **kwargs))
+
+    def getAllDatasetNames(self):
+        return self.datasetsEmb.getAllDatasetNames()
+
+    def close(self):
+        self.forEach(self, lambda d: d.close())
+
+    # End of compatibility methods
+    
+    def isResidualAdded(self, datasetName):
+        return datasetName in self.totalNames or datasetName in self.residualNames
+
+    def getLuminosity(self):
+        return self.datasetsEmb.getLuminosity()
+
+    def hasHistogram(self, datasetName, name):
+        return self.datasetsEmb.hasHistogram(datasetName, name) and self.datasetsSig.getDataset(datasetName).hasHistogram(name)
+
+    def getHistogram(self, datasetName, name, rebin=1):
+        if datasetName in self.totalNames:
+            #print "Creating sum for "+datasetName
+            (histo, tmp) = self.datasetsEmb.getHistogram(datasetName, name, rebin)
+            for res in self.residualNames:
+                #print "From residual of "+res
+                (h, tmp) = self.getHistogram(res, name, rebin)
+                histo.Add(h)
+            return (histo, None)
+        elif not datasetName in self.residualNames:
+            return self.datasetsEmb.getHistogram(datasetName, name)
+
+        #print "Calculating residual of "+datasetName
+
+        # Ugly hack
+        sigName = self._replaceSigName(name)
+
+        # Get properly normalized embedded data, embedded DY and normal DY histograms
+        (embHisto, tmp) = self.datasetsEmb.getHistogram(datasetName, name)
+        sigHisto = self.datasetsSig.getDataset(datasetName).getDatasetRootHisto(sigName) # DatasetRootHisto
+        sigHisto.normalizeToLuminosity(self.datasetsEmb.getLuminosity())
+        sigHisto = sigHisto.getHistogram() # ROOT.TH1
+
+        # residual = normal-embedded
+        sigHisto.Add(embHisto, -1)
+
+        sigHisto.SetName(embHisto.GetName()+"Residual")
+        if rebin > 1:
+            sigHisto.Rebin(rebin)
+
+        return (sigHisto, None)
+
+    def getCounter(self, datasetName, name):
+        if not datasetName in self.residualNames:
+            return self.datasetsEmb.getCounter(datasetName, name)
+
+        # Ugly hack
+        sigName = name
+        if isinstance(sigName, basestring):
+            sigName = sigName.replace(self.analysisEmb, self.analysisSig)
+        else:
+            sigName = sigName.clone(tree=sigName.tree.replace(self.analysisEmb, self.analysisSig))
+
+        # Get properly normalized embedded data, embedded DY and normal DY histograms
+        (embHisto, tmp) = self.datasetsEmb.getHistogram(datasetName, name)
+        sigHisto = self.datasetsSig.getDataset(datasetName).getDatasetRootHisto(sigName) # DatasetRootHisto
+        sigHisto.normalizeToLuminosity(self.datasetsEmb.getLuminosity())
+        sigHisto = sigHisto.getHistogram() # ROOT.TH1
+
+        table = counter.CounterTable()
+        table.appendColumn(counter.HistoCounter("Embedded", embHisto))
+        table.appendColumn(counter.HistoCounter("Normal", sigHisto))
+        table.removeNonFullRows()
+
+        embColumn = table.getColumn(name="Embedded")
+        sigColumn = table.getColumn(name="Normal")
+        residual = counter.subtractColumn(datasetName+" residual", sigColumn, embColumn)
+        return residual
+
 
 class EventCounterMany:
     def __init__(self, datasetsMany, normalize=True, *args, **kwargs):
@@ -322,18 +428,69 @@ class EventCounterMany:
     def getNormalizationString(self):
         return self.eventCounters[0].getNormalizationString()
 
+class EventCounterResidual:
+    def __init__(self, datasetsResidual, counters=None, **kwargs):
+        self.datasetsResidual = datasetsResidual
+        self.residualNames = datasetsResidual.residualNames
+
+        countersSig = counters
+        if countersSig != None:
+            countersSig = datasetsResidual._replaceSigName(countersSig)
+
+        self.eventCounterEmb = EventCounterMany(datasetsResidual.datasetsEmb, counters=counters, **kwargs)
+        self.eventCounterSig = counter.EventCounter(datasetsResidual.datasetsSig, counters=countersSig, **kwargs)
+        self.eventCounterSig.normalizeMCToLuminosity(datasetsResidual.datasetsEmb.getLuminosity())
+
+    def mainCounterAppendRow(self, rowName, treeDraw):
+        treeDrawSig = self.datasetsDYCorrection._replaceSigName(treeDraw)
+        self.eventCounterEmb.mainCounterAppendRow(rowName, treeDraw)
+        self.eventCounterSig.getMainCounter().appendRow(rowName, treeDrawSig)
+
+    def subCounterAppendRow(self, name, rowName, treeDraw):
+        treeDrawSig = self.datasetsDYCorrection._replaceSigName(treeDraw)
+        self.eventCounterEmb.subCounterAppendRow(name, rowName, treeDraw)
+        self.eventCounterSig.getSubCounter(name).appendRow(rowName, treeDrawSig)
+
+    def _calculateResidual(self, table, sigTable):
+        columnNames = table.getColumnNames()
+        for name in columnNames:
+            if name in self.residualNames:
+                i = columnNames.index(name)
+                col = table.getColumn(index=i)
+                table.removeColumn(i)
+                col = counter.subtractColumn(name+" residual", sigTable.getColumn(name=name), col)
+                table.insertColumn(i, col)
+        return table
+
+    def getMainCounterTable(self):
+        table = self.eventCounterEmb.getMainCounterTable()
+        sigTable = self.eventCounterSig.getMainCounterTable()
+        
+        table = self._calculateResidual(table, sigTable)
+        return table
+
+    def getSubCounterTable(self, name):
+        table = self.eventCounterEmb.getSubCounterTable(name)
+        sigTable = self.eventCounterSig.getSubCounterTable(name)
+        
+        table = self._calculateResidual(table, sigTable)
+        return table
+
 ########################################
 # Common plot drawer
 class PlotDrawerTauEmbedding(plots.PlotDrawer):
-    def __init__(self, **kwargs):
-        plots.PlotDrawer.__init__(self, normalize=True, **kwargs)
+    def __init__(self, normalize=True, **kwargs):
+        plots.PlotDrawer.__init__(self, **kwargs)
         self.normalizeDefault = normalize
+
+    def tauEmbeddingNormalization(self, p, **kwargs):
+        if kwargs.get("normalize", self.normalizeDefault):
+            scaleNormalization(p)
 
     def __call__(self, p, name, xlabel, **kwargs):
         self.rebin(p, **kwargs)
 
-        if kwargs.get("normalize", self.normalizeDefault):
-            scaleNormalization(p)
+        self.tauEmbeddingNormalization(p, **kwargs)
 
         self.stackMCHistograms(p, **kwargs)
         self.createFrame(p, name, **kwargs)
@@ -342,3 +499,151 @@ class PlotDrawerTauEmbedding(plots.PlotDrawer):
         self.finish(p, xlabel, **kwargs)
 
 drawPlot = PlotDrawerTauEmbedding(ylabel="Events / %.0f GeV/c", log=True, stackMCHistograms=True, addMCUncertainty=True)
+
+class PlotDrawerTauEmbeddingEmbeddedNormal(PlotDrawerTauEmbedding):
+    def __init__(self, **kwargs):
+        PlotDrawerTauEmbedding.__init__(self, normalize=False, **kwargs)
+
+    def __call__(self, p, name, xlabel, **kwargs):
+        self.rebin(p, **kwargs)
+
+        self.tauEmbeddingNormalization(p, **kwargs)
+
+        sigErr = p.histoMgr.getHisto("Normal").getRootHisto().Clone("Normal_err")
+        sigErr.SetFillColor(ROOT.kRed-7)
+        sigErr.SetMarkerSize(0)
+        sigErr.SetFillStyle(3005)
+        p.prependPlotObject(sigErr, "E2")
+        if p.histoMgr.hasHisto("Embedded"):
+            embErr = p.histoMgr.getHisto("Embedded").getRootHisto().Clone("Embedded_err")
+            embErr.SetFillColor(ROOT.kBlue-7)
+            embErr.SetFillStyle(3004)
+            embErr.SetMarkerSize(0)
+            p.prependPlotObject(embErr, "E2")
+
+        if hasattr(p, "embeddingVariation"):
+            p.prependPlotObject(h.embeddingVariation, "[]")
+        if hasattr(p, "embeddingDataVariation"):
+            p.prependPlotObject(p.embeddingDataVariation, "[]")
+
+        if kwargs.get("log", self.logDefault):
+            name = name+"_log"
+
+        self.createFrame(p, name, **kwargs)
+        if kwargs.get("ratio", self.ratioDefault):
+            p.getFrame2().GetYaxis().SetTitle("Ratio")
+            # Very, very ugly hack
+            if p.histoMgr.hasHisto("EmbeddedData"):
+                if p.ratios[1].getName() != "Embedded":
+                    raise Exception("Assumption that [1] is from embedded MC failed")
+                p.ratios[1].setDrawStyle("PE2")
+                rh = p.ratios[1].getRootHisto()
+                rh.SetFillColor(ROOT.kBlue-7)
+                rh.SetFillStyle(3004)
+
+        self.setLegend(p, **kwargs)
+        # Add the legend box for stat uncertainty band
+        tmp = sigErr.Clone("tmp")
+        tmp.SetFillColor(ROOT.kBlack)
+        tmp.SetFillStyle(3013)
+        tmp.SetLineColor(ROOT.kWhite)
+        if not p.histoMgr.hasHisto("Embedded"):
+            tmp.SetFillStyle(sigErr.GetFillStyle())
+            tmp.SetFillColor(sigErr.GetFillColor())
+        p.legend.AddEntry(tmp, "Stat. unc.", "F")
+
+        # Add "legend" entries manually for brackets in embedded variations
+        x = p.legend.GetX1()
+        y = p.legend.GetY1()
+        x += 0.05; y -= 0.03
+        if hasattr(p, "embeddingDataVariation"):
+            p.appendPlotObject(histograms.PlotText(x, y, "[  ]", size=17, color=p.embeddingDataVariation.GetMarkerColor())); x += 0.05
+            p.appendPlotObject(histograms.PlotText(x, y, "Embedded data min/max", size=17)); y-= 0.03
+        if hasattr(p, "embeddingVariation"):
+            p.appendPlotObject(histograms.PlotText(x, y, "[  ]", size=17, color=p.embeddingVariation.GetMarkerColor())); x += 0.05
+            p.appendPlotObject(histograms.PlotText(x, y, "Embedded MC min/max", size=17)); y-= 0.03
+
+        self.addCutLineBox(p, **kwargs)
+        self.finish(p, xlabel, **kwargs)
+
+class PlotCreatorMany:
+    def __init__(self, analysisEmb, analysisSig, datasetsEmb, datasetsSig, datasetName, styles, addData=False, addVariation=False):
+        self.analysisEmb = analysisEmb
+        self.analysisSig = analysisSig
+        self.datasetsEmb = datasetsEmb # DatasetsMany
+        self.datasetsSig = datasetsSig # DatasetManager
+        self.datasetName = datasetName
+        self.styles = styles # list of styles
+        self.addData = addData
+        self.addVariation = addVariation
+        try:
+            self.isResidual = self.datasetsEmb.isResidualAdded(datasetName)
+        except:
+            self.isResidual = False
+
+    def __call__(self, name, rebin=1):
+        lumi = self.datasetsEmb.getLuminosity()
+
+        name2Emb = name
+        name2Sig = name
+        if isinstance(name, basestring):
+            name2Emb = self.analysisEmb+"/"+name
+            name2Sig = self.analysisSig+"/"+name
+        else: # assume TreeDraw
+            name2Emb = name.clone(tree=self.analysisEmb+"/tree")
+            name2Sig = name.clone(tree=self.analysisSig+"/tree")
+        
+        (emb, embVar) = self.datasetsEmb.getHistogram(self.datasetName, name2Emb, rebin)
+        sig = self.datasetsSig.getDataset(self.datasetName).getDatasetRootHisto(name2Sig)
+        sig.normalizeToLuminosity(lumi)
+        sig = sig.getHistogram()
+        if rebin > 1:
+            sig.Rebin(rebin)
+
+        emb.SetName("Embedded")
+        sig.SetName("Normal")
+        p = None
+        sty = self.styles[:]
+        if self.addData:
+            (embData, embDataVar) = self.datasetsEmb.getHistogram("Data", name2Emb, rebin=rebin)
+            embData.SetName("EmbeddedData")
+            p = plots.ComparisonManyPlot(sig, [embData, emb])
+            p.histoMgr.reorderDraw(["EmbeddedData", "Embedded", "Normal"])
+            p.histoMgr.reorderLegend(["EmbeddedData", "Embedded", "Normal"])
+            p.histoMgr.setHistoDrawStyle("EmbeddedData", "EP")
+            p.histoMgr.setHistoLegendStyle("EmbeddedData", "P")
+            p.histoMgr.setHistoLegendStyle("Embedded", "PL")
+            p.setLuminosity(lumi)
+            sty = [styles.dataStyle]+sty
+        else:
+            p = plots.ComparisonPlot(emb, sig)
+
+        embedded = "Embedded "
+        legLabel = plots._legendLabels.get(self.datasetName, self.datasetName)
+        legLabelEmb = legLabel
+        if legLabel != "Data":
+            legLabel += " MC"
+        residual = ""
+        if self.isResidual:
+            embedded = "Emb. "
+            residual = " + res. MC"
+        legLabelEmb += " MC"
+
+        p.histoMgr.setHistoLegendLabelMany({
+                "Embedded":     embedded + legLabelEmb + residual,
+                "Normal":       "Normal " + legLabel,
+                "EmbeddedData": embedded+"data"+residual,
+                })
+        p.histoMgr.forEachHisto(styles.Generator(sty))
+        if self.addVariation:
+            if self.addData:
+                if embDataVar != None:
+                    plots.copyStyle(p.histoMgr.getHisto("EmbeddedData").getRootHisto(), embDataVar)
+                    embDataVar.SetMarkerStyle(2)
+                    p.embeddingDataVariation = embDataVar
+            if embVar != None:
+                plots.copyStyle(p.histoMgr.getHisto("Embedded").getRootHisto(), embVar)
+                embVar.SetMarkerStyle(2)
+                p.embeddingVariation = embVar
+    
+        return p
