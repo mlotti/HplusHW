@@ -998,23 +998,36 @@ class CounterTable:
         # Construct the column object
         return CounterColumn(self.columnNames[icol], rowNames, colValues)
 
-    def removeColumn(self, icol):
+    def removeColumn(self, index=None, name=None):
+        if index == None and name == None:
+            raise Exception("Give either index or name, neither was given")
+        if index != None and name != None:
+            raise Exception("Give either index or name, not both")
+
+        if index == None:
+            index = self.columnNames.index(name)
+
         def rowAllNone(row):
             for col in row:
                 if col != None:
                     return False
             return True
 
-        del self.columnNames[icol]
+        del self.columnNames[index]
         irow = 0
         while irow < len(self.table):
-            del self.table[irow][icol]
+            del self.table[irow][index]
             if rowAllNone(self.table[irow]):
                 del self.rowNames[irow]
                 del self.table[irow]
                 irow -= 1
 
             irow += 1
+
+    def keepOnlyColumns(self, names):
+        for name in self.getColumnNames()[:]:
+            if not name in names:
+                self.removeColumn(name=name)
 
     def indexRow(self, name):
         try:
