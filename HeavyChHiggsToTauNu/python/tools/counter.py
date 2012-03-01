@@ -855,7 +855,21 @@ class CounterTable:
             return 0
         return len(self.table[0])
 
-    def getCount(self, irow, icol):
+    def getCount(self, irow=None, icol=None, rowName=None, colName=None):
+        if irow == None and rowName == None:
+            raise Exception("Give either irow or rowName, neither was given")
+        if irow != None and rowName != None:
+            raise Exception("Give either irow or rowName, not both")
+        if icol == None and colName == None:
+            raise Exception("Give either icol or colName, neither was given")
+        if icol != None and colName != None:
+            raise Exception("Give either icol or colName, not both")
+
+        if irow == None:
+            irow = self.rowNames.index(rowName)
+        if icol == None:
+            icol = self.columnNames.index(colName)
+
         return self.table[irow][icol]
 
     def setCount(self, irow, icol, value):
