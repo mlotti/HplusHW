@@ -26,8 +26,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
-import plotTauEmbeddingSignalAnalysis as tauEmbedding
-import produceTauEmbeddingResult as result
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 
 analysisEmb = "signalAnalysisCaloMet60TEff"
 analysisSig = "signalAnalysisGenuineTau"
@@ -36,15 +35,12 @@ counters = "Counters/weighted"
 #counters = "Counters"
 
 def main():
-    dirEmbs = ["."] + [os.path.join("..", d) for d in result.dirEmbs[1:]]
-    dirSig = "../"+result.dirSig
+    dirEmbs = ["."] + [os.path.join("..", d) for d in tauEmbedding.dirEmbs[1:]]
 
-    datasetsEmb = result.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
-    datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
+    datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
 
     datasetsEmb.forEach(plots.mergeRenameReorderForDataMC)
     datasetsEmb.setLumiFromData()
-    plots.mergeRenameReorderForDataMC(datasetsSig)
 
     datasetsEmb.remove(filter(lambda name: "HplusTB" in name, datasetsEmb.getAllDatasetNames()))
 
@@ -69,7 +65,7 @@ def main():
     doCounters(datasetsEmb)
 
 def doCounters(datasetsEmb):    
-    eventCounter = result.EventCounterMany(datasetsEmb, counters=analysisEmb+counters, scaleNormalization=True)
+    eventCounter = tauEmbedding.EventCounterMany(datasetsEmb, counters=analysisEmb+counters, normalize=True)
 
     mainTable = eventCounter.getMainCounterTable()
 
