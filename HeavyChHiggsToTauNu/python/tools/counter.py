@@ -27,52 +27,118 @@ def _counterTh1AddBinFromTh1(counter, name, th1):
 
     return new
 
+def _numToDig(num):
+    if num == 0:
+        return 0
+    log = math.log10(abs(num))
+    if log >= 0:
+        return int(log)+1
+    else:
+        # It's a bit complex to get it correctly
+        # 0.9 -> -1
+        # 0.1 -> -1
+        # 0.09 -> -2
+        # 0.01 -> -2
+        return -math.ceil(abs(log))
+
+_format_re = re.compile("%\.(?P<num>\d+)(?P<type>[fe])")
+
+## Base class for cell formats.
+# 
+# The deriving classes must implement
+# _formatValue(value)
+# _formatValuePlusMinus(value, uncertainty)
+# _formatValuePlusHighMinusLow(value, uncertaintyHigh, uncertaintyLow)
+# 
+# The value, uncertainty(High|Low) are strings formatted with the
+# value/uncertaintyFormats. The deriving class may then apply
+# additional formatting for the value/uncertainties, and it must
+# construct the plusminus string for single uncertainty, and plus
+# upper minus lower string for unequal upper/lower uncertainties.
 class CellFormatBase:
-    """Base class for cell formats.
 
-    The deriving classes must implement
-    _formatValue(value)
-    _formatValuePlusMinus(value, uncertainty)
-    _formatValuePlusHighMinusLow(value, uncertaintyHigh, uncertaintyLow)
-
-    The value, uncertainty(Up|Low) are strings formatted with the
-    value/uncertaintyFormats. The deriving class may then apply
-    additional formatting for the value/uncertainties, and it must
-    construct the plusminus string for single uncertainty, and plus
-    upper minus lower string for unequal upper/lower uncertainties.
-    """
-
+    ## Constructor
+    # 
+    # Keyword arguments:
+    # valueFormat           Format string for float values (printf style; default: '%.6g')
+    # uncertaintyFormat     Format string for uncertainties (default: same as valueFormat)
+    # uncertaintyPrecision  Number of digits to use for comparing if
+    #                       the lower and upper uncertainties are
+    #                       equal (default: 4)
+    # withPrecision         Number of digits in uncertainty in uncertainty to
+    #                       report the value and uncertainty (default:
+    #                       None). If specified, overrides
+    #                       valueFormat, uncertaintyFormat, and
+    #                       uncertaintyPrecision
+    # valueOnly             Boolean, format the value only? (default: False)
     def __init__(self, **kwargs):
-        """Constructor.
-
-        Keyword arguments:
-        valueFormat           Format string for float values (printf style; default: '%.4g')
-        uncertaintyFormat     Format string for uncertainties (default: same as valueFormat)
-        uncertaintyPrecision  Number of digits to use for comparing if
-                              the lower and upper uncertainties are
-                              equal (default: 4)
-        valueOnly             Boolean, format the value only? (default: False)
-        """
         self._valueFormat = kwargs.get("valueFormat", "%.6g")
         self._uncertaintyFormat = kwargs.get("uncertaintyFormat", self._valueFormat)
         self._valueOnly = kwargs.get("valueOnly", False)
 
         uncertaintyPrecision = kwargs.get("uncertaintyPrecision", 4)
+        self._withPrecision = kwargs.get("withPrecision", None)
+        if self._withPrecision != None:
+            uncertaintyPrecision = self._withPrecision
+
+            valM = _format_re.match(self._valueFormat)
+            uncM = _format_re.match(self._uncertaintyFormat)
+            if not valM:
+                raise Exception("Unsupported valueFormat '%s'" % self._valueFormat)
+            if not uncM:
+                raise Exception("Unsupported uncertaintyFormat '%s'" % self._uncertaintyFormat)
+            if valM.group("type") != uncM.group("type"):
+                raise Exception("Types of value and uncertainty formats must be the same (either 'f' or 'e', were '%s' and '%s')" % valM.group("type"), uncM.group("type"))
+            self.valueType = valM.group("type")
+
         self._uncertaintyEpsilon = math.pow(10., -1.0*uncertaintyPrecision)
 
-    def format(self, count):
-        """Format the Count object."""
-        value = self._valueFormat % count.value()
-        uUp = count.uncertaintyHigh()
-        uLow = count.uncertaintyLow()
 
-        if self._valueOnly or (uLow == None and uUp == None):
+    ## Format the Count object.
+    def format(self, count):
+        val = count.value()
+        uUp = count.uncertaintyHigh()
+        uDown = count.uncertaintyLow()
+        hasUncertainty = (uUp != None  and uDown != None)
+        if hasUncertainty:
+            uncertaintiesSame = (abs(uUp-uDown)/uUp < self._uncertaintyEpsilon)
+
+        if self._withPrecision == None or not hasUncertainty:
+            value = self._valueFormat % val
+            if hasUncertainty:
+                uUpf = self._uncertaintyFormat % uUp
+                uDownf = self._uncertaintyFormat % uDown
+        else:
+            valDig = _numToDig(val)
+            uncDig = min(_numToDig(uUp), _numToDig(uDown))
+            
+            if self.valueType == "f":
+                if uncDig - self._withPrecision < 0:
+                    precision = abs(uncDig - self._withPrecision)
+                    if uncDig < 0:
+                        precision -= 1
+                else:
+                    precision = 0
+                valFmt = "%%.%df" % precision
+                uncFmt = valFmt
+            elif self.valueType == "e":
+                precisionVal = valDig - uncDig + self._withPrecision - 1
+                precisionUnc = self._withPrecision - 1
+                valFmt = "%%.%de" % precisionVal
+                uncFmt = "%%.%de" % precisionUnc
+
+            value = valFmt % val
+            uUpf = uncFmt % uUp
+            uDownf = uncFmt % uDown
+
+
+        if self._valueOnly or not hasUncertainty:
             return self._formatValue(value)
 
-        if (uLow == 0.0 and uUp == 0.0) or (abs(uUp-uLow)/uUp < self._uncertaintyEpsilon):
-            return self._formatValuePlusMinus(value, self._uncertaintyFormat % uLow)
+        if (uDown == 0.0 and uUp == 0.0) or uncertaintiesSame:
+            return self._formatValuePlusMinus(value, uUpf)
         else:
-            return self._formatValuePlusHighMinusLow(value, self._uncertaintyFormat % uUp, self._uncertaintyFormat % uLow)
+            return self._formatValuePlusHighMinusDown(value, uUpf, uDownf)
 
 
 class CellFormatText(CellFormatBase):
