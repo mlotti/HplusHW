@@ -162,7 +162,7 @@ def addOptions(parser):
 
 class Count:
     """Represents counter count value with uncertainty."""
-    def __init__(self, value, uncertainty):
+    def __init__(self, value, uncertainty=0.0):
         self._value = value
         self._uncertainty = uncertainty
 
