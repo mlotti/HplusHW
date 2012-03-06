@@ -101,7 +101,7 @@ class CellFormatBase:
         uDown = count.uncertaintyLow()
         hasUncertainty = (uUp != None  and uDown != None)
         if hasUncertainty:
-            uncertaintiesSame = (abs(uUp-uDown)/uUp < self._uncertaintyEpsilon)
+            uncertaintiesSame = (uUp == 0 or abs(uUp-uDown)/uUp < self._uncertaintyEpsilon)
 
         if self._withPrecision == None or not hasUncertainty:
             value = self._valueFormat % val
@@ -825,8 +825,14 @@ class CounterColumn:
     def getRowNames(self):
         return self.rowNames
 
-    def getCount(self, irow):
-        return self.values[irow]
+    def getCount(self, index=None, name=None):
+        if index == None and name == None:
+            raise Exception("Give either index or name, neither was given")
+        if index != None and name != None:
+            raise Exception("Give either index or name, not both")
+        if index == None:
+            index = self.rowNames.index(name)
+        return self.values[index]
 
     def setCount(self, irow, count):
         self.values[irow] = count
