@@ -27,7 +27,7 @@ trigger = cms.untracked.PSet(
     throwIfNoMet = cms.untracked.bool(False), # to prevent jobs from failing, FIXME: must be investigated later
     selectionType = cms.untracked.string("byTriggerBit"), # Default byTriggerBit, other options , disabled
     caloMetSelection = cms.untracked.PSet(
-        src = cms.untracked.InputTag("patMETs"), # Calo MET
+        src = cms.untracked.InputTag("met"), # Calo MET
         metEmulationCut = cms.untracked.double(-1), # disabled by default
     )
 )
@@ -143,8 +143,6 @@ jetSelection = cms.untracked.PSet(
 )
 
 MET = cms.untracked.PSet(
-    # src = cms.untracked.InputTag("patMETs"), # calo MET
-    #src = cms.untracked.InputTag("patMETsTC"), # tc MET
     rawSrc = cms.untracked.InputTag("patMETsPF"), # PF MET
     type1Src = cms.untracked.InputTag("dummy"),
     type2Src = cms.untracked.InputTag("dummy"),
@@ -598,3 +596,35 @@ def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processNa
 def changeJetCollection(**kwargs):
     _changeCollection([jetSelection.src, forwardJetVeto.src], **kwargs)
 
+def changeCollectionsToPF2PAT(postfix="PFlow"):
+    # Taus
+    tauSelectionCaloTauCutBased.src = "Nonexistent"
+    tauSelectionShrinkingConeTaNCBased.src = "Nonexistent"
+    tauSelectionShrinkingConeCutBased.src = "Nonexistent"
+    tauSelectionCombinedHPSTaNCTauBased.src = "Nonexistent"
+
+    hps = "selectedPatTaus"+postfix
+    if "TriggerMatched" in tauSelectionHPSTightTauBased.src.value():
+        hps = "patTaus%sTriggerMatched%s" % (postfix, postfix)
+
+    tauSelectionHPSTightTauBased.src = hps
+    tauSelectionHPSTightTauBasedNoLdgPtOrRtauCut.src = hps
+    tauSelectionHPSMediumTauBased.src = hps
+    tauSelectionHPSLooseTauBased.src = hps
+
+
+    # Muons
+    GlobalMuonVeto.MuonCollectionName = "selectedPatMuons"+postfix
+    NonIsolatedMuonVeto.MuonCollectionName = "selectedPatMuons"+postfix
+
+    # Electrons
+    GlobalElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
+    NonIsolatedElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
+
+    # Jets
+    changeJetCollection(moduleLabel="selectedPatJets"+postfix)
+
+    # MET
+    MET.rawSrc = "patMETsPFlow"
+    MET.caloSrc = "Nonexistent"
+    MET.tcSrc = "Nonexistent"

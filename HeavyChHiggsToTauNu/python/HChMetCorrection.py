@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauFilter_cfi as tauFilter
 import PhysicsTools.PatUtils.patPFMETCorrections_cff as patPFMETCorrections
 
-def addCorrectedMet(process, dataVersion, tauSelection, jetSelection, metRaw = "patMETsPF", postfix=""):
+def addCorrectedMet(process, dataVersion, tauSelection, jetSelection, metRaw = "patMETsPF", pfCandMETcorrPostfix="", postfix=""):
     sequence = cms.Sequence()
 
     # First re-do the tau selection
@@ -96,7 +96,7 @@ def addCorrectedMet(process, dataVersion, tauSelection, jetSelection, metRaw = "
             cms.InputTag(type1p2Corr, 'type2' ),
             cms.InputTag(type2Corr,   'type2' ),
             cms.InputTag(type1p2Corr, 'offset'),
-            cms.InputTag('pfCandMETcorr'),
+            cms.InputTag('pfCandMETcorr'+pfCandMETcorrPostfix),
         ]
     )
     type1p2Name = "patType1p2CorrectedPFMet"+postfix

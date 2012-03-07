@@ -6,8 +6,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 # Select the version of the data (needed only for interactice running,
 # overridden automatically from multicrab
-dataVersion="42XmcS4"     # Summer11 MC
-#dataVersion="42Xdata" # Run2010 Apr21 ReReco, Run2011 May10 ReReco, Run2011 PromptReco
+dataVersion="44XmcS6"     # Fall11 MC
+#dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
 
 
 ##########
@@ -131,6 +131,9 @@ param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionSrcSelectedPatTaus()
 param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
+# Switch to PF2PAT objects
+param.changeCollectionsToPF2PAT()
+
 # Trigger with scale factors (at the moment hard coded)
 if applyTriggerScaleFactor and dataVersion.isMC():
     param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
@@ -165,7 +168,7 @@ process.signalAnalysis = signalAnalysis.createEDFilter(param)
 
 # Add type 1 MET
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
-(sequence, type1Met, type1p2Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.signalAnalysis.tauSelection, process.signalAnalysis.jetSelection)
+(sequence, type1Met, type1p2Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.signalAnalysis.tauSelection, process.signalAnalysis.jetSelection, metRaw=param.MET.rawSrc.value(), pfCandMETcorrPostfix="PFlow")
 process.commonSequence *= sequence
 process.signalAnalysis.MET.type1Src = type1Met
 process.signalAnalysis.MET.type2Src = type1p2Met
