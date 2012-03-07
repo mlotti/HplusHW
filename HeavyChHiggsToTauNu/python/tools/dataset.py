@@ -205,6 +205,11 @@ class Count:
                                        (self._value*count._uncertainty / (count._value**2) )**2 )
         self._value = self._value / count._value
 
+    ## \var _value
+    # Value of the count
+    ## \var _uncertainty
+    # Uncertainty of the count
+
 ## Represents counter count value with asymmetric uncertainties.
 class CountAsymmetric:
     def __init__(self, value, uncertaintyLow, uncertaintyHigh):
@@ -226,6 +231,13 @@ class CountAsymmetric:
 
     def uncertaintyHigh(self):
         return self._uncertaintyHigh
+
+    ## \var _value
+    # Value of the count
+    ## \var _uncertaintyLow
+    # Lower uncertainty of the count (-)
+    ## \var _uncertaintyHigh
+    # Upper uncertainty of the count (+)
 
 ## Transform histogram (TH1) to a list of (name, Count) pairs.
 #
@@ -509,6 +521,16 @@ class TreeDraw:
         h.SetDirectory(0)
         return h
 
+
+    ## \var tree
+    # Path to the TTree object in a file
+    ## \var varexp
+    # Expression for the variable
+    ## \var selection
+    # Draw only those entries passing this selection
+    ## \var weight
+    # Weight the entries with this weight
+
 ## Helper class for running code for selected TTree entries
 #
 # A function is given to the constructor, the function is called for
@@ -549,6 +571,13 @@ class TreeScan:
         for ientry in xrange(elist.GetN()):
             tree.GetEntry(elist.GetEntry(ientry))
             self.function(tree)
+
+    ## \var tree
+    # Path to the TTree object in a file
+    ## \var function
+    # Function to call for each TTree entry
+    ## \var selection
+    # Select only these TTree entries
 
 ## Provides ability to have separate dataset.TreeDraws for different datasets
 #
@@ -600,6 +629,12 @@ class TreeDrawCompound:
         for name, td in self.datasetMap.iteritems():
             ret.datasetMap[name] = td.clone(**kwargs)
         return ret
+
+    ## \var default
+    # Default dataset.TreeDraw
+    ## \var datasetMap
+    # Dictionary for the overriding dataset.TreeDraw objects
+    # containing dataset names as keys, and TreeDraws as values.
 
 def _treeDrawToNumEntriesSingle(treeDraw):
     var = treeDraw.weight
@@ -682,6 +717,13 @@ class DatasetRootHistoBase:
         else:
             self.multiplication *= value
 
+    ## \var dataset
+    # dataset.Dataset object where the histogram originates
+    ## \var name
+    # Name of the histogram (default is dataset name)
+    ## \var multuplication
+    # Multiplication factor to be applied after normalization (if None, not applied)
+
 ## Wrapper for a single TH1 histogram and the corresponding Dataset.
 class DatasetRootHisto(DatasetRootHistoBase):
     ## Constructor.
@@ -760,6 +802,12 @@ class DatasetRootHisto(DatasetRootHistoBase):
 
         self.normalization = "toLuminosity"
         self.luminosity = lumi
+    
+    ## \var histo
+    # Holds the unnormalized ROOT histogram (TH1)
+    ## \var normalization
+    # String representing the current normalization scheme
+
 
 ## Wrapper for a merged TH1 histograms from data and the corresponding Datasets.
 #
@@ -839,6 +887,12 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
             return _normalizeToOne(hsum)
         else:
             return hsum
+
+    ## \var histoWrappers
+    # List of underlying dataset.DatasetRootHisto objects
+    ## \var normalization
+    # String representing the current normalization scheme
+
 
 ## Wrapper for a merged TH1 histograms from MC and the corresponding Datasets.
 # 
@@ -958,6 +1012,11 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
             return _normalizeToOne(hsum)
         else:
             return hsum
+
+    ## \var histoWrappers
+    # List of underlying dataset.DatasetRootHisto objects
+    ## \var normalization
+    # String representing the current normalization scheme
 
 
 ## Dataset class for histogram access from one ROOT file.
@@ -1216,6 +1275,25 @@ class Dataset:
             key = diriter.Next()
         return ret
 
+    ## \var name
+    # Name of the dataset
+    ## \var file
+    # TFile object of the dataset
+    ## \var info
+    # Dictionary containing the configInfo histogram
+    ## \var dataVersion
+    # dataVersion string of the dataset (from TFile)
+    ## \var prefix
+    # Prefix for TDirectory access, see setPrefix()
+    ## \var originalCounterDir
+    # Original counter directory, see setPrefix()
+    ## \var nAllEvents
+    # Number of all MC events, used in MC normalization
+    ## \var counterDir
+    # Name of TDirectory containing the main event counter
+    ## \var _isData
+    # If true, dataset is from data, if false, from MC
+
 ## Maybe unnecessary class?
 #
 # This is some old trial for implementing a dataset class for the
@@ -1402,6 +1480,13 @@ class DatasetMerged:
                 raise Exception("Error: merged datasets have different contents in directory '%s'" % directory)
         return content
 
+    ## \var name
+    # Name of the merged dataset
+    ## \var datasets
+    # List of merged dataset.Dataset objects
+    ## \var info
+    # Dictionary containing total cross section (MC) or integrated luminosity (data)
+
 ## Collection of Dataset objects which are managed together.
 # 
 # Holds both an ordered list of Dataset objects, and a name->object
@@ -1410,7 +1495,7 @@ class DatasetManager:
     ## Constructor
     #
     # \param base    Directory (absolute/relative to current working
-    #                directory) where the luminosity JSON file is located (\see
+    #                directory) where the luminosity JSON file is located (see
     #                loadLuminosities())
     #
     # DatasetManager is constructed as empty
@@ -1717,3 +1802,13 @@ class DatasetManager:
                 line += c2skip+c3skip + c4fmt%dataset.getLuminosity()
             print line
 
+
+    ## \var datasets
+    # List of dataset.Dataset (or dataset.DatasetMerged) objects to manage
+    ## \var datasetMap
+    # Dictionary from dataset names to dataset.Dataset objects, for
+    # more straightforward accessing of dataset.Dataset objects by
+    # their name.
+    ## \var basedir
+    # Directory (absolute/relative to current working directory) where
+    # the luminosity JSON file is located (see loadLuminosities())
