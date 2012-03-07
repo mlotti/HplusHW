@@ -47,13 +47,13 @@ config = {
 #        "signalTrigger": "HLT_IsoPFTau35_Trk20_MET60_v2",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2011A-08Nov2011-v1/AOD/E8B13C66-A70B-E111-B8C5-001EC9B09F59.root"
     },
-    "44Xmc": {
+    "44XmcS6": {
         "simProcess": "HLT",
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
         "signalTrigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
-        #"patMadhatter": "file:/mnt/flustre/slehti/Fall11_TTToHplusBWB_M-90_7TeV-pythia6-tauola_B2AD85E1-D520-E111-B5AC-001A928116EA.root",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM/28ACFF78-0237-E111-97C7-00261894397B.root"
+        #"patMadhatter": "file:/mnt/flustre/mkortela/data//QCD_Pt-170to300_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM/F468E7CF-C029-E111-BDA8-003048D47750.root"
     },
     "44XmcAve32": {
         "simProcess": "SIM",
@@ -70,7 +70,7 @@ class DataVersion:
     def __init__(self, dataVersion):
         if dataVersion == "42Xmc":
             dataVersion = "42XmcS4"
-        
+
         if not dataVersion in config:
             names = config.keys()
             names.sort()
