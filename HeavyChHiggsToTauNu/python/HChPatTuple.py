@@ -1154,8 +1154,6 @@ def addPF2PAT(process, dataVersion, doPatTrigger=True, **kwargs):
         outputCommands = out.outputCommands[:]
 
     sequence = cms.Sequence()
-    endSequence = cms.Sequence()
-    setattr(process, "patEndSequence", endSequence)
 
     # Visible taus
     if dataVersion.isMC():
@@ -1186,8 +1184,8 @@ def addPF2PAT(process, dataVersion, doPatTrigger=True, **kwargs):
     postfixes.append("PFlow")
 
     # Then with CHS
-    #pf2patBuilder.build(postfix="PFlowChs", chs=True)
-    #postfixes.append("PFlowChs")
+    pf2patBuilder.build(postfix="PFlowChs", chs=True)
+    postfixes.append("PFlowChs")
 
     outputCommands.extend(pf2patBuilder.getOutputCommands())
 
@@ -1259,7 +1257,6 @@ def addPF2PAT(process, dataVersion, doPatTrigger=True, **kwargs):
     ### Construct the sequences
     for pf in postfixes:
         sequence *= getattr(process, "patPF2PATSequence"+pf)
-    sequence *= endSequence
     return sequence
 
 
