@@ -39,7 +39,7 @@ tauPathLastFilter = {
     "HLT_MediumIsoPFTau35_Trk20_MET70_v6": "hltFilterSingleIsoPFTau35Trk20MET70LeadTrack20IsolationL1HLTMatched",
     }
 
-def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauCollectionsDefault, pathFilterMap=tauPathLastFilter, throw=True):
+def addTauTriggerMatching(process, trigger, collections, postfix="", outputCommands=None, pathFilterMap=tauPathLastFilter, throw=True):
     seq = cms.Sequence()
 
     if isinstance(trigger, basestring):
@@ -89,7 +89,7 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
         matcher = matcherPrototype.clone(
             src = cms.InputTag(name)
         )
-        matcherName = collection+postfix+"TriggerMatcher"
+        matcherName = collection+"TriggerMatcher"+postfix
         setattr(process, matcherName, matcher)
         seq *= matcher
 
@@ -98,7 +98,7 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
             src     = cms.InputTag(name),
             matches = cms.VInputTag(matcherName)
         )
-        embedderName = collection+postfix+"TriggerEmbedder"
+        embedderName = collection+"TriggerEmbedder"+postfix
         setattr(process, embedderName, embedder)
         seq *= embedder
 
@@ -106,9 +106,16 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
         selector= selectorPrototype.clone(
             src = cms.InputTag(embedderName)
         )
-        selectorName = collection+postfix+"TriggerMatched"
+        selectorName = collection+"TriggerMatched"+postfix
         setattr(process, selectorName, selector)
         seq *= selector
+
+        if outputCommands:
+            outputCommands.extend([
+                    "drop *_%s_*_*" % matcherName,
+                    "drop *_%s_*_*" % embedderName,
+                    "keep patTaus_%s_*_*" % selectorName,
+                    ])
 
     return seq
 
@@ -163,47 +170,17 @@ def addMuonTriggerMatching(process, muons="patMuons", postfix=""):
 #   2) a copy of the same collection with the patTau matching to the HLT jet trigger
 #      removed (needed to remove trigger bias in QCD backround measurement).
 # Yes, I agree that this sounds (and is) a bit compicated :)
-def addTauHLTMatching(process, tauTrigger, jetTrigger=None, collections=_patTauCollectionsDefault, postfix=""):
+def addTauHLTMatching(process, tauTrigger, jetTrigger=None, collections=_patTauCollectionsDefault, outputCommands=None, postfix=""):
     if tauTrigger == None:
         raise Exception("Tau trigger missing for matching")
 
-    setattr(process, "tauTriggerMatchingSequence"+postfix, addTauTriggerMatching(process, tauTrigger, "Tau", collections=collections))
-    setattr(process, "triggerMatchingSequence"+postfix, cms.Sequence(
-            getattr(process, "tauTriggerMatchingSequence"+postfix)
-    ))
+    seq = addTauTriggerMatching(process, tauTrigger, collections=collections, postfix=postfix, outputCommands=outputCommands)
+    setattr(process, "tauTriggerMatchingSequence"+postfix, seq)
 
     if jetTrigger != None:
-        setattr(process, "jetTriggerMatchingSequence"+postfix, addTauTriggerMatching(process, jetTrigger, "Jet", collections=collections))
-        seq = getattr(process, "triggerMatchingSequence"+postfix)
-        seq *= getattr(process, "jetTriggerMatchingSequence"+postfix)
-
-        ###########################################################################
-        # Remove first tau matching to the jet trigger from the list
-        # of tau -> HLT tau trigger matched patTaus
-        for collection in _patTauCollectionsDefault:
-            patJetTriggerCleanedTauTriggerMatchedTaus = cms.EDProducer("TauHLTMatchJetTriggerRemover",
-                tausMatchedToTauTriggerSrc = cms.InputTag(collection+"TauTriggerMatched"),
-                tausMatchedToJetTriggerSrc = cms.InputTag(collection+"JetTriggerMatched"),
-            )
-            patJetTriggerCleanedTauTriggerMatchedTausName = collection+"TauTriggerMatchedAndJetTriggerCleaned"+postfix
-            setattr(process, patJetTriggerCleanedTauTriggerMatchedTausName, patJetTriggerCleanedTauTriggerMatchedTaus)
-            seq = getattr(process, "triggerMatchingSequence"+postfix)
-            seq *= patJetTriggerCleanedTauTriggerMatchedTaus
+        raise Exception("Jet trigger matching for taus is not supported anymore")
     
-    out = None
-    outdict = process.outputModules_()
-    if outdict.has_key("out"):
-        outdict["out"].outputCommands.extend([
-            "keep patTaus_*TauTriggerMatched_*_*",
-            "drop *_*TauTriggerMatcher_*_*",
-            "drop *_*TauTriggerEmbedder_*_*",
-            "drop patTaus_*JetTriggerMatched_*_*",
-            "drop *_*JetTriggerMatcher_*_*",
-            "drop *_*JetTriggerEmbedder_*_*",
-            "keep *_*TauTriggerMatchedAndJetTriggerCleaned_*_*"
-        ])
-
-    return getattr(process, "triggerMatchingSequence"+postfix)
+    return seq
 
 
 def createTauTriggerMatchingInAnalysis(trigger, taus, pathFilterMap=tauPathLastFilter, throw=True):

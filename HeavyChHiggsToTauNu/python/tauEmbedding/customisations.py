@@ -232,7 +232,7 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
     m = muonSelector.selectedPatMuons.clone(
         src = name
     )
-    name = "selectedPatMuonsWithIso"+postfix
+    name = "patMuonsWithIso"+postfix
     setattr(process, name, m)
     sequence *= m
 

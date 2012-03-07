@@ -31,7 +31,7 @@ PFTauQualityCuts09.isolationQualityCuts.minTrackPt = cms.double(0.9)
 
 from PFRecoTauDiscriminationForChargedHiggs import addDiscriminator
 def addTestDiscriminatorSequence(process, tau, postfix):
-    leadingTrackFinding = "hpsPFTauDiscriminationByLeadingTrackFinding"+postfix
+    leadingTrackFinding = "hpsPFTauDiscriminationByDecayModeFinding"+postfix
 
     lst = []
 

@@ -130,7 +130,7 @@ def addDiscriminatorSequence(process, tau, postfix=""):
 	 			        )
 	 			    )
 	 			)))
-    lst.append(addDiscriminator(process, tau, "DiscriminationForChargedHiggs",
+    lst.append(addDiscriminator(process, tau, "DiscriminationForChargedHiggs"+postfix,
        			        pfRecoTauDiscriminationByTrackIsolation.clone(
 	                             Prediscriminants = cms.PSet(
 	 			        BooleanOperator = cms.string("and"),
