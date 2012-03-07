@@ -4,12 +4,12 @@
 # The package is intended to gather the following commonalities in the
 # plots of H+ analysis (signal analysis, QCD and EWK background
 # analyses)
-# - Dataset merging (see plots._datasetMerge)
-# - Dataset order (see plots._datasetOrder)
-# - Dataset legend labels (see plots._legendLabels)
-# - Dataset plot styles (see plots._plotStyles)
-# - Various datasets.DatasetManager operations (see plots.mergeRenameReorderForDataMC())
-# - Various histograms.HistoManager operations (see plots.PlotBase and the derived classes)
+# \li Dataset merging (see plots._datasetMerge)
+# \li Dataset order (see plots._datasetOrder)
+# \li Dataset legend labels (see plots._legendLabels)
+# \li Dataset plot styles (see plots._plotStyles)
+# \li Various datasets.DatasetManager operations (see plots.mergeRenameReorderForDataMC())
+# \li Various histograms.HistoManager operations (see plots.PlotBase and the derived classes)
 #
 # The intended usage is to first construct datasets.DatasetManager as
 # usual, then call plots.mergeRenameReorderForDataMC() and then
@@ -479,6 +479,9 @@ def mergeRenameReorderForDataMC(datasetMgr, keepSourcesMC=False):
     newOrder.extend(mcNames)
     datasetMgr.selectAndReorder(newOrder)
 
+## Merge WH and HH datasets for each mass point
+#
+# The dataset names to be merged are defined in plots._signalMerge list
 def mergeWHandHH(datasetMgr):
     names = datasetMgr.getAllDatasetNames()
     for signalWH, signalHH, target in _signalMerge:
@@ -496,11 +499,16 @@ def replaceQCDFromData(datasetMgr, datasetQCDdata):
 
 ## Creates a ratio histogram
 #
-# \param rootHisto1  TH1 dividend
-# \param rootHisto2  TH1 divisor
+# \param rootHisto1  TH1/TGraph dividend
+# \param rootHisto2  TH1/TGraph divisor
 # \param ytitle      Y axis title of the final ratio histogram
+# \param isBinomial  True if the division has a binomial nature (e.g. efficnecy). Supported only for TH1s
 #
 # \return TH1 of rootHisto1/rootHisto2
+#
+# If the ratio has a binomial nature, the uncertainty estimation is
+# done via TGraphAsymmErrors and Clopper-Pearson method (one of the
+# methods recommended by statistics committee).
 def _createRatio(rootHisto1, rootHisto2, ytitle, isBinomial=False):
     if isinstance(rootHisto1, ROOT.TH1) and isinstance(rootHisto2, ROOT.TH1):
         if isBinomial:
@@ -545,7 +553,10 @@ def _divideOrZero(numerator, denominator):
         return 0
     return numerator/denominator
 
-
+## Copy (some) style attributes from one ROOT object to another
+#
+# \param src  Source object (copy attributes from)
+# \param dst  Destination object (copy attributes to)
 def copyStyle(src, dst):
     properties = []
     if hasattr(src, "GetLineColor") and hasattr(dst, "SetLineColor"):
@@ -559,12 +570,15 @@ def copyStyle(src, dst):
         getattr(dst, "Set"+prop)(getattr(src, "Get"+prop)())
 
 
-## Creates a 1-line for ratio plots
+## Creates a horizontal line
 #
-# \param xmin  Minimum x value
-# \param xmax  Maximum x value
+# \param xmin    Minimum x value
+# \param xmax    Maximum x value
+# \param yvalue  Y value
 #
-# \return TGraph of line from (xmin, 1.0) to (xmax, 1.0)
+# \return TGraph of line from (xmin, yvalue) to (xmax, yvalue)
+#
+# First use case: 1-line for ratio plots
 def _createRatioLine(xmin, xmax, yvalue=1.0):
     line = ROOT.TGraph(2, array.array("d", [xmin, xmax]), array.array("d", [yvalue, yvalue]))
 #    line.SetLineColor(ROOT.kBlack)
@@ -600,6 +614,14 @@ def _createCoverPad(xmin=0.065, ymin=0.285, xmax=0.165, ymax=0.33):
     coverPad.SetBorderMode(0)
     return coverPad
 
+## Create cut box and/or line
+#
+# \param frame      TH1 representing the frame
+# \param cutValue   Value of the cut
+# \param fillColor  Fill color for the box
+# \param box        If true, draw cut box
+# \param line       If true, draw cut line
+# \param kwargs     Keyword arguments (\a lessThan or \a greaterThan, forwarded to histograms.isLessThan())
 def _createCutBoxAndLine(frame, cutValue, fillColor=18, box=True, line=True, **kwargs):
     xmin = frame.GetXaxis().GetXmin()
     xmax = frame.GetXaxis().GetXmax()
@@ -627,6 +649,10 @@ def _createCutBoxAndLine(frame, cutValue, fillColor=18, box=True, line=True, **k
 
     return ret
 
+## Helper function for creating a histograms.Histo object from a ROOT object based on the ROOT object type
+#
+# \param rootObject   ROOT object (TH1 or TGraph)
+# \param kwargs       Keyword arguments (forwarded to histograms.Histo.__init__() or histograms.HistoGraph.__init__())
 def _createHisto(rootObject, **kwargs):
     if isinstance(rootObject, ROOT.TH1):
         return histograms.Histo(rootObject, rootObject.GetName(), **kwargs)
@@ -638,10 +664,19 @@ def _createHisto(rootObject, **kwargs):
     return rootObject
 
 ## Base class for plots
+#
+# This class can also be used as for plots which don't need the
+# features provided by the derived classes. E.g. for plots without the
+# need for ratio pad, or stacking of MC histograms, this class is perfect.
+#
+# In addition of the plot histograms/graphs, the class also provides
+# hooks for other objects (lines, arrows, text, whatever implementing
+# Draw() method) to be drawn before and after the plot
+# histograms/graphs.
 class PlotBase:
     ## Construct plot from DatasetManager and histogram name
     #
-    # \param datasetRootHistos  dataset.DatasetRootHistoBase objects to plot
+    # \param datasetRootHistos  dataset.DatasetRootHistoBase/TH1/TGraph objects to plot
     # \param saveFormats        List of suffixes for formats for which to save the plot
     def __init__(self, datasetRootHistos=[], saveFormats=[".png", ".eps", ".C"]):
         # Create the histogram manager
@@ -682,6 +717,8 @@ class PlotBase:
 
     ## Set the default legend styles
     #
+    # Default is "F", except for data "P" and for signal MC "L"
+    # 
     # Intended to be called from the deriving classes
     def _setLegendStyles(self):
         self.histoMgr.setHistoLegendStyleAll("F")
@@ -738,12 +775,24 @@ class PlotBase:
     def removeLegend(self):
         delattr(self, "legend")
 
+    ## Add an additional object to be drawn before the plot histograms/graphs
+    #
+    # \param obj      Object
+    # \param option   Drawing option (given to obj.Draw())
     def prependPlotObject(self, obj, option=""):
         self.plotObjectsBefore.append( (obj, option) )
 
+    ## Add an additional object to be drawn after the plot histograms/graphs
+    #
+    # \param obj      Object
+    # \param option   Drawing option (given to obj.Draw())
     def appendPlotObject(self, obj, option=""):
         self.plotObjectsAfter.append( (obj, option) )
 
+    ## Add cut box and/or line
+    #
+    # \param args    Positional arguments (forwarded to plots._createCutBoxAndLine())
+    # \param kwargs  Keyword arguments (forwarded to plots._createCutBoxAndLine())
     def addCutBoxAndLine(self, *args, **kwargs):
         objs = _createCutBoxAndLine(self.getFrame(), *args, **kwargs)
         for o in objs:
@@ -761,7 +810,10 @@ class PlotBase:
         self.cf = histograms.CanvasFrame(self.histoMgr, filename, **kwargs)
         self.frame = self.cf.frame
 
-    def setFrameName(self, filename):
+    ## Set the name of the canvas for the output file
+    #
+    # \param filename  New name
+    def setFileName(self, filename):
         self.cf.canvas.SetName(filename)
 
     ## Get the frame TH1
@@ -819,6 +871,10 @@ class PlotBase:
     # histograms.HistoManager object for histogram management
     ## \var saveFormats
     # List of formats to which to save the plot
+    ## \var plotObjectsBefore
+    # List of objects to be drawn before histoMgr
+    ## \var plotObjectsAfter
+    # List of objects to be drawn after histoMgr
     ## \var legend
     # TLegend object if legend has been added to the plot
     ## \var cf
@@ -827,6 +883,8 @@ class PlotBase:
     # TH1 object for the frame (from the cf object)
 
 ## Base class for plots with ratio (intended for multiple inheritance)
+#
+# This class should not be instantiated!
 class PlotRatioBase:
     def __init__(self):
         self.ratioPlotObjectsBefore = []
