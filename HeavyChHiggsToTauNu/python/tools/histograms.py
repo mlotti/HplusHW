@@ -559,7 +559,11 @@ class CanvasFrame:
     #
     # \param histoManager  histograms.HistoManager object to take the histograms for automatic axis ranges
     # \param name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
-    # \param kwargs        Keyword arguments (forwarded to histograms._boundsArgs())
+    # \param kwargs        Keyword arguments for frame bounds (forwarded to histograms._boundsArgs())
+    #
+    # <b>Keyword arguments</b>
+    # \li\a opts   If given, give \a opts to histograms._boundsArgs() instead of kwargs. No other keyword arguments are allowed (except opts2, see below).
+    # \li\a opts2  Ignored, existence allowed only for compatibility with histograms.CanvasFrameTwo
     def __init__(self, histoManager, name, **kwargs):
         histos = []
         if isinstance(histoManager, list):
@@ -610,7 +614,12 @@ class CanvasFrameTwo:
     # \param histoManager1 HistoManager object to take the histograms for automatic axis ranges for upper pad
     # \param histos2       List of Histo objects to take the histograms for automatic axis ranges for lower pad
     # \param name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
-    # \param kwargs        Keyword arguments (forwarded to histograms._boundsArgs())
+    # \param kwargs        Keyword arguments (see below)
+    #
+    # <b>Keyword arguments</b>
+    # \li\a opts   Dictionary for frame bounds (forwarded to histograms._boundsArgs())
+    # \li\a opts1  Same as \a opts (can not coexist with \a opts, only either one can be given)
+    # \li\a opts2  Dictionary for ratio pad bounds (forwarded to histograms._boundsArgs()) Only Y axis values are allowed, for X axis values are taken from \a opts/\a opts1
     def __init__(self, histoManager1, histos2, name, **kwargs):
         ## Wrapper to provide the CanvasFrameTwo.frame member.
         #
