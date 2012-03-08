@@ -1,4 +1,5 @@
-# tau embedding related plotting stuff
+## \package tauEmbedding
+# Tau embedding (EWK+ttbar tau background measurement) related plotting stuff
 
 import math
 import array
@@ -12,15 +13,15 @@ import plots
 import counter
 import styles
 
-# Apply embedding normalization (muon efficiency, W->tau->mu factor
+## Apply embedding normalization (muon efficiency, W->tau->mu factor
 normalize = True
-# Data era
+## Data era
 era = "Run2011A"
 
-# When doing the averaging, take the stat uncertainty as the average
-# of the stat uncertanties of the trials
+## When doing the averaging, take the stat uncertainty as the average of the stat uncertanties of the trials
 uncertaintyByAverage = False
 
+## Number of PU-reweighted all events for datasets
 datasetAllEvents = {
     "TTJets_TuneZ2_Summer11": (3701947, {"Run2011A": 3693782.50}),
     # Not all events were processed for pattuples
@@ -40,7 +41,7 @@ datasetAllEvents = {
     "ZZ_TuneZ2_Summer11": (4187885, {"Run2011A": 4197760.00}),
 }
 
-# Signal analysis multicrab directories for embedding trials
+## Signal analysis multicrab directories for embedding trials
 dirEmbs_120131 = [
     "multicrab_signalAnalysis_Met50_systematics_v13_3_Run2011A_120131_123142",
     "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest1_Run2011A_120131_133727",
@@ -53,13 +54,18 @@ dirEmbs_120131 = [
     "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest8_Run2011A_120131_160339",
     "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest9_Run2011A_120131_162422",
 ]
+## Signal analysis multicrab directories for embedding trials
+#
+# This variable is used to select from possibly multiple sets of embedding directories
 dirEmbs = dirEmbs_120131
 
-# Signal analysis multicrab directory for normal MC
+## Signal analysis multicrab directory for normal MC
 dirSig = "../multicrab_compareEmbedding_Run2011A_120118_122555" # for 120118, 120126, 120131
 
-########################################
-# Update all event counts to the ones taking into account the pileup reweighting
+
+## Update all event counts to the ones taking into account the pileup reweighting
+#
+# \param datasets   dataset.DatasetManager object
 def updateAllEventsToWeighted(datasets):
     # If DatasetsMany or similar
     if hasattr(datasets, "datasetManagers"):
@@ -81,8 +87,11 @@ def updateAllEventsToWeighted(datasets):
             dataset.setNAllEvents(weightedN[era]*nAllEvents) # There is some fluctuation in the exact counts of DYJets and WJets between trials
 
 
-########################################
-# Embedding normalization
+## Apply embedding normalization
+#
+# \param obj  plots.PlotBase, histograms.Histo, or counter.EventCounter object
+#
+# The normalization includes the muon trigger and ID efficiency, and W->tau->mu fraction
 def scaleNormalization(obj):
     if not normalize:
         return
@@ -90,8 +99,10 @@ def scaleNormalization(obj):
     #scaleMCfromWmunu(obj) # data/MC trigger correction
     scaleMuTriggerIdEff(obj)
     scaleWmuFraction(obj)
-    return
 
+## Apply muon trigger and ID efficiency normalization
+#
+# \param obj  plots.PlotBase, histograms.Histo, or counter.EventCounter object
 def scaleMuTriggerIdEff(obj):
     # From 2011A only
     #data = 0.508487
@@ -112,11 +123,20 @@ def scaleMuTriggerIdEff(obj):
     scaleHistosCounters(obj, scaleDataHisto, "scaleData", 1/data)
     scaleHistosCounters(obj, scaleMCHisto, "scaleMC", 1/mc)
 
+## Apply W->tau->mu normalization
+#
+# \param obj  plots.PlotBase, histograms.Histo, or counter.EventCounter object
 def scaleWmuFraction(obj):
     Wtaumu = 0.038479
 
     scaleHistosCounters(obj, scaleHisto, "scale", 1-Wtaumu)
 
+## Helper function to scale histos or counters
+#
+# \param obj          plots.PlotBase, histograms.Histo, or counter.EventCounter object
+# \param plotFunc     Function to apply for plots.PlotBase and histograms.Histo objects
+# \param counterFunc  Name of counter.EventCounter function to apply
+# \param scale        Multiplication factor
 def scaleHistosCounters(obj, plotFunc, counterFunc, scale):
     if isinstance(obj, plots.PlotBase):
         scaleHistos(obj, plotFunc, scale)
@@ -125,27 +145,48 @@ def scaleHistosCounters(obj, plotFunc, counterFunc, scale):
     else:
         plotFunc(obj, scale)
 
+## Helper function to scale plots.PlotBase objects
+#
+# \param plot       plots.PlotBase object
+# \param function   Function to apply
+# \param scale      Multiplication factor
 def scaleHistos(plot, function, scale):
     plot.histoMgr.forEachHisto(lambda histo: function(histo, scale))
 
+## Helper function to scale counter.EventCounter
+#
+# \param eventCounter  counter.EventCounter object
+# \param methodName    Name of the counter.EventCounter method to apply
+# \param scale         Multiplication factor
 def scaleCounters(eventCounter, methodName, scale):
     getattr(eventCounter, methodName)(scale)
 
+## Helper function to scale only MC histograms.Histo objects
+#
+# \param histo   histograms.Histo object
+# \param scale   Multiplication factor
 def scaleMCHisto(histo, scale):
     if histo.isMC():
         scaleHisto(histo, scale)
 
+## Helper function to scale only data histograms.Histo objects
+#
+# \param histo   histograms.Histo object
+# \param scale   Multiplication factor
 def scaleDataHisto(histo, scale):
     if histo.isData():
         scaleHisto(histo, scale)
 
+## Helper function to scale histograms.Histo objects
+#
+# \param histo   histograms.Histo object
+# \param scale   Multiplication factor
 def scaleHisto(histo, scale):
     th1 = histo.getRootHisto()
     th1.Scale(scale)
 
 
-########################################
-# helper function
+## Calculate square sum of TH1 bins
 def squareSum(th1):
     s = 0
     for bin in xrange(0, th1.GetNbinsX()+2):
@@ -155,9 +196,15 @@ def squareSum(th1):
     return s
 
 
-########################################
-# Classes for doing the averaging
+## Class for doing the averaging over many dataset.DatasetManager objects
 class DatasetsMany:
+    ## Constructor
+    #
+    # \param dirs                      List of paths multicrab directories, either absolute or relative to working directory
+    # \param counters                  Directory in dataset TFiles containing the event counters
+    # \param normalizeMCByLuminosity   Normalize MC to data luminosity?
+    #
+    # Construct a dataset.DatasetManager object from each multicrab directory
     def __init__(self, dirs, counters, normalizeMCByLuminosity=False):
         self.datasetManagers = []
         for d in dirs:
@@ -168,33 +215,57 @@ class DatasetsMany:
 
         self.normalizeMCByLuminosity=normalizeMCByLuminosity
 
+    ## Apply a function for each dataset.DatasetManager object
     def forEach(self, function):
         for dm in self.datasetManagers:
             function(dm)
 
+    ## Get dataset.DatasetManager object from the first multicrab directory
     def getFirstDatasetManager(self):
         return self.datasetManagers[0]
 
-    # Compatibility with dataset.DatasetManager
+    ## Remove dataset.Dataset objects (compatibility with dataset.DatasetManager)
+    #
+    # \param args    Positional arguments (forwarded to dataset.Dataset.remove())
+    # \param kwargs  Keyword arguments (forwarded to dataset.Dataset.remove())
     def remove(self, *args, **kwargs):
         self.forEach(lambda d: d.remove(*args, **kwargs))
 
+    ## Get a list of names of all dataset.Dataset objects (compatibility with dataset.DatasetManager)
     def getAllDatasetNames(self):
         return self.datasetManagers[0].getAllDatasetNames()
 
+    ## Close all TFiles of the contained dataset.Dataset objects (compatibility with dataset.DatasetManager)
+    #
+    # \see dataset.DatasetManager.close()
     def close(self):
         self.forEach(lambda d: d.close())
 
-    # End of compatibility methods
+    
+    ## Get dataset.Dataset object from the first dataset.DatasetManager
+    #
+    # \param name   Name of the dataset
     def getDatasetFromFirst(self, name):
         return self.getFirstDatasetManager().getDataset(name)
 
+    ## Set the integrated luminosity from data dataset
     def setLumiFromData(self):
         self.lumi = self.getDatasetFromFirst("Data").getLuminosity()
 
+    ## Get the integrated luminosity
     def getLuminosity(self):
         return self.lumi
 
+    ## Get a ROOT histogram for a given dataset, averaged over the multiple dataset.DatasetManager objects
+    #
+    # \param datasetName   Name of the dataset
+    # \param name          Name of the histogram (or dataset.TreeDraw object)
+    # \param rebin         Rebin
+    #
+    # \return tuple of (histogram, min_max_graph)
+    #
+    # The min/max graph has the average as the value, and for each bin
+    # the minimum and maximum in the asymmetric errors.
     def getHistogram(self, datasetName, name, rebin=1):
         histos = self.getHistograms(datasetName, name)
 
@@ -244,6 +315,13 @@ class DatasetsMany:
 
         return (histo, gr) # Average histogram, min/max graph
 
+    ## Create TEfficiency for a given dataset, merged over the multiple dataset.DatasetManager objects
+    #
+    # \param datasetName   Name of the dataset
+    # \param numerator     Name of the numerator histogram
+    # \param denominator   Name of the denominator histogram
+    #
+    # \return TEfficiency object 
     def getEfficiency(self, datasetName, numerator, denominator):
         effs = []
         for dm in self.datasetManagers:
@@ -260,12 +338,22 @@ class DatasetsMany:
             result.Add(e)
         return result
 
+    ## Check if a histogram exists for all dataset.DatasetManager objects
+    #
+    # \param datasetName   Name of the dataset
+    # \param name          Name of the histogram to check
     def hasHistogram(self, datasetName, name):
         has = True
         for dm in self.datasetManagers:
             has = has and dm.getDataset(datasetName).hasRootHisto(name)
         return has
 
+    ## Get the ROOT histograms of a given name from all dataset.DatasetManager objects
+    #
+    # \param datasetName   Name of the dataset
+    # \param name          Name of the ROOT histogram
+    #
+    # \return list of ROOT histograms
     def getHistograms(self, datasetName, name):
         histos = []
         for i, dm in enumerate(self.datasetManagers):
@@ -281,11 +369,26 @@ class DatasetsMany:
 
         return histos # list of individual histograms
 
+    ## Get a counter.HistoCounter for a given dataset and counter
+    #
+    # \param datasetName   Name of the dataset
+    # \param name          Name of the counter ROOT histogram
+    #
+    # \return counter.HistoCounter object
     def getCounter(self, datasetName, name):
         (embDataHisto, tmp) = self.getHistogram(datasetName, name)
         return counter.HistoCounter(datasetName, embDataHisto)
 
+## Class for obtaining the residual MC results
 class DatasetsResidual:
+    ## Constructor
+    #
+    # \param datasetsEmb    tauEmbedding.DatasetsMany object for embedding datasets
+    # \param datasetsSig    dataset.DatasetManager obejct for normal MC
+    # \param analysisEmb    Analysis directory for embeddded datasets (directory containing the ROOT histograms in the TFile)
+    # \param analysisSig    Analysis directory for normal MC datasets (directory containing the ROOT histograms in the TFile)
+    # \param residualNames  List of names of the datasets for which to derive the residuals (e.g. DYJetsToLL and WW)
+    # \param totalNames     List of names of "total" datasets, for which to add the residual MC on top of the original contribution (e.g. emb.data+res.MC and emb.MC+res.MC)
     def __init__(self, datasetsEmb, datasetsSig, analysisEmb, analysisSig, residualNames, totalNames=[]):
         self.datasetsEmb = datasetsEmb
         self.datasetsSig = datasetsSig
@@ -300,37 +403,70 @@ class DatasetsResidual:
             if name in residualNames:
                 raise Exception("residualNames and totalNames must be disjoint (dataset '%s' was given in both)")
 
+    ## Replace embedding analysis directory name with a normal MC analysis directory
+    #
+    # \param name  Histogram name, or dataset.TreeDraw object
     def _replaceSigName(self, name):
         if isinstance(name, basestring):
             return name.replace(self.analysisEmb, self.analysisSig)
         else:
             return name.clone(tree=lambda name: name.replace(self.analysisEmb, self.analysisSig))
 
+    ## Apply a function for each dataset.DatasetManager object
     def forEach(self, function):
         self.datasetsEmb.forEach(function)
         function(self.datasetsSig)
 
-    # Compatibility with dataset.DatasetManager
+    ## Remove dataset.Dataset objects (compatibility with dataset.DatasetManager)
+    #
+    # \param args    Positional arguments (forwarded to dataset.Dataset.remove())
+    # \param kwargs  Keyword arguments (forwarded to dataset.Dataset.remove())
     def remove(self, *args, **kwargs):
         self.forEach(lambda d: d.remove(*args, **kwargs))
 
+    ## Get a list of names of all dataset.Dataset objects (compatibility with dataset.DatasetManager)
     def getAllDatasetNames(self):
         return self.datasetsEmb.getAllDatasetNames()
 
+    ## Close all TFiles of the contained dataset.Dataset objects (compatibility with dataset.DatasetManager)
+    #
+    # \see dataset.DatasetManager.close()
     def close(self):
         self.forEach(self, lambda d: d.close())
 
-    # End of compatibility methods
-    
+
+    ## Ask if the residual MC is added to a given dataset
+    #
+    # \param datasetName   Dataset name
+    #
+    # \return  True, if residual MC has been added for this dataset
     def isResidualAdded(self, datasetName):
         return datasetName in self.totalNames or datasetName in self.residualNames
 
+    ## Get the integrated luminosity
     def getLuminosity(self):
         return self.datasetsEmb.getLuminosity()
 
+    ## Check if a histogram exists for all dataset.DatasetManager objects
+    #
+    # \param datasetName   Name of the dataset
+    # \param name          Name of the histogram to check
     def hasHistogram(self, datasetName, name):
         return self.datasetsEmb.hasHistogram(datasetName, name) and self.datasetsSig.getDataset(datasetName).hasHistogram(name)
 
+    ## Get a ROOT histogram for a given dataset
+    #
+    # \param datasetName   Name of the dataset
+    # \param name          Name of the histogram (or dataset.TreeDraw object)
+    # \param rebin         Rebin
+    #
+    # If dataset is not in \a totalNames nor \a residual names, return
+    # the embedded result (averaged over multiple dataset.DatasetManager object).
+    #
+    # If dataset is in \a residualNames, calculate the residual result
+    # as normal-embedded.
+    #
+    # If dataset is in \a totalNames, calculate sum of total_emb + sum(res_mc)
     def getHistogram(self, datasetName, name, rebin=1):
         if datasetName in self.totalNames:
             #print "Creating sum for "+datasetName
@@ -363,6 +499,16 @@ class DatasetsResidual:
 
         return (sigHisto, None)
 
+    ## Get a counter.HistoCounter for a given dataset and counter
+    #
+    # \param datasetName   Name of the dataset
+    # \param name          Name of the counter ROOT histogram
+    #
+    # \return counter.HistoCounter object
+    #
+    # For datasets not in \a residualNames, return the embedded result
+    #
+    # For datasets in \a residualNames, calculate the result as normal-embedded
     def getCounter(self, datasetName, name):
         if not datasetName in self.residualNames:
             return self.datasetsEmb.getCounter(datasetName, name)
@@ -390,8 +536,14 @@ class DatasetsResidual:
         residual = counter.subtractColumn(datasetName+" residual", sigColumn, embColumn)
         return residual
 
-
+## Event counter for doing the averaging over many datasets.DatasetManager objects
 class EventCounterMany:
+    ## Constructor
+    #
+    # \param datasetsMany   tauEmbedding.DatasetsMany object
+    # \param normalize      Apply embedding normalization?
+    # \param args           Positional arguments (forwarded to counter.EventCounter.__init__())
+    # \param kwargs         Keyword arguments (forwarded to counter.EventCounter.__init__())
     def __init__(self, datasetsMany, normalize=True, *args, **kwargs):
         self.eventCounters = []
         for dsMgr in datasetsMany.datasetManagers:
@@ -401,34 +553,81 @@ class EventCounterMany:
                 scaleNormalization(ec)
             self.eventCounters.append(ec)
 
+    ## Remove columns
+    #
+    # \param datasetNames   List of dataset names to remove
     def removeColumns(self, datasetNames):
         for ec in self.eventCounters:
             ec.removeColumns(datasetNames)
 
+    ## Append row from TTree to main counter
+    #
+    # \param args   Positional arguments (forwarded to counter.Counter.appendRow())
+    # \param kwargs Keyword arguments (forwarded to counter.Counter.appendRow())
     def mainCounterAppendRow(self, *args, **kwargs):
         for ec in self.eventCounters:
             ec.getMainCounter().appendRow(*args, **kwargs)
 
+    ## Append row from TTree to a sub counter
+    #
+    # \param name   Name of the subcounter
+    # \param args   Positional arguments (forwarded to counter.Counter.appendRow())
+    # \param kwargs Keyword arguments (forwarded to counter.Counter.appendRow())
     def subCounterAppendRow(self, name, *args, **kwargs):
         for ec in self.eventCounters:
             ec.getSubCounter(name).appendRow(*args, **kwargs)
 
+    ## Get main counter table
+    #
+    # \return counter.CounterTable object
+    #
+    # Calculated as the mean of the counter.CounterTable objects from
+    # the individual trials
     def getMainCounterTable(self):
         return counter.meanTable([ec.getMainCounterTable() for ec in self.eventCounters], uncertaintyByAverage)
 
+    ## Get subcounter table
+    #
+    # \param name  Name of the subcounter
+    #
+    # \return counter.CounterTable object
+    #
+    # Calculated as the mean of the counter.CounterTable objects from
+    # the individual trials
     def getSubCounterTable(self, name):
         return counter.meanTable([ec.getSubCounterTable(name) for ec in self.eventCounters], uncertaintyByAverage)
 
+    ## Get main counter table from fit
+    #
+    # \return counter.CounterTable object
+    #
+    # Calculated with a least-square fit of a zero-order polynomial to
+    # counter.CounterTable objects from the individual trials
     def getMainCounterTableFit(self):
         return counter.meanTableFit([ec.getMainCounterTable() for ec in self.eventCounters])
 
+    ## Get subcounter table from fit
+    #
+    # \param name  Name of the subcounter
+    #
+    # \return counter.CounterTable object
+    #
+    # Calculated with a least-square fit of a zero-order polynomial to
+    # counter.CounterTable objects from the individual trials
     def getSubCounterTableFit(self, name):
         return counter.meanTableFit([ec.getSubCounterTable(name) for ec in self.eventCounters])
 
+    ## Get current normalization scheme string
     def getNormalizationString(self):
         return self.eventCounters[0].getNormalizationString()
 
+## Event counter for adding the residual MC
 class EventCounterResidual:
+    ## Constructor
+    #
+    # \param datasetsResidual  tauEmbedding.DatasetsResidual object
+    # \param counters          Name of the counter histogram in the embedded analysis
+    # \param kwargs            Keyword arguments (forwarded to counter.EventCounter.__init__())
     def __init__(self, datasetsResidual, counters=None, **kwargs):
         self.datasetsResidual = datasetsResidual
         self.residualNames = datasetsResidual.residualNames
@@ -441,16 +640,35 @@ class EventCounterResidual:
         self.eventCounterSig = counter.EventCounter(datasetsResidual.datasetsSig, counters=countersSig, **kwargs)
         self.eventCounterSig.normalizeMCToLuminosity(datasetsResidual.datasetsEmb.getLuminosity())
 
+    ## Append row from TTree to main counter
+    #
+    # \param rowName   Name of the row
+    # \param treeDraw  dataset.TreeDraw object
+    #
+    # The TTree name should be the one in embedded analysis
     def mainCounterAppendRow(self, rowName, treeDraw):
-        treeDrawSig = self.datasetsDYCorrection._replaceSigName(treeDraw)
+        treeDrawSig = self.datasetsResidual._replaceSigName(treeDraw)
         self.eventCounterEmb.mainCounterAppendRow(rowName, treeDraw)
         self.eventCounterSig.getMainCounter().appendRow(rowName, treeDrawSig)
 
+    ## Append row from TTree to subcounter
+    #
+    # \param name      Name of the subcounter
+    # \param rowName   Name of the row
+    # \param treeDraw  dataset.TreeDraw object
+    #
+    # The TTree name should be the one in embedded analysis
     def subCounterAppendRow(self, name, rowName, treeDraw):
-        treeDrawSig = self.datasetsDYCorrection._replaceSigName(treeDraw)
+        treeDrawSig = self.datasetsResidual._replaceSigName(treeDraw)
         self.eventCounterEmb.subCounterAppendRow(name, rowName, treeDraw)
         self.eventCounterSig.getSubCounter(name).appendRow(rowName, treeDrawSig)
 
+    ## Helper function for adding columns for residual datasets
+    #
+    # \param table     counter.CounterTable for embedding
+    # \param sigTable  counter.CounterTable for normal MC
+    #
+    # \return counter.CounterTable with residual columns added (same object as \a table argument)
     def _calculateResidual(self, table, sigTable):
         columnNames = table.getColumnNames()
         for name in columnNames:
@@ -462,6 +680,9 @@ class EventCounterResidual:
                 table.insertColumn(i, col)
         return table
 
+    ## Get main counter table with residual columns
+    #
+    # \return counter.CounterTable object
     def getMainCounterTable(self):
         table = self.eventCounterEmb.getMainCounterTable()
         sigTable = self.eventCounterSig.getMainCounterTable()
@@ -469,6 +690,11 @@ class EventCounterResidual:
         table = self._calculateResidual(table, sigTable)
         return table
 
+    ## Get subcounter table with residual columns
+    #
+    # \param name  Name of the subcounter
+    #
+    # \return counter.CounterTable object
     def getSubCounterTable(self, name):
         table = self.eventCounterEmb.getSubCounterTable(name)
         sigTable = self.eventCounterSig.getSubCounterTable(name)
@@ -476,13 +702,26 @@ class EventCounterResidual:
         table = self._calculateResidual(table, sigTable)
         return table
 
-########################################
-# Common plot drawer
+
+## Plot drawer for embedding plots
+#
+# Adds the normalization step to the workflow if plots.PlotDrawer
 class PlotDrawerTauEmbedding(plots.PlotDrawer):
+    ## Constructor
+    #
+    # \param normalize   Apply embedding normalization
+    # \param kwargs      Keyword arguments (forwarded to plots.PlotDrawer.__init__())
     def __init__(self, normalize=True, **kwargs):
         plots.PlotDrawer.__init__(self, **kwargs)
         self.normalizeDefault = normalize
 
+    ## Apply the tau embedding normalization
+    #
+    # \param p       plots.PlotBase (or deriving) object
+    # \param kwargs  Keyword arguments (see below)
+    #
+    # <b>Keyword arguments</b>
+    # \lu\a normalize   Should embedding normalization be applied? (default given in __init__()/setDefaults())
     def tauEmbeddingNormalization(self, p, **kwargs):
         if kwargs.get("normalize", self.normalizeDefault):
             scaleNormalization(p)
@@ -498,9 +737,17 @@ class PlotDrawerTauEmbedding(plots.PlotDrawer):
         self.addCutLineBox(p, **kwargs)
         self.finish(p, xlabel, **kwargs)
 
+## Default plot drawer object for tau embedding (embedded data vs. embedded MC) plots
 drawPlot = PlotDrawerTauEmbedding(ylabel="Events / %.0f GeV/c", log=True, stackMCHistograms=True, addMCUncertainty=True)
 
+
+## Plot drawer for embedding vs. normal MC plots
+#
+# More customization is needed for the uncertainties
 class PlotDrawerTauEmbeddingEmbeddedNormal(PlotDrawerTauEmbedding):
+    ## Constructor
+    #
+    # \param kwargs      Keyword arguments (forwarded to tauEmbedding.PlotDrawerTauEmbedding.__init__())
     def __init__(self, **kwargs):
         PlotDrawerTauEmbedding.__init__(self, normalize=False, **kwargs)
 
@@ -566,7 +813,18 @@ class PlotDrawerTauEmbeddingEmbeddedNormal(PlotDrawerTauEmbedding):
         self.addCutLineBox(p, **kwargs)
         self.finish(p, xlabel, **kwargs)
 
+## Plot creator for embedded vs. normal plots
 class PlotCreatorMany:
+    ## Constructor
+    #
+    # \param analysisEmb    Name of the embedding analysis TDirectory
+    # \param analysisSig    Name of the normal MC analysis TDirectory
+    # \param datasetsEmb    tauEmbedding.DatasetsMany object for embedded datasets
+    # \param datasetsSig    dataset.DatasetManager object for normal MC datasets
+    # \param datasetName    Name of the dataset
+    # \param styles         List of plot styles
+    # \param addData        Add embedded data?
+    # \param addVariation   Add min/max values from embedding trials?
     def __init__(self, analysisEmb, analysisSig, datasetsEmb, datasetsSig, datasetName, styles, addData=False, addVariation=False):
         self.analysisEmb = analysisEmb
         self.analysisSig = analysisSig
@@ -581,6 +839,12 @@ class PlotCreatorMany:
         except:
             self.isResidual = False
 
+    ## Function call syntax for creating the plot
+    #
+    # \param name   Name of the histogram (with embedding analysis path)
+    # \param rebin  Rebin
+    #
+    # \return plots.PlotBase derived object
     def __call__(self, name, rebin=1):
         lumi = self.datasetsEmb.getLuminosity()
 

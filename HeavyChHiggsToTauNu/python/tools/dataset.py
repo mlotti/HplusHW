@@ -1364,6 +1364,7 @@ class DatasetMerged:
                 lumiSum += d.getLuminosity()
             self.info["luminosity"] = lumiSum
 
+    ## Close TFiles in the contained dataset.Dataset objects
     def close(self):
         for d in self.datasets:
             d.close()
@@ -1638,7 +1639,8 @@ class DatasetManager:
 
     ## Remove dataset.Dataset objects
     # 
-    # \param nameList    List of dataset.Dataset names ro remove
+    # \param nameList    List of dataset.Dataset names to remove
+    # \param close       If true, close the removed dataset.Dataset objects
     def remove(self, nameList, close=True):
         if isinstance(nameList, basestring):
             nameList = [nameList]

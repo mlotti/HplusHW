@@ -1,5 +1,10 @@
+## \package multicrabDatasetsCollisionData11Aug05
+#
+# Dataset definitions for partial Run2011 (170722-172619) Aug10 ReReco (with CMSSW 42X)
+
 import multicrabDatasetsCommon as common
 
+## Dataset definitions
 datasets = {
     # Single tau + MET
     "Tau_170722-172619_Aug05": {

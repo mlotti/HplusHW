@@ -1,9 +1,11 @@
+## \package multicrabDatasetsCollisionData10Dec22
+#
+# Dataset definitions for Run2010 Dec22 ReReco (with CMSSW 39X)
+
 import multicrabDatasetsCommon as common
 
+## Dataset definitions
 datasets = {
-    ############################################################
-    # Collision data
-    #
     # BTau PD (for signal analysis)
     "BTau_141956-144114_Dec22": {
         "dataVersion": "39Xdata",

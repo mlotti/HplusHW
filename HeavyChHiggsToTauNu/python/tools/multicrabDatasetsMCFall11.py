@@ -1,9 +1,15 @@
+## \package multicrabDatasetsMCFall11
+#
+# Dataset definitions for Fall11 MC production (CMSSW 42X)
+
 import multicrabDatasetsCommon as common
 
 # For pattuples: ~10kev/job (~20-30 kB/event on average, depending on the process)
 # For analysis: ~500kev/job
 
 # Default signal cross section taken the same as ttbar
+
+## Dataset definitions
 datasets = {
     # Signal WH
     "TTToHplusBWB_M120_Fall11": {

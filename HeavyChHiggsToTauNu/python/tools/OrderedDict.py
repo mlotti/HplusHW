@@ -1,7 +1,13 @@
+## \package OrderedDict
+# Provides dictionary which keeps the order of contained objects
+#
+# Needed for multicrab
+
 from UserDict import DictMixin
 
+## Ordered dictionary
+#
 # From http://code.activestate.com/recipes/576693/
-
 class OrderedDict(dict, DictMixin):
 
     def __init__(self, *args, **kwds):
