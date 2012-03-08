@@ -1,4 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeJetBranches.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -39,6 +41,8 @@ namespace HPlus {
       tree->Branch("jets_elm", &fJetsElm);
       tree->Branch("jets_phm", &fJetsPhm);
       tree->Branch("jets_mum", &fJetsMum);
+      tree->Branch("jets_flavour", &fJetsFlavour);
+      tree->Branch("jets_id", &fJetsId);
     }
     tree->Branch("jets_jecToRaw", &fJetsJec);
     tree->Branch("jets_area", &fJetsArea);
@@ -65,7 +69,14 @@ namespace HPlus {
 
       int chm = jet.chargedHadronMultiplicity();
       int npr = jet.chargedMultiplicity() + jet.neutralMultiplicity();
-      if(fJetComposition) {
+      int flavour = -999;
+      int jetid = -999;
+      if (!iEvent.isRealData()) {
+	flavour = jet.partonFlavour();
+	const reco::GenParticle* myParticle = jet.genParton();
+	//	if (myParticle != 0 ) flavour = myParticle->pdgId();
+      }
+     if(fJetComposition) {
         double sum = chf+nhf+elf+phf+muf;
         if(std::abs(sum - 1.0) > 0.000001) {
           throw cms::Exception("Assert") << "The assumption that chf+nhf+elf+phf+muf=1 failed, the sum was " << (chf+nhf+elf+phf+muf)
@@ -80,12 +91,14 @@ namespace HPlus {
         fJetsElf.push_back(elf);
         fJetsPhf.push_back(phf);
         fJetsMuf.push_back(muf);
-
+      
         fJetsChm.push_back(chm);
         fJetsNhm.push_back(jet.neutralHadronMultiplicity());
         fJetsElm.push_back(jet.electronMultiplicity());
         fJetsPhm.push_back(jet.photonMultiplicity());
         fJetsMum.push_back(jet.muonMultiplicity());
+	fJetsFlavour.push_back(flavour);
+	fJetsId.push_back(jetid);
       }
 
       fJetsJec.push_back(jet.jecFactor(0));
@@ -115,7 +128,8 @@ namespace HPlus {
       fJetsElf.clear();
       fJetsPhf.clear();
       fJetsMuf.clear();
-
+      fJetsFlavour.clear();
+      fJetsId.clear();
       fJetsChm.clear();
       fJetsNhm.clear();
       fJetsElm.clear();

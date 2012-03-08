@@ -25,7 +25,7 @@ doRtau0 = False # Rtau>0, MET>50
 doBTagScan = False
 
 # fill tree for btagging eff study
-doBTagTree = False
+doBTagTree = True
 
 # Perform Rtau scanning
 doRtauScan = False
