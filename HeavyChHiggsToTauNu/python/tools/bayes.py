@@ -1,7 +1,14 @@
-#!/usr/bin env python
+## \package bayes
+# Provides bayesDivide
+#
+# \todo This package should be removed as unnecessary, the
+# functionality is now available in TEfficiency. In addition, CMS
+# statistics committee recommends Clopper-Pearson (or Feldman-Cousins)
+# instead of the bayesian method.
+
 import ROOT
 
-### Function to calculate efficiency of two numbers with Bayesian method.
+## Function to calculate efficiency of two numbers with Bayesian method.
 def bayesDivide(passed, total):
     hp = ROOT.TH1F("tmp_passed", "", 1, 0, 1)
     ht = ROOT.TH1F("tmp_total", "", 1, 0, 1)
