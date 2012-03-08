@@ -7,18 +7,6 @@ datasets = {
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v1",
         "runs": (160431, 161176), #
         "data": {
-            "AOD": {
-                "datasetpath": "/Tau/Run2011A-May10ReReco-v1/AOD",
-                "luminosity": 0,
-                "number_of_jobs": 15, # Adjusted for PATtuple file size
-                "lumiMask": "May10ReReco"
-            },
-            "pattuple_v17": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_160431_pattuple_v17-377a23a99017553e73fe517f9c607b59/USER",
-                "luminosity": 5.884518,
-                "number_of_jobs": 1
-            },
             "pattuple_v18": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-May10ReReco_v1_AOD_160431_pattuple_v18-344241722cb53b6dc9e6433dfd125850/USER",
@@ -27,36 +15,11 @@ datasets = {
             },
         }
     },
-    "Tau_161119-161119_May10_Wed": {
-        "dataVersion": "42Xdata",
-        "trigger": "HLT_IsoPFTau35_Trk20_MET45_v1",
-        "runs": (161119, 161119), #
-        "data": {
-            "pattuple_v17": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_161119_pattuple_v17-377a23a99017553e73fe517f9c607b59/USER",
-                "luminosity": 0.490643,
-                "number_of_jobs": 1
-            },
-        }
-    },        
     "Tau_161217-163261_May10": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
         "runs": (161217, 163261),
         "data": {
-            "AOD": {
-                "datasetpath": "/Tau/Run2011A-May10ReReco-v1/AOD",
-                "luminosity": 0,
-                "number_of_jobs": 100, # Adjusted for PATtuple file size
-                "lumiMask": "May10ReReco"
-            },
-            "pattuple_v17": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_161217_pattuple_v17-e4cfe64c6b123ecde897f0b19cc05328/USER",
-                "luminosity": 38.518306,
-                "number_of_jobs": 2
-            },
             "pattuple_v18": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-May10ReReco_v1_AOD_161217_pattuple_v18-69a11d04d01ec96141c740547251864b/USER",
@@ -70,18 +33,6 @@ datasets = {
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v4",
         "runs": (163270, 163869),
         "data": {
-            "AOD": {
-                "datasetpath": "/Tau/Run2011A-May10ReReco-v1/AOD",
-                "luminosity": 0,
-                "number_of_jobs": 220,
-                "lumiMask": "May10ReReco"
-            },
-            "pattuple_v17": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_163270_pattuple_v17-6d098da292fab19f3d03a84563841e91/USER",
-                "luminosity": 159.758105,
-                "number_of_jobs": 6
-            },
             "pattuple_v18": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-May10ReReco_v1_AOD_163270_pattuple_v18-62e2e156bbf332fdc6c67ab8a6d7a4f0/USER",
@@ -90,23 +41,78 @@ datasets = {
             },
         }
     },
+    "Tau_160431-163869_May10": {
+        "dataVersion": "42Xdata",
+        "args": {"triggerThrow": 0}, # needed for OR of triggers in separate run ranges
+        "triggerOR": [
+            "HLT_IsoPFTau35_Trk20_MET45_v1", # 160431-161176
+            "HLT_IsoPFTau35_Trk20_MET45_v2", # 161217-163261
+            "HLT_IsoPFTau35_Trk20_MET45_v4", # 163270-163869
+        ],
+        "runs": (160431, 163869),
+        "data": {
+            "AOD": {
+                "datasetpath": "/Tau/Run2011A-May10ReReco-v1/AOD",
+                "number_of_jobs": 350, # Adjusted for PATtuple file size
+                "lumiMask": "May10ReReco"
+            },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_160431_pattuple_v19-95bdfb89e63988c1ffa2ad610b62da8e/USER",
+                "luminosity": 216.149000,
+                "number_of_jobs": 6
+            },
+        }
+    },
 
-    # Single Mu without trigger
+    # Single Mu
     "SingleMu_160431-163261_May10": {
         "dataVersion": "42Xdata",
         "args": {"doTauHLTMatching": 0},
+        "triggerOR": [
+            "HLT_Mu20_v1", "HLT_IsoMu12_v1", # not prescaled
+            "HLT_Mu15_v2", # prescaled
+            ],
         "runs": (160431, 163261),
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
-                "luminosity": 0,
-                "number_of_jobs": 120, # Adjusted for skim file size
+                "number_of_jobs": 1000, # Adjusted for PATtuple file size (~430 in reality)
                 "lumiMask": "May10ReReco"
+            },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_May10ReReco_v1_AOD_160431_pattuple_v19b-c0ae6cd4b6a7f4894060bf4c50b6b08b/USER",
+                "luminosity": 47.008000,
+                "number_of_jobs": 15
             },
         }
     }, 
+   "SingleMu_163270-163869_May10": {
+        "dataVersion": "42Xdata",
+        "args": {"doTauHLTMatching": 0},
+        "triggerOR": [
+            "HLT_Mu24_v2", "HLT_IsoMu17_v6", # not prescaled
+            "HLT_Mu15_v3", "HLT_Mu20_v2", "HLT_IsoMu15_v6", # prescaled
+            ],
+        "runs": (163270, 163869),
+        "data": {
+            "AOD": {
+                "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
+                "number_of_jobs": 1000, # Adjusted for PATtuple file size (~390 in reality)
+                "lumiMask": "May10ReReco"
+            },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_May10ReReco_v1_AOD_163270_pattuple_v19b-4be8b2cd98e864fb2d0886a3cbadb57d/USER",
+                "luminosity": 164.500000,
+                "number_of_jobs": 20
+            },
+        },
+    },
 
-    # Single Mu with Mu trigger
+
+    # Single Mu for tau embedding skims
     "SingleMu_Mu_160431-163261_May10": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_Mu20_v1",
@@ -114,7 +120,6 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
-                "luminosity": 0,
                 "number_of_jobs": 120, # Adjusted for skim file size
                 "lumiMask": "May10ReReco"
             },
@@ -134,7 +139,6 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
-                "luminosity": 0,
                 "number_of_jobs": 140, # Adjusted for skim file size
                 "lumiMask": "May10ReReco"
             },

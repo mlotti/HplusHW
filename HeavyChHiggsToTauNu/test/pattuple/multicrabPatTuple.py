@@ -22,27 +22,50 @@ multicrab.extendDatasets(
 #        "BTau_146428-148058_Apr21",          # HLT_SingleIsoTau20_Trk15_MET20
 #        "BTau_148822-149182_Apr21",          # HLT_SingleIsoTau20_Trk15_MET25_v3
 #        "BTau_149291-149294_Apr21",          # HLT_SingleIsoTau20_Trk15_MET25_v4
+
         # Data 2011 
-#        "Tau_160431-161176_May10",           # HLT_IsoPFTau35_Trk20_MET45_v1
-#        "Tau_161217-163261_May10",           # HLT_IsoPFTau35_Trk20_MET45_v2
-#        "Tau_163270-163869_May10",           # HLT_IsoPFTau35_Trk20_MET45_v4
-#        "Tau_165088-165633_Prompt",          # HLT_IsoPFTau35_Trk20_MET45_v6
-#        "Tau_165970-166164_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v2
-#        "Tau_166346-166346_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v3
-#        "Tau_166374-167043_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v2
-#        "Tau_167078-167913_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v4
-#        "Tau_170722-172619_Aug05",           # HLT_IsoPFTau35_Trk20_MET60_v6
-#        "Tau_172620-173198_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v6
-#        "Tau_173236-173692_Prompt",          # HLT_MediumIsoPFTau35_Trk20_MET60_v1
+#       "Tau_160431-163869_May10",           # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4}
+#       "Tau_165088-165633_Prompt",          # 2011A HLT_IsoPFTau35_Trk20_MET45_v6
+#       "Tau_165970-167913_Prompt",          # 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
+#       "Tau_170722-172619_Aug05",           # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
+#       "Tau_172620-173198_Prompt",          # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
+#       "Tau_173236-173692_Prompt",          # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
+#       "Tau_175860-177452_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v1
+#       "Tau_177718-178380_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v1
+#       "Tau_178420-179889_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v5
+#       "Tau_179959-180252_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v6
 
-#        "Tau_Single_165970-166164_Prompt",   # HLT_IsoPFTau35_Trk20_v2
-#        "Tau_Single_166346-166346_Prompt",   # HLT_IsoPFTau35_Trk20_v3
-#        "Tau_Single_166374-167043_Prompt",   # HLT_IsoPFTau35_Trk20_v2
-#        "Tau_Single_167078-167913_Prompt",   # HLT_IsoPFTau35_Trk20_v4
-#        "Tau_Single_170722-172619_Aug05",    # HLT_IsoPFTau35_Trk20_v6
-#        "Tau_Single_172620-173198_Prompt",   # HLT_IsoPFTau35_Trk20_v6
-#        "Tau_Single_173236-173692_Prompt",   # HLT_MediumIsoPFTau35_Trk20_v1
+#       "Tau_Single_165970-167913_Prompt",   # 2011A HLT_IsoPFTau35_Trk20_v{2,3,4}
+#       "Tau_Single_170722-172619_Aug05",    # 2011A HLT_IsoPFTau35_Trk20_v6
+#       "Tau_Single_172620-173198_Prompt",   # 2011A HLT_IsoPFTau35_Trk20_v6
+#       "Tau_Single_173236-173692_Prompt",   # 2011A HLT_MediumIsoPFTau35_Trk20_v1
+#       "Tau_Single_175860-177452_Prompt",   # 2011B HLT_MediumIsoPFTau35_Trk20_v1
+#       "Tau_Single_177718-178380_Prompt",   # 2011B HLT_MediumIsoPFTau35_Trk20_v1
+#       "Tau_Single_178420-179889_Prompt",   # 2011B HLT_MediumIsoPFTau35_Trk20_v5
+#       "Tau_Single_179959-180252_Prompt",   # 2011B HLT_MediumIsoPFTau35_Trk20_v6
 
+        # Muon data samples
+#       "SingleMu_160431-163261_May10",      # 2011A
+#       "SingleMu_163270-163869_May10",      # 2011A
+#       "SingleMu_165088-165633_Prompt",     # 2011A
+#       "SingleMu_165970-166150_Prompt",     # 2011A
+#       "SingleMu_166161-166164_Prompt",     # 2011A
+#       "SingleMu_166346-166346_Prompt",     # 2011A
+#       "SingleMu_166374-166967_Prompt",     # 2011A
+#       "SingleMu_167039-167043_Prompt",     # 2011A
+#       "SingleMu_167078-167913_Prompt",     # 2011A
+#       "SingleMu_170722-172619_Aug05",      # 2011A
+#       "SingleMu_172620-173198_Prompt",     # 2011A
+#       "SingleMu_173236-173692_Prompt",     # 2011A
+#       "SingleMu_175860-176469_Prompt",     # 2011B
+#       "SingleMu_176545-177053_Prompt",     # 2011B
+#       "SingleMu_177074-177452_Prompt",     # 2011B
+#       "SingleMu_177718-178380_Prompt",     # 2011B
+#       "SingleMu_178420-178866_Prompt",     # 2011B
+#       "SingleMu_178871-179889_Prompt",     # 2011B
+#       "SingleMu_179959-180252_Prompt",     # 2011B
+
+        # Summer11
         # Signal MC (WH)
 #        "TTToHplusBWB_M80_Summer11",
 #        "TTToHplusBWB_M90_Summer11",
@@ -76,6 +99,7 @@ multicrab.extendDatasets(
 #        "QCD_Pt120to170_TuneZ2_Summer11",
 #        "QCD_Pt170to300_TuneZ2_Summer11",
 #        "QCD_Pt300to470_TuneZ2_Summer11",
+#        "QCD_Pt20_MuEnriched_TuneZ2_Summer11",
 #        "TTJets_TuneZ2_Summer11",
 #        "WJets_TuneZ2_Summer11",
 #        "W3Jets_TuneZ2_Summer11",
@@ -89,6 +113,43 @@ multicrab.extendDatasets(
 #        "WW_TuneZ2_Summer11",
 #        "WZ_TuneZ2_Summer11",
 #        "ZZ_TuneZ2_Summer11",
+
+        # Fall11
+        # Signal MC (WH)
+#        "TTToHplusBWB_M80_Fall11",
+#        "TTToHplusBWB_M90_Fall11",
+#        "TTToHplusBWB_M100_Fall11",
+#        "TTToHplusBWB_M120_Fall11",
+#        "TTToHplusBWB_M140_Fall11",
+#        "TTToHplusBWB_M150_Fall11",
+#        "TTToHplusBWB_M155_Fall11",
+#        "TTToHplusBWB_M160_Fall11",
+        # Signal MC (HH)
+#        "TTToHplusBHminusB_M80_Fall11",
+#        "TTToHplusBHminusB_M90_Fall11",
+#        "TTToHplusBHminusB_M100_Fall11",
+#        "TTToHplusBHminusB_M120_Fall11",
+#        "TTToHplusBHminusB_M140_Fall11",
+#        "TTToHplusBHminusB_M155_Fall11",
+#        "TTToHplusBHminusB_M160_Fall11",
+        # Signal MC (Heavy)
+#        "HplusTB_M180_Fall11",
+#        "HplusTB_M190_Fall11",
+#        "HplusTB_M250_Fall11",
+#        "HplusTB_M300_Fall11",
+        # Background MC
+#        "QCD_Pt120to170_TuneZ2_Fall11",
+#        "QCD_Pt300to470_TuneZ2_Fall11",
+#        "TTJets_TuneZ2_Fall11",
+#        "WJets_TuneZ2_Fall11",
+#        "DYJetsToLL_M50_TuneZ2_Fall11",
+#        "T_t-channel_TuneZ2_Fall11",
+#        "Tbar_t-channel_TuneZ2_Fall11",
+#        "T_tW-channel_TuneZ2_Fall11",
+#        "T_s-channel_TuneZ2_Fall11",
+#        "Tbar_s-channel_TuneZ2_Fall11",
+#        "WZ_TuneZ2_Fall11",
+#        "ZZ_TuneZ2_Fall11",
         ])
 
 # local_stage_out doesn't work due to denied permission because we're
@@ -105,7 +166,7 @@ def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
-    name += "_pattuple_v18_1"
+    name += "_pattuple_v19"
 
     # Add the begin run in the dataset name to the publish name in
     # order to distinguish pattuple datasets from the same PD

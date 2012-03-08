@@ -13,7 +13,6 @@
   <use   name="DataFormats/WrappedStdDictionaries"/>
   <use   name="DataFormats/HepMCCandidate"/>
   <use   name="DataFormats/ParticleFlowCandidate"/>
-  <use   name="DataFormats/L1GlobalTrigger"/>
   <use   name="CommonTools/UtilAlgos"/>
   <use   name="CommonTools/TriggerUtils"/>
   <use   name="HLTrigger/HLTcore"/>

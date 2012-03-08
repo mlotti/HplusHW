@@ -122,10 +122,6 @@ if filterGenTaus:
 ################################################################################
 # The "golden" version of the signal analysis
 
-# Primary vertex selection
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
-addPrimaryVertexSelection(process, process.commonSequence)
-
 # Import Standard SignalAnalysis Parameters and change accordingly
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)

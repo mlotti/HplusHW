@@ -83,10 +83,6 @@ process.infoPath = addConfigInfo(process, options, dataVersion)
 ################################################################################
 # qcdMeasurementMethod3 module
 
-# Primary vertex selection
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
-addPrimaryVertexSelection(process, process.commonSequence)
-
 # Import default parameter set and make necessary tweaks
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
@@ -159,9 +155,10 @@ process.QCDMeasurement.factorization = mettables.METTableParameters
 process.QCDMeasurement.factorization.factorizationTables = mettableCoeff.METTableFactorizationCoefficients
 # Type 1 MET
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
-(sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.QCDMeasurement.tauSelection, process.QCDMeasurement.jetSelection)
+(sequence, type1Met, type1p2Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.QCDMeasurement.tauSelection, process.QCDMeasurement.jetSelection)
 process.commonSequence *= sequence
 process.QCDMeasurement.MET.type1Src = type1Met
+process.QCDMeasurement.MET.type2Src = type1p2Met
         
 # Prescale fetching done automatically for data
 if dataVersion.isData() and not disablePrescales:

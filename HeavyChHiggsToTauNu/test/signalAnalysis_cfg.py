@@ -25,7 +25,7 @@ doRtau0 = False # Rtau>0, MET>50
 doBTagScan = False
 
 # fill tree for btagging eff study
-doBTagTree = False
+doBTagTree = True
 
 # Perform Rtau scanning
 doRtauScan = False
@@ -125,10 +125,6 @@ process.infoPath = addConfigInfo(process, options, dataVersion)
 
 ################################################################################
 # The "golden" version of the signal analysis
-# Primary vertex selection
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
-addPrimaryVertexSelection(process, process.commonSequence)
-
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
 param.trigger.triggerSrc.setProcessName(dataVersion.getTriggerProcess())
@@ -178,9 +174,10 @@ process.signalAnalysis = signalAnalysis.createEDFilter(param)
 
 # Add type 1 MET
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
-(sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.signalAnalysis.tauSelection, process.signalAnalysis.jetSelection)
+(sequence, type1Met, type1p2Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.signalAnalysis.tauSelection, process.signalAnalysis.jetSelection)
 process.commonSequence *= sequence
 process.signalAnalysis.MET.type1Src = type1Met
+process.signalAnalysis.MET.type2Src = type1p2Met
 
 # Prescale fetching done automatically for data
 if dataVersion.isData() and options.tauEmbeddingInput == 0:

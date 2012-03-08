@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
 
-def addDataSelection(process, dataVersion, trigger):
+def addDataSelection(process, dataVersion, options):
     if not dataVersion.isData():
         raise Exception("Data version is not data!")
 
@@ -21,12 +21,16 @@ def addDataSelection(process, dataVersion, trigger):
     seq *= process.passedPhysicsDeclared
     
     # Trigger
-    if len(trigger) > 0:
+    if len(options.trigger) > 0:
+        print "Triggering with", " OR ".join(options.trigger)
         process.TriggerFilter = triggerResultsFilter.clone()
         process.TriggerFilter.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
         process.TriggerFilter.l1tResults = cms.InputTag("")
-        # process.TriggerFilter.throw = cms.bool(False) # Should it throw an exception if the trigger product is not found
-        process.TriggerFilter.triggerConditions = cms.vstring(trigger)
+        process.TriggerFilter.triggerConditions = cms.vstring(options.trigger)
+        if options.triggerThrow == 0:
+            # Should it throw an exception if the trigger product is not found
+            process.TriggerFilter.throw = False
+
         seq *= process.TriggerFilter
 
     process.passedTrigger = cms.EDProducer("EventCountProducer")
@@ -45,13 +49,13 @@ def addDataSelection(process, dataVersion, trigger):
     seq *= process.passedScrapingVeto
 
     # Reject events with anomalous HCAL noise, see
-    # https://twiki.cern.ch/twiki/bin/viewauth/CMS/Collisions2010Recipes#Anomalous_Signals_treatment_reco
-    # https://twiki.cern.ch/twiki/bin/view/CMS/HcalDPGAnomalousSignals
-    # https://twiki.cern.ch/twiki/bin/viewauth/CMS/HcalNoiseInfoLibrary#How_do_I_reject_events_with_anom
-    process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
-    process.passedHBHENoiseFilter = cms.EDProducer("EventCountProducer")
-    seq *= process.HBHENoiseFilter
-    seq *= process.passedHBHENoiseFilter
+    # https://twiki.cern.ch/twiki/bin/view/CMS/HBHEAnomalousSignals2011
+    # https://hypernews.cern.ch/HyperNews/CMS/get/hcal-noise/93.html
+    process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
+    process.HBHENoiseFilterResultProducer.minNumIsolatedNoiseChannels = 9999
+    process.HBHENoiseFilterResultProducer.minIsolatedNoiseSumE = 9999
+    process.HBHENoiseFilterResultProducer.minIsolatedNoiseSumEt = 9999
+    seq *= process.HBHENoiseFilterResultProducer
 
     # Require a good primary vertex (we might want to do this for MC too), see
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/Collisions2010Recipes#Good_Vertex_selection
@@ -71,6 +75,23 @@ def addDataSelection(process, dataVersion, trigger):
     return seq
 
 dataSelectionCounters = [
-    "allEvents", "passedTrigger", "passedScrapingVeto", "passedHBHENoiseFilter",
+    "allEvents", "passedPhysicsDeclared", "passedTrigger", "passedScrapingVeto"
 #    "passedPrimaryVertexFilter"
     ]
+
+
+def addHBHENoiseFilter(process, sequence):
+    process.HBHENoiseFilter = cms.EDFilter("HPlusBoolFilter",
+        src = cms.InputTag("HBHENoiseFilterResultProducer", "HBHENoiseFilterResult")
+    )
+    process.HBHENoiseFilterAllEvents = cms.EDProducer("EventCountProducer")
+    process.HBHENoiseFilterPassed = cms.EDProducer("EventCountProducer")
+    sequence *= (
+        process.HBHENoiseFilterAllEvents *
+        process.HBHENoiseFilter *
+        process.HBHENoiseFilterPassed
+    )
+    counters = ["HBHENoiseFilterAllEvents", "HBHENoiseFilterPassed"]
+    return counters
+
+

@@ -31,6 +31,7 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     jetsForMetVariation = name+"JetsForMetVariation"
     rawMetVariationName = name+"RawMetVariation"
     type1MetVariationName = name+"Type1MetVariation"
+    type2MetVariationName = name+"Type2MetVariation"
     analysisName = prefix+name
     countersName = analysisName+"Counters"
     pathName = analysisName+"Path"
@@ -50,7 +51,7 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     # which tau to select, and that tau is needed for the jet cleaning
     # in the type 1 MET calculation.
     tauSelection = prototype.tauSelection.clone(src=tauVariationName)
-    (type1sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, tauSelection, prototype.jetSelection, postfix=name)
+    (type1sequence, type1Met, type1p2Met) = MetCorrection.addCorrectedMet(process, dataVersion, tauSelection, prototype.jetSelection, postfix=name)
     tauForMetVariation = "selectedPatTausForMetCorr"+name
 
     # Jet variation
@@ -102,6 +103,14 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     )
     setattr(process, type1MetVariationName, mettype1v)
 
+    mettype2v = metVariation.clone(
+        metSrc = type1p2Met,
+        tauSrc = tauForMetVariation,
+        jetSrc = jetsForMetVariation,
+        unclusteredVariation = unclusteredEnergyVariationForMET
+    )
+    setattr(process, type2MetVariationName, mettype2v)
+
     # Construct the signal analysis module for this variation
     # Use variated taus, jets and MET
     analysis = prototype.clone()
@@ -109,6 +118,7 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     analysis.jetSelection.src = jetVariationName
     analysis.MET.rawSrc = rawMetVariationName
     analysis.MET.type1Src = type1MetVariationName
+    analysis.MET.type2Src = type2MetVariationName
     setattr(process, analysisName, analysis)
     
     # Construct the counters module
@@ -129,6 +139,7 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
         * jetsForMetv
         * metrawv
         * mettype1v
+        * mettype2v
         * analysis
         * counters
     )

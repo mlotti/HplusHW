@@ -53,8 +53,10 @@ set -e
 # 28.9.2011/M.Kortelainen CMSSW_4_2_8_patch2 Added tags for calculating type I/II MET from PAT objects
 # 3.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Bugfix from Christian for type I/II MET
 # 5.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Updated LumiDB tag (bugfix)
-# 6.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Another bugfix from Christian for type I/II MEt
+# 6.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Another bugfix from Christian for type I/II MET
+# 14.10.2011/M.Kortelainen CMSSW_4_2_8_patch6 Updated PAT tags
 # 17.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Updated PU reweight tag for the updated recipe, lumi tag for minor bugfix (which is probably not relevant to us)
+# 17.10.2011/M.Kortelainen CMSSW_4_2_8_patch6 Updated type I/II MET tags
 # 29.12.2011/S.Lehti       CMSSW_4_2_8_patch2 Commented removal of HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
 
 # addpkg requires cmsenv
@@ -73,10 +75,15 @@ addpkg RecoTauTag/Configuration   V01-02-03
 addpkg RecoTauTag/RecoTau         V01-02-07
 addpkg RecoTauTag/TauTagTools     V01-02-00
 # PAT
-addpkg DataFormats/PatCandidates  V06-04-19-01
-addpkg PhysicsTools/PatAlgos      V08-06-41
-addpkg PhysicsTools/PatExamples   V00-05-22
-addpkg PhysicsTools/SelectorUtils V00-03-17
+addpkg DataFormats/PatCandidates  V06-04-19-02
+addpkg PhysicsTools/PatAlgos      V08-06-46
+addpkg PhysicsTools/PatExamples   V00-05-24
+addpkg CommonTools/ParticleFlow   B4_2_X_V00-03-00
+addpkg PhysicsTools/SelectorUtils V00-03-24
+addpkg PhysicsTools/UtilAlgos     V08-02-14
+# New tau discriminators
+# https://hypernews.cern.ch/HyperNews/CMS/get/tauid/164/1.html
+cvs co -r 1.43 PhysicsTools/PatAlgos/python/tools/tauTools.py
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 addpkg RecoJets/Configuration     V02-04-17
@@ -85,8 +92,9 @@ addpkg PhysicsTools/Utilities     V08-03-10
 
 # Type I/II MET
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis#HeadingFive
-addpkg JetMETCorrections/Type1MET V04-05-04
-addpkg PhysicsTools/PatUtils      b4_2_X_cvMEtCorr_06Oct11
+addpkg JetMETCorrections/Type1MET V04-05-05
+addpkg PhysicsTools/PatUtils      b4_2_X_cvMEtCorr_14Oct2011
+cvs up -r 1.2 PhysicsTools/PatUtils/interface/SmearedJetProducerT.h
 
 addpkg DataFormats/METReco
 cvs up -r 1.28 DataFormats/METReco/src/classes.h
@@ -96,9 +104,6 @@ addpkg JetMETCorrections/Algorithms V02-03-00
 rm -f JetMETCorrections/Algorithms/interface/L1JPTOffsetCorrector.h
 rm -f JetMETCorrections/Algorithms/src/L1JPTOffsetCorrector.cc
 addpkg JetMETCorrections/Objects V03-01-00
-addpkg JetMETCorrections/Modules
-cvs up -r 1.4 JetMETCorrections/Modules/plugins/JetCorrectorOnTheFly.cc
-cvs up -r 1.6 JetMETCorrections/Modules/interface/JetCorrectionProducer.h
 
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc

@@ -24,7 +24,14 @@ defaultSeBlacklist = [
     "iihe.ac.be", # Problematic site with server
     "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout, also jobs can queue long times
     "unl.edu", # Jobs can wait in queues for a looong time
-    "wisc.edu", # Stageout failures
+    "wisc.edu", # Stageout failures,
+#    "ingrid.pt", # Stageout failures
+    "ucsd.edu", # Stageout failures
+    "pi.infn.it", # Stageout failures
+    "lnl.infn.it", # Stageout failures
+    "mit.edu", # MIT has some problems?
+    "sprace.org.br", # Stageout failures
+    "knu.ac.kr", # Stageout failures
     ]
 
 def getTaskDirectories(opts, filename="multicrab.cfg"):
@@ -476,6 +483,20 @@ class MulticrabDataset:
         else:
             self.data[blackWhiteList] = sites[:]
 
+    def setTrigger(self, name, content):
+        if name != "trigger" and name != "triggerOR":
+            raise Exception("name can be either 'trigger' or 'triggerOR', was '%s'" % name)
+        try:
+            del self.data["trigger"]
+        except KeyError:
+            pass
+        try:
+            del self.data["triggerOR"]
+        except KeyError:
+            pass
+
+        self.data[name] = content
+
     def _writeGeneratedFiles(self, directory):
         """Write generated files to a directory.
 
@@ -515,12 +536,12 @@ class MulticrabDataset:
                 pass
         try:
             args.extend(["trigger=%s" % trigger for trigger in self.data["triggerOR"]])
+            del dataKeys[dataKeys.index("triggerOR")]
         except KeyError:
             pass
 
         if "args" in self.data:
             for key, value in self.data["args"].iteritems():
-                print key, value
                 args.append("%s=%s" % (key, str(value)))
             del dataKeys[dataKeys.index("args")]
         args += self.args

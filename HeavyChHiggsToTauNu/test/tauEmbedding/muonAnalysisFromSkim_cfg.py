@@ -61,7 +61,6 @@ patArgs = {"doPatTrigger": False,
 #           "doHChTauDiscriminators": False,
            "doPatElectronID": True,
            "doTauHLTMatching": False,
-           "doPatMuonPFIsolation": True,
            }
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, plainPatArgs=patArgs)
 #process.commonSequence.remove(process.goodPrimaryVertices10)

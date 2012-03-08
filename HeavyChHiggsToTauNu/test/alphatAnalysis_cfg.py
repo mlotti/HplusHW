@@ -80,10 +80,6 @@ process.infoPath = addConfigInfo(process, options, dataVersion)
 ################################################################################
 # The "golden" version of the alphat analysis
 
-# Primary vertex selection
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
-addPrimaryVertexSelection(process, process.commonSequence)
-
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
 # Set tau selection mode to 'standard' or 'factorized'

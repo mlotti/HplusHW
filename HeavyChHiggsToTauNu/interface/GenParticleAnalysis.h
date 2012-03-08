@@ -45,6 +45,7 @@ namespace HPlus {
 
   private:
     void init();
+    /*
     std::vector<const reco::GenParticle*> getImmediateMothers(const reco::Candidate&);
     std::vector<const reco::GenParticle*> getMothers(const reco::Candidate&);
     bool hasImmediateMother(const reco::Candidate&, int);
@@ -57,6 +58,8 @@ namespace HPlus {
     bool hasDaughter(const reco::Candidate&, int);
     void printImmediateDaughters(const reco::Candidate& );
     void printDaughters(const reco::Candidate& );
+    */
+
     
     // EventWeight object
     EventWeight& fEventWeight;
@@ -100,6 +103,12 @@ namespace HPlus {
     TH1 *hBquarkNotFromTopPt;
     TH1 *hBquarkFromTopDeltaRTau;
     TH1 *hBquarkNotFromTopDeltaRTau;
+    TH1 *hGenBquarkFromHiggsSideEta;
+    TH1 *hGenBquarkFromHiggsSidePt;
+    TH1 *hGenDeltaRHiggsSide;
+    TH1 *hGenBquarkFromTopSideEta;
+    TH1 *hGenBquarkFromTopSidePt;
+    TH1 *hGenDeltaRTopSide;
     TH1 *hTopPt;
     TH1 *hTopPt_wrongB;
     TH1 *hGenMET;

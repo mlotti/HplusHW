@@ -235,8 +235,26 @@ GenParticleAnalysis = cms.untracked.PSet(
 )
 topSelection = cms.untracked.PSet(
   TopMassLow = cms.untracked.double(100.0),
-  TopMassHigh = cms.untracked.double(300.0)
+  TopMassHigh = cms.untracked.double(300.0),
+  src = cms.untracked.InputTag("genParticles")
 )
+
+bjetSelection = cms.untracked.PSet(
+  src = cms.untracked.InputTag("genParticles")
+)
+topChiSelection = cms.untracked.PSet(
+  TopMassLow = cms.untracked.double(120.0),
+  TopMassHigh = cms.untracked.double(250.0),
+  Chi2Cut = cms.untracked.double(5.0),
+  src = cms.untracked.InputTag("genParticles") 
+)
+
+topWithBSelection = cms.untracked.PSet(
+      TopMassLow = cms.untracked.double(120.0),
+      TopMassHigh = cms.untracked.double(250.0),
+      Chi2Cut = cms.untracked.double(5.0),
+      src = cms.untracked.InputTag("genParticles")
+)      
 
 tree = cms.untracked.PSet(
     fill = cms.untracked.bool(True),
@@ -572,8 +590,9 @@ def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, ad
         module.tauSelection = selection.clone()
 
         # Calculate type 1 MET
-        (type1Sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, module.tauSelection, module.jetSelection, postfix=name)
+        (type1Sequence, type1Met, type1p2Met) = MetCorrection.addCorrectedMet(process, dataVersion, module.tauSelection, module.jetSelection, postfix=name)
         module.MET.type1Src = type1Met
+        module.MET.type2Src = type1p2Met
 
         seq = cms.Sequence(
             commonSequence *

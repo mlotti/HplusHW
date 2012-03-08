@@ -64,6 +64,8 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep *_offlinePrimaryVertices_*_*",
         "keep *_l1GtTriggerMenuLite_*_*", # in run block, needed for prescale provider
         "keep recoCaloMETs_*_*_*", # keep all calo METs (metNoHF is needed!)
+        "keep *_kt6PFJets_rho_HChPatTuple", # keep the rho of the event
+        "keep *_HBHENoiseFilterResultProducer_*_*", # keep the resulf of HBHENoiseFilterResultProducer
         ),
     dropMetaData = cms.untracked.string("ALL")
 )
@@ -84,9 +86,9 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 options.doPat=1
 (process.sPAT, c) = addPatOnTheFly(process, options, dataVersion,
                                    doPlainPat=True, doPF2PAT=False,
-                                   plainPatArgs={"doTauHLTMatching": doTauHLTMatching
-                                                 "matchingTauTrigger": myTrigger,
-                                                 "doPatMuonPFIsolation": True},
+                                   plainPatArgs={"doTauHLTMatching": doTauHLTMatching,
+                                                 "matchingTauTrigger": myTrigger},
+                                   doHBHENoiseFilter=False, # Only save the HBHE result to event, don't filter
                                    )
 
 process.out.outputCommands.extend([
@@ -106,7 +108,7 @@ if dataVersion.isMC():
             # Remove the soft photons from fragmentations (we have not needed them)
 #            "drop pdgId() = {gamma} && mother().pdgId() = {pi0}"
             "drop++ pdgId() = {string}",
-            "keep pdgId() = {string}"
+            "keep pdgId() = {string}",
             )
     )
     process.out.outputCommands.extend([
@@ -136,6 +138,7 @@ if dataVersion.isData():
     process.out.outputCommands.extend(["drop recoGenJets_*_*_*"])
 else:
     process.out.outputCommands.extend([
+            "keep LHEEventProduct_*_*_*",
             "keep GenEventInfoProduct_*_*_*",
             "keep GenRunInfoProduct_*_*_*",
             ])
@@ -151,12 +154,26 @@ process.heavyChHiggsToTauNuSequence.remove(process.heavyChHiggsToTauNuHLTrigRepo
 if isinstance(myTrigger, basestring):
     myTrigger = [myTrigger]
 process.heavyChHiggsToTauNuHLTFilter.HLTPaths = myTrigger
+process.heavyChHiggsToTauNuHLTFilter.throw = False
+
+# TotalKinematicsFilter for managing with buggy LHE+Pythia samples
+# https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1489.html
+if dataVersion.isMC():
+    process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
+    process.totalKinematicsFilter.src.setProcessName(dataVersion.getTriggerProcess())
+    process.totalKinematicsFilterPath = cms.Path(
+        process.totalKinematicsFilter
+    )
 
 #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HLTTauEmulation_cff")
 #process.out.outputCommands.extend(["keep recoCaloTaus_caloTauHLTTauEmu_*_*"])
 #process.out.outputCommands.extend(["keep *_l1extraParticles_*_*"])
 #process.out.outputCommands.extend(["keep recoTracks_generalTracks_*_*"])
 #process.out.outputCommands.extend(["keep recoCaloJets_ak5CaloJets_*_*"])
+
+process.triggerObjects = cms.EDAnalyzer("HPlusPATTriggerPrinter",
+    src = cms.InputTag("patTriggerEvent")
+)
 
 # Create paths
 process.path    = cms.Path(
@@ -165,9 +182,49 @@ process.path    = cms.Path(
     process.sPAT
 #    process.sPF2PAT *
 #    process.sPF2PATnoPU
+    * process.triggerObjects
 )
 process.skimPath = cms.Path(
     process.heavyChHiggsToTauNuSequence
 )
+
+# In case of OR of many triggers, add event counts for each trigger separately
+# Assume that if triggerThrow is false, the multiple triggers cover
+# different run ranges without any overlaps, then this information is
+# not interesting and can be neglected
+if dataVersion.isData() and len(options.trigger) > 1 and options.triggerThrow != 0:
+    import HLTrigger.HLTfilters.hltHighLevel_cfi as hltHighLevel
+    for trig in options.trigger:
+        name = trig.replace("_", "")
+
+        mt = hltHighLevel.hltHighLevel.clone(
+            HLTPaths = cms.vstring(trig)
+        )
+        mt.TriggerResultsTag.setProcessName(dataVersion.getTriggerProcess())
+        setattr(process, "Trigger"+name, mt)
+
+        mc1 = cms.EDProducer("EventCountProducer")
+        setattr(process, "Counter"+name, mc1)
+
+        mc2 = cms.EDProducer("EventCountProducer")
+        setattr(process, "CounterScraping"+name, mc2)
+
+        path = cms.Path(
+            process.hltPhysicsDeclared *
+            mt * 
+            mc1 *
+            process.scrapingVeto *
+            mc2
+        )
+        setattr(process, "Path"+name, path)
+
+# If there is a need to apply some skim
+if options.skimConfig != "":
+    print "Skimming with configuration ", options.skimConfig
+    process.load(options.skimConfig)
+    process.plainPatSequence.replace(process.plainPatEndSequence,
+                                     process.skimSequence*process.plainPatEndSequence)
+
+# Output module in EndPath
 process.outpath = cms.EndPath(process.out)
 

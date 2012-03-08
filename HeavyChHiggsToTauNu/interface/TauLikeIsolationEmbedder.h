@@ -17,7 +17,7 @@
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 
 #include "RecoTauTag/TauTagTools/interface/TauTagTools.h"
-#include "RecoTauTag/RecoTau/src/RecoTauVertexAssociator.cc"
+#include "RecoTauTag/RecoTau/interface/RecoTauVertexAssociator.h"
 #include "RecoTauTag/RecoTau/interface/RecoTauQualityCuts.h"
 
 #include "DataFormats/PatCandidates/interface/Tau.h"
