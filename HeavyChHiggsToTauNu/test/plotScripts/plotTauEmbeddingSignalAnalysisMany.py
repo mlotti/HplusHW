@@ -89,7 +89,7 @@ def main():
     datasetsEmb.forEach(mergeEWK)
 
     datasetsEmbCorrected = result.DatasetsDYCorrection(datasetsEmb, datasetsSig, analysisEmb, analysisSig)
-    datasetsResidual = tauEmbedding.DatasetsResidual(datasetsEmb, datasetsSig, analysisEmb, analysisSig, ["DYJetsToLL", "WW"], totalNames=["Data", "EWKMC"]))
+    datasetsResidual = tauEmbedding.DatasetsResidual(datasetsEmb, datasetsSig, analysisEmb, analysisSig, ["DYJetsToLL", "WW"], totalNames=["Data", "EWKMC"])
 
 #    doPlots(datasetsEmb)
     #doPlots(datasetsEmbCorrected)
