@@ -1,6 +1,8 @@
 ## \package multicrabDatasetsTauEmbedding
 #
 # Dataset definitions for tau embedding datasets
+#
+# \see multicrab
 
 import multicrabDatasetsCommon as common
 

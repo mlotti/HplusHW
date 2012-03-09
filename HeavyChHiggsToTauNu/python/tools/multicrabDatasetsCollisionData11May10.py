@@ -1,6 +1,8 @@
 ## \package multicrabDatasetsCollisionData11May10
 #
 # Dataset definitions for partial Run2011 (160431-163869) May10 ReReco (with CMSSW 42X)
+#
+# \see multicrab
 
 import multicrabDatasetsCommon as common
 

@@ -1,5 +1,30 @@
 ## \package multicrab
 # Python interface for multicrab, also the default SE black list
+#
+# The functionality is divided to
+# \li creating (multi)crab tasks (also multicrabDataset package)
+# \li querying the status of crab jobs (via hplusMultiCrabStatus.py)
+#
+# The motivation for having all this trouble with creating the crab
+# tasks is that managing hundreds of datasets/crab tasks (one crab
+# task per dataset with an entry in DBS) with plain multicrab.cfg
+# files requires a lot of manual copy-pasting and is thus error prone.
+# And yes, the number of datasets to manage is indeed in hundreds
+# (PromptReco and ReRecos for data, production campaigns for MC;
+# orthogonally the AOD version, various pattuple versions, tau
+# embedding skims, tau embedding embedded datasets etc.).
+#
+# Writing the dataset definitions to a data structure which can be
+# queried easily (multicrabDataset.datasets), and few classes to
+# provide nice interface to the user (multicrab.Multicrab,
+# multicrab.MulticrabDataset) makes it easy to write scripts for
+# creating multicrab jobs such that (see e.g.
+# test/multicrabSignalAnalysis.py, test/pattuple/multicrabPatTuple.py,
+# test/tauEmbedding/multicrabTauEmbedding.py)
+# \li selecting only some datasets is a matter of (un)commenting one line per dataset
+# \li switching pattuple versions is a matter of changing value of one variable (i.e. one line change)
+# \li switching from pattuple to AOD with PAT-on-the-fly is a matter of chaning value of one variable
+# \li switching data processing era (for data datasets, PU reweighting factors, trigger efficiencies) is a matter of changing value of one variable
 
 import os, re
 import subprocess, errno

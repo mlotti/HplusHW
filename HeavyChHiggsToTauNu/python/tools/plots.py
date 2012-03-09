@@ -22,6 +22,16 @@
 # interface of the plots.PlotBase derived class, or directly with the
 # histograms.HistoManager object contained by the plot object (via
 # histoMgr member). Some automation is provided with plots.PlotDrawer.
+#
+# Although the intended usage is described above, it does \b not mean
+# that it would be the only way to use the classes. You should use
+# them only if they help you, and in a way which helps you. For
+# example, plots.PlotBase (or plots.ComparisonPlot,
+# plots.ComparisonManyPlot) doesn't care at all where the
+# histograms/graphs come from. If your problem is solved with direct
+# access to TFile and TH1/TGraph objects, or from TTree, more easily
+# than with datasetsd.DatasetManager, there is absolutely no problem
+# in doing so.
 
 import ROOT
 import array

@@ -1,6 +1,8 @@
 ## \package multicrabDatasetsMCSummer11
 #
 # Dataset definitions for Summer11 MC production (CMSSW 42X)
+#
+# \see multicrab
 
 import multicrabDatasetsCommon as common
 

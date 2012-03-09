@@ -6,6 +6,8 @@
 #
 # Note that you can obtain a list of all defined datasets by running
 # this file through the python interpreter.
+#
+# \see multicrab
 
 import multicrabDatasetsCollisionData10Dec22 as collisionData10Dec22
 import multicrabDatasetsCollisionData10Apr21 as collisionData10Apr21
