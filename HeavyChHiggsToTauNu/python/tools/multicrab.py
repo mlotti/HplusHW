@@ -25,6 +25,114 @@
 # \li switching pattuple versions is a matter of changing value of one variable (i.e. one line change)
 # \li switching from pattuple to AOD with PAT-on-the-fly is a matter of chaning value of one variable
 # \li switching data processing era (for data datasets, PU reweighting factors, trigger efficiencies) is a matter of changing value of one variable
+#
+# The dataset definition structure is as follows
+# \code
+# datasets = {
+#     # Example of data dataset with a single trigger
+#     "Tau_165088-165633_Prompt": { # Name of the dataset
+#         "dataVersion": "42Xdata", # Data version string 
+#         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v6", # Trigger to be applied (optional)
+#         "runs": (165088, 165633), # Inclusive range of runs for this dataset
+#         "data": { # Section for various dataInput versions
+#             "AOD": { # Name of dataInput
+#                 "datasetpath": "/Tau/Run2011A-PromptReco-v4/AOD", # DBS path
+#                 "number_of_jobs": 200, # (Default) number of jobs to create for a task processing this dataset
+#                 "lumiMask": "PromptReco" # Lumi mask name
+#             },
+#             "pattuple_v18": {
+#                 "dbs_url": common.pattuple_dbs, # DBS reader URL, if dataset is published in some other DBS instance than the global DBS
+#                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_165088_pattuple_v18-68faa0f802ec7fdcb65798edde8320e0/USER",
+#                 "luminosity": 138.377000, # Integrated luminosity of a dataset in pb^-1 (optional)
+#                 "number_of_jobs": 2,
+#             },
+#             "pattuple_v19": {
+#                 "dbs_url": common.pattuple_dbs,
+#                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_165088_pattuple_v19-3bb41d427869a8c545d9fa20bdb93436/USER",
+#                 "number_of_jobs": 2,
+#             },
+#         }
+#     },
+#     # Example of data dataset with OR of many triggers
+#     "SingleMu_165088-165633_Prompt": {
+#         "dataVersion": "42Xdata",
+#         "args": {"doTauHLTMatching": 0}, # Additional command line arguments
+#         "triggerOR": [ # List of triggers whose OR is to be applied (optional)
+#             "HLT_Mu30_v3", "HLT_IsoMu17_v8",
+#             "HLT_Mu15_v4", "HLT_Mu20_v3", "HLT_Mu24_v3", "HLT_IsoMu15_v8",
+#             ],
+#         "runs": (165088, 165633),
+#         "data": {
+#             "AOD": {
+#                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
+#                 "number_of_jobs": 490,
+#                 "lumiMask": "PromptReco"
+#             },
+#             "pattuple_v19": {
+#                 "dbs_url": common.pattuple_dbs,
+#                 "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v4_AOD_165088_pattuple_v19b-a96d8be905ea05d746e188c63f686c22/USER",
+#                 "luminosity": 139.078000,
+#                 "number_of_jobs": 10
+#             },
+#         }
+#     },
+#     # Example of MC dataset
+#     "W3Jets_TuneZ2_Summer11": {
+#         "dataVersion": "42XmcS4",
+#         "crossSection": 304.2*31314/27770.0, # Cross section in pb. Demonstrates also that all values in given here can be python expressions
+#         "data": {
+#             "AOD": {
+#                 "datasetpath": "/W3Jets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+#                 "number_of_jobs": 490,
+#             },
+#             "pattuple_v18": {
+#                 "dbs_url": common.pattuple_dbs,
+#                 "datasetpath": "/W3Jets_TuneZ2_7TeV-madgraph-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v18_1-5c1fe2e0ac511ee6db9df3b7fb33ca32/USER",
+#                 "number_of_jobs": 16
+#             },
+#         },
+#     },
+# }
+# \endcode
+# \li <i>Dataset name</i> translates to [name] section in
+#     multicrab.cfg, and thus becomes the task directory name.
+# \li <i>Data version</i> should be one defined in
+#     <tt>python/HChDataVersion.py</tt>. Data version affects to
+#     Global Tag and default input files. E.g. JEC levels and
+#     pattuple-time event selection depends whether dataset is data or
+#     MC. There can be also some customisations which depend on the
+#     CMSSW version of the data.
+# \li <i>Trigger</i> can be specified either with \a trigger or \a
+#     triggerOR (mutually exclusive; either one is required for data,
+#     for MC trigger is not used). With \a trigger, a single HLT path
+#     should be specified, events are required to pass the path. With
+#     \a triggerOR, a list of HLT paths should be specified, events
+#     are required to pass any of the specified paths.
+# \li <i>Run range</i> If \a lumiMask is given, process only the runs
+#     in this range. If \a lumiMask is not given, run range has no
+#     effect
+# \li <i>DataInput</i> (better name, anyone?) specifies various
+#     "versions" of the dataset which can be an input to crab jobs.
+#     Usually one of the entries is "AOD", which corresponds the
+#     AOD(SIM) dataset centrally produced by CMS. There can be one or
+#     more pattuple versions produced by us.
+# \li <i>Lumi mask</i> Shorthand name for a JSON file, specified in
+#     <tt>python/tools/certifiedLumi.py</i>. The JSON files are
+#     assumed to exist in <tt>test</tt> directory.
+# \li <i>Integrated luminosity</i> is purely informative, and is not
+#     used in processing workflow in any way (the recommendation is to
+#     always calculate the luminosity after processing data). Can be
+#     useful to detect inconsitenties in the amount of data really
+#     processed (e.g. if some file was skipped)
+# \li <i>Additional command line arguments</i> can be given. These are
+#     appended to <i>CMSSW.pycfg_params</i> list in multicrab.cfg for
+#     this dataset, and where they are then delivered to
+#     <i>sys.argv</i> of the python configuration file.
+# \li <i>Cross section</i> is mandatory for MC datasets. It is
+#     forwarded to python configuration, which in turns forwards it to
+#     <tt>configInfo/configinfo</tt> histogram in the resulting
+#     histograms.root file. The value provides a default value for the
+#     cross section of the dataset.
 
 import os, re
 import subprocess, errno
