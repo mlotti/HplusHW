@@ -1,5 +1,5 @@
 ## \package tauEmbedding
-# Tau embedding (EWK+ttbar tau background measurement) related plotting stuff
+# Tau embedding (EWK+ttbar tau background measurement) related plotting utilities
 
 import math
 import array

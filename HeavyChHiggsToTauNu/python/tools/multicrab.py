@@ -118,7 +118,6 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
 #
 # \param parser  optparse.OptionParser object
 def addOptions(parser):
-    """"""
     parser.add_option("--dir", "-d", dest="dirs", type="string", action="append", default=[],
                       help="CRAB task directory to have the files to merge (default: read multicrab.cfg and use the sections in it)")
     parser.add_option("--filter", dest="filter", type="string", default="",
@@ -775,7 +774,7 @@ class Multicrab:
 
     ## Modify the number of jobs of all dataset with a function.
     # 
-    # \param function    Function
+    # \param func    Function
     #
     # The function gets the original number of jobs as an argument,
     # and the function should return a number for the new number of

@@ -1,6 +1,6 @@
 ## \package multicrabDatasetsCollisionData11Prompt
 #
-# Dataset definitions for Run2011 PromtReco (160431-163869 with CMSSW 41X, after that 42X)
+# Dataset definitions for Run2011 PromptReco (160431-163869 with CMSSW 41X, after that 42X)
 #
 # \see multicrab
 

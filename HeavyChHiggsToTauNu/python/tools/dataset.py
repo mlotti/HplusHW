@@ -21,7 +21,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 #                    the item of the list is pair of strings, the first
 #                    element is the directory, and the second element is
 #                    the postfix for the dataset names from that directory.
-# <b>Keyword arguments</b> are forwarded to getDatasetsFromMulticrabCfg()
+# \param kwargs      Keyword arguments (forwarded to getDatasetsFromMulticrabCfg())
 #
 # \return DatasetManager object
 def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
@@ -44,7 +44,9 @@ def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
     return datasets
 
 ## Construct DatasetManager from a multicrab.cfg.
-# 
+#
+# \param kwargs   Keyword arguments (see below) 
+#
 # <b>Keyword arguments</b>
 # \li \a opts       Optional OptionParser object. Should have options added with addOptions() and multicrab.addOptions().
 # \li \a cfgfile    Path to the multicrab.cfg file (for default, see multicrab.getTaskDirectories())
@@ -73,6 +75,7 @@ def getDatasetsFromMulticrabCfg(**kwargs):
 # 
 # \param taskdirs     List of strings for the CRAB task directories (relative
 #                     to the working directory)
+# \param kwargs       Keyword arguments (see below) 
 # 
 # <b>Keyword arguments</b>
 # \li \a opts         Optional OptionParser object. Should have options added with addOptions() and multicrab.addOptions().
@@ -128,6 +131,7 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
 # \param rootFileList  List of (name, filename) pairs (both should be strings).
 #                     'name' is taken as the dataset name, and 'filename' as
 #                      the path to the ROOT file.
+# \param kwargs        Keyword arguments (see below) 
 # 
 # <b>Keyword arguments</b>
 # \li \a counters      String for a directory name inside the ROOT files for the event counter histograms (default: 'signalAnalysisCounters').
@@ -743,7 +747,8 @@ class DatasetRootHisto(DatasetRootHistoBase):
 
     ## Modify the TH1 with a function
     #
-    # \param function   Function taking the original TH1 and some other DatasetRootHisto object as input, returning a new TH1
+    # \param function              Function taking the original TH1 and some other DatasetRootHisto object as input, returning a new TH1
+    # \param newDatasetRootHisto   The other DatasetRootHisto object
     #
     # Needed for appending rows to counters from TTree
     def modifyRootHisto(self, function, newDatasetRootHisto):
@@ -843,7 +848,8 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
 
     ## Modify the TH1 with a function
     #
-    # \param function   Function taking the original TH1 and some other DatasetRootHisto object as input, returning a new TH1
+    # \param function             Function taking the original TH1 and some other DatasetRootHisto object as input, returning a new TH1
+    # \param newDatasetRootHisto  The other DatasetRootHisto object, must be the same type and contain same number of DatasetRootHisto objects
     #
     # Needed for appending rows to counters from TTree
     def modifyRootHisto(self, function, newDatasetRootHisto):
@@ -926,6 +932,7 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
     ## Modify the TH1 with a function
     #
     # \param function   Function taking the original TH1 and some other DatasetRootHisto object as input, returning a new TH1
+    # \param newDatasetRootHisto  The other DatasetRootHisto object, must be the same type and contain same number of DatasetRootHisto objects
     #
     # Needed for appending rows to counters from TTree
     def modifyRootHisto(self, function, newDatasetRootHisto):
@@ -1670,6 +1677,7 @@ class DatasetManager:
     ## Rename many dataset.Dataset objects
     # 
     # \param nameMap   Dictionary containing oldName->newName mapping
+    # \param silent    If true, don't raise Exception if source dataset doesn't exist
     #
     # \see rename()
     def renameMany(self, nameMap, silent=False):
@@ -1722,8 +1730,12 @@ class DatasetManager:
 
     ## Merge dataset.Dataset objects.
     # 
-    # \param newName    Name of the merged dataset.DatasetMerged
-    # \param nameList   List of dataset.Dataset names to merge
+    # \param newName      Name of the merged dataset.DatasetMerged
+    # \param nameList     List of dataset.Dataset names to merge
+    # \param keepSources  If true, keep the original dataset.Dataset
+    #                     objects in the list of datasets. Otherwise
+    #                     they are removed, as they are now contained
+    #                     in the dataset.DatasetMerged object
     #
     # If nameList translates to only one dataset.Dataset, the
     # dataset.Daataset object is renamed (i.e. dataset.DatasetMerged

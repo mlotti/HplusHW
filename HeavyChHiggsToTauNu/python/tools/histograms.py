@@ -259,7 +259,7 @@ class LegendCreator:
     # 
     # <b>Arguments can be either</b>
     # \li Four numbers for the coordinates (\a x1, \a y1, \a x2, \a y2) as positional arguments
-    # \l1 Keyword arguments (\a x1, \a y1, \a x2, \a y2)
+    # \li Keyword arguments (\a x1, \a y1, \a x2, \a y2)
     #
     # If all 4 coordinates are specified, they are used. In the
     # keyword argument case, the coordinates which are not given are

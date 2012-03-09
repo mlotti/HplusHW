@@ -1,4 +1,4 @@
-## \packate tdrstyle
+## \package tdrstyle
 # Provides pythonized version of CMS TDR style
 
 import ROOT

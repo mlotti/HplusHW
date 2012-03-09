@@ -496,7 +496,8 @@ def UpdatePlotStyleFill(styleMap, namesToFilled):
 
 ## Default dataset merging, naming and reordering for data/MC comparison
 #
-# \param datasetMgr  dataset.DatasetManager object
+# \param datasetMgr     dataset.DatasetManager object
+# \param keepSourcesMC  If True, for MC keep also the merged dataset.Dataset objects in the dataset.DatasetManager (see dataset.DatasetManager.merge)
 #
 # Merges data datasets and the MC datasets as specified in
 # plots._datasetMerge. The intention is that the datasets to be merged
@@ -1046,11 +1047,14 @@ class PlotRatioBase:
     #
     # \param filename         Name of the frame
     # \param numerators       List of numerator TH1/TGraph objects
-    # \param denominators     List of denominator TH1/TGraph objects
-    # \param ytitle           Y axis title for the ratio pad
+    # \param denominator      Denominator TH1/TGraph object
     # \param invertRatio      Invert the roles of numerator and denominator
     # \param ratioIsBinomial  True for binomial ratio (e.g. efficiency)
     # \param kwargs           Keyword arguments (forwarded to _createFrame())
+    #
+    # Creates one ratio histogram for each numerator, as
+    # numerator/denominator. If \a invertRatio is True, the ratios are
+    # formed as denominator/numerator.
     #
     # Intended for internal use only
     def _createFrameRatioMany(self, filename, numerators, denominator, invertRatio=False, ratioIsBinomial=False, **kwargs):
@@ -1292,9 +1296,13 @@ class MCPlot(PlotSameBase):
 class DataMCPlot(PlotSameBase, PlotRatioBase):
     ## Construct from DatasetManager and a histogram path
     #
-    # \param datasetMgr      DatasetManager for datasets
-    # \param name            Path of the histogram in the ROOT files
-    # \param kwargs          Keyword arguments, forwarded to PlotSameBase.__init__()
+    # \param datasetMgr       DatasetManager for datasets
+    # \param name             Path of the histogram in the ROOT files
+    # \param normalizeToLumi  If None, MC is implicitly normalized to
+    #                         the luminosity of data. If not None, MC
+    #                         is normalized to the this value of
+    #                         integrated luminosity (in pb^-1)
+    # \param kwargs           Keyword arguments, forwarded to PlotSameBase.__init__()
     def __init__(self, datasetMgr, name, normalizeToLumi=None, **kwargs):
         PlotSameBase.__init__(self, datasetMgr, name, **kwargs)
         PlotRatioBase.__init__(self)
@@ -1486,6 +1494,7 @@ class ComparisonPlot(PlotBase, PlotRatioBase):
     #
     # \param datasetRootHisto1  Numerator dataset.DatasetRootHistoBase or histograms.Histo or TH1/TGraph object
     # \param datasetRootHisto2  Denominator dataset.DatasetRootHistoBase or histograms.Histo or TH1/TGraph object
+    # \param kwargs             Keyword arguments (forwarded to plots.PlotBase.__init__())
     #
     # The possible ratio is calculated as datasetRootHisto1/datasetRootHisto2
     def __init__(self, datasetRootHisto1, datasetRootHisto2, **kwargs):
@@ -1546,6 +1555,7 @@ class ComparisonManyPlot(PlotBase, PlotRatioBase):
     #
     # \param histoReference    Reference dataset.DatasetRootHistoBase or histograms.Histo or TH1/TGraph object 
     # \param histoCompares     List of dataset.DatasetRootHistoBase or histograms.Histo or TH1/TGraph objects to compare with the reference
+    # \param kwargs            Keyword arguments (forwarded to plots.PlotBase.__init__())
     def __init__(self, histoReference, histoCompares, **kwargs):
         PlotBase.__init__(self, [histoReference]+histoCompares, **kwargs)
         PlotRatioBase.__init__(self)
@@ -1658,6 +1668,7 @@ class PlotDrawer:
     #
     # \param ylabel              Default Y axis title
     # \param log                 Should Y axis be in log scale by default?
+    # \param ratio               Should the ratio pad be drawn?
     # \param opts                Default frame bounds linear scale (see histograms._boundsArgs())
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())

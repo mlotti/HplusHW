@@ -1501,7 +1501,7 @@ class CounterTable:
     # \param index   Row index (forwarded to counter._indexNameHelper)
     # \param name    Row name (forwarded to counter._indexNameHelper)
     #
-    # \param counter.CounterRow object
+    # \return counter.CounterRow object
     def getRow(self, index=None, name=None):
         irow = _indexNameHelper(index, name, self.rowNames)
     
@@ -1924,7 +1924,7 @@ class EventCounter:
 
     ## Remove columns
     #
-    # \padam datasetNames   Names of datasets to remove
+    # \param datasetNames   Names of datasets to remove
     def removeColumns(self, datasetNames):
         self._forEachCounter(lambda c: c.removeColumns(datasetNames))
 
