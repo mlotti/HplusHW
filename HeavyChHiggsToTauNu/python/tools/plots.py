@@ -16,7 +16,7 @@
 # \li construct datasets.DatasetManager as usual
 # \li call plots.mergeRenameReorderForDataMC()
 # \li construct an object of the appropriate plots.PlotBase derived class
-# \lu customise, draw, and save the plot with plots.drawPlot (or something derived from plots.PlotDrawer, or more manually)
+# \li customise, draw, and save the plot with plots.drawPlot (or something derived from plots.PlotDrawer, or more manually)
 #
 # Manually further customisations and operations can be done via the
 # interface of the plots.PlotBase derived class, or directly with the
@@ -1288,6 +1288,7 @@ class MCPlot(PlotSameBase):
 #           unit area while the ratios of the individual datasets is
 #           determined from the cross sections. The support is in the base class. </li>
 #     </ul></li>
+# </ul>
 class DataMCPlot(PlotSameBase, PlotRatioBase):
     ## Construct from DatasetManager and a histogram path
     #

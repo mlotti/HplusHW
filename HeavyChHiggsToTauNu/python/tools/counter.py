@@ -564,8 +564,8 @@ class TableSplitter:
    
         return ret
 
-    ## \var _separator
-    # Separators to split the text
+    ## \var _separators
+    # List of separators to split the text
     ## \var _removeSeparators
     # After splitting, should the separators be removed from the
     # result?
@@ -762,8 +762,8 @@ def divideColumn(name, column1, column2):
 ## Create a new counter.CounterRow as row1-row2
 #
 # \param name     Name of the new row
-# \param column1  counter.CounterRow object
-# \param column2  counter.CounterRow object
+# \param row1  counter.CounterRow object
+# \param row2  counter.CounterRow object
 #
 # \return New counter.CounterRow object as the difference of the two rows
 #
@@ -873,7 +873,7 @@ def meanRowFit(table):
 #
 # \param table   counter.CounterTable object
 #
-# \param counter.CounterRow object, cells contain the column-wise maximum values
+# \return counter.CounterRow object, cells contain the column-wise maximum values
 def maxRow(table):
     row = accumulateRow(table, lambda a, b: max(a, b, key=lambda x: x.value()))
     row.setName("Max")
@@ -883,7 +883,7 @@ def maxRow(table):
 #
 # \param table   counter.CounterTable object
 #
-# \param counter.CounterRow object, cells contain the column-wise maximum values
+# \return counter.CounterRow object, cells contain the column-wise maximum values
 def minRow(table):
     row = accumulateRow(table, lambda a, b: min(a, b, key=lambda x: x.value()))
     row.setName("Min")
@@ -931,7 +931,7 @@ def removeColumnsRowsNotInAll(tables):
 # \param tables  List of counter.CounterTable objects
 # \param uncertaintyByAverage    By default uncertainties are propageted with error propagation. If this is set to true, take the mean of the uncertainties as the final uncertainty
 #
-# \param new counter.CounterTable object
+# \return new counter.CounterTable object
 #
 # For each cell, calculate the average over the tables.
 #
@@ -1122,7 +1122,7 @@ class CounterRow:
     ## Constructor
     #
     # \param name      Name of the row
-    # \param rowNames  List of names of the columns
+    # \param columnNames  List of names of the columns
     # \param values    Values for columns (dataset.Count objects)
     #
     # Lengths of columnNames and values should be equal. 
@@ -1374,7 +1374,7 @@ class CounterTable:
     # \param index   Column index (forwarded to counter._indexNameHelper)
     # \param name    Column name (forwarded to counter._indexNameHelper)
     #
-    # \param counter.CounterColumn object
+    # \return counter.CounterColumn object
     def getColumn(self, index=None, name=None):
         icol = _indexNameHelper(index, name, self.columnNames)
         
@@ -1452,9 +1452,9 @@ class CounterTable:
         except ValueError:
             raise Exception("Row '%s' not found" % name)
 
-    ## Append a column
+    ## Append a row
     #
-    # \param column  counter.CounterRow object
+    # \param row  counter.CounterRow object
     #
     # New row is inserted as the last row in the table
     def appendRow(self, row):
@@ -1803,7 +1803,7 @@ class Counter:
 
     ## Remove columns
     #
-    # \padam datasetNames   Names of datasets to remove
+    # \param datasetNames   Names of datasets to remove
     def removeColumns(self, datasetNames):
         i = 0
         while i < len(self.counters):

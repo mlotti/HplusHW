@@ -721,7 +721,7 @@ class DatasetRootHistoBase:
     # dataset.Dataset object where the histogram originates
     ## \var name
     # Name of the histogram (default is dataset name)
-    ## \var multuplication
+    ## \var multiplication
     # Multiplication factor to be applied after normalization (if None, not applied)
 
 ## Wrapper for a single TH1 histogram and the corresponding Dataset.
@@ -1113,7 +1113,7 @@ class Dataset:
     #     parameters in one CMSSW jobs. The different analyses have
     #     different prefixes but the same base name (e.g. 'analysis,
     #     'foo1analysis', 'foo2analysis' etc.)
-    # \l1 The different analyses can then be selected easily by
+    # \li The different analyses can then be selected easily by
     #     calling this method with a prefix
     def setPrefix(self, prefix):
         self.prefix = prefix

@@ -721,7 +721,7 @@ class PlotDrawerTauEmbedding(plots.PlotDrawer):
     # \param kwargs  Keyword arguments (see below)
     #
     # <b>Keyword arguments</b>
-    # \lu\a normalize   Should embedding normalization be applied? (default given in __init__()/setDefaults())
+    # \li\a normalize   Should embedding normalization be applied? (default given in __init__()/setDefaults())
     def tauEmbeddingNormalization(self, p, **kwargs):
         if kwargs.get("normalize", self.normalizeDefault):
             scaleNormalization(p)
