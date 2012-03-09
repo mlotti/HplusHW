@@ -1,14 +1,38 @@
+## \package styles
+# Histogram/graph (line/marker/fill) style classes and objects
+#
+# \todo This package would benefit from a major overhaul...
+
 import ROOT
 
+## Base class for styles
+#
+# The only abstraction it provides is forwarding the function call to
+# apply() method call.
+#
+# Deribing classes should implement the \a apply() method.
 class StyleBase:
+    ## Function call syntax
+    #
+    # \param h   histograms.Histo object
+    #
+    # Call apply() method with the ROOT histogram/graph object.
     def __call__(self, h):
         self.apply(h.getRootHisto())
 
+## Basic style (marker style, marker and line color)
 class Style(StyleBase):
+    ## Constructor
+    #
+    # \param marker   Marker style
+    # \param color    Marker and line color
     def __init__(self, marker, color):
         self.marker = marker
         self.color = color
 
+    ## Apply the style
+    #
+    # \param h ROOT object
     def apply(self, h):
         h.SetLineWidth(2)
         h.SetLineColor(self.color)
@@ -17,26 +41,52 @@ class Style(StyleBase):
         h.SetMarkerSize(1.2)
 	h.SetFillColor(0)
 
+## Compound style
+#
+# Applies are contained styles
 class StyleCompound(StyleBase):
+    ## Constructor
+    #
+    # \param styles   List of style objects
     def __init__(self, styles=[]):
         self.styles = styles
 
+    ## Append a style object
     def append(self, style):
         self.styles.append(style)
 
+    ## Apply the style
+    #
+    # \param h ROOT object
     def apply(self, h):
         for s in self.styles:
             s.apply(h)
 
+    # Clone the compound style
     def clone(self):
         return StyleCompound(self.styles[:])
 
+## Fill style
+#
+# Contains a base style, and applies fill style and color on top of
+# that.
+#
+# \todo Remove the holding of the style, this is done with
+# styles.StyleCompound in much cleaner way
 class StyleFill(StyleBase):
+    ## Constructor
+    #
+    # \param style      Other style object
+    # \param fillStyle  Fill style
+    # \param fillColor  Fill color (if not given, line color is used as fill color)
     def __init__(self, style=None, fillStyle=1001, fillColor=None):
         self.style     = style
         self.fillStyle = fillStyle
 	self.fillColor = fillColor
 
+    ## Apply the style
+    #
+    # \param h ROOT object
     def apply(self, h):
 	if self.style != None:
             self.style.apply(h)
@@ -44,15 +94,18 @@ class StyleFill(StyleBase):
 	    h.SetFillColor(self.fillColor)
 	else:
 	    h.SetFillColor(h.GetLineColor())
-        #h.SetFillStyle(3002)
         h.SetFillStyle(self.fillStyle)
 
+## Line style
 class StyleLine(StyleBase):
     def __init__(self, lineStyle=None, lineWidth=None, lineColor=None):
         self.lineStyle = lineStyle
         self.lineWidth = lineWidth
         self.lineColor = lineColor
 
+    ## Apply the style
+    #
+    # \param h ROOT object
     def apply(self, h):
         if self.lineStyle != None:
             h.SetLineStyle(self.lineStyle)
@@ -61,7 +114,16 @@ class StyleLine(StyleBase):
         if self.lineColor != None:
             h.SetLineColor(self.lineColor)
 
+## Marker style
+#
+# \todo markerSizes should be handled in a cleaner way
 class StyleMarker(StyleBase):
+    ## Constructor
+    #
+    # \param markerSize   Marker size
+    # \param markerColor  Marker color
+    # \param markerStyle  Marker style
+    # \param markerSizes  List of marker sizes. If given, marker sizes are drawn from this list succesively.
     def __init__(self, markerSize=1.2, markerColor=None, markerSizes=None, markerStyle=None):
         self.markerSize = markerSize
         self.markerColor = markerColor
@@ -69,6 +131,9 @@ class StyleMarker(StyleBase):
 	self.markerStyle = markerStyle
         self.markerSizeIndex = 0
 
+    ## Apply the style
+    #
+    # \param h ROOT object
     def apply(self, h):
         if self.markerSizes == None:
             h.SetMarkerSize(self.markerSize)
@@ -80,12 +145,21 @@ class StyleMarker(StyleBase):
 	if self.markerStyle != None:
 	    h.SetMarkerStyle(self.markerStyle)
 
+## Error style
 class StyleError(StyleBase):
+    ## Constructor
+    #
+    # \param color      Fill color
+    # \param style      Fill style
+    # \param linecolor  Line color
     def __init__(self, color, style=3004, linecolor=None):
         self.color = color
         self.style = style
         self.linecolor = linecolor
 
+    ## Apply the style
+    #
+    # \param h ROOT object
     def apply(self, h):
         h.SetFillStyle(self.style)
         h.SetFillColor(self.color)

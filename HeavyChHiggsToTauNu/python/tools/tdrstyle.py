@@ -1,8 +1,14 @@
+## \packate tdrstyle
+# Provides pythonized version of CMS TDR style
+
 import ROOT
 from array import array
 
+## TDR style class
+#
 # Translated from C++
 class TDRStyle:
+    ## Apply the default tdr style in the constructor
     def __init__(self):
         self.tdrStyle = ROOT.TStyle("self.tdrStyle", "Style for P-TDR")
         self.defaultStat = ""
@@ -175,13 +181,18 @@ class TDRStyle:
 
         self.tdrStyle.cd()
 
+    ## Set grid on or off
+    #
+    # \param onoff  If True (False), set the grid on (off)
     def setGrid(self, onoff):
         self.tdrStyle.SetPadGridX(onoff)
         self.tdrStyle.SetPadGridX(onoff)
 
+    ## Set pretty palette style
     def setPalettePretty(self):
         self.tdrStyle.SetPalette(1)
 
+    ## Set a custom palette style
     def setPaletteMy(self):
         mycolors = [51,
                     60,
@@ -194,6 +205,9 @@ class TDRStyle:
         
         self.tdrStyle.SetPalette(len(mycolors), array("i", mycolors))
 
+    ## Widen the default canvas and pad widths to be able to draw with "*Z" draw styles
+    #
+    # \param onoff  If True (False), make the canvas and pad wider (normal)     
     def setWide(self, onoff):
         if onoff:
             self.tdrStyle.SetCanvasDefW(int(1.08*self.canvasW))
@@ -202,5 +216,7 @@ class TDRStyle:
             self.tdrStyle.SetCanvasDefW(self.canvasW)
             self.tdrStyle.SetPadRightMargin(self.rightMargin)
 
+
+    ## Set OptStat
     def setOptStat(self, stat):
         self.tdrStyle.SetOptStat(stat)

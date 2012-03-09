@@ -53,16 +53,16 @@ deltaPhi130Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_
 deltaPhi90Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 90)"
 
 def main():
-    dirEmbs = ["."] + [os.path.join("..", d) for d in result.dirEmbs[1:]]
-    dirSig = "../"+result.dirSig
+    dirEmbs = ["."] + [os.path.join("..", d) for d in tauEmbedding.dirEmbs[1:]]
+    dirSig = "../"+tauEmbedding.dirSig
   
-    datasetsEmb = result.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
+    datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
 
     datasetsEmb.remove(filter(lambda name: "HplusTB" in name, datasetsEmb.getAllDatasetNames()))
     datasetsEmb.remove(filter(lambda name: "TTToHplus" in name, datasetsEmb.getAllDatasetNames()))
 
-#    del plots._datasetMerge["WW"]
+    del plots._datasetMerge["WW"]
 #    del plots._datasetMerge["WZ"]
 #    del plots._datasetMerge["ZZ"]
 
@@ -85,13 +85,13 @@ def main():
     def mergeEWK(datasets):
         datasets.merge("EWKMC", ["WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson", "WW"], keepSources=True)
         #datasets.merge("EWKMC", ["WJets", "TTJets"], keepSources=True)
-#    mergeEWK(datasetsSig)
-#    datasetsEmb.forEach(mergeEWK)
+    mergeEWK(datasetsSig)
+    datasetsEmb.forEach(mergeEWK)
 
     datasetsEmbCorrected = result.DatasetsDYCorrection(datasetsEmb, datasetsSig, analysisEmb, analysisSig)
-    datasetsResidual = result.DatasetsResidual(datasetsEmb, datasetsSig, analysisEmb, analysisSig, ["DYJetsToLL", "WW"])
+    datasetsResidual = tauEmbedding.DatasetsResidual(datasetsEmb, datasetsSig, analysisEmb, analysisSig, ["DYJetsToLL", "WW"], totalNames=["Data", "EWKMC"])
 
-    doPlots(datasetsEmb)
+#    doPlots(datasetsEmb)
     #doPlots(datasetsEmbCorrected)
 #    doPlotsWTauMu(datasetsEmb, "TTJets", True)
 #    doPlotsWTauMu(datasetsEmb, "TTJets", False)
@@ -99,7 +99,7 @@ def main():
 #    doCounters(datasetsEmb)
     #doCounters(datasetsEmbCorrected)
 
-#    doCountersResidual(datasetsResidual)
+    doCountersResidual(datasetsResidual)
 
     #doCountersOld(datasetsEmb)
 
@@ -180,7 +180,7 @@ def doPlotsWTauMu(datasetsEmb, name, btag=True):
     p.save()
 
 def drawPlot(*args, **kwargs):
-    tauEmbeddingPlot.drawPlot(normalize=False, *args, **kwargs)
+    tauEmbedding.drawPlot(normalize=False, *args, **kwargs)
 
 def doPlots(datasetsEmb):
     datasetNames = datasetsEmb.getAllDatasetNames()
@@ -323,7 +323,7 @@ def doCounters(datasetsEmb):
         eventCounter = result.EventCounterDYCorrection(datasetsEmb, counters=analysisEmb+counters)
     else:
         scaleNormalization = analysisEmb != "signalAnalysis"
-        eventCounter = result.EventCounterMany(datasetsEmb, counters=analysisEmb+counters, scaleNormalization=scaleNormalization)
+        eventCounter = tauEmbedding.EventCounterMany(datasetsEmb, counters=analysisEmb+counters, normalize=scaleNormalization)
 
     # Add counts
     sels = []
@@ -459,7 +459,7 @@ def doCounters(datasetsEmb):
             #absUnc = th12.Integral(0, 2)
             NallSum += Nall
             NSum += N
-            absUnc = tauEmbeddingPlot.squareSum(th12)
+            absUnc = tauEmbedding.squareSum(th12)
             absUncSquareSum += absUnc
             absUnc = math.sqrt(absUnc)
             relUnc = 0
@@ -477,7 +477,7 @@ def doCounters(datasetsEmb):
 
 
 def doCountersResidual(datasetsResidual):
-    eventCounter = result.EventCounterResidual(datasetsResidual, counters=analysisEmb+counters)
+    eventCounter = tauEmbedding.EventCounterResidual(datasetsResidual, counters=analysisEmb+counters)
 
     mainTable = eventCounter.getMainCounterTable()
 
