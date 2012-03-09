@@ -997,15 +997,42 @@ class PF2PATBuilder:
     def _customizeMuons(self, postfix):
         # isolation step in PF2PAT, default is 0.15 (deltabeta corrected)
         #getattr(process, "pfIsolatedMuons"+postfix).isolationCut = 0.15
-        setPatLeptonDefaults(getattr(self.process, "patMuons"+postfix), self.includePFCands)
-        isoSeq = cms.Sequence()
-        setattr(self.process, "muonIsolationEmbeddingSequence"+postfix, isoSeq)
-        muons = tauEmbeddingCustomisations.addMuonIsolationEmbedding(self.process, isoSeq, "patMuons"+postfix, postfix=postfix)
-        getattr(self.process, "patDefaultSequence"+postfix).replace(
-            getattr(self.process, "selectedPatMuons"+postfix),
-            isoSeq * getattr(self.process, "selectedPatMuons"+postfix))
-        getattr(self.process, "selectedPatMuons"+postfix).src = muons
     
+        # First for isolated muons (PF2PAT default)
+        self._customizeMuons2(postfix)
+
+        # Then, for all muons (needed for muon isolation studies for embedding)
+        allPostfix = "All"
+        # Clone the makePatMuons sequence
+        makePatMuonsAll = patHelpers.cloneProcessingSnippet(self.process, getattr(self.process, "makePatMuons"+postfix), allPostfix)
+        makePatMuons = getattr(self.process, "makePatMuons"+postfix)
+        getattr(self.process, "patDefaultSequence"+postfix).replace(makePatMuons,
+                                                                    makePatMuons * makePatMuonsAll)
+        # Set the InputTags to point to pfMuons (all PF muons) instead of pfIsolatedMuons (after isolation)
+        getattr(self.process, "muonMatch"+postfix+allPostfix).src = "pfMuons"+postfix
+        getattr(self.process, "patMuons"+postfix+allPostfix).pfMuonSource = "pfMuons"+postfix
+        # Clone selectedPatMuons
+        selectedPatMuons = getattr(self.process, "selectedPatMuons"+postfix)
+        selectedPatMuonsAll = selectedPatMuons.clone(
+            src = "patMuons"+postfix+allPostfix
+        )
+        setattr(self.process, "selectedPatMuons"+postfix+allPostfix, selectedPatMuonsAll)
+        getattr(self.process, "patDefaultSequence"+postfix).replace(selectedPatMuons,
+                                                                    selectedPatMuons*selectedPatMuonsAll)
+        self._customizeMuons2(postfix, allPostfix)
+
+    def _customizeMuons2(self, postfix, postfixMuon=""):
+        # Set default lepton options
+        setPatLeptonDefaults(getattr(self.process, "patMuons"+postfix+postfixMuon), self.includePFCands)
+        # Embed tau-embedding-like isolation variables to pat::Muons
+        isoSeq = cms.Sequence()
+        setattr(self.process, "muonIsolationEmbeddingSequence"+postfix+postfixMuon, isoSeq)
+        muons = tauEmbeddingCustomisations.addMuonIsolationEmbedding(self.process, isoSeq, "patMuons"+postfix+postfixMuon, postfix=postfix+postfixMuon)
+        getattr(self.process, "patDefaultSequence"+postfix).replace(
+            getattr(self.process, "selectedPatMuons"+postfix+postfixMuon),
+            isoSeq * getattr(self.process, "selectedPatMuons"+postfix+postfixMuon))
+        getattr(self.process, "selectedPatMuons"+postfix+postfixMuon).src = muons
+
         # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Cosmic_ID
         proto = cms.EDProducer("HPlusCosmicID",
             src=cms.InputTag("muons", "cosmicsVeto"),
@@ -1014,21 +1041,23 @@ class PF2PATBuilder:
         for name in ["cosmicCompatibility", 'timeCompatibility','backToBackCompatibility','overlapCompatibility']:
             m = proto.clone(result=name)
             self.beginSequence *= m
-            setattr(self.process, name+postfix, m)
-            setattr(getattr(self.process, "patMuons"+postfix).userData.userFloats, name, cms.InputTag(name+postfix))
+            setattr(self.process, name+postfix+postfixMuon, m)
+            setattr(getattr(self.process, "patMuons"+postfix+postfixMuon).userData.userFloats, name, cms.InputTag(name+postfix+postfixMuon))
     
         # HLT Matching
         if self.doMuonHLTMatching:
-            (muHltSequence, muonsWithTrigger) = HChTriggerMatching.addMuonTriggerMatching(self.process, muons=getattr(self.process, "selectedPatMuons"+postfix).src.value(), postfix=postfix)
-            setattr(self.process, "muonTriggerMatchingSequence"+postfix, muHltSequence)
-            getattr(self.process, "selectedPatMuons"+postfix).src = muonsWithTrigger
-            getattr(self.process, "patDefaultSequence"+postfix).remove(getattr(self.process, "selectedPatMuons"+postfix))
+            (muHltSequence, muonsWithTrigger) = HChTriggerMatching.addMuonTriggerMatching(self.process, muons=getattr(self.process, "selectedPatMuons"+postfix+postfixMuon).src.value(), postfix=postfix+postfixMuon)
+            setattr(self.process, "muonTriggerMatchingSequence"+postfix+postfixMuon, muHltSequence)
+            getattr(self.process, "selectedPatMuons"+postfix+postfixMuon).src = muonsWithTrigger
+            getattr(self.process, "patDefaultSequence"+postfix).remove(getattr(self.process, "selectedPatMuons"+postfix+postfixMuon))
             seqTmp = getattr(self.process, "patDefaultSequence"+postfix) 
             seqTmp *= (
                 muHltSequence *
-                getattr(self.process, "selectedPatMuons"+postfix)
+                getattr(self.process, "selectedPatMuons"+postfix+postfixMuon)
             )
             self.outputCommands.append("drop patTriggerObjectStandAlonesedmAssociation_*_*_*")
+
+        self.outputCommands.append("keep *_selectedPatMuons%s%s_*_*" % (postfix, postfixMuon))
 
     def _customizeElectrons(self, postfix):
         # isolation step in PF2PAT, default is 0.2 (deltabeta corrected)
