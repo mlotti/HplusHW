@@ -17,12 +17,12 @@ counters = analysis+"Counters/weighted"
 treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup")
 
 def main():
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-    datasets.loadLuminosities()
-
-    plots.mergeRenameReorderForDataMC(datasets)
-    plots.mergeWHandHH(datasets)
-    print "Int.Lumi",datasets.getDataset("Data").getLuminosity()
+#    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+#    datasets.loadLuminosities()
+    datasets = btaggingWJets.root
+#    plots.mergeRenameReorderForDataMC(datasets)
+#    plots.mergeWHandHH(datasets)
+#    print "Int.Lumi",datasets.getDataset("Data").getLuminosity()
 
     style = tdrstyle.TDRStyle()
 
@@ -31,8 +31,8 @@ def main():
 
 def plot(datasets):
 
-    datasetName = "TTJets"
-#    datasetName = "QCD"
+#    datasetName = "TTJets"
+    datasetName = "btaggingWJets"
     
     den_selection = "jets_p4.Pt()>30 && jets_flavour == 2"
 #    den_selection = "jets_p4.Pt()>30"
