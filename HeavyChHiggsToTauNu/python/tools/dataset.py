@@ -67,8 +67,8 @@ def getDatasetsFromMulticrabCfg(**kwargs):
         taskDirs = multicrab.getTaskDirectories(opts)
 
     datasetMgr = getDatasetsFromCrabDirs(taskDirs, **kwargs)
-    if len(dirname) > 0:
-        datasetMgr._setBaseDirectory(dirname)
+####    if len(dirname) > 0:
+####        datasetMgr._setBaseDirectory(dirname)
     return datasetMgr
 
 ## Construct DatasetManager from a list of CRAB task directory names.
@@ -1059,6 +1059,7 @@ class Dataset:
    # """
     def __init__(self, name, fname, counterDir):
         self.name = name
+        self.basedir = os.path.dirname(os.path.dirname(os.path.dirname(fname)))
         self.file = ROOT.TFile.Open(fname)
         if self.file == None:
             raise Exception("Unable to open ROOT file '%s'"%fname)
@@ -1510,7 +1511,7 @@ class DatasetManager:
     def __init__(self, base=""):
         self.datasets = []
         self.datasetMap = {}
-        self.basedir = base
+####        self.basedir = base
 
     ## Populate the datasetMap member from the datasets list.
     # 
@@ -1520,8 +1521,8 @@ class DatasetManager:
         for d in self.datasets:
             self.datasetMap[d.getName()] = d
 
-    def _setBaseDirectory(self, base):
-        self.basedir = base
+####    def _setBaseDirectory(self, base):
+####        self.basedir = base
 
     ## Close all TFiles of the contained dataset.Dataset objects
     #
@@ -1774,16 +1775,25 @@ class DatasetManager:
     # luminosities must be done before merging the data datasets to
     # one.
     def loadLuminosities(self, fname="lumi.json"):
-        if len(os.path.dirname(fname)) == 0:
-            fname = os.path.join(self.basedir, fname)
+        for d in self.datasets:
+            jsonname = os.path.join(d.basedir, fname)
+            if not os.path.exists(jsonname):
+                print >> sys.stderr, "WARNING: luminosity json file '%s' doesn't exist!" % jsonname
+            data = json.load(open(jsonname))
+            for name, value in data.iteritems():
+                if self.hasDataset(name):
+                    self.getDataset(name).setLuminosity(value)
 
-        if not os.path.exists(fname):
-            print >> sys.stderr, "WARNING: luminosity json file '%s' doesn't exist!" % fname
-
-        data = json.load(open(fname))
-        for name, value in data.iteritems():
-            if self.hasDataset(name):
-                self.getDataset(name).setLuminosity(value)
+####        if len(os.path.dirname(fname)) == 0:
+####            fname = os.path.join(self.basedir, fname)
+####
+####        if not os.path.exists(fname):
+####            print >> sys.stderr, "WARNING: luminosity json file '%s' doesn't exist!" % fname
+####
+####        data = json.load(open(fname))
+####        for name, value in data.iteritems():
+####            if self.hasDataset(name):
+####                self.getDataset(name).setLuminosity(value)
 
     ## Print dataset information.
     def printInfo(self):
