@@ -12,7 +12,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 analysis = "signalAnalysis"
 counters = analysis+"Counters"
 
-debugstatus = True
+debugstatus = False
 
 
 def getDatasetNames(multiCrabDir):
@@ -148,22 +148,41 @@ def validateCounters(dataset1,dataset2):
 
 def getHistogram(dataset, histoname, isRef):
     roothisto = dataset.getDatasetRootHisto(histoname[0])
-    roothisto.normalizeToOne()
-    h = roothisto.getHistogram()
+    #roothisto.normalizeToOne()
+    hnew = roothisto.getHistogram()
     # Rebin
-    a = (h.GetXaxis().GetXmax() - h.GetXaxis().GetXmin()) / h.GetNbinsX()
-    if histoname[1] > a:
-        h.Rebin(int(histoname[1] / a))
-    # Set attributes
-    h.SetStats(1)
+    binwidth = hnew.GetXaxis().GetBinWidth(1)
+    if histoname[1] > binwidth:
+        hnew.Rebin(int(histoname[1] / binwidth))
+    myName = "New"
     if isRef:
-        h.SetName("Reference")
+        myName = "Reference"
+    binwidth = hnew.GetXaxis().GetBinWidth(1)
+    h = ROOT.TH1F("h_"+myName,"h_"+myName, hnew.GetNbinsX()+2, hnew.GetXaxis().GetXmin() - binwidth, hnew.GetXaxis().GetXmax() + binwidth)
+    # Copy bin contents
+    for i in range (1, hnew.GetNbinsX()+1):
+        h.SetBinContent(i+1, hnew.GetBinContent(i))
+        h.SetBinError(i+1, hnew.GetBinError(i))
+        if hnew.GetXaxis().GetBinLabel(i) <> "":
+            h.GetXaxis().SetBinLabel(i+1, hnew.GetXaxis().GetBinLabel(i))
+    # Set under/overflow bins
+    h.SetBinContent(1, hnew.GetBinContent(0))
+    h.SetBinError(1, hnew.GetBinError(0))
+    h.SetBinContent(h.GetNbinsX(), hnew.GetBinContent(hnew.GetNbinsX()+1))
+    h.SetBinError(h.GetNbinsX(), hnew.GetBinError(hnew.GetNbinsX()+1))
+    # Set attributes
+    h.SetEntries(hnew.GetEntries())
+    h.SetTitle(hnew.GetTitle())
+    h.SetXTitle(hnew.GetXaxis().GetTitle())
+    h.SetYTitle(hnew.GetYaxis().GetTitle())
+    h.SetStats(1)
+    h.SetName(myName)
+    if isRef:
         h.SetFillStyle(1001)
         h.SetFillColor(ROOT.kBlue-6)
         h.SetLineColor(ROOT.kBlue-6)
         #statbox.SetTextColor(ROOT.kBlue-6)
     else:
-        h.SetName("New")
         h.SetMarkerColor(ROOT.kBlack)
         h.SetLineColor(ROOT.kBlack)
         h.SetMarkerStyle(20)
@@ -205,8 +224,8 @@ def setframeextrema(myframe, h1, h2, logstatus):
     myframe.SetMaximum(ymax*myscalefactor)
 
 def analysehistodiff(canvas,h1,h2):
-    canvas.GetPad(1).SetFrameFillColor(ROOT.TColor.GetColor("#fdffff"))
-    canvas.GetPad(2).SetFrameFillColor(ROOT.TColor.GetColor("#fdffff"))
+    canvas.GetPad(1).SetFrameFillColor(4000)
+    canvas.GetPad(2).SetFrameFillColor(4000)
     if not h1.GetNbinsX() == h2.GetNbinsX():
         canvas.GetPad(1).SetFillColor(ROOT.kOrange)
         canvas.GetPad(2).SetFillColor(ROOT.kOrange)
@@ -261,7 +280,9 @@ def validateHistograms(mydir,dataset1,dataset2):
         os.mkdir(mysubdir)
     mydir = dataset1.getName()
 
-    myoutput = "<br><h3><a name=histotop>Histograms for validation:</a></h3><br>\n"
+    myoutput = "<br><a href=#maintop>Back to datasets</a>\n"
+    myoutput += "<h3><a name=histotop_"+dataset1.getName()+">Histograms for validation:</a></h3><br>\n"
+    myoutput += "Note: the underflow (overflow) bin is shown as the first (last) bin in the histogram<br>\n"
     myoutput += "Color legend: blue histogram = reference, red points = dataset to be validated<br>\n"
     myoutput += "Difference is defined as sum_i (abs(new_i / ref_i - 1.0)), where sum goes over the histogram bins<br><br>\n"
     print "Generating validation histograms"
@@ -332,25 +353,25 @@ def validateHistograms(mydir,dataset1,dataset2):
             ["signalAnalysis/GlobalMuonVeto/GlobalMuonEta", 0.1, "log"]
         ]],
         ["All jets", [
-            ["signalAnalysis/JetSelection/jet_pt", 5, "log"],
+            ["signalAnalysis/JetSelection/jet_pt", 10, "log"],
             ["signalAnalysis/JetSelection/jet_pt_central", 5, "log"],
-            ["signalAnalysis/JetSelection/jet_eta", 0.1, "log"],
+            ["signalAnalysis/JetSelection/jet_eta", 0.2, "log"],
             ["signalAnalysis/JetSelection/jet_phi", 3.14159265 / 36, "log"],
             ["signalAnalysis/JetSelection/jetEMFraction", 0.05, "log"],
-            ["signalAnalysis/JetSelection/firstJet_pt", 5, "log"],
-            ["signalAnalysis/JetSelection/firstJet_eta", 0.1, "log"],
+            ["signalAnalysis/JetSelection/firstJet_pt", 10, "log"],
+            ["signalAnalysis/JetSelection/firstJet_eta", 0.2, "log"],
             ["signalAnalysis/JetSelection/firstJet_phi", 3.14159265 / 36, "log"],
-            ["signalAnalysis/JetSelection/secondJet_pt", 5, "log"],
-            ["signalAnalysis/JetSelection/secondJet_eta", 0.1, "log"],
+            ["signalAnalysis/JetSelection/secondJet_pt", 10, "log"],
+            ["signalAnalysis/JetSelection/secondJet_eta", 0.2, "log"],
             ["signalAnalysis/JetSelection/secondJet_phi", 3.14159265 / 36, "log"],
-            ["signalAnalysis/JetSelection/thirdJet_pt", 5, "log"],
-            ["signalAnalysis/JetSelection/thirdJet_eta", 0.1, "log"],
+            ["signalAnalysis/JetSelection/thirdJet_pt", 10, "log"],
+            ["signalAnalysis/JetSelection/thirdJet_eta", 0.2, "log"],
             ["signalAnalysis/JetSelection/thirdJet_phi", 3.14159265 / 36, "log"],
         ]],
         ["Selected jets", [
-            ["signalAnalysis/JetSelection/NumberOfSelectedJets", 1, "log"],
+            ["signalAnalysis/JetSelection/NumberOfSelectedJets", 10, "log"],
             ["signalAnalysis/JetSelection/SelectedJets/jet_pt", 5, "log"],
-            ["signalAnalysis/JetSelection/SelectedJets/jet_eta", 0.1, "log"],
+            ["signalAnalysis/JetSelection/SelectedJets/jet_eta", 0.2, "log"],
             ["signalAnalysis/JetSelection/SelectedJets/jet_phi", 3.14159265 / 36, "log"],
             ["signalAnalysis/JetSelection/SelectedJets/jet_NeutralEmEnergyFraction", 0.05, "log"],
             ["signalAnalysis/JetSelection/SelectedJets/jet_NeutralHadronFraction", 0.05, "log"],
@@ -362,8 +383,8 @@ def validateHistograms(mydir,dataset1,dataset2):
             ["signalAnalysis/JetSelection/SelectedJets/jet_PartonFlavour", 1, "log"],
         ]],
         ["Excluded jets, i.e. jets with DeltaR(jet, tau) < 0.5", [
-            ["signalAnalysis/JetSelection/ExcludedJets/jet_pt", 5, "log"],
-            ["signalAnalysis/JetSelection/ExcludedJets/jet_eta", 0.1, "log"],
+            ["signalAnalysis/JetSelection/ExcludedJets/jet_pt", 10, "log"],
+            ["signalAnalysis/JetSelection/ExcludedJets/jet_eta", 0.2, "log"],
             ["signalAnalysis/JetSelection/ExcludedJets/jet_phi", 3.14159265 / 36, "log"],
             ["signalAnalysis/JetSelection/ExcludedJets/jet_NeutralEmEnergyFraction", 0.05, "log"],
             ["signalAnalysis/JetSelection/ExcludedJets/jet_NeutralHadronFraction", 0.05, "log"],
@@ -375,19 +396,19 @@ def validateHistograms(mydir,dataset1,dataset2):
             ["signalAnalysis/JetSelection/ExcludedJets/jet_PartonFlavour", 1, "log"],
         ]],
         ["MET", [
-            ["signalAnalysis/MET/met", 5, "log"],
+            ["signalAnalysis/MET/met", 20, "log"],
             ["signalAnalysis/MET/metSignif", 5, "log"],
-            ["signalAnalysis/MET/metSumEt", 10, "log"],
+            ["signalAnalysis/MET/metSumEt", 20, "log"],
         ]],
         ["b-jet tagging", [
             ["signalAnalysis/Btagging/NumberOfBtaggedJets", 1, "log"],
-            ["signalAnalysis/Btagging/jet_bdiscriminator", 5, "log"],
-            ["signalAnalysis/Btagging/bjet_pt", 5, "log"],
-            ["signalAnalysis/Btagging/bjet_eta", 0.1, "log"],
-            ["signalAnalysis/Btagging/bjet1_pt", 5, "log"],
-            ["signalAnalysis/Btagging/bjet1_eta", 0.1, "log"],
-            ["signalAnalysis/Btagging/bjet2_pt", 5, "log"],
-            ["signalAnalysis/Btagging/bjet2_eta", 0.1, "log"],
+            ["signalAnalysis/Btagging/jet_bdiscriminator", 0.1, "log"],
+            ["signalAnalysis/Btagging/bjet_pt", 10, "log"],
+            ["signalAnalysis/Btagging/bjet_eta", 0.2, "log"],
+            ["signalAnalysis/Btagging/bjet1_pt", 20, "log"],
+            ["signalAnalysis/Btagging/bjet1_eta", 0.2, "log"],
+            ["signalAnalysis/Btagging/bjet2_pt", 20, "log"],
+            ["signalAnalysis/Btagging/bjet2_eta", 0.2, "log"],
             ["signalAnalysis/Btagging/MCMatchForPassedJets", 1, "log"],
         ]],
         ["Transverse mass", [
@@ -397,8 +418,8 @@ def validateHistograms(mydir,dataset1,dataset2):
             ["signalAnalysis/transverseMassAfterDeltaPhi130", 20, "linear"],
         ]]
     ]
-
-    #histolist = [["Primary vertices", [["signalAnalysis/Vertices/verticesBeforeWeight", 1, "log"],["signalAnalysis/tauID/N_TriggerMatchedTaus", 1, "log"]]]]
+    if debugstatus:
+        histolist = [["Primary vertices", [["signalAnalysis/Vertices/verticesBeforeWeight", 1, "log"],["signalAnalysis/tauID/N_TriggerMatchedTaus", 1, "log"]]]]
 
     mycolumns = 2
     myscale = 200.0 / float(mycolumns)
@@ -406,7 +427,7 @@ def validateHistograms(mydir,dataset1,dataset2):
     # table of contents
     myoutput += "List of histogram groups:</a><br>\n"
     for group in histolist:
-        myoutput += "<a href=#idx"+str(myindexcount)+">"+group[0]+"</a><br>\n"
+        myoutput += "<a href=#idx"+str(myindexcount)+"_"+dataset1.getName()+">"+group[0]+"</a><br>\n"
         myindexcount += 1
     myoutput += "<br>\n"
 
@@ -414,10 +435,12 @@ def validateHistograms(mydir,dataset1,dataset2):
     myindexcount = 0
     mydifference = 0
     for group in histolist:
-        myoutput += "<hr><h3><a name=idx"+str(myindexcount)+">"+group[0]+"</a></h3><br>\n"
+        myoutput += "<hr><h3><a name=idx"+str(myindexcount)+"_"+dataset1.getName()+">"+group[0]+"</a></h3><br>\n"
+        myindexcount += 1
         myoutput += "<table>\n"
         mycount = 0
         for histoname in group[1]:
+            print "Getting histogram",histoname[0]
             if mycount == 0:
                 myoutput += "<tr>\n"
             mycount = mycount + 1
@@ -427,7 +450,9 @@ def validateHistograms(mydir,dataset1,dataset2):
                 myname = histoname[0].replace("/", "_")
                 # Obtain histograms and make canvas
                 h1 = getHistogram(dataset1, histoname, True)
+                #expandOverflowBins(h1)
                 h2 = getHistogram(dataset2, histoname, False)
+                #expandOverflowBins(h2)
                 canvas = ROOT.TCanvas(histoname[0],histoname[0],600,500)
                 canvas.cd()
                 setCanvasDefinitions(canvas)
@@ -436,8 +461,10 @@ def validateHistograms(mydir,dataset1,dataset2):
                 myframe.SetBinContent(1,0)
                 myframe.SetStats(0)
                 myframe.SetXTitle("")
-                myframe.SetYTitle("A.u. (normalised to 1)")
                 myframe.GetXaxis().SetLabelSize(0)
+                myframe.SetTitleSize(0.06, "Y")
+                myframe.SetLabelSize(0.05, "Y")
+                myframe.GetYaxis().SetTitleOffset(0.75)
                 setframeextrema(myframe,h1,h2,histoname[2])
                 # Make agreement histograms
                 hdiff = h2.Clone("hdiffclone")
@@ -445,11 +472,13 @@ def validateHistograms(mydir,dataset1,dataset2):
                 hdiff.Divide(h1)
                 hdiffWarn = hdiff.Clone("hdiffwarn")
                 hdiffWarn.SetLineColor(ROOT.kOrange)
+                hdiffWarn.SetFillColor(ROOT.kOrange)
                 hdiffWarn.SetMarkerColor(ROOT.kOrange)
                 hdiffError = hdiff.Clone("hdifferror")
                 hdiffError.SetLineColor(ROOT.kRed+1)
+                hdiffError.SetFillColor(ROOT.kRed+1)
                 hdiffError.SetMarkerColor(ROOT.kRed+1)
-                for i in range(1, hdiff.GetNbinsX()):
+                for i in range(1, hdiff.GetNbinsX()+1):
                     if hdiff.GetBinContent(i) > 0 and abs(hdiff.GetBinContent(i) - 1) > 0.03:
                         hdiffError.SetBinContent(i, hdiff.GetBinContent(i))
                         hdiffError.SetBinError(i, hdiff.GetBinError(i))
@@ -460,10 +489,13 @@ def validateHistograms(mydir,dataset1,dataset2):
                         hdiffWarn.SetBinError(i, hdiff.GetBinError(i))
                         hdiff.SetBinContent(i, -100)
                 # Line at zero
-                hdiffLine = ROOT.TH1F("line","line",1,h2.GetXaxis().GetXmin(),h2.GetXaxis().GetXmax())
+                hdiffLine = h1.Clone("hdifflineclone")
                 hdiffLine.SetLineColor(ROOT.kGray)
-                hdiffLine.SetBinContent(1,1)
+                for i in range(1, hdiff.GetNbinsX()+1):
+                    hdiffLine.SetBinContent(i,1)
+                    hdiffLine.SetBinError(i,0)
                 hdiffLine.SetLineWidth(1)
+                hdiffLine.SetFillStyle(0)
                 hdiffLine.SetMaximum(2)
                 hdiffLine.SetMinimum(0)
                 hdiffLine.SetTitle("")
@@ -493,6 +525,7 @@ def validateHistograms(mydir,dataset1,dataset2):
                 h2.FindObject("stats").SetY1NDC(0.615)
                 h2.FindObject("stats").SetY2NDC(0.775)
                 h2.FindObject("stats").Draw()
+                canvas.GetPad(1).Modified()
                 #canvas.GetPad(1).Update()
                 # Difference pad
                 canvas.cd(2)
@@ -501,9 +534,9 @@ def validateHistograms(mydir,dataset1,dataset2):
                 hdiffWarn.Draw("e same")
                 hdiff.Draw("e same")
                 canvas.GetPad(2).RedrawAxis()
-                canvas.GetPad(2).Update()
+                canvas.GetPad(2).Modified()
                 # Save plot
-                #canvas.Modified()
+                canvas.Modified()
                 canvas.Print(mysubdir+"/"+myname+".png")
                 canvas.Close()
                 myoutput += "<br><img"
@@ -530,7 +563,7 @@ def validateHistograms(mydir,dataset1,dataset2):
         if mycount > 0:
             myoutput += "</tr>\n"
         myoutput += "</table>\n"
-        myoutput += "<a href=#histotop>Back to histogram list</a><br>\n"
+        myoutput += "<a href=#histotop_"+dataset1.getName()+">Back to histogram list</a><br>\n"
     print "\nHistograms done for dataset",dataset1.getName()
     print "Legend: blue histogram = reference, red points = dataset to be validated\n"
     return myoutput
@@ -571,22 +604,27 @@ def main(argv):
     print "          validated datasets = ",validateData
     print
 
+    ROOT.gROOT.SetBatch() # no flashing canvases
+
     myoutput += "<b>Shell command that was run:</b>"
     for arg in argv:
          myoutput += " "+arg
     myoutput += "<br><br>\n"
-    myoutput += "<b>Reference datasets:</b> "+referenceData+"<br>\n"
-    myoutput += "<b>New datasets to be validated:</b> "+validateData+"<br>\n<hr><br>\n"
+    myoutput += "<b>Reference multicrab directory:</b> "+referenceData+"<br>\n"
+    myoutput += "<b>New multicrab directory to be validated:</b> "+validateData+"<br>\n<hr><br>\n"
 
     refDatasetNames = getDatasetNames(referenceData)
     valDatasetNames = getDatasetNames(validateData)
 
     datasetNames = validateDatasetExistence(refDatasetNames,valDatasetNames)
-
+    myoutput += "<h3><a name=maintop>List of datasets analysed:</a></h3><br>\n"
+    for datasetname in datasetNames:
+        myoutput += "<a href=#dataset_"+datasetname+">"+datasetname+"</a><br>\n"
+    myoutput += "<hr><br>\n"
     for datasetname in datasetNames:
         print "\n\n"
         print datasetname
-        myoutput += "<h2>Dataset: "+datasetname+"</h2><br>\n"
+        myoutput += "<h2><a name=dataset_"+datasetname+">Dataset: "+datasetname+"</a></h2><br>\n"
         refDatasets = dataset.getDatasetsFromCrabDirs([referenceData+"/"+datasetname],counters=counters)
         valDatasets = dataset.getDatasetsFromCrabDirs([validateData+"/"+datasetname],counters=counters)
 
@@ -595,6 +633,7 @@ def main(argv):
         myoutput += "<hr><br>\n"
 
     print "\nResults saved into directory:",mydir
+    print "To view html version, use link "+mydir+"/index.html"
     makehtml(mydir,myoutput)
 
 main(sys.argv[1:])
