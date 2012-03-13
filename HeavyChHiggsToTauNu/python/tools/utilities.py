@@ -1,5 +1,15 @@
+## \package utilities
+#
+# Various utilities
+
 import math
 
+## Least square fit of zero-order polynomial
+#
+# \param values         List of values
+# \param uncertainties  List of uncertainties
+#
+# \return tuple (value, uncertainty, chi2, ndof)
 def leastSquareFitPoly0(values, uncertainties):
     if len(values) != len(uncertainties):
         raise Exception("len(values) != len(uncertainties) (%d != %d)" % len(values), len(uncertainties))

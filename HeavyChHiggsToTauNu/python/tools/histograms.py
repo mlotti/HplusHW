@@ -88,11 +88,30 @@ class TextDefaults:
 # histograms.addEnergyText(), histograms.addLuminosityText().
 textDefaults = TextDefaults()
 
+## Draw text to current TCanvas/TPad with TLaTeX
+#
+# \param x       X coordinate of the text (in NDC)
+# \param y       Y coordinate of the text (in NDC)
+# \param text    String to draw
+# \param args    Other positional arguments (forwarded to histograms.PlotText.__init__())
+# \param kwargs  Other keyword arguments (forwarded to histograms.PlotText.__init__())
 def addText(x, y, text, *args, **kwargs):
     t = PlotText(x, y, text, *args, **kwargs)
     t.Draw()
 
+## Class for drawing text to current TPad with TLaTeX
+#
+# Text can be added to plots in object-oriented way. Mainly intended
+# to be used with plots.PlotBase.appendPlotObject etc.
 class PlotText:
+    ## Constructor
+    #
+    # \param x       X coordinate of the text (in NDC)
+    # \param y       Y coordinate of the text (in NDC)
+    # \param text    String to draw
+    # \param size    Size of text (None for the default value, taken from gStyle)
+    # \param bold    Should the text be bold?
+    # \param color   Color of the text
     def __init__(self, x, y, text, size=None, bold=True, color=ROOT.kBlack):
         self.x = x
         self.y = y
@@ -106,11 +125,16 @@ class PlotText:
             self.l.SetTextSize(size)
         self.l.SetTextColor(color)
 
+    ## Draw the text to the current TPad
+    #
+    # \param options   For interface compatibility, ignored
+    #
+    # Provides interface compatible with ROOT's drawable objects.
     def Draw(self, options=None):
         self.l.DrawLatex(self.x, self.y, self.text)        
         
 
-## Add the "CMS Preliminary" text to the pad
+## Draw the "CMS Preliminary" text to the current TPad
 #
 # \param x   X coordinate of the text (None for default value)
 # \param y   Y coordinate of the text (None for default value)
@@ -118,7 +142,7 @@ def addCmsPreliminaryText(x=None, y=None):
     (x, y) = textDefaults.getValues("cmsPreliminary", x, y)
     addText(x, y, "CMS Preliminary", textDefaults.getSize("cmsPreliminary"), bold=False)
 
-## Add the center-of-mass energy text to the pad
+## Draw the center-of-mass energy text to the current TPad
 #
 # \param x   X coordinate of the text (None for default value)
 # \param y   Y coordinate of the text (None for default value)
@@ -127,7 +151,7 @@ def addEnergyText(x=None, y=None, s="7 TeV"):
     (x, y) = textDefaults.getValues("energy", x, y)
     addText(x, y, "#sqrt{s} = "+s, textDefaults.getSize("energy"), bold=False)
 
-## Add the integrated luminosity text to the pad
+## Draw the integrated luminosity text to the current TPad
 #
 # \param x     X coordinate of the text (None for default value)
 # \param y     Y coordinate of the text (None for default value)
@@ -160,8 +184,11 @@ def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
 # \code
 # createLegend = LegendCreator(x1, y1, x2, y2)
 # createLegend.setDefaults(x1=0.4, y2=0.5)
+# createLegend.moveDefaults(dx=0.2, dh=0.1)
 # legend = createLegend()
 # \endcode
+#
+# All coordinates are in NDC
 class LegendCreator:
     ## Constructor
     #
@@ -190,6 +217,8 @@ class LegendCreator:
 
     ## Set new default positions
     #
+    # \param kwargs   Keyword arguments
+    #
     # <b>Keyword arguments</b>
     # \li \a x1          X1 coordinate
     # \li \a y1          Y1 coordinate
@@ -203,6 +232,16 @@ class LegendCreator:
         for x, value in kwargs.iteritems():
             setattr(self, x, value)
 
+    ## Move the default position/width/height
+    #
+    # \param dx  Movement in x (positive is to right)
+    # \param dy  Movement in y (positive is to up)
+    # \param dw  Increment of width (negative to decrease width)
+    # \param dh  Increment of height (negative to decrease height)
+    #
+    # Typically one want's to only move the legend, but keep it with
+    # the same size, or increase/decrease width/height for some plots
+    # only from the default
     def moveDefaults(self, dx=0, dy=0, dw=0, dh=0):
         self.x1 += dx
         self.x2 += dx
@@ -215,9 +254,12 @@ class LegendCreator:
 
     ## Create a new TLegend object (function call syntax)
     #
-    # Arguments can be either
-    # - Four numbers for the coordinates (x1, y1, x2, y2) as positional arguments
-    # - Keyword arguments (x1, y1, x2, y2)
+    # \param args    Positional arguments (must get 0 or 4, see below)
+    # \param kwargs  Keyword arguments
+    # 
+    # <b>Arguments can be either</b>
+    # \li Four numbers for the coordinates (\a x1, \a y1, \a x2, \a y2) as positional arguments
+    # \li Keyword arguments (\a x1, \a y1, \a x2, \a y2)
     #
     # If all 4 coordinates are specified, they are used. In the
     # keyword argument case, the coordinates which are not given are
@@ -258,6 +300,10 @@ class LegendCreator:
     # Text size
     ## \var borderSize
     # Border size
+    ## \var fillStyle
+    # Fill style
+    ## \var fillColor
+    # Fill color
     ## \var _keys
     # List of valid coordinate names for __call__() function
 
@@ -266,6 +312,18 @@ class LegendCreator:
 createLegend = LegendCreator()
 
 ## Move TLegend
+# 
+# \param legend   TLegend object to modify
+# \param dx  Movement in x (positive is to right)
+# \param dy  Movement in y (positive is to up)
+# \param dw  Increment of width (negative to decrease width)
+# \param dh  Increment of height (negative to decrease height)
+#
+# \return Modified TLegend (which is the same object as given as input)
+#
+# Typically one want's to only move the legend, but keep it with
+# the same size, or increase/decrease width/height for some plots
+# only from the default
 def moveLegend(legend, dx=0, dy=0, dw=0, dh=0):
     legend.SetX1(legend.GetX1() + dx)
     legend.SetX2(legend.GetX2() + dx)
@@ -281,7 +339,8 @@ def moveLegend(legend, dx=0, dy=0, dw=0, dh=0):
 ## Update the style of palette Z axis according to ROOT.gStyle.
 #
 # This function is needed because the style is not propageted to the Z
-# axis automatically.
+# axis automatically. It is recommended to call this every time
+# something is drawn with an option "Z"
 def updatePaletteStyle(histo):
     ROOT.gPad.Update()
     paletteAxis = histo.GetListOfFunctions().FindObject("palette")
@@ -304,6 +363,19 @@ def sumRootHistos(rootHistos, postfix="_sum"):
         h.Add(a)
     return h
 
+## Helper function for lessThan/greaterThan argument handling
+#
+# \param kwargs  Keyword arguments
+#
+# <b>Keyword arguments</b>
+# \li \a lessThan     True for lessThan, False for greaterThan
+# \li \a greaterThan  False for lessThan, True for greaterThan
+#
+# \return True for lessThan, False for greaterThan
+#
+# Provides the ability to have 'lessThan=True' and 'greaterThan=True'
+# keyword arguments, as I believe they enhance the readability of the
+# function calls.
 def isLessThan(**kwargs):
     if len(kwargs) != 1:
         raise Exception("Should give only either 'lessThan' or 'greaterThan' as a keyword argument")
@@ -315,6 +387,9 @@ def isLessThan(**kwargs):
         raise Exception("Must give either 'lessThan' or 'greaterThan' as a keyword argument")
 
 ## Convert TH1 distribution to TH1 of number of passed events as a function of cut value
+#
+# \param hdist   TH1 distribution
+# \param kwargs  Keyword arguments (forwarded to histograms.isLessThan)
 def dist2pass(hdist, **kwargs):
     lessThan = isLessThan(**kwargs)
 
@@ -373,11 +448,18 @@ def dist2pass(hdist, **kwargs):
 
     return hpass
 
+## Helper function for applying a function for each bin of TH1
+#
+# \param th1       TH1 object
+# \param function  Function taking a number as an input, and returning a number
 def th1ApplyBin(th1, function):
     for bin in xrange(0, th1.GetNbinsX()+2):
         th1.SetBinContent(bin, function(th1.GetBinContent(bin)))
 
 ## Convert TH1 distribution to TH1 of efficiency as a function of cut value
+#
+# \param hdist  TH1 distribution
+# \param kwargs  Keyword arguments (forwarded to histograms.isLessThan)
 def dist2eff(hdist, **kwargs):
     hpass = dist2pass(hdist, **kwargs)
     total = hdist.Integral(0, hdist.GetNbinsX()+1)
@@ -385,6 +467,9 @@ def dist2eff(hdist, **kwargs):
     return hpass
 
 ## Convert TH1 distribution to TH1 of 1-efficiency as a function of cut value
+#
+# \param hdist  TH1 distribution
+# \param kwargs  Keyword arguments (forwarded to histograms.isLessThan)
 def dist2rej(hdist, **kwargs):
     hpass = dist2pass(hdist, **kwargs)
     total = hdist.Integral(0, hdist.GetNbinsX()+1)
@@ -396,6 +481,23 @@ def dist2rej(hdist, **kwargs):
 #
 # \param histos  List of histograms.Histo objects
 # \param kwargs  Dictionary of keyword arguments to parse
+#
+# <b>Keyword arguments</b>
+# \li\a ymin     Minimum value of Y axis
+# \li\a ymax     Maximum value of Y axis
+# \li\a xmin     Minimum value of X axis
+# \li\a xmax     Maximum value of X axis
+# \li\a ymaxfactor  Maximum value of Y is \a ymax*\a ymaxfactor (default 1.1)
+# \li\a yminfactor  Minimum value of Y is \a ymax*\a yminfactor (yes, calculated from \a ymax )
+#
+# By default \a ymin, \a ymax, \a xmin and \a xmax are taken as
+# the maximum/minimums of the histogram objects such that frame
+# contains all histograms. The \a ymax is then multiplied with \a
+# ymaxfactor
+#
+# The \a yminfactor/\a ymaxfactor are used only if \a ymin/\a ymax
+# is taken from the histograms, i.e. \a ymax keyword argument is
+# \b not given.
 #
 # Used e.g. in histograms.CanvasFrame and histograms.CanvasFrameTwo
 def _boundsArgs(histos, kwargs):
@@ -414,6 +516,20 @@ def _boundsArgs(histos, kwargs):
     if not "xmax" in kwargs:
         kwargs["xmax"] = max([h.getXmax() for h in histos])
 
+## Draw a frame
+#
+# \param pad   TPad to draw the frame to
+# \param xmin  Minimum X axis value
+# \param ymin  Minimum Y axis value
+# \param xmax  Maximum X axis value
+# \param ymax  Maximum Y axis value
+# \param nbins Number of x axis bins
+#
+# If nbins is None, TPad.DrawFrame is used. Otherwise a custom TH1 is
+# created for the frame with nbins bins in x axis.
+#
+# Use case: selection flow histogram (or whatever having custom x axis
+# lables).
 def _drawFrame(pad, xmin, ymin, xmax, ymax, nbins=None):
     if nbins == None:
         return pad.DrawFrame(xmin, ymin, xmax, ymax)
@@ -435,29 +551,19 @@ def _drawFrame(pad, xmin, ymin, xmax, ymax, nbins=None):
         return frame
 
 ## Create TCanvas and frame for one TPad.
+#
+# Used mainly from plots.PlotBase (based) class(es), although it can
+# be also used directly if one really wants.
 class CanvasFrame:
     ## Create TCanvas and TH1 for the frame.
     #
     # \param histoManager  histograms.HistoManager object to take the histograms for automatic axis ranges
     # \param name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
-    # \param kwargs        Keyword arguments (see below)
+    # \param kwargs        Keyword arguments for frame bounds (forwarded to histograms._boundsArgs())
     #
     # <b>Keyword arguments</b>
-    # \li\a ymin     Minimum value of Y axis
-    # \li\a ymax     Maximum value of Y axis
-    # \li\a xmin     Minimum value of X axis
-    # \li\a xmax     Maximum value of X axis
-    # \li\a ymaxfactor  Maximum value of Y is \a ymax*\a ymaxfactor (default 1.1)
-    # \li\a yminfactor  Minimum value of Y is \a ymax*\a yminfactor (yes, calculated from \a ymax )
-    #
-    # By default \a ymin, \a ymax, \a xmin and \a xmax are taken as
-    # the maximum/minimums of the histogram objects such that frame
-    # contains all histograms. The \a ymax is then multiplied with \a
-    # ymaxfactor
-    #
-    # The \a yminfactor/\a ymaxfactor are used only if \a ymin/\a ymax
-    # is taken from the histograms, i.e. \a ymax keyword argument is
-    # \b not given.
+    # \li\a opts   If given, give \a opts to histograms._boundsArgs() instead of kwargs. No other keyword arguments are allowed (except opts2, see below).
+    # \li\a opts2  Ignored, existence allowed only for compatibility with histograms.CanvasFrameTwo
     def __init__(self, histoManager, name, **kwargs):
         histos = []
         if isinstance(histoManager, list):
@@ -511,34 +617,15 @@ class CanvasFrameTwo:
     # \param kwargs        Keyword arguments (see below)
     #
     # <b>Keyword arguments</b>
-    # \li\a opts1/\a opts           Dictionary for histoManager1 options
-    # \li\a opts2                   Dictionary for histos2 options
-    # \li\a canvasFactor            Multiply the canvas height by this factor (default 1.25)
-    # \li\a canvasHeightCorrection  Add this to the height of the lower pad (default 0.022)
-    #
-    # <b>Options</b>
-    # \li\a ymin     Minimum value of Y axis
-    # \li\a ymax     Maximum value of Y axis
-    # \li\a xmin     Minimum value of X axis (only for opts1)
-    # \li\a xmax     Maximum value of X axis (only for opts1)
-    # \li\a ymaxfactor  Maximum value of Y is ymax*ymaxfactor (default 1.1)
-    # \li\a yminfactor  Minimum value of Y is ymax*yminfactor (yes, calculated from ymax
-    #
-    # By default \a ymin, \a ymax, \a xmin and \a xmax are taken as
-    # the maximum/minimums of the histogram objects such that frame
-    # contains all histograms. The \a ymax is then multiplied with \a
-    # ymaxfactor
-    #
-    # The \a yminfactor/\a ymaxfactor are used only if \a ymin/\a ymax
-    # is taken from the histograms, i.e. \a ymax keyword argument is \b
-    # not given.
+    # \li\a opts   Dictionary for frame bounds (forwarded to histograms._boundsArgs())
+    # \li\a opts1  Same as \a opts (can not coexist with \a opts, only either one can be given)
+    # \li\a opts2  Dictionary for ratio pad bounds (forwarded to histograms._boundsArgs()) Only Y axis values are allowed, for X axis values are taken from \a opts/\a opts1
     def __init__(self, histoManager1, histos2, name, **kwargs):
+        ## Wrapper to provide the CanvasFrameTwo.frame member.
+        #
+        # The GetXaxis() is forwarded to the frame of the lower pad,
+        # and the GetYaxis() is forwared to the frame of the upper pad.
         class FrameWrapper:
-            """Wrapper to provide the CanvasFrameTwo.frame member.
-
-            The GetXaxis() is forwarded to the frame of the lower pad,
-            and the GetYaxis() is forwared to the frame of the upper pad.
-            """
             def __init__(self, frame1, frame2):
                 self.frame1 = frame1
                 self.frame2 = frame2
@@ -556,9 +643,8 @@ class CanvasFrameTwo:
             def getXmax(self):
                 return self.frame2.GetXaxis().GetBinUpEdge(self.frame2.GetXaxis().GetLast())
 
-
+        ## Wrapper to provide the getXmin/getXmax functions for _boundsArgs function.
         class HistoWrapper:
-            """Wrapper to provide the getXmin/getXmax functions for _boundsArgs function."""
             def __init__(self, histo):
                 self.histo = histo
 
@@ -678,6 +764,13 @@ class CanvasFrameTwo:
     # xa xis from the lower frame.
 
 ## Base class for all Histo classes.
+#
+# Histo classes are wrappers for ROOT TH1/TH2/TGraph objects,
+# providing one layer of customisation options between the end user
+# and ROOT. The classes contain all necessary information to draw the
+# histograms without the need for drawing code to know anything about
+# the objects to be drawn (i.e. in addition of TH1, these contain the
+# draw and legend styles).
 class Histo:
     ## Constructor
     #
@@ -708,6 +801,13 @@ class Histo:
     def setName(self, name):
         self.name = name
 
+    ## Allow the Data/MC status of the Histo to be changed
+    #
+    # \param isData   True for data, false for MC
+    # \param isMC     True for MC, false for data
+    #
+    # Some plotting defaults depend on whether histograms are data or
+    # MC. This provides an ability to circumvent those.
     def setIsDataMC(self, isData, isMC):
         self._isData = isData
         self._isMC = isMC
@@ -724,6 +824,9 @@ class Histo:
             raise Exception("setIsDataMC() has not been called, don't know if the histogram is from data or MC")
         return self._isData
 
+    ## Set the histogram draw style
+    #
+    # \param drawStyle  new draw style
     def setDrawStyle(self, drawStyle):
         self.drawStyle = drawStyle
 
@@ -807,6 +910,10 @@ class Histo:
     # Style string for TLegend
     ## \var drawStyle
     # Style string for Draw()
+    ## \var _isData
+    # Is the histogram from data?
+    ## \var _isMC
+    # Is the histogram from MC?
 
 ## Represents one (TH1/TH2) histogram associated with a dataset.Dataset object
 class HistoWithDataset(Histo):
@@ -922,7 +1029,14 @@ class HistoStacked(Histo):
     ## \var histos
     # List of histograms.Histo objects which are stacked
 
+## Represents TGraph objects
 class HistoGraph(Histo):
+    ## Constructor
+    #
+    # \param  rootGraph   TGraph object
+    # \param name         Name of the histogram
+    # \param legendStyle  Style string for TLegend (third parameter for TLegend.AddEntry())
+    # \param drawStyle    Style string for Draw (string parameter for TH1.Draw())
     def __init__(self, rootGraph, name, legendStyle="l", drawStyle="L"):
         Histo.__init__(self, rootGraph, name, legendStyle, drawStyle)
 
@@ -947,7 +1061,13 @@ class HistoGraph(Histo):
     def getBinWidth(self, bin):
         raise Exception("getBinWidth() is meaningless for HistoGraph (name %s)" % self.getName())
 
+## Represents TGraph objects with associated dataset.Dataset object
 class HistoGraphWithDataset(HistoGraph):
+    ## Constructor
+    #
+    # \param dataset  dataset.Dataset object
+    # \param args     Positional arguments (forwarded to histograms.HistoGraph.__init__())
+    # \param kwargs   Keyword arguments (forwarded to histograms.HistoGraph.__init__())
     def __init__(self, dataset, *args, **kwargs):
         HistoGraph.__init__(self, *args, **kwargs)
         self.dataset = dataset
@@ -958,8 +1078,14 @@ class HistoGraphWithDataset(HistoGraph):
 
 ## Implementation of HistoManager.
 #
-# Intended to be used only from HistoManager. This class contains all
-#  the methods which require the Histo objects (and only them).
+# Intended to be used only from histograms.HistoManager. This class contains all
+# the methods which require the Histo objects (and only them).
+#
+# Contains two lists for histograms, one for the drawing order, and
+# other for the legend insertion order. By default, the histogram
+# which is first in the legend, is drawn last such that it is in the
+# top of all drawn histograms. Both lists can be reordered if user
+# wants.
 class HistoManagerImpl:
     ## Constructor.
     #
@@ -988,12 +1114,16 @@ class HistoManagerImpl:
             self.nameHistoMap[h.getName()] = h
 
     ## Append a histograms.Histo object.
+    #
+    # \param histo   histograms.Histo object to be added
     def appendHisto(self, histo):
         self.drawList.append(histo)
         self.legendList.append(histo)
         self._populateMap()
 
     ## Extend with a list of histograms.Histo objects.
+    #
+    # \param histos  List of histograms.Histo objects to be added
     def extendHistos(self, histos):
         self.drawList.extend(histos)
         self.legendList.extend(histos)
@@ -1020,6 +1150,9 @@ class HistoManagerImpl:
         self.legendList.insert(legendIndex, histo)
         self._populateMap()
 
+    ## Remove histograms.Histo object
+    #
+    # \param name  Name of the histograms.Histo object to be removed
     def removeHisto(self, name):
         del self.nameHistoMap[name]
         for i, h in enumerate(self.drawList):
@@ -1031,6 +1164,10 @@ class HistoManagerImpl:
                 del self.legendList[i]
                 break
 
+    ## Replace histograms.Histo object
+    #
+    # \param name   Name of the histograms.Histo object to be replaced
+    # \param histo  New histograms.Histo object
     def replaceHisto(self, name, histo):
         if not name in self.nameHistoMap:
             raise Exception("Histogram %s doesn't exist" % name)
@@ -1248,14 +1385,12 @@ class HistoManagerImpl:
         
     ## \var drawList
     # List of histograms.Histo objects for drawing
-    #
     # The histograms are drawn in the <i>reverse</i> order, i.e. the
     # first histogram is on the top, anbd the last histogram is on the
     # bottom.
     #
     ## \var legendList
     # List of histograms.Histo objects for TLegend
-    #
     # The histograms are added to the TLegend in the order they are in
     # the list.
     #
@@ -1267,14 +1402,15 @@ class HistoManagerImpl:
 #
 # The histograms in a HistoManager are drawn to one plot.
 
-# The implementation is divided to this and HistoManagerImpl class.
-# The idea is that here are the methods, which don't require Histo
-# objects (namely setting the normalization), and HistoManagerImpl has
-# all the methods which require the histograms.Histo objects. User
-# can set freely the normalization scheme as many times as (s)he
-# wants, and at the first time some method not implemented in
-# HistoManagerBase is called, the Histo objects are created and the
-# calls are delegated to HistoManagerImpl class.
+# The implementation is divided to this and
+# histograms.HistoManagerImpl class. The idea is that here are the
+# methods, which don't require Histo objects (namely setting the
+# normalization), and histograms.HistoManagerImpl has all the methods
+# which require the histograms.Histo objects. User can set freely the
+# normalization scheme as many times as (s)he wants, and at the first
+# time some method not implemented in HistoManagerBase is called, the
+# Histo objects are created and the calls are delegated to
+# HistoManagerImpl class.
 class HistoManager:
     ## Constructor.
     #

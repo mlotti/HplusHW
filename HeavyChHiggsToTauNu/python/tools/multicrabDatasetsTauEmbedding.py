@@ -1,8 +1,15 @@
+## \package multicrabDatasetsTauEmbedding
+#
+# Dataset definitions for tau embedding datasets
+#
+# \see multicrab
+
 import multicrabDatasetsCommon as common
 
 # for generation (skim): ~1 kev ev/job
 # for analysis (embedding): 2 hours / job (~5-10 kev/job)
 
+## Numbers of jobs for the datasets of interest
 # ~5 kev/job
 njobs = {
     "SingleMu_Mu_160431-163261_May10":     {"skim":   6, "embedding":  1},
@@ -50,6 +57,11 @@ njobs = {
  }
 
 
+## Add the datasets with this function
+#
+# \param datasets   Dataset definition dictionary
+#
+# Done with a function, as the existing datasets are modified (more dataInputs are added)
 def addTo(datasets):
 #    datasets[""]["data"]["tauembedding_skim_v5"] = {
 #        "dbs_url": common.pattuple_dbs,

@@ -94,6 +94,8 @@ def main(opts, args):
         cmd = ["lumiCalc2.py", "-i", jsonfile, "--nowarning", "overview", "-b", "stable"]
         if opts.lumicalc1:
             cmd = ["lumiCalc.py", "-i", jsonfile, "--with-correction", "--nowarning", "overview", "-b", "stable"]
+        if opts.pixel:
+            cmd = ["pixelLumiCalc.py", "-i", jsonfile, "--nowarning", "overview"]
         #cmd = ["lumiCalc.py", "-c", "frontier://LumiCalc/CMS_LUMI_PROD", "-r", "132440", "--nowarning", "overview"]
         #ret = subprocess.call(cmd)
         if opts.verbose:
@@ -164,6 +166,8 @@ if __name__ == "__main__":
                       help="Print outputs of the commands which are executed")
     parser.add_option("--lumicalc1", dest="lumicalc1", action="store_true", default=False,
                       help="Use lumiCalc.py instead of lumiCalc2.py (default is to use lumiCalc2.py")
+    parser.add_option("--pixel", dest="pixel", action="store_true", default=False,
+                      help="Use pixelLumiCalc.py instead of lumiCalc2.py (default is to use lumiCalc2.py")
     
     (opts, args) = parser.parse_args()
 

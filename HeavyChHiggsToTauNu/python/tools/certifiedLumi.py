@@ -1,4 +1,9 @@
+## \package certifiedLumi
+# Name -> JSON file mapping
 
+## JSON file mapping
+#
+# The JSON files are assumed to exist in <tt>test</tt> directory.
 files = {
     "Apr21ReReco": "Cert_136033-149442_7TeV_Apr21ReReco_Collisions10_JSON.txt",
     "May10ReReco": "Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_v3.txt",
@@ -6,6 +11,7 @@ files = {
     "PromptReco": "Cert_160404-180252_7TeV_PromptReco_Collisions11_JSON.txt",
 }
 
+## Get a JSON file name
 def getFile(name):
     try:
         return files[name]

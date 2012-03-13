@@ -1,3 +1,8 @@
+## \package multicrabDatasetsMCSummer11
+#
+# Dataset definitions for Summer11 MC production (CMSSW 42X)
+#
+# \see multicrab
 
 import multicrabDatasetsCommon as common
 
@@ -6,6 +11,7 @@ import multicrabDatasetsCommon as common
 
 # Default signal cross section taken the same as ttbar
 
+## Dataset definitions
 datasets = {
     # Signal WH
     "TTToHplusBWB_M80_Summer11": {

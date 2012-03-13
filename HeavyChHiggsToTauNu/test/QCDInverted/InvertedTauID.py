@@ -15,7 +15,8 @@ from ROOT import *
 import math
 import sys
 import copy
-import re
+import re,os
+import datetime
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
@@ -859,3 +860,27 @@ class InvertedTauID:
 	    print "    Label",label,", normalization",self.normFactors[i]
 	    i = i + 1
 
+        print "\nNow run plotSignalAnalysisInverted.py with these normalization factors.\n"
+
+
+    def WriteNormalizationToFile(self,filename):
+	fOUT = open(filename,"w")
+
+	now = datetime.datetime.now()
+
+	fOUT.write("# Generated on %s\n"%now.ctime())
+	fOUT.write("# by %s\n"%os.path.basename(sys.argv[0]))
+        fOUT.write("\n")
+	fOUT.write("QCDInvertedNormalization = {\n")
+        i = 0
+        while i < len(self.normFactors):
+	    line = "    \"" + self.labels[i] + "\": " + str(self.normFactors[i])
+	    if i < len(self.normFactors) - 1:
+		line += ","
+	    line += "\n"
+            fOUT.write(line)
+            i = i + 1
+
+	fOUT.write("}\n")
+	fOUT.close()
+	print "Normalization factors written in file",filename

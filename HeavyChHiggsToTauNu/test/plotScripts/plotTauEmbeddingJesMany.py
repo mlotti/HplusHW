@@ -33,10 +33,10 @@ count = "deltaPhiTauMET<160"
 
 
 def main():
-    dirEmbs = ["."] + [os.path.join("..", d) for d in result.dirEmbs[1:]]
+    dirEmbs = ["."] + [os.path.join("..", d) for d in tauEmbedding.dirEmbs[1:]]
     #dirSig = "../"+result.dirSig
     
-    datasetsEmb = result.DatasetsMany(dirEmbs, baseline+"Counters")
+    datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, baseline+"Counters")
     #datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
 
     datasetsEmb.forEach(plots.mergeRenameReorderForDataMC)
