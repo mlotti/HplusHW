@@ -2,7 +2,7 @@
 
 set odir = `pwd`
 
-# prepare CMSSW
+# prepare CMSSW, if doesn't yet exist
 if ( !(-e mycmsswlink) ) then
   set MYCMSSWVER = CMSSW_4_2_8_patch7
   cmsrel ${MYCMSSWVER}
@@ -19,15 +19,9 @@ source ${odir}/mkBrLimits_process
 echo done with plotting!
 
 # Finally, remove LandS and clean directory
-
-# # compress LandS output files,
-# # remove LandS and clean directory from files created by LandS
-# rm -r LSFJOB_*
 rm *Hybrid*root
 rm spli*root
-#rm -r mycmsswlink/src/HiggsAnalysis
-#rm -r mycmsswlink/src/UserCode
-#rm -r mycmsswlink/tmp
+#rm -r LSFJOB_*
 rm -r mycmsswlink CMSSW_*
 rm __limitbands.root
 

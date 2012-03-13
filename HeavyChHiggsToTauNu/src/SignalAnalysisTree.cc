@@ -27,6 +27,7 @@ namespace HPlus {
     fDoFill(iConfig.getUntrackedParameter<bool>("fill")),
     fTauEmbeddingInput(iConfig.getUntrackedParameter<bool>("tauEmbeddingInput", false)),
     fFillJetEnergyFractions(iConfig.getUntrackedParameter<bool>("fillJetEnergyFractions", true)),
+    fillNonIsoLeptonVars(iConfig.getUntrackedParameter<bool>("fillNonIsoLeptonVars", false)),
     fGenParticleSource(iConfig.getUntrackedParameter<edm::InputTag>("genParticleSrc")),
     fTree(0)
   {
@@ -45,7 +46,7 @@ namespace HPlus {
     for(size_t i=0; i<tauIds.size(); ++i) {
       fTauIds.push_back(TauId(tauIds[i]));
     }
-    fillNonIsoLeptonVars = false;
+//    fillNonIsoLeptonVars = false;
     reset();    
   }
   SignalAnalysisTree::~SignalAnalysisTree() {}
@@ -97,6 +98,7 @@ namespace HPlus {
     fTree->Branch("jets_elm", &fJetsElm);
     fTree->Branch("jets_phm", &fJetsPhm);
     fTree->Branch("jets_mum", &fJetsMum);
+    fTree->Branch("jets_flavour", &fJetsFlavour);
     fTree->Branch("jets_jecToRaw", &fJetsJec);
     fTree->Branch("jets_area", &fJetsArea);
     fTree->Branch("jets_looseId", &fJetsLooseId);
@@ -289,7 +291,7 @@ namespace HPlus {
       fJetsElm.push_back(jets[i]->electronMultiplicity());
       fJetsPhm.push_back(jets[i]->photonMultiplicity());
       fJetsMum.push_back(jets[i]->muonMultiplicity());
-
+      fJetsFlavour.push_back(jets[i]->partonFlavour());
       fJetsJec.push_back(jets[i]->jecFactor(0));
 
       int npr = jets[i]->chargedMultiplicity() + jets[i]->neutralMultiplicity();

@@ -81,20 +81,28 @@ def addCorrectedMet(process, dataVersion, tauSelection, jetSelection, metRaw = "
 
     # Apply type 1 corrections to raw PF MET in PAT
     m = patPFMETCorrections.patType1CorrectedPFMet.clone(
+        src = metRaw,
         srcType1Corrections = [cms.InputTag(type1p2Corr, "type1")],
-        src = metRaw
     )
     type1Name = "patType1CorrectedPFMet"+postfix
     setattr(process, type1Name, m)
     sequence *= m
 
-    #m = patPFMETCorrections.patType1p2CorrectedPFMet.clone(
-    #    src = metRaw
-    #)
-    #type1p2Name = "patType1p2CorrectedPFMet"+postfix
-    #setattr(process, type1p2Name, m)
-    #sequence *= m
+    # Appluy type 1 and type 2 corrections ro raw PF MET in PAT
+    m = patPFMETCorrections.patType1p2CorrectedPFMet.clone(
+        src = metRaw,
+        srcType1Corrections = [cms.InputTag(type1p2Corr, "type1")],
+        srcUnclEnergySums = [
+            cms.InputTag(type1p2Corr, 'type2' ),
+            cms.InputTag(type2Corr,   'type2' ),
+            cms.InputTag(type1p2Corr, 'offset'),
+            cms.InputTag('pfCandMETcorr'),
+        ]
+    )
+    type1p2Name = "patType1p2CorrectedPFMet"+postfix
+    setattr(process, type1p2Name, m)
+    sequence *= m
 
     setattr(process, "patMetCorrSequence"+postfix, sequence)
 
-    return (sequence, type1Name)
+    return (sequence, type1Name, type1p2Name)

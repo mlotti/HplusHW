@@ -1,10 +1,6 @@
 #!/bin/tcsh
 
 set odir = $1
-# set datacard1 = ${odir}/$2 
-# set datacard2 = ${odir}/$3
-# set datacard3 = ${odir}/$4 
-# set datacard4 = ${odir}/$5 
 set datacard1 = $2 
 set datacard2 = $3
 set datacard3 = $4 

@@ -1,3 +1,8 @@
+## \package srm
+# Provides python interface to srm tools
+#
+# Main usage is from hplusSrm.py tool
+
 import os, re, math
 import subprocess
 import getopt

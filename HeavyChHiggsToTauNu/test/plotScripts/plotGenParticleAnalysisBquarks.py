@@ -48,13 +48,18 @@ def main():
     datasets.loadLuminosities()
 
     # Take signals from 42X
-    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
+#    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
+  # Remove signals other than M120
+    #datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
+
     
     datasets.remove(["QCD_Pt30to50_TuneZ2_Summer11","QCD_Pt50to80_TuneZ2_Summer11","QCD_Pt80to120_TuneZ2_Summer11",
                      "QCD_Pt120to170_TuneZ2_Summer11","QCD_Pt170to300_TuneZ2_Summer11","QCD_Pt300to470_TuneZ2_Summer11",
                      "WJets_TuneZ2_Summer11", "TTJets_TuneZ2_Summer11", "DYJetsToLL_M50_TuneZ2_Summer11", "Tau_160431-161176_May10",                                                            
-                     "Tau_161119-161119_May10_Wed", "Tau_161217-163261_May10", "Tau_163270-163869_May10",
-                     "Tau_165088-165633_Prompt", "Tau_165103-165103_Prompt_Wed", "Tau_165970-166164_Prompt",
+                     "Tau_160431-163869_May10", "Tau_165088-165633_Prompt", "Tau_165970-167913_Prompt",
+                     "Tau_170722-172619_Aug05", "Tau_172620-173198_Prompt", "Tau_173236-173692_Prompt",
                      "Tau_166346-166346_Prompt", "Tau_166374-167043_Prompt", "Tau_167078-167784_Prompt",
                      "Tau_167786-167913_Prompt_Wed"
                      ])
@@ -75,7 +80,13 @@ def main():
     genBquark_Pt(plots.MCPlot(datasets, analysis+"/GenParticleAnalysis/genBquark_NotFromTop_Pt", normalizeByCrossSection=True), "genBquark_NotFromTop_Pt")
     genBquark_DeltaRTau(plots.MCPlot(datasets, analysis+"/GenParticleAnalysis/genBquark_FromTop_DeltaRTau", normalizeByCrossSection=True), "genBquark_FromTop_DeltaRTau")
     genBquark_DeltaRTau(plots.MCPlot(datasets, analysis+"/GenParticleAnalysis/genBquark_NotFromTop_DeltaRTau", normalizeByCrossSection=True), "genBquark_NotFromTop_DeltaRTau")
- 
+    genBquark_DeltaRTau(plots.MCPlot(datasets, analysis+"/GenParticleAnalysis/genBquark_FromHiggsSide_DeltaRTau", normalizeByCrossSection=True), "genBquark_FromHiggsSide_DeltaRTau")
+    genBquark_DeltaRTau(plots.MCPlot(datasets, analysis+"/GenParticleAnalysis/genBquark_FromTopSide_DeltaRTau", normalizeByCrossSection=True), "genBquark_FromTopSide_DeltaRTau")
+    genBquark_Pt(plots.MCPlot(datasets, analysis+"/GenParticleAnalysis/genBquark_FromHiggsSide_Pt", normalizeByCrossSection=True), "genBquark_FromHiggsSide_Pt")
+    genBquark_Pt(plots.MCPlot(datasets, analysis+"/GenParticleAnalysis/genBquark_FromTopSide_Pt", normalizeByCrossSection=True), "genBquark_FromTopSide_Pt")
+    genBquark_Eta(plots.MCPlot(datasets, analysis+"/GenParticleAnalysis/genBquark_FromHiggsSide_Eta", normalizeByCrossSection=True), "genBquark_FromHiggsSide_Eta")
+    genBquark_Eta(plots.MCPlot(datasets, analysis+"/GenParticleAnalysis/genBquark_FromTopSide_Eta", normalizeByCrossSection=True), "genBquark_FromTopSide_Eta")
+    
 def scaleMC(histo, scale):
     if histo.isMC():
         th1 = histo.getRootHisto()

@@ -34,12 +34,22 @@ def getOptions(options=None):
                      1,
                      options.multiplicity.singleton,
                      options.varType.int,
-                     "Do tau trigger mathching? (default: 1")
+                     "Do tau trigger matching? (default: 1)")
     options.register("doTauHLTMatchingInAnalysis",
                      0,
                      options.multiplicity.singleton,
                      options.varType.int,
                      "Do tau trigger mathching with the InAnalysis method? (default: 0")
+    options.register("triggerThrow",
+                     1,
+                     options.multiplicity.singleton,
+                     options.varType.int,
+                     "Should the TriggerFilter for data throw if trigger path is not found? (default: 1)")
+    options.register("skimConfig",
+                     "",
+                     options.multiplicity.singleton,
+                     options.varType.string,
+                     "Configuration fragment for a skim to be done during pattuplization")
     options.register("tauEmbeddingInput",
                      0,
                      options.multiplicity.singleton,
@@ -53,11 +63,6 @@ def getOptions(options=None):
                      "",
                      options.multiplicity.singleton, options.varType.string,
                      "What tau trigger efficiency to use for tau embedding normalisation")
-    options.register("tauIDFactorizationMap",
-                     "FactorizationMap_NoFactorization_cfi",
-                     options.multiplicity.singleton,
-                     options.varType.string,
-                     "Factorization map config file")
     options.register("runOnCrab",
                      0,
                      options.multiplicity.singleton,
@@ -99,12 +104,3 @@ def getOptionsDataVersion(dataVersion, options=None, useDefaultSignalTrigger=Tru
         options.trigger = [dataVersion.getDefaultSignalTrigger()]
 
     return (options, dataVersion)
-
-
-def getTauIDFactorizationMap(options):
-    if options.tauIDFactorizationMap != "":
-        myFactorizationMapName = "HiggsAnalysis.HeavyChHiggsToTauNu."+options.tauIDFactorizationMap
-    else:
-        raise RuntimeError, "HChOptions::getTauIDFactorizationMap: Check default parameter value!"
-    print "tauID factorization map is:", myFactorizationMapName
-    return myFactorizationMapName

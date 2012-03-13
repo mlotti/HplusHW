@@ -22,6 +22,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 
 # These are per-muon cuts
 muonKinematics = "(muons_p4.Pt() > 40 && abs(muons_p4.Eta()) < 2.1)"
@@ -71,6 +73,7 @@ treeDraw = dataset.TreeDraw(analysis+"/tree", weight=weight)
 def main():
     counters = analysis+"Counters"
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    tauEmbedding.updateAllEventsToWeighted(datasets)
 
     #datasets.remove(filter(lambda name: name != "SingleMu_Mu_166374-167043_Prompt" and name != "TTJets_TuneZ2_Summer11", datasets.getAllDatasetNames()))
     if era == "EPS":
@@ -111,17 +114,19 @@ def main():
     plots._legendLabels["QCD_Pt20_MuEnriched"] = "QCD"
     histograms.createLegend.moveDefaults(dx=-0.02)
 
-    #doPlots(datasets)
-    printCounters(datasets)
-
+    doPlots(datasets)
+#    printCounters(datasets)
+#    doPlotsWTauMu(datasets, "TTJets")
+#    doPlotsWTauMu(datasets, "WJets")
 
 def doPlots(datasets):
     def createPlot(name, **kwargs):
         return plots.DataMCPlot(datasets, name, **kwargs)
+    drawPlot = plots.PlotDrawer(stackMCHistograms=True, addMCUncertainty=True, log=True, ratio=True)
 
     selections = [
-        ("Full_", "&&".join([muonSelection, muonVeto, electronVeto, jetSelection])),
-        ("FullNoIso_", "&&".join([muonSelectionNoIso, muonVetoNoIso, electronVeto, jetSelectionNoIso])),
+        ("Full_", And(muonSelection, muonVeto, electronVeto, jetSelection)),
+        ("FullNoIso_", And(muonSelectionNoIso, muonVetoNoIso, electronVeto, jetSelectionNoIso)),
 #        ("Analysis_", "&&".join([muonSelection, muonVeto, electronVeto, jetSelection, metcut, btagging])),
         ]
 
@@ -130,13 +135,90 @@ def doPlots(datasets):
 
 
         td = tdMuon.clone(varexp="muons_p4.Pt() >>tmp(40,0,400)")
-        muonPt(createPlot(td), prefix=name, ratio=True, cutBox={"cutValue":40, "greaterThan":True})
+        drawPlot(createPlot(td), name+"muon_pt_log", "Muon p_{T} (GeV/c)", ylabel="Events / %.0f GeV/c", cutBox={"cutValue":40, "greaterThan":True})
 
         td = tdMuon.clone(varexp="pfMet_p4.Pt() >>tmp(40,0,400)")
-        met(createPlot(td), prefix=name, ratio=True)
+        drawPlot(createPlot(td), name+"met_log", "E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV")
 
         td = tdMuon.clone(varexp="sqrt(2 * muons_p4.Pt() * pfMet_p4.Et() * (1-cos(muons_p4.Phi()-pfMet_p4.Phi()))) >>tmp(40,0,400)")
-        transverseMass(createPlot(td), prefix=name, ratio=True)
+        drawPlot(createPlot(td), name+"mt_log", "m_{T}(#mu, E_{T}^{miss}) (GeV/c^{2})", ylabel="Events / %.0f GeV/c^{2}")
+
+
+
+def doPlotsWTauMu(datasets, name):
+    selection = And(muonSelection, muonVeto, electronVeto, jetSelection)
+    td = treeDraw.clone(varexp="muons_p4.Pt() >> tmp(40,0,400)")
+
+    ds = datasets.getDataset(name)
+    # Take first unweighted histograms for the fraction plot
+    drh_all = ds.getDatasetRootHisto(td.clone(selection=selection, weight=""))
+    drh_pure = ds.getDatasetRootHisto(td.clone(selection=And(selection, "abs(muons_mother_pdgid) == 24"), weight=""))
+    hallUn = drh_all.getHistogram()
+    hpureUn = drh_pure.getHistogram()
+
+    # Then the correctly weighted for the main plot
+    drh_all = ds.getDatasetRootHisto(td.clone(selection=selection))
+    drh_pure = ds.getDatasetRootHisto(td.clone(selection=And(selection, "abs(muons_mother_pdgid) == 24")))
+    lumi = datasets.getDataset("Data").getLuminosity()
+    drh_all.normalizeToLuminosity(lumi)
+    drh_pure.normalizeToLuminosity(lumi)
+    hall = drh_all.getHistogram()
+    hpure = drh_pure.getHistogram()
+
+    hall.SetName("All")
+    hpure.SetName("Pure")
+
+    p = plots.ComparisonPlot(hall, hpure)
+    p.histoMgr.setHistoLegendLabelMany({
+            "All": "All muons",
+            "Pure": "W#rightarrow#tau#rightarrow#mu"
+#            "Pure": "W#rightarrow#mu"
+            })
+    p.histoMgr.forEachHisto(styles.generator())
+
+    hallErr = hall.Clone("AllError")
+    hallErr.SetFillColor(ROOT.kBlue-7)
+    hallErr.SetFillStyle(3004)
+    hallErr.SetMarkerSize(0)
+    p.prependPlotObject(hallErr, "E2")
+
+    hpureErr = hpure.Clone("PureErr")
+    hpureErr.SetFillColor(ROOT.kRed-7)
+    hpureErr.SetFillStyle(3005)
+    hpureErr.SetMarkerSize(0)
+    p.prependPlotObject(hpureErr, "E2")
+
+    p.createFrame("muonPt_wtaumu_"+name, createRatio=True, opts={"ymin": 1e-1, "ymaxfactor": 2}, opts2={"ymin": 0.9, "ymax": 1.05}
+                  )
+    p.setRatios([plots._createRatio(hpureUn, hallUn, "", isBinomial=True)])
+    xmin = p.frame.GetXaxis().GetXmin()
+    xmax = p.frame.GetXaxis().GetXmax()
+    val = 1-0.038479
+    l = ROOT.TLine(xmin, val, xmax, val)
+    l.SetLineWidth(2)
+    l.SetLineColor(ROOT.kBlue)
+    l.SetLineStyle(4)
+    p.prependPlotObjectToRatio(l)
+    #p.appendPlotObjectToRatio(histograms.PlotText(0.18, 0.61, "1-0.038", size=18, color=ROOT.kBlue))
+    p.appendPlotObjectToRatio(histograms.PlotText(0.18, 0.61, "0.038", size=18, color=ROOT.kBlue))
+    p.getFrame2().GetYaxis().SetTitle("W#rightarrow#mu fraction")
+
+    p.getPad().SetLogy(True)
+    p.setLegend(histograms.moveLegend(histograms.createLegend()))
+    tmp = hpureErr.Clone("tmp")
+    tmp.SetFillColor(ROOT.kBlack)
+    tmp.SetFillStyle(3013)
+    tmp.SetLineColor(ROOT.kWhite)
+    p.legend.AddEntry(tmp, "Stat. unc.", "F")
+
+    p.frame.GetXaxis().SetTitle("Muon p_{T} (GeV/c)")
+    p.frame.GetYaxis().SetTitle("Events / %.0f GeV/c" % p.binWidth())
+    p.appendPlotObject(histograms.PlotText(0.5, 0.9, plots._legendLabels.get(name, name), size=18))
+
+    p.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    p.save()
 
 
 def printCounters(datasets):
@@ -168,7 +250,7 @@ def printCounters(datasets):
     eventCounter.normalizeMCByLuminosity()
 
     table = eventCounter.getMainCounterTable()
-    #addSumColumn(table)
+    addSumColumn(table)
 
     cellFormat = counter.TableFormatText(counter.CellFormatText(valueFormat='%.3f'))
     print table.format(cellFormat)
@@ -195,7 +277,7 @@ class PlotPassed(plots.PlotBase):
 
         with SetTH1Directory(False):
             for histo in plot.histoMgr.getHistos():
-                hpass = dist2pass(histo.getRootHisto())
+                hpass = histograms.dist2pass(histo.getRootHisto())
                 h = histograms.Histo(histo.getDataset(), hpass, histo.getName())
                 self.histoMgr.appendHisto(h)
             self.histoMgr.setHistoDrawStyleAll("P")
@@ -325,237 +407,6 @@ class PlotIso(plots.PlotBase):
 #                 self.histoMgr.forEachHisto(styles.generator())
 #                 self.histoMgr.setHistoLegendStyleAll("l")
 
-# dist = TH1
-def dist2pass(hdist):
-    # bin 0             underflow bin
-    # bin 1             first bin
-    # bin GetNbinsX()   last bin
-    # bin GetNbinsX()+1 overflow bin
-
-    # Construct the passed histogram such that the bin low edges in
-    # the distribution histogram become the bin centers
-    binLowEdges = []
-    for bin in xrange(1, hdist.GetNbinsX()+3):
-        prevBin = bin-1
-        prevLowEdge = hdist.GetBinLowEdge(prevBin)
-        thisLowEdge = hdist.GetBinLowEdge(bin)
-        binLowEdges.append( (prevLowEdge+thisLowEdge)/2 )
-
-    name = "passed_"+hdist.GetName()
-    hpass = ROOT.TH1F(name, name, len(binLowEdges)-1, array.array("d", binLowEdges))
-
-    #print "dist bins %d, pass bins %d" % (hdist.GetNbinsX(), hpass.GetNbinsX())
-
-    #print ["%.4f" % i for i in binLowEdges]
-    #print ["%.3f" % hdist.GetBinLowEdge(bin) for bin in xrange(1, hdist.GetNbinsX()+2)]
-    #print ["%.3f" % hpass.GetBinCenter(bin) for bin in xrange(1, hpass.GetNbinsX()+1)]
-    #for bin in xrange(1, hpass.GetNbinsX()):
-    total = hdist.Integral(0, hdist.GetNbinsX()+1)
-    #print "total %f" % total
-    for bin in xrange(0, hdist.GetNbinsX()+2):
-        passed = hdist.Integral(0, bin)
-        #print "bin %d content %f, passed/total = %f/%f = %f" % (bin, hdist.GetBinContent(bin), passed, total, passed/total)
-        hpass.SetBinContent(bin+1, passed)
-    #print "bin N, N+1 %f, %f" % (hpass.GetBinContent(hpass.GetNbinsX()), hpass.GetBinContent(hpass.GetNbinsX()+1))
-    return hpass
-
-def dist2eff(hdist):
-    hpass = dist2pass(hdist)
-    total = hdist.Integral(0, hdist.GetNbinsX()+1)
-    for bin in xrange(0, hdist.GetNbinsX()+2):
-        hpass.SetBinContent(bin, hpass.GetBinContent(bin)/total)
-    return hpass
-
-def dist2rej(hdist):
-    hpass = dist2pass(hdist)
-    total = hdist.Integral(0, hdist.GetNbinsX()+1)
-    for bin in xrange(0, hdist.GetNbinsX()+2):
-        hpass.SetBinContent(bin, 1-hpass.GetBinContent(bin)/total)
-    return hpass
-
-def jetMultiplicity(h, prefix=""):
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-    h.createFrame(prefix+"njets_log", xmin=3, xmax=10, ymin=0.1, yfactor=2)
-    h.frame.GetXaxis().SetTitle("Jet multiplicity")
-    h.frame.GetYaxis().SetTitle("Number of events")
-    h.setLegend(histograms.createLegend())
-    ROOT.gPad.SetLogy(True)
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.histoMgr.addLuminosityText()
-    h.save()
-
-def jetPt(h, prefix="", rebin=10):
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "Jet p_{T} (GeV/c)"
-    ylabel = "Number of jets / %.0f GeV/c" % h.binWidth()
-
-    ptcut = 30
-    ymin = 1e-1
-    xmax = 400
-
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-    h.createFrame(prefix+"jet_pt_log", xmax=xmax, ymin=ymin, yfactor=2)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.createLegend())
-    ROOT.gPad.SetLogy(True)
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.histoMgr.addLuminosityText()
-    h.save()
-
-    h.createFrame(prefix+"jet_pt_log_cut%d"%ptcut, xmin=ptcut, xmax=xmax, ymin=ymin, yfactor=2)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.createLegend())
-    ROOT.gPad.SetLogy(True)
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.histoMgr.addLuminosityText()
-    h.save()
-    
-
-def vertexCount(h, prefix="", postfix=""):
-    xlabel = "Number of vertices"
-    ylabel = "Number of events"
-
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-    h.createFrame(prefix+"vertices"+postfix)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.createLegend())
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.histoMgr.addLuminosityText()
-    h.save()
-
-    h.createFrame(prefix+"vertices"+postfix+"_log", ymin=0.1, factor=2)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    ROOT.gPad.SetLogy(True)
-    h.setLegend(histograms.createLegend())
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.histoMgr.addLuminosityText()
-    h.save()
-    
-
-
-def muonPt(h, prefix="", rebin=1, ratio=False, cutBox=None):
-    xlabel = "Muon p_{T} (GeV/c)"
-    ylabel = "Events / %.0f GeV/c"
-    #ylabel = "Number of events / 5.0 GeV/c"
-
-    _optsLin  = {}
-    _optsLog  = {"ymin": 0.1, "ymaxfactor": 2}
-    _opts2 = {"ymin": 0, "ymax": 2}
-
-    if rebin > 1:
-        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    ylabel = ylabel % h.binWidth()
-
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-#    tmp = h.histoMgr.getHisto("Data").getRootHisto()
-#    dataEvents = tmp.Integral(0, tmp.GetNbinsX()+1)
-#    tmp = h.histoMgr.getHisto("StackedMC").getSumRootHisto()
-#    mcEvents = tmp.Integral(0, tmp.GetNbinsX()+1)
-#    print "Muon pt Data/MC = %f/%f = %f" % (dataEvents, mcEvents, dataEvents/mcEvents)
-
-    h.createFrame(prefix+"muon_pt", opts=_optsLin)
-    if cutBox != None:
-        h.addCutBoxAndLine(**cutBox)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.createLegend())
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.histoMgr.addLuminosityText()
-    h.save()
-
-    h.createFrame(prefix+"muon_pt_log", createRatio=ratio, opts=_optsLog, opts2=_opts2)
-    if cutBox != None:
-        h.addCutBoxAndLine(**cutBox)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.moveLegend(histograms.createLegend()))
-    ROOT.gPad.SetLogy(True)
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.histoMgr.addLuminosityText()
-    h.save()
-    
-def muonEta(h, prefix="", plotAll=False, rebin=5):
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "Muon  #eta"
-    ylabel = "Number of muons / %.1f" % h.binWidth()
-
-    h.stackMCHistograms()
-    
-    if plotAll:
-        h.createFrame(prefix+"muon_eta", yfactor=1.4)
-        h.frame.GetXaxis().SetTitle(xlabel)
-        h.frame.GetYaxis().SetTitle(ylabel)
-        h.setLegend(histograms.createLegend())
-        h.draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.histoMgr.addLuminosityText()
-        h.save()
-
-    h.createFrame(prefix+"muon_eta_log", yfactor=2, ymin=0.1)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    ROOT.gPad.SetLogy(True)
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.histoMgr.addLuminosityText()
-    h.save()
-
-def muonPhi(h, prefix="", plotAll=False, rebin=1):
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-
-    xlabel = "Muon  #phi"
-    ylabel = "Number of muons / %.1f" % h.binWidth()
-    h.stackMCHistograms()
-
-    if plotAll:
-        h.createFrame(prefix+"muon_phi", yfactor=1.4)
-        h.frame.GetXaxis().SetTitle(xlabel)
-        h.frame.GetYaxis().SetTitle(ylabel)
-        h.setLegend(histograms.createLegend())
-        h.draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.histoMgr.addLuminosityText()
-        h.save()
-
-    h.createFrame(prefix+"muon_phi_log", yfactor=2, ymin=0.1)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    ROOT.gPad.SetLogy()
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.histoMgr.addLuminosityText()
-    h.save()
-
 def muonIso(h, prefix="", q="reliso", plotAll=False, ratio=False, printFraction=False, rebin=5, opts={}, opts2={}):
     #dist2pass(h.histoMgr.getHisto("QCD_Pt20_MuEnriched").getRootHisto())
 
@@ -655,258 +506,6 @@ def muonIsoQcd(plot, prefix=""):
     plot.draw()
     plot.save()
 
-    
-
-def muonD0():
-    # Muon track ip w.r.t. beam spot
-    h = Plot(datasets, lastSelection+"/muon_trackDB")
-    h.stackMCHistograms()
-    h.createFrame(lastSelection+"_muon_trackdb", xmin=0, xmax=0.2, ymin=0.1)
-    h.frame.GetXaxis().SetTitle("Muon track d_{0}(Bsp) (cm)")
-    h.frame.GetYaxis().SetTitle("Number of muons")
-    h.setLegend(histograms.createLegend())
-    ROOT.gPad.SetLogy(True)
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.histoMgr.addLuminosityText()
-    h.save()
-
-def wTransMass(h, prefix="", rebin=10):
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
-    xlabel = "m_{T}(#mu, MET) (GeV/c)"
-    ylabel = "Number of events / %.0f GeV/c^{2}" % h.binWidth()
-
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-    h.createFrame(prefix+"wtmass_log", ymin=0.1, xmax=350, yfactor=2)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.createLegend())
-    ROOT.gPad.SetLogy(True)
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.histoMgr.addLuminosityText()
-    h.save()
-
-class PrintNumEvents:
-    def __init__(self, minMet):
-        self.minMet = minMet
-        self.results = {}
-        #print "MET cut %d" % self.minMet
-
-    def __call__(self, name, histo):
-        th1 = histo.getRootHisto()
-
-        bin = th1.FindBin(self.minMet)
-        n = th1.Integral(bin, th1.GetNbinsX()+1)
-        #print "Dataset %s: %.1f passes MET cut" % (name, n)
-        self.results[name] = n
-
-    def printQcdFraction(self):
-        if not "QCD" in self.results:
-            return
-
-        s = 0.0
-        for name, value in self.results.iteritems():
-            if name != "Data":
-                s += value
-
-        print "MET cut %d" % self.minMet
-        for name, value in self.results.iteritems():
-            if name == "Data":
-                print "Dataset %s: %.1f passes" % (name, value)
-            else:
-                print "Dataset %s: %.1f passes, %.1f %%" % (name, value, value/s*100)
-                #print "Fraction of name of all MC %.1f %%" % (value/s*100)
-
-def met(h, prefix="", rebin=1, ratio=False):
-    xlabel = "E_{T}^{miss} (GeV)"
-    ylabel = "Events / %.0f GeV"
-
-    _optsLin  = {}
-    _optsLog  = {"ymin": 0.1, "ymaxfactor": 2}
-    _opts2 = {"ymin": 0, "ymax": 2}
-
-    if rebin > 1:
-        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    ylabel = ylabel % h.binWidth()
-
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-    h.createFrame(prefix+"met", opts=_optsLin)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.createLegend())
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.histoMgr.addLuminosityText()
-    h.save()
-
-    h.createFrame(prefix+"met_log", createRatio=ratio, opts=_optsLog, opts2=_opts2)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.moveLegend(histograms.createLegend()))
-    ROOT.gPad.SetLogy(True)
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.histoMgr.addLuminosityText()
-    h.save()
-
-def transverseMass(h, prefix="", rebin=1, ratio=False):
-    xlabel = "m_{T}(#mu, E_{T}^{miss}) (GeV)"
-    ylabel = "Events / %.0f GeV"
-
-    _optsLin  = {}
-    _optsLog  = {"ymin": 0.1, "ymaxfactor": 2}
-    _opts2 = {"ymin": 0, "ymax": 2}
-
-    if rebin > 1:
-        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    ylabel = ylabel % h.binWidth()
-
-    h.stackMCHistograms()
-    h.addMCUncertainty()
-
-    h.createFrame(prefix+"mt", opts=_optsLin)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.createLegend())
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.histoMgr.addLuminosityText()
-    h.save()
-
-    h.createFrame(prefix+"mt_log", createRatio=ratio, opts=_optsLog, opts2=_opts2)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.moveLegend(histograms.createLegend()))
-    ROOT.gPad.SetLogy(True)
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.histoMgr.addLuminosityText()
-    h.save()
-
-
-# MET
-class PlotMet:
-    def __init__(self, datasets, normalizeToLumi=None, rebin=2, postfix=""):
-        self.datasets = datasets
-        self.normalizeToLumi = normalizeToLumi
-        self.rebin = rebin
-        self.postfix = postfix
-        if len(postfix) > 0:
-            self.postfix = "_"+self.postfix
-        self.ylabel = "Number of events / %d GeV" % self.rebin
-        self.xlabels = {"calomet": "Calo MET",
-                        "pfmet": "PF MET",
-                        "met": "PF MET",
-                        "tcmet": "TC MET"}
-
-        self.ymax = 200
-        self.xmax = 300
-#        self.xmax = 100
-
-    def xlabel(self, met):
-        return self.xlabels[met]+" (GeV)"
-
-    def _calculateNumEvents(self, h):
-        for pn in [0, 15, 20, 30, 40]:
-            pn = PrintNumEvents(pn)
-            for name in [d.getName() for d in datasets.getAllDatasets()]:
-                h.histoMgr.forHisto(name, lambda h: pn(name, h))
-            pn.printQcdFraction()
-            print
-
-    def _plotLinear(self, h, selection, met):
-        h.createFrame(selection+"_"+met+self.postfix, ymax=self.ymax, xmax=self.xmax)
-        h.frame.GetXaxis().SetTitle(self.xlabel(met))
-        h.frame.GetYaxis().SetTitle(self.ylabel)
-        h.setLegend(histograms.createLegend())
-        h.draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.histoMgr.addLuminosityText()
-        h.save()
-
-    def _plotLog(self, h, selection, met):
-        h.createFrame(selection+"_"+met+"_log"+self.postfix, ymin=0.1, yfactor=2, xmax=self.xmax)
-        h.frame.GetXaxis().SetTitle(self.xlabel(met))
-        h.frame.GetYaxis().SetTitle(self.ylabel)
-        h.setLegend((histograms.createLegend()))
-        ROOT.gPad.SetLogy(True)
-        h.draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.histoMgr.addLuminosityText()
-        h.save()
-
-    def _createPlot(self, met, selection, calcNumEvents=False):
-        h = plots.DataMCPlot(self.datasets, selection+"/%s_et" % met, normalizeToLumi=self.normalizeToLumi)
-        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(self.rebin))
-        if calcNumEvents:
-            self._calculateNumEvents(h)
-        h.stackMCHistograms()
-        h.addMCUncertainty()
-        return h
-
-    def plot(self, met, selection, calcNumEvents=False):
-        h = self._createPlot(met, selection, calcNumEvents)
-        self._plotLinear(h, selection, met)
-        h.removeLegend()
-        self._plotLog(h, selection, met)
-
-    def plotLog(self, met, selection):
-        h = self._createPlot(met, selection)
-        self._plotLog(h, selection, met)
-
-############################################################
-
-def printMuonOrigin(datasetsMC, selection):
-    datasets = datasetsMC.deepCopy()
-    plots.mergeRenameReorderForDataMC(datasets)
-    
-    printMuonOriginHelper(datasets, selection)
-
-    datasets.merge("Ws", ["TTJets", "WJets", "SingleTop"])
-    datasets.selectAndReorder(["Ws"])
-    printMuonOriginHelper(datasets, selection)
-
-def printMuonOriginHelper(datasets, selection):
-    mother = histograms.HistoManager(datasets, selection+"/muon_genMother")
-    mother.normalizeMCByCrossSection()
-    grandMother = histograms.HistoManager(datasets, selection+"/muon_genGrandMother")
-    grandMother.normalizeMCByCrossSection()
-
-    for datasetName in datasets.getMCDatasetNames():
-        m = mother.getHisto(datasetName).getRootHisto()
-        gm = grandMother.getHisto(datasetName).getRootHisto()
-
-        allMus = m.Integral(0, m.GetNbinsX()+1)
-        muFromW = m.GetBinContent(25)
-        muFromZ = m.GetBinContent(24)
-        muFromTau = m.GetBinContent(16)
-        muFromTauW = gm.GetBinContent(25)
-        muFromTauZ = gm.GetBinContent(24)
-        otherMus = allMus - muFromW - muFromZ - muFromTauW - muFromTauZ
-
-        print "Dataset %s" % datasetName
-#        print "  All mus           %f" % allMus
-        print "  Mus from W        %f" % (muFromW/allMus)
-        print "  Mus from Z        %f" % (muFromZ/allMus)
-        print "  Mus from tau      %f" % (muFromTau/allMus)
-        print "    Mus from W->tau %f" % (muFromTauW/allMus)
-        print "    Mus from Z->tau %f" % (muFromTauZ/allMus)
-        print "  Other mus         %f" % (otherMus/allMus)
-
- 
 ############################################################
 
 class PrefixModify:

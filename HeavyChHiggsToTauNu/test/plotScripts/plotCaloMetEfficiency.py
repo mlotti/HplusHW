@@ -37,8 +37,8 @@ counters = "metNtupleCounters"
 #cutText = "Calo E_{T}^{miss} > 45 GeV"
 #cutText = "Calo E_{T}^{miss} > 60 GeV"
 
-runRegion = 1
-#runRegion = 2
+#runRegion = 1
+runRegion = 2
 
 #mcDataDefinition = True
 mcDataDefinition = False
@@ -164,10 +164,28 @@ def main():
     plotTurnOnData(datasets,
                    name="l1met",
                    pathAll=pfmet.clone(),
+                   pathPassed1=pfmet.clone(selection="caloMet_p4.Et() > 60"),
+                   pathPassed2=pfmet.clone(selection="l1Met.Et() > 30 && caloMet_p4.Et() > 60"),
+                   dataText1="CaloMET > 60 GeV",
+                   dataText2="L1 MET > 30 & CaloMET > 60 GeV",
+                   ratio=True
+                   )
+    plotTurnOnData(datasets,
+                   name="l1met36",
+                   pathAll=pfmet.clone(),
                    pathPassed1=pfmet.clone(selection="l1Met.Et() > 30 && caloMet_p4.Et() > 60"),
-                   pathPassed2=pfmet.clone(selection="caloMet_p4.Et() > 60"),
+                   pathPassed2=pfmet.clone(selection="l1Met.Et() > 36 && caloMet_p4.Et() > 60"),
                    dataText1="L1 MET > 30 & CaloMET > 60 GeV",
-                   dataText2="CaloMET > 60 GeV",
+                   dataText2="L1 MET > 36 & CaloMET > 60 GeV",
+                   ratio=True
+                   )
+    plotTurnOnData(datasets,
+                   name="l1met40",
+                   pathAll=pfmet.clone(),
+                   pathPassed1=pfmet.clone(selection="l1Met.Et() > 30 && caloMet_p4.Et() > 60"),
+                   pathPassed2=pfmet.clone(selection="l1Met.Et() > 40 && caloMet_p4.Et() > 60"),
+                   dataText1="L1 MET > 30 & CaloMET > 60 GeV",
+                   dataText2="L1 MET > 40 & CaloMET > 60 GeV",
                    ratio=True
                    )
 
@@ -480,7 +498,7 @@ def plotTurnOnData(datasets, name, pathAll, pathPassed1, pathPassed2, dataText1,
     opts2 = {"ymin": 0.8, "ymax": 1.2}
 
     name = "calomet_turnon_"+runs+"_data_"+name
-    p.createFrame(name, createRatio=ratio, opts=opts, opts2=opts2)
+    p.createFrame(name, createRatio=ratio, invertRatio=True, opts=opts, opts2=opts2)
     if ratio:
         p.getFrame2().GetYaxis().SetTitle("Ratio")
 

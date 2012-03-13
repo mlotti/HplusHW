@@ -81,7 +81,9 @@ bool ControlPlot::loopOverFiles(std::vector< TFile* > files, string source, TH1*
     // Obtain plot
     TH1* h = dynamic_cast<TH1*>(files[i]->Get(source.c_str()));
     if (!h) {
-      cout << "Error: Cannot open histogram " << source << "!" << endl;
+      cout << "Error: Cannot open histogram " << source 
+           << " from file " << files[i]->GetName()
+           << "!" << endl;
       return false;
     }
     // Obtain normalisation
@@ -769,12 +771,16 @@ void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, doubl
   tex->SetTextSize(27);
   tex->SetLineWidth(2);
   tex->Draw();
-  tex = new TLatex(0.43,0.945,"2.2 fb^{-1}");
+  tex = new TLatex(0.43,0.945,"2.3 fb^{-1}");
   tex->SetNDC();
   tex->SetTextFont(43);
   tex->SetTextSize(27);
   tex->SetLineWidth(2);
   tex->Draw();
+
+  // For SelectionFlow plot, comment/uncomment manually :(
+  //tex->DrawLatex(0.87, -0.41, "Step");
+
   tex = new TLatex(0.28,0.865,"m_{H^{#pm}} = 120 GeV/c^{2}");
   tex->SetNDC();
   tex->SetTextFont(63);
@@ -787,7 +793,8 @@ void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, doubl
   tex->SetTextSize(20);
   tex->SetLineWidth(2);
   tex->Draw();
-  
+
+ 
   plotpad->RedrawAxis();
 
   s.str("");
@@ -901,7 +908,8 @@ int main() {
   // Empty list
   vector<TFile*> myEmptyFiles;
   
-  double myLuminosityInPb = 2177.9;
+  //double myLuminosityInPb = 2177.9;
+  double myLuminosityInPb = 2256.103;
   double myBr = 0.05;
   
   string QCDprefix = "QCDMeasurement/QCDMeasurementVariation_METcut50_DeltaPhiTauMETCut160_tauIsol1/";

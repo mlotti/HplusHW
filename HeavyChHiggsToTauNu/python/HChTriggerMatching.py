@@ -18,12 +18,16 @@ tauPathLastFilter = {
     "HLT_IsoPFTau35_Trk20_v4":       "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
     "HLT_IsoPFTau35_Trk20_v6":       "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
     "HLT_MediumIsoPFTau35_Trk20_v1": "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
+    "HLT_MediumIsoPFTau35_Trk20_v5": "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
+    "HLT_MediumIsoPFTau35_Trk20_v6": "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
 
     "HLT_IsoPFTau35_Trk20_MET60_v2":        "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
     "HLT_IsoPFTau35_Trk20_MET60_v3":        "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
     "HLT_IsoPFTau35_Trk20_MET60_v4":        "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
     "HLT_IsoPFTau35_Trk20_MET60_v6":        "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
     "HLT_MediumIsoPFTau35_Trk20_MET60_v1":  "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_MediumIsoPFTau35_Trk20_MET60_v5": " hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_MediumIsoPFTau35_Trk20_MET60_v6": " hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
 
     "HLT_IsoPFTau45_Trk20_MET60_v2":       "hltFilterSingleIsoPFTau45Trk20MET60LeadTrack20IsolationL1HLTMatched",
     "HLT_IsoPFTau45_Trk20_MET60_v3":       "hltFilterSingleIsoPFTau45Trk20MET60LeadTrack20IsolationL1HLTMatched",
@@ -31,6 +35,8 @@ tauPathLastFilter = {
 
     "HLT_IsoPFTau35_Trk20_MET70_v2":       "hltFilterSingleIsoPFTau35Trk20MET70LeadTrack20IsolationL1HLTMatched",
     "HLT_MediumIsoPFTau35_Trk20_MET70_v1": "hltFilterSingleIsoPFTau35Trk20MET70LeadTrack20IsolationL1HLTMatched",
+    "HLT_MediumIsoPFTau35_Trk20_MET70_v5": "hltFilterSingleIsoPFTau35Trk20MET70LeadTrack20IsolationL1HLTMatched",
+    "HLT_MediumIsoPFTau35_Trk20_MET70_v6": "hltFilterSingleIsoPFTau35Trk20MET70LeadTrack20IsolationL1HLTMatched",
     }
 
 def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauCollectionsDefault, pathFilterMap=tauPathLastFilter, throw=True):
@@ -105,6 +111,47 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
         seq *= selector
 
     return seq
+
+def addMuonTriggerMatching(process, muons="patMuons"):
+    # See MuonAnalysis/MuonAssociators/python/patMuonsWithTrigger_cff.py V01-15-01
+    # http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/CMSSW/MuonAnalysis/MuonAssociators/python/patMuonsWithTrigger_cff.py?view=log
+
+    matcherPrototype = cms.EDProducer("PATTriggerMatcherDRDPtLessByR",
+        src     = cms.InputTag(muons),
+        matched = cms.InputTag("patTrigger"),
+        matchedCuts = cms.string(""),
+        maxDPtRel = cms.double(0.5),
+        maxDeltaR = cms.double(0.5),
+        resolveAmbiguities    = cms.bool(True),
+        resolveByMatchQuality = cms.bool(True)
+    )
+    process.muonMatchHLTL2 = matcherPrototype.clone(
+        matchedCuts = cms.string('coll("hltL2MuonCandidates")'),
+        maxDeltaR = 0.3, #maxDeltaR Changed accordingly to Zoltan tuning. It was: 1.2
+        maxDPtRel = 10.0
+    )
+    process.muonMatchHLTL3 = matcherPrototype.clone(
+        matchedCuts = cms.string('coll("hltL3MuonCandidates")'),
+        maxDeltaR = 0.1, #maxDeltaR Changed accordingly to Zoltan tuning. It was: 0.5
+        maxDPtRel = 10.0
+    )
+
+    process.patMuonsWithTrigger = cms.EDProducer("PATTriggerMatchMuonEmbedder",
+        src     = cms.InputTag(muons),
+        matches = cms.VInputTag(
+            cms.InputTag("muonMatchHLTL2"),
+            cms.InputTag("muonMatchHLTL3"),
+        )
+    )
+
+    sequence = cms.Sequence(
+        process.muonMatchHLTL2 *
+        process.muonMatchHLTL3 *
+        process.patMuonsWithTrigger
+    )
+
+    return (sequence, "patMuonsWithTrigger")
+    
 
 ################################################################################
 # Do tau -> HLT tau trigger matching and tau -> HLT jet trigger matching

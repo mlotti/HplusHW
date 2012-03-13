@@ -5,8 +5,24 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "Math/GenVector/VectorUtil.h"
 
 #include "TH1F.h"
+
+std::vector<const reco::GenParticle*>   getImmediateMothers(const reco::Candidate&);
+std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
+bool  hasImmediateMother(const reco::Candidate& p, int id);
+bool  hasMother(const reco::Candidate& p, int id);
+void  printImmediateMothers(const reco::Candidate& p);
+void  printMothers(const reco::Candidate& p);
+std::vector<const reco::GenParticle*>  getImmediateDaughters(const reco::Candidate& p);
+std::vector<const reco::GenParticle*>   getDaughters(const reco::Candidate& p);
+bool  hasImmediateDaughter(const reco::Candidate& p, int id);
+bool  hasDaughter(const reco::Candidate& p, int id);
+void  printImmediateDaughters(const reco::Candidate& p);
+void printDaughters(const reco::Candidate& p);
+
+
 
 namespace HPlus {
   BTagging::Data::Data(const BTagging *bTagging, bool passedEvent):
@@ -119,8 +135,19 @@ namespace HPlus {
     hDiscr = makeTH<TH1F>(myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
     hPt = makeTH<TH1F>(myDir, "bjet_pt", "bjet_pt", 400, 0., 400.);
     hDiscrB = makeTH<TH1F>(myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
-    hPtB = makeTH<TH1F>(myDir, "relabjet_pt", "realbjet_pt", 400, 0., 400.);
-    hEtaB = makeTH<TH1F>(myDir, "realbjet_eta", "realbjet_pt", 400, -5., 5.);
+    hPtB17 = makeTH<TH1F>(myDir, "realbjet17_pt", "realbjet17_pt", 400, 0., 400.);
+    hEtaB17 = makeTH<TH1F>(myDir, "realbjet17_eta", "realbjet17_eta", 400, -5., 5.);
+    hPtB33 = makeTH<TH1F>(myDir, "realbjet33_pt", "realbjet33_pt", 400, 0., 400.);
+    hEtaB33 = makeTH<TH1F>(myDir, "realbjet33_eta", "realbjet33_eta", 400, -5., 5.);
+    hPtBnoTag = makeTH<TH1F>(myDir, "realbjetNotag_pt", "realbjetNotag_pt", 400, 0., 400.);
+    hEtaBnoTag = makeTH<TH1F>(myDir, "realbjetNotag_eta", "realbjetNotag_eta", 400, -5., 5.);
+    hDiscrQ = makeTH<TH1F>(myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
+    hPtQ17 = makeTH<TH1F>(myDir, "realqjet17_pt", "realqjet17_pt", 400, 0., 400.);
+    hEtaQ17 = makeTH<TH1F>(myDir, "realqjet17_eta", "realqjet17_pt", 400, -5., 5.);
+    hPtQ33 = makeTH<TH1F>(myDir, "realqjet33_pt", "realqjet33_pt", 400, 0., 400.);
+    hEtaQ33 = makeTH<TH1F>(myDir, "realqjet33_eta", "realqjet33_pt", 400, -5., 5.);
+    hPtQnoTag = makeTH<TH1F>(myDir, "realqjetNotag_pt", "realqjetNotag_pt", 400, 0., 400.);
+    hEtaQnoTag = makeTH<TH1F>(myDir, "realqjetNotag_eta", "realqjetNotag_pt", 400, -5., 5.);
     hPt1 = makeTH<TH1F>(myDir, "bjet1_pt", "bjet1_pt", 100, 0., 400.);
     hPt2 = makeTH<TH1F>(myDir, "bjet2_pt", "bjet2_pt", 100, 0., 400.);
     hEta = makeTH<TH1F>(myDir, "bjet_eta", "bjet_pt", 400, -5., 5.);
@@ -217,7 +244,10 @@ namespace HPlus {
 
     size_t passed = 0;
     bool bmatchedJet = false;
-    
+    bool qmatchedJet = false;
+    bool bMatch = false;
+    bool qMatch = false;
+      
     // Calculate 
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
@@ -227,12 +257,47 @@ namespace HPlus {
       if (!iEvent.isRealData()) {
 	edm::Handle <reco::GenParticleCollection> genParticles;
 	iEvent.getByLabel("genParticles", genParticles);
+
+	
+	for (size_t i=0; i < genParticles->size(); ++i){
+	  const reco::Candidate & p = (*genParticles)[i];
+	  int id = p.pdgId();
+	  if ( abs(id) != 5 || hasImmediateMother(p,5) || hasImmediateMother(p,-5) )continue;
+	  //	  printImmediateMothers(p);
+	  double deltaR = ROOT::Math::VectorUtil::DeltaR(iJet->p4(),p.p4() );
+	  if ( deltaR < 0.2) bMatch = true;
+	  //	  std::cout << "  bmatch   "  <<  p.pdgId()   << std::endl;
+	} 
+
+	for (size_t i=0; i < genParticles->size(); ++i){
+	  const reco::Candidate & p = (*genParticles)[i];
+	  int id = p.pdgId();
+	  if ( abs(id) > 4 &&  p.pdgId() != 21 )continue;
+	  if ( hasImmediateMother(p,1) || hasImmediateMother(p,-1) )continue;
+	  if ( hasImmediateMother(p,2) || hasImmediateMother(p,-2) )continue;
+	  if ( hasImmediateMother(p,3) || hasImmediateMother(p,-3) )continue;
+	  if ( hasImmediateMother(p,4) || hasImmediateMother(p,-4) )continue;
+	  double deltaR = ROOT::Math::VectorUtil::DeltaR(iJet->p4(),p.p4() );
+	  if ( deltaR < 0.2) qMatch = true;
+	  //	  std::cout << "  qmatch   "  <<  p.pdgId()   << std::endl;
+
+	}
+	//////////////////////////////////////////////
+
+
+
 	for (size_t i=0; i < genParticles->size(); ++i) {
 	  const reco::Candidate & p = (*genParticles)[i];
 	  if (p.status() != 2 ) continue;
+	  //	  if (reco::deltaR(p, iJet->p4()) < 0.2) std::cout << "  id jet   "  <<  p.pdgId()   << std::endl;
 	  if (std::abs(p.pdgId()) == 5) {	    
-	    if (reco::deltaR(p, iJet->p4()) < 0.4) {
+	    if (reco::deltaR(p, iJet->p4()) < 0.2) {
 	      bmatchedJet = true;
+	    }
+	  }
+	  if (std::abs(p.pdgId()) < 4 || p.pdgId() == 21 ) {	    
+	    if (reco::deltaR(p, iJet->p4()) < 0.2) {
+	      qmatchedJet = true;
 	    }
 	  }
 	}
@@ -240,12 +305,37 @@ namespace HPlus {
       if( bmatchedJet )   increment(fTaggedAllRealBJetsSubCount);
 
       float discr = iJet->bDiscriminator(fDiscriminator);
-      if (bmatchedJet ) {
-	if(discr > fDiscrCut ) {
-	  hPtB->Fill(iJet->pt(), fEventWeight.getWeight());
-	  hEtaB->Fill(iJet->eta(), fEventWeight.getWeight());
+      //      if (bmatchedJet ) {
+      if (bMatch ) {
+	hPtBnoTag->Fill(iJet->pt(), fEventWeight.getWeight());
+	hEtaBnoTag->Fill(iJet->eta(), fEventWeight.getWeight());
+	//	std::cout << " discr. b-matched   "  << discr << " discr cut   "  << fDiscrCut  << std::endl;	
+	//	if(discr > fDiscrCut ) {
+	if(discr > 3.3 ) {
+	  hPtB33->Fill(iJet->pt(), fEventWeight.getWeight());
+	  hEtaB33->Fill(iJet->eta(), fEventWeight.getWeight());
+	}
+	if(discr > 1.7 ) {
+	  hPtB17->Fill(iJet->pt(), fEventWeight.getWeight());
+	  hEtaB17->Fill(iJet->eta(), fEventWeight.getWeight());
 	}
 	hDiscrB->Fill(discr, fEventWeight.getWeight());
+      }
+      //      if (qmatchedJet ) {
+      if (qMatch ) {
+	hPtQnoTag->Fill(iJet->pt(), fEventWeight.getWeight());
+	hEtaQnoTag->Fill(iJet->eta(), fEventWeight.getWeight());
+	//	std::cout << " discr. q-matched  "  << discr <<  discr << " discr cut   "  << fDiscrCut << std::endl;
+	//	if(discr > fDiscrCut ) {
+	if(discr > 3.3 ) {
+	  hPtQ33->Fill(iJet->pt(), fEventWeight.getWeight());
+	  hEtaQ33->Fill(iJet->eta(), fEventWeight.getWeight());
+	}
+	if(discr > 1.7 ) {
+	  hPtQ17->Fill(iJet->pt(), fEventWeight.getWeight());
+	  hEtaQ17->Fill(iJet->eta(), fEventWeight.getWeight());
+	}
+	hDiscrQ->Fill(discr, fEventWeight.getWeight());
       }
 
       
