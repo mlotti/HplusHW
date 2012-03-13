@@ -131,7 +131,7 @@ class InvertedTauID:
         st.append(styles.StyleFill(fillColor=ROOT.kYellow))
 
 	plot.histoMgr.forHisto(objectName, st)
-	plot.setFrameName(plot.cf.canvas.GetName()+canvasName)
+	plot.setFileName(plot.cf.canvas.GetName()+canvasName)
         
 	plot.draw()
         plot.save()
