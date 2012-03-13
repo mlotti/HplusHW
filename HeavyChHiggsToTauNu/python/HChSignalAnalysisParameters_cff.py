@@ -126,6 +126,7 @@ tauSelectionNames = ["TauSelectionCaloTauCutBasedTauTriggerMatched",
 #tauSelection = tauSelectionShrinkingConeTaNCBased
 #tauSelection = tauSelectionCaloTauCutBased
 tauSelection = tauSelectionHPSTightTauBased
+tauVetoSelection = tauSelectionHPSLooseTauBased
 #tauSelection = tauSelectionHPSLooseTauBased
 #tauSelection = tauSelectionHPSMediumTauBased
 #tauSelection = tauSelectionCombinedHPSTaNCTauBased
