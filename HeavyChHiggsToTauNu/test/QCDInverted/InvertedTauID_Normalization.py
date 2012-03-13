@@ -25,13 +25,26 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 from InvertedTauID import *
 
-def main():
+def usage():
+    print "\n"
+    print "### Usage:   InvertedTauID_Normalization.py <multicrab dir>\n"
+    print "\n"
+    sys.exit()
+
+def main(argv):
 
 #    HISTONAME = "TauIdJets"
     HISTONAME = "TauIdBtag"
+
+    dirs = []
+    if len(sys.argv) < 2:
+	usage()
+
+    dirs.append(sys.argv[1])
     
     # Create all datasets from a multicrab task
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+#    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters)
 
     # Read integrated luminosities of data datasets from lumi.json
     datasets.loadLuminosities()
@@ -103,7 +116,8 @@ def main():
         invertedQCD.getNormalization()
 
     invertedQCD.Summary()
+    invertedQCD.WriteNormalizationToFile("QCDInvertedNormalizationFactors.py")
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
