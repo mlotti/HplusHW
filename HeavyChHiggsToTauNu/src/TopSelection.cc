@@ -29,6 +29,7 @@ namespace HPlus {
   TopSelection::Data::~Data() {}
 
   TopSelection::TopSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fTopMassLow(iConfig.getUntrackedParameter<double>("TopMassLow")),
     fTopMassHigh(iConfig.getUntrackedParameter<double>("TopMassHigh")),
@@ -177,6 +178,7 @@ namespace HPlus {
 	  if ( deltaR2 < 0.4) Jet2Match = true;
 	  
 	}
+
       }
 
       

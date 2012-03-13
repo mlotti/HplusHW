@@ -67,6 +67,7 @@ namespace HPlus {
     // Input parameters
     const double fTopMassLow;
     const double fTopMassHigh;
+ 
 
     // Counters
     Count fTopMassCount;

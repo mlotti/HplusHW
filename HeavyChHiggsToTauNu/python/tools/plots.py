@@ -765,7 +765,6 @@ class PlotBase:
         else:
             self.histoMgr = histograms.HistoManager()
 
-
         # Save the format
         self.saveFormats = saveFormats
 

@@ -530,6 +530,14 @@ namespace HPlus {
 	 hTransverseMassTopChiSelection->Fill(transverseMass, fEventWeight.getWeight());     
     } 
 
+
+    int njets30 = 0;
+    for(edm::PtrVector<pat::Jet>::const_iterator iter = jetData.getSelectedJets().begin(); iter != jetData.getSelectedJets().end(); ++iter) {
+      edm::Ptr<pat::Jet> iJet = *iter;
+      if (iJet->pt() < 30) continue;
+      njets30++;
+    }
+
     if (BjetSelectionData.passedEvent() ) {
         
       TopWithBSelection::Data TopWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData.getBjetTopSide());
@@ -540,7 +548,6 @@ namespace HPlus {
 	hTransverseMassTopBjetSelection->Fill(transverseMass, fEventWeight.getWeight());     
       }    
     }
-
 
 
 
