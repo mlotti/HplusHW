@@ -1062,8 +1062,38 @@ class PF2PATBuilder:
     def _customizeElectrons(self, postfix):
         # isolation step in PF2PAT, default is 0.2 (deltabeta corrected)
         #getattr(process, "pfIsolatedElectrons"+postfix).isolationCut = 0.2
-        # I'm not sure if the electron ID will work as simply as this
+
+        # First, for isolated electrons (PF2PAT default) 
+        # Simple cut-based ElectronID  seems to work as simply as this
         addPatElectronID(self.process, getattr(self.process, "patElectrons"+postfix))
+
+        # Then, for all electrons (not necessarily needed, but let's keep them when we're still studying the PU effects)
+        allPostfix = "All"
+        makePatElectronsAll = patHelpers.cloneProcessingSnippet(self.process, getattr(self.process, "makePatElectrons"+postfix), allPostfix)
+        makePatElectrons = getattr(self.process, "makePatElectrons"+postfix)
+        getattr(self.process, "patDefaultSequence"+postfix).replace(makePatElectrons,
+                                                                    makePatElectrons * makePatElectronsAll)
+        # Set the InputTags to point to pfElectrons (all PF electrons) instead of pfIsolatedElectrons (after isolation)
+#        getattr(self.process, "electronMatch"+postfix+allPostfix).src = "pfElectrons"+postfix
+        getattr(self.process, "patElectrons"+postfix+allPostfix).pfElectronSource = "pfElectrons"+postfix
+        # Clone selectedPatElectrons
+        selectedPatElectrons = getattr(self.process, "selectedPatElectrons"+postfix)
+        selectedPatElectronsAll = selectedPatElectrons.clone(
+            src = "patElectrons"+postfix+allPostfix
+        )
+        setattr(self.process, "selectedPatElectrons"+postfix+allPostfix, selectedPatElectronsAll)
+        getattr(self.process, "patDefaultSequence"+postfix).replace(selectedPatElectrons,
+                                                                    selectedPatElectrons*selectedPatElectronsAll)
+        # Add the elecron Id
+#        addPatElectronID(self.process, getattr(self.process, "patElectrons"+postfix+allPostfix))
+        self.outputCommands.append("keep *_selectedPatElectrons%s%s_*_*" % (postfix, allPostfix))
+
+#        getattr(self.process, "patElectrons"+postfix+allPostfix).isoDeposits = cms.PSet()
+#        getattr(self.process, "patElectrons"+postfix+allPostfix).isolationValues = cms.PSet()
+#        getattr(self.process, "patElectrons"+postfix+allPostfix).electronIDSources = cms.PSet()
+#        getattr(self.process, "patElectrons"+postfix+allPostfix).addElectronID = False
+#        getattr(self.process, "patElectrons"+postfix+allPostfix).addGenMatch = False
+
 
     def _customizeJets(self, postfix):
         # Take all jets (we clean jets from tau later in the analysis)
