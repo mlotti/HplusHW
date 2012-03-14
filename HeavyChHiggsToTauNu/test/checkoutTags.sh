@@ -62,6 +62,7 @@ set -e
 # 16.1.2012/S.Lehti        CMSSW_4_4_2_patch9 Updated tags to 44x
 # 19.1.2012/M.Kortelainen CMSSW_4_4_2_patch9 Updated PAT and tau tags
 # 20.1.2012/M.Kortelainen CMSSW_4_4_2_patch10 Updated and fixed PAT tags
+# 13.3.2012/M.Kortelainen CMSSW_4_4_4 Updated PAT, tau and lumi tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -71,22 +72,16 @@ eval $(scram runtime -sh)
 
 # Tau+PAT
 # https://hypernews.cern.ch/HyperNews/CMS/get/tauid/83/1/1/1/1.html
-# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePFTauID#CMSSW_4_4_2
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePFTauID#CMSSW_4_X_X
 #
 # Tau
-addpkg RecoTauTag/RecoTau         V01-02-14 # These two contain the continous HPS isolation
-addpkg RecoTauTag/Configuration   V01-02-10 # source: private e-mails
+addpkg RecoTauTag/TauTagTools     V01-02-01
+addpkg RecoTauTag/RecoTau         V01-02-16
+addpkg RecoTauTag/Configuration   V01-02-12
 # PAT
-addpkg DataFormats/PatCandidates   V06-04-31
-addpkg PhysicsTools/PatAlgos       V08-07-31-06
-addpkg PhysicsTools/PatExamples    V00-05-29
-addpkg PhysicsTools/PatUtils       V03-09-18-02
-addpkg PhysicsTools/SelectorUtils  V00-03-24-01
-addpkg CommonTools/ParticleFlow    V00-03-05
-addpkg RecoParticleFlow/PFProducer V14-07-13
-##### New tau discriminators
-# https://hypernews.cern.ch/HyperNews/CMS/get/tauid/164/1.html
-cvs co -r 1.46 PhysicsTools/PatAlgos/python/tools/tauTools.py
+addpkg PhysicsTools/PatAlgos  # needed for the tauTools.py update below
+##### New tau discriminators, electron MVA discriminator
+cvs co -r 1.47 PhysicsTools/PatAlgos/python/tools/tauTools.py
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 ####addpkg RecoJets/Configuration     V02-04-17
@@ -95,13 +90,13 @@ addpkg PhysicsTools/Utilities     V08-03-17
 
 # Type I/II MET
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis#HeadingFive
-addpkg JetMETCorrections/Type1MET V04-05-07
-addpkg PhysicsTools/PatUtils      b4_2_X_cvMEtCorr_30Nov11
+addpkg JetMETCorrections/Type1MET V04-05-08
+addpkg PhysicsTools/PatUtils      b4_2_X_cvMEtCorr_13Feb2012_JEC11V12 # this appears to only add stuff on top of V03-09-18-02 in 444 release
 addpkg DataFormats/METReco        V03-03-07
 
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc
-addpkg RecoLuminosity/LumiDB      V03-03-12
+addpkg RecoLuminosity/LumiDB      V03-04-02
 
 # Electron ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
