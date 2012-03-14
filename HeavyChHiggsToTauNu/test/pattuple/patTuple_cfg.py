@@ -227,11 +227,22 @@ if dataVersion.isData() and len(options.trigger) > 1 and options.triggerThrow !=
         setattr(process, "Path"+name, path)
 
 # If there is a need to apply some skim
-if options.skimConfig != "":
-    print "Skimming with configuration ", options.skimConfig
-    process.load(options.skimConfig)
-    process.plainPatSequence.replace(process.plainPatEndSequence,
-                                     process.skimSequence*process.plainPatEndSequence)
+if len(options.skimConfig) > 0:
+    if len(options.skimConfig) == 1:
+        print "Skimming with configuration ", options.skimConfig
+    else:
+        print "Skimming with OR of configurations ", " ".join(options.skimConfig)
+    process.out.SelectEvents.SelectEvents = []
+    for config in process.load(options.skimConfig):
+        process.load("HiggsAnalysis.HeavyChHiggsToTauNu."+config)
+        baseName = config.replace("_cff", "")
+        baseName = baseName[0].lower() + baseName[1:] # Make the first letter lower case
+        path = cms.Path(
+            process.sPAT * # Ensure that PAT and the possible trigger selection have been run, framework ensures the modules are ran only once
+            getattr(process, baseName+"Sequence")
+        )
+        setattr(process, baseName+"Path", cms.Path(getattr(process, baseName+"Sequence")))
+        process.out.SelectEvents.SelectEvents.append(baseName+"Path")
 
 # Output module in EndPath
 process.outpath = cms.EndPath(process.out)
