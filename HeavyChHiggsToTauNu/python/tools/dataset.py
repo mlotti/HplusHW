@@ -67,8 +67,8 @@ def getDatasetsFromMulticrabCfg(**kwargs):
         taskDirs = multicrab.getTaskDirectories(opts)
 
     datasetMgr = getDatasetsFromCrabDirs(taskDirs, **kwargs)
-####    if len(dirname) > 0:
-####        datasetMgr._setBaseDirectory(dirname)
+    if len(dirname) > 0:
+        datasetMgr._setBaseDirectory(dirname)
     return datasetMgr
 
 ## Construct DatasetManager from a list of CRAB task directory names.
@@ -1059,7 +1059,7 @@ class Dataset:
    # """
     def __init__(self, name, fname, counterDir):
         self.name = name
-        self.basedir = os.path.dirname(os.path.dirname(os.path.dirname(fname)))
+        self._setBaseDirectory(os.path.dirname(os.path.dirname(os.path.dirname(fname))))
         self.file = ROOT.TFile.Open(fname)
         if self.file == None:
             raise Exception("Unable to open ROOT file '%s'"%fname)
@@ -1283,6 +1283,9 @@ class Dataset:
             key = diriter.Next()
         return ret
 
+    def _setBaseDirectory(self,base):
+        self.basedir = base
+        
     ## \var name
     # Name of the dataset
     ## \var file
@@ -1511,7 +1514,7 @@ class DatasetManager:
     def __init__(self, base=""):
         self.datasets = []
         self.datasetMap = {}
-####        self.basedir = base
+        self._setBaseDirectory(base)
 
     ## Populate the datasetMap member from the datasets list.
     # 
@@ -1521,8 +1524,9 @@ class DatasetManager:
         for d in self.datasets:
             self.datasetMap[d.getName()] = d
 
-####    def _setBaseDirectory(self, base):
-####        self.basedir = base
+    def _setBaseDirectory(self, base):
+        for d in self.datasets:
+            d._setBaseDirectory(base)
 
     ## Close all TFiles of the contained dataset.Dataset objects
     #
