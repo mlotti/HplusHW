@@ -92,7 +92,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 
 options.doPat=1
 (process.sPAT, c) = addPatOnTheFly(process, options, dataVersion,
-                                   doPlainPat=False, doPF2PAT=True,
                                    patArgs={"doTauHLTMatching": doTauHLTMatching,
                                             "matchingTauTrigger": myTrigger},
                                    doHBHENoiseFilter=False, # Only save the HBHE result to event, don't filter

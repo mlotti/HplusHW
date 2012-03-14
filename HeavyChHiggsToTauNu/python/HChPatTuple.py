@@ -30,88 +30,164 @@ tauPreSelection = "pt() > 15"
 #jetPreSelection = "pt() > 10"
 jetPreSelection = ""
 
-##################################################
-#
-# PAT on the fly
-#
-def addPatOnTheFly(process, options, dataVersion,
-                   doPlainPat=True, doPF2PAT=False,
-                   patArgs={},
-                   doMcPreselection=False,
-                   doTotalKinematicsFilter=False,
-                   doHBHENoiseFilter=True, doPhysicsDeclared=False,
-                   calculateEventCleaning=False,
-                   ):
-    if doPlainPat and doPF2PAT:
-        raise Exception("Plain PAT and PF2PAT can not coexist!")
+class PATBuilder:
+    def __init__(self):
+        pass
 
+    def __call__(self, process, options, dataVersion,
+                 patArgs={},
+                 doMcPreselection=False,
+                 doTotalKinematicsFilter=False,
+                 doHBHENoiseFilter=True, doPhysicsDeclared=False,
+                 calculateEventCleaning=False):
 
-    def setPatArg(args, name, value):
-        if name in args:
-            print "Overriding PAT arg '%s' from '%s' to '%s'" % (name, str(args[name]), str(value))
-        args[name] = value
-    def setPatArgs(args, d):
-        for name, value in d.iteritems():
-            setPatArg(args, name, value)
+        self.process = process
+        self.counters = []
 
-    counters = []
-    if dataVersion.isData():
-        counters.extend(HChDataSelection.dataSelectionCounters[:])
+        if dataVersion.isData():
+            # Append the data selection counters for data
+            self.counters.extend(HChDataSelection.dataSelectionCounters[:])
+
+        if options.tauEmbeddingInput != 0:
+            # Add the tau embedding counters, if that's the input
+            import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
+            self.counters.extend(MuonSelection.muonSelectionCounters[:])
+            self.counters.extend(PFEmbeddingSource.muonSelectionCounters)
+        elif dataVersion.isMC() and doMcPreselection:
+            # If MC prseleciton is enabled, add the counters from there
+            self.counters = HChMcSelection.mcSelectionCounters[:]
+
+        if options.doPat == 0:
+            # Not running PAT, assuming that the job is taking pattuples as input
+            seq = cms.Sequence()
+
+            # Add event filters if requested
+            self.addFilters(dataVersion, seq, doTotalKinematicsFilter, doHBHENoiseFilter, doPhysicsDeclared, patOnTheFly=False)
+
+            # Add primary vertex selection
+            HChPrimaryVertex.addPrimaryVertexSelection(process, seq)
+
+            if options.doTauHLTMatchingInAnalysis != 0:
+                raise Exception("doTauLHTMAtchingInAnalysis is not supported at the moment")
+#                self.process.patTausHpsPFTauTauTriggerMatched = HChTriggerMatching.createTauTriggerMatchingInAnalysis(options.trigger, "selectedPatTausHpsPFTau")
+#                seq *= process.patTausHpsPFTauTauTriggerMatched
+            return (seq, self.counters)
+
+        # After this step we're running the PAT
+        print "Running PAT on the fly"
+        
+        self.process.eventPreSelection = cms.Sequence()
+        if options.tauEmbeddingInput != 0:
+            raise Exception("Tau embedding input not converted yet to PF2PAT")
+
+        else:
+            # normal AOD input
+            if dataVersion.isData():
+                self.process.eventPreSelection = HChDataSelection.addDataSelection(process, dataVersion, options, calculateEventCleaning)
+            elif dataVersion.isMC() and doMcPreselection:
+                self.process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
+            
+            # Do some manipulation of PAT arguments, ensure that the
+            # trigger has been given if Tau-HLT matching is required
+            pargs = patArgs.copy()
+            pargs["calculateEventCleaning"] = calculateEventCleaning
+            if pargs.get("doTauHLTMatching", True):
+                if not "matchingTauTrigger" in pargs:
+                    if options.trigger == "":
+                        raise Exception("Command line argument 'trigger' is missing")
+                    pargs["matchingTauTrigger"] = options.trigger
+                print "Trigger used for tau matching:", pargs["matchingTauTrigger"]
     
-    if options.tauEmbeddingInput != 0:
-        import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
-        counters.extend(MuonSelection.muonSelectionCounters[:])
-        counters.extend(PFEmbeddingSource.muonSelectionCounters)
-    elif dataVersion.isMC() and doMcPreselection:
-        counters = HChMcSelection.mcSelectionCounters[:]
+            self.process.patSequence = self.addPat(dataVersion, patArgs=pargs)
     
-    if options.doPat == 0:
-        seq = cms.Sequence()
+        # Add event filters if requested
+        self.addFilters(dataVersion, self.process.eventPreSelection, doTotalKinematicsFilter, doHBHENoiseFilter, doPhysicsDeclared, patOnTheFly=True)
+
+        # Add primary vertex selection
+        HChPrimaryVertex.addPrimaryVertexSelection(process, self.process.eventPreSelection)
+
+        if options.tauEmbeddingInput != 0:
+            # Select the tau objects deltaR matched to the original muon objects
+            from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations import addTauEmbeddingMuonTaus
+            process.patMuonTauSequence = addTauEmbeddingMuonTaus(process)
+            process.patSequence *= process.patMuonTauSequence
+
+        # Build final sequence
+        dataPatSequence = cms.Sequence(
+            process.eventPreSelection *
+            process.patSequence
+        )
+
+        return (dataPatSequence, self.counters)
+
+    def addPat(self, dataVersion, patArgs, includePFCands=False):
+        # Add PF2PAT
+        sequence = addPF2PAT(self.process, dataVersion, **patArgs)
+
+        # Adjust event conent
+        outdict = self.process.outputModules_()
+        if outdict.has_key("out"):
+            out = outdict["out"]
+            out.outputCommands.extend([
+#                    "keep *_goodPrimaryVertices*_*_*",
+                    "keep *_offlinePrimaryVerticesSumPt_*_*",
+                    "keep *_offlineBeamSpot_*_*",
+                    ])
     
-        if dataVersion.isMC():
-            # First apply total kinematics filter
-            if doTotalKinematicsFilter:
+            if includePFCands:
+                out.outputCommands.extend([
+                        "keep *_particleFlow_*_*",
+                        "keep *_generalTracks_*_*",
+                        ])
+    
+        # ValueMap of sumPt of vertices
+        self.process.offlinePrimaryVerticesSumPt = cms.EDProducer("HPlusVertexViewSumPtComputer",
+            src = cms.InputTag("offlinePrimaryVertices")
+        )
+        sequence *= self.process.offlinePrimaryVerticesSumPt
+        return sequence
+ 
+
+    def addFilters(self, dataVersion, sequence,
+                   doTotalKinematicsFilter,
+                   doHBHENoiseFilter, doPhysicsDeclared,
+                   patOnTheFly):
+        if dataVersion.isData():
+            if doPhysicsDeclared:
+                self.counters.extend(HChDataSelection.addPhysicsDeclaredBit(self.process, sequence))
+            if doHBHENoiseFilter:
+                self.counters.extend(HChDataSelection.addHBHENoiseFilter(self.process, sequence))
+        elif dataVersion.isMC() and doTotalKinematicsFilter:
+            # TotalKinematicsFilter for managing with buggy LHE+Pythia samples
+            if patOnTheFly:
+                # https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1489.html
+                self.process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
+                self.process.totalKinematicsFilter.src.setProcessName(dataVersion.getTriggerProcess())
+            else:
+                # For pattuples, this is implemented in patTuple_cfg.py, and saved in the event via TriggerResults
                 import HLTrigger.HLTfilters.hltHighLevel_cfi as hltHighLevel
-                process.totalKinematicsFilter = hltHighLevel.hltHighLevel.clone(
+                self.process.totalKinematicsFilter = hltHighLevel.hltHighLevel.clone(
                     TriggerResultsTag = cms.InputTag("TriggerResults", "", "HChPatTuple"),
                     HLTPaths = cms.vstring("totalKinematicsFilterPath")
                 )
-                process.totalKinematicsFilterAllEvents = cms.EDproducer("EventCountProcucer")
-                process.totalKinematicsFilterPassed = cms.EDProducer("EventCountProducer")
-                seq *= (
-                    process.totalKinematicsFilterAllEvents *
-                    process.totalKinematicsFilter *
-                    process.totalKinematicsFilterPassed
-                )
-                counters.extend([
-                        "totalKinematicsFilterAllEvents",
-                        "totalKinematicsFilterPassed"
-                        ])                    
+            self.process.totalKinematicsFilterAllEvents = cms.EDproducer("EventCountProcucer")
+            self.process.totalKinematicsFilterPassed = cms.EDProducer("EventCountProducer")
     
-            # Then apply MC preselection if wanted
-            if doMcPreselection:
-                process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
-                seq *= process.eventPreSelection
-        else:
-            if doPhysicsDeclared:
-                counters.extend(HChDataSelection.addPhysicsDeclaredBit(process, seq))
-            if doHBHENoiseFilter:
-                counters.extend(HChDataSelection.addHBHENoiseFilter(process, seq))
 
-        # Add primary vertex selection
-        HChPrimaryVertex.addPrimaryVertexSelection(process, seq)
+            sequence *(
+                self.process.totalKinematicsFilterAllEvents *
+                self.process.totalKinematicsFilter *
+                self.process.totalKinematicsFilterPassed
+            )
+            self.counters.extend([
+                    "totalKinematicsFilterAllEvents",
+                    "totalKinematicsFilterPassed"
+                    ])                    
 
-        if options.doTauHLTMatchingInAnalysis != 0:
-            process.patTausHpsPFTauTauTriggerMatched = HChTriggerMatching.createTauTriggerMatchingInAnalysis(options.trigger, "selectedPatTausHpsPFTau")
-            seq *= process.patTausHpsPFTauTauTriggerMatched
-        return (seq, counters)
 
-    print "Running PAT on the fly"
-
-    process.eventPreSelection = cms.Sequence()
-    if options.tauEmbeddingInput != 0:
-        if doPF2PAT or not doPlainPat:
-            raise Exception("Only plainPat can be done for tau embedding input at the moment")
+    def customizeForTauEmbeddingInput(self):
+        raise Exception("This function is not yet functional, contains only legacy code")
+        # This is the old code for plain PAT, it should be updated to PF2PAT
 
         # Hack to not to crash if something in PAT assumes process.out
         hasOut = hasattr(process, "out")
@@ -173,105 +249,18 @@ def addPatOnTheFly(process, options, dataVersion,
 #        if dataVersion.isData():
 #            process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
 #            process.patSequence *= process.goodPrimaryVertices
-    else:
-        if dataVersion.isData():
-            process.eventPreSelection = HChDataSelection.addDataSelection(process, dataVersion, options, calculateEventCleaning)
-
-        elif dataVersion.isMC() and doMcPreselection:
-            process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
-
-        pargs = patArgs.copy()
-
-        pargs["calculateEventCleaning"] = calculateEventCleaning
-        if pargs.get("doTauHLTMatching", True):
-            if not "matchingTauTrigger" in pargs:
-                if options.trigger == "":
-                    raise Exception("Command line argument 'trigger' is missing")
-                pargs["matchingTauTrigger"] = options.trigger
-            print "Trigger used for tau matching:", pargs["matchingTauTrigger"]
-
-        process.patSequence = addPat(process, dataVersion,
-                                     doPlainPat=doPlainPat, doPF2PAT=doPF2PAT,
-                                     patArgs=pargs)
-    
-    if dataVersion.isData():
-        if doPhysicsDeclared:
-            counters.extend(HChDataSelection.addPhysicsDeclaredBit(process, seq))
-        if doHBHENoiseFilter:
-            counters.extend(HChDataSelection.addHBHENoiseFilter(process, process.eventPreSelection))
-    elif dataVersion.isMC() and doTotalKinematicsFilter:
-        # TotalKinematicsFilter for managing with buggy LHE+Pythia samples
-        # https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1489.html
-        # For pattuples, this is implemented in patTuple_cfg.py, and saved in the event via TriggerResults
-        process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
-        process.totalKinematicsFilter.src.setProcessName(dataVersion.getTriggerProcess())
-        process.totalKinematicsFilterAllEvents = cms.EDproducer("EventCountProcucer")
-        process.totalKinematicsFilterPassed = cms.EDProducer("EventCountProducer")
-        process.eventPreSelection *= (
-            process.totalKinematicsFilterAllEvents *
-            process.totalKinematicsFilter *
-            process.totalKinematicsFilterPassed
-        )
-        counters.extend([
-                "totalKinematicsFilterAllEvents",
-                "totalKinematicsFilterPassed"
-                ])                    
-
-    HChPrimaryVertex.addPrimaryVertexSelection(process, process.eventPreSelection)
-    dataPatSequence = cms.Sequence(
-        process.eventPreSelection *
-        process.patSequence
-    )
-
-    if options.tauEmbeddingInput != 0:
-        from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations import addTauEmbeddingMuonTaus
-        process.patMuonTauSequence = addTauEmbeddingMuonTaus(process)
-        process.patSequence *= process.patMuonTauSequence
-    
-    return (dataPatSequence, counters)
 
 
-# Add the PAT sequences as requested
-def addPat(process, dataVersion,
-           doPlainPat=True, doPF2PAT=False,
-           patArgs={},
-           includePFCands=False):
-    if doPlainPat and doPF2PAT:
-        raise Exception("Plain PAT and PF2PAT can not coexist!")
+    def _setPatArg(self, args, name, value):
+        if name in args:
+            print "Overriding PAT arg '%s' from '%s' to '%s'" % (name, str(args[name]), str(value))
+        args[name] = value
+    def _setPatArgs(self, args, d):
+        for name, value in d.iteritems():
+            self._setPatArg(args, name, value)
 
-    # Run various PATs
-    sequence = None
-    if doPF2PAT:
-        print "Using PF2PAT"
-        sequence = addPF2PAT(process, dataVersion, **patArgs)
-    elif doPlainPat:
-        print "Using plain PAT"
-        sequence = addPlainPat(process, dataVersion, includePFCands=includePFCands, **patArgs)
-    else:
-        raise Exception("Either plain PAT or PF2PAT must be run!")
+addPatOnTheFly = PATBuilder()
 
-    # Adjust event conent
-    outdict = process.outputModules_()
-    if outdict.has_key("out"):
-        out = outdict["out"]
-        out.outputCommands.extend([
- #               "keep *_goodPrimaryVertices*_*_*",
-                "keep *_offlinePrimaryVerticesSumPt_*_*",
-                "keep *_offlineBeamSpot_*_*",
-                ])
-
-        if includePFCands:
-            out.outputCommands.extend([
-                    "keep *_particleFlow_*_*",
-                    "keep *_generalTracks_*_*",
-                    ])
-
-    # ValueMap of sumPt of vertices
-    process.offlinePrimaryVerticesSumPt = cms.EDProducer("HPlusVertexViewSumPtComputer",
-        src = cms.InputTag("offlinePrimaryVertices")
-    )
-    sequence *= process.offlinePrimaryVerticesSumPt
-    return sequence
 
 def myRemoveCleaning(process, postfix=""):
     modulesInSequence = getattr(process, "patDefaultSequence"+postfix).moduleNames()
