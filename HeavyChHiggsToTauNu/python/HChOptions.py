@@ -50,6 +50,11 @@ def getOptions(options=None):
                      options.multiplicity.list,
                      options.varType.string,
                      "Configuration fragment for a skim to be done during pattuplization (if multiple are given, an OR of skims is taken)")
+    options.register("pvSelectionConfig",
+                     "",
+                     options.multiplicity.singleton,
+                     options.varType.string,
+                     "Configuration fragment for a primary vertex selection (default is to use offlinePrimaryVertices as it is")
     options.register("tauEmbeddingInput",
                      0,
                      options.multiplicity.singleton,

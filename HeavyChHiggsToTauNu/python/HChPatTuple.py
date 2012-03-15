@@ -86,7 +86,7 @@ class PATBuilder:
                 self.process.eventPreSelection = HChDataSelection.addDataSelection(process, dataVersion, options, calculateEventCleaning)
             elif dataVersion.isMC() and doMcPreselection:
                 self.process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
-            
+
             # Do some manipulation of PAT arguments, ensure that the
             # trigger has been given if Tau-HLT matching is required
             pargs = patArgs.copy()
@@ -97,8 +97,8 @@ class PATBuilder:
                         raise Exception("Command line argument 'trigger' is missing")
                     pargs["matchingTauTrigger"] = options.trigger
                 print "Trigger used for tau matching:", pargs["matchingTauTrigger"]
-    
-            self.process.patSequence = self.addPat(dataVersion, patArgs=pargs)
+
+            self.process.patSequence = self.addPat(dataVersion, patArgs=pargs, pvSelectionConfig=options.pvSelectionConfig)
     
         # Add event filters if requested
         self.addFilters(dataVersion, self.process.eventPreSelection, doTotalKinematicsFilter, doHBHENoiseFilter, doPhysicsDeclared, patOnTheFly=True)
@@ -120,9 +120,9 @@ class PATBuilder:
 
         return (dataPatSequence, self.counters)
 
-    def addPat(self, dataVersion, patArgs, includePFCands=False):
+    def addPat(self, dataVersion, patArgs, includePFCands=False, pvSelectionConfig=""):
         # Add PF2PAT
-        sequence = addPF2PAT(self.process, dataVersion, **patArgs)
+        sequence = addPF2PAT(self.process, dataVersion, patArgs=patArgs, pvSelectionConfig=pvSelectionConfig)
 
         # Adjust event conent
         outdict = self.process.outputModules_()
@@ -1182,7 +1182,7 @@ class PF2PATBuilder:
         self.endSequence *= m
 
 
-def addPF2PAT(process, dataVersion, doPatTrigger=True, **kwargs):
+def addPF2PAT(process, dataVersion, doPatTrigger=True, patArgs={}, pvSelectionConfig=""):
     # Hack to not to crash if something in PAT assumes process.out
     # hasOut = hasattr(process, "out")
     # outputCommands = []
@@ -1224,8 +1224,10 @@ def addPF2PAT(process, dataVersion, doPatTrigger=True, **kwargs):
     sequence *= process.simpleEleIdSequence
 
     # Create the PF2PAT configuration builder
-    pf2patBuilder = PF2PATBuilder(process, dataVersion, **kwargs)
+    pf2patBuilder = PF2PATBuilder(process, dataVersion, **patArgs)
 
+    # Note that although PF2PAT configurations are built here, they're
+    # really executed after the "sequence" Sequence.
     postfixes = []
     # First PF2PAT without CHS
     pf2patBuilder.build(postfix="PFlow")
@@ -1297,6 +1299,29 @@ def addPF2PAT(process, dataVersion, doPatTrigger=True, **kwargs):
     )
     sequence *= process.generalTracks20eta2p5
     outputCommands.append("keep *_generalTracks20eta2p5_*_*")
+
+
+    ### Primary vertex selection
+    # Although defined here, it is run before any PF2PAT modules
+    # It just has to be run after PAT trigger, in order make use of that in the PV selection code
+    if len(pvSelectionConfig) > 0:
+        # Reorder offlinePrimaryVertices
+        module = __import__("HiggsAnalysis.HeavyChHiggsToTauNu."+pvSelectionConfig, fromlist=[pvSelectionConfig])
+        process.primaryVertexSelectionSequence = module.buildSequence(process, patArgs)
+
+        process.offlinePrimaryVertices = cms.EDProducer("HPlusVertexReorderProducer",
+            vertexSrc = cms.InputTag("offlinePrimaryVertices"),
+            indexSrc = cms.InputTag("selectedPrimaryVertexIndex")
+        )
+        process.primaryVertexSelectionSequence *= process.offlinePrimaryVertices
+        outputCommands.extend([
+                "drop *_offlinePrimaryVertices_*_*",
+                "keep *_offlinePrimaryVertices_*_%s" % process.name_(),
+                "keep *_selectedPrimaryVertexIndex_*_*",
+                ])
+
+        sequence *= process.primaryVertexSelectionSequence
+
 
     # Adjust output commands
     if out != None:
