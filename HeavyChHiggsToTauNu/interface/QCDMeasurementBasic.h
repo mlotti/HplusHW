@@ -154,7 +154,7 @@ namespace HPlus {
     Count fAllCounter;
     Count fTriggerAndHLTMetCutCounter;
     Count fPrimaryVertexCounter;
-    Count fOneProngTauSelectionCounter;
+    Count fTauSelectionCounter;
     Count fOneSelectedTauCounter;
     Count fGlobalElectronVetoCounter;
     Count fGlobalMuonVetoCounter;
@@ -171,7 +171,7 @@ namespace HPlus {
     // The order here defines the order the subcounters are printed at the program termination
     TriggerSelection fTriggerSelection;
     VertexSelection fPrimaryVertexSelection;
-    TauSelection fOneProngTauSelection;
+    TauSelection fTauSelection;
     GlobalElectronVeto fGlobalElectronVeto;
     NonIsolatedElectronVeto fNonIsolatedElectronVeto;
     GlobalMuonVeto fGlobalMuonVeto;

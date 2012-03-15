@@ -17,7 +17,7 @@ namespace HPlus {
     fAllCounter(eventCounter.addCounter("allEvents")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger_and_HLT_MET")),
     fPrimaryVertexCounter(eventCounter.addCounter("PrimaryVertex")),
-    fOneProngTauSelectionCounter(eventCounter.addCounter("TauCandSelection")),
+    fTauSelectionCounter(eventCounter.addCounter("TauCandSelection")),
     fOneSelectedTauCounter(eventCounter.addCounter("TauCands==1")),
     fGlobalElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
     fGlobalMuonVetoCounter(eventCounter.addCounter("GlobalMuonVeto")),
@@ -31,7 +31,7 @@ namespace HPlus {
     fOneProngTauIDWithRtauCounter(eventCounter.addCounter("TauID_withRtau")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
-    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "tauCandidate"),
+    fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fNonIsolatedElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("NonIsolatedElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
@@ -192,27 +192,25 @@ namespace HPlus {
     // Store weight of event
     double myWeightBeforeTauID = fEventWeight.getWeight();
     // Do tau candidate selection
-    TauSelection::Data tauCandidateData = fOneProngTauSelection.analyze(iEvent, iSetup);
+    TauSelection::Data tauCandidateData = fTauSelection.analyze(iEvent, iSetup);
     if (!tauCandidateData.passedEvent()) return false;
     // note: do not require here that only one tau has been found; instead take first item from mySelectedTau as the tau in the event
-    increment(fOneProngTauSelectionCounter);
+    increment(fTauSelectionCounter);
     // Apply trigger scale factor here, because it depends only on tau
-    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauCandidateData.getCleanedTauCandidates()[0]), iEvent.isRealData());
-    double myTauTriggerWeight = triggerWeight.getEventWeight();
+    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauCandidateData.getSelectedTau()), iEvent.isRealData());
     fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
     increment(fOneSelectedTauCounter);
     hSelectionFlow->Fill(kQCDOrderTauCandidateSelection, fEventWeight.getWeight());
     // Obtain MC matching - for EWK without genuine taus
-    FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauCandidateData.getCleanedTauCandidates()[0]));
+    FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauCandidateData.getSelectedTau()));
     bool myTypeIIStatus = fFakeTauIdentifier.isFakeTau(myTauMatch); // True if the selected tau is a fake
     // Obtain tau pT bin index
-    int myTauPtBinIndex = getTauPtBinIndex(tauCandidateData.getCleanedTauCandidates()[0]->pt());
+    int myTauPtBinIndex = getTauPtBinIndex(tauCandidateData.getSelectedTau()->pt());
     hAfterTauCandidateSelection->Fill(myTauPtBinIndex, fEventWeight.getWeight());
     if (myTypeIIStatus) hFakeTauAfterTauCandidateSelection->Fill(myTauPtBinIndex, fEventWeight.getWeight());
 
     // Obtain boolean for rest of tauID
-    TauSelection::Data tauIDData = fOneProngTauSelection.analyzeTauIDWithoutRtauOnCleanedTauCandidates(iEvent, iSetup, tauCandidateData.getCleanedTauCandidates()[0]);
-    bool myPassedTauIDStatus = tauIDData.passedEvent() && tauCandidateData.getBestTauCandidatePassedRtauStatus();
+    bool myPassedTauIDStatus = tauCandidateData.selectedTauPassesFullTauID();
     // Control plot
     if (myPassedTauIDStatus) hAfterTauCandidateSelectionAndTauID->Fill(myTauPtBinIndex, fEventWeight.getWeight());
 
@@ -246,7 +244,7 @@ namespace HPlus {
 
 
 //------ Jet selection
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauCandidateData.getCleanedTauCandidates()[0]);
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau());
     if (!jetData.passedEvent()) return false;
     increment(fJetSelectionCounter);
     hSelectionFlow->Fill(kQCDOrderJetSelection, fEventWeight.getWeight());
@@ -262,7 +260,7 @@ namespace HPlus {
     // Obtain btagging data
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     // Obtain alphaT
-    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauCandidateData.getCleanedTauCandidates()[0]), jetData.getSelectedJets());
+    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauCandidateData.getSelectedTau()), jetData.getSelectedJets());
 
     // Fill tree
     if(metData.getRawMET().isNonnull())
@@ -284,7 +282,7 @@ namespace HPlus {
     //fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
     //fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
     edm::PtrVector<pat::Tau> mySelectedTaus;
-    mySelectedTaus.push_back(tauCandidateData.getCleanedTauCandidates()[0]);
+    mySelectedTaus.push_back(tauCandidateData.getSelectedTau());
     fTree.fill(iEvent, mySelectedTaus, jetData.getSelectedJets());
 
     // Uncertainties after standard selections
@@ -293,7 +291,7 @@ namespace HPlus {
                                                                       1.0, 0.0); // these values are valid because btagging is not yet applied at this stage
 
     // Loop over analysis variations (that's where the rest of the tau pT spectrum plots and mT shapes are obtained ...)
-    double transverseMass = TransverseMass::reconstruct(*(tauCandidateData.getCleanedTauCandidates()[0]), *(metData.getSelectedMET()));
+    double transverseMass = TransverseMass::reconstruct(*(tauCandidateData.getSelectedTau()), *(metData.getSelectedMET()));
     for(std::vector<AnalysisVariation>::iterator it = fAnalyses.begin(); it != fAnalyses.end(); ++it) {
       (*it).analyse(iEvent.isRealData(), electronVetoData.getSelectedElectronPtBeforePtCut(), muonVetoData.getSelectedMuonPtBeforePtCut(), jetData.getHadronicJetCount(),
                     metData, tauCandidateData, btagData, myTauPtBinIndex, myWeightBeforeTauID, triggerWeight, myTauMatch, getMtBinIndex(transverseMass));
@@ -445,42 +443,30 @@ namespace HPlus {
 
     // Big box i.e. standard selections have been passed, now look at the rest of the selections
     bool myFakeTauStatus = !(tauMatch == FakeTauIdentifier::kkTauToTau || tauMatch == FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance);
-    double myDeltaPhi = DeltaPhi::reconstruct(*(tauCandidateData.getCleanedTauCandidates()[0]), *(METData.getSelectedMET())) * 57.29578; // converted to degrees
-    double transverseMass = TransverseMass::reconstruct(*(tauCandidateData.getCleanedTauCandidates()[0]), *(METData.getSelectedMET()));
+    double myDeltaPhi = DeltaPhi::reconstruct(*(tauCandidateData.getSelectedTau()), *(METData.getSelectedMET())) * 57.29578; // converted to degrees
+    double transverseMass = TransverseMass::reconstruct(*(tauCandidateData.getSelectedTau()), *(METData.getSelectedMET()));
     
     // Obtain boolean for tau isolation and inverted isolation
     bool myPassedTauIsol = false;
     if (iTauIsolation == 1 || iTauIsolation == 3) // Tight isolation + 1/3 prong
-      myPassedTauIsol = tauCandidateData.applyDiscriminatorOnBestTauCandidate("byTightIsolation") &&
-        tauCandidateData.getBestTauCandidateProngCount() == iTauIsolation;
-    else if (iTauIsolation == 11 || iTauIsolation == 13) // Medium isolation + 1/3 prong
-      myPassedTauIsol = tauCandidateData.applyDiscriminatorOnBestTauCandidate("byMediumIsolation") &&
-        tauCandidateData.getBestTauCandidateProngCount() == iTauIsolation;
-    else if (iTauIsolation == 21 || iTauIsolation == 23) // Loose isolation + 1/3 prong
-      myPassedTauIsol = tauCandidateData.applyDiscriminatorOnBestTauCandidate("byLooseIsolation") &&
-        tauCandidateData.getBestTauCandidateProngCount() == iTauIsolation;
+      myPassedTauIsol = tauCandidateData.selectedTauPassesIsolation() &&
+        tauCandidateData.getNProngsOfSelectedTau() == static_cast<size_t>(iTauIsolation);
     // inverted tau isolation and prongs (assuming HPS tau)
     bool myPassedInvertedTauIsol = false;
     if (iTauIsolation == 1 || iTauIsolation == 3) // Tight isolation + 1/3 prong
-      myPassedInvertedTauIsol = !tauCandidateData.applyDiscriminatorOnBestTauCandidate("byTightIsolation") &&
-        tauCandidateData.getBestTauCandidateProngCount() == iTauIsolation;
-    else if (iTauIsolation == 11 || iTauIsolation == 13) // Medium isolation + 1/3 prong
-      myPassedInvertedTauIsol = !tauCandidateData.applyDiscriminatorOnBestTauCandidate("byMediumIsolation") &&
-        tauCandidateData.getBestTauCandidateProngCount() == iTauIsolation;
-    else if (iTauIsolation == 21 || iTauIsolation == 23) // Loose isolation + 1/3 prong
-      myPassedInvertedTauIsol = !tauCandidateData.applyDiscriminatorOnBestTauCandidate("byLooseIsolation") &&
-        tauCandidateData.getBestTauCandidateProngCount() == iTauIsolation;
-    bool myPassedRtau = tauCandidateData.getBestTauCandidatePassedRtauStatus();
+      myPassedInvertedTauIsol = tauCandidateData.selectedTausDoNotPassIsolation() &&
+        tauCandidateData.getNProngsOfSelectedTau() == static_cast<size_t>(iTauIsolation);
+    bool myPassedRtau = tauCandidateData.selectedTauPassesRtau();
 
     // Fill control plots here for point "standard selections with full tauID"
-    hCtrlSelectedTauRtauAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getRtauOfBestTauCandidate(), weightAfterVertexReweight*trgEffData.getEventWeight());
-    hCtrlSelectedTauLeadingTrkPtAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getCleanedTauCandidates()[0]->leadPFChargedHadrCand()->pt(), weightAfterVertexReweight*trgEffData.getEventWeight());
-    hCtrlSelectedTauPtAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getCleanedTauCandidates()[0]->pt(), weightAfterVertexReweight*trgEffData.getEventWeight());
-    hCtrlSelectedTauEtaAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getCleanedTauCandidates()[0]->eta(), weightAfterVertexReweight*trgEffData.getEventWeight());
-    hCtrlSelectedTauPhiAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getCleanedTauCandidates()[0]->phi()*180.0/3.1415926, weightAfterVertexReweight*trgEffData.getEventWeight());
-    hCtrlSelectedTauEtaVsPhiAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getCleanedTauCandidates()[0]->eta(), tauCandidateData.getCleanedTauCandidates()[0]->phi()*180.0/3.1415926, weightAfterVertexReweight*trgEffData.getEventWeight());
-    hCtrlSelectedTauPAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getCleanedTauCandidates()[0]->p(), weightAfterVertexReweight*trgEffData.getEventWeight());
-    hCtrlSelectedTauLeadingTrkPAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getCleanedTauCandidates()[0]->leadPFChargedHadrCand()->p(), weightAfterVertexReweight*trgEffData.getEventWeight());
+    hCtrlSelectedTauRtauAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getRtauOfSelectedTau(), weightAfterVertexReweight*trgEffData.getEventWeight());
+    hCtrlSelectedTauLeadingTrkPtAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getSelectedTau()->leadPFChargedHadrCand()->pt(), weightAfterVertexReweight*trgEffData.getEventWeight());
+    hCtrlSelectedTauPtAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getSelectedTau()->pt(), weightAfterVertexReweight*trgEffData.getEventWeight());
+    hCtrlSelectedTauEtaAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getSelectedTau()->eta(), weightAfterVertexReweight*trgEffData.getEventWeight());
+    hCtrlSelectedTauPhiAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getSelectedTau()->phi()*180.0/3.1415926, weightAfterVertexReweight*trgEffData.getEventWeight());
+    hCtrlSelectedTauEtaVsPhiAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getSelectedTau()->eta(), tauCandidateData.getSelectedTau()->phi()*180.0/3.1415926, weightAfterVertexReweight*trgEffData.getEventWeight());
+    hCtrlSelectedTauPAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getSelectedTau()->p(), weightAfterVertexReweight*trgEffData.getEventWeight());
+    hCtrlSelectedTauLeadingTrkPAfterStandardSelections[tauPtBinIndex]->Fill(tauCandidateData.getSelectedTau()->leadPFChargedHadrCand()->p(), weightAfterVertexReweight*trgEffData.getEventWeight());
     hCtrlIdentifiedElectronPtAfterStandardSelections[tauPtBinIndex]->Fill(maxElectronPt, weightAfterVertexReweight*trgEffData.getEventWeight());
     hCtrlIdentifiedMuonPtAfterStandardSelections[tauPtBinIndex]->Fill(maxMuonPt, weightAfterVertexReweight*trgEffData.getEventWeight());
     hCtrlNjets[tauPtBinIndex]->Fill(njets, weightAfterVertexReweight*trgEffData.getEventWeight());

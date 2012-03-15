@@ -25,6 +25,9 @@ namespace {
     // Do first comparisons of the isolation discriminators, because
     // they are bullet proof way of using exactly the same isolation
     // defitions as in the discriminators
+    
+    // FIXME change to delta beta discriminators or eventually to continuous discriminator
+    
     if(a->tauID("byTightIsolation") > 0.5 && b->tauID("byTightIsolation") < 0.5)
       return true;
 
@@ -91,7 +94,7 @@ namespace {
 
     // At this point bot a and b are in the same isolation class. Next
     // see, if either is one prong
-    size_t aProng = a->signalPFChargedHadrCands().size();
+    size_t aProng = a->signalPFChargedHadrCands().size(); // FIXME: does not work for TCTau
     size_t bProng = b->signalPFChargedHadrCands().size();
 
     if(aProng == 1 && bProng != 1)
@@ -109,41 +112,85 @@ namespace {
 }
 
 namespace HPlus {
+  // TauSelection::Data methods ------------------------------------------------
   TauSelection::Data::Data(const TauSelection *tauSelection, bool passedEvent):
     fTauSelection(tauSelection), fPassedEvent(passedEvent) {}
   TauSelection::Data::~Data() {}
+  
+  const edm::PtrVector<pat::Tau>& TauSelection::Data::getSelectedTaus() const {
+    if (fTauSelection->fOperationMode == TauSelection::kTauCandidateSelectionOnly)
+      return fTauSelection->fSelectedTauCandidates;
+    else if (fTauSelection->fOperationMode == TauSelection::kNormalTauID)
+      return fTauSelection->fSelectedTaus;
+    return fTauSelection->fSelectedTaus; // never reached
+  }
 
-  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label):
+  const edm::Ptr<pat::Tau> TauSelection::Data::getSelectedTau() const {
+    if (!fPassedEvent) return fTauSelection->fSelectedTauCandidates[0]; // No tau was selected, return zero pointer
+    if (fTauSelection->fOperationMode == TauSelection::kTauCandidateSelectionOnly)
+      return fTauSelection->fSelectedTauCandidates[0];
+    else if (fTauSelection->fOperationMode == TauSelection::kNormalTauID)
+      return fTauSelection->fSelectedTaus[0];
+    return fTauSelection->fSelectedTauCandidates[0]; // never reached
+  }
+
+  const size_t TauSelection::Data::getNProngsOfSelectedTau() const {
+    if (!fPassedEvent) return 0;
+    return fTauSelection->fTauID->getNProngs(getSelectedTau());
+  }
+
+  const double TauSelection::Data::getRtauOfSelectedTau() const {
+    if (!fPassedEvent) return 0;
+    return fTauSelection->fTauID->getRtauValue(getSelectedTau());
+  }
+
+  const bool TauSelection::Data::selectedTauPassesIsolation() const {
+    if (!fPassedEvent) return false;
+    return fTauSelection->fTauID->passIsolation(getSelectedTau());
+  }
+
+  const bool TauSelection::Data::selectedTauPassesNProngs() const {
+    if (!fPassedEvent) return false;
+    return fTauSelection->fTauID->passNProngsCut(getSelectedTau());
+  }
+
+  const bool TauSelection::Data::selectedTauPassesRtau() const {
+    if (!fPassedEvent) return false;
+    return fTauSelection->fTauID->passRTauCut(getSelectedTau());
+  }
+  
+  const bool TauSelection::Data::selectedTausDoNotPassIsolation() const {
+    if (!fPassedEvent) return false;
+    for (edm::PtrVector<pat::Tau>::const_iterator iter = getSelectedTaus().begin(); iter != getSelectedTaus().end(); ++iter) {
+      if (fTauSelection->fTauID->passIsolation(*iter)) return false;
+    }
+  }
+
+  const bool TauSelection::Data::selectedTauPassesDiscriminator(std::string discr, double cutPoint) const {
+    if (!fPassedEvent) return false;
+    return (getSelectedTau()->tauID(discr) > cutPoint);
+  }
+  
+  // TauSelection methods ------------------------------------------------
+  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, std::string label):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fSelection(iConfig.getUntrackedParameter<std::string>("selection")),
-    fProngNumber(prongNumber),
-    fLabel(label),
     fTauID(0),
     fOperationMode(kNormalTauID),
-    fTauFound(eventCounter.addSubCounter(label+"TauSelection","Tau found")),
+    fTauFound(eventCounter.addSubCounter("TauSelection","Tau found")),
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir(label);
     
     // Create tauID algorithm handler
-    if     (fSelection == "CaloTauCutBased")
-      fTauID = new TauIDTCTau(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
-    else if(fSelection == "ShrinkingConePFTauCutBased")
-      fTauID = new TauIDPFShrinkingCone(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
-    else if(fSelection == "ShrinkingConePFTauTaNCBased")
-      fTauID = new TauIDPFShrinkingConeTaNC(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
-    else if(fSelection == "HPSTightTauBased")
-      fTauID = new TauIDPFHPSTight(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
-    else if(fSelection == "HPSMediumTauBased")
-      fTauID = new TauIDPFHPSMedium(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
-    else if(fSelection == "HPSLooseTauBased")
-      fTauID = new TauIDPFHPSLoose(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
-    else if(fSelection == "HPSVeryLooseTauBased")
-      fTauID = new TauIDPFHPSVeryLoose(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
-    else if(fSelection == "CombinedHPSTaNCTauBased")
-      fTauID = new TauIDPFShrinkingConeCombinedHPSTaNC(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
-    else throw cms::Exception("Configuration") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTightTauBased, HPSMediumTauBased, HPSLooseTauBased, HPSVeryLooseTauBased, CombinedHPSTaNCBased (you chose '" << fSelection << "')" << std::endl;
+    //if(fSelection == "PFTauTaNCBased")
+    //  fTauID = new TauIDPFTaNC(iConfig, eventCounter, eventWeight, "TaNC", myDir);
+    if(fSelection == "HPSTauBased")
+      fTauID = new TauIDPFHPS(iConfig, eventCounter, eventWeight, "HPS", myDir);
+    //else if(fSelection == "CombinedHPSTaNCTauBased")
+    //  fTauID = new TauIDPFCombinedHPSTaNC(iConfig, eventCounter, eventWeight, "HPS+TaNC", myDir);
+    else throw cms::Exception("Configuration") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: HPSTauBased (you chose '" << fSelection << "')" << std::endl;
     
     // Define tau selection operation mode
     std::string myOperatingModeSelection = iConfig.getUntrackedParameter<std::string>("operatingMode");
@@ -162,7 +209,7 @@ namespace HPlus {
     int myTauJetEtaBins = 60;
     float myTauJetEtaMin = -3.;
     float myTauJetEtaMax = 3.;
-    int myTauJetPhiBins = 72;
+    int myTauJetPhiBins = 72; // five degrees
     float myTauJetPhiMin = -3.14159265;
     float myTauJetPhiMax = 3.14159265;
     int myTauJetNumberBins = 20;
@@ -173,7 +220,7 @@ namespace HPlus {
       "TauSelection_all_tau_candidates_pt",
       "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
       myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
-    hPtCleanedTauCandidates = makeTH<TH1F>(myDir,
+    hPtSelectedTauCandidates = makeTH<TH1F>(myDir,
       "TauSelection_cleaned_tau_candidates_pt",
       "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
       myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
@@ -186,7 +233,7 @@ namespace HPlus {
       "TauSelection_all_tau_candidates_eta",
       "tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
-    hEtaCleanedTauCandidates = makeTH<TH1F>(myDir,
+    hEtaSelectedTauCandidates = makeTH<TH1F>(myDir,
       "TauSelection_cleaned_tau_candidates_eta",
       "cleaned_tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
@@ -200,7 +247,7 @@ namespace HPlus {
       "tau_candidates_eta_vs_phi;#tau #eta;#tau phi",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax,
       myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
-    hEtaPhiCleanedTauCandidates = makeTH<TH2F>(myDir,
+    hEtaPhiSelectedTauCandidates = makeTH<TH2F>(myDir,
       "TauSelection_cleaned_tau_candidates_eta_vs_phi",
       "cleaned_tau_candidates_eta_vs_phi;#tau #eta;#tau phi",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax,
@@ -215,7 +262,7 @@ namespace HPlus {
       "TauSelection_all_tau_candidates_phi",
       "tau_candidates_phi;#tau #phi;N_{jets} / 0.087",
       myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
-    hPhiCleanedTauCandidates = makeTH<TH1F>(myDir,
+    hPhiSelectedTauCandidates = makeTH<TH1F>(myDir,
       "TauSelection_cleaned_tau_candidates_phi",
       "cleaned_tau_candidates_phi;#tau #phi;N_{jets} / 0.087",
       myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
@@ -228,7 +275,7 @@ namespace HPlus {
       "TauSelection_all_tau_candidates_N",
       "tau_candidates_N;Number of #tau's;N_{jets}",
       myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
-    hNumberOfCleanedTauCandidates = makeTH<TH1F>(myDir,
+    hNumberOfSelectedTauCandidates = makeTH<TH1F>(myDir,
       "TauSelection_cleaned_tau_candidates_N",
       "cleaned_tau_candidates_N;Number of #tau's;N_{jets}",
       myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
@@ -244,13 +291,13 @@ namespace HPlus {
     hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(2, "#tau from W#pm");
     hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(3, "Other #tau source");
     hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(4, "No MC #tau match");
-    hMCPurityOfCleanedTauCandidates = makeTH<TH1F>(myDir,
+    hMCPurityOfSelectedTauCandidates = makeTH<TH1F>(myDir,
       "TauSelection_cleaned_tau_candidates_MC_purity",
       "cleaned_tau_candidates_MC_purity;;N_{jets}", 4, 0., 4.);
-    hMCPurityOfCleanedTauCandidates->GetXaxis()->SetBinLabel(1, "#tau from H#pm");
-    hMCPurityOfCleanedTauCandidates->GetXaxis()->SetBinLabel(2, "#tau from W#pm");
-    hMCPurityOfCleanedTauCandidates->GetXaxis()->SetBinLabel(3, "Other #tau source");
-    hMCPurityOfCleanedTauCandidates->GetXaxis()->SetBinLabel(4, "No MC #tau match");
+    hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(1, "#tau from H#pm");
+    hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(2, "#tau from W#pm");
+    hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(3, "Other #tau source");
+    hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(4, "No MC #tau match");
     hMCPurityOfSelectedTaus = makeTH<TH1F>(myDir,
       "TauSelection_selected_taus_MC_purity",
       "selected_tau_MC_purity;;N_{jets}", 4, 0., 4.);
@@ -266,12 +313,10 @@ namespace HPlus {
     hTightIsoNcands = makeTH<TH1F>(myDir, "TauSelection_all_tau_candidates_TightIsoNCands", "Number of isolation candidates in Tight", 100, 0, 100);
 
     // Operating mode of tau ID -- for quick validating that tau selection is doing what is expected 
-    hTauIdOperatingMode = makeTH<TH1F>(myDir, "tauSelection_operating_mode", "tau_operating_mode;;N_{events}", 6, 0., 6.);
+    hTauIdOperatingMode = makeTH<TH1F>(myDir, "tauSelection_operating_mode", "tau_operating_mode;;N_{events}", 3, 0., 3.);
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(1, "Control");
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(2, "Normal tau ID");
-    hTauIdOperatingMode->GetXaxis()->SetBinLabel(4, "tauCandidateSelectionOnly");
-    hTauIdOperatingMode->GetXaxis()->SetBinLabel(5, "tauIDWithoutRtauOnly");
-    hTauIdOperatingMode->GetXaxis()->SetBinLabel(6, "tauIDWithRtauOnly");
+    hTauIdOperatingMode->GetXaxis()->SetBinLabel(3, "tauCandidateSelectionOnly");
 
     hNTriggerMatchedTaus = makeTH<TH1F>(myDir, "N_TriggerMatchedTaus", "NTriggerMatchedTaus;N(trigger matched taus);N_{events}", 10, 0., 10.);
     hNTriggerMatchedSeparateTaus = makeTH<TH1F>(myDir, "N_TriggerMatchedSeparateTaus", "NTriggerMatchedSeparateTaus;N(trigger matched separate taus);N_{events}", 10, 0., 10.);
@@ -294,6 +339,9 @@ namespace HPlus {
     hTightGammaOccupancyAfterIsolation = makeTH<TH1F>(myDir, "TightGammaOccupancyAfterIsolation", "TightGammaOccupancyAfterIsolation;TightGammaOccupancy;N_{tau candidates}", 100, 0., 100.); 
 
     hHPSDecayMode = makeTH<TH1F>(myDir, "HPSDecayMode", "HPSDecayMode;HPSDecayMode;N_{tau candidates}",100,0,100);
+    
+    
+    //tau->emFraction()
   }
 
   TauSelection::~TauSelection() {
@@ -350,7 +398,7 @@ namespace HPlus {
     return Data(this, passEvent);
   }
 
-  TauSelection::Data TauSelection::analyzeTriggerTau(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+/*  TauSelection::Data TauSelection::analyzeTriggerTau(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Obtain tau collection from src specified in config
     edm::Handle<edm::View<pat::Tau> > htaus;
     iEvent.getByLabel(fSrc, htaus);
@@ -359,8 +407,8 @@ namespace HPlus {
     // Initialize
     fSelectedTaus.clear();
     fSelectedTaus.reserve(taus.size());
-    fCleanedTauCandidates.clear();
-    fCleanedTauCandidates.reserve(taus.size());
+    fSelectedTauCandidates.clear();
+    fSelectedTauCandidates.reserve(taus.size());
     fTauID->reset();
 
     // Require at least one tau in the trigger matched collection
@@ -371,7 +419,7 @@ namespace HPlus {
     // Tau candidate selection
     edm::PtrVector<pat::Tau> myTauCandidates;
     for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter)
-      if (fTauID->passDecayModeFinding(*iter) && fTauID->passTauCandidateSelection(*iter)) myTauCandidates.push_back(*iter);
+      if (fTauID->passDecayModeFinding(*iter) && fTauID->passKinematicSelection(*iter)) myTauCandidates.push_back(*iter);
     if (myTauCandidates.size() <= 1) {
       if (!myTauCandidates.size()) { // no taus left
 	findBestTau(myBestTau, taus);
@@ -414,40 +462,7 @@ namespace HPlus {
     } else
       fSelectedTaus.push_back(myIsolatedTaus[0]);
     return Data(this, true);
-  }
-
-  TauSelection::Data TauSelection::analyzeTauIDWithoutRtauOnCleanedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> tauCandidate) {
-    // Initialize
-    bool passEvent = false;
-    fSelectedTaus.clear();
-    fSelectedTaus.reserve(1);
-    fTauID->reset();
-    // Document operation mode
-    TauSelectionOperationMode fOriginalOperationMode = fOperationMode;
-    fOperationMode = kTauIDWithoutRtauOnly;
-    fillOperationModeHistogram();
-    fOperationMode = fOriginalOperationMode;
-    // Do selection
-    if (fTauID->passIsolation(tauCandidate)) {
-      if ((fProngNumber == 1 && fTauID->passOneProngCut(tauCandidate)) ||
-          (fProngNumber == 3 && fTauID->passThreeProngCut(tauCandidate))) {
-        if (fTauID->passChargeCut(tauCandidate)) {
-          // All cuts have been passed, save tau
-          fillHistogramsForSelectedTaus(tauCandidate, iEvent);
-          fSelectedTaus.push_back(tauCandidate);
-        }
-      }
-    }
-    // Handle counters
-    fTauID->updatePassedCounters();
-    // Fill number of taus histograms
-    hNumberOfSelectedTaus->Fill(static_cast<float>(fSelectedTaus.size()), fEventWeight.getWeight()); 
-    // Make decision
-    if (fSelectedTaus.size() > 0)
-      passEvent = true;
-    // Return data object
-    return Data(this, passEvent);
-  }
+  }*/
 
   bool TauSelection::doTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
     // Document operation mode
@@ -456,8 +471,8 @@ namespace HPlus {
     // Initialize
     fSelectedTaus.clear();
     fSelectedTaus.reserve(taus.size());
-    fCleanedTauCandidates.clear();
-    fCleanedTauCandidates.reserve(taus.size());
+    fSelectedTauCandidates.clear();
+    fSelectedTauCandidates.reserve(taus.size());
     fTauID->reset();
 
     // Analyze the separation of the trigger matched taus
@@ -474,7 +489,7 @@ namespace HPlus {
     hNTriggerMatchedTaus->Fill(taus.size(),fEventWeight.getWeight());
 
     // Need std:vector in order to be able to use std::sort
-    std::vector<edm::Ptr<pat::Tau> > tmpCleanedTauCandidates;
+    std::vector<edm::Ptr<pat::Tau> > tmpSelectedTauCandidates;
     std::vector<edm::Ptr<pat::Tau> > tmpSelectedTaus;
 
     // Loop over the taus
@@ -486,12 +501,12 @@ namespace HPlus {
       // Tau candidate selections
       fTauID->incrementAllCandidates();
       if (!fTauID->passDecayModeFinding(iTau)) continue;
-      if (!fTauID->passTauCandidateSelection(iTau)) continue;
+      if (!fTauID->passKinematicSelection(iTau)) continue;
       if (!fTauID->passLeadingTrackCuts(iTau)) continue;
       if (!fTauID->passECALFiducialCuts(iTau)) continue;
       if (!fTauID->passTauCandidateEAndMuVetoCuts(iTau)) continue;      
-      fillHistogramsForCleanedTauCandidates(iTau, iEvent);
-      tmpCleanedTauCandidates.push_back(iTau);
+      fillHistogramsForSelectedTauCandidates(iTau, iEvent);
+      tmpSelectedTauCandidates.push_back(iTau);
       
       // Tau ID selections
       if (fOperationMode == kNormalTauID) {
@@ -514,34 +529,21 @@ namespace HPlus {
         hTightGammaMaxPtAfterIsolation->Fill(iTau->userFloat("byTightGammaMaxPt"), fEventWeight.getWeight());
         hTightGammaSumPtAfterIsolation->Fill(iTau->userFloat("byTightGammaSumPt"), fEventWeight.getWeight());
         hTightGammaOccupancyAfterIsolation->Fill((float)iTau->userInt("byTightGammaOccupancy"), fEventWeight.getWeight());
-
-        if (fProngNumber == 1) {
-          if (!fTauID->passOneProngCut(iTau)) continue;
-          if (!fTauID->passChargeCut(iTau)) continue;
-          if (!fTauID->passRTauCut(iTau)) continue;
-        } else if (fProngNumber == 3) {
-          if (!fTauID->passThreeProngCut(iTau)) continue;
-          if (!fTauID->passChargeCut(iTau)) continue;
-          //if (!fTauID->passInvMassCut(iTau)) continue; // FIXME: not tested, not validated
-          //if (!fTauID->passDeltaECut(iTau)) continue; // FIXME: not tested, not validated
-          //if (!fTauID->passFlightpathCut(iTau)) continue; // FIXME: not tested, not validated
-          if (!fTauID->passRTauCut(iTau)) continue;
-        }
+        if (!fTauID->passNProngsCut(iTau)) continue;
+        if (!fTauID->passRTauCut(iTau)) continue;
       }
-      // Further cleaning cuts
-      if (!fTauID->passEMFractionCut(iTau)) continue;
 
       // All cuts have been passed, save tau
       fillHistogramsForSelectedTaus(iTau, iEvent);
       tmpSelectedTaus.push_back(iTau);
     }
     // Sort taus in an order of isolation, most isolated first
-    std::sort(tmpCleanedTauCandidates.begin(), tmpCleanedTauCandidates.end(), isolationLessThan); // sort by isolation only
-    std::sort(tmpSelectedTaus.begin(), tmpSelectedTaus.end(), isolationLessThan);
-    //std::sort(tmpCleanedTauCandidates.begin(), tmpCleanedTauCandidates.end(), isolationProngRtauLessThan); // sort by isolation, prong and Rtau
-    //std::sort(tmpSelectedTaus.begin(), tmpSelectedTaus.end(), isolationProngRtauLessThan);
-    for(size_t i=0; i<tmpCleanedTauCandidates.size(); ++i)
-      fCleanedTauCandidates.push_back(tmpCleanedTauCandidates[i]);
+    //std::sort(tmpSelectedTauCandidates.begin(), tmpSelectedTauCandidates.end(), isolationLessThan); // sort by isolation only
+    //std::sort(tmpSelectedTaus.begin(), tmpSelectedTaus.end(), isolationLessThan);
+    std::sort(tmpSelectedTauCandidates.begin(), tmpSelectedTauCandidates.end(), isolationProngRtauLessThan); // sort by isolation, prong and Rtau
+    std::sort(tmpSelectedTaus.begin(), tmpSelectedTaus.end(), isolationProngRtauLessThan);
+    for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i)
+      fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
     for(size_t i=0; i<tmpSelectedTaus.size(); ++i)
       fSelectedTaus.push_back(tmpSelectedTaus[i]);
 
@@ -549,26 +551,29 @@ namespace HPlus {
     fTauID->updatePassedCounters();
     // Fill number of taus histograms
     hNumberOfTauCandidates->Fill(static_cast<float>(taus.size()), fEventWeight.getWeight());
-    hNumberOfCleanedTauCandidates->Fill(static_cast<float>(fCleanedTauCandidates.size()), fEventWeight.getWeight());
+    hNumberOfSelectedTauCandidates->Fill(static_cast<float>(fSelectedTauCandidates.size()), fEventWeight.getWeight());
     if (fOperationMode != kTauCandidateSelectionOnly) {
       hNumberOfSelectedTaus->Fill(static_cast<float>(fSelectedTaus.size()), fEventWeight.getWeight());
     }
 
     // Handle result of tau candidate selection only
     if (fOperationMode == kTauCandidateSelectionOnly) {
-      return (fCleanedTauCandidates.size() > 0);
+      if (fSelectedTauCandidates.size()) {
+        increment(fTauFound);
+        return true;
+      } else
+        return false;
     }
-
-    // Check if taus have been found
-    if (fSelectedTaus.size() == 0)
-      return false;
-    // Found at least 1 tau beyond this line
-    increment(fTauFound);
     
     // Handle result of standard tau ID 
-    if (fOperationMode == kNormalTauID)
-      return true;
-
+    if (fOperationMode == kNormalTauID) {
+      if (fSelectedTaus.size() == 0) {
+        increment(fTauFound);
+        return true;
+      } else
+        return false;
+    }
+    
     // Never reached
     return true;
   }
@@ -578,11 +583,7 @@ namespace HPlus {
     if (fOperationMode == kNormalTauID)
       hTauIdOperatingMode->Fill(1., fEventWeight.getWeight());
     else if (fOperationMode == kTauCandidateSelectionOnly)
-      hTauIdOperatingMode->Fill(3., fEventWeight.getWeight());
-    else if (fOperationMode == kTauIDWithoutRtauOnly)
-      hTauIdOperatingMode->Fill(4., fEventWeight.getWeight());
-    else if (fOperationMode == kTauIDWithRtauOnly)
-      hTauIdOperatingMode->Fill(5., fEventWeight.getWeight());
+      hTauIdOperatingMode->Fill(2., fEventWeight.getWeight());
   }
 
   void TauSelection::fillHistogramsForTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent) {
@@ -604,18 +605,18 @@ namespace HPlus {
     hTightIsoNcands->Fill(tau->userInt("byTightOccupancy"), fEventWeight.getWeight());
   }
   
-  void TauSelection::fillHistogramsForCleanedTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent) {
+  void TauSelection::fillHistogramsForSelectedTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent) {
     double myTauPt = tau->pt();
     double myTauEta = tau->eta();
     double myTauPhi = tau->phi();
-    hPtCleanedTauCandidates->Fill(myTauPt, fEventWeight.getWeight());
-    hEtaCleanedTauCandidates->Fill(myTauEta, fEventWeight.getWeight());
-    hPhiCleanedTauCandidates->Fill(myTauPhi, fEventWeight.getWeight());
-    hEtaPhiCleanedTauCandidates->Fill(myTauEta, myTauPhi, fEventWeight.getWeight());
+    hPtSelectedTauCandidates->Fill(myTauPt, fEventWeight.getWeight());
+    hEtaSelectedTauCandidates->Fill(myTauEta, fEventWeight.getWeight());
+    hPhiSelectedTauCandidates->Fill(myTauPhi, fEventWeight.getWeight());
+    hEtaPhiSelectedTauCandidates->Fill(myTauEta, myTauPhi, fEventWeight.getWeight());
 
     // Purity
     if (!iEvent.isRealData()) {
-      ObtainMCPurity(tau, iEvent, hMCPurityOfCleanedTauCandidates); 
+      ObtainMCPurity(tau, iEvent, hMCPurityOfSelectedTauCandidates); 
     }
   }
   
@@ -673,7 +674,7 @@ namespace HPlus {
     histogram->Fill(3., fEventWeight.getWeight()); // No MC match found
   }
 
-  void TauSelection::findBestTau(edm::PtrVector<pat::Tau>& bestTau, edm::PtrVector<pat::Tau>& taus) {
+/*  void TauSelection::findBestTau(edm::PtrVector<pat::Tau>& bestTau, edm::PtrVector<pat::Tau>& taus) {
     double myBestValue = 1e99;
     edm::Ptr<pat::Tau> myBestTau = taus[0];
     edm::PtrVector<pat::Tau> myIsolatedTaus;
@@ -694,6 +695,6 @@ namespace HPlus {
       bestTau.push_back(myIsolatedTaus[0]);
     else
       bestTau.push_back(myBestTau);
-  }
+  }*/
   
 }
