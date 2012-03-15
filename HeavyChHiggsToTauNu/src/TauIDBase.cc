@@ -59,11 +59,11 @@ namespace HPlus {
     fIDECALFiducialCut = fCounterPackager.addSubCounter(baseLabel, "TauECALFiducialCutsCracksAndGap", 0);
     fIDAgainstElectronCut = fCounterPackager.addSubCounter(baseLabel, "TauAgainstElectronCut", 0);
     fIDAgainstMuonCut = fCounterPackager.addSubCounter(baseLabel, "TauAgainstMuonCut", 0);
-    fIDIsolationCut = fCounterPackager.addSubCounter(baseLabel, "TauIsolation", 0);
     // Initialize counter objects for tau identification
-    fIDNProngsCut = fCounterPackager.addSubCounter(fBaseLabel, "TauProngCut",
+    fIDIsolationCut = fCounterPackager.addSubCounter(baseLabel, "TauIsolation", 0);
+    fIDNProngsCut = fCounterPackager.addSubCounter(baseLabel, "TauProngCut",
       makeTH<TH1F>(fMyDir, "TauID_NProngsCut", "TauNProngsCut;N_{#tau prong};N_{jets}", 10, 0., 10.));
-    fIDRTauCut = fCounterPackager.addSubCounter(fBaseLabel, "TauRtauCut",
+    fIDRTauCut = fCounterPackager.addSubCounter(baseLabel, "TauRtauCut",
       makeTH<TH1F>(fMyDir, "TauID_RtauCut", "TauRtauCut;R_{#tau}=p^{ldg.track}/E^{vis.#tau jet};N_{jets} / 0.02", 60, 0., 1.2));
     // Histograms
     hRtauVsEta = makeTH<TH2F>(fMyDir, "TauID_RtauDetail_RtauVsEta", "RtauVsEta;R_{#tau};#tau eta", 60, 0.0, 1.2, 60, -3., 3.); // FIXME: check if this is necessary

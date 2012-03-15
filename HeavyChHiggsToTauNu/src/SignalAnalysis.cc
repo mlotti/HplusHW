@@ -64,7 +64,7 @@ namespace HPlus {
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
     fTriggerScaleFactorCounter(eventCounter.addCounter("trigger scale factor")),
     fGenuineTauCounter(eventCounter.addCounter("Tau is genuine")),
-    fRtauAfterTauIDCounter(eventCounter.addCounter("RtauAfterTauID")),
+    fVetoTauCounter(eventCounter.addCounter("tau veto")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
     fNJetsCounter(eventCounter.addCounter("njets")),
@@ -93,6 +93,7 @@ namespace HPlus {
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
+    fVetoTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("vetoTauSelection"), eventCounter, eventWeight),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET"),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
@@ -110,7 +111,7 @@ namespace HPlus {
     fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), eventWeight),
     fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
     fVertexAssignmentAnalysis(eventCounter, eventWeight),
-    fFakeTauIdentifier(fEventWeight),
+    fFakeTauIdentifier(fEventWeight, "TauID"),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     // Scale factor uncertainties
     fSFUncertaintiesAfterBTagging("AfterBTagging"),
@@ -310,14 +311,12 @@ namespace HPlus {
       iEvent.put(saveTaus, "selectedTaus");
     }
     //    hSelectedTauRtau->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());  
-    increment(fGenuineTauCounter);
-
+    if (!fFakeTauIdentifier.isFakeTau(myTauMatch))
+      increment(fGenuineTauCounter);
 
     // For plotting Rtau
     //    if (!tauData.selectedTauPassedRtau()) return false;
     //    if (tauData.getRtauOfSelectedTau() < 0.7) return false;
-    increment(fRtauAfterTauIDCounter);
-
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt(), fEventWeight.getWeight());
     hSelectedTauEt->Fill(tauData.getSelectedTau()->pt(), fEventWeight.getWeight());
     hSelectedTauEta->Fill(tauData.getSelectedTau()->eta(), fEventWeight.getWeight());
@@ -329,6 +328,12 @@ namespace HPlus {
     if (myTauMatch == FakeTauIdentifier::kkElectronToTau)
       hEMFractionElectrons->Fill(tauData.getSelectedTau()->emFraction(), fEventWeight.getWeight());
     hEMFractionAll->Fill(tauData.getSelectedTau()->emFraction(), fEventWeight.getWeight());
+
+
+//------ Veto against second tau in event
+    VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauData.getSelectedTau());
+    // if (!vetoTauData.passedEvent()) return false;
+    increment(fVetoTauCounter);
 
 
 //------ Global electron veto

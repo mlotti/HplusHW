@@ -177,7 +177,7 @@ namespace HPlus {
     fSelection(iConfig.getUntrackedParameter<std::string>("selection")),
     fTauID(0),
     fOperationMode(kNormalTauID),
-    fTauFound(eventCounter.addSubCounter("TauSelection","Tau found")),
+    fTauFound(eventCounter.addSubCounter(label,"Tau found")),
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
@@ -187,7 +187,7 @@ namespace HPlus {
     //if(fSelection == "PFTauTaNCBased")
     //  fTauID = new TauIDPFTaNC(iConfig, eventCounter, eventWeight, "TaNC", myDir);
     if(fSelection == "HPSTauBased")
-      fTauID = new TauIDPFHPS(iConfig, eventCounter, eventWeight, "HPS", myDir);
+      fTauID = new TauIDPFHPS(iConfig, eventCounter, eventWeight, label+"_HPS", myDir);
     //else if(fSelection == "CombinedHPSTaNCTauBased")
     //  fTauID = new TauIDPFCombinedHPSTaNC(iConfig, eventCounter, eventWeight, "HPS+TaNC", myDir);
     else throw cms::Exception("Configuration") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: HPSTauBased (you chose '" << fSelection << "')" << std::endl;

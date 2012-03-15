@@ -86,14 +86,21 @@ tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
-#for QCD control plots -- FIXME: is it still needed?
-tauSelectionHPSTightTauBasedNoLdgPtOrRtauCut = tauSelectionHPSTightTauBased.clone(
-    leadingTrackPtCut = cms.untracked.double(0.0),
-    rtauCut = cms.untracked.double(0.0)
+vetoTauBase = tauSelectionHPSLooseTauBased.clone(
+    ptCut = cms.untracked.double(20), # jet pt > value
+    etaCut = cms.untracked.double(2.5), # jet |eta| < value
+    leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
+    rtauCut = cms.untracked.double(0.0), # rtau > value
+    nprongs = cms.untracked.uint32(1) # number of prongs
+)
+
+vetoTauSelection = cms.untracked.PSet(
+    tauSelection = vetoTauBase,
+    Zmass = cms.untracked.double(90), # Z mass value in GeV
+    ZmassWindow = cms.untracked.double(10), # window around Z mass in GeV for vetoing events
 )
 
 tauSelections = [tauSelectionHPSTightTauBased,
-#                 tauSelectionHPSTightTauBasedNoLdgPtOrRtauCut, #for QCD control plots
                  tauSelectionHPSMediumTauBased,
                  tauSelectionHPSLooseTauBased]
 tauSelectionNames = ["TauSelectionHPSTightTauBasedTauTriggerMatched",
@@ -101,7 +108,6 @@ tauSelectionNames = ["TauSelectionHPSTightTauBasedTauTriggerMatched",
                      "TauSelectionHPSLooseTauBasedTauTriggerMatched"]
 
 tauSelection = tauSelectionHPSTightTauBased
-tauVetoSelection = tauSelectionHPSLooseTauBased
 #tauSelection = tauSelectionHPSLooseTauBased
 #tauSelection = tauSelectionHPSMediumTauBased
 
