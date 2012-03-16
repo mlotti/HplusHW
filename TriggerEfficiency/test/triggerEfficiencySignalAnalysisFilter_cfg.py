@@ -24,8 +24,8 @@ options.doPat=1
 # Define the process
 process = cms.Process("HChTriggerEfficiency")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
@@ -33,7 +33,8 @@ process.source = cms.Source('PoolSource',
 #        dataVersion.getAnalysisDefaultFileMadhatter()
 #        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_166374-167043_Prompt/Tau/Run2011A_PromptReco_v4_AOD_Single_166374_pattuple_v18/a074e5725328b3ec89273a9ce844bc40/pattuple_5_1_Med.root"
 #        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_166374-167043_Prompt/Tau/PromptReco_v4_AOD_Single_166374_pattuple_v18_1/fdd51a0468635b24b4e8e11496951f46/pattuple_58_3_tsm.root"
-	"file:/mnt/flustre/slehti/Fall11_TTToHplusBWB_M-90_7TeV-pythia6-tauola_B2AD85E1-D520-E111-B5AC-001A928116EA.root"
+#	"file:/mnt/flustre/slehti/Fall11_TTToHplusBWB_M-90_7TeV-pythia6-tauola_B2AD85E1-D520-E111-B5AC-001A928116EA.root"
+	"file:/tmp/slehti/Fall11_TTToHplusBWB_M-90_7TeV-pythia6-tauola_B2AD85E1-D520-E111-B5AC-001A928116EA.root"
         #"file:/home/mkortela/hplus/CMSSW_4_2_8_patch2/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple/pattuple.root"
     )
 )
@@ -59,25 +60,44 @@ if len(options.trigger) == 0:
 #options.trigger = ["HLT_IsoPFTau35_Trk20_v6"]
 
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, plainPatArgs={"doTauHLTMatching":False})
+process.makePatTaus.remove(process.tauGenJets)
+process.makePatTaus.remove(process.tauGenJetsSelectorAllHadrons)
+process.makePatTaus.remove(process.tauGenJetMatch)
+process.patDefaultSequence.remove(process.tauGenJets)
+process.patDefaultSequence.remove(process.tauGenJetsSelectorAllHadrons)
+process.patDefaultSequence.remove(process.tauGenJetMatch)
+process.patDefaultSequence.remove(process.tauGenJetMatchHpsPFTau)
+process.patDefaultSequence.remove(process.tauGenJetMatchHpsTancPFTau)
+del process.tauGenJets
+del process.tauGenJetsSelectorAllHadrons
+del process.tauGenJetMatch
+del process.tauGenJetMatchHpsPFTau
+del process.tauGenJetMatchHpsTancPFTau
+process.patTaus.addGenJetMatch = False
+process.patTaus.embedGenJetMatch = False
+process.patTausHpsPFTau.addGenJetMatch = False
+process.patTausHpsPFTau.embedGenJetMatch = False
+process.patTausHpsTancPFTau.addGenJetMatch = False
+process.patTausHpsTancPFTau.embedGenJetMatch = False
 
 if options.doPat != 0:
-    process.patDefaultSequence.remove(process.patElectrons)
-    process.patDefaultSequence.remove(process.selectedPatElectrons)
-    process.patDefaultSequence.remove(process.electronMatch)
-    process.patDefaultSequence.remove(process.cleanPatElectrons)
+#    process.patDefaultSequence.remove(process.patElectrons)
+#    process.patDefaultSequence.remove(process.selectedPatElectrons)
+#    process.patDefaultSequence.remove(process.electronMatch)
+#    process.patDefaultSequence.remove(process.cleanPatElectrons)
     process.patDefaultSequence.remove(process.cleanPatPhotons)
     process.patDefaultSequence.remove(process.cleanPatTaus)
     process.patDefaultSequence.remove(process.cleanPatTausHpsTancPFTau)
     process.patDefaultSequence.remove(process.cleanPatTausHpsPFTau)
-    process.patDefaultSequence.remove(process.cleanPatTausShrinkingConePFTau)
-    process.patDefaultSequence.remove(process.cleanPatTausCaloRecoTau)
+#    process.patDefaultSequence.remove(process.cleanPatTausShrinkingConePFTau)
+#    process.patDefaultSequence.remove(process.cleanPatTausCaloRecoTau)
     process.patDefaultSequence.remove(process.cleanPatJets)
     process.patDefaultSequence.remove(process.countPatElectrons)
     process.patDefaultSequence.remove(process.countPatLeptons)
 
 
-    process.commonSequence.remove(process.collisionDataSelection)
-    del process.collisionDataSelection
+#    process.commonSequence.remove(process.collisionDataSelection)
+#    del process.collisionDataSelection
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
@@ -167,11 +187,11 @@ process.triggerEfficiency = cms.EDAnalyzer("TriggerEfficiencyAnalyzer",
     caloMetSrc          = cms.untracked.InputTag("patMETs"),
     caloMetNoHFSrc      = cms.untracked.InputTag("metNoHF"),
     bools = cms.PSet(
-        TauIDPassed = cms.InputTag("tauSelectionFilter"),
-        ElectronVetoPassed = cms.InputTag("eVetoFilter"),
-        MuonVetoPassed = cms.InputTag("muVetoFilter"),
-        JetSelectionPassed = cms.InputTag("jetSelectionFilter"),
-        BTaggingPassed = cms.InputTag("btagSelectionFilter"),
+#        TauIDPassed = cms.InputTag("tauSelectionFilter"),
+#        ElectronVetoPassed = cms.InputTag("eVetoFilter"),
+#        MuonVetoPassed = cms.InputTag("muVetoFilter"),
+#        JetSelectionPassed = cms.InputTag("jetSelectionFilter"),
+#        BTaggingPassed = cms.InputTag("btagSelectionFilter"),
     )
 )
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
@@ -179,11 +199,12 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
 process.commonSequence *= sequence
 process.triggerEfficiency.metType1Src = cms.untracked.InputTag(type1Met)
 
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
 process.triggerEfficiencyPath = cms.Path(
     process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
-    process.eventFilter *
     process.signalAnalysisFilter *
-    process.triggerEfficiency
+    process.triggerEfficiency *
+    process.PickEvents
 )
 
 
@@ -203,6 +224,9 @@ process.out = cms.OutputModule("PoolOutputModule",
 #	"drop *",
 #	"keep *",
 #        "keep edmMergeableCounter_*_*_*"
+#    ),
+#    SelectEvents = cms.untracked.PSet(
+#	SelectEvents = cms.vstring('signalAnalysisFilter')
     )
 )
 
