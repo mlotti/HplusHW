@@ -1728,8 +1728,17 @@ class PlotDrawer:
         _opts.update(kwargs.get("opts", {}))
         _opts2.update(kwargs.get("opts2", {}))
 
+        # Not all plot objects have createRatio keyword argument in their createFrame() method
+        args = {
+            "opts": _opts,
+            "opts2": _opts2,
+        }
+        ratio = kwargs.get("ratio", self.ratioDefault)
+        if ratio:
+            args["createRatio"] = True
+
         # Create frame
-        p.createFrame(name, createRatio=kwargs.get("ratio", self.ratioDefault), opts=_opts, opts2=_opts2)
+        p.createFrame(name, **args)
         if log:
             p.getPad().SetLogy(log)
 
