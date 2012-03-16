@@ -115,11 +115,16 @@ jetSelection = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatJets"),       # Calo jets
     #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"), # JPT jets 
     src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
-    cleanTauDR = cms.untracked.double(0.5), #no change
+    cleanTauDR = cms.untracked.double(0.5), # cone for rejecting jets
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
-    minNumber = cms.untracked.uint32(3),
-#   EMfractionCut = cms.untracked.double(0.8)
+    minNumber = cms.untracked.uint32(3), # minimum number of selected jets
+    # Jet ID cuts
+    jetIdMinNumberOfDaughters = cms.untracked.uint32(2),
+    jetIdMaxChargedEMEnergyFraction = cms.untracked.double(0.99),
+    jetIdMaxNeutralHadronEnergyFraction = cms.untracked.double(0.99),
+    jetIdMaxNeutralEMEnergyFraction = cms.untracked.double(0.99),
+    # Experimental
     EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )
 

@@ -36,7 +36,7 @@ namespace HPlus {
 
       bool passedEvent() const { return fPassedEvent; }
       const edm::PtrVector<pat::Jet>& getSelectedJets() const { return fJetSelection->fSelectedJets; }
-      const uint32_t getMinNumber() const { return fJetSelection->fMin; }
+      const uint32_t getMinNumber() const { return fJetSelection->fMinNumberOfJets; }
       const int getHadronicJetCount() const { return fJetSelection->iNHadronicJets; }
       const int getHadronicJetCountInFwdDir() const { return fJetSelection->iNHadronicJetsInFwdDir; }
       const bool eventHasJetWithEMFraction07() const { return fJetSelection->bEMFraction07Veto; }
@@ -65,7 +65,11 @@ namespace HPlus {
     const double fEtaCut;
     const double fEMfractionCut;
     const double fMaxDR;
-    const uint32_t fMin;
+    const uint32_t fMinNumberOfJets;
+    const uint32_t fJetIdMinNumberOfDaughters;
+    const double fJetIdMaxChargedEMEnergyFraction;
+    const double fJetIdMaxNeutralHadronEnergyFraction;
+    const double fJetIdMaxNeutralEMEnergyFraction;
 
     // Counters
     Count fCleanCutCount;
@@ -104,12 +108,15 @@ namespace HPlus {
     TH1 *hFirstJetPt;
     TH1 *hSecondJetPt;
     TH1 *hThirdJetPt;
+    TH1 *hFourthJetPt;
     TH1 *hFirstJetEta;
     TH1 *hSecondJetEta;
     TH1 *hThirdJetEta;
+    TH1 *hFourthJetEta;
     TH1 *hFirstJetPhi;
     TH1 *hSecondJetPhi;
     TH1 *hThirdJetPhi;
+    TH1 *hFourthJetPhi;
 
     // Histograms for jet composition
     TH1 *hPtExcludedJets;
