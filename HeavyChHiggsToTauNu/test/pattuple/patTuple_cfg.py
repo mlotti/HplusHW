@@ -74,17 +74,14 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep *_EcalDeadCellEventFilter*_*_*",
         "keep *_trackingFailureFilter*_*_*",
         ),
-    dropMetaData = cms.untracked.string("ALL")
-)
-# For MC we apply the trigger filter, but save all events in order to
-# get a correct handle to all events with pileup weighting. The trict
-# is that the rest of the path (after triggering) is NOT executed,
-# hence the branches are empty for those events.
-if dataVersion.isData():
-    process.out.SelectEvents = cms.untracked.PSet(
+    dropMetaData = cms.untracked.string("ALL"),
+    # Save only those events which passed the path (for possible
+    # trigger and event cleaning). See also for 'skimConfig' in the
+    # end of this configuration.
+    SelectEvents = cms.untracked.PSet(
         SelectEvents = cms.vstring("path")
-    )
-
+    ),
+)
 
 ################################################################################
 # Add PAT sequences
