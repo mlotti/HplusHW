@@ -998,14 +998,24 @@ class PF2PATBuilder:
 
         # Then, for all muons (needed for muon isolation studies for embedding)
         allPostfix = "All"
-        # Clone the makePatMuons sequence
-        makePatMuonsAll = patHelpers.cloneProcessingSnippet(self.process, getattr(self.process, "makePatMuons"+postfix), allPostfix)
-        makePatMuons = getattr(self.process, "makePatMuons"+postfix)
-        getattr(self.process, "patDefaultSequence"+postfix).replace(makePatMuons,
-                                                                    makePatMuons * makePatMuonsAll)
-        # Set the InputTags to point to pfMuons (all PF muons) instead of pfIsolatedMuons (after isolation)
-        getattr(self.process, "muonMatch"+postfix+allPostfix).src = "pfMuons"+postfix
-        getattr(self.process, "patMuons"+postfix+allPostfix).pfMuonSource = "pfMuons"+postfix
+        if self.dataVersion.isMC():
+            # For MC, clone the makePatMuons sequence
+            makePatMuonsAll = patHelpers.cloneProcessingSnippet(self.process, getattr(self.process, "makePatMuons"+postfix), allPostfix)
+            makePatMuons = getattr(self.process, "makePatMuons"+postfix)
+            getattr(self.process, "patDefaultSequence"+postfix).replace(makePatMuons,
+                                                                        makePatMuons * makePatMuonsAll)
+            # Set the InputTags to point to pfMuons (all PF muons) instead of pfIsolatedMuons (after isolation)
+            getattr(self.process, "muonMatch"+postfix+allPostfix).src = "pfMuons"+postfix
+            getattr(self.process, "patMuons"+postfix+allPostfix).pfMuonSource = "pfMuons"+postfix
+        else:
+            # For data, clone just patMuons, as muonMatch and hence makePatMuons don't exist
+            patMuons = getattr(self.process, "patMuons"+postfix)
+            patMuonsAll = patMuons.clone(
+                pfMuonSource = "pfMuons"+postfix
+            )
+            setattr(self.process, "patMuons"+postfix+allPostfix, patMuonsAll)
+            getattr(self.process, "patDefaultSequence"+postfix).replace(patMuons, patMuons*patMuonsAll)
+
         # Clone selectedPatMuons
         selectedPatMuons = getattr(self.process, "selectedPatMuons"+postfix)
         selectedPatMuonsAll = selectedPatMuons.clone(
@@ -1064,13 +1074,23 @@ class PF2PATBuilder:
 
         # Then, for all electrons (not necessarily needed, but let's keep them when we're still studying the PU effects)
         allPostfix = "All"
-        makePatElectronsAll = patHelpers.cloneProcessingSnippet(self.process, getattr(self.process, "makePatElectrons"+postfix), allPostfix)
-        makePatElectrons = getattr(self.process, "makePatElectrons"+postfix)
-        getattr(self.process, "patDefaultSequence"+postfix).replace(makePatElectrons,
-                                                                    makePatElectrons * makePatElectronsAll)
-        # Set the InputTags to point to pfElectrons (all PF electrons) instead of pfIsolatedElectrons (after isolation)
-#        getattr(self.process, "electronMatch"+postfix+allPostfix).src = "pfElectrons"+postfix
-        getattr(self.process, "patElectrons"+postfix+allPostfix).pfElectronSource = "pfElectrons"+postfix
+        if self.dataVersion.isMC():
+            # For MC, clone the makePatElectrons sequence
+            makePatElectronsAll = patHelpers.cloneProcessingSnippet(self.process, getattr(self.process, "makePatElectrons"+postfix), allPostfix)
+            makePatElectrons = getattr(self.process, "makePatElectrons"+postfix)
+            getattr(self.process, "patDefaultSequence"+postfix).replace(makePatElectrons,
+                                                                        makePatElectrons * makePatElectronsAll)
+            # Set the InputTags to point to pfElectrons (all PF electrons) instead of pfIsolatedElectrons (after isolation)
+            getattr(self.process, "patElectrons"+postfix+allPostfix).pfElectronSource = "pfElectrons"+postfix
+        else:
+            # For data, clone just patElectrons, as electronMatch and makePatElectrons don't exist
+            patElectrons = getattr(self.process, "patElectrons"+postfix)
+            patElectronsAll = patElectrons.clone(
+                pfElectronSource = "pfElectrons"+postfix
+            )
+            setattr(self.process, "patElectrons"+postfix+allPostfix, patElectronsAll)
+            getattr(self.process, "patDefaultSequence"+postfix).replace(patElectrons, patElectrons*patElectronsAll)
+
         # Clone selectedPatElectrons
         selectedPatElectrons = getattr(self.process, "selectedPatElectrons"+postfix)
         selectedPatElectronsAll = selectedPatElectrons.clone(
