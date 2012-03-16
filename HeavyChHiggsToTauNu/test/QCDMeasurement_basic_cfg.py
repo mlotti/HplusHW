@@ -183,6 +183,7 @@ print "\nPV Selection:", process.QCDMeasurement.primaryVertexSelection
 print "\nTauSelection operating mode:", process.QCDMeasurement.tauSelection.operatingMode
 print "TauSelection src:", process.QCDMeasurement.tauSelection.src
 print "TauSelection selection:", process.QCDMeasurement.tauSelection.selection
+print "TauSelection isolation:", process.signalAnalysis.tauSelection.isolationDiscriminator
 print "TauSelection ptCut:", process.QCDMeasurement.tauSelection.ptCut
 print "TauSelection etacut:", process.QCDMeasurement.tauSelection.etaCut
 print "TauSelection leadingTrackPtCut:", process.QCDMeasurement.tauSelection.leadingTrackPtCut
