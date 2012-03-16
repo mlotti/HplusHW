@@ -21,9 +21,9 @@ def addCorrectedMet(process, dataVersion, tauSelection, jetSelection, metRaw = "
     sequence *= m
 
     # Then clean jet collection from the selected tau
-    m = cms.EDFilter("PATJetSelector",
+    m = cms.EDProducer("PATJetCleaner",
         src = cms.InputTag(jetSelection.src.value()),
-        cut = cms.string(""),
+        preselection = cms.string(""),
         checkOverlaps = cms.PSet(
             taus = cms.PSet(
                 src                 = cms.InputTag(tauName),
@@ -34,7 +34,8 @@ def addCorrectedMet(process, dataVersion, tauSelection, jetSelection, metRaw = "
                 pairCut             = cms.string(""),
                 requireNoOverlaps   = cms.bool(True),
             )
-        )
+        ),
+        finalCut = cms.string("")
     )
     jetName = "selectedPatJetsTauCleaned"+postfix
     setattr(process, jetName, m)
