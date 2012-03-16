@@ -65,7 +65,7 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     # Select (type I like) jets for MET variation, clean the selected tau from these
     cutstr = process.selectedPatJetsForMETtype1p2Corr.cut.value()
     cutstr += "&& pt() > %f" % process.patPFJetMETtype1p2Corr.type1JetPtThreshold.value()
-    jetsForMetv = cms.EDFilter("PATJetSelector",
+    jetsForMetv = cms.EDFilter("PATJetRefSelector",
         src = cms.InputTag(jetVariationName),
         cut = cms.string(cutstr),
         checkOverlaps = cms.PSet(
