@@ -39,7 +39,7 @@ namespace HPlus {
     ~VetoTauSelection();
 
     /// Analyses the compatibility of the tau and the primary vertex
-    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<pat::Tau> selectedTau);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau);
 
   private:
     // Parameters set in config file

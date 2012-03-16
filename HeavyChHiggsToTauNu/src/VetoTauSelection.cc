@@ -55,7 +55,7 @@ namespace HPlus {
 
   VetoTauSelection::~VetoTauSelection() {}
 
-  VetoTauSelection::Data VetoTauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr< pat::Tau > selectedTau) {
+  VetoTauSelection::Data VetoTauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau) {
     increment(fAllEventsCounter);
     // Obtain tau collection as the veto tau candidates and take out selected tauSelection
     edm::Handle<edm::View<pat::Tau> > myTaus;
