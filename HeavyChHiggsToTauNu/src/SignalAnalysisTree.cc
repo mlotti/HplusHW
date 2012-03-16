@@ -640,6 +640,7 @@ namespace HPlus {
 
     fJets.clear();
     fJetsBtags.clear();
+    fJetsFlavour.clear();
 
     if(fFillJetEnergyFractions) {
       fJetsChf.clear();

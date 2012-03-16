@@ -12,6 +12,7 @@
 ######################################################################
 
 import ROOT
+import sys,os
 ROOT.gROOT.SetBatch(True)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
@@ -41,10 +42,24 @@ deltaPhi160 = True
 deltaPhi130 = False
 btagging = True
 
+def usage():
+    print "\n"
+    print "### Usage:   plotSignalAnalysisInverted.py <multicrab dir>\n"
+    print "\n"
+    sys.exit()
+
 # main function
 def main():
+
+    if len(sys.argv) < 2:
+        usage()
+
+    dirs = []
+    dirs.append(sys.argv[1])
+
     # Read the datasets
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters)
+    #datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
     datasets.loadLuminosities()
 
     # Take QCD from data
@@ -249,9 +264,15 @@ def doCounters(datasets):
 #            "vertices_H120")
 
 
-from QCDInvertedNormalizationFactors import *
-norm_inc = QCDInvertedNormalization["inclusive"]
-print norm_inc
+try:
+    from QCDInvertedNormalizationFactors import *
+    norm_inc = QCDInvertedNormalization["inclusive"]
+except ImportError:
+    print
+    print "    WARNING, QCDInvertedNormalizationFactors.py not found!"
+    print "    Run script InvertedTauID_Normalization.py to generate QCDInvertedNormalizationFactors.py"
+    print
+    sys.exit()
 
 def mtComparison(datasets):
     
@@ -572,8 +593,9 @@ def mtComparison(datasets):
 
 
 
-
-    fOUT = ROOT.TFile.Open("transverseMassQCDInverted.root", "RECREATE")
+    fName = os.path.join(sys.argv[1],"transverseMassQCDInverted.root")
+    fOUT = ROOT.TFile.Open(fName, "RECREATE")
+#    fOUT = ROOT.TFile.Open("transverseMassQCDInverted.root", "RECREATE")
 #    hmtSum.SetDirectory(fOUT)
     hmt.SetDirectory(fOUT)
     fOUT.Write()
