@@ -69,6 +69,7 @@ def plot(datasets):
     hpt = plots.DataMCPlot(datasets, treeDraw.clone(varexp="jets_p4.Et()>>dist(25,0,500)", selection=noTagging))
     
     hptt = hpt.histoMgr.getHisto("TTJets").getRootHisto().Clone("TTJets")
+#    hptt = hpt.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto().Clone("TTToHplusBWB_M120")
    # hptt_btag = hptb.histoMgr.getHisto("TTJets").getRootHisto()
     
     hpt.stackMCHistograms()
@@ -108,9 +109,12 @@ def plot(datasets):
     hpt120 = hpt.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto().Clone("TTToHplusBWB_M120")
     hpt120_btag = hptb.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto()
 
-    hptt = hpt.histoMgr.getHisto("TTJets_TuneZ2").getRootHisto().Clone("TTJets_TuneZ2")
-    hptt_btag = hptb.histoMgr.getHisto("TTJets").getRootHisto()
+#    hptt = hpt.histoMgr.getHisto("TTJets_TuneZ2_Summer11").getRootHisto().Clone("TTJets_TuneZ2_Summer11")
+#    hptt_btag = hptb.histoMgr.getHisto("TTJets_TuneZ2_Summer11").getRootHisto()
+#    hptt = hpt.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto().Clone("TTToHplusBWB_M120")
+#    hptt_btag = hptb.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto()
 
+    
     # tagged et / et 
     hpt120_btag.Divide(hpt120)
     hpt120_btag.SetName("btagEff_pt")
@@ -129,7 +133,7 @@ def plot(datasets):
 
 
     canvas3 = ROOT.TCanvas("canvas3","",500,500)
-#    canvas3.SetLogy()
+    canvas3.SetLogy()
 #    hmt.SetMaximum(3.0)
     hpt120_btag.SetMarkerColor(2)
     hpt120_btag.SetMarkerSize(1)
@@ -200,14 +204,18 @@ def plot(datasets):
     hpt160_btag.SetName("btagEff160_pt")
 
 
-    hpttt = hpt.histoMgr.getHisto("TTJets").getRootHisto().Clone("TTJets")
+#    hpttt = hpt.histoMgr.getHisto("TTJets").getRootHisto().Clone("TTJets")
+#    hpttt = hpt.histoMgr.getHisto("TTJets").getRootHisto()
+    
     hpttt_btag = hptb.histoMgr.getHisto("TTJets").getRootHisto()
+#    hpttt = hpt.histoMgr.getHisto("TTToHplusBWB_M160").getRootHisto().Clone("TTToHplusBWB_M160")
+#    hpttt_btag = hptb.histoMgr.getHisto("TTToHplusBWB_M160").getRootHisto()
     # tagged et / et 
     hpttt_btag.Divide(hpttt)
     hpttt_btag.SetName("btagEfftt_pt")
 
     canvas5 = ROOT.TCanvas("canvas5","",500,500)
-#    canvas5.SetLogy()
+    canvas5.SetLogy()
     hpt120_btag.SetMaximum(1.5)
     hpt120_btag.SetMarkerColor(2)
     hpt120_btag.SetMarkerSize(1)
@@ -295,56 +303,56 @@ def plot(datasets):
 
 #######################################################################
 
-    canvas = ROOT.TCanvas("canvas","",500,500)
-    hpt120_btag.GetYaxis().SetTitle("B-tagging efficiency")
-    hpt120_btag.GetXaxis().SetTitle("p_{T}^{jet} (GeV)")
-    hpt120_btag.Draw()
-    histo = hpt120_btag.Clone("histo")
-#    rangeMin = htopmass.GetXaxis().GetXmin()
-#    rangeMax = htopmass.GetXaxis().GetXmax()
-    rangeMin = 30
-    rangeMax = 500
+#    canvas = ROOT.TCanvas("canvas","",500,500)
+#    hpt120_btag.GetYaxis().SetTitle("B-tagging efficiency")
+#    hpt120_btag.GetXaxis().SetTitle("p_{T}^{jet} (GeV)")
+#    hpt120_btag.Draw()
+#    histo = hpt120_btag.Clone("histo")
+##    rangeMin = htopmass.GetXaxis().GetXmin()
+##    rangeMax = htopmass.GetXaxis().GetXmax()
+#    rangeMin = 30
+#    rangeMax = 500
 
-    numberOfParameters = 3
+#    numberOfParameters = 3
 
 #    print "Fit range ",rangeMin, " - ",rangeMax
 
-    class FitFunction:
-        def __call__( self, x, par ):
-#            return exp(par[0] + par[1]*x[0]) 
-            return par[0] + par[1]*x[0] + par[2]*x[0]*x[0] 
-#            return par[0] + par[1]*x[0] + par[2]*x[0]*x[0] + par[3]*x[0]*x[0]*x[0]
+#    class FitFunction:
+#        def __call__( self, x, par ):
+##            return exp(par[0] + par[1]*x[0]) 
+#            return par[0] + par[1]*x[0] + par[2]*x[0]*x[0] 
+##            return par[0] + par[1]*x[0] + par[2]*x[0]*x[0] + par[3]*x[0]*x[0]*x[0]
 
-    theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
-    theFit.SetParLimits(0,-20000,20000)
-    theFit.SetParLimits(1,-20000,20000)
-    theFit.SetParLimits(2,-20000,20000)
-    theFit.SetParLimits(3,-20000,20000)   
-#    gStyle.SetOptFit(0)
+#    theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
+#    theFit.SetParLimits(0,-20000,20000)
+#    theFit.SetParLimits(1,-20000,20000)
+#    theFit.SetParLimits(2,-20000,20000)
+#    theFit.SetParLimits(3,-20000,20000)   
+##    gStyle.SetOptFit(0)
     
-    data_btag.Fit(theFit,"LR")          
-    theFit.SetRange(rangeMin,rangeMax)
-    theFit.SetLineStyle(1)
-    theFit.SetLineWidth(2)  
-    theFit.Draw("same")
-    tex4 = ROOT.TLatex(0.2,0.95,"CMS Preliminary ")
-    tex4.SetNDC()
-    tex4.SetTextSize(20)
-    tex4.Draw()
-    tex2 = ROOT.TLatex(0.6,0.7,"tt->tbH^{#pm}") 
-    tex2.SetNDC()
-    tex2.SetTextSize(20)
-    tex2.Draw()
-    tex3 = ROOT.TLatex(0.6,0.6,"m_{H^{#pm}} = 120 GeV/c^{2}") 
-    tex3.SetNDC()
-    tex3.SetTextSize(20)
-    tex3.Draw()
-    tex5 = ROOT.TLatex(0.6,0.5,"No MET cut") 
-    tex5.SetNDC()
-    tex5.SetTextSize(20)
-    tex5.Draw()
-    print "Fit range ",rangeMin, " - ",rangeMax    
-    canvas.Print("jetEtFit.png")
+#    data_btag.Fit(theFit,"LR")          
+#    theFit.SetRange(rangeMin,rangeMax)
+#    theFit.SetLineStyle(1)
+#    theFit.SetLineWidth(2)  
+#    theFit.Draw("same")
+#    tex4 = ROOT.TLatex(0.2,0.95,"CMS Preliminary ")
+#    tex4.SetNDC()
+#    tex4.SetTextSize(20)
+#    tex4.Draw()
+#    tex2 = ROOT.TLatex(0.6,0.7,"tt->tbH^{#pm}") 
+#    tex2.SetNDC()
+#    tex2.SetTextSize(20)
+#    tex2.Draw()
+#    tex3 = ROOT.TLatex(0.6,0.6,"m_{H^{#pm}} = 120 GeV/c^{2}") 
+#    tex3.SetNDC()
+#    tex3.SetTextSize(20)
+#    tex3.Draw()
+#    tex5 = ROOT.TLatex(0.6,0.5,"No MET cut") 
+#    tex5.SetNDC()
+#    tex5.SetTextSize(20)
+#    tex5.Draw()
+#    print "Fit range ",rangeMin, " - ",rangeMax    
+#    canvas.Print("jetEtFit.png")
 
     
 
@@ -434,7 +442,7 @@ def plot(datasets):
     hetatt_btag.SetName("btagEfftt_eta")
 
     canvas5a = ROOT.TCanvas("canvas5a","",500,500)
-#    canvas5.SetLogy()
+    canvas5a.SetLogy()
     heta120_btag.SetMaximum(1.5)
     heta120_btag.SetMarkerColor(2)
     heta120_btag.SetMarkerSize(1)
@@ -518,14 +526,14 @@ def plot(datasets):
     tex5.SetNDC()
     tex5.SetTextSize(20)
     tex5.Draw()        
-    canvas5.Print("btagEff_eta_mH.png")
+    canvas5a.Print("btagEff_eta_mH.png")
 
 #######################################################################
 
 
 
     canvas4 = ROOT.TCanvas("canvas4","",500,500)
-#    canvas3.SetLogy()
+    canvas4.SetLogy()
 #    hmt.SetMaximum(3.0)
     heta120_btag.SetMarkerColor(4)
     heta120_btag.SetMarkerSize(1)
