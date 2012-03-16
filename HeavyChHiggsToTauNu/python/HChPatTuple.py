@@ -239,6 +239,14 @@ class PATBuilder:
         process.ak5PFJetTracksAssociatorAtVertex.tracks.setModuleLabel("tmfTracks")
         process.jetTracksAssociatorAtVertex.tracks.setModuleLabel("tmfTracks")
 
+        # Do jet-parton matching with the genParticles of the original event
+        if dataVersion.isMC():
+            process.patJetPartons.src.setProcessName(dataVersion.getTriggerProcess())
+            process.patJetPartonMatch.matched.setProcessName(dataVersion.getTriggerProcess())
+            # in v13_3 embeddings the GenJets are done from the tau part, hence they are meaningless
+            process.patJets.addGenJetMatch = False
+            process.patJets.genJetMatch = ""
+
         # Another part of the PAT process.out hack
         if not hasOut:
             del process.out

@@ -6,12 +6,14 @@
 #include "CommonTools/Utils/interface/PtComparator.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIsolationSelectorOld.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIsolationSelector.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FirstObjectSelector.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerMatchSelector.h"
 
 #include<vector>
 
@@ -38,13 +40,24 @@ namespace {
       return relIso(t1) > relIso(t2);
     }
   };
+
+  template <typename T>
+  struct ViewToVectorAdder {
+    void operator()(std::vector<T>& dst, edm::Handle<edm::View<T> >& src, size_t index) {
+      dst.push_back(src->at(index));
+    }
+  };
 }
+
 
 typedef SingleObjectSelector<
   edm::View<pat::Muon>,
   StringCutObjectSelector<pat::Muon>,
   edm::PtrVector<pat::Muon>
   > PATMuonViewPtrSelector;
+
+DEFINE_FWK_MODULE( PATMuonViewPtrSelector );
+
 
 typedef ObjectSelector<
   SortCollectionSelector<
@@ -70,6 +83,11 @@ typedef ObjectSelector<
     >,
   edm::PtrVector<pat::Muon>
   > HPlusSmallestRelIsoPATMuonViewPtrSelector;
+
+DEFINE_FWK_MODULE( HPlusSmallestRelIsoPATMuonSelector );
+DEFINE_FWK_MODULE( HPlusSmallestRelIsoPATMuonViewSelector );
+DEFINE_FWK_MODULE( HPlusSmallestRelIsoPATMuonViewPtrSelector );
+
 
 typedef ObjectSelector<
   SortCollectionSelector<
@@ -105,6 +123,11 @@ typedef ObjectSelector<
   edm::PtrVector<reco::Candidate>
   > HPlusLargestPtCandViewPtrSelector;
 
+DEFINE_FWK_MODULE( HPlusLargestPtPATMuonSelector );
+DEFINE_FWK_MODULE( HPlusLargestPtPATMuonViewSelector );
+DEFINE_FWK_MODULE( HPlusLargestPtPATMuonViewPtrSelector );
+DEFINE_FWK_MODULE( HPlusLargestPtCandViewPtrSelector );
+
 
 typedef HPlus::TauIsolationSelector<
   edm::View<reco::Candidate>,
@@ -121,23 +144,22 @@ typedef HPlus::TauIsolationSelector<
   edm::RefVector<std::vector<pat::Muon> >
   > HPlusTauIsolationPATMuonRefSelector;
 
-typedef HPlus::FirstObjectSelector<reco::Vertex, reco::VertexCollection> HPlusFirstVertexSelector;
-typedef HPlus::FirstObjectSelector<reco::Candidate, edm::PtrVector<reco::Candidate> > HPlusFirstCandidateSelector;
-
-DEFINE_FWK_MODULE( PATMuonViewPtrSelector );
-
-DEFINE_FWK_MODULE( HPlusSmallestRelIsoPATMuonSelector );
-DEFINE_FWK_MODULE( HPlusSmallestRelIsoPATMuonViewSelector );
-DEFINE_FWK_MODULE( HPlusSmallestRelIsoPATMuonViewPtrSelector );
-
-DEFINE_FWK_MODULE( HPlusLargestPtPATMuonSelector );
-DEFINE_FWK_MODULE( HPlusLargestPtPATMuonViewSelector );
-DEFINE_FWK_MODULE( HPlusLargestPtPATMuonViewPtrSelector );
-DEFINE_FWK_MODULE( HPlusLargestPtCandViewPtrSelector );
-
 DEFINE_FWK_MODULE( HPlusTauIsolationCandViewPtrSelector );
 DEFINE_FWK_MODULE( HPlusTauIsolationPATMuonViewPtrSelector );
 DEFINE_FWK_MODULE( HPlusTauIsolationPATMuonRefSelector );
 
+
+typedef HPlus::FirstObjectSelector<reco::Vertex, reco::VertexCollection> HPlusFirstVertexSelector;
+typedef HPlus::FirstObjectSelector<reco::Candidate, edm::PtrVector<reco::Candidate> > HPlusFirstCandidateSelector;
+
 DEFINE_FWK_MODULE( HPlusFirstVertexSelector );
 DEFINE_FWK_MODULE( HPlusFirstCandidateSelector );
+
+
+typedef HPlus::TriggerMatchSelector<
+  edm::View<pat::Tau>,
+  std::vector<pat::Tau>,
+  ViewToVectorAdder<pat::Tau>
+  > HPlusTriggerMatchPATTauSelector;
+
+//DEFINE_FWK_MODULE( HPlusTriggerMatchPATTauViewSelector );

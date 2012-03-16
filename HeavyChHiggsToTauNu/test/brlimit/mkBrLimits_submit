@@ -17,7 +17,7 @@ set nJobs = "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 2
 # and cpu time in root:
 # n=60; m=8; cout << "time="<<n/60.0+3.6+0.82*(m) << ", tot ev="<<n*m<<", cpu="<<n*(3.6+0.82*m)
 #
-# ----- Masspoints: hard-coded in plotting scripts also
+# ----- Masspoints: NOTE:hard-coded in plotting scripts also
 set massPoints = "80 100 120 140 150 155 160"
 # ----------------------------------------------
 
@@ -27,7 +27,7 @@ set nameJobs = `basename ${odir}`
 set jobname = ${nameJobs}_`date +"%H%M%S"`
 
 if (${combinedAnalysis} == 1) then 
- echo "-------- Running combined analysis (remember to fix label in limit plot)"
+ echo "-------- Running combined analysis (remember to fix label in mkBrLimits_processBrPlots.cxx and mkBrLimits_processTanbPlots.py)"
 else
  echo "-------- Running analysis for fully hadronic channel only"
 endif
@@ -35,17 +35,19 @@ endif
 # NOTE: a job with longer name containing the name of this job might block this 
 # job, even though it would not produce output files with same name
 while (`bjobs -w |& grep $nameJobs` != "") 
-  echo Waiting for previous jobs to end.  You might want to bkill these jobs...
+  echo Waiting for previous jobs using this directory to end.  You might want to bkill these jobs...
   sleep 10
 end
 
 # prepare LandS
-cd mycmsswlink/src/
-cvs co -r V3-04-01_eps UserCode/mschen/LandS
-cd UserCode/mschen/LandS  
-cmsenv
-gmake clean
-gmake all
+if ( !(-e mycmsswlink/src/UserCode) ) then
+  cd mycmsswlink/src/
+  cvs co -r V3-04-01_eps UserCode/mschen/LandS
+  cd UserCode/mschen/LandS  
+  cmsenv
+  gmake clean
+  gmake all
+endif
 
 cd ${odir}
 mkdir outputs
@@ -95,9 +97,9 @@ foreach xmas ($massPoints)
 end
 
 # here check if jobs with same name are running
-echo Checking jobs with name $jobname.
+echo Reporting jobs of this directory with name $jobname.
 while (`bjobs -w |& grep $jobname` != "") # check if job name exists
-  echo `date +"%H:%M"` ": Waiting jobs, " `bjobs|grep RUN|wc|awk '{print $1}'` " running, " `bjobs|grep PEND|wc|awk '{print $1}'` " pending. (do no modify scripts yet.)"
+  echo `date +"%H:%M"` ": Waiting jobs, " `bjobs -w|grep ${jobname}|grep RUN|wc|awk '{print $1}'` " running, " `bjobs -w|grep ${jobname}|grep PEND|wc|awk '{print $1}'` " pending. (do no modify scripts yet.)"
   sleep 60
 end
 
@@ -111,8 +113,6 @@ end
 foreach xmas ($massPoints)
 head -3 outputs/output_${nameDataCard}${xmas}_obs | tail -1 | awk '{print $12 }' >&! outputs/output_${nameDataCard}${xmas}
 head -3 outputs/output_${nameDataCard}${xmas}_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> outputs/output_${nameDataCard}${xmas}
-#grep 'Observed Upper' outputs/output_${nameDataCard}${xmas}_exp | awk '{print $12}' >&! outputs/output_${nameDataCard}${xmas}                 
-#grep 'BANDS' outputs/output_${nameDataCard}${xmas}_exp | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> outputs/output_${nameDataCard}${xmas}
 end
 
 cd ${odir}

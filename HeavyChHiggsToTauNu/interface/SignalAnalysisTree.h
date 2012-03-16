@@ -137,6 +137,7 @@ namespace HPlus {
     std::vector<int> fJetsElm;
     std::vector<int> fJetsPhm;
     std::vector<int> fJetsMum;
+    std::vector<int> fJetsFlavour;
     std::vector<double> fJetsJec;
     std::vector<double> fJetsArea;
     std::vector<bool> fJetsLooseId;

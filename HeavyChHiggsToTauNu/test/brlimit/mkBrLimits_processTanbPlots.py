@@ -29,26 +29,36 @@ textFullyHadronic = 1 # 0 for the combined result
 
 # write text to plot
 def writeTitleTexts(lumi):
-    x = 0.62
-    y = 0.96
-    l = TLatex()
-    l.SetNDC()
-    l.SetTextFont(l.GetTextFont()-20) # bold -> normal
-    l.DrawLatex(x, y, "CMS Preliminary")
-    x = 0.2
-    l.DrawLatex(x, y, "#sqrt{s} = 7 TeV")
-    x = 0.45
+# Texts for 
+# 1) "CMS Preliminary"
+# 2) "sqrt(s) = 7"
+# 3) integrated luminosity
+    tex = TLatex()
+    tex.SetNDC()
+    tex.SetTextFont(43)
+    tex.SetTextSize(27)
+    tex.SetLineWidth(2)
+    tex.DrawLatex(0.62,0.96,"CMS Preliminary")
+    tex2 = TLatex()
+    tex2.SetNDC()
+    tex2.SetTextFont(43)
+    tex2.SetTextSize(27)
+    tex2.SetLineWidth(2)
+    tex2.DrawLatex(0.2,0.96,"#sqrt{s} = 7 TeV")
     mystring = '%.1f' % float(lumi)
-    l.DrawLatex(x, y, mystring + " fb^{-1}")
+    tex = TLatex()
+    tex.SetNDC()
+    tex.SetTextFont(43)
+    tex.SetTextSize(27)
+    tex.SetLineWidth(2)
+    tex.DrawLatex(0.43,0.96,mystring + " fb^{-1}")
     return 0
 
 def writeText( myText, y ):
     text = TLatex()
-#    text.SetTextColor(1)
-#    text.SetTextAlign(12)
-    text.SetTextSize(20)
-#    text.SetTextFont(1)
     text.SetNDC()
+    text.SetTextFont(63)
+    text.SetTextSize(20)
     text.DrawLatex(0.185,y,myText)
     return 0
 
@@ -500,7 +510,15 @@ def main():
     observed_minus_tanb.Draw("L")
     observed_plus_tanb.Draw("L")
 
-    # Axis labels
+    # Axis style and labels
+    frame.GetXaxis().SetTitleFont(43);
+    frame.GetYaxis().SetTitleFont(43);
+    frame.GetXaxis().SetTitleSize(33);
+    frame.GetYaxis().SetTitleSize(33);
+    frame.GetXaxis().SetLabelFont(43);
+    frame.GetYaxis().SetLabelFont(43);
+    frame.GetXaxis().SetLabelSize(27);
+    frame.GetYaxis().SetLabelSize(27);
     if useMA:
         frame.GetXaxis().SetTitle("m_{A} (GeV/c^{2})")
     else:
@@ -509,12 +527,12 @@ def main():
 #    frame.GetXaxis().SetLimits(72,166)
 
     # Legends
-    legeX = 0.60
+    legeX = 0.55
     legeY = 0.17
     pl  = ROOT.TLegend(legeX,legeY,legeX+0.30,legeY+0.2)
+    pl.SetTextFont(62)
     pl.SetTextSize(0.03)
     pl.SetFillStyle(4000)
-    pl.SetTextFont(132)
     pl.SetBorderSize(0)
     ple = ROOT.TLegendEntry()
     pl.AddEntry(observed_tanb,     "Observed", "lp")
@@ -549,9 +567,9 @@ def main():
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
     if textFullyHadronic:
-        writeText("Fully hadronic final state",   top - lineSpace)
+        writeText("#tau_{h}+jets final state",   top - lineSpace)
     else:
-        writeText("hadr. + ltau + emu final states",   top - lineSpace)
+        writeText("#tau_{h}+jets, e#tau_{h}, #mu#tau_{h}, and e#mu final states",   top - lineSpace)
     writeText("MSSM m_{h}^{max}",           top - 2*lineSpace)
     writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
     writeText("#mu=%d GeV"%mu, top - 4*lineSpace)
@@ -582,7 +600,15 @@ def main():
         canvas2 = ROOT.TCanvas("limitsTanb_mus_mh")
     frame2 = canvas.DrawFrame(massMin, 0, massMax, tanbMax)
 
-    # Axis labels
+    # Axis style and labels
+    frame2.GetXaxis().SetTitleFont(43);
+    frame2.GetYaxis().SetTitleFont(43);
+    frame2.GetXaxis().SetTitleSize(33);
+    frame2.GetYaxis().SetTitleSize(33);
+    frame2.GetXaxis().SetLabelFont(43);
+    frame2.GetYaxis().SetLabelFont(43);
+    frame2.GetXaxis().SetLabelSize(27);
+    frame2.GetYaxis().SetLabelSize(27);
     if useMA:
         frame2.GetXaxis().SetTitle("m_{A} (GeV/c^{2})")
     else:
@@ -650,12 +676,12 @@ def main():
         observed_mkl.Draw("LP")
 
     # Legends
-    legeX = 0.52
+    legeX = 0.47
     legeY = 0.20
     pl2  = ROOT.TLegend(legeX,legeY,legeX+0.35,legeY+0.2)
+    pl2.SetTextFont(62)
     pl2.SetTextSize(0.03)
     pl2.SetFillStyle(4000)
-    pl2.SetTextFont(132)
     pl2.SetBorderSize(0)
     pl2.AddEntry(observed_pk,     "Observed, mu=1000 GeV/c^{2}", "lp")
     pl2.AddEntry(observed_p2,     "Observed, mu=200 GeV/c^{2}", "lp")
@@ -670,10 +696,9 @@ def main():
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
     if textFullyHadronic:
-        writeText("Fully hadronic final state",   top - lineSpace)
+        writeText("#tau_{h}+jets final state",   top - lineSpace)
     else:
-        writeText("hadr. + ltau + emu final states",   top - lineSpace)
-#    writeText("Bayesian CL limit",           top - 2*lineSpace)
+        writeText("#tau_{h}+jets, e#tau_{h}, #mu#tau_{h}, and e#mu final states",   top - lineSpace)
     writeText("MSSM m_{h}^{max}",           top - 2*lineSpace)
     writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
 

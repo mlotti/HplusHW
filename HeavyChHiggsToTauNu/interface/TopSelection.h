@@ -49,32 +49,56 @@ namespace HPlus {
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
 
   private:
+    void init();
+    /*
+    std::vector<const reco::GenParticle*> getImmediateMothers(const reco::Candidate&);
+    std::vector<const reco::GenParticle*> getMothers(const reco::Candidate&);
+    bool hasImmediateMother(const reco::Candidate&, int);
+    bool hasMother(const reco::Candidate&, int);
+    void printImmediateMothers(const reco::Candidate& );
+    void printMothers(const reco::Candidate& );
+    std::vector<const reco::GenParticle*> getImmediateDaughters(const reco::Candidate&);
+    std::vector<const reco::GenParticle*> getDaughters(const reco::Candidate&);
+    bool hasImmediateDaughter(const reco::Candidate&, int);
+    bool hasDaughter(const reco::Candidate&, int);
+    void printImmediateDaughters(const reco::Candidate& );
+    void printDaughters(const reco::Candidate& );
+    */
     // Input parameters
     const double fTopMassLow;
     const double fTopMassHigh;
+ 
 
     // Counters
     Count fTopMassCount;
 
     // EventWeight object
     EventWeight& fEventWeight;
+    edm::InputTag fSrc;
     
     // Histograms
     TH1 *hPtjjb;
     TH1 *hPtmax;
+    TH1 *hPtmaxMatch;
+    TH1 *hPtmaxBMatch;
+    TH1 *hPtmaxQMatch;
+    TH1 *hPtmaxMatchWrongB;
     TH1 *hjjbMass;
     TH1 *htopMass;
-    TH1 *hPtmaxTop;
-    TH1 *hPtmaxTopReal;
-    TH1 *hPtmaxTopHplus;
-    TH1 *htopMassReal;
-    TH1 *htopMassMaxReal;
-    TH1 *htopMassRealHplus;
-    TH1 *htopMassRealb;
-
+    TH1 *htopMassMatch;
+    TH1 *hWMass;
+    TH1 *hWMassMatch;
+    TH1 *htopMassBMatch;
+    TH1 *hWMassBMatch;
+    TH1 *htopMassQMatch;
+    TH1 *hWMassQMatch;
+    TH1 *htopMassMatchWrongB;
+    TH1 *hWMassMatchWrongB;  
     // Variables
     double topMass;
+    double wMass;
     XYZTLorentzVector top;
+    XYZTLorentzVector W;
   };
 }
 

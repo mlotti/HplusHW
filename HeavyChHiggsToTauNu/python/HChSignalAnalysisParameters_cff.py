@@ -126,6 +126,7 @@ tauSelectionNames = ["TauSelectionCaloTauCutBasedTauTriggerMatched",
 #tauSelection = tauSelectionShrinkingConeTaNCBased
 #tauSelection = tauSelectionCaloTauCutBased
 tauSelection = tauSelectionHPSTightTauBased
+tauVetoSelection = tauSelectionHPSLooseTauBased
 #tauSelection = tauSelectionHPSLooseTauBased
 #tauSelection = tauSelectionHPSMediumTauBased
 #tauSelection = tauSelectionCombinedHPSTaNCTauBased
@@ -233,8 +234,26 @@ GenParticleAnalysis = cms.untracked.PSet(
 )
 topSelection = cms.untracked.PSet(
   TopMassLow = cms.untracked.double(100.0),
-  TopMassHigh = cms.untracked.double(300.0)
+  TopMassHigh = cms.untracked.double(300.0),
+  src = cms.untracked.InputTag("genParticles")
 )
+
+bjetSelection = cms.untracked.PSet(
+  src = cms.untracked.InputTag("genParticles")
+)
+topChiSelection = cms.untracked.PSet(
+  TopMassLow = cms.untracked.double(120.0),
+  TopMassHigh = cms.untracked.double(250.0),
+  Chi2Cut = cms.untracked.double(5.0),
+  src = cms.untracked.InputTag("genParticles") 
+)
+
+topWithBSelection = cms.untracked.PSet(
+      TopMassLow = cms.untracked.double(120.0),
+      TopMassHigh = cms.untracked.double(250.0),
+      Chi2Cut = cms.untracked.double(5.0),
+      src = cms.untracked.InputTag("genParticles")
+)      
 
 tree = cms.untracked.PSet(
     fill = cms.untracked.bool(True),

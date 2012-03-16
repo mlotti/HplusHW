@@ -13,9 +13,9 @@ multicrab = Multicrab("crab_analysis.cfg", cfg)
 pattupleVersion = "pattuple_v20_test1"
 
 #era = "EPS"
-era = "Run2011A"
+#era = "Run2011A"
 #era = "Run2011B"
-#era = "Run2011A+B"
+era = "Run2011A+B"
 
 # Change this to true if you want to run the PAT on the fly (for
 # datasets where no pattuples are produced, or for testing something
@@ -124,8 +124,14 @@ elif era == "Run2011A":
         datasets += datasetsRun2011A_v18
     elif "v19" in pattupleVersion:
         datasets += datasetsRun2011A_v19
+elif era == "Run2011B":
+    if "v19" in pattupleVersion:
+        datasets += datasetsRun2011B_v19
+elif era == "Run2011A+B":
+    if "v19" in pattupleVersion:
+        datasets += datasetsRun2011A_v19 + datasetsRun2011B_v19
 else:
-    raise Exception("Wrong value for 'era' %s, supported are 'EPS', 'Run2011A'" % era)
+    raise Exception("Wrong value for 'era' %s, supported are 'EPS', 'Run2011A', 'Run2011B', 'Run2011A+B'" % era)
 datasets += datasetsMC
 
 if "v20_test1" in pattupleVersion:

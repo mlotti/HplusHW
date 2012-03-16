@@ -20,12 +20,16 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
 
+#include<string>
 
 namespace edm {
   class ParameterSet;
@@ -60,6 +64,7 @@ namespace HPlus {
       void incrementDeltaPhi90Counter() { increment(fDeltaPhi90Counter); }
       void incrementFakeMETVetoCounter() { increment(fFakeMETVetoCounter); }
       void incrementTopSelectionCounter() { increment(fTopSelectionCounter); }
+      void incrementTopChiSelectionCounter() { increment(fTopChiSelectionCounter); }
     private:
       Count fOneTauCounter;
       Count fElectronVetoCounter;
@@ -73,6 +78,8 @@ namespace HPlus {
       Count fDeltaPhi90Counter;
       Count fFakeMETVetoCounter;
       Count fTopSelectionCounter;
+      Count fTopChiSelectionCounter;
+      Count fTopWithBSelectionCounter;
     };
   enum SignalSelectionOrder {
     kSignalOrderTrigger,
@@ -88,7 +95,10 @@ namespace HPlus {
     kSignalOrderDeltaPhi130Selection,
     kSignalOrderDeltaPhi90Selection,
     kSignalOrderFakeMETVeto,
-    kSignalOrderTopSelection
+    kSignalOrderTopSelection,
+    kSignalOrderBjetSelection,
+    kSignalOrderTopChiSelection,
+    kSignalOrderTopWithBSelection
   };
   public:
     explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
@@ -115,6 +125,7 @@ namespace HPlus {
     Count fTausExistCounter;
     Count fOneTauCounter;
     Count fTriggerScaleFactorCounter;
+    Count fGenuineTauCounter;
     Count fRtauAfterTauIDCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
@@ -136,6 +147,8 @@ namespace HPlus {
     Count ftransverseMassCut100NoRtauCounter;
     Count fZmassVetoCounter;
     Count fTopSelectionCounter;
+    Count fTopChiSelectionCounter;
+    Count fTopWithBSelectionCounter;
     Count ftransverseMassCut100TopCounter;
 
     TriggerSelection fTriggerSelection;
@@ -149,6 +162,9 @@ namespace HPlus {
     FakeMETVeto fFakeMETVeto;
     JetTauInvMass fJetTauInvMass;
     TopSelection fTopSelection;
+    TopChiSelection fTopChiSelection;
+    TopWithBSelection fTopWithBSelection;
+    BjetSelection fBjetSelection;
     GenParticleAnalysis fGenparticleAnalysis;
     ForwardJetVeto fForwardJetVeto;
     CorrelationAnalysis fCorrelationAnalysis;
@@ -177,6 +193,8 @@ namespace HPlus {
     TH1 *hTransverseMass;
     TH1 *hTransverseMassJetMetCut;
     TH1 *hTransverseMassTopSelection;
+    TH1 *hTransverseMassTopChiSelection;
+    TH1 *hTransverseMassTopBjetSelection;
     TH1 *hTransverseMassMET70;
     TH1 *hTransverseMassAfterDeltaPhi;
     TH1 *hTransverseMassAfterDeltaPhi160;
@@ -243,7 +261,10 @@ namespace HPlus {
     TH1 *hEMFractionAll;
     TH1 *hEMFractionElectrons;
 
+    std::string fModuleLabel;
+
     bool fProduce;
+    bool fOnlyGenuineTaus;
   };
 }
 

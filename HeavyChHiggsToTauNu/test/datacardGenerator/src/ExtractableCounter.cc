@@ -49,6 +49,10 @@ double ExtractableCounter::doExtract(std::vector< Dataset* > datasets, Normalisa
       fCounterValue += h->GetBinContent(myBinIndex) * myNormFactor;
       fCounterUncertainty += h->GetBinError(myBinIndex) * h->GetBinError(myBinIndex)
         * myNormFactor * myNormFactor;
+
+      if (sCounterItem == "MET") {
+        std::cout << "EWKtau debug: counts = " << h->GetBinContent(myBinIndex) << " +- " << h->GetBinError(myBinIndex) << " normfact = " << myNormFactor << " lumiscal=" << info->getLuminosityScaling() << std::endl;
+      }
     }
     // FIXME add here obtaining of result from txt file
   }

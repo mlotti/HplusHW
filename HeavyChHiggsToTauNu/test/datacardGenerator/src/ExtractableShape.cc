@@ -48,8 +48,22 @@ double ExtractableShape::doExtract(std::vector< Dataset* > datasets, Normalisati
     } else if (h->GetNbinsX() < hUp->GetNbinsX()) {
       std::cout << "\033[0;41m\033[1;37mError:\033[0;0m You asked for " << hUp->GetNbinsX() << ", but the mT histogram " << s.str() << " has only " << h->GetNbinsX() << " bins!" << std::endl;
     }
+    // Set negative bins to zero prior to normalisation (occurs in EWK residual channels)
+    double myOriginalIntegral = h->Integral();
+    for (int j = 0; j < h->GetNbinsX()+1; ++j) {
+      if (h->GetBinContent(j) < 0) {
+        std::cout << "\033[0;43m\033[1;37mWarning:\033[0;0m up variation with negative value (" << h->GetBinContent(j) << "+-" << h->GetBinError(j)
+                  << ") in bin " << h->GetXaxis()->GetBinLowEdge(j) << "-" << h->GetXaxis()->GetBinUpEdge(j)
+                  << " set to 0+-0 prior to normalisation in column " << datasets[i]->getFilename() << std::endl;
+        h->SetBinContent(j, 0);
+        h->SetBinError(j, 0);
+      }
+    }
     // Normalise
-    hUp->Add(h, info->getNormalisationFactor(datasets[i]->getFile()) * additionalNormalisation);
+    double myZeroSuppressionCorrection = 1.0;
+    if (h->Integral() > 0)
+      myZeroSuppressionCorrection = myOriginalIntegral / h->Integral();
+    hUp->Add(h, info->getNormalisationFactor(datasets[i]->getFile()) * additionalNormalisation * myZeroSuppressionCorrection);
 
     s.str("");
     s << sDownPrefix+"/"+sHistoName;
@@ -66,8 +80,22 @@ double ExtractableShape::doExtract(std::vector< Dataset* > datasets, Normalisati
     } else if (h->GetNbinsX() < hDown->GetNbinsX()) {
       std::cout << "\033[0;41m\033[1;37mError:\033[0;0m You asked for " << hDown->GetNbinsX() << ", but the mT histogram " << s.str() << " has only " << h->GetNbinsX() << " bins!" << std::endl;
     }
+    // Set negative bins to zero prior to normalisation (occurs in EWK residual channels)
+    myOriginalIntegral = h->Integral();
+    for (int j = 0; j < h->GetNbinsX()+1; ++j) {
+      if (h->GetBinContent(j) < 0) {
+        std::cout << "\033[0;43m\033[1;37mWarning:\033[0;0m down variation with negative value (" << h->GetBinContent(j) << "+-" << h->GetBinError(j)
+                  << ") in bin " << h->GetXaxis()->GetBinLowEdge(j) << "-" << h->GetXaxis()->GetBinUpEdge(j)
+                  << " set to 0+-0 prior to normalisation in column " << datasets[i]->getFilename() << std::endl;
+        h->SetBinContent(j, 0);
+        h->SetBinError(j, 0);
+      }
+    }
     // Normalise
-    hDown->Add(h, info->getNormalisationFactor(datasets[i]->getFile()) * additionalNormalisation);
+    myZeroSuppressionCorrection = 1.0;
+    if (h->Integral() > 0)
+      myZeroSuppressionCorrection = myOriginalIntegral / h->Integral();
+    hDown->Add(h, info->getNormalisationFactor(datasets[i]->getFile()) * additionalNormalisation * myZeroSuppressionCorrection);
   }
   return 0.;
 }
