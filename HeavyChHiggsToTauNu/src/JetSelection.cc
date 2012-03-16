@@ -31,10 +31,12 @@ namespace HPlus {
     fEMfractionCut(iConfig.getUntrackedParameter<double>("EMfractionCut")),
     fMaxDR(iConfig.getUntrackedParameter<double>("cleanTauDR")),
     fMinNumberOfJets(iConfig.getUntrackedParameter<uint32_t>("minNumber")),
-    fJetIdMinNumberOfDaughters(iConfig.getUntrackedParameter<uint32_t>("jetIdMinNumberOfDaughters")),
-    fJetIdMaxChargedEMEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMaxChargedEMEnergyFraction")),
     fJetIdMaxNeutralHadronEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMaxNeutralHadronEnergyFraction")),
     fJetIdMaxNeutralEMEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMaxNeutralEMEnergyFraction")),
+    fJetIdMinNumberOfDaughters(iConfig.getUntrackedParameter<uint32_t>("jetIdMinNumberOfDaughters")),
+    fJetIdMinChargedHadronEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMinChargedHadronEnergyFraction")),
+    fJetIdMinChargedMultiplicity(iConfig.getUntrackedParameter<uint32_t>("jetIdMinChargedMultiplicity")),
+    fJetIdMaxChargedEMEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMaxChargedEMEnergyFraction")),
     fCleanCutCount(eventCounter.addSubCounter("Jet main","Jet cleaning")),
     fJetIdCount(eventCounter.addSubCounter("Jet main", "Jet ID")),
     fEMfractionCutCount(eventCounter.addSubCounter("Jet main","Jet EMfrac ")),
@@ -44,12 +46,12 @@ namespace HPlus {
     fEMfraction08CutCount(eventCounter.addSubCounter("Jet main","Jet EMfrac < 0.8")),
     fEMfraction07CutCount(eventCounter.addSubCounter("Jet main","Jet EMfrac < 0.7")),
     fCleanCutSubCount(eventCounter.addSubCounter("Jet selection", "cleaning")),
-    fnumberOfDaughtersCutSubCount(eventCounter.addSubCounter("Jet selection", "numberOfDaughtersCut")),
-    fchargedEmEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "chargedEmEnergyFractionCut")),
     fneutralHadronEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "neutralHadronEnergyFractionCut")),
     fneutralEmEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "neutralEmEnergyFractionCut")),
+    fnumberOfDaughtersCutSubCount(eventCounter.addSubCounter("Jet selection", "numberOfDaughtersCut")),
     fchargedHadronEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "chargedHadronEnergyFractionCut")),
     fchargedMultiplicityCutSubCount(eventCounter.addSubCounter("Jet selection", "fchargedMultiplicityCut")),  
+    fchargedEmEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "chargedEmEnergyFractionCut")),
     fJetIdSubCount(eventCounter.addSubCounter("Jet selection", "Jet ID")),
     fEMfractionCutSubCount(eventCounter.addSubCounter("Jet selection", "EMfraction")),
     fEtaCutSubCount(eventCounter.addSubCounter("Jet selection", "eta cut")),
@@ -222,9 +224,9 @@ namespace HPlus {
       increment(fneutralEmEnergyFractionCutSubCount);
     
       if(fabs(iJet->eta()) < 2.4) {
-        if(!(iJet->chargedHadronEnergyFraction() > 0)) continue;
+        if(!(iJet->chargedHadronEnergyFraction() > fJetIdMinChargedHadronEnergyFraction)) continue;
         increment(fchargedHadronEnergyFractionCutSubCount);
-        if(!(iJet->chargedMultiplicity() > 0)) continue;
+        if(!(static_cast<uint32_t>(iJet->chargedMultiplicity()) > fJetIdMinChargedMultiplicity)) continue;
         increment(fchargedMultiplicityCutSubCount);
       }
       increment(fJetIdSubCount);

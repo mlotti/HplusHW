@@ -107,26 +107,42 @@ tauSelectionNames = ["TauSelectionHPSTightTauBasedTauTriggerMatched",
                      "TauSelectionHPSMediumTauBasedTauTriggerMatched",
                      "TauSelectionHPSLooseTauBasedTauTriggerMatched"]
 
-tauSelection = tauSelectionHPSTightTauBased
+#tauSelection = tauSelectionHPSTightTauBased
 #tauSelection = tauSelectionHPSLooseTauBased
-#tauSelection = tauSelectionHPSMediumTauBased
+tauSelection = tauSelectionHPSMediumTauBased
 
-jetSelection = cms.untracked.PSet(
+jetSelectionBase = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatJets"),       # Calo jets
     #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"), # JPT jets 
     src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
-    cleanTauDR = cms.untracked.double(0.5), # cone for rejecting jets
+    cleanTauDR = cms.untracked.double(0.5), # cone for rejecting jets around tau jet
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(3), # minimum number of selected jets
     # Jet ID cuts
-    jetIdMinNumberOfDaughters = cms.untracked.uint32(2),
-    jetIdMaxChargedEMEnergyFraction = cms.untracked.double(0.99),
     jetIdMaxNeutralHadronEnergyFraction = cms.untracked.double(0.99),
     jetIdMaxNeutralEMEnergyFraction = cms.untracked.double(0.99),
+    jetIdMinNumberOfDaughters = cms.untracked.uint32(2),
+    jetIdMinChargedHadronEnergyFraction = cms.untracked.double(0.0),
+    jetIdMinChargedMultiplicity = cms.untracked.uint32(0),
+    jetIdMaxChargedEMEnergyFraction = cms.untracked.double(0.99),
     # Experimental
     EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )
+
+jetSelectionLoose = jetSelectionBase.clone()
+
+jetSelectionMedium = jetSelectionBase.clone(
+    jetIdMaxNeutralHadronEnergyFraction = cms.untracked.double(0.95),
+    jetIdMaxNeutralEMEnergyFraction = cms.untracked.double(0.95),
+)
+
+jetSelectionTight = jetSelectionBase.clone(
+    jetIdMaxNeutralHadronEnergyFraction = cms.untracked.double(0.90),
+    jetIdMaxNeutralEMEnergyFraction = cms.untracked.double(0.90),
+)
+
+jetSelection = jetSelectionLoose # set default jet selection
 
 MET = cms.untracked.PSet(
     # src = cms.untracked.InputTag("patMETs"), # calo MET
