@@ -64,6 +64,8 @@ class PATBuilder:
             self.addFilters(dataVersion, seq, doTotalKinematicsFilter, doHBHENoiseFilter, doPhysicsDeclared, patOnTheFly=False)
 
             # Add primary vertex selection
+            # Selects the first primary vertex, applies the quality cuts to it
+            # Applies quality cuts to all vertices too
             HChPrimaryVertex.addPrimaryVertexSelection(process, seq)
 
             if options.doTauHLTMatchingInAnalysis != 0:
@@ -101,9 +103,6 @@ class PATBuilder:
     
         # Add event filters if requested
         self.addFilters(dataVersion, self.process.eventPreSelection, doTotalKinematicsFilter, doHBHENoiseFilter, doPhysicsDeclared, patOnTheFly=True)
-
-        # Add primary vertex selection
-        HChPrimaryVertex.addPrimaryVertexSelection(process, self.process.eventPreSelection)
 
         if options.tauEmbeddingInput != 0:
             # Select the tau objects deltaR matched to the original muon objects
@@ -1320,6 +1319,10 @@ def addPF2PAT(process, dataVersion, doPatTrigger=True, patArgs={}, pvSelectionCo
                 ])
 
         sequence *= process.primaryVertexSelectionSequence
+
+    # Selects the first primary vertex, applies the quality cuts to it
+    # Applies quality cuts to all vertices too
+    HChPrimaryVertex.addPrimaryVertexSelection(process, sequence)
 
 
     # Adjust output commands
