@@ -36,7 +36,6 @@ class PATBuilder:
 
     def __call__(self, process, options, dataVersion,
                  patArgs={},
-                 doMcPreselection=False,
                  doTotalKinematicsFilter=False,
                  doHBHENoiseFilter=True, doPhysicsDeclared=False,
                  calculateEventCleaning=False):
@@ -53,8 +52,8 @@ class PATBuilder:
             import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
             self.counters.extend(MuonSelection.muonSelectionCounters[:])
             self.counters.extend(PFEmbeddingSource.muonSelectionCounters)
-        elif dataVersion.isMC() and doMcPreselection:
-            # If MC prseleciton is enabled, add the counters from there
+        elif dataVersion.isMC() and options.triggerMC != 0:
+            # If MC preselection is enabled, add the counters from there
             self.counters = HChMcSelection.mcSelectionCounters[:]
 
         if options.doPat == 0:
@@ -84,7 +83,7 @@ class PATBuilder:
             # normal AOD input
             if dataVersion.isData():
                 self.process.eventPreSelection = HChDataSelection.addDataSelection(process, dataVersion, options, calculateEventCleaning)
-            elif dataVersion.isMC() and doMcPreselection:
+            elif dataVersion.isMC() and options.triggerMC != 0:
                 self.process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
 
             # Do some manipulation of PAT arguments, ensure that the
