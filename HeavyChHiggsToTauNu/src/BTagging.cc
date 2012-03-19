@@ -220,7 +220,7 @@ namespace HPlus {
     fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
     fDiscrCut(iConfig.getUntrackedParameter<double>("discriminatorCut")),
     fMin(iConfig.getUntrackedParameter<uint32_t>("minNumber")),
-    FactorsFromDB(iConfig.getUntrackedParameter<bool>("FactorsFromDB",false)),
+    FactorsFromDB(iConfig.getUntrackedParameter<bool>("UseBTagDB",false)),
     fTaggedCount(eventCounter.addSubCounter("b-tagging main","b-tagging")),
     fAllSubCount(eventCounter.addSubCounter("b-tagging", "all jets")),
     fTaggedSubCount(eventCounter.addSubCounter("b-tagging", "tagged")),

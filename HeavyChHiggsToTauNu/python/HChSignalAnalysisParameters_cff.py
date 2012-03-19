@@ -161,6 +161,8 @@ bTagging = cms.untracked.PSet(
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(1),
+    UseBTagDB  = cms.untracked.bool(False),
+    BTagDBAlgo = cms.string("TCHEL")
 )
 
 transverseMassCut = cms.untracked.double(100)
