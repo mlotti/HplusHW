@@ -567,7 +567,7 @@ namespace HPlus {
     
     // Handle result of standard tau ID 
     if (fOperationMode == kNormalTauID) {
-      if (fSelectedTaus.size() == 0) {
+      if (fSelectedTaus.size()) {
         increment(fTauFound);
         return true;
       } else

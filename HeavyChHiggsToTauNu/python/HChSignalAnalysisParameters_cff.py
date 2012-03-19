@@ -51,7 +51,7 @@ tauSelectionBase = cms.untracked.PSet(
     againstElectronDiscriminator = cms.untracked.string("againstElectronMedium"), # discriminator against electrons
     againstMuonDiscriminator = cms.untracked.string("againstMuonTight"), # discriminator for against muons
     isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr"), # discriminator for isolation
-    isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1), # cut point for continuous isolation discriminator, applied only if it is non-zero
+    isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1.0), # cut point for continuous isolation discriminator, applied only if it is non-zero
     rtauCut = cms.untracked.double(0.7), # rtau > value
     nprongs = cms.untracked.uint32(1) # number of prongs
 )
