@@ -58,11 +58,12 @@ bool HPlusTauPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup
   std::auto_ptr<Product> ret(new Product());
   HPlus::TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
   bool passed = tauData.passedEvent();
-  if(passed)
+  if(passed) {
     ret->push_back(tauData.getSelectedTau());
+    iEvent.put(ret);
+  }
   std::auto_ptr<bool> p(new bool(passed));
-
-  iEvent.put(ret);
+  
   iEvent.put(p);
 
   return !fFilter || (fFilter && passed);

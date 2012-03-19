@@ -101,17 +101,21 @@ namespace HPlus {
   
   bool TauIDBase::passIsolation(const edm::Ptr<pat::Tau> tau) {
     // If no continuous cut point was set, set the default cut point for discrete discriminator
-    if (fIsolationDiscriminatorContinuousCutPoint < 0)
-      if (tau->tauID(fIsolationDiscriminator) < 0.5) return false;
-    else if (tau->tauID(fIsolationDiscriminator) > fIsolationDiscriminatorContinuousCutPoint) return false;
+    if (fIsolationDiscriminatorContinuousCutPoint < 0) {
+      if (tau->tauID(fIsolationDiscriminator) < 0.5)
+        return false;
+    } else if (tau->tauID(fIsolationDiscriminator) > fIsolationDiscriminatorContinuousCutPoint)
+      return false;
     fCounterPackager.incrementSubCount(fIDIsolationCut);
     return true;
   }
   
   bool TauIDBase::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
-    if (fIsolationDiscriminatorContinuousCutPoint < 0)
-      if (tau->tauID(fIsolationDiscriminator) > 0.5) return false;
-    else if (tau->tauID(fIsolationDiscriminator) < fIsolationDiscriminatorContinuousCutPoint) return false;
+    if (fIsolationDiscriminatorContinuousCutPoint < 0) {
+      if (tau->tauID(fIsolationDiscriminator) > 0.5)
+        return false;
+    } else if (tau->tauID(fIsolationDiscriminator) < fIsolationDiscriminatorContinuousCutPoint)
+      return false;
     fCounterPackager.incrementSubCount(fIDIsolationCut);
     return true;
   }
