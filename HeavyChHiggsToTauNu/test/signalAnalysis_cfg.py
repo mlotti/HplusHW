@@ -83,11 +83,11 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
 #    "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v18/pattuple_v18_TTJets_TuneZ2_Summer11_9_1_bfN.root"
-    "file:/tmp/slehti/TTJets_TuneZ2_Summer11_pattuple_266_1_at8.root"
+#    "file:/tmp/slehti/TTJets_TuneZ2_Summer11_pattuple_266_1_at8.root"
     # For testing in lxplus
     #dataVersion.getAnalysisDefaultFileCastor()
     # For testing in jade
-    #dataVersion.getAnalysisDefaultFileMadhatter()
+    dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
     )
 )
@@ -172,6 +172,16 @@ process.signalAnalysis = signalAnalysis.createEDFilter(param)
 # process.signalAnalysis.GlobalMuonVeto = param.NonIsolatedMuonVeto
 # Change default tau algorithm here if needed
 #process.signalAnalysis.tauSelection.tauSelectionHPSTightTauBased # HPS Tight is the default
+
+# Btagging DB
+process.load("CondCore.DBCommon.CondDBCommon_cfi")
+#MC measurements from 36X
+process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
+process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
+#Data measurements from Fall10
+process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
+process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
+#param.bTagging.UseBTagDB  = cms.untracked.bool(True)
 
 # Add type 1 MET
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
