@@ -207,13 +207,13 @@ namespace HPlus {
 	    edm::Ptr<pat::Jet> iJet = *iter;
 	    double deltaR = ROOT::Math::VectorUtil::DeltaR(p.p4(), iJet->p4());
 	    //	    printImmediateMothers(p);
-	    //	    std::cout << " q quark1 " << id <<  " deltaR " <<   deltaR << std::endl;
-	    if ( deltaR < 0.4) jetsFromW.push_back(iJet);
+	    //	    std::cout << " q quark1 " << id <<  " deltaR " <<   deltaR << " jet Et " << iJet->p4().pt() << std::endl;
+	    if ( deltaR < 0.5) jetsFromW.push_back(iJet);
 	  }
 	}
       							   
       }
-    
+      //      std::cout << " jetsFromW.size() " << jetsFromW.size() << std::endl;    
       // W and top mass from matched jets
       if (jetsFromW.size() == 2) {
 	

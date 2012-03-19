@@ -401,61 +401,59 @@ def rtauComparison(datasets):
 
 
 def topMassComparison(datasets):
+    def createHisto(path, name):
+        drh = datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+path)
+        drh.setName(name)
+        return drh
+    
     top = plots.PlotBase([
-        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/TopSelection/TopMass"),
-        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/TopChiSelection/TopMass"),
-        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/TopWithBSelection/TopMass")])
+        createHisto("/TopSelection/TopMass", "Max(p_{T}^{jjb}) method"),
+        createHisto("/TopChiSelection/TopMass", "Min(#chi^{2}) method"),
+        createHisto("/TopWithBSelection/TopMass", "Min(#chi^{2}) with b-jet sel.")]) 
     top.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     top._setLegendStyles()
     top._setLegendLabels()
     st1 = styles.StyleCompound([styles.styles[2]])
     st2 = styles.StyleCompound([styles.styles[1]])
     st3 = styles.StyleCompound([styles.styles[0]])
-    st1.append(styles.StyleLine(lineColor=4, lineWidth=3))
+    st1.append(styles.StyleLine(lineColor=4, lineWidth=2))
     st2.append(styles.StyleLine(lineStyle=2, lineWidth=3))
-    st3.append(styles.StyleLine(lineStyle=3, lineWidth=3))
-    top.histoMgr.forHisto(analysis+"/TopSelection/TopMass", st1)
-#    top.histoMgr.forHisto(analysis+"/TopChiSelection/TopMass", st2)
-#    top.histoMgr.forHisto(analysis+"/TopWithBSelection/TopMass", st3)
-    top.histoMgr.forHisto("TTToHplus_M120", st2)    
-
-    top.histoMgr.forHisto(datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/TopSelection/TopMass"), st1)
-    top.histoMgr.forHisto(datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/TopChiSelection/TopMass"), st2)
-    top.histoMgr.forHisto(datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/TopWithBSelection/TopMass"), st3)
+    st3.append(styles.StyleLine(lineStyle=3,lineColor=1, lineWidth=3))
+    top.histoMgr.forHisto("Max(p_{T}^{jjb}) method", st3)
+    top.histoMgr.forHisto("Min(#chi^{2}) method", st1)
+    top.histoMgr.forHisto("Min(#chi^{2}) with b-jet sel.", st2)
 #    mt.histoMgr.setHistoDrawStyleAll("P")
+
     rtauGen(top, "topMass120", rebin=10, defaultStyles=False)
 
-
 def topMassPurity(datasets):
+    def createHisto(path, name):
+        drh = datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+path)
+        drh.setName(name)
+        return drh
+    
     top = plots.PlotBase([
-        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/TopChiSelection/TopMass"),
-        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/TopChiSelection/TopMass_fullMatch"),
-        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/TopChiSelection/TopMass_bMatch")])
+        createHisto("/TopChiSelection/TopMass", "All combinations"),
+        createHisto("/TopChiSelection/TopMass_fullMatch", "Matched jets"),
+        createHisto("/TopChiSelection/TopMass_bMatch", "Matched b jet")]) 
     top.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     top._setLegendStyles()
     top._setLegendLabels()
     st1 = styles.StyleCompound([styles.styles[2]])
     st2 = styles.StyleCompound([styles.styles[1]])
     st3 = styles.StyleCompound([styles.styles[0]])
-    st2 = st1.clone()    
-    st2.append(styles.StyleLine(lineColor=ROOT.kRed))
-    st3 = st1.clone()
-    st3.append(styles.StyleLine(lineColor=ROOT.kBlue))
+    st1.append(styles.StyleLine(lineColor=4, lineWidth=2))
+    st2.append(styles.StyleLine(lineStyle=2, lineWidth=3))
+    st3.append(styles.StyleLine(lineStyle=3,lineColor=1, lineWidth=3))
+    top.histoMgr.forHisto("All combinations", st3)
+    top.histoMgr.forHisto("Matched jets", st1)
+    top.histoMgr.forHisto("Matched b jet", st2)
+#    mt.histoMgr.setHistoDrawStyleAll("P")
+    histograms.addText(0.35, 0.5, "Normalized to unit area", 17)
+    rtauGen(top, "topMassPurity", rebin=10, defaultStyles=False)
 
     
-    st1.append(styles.StyleLine(lineColor=4, lineWidth=3))
-#    st2.append(styles.StyleLine(lineStyle=2, lineWidth=3))
-#    st3.append(styles.StyleLine(lineStyle=3, lineWidth=3))
-    top.histoMgr.forHisto(analysis+"/TopSelection/TopMass", st1)
-    top.histoMgr.forHisto(analysis+"/TopChiSelection/TopMass", st2)
-    top.histoMgr.forHisto(analysis+"/TopWithBSelection/TopMass", st3)
-    top.histoMgr.forHisto("TTToHplus_M120", st2)
 
-    top.histoMgr.forHisto(datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/TopSelection/TopMass"), st1)
-    top.histoMgr.forHisto(datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/TopChiSelection/TopMass"), st2)
-    top.histoMgr.forHisto(datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/TopWithBSelection/TopMass"), st3)
-#    mt.histoMgr.setHistoDrawStyleAll("P")
-    rtauGen(top, "topMassPurity", rebin=10, defaultStyles=False)
     
 ##############def genComparison(datasets):
 #    rtau = plots.PlotBase([
@@ -704,8 +702,12 @@ def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
     h.getPad().SetLogy(True)
     if "Mass" in name:
         h.getPad().SetLogy(False)
-                
-    h.setLegend(histograms.createLegend(0.4, 0.75, 0.6, 0.9))
+
+    leg = histograms.createLegend(0.4, 0.75, 0.6, 0.9)
+    if "topMass" in name:
+        leg = histograms.moveLegend(leg, dx=0.2)
+    h.setLegend(leg)
+    
     if  "vertex" in name:
         histograms.addText(0.75, 0.9, "Data", 22) 
         plots._legendLabels["Data"] = "vertex3"
