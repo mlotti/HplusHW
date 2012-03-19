@@ -50,8 +50,9 @@ def main(opts):
 
 
 if __name__ == "__main__":
-    parser = OptionParser(usage="Usage: %prog [options]")
+    parser = OptionParser(usage="Usage: %prog [options] [crab task dirs]\n\nCRAB task directories can be given either as the last arguments, or with -d.")
     multicrab.addOptions(parser)
     (opts, args) = parser.parse_args()
+    opts.dirs.extend(args)
 
     sys.exit(main(opts))
