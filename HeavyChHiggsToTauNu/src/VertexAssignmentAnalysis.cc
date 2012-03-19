@@ -16,7 +16,7 @@
 
 namespace HPlus {
   VertexAssignmentAnalysis::VertexAssignmentAnalysis(EventCounter& eventCounter, EventWeight& eventWeight):
-    fFakeTauIdentifier(eventWeight),
+    fFakeTauIdentifier(eventWeight, "VertexAssignment"),
     fEventWeight(eventWeight),
     fAllEventsWithGenuineTaus(eventCounter.addSubCounter("VtxAssignment","genuine tau/all events")),
     fGenuineTausWithCorrectPV(eventCounter.addSubCounter("VtxAssignment","genuine tau/passed events")),

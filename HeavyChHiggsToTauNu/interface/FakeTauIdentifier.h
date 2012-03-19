@@ -39,7 +39,7 @@ namespace HPlus {
       kkFromHplusTau
     };
 
-    FakeTauIdentifier(EventWeight& eventWeight);
+    FakeTauIdentifier(EventWeight& eventWeight, std::string label);
     ~FakeTauIdentifier();
     
     MCSelectedTauMatchType matchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau);

@@ -38,7 +38,7 @@ class HPlusTauPtrSelectorFilter: public edm::EDFilter {
 HPlusTauPtrSelectorFilter::HPlusTauPtrSelectorFilter(const edm::ParameterSet& iConfig):
   eventCounter(),
   eventWeight(iConfig),
-  fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "TauFilter"),
+  fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
   fFilter(iConfig.getParameter<bool>("filter"))
 {
   eventCounter.produces(this);
@@ -59,7 +59,7 @@ bool HPlusTauPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup
   HPlus::TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
   bool passed = tauData.passedEvent();
   if(passed)
-    ret->push_back(tauData.getSelectedTaus()[0]);
+    ret->push_back(tauData.getSelectedTau());
   std::auto_ptr<bool> p(new bool(passed));
 
   iEvent.put(ret);

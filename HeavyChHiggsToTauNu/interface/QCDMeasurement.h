@@ -51,7 +51,7 @@ namespace HPlus {
       AnalysisVariation(double METcut, double fakeMETVetoCut, int nTauPtBins);
       ~AnalysisVariation();
       
-      void analyse(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET);
+      void analyse(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET);
 
     private:
       double fMETCut;
@@ -105,14 +105,14 @@ namespace HPlus {
     std::vector<double> getJetPtBins(void);
     void createHistogramGroupByOtherVariableBins(std::string name, std::vector<TH1*>& histograms, const int nBins, double xMin, double xMax, std::vector<double> BinVariableBins, const TString BinVariableName, const TString VariableName, const TString VariableUnits);
     void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-    void AfterBigBox(double EventWeightWithBtag, double EventWeightWithoutBtag, const TauSelection::Data& tauCandidateData, JetSelection::Data& jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const TauSelection::Data& tauData); 
+    void AfterBigBox(double EventWeightWithBtag, double EventWeightWithoutBtag, const TauSelection::Data& tauCandidateData, JetSelection::Data& jetData, const METSelection::Data& metData, const BTagging::Data& btagData); 
       
     /// Chooses the most isolated of the tau candidates and returns a vector with just that candidate
-    edm::PtrVector<pat::Tau> chooseMostIsolatedTauCandidate(edm::PtrVector<pat::Tau> tauCandidates);
+    //edm::PtrVector<pat::Tau> chooseMostIsolatedTauCandidate(edm::PtrVector<pat::Tau> tauCandidates); // LAW: removed since this is done already in TauSelection.cc
 
     // Different forks of analysis
-    void analyzeCorrelation(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET);
-    void analyzePurities(const TauSelection::Data& tauDataForTauID, const JetSelection::Data &jetData, const METSelection::Data& METData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const int myTauPtIndex, double EventWeight, std::vector<TH1*> fPurityBeforeAfterJets, std::vector<TH1*> fPurityBeforeAfterJetsMet, std::vector<TH1*> fPurityBeforeAfterJetsMetBtag, std::vector<TH1*> fPurityBeforeAfterJetsFakeMet, std::vector<TH1*> fPurityBeforeAfterJetsTauIdNoRtau);
+    void analyzeCorrelation(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET);
+    void analyzePurities(const TauSelection::Data& tauCandidateData, const JetSelection::Data &jetData, const METSelection::Data& METData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const int myTauPtIndex, double EventWeight, std::vector<TH1*> fPurityBeforeAfterJets, std::vector<TH1*> fPurityBeforeAfterJetsMet, std::vector<TH1*> fPurityBeforeAfterJetsMetBtag, std::vector<TH1*> fPurityBeforeAfterJetsFakeMet, std::vector<TH1*> fPurityBeforeAfterJetsTauIdNoRtau);
     std::vector<AnalysisVariation> fAnalyses;
 
     // We need a reference in order to use the same object (and not a copied one) given in HPlusSignalAnalysisProducer
@@ -122,7 +122,7 @@ namespace HPlus {
     Count fAllCounter;
     Count fTriggerAndHLTMetCutCounter;
     Count fPrimaryVertexCounter;
-    Count fOneProngTauSelectionCounter;
+    Count fTauSelectionCounter;
     Count fOneSelectedTauCounter;
     Count fGlobalElectronVetoCounter;
     Count fNonIsolatedElectronVetoCounter;
@@ -143,7 +143,7 @@ namespace HPlus {
     // The order here defines the order the subcounters are printed at the program termination
     TriggerSelection fTriggerSelection;
     VertexSelection fPrimaryVertexSelection;
-    TauSelection fOneProngTauSelection;
+    TauSelection fTauSelection;
     GlobalElectronVeto fGlobalElectronVeto;
     NonIsolatedElectronVeto fNonIsolatedElectronVeto;
     GlobalMuonVeto fGlobalMuonVeto;
