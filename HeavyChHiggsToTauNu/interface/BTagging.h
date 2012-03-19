@@ -9,6 +9,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTaggingScaleFactorFromDB.h"
+
 namespace edm {
   class ParameterSet;
 }
@@ -23,16 +25,31 @@ namespace HPlus {
     public:
       BTaggingScaleFactor();
       ~BTaggingScaleFactor();
+
+      void UseDB(BTaggingScaleFactorFromDB*);
       
       void addBFlavorData(double pT, double scaleFactorB, double scaleFactorUncertaintyB, double epsilonMCB);
       void addNonBFlavorData(double pT, double scaleFactorL, double scaleFactorUncertaintyL, double epsilonMCL);
-      
-      double getWeight(int nPassedB, int nPassedL, std::vector<double>& nFailedBpT, std::vector<double>& nFailedLpT);
-      double getRelativeUncertainty(int nPassedB, int nPassedL, std::vector<double>& nFailedBpT, std::vector<double>& nFailedLpT);
-      double getAbsoluteUncertainty(int nPassedB, int nPassedL, std::vector<double>& nFailedBpT, std::vector<double>& nFailedLpT);
+/*      
+      double getWeight(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
+      double getRelativeUncertainty(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
+      double getAbsoluteUncertainty(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
+*/
+      double getWeight(edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>);
+      double getRelativeUncertainty(edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>);
+      double getAbsoluteUncertainty(edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>,edm::PtrVector<pat::Jet>);
       
     private:
       size_t obtainIndex(std::vector<double>& table, double pt);
+
+      double getBtagScaleFactor(double,double);
+      double getBtagScaleFactorError(double,double);
+      double getMistagScaleFactor(double,double);
+      double getMistagScaleFactorError(double,double);
+      double getMCBtagEfficiency(double,double);
+      double getMCMistagEfficiency(double,double);
+
+      BTaggingScaleFactorFromDB *btagdb;
       
       std::vector<double> fPtBinsB; // lower edges of pT bins for b-flavor jets
       std::vector<double> fPtBinsL; // lower edges of pT bins for l-flavor jets
@@ -91,6 +108,9 @@ namespace HPlus {
     const std::string fDiscriminator;
     const double fDiscrCut;
     const uint32_t fMin;
+
+    BTaggingScaleFactorFromDB *btagDB;
+    bool FactorsFromDB;
 
     // Lookup tables for scale factors
     BTaggingScaleFactor fBTaggingScaleFactor;
