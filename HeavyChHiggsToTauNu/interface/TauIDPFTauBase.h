@@ -19,10 +19,9 @@ namespace HPlus {
 
     /// Returns true, if the tau candidate conditions are fulfilled (jet et, eta, ldg pt, e/mu veto) 
     bool passLeadingTrackCuts(const edm::Ptr<pat::Tau> tau);
-    bool passOneProngCut(const edm::Ptr<pat::Tau> tau);
-    bool passThreeProngCut(const edm::Ptr<pat::Tau> tau);
+    bool passNProngsCut(const edm::Ptr<pat::Tau> tau);
+    size_t getNProngs(const edm::Ptr<pat::Tau> tau) const;
     bool passRTauCut(const edm::Ptr<pat::Tau> tau);
-    bool passAntiRTauCut(const edm::Ptr<pat::Tau> tau);
     double getRtauValue(const edm::Ptr<pat::Tau> tau) const;
     
   protected:

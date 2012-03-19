@@ -12,11 +12,11 @@
 
 namespace HPlus {
   
-  FakeTauIdentifier::FakeTauIdentifier(EventWeight& eventWeight) :
+  FakeTauIdentifier::FakeTauIdentifier(HPlus::EventWeight& eventWeight, std::string label) :
   fEventWeight(eventWeight) {
     edm::Service<TFileService> fs;
     // Create histograms
-    TFileDirectory myDir = fs->mkdir("FakeTauIdentifier");
+    TFileDirectory myDir = fs->mkdir("FakeTauIdentifier_"+label);
     hTauMatchType = makeTH<TH1F>(myDir, "TauMatchType", "TauMatchType", 9, 0, 9);
     hTauMatchType->GetXaxis()->SetBinLabel(1+kkNoMC, "NoMatch");
     hTauMatchType->GetXaxis()->SetBinLabel(1+kkElectronToTau, "e#rightarrow#tau");

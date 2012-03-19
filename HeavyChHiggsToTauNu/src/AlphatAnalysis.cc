@@ -35,7 +35,7 @@ namespace HPlus {
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
-    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "TauID"),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET"),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
@@ -196,8 +196,8 @@ namespace HPlus {
     // 5) TauID
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup); 
     // TauSelection::Data tauData = fOneProngTauSelection.analyzeTauIDWithoutRtauOnCleanedTauCandidates(iEvent, iSetup);
-    if( tauData.selectedTauPassedRtau() ) bRtauPassed = true;
-    if( tauData.passedEvent() ){
+    if ( tauData.selectedTauPassesRtau() ) bRtauPassed = true;
+    if ( tauData.passedEvent() ){
       bTauIdPassed = true;
       fTauJetEt  = static_cast<float>( (tauData.getSelectedTaus()[0])->pt() );
       fTauJetEta = static_cast<float>( (tauData.getSelectedTaus()[0])->eta() );
@@ -311,7 +311,7 @@ namespace HPlus {
     increment(fOneTauCounter);
 
     // Rtau cut
-    if(!tauData.selectedTauPassedRtau() ) return;
+    if(!tauData.selectedTauPassesRtau() ) return;
     increment(fRtauCounter);
 
     // Histos after Full TauID

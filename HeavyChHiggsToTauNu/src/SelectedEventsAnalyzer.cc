@@ -67,7 +67,7 @@ namespace HPlus {
       hRTauAfterAllSelections->Fill(tauData.getRtauOfSelectedTau(), weight);
     } else {
       // This should happen only when TauSelection is run with tau candidate selection only (or anti-isolation)
-      hRTauAfterAllSelections->Fill(tauData.getBestTauCandidatePassedRtauStatus(), weight);
+      hRTauAfterAllSelections->Fill(tauData.getRtauOfSelectedTau(), weight);
     }
     // Global e/mu veto
 

@@ -91,10 +91,11 @@ def main(opts, args):
         #print
         #print "================================================================================"
         #print "Dataset %s:" % d
-        cmd = ["lumiCalc2.py", "-i", jsonfile, "--nowarning", "overview", "-b", "stable"]
-        if opts.lumicalc1:
+        if opts.lumicalc == "lumiCalc1":
             cmd = ["lumiCalc.py", "-i", jsonfile, "--with-correction", "--nowarning", "overview", "-b", "stable"]
-        if opts.pixel:
+        if opts.lumicalc == "lumiCalc2":
+            cmd = ["lumiCalc2.py", "-i", jsonfile, "--nowarning", "overview", "-b", "stable"]
+        if opts.lumicalc == "pixelLumiCalc":
             cmd = ["pixelLumiCalc.py", "-i", jsonfile, "--nowarning", "overview"]
         #cmd = ["lumiCalc.py", "-c", "frontier://LumiCalc/CMS_LUMI_PROD", "-r", "132440", "--nowarning", "overview"]
         #ret = subprocess.call(cmd)
@@ -164,11 +165,16 @@ if __name__ == "__main__":
                       help="Do not run 'crab -report', i.e. you guarantee that the lumiSummary.json contains already all jobs.")
     parser.add_option("--verbose", dest="verbose", action="store_true", default=False,
                       help="Print outputs of the commands which are executed")
-    parser.add_option("--lumicalc1", dest="lumicalc1", action="store_true", default=False,
+    parser.add_option("--lumiCalc1", dest="lumicalc", action="store_const", const="lumiCalc1",
                       help="Use lumiCalc.py instead of lumiCalc2.py (default is to use lumiCalc2.py")
-    parser.add_option("--pixel", dest="pixel", action="store_true", default=False,
+    parser.add_option("--lumiCalc2", dest="lumicalc", action="store_const", const="lumiCalc2",
+                      help="Use lumiCalc2.py (default)")
+    parser.add_option("--pixelLumiCalc", dest="lumicalc", action="store_const", const="pixelLumiCalc",
                       help="Use pixelLumiCalc.py instead of lumiCalc2.py (default is to use lumiCalc2.py")
     
     (opts, args) = parser.parse_args()
+    if opts.lumicalc == None:
+        opts.lumicalc = "lumiCalc2"
+    print "Calculating luminosity with %s" % opts.lumicalc
 
     sys.exit(main(opts, args))

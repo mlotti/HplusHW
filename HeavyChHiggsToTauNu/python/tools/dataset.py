@@ -500,7 +500,10 @@ class TreeDraw:
         opt = ""
         if len(self.weight) > 0:
             opt = "e "
-        nentries = tree.Draw(varexp, selection, opt+"goff")
+        option = opt+"goff"
+        nentries = tree.Draw(varexp, selection, option)
+        if nentries < 0:
+            raise Exception("Error when calling TTree.Draw with\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (self.tree, varexp, selection, option))
         h = tree.GetHistogram()
         if h != None:
             h = h.Clone(h.GetName()+"_cloned")
