@@ -16,7 +16,7 @@ def isInRange(opts, j):
         return False
     return True
 
-def main(opts, args):
+def main(opts):
     taskDirs = multicrab.getTaskDirectories(opts)
     multicrab.checkCrabInPath()
 
@@ -47,7 +47,7 @@ def main(opts, args):
 
         for task, jobs in jobsToSubmit.iteritems():
             pretty = multicrab.prettyJobnums(jobs)
-            command = ["crab", "-c", task, "-submit", pretty] + args
+            command = ["crab", "-c", task, "-submit", pretty] + opts.crabArgs.split(" ")
             print "Submitting %d jobs from task %s" % (len(jobs), task)
             print "Command", " ".join(command)
             if not opts.test:
@@ -67,7 +67,7 @@ def main(opts, args):
     return 0
 
 if __name__ == "__main__":
-    parser = OptionParser(usage="Usage: %prog [options] [-- crab-options]")
+    parser = OptionParser(usage="Usage: %prog [options] [crab task dirs]\n\nCRAB task directories can be given either as the last arguments, or with -d.")
     multicrab.addOptions(parser)
     parser.add_option("--jobs", dest="jobs", type="int", default=50, 
                       help="Number of jobs to submit at a time (default: 50)")
@@ -83,7 +83,10 @@ if __name__ == "__main__":
                       help="Test only, do not submit anything")
     parser.add_option("--allowFails", dest="allowFails", default=False, action="store_true",
                       help="Continue submissions even if crab -submit fails for any reason")
+    parser.add_option("--crabArgs", dest="crabArgs", default="",
+                      help="String of options to pass to CRAB")
     (opts, args) = parser.parse_args()
+    opts.dirs.extend(args)
 
-    sys.exit(main(opts, args))
+    sys.exit(main(opts))
 

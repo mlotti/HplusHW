@@ -145,7 +145,7 @@ def main(opts):
     return 0
 
 if __name__ == "__main__":
-    parser = OptionParser(usage="Usage: %prog [options]")
+    parser = OptionParser(usage="Usage: %prog [options] [crab task dirs]\n\nCRAB task directories can be given either as the last arguments, or with -d.")
     multicrab.addOptions(parser)
     parser.add_option("--resubmit", dest="resubmit", default="all", 
                       help="Provide the resubmit list for these jobs ('all', 'aborted', 'done', comma separated list of exit codes; default 'all'")
@@ -158,6 +158,7 @@ if __name__ == "__main__":
     parser.add_option("--showJobs", dest="showJobs", action="store_true", default=False,
                       help="Show job numbers for each status type")
     (opts, args) = parser.parse_args()
+    opts.dirs.extend(args)
 
     opts.resubmit = opts.resubmit.lower()
     if opts.resubmit not in ["all", "aborted", "done"]:

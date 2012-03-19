@@ -19,13 +19,13 @@ mu = 200
 ## NOTE Tevatron results cannot be shown in some values of mA, 
 # since the corresponding mH values have not been calculated
 # in Feynhiggs
-useMA = 0 # use mH space by default, override with parameter "-ma"
-showLow = 0
-showAN = 1
-showTeva = 0
-showLEP = 0
-plotTwoSigmaBands = 0
-textFullyHadronic = 1 # 0 for the combined result  
+useMA = False # use mH space by default, override with parameter "-ma"
+showLow = False
+showAN = False
+showTeva = False
+showLEP = False
+plotTwoSigmaBands = False
+textFullyHadronic = True # 0 for the combined result  
 
 # write text to plot
 def writeTitleTexts(lumi):
@@ -59,7 +59,7 @@ def writeText( myText, y ):
     text.SetNDC()
     text.SetTextFont(63)
     text.SetTextSize(20)
-    text.DrawLatex(0.185,y,myText)
+    text.DrawLatex(0.2,y,myText)
     return 0
 
 # Convert from mH space to mA
@@ -405,6 +405,7 @@ def main():
     print "Constructing expected"
     expected_tanb = graphToTanBeta(expected,mu)
     expected_tanb.SetLineWidth(3)
+    expected_tanb.SetLineStyle(2)
     observed_minus_tanb = graphToTanBeta(observed_minus,mu)
     observed_plus_tanb = graphToTanBeta(observed_plus,mu)
     observed_minus_tanb.SetLineWidth(3)
@@ -449,9 +450,9 @@ def main():
     tanbMax = 60#200
 
     # Upper edges of the uncertainty bands to the plot edges
-    for gr in [expected_1s_tanb, expected_2s_tanb]:
-        for p in xrange(gr.GetN()/2, gr.GetN()):
-            gr.SetPoint(p, gr.GetX()[p], tanbMax)
+    #for gr in [expected_1s_tanb, expected_2s_tanb]:
+    #    for p in xrange(gr.GetN()/2, gr.GetN()):
+    #        gr.SetPoint(p, gr.GetX()[p], tanbMax)
     if showLow:
         # Lowed edges of the uncertainty bands to the plot edges
         for gr in [expected_1s_tanb_low, expected_2s_tanb_low]:
@@ -472,10 +473,10 @@ def main():
         expected_2s_tanb.Draw("F")
     expected_1s_tanb.Draw("F")
     expected_tanb.Draw("LP")
-    observed_minus_tanb.Draw("L")
-    observed_plus_tanb.Draw("L")
+#    observed_minus_tanb.Draw("L") # no need to draw this twice
+#    observed_plus_tanb.Draw("L") # no need to draw this twice
 #    observed_tanb.SetLineWidth(804)
-    observed_tanb.Draw("LP")
+#    observed_tanb.Draw("LP") # no need to draw this twice
 
     if showAN:
         ANCurve = getANCurve()
@@ -520,9 +521,9 @@ def main():
     frame.GetXaxis().SetLabelSize(27);
     frame.GetYaxis().SetLabelSize(27);
     if useMA:
-        frame.GetXaxis().SetTitle("m_{A} (GeV/c^{2})")
+        frame.GetXaxis().SetTitle("m_{A} (GeV)")
     else:
-        frame.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
+        frame.GetXaxis().SetTitle("m_{H^{+}} (GeV)")
     frame.GetYaxis().SetTitle("tan(#beta)")
 #    frame.GetXaxis().SetLimits(72,166)
 
@@ -533,6 +534,7 @@ def main():
     pl.SetTextFont(62)
     pl.SetTextSize(0.03)
     pl.SetFillStyle(4000)
+    pl.SetFillColor(0)
     pl.SetBorderSize(0)
     ple = ROOT.TLegendEntry()
     pl.AddEntry(observed_tanb,     "Observed", "lp")
@@ -565,14 +567,14 @@ def main():
     writeTitleTexts(lumi)
     top = 0.9
     lineSpace = 0.038
-    writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
+    writeText("t#rightarrowH^{+}b, H^{+}#rightarrow#tau#nu", 0.9)
     if textFullyHadronic:
-        writeText("#tau_{h}+jets final state",   top - lineSpace)
+        writeText("#tau_{h}+jets final state", 0.863)
     else:
-        writeText("#tau_{h}+jets, e#tau_{h}, #mu#tau_{h}, and e#mu final states",   top - lineSpace)
-    writeText("MSSM m_{h}^{max}",           top - 2*lineSpace)
-    writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
-    writeText("#mu=%d GeV"%mu, top - 4*lineSpace)
+        writeText("#tau_{h}+jets, e#tau_{h}, #mu#tau_{h}, and e#mu final states", 0.863)
+    writeText("MSSM m_{h}^{max}", 0.815)
+    writeText("Br(H^{+}#rightarrow#tau#nu) = 1", 0.775)
+    writeText("#mu=%d GeV"%mu, 0.735)
 
     ROOT.gPad.RedrawAxis()
 
@@ -610,9 +612,9 @@ def main():
     frame2.GetXaxis().SetLabelSize(27);
     frame2.GetYaxis().SetLabelSize(27);
     if useMA:
-        frame2.GetXaxis().SetTitle("m_{A} (GeV/c^{2})")
+        frame2.GetXaxis().SetTitle("m_{A} (GeV)")
     else:
-        frame2.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
+        frame2.GetXaxis().SetTitle("m_{H^{+}} (GeV)")
     frame2.GetYaxis().SetTitle("tan(#beta)")
 #    frame2.GetXaxis().SetLimits(72,166)
 
@@ -694,13 +696,13 @@ def main():
     writeTitleTexts(lumi)
     top = 0.83
     lineSpace = 0.038
-    writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
+    writeText("t#rightarrowH^{+}b, H^{+}#rightarrow#tau#nu",top)
     if textFullyHadronic:
         writeText("#tau_{h}+jets final state",   top - lineSpace)
     else:
         writeText("#tau_{h}+jets, e#tau_{h}, #mu#tau_{h}, and e#mu final states",   top - lineSpace)
     writeText("MSSM m_{h}^{max}",           top - 2*lineSpace)
-    writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
+    writeText("Br(H^{+}#rightarrow#tau#nu) = 1", top - 3*lineSpace)
 
     # Save to file
     formats = [

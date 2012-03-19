@@ -83,8 +83,8 @@ int mkBrLimits_processBrPlots()
   tg_obs->SetLineWidth(3);
   tg_obs->Draw("LPA");
   tg_obs->GetYaxis()->SetRangeUser(0,0.2);
-  tg_obs->GetYaxis()->SetTitle("95\% CL limit for Br(t#rightarrow bH^{#pm})");
-  tg_obs->GetXaxis()->SetTitle("m_{H^{+}} (GeV/c^{2})");
+  tg_obs->GetYaxis()->SetTitle("95\% CL limit for Br(t#rightarrow bH^{+})");
+  tg_obs->GetXaxis()->SetTitle("m_{H^{+}} (GeV)");
   tg_obs->  GetXaxis()->SetTitleFont(43);
   tg_obs->  GetYaxis()->SetTitleFont(43);
   tg_obs->  GetXaxis()->SetTitleSize(33);
@@ -238,12 +238,12 @@ void plotTxt(double lumi) {
   text.SetNDC();
   text.SetTextFont(63);
   text.SetTextSize(20);
-  text.DrawLatex(left,linePos,"t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu");
+  text.DrawLatex(left,linePos,"t#rightarrowH^{+}b, H^{+}#rightarrow#tau#nu");
   text.DrawLatex(left,linePos -= lineSpace,"#tau_{h}+jets final state");
   // --- Other possible final states --
   //  text.DrawLatex(left,linePos -= lineSpace,"hadr. + ltau final states");
   //text.DrawLatex(left,linePos -= lineSpace,"#tau_{h}+jets, e#tau_{h}, #mu#tau_{h}, and e#mu final states");
-  text.DrawLatex(left,linePos -= lineSpace,"Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1");
+  text.DrawLatex(left,linePos -= lineSpace,"Br(H^{+}#rightarrow#tau#nu) = 1");
 
 
   // "CMS Preliminary" / "CMS" text
