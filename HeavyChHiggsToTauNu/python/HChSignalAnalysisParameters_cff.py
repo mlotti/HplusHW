@@ -48,100 +48,101 @@ tauSelectionBase = cms.untracked.PSet(
     ptCut = cms.untracked.double(40), # jet pt > value
     etaCut = cms.untracked.double(2.1), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
+    againstElectronDiscriminator = cms.untracked.string("againstElectronMedium"), # discriminator against electrons
+    againstMuonDiscriminator = cms.untracked.string("againstMuonTight"), # discriminator for against muons
+    isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr"), # discriminator for isolation
+    isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1.0), # cut point for continuous isolation discriminator, applied only if it is non-zero
     rtauCut = cms.untracked.double(0.7), # rtau > value
-    antiRtauCut = cms.untracked.double(0.0), # rtau < value
-    invMassCut = cms.untracked.double(999.), # m(vis.tau) < value; FIXME has no effect in TauSelection.cc 
-    maximumEMFractionCut = cms.untracked.double(999.), # disable cut
-    #maximumEMFractionCut = cms.untracked.double(0.8), # emfraction < value
-    nprongs = cms.untracked.uint32(1) # not used at the moment FIXME: has no effect in TauSelection.cc
+    nprongs = cms.untracked.uint32(1) # number of prongs
 )
 
-#for QCD control plots
-tauSelectionHPSTightTauBasedNoLdgPtOrRtauCut = tauSelectionBase.clone(
-    src = "selectedPatTausHpsPFTau",
-    selection = "HPSTightTauBased",
-    leadingTrackPtCut = cms.untracked.double(0.0),
-    rtauCut = cms.untracked.double(0.0)
-    )
-
-tauSelectionCaloTauCutBased = tauSelectionBase.clone(
-    src = "selectedPatTausCaloRecoTau",
-    selection = "CaloTauCutBased"
-)
-
-tauSelectionShrinkingConeCutBased = tauSelectionBase.clone(
-    src = "selectedPatTausShrinkingConePFTau",
-    selection = "ShrinkingConePFTauCutBased"
-)
-
-tauSelectionShrinkingConeTaNCBased = tauSelectionBase.clone(
-    src = "selectedPatTausShrinkingConePFTau",
-    selection = "ShrinkingConePFTauTaNCBased"
-)
+# Only HPS should be used (ignore TCTau, plain PF, TaNC, and Combined HPS+TaNC)
 
 tauSelectionHPSTightTauBased = tauSelectionBase.clone(
     src = "selectedPatTausHpsPFTau",
-    selection = "HPSTightTauBased"
+    selection = "HPSTauBased",
+    isolationDiscriminator = "byTightCombinedIsolationDeltaBetaCorr",
+    isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
 tauSelectionHPSMediumTauBased = tauSelectionBase.clone(
     src = "selectedPatTausHpsPFTau",
-    selection = "HPSMediumTauBased"
+    selection = "HPSTauBased",
+    isolationDiscriminator = "byMediumCombinedIsolationDeltaBetaCorr",
+    isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
 tauSelectionHPSLooseTauBased = tauSelectionBase.clone(
     src = "selectedPatTausHpsPFTau",
-    selection = "HPSLooseTauBased"
+    selection = "HPSTauBased",
+    isolationDiscriminator = "byLooseCombinedIsolationDeltaBetaCorr",
+    isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
 tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
     src = "selectedPatTausHpsPFTau",
-    selection = "HPSVeryLooseTauBased"
+    selection = "HPSTauBased",
+    isolationDiscriminator = "byVLooseCombinedIsolationDeltaBetaCorr",
+    isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
-tauSelectionCombinedHPSTaNCTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsTancPFTau",
-    selection = "CombinedHPSTaNCTauBased"
+vetoTauBase = tauSelectionHPSLooseTauBased.clone(
+    ptCut = cms.untracked.double(20), # jet pt > value
+    etaCut = cms.untracked.double(2.5), # jet |eta| < value
+    leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
+    rtauCut = cms.untracked.double(0.0), # rtau > value
+    nprongs = cms.untracked.uint32(1) # number of prongs
 )
 
+vetoTauSelection = cms.untracked.PSet(
+    tauSelection = vetoTauBase,
+    Zmass = cms.untracked.double(90), # Z mass value in GeV
+    ZmassWindow = cms.untracked.double(10), # window around Z mass in GeV for vetoing events
+)
 
-tauSelections = [tauSelectionCaloTauCutBased,
-                 tauSelectionShrinkingConeCutBased,
-                 tauSelectionShrinkingConeTaNCBased,
-                 tauSelectionHPSTightTauBased,
-                 tauSelectionHPSTightTauBasedNoLdgPtOrRtauCut, #for QCD control plots
+tauSelections = [tauSelectionHPSTightTauBased,
                  tauSelectionHPSMediumTauBased,
-                 tauSelectionHPSLooseTauBased,
-                 tauSelectionCombinedHPSTaNCTauBased]
-tauSelectionNames = ["TauSelectionCaloTauCutBasedTauTriggerMatched",
-                     "TauSelectionShrinkingConeCutBasedTauTriggerMatched",
-                     "TauSelectionShrinkingConeTaNCBasedTauTriggerMatched",
-                     "TauSelectionHPSTightTauBasedTauTriggerMatched",
-                     "TauSelectionHPSTightTauBasedNoLdgPtOrRtauCutTauTriggerMatched",
+                 tauSelectionHPSLooseTauBased]
+tauSelectionNames = ["TauSelectionHPSTightTauBasedTauTriggerMatched",
                      "TauSelectionHPSMediumTauBasedTauTriggerMatched",
-                     "TauSelectionHPSLooseTauBasedTauTriggerMatched",
-                     "TauSelectionCombinedHPSTaNCBasedTauTriggerMatched"]
+                     "TauSelectionHPSLooseTauBasedTauTriggerMatched"]
 
-#tauSelection = tauSelectionShrinkingConeCutBased
-#tauSelection = tauSelectionShrinkingConeTaNCBased
-#tauSelection = tauSelectionCaloTauCutBased
-tauSelection = tauSelectionHPSTightTauBased
-tauVetoSelection = tauSelectionHPSLooseTauBased
+#tauSelection = tauSelectionHPSTightTauBased
 #tauSelection = tauSelectionHPSLooseTauBased
-#tauSelection = tauSelectionHPSMediumTauBased
-#tauSelection = tauSelectionCombinedHPSTaNCTauBased
+tauSelection = tauSelectionHPSMediumTauBased
 
-jetSelection = cms.untracked.PSet(
+jetSelectionBase = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatJets"),       # Calo jets
     #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"), # JPT jets 
     src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
-    cleanTauDR = cms.untracked.double(0.5), #no change
+    cleanTauDR = cms.untracked.double(0.5), # cone for rejecting jets around tau jet
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
-    minNumber = cms.untracked.uint32(3),
-#   EMfractionCut = cms.untracked.double(0.8)
+    minNumber = cms.untracked.uint32(3), # minimum number of selected jets
+    # Jet ID cuts
+    jetIdMaxNeutralHadronEnergyFraction = cms.untracked.double(0.99),
+    jetIdMaxNeutralEMEnergyFraction = cms.untracked.double(0.99),
+    jetIdMinNumberOfDaughters = cms.untracked.uint32(2),
+    jetIdMinChargedHadronEnergyFraction = cms.untracked.double(0.0),
+    jetIdMinChargedMultiplicity = cms.untracked.uint32(0),
+    jetIdMaxChargedEMEnergyFraction = cms.untracked.double(0.99),
+    # Experimental
     EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )
+
+jetSelectionLoose = jetSelectionBase.clone()
+
+jetSelectionMedium = jetSelectionBase.clone(
+    jetIdMaxNeutralHadronEnergyFraction = cms.untracked.double(0.95),
+    jetIdMaxNeutralEMEnergyFraction = cms.untracked.double(0.95),
+)
+
+jetSelectionTight = jetSelectionBase.clone(
+    jetIdMaxNeutralHadronEnergyFraction = cms.untracked.double(0.90),
+    jetIdMaxNeutralEMEnergyFraction = cms.untracked.double(0.90),
+)
+
+jetSelection = jetSelectionLoose # set default jet selection
 
 MET = cms.untracked.PSet(
     # src = cms.untracked.InputTag("patMETs"), # calo MET
@@ -523,7 +524,6 @@ def setVertexWeightFor2011(pset=vertexWeight):
     pset.enabled = True
     pset.useSimulatedPileup = False
 
-
 # Tau selection
 def forEachTauSelection(function):
     for selection in tauSelections:
@@ -533,24 +533,14 @@ def setAllTauSelectionOperatingMode(mode):
     forEachTauSelection(lambda x: x.operatingMode.setValue(mode))
 
 def setAllTauSelectionSrcSelectedPatTaus():
-    tauSelectionCaloTauCutBased.src         = "selectedPatTausCaloRecoTau"
-    tauSelectionShrinkingConeTaNCBased.src  = "selectedPatTausShrinkingConePFTau"
-    tauSelectionShrinkingConeCutBased.src   = "selectedPatTausShrinkingConePFTau"
     tauSelectionHPSTightTauBased.src        = "selectedPatTausHpsPFTau"
-    tauSelectionHPSTightTauBasedNoLdgPtOrRtauCut.src = "selectedPatTausHpsPFTau" #for QCD control plots
     tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTau"
     tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTau"
-    tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTau"
 
 def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
-    tauSelectionCaloTauCutBased.src         = "patTausCaloRecoTauTauTriggerMatched"
-    tauSelectionShrinkingConeTaNCBased.src  = "patTausShrinkingConePFTauTauTriggerMatched"
-    tauSelectionShrinkingConeCutBased.src   = "patTausShrinkingConePFTauTauTriggerMatched"
     tauSelectionHPSTightTauBased.src        = "patTausHpsPFTauTauTriggerMatched"
-    tauSelectionHPSTightTauBasedNoLdgPtOrRtauCut.src = "patTausHpsPFTauTauTriggerMatched"#for QCD control plots
     tauSelectionHPSMediumTauBased.src       = "patTausHpsPFTauTauTriggerMatched"
     tauSelectionHPSLooseTauBased.src        = "patTausHpsPFTauTauTriggerMatched"
-    tauSelectionCombinedHPSTaNCTauBased.src = "patTausHpsTancPFTauTauTriggerMatched"
     
 def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, additionalCounters):
     from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
@@ -558,33 +548,10 @@ def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, ad
 
     selections = tauSelections[:]
     names = tauSelectionNames[:]
-    # Remove TCTau from list
-    tctauIndex = selections.index(tauSelectionCaloTauCutBased)
-    del selections[tctauIndex]
-    del names[tctauIndex]
-    # Remove PF shrinking cone from list
-    pfShrinkingConeIndex = selections.index(tauSelectionShrinkingConeCutBased)
-    del selections[pfShrinkingConeIndex]
-    del names[pfShrinkingConeIndex]
-    # Remove TaNC from list
-    tancIndex = selections.index(tauSelectionShrinkingConeTaNCBased)
-    del selections[tancIndex]
-    del names[tancIndex]
     # HPS loose
     hpsLoose = selections.index(tauSelectionHPSLooseTauBased)
     #del selections[hpsLoose]
     #del names[hpsLoose]
-    # TCTau can be missing in tau embedding case
-    try: 
-        caloTauIndex = selections.index(tauSelectionCaloTauCutBased)
-        del selections[caloTauIndex]
-        del names[caloTauIndex]
-    except ValueError:
-        pass
-    # Remove combined HPS TaNC from list
-    combinedHPSTaNCIndex = selections.index(tauSelectionCombinedHPSTaNCTauBased)
-    del selections[combinedHPSTaNCIndex]
-    del names[combinedHPSTaNCIndex]
 
     for selection, name in zip(selections, names):
         module = prototype.clone()

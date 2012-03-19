@@ -160,10 +160,13 @@ mettableCoeff.METTableFactorizationCoefficients.factorizationSourceName = cms.un
 process.QCDMeasurement.factorization = mettables.METTableParameters
 process.QCDMeasurement.factorization.factorizationTables = mettableCoeff.METTableFactorizationCoefficients
 # Type 1 MET
+
+# Add type 1 MET
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
-(sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.QCDMeasurement.tauSelection, process.QCDMeasurement.jetSelection)
+(sequence, type1Met, type1p2Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.QCDMeasurement.tauSelection, process.QCDMeasurement.jetSelection)
 process.commonSequence *= sequence
 process.QCDMeasurement.MET.type1Src = type1Met
+process.QCDMeasurement.MET.type2Src = type1p2Met
         
 # Prescale fetching done automatically for data
 if dataVersion.isData() and not disablePrescales:
@@ -180,6 +183,7 @@ print "\nPV Selection:", process.QCDMeasurement.primaryVertexSelection
 print "\nTauSelection operating mode:", process.QCDMeasurement.tauSelection.operatingMode
 print "TauSelection src:", process.QCDMeasurement.tauSelection.src
 print "TauSelection selection:", process.QCDMeasurement.tauSelection.selection
+print "TauSelection isolation:", process.signalAnalysis.tauSelection.isolationDiscriminator
 print "TauSelection ptCut:", process.QCDMeasurement.tauSelection.ptCut
 print "TauSelection etacut:", process.QCDMeasurement.tauSelection.etaCut
 print "TauSelection leadingTrackPtCut:", process.QCDMeasurement.tauSelection.leadingTrackPtCut

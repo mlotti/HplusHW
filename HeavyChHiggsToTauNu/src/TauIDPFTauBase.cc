@@ -32,27 +32,22 @@ namespace HPlus {
     return true;
   }
   
-  bool TauIDPFTauBase::passOneProngCut(const edm::Ptr<pat::Tau> tau) {
-    size_t myTrackCount = tau->signalPFChargedHadrCands().size();
+  bool TauIDPFTauBase::passNProngsCut(const edm::Ptr<pat::Tau> tau) {
+    size_t myTrackCount = getNProngs(tau);
     //std::cout << "DEBUG: prong=" << tau->signalTracks().size() << " check=" << myTrackCount << std::endl;
-    fCounterPackager.fill(fIDOneProngNumberCut, myTrackCount);
-    if (!(myTrackCount == 1)) return false;
-    fCounterPackager.incrementSubCount(fIDOneProngNumberCut);
+    fCounterPackager.fill(fIDNProngsCut, myTrackCount);
+    if (!(myTrackCount == fProngCount)) return false;
+    fCounterPackager.incrementSubCount(fIDNProngsCut);
     // All cuts passed, return true
     return true;
   }
   
-  bool TauIDPFTauBase::passThreeProngCut(const edm::Ptr<pat::Tau> tau) {
-    size_t myTrackCount = tau->signalPFChargedHadrCands().size();
-    fCounterPackager.fill(fIDThreeProngNumberCut, myTrackCount);
-    if (!(myTrackCount == 3)) return false;
-    fCounterPackager.incrementSubCount(fIDThreeProngNumberCut);
-    // All cuts passed, return true
-    return true;
+  size_t TauIDPFTauBase::getNProngs(const edm::Ptr< pat::Tau > tau) const {
+    return tau->signalPFChargedHadrCands().size();
   }
-    
+  
   bool TauIDPFTauBase::passRTauCut(const edm::Ptr<pat::Tau> tau) {
-    double myRtauValue = tau->leadPFChargedHadrCand()->p() / tau->p() - 1.0e-10; // value 1 goes in the bin below 1 in the histogram
+    double myRtauValue = getRtauValue(tau);
     hRtauVsEta->Fill(myRtauValue, tau->eta(), fEventWeight.getWeight());
     fCounterPackager.fill(fIDRTauCut, myRtauValue);
     // Fill Rtau plots based on decaymode
@@ -79,18 +74,8 @@ namespace HPlus {
     // All cuts passed, return true
     return true;
   }
-
-  bool TauIDPFTauBase::passAntiRTauCut(const edm::Ptr<pat::Tau> tau) {
-    double myRtauValue = tau->leadPFChargedHadrCand()->p() / tau->p() - 1.0e-10; // value 1 goes in the bin below 1 in the histogram
-    hRtauVsEta->Fill(myRtauValue, tau->eta(), fEventWeight.getWeight());
-    fCounterPackager.fill(fIDRTauCut, myRtauValue);
-    if (!(myRtauValue < fAntiRtauCut)) return false;
-    fCounterPackager.incrementSubCount(fIDRTauCut);
-    // All cuts passed, return true
-    return true;
-  }
   
   double TauIDPFTauBase::getRtauValue(const edm::Ptr<pat::Tau> tau) const {
-    return tau->leadPFChargedHadrCand()->p() / tau->p() - 1.0e-10; // value 1 goes in the bin below 1 in the histogram
+    return tau->leadPFChargedHadrCand()->p() / tau->p() - 1.0e-6; // value 1 goes in the bin below 1 in the histogram
   }
 }

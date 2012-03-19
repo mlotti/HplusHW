@@ -27,6 +27,10 @@ namespace HPlus {
      * Class to encapsulate the access to the data members of
      * TauSelection. If you want to add a new accessor, add it here
      * and keep all the data of TauSelection private.
+     * 
+     * Note: There might be multiple selected taus in the event.
+     *       In that case, the first in the list is the selected tau
+     *       in the event (the most isolated).
      */
     class Data {
     public:
@@ -35,46 +39,29 @@ namespace HPlus {
       // Here the object pointed-to must live longer than this object.
       Data(const TauSelection *tauSelection, bool passedEvent);
       ~Data();
-
+      /// Returns true, if the selected tau has passed all selections
       bool passedEvent() const { return fPassedEvent; }
-
-      // Getters for selected taus (i.e. taus after full tau ID) 
-      const edm::PtrVector<pat::Tau>& getSelectedTaus() const {
-        return fTauSelection->fSelectedTaus;
-      }
-      double getRtauOfSelectedTau() const {
-        return fTauSelection->getSelectedRtauValue();
-      }
-      bool selectedTauPassedRtau() const {
-        if (!fTauSelection->fSelectedTaus.size()) return false;
-        return fTauSelection->fTauID->passRTauCut(fTauSelection->fSelectedTaus[0]);
-      }
-      // Getters for best tau candidate and operations on tau candidates
-      const edm::PtrVector<pat::Tau>& getCleanedTauCandidates() const {
-        return fTauSelection->fCleanedTauCandidates;
-      }
-      bool getBestTauCandidatePassedRtauStatus() const {
-        if (!fTauSelection->fCleanedTauCandidates.size()) return false;
-        return fTauSelection->fTauID->passRTauCut(fTauSelection->fCleanedTauCandidates[0]);
-      }
-      double getRtauOfBestTauCandidate() const {
-        return fTauSelection->getBestCandidateRtauValue();
-      }
-      /// Returns true if no candidates passed asked discriminator
-      bool applyVetoOnTauCandidates(std::string discr) const {
-        for(edm::PtrVector<pat::Tau>::const_iterator iter = fTauSelection->fCleanedTauCandidates.begin(); iter != fTauSelection->fCleanedTauCandidates.end(); ++iter)
-          if ((*iter)->tauID(discr) > 0.5) return false;
-        return true;
-      }
-      int getBestTauCandidateProngCount() const {
-        if (!fTauSelection->fCleanedTauCandidates.size()) return 0;
-        return fTauSelection->fCleanedTauCandidates[0]->signalPFChargedHadrCands().size();
-      }
-      bool applyDiscriminatorOnBestTauCandidate(std::string discr) const {
-        if (!fTauSelection->fCleanedTauCandidates.size()) return 0;
-        return fTauSelection->fCleanedTauCandidates[0]->tauID(discr) > 0.5;
-      }
-
+      /// Returns list of selected taus (i.e. taus after tau candidate selection or after full tau ID); Note: list can be empty if no tau was selected
+      const edm::PtrVector<pat::Tau>& getSelectedTaus() const;
+      /// Returns selected tau in the event (i.e. tau after tau candidate selection or after full tau ID); Note: list can be empty if no tau was selected
+      const edm::Ptr<pat::Tau> getSelectedTau() const;
+      /// Returns the number of prongs of the selected tau
+      const size_t getNProngsOfSelectedTau() const;
+      /// Returns the number of prongs of the selected tau
+      const double getRtauOfSelectedTau() const;
+      /// Returns true if the selected tau passes the isolation criteria
+      const bool selectedTauPassesIsolation() const;
+      /// Returns true if the selected tau passes the nprongs cut
+      const bool selectedTauPassesNProngs() const;
+      /// Returns true if the selected tau passes the rtau cut
+      const bool selectedTauPassesRtau() const;
+      /// Returns true if the selected tau passes the isolation, Nprongs, and the Rtau cuts
+      const bool selectedTauPassesFullTauID() const { return selectedTauPassesIsolation() && selectedTauPassesNProngs() && selectedTauPassesRtau(); }
+      /// Returns true if no candidates pass isolation
+      const bool selectedTausDoNotPassIsolation() const;
+      /// Returns true if the selected tau passes a specified discriminator
+      const bool selectedTauPassesDiscriminator(std::string discr, double cutPoint) const;
+      
     private:
       const TauSelection *fTauSelection;
       bool fPassedEvent; // non-const because need to be set from TauSelectionFactorized via setSelectedTau(...)
@@ -82,12 +69,10 @@ namespace HPlus {
 
     enum TauSelectionOperationMode {
       kNormalTauID, // Tau candidate selection + tau ID selections
-      kTauCandidateSelectionOnly, // Only tau candidate selection is applied
-      kTauIDWithoutRtauOnly, // For QCD bkg measurement - set internally
-      kTauIDWithRtauOnly // For QCD bkg measurement - set internally
+      kTauCandidateSelectionOnly // Only tau candidate selection is applied
     };
 
-    TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label);
+    TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, std::string label = "TauSelection");
     ~TauSelection();
 
     /// Default tauID
@@ -95,15 +80,15 @@ namespace HPlus {
     /// tau ID on a given sample of taus
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
     /// Trigger tau selection - find best unique tau candidate
-    Data analyzeTriggerTau(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    // Data analyzeTriggerTau(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// tau ID on cleaned tau candidates
-    Data analyzeTauIDWithoutRtauOnCleanedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> tauCandidate);
-    /// tau ID on selected tau candidates - to be applied after analyzeTauIDWithoutRtauOnCleanedTauCandidates
-    //Data analyzeTauIDWithRtauOnCleanedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    Data analyzeTauIDWithoutRtauOnSelectedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> tauCandidate);
+    /// tau ID on selected tau candidates - to be applied after analyzeTauIDWithoutRtauOnSelectedTauCandidates
+    //Data analyzeTauIDWithRtauOnSelectedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// Method for setting selected tau (from factorization)
     Data setSelectedTau(edm::Ptr<pat::Tau>& tau, bool passedEvent);
     /// Method for getting operating mode (needed for tau specific weight maps)
-    TauSelectionOperationMode getOperationMode() const { return fOperationMode; }
+    const TauSelectionOperationMode getOperationMode() const { return fOperationMode; }
 
   private:
     /// Method for doing tau selection
@@ -115,30 +100,15 @@ namespace HPlus {
     void fillOperationModeHistogram();
 
     void fillHistogramsForTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
-    void fillHistogramsForCleanedTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
+    void fillHistogramsForSelectedTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
     void fillHistogramsForSelectedTaus(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
     void ObtainMCPurity(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent, TH1* histogram);
-    void findBestTau(edm::PtrVector<pat::Tau>& bestTau, edm::PtrVector<pat::Tau>& taus);
-
-    double getSelectedRtauValue() const {
-      if (fSelectedTaus.size())
-        return fTauID->getRtauValue(fSelectedTaus[0]);
-      else
-        return -1.0; // safety
-    }
-    double getBestCandidateRtauValue() const {
-      if (fCleanedTauCandidates.size())
-        return fTauID->getRtauValue(fCleanedTauCandidates[0]);
-      else
-        return -1.0; // safety
-    }
+    //void findBestTau(edm::PtrVector<pat::Tau>& bestTau, edm::PtrVector<pat::Tau>& taus);
 
   private:
     // Input parameters
     edm::InputTag fSrc;
     const std::string fSelection;
-    const int fProngNumber;
-    const std::string fLabel;
 
     /// TauID object
     TauIDBase* fTauID;
@@ -156,24 +126,24 @@ namespace HPlus {
     // Histograms
     TH1 *hTauIdOperatingMode;
     TH1 *hPtTauCandidates; // Tau candidates == all taus in the pat::Tau collection
-    TH1 *hPtCleanedTauCandidates; // Cleaned tau candidates == taus after jet et, jet eta, ldg pt, e/mu veto 
+    TH1 *hPtSelectedTauCandidates; // Cleaned tau candidates == taus after jet et, jet eta, ldg pt, e/mu veto 
     TH1 *hPtSelectedTaus; // Selected taus == after all tauID cuts
     TH1 *hEtaTauCandidates;
-    TH1 *hEtaCleanedTauCandidates;
+    TH1 *hEtaSelectedTauCandidates;
     TH1 *hEtaSelectedTaus;
 
     TH2 *hEtaPhiTauCandidates;
-    TH2 *hEtaPhiCleanedTauCandidates;
+    TH2 *hEtaPhiSelectedTauCandidates;
     TH2 *hEtaPhiSelectedTaus;
 
     TH1 *hPhiTauCandidates;
-    TH1 *hPhiCleanedTauCandidates;
+    TH1 *hPhiSelectedTauCandidates;
     TH1 *hPhiSelectedTaus;
     TH1 *hNumberOfTauCandidates;
-    TH1 *hNumberOfCleanedTauCandidates;
+    TH1 *hNumberOfSelectedTauCandidates;
     TH1 *hNumberOfSelectedTaus;
     TH1 *hMCPurityOfTauCandidates;
-    TH1 *hMCPurityOfCleanedTauCandidates;
+    TH1 *hMCPurityOfSelectedTauCandidates;
     TH1 *hMCPurityOfSelectedTaus;
 
     TH1 *hNTriggerMatchedTaus;
@@ -202,7 +172,7 @@ namespace HPlus {
     TH1 *hTightIsoNcands;
 
     // Selected tau
-    edm::PtrVector<pat::Tau> fCleanedTauCandidates;
+    edm::PtrVector<pat::Tau> fSelectedTauCandidates;
     edm::PtrVector<pat::Tau> fSelectedTaus;
   };
 }
