@@ -60,10 +60,10 @@ bool HPlusTauPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup
   bool passed = tauData.passedEvent();
   if(passed) {
     ret->push_back(tauData.getSelectedTau());
-    iEvent.put(ret);
   }
   std::auto_ptr<bool> p(new bool(passed));
   
+  iEvent.put(ret);
   iEvent.put(p);
 
   return !fFilter || (fFilter && passed);
