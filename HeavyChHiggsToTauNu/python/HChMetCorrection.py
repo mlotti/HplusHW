@@ -1,6 +1,5 @@
 import FWCore.ParameterSet.Config as cms
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauFilter_cfi as tauFilter
 import PhysicsTools.PatUtils.patPFMETCorrections_cff as patPFMETCorrections
 
 # Note that the Type I and II MET produced here are calculated with
@@ -37,29 +36,28 @@ def addCorrectedMet(process, signalAnalysis, postfix=""):
     sequence *= m
 
     # Apply type 1 and type 2 corrections to raw PF MET in PAT
-    m = patPFMETCorrections.patType1p2CorrectedPFMet.clone(
-        src = signalAnalysis.MET.rawSrc.value(),
-        srcType1Corrections = [cms.InputTag(type1p2Corr, "type1")],
-        srcUnclEnergySums = [
-            cms.InputTag(type1p2Corr, 'type2' ),
-            cms.InputTag(type2Corr,   'type2' ),
-            cms.InputTag(type1p2Corr, 'offset'),
-            cms.InputTag(pfCandCorr),
-        ]
-    )
-    type1p2Name = "patType1p2CorrectedPFMet"+postfix
-    setattr(process, type1p2Name, m)
-    sequence *= m
+    # m = patPFMETCorrections.patType1p2CorrectedPFMet.clone(
+    #     src = signalAnalysis.MET.rawSrc.value(),
+    #     srcType1Corrections = [cms.InputTag(type1p2Corr, "type1")],
+    #     srcUnclEnergySums = [
+    #         cms.InputTag(type1p2Corr, 'type2' ),
+    #         cms.InputTag(type2Corr,   'type2' ),
+    #         cms.InputTag(type1p2Corr, 'offset'),
+    #         cms.InputTag(pfCandCorr),
+    #     ]
+    # )
+    # type1p2Name = "patType1p2CorrectedPFMet"+postfix
+    # setattr(process, type1p2Name, m)
+    # sequence *= m
 
-    if m.type2CorrFormula.value() != "A":
-        raise Exception("Assumption that Type II MET correction formula would be constant failed. METSelection.cc should be modified accordingly")
-    if m.type2CorrParameter.A.value() != signalAnalysis.MET.type2ScaleFactor.value():
-        raise Exception("Correction factor for type II MET differ in signalAnalysis.MET.type2ScaleFactor (%f) and %s (%f)" % (signalAnalysis.MET.type2ScaleFactor.value(), type1p2Name, m.type2CorrParameter.A.value()))
+    # if m.type2CorrFormula.value() != "A":
+    #     raise Exception("Assumption that Type II MET correction formula would be constant failed. METSelection.cc should be modified accordingly")
+    # if m.type2CorrParameter.A.value() != signalAnalysis.MET.type2ScaleFactor.value():
+    #     raise Exception("Correction factor for type II MET differ in signalAnalysis.MET.type2ScaleFactor (%f) and %s (%f)" % (signalAnalysis.MET.type2ScaleFactor.value(), type1p2Name, m.type2CorrParameter.A.value()))
 
     setattr(process, "patMetCorrSequence"+postfix, sequence)
 
     signalAnalysis.MET.type1Src = type1Name
-    signalAnalysis.MET.type2Src = type1p2Name
-
+    #signalAnalysis.MET.type2Src = type1p2Name
 
     return sequence

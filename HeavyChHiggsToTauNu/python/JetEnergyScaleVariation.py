@@ -3,29 +3,6 @@ import PhysicsTools.PatUtils.patPFMETCorrections_cff as patPFMETCorrections
 
 import math
 
-# tauVariation = cms.EDProducer("HPlusTauEnergyScaleVariation",
-#     src = cms.InputTag("selectedPatTaus"),
-#     energyVariation = cms.double(0.03),
-#     energyEtaVariation = cms.double(0)
-# )
-
-# jetVariation = cms.EDProducer("HPlusJetEnergyScaleVariation",
-#     src = cms.InputTag("selectedPatJetsAK5PF"),
-#     payloadName = cms.string("AK5PF"),
-#     uncertaintyTag = cms.string("Uncertainty"),
-#     defaultPlusVariation = cms.bool(True),
-#     doVariation = cms.bool(True),
-#     etaBins = cms.VPSet(
-#     )
-# )
-
-# metVariation = cms.EDProducer("HPlusMetEnergyScaleVariation",
-#     metSrc = cms.InputTag("patMETsPF"),
-# #    tauSrc = cms.InputTag("tauVariation"),
-#     jetSrc = cms.InputTag("jetVariation"),
-#     unclusteredVariation = cms.double(0.1)
-# )
-
 tauVariation = cms.EDProducer("ShiftedPATTauProducer",
     src = cms.InputTag("selectedPatTaus"),
     uncertainty = cms.double(0.03),
@@ -175,10 +152,10 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     add(type1MetVariationName, mettype1v)
 
     # Type II MET
-    mettype2v = mettype1v.clone(
-        src = prototype.MET.type2Src.value()
-    )
-    add(type2MetVariationName, mettype2v)
+    #mettype2v = mettype1v.clone(
+    #    src = prototype.MET.type2Src.value()
+    #)
+    #add(type2MetVariationName, mettype2v)
 
     # Construct the signal analysis module for this variation
     # Use variated taus, jets and MET
@@ -188,7 +165,7 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
         analysis.jetSelection.src = jetVariationName
     analysis.MET.rawSrc = rawMetVariationName
     analysis.MET.type1Src = type1MetVariationName
-    analysis.MET.type2Src = type2MetVariationName
+    #analysis.MET.type2Src = type2MetVariationName
     setattr(process, analysisName, analysis)
     
     # Construct the counters module

@@ -157,7 +157,7 @@ MET = cms.untracked.PSet(
     tauJetMatchingCone = cms.untracked.double(0.5),
     jetType1Threshold = cms.untracked.double(10),
     jetOffsetCorrLabel = cms.untracked.string("L1FastJet"),
-    type2ScaleFactor = cms.untracked.double(1.4),
+    #type2ScaleFactor = cms.untracked.double(1.4),
 )
 
 bTagging = cms.untracked.PSet(
@@ -562,9 +562,8 @@ def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, ad
         module.tauSelection = selection.clone()
 
         # Calculate type 1 MET
-        (type1Sequence, type1Met, type1p2Met) = MetCorrection.addCorrectedMet(process, dataVersion, module.tauSelection, module.jetSelection, postfix=name)
-        module.MET.type1Src = type1Met
-        module.MET.type2Src = type1p2Met
+        raise Exception("This needs further adjustment")
+        type1Sequence = MetCorrection.addCorrectedMet(process, dataVersion, module, postfix=name)
 
         seq = cms.Sequence(
             commonSequence *

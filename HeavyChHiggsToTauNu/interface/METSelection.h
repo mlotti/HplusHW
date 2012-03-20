@@ -72,7 +72,7 @@ namespace HPlus {
     double fTauJetMatchingCone;
     double fJetType1Threshold;
     std::string fJetOffsetCorrLabel;
-    double fType2ScaleFactor;
+    //double fType2ScaleFactor;
 
 
     // Counters
@@ -98,7 +98,7 @@ namespace HPlus {
 
     // For type I/II correction
     std::vector<reco::MET> fType1METCorrected;
-    std::vector<reco::MET> fType2METCorrected;
+    //std::vector<reco::MET> fType2METCorrected;
   };
 }
 

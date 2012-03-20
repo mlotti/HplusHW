@@ -26,7 +26,7 @@ namespace HPlus {
     fTauJetMatchingCone(iConfig.getUntrackedParameter<double>("tauJetMatchingCone")),
     fJetType1Threshold(iConfig.getUntrackedParameter<double>("jetType1Threshold")),
     fJetOffsetCorrLabel(iConfig.getUntrackedParameter<std::string>("jetOffsetCorrLabel")),
-    fType2ScaleFactor(iConfig.getUntrackedParameter<double>("type2ScaleFactor")),
+    //fType2ScaleFactor(iConfig.getUntrackedParameter<double>("type2ScaleFactor")),
     fMetCutCount(eventCounter.addSubCounter(label+"_MET","MET cut")),
     fEventWeight(eventWeight)
   {
@@ -38,8 +38,10 @@ namespace HPlus {
       fSelect = kRaw;
     else if(select == "type1")
       fSelect = kType1;
-    else if(select == "type2")
+    else if(select == "type2") {
       fSelect = kType2;
+      throw cms::Exception("Configuration") << "Type II MET is not supported at the moment" << std::endl;
+    }
     else
       throw cms::Exception("Configuration") << "Invalid value for select '" << select << "', valid values are raw, type1, type2" << std::endl;
     
@@ -60,8 +62,10 @@ namespace HPlus {
     edm::Handle<edm::View<reco::MET> > htype1met;
     iEvent.getByLabel(fType1Src, htype1met);
 
+    /*
     edm::Handle<edm::View<reco::MET> > htype2met;
     iEvent.getByLabel(fType2Src, htype2met);
+    */
 
     edm::Handle<edm::View<reco::MET> > hcalomet;
     iEvent.getByLabel(fCaloSrc, hcalomet);
@@ -85,12 +89,14 @@ namespace HPlus {
       fType1METCorrected.push_back(undoJetCorrectionForSelectedTau(fType1MET, selectedTau, allJets, kType1));
       fType1MET = edm::Ptr<reco::MET>(&fType1METCorrected, 0);
     }
+    /*
     if(htype2met.isValid()) {
       fType2METCorrected.clear();
       fType2MET = htype2met->ptrAt(0);
       fType2METCorrected.push_back(undoJetCorrectionForSelectedTau(fType2MET, selectedTau, allJets, kType2));
       fType2MET = edm::Ptr<reco::MET>(&fType2METCorrected, 0);
     }
+    */
     if(hcalomet.isValid())
       fCaloMET = hcalomet->ptrAt(0);
     if(htcmet.isValid())
@@ -103,7 +109,8 @@ namespace HPlus {
     else if(fSelect == kType1)
       met = htype1met->ptrAt(0);
     else if(fSelect == kType2)
-      met = htype2met->ptrAt(0);
+      //met = htype2met->ptrAt(0);
+      throw cms::Exception("Configuration") << "Type II MET is not supported at the moment at " << __FILE__ << ":" << __LINE__ << std::endl;
     else
       throw cms::Exception("LogicError") << "This should never happen at " << __FILE__ << ":" << __LINE__ << std::endl;
 
@@ -158,8 +165,10 @@ namespace HPlus {
 
     double mex = 0;
     double mey = 0;
+    /*
     double unclusteredX = 0;
     double unclusteredY = 0;
+    */
     //double sumet = 0;
 
     reco::Candidate::LorentzVector rawJetP4 = selectedJet->correctedP4("Uncorrected");
@@ -171,11 +180,14 @@ namespace HPlus {
 
       // For type II MET, we should undo also the portion of L1FastJet
       // correction for unclustered energy due to pile-up
+      /*
       if(type == kType2) {
         unclusteredX -= (rawJetP4offset.px() - rawJetP4.px());
         unclusteredY -= (rawJetP4offset.py() - rawJetP4.py());
       }
+      */
     }
+    /*
     else {
       // If the corresponding jet was not above type I threshold, we
       // should subtract the contribution from raw jet from the unclustered energy
@@ -184,14 +196,17 @@ namespace HPlus {
         unclusteredY -= rawJetP4.py();
       }
     }
+    */
 
     // JetMETCorrections/Type1MET/interface/CorrectedMETProducerT.h
     double correctedEx = met->px() + mex;
     double correctedEy = met->py() + mey;
+    /*
     if(type == kType2) {
       correctedEx += (fType2ScaleFactor-1.) * unclusteredX;
       correctedEy += (fType2ScaleFactor-1.) * unclusteredY;
     }
+    */
     reco::Candidate::LorentzVector correctedP4(correctedEx, correctedEy, 0,
                                                std::sqrt(correctedEx*correctedEx + correctedEy+correctedEy));
     // sumet is not set for pat::MET in the corrections anyway
