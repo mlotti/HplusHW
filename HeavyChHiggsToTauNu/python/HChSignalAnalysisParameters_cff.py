@@ -584,19 +584,15 @@ def changeJetCollection(**kwargs):
 
 def changeCollectionsToPF2PAT(postfix="PFlow"):
     # Taus
-    tauSelectionCaloTauCutBased.src = "Nonexistent"
-    tauSelectionShrinkingConeTaNCBased.src = "Nonexistent"
-    tauSelectionShrinkingConeCutBased.src = "Nonexistent"
-    tauSelectionCombinedHPSTaNCTauBased.src = "Nonexistent"
-
     hps = "selectedPatTaus"+postfix
     if "TriggerMatched" in tauSelectionHPSTightTauBased.src.value():
         hps = "patTaus%sTriggerMatched%s" % (postfix, postfix)
 
     tauSelectionHPSTightTauBased.src = hps
-    tauSelectionHPSTightTauBasedNoLdgPtOrRtauCut.src = hps
     tauSelectionHPSMediumTauBased.src = hps
     tauSelectionHPSLooseTauBased.src = hps
+    tauSelectionHPSVeryLooseTauBased.src = hps
+    vetoTauSelection.tauSelection.src = "selectedPatTaus"+postfix
 
 
     # Muons
