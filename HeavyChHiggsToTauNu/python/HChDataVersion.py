@@ -59,7 +59,7 @@ config = {
         "simProcess": "SIM",
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
-        "globalTag": "START44_V12::All",
+        "globalTag": "START44_V13::All",
         "signalTrigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
         "patMadhatter": "file:/mnt/flustre/slehti/Fall11_TTToHplusBWB_M-90_7TeV-pythia6-tauola_B2AD85E1-D520-E111-B5AC-001A928116EA.root",
     }
@@ -90,12 +90,12 @@ class DataVersion:
         # Collision data
         if "data" in dataVersion:
             self.is_data = True
-            self.globalTag = "GR_R_44_V13::All"
+            self.globalTag = "GR_R_44_V15::All"
 
         # MC
         else:
             self.is_data = False
-            self.globalTag = conf.get("globalTag", "START44_V9C::All")
+            self.globalTag = conf.get("globalTag", "START44_V13::All")
                 
             try:
                 self.signalTrigger = conf["signalTrigger"]
