@@ -358,7 +358,7 @@ namespace HPlus {
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     
     // get the MET, but cut on it later
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau(), jetData.getAllJets());
     hMET_AfterJetSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 
     hTransverseMass_AfterJetSelection->Fill(TransverseMass::reconstruct(*(tauCandidateData.getSelectedTau()), *(metData.getSelectedMET())), fEventWeight.getWeight()); 
 
@@ -492,7 +492,7 @@ namespace HPlus {
     
     /////////////////////    /////////////////////    /////////////////////
     /// BIG BOX: Produce plots
-    METSelection::Data metDataBB  = fMETSelection.analyze(iEvent, iSetup);
+    METSelection::Data metDataBB  = fMETSelection.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau(), jetData.getAllJets());
     double EventWeightWithoutBTag = fEventWeight.getWeight(); // needed because of btag scale factor 
     BTagging::Data btagDataBB = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     double EventWeightWithBTag = fEventWeight.getWeight(); // needed because of btag scale factor 

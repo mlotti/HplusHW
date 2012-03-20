@@ -381,7 +381,7 @@ namespace HPlus {
 
 //------ Obtain rest of data objects      
     // MET
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
     // transverse mass
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()) );
     // b tagging, no event cut

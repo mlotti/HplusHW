@@ -212,12 +212,7 @@ namespace HPlus {
     
     fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
 
-
-  // Get MET object 
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
-    hMETBeforeTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());    
-
-                                                                                                                                                                      
+                                                                                                                                                                   
                                                                                                     
     // TauID
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
@@ -248,10 +243,6 @@ namespace HPlus {
     hSelectedTauEta->Fill(tauData.getSelectedTau()->eta(), fEventWeight.getWeight());
     hSelectedTauPhi->Fill(tauData.getSelectedTau()->phi(), fEventWeight.getWeight());
     //    hSelectedTauRtau->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
-    if(metData.passedEvent()) {
-      //      hSelectedTauEtMetCut->Fill(tauData.getSelectedTau()->pt(), fEventWeight.getWeight());
-      hSelectedTauLeadingTrackPtMetCut->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt(), fEventWeight.getWeight());
-    }
 
     // Obtain MC matching
     MCSelectedTauMatchType myTauMatch = matchTauToMC(iEvent, tauData.getSelectedTau());
@@ -261,6 +252,23 @@ namespace HPlus {
       hEMFractionElectrons->Fill(tauData.getSelectedTau()->emFraction());
     hEMFractionAll->Fill(tauData.getSelectedTau()->emFraction());
 
+
+    // Hadronic jet selection
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau()); 
+    if(!jetData.passedEvent()) return false;
+    increment(fNJetsCounter);
+    hSelectionFlow->Fill(kSignalOrderJetSelection, fEventWeight.getWeight());
+    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderJetSelection, tauData);
+    std::auto_ptr<std::vector<pat::Jet> > saveJets(new std::vector<pat::Jet>());
+    copyPtrToVector(jetData.getSelectedJets(), *saveJets);
+    iEvent.put(saveJets, "jets");
+
+
+  // Get MET object 
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
+    hMETBeforeTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    
+   
 
     // MET cut
     //    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
@@ -302,16 +310,6 @@ namespace HPlus {
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderMuonVeto, tauData);
 
 
-    // Hadronic jet selection
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau()); 
-    if(!jetData.passedEvent()) return false;
-    increment(fNJetsCounter);
-    hSelectionFlow->Fill(kSignalOrderJetSelection, fEventWeight.getWeight());
-    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderJetSelection, tauData);
-    std::auto_ptr<std::vector<pat::Jet> > saveJets(new std::vector<pat::Jet>());
-    copyPtrToVector(jetData.getSelectedJets(), *saveJets);
-    iEvent.put(saveJets, "jets");
-    
 
     // b tagging
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 

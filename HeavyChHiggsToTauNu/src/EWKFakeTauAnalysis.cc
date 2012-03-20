@@ -148,10 +148,15 @@ namespace HPlus {
     if (myTauMatch == kElectronToTau)
       hEMFractionElectrons->Fill(tauData.getSelectedTaus()[0]->emFraction());
     hEMFractionAll->Fill(tauData.getSelectedTaus()[0]->emFraction());
+
+    // Hadronic jet selection
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()[0]); 
+    if(!jetData.passedEvent()) return;
+    fAllTausCounterGroup.incrementNJetsCounter();
+    if (myTauMatch != kNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementNJetsCounter();
     
     // MET 
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
-
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
     hTransverseMassBeforeVeto->Fill(transverseMass, fEventWeight.getWeight());
  
@@ -173,12 +178,6 @@ namespace HPlus {
     fAllTausCounterGroup.incrementMETCounter();
     if (myTauMatch != kNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementMETCounter();
    
-    // Hadronic jet selection
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()[0]); 
-    if(!jetData.passedEvent()) return;
-    fAllTausCounterGroup.incrementNJetsCounter();
-    if (myTauMatch != kNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementNJetsCounter();
-
     // b tagging
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
     if(!btagData.passedEvent()) return;

@@ -204,12 +204,7 @@ namespace HPlus {
       iNSelectedTaus = tauData.getSelectedTaus().size();
       fRtau = tauData.getRtauOfSelectedTau();
     }
-    
 
-    // 6) MET
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
-    fMET = metData.getSelectedMET()->et();
-    
     // 7) Selected Jets
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()[0]); 
     edm::PtrVector<pat::Jet> selectedJets = jetData.getSelectedJets();
@@ -217,7 +212,11 @@ namespace HPlus {
     if(iNHadronicJets > 0) fLdgJetEt = selectedJets[0]->et();
     if(iNHadronicJets > 1) fSecondLdgJetEt = selectedJets[1]->et();
     if(iNHadronicJets > 2) fThirdLdgJetEt = selectedJets[2]->et();
-
+   
+    // 6) MET
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
+    fMET = metData.getSelectedMET()->et();
+    
     // Note: If TauID and JetSelection fail return; attikis
     if(!tauData.passedEvent()) return false;
     //    if(!jetData.passedEvent()) return false;
@@ -321,20 +320,21 @@ namespace HPlus {
     hSelectedTauRtau->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
     // hAlphatVsMETAfterTauID->Fill(sAlphaT.fAlphaT, metData.getSelectedMET()->et(), fEventWeight.getWeight());
     // hAlphatAfterTauID->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight());
-    
-    // 6) MET 
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
-    hMet_AfterTauSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
-    if(!metData.passedEvent()) return;
-    increment(fMETCounter);
-    hMet_BeforeTauSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
-    
+
     // 7) Selected Jets
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()[0]); 
     if(!jetData.passedEvent()) return;
     increment(fNJetsCounter);
     // hAlphatAfterJetSelection->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight());
     
+    // 6) MET 
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
+    hMet_AfterTauSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    if(!metData.passedEvent()) return;
+    increment(fMETCounter);
+    hMet_BeforeTauSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    
+   
     // 8) B-tagging
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
     if(!btagData.passedEvent()) return;

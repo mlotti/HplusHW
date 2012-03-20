@@ -177,9 +177,16 @@ namespace HPlus {
     fTauJetEt  = static_cast<float>( (tauData.getSelectedTaus()[0])->pt() );
     fTauJetEta = static_cast<float>( (tauData.getSelectedTaus()[0])->eta() );
 
+    // Hadronic jet selection
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()[0]); 
+    // if(!jetData.passedEvent()) return false;
+    // increment(fNJetsCounter);
+    iNHadronicJets = jetData.getHadronicJetCount();   
+    iNHadronicJetsInFwdDir = jetData.getHadronicJetCountInFwdDir();
+    
 
     // MET
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
     // if(!metData.passedEvent()) return false;
     fMET = metData.getSelectedMET()->et();
     
@@ -197,14 +204,6 @@ namespace HPlus {
     increment(fMuonVetoCounter);
     fGlobalMuonVetoHighestPt = muonVetoData.getSelectedMuonPt();
  
-
-    // Hadronic jet selection
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()[0]); 
-    // if(!jetData.passedEvent()) return false;
-    // increment(fNJetsCounter);
-    iNHadronicJets = jetData.getHadronicJetCount();   
-    iNHadronicJetsInFwdDir = jetData.getHadronicJetCountInFwdDir();
-    
 
     // b-tagging
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 

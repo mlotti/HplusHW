@@ -4,6 +4,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
+#include "DataFormats/Math/interface/deltaR.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -22,6 +23,9 @@ namespace HPlus {
     fCaloSrc(iConfig.getUntrackedParameter<edm::InputTag>("caloSrc")),
     fTcSrc(iConfig.getUntrackedParameter<edm::InputTag>("tcSrc")),
     fMetCut(iConfig.getUntrackedParameter<double>("METCut")),
+    fTauJetMatchingCone(iConfig.getUntrackedParameter<double>("tauJetMatchingCone")),
+    fJetType1Threshold(iConfig.getUntrackedParameter<double>("jetType1Threshold")),
+    fJetOffsetCorrLabel(iConfig.getUntrackedParameter<std::string>("jetOffsetCorrLabel")),
     fMetCutCount(eventCounter.addSubCounter(label+"_MET","MET cut")),
     fEventWeight(eventWeight)
   {
@@ -47,7 +51,7 @@ namespace HPlus {
 
   METSelection::~METSelection() {}
 
-  METSelection::Data METSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  METSelection::Data METSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
     bool passEvent = false;
     edm::Handle<edm::View<reco::MET> > hrawmet;
     iEvent.getByLabel(fRawSrc, hrawmet);
@@ -74,10 +78,18 @@ namespace HPlus {
     // Set the handles, if object available
     if(hrawmet.isValid())
       fRawMET = hrawmet->ptrAt(0);
-    if(htype1met.isValid())
+    if(htype1met.isValid()) {
+      fType1METCorrected.clear();
       fType1MET = htype1met->ptrAt(0);
-    if(htype2met.isValid())
+      fType1METCorrected.push_back(undoJetCorrectionForSelectedTau(fType1MET, selectedTau, allJets));
+      fType1MET = edm::Ptr<reco::MET>(&fType1METCorrected, 0);
+    }
+    if(htype2met.isValid()) {
+      fType2METCorrected.clear();
       fType2MET = htype2met->ptrAt(0);
+      fType2METCorrected.push_back(undoJetCorrectionForSelectedTau(fType2MET, selectedTau, allJets));
+      fType2MET = edm::Ptr<reco::MET>(&fType2METCorrected, 0);
+    }
     if(hcalomet.isValid())
       fCaloMET = hcalomet->ptrAt(0);
     if(htcmet.isValid())
@@ -110,5 +122,56 @@ namespace HPlus {
     fSelectedMET = met;
     
     return Data(this, passEvent);
+  }
+
+  reco::MET METSelection::undoJetCorrectionForSelectedTau(const edm::Ptr<reco::MET>& met, const edm::Ptr<pat::Tau>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
+    /**
+     * When the type I/II corrections are done, it is assumed (for
+     * simplicity at that point) that the type I correction should be
+     * done with all jets (with pt>10 etc). However, this is not
+     * really the case, as we have a tau jet in the event. The JES
+     * from a jet corresponding to the selected tau should not be
+     * propagated to type I correction. In this method we undo that
+     * correction for that particula jet.
+     */
+
+    // Find the hadronic jet corresponding to the selected tau
+    double minDR = fTauJetMatchingCone;
+    edm::Ptr<pat::Jet> selectedJet;
+    for(size_t i=0; i<allJets.size(); ++i) {
+      double dr = reco::deltaR(*selectedTau, *(allJets[i]));
+      if(dr < minDR) {
+        minDR = dr;
+        selectedJet = allJets[i];
+      }
+    }
+    if(selectedJet.isNull())
+      throw cms::Exception("Assert") << "METSelection: Did not find the hadronic jet corresponding to the selected tau jet" << std::endl;
+
+    // The correction JetMETCorrections/Type1MET/interface/PFJetMETcorrInputProducerT.h
+
+    double mex = 0;
+    double mey = 0;
+    //double sumet = 0;
+    if(selectedJet->pt() > fJetType1Threshold) {
+      reco::Candidate::LorentzVector rawJetP4offset = selectedJet->correctedP4(fJetOffsetCorrLabel);
+      mex += (selectedJet->px() - rawJetP4offset.px());
+      mey += (selectedJet->py() - rawJetP4offset.py());
+      //sumet -= (selectedJet->Et() - rawJetP4offset.Et());
+    }
+    else{
+    }
+
+    // JetMETCorrections/Type1MET/interface/CorrectedMETProducerT.h
+    double correctedEx = met->px() + mex;
+    double correctedEy = met->py() + mey;
+    reco::Candidate::LorentzVector correctedP4(correctedEx, correctedEy, 0,
+                                               std::sqrt(correctedEx*correctedEx + correctedEy+correctedEy));
+    // sumet is not set for pat::MET in the corrections anyway
+    //double correctedSumEt = met->sumEt() + sumet;
+
+    reco::MET correctedMet = *met;
+    correctedMet.setP4(correctedP4);
+    return correctedMet;
   }
 }

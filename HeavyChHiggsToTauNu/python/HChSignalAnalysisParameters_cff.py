@@ -151,7 +151,12 @@ MET = cms.untracked.PSet(
     caloSrc = cms.untracked.InputTag("patMETs"),
     tcSrc = cms.untracked.InputTag("patMETsTC"),
     select = cms.untracked.string("raw"), # raw, type1, type2
-    METCut = cms.untracked.double(50.0)
+    METCut = cms.untracked.double(50.0),
+
+    # For type I/II correction
+    tauJetMatchingCone = cms.untracked.double(0.5),
+    jetType1Threshold = cms.untracked.double(10),
+    jetOffsetCorrLabel = cms.untracked.string("L1FastJet"),
 )
 
 bTagging = cms.untracked.PSet(
