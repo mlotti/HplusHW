@@ -10,6 +10,7 @@ from PhysicsTools.PatAlgos.tools.coreTools import restrictInputToAOD, removeSpec
 import PhysicsTools.PatAlgos.tools.helpers as patHelpers
 import PhysicsTools.PatAlgos.tools.pfTools as pfTools
 from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerStandAloneEventContent
+import PhysicsTools.PatUtils.patPFMETCorrections_cff as patPFMETCorrections
 import CommonTools.ParticleFlow.TopProjectors.pfNoJet_cfi as pfNoJet
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggs as HChPFTauDiscriminators
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous as HChPFTauDiscriminatorsCont
@@ -1183,15 +1184,58 @@ class PF2PATBuilder:
 
 
     def _customizeMET(self, postfix):
-        # Produce Type 2 MET correction from unclustered PFCandidates
+        # Produce Type I MET correction from all PF jets
+        # Note that further correction is needed at the analysis level
+        # to remove contribution from jet energy corrections of those
+        # jets which correspond isolated e/mu/tau
+
+        jets = getattr(self.process, "selectedPatJets"+postfix).src.value()
+
+        def add(name, module, keepInOutput=False):
+            setattr(self.process, name, module)
+            self.endSequence *= module
+            if keepInOutput:
+                self.outputCommands.append("keep *_%s_*_*" % name)
+            return name
+
+        # Select jets with |eta| < 4.7
+        m = patPFMETCorrections.selectedPatJetsForMETtype1p2Corr.clone(
+            src = jets
+        )
+        jetsForMETtype1p2 = add("selectedPatJetsForMETtype1p2Corr"+postfix, m)
+
+        # Select jets with |eta| > 4.7
+        m = patPFMETCorrections.selectedPatJetsForMETtype2Corr.clone(
+            src = jets
+        )
+        jetsForMETtype2 = add("selectedPatJetsForMETtype2Corr"+postfix, m)
+
+        # Calculate corrections for type I and II from jets |eta| < 4.7
+        m = patPFMETCorrections.patPFJetMETtype1p2Corr.clone(
+            src = jetsForMETtype1p2,
+            skipMuons = False # we don't have muons in the final state
+        )
+        if self.dataVersion.isData():
+            m.jetCorrLabel = "L2L3Residual"
+        type1p2Corr = add("patPFJetMETtype1p2Corr"+postfix, m, True)
+
+        # Calculate correction for type II from jets |eta| > 4.7
+        m = patPFMETCorrections.patPFJetMETtype2Corr.clone(
+            src = jetsForMETtype2,
+            skipMuons = False
+        )
+        if self.dataVersion.isData():
+            m.jetCorrLabel = "L2L3Residual"
+        type2Corr = add("patPFJetMETtype2Corr"+postfix, m, True)
+    
+
+        # Produce Type II MET correction from unclustered PFCandidates
         m = cms.EDProducer("PFCandMETcorrInputProducer",
             src = cms.InputTag("pfNoJet"+postfix)
         )
-        name = "pfCandMETcorr"+postfix
-        setattr(self.process, name, m)
-        self.endSequence *= m
-        self.outputCommands.append("keep *_%s_*_*"%name)
-    
+        add("pfCandMETcorr"+postfix, m, True)
+
+   
     def _customizeEventCleaning(self, postfix):
         if not self.calculateEventCleaning:
             return
