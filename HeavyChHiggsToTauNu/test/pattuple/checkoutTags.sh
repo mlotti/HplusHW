@@ -14,5 +14,3 @@ cvs co -r Colin_TaggingMode_June30 JetMETAnalysis/ecalDeadCellTools
 cvs co -r TrackingfailTagMode_18Oct11 -d SandBox/Skims UserCode/seema/SandBox/Skims
 rm SandBox/Skims/python/RA2Objects_cff.py
 rm SandBox/Skims/python/RA2Cleaning_cff.py
-
-addpkg GeneratorInterface/GenFilters V00-11-00-01 # for some reason 44x has older tag than 4_2_8_patch7
