@@ -61,16 +61,27 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     objectVariationRaw = []
     objectVariationType1p2 = []
 
-    # Tau variation
+    # Tau variation (for analysis)
     tauv = tauVariation.clone(
         src = prototype.tauSelection.src.value(),
         uncertainty = abs(variation),
         shiftBy = math.copysign(1.0, variation)
     )
     add(tauVariationName, tauv)
+
+    # For tau variation for type I MET, we need the selected tau only
+    m = cms.EDFilter("HPlusTauSelectorFilter",
+        tauSelection = prototype.tauSelection.clone(),
+        filter = cms.bool(False)
+    )
+    selectedTauName = add(name+"SelectedTauForVariation", m)
+    m = tauVariation.clone(
+        src = selectedTauName
+    )
+    selectedVariatedTauName = add(name+"SelectedTauVariated", m)
     metCorr = objectVariationToMet.clone(
-        srcOriginal = tauv.src.value(),
-        srcShifted = tauVariationName
+        srcOriginal = selectedTauName,
+        srcShifted = selectedVariatedTauName
     )
     n = add(tauVariationName+"METCorr", metCorr)
     objectVariationRaw.append(cms.InputTag(n))
