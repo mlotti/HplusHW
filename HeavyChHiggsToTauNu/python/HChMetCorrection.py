@@ -8,7 +8,7 @@ import PhysicsTools.PatUtils.patPFMETCorrections_cff as patPFMETCorrections
 # correction is needed (implemented in METSelection.cc) (the hadronic
 # jet corresponding to the tau should not be included in type I
 # correction)
-def addCorrectedMet(process, dataVersion, tauSelection, jetSelection, metRaw = "patMETsPF", postfix=""):
+def addCorrectedMet(process, signalAnalysis, postfix=""):
     sequence = cms.Sequence()
 
     # For jets |eta| < 4.7
@@ -29,7 +29,7 @@ def addCorrectedMet(process, dataVersion, tauSelection, jetSelection, metRaw = "
 
     # Apply type 1 corrections to raw PF MET in PAT
     m = patPFMETCorrections.patType1CorrectedPFMet.clone(
-        src = metRaw,
+        src = signalAnalysis.MET.rawSrc.value(),
         srcType1Corrections = [cms.InputTag(type1p2Corr, "type1")],
     )
     type1Name = "patType1CorrectedPFMet"+postfix
@@ -38,7 +38,7 @@ def addCorrectedMet(process, dataVersion, tauSelection, jetSelection, metRaw = "
 
     # Apply type 1 and type 2 corrections to raw PF MET in PAT
     m = patPFMETCorrections.patType1p2CorrectedPFMet.clone(
-        src = metRaw,
+        src = signalAnalysis.MET.rawSrc.value(),
         srcType1Corrections = [cms.InputTag(type1p2Corr, "type1")],
         srcUnclEnergySums = [
             cms.InputTag(type1p2Corr, 'type2' ),
@@ -51,6 +51,15 @@ def addCorrectedMet(process, dataVersion, tauSelection, jetSelection, metRaw = "
     setattr(process, type1p2Name, m)
     sequence *= m
 
+    if m.type2CorrFormula.value() != "A":
+        raise Exception("Assumption that Type II MET correction formula would be constant failed. METSelection.cc should be modified accordingly")
+    if m.type2CorrParameter.A.value() != signalAnalysis.MET.type2ScaleFactor.value():
+        raise Exception("Correction factor for type II MET differ in signalAnalysis.MET.type2ScaleFactor (%f) and %s (%f)" % (signalAnalysis.MET.type2ScaleFactor.value(), type1p2Name, m.type2CorrParameter.A.value()))
+
     setattr(process, "patMetCorrSequence"+postfix, sequence)
 
-    return (sequence, type1Name, type1p2Name)
+    signalAnalysis.MET.type1Src = type1Name
+    signalAnalysis.MET.type2Src = type1p2Name
+
+
+    return sequence

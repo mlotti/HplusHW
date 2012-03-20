@@ -159,9 +159,8 @@ process.QCDMeasurement.factorization = mettables.METTableParameters
 process.QCDMeasurement.factorization.factorizationTables = mettableCoeff.METTableFactorizationCoefficients
 # Type 1 MET
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
-(sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.QCDMeasurement.tauSelection, process.QCDMeasurement.jetSelection)
+sequence, type1Met = MetCorrection.addCorrectedMet(process, process.QCDMeasurement)
 process.commonSequence *= sequence
-process.QCDMeasurement.MET.type1Src = type1Met
         
 # Prescale fetching done automatically for data
 if dataVersion.isData() and not disablePrescales:

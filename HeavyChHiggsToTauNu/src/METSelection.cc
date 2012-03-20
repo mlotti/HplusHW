@@ -26,6 +26,7 @@ namespace HPlus {
     fTauJetMatchingCone(iConfig.getUntrackedParameter<double>("tauJetMatchingCone")),
     fJetType1Threshold(iConfig.getUntrackedParameter<double>("jetType1Threshold")),
     fJetOffsetCorrLabel(iConfig.getUntrackedParameter<std::string>("jetOffsetCorrLabel")),
+    fType2ScaleFactor(iConfig.getUntrackedParameter<double>("type2ScaleFactor")),
     fMetCutCount(eventCounter.addSubCounter(label+"_MET","MET cut")),
     fEventWeight(eventWeight)
   {
@@ -81,13 +82,13 @@ namespace HPlus {
     if(htype1met.isValid()) {
       fType1METCorrected.clear();
       fType1MET = htype1met->ptrAt(0);
-      fType1METCorrected.push_back(undoJetCorrectionForSelectedTau(fType1MET, selectedTau, allJets));
+      fType1METCorrected.push_back(undoJetCorrectionForSelectedTau(fType1MET, selectedTau, allJets, kType1));
       fType1MET = edm::Ptr<reco::MET>(&fType1METCorrected, 0);
     }
     if(htype2met.isValid()) {
       fType2METCorrected.clear();
       fType2MET = htype2met->ptrAt(0);
-      fType2METCorrected.push_back(undoJetCorrectionForSelectedTau(fType2MET, selectedTau, allJets));
+      fType2METCorrected.push_back(undoJetCorrectionForSelectedTau(fType2MET, selectedTau, allJets, kType2));
       fType2MET = edm::Ptr<reco::MET>(&fType2METCorrected, 0);
     }
     if(hcalomet.isValid())
@@ -124,7 +125,7 @@ namespace HPlus {
     return Data(this, passEvent);
   }
 
-  reco::MET METSelection::undoJetCorrectionForSelectedTau(const edm::Ptr<reco::MET>& met, const edm::Ptr<pat::Tau>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
+  reco::MET METSelection::undoJetCorrectionForSelectedTau(const edm::Ptr<reco::MET>& met, const edm::Ptr<pat::Tau>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, Select type) {
     /**
      * When the type I/II corrections are done, it is assumed (for
      * simplicity at that point) that the type I correction should be
@@ -134,6 +135,9 @@ namespace HPlus {
      * propagated to type I correction. In this method we undo that
      * correction for that particula jet.
      */
+
+    if(type == kRaw)
+      throw cms::Exception("Assert") << "METSelection::undoJetCorrectionForSelectedTau should not be called for raw MET" << std::endl;
 
     // Find the hadronic jet corresponding to the selected tau
     double minDR = fTauJetMatchingCone;
@@ -148,23 +152,46 @@ namespace HPlus {
     if(selectedJet.isNull())
       throw cms::Exception("Assert") << "METSelection: Did not find the hadronic jet corresponding to the selected tau jet" << std::endl;
 
-    // The correction JetMETCorrections/Type1MET/interface/PFJetMETcorrInputProducerT.h
+    // The code doing the correction is at
+    // JetMETCorrections/Type1MET/interface/PFJetMETcorrInputProducerT.h
+    // (Here we try to undo the corrections for one jet)
 
     double mex = 0;
     double mey = 0;
+    double unclusteredX = 0;
+    double unclusteredY = 0;
     //double sumet = 0;
+
+    reco::Candidate::LorentzVector rawJetP4 = selectedJet->correctedP4("Uncorrected");
+    reco::Candidate::LorentzVector rawJetP4offset = selectedJet->correctedP4(fJetOffsetCorrLabel);
     if(selectedJet->pt() > fJetType1Threshold) {
-      reco::Candidate::LorentzVector rawJetP4offset = selectedJet->correctedP4(fJetOffsetCorrLabel);
       mex += (selectedJet->px() - rawJetP4offset.px());
       mey += (selectedJet->py() - rawJetP4offset.py());
       //sumet -= (selectedJet->Et() - rawJetP4offset.Et());
+
+      // For type II MET, we should undo also the portion of L1FastJet
+      // correction for unclustered energy due to pile-up
+      if(type == kType2) {
+        unclusteredX -= (rawJetP4offset.px() - rawJetP4.px());
+        unclusteredY -= (rawJetP4offset.py() - rawJetP4.py());
+      }
     }
-    else{
+    else {
+      // If the corresponding jet was not above type I threshold, we
+      // should subtract the contribution from raw jet from the unclustered energy
+      if(type == kType2) {
+        unclusteredX -= rawJetP4.px();
+        unclusteredY -= rawJetP4.py();
+      }
     }
 
     // JetMETCorrections/Type1MET/interface/CorrectedMETProducerT.h
     double correctedEx = met->px() + mex;
     double correctedEy = met->py() + mey;
+    if(type == kType2) {
+      correctedEx += (fType2ScaleFactor-1.) * unclusteredX;
+      correctedEy += (fType2ScaleFactor-1.) * unclusteredY;
+    }
     reco::Candidate::LorentzVector correctedP4(correctedEx, correctedEy, 0,
                                                std::sqrt(correctedEx*correctedEx + correctedEy+correctedEy));
     // sumet is not set for pat::MET in the corrections anyway

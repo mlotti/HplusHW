@@ -157,6 +157,7 @@ MET = cms.untracked.PSet(
     tauJetMatchingCone = cms.untracked.double(0.5),
     jetType1Threshold = cms.untracked.double(10),
     jetOffsetCorrLabel = cms.untracked.string("L1FastJet"),
+    type2ScaleFactor = cms.untracked.double(1.4),
 )
 
 bTagging = cms.untracked.PSet(

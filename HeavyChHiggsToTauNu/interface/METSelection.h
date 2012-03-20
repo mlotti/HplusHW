@@ -55,9 +55,9 @@ namespace HPlus {
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
     
   private:
-    reco::MET undoJetCorrectionForSelectedTau(const edm::Ptr<reco::MET>& met, const edm::Ptr<pat::Tau>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
-
     enum Select {kRaw, kType1, kType2};
+
+    reco::MET undoJetCorrectionForSelectedTau(const edm::Ptr<reco::MET>& met, const edm::Ptr<pat::Tau>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, Select type);
 
     // Input parameters
     edm::InputTag fRawSrc;
@@ -72,6 +72,7 @@ namespace HPlus {
     double fTauJetMatchingCone;
     double fJetType1Threshold;
     std::string fJetOffsetCorrLabel;
+    double fType2ScaleFactor;
 
 
     // Counters
