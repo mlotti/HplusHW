@@ -55,9 +55,6 @@ doSystematics = False
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
 doJESVariation = False
-JESVariation = 0.03
-JESEtaVariation = 0.02
-JESUnclusteredMETVariation = 0.10
 
 # Perform the signal analysis with the PU weight variations
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
@@ -388,7 +385,7 @@ if doAllTauIds:
 # signalAnalysisJESPlus05
 # signalAnalysisJESMinus05
 from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVariationAnalysis
-def addJESVariation(name, doJetVariation, doUnclusteredVariation, metVariation):
+def addJESVariation(name, doJetUnclusteredVariation):
     jetVariationMode="all"
     module = getattr(process, name)
 
@@ -396,17 +393,17 @@ def addJESVariation(name, doJetVariation, doUnclusteredVariation, metVariation):
     module.Tree.fill = False        
     module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
 
-    JESs = "%02d" % int(JESVariation*100)
-    JESe = "%02d" % int(JESEtaVariation*100)
-    JESm = "%02d" % int(metVariation*100)
-    addJESVariationAnalysis(process, dataVersion, name, "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm,   module, additionalCounters, JESVariation, JESEtaVariation, metVariation, doJetVariation, doUnclusteredVariation, postfix=PF2PATVersion)
-    addJESVariationAnalysis(process, dataVersion, name, "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm,  module, additionalCounters, -JESVariation, JESEtaVariation, metVariation, doJetVariation, doUnclusteredVariation, postfix=PF2PATVersion)
-    addJESVariationAnalysis(process, dataVersion, name, "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm,  module, additionalCounters, JESVariation, JESEtaVariation, -metVariation, doJetVariation, doUnclusteredVariation, postfix=PF2PATVersion)
-    addJESVariationAnalysis(process, dataVersion, name, "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, -metVariation, doJetVariation, doUnclusteredVariation, postfix=PF2PATVersion)
+    if doJetUnclusteredVariation:
+        addJESVariationAnalysis(process, dataVersion, name, "JESPlusMETPlus",  module, additionalCounters, tauVariationSigma=1.0, jetVariationSigma=1.0, unclusteredVariationSigma=1.0)
+        addJESVariationAnalysis(process, dataVersion, name, "JESPlusMETMinus",  module, additionalCounters, tauVariationSigma=1.0, jetVariationSigma=1.0, unclusteredVariationSigma=-1.0)
+        addJESVariationAnalysis(process, dataVersion, name, "JESMinusMETPlus",  module, additionalCounters, tauVariationSigma=-1.0, jetVariationSigma=-1.0, unclusteredVariationSigma=1.0)
+        addJESVariationAnalysis(process, dataVersion, name, "JESMinusMETMinus",  module, additionalCounters, tauVariationSigma=-1.0, jetVariationSigma=-1.0, unclusteredVariationSigma=-1.0)
+    else:
+        addJESVariationAnalysis(process, dataVersion, name, "TESPlus",  module, additionalCounters, tauVariationSigma=1.0)
+        addJESVariationAnalysis(process, dataVersion, name, "TESMinus",  module, additionalCounters, tauVariationSigma=-1.0)
 
 if doJESVariation or doSystematics:
-    doJetVariation = True
-    doUnclusteredVariation = True
+    doJetUnclusteredVariation = True
 
     modules = getSignalAnalysisModuleNames()
     if doTauEmbeddingLikePreselection:
@@ -417,12 +414,10 @@ if doJESVariation or doSystematics:
     if options.tauEmbeddingInput != 0:
         modules = [n+"CaloMet60TEff" for n in modules]
         if dataVersion.isData():
-            doJetVariation = False
-            doUnclusreredVariation = False
-            JESUnclusteredMETVariation=0
+            doJetUnclusteredVariation = False
 
     for name in modules:
-        addJESVariation(name, doJetVariation, doUnclusteredVariation, JESUnclusteredMETVariation)
+        addJESVariation(name, doJetUnclusteredVariation)
 
 
 def addPUWeightVariation(name):

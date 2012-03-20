@@ -37,7 +37,7 @@ unclusteredVariation = cms.EDProducer("ShiftedMETcorrInputProducer",
     shiftBy = cms.double(+1) # +1/-1 for +-1 sigma variation
 )
 
-def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, additionalCounters, variation, etaVariation, unclusteredEnergyVariationForMET, doJetVariation=True, doUnclusteredVariation=True, postfix="PFlow"):
+def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, additionalCounters, tauVariationSigma, jetVariationSigma=None, unclusteredVariationSigma=None, postfix="PFlow"):
     variationName = name
     tauVariationName = name+"TauVariation"
     jetVariationForRawMetName = name+"JetVariationForRawMet"
@@ -64,8 +64,7 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     # Tau variation (for analysis)
     tauv = tauVariation.clone(
         src = prototype.tauSelection.src.value(),
-        uncertainty = abs(variation),
-        shiftBy = math.copysign(1.0, variation)
+        shiftBy = tauVariationSigma
     )
     add(tauVariationName, tauv)
 
@@ -88,7 +87,7 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     objectVariationType1p2.append(cms.InputTag(n))
 
     # Jet variation for raw MET
-    if doJetVariation:
+    if jetVariationSigma != None:
         # Add the necessary jet corrector services
         # It should be problem to add these multiple times with the same name (i.e. in each function call)
         # FIXME: support for chs!
@@ -108,7 +107,7 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
         jetvRaw = jetVariation.clone(
             src = prototype.jetSelection.src.value(),
             addResidualJES = True,
-            shiftBy = math.copysign(1.0, variation)
+            shiftBy = jetVariationSigma
         )
         add(jetVariationForRawMetName, jetvRaw)
         metCorr = objectVariationToMet.clone(
@@ -121,7 +120,7 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
         # For type I MET and analysis
         jetv = jetVariation.clone(
             src = prototype.jetSelection.src.value(),
-            shiftBy = math.copysign(1.0, variation)
+            shiftBy = jetVariationSigma,
         )
         add(jetVariationName, jetv)
         metCorr = objectVariationToMet.clone(
@@ -134,12 +133,11 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     # Unclustered energy variations
     # This looks a bit complex, but that's how it is in PAT
     unclusteredVariations = []
-    if doUnclusteredVariation:
+    if unclusteredVariationSigma != None: 
         for src in unclusteredCorrections:
             m = unclusteredVariation.clone(
                 src = [cms.InputTag(src[0]+postfix, instanceLabel) for instanceLabel in src[1]],
-                uncertainty = abs(unclusteredEnergyVariationForMET),
-                shiftBy = math.copysign(1.0, unclusteredEnergyVariationForMET)
+                shiftBy = unclusteredVariationSigma
             )
             n = add(name+src[0]+"Variation", m)
             unclusteredVariations.extend([ cms.InputTag(n, instanceLabel) for instanceLabel in src[1]  ])
@@ -172,7 +170,7 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     # Use variated taus, jets and MET
     analysis = prototype.clone()
     analysis.tauSelection.src = tauVariationName
-    if doJetVariation:
+    if jetVariationSigma != None:
         analysis.jetSelection.src = jetVariationName
     analysis.MET.rawSrc = rawMetVariationName
     analysis.MET.type1Src = type1MetVariationName
