@@ -101,6 +101,8 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
                 setattr(process, corr+"Chs", m)
                 if hasattr(m, "correctors"):
                     m.correctors = [c+"Chs" for c in m.correctors]
+                if hasattr(m, "algorithm"):
+                    m.algorithm = m.algorithm.value()+"chs"
             process.ak5PFL1FastjetChs.srcRho = cms.InputTag("kt6PFJetsPFlow", "rho")
 
         # The residual JES is needed here

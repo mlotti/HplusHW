@@ -45,7 +45,7 @@ doTauEmbeddingLikePreselection = False
 applyTriggerScaleFactor = True
 
 PF2PATVersion = "PFlow" # For normal PF2PAT
-PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
+#PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
 
 ### Systematic uncertainty flags ###
 # Running of systematic variations is controlled by the global flag
@@ -394,13 +394,13 @@ def addJESVariation(name, doJetUnclusteredVariation):
     module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
 
     if doJetUnclusteredVariation:
-        addJESVariationAnalysis(process, dataVersion, name, "JESPlusMETPlus",  module, additionalCounters, tauVariationSigma=1.0, jetVariationSigma=1.0, unclusteredVariationSigma=1.0)
-        addJESVariationAnalysis(process, dataVersion, name, "JESPlusMETMinus",  module, additionalCounters, tauVariationSigma=1.0, jetVariationSigma=1.0, unclusteredVariationSigma=-1.0)
-        addJESVariationAnalysis(process, dataVersion, name, "JESMinusMETPlus",  module, additionalCounters, tauVariationSigma=-1.0, jetVariationSigma=-1.0, unclusteredVariationSigma=1.0)
-        addJESVariationAnalysis(process, dataVersion, name, "JESMinusMETMinus",  module, additionalCounters, tauVariationSigma=-1.0, jetVariationSigma=-1.0, unclusteredVariationSigma=-1.0)
+        addJESVariationAnalysis(process, dataVersion, name, "JESPlusMETPlus",  module, additionalCounters, tauVariationSigma=1.0, jetVariationSigma=1.0, unclusteredVariationSigma=1.0, postfix=PF2PATVersion)
+        addJESVariationAnalysis(process, dataVersion, name, "JESPlusMETMinus",  module, additionalCounters, tauVariationSigma=1.0, jetVariationSigma=1.0, unclusteredVariationSigma=-1.0, postfix=PF2PATVersion)
+        addJESVariationAnalysis(process, dataVersion, name, "JESMinusMETPlus",  module, additionalCounters, tauVariationSigma=-1.0, jetVariationSigma=-1.0, unclusteredVariationSigma=1.0, postfix=PF2PATVersion)
+        addJESVariationAnalysis(process, dataVersion, name, "JESMinusMETMinus",  module, additionalCounters, tauVariationSigma=-1.0, jetVariationSigma=-1.0, unclusteredVariationSigma=-1.0, postfix=PF2PATVersion)
     else:
-        addJESVariationAnalysis(process, dataVersion, name, "TESPlus",  module, additionalCounters, tauVariationSigma=1.0)
-        addJESVariationAnalysis(process, dataVersion, name, "TESMinus",  module, additionalCounters, tauVariationSigma=-1.0)
+        addJESVariationAnalysis(process, dataVersion, name, "TESPlus",  module, additionalCounters, tauVariationSigma=1.0, postfix=PF2PATVersion)
+        addJESVariationAnalysis(process, dataVersion, name, "TESMinus",  module, additionalCounters, tauVariationSigma=-1.0, postfix=PF2PATVersion)
 
 if doJESVariation or doSystematics:
     doJetUnclusteredVariation = True
