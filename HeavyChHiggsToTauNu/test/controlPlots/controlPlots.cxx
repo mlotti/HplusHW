@@ -17,6 +17,7 @@
 using namespace std;
 
 bool bPaperStatus = true; // Set to true if you want paper style figures
+//bool bPaperStatus = false; // Set to true if you want paper style figures
 
 class ControlPlot {
 public:
@@ -771,7 +772,7 @@ void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, doubl
   tex->SetTextSize(27);
   tex->SetLineWidth(2);
   tex->Draw();
-  tex = new TLatex(0.43,0.945,"2.3 fb^{-1}");
+  tex = new TLatex(0.43,0.945,"2.2 fb^{-1}");
   tex->SetNDC();
   tex->SetTextFont(43);
   tex->SetTextSize(27);
@@ -782,6 +783,8 @@ void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, doubl
   //tex->DrawLatex(0.87, -0.41, "Step");
 
   tex = new TLatex(0.28,0.865,"m_{H^{#pm}} = 120 GeV/c^{2}");
+  if(bPaperStatus)
+    tex = new TLatex(0.28,0.865,"m_{H^{#pm}} = 120 GeV");
   tex->SetNDC();
   tex->SetTextFont(63);
   tex->SetTextSize(20);
@@ -908,8 +911,8 @@ int main() {
   // Empty list
   vector<TFile*> myEmptyFiles;
   
-  //double myLuminosityInPb = 2177.9;
-  double myLuminosityInPb = 2256.103;
+  double myLuminosityInPb = 2177.9; // approved
+  //double myLuminosityInPb = 2256.103; // pixel lumi
   double myBr = 0.05;
   
   string QCDprefix = "QCDMeasurement/QCDMeasurementVariation_METcut50_DeltaPhiTauMETCut160_tauIsol1/";

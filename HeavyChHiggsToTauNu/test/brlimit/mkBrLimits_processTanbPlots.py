@@ -25,7 +25,8 @@ showAN = False
 showTeva = False
 showLEP = False
 plotTwoSigmaBands = False
-textFullyHadronic = True # 0 for the combined result  
+textFullyHadronic = True # False for the combined result  
+paperStatus = True # False for AN
 
 # write text to plot
 def writeTitleTexts(lumi):
@@ -38,7 +39,10 @@ def writeTitleTexts(lumi):
     tex.SetTextFont(43)
     tex.SetTextSize(27)
     tex.SetLineWidth(2)
-    tex.DrawLatex(0.62,0.96,"CMS Preliminary")
+    if paperStatus:
+        tex.DrawLatex(0.62,0.96,"CMS")
+    else:
+        tex.DrawLatex(0.62,0.96,"CMS Preliminary")
     tex2 = TLatex()
     tex2.SetNDC()
     tex2.SetTextFont(43)
@@ -521,9 +525,15 @@ def main():
     frame.GetXaxis().SetLabelSize(27);
     frame.GetYaxis().SetLabelSize(27);
     if useMA:
-        frame.GetXaxis().SetTitle("m_{A} (GeV)")
+        if paperStatus:
+            frame.GetXaxis().SetTitle("m_{A} (GeV)")
+        else:
+            frame.GetXaxis().SetTitle("m_{A} (GeV/c^{2})")
     else:
-        frame.GetXaxis().SetTitle("m_{H^{+}} (GeV)")
+        if paperStatus:
+            frame.GetXaxis().SetTitle("m_{H^{+}} (GeV)")
+        else:
+            frame.GetXaxis().SetTitle("m_{H^{+}} (GeV/c^{2})")
     frame.GetYaxis().SetTitle("tan(#beta)")
 #    frame.GetXaxis().SetLimits(72,166)
 
@@ -574,7 +584,10 @@ def main():
         writeText("#tau_{h}+jets, e#tau_{h}, #mu#tau_{h}, and e#mu final states", 0.863)
     writeText("MSSM m_{h}^{max}", 0.815)
     writeText("Br(H^{+}#rightarrow#tau#nu) = 1", 0.775)
-    writeText("#mu=%d GeV"%mu, 0.735)
+    if paperStatus:
+        writeText("#mu=%d GeV"%mu, 0.735)
+    else:
+        writeText("#mu=%d GeV/c^{2}"%mu, 0.735)
 
     ROOT.gPad.RedrawAxis()
 
@@ -612,9 +625,15 @@ def main():
     frame2.GetXaxis().SetLabelSize(27);
     frame2.GetYaxis().SetLabelSize(27);
     if useMA:
-        frame2.GetXaxis().SetTitle("m_{A} (GeV)")
+        if paperStatus:
+            frame2.GetXaxis().SetTitle("m_{A} (GeV)")
+        else:
+            frame2.GetXaxis().SetTitle("m_{A} (GeV/c^{2})")
     else:
-        frame2.GetXaxis().SetTitle("m_{H^{+}} (GeV)")
+        if paperStatus:
+            frame2.GetXaxis().SetTitle("m_{H^{+}} (GeV)")
+        else:
+            frame2.GetXaxis().SetTitle("m_{H^{+}} (GeV/c^{2})")
     frame2.GetYaxis().SetTitle("tan(#beta)")
 #    frame2.GetXaxis().SetLimits(72,166)
 
@@ -685,10 +704,16 @@ def main():
     pl2.SetTextSize(0.03)
     pl2.SetFillStyle(4000)
     pl2.SetBorderSize(0)
-    pl2.AddEntry(observed_pk,     "Observed, mu=1000 GeV/c^{2}", "lp")
-    pl2.AddEntry(observed_p2,     "Observed, mu=200 GeV/c^{2}", "lp")
-    pl2.AddEntry(observed_m2,     "Observed, mu=-200 GeV/c^{2}", "lp")
-    pl2.AddEntry(observed_mk,     "Observed, mu=-1000 GeV/c^{2}", "lp")
+    if paperStatus:
+        pl2.AddEntry(observed_pk,     "Observed, mu=1000 GeV", "lp")
+        pl2.AddEntry(observed_p2,     "Observed, mu=200 GeV", "lp")
+        pl2.AddEntry(observed_m2,     "Observed, mu=-200 GeV", "lp")
+        pl2.AddEntry(observed_mk,     "Observed, mu=-1000 GeV", "lp")
+    else:
+        pl2.AddEntry(observed_pk,     "Observed, mu=1000 GeV", "lp")
+        pl2.AddEntry(observed_p2,     "Observed, mu=200 GeV", "lp")
+        pl2.AddEntry(observed_m2,     "Observed, mu=-200 GeV", "lp")
+        pl2.AddEntry(observed_mk,     "Observed, mu=-1000 GeV", "lp")
                 
 
     pl2.Draw()
