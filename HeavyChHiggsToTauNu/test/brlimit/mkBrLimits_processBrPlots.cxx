@@ -3,6 +3,9 @@
 void plotTxt(double lumi);
 void readValuesFromLandsFile(char * temp, double &my_obs,double * my_exp);
 
+bool bPaperStatus = true; // For paper
+//bool bPaperStatus = false; // For AN
+
 int mkBrLimits_processBrPlots()
 {
   gROOT->ProcessLine(".L mkBrLimits_processBrPlots_plotstyle.cxx");
@@ -83,8 +86,11 @@ int mkBrLimits_processBrPlots()
   tg_obs->SetLineWidth(3);
   tg_obs->Draw("LPA");
   tg_obs->GetYaxis()->SetRangeUser(0,0.2);
-  tg_obs->GetYaxis()->SetTitle("95\% CL limit for Br(t#rightarrow bH^{+})");
-  tg_obs->GetXaxis()->SetTitle("m_{H^{+}} (GeV)");
+  tg_obs->GetYaxis()->SetTitle("95\% CL limit for BR(t#rightarrow bH^{+})");
+  if(bPaperStatus)
+    tg_obs->GetXaxis()->SetTitle("m_{H^{+}} (GeV)");
+  else
+    tg_obs->GetXaxis()->SetTitle("m_{H^{+}} (GeV/c^{2})");
   tg_obs->  GetXaxis()->SetTitleFont(43);
   tg_obs->  GetYaxis()->SetTitleFont(43);
   tg_obs->  GetXaxis()->SetTitleSize(33);
@@ -117,9 +123,10 @@ int mkBrLimits_processBrPlots()
   tg_exp_cont2->Draw("F");
   tg_exp_cont1->Draw("F");
 
-  TLegend *pl = new TLegend(0.5,0.60,0.82,0.82);
+  TLegend *pl = new TLegend(0.55, 0.70, 0.87, 0.92);
   pl->SetTextSize(0.03);
   pl->SetFillStyle(4000);
+  pl->SetFillColor(0);
   pl->SetTextFont(62);
   pl->SetTextSize(0.03);
   pl->SetBorderSize(0);
@@ -231,8 +238,8 @@ void plotTxt(double lumi) {
   //  2) final state
   //  3) assumption that Br(H->tau nu) = 1 
   Double_t linePos       = 0.9;
-  Double_t lineSpace = 0.038;
-  Double_t left      = 0.185;
+  Double_t lineSpace = 0.036;
+  Double_t left      = 0.2;
   TLatex text;
   text.SetTextAlign(12);
   text.SetNDC();
@@ -243,12 +250,15 @@ void plotTxt(double lumi) {
   // --- Other possible final states --
   //  text.DrawLatex(left,linePos -= lineSpace,"hadr. + ltau final states");
   //text.DrawLatex(left,linePos -= lineSpace,"#tau_{h}+jets, e#tau_{h}, #mu#tau_{h}, and e#mu final states");
-  text.DrawLatex(left,linePos -= lineSpace,"Br(H^{+}#rightarrow#tau#nu) = 1");
+  text.DrawLatex(left,linePos -= lineSpace,"BR(H^{+}#rightarrow#tau#nu) = 1");
 
 
   // "CMS Preliminary" / "CMS" text
-  TLatex *tex = new TLatex(0.62,0.96,"CMS Preliminary");
-  //  TLatex *tex = new TLatex(0.62,0.96,"CMS");
+  TLatex *tex = 0;
+  if(bPaperStatus)
+    tex = new TLatex(0.62,0.96,"CMS");
+  else
+    tex = new TLatex(0.62,0.96,"CMS Preliminary");
   tex->SetNDC();
   tex->SetTextFont(43);
   tex->SetTextSize(27);
