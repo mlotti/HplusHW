@@ -133,6 +133,16 @@
 #     <tt>configInfo/configinfo</tt> histogram in the resulting
 #     histograms.root file. The value provides a default value for the
 #     cross section of the dataset.
+#
+# \todo The current structure of dataset definitions provides almost
+# no support for workflows with different skims (e.g. tau+MET trigger
+# + jets for signal pattuples, muon+jets for embedding, muon+tau for
+# trigger efficiency). Although the variety can probably be managed by
+# overriding some of the definition parameters in the multicrab
+# configuration scripts, I think having the support for multiple
+# workflows with different skims (and numbers of jobs for same input
+# dataset, e.g. AOD) already in the dataset definitions would provide
+# additional documentation.
 
 import os, re
 import subprocess, errno

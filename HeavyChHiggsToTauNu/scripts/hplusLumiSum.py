@@ -7,6 +7,9 @@ from optparse import OptionParser
 
 def main(opts):
     lumiSum = 0
+
+    maxLen = max([len(s) for s in opts.files])
+
     for fname in opts.files:
         f = open(fname)
         d = json.load(f)
@@ -16,7 +19,8 @@ def main(opts):
         for dataset, lumi in d.iteritems():
             ls += lumi
         if len(opts.files) > 1:
-            print "%s: %f pb^-1" % (fname, ls)
+            fmt = "%%-%ds %%f pb^-1" % (maxLen+1)
+            print fmt % (fname+":", ls)
         lumiSum += ls
 
     if len(opts.files) > 1:
