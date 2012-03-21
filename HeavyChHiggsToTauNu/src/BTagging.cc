@@ -200,9 +200,7 @@ namespace HPlus {
                 int myIndex = obtainIndex(fPtBinsB, pt);
                 return fEpsilonMCB[myIndex];
         }else{
-// FIXME: to be replaced later with DB
-                int myIndex = obtainIndex(fPtBinsB, pt);
-                return fEpsilonMCB[myIndex];
+		return btagdb->getScaleFactors(pt,eta).btagEfficiency();
         }
   }
   double BTagging::BTaggingScaleFactor::getMCMistagEfficiency(double pt,double eta){

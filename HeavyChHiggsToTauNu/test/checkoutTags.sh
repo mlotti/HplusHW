@@ -59,7 +59,6 @@ set -e
 # 17.10.2011/M.Kortelainen CMSSW_4_2_8_patch6 Updated type I/II MET tags
 # 29.12.2011/S.Lehti       CMSSW_4_2_8_patch2 Commented removal of HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
 # 16.3.2012/S.Lehti	   CMSSW_4_2_8 Added tag for btagging scale factors
-# 20.3.2012/S.Lehti        CMSSW_4_2_8 Added git repo containing btag DB and DB creation scripts
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -94,7 +93,6 @@ addpkg PhysicsTools/Utilities     V08-03-10
 
 # btagging scale factors
 # https://twiki.cern.ch/twiki/bin/view/CMS/BtagPerformanceDBV2
-git clone http://cmsdoc.cern.ch/~slehti/RecoBTag.git
 cvs co -r V00-04-11 RecoBTag/PerformanceDB
 
 # Type I/II MET

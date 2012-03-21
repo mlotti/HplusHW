@@ -28,7 +28,8 @@ double BTaggingScaleFactorFromDB::Data::mistagScaleFactorError(){return mistagSF
 
 
 BTaggingScaleFactorFromDB::BTaggingScaleFactorFromDB(const edm::ParameterSet& iConfig):
-  algoName(iConfig.getParameter<std::string>("BTagDBAlgo"))
+  algoName(iConfig.getUntrackedParameter<std::string>("BTagDBAlgo")),
+  userAlgoName(iConfig.getUntrackedParameter<std::string>("BTagUserDBAlgo"))
 {}
 
 BTaggingScaleFactorFromDB::~BTaggingScaleFactorFromDB(){}
@@ -36,34 +37,27 @@ BTaggingScaleFactorFromDB::~BTaggingScaleFactorFromDB(){}
 void BTaggingScaleFactorFromDB::setup(const edm::EventSetup& iSetup){
         
         // btag
-//        edm::ESHandle<BtagPerformance> bHandle;
         iSetup.get<BTagPerformanceRecord>().get("BTAG" + algoName,bHandle);
-//        const BtagPerformance & bperf = *(bHandle.product());
+	iSetup.get<BTagPerformanceRecord>().get(userAlgoName,userHandle);
         
         // mistag
-//        edm::ESHandle<BtagPerformance> misHandle;
         iSetup.get<BTagPerformanceRecord>().get("MISTAG" + algoName,misHandle);
-//        const BtagPerformance & misperf = *(misHandle.product());
-	
 }
 BTaggingScaleFactorFromDB::Data BTaggingScaleFactorFromDB::getScaleFactors(double pt,double eta){
 
 	// btag
-//        edm::ESHandle<BtagPerformance> bHandle;
-//        iSetup.get<BTagPerformanceRecord>().get("BTAG" + algoName,bHandle); 
-        const BtagPerformance & bperf = *(bHandle.product());
+        const BtagPerformance & bperf    = *(bHandle.product());
+	const BtagPerformance & userperf = *(userHandle.product());
 
 	// mistag
-//        edm::ESHandle<BtagPerformance> misHandle;
-//        iSetup.get<BTagPerformanceRecord>().get("MISTAG" + algoName,misHandle);
-        const BtagPerformance & misperf = *(misHandle.product());
+        const BtagPerformance & misperf  = *(misHandle.product());
 
         BinningPointByMap measurePoint;
         measurePoint.insert(BinningVariables::JetEt,pt);
         measurePoint.insert(BinningVariables::JetAbsEta,fabs(eta));
 
-	double btagEff              = bperf.getResult(PerformanceResult::BTAGBEFF, measurePoint);
-	double btagErr              = bperf.getResult(PerformanceResult::BTAGBERR, measurePoint);
+	double btagEff              = userperf.getResult(PerformanceResult::BTAGBEFF, measurePoint);
+	double btagErr              = userperf.getResult(PerformanceResult::BTAGBERR, measurePoint);
 	double mistagEff            = misperf.getResult(PerformanceResult::BTAGLEFF, measurePoint);
 	double mistagErr	    = misperf.getResult(PerformanceResult::BTAGLERR, measurePoint);
 

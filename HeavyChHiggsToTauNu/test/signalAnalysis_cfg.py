@@ -175,12 +175,16 @@ process.signalAnalysis = signalAnalysis.createEDFilter(param)
 
 # Btagging DB
 process.load("CondCore.DBCommon.CondDBCommon_cfi")
-#MC measurements from 36X
+#MC measurements
 process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
 process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
-#Data measurements from Fall10
+#Data measurements
 process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
 process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
+#User DB for btag eff
+process.CondDBCommon.connect = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
+process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
+process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
 #param.bTagging.UseBTagDB  = cms.untracked.bool(True)
 
 # Add type 1 MET
