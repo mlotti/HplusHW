@@ -13,7 +13,8 @@
 #include <sstream>
 
 
-double paperStatus = true;
+bool paperStatus = true;
+//bool paperStatus = false;
 
 using namespace std;
 
@@ -123,9 +124,11 @@ void plot(int mass) {
   hFrame->SetLineStyle(0);
   hFrame->SetMarkerStyle(20);
   hFrame->SetXTitle("Transverse mass (#tau jet, E_{T}^{miss}) (GeV/c^{2})");
-  if (paperStatus)
-    hFrame->SetXTitle("Transverse mass (#tau_{h}, E_{T}^{miss}) (GeV/c^{2})");
   hFrame->SetYTitle("Events / 20 GeV/c^{2}");
+  if (paperStatus) {
+    hFrame->SetXTitle("Transverse mass (#tau_{h}, E_{T}^{miss}) (GeV)");
+    hFrame->SetYTitle("Events / 20 GeV");
+  }
   hFrame->GetXaxis()->SetTitleSize(0);
   hFrame->GetXaxis()->SetLabelSize(0);
   hFrame->GetYaxis()->SetTitleFont(43);
@@ -344,7 +347,10 @@ void plot(int mass) {
   tex->Draw();
 
   s.str("");
-  s << "m_{H^{#pm}} = " << mass << " GeV/c^{2}";
+  if(paperStatus)
+    s << "m_{H^{#pm}} = " << mass << " GeV";
+  else
+    s << "m_{H^{#pm}} = " << mass << " GeV/c^{2}";
   tex = new TLatex(0.28,0.865,s.str().c_str());
   tex->SetNDC();
   tex->SetTextFont(63);

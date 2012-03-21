@@ -58,12 +58,13 @@ HPlusJetEnergyScaleVariation::HPlusJetEnergyScaleVariation(const edm::ParameterS
 HPlusJetEnergyScaleVariation::~HPlusJetEnergyScaleVariation() {}
 
 void HPlusJetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  std::auto_ptr<pat::JetCollection> rescaledJets(new pat::JetCollection);
-
   typedef pat::Jet::LorentzVector LorentzVector;
 
   edm::Handle<edm::View<pat::Jet> > hjets;
   iEvent.getByLabel(src, hjets);
+
+  std::auto_ptr<pat::JetCollection> rescaledJets(new pat::JetCollection);
+  rescaledJets->reserve(hjets->size());
 
   edm::ESHandle<JetCorrectorParametersCollection> jetCorParColl;
   iSetup.get<JetCorrectionsRecord>().get(payloadName, jetCorParColl); 

@@ -5,6 +5,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VetoTauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
@@ -28,6 +29,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexAssignmentAnalysis.h"
 
 #include<string>
 
@@ -126,7 +128,7 @@ namespace HPlus {
     Count fOneTauCounter;
     Count fTriggerScaleFactorCounter;
     Count fGenuineTauCounter;
-    Count fRtauAfterTauIDCounter;
+    Count fVetoTauCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fNJetsCounter;
@@ -155,7 +157,8 @@ namespace HPlus {
     VertexSelection fPrimaryVertexSelection;
     GlobalElectronVeto fGlobalElectronVeto;
     GlobalMuonVeto fGlobalMuonVeto;
-    TauSelection fOneProngTauSelection;
+    TauSelection fTauSelection;
+    VetoTauSelection fVetoTauSelection;
     JetSelection fJetSelection;
     METSelection fMETSelection;
     BTagging fBTagging;
@@ -171,6 +174,7 @@ namespace HPlus {
     EvtTopology fEvtTopology;
     TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
     VertexWeight fVertexWeight;
+    VertexAssignmentAnalysis fVertexAssignmentAnalysis;
     FakeTauIdentifier fFakeTauIdentifier;
     
     SignalAnalysisTree fTree;

@@ -91,6 +91,7 @@ def addTo(datasets):
                         }
                         })
 
+    # Deleted to save space, but not invalidated in DBS due to parentage issues (v13 is a child dataset)
     add("skim", "v13_original", {
         "WJets_TuneZ2_Summer11":               "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_skim_v13-6ce8de2c5b6c0c9ed414998577b7e28d/USER",
             })
@@ -836,23 +837,6 @@ def addTo(datasets):
         "WJets_TuneZ2_Summer11":               "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_embedding_v13_3_seedTest29-22559ec2c5e66c0c33625ecb67add84e/USER",
         })
 
-
-
-
-    add("embedding", "v14", {
-        "SingleMu_Mu_160431-163261_May10":     "/SingleMu/local-May10ReReco_v1_AOD_160431_tauembedding_embedding_v14-1f85a4e6ed0508d8166f68995731b8f5/USER",
-        "SingleMu_Mu_163270-163869_May10":     "/SingleMu/local-May10ReReco_v1_AOD_163270_tauembedding_embedding_v14-1f85a4e6ed0508d8166f68995731b8f5/USER",
-        "SingleMu_Mu_165088-166150_Prompt":    "/SingleMu/local-PromptReco_v4_AOD_165088_tauembedding_embedding_v14-1f85a4e6ed0508d8166f68995731b8f5/USER",
-        "SingleMu_Mu_166161-166164_Prompt":    "/SingleMu/local-PromptReco_v4_AOD_166161_tauembedding_embedding_v14-1f85a4e6ed0508d8166f68995731b8f5/USER",
-        "SingleMu_Mu_166346-166346_Prompt":    "/SingleMu/local-PromptReco_v4_AOD_166346_tauembedding_embedding_v14-1f85a4e6ed0508d8166f68995731b8f5/USER",
-        "SingleMu_Mu_166374-167043_Prompt":    "/SingleMu/local-PromptReco_v4_AOD_166374_tauembedding_embedding_v14-1f85a4e6ed0508d8166f68995731b8f5/USER",
-        "SingleMu_Mu_167078-167913_Prompt":    "/SingleMu/local-PromptReco_v4_AOD_167078_tauembedding_embedding_v14-1f85a4e6ed0508d8166f68995731b8f5/USER",
-        "SingleMu_Mu_170722-172619_Aug05":     "/SingleMu/local-05Aug2011_v1_AOD_170722_tauembedding_embedding_v14-1f85a4e6ed0508d8166f68995731b8f5/USER",
-        "SingleMu_Mu_172620-173198_Prompt":    "/SingleMu/local-PromptReco_v6_AOD_172620_tauembedding_embedding_v14-1f85a4e6ed0508d8166f68995731b8f5/USER",
-        "SingleMu_Mu_173236-173692_Prompt":    "/SingleMu/local-PromptReco_v6_AOD_173236_tauembedding_embedding_v14-1f85a4e6ed0508d8166f68995731b8f5/USER",
-        "TTJets_TuneZ2_Summer11":              "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_embedding_v14-7cb5d9664ebd92d58d66f3529b14fa68/USER",
-        "WJets_TuneZ2_Summer11":               "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_embedding_v14-7cb5d9664ebd92d58d66f3529b14fa68/USER",
-        })
 
 
     # add("embedding", "", {

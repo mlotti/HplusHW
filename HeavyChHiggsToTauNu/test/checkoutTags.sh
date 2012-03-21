@@ -59,6 +59,8 @@ set -e
 # 17.10.2011/M.Kortelainen CMSSW_4_2_8_patch6 Updated type I/II MET tags
 # 29.12.2011/S.Lehti       CMSSW_4_2_8_patch2 Commented removal of HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
 # 16.3.2012/S.Lehti	   CMSSW_4_2_8 Added tag for btagging scale factors
+# 19.3.2012/M.Kortelainen  CMSSW_4_2_8_patch2 Updated lumi tag to include the pixel lumi
+
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -112,7 +114,7 @@ addpkg JetMETCorrections/Objects V03-01-00
 
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc
-addpkg RecoLuminosity/LumiDB      V03-03-02
+addpkg RecoLuminosity/LumiDB      V03-04-02
 
 # Electron ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID

@@ -213,6 +213,24 @@ namespace HPlus {
     fTaus.clear();
     fMets.clear();
 
+    const pat::TriggerPath *path = trigger.path(fPath);
+    if(!path || !path->wasAccept())
+      return false;
+
+    pat::TriggerFilterRefVector filters = trigger.pathFilters(fPath, false);
+    if(filters.size() == 0)
+      throw cms::Exception("LogicError") << "No filters for fired path " << fPath << std::endl;
+    pat::TriggerObjectRefVector objs = trigger.filterObjects(filters[filters.size()-1]->label());
+    for(pat::TriggerObjectRefVector::const_iterator iObj = objs.begin(); iObj != objs.end(); ++iObj) {
+      if((*iObj)->id(trigger::TriggerTau))
+        fTaus.push_back(*iObj);
+      else if((*iObj)->id(trigger::TriggerMET))
+        fMets.push_back(*iObj);
+    }
+
+    return true;
+
+    // Below is legacy code, which might be helpful for debugging
     /*
     //pat::TriggerObjectRefVector coll = trigger.pathObjects(fPath);
     pat::TriggerObjectRefVector coll = trigger.objects(trigger::TriggerTau);
@@ -246,8 +264,10 @@ namespace HPlus {
     }
     */
 
+    /*
     pat::TriggerPathRefVector accepted = trigger.acceptedPaths();
     for(pat::TriggerPathRefVector::const_iterator iter = accepted.begin(); iter != accepted.end(); ++iter) {
+    */
       /*
       pat::TriggerFilterRefVector filters = trigger.pathFilters((*iter)->name(), false);
       pat::TriggerObjectRefVector objects = trigger.pathObjects((*iter)->name());
@@ -271,6 +291,7 @@ namespace HPlus {
       std::cout << std::endl;
       */
 
+    /*
       if((*iter)->name() == fPath && (*iter)->wasAccept()) {
 	//std::cout << "*** (*iter)->name() = " << (*iter)->name() << std::endl;
         pat::TriggerFilterRefVector filters = trigger.pathFilters(fPath, false);
@@ -290,6 +311,7 @@ namespace HPlus {
       }
     }
     return false;
+    */
   }
 
   bool TriggerSelection::TriggerPath::analyze(const edm::TriggerResults& trigger, const edm::TriggerNames& triggerNames) {

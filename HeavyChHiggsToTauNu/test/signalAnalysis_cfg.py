@@ -210,6 +210,7 @@ print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", pr
 #print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection src:", process.signalAnalysis.tauSelection.src
+print "TauSelection isolation:", process.signalAnalysis.tauSelection.isolationDiscriminator
 print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode
 
 # Counter analyzer (in order to produce compatible root file with the
