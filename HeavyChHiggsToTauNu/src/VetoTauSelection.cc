@@ -79,8 +79,10 @@ namespace HPlus {
     }
     // Do tau selection on the veto tau candidates
     TauSelection::Data myTauData = fTauSelection.analyze(iEvent, iSetup, myVetoTauCandidates);
+    //    std::cout << " myVetoTauCandidates   " << myVetoTauCandidates.size() << std::endl;
     if (myTauData.passedEvent())
       increment(fVetoTausSelectedCounter);
+    //    std::cout << " myTauData.passedEvent())  " << myTauData.passedEvent()  << std::endl;
     
     // Loop over the selected veto taus
     bool myVetoStatus = false;
@@ -114,12 +116,12 @@ namespace HPlus {
       }
       // Add the taus up and get the ditau mass
       TLorentzVector myVetoTauMomentum;
-      myVetoTauMomentum.SetXYZM((*it)->px(), (*it)->py(), (*it)->pz(), 1.777);
+      myVetoTauMomentum.SetXYZM((*it)->px(), (*it)->py(), (*it)->pz(), 1.777);  
       myVetoTauMomentum += mySelectedTauMomentum;
       double myDitauMass = myVetoTauMomentum.M();
       // Check if ditau mass is compatible with Z mass
       if (TMath::Abs(myDitauMass - fZMass) < fZMassWindow) {
-        myVetoStatus = true;
+	//	myVetoStatus = true;
       }
       if (isGenuineTau) {
           hSelectedGenuineTauDiTauMass->Fill(myDitauMass, fEventWeight.getWeight());
@@ -127,6 +129,8 @@ namespace HPlus {
           hSelectedFakeTauDiTauMass->Fill(myDitauMass, fEventWeight.getWeight());
       }
     }
+    if (myTauData.passedEvent()) myVetoStatus = true;
+
     // Return the end result
     if (myVetoStatus)
       increment(fEventsCompatibleWithZMassCounter);

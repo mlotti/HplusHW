@@ -200,6 +200,7 @@ namespace HPlus {
     TH1 *hTransverseMassTopChiSelection;
     TH1 *hTransverseMassTopBjetSelection;
     TH1 *hTransverseMassMET70;
+    TH1 *hTransverseMassTauVeto;
     TH1 *hTransverseMassAfterDeltaPhi;
     TH1 *hTransverseMassAfterDeltaPhi160;
     TH1 *hTransverseMassAfterDeltaPhi130;

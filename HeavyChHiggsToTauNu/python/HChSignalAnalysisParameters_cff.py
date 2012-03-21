@@ -86,10 +86,10 @@ tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
-vetoTauBase = tauSelectionHPSLooseTauBased.clone(
+vetoTauBase = tauSelectionHPSVeryLooseTauBased.clone(
     ptCut = cms.untracked.double(20), # jet pt > value
     etaCut = cms.untracked.double(2.5), # jet |eta| < value
-    leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
+    leadingTrackPtCut = cms.untracked.double(10.0), # ldg. track > value
     rtauCut = cms.untracked.double(0.0), # rtau > value
     nprongs = cms.untracked.uint32(1) # number of prongs
 )
