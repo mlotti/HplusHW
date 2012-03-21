@@ -1022,7 +1022,10 @@ def _indexNameHelper(index, name, names):
     if index != None and name != None:
         raise Exception("Give either index or name, not both")
     if index == None:
-        ind = names.index(name)
+        try:
+            ind = names.index(name)
+        except ValueError:
+            raise Exception("Name '%s' does not exist in list '%s'" %(name, ",".join(names)))
     return ind
 
 ## Class representing a column in counter.CounterTable.
