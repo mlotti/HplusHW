@@ -416,8 +416,12 @@ if doJESVariation or doSystematics:
         if dataVersion.isData():
             doJetUnclusteredVariation = False
 
-    for name in modules:
-        addJESVariation(name, doJetUnclusteredVariation)
+    # JES variation is relevant for MC, and for tau in embedding
+    if dataVersion.isMC() or options.tauEmbeddingInput != 0:
+        for name in modules:
+            addJESVariation(name, doJetUnclusteredVariation)
+    else:
+        print "JES variation disabled for data (not meaningful for data)"
 
 
 def addPUWeightVariation(name):
@@ -447,8 +451,12 @@ if doPUWeightVariation or doSystematics:
     if options.tauEmbeddingInput != 0:
         modules = [n+"CaloMet60TEff" for n in modules]
 
-    for name in modules:
-        addPUWeightVariation(name)
+    # PU weight variation is relevant for MC only
+    if dataVersion.isMC():
+        for name in modules:
+            addPUWeightVariation(name)
+    else:
+        print "PU weight variation disabled for data (not meaningful for data)"
 
 
 # Signal analysis with various tightened muon selections for tau embedding
