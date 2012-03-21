@@ -166,15 +166,15 @@ if __name__ == "__main__":
     parser.add_option("--verbose", dest="verbose", action="store_true", default=False,
                       help="Print outputs of the commands which are executed")
     parser.add_option("--lumiCalc1", dest="lumicalc", action="store_const", const="lumiCalc1",
-                      help="Use lumiCalc.py instead of lumiCalc2.py (default is to use lumiCalc2.py")
+                      help="Use lumiCalc.py instead of lumiCalc2.py (default is to use pixelLumiCalc.py")
     parser.add_option("--lumiCalc2", dest="lumicalc", action="store_const", const="lumiCalc2",
-                      help="Use lumiCalc2.py (default)")
+                      help="Use lumiCalc2.py (default is to use pixelLumiCalc.py)")
     parser.add_option("--pixelLumiCalc", dest="lumicalc", action="store_const", const="pixelLumiCalc",
-                      help="Use pixelLumiCalc.py instead of lumiCalc2.py (default is to use lumiCalc2.py")
+                      help="Use pixelLumiCalc.py instead of lumiCalc2.py (default)")
     
     (opts, args) = parser.parse_args()
     if opts.lumicalc == None:
-        opts.lumicalc = "lumiCalc2"
+        opts.lumicalc = "pixelLumiCalc"
     print "Calculating luminosity with %s" % opts.lumicalc
 
     sys.exit(main(opts, args))
