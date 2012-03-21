@@ -1506,6 +1506,30 @@ class DatasetMerged:
 # 
 # Holds both an ordered list of Dataset objects, and a name->object
 # map for convenient access by dataset name.
+#
+# \todo The code structure could be simplified by getting rid of
+# dataset.DatasetRootHisto. This would mean that the MC normalisation
+# should be handled in dataset.DatasetManagager and dataset.Dataset,
+# with an interface similar to what dataset.DatasetRootHisto and
+# histograms.HistoManager provide now (i.e. user first sets the
+# normalisation scheme, and then asks histograms which are then
+# normalised as requested). dataset.Dataset and dataset.DatasetManager
+# should then return ROOT TH1s, with which user is free to do what
+# (s)he wants. histograms.HistoManager and histograms.HistoManagerImpl
+# could be merged, as it would take already-normalized histograms as
+# input (the input should still be histograms.Histo classes in order
+# to give user freedom to provide fully customized version of such
+# wrapper class if necessary). The interface of plots.PlotBase would
+# still accept TH1/TGraph, so no additional burden would appear for
+# the usual use cases with plots. The information of a histogram being
+# data/MC in histograms.Histo could also be removed (as it is
+# sometimes too restrictive), and the use in plots.PlotBase (and
+# deriving classes) could be transformed to identify the data/MC
+# datasets (for default formatting purposes) by the name of the
+# histograms (in the usual workflow the histograms have the dataset
+# name), with the possibility that user can easily modify the names of
+# data/MC histograms. This would bring more flexibility on that front,
+# and easier customization when necessary.
 class DatasetManager:
     ## Constructor
     #
