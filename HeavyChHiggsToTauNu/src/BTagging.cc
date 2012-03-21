@@ -91,7 +91,6 @@ namespace HPlus {
       // obtain index for pT table
 ////      int myIndex = obtainIndex(fPtBinsL, *it);
 ////      myValue *= (1.-fScaleFactorL[myIndex]*fEpsilonMCL[myIndex]) / (1.-fEpsilonMCL[myIndex]);
-      std::cout << "check " << (*it)->pt() << " "  << (*it)->eta() << " " << getMCMistagEfficiency((*it)->pt(),(*it)->eta()) << std::endl;
       myValue *= (1.-getMistagScaleFactor((*it)->pt(),(*it)->eta())*getMCMistagEfficiency((*it)->pt(),(*it)->eta())) / (1.-getMCMistagEfficiency((*it)->pt(),(*it)->eta()));
     }
     // Return calculated value
