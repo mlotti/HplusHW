@@ -12,6 +12,7 @@ import histograms
 import plots
 import counter
 import styles
+import cutstring
 
 ## Apply embedding normalization (muon efficiency, W->tau->mu factor
 normalize = True
@@ -27,7 +28,7 @@ datasetAllEvents = {
     # Not all events were processed for pattuples
     "WJets_TuneZ2_Summer11": (None, {"Run2011A": 82207600.00/81352576}),
     "W3Jets_TuneZ2_Summer11": (7685944, {"Run2011A": 7688457.50}),
-    "DYJetsToLL_M50_TuneZ2_Summer11": (33576416, {"Run2011A": 33556404.00}),
+#    "DYJetsToLL_M50_TuneZ2_Summer11": (33576416, {"Run2011A": 33556404.00}),
     # Not all events were processed for pattuples
     "DYJetsToLL_M50_TuneZ2_Summer11": (None, {"Run2011A": 33556404.00/33576416}),
     "T_t-channel_TuneZ2_Summer11": (3900171, {"Run2011A": 3906455.50}),
@@ -58,9 +59,143 @@ dirEmbs_120131 = [
 #
 # This variable is used to select from possibly multiple sets of embedding directories
 dirEmbs = dirEmbs_120131
-
 ## Signal analysis multicrab directory for normal MC
 dirSig = "../multicrab_compareEmbedding_Run2011A_120118_122555" # for 120118, 120126, 120131
+
+
+## Tau analysis multicrab directories for embedding trials
+tauDirEmbs_120110 = [
+    "multicrab_analysis_v13_3_Run2011A_120110_150535",
+    "multicrab_analysis_v13_3_seedTest1_Run2011A_120110_203953",
+    "multicrab_analysis_v13_3_seedTest2_Run2011A_120110_205101",
+    "multicrab_analysis_v13_3_seedTest3_Run2011A_120110_210157",
+    "multicrab_analysis_v13_3_seedTest4_Run2011A_120110_211348",
+    "multicrab_analysis_v13_3_seedTest5_Run2011A_120110_212548",
+    "multicrab_analysis_v13_3_seedTest6_Run2011A_120126_211602",
+    "multicrab_analysis_v13_3_seedTest7_Run2011A_120110_214901",
+    "multicrab_analysis_v13_3_seedTest8_Run2011A_120110_220005",
+    "multicrab_analysis_v13_3_seedTest9_Run2011A_120110_221143",
+]
+## Tau analysis multicrab directories for embedding trials
+#
+# This variable is used to select from possibly multiple sets of embedding directories
+tauDirEmbs = tauDirEmbs_120110
+## Tau analysis multicrab directory for normal MC
+tauDirSig = "multicrab_analysisTau_111202_144918"
+
+class Selections:
+    def __init__(self, **kwargs):
+        for key, value in kwargs.iteritems():
+            setattr(self, key, value)
+
+## Selections for tau ntuple
+tauNtuple = Selections(decayModeExpression = "(taus_decayMode<=2)*taus_decayMode + (taus_decayMode==10)*3 +(taus_decayMode > 2 && taus_decayMode != 10)*4>>tmp(5,0,5)",
+                       rtauExpression = "(taus_leadPFChargedHadrCand_p4.P() / taus_p4.P() -1e-10)",
+                       deltaPhiExpression = "acos( (taus_p4.Px()*pfMet_p4.Px()+taus_p4.Py()*pfMet_p4.Py())/(taus_p4.Pt()*pfMet_p4.Et()) )*57.3")
+
+# tau candidate selection
+#tauNtuple.decayModeFinding = "taus_decayMode >= 0" # replace with discriminator after re-running ntuples
+tauNtuple.decayModeFinding = "taus_f_decayModeFinding > 0.5" # replace with discriminator after re-running ntuples
+tauNtuple.tauPtPreCut = "taus_p4.Pt() > 15"
+tauNtuple.tauPtCut = "taus_p4.Pt() > 40"
+tauNtuple.tauEtaCut = "abs(taus_p4.Eta()) < 2.1"
+tauNtuple.tauLeadPt = "taus_leadPFChargedHadrCand_p4.Pt() > 20"
+tauNtuple.ecalFiducial = "!( abs(taus_p4.Eta()) < 0.018 || (0.423 < abs(taus_p4.Eta()) && abs(taus_p4.Eta()) < 0.461)"
+tauNtuple.ecalFiducial += " || (0.770 < abs(taus_p4.Eta()) && abs(taus_p4.Eta()) < 0.806)"
+tauNtuple.ecalFiducial += " || (1.127 < abs(taus_p4.Eta()) && abs(taus_p4.Eta()) < 1.163)"
+tauNtuple.ecalFiducial += " || (1.460 < abs(taus_p4.Eta()) && abs(taus_p4.Eta()) < 1.558)" # gap
+tauNtuple.ecalFiducial += ")"
+tauNtuple.electronRejection = "taus_f_againstElectronMedium > 0.5"
+tauNtuple.muonRejection = "taus_f_againstMuonTight > 0.5"
+
+# tau ID
+tauNtuple.tightIsolation = "taus_f_byTightIsolation > 0.5"
+tauNtuple.oneProng = "taus_signalPFChargedHadrCands_n == 1"
+tauNtuple.rtau = "%s > 0.7" % tauNtuple.rtauExpression
+
+# Short-hand notations for tau candidate selection and tau id (and yes, the isolation is intentionally part of tau candidate selection here)
+tauNtuple.tauCandidateSelection = cutstring.And(*[getattr(tauNtuple, name) for name in ["decayModeFinding", "tightIsolation", "tauPtCut", "tauEtaCut", "tauLeadPt", "ecalFiducial", "electronRejection", "muonRejection"]])
+tauNtuple.tauID = cutstring.And(*[getattr(tauNtuple, name) for name in ["tightIsolation", "oneProng", "rtau"]])
+
+# Rest of the event selection
+tauNtuple.pvSelection = "selectedPrimaryVertices_n >= 1"
+tauNtuple.metSelection = "pfMet_p4.Pt() > 50"
+tauNtuple.jetSelection = "jets_looseId && jets_p4.Pt() > 30 && abs(jets_p4.Eta()) < 2.4 && sqrt((jets_p4.Eta()-taus_p4[0].Eta())^2+(jets_p4.Phi()-taus_p4[0].Phi())^2) > 0.5"
+tauNtuple.jetEventSelection = "Sum$(%s) >= 3" % tauNtuple.jetSelection
+tauNtuple.btagSelection = "jets_f_tche > 1.7"
+tauNtuple.btagEventSelection = "Sum$(%s && %s) >= 1" % (tauNtuple.jetSelection, tauNtuple.btagSelection)
+tauNtuple.deltaPhi160Selection = "%s <= 160)" % tauNtuple.deltaPhiExpression
+
+tauNtuple.caloMetNoHF = "tecalometNoHF_p4.Pt() > 60"
+tauNtuple.caloMet = "tecalomet_p4.Pt() > 60"
+tauNtuple.weight = {
+    "EPS": "weightPileup_Run2011A",
+    "Run2011A-EPS": "pileupWeight_Run2011AnoEPS",
+    "Run2011A": "weightPileup_Run2011A"
+    }
+
+## Customization function for decay mode plot (all decay modes)
+#
+# \param h   plots.PlotBase object
+def decayModeCheckCustomize(h):
+    n = 16
+    if hasattr(h, "getFrame1"):
+        h.getFrame1().GetXaxis().SetNdivisions(n)
+        h.getFrame1().GetXaxis().SetNdivisions(n)
+    else:
+        h.getFrame().GetXaxis().SetNdivisions(n)
+
+    xaxis = h.getFrame().GetXaxis()
+    xaxis.SetBinLabel(1, "#pi^{#pm}")
+    xaxis.SetBinLabel(2, "#pi^{#pm}#pi^{0}")
+    xaxis.SetBinLabel(3, "#pi^{#pm}#pi^{0}#pi^{0}")
+    xaxis.SetBinLabel(4, "#pi^{#pm}#pi^{0}#pi^{0}#pi^{0}")
+    xaxis.SetBinLabel(5, "#pi^{#pm} N#pi^{0}")
+    xaxis.SetBinLabel(6, "#pi^{+}#pi^{-}")
+    xaxis.SetBinLabel(7, "#pi^{+}#pi^{-}#pi^{0}")
+    xaxis.SetBinLabel(8, "#pi^{+}#pi^{-}#pi^{0}#pi^{0}")
+    xaxis.SetBinLabel(9, "#pi^{+}#pi^{-}#pi^{0}#pi^{0}#pi^{0}")
+    xaxis.SetBinLabel(10, "#pi^{+}#pi^{-} N#pi^{0}")
+    xaxis.SetBinLabel(11, "#pi^{+}#pi^{-}#pi^{#pm}")
+    xaxis.SetBinLabel(12, "#pi^{+}#pi^{-}#pi^{#pm}#pi^{0}")
+    xaxis.SetBinLabel(13, "#pi^{+}#pi^{-}#pi^{#pm}#pi^{0}#pi^{0}")
+    xaxis.SetBinLabel(14, "#pi^{+}#pi^{-}#pi^{#pm}#pi^{0}#pi^{0}#pi^{0}")
+    xaxis.SetBinLabel(15, "#pi^{+}#pi^{-}#pi^{#pm} N#pi^{0}")
+    xaxis.SetBinLabel(16, "Other")
+
+
+## Customization function for decay mode plot (relevant decay modes)
+#
+# \param h   plots.PlotBase object
+def decayModeCustomize(h):
+    n = 5
+    if hasattr(h, "getFrame1"):
+        h.getFrame1().GetXaxis().SetNdivisions(n)
+        h.getFrame1().GetXaxis().SetNdivisions(n)
+    else:
+        h.getFrame().GetXaxis().SetNdivisions(n)
+
+    xaxis = h.getFrame().GetXaxis()
+    xaxis.SetBinLabel(1, "#pi^{#pm}")
+    xaxis.SetBinLabel(2, "#pi^{#pm}#pi^{0}")
+    xaxis.SetBinLabel(3, "#pi^{#pm}#pi^{0}#pi^{0}")
+    xaxis.SetBinLabel(4, "#pi^{+}#pi^{-}#pi^{#pm}")
+    xaxis.SetBinLabel(5, "Other")
+
+
+## Selections for signal analysis tree
+signalNtuple = Selections(
+    deltaPhiExpression="acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3",
+    mtExpression = "sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))",
+    )
+signalNtuple.metCut = "met_p4.Et() > 50"
+signalNtuple.bTaggingCut = "passedBTagging"
+signalNtuple.deltaPhi160Cut = "%s <= 160" % signalNtuple.deltaPhiExpression
+signalNtuple.deltaPhi130Cut = "%s <= 130" % signalNtuple.deltaPhiExpression
+signalNtuple.weight = "weightPileup*weightTrigger"
+signalNtuple.weightBTagging = signalNtuple.weight+"*weightBTagging"
+
+
 
 
 ## Update all event counts to the ones taking into account the pileup reweighting
@@ -70,7 +205,7 @@ def updateAllEventsToWeighted(datasets):
     # If DatasetsMany or similar
     if hasattr(datasets, "datasetManagers"):
         for ds in datasets.datasetManagers:
-            updateAllEventsToWEighted(ds)
+            updateAllEventsToWeighted(ds)
         return
 
     for name, tpl in datasetAllEvents.iteritems():
@@ -202,10 +337,11 @@ class DatasetsMany:
     #
     # \param dirs                      List of paths multicrab directories, either absolute or relative to working directory
     # \param counters                  Directory in dataset TFiles containing the event counters
+    # \param normalizeMCByCrossSection Normalize MC to cross section
     # \param normalizeMCByLuminosity   Normalize MC to data luminosity?
     #
     # Construct a dataset.DatasetManager object from each multicrab directory
-    def __init__(self, dirs, counters, normalizeMCByLuminosity=False):
+    def __init__(self, dirs, counters, normalizeMCByCrossSection=False, normalizeMCByLuminosity=False):
         self.datasetManagers = []
         for d in dirs:
             datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=d+"/multicrab.cfg", counters=counters)
@@ -213,7 +349,8 @@ class DatasetsMany:
             updateAllEventsToWeighted(datasets)
             self.datasetManagers.append(datasets)
 
-        self.normalizeMCByLuminosity=normalizeMCByLuminosity
+        self.normalizeMCByCrossSection = normalizeMCByCrossSection
+        self.normalizeMCByLuminosity = normalizeMCByLuminosity
 
     ## Apply a function for each dataset.DatasetManager object
     def forEach(self, function):
@@ -359,8 +496,11 @@ class DatasetsMany:
         for i, dm in enumerate(self.datasetManagers):
             ds = dm.getDataset(datasetName)
             h = ds.getDatasetRootHisto(name)
-            if h.isMC() and self.normalizeMCByLuminosity:
-                h.normalizeToLuminosity(self.lumi)
+            if h.isMC():
+                if self.normalizeMCByCrossSection:
+                    h.normalizeByCrossSection()
+                if self.normalizeMCByLuminosity:
+                    h.normalizeToLuminosity(self.lumi)
             h = histograms.HistoWithDataset(ds, h.getHistogram(), "dummy") # only needed for scaleNormalization()
             scaleNormalization(h)
             h = h.getRootHisto()

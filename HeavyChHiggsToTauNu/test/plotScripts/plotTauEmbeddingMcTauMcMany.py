@@ -24,7 +24,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
-import plotTauEmbeddingMcSignalAnalysisMc as tauEmbedding
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 import plotTauEmbeddingTau as tauPlot
 import produceTauEmbeddingResult as result
 import plotTauEmbeddingTauMany as tauPlotMany
@@ -37,8 +37,11 @@ dirSig = "../multicrab_analysisTau_111202_144918"
 weight = "weightPileup_Run2011A"
 
 def main():
-    datasetsEmb = result.DatasetsMany(tauPlotMany.dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
-    datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
+    tauDirEmbs = ["."] + [os.path.join("..", d) for d in tauEmbedding.tauDirEmbs[1:]]
+    tauDirSig = "../"+tauEmbedding.tauDirSig
+
+    datasetsEmb = tauEmbedding.DatasetsMany(tauDirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
+    datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=tauDirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
 
     datasetsEmb.forEach(plots.mergeRenameReorderForDataMC)
     datasetsEmb.setLumiFromData()
