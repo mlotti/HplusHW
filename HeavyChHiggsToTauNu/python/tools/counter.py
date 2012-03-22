@@ -1258,6 +1258,18 @@ class CounterTable:
     def setCount(self, irow, icol, value):
         self.table[irow][icol] = value
 
+    ## Set count with row and column index or name
+    #
+    # \param value  Value to insert (dataset.Count object)
+    # \param irow      Row index (forwarded to counter._indexNameHelper)
+    # \param icol      Column index (forwarded to counter._indexNameHelper)
+    # \param rowName   Row name (forwarded to counter._indexNameHelper)
+    # \param colName   Column name (forwarded to counter._indexNameHelper)
+    def setCount2(self, value, irow=None, icol=None, rowName=None, colName=None):
+        ir = _indexNameHelper(irow, rowName, self.rowNames)
+        ic = _indexNameHelper(icol, colName, self.columnNames)
+        self.table[ir][ic] = value
+
     ## Get row names
     def getRowNames(self):
         return self.rowNames
