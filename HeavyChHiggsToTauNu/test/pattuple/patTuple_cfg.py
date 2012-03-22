@@ -234,10 +234,10 @@ if len(options.skimConfig) > 0:
         baseName = config.replace("_cff", "")
         baseName = baseName[0].lower() + baseName[1:] # Make the first letter lower case
         path = cms.Path(
-            process.sPAT * # Ensure that PAT and the possible trigger selection have been run, framework ensures the modules are ran only once
+            process.sPAT + # Ensure that PAT and the possible trigger selection have been run, framework ensures the modules are ran only once
             getattr(process, baseName+"Sequence")
         )
-        setattr(process, baseName+"Path", cms.Path(getattr(process, baseName+"Sequence")))
+        setattr(process, baseName+"Path", path)
         process.out.SelectEvents.SelectEvents.append(baseName+"Path")
 
 # Output module in EndPath
