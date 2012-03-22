@@ -229,7 +229,7 @@ if len(options.skimConfig) > 0:
     else:
         print "Skimming with OR of configurations ", " ".join(options.skimConfig)
     process.out.SelectEvents.SelectEvents = []
-    for config in process.load(options.skimConfig):
+    for config in options.skimConfig:
         process.load("HiggsAnalysis.HeavyChHiggsToTauNu."+config)
         baseName = config.replace("_cff", "")
         baseName = baseName[0].lower() + baseName[1:] # Make the first letter lower case
