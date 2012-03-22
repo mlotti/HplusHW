@@ -3,13 +3,10 @@
 import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.certifiedLumi as lumi
 
 multicrab = Multicrab("crab_pat.cfg", lumiMaskDir="..")
 
-multicrab.extendDatasets(
-    "AOD",
-    [
+datasets = [
 ########
 #
 # 42X
@@ -150,7 +147,9 @@ multicrab.extendDatasets(
 #        "Tbar_s-channel_TuneZ2_Fall11",
 #        "WZ_TuneZ2_Fall11",
 #        "ZZ_TuneZ2_Fall11",
-        ])
+]
+
+multicrab.extendDatasets("AOD", datasets)
 
 # local_stage_out doesn't work due to denied permission because we're
 # writing to /store/group/local ...
@@ -190,6 +189,11 @@ def addSplitMode(dataset):
         dataset.appendLine("CMSSW.total_number_of_lumis = -1")
 multicrab.forEachDataset(addSplitMode)
 
+def addCopyConfig(dataset):
+    dataset.appendLine("USER.additional_input_files = copy_cfg.py")
+    dataset.appendCopyFile("../copy_cfg.py")
+multicrab.forEachDataset(addCopyConfig)
+
 # For collision data stageout from US doesn't seem to be a problem
 #allowUS = ["TT", "TTJets", "TTToHplusBWB_M90", "TTToHplusBWB_M100", "TTToHplusBWB_M120", "TTToHplusBWB_M140", "TTToHplusBWB_M160"]
 #def blacklistUS(dataset):
@@ -202,9 +206,22 @@ multicrab.forEachDataset(addSplitMode)
 multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
 
 prefix = "multicrab"
+configOnly = False # Create task configuration only?
 
 # Create multicrab task configuration and run 'multicrab -create'
-multicrab.createTasks(prefix=prefix)
+taskDir = multicrab.createTasks(prefix=prefix, configOnly=configOnly)
 
-# Create task configuration only
-#multicrab.createTasks(prefix=prefix, configOnly=True)
+# patch CMSSW.sh
+#
+# Running CMSSW again in each job just to copy the file seems to
+# somehow "linearize" the file, and the subsequent file access is fast
+class Wrapper:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+if not configOnly:
+    import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
+    import os
+    os.chdir(taskDir)
+    patch.main(Wrapper(dirs=datasets, input="pattuple"))
+    os.chdir("..")

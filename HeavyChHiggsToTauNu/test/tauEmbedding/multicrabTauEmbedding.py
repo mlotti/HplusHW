@@ -319,7 +319,7 @@ def modify(dataset):
     else:
         dataset.appendLine("CMSSW.output_file = "+config[step]["output"])
         dataset.appendLine("USER.additional_input_files = copy_cfg.py")
-        dataset.appendCopyFile("copy_cfg.py")
+        dataset.appendCopyFile("../copy_cfg.py")
 
 # Modification step for analysis steps
 def modifyAnalysis(dataset):
@@ -368,7 +368,7 @@ class Wrapper:
         self.__dict__.update(kwargs)
 
 if not configOnly and step in ["skim", "embedding"]:
-    import patchSkimEmbedding as patch
+    import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
     import os
     os.chdir(taskDir)
     patch.main(Wrapper(dirs=datasets, input={"skim": "skim",
