@@ -26,7 +26,7 @@ datasets = [
 #       "Tau_165970-167913_Prompt",          # 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
 #       "Tau_170722-172619_Aug05",           # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
 #       "Tau_172620-173198_Prompt",          # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
-       "Tau_173236-173692_Prompt",          # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
+#       "Tau_173236-173692_Prompt",          # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
 #       "Tau_175860-177452_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v1
 #       "Tau_177718-178380_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v1
 #       "Tau_178420-179889_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v5
@@ -67,7 +67,7 @@ datasets = [
 #        "TTToHplusBWB_M80_Summer11",
 #        "TTToHplusBWB_M90_Summer11",
 #        "TTToHplusBWB_M100_Summer11",
-        "TTToHplusBWB_M120_Summer11",
+#        "TTToHplusBWB_M120_Summer11",
 #        "TTToHplusBWB_M140_Summer11",
 #        "TTToHplusBWB_M150_Summer11",
 #        "TTToHplusBWB_M155_Summer11",
@@ -111,6 +111,40 @@ datasets = [
 #        "WZ_TuneZ2_Summer11",
 #        "ZZ_TuneZ2_Summer11",
 
+########
+#
+# 44X
+#
+########
+
+        # Data 2011
+        # tau+met trigger
+#       "Tau_160431-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
+#       "Tau_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
+#       "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
+#       "Tau_175860-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
+
+        # single mu
+#       "SingleMu_160431-163261_2011A_Nov08",     # 2011A
+#       "SingleMu_163270-163869_2011A_Nov08",     # 2011A
+#       "SingleMu_165088-165633_2011A_Nov08",     # 2011A
+#       "SingleMu_165970-166150_2011A_Nov08",     # 2011A
+#       "SingleMu_166161-166164_2011A_Nov08",     # 2011A
+#       "SingleMu_166346-166346_2011A_Nov08",     # 2011A
+#       "SingleMu_166374-166967_2011A_Nov08",     # 2011A
+#       "SingleMu_167039-167043_2011A_Nov08",     # 2011A
+#       "SingleMu_167078-167913_2011A_Nov08",     # 2011A
+#       "SingleMu_170722-172619_2011A_Nov08",     # 2011A
+#       "SingleMu_172620-173198_2011A_Nov08",     # 2011A
+#       "SingleMu_173236-173692_2011A_Nov08",     # 2011A
+#       "SingleMu_175860-176469_2011A_Nov19",     # 2011B
+#       "SingleMu_176545-177053_2011B_Nov19",     # 2011B
+#       "SingleMu_177074-177452_2011B_Nov19",     # 2011B
+#       "SingleMu_177718-178380_2011B_Nov19",     # 2011B
+#       "SingleMu_178420-178866_2011B_Nov19",     # 2011B
+#       "SingleMu_178871-179889_2011B_Nov19",     # 2011B
+#       "SingleMu_179959-180252_2011B_Nov19",     # 2011B
+
         # Fall11
         # Signal MC (WH)
 #        "TTToHplusBWB_M80_Fall11",
@@ -132,19 +166,24 @@ datasets = [
         # Signal MC (Heavy)
 #        "HplusTB_M180_Fall11",
 #        "HplusTB_M190_Fall11",
+#        "HplusTB_M200_Fall11",
+#        "HplusTB_M220_Fall11",
 #        "HplusTB_M250_Fall11",
 #        "HplusTB_M300_Fall11",
         # Background MC
-#        "QCD_Pt120to170_TuneZ2_Fall11",
-#        "QCD_Pt300to470_TuneZ2_Fall11",
 #        "TTJets_TuneZ2_Fall11",
 #        "WJets_TuneZ2_Fall11",
+#        "W2Jets_TuneZ2_Fall11",
+#        "W3Jets_TuneZ2_Fall11",
+#        "W4Jets_TuneZ2_Fall11",
+#        "DYJetsToLL_M10to50_TuneZ2_Fall11",
 #        "DYJetsToLL_M50_TuneZ2_Fall11",
 #        "T_t-channel_TuneZ2_Fall11",
 #        "Tbar_t-channel_TuneZ2_Fall11",
 #        "T_tW-channel_TuneZ2_Fall11",
 #        "T_s-channel_TuneZ2_Fall11",
 #        "Tbar_s-channel_TuneZ2_Fall11",
+#        "WW_TuneZ2_Fall11",
 #        "WZ_TuneZ2_Fall11",
 #        "ZZ_TuneZ2_Fall11",
 ]
