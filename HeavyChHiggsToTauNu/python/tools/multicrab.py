@@ -681,6 +681,10 @@ class MulticrabDataset:
         else:
             self.data[blackWhiteList] = sites[:]
 
+    ## Set the trigger for the dataset
+    #
+    # \param name     'trigger' or 'triggerOR'
+    # \param content  string for 'trigger', list of strings for 'triggerOR'
     def setTrigger(self, name, content):
         if name != "trigger" and name != "triggerOR":
             raise Exception("name can be either 'trigger' or 'triggerOR', was '%s'" % name)
@@ -694,6 +698,12 @@ class MulticrabDataset:
             pass
 
         self.data[name] = content
+
+    ## Set the skim configuration(s)
+    #
+    # \param content  String or list of strings for the skim configuration files (without the .py; these are looked from python directory)
+    def setSkimConfig(self, content):
+        self.data["skimConfig"] = content
 
     ## Write generated files to a directory.
     #
@@ -734,6 +744,14 @@ class MulticrabDataset:
         try:
             args.extend(["trigger=%s" % trigger for trigger in self.data["triggerOR"]])
             del dataKeys[dataKeys.index("triggerOR")]
+        except KeyError:
+            pass
+        try:
+            lst = self.data["skimConfig"]
+            if isinstance(lst, basestring):
+                lst = [lst]
+            args.extend(["skimConfig=%s" % conf for conf in lst])
+            del dataKeys[dataKeys.index("skimConfig")]
         except KeyError:
             pass
 
