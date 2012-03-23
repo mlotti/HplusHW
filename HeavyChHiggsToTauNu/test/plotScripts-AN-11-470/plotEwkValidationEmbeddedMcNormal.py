@@ -43,9 +43,6 @@ tauAnalysisSig = "tauNtuple"
 analysisEmb = "signalAnalysis"
 analysisSig = "signalAnalysisTauEmbeddingLikePreselection"
 
-#analysisEmb = "signalAnalysisCaloMet60TEff"
-#analysisSig = "signalAnalysisGenuineTau" # require that the selected tau is genuine, valid comparison after njets
-
 counters = "Counters/weighted"
 
 def main():
@@ -84,17 +81,17 @@ def main():
     tauEmbedding.normalize = True
     tauEmbedding.era = "Run2011A"
 
-    def dtp(name):
+    def dop(name):
         doTauPlots(tauDatasetsEmb, tauDatasetsSig, name)
         doTauCounters(tauDatasetsEmb, tauDatasetsSig, name)
         doPlots(datasetsEmb, datasetsSig, name)
         doCounters(datasetsEmb, datasetsSig, name)
 
-    dtp("TTJets")
-    dtp("WJets")
-    dtp("DYJetsToLL")
-    dtp("SingleTop")
-    dtp("Diboson")
+    dop("TTJets")
+    dop("WJets")
+    dop("DYJetsToLL")
+    dop("SingleTop")
+    dop("Diboson")
 
 
 drawPlotCommon = tauEmbedding.PlotDrawerTauEmbeddingEmbeddedNormal(ylabel="Events / %.0f GeV/c", stackMCHistograms=False, log=True, addMCUncertainty=True, ratio=True)
