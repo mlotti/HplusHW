@@ -1610,11 +1610,14 @@ class CounterTable:
     # \param splitter    Possible content splitter object (counter.TableSplitter)
     #
     # \return Table formatted as a string
-    def format(self, formatter=TableFormatText(), splitter=None):
+    def format(self, formatter=TableFormatText(), splitter=None, header=True):
         if self.getNcolumns() == 0 or self.getNrows() == 0:
             return ""
 
-        content = [self._header()] + self._content(formatter)
+        content = []
+        if header:
+            content.append(self._header())
+        content.extend(self._content(formatter))
 
         if splitter != None:
             content = splitter.split(content)
