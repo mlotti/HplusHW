@@ -9,7 +9,6 @@
 #
 # \see multicrab
 
-import multicrabDatasetsCollisionData10Apr21 as collisionData10Apr21
 import multicrabDatasetsCollisionData11May10 as collisionData11May10
 import multicrabDatasetsCollisionData11Aug05 as collisionData11Aug05
 import multicrabDatasetsCollisionData11Prompt as collisionData11Prompt
@@ -24,10 +23,9 @@ import multicrabDatasetsTauEmbedding as tauEmbedding
 ## multicrabDatasets* files
 datasets = {}
 
-#datasets.update(collisionData10Apr21.datasets)
-#datasets.update(collisionData11May10.datasets)
-#datasets.update(collisionData11Aug05.datasets)
-#datasets.update(collisionData11Prompt.datasets)
+datasets.update(collisionData11May10.datasets)
+datasets.update(collisionData11Aug05.datasets)
+datasets.update(collisionData11Prompt.datasets)
 datasets.update(collisionData11Nov08Nov19.datasets)
 
 datasets.update(mcSummer11.datasets)
