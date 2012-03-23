@@ -125,25 +125,25 @@ datasets = [
 #       "Tau_175860-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
 
         # single mu
-#       "SingleMu_160431-163261_May10",      # 2011A
-#       "SingleMu_163270-163869_May10",      # 2011A
-#       "SingleMu_165088-165633_Prompt",     # 2011A
-#       "SingleMu_165970-166150_Prompt",     # 2011A
-#       "SingleMu_166161-166164_Prompt",     # 2011A
-#       "SingleMu_166346-166346_Prompt",     # 2011A
-#       "SingleMu_166374-166967_Prompt",     # 2011A
-#       "SingleMu_167039-167043_Prompt",     # 2011A
-#       "SingleMu_167078-167913_Prompt",     # 2011A
-#       "SingleMu_170722-172619_Aug05",      # 2011A
-#       "SingleMu_172620-173198_Prompt",     # 2011A
-#       "SingleMu_173236-173692_Prompt",     # 2011A
-#       "SingleMu_175860-176469_Prompt",     # 2011B
-#       "SingleMu_176545-177053_Prompt",     # 2011B
-#       "SingleMu_177074-177452_Prompt",     # 2011B
-#       "SingleMu_177718-178380_Prompt",     # 2011B
-#       "SingleMu_178420-178866_Prompt",     # 2011B
-#       "SingleMu_178871-179889_Prompt",     # 2011B
-#       "SingleMu_179959-180252_Prompt",     # 2011B
+#       "SingleMu_160431-163261_2011A_Nov08",     # 2011A
+#       "SingleMu_163270-163869_2011A_Nov08",     # 2011A
+#       "SingleMu_165088-165633_2011A_Nov08",     # 2011A
+#       "SingleMu_165970-166150_2011A_Nov08",     # 2011A
+#       "SingleMu_166161-166164_2011A_Nov08",     # 2011A
+#       "SingleMu_166346-166346_2011A_Nov08",     # 2011A
+#       "SingleMu_166374-166967_2011A_Nov08",     # 2011A
+#       "SingleMu_167039-167043_2011A_Nov08",     # 2011A
+#       "SingleMu_167078-167913_2011A_Nov08",     # 2011A
+#       "SingleMu_170722-172619_2011A_Nov08",     # 2011A
+#       "SingleMu_172620-173198_2011A_Nov08",     # 2011A
+#       "SingleMu_173236-173692_2011A_Nov08",     # 2011A
+#       "SingleMu_175860-176469_2011A_Nov19",     # 2011B
+#       "SingleMu_176545-177053_2011B_Nov19",     # 2011B
+#       "SingleMu_177074-177452_2011B_Nov19",     # 2011B
+#       "SingleMu_177718-178380_2011B_Nov19",     # 2011B
+#       "SingleMu_178420-178866_2011B_Nov19",     # 2011B
+#       "SingleMu_178871-179889_2011B_Nov19",     # 2011B
+#       "SingleMu_179959-180252_2011B_Nov19",     # 2011B
 
         # Fall11
         # Signal MC (WH)
@@ -183,6 +183,7 @@ datasets = [
 #        "T_tW-channel_TuneZ2_Fall11",
 #        "T_s-channel_TuneZ2_Fall11",
 #        "Tbar_s-channel_TuneZ2_Fall11",
+#        "WW_TuneZ2_Fall11",
 #        "WZ_TuneZ2_Fall11",
 #        "ZZ_TuneZ2_Fall11",
 ]
