@@ -70,7 +70,7 @@ datasetsRun2011A_v25 = [
        "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
 ]
 datasetsRun2011B_v25 = [
-       "Tau_175860-180252_Nov19",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
+       "Tau_175860-180252_2011B_Nov19",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
 ]
 
 
@@ -113,6 +113,9 @@ datasetsMC = [
 #        "QCD_Pt300to470_TuneZ2_Fall11",
         "TTJets_TuneZ2_Fall11",
         "WJets_TuneZ2_Fall11",
+        "W2Jets_TuneZ2_Fall11",
+        "W3Jets_TuneZ2_Fall11",
+        "W4Jets_TuneZ2_Fall11",
         "DYJetsToLL_M10to50_TuneZ2_Fall11",
         "DYJetsToLL_M50_TuneZ2_Fall11",
         "T_t-channel_TuneZ2_Fall11",
