@@ -4,6 +4,8 @@
 #
 # The ntuple files should come from the TTEff code
 #
+# Needs ROOT >= 5.30 (for TEfficiency)
+#
 # Author: Matti Kortelainen
 #
 ######################################################################
@@ -45,7 +47,7 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
     offlineTauPt40 = "PFTauPt > 40"
 
     if runrange == 1: # May10+Prompt-v4 (160431-167913)
-        lumi = 210.616+922.863
+        lumi = 217.056000+966.249000
         #l1Trigger = "(L1_SingleTauJet52 || L1_SingleJet68)"
         #hltTrigger = "(run >= 160341 && run <= 165633 && (HLT_IsoPFTau35_Trk20_MET45_v1 || HLT_IsoPFTau35_Trk20_MET45_v2 || HLT_IsoPFTau35_Trk20_MET45_v4 || HLT_IsoPFTau35_Trk20_MET45_v6))"
         #hltTrigger += "|| (run >= 165970 && run <= 167913 && (HLT_IsoPFTau35_Trk20_MET60_v2 || HLT_IsoPFTau35_Trk20_MET60_v3 || HLT_IsoPFTau35_Trk20_MET60_v4)"
@@ -54,12 +56,12 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
         offlineTriggerData = "((HLT_IsoMu17_v5 || HLT_IsoMu17_v6 || HLT_IsoMu17_v8) && MuonPt > 17)" # runs 160404-165633, unprescaled
         offlineTriggerData += "|| ((HLT_IsoMu17_v9 || HLT_IsoMu17_v11) && MuonPt > 17)"              # runs 165970-167913, PRESCALED
     elif runrange == 2: # Prompt-v6 (172620-173198), Aug05 (170722-172619) is missing!
-        lumi = 385.623
+        lumi = 412.749000
         runs = "run >= 170722 && run <= 173198"
         runsText = "172620-173198"
         offlineTriggerData = "HLT_IsoMu17_v13 && MuonPt > 17"# runs 17022-172619, PRESCALED
     elif runrange == 3: # Prompt-v6 (173236-173692)
-        lumi = 246.527
+        lumi = 265.313000
         runs = "run >= 173236 && run <= 173692";
         runsText = "173236-173692"
         offlineTriggerData = "HLT_IsoMu20_v9 && MuonPt > 20"
@@ -461,7 +463,7 @@ class Plotter:
                 print "Bin low edge %.0f" % n1.GetBinLowEdge(bin)
                 print "   1: efficiency %.7f +- %.7f" % (eff1.GetY()[i], max(eff1.GetErrorYhigh(i), eff1.GetErrorYlow(i)))
                 print "   2: efficiency %.7f +- %.7f" % (eff2.GetY()[i], max(eff2.GetErrorYhigh(i), eff2.GetErrorYlow(i)))
-                print "   ratio:        %.7f +- %.7f" % (ratio.GetY()[i], max(ratio.GetErrorYhigh(i), ratio.GetErrorYlow(i)))
+                print "   ratio:        %.7f +- %.7f" % (ratio.getRootGraph().GetY()[i], max(ratio.getRootGraph().GetErrorYhigh(i), ratio.getRootGraph().GetErrorYlow(i)))
             print
 
         p.getFrame2().GetYaxis().SetTitle("Ratio")

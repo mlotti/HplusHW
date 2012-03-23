@@ -37,8 +37,8 @@ counters = "metNtupleCounters"
 #cutText = "Calo E_{T}^{miss} > 45 GeV"
 #cutText = "Calo E_{T}^{miss} > 60 GeV"
 
-#runRegion = 1
-runRegion = 2
+runRegion = 1
+#runRegion = 2
 
 #mcDataDefinition = True
 mcDataDefinition = False
