@@ -38,16 +38,6 @@ analysisEmb = "signalAnalysisCaloMet60TEff"
 
 counters = "Counters/weighted"
 
-weight = "weightPileup*weightTrigger"
-weightBTagging = weight+"*weightBTagging"
-
-caloMetCut = "(tecalomet_p4.Et() > 60)"
-caloMetNoHFCut = "(tecalometNoHF_p4.Et() > 60)"
-metCut = "(met_p4.Et() > 50)"
-bTaggingCut = "passedBTagging"
-deltaPhi160Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 160)"
-deltaPhi130Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 130)"
-
 def main():
     # Adjust paths such that this script can be run inside the first embedding trial directory
     dirEmbs = ["."] + [os.path.join("..", d) for d in tauEmbedding.dirEmbs[1:]]
@@ -125,21 +115,21 @@ def doPlots(datasetsEmb):
     drawControlPlot("NBjets", "Number of selected b jets", opts={"xmax": 6}, ylabel="Events", cutLine=1)
 
     # After b tagging
-    treeDraw = dataset.TreeDraw(analysisEmb+"/tree", weight=weightBTagging)
-    tdMt = treeDraw.clone(varexp="sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi()))) >>tmp(20,0,400)")
-    tdDeltaPhi = treeDraw.clone(varexp="acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 >>tmp(18, 0, 180)")
+    treeDraw = dataset.TreeDraw(analysisEmb+"/tree", weight=tauEmbedding.signalNtuple.weightBTagging)
+    tdMt = treeDraw.clone(varexp="%s >>tmp(20,0,400)" % tauEmbedding.signalNtuple.mtExpression)
+    tdDeltaPhi = treeDraw.clone(varexp="%s >>tmp(18, 0, 180)" % tauEmbedding.signalNtuple.deltaPhiExpression)
 
     # DeltaPhi
     def customDeltaPhi(h):
         yaxis = h.getFrame().GetYaxis()
         yaxis.SetTitleOffset(0.8*yaxis.GetTitleOffset())
-    drawPlot(createPlot(tdDeltaPhi.clone(selection=And(metCut, bTaggingCut))), prefix+"deltaPhi_3AfterBTagging", "#Delta#phi(#tau jet, E_{T}^{miss}) (^{o})", log=False, opts={"ymax": 30}, opts2=opts2, ylabel="Events / %.0f^{o}", function=customDeltaPhi, moveLegend={"dx": -0.22}, cutLine=[130, 160])
+    drawPlot(createPlot(tdDeltaPhi.clone(selection=And(tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut))), prefix+"deltaPhi_3AfterBTagging", "#Delta#phi(#tau jet, E_{T}^{miss}) (^{o})", log=False, opts={"ymax": 30}, opts2=opts2, ylabel="Events / %.0f^{o}", function=customDeltaPhi, moveLegend={"dx": -0.22}, cutLine=[130, 160])
 
     # Transverse mass
     for name, label, selection in [
-        ("3AfterBTagging", "Without #Delta#phi(#tau jet, E_{T}^{miss}) cut", [metCut, bTaggingCut]),
-        ("4AfterDeltaPhi160", "#Delta#phi(#tau jet, E_{T}^{miss}) < 160^{o}", [metCut, bTaggingCut, deltaPhi160Cut]),
-        ("5AfterDeltaPhi130", "#Delta#phi(#tau jet, E_{T}^{miss}) < 130^{o}", [metCut, bTaggingCut, deltaPhi130Cut])]:
+        ("3AfterBTagging", "Without #Delta#phi(#tau jet, E_{T}^{miss}) cut", [tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut]),
+        ("4AfterDeltaPhi160", "#Delta#phi(#tau jet, E_{T}^{miss}) < 160^{o}", [tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut, tauEmbedding.signalNtuple.deltaPhi160Cut]),
+        ("5AfterDeltaPhi130", "#Delta#phi(#tau jet, E_{T}^{miss}) < 130^{o}", [tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut, tauEmbedding.signalNtuple.deltaPhi130Cut])]:
 
         p = createPlot(tdMt.clone(selection=And(*selection)))
         p.appendPlotObject(histograms.PlotText(0.5, 0.62, label, size=20))
@@ -210,7 +200,7 @@ def doCounters(datasetsEmb):
             result.appendRow(tbl.getRow(index=iRow))
 
     addMcSum(result)
-    cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.2f'))
+    cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.4f', withPrecision=2))
 
     print result.format(cellFormat)
 
