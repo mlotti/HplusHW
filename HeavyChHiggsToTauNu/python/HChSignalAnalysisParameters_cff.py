@@ -53,7 +53,7 @@ tauSelectionBase = cms.untracked.PSet(
     isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr"), # discriminator for isolation
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1.0), # cut point for continuous isolation discriminator, applied only if it is non-zero
     rtauCut = cms.untracked.double(0.7), # rtau > value
-    nprongs = cms.untracked.uint32(1) # number of prongs
+    nprongs = cms.untracked.uint32(1) # number of prongs (options: 1, 3, or 13 == 1 || 3)
 )
 
 # Only HPS should be used (ignore TCTau, plain PF, TaNC, and Combined HPS+TaNC)
@@ -91,7 +91,7 @@ vetoTauBase = tauSelectionHPSLooseTauBased.clone(
     etaCut = cms.untracked.double(2.5), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
     rtauCut = cms.untracked.double(0.0), # rtau > value
-    nprongs = cms.untracked.uint32(1) # number of prongs
+    nprongs = cms.untracked.uint32(1) # number of prongs (options: 1, 3, or 13 == 1 || 3)
 )
 
 vetoTauSelection = cms.untracked.PSet(
@@ -150,7 +150,7 @@ MET = cms.untracked.PSet(
     type2Src = cms.untracked.InputTag("dummy"),
     caloSrc = cms.untracked.InputTag("patMETs"),
     tcSrc = cms.untracked.InputTag("patMETsTC"),
-    select = cms.untracked.string("raw"), # raw, type1, type2
+    select = cms.untracked.string("type1"), # raw, type1, type2
     METCut = cms.untracked.double(50.0),
 
     # For type I/II correction
@@ -436,7 +436,7 @@ def setPileupWeightFor2010(pset=vertexWeight):
     pset.useSimulatedPileup = True
     raise Exception("Data PU distribution for 2010 is not yet available")
 
-def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="Run2011A", method="3D"):
+def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="Run2011A", method="intime"):
     if dataVersion.isData():
         return
 
