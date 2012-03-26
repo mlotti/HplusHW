@@ -124,7 +124,7 @@ datasets = {
             },
         }
     },
-    "Tau_Single_175832-177452_2011B_Nov19": {
+    "Tau_Single_175832-180252_2011B_Nov19": {
         "dataVersion": "44Xdata",
         "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "args": {"triggerThrow": 0}, # needed for OR of triggers in separate run ranges
@@ -133,7 +133,7 @@ datasets = {
             "HLT_MediumIsoPFTau35_Trk20_v5", #178420-179889
             "HLT_MediumIsoPFTau35_Trk20_v6", #179959-180252
         ],
-        "runs": (175832, 177452), # This is prompt RECO, so check the run range again when running!
+        "runs": (175832, 180252), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/Tau/Run2011B-19Nov2011-v1/AOD",
