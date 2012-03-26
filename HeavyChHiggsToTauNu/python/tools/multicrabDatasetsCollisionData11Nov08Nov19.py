@@ -12,6 +12,7 @@ datasets = {
     "Tau_160431-167913_2011A_Nov08": {
         "dataVersion": "44Xdata",
         "args": {"triggerThrow": 0}, # needed for OR of triggers in separate run ranges
+        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "triggerOR": [
             "HLT_IsoPFTau35_Trk20_MET45_v1", # 160431-161176
             "HLT_IsoPFTau35_Trk20_MET45_v2", # 161216-163261
@@ -33,6 +34,7 @@ datasets = {
     # break of range because of trigger eff. boundary
     "Tau_170722-173198_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "trigger": "HLT_IsoPFTau35_Trk20_MET60_v6",
         "runs": (170722, 173198), # This is prompt RECO, so check the run range again when running!
         "data": {
@@ -46,6 +48,7 @@ datasets = {
     # break of range because of trigger eff. boundary
     "Tau_173236-173692_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "trigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
         "runs": (173236, 173692), # This is prompt RECO, so check the run range again when running!
         "data": {
@@ -60,6 +63,7 @@ datasets = {
     "Tau_175860-180252_2011B_Nov19": {
         "dataVersion": "44Xdata",
         "args": {"triggerThrow": 0}, # needed for OR of triggers in separate run ranges
+        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "triggerOR": [
             "HLT_MediumIsoPFTau35_Trk20_MET60_v1", # 175860-178380
             "HLT_MediumIsoPFTau35_Trk20_MET60_v5", # 178420-179889
@@ -78,6 +82,7 @@ datasets = {
     # Single tau (control)
     "Tau_Single_165970-167913_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "args": {"triggerThrow": 0}, # needed for OR of triggers in separate run ranges
         "triggerOR": [
             "HLT_IsoPFTau35_Trk20_v2", # 165970-166164, 166374-167043
@@ -95,6 +100,7 @@ datasets = {
     },
     "Tau_Single_170722-173198_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "trigger": "HLT_IsoPFTau35_Trk20_v6",
         "runs": (170722, 173198), # This is prompt RECO, so check the run range again when running!
         "data": {
@@ -107,6 +113,7 @@ datasets = {
     },
     "Tau_Single_173236-173692_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "trigger": "HLT_MediumIsoPFTau35_Trk20_v1",
         "runs": (173236, 173692), # This is prompt RECO, so check the run range again when running!
         "data": {
@@ -119,6 +126,7 @@ datasets = {
     },
     "Tau_Single_175832-177452_2011B_Nov19": {
         "dataVersion": "44Xdata",
+        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "args": {"triggerThrow": 0}, # needed for OR of triggers in separate run ranges
         "triggerOR": [
             "HLT_MediumIsoPFTau35_Trk20_v1", #175832-178380
