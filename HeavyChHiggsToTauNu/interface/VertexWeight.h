@@ -4,7 +4,7 @@
 
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
-#include "PhysicsTools/Utilities/interface/Lumi3DReWeighting.h"
+//#include "PhysicsTools/Utilities/interface/Lumi3DReWeighting.h" // no longer needed for Fall11
 
 #include<vector>
 
@@ -31,7 +31,7 @@ namespace HPlus {
     edm::InputTag fVertexSrc;
     edm::InputTag fPuSummarySrc;
     mutable edm::LumiReWeighting fLumiWeights; // the weight() methods are NOT const...
-    mutable edm::Lumi3DReWeighting fLumi3DWeights;
+    //mutable edm::Lumi3DReWeighting fLumi3DWeights;
     mutable reweight::PoissonMeanShifter fMeanShifter;
     std::vector<double> fWeights;
     TH1 *hWeights;
