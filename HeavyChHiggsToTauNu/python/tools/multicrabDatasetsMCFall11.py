@@ -145,6 +145,16 @@ datasets = {
             },
         }
     },
+    "TTToHplusBHminusB_M150_Fall11": {
+        "dataVersion": "44XmcS6",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TTToHplusBHminusB_M-150_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
+                "number_of_jobs": 50, # Adjusted for PATtuple file size
+            },
+        }
+    },
     "TTToHplusBHminusB_M155_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,

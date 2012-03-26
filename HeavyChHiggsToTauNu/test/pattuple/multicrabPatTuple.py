@@ -7,7 +7,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 multicrab = Multicrab("crab_pat.cfg", lumiMaskDir="..")
 
 datasets = [
+<<<<<<< HEAD
+=======
 
+>>>>>>> lauri/pattuplev25
 ########
 #
 # 44X
@@ -21,10 +24,11 @@ datasets = [
 #       "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
 #       "Tau_175860-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
         # single tau trigger
-#       "Tau_Single_165970-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_v{2,3,4}
-#       "Tau_Singl170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_v6
-#       "Tau_Singl173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_v1
-#       "Tau_Singl175860-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_v{1,5,6}
+#       "Tau_Single_165970-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
+#       "Tau_Single_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
+#       "Tau_Single_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
+#       "Tau_Single_175832-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
+
         # single mu
 #       "SingleMu_160431-163261_2011A_Nov08",     # 2011A
 #       "SingleMu_163270-163869_2011A_Nov08",     # 2011A
@@ -62,6 +66,7 @@ datasets = [
 #        "TTToHplusBHminusB_M100_Fall11",
 #        "TTToHplusBHminusB_M120_Fall11",
 #        "TTToHplusBHminusB_M140_Fall11",
+#        "TTToHplusBHminusB_M150_Fall11",
 #        "TTToHplusBHminusB_M155_Fall11",
 #        "TTToHplusBHminusB_M160_Fall11",
         # Signal MC (Heavy)
