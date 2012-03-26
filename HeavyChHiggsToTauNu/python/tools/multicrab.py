@@ -158,7 +158,7 @@ defaultSeBlacklist = [
     "T3_*", # Don't submit to T3's  
     "T2_UK_London_Brunel", # Noticeable fraction of submitted jobs fail due to stageout errors
     "ucl.ac.be", # Jobs end up in queuing, lot's of file open errors
-    "iihe.ac.be", # Problematic site with server
+#    "iihe.ac.be", # Problematic site with server
     "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout, also jobs can queue long times
     "unl.edu", # Jobs can wait in queues for a looong time
     "wisc.edu", # Stageout failures,
