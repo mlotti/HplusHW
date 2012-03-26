@@ -7,6 +7,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 multicrab = Multicrab("crab_pat.cfg", lumiMaskDir="..")
 
 datasets = [
+<<<<<<< HEAD
+=======
+
+>>>>>>> lauri/pattuplev25
 ########
 #
 # 44X
@@ -149,6 +153,7 @@ multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
 
 prefix = "multicrab"
 configOnly = False # Create task configuration only?
+# Leave configOnly as false and specify site whitelist on command line when submitting the jobs
 
 # Create multicrab task configuration and run 'multicrab -create'
 taskDir = multicrab.createTasks(prefix=prefix, configOnly=configOnly)
