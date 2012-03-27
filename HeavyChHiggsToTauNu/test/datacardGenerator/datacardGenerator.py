@@ -2,8 +2,8 @@
 
 import sys
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.MulticrabPathFinder as PathFinder
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.DataCardGenerator as DataCard
+import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
+import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DataCardGenerator as DataCard
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
     
