@@ -265,8 +265,8 @@ namespace HPlus {
     if (!triggerData.passedEvent()) return false;
     increment(fTriggerCounter);
     hSelectionFlow->Fill(kSignalOrderTrigger, fEventWeight.getWeight());
-    hSelectionFlowVsVertices->Fill(kSignalOrderTrigger, nVertices, fEventWeight.getWeight());
-    hSelectionFlowVsVerticesFakeTaus->Fill(kSignalOrderTrigger, nVertices, fEventWeight.getWeight());
+    hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderTrigger, fEventWeight.getWeight());
+    hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderTrigger, fEventWeight.getWeight());
     if(triggerData.hasTriggerPath()) // protection if TriggerSelection is disabled
       fTree.setHltTaus(triggerData.getTriggerTaus());
 
@@ -311,8 +311,8 @@ namespace HPlus {
     fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
     increment(fTriggerScaleFactorCounter);
     hSelectionFlow->Fill(kSignalOrderTauID, fEventWeight.getWeight());
-    hSelectionFlowVsVertices->Fill(kSignalOrderTauID, nVertices, fEventWeight.getWeight());
-    if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(kSignalOrderTauID, nVertices, fEventWeight.getWeight());
+    hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderTauID, fEventWeight.getWeight());
+    if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderTauID, fEventWeight.getWeight());
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Tau> > saveTaus(new std::vector<pat::Tau>());
       copyPtrToVector(tauData.getSelectedTaus(), *saveTaus);
@@ -350,8 +350,8 @@ namespace HPlus {
     if (!electronVetoData.passedEvent()) return false;
     increment(fElectronVetoCounter);
     hSelectionFlow->Fill(kSignalOrderElectronVeto, fEventWeight.getWeight());
-    hSelectionFlowVsVertices->Fill(kSignalOrderElectronVeto, nVertices, fEventWeight.getWeight());
-    if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(kSignalOrderElectronVeto, nVertices, fEventWeight.getWeight());
+    hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderElectronVeto, fEventWeight.getWeight());
+    if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderElectronVeto, fEventWeight.getWeight());
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderElectronVeto, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Electron> > saveElectrons(new std::vector<pat::Electron>());
@@ -366,8 +366,8 @@ namespace HPlus {
     if (!muonVetoData.passedEvent()) return false;
     increment(fMuonVetoCounter);
     hSelectionFlow->Fill(kSignalOrderMuonVeto, fEventWeight.getWeight());
-    hSelectionFlowVsVertices->Fill(kSignalOrderMuonVeto, nVertices, fEventWeight.getWeight());
-    if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(kSignalOrderMuonVeto, nVertices, fEventWeight.getWeight());
+    hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderMuonVeto, fEventWeight.getWeight());
+    if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderMuonVeto, fEventWeight.getWeight());
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderMuonVeto, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Muon> > saveMuons(new std::vector<pat::Muon>());
@@ -384,8 +384,8 @@ namespace HPlus {
     if(!jetData.passedEvent()) return false;
     increment(fNJetsCounter);
     hSelectionFlow->Fill(kSignalOrderJetSelection, fEventWeight.getWeight());
-    hSelectionFlowVsVertices->Fill(kSignalOrderJetSelection, nVertices, fEventWeight.getWeight());
-    if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(kSignalOrderJetSelection, nVertices, fEventWeight.getWeight());
+    hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderJetSelection, fEventWeight.getWeight());
+    if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderJetSelection, fEventWeight.getWeight());
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderJetSelection, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Jet> > saveJets(new std::vector<pat::Jet>());
@@ -449,8 +449,8 @@ namespace HPlus {
     if(!metData.passedEvent()) return false;
     increment(fMETCounter);
     hSelectionFlow->Fill(kSignalOrderMETSelection, fEventWeight.getWeight());
-    hSelectionFlowVsVertices->Fill(kSignalOrderMETSelection, nVertices, fEventWeight.getWeight());
-    if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(kSignalOrderMETSelection, nVertices, fEventWeight.getWeight());
+    hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderMETSelection, fEventWeight.getWeight());
+    if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderMETSelection, fEventWeight.getWeight());
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderMETSelection, tauData);
 
 
@@ -465,8 +465,8 @@ namespace HPlus {
     }
     increment(fBTaggingScaleFactorCounter);
     hSelectionFlow->Fill(kSignalOrderBTagSelection, fEventWeight.getWeight());
-    hSelectionFlowVsVertices->Fill(kSignalOrderBTagSelection, nVertices, fEventWeight.getWeight());
-    if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(kSignalOrderBTagSelection, nVertices, fEventWeight.getWeight());
+    hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderBTagSelection, fEventWeight.getWeight());
+    if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderBTagSelection, fEventWeight.getWeight());
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderBTagSelection, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Jet> > saveBJets(new std::vector<pat::Jet>());
@@ -491,8 +491,8 @@ namespace HPlus {
         increment(fdeltaPhiTauMET160Counter);
         hSelectionFlow->Fill(kSignalOrderDeltaPhi160Selection, fEventWeight.getWeight());
       }
-      hSelectionFlowVsVertices->Fill(kSignalOrderDeltaPhi160Selection, nVertices, fEventWeight.getWeight());
-      if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(kSignalOrderDeltaPhi160Selection, nVertices, fEventWeight.getWeight());
+      hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderDeltaPhi160Selection, fEventWeight.getWeight());
+      if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderDeltaPhi160Selection, fEventWeight.getWeight());
       fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi160Selection, tauData);
       fSFUncertaintiesAfterDeltaPhi160.setScaleFactorUncertainties(fEventWeight.getWeight(),
                                                                   triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
