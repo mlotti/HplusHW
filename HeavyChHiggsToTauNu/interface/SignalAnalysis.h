@@ -228,6 +228,8 @@ namespace HPlus {
     TH1 *hTransverseMassDeltaPhiUpperCutFakeMet; 
 
     TH1 *hSelectionFlow;
+    TH2 *hSelectionFlowVsVertices;
+    TH2 *hSelectionFlowVsVerticesFakeTaus;
 
     // Control plots
     TH1* hCtrlIdentifiedElectronPt;
