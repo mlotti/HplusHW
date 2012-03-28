@@ -185,6 +185,8 @@ namespace HPlus {
       edm::PtrVector<pat::Jet> bjetsFromTop;
       edm::PtrVector<pat::Jet> bjetsHiggsSide;
       edm::PtrVector<pat::Jet> bjetsTopSide;
+      std::vector<LorentzVector> bquarkTopSide;
+      std::vector<LorentzVector> QquarksTopSide;
       bjetsAny.clear();
       jetsFromW.clear();
       bjetsFromTop.clear();
@@ -201,32 +203,34 @@ namespace HPlus {
 	bEta = p.eta();
 	bPt = p.pt();
 	if(hasImmediateMother(p,6) || hasImmediateMother(p,-6)) {
-	// 	    printImmediateMothers(p);
+	  if ( id * idHiggsSide < 0 ) bquarkTopSide.push_back(p.p4());
+	  
+	  // 	    printImmediateMothers(p);
 	  //	std::cout << " b quark1 " << id <<  " idHiggsSide " <<   idHiggsSide << std::endl;
-      
-	for(edm::PtrVector<pat::Jet>::const_iterator iterb = bjets.begin(); iterb != bjets.end(); ++iterb ) {
-	  edm::Ptr<pat::Jet> iJetb = *iterb;
-	  double deltaR = ROOT::Math::VectorUtil::DeltaR(p.p4(), iJetb->p4());
-	  if ( deltaR < 0.4 ) {
-	    bjetsAny.push_back(iJetb);
-	    //b jets from top
-	    if( hasImmediateMother(p,6) || hasImmediateMother(p,-6)) {
-	      bjetsFromTop.push_back(iJetb);
-	      // b from Higgs side
-	      if ( id * idHiggsSide > 0 ) {
-		bjetsHiggsSide.push_back(iJetb);
-	      }
-	      // b from Top side
-	      if ( id * idHiggsSide < 0 ) {
-		bjetsTopSide.push_back(iJetb);
+	  
+	  for(edm::PtrVector<pat::Jet>::const_iterator iterb = bjets.begin(); iterb != bjets.end(); ++iterb ) {
+	    edm::Ptr<pat::Jet> iJetb = *iterb;
+	    double deltaR = ROOT::Math::VectorUtil::DeltaR(p.p4(), iJetb->p4());
+	    if ( deltaR < 0.4 ) {
+	      bjetsAny.push_back(iJetb);
+	      //b jets from top
+	      if( hasImmediateMother(p,6) || hasImmediateMother(p,-6)) {
+		bjetsFromTop.push_back(iJetb);
+		// b from Higgs side
+		if ( id * idHiggsSide > 0 ) {
+		  bjetsHiggsSide.push_back(iJetb);
+		}
+		// b from Top side
+		if ( id * idHiggsSide < 0 ) {
+		  bjetsTopSide.push_back(iJetb);
+		}
 	      }
 	    }
 	  }
-	}
 	  
 	}
       }	
-
+      
 						
      // search for matched light quark jets
       for (size_t i=0; i < genParticles->size(); ++i){
@@ -240,6 +244,7 @@ namespace HPlus {
 	bEta = p.eta();
 	bPt = p.pt();
 	if(hasImmediateMother(p,24) || hasImmediateMother(p,-24)) {
+	  QquarksTopSide.push_back(p.p4());
 	  for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter ) {
 	    edm::Ptr<pat::Jet> iJet = *iter;
 	    double deltaR = ROOT::Math::VectorUtil::DeltaR(p.p4(), iJet->p4());
@@ -250,7 +255,7 @@ namespace HPlus {
 	}
       							   
       }
-      //      std::cout << " jetsFromW.size() " << jetsFromW.size() << std::endl;    
+      std::cout << " QquarksTopSide.size() " << QquarksTopSide.size()<< " bquarkTopSide.size() " << bquarkTopSide.size() << std::endl;    
       // W and top mass from matched jets
       if (jetsFromW.size() == 2) {
 	
