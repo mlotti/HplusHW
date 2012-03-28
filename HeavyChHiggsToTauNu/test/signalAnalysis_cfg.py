@@ -42,9 +42,16 @@ doTauEmbeddingTauSelectionScan = False
 # Do embedding-like preselection for signal analysis
 doTauEmbeddingLikePreselection = False
 
+
+#########
+# Flags for options in the signal analysis
+
 # Keep / Ignore prescaling for data (suppresses greatly error messages 
 # in datasets with or-function of triggers)
 doPrescalesForData = False
+
+# Tree filling
+doFillTree = True
 
 applyTriggerScaleFactor = True
 
@@ -176,6 +183,8 @@ if doBTagTree:
 # Signal analysis module for the "golden analysis"
 import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
 process.signalAnalysis = signalAnalysis.createEDFilter(param)
+if not doFillTree:
+    process.signalAnalysis.Tree.fill = cms.untracked.bool(False)
 # process.signalAnalysis.GlobalMuonVeto = param.NonIsolatedMuonVeto
 # Change default tau algorithm here if needed
 #process.signalAnalysis.tauSelection.tauSelectionHPSTightTauBased # HPS Tight is the default
@@ -194,7 +203,7 @@ if dataVersion.isData() and options.tauEmbeddingInput == 0 and doPrescalesForDat
     process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output
-print "Analysis is blind:", process.signalAnalysis.blindAnalysisStatus
+print "\nAnalysis is blind:", process.signalAnalysis.blindAnalysisStatus, "\n"
 print "Trigger:", process.signalAnalysis.trigger
 print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode
 print "VertexWeight:",process.signalAnalysis.vertexWeight
