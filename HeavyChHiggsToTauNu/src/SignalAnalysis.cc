@@ -56,6 +56,7 @@ namespace HPlus {
 
   SignalAnalysis::SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fEventWeight(eventWeight),
+    bBlindAnalysisStatus(iConfig.getUntrackedParameter<bool>("blindAnalysisStatus")),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),
@@ -149,17 +150,13 @@ namespace HPlus {
     //    hmetAfterTrigger = makeTH<TH1F>(*fs, "metAfterTrigger", "metAfterTrigger", 50, 0., 200.);
     
     hTransverseMass = makeTH<TH1F>(*fs, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
-    hTransverseMassMET70 = makeTH<TH1F>(*fs, "transverseMassMET70", "transverseMassMET70;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
-    hTransverseMassAfterDeltaPhi = makeTH<TH1F>(*fs, "transverseMassAfterDeltaPhi", "transverseMassAfterDeltaPhi;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassAfterDeltaPhi160 = makeTH<TH1F>(*fs, "transverseMassAfterDeltaPhi160", "transverseMassAfterDeltaPhi160;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassAfterDeltaPhi130 = makeTH<TH1F>(*fs, "transverseMassAfterDeltaPhi130", "transverseMassAfterDeltaPhi130;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassAfterDeltaPhi90 = makeTH<TH1F>(*fs, "transverseMassAfterDeltaPhi90", "transverseMassAfterDeltaPhi90;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassTopSelection = makeTH<TH1F>(*fs, "transverseMassTopSelection", "transverseMassTopSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassTopChiSelection = makeTH<TH1F>(*fs, "transverseMassTopChiSelection", "transverseMassTopChiSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassTopBjetSelection = makeTH<TH1F>(*fs, "transverseMassTopBjetSelection", "transverseMassTopBjetSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
-    hTransverseMassJetMetCut= makeTH<TH1F>(*fs, "transverseMassJetMetCut", "transverseMassJetMetCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hNonQCDTypeIITransverseMass = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMass", "NonQCDTypeIITransverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
-    hNonQCDTypeIITransverseMassAfterDeltaPhi = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMassAfterDeltaPhi", "NonQCDTypeIITransverseMassAfterDeltaPhi;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hNonQCDTypeIITransverseMassAfterDeltaPhi160 = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMassAfterDeltaPhi160", "NonQCDTypeIITransverseMassAfterDeltaPhi160;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hNonQCDTypeIITransverseMassAfterDeltaPhi130 = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMassAfterDeltaPhi130", "NonQCDTypeIITransverseMassAfterDeltaPhi130;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hNonQCDTypeIITransverseMassAfterDeltaPhi90 = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMassAfterDeltaPhi90", "NonQCDTypeIITransverseMassAfterDeltaPhi90;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
@@ -460,61 +457,58 @@ namespace HPlus {
                                                               btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
 
 //------ Fill transverse mass histograms    
-    hTransverseMass->Fill(transverseMass, fEventWeight.getWeight());
-    if (myTypeIIStatus) hNonQCDTypeIITransverseMass->Fill(transverseMass, fEventWeight.getWeight());
-    // with MET > 70 GeV    
-    if (metData.getSelectedMET()->et() > 70) hTransverseMassMET70->Fill(transverseMass, fEventWeight.getWeight());
-
+    if (!(bBlindAnalysisStatus && iEvent.isRealData())) {
+      hTransverseMass->Fill(transverseMass, fEventWeight.getWeight());
+      if (myTypeIIStatus) hNonQCDTypeIITransverseMass->Fill(transverseMass, fEventWeight.getWeight());
+    }
 
 //------ Delta phi(tau,MET) cut
-    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
-    hDeltaPhi->Fill(deltaPhi, fEventWeight.getWeight());
-    if (deltaPhi > 10) 
-      increment(fdeltaPhiTauMET10Counter); 
-    if (deltaPhi < 160) {
-      increment(fdeltaPhiTauMET160Counter);
-      hSelectionFlow->Fill(kSignalOrderDeltaPhi160Selection, fEventWeight.getWeight());
-      fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi160Selection, tauData);
-      fSFUncertaintiesAfterDeltaPhi160.setScaleFactorUncertainties(fEventWeight.getWeight(),
-                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
-                                                                  btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
-      // Fill transverse mass histograms after Deltaphi cut
-      hTransverseMassAfterDeltaPhi160->Fill(transverseMass, fEventWeight.getWeight());
-      if (myTypeIIStatus) hNonQCDTypeIITransverseMassAfterDeltaPhi160->Fill(transverseMass, fEventWeight.getWeight());
-    }
+    if (!(bBlindAnalysisStatus && iEvent.isRealData())) {
+      double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
+      hDeltaPhi->Fill(deltaPhi, fEventWeight.getWeight());
+      if (deltaPhi < 160) {
+        increment(fdeltaPhiTauMET160Counter);
+        hSelectionFlow->Fill(kSignalOrderDeltaPhi160Selection, fEventWeight.getWeight());
+        fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi160Selection, tauData);
+        fSFUncertaintiesAfterDeltaPhi160.setScaleFactorUncertainties(fEventWeight.getWeight(),
+                                                                    triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
+                                                                    btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+        // Fill transverse mass histograms after Deltaphi cut
+        hTransverseMassAfterDeltaPhi160->Fill(transverseMass, fEventWeight.getWeight());
+        if (myTypeIIStatus) hNonQCDTypeIITransverseMassAfterDeltaPhi160->Fill(transverseMass, fEventWeight.getWeight());
+      }
 
-    if (deltaPhi < 130) {
-      increment(fdeltaPhiTauMET130Counter);
-      fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi130Selection, tauData);
-      hSelectionFlow->Fill(kSignalOrderDeltaPhi130Selection, fEventWeight.getWeight());
-      fSFUncertaintiesAfterDeltaPhi130.setScaleFactorUncertainties(fEventWeight.getWeight(),
-                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
-                                                                  btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
-      // Fill transverse mass histograms after Deltaphi cut
-      hTransverseMassAfterDeltaPhi130->Fill(transverseMass, fEventWeight.getWeight());
-      if (myTypeIIStatus) hNonQCDTypeIITransverseMassAfterDeltaPhi130->Fill(transverseMass, fEventWeight.getWeight());
-    }
+      if (deltaPhi < 130) {
+        increment(fdeltaPhiTauMET130Counter);
+        fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi130Selection, tauData);
+        hSelectionFlow->Fill(kSignalOrderDeltaPhi130Selection, fEventWeight.getWeight());
+        fSFUncertaintiesAfterDeltaPhi130.setScaleFactorUncertainties(fEventWeight.getWeight(),
+                                                                    triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
+                                                                    btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+        // Fill transverse mass histograms after Deltaphi cut
+        hTransverseMassAfterDeltaPhi130->Fill(transverseMass, fEventWeight.getWeight());
+        if (myTypeIIStatus) hNonQCDTypeIITransverseMassAfterDeltaPhi130->Fill(transverseMass, fEventWeight.getWeight());
+      }
 
-    if (deltaPhi < 90) {
-      increment(fdeltaPhiTauMET90Counter);
-      fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi90Selection, tauData);
-      hSelectionFlow->Fill(kSignalOrderDeltaPhi90Selection, fEventWeight.getWeight());
-      fSFUncertaintiesAfterDeltaPhi90.setScaleFactorUncertainties(fEventWeight.getWeight(),
-                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
-                                                                  btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
-      // Fill transverse mass histograms after Deltaphi cut
-      hTransverseMassAfterDeltaPhi90->Fill(transverseMass, fEventWeight.getWeight());
-      if (myTypeIIStatus) hNonQCDTypeIITransverseMassAfterDeltaPhi90->Fill(transverseMass, fEventWeight.getWeight());
+      if (deltaPhi < 90) {
+        increment(fdeltaPhiTauMET90Counter);
+        fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi90Selection, tauData);
+        hSelectionFlow->Fill(kSignalOrderDeltaPhi90Selection, fEventWeight.getWeight());
+        fSFUncertaintiesAfterDeltaPhi90.setScaleFactorUncertainties(fEventWeight.getWeight(),
+                                                                    triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
+                                                                    btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+        // Fill transverse mass histograms after Deltaphi cut
+        hTransverseMassAfterDeltaPhi90->Fill(transverseMass, fEventWeight.getWeight());
+        if (myTypeIIStatus) hNonQCDTypeIITransverseMassAfterDeltaPhi90->Fill(transverseMass, fEventWeight.getWeight());
+      }
     }
-
 
 //------Experimental cuts, counters, and histograms
     
     // plot deltaPhi(jet,met)
     for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getSelectedJets().begin(); iJet != jetData.getSelectedJets().end(); ++iJet) {
-      deltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET()));
-      hDeltaPhiJetMet->Fill(deltaPhi*57.3, fEventWeight.getWeight());
-      if (deltaPhi*57.3 > 10) hTransverseMassJetMetCut->Fill(transverseMass, fEventWeight.getWeight());     
+      double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET()));
+      hDeltaPhiJetMet->Fill(jetDeltaPhi*57.3, fEventWeight.getWeight());
     }
 
     hSelectedTauRtauAfterCuts->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
@@ -526,18 +520,21 @@ namespace HPlus {
    // top mass with possible event cuts
     if (TopSelectionData.passedEvent() ) {
       increment(fTopSelectionCounter);
-      //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-      if(transverseMass > 80 ) increment(ftransverseMassCut100TopCounter);
-      hTransverseMassTopSelection->Fill(transverseMass, fEventWeight.getWeight());     
+      //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());
+      if (!(bBlindAnalysisStatus && iEvent.isRealData())) {
+        if(transverseMass > 80 ) increment(ftransverseMassCut100TopCounter);
+        hTransverseMassTopSelection->Fill(transverseMass, fEventWeight.getWeight());     
+      }
     } 
     
 
     if (TopChiSelectionData.passedEvent() ) {
-         increment(fTopChiSelectionCounter);
+      increment(fTopChiSelectionCounter);
       //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-	 hTransverseMassTopChiSelection->Fill(transverseMass, fEventWeight.getWeight());     
+      if (!(bBlindAnalysisStatus && iEvent.isRealData())) {
+        hTransverseMassTopChiSelection->Fill(transverseMass, fEventWeight.getWeight());
+      }
     } 
-
 
     int njets30 = 0;
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jetData.getSelectedJets().begin(); iter != jetData.getSelectedJets().end(); ++iter) {
@@ -551,9 +548,11 @@ namespace HPlus {
       TopWithBSelection::Data TopWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData.getBjetTopSide());
 
       if (TopWithBSelectionData.passedEvent() ) {
-	increment(fTopWithBSelectionCounter);
-	//      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-	hTransverseMassTopBjetSelection->Fill(transverseMass, fEventWeight.getWeight());     
+        increment(fTopWithBSelectionCounter);
+        //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
+        if (!(bBlindAnalysisStatus && iEvent.isRealData())) {
+          hTransverseMassTopBjetSelection->Fill(transverseMass, fEventWeight.getWeight());     
+        }
       }    
     }
 
@@ -573,23 +572,21 @@ namespace HPlus {
     */
       
     //hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());
-    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderFakeMETVeto, tauData);
+    //fillNonQCDTypeIICounters(myTauMatch, kSignalOrderFakeMETVeto, tauData);
 
-    if(transverseMass > 80 )
-      increment(ftransverseMassCut80Counter);
-    if(transverseMass > 100 )
-      increment(ftransverseMassCut100Counter);
-
+    if (!(bBlindAnalysisStatus && iEvent.isRealData())) {
+      if(transverseMass > 80 )
+        increment(ftransverseMassCut80Counter);
+      if(transverseMass > 100 )
+        increment(ftransverseMassCut100Counter);
+    }
     
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
     // Alpha T
     //if(!evtTopologyData.passedEvent()) return false;
-    //    EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
-    //    hAlphaT->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight()); // FIXME: move this histogramming to evt topology
+    hAlphaT->Fill(evtTopologyData.alphaT().fAlphaT, fEventWeight.getWeight()); // FIXME: move this histogramming to evt topology
 
-
-   
     // Forward jet veto                                                                                                                                                                                                           
     //    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
     //    if (!forwardJetData.passedEvent()) return false;

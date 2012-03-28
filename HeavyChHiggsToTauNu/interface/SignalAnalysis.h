@@ -119,6 +119,7 @@ namespace HPlus {
     // copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;
 
+    const bool bBlindAnalysisStatus;
     //    const double ftransverseMassCut;
 
     Count fAllCounter;
@@ -195,17 +196,14 @@ namespace HPlus {
     
     // Transverse mass histograms
     TH1 *hTransverseMass;
-    TH1 *hTransverseMassJetMetCut;
     TH1 *hTransverseMassTopSelection;
     TH1 *hTransverseMassTopChiSelection;
     TH1 *hTransverseMassTopBjetSelection;
-    TH1 *hTransverseMassMET70;
     TH1 *hTransverseMassAfterDeltaPhi;
     TH1 *hTransverseMassAfterDeltaPhi160;
     TH1 *hTransverseMassAfterDeltaPhi130;
     TH1 *hTransverseMassAfterDeltaPhi90;
     TH1 *hNonQCDTypeIITransverseMass;
-    TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi;
     TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi130;
     TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi160;
     TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi90;

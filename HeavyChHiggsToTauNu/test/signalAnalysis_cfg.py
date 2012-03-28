@@ -194,6 +194,7 @@ if dataVersion.isData() and options.tauEmbeddingInput == 0 and doPrescalesForDat
     process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output
+print "Analysis is blind:", process.signalAnalysis.blindAnalysisStatus
 print "Trigger:", process.signalAnalysis.trigger
 print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode
 print "VertexWeight:",process.signalAnalysis.vertexWeight

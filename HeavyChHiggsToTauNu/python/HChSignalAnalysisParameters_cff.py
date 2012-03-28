@@ -1,5 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
+# Blind analysis - do not fill final counter and histogram for data if true
+blindAnalysisStatus = cms.untracked.bool(True);
+
 singleTauMetTriggerPaths = [
 #    "HLT_SingleLooseIsoTau20",
 #    "HLT_SingleLooseIsoTau20_Trk5",
