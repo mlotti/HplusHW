@@ -40,7 +40,9 @@ def addPatOnTheFly(process, options, dataVersion,
                    doPlainPat=True, doPF2PAT=False,
                    plainPatArgs={}, pf2patArgs={},
                    doMcPreselection=False,
-                   doTotalKinematicsFilter=False, doHBHENoiseFilter=True):
+                   doTotalKinematicsFilter=False,
+                   doHBHENoiseFilter=True, doPhysicsDeclared=False,
+                   ):
     def setPatArg(args, name, value):
         if name in args:
             print "Overriding PAT arg '%s' from '%s' to '%s'" % (name, str(args[name]), str(value))
@@ -88,7 +90,8 @@ def addPatOnTheFly(process, options, dataVersion,
                 process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
                 seq *= process.eventPreSelection
         else:
-            # HBHE noise filter
+            if doPhysicsDeclared:
+                counters.extend(HChDataSelection.addPhysicsDeclaredBit(process, seq))
             if doHBHENoiseFilter:
                 counters.extend(HChDataSelection.addHBHENoiseFilter(process, seq))
 
@@ -203,8 +206,11 @@ def addPatOnTheFly(process, options, dataVersion,
                                      doPlainPat=doPlainPat, doPF2PAT=doPF2PAT,
                                      plainPatArgs=pargs, pf2patArgs=pargs2,)
     
-    if dataVersion.isData() and doHBHENoiseFilter:
-        counters.extend(HChDataSelection.addHBHENoiseFilter(process, process.eventPreSelection))
+    if dataVersion.isData():
+        if doPhysicsDeclared:
+            counters.extend(HChDataSelection.addPhysicsDeclaredBit(process, seq))
+        if doHBHENoiseFilter:
+            counters.extend(HChDataSelection.addHBHENoiseFilter(process, process.eventPreSelection))
     elif dataVersion.isMC() and doTotalKinematicsFilter:
         # TotalKinematicsFilter for managing with buggy LHE+Pythia samples
         # https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1489.html
@@ -295,7 +301,7 @@ def myRemoveCleaning(process, postfix=""):
         "cleanPatTaus",
         "cleanPatTausHpsTancPFTau",
         "cleanPatTausHpsPFTau",
-        "cleanPatTausShrinkingConePFTau",
+#        "cleanPatTausShrinkingConePFTau",
         "cleanPatTausCaloRecoTau",
         "cleanPatJets",
         "cleanPatCandidateSummary",
@@ -507,6 +513,10 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
                          typeLabel = "PFTau")
         if not doPatTauIsoDeposits:
             process.patTausHpsPFTau.isoDeposits = cms.PSet()
+        # Continous isolation
+        process.patTausHpsPFTau.tauIDSources.byRawCombinedIsolationDeltaBetaCorr = cms.InputTag("hpsPFTauDiscriminationByRawCombinedIsolationDBSumPtCorr")
+        process.patTausHpsPFTau.tauIDSources.byRawChargedIsolationDeltaBetaCorr = cms.InputTag("hpsPFTauDiscriminationByRawChargedIsolationDBSumPtCorr")
+        process.patTausHpsPFTau.tauIDSources.byRawGammaIsolationDeltaBetaCorr = cms.InputTag("hpsPFTauDiscriminationByRawGammaIsolationDBSumPtCorr")
         addPatTauIsolationEmbedding(process, process.patDefaultSequence, "HpsPFTau")
 
         tauTools.addTauCollection(process,cms.InputTag('hpsTancTaus'),
@@ -580,10 +590,27 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     process.patDefaultSequence.replace(process.selectedPatMuons,
                                        process.muonIsolationEmbeddingSequence*process.selectedPatMuons)
     process.selectedPatMuons.src = muons
-
-    outputCommands.extend([
-            "keep *_selectedPatMuons_*_*"
-            ])
+#### FIXME: commented during 42X->44X transition, 20012012/SL
+####    # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Cosmic_ID
+####    process.cosmicCompatibility = cms.EDProducer("HPlusCosmicID",
+####        src=cms.InputTag("cosmicsVeto"),
+####        result = cms.string("cosmicCompatibility")
+####    )
+####    process.timeCompatibility = process.cosmicCompatibility.clone(result = 'timeCompatibility')
+####    process.backToBackCompatibility = process.cosmicCompatibility.clone(result = 'backToBackCompatibility')
+####    process.overlapCompatibility = process.cosmicCompatibility.clone(result = 'overlapCompatibility')
+####    sequence *= (
+####        process.cosmicCompatibility *
+####        process.timeCompatibility *
+####        process.backToBackCompatibility *
+####        process.overlapCompatibility
+####    )
+####    for name in ["cosmicCompatibility", 'timeCompatibility','backToBackCompatibility','overlapCompatibility']:
+####        setattr(process.patMuons.userData.userFloats, name, cms.InputTag(name))
+####
+####    outputCommands.extend([
+####            "keep *_selectedPatMuons_*_*"
+####            ])
 
     # Electrons
     # In order to calculate the transverse impact parameter w.r.t.
@@ -664,6 +691,14 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
 
     # Build sequence
     sequence *= process.patDefaultSequence
+#### FIXME: commented during 42X->44X transition, 20012012/SL
+####    # Event cleaning steps which require pat objects
+####    # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Tracking_failure_filter
+####    process.load('SandBox.Skims.trackingFailureFilter_cfi')
+####    process.trackingFailureFilter.taggingMode = True
+####    process.trackingFailureFilter.JetSource = "selectedPatJetsAK5PF"
+####    process.trackingFailureFilter.VertexSource = "goodPrimaryVertices"
+####    sequence *= process.trackingFailureFilter
 
     # Tau+HLT matching
     if doTauHLTMatching:
@@ -677,7 +712,8 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
             process.muonTriggerMatchingSequence *
             process.selectedPatMuons
         )
-        out.outputCommands.append("drop patTriggerObjectStandAlonesedmAssociation_*_*_*")
+	if not out == None:
+            out.outputCommands.append("drop patTriggerObjectStandAlonesedmAssociation_*_*_*")
 
     # Add the end sequence (to be able to add possible skim sequence between other pat sequences and it
     sequence *= process.plainPatEndSequence

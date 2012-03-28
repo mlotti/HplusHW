@@ -65,7 +65,12 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep *_l1GtTriggerMenuLite_*_*", # in run block, needed for prescale provider
         "keep recoCaloMETs_*_*_*", # keep all calo METs (metNoHF is needed!)
         "keep *_kt6PFJets_rho_HChPatTuple", # keep the rho of the event
-        "keep *_HBHENoiseFilterResultProducer_*_*", # keep the resulf of HBHENoiseFilterResultProducer
+        "keep recoBeamHaloSummary_*_*_*", # keep beam halo summaries
+        "keep recoGlobalHaloData_*_*_*",
+        "keep *_HBHENoiseFilterResultProducer*_*_*", # keep the resulf of HBHENoiseFilterResultProducer*
+        "keep *_ecalDeadCellTPfilter_*_*",
+        "keep *_EcalDeadCellEventFilter_*_*",
+        "keep *_trackingFailureFilter_*_*",
         ),
     dropMetaData = cms.untracked.string("ALL")
 )
