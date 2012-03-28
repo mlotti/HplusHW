@@ -29,12 +29,11 @@ namespace HPlus {
   TopSelection::Data::~Data() {}
 
   TopSelection::TopSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
-
-    fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fTopMassLow(iConfig.getUntrackedParameter<double>("TopMassLow")),
     fTopMassHigh(iConfig.getUntrackedParameter<double>("TopMassHigh")),
     fTopMassCount(eventCounter.addSubCounter("Top mass","Top Mass cut")),
-    fEventWeight(eventWeight)
+    fEventWeight(eventWeight),
+    fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src"))
   {
     edm::Service<TFileService> fs;
 
@@ -72,7 +71,6 @@ namespace HPlus {
     W.SetXYZT(nan, nan, nan, nan);
 
     bool passEvent = false;
-    size_t passed = 0;
 
     double ptmax = 0;
    

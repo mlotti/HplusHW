@@ -61,7 +61,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/Tau/Run2011A-May10ReReco-v1/AOD",
                 "number_of_jobs": 350, # Adjusted for PATtuple file size
-                "lumiMask": "May10ReReco"
+                "lumiMask": "DCSOnly"
             },
             "pattuple_v19": {
                 "dbs_url": common.pattuple_dbs,
@@ -85,7 +85,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
                 "number_of_jobs": 1000, # Adjusted for PATtuple file size (~430 in reality)
-                "lumiMask": "May10ReReco"
+                "lumiMask": "DCSOnly"
             },
             "pattuple_v19": {
                 "dbs_url": common.pattuple_dbs,
@@ -107,7 +107,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
                 "number_of_jobs": 1000, # Adjusted for PATtuple file size (~390 in reality)
-                "lumiMask": "May10ReReco"
+                "lumiMask": "DCSOnly"
             },
             "pattuple_v19": {
                 "dbs_url": common.pattuple_dbs,

@@ -256,7 +256,7 @@ namespace HPlus {
 
 //------ Standard selections is done, obtain data objects, fill tree, and loop over analysis variations
     // Obtain MET data
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau(), jetData.getAllJets());
     // Obtain btagging data
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     // Obtain alphaT

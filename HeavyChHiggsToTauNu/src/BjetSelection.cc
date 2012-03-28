@@ -30,9 +30,8 @@ namespace HPlus {
   BjetSelection::Data::~Data() {}
 
   BjetSelection::BjetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
-    fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
-    fEventWeight(eventWeight)
-  {
+    fEventWeight(eventWeight),
+    fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")) {
     edm::Service<TFileService> fs;
 
     TFileDirectory myDir = fs->mkdir("BjetSelection");
@@ -78,7 +77,7 @@ namespace HPlus {
     typedef std::vector<LorentzVector> LorentzVectorCollection;
     bool passEvent = false;
       
-    double nan = std::numeric_limits<double>::quiet_NaN();
+//    double nan = std::numeric_limits<double>::quiet_NaN();
 
     bool bjetTopSideFound = false;
     bool bjetTauSideFound = false;

@@ -108,21 +108,21 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
 
     medium = tight.clone(
         candSrc = name,
-        embedPrefix = "byMedium"+postfix,
+        embedPrefix = "byMedium",
     )
     name = "patMuonsWithMedium"+postfix
     setattr(process, name, medium)
 
     loose = tight.clone(
         candSrc = name,
-        embedPrefix = "byLoose"+postfix,
+        embedPrefix = "byLoose",
     )
     name = "patMuonsWithLoose"+postfix
     setattr(process, name, loose)
 
     vloose = tight.clone(
         candSrc = name,
-        embedPrefix = "byVLoose"+postfix,
+        embedPrefix = "byVLoose",
     )
     name = "patMuonsWithVLoose"+postfix
     setattr(process, name, vloose)
@@ -141,53 +141,53 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
     #######################
     m = tight.clone(
         candSrc = name,
-        embedPrefix = "byTightSc015"+postfix,
+        embedPrefix = "byTightSc015",
         signalCone = 0.15
     )
-    name = "patMuonsWithTightSc015"
+    name = "patMuonsWithTightSc015"+postfix
     setattr(process, name, m)
     sequence *= m
 
     m = tight.clone(
         candSrc = name,
-        embedPrefix = "byTightSc02"+postfix,
+        embedPrefix = "byTightSc02",
         signalCone = 0.2
     )
-    name = "patMuonsWithTightSc02"
+    name = "patMuonsWithTightSc02"+postfix
     setattr(process, name, m)
     sequence *= m
 
     m = tight.clone(
         candSrc = name,
-        embedPrefix = "byTightIc04"+postfix,
+        embedPrefix = "byTightIc04",
         isolationCone = 0.4
     )
-    name = "patMuonsWithTightIc04"
+    name = "patMuonsWithTightIc04"+postfix
     setattr(process, name, m)
     sequence *= m
 
     m = m.clone(
         candSrc = name,
-        embedPrefix = "byTightSc015Ic04"+postfix,
+        embedPrefix = "byTightSc015Ic04",
         signalCone = 0.15
     )
-    name = "patMuonsWithTightSc015Ic04"
+    name = "patMuonsWithTightSc015Ic04"+postfix
     setattr(process, name, m)
     sequence *= m
 
     m = m.clone(
         candSrc = name,
-        embedPrefix = "byTightSc02Ic04"+postfix,
+        embedPrefix = "byTightSc02Ic04",
         signalCone = 0.2
     )
-    name = "patMuonsWithTightSc02Ic04"
+    name = "patMuonsWithTightSc02Ic04"+postfix
     setattr(process, name, m)
     sequence *= m
 
     #######################
     m = tight.clone(
         candSrc = name,
-        embedPrefix = "byTightSc0"+postfix,
+        embedPrefix = "byTightSc0",
         signalCone = 0.01
     )
     name = "patMuonsWithTightSc0"+postfix
@@ -196,7 +196,7 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
 
     m = m.clone(
         candSrc = name,
-        embedPrefix = "byTightSc0Ic04"+postfix,
+        embedPrefix = "byTightSc0Ic04",
         isolationCone = 0.4,
     )
     name = "patMuonsWithTightSc0Ic04"+postfix
@@ -225,7 +225,7 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
         maxDR = cms.double(0.5),
         pdgId = cms.uint32(13)
     )
-    name = "patMuonsWithGen"
+    name = "patMuonsWithGen"+postfix
     setattr(process, name, gen)
     sequence *= gen
 
@@ -233,7 +233,7 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
     m = muonSelector.selectedPatMuons.clone(
         src = name
     )
-    name = "selectedPatMuonsWithIso"+postfix
+    name = "patMuonsWithIso"+postfix
     setattr(process, name, m)
     sequence *= m
 

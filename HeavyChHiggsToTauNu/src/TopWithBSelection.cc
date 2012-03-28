@@ -31,12 +31,12 @@ namespace HPlus {
   TopWithBSelection::Data::~Data() {}
 
   TopWithBSelection::TopWithBSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
-    fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fTopMassLow(iConfig.getUntrackedParameter<double>("TopMassLow")),
     fTopMassHigh(iConfig.getUntrackedParameter<double>("TopMassHigh")),
     fChi2Cut(iConfig.getUntrackedParameter<double>("Chi2Cut")),
     fTopWithBMassCount(eventCounter.addSubCounter("Top with B mass cut","Top with B Mass cut")),
-    fEventWeight(eventWeight)
+    fEventWeight(eventWeight),
+    fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src"))
   {
     edm::Service<TFileService> fs;
 
@@ -72,7 +72,6 @@ namespace HPlus {
     W.SetXYZT(nan, nan, nan, nan);
 
     bool passEvent = false;
-    size_t passed = 0;
 
     bool topmassfound = false;
     double chi2Min = 999999;

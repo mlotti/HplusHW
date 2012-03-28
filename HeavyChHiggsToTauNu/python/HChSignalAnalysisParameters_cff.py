@@ -1,5 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
+# Blind analysis - do not fill final counter and histogram for data if true
+blindAnalysisStatus = cms.untracked.bool(True);
+
 singleTauMetTriggerPaths = [
 #    "HLT_SingleLooseIsoTau20",
 #    "HLT_SingleLooseIsoTau20_Trk5",
@@ -27,7 +30,7 @@ trigger = cms.untracked.PSet(
     throwIfNoMet = cms.untracked.bool(False), # to prevent jobs from failing, FIXME: must be investigated later
     selectionType = cms.untracked.string("byTriggerBit"), # Default byTriggerBit, other options , disabled
     caloMetSelection = cms.untracked.PSet(
-        src = cms.untracked.InputTag("patMETs"), # Calo MET
+        src = cms.untracked.InputTag("met"), # Calo MET
         metEmulationCut = cms.untracked.double(-1), # disabled by default
     )
 )
@@ -53,7 +56,7 @@ tauSelectionBase = cms.untracked.PSet(
     isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr"), # discriminator for isolation
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1.0), # cut point for continuous isolation discriminator, applied only if it is non-zero
     rtauCut = cms.untracked.double(0.7), # rtau > value
-    nprongs = cms.untracked.uint32(1) # number of prongs
+    nprongs = cms.untracked.uint32(1) # number of prongs (options: 1, 3, or 13 == 1 || 3)
 )
 
 # Only HPS should be used (ignore TCTau, plain PF, TaNC, and Combined HPS+TaNC)
@@ -91,7 +94,7 @@ vetoTauBase = tauSelectionHPSLooseTauBased.clone(
     etaCut = cms.untracked.double(2.5), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
     rtauCut = cms.untracked.double(0.0), # rtau > value
-    nprongs = cms.untracked.uint32(1) # number of prongs
+    nprongs = cms.untracked.uint32(1) # number of prongs (options: 1, 3, or 13 == 1 || 3)
 )
 
 vetoTauSelection = cms.untracked.PSet(
@@ -145,15 +148,19 @@ jetSelectionTight = jetSelectionBase.clone(
 jetSelection = jetSelectionLoose # set default jet selection
 
 MET = cms.untracked.PSet(
-    # src = cms.untracked.InputTag("patMETs"), # calo MET
-    #src = cms.untracked.InputTag("patMETsTC"), # tc MET
     rawSrc = cms.untracked.InputTag("patMETsPF"), # PF MET
     type1Src = cms.untracked.InputTag("dummy"),
     type2Src = cms.untracked.InputTag("dummy"),
     caloSrc = cms.untracked.InputTag("patMETs"),
     tcSrc = cms.untracked.InputTag("patMETsTC"),
-    select = cms.untracked.string("raw"), # raw, type1, type2
-    METCut = cms.untracked.double(50.0)
+    select = cms.untracked.string("type1"), # raw, type1, type2
+    METCut = cms.untracked.double(50.0),
+
+    # For type I/II correction
+    tauJetMatchingCone = cms.untracked.double(0.5),
+    jetType1Threshold = cms.untracked.double(10),
+    jetOffsetCorrLabel = cms.untracked.string("L1FastJet"),
+    #type2ScaleFactor = cms.untracked.double(1.4),
 )
 
 bTagging = cms.untracked.PSet(
@@ -432,7 +439,7 @@ def setPileupWeightFor2010(pset=vertexWeight):
     pset.useSimulatedPileup = True
     raise Exception("Data PU distribution for 2010 is not yet available")
 
-def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="Run2011A", method="3D"):
+def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="Run2011A", method="intime"):
     if dataVersion.isData():
         return
 
@@ -558,9 +565,8 @@ def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, ad
         module.tauSelection = selection.clone()
 
         # Calculate type 1 MET
-        (type1Sequence, type1Met, type1p2Met) = MetCorrection.addCorrectedMet(process, dataVersion, module.tauSelection, module.jetSelection, postfix=name)
-        module.MET.type1Src = type1Met
-        module.MET.type2Src = type1p2Met
+        raise Exception("This needs further adjustment")
+        type1Sequence = MetCorrection.addCorrectedMet(process, dataVersion, module, postfix=name)
 
         seq = cms.Sequence(
             commonSequence *
@@ -584,3 +590,31 @@ def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processNa
 def changeJetCollection(**kwargs):
     _changeCollection([jetSelection.src, forwardJetVeto.src], **kwargs)
 
+def changeCollectionsToPF2PAT(postfix="PFlow"):
+    # Taus
+    hps = "selectedPatTaus"+postfix
+    if "TriggerMatched" in tauSelectionHPSTightTauBased.src.value():
+        hps = "patTaus%sTriggerMatched%s" % (postfix, postfix)
+
+    tauSelectionHPSTightTauBased.src = hps
+    tauSelectionHPSMediumTauBased.src = hps
+    tauSelectionHPSLooseTauBased.src = hps
+    tauSelectionHPSVeryLooseTauBased.src = hps
+    vetoTauSelection.tauSelection.src = "selectedPatTaus"+postfix
+
+
+    # Muons
+    GlobalMuonVeto.MuonCollectionName = "selectedPatMuons"+postfix
+    NonIsolatedMuonVeto.MuonCollectionName = "selectedPatMuons"+postfix
+
+    # Electrons
+    GlobalElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
+    NonIsolatedElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
+
+    # Jets
+    changeJetCollection(moduleLabel="selectedPatJets"+postfix)
+
+    # MET
+    MET.rawSrc = "patMETsPFlow"
+    MET.caloSrc = "Nonexistent"
+    MET.tcSrc = "Nonexistent"

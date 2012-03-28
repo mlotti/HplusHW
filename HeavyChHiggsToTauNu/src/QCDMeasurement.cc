@@ -304,7 +304,7 @@ namespace HPlus {
     hStdAfterNjets->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
     
     // get the MET, but cut on it later
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau(), jetData.getAllJets());
 
     // alphaT - No cuts applied! Only produces plots
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauCandidateData.getSelectedTau()), jetData.getSelectedJets());
@@ -363,7 +363,7 @@ namespace HPlus {
     
     /////////////////////    /////////////////////    /////////////////////
     /// BIG BOX: Produce plots
-    METSelection::Data metDataBB  = fMETSelection.analyze(iEvent, iSetup);
+    METSelection::Data metDataBB  = fMETSelection.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau(), jetData.getAllJets());
     double EventWeightWithoutBTag = fEventWeight.getWeight(); // needed because of btag scale factor 
     BTagging::Data btagDataBB = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     double EventWeightWithBTag = fEventWeight.getWeight(); // needed because of btag scale factor 
