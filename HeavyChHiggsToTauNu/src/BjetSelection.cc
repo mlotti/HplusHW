@@ -31,6 +31,8 @@ namespace HPlus {
 
   BjetSelection::BjetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
+    fOneProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneProngTauSrc")),
+    fOneAndThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneAndThreeProngTauSrc")),
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
@@ -60,6 +62,9 @@ namespace HPlus {
     hBquarkFromHiggsSidePt = makeTH<TH1F>(myDir, "PtBquarkFromHiggsSide", "PtBquarkFromHiggsSide", 200, 0.,400.);
     hBquarkFromTopSideEta = makeTH<TH1F>(myDir, "EtaBquarkFromTopSide", "EtaBquarkFromTopSide", 250, -5.,5.);
     hBquarkFromTopSidePt = makeTH<TH1F>(myDir, "PtBquarkFromTopSide", "PtBquarkFromTopSide", 200, 0.,400.);
+    hDeltaRtauBtauSide = makeTH<TH1F>(myDir, "DeltaRtauBtauSide", "DeltaRtauBtauSide", 200, 0., 6.);
+    hDeltaRHadTauBtauSide = makeTH<TH1F>(myDir, "DeltaRHadTauBtauSide", "DeltaRHadTauBtauSide", 200, 0., 6.);
+    hDeltaRHadTauBtopSide = makeTH<TH1F>(myDir, "DeltaRHadTauBtopSide", "DeltaRHadTauBtopSide", 200, 0., 6.);
     hDeltaTauB = makeTH<TH1F>(myDir, "DeltaTauB", "DeltaTauB", 200, 0., 6.);
     
 
@@ -76,6 +81,13 @@ namespace HPlus {
 
     typedef math::XYZTLorentzVectorD LorentzVector;
     typedef std::vector<LorentzVector> LorentzVectorCollection;
+
+    edm::Handle <std::vector<LorentzVector> > oneProngTaus;
+    iEvent.getByLabel(fOneProngTauSrc, oneProngTaus);
+
+    edm::Handle <std::vector<LorentzVector> > oneAndThreeProngTaus;
+    iEvent.getByLabel(fOneAndThreeProngTauSrc,oneAndThreeProngTaus);	  
+
     bool passEvent = false;
       
     double nan = std::numeric_limits<double>::quiet_NaN();
@@ -85,6 +97,8 @@ namespace HPlus {
     double deltaRMax = 0;
     double deltaRMin = 999999;
 
+
+    /*
     // b jet most far from tau jet
     for(edm::PtrVector<pat::Jet>::const_iterator iterb = bjets.begin(); iterb != bjets.end(); ++iterb) {
       edm::Ptr<pat::Jet> iJetb = *iterb;
@@ -100,8 +114,31 @@ namespace HPlus {
     hPtBjetTopSide->Fill(BjetTopSide->pt(), fEventWeight.getWeight());
     hEtaBjetTopSide->Fill(BjetTopSide->eta(), fEventWeight.getWeight());
     hDeltaMaxTauB->Fill(deltaRMax, fEventWeight.getWeight()); 
-
+    */
  
+
+    // hardest b jet in opposite hemisphere
+    double pTmax = 0;
+    for(edm::PtrVector<pat::Jet>::const_iterator iterb = bjets.begin(); iterb != bjets.end(); ++iterb) {
+      edm::Ptr<pat::Jet> iJetb = *iterb;
+      double deltaRtau = ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJetb->p4());
+      hDeltaTauB->Fill(deltaRtau, fEventWeight.getWeight());  
+      if ( deltaRtau > 1.5 ) {
+	if ( iJetb->pt() > pTmax) {
+	  pTmax = iJetb->pt();	
+	  bjetTopSideFound = true;
+	  BjetTopSide = iJetb;
+	}
+      }
+    }
+    if( !bjetTopSideFound  ) return Data(this, passEvent);
+    hPtBjetTopSide->Fill(BjetTopSide->pt(), fEventWeight.getWeight());
+    hEtaBjetTopSide->Fill(BjetTopSide->eta(), fEventWeight.getWeight());
+    hDeltaMaxTauB->Fill(deltaRMax, fEventWeight.getWeight()); 
+
+
+
+
     // b jet closest to tau jet from remaining jets   
     for(edm::PtrVector<pat::Jet>::const_iterator iterb = bjets.begin(); iterb != bjets.end(); ++iterb) {
       edm::Ptr<pat::Jet> iJetb = *iterb;
@@ -268,18 +305,36 @@ namespace HPlus {
       if( bjetTauSideFound  ) {
 
 	int idbjetHiggsSide = 0;
+      
+	std::vector<LorentzVector> tausFromHp;
+
+	for (size_t i=0; i < genParticles->size(); ++i){
+	  const reco::Candidate & p = (*genParticles)[i];
+	  int id = p.pdgId();	  
+	  if ( abs(id) != 15 || hasImmediateMother(p,15) || hasImmediateMother(p,-15) )continue;
+	  if(hasImmediateMother(p,37) || hasImmediateMother(p,-37)) {
+	    tausFromHp.push_back(p.p4());	    
+	  }
+	}
+
+
 	for (size_t i=0; i < genParticles->size(); ++i){
 	  const reco::Candidate & p = (*genParticles)[i];
 	  int id = p.pdgId();
+
 	  if ( abs(id) != 5 || hasImmediateMother(p,5) || hasImmediateMother(p,-5) )continue;
 	  bEta = p.eta();
 	  bPt = p.pt();
 	  if(hasImmediateMother(p,6) || hasImmediateMother(p,-6)) {
 	    //	  printImmediateMothers(p);
-	    //	  std::cout << " b quarks " << id <<  " idHiggsSide " <<   idHiggsSide << std::endl;
+	    //	    std::cout << " p " << p.p4() <<  " tau " <<  tau.p4() << std::endl;
 	    if ( id * idHiggsSide > 0 ) {
 	      hBquarkFromHiggsSideEta->Fill(bEta, fEventWeight.getWeight());
 	      hBquarkFromHiggsSidePt->Fill(bPt, fEventWeight.getWeight());
+	      if ( tausFromHp.size() > 0) {
+		double deltaRtaub = ROOT::Math::VectorUtil::DeltaR(tausFromHp[0],p.p4() );
+		hDeltaRtauBtauSide->Fill(deltaRtaub, fEventWeight.getWeight());      
+	      }
 	      // test with b jet from tau side
 	      double deltaR = ROOT::Math::VectorUtil::DeltaR(BjetTauSide->p4(),p.p4() );
 	      if ( deltaR < 0.4) bjetHiggsSide = true;
@@ -320,9 +375,42 @@ namespace HPlus {
 	  hEtaBjetTopSideTrue->Fill(BjetTopSide->eta(), fEventWeight.getWeight());
 	}
       } 
-    }   
+   
 
-    
+    // pure MC
+      for( LorentzVectorCollection::const_iterator tau = oneProngTaus->begin();tau!=oneProngTaus->end();++tau) { 
+	bool tauFromHplus = false;
+	for (size_t i=0; i < genParticles->size(); ++i){
+	  const reco::Candidate & p = (*genParticles)[i];
+	  int id = p.pdgId();	  
+	  if ( abs(id) != 15 || hasImmediateMother(p,15) || hasImmediateMother(p,-15) )continue;
+	  if(hasImmediateMother(p,37) || hasImmediateMother(p,-37)) {
+	    double deltaR = ROOT::Math::VectorUtil::DeltaR(*tau,p.p4() );
+	    if (deltaR < 0.4) tauFromHplus = true;	    
+	  }
+	}
+	if( !tauFromHplus ) continue;
+	if( tau->pt() < 40) continue;
+
+	for (size_t i=0; i < genParticles->size(); ++i){  
+	  const reco::Candidate & p = (*genParticles)[i];  
+	  int id = p.pdgId();
+	  if ( abs(id) != 5 || hasImmediateMother(p,5) || hasImmediateMother(p,-5) )continue;
+	  if(hasImmediateMother(p,6) || hasImmediateMother(p,-6)) {
+	    if ( id * idHiggsSide > 0 ) {
+	      double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() ,*tau );
+	      hDeltaRHadTauBtauSide->Fill(deltaR, fEventWeight.getWeight());
+	    }
+	    if ( id * idHiggsSide < 0 ) {
+	      double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() ,*tau );
+	      hDeltaRHadTauBtopSide->Fill(deltaR, fEventWeight.getWeight());
+	    }
+	  }  
+	}
+      } 
+    }
+
+  
     passEvent = true; 
     if( !bjetTopSideFound) passEvent = false;   
     return Data(this, passEvent);

@@ -22,6 +22,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetWithPtSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h"
@@ -81,6 +82,7 @@ namespace HPlus {
       Count fFakeMETVetoCounter;
       Count fTopSelectionCounter;
       Count fTopChiSelectionCounter;
+      //      Count fTopChiSelectionNarrowCounter;
       Count fTopWithBSelectionCounter;
     };
   enum SignalSelectionOrder {
@@ -140,18 +142,30 @@ namespace HPlus {
     Count fdeltaPhiTauMET160Counter;
     Count fdeltaPhiTauMET130Counter;
     Count fdeltaPhiTauMET90Counter;
+    Count fTauVetoAfterDeltaPhiCounter;
+    Count fRealTauAfterDeltaPhiCounter;
+    Count fRealTauAfterDeltaPhiTauVetoCounter;
     Count fFakeMETVetoCounter;
     Count fdeltaPhiTauMET160FakeMetCounter;
     Count fForwardJetVetoCounter;
+    Count ftransverseMassCut70Counter;
     Count ftransverseMassCut80Counter;
-    Count ftransverseMassCut100Counter;
+    Count ftransverseMass70TauVetoCounter;
+    Count ftransverseMass80TauVetoCounter;
+    Count ftransverseMass70TopChiSelCounter;
+    Count ftransverseMass70TopWithBSelCounter;
+    Count ftransverseMass70TopSelCounter;
+    Count ftransverseMass80TopChiSelCounter;
+    Count ftransverseMass80TopWithBSelCounter;
+    Count ftransverseMass80TopSelCounter;
     Count ftransverseMassCut80NoRtauCounter;
     Count ftransverseMassCut100NoRtauCounter;
     Count fZmassVetoCounter;
     Count fTopSelectionCounter;
     Count fTopChiSelectionCounter;
+    Count fTopChiSelectionNarrowCounter;
     Count fTopWithBSelectionCounter;
-    Count ftransverseMassCut100TopCounter;
+    
 
     TriggerSelection fTriggerSelection;
     VertexSelection fPrimaryVertexSelection;
@@ -168,6 +182,7 @@ namespace HPlus {
     TopChiSelection fTopChiSelection;
     TopWithBSelection fTopWithBSelection;
     BjetSelection fBjetSelection;
+    //    BjetWithPtSelection fBjetWithPtSelection;
     GenParticleAnalysis fGenparticleAnalysis;
     ForwardJetVeto fForwardJetVeto;
     CorrelationAnalysis fCorrelationAnalysis;

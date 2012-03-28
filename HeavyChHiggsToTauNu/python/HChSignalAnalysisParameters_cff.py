@@ -87,15 +87,20 @@ tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
 )
 
 vetoTauBase = tauSelectionHPSVeryLooseTauBased.clone(
-    ptCut = cms.untracked.double(20), # jet pt > value
+    ptCut = cms.untracked.double(15), # jet pt > value
     etaCut = cms.untracked.double(2.5), # jet |eta| < value
-    leadingTrackPtCut = cms.untracked.double(10.0), # ldg. track > value
+    leadingTrackPtCut = cms.untracked.double(5.0), # ldg. track > value
+#    isolationDiscriminator = "byVLooseIsolation",
     rtauCut = cms.untracked.double(0.0), # rtau > value
-    nprongs = cms.untracked.uint32(1) # number of prongs
+    nprongs = cms.untracked.uint32(1), # number of prongs
 )
 
 vetoTauSelection = cms.untracked.PSet(
     tauSelection = vetoTauBase,
+    src = cms.untracked.InputTag("genParticles"),
+    oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
+    oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"),
+    threeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauThreeProng"),
     Zmass = cms.untracked.double(90), # Z mass value in GeV
     ZmassWindow = cms.untracked.double(10), # window around Z mass in GeV for vetoing events
 )
@@ -242,11 +247,15 @@ topSelection = cms.untracked.PSet(
 )
 
 bjetSelection = cms.untracked.PSet(
-  src = cms.untracked.InputTag("genParticles")
+  src = cms.untracked.InputTag("genParticles"),
+  oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
+  oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng") 
 )
+
+
 topChiSelection = cms.untracked.PSet(
   TopMassLow = cms.untracked.double(120.0),
-  TopMassHigh = cms.untracked.double(250.0),
+  TopMassHigh = cms.untracked.double(300.0),
   Chi2Cut = cms.untracked.double(5.0),
   src = cms.untracked.InputTag("genParticles") 
 )

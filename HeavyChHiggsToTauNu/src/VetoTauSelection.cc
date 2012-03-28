@@ -15,6 +15,22 @@
 #include "TH1.h"
 #include "TLorentzVector.h"
 
+
+
+std::vector<const reco::GenParticle*>   getImmediateMothers(const reco::Candidate&);
+std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
+bool  hasImmediateMother(const reco::Candidate& p, int id);
+bool  hasMother(const reco::Candidate& p, int id);
+void  printImmediateMothers(const reco::Candidate& p);
+void  printMothers(const reco::Candidate& p);
+std::vector<const reco::GenParticle*>  getImmediateDaughters(const reco::Candidate& p);
+std::vector<const reco::GenParticle*>   getDaughters(const reco::Candidate& p);
+bool  hasImmediateDaughter(const reco::Candidate& p, int id);
+bool  hasDaughter(const reco::Candidate& p, int id);
+void  printImmediateDaughters(const reco::Candidate& p);
+void printDaughters(const reco::Candidate& p);
+
+
 namespace HPlus {
   VetoTauSelection::Data::Data(const VetoTauSelection *vetoTauSelection, bool passedEvent) :
   fVetoTauSelection(vetoTauSelection), fPassedEvent(passedEvent) { }
@@ -22,6 +38,10 @@ namespace HPlus {
   VetoTauSelection::Data::~Data() { }
   
   VetoTauSelection::VetoTauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight) :
+    fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
+    fOneProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneProngTauSrc")),
+    fOneAndThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneAndThreeProngTauSrc")),
+    fThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("threeProngTauSrc")),
     fZMass(iConfig.getUntrackedParameter<double>("Zmass")),
     fZMassWindow(iConfig.getUntrackedParameter<double>("ZmassWindow")),
     fTauSource(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection").getUntrackedParameter<edm::InputTag>("src")),
@@ -43,6 +63,8 @@ namespace HPlus {
     hSelectedTauNumber = makeTH<TH1F>(myDir, "SelectedTauNumber", "SelectedTauNumber;Number of selected veto #tau jets;Jets", 4, 0, 4);
     for (int i = 1; i <= hCandidateTauNumber->GetNbinsX(); ++i)
       hSelectedTauNumber->GetXaxis()->SetBinLabel(i, hCandidateTauNumber->GetXaxis()->GetBinLabel(i));
+    hTauCandFromWPt = makeTH<TH1F>(myDir, "TauCandFromWPt", "TauCandFromWPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hTauCandAllPt = makeTH<TH1F>(myDir, "TauCandAllPt", "TauCandAllPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
     hSelectedGenuineTauByPt = makeTH<TH1F>(myDir, "SelectedGenuineTauByPt", "SelectedGenuineTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
     hSelectedGenuineTauByEta = makeTH<TH1F>(myDir, "SelectedGenuineTauByEta", "SelectedGenuineTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
     hSelectedGenuineTauByPhi = makeTH<TH1F>(myDir, "SelectedGenuineTauByPhi", "SelectedGenuineTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
@@ -57,6 +79,8 @@ namespace HPlus {
 
   VetoTauSelection::Data VetoTauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau) {
     increment(fAllEventsCounter);
+
+
     // Obtain tau collection as the veto tau candidates and take out selected tauSelection
     edm::Handle<edm::View<pat::Tau> > myTaus;
     iEvent.getByLabel(fTauSource, myTaus);
@@ -65,8 +89,92 @@ namespace HPlus {
       if (reco::deltaR(*selectedTau, **it) > 0.2)
         myVetoTauCandidates.push_back(*it);
     }
+
+
+  
+// Obtain tau collection as the veto tau candidates and take out selected tauSelection
+    if (!iEvent.isRealData()) {
+
+      edm::Handle <reco::GenParticleCollection> genParticles;
+      iEvent.getByLabel(fSrc, genParticles);
+      
+      typedef math::XYZTLorentzVectorD LorentzVector;
+      typedef std::vector<LorentzVector> LorentzVectorCollection;
+      
+      
+      edm::Handle <std::vector<LorentzVector> > oneProngTaus;
+      iEvent.getByLabel(fOneProngTauSrc, oneProngTaus);
+      
+      edm::Handle <std::vector<LorentzVector> > oneAndThreeProngTaus;
+      iEvent.getByLabel(fOneAndThreeProngTauSrc,oneAndThreeProngTaus);	  
+      
+      edm::Handle <std::vector<LorentzVector> > threeProngTaus;
+      iEvent.getByLabel(fThreeProngTauSrc, threeProngTaus);	  
+      
+      //     std::cout << " hadronic taus  " << oneAndThreeProngTaus.size() << std::endl;	       
+      for( LorentzVectorCollection::const_iterator tau = oneAndThreeProngTaus->begin();tau!=oneAndThreeProngTaus->end();++tau) {  
+	bool tauFromHiggs = false;
+	bool tauFromW = false;
+	bool tauCandFromW = false;	
+	for (size_t i=0; i < genParticles->size(); ++i){  
+	  const reco::Candidate & p = (*genParticles)[i];
+	  int id = p.pdgId();
+	  if ( abs(id) == 15 ) {
+	    int numberOfTauMothers = p.numberOfMothers(); 
+	    for (int im=0; im < numberOfTauMothers; ++im){  
+	      const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
+	      if ( !dparticle) continue;
+	      int idmother = dparticle->pdgId();
+	      if ( abs(idmother) == 37 ) {
+		tauFromHiggs = true;
+	      }
+	      if ( abs(idmother) == 24 ) {
+		tauFromW = true;
+	      }
+	    }
+	  }
+	  //	  std::cout << " tauFromW " << tauFromW << " tauFromHiggs " << tauFromHiggs << std::endl;	  
+	  
+	  for (edm::PtrVector<pat::Tau>::iterator it = myVetoTauCandidates.begin(); it != myVetoTauCandidates.end(); ++it) {
+	    double deltaR = reco::deltaR( *tau, **it);
+	    if ( deltaR < 0.2 && tauFromW) {
+	      tauCandFromW = true;
+	      hTauCandFromWPt->Fill((*it)->pt(), fEventWeight.getWeight()); 
+	    }
+	  }
+	}
+      }
+
+      
+ 
+      /*     
+      for (edm::PtrVector<pat::Tau>::iterator it = myTaus->ptrVector().begin(); it != myTaus->ptrVector().end(); ++it) {
+	if (reco::deltaR(*selectedTau, **it) < 0.4 ) continue;        
+	
+	for (size_t i=0; i < genParticles->size(); ++i){
+	  const reco::Candidate & p = (*genParticles)[i];
+	  int id = p.pdgId();
+	  if ( abs(id) != 15 || hasImmediateMother(p,15) || hasImmediateMother(p,-15) )continue;
+	  //	  if(hasImmediateMother(p,24) || hasImmediateMother(p,-24)) {
+	  printImmediateMothers(p);
+	  //	  std::cout << " b quarks " << id <<  " idHiggsSide " <<   idHiggsSide << std::endl;
+	  //	       double deltaR = ROOT::Math::VectorUtil::DeltaR(Jetb->p4(),p.p4() );
+	  double deltaR = reco::deltaR(p.p4(), **it);	
+	  //	  if ( deltaR < 0.4) tauCandFromW = true;
+	  //	  }
+	} 
+      }
+      */
+    }
+    //    std::cout << " tauCandFromW " << tauCandFromW << std::endl;
+
+
+
+
+
     // Count how many taus (excluding the selected tau) are available in the event
     for (edm::PtrVector<pat::Tau>::iterator it = myVetoTauCandidates.begin(); it != myVetoTauCandidates.end(); ++it) {
+      hTauCandAllPt->Fill((*it)->pt(), fEventWeight.getWeight()); 
       FakeTauIdentifier::MCSelectedTauMatchType myMatch = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
       if (myMatch == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
         hCandidateTauNumber->Fill(0., fEventWeight.getWeight());
@@ -120,16 +228,19 @@ namespace HPlus {
       myVetoTauMomentum += mySelectedTauMomentum;
       double myDitauMass = myVetoTauMomentum.M();
       // Check if ditau mass is compatible with Z mass
+      if (myDitauMass <  100 ) 	myVetoStatus = true;
+      /*
       if (TMath::Abs(myDitauMass - fZMass) < fZMassWindow) {
-	//	myVetoStatus = true;
+	myVetoStatus = true;
       }
+      */
       if (isGenuineTau) {
           hSelectedGenuineTauDiTauMass->Fill(myDitauMass, fEventWeight.getWeight());
         } else {
           hSelectedFakeTauDiTauMass->Fill(myDitauMass, fEventWeight.getWeight());
       }
     }
-    if (myTauData.passedEvent()) myVetoStatus = true;
+    //    if (myTauData.passedEvent()) myVetoStatus = true;
 
     // Return the end result
     if (myVetoStatus)

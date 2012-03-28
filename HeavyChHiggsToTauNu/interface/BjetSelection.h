@@ -80,9 +80,13 @@ namespace HPlus {
     // EventWeight object
     EventWeight& fEventWeight;
     edm::InputTag fSrc;
-
+    edm::InputTag fOneProngTauSrc;
+    edm::InputTag fOneAndThreeProngTauSrc;
     
     // Histograms
+    TH1 *hDeltaRtauBtauSide;
+    TH1 *hDeltaRHadTauBtauSide;
+    TH1 *hDeltaRHadTauBtopSide;
     TH1 *hDeltaMinTauB;
     TH1 *hDeltaMaxTauB;
     TH1 *hPtBjetTauSide;
