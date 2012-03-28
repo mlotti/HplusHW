@@ -322,6 +322,30 @@ def createTasks(opts, step, version=None):
             dataset.appendArg("outputFile=embedded_copy.root")
             dataset.appendLine("CMSSW.output_file = embedded_copy.root")
         elif step == "skim_copy":
+<<<<<<< HEAD
+=======
+
+# old code in master
+#            dataset.appendArg("outputFile=skim_copy.root")
+#            dataset.appendLine("CMSSW.output_file = skim_copy.root")
+#        else:
+#            dataset.appendLine("CMSSW.output_file = "+config[step]["output"])
+#            dataset.appendLine("USER.additional_input_files = copy_cfg.py")
+#            dataset.appendCopyFile("copy_cfg.py")
+#    
+#    # Modification step for analysis steps
+#    def modifyAnalysis(dataset):
+#        if dataset.isMC():
+#            dataset.appendArg("puWeightEra="+opts.era)
+#        if step == "signalAnalysis":
+#            dataset.appendArg("tauEmbeddingInput=1")
+#            dataset.appendArg("doPat=1")
+#            if dataset.getName() in datasetsData2011_Run2011A_noEPS:
+#                dataset.appendArg("tauEmbeddingCaloMet=caloMetSum")
+#    #    if step == "analysisTau":
+#    #        if dataset.getName() == "WJets":
+#    #            dataset.setNumberOfJobs(100)
+>>>>>>> lauri/master
             import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabDatasetsTauEmbedding as tauEmbeddingDatasets
             njobs = tauEmbeddingDatasets.njobs[dataset.getName()]["skim"]
             dataset.setNumberOfJobs(njobs*2)
@@ -404,6 +428,10 @@ class Wrapper:
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
+# old code in master
+#if __name__ == "__main__":
+#    main()
+
 if not configOnly and step in ["skim", "embedding"]:
     import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
     import os
@@ -411,4 +439,3 @@ if not configOnly and step in ["skim", "embedding"]:
     patch.main(Wrapper(dirs=datasets, input={"skim": "skim",
                                              "embedding": "embedded"}[step]))
     os.chdir("..")
-
