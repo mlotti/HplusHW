@@ -42,10 +42,14 @@ doTauEmbeddingTauSelectionScan = False
 # Do embedding-like preselection for signal analysis
 doTauEmbeddingLikePreselection = False
 
+# Keep / Ignore prescaling for data (suppresses greatly error messages 
+# in datasets with or-function of triggers)
+doPrescalesForData = False
+
 applyTriggerScaleFactor = True
 
-PF2PATVersion = "PFlow" # For normal PF2PAT
-#PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
+#PF2PATVersion = "PFlow" # For normal PF2PAT
+PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
 
 ### Systematic uncertainty flags ###
 # Running of systematic variations is controlled by the global flag
@@ -182,7 +186,7 @@ sequence = MetCorrection.addCorrectedMet(process, process.signalAnalysis, postfi
 process.commonSequence *= sequence
 
 # Prescale fetching done automatically for data
-if dataVersion.isData() and options.tauEmbeddingInput == 0:
+if dataVersion.isData() and options.tauEmbeddingInput == 0 and doPrescalesForData:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
     process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
     process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
