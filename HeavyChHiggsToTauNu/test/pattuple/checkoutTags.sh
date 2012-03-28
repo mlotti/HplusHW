@@ -4,6 +4,7 @@ set -e
 
 # Tag list modification history
 # 21.12.2011 M.Kortelainen CMSSW_4_2_8_patch7 Introduced the file for event filters
+# 19.1.2012 M.Kortelainen CMSSW_4_4_2_patch9 Added tag for GenFilters
 
 # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#ECAL_dead_cell_filter
 # https://twiki.cern.ch/twiki/bin/view/CMS/SusyEcalMaskedCellSummary

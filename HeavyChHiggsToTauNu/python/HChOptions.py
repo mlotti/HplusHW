@@ -45,11 +45,21 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.int,
                      "Should the TriggerFilter for data throw if trigger path is not found? (default: 1)")
+    options.register("triggerMC",
+                     0,
+                     options.multiplicity.singleton,
+                     options.varType.int,
+                     "Should MC be triggered? (default: 0) If MC is to be triggered, the default trigger is taken from HChDataVersion (called signalTrigger in there). This can be overridden with the 'trigger' command line argument.")
     options.register("skimConfig",
+                     [],
+                     options.multiplicity.list,
+                     options.varType.string,
+                     "Configuration fragment for a skim to be done during pattuplization (if multiple are given, an OR of skims is taken)")
+    options.register("pvSelectionConfig",
                      "",
                      options.multiplicity.singleton,
                      options.varType.string,
-                     "Configuration fragment for a skim to be done during pattuplization")
+                     "Configuration fragment for a primary vertex selection (default is to use offlinePrimaryVertices as it is")
     options.register("tauEmbeddingInput",
                      0,
                      options.multiplicity.singleton,

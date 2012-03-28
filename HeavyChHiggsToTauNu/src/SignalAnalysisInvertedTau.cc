@@ -413,9 +413,11 @@ namespace HPlus {
 
     std::string myTauIsolation = "byTightIsolation";
 
+    // Hadronic jet selection
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup,  tauData.getSelectedTau()); 
 
  // Get MET object 
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
     //double Met = metData.getSelectedMET()->et();
     //    std::cout << " weight before  = " << fEventWeight.getWeight() << " met " << Met <<  std::endl;
     hMETBeforeTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());  
@@ -424,8 +426,6 @@ namespace HPlus {
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     // Global muon veto
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
-    // Hadronic jet selection
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup,  tauData.getSelectedTau()); 
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
 
     BjetSelection::Data BjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), tauData.getSelectedTau(), metData.getSelectedMET());

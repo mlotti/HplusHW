@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
 
-def addDataSelection(process, dataVersion, options):
+def addDataSelection(process, dataVersion, options, calculateEventCleaning=False):
     if not dataVersion.isData():
         raise Exception("Data version is not data!")
 
@@ -56,15 +56,16 @@ def addDataSelection(process, dataVersion, options):
         process.HBHENoiseFilterResultProducerMETWG
     )
 
-    # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#ECAL_dead_cell_filter
-    # https://twiki.cern.ch/twiki/bin/view/CMS/SusyEcalMaskedCellSummary
-    process.load("JetMETAnalysis.ecalDeadCellTools.RA2TPfilter_cff")
-    process.ecalDeadCellTPfilter.taggingMode = True
-    process.EcalDeadCellEventFilter.taggingMode = True
-    seq *= (
-        process.ecalDeadCellTPfilter *
-        process.EcalDeadCellEventFilter
-    )
+    if calculateEventCleaning:
+        # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#ECAL_dead_cell_filter
+        # https://twiki.cern.ch/twiki/bin/view/CMS/SusyEcalMaskedCellSummary
+        process.load("JetMETAnalysis.ecalDeadCellTools.RA2TPfilter_cff")
+        process.ecalDeadCellTPfilter.taggingMode = True
+        process.EcalDeadCellEventFilter.taggingMode = True
+        seq *= (
+            process.ecalDeadCellTPfilter *
+            process.EcalDeadCellEventFilter
+        )
 
     return seq
 

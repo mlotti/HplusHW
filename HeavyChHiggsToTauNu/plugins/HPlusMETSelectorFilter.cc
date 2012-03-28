@@ -26,12 +26,16 @@ class HPlusMETPtrSelectorFilter: public edm::EDFilter {
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
   HPlus::METSelection fMETSelection;
+  edm::InputTag fTauSrc;
+  edm::InputTag fJetSrc;
 };
 
 HPlusMETPtrSelectorFilter::HPlusMETPtrSelectorFilter(const edm::ParameterSet& iConfig):
   eventCounter(),
   eventWeight(iConfig),
-  fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET")
+  fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET"),
+  fTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
+  fJetSrc(iConfig.getUntrackedParameter<edm::InputTag>("jetSrc"))
 {
   eventCounter.produces(this);
   eventCounter.setWeightPointer(eventWeight.getWeightPtr());
@@ -45,7 +49,15 @@ bool HPlusMETPtrSelectorFilter::beginLuminosityBlock(edm::LuminosityBlock& iBloc
 }
 
 bool HPlusMETPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  HPlus::METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+  edm::Handle<edm::View<pat::Tau> > htaus;
+  iEvent.getByLabel(fTauSrc, htaus);
+  if(htaus->size() == 0)
+    throw cms::Exception("Assert") << "At least one tau required, got 0" << std::endl;
+
+  edm::Handle<edm::View<pat::Jet> > hjets;
+  iEvent.getByLabel(fJetSrc, hjets);
+
+  HPlus::METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, htaus->ptrAt(0), hjets->ptrVector());
   if(!metData.passedEvent()) return false;
   return true;
 }

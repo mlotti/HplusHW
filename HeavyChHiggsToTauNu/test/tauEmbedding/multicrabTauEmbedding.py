@@ -322,25 +322,46 @@ def createTasks(opts, step, version=None):
             dataset.appendArg("outputFile=embedded_copy.root")
             dataset.appendLine("CMSSW.output_file = embedded_copy.root")
         elif step == "skim_copy":
-            dataset.appendArg("outputFile=skim_copy.root")
-            dataset.appendLine("CMSSW.output_file = skim_copy.root")
-        else:
-            dataset.appendLine("CMSSW.output_file = "+config[step]["output"])
-            dataset.appendLine("USER.additional_input_files = copy_cfg.py")
-            dataset.appendCopyFile("copy_cfg.py")
-    
-    # Modification step for analysis steps
-    def modifyAnalysis(dataset):
-        if dataset.isMC():
-            dataset.appendArg("puWeightEra="+opts.era)
-        if step == "signalAnalysis":
-            dataset.appendArg("tauEmbeddingInput=1")
-            dataset.appendArg("doPat=1")
-            if dataset.getName() in datasetsData2011_Run2011A_noEPS:
-                dataset.appendArg("tauEmbeddingCaloMet=caloMetSum")
-    #    if step == "analysisTau":
-    #        if dataset.getName() == "WJets":
-    #            dataset.setNumberOfJobs(100)
+            import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabDatasetsTauEmbedding as tauEmbeddingDatasets
+            njobs = tauEmbeddingDatasets.njobs[dataset.getName()]["skim"]
+            dataset.setNumberOfJobs(njobs*2)
+          
+
+    if dataset.isData() and step in ["generation", "embedding"]:
+        dataset.appendArg("overrideBeamSpot=1")
+
+    dataset.appendLine("USER.publish_data_name = "+name)
+    if step == "embedding_copy":
+        dataset.appendArg("outputFile=embedded_copy.root")
+        dataset.appendLine("CMSSW.output_file = embedded_copy.root")
+    elif step == "skim_copy":
+        dataset.appendArg("outputFile=skim_copy.root")
+        dataset.appendLine("CMSSW.output_file = skim_copy.root")
+    else:
+        dataset.appendLine("CMSSW.output_file = "+config[step]["output"])
+        dataset.appendLine("USER.additional_input_files = copy_cfg.py")
+        dataset.appendCopyFile("../copy_cfg.py")
+
+# Modification step for analysis steps
+def modifyAnalysis(dataset):
+    if dataset.isMC():
+        dataset.appendArg("puWeightEra="+era)
+    if step == "signalAnalysis":
+        dataset.appendArg("tauEmbeddingInput=1")
+        dataset.appendArg("doPat=1")
+        if dataset.getName() in datasetsData2011_Run2011A_noEPS:
+            dataset.appendArg("tauEmbeddingCaloMet=caloMetSum")
+#    if step == "analysisTau":
+#        if dataset.getName() == "WJets":
+#            dataset.setNumberOfJobs(100)
+
+def modifyMuonAnalysis(dataset):
+    if dataset.isMC():
+        dataset.appendArg("puWeightEra="+era)
+    try:
+        dataset.setNumberOfJobs(muonAnalysisNjobs[dataset.getName()])
+    except KeyError:
+        pass
     
     def modifyMuonAnalysis(dataset):
         if dataset.isMC():
@@ -383,7 +404,11 @@ class Wrapper:
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
+if not configOnly and step in ["skim", "embedding"]:
+    import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
+    import os
+    os.chdir(taskDir)
+    patch.main(Wrapper(dirs=datasets, input={"skim": "skim",
+                                             "embedding": "embedded"}[step]))
+    os.chdir("..")
 
-
-if __name__ == "__main__":
-    main()

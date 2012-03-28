@@ -35,6 +35,7 @@ namespace HPlus {
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
+      const edm::PtrVector<pat::Jet>& getAllJets() const { return fJetSelection->fAllJets; }
       const edm::PtrVector<pat::Jet>& getSelectedJets() const { return fJetSelection->fSelectedJets; }
       const uint32_t getMinNumber() const { return fJetSelection->fMinNumberOfJets; }
       const int getHadronicJetCount() const { return fJetSelection->iNHadronicJets; }
@@ -163,6 +164,8 @@ namespace HPlus {
     TH1 *hJetChargeSelectedJets;
     TH1 *hPtDiffToGenJetSelectedJets;
 
+    // All jets
+    edm::PtrVector<pat::Jet> fAllJets;
     // Selected jets
     edm::PtrVector<pat::Jet> fSelectedJets;
     // Not Selected jets

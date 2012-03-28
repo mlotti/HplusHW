@@ -31,7 +31,7 @@ if hasattr(sys, "argv"):
 
     options.parseArguments()
 
-process = cms.Process('TAUEMBEDDINGCOPY')
+process = cms.Process('CRABCOPY')
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(options.maxEvents)
