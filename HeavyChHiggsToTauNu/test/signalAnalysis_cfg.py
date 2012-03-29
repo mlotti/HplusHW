@@ -18,6 +18,10 @@ doAllTauIds = False
 
 # Apply summer PAS style cuts
 doSummerPAS = False # Rtau>0, MET>70
+
+# Scan against electron discriminators
+doAgainstElectronScan = True
+
 # Disable Rtau
 doRtau0 = False # Rtau>0, MET>50
 
@@ -254,6 +258,36 @@ if doSummerPAS:
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
 
+if doAgainstElectronScan:
+    myTauIsolation = "byMediumCombinedIsolationDeltaBetaCorr"
+    moduleL = process.signalAnalysis.clone()
+    moduleL.tauSelection.isolationDiscriminator = myTauIsolation
+    moduleL.tauSelection.againstElectronDiscriminator = "againstElectronLoose"
+    addAnalysis(process, "signalAnalysisAgainstElectronLoose", moduleL,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+    moduleM = process.signalAnalysis.clone()
+    moduleM.tauSelection.isolationDiscriminator = myTauIsolation
+    moduleM.tauSelection.againstElectronDiscriminator = "againstElectronMedium"
+    addAnalysis(process, "signalAnalysisAgainstElectronMedium", moduleM,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+    moduleT = process.signalAnalysis.clone()
+    moduleT.tauSelection.isolationDiscriminator = myTauIsolation
+    moduleT.tauSelection.againstElectronDiscriminator = "againstElectronTight"
+    addAnalysis(process, "signalAnalysisAgainstElectronTight", moduleT,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+    moduleMVA = process.signalAnalysis.clone()
+    moduleMVA.tauSelection.isolationDiscriminator = myTauIsolation
+    moduleMVA.tauSelection.againstElectronDiscriminator = "againstElectronMVA"
+    addAnalysis(process, "signalAnalysisAgainstElectronMVA", moduleMVA,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
 
 # b tagging testing
 if doBTagScan:
