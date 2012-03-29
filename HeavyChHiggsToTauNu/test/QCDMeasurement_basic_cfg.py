@@ -5,8 +5,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # Configuration
 
 # Select the version of the data (needed only for interactice running,
-#dataVersion = "42Xmc"
-dataVersion = "42Xdata"   # Run2011 data
+dataVersion="44XmcS6"     # Fall11 MC
+#dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
 
 
 ##########
@@ -27,11 +27,19 @@ JESVariation = 0.03
 JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
 
+# Tree filling
+doFillTree = True
+
 applyTriggerScaleFactor = True
+
+#PF2PATVersion = "PFlow" # For normal PF2PAT
+PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
 
 # Temporary switch for disabling prescales (produces tons of unnecessary output
 # with Btau data where no prescale is needed at the moment) 
 disablePrescales = True
+
+
 
 ################################################################################
 
@@ -104,6 +112,9 @@ param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 if applyTriggerScaleFactor and dataVersion.isMC():
     param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
 
+# Switch to PF2PAT objects
+#param.changeCollectionsToPF2PAT()
+param.changeCollectionsToPF2PAT(postfix=PF2PATVersion)
 
 # Set the data scenario for vertex/pileup weighting
 puweight = "Run2011A"
@@ -128,7 +139,7 @@ process.QCDMeasurement = cms.EDFilter("HPlusQCDMeasurementBasicFilter",
     trigger = param.trigger,
     triggerEfficiencyScaleFactor = param.triggerEfficiencyScaleFactor,
     primaryVertexSelection = param.primaryVertexSelection,
-    tauSelection = param.tauSelectionHPSTightTauBased,
+    tauSelection = param.tauSelectionHPSMediumTauBased,
     GlobalElectronVeto = param.GlobalElectronVeto,
     NonIsolatedElectronVeto = param.NonIsolatedElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
@@ -140,6 +151,9 @@ process.QCDMeasurement = cms.EDFilter("HPlusQCDMeasurementBasicFilter",
     MET = param.MET,
     fakeMETVeto = param.fakeMETVeto,
     topSelection = param.topSelection,
+    bjetSelection = param.bjetSelection,                                      
+    topChiSelection = param.topChiSelection,                                  
+    topWithBSelection = param.topWithBSelection,
     forwardJetVeto = param.forwardJetVeto,
     GenParticleAnalysis = param.GenParticleAnalysis,
     vertexWeight = param.vertexWeight,
@@ -163,7 +177,7 @@ process.QCDMeasurement.factorization.factorizationTables = mettableCoeff.METTabl
 
 # Add type 1 MET
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
-sequence = MetCorrection.addCorrectedMet(process, process.QCDMeasurement)
+sequence = MetCorrection.addCorrectedMet(process, process.QCDMeasurement, postfix=PF2PATVersion)
 process.commonSequence *= sequence
         
 # Prescale fetching done automatically for data
@@ -174,6 +188,10 @@ if dataVersion.isData() and not disablePrescales:
     process.commonSequence *= process.hplusPrescaleWeightProducer
     process.QCDMeasurement.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
+# Disable filling of TTree
+if not doFillTree:
+    process.QCDMeasurement.Tree.fill = cms.untracked.bool(False)
+
 # Print output
 print "\nVertexWeight:", process.QCDMeasurement.vertexWeight
 print "\nTrigger:", process.QCDMeasurement.trigger
@@ -181,13 +199,11 @@ print "\nPV Selection:", process.QCDMeasurement.primaryVertexSelection
 print "\nTauSelection operating mode:", process.QCDMeasurement.tauSelection.operatingMode
 print "TauSelection src:", process.QCDMeasurement.tauSelection.src
 print "TauSelection selection:", process.QCDMeasurement.tauSelection.selection
-print "TauSelection isolation:", process.signalAnalysis.tauSelection.isolationDiscriminator
+print "TauSelection isolation:", process.QCDMeasurement.tauSelection.isolationDiscriminator
 print "TauSelection ptCut:", process.QCDMeasurement.tauSelection.ptCut
 print "TauSelection etacut:", process.QCDMeasurement.tauSelection.etaCut
 print "TauSelection leadingTrackPtCut:", process.QCDMeasurement.tauSelection.leadingTrackPtCut
 print "TauSelection rtauCut:", process.QCDMeasurement.tauSelection.rtauCut
-print "TauSelection antiRtauCut:", process.QCDMeasurement.tauSelection.antiRtauCut
-print "TauSelection invMassCut:", process.QCDMeasurement.tauSelection.invMassCut
 print "TauSelection nprongs:", process.QCDMeasurement.tauSelection.nprongs
 print "\nMET:", process.QCDMeasurement.MET
 print "\nGlobalElectronVeto:", process.QCDMeasurement.GlobalElectronVeto
@@ -264,6 +280,7 @@ if doAllTauIds:
 # QCDMeasurementCountersJESMinus05
 from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVariationAnalysis
 if doJESVariation:
+    # FIXME: copy new code from signal analysis 
     # In principle here could be more than two JES variation analyses
     JESs = "%02d" % int(JESVariation*100)
     JESe = "%02d" % int(JESEtaVariation*100)
