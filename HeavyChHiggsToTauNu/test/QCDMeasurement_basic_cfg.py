@@ -20,6 +20,8 @@ doAllTauIds = False
 # Perform b tagging scanning
 doBTagScan = False
 
+doJetThresholdScan = True
+
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
 doJESVariation = False
@@ -28,7 +30,7 @@ JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
 
 # Tree filling
-doFillTree = True
+doFillTree = False
 
 applyTriggerScaleFactor = True
 
@@ -193,6 +195,7 @@ if not doFillTree:
     process.QCDMeasurement.Tree.fill = cms.untracked.bool(False)
 
 # Print output
+print "\ntree will be filled:", process.QCDMeasurement.Tree.fill
 print "\nVertexWeight:", process.QCDMeasurement.vertexWeight
 print "\nTrigger:", process.QCDMeasurement.trigger
 print "\nPV Selection:", process.QCDMeasurement.primaryVertexSelection
@@ -244,7 +247,7 @@ process.QCDMeasurementPath = cms.Path(
 
 ################################################################################
 # The signal analysis with different tau ID algorithms
-#
+# # FIXME
 # Run the analysis for the different tau ID algorithms at the same job
 # as the golden analysis. It is significantly more efficiency to run
 # many analyses in a single job compared to many jobs (this avoids
@@ -264,8 +267,32 @@ process.QCDMeasurementPath = cms.Path(
 # analysis module after PAT (and runs PAT only once).
 if doAllTauIds:
     module = process.QCDMeasurement.clone()
-    module.Tree.fill = True #attikis (default is False)
+    module.Tree.fill = False #attikis (default is False)
     param.addTauIdAnalyses(process, dataVersion, "QCDMeasurement", module, process.commonSequence, additionalCounters)
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
+if doJetThresholdScan:
+    moduleA = process.QCDMeasurement.clone()
+    moduleA.jetSelection.ptCut = 20.0
+    addAnalysis(process, "QCDMeasurement3Jets20", moduleA,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+    moduleB = process.QCDMeasurement.clone()
+    moduleB.jetSelection.ptCut = 20.0
+    moduleB.jetSelection.minNumber = 4
+    addAnalysis(process, "QCDMeasurement4Jets20", moduleB,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+    moduleC = process.QCDMeasurement.clone()
+    moduleC.jetSelection.ptCut = 20.0
+    moduleC.jetSelection.minNumber = 4
+    moduleC.bTagging.minNumber = 2
+    addAnalysis(process, "QCDMeasurement4Jets20TwoBjets", moduleC,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
 
 
 ################################################################################

@@ -126,9 +126,9 @@ namespace HPlus {
     myDeltaPhiTauMETVariation.push_back(180);
     std::vector<int> myTauIsolVariation;
     myTauIsolVariation.push_back(1);
-    myTauIsolVariation.push_back(3);
-    //myTauIsolVariation.push_back(11);
-    //myTauIsolVariation.push_back(21);
+    //myTauIsolVariation.push_back(3);
+    myTauIsolVariation.push_back(11);
+    //myTauIsolVariation.push_back(13);
     for (size_t i = 0; i < myMETVariation.size(); ++i) {
       for (size_t j = 0; j < myDeltaPhiTauMETVariation.size(); ++j) {
         for (size_t k = 0; k < myTauIsolVariation.size(); ++k) {
@@ -475,6 +475,9 @@ namespace HPlus {
     bool myPassedTauIsol = false;
     if (iTauIsolation == 1 || iTauIsolation == 3) // Tight isolation + 1/3 prong
       myPassedTauIsol = tauCandidateData.selectedTauPassesIsolation() &&
+        tauCandidateData.getNProngsOfSelectedTau() == static_cast<size_t>(iTauIsolation);
+    if (iTauIsolation == 11 || iTauIsolation == 13) // Tight isolation + 1/3 prong
+      myPassedTauIsol = tauCandidateData.selectedTauPassesDiscriminator("byLooseCombinedIsolationDeltaBetaCorr", 0.5) &&
         tauCandidateData.getNProngsOfSelectedTau() == static_cast<size_t>(iTauIsolation);
     // inverted tau isolation and prongs (assuming HPS tau)
     bool myPassedInvertedTauIsol = false;
