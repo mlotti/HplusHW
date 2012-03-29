@@ -575,7 +575,7 @@ namespace HPlus {
 
     if (BjetSelectionData.passedEvent() ) {
         
-      TopWithBSelection::Data TopWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData.getBjetTopSide());
+      TopWithBSelection::Data TopWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData);
 
       if (TopWithBSelectionData.passedEvent() ) {
         increment(fTopWithBSelectionCounter);
