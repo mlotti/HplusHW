@@ -35,7 +35,9 @@ class Extractable:
 
     ## Returns true if extractable mode is any type of nuisance
     def isAnyNuisance(self):
-        return self._mode == ExtractableMode.NUISANCE or self._mode == ExtractableMode.ASYMMETRICNUISANCE or self._mode == ExtractableMode.SHAPENUISANCE
+        return self._mode == ExtractableMode.NUISANCE or \
+               self._mode == ExtractableMode.ASYMMETRICNUISANCE or \
+               self._mode == ExtractableMode.SHAPENUISANCE
 
     ## Returns true if extractable mode is nuisance
     def isNuisance(self):
