@@ -112,6 +112,7 @@ namespace HPlus {
     EventWeight& fEventWeight;
 
     //    const double ftransverseMassCut;
+    const bool bBlindAnalysisStatus;
 
     Count fAllCounter;
     Count fTriggerCounter;
@@ -230,6 +231,16 @@ namespace HPlus {
     TH1 *hMETBaselineTauIdBtag6070;
     TH1 *hMETBaselineTauIdBtag5060;
     TH1 *hMETBaselineTauIdBtag4050;
+
+    TH1 *hMTBaselineTauIdTopMass;
+    TH1 *hMTBaselineTauIdTopMass150;
+    TH1 *hMTBaselineTauIdTopMass120150;
+    TH1 *hMTBaselineTauIdTopMass100120;
+    TH1 *hMTBaselineTauIdTopMass80100;
+    TH1 *hMTBaselineTauIdTopMass7080;
+    TH1 *hMTBaselineTauIdTopMass6070;
+    TH1 *hMTBaselineTauIdTopMass5060;
+    TH1 *hMTBaselineTauIdTopMass4050;
 
 
     TH1 *hMETInvertedTauIdJets;

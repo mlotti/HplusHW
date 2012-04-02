@@ -48,6 +48,7 @@ namespace HPlus {
 
   SignalAnalysisInvertedTau::SignalAnalysisInvertedTau(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fEventWeight(eventWeight),
+    bBlindAnalysisStatus(iConfig.getUntrackedParameter<bool>("blindAnalysisStatus")),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),
@@ -201,6 +202,16 @@ namespace HPlus {
     hMTBaselineTauIdJet6070 = makeTH<TH1F>(*fs, "MTBaselineTauIdJet6070", "MTBaselineTauIdJet6070", 400, 0., 400.);
     hMTBaselineTauIdJet5060 = makeTH<TH1F>(*fs, "MTBaselineTauIdJet5060", "MTBaselineTauIdJet5060", 400, 0., 400.);
     hMTBaselineTauIdJet4050 = makeTH<TH1F>(*fs, "MTBaselineTauIdJet4050", "MTBaselineTauIdJet4050", 400, 0., 400.);
+
+    hMTBaselineTauIdTopMass = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass", "MTBaselineTauIdTopMass", 400, 0., 400.);
+    hMTBaselineTauIdTopMass150 = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass150", "MTBaselineTauIdTopMass150", 400, 0., 400.);
+    hMTBaselineTauIdTopMass120150 = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass120150", "MTBaselineTauIdTopMass120150", 400, 0., 400.);
+    hMTBaselineTauIdTopMass100120 = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass100120", "MTBaselineTauIdTopMass100120", 400, 0., 400.);
+    hMTBaselineTauIdTopMass80100 = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass80100", "MTBaselineTauIdTopMass80100", 400, 0., 400.);
+    hMTBaselineTauIdTopMass7080 = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass7080", "MTBaselineTauIdTopMass7080", 400, 0., 400.);
+    hMTBaselineTauIdTopMass6070 = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass6070", "MTBaselineTauIdTopMass6070", 400, 0., 400.);
+    hMTBaselineTauIdTopMass5060 = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass5060", "MTBaselineTauIdTopMass5060", 400, 0., 400.);
+    hMTBaselineTauIdTopMass4050 = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass4050", "MTBaselineTauIdTopMass4050", 400, 0., 400.);
 
     hMTInvertedTauIdJet = makeTH<TH1F>(*fs, "MTInvertedTauIdJet", "MTInvertedTauIdJet", 400, 0., 400.);
     hMTInvertedTauIdJet150 = makeTH<TH1F>(*fs, "MTInvertedTauIdJet150", "MTInvertedTauIdJet150", 400, 0., 400.);
@@ -411,7 +422,9 @@ namespace HPlus {
 
 
 
-    std::string myTauIsolation = "byTightIsolation";
+    //    std::string myTauIsolation = "byTightIsolation";
+    std::string myTauIsolation = "byTightCombinedIsolationDeltaBetaCorr";
+
 
     // Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup,  tauData.getSelectedTau()); 
@@ -488,6 +501,17 @@ namespace HPlus {
 		if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMTBaselineTauIdJet6070->Fill(transverseMass, fEventWeight.getWeight()); 
 		if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMTBaselineTauIdJet5060->Fill(transverseMass, fEventWeight.getWeight()); 
 		if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMTBaselineTauIdJet4050->Fill(transverseMass, fEventWeight.getWeight());
+		
+		if (TopChiSelectionData.passedEvent() ) {
+		  if ( tauData.getSelectedTau()->pt() > 150  ) hMTBaselineTauIdJet150->Fill(transverseMass, fEventWeight.getWeight()); 
+		  if ( tauData.getSelectedTau()->pt() > 120 && tauData.getSelectedTau()->pt() < 150 ) hMTBaselineTauIdTopMass120150->Fill(transverseMass, fEventWeight.getWeight()); 
+		  if ( tauData.getSelectedTau()->pt() > 100 && tauData.getSelectedTau()->pt() < 120 ) hMTBaselineTauIdTopMass100120->Fill(transverseMass, fEventWeight.getWeight()); 
+		  if ( tauData.getSelectedTau()->pt() > 80 && tauData.getSelectedTau()->pt() < 100 ) hMTBaselineTauIdTopMass80100->Fill(transverseMass, fEventWeight.getWeight()); 
+		  if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hMTBaselineTauIdTopMass7080->Fill(transverseMass, fEventWeight.getWeight()); 
+		  if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMTBaselineTauIdTopMass6070->Fill(transverseMass, fEventWeight.getWeight()); 
+		  if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMTBaselineTauIdTopMass5060->Fill(transverseMass, fEventWeight.getWeight()); 
+		  if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMTBaselineTauIdTopMass4050->Fill(transverseMass, fEventWeight.getWeight());
+		}
 	      }
 	    }
 
@@ -531,15 +555,7 @@ namespace HPlus {
       iEvent.put(saveTaus, "selectedTaus");
     }
 
-  
-    
-    //    hSelectedTauRtau->Fill(tauData.getRtauOfBestTauCandidate(), fEventWeight.getWeight());  
-    //    if(tauData.getRtauOfBestTauCandidate() < 0.8 ) return false;
-    //    increment(fRtauAfterTauIDCounter);
-
-    //    hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt(), fEventWeight.getWeight());
-    //    if (tauData.getSelectedTau()->leadPFChargedHadrCand()->pt() < 20.0) return false;                             
-  
+ 
     hSelectedTauEt->Fill(tauData.getSelectedTau()->pt(), fEventWeight.getWeight());
     hSelectedTauEta->Fill(tauData.getSelectedTau()->eta(), fEventWeight.getWeight());
     hSelectedTauPhi->Fill(tauData.getSelectedTau()->phi(), fEventWeight.getWeight());
@@ -556,13 +572,6 @@ namespace HPlus {
     if (myTauMatch == kkElectronToTau)
       hEMFractionElectrons->Fill(tauData.getSelectedTau()->emFraction());
     hEMFractionAll->Fill(tauData.getSelectedTau()->emFraction());
-
-
-    //    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()) );
-    // hTransverseMassBeforeVeto->Fill(transverseMass);
-    // Hadronic jet selection                                                                                                                                      
-    //    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());
-
 
     hTransverseMassBeforeVeto->Fill(transverseMass, fEventWeight.getWeight());
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderMETSelection, tauData);
