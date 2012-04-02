@@ -26,6 +26,7 @@ def createEDFilter(param):
         bjetSelection = param.bjetSelection,                                      
         topChiSelection = param.topChiSelection,                                  
         topWithBSelection = param.topWithBSelection,
+        topWithWSelection = param.topWithWSelection,
         forwardJetVeto = param.forwardJetVeto,
         transverseMassCut = param.transverseMassCut,
         EvtTopology = param.EvtTopology,

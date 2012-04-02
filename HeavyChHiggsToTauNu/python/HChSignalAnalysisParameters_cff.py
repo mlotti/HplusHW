@@ -277,7 +277,7 @@ topWithBSelection = cms.untracked.PSet(
 topWithWSelection = cms.untracked.PSet(
     TopMassLow = cms.untracked.double(120.0),
     TopMassHigh = cms.untracked.double(250.0),
-    Chi2Cut = cms.untracked.double(2.0),
+    Chi2Cut = cms.untracked.double(5.0),
     src = cms.untracked.InputTag("genParticles")
 )
 
