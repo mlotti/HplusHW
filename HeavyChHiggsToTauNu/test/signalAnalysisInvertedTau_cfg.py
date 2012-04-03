@@ -18,6 +18,10 @@ doAllTauIds = False
 
 # Apply summer PAS style cuts
 doSummerPAS = False # Rtau>0, MET>70
+
+# Scan against electron discriminators
+doAgainstElectronScan = True
+
 # Disable Rtau
 doRtau0 = False # Rtau>0, MET>50
 
@@ -182,20 +186,14 @@ if doBTagTree:
     param.bTagging.discriminatorCut = cms.untracked.double(-999)
     param.GlobalMuonVeto.MuonPtCut = cms.untracked.double(999)
 
-
-
-
 # Signal analysis module for the "golden analysis"
-import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
-process.signalAnalysis = signalAnalysis.createEDFilter("HPlusSignalAnalysisInvertedTauFilter")
+import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysisInvertedTau as signalAnalysis
+process.signalAnalysis = signalAnalysis.createEDFilter(param)
 if not doFillTree:
     process.signalAnalysis.Tree.fill = cms.untracked.bool(False)
 # process.signalAnalysis.GlobalMuonVeto = param.NonIsolatedMuonVeto
 # Change default tau algorithm here if needed
 #process.signalAnalysis.tauSelection.tauSelectionHPSTightTauBased # HPS Tight is the default
-
-
-
 
 # Add type 1 MET
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
@@ -211,7 +209,7 @@ if dataVersion.isData() and options.tauEmbeddingInput == 0 and doPrescalesForDat
     process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output
-#print "\nAnalysis is blind:", process.signalAnalysis.blindAnalysisStatus, "\n"
+print "\nAnalysis is blind:", process.signalAnalysis.blindAnalysisStatus, "\n"
 print "Trigger:", process.signalAnalysis.trigger
 print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode
 print "VertexWeight:",process.signalAnalysis.vertexWeight
@@ -260,6 +258,36 @@ if doSummerPAS:
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
 
+if doAgainstElectronScan:
+    myTauIsolation = "byMediumCombinedIsolationDeltaBetaCorr"
+    moduleL = process.signalAnalysis.clone()
+    moduleL.tauSelection.isolationDiscriminator = myTauIsolation
+    moduleL.tauSelection.againstElectronDiscriminator = "againstElectronLoose"
+    addAnalysis(process, "signalAnalysisAgainstElectronLoose", moduleL,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+    moduleM = process.signalAnalysis.clone()
+    moduleM.tauSelection.isolationDiscriminator = myTauIsolation
+    moduleM.tauSelection.againstElectronDiscriminator = "againstElectronMedium"
+    addAnalysis(process, "signalAnalysisAgainstElectronMedium", moduleM,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+    moduleT = process.signalAnalysis.clone()
+    moduleT.tauSelection.isolationDiscriminator = myTauIsolation
+    moduleT.tauSelection.againstElectronDiscriminator = "againstElectronTight"
+    addAnalysis(process, "signalAnalysisAgainstElectronTight", moduleT,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+    moduleMVA = process.signalAnalysis.clone()
+    moduleMVA.tauSelection.isolationDiscriminator = myTauIsolation
+    moduleMVA.tauSelection.againstElectronDiscriminator = "againstElectronMVA"
+    addAnalysis(process, "signalAnalysisAgainstElectronMVA", moduleMVA,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
 
 # b tagging testing
 if doBTagScan:

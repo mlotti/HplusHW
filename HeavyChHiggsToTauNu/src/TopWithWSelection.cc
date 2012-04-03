@@ -109,6 +109,7 @@ namespace HPlus {
 	}
       }
     }
+
     if ( wmassfound ) {
       XYZTLorentzVector top = Jet1->p4() + Jet2->p4() + iJetb->p4(); 
       hWMass->Fill(W.M(), fEventWeight.getWeight());
