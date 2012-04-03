@@ -22,6 +22,11 @@ namespace HPlus {
     fCounterPackager(eventCounter, eventWeight),
     fEventWeight(eventWeight)
   {
+    // Check that input parameters are valid
+    if (fProngCount != 1 && fProngCount != 3 && fProngCount != 13) {
+      throw cms::Exception("Configuration") << "TauSelection/" << baseLabel << ": invalid prong number (" << fProngCount << " requested! Options are 1, 3, and 13 (for both 1 and 3 prongs)" << std::endl;
+    }
+    
     // contstuct base label suffix
     std::stringstream mySuffix;
     mySuffix << baseLabel << "_" << fIsolationDiscriminator;
@@ -32,7 +37,7 @@ namespace HPlus {
     else
       mySuffix << "_noRtau";
     fBaseLabel = mySuffix.str();
-        
+    
     // Histograms
     hEtaTauCands_nocut = makeTH<TH1F>(fMyDir,
       "hEtaTauCands_nocuts",

@@ -14,9 +14,9 @@ pattupleVersion = "pattuple_v25"
 
 
 #era = "EPS"
-#era = "Run2011A"
+era = "Run2011A"
 #era = "Run2011B"
-era = "Run2011A+B"
+#era = "Run2011A+B"
 
 # Change this to true if you want to run the PAT on the fly (for
 # datasets where no pattuples are produced, or for testing something
@@ -130,7 +130,7 @@ datasetsMC = [
         ]
 
 datasets = []
-elif era == "Run2011A":
+if era == "Run2011A":
     if "v18" in pattupleVersion:
         datasets += datasetsRun2011A_v18
     elif "v19" in pattupleVersion:
@@ -189,8 +189,8 @@ if "QCD" in cfg:
     prefix += "_QCD"
 
 # Generate configuration only?
-#configOnly=True
-configOnly=False
+configOnly=True
+#configOnly=False
 # Genenerate configuration and create the crab tasks
 multicrab.createTasks(prefix=prefix, configOnly=configOnly)
 

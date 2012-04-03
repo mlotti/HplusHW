@@ -36,7 +36,15 @@ namespace HPlus {
     size_t myTrackCount = getNProngs(tau);
     //std::cout << "DEBUG: prong=" << tau->signalTracks().size() << " check=" << myTrackCount << std::endl;
     fCounterPackager.fill(fIDNProngsCut, myTrackCount);
-    if (!(myTrackCount == fProngCount)) return false;
+    if (!(myTrackCount == fProngCount)) {
+      if (fProngCount == 13) { // 1 or 3 prong
+        if (myTrackCount != 1 && myTrackCount != 3) {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    }
     fCounterPackager.incrementSubCount(fIDNProngsCut);
     // All cuts passed, return true
     return true;

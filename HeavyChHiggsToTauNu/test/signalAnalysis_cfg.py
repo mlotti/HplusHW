@@ -42,10 +42,21 @@ doTauEmbeddingTauSelectionScan = False
 # Do embedding-like preselection for signal analysis
 doTauEmbeddingLikePreselection = False
 
+
+#########
+# Flags for options in the signal analysis
+
+# Keep / Ignore prescaling for data (suppresses greatly error messages 
+# in datasets with or-function of triggers)
+doPrescalesForData = False
+
+# Tree filling
+doFillTree = True
+
 applyTriggerScaleFactor = True
 
-PF2PATVersion = "PFlow" # For normal PF2PAT
-#PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
+#PF2PATVersion = "PFlow" # For normal PF2PAT
+PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
 
 ### Systematic uncertainty flags ###
 # Running of systematic variations is controlled by the global flag
@@ -88,6 +99,8 @@ process.source = cms.Source('PoolSource',
     # For testing in jade
     dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
+    #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau_173236-173692_2011A_Nov08/Tau/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_173236-173692_2011A_Nov08//d7b7dcb6c55f2b2177021b8423a82913/pattuple_10_1_9l2.root",
+    #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau_175860-180252_2011B_Nov19/Tau/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_175860-180252_2011B_Nov19//28e7e0ab56ad4146eca1efa805cd10f4/pattuple_100_1_jnU.root",
     )
 )
 
@@ -172,6 +185,8 @@ if doBTagTree:
 # Signal analysis module for the "golden analysis"
 import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
 process.signalAnalysis = signalAnalysis.createEDFilter(param)
+if not doFillTree:
+    process.signalAnalysis.Tree.fill = cms.untracked.bool(False)
 # process.signalAnalysis.GlobalMuonVeto = param.NonIsolatedMuonVeto
 # Change default tau algorithm here if needed
 #process.signalAnalysis.tauSelection.tauSelectionHPSTightTauBased # HPS Tight is the default
@@ -182,7 +197,7 @@ sequence = MetCorrection.addCorrectedMet(process, process.signalAnalysis, postfi
 process.commonSequence *= sequence
 
 # Prescale fetching done automatically for data
-if dataVersion.isData() and options.tauEmbeddingInput == 0:
+if dataVersion.isData() and options.tauEmbeddingInput == 0 and doPrescalesForData:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
     process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
     process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
@@ -190,6 +205,7 @@ if dataVersion.isData() and options.tauEmbeddingInput == 0:
     process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output
+print "\nAnalysis is blind:", process.signalAnalysis.blindAnalysisStatus, "\n"
 print "Trigger:", process.signalAnalysis.trigger
 print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode
 print "VertexWeight:",process.signalAnalysis.vertexWeight
