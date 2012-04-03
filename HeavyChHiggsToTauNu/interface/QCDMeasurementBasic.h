@@ -20,6 +20,10 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SelectedEventsAnalyzer.h"
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
@@ -49,7 +53,7 @@ namespace HPlus {
       AnalysisVariation(double METcut, double deltaPhiTauMETCut, int tauIsolation, int nTauPtBins, int nMtBins);
       ~AnalysisVariation();
       
-      void analyse(bool isRealData, const float maxElectronPt, const float maxMuonPt, const int njets, const METSelection::Data& METData, const TauSelection::Data& tauCandidateData,const BTagging::Data& btagData, int tauPtBinIndex, double weightAfterVertexReweight, TriggerEfficiencyScaleFactor::Data& trgEffData, FakeTauIdentifier::MCSelectedTauMatchType tauMatch, double mTBinIndex);
+      void analyse(bool isRealData, const float maxElectronPt, const float maxMuonPt, const int njets, const METSelection::Data& METData, const TauSelection::Data& tauCandidateData,const BTagging::Data& btagData, int tauPtBinIndex, double weightAfterVertexReweight, TriggerEfficiencyScaleFactor::Data& trgEffData, FakeTauIdentifier::MCSelectedTauMatchType tauMatch, double mTBinIndex, const TopSelection::Data& topSelectionData, const BjetSelection::Data& bjetSelectionData, const TopChiSelection::Data& topChiSelectionData, const TopWithBSelection::Data& topWithBSelectionData);
 
     private:
       double fMETCut;
@@ -75,6 +79,9 @@ namespace HPlus {
       TH1F* hLeg1AfterDeltaPhiTauMET;
       TH1F* hLeg1AfterMET;
       TH1F* hLeg1AfterBTagging;
+      TH1F* hLeg1AfterTopSelection;
+      TH1F* hLeg1AfterTopChiSelection;
+      TH1F* hLeg1AfterTopWithBSelection;
       ScaleFactorUncertaintyManager* fSFUncertaintyAfterMetLeg;
       TH1F* hLeg2AfterTauIDNoRtau;
       TH1F* hLeg2AfterTauIDWithRtau;
@@ -89,6 +96,10 @@ namespace HPlus {
       TH1F* hMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau;
       ScaleFactorUncertaintyManager* fSFUncertaintyMtAfterMETAndDeltaPhiAndInvertedTauID;
       std::vector<TH1F*> hMtShapesAfterMETAndDeltaPhi;
+      std::vector<TH1F*> hMtShapesAfterMETAndBTaggingAndDeltaPhi;
+      std::vector<TH1F*> hMtShapesAfterMETAndBTaggingAndDeltaPhiAndTopSelection;
+      std::vector<TH1F*> hMtShapesAfterMETAndBTaggingAndDeltaPhiAndTopChiSelection;
+      std::vector<TH1F*> hMtShapesAfterMETAndBTaggingAndDeltaPhiAndTopWithBSelection;
       std::vector<TH1F*> hMtShapesAfterMETAndDeltaPhiAndInvertedTau;
       // event counts in bins of tau jet pt and transverse mass for transverse mass
       TH2F* h2DMtLegAfterDeltaPhiTauMET;
@@ -112,7 +123,6 @@ namespace HPlus {
       std::vector<TH1F*> hFakeTauMtShapesAfterMETAndDeltaPhi;
       std::vector<TH1F*> hFakeTauMtShapesAfterMETAndDeltaPhiAndInvertedTau;
       
-      // FIXME add TTree's for trigger and btag scalefactor uncertainties
     };
     
   enum QCDSelectionOrder {
@@ -186,7 +196,11 @@ namespace HPlus {
     //TopSelection fTopSelection;
     //ForwardJetVeto fForwardJetVeto;
     TransverseMass fTransverseMass;
-    GenParticleAnalysis fGenparticleAnalysis;   
+    GenParticleAnalysis fGenparticleAnalysis;
+    TopSelection fTopSelection;
+    TopChiSelection fTopChiSelection;
+    TopWithBSelection fTopWithBSelection;
+    BjetSelection fBjetSelection;
     //
     VertexWeight fVertexWeight;
     FakeTauIdentifier fFakeTauIdentifier;
@@ -227,7 +241,6 @@ namespace HPlus {
     // Other histograms
     TH1 *hSelectionFlow;
 
-    // FIXME add TTree's for trigger and btag scalefactor uncertainties
   };
 }
 

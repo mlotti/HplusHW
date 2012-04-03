@@ -62,15 +62,16 @@ namespace HPlus {
 
   TopWithBSelection::~TopWithBSelection() {}
 
-  TopWithBSelection::Data TopWithBSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
-
-
+  TopWithBSelection::Data TopWithBSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const BjetSelection::Data& bjetData) {
     // Reset variables
     topMass = -1;
     double nan = std::numeric_limits<double>::quiet_NaN();
     top.SetXYZT(nan, nan, nan, nan);
     W.SetXYZT(nan, nan, nan, nan);
-
+    // Check existence of bjet
+    if (!bjetData.passedEvent())
+      return Data(this, false);
+    
     bool passEvent = false;
 
     bool topmassfound = false;
@@ -93,10 +94,10 @@ namespace HPlus {
 
 	if (ROOT::Math::VectorUtil::DeltaR(iJet1->p4(), iJet2->p4()) < 0.4) continue;
 	
-	if (ROOT::Math::VectorUtil::DeltaR(iJet1->p4(), iJetb->p4()) < 0.4) continue;
-	if (ROOT::Math::VectorUtil::DeltaR(iJet2->p4(), iJetb->p4()) < 0.4) continue;	  
+	if (ROOT::Math::VectorUtil::DeltaR(iJet1->p4(), bjetData.getBjetTopSide()->p4()) < 0.4) continue;
+	if (ROOT::Math::VectorUtil::DeltaR(iJet2->p4(), bjetData.getBjetTopSide()->p4()) < 0.4) continue;	  
 	
-	XYZTLorentzVector candTop = iJet1->p4() + iJet2->p4() + iJetb->p4();
+	XYZTLorentzVector candTop = iJet1->p4() + iJet2->p4() + bjetData.getBjetTopSide()->p4();
 	XYZTLorentzVector candW = iJet1->p4() + iJet2->p4();
 	
         
@@ -107,7 +108,7 @@ namespace HPlus {
 	  chi2Min = chi2;
 	  Jet1 = iJet1;
 	  Jet2 = iJet2;
-	  Jetb = iJetb;            
+	  Jetb = bjetData.getBjetTopSide();
 	  top = candTop;
 	  W = candW;
 	  topmassfound = true;

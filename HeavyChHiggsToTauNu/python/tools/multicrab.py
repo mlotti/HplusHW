@@ -1034,7 +1034,8 @@ class Multicrab:
     # files to the directory and optionally run 'multicrab -create'
     # in the directory.
     def createTasks(self, configOnly=False, **kwargs):
-        checkCrabInPath()
+        if not configOnly:
+            checkCrabInPath()
         dirname = createTaskDir(**kwargs)
 
         self._writeConfig(os.path.join(dirname, "multicrab.cfg"))

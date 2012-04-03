@@ -98,7 +98,7 @@ datasets = {
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_175860-180252_2011B_Nov19-28e7e0ab56ad4146eca1efa805cd10f4/USER",
-                "number_of_jobs": 20, # 4601361 evt, 30 MB / file
+                "number_of_jobs": 20, # 5691371 evt, 30 MB / file
                 "lumiMask": "Nov08ReReco",
             },
         }
