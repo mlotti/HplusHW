@@ -8,8 +8,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
-
 
 namespace edm {
   class ParameterSet;
@@ -18,6 +16,8 @@ namespace edm {
 class TH1;
 
 namespace HPlus {
+  class TopWithBSelection;
+
   class TopWithBSelection {
   public:
     typedef math::XYZTLorentzVector XYZTLorentzVector;
@@ -46,7 +46,7 @@ namespace HPlus {
     TopWithBSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~TopWithBSelection();
 
-    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const BjetSelection::Data& bjetData);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> bjet);
 
   private:
     void init();
