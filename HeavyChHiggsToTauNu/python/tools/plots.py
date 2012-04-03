@@ -127,6 +127,7 @@ _physicalToLogical = {
     "WJets_TuneZ2_Spring11": "WJets",
     "WJets_TuneZ2_Summer11": "WJets",
     "WJets_TuneZ2_Fall11": "WJets",
+
     "WToTauNu_TuneZ2_Summer11": "WToTauNu",
 
     "W3Jets_TuneZ2_Summer11": "W3Jets",

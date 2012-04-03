@@ -17,9 +17,9 @@ counters = analysis+"Counters/weighted"
 treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup")
 
 def main():
-#    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
 #    datasets.loadLuminosities()
-    datasets = btaggingWJets.root
+#    datasets = btaggingWJets.root
 #    plots.mergeRenameReorderForDataMC(datasets)
 #    plots.mergeWHandHH(datasets)
 #    print "Int.Lumi",datasets.getDataset("Data").getLuminosity()
@@ -31,12 +31,14 @@ def main():
 
 def plot(datasets):
 
-#    datasetName = "TTJets"
-    datasetName = "btaggingWJets"
-    
-    den_selection = "jets_p4.Pt()>30 && jets_flavour == 2"
+#    datasetName = "TTJets_TuneZ2_Summer11"
+#    datasetName = "TTToHplusBWB_M120_Summer11"
+    datasetName = "WJets_TuneZ2_Summer11"
+
+
+    den_selection = "jets_p4.Pt()>30 && ( abs(jets_flavour) < 4 || jets_flavour > 20)"
 #    den_selection = "jets_p4.Pt()>30"
-    num_selection = den_selection + "&&jets_btag>3.3"
+    num_selection = den_selection + "&&jets_btag>1.7"
 
     ds = datasets.getDataset(datasetName)
     den = ds.getDatasetRootHisto(treeDraw.clone(varexp="jets_p4.Pt()>>dist1(100,0.,500.)", selection=den_selection)).getHistogram()

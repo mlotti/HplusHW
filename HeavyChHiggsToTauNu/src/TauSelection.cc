@@ -510,6 +510,7 @@ namespace HPlus {
       
       // Tau ID selections
       if (fOperationMode == kNormalTauID) {
+      
         // Standard tau ID (necessary for the tau selection logic) 
         hIsolationPFChargedHadrCandsPtSum->Fill(iTau->isolationPFChargedHadrCandsPtSum(), fEventWeight.getWeight());
         hIsolationPFGammaCandsEtSum->Fill(iTau->isolationPFGammaCandsEtSum(), fEventWeight.getWeight());
@@ -546,6 +547,7 @@ namespace HPlus {
       fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
     for(size_t i=0; i<tmpSelectedTaus.size(); ++i)
       fSelectedTaus.push_back(tmpSelectedTaus[i]);
+ 
 
     // Handle counters
     fTauID->updatePassedCounters();
@@ -564,12 +566,14 @@ namespace HPlus {
       } else
         return false;
     }
-    
+   
     // Handle result of standard tau ID 
     if (fOperationMode == kNormalTauID) {
       if (fSelectedTaus.size()) {
+	//	std::cout << " result true  " << std::endl;
         increment(fTauFound);
         return true;
+
       } else
         return false;
     }

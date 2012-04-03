@@ -6,7 +6,7 @@ import FWCore.ParameterSet.Config as cms
 # HChSignalAnalysisParameters module is typically modified before
 # creating the EDFilter.
 def createEDFilter(param):
-    return cms.EDFilter("HPlusSignalAnalysisFilter",
+    return cms.EDFilter("HPlusSignalAnalysisInvertedTauFilter",
         blindAnalysisStatus = param.blindAnalysisStatus,
         trigger = param.trigger,
         triggerEfficiencyScaleFactor = param.triggerEfficiencyScaleFactor,
