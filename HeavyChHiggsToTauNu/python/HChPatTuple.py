@@ -21,7 +21,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection as HChDataSelection
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMcSelection as HChMcSelection
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex as HChPrimaryVertex
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as MuonSelection
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.RemoveSoftMuonVisitor as RemoveSoftMuonVisitor
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 
@@ -51,7 +51,8 @@ class PATBuilder:
         if options.tauEmbeddingInput != 0:
             # Add the tau embedding counters, if that's the input
             import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
-            self.counters.extend(MuonSelection.muonSelectionCounters[:])
+            self.counters.extend(MuonSelection.getMuonSelectionCountersForEmbedding("PFlow"))
+            self.counters.extend(MuonSelection.getMuonSelectionCountersForEmbedding("PFlowCHS"))
             self.counters.extend(PFEmbeddingSource.muonSelectionCounters)
         elif dataVersion.isMC() and options.triggerMC != 0:
             # If MC preselection is enabled, add the counters from there
