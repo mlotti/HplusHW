@@ -15,6 +15,9 @@ def addConfigInfo(process, options, dataVersion):
     if codeVersion != None:
         process.configInfo.codeVersion = cms.untracked.string(codeVersion)
 
+    if len(options.puWeightEra) > 0:
+        process.configInfo.era = cms.untracked.string(options.puWeightEra)
+
     return cms.Path(process.configInfo)
 
 def insertPSetContentsTo(src, dst):
