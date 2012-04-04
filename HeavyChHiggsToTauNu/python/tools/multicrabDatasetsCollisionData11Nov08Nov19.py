@@ -641,10 +641,10 @@ datasets = {
             },
         }
     },
-    "SingleMu_Mu_175860-177452_2011B_Nov19": {
+    "SingleMu_Mu_173693-177452_2011B_Nov19": {
         "dataVersion": "44Xdata",
         "trigger": "HLT_Mu40_eta2p1_v1",
-        "runs": (175860, 177452), # This is prompt RECO, so check the run range again when running!
+        "runs": (173693, 177452), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011B-19Nov2011-v1/AOD",
@@ -653,10 +653,10 @@ datasets = {
             },
         }
     },
-    "SingleMu_Mu_177718-177878_2011B_Nov19": {
+    "SingleMu_Mu_177453-178380_2011B_Nov19": {
         "dataVersion": "44Xdata",
         "trigger": "HLT_Mu40_eta2p1_v1",
-        "runs": (177718, 177878), # This is prompt RECO, so check the run range again when running!
+        "runs": (177453, 178380), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011B-19Nov2011-v1/AOD",
@@ -665,10 +665,10 @@ datasets = {
             },
         }
     },
-    "SingleMu_Mu_178420-179889_2011B_Nov19": {
+    "SingleMu_Mu_178411-179889_2011B_Nov19": {
         "dataVersion": "44Xdata",
         "trigger": "HLT_Mu40_eta2p1_v4",
-        "runs": (178420, 179889), # This is prompt RECO, so check the run range again when running!
+        "runs": (178411, 179889), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011B-19Nov2011-v1/AOD",
@@ -677,10 +677,10 @@ datasets = {
             },
         }
     },
-    "SingleMu_Mu_179959-180252_2011B_Nov19": {
+    "SingleMu_Mu_179942-180371_2011B_Nov19": {
         "dataVersion": "44Xdata",
         "trigger": "HLT_Mu40_eta2p1_v5",
-        "runs": (179959, 180252), # This is prompt RECO, so check the run range again when running!
+        "runs": (179942, 180371), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011B-19Nov2011-v1/AOD",

@@ -18,7 +18,7 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 
 process = cms.Process("MUONSKIM")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -26,8 +26,8 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
         #dataVersion.getPatDefaultFileCastor()
-        dataVersion.getPatDefaultFileMadhatter()
-        #"file:/mnt/flustre/wendland/AODSIM_PU_S6_START44_V9B_7TeV/Fall11_TTJets_TuneZ2_7TeV-madgraph-tauola_AODSIM_PU_S6_START44_V9B-v1_testfile.root"
+        #dataVersion.getPatDefaultFileMadhatter()
+        "file:/mnt/flustre/wendland/AODSIM_PU_S6_START44_V9B_7TeV/Fall11_TTJets_TuneZ2_7TeV-madgraph-tauola_AODSIM_PU_S6_START44_V9B-v1_testfile.root"
     )
 )
 
@@ -36,7 +36,8 @@ process.source = cms.Source('PoolSource',
 trigger = options.trigger
 # Default trigger (for MC)
 if len(trigger) == 0:
-    trigger = "HLT_Mu20_v8" # Fall1; other HLT_Mu40_v6 or HLT_Mu40_eta2p1_v1
+    trigger = "HLT_Mu40_eta2p1_v1" # Fall1; other HLT_Mu20_v8, HLT_Mu40_v6 or HLT_Mu40_eta2p1_v1
+print "trigger:", trigger
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000

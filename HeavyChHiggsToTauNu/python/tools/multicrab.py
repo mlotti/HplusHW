@@ -179,6 +179,7 @@ defaultSeBlacklist = [
     "mit.edu", # MIT has some problems?
     "sprace.org.br", # Stageout failures
     "knu.ac.kr", # Stageout failures
+    "T2_US_*", # disable US because of low bandwidth
     ]
 
 
