@@ -82,6 +82,7 @@ def main():
         pass
     else:
         raise Exception("Unsupported era "+era)
+    datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()
     plots.mergeRenameReorderForDataMC(datasets)
     datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))

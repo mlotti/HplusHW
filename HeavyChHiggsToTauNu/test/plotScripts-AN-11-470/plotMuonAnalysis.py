@@ -75,7 +75,7 @@ treeDraw = dataset.TreeDraw(analysis+"/tree", weight=weight)
 def main():
     counters = analysis+"Counters"
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-    tauEmbedding.updateAllEventsToWeighted(datasets)
+    datasets.updateNAllEventsToPUWeighted()
 
     if era == "EPS":
         datasets.remove([

@@ -33,9 +33,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 
 analysisEmb = "signalAnalysisCaloMet60TEff"
 
-counters = "Counters/weighted"
-#counters = "Counters"
-
 def main():
     dirEmbs = ["."] + [os.path.join("..", d) for d in tauEmbedding.dirEmbs[1:]]
 #    dirEmbs = dirEmbs[:2]
@@ -108,7 +105,7 @@ def doCounters(dirEmbs):
     datasetsEmb.remove(filter(lambda name: "HplusTB" in name, datasetsEmb.getAllDatasetNames()))
     datasetsEmb.remove(filter(lambda name: "TTToHplus" in name, datasetsEmb.getAllDatasetNames()))
 
-    eventCounter = tauEmbedding.EventCounterMany(datasetsEmb, counters=analysisEmb+counters)
+    eventCounter = tauEmbedding.EventCounterMany(datasetsEmb)
 
     mainTable = eventCounter.getMainCounterTable()
 

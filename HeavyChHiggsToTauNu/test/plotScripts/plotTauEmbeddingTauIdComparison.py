@@ -66,7 +66,8 @@ class DatasetManagers:
         self.analyses = analyses
         self.datasetManagers = []
         for an in analyses:
-            dm = dataset.getDatasetsFromMulticrabCfg(counters=an+"Counters/weighted")
+            dm = dataset.getDatasetsFromMulticrabCfg(counters=an+"Counters")
+            dm.updateNAllEventsToPUWeighted()
             dm.loadLuminosities()
             plots.mergeRenameReorderForDataMC(dm)
             if mergeAllMC:

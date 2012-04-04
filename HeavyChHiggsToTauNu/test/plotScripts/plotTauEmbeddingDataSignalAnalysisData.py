@@ -26,7 +26,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 # Configuration
 #analysis = "signalAnalysis"
 analysis = "signalAnalysisTauSelectionHPSTightTauBased"
-counters = analysis+"Counters/weighted"
+counters = analysis+"Counters"
 prefix = "TauEmbeddingDataSignalAnalysisData"
 
 embeddingSignalAnalysis = "."
@@ -46,7 +46,8 @@ def main():
     # Take only TT+W from signal analysis, and data from embedding+signal analysis
     datasetsEmbSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=embeddingSignalAnalysis+"/multicrab.cfg", counters=counters)
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=signalAnalysis+"/multicrab.cfg", counters=counters)
-
+    datasetsEmbSig.updateNAllEventsToPUWeighted()
+    datasetsSig.updateNAllEventsToPUWeighted()
 
     # Select only data from embedded
     datasetsEmbSig.loadLuminosities()

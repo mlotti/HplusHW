@@ -33,9 +33,11 @@ else:
     datasetsData = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(embeddingData, "multicrab.cfg"))
     datasetsData.loadLuminosities()
     datasets.extend(datasetsData)
+datasets.updateNAllEventsToPUWeighted()
 
 # Datasets from the original signal analysis
 datasetsExpected = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(signalAnalysis, "multicrab.cfg"))
+datasetsExpected.updateNAllEventsToPUWeighted()
 
 plots.mergeRenameReorderForDataMC(datasetsExpected)
 plots.mergeRenameReorderForDataMC(datasets)

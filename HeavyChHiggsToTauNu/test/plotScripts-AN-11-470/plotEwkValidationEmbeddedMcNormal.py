@@ -43,8 +43,6 @@ tauAnalysisSig = "tauNtuple"
 analysisEmb = "signalAnalysis"
 analysisSig = "signalAnalysisTauEmbeddingLikePreselection"
 
-counters = "Counters/weighted"
-
 def main():
     tauDirEmbs = [os.path.join("..", d) for d in tauEmbedding.tauDirEmbs]
     tauDirSig = "../"+tauEmbedding.tauDirSig
@@ -59,6 +57,9 @@ def main():
     tauDatasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=tauDirSig+"/multicrab.cfg", counters=tauAnalysisSig+"Counters")
     datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
+
+    tauDatasetsSig.updateNAllEventsToPUWeighted()
+    datasetsSig.updateNAllEventsToPUWeighted()
 
     tauDatasetsEmb.forEach(plots.mergeRenameReorderForDataMC)
     datasetsEmb.forEach(plots.mergeRenameReorderForDataMC)
@@ -245,8 +246,8 @@ def doTauCounters(datasetsEmb, datasetsSig, datasetName):
     lumi = datasetsEmb.getLuminosity()
     treeDraw = dataset.TreeDraw("dummy", weight=tauEmbedding.tauNtuple.weight[tauEmbedding.era])
 
-    eventCounterEmb = tauEmbedding.EventCounterMany(datasetsEmb, counters=tauAnalysisEmb+"Counters")
-    eventCounterSig = counter.EventCounter(datasetsSig, counters=tauAnalysisSig+"Counters")
+    eventCounterEmb = tauEmbedding.EventCounterMany(datasetsEmb)
+    eventCounterSig = counter.EventCounter(datasetsSig)
 
     def isNotThis(name):
         return name != datasetName
@@ -329,8 +330,8 @@ def doCounters(datasetsEmb, datasetsSig, datasetName):
     lumi = datasetsEmb.getLuminosity()
 
     # Counters
-    eventCounterEmb = tauEmbedding.EventCounterMany(datasetsEmb, counters=analysisEmb+"Counters/weighted")
-    eventCounterSig = counter.EventCounter(datasetsSig, counters=analysisSig+"Counters/weighted")
+    eventCounterEmb = tauEmbedding.EventCounterMany(datasetsEmb)
+    eventCounterSig = counter.EventCounter(datasetsSig)
 
     def isNotThis(name):
         return name != datasetName

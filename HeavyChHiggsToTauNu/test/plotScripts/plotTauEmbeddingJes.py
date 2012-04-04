@@ -32,7 +32,7 @@ count = "deltaPhiTauMET<160"
 #count = "deltaPhiTauMET<90"
 
 def main():
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=baseline+"Counters")
+    datasets = dataset.getDatasetsFromMulticrabCfg(counters=baseline+"Counters", weightedCounters=False)
 
     datasets.remove([
 #            "SingleMu_Mu_160431-163261_May10",
