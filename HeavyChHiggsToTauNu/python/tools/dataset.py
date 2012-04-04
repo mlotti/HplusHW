@@ -139,15 +139,9 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
 # \return DatasetManager object
 def getDatasetsFromRootFiles(rootFileList, **kwargs):
     counters = kwargs.get("counters", "signalAnalysisCounters")
-    dataQcd = kwargs.get("dataQcdMode", False)
-    dataQcdNorm = kwargs.get("dataQcdNormalization", 1.0)
     datasets = DatasetManager()
     for name, f in rootFileList:
-        dset = None
-        if dataQcd:
-            dset = DatasetQCDData(name, f, counters, dataQcdNorm)
-        else:
-            dset = Dataset(name, f, counters)
+        dset = Dataset(name, f, counters)
         datasets.append(dset)
     return datasets
 
@@ -1308,44 +1302,6 @@ class Dataset:
     ## \var _isData
     # If true, dataset is from data, if false, from MC
 
-## Maybe unnecessary class?
-#
-# This is some old trial for implementing a dataset class for the
-# data-driven QCD measurement. Development was never finished.
-class DatasetQCDData(Dataset):
-    def __init__(self, name, fname, counterDir, normfactor=1.0):
-        Dataset.__init__(self, name, fname, counterDir)
-        self.normfactor = normfactor
-
-    def deepCopy(self):
-        d = DatasetQCDData(self.name, self.file.GetName(), self.counterDir, self.normfactor)
-        d.info.update(self.info)
-        d._isData = self._isData
-        return d
-
-    def changeTypeToMC(self):
-        self._isData = False
-
-    def getDatasetRootHisto(self, name):
-        drh = Dataset.getDatasetRootHisto(self, name)
-        drh.scale(self.normfactor)
-        return drh
-
-    def setNormFactor(self, normfactor):
-        self.normfactor = normfactor
-
-    def setNormFactorFromTree(self, treeDraw, targetNumEvents):
-        drh = Dataset.getDatasetRootHisto(self, treeDrawToNumEntries(treeDraw))
-        nevents = drh.histo.Integral(0, drh.histo.GetNbinsX()+1)
-        self.setNormFactor(targetNumEvents/nevents)
-
-    # Overloads needed for this ugly hack
-    def getCrossSection(self):
-        return 0
-
-    def setCrossSection(self):
-        raise Exception("Assert that this is not called for DatasetQCDData")
-        
 
 ## Dataset class for histogram access for a dataset merged from Dataset objects.
 # 
