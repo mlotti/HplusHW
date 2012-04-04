@@ -508,23 +508,7 @@ def muonIsoQcd(plot, prefix=""):
 
 ############################################################
 
-class PrefixModify:
-    def __init__(self):
-        self.remove = []
-    def addPrefix(self, prefix):
-        self.remove.append(prefix)
-
-    def __call__(self, name):
-        for r in self.remove:
-            name = name.replace(r, "")
-        return name
-
 def makeEventCounter(ds):
-    modifyCountNames = PrefixModify()
-    for d in ds.getAllDatasets():
-        prefix = d.getPrefix()
-        if prefix != "":
-            modifyCountNames.addPrefix(prefix)
     return counter.EventCounter(ds, modifyCountNames)
 
 def addSumColumn(table):

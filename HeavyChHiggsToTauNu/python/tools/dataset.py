@@ -1074,10 +1074,10 @@ class Dataset:
 
         self._isData = "data" in self.dataVersion
 
-        self.prefix = ""
         if counterDir != None:
-            self.originalCounterDir = counterDir
-            self._readCounter(counterDir)
+            ctr = _histoToCounter(self.file.Get(counterDir).Get("counter"))
+            self.nAllEvents = ctr[0][1].value() # first counter, second element of the tuple
+            self.counterDir = counterDir
 
     ## Close the file
     #
@@ -1089,43 +1089,6 @@ class Dataset:
         self.file.Close("R")
         self.file.Delete()
         del self.file
-
-    ## Read the number of all events from the event counters.
-    # 
-    # \param counterDir  Name of the directory for event counter histograms.
-    # 
-    # Reads 'counterDir/counters' histogram, and takes the value of
-    # the first bin as the number of all events.
-    # 
-    # Intended for internal use only.
-    def _readCounter(self, counterDir):
-        if self.file.Get(counterDir) == None:
-            raise Exception("Unable to find directory '%s' from ROOT file '%s'" % (counterDir, self.file.GetName()))
-        ctr = _histoToCounter(self.file.Get(counterDir).Get("counter"))
-        self.nAllEvents = ctr[0][1].value() # first counter, second element of the tuple
-        self.counterDir = counterDir
-
-    ## Set a prefix for the directory access.
-    # 
-    # \param prefix   Prefix for event counter and histogram directories.
-    # 
-    # The number of all events (for normalization) are re-read from
-    # a directory prefix+original_counter_directory. The prefix is
-    # also used for the histogram paths in getHistogram() method.
-    # 
-    # The use case is the following:
-    # \li The same analysis is run many times with different
-    #     parameters in one CMSSW jobs. The different analyses have
-    #     different prefixes but the same base name (e.g. 'analysis,
-    #     'foo1analysis', 'foo2analysis' etc.)
-    # \li The different analyses can then be selected easily by
-    #     calling this method with a prefix
-    def setPrefix(self, prefix):
-        self.prefix = prefix
-        self._readCounter(prefix+self.originalCounterDir)
-
-    def getPrefix(self):
-        return self.prefix
 
     ## Clone the Dataset object
     # 
@@ -1183,7 +1146,7 @@ class Dataset:
         return not self._isData
 
     def getCounterDirectory(self):
-        return self.originalCounterDir
+        return self.counterDir
 
     ## Set the number of all events (for normalization).
     #
@@ -1217,7 +1180,7 @@ class Dataset:
     def hasRootHisto(self, name):
         if hasattr(name, "draw"):
             return True
-        pname = self.prefix+name
+        pname = name
         return self.file.Get(pname) != None
 
     ## Get the dataset.DatasetRootHisto object for a named histogram.
@@ -1226,9 +1189,6 @@ class Dataset:
     #
     # \return dataset.DatasetRootHisto object containing the (unnormalized) TH1 and this Dataset
     # 
-    # If the prefix is set (setPrefix() method), it is prepended to
-    # the name before TFile.Get() call.
-    #
     # If dataset.TreeDraw object is given (or actually anything with
     # draw() method), the draw() method is called by giving the TFile
     # and the dataset name as parameters. The draw() method is
@@ -1238,7 +1198,7 @@ class Dataset:
         if hasattr(name, "draw"):
             h = name.draw(self.file, self.getName())
         else:
-            pname = self.prefix+name
+            pname = name
             h = self.file.Get(pname)
             if h == None:
                 raise Exception("Unable to find histogram '%s' from file '%s'" % (pname, self.file.GetName()))
@@ -1256,13 +1216,10 @@ class Dataset:
     #                    argument and returning a boolean.
     # 
     # \return List of names in the directory.
-    # 
-    # If the prefix is set (setPrefix() method), it is prepended to
-    # the bame before TFile.Get() call.
     def getDirectoryContent(self, directory, predicate=lambda x: True):
-        d = self.file.Get(self.prefix+directory)
+        d = self.file.Get(directory)
         if d == None:
-            raise Exception("No object %s in file %s" % (self.prefix+directory, self.file.GetName()))
+            raise Exception("No object %s in file %s" % (directory, self.file.GetName()))
         dirlist = d.GetListOfKeys()
 
         # Suppress the warning message of missing dictionary for some iterator
@@ -1291,10 +1248,6 @@ class Dataset:
     # Dictionary containing the configInfo histogram
     ## \var dataVersion
     # dataVersion string of the dataset (from TFile)
-    ## \var prefix
-    # Prefix for TDirectory access, see setPrefix()
-    ## \var originalCounterDir
-    # Original counter directory, see setPrefix()
     ## \var nAllEvents
     # Number of all MC events, used in MC normalization
     ## \var counterDir
@@ -1339,24 +1292,6 @@ class DatasetMerged:
         for d in self.datasets:
             d.close()
 
-    ## Set a prefix for the directory access.
-    # 
-    # \param prefix   Prefix for event counter and histogram directories.
-    # 
-    # \see dataset.Dataset.setPrefix()
-    def setPrefix(self, prefix):
-        for d in self.datasets:
-            d.setPrefix(prefix)
-
-    def getPrefix(self):
-        prefix = None
-        for d in self.datasets:
-            if prefix == None:
-                prefix = d.getPrefix()
-            elif prefix != d.getPrefix():
-                raise Exception("Internal error")
-        return prefix
- 
     ## Make a deep copy of a DatasetMerged object.
     #
     # Nothing is shared between the returned copy and this object.
