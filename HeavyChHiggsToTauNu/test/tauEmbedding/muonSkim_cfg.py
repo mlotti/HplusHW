@@ -4,7 +4,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 import FWCore.ParameterSet.VarParsing as VarParsing
 
 dataVersion = "44XmcS6"
-#dataVersion = "42Xdata"
+#dataVersion = "42Xdata"g
 
 options = getOptions()
 if options.dataVersion != "":
@@ -18,7 +18,7 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 
 process = cms.Process("MUONSKIM")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -27,6 +27,7 @@ process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
         #dataVersion.getPatDefaultFileCastor()
         dataVersion.getPatDefaultFileMadhatter()
+        #"file:/mnt/flustre/wendland/AODSIM_PU_S6_START44_V9B_7TeV/Fall11_TTJets_TuneZ2_7TeV-madgraph-tauola_AODSIM_PU_S6_START44_V9B-v1_testfile.root"
     )
 )
 
@@ -44,7 +45,7 @@ del process.TFileService
 # Output module
 process.out = cms.OutputModule("PoolOutputModule",
     SelectEvents = cms.untracked.PSet(
-        SelectEvents = cms.vstring("PFlowMuonsPath", "PFlowCHSMuonsPath")
+        SelectEvents = cms.vstring("PFlowMuonsPath", "PFlowChsMuonsPath")
     ),
     fileName = cms.untracked.string('skim.root'),
     outputCommands = cms.untracked.vstring()
@@ -82,10 +83,10 @@ process.PFlowMuonsPath = cms.Path(
     process.muonSelectionSequencePFlow
 )
 
-process.muonSelectionSequencePFlowCHS = muonSelection.addMuonSelectionForEmbedding(process, "PFlowCHS")
-process.PFlowCHSMuonsPath = cms.Path(
+process.muonSelectionSequencePFlowChs = muonSelection.addMuonSelectionForEmbedding(process, "PFlowChs")
+process.PFlowChsMuonsPath = cms.Path(
     process.commonSequence *
-    process.muonSelectionSequencePFlowCHS
+    process.muonSelectionSequencePFlowChs
 )
 
 process.endPath = cms.EndPath(
