@@ -1,11 +1,11 @@
-## \package Extractable
+## \package Extractor
 # Base class for extracting observation/rate/nuisance from datasets
 #
 #
 
 
 # Enumerator class for data mining mode
-class ExtractableMode:
+class ExtractorMode:
     UNKNOWN = 0
     OBSERVATION = 1
     RATE = 2
@@ -13,8 +13,8 @@ class ExtractableMode:
     ASYMMETRICNUISANCE = 4
     SHAPENUISANCE = 5
 
-# Extractable class
-class Extractable:
+# Extractor class
+class ExtractorBase:
     ## Constructor
     def __init__(self, mode, exid, distribution, description):
         self._mode = mode
@@ -27,29 +27,29 @@ class Extractable:
 
     ## Returns true if extractable mode is observation
     def isObservation(self):
-        return self._mode == ExtractableMode.OBSERVATION
+        return self._mode == ExtractorMode.OBSERVATION
     
     ## Returns true if extractable mode is rate
     def isRate(self):
-        return self._mode == ExtractableMode.RATE
+        return self._mode == ExtractorMode.RATE
 
     ## Returns true if extractable mode is any type of nuisance
     def isAnyNuisance(self):
-        return self._mode == ExtractableMode.NUISANCE or \
-               self._mode == ExtractableMode.ASYMMETRICNUISANCE or \
-               self._mode == ExtractableMode.SHAPENUISANCE
+        return self._mode == ExtractorMode.NUISANCE or \
+               self._mode == ExtractorMode.ASYMMETRICNUISANCE or \
+               self._mode == ExtractorMode.SHAPENUISANCE
 
     ## Returns true if extractable mode is nuisance
     def isNuisance(self):
-        return self._mode == ExtractableMode.NUISANCE
+        return self._mode == ExtractorMode.NUISANCE
     
     ## Returns true if extractable mode is nuisance with asymmetric limits
     def isAsymmetricNuisance(self):
-        return self._mode == ExtractableMode.ASYMMETRICNUISANCE
+        return self._mode == ExtractorMode.ASYMMETRICNUISANCE
     
     ## Returns true if extractable mode is shape nuisance
     def isShapeNuisance(self):
-        return self._mode == ExtractableMode.SHAPENUISANCE
+        return self._mode == ExtractorMode.SHAPENUISANCE
 
     ## True if nuisance will generate a new line in output (i.e. is not merged)
     def isPrintable(self):
@@ -68,7 +68,7 @@ class Extractable:
         return self._description
 
     ## Adds extractable to list of extractables to be merged
-    def addExtractableToBeMerged(self, extractable):
+    def addExtractorToBeMerged(self, extractable):
         self._extractablesToBeMerged.append(extractable)
         extractable.setAsSlave(self._exid)
 

@@ -1,15 +1,15 @@
-## \package ConstantExtractable
+## \package ConstantExtractor
 # Base class for extracting observation/rate/nuisance from datasets
 #
 #
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractable import Extractable
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorBase
 
-# ConstantExtractable class
-class ConstantExtractable(Extractable):
+# ConstantExtractor class
+class ConstantExtractor(Extractor):
     ## Constructor
     def __init__(self, constantValue, mode, exid = "", distribution = "lnN", description = "", constantUpperValue = 0.0):
-        Extractable.__init__(self, mode, exid, distribution, description)
+        ExtractorBase.__init__(self, mode, exid, distribution, description)
         self._constantValue = constantValue
         self._constantUpperValue = constantUpperValue
 
@@ -27,12 +27,12 @@ class ConstantExtractable(Extractable):
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
-        print "ConstantExtractable"
+        print "ConstantExtractor"
         if self.isAsymmetricNuisance():
             print "- value = ", self._constantValue, "/", self._constantUpperValue
         else:
             print "- value = ", self._constantValue
-        Extractable.printDebugInfo(self)
+        ExtractorBase.printDebugInfo(self)
 
     ## \var _constantValue
     # Constant value (either rate or nuisance in percent)
