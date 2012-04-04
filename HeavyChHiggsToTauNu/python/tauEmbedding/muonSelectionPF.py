@@ -14,20 +14,20 @@ def addMuonSelectionForEmbedding(process, postfix=""):
     
     muonGoodPrimaryVertex = cms.EDFilter("VertexSelector",
         filter = cms.bool(False),
-        src = cms.InputTag("muonFirstPrimaryVertex"),
+        src = cms.InputTag("muonFirstPrimaryVertex"+postfix),
         cut = cms.string("!isFake && ndof > 4 && abs(z) < 24.0 && position.rho < 2.0")
     )
     setattr(process, "muonGoodPrimaryVertex"+postfix, muonGoodPrimaryVertex)
     
     muonPrimaryVertexFilter = cms.EDFilter("VertexCountFilter",
-        src = cms.InputTag("muonGoodPrimaryVertex"),
+        src = cms.InputTag("muonGoodPrimaryVertex"+postfix),
         minNumber = cms.uint32(1),
         maxNumber = cms.uint32(999)
     )
     setattr(process, "muonPrimaryVertexFilter"+postfix, muonPrimaryVertexFilter)
     
     muonSelectionPrimaryVertex = cms.EDProducer("EventCountProducer")
-    setattr(process, "muonSelectionPrimaryVertex", muonSelectionPrimaryVertex)
+    setattr(process, "muonSelectionPrimaryVertex"+postfix, muonSelectionPrimaryVertex)
 
     tightMuons = cms.EDFilter("PATMuonSelector",
         src = cms.InputTag("selectedPatMuons"),
@@ -52,7 +52,7 @@ def addMuonSelectionForEmbedding(process, postfix=""):
     #setattr(process, "tightMuonsZ"+postfix, tightMuonsZ)
     
     tightMuonsFilter = cms.EDFilter("CandViewCountFilter",
-        src = cms.InputTag("tightMuons"),
+        src = cms.InputTag("tightMuons"+postfix),
         minNumber = cms.uint32(1)
     )
     setattr(process, "tightMuonsFilter"+postfix, tightMuonsFilter)
@@ -104,7 +104,7 @@ def addMuonSelectionForEmbedding(process, postfix=""):
     setattr(process, "goodJets"+postfix, goodJets)
     
     goodJetFilter = cms.EDFilter("CandViewCountFilter",
-        src = cms.InputTag("goodJets"),
+        src = cms.InputTag("goodJets"+postfix),
         minNumber = cms.uint32(3)
     )
     setattr(process, "goodJetFilter"+postfix, goodJetFilter)
