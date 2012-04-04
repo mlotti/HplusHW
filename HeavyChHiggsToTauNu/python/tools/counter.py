@@ -1900,8 +1900,8 @@ class EventCounter:
     ## Constructor
     #
     # \param datasets            dataset.DatasetManager object
-    # \param countNameFunction   Function for mapping the X axis bin labels to count names
-    # \param counters            Counter directory within the dataset.Dataset TFiles
+    # \param countNameFunction   Function for mapping the X axis bin labels to count names (optional)
+    # \param counters            Counter directory within the dataset.Dataset TFiles (if not given, use the counter from dataset.DatasetManager object)
     #
     # Creates counter.Counter for the main counter and each subcounter
     def __init__(self, datasets, countNameFunction=None, counters=None):
