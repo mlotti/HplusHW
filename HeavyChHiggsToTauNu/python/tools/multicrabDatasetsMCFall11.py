@@ -380,6 +380,16 @@ datasets = {
 #            },
 #        }
 #    },
+    "QCD_Pt20_MuEnriched_TuneZ2_Fall11": {
+        "dataVersion": "44XmcS6",
+        "crossSection": 296600000.*0.0002855,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
+                "number_of_jobs": 2000,  # Adjusted for PATtuple file size
+            },
+        }
+    },
 
     # EWK pythia
     # Cross sections https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries

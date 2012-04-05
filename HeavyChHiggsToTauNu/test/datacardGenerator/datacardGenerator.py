@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import sys
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ConstantExtractor import ConstantExtractor
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ExtractorBase import ExtractorMode
 

@@ -30,7 +30,7 @@ def addMuonSelectionForEmbedding(process, postfix=""):
     setattr(process, "muonSelectionPrimaryVertex"+postfix, muonSelectionPrimaryVertex)
 
     tightMuons = cms.EDFilter("PATMuonSelector",
-        src = cms.InputTag("selectedPatMuons"),
+        src = cms.InputTag("selectedPatMuons"+postfix+"All"),
         cut = cms.string(
         "isGlobalMuon() && isTrackerMuon()"
         "&& pt() > 35 && abs(eta()) < 2.1"
@@ -81,7 +81,7 @@ def addMuonSelectionForEmbedding(process, postfix=""):
     #from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import *
     #goodJets = cleanPatJets.clone(
     goodJets = cms.EDFilter("PATJetSelector",
-        src = cms.InputTag("selectedPatJetsAK5PF"),
+        src = cms.InputTag("selectedPatJets"+postfix),
     #    preselection =
         cut = cms.string(
         "pt() > 20 && abs(eta()) < 2.4"
