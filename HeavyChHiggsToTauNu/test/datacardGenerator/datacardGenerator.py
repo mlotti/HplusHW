@@ -6,8 +6,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ExtractorBase import Extrac
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DataCardGenerator as DataCard
-
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
     
 def usage():
     print 
@@ -35,6 +33,8 @@ def main():
     c = ConstantExtractor (mode=ExtractorMode.NUISANCE, exid="TST2", description="test", constantValue=0.123)
     c.printDebugInfo()
     
+    datacardgenerator = DataCard.DataCardGenerator(sys.argv[1])
+    datacardgenerator.generate()
 
 if __name__ == "__main__":
     main()

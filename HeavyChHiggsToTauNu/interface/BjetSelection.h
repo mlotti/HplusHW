@@ -80,25 +80,38 @@ namespace HPlus {
     // EventWeight object
     EventWeight& fEventWeight;
     edm::InputTag fSrc;
-
+    edm::InputTag fOneProngTauSrc;
+    edm::InputTag fOneAndThreeProngTauSrc;
     
     // Histograms
+    TH1 *hDeltaRmaxFromTop;
+    TH1 *hDeltaRtauBtauSide;
+    TH1 *hDeltaRHadTauBtauSide;
+    TH1 *hDeltaRHadTauBtopSide;
     TH1 *hDeltaMinTauB;
     TH1 *hDeltaMaxTauB;
     TH1 *hPtBjetTauSide;
     TH1 *hEtaBjetTauSide;
     TH1 *hPtBjetTopSide;
     TH1 *hEtaBjetTopSide;
+    TH1 *hPtBjetMax;
+    TH1 *hEtaBjetMax;
+    TH1 *hPtBjetMaxTrue;
+    TH1 *hEtaBjetMaxTrue;
     TH1 *hDeltaMinTauBTrue;
     TH1 *hDeltaMaxTopBTrue;
     TH1 *hPtBjetTauSideTrue;
     TH1 *hEtaBjetTauSideTrue;
     TH1 *hPtBjetTopSideTrue;
+    TH1 *hBquarkFromTopSideEta;
+    TH1 *hBquarkFromTopSidePt;
     TH1 *hEtaBjetTopSideTrue;
     TH1 *hBquarkFromHiggsSideEta;
     TH1 *hBquarkFromHiggsSidePt;
-    TH1 *hBquarkFromTopSideEta;
-    TH1 *hBquarkFromTopSidePt;
+    TH1 *hQquarkFromTopSideEta;
+    TH1 *hQquarkFromTopSidePt;
+ 
+
     TH1 *hDeltaTauB;
     TH1 *hMassTopTop;
     TH1 *hMassTopHiggs;

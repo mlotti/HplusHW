@@ -61,7 +61,7 @@ plotStyles = [
 # main function
 def main():
     # Read the datasets
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, weightedCounters=False)
     if runRegion == 1:
         datasets.remove([
                 "SingleMu_Mu_170722-172619_Aug05",

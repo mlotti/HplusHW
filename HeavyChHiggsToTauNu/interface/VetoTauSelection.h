@@ -46,6 +46,11 @@ namespace HPlus {
     const double fZMass;
     const double fZMassWindow;
     edm::InputTag fTauSource;
+    edm::InputTag fMetSrc;
+    edm::InputTag fOneProngTauSrc;
+    edm::InputTag fOneAndThreeProngTauSrc;
+    edm::InputTag fThreeProngTauSrc;
+    edm::InputTag fSrc;
     
     TauSelection fTauSelection;
     FakeTauIdentifier fFakeTauIdentifier;
@@ -58,6 +63,8 @@ namespace HPlus {
     Count fSelectedEventsCounter;
     
     // histograms
+    TH1* hTauCandFromWPt;
+    TH1* hTauCandAllPt;
     TH1* hCandidateTauNumber;
     TH1* hSelectedTauNumber;
     TH1* hSelectedGenuineTauByPt;

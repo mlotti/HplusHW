@@ -89,16 +89,21 @@ tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
-vetoTauBase = tauSelectionHPSLooseTauBased.clone(
-    ptCut = cms.untracked.double(20), # jet pt > value
+vetoTauBase = tauSelectionHPSVeryLooseTauBased.clone(
+    ptCut = cms.untracked.double(15), # jet pt > value
     etaCut = cms.untracked.double(2.5), # jet |eta| < value
-    leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
+    leadingTrackPtCut = cms.untracked.double(5.0), # ldg. track > value
+#    isolationDiscriminator = "byVLooseIsolation",
     rtauCut = cms.untracked.double(0.0), # rtau > value
     nprongs = cms.untracked.uint32(1) # number of prongs (options: 1, 3, or 13 == 1 || 3)
 )
 
 vetoTauSelection = cms.untracked.PSet(
     tauSelection = vetoTauBase,
+    src = cms.untracked.InputTag("genParticles"),
+    oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
+    oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"),
+    threeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauThreeProng"),
     Zmass = cms.untracked.double(90), # Z mass value in GeV
     ZmassWindow = cms.untracked.double(10), # window around Z mass in GeV for vetoing events
 )
@@ -119,7 +124,7 @@ jetSelectionBase = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"), # JPT jets 
     src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
     cleanTauDR = cms.untracked.double(0.5), # cone for rejecting jets around tau jet
-    ptCut = cms.untracked.double(30.0),
+    ptCut = cms.untracked.double(20.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(3), # minimum number of selected jets
     # Jet ID cuts
@@ -249,21 +254,32 @@ topSelection = cms.untracked.PSet(
 )
 
 bjetSelection = cms.untracked.PSet(
-  src = cms.untracked.InputTag("genParticles")
+  src = cms.untracked.InputTag("genParticles"),
+  oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
+  oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng") 
 )
+
+
 topChiSelection = cms.untracked.PSet(
-  TopMassLow = cms.untracked.double(120.0),
-  TopMassHigh = cms.untracked.double(250.0),
-  Chi2Cut = cms.untracked.double(5.0),
-  src = cms.untracked.InputTag("genParticles") 
+    TopMassLow = cms.untracked.double(120.0),
+    TopMassHigh = cms.untracked.double(300.0),
+    Chi2Cut = cms.untracked.double(5.0),
+    src = cms.untracked.InputTag("genParticles") 
 )
 
 topWithBSelection = cms.untracked.PSet(
-      TopMassLow = cms.untracked.double(120.0),
-      TopMassHigh = cms.untracked.double(250.0),
-      Chi2Cut = cms.untracked.double(5.0),
-      src = cms.untracked.InputTag("genParticles")
-)      
+    TopMassLow = cms.untracked.double(120.0),
+    TopMassHigh = cms.untracked.double(250.0),
+    Chi2Cut = cms.untracked.double(5.0),
+    src = cms.untracked.InputTag("genParticles")
+)
+
+topWithWSelection = cms.untracked.PSet(
+    TopMassLow = cms.untracked.double(120.0),
+    TopMassHigh = cms.untracked.double(250.0),
+    Chi2Cut = cms.untracked.double(5.0),
+    src = cms.untracked.InputTag("genParticles")
+)
 
 tree = cms.untracked.PSet(
     fill = cms.untracked.bool(True),

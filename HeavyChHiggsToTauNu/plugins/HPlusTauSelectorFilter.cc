@@ -70,6 +70,7 @@ class HPlusTauSelectorFilterT: public edm::EDFilter {
   bool fFilter;
 };
 
+
 /*<<<<<<< HEAD
 HPlusTauPtrSelectorFilter::HPlusTauPtrSelectorFilter(const edm::ParameterSet& iConfig):
   eventCounter(),
@@ -101,7 +102,6 @@ bool HPlusTauPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup
   
   iEvent.put(ret);
   iEvent.put(p);
-=======
 >>>>>>> pattuplev25 */
 
 // Let's use reco::Candidate as the output type, as the required

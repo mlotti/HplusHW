@@ -29,6 +29,11 @@ def main():
     # Create all datasets from a multicrab task
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
 
+    # As we use weighted counters for MC normalisation, we have to
+    # update the all event count to a separately defined value because
+    # the analysis job uses skimmed pattuple as an input
+    datasets.updateNAllEventsToPUWeighted()
+
     # Read integrated luminosities of data datasets from lumi.json
     datasets.loadLuminosities()
 

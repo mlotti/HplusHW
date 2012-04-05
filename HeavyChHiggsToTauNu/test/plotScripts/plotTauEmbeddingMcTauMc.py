@@ -38,6 +38,9 @@ def main():
     datasetsEmb = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirEmb+"/multicrab.cfg", counters=analysisEmb+"Counters")
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
 
+    datasetsEmb.updateNAllEventsToPUWeighted()
+    datasetsSig.updateNAllEventsToPUWeighted()
+
     datasetsEmb.loadLuminosities()
     plots.mergeRenameReorderForDataMC(datasetsEmb)
     plots.mergeRenameReorderForDataMC(datasetsSig)

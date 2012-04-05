@@ -2,12 +2,12 @@
 
 import sys
 import os
+import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import execute
         
 class MulticrabPathFinder:
-    def __init__(self, config):
-	path = config.Path
+    def __init__(self, path):
         multicrabpaths = self.scan(path)
         self.ewk_path     = self.ewkfind(multicrabpaths)
         self.signal_path  = self.signalfind(multicrabpaths)
@@ -38,6 +38,23 @@ class MulticrabPathFinder:
     def getQCDinvPath(self):
         return self.qcdinv_path
 
+    def getSubPaths(self,path,regexp,exclude=False):
+	retDirs = []
+	dirs = execute("ls %s"%path)
+	path_re = re.compile(regexp)
+	multicrab_re = re.compile("^multicrab_")
+	for dir in dirs:
+	    fulldir = os.path.join(path,dir)
+	    if os.path.isdir(fulldir):
+		match = path_re.search(dir)
+		if match and not exclude:
+		    retDirs.append(dir)
+		if not match and exclude:
+		    multicrabmatch = multicrab_re.search(dir)
+		    if not multicrabmatch:
+ 		        retDirs.append(dir)
+	return retDirs
+
     def scan(self,path):
         multicrabdirs = []
         dirs = execute("ls %s"%path)
@@ -45,12 +62,13 @@ class MulticrabPathFinder:
             dir = os.path.join(path,dir)
             if os.path.isdir(dir):
                 filepath = os.path.join(dir,"multicrab.cfg")
-                if os.path.exists(filepath):
+		filepath2 = os.path.join(dir,"inputInfo.txt")
+                if os.path.exists(filepath) or os.path.exists(filepath2):
                     multicrabdirs.append(dir)
         return multicrabdirs
     
     def ewkfind(self,dirs):
-        return self.selectLatest(self.grep(dirs,"embedding"))
+        return self.selectLatest(self.grep(dirs,"mbedding",file="inputInfo.txt"))
     
     def signalfind(self,dirs):
         ret_dirs = []
@@ -69,14 +87,15 @@ class MulticrabPathFinder:
     def qcdinvfind(self,dirs):
         return self.selectLatest(self.grep(dirs,"signalAnalysisInverted"))
 
-    def grep(self,dirs,word):
+    def grep(self,dirs,word,file="multicrab.cfg"):
         command = "grep " + word + " "
         founddirs = []
         for dir in dirs:
-            multicrabfile = os.path.join(dir,"multicrab.cfg")
-            grep = execute(command + multicrabfile)
-            if grep != []:
-                founddirs.append(dir)
+            multicrabfile = os.path.join(dir,file)
+	    if os.path.exists(multicrabfile):
+                grep = execute(command + multicrabfile)
+                if grep != []:
+                    founddirs.append(dir)
         if len(founddirs) == 0:
             return ""
         return founddirs

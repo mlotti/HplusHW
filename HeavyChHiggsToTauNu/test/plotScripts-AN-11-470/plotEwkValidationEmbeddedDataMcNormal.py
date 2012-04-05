@@ -38,8 +38,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 analysisEmb = "signalAnalysisCaloMet60TEff"
 analysisSig = "signalAnalysisGenuineTau" # require that the selected tau is genuine, valid comparison after njets
 
-counters = "Counters/weighted"
-
 plotStyles = styles.styles[0:2]
 plotStyles[0] = styles.StyleCompound([plotStyles[0], styles.StyleMarker(markerStyle=21, markerSize=1.2)])
 
@@ -51,6 +49,7 @@ def main():
     # Create the dataset objects
     datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
+    datasetsSig.updateNAllEventsToPUWeighted()
 
     # Remove signal and W+3jets datasets
     datasetsEmb.remove(filter(lambda name: "HplusTB" in name, datasetsEmb.getAllDatasetNames()))
@@ -207,13 +206,13 @@ def doCounters(datasetsEmb, datasetsSig):
     residuals = ["DYJetsToLL residual", "WW residual"]
 
     # Normal MC
-    eventCounterNormal = counter.EventCounter(datasetsSig, counters=analysisSig+counters)
+    eventCounterNormal = counter.EventCounter(datasetsSig)
     eventCounterNormal.normalizeMCToLuminosity(datasetsEmb.getLuminosity())
     tableNormal = eventCounterNormal.getMainCounterTable()
     tableNormal.keepOnlyRows(rows)
 
     # Embedded data and MC, residual MC
-    eventCounter = tauEmbedding.EventCounterResidual(datasetsEmb, counters=analysisEmb+counters)
+    eventCounter = tauEmbedding.EventCounterResidual(datasetsEmb)
     table = eventCounter.getMainCounterTable()
     table.keepOnlyRows(rows)
 

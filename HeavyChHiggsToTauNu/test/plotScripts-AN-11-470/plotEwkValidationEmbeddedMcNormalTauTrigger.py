@@ -37,8 +37,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 analysisEmb = "signalAnalysisCaloMet60TEff"
 analysisSig = "signalAnalysisGenuineTau" # require that the selected tau is genuine, valid comparison after njets
 
-counters = "Counters/weighted"
-
 def main():
     dirEmbs = ["."] + [os.path.join("..", d) for d in tauEmbedding.dirEmbs[1:]]
     dirSig = "../"+tauEmbedding.dirSig
@@ -46,6 +44,7 @@ def main():
 
     datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
+    datasetsSig.updateNAllEventsToPUWeighted()
 
     datasetsEmb.forEach(plots.mergeRenameReorderForDataMC)
     datasetsEmb.setLumiFromData()
@@ -198,8 +197,8 @@ def doCounters(datasetsEmb, datasetsSig, datasetName):
     lumi = datasetsEmb.getLuminosity()
 
     # Counters
-    eventCounterEmb = tauEmbedding.EventCounterMany(datasetsEmb, counters=analysisEmb+"Counters/weighted")
-    eventCounterSig = counter.EventCounter(datasetsSig, counters=analysisSig+"Counters/weighted")
+    eventCounterEmb = tauEmbedding.EventCounterMany(datasetsEmb)
+    eventCounterSig = counter.EventCounter(datasetsSig)
 
     def isNotThis(name):
         return name != datasetName

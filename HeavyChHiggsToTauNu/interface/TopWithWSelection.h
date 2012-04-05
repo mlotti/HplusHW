@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_TopWithBSelection_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_TopWithBSelection_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_TopWithWSelection_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_TopWithWSelection_h
 
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
@@ -16,9 +16,9 @@ namespace edm {
 class TH1;
 
 namespace HPlus {
-  class TopWithBSelection;
+  class TopWithWSelection;
 
-  class TopWithBSelection {
+  class TopWithWSelection {
   public:
     typedef math::XYZTLorentzVector XYZTLorentzVector;
     /**
@@ -31,20 +31,20 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const TopWithBSelection *TopWithBSelection, bool passedEvent);
+      Data(const TopWithWSelection *TopWithWSelection, bool passedEvent);
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
-      const double getTopMass() const { return fTopWithBSelection->topMass; }
-      const XYZTLorentzVector& getTopP4() const { return fTopWithBSelection->top; }
+      const double getTopMass() const { return fTopWithWSelection->topMass; }
+      const XYZTLorentzVector& getTopP4() const { return fTopWithWSelection->top; }
 
     private:
-      const TopWithBSelection *fTopWithBSelection;
+      const TopWithWSelection *fTopWithWSelection;
       const bool fPassedEvent;
     };
     
-    TopWithBSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
-    ~TopWithBSelection();
+    TopWithWSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    ~TopWithWSelection();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> bjet);
 
@@ -71,7 +71,7 @@ namespace HPlus {
     const double fChi2Cut;
 
     // Counters
-    Count fTopWithBMassCount;
+    Count fTopWithWMassCount;
 
     // EventWeight object
     EventWeight& fEventWeight;
@@ -80,7 +80,7 @@ namespace HPlus {
     // Histograms
     TH1 *hPtTopChiCut;
     TH1 *hPtTop;
-    TH1 *hjjbMass;
+    TH1 *hjjMass;
     TH1 *htopMass;
     TH1 *htopMassMatch;
     TH1 *htopMassChiCut;

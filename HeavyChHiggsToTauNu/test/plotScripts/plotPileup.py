@@ -12,7 +12,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
 
 def main():
-    datasets = dataset.getDatasetsFromMulticrabCfg()
+    datasets = dataset.getDatasetsFromMulticrabCfg(weightedCounters=False)
     datasets.loadLuminosities()
 
     #mc = "WJets"

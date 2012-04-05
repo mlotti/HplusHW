@@ -90,6 +90,7 @@ def main():
 
     for i, d in enumerate(dirEmbs):
         datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=d+"/multicrab.cfg", counters=analysisEmb+"Counters")
+        datasets.updateNAllEventsToPUWeighted()
         if onlyWjets:
             datasets.remove(filter(lambda n: n != "WJets_TuneZ2_Summer11", datasets.getAllDatasetNames()))
         else:
@@ -98,7 +99,6 @@ def main():
             datasets.loadLuminosities()
         datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
         datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
-        tauEmbedding.updateAllEventsToWeighted(datasets)
         plots.mergeRenameReorderForDataMC(datasets)
 
         # for ds in datasets.getAllDatasets():

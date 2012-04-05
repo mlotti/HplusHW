@@ -95,11 +95,11 @@ class ExtractorBase:
 
     ## Virtual method for extracking information
     def doExtract(self, datasets, normalisation, additionalNormalisation = 1.0):
-        return
+        return -1.0
         
     ## Virtual method for extracking information
     def doExtractAsymmetricUpperValue(self, datasets, normalisation, additionalNormalisation = 1.0):
-        return
+        return -1.0
       
     ## Virtual method for adding histograms to the root file
     def addHistogramsToFile(self, label, exid, rootFile):

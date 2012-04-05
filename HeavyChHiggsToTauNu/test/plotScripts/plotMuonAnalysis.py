@@ -73,7 +73,7 @@ treeDraw = dataset.TreeDraw(analysis+"/tree", weight=weight)
 def main():
     counters = analysis+"Counters"
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-    tauEmbedding.updateAllEventsToWeighted(datasets)
+    datasets.updateNAllEventsToPUWeighted()
 
     #datasets.remove(filter(lambda name: name != "SingleMu_Mu_166374-167043_Prompt" and name != "TTJets_TuneZ2_Summer11", datasets.getAllDatasetNames()))
     if era == "EPS":
@@ -508,23 +508,7 @@ def muonIsoQcd(plot, prefix=""):
 
 ############################################################
 
-class PrefixModify:
-    def __init__(self):
-        self.remove = []
-    def addPrefix(self, prefix):
-        self.remove.append(prefix)
-
-    def __call__(self, name):
-        for r in self.remove:
-            name = name.replace(r, "")
-        return name
-
 def makeEventCounter(ds):
-    modifyCountNames = PrefixModify()
-    for d in ds.getAllDatasets():
-        prefix = d.getPrefix()
-        if prefix != "":
-            modifyCountNames.addPrefix(prefix)
     return counter.EventCounter(ds, modifyCountNames)
 
 def addSumColumn(table):

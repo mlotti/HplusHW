@@ -53,6 +53,7 @@ def main():
 
     datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, baseline+"Counters")
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
+    datasetsSig.updateNAllEventsToPUWeighted()
 
     # Remove signal and W3jets
     datasetsEmb.remove(filter(lambda name: "HplusTB" in name, datasetsEmb.getAllDatasetNames()))

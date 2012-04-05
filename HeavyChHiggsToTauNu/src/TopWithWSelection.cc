@@ -1,4 +1,4 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
@@ -26,25 +26,25 @@ void printDaughters(const reco::Candidate& p);
 
 
 namespace HPlus {
-  TopWithBSelection::Data::Data(const TopWithBSelection *topWithBSelection, bool passedEvent):
-    fTopWithBSelection(topWithBSelection), fPassedEvent(passedEvent) {}
-  TopWithBSelection::Data::~Data() {}
+  TopWithWSelection::Data::Data(const TopWithWSelection *topWithWSelection, bool passedEvent):
+    fTopWithWSelection(topWithWSelection), fPassedEvent(passedEvent) {}
+  TopWithWSelection::Data::~Data() {}
 
-  TopWithBSelection::TopWithBSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  TopWithWSelection::TopWithWSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fTopMassLow(iConfig.getUntrackedParameter<double>("TopMassLow")),
     fTopMassHigh(iConfig.getUntrackedParameter<double>("TopMassHigh")),
     fChi2Cut(iConfig.getUntrackedParameter<double>("Chi2Cut")),
-    fTopWithBMassCount(eventCounter.addSubCounter("Top with B mass cut","Top with B Mass cut")),
+    fTopWithWMassCount(eventCounter.addSubCounter("Top with W mass cut","Top with W Mass cut")),
     fEventWeight(eventWeight),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src"))
   {
     edm::Service<TFileService> fs;
 
-    TFileDirectory myDir = fs->mkdir("TopWithBSelection");
+    TFileDirectory myDir = fs->mkdir("TopWithWSelection");
     
     hPtTop = makeTH<TH1F>(myDir, "PtTop", "PtTop", 200, 0., 400.);
     hPtTopChiCut = makeTH<TH1F>(myDir, "PtTopChiCut", "PtTopChiCut", 200, 0., 400.);
-    hjjbMass = makeTH<TH1F>(myDir, "jjbMass", "jjbMass", 400, 0., 400.);
+    hjjMass = makeTH<TH1F>(myDir, "jjMass", "jjMass", 400, 0., 400.);
     htopMass = makeTH<TH1F>(myDir, "TopMass", "TopMass", 400, 0., 400.);
     hWMass = makeTH<TH1F>(myDir, "WMass", "WMass", 400, 0., 200.);
     htopMassMatch = makeTH<TH1F>(myDir, "TopMass_fullMatch", "TopMass_fullMatch", 400, 0., 400.);
@@ -60,9 +60,9 @@ namespace HPlus {
     hWMassChiCut = makeTH<TH1F>(myDir, "WMassChiCut", "WMassChiCut", 400, 0., 200.);
   }
 
-  TopWithBSelection::~TopWithBSelection() {}
+  TopWithWSelection::~TopWithWSelection() {}
 
-  TopWithBSelection::Data TopWithBSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
+  TopWithWSelection::Data TopWithWSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
 
 
     // Reset variables
@@ -73,16 +73,14 @@ namespace HPlus {
 
     bool passEvent = false;
 
+    bool wmassfound = false;
     bool topmassfound = false;
     double chi2Min = 999999;
-    double nominalTop = 172.9;
     double nominalW = 80.4;
-    double sigmaTop = 18.;
     double sigmaW = 11.;
   
     edm::Ptr<pat::Jet> Jet1;
     edm::Ptr<pat::Jet> Jet2;
-    edm::Ptr<pat::Jet> Jetb;
 
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet1 = *iter;
@@ -96,38 +94,39 @@ namespace HPlus {
 	if (ROOT::Math::VectorUtil::DeltaR(iJet1->p4(), iJetb->p4()) < 0.4) continue;
 	if (ROOT::Math::VectorUtil::DeltaR(iJet2->p4(), iJetb->p4()) < 0.4) continue;	  
 	
-	XYZTLorentzVector candTop = iJet1->p4() + iJet2->p4() + iJetb->p4();
 	XYZTLorentzVector candW = iJet1->p4() + iJet2->p4();
 	
         
-	hjjbMass->Fill(candTop.M(), fEventWeight.getWeight());
-	double chi2 = ((candTop.M() - nominalTop)/sigmaTop)*((candTop.M() - nominalTop)/sigmaTop) + ((candW.M() - nominalW)/sigmaW)*((candW.M() - nominalW)/sigmaW); 
+	hjjMass->Fill(candW.M(), fEventWeight.getWeight());
+	double chi2 = ((candW.M() - nominalW)/sigmaW)*((candW.M() - nominalW)/sigmaW); 
 	
 	if (chi2 < chi2Min ) {
 	  chi2Min = chi2;
 	  Jet1 = iJet1;
-	  Jet2 = iJet2;
-	  Jetb = iJetb;            
-	  top = candTop;
-	  W = candW;
-	  topmassfound = true;
+	  Jet2 = iJet2;        
+	  wmassfound = true;  
+	  W = candW;          
 	}
       }
     }
- 
-  
-    hPtTop->Fill(top.Pt(), fEventWeight.getWeight());
-    htopMass->Fill(top.M(), fEventWeight.getWeight());
-    hWMass->Fill(W.M(), fEventWeight.getWeight());
-    hChi2Min->Fill(sqrt(chi2Min), fEventWeight.getWeight());
-    if ( sqrt(chi2Min) < fChi2Cut) {
-      htopMassChiCut->Fill(top.M(), fEventWeight.getWeight());
-      hWMassChiCut->Fill(W.M(), fEventWeight.getWeight());
-      hPtTopChiCut->Fill(top.Pt(), fEventWeight.getWeight());
+
+    if ( wmassfound ) {
+      XYZTLorentzVector top = Jet1->p4() + Jet2->p4() + iJetb->p4(); 
+      hWMass->Fill(W.M(), fEventWeight.getWeight());
+      hChi2Min->Fill(sqrt(chi2Min), fEventWeight.getWeight());
       topMass = top.M();
       wMass = W.M();
+      hPtTop->Fill(top.Pt(), fEventWeight.getWeight());
+      htopMass->Fill(top.M(), fEventWeight.getWeight());
+      if ( sqrt(chi2Min) < fChi2Cut) {
+	topmassfound = true;
+	htopMassChiCut->Fill(top.M(), fEventWeight.getWeight());
+	hWMassChiCut->Fill(W.M(), fEventWeight.getWeight());
+	hPtTopChiCut->Fill(top.Pt(), fEventWeight.getWeight());
+      }
     }
-
+   
+     
 
 
     // search correct combinations
@@ -159,11 +158,11 @@ namespace HPlus {
 	  //	  std::cout << " b quarks " << id <<  " idHiggsSide " <<   idHiggsSide << std::endl;
 	  if ( id * idHiggsSide > 0 ) {
 	    // test with b jet to tau side
-	    double deltaR = ROOT::Math::VectorUtil::DeltaR(Jetb->p4(),p.p4() );
+	    double deltaR = ROOT::Math::VectorUtil::DeltaR(iJetb->p4(),p.p4() );
 	    if ( deltaR < 0.4) bMatchHiggsSide = true;
 	  }
 	  if ( id * idHiggsSide < 0 ) {
-	    double deltaR = ROOT::Math::VectorUtil::DeltaR(Jetb->p4(),p.p4() );
+	    double deltaR = ROOT::Math::VectorUtil::DeltaR(iJetb->p4(),p.p4() );
 	    if ( deltaR < 0.4) bMatchTopSide = true;
 	  }
 	}
@@ -212,7 +211,7 @@ namespace HPlus {
     
     passEvent = true;
     if( topMass < fTopMassLow || topMass > fTopMassHigh ) passEvent = false;
-    increment(fTopWithBMassCount);
+    increment(fTopWithWMassCount);
     
     return Data(this, passEvent);
   }    

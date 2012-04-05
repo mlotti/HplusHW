@@ -63,6 +63,8 @@ set -e
 # 19.1.2012/M.Kortelainen CMSSW_4_4_2_patch9 Updated PAT and tau tags
 # 20.1.2012/M.Kortelainen CMSSW_4_4_2_patch10 Updated and fixed PAT tags
 # 13.3.2012/M.Kortelainen CMSSW_4_4_4 Updated PAT, tau and lumi tags
+# 19.3.2012/M.Kortelainen CMSSW_4_2_8_patch2 Updated lumi tag to include the pixel lumi
+# 28.3.2012/S.Lehti       CMSSW_4_4_4 Moved master to 444/ 444 tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)

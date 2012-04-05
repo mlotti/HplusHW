@@ -32,12 +32,12 @@ analysis = "signalAnalysis"
 #analysis = "signalOptimisation/QCDAnalysisVariation_tauPt40_rtau0_btag2_METcut60_FakeMETCut0"
 #analysis = "signalAnalysisTauSelectionHPSTightTauBased2"
 #analysis = "signalAnalysisBtaggingTest2"
-counters = analysis+"Counters/weighted"
 
 # main function
 def main():
     # Read the datasets
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets = dataset.getDatasetsFromMulticrabCfg(counters=analysis+"Counters")
+    datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()
 
     plots.mergeRenameReorderForDataMC(datasets)
@@ -56,7 +56,7 @@ def main():
 
     style = tdrstyle.TDRStyle()
 
-    eventCounter = counter.EventCounter(datasets, counters=counters)
+    eventCounter = counter.EventCounter(datasets)
     eventCounter.normalizeMCByCrossSection()
     mainTable = eventCounter.getMainCounterTable()
 

@@ -9,10 +9,46 @@ import glob, os, sys, re
 import json
 from optparse import OptionParser
 import math
+import copy
 
 import ROOT
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
+
+## Utility class for handling the weighted number of all MC events
+#
+# Represents values for one dataset
+class WeightedAllEvents:
+    ## Constructor
+    #
+    # \param unweighted   Number of unweighted MC events
+    # \param weighted     Dictionary with data era names as keys, and
+    #                     weighted number of all MC events as values
+    def __init__(self, unweighted, weighted):
+        self.unweighted = unweighted
+        self.weighted = weighted
+
+    ## Get the weighted number of all MC events
+    #
+    # \param name        Name of the dataset (used only in a warning message)
+    # \param unweighted  Unweighted number of all events (used for a cross check)
+    # \param era         Name of the data era
+    def getWeighted(self, name, unweighted, era):
+        try:
+            nweighted = self.weighted[era]
+        except KeyError:
+            raise Exception("%s: no weighted number of all events specified for data era '%s', see dataset._weightedAllEvents dictionary" % (name, era))
+        if int(unweighted) != int(self.unweighted):
+            print "%s: Unweighted all events from analysis %d, unweighted all events from _weightedAllEvents %d, using their ratio for setting the weighted all events" % (name, int(unweighted), int(self.unweighted))
+            nweighted = unweighted * nweighted/self.unweighted
+        return nweighted
+
+## Number of PU-reweighted all events for skimmed datasets
+#
+# These are obtained with pileupNtuple_cfg.py
+_weightedAllEvents = {
+#    "TTJets_TuneZ2_Fall11": WeightedAllEvents(12345, {"Run2011A": 1234561.}) # FIXME: these numbers are only for an example, to be updated with the real numbers
+}
 
 ## Construct DatasetManager from a list of MultiCRAB directory names.
 # 
@@ -57,16 +93,18 @@ def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
 # The section names in multicrab.cfg are taken as the dataset names
 # in the DatasetManager object.
 def getDatasetsFromMulticrabCfg(**kwargs):
+    _args = copy.copy(kwargs)
     opts = kwargs.get("opts", None)
     taskDirs = []
     dirname = ""
     if "cfgfile" in kwargs:
         taskDirs = multicrab.getTaskDirectories(opts, kwargs["cfgfile"])
         dirname = os.path.dirname(kwargs["cfgfile"])
+        del _args["cfgfile"]
     else:
         taskDirs = multicrab.getTaskDirectories(opts)
 
-    datasetMgr = getDatasetsFromCrabDirs(taskDirs, **kwargs)
+    datasetMgr = getDatasetsFromCrabDirs(taskDirs, **_args)
     if len(dirname) > 0:
         datasetMgr._setBaseDirectory(dirname)
     return datasetMgr
@@ -88,9 +126,11 @@ def getDatasetsFromMulticrabCfg(**kwargs):
 # names in the DatasetManager object (e.g. for directory '../Foo',
 # 'Foo' will be the dataset name)
 def getDatasetsFromCrabDirs(taskdirs, **kwargs):
+    _args = copy.copy(kwargs)
     opts = None
     if "opts" in kwargs:
         opts = kwargs["opts"]
+        del _args["opts"]
     else:
         parser = OptionParser(usage="Usage: %prog [options]")
         multicrab.addOptions(parser)
@@ -99,6 +139,10 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
     if hasattr(opts, "counterDir"):
         counters = opts.counterdir
     postfix = kwargs.get("namePostfix", "")
+    try:
+        del _args["namePostfix"]
+    except KeyError:
+        pass
 
     dlist = []
     noFiles = False
@@ -124,7 +168,7 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
     if len(dlist) == 0:
         raise Exception("No datasets from CRAB task directories %s" % ", ".join(taskdirs))
 
-    return getDatasetsFromRootFiles(dlist, **kwargs)
+    return getDatasetsFromRootFiles(dlist, **_args)
 
 ## Construct DatasetManager from a list of CRAB task directory names.
 # 
@@ -135,19 +179,21 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
 # 
 # <b>Keyword arguments</b>
 # \li \a counters      String for a directory name inside the ROOT files for the event counter histograms (default: 'signalAnalysisCounters').
+# \li Rest are forwarded to dataset.Dataset.__init__()
 #
 # \return DatasetManager object
 def getDatasetsFromRootFiles(rootFileList, **kwargs):
     counters = kwargs.get("counters", "signalAnalysisCounters")
-    dataQcd = kwargs.get("dataQcdMode", False)
-    dataQcdNorm = kwargs.get("dataQcdNormalization", 1.0)
+    # Pass the rest of the keyword arguments, except 'counters', to Dataset constructor
+    _args = copy.copy(kwargs)
+    try:
+        del _args["counters"]
+    except KeyError:
+        pass
+
     datasets = DatasetManager()
     for name, f in rootFileList:
-        dset = None
-        if dataQcd:
-            dset = DatasetQCDData(name, f, counters, dataQcdNorm)
-        else:
-            dset = Dataset(name, f, counters)
+        dset = Dataset(name, f, counters, **_args)
         datasets.append(dset)
     return datasets
 
@@ -1042,25 +1088,30 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
 # (either data or MC) to one logical dataset (e.g. all data datasets
 # to one dataset, all QCD pThat bins to one dataset)
 class Dataset:
-
-   ## Constructor.
-   # 
-   # \param name        Name of the dataset (can be anything)
-   # \param fname       Path to the ROOT file of the dataset
-   # \param counterDir  Name of the directory in the ROOT file for event
-   #                    counter histograms. If None is given, it is
-   #                    assumed that the dataset has no counters. This
-   #                    also means that the histograms from this dataset
-   #                    can not be normalized unless the number of all
-   #                    events is explictly set with setNAllEvents()
-   #                    method.
-   # 
-   # Opens the ROOT file, reads 'configInfo/configInfo' histogram
-   # (if it exists), and reads the main event counter
-   # ('counterDir/counters') if counterDir is not None. Reads also
-   # 'configInfo/dataVersion' TNamed.
-   # """
-    def __init__(self, name, fname, counterDir):
+    ## Constructor.
+    # 
+    # \param name              Name of the dataset (can be anything)
+    # \param fname             Path to the ROOT file of the dataset
+    # \param counterDir        Name of the directory in the ROOT file for
+    #                          event counter histograms. If None is given, it
+    #                          is assumed that the dataset has no counters.
+    #                          This also means that the histograms from this
+    #                          dataset can not be normalized unless the
+    #                          number of all events is explictly set with
+    #                          setNAllEvents() method. Note that this
+    #                          directory should *not* point to the 'weighted'
+    #                          subdirectory, but to the top-level counter
+    #                          directory. The weighted counters are taken
+    #                          into account with \a useWeightedCounters
+    #                          argument
+    # \param weightedCounters  If True, pick the counters from the 'weighted' subdirectory
+    # 
+    # Opens the ROOT file, reads 'configInfo/configInfo' histogram
+    # (if it exists), and reads the main event counter
+    # ('counterDir/counters') if counterDir is not None. Reads also
+    # 'configInfo/dataVersion' TNamed.
+    # """
+    def __init__(self, name, fname, counterDir, weightedCounters=True):
         self.name = name
         self._setBaseDirectory(os.path.dirname(os.path.dirname(os.path.dirname(fname))))
         self.file = ROOT.TFile.Open(fname)
@@ -1078,12 +1129,35 @@ class Dataset:
             raise Exception("Unable to determine dataVersion for dataset %s from file %s" % (name, fname))
         self.dataVersion = dataVersion.GetTitle()
 
+        era = configInfo.Get("era")
+        if era == None:
+            self.era = None
+        else:
+            self.era = era.GetTitle()
+
         self._isData = "data" in self.dataVersion
 
-        self.prefix = ""
         if counterDir != None:
-            self.originalCounterDir = counterDir
-            self._readCounter(counterDir)
+            self.counterDir = counterDir
+            self._origCounterDir = counterDir
+            d = self.file.Get(counterDir)
+            if d == None:
+                raise Exception("Could not find counter directory %s from file %s" % (counterDir, fname))
+            ctr = _histoToCounter(d.Get("counter"))
+            self.nAllEventsUnweighted = ctr[0][1].value() # first counter, second element of the tuple
+            self.nAllEventsWeighted = None
+
+            self.nAllEvents = self.nAllEventsUnweighted
+
+            if weightedCounters:
+                self.counterDir += "/weighted"
+                d = self.file.Get(self.counterDir)
+                if d == None:
+                    raise Exception("Could not find counter directory %s from file %s" % (self.counterDir, fname))
+                ctr = _histoToCounter(d.Get("counter"))
+                self.nAllEventsWeighted = ctr[0][1].value() # first counter, second element of the tuple
+
+                self.nAllEvents = self.nAllEventsWeighted
 
     ## Close the file
     #
@@ -1096,43 +1170,6 @@ class Dataset:
         self.file.Delete()
         del self.file
 
-    ## Read the number of all events from the event counters.
-    # 
-    # \param counterDir  Name of the directory for event counter histograms.
-    # 
-    # Reads 'counterDir/counters' histogram, and takes the value of
-    # the first bin as the number of all events.
-    # 
-    # Intended for internal use only.
-    def _readCounter(self, counterDir):
-        if self.file.Get(counterDir) == None:
-            raise Exception("Unable to find directory '%s' from ROOT file '%s'" % (counterDir, self.file.GetName()))
-        ctr = _histoToCounter(self.file.Get(counterDir).Get("counter"))
-        self.nAllEvents = ctr[0][1].value() # first counter, second element of the tuple
-        self.counterDir = counterDir
-
-    ## Set a prefix for the directory access.
-    # 
-    # \param prefix   Prefix for event counter and histogram directories.
-    # 
-    # The number of all events (for normalization) are re-read from
-    # a directory prefix+original_counter_directory. The prefix is
-    # also used for the histogram paths in getHistogram() method.
-    # 
-    # The use case is the following:
-    # \li The same analysis is run many times with different
-    #     parameters in one CMSSW jobs. The different analyses have
-    #     different prefixes but the same base name (e.g. 'analysis,
-    #     'foo1analysis', 'foo2analysis' etc.)
-    # \li The different analyses can then be selected easily by
-    #     calling this method with a prefix
-    def setPrefix(self, prefix):
-        self.prefix = prefix
-        self._readCounter(prefix+self.originalCounterDir)
-
-    def getPrefix(self):
-        return self.prefix
-
     ## Clone the Dataset object
     # 
     # Nothing is shared between the returned copy and this object.
@@ -1142,7 +1179,7 @@ class Dataset:
     # while also keeping the original ttbar with the original SM cross
     # section.
     def deepCopy(self):
-        d = Dataset(self.name, self.file.GetName(), self.counterDir)
+        d = Dataset(self.name, self.file.GetName(), self._origCounterDir, self.nAllEventsWeighted != None)
         d.info.update(self.info)
         return d
 
@@ -1189,7 +1226,7 @@ class Dataset:
         return not self._isData
 
     def getCounterDirectory(self):
-        return self.originalCounterDir
+        return self.counterDir
 
     ## Set the number of all events (for normalization).
     #
@@ -1197,6 +1234,20 @@ class Dataset:
     # counter, or creating a dataset without event counter at all.
     def setNAllEvents(self, nAllEvents):
         self.nAllEvents = nAllEvents
+
+    ## Update number of all events (for normalization) to a pileup-reweighted value.
+    #
+    # \param weight  dataset.WeightedAllEvents object
+    # \param era     Data era to use to pick the pile-up-reweighted all
+    #                event number (optional, if not given a default
+    #                value read from the configinfo is used)
+    def updateNAllEventsToPUWeighted(self, weight, era=None):
+        if era == None:
+            era = self.era
+        if era == None:
+            raise Exception("%s: tried to update number of all events to pile-up reweighted value, but the data era was not set in 'configInfo' nor was given as an argument" % self.getName())
+
+        self.nAllEvents = weight.getWeighted(self.getName(), self.nAllEventsUnweighted, era)
 
     def getNAllEvents(self):
         return self.nAllEvents
@@ -1210,7 +1261,7 @@ class Dataset:
         if not hasattr(self, "nAllEvents"):
             raise Exception("Number of all events is not set for dataset %s! The counter directory was not given, and setNallEvents() was not called." % self.name)
         if self.nAllEvents == 0:
-            raise Exception("Number of all events is 0 for dataset %s" % self.name)
+            raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateAllEventsToPUWeighted() has not been called." % self.name)
 
         return self.getCrossSection() / self.nAllEvents
 
@@ -1223,7 +1274,7 @@ class Dataset:
     def hasRootHisto(self, name):
         if hasattr(name, "draw"):
             return True
-        pname = self.prefix+name
+        pname = name
         return self.file.Get(pname) != None
 
     ## Get the dataset.DatasetRootHisto object for a named histogram.
@@ -1232,9 +1283,6 @@ class Dataset:
     #
     # \return dataset.DatasetRootHisto object containing the (unnormalized) TH1 and this Dataset
     # 
-    # If the prefix is set (setPrefix() method), it is prepended to
-    # the name before TFile.Get() call.
-    #
     # If dataset.TreeDraw object is given (or actually anything with
     # draw() method), the draw() method is called by giving the TFile
     # and the dataset name as parameters. The draw() method is
@@ -1244,7 +1292,7 @@ class Dataset:
         if hasattr(name, "draw"):
             h = name.draw(self.file, self.getName())
         else:
-            pname = self.prefix+name
+            pname = name
             h = self.file.Get(pname)
             if h == None:
                 raise Exception("Unable to find histogram '%s' from file '%s'" % (pname, self.file.GetName()))
@@ -1262,13 +1310,10 @@ class Dataset:
     #                    argument and returning a boolean.
     # 
     # \return List of names in the directory.
-    # 
-    # If the prefix is set (setPrefix() method), it is prepended to
-    # the bame before TFile.Get() call.
     def getDirectoryContent(self, directory, predicate=lambda x: True):
-        d = self.file.Get(self.prefix+directory)
+        d = self.file.Get(directory)
         if d == None:
-            raise Exception("No object %s in file %s" % (self.prefix+directory, self.file.GetName()))
+            raise Exception("No object %s in file %s" % (directory, self.file.GetName()))
         dirlist = d.GetListOfKeys()
 
         # Suppress the warning message of missing dictionary for some iterator
@@ -1297,55 +1342,27 @@ class Dataset:
     # Dictionary containing the configInfo histogram
     ## \var dataVersion
     # dataVersion string of the dataset (from TFile)
-    ## \var prefix
-    # Prefix for TDirectory access, see setPrefix()
-    ## \var originalCounterDir
-    # Original counter directory, see setPrefix()
+    ## \var era
+    # Era of the data (used in the analysis for pile-up reweighting,
+    # trigger efficiencies etc). Is None if corresponding TNamed
+    # doesn't exist in configinfo directory
     ## \var nAllEvents
     # Number of all MC events, used in MC normalization
+    ## \var nAllEventsUnweighted
+    # Number of all MC events as read from the unweighted counter.
+    # This should always be a non-zero number
+    ## \var nAllEventsWeighted
+    # Number of all MC events as read from the weighted counter. This
+    # can be None (if weightedCounters was False in __init__()), zero
+    # (if the input for the analysis job was a skim), or a non-zero
+    # number (if the input for the anlysis job was not a skim)
     ## \var counterDir
     # Name of TDirectory containing the main event counter
+    ## \var _origCounterDir
+    # Name of the counter directory as given for __init__(), needed for deepCopy()
     ## \var _isData
     # If true, dataset is from data, if false, from MC
 
-## Maybe unnecessary class?
-#
-# This is some old trial for implementing a dataset class for the
-# data-driven QCD measurement. Development was never finished.
-class DatasetQCDData(Dataset):
-    def __init__(self, name, fname, counterDir, normfactor=1.0):
-        Dataset.__init__(self, name, fname, counterDir)
-        self.normfactor = normfactor
-
-    def deepCopy(self):
-        d = DatasetQCDData(self.name, self.file.GetName(), self.counterDir, self.normfactor)
-        d.info.update(self.info)
-        d._isData = self._isData
-        return d
-
-    def changeTypeToMC(self):
-        self._isData = False
-
-    def getDatasetRootHisto(self, name):
-        drh = Dataset.getDatasetRootHisto(self, name)
-        drh.scale(self.normfactor)
-        return drh
-
-    def setNormFactor(self, normfactor):
-        self.normfactor = normfactor
-
-    def setNormFactorFromTree(self, treeDraw, targetNumEvents):
-        drh = Dataset.getDatasetRootHisto(self, treeDrawToNumEntries(treeDraw))
-        nevents = drh.histo.Integral(0, drh.histo.GetNbinsX()+1)
-        self.setNormFactor(targetNumEvents/nevents)
-
-    # Overloads needed for this ugly hack
-    def getCrossSection(self):
-        return 0
-
-    def setCrossSection(self):
-        raise Exception("Assert that this is not called for DatasetQCDData")
-        
 
 ## Dataset class for histogram access for a dataset merged from Dataset objects.
 # 
@@ -1383,24 +1400,6 @@ class DatasetMerged:
         for d in self.datasets:
             d.close()
 
-    ## Set a prefix for the directory access.
-    # 
-    # \param prefix   Prefix for event counter and histogram directories.
-    # 
-    # \see dataset.Dataset.setPrefix()
-    def setPrefix(self, prefix):
-        for d in self.datasets:
-            d.setPrefix(prefix)
-
-    def getPrefix(self):
-        prefix = None
-        for d in self.datasets:
-            if prefix == None:
-                prefix = d.getPrefix()
-            elif prefix != d.getPrefix():
-                raise Exception("Internal error")
-        return prefix
- 
     ## Make a deep copy of a DatasetMerged object.
     #
     # Nothing is shared between the returned copy and this object.
@@ -1825,6 +1824,19 @@ class DatasetManager:
 ####        for name, value in data.iteritems():
 ####            if self.hasDataset(name):
 ####                self.getDataset(name).setLuminosity(value)
+
+    ## Update all event counts to the ones taking into account the pile-up reweighting
+    #
+    # \param kwargs     Keyword arguments (forwarded to dataset.Dataset.updateAllEventsToWeighted)
+    #
+    # Uses the table dataset._weightedAllEvents
+    def updateNAllEventsToPUWeighted(self, **kwargs):
+        for name, weight in _weightedAllEvents.iteritems():
+            if not self.hasDataset(name):
+                continue
+
+            dataset = self.getDataset(name)
+            dataset.updateNAllEventsToPUWeighted(weight, **kwargs)
 
     ## Print dataset information.
     def printInfo(self):

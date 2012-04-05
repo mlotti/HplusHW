@@ -78,7 +78,7 @@ def do(onlyWjets, mcEvents, normalize, formatCounters, formatPlots):
 #    dirEmbs = dirEmbs[0:2]
 
     # Read luminosity
-    datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirEmbs[0]+"/multicrab.cfg", counters=analysisEmb+"Counters")
+    datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirEmbs[0]+"/multicrab.cfg", counters=analysisEmb+"Counters", weightedCounters=False)
     datasets.loadLuminosities()
     plots.mergeRenameReorderForDataMC(datasets)
     lumi = datasets.getDataset("Data").getLuminosity()
@@ -91,7 +91,7 @@ def do(onlyWjets, mcEvents, normalize, formatCounters, formatPlots):
 
     table = counter.CounterTable()
     for i, d in enumerate(dirEmbs):
-        datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=d+"/multicrab.cfg", counters=analysisEmb+"Counters")
+        datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=d+"/multicrab.cfg", counters=analysisEmb+"Counters", weightedCounters=False)
         if onlyWjets:
             datasets.remove(filter(lambda n: n != "WJets_TuneZ2_Summer11", datasets.getAllDatasetNames()))
         else:
