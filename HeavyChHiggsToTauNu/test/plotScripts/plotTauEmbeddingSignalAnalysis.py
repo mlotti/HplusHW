@@ -105,9 +105,7 @@ deltaPhi90Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p
 # main function
 def main():
     # Read the datasets
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters,
-#                                                   weightedCounters=countersWeighted, firstWeightedCount="All events"
-                                                   )
+    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
 
     if era == "EPS":
         datasets.remove([
@@ -134,13 +132,13 @@ def main():
         pass
     else:
         raise Exception("Unsupported era "+era)
+    datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()
     #print datasets.getAllDatasetNames()
     #return
 
 #    apply_v13_1_bugfix(datasets)
 
-    tauEmbedding.updateAllEventsToWeighted(datasets)
     plots.mergeRenameReorderForDataMC(datasets)
     datasets.remove(["W3Jets"])
 

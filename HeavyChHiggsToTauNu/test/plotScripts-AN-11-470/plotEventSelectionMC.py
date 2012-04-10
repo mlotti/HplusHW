@@ -24,12 +24,10 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters/weighted"
-
-
 def main():
     # Read the datasets
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets = dataset.getDatasetsFromMulticrabCfg(counters=analysis+"Counters")
+    datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()
 
     plots.mergeRenameReorderForDataMC(datasets)
@@ -197,7 +195,7 @@ def doPlots(datasets):
 
 
 def doCounters(datasets, massPoints):
-    eventCounter = counter.EventCounter(datasets, counters=counters)
+    eventCounter = counter.EventCounter(datasets)
     eventCounter.normalizeMCByLuminosity()
 
     rows1 = [

@@ -14,7 +14,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
         
 analysis = "signalAnalysis"
-counters = analysis+"Counters/weighted"
+counters = analysis+"Counters"
 analysisPlusPlus   = "signalAnalysisJESPlus03eta02METPlus10"
 analysisMinusPlus  = "signalAnalysisJESMinus03eta02METPlus10"
 analysisPlusMinus  = "signalAnalysisJESPlus03eta02METMinus10"
@@ -25,6 +25,7 @@ from InvertedTauID import *
 
 def main():
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()
     plots.mergeRenameReorderForDataMC(datasets)
 

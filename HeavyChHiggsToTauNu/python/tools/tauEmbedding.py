@@ -22,26 +22,6 @@ era = "Run2011A"
 ## When doing the averaging, take the stat uncertainty as the average of the stat uncertanties of the trials
 uncertaintyByAverage = False
 
-## Number of PU-reweighted all events for datasets
-datasetAllEvents = {
-    "TTJets_TuneZ2_Summer11": (3701947, {"Run2011A": 3693782.50}),
-    # Not all events were processed for pattuples
-    "WJets_TuneZ2_Summer11": (None, {"Run2011A": 82207600.00/81352576}),
-    "W3Jets_TuneZ2_Summer11": (7685944, {"Run2011A": 7688457.50}),
-#    "DYJetsToLL_M50_TuneZ2_Summer11": (33576416, {"Run2011A": 33556404.00}),
-    # Not all events were processed for pattuples
-    "DYJetsToLL_M50_TuneZ2_Summer11": (None, {"Run2011A": 33556404.00/33576416}),
-    "T_t-channel_TuneZ2_Summer11": (3900171, {"Run2011A": 3906455.50}),
-    "Tbar_t-channel_TuneZ2_Summer11": (1944826, {"Run2011A": 1949474.6}),
-    "T_tW-channel_TuneZ2_Summer11": (814390, {"Run2011A": 807697.38}),
-    "Tbar_tW-channel_TuneZ2_Summer11": (809984, {"Run2011A": 797144.94}),
-    "T_s-channel_TuneZ2_Summer11": (259971, {"Run2011A": 261646.25}),
-    "Tbar_s-channel_TuneZ2_Summer11": (137980, {"Run2011A": 139142.36}),
-    "WW_TuneZ2_Summer11": (4225916, {"Run2011A": 4226660.50}),
-    "WZ_TuneZ2_Summer11": (4265243, {"Run2011A": 4272549.50}),
-    "ZZ_TuneZ2_Summer11": (4187885, {"Run2011A": 4197760.00}),
-}
-
 ## Signal analysis multicrab directories for embedding trials
 dirEmbs_120131 = [
     "multicrab_signalAnalysis_Met50_systematics_v13_3_Run2011A_120131_123142",
@@ -197,31 +177,6 @@ signalNtuple.weightBTagging = signalNtuple.weight+"*weightBTagging"
 
 
 
-
-## Update all event counts to the ones taking into account the pileup reweighting
-#
-# \param datasets   dataset.DatasetManager object
-def updateAllEventsToWeighted(datasets):
-    # If DatasetsMany or similar
-    if hasattr(datasets, "datasetManagers"):
-        for ds in datasets.datasetManagers:
-            updateAllEventsToWeighted(ds)
-        return
-
-    for name, tpl in datasetAllEvents.iteritems():
-        if not datasets.hasDataset(name):
-            continue
-        dataset = datasets.getDataset(name)
-        (N, weightedN) = tpl
-        nAllEvents = dataset.getNAllEvents()
-        if N != None:
-            if nAllEvents != N:
-                raise Exception("Datasets %s, number of all events is %d, expected %d" % (name, nAllEvents, N))
-            dataset.setNAllEvents(weightedN[era])
-        else:
-            dataset.setNAllEvents(weightedN[era]*nAllEvents) # There is some fluctuation in the exact counts of DYJets and WJets between trials
-
-
 ## Apply embedding normalization
 #
 # \param obj  plots.PlotBase, histograms.Histo, or counter.EventCounter object
@@ -345,8 +300,8 @@ class DatasetsMany:
         self.datasetManagers = []
         for d in dirs:
             datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=d+"/multicrab.cfg", counters=counters)
+            datasets.updateNAllEventsToPUWeighted()
             datasets.loadLuminosities()
-            updateAllEventsToWeighted(datasets)
             self.datasetManagers.append(datasets)
 
         self.normalizeMCByCrossSection = normalizeMCByCrossSection
