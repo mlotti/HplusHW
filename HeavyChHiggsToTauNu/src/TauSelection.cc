@@ -160,10 +160,12 @@ namespace HPlus {
   }
   
   const bool TauSelection::Data::selectedTausDoNotPassIsolation() const {
-    if (!fPassedEvent) return false;
+    //    if (!fPassedEvent) return false;
     for (edm::PtrVector<pat::Tau>::const_iterator iter = getSelectedTaus().begin(); iter != getSelectedTaus().end(); ++iter) {
+      //      std::cout << "passIsolation" << fTauSelection->fTauID->passIsolation(*iter) << std::endl;
       if (fTauSelection->fTauID->passIsolation(*iter)) return false;
     }
+    return true;
   }
 
   const bool TauSelection::Data::selectedTauPassesDiscriminator(std::string discr, double cutPoint) const {
