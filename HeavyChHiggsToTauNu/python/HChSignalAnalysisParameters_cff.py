@@ -437,7 +437,7 @@ def setDataTriggerEfficiency(dataVersion, era):
 # simulated pile up interactions
 # See test/PUtools for tools to generate distributions and links to twiki
 
-def setPileupWeight(dataVersion, pset=vertexWeight, era="Run2011A"):
+def setPileupWeight(dataVersion, pset=vertexWeight, era="Run2011A", suffix=""):
     if dataVersion.isData():
         return
     if dataVersion.isS6():
@@ -448,17 +448,13 @@ def setPileupWeight(dataVersion, pset=vertexWeight, era="Run2011A"):
         raise Exception("No PU reweighting support for anything else than Fall11 S6 scenario at the moment")
     pset.enabled = True
 
-    if era == "Run2011A":
-        dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011A.root"
-        dataPUdistributionLabel = "pileup"
-    elif era == "Run2011B":
-        dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011B.root"
-        dataPUdistributionLabel = "pileup"
+    if era == "Run2011A" or era == "Run2011B":
+        dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData"+era+suffix+".root"
     elif era == "Run2011A+B":
-        dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011.root"
-        dataPUdistributionLabel = "pileup"
+        dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011"+suffix+".root"
     else:
         raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'Run2011A', 'Run2011B', 'Run2011A+B'" % era)
+    dataPUdistributionLabel = "pileup"
 
 # Tau selection
 def forEachTauSelection(function):

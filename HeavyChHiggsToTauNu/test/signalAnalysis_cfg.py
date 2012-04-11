@@ -72,8 +72,7 @@ doJESVariation = False
 
 # Perform the signal analysis with the PU weight variations
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
-doPUWeightVariation = False
-PUWeightVariation = 0.6
+doPUWeightVariation = not False
 
 
 ################################################################################
@@ -478,15 +477,15 @@ if doJESVariation or doSystematics:
 def addPUWeightVariation(name):
     module = getattr(process, name).clone()
     module.Tree.fill = False
-    module.vertexWeight.shiftMean = True
-    module.vertexWeight.shiftMeanAmount = PUWeightVariation
+    module.vertexWeight
+    param.setPileupWeight(dataVersion, pset=module.vertexWeight, era=puweight, suffix="up")
     addAnalysis(process, name+"PUWeightPlus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
 
     module = module.clone()
-    module.vertexWeight.shiftMeanAmount = -PUWeightVariation
+    param.setPileupWeight(dataVersion, pset=module.vertexWeight, era=puweight, suffix="down")
     addAnalysis(process, name+"PUWeightMinus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
