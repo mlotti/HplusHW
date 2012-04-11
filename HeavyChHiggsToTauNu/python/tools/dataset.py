@@ -65,7 +65,7 @@ class WeightedAllEvents:
 # These are obtained with pileupNtuple_cfg.py
 _weightedAllEvents = {
 #    "Run2011A": {
-#        "TTJets_TuneZ2_Fall11": WeightedAllEvents(12345, weighted=1234561., up=1290000., down=1210000.) # FIXME: these numbers are only for an example, to be updated with the real numbers
+#        "TTJets_TuneZ2_Fall11": WeightedAllEvents(unweighted=12345, weighted=1234561., up=1290000., down=1210000.), # FIXME: these numbers are only for an example, to be updated with the real numbers
 #     }
 }
 
