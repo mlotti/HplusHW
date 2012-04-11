@@ -19,7 +19,7 @@ doAllTauIds = False
 doSummerPAS = False # Rtau>0, MET>70
 
 # Scan against electron discriminators
-doAgainstElectronScan = True
+doAgainstElectronScan = False
 
 # Disable Rtau
 doRtau0 = False # Rtau>0, MET>50
@@ -72,7 +72,7 @@ doJESVariation = False
 
 # Perform the signal analysis with the PU weight variations
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
-doPUWeightVariation = not False
+doPUWeightVariation = False
 
 
 ################################################################################
