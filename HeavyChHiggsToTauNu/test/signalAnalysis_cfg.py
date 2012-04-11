@@ -9,7 +9,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 dataVersion="44XmcS6"     # Fall11 MC
 #dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
 
-
 ##########
 # Flags for additional signal analysis modules
 # Perform the signal analysis with all tau ID algorithms in addition
@@ -20,7 +19,7 @@ doAllTauIds = False
 doSummerPAS = False # Rtau>0, MET>70
 
 # Scan against electron discriminators
-doAgainstElectronScan = True
+doAgainstElectronScan = False
 
 # Disable Rtau
 doRtau0 = False # Rtau>0, MET>50
@@ -74,7 +73,6 @@ doJESVariation = False
 # Perform the signal analysis with the PU weight variations
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
 doPUWeightVariation = False
-PUWeightVariation = 0.6
 
 
 ################################################################################
@@ -162,11 +160,13 @@ if applyTriggerScaleFactor and dataVersion.isMC():
     param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
 
 # Set the data scenario for vertex/pileup weighting
+# options: Run2011A, Run2011B, Run2011A+B
 puweight = "Run2011A"
 if len(options.puWeightEra) > 0:
     puweight = options.puWeightEra
-param.setPileupWeightFor2011(dataVersion, era=puweight) # Reweight by true PU distribution 
+param.setPileupWeight(dataVersion, pset=param.vertexWeight, era=puweight) # Reweight by true PU distribution 
 param.setDataTriggerEfficiency(dataVersion, era=puweight)
+print "PU weight era =",puweight
 
 #param.trigger.selectionType = "disabled"
 
@@ -477,15 +477,15 @@ if doJESVariation or doSystematics:
 def addPUWeightVariation(name):
     module = getattr(process, name).clone()
     module.Tree.fill = False
-    module.vertexWeight.shiftMean = True
-    module.vertexWeight.shiftMeanAmount = PUWeightVariation
+    module.vertexWeight
+    param.setPileupWeight(dataVersion, pset=module.vertexWeight, era=puweight, suffix="up")
     addAnalysis(process, name+"PUWeightPlus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
 
     module = module.clone()
-    module.vertexWeight.shiftMeanAmount = -PUWeightVariation
+    param.setPileupWeight(dataVersion, pset=module.vertexWeight, era=puweight, suffix="down")
     addAnalysis(process, name+"PUWeightMinus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
