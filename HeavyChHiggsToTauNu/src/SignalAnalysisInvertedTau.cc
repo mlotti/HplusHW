@@ -400,7 +400,7 @@ namespace HPlus {
    
     if(tauData.getSelectedTaus().size() == 0) return false; // at least one tau candidate
     increment(fTausExistCounter);
-    /*    
+        
     // nprongs
     if (!tauData.selectedTauPassesNProngs()) return false;
     increment(fNprongsAfterTauIDCounter);
@@ -412,7 +412,7 @@ namespace HPlus {
     if (!tauData.selectedTauPassesRtau()) return false;
     increment(fRtauAfterTauIDCounter);
     // now tau ID has been applied
-    */
+   
 
     if(iEvent.isRealData())
       fTriggerEfficiencyScaleFactor.setRun(iEvent.id().run());
