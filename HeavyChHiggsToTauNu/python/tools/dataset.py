@@ -15,6 +15,12 @@ import ROOT
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
+## "Enumeration" of pile-up weight type
+class PileupWeightType:
+    NOMINAL = 0
+    UP = 1
+    DOWN = 2
+
 ## Utility class for handling the weighted number of all MC events
 #
 # Represents values for one dataset
@@ -22,26 +28,37 @@ class WeightedAllEvents:
     ## Constructor
     #
     # \param unweighted   Number of unweighted MC events
-    # \param weighted     Dictionary with data era names as keys, and
-    #                     weighted number of all MC events as values
-    def __init__(self, unweighted, weighted):
+    # \param weighted     Weighted number of all MC events (nominal)
+    # \param up           Weighted number of all MC events, varied upwards (for systematics)
+    # \param down         Weighted number of all MC events, varied downwards (for systematics)
+    def __init__(self, unweighted, weighted, up, down):
         self.unweighted = unweighted
-        self.weighted = weighted
+        self.weighted = {
+            PileupWeightType.NOMINAL: weighted,
+            PileupWeightType.UP: up,
+            PileupWeightType.DOWN: down
+            }
 
     ## Get the weighted number of all MC events
     #
     # \param name        Name of the dataset (used only in a warning message)
     # \param unweighted  Unweighted number of all events (used for a cross check)
-    # \param era         Name of the data era
-    def getWeighted(self, name, unweighted, era):
+    # \param weightType  Type of weight (nominal, up/down varied), one of PileupWeightType members
+    def getWeighted(self, name, unweighted, weightType=PileupWeightType.NOMINAL):
         try:
-            nweighted = self.weighted[era]
+            nweighted = self.weighted[weightType]
         except KeyError:
-            raise Exception("%s: no weighted number of all events specified for data era '%s', see dataset._weightedAllEvents dictionary" % (name, era))
+            raise Exception("Invalid weight type %d, see dataset.PileupWeightType" % weightType)
         if int(unweighted) != int(self.unweighted):
             print "%s: Unweighted all events from analysis %d, unweighted all events from _weightedAllEvents %d, using their ratio for setting the weighted all events" % (name, int(unweighted), int(self.unweighted))
             nweighted = unweighted * nweighted/self.unweighted
+        print nweighted
         return nweighted
+
+    ## \var unweighted
+    # Number of unweighted all MC events
+    ## \var weighted
+    # Dictionary holding the weighted number of all MC events for nominal case, and for up/down variations (for systematics)
 
 ## Number of PU-reweighted all events for skimmed datasets
 #
@@ -172,7 +189,6 @@ _weightedAllEvents = {
         "WZ_TuneZ2_Fall11": WeightedAllEvents(unweighted=4265243, weighted=4314366.796459, up=4312077.477019, down=4314270.014944),
         "ZZ_TuneZ2_Fall11": WeightedAllEvents(unweighted=4191045, weighted=4219867.317119, up=4217725.835095, down=4220813.875245),
     },
-
 }
 
 ## Construct DatasetManager from a list of MultiCRAB directory names.
@@ -1362,17 +1378,30 @@ class Dataset:
 
     ## Update number of all events (for normalization) to a pileup-reweighted value.
     #
-    # \param weight  dataset.WeightedAllEvents object
     # \param era     Data era to use to pick the pile-up-reweighted all
     #                event number (optional, if not given a default
     #                value read from the configinfo is used)
-    def updateNAllEventsToPUWeighted(self, weight, era=None):
+    # \param kwargs  Keyword arguments (forwarded to WeightedAllEvents.getWeighted())
+    def updateNAllEventsToPUWeighted(self, era=None, **kwargs):
+        # Ignore if data
+        if self.isData():
+            return
+
         if era == None:
             era = self.era
         if era == None:
             raise Exception("%s: tried to update number of all events to pile-up reweighted value, but the data era was not set in 'configInfo' nor was given as an argument" % self.getName())
 
-        self.nAllEvents = weight.getWeighted(self.getName(), self.nAllEventsUnweighted, era)
+        try:
+            data = _weightedAllEvents[era]
+        except KeyError:
+            raise Exception("No weighted numbers of all events specified for data era '%s', see dataset._weightedAllEvents dictionary" % era)
+
+        try:
+            self.nAllEvents = data[self.getName()].getWeighted(self.getName(), self.nAllEventsUnweighted, **kwargs)
+        except KeyError:
+            # Just ignore if no weights found for this dataset
+            pass
 
     def getNAllEvents(self):
         return self.nAllEvents
@@ -1956,12 +1985,8 @@ class DatasetManager:
     #
     # Uses the table dataset._weightedAllEvents
     def updateNAllEventsToPUWeighted(self, **kwargs):
-        for name, weight in _weightedAllEvents.iteritems():
-            if not self.hasDataset(name):
-                continue
-
-            dataset = self.getDataset(name)
-            dataset.updateNAllEventsToPUWeighted(weight, **kwargs)
+        for dataset in self.datasets:
+            dataset.updateNAllEventsToPUWeighted(**kwargs)
 
     ## Print dataset information.
     def printInfo(self):
