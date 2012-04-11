@@ -301,10 +301,10 @@ vertexWeight = cms.untracked.PSet(
     vertexSrc = cms.InputTag("goodPrimaryVertices"),
 #    vertexSrc = cms.InputTag("goodPrimaryVertices10"),
     puSummarySrc = cms.InputTag("addPileupInfo"),
-    dataPUdistribution = cms.untracked.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011.root"),
-    dataPUdistributionLabel = cms.untracked.string("pileup"),
-    mcPUdistribution = cms.untracked.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramMCFall11.root"),
-    mcPUdistributionLabel = cms.untracked.string("pileup"),
+    dataPUdistribution = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011.root"),
+    dataPUdistributionLabel = cms.string("pileup"),
+    mcPUdistribution = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramMCFall11.root"),
+    mcPUdistributionLabel = cms.string("pileup"),
     enabled = cms.bool(False),
 )
 
