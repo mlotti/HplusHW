@@ -90,7 +90,7 @@ datasets = {
         "data": {
             "AOD": {
 #                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-E7TeV_Ave23_50ns-v1/AODSIM",
-                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-E7TeV_Ave32_50ns-v1/GEN-SIM-RAW-HLTDEBUG-RECO",
+                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-E7TeV_Ave32_50ns-v2/GEN-SIM-RAW-HLTDEBUG-RECO",
                 "number_of_jobs": 141, # Adjusted for PATtuple file size ; expected output max. 31 MB/file
             },
         },
