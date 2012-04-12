@@ -319,7 +319,7 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
 #
 # \return DatasetManager object
 def getDatasetsFromRootFiles(rootFileList, **kwargs):
-    counters = kwargs.get("counters", "signalAnalysisCounters")
+    counters = kwargs.get("counters", _optionDefaults["counterdir"])
     # Pass the rest of the keyword arguments, except 'counters', to Dataset constructor
     _args = copy.copy(kwargs)
     try:
