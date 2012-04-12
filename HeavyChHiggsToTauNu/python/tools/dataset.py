@@ -7,7 +7,6 @@
 
 import glob, os, sys, re
 import json
-from optparse import OptionParser
 import math
 import copy
 
@@ -257,7 +256,7 @@ def getDatasetsFromMulticrabCfg(**kwargs):
 # \param kwargs       Keyword arguments (see below) 
 # 
 # <b>Keyword arguments</b>
-# \li \a opts         Optional OptionParser object. Should have options added with addOptions() and multicrab.addOptions().
+# \li \a opts         Optional OptionParser object. Should have options added with addOptions().
 # \li \a namePostfix  Postfix for the dataset names (default: '')
 # \li Rest are forwarded to getDatasetsFromRootFiles()
 #
@@ -268,17 +267,13 @@ def getDatasetsFromMulticrabCfg(**kwargs):
 # 'Foo' will be the dataset name)
 def getDatasetsFromCrabDirs(taskdirs, **kwargs):
     _args = copy.copy(kwargs)
-    opts = None
+    inputFile = None
     if "opts" in kwargs:
         opts = kwargs["opts"]
         del _args["opts"]
+        inputFile = opts.input
     else:
-        parser = OptionParser(usage="Usage: %prog [options]")
-        multicrab.addOptions(parser)
-        addOptions(parser)
-        (opts, args) = parser.parse_args()
-    if hasattr(opts, "counterDir"):
-        counters = opts.counterdir
+        inputFile = _optionDefaults["input"]
     postfix = kwargs.get("namePostfix", "")
     try:
         del _args["namePostfix"]
@@ -288,12 +283,12 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
     dlist = []
     noFiles = False
     for d in taskdirs:
-        files = glob.glob(os.path.join(d, "res", opts.input))
+        files = glob.glob(os.path.join(d, "res", inputFile))
         if len(files) > 1:
             raise Exception("Only one file should match the input (%d matched) for task %s" % (len(files), d))
             return 1
         elif len(files) == 0:
-            print >> sys.stderr, "Ignoring dataset %s: no files matched to '%s' in task directory %s" % (d, opts.input, os.path.join(d, "res"))
+            print >> sys.stderr, "Ignoring dataset %s: no files matched to '%s' in task directory %s" % (d, inputFile, os.path.join(d, "res"))
             noFiles = True
             continue
 
@@ -338,16 +333,22 @@ def getDatasetsFromRootFiles(rootFileList, **kwargs):
         datasets.append(dset)
     return datasets
 
+## Default command line options
+_optionDefaults = {
+    "input": "histograms-*.root",
+    "counterdir": "signalAnalysisCounters"
+}
+
 ## Add common dataset options to OptionParser object.
 #
 # \param parser   OptionParser object
 def addOptions(parser):
-    parser.add_option("-i", dest="input", type="string", default="histograms-*.root",
-                      help="Pattern for input root files (note: remember to escape * and ? !) (default: 'histograms-*.root')")
+    parser.add_option("-i", dest="input", type="string", default=_optionDefaults["input"],
+                      help="Pattern for input root files (note: remember to escape * and ? !) (default: '%s')" % _optionDefaults["input"])
     parser.add_option("-f", dest="files", type="string", action="append", default=[],
                       help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
-    parser.add_option("--counterDir", "-c", dest="counterdir", type="string", default="signalAnalysisCounters",
-                      help="TDirectory name containing the counters (default: signalAnalysisCounters")
+    parser.add_option("--counterDir", "-c", dest="counterdir", type="string", default=_optionDefaults["counterdir"],
+                      help="TDirectory name containing the counters (default: %s" % _optionDefaults["counterdir"])
 
 
 ## Represents counter count value with uncertainty.
