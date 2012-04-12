@@ -416,6 +416,8 @@ def setDataTriggerEfficiency(dataVersion, era):
             triggerEfficiencyScaleFactor.mcSelect = "Summer11"
         elif dataVersion.isS6():
             triggerEfficiencyScaleFactor.mcSelect = "Fall11"
+        elif dataVersion.isHighPU():
+	    triggerEfficiencyScaleFactor.mode = "disabled"
         else:
             raise Exception("MC trigger efficencies are available only for Summer11 and Fall11")
     
@@ -444,6 +446,10 @@ def setPileupWeight(dataVersion, pset=vertexWeight, era="Run2011A", suffix=""):
         # Fall11
         pset.mcPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramMCFall11.root"
         pset.mcPUdistributionLabel = "pileup"
+    elif dataVersion.isHighPU():
+	# High PU - disable vertex reweighting
+        pset.enabled = False
+        return
     else:
         raise Exception("No PU reweighting support for anything else than Fall11 S6 scenario at the moment")
     pset.enabled = True
