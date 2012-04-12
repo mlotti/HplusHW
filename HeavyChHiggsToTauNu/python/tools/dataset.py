@@ -69,7 +69,7 @@ class WeightedAllEvents:
 # 4) test/PUtools/calculateWeightedTotalEventCount.py (uses output of 1-3 as input and produces the following code fragment
 
 _weightedAllEvents = {
-    "2011A": {
+    "Run2011A": {
         "TTToHplusBWB_M80_Fall11": WeightedAllEvents(unweighted=218200, weighted=222212.037137, up=221902.723480, down=222062.117878),
         "TTToHplusBWB_M90_Fall11": WeightedAllEvents(unweighted=218050, weighted=222329.037037, up=222279.317313, down=221972.416812),
         "TTToHplusBWB_M100_Fall11": WeightedAllEvents(unweighted=218200, weighted=222212.037137, up=221902.723480, down=222062.117878),
@@ -109,7 +109,7 @@ _weightedAllEvents = {
         "WZ_TuneZ2_Fall11": WeightedAllEvents(unweighted=4265243, weighted=4406721.928127, up=4401780.867118, down=4403806.738003),
         "ZZ_TuneZ2_Fall11": WeightedAllEvents(unweighted=4191045, weighted=4344331.840620, up=4335210.895426, down=4344886.886857),
     },
-    "2011B": {
+    "Run2011B": {
         "TTToHplusBWB_M80_Fall11": WeightedAllEvents(unweighted=218200, weighted=216325.066231, up=217254.616614, down=215493.146064),
         "TTToHplusBWB_M90_Fall11": WeightedAllEvents(unweighted=218050, weighted=216859.944595, up=217180.292362, down=216556.317936),
         "TTToHplusBWB_M100_Fall11": WeightedAllEvents(unweighted=218200, weighted=216325.066231, up=217254.616614, down=215493.146064),
@@ -149,7 +149,7 @@ _weightedAllEvents = {
         "WZ_TuneZ2_Fall11": WeightedAllEvents(unweighted=4265243, weighted=4236720.798188, up=4236658.208119, down=4238992.390341),
         "ZZ_TuneZ2_Fall11": WeightedAllEvents(unweighted=4191045, weighted=4115225.896538, up=4118948.772735, down=4116500.010809),
     },
-    "2011A+B": {
+    "Run2011A+B": {
         "TTToHplusBWB_M80_Fall11": WeightedAllEvents(unweighted=218200, weighted=219013.870316, up=219377.625194, down=218493.470983),
         "TTToHplusBWB_M90_Fall11": WeightedAllEvents(unweighted=218050, weighted=219357.887652, up=219509.256396, down=219030.077434),
         "TTToHplusBWB_M100_Fall11": WeightedAllEvents(unweighted=218200, weighted=219013.870316, up=219377.625194, down=218493.470983),
