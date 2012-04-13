@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff import *
 
 generatorMuonValidation = cms.EDAnalyzer("MuonValidation",
