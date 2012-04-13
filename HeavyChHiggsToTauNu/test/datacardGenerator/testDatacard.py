@@ -5,7 +5,7 @@ MassPoints      = [80,100,120,140,150,155,160]
 Analysis        = "signalAnalysis"
 RootFileName    = "histograms.root"
 ShapeHisto      = "transverseMassAfterDeltaPhi160"
-CounterDir      = Analysis+"Counters/weighted"
+CounterDir      = Analysis+"Counters" # do not put weighted here, it is taken automatically
 Counter         = "deltaPhiTauMET<160"
 ConfigInfoHisto = "configInfo/configinfo"
 
