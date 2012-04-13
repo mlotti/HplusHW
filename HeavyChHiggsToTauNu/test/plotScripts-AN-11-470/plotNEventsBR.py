@@ -66,9 +66,16 @@ def massPoint(br, mass, n_hh, n_hw, n_ww):
             "WW": "WW (t#bar{t} #rightarrow W^{+}bW^{-}#bar{b})",
             "HW": "WH^{#pm} (t#bar{t} #rightarrow W^{+}bH^{-}#bar{b})",
             "HH": "H^{+}H^{-} (t#bar{t} #rightarrow H^{+}bH^{-}#bar{b})"})
-    p.appendPlotObject(histograms.PlotText(x1, 0.6, "m_{H^{#pm}} = %d GeV/c^{2}"%mass, size=17))
-    p.appendPlotObject(histograms.PlotText(x1, 0.55, "#tau_{h}+jets final state", size=17))
-    plots.drawPlot(p, "nevents_ttbar_br_mass%d"%mass, "BR(t#rightarrowH^{+}b)", ylabel="Events")
+    p.appendPlotObject(histograms.PlotText(x1, 0.68, "m_{H^{#pm}} = %d GeV/c^{2}"%mass, size=17))
+    p.appendPlotObject(histograms.PlotText(x1, 0.64, "#tau_{h}+jets final state", size=17))
+
+    opts = {}
+    if mass == 150:
+        opts["ymaxfactor"] = 1.2
+    elif mass == 160:
+        opts["ymaxfactor"] = 1.4
+
+    plots.drawPlot(p, "nevents_ttbar_br_mass%d"%mass, "BR(t#rightarrowH^{+}b)", ylabel="Events", opts=opts)
 
 def createGraph(name, br, func):
     gr = ROOT.TGraph(len(br), array.array("d", br), array.array("d", map(func, br)))
