@@ -5,6 +5,8 @@ import os
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import sort
 
+# data structures for the config file information
+
 class ObservationInput:
     def __init__(self, counterDir, counter, shapeHisto):
 	self.setChannel(1)
