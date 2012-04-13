@@ -209,7 +209,7 @@ Nuisances.add(Nuisance(
                      "signalAnalysisJESMinus03eta02METPlus10"],
     histograms    = [ShapeHisto]
 ))
-  
+
 Nuisances.add(Nuisance(
     id            = "7b",  
     label         = "JES/JER/MET/Rtau effect on mT shape",
@@ -553,7 +553,6 @@ Nuisances.add(Nuisance(
     value         = 0.0043
 ))
 
-
 Nuisances.merge("1","1b")
 Nuisances.merge("1","1c")
 Nuisances.merge("7","7b")
@@ -562,4 +561,3 @@ Nuisances.merge("11","11b")
 Nuisances.merge("15","15b")   
 Nuisances.merge("16","16b")   
 Nuisances.merge("34","34b")   
-

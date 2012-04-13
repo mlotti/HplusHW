@@ -316,7 +316,7 @@ class NuisanceTable:
         return self.nuisances[key]
 
     def merge(self,n1,n2):
-	print
+	print "merging nuisances is not yet implemented"
 
     def reserve(self, ids, comment):
 	for id in ids:

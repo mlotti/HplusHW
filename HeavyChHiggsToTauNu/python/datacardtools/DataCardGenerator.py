@@ -12,11 +12,10 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module,sort
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import sort
 
 class DataCardGenerator:
-    def __init__(self, cfgFileName):
-	config = load_module(cfgFileName)
+    def __init__(self, config):
 	config.DataGroups.Print()
 	config.Nuisances.Print()
 
