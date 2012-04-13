@@ -250,13 +250,18 @@ def doPlots(table, onlyWjets, mcEvents, normalize, lumi):
             ylabel = "Data"
         ylabel += " events"
         p.frame.GetYaxis().SetTitle(ylabel)
-        for irow in xrange(nrows):
+        step = 1
+        start = 0
+        if onlyWjets:
+            start = 4
+            step = 5
+        for irow in xrange(start, nrows, step):
             p.frame.GetXaxis().SetBinLabel(irow+1, "%d"%(irow+1))
 
         xmin = p.frame.GetXaxis().GetXmin()
         xmax = p.frame.GetXaxis().GetXmax()
 
-        leg = histograms.moveLegend(histograms.createLegend(), dx=-0.05, dy=-0.6, dh=-0.15)
+        leg = histograms.moveLegend(histograms.createLegend(), dx=-0.07, dy=-0.6, dh=-0.15)
         leg.AddEntry(h, "Trial values", "P")
 
         def createLine(val, st=1, col=ROOT.kRed):
@@ -283,7 +288,7 @@ def doPlots(table, onlyWjets, mcEvents, normalize, lumi):
 
         p.legend = leg
 
-        p.appendPlotObject(histograms.PlotText(0.5, 0.2, label, size=20))
+        p.appendPlotObject(histograms.PlotText(0.48, 0.2, label, size=20))
         p.draw()
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
