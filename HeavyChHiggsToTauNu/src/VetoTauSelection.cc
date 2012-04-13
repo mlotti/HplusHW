@@ -49,6 +49,7 @@ namespace HPlus {
     fFakeTauIdentifier(eventWeight, "VetoTauSelection"),
     fEventWeight(eventWeight),
     fAllEventsCounter(eventCounter.addSubCounter("VetoTauSelection","All events")),
+    //    fVetoTauCandidatesCounter(eventCounter.addSubCounter("VetoTauSelection","Veto tau candidates"));
     fVetoTausSelectedCounter(eventCounter.addSubCounter("VetoTauSelection","Veto taus found")),
     fEventsCompatibleWithZMassCounter(eventCounter.addSubCounter("VetoTauSelection","Z mass compatible ditau found")),
     fSelectedEventsCounter(eventCounter.addSubCounter("VetoTauSelection","Selected events")) {
@@ -73,6 +74,7 @@ namespace HPlus {
     hSelectedFakeTauByPhi = makeTH<TH1F>(myDir, "SelectedFakeTauByPhi", "SelectedFakeTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
     hSelectedGenuineTauDiTauMass = makeTH<TH1F>(myDir, "SelectedGenuineTauDitauMass", "SelectedGenuineTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
     hSelectedFakeTauDiTauMass = makeTH<TH1F>(myDir, "SelectedFakeTauDitauMass", "SelectedFakeTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
+    hSelectedTaus= makeTH<TH1F>(myDir, "SelectedTausPerEvent", "SelectedTausPerEvent", 20, 0, 20);
   }
 
   VetoTauSelection::~VetoTauSelection() {}
@@ -119,6 +121,7 @@ namespace HPlus {
 	for (size_t i=0; i < genParticles->size(); ++i){  
 	  const reco::Candidate & p = (*genParticles)[i];
 	  int id = p.pdgId();
+      
 	  if ( abs(id) == 15 ) {
 	    int numberOfTauMothers = p.numberOfMothers(); 
 	    for (int im=0; im < numberOfTauMothers; ++im){  
@@ -132,8 +135,7 @@ namespace HPlus {
 		tauFromW = true;
 	      }
 	    }
-	  }
-	  //	  std::cout << " tauFromW " << tauFromW << " tauFromHiggs " << tauFromHiggs << std::endl;	  
+	  }	  
 	  
 	  for (edm::PtrVector<pat::Tau>::iterator it = myVetoTauCandidates.begin(); it != myVetoTauCandidates.end(); ++it) {
 	    double deltaR = reco::deltaR( *tau, **it);
@@ -147,10 +149,10 @@ namespace HPlus {
 
       
  
-      /*     
+      /*           
       for (edm::PtrVector<pat::Tau>::iterator it = myTaus->ptrVector().begin(); it != myTaus->ptrVector().end(); ++it) {
 	if (reco::deltaR(*selectedTau, **it) < 0.4 ) continue;        
-	
+	bool tauCandFromW = false;	
 	for (size_t i=0; i < genParticles->size(); ++i){
 	  const reco::Candidate & p = (*genParticles)[i];
 	  int id = p.pdgId();
@@ -160,13 +162,14 @@ namespace HPlus {
 	  //	  std::cout << " b quarks " << id <<  " idHiggsSide " <<   idHiggsSide << std::endl;
 	  //	       double deltaR = ROOT::Math::VectorUtil::DeltaR(Jetb->p4(),p.p4() );
 	  double deltaR = reco::deltaR(p.p4(), **it);	
-	  //	  if ( deltaR < 0.4) tauCandFromW = true;
-	  //	  }
+	  if ( deltaR < 0.4) tauCandFromW = true;
+	  // }
 	} 
+    std::cout << " tauCandFromW " << tauCandFromW << std::endl; 
       }
-      */
+      */          
     }
-    //    std::cout << " tauCandFromW " << tauCandFromW << std::endl;
+
 
 
 
@@ -174,6 +177,7 @@ namespace HPlus {
 
     // Count how many taus (excluding the selected tau) are available in the event
     for (edm::PtrVector<pat::Tau>::iterator it = myVetoTauCandidates.begin(); it != myVetoTauCandidates.end(); ++it) {
+      //     increment(fVetoTauCandidatesCounter);
       hTauCandAllPt->Fill((*it)->pt(), fEventWeight.getWeight()); 
       FakeTauIdentifier::MCSelectedTauMatchType myMatch = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
       if (myMatch == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
@@ -193,6 +197,7 @@ namespace HPlus {
     //    std::cout << " myTauData.passedEvent())  " << myTauData.passedEvent()  << std::endl;
     
     // Loop over the selected veto taus
+    double numberOfTaus = 0;
     bool myVetoStatus = false;
     TLorentzVector mySelectedTauMomentum;
     mySelectedTauMomentum.SetXYZM(selectedTau->px(), selectedTau->py(), selectedTau->pz(), 1.777);
@@ -228,7 +233,11 @@ namespace HPlus {
       myVetoTauMomentum += mySelectedTauMomentum;
       double myDitauMass = myVetoTauMomentum.M();
       // Check if ditau mass is compatible with Z mass
-      if (myDitauMass <  100 ) 	myVetoStatus = true;
+      if (myDitauMass <  100 ) 	{
+	myVetoStatus = true;
+	numberOfTaus++;
+      }
+      
       /*
       if (TMath::Abs(myDitauMass - fZMass) < fZMassWindow) {
 	myVetoStatus = true;
@@ -241,7 +250,7 @@ namespace HPlus {
       }
     }
     //    if (myTauData.passedEvent()) myVetoStatus = true;
-
+    hSelectedTaus->Fill(numberOfTaus, fEventWeight.getWeight());
     // Return the end result
     if (myVetoStatus)
       increment(fEventsCompatibleWithZMassCounter);

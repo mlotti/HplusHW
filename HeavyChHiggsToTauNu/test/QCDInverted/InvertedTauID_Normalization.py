@@ -41,6 +41,9 @@ def main(argv):
 	usage()
 
     dirs.append(sys.argv[1])
+
+
+
     
     # Create all datasets from a multicrab task
     # datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)

@@ -58,6 +58,7 @@ namespace HPlus {
     EventWeight& fEventWeight;
 
     Count fAllEventsCounter;
+    //    Count fVetoTauCandidatesCounter;
     Count fVetoTausSelectedCounter;
     Count fEventsCompatibleWithZMassCounter;
     Count fSelectedEventsCounter;
@@ -75,6 +76,7 @@ namespace HPlus {
     TH1* hSelectedFakeTauByPhi;
     TH1* hSelectedGenuineTauDiTauMass;
     TH1* hSelectedFakeTauDiTauMass;
+    TH1* hSelectedTaus;
     
     edm::PtrVector<pat::Tau> fSelectedVetoTaus;
   };

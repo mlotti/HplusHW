@@ -170,7 +170,7 @@ MET = cms.untracked.PSet(
 
 bTagging = cms.untracked.PSet(
     discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
-    discriminatorCut = cms.untracked.double(1.7),
+    discriminatorCut = cms.untracked.double(3.3),
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(1),
