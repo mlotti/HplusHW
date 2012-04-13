@@ -27,7 +27,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters/weighted"
+counters = analysis+"Counters"
 
 def Linear(x,par):
     return par[0]*x[0] + par[1]
