@@ -14,6 +14,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as Pa
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module,sort
 
+# main class for generating the datacards from a given cfg file
+
 class DataCardGenerator:
     def __init__(self, cfgFileName):
 	config = load_module(cfgFileName)

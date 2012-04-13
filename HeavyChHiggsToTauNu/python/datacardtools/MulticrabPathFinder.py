@@ -6,6 +6,9 @@ import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import execute
         
+# class to identify multicrab dirs from a given directory. Identifies separately the signal, ewk
+# QCDfact and QCDinv dirs. If multiple directories are found, the latest is taken.
+
 class MulticrabPathFinder:
     def __init__(self, path):
         multicrabpaths = self.scan(path)
