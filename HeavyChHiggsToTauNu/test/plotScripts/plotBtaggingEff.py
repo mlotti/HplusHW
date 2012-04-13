@@ -20,12 +20,13 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters/weighted"
+counters = analysis+"Counters"
 
 treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup")
 
 def main():
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()
 
     plots.mergeRenameReorderForDataMC(datasets)
@@ -115,14 +116,14 @@ def plot(datasets):
 #    noTaggingLight = jetNumCut + "&&abs(jets_flavour) != 5"
     btaggingLight = noTaggingLight + "&&jets_btag > 3.3" 
     noTaggingMet = jetNumCut + "&&met_p4.Et() > 50" + "&&abs(jets_flavour)==5"    
-    btaggingMet = noTaggingMet + "&&jets_btag > 1.7" 
+    btaggingMet = noTaggingMet + "&&jets_btag > 3.3" 
 
 
 
 ###########################################
     
-    hpt = plots.DataMCPlot(datasets, treeDraw.clone(varexp="jets_p4.Et()>>dist(25,0,500)", selection=noTaggingLight))
-    hptb = plots.DataMCPlot(datasets, treeDraw.clone(varexp="jets_p4.Et()>>dist(25,0,500)", selection=btaggingLight))
+    hpt = plots.DataMCPlot(datasets, treeDraw.clone(varexp="jets_p4.Et()>>dist(25,0,500)", selection=noTagging))
+    hptb = plots.DataMCPlot(datasets, treeDraw.clone(varexp="jets_p4.Et()>>dist(25,0,500)", selection=btagging))
     
     hptQ = plots.DataMCPlot(datasets, treeDraw.clone(varexp="jets_p4.Et()>>dist(25,0,500)", selection=noTaggingLight))
     hptbQ = plots.DataMCPlot(datasets, treeDraw.clone(varexp="jets_p4.Et()>>dist(25,0,500)", selection=btaggingLight))
@@ -137,7 +138,7 @@ def plot(datasets):
 
 
     canvas9 = ROOT.TCanvas("canvas9","",500,500)
-#    canvas3.SetLogy()
+    canvas9.SetLogy()
 #    hmt.SetMaximum(3.0)
     hpt120.SetMarkerColor(2)
     hpt120.SetMarkerSize(1)
@@ -174,7 +175,7 @@ def plot(datasets):
 
 
     canvas3 = ROOT.TCanvas("canvas3","",500,500)
-#    canvas3.SetLogy()
+    canvas3.SetLogy()
 #    hmt.SetMaximum(3.0)
     hpt120_btag.SetMarkerColor(2)
     hpt120_btag.SetMarkerSize(1)
@@ -249,8 +250,9 @@ def plot(datasets):
     hpttt_btag.SetName("btagEfftt_pt")
 
     canvas5 = ROOT.TCanvas("canvas5","",500,500)
-#    canvas5.SetLogy()
-    hpt120_btag.SetMaximum(1.5)
+    canvas5.SetLogy()
+    hpt120_btag.SetMaximum(2.0)
+    hpt120_btag.SetMinimum(0.1)
     hpt120_btag.SetMarkerColor(2)
     hpt120_btag.SetMarkerSize(1)
     hpt120_btag.SetMarkerStyle(21)
@@ -287,64 +289,68 @@ def plot(datasets):
 #    data_btag.GetYaxis().SetTitleOffset(1.5)
     hpt120_btag.GetXaxis().SetTitle("E_{T}^{jet} (GeV)")
 
-    tex1 = ROOT.TLatex(0.25,0.8,"m_{H^{#pm}} = 120 GeV/c^{2}")
+    tex1 = ROOT.TLatex(0.25,0.5,"m_{H^{#pm}} = 120 GeV/c^{2}")
     tex1.SetNDC()
     tex1.SetTextSize(20)
     tex1.Draw()    
-    marker1 = ROOT.TMarker(0.22,0.815,hpt120_btag.GetMarkerStyle())
+    marker1 = ROOT.TMarker(0.22,0.515,hpt120_btag.GetMarkerStyle())
     marker1.SetNDC()
     marker1.SetMarkerColor(hpt120_btag.GetMarkerColor())
     marker1.SetMarkerSize(0.9*hpt120_btag.GetMarkerSize())
     marker1.Draw()
     
-    tex2 = ROOT.TLatex(0.25,0.75,"m_{H^{#pm}} = 80 GeV/c^{2}") 
+    tex2 = ROOT.TLatex(0.25,0.45,"m_{H^{#pm}} = 80 GeV/c^{2}") 
     tex2.SetNDC()
     tex2.SetTextSize(20)
     tex2.Draw()    
-    marker2 = ROOT.TMarker(0.22,0.755,hpt80_btag.GetMarkerStyle())
+    marker2 = ROOT.TMarker(0.22,0.455,hpt80_btag.GetMarkerStyle())
     marker2.SetNDC()
     marker2.SetMarkerColor(hpt80_btag.GetMarkerColor())
     marker2.SetMarkerSize(0.9*hpt80_btag.GetMarkerSize())
     marker2.Draw()
     
-    tex3 = ROOT.TLatex(0.25,0.7,"m_{H^{#pm}} = 160 GeV/c^{2}") 
+    tex3 = ROOT.TLatex(0.25,0.4,"m_{H^{#pm}} = 160 GeV/c^{2}") 
     tex3.SetNDC()
     tex3.SetTextSize(20)
     tex3.Draw()    
-    marker3 = ROOT.TMarker(0.22,0.715,hpt160_btag.GetMarkerStyle())
+    marker3 = ROOT.TMarker(0.22,0.415,hpt160_btag.GetMarkerStyle())
     marker3.SetNDC()
     marker3.SetMarkerColor(hpt160_btag.GetMarkerColor())
     marker3.SetMarkerSize(0.9*hpt160_btag.GetMarkerSize())
     marker3.Draw()
 
     
-    tex4 = ROOT.TLatex(0.25,0.65,"tt") 
+    tex4 = ROOT.TLatex(0.25,0.35,"tt") 
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()    
-    marker4 = ROOT.TMarker(0.22,0.655,hpttt_btag.GetMarkerStyle())
+    marker4 = ROOT.TMarker(0.22,0.355,hpttt_btag.GetMarkerStyle())
     marker4.SetNDC()
     marker4.SetMarkerColor(hpttt_btag.GetMarkerColor())
     marker4.SetMarkerSize(0.9*hpttt_btag.GetMarkerSize())
     marker4.Draw()
-
+    
+    tex9 = ROOT.TLatex(0.2,0.85,"Discriminator > 3.3 ")
+    tex9.SetNDC()
+    tex9.SetTextSize(20)
+    tex9.Draw() 
     
     tex5 = ROOT.TLatex(0.2,0.95,"7 TeV                        CMS Preliminary ")
     tex5.SetNDC()
     tex5.SetTextSize(20)
     tex5.Draw()        
-    canvas5.Print("btagEff_pt_mH.png")
+    canvas5.Print("btagEff33_pt_mH.png")
 
 
     
 ##################################################
-    #  Higgs mass comparison b jets
+    #  Higgs mass comparison Q jets
    
     hpt120Q = hptQ.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto().Clone("TTToHplusBWB_M120")
     hpt120Q_btag = hptbQ.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto()
 
     canvas9b = ROOT.TCanvas("canvas9b","",500,500)
-#    canvas3.SetLogy()
+    canvas9b.SetLogy()
 #    hmt.SetMaximum(3.0)
     hpt120Q.SetMarkerColor(2)
     hpt120Q.SetMarkerSize(1)
@@ -384,9 +390,24 @@ def plot(datasets):
     hptttQ_btag.Divide(hptttQ)
     hptttQ_btag.SetName("btagEffttQ_pt")
 
+
+    hptWjetQ = hptQ.histoMgr.getHisto("WJets").getRootHisto().Clone("WJets")
+    hptWjetQ_btag = hptbQ.histoMgr.getHisto("WJets").getRootHisto()
+    # tagged et / et 
+    hptWjetQ_btag.Divide(hptWjetQ)
+    hptWjetQ_btag.SetName("btagEffWjetQ_pt")
+
+    hptqcdQ = hptQ.histoMgr.getHisto("QCD").getRootHisto().Clone("QCD")
+    hptqcdQ_btag = hptbQ.histoMgr.getHisto("QCD").getRootHisto()
+    # tagged et / et 
+    hptqcdQ_btag.Divide(hptqcdQ)
+    hptqcdQ_btag.SetName("btagEffqcdQ_pt")
+
+    
     canvas5q = ROOT.TCanvas("canvas5q","",500,500)
-#    canvas5q.SetLogy()
-    hpt120Q_btag.SetMaximum(1.5)
+    canvas5q.SetLogy()
+    hpt120Q_btag.SetMaximum(0.5)
+    hpt120Q_btag.SetMinimum(0.001)
     hpt120Q_btag.SetMarkerColor(2)
     hpt120Q_btag.SetMarkerSize(1)
     hpt120Q_btag.SetMarkerStyle(21)
@@ -400,7 +421,7 @@ def plot(datasets):
     hpt80Q_btag.SetLineStyle(1)
     hpt80Q_btag.SetLineColor(4)
     hpt80Q_btag.SetLineWidth(1)
-    hpt80Q_btag.Draw("same")
+#    hpt80Q_btag.Draw("same")
 
     hpt160Q_btag.SetMarkerColor(7)
     hpt160Q_btag.SetMarkerSize(1)
@@ -408,7 +429,7 @@ def plot(datasets):
     hpt160Q_btag.SetLineStyle(1)
     hpt160Q_btag.SetLineColor(7)
     hpt160Q_btag.SetLineWidth(1)
-    hpt160Q_btag.Draw("same")
+#    hpt160Q_btag.Draw("same")
     
     hptttQ_btag.SetMarkerColor(6)
     hptttQ_btag.SetMarkerSize(1)
@@ -417,59 +438,101 @@ def plot(datasets):
     hptttQ_btag.SetLineColor(6)
     hptttQ_btag.SetLineWidth(1)
     hptttQ_btag.Draw("same")
+
+    hptWjetQ_btag.SetMarkerColor(4)
+    hptWjetQ_btag.SetMarkerSize(1)
+    hptWjetQ_btag.SetMarkerStyle(22)
+    hptWjetQ_btag.SetLineStyle(1)
+    hptWjetQ_btag.SetLineColor(4)
+    hptWjetQ_btag.SetLineWidth(1)
+    hptWjetQ_btag.Draw("same")
+
+    hptqcdQ_btag.SetMarkerColor(1)
+    hptqcdQ_btag.SetMarkerSize(1)
+    hptqcdQ_btag.SetMarkerStyle(25)
+    hptqcdQ_btag.SetLineStyle(1)
+    hptqcdQ_btag.SetLineColor(1)
+    hptqcdQ_btag.SetLineWidth(1)
+    hptqcdQ_btag.Draw("same")
     
-    hpt120Q_btag.GetYaxis().SetTitle("Miss-tagging efficiency")
+    
+    hpt120Q_btag.GetYaxis().SetTitle("B-tagging efficiency")
 #    hmt.GetYaxis().SetTitleSize(20.0)
 #    data_btag.GetYaxis().SetTitleOffset(1.5)
     hpt120Q_btag.GetXaxis().SetTitle("E_{T}^{jet} (GeV)")
 
-    tex1 = ROOT.TLatex(0.25,0.8,"m_{H^{#pm}} = 120 GeV/c^{2}")
+    tex1 = ROOT.TLatex(0.25,0.9,"m_{H^{#pm}} = 120 GeV/c^{2}")
     tex1.SetNDC()
     tex1.SetTextSize(20)
     tex1.Draw()    
-    marker1 = ROOT.TMarker(0.22,0.815,hpt120Q_btag.GetMarkerStyle())
+    marker1 = ROOT.TMarker(0.22,0.915,hpt120Q_btag.GetMarkerStyle())
     marker1.SetNDC()
     marker1.SetMarkerColor(hpt120Q_btag.GetMarkerColor())
     marker1.SetMarkerSize(0.9*hpt120Q_btag.GetMarkerSize())
     marker1.Draw()
     
-    tex2 = ROOT.TLatex(0.25,0.75,"m_{H^{#pm}} = 80 GeV/c^{2}") 
+    tex2 = ROOT.TLatex(0.25,0.55,"m_{H^{#pm}} = 80 GeV/c^{2}") 
     tex2.SetNDC()
     tex2.SetTextSize(20)
-    tex2.Draw()    
-    marker2 = ROOT.TMarker(0.22,0.755,hpt80Q_btag.GetMarkerStyle())
+#    tex2.Draw()    
+    marker2 = ROOT.TMarker(0.22,0.555,hpt80Q_btag.GetMarkerStyle())
     marker2.SetNDC()
     marker2.SetMarkerColor(hpt80Q_btag.GetMarkerColor())
     marker2.SetMarkerSize(0.9*hpt80Q_btag.GetMarkerSize())
-    marker2.Draw()
+#    marker2.Draw()
     
-    tex3 = ROOT.TLatex(0.25,0.7,"m_{H^{#pm}} = 160 GeV/c^{2}") 
+    tex3 = ROOT.TLatex(0.25,0.8,"m_{H^{#pm}} = 160 GeV/c^{2}") 
     tex3.SetNDC()
     tex3.SetTextSize(20)
-    tex3.Draw()    
-    marker3 = ROOT.TMarker(0.22,0.715,hpt160Q_btag.GetMarkerStyle())
+#    tex3.Draw()    
+    marker3 = ROOT.TMarker(0.22,0.815,hpt160Q_btag.GetMarkerStyle())
     marker3.SetNDC()
     marker3.SetMarkerColor(hpt160Q_btag.GetMarkerColor())
     marker3.SetMarkerSize(0.9*hpt160Q_btag.GetMarkerSize())
-    marker3.Draw()
+#    marker3.Draw()
 
     
-    tex4 = ROOT.TLatex(0.25,0.65,"tt") 
+    tex4 = ROOT.TLatex(0.25,0.85,"tt") 
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()    
-    marker4 = ROOT.TMarker(0.22,0.655,hptttQ_btag.GetMarkerStyle())
+    marker4 = ROOT.TMarker(0.22,0.855,hptttQ_btag.GetMarkerStyle())
     marker4.SetNDC()
     marker4.SetMarkerColor(hptttQ_btag.GetMarkerColor())
     marker4.SetMarkerSize(0.9*hptttQ_btag.GetMarkerSize())
     marker4.Draw()
 
-    
-    tex5 = ROOT.TLatex(0.2,0.95,"7 TeV                        CMS Preliminary ")
+    tex5 = ROOT.TLatex(0.25,0.8,"Wjets") 
     tex5.SetNDC()
     tex5.SetTextSize(20)
-    tex5.Draw()        
-    canvas5q.Print("QtagEff_pt_mH.png")
+    tex5.Draw()    
+    marker5 = ROOT.TMarker(0.22,0.815,hptWjetQ_btag.GetMarkerStyle())
+    marker5.SetNDC()
+    marker5.SetMarkerColor(hptWjetQ_btag.GetMarkerColor())
+    marker5.SetMarkerSize(0.9*hptWjetQ_btag.GetMarkerSize())
+    marker5.Draw()
+
+    tex8 = ROOT.TLatex(0.25,0.75,"QCD") 
+    tex8.SetNDC()
+    tex8.SetTextSize(20)
+    tex8.Draw()    
+    marker8 = ROOT.TMarker(0.22,0.757,hptqcdQ_btag.GetMarkerStyle())
+    marker8.SetNDC()
+    marker8.SetMarkerColor(hptqcdQ_btag.GetMarkerColor())
+    marker8.SetMarkerSize(0.9*hptqcdQ_btag.GetMarkerSize())
+    marker8.Draw()
+    
+    tex7 = ROOT.TLatex(0.2,0.95,"7 TeV                        CMS Preliminary ")
+    tex7.SetNDC()
+    tex7.SetTextSize(20)
+    tex7.Draw()
+
+
+    tex9 = ROOT.TLatex(0.3,0.3,"Discriminator > 3.3 ")
+    tex9.SetNDC()
+    tex9.SetTextSize(20)
+    tex9.Draw() 
+    canvas5q.Print("QtagEff33_pt_mH.png")
 
 
     
@@ -514,10 +577,23 @@ def plot(datasets):
     # tagged et / et 
     hetatt_btag.Divide(hetatt)
     hetatt_btag.SetName("btagEfftt_eta")
+    
+    hetaWjet = heta.histoMgr.getHisto("WJets").getRootHisto().Clone("WJets")
+    hetaWjet_btag = hetab.histoMgr.getHisto("WJets").getRootHisto()
+    # tagged et / et 
+    hetaWjet_btag.Divide(hetaWjet)
+    hetaWjet_btag.SetName("btagEffWjet_eta")
+
+    hetaqcd = heta.histoMgr.getHisto("QCD").getRootHisto().Clone("QCD")
+    hetaqcd_btag = hetab.histoMgr.getHisto("QCD").getRootHisto()
+    # tagged et / et 
+    hetaqcd_btag.Divide(hetaqcd)
+    hetaqcd_btag.SetName("btagEffqcd_eta")
 
     canvas5a = ROOT.TCanvas("canvas5a","",500,500)
-#    canvas5.SetLogy()
-    heta120_btag.SetMaximum(0.7)
+    canvas5a.SetLogy()
+    heta120_btag.SetMaximum(2.0)
+    heta120_btag.SetMinimum(0.1)
     heta120_btag.SetMarkerColor(2)
     heta120_btag.SetMarkerSize(1)
     heta120_btag.SetMarkerStyle(21)
@@ -548,6 +624,23 @@ def plot(datasets):
     hetatt_btag.SetLineColor(6)
     hetatt_btag.SetLineWidth(1)
     hetatt_btag.Draw("same")
+    
+    hetaWjet_btag.SetMarkerColor(4)
+    hetaWjet_btag.SetMarkerSize(1)
+    hetaWjet_btag.SetMarkerStyle(22)
+    hetaWjet_btag.SetLineStyle(1)
+    hetaWjet_btag.SetLineColor(4)
+    hetaWjet_btag.SetLineWidth(1)
+#    hetaWjet_btag.Draw("same")
+
+
+    hetaqcd_btag.SetMarkerColor(1)
+    hetaqcd_btag.SetMarkerSize(1)
+    hetaqcd_btag.SetMarkerStyle(25)
+    hetaqcd_btag.SetLineStyle(1)
+    hetaqcd_btag.SetLineColor(1)
+    hetaqcd_btag.SetLineWidth(1)
+#    hetaqcd_btag.Draw("same")
     
     heta120_btag.GetYaxis().SetTitle("B-tagging efficiency")
 #    hmt.GetYaxis().SetTitleSize(20.0)
@@ -595,12 +688,36 @@ def plot(datasets):
     marker4.SetMarkerSize(0.9*hetatt_btag.GetMarkerSize())
     marker4.Draw()
 
+    tex7 = ROOT.TLatex(0.25,0.8,"Wjet") 
+    tex7.SetNDC()
+    tex7.SetTextSize(20)
+#    tex7.Draw()    
+    marker7 = ROOT.TMarker(0.22,0.815,hetaWjet_btag.GetMarkerStyle())
+    marker7.SetNDC()
+    marker7.SetMarkerColor(hetaWjet_btag.GetMarkerColor())
+    marker7.SetMarkerSize(0.9*hetaWjet_btag.GetMarkerSize())
+#    marker7.Draw()
+    
+    tex8 = ROOT.TLatex(0.25,0.75,"QCD") 
+    tex8.SetNDC()
+    tex8.SetTextSize(20)
+#    tex8.Draw()    
+    marker8 = ROOT.TMarker(0.22,0.755,hetaqcd_btag.GetMarkerStyle())
+    marker8.SetNDC()
+    marker8.SetMarkerColor(hetaqcd_btag.GetMarkerColor())
+    marker8.SetMarkerSize(0.9*hetaqcd_btag.GetMarkerSize())
+#    marker8.Draw()
+
+    tex9 = ROOT.TLatex(0.4,0.3,"Discriminator > 3.3 ")
+    tex9.SetNDC()
+    tex9.SetTextSize(20)
+    tex9.Draw()
     
     tex5 = ROOT.TLatex(0.2,0.95,"7 TeV                        CMS Preliminary ")
     tex5.SetNDC()
     tex5.SetTextSize(20)
     tex5.Draw()        
-    canvas5a.Print("btagEff_eta_mH.png")
+    canvas5a.Print("btagEff33_eta_mH.png")
 
 #######################################################################
     #  Higgs mass comparison light jets
@@ -630,10 +747,23 @@ def plot(datasets):
     # tagged et / et 
     hetattQ_btag.Divide(hetattQ)
     hetattQ_btag.SetName("btagEffttQ_eta")
+    
+    hetawjetQ = hetaQ.histoMgr.getHisto("WJets").getRootHisto().Clone("WJets")
+    hetawjetQ_btag = hetabQ.histoMgr.getHisto("WJets").getRootHisto()
+    # tagged et / et 
+    hetawjetQ_btag.Divide(hetawjetQ)
+    hetawjetQ_btag.SetName("btagEffwjet_eta")
 
+    hetaqcdQ = hetaQ.histoMgr.getHisto("QCD").getRootHisto().Clone("QCD")
+    hetaqcdQ_btag = hetabQ.histoMgr.getHisto("QCD").getRootHisto()
+    # tagged et / et 
+    hetaqcdQ_btag.Divide(hetaqcdQ)
+    hetaqcdQ_btag.SetName("btagEffqcd_eta")
+
+    
     canvas5aq = ROOT.TCanvas("canvas5aq","",500,500)
-#    canvas5.SetLogy()
-    heta120Q_btag.SetMaximum(0.7)
+    canvas5aq.SetLogy()
+    heta120Q_btag.SetMinimum(0.001)
     heta120Q_btag.SetMarkerColor(2)
     heta120Q_btag.SetMarkerSize(1)
     heta120Q_btag.SetMarkerStyle(21)
@@ -647,7 +777,7 @@ def plot(datasets):
     heta80Q_btag.SetLineStyle(1)
     heta80Q_btag.SetLineColor(4)
     heta80Q_btag.SetLineWidth(1)
-    heta80Q_btag.Draw("same")
+#    heta80Q_btag.Draw("same")
 
     heta160Q_btag.SetMarkerColor(7)
     heta160Q_btag.SetMarkerSize(1)
@@ -655,7 +785,7 @@ def plot(datasets):
     heta160Q_btag.SetLineStyle(1)
     heta160Q_btag.SetLineColor(7)
     heta160Q_btag.SetLineWidth(1)
-    heta160Q_btag.Draw("same")
+#    heta160Q_btag.Draw("same")
     
     hetattQ_btag.SetMarkerColor(6)
     hetattQ_btag.SetMarkerSize(1)
@@ -665,7 +795,23 @@ def plot(datasets):
     hetattQ_btag.SetLineWidth(1)
     hetattQ_btag.Draw("same")
     
-    heta120Q_btag.GetYaxis().SetTitle("Miss-tagging efficiency")
+    hetawjetQ_btag.SetMarkerColor(4)
+    hetawjetQ_btag.SetMarkerSize(1)
+    hetawjetQ_btag.SetMarkerStyle(22)
+    hetawjetQ_btag.SetLineStyle(1)
+    hetawjetQ_btag.SetLineColor(4)
+    hetawjetQ_btag.SetLineWidth(1)
+    hetawjetQ_btag.Draw("same")
+
+    hetaqcdQ_btag.SetMarkerColor(1)
+    hetaqcdQ_btag.SetMarkerSize(1)
+    hetaqcdQ_btag.SetMarkerStyle(25)
+    hetaqcdQ_btag.SetLineStyle(1)
+    hetaqcdQ_btag.SetLineColor(1)
+    hetaqcdQ_btag.SetLineWidth(1)
+    hetaqcdQ_btag.Draw("same")
+    
+    heta120Q_btag.GetYaxis().SetTitle("B-tagging efficiency")
 #    hmt.GetYaxis().SetTitleSize(20.0)
 #    data_btag.GetYaxis().SetTitleOffset(1.5)
     heta120Q_btag.GetXaxis().SetTitle("#eta^{jet}")
@@ -683,40 +829,65 @@ def plot(datasets):
     tex2 = ROOT.TLatex(0.25,0.85,"m_{H^{#pm}} = 80 GeV/c^{2}") 
     tex2.SetNDC()
     tex2.SetTextSize(20)
-    tex2.Draw()    
+#    tex2.Draw()    
     marker2 = ROOT.TMarker(0.22,0.855,heta80Q_btag.GetMarkerStyle())
     marker2.SetNDC()
     marker2.SetMarkerColor(heta80Q_btag.GetMarkerColor())
     marker2.SetMarkerSize(0.9*heta80Q_btag.GetMarkerSize())
-    marker2.Draw()
+#    marker2.Draw()
     
     tex3 = ROOT.TLatex(0.25,0.8,"m_{H^{#pm}} = 160 GeV/c^{2}") 
     tex3.SetNDC()
     tex3.SetTextSize(20)
-    tex3.Draw()    
+#    tex3.Draw()    
     marker3 = ROOT.TMarker(0.22,0.815,heta160Q_btag.GetMarkerStyle())
     marker3.SetNDC()
     marker3.SetMarkerColor(heta160Q_btag.GetMarkerColor())
     marker3.SetMarkerSize(0.9*heta160Q_btag.GetMarkerSize())
-    marker3.Draw()
+#    marker3.Draw()
 
     
-    tex4 = ROOT.TLatex(0.25,0.75,"tt") 
+    tex4 = ROOT.TLatex(0.25,0.85,"tt") 
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()    
-    marker4 = ROOT.TMarker(0.22,0.755,hetattQ_btag.GetMarkerStyle())
+    marker4 = ROOT.TMarker(0.22,0.855,hetattQ_btag.GetMarkerStyle())
     marker4.SetNDC()
     marker4.SetMarkerColor(hetattQ_btag.GetMarkerColor())
     marker4.SetMarkerSize(0.9*hetattQ_btag.GetMarkerSize())
     marker4.Draw()
+    
+    tex6 = ROOT.TLatex(0.25,0.8,"Wjets") 
+    tex6.SetNDC()
+    tex6.SetTextSize(20)
+    tex6.Draw()    
+    marker6 = ROOT.TMarker(0.22,0.815,hetawjetQ_btag.GetMarkerStyle())
+    marker6.SetNDC()
+    marker6.SetMarkerColor(hetawjetQ_btag.GetMarkerColor())
+    marker6.SetMarkerSize(0.9*hetawjetQ_btag.GetMarkerSize())
+    marker6.Draw()
 
+
+    tex7 = ROOT.TLatex(0.25,0.75,"QCD") 
+    tex7.SetNDC()
+    tex7.SetTextSize(20)
+    tex7.Draw()    
+    marker7 = ROOT.TMarker(0.22,0.755,hetaqcdQ_btag.GetMarkerStyle())
+    marker7.SetNDC()
+    marker7.SetMarkerColor(hetaqcdQ_btag.GetMarkerColor())
+    marker7.SetMarkerSize(0.9*hetaqcdQ_btag.GetMarkerSize())
+    marker7.Draw()
     
     tex5 = ROOT.TLatex(0.2,0.95,"7 TeV                        CMS Preliminary ")
     tex5.SetNDC()
     tex5.SetTextSize(20)
-    tex5.Draw()        
-    canvas5aq.Print("QtagEff_eta_mH.png")
+    tex5.Draw()
+
+    tex9 = ROOT.TLatex(0.4,0.3,"Discriminator > 3.3 ")
+    tex9.SetNDC()
+    tex9.SetTextSize(20)
+    tex9.Draw() 
+    canvas5aq.Print("QtagEff33_eta_mH.png")
 
 #######################################################################
 
@@ -773,7 +944,7 @@ def plot(datasets):
 ###########################################
 
     canvas4 = ROOT.TCanvas("canvas4","",500,500)
-#    canvas3.SetLogy()
+    canvas4.SetLogy()
 #    hmt.SetMaximum(3.0)
     heta120_btag.SetMarkerColor(4)
     heta120_btag.SetMarkerSize(1)

@@ -1,6 +1,14 @@
 import FWCore.ParameterSet.Config as cms
 
-def addDiscriminatorSequenceCont(process, tau):
+from PFRecoTauDiscriminationForChargedHiggs import addDiscriminator
+
+HChTauIDSourcesCont = [("HChTauIDtauPolarizationCont", "DiscriminationByTauPolarizationCont"),
+                       ("HChTauIDDeltaECont", "DiscriminationByDeltaECont"),
+                       ("HChTauIDInvMassCont", "DiscriminationByInvMassCont"),
+                       ("HChTauIDFlightPathSignifCont", "DiscriminationByFlightPathSignificanceCont"),
+                       ("HChTauIDnProngsCont", "DiscriminationByNProngsCont")]
+
+def addDiscriminatorSequenceCont(process, tau, postfix):
     # Import the modules here in order to not to introduce compile
     # time dependency (some of these are not in vanilla 3_9_7)
     import RecoTauTag.RecoTau.PFRecoTauDiscriminationByTauPolarization_cfi as tauPolarization
@@ -9,21 +17,17 @@ def addDiscriminatorSequenceCont(process, tau):
     import RecoTauTag.RecoTau.PFRecoTauDiscriminationByFlightPathSignificance_cfi as flightPath
     import RecoTauTag.RecoTau.PFRecoTauDiscriminationByNProngs_cfi as nProngs
     
-    from RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi import addDiscriminator
-
-    leadingTrackFinding = tau+"DiscriminationByLeadingTrackFinding"
-    if tau == "hpsPFTau":
-        leadingTrackFinding = tau+"DiscriminationByDecayModeFinding"
+    leadingTrackFinding = "hpsPFTauDiscriminationByDecayModeFinding"+postfix
 
     lst = []
 
-    lst.append(addDiscriminator(process, tau, "DiscriminationByTauPolarizationCont",
+    lst.append(addDiscriminator(process, tau, "DiscriminationByTauPolarizationCont"+postfix,
                                 tauPolarization.pfRecoTauDiscriminationByTauPolarization.clone(
 					BooleanOutput = cms.bool(False)
 				)))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(leadingTrackFinding)
 
-    lst.append(addDiscriminator(process, tau, "DiscriminationByDeltaECont",
+    lst.append(addDiscriminator(process, tau, "DiscriminationByDeltaECont"+postfix,
                                 deltaE.pfRecoTauDiscriminationByDeltaE.clone(
 					BooleanOutput = cms.bool(False)
 				)))
@@ -31,16 +35,16 @@ def addDiscriminatorSequenceCont(process, tau):
 
     invMassCont = invMass.pfRecoTauDiscriminationByInvMass.clone()
     del invMassCont.select
-    lst.append(addDiscriminator(process, tau, "DiscriminationByInvMassCont", invMassCont))
+    lst.append(addDiscriminator(process, tau, "DiscriminationByInvMassCont"+postfix, invMassCont))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(leadingTrackFinding)
 
-    lst.append(addDiscriminator(process, tau, "DiscriminationByFlightPathSignificanceCont",
+    lst.append(addDiscriminator(process, tau, "DiscriminationByFlightPathSignificanceCont"+postfix,
                                 flightPath.pfRecoTauDiscriminationByFlightPathSignificance.clone(
                                         BooleanOutput = cms.bool(False)
                                 )))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(leadingTrackFinding)
 
-    lst.append(addDiscriminator(process, tau, "DiscriminationByNProngsCont",
+    lst.append(addDiscriminator(process, tau, "DiscriminationByNProngsCont"+postfix,
                                 nProngs.pfRecoTauDiscriminationByNProngs.clone(
 					BooleanOutput = cms.bool(False),
                                   	nProngs       = cms.uint32(0)
@@ -51,14 +55,15 @@ def addDiscriminatorSequenceCont(process, tau):
     for m in lst:
         sequence *= m
 
-    process.__setattr__(tau+"HplusDiscriminationSequenceCont", sequence)
+    setattr(process, tau+"HplusDiscriminationSequenceCont"+postfix, sequence)
 
     return sequence
 
 
-def addPFTauDiscriminationSequenceForChargedHiggsCont(process, tauAlgos=["shrinkingConePFTau"]):
-    process.PFTauDiscriminationSequenceForChargedHiggsCont = cms.Sequence()
+def addPFTauDiscriminationSequenceForChargedHiggsCont(process, tauAlgos=["hpsPFTau"], postfix=""):
+    sequence = cms.Sequence()
+    setattr(process, "PFTauDiscriminationSequenceForChargedHiggsCont"+postfix, sequence)
     for algo in tauAlgos:
-        process.PFTauDiscriminationSequenceForChargedHiggsCont *= addDiscriminatorSequenceCont(process, algo)
+        sequence *= addDiscriminatorSequenceCont(process, algo, postfix)
 
-    return process.PFTauDiscriminationSequenceForChargedHiggsCont
+    return sequence

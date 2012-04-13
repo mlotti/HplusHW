@@ -17,6 +17,7 @@
 import os
 import math
 import array
+from optparse import OptionParser
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -36,12 +37,38 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 analysisEmb = "signalAnalysisCaloMet60TEff"
 analysisSig = "signalAnalysisGenuineTau"
 
-dirEmbs = tauEmbedding.dirEmbs
-dirSig = tauEmbedding.dirSig
+############################################################
+#
+# !!!!  IMPORTANT NOTE  !!!!
+#
+# Following subtle bug remains
+#
+# 1. The precision of TH1F is not enough (ok, this is very small
+#    effect, 1e-7). We should consider TH1D for all counters.
+#
+############################################################
 
 def main():
-    datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=False)
+    parser = OptionParser(usage="Usage: %prog [options] [embedding multicrab dirs]\n\nIf no multicrab directories are given, the ones in specified in HiggsAnalysis.HeavyChHiggstoTauNu.tools.tauEmbedding.dirEmbs are used.\nIf multicrab directories are given, you must also give the a signal analysis directory with --signalAnalysisDir.")
+    parser.add_option("--minimal", dest="minimal", action="store_true", default=False,
+                      help="Produce the minimal amount of histograms for datacard generation and data-driven control plots (fast)")
+    parser.add_option("--signalAnalysisDir", dest="signalAnalysisDir", default="",
+                      help="Signal analysis multicrab directory, produced with 'doTauEmbeddingLikePreselection=True'. Needed if any embedding multicrab directory is given as argument.")
+
+    (opts, args) = parser.parse_args()
+
+    dirEmbs = tauEmbedding.dirEmbs
+    dirSig = tauEmbedding.dirSig
+    if len(args) > 0:
+        dirEmbs = args
+        dirSig = opts.signalAnalysisDir
+        if len(dirSig):
+            raise Exception("When giving embedding multicrab directories as argument, must give the signal analysis directory too with --signalAnalysisDir")
+
+
+    datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByCrossSection=True)
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
+    datasetsSig.updateNAllEventsToPUWeighted()
     datasetsEmb.forEach(lambda d: d.mergeData())
     datasetsEmb.setLumiFromData()
 
@@ -125,7 +152,6 @@ def operateDataset(taskDir, datasetsEmb, datasetsSig, datasetName):
         addMcHistos(mainDir="signalAnalysisNormal", only="ScaleFactorUncertainties")
         addMcCounters(mainDir="signalAnalysisNormal")
         adder.setNormalOnly(False)
-        
 
         # JES
         # Uncertainties are in same direction in both => for each variated case produce residual counts
@@ -169,7 +195,7 @@ def addConfigInfo(of, dataset):
         setValue(2, "luminosity", dataset.getLuminosity())
         setValue(3, "isData", 1)
     elif dataset.isMC():
-        setValue(2, "crossSection", dataset.getCrossSection())
+        setValue(2, "crossSection", 1.0)
         setValue(3, "isData", 0)
 
     configinfo.Write()
@@ -292,14 +318,26 @@ class RootHistoAdderResidual:
         histo = None
         # Get properly normalized embedded and normal MC
         (embMcHisto, tmp) = self.datasetsEmb.getHistogram(self.datasetName, srcEmbName)
-        sigMcHisto = self.datasetSig.getDatasetRootHisto(srcSigName).getHistogram() # ROOT.TH1
+        drh = self.datasetSig.getDatasetRootHisto(srcSigName)
+        drh.normalizeByCrossSection()
+        sigMcHisto = drh.getHistogram() # ROOT.TH1
 
         #print embMcHisto, sigMcHisto
 
         if self.normalOnly:
-            histo = sigMcHisto
+            if isCounter:
+                pairList = dataset._histoToCounter(sigMcHisto)
+                pairList.insert(0, ("AllEventCountForCorrectDCGNormalizationUglyHack", dataset.Count(1.0)))
+                histo = dataset._counterToHisto(dstName, pairList)
+            else:
+                histo = sigMcHisto
         elif self.embeddedOnly:
-            histo = embMcHisto
+            if isCounter:
+                pairList = dataset._histoToCounter(embMcHisto)
+                pairList.insert(0, ("AllEventCountForCorrectDCGNormalizationUglyHack", dataset.Count(1.0)))
+                histo = dataset._counterToHisto(dstName, pairList)
+            else:
+                histo = embMcHisto
         else:
         
             if isCounter:
@@ -314,10 +352,16 @@ class RootHistoAdderResidual:
                 if table.getNrows() == 0:
                     return
     
+
                 embMcColumn = table.getColumn(name="EmbMc")
                 sigMcColumn = table.getColumn(name="SigMc")
                 residual = counter.subtractColumn("Correction", sigMcColumn, embMcColumn)
-                histo = dataset._counterToHisto(dstName, residual.getPairList())
+                pairList = residual.getPairList()
+                pairList.insert(0, ("AllEventCountForCorrectDCGNormalizationUglyHack", dataset.Count(1.0)))
+                histo = dataset._counterToHisto(dstName, pairList)
+
+#                table.appendColumn(residual)
+#                print table.format(counter.TableFormatText(counter.CellFormatText(valueFormat="%.2f")))
             else:
                 # Residual MC: normal-embedded
                 sigMcHisto.Add(embMcHisto, -1)

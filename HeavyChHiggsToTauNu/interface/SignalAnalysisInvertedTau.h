@@ -112,6 +112,7 @@ namespace HPlus {
     EventWeight& fEventWeight;
 
     //    const double ftransverseMassCut;
+    const bool bBlindAnalysisStatus;
 
     Count fAllCounter;
     Count fTriggerCounter;
@@ -158,7 +159,8 @@ namespace HPlus {
     VertexSelection fPrimaryVertexSelection;
     GlobalElectronVeto fGlobalElectronVeto;
     GlobalMuonVeto fGlobalMuonVeto;
-    TauSelection fOneProngTauSelection;
+    //    TauSelection fOneProngTauSelection;
+    TauSelection fTauSelection;
     JetSelection fJetSelection;
     METSelection fMETSelection;
     BTagging fBTagging;
@@ -231,6 +233,16 @@ namespace HPlus {
     TH1 *hMETBaselineTauIdBtag5060;
     TH1 *hMETBaselineTauIdBtag4050;
 
+    TH1 *hMTBaselineTauIdTopMass;
+    TH1 *hMTBaselineTauIdTopMass150;
+    TH1 *hMTBaselineTauIdTopMass120150;
+    TH1 *hMTBaselineTauIdTopMass100120;
+    TH1 *hMTBaselineTauIdTopMass80100;
+    TH1 *hMTBaselineTauIdTopMass7080;
+    TH1 *hMTBaselineTauIdTopMass6070;
+    TH1 *hMTBaselineTauIdTopMass5060;
+    TH1 *hMTBaselineTauIdTopMass4050;
+
 
     TH1 *hMETInvertedTauIdJets;
     TH1 *hMETInvertedTauIdJets150;
@@ -250,14 +262,14 @@ namespace HPlus {
     TH1 *hMETInvertedTauIdBtag5060;
     TH1 *hMETInvertedTauIdBtag4050;
     TH1 *hMTBaselineTauIdJet;
-    TH1 *hMTBaselineTauIdJet150;
-    TH1 *hMTBaselineTauIdJet120150;
-    TH1 *hMTBaselineTauIdJet100120;
-    TH1 *hMTBaselineTauIdJet80100;
-    TH1 *hMTBaselineTauIdJet7080;
-    TH1 *hMTBaselineTauIdJet6070;
-    TH1 *hMTBaselineTauIdJet5060;
-    TH1 *hMTBaselineTauIdJet4050;
+    TH1 *hMTBaselineTauIdBtag150;
+    TH1 *hMTBaselineTauIdBtag120150;
+    TH1 *hMTBaselineTauIdBtag100120;
+    TH1 *hMTBaselineTauIdBtag80100;
+    TH1 *hMTBaselineTauIdBtag7080;
+    TH1 *hMTBaselineTauIdBtag6070;
+    TH1 *hMTBaselineTauIdBtag5060;
+    TH1 *hMTBaselineTauIdBtag4050;
     TH1 *hMTInvertedTauIdJets;
     TH1 *hMTInvertedTauIdJet;
     TH1 *hMTInvertedTauIdJet150;

@@ -168,7 +168,7 @@ defaultSeBlacklist = [
     "T3_*", # Don't submit to T3's  
     "T2_UK_London_Brunel", # Noticeable fraction of submitted jobs fail due to stageout errors
     "ucl.ac.be", # Jobs end up in queuing, lot's of file open errors
-    "iihe.ac.be", # Problematic site with server
+#    "iihe.ac.be", # Problematic site with server
     "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout, also jobs can queue long times
     "unl.edu", # Jobs can wait in queues for a looong time
     "wisc.edu", # Stageout failures,
@@ -179,6 +179,7 @@ defaultSeBlacklist = [
     "mit.edu", # MIT has some problems?
     "sprace.org.br", # Stageout failures
     "knu.ac.kr", # Stageout failures
+    "T2_US_*", # disable US because of low bandwidth
     ]
 
 
@@ -691,6 +692,10 @@ class MulticrabDataset:
         else:
             self.data[blackWhiteList] = sites[:]
 
+    ## Set the trigger for the dataset
+    #
+    # \param name     'trigger' or 'triggerOR'
+    # \param content  string for 'trigger', list of strings for 'triggerOR'
     def setTrigger(self, name, content):
         if name != "trigger" and name != "triggerOR":
             raise Exception("name can be either 'trigger' or 'triggerOR', was '%s'" % name)
@@ -704,6 +709,12 @@ class MulticrabDataset:
             pass
 
         self.data[name] = content
+
+    ## Set the skim configuration(s)
+    #
+    # \param content  String or list of strings for the skim configuration files (without the .py; these are looked from python directory)
+    def setSkimConfig(self, content):
+        self.data["skimConfig"] = content
 
     ## Write generated files to a directory.
     #
@@ -744,6 +755,14 @@ class MulticrabDataset:
         try:
             args.extend(["trigger=%s" % trigger for trigger in self.data["triggerOR"]])
             del dataKeys[dataKeys.index("triggerOR")]
+        except KeyError:
+            pass
+        try:
+            lst = self.data["skimConfig"]
+            if isinstance(lst, basestring):
+                lst = [lst]
+            args.extend(["skimConfig=%s" % conf for conf in lst])
+            del dataKeys[dataKeys.index("skimConfig")]
         except KeyError:
             pass
 
@@ -1016,7 +1035,8 @@ class Multicrab:
     # files to the directory and optionally run 'multicrab -create'
     # in the directory.
     def createTasks(self, configOnly=False, **kwargs):
-        checkCrabInPath()
+        if not configOnly:
+            checkCrabInPath()
         dirname = createTaskDir(**kwargs)
 
         self._writeConfig(os.path.join(dirname, "multicrab.cfg"))

@@ -150,6 +150,7 @@ namespace HPlus {
     iEvent.getByLabel(fSrc, hjets);
 
     const edm::PtrVector<pat::Jet>& jets(hjets->ptrVector());
+    fAllJets = hjets->ptrVector();
 
     fSelectedJets.clear();
     fNotSelectedJets.clear();

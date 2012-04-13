@@ -1,8 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
-dataVersion="42XmcS4"
-#dataVersion="42Xdata"
+dataVersion="44XmcS6"
+#dataVersion="44Xdata"
 
 # Command line arguments (options) and DataVersion object
 options, dataVersion = getOptionsDataVersion(dataVersion)
@@ -36,6 +36,8 @@ process.source = cms.Source('PoolSource',
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 del process.TFileService
+#process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
+#process.Tracer = cms.Service("Tracer")
 
 ################################################################################
 # In case of data, add trigger
@@ -45,7 +47,6 @@ doTauHLTMatching = options.doTauHLTMatching != 0
 if doTauHLTMatching:
     if len(myTrigger) == 0:
         myTrigger = dataVersion.getDefaultSignalTrigger()
-    print "Trigger used for tau matching: "+str(myTrigger)
 
 ################################################################################
 # Output module
@@ -57,27 +58,30 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep edmTriggerResults_*_*_*",
 #        "keep triggerTriggerEvent_*_*_*", # the information is alread in full PAT trigger
         "keep L1GlobalTriggerReadoutRecord_*_*_*",   # needed for prescale provider
-        "keep L1GlobalTriggerObjectMapRecord_*_*_*", # needed for prescale provider
+#        "keep L1GlobalTriggerObjectMapRecord_*_*_*", # needed for prescale provider
         "keep *_conditionsInEdm_*_*",
         "keep edmMergeableCounter_*_*_*", # in lumi block
         "keep PileupSummaryInfos_*_*_*", # only in MC
         "keep *_offlinePrimaryVertices_*_*",
         "keep *_l1GtTriggerMenuLite_*_*", # in run block, needed for prescale provider
         "keep recoCaloMETs_*_*_*", # keep all calo METs (metNoHF is needed!)
-        "keep *_kt6PFJets_rho_HChPatTuple", # keep the rho of the event
-        "keep *_HBHENoiseFilterResultProducer_*_*", # keep the resulf of HBHENoiseFilterResultProducer
+        "keep *_genMetTrue_*_*", # keep generator level MET
+        "keep *_kt6PFJets*_rho_HChPatTuple", # keep the rho of the event
+        "keep recoBeamHaloSummary_*_*_*", # keep beam halo summaries
+        "keep recoGlobalHaloData_*_*_*",
+        "keep *_HBHENoiseFilterResultProducer*_*_*", # keep the resulf of HBHENoiseFilterResultProducer*
+        "keep *_ecalDeadCellTPfilter*_*_*",
+        "keep *_EcalDeadCellEventFilter*_*_*",
+        "keep *_trackingFailureFilter*_*_*",
         ),
-    dropMetaData = cms.untracked.string("ALL")
-)
-# For MC we apply the trigger filter, but save all events in order to
-# get a correct handle to all events with pileup weighting. The trict
-# is that the rest of the path (after triggering) is NOT executed,
-# hence the branches are empty for those events.
-if dataVersion.isData():
-    process.out.SelectEvents = cms.untracked.PSet(
+    dropMetaData = cms.untracked.string("ALL"),
+    # Save only those events which passed the path (for possible
+    # trigger and event cleaning). See also for 'skimConfig' in the
+    # end of this configuration.
+    SelectEvents = cms.untracked.PSet(
         SelectEvents = cms.vstring("path")
-    )
-
+    ),
+)
 
 ################################################################################
 # Add PAT sequences
@@ -85,10 +89,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 
 options.doPat=1
 (process.sPAT, c) = addPatOnTheFly(process, options, dataVersion,
-                                   doPlainPat=True, doPF2PAT=False,
-                                   plainPatArgs={"doTauHLTMatching": doTauHLTMatching,
-                                                 "matchingTauTrigger": myTrigger},
+                                   patArgs={"doTauHLTMatching": doTauHLTMatching,
+                                            "matchingTauTrigger": myTrigger},
                                    doHBHENoiseFilter=False, # Only save the HBHE result to event, don't filter
+                                   calculateEventCleaning=True, # This requires the tags from test/pattuple/checkoutTags.sh
                                    )
 
 process.out.outputCommands.extend([
@@ -160,7 +164,7 @@ process.heavyChHiggsToTauNuHLTFilter.throw = False
 # https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1489.html
 if dataVersion.isMC():
     process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
-    process.totalKinematicsFilter.src.setProcessName(dataVersion.getTriggerProcess())
+    process.totalKinematicsFilter.src.setProcessName(dataVersion.getSimProcess())
     process.totalKinematicsFilterPath = cms.Path(
         process.totalKinematicsFilter
     )
@@ -219,11 +223,22 @@ if dataVersion.isData() and len(options.trigger) > 1 and options.triggerThrow !=
         setattr(process, "Path"+name, path)
 
 # If there is a need to apply some skim
-if options.skimConfig != "":
-    print "Skimming with configuration ", options.skimConfig
-    process.load(options.skimConfig)
-    process.plainPatSequence.replace(process.plainPatEndSequence,
-                                     process.skimSequence*process.plainPatEndSequence)
+if len(options.skimConfig) > 0:
+    if len(options.skimConfig) == 1:
+        print "Skimming with configuration ", options.skimConfig
+    else:
+        print "Skimming with OR of configurations ", " ".join(options.skimConfig)
+    process.out.SelectEvents.SelectEvents = []
+    for config in options.skimConfig:
+        process.load("HiggsAnalysis.HeavyChHiggsToTauNu."+config)
+        baseName = config.replace("_cff", "")
+        baseName = baseName[0].lower() + baseName[1:] # Make the first letter lower case
+        path = cms.Path(
+            process.sPAT + # Ensure that PAT and the possible trigger selection have been run, framework ensures the modules are ran only once
+            getattr(process, baseName+"Sequence")
+        )
+        setattr(process, baseName+"Path", path)
+        process.out.SelectEvents.SelectEvents.append(baseName+"Path")
 
 # Output module in EndPath
 process.outpath = cms.EndPath(process.out)

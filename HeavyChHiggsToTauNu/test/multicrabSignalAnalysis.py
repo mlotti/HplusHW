@@ -9,12 +9,14 @@ multicrab = Multicrab("crab_analysis.cfg", cfg)
 
 # Select the pattuple version to use as an input
 #pattupleVersion = "pattuple_v18"
-pattupleVersion = "pattuple_v19"
+#pattupleVersion = "pattuple_v19"
+pattupleVersion = "pattuple_v25"
+
 
 #era = "EPS"
-#era = "Run2011A"
+era = "Run2011A"
 #era = "Run2011B"
-era = "Run2011A+B"
+#era = "Run2011A+B"
 
 # Change this to true if you want to run the PAT on the fly (for
 # datasets where no pattuples are produced, or for testing something
@@ -61,76 +63,93 @@ datasetsRun2011B_v19 = [
        "Tau_178420-179889_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v5
        "Tau_179959-180252_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v6
 ]
+# v25
+datasetsRun2011A_v25 = [
+       "Tau_160431-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
+       "Tau_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
+       "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
+]
+datasetsRun2011B_v25 = [
+       "Tau_175860-180252_2011B_Nov19",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
+]
+
+
 
 datasetsMC = [
         # MC Signal (WH)
-        "TTToHplusBWB_M80_Summer11",
-        "TTToHplusBWB_M90_Summer11",
-        "TTToHplusBWB_M100_Summer11",
-        "TTToHplusBWB_M120_Summer11",
-        "TTToHplusBWB_M140_Summer11",
-        "TTToHplusBWB_M150_Summer11",
-        "TTToHplusBWB_M155_Summer11",
-        "TTToHplusBWB_M160_Summer11",
+        "TTToHplusBWB_M80_Fall11",
+        "TTToHplusBWB_M90_Fall11",
+        "TTToHplusBWB_M100_Fall11",
+        "TTToHplusBWB_M120_Fall11",
+        "TTToHplusBWB_M140_Fall11",
+        "TTToHplusBWB_M150_Fall11",
+        "TTToHplusBWB_M155_Fall11",
+        "TTToHplusBWB_M160_Fall11",
 
         # MC Signal (HH)
-        "TTToHplusBHminusB_M80_Summer11",
-        "TTToHplusBHminusB_M90_Summer11",
-        "TTToHplusBHminusB_M100_Summer11",
-        "TTToHplusBHminusB_M120_Summer11",
-        "TTToHplusBHminusB_M140_Summer11",
-        "TTToHplusBHminusB_M150_Summer11",
-        "TTToHplusBHminusB_M155_Summer11",
-        "TTToHplusBHminusB_M160_Summer11",
+        "TTToHplusBHminusB_M80_Fall11",
+        "TTToHplusBHminusB_M90_Fall11",
+        "TTToHplusBHminusB_M100_Fall11",
+        "TTToHplusBHminusB_M120_Fall11",
+        "TTToHplusBHminusB_M140_Fall11",
+        "TTToHplusBHminusB_M150_Fall11",
+        "TTToHplusBHminusB_M155_Fall11",
+        "TTToHplusBHminusB_M160_Fall11",
 
 	# MC Signal (heavy H+ from process pp->tbH+)
-#        "HplusTB_M180_Summer11",
-#        "HplusTB_M190_Summer11",
-#        "HplusTB_M200_Summer11",
-#        "HplusTB_M220_Summer11",
-#        "HplusTB_M250_Summer11",
-#        "HplusTB_M300_Summer11",
+        "HplusTB_M180_Fall11",
+        "HplusTB_M190_Fall11",
+        "HplusTB_M200_Fall11",
+        "HplusTB_M220_Fall11",
+        "HplusTB_M250_Fall11",
+        "HplusTB_M300_Fall11",
 
         # MC Background
-        "QCD_Pt30to50_TuneZ2_Summer11",
-        "QCD_Pt50to80_TuneZ2_Summer11",
-        "QCD_Pt80to120_TuneZ2_Summer11",
-        "QCD_Pt120to170_TuneZ2_Summer11",
-        "QCD_Pt170to300_TuneZ2_Summer11",
-        "QCD_Pt300to470_TuneZ2_Summer11",
-        "TTJets_TuneZ2_Summer11",
-        "WJets_TuneZ2_Summer11",
-        "DYJetsToLL_M50_TuneZ2_Summer11",
-        "T_t-channel_TuneZ2_Summer11",
-        "Tbar_t-channel_TuneZ2_Summer11",
-        "T_tW-channel_TuneZ2_Summer11",
-        "Tbar_tW-channel_TuneZ2_Summer11",
-        "T_s-channel_TuneZ2_Summer11",
-        "Tbar_s-channel_TuneZ2_Summer11",
-        "WW_TuneZ2_Summer11",
-        "WZ_TuneZ2_Summer11",
-        "ZZ_TuneZ2_Summer11",
+#        "QCD_Pt30to50_TuneZ2_Fall11",
+#        "QCD_Pt50to80_TuneZ2_Fall11",
+#        "QCD_Pt80to120_TuneZ2_Fall11",
+#        "QCD_Pt120to170_TuneZ2_Fall11",
+#        "QCD_Pt170to300_TuneZ2_Fall11",
+#        "QCD_Pt300to470_TuneZ2_Fall11",
+        "TTJets_TuneZ2_Fall11",
+        "WJets_TuneZ2_Fall11",
+        "W2Jets_TuneZ2_Fall11",
+        "W3Jets_TuneZ2_Fall11",
+        "W4Jets_TuneZ2_Fall11",
+        "DYJetsToLL_M10to50_TuneZ2_Fall11",
+        "DYJetsToLL_M50_TuneZ2_Fall11",
+        "T_t-channel_TuneZ2_Fall11",
+        "Tbar_t-channel_TuneZ2_Fall11",
+        "T_tW-channel_TuneZ2_Fall11",
+        "Tbar_tW-channel_TuneZ2_Fall11",
+        "T_s-channel_TuneZ2_Fall11",
+        "Tbar_s-channel_TuneZ2_Fall11",
+        "WW_TuneZ2_Fall11",
+        "WZ_TuneZ2_Fall11",
+        "ZZ_TuneZ2_Fall11",
         ]
 
 datasets = []
-if era == "EPS":
-    if "v18" in pattupleVersion:
-        datasets += datasetsEPS_v18
-    elif "v19" in pattupleVersion:
-        datasets += datasetsEPS_v19
-elif era == "Run2011A":
+if era == "Run2011A":
     if "v18" in pattupleVersion:
         datasets += datasetsRun2011A_v18
     elif "v19" in pattupleVersion:
         datasets += datasetsRun2011A_v19
+    elif "v25" in pattupleVersion:
+        datasets += datasetsRun2011A_v25
 elif era == "Run2011B":
     if "v19" in pattupleVersion:
         datasets += datasetsRun2011B_v19
+    elif "v25" in pattupleVersion:
+        datasets += datasetsRun2011B_v25
 elif era == "Run2011A+B":
     if "v19" in pattupleVersion:
         datasets += datasetsRun2011A_v19 + datasetsRun2011B_v19
+    elif "v25" in pattupleVersion:
+        datasets += datasetsRun2011A_v25 + datasetsRun2011B_v25
+
 else:
-    raise Exception("Wrong value for 'era' %s, supported are 'EPS', 'Run2011A', 'Run2011B', 'Run2011A+B'" % era)
+    raise Exception("Wrong value for 'era' %s, supported are 'Run2011A', 'Run2011B', 'Run2011A+B'" % era)
 datasets += datasetsMC
 
 # Add the datasest to the multicrab system
@@ -169,8 +188,9 @@ prefix = "multicrab"
 if "QCD" in cfg:
     prefix += "_QCD"
 
-# Generate configuration only
-#multicrab.createTasks(prefix=prefix, configOnly=True)
-
+# Generate configuration only?
+configOnly=True
+#configOnly=False
 # Genenerate configuration and create the crab tasks
-multicrab.createTasks(prefix=prefix)
+multicrab.createTasks(prefix=prefix, configOnly=configOnly)
+

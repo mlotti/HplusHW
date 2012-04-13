@@ -24,6 +24,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
@@ -81,7 +82,9 @@ namespace HPlus {
       Count fFakeMETVetoCounter;
       Count fTopSelectionCounter;
       Count fTopChiSelectionCounter;
+      //      Count fTopChiSelectionNarrowCounter;
       Count fTopWithBSelectionCounter;
+      Count fTopWithWSelectionCounter;
     };
   enum SignalSelectionOrder {
     kSignalOrderTrigger,
@@ -119,6 +122,7 @@ namespace HPlus {
     // copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;
 
+    const bool bBlindAnalysisStatus;
     //    const double ftransverseMassCut;
 
     Count fAllCounter;
@@ -140,18 +144,32 @@ namespace HPlus {
     Count fdeltaPhiTauMET160Counter;
     Count fdeltaPhiTauMET130Counter;
     Count fdeltaPhiTauMET90Counter;
+    Count fTauVetoAfterDeltaPhiCounter;
+    Count fRealTauAfterDeltaPhiCounter;
+    Count fRealTauAfterDeltaPhiTauVetoCounter;
     Count fFakeMETVetoCounter;
     Count fdeltaPhiTauMET160FakeMetCounter;
     Count fForwardJetVetoCounter;
+    Count ftransverseMassCut70Counter;
     Count ftransverseMassCut80Counter;
-    Count ftransverseMassCut100Counter;
+    Count ftransverseMass70TauVetoCounter;
+    Count ftransverseMass80TauVetoCounter;
+    Count ftransverseMass70TopChiSelCounter;
+    Count ftransverseMass70TopWithBSelCounter;
+    Count ftransverseMass70TopWithWSelCounter;
+    Count ftransverseMass70TopSelCounter;
+    Count ftransverseMass80TopChiSelCounter;
+    Count ftransverseMass80TopWithBSelCounter;
+    Count ftransverseMass80TopWithWSelCounter;
+    Count ftransverseMass80TopSelCounter;
     Count ftransverseMassCut80NoRtauCounter;
     Count ftransverseMassCut100NoRtauCounter;
     Count fZmassVetoCounter;
     Count fTopSelectionCounter;
     Count fTopChiSelectionCounter;
+    Count fTopChiSelectionNarrowCounter;
     Count fTopWithBSelectionCounter;
-    Count ftransverseMassCut100TopCounter;
+    Count fTopWithWSelectionCounter;    
 
     TriggerSelection fTriggerSelection;
     VertexSelection fPrimaryVertexSelection;
@@ -167,7 +185,9 @@ namespace HPlus {
     TopSelection fTopSelection;
     TopChiSelection fTopChiSelection;
     TopWithBSelection fTopWithBSelection;
+    TopWithWSelection fTopWithWSelection;
     BjetSelection fBjetSelection;
+    //    BjetWithPtSelection fBjetWithPtSelection;
     GenParticleAnalysis fGenparticleAnalysis;
     ForwardJetVeto fForwardJetVeto;
     CorrelationAnalysis fCorrelationAnalysis;
@@ -195,17 +215,17 @@ namespace HPlus {
     
     // Transverse mass histograms
     TH1 *hTransverseMass;
-    TH1 *hTransverseMassJetMetCut;
     TH1 *hTransverseMassTopSelection;
     TH1 *hTransverseMassTopChiSelection;
     TH1 *hTransverseMassTopBjetSelection;
+    TH1 *hTransverseMassTopWithWSelection;
     TH1 *hTransverseMassMET70;
+    TH1 *hTransverseMassTauVeto;
     TH1 *hTransverseMassAfterDeltaPhi;
     TH1 *hTransverseMassAfterDeltaPhi160;
     TH1 *hTransverseMassAfterDeltaPhi130;
     TH1 *hTransverseMassAfterDeltaPhi90;
     TH1 *hNonQCDTypeIITransverseMass;
-    TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi;
     TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi130;
     TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi160;
     TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi90;
@@ -230,6 +250,8 @@ namespace HPlus {
     TH1 *hTransverseMassDeltaPhiUpperCutFakeMet; 
 
     TH1 *hSelectionFlow;
+    TH2 *hSelectionFlowVsVertices;
+    TH2 *hSelectionFlowVsVerticesFakeTaus;
 
     // Control plots
     TH1* hCtrlIdentifiedElectronPt;

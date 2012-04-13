@@ -34,7 +34,7 @@ namespace HPlus {
     bool passEvent = false;
   
     double minMass = 99999;
-    size_t cleanPassed = 0;
+    //size_t cleanPassed = 0;
     double closestMass = -999;
     
 

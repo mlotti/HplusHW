@@ -38,16 +38,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 analysisEmb = "signalAnalysisCaloMet60TEff"
 analysisSig = "signalAnalysisGenuineTau" # require that the selected tau is genuine, valid comparison after njets
 
-counters = "Counters/weighted"
-
-metCut = "(met_p4.Et() > 50)"
-bTaggingCut = "passedBTagging"
-deltaPhi160Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 160)"
-deltaPhi130Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 130)"
-
-weight = "weightPileup*weightTrigger"
-weightBTagging = weight+"*weightBTagging"
-
 plotStyles = styles.styles[0:2]
 plotStyles[0] = styles.StyleCompound([plotStyles[0], styles.StyleMarker(markerStyle=21, markerSize=1.2)])
 
@@ -59,6 +49,7 @@ def main():
     # Create the dataset objects
     datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
+    datasetsSig.updateNAllEventsToPUWeighted()
 
     # Remove signal and W+3jets datasets
     datasetsEmb.remove(filter(lambda name: "HplusTB" in name, datasetsEmb.getAllDatasetNames()))
@@ -93,7 +84,7 @@ def main():
     # I.e. Data will be embedded data + res. MC, and EWKMC embedded MC + res. MC
     datasetsEmbCorrected = tauEmbedding.DatasetsResidual(datasetsEmb, datasetsSig, analysisEmb, analysisSig, ["DYJetsToLL", "WW"], totalNames=["Data", "EWKMC"])
 
-    #doPlots(datasetsEmbCorrected, datasetsSig, "EWKMC")
+#    doPlots(datasetsEmbCorrected, datasetsSig, "EWKMC")
     doCounters(datasetsEmbCorrected, datasetsSig)
 
 def doPlots(datasetsEmb, datasetsSig, datasetName):
@@ -162,9 +153,9 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
     drawControlPlot("NBjets", "Number of selected b jets", opts=update(opts, {"xmax": 6}), ylabel="Events", moveLegend=moveLegend, cutLine=1)
 
     # Tree cut definitions
-    treeDraw = dataset.TreeDraw("dummy", weight=weightBTagging)
-    tdDeltaPhi = treeDraw.clone(varexp="acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 >>tmp(18, 0, 180)")
-    tdMt = treeDraw.clone(varexp="sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi()))) >>tmp(20,0,400)")
+    treeDraw = dataset.TreeDraw("dummy", weight=tauEmbedding.signalNtuple.weightBTagging)
+    tdMt = treeDraw.clone(varexp="%s >>tmp(20,0,400)" % tauEmbedding.signalNtuple.mtExpression)
+    tdDeltaPhi = treeDraw.clone(varexp="%s >>tmp(18, 0, 180)" % tauEmbedding.signalNtuple.deltaPhiExpression)
 
     # DeltapPhi
     xlabel = "#Delta#phi(#tau jet, E_{T}^{miss}) (^{o})"
@@ -180,11 +171,12 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
     opts2 = {
         "WJets": {"ymin": 0, "ymax": 3}
         }.get(datasetName, opts2def)
-    drawPlot(createPlot(tdDeltaPhi.clone(selection=And(metCut, bTaggingCut))), prefix+"deltaPhi_3AfterBTagging", xlabel, log=False, opts=opts, opts2=opts2, ylabel="Events / %.0f^{o}", function=customDeltaPhi, moveLegend={"dx":-0.22}, cutLine=[130, 160])
+    selection = And(*[getattr(tauEmbedding.signalNtuple, cut) for cut in ["metCut", "bTaggingCut"]])
+    drawPlot(createPlot(tdDeltaPhi.clone(selection=selection)), prefix+"deltaPhi_3AfterBTagging", xlabel, log=False, opts=opts, opts2=opts2, ylabel="Events / %.0f^{o}", function=customDeltaPhi, moveLegend={"dx":-0.22}, cutLine=[130, 160])
 
 
     # After all cuts
-    selection = And(metCut, bTaggingCut, deltaPhi160Cut)
+    selection = And(*[getattr(tauEmbedding.signalNtuple, cut) for cut in ["metCut", "bTaggingCut", "deltaPhi160Cut"]])
 
     #opts = {"ymaxfactor": 1.4}
     opts = {}
@@ -214,13 +206,13 @@ def doCounters(datasetsEmb, datasetsSig):
     residuals = ["DYJetsToLL residual", "WW residual"]
 
     # Normal MC
-    eventCounterNormal = counter.EventCounter(datasetsSig, counters=analysisSig+counters)
+    eventCounterNormal = counter.EventCounter(datasetsSig)
     eventCounterNormal.normalizeMCToLuminosity(datasetsEmb.getLuminosity())
     tableNormal = eventCounterNormal.getMainCounterTable()
     tableNormal.keepOnlyRows(rows)
 
     # Embedded data and MC, residual MC
-    eventCounter = tauEmbedding.EventCounterResidual(datasetsEmb, counters=analysisEmb+counters)
+    eventCounter = tauEmbedding.EventCounterResidual(datasetsEmb)
     table = eventCounter.getMainCounterTable()
     table.keepOnlyRows(rows)
 
@@ -246,7 +238,7 @@ def doCounters(datasetsEmb, datasetsSig):
                       "btagging scale factor": "b tagging"
                       })
 
-    cellFormat = counter.TableFormatLaTeX(counter.CellFormatTeX(valueFormat='%.2f'))
+    cellFormat = counter.TableFormatLaTeX(counter.CellFormatTeX(valueFormat='%.4f', withPrecision=2))
     print result.format(cellFormat)
 
 if __name__ == "__main__":

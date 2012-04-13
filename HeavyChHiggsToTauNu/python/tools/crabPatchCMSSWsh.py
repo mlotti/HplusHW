@@ -1,35 +1,24 @@
-#!/usr/bin/env python
+## \package crabPatchCMSSWsh
+# Utility to patch CMSSW.sh in crab task
+#
+# Patch CMSSW.sh for sparse MC skims in order to run cmsRun again to
+# just copy the file. This somehow reorganizes the file so that
+# reading the result should be faster.
 
-# Patch CMSSW.sh for skim and embedding steps in order to run cmsRun
-# again to just copy the file. This somehow reorganizes the file so
-# that reading the result should be faster.
-
-#import tempfile
 import subprocess
 import shutil
 from optparse import OptionParser
 import sys
 import os
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
+import multicrab
 
 def main(opts):
     if len(opts.dirs) == 0:
         print "No directories given"
         return 1
 
-    # (tmph, tmp) = tempfile.mkstemp(suffix=".patch")
-    # print tmp
-
-    # src = open("CMSSW_sh.patch")
-    # dst = open(tmp, "w")
-    # for line in src:
-    #     dst.write(line.replace("%%INPUT%%", opts.input))
-    # src.close()
-    # dst.close()
-#    os.remove(tmp)
-
     patch = ""
-    src = open(os.path.join(os.environ["CMSSW_BASE"], "src/HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/CMSSW_sh.patch"))
+    src = open(os.path.join(os.environ["CMSSW_BASE"], "src/HiggsAnalysis/HeavyChHiggsToTauNu/test/CMSSW_sh.patch"))
     for line in src:
         patch += line.replace("%%INPUT%%", opts.input)
     src.close()

@@ -6,11 +6,11 @@ from optparse import OptionParser
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 # Default processing step
-#defaultStep = "skim"
+defaultStep = "skim"
 #defaultStep = "embedding"
 #defaultStep = "analysis"
 #defaultStep = "analysisTau"
-defaultStep = "signalAnalysis"
+#defaultStep = "signalAnalysis"
 #defaultStep = "muonAnalysis"
 #defaultStep = "caloMetEfficiency"
 
@@ -27,18 +27,19 @@ defaultVersions = [
 # "v13_2_seedTest1"
 # "v13_2_seedTest2"
 # "v13_2_seedTest3"
-    "v13_3",
-    "v13_3_seedTest1",
-    "v13_3_seedTest2",
-    "v13_3_seedTest3",
-    "v13_3_seedTest4",
-    "v13_3_seedTest5",
-    "v13_3_seedTest6",
-    "v13_3_seedTest7",
-    "v13_3_seedTest8",
-    "v13_3_seedTest9",
+#    "v13_3",
+#    "v13_3_seedTest1",
+#    "v13_3_seedTest2",
+#    "v13_3_seedTest3",
+#    "v13_3_seedTest4",
+#    "v13_3_seedTest5",
+#    "v13_3_seedTest6",
+#    "v13_3_seedTest7",
+#    "v13_3_seedTest8",
+#    "v13_3_seedTest9",
 #    "v13_3_seedTest10",
 #    "v14"
+    "v44_1"
 ]
 
 # Define the processing steps: input dataset, configuration file, output file
@@ -62,83 +63,86 @@ dirPrefix = ""
 #dirPrefix += "_debug"
 
 # Define dataset collections
-datasetsData2010 = [
-    "Mu_136035-144114_Apr21", # HLT_Mu9
-    "Mu_146428-147116_Apr21", # HLT_Mu9
-    "Mu_147196-149294_Apr21", # HLT_Mu15_v1
+#datasetsData2010 = [
+#    "Mu_136035-144114_Apr21", # HLT_Mu9
+#    "Mu_146428-147116_Apr21", # HLT_Mu9
+#    "Mu_147196-149294_Apr21", # HLT_Mu15_v1
+#]
+datasetsData2011A = [
+    "SingleMu_Mu_160431-163261_2001A_Nov08",  # HLT_Mu20_v1
+    "SingleMu_Mu_163270-163869_2001A_Nov08",  # HLT_Mu24_v2
+    "SingleMu_Mu_165088-166150_2001A_Nov08", # HLT_Mu30_v3
+    "SingleMu_Mu_166161-166164_2001A_Nov08", # HLT_Mu40_v1
+    "SingleMu_Mu_166346-166346_2001A_Nov08", # HLT_Mu40_v2
+    "SingleMu_Mu_166374-167043_2001A_Nov08", # HLT_Mu40_v1
+    "SingleMu_Mu_167078-167913_2001A_Nov08", # HLT_Mu40_v3
+    "SingleMu_Mu_170722-172619_2001A_Nov08",  # HLT_Mu40_v5
+    "SingleMu_Mu_172620-173198_2001A_Nov08", # HLT_Mu40_v5
+    "SingleMu_Mu_173236-173692_2001A_Nov08", # HLT_Mu40_eta2p1_v1
 ]
-datasetsData2011_EPS = [
-    "SingleMu_Mu_160431-163261_May10",  # HLT_Mu20_v1
-    "SingleMu_Mu_163270-163869_May10",  # HLT_Mu24_v2
-    "SingleMu_Mu_165088-166150_Prompt", # HLT_Mu30_v3
-    "SingleMu_Mu_166161-166164_Prompt", # HLT_Mu40_v1
-    "SingleMu_Mu_166346-166346_Prompt", # HLT_Mu40_v2
-    "SingleMu_Mu_166374-167043_Prompt", # HLT_Mu40_v1
-    "SingleMu_Mu_167078-167913_Prompt", # HLT_Mu40_v3
+datasetsData2011B = [
+    "SingleMu_Mu_173693-177452_2011B_Nov19", # HLT_Mu40_eta2p1_v1
+    "SingleMu_Mu_177453-178380_2011B_Nov19", # HLT_Mu40_eta2p1_v1
+    "SingleMu_Mu_178411-179889_2011B_Nov19", # HLT_Mu40_eta2p1_v4
+    "SingleMu_Mu_179942-180371_2011B_Nov19", # HLT_Mu40_eta2p1_v5
 ]
-datasetsData2011_Run2011A_noEPS = [
-    "SingleMu_Mu_170722-172619_Aug05",  # HLT_Mu40_v5
-    "SingleMu_Mu_172620-173198_Prompt", # HLT_Mu40_v5
-    "SingleMu_Mu_173236-173692_Prompt", # HLT_Mu40_eta2p1_v1
-]
-datasetsData2011_Run2011A = datasetsData2011_EPS + datasetsData2011_Run2011A_noEPS
-datasetsData2011 = datasetsData2011_Run2011A
+datasetsData2011 = datasetsData2011_Run2011A + datasetsData2011_Run2011B
 datasetsMCnoQCD = [
-    "TTJets_TuneZ2_Summer11",
-    "WJets_TuneZ2_Summer11",
-    "DYJetsToLL_M50_TuneZ2_Summer11",
-    "W3Jets_TuneZ2_Summer11",
-    "T_t-channel_TuneZ2_Summer11",
-    "Tbar_t-channel_TuneZ2_Summer11",
-    "T_tW-channel_TuneZ2_Summer11",
-    "Tbar_tW-channel_TuneZ2_Summer11",
-    "T_s-channel_TuneZ2_Summer11",
-    "Tbar_s-channel_TuneZ2_Summer11",
-    "WW_TuneZ2_Summer11",
-    "WZ_TuneZ2_Summer11",
-    "ZZ_TuneZ2_Summer11",
+    "TTJets_TuneZ2_Fall11",
+    "WJets_TuneZ2_Fall11",
+    "DYJetsToLL_M50_TuneZ2_Fall11",
+    "W3Jets_TuneZ2_Fall11",
+    "T_t-channel_TuneZ2_Fall11",
+    "Tbar_t-channel_TuneZ2_Fall11",
+    "T_tW-channel_TuneZ2_Fall11",
+    "Tbar_tW-channel_TuneZ2_Fall11",
+    "T_s-channel_TuneZ2_Fall11",
+    "Tbar_s-channel_TuneZ2_Fall11",
+    "WW_TuneZ2_Fall11",
+    "WZ_TuneZ2_Fall11",
+    "ZZ_TuneZ2_Fall11",
 ]
 datasetsMCQCD = [
-    "QCD_Pt20_MuEnriched_TuneZ2_Summer11",
+    "QCD_Pt20_MuEnriched_TuneZ2_Fall11",
 ]
 datasetsSignal = [
-    "TTToHplusBWB_M80_Summer11",
-    "TTToHplusBWB_M90_Summer11",
-    "TTToHplusBWB_M100_Summer11",
-    "TTToHplusBWB_M120_Summer11",
-    "TTToHplusBWB_M140_Summer11",
-    "TTToHplusBWB_M150_Summer11",
-    "TTToHplusBWB_M155_Summer11",
-    "TTToHplusBWB_M160_Summer11",
-    "TTToHplusBHminusB_M80_Summer11",
-    "TTToHplusBHminusB_M90_Summer11",
-    "TTToHplusBHminusB_M100_Summer11",
-    "TTToHplusBHminusB_M120_Summer11",
-    "TTToHplusBHminusB_M140_Summer11",
-    "TTToHplusBHminusB_M150_Summer11",
-    "TTToHplusBHminusB_M155_Summer11",
-    "TTToHplusBHminusB_M160_Summer11",
+    "TTToHplusBWB_M80_Fall11",
+    "TTToHplusBWB_M90_Fall11",
+    "TTToHplusBWB_M100_Fall11",
+    "TTToHplusBWB_M120_Fall11",
+    "TTToHplusBWB_M140_Fall11",
+    "TTToHplusBWB_M150_Fall11",
+    "TTToHplusBWB_M155_Fall11",
+    "TTToHplusBWB_M160_Fall11",
+    "TTToHplusBHminusB_M80_Fall11",
+    "TTToHplusBHminusB_M90_Fall11",
+    "TTToHplusBHminusB_M100_Fall11",
+    "TTToHplusBHminusB_M120_Fall11",
+    "TTToHplusBHminusB_M140_Fall11",
+    "TTToHplusBHminusB_M150_Fall11",
+    "TTToHplusBHminusB_M155_Fall11",
+    "TTToHplusBHminusB_M160_Fall11",
 ]
 
 
 # Override the default number of jobs
 # Goal: ~5 hour jobs
-skimNjobs = {
-    "WJets_TuneZ2_Summer11": 1000, # ~10 hours
-    "TTJets_TuneZ2_Summer11": 500,
-    "QCD_Pt20_MuEnriched_TuneZ2_Summer11": 490,
-    "DYJetsToLL_M50_TuneZ2_Summer11": 1000,
-    "T_t-channel_TuneZ2_Summer11": 490,
-    "Tbar_t-channel_TuneZ2_Summer11": 160,
-    "T_tW-channel_TuneZ2_Summer11": 90,
-    "Tbar_tW-channel_TuneZ2_Summer11": 90,
-    "T_s-channel_TuneZ2_Summer11": 50,
-    "Tbar_s-channel_TuneZ2_Summer11": 10,
-    "WW_TuneZ2_Summer11": 200,
-    "WZ_TuneZ2_Summer11": 200,
-    "ZZ_TuneZ2_Summer11": 350,
+skimNjobs = { 
+    "WJets_TuneZ2_Fall11": 1000, # ~10 hours
+    "TTJets_TuneZ2_Fall11": 2500,
+    "QCD_Pt20_MuEnriched_TuneZ2_Fall11": 490,
+    "DYJetsToLL_M50_TuneZ2_Fall11": 1000,
+    "T_t-channel_TuneZ2_Fall11": 490,
+    "Tbar_t-channel_TuneZ2_Fall11": 160,
+    "T_tW-channel_TuneZ2_Fall11": 90,
+    "Tbar_tW-channel_TuneZ2_Fall11": 90,
+    "T_s-channel_TuneZ2_Fall11": 50,
+    "Tbar_s-channel_TuneZ2_Fall11": 10,
+    "WW_TuneZ2_Fall11": 200,
+    "WZ_TuneZ2_Fall11": 200,
+    "ZZ_TuneZ2_Fall11": 350,
     }
-muonAnalysisNjobs = { # goal: 30k events/job
+muonAnalysisNjobs = { # goal: 30k events/job # FIXME these need to be updated
     "SingleMu_Mu_160431-163261_May10": 2,
     "SingleMu_Mu_163270-163869_May10": 5,
     "SingleMu_Mu_165088-166150_Prompt": 6,
@@ -151,19 +155,19 @@ muonAnalysisNjobs = { # goal: 30k events/job
 #    "SingleMu_Mu_173236-173692_Prompt": 4,
     "SingleMu_Mu_173236-176023_Prompt": 6,
     
-    "WJets_TuneZ2_Summer11": 60,
-    "TTJets_TuneZ2_Summer11": 17,
-    "QCD_Pt20_MuEnriched_TuneZ2_Summer11": 5,
-    "DYJetsToLL_M50_TuneZ2_Summer11": 15,
-    "T_t-channel_TuneZ2_Summer11": 3,
-    "Tbar_t-channel_TuneZ2_Summer11": 2,
-    "T_tW-channel_TuneZ2_Summer11": 4,
-    "Tbar_tW-channel_TuneZ2_Summer11": 4,
-    "T_s-channel_TuneZ2_Summer11": 1,
-    "Tbar_s-channel_TuneZ2_Summer11": 1,
-    "WW_TuneZ2_Summer11": 8,
-    "WZ_TuneZ2_Summer11": 8,
-    "ZZ_TuneZ2_Summer11": 8,
+    "WJets_TuneZ2_Fall11": 60,
+    "TTJets_TuneZ2_Fall11": 17,
+    "QCD_Pt20_MuEnriched_TuneZ2_Fall11": 5,
+    "DYJetsToLL_M50_TuneZ2_Fall11": 15,
+    "T_t-channel_TuneZ2_Fall11": 3,
+    "Tbar_t-channel_TuneZ2_Fall11": 2,
+    "T_tW-channel_TuneZ2_Fall11": 4,
+    "Tbar_tW-channel_TuneZ2_Fall11": 4,
+    "T_s-channel_TuneZ2_Fall11": 1,
+    "Tbar_s-channel_TuneZ2_Fall11": 1,
+    "WW_TuneZ2_Fall11": 8,
+    "WZ_TuneZ2_Fall11": 8,
+    "ZZ_TuneZ2_Fall11": 8,
     }
 
 
@@ -232,12 +236,12 @@ def createTasks(opts, step, version=None):
     else:
     #    datasets.extend(datasetsData2010)
         if step in ["analysis", "signalAnalysis"]:
-            if opts.era == "EPS":
-                datasets.extend(datasetsData2011_EPS)
-            elif opts.era == "Run2011A-EPS":
-                datasets.extend(datasetsData2011_Run2011A_noEPS)
-            elif opts.era == "Run2011A":
-                datasets.extend(datasetsData2011_Run2011A)
+            if opts.era == "Run2011A":
+                datasets.extend(datasetsData2011A)
+            if opts.era == "Run2011B":
+                datasets.extend(datasetsData2011B)
+            if opts.era == "Run2011":
+                datasets.extend(datasetsData2011)
             else:
                 raise Exception("Unsupported era %s" % opts.era)
         else:
@@ -264,6 +268,8 @@ def createTasks(opts, step, version=None):
 
     reco_re = re.compile("^Run[^_]+_(?P<reco>[^_]+_v\d+_[^_]+_)")
 
+    # Let's do the naming like this until we get some answer from crab people
+    multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
 
     # Modification function for skim/embedding steps
     def modify(dataset):
@@ -327,7 +333,7 @@ def createTasks(opts, step, version=None):
         else:
             dataset.appendLine("CMSSW.output_file = "+config[step]["output"])
             dataset.appendLine("USER.additional_input_files = copy_cfg.py")
-            dataset.appendCopyFile("copy_cfg.py")
+            dataset.appendCopyFile("../copy_cfg.py")
     
     # Modification step for analysis steps
     def modifyAnalysis(dataset):
@@ -370,7 +376,7 @@ def createTasks(opts, step, version=None):
 
     # patch CMSSW.sh
     if not opts.configOnly and step in ["skim", "embedding"]:
-        import patchSkimEmbedding as patch
+        import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
         import os
         os.chdir(taskDir)
         patch.main(Wrapper(dirs=datasets, input={"skim": "skim",

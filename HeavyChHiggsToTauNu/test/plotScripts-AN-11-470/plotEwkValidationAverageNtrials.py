@@ -8,6 +8,8 @@
 # * signalAnalysis_cfg.py with "doPat=1 tauEmbeddingInput=1"
 # for embedding+signal analysis
 #
+# The development script is plotTauEmbeddingSignalAnalysisAverage.py
+#
 # Authors: Matti Kortelainen
 #
 ######################################################################
@@ -27,16 +29,13 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
-import plotTauEmbeddingSignalAnalysis as tauEmbedding
-import produceTauEmbeddingResult as result
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 
 analysisEmb = "signalAnalysisCaloMet60TEff"
 
-counters = "Counters/weighted"
-#counters = "Counters"
-
 def main():
-    dirEmbs = ["."] + [os.path.join("..", d) for d in result.dirEmbs[1:]]
+    dirEmbs = ["."] + [os.path.join("..", d) for d in tauEmbedding.dirEmbs[1:]]
+#    dirEmbs = dirEmbs[:2]
 
     tauEmbedding.normalize=True
     tauEmbedding.era = "Run2011A"
@@ -62,18 +61,51 @@ def main():
     print "DeltaPhi < 160"
     print
     print table.format(cellFormat)
+    print
+    print
+
+    # Format the table as in AN
+    ftable = counter.CounterTable()
+    def addRow(name):
+        col = table.getColumn(name=name)
+
+        minimum = col.getCount(name="Min")
+        maximum = col.getCount(name="Max")
+
+        # Maximum deviation from average
+        dev1 = col.getCount(name="Max-mean")
+        dev2 = col.getCount(name="Mean-min")
+        if dev2.value() > dev1.value():
+            dev1 = dev2
+
+        dev1.divide(col.getCount(name="Mean"))
+        dev1.multiply(dataset.Count(100))
+
+        ftable.appendRow(counter.CounterRow(name,
+                                            ["Minimum", "Maximum", "Largest deviation from average (%)"],
+                                            [minimum, maximum, dev1]))
+
+    addRow("Data")
+    addRow("EWKMCsum")
+    addRow("TTJets")
+    addRow("WJets")
+    addRow("DYJetsToLL")
+    addRow("SingleTop")
+    addRow("Diboson")
+
+    cellFormat2 = counter.TableFormatLaTeX(counter.CellFormatTeX(valueFormat="%.4f", withPrecision=2))
+    cellFormat2.setColumnFormat(counter.CellFormatTeX(valueFormat="%.1f", valueOnly=True), index=2)
+    print ftable.format(cellFormat2)
 
 def doCounters(dirEmbs):
-    datasetsEmb = result.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
+    datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
     datasetsEmb.forEach(plots.mergeRenameReorderForDataMC)
     datasetsEmb.setLumiFromData()
 
     datasetsEmb.remove(filter(lambda name: "HplusTB" in name, datasetsEmb.getAllDatasetNames()))
     datasetsEmb.remove(filter(lambda name: "TTToHplus" in name, datasetsEmb.getAllDatasetNames()))
 
-    dirEmbs = ["."] + [os.path.join("..", d) for d in result.dirEmbs[1:]]
-
-    eventCounter = result.EventCounterMany(datasetsEmb, counters=analysisEmb+counters, scaleNormalization=True)
+    eventCounter = tauEmbedding.EventCounterMany(datasetsEmb)
 
     mainTable = eventCounter.getMainCounterTable()
 

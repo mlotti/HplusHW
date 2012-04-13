@@ -6,9 +6,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 # Select the version of the data (needed only for interactice running,
 # overridden automatically from multicrab
-dataVersion="42XmcS4"     # Summer11 MC
-#dataVersion="42Xdata" # Run2010 Apr21 ReReco, Run2011 May10 ReReco, Run2011 PromptReco
-
+dataVersion="44XmcS6"     # Fall11 MC
+#dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
 
 ##########
 # Flags for additional signal analysis modules
@@ -18,6 +17,10 @@ doAllTauIds = False
 
 # Apply summer PAS style cuts
 doSummerPAS = False # Rtau>0, MET>70
+
+# Scan against electron discriminators
+doAgainstElectronScan = False
+
 # Disable Rtau
 doRtau0 = False # Rtau>0, MET>50
 
@@ -42,7 +45,21 @@ doTauEmbeddingTauSelectionScan = False
 # Do embedding-like preselection for signal analysis
 doTauEmbeddingLikePreselection = False
 
+
+#########
+# Flags for options in the signal analysis
+
+# Keep / Ignore prescaling for data (suppresses greatly error messages 
+# in datasets with or-function of triggers)
+doPrescalesForData = False
+
+# Tree filling
+doFillTree = True
+
 applyTriggerScaleFactor = True
+
+#PF2PATVersion = "PFlow" # For normal PF2PAT
+PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
 
 ### Systematic uncertainty flags ###
 # Running of systematic variations is controlled by the global flag
@@ -52,14 +69,10 @@ doSystematics = False
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
 doJESVariation = False
-JESVariation = 0.03
-JESEtaVariation = 0.02
-JESUnclusteredMETVariation = 0.10
 
 # Perform the signal analysis with the PU weight variations
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
 doPUWeightVariation = False
-PUWeightVariation = 0.6
 
 
 ################################################################################
@@ -89,6 +102,8 @@ process.source = cms.Source('PoolSource',
     # For testing in jade
     dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
+    #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau_173236-173692_2011A_Nov08/Tau/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_173236-173692_2011A_Nov08//d7b7dcb6c55f2b2177021b8423a82913/pattuple_10_1_9l2.root",
+    #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau_175860-180252_2011B_Nov19/Tau/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_175860-180252_2011B_Nov19//28e7e0ab56ad4146eca1efa805cd10f4/pattuple_100_1_jnU.root",
     )
 )
 
@@ -137,16 +152,22 @@ param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionSrcSelectedPatTaus()
 param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
+# Switch to PF2PAT objects
+#param.changeCollectionsToPF2PAT()
+param.changeCollectionsToPF2PAT(postfix=PF2PATVersion)
+
 # Trigger with scale factors (at the moment hard coded)
 if applyTriggerScaleFactor and dataVersion.isMC():
     param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
 
 # Set the data scenario for vertex/pileup weighting
+# options: Run2011A, Run2011B, Run2011A+B
 puweight = "Run2011A"
 if len(options.puWeightEra) > 0:
     puweight = options.puWeightEra
-param.setPileupWeightFor2011(dataVersion, era=puweight) # Reweight by true PU distribution 
+param.setPileupWeight(dataVersion, pset=param.vertexWeight, era=puweight) # Reweight by true PU distribution 
 param.setDataTriggerEfficiency(dataVersion, era=puweight)
+print "PU weight era =",puweight
 
 #param.trigger.selectionType = "disabled"
 
@@ -169,6 +190,8 @@ if doBTagTree:
 # Signal analysis module for the "golden analysis"
 import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
 process.signalAnalysis = signalAnalysis.createEDFilter(param)
+if not doFillTree:
+    process.signalAnalysis.Tree.fill = cms.untracked.bool(False)
 # process.signalAnalysis.GlobalMuonVeto = param.NonIsolatedMuonVeto
 # Change default tau algorithm here if needed
 #process.signalAnalysis.tauSelection.tauSelectionHPSTightTauBased # HPS Tight is the default
@@ -189,13 +212,11 @@ process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJe
 
 # Add type 1 MET
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
-(sequence, type1Met, type1p2Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.signalAnalysis.tauSelection, process.signalAnalysis.jetSelection)
+sequence = MetCorrection.addCorrectedMet(process, process.signalAnalysis, postfix=PF2PATVersion)
 process.commonSequence *= sequence
-process.signalAnalysis.MET.type1Src = type1Met
-process.signalAnalysis.MET.type2Src = type1p2Met
 
 # Prescale fetching done automatically for data
-if dataVersion.isData() and options.tauEmbeddingInput == 0:
+if dataVersion.isData() and options.tauEmbeddingInput == 0 and doPrescalesForData:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
     process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
     process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
@@ -203,6 +224,7 @@ if dataVersion.isData() and options.tauEmbeddingInput == 0:
     process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output
+print "\nAnalysis is blind:", process.signalAnalysis.blindAnalysisStatus, "\n"
 print "Trigger:", process.signalAnalysis.trigger
 print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode
 print "VertexWeight:",process.signalAnalysis.vertexWeight
@@ -251,6 +273,36 @@ if doSummerPAS:
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
 
+if doAgainstElectronScan:
+    myTauIsolation = "byMediumCombinedIsolationDeltaBetaCorr"
+    moduleL = process.signalAnalysis.clone()
+    moduleL.tauSelection.isolationDiscriminator = myTauIsolation
+    moduleL.tauSelection.againstElectronDiscriminator = "againstElectronLoose"
+    addAnalysis(process, "signalAnalysisAgainstElectronLoose", moduleL,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+    moduleM = process.signalAnalysis.clone()
+    moduleM.tauSelection.isolationDiscriminator = myTauIsolation
+    moduleM.tauSelection.againstElectronDiscriminator = "againstElectronMedium"
+    addAnalysis(process, "signalAnalysisAgainstElectronMedium", moduleM,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+    moduleT = process.signalAnalysis.clone()
+    moduleT.tauSelection.isolationDiscriminator = myTauIsolation
+    moduleT.tauSelection.againstElectronDiscriminator = "againstElectronTight"
+    addAnalysis(process, "signalAnalysisAgainstElectronTight", moduleT,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+    moduleMVA = process.signalAnalysis.clone()
+    moduleMVA.tauSelection.isolationDiscriminator = myTauIsolation
+    moduleMVA.tauSelection.againstElectronDiscriminator = "againstElectronMVA"
+    addAnalysis(process, "signalAnalysisAgainstElectronMVA", moduleMVA,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
 
 # b tagging testing
 if doBTagScan:
@@ -398,7 +450,7 @@ if doAllTauIds:
 # signalAnalysisJESPlus05
 # signalAnalysisJESMinus05
 from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVariationAnalysis
-def addJESVariation(name, doJetVariation, metVariation):
+def addJESVariation(name, doJetUnclusteredVariation):
     jetVariationMode="all"
     module = getattr(process, name)
 
@@ -406,16 +458,17 @@ def addJESVariation(name, doJetVariation, metVariation):
     module.Tree.fill = False        
     module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
 
-    JESs = "%02d" % int(JESVariation*100)
-    JESe = "%02d" % int(JESEtaVariation*100)
-    JESm = "%02d" % int(metVariation*100)
-    addJESVariationAnalysis(process, dataVersion, name, "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm,   module, additionalCounters, JESVariation, JESEtaVariation, metVariation, doJetVariation)
-    addJESVariationAnalysis(process, dataVersion, name, "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm,  module, additionalCounters, -JESVariation, JESEtaVariation, metVariation, doJetVariation)
-    addJESVariationAnalysis(process, dataVersion, name, "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm,  module, additionalCounters, JESVariation, JESEtaVariation, -metVariation, doJetVariation)
-    addJESVariationAnalysis(process, dataVersion, name, "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, -metVariation, doJetVariation)
+    if doJetUnclusteredVariation:
+        addJESVariationAnalysis(process, dataVersion, name, "JESPlusMETPlus",  module, additionalCounters, tauVariationSigma=1.0, jetVariationSigma=1.0, unclusteredVariationSigma=1.0, postfix=PF2PATVersion)
+        addJESVariationAnalysis(process, dataVersion, name, "JESPlusMETMinus",  module, additionalCounters, tauVariationSigma=1.0, jetVariationSigma=1.0, unclusteredVariationSigma=-1.0, postfix=PF2PATVersion)
+        addJESVariationAnalysis(process, dataVersion, name, "JESMinusMETPlus",  module, additionalCounters, tauVariationSigma=-1.0, jetVariationSigma=-1.0, unclusteredVariationSigma=1.0, postfix=PF2PATVersion)
+        addJESVariationAnalysis(process, dataVersion, name, "JESMinusMETMinus",  module, additionalCounters, tauVariationSigma=-1.0, jetVariationSigma=-1.0, unclusteredVariationSigma=-1.0, postfix=PF2PATVersion)
+    else:
+        addJESVariationAnalysis(process, dataVersion, name, "TESPlus",  module, additionalCounters, tauVariationSigma=1.0, postfix=PF2PATVersion)
+        addJESVariationAnalysis(process, dataVersion, name, "TESMinus",  module, additionalCounters, tauVariationSigma=-1.0, postfix=PF2PATVersion)
 
 if doJESVariation or doSystematics:
-    doJetVariation = True
+    doJetUnclusteredVariation = True
 
     modules = getSignalAnalysisModuleNames()
     if doTauEmbeddingLikePreselection:
@@ -426,25 +479,28 @@ if doJESVariation or doSystematics:
     if options.tauEmbeddingInput != 0:
         modules = [n+"CaloMet60TEff" for n in modules]
         if dataVersion.isData():
-            doJetVariation = False
-            JESUnclusteredMETVariation=0
+            doJetUnclusteredVariation = False
 
-    for name in modules:
-        addJESVariation(name, doJetVariation, JESUnclusteredMETVariation)
+    # JES variation is relevant for MC, and for tau in embedding
+    if dataVersion.isMC() or options.tauEmbeddingInput != 0:
+        for name in modules:
+            addJESVariation(name, doJetUnclusteredVariation)
+    else:
+        print "JES variation disabled for data (not meaningful for data)"
 
 
 def addPUWeightVariation(name):
     module = getattr(process, name).clone()
     module.Tree.fill = False
-    module.vertexWeight.shiftMean = True
-    module.vertexWeight.shiftMeanAmount = PUWeightVariation
+    module.vertexWeight
+    param.setPileupWeight(dataVersion, pset=module.vertexWeight, era=puweight, suffix="up")
     addAnalysis(process, name+"PUWeightPlus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
 
     module = module.clone()
-    module.vertexWeight.shiftMeanAmount = -PUWeightVariation
+    param.setPileupWeight(dataVersion, pset=module.vertexWeight, era=puweight, suffix="down")
     addAnalysis(process, name+"PUWeightMinus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
@@ -460,8 +516,12 @@ if doPUWeightVariation or doSystematics:
     if options.tauEmbeddingInput != 0:
         modules = [n+"CaloMet60TEff" for n in modules]
 
-    for name in modules:
-        addPUWeightVariation(name)
+    # PU weight variation is relevant for MC only
+    if dataVersion.isMC():
+        for name in modules:
+            addPUWeightVariation(name)
+    else:
+        print "PU weight variation disabled for data (not meaningful for data)"
 
 
 # Signal analysis with various tightened muon selections for tau embedding

@@ -37,8 +37,8 @@ counters = "metNtupleCounters"
 #cutText = "Calo E_{T}^{miss} > 45 GeV"
 #cutText = "Calo E_{T}^{miss} > 60 GeV"
 
-#runRegion = 1
-runRegion = 2
+runRegion = 1
+#runRegion = 2
 
 #mcDataDefinition = True
 mcDataDefinition = False
@@ -61,7 +61,7 @@ plotStyles = [
 # main function
 def main():
     # Read the datasets
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, weightedCounters=False)
     if runRegion == 1:
         datasets.remove([
                 "SingleMu_Mu_170722-172619_Aug05",

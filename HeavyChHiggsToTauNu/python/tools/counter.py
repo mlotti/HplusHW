@@ -1022,7 +1022,10 @@ def _indexNameHelper(index, name, names):
     if index != None and name != None:
         raise Exception("Give either index or name, not both")
     if index == None:
-        ind = names.index(name)
+        try:
+            ind = names.index(name)
+        except ValueError:
+            raise Exception("Name '%s' does not exist in list '%s'" %(name, ",".join(names)))
     return ind
 
 ## Class representing a column in counter.CounterTable.
@@ -1254,6 +1257,18 @@ class CounterTable:
     # \param value  Value to insert (dataset.Count object)
     def setCount(self, irow, icol, value):
         self.table[irow][icol] = value
+
+    ## Set count with row and column index or name
+    #
+    # \param value  Value to insert (dataset.Count object)
+    # \param irow      Row index (forwarded to counter._indexNameHelper)
+    # \param icol      Column index (forwarded to counter._indexNameHelper)
+    # \param rowName   Row name (forwarded to counter._indexNameHelper)
+    # \param colName   Column name (forwarded to counter._indexNameHelper)
+    def setCount2(self, value, irow=None, icol=None, rowName=None, colName=None):
+        ir = _indexNameHelper(irow, rowName, self.rowNames)
+        ic = _indexNameHelper(icol, colName, self.columnNames)
+        self.table[ir][ic] = value
 
     ## Get row names
     def getRowNames(self):
@@ -1595,11 +1610,14 @@ class CounterTable:
     # \param splitter    Possible content splitter object (counter.TableSplitter)
     #
     # \return Table formatted as a string
-    def format(self, formatter=TableFormatText(), splitter=None):
+    def format(self, formatter=TableFormatText(), splitter=None, header=True):
         if self.getNcolumns() == 0 or self.getNrows() == 0:
             return ""
 
-        content = [self._header()] + self._content(formatter)
+        content = []
+        if header:
+            content.append(self._header())
+        content.extend(self._content(formatter))
 
         if splitter != None:
             content = splitter.split(content)
@@ -1882,8 +1900,8 @@ class EventCounter:
     ## Constructor
     #
     # \param datasets            dataset.DatasetManager object
-    # \param countNameFunction   Function for mapping the X axis bin labels to count names
-    # \param counters            Counter directory within the dataset.Dataset TFiles
+    # \param countNameFunction   Function for mapping the X axis bin labels to count names (optional)
+    # \param counters            Counter directory within the dataset.Dataset TFiles (if not given, use the counter from dataset.DatasetManager object)
     #
     # Creates counter.Counter for the main counter and each subcounter
     def __init__(self, datasets, countNameFunction=None, counters=None):

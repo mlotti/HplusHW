@@ -1,5 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
+# Blind analysis - do not fill final counter and histogram for data if true
+blindAnalysisStatus = cms.untracked.bool(True);
+
 singleTauMetTriggerPaths = [
 #    "HLT_SingleLooseIsoTau20",
 #    "HLT_SingleLooseIsoTau20_Trk5",
@@ -27,7 +30,7 @@ trigger = cms.untracked.PSet(
     throwIfNoMet = cms.untracked.bool(False), # to prevent jobs from failing, FIXME: must be investigated later
     selectionType = cms.untracked.string("byTriggerBit"), # Default byTriggerBit, other options , disabled
     caloMetSelection = cms.untracked.PSet(
-        src = cms.untracked.InputTag("patMETs"), # Calo MET
+        src = cms.untracked.InputTag("met"), # Calo MET
         metEmulationCut = cms.untracked.double(-1), # disabled by default
     )
 )
@@ -53,7 +56,7 @@ tauSelectionBase = cms.untracked.PSet(
     isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr"), # discriminator for isolation
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1.0), # cut point for continuous isolation discriminator, applied only if it is non-zero
     rtauCut = cms.untracked.double(0.7), # rtau > value
-    nprongs = cms.untracked.uint32(1) # number of prongs
+    nprongs = cms.untracked.uint32(1) # number of prongs (options: 1, 3, or 13 == 1 || 3)
 )
 
 # Only HPS should be used (ignore TCTau, plain PF, TaNC, and Combined HPS+TaNC)
@@ -86,16 +89,21 @@ tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
-vetoTauBase = tauSelectionHPSLooseTauBased.clone(
-    ptCut = cms.untracked.double(20), # jet pt > value
+vetoTauBase = tauSelectionHPSVeryLooseTauBased.clone(
+    ptCut = cms.untracked.double(15), # jet pt > value
     etaCut = cms.untracked.double(2.5), # jet |eta| < value
-    leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
+    leadingTrackPtCut = cms.untracked.double(5.0), # ldg. track > value
+#    isolationDiscriminator = "byVLooseIsolation",
     rtauCut = cms.untracked.double(0.0), # rtau > value
-    nprongs = cms.untracked.uint32(1) # number of prongs
+    nprongs = cms.untracked.uint32(1) # number of prongs (options: 1, 3, or 13 == 1 || 3)
 )
 
 vetoTauSelection = cms.untracked.PSet(
     tauSelection = vetoTauBase,
+    src = cms.untracked.InputTag("genParticles"),
+    oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
+    oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"),
+    threeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauThreeProng"),
     Zmass = cms.untracked.double(90), # Z mass value in GeV
     ZmassWindow = cms.untracked.double(10), # window around Z mass in GeV for vetoing events
 )
@@ -116,7 +124,7 @@ jetSelectionBase = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"), # JPT jets 
     src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
     cleanTauDR = cms.untracked.double(0.5), # cone for rejecting jets around tau jet
-    ptCut = cms.untracked.double(30.0),
+    ptCut = cms.untracked.double(20.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(3), # minimum number of selected jets
     # Jet ID cuts
@@ -145,15 +153,19 @@ jetSelectionTight = jetSelectionBase.clone(
 jetSelection = jetSelectionLoose # set default jet selection
 
 MET = cms.untracked.PSet(
-    # src = cms.untracked.InputTag("patMETs"), # calo MET
-    #src = cms.untracked.InputTag("patMETsTC"), # tc MET
     rawSrc = cms.untracked.InputTag("patMETsPF"), # PF MET
     type1Src = cms.untracked.InputTag("dummy"),
     type2Src = cms.untracked.InputTag("dummy"),
     caloSrc = cms.untracked.InputTag("patMETs"),
     tcSrc = cms.untracked.InputTag("patMETsTC"),
-    select = cms.untracked.string("raw"), # raw, type1, type2
-    METCut = cms.untracked.double(50.0)
+    select = cms.untracked.string("type1"), # raw, type1, type2
+    METCut = cms.untracked.double(50.0),
+
+    # For type I/II correction
+    tauJetMatchingCone = cms.untracked.double(0.5),
+    jetType1Threshold = cms.untracked.double(10),
+    jetOffsetCorrLabel = cms.untracked.string("L1FastJet"),
+    #type2ScaleFactor = cms.untracked.double(1.4),
 )
 
 bTagging = cms.untracked.PSet(
@@ -245,21 +257,32 @@ topSelection = cms.untracked.PSet(
 )
 
 bjetSelection = cms.untracked.PSet(
-  src = cms.untracked.InputTag("genParticles")
+  src = cms.untracked.InputTag("genParticles"),
+  oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
+  oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng") 
 )
+
+
 topChiSelection = cms.untracked.PSet(
-  TopMassLow = cms.untracked.double(120.0),
-  TopMassHigh = cms.untracked.double(250.0),
-  Chi2Cut = cms.untracked.double(5.0),
-  src = cms.untracked.InputTag("genParticles") 
+    TopMassLow = cms.untracked.double(120.0),
+    TopMassHigh = cms.untracked.double(300.0),
+    Chi2Cut = cms.untracked.double(5.0),
+    src = cms.untracked.InputTag("genParticles") 
 )
 
 topWithBSelection = cms.untracked.PSet(
-      TopMassLow = cms.untracked.double(120.0),
-      TopMassHigh = cms.untracked.double(250.0),
-      Chi2Cut = cms.untracked.double(5.0),
-      src = cms.untracked.InputTag("genParticles")
-)      
+    TopMassLow = cms.untracked.double(120.0),
+    TopMassHigh = cms.untracked.double(250.0),
+    Chi2Cut = cms.untracked.double(5.0),
+    src = cms.untracked.InputTag("genParticles")
+)
+
+topWithWSelection = cms.untracked.PSet(
+    TopMassLow = cms.untracked.double(120.0),
+    TopMassHigh = cms.untracked.double(250.0),
+    Chi2Cut = cms.untracked.double(5.0),
+    src = cms.untracked.InputTag("genParticles")
+)
 
 tree = cms.untracked.PSet(
     fill = cms.untracked.bool(True),
@@ -281,12 +304,11 @@ vertexWeight = cms.untracked.PSet(
     vertexSrc = cms.InputTag("goodPrimaryVertices"),
 #    vertexSrc = cms.InputTag("goodPrimaryVertices10"),
     puSummarySrc = cms.InputTag("addPileupInfo"),
-    useSimulatedPileup = cms.bool(False), # reweight by PileupSummaryInfo (True) or vertices (False)
-    method = cms.string("intime"), # intime, 3D
-    weights = cms.vdouble(0.0),
+    dataPUdistribution = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011.root"),
+    dataPUdistributionLabel = cms.string("pileup"),
+    mcPUdistribution = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramMCFall11.root"),
+    mcPUdistributionLabel = cms.string("pileup"),
     enabled = cms.bool(False),
-    shiftMean = cms.bool(False),
-    shiftMeanAmount = cms.double(0),    
 )
 
 def triggerBin(pt, efficiency, uncertainty):
@@ -397,6 +419,8 @@ def setDataTriggerEfficiency(dataVersion, era):
             triggerEfficiencyScaleFactor.mcSelect = "Summer11"
         elif dataVersion.isS6():
             triggerEfficiencyScaleFactor.mcSelect = "Fall11"
+        elif dataVersion.isHighPU():
+	    triggerEfficiencyScaleFactor.mode = "disabled"
         else:
             raise Exception("MC trigger efficencies are available only for Summer11 and Fall11")
     
@@ -416,116 +440,30 @@ def setDataTriggerEfficiency(dataVersion, era):
 
 # Weighting by instantaneous luminosity, and the number of true
 # simulated pile up interactions
+# See test/PUtools for tools to generate distributions and links to twiki
 
-# Summer11
-# SimGeneral/MixingModule/python/mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT.py rev 1.2
-mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT = cms.vdouble(0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0630151648,0.0526654164,0.0402754482,0.0292988928,0.0194384503,0.0122016783,0.007207042,0.004003637,0.0020278322,0.0010739954,0.0004595759,0.0002229748,0.0001028162,4.58337152809607E-05)
-# The following two distributions for Summer11 are from
-# https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
-Summer11_PU_S4_3D = mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT
-Summer11_PU_S4_intime = cms.vdouble(1.45346E-01, 6.42802E-02, 6.95255E-02, 6.96747E-02, 6.92955E-02, 6.84997E-02, 6.69528E-02, 6.45515E-02, 6.09865E-02, 5.63323E-02, 5.07322E-02, 4.44681E-02, 3.79205E-02, 3.15131E-02, 2.54220E-02, 2.00184E-02, 1.53776E-02, 1.15387E-02, 8.47608E-03, 6.08715E-03, 4.28255E-03, 2.97185E-03, 2.01918E-03, 1.34490E-03, 8.81587E-04, 5.69954E-04, 3.61493E-04, 2.28692E-04, 1.40791E-04, 8.44606E-05, 5.10204E-05, 3.07802E-05, 1.81401E-05, 1.00201E-05, 5.80004E-06)
-Summer11_PU_S4_ave = cms.vdouble(0.104109, 0.0703573, 0.0698445, 0.0698254, 0.0697054, 0.0697907, 0.0696751, 0.0694486, 0.0680332, 0.0651044, 0.0598036, 0.0527395, 0.0439513, 0.0352202, 0.0266714, 0.019411, 0.0133974, 0.00898536, 0.0057516, 0.00351493, 0.00212087, 0.00122891, 0.00070592, 0.000384744, 0.000219377)
-
-
-def setPileupWeightFor2010(pset=vertexWeight):
-    # From Apr21 JSON
-    pset.mcDist = mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT
-    pset.dataDist = cms.vdouble()
-    pset.enabled = True
-    pset.useSimulatedPileup = True
-    raise Exception("Data PU distribution for 2010 is not yet available")
-
-def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="Run2011A", method="3D"):
+def setPileupWeight(dataVersion, pset=vertexWeight, era="Run2011A", suffix=""):
     if dataVersion.isData():
         return
-
-    if dataVersion.isS4():
-        pset.mcDistIntime = Summer11_PU_S4_intime
-        pset.mcDist3D = Summer11_PU_S4_3D
-        pset.weightFile3D = cms.string("")
-        pset.method = method
+    if dataVersion.isS6():
+        # Fall11
+        pset.mcPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramMCFall11.root"
+        pset.mcPUdistributionLabel = "pileup"
+    elif dataVersion.isHighPU():
+	# High PU - disable vertex reweighting
+        pset.enabled = False
+        return
     else:
-        raise Exception("No PU reweighting support for anything else than Summer11 S4 scenario at the moment")
+        raise Exception("No PU reweighting support for anything else than Fall11 S6 scenario at the moment")
     pset.enabled = True
-    pset.useSimulatedPileup = True
 
-    # /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/PileUp
-    if era == "EPS":
-        # Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_v3.pileup_v2.root
-        # Cert_165088-167913_7TeV_PromptReco_JSON.pileup_v2.root
-        pset.dataDistIntime = cms.vdouble(8116477.00000000, 35321928.00000000, 81685392.00000000, 132385592.00000000, 168089600.00000000, 177634496.00000000, 162288416.00000000, 131549432.00000000, 96403088.00000000, 64783048.00000000, 40367300.00000000, 23533640.00000000, 12931737.00000000, 6739807.00000000, 3349574.00000000, 1594808.00000000, 730430.43750000, 322976.00000000, 138316.20312500, 57534.10156250, 23303.56054688, 9211.73242188, 3560.76806641, 1348.30310059, 500.88070679, 182.78894043, 65.60128021, 23.17440987, 8.06377983, 2.76517296, 0.93474805, 0.31154540, 0.10237330, 0.03316922, 0.01539941)
-        # Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_v3.pileupTruth_v2.root
-        # Cert_165088-167913_7TeV_PromptReco_JSON.pileupTruth_v2.root
-        pset.dataDist3D = cms.vdouble(0.00000000, 179221.81250000, 3814551.00000000, 25772300.00000000, 172987680.00000000, 356233824.00000000, 353649024.00000000, 175073792.00000000, 47863632.00000000, 10613712.00000000, 1599420.50000000, 243314.20312500, 26479.34960938, 4621.37011719, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000)
-        pset.weightFile3D = "HiggsAnalysis/HeavyChHiggsToTauNu/data/Weight3D_160404-167913.root"
-
-    elif era == "Run2011A-EPS":
-        # Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.pileup_v2.root
-        # Cert_172620-173692_PromptReco_JSON.pileup_v2.root
-        pset.dataDistIntime = cms.vdouble(4848892.97584991, 20529438.23677765, 47643960.96635760, 79748005.00045094, 108048133.88826957, 125969058.25675932, 130969086.58619121, 124083438.16256833, 108566913.20788163, 88480612.19331141, 67568311.67310232, 48566962.00574034, 32981250.33882020, 21230236.06722812, 12993001.81115350, 7581174.99149259, 4228179.23819536, 2259416.79477907, 1159379.56732899, 572440.97021515, 272480.69068092, 125257.93731902, 55699.30297723, 23995.56380003, 10029.20958816, 4072.25946078, 1608.34820338, 618.60207560, 231.95871764, 84.88525826, 30.34623619, 10.60798240, 3.62908322, 1.21605912, 0.58696811)
-        # Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.pileupTruth_v2.root
-        # Cert_172620-173692_PromptReco_JSON.pileupTruth_v2.root
-        pset.dataDist3D = cms.vdouble(0.00000000, 73351.21789568, 1924055.52206460, 24791818.40420207, 95209585.87688106, 156742968.69022515, 167816555.37041527, 200587495.86714596, 193603251.43905830, 132536767.53925066, 52232333.43499182, 11569144.56335005, 1264254.55759395, 106947.66097234, 6537.93290332, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000)
-        pset.weightFile3D = "HiggsAnalysis/HeavyChHiggsToTauNu/data/Weight3D_170249-173692.root"
-
-    elif era == "Run2011A":
-        # Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_v3.pileup_v2.root
-        # Cert_165088-167913_7TeV_PromptReco_JSON.pileup_v2.root
-        # Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.pileup_v2.root
-        # Cert_172620-173692_PromptReco_JSON.pileup_v2.root
-        pset.dataDistIntime = cms.vdouble(12965370.00000000, 55851368.00000000, 129329360.00000000, 212133600.00000000, 276137728.00000000, 303603552.00000000, 293257504.00000000, 255632864.00000000, 204970016.00000000, 153263664.00000000, 107935616.00000000, 72100608.00000000, 45912988.00000000, 27970044.00000000, 16342576.00000000, 9175983.00000000, 4958610.00000000, 2582392.75000000, 1297695.75000000, 629975.06250000, 295784.25000000, 134469.67187500, 59260.07031250, 25343.86718750, 10530.08984375, 4255.04833984, 1673.94946289, 641.77648926, 240.02249146, 87.65042877, 31.28098488, 10.91952801, 3.73145652, 1.24922824, 0.60236752)
-        # Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_v3.pileupTruth_v2.root
-        # Cert_165088-167913_7TeV_PromptReco_JSON.pileupTruth_v2.root
-        # Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.pileupTruth_v2.root
-        # Cert_172620-173692_PromptReco_JSON.pileupTruth_v2.root
-        pset.dataDist3D = cms.vdouble(0.00000000, 252573.03125000, 5738606.50000000, 50564120.00000000, 268197264.00000000, 512976800.00000000, 521465600.00000000, 375661280.00000000, 241466880.00000000, 143150480.00000000, 53831752.00000000, 11812459.00000000, 1290734.00000000, 111569.03125000, 6537.93310547, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000)
-        pset.weightFile3D = "HiggsAnalysis/HeavyChHiggsToTauNu/data/Weight3D_160404-173692.root"
-
-    elif era == "Run2011B":
-        # Cert_175832-177515_PromptReco_JSON.pileup_v2.root
-        # Cert_177718_178078_7TeV_PromptReco_Collisons11_JSON.pileup_v2.root
-        pset.dataDistIntime = cms.vdouble(288839.53915556, 1944213.26515934, 7048893.23414854, 17866609.95292950, 35426386.30411588, 58569220.47460749, 84109732.81887844, 107913437.32744664, 126207015.92123026, 136532056.99027678, 138111301.86270767, 131696668.90145068, 119102716.65215862, 102637515.42847806, 84591412.32094480, 66875650.26462977, 50838721.28147475, 37240033.46912239, 26333217.71488850, 18004589.36255783, 11920512.70239508, 7653181.43074327, 4770835.32761546, 2891324.00292016, 1705583.78483189, 980459.54751395, 549865.64067858, 301180.84548916, 161286.57232955, 84529.11170115, 43397.75678300, 21846.03128374, 10791.61205329, 5235.31386353, 4645.12031734)
-        # Cert_175832-177515_PromptReco_JSON.pileupTruth_v2.root
-        # Cert_177718_178078_7TeV_PromptReco_Collisons11_JSON.pileupTruth_v2.root
-        pset.dataDist3D = cms.vdouble(0.00000000, 27267.43951180, 35590.01162089, 74493.32615900, 574589.87278601, 2906478.58801937, 33631126.33142464, 93666084.68744215, 138283180.67404377, 187623897.42037976, 215647291.26482403, 211729949.14499977, 187001951.98512825, 146693123.78931406, 94437211.96536994, 46031697.28833491, 16923096.85784976, 5181606.42557313, 1428052.42465751, 437008.14233306, 102694.05116599, 6516.19593707, 0.00000000, 0.00000000, 0.00000000)
-        if method == "3D":
-            raise Exception("No 3D weight file yet for Run2011B")
-
+    if era == "Run2011A" or era == "Run2011B":
+        dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData"+era+suffix+".root"
     elif era == "Run2011A+B":
-        # Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_v3.pileup_v2.root
-        # Cert_165088-167913_7TeV_PromptReco_JSON.pileup_v2.root
-        # Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.pileup_v2.root
-        # Cert_172620-173692_PromptReco_JSON.pileup_v2.root
-        # Cert_175832-177515_PromptReco_JSON.pileup_v2.root
-        # Cert_177718_178078_7TeV_PromptReco_Collisons11_JSON.pileup_v2.root
-        pset.dataDistIntime = cms.vdouble(13254210.00000000, 57795580.00000000, 136378256.00000000, 230000208.00000000, 311564128.00000000, 362172768.00000000, 377367232.00000000, 363546304.00000000, 331177056.00000000, 289795712.00000000, 246046912.00000000, 203797264.00000000, 165015696.00000000, 130607568.00000000, 100933984.00000000, 76051632.00000000, 55797336.00000000, 39822424.00000000, 27630914.00000000, 18634564.00000000, 12216297.00000000, 7787651.00000000, 4830095.00000000, 2916667.75000000, 1716113.87500000, 984714.62500000, 551539.56250000, 301822.62500000, 161526.59375000, 84616.76562500, 43429.03906250, 21856.95117188, 10795.34375000, 5236.56347656, 4645.72265625)
-        # Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_v3.pileupTruth.root
-        # Cert_165088-167913_7TeV_PromptReco_JSON.pileupTruth.root
-        # Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.pileupTruth.root
-        # Cert_172620-173692_PromptReco_JSON.pileupTruth.root
-        pset.dataDist3D = cms.vdouble(0.00000000, 279840.46875000, 5774196.50000000, 50638612.00000000, 268771872.00000000, 515883296.00000000, 555096704.00000000, 469327360.00000000, 379750048.00000000, 330774368.00000000, 269479040.00000000, 223542416.00000000, 188292688.00000000, 146804688.00000000, 94443744.00000000, 46031696.00000000, 16923096.00000000, 5181606.50000000, 1428052.50000000, 437008.12500000, 102694.04687500, 6516.19580078, 0.00000000, 0.00000000, 0.00000000)
-        if method == "3D":
-            raise Exception("No 3D weight file yet for Run2011A+B")
-
+        dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011"+suffix+".root"
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS', 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011A+B'" % era)
-
-# Weighting by number of reconstructed vertices
-def setVertexWeightFor2010(pset=vertexWeight):
-    # From runs 136035-149294 single tau trigger and W+jet
-    #vertexWeight.weights = cms.vdouble(0.00000, 3.66926, 3.00360, 1.39912, 0.50035, 0.15271, 0.04164, 0.01124, 0.00293, 0.00083, 0.00022, 0.00006, 0.00000)
-    # From runs 136035-149294 single tau trigger and QCD, vertex sumpt > 10
-    pset.weights = cms.vdouble(0.09267533, 2.24385810, 1.55092120, 0.59239078, 0.17919108, 0.04978977, 0.01336043, 0.00359282, 0.00072334, 0.00017415, 0.00000000)
-    pset.enabled = True
-    pset.useSimulatedPileup = False
-
-def setVertexWeightFor2011(pset=vertexWeight):
-    # From runs 160431-162828 single tau trigger and W+jets
-    #vertexWeight.weights = cms.vdouble(0.00000, 0.24846, 0.88677, 1.52082, 1.79081, 1.53684, 1.08603, 0.71142, 0.45012, 0.27843, 0.17420, 0.13067, 0.08622, 0.04736, 0.03079, 0.14548, 0.00000)
-    # From runs 160431-162828 single tau trigger and W+jets, vertex sumpt > 10
-    pset.weights = cms.vdouble(0.03445398, 0.76995593, 1.36990047, 1.32346773, 0.96835577, 0.63931763, 0.41220802, 0.25240105, 0.15958929, 0.11445294, 0.07332379, 0.10596101, 0.00000000)
-    pset.enabled = True
-    pset.useSimulatedPileup = False
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'Run2011A', 'Run2011B', 'Run2011A+B'" % era)
+    dataPUdistributionLabel = "pileup"
 
 # Tau selection
 def forEachTauSelection(function):
@@ -561,9 +499,8 @@ def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, ad
         module.tauSelection = selection.clone()
 
         # Calculate type 1 MET
-        (type1Sequence, type1Met, type1p2Met) = MetCorrection.addCorrectedMet(process, dataVersion, module.tauSelection, module.jetSelection, postfix=name)
-        module.MET.type1Src = type1Met
-        module.MET.type2Src = type1p2Met
+        raise Exception("This needs further adjustment")
+        type1Sequence = MetCorrection.addCorrectedMet(process, dataVersion, module, postfix=name)
 
         seq = cms.Sequence(
             commonSequence *
@@ -587,3 +524,31 @@ def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processNa
 def changeJetCollection(**kwargs):
     _changeCollection([jetSelection.src, forwardJetVeto.src], **kwargs)
 
+def changeCollectionsToPF2PAT(postfix="PFlow"):
+    # Taus
+    hps = "selectedPatTaus"+postfix
+    if "TriggerMatched" in tauSelectionHPSTightTauBased.src.value():
+        hps = "patTaus%sTriggerMatched%s" % (postfix, postfix)
+
+    tauSelectionHPSTightTauBased.src = hps
+    tauSelectionHPSMediumTauBased.src = hps
+    tauSelectionHPSLooseTauBased.src = hps
+    tauSelectionHPSVeryLooseTauBased.src = hps
+    vetoTauSelection.tauSelection.src = "selectedPatTaus"+postfix
+
+
+    # Muons
+    GlobalMuonVeto.MuonCollectionName = "selectedPatMuons"+postfix
+    NonIsolatedMuonVeto.MuonCollectionName = "selectedPatMuons"+postfix
+
+    # Electrons
+    GlobalElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
+    NonIsolatedElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
+
+    # Jets
+    changeJetCollection(moduleLabel="selectedPatJets"+postfix)
+
+    # MET
+    MET.rawSrc = "patMETsPFlow"
+    MET.caloSrc = "Nonexistent"
+    MET.tcSrc = "Nonexistent"

@@ -14,7 +14,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters/weighted"
+counters = analysis+"Counters"
 
 styles.signal80Style.append(styles.StyleLine(lineColor=ROOT.kRed+2))
 styles.signal90Style.append(styles.StyleLine(lineColor=ROOT.kGreen+2))
@@ -26,6 +26,7 @@ styles.signal160Style.append(styles.StyleLine(lineColor=ROOT.kAzure+2))
 
 def main():
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets.updateNAllEventsToPUWeighted()
 
     # remove data datasets
     datasets.remove(filter(lambda name: "Tau_" in name, datasets.getAllDatasetNames()))

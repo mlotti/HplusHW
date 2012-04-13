@@ -7,6 +7,7 @@ import FWCore.ParameterSet.Config as cms
 # creating the EDFilter.
 def createEDFilter(param):
     return cms.EDFilter("HPlusSignalAnalysisFilter",
+        blindAnalysisStatus = param.blindAnalysisStatus,
         trigger = param.trigger,
         triggerEfficiencyScaleFactor = param.triggerEfficiencyScaleFactor,
         primaryVertexSelection = param.primaryVertexSelection,
@@ -25,6 +26,7 @@ def createEDFilter(param):
         bjetSelection = param.bjetSelection,                                      
         topChiSelection = param.topChiSelection,                                  
         topWithBSelection = param.topWithBSelection,
+        topWithWSelection = param.topWithWSelection,
         forwardJetVeto = param.forwardJetVeto,
         transverseMassCut = param.transverseMassCut,
         EvtTopology = param.EvtTopology,
