@@ -1047,16 +1047,36 @@ class HistoGraph(Histo):
         return [func(values[i], i) for i in xrange(0, self.getRootGraph().GetN())]
 
     def getXmin(self):
-        return min(self._values(self.getRootGraph().GetX(), lambda val, i: val-self.getRootGraph().GetErrorXlow(i)))
+        if isinstance(self.getRootGraph(), ROOT.TGraph):
+            # TGraph.GetError[XY]{low,high} return -1 ...
+            function = lambda val, i: val
+        else:
+            function = lambda val, i: val-self.getRootGraph().GetErrorXlow(i)
+        return min(self._values(self.getRootGraph().GetX(), function))
 
     def getXmax(self):
-        return max(self._values(self.getRootGraph().GetX(), lambda val, i: val+self.getRootGraph().GetErrorXhigh(i)))
+        if isinstance(self.getRootGraph(), ROOT.TGraph):
+            # TGraph.GetError[XY]{low,high} return -1 ...
+            function = lambda val, i: val
+        else:
+            function = lambda val, i: val+self.getRootGraph().GetErrorXhigh(i)
+        return max(self._values(self.getRootGraph().GetX(), function))
 
     def getYmin(self):
-        return min(self._values(self.getRootGraph().GetY(), lambda val, i: val-self.getRootGraph().GetErrorYlow(i)))
+        if isinstance(self.getRootGraph(), ROOT.TGraph):
+            # TGraph.GetError[XY]{low,high} return -1 ...
+            function = lambda val, i: val
+        else:
+            function = lambda val, i: val-self.getRootGraph().GetErrorYlow(i)
+        return min(self._values(self.getRootGraph().GetY(), function))
 
     def getYmax(self):
-        return max(self._values(self.getRootGraph().GetY(), lambda val, i: val+self.getRootGraph().GetErrorYhigh(i)))
+        if isinstance(self.getRootGraph(), ROOT.TGraph):
+            # TGraph.GetError[XY]{low,high} return -1 ...
+            function = lambda val, i: val
+        else:
+            function = lambda val, i: val+self.getRootGraph().GetErrorYhigh(i)
+        return max(self._values(self.getRootGraph().GetY(), function))
 
     def getBinWidth(self, bin):
         raise Exception("getBinWidth() is meaningless for HistoGraph (name %s)" % self.getName())
