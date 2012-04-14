@@ -90,10 +90,10 @@ def main(argv):
 
 
 
-    bins = ["inclusive"]
-#    bins = ["4050","5060","6070","7080","80100","100120","120150","150"]
+#    bins = ["inclusive"]
+    bins = ["4050","5060","6070","7080","80100","100120","120150","150"]
 #    bins = ["4050"]
-
+            
 
     for bin in bins:
 
@@ -124,7 +124,7 @@ def main(argv):
         invertedQCD.getNormalization()
 
     invertedQCD.Summary()
-    invertedQCD.WriteNormalizationToFile("QCDInvertedNormalizationFactors.py")
+    invertedQCD.WriteNormalizationToFile("QCDInvertedNormalizationFactorsRun.py")
 
 
 if __name__ == "__main__":
