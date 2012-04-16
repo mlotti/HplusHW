@@ -17,24 +17,26 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import sort
 # main class for generating the datacards from a given cfg file
 
 class DataCardGenerator:
-    def __init__(self, config):
-	config.DataGroups.Print()
-	config.Nuisances.Print()
+    def __init__(self, config, opts):
+	self._config = config
+	self._opts = opts
 
-	self.reportUnusedNuisances(config)
+	if (opts.debugConfig):
+            config.DataGroups.Print()
+            config.Nuisances.Print()
 
-	self.config = config
+	#self.reportUnusedNuisances()
 
-    def reportUnusedNuisances(self,config):
+    def reportUnusedNuisances(self):
 	usedNuisances = []
-        for nuisance in config.Nuisances.nuisances.keys():
-	    for datagroup in config.DataGroups.datagroups.keys():
-		for usedNuisance in config.DataGroups.get(datagroup).nuisances:
+        for nuisance in self._config.Nuisances.nuisances.keys():
+	    for datagroup in self._config.DataGroups.datagroups.keys():
+		for usedNuisance in self._config.DataGroups.get(datagroup).nuisances:
 		    if usedNuisance == nuisance:
 			usedNuisances.append(nuisance)
 	usedNuisances = self.rmDuplicates(usedNuisances)
 	unUsedNuisances = []
-	for nuisance in config.Nuisances.nuisances.keys():
+	for nuisance in self._config.Nuisances.nuisances.keys():
 	    if nuisance not in usedNuisances:
 		#print "UNUSED NUISANCE"
 		#config.Nuisances.get(nuisance).Print
@@ -50,8 +52,8 @@ class DataCardGenerator:
 
     def generate(self):
 	signalDir = []
-	signalDir.append(self.config.multicrabPaths.getSignalPath())
-	datasets = dataset.getDatasetsFromMulticrabDirs(signalDir,counters=self.config.CounterDir)
+	signalDir.append(self._config.multicrabPaths.getSignalPath())
+	datasets = dataset.getDatasetsFromMulticrabDirs(signalDir,counters=self._config.CounterDir)
 	datasets.loadLuminosities()
 	plots.mergeRenameReorderForDataMC(datasets)
 	luminosity = datasets.getDataset("Data").getLuminosity()

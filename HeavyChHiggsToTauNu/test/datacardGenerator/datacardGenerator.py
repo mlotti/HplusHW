@@ -13,9 +13,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
 def main(opts):
     print "Loading datacard:", opts.datacard
     config = load_module(opts.datacard)
-    #multicrabPaths = PathFinder.MulticrabPathFinder(config) #FIXME ??? it takes a path, not a config as input
-    
-    datacardgenerator = DataCard.DataCardGenerator(config)
+    print "Parsing datacard information ..."
+    datacardgenerator = DataCard.DataCardGenerator(config,opts)
 
     #if multicrabPaths.getQCDFactorizedExists():
     #    datacardgenerator.generate(multicrabPaths.getQCDFactorizedPaths())

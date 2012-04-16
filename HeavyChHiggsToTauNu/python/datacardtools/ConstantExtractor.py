@@ -18,7 +18,7 @@ class ConstantExtractor(Extractor):
         return self._constantValue
 
     ## Method for extracking information
-    def doExtractAsymmetricUpperValue(self, datasets, normalisation, additionalNormalisation = 1.0):
+    def doExtractAsymmetricUpperValue(self, counterHisto, datasets, normalisation, additionalNormalisation = 1.0):
         return self._constantUpperValue
 
     ## Method for adding histograms to the root file
