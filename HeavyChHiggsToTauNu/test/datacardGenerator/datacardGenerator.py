@@ -28,6 +28,8 @@ def main(opts):
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     parser.add_option("-x", "--datacard", dest="datacard", action="store", help="Name (incl. path) of the datacard to be used as an input")
+    parser.add_option("--QCDfactorised", dest="useQCDfactorised", action="store_true", default=False, help="Use factorised method for QCD measurement")
+    parser.add_option("--QCDinverted", dest="useQCDinverted", action="store_true", default=False, help="Use inverted method for QCD measurement")
     parser.add_option("--debugConfig", dest="debugConfig", action="store_true", default=False, help="Enable debugging print for config parsing")
     parser.add_option("--debugMining", dest="debugMining", action="store_true", default=False, help="Enable debugging print for data mining")
     parser.add_option("--debugQCD", dest="debugQCD", action="store_true", default=False, help="Enable debugging print for QCD measurement")
@@ -35,7 +37,10 @@ if __name__ == "__main__":
     
     myStatus = True
     if opts.datacard == None:
-        print "Missing datacard!\n"
+        print "Error: Missing datacard!\n"
+        myStatus = False
+    if opts.useQCDfactorised and opts.useQCDinverted:
+        print "Error: use either '--QCDfactorised' or '--QCDinverted' (only one can exist in the datacard)"
         myStatus = False
     if not myStatus:
         parser.print_help()

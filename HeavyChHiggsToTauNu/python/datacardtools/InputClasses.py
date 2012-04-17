@@ -8,13 +8,13 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import sort
 # data structures for the config file information
 
 class ObservationInput:
-    def __init__(self, counterDir, counter, shapeHisto):
-	self.setCounterDir(counterDir)
+    def __init__(self, dirPrefix, counter, shapeHisto):
+	self.setDirPrefix(dirPrefix)
 	self.setCounter(counter)
 	self.setShapeHisto(shapeHisto)
 
-    def setCounterDir(self,dir):
-	self.counterDir = dir
+    def setDirPrefix(self,dir):
+	self.dirPrefix = dir
 
     def setCounter(self,counter):
 	self.counter    = counter
@@ -22,8 +22,8 @@ class ObservationInput:
     def setShapeHisto(self,histo):
 	self.shapeHisto = histo
 
-    def getCounterDir(self):
-        return self.counterDir
+    def getDirPrefix(self):
+        return self.dirPrefix
         
     def getCounter(self):
         return self.counter
@@ -33,7 +33,7 @@ class ObservationInput:
         
     def Print(self):
 	print "ObservationInput :"
-	print "    counterdir  ",self.counterDir
+	print "    dirPrefix   ",self.dirPrefix
 	print "    counter     ",self.counter
 	print "    shapeHisto  ",self.shapeHisto
 
@@ -44,20 +44,22 @@ class DataGroup:
                  label = "", 
                  nuisances = [], 
                  shapeHisto = "", 
-                 counterDir = "",
+                 dirPrefix = "",
                  rateCounter = "",
                  datasetType = "",
                  datasetDefinitions = [],
+                 MCEWKDatasetDefinitions = [],
                  additionalNormalisation = 1.0):
 	self.landsProcess  = landsProcess
-	self.validMassPoints          = validMassPoints
+	self.validMassPoints = validMassPoints
 	self.label         = label
 	self.nuisances     = nuisances
 	self.shapeHisto    = shapeHisto
-	self.counterDir    = counterDir
+	self.dirPrefix    = dirPrefix
 	self.rateCounter   = rateCounter
         self.datasetType   = datasetType
         self.datasetDefinitions = datasetDefinitions
+        self.MCEWKDatasetDefinitions = MCEWKDatasetDefinitions
         self.additionalNormalisation = additionalNormalisation
 
     def getId(self):
@@ -69,10 +71,11 @@ class DataGroup:
                          label        = self.label,
                          nuisances    = self.nuisances,
                          shapeHisto   = self.shapeHisto,
-                         counterDir   = self.counterDir,
+                         dirPrefix   = self.dirPrefix,
                          rateCounter  = self.rateCounter,
                          datasetType  = self.datasetType,
                          datasetDefinitions = self.datasetDefinitions,
+                         MCEWKDatasetDefinitions = self.MCEWKDatasetDefinitions,
                          additionalNormalisation= self.additionalNormalisation)
 
     def setLandSProcess(self,landsProcess):
@@ -90,8 +93,8 @@ class DataGroup:
     def setShapeHisto(self,histo):
 	self.shapeHisto = histo
 
-    def setCounterHisto(self,counterDir):
-	self.counterDir = counterDir
+    def setCounterHisto(self,dirPrefix):
+	self.dirPrefix = dirPrefix
 
     def setRateCounter(self, rateCounter):
         self.rateCounter = rateCounter
@@ -102,6 +105,9 @@ class DataGroup:
     def setDatasetDefinitions(self,datasetDefinitions):
         self.datasetDefinitions = datasetDefinitions
 
+    def setMCEWKDatasetDefinitions(self,MCEWKDatasetDefinitions):
+        self.MCEWKDatasetDefinitions = MCEWKDatasetDefinitions
+
     def setAdditionalNormalisation(self,value):
 	self.additionaNormalisation = value
 
@@ -109,9 +115,10 @@ class DataGroup:
 	print "    Label        ",self.label
 	print "    LandS process",self.landsProcess
 	print "    Valid mass points",self.validMassPoints
-	print "    Counter      ",self.counterDir
+	print "    dir. prefix      ",self.dirPrefix
 	print "    datasetType  ",self.datasetType
 	print "    datasetDefinitions",self.datasetDefinitions
+	print "    MCEWKDatasetDefinitions",self.MCEWKDatasetDefinitions
 	print "    Additional normalisation",self.additionalNormalisation
 	print "    Nuisances    ",self.nuisances
         print
@@ -188,7 +195,7 @@ class Nuisance:
         self.upperValue = upperValue
 
     def setCounterHisto(self, value):
-	self.counterDir = value
+	self.dirPrefix = value
 
     def setCounter(self, value):
 	self.counter = value
@@ -221,8 +228,8 @@ class Nuisance:
         print "    Function      =",self.function
         if self.value > 0:
             print "    Value         =",self.value
-        if len(self.counterDir) > 0:
-            print "    CounterHisto  =",self.counterDir
+        if len(self.dirPrefix) > 0:
+            print "    CounterHisto  =",self.dirPrefix
         if len(self.counter) > 0:
             print "    Counter       =",self.counter
         if len(self.paths) > 0:

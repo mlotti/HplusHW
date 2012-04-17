@@ -10,11 +10,12 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import execute
 # QCDfact and QCDinv dirs. If multiple directories are found, the latest is taken.
 
 class MulticrabDirectoryDataType:
-    UNKNOWN = -1
-    SIGNAL = 0
-    EWKTAUS = 1
-    QCDFACTORISED = 2
-    QCDINVERTED = 3
+    UNKNOWN = 0
+    SIGNAL = 1
+    EWKTAUS = 2
+    QCDFACTORISED = 3
+    QCDINVERTED = 4
+    DUMMY = 5
 
 class MulticrabPathFinder:
     def __init__(self, path):
@@ -28,11 +29,11 @@ class MulticrabPathFinder:
         self._qcdinv_path  = self.qcdinvfind(multicrabpaths)
         print "- Using multi-jets (inverted) directory:", self._qcdinv_path
 
-    def getQCDFactorizedExists(self):
+    def getQCDFactorisedExists(self):
         return os.path.exists(self.getQCDfacPath())
     
-    def getQCDFactorizedPaths(self):
-        return self.getSignalPath(),self.getEWKPath(),self.getQCDfacPath()
+    def getQCDFactorisedPath(self):
+        return self.getQCDfacPath()
     
     def getQCDInvertedExists(self):
         return os.path.exists(self.getQCDinvPath())

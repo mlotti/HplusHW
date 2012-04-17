@@ -2,16 +2,17 @@ DataCardName    = 'myDymmyTestName'
 Path            = '/mnt/flustre/slehti/HplusDataForLands'
 MassPoints      = [80,100,120,140,150,155,160]
 
+# Specify name of EDFilter or EDAnalyser process that produced the root files
 SignalAnalysis  = "signalAnalysis"
 QCDFactorisedAnalysis = "QCDMeasurement"
 QCDInvertedAnalysis = "" # FIXME
 
-RootFileName    = "histograms.root"
+# Choose QCD measurement method (can be overridden from command line)
+# options: 'QCD factorised' or 'QCD inverted'
+QCDMeasurementMethod = "QCD factorised"
+#QCDMeasurementMethod = "QCD inverted"
 
-# Counter directory definitions
-SignalCounterDir = SignalAnalysis+"Counters" # do not put weighted here, it is taken automatically
-QCDFactorisedCounterDir = QCDFactorisedAnalysis+"Counters"
-QCDInvertedCounterDir = QCDInvertedAnalysis+"Counters"
+RootFileName    = "histograms.root" #FIXME
 
 # Rate counter definitions
 SignalRateCounter = "deltaPhiTauMET<160"
@@ -20,9 +21,7 @@ FakeRateCounter = "nonQCDType2:deltaphi160"
 # Shape histogram definitions
 SignalShapeHisto = "transverseMassAfterDeltaPhi160"
 FakeShapeHisto = "NonQCDTypeIITransverseMassAfterDeltaPhi160"
-
-# Config histo definition
-ConfigInfoHisto = "configInfo/configinfo"
+ShapeHistogramsDimensions = [20, 0.0, 400.0]  # bins, min, max
 
 
 #FIXME move
@@ -35,7 +34,7 @@ ConfigInfoHisto = "configInfo/configinfo"
 # Observation definition (how to retrieve number of observed events)
 #
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ObservationInput
-Observation = ObservationInput(counterDir=SignalCounterDir,
+Observation = ObservationInput(dirPrefix=SignalAnalysis,
                                counter=SignalRateCounter,
                                shapeHisto=SignalShapeHisto)
 #Observation.setPaths(signalPath,signalDataPaths)
@@ -48,7 +47,7 @@ DataGroups = []
 
 signalTemplate = DataGroup(datasetType="Signal",
                            shapeHisto=SignalShapeHisto,
-                           counterDir=SignalCounterDir,
+                           dirPrefix=SignalAnalysis,
                            rateCounter=SignalRateCounter)
 
 for mass in MassPoints:
@@ -75,7 +74,7 @@ DataGroups.append(DataGroup(
     label        = "QCDfact",
     landsProcess = 3,
     validMassPoints = MassPoints,
-    counterDir   = QCDFactorisedCounterDir,
+    dirPrefix   = QCDFactorisedAnalysis,
     datasetType  = "QCD factorised",
     #mcEWKDatasetsForQCD = multicrabPaths.getSubPaths(multicrabPaths.getQCDfacPath(),"^Tau_\S+|Hplus",exclude=True),
     nuisances    = ["12","13"]
@@ -88,7 +87,7 @@ DataGroups.append(DataGroup(
     datasetType  = "QCD inverted",
     datasetDefinitions   = "^Tau\S+",
     shapeHisto   = "mtSum",
-    counterDir   = QCDInvertedCounterDir,
+    dirPrefix   = QCDInvertedAnalysis,
     rateCounter  = "deltaPhiTauMET160 limit",
     additionalNormalisation= 0.0066,
     #path         = multicrabPaths.getQCDinvPath(),
@@ -102,7 +101,7 @@ DataGroups.append(DataGroup(
     shapeHisto   = SignalShapeHisto,
     datasetType  = "Embedding",
     datasetDefinitions   = ["^Data"],
-    counterDir   = SignalCounterDir,
+    dirPrefix   = SignalAnalysis,
     rateCounter  = SignalRateCounter,
     #path         = multicrabPaths.getEWKPath(),
     #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getEWKPath(),"^Data"),
@@ -115,7 +114,7 @@ DataGroups.append(DataGroup(
     shapeHisto   = SignalShapeHisto,
     datasetType  = "Embedding",
     datasetDefinitions   = ["^DYJetsToLL"],
-    counterDir   = SignalCounterDir,
+    dirPrefix   = SignalAnalysis,
     rateCounter  = SignalRateCounter,
     #path         = multicrabPaths.getEWKPath(),
     #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getEWKPath(),"^DYJetsToLL"),
@@ -128,7 +127,7 @@ DataGroups.append(DataGroup(
     shapeHisto   = FakeShapeHisto,
     datasetType  = "Signal",
     datasetDefinitions   = ["^WW","^WZ","^ZZ"],
-    counterDir   = SignalCounterDir,
+    dirPrefix   = SignalAnalysis,
     rateCounter  = FakeRateCounter,
     #path         = multicrabPaths.getEWKPath(),
     #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getEWKPath(),"^WW"),
@@ -141,7 +140,7 @@ DataGroups.append(DataGroup(
     shapeHisto   = FakeShapeHisto,
     datasetType  = "Signal",
     datasetDefinitions   = ["^TTJets_"],
-    counterDir   = SignalCounterDir,
+    dirPrefix   = SignalAnalysis,
     rateCounter  = FakeRateCounter,
     #subpath      = multicrabPaths.getSubPaths(signalPath,"^TTJets_"),
     nuisances    = ["1","4","7b","9","10","28","33","34b","35"]
@@ -153,7 +152,7 @@ DataGroups.append(DataGroup(
     shapeHisto   = FakeShapeHisto,
     datasetType  = "Signal",
     datasetDefinitions   = ["^WJets"],
-    counterDir   = SignalCounterDir,
+    dirPrefix   = SignalAnalysis,
     rateCounter  = FakeRateCounter,
     #subpath      = multicrabPaths.getSubPaths(signalPath,"^WJets_"),
     nuisances    = ["1","4","7b","9","11","29","33","34b","37"]
@@ -165,7 +164,7 @@ DataGroups.append(DataGroup(
     shapeHisto   = FakeShapeHisto,
     datasetType  = "Signal",
     datasetDefinitions   = ["^tW"], #FIXME and s and t channels
-    counterDir   = SignalCounterDir,
+    dirPrefix   = SignalAnalysis,
     rateCounter  = FakeRateCounter,
     #subpath      = multicrabPaths.getSubPaths(signalPath,"^T_tW"),
     nuisances    = ["1","4","7b","9","10","30","33","34b","38"]
