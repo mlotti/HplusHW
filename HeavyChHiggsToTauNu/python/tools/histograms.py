@@ -153,9 +153,13 @@ class PlotText:
 #
 # \param x   X coordinate of the text (None for default value)
 # \param y   Y coordinate of the text (None for default value)
-def addCmsPreliminaryText(x=None, y=None):
+def addCmsPreliminaryText(x=None, y=None, text=None):
     (x, y) = textDefaults.getValues("cmsPreliminary", x, y)
-    addText(x, y, cmsText[cmsTextMode], textDefaults.getSize("cmsPreliminary"), bold=False)
+    if text == None:
+        txt  = cmsText[cmsTextMode]
+    else:
+        txt = text
+    addText(x, y, txt, textDefaults.getSize("cmsPreliminary"), bold=False)
 
 ## Draw the center-of-mass energy text to the current TPad
 #
