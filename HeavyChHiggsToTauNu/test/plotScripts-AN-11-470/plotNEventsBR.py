@@ -79,7 +79,7 @@ def massPoint(br, mass, n_hh, n_hw, n_ww):
         opts["ymaxfactor"] = 1.4
 
     p.histoMgr.luminosity = 2300 # ugly hack, only for display
-    plots.drawPlot(p, "nevents_ttbar_br_mass%d"%mass, "BR(t#rightarrowH^{+}b)", ylabel="Events", opts=opts, addLuminosityText=True)
+    plots.drawPlot(p, "nevents_ttbar_br_mass%d"%mass, "BR(t#rightarrowH^{+}b)", ylabel="Events", opts=opts, addLuminosityText=True, cmsText="Simulation")
 
 def createGraph(name, br, func):
     gr = ROOT.TGraph(len(br), array.array("d", br), array.array("d", map(func, br)))
