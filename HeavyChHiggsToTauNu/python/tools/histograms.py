@@ -14,6 +14,15 @@ import ROOT
 
 import dataset
 
+## Enumeration class for CMS text mode
+class CMSMode:
+    PRELIMINARY = 0
+    PAPER = 1
+    SIMULATION = 2
+
+## Global variable to hold CMS text mode
+cmsTextMode = CMSMode.PRELIMINARY
+
 ## Class to provide default positions of the various texts.
 #
 # The attributes which can be set are the x and y coordinates and the
@@ -140,7 +149,12 @@ class PlotText:
 # \param y   Y coordinate of the text (None for default value)
 def addCmsPreliminaryText(x=None, y=None):
     (x, y) = textDefaults.getValues("cmsPreliminary", x, y)
-    addText(x, y, "CMS Preliminary", textDefaults.getSize("cmsPreliminary"), bold=False)
+    text = {
+        CMSMode.PRELIMINARY: "CMS Preliminary",
+        CMSMode.PAPER: "CMS",
+        CMSMode.SIMULATION : "CMS Simulation"
+        }[cmsTextMode]
+    addText(x, y, text, textDefaults.getSize("cmsPreliminary"), bold=False)
 
 ## Draw the center-of-mass energy text to the current TPad
 #
