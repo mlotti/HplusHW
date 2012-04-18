@@ -15,10 +15,13 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 
+lumi = 2.3
+
 x1 = 0.21
 def main():
     style = tdrstyle.TDRStyle()
     histograms.createLegend.setDefaults(x1=x1, y1=0.72, x2=0.51, y2=0.92)
+    histograms.cmsTextMode = histograms.CMSMode.SIMULATION
 
     br = map(lambda n: n*0.01, xrange(100))
 
@@ -75,7 +78,8 @@ def massPoint(br, mass, n_hh, n_hw, n_ww):
     elif mass == 160:
         opts["ymaxfactor"] = 1.4
 
-    plots.drawPlot(p, "nevents_ttbar_br_mass%d"%mass, "BR(t#rightarrowH^{+}b)", ylabel="Events", opts=opts)
+    p.histoMgr.luminosity = 2300 # ugly hack, only for display
+    plots.drawPlot(p, "nevents_ttbar_br_mass%d"%mass, "BR(t#rightarrowH^{+}b)", ylabel="Events", opts=opts, addLuminosityText=True)
 
 def createGraph(name, br, func):
     gr = ROOT.TGraph(len(br), array.array("d", br), array.array("d", map(func, br)))

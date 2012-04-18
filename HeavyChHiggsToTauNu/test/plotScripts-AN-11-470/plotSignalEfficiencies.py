@@ -56,6 +56,8 @@ def main():
 
     style = tdrstyle.TDRStyle()
 
+    histograms.cmsTextMode = histograms.CMSMode.SIMULATION
+
     eventCounter = counter.EventCounter(datasets, counters=counters)
     eventCounter.normalizeMCByCrossSection()
     mainTable = eventCounter.getMainCounterTable()
