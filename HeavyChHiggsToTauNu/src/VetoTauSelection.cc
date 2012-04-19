@@ -172,9 +172,6 @@ namespace HPlus {
 
 
 
-
-
-
     // Count how many taus (excluding the selected tau) are available in the event
     for (edm::PtrVector<pat::Tau>::iterator it = myVetoTauCandidates.begin(); it != myVetoTauCandidates.end(); ++it) {
       //     increment(fVetoTauCandidatesCounter);

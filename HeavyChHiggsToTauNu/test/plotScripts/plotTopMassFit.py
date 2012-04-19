@@ -52,6 +52,7 @@ btagging = False
 def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+#    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters)
     datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()
 
