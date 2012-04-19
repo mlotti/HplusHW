@@ -6,6 +6,7 @@ import os
 import sys
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor
 
 # DatacardColumn class
 class DatacardColumn():
@@ -92,18 +93,26 @@ class DatacardColumn():
         return mass in self._enabledForMassPoints
 
     ## Returns rate for column (as string)
-    def getRateData(self):
-        #FIXME
-        print "getRate not yet implemented"
-        return 0;
+    def getRateValue(self, luminosity, additionalNormalisation = 1.0):
+        myExtractor = None
+        if self._datasetType == MulticrabDirectoryDataType.OBSERVATION:
+            myExtractor = CounterExtractor(self._rateCounter, ExtractorMode.OBSERVATION)
+        else:
+            myExtractor = CounterExtractor(self._rateCounter, ExtractorMode.RATE)
+        if self._datasetType == MulticrabDirectoryDataType.QCDFACTORISED or self._datasetType == MulticrabDirectoryDataType.QCDINVERTED:
+            #myExtractor.Calculate(luminosity, additionalNormalisation)
+            #myExtractor.
+            print "rate not implemented for QCD yet"  #FIXME
+        else:
+            return myExtractor.doExtract(self._datasetMgr, self._datasetMgrColumn, luminosity, additionalNormalisation)
 
     ## Returns nuisance for column (as string)
-    def getNuisanceData(self, id):
+    def getNuisanceValue(self, id):
         for nid in self._nuisances:
             if id == nid:
-                print "not implemented yet" #FIXME
+                return myExtractor.doExtract(self._datasetMgr, self._datasetMgrColumn, luminosity, additionalNormalisation)
                 #return nid.doExtract(self._datasetMgrColumn
-        return ""
+        raise Exception("Nuisance with id='"+id+"' not found in data group '"+self._label+"'! Check first with hasNuisance(id) that data group has the nuisance.")
 
     ##
     def setShapeHistoToRootFile(self, rootfile):

@@ -14,6 +14,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import *
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
 
@@ -33,6 +34,7 @@ class DataCardGenerator:
 	self._config = config
 	self._opts = opts
         self._observation = None
+        self._luminosity = -1
         self._columns = []
         self._nuisances = []
         self._QCDmethod = DatacardQCDMethod.UNKNOWN
@@ -46,8 +48,13 @@ class DataCardGenerator:
         # Create columns (dataset groups)
         self.createDatacardColumns()
 
-        
+        # Create extractors for nuisances (data miners for nuisances)
+        self.createExtractors()
 
+        for c in self._columns:
+            print c._label, c.getRateValue(self._luminosity)
+        print "done."
+        sys.exit()
 	#if (opts.debugConfig):
         #    config.DataGroups.Print()
         #    config.Nuisances.Print()
@@ -215,6 +222,9 @@ class DataCardGenerator:
                                            shapeHisto = self._config.Observation.shapeHisto)
         if self._opts.debugConfig:
             self._observation.printDebug()
+        # Obtain luminosity from observation
+        self._luminosity = myDsetMgr.getDataset(myObservationName).getLuminosity()
+        print "Luminosity is set to \033[1;37m%f 1/pb\033[0;0m"%self._luminosity # FIXME: should this be set to all the other datasets?
         print "Data groups converted to datacard columns"
 
     ## Helper function for finding datasets
@@ -234,8 +244,41 @@ class DataCardGenerator:
                 sys.exit()
         return myResult
 
-    
-
+    ## Creates extractors for nuisances
+    def createExtractors(self):
+        for n in self._config.Nuisances:
+            myMode = ExtractorMode.NUISANCE
+            if n.function == "Constant":
+                if n.upperValue > 0:
+                    myMode = ExtractorMode.ASYMMETRICNUISANCE
+                self._nuisances.append(ConstantExtractor(exid = n.id,
+                                                         constantValue = n.value,
+                                                         constantUpperValue = n.upperValue,
+                                                         distribution = n.distr,
+                                                         description = n.label,
+                                                         mode = myMode))
+            elif n.function == "Counter":
+                self._nuisances.append(CounterExtractor(exid = n.id,
+                                                        counterItem = n.counter,
+                                                        distribution = n.distr,
+                                                        description = n.label,
+                                                        mode = myMode))
+            elif n.function == "maxCounter":
+                print "fixme"
+            elif n.function == "Shape":
+                print "fixme"
+            elif n.function == "ScaleFactor":
+                print "fixme"
+            elif n.function == "Ratio":
+                print "fixme"
+            elif n.function == "QCDFactorised":
+                print "fixme"
+            elif n.function == "QCDInverted":
+                print "fixme"
+            else:
+                print "Error in nuisance with id='"+n.id+"': unknown or missing field function '"+n.function+"' (string)!"
+                print "Options are: 'Constant', 'Counter', 'maxCounter', 'Shape', 'ScaleFactor', 'Ratio', 'QCDFactorised'"
+                sys.exit()
 
 # FIXME legacy code beyond this point
 

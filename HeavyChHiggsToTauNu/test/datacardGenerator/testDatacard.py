@@ -311,7 +311,7 @@ Nuisances.append(Nuisance(
     id            = "12",
     label         = "QCD stat.",
     distr         = "lnN",
-    function      = "QCDMeasurement",
+    function      = "QCDFactorised",
     QCDmode       = "statistics",
     histoDir      = ["QCDMeasurement/"],
     histograms    = ["KESKEN"]
@@ -321,7 +321,7 @@ Nuisances.append(Nuisance(
     id            = "13",
     label         = "QCD syst.",
     distr         = "lnN",
-    function      = "QCDMeasurement",
+    function      = "QCDFactorised",
     QCDmode       = "systematics",
 ))
 
@@ -559,7 +559,7 @@ Nuisances.append(Nuisance(
     id            = "42",
     label         = "QCDInv: MET shape", 
     distr         = "lnN",
-    function      = "Constant", 
+    function      = "Constant",
     value         = 0.055
 ))
 
