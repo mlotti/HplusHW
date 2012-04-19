@@ -1278,15 +1278,19 @@ class Dataset:
             self.era = era.GetTitle()
 
         self._isData = "data" in self.dataVersion
-
         if counterDir != None:
             self.counterDir = counterDir
             self._origCounterDir = counterDir
             d = self.file.Get(counterDir)
             if d == None:
                 raise Exception("Could not find counter directory %s from file %s" % (counterDir, fname))
-            ctr = _histoToCounter(d.Get("counter"))
-            self.nAllEventsUnweighted = ctr[0][1].value() # first counter, second element of the tuple
+            if d.Get("counter") != None:
+                ctr = _histoToCounter(d.Get("counter"))
+                self.nAllEventsUnweighted = ctr[0][1].value() # first counter, second element of the tuple
+            else:
+                if not weightedCounters:
+                    raise Exception("Could not find counter histogram in directory %s from file %s" % (self.counterDir, fname))
+                self.nAllEventsUnweighted = -1
             self.nAllEventsWeighted = None
 
             self.nAllEvents = self.nAllEventsUnweighted
@@ -1963,11 +1967,14 @@ class DatasetManager:
         for d in self.datasets:
             jsonname = os.path.join(d.basedir, fname)
             if not os.path.exists(jsonname):
-                print >> sys.stderr, "WARNING: luminosity json file '%s' doesn't exist!" % jsonname
-            data = json.load(open(jsonname))
-            for name, value in data.iteritems():
-                if self.hasDataset(name):
-                    self.getDataset(name).setLuminosity(value)
+                print >> sys.stderr, "WARNING: luminosity json file '%s' doesn't exist (using luminosity=1 for data)!" % jsonname
+                for name in self.getDataDatasetNames():
+                    self.getDataset(name).setLuminosity(1)
+            else:
+                data = json.load(open(jsonname))
+                for name, value in data.iteritems():
+                    if self.hasDataset(name):
+                        self.getDataset(name).setLuminosity(value)
 
 ####        if len(os.path.dirname(fname)) == 0:
 ####            fname = os.path.join(self.basedir, fname)

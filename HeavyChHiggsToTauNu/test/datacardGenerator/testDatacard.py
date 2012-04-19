@@ -35,7 +35,8 @@ ShapeHistogramsDimensions = [20, 0.0, 400.0]  # bins, min, max
 #
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ObservationInput
 Observation = ObservationInput(dirPrefix=SignalAnalysis,
-                               counter=SignalRateCounter,
+                               rateCounter=SignalRateCounter,
+                               datasetDefinitions=["Tau_"],
                                shapeHisto=SignalShapeHisto)
 #Observation.setPaths(signalPath,signalDataPaths)
 
@@ -103,7 +104,7 @@ DataGroups.append(DataGroup(
     landsProcess = 4,
     shapeHisto   = SignalShapeHisto,
     datasetType  = "Embedding",
-    datasetDefinitions   = ["Tau"],
+    datasetDefinitions   = ["Data"],
     dirPrefix   = SignalAnalysis,
     rateCounter  = SignalRateCounter,
     validMassPoints = MassPoints,
@@ -129,11 +130,11 @@ DataGroups.append(DataGroup(
 DataGroups.append(DataGroup(
     label        = "EWK_VV",
     landsProcess = 6,
-    shapeHisto   = FakeShapeHisto,
-    datasetType  = "Signal",
-    datasetDefinitions   = ["WW","WZ","ZZ"],
+    shapeHisto   = SignalShapeHisto,
+    datasetType  = "Embedding",
+    datasetDefinitions   = ["WW"], #,"WZ","ZZ"],
     dirPrefix   = SignalAnalysis,
-    rateCounter  = FakeRateCounter,
+    rateCounter  = SignalRateCounter,
     validMassPoints = MassPoints,
     #path         = multicrabPaths.getEWKPath(),
     #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getEWKPath(),"^WW"),

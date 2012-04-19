@@ -11,11 +11,12 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import execute
 
 class MulticrabDirectoryDataType:
     UNKNOWN = 0
-    SIGNAL = 1
-    EWKTAUS = 2
-    QCDFACTORISED = 3
-    QCDINVERTED = 4
-    DUMMY = 5
+    OBSERVATION = 1
+    SIGNAL = 2
+    EWKTAUS = 3
+    QCDFACTORISED = 4
+    QCDINVERTED = 5
+    DUMMY = 6
 
 class MulticrabPathFinder:
     def __init__(self, path):

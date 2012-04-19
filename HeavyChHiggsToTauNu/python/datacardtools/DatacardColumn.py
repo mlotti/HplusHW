@@ -26,7 +26,9 @@ class DatacardColumn():
         self._label = label
         self._landsProcess = landsProcess
         self._enabledForMassPoints = enabledForMassPoints
-        if datasetType == "Signal":
+        if datasetType == "Observation":
+            self._datasetType = MulticrabDirectoryDataType.OBSERVATION
+        elif datasetType == "Signal":
             self._datasetType = MulticrabDirectoryDataType.SIGNAL
         elif datasetType == "Embedding":
             self._datasetType = MulticrabDirectoryDataType.EWKTAUS
@@ -46,22 +48,23 @@ class DatacardColumn():
         self._additionalNormalisationFactor = additionalNormalisationFactor
         self._dirPrefix = dirPrefix
         self._shapeHisto = shapeHisto
-        
+
         self.checkInputValidity()
 
     def checkInputValidity(self):
         myMsg = ""
         if self._label == "":
             myMsg += "Missing or empty field 'label'! (string) to be printed on a column in datacard\n"
-        if self._landsProcess == -999:
-            myMsg += "Missing or empty field 'landsProcess'! (integer) to be printed as process in datacard\n"
+        if self._datasetType != MulticrabDirectoryDataType.OBSERVATION:
+            if self._landsProcess == -999:
+                myMsg += "Missing or empty field 'landsProcess'! (integer) to be printed as process in datacard\n"
         if len(self._enabledForMassPoints) == 0:
             myMsg += "Missing or empty field 'validMassPoints'! (list of integers) specifies for which mass points the column is enabled\n"
         if self._datasetType == MulticrabDirectoryDataType.UNKNOWN:
             myMsg += "Wrong 'datasetType' specified! Valid options are 'Signal', 'Embedding', 'QCD factorised', 'QCD inverted', and 'None'\n"
         if self._datasetMgrColumn == "":
             myMsg += "No dataset names defined!\n"
-        if self._datasetType == MulticrabDirectoryDataType.SIGNAL or self._datasetType == MulticrabDirectoryDataType.EWKTAUS:
+        if self._datasetType == MulticrabDirectoryDataType.SIGNAL or self._datasetType == MulticrabDirectoryDataType.EWKTAUS or self._datasetType == MulticrabDirectoryDataType.OBSERVATION:
             if self._rateCounter == "":
                 myMsg += "Missing or empty field 'rateCounter'! (string) Counter for rate to be used for column\n"
             if self._shapeHisto == "":
@@ -72,7 +75,7 @@ class DatacardColumn():
                 myMsg += "No datasets defined for MC EWK in data group for QCD factorised!\n"
         elif self._datasetType == MulticrabDirectoryDataType.QCDINVERTED:
             myMsg += "FIXME: QCD inverted not implemented yet\n" # FIXME
-        if self._datasetType != MulticrabDirectoryDataType.DUMMY:
+        if self._datasetType != MulticrabDirectoryDataType.DUMMY and self._datasetType != MulticrabDirectoryDataType.OBSERVATION:
             if len(self._nuisances) == 0:
                 myMsg += "Missing or empty field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
 
@@ -110,10 +113,12 @@ class DatacardColumn():
     ## Print debugging information
     def printDebug(self):
         print "Datagroup '"+self._label+"':"
-        print "  process:", self._landsProcess
+        if self._landsProcess > -999:
+            print "  process:", self._landsProcess
         print "  enabled for mass points:", self._enabledForMassPoints
         print "  rate counter:", self._rateCounter
-        print "  nuisances:", self._nuisances
+        if len(self._nuisances) > 0:
+            print "  nuisances:", self._nuisances
         print "  directory prefix for root file:", self._dirPrefix
         print "  shape histogram:", self._shapeHisto
 

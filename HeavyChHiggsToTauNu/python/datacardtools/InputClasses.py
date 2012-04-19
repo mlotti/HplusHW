@@ -8,33 +8,37 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import sort
 # data structures for the config file information
 
 class ObservationInput:
-    def __init__(self, dirPrefix, counter, shapeHisto):
+    def __init__(self, dirPrefix, rateCounter, datasetDefinitions, shapeHisto):
 	self.setDirPrefix(dirPrefix)
-	self.setCounter(counter)
+	self.setRateCounter(rateCounter)
+	self.setDatasetDefinitions(datasetDefinitions)
 	self.setShapeHisto(shapeHisto)
 
     def setDirPrefix(self,dir):
 	self.dirPrefix = dir
 
-    def setCounter(self,counter):
-	self.counter    = counter
+    def setRateCounter(self,rateCounter):
+	self.rateCounter = rateCounter
+
+    def setDatasetDefinitions(self,datasetDefinitions):
+        self.datasetDefinitions = datasetDefinitions
 
     def setShapeHisto(self,histo):
 	self.shapeHisto = histo
 
     def getDirPrefix(self):
         return self.dirPrefix
-        
-    def getCounter(self):
-        return self.counter
-        
+
+    def getRateCounter(self):
+        return self.rateCounter
+
     def getShapeHisto(self):
         return self.shapeHisto
-        
+
     def Print(self):
 	print "ObservationInput :"
 	print "    dirPrefix   ",self.dirPrefix
-	print "    counter     ",self.counter
+	print "    rate counter",self.rateCounter
 	print "    shapeHisto  ",self.shapeHisto
 
 class DataGroup:
