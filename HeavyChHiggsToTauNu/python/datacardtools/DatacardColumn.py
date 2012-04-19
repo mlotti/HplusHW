@@ -3,6 +3,7 @@
 #
 
 import os
+import sys
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
 
@@ -25,21 +26,18 @@ class DatacardColumn():
         self._label = label
         self._landsProcess = landsProcess
         self._enabledForMassPoints = enabledForMassPoints
-        if (datasetTypeInternal >= -1):
-            self_datasetType = datasetTypeInternal
+        if datasetType == "Signal":
+            self._datasetType = MulticrabDirectoryDataType.SIGNAL
+        elif datasetType == "Embedding":
+            self._datasetType = MulticrabDirectoryDataType.EWKTAUS
+        elif datasetType == "QCD factorised":
+            self._datasetType = MulticrabDirectoryDataType.QCDFACTORISED
+        elif datasetType == "QCD inverted":
+            self._datasetType = MulticrabDirectoryDataType.QCDINVERTED
+        elif datasetType == "None":
+            self._datasetType = MulticrabDirectoryDataType.DUMMY
         else:
-            if datasetType == "Signal":
-                self._datasetType = MulticrabDirectoryDataType.SIGNAL
-            elif datasetType == "Embedding":
-                self._datasetType = MulticrabDirectoryDataType.EMBEDDING
-            elif datasetType == "QCD factorised":
-                self._datasetType = MulticrabDirectoryDataType.QCDFACTORISED
-            elif datasetType == "QCD inverted":
-                self._datasetType = MulticrabDirectoryDataType.QCDINVERTED
-            elif datasetType == "None":
-                self._datasetType = MulticrabDirectoryDataType.DUMMY
-            else:
-                self._datasetType = MulticrabDirectoryDataType.UNKNOWN
+            self._datasetType = MulticrabDirectoryDataType.UNKNOWN
         self._rateCounter = rateCounter
         self._nuisances = nuisances
         self._datasetMgr = datasetMgr
@@ -58,14 +56,16 @@ class DatacardColumn():
         if self._landsProcess == -999:
             myMsg += "Missing or empty field 'landsProcess'! (integer) to be printed as process in datacard\n"
         if len(self._enabledForMassPoints) == 0:
-            myMsg += "Missing or empty field 'enabledForMassPoints'! (list of integers) specifies for which mass points the column is enabled\n"
+            myMsg += "Missing or empty field 'validMassPoints'! (list of integers) specifies for which mass points the column is enabled\n"
         if self._datasetType == MulticrabDirectoryDataType.UNKNOWN:
             myMsg += "Wrong 'datasetType' specified! Valid options are 'Signal', 'Embedding', 'QCD factorised', 'QCD inverted', and 'None'\n"
         if self._datasetMgrColumn == "":
             myMsg += "No dataset names defined!\n"
-        if self._datasetType == MulticrabDirectoryDataType.SIGNAL or self._datasetType == MulticrabDirectoryDataType.EMBEDDING:
+        if self._datasetType == MulticrabDirectoryDataType.SIGNAL or self._datasetType == MulticrabDirectoryDataType.EWKTAUS:
             if self._rateCounter == "":
                 myMsg += "Missing or empty field 'rateCounter'! (string) Counter for rate to be used for column\n"
+            if self._shapeHisto == "":
+                myMsg += "Missing or empty field 'shapeHisto'! (string) Name of histogram for shape \n"
         elif self._datasetType == MulticrabDirectoryDataType.QCDFACTORISED:
             # rate handled as spedial case, extra datasetMgrColumn are required for EWK MC
             if len(self._datasetMgrColumnForQCDMCEWK) == 0:
@@ -75,11 +75,9 @@ class DatacardColumn():
         if self._datasetType != MulticrabDirectoryDataType.DUMMY:
             if len(self._nuisances) == 0:
                 myMsg += "Missing or empty field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
-            if self._shapeHisto == "":
-                myMsg += "Missing or empty field 'shapeHisto'! (string) Name of histogram for shape \n"
 
         if myMsg != "":
-            print "Error (data gropu ='"+self._label_+"'):\n"+myMsg
+            print "Error (data group ='"+self._label+"'):\n"+myMsg
             sys.exit()
 
     ## Returns true if column has a nuisance
@@ -108,6 +106,17 @@ class DatacardColumn():
     def setShapeHistoToRootFile(self, rootfile):
         print "setShapeHistoToRootFile not yet implemented"
         #FIXME
+
+    ## Print debugging information
+    def printDebug(self):
+        print "Datagroup '"+self._label+"':"
+        print "  process:", self._landsProcess
+        print "  enabled for mass points:", self._enabledForMassPoints
+        print "  rate counter:", self._rateCounter
+        print "  nuisances:", self._nuisances
+        print "  directory prefix for root file:", self._dirPrefix
+        print "  shape histogram:", self._shapeHisto
+
 
     ## \var _additionalNormalisationFactor
     # Normalisation factor is multiplied by this factor (needed for EWK)

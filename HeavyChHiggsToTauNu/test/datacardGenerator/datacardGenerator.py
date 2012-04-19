@@ -23,7 +23,7 @@ def main(opts):
     #    datacardgenerator.generate(multicrabPaths.getQCDInvertedPaths())
     
     #datacardgenerator = DataCard.DataCardGenerator()
-    datacardgenerator.generate()
+    #datacardgenerator.generate()
 
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")

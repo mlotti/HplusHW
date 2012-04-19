@@ -57,7 +57,7 @@ for mass in MassPoints:
     hhx.setLandSProcess(-1)
     hhx.setValidMassPoints(myMassList)
     hhx.setNuisances(["1","3","7","9","10","17","28","33","34"])
-    hhx.setDatasetDefinitions(["^TTToHplusBHminusB_M"+str(mass)]),
+    hhx.setDatasetDefinitions(["TTToHplusBHminusB_M"+str(mass)]),
 #   hhx.setSubPaths(multicrabPaths.getSubPaths(signalPath,"^TTToHplusBHminusB_M"+str(mass)))
     DataGroups.append(hhx)
 
@@ -66,7 +66,7 @@ for mass in MassPoints:
     hwx.setLandSProcess(0)
     hwx.setValidMassPoints(myMassList)
     hwx.setNuisances(["1","3","7","9","10","18","28","33","34"])
-    hhx.setDatasetDefinitions(["^TTToHplusBWB_M"+str(mass)]),
+    hwx.setDatasetDefinitions(["TTToHplusBWB_M"+str(mass)]),
 #    hwx.setSubPaths(multicrabPaths.getSubPaths(signalPath,"^TTToHplusBWB_M"+str(mass)))
     DataGroups.append(hwx)
 
@@ -76,33 +76,37 @@ DataGroups.append(DataGroup(
     validMassPoints = MassPoints,
     dirPrefix   = QCDFactorisedAnalysis,
     datasetType  = "QCD factorised",
+    datasetDefinitions = ["Tau_"],
+    MCEWKDatasetDefinitions = ["TTJets","WJets","DY","WW","WZ","ZZ","T_","Tbar_"],
     #mcEWKDatasetsForQCD = multicrabPaths.getSubPaths(multicrabPaths.getQCDfacPath(),"^Tau_\S+|Hplus",exclude=True),
     nuisances    = ["12","13"]
 ))
 
-DataGroups.append(DataGroup(
-    label        = "QCDinv",
-    landsProcess = 3,
-    validMassPoints = MassPoints,
-    datasetType  = "QCD inverted",
-    datasetDefinitions   = "^Tau\S+",
-    shapeHisto   = "mtSum",
-    dirPrefix   = QCDInvertedAnalysis,
-    rateCounter  = "deltaPhiTauMET160 limit",
-    additionalNormalisation= 0.0066,
-    #path         = multicrabPaths.getQCDinvPath(),
-    #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getQCDinvPath(),"^Tau_\S+"),
-    nuisances    = ["40","41","42","43"]
-))
+if 0 == 1:
+    DataGroups.append(DataGroup(
+        label        = "QCDinv",
+        landsProcess = 3,
+        validMassPoints = MassPoints,
+        datasetType  = "QCD inverted",
+        datasetDefinitions   = "^Tau\S+",
+        shapeHisto   = "mtSum",
+        dirPrefix   = QCDInvertedAnalysis,
+        rateCounter  = "deltaPhiTauMET160 limit",
+        additionalNormalisation= 0.0066,
+        #path         = multicrabPaths.getQCDinvPath(),
+        #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getQCDinvPath(),"^Tau_\S+"),
+        nuisances    = ["40","41","42","43"]
+    ))
 
 DataGroups.append(DataGroup(
     label        = "EWK_Tau",
     landsProcess = 4,
     shapeHisto   = SignalShapeHisto,
     datasetType  = "Embedding",
-    datasetDefinitions   = ["^Data"],
+    datasetDefinitions   = ["Tau"],
     dirPrefix   = SignalAnalysis,
     rateCounter  = SignalRateCounter,
+    validMassPoints = MassPoints,
     #path         = multicrabPaths.getEWKPath(),
     #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getEWKPath(),"^Data"),
     nuisances    = ["1b","3","7c","14","15","16","19"]
@@ -113,9 +117,10 @@ DataGroups.append(DataGroup(
     landsProcess = 5,
     shapeHisto   = SignalShapeHisto,
     datasetType  = "Embedding",
-    datasetDefinitions   = ["^DYJetsToLL"],
+    datasetDefinitions   = ["DYJetsToLL"],
     dirPrefix   = SignalAnalysis,
     rateCounter  = SignalRateCounter,
+    validMassPoints = MassPoints,
     #path         = multicrabPaths.getEWKPath(),
     #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getEWKPath(),"^DYJetsToLL"),
     nuisances    = ["1c","3","7","9","11b","15b","16b","31","33","34","24"]
@@ -126,9 +131,10 @@ DataGroups.append(DataGroup(
     landsProcess = 6,
     shapeHisto   = FakeShapeHisto,
     datasetType  = "Signal",
-    datasetDefinitions   = ["^WW","^WZ","^ZZ"],
+    datasetDefinitions   = ["WW","WZ","ZZ"],
     dirPrefix   = SignalAnalysis,
     rateCounter  = FakeRateCounter,
+    validMassPoints = MassPoints,
     #path         = multicrabPaths.getEWKPath(),
     #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getEWKPath(),"^WW"),
     nuisances    = ["1c","3","7","9","11b","15b","16b","32","33","34","27"]
@@ -139,9 +145,10 @@ DataGroups.append(DataGroup(
     landsProcess = 1,
     shapeHisto   = FakeShapeHisto,
     datasetType  = "Signal",
-    datasetDefinitions   = ["^TTJets_"],
+    datasetDefinitions   = ["TTJets_"],
     dirPrefix   = SignalAnalysis,
     rateCounter  = FakeRateCounter,
+    validMassPoints = MassPoints,
     #subpath      = multicrabPaths.getSubPaths(signalPath,"^TTJets_"),
     nuisances    = ["1","4","7b","9","10","28","33","34b","35"]
 ))
@@ -151,9 +158,10 @@ DataGroups.append(DataGroup(
     landsProcess = 7,
     shapeHisto   = FakeShapeHisto,
     datasetType  = "Signal",
-    datasetDefinitions   = ["^WJets"],
+    datasetDefinitions   = ["WJets"],
     dirPrefix   = SignalAnalysis,
     rateCounter  = FakeRateCounter,
+    validMassPoints = MassPoints,
     #subpath      = multicrabPaths.getSubPaths(signalPath,"^WJets_"),
     nuisances    = ["1","4","7b","9","11","29","33","34b","37"]
 ))
@@ -163,9 +171,10 @@ DataGroups.append(DataGroup(
     landsProcess = 8,
     shapeHisto   = FakeShapeHisto,
     datasetType  = "Signal",
-    datasetDefinitions   = ["^tW"], #FIXME and s and t channels
+    datasetDefinitions   = ["T_", "Tbar_"], #FIXME and s and t channels
     dirPrefix   = SignalAnalysis,
     rateCounter  = FakeRateCounter,
+    validMassPoints = MassPoints,
     #subpath      = multicrabPaths.getSubPaths(signalPath,"^T_tW"),
     nuisances    = ["1","4","7b","9","10","30","33","34b","38"]
 ))
