@@ -874,10 +874,12 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
     def _getSumHistogram(self):
         hsum = self.histoWrappers[0].getHistogram() # we get a clone
         for h in self.histoWrappers[1:]:
-            if h.getHistogram().GetNbinsX() != hsum.GetNbinsX():
-                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.GetName(), self.histoWrappers[0].getDataset().getName(), h.getDataset().getName(), hsum.GetNbinsX(), h.getHistogram().GetNbinsX()))
+            histo = h.getHistogram()
+            if histo.GetNbinsX() != hsum.GetNbinsX():
+                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.GetName(), self.histoWrappers[0].getDataset().getName(), h.getDataset().getName(), hsum.GetNbinsX(), histo.GetNbinsX()))
 
-            hsum.Add(h.getHistogram())
+            hsum.Add(histo)
+            histo.Delete()
         return hsum
 
     ## Merge the histograms and apply the current normalization.
@@ -1006,10 +1008,12 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
 
         hsum = self.histoWrappers[0].getHistogram() # we get a clone
         for h in self.histoWrappers[1:]:
-            if h.getHistogram().GetNbinsX() != hsum.GetNbinsX():
-                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.getHistogram().GetName(), self.histoWrappers[0].getHistogram().getName(), h.getDataset().getName(), hsum.GetNbinsX(), h.getHistogram().GetNbinsX()))
+            histo = h.getHistogram()
+            if histo.GetNbinsX() != hsum.GetNbinsX():
+                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.GetName(), self.histoWrappers[0].getDataset().getName(), h.getDataset().getName(), hsum.GetNbinsX(), histo.GetNbinsX()))
 
-            hsum.Add(h.getHistogram())
+            hsum.Add(histo)
+            histo.Delete()
 
         if self.normalization == "toOne":
             return _normalizeToOne(hsum)
