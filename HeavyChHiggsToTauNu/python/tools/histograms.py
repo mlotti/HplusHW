@@ -29,6 +29,9 @@ cmsText = {
     CMSMode.SIMULATION : "CMS Simulation"
     }
 
+## Default energy text
+energyText = "7 TeV"
+
 ## Class to provide default positions of the various texts.
 #
 # The attributes which can be set are the x and y coordinates and the
@@ -165,17 +168,20 @@ def addCmsPreliminaryText(x=None, y=None, text=None):
 #
 # \param x   X coordinate of the text (None for default value)
 # \param y   Y coordinate of the text (None for default value)
-# \param s   Center-of-mass energy text with the unit
-def addEnergyText(x=None, y=None, s="7 TeV"):
+# \param s   Center-of-mass energy text with the unit (None for the default value, dataset.energyText
+def addEnergyText(x=None, y=None, s=None):
     (x, y) = textDefaults.getValues("energy", x, y)
-    addText(x, y, "#sqrt{s} = "+s, textDefaults.getSize("energy"), bold=False)
+    text = energyText
+    if s != None:
+        text = s
+    addText(x, y, "#sqrt{s} = "+text, textDefaults.getSize("energy"), bold=False)
 
 ## Draw the integrated luminosity text to the current TPad
 #
 # \param x     X coordinate of the text (None for default value)
 # \param y     Y coordinate of the text (None for default value)
-# \param lumi  Value of the integrated luminosity
-# \param unit  Unit of the integrated luminosity value
+# \param lumi  Value of the integrated luminosity in pb^-1
+# \param unit  Unit of the integrated luminosity value (should be fb^-1)
 def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
     (x, y) = textDefaults.getValues("lumi", x, y)
     lumiInFb = lumi/1000.
