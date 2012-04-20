@@ -9,19 +9,32 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import execute
 # class to identify multicrab dirs from a given directory. Identifies separately the signal, ewk
 # QCDfact and QCDinv dirs. If multiple directories are found, the latest is taken.
 
+class MulticrabDirectoryDataType:
+    UNKNOWN = 0
+    OBSERVATION = 1
+    SIGNAL = 2
+    EWKTAUS = 3
+    QCDFACTORISED = 4
+    QCDINVERTED = 5
+    DUMMY = 6
+
 class MulticrabPathFinder:
     def __init__(self, path):
         multicrabpaths = self.scan(path)
-        self.ewk_path     = self.ewkfind(multicrabpaths)
-        self.signal_path  = self.signalfind(multicrabpaths)
-        self.qcdfact_path = self.qcdfactfind(multicrabpaths)
-        self.qcdinv_path  = self.qcdinvfind(multicrabpaths)
+        self._ewk_path     = self.ewkfind(multicrabpaths)
+        print "- Using EWK+ttbar with genuine taus directory:", self._ewk_path
+        self._signal_path  = self.signalfind(multicrabpaths)
+        print "- Using signal and EWK+ttbar with fake taus directory:", self._signal_path
+        self._qcdfact_path = self.qcdfactfind(multicrabpaths)
+        print "- Using multi-jets (factorised) directory:", self._qcdfact_path
+        self._qcdinv_path  = self.qcdinvfind(multicrabpaths)
+        print "- Using multi-jets (inverted) directory:", self._qcdinv_path
 
-    def getQCDFactorizedExists(self):
+    def getQCDFactorisedExists(self):
         return os.path.exists(self.getQCDfacPath())
     
-    def getQCDFactorizedPaths(self):
-        return self.getSignalPath(),self.getEWKPath(),self.getQCDfacPath()
+    def getQCDFactorisedPath(self):
+        return self.getQCDfacPath()
     
     def getQCDInvertedExists(self):
         return os.path.exists(self.getQCDinvPath())
@@ -30,16 +43,16 @@ class MulticrabPathFinder:
         return self.getSignalPath(),self.getEWKPath(),self.getQCDinvPath()
     
     def getSignalPath(self):
-        return self.signal_path
+        return self._signal_path
     
     def getEWKPath(self):
-        return self.ewk_path
+        return self._ewk_path
     
     def getQCDfacPath(self):
-        return self.qcdfact_path
+        return self._qcdfact_path
     
     def getQCDinvPath(self):
-        return self.qcdinv_path
+        return self._qcdinv_path
 
     def getSubPaths(self,path,regexp,exclude=False):
 	retDirs = []
