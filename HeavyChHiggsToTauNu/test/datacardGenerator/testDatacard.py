@@ -1,5 +1,6 @@
 DataCardName    = 'myDymmyTestName'
-Path            = '/mnt/flustre/slehti/HplusDataForLands'
+#Path            = '/mnt/flustre/slehti/HplusDataForLands'
+Path            = '/home/wendland/data/lands/lands_HIG-11-019'
 MassPoints      = [80,100,120,140,150,155,160]
 
 # Specify name of EDFilter or EDAnalyser process that produced the root files

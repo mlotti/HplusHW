@@ -54,7 +54,6 @@ class DataCardGenerator:
         for c in self._columns:
             print c._label, c.getRateValue(self._luminosity)
         print "done."
-        sys.exit()
 	#if (opts.debugConfig):
         #    config.DataGroups.Print()
         #    config.Nuisances.Print()
@@ -147,6 +146,11 @@ class DataCardGenerator:
         if not os.path.exists(myQCDPath):
             print "Path for QCD measurement ('"+myQCDPath+"') does not exist!"
             sys.exit()
+        # Make dataset managers
+        myDsetMgrs = [None, # needed for datasetType==None
+                      dataset.getDatasetsFromMulticrabCfg(cfgfile=mySignalPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+"Counters"),
+                      dataset.getDatasetsFromMulticrabCfg(cfgfile=myEmbeddingPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+"Counters"),
+                      dataset.getDatasetsFromMulticrabCfg(cfgfile=myQCDPath+"/multicrab.cfg", counters=myQCDCounters)]
         # Make merges (a unique merge for each data group; used to access counters and histograms)
         for dg in self._config.DataGroups:
             print "Making merged dataset for data group: \033[1;37m"+dg.label+"\033[0;0m"
@@ -155,16 +159,19 @@ class DataCardGenerator:
             myMergedNameForQCDMCEWK = ""
             if dg.datasetType != "None":
                 if dg.datasetType == "Signal":
-                    myDsetMgr = dataset.getDatasetsFromMulticrabCfg(cfgfile=mySignalPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+"Counters")
+                    #myDsetMgr = dataset.getDatasetsFromMulticrabCfg(cfgfile=mySignalPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+"Counters")
+                    myDsetMgr = 1
                 elif dg.datasetType == "Embedding":
-                    myDsetMgr = dataset.getDatasetsFromMulticrabCfg(cfgfile=myEmbeddingPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+"Counters")
+                    #myDsetMgr = dataset.getDatasetsFromMulticrabCfg(cfgfile=myEmbeddingPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+"Counters")
+                    myDsetMgr = 2
                 elif dg.datasetType == "QCD factorised" or dg.datasetType == "QCD inverted":
-                    myDsetMgr = dataset.getDatasetsFromMulticrabCfg(cfgfile=myQCDPath+"/multicrab.cfg", counters=myQCDCounters)
+                    myDsetMgr = 3
+                    #myDsetMgr = dataset.getDatasetsFromMulticrabCfg(cfgfile=myQCDPath+"/multicrab.cfg", counters=myQCDCounters)
                 # update normalisation info
                 #myDsetMgr.updateNAllEventsToPUWeighted() // FIXME enable as soon as new full multicrab dirs exist
-                myDsetMgr.loadLuminosities()
+                myDsetMgrs[myDsetMgr].loadLuminosities()
                 # find dataset names
-                allDatasetNames = myDsetMgr.getAllDatasetNames()
+                allDatasetNames = myDsetMgrs[myDsetMgr].getAllDatasetNames()
                 myFoundNames = self.findDatasetNames(dg.label, allDatasetNames, dg.datasetDefinitions)
                 # make merged set
                 if self._opts.debugConfig:
@@ -172,7 +179,7 @@ class DataCardGenerator:
                     for n in myFoundNames:
                         print "  "+n
                 myMergedName = "dset_"+dg.label.replace(" ","_")
-                myDsetMgr.merge(myMergedName, myFoundNames)
+                myDsetMgrs[myDsetMgr].merge(myMergedName, myFoundNames)
                 # find datasets and make merged set for QCD MC EWK
                 if dg.datasetType == "QCD factorised":
                     myFoundNames = self.findDatasetNames(dg.label, allDatasetNames, dg.MCEWKDatasetDefinitions)
@@ -182,7 +189,7 @@ class DataCardGenerator:
                         for n in myFoundNames:
                             print "  "+n
                     myMergedNameForQCDMCEWK = "dset_"+dg.label.replace(" ","_")+"_MCEWK"
-                    myDsetMgr.merge(myMergedNameForQCDMCEWK, myFoundNames)
+                    myDsetMgrs[myDsetMgr].merge(myMergedNameForQCDMCEWK, myFoundNames)
             # Construct dataset column object
             myColumn = DatacardColumn(label=dg.label,
                                       landsProcess=dg.landsProcess,
@@ -190,7 +197,7 @@ class DataCardGenerator:
                                       datasetType = dg.datasetType,
                                       rateCounter = dg.rateCounter,
                                       nuisances = dg.nuisances,
-                                      datasetMgr = myDsetMgr,
+                                      datasetMgr = myDsetMgrs[myDsetMgr],
                                       datasetMgrColumn = myMergedName,
                                       datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK, 
                                       additionalNormalisationFactor = dg.additionalNormalisation,
@@ -200,30 +207,30 @@ class DataCardGenerator:
             if self._opts.debugConfig:
                 myColumn.printDebug()
         # Make datacard column object for observation
-        myDsetMgr = dataset.getDatasetsFromMulticrabCfg(cfgfile=mySignalPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+"Counters")
+        #myDsetMgr = dataset.getDatasetsFromMulticrabCfg(cfgfile=mySignalPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+"Counters")
         # update normalisation info
         #myDsetMgr.updateNAllEventsToPUWeighted() // FIXME enable as soon as new full multicrab dirs exist
-        myDsetMgr.loadLuminosities()
-        allDatasetNames = myDsetMgr.getAllDatasetNames()
+        #myDsetMgr.loadLuminosities()
+        allDatasetNames = myDsetMgrs[1].getAllDatasetNames()
         myFoundNames = self.findDatasetNames("Observation", allDatasetNames, self._config.Observation.datasetDefinitions)
         if self._opts.debugConfig:
             print "Adding datasets to data group 'Observation':"
             for n in myFoundNames:
                 print "  "+n
         myObservationName = "dset_observation"
-        myDsetMgr.merge(myObservationName, myFoundNames)
+        myDsetMgrs[1].merge(myObservationName, myFoundNames)
         self._observation = DatacardColumn(label = "Observation",
                                            enabledForMassPoints = self._config.MassPoints,
                                            datasetType = "Observation",
                                            rateCounter = self._config.Observation.rateCounter,
-                                           datasetMgr = myDsetMgr,
+                                           datasetMgr = myDsetMgrs[1],
                                            datasetMgrColumn = myObservationName,
                                            dirPrefix = self._config.Observation.dirPrefix,
                                            shapeHisto = self._config.Observation.shapeHisto)
         if self._opts.debugConfig:
             self._observation.printDebug()
         # Obtain luminosity from observation
-        self._luminosity = myDsetMgr.getDataset(myObservationName).getLuminosity()
+        self._luminosity = myDsetMgrs[1].getDataset(myObservationName).getLuminosity()
         print "Luminosity is set to \033[1;37m%f 1/pb\033[0;0m"%self._luminosity # FIXME: should this be set to all the other datasets?
         print "Data groups converted to datacard columns"
 
