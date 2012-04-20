@@ -100,7 +100,8 @@ def doPlots(mainTable, signalDatasets, signalPostfix, consequtive=True):
         "njets",
         "MET",
         "btagging",
-        "btagging scale factor"
+        "btagging scale factor",
+        "deltaPhiTauMET<160",
         ]
 
     xvalues = [80, 90, 100, 120, 140, 150, 155, 160]
@@ -164,8 +165,11 @@ def doPlots(mainTable, signalDatasets, signalPostfix, consequtive=True):
 
     gbtag = createErrors("btagging")
     setStyle(gbtag, lc=1, ls=6, ms=24)
+
+    gdphi = createErrors("deltaPhiTauMET<160")
+    setStyle(gdphi, lc=9, ls=3, ms=25)
                         
-    glist = [gtrig, gtau, gveto, gjets, gmet, gbtag]
+    glist = [gtrig, gtau, gveto, gjets, gmet, gbtag, gdphi]
     
     #opts = {"xmin": 75, "xmax": 165, "ymin": 0.001}
     opts = {"xmin": 75, "xmax": 165, "ymin": 7e-4, "ymax": 2e-1}
@@ -185,17 +189,20 @@ def doPlots(mainTable, signalDatasets, signalPostfix, consequtive=True):
         gr.Draw("PL same")
     
     histograms.addEnergyText()
-    histograms.addCmsPreliminaryText()
+    histograms.addCmsPreliminaryText(text="Simulation")
 
-    legend = histograms.createLegend(x1=0.5, y1=0.53, x2=0.85, y2=0.75)
+    legend = histograms.createLegend(x1=0.5, y1=0.5, x2=0.85, y2=0.75)
     legend = histograms.moveLegend(legend, dx=-0.3, dy=-0.04)
+    if not consequtive and signalPostfix == "HH":
+        legend = histograms.moveLegend(legend, dy=0.05)
 
     legend.AddEntry(gtrig,"Trigger", "lp"); 
     legend.AddEntry(gtau, "#tau-jet identification", "lp"); 
     legend.AddEntry(gveto ,"lepton vetoes", "lp"); 
     legend.AddEntry(gjets ,"3 jets", "lp"); 
-    legend.AddEntry(gmet,"E_{T}^{miss} ", "lp")
-    legend.AddEntry(gbtag,"b tagging ", "lp")
+    legend.AddEntry(gmet,"E_{T}^{miss}", "lp")
+    legend.AddEntry(gbtag,"b tagging", "lp")
+    legend.AddEntry(gdphi,"#Delta#phi(#tau, E_{T}^{miss})<160^{o} ", "lp")
     legend.Draw()
 
     process = {    
