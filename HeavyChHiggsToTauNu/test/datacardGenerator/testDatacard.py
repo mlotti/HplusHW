@@ -185,12 +185,19 @@ DataGroups.append(DataGroup(
 # Definition of nuisance parameters
 #
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import Nuisance
-Nuisances = []
 ReservedNuisances = []
-ReservedNuisances.append([["2","5","6","8","20","21","23"],"reserved for leptonic"])
+ReservedNuisances.append(["02", "reserved for leptonic"])
+ReservedNuisances.append(["05", "reserved for leptonic"])
+ReservedNuisances.append(["06", "reserved for leptonic"])
+ReservedNuisances.append(["08", "reserved for leptonic"])
+ReservedNuisances.append(["20", "reserved for leptonic"])
+ReservedNuisances.append(["21", "reserved for leptonic"])
+ReservedNuisances.append(["23", "reserved for leptonic"])
+
+Nuisances = []
 
 Nuisances.append(Nuisance(
-    id            = "1",
+    id            = "01",
     label         = "tau+MET trg scale factor",
     distr         = "lnN",
     function      = "ScaleFactor",
@@ -200,7 +207,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(  
-    id            = "1b", 
+    id            = "01b", 
     label         = "tau+MET trg efficiency",
     distr         = "lnN", 
     function      = "Constant",
@@ -208,7 +215,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "1c",
+    id            = "01c",
     label         = "tau+MET trg scale factor",
     distr         = "lnN",
     function      = "ScaleFactor",
@@ -221,7 +228,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "3",
+    id            = "03",
     label         = "tau-jet ID (no Rtau)",
     distr         = "lnN",
     function      = "Constant",
@@ -229,7 +236,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "4", 
+    id            = "04", 
     label         = "tau-jet mis ID (no Rtau)",  
     distr         = "lnN",
     function      = "Constant",
@@ -237,7 +244,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "7",
+    id            = "07",
     label         = "JES/JER/MET/Rtau effect on mT shape",
     distr         = "shapeQ",
     function      = "Shape",
@@ -248,7 +255,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "7b",
+    id            = "07b",
     label         = "JES/JER/MET/Rtau effect on mT shape",
     distr         = "shapeQ",
     function      = "Shape",
@@ -259,7 +266,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "7c",  
+    id            = "07c",
     label         = "JES/JER/MET/Rtau effect on mT shape",
     distr         = "shapeQ",
     function      = "Shape",
@@ -270,7 +277,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "9",  
+    id            = "09",
     label         = "lepton veto",
     distr         = "lnN",
     function      = "Ratio",
@@ -280,7 +287,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "10",   
+    id            = "10",
     label         = "btagging",
     distr         = "lnN",
     function      = "ScaleFactor",
@@ -319,7 +326,7 @@ Nuisances.append(Nuisance(
     histograms    = ["KESKEN"]
 ))
 
-Nuisances.append(Nuisance(   
+Nuisances.append(Nuisance(
     id            = "13",
     label         = "QCD syst.",
     distr         = "lnN",
@@ -328,7 +335,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "14", 
+    id            = "14",
     label         = "EWK with taus QCD contamination",
     distr         = "lnN",
     function      = "Constant",
@@ -344,7 +351,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "15b", 
+    id            = "15b",
     label         = "EWK with taus W->tau->mu",
     distr         = "lnN",
     function      = "Constant",
@@ -356,7 +363,7 @@ Nuisances.append(Nuisance(
     label         = "EWK with taus muon selection",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.005  
+    value         = 0.005
 ))
 
 Nuisances.append(Nuisance(
@@ -383,15 +390,15 @@ Nuisances.append(Nuisance(
     counter       = SignalRateCounter,
 ))
 
-Nuisances.append(Nuisance(  
-    id            = "19", 
+Nuisances.append(Nuisance(
+    id            = "19",
     label         = "EWK with taus stat.",
     distr         = "lnN",
     function      = "Counter",
     counter       = FakeRateCounter,
 ))
 
-Nuisances.append(Nuisance(  
+Nuisances.append(Nuisance(
     id            = "22",
     label         = "tt->jjtau MC stat.",
     distr         = "lnN",
@@ -399,7 +406,7 @@ Nuisances.append(Nuisance(
     value         = 0
 ))
 
-Nuisances.append(Nuisance(   
+Nuisances.append(Nuisance(
     id            = "24",
     label         = "Z->tautau MC stat",
     distr         = "lnN",
@@ -574,8 +581,8 @@ Nuisances.append(Nuisance(
 ))
 
 MergeNuisances = []
-MergeNuisances.append(["1","1b","1c"])
-MergeNuisances.append(["7","7b","7c"])
+MergeNuisances.append(["01","01b","01c"])
+MergeNuisances.append(["07","07b","07c"])
 MergeNuisances.append(["11","11b"])
 MergeNuisances.append(["15","15b"])
 MergeNuisances.append(["16","16b"])

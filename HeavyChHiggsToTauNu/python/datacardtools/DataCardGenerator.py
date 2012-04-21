@@ -51,8 +51,9 @@ class DataCardGenerator:
         # Create extractors for nuisances (data miners for nuisances)
         self.createExtractors()
 
-        # Merge nuisances
-        self.mergeNuisances()
+        # Check nuisances and do merging
+        self.checkNuisances()
+
 
         #for c in self._columns:
         #    print c._label, c.getRateValue(self._luminosity)
@@ -256,9 +257,10 @@ class DataCardGenerator:
 
     ## Creates extractors for nuisances
     def createExtractors(self):
+        myMode = ExtractorMode.NUISANCE
         for n in self._config.Nuisances:
-            myMode = ExtractorMode.NUISANCE
             if n.function == "Constant":
+                myMode = ExtractorMode.NUISANCE
                 if n.upperValue > 0:
                     myMode = ExtractorMode.ASYMMETRICNUISANCE
                 self._nuisances.append(ConstantExtractor(exid = n.id,
@@ -281,7 +283,7 @@ class DataCardGenerator:
                                                            description = n.label,
                                                            mode = myMode))
             elif n.function == "Shape":
-                print "fixme: add shape nuisacne"
+                print "fixme: add shape nuisance"
                 # FIXME temp code
                 self._nuisances.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
             elif n.function == "ScaleFactor":
@@ -301,16 +303,46 @@ class DataCardGenerator:
                                                       scale = n.scaling,
                                                       mode = myMode))
             elif n.function == "QCDFactorised":
-                print "fixme: add QCD factorised"
-                # FIXME temp code
-                self._nuisances.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
+                if self._QCDmethod == DatacardQCDMethod.FACTORISED:
+                    print "fixme: add QCD factorised"
+                    # FIXME temp code
+                    self._nuisances.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
+                else:
+                    self._nuisances.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
             elif n.function == "QCDInverted":
-                print "fixme: add QCD inverted"
+                if self._QCDmethod == DatacardQCDMethod.INVERTED:
+                    print "fixme: add QCD inverted"
+                    # FIXME temp code
+                    self._nuisances.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
+                else:
+                    self._nuisances.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
             else:
                 print "\033[0;41m\033[1;37mError in nuisance with id='"+n.id+"':\033[0;0m unknown or missing field function '"+n.function+"' (string)!"
                 print "Options are: 'Constant', 'Counter', 'maxCounter', 'Shape', 'ScaleFactor', 'Ratio', 'QCDFactorised'"
                 sys.exit()
+        # Create reserved nuisances
+        for n in self._config.ReservedNuisances:
+            self._nuisances.append(ConstantExtractor(exid = n[0], constantValue = 0.0, distribution = "lnN", description = n[1], mode = myMode))
+        # Done
         print "Created Nuisances"
+
+    def checkNuisances(self):
+        # Check for duplicates
+        for i in range(0,len(self._nuisances)):
+            for j in range(0,len(self._nuisances)):
+                if self._nuisances[i].isId(self._nuisances[j].getId()) and i != j:
+                    print "\033[0;41m\033[1;37mError:\033[0;0m You have defined two nuisances with id='"++"'! The id has to be unique!"
+                    sys.exit()
+        # Merge nuisances
+        self.mergeNuisances()
+        # Check consecutive id's
+        myCounter = 0
+        for n in sorted(self._nuisances, key=lambda x: x.getId()):
+            if n.isPrintable():
+                myCounter += 1
+                if int(n.getId()) != myCounter:
+                    print "\033[0;37m\033[1;37mWarning:\033[0;0m You have not declared a Nuisance or ReservedNuisance with id='%d'!"%myCounter
+                    myCounter = int(n.getId())
 
     def mergeNuisances(self):
         for mset in self._config.MergeNuisances:
@@ -333,38 +365,4 @@ class DataCardGenerator:
                     print "\033[0;41m\033[1;37mError in merging Nuisances:\033[0;0m tried to merge '"+mset[i]+"' (slave) to '"+mset[0]+"' (master) but could not find a nuisance with id '"+mset[i]+"'!"
                     sys.exit()
         print "Merged Nuisances"
-
-# FIXME legacy code beyond this point
-
-    def reportUnusedNuisances(self):
-	usedNuisances = []
-        for nuisance in self._config.Nuisances.nuisances.keys():
-	    for datagroup in self._config.DataGroups.datagroups.keys():
-		for usedNuisance in self._config.DataGroups.get(datagroup).nuisances:
-		    if usedNuisance == nuisance:
-			usedNuisances.append(nuisance)
-	usedNuisances = self.rmDuplicates(usedNuisances)
-	unUsedNuisances = []
-	for nuisance in self._config.Nuisances.nuisances.keys():
-	    if nuisance not in usedNuisances:
-		#print "UNUSED NUISANCE"
-		#config.Nuisances.get(nuisance).Print
-		unUsedNuisances.append(nuisance)
-	print "Unused nuisances",sort(unUsedNuisances)
-
-    def rmDuplicates(self,list):
-	retlist = []
-	for element in list:
-	    if element not in retlist:
-		retlist.append(element)
-	return retlist
-
-    #def generate(self):
-	#signalDir = []
-	#signalDir.append(self._config.multicrabPaths.getSignalPath())
-	#datasets = dataset.getDatasetsFromMulticrabDirs(signalDir,counters=self._config.CounterDir)
-	#datasets.loadLuminosities()
-	#plots.mergeRenameReorderForDataMC(datasets)
-	#luminosity = datasets.getDataset("Data").getLuminosity()
-        #print "Luminosity = ",luminosity
 

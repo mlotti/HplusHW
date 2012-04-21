@@ -62,6 +62,10 @@ class ExtractorBase:
     def isId(self, exid):
         return self._exid == exid or self._masterExID == exid
 
+    ## Returns id
+    def getId(self):
+        return self._exid
+
     ## Returns distribution string
     def getDistribution(self):
         return self._distribution
