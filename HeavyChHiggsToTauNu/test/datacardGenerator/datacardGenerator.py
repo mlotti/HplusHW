@@ -21,7 +21,7 @@ def main(opts):
 
     #if multicrabPaths.getQCDInvertedExists():
     #    datacardgenerator.generate(multicrabPaths.getQCDInvertedPaths())
-    
+
     #datacardgenerator = DataCard.DataCardGenerator()
     #datacardgenerator.generate()
 
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     parser.add_option("--debugMining", dest="debugMining", action="store_true", default=False, help="Enable debugging print for data mining")
     parser.add_option("--debugQCD", dest="debugQCD", action="store_true", default=False, help="Enable debugging print for QCD measurement")
     (opts, args) = parser.parse_args()
-    
+
     myStatus = True
     if opts.datacard == None:
         print "Error: Missing datacard!\n"
@@ -45,6 +45,6 @@ if __name__ == "__main__":
     if not myStatus:
         parser.print_help()
         sys.exit()
- 
+
     # Run main program
     main(opts)

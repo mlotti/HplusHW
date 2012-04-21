@@ -209,7 +209,7 @@ class MaxCounterExtractor(ExtractorBase):
             datasetRootHisto = dsetMgr.getDataset(dsetMgrColumn).getDatasetRootHisto(d+"/weighted/counters")
             datasetRootHisto.normalizeToLuminosity(luminosity)
             counterList = dataset._histoToCounter(datasetRootHisto.getHistogram())
-            
+
         myEventCounter = EventCounter(dsetMgr)
         #myEventCounter.normalizeMCByLuminosity()
         myEventCounter.normalizeMCToLuminosity(luminosity)

@@ -416,59 +416,59 @@ Nuisances.append(Nuisance(
 
 Nuisances.append(Nuisance(
     id            = "26",
-    label         = "Single top MC stat.",   
+    label         = "Single top MC stat.",
     distr         = "lnN",
     function      = "Constant",
     value         = 0
 ))
 
-Nuisances.append(Nuisance(                                                                                                  
-    id            = "27",                                                                                                
+Nuisances.append(Nuisance(
+    id            = "27",
     label         = "diboson MC stat",
-    distr         = "lnN",                                                                                               
-    function      = "Counter",                                                                                           
+    distr         = "lnN",
+    function      = "Counter",
     counter       = FakeRateCounter
 ))
 
-Nuisances.append(Nuisance(                                                                                                  
+Nuisances.append(Nuisance(
     id            = "28",
     label         = "ttbar cross section",
-    distr         = "lnN",                                                                                               
+    distr         = "lnN",
     function      = "Constant",
     value         = 0.096,
     upperValue    = 0.070,
 ))
 
-Nuisances.append(Nuisance(                                                                                                  
+Nuisances.append(Nuisance(
     id            = "29",
     label         = "W+jets cross section",
-    distr         = "lnN",                 
-    function      = "Constant",                                                                                          
+    distr         = "lnN",
+    function      = "Constant",
     value         = 0.05
 ))
 
-Nuisances.append(Nuisance(                                                                                                  
-    id            = "30",                                                                                                
+Nuisances.append(Nuisance(
+    id            = "30",
     label         = "single top cross section",
-    distr         = "lnN",                     
-    function      = "Constant",                
+    distr         = "lnN",
+    function      = "Constant",
     value         = 0.08
 ))
 
-Nuisances.append(Nuisance(                                                                                                  
+Nuisances.append(Nuisance(
     id            = "31",
     label         = "Z->ll cross section",
-    distr         = "lnN",                
-    function      = "Constant",           
+    distr         = "lnN",
+    function      = "Constant",
     value         = 0.04
 ))
 
-Nuisances.append(Nuisance(                                                                                                  
+Nuisances.append(Nuisance(
     id            = "32",
     label         = "diboson cross section",
-    distr         = "lnN",                                                                                               
-    function      = "Constant",                                                                                          
-    value         = 0.04                                                                                                 
+    distr         = "lnN",
+    function      = "Constant",
+    value         = 0.04
 ))
 
 Nuisances.append(Nuisance(
@@ -496,7 +496,7 @@ Nuisances.append(Nuisance(
     distr         = "lnN",
     function      = "maxCounter",
     histoDir      = ["signalAnalysis/weighted/",
-                     "signalAnalysisPUWeightMinusCounters/weighted/",       
+                     "signalAnalysisPUWeightMinusCounters/weighted/",
                      "signalAnalysisPUWeightPlusCounters/weighted/"],
     counter       = FakeRateCounter
 ))

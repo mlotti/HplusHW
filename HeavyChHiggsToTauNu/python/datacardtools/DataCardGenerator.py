@@ -38,13 +38,13 @@ class DataCardGenerator:
         self._columns = []
         self._nuisances = []
         self._QCDmethod = DatacardQCDMethod.UNKNOWN
-       
+
         # Override options from command line and determine QCD measurement method
         self.overrideConfigOptionsFromCommandLine()
-        
+
         # Check that all necessary parameters have been specified in config file
         self.checkCfgFile()
-       
+
         # Create columns (dataset groups)
         self.createDatacardColumns()
 
