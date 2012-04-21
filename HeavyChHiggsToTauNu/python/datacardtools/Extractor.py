@@ -240,6 +240,44 @@ class MaxCounterExtractor(ExtractorBase):
         print "- counter item = ", self._counterItem
         ExtractorBase.printDebugInfo(self)
 
+    ## \var _counterDirs
+    # List of directories (without /weighted/counter suffix ) for counter histograms; first needs to be the nominal counter
     ## \var _counterItem
     # Name of item (label) in counter histogram
 
+## RatioExtractor class
+# Extracts a value from a given counter item in the list of main counters and compares it to the reference value
+# Largest deviation from the reference (nominal) value is taken
+class RatioExtractor(ExtractorBase):
+    ## Constructor
+    def __init__(self, numeratorCounterItem, denominatorCounterItem, mode, exid = "", distribution = "lnN", description = ""):
+        ExtractorBase.__init__(self, mode, exid, distribution, description)
+        self._numeratorCounterItem = numeratorCounterItem
+        self._denominatorCounterItem = denominatorCounterItem
+
+    ## Method for extracking information
+    def doExtract(self, dsetMgr, dsetMgrColumn, luminosity, additionalNormalisation = 1.0):
+        myEventCounter = EventCounter(dsetMgr)
+        #myEventCounter.normalizeMCByLuminosity()
+        myEventCounter.normalizeMCToLuminosity(luminosity)
+        myTable = myEventCounter.getMainCounterTable()
+        myNumeratorCount = myTable.getCount(rowName=self._numeratorCounterItem, colName=dsetMgrColumn)
+        myDenominatorCount = myTable.getCount(rowName=self._denominatorCounterItem, colName=dsetMgrColumn)
+        # Protection against div by zero
+        if myDenominatorCount.value() == 0.0:
+            print "Warning: In Nuisance with id='"+self._exid+"' denominator counter ('"+self._counterItem+"') value is zero!"
+            return 0.0
+        # Return result
+        return myNumeratorCount.value() / myDenominatorCount.value()
+
+    ## Virtual method for printing debug information
+    def printDebugInfo(self):
+        print "RatioExtractor"
+        print "- numeratorCounterItem = ", self._numeratorCounterItem
+        print "- denominatorCounterItem = ", self._denominatorCounterItem
+        ExtractorBase.printDebugInfo(self)
+
+    ## \var _numeratorCounterItem
+    # Name of item (label) in counter histogram for numerator count
+    ## \var _denominatorCounterItem
+    # Name of item (label) in counter histogram for denominator count

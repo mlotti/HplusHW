@@ -51,8 +51,8 @@ class DataCardGenerator:
         # Create extractors for nuisances (data miners for nuisances)
         self.createExtractors()
 
-        for c in self._columns:
-            print c._label, c.getRateValue(self._luminosity)
+        #for c in self._columns:
+        #    print c._label, c.getRateValue(self._luminosity)
         print "done."
 	#if (opts.debugConfig):
         #    config.DataGroups.Print()
@@ -272,17 +272,22 @@ class DataCardGenerator:
                                                         mode = myMode))
             elif n.function == "maxCounter":
                 self._nuisances.append(MaxCounterExtractor(exid = n.id,
-                                                        counterItem = n.counter,
-                                                        counterDirs = n.histoDir,
-                                                        distribution = n.distr,
-                                                        description = n.label,
-                                                        mode = myMode))
+                                                           counterItem = n.counter,
+                                                           counterDirs = n.histoDir,
+                                                           distribution = n.distr,
+                                                           description = n.label,
+                                                           mode = myMode))
             elif n.function == "Shape":
                 print "fixme"
             elif n.function == "ScaleFactor":
                 print "fixme"
             elif n.function == "Ratio":
-                print "fixme"
+                self._nuisances.append(RatioExtractor(exid = n.id,
+                                                      numeratorCounterItem = n.numerator,
+                                                      denominatorCounterItem = n.denominator,
+                                                      distribution = n.distr,
+                                                      description = n.label,
+                                                      mode = myMode))
             elif n.function == "QCDFactorised":
                 print "fixme"
             elif n.function == "QCDInverted":
