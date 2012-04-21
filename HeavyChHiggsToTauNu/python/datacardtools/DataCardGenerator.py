@@ -51,6 +51,9 @@ class DataCardGenerator:
         # Create extractors for nuisances (data miners for nuisances)
         self.createExtractors()
 
+        # Merge nuisances
+        self.mergeNuisances()
+
         #for c in self._columns:
         #    print c._label, c.getRateValue(self._luminosity)
         print "done."
@@ -279,6 +282,8 @@ class DataCardGenerator:
                                                            mode = myMode))
             elif n.function == "Shape":
                 print "fixme: add shape nuisacne"
+                # FIXME temp code
+                self._nuisances.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
             elif n.function == "ScaleFactor":
                 self._nuisances.append(ScaleFactorExtractor(exid = n.id,
                                                             histoDirs = n.histoDir,
@@ -297,12 +302,37 @@ class DataCardGenerator:
                                                       mode = myMode))
             elif n.function == "QCDFactorised":
                 print "fixme: add QCD factorised"
+                # FIXME temp code
+                self._nuisances.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
             elif n.function == "QCDInverted":
                 print "fixme: add QCD inverted"
             else:
                 print "Error in nuisance with id='"+n.id+"': unknown or missing field function '"+n.function+"' (string)!"
                 print "Options are: 'Constant', 'Counter', 'maxCounter', 'Shape', 'ScaleFactor', 'Ratio', 'QCDFactorised'"
                 sys.exit()
+        print "Created Nuisances"
+
+    def mergeNuisances(self):
+        for mset in self._config.MergeNuisances:
+            # check if nuisance with master id can be found
+            myFoundStatus = False
+            for n in self._nuisances:
+                if n.isId(mset[0]):
+                    myFoundStatus = True
+            if not myFoundStatus:
+                print "Error in merging Nuisances: cannot find a nuisance with id '"+mset[0]+"'!"
+                sys.exit()
+            # assign master to slave nuisances
+            for i in range(1, len(mset)):
+                myFoundStatus = False
+                for n in self._nuisances:
+                    if n.isId(mset[i]):
+                        n.setAsSlave(mset[0])
+                        myFoundStatus = True
+                if not myFoundStatus:
+                    print "Error in merging Nuisances: tried to merge '"+mset[i]+"' (slave) to '"+mset[0]+"' (master) but could not find a nuisance with id '"+mset[i]+"'!"
+                    sys.exit()
+        print "Merged Nuisances"
 
 # FIXME legacy code beyond this point
 

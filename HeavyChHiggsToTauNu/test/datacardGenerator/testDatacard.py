@@ -248,7 +248,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "7b",  
+    id            = "7b",
     label         = "JES/JER/MET/Rtau effect on mT shape",
     distr         = "shapeQ",
     function      = "Shape",
