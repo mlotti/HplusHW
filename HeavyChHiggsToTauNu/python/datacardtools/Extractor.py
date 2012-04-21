@@ -193,37 +193,50 @@ class CounterExtractor(ExtractorBase):
     ## \var _counterItem
     # Name of item (label) in counter histogram
 
-## CounterExtractor class
-# Extracts a value from a given counter in the list of main counters
+## MaxCounterExtractor class
+# Extracts a value from a given counter item in the list of main counters and compares it to the reference value
+# Largest deviation from the reference (nominal) value is taken
 class MaxCounterExtractor(ExtractorBase):
     ## Constructor
     def __init__(self, counterDirs, counterItem, mode, exid = "", distribution = "lnN", description = ""):
         ExtractorBase.__init__(self, mode, exid, distribution, description)
         self._counterItem = counterItem
         self._counterDirs = counterDirs
+        if len(self._counterDirs) < 2:
+            print "Error in Nuisance with id='"+self._exid+"': need to specify at least two directories for counters!"
+            sys.exit()
 
     ## Method for extracking information
     def doExtract(self, dsetMgr, dsetMgrColumn, luminosity, additionalNormalisation = 1.0):
         myResult = []
         for d in self_counterDirs:
-            datasetRootHisto = dsetMgr.getDataset(dsetMgrColumn).getDatasetRootHisto(d+"/weighted/counters")
+            myHistoPath = d+"/weighted/counters"
+            datasetRootHisto = dsetMgr.getDataset(dsetMgrColumn).getDatasetRootHisto(myHistoPath)
             datasetRootHisto.normalizeToLuminosity(luminosity)
             counterList = dataset._histoToCounter(datasetRootHisto.getHistogram())
-
-        myEventCounter = EventCounter(dsetMgr)
-        #myEventCounter.normalizeMCByLuminosity()
-        myEventCounter.normalizeMCToLuminosity(luminosity)
-        myTable = myEventCounter.getMainCounterTable()
-        myCount = myTable.getCount(rowName=self._counterItem, colName=dsetMgrColumn)
-        # Return result
-        if self.isRate() or self.isObservation():
-            return myCount.value() * additionalNormalisation
-        elif self.isNuisance():
-            return myCount.uncertainty() / myCount.value()
+            myFoundStatus = False # to ensure that the first counter of given name is taken
+            for name, count in counterList:
+                if name == self._counterItem and not myFoundStatus:
+                    myResult.append(count)
+                    myFoundStatus = True
+            if not myFoundStatus:
+                print "Error in Nuisance with id='"+self._exid+"': Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!"
+                sys.exit()
+        # Loop over results
+        myMaxValue = 0.0
+        # Protect for div by zero
+        if myResult[0].value() == 0:
+            print "Warning: In Nuisance with id='"+self._exid+"' nominal counter ('"+self._counterItem+"')value is zero!"
+            return 0.0
+        for i in range(1,len(myResult)):
+            myValue = myResult[i].value() / myResult[0].value()
+            if (myValue > myMaxValue):
+                myMaxValue = myValue
+        return myMaxValue
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
-        print "CounterExtractor"
+        print "MaxCounterExtractor"
         print "- counter item = ", self._counterItem
         ExtractorBase.printDebugInfo(self)
 

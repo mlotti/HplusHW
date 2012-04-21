@@ -271,7 +271,12 @@ class DataCardGenerator:
                                                         description = n.label,
                                                         mode = myMode))
             elif n.function == "maxCounter":
-                print "fixme"
+                self._nuisances.append(MaxCounterExtractor(exid = n.id,
+                                                        counterItem = n.counter,
+                                                        counterDirs = n.histoDir,
+                                                        distribution = n.distr,
+                                                        description = n.label,
+                                                        mode = myMode))
             elif n.function == "Shape":
                 print "fixme"
             elif n.function == "ScaleFactor":

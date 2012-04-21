@@ -1,6 +1,6 @@
 DataCardName    = 'myDymmyTestName'
-#Path            = '/mnt/flustre/slehti/HplusDataForLands'
-Path            = '/home/wendland/data/lands/lands_HIG-11-019'
+Path            = '/mnt/flustre/slehti/HplusDataForLands'
+#Path            = '/home/wendland/data/lands/lands_HIG-11-019'
 MassPoints      = [80,100,120,140,150,155,160]
 
 # Specify name of EDFilter or EDAnalyser process that produced the root files
@@ -484,9 +484,9 @@ Nuisances.append(Nuisance(
     label         = "pileup",
     distr         = "lnN",
     function      = "maxCounter",
-    histoDir      = ["signalAnalysis/weighted/",
-                     "signalAnalysisPUWeightMinusCounters/weighted/",
-                     "signalAnalysisPUWeightPlusCounters/weighted/"],
+    histoDir      = ["signalAnalysisCounters",
+                     "signalAnalysisPUWeightMinusCounters",
+                     "signalAnalysisPUWeightPlusCounters"],
     counter       = SignalRateCounter
 ))
 
@@ -495,9 +495,9 @@ Nuisances.append(Nuisance(
     label         = "pileup",
     distr         = "lnN",
     function      = "maxCounter",
-    histoDir      = ["signalAnalysis/weighted/",
-                     "signalAnalysisPUWeightMinusCounters/weighted/",
-                     "signalAnalysisPUWeightPlusCounters/weighted/"],
+    histoDir      = ["signalAnalysisCounters",
+                     "signalAnalysisPUWeightMinusCounters",
+                     "signalAnalysisPUWeightPlusCounters"],
     counter       = FakeRateCounter
 ))
 
