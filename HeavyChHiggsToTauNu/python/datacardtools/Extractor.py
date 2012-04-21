@@ -205,7 +205,7 @@ class MaxCounterExtractor(ExtractorBase):
         self._counterItem = counterItem
         self._counterDirs = counterDirs
         if len(self._counterDirs) < 2:
-            print "Error in Nuisance with id='"+self._exid+"': need to specify at least two directories for counters!"
+            print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"':\033[0;0m need to specify at least two directories for counters!"
             sys.exit()
 
     ## Method for extracking information
@@ -222,13 +222,13 @@ class MaxCounterExtractor(ExtractorBase):
                     myResult.append(count)
                     myFoundStatus = True
             if not myFoundStatus:
-                print "Error in Nuisance with id='"+self._exid+"': Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!"
+                print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"':\033[0;0m Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!"
                 sys.exit()
         # Loop over results
         myMaxValue = 0.0
         # Protect for div by zero
         if myResult[0].value() == 0:
-            print "Warning: In Nuisance with id='"+self._exid+"' nominal counter ('"+self._counterItem+"')value is zero!"
+            print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' nominal counter ('"+self._counterItem+"')value is zero!"
             return 0.0
         for i in range(1,len(myResult)):
             myValue = myResult[i].value() / myResult[0].value()
@@ -267,7 +267,7 @@ class RatioExtractor(ExtractorBase):
         myDenominatorCount = myTable.getCount(rowName=self._denominatorCounterItem, colName=dsetMgrColumn)
         # Protection against div by zero
         if myDenominatorCount.value() == 0.0:
-            print "Warning: In Nuisance with id='"+self._exid+"' denominator counter ('"+self._counterItem+"') value is zero!"
+            print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' denominator counter ('"+self._counterItem+"') value is zero!"
             return 0.0
         # Return result
         return myNumeratorCount.value() / myDenominatorCount.value() * self._scale
@@ -296,7 +296,7 @@ class ScaleFactorExtractor(ExtractorBase):
         self._histograms = histograms
         self._normalisation = normalisation
         if len(self._histoDirs) != len(self._normalisation) or len(self._histoDirs) != len(self._histograms):
-            print "Error in Nuisance with id='"+self._exid+"': need to specify equal amount of histoDirs, histograms and normalisation histograms!"
+            print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"':\033[0;0m need to specify equal amount of histoDirs, histograms and normalisation histograms!"
             sys.exit()
 
     ## Method for extracking information
@@ -306,12 +306,12 @@ class ScaleFactorExtractor(ExtractorBase):
         for i in range (self._histoDirs):
             hValues = dsetMgr.getDataset(dsetMgrColumn).getDatasetRootHisto(self.histoDirs[i]+"/"+self._histograms[i])
             if hValues == None:
-                print "Error in Nuisance with id='"+self._exid+"': Cannot open histogram '"+self.histoDirs[i]+"/"+self._histograms[i]+"'!"
+                print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"':\033[0;0m Cannot open histogram '"+self.histoDirs[i]+"/"+self._histograms[i]+"'!"
                 sys.exit()
             hValues.normalizeToLuminosity(luminosity)
             hNormalisation = dsetMgr.getDataset(dsetMgrColumn).getDatasetRootHisto(self.histoDirs[i]+"/"+self._normalisation[i])
             if hNormalisation == None:
-                print "Error in Nuisance with id='"+self._exid+"': Cannot open histogram '"+self.histoDirs[i]+"/"+self._normalisation[i]+"'!"
+                print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"':\033[0;0m Cannot open histogram '"+self.histoDirs[i]+"/"+self._normalisation[i]+"'!"
                 sys.exit()
             hNormalisation.normalizeToLuminosity(luminosity)
             mySum = 0.0
@@ -321,7 +321,7 @@ class ScaleFactorExtractor(ExtractorBase):
             myTotal = hNormalisation.GetBinContent(1)
         # protection against div by zero
         if myTotal == 0.0:
-            print "Warning: In Nuisance with id='"+self._exid+"' total count from normalisation histograms is zero!"
+            print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' total count from normalisation histograms is zero!"
             return 0.0
         return math.sqrt(mySum) / myTotal
 

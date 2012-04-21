@@ -122,7 +122,7 @@ class DataCardGenerator:
             mymsg += "- need to specify at least one Nuisance to field 'Nuisances' (list of Nuisance objects)\n"
         # determine if datacard was ok
         if mymsg != "":
-            print "Error in config '"+self._opts.datacard+"'!\n"
+            print "\033[0;41m\033[1;37mError in config '"+self._opts.datacard+"'!\033[0;0m\n"
             print mymsg
             sys.exit()
 
@@ -247,7 +247,7 @@ class DataCardGenerator:
                     myResult.append(dsetfull)
                     myFoundStatus = True
             if not myFoundStatus:
-                print "Error in dataset group '"+label+"': cannot find datasetDefinition '"+dset+"'!"
+                print "\033[0;41m\033[1;37mError in dataset group '"+label+"':\033[0;0m cannot find datasetDefinition '"+dset+"'!"
                 print "Options are:"
                 for dsetfull in allNames:
                     print "  "+dsetfull
@@ -307,7 +307,7 @@ class DataCardGenerator:
             elif n.function == "QCDInverted":
                 print "fixme: add QCD inverted"
             else:
-                print "Error in nuisance with id='"+n.id+"': unknown or missing field function '"+n.function+"' (string)!"
+                print "\033[0;41m\033[1;37mError in nuisance with id='"+n.id+"':\033[0;0m unknown or missing field function '"+n.function+"' (string)!"
                 print "Options are: 'Constant', 'Counter', 'maxCounter', 'Shape', 'ScaleFactor', 'Ratio', 'QCDFactorised'"
                 sys.exit()
         print "Created Nuisances"
@@ -320,7 +320,7 @@ class DataCardGenerator:
                 if n.isId(mset[0]):
                     myFoundStatus = True
             if not myFoundStatus:
-                print "Error in merging Nuisances: cannot find a nuisance with id '"+mset[0]+"'!"
+                print "\033[0;41m\033[1;37mError in merging Nuisances:\033[0;0m cannot find a nuisance with id '"+mset[0]+"'!"
                 sys.exit()
             # assign master to slave nuisances
             for i in range(1, len(mset)):
@@ -330,7 +330,7 @@ class DataCardGenerator:
                         n.setAsSlave(mset[0])
                         myFoundStatus = True
                 if not myFoundStatus:
-                    print "Error in merging Nuisances: tried to merge '"+mset[i]+"' (slave) to '"+mset[0]+"' (master) but could not find a nuisance with id '"+mset[i]+"'!"
+                    print "\033[0;41m\033[1;37mError in merging Nuisances:\033[0;0m tried to merge '"+mset[i]+"' (slave) to '"+mset[0]+"' (master) but could not find a nuisance with id '"+mset[i]+"'!"
                     sys.exit()
         print "Merged Nuisances"
 
