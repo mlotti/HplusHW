@@ -214,7 +214,8 @@ Nuisances.append(Nuisance(
     function      = "ScaleFactor",
     histoDir      = ["signalAnalysisNormal/ScaleFactorUncertainties/",
                      "signalAnalysisEmbedded/ScaleFactorUncertainties/"],
-    histograms    = ["TriggerScaleFactorAbsUncert_AfterDeltaPhi160"],
+    histograms    = ["TriggerScaleFactorAbsUncert_AfterDeltaPhi160",
+                     "TriggerScaleFactorAbsUncert_AfterDeltaPhi160"],
     normalisation = ["signalAnalysisNormal/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterDeltaPhi160",
                      "signalAnalysisEmbedded/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterDeltaPhi160"]
 ))

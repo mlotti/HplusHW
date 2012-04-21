@@ -278,20 +278,27 @@ class DataCardGenerator:
                                                            description = n.label,
                                                            mode = myMode))
             elif n.function == "Shape":
-                print "fixme"
+                print "fixme: add shape nuisacne"
             elif n.function == "ScaleFactor":
-                print "fixme"
+                self._nuisances.append(ScaleFactorExtractor(exid = n.id,
+                                                            histoDirs = n.histoDir,
+                                                            histograms = n.histo,
+                                                            normalisation = n.norm,
+                                                            distribution = n.distr,
+                                                            description = n.label,
+                                                            mode = myMode))
             elif n.function == "Ratio":
                 self._nuisances.append(RatioExtractor(exid = n.id,
                                                       numeratorCounterItem = n.numerator,
                                                       denominatorCounterItem = n.denominator,
                                                       distribution = n.distr,
                                                       description = n.label,
+                                                      scale = n.scaling,
                                                       mode = myMode))
             elif n.function == "QCDFactorised":
-                print "fixme"
+                print "fixme: add QCD factorised"
             elif n.function == "QCDInverted":
-                print "fixme"
+                print "fixme: add QCD inverted"
             else:
                 print "Error in nuisance with id='"+n.id+"': unknown or missing field function '"+n.function+"' (string)!"
                 print "Options are: 'Constant', 'Counter', 'maxCounter', 'Shape', 'ScaleFactor', 'Ratio', 'QCDFactorised'"

@@ -4,6 +4,8 @@
 #
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter import EventCounter
+from math import pow,sqrt
+import sys
 
 # Enumerator class for data mining mode
 class ExtractorMode:
@@ -209,7 +211,7 @@ class MaxCounterExtractor(ExtractorBase):
     ## Method for extracking information
     def doExtract(self, dsetMgr, dsetMgrColumn, luminosity, additionalNormalisation = 1.0):
         myResult = []
-        for d in self_counterDirs:
+        for d in self._counterDirs:
             myHistoPath = d+"/weighted/counters"
             datasetRootHisto = dsetMgr.getDataset(dsetMgrColumn).getDatasetRootHisto(myHistoPath)
             datasetRootHisto.normalizeToLuminosity(luminosity)
@@ -284,3 +286,52 @@ class RatioExtractor(ExtractorBase):
     ## \var _scale
     # Scaling factor for result (float)
 
+## ScaleFactorExtractor class
+# Extracts an uncertainty for a scale factor
+class ScaleFactorExtractor(ExtractorBase):
+    ## Constructor
+    def __init__(self, histoDirs, histograms, normalisation, mode, exid = "", distribution = "lnN", description = ""):
+        ExtractorBase.__init__(self, mode, exid, distribution, description)
+        self._histoDirs = histoDirs
+        self._histograms = histograms
+        self._normalisation = normalisation
+        if len(self._histoDirs) != len(self._normalisation) or len(self._histoDirs) != len(self._histograms):
+            print "Error in Nuisance with id='"+self._exid+"': need to specify equal amount of histoDirs, histograms and normalisation histograms!"
+            sys.exit()
+
+    ## Method for extracking information
+    def doExtract(self, dsetMgr, dsetMgrColumn, luminosity, additionalNormalisation = 1.0):
+        myTotal = 0.0
+        mySum = 0.0
+        for i in range (self._histoDirs):
+            hValues = dsetMgr.getDataset(dsetMgrColumn).getDatasetRootHisto(self.histoDirs[i]+"/"+self._histograms[i])
+            if hValues == None:
+                print "Error in Nuisance with id='"+self._exid+"': Cannot open histogram '"+self.histoDirs[i]+"/"+self._histograms[i]+"'!"
+                sys.exit()
+            hValues.normalizeToLuminosity(luminosity)
+            hNormalisation = dsetMgr.getDataset(dsetMgrColumn).getDatasetRootHisto(self.histoDirs[i]+"/"+self._normalisation[i])
+            if hNormalisation == None:
+                print "Error in Nuisance with id='"+self._exid+"': Cannot open histogram '"+self.histoDirs[i]+"/"+self._normalisation[i]+"'!"
+                sys.exit()
+            hNormalisation.normalizeToLuminosity(luminosity)
+            mySum = 0.0
+            for j in range (1, hValues.GetNbinsX()+1):
+                mySum += math.pow(hValues.GetBinContent(j) * hValues.GetBinCenter(j),2)
+                mySum += myCount * myCount
+            myTotal = hNormalisation.GetBinContent(1)
+        # protection against div by zero
+        if myTotal == 0.0:
+            print "Warning: In Nuisance with id='"+self._exid+"' total count from normalisation histograms is zero!"
+            return 0.0
+        return math.sqrt(mySum) / myTotal
+
+    ## Virtual method for printing debug information
+    def printDebugInfo(self):
+        print "MaxCounterExtractor"
+        print "- counter item = ", self._counterItem
+        ExtractorBase.printDebugInfo(self)
+
+    ## \var _counterDirs
+    # List of directories (without /weighted/counter suffix ) for counter histograms; first needs to be the nominal counter
+    ## \var _counterItem
+    # Name of item (label) in counter histogram
