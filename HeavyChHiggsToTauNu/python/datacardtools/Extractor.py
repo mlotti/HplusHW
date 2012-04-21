@@ -246,14 +246,14 @@ class MaxCounterExtractor(ExtractorBase):
     # Name of item (label) in counter histogram
 
 ## RatioExtractor class
-# Extracts a value from a given counter item in the list of main counters and compares it to the reference value
-# Largest deviation from the reference (nominal) value is taken
+# Extracts two values from two counter items in the list of main counters and returns th ratio of these scaled by some factor
 class RatioExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, numeratorCounterItem, denominatorCounterItem, mode, exid = "", distribution = "lnN", description = ""):
+    def __init__(self, scale, numeratorCounterItem, denominatorCounterItem, mode, exid = "", distribution = "lnN", description = ""):
         ExtractorBase.__init__(self, mode, exid, distribution, description)
         self._numeratorCounterItem = numeratorCounterItem
         self._denominatorCounterItem = denominatorCounterItem
+        self._scale = scale
 
     ## Method for extracking information
     def doExtract(self, dsetMgr, dsetMgrColumn, luminosity, additionalNormalisation = 1.0):
@@ -268,7 +268,7 @@ class RatioExtractor(ExtractorBase):
             print "Warning: In Nuisance with id='"+self._exid+"' denominator counter ('"+self._counterItem+"') value is zero!"
             return 0.0
         # Return result
-        return myNumeratorCount.value() / myDenominatorCount.value()
+        return myNumeratorCount.value() / myDenominatorCount.value() * self._scale
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
@@ -281,3 +281,6 @@ class RatioExtractor(ExtractorBase):
     # Name of item (label) in counter histogram for numerator count
     ## \var _denominatorCounterItem
     # Name of item (label) in counter histogram for denominator count
+    ## \var _scale
+    # Scaling factor for result (float)
+
