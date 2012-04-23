@@ -4,6 +4,8 @@ import os
 import sys
 import imp
 from optparse import OptionParser
+import gc
+import cPickle
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DataCardGenerator as DataCard
@@ -11,19 +13,25 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
 
 
 def main(opts):
+    #gc.set_debug(gc.DEBUG_LEAK)
+    #gc.set_debug(gc.DEBUG_STATS)
     print "Loading datacard:", opts.datacard
     config = load_module(opts.datacard)
-    print "Parsing datacard information ..."
     datacardgenerator = DataCard.DataCardGenerator(config,opts)
 
-    #if multicrabPaths.getQCDFactorizedExists():
-    #    datacardgenerator.generate(multicrabPaths.getQCDFactorizedPaths())
+    #memoryDump()
 
-    #if multicrabPaths.getQCDInvertedExists():
-    #    datacardgenerator.generate(multicrabPaths.getQCDInvertedPaths())
+def memoryDump():
+    dump = open("memory_pickle.txt", 'w')
+    for obj in gc.get_objects():
+        i = id(obj)
+        size = sys.getsizeof(obj, 0)
+        #    referrers = [id(o) for o in gc.get_referrers(obj) if hasattr(o, '__class__')]
+        referents = [id(o) for o in gc.get_referents(obj) if hasattr(o, '__class__')]
+        if hasattr(obj, '__class__'):
+            cls = str(obj.__class__)
+            cPickle.dump({'id': i, 'class': cls, 'size': size, 'referents': referents}, dump)
 
-    #datacardgenerator = DataCard.DataCardGenerator()
-    #datacardgenerator.generate()
 
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")

@@ -49,6 +49,7 @@ class DatacardColumn():
         self._additionalNormalisationFactor = additionalNormalisationFactor
         self._dirPrefix = dirPrefix
         self._shapeHisto = shapeHisto
+        self._isPrintable = True
 
         self.checkInputValidity()
 
@@ -81,19 +82,45 @@ class DatacardColumn():
                 myMsg += "Missing or empty field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
 
         if myMsg != "":
-            print "Error (data group ='"+self._label+"'):\n"+myMsg
+            print "\033[0;41m\033[1;37mError (data group ='"+self._label+"'):\033[0;0m\n"+myMsg
             sys.exit()
 
-    ## Returns true if column has a nuisance
-    def hasNuisance(self, id):
+    ## Returns true if column has a nuisance Id
+    def hasNuisanceId(self, id):
         return id in self._nuisances
 
     ## Returns true if column is enabled for given mass point
     def isActiveForMass(self, mass):
-        return mass in self._enabledForMassPoints
+        return (mass in self._enabledForMassPoints) and self._isPrintable
+
+    ## Disables the datacard column
+    def disable(self):
+        self._isPrintable = False
+
+    ## Returns label
+    def getLabel(self):
+        return self._label
+
+    ## Returns LandS process
+    def getLandsProcess(self):
+        return self._landsProcess
+
+    ## Returns dataset manager
+    def getDatasetMgr(self):
+        return self._datasetMgr
+
+    ## Returns dataset manager column
+    def getDatasetMgrColumn(self):
+        return self._datasetMgrColumn
+
+    ## Returns dataset manager column for MC EWK in QCD factorised
+    def getDatasetMgrColumnForQCDMCEWK(self):
+        return self._datasetMgrColumnForQCDMCEWK
 
     ## Returns rate for column (as string)
     def getRateValue(self, luminosity, additionalNormalisation = 1.0):
+        if self._datasetType == MulticrabDirectoryDataType.DUMMY:
+            return 0.0
         myExtractor = None
         if self._datasetType == MulticrabDirectoryDataType.OBSERVATION:
             myExtractor = CounterExtractor(self._rateCounter, ExtractorMode.OBSERVATION)
@@ -102,15 +129,15 @@ class DatacardColumn():
         if self._datasetType == MulticrabDirectoryDataType.QCDFACTORISED or self._datasetType == MulticrabDirectoryDataType.QCDINVERTED:
             #myExtractor.Calculate(luminosity, additionalNormalisation)
             #myExtractor.
-            print "rate not implemented for QCD yet"  #FIXME
+            print "rate not implemented for QCD yet, setting rate to zero"  #FIXME
         else:
-            return myExtractor.doExtract(self._datasetMgr, self._datasetMgrColumn, luminosity, additionalNormalisation)
+            return myExtractor.doExtract(self, luminosity, additionalNormalisation)
 
     ## Returns nuisance for column (as string)
     def getNuisanceValue(self, id):
         for nid in self._nuisances:
             if id == nid:
-                return myExtractor.doExtract(self._datasetMgr, self._datasetMgrColumn, luminosity, additionalNormalisation)
+                return myExtractor.doExtract(self, luminosity, additionalNormalisation)
                 #return nid.doExtract(self._datasetMgrColumn
         raise Exception("Nuisance with id='"+id+"' not found in data group '"+self._label+"'! Check first with hasNuisance(id) that data group has the nuisance.")
 

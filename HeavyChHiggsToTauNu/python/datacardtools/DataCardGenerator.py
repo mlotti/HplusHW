@@ -15,6 +15,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer import *
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
 
@@ -47,6 +48,7 @@ class DataCardGenerator:
 
         # Create columns (dataset groups)
         self.createDatacardColumns()
+        self.checkDatacardColumns()
 
         # Create extractors for nuisances (data miners for nuisances)
         self.createExtractors()
@@ -54,6 +56,8 @@ class DataCardGenerator:
         # Check nuisances and do merging
         self.checkNuisances()
 
+        # Make datacards
+        myTable = TableProducer(opts, config, self._luminosity, self._observation, self._columns, self._nuisances)
 
         #for c in self._columns:
         #    print c._label, c.getRateValue(self._luminosity)
@@ -207,6 +211,12 @@ class DataCardGenerator:
                                       additionalNormalisationFactor = dg.additionalNormalisation,
                                       dirPrefix = dg.dirPrefix,
                                       shapeHisto = dg.shapeHisto)
+            # Disable non-active QCD measurements
+            if dg.datasetType == "QCD factorised" and self._QCDmethod == DatacardQCDMethod.INVERTED:
+                myColumn.disable()
+            elif dg.datasetType == "QCD inverted" and self._QCDmethod == DatacardQCDMethod.FACTORISED:
+                myColumn.disable()
+            # Add column
             self._columns.append(myColumn)
             if self._opts.debugConfig:
                 myColumn.printDebug()
@@ -255,6 +265,19 @@ class DataCardGenerator:
                 sys.exit()
         return myResult
 
+    ## Check landsProcess in datacard columns
+    def checkDatacardColumns(self):
+        i = 0
+        myFirstValue = 0
+        for c in sorted(self._columns, key=lambda x: x.getLandsProcess()):
+            if i == 0:
+                myFirstValue = c.getLandsProcess()
+            else:
+                if myFirstValue + i != c.getLandsProcess():
+                    print "\033[0;41m\033[1;37mError:\033[0;0m cannot find LandS process '"+str(myFirstValue+i)+"' in data groups! (need to have consecutive numbers; add group with such landsProcess or check input file)"
+                    sys.exit()
+            i += 1
+
     ## Creates extractors for nuisances
     def createExtractors(self):
         myMode = ExtractorMode.NUISANCE
@@ -285,7 +308,7 @@ class DataCardGenerator:
             elif n.function == "Shape":
                 print "fixme: add shape nuisance"
                 # FIXME temp code
-                self._nuisances.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
+                self._nuisances.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = ExtractorMode.SHAPENUISANCE))
             elif n.function == "ScaleFactor":
                 self._nuisances.append(ScaleFactorExtractor(exid = n.id,
                                                             histoDirs = n.histoDir,

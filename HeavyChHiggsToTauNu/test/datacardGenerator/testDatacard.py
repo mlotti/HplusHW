@@ -1,7 +1,7 @@
-DataCardName    = 'myDymmyTestName'
-Path            = '/mnt/flustre/slehti/HplusDataForLands'
-#Path            = '/home/wendland/data/lands/lands_HIG-11-019'
-MassPoints      = [80,100,120,140,150,155,160]
+DataCardName    = 'myDummyTestName'
+#Path            = '/mnt/flustre/slehti/HplusDataForLands'
+Path            = '/home/wendland/data/lands/lands_HIG-11-019'
+MassPoints      = [160]# [80,100,120,140,150,155,160]
 
 # Specify name of EDFilter or EDAnalyser process that produced the root files
 SignalAnalysis  = "signalAnalysis"
@@ -55,19 +55,19 @@ signalTemplate = DataGroup(datasetType="Signal",
 for mass in MassPoints:
     myMassList = [mass]
     hhx = signalTemplate.clone()
-    hhx.setLabel("HH"+str(mass))
+    hhx.setLabel("HH"+str(mass)+"_a")
     hhx.setLandSProcess(-1)
     hhx.setValidMassPoints(myMassList)
-    hhx.setNuisances(["1","3","7","9","10","17","28","33","34"])
+    hhx.setNuisances(["01","03","07","09","10","17","28","33","34"])
     hhx.setDatasetDefinitions(["TTToHplusBHminusB_M"+str(mass)]),
 #   hhx.setSubPaths(multicrabPaths.getSubPaths(signalPath,"^TTToHplusBHminusB_M"+str(mass)))
     DataGroups.append(hhx)
 
     hwx = signalTemplate.clone()
-    hwx.setLabel("HW"+str(mass))
+    hwx.setLabel("HW"+str(mass)+"_a")
     hwx.setLandSProcess(0)
     hwx.setValidMassPoints(myMassList)
-    hwx.setNuisances(["1","3","7","9","10","18","28","33","34"])
+    hwx.setNuisances(["01","03","07","09","10","18","28","33","34"])
     hwx.setDatasetDefinitions(["TTToHplusBWB_M"+str(mass)]),
 #    hwx.setSubPaths(multicrabPaths.getSubPaths(signalPath,"^TTToHplusBWB_M"+str(mass)))
     DataGroups.append(hwx)
@@ -111,7 +111,7 @@ DataGroups.append(DataGroup(
     validMassPoints = MassPoints,
     #path         = multicrabPaths.getEWKPath(),
     #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getEWKPath(),"^Data"),
-    nuisances    = ["1b","3","7c","14","15","16","19"]
+    nuisances    = ["01b","03","07c","14","15","16","19"]
 ))
 
 DataGroups.append(DataGroup(
@@ -125,7 +125,7 @@ DataGroups.append(DataGroup(
     validMassPoints = MassPoints,
     #path         = multicrabPaths.getEWKPath(),
     #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getEWKPath(),"^DYJetsToLL"),
-    nuisances    = ["1c","3","7","9","11b","15b","16b","31","33","34","24"]
+    nuisances    = ["01c","03","07","09","11b","15b","16b","31","33","34","24"]
 ))
 
 DataGroups.append(DataGroup(
@@ -139,7 +139,7 @@ DataGroups.append(DataGroup(
     validMassPoints = MassPoints,
     #path         = multicrabPaths.getEWKPath(),
     #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getEWKPath(),"^WW"),
-    nuisances    = ["1c","3","7","9","11b","15b","16b","32","33","34","27"]
+    nuisances    = ["01c","03","07","09","11b","15b","16b","32","33","34","27"]
 ))
 
 DataGroups.append(DataGroup(
@@ -152,7 +152,7 @@ DataGroups.append(DataGroup(
     rateCounter  = FakeRateCounter,
     validMassPoints = MassPoints,
     #subpath      = multicrabPaths.getSubPaths(signalPath,"^TTJets_"),
-    nuisances    = ["1","4","7b","9","10","28","33","34b","35"]
+    nuisances    = ["01","04","07b","09","10","28","33","34b","35"]
 ))
 
 DataGroups.append(DataGroup(
@@ -165,7 +165,7 @@ DataGroups.append(DataGroup(
     rateCounter  = FakeRateCounter,
     validMassPoints = MassPoints,
     #subpath      = multicrabPaths.getSubPaths(signalPath,"^WJets_"),
-    nuisances    = ["1","4","7b","9","11","29","33","34b","37"]
+    nuisances    = ["01","04","07b","09","11","29","33","34b","37"]
 ))
 
 DataGroups.append(DataGroup(
@@ -178,8 +178,23 @@ DataGroups.append(DataGroup(
     rateCounter  = FakeRateCounter,
     validMassPoints = MassPoints,
     #subpath      = multicrabPaths.getSubPaths(signalPath,"^T_tW"),
-    nuisances    = ["1","4","7b","9","10","30","33","34b","38"]
+    nuisances    = ["01","04","07b","09","10","30","33","34b","38"]
 ))
+
+DataGroups.append(DataGroup(
+    label        = "res.",
+    landsProcess = 2,
+    #shapeHisto   = SignalShapeHisto,
+    datasetType  = "None",
+    #datasetDefinitions   = ["Data"],
+    #dirPrefix   = SignalAnalysis,
+    #rateCounter  = SignalRateCounter,
+    validMassPoints = MassPoints,
+    #path         = multicrabPaths.getEWKPath(),
+    #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getEWKPath(),"^Data"),
+    #nuisances    = ["01b","03","07c","14","15","16","19"]
+))
+
 
 ##############################################################################
 # Definition of nuisance parameters
@@ -201,9 +216,9 @@ Nuisances.append(Nuisance(
     label         = "tau+MET trg scale factor",
     distr         = "lnN",
     function      = "ScaleFactor",
-    histoDir      = ["/ScaleFactorUncertainties/"],
+    histoDir      = ["signalAnalysis/ScaleFactorUncertainties/"],
     histograms    = ["TriggerScaleFactorAbsUncert_AfterDeltaPhi160"],
-    normalisation = ["/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterDeltaPhi160"]
+    normalisation = ["signalAnalysis/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterDeltaPhi160"]
 ))
 
 Nuisances.append(Nuisance(  
@@ -395,7 +410,7 @@ Nuisances.append(Nuisance(
     label         = "EWK with taus stat.",
     distr         = "lnN",
     function      = "Counter",
-    counter       = FakeRateCounter,
+    counter       = SignalRateCounter,
 ))
 
 Nuisances.append(Nuisance(
@@ -509,7 +524,7 @@ Nuisances.append(Nuisance(
     counter       = FakeRateCounter
 ))
 
-Nuisances.append(Nuisance(  
+Nuisances.append(Nuisance(
     id            = "35",
     label         = "ttbar fake tau MC stat.",
     distr         = "lnN",
@@ -521,13 +536,14 @@ Nuisances.append(Nuisance(
     id            = "36", 
     label         = "Z->tautau fake tau MC stat.",
     distr         = "lnN",
-    function      = "Counter",   
+    function      = "Counter",
     counter       = FakeRateCounter
 ))
 
 Nuisances.append(Nuisance(
     id            = "37",  
     label         = "W+jets fake tau MC stat.",
+    distr         = "lnN",
     function      = "Counter",
     counter       = FakeRateCounter
 ))
@@ -535,7 +551,7 @@ Nuisances.append(Nuisance(
 Nuisances.append(Nuisance(
     id            = "38",
     label         = "single top fake tau MC stat.",
-    distr         = "lnN",   
+    distr         = "lnN",
     function      = "Counter",
     counter       = FakeRateCounter
 ))

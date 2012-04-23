@@ -4,6 +4,7 @@
 #
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter import EventCounter
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import _histoToCounter
 from math import pow,sqrt
 import sys
 
@@ -26,7 +27,7 @@ class ExtractorBase:
         self._distribution = distribution
         self._description = description
         self._extractablesToBeMerged = []
-        self._masterExID = ""
+        self._masterExID = exid
 
     ## Returns true if extractable mode is observation
     def isObservation(self):
@@ -61,6 +62,10 @@ class ExtractorBase:
     ## True if the id of the current extractable or it's master is the same as the asked one
     def isId(self, exid):
         return self._exid == exid or self._masterExID == exid
+
+    ## Returns id of master
+    def getMasterId(self):
+        return self._masterExID
 
     ## Returns id
     def getId(self):
@@ -101,7 +106,7 @@ class ExtractorBase:
         sys.exit()
 
     ## Virtual method for extracking information
-    def doExtract(self, dsetMgr, dsetMgrColumn, luminosity, additionalNormalisation = 1.0):
+    def doExtract(self, datasetColumn, luminosity, additionalNormalisation = 1.0):
         return -1.0
 
     ## Virtual method for adding histograms to the root file
@@ -146,9 +151,9 @@ class ConstantExtractor(ExtractorBase):
         self._constantUpperValue = constantUpperValue
 
     ## Method for extracking information
-    def doExtract(self, dsetMgr, dsetMgrColumn, luminosity, additionalNormalisation = 1.0):
+    def doExtract(self, datasetColumn, luminosity, additionalNormalisation = 1.0):
         if self.isAsymmetricNuisance():
-            return [self._constantValue, self._constantUpperValue]
+            return [-(self._constantValue), self._constantUpperValue]
         else:
             return self._constantValue
 
@@ -178,16 +183,20 @@ class CounterExtractor(ExtractorBase):
         self._counterItem = counterItem
 
     ## Method for extracking information
-    def doExtract(self, dsetMgr, dsetMgrColumn, luminosity, additionalNormalisation = 1.0):
-        myEventCounter = EventCounter(dsetMgr)
+    def doExtract(self, datasetColumn, luminosity, additionalNormalisation = 1.0):
+        myEventCounter = EventCounter(datasetColumn.getDatasetMgr())
         #myEventCounter.normalizeMCByLuminosity()
         myEventCounter.normalizeMCToLuminosity(luminosity)
         myTable = myEventCounter.getMainCounterTable()
-        myCount = myTable.getCount(rowName=self._counterItem, colName=dsetMgrColumn)
-        # Return resul
+        myCount = myTable.getCount(rowName=self._counterItem, colName=datasetColumn.getDatasetMgrColumn())
+        # Return result
         if self.isRate() or self.isObservation():
             return myCount.value() * additionalNormalisation
         elif self.isNuisance():
+            # protection against zero
+            if myCount.value() == 0:
+                print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' counter ('"+self._counterItem+"') value is zero!"
+                return 0.0
             return myCount.uncertainty() / myCount.value()
 
     ## Virtual method for printing debug information
@@ -213,29 +222,29 @@ class MaxCounterExtractor(ExtractorBase):
             sys.exit()
 
     ## Method for extracking information
-    def doExtract(self, dsetMgr, dsetMgrColumn, luminosity, additionalNormalisation = 1.0):
+    def doExtract(self, datasetColumn, luminosity, additionalNormalisation = 1.0):
         myResult = []
         for d in self._counterDirs:
-            myHistoPath = d+"/weighted/counters"
-            datasetRootHisto = dsetMgr.getDataset(dsetMgrColumn).getDatasetRootHisto(myHistoPath)
+            myHistoPath = d+"/weighted/counter"
+            datasetRootHisto = datasetColumn.getDatasetMgr().getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoPath)
             datasetRootHisto.normalizeToLuminosity(luminosity)
-            counterList = dataset._histoToCounter(datasetRootHisto.getHistogram())
+            counterList = _histoToCounter(datasetRootHisto.getHistogram())
             myFoundStatus = False # to ensure that the first counter of given name is taken
             for name, count in counterList:
                 if name == self._counterItem and not myFoundStatus:
                     myResult.append(count)
                     myFoundStatus = True
             if not myFoundStatus:
-                print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"':\033[0;0m Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!"
+                print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':\033[0;0m Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!"
                 sys.exit()
         # Loop over results
         myMaxValue = 0.0
         # Protect for div by zero
         if myResult[0].value() == 0:
-            print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' nominal counter ('"+self._counterItem+"')value is zero!"
+            print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' nominal counter ('"+self._counterItem+"')value is zero!"
             return 0.0
         for i in range(1,len(myResult)):
-            myValue = myResult[i].value() / myResult[0].value()
+            myValue = abs(myResult[i].value() / myResult[0].value() - 1.0)
             if (myValue > myMaxValue):
                 myMaxValue = myValue
         return myMaxValue
@@ -262,19 +271,19 @@ class RatioExtractor(ExtractorBase):
         self._scale = scale
 
     ## Method for extracking information
-    def doExtract(self, dsetMgr, dsetMgrColumn, luminosity, additionalNormalisation = 1.0):
-        myEventCounter = EventCounter(dsetMgr)
+    def doExtract(self, datasetColumn, luminosity, additionalNormalisation = 1.0):
+        myEventCounter = EventCounter(datasetColumn.getDatasetMgr())
         #myEventCounter.normalizeMCByLuminosity()
         myEventCounter.normalizeMCToLuminosity(luminosity)
         myTable = myEventCounter.getMainCounterTable()
-        myNumeratorCount = myTable.getCount(rowName=self._numeratorCounterItem, colName=dsetMgrColumn)
-        myDenominatorCount = myTable.getCount(rowName=self._denominatorCounterItem, colName=dsetMgrColumn)
+        myNumeratorCount = myTable.getCount(rowName=self._numeratorCounterItem, colName=datasetColumn.getDatasetMgrColumn())
+        myDenominatorCount = myTable.getCount(rowName=self._denominatorCounterItem, colName=datasetColumn.getDatasetMgrColumn())
         # Protection against div by zero
         if myDenominatorCount.value() == 0.0:
-            print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' denominator counter ('"+self._counterItem+"') value is zero!"
+            print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' denominator counter ('"+self._counterItem+"') value is zero!"
             return 0.0
         # Return result
-        return myNumeratorCount.value() / myDenominatorCount.value() * self._scale
+        return (myDenominatorCount.value() / myNumeratorCount.value() - 1.0) * self._scale
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
@@ -300,34 +309,35 @@ class ScaleFactorExtractor(ExtractorBase):
         self._histograms = histograms
         self._normalisation = normalisation
         if len(self._histoDirs) != len(self._normalisation) or len(self._histoDirs) != len(self._histograms):
-            print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"':\033[0;0m need to specify equal amount of histoDirs, histograms and normalisation histograms!"
+            print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':\033[0;0m need to specify equal amount of histoDirs, histograms and normalisation histograms!"
             sys.exit()
 
     ## Method for extracking information
-    def doExtract(self, dsetMgr, dsetMgrColumn, luminosity, additionalNormalisation = 1.0):
+    def doExtract(self, datasetColumn, luminosity, additionalNormalisation = 1.0):
         myTotal = 0.0
         mySum = 0.0
-        for i in range (self._histoDirs):
-            hValues = dsetMgr.getDataset(dsetMgrColumn).getDatasetRootHisto(self.histoDirs[i]+"/"+self._histograms[i])
+        for i in range (0, len(self._histoDirs)):
+            myValueRootHisto = datasetColumn.getDatasetMgr().getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoDirs[i]+"/"+self._histograms[i])
+            myValueRootHisto.normalizeToLuminosity(luminosity)
+            hValues = myValueRootHisto.getHistogram()
             if hValues == None:
-                print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"':\033[0;0m Cannot open histogram '"+self.histoDirs[i]+"/"+self._histograms[i]+"'!"
+                print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':\033[0;0m Cannot open histogram '"+self._histoDirs[i]+"/"+self._histograms[i]+"'!"
                 sys.exit()
-            hValues.normalizeToLuminosity(luminosity)
-            hNormalisation = dsetMgr.getDataset(dsetMgrColumn).getDatasetRootHisto(self.histoDirs[i]+"/"+self._normalisation[i])
+            myNormalisationRootHisto = datasetColumn.getDatasetMgr().getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoDirs[i]+"/"+self._normalisation[i])
+            myNormalisationRootHisto.normalizeToLuminosity(luminosity)
+            hNormalisation = myNormalisationRootHisto.getHistogram()
             if hNormalisation == None:
-                print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"':\033[0;0m Cannot open histogram '"+self.histoDirs[i]+"/"+self._normalisation[i]+"'!"
+                print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':\033[0;0m Cannot open histogram '"+self._histoDirs[i]+"/"+self._normalisation[i]+"'!"
                 sys.exit()
-            hNormalisation.normalizeToLuminosity(luminosity)
             mySum = 0.0
             for j in range (1, hValues.GetNbinsX()+1):
-                mySum += math.pow(hValues.GetBinContent(j) * hValues.GetBinCenter(j),2)
-                mySum += myCount * myCount
+                mySum += pow(hValues.GetBinContent(j) * hValues.GetBinCenter(j),2)
             myTotal = hNormalisation.GetBinContent(1)
         # protection against div by zero
         if myTotal == 0.0:
-            print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' total count from normalisation histograms is zero!"
+            print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' total count from normalisation histograms is zero!"
             return 0.0
-        return math.sqrt(mySum) / myTotal
+        return sqrt(mySum) / myTotal
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
