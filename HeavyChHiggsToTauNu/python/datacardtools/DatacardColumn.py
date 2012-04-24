@@ -42,7 +42,11 @@ class DatacardColumn():
         else:
             self._datasetType = MulticrabDirectoryDataType.UNKNOWN
         self._rateCounter = rateCounter
+        self._rateResult = None
+        self._rateHistogram = None
         self._nuisances = nuisances
+        self._nuisancesResults = None
+        self._nuisancesHistograms = None
         self._datasetMgr = datasetMgr
         self._datasetMgrColumn = datasetMgrColumn
         self._datasetMgrColumnForQCDMCEWK  = datasetMgrColumnForQCDMCEWK
@@ -104,6 +108,14 @@ class DatacardColumn():
     ## Returns LandS process
     def getLandsProcess(self):
         return self._landsProcess
+
+    ## Returns the label of the counter from which to look up the rate
+    def getRateCounterItem(self):
+        return self._rateCounter
+
+    ## Returns the list of nuisance IDs
+    def getNuisances(self):
+        return self._nuisances
 
     ## Returns dataset manager
     def getDatasetMgr(self):

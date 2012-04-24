@@ -6,6 +6,7 @@ import imp
 from optparse import OptionParser
 import gc
 import cPickle
+import ROOT
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DataCardGenerator as DataCard
@@ -13,13 +14,17 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
 
 
 def main(opts):
-    #gc.set_debug(gc.DEBUG_LEAK)
+    #gc.set_debug(gc.DEBUG_LEAK | gc.DEBUG_STATS)
+    gc.set_debug(gc.DEBUG_STATS)
+    ROOT.SetMemoryPolicy(ROOT.kMemoryStrict)
     #gc.set_debug(gc.DEBUG_STATS)
     print "Loading datacard:", opts.datacard
     config = load_module(opts.datacard)
-    datacardgenerator = DataCard.DataCardGenerator(config,opts)
-
-    #memoryDump()
+    #datacardgenerator = 
+    DataCard.DataCardGenerator(config,opts)
+    gc.collect()
+    #ROOT.SetMemoryPolicy( ROOT.kMemoryHeuristics)
+    memoryDump()
 
 def memoryDump():
     dump = open("memory_pickle.txt", 'w')
@@ -36,6 +41,7 @@ def memoryDump():
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     parser.add_option("-x", "--datacard", dest="datacard", action="store", help="Name (incl. path) of the datacard to be used as an input")
+    parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
     parser.add_option("--QCDfactorised", dest="useQCDfactorised", action="store_true", default=False, help="Use factorised method for QCD measurement")
     parser.add_option("--QCDinverted", dest="useQCDinverted", action="store_true", default=False, help="Use inverted method for QCD measurement")
     parser.add_option("--debugConfig", dest="debugConfig", action="store_true", default=False, help="Enable debugging print for config parsing")
@@ -53,6 +59,5 @@ if __name__ == "__main__":
     if not myStatus:
         parser.print_help()
         sys.exit()
-
     # Run main program
     main(opts)

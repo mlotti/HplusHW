@@ -152,12 +152,14 @@ class ConstantExtractor(ExtractorBase):
 
     ## Method for extracking information
     def doExtract(self, datasetColumn, luminosity, additionalNormalisation = 1.0):
+        myResult = None
         if self.isAsymmetricNuisance():
-            return [-(self._constantValue), self._constantUpperValue]
+            myResult = [-(self._constantValue), self._constantUpperValue]
         else:
-            return self._constantValue
+            myResult = self._constantValue
+        return myResult
 
-    ## Method for adding histograms to the root file
+### Method for adding histograms to the root file
     #def addHistogramsToFile(self, label, exid, rootFile):
 
     ## Virtual method for printing debug information
@@ -190,14 +192,19 @@ class CounterExtractor(ExtractorBase):
         myTable = myEventCounter.getMainCounterTable()
         myCount = myTable.getCount(rowName=self._counterItem, colName=datasetColumn.getDatasetMgrColumn())
         # Return result
+        myResult = None
         if self.isRate() or self.isObservation():
-            return myCount.value() * additionalNormalisation
+            myResult = myCount.value() * additionalNormalisation
         elif self.isNuisance():
             # protection against zero
             if myCount.value() == 0:
                 print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' counter ('"+self._counterItem+"') value is zero!"
-                return 0.0
-            return myCount.uncertainty() / myCount.value()
+                myResult = 0.0
+            else:
+                myResult = myCount.uncertainty() / myCount.value()
+        del myTable
+        del myEventCounter
+        return myResult
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
@@ -242,11 +249,11 @@ class MaxCounterExtractor(ExtractorBase):
         # Protect for div by zero
         if myResult[0].value() == 0:
             print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' nominal counter ('"+self._counterItem+"')value is zero!"
-            return 0.0
-        for i in range(1,len(myResult)):
-            myValue = abs(myResult[i].value() / myResult[0].value() - 1.0)
-            if (myValue > myMaxValue):
-                myMaxValue = myValue
+        else:
+            for i in range(1,len(myResult)):
+                myValue = abs(myResult[i].value() / myResult[0].value() - 1.0)
+                if (myValue > myMaxValue):
+                    myMaxValue = myValue
         return myMaxValue
 
     ## Virtual method for printing debug information
@@ -281,9 +288,11 @@ class RatioExtractor(ExtractorBase):
         # Protection against div by zero
         if myDenominatorCount.value() == 0.0:
             print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' denominator counter ('"+self._counterItem+"') value is zero!"
-            return 0.0
+            myResult = 0.0
+        else:
+            myResult = (myDenominatorCount.value() / myNumeratorCount.value() - 1.0) * self._scale
         # Return result
-        return (myDenominatorCount.value() / myNumeratorCount.value() - 1.0) * self._scale
+        return myResult
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
@@ -334,10 +343,15 @@ class ScaleFactorExtractor(ExtractorBase):
                 mySum += pow(hValues.GetBinContent(j) * hValues.GetBinCenter(j),2)
             myTotal = hNormalisation.GetBinContent(1)
         # protection against div by zero
+        myResult = None
         if myTotal == 0.0:
             print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' total count from normalisation histograms is zero!"
-            return 0.0
-        return sqrt(mySum) / myTotal
+            myResult = 0.0
+        else:
+            myResult = sqrt(mySum) / myTotal
+        # Return result
+        return myResult
+
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):

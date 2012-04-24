@@ -5,6 +5,7 @@
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorBase
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ProgressBar import ProgressBar
 
 from math import pow,sqrt
 import os
@@ -26,6 +27,11 @@ class TableProducer:
         self._timestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
         self._outputFileStem = "lands_datacard_hplushadronic_m"
         self._outputRootFileStem = "lands_histograms_hplushadronic_m"
+        # Calculate number of nuisance parameters
+        self._nNuisances = 0
+        for n in self._extractors:
+            if n.isPrintable():
+                self._nNuisances += 1
 
         self.makeDataCards()
 
@@ -73,15 +79,15 @@ class TableProducer:
             myCard += self._getTableOutput(myWidths,myRateDataTable)
             myCard += mySeparatorLine
             myCard += self._getTableOutput(myWidths,myNuisanceTable)
-
-            print myCard
-
+            # Print datacard to screen if requested
+            if self._opts.showDatacard:
+                print myCard
+            # Save datacard to file
             myFile = open(myFilename, "w")
             myFile.write(myCard)
             myFile.close()
             print "Written datacard to:",myFilename
-
-            # Close file
+            # Close root file
             self._outfile.Write()
             self._outfile.Close()
             print "Written shape root file to:",myRootFilename
@@ -94,15 +100,10 @@ class TableProducer:
 
     ## Generates parameter lines
     def _generateParameterLines(self):
-        # Calculate number of nuisance parameters
-        nNuisances = 0
-        for n in self._extractors:
-            if n.isPrintable():
-                nNuisances += 1
         # Produce result
         myResult =  "imax     1     number of channels\n"
         myResult += "jmax     *     number of backgrounds\n"
-        myResult += "kmax    %2d     number of parameters\n"%nNuisances
+        myResult += "kmax    %2d     number of parameters\n"%self._nNuisances
         return myResult
 
     ## Generates shape header
@@ -161,10 +162,14 @@ class TableProducer:
 
     ## Generates nuisance table as list
     def _generateNuisanceTable(self,mass):
+        myBar = ProgressBar(self._nNuisances)
         myResult = []
         # Loop over rows
+        myN = 0.0
         for n in sorted(self._extractors, key=lambda x: x.getId()):
             if n.isPrintable():
+                myN += 1.0
+                myBar.draw(float(myN) / float(self._nNuisances))
                 myRow = ["%d"%int(n.getId()), n.getDistribution()]
                 # Loop over columns
                 for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
@@ -215,6 +220,7 @@ class TableProducer:
                 # Add description to end of the row
                 myRow.append(n.getDescription())
                 myResult.append(myRow)
+        myBar.finished()
         return myResult
 
     ## Calculates maximum width of each table cell
