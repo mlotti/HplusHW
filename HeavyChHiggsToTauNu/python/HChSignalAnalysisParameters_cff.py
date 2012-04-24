@@ -134,6 +134,8 @@ jetSelectionBase = cms.untracked.PSet(
     jetIdMinChargedHadronEnergyFraction = cms.untracked.double(0.0),
     jetIdMinChargedMultiplicity = cms.untracked.uint32(0),
     jetIdMaxChargedEMEnergyFraction = cms.untracked.double(0.99),
+    # Pileup cleaning
+    betaCut = cms.untracked.double(0.0), # disabled
     # Experimental
     EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )

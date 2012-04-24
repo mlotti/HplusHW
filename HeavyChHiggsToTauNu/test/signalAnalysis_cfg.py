@@ -45,6 +45,8 @@ doTauEmbeddingTauSelectionScan = False
 # Do embedding-like preselection for signal analysis
 doTauEmbeddingLikePreselection = False
 
+# Apply beta cut for jets to reject PU jets
+betaCutForJets = 0.0 # Disable by setting to 0.0; if you want to enable, set to 0.5
 
 #########
 # Flags for options in the signal analysis
@@ -199,6 +201,9 @@ if not doFillTree:
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
 sequence = MetCorrection.addCorrectedMet(process, process.signalAnalysis, postfix=PF2PATVersion)
 process.commonSequence *= sequence
+
+# Set beta variable for jets
+process.signalAnalysis.jetSelection.betaCut = betaCutForJets
 
 # Prescale fetching done automatically for data
 if dataVersion.isData() and options.tauEmbeddingInput == 0 and doPrescalesForData:
