@@ -7,6 +7,8 @@
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
+#include "RecoTauTag/TauTagTools/interface/TauTagTools.h"
+
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -111,7 +113,11 @@ namespace HPlus {
       iEvent.getByLabel(fOneAndThreeProngTauSrc,oneAndThreeProngTaus);	  
       
       edm::Handle <std::vector<LorentzVector> > threeProngTaus;
-      iEvent.getByLabel(fThreeProngTauSrc, threeProngTaus);	  
+      iEvent.getByLabel(fThreeProngTauSrc, threeProngTaus);	 
+
+      //      edm::Handle<edm::View<reco::Vertex> > hvertex;
+      //     iEvent.getByLabel(pvSrc_, hvertex);
+      //     thePV_ = hvertex->ptrAt(0); 
       
       //     std::cout << " hadronic taus  " << oneAndThreeProngTaus.size() << std::endl;	       
       for( LorentzVectorCollection::const_iterator tau = oneAndThreeProngTaus->begin();tau!=oneAndThreeProngTaus->end();++tau) {  
@@ -176,6 +182,44 @@ namespace HPlus {
     for (edm::PtrVector<pat::Tau>::iterator it = myVetoTauCandidates.begin(); it != myVetoTauCandidates.end(); ++it) {
       //     increment(fVetoTauCandidatesCounter);
       hTauCandAllPt->Fill((*it)->pt(), fEventWeight.getWeight()); 
+      //      double ptLead = (*it)->leadTrack()->pt();
+      //      double emfrac = (*it)->emFraction();
+      //      double isolSum = (*it)->isolationTracksPtSum();
+      //      double myValue = (*it)->userFloat("byTightChargedMaxPt");
+      //      double myLdgTrackPt = (*it)->leadPFChargedHadrCand()->pt();
+      /*
+      double minTrackPt = 0.8;
+      int minPixelHits = 0;
+      int minTrackHits = 3;
+      double maxIP = 0.03;
+      double maxChi2 = 100;
+      double maxDeltaZ = 0.2;
+      double minGammaEt = 0.8;
+      *sumPt = 0;
+      *maxPt = 0;
+      *occupancy = 0;
+      reco::PFCandidateRefVector allCands = (*it)->isolationPFChargedHadrCands();
+      if(allCands.isNonnull()) {
+        reco::PFCandidateRefVector chargedCands = TauTagTools::filteredPFChargedHadrCands(allCands,
+                                                                                          minTrackPt,
+                                                                                          minPixelHits,
+                                                                                          minTrackHits,
+                                                                                          maxIP,
+                                                                                          maxChi2,
+                                                                                          maxDeltaZ,
+                                                                                          *thePV_,
+                                                                                          thePV_->position().z());
+        *occupancy = *occupancy + chargedCands.size();
+        for(size_t i=0; i<chargedCands.size(); ++i) {
+          double pt = chargedCands[i]->pt();
+          *sumPt = *sumPt + pt;
+          *maxPt = std::max(*maxPt, pt);
+        }
+     
+	std::cout << " allCands " << allCands << " sumPt  " << *sumPt << std::endl;
+      
+      }
+      */
       FakeTauIdentifier::MCSelectedTauMatchType myMatch = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
       if (myMatch == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
         hCandidateTauNumber->Fill(0., fEventWeight.getWeight());

@@ -16,7 +16,9 @@ namespace edm {
   class Event;
   class EventSetup;
 }
-
+namespace reco {
+  class Vertex;
+}
 namespace HPlus {
   class VetoTauSelection {
   public:
@@ -51,7 +53,8 @@ namespace HPlus {
     edm::InputTag fOneAndThreeProngTauSrc;
     edm::InputTag fThreeProngTauSrc;
     edm::InputTag fSrc;
-    
+    edm::Ptr<reco::Vertex> thePV_;
+   
     TauSelection fTauSelection;
     FakeTauIdentifier fFakeTauIdentifier;
     
