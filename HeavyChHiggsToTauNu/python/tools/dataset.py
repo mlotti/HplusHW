@@ -1103,7 +1103,11 @@ class Dataset:
     def _readCounter(self, counterDir):
         if self.file.Get(counterDir) == None:
             raise Exception("Unable to find directory '%s' from ROOT file '%s'" % (counterDir, self.file.GetName()))
-        ctr = _histoToCounter(self.file.Get(counterDir).Get("counter"))
+        h = self.file.Get(counterDir).Get("counter")
+        if h == None:
+            raise Exception("No TH1 'counter' in directory '%s' of ROOT file '%s'" % (counterDir, self.file.GetName()))
+        ctr = _histoToCounter(h)
+        h.Delete()
         self.nAllEvents = ctr[0][1].value() # first counter, second element of the tuple
         self.counterDir = counterDir
 

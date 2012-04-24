@@ -1762,7 +1762,9 @@ class SimpleCounter:
         self.datasetRootHisto.scale(value)
 
     def _createCounter(self):
-        self.counter = [x[1] for x in dataset._histoToCounter(self.datasetRootHisto.getHistogram())]
+        h = self.datasetRootHisto.getHistogram()
+        self.counter = [x[1] for x in dataset._histoToCounter(h)]
+        h.Delete()
 
     ## Get the name of the dataset
     def getName(self):
