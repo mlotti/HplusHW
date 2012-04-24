@@ -10,6 +10,7 @@
 
 #include "Math/GenVector/VectorUtil.h"
 #include "TH1F.h"
+#include <cmath>
 
 #include<algorithm>
 
@@ -226,9 +227,6 @@ namespace HPlus {
       if(!(iJet->neutralEmEnergyFraction() < fJetIdMaxNeutralEMEnergyFraction)) continue;
       increment(fneutralEmEnergyFractionCutSubCount);
 
-      if(iJet->userFloat("Beta") < fBetaCut) continue;
-      increment(fBetaCutSubCount);
-
       if(fabs(iJet->eta()) < 2.4) {
         if(!(iJet->chargedHadronEnergyFraction() > fJetIdMinChargedHadronEnergyFraction)) continue;
         increment(fchargedHadronEnergyFractionCutSubCount);
@@ -250,6 +248,9 @@ namespace HPlus {
       ++EMfractionCutPassed;
       increment(fEMfractionCutSubCount);
 
+      if(std::isnan(iJet->userFloat("BetaPV"))) continue;
+      if(iJet->userFloat("BetaPV") < fBetaCut) continue;
+      increment(fBetaCutSubCount);
 
       hPt->Fill(iJet->pt(), fEventWeight.getWeight());
       hEta->Fill(iJet->eta(), fEventWeight.getWeight());
