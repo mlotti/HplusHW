@@ -93,8 +93,12 @@ public:
       }
 
       //std::cout << "Jet " << iJet << " sumpt_all " << sumpt_all << " sumpt_pv " << sumpt_pv << " sumpt_nov " << sumpt_nov << std::endl;
-      double beta = (sumpt_pv+sumpt_nov) / sumpt_all;
-      double betaIncorrect = sumpt_pv / sumpt_all;
+      double beta = -1.0;
+      double betaIncorrect = -1.0;
+      if (sumpt_all > 0.0) {
+        beta = (sumpt_pv+sumpt_nov) / sumpt_all;
+        betaIncorrect = sumpt_pv / sumpt_all;
+      }
       //std::cout << "  beta " << beta << " betaIncorrect " << betaIncorrect << std::endl;
       
       // Make a copy from the original, because otherwise we'll have
