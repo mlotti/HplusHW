@@ -14,6 +14,24 @@ import ROOT
 
 import dataset
 
+## Enumeration class for CMS text mode
+class CMSMode:
+    PRELIMINARY = 0
+    PAPER = 1
+    SIMULATION = 2
+
+## Global variable to hold CMS text mode
+cmsTextMode = CMSMode.PRELIMINARY
+## Global dictionary to hold the CMS text labels
+cmsText = {
+    CMSMode.PRELIMINARY: "CMS Preliminary",
+    CMSMode.PAPER: "CMS",
+    CMSMode.SIMULATION : "CMS Simulation"
+    }
+
+## Default energy text
+energyText = "7 TeV"
+
 ## Class to provide default positions of the various texts.
 #
 # The attributes which can be set are the x and y coordinates and the
@@ -138,25 +156,32 @@ class PlotText:
 #
 # \param x   X coordinate of the text (None for default value)
 # \param y   Y coordinate of the text (None for default value)
-def addCmsPreliminaryText(x=None, y=None):
+def addCmsPreliminaryText(x=None, y=None, text=None):
     (x, y) = textDefaults.getValues("cmsPreliminary", x, y)
-    addText(x, y, "CMS Preliminary", textDefaults.getSize("cmsPreliminary"), bold=False)
+    if text == None:
+        txt  = cmsText[cmsTextMode]
+    else:
+        txt = text
+    addText(x, y, txt, textDefaults.getSize("cmsPreliminary"), bold=False)
 
 ## Draw the center-of-mass energy text to the current TPad
 #
 # \param x   X coordinate of the text (None for default value)
 # \param y   Y coordinate of the text (None for default value)
-# \param s   Center-of-mass energy text with the unit
-def addEnergyText(x=None, y=None, s="7 TeV"):
+# \param s   Center-of-mass energy text with the unit (None for the default value, dataset.energyText
+def addEnergyText(x=None, y=None, s=None):
     (x, y) = textDefaults.getValues("energy", x, y)
-    addText(x, y, "#sqrt{s} = "+s, textDefaults.getSize("energy"), bold=False)
+    text = energyText
+    if s != None:
+        text = s
+    addText(x, y, "#sqrt{s} = "+text, textDefaults.getSize("energy"), bold=False)
 
 ## Draw the integrated luminosity text to the current TPad
 #
 # \param x     X coordinate of the text (None for default value)
 # \param y     Y coordinate of the text (None for default value)
-# \param lumi  Value of the integrated luminosity
-# \param unit  Unit of the integrated luminosity value
+# \param lumi  Value of the integrated luminosity in pb^-1
+# \param unit  Unit of the integrated luminosity value (should be fb^-1)
 def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
     (x, y) = textDefaults.getValues("lumi", x, y)
     lumiInFb = lumi/1000.
