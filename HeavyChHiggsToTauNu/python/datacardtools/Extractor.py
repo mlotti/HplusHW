@@ -106,7 +106,7 @@ class ExtractorBase:
         sys.exit()
 
     ## Virtual method for extracking information
-    def doExtract(self, datasetColumn, luminosity, additionalNormalisation = 1.0):
+    def doExtract(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
         return -1.0
 
     ## Virtual method for adding histograms to the root file
@@ -151,7 +151,7 @@ class ConstantExtractor(ExtractorBase):
         self._constantUpperValue = constantUpperValue
 
     ## Method for extracking information
-    def doExtract(self, datasetColumn, luminosity, additionalNormalisation = 1.0):
+    def doExtract(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
         myResult = None
         if self.isAsymmetricNuisance():
             myResult = [-(self._constantValue), self._constantUpperValue]
@@ -185,12 +185,8 @@ class CounterExtractor(ExtractorBase):
         self._counterItem = counterItem
 
     ## Method for extracking information
-    def doExtract(self, datasetColumn, luminosity, additionalNormalisation = 1.0):
-        myEventCounter = EventCounter(datasetColumn.getDatasetMgr())
-        #myEventCounter.normalizeMCByLuminosity()
-        myEventCounter.normalizeMCToLuminosity(luminosity)
-        myTable = myEventCounter.getMainCounterTable()
-        myCount = myTable.getCount(rowName=self._counterItem, colName=datasetColumn.getDatasetMgrColumn())
+    def doExtract(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        myCount = mainCounterTable.getCount(rowName=self._counterItem, colName=datasetColumn.getDatasetMgrColumn())
         # Return result
         myResult = None
         if self.isRate() or self.isObservation():
@@ -202,8 +198,6 @@ class CounterExtractor(ExtractorBase):
                 myResult = 0.0
             else:
                 myResult = myCount.uncertainty() / myCount.value()
-        del myTable
-        del myEventCounter
         return myResult
 
     ## Virtual method for printing debug information
@@ -229,13 +223,15 @@ class MaxCounterExtractor(ExtractorBase):
             sys.exit()
 
     ## Method for extracking information
-    def doExtract(self, datasetColumn, luminosity, additionalNormalisation = 1.0):
+    def doExtract(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
         myResult = []
         for d in self._counterDirs:
             myHistoPath = d+"/weighted/counter"
-            datasetRootHisto = datasetColumn.getDatasetMgr().getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoPath)
+            datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoPath)
             datasetRootHisto.normalizeToLuminosity(luminosity)
-            counterList = _histoToCounter(datasetRootHisto.getHistogram())
+            myHisto = datasetRootHisto.getHistogram()
+            counterList = _histoToCounter(myHisto)
+            myHisto.IsA().Destructor(myHisto)
             myFoundStatus = False # to ensure that the first counter of given name is taken
             for name, count in counterList:
                 if name == self._counterItem and not myFoundStatus:
@@ -278,13 +274,9 @@ class RatioExtractor(ExtractorBase):
         self._scale = scale
 
     ## Method for extracking information
-    def doExtract(self, datasetColumn, luminosity, additionalNormalisation = 1.0):
-        myEventCounter = EventCounter(datasetColumn.getDatasetMgr())
-        #myEventCounter.normalizeMCByLuminosity()
-        myEventCounter.normalizeMCToLuminosity(luminosity)
-        myTable = myEventCounter.getMainCounterTable()
-        myNumeratorCount = myTable.getCount(rowName=self._numeratorCounterItem, colName=datasetColumn.getDatasetMgrColumn())
-        myDenominatorCount = myTable.getCount(rowName=self._denominatorCounterItem, colName=datasetColumn.getDatasetMgrColumn())
+    def doExtract(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        myNumeratorCount = mainCounterTable.getCount(rowName=self._numeratorCounterItem, colName=datasetColumn.getDatasetMgrColumn())
+        myDenominatorCount = mainCounterTable.getCount(rowName=self._denominatorCounterItem, colName=datasetColumn.getDatasetMgrColumn())
         # Protection against div by zero
         if myDenominatorCount.value() == 0.0:
             print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' denominator counter ('"+self._counterItem+"') value is zero!"
@@ -322,17 +314,17 @@ class ScaleFactorExtractor(ExtractorBase):
             sys.exit()
 
     ## Method for extracking information
-    def doExtract(self, datasetColumn, luminosity, additionalNormalisation = 1.0):
+    def doExtract(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
         myTotal = 0.0
         mySum = 0.0
         for i in range (0, len(self._histoDirs)):
-            myValueRootHisto = datasetColumn.getDatasetMgr().getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoDirs[i]+"/"+self._histograms[i])
+            myValueRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoDirs[i]+"/"+self._histograms[i])
             myValueRootHisto.normalizeToLuminosity(luminosity)
             hValues = myValueRootHisto.getHistogram()
             if hValues == None:
                 print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':\033[0;0m Cannot open histogram '"+self._histoDirs[i]+"/"+self._histograms[i]+"'!"
                 sys.exit()
-            myNormalisationRootHisto = datasetColumn.getDatasetMgr().getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoDirs[i]+"/"+self._normalisation[i])
+            myNormalisationRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoDirs[i]+"/"+self._normalisation[i])
             myNormalisationRootHisto.normalizeToLuminosity(luminosity)
             hNormalisation = myNormalisationRootHisto.getHistogram()
             if hNormalisation == None:
@@ -342,6 +334,8 @@ class ScaleFactorExtractor(ExtractorBase):
             for j in range (1, hValues.GetNbinsX()+1):
                 mySum += pow(hValues.GetBinContent(j) * hValues.GetBinCenter(j),2)
             myTotal = hNormalisation.GetBinContent(1)
+            hValues.IsA().Destructor(hValues)
+            hNormalisation.IsA().Destructor(hNormalisation)
         # protection against div by zero
         myResult = None
         if myTotal == 0.0:

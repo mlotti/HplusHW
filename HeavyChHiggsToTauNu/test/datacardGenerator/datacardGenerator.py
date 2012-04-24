@@ -15,16 +15,18 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
 
 def main(opts):
     #gc.set_debug(gc.DEBUG_LEAK | gc.DEBUG_STATS)
-    gc.set_debug(gc.DEBUG_STATS)
-    ROOT.SetMemoryPolicy(ROOT.kMemoryStrict)
+    #gc.set_debug(gc.DEBUG_STATS)
+    #ROOT.SetMemoryPolicy(ROOT.kMemoryStrict)
     #gc.set_debug(gc.DEBUG_STATS)
     print "Loading datacard:", opts.datacard
     config = load_module(opts.datacard)
     #datacardgenerator = 
     DataCard.DataCardGenerator(config,opts)
-    gc.collect()
+    #gc.collect()
     #ROOT.SetMemoryPolicy( ROOT.kMemoryHeuristics)
-    memoryDump()
+    #memoryDump()
+
+    print "\nDatacard generator is done."
 
 def memoryDump():
     dump = open("memory_pickle.txt", 'w')

@@ -114,7 +114,7 @@ class TableProducer:
     ## Generates observation lines
     def _generateObservationLine(self):
         # Obtain observed number of events
-        myObsCount = self._observation.getRateValue(self._luminosity)
+        myObsCount = self._observation.getRateResult()
         if self._opts.debugMining:
             print "  Observation is %d"%myObsCount
         myResult = "Observation    %d\n"%myObsCount
@@ -150,7 +150,7 @@ class TableProducer:
         myRow = ["rate",""]
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
             if c.isActiveForMass(mass):
-                myRateValue = c.getRateValue(self._luminosity)
+                myRateValue = c.getRateResult()
                 if myRateValue == None:
                     myRateValue = 0.0
                 if self._opts.debugMining:
@@ -162,39 +162,17 @@ class TableProducer:
 
     ## Generates nuisance table as list
     def _generateNuisanceTable(self,mass):
-        myBar = ProgressBar(self._nNuisances)
         myResult = []
         # Loop over rows
-        myN = 0.0
         for n in sorted(self._extractors, key=lambda x: x.getId()):
             if n.isPrintable():
-                myN += 1.0
-                myBar.draw(float(myN) / float(self._nNuisances))
                 myRow = ["%d"%int(n.getId()), n.getDistribution()]
                 # Loop over columns
                 for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
                     if c.isActiveForMass(mass):
                         # Check that column has current nuisance or has nuisance that is slave to current nuisance
-                        myStatus = c.hasNuisanceId(n.getId())
-                        myValue = 0.0
-                        if myStatus:
-                            if n.isShapeNuisance():
-                                myValue = None
-                                # FIXME add here call to store histograms from nuisance to root file
-                            else:
-                                myValue = n.doExtract(c, self._luminosity)
-                        mySlaveStatus = False
-                        for slaveCandidate in self._extractors:
-                            if not slaveCandidate.isPrintable() and slaveCandidate.getMasterId() == n.getId():
-                                if c.hasNuisanceId(slaveCandidate.getId()):
-                                    #print "id=",slaveCandidate.getId(),"is slave of",n.getId()
-                                    mySlaveStatus = True
-                                    if slaveCandidate.isShapeNuisance():
-                                        myValue = None
-                                        # FIXME add here call to store histograms from nuisance to root file
-                                    else:
-                                        myValue = slaveCandidate.doExtract(c, self._luminosity)
-                        if myStatus or mySlaveStatus:
+                        if c.hasNuisanceByMasterId(n.getId()):
+                            myValue = c.getNuisanceResultByMasterId(n.getId())
                             myValueString = ""
                             # Check output format
                             if myValue == None:
@@ -220,7 +198,6 @@ class TableProducer:
                 # Add description to end of the row
                 myRow.append(n.getDescription())
                 myResult.append(myRow)
-        myBar.finished()
         return myResult
 
     ## Calculates maximum width of each table cell
