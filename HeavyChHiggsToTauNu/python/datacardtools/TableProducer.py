@@ -297,6 +297,8 @@ class TableProducer:
 
     ## Save histograms to root file
     def _saveHistograms(self,rootFile,mass):
+        # Observation
+        self._observation.setResultHistogramsToRootFile(rootFile)
         # Loop over columns
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
             if c.isActiveForMass(mass):
