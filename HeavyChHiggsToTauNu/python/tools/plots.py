@@ -1675,6 +1675,7 @@ class PlotDrawer:
     # \param addLuminosityText   Should luminosity text be drawn?
     # \param stackMCHistograms   Should MC histograms be stacked?
     # \param addMCUncertainty    Should MC total (stat) uncertainty be drawn()
+    # \param cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis
     def __init__(self,
                  ylabel="Occurrances / %.0f",
                  log=False,
@@ -1685,6 +1686,7 @@ class PlotDrawer:
                  addLuminosityText=False,
                  stackMCHistograms=False,
                  addMCUncertainty=False,
+                 cmsText=None,
                  ):
         self.ylabelDefault = ylabel
         self.logDefault = log
@@ -1698,6 +1700,7 @@ class PlotDrawer:
         self.addLuminosityTextDefault = addLuminosityText
         self.stackMCHistogramsDefault = stackMCHistograms
         self.addMCUncertainty = addMCUncertainty
+        self.cmsText = cmsText
 
     ## Modify the defaults
     #
@@ -1857,6 +1860,7 @@ class PlotDrawer:
     # <b>Keyword arguments</b>
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
+    # \li\a cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis (default given in __init__()/setDefaults())
     #
     # In addition of drawing and saving the plot, handles the X and Y
     # axis titles, and "CMS Preliminary", "sqrt(s)" and luminosity
@@ -1869,7 +1873,8 @@ class PlotDrawer:
         p.frame.GetXaxis().SetTitle(xlabel)
         p.frame.GetYaxis().SetTitle(ylab)
         p.draw()
-        histograms.addCmsPreliminaryText()
+        cmsText = kwargs.get("cmsText", self.cmsText)
+        histograms.addCmsPreliminaryText(text=cmsText)
         histograms.addEnergyText()
         if kwargs.get("addLuminosityText", self.addLuminosityTextDefault):
             p.addLuminosityText()

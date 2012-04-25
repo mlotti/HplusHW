@@ -10,6 +10,7 @@
 
 #include "Math/GenVector/VectorUtil.h"
 #include "TH1F.h"
+#include <cmath>
 
 #include<algorithm>
 
@@ -37,6 +38,7 @@ namespace HPlus {
     fJetIdMinChargedHadronEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMinChargedHadronEnergyFraction")),
     fJetIdMinChargedMultiplicity(iConfig.getUntrackedParameter<uint32_t>("jetIdMinChargedMultiplicity")),
     fJetIdMaxChargedEMEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMaxChargedEMEnergyFraction")),
+    fBetaCut(iConfig.getUntrackedParameter<double>("betaCut")),
     fCleanCutCount(eventCounter.addSubCounter("Jet main","Jet cleaning")),
     fJetIdCount(eventCounter.addSubCounter("Jet main", "Jet ID")),
     fEMfractionCutCount(eventCounter.addSubCounter("Jet main","Jet EMfrac ")),
@@ -54,6 +56,7 @@ namespace HPlus {
     fchargedEmEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "chargedEmEnergyFractionCut")),
     fJetIdSubCount(eventCounter.addSubCounter("Jet selection", "Jet ID")),
     fEMfractionCutSubCount(eventCounter.addSubCounter("Jet selection", "EMfraction")),
+    fBetaCutSubCount(eventCounter.addSubCounter("Jet selection", "Beta cut")),
     fEtaCutSubCount(eventCounter.addSubCounter("Jet selection", "eta cut")),
     fPtCutSubCount(eventCounter.addSubCounter("Jet selection", "pt cut")),
 
@@ -223,7 +226,7 @@ namespace HPlus {
 
       if(!(iJet->neutralEmEnergyFraction() < fJetIdMaxNeutralEMEnergyFraction)) continue;
       increment(fneutralEmEnergyFractionCutSubCount);
-    
+
       if(fabs(iJet->eta()) < 2.4) {
         if(!(iJet->chargedHadronEnergyFraction() > fJetIdMinChargedHadronEnergyFraction)) continue;
         increment(fchargedHadronEnergyFractionCutSubCount);
@@ -245,6 +248,9 @@ namespace HPlus {
       ++EMfractionCutPassed;
       increment(fEMfractionCutSubCount);
 
+      if(std::isnan(iJet->userFloat("BetaPV"))) continue;
+      if(iJet->userFloat("BetaPV") < fBetaCut) continue;
+      increment(fBetaCutSubCount);
 
       hPt->Fill(iJet->pt(), fEventWeight.getWeight());
       hEta->Fill(iJet->eta(), fEventWeight.getWeight());

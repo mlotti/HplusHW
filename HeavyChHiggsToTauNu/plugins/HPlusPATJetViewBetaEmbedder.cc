@@ -14,6 +14,31 @@
 #include<memory>
 #include<vector>
 
+// FIXME: Add here a user float that is used for identifying if the jet is from chosen (i.e. first) PV or a PU vertex
+/*
+for each jet :
+   reco::TrackRefVector tracks = jet.getTrackRefs();
+   for each itrack in tracks :
+      for each vertex :
+           for ( jtrack = vertex.tracks_begin(); jtrack !=
+vertex.tracks_end(); ++jtrack ) {
+               if ( *itrack == *jtrack ) { // found the vertex the
+track belongs to
+                     if ( vertex is first ) { leading++;}
+                     else { subleading++;}
+               }
+           }
+    if ( subleading == 0 ) { countAsPrimary(); }   /// case 1
+    else if ( leading == 0 ) { countAsPiluep(); }   /// case 2
+    else {
+       ChristianHasToDecide() ;    /// you pick yourself what this
+third category means.
+    }
+*/
+// FIXME: Add cut of 2 mm to track-vertex association in DeltaZ
+// FIXME: Add beta star
+
+
 class HPlusPATJetViewBetaEmbedder: public edm::EDProducer {
 public:
   explicit HPlusPATJetViewBetaEmbedder(const edm::ParameterSet& iConfig):

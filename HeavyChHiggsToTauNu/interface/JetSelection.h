@@ -73,6 +73,7 @@ namespace HPlus {
     const double fJetIdMinChargedHadronEnergyFraction;
     const uint32_t fJetIdMinChargedMultiplicity;
     const double fJetIdMaxChargedEMEnergyFraction;
+    const double fBetaCut;
 
     // Counters
     Count fCleanCutCount;
@@ -92,6 +93,7 @@ namespace HPlus {
     Count fchargedEmEnergyFractionCutSubCount;
     Count fJetIdSubCount;
     Count fEMfractionCutSubCount;
+    Count fBetaCutSubCount;
     Count fEtaCutSubCount;
     Count fPtCutSubCount;
 
