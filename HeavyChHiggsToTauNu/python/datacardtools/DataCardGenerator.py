@@ -165,6 +165,7 @@ class DataCardGenerator:
         print "  signal multicrab: \033[1;37m%f 1/pb\033[0;0m"%myLuminosities[1]
         print "     EWK multicrab: \033[1;37m%f 1/pb\033[0;0m"%myLuminosities[2]
         print "     QCD multicrab: \033[1;37m%f 1/pb\033[0;0m"%myLuminosities[3]
+        self._luminosity = myLuminosities[1]
         # Make datacard column object for observation
         myFoundNames = self.findDatasetNames("Observation", myAllDatasetNames[1], self._config.Observation.datasetDefinitions)
         if self._opts.debugConfig:
@@ -326,6 +327,13 @@ class DataCardGenerator:
                                                            distribution = n.distr,
                                                            description = n.label,
                                                            mode = myMode))
+            elif n.function == "pileupUncertainty":
+                self._extractors.append(PileupUncertaintyExtractor(exid = n.id,
+                                                                   counterItem = n.counter,
+                                                                   counterDirs = n.histoDir,
+                                                                   distribution = n.distr,
+                                                                   description = n.label,
+                                                                   mode = myMode))
             elif n.function == "Shape":
                 print "fixme: add shape nuisance"
                 # FIXME temp code
@@ -335,6 +343,7 @@ class DataCardGenerator:
                                                             histoDirs = n.histoDir,
                                                             histograms = n.histo,
                                                             normalisation = n.norm,
+                                                            addSystInQuadrature = n.addUncertaintyInQuadrature,
                                                             distribution = n.distr,
                                                             description = n.label,
                                                             mode = myMode))

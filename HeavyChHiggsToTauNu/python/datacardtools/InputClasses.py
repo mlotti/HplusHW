@@ -161,7 +161,8 @@ class Nuisance:
 		histoDir = [],
 		histograms = [],
 		normalisation = [],
-		scaling = 1.0):
+		scaling = 1.0,
+		addUncertaintyInQuadrature = 0.0):
 	self.setId(id)
 	self.setLabel(label)
 	self.setDistribution(distr)
@@ -176,6 +177,7 @@ class Nuisance:
 	self.setHistograms(histograms)
         self.setNormalisation(normalisation)
         self.setScaling(scaling)
+        self.setAddUncertaintyInQuadrature(addUncertaintyInQuadrature)
 
     def setId(self,id):
 	self.id = id
@@ -221,6 +223,9 @@ class Nuisance:
 
     def setScaling(self, scaling):
         self.scaling = scaling
+
+    def setAddUncertaintyInQuadrature(self, addUncertaintyInQuadrature):
+        self.addUncertaintyInQuadrature = addUncertaintyInQuadrature
 
     def getId(self):
 	return self.id

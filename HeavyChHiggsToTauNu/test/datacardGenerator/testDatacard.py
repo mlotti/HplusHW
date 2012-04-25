@@ -219,10 +219,11 @@ Nuisances.append(Nuisance(
     function      = "ScaleFactor",
     histoDir      = ["signalAnalysis/ScaleFactorUncertainties/"],
     histograms    = ["TriggerScaleFactorAbsUncert_AfterDeltaPhi160"],
-    normalisation = ["signalAnalysis/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterDeltaPhi160"]
+    normalisation = ["signalAnalysis/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterDeltaPhi160"],
+    addUncertaintyInQuadrature = 0.10 # MET leg uncertainty
 ))
 
-Nuisances.append(Nuisance(  
+Nuisances.append(Nuisance(
     id            = "01b", 
     label         = "tau+MET trg efficiency",
     distr         = "lnN", 
@@ -240,7 +241,8 @@ Nuisances.append(Nuisance(
     histograms    = ["TriggerScaleFactorAbsUncert_AfterDeltaPhi160",
                      "TriggerScaleFactorAbsUncert_AfterDeltaPhi160"],
     normalisation = ["signalAnalysisNormal/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterDeltaPhi160",
-                     "signalAnalysisEmbedded/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterDeltaPhi160"]
+                     "signalAnalysisEmbedded/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterDeltaPhi160"],
+    addUncertaintyInQuadrature = 0.10 # MET leg uncertainty
 ))
 
 Nuisances.append(Nuisance(
@@ -507,10 +509,10 @@ Nuisances.append(Nuisance(
     id            = "34",
     label         = "pileup",
     distr         = "lnN",
-    function      = "maxCounter",
-    histoDir      = ["signalAnalysisCounters",
-                     "signalAnalysisPUWeightMinusCounters",
-                     "signalAnalysisPUWeightPlusCounters"],
+    function      = "pileupUncertainty",
+    histoDir      = ["signalAnalysisCounters", # nominal
+                     "signalAnalysisPUWeightMinusCounters", # minus
+                     "signalAnalysisPUWeightPlusCounters"], # up
     counter       = SignalRateCounter
 ))
 
@@ -518,10 +520,10 @@ Nuisances.append(Nuisance(
     id            = "34b",
     label         = "pileup",
     distr         = "lnN",
-    function      = "maxCounter",
-    histoDir      = ["signalAnalysisCounters",
-                     "signalAnalysisPUWeightMinusCounters",
-                     "signalAnalysisPUWeightPlusCounters"],
+    function      = "pileupUncertainty",
+    histoDir      = ["signalAnalysisCounters", # nominal
+                     "signalAnalysisPUWeightMinusCounters", # minus
+                     "signalAnalysisPUWeightPlusCounters"], # up
     counter       = FakeRateCounter
 ))
 

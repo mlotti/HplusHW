@@ -175,7 +175,7 @@ class TableProducer:
                             myValue = c.getNuisanceResultByMasterId(n.getId())
                             myValueString = ""
                             # Check output format
-                            if myValue == None:
+                            if myValue == None or n.isShapeNuisance():
                                 myValueString = "1"
                             else:
                                 if isinstance(myValue, list):

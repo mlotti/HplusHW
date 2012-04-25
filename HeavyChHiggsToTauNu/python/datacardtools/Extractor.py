@@ -263,6 +263,67 @@ class MaxCounterExtractor(ExtractorBase):
     ## \var _counterItem
     # Name of item (label) in counter histogram
 
+## PileupUncertaintyExtractor class
+# Extracts counter values after selection for nominal case and up/down variations and returns the max. deviation from the nominal, i.e. max(up/nominal, down/nominal)
+class PileupUncertaintyExtractor(ExtractorBase):
+    ## Constructor
+    def __init__(self, counterDirs, counterItem, mode, exid = "", distribution = "lnN", description = ""):
+        ExtractorBase.__init__(self, mode, exid, distribution, description)
+        self._counterItem = counterItem
+        self._counterDirs = counterDirs
+        if len(self._counterDirs) < 2:
+            print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"':\033[0;0m need to specify at least two directories for counters!"
+            sys.exit()
+
+    ## Method for extracking information
+    def doExtract(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        myResult = []
+        
+        # Normalise with up/down to get up/down histograms
+        # mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.UP) #FIXME
+        # mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.DOWN) #FIXME
+        
+        for d in self._counterDirs:
+            myHistoPath = d+"/weighted/counter"
+            datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoPath)
+            datasetRootHisto.normalizeToLuminosity(luminosity)
+            myHisto = datasetRootHisto.getHistogram()
+            counterList = _histoToCounter(myHisto)
+            myHisto.IsA().Destructor(myHisto)
+            myFoundStatus = False # to ensure that the first counter of given name is taken
+            for name, count in counterList:
+                if name == self._counterItem and not myFoundStatus:
+                    myResult.append(count)
+                    myFoundStatus = True
+            if not myFoundStatus:
+                print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':\033[0;0m Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!"
+                sys.exit()
+        # Revert back to nominal normalisation
+        # mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.NOMINAL) #FIXME
+        # Loop over results
+        myMaxValue = 0.0
+        # Protect for div by zero
+        if myResult[0].value() == 0:
+            print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' nominal counter ('"+self._counterItem+"')value is zero!"
+        else:
+            for i in range(1,len(myResult)):
+                myValue = abs(myResult[i].value() / myResult[0].value() - 1.0)
+                if (myValue > myMaxValue):
+                    myMaxValue = myValue
+        return myMaxValue
+
+    ## Virtual method for printing debug information
+    def printDebugInfo(self):
+        print "MaxCounterExtractor"
+        print "- counter item = ", self._counterItem
+        ExtractorBase.printDebugInfo(self)
+
+    ## \var _counterDirs
+    # List of directories (without /weighted/counter suffix ) for counter histograms; first needs to be the nominal counter
+    ## \var _counterItem
+    # Name of item (label) in counter histogram
+
+
 ## RatioExtractor class
 # Extracts two values from two counter items in the list of main counters and returns th ratio of these scaled by some factor
 class RatioExtractor(ExtractorBase):
@@ -304,20 +365,22 @@ class RatioExtractor(ExtractorBase):
 # Extracts an uncertainty for a scale factor
 class ScaleFactorExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, histoDirs, histograms, normalisation, mode, exid = "", distribution = "lnN", description = ""):
+    def __init__(self, histoDirs, histograms, normalisation, addSystInQuadrature = 0.0, mode = ExtractorMode.NUISANCE, exid = "", distribution = "lnN", description = ""):
         ExtractorBase.__init__(self, mode, exid, distribution, description)
         self._histoDirs = histoDirs
         self._histograms = histograms
         self._normalisation = normalisation
+        self._addSystInQuadrature = addSystInQuadrature
         if len(self._histoDirs) != len(self._normalisation) or len(self._histoDirs) != len(self._histograms):
             print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':\033[0;0m need to specify equal amount of histoDirs, histograms and normalisation histograms!"
             sys.exit()
 
     ## Method for extracking information
     def doExtract(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
-        myTotal = 0.0
-        mySum = 0.0
+        myResult = []
         for i in range (0, len(self._histoDirs)):
+            myTotal = 0.0
+            mySum = 0.0
             myValueRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoDirs[i]+"/"+self._histograms[i])
             myValueRootHisto.normalizeToLuminosity(luminosity)
             hValues = myValueRootHisto.getHistogram()
@@ -330,21 +393,24 @@ class ScaleFactorExtractor(ExtractorBase):
             if hNormalisation == None:
                 print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':\033[0;0m Cannot open histogram '"+self._histoDirs[i]+"/"+self._normalisation[i]+"'!"
                 sys.exit()
-            mySum = 0.0
             for j in range (1, hValues.GetNbinsX()+1):
                 mySum += pow(hValues.GetBinContent(j) * hValues.GetBinCenter(j),2)
             myTotal = hNormalisation.GetBinContent(1)
             hValues.IsA().Destructor(hValues)
             hNormalisation.IsA().Destructor(hNormalisation)
-        # protection against div by zero
-        myResult = None
-        if myTotal == 0.0:
-            print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' total count from normalisation histograms is zero!"
-            myResult = 0.0
-        else:
-            myResult = sqrt(mySum) / myTotal
+            # Calculate result, protection against div by zero
+            if myTotal == 0.0:
+                print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' total count from normalisation histograms is zero!"
+                myResult.append(0.0)
+            else:
+                myResult.append(sqrt(mySum) / myTotal)
+        # Combine result
+        myCombinedResult = 0.0
+        for i in range (0, len(self._histoDirs)):
+            myCombinedResult += pow(myResult[i], 2)
+        myCombinedResult += pow(self._addSystInQuadrature, 2)
         # Return result
-        return myResult
+        return sqrt(myCombinedResult)
 
 
     ## Virtual method for printing debug information
