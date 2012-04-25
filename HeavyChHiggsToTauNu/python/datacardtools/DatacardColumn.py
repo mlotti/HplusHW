@@ -18,6 +18,7 @@ class ExtractorResult():
         self._masterId = masterId
         self._result = result
         self._histograms = histograms
+        self._tempHistos = [] # Needed to make histograms going into root file persistent
 
     def getId(self):
         return self._exId
@@ -29,8 +30,14 @@ class ExtractorResult():
         return self._result
 
     def linkHistogramsToRootFile(self,rootfile):
+        # Note: Do not call destructor for the tempHistos.
+        #       Closing the root file to which they have been assigned to destructs them.
+        #       i.e. it is enough to just clear the list.
+        self._tempHistos = [] 
         for h in self._histograms:
-            h.SetDirectory(rootfile)
+            htemp = h.Clone(h.GetTitle())
+            htemp.SetDirectory(rootfile)
+            self._tempHistos.append(htemp)
 
 # DatacardColumn class
 class DatacardColumn():
@@ -169,26 +176,28 @@ class DatacardColumn():
     ## Do data mining and cache results
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors):
         # Obtain rate
-        sys.stdout.write("\r... data mining in progress: Column="+self._label+", obtaining Rate...                                                          ")
-        sys.stdout.flush()
+        #sys.stdout.write("\r... data mining in progress: Column="+self._label+", obtaining Rate...                                                          ")
+        #sys.stdout.flush()
         myRateResult = None
         myRateHistograms = []
         if self.typeIsEmptyColum():
             myRateResult = 0.0
-            myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, [], [], ExtractorMode.RATE)
+            myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [], [], ExtractorMode.RATE, description="empty")
+            myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
         elif self.typeIsQCD():
-            print WarningStyle()+"rate not implemented for QCD yet, setting rate to zero"+NormalStyle()  #FIXME
+            print WarningStyle()+"Warning: rate not implemented for QCD yet, setting rate to zero"+NormalStyle()  #FIXME
             myRateResult = 0.0
+            myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [], [], ExtractorMode.RATE, description="empty")
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
         else:
             myExtractor = None
             myShapeExtractor = None
             if self.typeIsObservation():
                 myExtractor = CounterExtractor(self._rateCounter, ExtractorMode.OBSERVATION)
-                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, [self._dirPrefix], [self._shapeHisto], ExtractorMode.OBSERVATION)
+                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [self._dirPrefix], [self._shapeHisto], ExtractorMode.OBSERVATION)
             else:
                 myExtractor = CounterExtractor(self._rateCounter, ExtractorMode.RATE)
-                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, [self._dirPrefix], [self._shapeHisto], ExtractorMode.RATE)
+                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [self._dirPrefix], [self._shapeHisto], ExtractorMode.RATE)
             myRateResult = myExtractor.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
         # Cache result
@@ -198,8 +207,8 @@ class DatacardColumn():
                                            myRateHistograms)
         # Obtain nuisances
         for nid in self._nuisanceIds:
-            sys.stdout.write("\r... data mining in progress: Column="+self._label+", obtaining Nuisance="+nid+"...                                              ")
-            sys.stdout.flush()
+            #sys.stdout.write("\r... data mining in progress: Column="+self._label+", obtaining Nuisance="+nid+"...                                              ")
+            #sys.stdout.flush()
             myFoundStatus = False
             for e in extractors:
                 if e.getId() == nid:
@@ -209,7 +218,6 @@ class DatacardColumn():
                     # Obtain histograms
                     myHistograms = []
                     if e.isShapeNuisance():
-                        print "shape nuisance id=",e.getId()
                         myHistograms.extend(e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
                     # Cache result
                     self._nuisanceResults.append(ExtractorResult(e.getId(),
@@ -254,15 +262,11 @@ class DatacardColumn():
             raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
         if self._rateResult.getResult() == None:
             raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
-        if self._nuisanceResults == None:
-            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Nuisance values have not been cached! (did you forget to call doDataMining()?)")
-        if len(self._nuisanceResults) == 0:
-            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Nuisance values have not been cached! (did you forget to call doDataMining()?)")
         # Set rate histogram
-        self._rateResult.setResultHistogramsToRootFile(rootfile)
+        self._rateResult.linkHistogramsToRootFile(rootfile)
         # Set nuisance histograms
         for result in self._nuisanceResults:
-            result.setResultHistogramsToRootFile(rootfile)
+            result.linkHistogramsToRootFile(rootfile)
 
     ## Print debugging information
     def printDebug(self):

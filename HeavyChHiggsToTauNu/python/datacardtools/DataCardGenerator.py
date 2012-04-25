@@ -205,7 +205,7 @@ class DataCardGenerator:
         myObservationName = "dset_observation"
         print "Making merged dataset for data group: "+HighlightStyle()+"observation"+NormalStyle()
         myDsetMgrs[1].merge(myObservationName, myFoundNames, keepSources=True)
-        self._observation = DatacardColumn(label = "Observation",
+        self._observation = DatacardColumn(label = "data_obs",
                                            enabledForMassPoints = self._config.MassPoints,
                                            datasetType = "Observation",
                                            rateCounter = self._config.Observation.rateCounter,
@@ -275,6 +275,7 @@ class DataCardGenerator:
         # create extractors
         self.createExtractors()
         # Obtain main counter tables
+        print "Obtaining main counter tables"
         myEventCounterTables = []
         for i in range(0,len(myDsetMgrs)):
             if myDsetMgrs[i] != None:
@@ -285,6 +286,7 @@ class DataCardGenerator:
             else:
                 myEventCounterTables.append([])
         # Do data mining and cache results
+        print "Starting data mining"
         self._observation.doDataMining(self._config,myDsetMgrs[1],myLuminosities[1],myEventCounterTables[1],self._extractors)
         for c in self._columns:
             myIndex = 0
@@ -294,8 +296,8 @@ class DataCardGenerator:
                 myIndex = 2
             if c.typeIsQCD():
                 myIndex = 3
-            c.doDataMining(myDsetMgrs[myIndex],myLuminosities[myIndex],myEventCounterTables[myIndex],self._extractors)
-        print "\nData mining has been done, results have been cached"
+            c.doDataMining(self._config,myDsetMgrs[myIndex],myLuminosities[myIndex],myEventCounterTables[myIndex],self._extractors)
+        print "\nData mining has been finished, results (and histograms) have been ingeniously cached"
 
     ## Helper function for finding datasets
     def findDatasetNames(self, label, allNames, searchNames):
@@ -369,9 +371,14 @@ class DataCardGenerator:
                                                                    description = n.label,
                                                                    mode = myMode))
             elif n.function == "Shape":
-                print "fixme: add shape nuisance"
-                # FIXME temp code
-                self._extractors.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = ExtractorMode.SHAPENUISANCE))
+                self._extractors.append(ShapeExtractor(self._config.ShapeHistogramsDimensions,
+                                                       counterItem = n.counter,
+                                                       histoDirs = n.histoDir,
+                                                       histograms = n.histo,
+                                                       exid = n.id,
+                                                       distribution = n.distr,
+                                                       description = n.label,
+                                                       mode = ExtractorMode.SHAPENUISANCE))
             elif n.function == "ScaleFactor":
                 self._extractors.append(ScaleFactorExtractor(exid = n.id,
                                                             histoDirs = n.histoDir,
@@ -394,6 +401,10 @@ class DataCardGenerator:
                     print "fixme: add QCD factorised"
                     # FIXME temp code
                     self._extractors.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
+                    #self._extractors.append(ShapeExtractor( exid = n.id,
+                    #distribution = n.distr,
+                    #description = n.label,
+                    #mode = Data))
                 else:
                     self._extractors.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
             elif n.function == "QCDInverted":

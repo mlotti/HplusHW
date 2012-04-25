@@ -8,6 +8,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import _histoToCounter
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from math import pow,sqrt
 import sys
+import ROOT
 
 # Enumerator class for data mining mode
 class ExtractorMode:
@@ -426,26 +427,37 @@ class ScaleFactorExtractor(ExtractorBase):
 # Extracts histogram shapes
 class ShapeExtractor(ExtractorBase):
     ## Constructor
-    def __init__(self, histoSpecs, histoDirs, histograms, mode = ExtractorMode.NUISANCE, exid = "", distribution = "lnN", description = ""):
+    def __init__(self, histoSpecs, counterItem, histoDirs, histograms, mode = ExtractorMode.NUISANCE, exid = "", distribution = "lnN", description = ""):
         ExtractorBase.__init__(self, mode, exid, distribution, description)
         self._histoSpecs = histoSpecs
         self._histoDirs = histoDirs
         self._histograms = histograms
+        self._counterItem = counterItem
         if len(self._histoDirs) != len(self._histograms):
             print ErrorStyle()+"Error in Rate/Nuisance with id='"+str(self._exid)+"':"+NormalStyle()+" need to specify equal amount of histoDirs and histograms!"
             sys.exit()
-        if len(self._histoDirs) == 0:
+        if len(self._histoDirs) == 0 and self._description != "empty":
             print ErrorStyle()+"Error in Rate/Nuisance with id='"+str(self._exid)+"':"+NormalStyle()+" need to specify histoDirs and histograms!"
             sys.exit()
         if (self.isRate() or self.isObservation()):
-            # Rate or observation needs to have exactly one entry
+            # Rate or observation needs to have exactly one entry (unless empty)
             if len(self._histoDirs) > 1:
                 print ErrorStyle()+"Error in Observation/Rate:"+NormalStyle()+"need to specify exactly one entry in both histoDirs and histograms!"
                 sys.exit()
         else:
-            # Shape nuisance needs to have exactly two entries (down, up)
-            if len(self._histoDirs) != 2:
-                print ErrorStyle()+"Error in Nuisance with id='"+str(self._exid)+"':"+NormalStyle()+" need to specify exactly two entries (down and up) in both histoDirs and histograms!"
+            # Shape nuisance
+            if self._distribution == "shapeQ":
+                # Shape variation nuisance needs to have exactly two entries (down, up)
+                if len(self._histoDirs) != 2:
+                    print ErrorStyle()+"Error in Nuisance with id='"+str(self._exid)+"' (shapeQ):"+NormalStyle()+" need to specify exactly two entries (down and up) in both histoDirs and histograms!"
+                    sys.exit()
+            elif self._distribution == "shapeStat":
+                # Shape variation nuisance needs to have exactly one entry
+                if len(self._histoDirs) != 1:
+                    print ErrorStyle()+"Error in Nuisance with id='"+str(self._exid)+"' (shapeStat):"+NormalStyle()+" need to specify exactly one entry in both histoDirs and histograms!"
+                    sys.exit()
+            else:
+                print ErrorStyle()+"Error in Nuisance with id='"+str(self._exid)+"':"+NormalStyle()+" unknown option '"+self._distribution+"' for distribution! Options are 'shapeStat' and 'shapeQ'."
                 sys.exit()
         if len(self._histoSpecs) != 3:
             print ErrorStyle()+"Error in config:"+NormalStyle()+" need to specify to ShapeHistogramsDimensions as list, example = [20,0.0,400.0] (i.e. nbins, min, max)!"
@@ -453,7 +465,27 @@ class ShapeExtractor(ExtractorBase):
 
     ## Method for extracking result
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
-        return 1.0
+        # Calculate up and down variation numerical values vs. nominal
+        myResult = []
+        if self._distribution == "shapeQ":
+            myNominalRateCount = mainCounterTable.getCount(rowName=self._counterItem, colName=datasetColumn.getDatasetMgrColumn()).value()
+            for i in range (0, len(self._histoDirs)):
+                myHistoPath = self._histoDirs[i]+"Counters/weighted/counter"
+                datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoPath)
+                if datasetRootHisto.isMC():
+                    datasetRootHisto.normalizeToLuminosity(luminosity)
+                myHisto = datasetRootHisto.getHistogram()
+                counterList = _histoToCounter(myHisto)
+                myHisto.IsA().Destructor(myHisto)
+                myFoundStatus = False # to ensure that the first counter of given name is taken
+                for name, count in counterList:
+                    if name == self._counterItem and not myFoundStatus:
+                        myResult.append(abs(count.value()/myNominalRateCount-1.0))
+                        myFoundStatus = True
+                if not myFoundStatus:
+                    print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!"
+                    sys.exit()
+        return myResult
 
     ## Virtual method for extracting histograms
     def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -463,8 +495,8 @@ class ShapeExtractor(ExtractorBase):
         if self.isRate() or self.isObservation():
             myLabels = [myPrefix]
         else:
-            myLabels = [myPrefix+"_"+int(self._masterExID)+"Down",
-                        myPrefix+"_"+int(self._masterExID)+"Up"]
+            myLabels = [myPrefix+"_"+str(int(self._masterExID))+"Down",
+                        myPrefix+"_"+str(int(self._masterExID))+"Up"]
         myHistograms = []
         for i in range (0, len(self._histoDirs)):
             # Obtain histogram
@@ -493,12 +525,26 @@ class ShapeExtractor(ExtractorBase):
             # Add here substraction of negative bins, if necessary
             for k in range(1, h.GetNbinsX()+1):
                 if h.GetBinContent(k) < 0.0:
-                    print WarningStyle()+"Rate/Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shape histo bin %d is negative (%f)"%(k,h.GetBinContent(k))
+                    print WarningStyle()+"Warning: Rate/Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shape histo bin %d is negative (%f)"%(k,h.GetBinContent(k))
             myHistograms.append(h)
-        if (self.isRate() or self.isObservation()) and c.typeIsEmptyColum():
-            # No source for histograms for empty column; create an empty histogram with correct dimensions
-            h = ROOT.TH1F(myLabels[0], myLabels[0], self._histoSpecs[0]+1,self._histoSpecs[1],self._histoSpecs[2]+h.GetXaxis().GetBinWidth(1))
+        # Make histograms for shape stat
+        if self._distribution == "shapeStat":
+            # Make second histogram by cloning
+            myHistograms.append(myHistograms[0].Clone(myLabels[1]))
+            # Substract/Add one sigma to get Down/Up variation
+            for k in range(1, myHistograms[0].GetNbinsX()+1):
+                myHistograms[0].SetBinContent(k, myHistograms[0].GetBinContent(k) - myHistograms[0].GetBinError(k))
+                myHistograms[1].SetBinContent(k, myHistograms[1].GetBinContent(k) + myHistograms[1].GetBinError(k))
+                if myHistograms[0].GetBinContent(k) < 0:
+                    print WarningStyle()+"Warning: shapeStat Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shapeDown histo bin %d is negative (%f)"%(k,myHistograms[0].GetBinContent(k))
+                if myHistograms[1].GetBinContent(k) < 0:
+                    print WarningStyle()+"Warning: shapeStat Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shapeUp histo bin %d is negative (%f)"%(k,myHistograms[0].GetBinContent(k))
+        # No source for histograms for empty column; create an empty histogram with correct dimensions
+        if (self.isRate() or self.isObservation()) and datasetColumn.typeIsEmptyColum():
+            myBinWidth = (self._histoSpecs[2] - self._histoSpecs[1]) / self._histoSpecs[0]
+            h = ROOT.TH1F(myLabels[0], myLabels[0], self._histoSpecs[0]+1,self._histoSpecs[1],self._histoSpecs[2]+myBinWidth)
             myHistograms.append(h)
+        # Return result
         return myHistograms
 
     ## Virtual method for printing debug information

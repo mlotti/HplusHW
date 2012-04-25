@@ -24,7 +24,6 @@ class TableProducer:
         self._observation = observation
         self._datasetGroups = datasetGroups
         self._extractors = extractors
-        self._outfile = None
         self._timestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
         self._outputFileStem = "lands_datacard_hplushadronic_m"
         self._outputRootFileStem = "lands_histograms_hplushadronic_m"
@@ -33,22 +32,55 @@ class TableProducer:
         for n in self._extractors:
             if n.isPrintable():
                 self._nNuisances += 1
+        # Make directory for output
+        self._dirname = "datacards_"+self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName
+        os.mkdir(self._dirname)
 
+        # Make datacards
         self.makeDataCards()
+
+        # Make other reports
+        print "\n"+HighlightStyle()+"Generating reports"+NormalStyle()
+        # Print table of shape variation for shapeQ nuisances
+        self.makeShapeVariationTable()
+
+    ## Generates table of shape variation for shapeQ nuisances
+    def makeShapeVariationTable(self):
+        myOutput = ""
+        for m in self._config.MassPoints:
+            # Invoke extractors
+            myRateHeaderTable = self._generateRateHeaderTable(m)
+            myNuisanceTable = self._generateShapeNuisanceVariationTable(m)
+            # Calculate dimensions of tables
+            myWidths = []
+            myWidths = self._calculateCellWidths(myWidths, myRateHeaderTable)
+            myWidths = self._calculateCellWidths(myWidths, myNuisanceTable)
+            mySeparatorLine = self._getSeparatorLine(myWidths)
+            # Construct output
+            myOutput += "*** Shape nuisance variation summary ***\n"
+            myOutput += self._generateHeader(m)
+            myOutput += mySeparatorLine
+            myOutput += self._getTableOutput(myWidths,myRateHeaderTable)
+            myOutput += mySeparatorLine
+            myOutput += self._getTableOutput(myWidths,myNuisanceTable)
+            myOutput += "\n"
+        # Save output to file
+        myFilename = self._dirname+"/shapeVariationResults.txt"
+        myFile = open(myFilename, "w")
+        myFile.write(myOutput)
+        myFile.close()
+        print "Shape variation tables written to:",myFilename
 
     ## Generates datacards
     def makeDataCards(self):
-        # Make directory for output
-        myDirname = "datacards_"+self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName
-        os.mkdir(myDirname)
         # Obtain observation line
         for m in self._config.MassPoints:
             print "\n"+HighlightStyle()+"Generating datacard for mass point %d for "%m +self._outputPrefix+NormalStyle()
             # Open output root file
-            myFilename = myDirname+"/"+self._outputFileStem+"%d.txt"%m
-            myRootFilename = myDirname+"/"+self._outputRootFileStem+"%d.root"%m
-            self._outfile = ROOT.TFile.Open(myRootFilename, "RECREATE")
-            if self._outfile == None:
+            myFilename = self._dirname+"/"+self._outputFileStem+"%d.txt"%m
+            myRootFilename = self._dirname+"/"+self._outputRootFileStem+"%d.root"%m
+            myRootFile = ROOT.TFile.Open(myRootFilename, "RECREATE")
+            if myRootFile == None:
                 print ErrorStyle()+"Error:"+NormalStyle()+" Cannot open file '"+myRootFilename+"' for output!"
                 sys.exit()
             # Invoke extractors
@@ -85,9 +117,11 @@ class TableProducer:
             myFile.write(myCard)
             myFile.close()
             print "Written datacard to:",myFilename
+            # Save histograms to root file
+            self._saveHistograms(myRootFile,m),
             # Close root file
-            self._outfile.Write()
-            self._outfile.Close()
+            myRootFile.Write()
+            myRootFile.Close()
             print "Written shape root file to:",myRootFilename
 
     ## Generates header of datacard
@@ -197,6 +231,43 @@ class TableProducer:
                 myRow.append(n.getDescription())
                 myResult.append(myRow)
         return myResult
+
+    ## Generates nuisance table as list
+    def _generateShapeNuisanceVariationTable(self,mass):
+        myResult = []
+        # Loop over rows
+        for n in sorted(self._extractors, key=lambda x: x.getId()):
+            if n.isPrintable() and n.getDistribution() == "shapeQ":
+                myDownRow = ["%d"%int(n.getId())+"_Down", ""]
+                myUpRow = ["%d"%int(n.getId())+"_Up", ""]
+                # Loop over columns
+                for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
+                    if c.isActiveForMass(mass):
+                        # Check that column has current nuisance or has nuisance that is slave to current nuisance
+                        if c.hasNuisanceByMasterId(n.getId()):
+                            myValue = c.getNuisanceResultByMasterId(n.getId())
+                            # Check output format
+                            if not isinstance(myValue, list):
+                                print ErrorStyle()+"Error: Nuisance '"+n.getId()+"'did strangely not return a list of results for shapeQ. Check code."+NormalStyle()
+                                sys.exit()
+                            myDownRow.append("%.3f"%(myValue[0]))
+                            myUpRow.append("%.3f"%(myValue[1]))
+                        else:
+                            myDownRow.append("-")
+                            myUpRow.append("-")
+                # Add description to end of the row
+                myDownRow.append(n.getDescription())
+                myUpRow.append(n.getDescription())
+                myResult.append(myDownRow)
+                myResult.append(myUpRow)
+        return myResult
+
+    ## Save histograms to root file
+    def _saveHistograms(self,rootFile,mass):
+        # Loop over columns
+        for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
+            if c.isActiveForMass(mass):
+                c.setResultHistogramsToRootFile(rootFile)
 
     ## Calculates maximum width of each table cell
     def _calculateCellWidths(self,widths,table):

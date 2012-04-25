@@ -1,6 +1,6 @@
 DataCardName    = 'myDummyTestName'
-#Path            = '/mnt/flustre/slehti/HplusDataForLands'
-Path            = '/home/wendland/data/lands/lands_HIG-11-019'
+Path            = '/mnt/flustre/slehti/HplusDataForLands'
+#Path            = '/home/wendland/data/lands/lands_HIG-11-019'
 MassPoints      = [80,90,100,120,140,150,155,160]
 #MassPoints      = [160]
 
@@ -284,10 +284,11 @@ Nuisances.append(Nuisance(
     label         = "JES/JER/MET/Rtau effect on mT shape",
     distr         = "shapeQ",
     function      = "Shape",
-    histoDir      = ["signalAnalysis",
-                     "signalAnalysisJESPlus03eta02METMinus10",
+    counter       = SignalRateCounter,
+    histoDir      = ["signalAnalysisJESPlus03eta02METMinus10",
                      "signalAnalysisJESMinus03eta02METPlus10"],
-    histograms    = [SignalShapeHisto]
+    histograms    = [SignalShapeHisto,
+                     SignalShapeHisto]
 ))
 
 Nuisances.append(Nuisance(
@@ -295,10 +296,11 @@ Nuisances.append(Nuisance(
     label         = "JES/JER/MET/Rtau effect on mT shape",
     distr         = "shapeQ",
     function      = "Shape",
-    histoDir      = ["signalAnalysis",
-                     "signalAnalysisJESPlus03eta02METMinus10",
+    counter       = FakeRateCounter,
+    histoDir      = ["signalAnalysisJESPlus03eta02METMinus10",
                      "signalAnalysisJESMinus03eta02METPlus10"],
-    histograms    = [FakeShapeHisto]
+    histograms    = [FakeShapeHisto,
+                     FakeShapeHisto]
 ))
 
 Nuisances.append(Nuisance(
@@ -306,10 +308,11 @@ Nuisances.append(Nuisance(
     label         = "JES/JER/MET/Rtau effect on mT shape",
     distr         = "shapeQ",
     function      = "Shape",
-    histoDir      = ["signalAnalysis",
-                     "signalAnalysisJESPlus03eta02METMinus00",
+    counter       = SignalRateCounter,
+    histoDir      = ["signalAnalysisJESPlus03eta02METMinus00",
                      "signalAnalysisJESMinus03eta02METPlus00"],
-    histograms    = [SignalShapeHisto]
+    histograms    = [SignalShapeHisto,
+                     SignalShapeHisto]
 ))
 
 Nuisances.append(Nuisance(
@@ -590,14 +593,16 @@ Nuisances.append(Nuisance(
     label         = "Stat. uncertainty on the shape",
     distr         = "shapeStat",
     function      = "Shape",
-    counter       = SignalRateCounter
+    counter       = SignalRateCounter,
+    histoDir      = [SignalAnalysis],
+    histograms    = [SignalShapeHisto],
 ))
 
 Nuisances.append(Nuisance(
     id            = "40b",
     label         = "Stat. uncertainty on the shape",
     distr         = "shapeStat",
-    function      = "Shape",
+    function      = "QCDFactorised",
     QCDmode       = "shapestat"
 ))
 
@@ -606,7 +611,9 @@ Nuisances.append(Nuisance(
     label         = "Stat. uncertainty on the shape",
     distr         = "shapeStat",
     function      = "Shape",
-    counter       = FakeRateCounter
+    counter       = FakeRateCounter,
+    histoDir      = [SignalAnalysis],
+    histograms    = [FakeShapeHisto],
 ))
 
 Nuisances.append(Nuisance(
