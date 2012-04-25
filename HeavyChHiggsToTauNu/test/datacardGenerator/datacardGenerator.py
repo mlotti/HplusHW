@@ -20,13 +20,24 @@ def main(opts):
     #gc.set_debug(gc.DEBUG_STATS)
     print "Loading datacard:", opts.datacard
     config = load_module(opts.datacard)
-    #datacardgenerator = 
-    DataCard.DataCardGenerator(config,opts)
+
+    # If user insisted on certain QCD method on command line, produce datacards only for that QCD method
+    # Otherwise produce cards for all QCD methods
+    myQCDMethods = [DataCard.DatacardQCDMethod.FACTORISED, DataCard.DatacardQCDMethod.INVERTED]
+    if opts.useQCDfactorised:
+        myQCDMethods = [DataCard.DatacardQCDMethod.FACTORISED]
+    elif opts.useQCDinverted:
+        myQCDMethods = [DataCard.DatacardQCDMethod.INVERTED]
+
+    # Produce cards
+    for method in myQCDMethods:
+        DataCard.DataCardGenerator(config,opts,method)
+
+    print "\nDatacard generator is done."
+
     #gc.collect()
     #ROOT.SetMemoryPolicy( ROOT.kMemoryHeuristics)
     #memoryDump()
-
-    print "\nDatacard generator is done."
 
 def memoryDump():
     dump = open("memory_pickle.txt", 'w')

@@ -9,11 +9,6 @@ SignalAnalysis  = "signalAnalysis"
 QCDFactorisedAnalysis = "QCDMeasurement"
 QCDInvertedAnalysis = "" # FIXME
 
-# Choose QCD measurement method (can be overridden from command line)
-# options: 'QCD factorised' or 'QCD inverted'
-QCDMeasurementMethod = "QCD factorised"
-#QCDMeasurementMethod = "QCD inverted"
-
 RootFileName    = "histograms.root" #FIXME
 
 # Rate counter definitions
@@ -85,7 +80,7 @@ DataGroups.append(DataGroup(
     nuisances    = ["12","13","40b"]
 ))
 
-if 0 == 1:
+if 1 == 1:
     DataGroups.append(DataGroup(
         label        = "QCDinv",
         landsProcess = 3,

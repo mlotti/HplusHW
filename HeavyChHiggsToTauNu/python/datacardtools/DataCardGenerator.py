@@ -32,42 +32,46 @@ class DatacardQCDMethod:
     INVERTED = 2
 
 class DataCardGenerator:
-    def __init__(self, config, opts):
+    def __init__(self, config, opts, QCDMethod):
 	self._config = config
 	self._opts = opts
         self._observation = None
         self._luminosity = -1
         self._columns = []
         self._extractors = []
-        self._QCDmethod = DatacardQCDMethod.UNKNOWN
+        self._QCDMethod = QCDMethod
 
-        # Override options from command line and determine QCD measurement method
-        self.overrideConfigOptionsFromCommandLine()
+        # Override options from command line (not used at the moment)
+        #self.overrideConfigOptionsFromCommandLine()
+        if self._QCDMethod != DatacardQCDMethod.FACTORISED and self._QCDMethod != DatacardQCDMethod.INVERTED:
+            print ErrorStyle()+"Error: QCD method was not properly specified when creating DataCardGenerator!"+NormalStyle()
+            sys.exit()
 
         # Check that all necessary parameters have been specified in config file
         self.checkCfgFile()
+
+        # Construct prefix for output name
+        myOutputPrefix = ""
+        if self._QCDMethod == DatacardQCDMethod.FACTORISED:
+            myOutputPrefix += "QCDfact"
+        elif self._QCDMethod == DatacardQCDMethod.INVERTED:
+            myOutputPrefix += "QCDinv"
+
+        print "\n"+CaptionStyle()+"Running datacard generator"+NormalStyle()
+        myMassRange = str(self._config.MassPoints[0])
+        if len(self._config.MassPoints) > 0:
+            myMassRange += "-"+str(self._config.MassPoints[len(self._config.MassPoints)-1])
+        print "Cards will be generated for "+HighlightStyle()+myOutputPrefix+NormalStyle()+" in mass range "+HighlightStyle()+myMassRange+" GeV"+NormalStyle()+"\n"
 
         # Create columns (dataset groups)
         self.createDatacardColumns()
         self.checkDatacardColumns()
 
         # Make datacards
-        TableProducer(opts, config, self._luminosity, self._observation, self._columns, self._extractors)
+        TableProducer(opts, config, myOutputPrefix, self._luminosity, self._observation, self._columns, self._extractors)
 
-    def overrideConfigOptionsFromCommandLine(self):
+    #def overrideConfigOptionsFromCommandLine(self):
         # Obtain QCD measurement method
-        if self._config.QCDMeasurementMethod == None:
-            self._QCDmethod = DatacardQCDMethod.UNKNOWN
-        elif self._config.QCDMeasurementMethod == "QCD factorised":
-            self._QCDmethod = DatacardQCDMethod.FACTORISED
-        elif self._config.QCDMeasurementMethod == "QCD inverted":
-            self._QCDmethod = DatacardQCDMethod.INVERTED
-        else:
-            self._QCDmethod = DatacardQCDMethod.UNKNOWN
-        if self._opts.useQCDfactorised:
-            self._QCDmethod = DatacardQCDMethod.FACTORISED
-        if self._opts.useQCDinverted:
-            self._QCDmethod = DatacardQCDMethod.INVERTED
 
     def checkCfgFile(self):
         mymsg = ""
@@ -83,11 +87,11 @@ class DataCardGenerator:
             mymsg += "- field 'MassPoints' needs to have at least one entry! (list of integers, mass points for which datacard is generated)\n"
         if self._config.SignalAnalysis == None:
             mymsg += "- missing field 'SignalAnalysis' (string, name of EDFilter/EDAnalyzer process that produced the root files for signal analysis)\n"
-        if self._QCDmethod == DatacardQCDMethod.FACTORISED and self._config.QCDFactorisedAnalysis == None:
+        if self._QCDMethod == DatacardQCDMethod.FACTORISED and self._config.QCDFactorisedAnalysis == None:
             mymsg += "- missing field 'QCDFactorisedAnalysis' (string, name of EDFilter/EDAnalyzer process that produced the root files for QCD measurement factorised)\n"
-        if self._QCDmethod == DatacardQCDMethod.INVERTED and self._config.QCDInvertedAnalysis == None:
+        if self._QCDMethod == DatacardQCDMethod.INVERTED and self._config.QCDInvertedAnalysis == None:
             mymsg += "- missing field 'QCDInvertedAnalysis' (string, name of EDFilter/EDAnalyzer process that produced the root files for QCD measurement inverted)\n"
-        if self._QCDmethod == DatacardQCDMethod.UNKNOWN:
+        if self._QCDMethod == DatacardQCDMethod.UNKNOWN:
             mymsg += "- missing field 'QCDMeasurementMethod' (string, name of QCD measurement method, options: 'QCD factorised' or 'QCD inverted')\n"
         if self._config.SignalRateCounter == None:
             mymsg += "- missing field 'SignalRateCounter' (string, label of counter to be used for rate)\n"
@@ -122,23 +126,27 @@ class DataCardGenerator:
         # Obtain paths to multicrab directories
         multicrabPaths = PathFinder.MulticrabPathFinder(self._config.Path)
         mySignalPath = multicrabPaths.getSignalPath()
+        print "- Using signal and EWK+ttbar with fake taus directory:", mySignalPath
         if not os.path.exists(mySignalPath):
-            print "Path for signal analysis ('"+mySignalPath+"') does not exist!"
+            print ErrorStyle()+"Path for signal analysis ('"+mySignalPath+"') does not exist!"+NormalStyle()
             sys.exit()
         myEmbeddingPath = multicrabPaths.getEWKPath()
+        print "- Using embedding (EWK+ttbar with genuine taus) directory:", myEmbeddingPath
         if not os.path.exists(myEmbeddingPath):
-            print "Path for embedding analysis ('"+myEmbeddingPath+"') does not exist!"
+            print ErrorStyle()+"Path for embedding analysis ('"+myEmbeddingPath+"') does not exist!"+NormalStyle()
             sys.exit()
         myQCDPath = ""
         myQCDCounters = ""
-        if self._QCDmethod == DatacardQCDMethod.FACTORISED:
+        if self._QCDMethod == DatacardQCDMethod.FACTORISED:
             myQCDPath = multicrabPaths.getQCDFactorisedPath()
             myQCDCounters = self._config.QCDFactorisedAnalysis+"Counters"
-        elif self._QCDmethod == DatacardQCDMethod.INVERTED:
-            myQCDPath = multicrabPaths.getQCDInvertedPath()
+            print "- Using multi-jets (factorised) directory:", myQCDPath
+        elif self._QCDMethod == DatacardQCDMethod.INVERTED:
+            myQCDPath = multicrabPaths.getQCDinvPath()
             myQCDCounters = self._config.QCDInvertedAnalysis+"Counters"
+            print "- Using multi-jets (inverted) directory:", myQCDPath
         if not os.path.exists(myQCDPath):
-            print "Path for QCD measurement ('"+myQCDPath+"') does not exist!"
+            print ErrorStyle()+"Path for QCD measurement ('"+myQCDPath+"') does not exist!"+NormalStyle()
             sys.exit()
         # Make dataset managers
         myDsetMgrs = [None, # needed for datasetType==None
@@ -167,6 +175,17 @@ class DataCardGenerator:
         print "     EWK multicrab: "+HighlightStyle()+"%f 1/pb"%myLuminosities[2] +NormalStyle()
         print "     QCD multicrab: "+HighlightStyle()+"%f 1/pb"%myLuminosities[3] +NormalStyle()
         self._luminosity = myLuminosities[1]
+        # Check that luminosities are compatible
+        if myLuminosities[2] != myLuminosities[1]:
+            myDiff = abs(myLuminosities[2] / myLuminosities[1]-1.0)
+            if myDiff < 0.01:
+                print WarningStyle()+"Warning: signal and embedding luminosities differ slightly (%.2f %%)!"%(myDiff*100.0) +NormalStyle()
+            else:
+                print ErrorStyle()+"Error: signal and embedding luminosities differ more than 1 %!"+NormalStyle()
+                sys.exit()
+        if myLuminosities[3] != myLuminosities[1]:
+            print ErrorStyle()+"Error: signal and QCD luminosities are not the same!"+NormalStyle()
+            sys.exit()
         # Make datacard column object for observation
         myFoundNames = self.findDatasetNames("Observation", myAllDatasetNames[1], self._config.Observation.datasetDefinitions)
         if self._opts.debugConfig:
@@ -187,57 +206,61 @@ class DataCardGenerator:
             self._observation.printDebug()
         # Make merges for columns (a unique merge for each data group; used to access counters and histograms)
         for dg in self._config.DataGroups:
-            print "Making merged dataset for data group: "+HighlightStyle()+""+dg.label+""+NormalStyle()
-            myDsetMgr = 0
-            mMergedName = ""
-            myMergedNameForQCDMCEWK = ""
-            if dg.datasetType != "None":
-                if dg.datasetType == "Signal":
-                    myDsetMgr = 1
-                elif dg.datasetType == "Embedding":
-                    myDsetMgr = 2
-                elif dg.datasetType == "QCD factorised" or dg.datasetType == "QCD inverted":
-                    myDsetMgr = 3
-                # find dataset names
-                myFoundNames = self.findDatasetNames(dg.label, myAllDatasetNames[myDsetMgr], dg.datasetDefinitions)
-                # make merged set
-                if self._opts.debugConfig:
-                    print "Adding datasets to data group '"+dg.label+"':"
-                    for n in myFoundNames:
-                        print "  "+n
-                myMergedName = "dset_"+dg.label.replace(" ","_")
-                myDsetMgrs[myDsetMgr].merge(myMergedName, myFoundNames)
-                # find datasets and make merged set for QCD MC EWK
-                if dg.datasetType == "QCD factorised":
-                    myFoundNames = self.findDatasetNames(dg.label, myAllDatasetNames[myDsetMgr], dg.MCEWKDatasetDefinitions)
+            # Make sure that only one QCD method is included
+            if (dg.datasetType == "QCD factorised" and self._QCDMethod == DatacardQCDMethod.INVERTED) or (dg.datasetType == "QCD inverted" and self._QCDMethod == DatacardQCDMethod.FACTORISED):
+                print "Skipping data group: "+HighlightStyle()+""+dg.label+""+NormalStyle() + " (only one QCD measurement allowed in a datacard)"
+            else:
+                print "Making merged dataset for data group: "+HighlightStyle()+""+dg.label+""+NormalStyle()
+                myDsetMgr = 0
+                mMergedName = ""
+                myMergedNameForQCDMCEWK = ""
+                if dg.datasetType != "None":
+                    if dg.datasetType == "Signal":
+                        myDsetMgr = 1
+                    elif dg.datasetType == "Embedding":
+                        myDsetMgr = 2
+                    elif dg.datasetType == "QCD factorised" or dg.datasetType == "QCD inverted":
+                        myDsetMgr = 3
+                    # find dataset names
+                    myFoundNames = self.findDatasetNames(dg.label, myAllDatasetNames[myDsetMgr], dg.datasetDefinitions)
                     # make merged set
                     if self._opts.debugConfig:
-                        print "Adding MC EWK datasets to QCD:"
+                        print "Adding datasets to data group '"+dg.label+"':"
                         for n in myFoundNames:
                             print "  "+n
-                    myMergedNameForQCDMCEWK = "dset_"+dg.label.replace(" ","_")+"_MCEWK"
-                    myDsetMgrs[myDsetMgr].merge(myMergedNameForQCDMCEWK, myFoundNames)
-            # Construct dataset column object
-            myColumn = DatacardColumn(label=dg.label,
-                                      landsProcess=dg.landsProcess,
-                                      enabledForMassPoints = dg.validMassPoints,
-                                      datasetType = dg.datasetType,
-                                      rateCounter = dg.rateCounter,
-                                      nuisanceIds = dg.nuisances,
-                                      datasetMgrColumn = myMergedName,
-                                      datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK,
-                                      additionalNormalisationFactor = dg.additionalNormalisation,
-                                      dirPrefix = dg.dirPrefix,
-                                      shapeHisto = dg.shapeHisto)
-            # Disable non-active QCD measurements
-            if dg.datasetType == "QCD factorised" and self._QCDmethod == DatacardQCDMethod.INVERTED:
-                myColumn.disable()
-            elif dg.datasetType == "QCD inverted" and self._QCDmethod == DatacardQCDMethod.FACTORISED:
-                myColumn.disable()
-            # Add column
-            self._columns.append(myColumn)
-            if self._opts.debugConfig:
-                myColumn.printDebug()
+                    myMergedName = "dset_"+dg.label.replace(" ","_")
+                    myDsetMgrs[myDsetMgr].merge(myMergedName, myFoundNames)
+                    # find datasets and make merged set for QCD MC EWK
+                    if dg.datasetType == "QCD factorised":
+                        myFoundNames = self.findDatasetNames(dg.label, myAllDatasetNames[myDsetMgr], dg.MCEWKDatasetDefinitions)
+                        # make merged set
+                        if self._opts.debugConfig:
+                            print "Adding MC EWK datasets to QCD:"
+                            for n in myFoundNames:
+                                print "  "+n
+                        myMergedNameForQCDMCEWK = "dset_"+dg.label.replace(" ","_")+"_MCEWK"
+                        myDsetMgrs[myDsetMgr].merge(myMergedNameForQCDMCEWK, myFoundNames)
+                # Construct dataset column object
+                myColumn = DatacardColumn(label=dg.label,
+                                          landsProcess=dg.landsProcess,
+                                          enabledForMassPoints = dg.validMassPoints,
+                                          datasetType = dg.datasetType,
+                                          rateCounter = dg.rateCounter,
+                                          nuisanceIds = dg.nuisances,
+                                          datasetMgrColumn = myMergedName,
+                                          datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK,
+                                          additionalNormalisationFactor = dg.additionalNormalisation,
+                                          dirPrefix = dg.dirPrefix,
+                                          shapeHisto = dg.shapeHisto)
+                # Disable non-active QCD measurements
+                if dg.datasetType == "QCD factorised" and self._QCDMethod == DatacardQCDMethod.INVERTED:
+                    myColumn.disable()
+                elif dg.datasetType == "QCD inverted" and self._QCDMethod == DatacardQCDMethod.FACTORISED:
+                    myColumn.disable()
+                # Add column
+                self._columns.append(myColumn)
+                if self._opts.debugConfig:
+                    myColumn.printDebug()
         print "Data groups converted to datacard columns"
         # create extractors
         self.createExtractors()
@@ -357,14 +380,14 @@ class DataCardGenerator:
                                                       scale = n.scaling,
                                                       mode = myMode))
             elif n.function == "QCDFactorised":
-                if self._QCDmethod == DatacardQCDMethod.FACTORISED:
+                if self._QCDMethod == DatacardQCDMethod.FACTORISED:
                     print "fixme: add QCD factorised"
                     # FIXME temp code
                     self._extractors.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
                 else:
                     self._extractors.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
             elif n.function == "QCDInverted":
-                if self._QCDmethod == DatacardQCDMethod.INVERTED:
+                if self._QCDMethod == DatacardQCDMethod.INVERTED:
                     print "fixme: add QCD inverted"
                     # FIXME temp code
                     self._extractors.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))

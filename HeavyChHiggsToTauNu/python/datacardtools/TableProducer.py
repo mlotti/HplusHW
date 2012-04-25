@@ -16,9 +16,10 @@ import ROOT
 ## ExtractorBase class
 class TableProducer:
     ## Constructor
-    def __init__(self, opts, config, luminosity, observation, datasetGroups, extractors):
+    def __init__(self, opts, config, outputPrefix, luminosity, observation, datasetGroups, extractors):
         self._opts = opts
         self._config = config
+        self._outputPrefix = outputPrefix
         self._luminosity = luminosity
         self._observation = observation
         self._datasetGroups = datasetGroups
@@ -38,7 +39,7 @@ class TableProducer:
     ## Generates datacards
     def makeDataCards(self):
         # Make directory for output
-        myDirname = "datacards_"+self._timestamp+"_"+self._config.DataCardName
+        myDirname = "datacards_"+self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName
         os.mkdir(myDirname)
         # Obtain observation line
         for m in self._config.MassPoints:
