@@ -5,6 +5,7 @@
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter import EventCounter
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import _histoToCounter
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from math import pow,sqrt
 import sys
 
@@ -194,7 +195,7 @@ class CounterExtractor(ExtractorBase):
         elif self.isNuisance():
             # protection against zero
             if myCount.value() == 0:
-                print WarningStyle+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' counter ('"+self._counterItem+"') value is zero!"
+                print WarningStyle()+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' counter ('"+self._counterItem+"') value is zero!"
                 myResult = 0.0
             else:
                 myResult = myCount.uncertainty() / myCount.value()
@@ -244,7 +245,7 @@ class MaxCounterExtractor(ExtractorBase):
         myMaxValue = 0.0
         # Protect for div by zero
         if myResult[0].value() == 0:
-            print WarningStyle+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' nominal counter ('"+self._counterItem+"')value is zero!"
+            print WarningStyle()+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' nominal counter ('"+self._counterItem+"')value is zero!"
         else:
             for i in range(1,len(myResult)):
                 myValue = abs(myResult[i].value() / myResult[0].value() - 1.0)
@@ -304,7 +305,7 @@ class PileupUncertaintyExtractor(ExtractorBase):
         myMaxValue = 0.0
         # Protect for div by zero
         if myResult[0].value() == 0:
-            print WarningStyle+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' nominal counter ('"+self._counterItem+"')value is zero!"
+            print WarningStyle()+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' nominal counter ('"+self._counterItem+"')value is zero!"
         else:
             for i in range(1,len(myResult)):
                 myValue = abs(myResult[i].value() / myResult[0].value() - 1.0)
@@ -340,7 +341,7 @@ class RatioExtractor(ExtractorBase):
         myDenominatorCount = mainCounterTable.getCount(rowName=self._denominatorCounterItem, colName=datasetColumn.getDatasetMgrColumn())
         # Protection against div by zero
         if myDenominatorCount.value() == 0.0:
-            print WarningStyle+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' denominator counter ('"+self._counterItem+"') value is zero!"
+            print WarningStyle()+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' denominator counter ('"+self._counterItem+"') value is zero!"
             myResult = 0.0
         else:
             myResult = (myDenominatorCount.value() / myNumeratorCount.value() - 1.0) * self._scale
@@ -400,7 +401,7 @@ class ScaleFactorExtractor(ExtractorBase):
             hNormalisation.IsA().Destructor(hNormalisation)
             # Calculate result, protection against div by zero
             if myTotal == 0.0:
-                print WarningStyle+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' total count from normalisation histograms is zero!"
+                print WarningStyle()+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' total count from normalisation histograms is zero!"
                 myResult.append(0.0)
             else:
                 myResult.append(sqrt(mySum) / myTotal)

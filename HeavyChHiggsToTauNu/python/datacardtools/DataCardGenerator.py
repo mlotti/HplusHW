@@ -40,12 +40,15 @@ class DataCardGenerator:
         self._columns = []
         self._extractors = []
         self._QCDMethod = QCDMethod
+        self._replaceEmbeddingWithMC = False
 
         # Override options from command line (not used at the moment)
         #self.overrideConfigOptionsFromCommandLine()
         if self._QCDMethod != DatacardQCDMethod.FACTORISED and self._QCDMethod != DatacardQCDMethod.INVERTED:
             print ErrorStyle()+"Error: QCD method was not properly specified when creating DataCardGenerator!"+NormalStyle()
             sys.exit()
+        if self._config.OptionReplaceEmbeddingByMC != None:
+            self._replaceEmbeddingByMC = self._config.OptionReplaceEmbeddingByMC
 
         # Check that all necessary parameters have been specified in config file
         self.checkCfgFile()
@@ -56,6 +59,8 @@ class DataCardGenerator:
             myOutputPrefix += "QCDfact"
         elif self._QCDMethod == DatacardQCDMethod.INVERTED:
             myOutputPrefix += "QCDinv"
+        if self._replaceEmbeddingByMC:
+            myOutputPrefix += "_MCEWK"
 
         print "\n"+CaptionStyle()+"Running datacard generator"+NormalStyle()
         myMassRange = str(self._config.MassPoints[0])
@@ -131,10 +136,15 @@ class DataCardGenerator:
             print ErrorStyle()+"Path for signal analysis ('"+mySignalPath+"') does not exist!"+NormalStyle()
             sys.exit()
         myEmbeddingPath = multicrabPaths.getEWKPath()
-        print "- Using embedding (EWK+ttbar with genuine taus) directory:", myEmbeddingPath
-        if not os.path.exists(myEmbeddingPath):
-            print ErrorStyle()+"Path for embedding analysis ('"+myEmbeddingPath+"') does not exist!"+NormalStyle()
-            sys.exit()
+        if not self._replaceEmbeddingByMC:
+            print "- Using embedding (EWK+ttbar with genuine taus) directory:", myEmbeddingPath
+            if not os.path.exists(myEmbeddingPath):
+                print ErrorStyle()+"Path for embedding analysis ('"+myEmbeddingPath+"') does not exist!"+NormalStyle()
+                sys.exit()
+        else:
+            # if embedding is replaced by MC EWK, use signal path as path for embedding
+            myEmbeddingPath = mySignalPath
+            print WarningStyle()+"- Replacing embedding with MC EWK samples from signal analysis"+NormalStyle()
         myQCDPath = ""
         myQCDCounters = ""
         if self._QCDMethod == DatacardQCDMethod.FACTORISED:
@@ -194,7 +204,7 @@ class DataCardGenerator:
                 print "  "+n
         myObservationName = "dset_observation"
         print "Making merged dataset for data group: "+HighlightStyle()+"observation"+NormalStyle()
-        myDsetMgrs[1].merge(myObservationName, myFoundNames)
+        myDsetMgrs[1].merge(myObservationName, myFoundNames, keepSources=True)
         self._observation = DatacardColumn(label = "Observation",
                                            enabledForMassPoints = self._config.MassPoints,
                                            datasetType = "Observation",

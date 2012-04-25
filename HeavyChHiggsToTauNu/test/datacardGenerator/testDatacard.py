@@ -20,6 +20,9 @@ SignalShapeHisto = "transverseMassAfterDeltaPhi160"
 FakeShapeHisto = "NonQCDTypeIITransverseMassAfterDeltaPhi160"
 ShapeHistogramsDimensions = [20, 0.0, 400.0]  # bins, min, max
 
+# Options
+OptionReplaceEmbeddingByMC = False
+
 
 #FIXME move
 #import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
@@ -56,7 +59,6 @@ for mass in MassPoints:
     hhx.setValidMassPoints(myMassList)
     hhx.setNuisances(["01","03","07","09","10","17","28","33","34"])
     hhx.setDatasetDefinitions(["TTToHplusBHminusB_M"+str(mass)]),
-#   hhx.setSubPaths(multicrabPaths.getSubPaths(signalPath,"^TTToHplusBHminusB_M"+str(mass)))
     DataGroups.append(hhx)
 
     hwx = signalTemplate.clone()
@@ -65,7 +67,6 @@ for mass in MassPoints:
     hwx.setValidMassPoints(myMassList)
     hwx.setNuisances(["01","03","07","09","10","18","28","33","34"])
     hwx.setDatasetDefinitions(["TTToHplusBWB_M"+str(mass)]),
-#    hwx.setSubPaths(multicrabPaths.getSubPaths(signalPath,"^TTToHplusBWB_M"+str(mass)))
     DataGroups.append(hwx)
 
 DataGroups.append(DataGroup(
@@ -76,119 +77,141 @@ DataGroups.append(DataGroup(
     datasetType  = "QCD factorised",
     datasetDefinitions = ["Tau_"],
     MCEWKDatasetDefinitions = ["TTJets","WJets","DY","WW","WZ","ZZ","T_","Tbar_"],
-    #mcEWKDatasetsForQCD = multicrabPaths.getSubPaths(multicrabPaths.getQCDfacPath(),"^Tau_\S+|Hplus",exclude=True),
     nuisances    = ["12","13","40b"]
 ))
 
-if 1 == 1:
+DataGroups.append(DataGroup(
+    label        = "QCDinv",
+    landsProcess = 3,
+    validMassPoints = MassPoints,
+    datasetType  = "QCD inverted",
+    datasetDefinitions   = "^Tau\S+",
+    shapeHisto   = "mtSum",
+    dirPrefix   = QCDInvertedAnalysis,
+    rateCounter  = "deltaPhiTauMET160 limit",
+    additionalNormalisation= 0.0066,
+    nuisances    = ["41","42","43","44"] # FIXME: add shape stat, i.e. 40x
+))
+
+if not OptionReplaceEmbeddingByMC:
+     # EWK + ttbar with genuine taus
     DataGroups.append(DataGroup(
-        label        = "QCDinv",
-        landsProcess = 3,
+        label        = "EWK_Tau",
+        landsProcess = 4,
+        shapeHisto   = SignalShapeHisto,
+        datasetType  = "Embedding",
+        datasetDefinitions   = ["Data"],
+        dirPrefix   = SignalAnalysis,
+        rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
-        datasetType  = "QCD inverted",
-        datasetDefinitions   = "^Tau\S+",
-        shapeHisto   = "mtSum",
-        dirPrefix   = QCDInvertedAnalysis,
-        rateCounter  = "deltaPhiTauMET160 limit",
-        additionalNormalisation= 0.0066,
-        #path         = multicrabPaths.getQCDinvPath(),
-        #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getQCDinvPath(),"^Tau_\S+"),
-        nuisances    = ["41","42","43","44"] # FIXME: add shape stat, i.e. 40x
+        nuisances    = ["01b","03","07c","14","15","16","19","40"]
+    ))
+    DataGroups.append(DataGroup(
+        label        = "EWK_DY",
+        landsProcess = 5,
+        shapeHisto   = SignalShapeHisto,
+        datasetType  = "Embedding",
+        datasetDefinitions   = ["DYJetsToLL"],
+        dirPrefix   = SignalAnalysis,
+        rateCounter  = SignalRateCounter,
+        validMassPoints = MassPoints,
+        nuisances    = ["01c","03","07","09","11b","15b","16b","31","33","34","24"]
+    ))
+    DataGroups.append(DataGroup(
+        label        = "EWK_VV",
+        landsProcess = 6,
+        shapeHisto   = SignalShapeHisto,
+        datasetType  = "Embedding",
+        datasetDefinitions   = ["WW"], #,"WZ","ZZ"],
+        dirPrefix   = SignalAnalysis,
+        rateCounter  = SignalRateCounter,
+        validMassPoints = MassPoints,
+        nuisances    = ["01c","03","07","09","11b","15b","16b","32","33","34","27"]
     ))
 
-DataGroups.append(DataGroup(
-    label        = "EWK_Tau",
-    landsProcess = 4,
-    shapeHisto   = SignalShapeHisto,
-    datasetType  = "Embedding",
-    datasetDefinitions   = ["Data"],
-    dirPrefix   = SignalAnalysis,
-    rateCounter  = SignalRateCounter,
-    validMassPoints = MassPoints,
-    #path         = multicrabPaths.getEWKPath(),
-    #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getEWKPath(),"^Data"),
-    nuisances    = ["01b","03","07c","14","15","16","19","40"]
-))
+    # EWK + ttbar with fake taus
+    DataGroups.append(DataGroup(
+        label        = "EWK_tt_faketau",
+        landsProcess = 1,
+        shapeHisto   = FakeShapeHisto,
+        datasetType  = "Signal",
+        datasetDefinitions   = ["TTJets_"],
+        dirPrefix   = SignalAnalysis,
+        rateCounter  = FakeRateCounter,
+        validMassPoints = MassPoints,
+        nuisances    = ["01","04","07b","09","10","28","33","34b","35"]
+    ))
+    DataGroups.append(DataGroup(
+        label        = "EWK_W_faketau",
+        landsProcess = 7,
+        shapeHisto   = FakeShapeHisto,
+        datasetType  = "Signal",
+        datasetDefinitions   = ["WJets"],
+        dirPrefix   = SignalAnalysis,
+        rateCounter  = FakeRateCounter,
+        validMassPoints = MassPoints,
+        nuisances    = ["01","04","07b","09","11","29","33","34b","37"]
+    ))
+    DataGroups.append(DataGroup(
+        label        = "EWK_t_faketau",
+        landsProcess = 8,
+        shapeHisto   = FakeShapeHisto,
+        datasetType  = "Signal",
+        datasetDefinitions   = ["T_", "Tbar_"],
+        dirPrefix   = SignalAnalysis,
+        rateCounter  = FakeRateCounter,
+        validMassPoints = MassPoints,
+        nuisances    = ["01","04","07b","09","10","30","33","34b","38"]
+    ))
+else:
+    # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
+    DataGroups.append(DataGroup(
+        label        = "MC_EWK_Tau",
+        landsProcess = 4,
+        shapeHisto   = SignalShapeHisto,
+        datasetType  = "Signal",
+        datasetDefinitions = ["TTJets", "WJets_", "Tbar_", "T_"],
+        dirPrefix   = SignalAnalysis,
+        rateCounter  = SignalRateCounter,
+        validMassPoints = MassPoints,
+        nuisances    = ["01b","03","07","14","15","16","19","40"]
+    ))
+    DataGroups.append(DataGroup(
+        label        = "MC_EWK_DY",
+        landsProcess = 5,
+        shapeHisto   = SignalShapeHisto,
+        datasetType  = "Embedding",
+        datasetDefinitions   = ["DYJetsToLL"],
+        dirPrefix   = SignalAnalysis,
+        rateCounter  = SignalRateCounter,
+        validMassPoints = MassPoints,
+        nuisances    = ["01","03","07","09","11","15b","16b","31","33","34","24"]
+    ))
+    DataGroups.append(DataGroup(
+        label        = "MC_EWK_VV",
+        landsProcess = 6,
+        shapeHisto   = SignalShapeHisto,
+        datasetType  = "Embedding",
+        datasetDefinitions   = ["WW","WZ","ZZ"],
+        dirPrefix   = SignalAnalysis,
+        rateCounter  = SignalRateCounter,
+        validMassPoints = MassPoints,
+        nuisances    = ["01","03","07","09","11","15b","16b","32","33","34","27"]
+    ))
+    DataGroups.append(DataGroup(
+        label        = "empty",
+        landsProcess = 1,
+        datasetType  = "None",
+        validMassPoints = MassPoints,
+    ))
 
-DataGroups.append(DataGroup(
-    label        = "EWK_DY",
-    landsProcess = 5,
-    shapeHisto   = SignalShapeHisto,
-    datasetType  = "Embedding",
-    datasetDefinitions   = ["DYJetsToLL"],
-    dirPrefix   = SignalAnalysis,
-    rateCounter  = SignalRateCounter,
-    validMassPoints = MassPoints,
-    #path         = multicrabPaths.getEWKPath(),
-    #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getEWKPath(),"^DYJetsToLL"),
-    nuisances    = ["01c","03","07","09","11b","15b","16b","31","33","34","24"]
-))
 
-DataGroups.append(DataGroup(
-    label        = "EWK_VV",
-    landsProcess = 6,
-    shapeHisto   = SignalShapeHisto,
-    datasetType  = "Embedding",
-    datasetDefinitions   = ["WW"], #,"WZ","ZZ"],
-    dirPrefix   = SignalAnalysis,
-    rateCounter  = SignalRateCounter,
-    validMassPoints = MassPoints,
-    #path         = multicrabPaths.getEWKPath(),
-    #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getEWKPath(),"^WW"),
-    nuisances    = ["01c","03","07","09","11b","15b","16b","32","33","34","27"]
-))
-
-DataGroups.append(DataGroup(
-    label        = "EWK_tt_faketau",
-    landsProcess = 1,
-    shapeHisto   = FakeShapeHisto,
-    datasetType  = "Signal",
-    datasetDefinitions   = ["TTJets_"],
-    dirPrefix   = SignalAnalysis,
-    rateCounter  = FakeRateCounter,
-    validMassPoints = MassPoints,
-    #subpath      = multicrabPaths.getSubPaths(signalPath,"^TTJets_"),
-    nuisances    = ["01","04","07b","09","10","28","33","34b","35"]
-))
-
-DataGroups.append(DataGroup(
-    label        = "EWK_W_faketau",
-    landsProcess = 7,
-    shapeHisto   = FakeShapeHisto,
-    datasetType  = "Signal",
-    datasetDefinitions   = ["WJets"],
-    dirPrefix   = SignalAnalysis,
-    rateCounter  = FakeRateCounter,
-    validMassPoints = MassPoints,
-    #subpath      = multicrabPaths.getSubPaths(signalPath,"^WJets_"),
-    nuisances    = ["01","04","07b","09","11","29","33","34b","37"]
-))
-
-DataGroups.append(DataGroup(
-    label        = "EWK_t_faketau",
-    landsProcess = 8,
-    shapeHisto   = FakeShapeHisto,
-    datasetType  = "Signal",
-    datasetDefinitions   = ["T_", "Tbar_"], #FIXME and s and t channels
-    dirPrefix   = SignalAnalysis,
-    rateCounter  = FakeRateCounter,
-    validMassPoints = MassPoints,
-    #subpath      = multicrabPaths.getSubPaths(signalPath,"^T_tW"),
-    nuisances    = ["01","04","07b","09","10","30","33","34b","38"]
-))
-
+# Reserve column 2
 DataGroups.append(DataGroup(
     label        = "res.",
     landsProcess = 2,
-    #shapeHisto   = SignalShapeHisto,
     datasetType  = "None",
-    #datasetDefinitions   = ["Data"],
-    #dirPrefix   = SignalAnalysis,
-    #rateCounter  = SignalRateCounter,
     validMassPoints = MassPoints,
-    #path         = multicrabPaths.getEWKPath(),
-    #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getEWKPath(),"^Data"),
-    #nuisances    = ["01b","03","07c","14","15","16","19"]
 ))
 
 
@@ -424,7 +447,7 @@ Nuisances.append(Nuisance(
     label         = "Z->tautau MC stat",
     distr         = "lnN",
     function      = "Counter",
-    counter       = FakeRateCounter,
+    counter       = SignalRateCounter,
 ))
 
 Nuisances.append(Nuisance(
