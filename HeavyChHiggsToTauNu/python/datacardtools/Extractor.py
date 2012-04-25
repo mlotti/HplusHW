@@ -107,12 +107,12 @@ class ExtractorBase:
         sys.exit()
 
     ## Virtual method for extracking information
-    def doExtract(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+    def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
         return -1.0
 
-    ## Virtual method for adding histograms to the root file
-    def addHistogramsToFile(self, label, exid, rootFile):
-        return
+    ## Virtual method for extracting histograms
+    def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        return None
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
@@ -152,16 +152,13 @@ class ConstantExtractor(ExtractorBase):
         self._constantUpperValue = constantUpperValue
 
     ## Method for extracking information
-    def doExtract(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+    def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
         myResult = None
         if self.isAsymmetricNuisance():
             myResult = [-(self._constantValue), self._constantUpperValue]
         else:
             myResult = self._constantValue
         return myResult
-
-### Method for adding histograms to the root file
-    #def addHistogramsToFile(self, label, exid, rootFile):
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
@@ -186,7 +183,7 @@ class CounterExtractor(ExtractorBase):
         self._counterItem = counterItem
 
     ## Method for extracking information
-    def doExtract(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+    def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
         myCount = mainCounterTable.getCount(rowName=self._counterItem, colName=datasetColumn.getDatasetMgrColumn())
         # Return result
         myResult = None
@@ -224,7 +221,7 @@ class MaxCounterExtractor(ExtractorBase):
             sys.exit()
 
     ## Method for extracking information
-    def doExtract(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+    def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
         myResult = []
         for d in self._counterDirs:
             myHistoPath = d+"/weighted/counter"
@@ -277,13 +274,13 @@ class PileupUncertaintyExtractor(ExtractorBase):
             sys.exit()
 
     ## Method for extracking information
-    def doExtract(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+    def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
         myResult = []
-        
+
         # Normalise with up/down to get up/down histograms
         # mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.UP) #FIXME
         # mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.DOWN) #FIXME
-        
+
         for d in self._counterDirs:
             myHistoPath = d+"/weighted/counter"
             datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoPath)
@@ -336,7 +333,7 @@ class RatioExtractor(ExtractorBase):
         self._scale = scale
 
     ## Method for extracking information
-    def doExtract(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+    def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
         myNumeratorCount = mainCounterTable.getCount(rowName=self._numeratorCounterItem, colName=datasetColumn.getDatasetMgrColumn())
         myDenominatorCount = mainCounterTable.getCount(rowName=self._denominatorCounterItem, colName=datasetColumn.getDatasetMgrColumn())
         # Protection against div by zero
@@ -377,7 +374,7 @@ class ScaleFactorExtractor(ExtractorBase):
             sys.exit()
 
     ## Method for extracking information
-    def doExtract(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+    def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
         myResult = []
         for i in range (0, len(self._histoDirs)):
             myTotal = 0.0
@@ -413,6 +410,96 @@ class ScaleFactorExtractor(ExtractorBase):
         # Return result
         return sqrt(myCombinedResult)
 
+
+    ## Virtual method for printing debug information
+    def printDebugInfo(self):
+        print "MaxCounterExtractor"
+        print "- counter item = ", self._counterItem
+        ExtractorBase.printDebugInfo(self)
+
+    ## \var _counterDirs
+    # List of directories (without /weighted/counter suffix ) for counter histograms; first needs to be the nominal counter
+    ## \var _counterItem
+    # Name of item (label) in counter histogram
+
+## ShapeExtractor class
+# Extracts histogram shapes
+class ShapeExtractor(ExtractorBase):
+    ## Constructor
+    def __init__(self, histoSpecs, histoDirs, histograms, mode = ExtractorMode.NUISANCE, exid = "", distribution = "lnN", description = ""):
+        ExtractorBase.__init__(self, mode, exid, distribution, description)
+        self._histoSpecs = histoSpecs
+        self._histoDirs = histoDirs
+        self._histograms = histograms
+        if len(self._histoDirs) != len(self._histograms):
+            print ErrorStyle()+"Error in Rate/Nuisance with id='"+str(self._exid)+"':"+NormalStyle()+" need to specify equal amount of histoDirs and histograms!"
+            sys.exit()
+        if len(self._histoDirs) == 0:
+            print ErrorStyle()+"Error in Rate/Nuisance with id='"+str(self._exid)+"':"+NormalStyle()+" need to specify histoDirs and histograms!"
+            sys.exit()
+        if (self.isRate() or self.isObservation()):
+            # Rate or observation needs to have exactly one entry
+            if len(self._histoDirs) > 1:
+                print ErrorStyle()+"Error in Observation/Rate:"+NormalStyle()+"need to specify exactly one entry in both histoDirs and histograms!"
+                sys.exit()
+        else:
+            # Shape nuisance needs to have exactly two entries (down, up)
+            if len(self._histoDirs) != 2:
+                print ErrorStyle()+"Error in Nuisance with id='"+str(self._exid)+"':"+NormalStyle()+" need to specify exactly two entries (down and up) in both histoDirs and histograms!"
+                sys.exit()
+        if len(self._histoSpecs) != 3:
+            print ErrorStyle()+"Error in config:"+NormalStyle()+" need to specify to ShapeHistogramsDimensions as list, example = [20,0.0,400.0] (i.e. nbins, min, max)!"
+            sys.exit()
+
+    ## Method for extracking result
+    def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        return 1.0
+
+    ## Virtual method for extracting histograms
+    def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        # Construct labels for histograms
+        myPrefix = datasetColumn.getLabel()
+        myLabels = []
+        if self.isRate() or self.isObservation():
+            myLabels = [myPrefix]
+        else:
+            myLabels = [myPrefix+"_"+int(self._masterExID)+"Down",
+                        myPrefix+"_"+int(self._masterExID)+"Up"]
+        myHistograms = []
+        for i in range (0, len(self._histoDirs)):
+            # Obtain histogram
+            myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoDirs[i]+"/"+self._histograms[i])
+            if myDatasetRootHisto.isMC():
+                myDatasetRootHisto.normalizeToLuminosity(luminosity)
+            h = myDatasetRootHisto.getHistogram()
+            # Check histogram dimensions
+            if h.GetXaxis().GetXmin() != self._histoSpecs[1]:
+                print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Obtained shape histogram has xmin=%f (should be %f)!"%(h.GetXaxis().GetXmin(), self._histoSpecs[1])
+                sys.exit()
+            if h.GetXaxis().GetXmax() != self._histoSpecs[2]:
+                print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Obtained shape histogram has xmax=%f (should be %f)!"%(h.GetXaxis().GetXmax(), self._histoSpecs[2])
+                sys.exit()
+            if h.GetXaxis().GetNbins() % self._histoSpecs[0] != 0:
+                print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Obtained shape histogram has nbins=%d which is not rebinnable to %d)!"%(h.GetXaxis().GetNbins(), self._histoSpecs[0])
+                sys.exit()
+            # Rebin
+            if h.GetXaxis().GetNbins() != self._histoSpecs[0]:
+                h.Rebin(h.GetXaxis().GetNbins() / self._histoSpecs[0])
+            # Set name to histogram
+            h.SetName(myLabels[i])
+            h.SetTitle(myLabels[i])
+            # Extract overflow bin as an independent bin
+            h.GetXaxis().Set(self._histoSpecs[0]+1,self._histoSpecs[1],self._histoSpecs[2]+h.GetXaxis().GetBinWidth(1))
+            # Add here substraction of negative bins, if necessary
+            for k in range(1, h.GetNbinsX()+1):
+                if h.GetBinContent(k) < 0.0:
+                    print WarningStyle()+"Rate/Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shape histo bin %d is negative (%f)"%(k,h.GetBinContent(k))
+            myHistograms.append(h)
+        if (self.isRate() or self.isObservation()) and c.typeIsEmptyColum():
+            # No source for histograms for empty column; create an empty histogram with correct dimensions
+            h = ROOT.TH1F(myLabels[0], myLabels[0], self._histoSpecs[0]+1,self._histoSpecs[1],self._histoSpecs[2]+h.GetXaxis().GetBinWidth(1))
+            myHistograms.append(h)
+        return myHistograms
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):

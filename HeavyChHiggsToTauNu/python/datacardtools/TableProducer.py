@@ -43,7 +43,7 @@ class TableProducer:
         os.mkdir(myDirname)
         # Obtain observation line
         for m in self._config.MassPoints:
-            print "\n"+CaptionStyle()+"Generating datacard for mass point %d"%m +NormalStyle()
+            print "\n"+HighlightStyle()+"Generating datacard for mass point %d for "%m +self._outputPrefix+NormalStyle()
             # Open output root file
             myFilename = myDirname+"/"+self._outputFileStem+"%d.txt"%m
             myRootFilename = myDirname+"/"+self._outputRootFileStem+"%d.root"%m
@@ -52,12 +52,9 @@ class TableProducer:
                 print ErrorStyle()+"Error:"+NormalStyle()+" Cannot open file '"+myRootFilename+"' for output!"
                 sys.exit()
             # Invoke extractors
-            print "... obtaining observation"
             myObservationLine = self._generateObservationLine()
-            print "... obtaining rates"
             myRateHeaderTable = self._generateRateHeaderTable(m)
             myRateDataTable = self._generateRateDataTable(m)
-            print "... obtaining nuisances"
             myNuisanceTable = self._generateNuisanceTable(m)
             # Calculate dimensions of tables
             myWidths = []

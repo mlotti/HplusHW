@@ -285,7 +285,7 @@ class DataCardGenerator:
             else:
                 myEventCounterTables.append([])
         # Do data mining and cache results
-        self._observation.doDataMining(myDsetMgrs[1],myLuminosities[1],myEventCounterTables[1],self._extractors)
+        self._observation.doDataMining(self._config,myDsetMgrs[1],myLuminosities[1],myEventCounterTables[1],self._extractors)
         for c in self._columns:
             myIndex = 0
             if c.typeIsObservation() or c.typeIsSignal():

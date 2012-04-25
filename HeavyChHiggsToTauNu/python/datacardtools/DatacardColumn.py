@@ -6,7 +6,7 @@ import os
 import sys
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 
 ## ExtractorResult
@@ -167,7 +167,7 @@ class DatacardColumn():
         return self._datasetMgrColumnForQCDMCEWK
 
     ## Do data mining and cache results
-    def doDataMining(self, dsetMgr, luminosity, mainCounterTable, extractors):
+    def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors):
         # Obtain rate
         sys.stdout.write("\r... data mining in progress: Column="+self._label+", obtaining Rate...                                                          ")
         sys.stdout.flush()
@@ -175,20 +175,22 @@ class DatacardColumn():
         myRateHistograms = []
         if self.typeIsEmptyColum():
             myRateResult = 0.0
-            # FIXME add empty histogram !
+            myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, [], [], ExtractorMode.RATE)
         elif self.typeIsQCD():
-            print "rate not implemented for QCD yet, setting rate to zero"  #FIXME
+            print WarningStyle()+"rate not implemented for QCD yet, setting rate to zero"+NormalStyle()  #FIXME
             myRateResult = 0.0
-            # FIXME add empty histogram !
+            myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
         else:
             myExtractor = None
+            myShapeExtractor = None
             if self.typeIsObservation():
                 myExtractor = CounterExtractor(self._rateCounter, ExtractorMode.OBSERVATION)
+                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, [self._dirPrefix], [self._shapeHisto], ExtractorMode.OBSERVATION)
             else:
                 myExtractor = CounterExtractor(self._rateCounter, ExtractorMode.RATE)
-            myRateResult = myExtractor.doExtract(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
-            # FIXME add histograms 
-
+                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, [self._dirPrefix], [self._shapeHisto], ExtractorMode.RATE)
+            myRateResult = myExtractor.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
+            myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
         # Cache result
         self._rateResult = ExtractorResult("rate",
                                            "rate",
@@ -203,11 +205,12 @@ class DatacardColumn():
                 if e.getId() == nid:
                     myFoundStatus = True
                     # Obtain result
-                    myResult = e.doExtract(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
+                    myResult = e.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
                     # Obtain histograms
                     myHistograms = []
-                    #if e.isShapeNuisance():
-                        #FIXME add histograms
+                    if e.isShapeNuisance():
+                        print "shape nuisance id=",e.getId()
+                        myHistograms.extend(e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
                     # Cache result
                     self._nuisanceResults.append(ExtractorResult(e.getId(),
                                                                  e.getMasterId(),
