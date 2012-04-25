@@ -82,7 +82,7 @@ DataGroups.append(DataGroup(
     datasetDefinitions = ["Tau_"],
     MCEWKDatasetDefinitions = ["TTJets","WJets","DY","WW","WZ","ZZ","T_","Tbar_"],
     #mcEWKDatasetsForQCD = multicrabPaths.getSubPaths(multicrabPaths.getQCDfacPath(),"^Tau_\S+|Hplus",exclude=True),
-    nuisances    = ["12","13"]
+    nuisances    = ["12","13","40b"]
 ))
 
 if 0 == 1:
@@ -98,7 +98,7 @@ if 0 == 1:
         additionalNormalisation= 0.0066,
         #path         = multicrabPaths.getQCDinvPath(),
         #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getQCDinvPath(),"^Tau_\S+"),
-        nuisances    = ["40","41","42","43"]
+        nuisances    = ["41","42","43","44"] # FIXME: add shape stat, i.e. 40x
     ))
 
 DataGroups.append(DataGroup(
@@ -112,7 +112,7 @@ DataGroups.append(DataGroup(
     validMassPoints = MassPoints,
     #path         = multicrabPaths.getEWKPath(),
     #subpath      = multicrabPaths.getSubPaths(multicrabPaths.getEWKPath(),"^Data"),
-    nuisances    = ["01b","03","07c","14","15","16","19"]
+    nuisances    = ["01b","03","07c","14","15","16","19","40"]
 ))
 
 DataGroups.append(DataGroup(
@@ -567,6 +567,30 @@ Nuisances.append(Nuisance(
 
 Nuisances.append(Nuisance(
     id            = "40",
+    label         = "Stat. uncertainty on the shape",
+    distr         = "shapeStat",
+    function      = "Shape",
+    counter       = SignalRateCounter
+))
+
+Nuisances.append(Nuisance(
+    id            = "40b",
+    label         = "Stat. uncertainty on the shape",
+    distr         = "shapeStat",
+    function      = "Shape",
+    QCDmode       = "shapestat"
+))
+
+Nuisances.append(Nuisance(
+    id            = "40c",
+    label         = "Stat. uncertainty on the shape",
+    distr         = "shapeStat",
+    function      = "Shape",
+    counter       = FakeRateCounter
+))
+
+Nuisances.append(Nuisance(
+    id            = "41",
     label         = "QCDInv: stat.",
     distr         = "lnN",
     function      = "QCDInverted",
@@ -574,7 +598,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "41",
+    id            = "42",
     label         = "QCDInv: JES/JER/MET/Rtau effect on normalisation",
     distr         = "lnN",
     function      = "Constant",
@@ -582,7 +606,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "42",
+    id            = "43",
     label         = "QCDInv: MET shape", 
     distr         = "lnN",
     function      = "Constant",
@@ -590,7 +614,7 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
-    id            = "43",
+    id            = "44",
     label         = "QCDInv: fit", 
     distr         = "lnN",
     function      = "Constant", 
@@ -604,3 +628,4 @@ MergeNuisances.append(["11","11b"])
 MergeNuisances.append(["15","15b"])
 MergeNuisances.append(["16","16b"])
 MergeNuisances.append(["34","34b"])
+MergeNuisances.append(["40","40b","40c"])
