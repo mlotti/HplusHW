@@ -16,6 +16,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
 
@@ -112,7 +113,7 @@ class DataCardGenerator:
             mymsg += "- need to specify at least one Nuisance to field 'Nuisances' (list of Nuisance objects)\n"
         # determine if datacard was ok
         if mymsg != "":
-            print "\033[0;41m\033[1;37mError in config '"+self._opts.datacard+"'!\033[0;0m\n"
+            print ErrorStyle()+"Error in config '"+self._opts.datacard+"'!"+NormalStyle()+"\n"
             print mymsg
             sys.exit()
 
@@ -162,9 +163,9 @@ class DataCardGenerator:
                 myAllDatasetNames.append([])
                 myLuminosities.append(0.0)
         print "Luminosity is set to:"
-        print "  signal multicrab: \033[1;37m%f 1/pb\033[0;0m"%myLuminosities[1]
-        print "     EWK multicrab: \033[1;37m%f 1/pb\033[0;0m"%myLuminosities[2]
-        print "     QCD multicrab: \033[1;37m%f 1/pb\033[0;0m"%myLuminosities[3]
+        print "  signal multicrab: "+HighlightStyle()+"%f 1/pb"%myLuminosities[1] +NormalStyle()
+        print "     EWK multicrab: "+HighlightStyle()+"%f 1/pb"%myLuminosities[2] +NormalStyle()
+        print "     QCD multicrab: "+HighlightStyle()+"%f 1/pb"%myLuminosities[3] +NormalStyle()
         self._luminosity = myLuminosities[1]
         # Make datacard column object for observation
         myFoundNames = self.findDatasetNames("Observation", myAllDatasetNames[1], self._config.Observation.datasetDefinitions)
@@ -173,7 +174,7 @@ class DataCardGenerator:
             for n in myFoundNames:
                 print "  "+n
         myObservationName = "dset_observation"
-        print "Making merged dataset for data group: \033[1;37mobservation\033[0;0m"
+        print "Making merged dataset for data group: "+HighlightStyle()+"observation"+NormalStyle()
         myDsetMgrs[1].merge(myObservationName, myFoundNames)
         self._observation = DatacardColumn(label = "Observation",
                                            enabledForMassPoints = self._config.MassPoints,
@@ -186,7 +187,7 @@ class DataCardGenerator:
             self._observation.printDebug()
         # Make merges for columns (a unique merge for each data group; used to access counters and histograms)
         for dg in self._config.DataGroups:
-            print "Making merged dataset for data group: \033[1;37m"+dg.label+"\033[0;0m"
+            print "Making merged dataset for data group: "+HighlightStyle()+""+dg.label+""+NormalStyle()
             myDsetMgr = 0
             mMergedName = ""
             myMergedNameForQCDMCEWK = ""
@@ -273,7 +274,7 @@ class DataCardGenerator:
                     myResult.append(dsetfull)
                     myFoundStatus = True
             if not myFoundStatus:
-                print "\033[0;41m\033[1;37mError in dataset group '"+label+"':\033[0;0m cannot find datasetDefinition '"+dset+"'!"
+                print ErrorStyle()+"Error in dataset group '"+label+"':"+NormalStyle()+" cannot find datasetDefinition '"+dset+"'!"
                 print "Options are:"
                 for dsetfull in allNames:
                     print "  "+dsetfull
@@ -292,7 +293,7 @@ class DataCardGenerator:
                         myFirstValue = c.getLandsProcess()
                     else:
                         if myFirstValue + i != c.getLandsProcess():
-                            print "\033[0;41m\033[1;37mError:\033[0;0m cannot find LandS process '"+str(myFirstValue+i)+"' in data groups for mass = %d! (need to have consecutive numbers; add group with such landsProcess or check input file)"%m
+                            print ErrorStyle()+"Error:"+NormalStyle()+" cannot find LandS process '"+str(myFirstValue+i)+"' in data groups for mass = %d! (need to have consecutive numbers; add group with such landsProcess or check input file)"%m
                             sys.exit()
                     i += 1
 
@@ -301,7 +302,7 @@ class DataCardGenerator:
         # Protection to create extractors only once
         if len(self._extractors) > 0:
             return
-        
+
         myMode = ExtractorMode.NUISANCE
         for n in self._config.Nuisances:
             if n.function == "Constant":
@@ -370,7 +371,7 @@ class DataCardGenerator:
                 else:
                     self._extractors.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
             else:
-                print "\033[0;41m\033[1;37mError in nuisance with id='"+n.id+"':\033[0;0m unknown or missing field function '"+n.function+"' (string)!"
+                print ErrorStyle()+"Error in nuisance with id='"+n.id+"':"+NormalStyle()+" unknown or missing field function '"+n.function+"' (string)!"
                 print "Options are: 'Constant', 'Counter', 'maxCounter', 'Shape', 'ScaleFactor', 'Ratio', 'QCDFactorised'"
                 sys.exit()
         # Create reserved nuisances
@@ -385,7 +386,7 @@ class DataCardGenerator:
         for i in range(0,len(self._extractors)):
             for j in range(0,len(self._extractors)):
                 if self._extractors[i].isId(self._extractors[j].getId()) and i != j:
-                    print "\033[0;41m\033[1;37mError:\033[0;0m You have defined two nuisances with id='"++"'! The id has to be unique!"
+                    print ErrorStyle()+"Error:"+NormalStyle()+" You have defined two nuisances with id='"++"'! The id has to be unique!"
                     sys.exit()
         # Merge nuisances
         self.mergeNuisances()
@@ -395,7 +396,7 @@ class DataCardGenerator:
             if n.isPrintable():
                 myCounter += 1
                 if int(n.getId()) != myCounter:
-                    print "\033[0;37m\033[1;37mWarning:\033[0;0m You have not declared a Nuisance or ReservedNuisance with id='%d'!"%myCounter
+                    print WarningStyle()+"Warning:"+NormalStyle()+" You have not declared a Nuisance or ReservedNuisance with id='%d'!"%myCounter
                     myCounter = int(n.getId())
 
     def mergeNuisances(self):
@@ -406,7 +407,7 @@ class DataCardGenerator:
                 if n.isId(mset[0]):
                     myFoundStatus = True
             if not myFoundStatus:
-                print "\033[0;41m\033[1;37mError in merging Nuisances:\033[0;0m cannot find a nuisance with id '"+mset[0]+"'!"
+                print ErrorStyle()+"Error in merging Nuisances:"+NormalStyle()+" cannot find a nuisance with id '"+mset[0]+"'!"
                 sys.exit()
             # assign master to slave nuisances
             for i in range(1, len(mset)):
@@ -416,7 +417,7 @@ class DataCardGenerator:
                         n.setAsSlave(mset[0])
                         myFoundStatus = True
                 if not myFoundStatus:
-                    print "\033[0;41m\033[1;37mError in merging Nuisances:\033[0;0m tried to merge '"+mset[i]+"' (slave) to '"+mset[0]+"' (master) but could not find a nuisance with id '"+mset[i]+"'!"
+                    print ErrorStyle()+"Error in merging Nuisances:"+NormalStyle()+" tried to merge '"+mset[i]+"' (slave) to '"+mset[0]+"' (master) but could not find a nuisance with id '"+mset[i]+"'!"
                     sys.exit()
         print "Merged Nuisances"
 

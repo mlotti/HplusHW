@@ -93,7 +93,7 @@ class ExtractorBase:
     def getCounterHistogram(self, rootFile, counterHisto):
         histo = rootFile.Get(counterHisto)
         if not histo:
-            print "\033[0;41m\033[1;37mError:\033[0;0m Cannot find counter histogram '"+counterHisto+"'!"
+            print ErrorStyle()+"Error:"+NormalStyle()+" Cannot find counter histogram '"+counterHisto+"'!"
             sys.exit()
         return histo
 
@@ -102,7 +102,7 @@ class ExtractorBase:
         for i in range(1, histo.GetNbinsX()+1):
             if histo.GetXaxis().GetBinLabel(i) == myBinLabel:
                 return i
-        print "\033[0;41m\033[1;37mError:\033[0;0m Cannot find counter by name "+counterItem+"!"
+        print ErrorStyle()+"Error:"+NormalStyle()+" Cannot find counter by name "+counterItem+"!"
         sys.exit()
 
     ## Virtual method for extracking information
@@ -194,7 +194,7 @@ class CounterExtractor(ExtractorBase):
         elif self.isNuisance():
             # protection against zero
             if myCount.value() == 0:
-                print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' counter ('"+self._counterItem+"') value is zero!"
+                print WarningStyle+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' counter ('"+self._counterItem+"') value is zero!"
                 myResult = 0.0
             else:
                 myResult = myCount.uncertainty() / myCount.value()
@@ -219,7 +219,7 @@ class MaxCounterExtractor(ExtractorBase):
         self._counterItem = counterItem
         self._counterDirs = counterDirs
         if len(self._counterDirs) < 2:
-            print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"':\033[0;0m need to specify at least two directories for counters!"
+            print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"':"+NormalStyle()+" need to specify at least two directories for counters!"
             sys.exit()
 
     ## Method for extracking information
@@ -238,13 +238,13 @@ class MaxCounterExtractor(ExtractorBase):
                     myResult.append(count)
                     myFoundStatus = True
             if not myFoundStatus:
-                print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':\033[0;0m Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!"
+                print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!"
                 sys.exit()
         # Loop over results
         myMaxValue = 0.0
         # Protect for div by zero
         if myResult[0].value() == 0:
-            print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' nominal counter ('"+self._counterItem+"')value is zero!"
+            print WarningStyle+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' nominal counter ('"+self._counterItem+"')value is zero!"
         else:
             for i in range(1,len(myResult)):
                 myValue = abs(myResult[i].value() / myResult[0].value() - 1.0)
@@ -272,7 +272,7 @@ class PileupUncertaintyExtractor(ExtractorBase):
         self._counterItem = counterItem
         self._counterDirs = counterDirs
         if len(self._counterDirs) < 2:
-            print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"':\033[0;0m need to specify at least two directories for counters!"
+            print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"':"+NormalStyle()+" need to specify at least two directories for counters!"
             sys.exit()
 
     ## Method for extracking information
@@ -296,7 +296,7 @@ class PileupUncertaintyExtractor(ExtractorBase):
                     myResult.append(count)
                     myFoundStatus = True
             if not myFoundStatus:
-                print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':\033[0;0m Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!"
+                print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!"
                 sys.exit()
         # Revert back to nominal normalisation
         # mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.NOMINAL) #FIXME
@@ -304,7 +304,7 @@ class PileupUncertaintyExtractor(ExtractorBase):
         myMaxValue = 0.0
         # Protect for div by zero
         if myResult[0].value() == 0:
-            print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' nominal counter ('"+self._counterItem+"')value is zero!"
+            print WarningStyle+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' nominal counter ('"+self._counterItem+"')value is zero!"
         else:
             for i in range(1,len(myResult)):
                 myValue = abs(myResult[i].value() / myResult[0].value() - 1.0)
@@ -340,7 +340,7 @@ class RatioExtractor(ExtractorBase):
         myDenominatorCount = mainCounterTable.getCount(rowName=self._denominatorCounterItem, colName=datasetColumn.getDatasetMgrColumn())
         # Protection against div by zero
         if myDenominatorCount.value() == 0.0:
-            print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' denominator counter ('"+self._counterItem+"') value is zero!"
+            print WarningStyle+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' denominator counter ('"+self._counterItem+"') value is zero!"
             myResult = 0.0
         else:
             myResult = (myDenominatorCount.value() / myNumeratorCount.value() - 1.0) * self._scale
@@ -372,7 +372,7 @@ class ScaleFactorExtractor(ExtractorBase):
         self._normalisation = normalisation
         self._addSystInQuadrature = addSystInQuadrature
         if len(self._histoDirs) != len(self._normalisation) or len(self._histoDirs) != len(self._histograms):
-            print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':\033[0;0m need to specify equal amount of histoDirs, histograms and normalisation histograms!"
+            print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" need to specify equal amount of histoDirs, histograms and normalisation histograms!"
             sys.exit()
 
     ## Method for extracking information
@@ -385,13 +385,13 @@ class ScaleFactorExtractor(ExtractorBase):
             myValueRootHisto.normalizeToLuminosity(luminosity)
             hValues = myValueRootHisto.getHistogram()
             if hValues == None:
-                print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':\033[0;0m Cannot open histogram '"+self._histoDirs[i]+"/"+self._histograms[i]+"'!"
+                print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot open histogram '"+self._histoDirs[i]+"/"+self._histograms[i]+"'!"
                 sys.exit()
             myNormalisationRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoDirs[i]+"/"+self._normalisation[i])
             myNormalisationRootHisto.normalizeToLuminosity(luminosity)
             hNormalisation = myNormalisationRootHisto.getHistogram()
             if hNormalisation == None:
-                print "\033[0;41m\033[1;37mError in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':\033[0;0m Cannot open histogram '"+self._histoDirs[i]+"/"+self._normalisation[i]+"'!"
+                print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot open histogram '"+self._histoDirs[i]+"/"+self._normalisation[i]+"'!"
                 sys.exit()
             for j in range (1, hValues.GetNbinsX()+1):
                 mySum += pow(hValues.GetBinContent(j) * hValues.GetBinCenter(j),2)
@@ -400,7 +400,7 @@ class ScaleFactorExtractor(ExtractorBase):
             hNormalisation.IsA().Destructor(hNormalisation)
             # Calculate result, protection against div by zero
             if myTotal == 0.0:
-                print "\033[0;43m\033[1;37mWarning:\033[0;0m In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' total count from normalisation histograms is zero!"
+                print WarningStyle+"Warning:"+NormalStyle()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' total count from normalisation histograms is zero!"
                 myResult.append(0.0)
             else:
                 myResult.append(sqrt(mySum) / myTotal)

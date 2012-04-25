@@ -7,6 +7,7 @@ import sys
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 
 ## ExtractorResult
 # Helper class to cache the result for each extractor in each datacard column
@@ -126,7 +127,7 @@ class DatacardColumn():
                 myMsg += "Missing or empty field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
 
         if myMsg != "":
-            print "\033[0;41m\033[1;37mError (data group ='"+self._label+"'):\033[0;0m\n"+myMsg
+            print ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+"\n"+myMsg
             sys.exit()
 
     ## Returns true if column is enabled for given mass point
@@ -213,16 +214,16 @@ class DatacardColumn():
                                                                  myResult,
                                                                  myHistograms))
             if not myFoundStatus:
-                print "\n\033[0;41m\033[1;37mError (data group ='"+self._label+"'):\033[0;0m Cannot find nuisance with id '"+nid+"'!"
+                print "\n"+ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Cannot find nuisance with id '"+nid+"'!"
                 sys.exit()
         #print "\nData mining done"
 
     ## Returns rate for column (as string)
     def getRateResult(self):
         if self._rateResult == None:
-            raise Exception("\033[0;41m\033[1;37mError (data group ='"+self._label+"'):\033[0;0m Rate value has not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
         if self._rateResult.getResult() == None:
-            raise Exception("\033[0;41m\033[1;37mError (data group ='"+self._label+"'):\033[0;0m Rate value has not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
         return self._rateResult.getResult()
 
     ## Returns true if column has a nuisance Id
@@ -235,9 +236,9 @@ class DatacardColumn():
     ## Returns nuisance for column (as string)
     def getNuisanceResultByMasterId(self, id):
         if self._nuisanceResults == None:
-            raise Exception("\033[0;41m\033[1;37mError (data group ='"+self._label+"'):\033[0;0m Nuisance values have not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Nuisance values have not been cached! (did you forget to call doDataMining()?)")
         if len(self._nuisanceResults) == 0:
-            raise Exception("\033[0;41m\033[1;37mError (data group ='"+self._label+"'):\033[0;0m Nuisance values have not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Nuisance values have not been cached! (did you forget to call doDataMining()?)")
         for result in self._nuisanceResults:
             if id == result.getMasterId():
                 return result.getResult()
@@ -247,13 +248,13 @@ class DatacardColumn():
     ## Stores the cached result histograms to root file
     def setResultHistogramsToRootFile(self, rootfile):
         if self._rateResult == None:
-            raise Exception("\033[0;41m\033[1;37mError (data group ='"+self._label+"'):\033[0;0m Rate value has not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
         if self._rateResult.getResult() == None:
-            raise Exception("\033[0;41m\033[1;37mError (data group ='"+self._label+"'):\033[0;0m Rate value has not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
         if self._nuisanceResults == None:
-            raise Exception("\033[0;41m\033[1;37mError (data group ='"+self._label+"'):\033[0;0m Nuisance values have not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Nuisance values have not been cached! (did you forget to call doDataMining()?)")
         if len(self._nuisanceResults) == 0:
-            raise Exception("\033[0;41m\033[1;37mError (data group ='"+self._label+"'):\033[0;0m Nuisance values have not been cached! (did you forget to call doDataMining()?)")
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Nuisance values have not been cached! (did you forget to call doDataMining()?)")
         # Set rate histogram
         self._rateResult.setResultHistogramsToRootFile(rootfile)
         # Set nuisance histograms

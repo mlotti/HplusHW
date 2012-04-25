@@ -5,7 +5,7 @@
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorBase
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ProgressBar import ProgressBar
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 
 from math import pow,sqrt
 import os
@@ -42,13 +42,13 @@ class TableProducer:
         os.mkdir(myDirname)
         # Obtain observation line
         for m in self._config.MassPoints:
-            print "\n\033[0;44m\033[1;37mGenerating datacard for mass point %d\033[0;0m"%m
+            print "\n"+CaptionStyle()+"Generating datacard for mass point %d"%m +NormalStyle()
             # Open output root file
             myFilename = myDirname+"/"+self._outputFileStem+"%d.txt"%m
             myRootFilename = myDirname+"/"+self._outputRootFileStem+"%d.root"%m
             self._outfile = ROOT.TFile.Open(myRootFilename, "RECREATE")
             if self._outfile == None:
-                print "\033[0;41m\033[1;37mError:\033[0;0m Cannot open file '"+myRootFilename+"' for output!"
+                print ErrorStyle()+"Error:"+NormalStyle()+" Cannot open file '"+myRootFilename+"' for output!"
                 sys.exit()
             # Invoke extractors
             print "... obtaining observation"

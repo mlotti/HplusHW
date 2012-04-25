@@ -11,7 +11,7 @@ import ROOT
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DataCardGenerator as DataCard
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
-
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 
 def main(opts):
     #gc.set_debug(gc.DEBUG_LEAK | gc.DEBUG_STATS)
@@ -53,10 +53,10 @@ if __name__ == "__main__":
 
     myStatus = True
     if opts.datacard == None:
-        print "Error: Missing datacard!\n"
+        print ErrorStyle()+"Error: Missing datacard!"+NormalStyle()+"\n"
         myStatus = False
     if opts.useQCDfactorised and opts.useQCDinverted:
-        print "Error: use either '--QCDfactorised' or '--QCDinverted' (only one can exist in the datacard)"
+        print ErrorStyle()+"Error: use either '--QCDfactorised' or '--QCDinverted' (only one can exist in the datacard)"+NormalStyle()
         myStatus = False
     if not myStatus:
         parser.print_help()
