@@ -23,6 +23,9 @@ ShapeHistogramsDimensions = [20, 0.0, 400.0]  # bins, min, max
 # Options
 OptionReplaceEmbeddingByMC = False
 
+# Options for reports and article
+OptionBr = 0.05  # Br(t->bH+)
+
 
 #FIXME move
 #import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder

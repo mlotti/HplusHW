@@ -13,7 +13,63 @@ import sys
 import time
 import ROOT
 
-## ExtractorBase class
+## EventYieldSummary class
+class EventYieldSummary:
+    ## Constructor
+    def __init__(self):
+        self._rate = 0.0
+        self._absoluteStat = 0.0
+        self._absoluteSystUp = 0.0
+        self._absoluteSystDown = 0.0
+
+    def extract(self, opts, config, datasetColumn, extractors):
+        self._rate = datasetColumn.getRateResult()
+        myAbsoluteSystUpSquared = 0.0
+        myAbsoluteSystDownSquared = 0.0
+        for n in sorted(extractors, key=lambda x: x.getId()):
+            if n.isPrintable():
+                if datasetColumn.hasNuisanceByMasterId(n.getId()):
+                    myValue = datasetColumn.getNuisanceResultByMasterId(n.getId())
+                    if "stat" in n.getDescription() and n.isNuisance():
+                        self._absoluteStat = myValue * self._rate
+                    else:
+                        if n.isAsymmetricNuisance():
+                            myAbsoluteSystDownSquared += pow(myValue[0] * self._rate,2)
+                            myAbsoluteSystUpSquared += pow(myValue[1] * self._rate,2)
+                        elif n.isNuisance():
+                            myAbsoluteSystDownSquared += pow(myValue * self._rate,2)
+                            myAbsoluteSystUpSquared += pow(myValue * self._rate,2)
+                        elif n.isShapeNuisance() and n.getDistribution() == "shapeQ":
+                            # Determine maximum of values
+                            myMax = 0.0
+                            for v in myValue:
+                                if v > myMax:
+                                    myMax = v
+                            myAbsoluteSystDownSquared += pow(myMax * self._rate,2)
+                            myAbsoluteSystUpSquared += pow(myMax * self._rate,2)
+        self._absoluteSystDown = sqrt(myAbsoluteSystDownSquared)
+        self._absoluteSystUp = sqrt(myAbsoluteSystUpSquared)
+
+    ## Combines with another event yield summary
+    def add(self,summary):
+        self._rate += summary.getRate()
+        self._absoluteStat = sqrt(pow(self._absoluteStat,2)+pow(summary.getAbsoluteStat(),2))
+        self._absoluteSystDown = sqrt(pow(self._absoluteSystDown,2)+pow(summary.getAbsoluteSystDown(),2))
+        self._absoluteSystUp = sqrt(pow(self._absoluteSystUp,2)+pow(summary.getAbsoluteSystUp(),2))
+
+    def getRate(self):
+        return self._rate
+
+    def getAbsoluteStat(self):
+        return self._absoluteStat
+
+    def getAbsoluteSystDown(self):
+        return self._absoluteSystDown
+
+    def getAbsoluteSystUp(self):
+        return self._absoluteSystUp
+
+## TableProducer class
 class TableProducer:
     ## Constructor
     def __init__(self, opts, config, outputPrefix, luminosity, observation, datasetGroups, extractors):
@@ -43,33 +99,10 @@ class TableProducer:
         print "\n"+HighlightStyle()+"Generating reports"+NormalStyle()
         # Print table of shape variation for shapeQ nuisances
         self.makeShapeVariationTable()
-
-    ## Generates table of shape variation for shapeQ nuisances
-    def makeShapeVariationTable(self):
-        myOutput = ""
-        for m in self._config.MassPoints:
-            # Invoke extractors
-            myRateHeaderTable = self._generateRateHeaderTable(m)
-            myNuisanceTable = self._generateShapeNuisanceVariationTable(m)
-            # Calculate dimensions of tables
-            myWidths = []
-            myWidths = self._calculateCellWidths(myWidths, myRateHeaderTable)
-            myWidths = self._calculateCellWidths(myWidths, myNuisanceTable)
-            mySeparatorLine = self._getSeparatorLine(myWidths)
-            # Construct output
-            myOutput += "*** Shape nuisance variation summary ***\n"
-            myOutput += self._generateHeader(m)
-            myOutput += mySeparatorLine
-            myOutput += self._getTableOutput(myWidths,myRateHeaderTable)
-            myOutput += mySeparatorLine
-            myOutput += self._getTableOutput(myWidths,myNuisanceTable)
-            myOutput += "\n"
-        # Save output to file
-        myFilename = self._dirname+"/shapeVariationResults.txt"
-        myFile = open(myFilename, "w")
-        myFile.write(myOutput)
-        myFile.close()
-        print "Shape variation tables written to:",myFilename
+        # Print event yield summary table
+        self.makeEventYieldSummary()
+        # Print systematics summary table
+        self.makeSystematicsSummary()
 
     ## Generates datacards
     def makeDataCards(self):
@@ -126,7 +159,7 @@ class TableProducer:
 
     ## Generates header of datacard
     def _generateHeader(self, mass):
-        myString = "Description: LandS datacard (auto generated) mass=%d, luminosity=%f 1/fb, %s\n"%(mass,self._luminosity,self._config.DataCardName)
+        myString = "Description: LandS datacard (auto generated) mass=%d, luminosity=%f 1/fb, %s/%s\n"%(mass,self._luminosity,self._config.DataCardName,self._outputPrefix)
         myString += "Date: %s\n"%time.ctime()
         return myString
 
@@ -304,3 +337,137 @@ class TableProducer:
                 myResult += row[i].ljust(widths[i])
             myResult += "\n"
         return myResult
+
+    ## Generates table of shape variation for shapeQ nuisances
+    def makeShapeVariationTable(self):
+        myOutput = ""
+        for m in self._config.MassPoints:
+            # Invoke extractors
+            myRateHeaderTable = self._generateRateHeaderTable(m)
+            myNuisanceTable = self._generateShapeNuisanceVariationTable(m)
+            # Calculate dimensions of tables
+            myWidths = []
+            myWidths = self._calculateCellWidths(myWidths, myRateHeaderTable)
+            myWidths = self._calculateCellWidths(myWidths, myNuisanceTable)
+            mySeparatorLine = self._getSeparatorLine(myWidths)
+            # Construct output
+            myOutput += "*** Shape nuisance variation summary ***\n"
+            myOutput += self._generateHeader(m)
+            myOutput += mySeparatorLine
+            myOutput += self._getTableOutput(myWidths,myRateHeaderTable)
+            myOutput += mySeparatorLine
+            myOutput += self._getTableOutput(myWidths,myNuisanceTable)
+            myOutput += "\n"
+        # Save output to file
+        myFilename = self._dirname+"/shapeVariationResults.txt"
+        myFile = open(myFilename, "w")
+        myFile.write(myOutput)
+        myFile.close()
+        print "Shape variation tables written to:",myFilename
+
+    ## Prints event yield summary table
+    def makeEventYieldSummary(self):
+        Data = EventYieldSummary()
+        Data.extract(self._opts,self._config,self._observation,self._extractors)
+        for m in self._config.MassPoints:
+            myOutput = ""
+            myOutputLatex = ""
+            HH = EventYieldSummary()
+            HW = EventYieldSummary()
+            QCD = EventYieldSummary()
+            Embedding = EventYieldSummary()
+            EWKFakes = EventYieldSummary()
+            # Loop over columns
+            for c in self._datasetGroups:
+                if c.isActiveForMass(m):
+                    mySummary = EventYieldSummary()
+                    mySummary.extract(self._opts,self._config,c,self._extractors)
+                    # Find out what type the column is
+                    if c.getLandsProcess() == -1:
+                        HH.add(mySummary)
+                    elif c.getLandsProcess() == 0:
+                        HW.add(mySummary)
+                    elif c.typeIsQCD():
+                        QCD.add(mySummary)
+                    elif c.typeIsEWK():
+                        Embedding.add(mySummary)
+                    else:
+                        EWKFakes.add(mySummary)
+            # Calculate signal yield
+            myBr = 0.05
+            if self._config.OptionBr == None:
+                print WarningStyle()+"Warning: Br(t->bH+) has not been specified in config file, using default 0.05! To specify, add OptionBr=0.05 to the config file."+NormalStyle()
+                myBr = self._config.OptionBr
+            mySignalRate = HH.getRate() * pow(myBr,2) + HW.getRate() * 2.0 * myBr * (1.0 - myBr)
+            mySignalStat = sqrt(pow(HH.getAbsoluteStat() * pow(myBr,2),2) + pow(HW.getAbsoluteStat() * 2.0 * myBr * (1.0 - myBr),2))
+            mySignalSystDown = sqrt(pow(HH.getAbsoluteSystDown() * pow(myBr,2),2) + pow(HW.getAbsoluteSystDown() * 2.0 * myBr * (1.0 - myBr),2))
+            mySignalSystUp = sqrt(pow(HH.getAbsoluteSystUp() * pow(myBr,2),2) + pow(HW.getAbsoluteSystUp() * 2.0 * myBr * (1.0 - myBr),2))
+            # Calculate expected yield
+            TotalExpected = EventYieldSummary()
+            TotalExpected.add(QCD)
+            TotalExpected.add(Embedding)
+            TotalExpected.add(EWKFakes)
+            # Construct table
+            myOutput = "*** Event yield summary ***\n"
+            myOutput += self._generateHeader(m)
+            myOutput += "\n"
+            myOutput += "Number of events\n"
+            myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f:  %5.0f +- %4.0f (stat.) "%(m,myBr,mySignalRate,mySignalStat)
+            if round(mySignalSystDown) == round(mySignalSystUp):
+                myOutput += "+- %4.0f (syst.)\n"%mySignalSystDown
+            else:
+                myOutput += "+%4.0f -%4.0f (syst.)\n"%(mySignalSystUp, mySignalSystDown)
+            myOutput += "Backgrounds:\n"
+            myOutput += "                           Multijets: %5.0f +- %4.0f (stat.) +- %4.0f (syst.)\n"%(QCD.getRate(),QCD.getAbsoluteStat(),QCD.getAbsoluteSystDown())
+            myOutput += "                    EWK+tt with taus: %5.0f +- %4.0f (stat.) +- %4.0f (syst.)\n"%(Embedding.getRate(),Embedding.getAbsoluteStat(),Embedding.getAbsoluteSystDown())
+            myOutput += "               EWK+tt with fake taus: %5.0f +- %4.0f (stat.) "%(EWKFakes.getRate(),EWKFakes.getAbsoluteStat())
+            if round(EWKFakes.getAbsoluteSystDown()) == round(EWKFakes.getAbsoluteSystUp()):
+                myOutput += "+- %4.0f (syst.)\n"%EWKFakes.getAbsoluteSystDown()
+            else:
+                myOutput += "+%4.0f -%4.0f (syst.)\n"%(EWKFakes.getAbsoluteSystUp(), EWKFakes.getAbsoluteSystDown())
+            myOutput += "                      Total expected: %5.0f +- %4.0f (stat.) "%(TotalExpected.getRate(),TotalExpected.getAbsoluteStat())
+            if round(TotalExpected.getAbsoluteSystDown()) == round(TotalExpected.getAbsoluteSystUp()):
+                myOutput += "+- %4.0f (syst.)\n"%(TotalExpected.getAbsoluteSystUp())
+            else:
+                myOutput += "+%4.0f -%4.0f (syst.)\n"%(TotalExpected.getAbsoluteSystUp(), TotalExpected.getAbsoluteSystDown())
+            myOutput += "                            Observed: %5d\n\n"%Data.getRate() #FIXME add blinding
+            # Save output to file
+            myFilename = self._dirname+"/EventYieldSummary_m%d.txt"%m
+            myFile = open(myFilename, "w")
+            myFile.write(myOutput)
+            myFile.close()
+
+            # FIXME add timestamp to latex table
+            myOutputLatex += "\renewcommand{\arraystretch}{1.2}\n"
+            myOutputLatex += "\begin{table}\n"
+            myOutputLatex += "  \centering\n"
+            myOutputLatex += "  \caption{Summary of the number of events from the signal with mass point $\mHpm=%d\GeVcc$ with $\BRtH=%.2f$,\n"%(m,myBr)
+            myOutputLatex += "           from the background measurements, and the observed event yield. Luminosity uncertainty is not included in the numbers.}\n"
+            myOutputLatex += "  \label{tab:summary:yields}\n"
+            myOutputLatex += "  \vskip 0.1 in\n"
+            myOutputLatex += "  \hspace*{-.8cm}\n"
+            myOutputLatex += "  \begin{tabular}{ l c }\n"
+            myOutputLatex += "  \hline\n"
+            myOutputLatex += "  \multicolumn{1}{ c }{Source}  & {$N_{\text{events}} \pm \text{stat.} \pm \text{syst.}$}  \\ \n"
+            myOutputLatex += "  \hline\n"
+            if round(mySignalSystDown) == round(mySignalSystUp):
+                myOutputLatex += "  HH+HW, $\mHplus = %d\GeVcc & $%.0f \pm %.0f \pm %0.f $\n"%(m, mySignalRate, mySignalStat, mySignalSystDown)
+            else:
+                myOutputLatex += "  HH+HW, $\mHplus = %d\GeVcc & $%.0f \pm $%.0f~^{+%.0f}_{%0.f} $\n"%(m, mySignalRate, mySignalStat, mySignalSystUp, mySignalSystDown)
+            myOutputLatex += "  \hline\n"
+            #QCD background (data-driven)      #FIXME finish latex
+            #EWK+\ttbar $\tau$ (data-driven)     
+            #EWK+\ttbar $\tau$ fakes (MC)           
+            myOutputLatex += "  \hline\n"
+            #Total expected from the SM             
+            #Data                          
+            myOutputLatex += "  \hline\n"
+            myOutputLatex += "  \end{tabular}\n"
+            myOutputLatex += "  \end{table}\n"
+            myOutputLatex += "  \renewcommand{\arraystretch}{1}\n"
+
+            print "Event yield summary for mass %d written to: "%m +myFilename
+
+    ## Prints systematics summary table
+    def makeSystematicsSummary(self):
+        print "FIXME makeSystematicsSummary"
