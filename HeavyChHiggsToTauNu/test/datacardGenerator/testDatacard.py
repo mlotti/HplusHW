@@ -1,6 +1,6 @@
 DataCardName    = 'myDummyTestName'
-Path            = '/mnt/flustre/slehti/HplusDataForLands'
-#Path            = '/home/wendland/data/lands/lands_HIG-11-019'
+#Path            = '/mnt/flustre/slehti/HplusDataForLands'
+Path            = '/home/wendland/data/lands/lands_HIG-11-019'
 MassPoints      = [80,90,100,120,140,150,155,160]
 #MassPoints      = [160]
 
