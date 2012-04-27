@@ -229,7 +229,7 @@ class DatacardColumn():
                 sys.exit()
         #print "\nData mining done"
 
-    ## Returns rate for column (as string)
+    ## Returns rate for column
     def getRateResult(self):
         if self._rateResult == None:
             raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")

@@ -16,6 +16,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.QCDfactorised import QCDfactorisedColumn,QCDfactorisedExtractor
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
@@ -251,17 +253,28 @@ class DataCardGenerator:
                         myMergedNameForQCDMCEWK = "dset_"+dg.label.replace(" ","_")+"_MCEWK"
                         myDsetMgrs[myDsetMgr].merge(myMergedNameForQCDMCEWK, myFoundNames)
                 # Construct dataset column object
-                myColumn = DatacardColumn(label=dg.label,
-                                          landsProcess=dg.landsProcess,
-                                          enabledForMassPoints = dg.validMassPoints,
-                                          datasetType = dg.datasetType,
-                                          rateCounter = dg.rateCounter,
-                                          nuisanceIds = dg.nuisances,
-                                          datasetMgrColumn = myMergedName,
-                                          datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK,
-                                          additionalNormalisationFactor = dg.additionalNormalisation,
-                                          dirPrefix = dg.dirPrefix,
-                                          shapeHisto = dg.shapeHisto)
+                myColumn = None
+                if dg.datasetType == "QCD factorised":
+                    myColumn = QCDfactorisedColumn(landsProcess=dg.landsProcess,
+                                                   enabledForMassPoints = dg.validMassPoints,
+                                                   nuisanceIds = dg.nuisances,
+                                                   datasetMgrColumn = myMergedName,
+                                                   datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK,
+                                                   additionalNormalisationFactor = dg.additionalNormalisation,
+                                                   dirPrefix = dg.dirPrefix,
+                                                   QCDfactorisedInfo = dg.QCDfactorisedInfo)
+                else:
+                    myColumn = DatacardColumn(label=dg.label,
+                                              landsProcess=dg.landsProcess,
+                                              enabledForMassPoints = dg.validMassPoints,
+                                              datasetType = dg.datasetType,
+                                              rateCounter = dg.rateCounter,
+                                              nuisanceIds = dg.nuisances,
+                                              datasetMgrColumn = myMergedName,
+                                              datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK,
+                                              additionalNormalisationFactor = dg.additionalNormalisation,
+                                              dirPrefix = dg.dirPrefix,
+                                              shapeHisto = dg.shapeHisto)
                 # Disable non-active QCD measurements
                 if dg.datasetType == "QCD factorised" and self._QCDMethod == DatacardQCDMethod.INVERTED:
                     myColumn.disable()
@@ -398,14 +411,9 @@ class DataCardGenerator:
                                                       mode = myMode))
             elif n.function == "QCDFactorised":
                 if self._QCDMethod == DatacardQCDMethod.FACTORISED:
-                    print "fixme: add QCD factorised"
-                    # FIXME temp code
-                    self._extractors.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
-                    #self._extractors.append(ShapeExtractor( exid = n.id,
-                    #distribution = n.distr,
-                    #description = n.label,
-                    #mode = Data))
+                    self._extractors.append(QCDfactorisedExtractor(QCDmode = n.QCDmode, exid = n.id, distribution = n.distr, description = n.label, mode = myMode))
                 else:
+                    # Protection; generate nuisance line even, but leave it empty
                     self._extractors.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
             elif n.function == "QCDInverted":
                 if self._QCDMethod == DatacardQCDMethod.INVERTED:
@@ -413,6 +421,7 @@ class DataCardGenerator:
                     # FIXME temp code
                     self._extractors.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
                 else:
+                    # Protection; generate nuisance line even, but leave it empty
                     self._extractors.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
             else:
                 print ErrorStyle()+"Error in nuisance with id='"+n.id+"':"+NormalStyle()+" unknown or missing field function '"+n.function+"' (string)!"

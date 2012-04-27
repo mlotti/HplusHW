@@ -44,7 +44,7 @@ class ObservationInput:
 class DataGroup:
     def __init__(self, 
                  landsProcess = -999,
-                 validMassPoints = [], 
+                 validMassPoints = [],
                  label = "", 
                  nuisances = [], 
                  shapeHisto = "", 
@@ -53,6 +53,7 @@ class DataGroup:
                  datasetType = "",
                  datasetDefinitions = [],
                  MCEWKDatasetDefinitions = [],
+                 QCDfactorisedInfo = None,
                  additionalNormalisation = 1.0):
 	self.landsProcess  = landsProcess
 	self.validMassPoints = validMassPoints
@@ -64,6 +65,7 @@ class DataGroup:
         self.datasetType   = datasetType
         self.datasetDefinitions = datasetDefinitions
         self.MCEWKDatasetDefinitions = MCEWKDatasetDefinitions
+        self.QCDfactorisedInfo = QCDfactorisedInfo
         self.additionalNormalisation = additionalNormalisation
 
     def getId(self):
@@ -80,6 +82,7 @@ class DataGroup:
                          datasetType  = self.datasetType,
                          datasetDefinitions = self.datasetDefinitions,
                          MCEWKDatasetDefinitions = self.MCEWKDatasetDefinitions,
+                         QCDfactorisedInfo = self.QCDfactorisedInfo,
                          additionalNormalisation= self.additionalNormalisation)
 
     def setLandSProcess(self,landsProcess):
@@ -111,6 +114,9 @@ class DataGroup:
 
     def setMCEWKDatasetDefinitions(self,MCEWKDatasetDefinitions):
         self.MCEWKDatasetDefinitions = MCEWKDatasetDefinitions
+
+    def setQCDfactorisedInfo(self,QCDfactorisedInfo):
+        self.QCDfactorisedInfo = QCDfactorisedInfo
 
     def setAdditionalNormalisation(self,value):
 	self.additionaNormalisation = value

@@ -80,7 +80,12 @@ DataGroups.append(DataGroup(
     datasetType  = "QCD factorised",
     datasetDefinitions = ["Tau_"],
     MCEWKDatasetDefinitions = ["TTJets","WJets","DY","WW","WZ","ZZ","T_","Tbar_"],
-    nuisances    = ["12","13","40b"]
+    nuisances    = ["12","13","40b"],
+    QCDfactorisedInfo = { "afterBigboxSource": "QCDStandardSelections/AfterJetSelection",
+                          "afterMETLegSource": "QCDMeasurementVariation_METcut50_DeltaPhiTauMETCut160_tauIsol1/Leg1AfterDeltaPhiTauMET",
+                          "afterTauLegSource": "QCDMeasurementVariation_METcut50_DeltaPhiTauMETCut160_tauIsol1/Leg2AfterTauIDWithRtau",
+                          "basicMtHisto": "QCDMeasurementVariation_METcut50_DeltaPhiTauMETCut160_tauIsol1/MtShapeAfterMETAndDeltaPhi",
+                          "assumedMCEWKSystUncertainty": 0.20 }
 ))
 
 DataGroups.append(DataGroup(
@@ -364,8 +369,6 @@ Nuisances.append(Nuisance(
     distr         = "lnN",
     function      = "QCDFactorised",
     QCDmode       = "statistics",
-    histoDir      = ["QCDMeasurement/"],
-    histograms    = ["KESKEN"]
 ))
 
 Nuisances.append(Nuisance(
