@@ -104,7 +104,7 @@ public:
           // Loop over tracks in vertex
           for (std::vector<reco::TrackBaseRef>::const_iterator iVtxTrk = hvertices->at(iVtx).tracks_begin(); iVtxTrk != hvertices->at(iVtx).tracks_end(); ++iVtxTrk) {
             if (*iVtxTrk == reco::TrackBaseRef(pfcand.trackRef())) {
-              std::cout << "trkref matched" << std::endl;
+              //std::cout << "trkref matched" << std::endl;
               myTrackPtInVertex.at(iVtx) += pfcand.pt();
               myTrackBelongsToAnyVertex = true;
             }
@@ -161,9 +161,8 @@ public:
         betaStar = sumpt_PU / sumpt_all;
         betaUnassociated = sumpt_nov / sumpt_all;
       }
-      std::cout << "Jet " << iJet << " sumpt_all " << sumpt_all << " sumpt_pv " << myTrackPtInVertex[0] << " sumpt_nov " << sumpt_nov << std::endl;
-      std::cout << "  beta " << beta << " betaMax " << betaMax << " betaStar " << betaStar << " vtxIdByBetaMax " << vertexIdByBetaMax << " ldgTrkBelongsToSelectedVertex " 
-<< ldgTrkBelongsToSelectedVertex << " DRmean " << myDRmean << std::endl;
+      //std::cout << "Jet " << iJet << " sumpt_all " << sumpt_all << " sumpt_pv " << myTrackPtInVertex[0] << " sumpt_nov " << sumpt_nov << std::endl;
+      //std::cout << "  beta " << beta << " betaMax " << betaMax << " betaStar " << betaStar << " vtxIdByBetaMax " << vertexIdByBetaMax << " ldgTrkBelongsToSelectedVertex " << ldgTrkBelongsToSelectedVertex << " DRmean " << myDRmean << std::endl;
       // Make a copy from the original, because otherwise we'll have
       // the pat::Jet::pfCandidatesTemp_ serialized (maybe it should
       // be a transient member in the first place?)
