@@ -17,6 +17,7 @@ namespace edm {
 }
 
 class TH1;
+class TH2;
 
 namespace HPlus {
   class JetSelection {
@@ -53,7 +54,7 @@ namespace HPlus {
 
     // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate
     //    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus);
-    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau, int nVertices = 1);
 
     //    Data  analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau);
     //    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau);
@@ -122,6 +123,20 @@ namespace HPlus {
     TH1 *hSecondJetPhi;
     TH1 *hThirdJetPhi;
     TH1 *hFourthJetPhi;
+
+    // PU analysis
+    TH1 *hBetaGenuine;
+    TH1 *hBetaStarGenuine;
+    TH1 *hMeanDRgenuine;
+    TH1 *hBetaFake;
+    TH1 *hBetaStarFake;
+    TH1 *hMeanDRfake;
+    TH2 *hBetaVsPUgenuine;
+    TH2 *hBetaStarVsPUgenuine;
+    TH2 *hMeanDRVsPUgenuine;
+    TH2 *hBetaVsPUfake;
+    TH2 *hBetaStarVsPUfake;
+    TH2 *hMeanDRVsPUfake;
 
     // Histograms for jet composition
     TH1 *hPtExcludedJets;

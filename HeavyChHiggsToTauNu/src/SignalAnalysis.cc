@@ -406,7 +406,7 @@ namespace HPlus {
     }
   
 //------ Hadronic jet selection
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau()); 
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
     hCtrlNjets->Fill(jetData.getHadronicJetCount(), fEventWeight.getWeight());
     if(!jetData.passedEvent()) return false;
     increment(fNJetsCounter);
