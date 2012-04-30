@@ -161,12 +161,17 @@ param.changeCollectionsToPF2PAT(postfix=PF2PATVersion)
 if applyTriggerScaleFactor and dataVersion.isMC():
     param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
 
+
+
 # Set the data scenario for vertex/pileup weighting
+# options: Run2011A, Run2011B, Run2011A+B
 puweight = "Run2011A"
 if len(options.puWeightEra) > 0:
     puweight = options.puWeightEra
-param.setPileupWeightFor2011(dataVersion, era=puweight) # Reweight by true PU distribution 
+param.setPileupWeight(dataVersion, pset=param.vertexWeight, era=puweight) # Reweight by true PU distribution 
 param.setDataTriggerEfficiency(dataVersion, era=puweight)
+print "PU weight era =",puweight
+
 
 #param.trigger.selectionType = "disabled"
 
