@@ -175,7 +175,7 @@ bTagging = cms.untracked.PSet(
 #   OP: JPL = 0.275, LPM = 0.545, JPT = 0.790, CSVL = 0.244, CSVM = 0.679, CSVT = 0.898
 #    discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
     discriminator = cms.untracked.string("combinedSecondaryVertexBJetTags"),
-    discriminatorCut = cms.untracked.double(0.244),
+    discriminatorCut = cms.untracked.double(0.679),
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(1),
