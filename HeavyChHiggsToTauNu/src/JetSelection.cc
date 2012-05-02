@@ -268,7 +268,7 @@ namespace HPlus {
       //double myBetaMax = iJet->userFloat("BetaMax");
       double myBetaStar = iJet->userFloat("BetaStar");
       double myMeanDR = iJet->userFloat("DRMean");
-      bool myIsPVJetStatus = (iJet->userFloat("LdgTrackBelongsToSelectedPV") == 1);
+      bool myIsPVJetStatus = (iJet->userInt("LdgTrackBelongsToSelectedPV") == 1);
       // Fill histograms after eta and pt cuts
       if (std::abs(iJet->eta()) < fEtaCut && iJet->pt() > fPtCut) {
         if (myIsPVJetStatus) {
@@ -288,7 +288,7 @@ namespace HPlus {
         }
       }
       //if(std::isnan(iJet->userFloat("BetaPV"))) continue;
-      if(iJet->userFloat("BetaPV") < fBetaCut) continue;
+      if(iJet->userFloat("Beta") < fBetaCut) continue;
       increment(fBetaCutSubCount);
 
       hPt->Fill(iJet->pt(), fEventWeight.getWeight());
