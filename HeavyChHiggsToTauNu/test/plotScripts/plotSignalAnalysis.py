@@ -73,6 +73,7 @@ def main():
 
     # Remove signals other than M120
     #datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
+#    datasets.remove(filter(lambda name: "TTJets" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     

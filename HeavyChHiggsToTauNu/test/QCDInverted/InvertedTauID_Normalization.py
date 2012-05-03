@@ -33,8 +33,8 @@ def usage():
 
 def main(argv):
 
-#    HISTONAME = "TauIdJets"
-    HISTONAME = "TauIdBtag"
+    HISTONAME = "TauIdJets"
+#    HISTONAME = "TauIdBtag"
 
     dirs = []
     if len(sys.argv) < 2:
@@ -75,11 +75,11 @@ def main(argv):
     plots.mergeWHandHH(datasets)
 
     datasets.merge("EWK", [
-#	    "TTJets"
+	    "TTJets"
             "WJets"
-#            "DYJetsToLL",
-#            "SingleTop",
-#            "Diboson"
+            "DYJetsToLL",
+            "SingleTop",
+            "Diboson"
             ])
 
     # Apply TDR style

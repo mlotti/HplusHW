@@ -124,7 +124,7 @@ jetSelectionBase = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"), # JPT jets 
     src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
     cleanTauDR = cms.untracked.double(0.5), # cone for rejecting jets around tau jet
-    ptCut = cms.untracked.double(20.0),
+    ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(3), # minimum number of selected jets
     # Jet ID cuts
@@ -174,8 +174,9 @@ bTagging = cms.untracked.PSet(
     # jetBProbabilityBJetTags,jetProbabilityBJetTags,trackCountingHighPurBJetTags,trackCountingHighEffBJetTags,simpleSecondaryVertexHighEffBJetTags,simpleSecondaryVertexHighPurBJetTags,combinedSecondaryVertexBJetTags,combinedSecondaryVertexMVABJetTags,softMuonBJetTags,softMuonByPtBJetTags,softMuonByIP3dBJetTags
 #   OP: JPL = 0.275, LPM = 0.545, JPT = 0.790, CSVL = 0.244, CSVM = 0.679, CSVT = 0.898
 #    discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
-    discriminator = cms.untracked.string("combinedSecondaryVertexBJetTags"),
-    discriminatorCut = cms.untracked.double(0.244),
+#    discriminator = cms.untracked.string("combinedSecondaryVertexBJetTags"),
+    discriminator = cms.untracked.string("jetProbabilityBJetTags"),   
+    discriminatorCut = cms.untracked.double(0.790),
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(1),
