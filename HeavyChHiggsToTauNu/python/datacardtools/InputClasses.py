@@ -44,7 +44,7 @@ class ObservationInput:
 class DataGroup:
     def __init__(self, 
                  landsProcess = -999,
-                 validMassPoints = [], 
+                 validMassPoints = [],
                  label = "", 
                  nuisances = [], 
                  shapeHisto = "", 
@@ -53,6 +53,7 @@ class DataGroup:
                  datasetType = "",
                  datasetDefinitions = [],
                  MCEWKDatasetDefinitions = [],
+                 QCDfactorisedInfo = None,
                  additionalNormalisation = 1.0):
 	self.landsProcess  = landsProcess
 	self.validMassPoints = validMassPoints
@@ -64,6 +65,7 @@ class DataGroup:
         self.datasetType   = datasetType
         self.datasetDefinitions = datasetDefinitions
         self.MCEWKDatasetDefinitions = MCEWKDatasetDefinitions
+        self.QCDfactorisedInfo = QCDfactorisedInfo
         self.additionalNormalisation = additionalNormalisation
 
     def getId(self):
@@ -80,6 +82,7 @@ class DataGroup:
                          datasetType  = self.datasetType,
                          datasetDefinitions = self.datasetDefinitions,
                          MCEWKDatasetDefinitions = self.MCEWKDatasetDefinitions,
+                         QCDfactorisedInfo = self.QCDfactorisedInfo,
                          additionalNormalisation= self.additionalNormalisation)
 
     def setLandSProcess(self,landsProcess):
@@ -111,6 +114,9 @@ class DataGroup:
 
     def setMCEWKDatasetDefinitions(self,MCEWKDatasetDefinitions):
         self.MCEWKDatasetDefinitions = MCEWKDatasetDefinitions
+
+    def setQCDfactorisedInfo(self,QCDfactorisedInfo):
+        self.QCDfactorisedInfo = QCDfactorisedInfo
 
     def setAdditionalNormalisation(self,value):
 	self.additionaNormalisation = value
@@ -161,7 +167,8 @@ class Nuisance:
 		histoDir = [],
 		histograms = [],
 		normalisation = [],
-		scaling = 1.0):
+		scaling = 1.0,
+		addUncertaintyInQuadrature = 0.0):
 	self.setId(id)
 	self.setLabel(label)
 	self.setDistribution(distr)
@@ -176,6 +183,7 @@ class Nuisance:
 	self.setHistograms(histograms)
         self.setNormalisation(normalisation)
         self.setScaling(scaling)
+        self.setAddUncertaintyInQuadrature(addUncertaintyInQuadrature)
 
     def setId(self,id):
 	self.id = id
@@ -221,6 +229,9 @@ class Nuisance:
 
     def setScaling(self, scaling):
         self.scaling = scaling
+
+    def setAddUncertaintyInQuadrature(self, addUncertaintyInQuadrature):
+        self.addUncertaintyInQuadrature = addUncertaintyInQuadrature
 
     def getId(self):
 	return self.id

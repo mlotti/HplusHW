@@ -10,6 +10,7 @@
 
 #include "Math/GenVector/VectorUtil.h"
 #include "TH1F.h"
+#include "TH2F.h"
 #include <cmath>
 
 #include<algorithm>
@@ -88,6 +89,20 @@ namespace HPlus {
     hFourthJetEta = makeTH<TH1F>(myDir, "fourthJet_eta", "fourthJet_eta;#eta of fourth jet;Events", 250, -5., 5.); 
     hFourthJetPhi = makeTH<TH1F>(myDir, "fourthJet_phi", "fourthJet_phi;#phi of fourth jet;Events", 72, -3.14159, 3.14159); 
 
+    // Histograms for PU analysis
+    hBetaGenuine = makeTH<TH1F>(myDir, "betaGenuine", "betaGenuine;#beta variable, PV jets;Events", 100, 0., 1.);
+    hBetaStarGenuine = makeTH<TH1F>(myDir, "betaStarGenuine", "betaStarGenuine;#beta* variable, PV jets;Events", 100, 0., 1.);
+    hMeanDRgenuine = makeTH<TH1F>(myDir, "meanDRGenuine", "meanDRGenuine;Mean #DeltaR, PV jets;Events", 100, 0., 4.);
+    hBetaFake = makeTH<TH1F>(myDir, "betaPU", "betaPU;#beta variable, PU jets;Events", 100, 0., 1.);
+    hBetaStarFake = makeTH<TH1F>(myDir, "betaStarPU", "betaStarPU;#beta* variable, PU jets;Events", 100, 0., 1.);
+    hMeanDRfake = makeTH<TH1F>(myDir, "meanDRPU", "meanDRPU;Mean #DeltaR, PU jets;Events", 100, 0., 4.);
+    hBetaVsPUgenuine = makeTH<TH2F>(myDir, "betaVsPUGenuine", "betaVSPUGenuine;#beta variable, PV jets;Number of vertices", 100, 0., 1., 50, 0., 50.);
+    hBetaStarVsPUgenuine = makeTH<TH2F>(myDir, "betaVsPUStarGenuine", "betaStarVsPUGenuine;#beta* variable, PV jets;Events", 100, 0., 1., 50, 0., 50.);
+    hMeanDRVsPUgenuine = makeTH<TH2F>(myDir, "meanDRVsPUGenuine", "meanDRVsPUGenuine;Mean #DeltaR, PV jets;Events", 100, 0., 4., 50, 0., 50.);
+    hBetaVsPUfake = makeTH<TH2F>(myDir, "betaVsPUFake", "betaVsPUFake;#beta variable, PU jets;Events", 100, 0., 1., 50, 0., 50.);
+    hBetaStarVsPUfake = makeTH<TH2F>(myDir, "betaStarVsPUFake", "betaStarVsPUFake;#beta* variable, PU jets;Events", 100, 0., 1., 50, 0., 50.);
+    hMeanDRVsPUfake = makeTH<TH2F>(myDir, "meanDRVsPUFake", "meanDRVsPUFake;Mean #DeltaR, PU jets;Events", 100, 0., 4., 50, 0., 50.);
+
     // Histograms for excluded jets (i.e. matching in DeltaR to tau jet)
     TFileDirectory myExcludedJetsDir = myDir.mkdir("ExcludedJets");
     hPtExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_pt", "jet_pt", 40, 0., 400.);
@@ -139,7 +154,7 @@ namespace HPlus {
 
   JetSelection::~JetSelection() {}
 
-  JetSelection::Data JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau) {
+  JetSelection::Data JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr< reco::Candidate >& tau, int nVertices) {
     // Reset variables
     iNHadronicJets = -1;
     iNHadronicJetsInFwdDir = -1;
@@ -148,7 +163,7 @@ namespace HPlus {
     bEMFraction07Veto = false;
 
     bool passEvent = false;
-  
+
     edm::Handle<edm::View<pat::Jet> > hjets;
     iEvent.getByLabel(fSrc, hjets);
 
@@ -165,7 +180,7 @@ namespace HPlus {
     size_t etaCutPassed = 0;
     double maxEMfraction = 0;
     size_t EMfractionCutPassed = 0;
-    
+
     std::vector<edm::Ptr<pat::Jet> > tmpSelectedJets;
     tmpSelectedJets.reserve(jets.size());
 
@@ -248,8 +263,35 @@ namespace HPlus {
       ++EMfractionCutPassed;
       increment(fEMfractionCutSubCount);
 
-      if(std::isnan(iJet->userFloat("BetaPV"))) continue;
-      if(iJet->userFloat("BetaPV") < fBetaCut) continue;
+      // against PU cut (beta or betaStar)
+      double myBeta = iJet->userFloat("Beta");
+      //double myBetaMax = iJet->userFloat("BetaMax");
+      double myBetaStar = iJet->userFloat("BetaStar");
+      double myMeanDR = iJet->userFloat("DRMean");
+      bool myIsPVJetStatus = (iJet->userInt("LdgTrackBelongsToSelectedPV") == 1);
+      //      std::cout << "mybeta " << myBeta << " myBetaStar " <<  myBetaStar  << " myIsPVJetStatus " << myIsPVJetStatus << std::endl;
+ 
+      // Fill histograms after eta and pt cuts
+      
+      if (std::abs(iJet->eta()) < fEtaCut && iJet->pt() > fPtCut) {
+        if (myIsPVJetStatus) {
+          hBetaGenuine->Fill(myBeta, fEventWeight.getWeight());
+          hBetaStarGenuine->Fill(myBetaStar, fEventWeight.getWeight());
+          hMeanDRgenuine->Fill(myMeanDR, fEventWeight.getWeight());
+          hBetaVsPUgenuine->Fill(myBeta, nVertices, fEventWeight.getWeight());
+          hBetaStarVsPUgenuine->Fill(myBetaStar, nVertices, fEventWeight.getWeight());
+          hMeanDRVsPUgenuine->Fill(myMeanDR, nVertices, fEventWeight.getWeight());
+        } else {
+          hBetaFake->Fill(myBeta, fEventWeight.getWeight());
+          hBetaStarFake->Fill(myBetaStar, fEventWeight.getWeight());
+          hMeanDRfake->Fill(myMeanDR, fEventWeight.getWeight());
+          hBetaVsPUfake->Fill(myBeta, nVertices, fEventWeight.getWeight());
+          hBetaStarVsPUfake->Fill(myBetaStar, nVertices, fEventWeight.getWeight());
+          hMeanDRVsPUfake->Fill(myMeanDR, nVertices, fEventWeight.getWeight());
+        }
+      }
+      //if(std::isnan(iJet->userFloat("BetaPV"))) continue;
+      if(iJet->userFloat("Beta") < fBetaCut) continue;
       increment(fBetaCutSubCount);
 
       hPt->Fill(iJet->pt(), fEventWeight.getWeight());

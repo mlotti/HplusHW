@@ -135,7 +135,7 @@ jetSelectionBase = cms.untracked.PSet(
     jetIdMinChargedMultiplicity = cms.untracked.uint32(0),
     jetIdMaxChargedEMEnergyFraction = cms.untracked.double(0.99),
     # Pileup cleaning
-    betaCut = cms.untracked.double(0.0), # disabled
+    betaCut = cms.untracked.double(0.7), # disabled
     # Experimental
     EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )
@@ -172,7 +172,7 @@ MET = cms.untracked.PSet(
 
 bTagging = cms.untracked.PSet(
     # jetBProbabilityBJetTags,jetProbabilityBJetTags,trackCountingHighPurBJetTags,trackCountingHighEffBJetTags,simpleSecondaryVertexHighEffBJetTags,simpleSecondaryVertexHighPurBJetTags,combinedSecondaryVertexBJetTags,combinedSecondaryVertexMVABJetTags,softMuonBJetTags,softMuonByPtBJetTags,softMuonByIP3dBJetTags
-#   OP: JPL = 0.275, LPM = 0.545, JPT = 0.790, CSVL = 0.244, CSVM = 0.679, CSVT = 0.898
+#   OP: JPL = 0.275, JPM = 0.545, JPT = 0.790, CSVL = 0.244, CSVM = 0.679, CSVT = 0.898
 #    discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
 #    discriminator = cms.untracked.string("combinedSecondaryVertexBJetTags"),
     discriminator = cms.untracked.string("jetProbabilityBJetTags"),   
