@@ -253,8 +253,10 @@ def checkCrabInPath():
             raise e
 
 ## Create 'standard' multicrab task directory and return the name of it.
-def createTaskDir(prefix="multicrab"):
+def createTaskDir(prefix="multicrab", postfix=""):
     dirname = prefix+"_" + time.strftime("%y%m%d_%H%M%S")
+    if len(postfix) > 0:
+        dirname += "_" + postfix
     os.mkdir(dirname)
     return dirname
 
