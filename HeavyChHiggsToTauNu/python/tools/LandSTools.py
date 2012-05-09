@@ -3,42 +3,95 @@
 import os
 import re
 import sys
+import glob
 import random
+import shutil
+import subprocess
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
 #LandS_tag           = "t3-04-13"
 LandS_tag	    = "HEAD"
+#LandS_options       = "--PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0.01 --initialRmax 0.05"
 LandS_options       = "--PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09"
+#LandS_options       = "--PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09 --tH 40000"
+#LandS_options       = "--PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.15"
+#LandS_nToysPerJob   = 10
+#LandS_nToysPerJob   = 50
+#number_of_jobs      = 20	# used only for making the expected limits, making the observed limits does not need splitting 
+#LandS_nToysPerJob   = 25
+#number_of_jobs      = 40
+#LandS_nToysPerJob   = 10
+#number_of_jobs      = 100
 LandS_nToysPerJob   = 50
-number_of_jobs      = 10	# used only for making the expected limits, making the observed limits does not need splitting 
+number_of_jobs      = 200
+#LandS_nToysPerJob   = 25
+#number_of_jobs      = 400
+#LandS_nToysPerJob   = 100
+#number_of_jobs      = 400
 LandSDataCardNaming = "lands_datacard_hplushadronic_m"
 LandSRootFileNaming = "lands_histograms_hplushadronic_m"
+scheduler = "arc"
+#scheduler = "glite"
 
+#startSeed = 1000
+startSeed = 2000
 
-datacard_re = re.compile(LandSDataCardNaming+"(?P<mass>(\d+))\.txt$")
-root_re     = re.compile(LandSRootFileNaming+"(?P<mass>(\d+))\.root$")
-script_re   = re.compile("runLandS_(?P<label>(Observed|Expected)_m)(?P<mass>(\d+))")
-luminosity_re = re.compile("luminosity=[\S| ]*(?P<lumi>(\d+\.\d+))")
+postfix = "toys10k_50toys_200jobs"
+#postfix += "_LSFdatacardorder"
+postfix += "_HIPdatacardorder"
+postfix += "_seed%d" % startSeed
+
+massPoints = ["160"]
+
+datacard_hadr_re = re.compile(LandSDataCardNaming+"(?P<mass>\d+)\.txt$")
+datacards_re = [
+    datacard_hadr_re,
+    re.compile("datacard_m(?P<mass>\d+)_etau_miso_20mar12.txt"),
+    re.compile("datacard_m(?P<mass>\d+)_mutau_miso_20mar12.txt"),
+    re.compile("datacard_m(?P<mass>\d+)_emu_nobtag_20mar12.txt"),
+]
+
+# Patterns of input files, %s denotes the place of the mass
+datacard_patterns = [
+    LandSDataCardNaming+"%s.txt",
+    "datacard_m%s_emu_nobtag_20mar12.txt",
+    "datacard_m%s_etau_miso_20mar12.txt",
+    "datacard_m%s_mutau_miso_20mar12.txt",
+    ]
+datacard_patterns = [datacard_patterns[i] for i in [3, 1, 0, 2]] # order in my first crab tests
+
+rootfile_patterns = [
+    LandSRootFileNaming+"%s.root"
+]
+
+script_re   = re.compile("runLandS_(?P<label>(Observed|Expected)_m)(?P<mass>\d+)")
+luminosity_re = re.compile("luminosity=[\S| ]*(?P<lumi>\d+\.\d+)")
 
 class MultiCrabLandS:
     def __init__(self):
 
-        self.exe = execute("which lands.exe 2> /dev/null")
-
-        if len(self.exe) == 0:
+        self.exe = which("lands.exe")
+        if self.exe == None:
 	    self.exe = install_lands()
 
-        localFiles = execute("ls")
-        self.datacards = []
-        self.rootfiles = []
+        self.datacards = {}
+        self.rootfiles = {}
         self.scripts   = []
-        for file in localFiles:
-	    match_root = root_re.search(file)
-	    if match_root:
-	        self.rootfiles.append(file)
-	    match_datacard = datacard_re.search(file)
-	    if match_datacard:
-	        self.datacards.append(file)
+
+        for mass in massPoints:
+            for dc in datacard_patterns:
+                fname = dc % mass
+                if not os.path.isfile(fname):
+                    raise Exception("Datacard file '%s' does not exist!" % fname)
+
+                multicrab._addToDictList(self.datacards, mass, fname)
+
+            for rf in rootfile_patterns:
+                fname = rf % mass
+                if not os.path.isfile(fname):
+                    raise Exception("ROOT file (for shapes) '%s' does not exist!" % fname)
+
+                multicrab._addToDictList(self.rootfiles, mass, fname)
 
         if len(self.datacards) == 0:
 	    print "No LandS datacards found in this directory!"
@@ -47,33 +100,52 @@ class MultiCrabLandS:
 	    sys.exit()
 
     def CreateMultiCrabDir(self):
-	self.dirname = multicrab.createTaskDir(prefix="LandSMultiCrab")
+	self.dirname = multicrab.createTaskDir(prefix="LandSMultiCrab", postfix=postfix)
 
     def CopyLandsInputFiles(self):
-	for file in self.datacards:
-	    os.system("cp " + file + " " + self.dirname)
-        for file in self.rootfiles:
-            os.system("cp " + file + " " + self.dirname)
+        for d in [self.datacards, self.rootfiles]:
+            for mass, files in d.iteritems():
+                for f in files:
+                    shutil.copy(f, self.dirname)
+        shutil.copy(self.exe, self.dirname)        
 
     def writeLandsScripts(self):
-        for datacard in self.datacards:
-	    self.writeObs(datacard)
-	    self.writeExp(datacard)
+        for mass, datacardFiles in self.datacards.iteritems():
+	    self.writeObs(mass, datacardFiles)
+	    self.writeExp(mass, datacardFiles)
 
-    def writeObs(self, datacard):
-        match = datacard_re.search(datacard)
-        mass = match.group("mass")
+    def writeObs(self, mass, datacardFiles):
         outFileName = "runLandS_Observed_m" + mass
-        command = "./lands.exe " + LandS_options + " -d " + datacard + "| tail -5 >& lands.out && cat lands.out" 
-        self.writeCard(outFileName,command)
+        command = [
+            "#!/bin/sh",
+            "",
+            "SEED=$(expr %d + $1)" % startSeed,
+            'echo "LandSSeed=$SEED"',
+            "",
+            "./lands.exe " + LandS_options + " --seed $SEED -d " + " ".join(datacardFiles) + "| tail -5 >& lands.out",
+            ""
+            "cat lands.out"
+            ]
+        self.writeCard(outFileName, "\n".join(command)+"\n")
 
-    def writeExp(self, datacard):
-        match = datacard_re.search(datacard)
-        mass = match.group("mass")
-	seed = self.randomSeed()
+    def writeExp(self, mass, datacardFiles):
+#	seed = self.randomSeed()
         outFileName = "runLandS_Expected_m" + mass
-        command = "./lands.exe " + LandS_options + " -d " + datacard + " --doExpectation 1 -t " + str(LandS_nToysPerJob) + " --seed " + str(seed) + "| tail -5 >& lands.out && cat lands.out && echo 'LandSSeed='" + str(seed)
-        self.writeCard(outFileName,command)
+        command = [
+            "#!/bin/sh",
+            "",
+            "SEED=$(expr %d + $1)" % startSeed,
+            'echo "LandSSeed=$SEED"',
+            "",
+            "./lands.exe %s -n split_m%s --doExpectation 1 -t %d --seed $SEED -d %s | tail -5 > lands.out" % (LandS_options, mass, LandS_nToysPerJob, " ".join(datacardFiles)),
+            "",
+            "cat lands.out",
+            ]
+
+
+        self.writeCard(outFileName, "\n".join(command)+"\n")
+        # command = "./lands.exe " + LandS_options + " --doExpectation 1 -t " + str(LandS_nToysPerJob) + " --seed " + str(seed) + " -d " + " ".join(datacardFiles) + "| tail -5 >& lands.out && cat lands.out && echo 'LandSSeed='" + str(seed)
+        # self.writeCard(outFileName, command)
 
     def writeCard(self, filename,command):
         fOUT = open(self.dirname+"/"+filename,'w')
@@ -87,7 +159,7 @@ class MultiCrabLandS:
 	fOUT = open(filename,'w')
 	fOUT.write("[CRAB]\n")
         fOUT.write("jobtype                 = cmssw\n")
-        fOUT.write("scheduler               = glite\n")
+        fOUT.write("scheduler               = %s\n" % scheduler)
         fOUT.write("use_server              = 0\n")
         fOUT.write("\n")
         fOUT.write("[CMSSW]\n")
@@ -109,6 +181,7 @@ class MultiCrabLandS:
         fOUT.write("CRAB.use_server              = 0\n")
 	fOUT.write("CMSSW.datasetpath            = none\n")
 	fOUT.write("CMSSW.pset                   = none\n")
+        fOUT.write("GRID.ce_white_list           = jade-cms.hip.fi\n")
         fOUT.write("\n")
     
         for i, script in enumerate(self.scripts):
@@ -116,16 +189,26 @@ class MultiCrabLandS:
 	    if match:
 	        label = match.group("label")
 		mass  = match.group("mass")
-                datacard = self.findDataCard(mass)
-		rootfile = self.findRootFile(mass)
+                datacards = ",".join(self.datacards[mass])
+                rootfiles = ",".join(self.rootfiles[mass])
+                exe = self.exe.split("/")[-1]
 		fOUT.write("[" + label + str(mass) + "]\n")
 		fOUT.write("USER.return_data             = 1\n")
 		fOUT.write("USER.copy_data               = 0\n")
 	    	fOUT.write("USER.script_exe              = " + script + "\n")
-	    	fOUT.write("USER.additional_input_files  = " + datacard + ", " + self.exe[0] + ", " + rootfile + "\n")
+	    	fOUT.write("USER.additional_input_files  = " + datacards + "," + exe + "," + rootfiles + "\n")
 		if label.find("Expected") == 0:
+                    #fdc = self.datacards[mass][0]
+                    fdc = "split_m%s" % mass
+                    output_files = [
+                        fdc + "_limitbands.root",
+                        fdc + "_limits_tree.root"
+                        ]
+#                    output_files = [dc+"_Hybrid_limitbands.root" for dc in self.datacards[mass]]
+#                    output_files.extend([dc+"_Hybrid_limits_tree.root" for dc in self.datacards[mass]])
+
 		    fOUT.write("CMSSW.number_of_jobs         = " + str(number_of_jobs) + "\n")
-		    fOUT.write("CMSSW.output_file            = lands.out, " + datacard + "_HybridHybrid_limitbands.root, " + datacard + "_HybridHybrid_limits_tree.root, " + datacard + "_Hybrid_freqObsLimit.root\n")
+		    fOUT.write("CMSSW.output_file            = lands.out," + ",".join(output_files) + "\n")
 		else:
 		    fOUT.write("CMSSW.number_of_jobs         = 1\n")
 		    fOUT.write("CMSSW.output_file            = lands.out\n")
@@ -187,8 +270,10 @@ class Result:
         print "Mass = ",self.mass
         print "    Observed = ",self.observed
         print "    Expected = ",self.expected
-        print "     +1sigma = ",self.expectedPlus1Sigma," -1sigma = ",self.expectedMinus1Sigma
-        print "     +2sigma = ",self.expectedPlus2Sigma," -2sigma = ",self.expectedMinus2Sigma
+        print "     -1sigma = ",self.expectedMinus1Sigma," +1sigma = ",self.expectedPlus1Sigma
+        print "     -2sigma = ",self.expectedMinus2Sigma," +2sigma = ",self.expectedPlus2Sigma
+#        print "     +1sigma = ",self.expectedPlus1Sigma," -1sigma = ",self.expectedMinus1Sigma
+#        print "     +2sigma = ",self.expectedPlus2Sigma," -2sigma = ",self.expectedMinus2Sigma
 
 
 def ConvertToErrorBands(result):
@@ -217,7 +302,7 @@ class ParseLandsOutput:
 	dirs = execute("ls %s"%self.path)
 	for dir in dirs:
 	    dir = path + dir
-	    datacard_match = datacard_re.search(dir)
+	    datacard_match = datacard_hadr_re.search(dir)
 	    if datacard_match:
 		self.ReadLuminosity(dir)
 	    if os.path.isdir(dir):
@@ -319,9 +404,9 @@ class ParseLandsOutput:
 	fOUT = "lands_merged.out"
 	if not self.FileExists(dir):
 
-#	    exe = execute("which lands.exe")
-#	    if len(exe) == 0:
-            exe = install_lands()
+	    exe = which("lands.exe")
+	    if exe == None:
+                exe = install_lands()
 
 	    command = "ls "+ dir + "/res"
 	    files = execute(command)
@@ -329,28 +414,23 @@ class ParseLandsOutput:
 	        match = self.landsRootFile_re.search(file)
 	        if match:
 		    fIN = dir + "/res/" + match.group(0)
-	            command = exe[0] +" --doExpectation 1 --readLimitsFromFile " + fIN + " >& " + dir + "/res/" + fOUT
+	            command = exe +" --doExpectation 1 --readLimitsFromFile " + fIN + " > " + dir + "/res/" + fOUT
 	            os.system(command)
 		    return
 
     def ParseExpFile(self, result, dir):
-        command = "ls "+ dir + "/res"
-        files = execute(command)
-        for file in files:
-            file_match = self.landsOutFile_re.search(file)
-            if file_match:
-                fIN = open(dir+"/res/"+file, 'r')
-                for line in fIN:
-                    result_match = self.landsExpResult_re.search(line)
-                    if result_match:
-#                        result.expected = result_match.group("mean")
-			result.expected = result_match.group("median")
-			result.expectedPlus1Sigma  = result_match.group("plus1")
-			result.expectedPlus2Sigma  = result_match.group("plus2")
-			result.expectedMinus1Sigma = result_match.group("minus1")
-			result.expectedMinus2Sigma = result_match.group("minus2")
-                fIN.close()
-                break
+        f = os.path.join(dir, "res", "lands_merged.out")
+        fIN = open(f)
+        for line in fIN:
+            result_match = self.landsExpResult_re.search(line)
+            if result_match:
+#                result.expected = result_match.group("mean")
+		result.expected = result_match.group("median")
+		result.expectedPlus1Sigma  = result_match.group("plus1")
+		result.expectedPlus2Sigma  = result_match.group("plus2")
+		result.expectedMinus1Sigma = result_match.group("minus1")
+		result.expectedMinus2Sigma = result_match.group("minus2")
+        fIN.close()
 	return result
 
     def FileExists(self, dir):
@@ -416,4 +496,20 @@ def execute(cmd):
     f.close()
     return ret
 
-                                                                        
+# http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
+def which(program):
+    import os
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
