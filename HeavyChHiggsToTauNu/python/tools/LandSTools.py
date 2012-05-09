@@ -9,8 +9,9 @@ import shutil
 import subprocess
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
+LandS_tag           = "V3-04-01_eps" # this one is in the Tapio's scripts
 #LandS_tag           = "t3-04-13"
-LandS_tag	    = "HEAD"
+#LandS_tag	    = "HEAD"
 #LandS_options       = "--PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0.01 --initialRmax 0.05"
 LandS_options       = "--PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09"
 #LandS_options       = "--PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09 --tH 40000"
@@ -41,6 +42,8 @@ postfix = "toys10k_50toys_200jobs"
 postfix += "_HIPdatacardorder"
 postfix += "_seed%d" % startSeed
 
+postfix = "testing"
+
 massPoints = ["160"]
 
 datacard_hadr_re = re.compile(LandSDataCardNaming+"(?P<mass>\d+)\.txt$")
@@ -70,9 +73,7 @@ luminosity_re = re.compile("luminosity=[\S| ]*(?P<lumi>\d+\.\d+)")
 class MultiCrabLandS:
     def __init__(self):
 
-        self.exe = which("lands.exe")
-        if self.exe == None:
-	    self.exe = install_lands()
+        self.exe = findOrInstallLandS()
 
         self.datacards = {}
         self.rootfiles = {}
@@ -404,9 +405,7 @@ class ParseLandsOutput:
 	fOUT = "lands_merged.out"
 	if not self.FileExists(dir):
 
-	    exe = which("lands.exe")
-	    if exe == None:
-                exe = install_lands()
+            exe = findOrInstallLandS()
 
 	    command = "ls "+ dir + "/res"
 	    files = execute(command)
@@ -480,13 +479,42 @@ class ParseLandsOutput:
     def Data(self):
 	return self.results
 
-def install_lands():
-    exe = execute("ls ${PWD}/LandS/test/lands.exe 2> /dev/null")
-    if len(exe) == 0:
-        os.system("cvs co -r " + LandS_tag + " -d LandS UserCode/mschen/LandS")
-        os.system("cd LandS && make")
-        exe = execute("ls ${PWD}/LandS/test/lands.exe 2> /dev/null")
-    return exe
+def findOrInstallLandS():
+    try:
+        cmsswBase = os.environ["CMSSW_BASE"]
+    except KeyError:
+        raise Exception("Did you 'cmsenv'? I can't find $CMSSW_BASE environment variable")
+
+    brlimitBase = os.path.join(cmsswBase, "src", "HiggsAnalysis", "HeavyChHiggsToTauNu", "test", "brlimit")
+    landsDir = "LandS_"+LandS_tag
+    landsDirAbs = os.path.join(brlimitBase, landsDir)
+    landsExe = os.path.join(landsDirAbs, "test", "lands.exe")
+    if os.path.exists(landsDirAbs):
+        if not os.path.isfile(landsExe):
+            raise Exception("Found LandS directory in '%s', but not lands.exe in '%s'" % (landsDirAbs, landsExe))
+        return landsExe
+    else:
+        pwd = os.getcwd()
+        os.chdir(brlimitBase)
+
+        command = ["cvs", "checkout", "-r", LandS_tag, "-d", landsDir, "UserCode/mschen/LandS"]
+        ret = subprocess.call(command)
+        if ret != 0:
+            raise Exception("cvs checkout failed (exit code %d), command '%s'" % (ret, " ".join(command)))
+        if not os.path.exists(landsDir):
+            raise Exception("cvs checkout failed to create directory '%s' under '%s'" % (brlimitBase, landsDir))
+
+        os.chdir(landsDir)
+        ret = subprocess.call(["make"])
+        if ret != 0:
+            raise Exception("Compiling LandS failed (exit code %d), command 'make'" % ret)
+
+        if not os.path.isfile(landsExe):
+            raise Exception("After LandS checkout and compilation, the lands.exe is not found in '%s'" % landsExe)
+
+        os.chdir(pwd)
+
+        return landsExe
 
 def execute(cmd):
     f = os.popen(cmd)
@@ -495,21 +523,3 @@ def execute(cmd):
         ret.append(line.replace("\n", ""))
     f.close()
     return ret
-
-# http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
-def which(program):
-    import os
-    def is_exe(fpath):
-        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-
-    fpath, fname = os.path.split(program)
-    if fpath:
-        if is_exe(program):
-            return program
-    else:
-        for path in os.environ["PATH"].split(os.pathsep):
-            exe_file = os.path.join(path, program)
-            if is_exe(exe_file):
-                return exe_file
-
-    return None
