@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import glob
+import stat
 import random
 import shutil
 import subprocess
@@ -30,7 +31,6 @@ number_of_jobs      = 200
 #LandS_nToysPerJob   = 100
 #number_of_jobs      = 400
 LandSDataCardNaming = "lands_datacard_hplushadronic_m"
-LandSRootFileNaming = "lands_histograms_hplushadronic_m"
 scheduler = "arc"
 #scheduler = "glite"
 
@@ -64,7 +64,7 @@ datacard_patterns = [
 datacard_patterns = [datacard_patterns[i] for i in [3, 1, 0, 2]] # order in my first crab tests
 
 rootfile_patterns = [
-    LandSRootFileNaming+"%s.root"
+    "lands_histograms_hplushadronic_m%s.root"
 ]
 
 script_re   = re.compile("runLandS_(?P<label>(Observed|Expected)_m)(?P<mass>\d+)")
@@ -96,9 +96,10 @@ class MultiCrabLandS:
 
         if len(self.datacards) == 0:
 	    print "No LandS datacards found in this directory!"
-	    print "Naming convention for datacards:",LandSDataCardNaming
-	    print "Naming convention for rootfiles:",LandSRootFileNaming
-	    sys.exit()
+            print "Mass points:", ", ".join(massPoints)
+            print "Datacard patterns:", ", ".join(datacard_patterns)
+            print "Rootfile patterns:", ", ".join(rootfile_patterns)
+	    sys.exit(1)
 
     def CreateMultiCrabDir(self):
 	self.dirname = multicrab.createTaskDir(prefix="LandSMultiCrab", postfix=postfix)
@@ -130,7 +131,6 @@ class MultiCrabLandS:
         self.writeCard(outFileName, "\n".join(command)+"\n")
 
     def writeExp(self, mass, datacardFiles):
-#	seed = self.randomSeed()
         outFileName = "runLandS_Expected_m" + mass
         command = [
             "#!/bin/sh",
@@ -142,21 +142,22 @@ class MultiCrabLandS:
             "",
             "cat lands.out",
             ]
-
-
         self.writeCard(outFileName, "\n".join(command)+"\n")
-        # command = "./lands.exe " + LandS_options + " --doExpectation 1 -t " + str(LandS_nToysPerJob) + " --seed " + str(seed) + " -d " + " ".join(datacardFiles) + "| tail -5 >& lands.out && cat lands.out && echo 'LandSSeed='" + str(seed)
-        # self.writeCard(outFileName, command)
 
-    def writeCard(self, filename,command):
-        fOUT = open(self.dirname+"/"+filename,'w')
+    def writeCard(self, filename, command):
+        fname = os.path.join(self.dirname, filename)
+        fOUT = open(fname, 'w')
         fOUT.write(command)
         fOUT.close()
-        os.system("chmod +x "+self.dirname+"/"+filename)
+
+        # make the script executable
+        st = os.stat(fname)
+        os.chmod(fname, st.st_mode | stat.S_IXUSR)
+
         self.scripts.append(filename)
 
     def writeCrabCfg(self):
-	filename = self.dirname+"/crab.cfg"
+	filename = os.path.join(self.dirname, "crab.cfg")
 	fOUT = open(filename,'w')
 	fOUT.write("[CRAB]\n")
         fOUT.write("jobtype                 = cmssw\n")
@@ -176,7 +177,7 @@ class MultiCrabLandS:
 	fOUT.close()
 
     def writeMultiCrabCfg(self):
-	filename = self.dirname+"/multicrab.cfg"
+	filename = os.path.join(self.dirname, "multicrab.cfg")
         fOUT = open(filename,'w')
         fOUT.write("[COMMON]\n")
         fOUT.write("CRAB.use_server              = 0\n")
@@ -217,25 +218,6 @@ class MultiCrabLandS:
 		fOUT.write("\n")
 
         fOUT.close()
-
-    def findDataCard(self, mass):
-	for datacard in self.datacards:
-	    if not datacard.find(mass) == -1:
-		return datacard
-	print "Datacard matching mass",mass,"not found"
-	sys.exit()
-
-    def findRootFile(self, mass):
-	for rootfile in self.rootfiles:
-            if not rootfile.find(mass) == -1:
-                return rootfile
-        print "Rootfile matching mass",mass,"not found"
-        sys.exit()
-
-    def randomSeed(self):
-	seed = int(10000000*random.random())
-	#print "Random seed",seed
-	return seed
 
     def printInstruction(self):
 	print "Multicrab cfg created. Type"
@@ -300,7 +282,7 @@ class ParseLandsOutput:
 	self.landsExpResult_re = re.compile("BANDS    (?P<minus2>(\d*\.\d*))(    )(?P<minus1>(\d*\.\d*))(    )(?P<mean>(\d*\.\d*))(    )(?P<plus1>(\d*\.\d*))(    )(?P<plus2>(\d*\.\d*))(    )(?P<median>(\d*\.\d*))")
 
 	subdirs = []
-	dirs = execute("ls %s"%self.path)
+	dirs = glob.glob(os.path.join(self.path, "*"))
 	for dir in dirs:
 	    dir = path + dir
 	    datacard_match = datacard_hadr_re.search(dir)
@@ -387,8 +369,7 @@ class ParseLandsOutput:
 		return
 
     def ParseObsFile(self, result, dir):
-	command = "ls "+ dir + "/res"
-        files = execute(command)
+        files = glob.glob(os.path.join(dir, "res", "*"))
 	for file in files:
 	    file_match = self.landsOutFile_re.search(file)
 	    if file_match:
@@ -407,8 +388,7 @@ class ParseLandsOutput:
 
             exe = findOrInstallLandS()
 
-	    command = "ls "+ dir + "/res"
-	    files = execute(command)
+            files = glob.glob(os.path.join(dir, "res", "*"))
 	    for file in files:
 	        match = self.landsRootFile_re.search(file)
 	        if match:
@@ -433,8 +413,7 @@ class ParseLandsOutput:
 	return result
 
     def FileExists(self, dir):
-        command = "ls "+ dir + "/res"
-        files = execute(command)
+        files = glob.glob(os.path.join(dir, "res", "*"))
         found = False
         for file in files:
             file_match = self.landsOutFile_re.search(file)
@@ -444,14 +423,6 @@ class ParseLandsOutput:
                     found = True
         return found
 
-    def DirExists(self, dir):
-	files = execute("ls")
-	for file in files:
-	    if os.path.isdir(dir):
-		if file == dir:
-		    return True
-	return False
-
     def Print(self):
 	for result in self.results:
 	    result.Print()
@@ -459,8 +430,8 @@ class ParseLandsOutput:
     def Save(self, dOUT):
 	outputFileNaming = "output_lands_datacard_hplushadronic_m"
 
-	if not self.DirExists(dOUT):
-	    os.system("mkdir " + dOUT)
+	if not os.isdir(dOUT):
+            os.mkdir(dOUT)
 
 	print "Saving in",dOUT
 	for result in self.results:
@@ -515,11 +486,3 @@ def findOrInstallLandS():
         os.chdir(pwd)
 
         return landsExe
-
-def execute(cmd):
-    f = os.popen(cmd)
-    ret=[]
-    for line in f:
-        ret.append(line.replace("\n", ""))
-    f.close()
-    return ret
