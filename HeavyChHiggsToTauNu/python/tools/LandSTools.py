@@ -13,84 +13,81 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 LandS_tag           = "V3-04-01_eps" # this one is in the Tapio's scripts
 #LandS_tag           = "t3-04-13"
 #LandS_tag	    = "HEAD"
-#LandS_options       = "--PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0.01 --initialRmax 0.05"
-LandS_options       = "--PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09"
-#LandS_options       = "--PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09 --tH 40000"
-#LandS_options       = "--PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.15"
-#LandS_nToysPerJob   = 10
-#LandS_nToysPerJob   = 50
-#number_of_jobs      = 20	# used only for making the expected limits, making the observed limits does not need splitting 
-#LandS_nToysPerJob   = 25
-#number_of_jobs      = 40
-#LandS_nToysPerJob   = 10
-#number_of_jobs      = 100
-LandS_nToysPerJob   = 50
-number_of_jobs      = 200
-#LandS_nToysPerJob   = 25
-#number_of_jobs      = 400
-#LandS_nToysPerJob   = 100
-#number_of_jobs      = 400
-LandSDataCardNaming = "lands_datacard_hplushadronic_m"
-scheduler = "arc"
-#scheduler = "glite"
 
-#startSeed = 1000
-startSeed = 2000
+commonOptions  = "--PhysicsModel ChargedHiggs --bQuickEstimateInitialLimit 0"
+defaultOptions = "-M Hybrid  --initialRmin 0. --initialRmax 0.09"
+defaultToysPerJob = 50
+defaultNumberOfJobs = 20
 
-postfix = "toys10k_50toys_200jobs"
-#postfix += "_LSFdatacardorder"
-postfix += "_HIPdatacardorder"
-postfix += "_seed%d" % startSeed
+defaultFirstSeed = 1000
 
-postfix = "testing"
-
-massPoints = ["160"]
-
-datacard_hadr_re = re.compile(LandSDataCardNaming+"(?P<mass>\d+)\.txt$")
+allMassPoints = ["80", "100", "120", "140", "150", "155", "160"]
+defaultMassPoints = ["120"]
 
 # Patterns of input files, %s denotes the place of the mass
-datacard_patterns = [
-    LandSDataCardNaming+"%s.txt",
-    "datacard_m%s_emu_nobtag_20mar12.txt",
-    "datacard_m%s_etau_miso_20mar12.txt",
-    "datacard_m%s_mutau_miso_20mar12.txt",
-    ]
-datacard_patterns = [datacard_patterns[i] for i in [3, 1, 0, 2]] # order in my first crab tests
+LandSDataCardNaming = "lands_datacard_hplushadronic_m"
+taujetsDatacardPattern = LandSDataCardNaming+"%s.txt"
+mutauDatacardPattern = "datacard_m%s_mutau_miso_20mar12.txt"
+etauDatacardPattern = "datacard_m%s_etau_miso_20mar12.txt"
+emuDatacardPattern = "datacard_m%s_emu_nobtag_20mar12.txt"
 
-rootfile_patterns = [
-    "lands_histograms_hplushadronic_m%s.root"
+taujetsRootfilePattern = "lands_histograms_hplushadronic_m%s.root"
+
+defaultDatacardPatterns = [
+    taujetsDatacardPattern,
+    emuDatacardPattern,
+    etauDatacardPattern,
+    mutauDatacardPattern
+    ]
+defaultDatacardPatterns = [defaultDatacardPatterns[i] for i in [3, 1, 0, 2]] # order in my first crab tests
+
+defaultRootfilePatterns = [
+    taujetsRootfilePattern
 ]
 
+datacard_hadr_re = re.compile(LandSDataCardNaming+"(?P<mass>\d+)\.txt$")
 script_re   = re.compile("runLandS_(?P<label>(Observed|Expected)_m)(?P<mass>\d+)")
 luminosity_re = re.compile("luminosity=[\S| ]*(?P<lumi>\d+\.\d+)")
 
-def generateMultiCrab():
-    lands = MultiCrabLandS()
-    lands.CreateMultiCrabDir()
-    lands.CopyLandsInputFiles()
+def generateMultiCrab(massPoints=defaultMassPoints,
+                      datacardPatterns=defaultDatacardPatterns,
+                      rootfilePatterns=defaultRootfilePatterns,
+                      firstSeed=defaultFirstSeed,
+                      landsOptions=defaultOptions,
+                      toysPerJob=defaultToysPerJob,
+                      numberOfJobs=defaultNumberOfJobs,
+                      crabScheduler="arc",
+                      crabOptions={},
+                      postfix=""
+                      ):
+    lands = MultiCrabLandS(massPoints, datacardPatterns, rootfilePatterns, firstSeed, landsOptions, toysPerJob)
+    lands.createMultiCrabDir(postfix)
+    lands.copyLandsInputFiles()
     lands.writeLandsScripts()
-    lands.writeCrabCfg()
-    lands.writeMultiCrabCfg()
+    lands.writeCrabCfg(crabScheduler, crabOptions)
+    lands.writeMultiCrabCfg(numberOfJobs)
     lands.printInstruction()
 
 class MultiCrabLandS:
-    def __init__(self):
-
+    def __init__(self, massPoints, datacardPatterns, rootfilePatterns, firstSeed, landsOptions, toysPerJob):
         self.exe = findOrInstallLandS()
+        self.firstSeed = firstSeed
+        self.landsOptions = landsOptions
+        self.toysPerJob = toysPerJob
 
         self.datacards = {}
         self.rootfiles = {}
         self.scripts   = []
 
         for mass in massPoints:
-            for dc in datacard_patterns:
+            for dc in datacardPatterns:
                 fname = dc % mass
                 if not os.path.isfile(fname):
                     raise Exception("Datacard file '%s' does not exist!" % fname)
 
                 multicrab._addToDictList(self.datacards, mass, fname)
 
-            for rf in rootfile_patterns:
+            for rf in rootfilePatterns:
                 fname = rf % mass
                 if not os.path.isfile(fname):
                     raise Exception("ROOT file (for shapes) '%s' does not exist!" % fname)
@@ -100,14 +97,14 @@ class MultiCrabLandS:
         if len(self.datacards) == 0:
 	    print "No LandS datacards found in this directory!"
             print "Mass points:", ", ".join(massPoints)
-            print "Datacard patterns:", ", ".join(datacard_patterns)
-            print "Rootfile patterns:", ", ".join(rootfile_patterns)
+            print "Datacard patterns:", ", ".join(datacardPatterns)
+            print "Rootfile patterns:", ", ".join(rootfilePatterns)
 	    sys.exit(1)
 
-    def CreateMultiCrabDir(self):
+    def createMultiCrabDir(self, postfix):
 	self.dirname = multicrab.createTaskDir(prefix="LandSMultiCrab", postfix=postfix)
 
-    def CopyLandsInputFiles(self):
+    def copyLandsInputFiles(self):
         for d in [self.datacards, self.rootfiles]:
             for mass, files in d.iteritems():
                 for f in files:
@@ -124,10 +121,10 @@ class MultiCrabLandS:
         command = [
             "#!/bin/sh",
             "",
-            "SEED=$(expr %d + $1)" % startSeed,
+            "SEED=$(expr %d + $1)" % self.firstSeed,
             'echo "LandSSeed=$SEED"',
             "",
-            "./lands.exe " + LandS_options + " --seed $SEED -d " + " ".join(datacardFiles) + "| tail -5 >& lands.out",
+            "./lands.exe %s %s --seed $SEED -d %s | tail -5 > lands.out" % (commonOptions, self.landsOptions, " ".join(datacardFiles)),
             ""
             "cat lands.out"
             ]
@@ -138,10 +135,10 @@ class MultiCrabLandS:
         command = [
             "#!/bin/sh",
             "",
-            "SEED=$(expr %d + $1)" % startSeed,
+            "SEED=$(expr %d + $1)" % self.firstSeed,
             'echo "LandSSeed=$SEED"',
             "",
-            "./lands.exe %s -n split_m%s --doExpectation 1 -t %d --seed $SEED -d %s | tail -5 > lands.out" % (LandS_options, mass, LandS_nToysPerJob, " ".join(datacardFiles)),
+            "./lands.exe %s %s -n split_m%s --doExpectation 1 -t %d --seed $SEED -d %s | tail -5 > lands.out" % (commonOptions, self.landsOptions, mass, self.toysPerJob, " ".join(datacardFiles)),
             "",
             "cat lands.out",
             ]
@@ -159,27 +156,45 @@ class MultiCrabLandS:
 
         self.scripts.append(filename)
 
-    def writeCrabCfg(self):
+    def writeCrabCfg(self, crabScheduler, crabOptions):
 	filename = os.path.join(self.dirname, "crab.cfg")
 	fOUT = open(filename,'w')
 	fOUT.write("[CRAB]\n")
         fOUT.write("jobtype                 = cmssw\n")
-        fOUT.write("scheduler               = %s\n" % scheduler)
+        fOUT.write("scheduler               = %s\n" % crabScheduler)
         fOUT.write("use_server              = 0\n")
+        if "CRAB" in crabOptions:
+            for line in crabOptions["CRAB"]:
+                fOUT.write(line+"\n")
         fOUT.write("\n")
+
         fOUT.write("[CMSSW]\n")
         fOUT.write("datasetpath             = none\n")
         fOUT.write("pset                    = none\n")
         fOUT.write("number_of_jobs          = 1\n")
         fOUT.write("output_file             = lands.out\n")
+        if "CMSSW" in crabOptions:
+            for line in crabOptions["CMSSW"]:
+                fOUT.write(line+"\n")
         fOUT.write("\n")
+
         fOUT.write("[USER]\n")
         fOUT.write("return_data             = 1\n")
         fOUT.write("copy_data               = 0\n")
+        if "USER" in crabOptions:
+            for line in crabOptions["USER"]:
+                fOUT.write(line+"\n")
         fOUT.write("\n")
+
+        if "GRID" in crabOptions:
+            fOUT.write("[GRID]\n")
+            for line in crabOptions["GRID"]:
+                fOUT.write(line+"\n")
+            fOUT.write("\n")
+
 	fOUT.close()
 
-    def writeMultiCrabCfg(self):
+    def writeMultiCrabCfg(self, numberOfJobs):
 	filename = os.path.join(self.dirname, "multicrab.cfg")
         fOUT = open(filename,'w')
         fOUT.write("[COMMON]\n")
@@ -203,16 +218,13 @@ class MultiCrabLandS:
 	    	fOUT.write("USER.script_exe              = " + script + "\n")
 	    	fOUT.write("USER.additional_input_files  = " + datacards + "," + exe + "," + rootfiles + "\n")
 		if label.find("Expected") == 0:
-                    #fdc = self.datacards[mass][0]
                     fdc = "split_m%s" % mass
                     output_files = [
                         fdc + "_limitbands.root",
                         fdc + "_limits_tree.root"
                         ]
-#                    output_files = [dc+"_Hybrid_limitbands.root" for dc in self.datacards[mass]]
-#                    output_files.extend([dc+"_Hybrid_limits_tree.root" for dc in self.datacards[mass]])
 
-		    fOUT.write("CMSSW.number_of_jobs         = " + str(number_of_jobs) + "\n")
+		    fOUT.write("CMSSW.number_of_jobs         = %d\n" % numberOfJobs)
 		    fOUT.write("CMSSW.output_file            = lands.out," + ",".join(output_files) + "\n")
 		else:
 		    fOUT.write("CMSSW.number_of_jobs         = 1\n")
