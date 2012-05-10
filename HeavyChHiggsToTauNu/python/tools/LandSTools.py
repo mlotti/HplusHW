@@ -5,6 +5,7 @@ import re
 import sys
 import glob
 import stat
+import json
 import random
 import shutil
 import subprocess
@@ -78,6 +79,13 @@ class MultiCrabLandS:
         self.datacards = {}
         self.rootfiles = {}
         self.scripts   = []
+
+        # this is a dictionary dumped to configuration.json
+        self.configuration = {
+            "masspoints": massPoints,
+            "datacards": datacardPatterns,
+            "rootfiles": rootfilePatterns,
+        }
 
         for mass in massPoints:
             for dc in datacardPatterns:
@@ -233,6 +241,10 @@ class MultiCrabLandS:
 		fOUT.write("\n")
 
         fOUT.close()
+
+        f = open(os.path.join(self.dirname, "configuration.json"), "wb")
+        json.dump(self.configuration, f, sort_keys=True, indent=2)
+        f.close()
 
     def printInstruction(self):
 	print "Multicrab cfg created. Type"
