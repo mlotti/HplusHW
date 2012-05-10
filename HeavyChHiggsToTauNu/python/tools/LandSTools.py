@@ -337,7 +337,7 @@ class ParseLandsOutput:
 	    for line in fIN:
 		match = luminosity_re.search(line)
 		if match:
-		    print line
+#		    print line
 		    self.lumi = match.group("lumi")
 		    return
 		print line
@@ -482,10 +482,22 @@ class ParseLandsOutput:
                        str(result.expectedPlus2Sigma))
 	    fOUT.close()
 
-    def saveJson(self):
-        output = {}
+    def print2(self):
+        print
+        print "                  Expected"
+        print "Mass  Observed    Median    -2sigma  -1sigma  +1sigma  +2sigma"
         for result in self.results:
-            output[result.mass] = {
+            print "%s:  %s   %s   %s  %s  %s  %s" % (result.mass, result.observed, result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
+        print
+
+
+    def saveJson(self):
+        output = {
+            "luminosity": self.GetLuminosity(),
+            "masspoints": {}
+            }
+        for result in self.results:
+            output["masspoints"][result.mass] = {
                 "observed": result.observed,
                 "observed_error": result.observedError,
                 "expected": {

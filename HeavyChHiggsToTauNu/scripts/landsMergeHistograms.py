@@ -18,6 +18,7 @@ def main():
     # Run LandS to do obtain the results
     print "Running LandS for merged expected results"
     result = lands.ParseLandsOutput(".")
+    result.print2()
     result.saveJson()
 
     return 0
