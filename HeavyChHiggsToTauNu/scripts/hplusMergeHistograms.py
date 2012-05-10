@@ -48,6 +48,10 @@ def main(opts, args):
         if len(files) == 0:
             print "Task %s, skipping, no files to merge" % d
             continue
+        for f in files:
+            if not os.path.isfile(f):
+                raise Exception("File %s is marked as output file in the  CMSSW_N.stdout, but does not exist" % f)
+
         print "Task %s, merging %d file(s)" % (d, len(files))
 
         mergeName = os.path.join(d, "res", opts.output % d)
@@ -66,12 +70,19 @@ def main(opts, args):
             print output
             print "Merging failed with exit code %d" % ret
             return 1
-        mergedFiles.append((mergeName, len(files)))
+        mergedFiles.append((mergeName, files))
+
+    deleteMessage = ""
+    if opts.delete:
+        deleteMessage = " (source files deleted)"
 
     print
-    print "Merged histogram files:"
-    for f, num in mergedFiles:
-        print "  %s (from %d file(s))" % (f, num)
+    print "Merged histogram files%s:" % deleteMessage
+    for f, sourceFiles in mergedFiles:
+        print "  %s (from %d file(s))" % (f, len(sourceFiles))
+        if opts.delete:
+            for srcFile in sourceFiles:
+                os.remove(srcFile)
 
     return 0
 
@@ -82,6 +93,8 @@ if __name__ == "__main__":
                       help="Regex for input root files (note: remember to escape * and ? !) (default: 'histograms_.*?\.root')")
     parser.add_option("-o", dest="output", type="string", default="histograms-%s.root",
                       help="Pattern for merged output root files (use '%s' for crab directory name) (default: 'histograms-%s.root')")
+    parser.add_option("--delete", dest="delete", default=False, action="store_true",
+                      help="Delete the source files to save disk space (default is to keep the files)")
     
     (opts, args) = parser.parse_args()
 
