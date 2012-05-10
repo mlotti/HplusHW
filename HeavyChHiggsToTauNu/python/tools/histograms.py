@@ -197,7 +197,7 @@ def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
         format = ".%df" % (abs(ndigis)+1)
         format = "%"+format
     format += " %s"
-    
+    format = "L="+format    
 
     addText(x, y, format % (lumi/1000., unit), textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
@@ -880,7 +880,7 @@ class Histo:
             return
 
         # Hack to get the black border to the legend, only if the legend style is fill
-        if "f" in self.legendStyle.lower():
+        if "f" == self.legendStyle.lower():
             h = self.rootHisto.Clone(self.rootHisto.GetName()+"_forLegend")
             if hasattr(h, "SetDirectory"):
                 h.SetDirectory(0)
