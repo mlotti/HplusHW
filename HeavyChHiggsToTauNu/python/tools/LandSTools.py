@@ -47,12 +47,6 @@ postfix = "testing"
 massPoints = ["160"]
 
 datacard_hadr_re = re.compile(LandSDataCardNaming+"(?P<mass>\d+)\.txt$")
-datacards_re = [
-    datacard_hadr_re,
-    re.compile("datacard_m(?P<mass>\d+)_etau_miso_20mar12.txt"),
-    re.compile("datacard_m(?P<mass>\d+)_mutau_miso_20mar12.txt"),
-    re.compile("datacard_m(?P<mass>\d+)_emu_nobtag_20mar12.txt"),
-]
 
 # Patterns of input files, %s denotes the place of the mass
 datacard_patterns = [
@@ -69,6 +63,15 @@ rootfile_patterns = [
 
 script_re   = re.compile("runLandS_(?P<label>(Observed|Expected)_m)(?P<mass>\d+)")
 luminosity_re = re.compile("luminosity=[\S| ]*(?P<lumi>\d+\.\d+)")
+
+def generateMultiCrab():
+    lands = MultiCrabLandS()
+    lands.CreateMultiCrabDir()
+    lands.CopyLandsInputFiles()
+    lands.writeLandsScripts()
+    lands.writeCrabCfg()
+    lands.writeMultiCrabCfg()
+    lands.printInstruction()
 
 class MultiCrabLandS:
     def __init__(self):
@@ -276,7 +279,7 @@ class ParseLandsOutput:
 	self.results = []
 	self.subdir_re         = re.compile("(?P<label>(Expected|Observed)_m)(?P<mass>(\d*$))")
 	self.landsRootFile_re  = re.compile("histograms-Expected_m(?P<mass>(\d*))\.root$")
-	self.landsOutFile_re   = re.compile("^lands(?P<label>(\S*|_merged))\.out$")
+	self.landsOutFile_re   = re.compile("lands(?P<label>(\S*|_merged))\.out$")
 #	self.landsObsResult_re = re.compile("(= )(?P<value>(\d*\.\d*))( +/- )(?P<error>(\d*\.\d*))")
 	self.landsObsResult_re = re.compile("= *(?P<value>(\d*\.\d*))")
 	self.landsExpResult_re = re.compile("BANDS    (?P<minus2>(\d*\.\d*))(    )(?P<minus1>(\d*\.\d*))(    )(?P<mean>(\d*\.\d*))(    )(?P<plus1>(\d*\.\d*))(    )(?P<plus2>(\d*\.\d*))(    )(?P<median>(\d*\.\d*))")
@@ -373,7 +376,7 @@ class ParseLandsOutput:
 	for file in files:
 	    file_match = self.landsOutFile_re.search(file)
 	    if file_match:
-		fIN = open(dir+"/res/"+file, 'r')
+		fIN = open(file, 'r')
 		for line in fIN:
 		    result_match = self.landsObsResult_re.search(line)
 		    if result_match:
