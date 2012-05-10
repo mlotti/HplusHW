@@ -857,6 +857,9 @@ class Histo:
 
     ## Set the legend label
     #
+    # If the legend label is set to None, this Histo is not added to
+    # TLegend in addToLegend()
+    #
     # \param label  New histogram label for TLegend
     def setLegendLabel(self, label):
         self.legendLabel = label
@@ -869,8 +872,13 @@ class Histo:
 
     ## Add the histogram to a TLegend
     #
+    # If the legend label is None, do not add this Histo to TLegend
+    #
     # \param legend   TLegend object
     def addToLegend(self, legend):
+        if self.legendLabel == None:
+            return
+
         # Hack to get the black border to the legend, only if the legend style is fill
         if "f" in self.legendStyle.lower():
             h = self.rootHisto.Clone(self.rootHisto.GetName()+"_forLegend")
