@@ -31,6 +31,7 @@ def main():
     fOUT = "brlimit"
 
     result = ParseLandsOutput(path)
+    result.toFloat()
     result.Print()
 #    result.Save("outputs")
     

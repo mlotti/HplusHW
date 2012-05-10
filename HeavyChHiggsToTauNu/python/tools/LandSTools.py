@@ -251,15 +251,21 @@ class MultiCrabLandS:
         print "cd",self.dirname,"&& multicrab -create"
 
 class Result:
-    def __init__(self, mass = 0, observed = 0, expected = 0, expectedPlus1Sigma = 0, expectedPlus2Sigma = 0, expectedMinus1Sigma = 0, expectedMinus2Sigma = 0):
-        self.mass                = float(mass)
-        self.observed            = float(observed)
-        self.expected            = float(expected)
-        self.expectedPlus1Sigma  = float(expectedPlus1Sigma)
-        self.expectedPlus2Sigma  = float(expectedPlus2Sigma)
-        self.expectedMinus1Sigma = float(expectedMinus1Sigma)
-        self.expectedMinus2Sigma = float(expectedMinus2Sigma)
+    def __init__(self, mass = None, observed = None, observedError = None, expected = None, expectedPlus1Sigma = None, expectedPlus2Sigma = None, expectedMinus1Sigma = None, expectedMinus2Sigma = None):
+        self.mass                = mass
+        self.observed            = observed
+        self.observedError       = observedError
+        self.expected            = expected
+        self.expectedPlus1Sigma  = expectedPlus1Sigma
+        self.expectedPlus2Sigma  = expectedPlus2Sigma
+        self.expectedMinus1Sigma = expectedMinus1Sigma
+        self.expectedMinus2Sigma = expectedMinus2Sigma
+
+    def toFloat(self):
+        for attr in ["mass", "observed", "expected", "expectedPlus1Sigma", "expectedPlus2Sigma", "expectedMinus1Sigma", "expectedMinus2Sigma"]:
+            setattr(self, attr, float(getattr(self, attr)))
         
+
     def Exists(self, result):
         if self.mass == result.mass:
             return True
@@ -267,14 +273,15 @@ class Result:
         
     def Add(self, result):
         if self.mass == result.mass:
-            if self.observed == 0:
-                self.observed = float(result.observed)   
-            if self.expected == 0:
-                self.expected            = float(result.expected)
-                self.expectedPlus1Sigma  = float(result.expectedPlus1Sigma)
-                self.expectedPlus2Sigma  = float(result.expectedPlus2Sigma)
-                self.expectedMinus1Sigma = float(result.expectedMinus1Sigma)
-                self.expectedMinus2Sigma = float(result.expectedMinus2Sigma)
+            if self.observed == None:
+                self.observed = result.observed
+                self.observedError = result.observedError
+            if self.expected == None:
+                self.expected            = result.expected
+                self.expectedPlus1Sigma  = result.expectedPlus1Sigma
+                self.expectedPlus2Sigma  = result.expectedPlus2Sigma
+                self.expectedMinus1Sigma = result.expectedMinus1Sigma
+                self.expectedMinus2Sigma = result.expectedMinus2Sigma
   
     def Print(self):
         print "Mass = ",self.mass
@@ -304,14 +311,13 @@ class ParseLandsOutput:
 	self.subdir_re         = re.compile("(?P<label>(Expected|Observed)_m)(?P<mass>(\d*$))")
 	self.landsRootFile_re  = re.compile("histograms-Expected_m(?P<mass>(\d*))\.root$")
 	self.landsOutFile_re   = re.compile("lands(?P<label>(\S*|_merged))\.out$")
-#	self.landsObsResult_re = re.compile("(= )(?P<value>(\d*\.\d*))( +/- )(?P<error>(\d*\.\d*))")
-	self.landsObsResult_re = re.compile("= *(?P<value>(\d*\.\d*))")
+	self.landsObsResult_re = re.compile("= (?P<value>\d+\.\d+)\s+\+/-\s+(?P<error>\d+\.\S+)")
+#	self.landsObsResult_re = re.compile("= *(?P<value>(\d*\.\d*))")
 	self.landsExpResult_re = re.compile("BANDS    (?P<minus2>(\d*\.\d*))(    )(?P<minus1>(\d*\.\d*))(    )(?P<mean>(\d*\.\d*))(    )(?P<plus1>(\d*\.\d*))(    )(?P<plus2>(\d*\.\d*))(    )(?P<median>(\d*\.\d*))")
 
 	subdirs = []
 	dirs = glob.glob(os.path.join(self.path, "*"))
 	for dir in dirs:
-	    dir = path + dir
 	    datacard_match = datacard_hadr_re.search(dir)
 	    if datacard_match:
 		self.ReadLuminosity(dir)
@@ -405,6 +411,8 @@ class ParseLandsOutput:
 		    result_match = self.landsObsResult_re.search(line)
 		    if result_match:
 			result.observed = result_match.group("value")
+                        result.observedError = result_match.group("error")
+                        break
 		fIN.close()
 		break
 	return result
@@ -473,6 +481,27 @@ class ParseLandsOutput:
                        str(result.expectedPlus1Sigma) + " " + \
                        str(result.expectedPlus2Sigma))
 	    fOUT.close()
+
+    def saveJson(self):
+        output = {}
+        for result in self.results:
+            output[result.mass] = {
+                "observed": result.observed,
+                "observed_error": result.observedError,
+                "expected": {
+                    "-2sigma": result.expectedMinus2Sigma,
+                    "-1sigma": result.expectedMinus1Sigma,
+                    "median": result.expected,
+                    "+1sigma": result.expectedPlus1Sigma,
+                    "+2sigma": result.expectedPlus2Sigma,
+                    }
+                }
+
+        fname = os.path.join(self.path, "limits.json")
+        f = open(fname, "wb")
+        json.dump(output, f, indent=2)
+        f.close()
+        print "Wrote results to %s" % fname
 
     def Data(self):
 	return self.results
