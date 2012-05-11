@@ -185,7 +185,6 @@ class MultiCrabLandS:
         fOUT.write("CRAB.use_server              = 0\n")
 	fOUT.write("CMSSW.datasetpath            = none\n")
 	fOUT.write("CMSSW.pset                   = none\n")
-        fOUT.write("GRID.ce_white_list           = jade-cms.hip.fi\n")
         fOUT.write("\n")
 
         exe = self.exe.split("/")[-1]
@@ -321,8 +320,15 @@ class LHCType:
             "cat lands.out"
             ]
 
-        _writeScript(os.path.join(self.dirname, filename))
+        _writeScript(os.path.join(self.dirname, filename), "\n".join(command)+"\n")
         self.scripts[mass] = filename
+
+    def writeMultiCrabConfig(self, output, mass, inputFiles, numJobs):
+        output.write("[Mass_%s]\n" % mass)
+        output.write("USER.script_exe = %s\n" % self.scripts[mass])
+        output.write("USER.additional_input_files = %s\n" % ",".join(inputFiles))
+        output.write("CMSSW.number_of_jobs = %d\n" % numJobs)
+        output.write("CMSSW.output_file = lands.out,split_m%s_m2lnQ.root\n" % mass)
 
 
 class Result:
