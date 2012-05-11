@@ -173,6 +173,9 @@ namespace HPlus {
       bool bElecIDIsRobustTight = false;
       bool bElecIDIsRobustHighEnergy = false;
 
+      //      double HE = (*iElectron)->hadronicOverEm();
+    
+
       // Simple Electron ID's return 1 or 0 (true or false)
       if( (*iElectron)->electronID("eidLoose") ) bElecIDIsLoose = true;
       if( (*iElectron)->electronID("eidRobustLoose") ) bElecIDIsRobustLoose = true;

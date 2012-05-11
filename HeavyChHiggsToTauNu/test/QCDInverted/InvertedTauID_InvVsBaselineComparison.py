@@ -29,10 +29,15 @@ from InvertedTauID import *
 ReBinning = True
 
 def main():
+    if len(sys.argv) < 2:
+        usage()
 
+    dirs = []
+    dirs.append(sys.argv[1])
     
     # Create all datasets from a multicrab task
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters) 
+#    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
 
     # As we use weighted counters for MC normalisation, we have to
     # update the all event count to a separately defined value because

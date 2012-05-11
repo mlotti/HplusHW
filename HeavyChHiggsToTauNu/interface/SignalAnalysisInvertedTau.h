@@ -135,6 +135,7 @@ namespace HPlus {
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fNJetsCounter;
+    Count fBTaggingBeforeMETCounter;
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fdeltaPhiTauMET10Counter;
@@ -271,6 +272,7 @@ namespace HPlus {
     TH1 *hMTBaselineTauIdBtag5060;
     TH1 *hMTBaselineTauIdBtag4050;
     TH1 *hMTInvertedTauIdJets;
+
     TH1 *hMTInvertedTauIdJet;
     TH1 *hMTInvertedTauIdJet150;
     TH1 *hMTInvertedTauIdJet120150;
@@ -280,6 +282,16 @@ namespace HPlus {
     TH1 *hMTInvertedTauIdJet6070;
     TH1 *hMTInvertedTauIdJet5060;
     TH1 *hMTInvertedTauIdJet4050;
+
+    TH1 *hMTInvertedTauIdBtag;
+    TH1 *hMTInvertedTauIdBtag150;
+    TH1 *hMTInvertedTauIdBtag120150;
+    TH1 *hMTInvertedTauIdBtag100120;
+    TH1 *hMTInvertedTauIdBtag80100;
+    TH1 *hMTInvertedTauIdBtag7080;
+    TH1 *hMTInvertedTauIdBtag6070;
+    TH1 *hMTInvertedTauIdBtag5060;
+    TH1 *hMTInvertedTauIdBtag4050;
 
     TH1 *hMTInvertedTauIdMet;
     TH1 *hMTInvertedTauIdMet150;
@@ -332,7 +344,6 @@ namespace HPlus {
 
     //    TH1 *hMTInvertedTauIdJets;
     TH1 *hMTBaselineTauIdBtag;
-    TH1 *hMTInvertedTauIdBtag;
     TH1 *hMETBaselineTauIdBtagDphi;
     TH1 *hMETInvertedTauIdBtagDphi;
     //    TH1 *hMETInvertedTauIdBtag;

@@ -510,7 +510,7 @@ def mtComparison(datasets):
     
     canvas3 = ROOT.TCanvas("canvas3","",500,500)
 #    canvas3.SetLogy()
-    hmt.SetMaximum(120.0)
+#    hmt.SetMaximum(120.0)
     hmt.SetMarkerColor(2)
     hmt.SetMarkerSize(1)
     hmt.SetMarkerStyle(21)
@@ -580,27 +580,17 @@ def mtComparison(datasets):
 #    canvas3.Print("mtInverted.C")    
 #    canvas3.Print("mtInverted_Met70_log.png")
 #    canvas3.Print("mtInverted_Met70_log.C")
-    if(btagging):
-        if(deltaPhi180):  
-            canvas3.Print("mtInverted_btag.png")
-            canvas3.Print("mtInverted_btag.C")
-        if(deltaPhi160):
-            canvas3.Print("mtInverted_btag_dphi160.png")
-            canvas3.Print("mtInverted_btag_dphi160.C")
-        if(topmass):
-            canvas3.Print("mtInverted_btag_topmass.png")
-            canvas3.Print("mtInverted_btag_topmass.C")   
-    else:
-        if(deltaPhi180): 
-            canvas3.Print("mtInverted_3jets.png")
-            canvas3.Print("mtInverted_3jets.C")
-        if(deltaPhi160):
-            canvas3.Print("mtInverted_3jets_dphi160.png")
-            canvas3.Print("mtInverted_3jets_dphi160.C")  
-        if(deltaPhi130):
-            canvas3.Print("mtInverted_3jets_dphi130.png")
-            canvas3.Print("mtInverted_3jets_dphi130.C")
 
+    if(deltaPhi180):  
+        canvas3.Print("mtInverted_btag.png")
+        canvas3.Print("mtInverted_btag.C")
+    if(deltaPhi160):
+        canvas3.Print("mtInverted_btag_dphi160.png")
+        canvas3.Print("mtInverted_btag_dphi160.C")
+    if(topmass):
+        canvas3.Print("mtInverted_btag_topmass.png")
+        canvas3.Print("mtInverted_btag_topmass.C")  
+ 
 
 
     fName = os.path.join(sys.argv[1],"transverseMassQCDInverted.root")

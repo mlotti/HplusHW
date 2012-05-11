@@ -33,8 +33,8 @@ def usage():
 
 def main(argv):
 
-    HISTONAME = "TauIdJets"
-#    HISTONAME = "TauIdBtag"
+#    HISTONAME = "TauIdJets"
+    HISTONAME = "TauIdBtag"
 
     dirs = []
     if len(sys.argv) < 2:
