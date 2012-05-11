@@ -9,7 +9,9 @@ import json
 import random
 import shutil
 import subprocess
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
+
+import multicrab
+import git
 
 LandS_tag           = "V3-04-01_eps" # this one is in the Tapio's scripts
 #LandS_tag           = "t3-04-13"
@@ -85,6 +87,8 @@ class MultiCrabLandS:
             "masspoints": massPoints,
             "datacards": datacardPatterns,
             "rootfiles": rootfilePatterns,
+            "landsVersion": LandS_tag,
+            "codeVersion": git.getCommitId()
         }
 
         for mass in massPoints:
@@ -486,8 +490,11 @@ class ParseLandsOutput:
         print
         print "                  Expected"
         print "Mass  Observed    Median    -2sigma  -1sigma  +1sigma  +2sigma"
-        for result in self.results:
-            print "%s:  %s   %s   %s  %s  %s  %s" % (result.mass, result.observed, result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
+        massIndex = [(int(self.results[i].mass), i) for i in range(len(self.results))]
+        massIndex.sort()
+        for mass, index in massIndex:
+            result = self.results[index]
+            print "%3s:  %-9s   %6s   %6s  %6s  %6s  %6s" % (result.mass, result.observed, result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
         print
 
 
@@ -496,8 +503,12 @@ class ParseLandsOutput:
             "luminosity": self.GetLuminosity(),
             "masspoints": {}
             }
-        for result in self.results:
+        massIndex = [(int(self.results[i].mass), i) for i in range(len(self.results))]
+        massIndex.sort()
+        for mass, index in massIndex:
+            result = self.results[index]
             output["masspoints"][result.mass] = {
+                "mass": result.mass,
                 "observed": result.observed,
                 "observed_error": result.observedError,
                 "expected": {
@@ -511,7 +522,7 @@ class ParseLandsOutput:
 
         fname = os.path.join(self.path, "limits.json")
         f = open(fname, "wb")
-        json.dump(output, f, indent=2)
+        json.dump(output, f, sort_keys=True, indent=2)
         f.close()
         print "Wrote results to %s" % fname
 
