@@ -375,7 +375,9 @@ class LHCType:
             "SEED=$(expr %d + $1)" % self.firstSeed,
             'echo "LandSSeed=$SEED"',
             "",
-            "./lands.exe %s %s --seed $SEED -d %s | tail -5 > lands.out" % (commonOptions, self.options, " ".join(datacardFiles)),
+            "./lands.exe %s %s --seed $SEED -d %s | tee lands.out" % (commonOptions, self.options, " ".join(datacardFiles)),
+            "tail -n 5 lands.out > lands.out.tmp",
+            "mv lands.out.tmp lands.out",
             ""
             "cat lands.out"
             ]
