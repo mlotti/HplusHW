@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import json
 import subprocess
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
@@ -10,7 +11,15 @@ def main():
 
     # Merge the LandS root files
     print "Merging job ROOT files"
-    command = ["hplusMergeHistograms.py", "-i", "split\S+_limits_tree\S*\.root"]+args
+    f = open("configuration.json")
+    config = json.load(f)
+    f.close()
+    if config["clsType"] == "LEP":
+        command = ["hplusMergeHistograms.py", "-i", "split\S+_limits_tree\S*\.root"]+args
+    elif config["clsType"] == "LHC":
+        command = ["hplusMergeHistograms.py", "-i", "split\S+_m2lnQ\S*\.root"]+args
+    else:
+        raise Exception("Unsupported clsType '%s' in configuration.json" % config["clsType"])
     ret = subprocess.call(command)
     if ret != 0:
         raise Exception("hplusMergeHistograms failed with exit code %d, command was\n%s" %(ret, " ".join(command)))
