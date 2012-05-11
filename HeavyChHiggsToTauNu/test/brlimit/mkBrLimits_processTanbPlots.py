@@ -106,7 +106,7 @@ def graphToTanBeta(graph, mymu, removeNotValid=True):
         # For some reason tanbForBR gets stuck for some large values; solution: do not
         # even bother to calculate values for Br>=0.5
         if yvalues[i]<0.50:
-            tanb = statisticalFunctions.tanbForBR(yvalues[i], mass, tanbRef, mymu)
+            tanb = statisticalFunctions.tanbForBR(yvalues[i], int(mass), tanbRef, mymu)
         else:
             tanb = -1
 #        print "mass %d, BR %f, tanb %f, %d / %d" % (mass, yvalues[i], tanb, i, graph.GetN())
@@ -213,10 +213,10 @@ def keepOnlyMassPoints(graph, massPoints):
 # Remove mass points lower than 100 since
 # statisticalFunctions.tanbForBR cannot handle them (they are unphysical)
 # also remove points lower than 115 since excluded by LEP
-def cleanGraph(graph):
+def cleanGraph(graph, minX=115):
     i=0
     while (i<graph.GetN()):
-        if (graph.GetX()[i]<115):
+        if (graph.GetX()[i]<minX):
             graph.RemovePoint(i)
         else:
             i=i+1        
