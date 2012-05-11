@@ -115,7 +115,7 @@ namespace HPlus {
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
     fDiscrCut(iConfig.getUntrackedParameter<double>("discriminatorCut")),
-    fMin(iConfig.getUntrackedParameter<uint32_t>("minNumber")),
+    fNumberOfBJets(iConfig.getUntrackedParameter<uint32_t>("jetNumber"),iConfig.getUntrackedParameter<std::string>("jetNumberCutDirection")),
     fTaggedCount(eventCounter.addSubCounter("b-tagging main","b-tagging")),
     fAllSubCount(eventCounter.addSubCounter("b-tagging", "all jets")),
     fTaggedSubCount(eventCounter.addSubCounter("b-tagging", "tagged")),
@@ -214,7 +214,7 @@ namespace HPlus {
     fBTaggingScaleFactor.addNonBFlavorData(360., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.374);
     fBTaggingScaleFactor.addNonBFlavorData(370., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.377);
     fBTaggingScaleFactor.addNonBFlavorData(380., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.376);
-    fBTaggingScaleFactor.addNonBFlavorData(390., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 3.380);
+    fBTaggingScaleFactor.addNonBFlavorData(390., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.380);
     fBTaggingScaleFactor.addNonBFlavorData(400., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.385);
     fBTaggingScaleFactor.addNonBFlavorData(410., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.387);
     fBTaggingScaleFactor.addNonBFlavorData(420., fScaleFactorLightFlavor, fScaleFactorLightFlavorUncertainty, 0.391);
@@ -383,16 +383,16 @@ namespace HPlus {
       //	  hDeltaPhiJetMet->Fill(deltaPhi*57.3);
       //      }
     if( passed == 0)   increment(fTaggedNoTaggedJet);
-    if( passed == 1)   increment(fTaggedOneTaggedJet);
-    if( passed == 2)   increment(fTaggedTwoTaggedJets);
+    else if( passed == 1)   increment(fTaggedOneTaggedJet);
+    else if( passed == 2)   increment(fTaggedTwoTaggedJets);
 
-    passEvent = true;
-    if(passed < fMin) passEvent = false;
-    increment(fTaggedCount);
+    passEvent = fNumberOfBJets.passedCut(passed);
+    if (passEvent)
+      increment(fTaggedCount);
 
     return Data(this, passEvent);
   }
-  
+
   void BTagging::applyScaleFactor(const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
     // Count number of b jets and light jets
     int nBJetsPassed = 0;

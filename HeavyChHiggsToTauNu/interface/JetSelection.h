@@ -9,6 +9,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DirectionalCut.h"
 
 namespace edm {
   class ParameterSet;
@@ -38,7 +39,7 @@ namespace HPlus {
       bool passedEvent() const { return fPassedEvent; }
       const edm::PtrVector<pat::Jet>& getAllJets() const { return fJetSelection->fAllJets; }
       const edm::PtrVector<pat::Jet>& getSelectedJets() const { return fJetSelection->fSelectedJets; }
-      const uint32_t getMinNumber() const { return fJetSelection->fMinNumberOfJets; }
+      bool testPassStatus(size_t value) const { return fJetSelection->fNumberOfJets.passedCut(value); }
       const int getHadronicJetCount() const { return fJetSelection->iNHadronicJets; }
       const int getHadronicJetCountInFwdDir() const { return fJetSelection->iNHadronicJetsInFwdDir; }
       const bool eventHasJetWithEMFraction07() const { return fJetSelection->bEMFraction07Veto; }
@@ -67,14 +68,15 @@ namespace HPlus {
     const double fEtaCut;
     const double fEMfractionCut;
     const double fMaxDR;
-    const uint32_t fMinNumberOfJets;
+    DirectionalCut fNumberOfJets;
     const double fJetIdMaxNeutralHadronEnergyFraction;
     const double fJetIdMaxNeutralEMEnergyFraction;
     const uint32_t fJetIdMinNumberOfDaughters;
     const double fJetIdMinChargedHadronEnergyFraction;
     const uint32_t fJetIdMinChargedMultiplicity;
     const double fJetIdMaxChargedEMEnergyFraction;
-    const double fBetaCut;
+    DirectionalCut fBetaCut;
+    std::string fBetaSrc;
 
     // Counters
     Count fCleanCutCount;
