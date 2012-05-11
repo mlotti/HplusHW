@@ -38,7 +38,7 @@ def main():
     frame = Frame()
     frame.SetXTitle("m_{H^{#pm}} [GeV/c^{2}]")
     frame.SetYTitle("95% CL limit for BR(t#rightarrow bH^{#pm})")
-    frame.SetLuminosity(result.GetLuminosity())
+    frame.SetLuminosity(result.getLuminosity())
     
     frame.SetData(result.Data())
 

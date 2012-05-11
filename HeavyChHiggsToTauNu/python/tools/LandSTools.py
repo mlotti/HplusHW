@@ -36,8 +36,7 @@ allMassPoints = ["80", "100", "120", "140", "150", "155", "160"]
 defaultMassPoints = ["120"]
 
 # Patterns of input files, %s denotes the place of the mass
-LandSDataCardNaming = "lands_datacard_hplushadronic_m"
-taujetsDatacardPattern = LandSDataCardNaming+"%s.txt"
+taujetsDatacardPattern = "lands_datacard_hplushadronic_m%s.txt"
 mutauDatacardPattern = "datacard_m%s_mutau_miso_20mar12.txt"
 etauDatacardPattern = "datacard_m%s_etau_miso_20mar12.txt"
 emuDatacardPattern = "datacard_m%s_emu_nobtag_20mar12.txt"
@@ -55,10 +54,6 @@ defaultDatacardPatterns = [defaultDatacardPatterns[i] for i in [3, 1, 0, 2]] # o
 defaultRootfilePatterns = [
     taujetsRootfilePattern
 ]
-
-datacard_hadr_re = re.compile(LandSDataCardNaming+"(?P<mass>\d+)\.txt$")
-script_re   = re.compile("runLandS_(?P<label>(Observed|Expected)_m)(?P<mass>\d+)")
-luminosity_re = re.compile("luminosity=[\S| ]*(?P<lumi>\d+\.\d+)")
 
 def generateMultiCrab(massPoints=defaultMassPoints,
                       datacardPatterns=defaultDatacardPatterns,
@@ -189,7 +184,10 @@ class MultiCrabLandS:
 
         exe = self.exe.split("/")[-1]
         for mass in self.massPoints:
-            self.clsType.writeMultiCrabConfig(fOUT, mass, [exe]+self.datacards[mass]+self.rootfiles[mass], numberOfJobs)
+            inputFiles = [exe]+self.datacards[mass]
+            if len(self.rootfiles) > 0:
+                inputFiles += self.rootfiles[mass]
+            self.clsType.writeMultiCrabConfig(fOUT, mass, inputFiles, numberOfJobs)
             fOUT.write("\n\n")
 
         f = open(os.path.join(self.dirname, "configuration.json"), "wb")
@@ -267,7 +265,7 @@ class LEPType:
             "SEED=$(expr %d + $1)" % self.firstSeed,
             'echo "LandSSeed=$SEED"',
             "",
-            "./lands.exe %s %s -n split_m%s --doExpectation 1 %s --seed $SEED -d %s | tail -5 > lands.out" % (commonOptions, self.options, mass, self.toysPerJob, " ".join(datacardFiles)),
+            "./lands.exe %s %s -n split_m%s --doExpectation 1 -t %s --seed $SEED -d %s | tail -5 > lands.out" % (commonOptions, self.options, mass, self.toysPerJob, " ".join(datacardFiles)),
             "",
             "cat lands.out",
             ]
@@ -286,7 +284,69 @@ class LEPType:
         output.write("USER.script_exe = %s\n" % self.expScripts[mass])
         output.write("USER.additional_input_files = %s\n" % ",".join(inputFiles))
         output.write("CMSSW.number_of_jobs = %d\n" % numJobs)
-        output.write("CMSSW.output_file = lands.out,split_m%s_limitbands.root,split_m%s_limits_tree.root\n" % (mass, mass))
+        output.write("CMSSW.output_file = lands.out,split_m%sHybrid_limitbands.root,split_m%sHybrid_limits_tree.root\n" % (mass, mass))
+
+    def getResult(self, path, mass):
+        result = Result(mass)
+        self._parseObserved(result, path, mass)
+        self._parseExpected(result, path, mass)
+        return result
+
+    def _parseObserved(self, result, path, mass):
+        landsOutFiles = glob.glob(os.path.join(path, "Observed_m%s"%mass, "res", "lands_*.out"))
+        if len(landsOutFiles) != 1:
+            raise Exception("Expected exactly 1 LandS output file, got %d" % len(landsOutFiles))
+
+        result_re = re.compile("= (?P<value>\d+\.\d+)\s+\+/-\s+(?P<error>\d+\.\S+)")
+        f = open(landsOutFiles[0])
+        for line in f:
+            match = result_re.search(line)
+            if match:
+                result.observed = match.group("value")
+                result.observedError =match.group("error")
+                f.close()
+                return result
+        raise Exception("Unable to parse observed result from '%s'" % landsOutFiles[0])
+
+    def _parseExpected(self, result, path, mass):
+        mergedFilename = "lands_merged.out"
+        crabRes = os.path.join(path, "Expected_m%s"%mass, "res")
+        self._runLandSForMerge(crabRes, mergedFilename, mass)
+
+        fname = os.path.join(crabRes, mergedFilename)
+        f = open(fname)
+        result_re = re.compile("BANDS    (?P<minus2>(\d*\.\d*))(    )(?P<minus1>(\d*\.\d*))(    )(?P<mean>(\d*\.\d*))(    )(?P<plus1>(\d*\.\d*))(    )(?P<plus2>(\d*\.\d*))(    )(?P<median>(\d*\.\d*))")
+        for line in f:
+            match = result_re.search(line)
+            if match:
+		result.expected = match.group("median")
+		result.expectedPlus1Sigma  = match.group("plus1")
+		result.expectedPlus2Sigma  = match.group("plus2")
+		result.expectedMinus1Sigma = match.group("minus1")
+		result.expectedMinus2Sigma = match.group("minus2")
+                f.close()
+                return result
+
+        raise Exception("Unable to parse expected result from '%s'" % fname)
+
+    def _runLandSForMerge(self, resDir, mergedFilename, mass):
+        targetFile = os.path.join(resDir, mergedFilename)
+        if os.path.exists(targetFile):
+            return
+
+        exe = findOrInstallLandS()
+        rootFile = os.path.join(resDir, "histograms-Expected_m%s.root" % mass)
+        if not os.path.exists(rootFile):
+            raise Exception("Merged root file '%s' does not exist, did you run landsMergeHistograms.py?" % rootFile)
+        cmd = [exe, "--doExpectation", "1", "--readLimitsFromFile", rootFile]
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output = p.communicate()[0]
+        if p.returncode != 1:
+            raise Exception("Call to '%s' failed with exit code %d" % (" ".join(cmd), p.returncode))
+        f = open(targetFile, "w")
+        f.write(output)
+        f.write("\n")
+        f.close()
 
 class LHCType:
     def __init__(self, options=lhcHybridOptions, toysCLsb=lhcHybridToysCLsb, toysCLb=lhcHybridToysCLb, firstSeed=defaultFirstSeed):
@@ -329,6 +389,48 @@ class LHCType:
         output.write("USER.additional_input_files = %s\n" % ",".join(inputFiles))
         output.write("CMSSW.number_of_jobs = %d\n" % numJobs)
         output.write("CMSSW.output_file = lands.out,split_m%s_m2lnQ.root\n" % mass)
+
+    def getResult(self, path, mass):
+        result = Result(mass)
+
+        rootFile = os.path.join(path, "Mass_%s"%mass, "res", "histograms-Mass_%s.root"%mass)
+        if not os.path.exists(rootFile):
+            raise Exception("Merged root file '%s' does not exist, did you run landsMergeHistograms.py?" % rootFile)
+
+        fitScript = os.path.join(findOrInstallLandS(directory=True), "test", "fitRvsCLs.C")
+        if not os.path.exists(fitScript):
+            raise Exception("Did not find fit script '%s'" % fitScript)
+        p = subprocess.Popen(["root", "-l", "-n", "-b", fitScript+"++"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        commands = [
+            "run(%s, plot_m%s)" % (rootFile, mass),
+            ".q"
+            ]
+        output = p.communicate("\n".join(commands)+"\n")[0]
+        print output
+
+        lines = output.split("\n")
+        lines.reverse()
+        def res(s):
+            return "(?P<%ss>[^/]+)/(?P<%se>[^,]+)" % (s, s)
+        result_re = re.compile("EXPECTED LIMIT BANDS.+mass=[^:]+:\s*" + res("obs") + ",\s+" +
+                               res("m2s") + ",\s+" + res("m1s") + ",\s+" + res("med") + ",\s+" + res("p1s") + ",\s+" + res("p2s"))
+        for line in lines:
+            match = result_re.search(line)
+            if match:
+                result.observed = match.group("obs")
+                result.observedError = match.group("obse")
+                result.expected = match.group("med")
+                result.expectedError = match.group("mede")
+                result.expectedPlus1Sigma = match.group("p1s")
+                result.expectedPlus1SigmaError = match.group("p1se")
+                result.expectedPlus2Sigma = match.group("p2s")
+                result.expectedPlus2SigmaError = match.group("p2se")
+                result.expectedMinus1Sigma = match.group("m1s")
+                result.expectedMinus1SigmaError = match.group("m1se")
+                result.expectedMinus2Sigma = match.group("m2s")
+                result.expectedMinus2SigmaError = match.group("m2se")
+
+        return result
 
 
 class Result:
@@ -388,156 +490,59 @@ class ParseLandsOutput:
 	self.path = path
 	self.lumi = 0
 
-	self.results = []
-	self.subdir_re         = re.compile("(?P<label>(Expected|Observed)_m)(?P<mass>(\d*$))")
-	self.landsRootFile_re  = re.compile("histograms-Expected_m(?P<mass>(\d*))\.root$")
-	self.landsOutFile_re   = re.compile("lands(?P<label>(\S*|_merged))\.out$")
-	self.landsObsResult_re = re.compile("= (?P<value>\d+\.\d+)\s+\+/-\s+(?P<error>\d+\.\S+)")
-#	self.landsObsResult_re = re.compile("= *(?P<value>(\d*\.\d*))")
-	self.landsExpResult_re = re.compile("BANDS    (?P<minus2>(\d*\.\d*))(    )(?P<minus1>(\d*\.\d*))(    )(?P<mean>(\d*\.\d*))(    )(?P<plus1>(\d*\.\d*))(    )(?P<plus2>(\d*\.\d*))(    )(?P<median>(\d*\.\d*))")
+        # Read task configuration json file
+        configFile = os.path.join(path, "configuration.json")
+        f = open(configFile)
+        self.config = json.load(f)
+        f.close()
 
-	subdirs = []
-	dirs = glob.glob(os.path.join(self.path, "*"))
-	for dir in dirs:
-	    datacard_match = datacard_hadr_re.search(dir)
-	    if datacard_match:
-		self.ReadLuminosity(dir)
-	    if os.path.isdir(dir):
-		match = self.subdir_re.search(dir)
-		if match:
-		    subdirs.append(dir)
-	if len(subdirs) == 0:
-	    print "No data found, is the directory '" + path + "' a multicrab dir? Exiting.."
-	    sys.exit()
-
-	self.Read(subdirs)
-
-    def ReadLuminosity(self, dir):
-	if self.lumi == 0:
-	    fIN = open(dir,"r")
-	    for line in fIN:
-		match = luminosity_re.search(line)
-		if match:
-#		    print line
-		    self.lumi = match.group("lumi")
-		    return
-		print line
-
-    def GetLuminosity(self):
-	return self.lumi
-
-    def Read(self,dirs):
-	for dir in dirs:
-	    if os.path.isdir(dir):
-		match = self.subdir_re.search(dir)
-		if match:
-		    self.AddResult(dir)
-
-	self.Sort()
-
-    def Sort(self):
-	i = len(self.results)
-	while i > 1:
-	    if self.Compare(self.results[i-1],self.results[i-2]):
-		self.Swap(i-1,i-2)
-	    i = i - 1
-
-    def Compare(self, results1, results2):
-	return results1.mass < results2.mass
-	
-    def Swap(self, i, j):
-	tmp = self.results[i]
-	self.results[i] = self.results[j]
-	self.results[j] = tmp
-
-    def AddResult(self, dir):
-        result = self.ReadDir(dir)
-        if not self.ResultExists(result):
-            self.results.append(result)
+        if self.config["clsType"] == "LEP":
+            self.clsType = LEPType()
+        elif self.config["clsType"] == "LHC":
+            self.clsType = LHCType()
         else:
-            self.MergeResult(result)
+            raise Exception("Unsupported CLs type '%s' in %s" % (self.config["clsType"], configFile))
 
-    def ReadDir(self,dir):
-	match = self.subdir_re.search(dir)
-	if match:
-	    mass  = match.group("mass")
-	    result = Result(mass) # filling the mass
-	    label = match.group("label")
-	    if label.find("Observed") == 0:
-		result = self.ParseObsFile(result,dir)
-	    if label.find("Expected") == 0:
-		self.RunLandSFromMergedFile(dir)
-	        result = self.ParseExpFile(result,dir)
-	    return result
+        # Read the luminosity, use tau+jets one if that's available, if not, use the first one
+        datacards = self.config["datacards"]
+        taujetsDc = None
+        for dc in datacards:
+            if "hplushadronic" in dc:
+                taujetsDc = dc
+                break
+        if taujetsDc != None:
+            self.readLuminosityTaujets(taujetsDc % self.config["masspoints"][0])
+        else:
+            self.readLuminosityLeptonic(self.config["datacards"][0] % self.config["masspoints"][0])
 
-    def ResultExists(self, result):
-	for r in self.results:
-	    if r.Exists(result):
-		return True
-	return False
+        # Read in the results
+        self.results = []
+        for mass in self.config["masspoints"]:
+            self.results.append(self.clsType.getResult(self.path, mass))
 
-    def MergeResult(self, result):
-	for r in self.results:
-	    if r.Exists(result):
-		r.Add(result)
-		return
 
-    def ParseObsFile(self, result, dir):
-        files = glob.glob(os.path.join(dir, "res", "*"))
-	for file in files:
-	    file_match = self.landsOutFile_re.search(file)
-	    if file_match:
-		fIN = open(file, 'r')
-		for line in fIN:
-		    result_match = self.landsObsResult_re.search(line)
-		    if result_match:
-			result.observed = result_match.group("value")
-                        result.observedError = result_match.group("error")
-                        break
-		fIN.close()
-		break
-	return result
+#	self.subdir_re         = re.compile("(?P<label>(Expected|Observed)_m)(?P<mass>(\d*$))")
+#	self.landsRootFile_re  = re.compile("histograms-Expected_m(?P<mass>(\d*))\.root$")
+#	self.landsOutFile_re   = re.compile("lands(?P<label>(\S*|_merged))\.out$")
+#	self.landsObsResult_re = re.compile("= (?P<value>\d+\.\d+)\s+\+/-\s+(?P<error>\d+\.\S+)")
+#	self.landsExpResult_re = re.compile("BANDS    (?P<minus2>(\d*\.\d*))(    )(?P<minus1>(\d*\.\d*))(    )(?P<mean>(\d*\.\d*))(    )(?P<plus1>(\d*\.\d*))(    )(?P<plus2>(\d*\.\d*))(    )(?P<median>(\d*\.\d*))")
 
-    def RunLandSFromMergedFile(self, dir):
-	fOUT = "lands_merged.out"
-	if not self.FileExists(dir):
+    def readLuminosityTaujets(self, filename):
+        lumi_re = re.compile("luminosity=[\S| ]*(?P<lumi>\d+\.\d+)")
+        fname = os.path.join(self.path, filename)
+        f = open(fname)
+        for line in f:
+            match = lumi_re.search(line)
+            if match:
+                self.lumi = match.group("lumi")
+                return
+        raise Exception("Did not find luminosity information from '%s'" % fname)
 
-            exe = findOrInstallLandS()
+    def readLuminosityLeptonic(self, filename):
+        raise Exception("Not implemented yet")
 
-            files = glob.glob(os.path.join(dir, "res", "*"))
-	    for file in files:
-	        match = self.landsRootFile_re.search(file)
-	        if match:
-		    fIN = dir + "/res/" + match.group(0)
-	            command = exe +" --doExpectation 1 --readLimitsFromFile " + fIN + " > " + dir + "/res/" + fOUT
-	            os.system(command)
-		    return
-
-    def ParseExpFile(self, result, dir):
-        f = os.path.join(dir, "res", "lands_merged.out")
-        fIN = open(f)
-        for line in fIN:
-            result_match = self.landsExpResult_re.search(line)
-            if result_match:
-#                result.expected = result_match.group("mean")
-		result.expected = result_match.group("median")
-		result.expectedPlus1Sigma  = result_match.group("plus1")
-		result.expectedPlus2Sigma  = result_match.group("plus2")
-		result.expectedMinus1Sigma = result_match.group("minus1")
-		result.expectedMinus2Sigma = result_match.group("minus2")
-        fIN.close()
-	return result
-
-    def FileExists(self, dir):
-        files = glob.glob(os.path.join(dir, "res", "*"))
-        found = False
-        for file in files:
-            file_match = self.landsOutFile_re.search(file)
-            if file_match:
-                label = file_match.group("label")
-                if label == "_merged":
-                    found = True
-        return found
+    def getLuminosity(self):
+	return self.lumi
 
     def Print(self):
 	for result in self.results:
@@ -577,7 +582,7 @@ class ParseLandsOutput:
 
     def saveJson(self):
         output = {
-            "luminosity": self.GetLuminosity(),
+            "luminosity": self.getLuminosity(),
             "masspoints": {}
             }
         massIndex = [(int(self.results[i].mass), i) for i in range(len(self.results))]
@@ -606,7 +611,8 @@ class ParseLandsOutput:
     def Data(self):
 	return self.results
 
-def findOrInstallLandS():
+
+def findOrInstallLandS(directory=False):
     try:
         cmsswBase = os.environ["CMSSW_BASE"]
     except KeyError:
@@ -619,7 +625,11 @@ def findOrInstallLandS():
     if os.path.exists(landsDirAbs):
         if not os.path.isfile(landsExe):
             raise Exception("Found LandS directory in '%s', but not lands.exe in '%s'" % (landsDirAbs, landsExe))
-        return landsExe
+
+        if directory:
+            return landsDirAbs
+        else:
+            return landsExe
     else:
         pwd = os.getcwd()
         os.chdir(brlimitBase)
@@ -644,4 +654,7 @@ def findOrInstallLandS():
 
         os.chdir(pwd)
 
-        return landsExe
+        if directory:
+            return landsDirAbs
+        else:
+            return landsExe
