@@ -60,8 +60,8 @@ doFillTree = True
 
 applyTriggerScaleFactor = True
 
-#PF2PATVersion = "PFlow" # For normal PF2PAT
-PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
+PF2PATVersion = "PFlow" # For normal PF2PAT
+#PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
 
 ### Systematic uncertainty flags ###
 # Running of systematic variations is controlled by the global flag
@@ -274,8 +274,11 @@ if doMETResolution:
     process.signalAnalysisPath += process.metResolutionAnalysis
 
 # Optimisation
+variationModuleNames = []
 if doOptimisation:
-    myOptimisation.generateVariations(process,additionalCounters,process.commonSequence,process.signalAnalysis)
+    # Make variation modules
+    variationModuleNames.extend(myOptimisation.generateVariations(process,additionalCounters,process.commonSequence,process.signalAnalysis,"signalAnalysis"))
+
 
 # Summer PAS cuts
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
@@ -361,13 +364,14 @@ if doRtau0 and not hasattr(process, "signalAnalysisRtau0"):
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
 
-
 def getSignalAnalysisModuleNames():
     modules = ["signalAnalysis"]
     if doSummerPAS:
         modules.append("signalAnalysisRtau0MET70")
     if doRtau0:
         modules.append("signalAnalysisRtau0")
+    if doOptimisation:
+        modules.extend(variationModuleNames)
     return modules
 
 # To have tau embedding like preselection

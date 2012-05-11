@@ -166,13 +166,14 @@ class HPlusOptimisationScheme():
         myNumber = float(variation[myRange:])
         return myNumber
 
-    def generateVariations(self, process, additionalCounters, commonSequence, nominalAnalysis):
+    def generateVariations(self, process, additionalCounters, commonSequence, nominalAnalysis, analysisName):
         # if no variations were supplied, take the default value
         self._dealWithEmptyVariations(nominalAnalysis)
         # Print info
         self.printOptimisationConfig()
         # loop over variations
         nVariations = 0
+        variationModuleNames = []
         for taupt in self._tauPtVariation:
             for tauIsol in self._tauIsolationVariation:
                 for tauIsolCont in self._tauIsolationContinuousVariation:
@@ -190,21 +191,22 @@ class HPlusOptimisationScheme():
                                                             if bjetEt >= jetEt:
                                                                   nVariations += 1
                                                                   # Construct name for variation
-                                                                  myVariationName = "var"
-                                                                  myVariationName += "_taupt%.0f"%taupt
+                                                                  myVariationName = "%s_Opt"%analysisName
+                                                                  myVariationName += "_Taupt%.0f"%taupt
                                                                   myVariationName += "_%s"%tauIsol
                                                                   if tauIsolCont > 0:
                                                                       myVariationName += "%.1f"%tauIsolCont
-                                                                  myVariationName += "_rtau%.1f"%rtau
-                                                                  myVariationName += "_jet%s"%jetNumber
+                                                                  myVariationName += "_Rtau%.1f"%rtau
+                                                                  myVariationName += "_Jet%s"%jetNumber
                                                                   myVariationName += "_Et%.0f"%jetEt
                                                                   myVariationName += "_Beta%s"%jetBeta
-                                                                  myVariationName += "_met%.0f"%met
-                                                                  myVariationName += "_bjet%s"%bjetNumber
+                                                                  myVariationName += "_Met%.0f"%met
+                                                                  myVariationName += "_Bjet%s"%bjetNumber
                                                                   myVariationName += "_Et%.0f_discr%.1f"%(bjetEt,bjetDiscr)
-                                                                  myVariationName += "_dphi%.0f"%dphi
-                                                                  myVariationName += "_topreco"+topreco
+                                                                  myVariationName += "_Dphi%.0f"%dphi
+                                                                  myVariationName += "_Topreco"+topreco
                                                                   myVariationName = myVariationName.replace(".","") # remove dots from name since they are forbidden
+                                                                  myVariationName = myVariationName.replace("_","") # remove underscores from name since they are forbidden
                                                                   #print "Generating variation",myVariationName
                                                                   # Clone module and make changes
                                                                   myModule = nominalAnalysis.clone()
@@ -229,9 +231,11 @@ class HPlusOptimisationScheme():
                                                                               preSequence=commonSequence,
                                                                               additionalCounters=additionalCounters,
                                                                               signalAnalysisCounters=True)
+                                                                  variationModuleNames.append(myVariationName)
         if self._maxVariations > 0:
             if nVariations > self._maxVariations:
                 print "You generated %d variations, which is more than the safety limit (%d)!"%(nVariations,self._maxVariations)
                 print "To remove the safety switch (if you REALLY know what you are doing), call disableMaxVariations()"
                 sys.exit()
         print "Added %d variations to the analysis"%nVariations
+        return variationModuleNames
