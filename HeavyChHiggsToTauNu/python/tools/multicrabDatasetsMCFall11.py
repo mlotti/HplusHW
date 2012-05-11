@@ -19,7 +19,7 @@ datasets = {
         "crossSection": 165,
         "data": {
             "AOD": {
-                "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
+                "datasetpath": "/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
                 "number_of_jobs": 50, # Adjusted for PATtuple file size;  53 GB, 19 files
             },
             "pattuple_v25": {
@@ -350,36 +350,91 @@ datasets = {
 
     # QCD backgrounds
     # Cross sections are from https://twiki.cern.ch/twiki/bin/view/CMS/ReProcessingSummer2011
-#    "QCD_Pt120to170_TuneZ2_Fall11": {
-#        "dataVersion": "44XmcS6",
-#        "crossSection": 1.151e+05,
-#        "data": {
-#            "AOD": {
-#                "datasetpath": "/QCD_Pt-120to170_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-#                "number_of_jobs": 490, # Adjusted for PATtuple file size
-#            },
-#        },
-#    },
-#    "QCD_Pt170to300_TuneZ2_Fall11": {
-#        "dataVersion": "44XmcS6",
-#        "crossSection": 2.426e+04,
-#        "data": {
-#            "AOD": {
-#                "datasetpath": "/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-#                "number_of_jobs": 490, # Adjusted for PATtuple file size
-#            },
-#        },
-#    },
-#    "QCD_Pt300to470_TuneZ2_Fall11": {
-#        "dataVersion": "44XmcS6",
-#        "crossSection": 1.168e+03,
-#        "data": {
-#            "AOD": {
-#                "datasetpath": "/QCD_Pt-300to470_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-#                "number_of_jobs": 490 # Adjusted for PATtuple file size
-#            },
-#        }
-#    },
+    "QCD_Pt30to50_TuneZ2_Fall11": {
+        "dataVersion": "44XmcS6",
+        "crossSection": 5.312e+07,
+        "args": { "triggerMC": "1" },
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        "data": {
+           "AOD": {
+               "datasetpath": "/QCD_Pt-30to50_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
+               "number_of_jobs": 200, # Adjusted for PATtuple file size
+           },
+        },
+    },
+    "QCD_Pt50to80_TuneZ2_Fall11": {
+        "dataVersion":  "44XmcS6",
+        "crossSection": 6.359e+06,
+        "args": { "triggerMC": "1" },
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        "data": {
+           "AOD": {
+               "datasetpath": "/QCD_Pt-50to80_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
+               "number_of_jobs": 200, # Adjusted for PATtuple file size
+           },
+        },
+    },
+    "QCD_Pt80to120_TuneZ2_Fall11": {
+        "dataVersion": "44XmcS6",
+        "crossSection": 7.843e+05,
+        "args": { "triggerMC": "1" },
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        "data": {
+           "AOD": {
+               "datasetpath": "/QCD_Pt-80to120_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
+               "number_of_jobs": 200, # Adjusted for PATtuple file size
+           },
+        },
+    },
+
+    "QCD_Pt120to170_TuneZ2_Fall11": {
+        "dataVersion": "44XmcS6",
+        "crossSection": 1.151e+05,
+        "args": { "triggerMC": "1" },
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt-120to170_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
+                "number_of_jobs": 200, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "QCD_Pt170to300_TuneZ2_Fall11": {
+        "dataVersion": "44XmcS6",
+        "crossSection": 2.426e+04,
+        "args": { "triggerMC": "1" },
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
+                "number_of_jobs": 2000, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "QCD_Pt300to470_TuneZ2_Fall11": {
+        "dataVersion": "44XmcS6",
+        "crossSection": 1.168e+03,
+        "args": { "triggerMC": "1" },
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt-300to470_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
+                "number_of_jobs": 200 # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "QCD_Pt20_MuEnriched_TuneZ2_Fall11": {
+        "dataVersion": "44XmcS6", 
+        "crossSection": 296600000.*0.0002855,
+        "args": { "triggerMC": "1" },
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
+                "number_of_jobs": 490,  # Adjusted for PATtuple file size
+            },
+        }
+    },
 
     # EWK pythia
     # Cross sections https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
@@ -387,7 +442,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 43,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/WW_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -404,7 +459,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 18.2,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/WZ_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -421,7 +476,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 5.9,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/ZZ_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -443,7 +498,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 165, # [1,2], approx. NNLO
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -460,7 +515,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 31314, # [2], NNLO
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -478,11 +533,11 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 1, # FIXME
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/W2Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 300, # Adjusted for PATtuple file size ; expected output max. 38 MB/file, obs 38 MB / file
+                "number_of_jobs": 100, # Adjusted for PATtuple file size ; expected output max. 38 MB/file, obs 38 MB / file
                 #"se_white_list": ["T2_FI_HIP"],
             },
             "pattuple_v25": {
@@ -496,11 +551,11 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 1, # FIXME
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/W3Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 120, # Adjusted for PATtuple file size ; expected output max. 56 MB/file, obs 20-22 MB / file
+                "number_of_jobs": 50, # Adjusted for PATtuple file size ; expected output max. 56 MB/file, obs 20-22 MB / file
                 #"se_white_list": ["T2_FI_HIP"],
             },
             "pattuple_v25": {
@@ -514,11 +569,11 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 1, # FIXME
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/W4Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 200, # Adjusted for PATtuple file size ; expected output max. 144 MB/file, obs 20-22 MB / file
+                "number_of_jobs": 70, # Adjusted for PATtuple file size ; expected output max. 144 MB/file, obs 20-22 MB / file
                 #"se_white_list": ["T2_FI_HIP"],
             },
             "pattuple_v25": {
@@ -532,11 +587,11 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 3048, # [2], NNLO
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 350, # Adjusted for PATtuple file size ; file size 6945 GB, 1964 files, expected output max. 46 MB/file, obs 40 MB / file
+                "number_of_jobs": 300, # Adjusted for PATtuple file size ; file size 6945 GB, 1964 files, expected output max. 46 MB/file, obs 40 MB / file
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -549,11 +604,11 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 9611, # Madgraph gives this number
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/DYJetsToLL_M-10To50_TuneZ2_7TeV-madgraph/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 300, # Adjusted for PATtuple file size ; file size 5900 GB, 1420 files, expected output max. 47 MB/file, obs 21 MB / file
+                "number_of_jobs": 200, # Adjusted for PATtuple file size ; file size 5900 GB, 1420 files, expected output max. 47 MB/file, obs 21 MB / file
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -572,11 +627,11 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 41.92,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/T_TuneZ2_t-channel_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size ; 866 GB, 395 files, expected output max. 47 MB/file, obs 15-20 MB / file
+                "number_of_jobs": 20, # Adjusted for PATtuple file size ; 866 GB, 395 files, expected output max. 47 MB/file, obs 15-20 MB / file
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -589,11 +644,11 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 22.65,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size, expected output max. 47 MB/file, obs 15-20 MB / file
+                "number_of_jobs": 20, # Adjusted for PATtuple file size, expected output max. 47 MB/file, obs 15-20 MB / file
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -606,11 +661,11 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 7.87,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 20, # Adjusted for PATtuple file size ; 210 GB, 69 files, expected output max. 28 MB/file, obs 15-20 MB / file
+                "number_of_jobs": 10, # Adjusted for PATtuple file size ; 210 GB, 69 files, expected output max. 28 MB/file, obs 15-20 MB / file
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -623,11 +678,11 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 7.87,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 20, # Adjusted for PATtuple file size, expected output max. 15 MB/file, obs 15-20 MB / file
+                "number_of_jobs": 10, # Adjusted for PATtuple file size, expected output max. 15 MB/file, obs 15-20 MB / file
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -640,7 +695,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 3.19,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/T_TuneZ2_s-channel_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -657,7 +712,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 1.44,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",

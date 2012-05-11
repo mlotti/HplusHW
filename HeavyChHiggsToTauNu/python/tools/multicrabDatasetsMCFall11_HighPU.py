@@ -20,7 +20,7 @@ datasets = {
         "data": {
             "AOD": {
 #                "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/Fall11-E7TeV_Ave23_50ns-v2/AODSIM",
-                "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/Fall11-E7TeV_Ave23_50ns-v2/GEN-SIM-RAW-HLTDEBUG-RECO",
+                "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/Fall11-E7TeV_Ave32_50ns-v2/GEN-SIM-RAW-HLTDEBUG-RECO",
                 "number_of_jobs": 42, # Adjusted for PATtuple file size
             },
         }
@@ -31,7 +31,7 @@ datasets = {
         "data": {
             "AOD": {
 #                "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/Fall11-E7TeV_Ave23_50ns-v2/AODSIM",
-                "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/Fall11-E7TeV_Ave23_50ns-v2/GEN-SIM-RAW-HLTDEBUG-RECO",
+                "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/Fall11-E7TeV_Ave32_50ns-v2/GEN-SIM-RAW-HLTDEBUG-RECO",
                 "number_of_jobs": 42, # Adjusted for PATtuple file size
             },
         }
@@ -50,7 +50,7 @@ datasets = {
         "data": {
             "AOD": {
 #                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-E7TeV_Ave23_50ns-v1/AODSIM",
-                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-E7TeV_Ave23_50ns-v1/GEN-SIM-RAW-HLTDEBUG-RECO",
+                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-E7TeV_Ave32_50ns-v2/GEN-SIM-RAW-HLTDEBUG-RECO",
                 "number_of_jobs": 141, # Adjusted for PATtuple file size ; expected output max. 31 MB/file
             },
         },
