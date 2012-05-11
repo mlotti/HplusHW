@@ -16,38 +16,59 @@ import mkBrLimits_processTanbPlots as tanb
 
 tanbMax = 60
 mu = 200
+#forPaper = False
+forPaper = True
+
+unit = "GeV/c^{2}"
+if forPaper:
+    unit = "GeV"
 
 def main():
     limits = brlimit.BRLimits()
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
+    if forPaper:
+        histograms.cmsTextMode = histograms.CMSMode.PAPER
 
-    obs = limits.observedGraph()
-    exp = limits.expectedGraph()
-    exp1 = limits.expectedGraph(sigma=1)
-    exp2 = limits.expectedGraph(sigma=2)
+    # Get BR limits
+    graphs = {}
+    graphs["obs"] = limits.observedGraph()
+    graphs["exp"] = limits.expectedGraph()
+    graphs["exp1"] = limits.expectedGraph(sigma=1)
+    graphs["exp2"] = limits.expectedGraph(sigma=2)
 
     # Remove m=80
-    for gr in [obs, exp, exp1, exp2]:
+    for gr in graphs.values():
         tanb.cleanGraph(gr, minX=100)
 
+    # Get theory uncertainties on observed
+    obs_th_plus = tanb.getObservedPlus(graphs["obs"]);   obs_th_plus.SetName("ObservedTheoryPlus")
+    obs_th_minus = tanb.getObservedMinus(graphs["obs"]); obs_th_minus.SetName("ObservedTheoryMinus")
+    for gr in [obs_th_plus, obs_th_minus]:
+        gr.SetLineWidth(3)
+        gr.SetLineStyle(5)
+#        gr.SetLineStyle(9)
+    graphs["obs_th_plus"] = obs_th_plus
+    graphs["obs_th_minus"] = obs_th_minus
+
+    # Interpret in MSSM
     mu = 200
 
-    obs = tanb.graphToTanBeta(obs, mu)
-    exp = tanb.graphToTanBeta(exp, mu)
-    exp1 = tanb.graphToTanBeta(exp1, mu, False)
-    exp2 = tanb.graphToTanBeta(exp2, mu, False)
+    for key in graphs.keys():
+        removeNotValid = not (key in ["exp1", "exp2"])
+        graphs[key] = tanb.graphToTanBeta(graphs[key], mu, removeNotValid)
 
-    doPlot("limitsTanb_mh", obs, exp, exp1, exp2, limits, "m_{H^{+}} (GeV)")
+    doPlot("limitsTanb_mh", graphs, limits, "m_{H^{+}} (%s)"%unit)
 
-    for gr in [obs, exp, exp1, exp2]:
+    for gr in graphs.values():
         tanb.graphToMa(gr)
 
-    doPlot("limitsTanb_ma", obs, exp, exp1, exp2, limits, "m_{A} (GeV)")
+    doPlot("limitsTanb_ma", graphs, limits, "m_{A} (%s)"%unit)
 
 
-def doPlot(name, obs, exp, exp1, exp2, limits, xlabel):
+def doPlot(name, graphs, limits, xlabel):
+    obs = graphs["obs"]
     excluded = ROOT.TGraph(obs)
     excluded.SetFillColor(ROOT.kGray)
     excluded.SetPoint(obs.GetN(), obs.GetX()[obs.GetN()-1], 2*tanbMax)
@@ -58,14 +79,18 @@ def doPlot(name, obs, exp, exp1, exp2, limits, xlabel):
     excluded.SetLineColor(ROOT.kWhite)
 
     plot = plots.PlotBase([
-            histograms.HistoGraph(obs, "Observed", drawStyle="PL", legendStyle="lp"),
+            histograms.HistoGraph(graphs["obs"], "Observed", drawStyle="PL", legendStyle="lp"),
+            histograms.HistoGraph(graphs["obs_th_plus"], "ObservedPlus", drawStyle="L", legendStyle="l"),
+            histograms.HistoGraph(graphs["obs_th_minus"], "ObservedMinus", drawStyle="L"),
             histograms.HistoGraph(excluded, "Excluded", drawStyle="F", legendStyle="f"),
-            histograms.HistoGraph(exp, "Expected", drawStyle="L"),
-            histograms.HistoGraph(exp1, "Expected1", drawStyle="F", legendStyle="fl"),
-            histograms.HistoGraph(exp2, "Expected2", drawStyle="F", legendStyle="fl"),
+            histograms.HistoGraph(graphs["exp"], "Expected", drawStyle="L"),
+            histograms.HistoGraph(graphs["exp1"], "Expected1", drawStyle="F", legendStyle="fl"),
+            histograms.HistoGraph(graphs["exp2"], "Expected2", drawStyle="F", legendStyle="fl"),
             ])
 
     plot.histoMgr.setHistoLegendLabelMany({
+            "ObservedPlus": "Observed #pm1#sigma (th.)",
+            "ObservedMinus": None,
             "Expected": None,
             "Expected1": "Expected median #pm 1#sigma",
             "Expected2": "Expected median #pm 2#sigma"
