@@ -51,8 +51,11 @@ def main():
 
 
 class BRLimits:
-    def __init__(self, resultfile="limits.json", configfile="configuration.json"):
-        f = open(resultfile, "r")
+    def __init__(self, directory="."):
+        resultfile="limits.json"
+        configfile="configuration.json"
+
+        f = open(os.path.join(directory, resultfile), "r")
         limits = json.load(f)
         f.close()
 
@@ -79,7 +82,7 @@ class BRLimits:
             setattr(self, attr, rearrange(getattr(self, attr)))
         
 
-        f = open(configfile, "r")
+        f = open(os.path.join(directory, configfile), "r")
         config = json.load(f)
         f.close()
 
