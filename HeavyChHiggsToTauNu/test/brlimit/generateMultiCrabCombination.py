@@ -11,7 +11,7 @@ def main():
                             lands.mutauDatacardPattern,
                             ],
         rootfilePatterns = [lands.taujetsRootfilePattern],
-        toysPerJob = 50,
+        clsType = lands.LEPType(toysPerJob=50),
         numberOfJobs = 20,
         postfix = "combination_toys1k",
         crabScheduler="arc",

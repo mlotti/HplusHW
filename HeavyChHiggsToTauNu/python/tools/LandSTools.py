@@ -13,13 +13,20 @@ import subprocess
 import multicrab
 import git
 
-LandS_tag           = "V3-04-01_eps" # this one is in the Tapio's scripts
+#LandS_tag           = "V3-04-01_eps" # this one is in the Tapio's scripts
 #LandS_tag           = "t3-04-13"
-#LandS_tag	    = "HEAD"
+LandS_tag	    = "HEAD" # Recommended by Mingshui 10.5.2012 at 23:23:22 EEST
 
-commonOptions  = "--PhysicsModel ChargedHiggs --bQuickEstimateInitialLimit 0"
-defaultOptions = "-M Hybrid  --initialRmin 0. --initialRmax 0.09"
-defaultToysPerJob = 50
+commonOptions  = "--PhysicsModel ChargedHiggs"
+
+lepHybridOptions = "-M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09"
+lepHybridToys = 50
+
+lhcHybridOptions = "-M Hybrid --freq --ExpectationHints Asymptotic --scanRs 1 --freq --PLalgorithm Migrad --rMin 0 --maximumFunctionCallsInAFit 500000 --minuitSTRATEGY 1 --rMax 1"
+lhcHybridToysPerJob = "--nToysForCLsb 300 --nToysForCLb 150"
+
+
+defaultOptions = lepHybridOptions
 defaultNumberOfJobs = 20
 
 defaultFirstSeed = 1000
@@ -55,15 +62,17 @@ luminosity_re = re.compile("luminosity=[\S| ]*(?P<lumi>\d+\.\d+)")
 def generateMultiCrab(massPoints=defaultMassPoints,
                       datacardPatterns=defaultDatacardPatterns,
                       rootfilePatterns=defaultRootfilePatterns,
-                      firstSeed=defaultFirstSeed,
-                      landsOptions=defaultOptions,
-                      toysPerJob=defaultToysPerJob,
+                      clsType = None,
                       numberOfJobs=defaultNumberOfJobs,
                       crabScheduler="arc",
                       crabOptions={},
                       postfix=""
                       ):
-    lands = MultiCrabLandS(massPoints, datacardPatterns, rootfilePatterns, firstSeed, landsOptions, toysPerJob)
+    cls = clsType
+    if clsType == None:
+        cls = LEPType()
+
+    lands = MultiCrabLandS(massPoints, datacardPatterns, rootfilePatterns, cls)
     lands.createMultiCrabDir(postfix)
     lands.copyLandsInputFiles()
     lands.writeLandsScripts()
@@ -71,13 +80,99 @@ def generateMultiCrab(massPoints=defaultMassPoints,
     lands.writeMultiCrabCfg(numberOfJobs)
     lands.printInstruction()
 
-class MultiCrabLandS:
-    def __init__(self, massPoints, datacardPatterns, rootfilePatterns, firstSeed, landsOptions, toysPerJob):
-        self.exe = findOrInstallLandS()
-        self.firstSeed = firstSeed
-        self.landsOptions = landsOptions
+class LEPType:
+    def __init__(self, options=lepHybridOptions, toysPerJob=lepHybridToys, firstSeed=defaultFirstSeed):
+        self.options = options
         self.toysPerJob = toysPerJob
+        self.firstSeed = firstSeed
 
+        self.expScripts = {}
+        self.obsScripts = {}
+
+    def name(self):
+        return "LEP"
+
+    def clone(self, **kwargs):
+        names = ["options", "toysPerJob", "firstSeed"]
+        for k in kwargs.keys():
+            if not k in names:
+                raise Exception("Unknown keyword argument '%s', known arguments are %s" % ", ".join(names))
+
+        args = {}
+        for n in names:
+            args[n] = kwargs.get(n, getattr(self, n))
+        return LEPType(**args)
+
+    def setDirectory(self, dirname):
+        self.dirname = dirname
+        
+    def createScripts(self, mass, datacardFiles):
+        self._createObs(mass, datacardFiles)
+        self._createExp(mass, datacardFiles)
+
+    def _createObs(self, mass, datacardFiles):
+        fileName = "runLandS_Observed_m" + mass
+        command = [
+            "#!/bin/sh",
+            "",
+            "SEED=$(expr %d + $1)" % self.firstSeed,
+            'echo "LandSSeed=$SEED"',
+            "",
+            "./lands.exe %s %s --seed $SEED -d %s | tail -5 > lands.out" % (commonOptions, self.options, " ".join(datacardFiles)),
+            ""
+            "cat lands.out"
+            ]
+        self._writeScript(mass, self.expScripts, fileName, "\n".join(command)+"\n")
+
+    def _createExp(self, mass, datacardFiles):
+        fileName = "runLandS_Expected_m" + mass
+        command = [
+            "#!/bin/sh",
+            "",
+            "SEED=$(expr %d + $1)" % self.firstSeed,
+            'echo "LandSSeed=$SEED"',
+            "",
+            "./lands.exe %s %s -n split_m%s --doExpectation 1 %s --seed $SEED -d %s | tail -5 > lands.out" % (commonOptions, self.options, mass, self.toysPerJob, " ".join(datacardFiles)),
+            "",
+            "cat lands.out",
+            ]
+        self._writeScript(mass, self.obsScripts, fileName, "\n".join(command)+"\n")
+    
+    def _writeScript(self, mass, dictionary, filename, content):
+        fname = os.path.join(self.dirname, filename)
+        fOUT = open(fname, 'w')
+        fOUT.write(content)
+        fOUT.close()
+
+        # make the script executable
+        st = os.stat(fname)
+        os.chmod(fname, st.st_mode | stat.S_IXUSR)
+
+        dictionary[mass] = filename
+
+    def writeMultiCrabConfig(self, output, mass, inputFiles, numJobs):
+        output.write("[Observed_m%s]\n" % mass)
+        output.write("USER.script_exe = %s\n" % self.obsScripts[mass])
+        output.write("USER.additional_input_files = %s\n" % ",".join(inputFiles))
+        output.write("CMSSW.number_of_jobs = 1\n")
+        output.write("CMSSW.output_file = lands.out\n")
+        output.write("\n")
+
+        output.write("[Expected_m%s]\n" % mass)
+        output.write("USER.script_exe = %s\n" % self.expScripts[mass])
+        output.write("USER.additional_input_files = %s\n" % ",".join(inputFiles))
+        output.write("CMSSW.number_of_jobs = %d\n" % numJobs)
+        output.write("CMSSW.output_file = lands.out,split_m%s_limitbands.root,split_m%s_limits_tree.root\n" % (mass, mass))
+
+
+        
+
+class MultiCrabLandS:
+    def __init__(self, massPoints, datacardPatterns, rootfilePatterns, clsType):
+        self.exe = findOrInstallLandS()
+        self.clsType = clsType.clone()
+
+        self.massPoints = massPoints
         self.datacards = {}
         self.rootfiles = {}
         self.scripts   = []
@@ -88,10 +183,11 @@ class MultiCrabLandS:
             "datacards": datacardPatterns,
             "rootfiles": rootfilePatterns,
             "landsVersion": LandS_tag,
-            "codeVersion": git.getCommitId()
+            "codeVersion": git.getCommitId(),
+            "clsType": self.clsType.name(),
         }
 
-        for mass in massPoints:
+        for mass in self.massPoints:
             for dc in datacardPatterns:
                 fname = dc % mass
                 if not os.path.isfile(fname):
@@ -108,13 +204,14 @@ class MultiCrabLandS:
 
         if len(self.datacards) == 0:
 	    print "No LandS datacards found in this directory!"
-            print "Mass points:", ", ".join(massPoints)
+            print "Mass points:", ", ".join(self.massPoints)
             print "Datacard patterns:", ", ".join(datacardPatterns)
             print "Rootfile patterns:", ", ".join(rootfilePatterns)
 	    sys.exit(1)
 
     def createMultiCrabDir(self, postfix):
 	self.dirname = multicrab.createTaskDir(prefix="LandSMultiCrab", postfix=postfix)
+        self.clsType.setDirectory(self.dirname)
 
     def copyLandsInputFiles(self):
         for d in [self.datacards, self.rootfiles]:
@@ -125,48 +222,7 @@ class MultiCrabLandS:
 
     def writeLandsScripts(self):
         for mass, datacardFiles in self.datacards.iteritems():
-	    self.writeObs(mass, datacardFiles)
-	    self.writeExp(mass, datacardFiles)
-
-    def writeObs(self, mass, datacardFiles):
-        outFileName = "runLandS_Observed_m" + mass
-        command = [
-            "#!/bin/sh",
-            "",
-            "SEED=$(expr %d + $1)" % self.firstSeed,
-            'echo "LandSSeed=$SEED"',
-            "",
-            "./lands.exe %s %s --seed $SEED -d %s | tail -5 > lands.out" % (commonOptions, self.landsOptions, " ".join(datacardFiles)),
-            ""
-            "cat lands.out"
-            ]
-        self.writeCard(outFileName, "\n".join(command)+"\n")
-
-    def writeExp(self, mass, datacardFiles):
-        outFileName = "runLandS_Expected_m" + mass
-        command = [
-            "#!/bin/sh",
-            "",
-            "SEED=$(expr %d + $1)" % self.firstSeed,
-            'echo "LandSSeed=$SEED"',
-            "",
-            "./lands.exe %s %s -n split_m%s --doExpectation 1 -t %d --seed $SEED -d %s | tail -5 > lands.out" % (commonOptions, self.landsOptions, mass, self.toysPerJob, " ".join(datacardFiles)),
-            "",
-            "cat lands.out",
-            ]
-        self.writeCard(outFileName, "\n".join(command)+"\n")
-
-    def writeCard(self, filename, command):
-        fname = os.path.join(self.dirname, filename)
-        fOUT = open(fname, 'w')
-        fOUT.write(command)
-        fOUT.close()
-
-        # make the script executable
-        st = os.stat(fname)
-        os.chmod(fname, st.st_mode | stat.S_IXUSR)
-
-        self.scripts.append(filename)
+            self.clsType.createScripts(mass, datacardFiles)
 
     def writeCrabCfg(self, crabScheduler, crabOptions):
 	filename = os.path.join(self.dirname, "crab.cfg")
@@ -215,36 +271,11 @@ class MultiCrabLandS:
 	fOUT.write("CMSSW.pset                   = none\n")
         fOUT.write("GRID.ce_white_list           = jade-cms.hip.fi\n")
         fOUT.write("\n")
-    
-        for i, script in enumerate(self.scripts):
-	    match = script_re.search(script)
-	    if match:
-	        label = match.group("label")
-		mass  = match.group("mass")
-                datacards = ",".join(self.datacards[mass])
-                rootfiles = ",".join(self.rootfiles[mass])
-                exe = self.exe.split("/")[-1]
-		fOUT.write("[" + label + str(mass) + "]\n")
-		fOUT.write("USER.return_data             = 1\n")
-		fOUT.write("USER.copy_data               = 0\n")
-	    	fOUT.write("USER.script_exe              = " + script + "\n")
-	    	fOUT.write("USER.additional_input_files  = " + datacards + "," + exe + "," + rootfiles + "\n")
-		if label.find("Expected") == 0:
-                    fdc = "split_m%s" % mass
-                    output_files = [
-                        fdc + "_limitbands.root",
-                        fdc + "_limits_tree.root"
-                        ]
 
-		    fOUT.write("CMSSW.number_of_jobs         = %d\n" % numberOfJobs)
-		    fOUT.write("CMSSW.output_file            = lands.out," + ",".join(output_files) + "\n")
-		else:
-		    fOUT.write("CMSSW.number_of_jobs         = 1\n")
-		    fOUT.write("CMSSW.output_file            = lands.out\n")
-	    	fOUT.write("\n")
-		fOUT.write("\n")
-
-        fOUT.close()
+        exe = self.exe.split("/")[-1]
+        for mass in self.massPoints:
+            self.clsType.writeMultiCrabConfig(fOUT, mass, [exe]+self.datacards[mass]+self.rootfiles[mass], numberOfJobs)
+            fOUT.write("\n\n")
 
         f = open(os.path.join(self.dirname, "configuration.json"), "wb")
         json.dump(self.configuration, f, sort_keys=True, indent=2)
@@ -555,6 +586,9 @@ def findOrInstallLandS():
             raise Exception("cvs checkout failed to create directory '%s' under '%s'" % (brlimitBase, landsDir))
 
         os.chdir(landsDir)
+        ret = subprocess.call(["make", "clean"])
+        if ret != 0:
+            raise Exception("Compiling LandS failed (exit code %d), command 'make clean'" % ret)
         ret = subprocess.call(["make"])
         if ret != 0:
             raise Exception("Compiling LandS failed (exit code %d), command 'make'" % ret)

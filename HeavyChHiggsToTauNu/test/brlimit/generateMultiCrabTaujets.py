@@ -7,7 +7,7 @@ def main():
         massPoints = lands.allMassPoints,
         datacardPatterns = [lands.taujetsDatacardPattern],
         rootfilePatterns = [lands.taujetsRootfilePattern],
-        toysPerJob = 50,
+        clsType = lands.LEPType(toysPerJob=50),
         numberOfJobs = 20,
         postfix = "taujets_toys1k",
         crabScheduler="arc",
