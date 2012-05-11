@@ -15,10 +15,10 @@ def main():
         numberOfJobs = 20,
         postfix = "combination_toys1k",
         crabScheduler="arc",
-        crabOptions = {"GRID": [
-                "ce_white_list = jade-cms.hip.fi",
+#        crabOptions = {"GRID": [
+#                "ce_white_list = jade-cms.hip.fi",
 #                "ce_white_list = korundi.grid.helsinki.fi",
-                ]},
+#                ]},
         )
 
 if __name__ == "__main__":

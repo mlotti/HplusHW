@@ -17,10 +17,12 @@ def main():
     landsOptionsB = "-M Hybrid  --initialRmin 0. --initialRmax 0.15"
 
     crabScheduler = "arc"
-    crabOptions = {"GRID": [
-            "ce_white_list = jade-cms.hip.fi",
+    crabOptions = {
+#        "GRID": [
+#            "ce_white_list = jade-cms.hip.fi",
 #            "ce_white_list = korundi.grid.helsinki.fi",
-            ]}
+#            ]
+        }
     
 
     lands.generateMultiCrab(
