@@ -62,9 +62,6 @@ namespace HPlus {
       void incrementNJetsCounter() { increment(fNJetsCounter); }
       void incrementBTaggingCounter() { increment(fBTaggingCounter); }
       void incrementDeltaPhiCounter() { increment(fDeltaPhiCounter); }
-      void incrementDeltaPhi160Counter() { increment(fDeltaPhi160Counter); }
-      void incrementDeltaPhi130Counter() { increment(fDeltaPhi130Counter); }
-      void incrementDeltaPhi90Counter() { increment(fDeltaPhi90Counter); }
       void incrementFakeMETVetoCounter() { increment(fFakeMETVetoCounter); }
       void incrementTopSelectionCounter() { increment(fTopSelectionCounter); }
       void incrementTopChiSelectionCounter() { increment(fTopChiSelectionCounter); }
@@ -76,9 +73,6 @@ namespace HPlus {
       Count fNJetsCounter;
       Count fBTaggingCounter;
       Count fDeltaPhiCounter;
-      Count fDeltaPhi160Counter;
-      Count fDeltaPhi130Counter;
-      Count fDeltaPhi90Counter;
       Count fFakeMETVetoCounter;
       Count fTopSelectionCounter;
       Count fTopChiSelectionCounter;
@@ -96,9 +90,7 @@ namespace HPlus {
     kSignalOrderMETSelection,
     kSignalOrderBTagSelection,
     //kSignalOrderDeltaPhiSelection,
-    kSignalOrderDeltaPhi160Selection,
-    kSignalOrderDeltaPhi130Selection,
-    kSignalOrderDeltaPhi90Selection,
+    kSignalOrderDeltaPhiSelection,
     kSignalOrderFakeMETVeto,
     kSignalOrderTopSelection,
     kSignalOrderBjetSelection,
@@ -123,6 +115,7 @@ namespace HPlus {
     EventWeight& fEventWeight;
 
     const bool bBlindAnalysisStatus;
+    const double fDeltaPhiCutValue;
     //    const double ftransverseMassCut;
 
     Count fAllCounter;
@@ -140,10 +133,6 @@ namespace HPlus {
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
     Count fDeltaPhiTauMETCounter;
-    Count fdeltaPhiTauMET10Counter;
-    Count fdeltaPhiTauMET160Counter;
-    Count fdeltaPhiTauMET130Counter;
-    Count fdeltaPhiTauMET90Counter;
     Count fTauVetoAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiTauVetoCounter;
@@ -169,7 +158,7 @@ namespace HPlus {
     Count fTopChiSelectionCounter;
     Count fTopChiSelectionNarrowCounter;
     Count fTopWithBSelectionCounter;
-    Count fTopWithWSelectionCounter;    
+    Count fTopWithWSelectionCounter;
 
     TriggerSelection fTriggerSelection;
     VertexSelection fPrimaryVertexSelection;
@@ -201,9 +190,7 @@ namespace HPlus {
 
     // Scale factor uncertainties
     ScaleFactorUncertaintyManager fSFUncertaintiesAfterBTagging;
-    ScaleFactorUncertaintyManager fSFUncertaintiesAfterDeltaPhi160;
-    ScaleFactorUncertaintyManager fSFUncertaintiesAfterDeltaPhi130;
-    ScaleFactorUncertaintyManager fSFUncertaintiesAfterDeltaPhi90;
+    ScaleFactorUncertaintyManager fSFUncertaintiesAfterDeltaPhi;
 
     // Histograms
     
@@ -222,13 +209,7 @@ namespace HPlus {
     TH1 *hTransverseMassMET70;
     TH1 *hTransverseMassTauVeto;
     TH1 *hTransverseMassAfterDeltaPhi;
-    TH1 *hTransverseMassAfterDeltaPhi160;
-    TH1 *hTransverseMassAfterDeltaPhi130;
-    TH1 *hTransverseMassAfterDeltaPhi90;
     TH1 *hNonQCDTypeIITransverseMass;
-    TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi130;
-    TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi160;
-    TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi90;
     TH1 *hDeltaPhi;
     TH1 *hDeltaPhiJetMet;
     TH1 *hAlphaT;
@@ -247,7 +228,7 @@ namespace HPlus {
     TH1 *hMetAfterCuts;
     TH1 *hNonQCDTypeIISelectedTauEtAfterCuts;
     TH1 *hNonQCDTypeIISelectedTauEtaAfterCuts;
-    TH1 *hTransverseMassDeltaPhiUpperCutFakeMet; 
+    TH1 *hTransverseMassDeltaPhiUpperCutFakeMet;
 
     TH1 *hSelectionFlow;
     TH2 *hSelectionFlowVsVertices;
