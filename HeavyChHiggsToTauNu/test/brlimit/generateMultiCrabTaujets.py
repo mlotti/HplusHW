@@ -5,7 +5,11 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
 def main():
     postfix = "taujets"
     lepType = False
+#    lepType = True
+    lhcType = False
     lhcType = True
+    lhcTypeAsymptotic = False
+#    lhcTypeAsymptotic = True
 
     crabScheduler = "arc"
     crabOptions = {
@@ -33,6 +37,13 @@ def main():
             numberOfJobs = 10,
             postfix = postfix+"_lhc_jobs10_sb300_b150",
             crabScheduler=crabScheduler, crabOptions=crabOptions)
+    if lhcTypeAsymptotic:
+        lands.produceLHCAsymptotic(
+            massPoints = lands.allMassPoints,
+            datacardPatterns = [lands.taujetsDatacardPattern],
+            rootfilePatterns = [lands.taujetsRootfilePattern],
+            postfix = postfix+"_lhcasy"
+            )
 
 if __name__ == "__main__":
     main()

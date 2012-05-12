@@ -22,10 +22,11 @@ commonOptions  = "--PhysicsModel ChargedHiggs"
 lepHybridOptions = "-M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09"
 lepHybridToys = 50
 
-lhcHybridOptions = "-M Hybrid --freq --ExpectationHints Asymptotic --scanRs 1 --freq --PLalgorithm Migrad --rMin 0 --maximumFunctionCallsInAFit 500000 --minuitSTRATEGY 1 --rMax 1"
+lhcHybridOptions = "-M Hybrid --freq --ExpectationHints Asymptotic --scanRs 1 --PLalgorithm Migrad --rMin 0 --maximumFunctionCallsInAFit 500000 --minuitSTRATEGY 1 --rMax 1"
 lhcHybridToysCLsb = 300
 lhcHybridToysCLb = 150
 
+lhcAsymptoticOptions = "-M Asymptotic --rMin 0 --maximumFunctionCallsInAFit 500000 --rMax 1"
 
 defaultOptions = lepHybridOptions
 defaultNumberOfJobs = 20
@@ -76,7 +77,22 @@ def generateMultiCrab(massPoints=defaultMassPoints,
     lands.writeMultiCrabCfg(numberOfJobs)
     lands.printInstruction()
 
-       
+def produceLHCAsymptotic(massPoints=defaultMassPoints,
+                         datacardPatterns=defaultDatacardPatterns,
+                         rootfilePatterns=defaultRootfilePatterns,
+                         clsType = None,
+                         postfix=""
+                         ):
+
+    clas = clsType
+    if clsType == None:
+        cls = LHCTypeAsymptotic()
+
+    lands = MultiCrabLandS(massPoints, datacardPatterns, rootfilePatterns, cls)
+    lands.createMultiCrabDir(postfix)
+    lands.copyLandsInputFiles()
+    lands.writeLandsScripts()
+    lands.runLandSForAsymptotic()
 
 class MultiCrabLandS:
     def __init__(self, massPoints, datacardPatterns, rootfilePatterns, clsType):
@@ -199,6 +215,22 @@ class MultiCrabLandS:
         print "cd",self.dirname,"&& multicrab -create"
 
 
+    def runLandSForAsymptotic(self):
+        print "Running LandS for asymptotic limits, saving results to %s" % self.dirname
+        f = open(os.path.join(self.dirname, "configuration.json"), "wb")
+        json.dump(self.configuration, f, sort_keys=True, indent=2)
+        f.close()
+
+        results = ResultContainer(self.dirname)
+        for mass in self.massPoints:
+            results.append(self.clsType.runLandS(mass))
+            print "Processed mass point %s" % mass
+        print
+
+        results.print2()
+        fname = results.saveJson()
+        print "Wrote results to %s" % fname
+
 def _updateArgs(kwargs, obj, names):
     for k in kwargs.keys():
         if not k in names:
@@ -217,7 +249,6 @@ def _writeScript(filename, content):
     # make the script executable
     st = os.stat(filename)
     os.chmod(filename, st.st_mode | stat.S_IXUSR)
-
 
 class LEPType:
     def __init__(self, options=lepHybridOptions, toysPerJob=lepHybridToys, firstSeed=defaultFirstSeed):
@@ -315,7 +346,7 @@ class LEPType:
 
         fname = os.path.join(crabRes, mergedFilename)
         f = open(fname)
-        result_re = re.compile("BANDS    (?P<minus2>(\d*\.\d*))(    )(?P<minus1>(\d*\.\d*))(    )(?P<mean>(\d*\.\d*))(    )(?P<plus1>(\d*\.\d*))(    )(?P<plus2>(\d*\.\d*))(    )(?P<median>(\d*\.\d*))")
+        result_re = re.compile("BANDS\s+(?P<minus2>\d+\.\d+)\s+(?P<minus1>\d+\.\d+)\s+(?P<mean>\d+\.\d+)\s+(?P<plus1>\d+\.\d+)\s+(?P<plus2>\d+\.\d+)\s+(?P<median>\d+\.\d+)")
         for line in f:
             match = result_re.search(line)
             if match:
@@ -358,7 +389,7 @@ class LHCType:
         self.scripts = {}
 
     def name(self):
-        return "LEP"
+        return "LHC"
 
     def clone(self, **kwargs):
         args = _updateArgs(kwargs, self, ["options", "toysCLsb", "toysCLb", "firstSeed"])
@@ -375,10 +406,9 @@ class LHCType:
             "SEED=$(expr %d + $1)" % self.firstSeed,
             'echo "LandSSeed=$SEED"',
             "",
-            "./lands.exe %s %s --seed $SEED -d %s | tee lands.out" % (commonOptions, self.options, " ".join(datacardFiles)),
-            "tail -n 5 lands.out > lands.out.tmp",
-            "mv lands.out.tmp lands.out",
-            ""
+            "./lands.exe %s %s -n split_m%s --nToysForCLsb %d --nToysForCLb %d --seed $SEED -d %s | tee lands.out.tmp" % (commonOptions, self.options, mass, self.toysCLsb, self.toysCLb, " ".join(datacardFiles)),
+            "head -n 50 lands.out.tmp> lands.out",
+            "tail -n 5 lands.out.tmp >> lands.out",
             "cat lands.out"
             ]
 
@@ -386,7 +416,7 @@ class LHCType:
         self.scripts[mass] = filename
 
     def writeMultiCrabConfig(self, output, mass, inputFiles, numJobs):
-        output.write("[Mass_%s]\n" % mass)
+        output.write("[Limit_m%s]\n" % mass)
         output.write("USER.script_exe = %s\n" % self.scripts[mass])
         output.write("USER.additional_input_files = %s\n" % ",".join(inputFiles))
         output.write("CMSSW.number_of_jobs = %d\n" % numJobs)
@@ -395,16 +425,17 @@ class LHCType:
     def getResult(self, path, mass):
         result = Result(mass)
 
-        rootFile = os.path.join(path, "Mass_%s"%mass, "res", "histograms-Mass_%s.root"%mass)
+        rootFile = os.path.join(path, "Limit_m%s"%mass, "res", "histograms-Limit_m%s.root"%mass)
         if not os.path.exists(rootFile):
             raise Exception("Merged root file '%s' does not exist, did you run landsMergeHistograms.py?" % rootFile)
 
         fitScript = os.path.join(findOrInstallLandS(directory=True), "test", "fitRvsCLs.C")
         if not os.path.exists(fitScript):
             raise Exception("Did not find fit script '%s'" % fitScript)
-        p = subprocess.Popen(["root", "-l", "-n", "-b", fitScript+"++"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        print rootFile
+        p = subprocess.Popen(["root", "-l", "-n", "-b", fitScript+"+"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         commands = [
-            "run(%s, plot_m%s)" % (rootFile, mass),
+            'run("%s", "plot_m%s")' % (rootFile, mass),
             ".q"
             ]
         output = p.communicate("\n".join(commands)+"\n")[0]
@@ -413,7 +444,7 @@ class LHCType:
         lines = output.split("\n")
         lines.reverse()
         def res(s):
-            return "(?P<%ss>[^/]+)/(?P<%se>[^,]+)" % (s, s)
+            return "(?P<%s>[^+]+)\+/-(?P<%se>[^,]+)" % (s, s)
         result_re = re.compile("EXPECTED LIMIT BANDS.+mass=[^:]+:\s*" + res("obs") + ",\s+" +
                                res("m2s") + ",\s+" + res("m1s") + ",\s+" + res("med") + ",\s+" + res("p1s") + ",\s+" + res("p2s"))
         for line in lines:
@@ -434,6 +465,106 @@ class LHCType:
 
         return result
 
+class LHCTypeAsymptotic:
+    def __init__(self, options=lhcAsymptoticOptions):
+        self.options = options
+
+        self.obsScripts = {}
+        self.expScripts = {}
+
+    def name(self):
+        return "LHCAsymptotic"
+
+    def clone(self, **kwargs):
+        return LHCTypeAsymptotic(kwargs.get("options", self.options))
+
+    def setDirectory(self, dirname):
+        self.dirname = dirname
+
+    def createScripts(self, mass, datacardFiles):
+        self._createObs(mass, datacardFiles)
+        self._createExp(mass, datacardFiles)
+
+    def _createObs(self, mass, datacardFiles):
+        fileName = "runLandS_Observed_m" + mass
+        command = [
+            "#!/bin/sh",
+            "",
+            "./lands.exe %s %s --minuitSTRATEGY 1 -n obs_m%s -d %s" % (commonOptions, self.options, mass, " ".join(datacardFiles)),
+            ]
+        _writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
+        self.obsScripts[mass] = fileName
+
+    def _createExp(self, mass, datacardFiles):
+        fileName = "runLandS_Expected_m" + mass
+        command = [
+            "#!/bin/sh",
+            "",
+            "./lands.exe %s %s --minuitSTRATEGY 2 --PLalgorithm Migrad -n exp_m%s -D asimov_b -d %s" % (commonOptions, self.options, mass, " ".join(datacardFiles)),
+            ]
+        _writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
+        self.expScripts[mass] = fileName
+
+    def runLandS(self, mass):
+        result = Result(mass)
+        self._runObserved(result, mass)
+        self._runExpected(result, mass)
+        return result
+
+    def _run(self, script, outputfile):
+        exe = findOrInstallLandS()
+        pwd = os.getcwd()
+        os.chdir(self.dirname)
+
+        p = subprocess.Popen(["./"+script], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output = p.communicate()[0]
+        if p.returncode != 0:
+            print output
+            raise Exception("LandS failed with exit code %d\nCommand: %s" % (p.returncode, script))
+        os.chdir(pwd)
+
+        f = open(os.path.join(self.dirname, outputfile), "w")
+        f.write(output)
+        f.write("\n")
+        f.close()
+
+        return output
+
+    def _runObserved(self, result, mass):
+        script = self.obsScripts[mass]
+        output = self._run(script, "obs_m%s_output.txt"%mass)
+
+        result_re = re.compile("Observed Upper Limit .* =\s*(?P<value>\d+\.\d+)")
+        lines = output.split("\n")
+        lines.reverse()
+        for line in lines:
+            match = result_re.search(line)
+            if match:
+                result.observed = match.group("value")
+                return result
+
+        print output
+        raise Exception("Unable to parse the output of command '%s'" % script)
+
+    def _runExpected(self, result, mass):
+        script = self.expScripts[mass]
+        output = self._run(script, "exp_m%s_output.txt"%mass)
+
+        result_re = re.compile("BANDS\s+(?P<minus2>\d+\.\d+)\s+(?P<minus1>\d+\.\d+)\s+(?P<mean>\d+\.\d+)\s+(?P<plus1>\d+\.\d+)\s+(?P<plus2>\d+\.\d+)\s+(?P<median>\d+\.\d+)")
+        lines = output.split("\n")
+        lines.reverse()
+        for line in lines:
+            match = result_re.search(line)
+            if match:
+		result.expected = match.group("median")
+		result.expectedPlus1Sigma  = match.group("plus1")
+		result.expectedPlus2Sigma  = match.group("plus2")
+		result.expectedMinus1Sigma = match.group("minus1")
+		result.expectedMinus2Sigma = match.group("minus2")
+                return result
+
+        print output
+        raise Exception("Unable to parse the output of command '%s'" % script)
 
 class Result:
     def __init__(self, mass = None, observed = None, observedError = None, expected = None, expectedPlus1Sigma = None, expectedPlus2Sigma = None, expectedMinus1Sigma = None, expectedMinus2Sigma = None):
@@ -478,6 +609,124 @@ class Result:
 #        print "     +2sigma = ",self.expectedPlus2Sigma," -2sigma = ",self.expectedMinus2Sigma
 
 
+class ResultContainer:
+    def __init__(self, path):
+        self.path = path
+
+        # Read task configuration json file
+        configFile = os.path.join(path, "configuration.json")
+        f = open(configFile)
+        self.config = json.load(f)
+        f.close()
+
+        # Read the luminosity, use tau+jets one if that's available, if not, use the first one
+        datacards = self.config["datacards"]
+        taujetsDc = None
+        for dc in datacards:
+            if "hplushadronic" in dc:
+                taujetsDc = dc
+                break
+        if taujetsDc != None:
+            self.readLuminosityTaujets(taujetsDc % self.config["masspoints"][0])
+        else:
+            self.readLuminosityLeptonic(self.config["datacards"][0] % self.config["masspoints"][0])
+
+        self.results = []
+
+    def append(self, obj):
+        self.results.append(obj)
+
+    def readLuminosityTaujets(self, filename):
+        lumi_re = re.compile("luminosity=[\S| ]*(?P<lumi>\d+\.\d+)")
+        fname = os.path.join(self.path, filename)
+        f = open(fname)
+        for line in f:
+            match = lumi_re.search(line)
+            if match:
+                self.lumi = str(1000*float(match.group("lumi"))) # 1/fb -> 1/pb
+                f.close()
+                return
+        raise Exception("Did not find luminosity information from '%s'" % fname)
+
+    def readLuminosityLeptonic(self, filename):
+        scale_re = re.compile("lumi scale (?P<scale>\S+)")
+        lumi_re = re.compile("lumi=(?P<lumi>\S+)")
+        scale = None
+        lumi = None
+
+        fname = os.path.join(self.path, filename)
+        f = open(fname)
+        for line in f:
+            match = scale_re.search(line)
+            if match:
+                scale = float(match.group("scale"))
+                continue
+            match = lumi_re.search(line)
+            if match:
+                lumi = float(match.group("lumi"))
+                break
+        f.close()
+        if lumi == None:
+            raise Exception("Did not find luminosity information from '%s'" % fname)
+        if scale != None:
+            lumi *= scale
+        self.lumi = str(lumi)
+
+    def getLuminosity(self):
+        return self.lumi
+
+    def print2(self):
+        print
+        print "                  Expected"
+        print "Mass  Observed    Median     -2sigma   -1sigma   +1sigma   +2sigma"
+        massIndex = [(int(self.results[i].mass), i) for i in range(len(self.results))]
+        massIndex.sort()
+        for mass, index in massIndex:
+            result = self.results[index]
+            print "%3s:  %-9s   %-8s   %-8s  %-8s  %-8s  %-8s" % (result.mass, result.observed, result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
+        print
+    
+    def saveJson(self, data={}):
+        output = {}
+        output.update(data)
+        output.update({
+                "luminosity": self.getLuminosity(),
+                "masspoints": {}
+                })
+
+        massIndex = [(int(self.results[i].mass), i) for i in range(len(self.results))]
+        massIndex.sort()
+        for mass, index in massIndex:
+            result = self.results[index]
+            output["masspoints"][result.mass] = {
+                "mass": result.mass,
+                "observed": result.observed,
+                "observed_error": result.observedError,
+                "expected": {
+                    "-2sigma": result.expectedMinus2Sigma,
+                    "-1sigma": result.expectedMinus1Sigma,
+                    "median": result.expected,
+                    "+1sigma": result.expectedPlus1Sigma,
+                    "+2sigma": result.expectedPlus2Sigma,
+                    }
+                }
+            if hasattr(result, "expectedError"):
+                output["masspoints"][result.mass]["expected"].update({
+                        "-2sigma_error": result.expectedMinus2SigmaError,
+                        "-1sigma_error": result.expectedMinus1SigmaError,
+                        "median_error": result.expectedError,
+                        "+1sigma_error": result.expectedPlus1SigmaError,
+                        "+2sigma_error": result.expectedPlus2SigmaError,
+                        })
+
+
+        fname = os.path.join(self.path, "limits.json")
+        f = open(fname, "wb")
+        json.dump(output, f, sort_keys=True, indent=2)
+        f.close()
+        return fname
+
+
 def ConvertToErrorBands(result):
     return Result(float(result.mass),
                   float(result.observed),
@@ -505,20 +754,8 @@ class ParseLandsOutput:
         else:
             raise Exception("Unsupported CLs type '%s' in %s" % (self.config["clsType"], configFile))
 
-        # Read the luminosity, use tau+jets one if that's available, if not, use the first one
-        datacards = self.config["datacards"]
-        taujetsDc = None
-        for dc in datacards:
-            if "hplushadronic" in dc:
-                taujetsDc = dc
-                break
-        if taujetsDc != None:
-            self.readLuminosityTaujets(taujetsDc % self.config["masspoints"][0])
-        else:
-            self.readLuminosityLeptonic(self.config["datacards"][0] % self.config["masspoints"][0])
-
         # Read in the results
-        self.results = []
+        self.results = ResultContainer(self.path)
         for mass in self.config["masspoints"]:
             self.results.append(self.clsType.getResult(self.path, mass))
 
@@ -529,25 +766,11 @@ class ParseLandsOutput:
 #	self.landsObsResult_re = re.compile("= (?P<value>\d+\.\d+)\s+\+/-\s+(?P<error>\d+\.\S+)")
 #	self.landsExpResult_re = re.compile("BANDS    (?P<minus2>(\d*\.\d*))(    )(?P<minus1>(\d*\.\d*))(    )(?P<mean>(\d*\.\d*))(    )(?P<plus1>(\d*\.\d*))(    )(?P<plus2>(\d*\.\d*))(    )(?P<median>(\d*\.\d*))")
 
-    def readLuminosityTaujets(self, filename):
-        lumi_re = re.compile("luminosity=[\S| ]*(?P<lumi>\d+\.\d+)")
-        fname = os.path.join(self.path, filename)
-        f = open(fname)
-        for line in f:
-            match = lumi_re.search(line)
-            if match:
-                self.lumi = match.group("lumi")
-                return
-        raise Exception("Did not find luminosity information from '%s'" % fname)
-
-    def readLuminosityLeptonic(self, filename):
-        raise Exception("Not implemented yet")
-
     def getLuminosity(self):
-	return self.lumi
+	return self.results.getLuminosity()
 
     def Print(self):
-	for result in self.results:
+	for result in self.results.results:
 	    result.Print()
 
     def Save(self, dOUT):
@@ -557,7 +780,7 @@ class ParseLandsOutput:
             os.mkdir(dOUT)
 
 	print "Saving in",dOUT
-	for result in self.results:
+	for result in self.results.results:
 	    fileName = outputFileNaming + result.mass
 	    print "    ",fileName
 	    fileName = dOUT + "/" + fileName
@@ -571,47 +794,14 @@ class ParseLandsOutput:
 	    fOUT.close()
 
     def print2(self):
-        print
-        print "                  Expected"
-        print "Mass  Observed    Median    -2sigma  -1sigma  +1sigma  +2sigma"
-        massIndex = [(int(self.results[i].mass), i) for i in range(len(self.results))]
-        massIndex.sort()
-        for mass, index in massIndex:
-            result = self.results[index]
-            print "%3s:  %-9s   %6s   %6s  %6s  %6s  %6s" % (result.mass, result.observed, result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
-        print
-
+        self.results.print2()
 
     def saveJson(self):
-        output = {
-            "luminosity": self.getLuminosity(),
-            "masspoints": {}
-            }
-        massIndex = [(int(self.results[i].mass), i) for i in range(len(self.results))]
-        massIndex.sort()
-        for mass, index in massIndex:
-            result = self.results[index]
-            output["masspoints"][result.mass] = {
-                "mass": result.mass,
-                "observed": result.observed,
-                "observed_error": result.observedError,
-                "expected": {
-                    "-2sigma": result.expectedMinus2Sigma,
-                    "-1sigma": result.expectedMinus1Sigma,
-                    "median": result.expected,
-                    "+1sigma": result.expectedPlus1Sigma,
-                    "+2sigma": result.expectedPlus2Sigma,
-                    }
-                }
-
-        fname = os.path.join(self.path, "limits.json")
-        f = open(fname, "wb")
-        json.dump(output, f, sort_keys=True, indent=2)
-        f.close()
+        fname = self.results.saveJson()
         print "Wrote results to %s" % fname
 
     def Data(self):
-	return self.results
+	return self.results.results
 
 
 def findOrInstallLandS(directory=False):

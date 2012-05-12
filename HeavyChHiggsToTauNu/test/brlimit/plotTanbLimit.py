@@ -35,8 +35,8 @@ def main():
     graphs = {}
     graphs["obs"] = limits.observedGraph()
     graphs["exp"] = limits.expectedGraph()
-    graphs["exp1"] = limits.expectedGraph(sigma=1)
-    graphs["exp2"] = limits.expectedGraph(sigma=2)
+    graphs["exp1"] = limits.expectedBandGraph(sigma=1)
+    graphs["exp2"] = limits.expectedBandGraph(sigma=2)
 
     # Remove m=80
     for gr in graphs.values():

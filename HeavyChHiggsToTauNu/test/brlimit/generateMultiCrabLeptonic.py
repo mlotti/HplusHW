@@ -2,7 +2,10 @@
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
 
-lepType = True
+lepType = False
+lhcType = False
+
+#lepType = True
 lhcType = True
 
 crabScheduler = "arc"

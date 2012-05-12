@@ -5,6 +5,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
 def main():
     postfix = "combination"
     lepType = False
+    lhcType = False
+
+#    lepType = True
     lhcType = True
 
     datacards = [lands.taujetsDatacardPattern,
