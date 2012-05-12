@@ -21,6 +21,7 @@ def main():
 
     doBRlimit(limits)
     doLimitError(limits)
+    limits.print2()
 
 def doBRlimit(limits):
     graphs = []
@@ -45,10 +46,10 @@ def doBRlimit(limits):
     ymax = 0.15
     finalStates = limits.getFinalstates()
     if len(finalStates) == 1:
-        if finalStates[0] in ["#mu#tau", "e#tau"]:
+        if finalStates[0] in ["#mu#tau_{h}", "e#tau_{h}"]:
             ymax = 0.4
         elif finalStates[0] == "e#mu":
-            ymax = 0.8            
+            ymax = 0.8
 
     plot.createFrame("limitsBr", opts={"ymin": 0, "ymax": ymax})
     plot.frame.GetXaxis().SetTitle("m_{H^{+}} (GeV)")
@@ -94,7 +95,7 @@ def doLimitError(limits):
             obsRelErrors = [(divideGraph(obsErr, obs), "ObsRelErr")]
             obsLabels = {"ObsRelErr": "Observed"}
 
-    if len(expRelErrors) == 0 and len(obsRelErr) == 0:
+    if len(expRelErrors) == 0 and len(obsRelErrors) == 0:
         return
         
     plot = plots.PlotBase()
@@ -160,6 +161,11 @@ class BRLimits:
         self.mass = limits["masspoints"].keys()
         members = ["mass"]
 
+        # sort mass
+        floatString = [(float(self.mass[i]), self.mass[i]) for i in range(len(self.mass))]
+        floatString.sort()
+        self.mass = [pair[1] for pair in floatString]
+
         firstMassPoint = limits["masspoints"][self.mass[0]]
 
         if "observed" in firstMassPoint:
@@ -184,16 +190,10 @@ class BRLimits:
             members.extend(["expected"+p+"Error" for p in ["Median", "Minus2", "Minus1", "Plus1", "Plus2"]])
 
         for attr in members:
+            setattr(self, attr+"_string", [m for m in getattr(self, attr)])
             setattr(self, attr, [float(m) for m in getattr(self, attr)])
 
-        # Sort according to mass
-        massIndex = [(self.mass[i], i) for i in range(len(self.mass))]
-        massIndex.sort()
-        def rearrange(lst):
-            return [lst[massIndex[i][1]] for i in xrange(len(massIndex))]
-        for attr in members:
-            setattr(self, attr, rearrange(getattr(self, attr)))
-        
+       
 
         f = open(os.path.join(directory, configfile), "r")
         config = json.load(f)
@@ -228,6 +228,14 @@ class BRLimits:
         ret = ", ".join(self.finalstates[:-1])
         ret += ", and %s final states" % self.finalstates[-1]
         return ret
+
+    def print2(self):
+        print
+        print "                  Expected"
+        print "Mass  Observed    Median     -2sigma   -1sigma   +1sigma   +2sigma"
+        for i in xrange(len(self.mass_string)):
+            print "%3s:  %-9s   %-8s   %-8s  %-8s  %-8s  %-8s" % (self.mass_string[i], self.observed_string[i], self.expectedMedian_string[i], self.expectedMinus2_string[i], self.expectedMinus1_string[i], self.expectedPlus1_string[i], self.expectedPlus2_string[i])
+        print
 
     def observedGraph(self):
         if not hasattr(self, "observed"):

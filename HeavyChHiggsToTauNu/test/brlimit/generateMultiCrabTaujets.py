@@ -5,11 +5,12 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
 def main():
     postfix = "taujets"
     lepType = False
-#    lepType = True
     lhcType = False
-    lhcType = True
     lhcTypeAsymptotic = False
-#    lhcTypeAsymptotic = True
+
+#    lepType = True
+#    lhcType = True
+    lhcTypeAsymptotic = True
 
     crabScheduler = "arc"
     crabOptions = {

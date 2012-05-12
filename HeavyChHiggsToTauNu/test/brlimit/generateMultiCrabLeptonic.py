@@ -4,9 +4,11 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
 
 lepType = False
 lhcType = False
+lhcTypeAsymptotic = False
 
 #lepType = True
-lhcType = True
+#lhcType = True
+lhcTypeAsymptotic = True
 
 crabScheduler = "arc"
 crabOptions = {
@@ -19,8 +21,8 @@ crabOptions = {
 def main():
     postfix = "taujets"
 
-    generate(lands.mutauDatacardPattern, "mutau", "0.05")
-    generate(lands.etauDatacardPattern,  "etau",  "0.05")
+#    generate(lands.mutauDatacardPattern, "mutau", "0.05")
+#    generate(lands.etauDatacardPattern,  "etau",  "0.05")
     generate(lands.emuDatacardPattern,   "emu",   "0.3")
 
 def generate(datacard, postfix, Rmax):
@@ -29,8 +31,8 @@ def generate(datacard, postfix, Rmax):
             massPoints = lands.allMassPoints,
             datacardPatterns = [datacard],
             rootfilePatterns = [],
-            clsType = lands.LEPType(toysPerJob=50, options=lands.lepHybridOptions.replace("0.09", Rmax)),
-            numberOfJobs = 20,
+            clsType = lands.LEPType(toysPerJob=500, options=lands.lepHybridOptions.replace("0.09", Rmax)),
+            numberOfJobs = 2,
             postfix = postfix+"_lep_toys1k",
             crabScheduler=crabScheduler, crabOptions=crabOptions)
     if lhcType:
@@ -42,6 +44,13 @@ def generate(datacard, postfix, Rmax):
             numberOfJobs = 10,
             postfix = postfix+"_lhc_jobs10_sb300_b150",
             crabScheduler=crabScheduler, crabOptions=crabOptions)
+    if lhcTypeAsymptotic:
+        lands.produceLHCAsymptotic(
+            massPoints = lands.allMassPoints,
+            datacardPatterns = [datacard],
+            rootfilePatterns = [],
+            postfix = postfix+"_lhcasy"
+            )
     
 
 if __name__ == "__main__":

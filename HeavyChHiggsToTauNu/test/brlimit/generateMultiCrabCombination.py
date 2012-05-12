@@ -6,9 +6,11 @@ def main():
     postfix = "combination"
     lepType = False
     lhcType = False
+    lhcTypeAsymptotic = False
 
 #    lepType = True
-    lhcType = True
+#    lhcType = True
+    lhcTypeAsymptotic = True
 
     datacards = [lands.taujetsDatacardPattern,
                  lands.emuDatacardPattern,
@@ -42,6 +44,13 @@ def main():
             numberOfJobs = 10,
             postfix = postfix+"_lhc_jobs10_sb300_b150",
             crabScheduler=crabScheduler, crabOptions=crabOptions)
+    if lhcTypeAsymptotic:
+        lands.produceLHCAsymptotic(
+            massPoints = lands.allMassPoints,
+            datacardPatterns = datacards,
+            rootfilePatterns = [lands.taujetsRootfilePattern],
+            postfix = postfix+"_lhcasy"
+            )
 
 if __name__ == "__main__":
     main()
