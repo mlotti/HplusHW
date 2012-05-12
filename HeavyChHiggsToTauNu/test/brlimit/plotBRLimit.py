@@ -20,8 +20,7 @@ def main():
     style = tdrstyle.TDRStyle()
 
     doBRlimit(limits)
-    doObservedError(limits)
-    doExpectedError(limits)
+    doLimitError(limits)
 
 def doBRlimit(limits):
     graphs = []
@@ -69,70 +68,55 @@ def doBRlimit(limits):
 
     plot.save()
 
-def doObservedError(limits):
-    obs = limits.observedGraph()
-    if obs == None:
-        return
-    obsErr = limits.observedErrorGraph()
-    if obsErr == None:
-        return
+def doLimitError(limits):
+    expRelErrors = []
+    expLabels = {}
+    obsRelErrors = []
+    obsLabels = {}
 
-    relErr = divideGraph(obsErr, obs)
-    plot = plots.PlotBase([histograms.HistoGraph(relErr, "ObsRelErr", drawStyle="PL")])
-
-    plot.createFrame("limitsBrObservedRelError", opts={"ymin": 0, "ymaxfactor": 1.5})
-    plot.frame.GetXaxis().SetTitle("m_{H^{+}} (GeV)")
-    plot.frame.GetYaxis().SetTitle("Uncertainty/limit")
-
-    plot.draw()
-
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=limits.getLuminosity())
-
-    size = 20
-    x = 0.2
-    histograms.addText(x, 0.88, "t #rightarrow H^{+}b, H^{+} #rightarrow #tau#nu", size=size)
-    histograms.addText(x, 0.84, limits.getFinalstateText(), size=size)
-    histograms.addText(x, 0.79, "BR(H^{+} #rightarrow #tau#nu) = 1", size=size)
-
-    size = 22
-    x = 0.55
-    histograms.addText(x, 0.88, "Toy MC relative", size=size)
-    histograms.addText(x, 0.84, "statistical uncertainty", size=size)
-
-    plot.save()
-
-def doExpectedError(limits):
     order = [0, 1, -1, 2, -2]
-
     expErrors = [limits.expectedErrorGraph(sigma=s) for s in order]
-    if expErrors[0] == None:
+    if expErrors[0] != None:
+        exps = [limits.expectedGraph(sigma=s) for s in order]
+        expRelErrors = [(divideGraph(expErrors[i], exps[i]), "ExpRelErr%d"%i) for i in xrange(len(exps))]
+        expLabels = {
+            "ExpRelErr0": "Expected median",
+            "ExpRelErr1": "Expected +1#sigma",
+            "ExpRelErr2": "Expected -1#sigma",
+            "ExpRelErr3": "Expected +2#sigma",
+            "ExpRelErr4": "Expected -2#sigma",
+            }
+
+    obsErr = limits.observedErrorGraph()
+    if obsErr != None:
+        obs = limits.observedGraph()
+        if obs != None:
+            obsRelErrors = [(divideGraph(obsErr, obs), "ObsRelErr")]
+            obsLabels = {"ObsRelErr": "Observed"}
+
+    if len(expRelErrors) == 0 and len(obsRelErr) == 0:
         return
-    exps = [limits.expectedGraph(sigma=s) for s in order]
+        
+    plot = plots.PlotBase()
+    if len(expRelErrors) > 0:
+        plot.histoMgr.extendHistos([histograms.HistoGraph(x[0], x[1], drawStyle="PL", legendStyle="lp") for x in expRelErrors])
+        plot.histoMgr.forEachHisto(styles.generator())
+        def sty(h):
+            r = h.getRootHisto()
+            r.SetLineStyle(1)
+            r.SetLineWidth(3)
+            r.SetMarkerSize(1.4)
+        plot.histoMgr.forEachHisto(sty)
+        plot.histoMgr.setHistoLegendLabelMany(expLabels)
+    if len(obsRelErrors) > 0:
+        obsRelErrors[0][0].SetMarkerSize(1.4)
+        obsRelErrors[0][0].SetMarkerStyle(25)
+        plot.histoMgr.insertHisto(0, histograms.HistoGraph(obsRelErrors[0][0], obsRelErrors[0][1], drawStyle="PL", legendStyle="lp"))
+        plot.histoMgr.setHistoLegendLabelMany(obsLabels)
 
-    relErrors = [divideGraph(expErrors[i], exps[i]) for i in xrange(len(exps))]
-
-    plot = plots.PlotBase([histograms.HistoGraph(relErrors[i], "ExpRelErr%d"%i, drawStyle="PL", legendStyle="lp") for i in xrange(len(exps))])
-
-    plot.histoMgr.setHistoLegendLabelMany({
-            "ExpRelErr0": "Median",
-            "ExpRelErr1": "+1#sigma",
-            "ExpRelErr2": "-1#sigma",
-            "ExpRelErr3": "+2#sigma",
-            "ExpRelErr4": "-2#sigma",
-            })
     plot.setLegend(histograms.moveLegend(histograms.createLegend(0.48, 0.75, 0.85, 0.92), dx=0.1, dy=-0.1))
 
-    plot.histoMgr.forEachHisto(styles.generator())
-    def sty(h):
-        r = h.getRootHisto()
-        r.SetLineStyle(1)
-        r.SetLineWidth(3)
-        r.SetMarkerSize(1.4)
-    plot.histoMgr.forEachHisto(sty)
-
-    plot.createFrame("limitsBrExpectedRelError", opts={"ymin": 0, "ymaxfactor": 1.5})
+    plot.createFrame("limitsBrRelativeUncertainty", opts={"ymin": 0, "ymaxfactor": 1.5})
     plot.frame.GetXaxis().SetTitle("m_{H^{+}} (GeV)")
     plot.frame.GetYaxis().SetTitle("Uncertainty/limit")
 
