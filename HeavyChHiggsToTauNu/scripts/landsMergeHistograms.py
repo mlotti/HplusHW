@@ -24,6 +24,9 @@ def main():
     if ret != 0:
         raise Exception("hplusMergeHistograms failed with exit code %d, command was\n%s" %(ret, " ".join(command)))
 
+    if "-h" in args or "--help" in args:
+        return 0
+
     # Run LandS to do obtain the results
     print "Running LandS for merged expected results"
     result = lands.ParseLandsOutput(".")
