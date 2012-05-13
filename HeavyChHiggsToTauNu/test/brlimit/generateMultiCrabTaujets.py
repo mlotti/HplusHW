@@ -9,8 +9,8 @@ def main():
     lhcTypeAsymptotic = False
 
 #    lepType = True
-#    lhcType = True
-    lhcTypeAsymptotic = True
+    lhcType = True
+#    lhcTypeAsymptotic = True
 
     crabScheduler = "arc"
     crabOptions = {
@@ -25,8 +25,8 @@ def main():
             massPoints = lands.allMassPoints,
             datacardPatterns = [lands.taujetsDatacardPattern],
             rootfilePatterns = [lands.taujetsRootfilePattern],
-            clsType = lands.LEPType(toysPerJob=50),
-            numberOfJobs = 20,
+            clsType = lands.LEPType(toysPerJob=100),
+            numberOfJobs = 10,
             postfix = postfix+"_lep_toys1k",
             crabScheduler=crabScheduler, crabOptions=crabOptions)
     if lhcType:
@@ -34,7 +34,9 @@ def main():
             massPoints = lands.allMassPoints,
             datacardPatterns = [lands.taujetsDatacardPattern],
             rootfilePatterns = [lands.taujetsRootfilePattern],
-            clsType = lands.LHCType(toysCLsb=300, toysCLb=150),
+            clsType = lands.LHCType(toysCLsb=300, toysCLb=150,
+                                    vR=("0.006", "0,05"), # obtained from asymp. limit as min/max of +-2 sigma and observed
+                                    ),
             numberOfJobs = 10,
             postfix = postfix+"_lhc_jobs10_sb300_b150",
             crabScheduler=crabScheduler, crabOptions=crabOptions)

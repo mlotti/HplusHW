@@ -380,11 +380,15 @@ class LEPType:
         f.close()
 
 class LHCType:
-    def __init__(self, options=lhcHybridOptions, toysCLsb=lhcHybridToysCLsb, toysCLb=lhcHybridToysCLb, firstSeed=defaultFirstSeed):
+    def __init__(self, options=lhcHybridOptions, toysCLsb=lhcHybridToysCLsb, toysCLb=lhcHybridToysCLb, firstSeed=defaultFirstSeed, vR=None):
         self.options = lhcHybridOptions
         self.toysCLsb = toysCLsb
         self.toysCLb = toysCLb
         self.firstSeed = firstSeed
+        self.vR = vR
+        if vR != None:
+            if len(vR) != 2:
+                raise Exception("vR should be pair (min, max)")
 
         self.scripts = {}
 
@@ -392,7 +396,7 @@ class LHCType:
         return "LHC"
 
     def clone(self, **kwargs):
-        args = _updateArgs(kwargs, self, ["options", "toysCLsb", "toysCLb", "firstSeed"])
+        args = _updateArgs(kwargs, self, ["options", "toysCLsb", "toysCLb", "firstSeed", "vR"])
         return LHCType(**args)
 
     def setDirectory(self, dirname):
@@ -400,13 +404,16 @@ class LHCType:
 
     def createScripts(self, mass, datacardFiles):
         filename = "runLandS_m%s" % mass
+        opts = self.options
+        if self.vR != None:
+            opts += " -vR [%s,%s,x1.05]" % self.vR
         command = [
             "#!/bin/sh",
             "",
             "SEED=$(expr %d + $1)" % self.firstSeed,
             'echo "LandSSeed=$SEED"',
             "",
-            "./lands.exe %s %s -n split_m%s --nToysForCLsb %d --nToysForCLb %d --seed $SEED -d %s | tee lands.out.tmp" % (commonOptions, self.options, mass, self.toysCLsb, self.toysCLb, " ".join(datacardFiles)),
+            "./lands.exe %s %s -n split_m%s --nToysForCLsb %d --nToysForCLb %d --seed $SEED -d %s | tee lands.out.tmp" % (commonOptions, opts, mass, self.toysCLsb, self.toysCLb, " ".join(datacardFiles)),
             "head -n 50 lands.out.tmp> lands.out",
             "tail -n 5 lands.out.tmp >> lands.out",
             "cat lands.out"
@@ -567,10 +574,9 @@ class LHCTypeAsymptotic:
         raise Exception("Unable to parse the output of command '%s'" % script)
 
 class Result:
-    def __init__(self, mass = None, observed = None, observedError = None, expected = None, expectedPlus1Sigma = None, expectedPlus2Sigma = None, expectedMinus1Sigma = None, expectedMinus2Sigma = None):
+    def __init__(self, mass = None, observed = None, expected = None, expectedPlus1Sigma = None, expectedPlus2Sigma = None, expectedMinus1Sigma = None, expectedMinus2Sigma = None):
         self.mass                = mass
         self.observed            = observed
-        self.observedError       = observedError
         self.expected            = expected
         self.expectedPlus1Sigma  = expectedPlus1Sigma
         self.expectedPlus2Sigma  = expectedPlus2Sigma
@@ -591,7 +597,6 @@ class Result:
         if self.mass == result.mass:
             if self.observed == None:
                 self.observed = result.observed
-                self.observedError = result.observedError
             if self.expected == None:
                 self.expected            = result.expected
                 self.expectedPlus1Sigma  = result.expectedPlus1Sigma
@@ -701,7 +706,6 @@ class ResultContainer:
             output["masspoints"][result.mass] = {
                 "mass": result.mass,
                 "observed": result.observed,
-                "observed_error": result.observedError,
                 "expected": {
                     "-2sigma": result.expectedMinus2Sigma,
                     "-1sigma": result.expectedMinus1Sigma,
@@ -710,6 +714,8 @@ class ResultContainer:
                     "+2sigma": result.expectedPlus2Sigma,
                     }
                 }
+            if hasattr(result, "observedError"):
+                output["masspoints"][result.mass]["observed_error"] = result.observedError
             if hasattr(result, "expectedError"):
                 output["masspoints"][result.mass]["expected"].update({
                         "-2sigma_error": result.expectedMinus2SigmaError,

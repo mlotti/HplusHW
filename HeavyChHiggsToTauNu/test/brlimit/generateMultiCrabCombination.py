@@ -31,8 +31,8 @@ def main():
             massPoints = lands.allMassPoints,
             datacardPatterns = datacards,
             rootfilePatterns = [lands.taujetsRootfilePattern],
-            clsType = lands.LEPType(toysPerJob=50),
-            numberOfJobs = 20,
+            clsType = lands.LEPType(toysPerJob=100),
+            numberOfJobs = 10,
             postfix = postfix+"_lep_toys1k",
             crabScheduler=crabScheduler, crabOptions=crabOptions)
     if lhcType:
