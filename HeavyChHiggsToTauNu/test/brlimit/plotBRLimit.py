@@ -43,15 +43,7 @@ def doBRlimit(limits):
             })
     plot.setLegend(histograms.createLegend(0.48, 0.75, 0.85, 0.92))
 
-    ymax = 0.15
-    finalStates = limits.getFinalstates()
-    if len(finalStates) == 1:
-        if finalStates[0] in ["#mu#tau_{h}", "e#tau_{h}"]:
-            ymax = 0.4
-        elif finalStates[0] == "e#mu":
-            ymax = 0.8
-
-    plot.createFrame("limitsBr", opts={"ymin": 0, "ymax": ymax})
+    plot.createFrame("limitsBr", opts={"ymin": 0, "ymax": limits.getFinalstateYmax()})
     plot.frame.GetXaxis().SetTitle("m_{H^{+}} (GeV)")
     plot.frame.GetYaxis().SetTitle("95% CL limit for BR(t#rightarrow bH^{+})")
 
@@ -147,6 +139,20 @@ def divideGraph(num, denom):
         gr.SetPoint(i, gr.GetX()[i], gr.GetY()[i]/denom.GetY()[i])
     return gr
 
+_finalstateLabels = {
+    "taujets": "#tau_{h}+jets",
+    "etau"   : "e#tau_{h}",
+    "mutau"  : "#mu#tau_{h}",
+    "emu"    : "e#mu",
+}
+
+_finalstateYmax = {
+    "etau": 0.4,
+    "muta": 0.4,
+    "emu": 0.8,
+    "default": 0.15,
+}
+
 class BRLimits:
     def __init__(self, directory="."):
         resultfile="limits.json"
@@ -207,13 +213,13 @@ class BRLimits:
             return False
 
         if hasDatacard("_hplushadronic_"):
-            self.finalstates.append("#tau_{h}+jets")
+            self.finalstates.append("taujets")
         if hasDatacard("_etau_"):
-            self.finalstates.append("e#tau_{h}")
+            self.finalstates.append("etau")
         if hasDatacard("_mutau_"):
-            self.finalstates.append("#mu#tau_{h}")
+            self.finalstates.append("mutau")
         if hasDatacard("_emu_"):
-            self.finalstates.append("e#mu")
+            self.finalstates.append("emu")
 
     def getLuminosity(self):
         return self.lumi
@@ -223,11 +229,21 @@ class BRLimits:
 
     def getFinalstateText(self):
         if len(self.finalstates) == 1:
-            return "%s final state" % self.finalstates[0]
+            return "%s final state" % _finalstateLabels[self.finalstates[0]]
 
-        ret = ", ".join(self.finalstates[:-1])
-        ret += ", and %s final states" % self.finalstates[-1]
+        ret = ", ".join([_finalstateLabels(x) for x in self.finalstates[:-1]])
+        ret += ", and %s final states" % _finalstateLabels[self.finalstates[-1]]
         return ret
+
+    def getFinalstateYmax(self):
+        if len(self.finalstates) == 1:
+            try:
+                ymax = _finalstateYmax[self.finalstates[0]]
+            except KeyError:
+                ymax = _finalstateYmax["default"]
+        else:
+            ymax = _finalstateYmax["default"]
+        return ymax
 
     def print2(self):
         print
