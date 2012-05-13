@@ -35,7 +35,10 @@ def main():
             datacardPatterns = [lands.taujetsDatacardPattern],
             rootfilePatterns = [lands.taujetsRootfilePattern],
             clsType = lands.LHCType(toysCLsb=300, toysCLb=150,
-                                    vR=("0.006", "0,05"), # obtained from asymp. limit as min/max of +-2 sigma and observed
+                                    vR={"default": None,
+                                        # obtained from asymp. limit as min/max of +-2 sigma and observed
+                                        "160": ("0.007", "0.04"), 
+                                        }
                                     ),
             numberOfJobs = 10,
             postfix = postfix+"_lhc_jobs10_sb300_b150",

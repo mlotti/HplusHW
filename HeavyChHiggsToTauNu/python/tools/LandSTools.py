@@ -261,13 +261,34 @@ def _ifNotNoneElse(value, default):
         return default
     return value
 
+class ValuePerMass:
+    def __init__(self, dictionary):
+        self.values = {}
+        if isinstance(dictionary, dict):
+            self.values.update(dictionary)
+            self.default = self.values["default"]
+            del self.values["default"]
+        elif isinstance(dictionary, ValuePerMass):
+            self.values.update(dictionary.values)
+            self.default = dictionary.default
+        else:
+            self.default = dictionary
+
+    def forEachValue(self, function):
+        function(self.default)
+        for value in self.values.values():
+            function(value)
+
+    def getValue(self, mass):
+        return self.values.get(mass, self.default)
+
 class LEPType:
     def __init__(self, options=lepHybridOptions, toysPerJob=lepHybridToys, firstSeed=defaultFirstSeed, rMin=None, rMax=None):
         self.options = options
         self.toysPerJob = toysPerJob
         self.firstSeed = firstSeed
-        self.rMin = _ifNotNoneElse(rMin, lepHybridRmin)
-        self.rMax = _ifNotNoneElse(rMax, lepHybridRmax)
+        self.rMin = ValuePerMass(_ifNotNoneElse(rMin, lepHybridRmin))
+        self.rMax = ValuePerMass(_ifNotNoneElse(rMax, lepHybridRmax))
 
         self.expScripts = {}
         self.obsScripts = {}
@@ -288,7 +309,7 @@ class LEPType:
 
     def _createObs(self, mass, datacardFiles):
         fileName = "runLandS_Observed_m" + mass
-        opts = commonOptions + " " + self.options + " --initialRmin %s --initialRmax %s" % (self.rMin, self.rMax)
+        opts = commonOptions + " " + self.options + " --initialRmin %s --initialRmax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         command = [
             "#!/bin/sh",
             "",
@@ -304,7 +325,7 @@ class LEPType:
 
     def _createExp(self, mass, datacardFiles):
         fileName = "runLandS_Expected_m" + mass
-        opts = commonOptions + " " + self.options + " --initialRmin %s --initialRmax %s" % (self.rMin, self.rMax)
+        opts = commonOptions + " " + self.options + " --initialRmin %s --initialRmax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         command = [
             "#!/bin/sh",
             "",
@@ -407,12 +428,15 @@ class LHCType:
         self.toysCLsb = toysCLsb
         self.toysCLb = toysCLb
         self.firstSeed = firstSeed
-        self.vR = vR
-        if vR != None:
-            if len(vR) != 2:
-                raise Exception("vR should be pair (min, max)")
-        self.rMin = _ifNotNoneElse(rMin, lhcHybridRmin)
-        self.rMax = _ifNotNoneElse(rMax, lhcHybridRmax)
+
+        def assertvR(value):
+            if value != None and len(value) != 2:
+                raise Exception("vR should be pair (min, max), got length %d: %s" % len(value), str(value))
+        self.vR = ValuePerMass(vR)
+        self.vR.forEachValue(assertvR)
+
+        self.rMin = ValuePerMass(_ifNotNoneElse(rMin, lhcHybridRmin))
+        self.rMax = ValuePerMass(_ifNotNoneElse(rMax, lhcHybridRmax))
 
         self.scripts = {}
 
@@ -428,9 +452,10 @@ class LHCType:
 
     def createScripts(self, mass, datacardFiles):
         filename = "runLandS_m%s" % mass
-        opts = commonOptions + " " + self.options + " --rMin %s --rMax %s" % (self.rMin, self.rMax)
-        if self.vR != None:
-            opts += " -vR [%s,%s,x1.05]" % self.vR
+        opts = commonOptions + " " + self.options + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        vR = self.vR.getValue(mass)
+        if vR != None:
+            opts += " -vR [%s,%s,x1.05]" % vR
         command = [
             "#!/bin/sh",
             "",
@@ -499,8 +524,8 @@ class LHCType:
 class LHCTypeAsymptotic:
     def __init__(self, options=lhcAsymptoticOptions, rMin=None, rMax=None):
         self.options = options
-        self.rMin = _ifNotNoneElse(rMin, lhcAsymptoticRmin)
-        self.rMax = _ifNotNoneElse(rMax, lhcAsymptoticRmax)
+        self.rMin = ValuePerMass(_ifNotNoneElse(rMin, lhcAsymptoticRmin))
+        self.rMax = valuePerMass(_ifNotNoneElse(rMax, lhcAsymptoticRmax))
 
         self.obsScripts = {}
         self.expScripts = {}
@@ -521,7 +546,7 @@ class LHCTypeAsymptotic:
 
     def _createObs(self, mass, datacardFiles):
         fileName = "runLandS_Observed_m" + mass
-        opts = commonOptions + " " + self.options + " --rMin %s --rMax %s" % (self.rMin, self.rMax)
+        opts = commonOptions + " " + self.options + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         command = [
             "#!/bin/sh",
             "",
@@ -532,7 +557,7 @@ class LHCTypeAsymptotic:
 
     def _createExp(self, mass, datacardFiles):
         fileName = "runLandS_Expected_m" + mass
-        opts = commonOptions + " " + self.options + " --rMin %s --rMax %s" % (self.rMin, self.rMax)
+        opts = commonOptions + " " + self.options + " --rMin %s --rMax %s" % (self.rMin.getValue(mas), self.rMax.getValue(mass))
         command = [
             "#!/bin/sh",
             "",
