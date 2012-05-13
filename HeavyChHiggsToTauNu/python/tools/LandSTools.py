@@ -19,14 +19,20 @@ LandS_tag	    = "HEAD" # Recommended by Mingshui 10.5.2012 at 23:23:22 EEST
 
 commonOptions  = "--PhysicsModel ChargedHiggs"
 
-lepHybridOptions = "-M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09"
+lepHybridOptions = "-M Hybrid --bQuickEstimateInitialLimit 0"
 lepHybridToys = 50
+lepHybridRmin = "0"
+lepHybridRmax = "0.09"
 
-lhcHybridOptions = "-M Hybrid --freq --ExpectationHints Asymptotic --scanRs 1 --PLalgorithm Migrad --rMin 0 --maximumFunctionCallsInAFit 500000 --minuitSTRATEGY 1 --rMax 1"
+lhcHybridOptions = "-M Hybrid --freq --ExpectationHints Asymptotic --scanRs 1 --PLalgorithm Migrad --maximumFunctionCallsInAFit 500000 --minuitSTRATEGY 1"
 lhcHybridToysCLsb = 300
 lhcHybridToysCLb = 150
+lhcHybridRmin = "0"
+lhcHybridRmax = "1"
 
-lhcAsymptoticOptions = "-M Asymptotic --rMin 0 --maximumFunctionCallsInAFit 500000 --rMax 1"
+lhcAsymptoticOptions = "-M Asymptotic --maximumFunctionCallsInAFit 500000"
+lhcAsymptoticRmin = "0"
+lhcAsymptoticRmax = "1"
 
 defaultOptions = lepHybridOptions
 defaultNumberOfJobs = 20
@@ -84,7 +90,7 @@ def produceLHCAsymptotic(massPoints=defaultMassPoints,
                          postfix=""
                          ):
 
-    clas = clsType
+    cls = clsType
     if clsType == None:
         cls = LHCTypeAsymptotic()
 
@@ -250,11 +256,18 @@ def _writeScript(filename, content):
     st = os.stat(filename)
     os.chmod(filename, st.st_mode | stat.S_IXUSR)
 
+def _ifNotNoneElse(value, default):
+    if value == None:
+        return default
+    return value
+
 class LEPType:
-    def __init__(self, options=lepHybridOptions, toysPerJob=lepHybridToys, firstSeed=defaultFirstSeed):
+    def __init__(self, options=lepHybridOptions, toysPerJob=lepHybridToys, firstSeed=defaultFirstSeed, rMin=None, rMax=None):
         self.options = options
         self.toysPerJob = toysPerJob
         self.firstSeed = firstSeed
+        self.rMin = _ifNotNoneElse(rMin, lepHybridRmin)
+        self.rMax = _ifNotNoneElse(rMax, lepHybridRmax)
 
         self.expScripts = {}
         self.obsScripts = {}
@@ -263,7 +276,7 @@ class LEPType:
         return "LEP"
 
     def clone(self, **kwargs):
-        args = _updateArgs(kwargs, self, ["options", "toysPerJob", "firstSeed"])
+        args = _updateArgs(kwargs, self, ["options", "toysPerJob", "firstSeed", "rMin", "rMax"])
         return LEPType(**args)
 
     def setDirectory(self, dirname):
@@ -275,13 +288,14 @@ class LEPType:
 
     def _createObs(self, mass, datacardFiles):
         fileName = "runLandS_Observed_m" + mass
+        opts = commonOptions + " " + self.options + " --initialRmin %s --initialRmax %s" % (self.rMin, self.rMax)
         command = [
             "#!/bin/sh",
             "",
             "SEED=$(expr %d + $1)" % self.firstSeed,
             'echo "LandSSeed=$SEED"',
             "",
-            "./lands.exe %s %s --seed $SEED -d %s | tail -5 > lands.out" % (commonOptions, self.options, " ".join(datacardFiles)),
+            "./lands.exe %s --seed $SEED -d %s | tail -5 > lands.out" % (opts, " ".join(datacardFiles)),
             ""
             "cat lands.out"
             ]
@@ -290,13 +304,14 @@ class LEPType:
 
     def _createExp(self, mass, datacardFiles):
         fileName = "runLandS_Expected_m" + mass
+        opts = commonOptions + " " + self.options + " --initialRmin %s --initialRmax %s" % (self.rMin, self.rMax)
         command = [
             "#!/bin/sh",
             "",
             "SEED=$(expr %d + $1)" % self.firstSeed,
             'echo "LandSSeed=$SEED"',
             "",
-            "./lands.exe %s %s -n split_m%s --doExpectation 1 -t %s --seed $SEED -d %s | tail -5 > lands.out" % (commonOptions, self.options, mass, self.toysPerJob, " ".join(datacardFiles)),
+            "./lands.exe %s -n split_m%s --doExpectation 1 -t %s --seed $SEED -d %s | tail -5 > lands.out" % (opts, mass, self.toysPerJob, " ".join(datacardFiles)),
             "",
             "cat lands.out",
             ]
@@ -325,6 +340,8 @@ class LEPType:
 
     def _parseObserved(self, result, path, mass):
         landsOutFiles = glob.glob(os.path.join(path, "Observed_m%s"%mass, "res", "lands_*.out"))
+        if len(landsOutFiles) == 0:
+            return
         if len(landsOutFiles) != 1:
             raise Exception("Expected exactly 1 LandS output file, got %d" % len(landsOutFiles))
 
@@ -336,13 +353,15 @@ class LEPType:
                 result.observed = match.group("value")
                 result.observedError =match.group("error")
                 f.close()
-                return result
+                return
         raise Exception("Unable to parse observed result from '%s'" % landsOutFiles[0])
 
     def _parseExpected(self, result, path, mass):
         mergedFilename = "lands_merged.out"
         crabRes = os.path.join(path, "Expected_m%s"%mass, "res")
-        self._runLandSForMerge(crabRes, mergedFilename, mass)
+        fileExists = self._runLandSForMerge(crabRes, mergedFilename, mass)
+        if not fileExists:
+            return
 
         fname = os.path.join(crabRes, mergedFilename)
         f = open(fname)
@@ -356,19 +375,21 @@ class LEPType:
 		result.expectedMinus1Sigma = match.group("minus1")
 		result.expectedMinus2Sigma = match.group("minus2")
                 f.close()
-                return result
+                return
 
         raise Exception("Unable to parse expected result from '%s'" % fname)
 
     def _runLandSForMerge(self, resDir, mergedFilename, mass):
         targetFile = os.path.join(resDir, mergedFilename)
         if os.path.exists(targetFile):
-            return
+            return True
 
         exe = findOrInstallLandS()
         rootFile = os.path.join(resDir, "histograms-Expected_m%s.root" % mass)
         if not os.path.exists(rootFile):
-            raise Exception("Merged root file '%s' does not exist, did you run landsMergeHistograms.py?" % rootFile)
+            print "Merged root file '%s' does not exist, did you run landsMergeHistograms.py?" % rootFile
+            return False
+
         cmd = [exe, "--doExpectation", "1", "--readLimitsFromFile", rootFile]
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         output = p.communicate()[0]
@@ -378,9 +399,10 @@ class LEPType:
         f.write(output)
         f.write("\n")
         f.close()
+        return True
 
 class LHCType:
-    def __init__(self, options=lhcHybridOptions, toysCLsb=lhcHybridToysCLsb, toysCLb=lhcHybridToysCLb, firstSeed=defaultFirstSeed, vR=None):
+    def __init__(self, options=lhcHybridOptions, toysCLsb=lhcHybridToysCLsb, toysCLb=lhcHybridToysCLb, firstSeed=defaultFirstSeed, vR=None, rMin=None, rMax=None):
         self.options = lhcHybridOptions
         self.toysCLsb = toysCLsb
         self.toysCLb = toysCLb
@@ -389,6 +411,8 @@ class LHCType:
         if vR != None:
             if len(vR) != 2:
                 raise Exception("vR should be pair (min, max)")
+        self.rMin = _ifNotNoneElse(rMin, lhcHybridRmin)
+        self.rMax = _ifNotNoneElse(rMax, lhcHybridRmax)
 
         self.scripts = {}
 
@@ -396,7 +420,7 @@ class LHCType:
         return "LHC"
 
     def clone(self, **kwargs):
-        args = _updateArgs(kwargs, self, ["options", "toysCLsb", "toysCLb", "firstSeed", "vR"])
+        args = _updateArgs(kwargs, self, ["options", "toysCLsb", "toysCLb", "firstSeed", "vR", "rMin", "rMax"])
         return LHCType(**args)
 
     def setDirectory(self, dirname):
@@ -404,7 +428,7 @@ class LHCType:
 
     def createScripts(self, mass, datacardFiles):
         filename = "runLandS_m%s" % mass
-        opts = self.options
+        opts = commonOptions + " " + self.options + " --rMin %s --rMax %s" % (self.rMin, self.rMax)
         if self.vR != None:
             opts += " -vR [%s,%s,x1.05]" % self.vR
         command = [
@@ -413,7 +437,7 @@ class LHCType:
             "SEED=$(expr %d + $1)" % self.firstSeed,
             'echo "LandSSeed=$SEED"',
             "",
-            "./lands.exe %s %s -n split_m%s --nToysForCLsb %d --nToysForCLb %d --seed $SEED -d %s | tee lands.out.tmp" % (commonOptions, opts, mass, self.toysCLsb, self.toysCLb, " ".join(datacardFiles)),
+            "./lands.exe %s -n split_m%s --nToysForCLsb %d --nToysForCLb %d --seed $SEED -d %s | tee lands.out.tmp" % (opts, mass, self.toysCLsb, self.toysCLb, " ".join(datacardFiles)),
             "head -n 50 lands.out.tmp> lands.out",
             "tail -n 5 lands.out.tmp >> lands.out",
             "cat lands.out"
@@ -434,12 +458,12 @@ class LHCType:
 
         rootFile = os.path.join(path, "Limit_m%s"%mass, "res", "histograms-Limit_m%s.root"%mass)
         if not os.path.exists(rootFile):
-            raise Exception("Merged root file '%s' does not exist, did you run landsMergeHistograms.py?" % rootFile)
+            print "Merged root file '%s' does not exist, did you run landsMergeHistograms.py?" % rootFile
+            return result
 
         fitScript = os.path.join(findOrInstallLandS(directory=True), "test", "fitRvsCLs.C")
         if not os.path.exists(fitScript):
             raise Exception("Did not find fit script '%s'" % fitScript)
-        print rootFile
         p = subprocess.Popen(["root", "-l", "-n", "-b", fitScript+"+"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         commands = [
             'run("%s", "plot_m%s")' % (rootFile, mass),
@@ -473,8 +497,10 @@ class LHCType:
         return result
 
 class LHCTypeAsymptotic:
-    def __init__(self, options=lhcAsymptoticOptions):
+    def __init__(self, options=lhcAsymptoticOptions, rMin=None, rMax=None):
         self.options = options
+        self.rMin = _ifNotNoneElse(rMin, lhcAsymptoticRmin)
+        self.rMax = _ifNotNoneElse(rMax, lhcAsymptoticRmax)
 
         self.obsScripts = {}
         self.expScripts = {}
@@ -483,7 +509,8 @@ class LHCTypeAsymptotic:
         return "LHCAsymptotic"
 
     def clone(self, **kwargs):
-        return LHCTypeAsymptotic(kwargs.get("options", self.options))
+        args = _updateArgs(kwargs, self, ["options", "rMin", "rMax"])
+        return LHCTypeAsymptotic(**args)
 
     def setDirectory(self, dirname):
         self.dirname = dirname
@@ -494,20 +521,22 @@ class LHCTypeAsymptotic:
 
     def _createObs(self, mass, datacardFiles):
         fileName = "runLandS_Observed_m" + mass
+        opts = commonOptions + " " + self.options + " --rMin %s --rMax %s" % (self.rMin, self.rMax)
         command = [
             "#!/bin/sh",
             "",
-            "./lands.exe %s %s --minuitSTRATEGY 1 -n obs_m%s -d %s" % (commonOptions, self.options, mass, " ".join(datacardFiles)),
+            "./lands.exe %s --minuitSTRATEGY 1 -n obs_m%s -d %s" % (opts, mass, " ".join(datacardFiles)),
             ]
         _writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.obsScripts[mass] = fileName
 
     def _createExp(self, mass, datacardFiles):
         fileName = "runLandS_Expected_m" + mass
+        opts = commonOptions + " " + self.options + " --rMin %s --rMax %s" % (self.rMin, self.rMax)
         command = [
             "#!/bin/sh",
             "",
-            "./lands.exe %s %s --minuitSTRATEGY 2 --PLalgorithm Migrad -n exp_m%s -D asimov_b -d %s" % (commonOptions, self.options, mass, " ".join(datacardFiles)),
+            "./lands.exe %s --minuitSTRATEGY 2 --PLalgorithm Migrad -n exp_m%s -D asimov_b -d %s" % (opts, mass, " ".join(datacardFiles)),
             ]
         _writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.expScripts[mass] = fileName
@@ -586,7 +615,10 @@ class Result:
     def toFloat(self):
         for attr in ["mass", "observed", "expected", "expectedPlus1Sigma", "expectedPlus2Sigma", "expectedMinus1Sigma", "expectedMinus2Sigma"]:
             setattr(self, attr, float(getattr(self, attr)))
-        
+
+    def empty(self):
+        return self.observed == None and self.expected == None
+
 
     def Exists(self, result):
         if self.mass == result.mass:
@@ -688,6 +720,8 @@ class ResultContainer:
         massIndex.sort()
         for mass, index in massIndex:
             result = self.results[index]
+            if result.empty():
+                continue
             print "%3s:  %-9s   %-8s   %-8s  %-8s  %-8s  %-8s" % (result.mass, result.observed, result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
         print
     
@@ -703,6 +737,9 @@ class ResultContainer:
         massIndex.sort()
         for mass, index in massIndex:
             result = self.results[index]
+            if result.empty():
+                continue
+
             output["masspoints"][result.mass] = {
                 "mass": result.mass,
                 "observed": result.observed,

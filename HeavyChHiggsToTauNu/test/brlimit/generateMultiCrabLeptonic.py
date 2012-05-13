@@ -21,17 +21,17 @@ crabOptions = {
 def main():
     postfix = "taujets"
 
-#    generate(lands.mutauDatacardPattern, "mutau", "0.05")
-#    generate(lands.etauDatacardPattern,  "etau",  "0.05")
-    generate(lands.emuDatacardPattern,   "emu",   "0.3")
+    generate(lands.mutauDatacardPattern, "mutau", lepRmax="0.05", lhcAsyRmax="0.2")
+    generate(lands.etauDatacardPattern,  "etau",  lepRmax="0.05", lhcAsyRmax="0.2")
+#    generate(lands.emuDatacardPattern,   "emu",   lepRmax="0.3")
 
-def generate(datacard, postfix, Rmax):
+def generate(datacard, postfix, lepRmax=None, lhcRmax=None, lhcAsyRmax=None):
     if lepType:
         lands.generateMultiCrab(
             massPoints = lands.allMassPoints,
             datacardPatterns = [datacard],
             rootfilePatterns = [],
-            clsType = lands.LEPType(toysPerJob=500, options=lands.lepHybridOptions.replace("0.09", Rmax)),
+            clsType = lands.LEPType(toysPerJob=500, rMax=lepRmax),
             numberOfJobs = 2,
             postfix = postfix+"_lep_toys1k",
             crabScheduler=crabScheduler, crabOptions=crabOptions)
@@ -40,7 +40,7 @@ def generate(datacard, postfix, Rmax):
             massPoints = lands.allMassPoints,
             datacardPatterns = [datacard],
             rootfilePatterns = [],
-            clsType = lands.LHCType(toysCLsb=300, toysCLb=150),
+            clsType = lands.LHCType(toysCLsb=300, toysCLb=150, rMax=lhcRmax),
             numberOfJobs = 10,
             postfix = postfix+"_lhc_jobs10_sb300_b150",
             crabScheduler=crabScheduler, crabOptions=crabOptions)
@@ -49,6 +49,7 @@ def generate(datacard, postfix, Rmax):
             massPoints = lands.allMassPoints,
             datacardPatterns = [datacard],
             rootfilePatterns = [],
+            clsType = lands.LHCTypeAsymptotic(rMax=lhcAsyRmax),
             postfix = postfix+"_lhcasy"
             )
     
