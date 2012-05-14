@@ -20,9 +20,10 @@ def main():
         command = ["hplusMergeHistograms.py", "-i", "split\S+_m2lnQ\S*\.root"]+args
     else:
         raise Exception("Unsupported clsType '%s' in configuration.json" % config["clsType"])
-    ret = subprocess.call(command)
-    if ret != 0:
-        raise Exception("hplusMergeHistograms failed with exit code %d, command was\n%s" %(ret, " ".join(command)))
+    if not "--skipMerge" in args:
+        ret = subprocess.call(command)
+        if ret != 0:
+            raise Exception("hplusMergeHistograms failed with exit code %d, command was\n%s" %(ret, " ".join(command)))
 
     if "-h" in args or "--help" in args:
         return 0
@@ -34,7 +35,6 @@ def main():
     result.saveJson()
 
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())
