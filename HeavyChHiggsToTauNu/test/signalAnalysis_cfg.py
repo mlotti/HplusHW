@@ -56,7 +56,7 @@ betaCutForJets = 0.0 # Disable by setting to 0.0; if you want to enable, set to 
 doPrescalesForData = False
 
 # Tree filling
-doFillTree = True
+doFillTree = False
 
 applyTriggerScaleFactor = True
 
@@ -77,7 +77,7 @@ doJESVariation = False
 doPUWeightVariation = False
 
 # Do variations for optimisation
-doOptimisation = True
+doOptimisation = False
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
 myOptimisation = HPlusOptimisationScheme()
