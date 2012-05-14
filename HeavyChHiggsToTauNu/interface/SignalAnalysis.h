@@ -65,6 +65,7 @@ namespace HPlus {
       void incrementFakeMETVetoCounter() { increment(fFakeMETVetoCounter); }
       void incrementTopSelectionCounter() { increment(fTopSelectionCounter); }
       void incrementTopChiSelectionCounter() { increment(fTopChiSelectionCounter); }
+      void incrementSelectedEventsCounter() { increment(fSelectedEventsCounter); }
     private:
       Count fOneTauCounter;
       Count fElectronVetoCounter;
@@ -79,6 +80,7 @@ namespace HPlus {
       //      Count fTopChiSelectionNarrowCounter;
       Count fTopWithBSelectionCounter;
       Count fTopWithWSelectionCounter;
+      Count fSelectedEventsCounter;
     };
   enum SignalSelectionOrder {
     kSignalOrderTrigger,
@@ -92,10 +94,9 @@ namespace HPlus {
     //kSignalOrderDeltaPhiSelection,
     kSignalOrderDeltaPhiSelection,
     kSignalOrderFakeMETVeto,
-    kSignalOrderTopSelection,
     kSignalOrderBjetSelection,
-    kSignalOrderTopChiSelection,
-    kSignalOrderTopWithBSelection
+    kSignalOrderTopSelection,
+    kSignalOrderSelectedEvents
   };
   public:
     explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
@@ -108,7 +109,7 @@ namespace HPlus {
 
   private:
     CounterGroup* getCounterGroupByTauMatch(FakeTauIdentifier::MCSelectedTauMatchType tauMatch);
-    void fillNonQCDTypeIICounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData);
+    void fillEWKFakeTausCounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData);
 
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisProducer
@@ -116,6 +117,7 @@ namespace HPlus {
 
     const bool bBlindAnalysisStatus;
     const double fDeltaPhiCutValue;
+    const std::string fTopRecoName; // Name of selected top reconstruction algorithm
     //    const double ftransverseMassCut;
 
     Count fAllCounter;
@@ -159,6 +161,7 @@ namespace HPlus {
     Count fTopChiSelectionNarrowCounter;
     Count fTopWithBSelectionCounter;
     Count fTopWithWSelectionCounter;
+    Count fSelectedEventsCounter;
 
     TriggerSelection fTriggerSelection;
     VertexSelection fPrimaryVertexSelection;
@@ -189,8 +192,7 @@ namespace HPlus {
     SignalAnalysisTree fTree;
 
     // Scale factor uncertainties
-    ScaleFactorUncertaintyManager fSFUncertaintiesAfterBTagging;
-    ScaleFactorUncertaintyManager fSFUncertaintiesAfterDeltaPhi;
+    ScaleFactorUncertaintyManager fSFUncertaintiesAfterSelection;
 
     // Histograms
     
@@ -209,7 +211,7 @@ namespace HPlus {
     TH1 *hTransverseMassMET70;
     TH1 *hTransverseMassTauVeto;
     TH1 *hTransverseMassAfterDeltaPhi;
-    TH1 *hNonQCDTypeIITransverseMass;
+    TH1 *hEWKFakeTausTransverseMass;
     TH1 *hDeltaPhi;
     TH1 *hDeltaPhiJetMet;
     TH1 *hAlphaT;
@@ -226,8 +228,8 @@ namespace HPlus {
     TH1 *hSelectedTauEtAfterCuts;
     TH1 *hSelectedTauEtaAfterCuts;
     TH1 *hMetAfterCuts;
-    TH1 *hNonQCDTypeIISelectedTauEtAfterCuts;
-    TH1 *hNonQCDTypeIISelectedTauEtaAfterCuts;
+    TH1 *hEWKFakeTausSelectedTauEtAfterCuts;
+    TH1 *hEWKFakeTausSelectedTauEtaAfterCuts;
     TH1 *hTransverseMassDeltaPhiUpperCutFakeMet;
 
     TH1 *hSelectionFlow;
@@ -253,7 +255,7 @@ namespace HPlus {
     TH1* hCtrlNbjets;
 
     // CounterGroups for EWK fake taus (aka non-QCD type 2(
-    CounterGroup fNonQCDTypeIIGroup;
+    CounterGroup fEWKFakeTausGroup;
     CounterGroup fAllTausCounterGroup;
     CounterGroup fElectronToTausCounterGroup;
     CounterGroup fMuonToTausCounterGroup;

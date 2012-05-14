@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 # Blind analysis - do not fill final counter and histogram for data if true
-blindAnalysisStatus = cms.untracked.bool(True);
+blindAnalysisStatus = cms.untracked.bool(False);
 
 singleTauMetTriggerPaths = [
 #    "HLT_SingleLooseIsoTau20",
@@ -188,8 +188,9 @@ bTagging = cms.untracked.PSet(
 )
 
 deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
+topReconstruction = cms.untracked.string("None") # Options: None
 
-transverseMassCut = cms.untracked.double(100)
+transverseMassCut = cms.untracked.double(100) # Not used
 
 EvtTopology = cms.untracked.PSet(
     #discriminator = cms.untracked.string("test"),
