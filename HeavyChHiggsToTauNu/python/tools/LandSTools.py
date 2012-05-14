@@ -65,8 +65,8 @@ defaultRootfilePatterns = [
 def generateMultiCrab(massPoints=defaultMassPoints,
                       datacardPatterns=defaultDatacardPatterns,
                       rootfilePatterns=defaultRootfilePatterns,
-                      clsType = None,
-                      numberOfJobs=defaultNumberOfJobs,
+                      clsType=None,
+                      numberOfJobs=None,
                       crabScheduler="arc",
                       crabOptions={},
                       postfix=""
@@ -75,12 +75,14 @@ def generateMultiCrab(massPoints=defaultMassPoints,
     if clsType == None:
         cls = LEPType()
 
+    njobs = ValuePerMass(_ifNotNoneElse(numberOfJobs, defaultNumberOfJobs))
+
     lands = MultiCrabLandS(massPoints, datacardPatterns, rootfilePatterns, cls)
     lands.createMultiCrabDir(postfix)
     lands.copyLandsInputFiles()
     lands.writeLandsScripts()
     lands.writeCrabCfg(crabScheduler, crabOptions)
-    lands.writeMultiCrabCfg(numberOfJobs)
+    lands.writeMultiCrabCfg(njobs)
     lands.printInstruction()
 
 def produceLHCAsymptotic(massPoints=defaultMassPoints,
@@ -143,7 +145,10 @@ class MultiCrabLandS:
 	    sys.exit(1)
 
     def createMultiCrabDir(self, postfix):
-	self.dirname = multicrab.createTaskDir(prefix="LandSMultiCrab", postfix=postfix)
+        prefix = "LandSMultiCrab"
+        if len(postfix) > 0:
+            prefix += "_"+postfix
+	self.dirname = multicrab.createTaskDir(prefix=prefix)
         self.clsType.setDirectory(self.dirname)
 
     def copyLandsInputFiles(self):
@@ -209,7 +214,7 @@ class MultiCrabLandS:
             inputFiles = [exe]+self.datacards[mass]
             if len(self.rootfiles) > 0:
                 inputFiles += self.rootfiles[mass]
-            self.clsType.writeMultiCrabConfig(fOUT, mass, inputFiles, numberOfJobs)
+            self.clsType.writeMultiCrabConfig(fOUT, mass, inputFiles, numberOfJobs.getValue(mass))
             fOUT.write("\n\n")
 
         f = open(os.path.join(self.dirname, "configuration.json"), "wb")
@@ -283,10 +288,10 @@ class ValuePerMass:
         return self.values.get(mass, self.default)
 
 class LEPType:
-    def __init__(self, options=lepHybridOptions, toysPerJob=lepHybridToys, firstSeed=defaultFirstSeed, rMin=None, rMax=None):
+    def __init__(self, options=lepHybridOptions, toysPerJob=None, firstSeed=defaultFirstSeed, rMin=None, rMax=None):
         self.options = options
-        self.toysPerJob = toysPerJob
         self.firstSeed = firstSeed
+        self.toysPerJob = ValuePerMass(_ifNotNoneElse(toysPerJob, lepHybridToys))
         self.rMin = ValuePerMass(_ifNotNoneElse(rMin, lepHybridRmin))
         self.rMax = ValuePerMass(_ifNotNoneElse(rMax, lepHybridRmax))
 
@@ -423,15 +428,16 @@ class LEPType:
         return True
 
 class LHCType:
-    def __init__(self, options=lhcHybridOptions, toysCLsb=lhcHybridToysCLsb, toysCLb=lhcHybridToysCLb, firstSeed=defaultFirstSeed, vR=None, rMin=None, rMax=None):
+    def __init__(self, options=lhcHybridOptions, toysCLsb=None, toysCLb=None, firstSeed=defaultFirstSeed, vR=None, rMin=None, rMax=None):
         self.options = lhcHybridOptions
-        self.toysCLsb = toysCLsb
-        self.toysCLb = toysCLb
         self.firstSeed = firstSeed
+
+        self.toysCLsb = ValuePerMass(_ifNotNoneElse(toysCLsb, lhcHybridToysCLsb))
+        self.toysCLb = ValuePerMass(_ifNotNoneElse(toysCLb, lhcHybridToysCLb))
 
         def assertvR(value):
             if value != None and len(value) != 2:
-                raise Exception("vR should be pair (min, max), got length %d: %s" % len(value), str(value))
+                raise Exception("vR should be pair (min, max), got length %d: %s" % (len(value), str(value)))
         self.vR = ValuePerMass(vR)
         self.vR.forEachValue(assertvR)
 
@@ -462,7 +468,7 @@ class LHCType:
             "SEED=$(expr %d + $1)" % self.firstSeed,
             'echo "LandSSeed=$SEED"',
             "",
-            "./lands.exe %s -n split_m%s --nToysForCLsb %d --nToysForCLb %d --seed $SEED -d %s | tee lands.out.tmp" % (opts, mass, self.toysCLsb, self.toysCLb, " ".join(datacardFiles)),
+            "./lands.exe %s -n split_m%s --nToysForCLsb %d --nToysForCLb %d --seed $SEED -d %s | tee lands.out.tmp" % (opts, mass, self.toysCLsb.getValue(mass), self.toysCLb.getValue(mass), " ".join(datacardFiles)),
             "head -n 50 lands.out.tmp> lands.out",
             "tail -n 5 lands.out.tmp >> lands.out",
             "cat lands.out"
@@ -495,7 +501,11 @@ class LHCType:
             ".q"
             ]
         output = p.communicate("\n".join(commands)+"\n")[0]
-        print output
+#        print output
+        f = open(os.path.join(path, "fitRvsCLs_m%s_output.txt"%mass), "w")
+        f.write(output)
+        f.write("\n")
+        f.close()
 
         lines = output.split("\n")
         lines.reverse()
@@ -740,14 +750,15 @@ class ResultContainer:
     def print2(self):
         print
         print "                  Expected"
-        print "Mass  Observed    Median     -2sigma   -1sigma   +1sigma   +2sigma"
+        print "Mass  Observed    Median       -2sigma     -1sigma     +1sigma     +2sigma"
+        format = "%3s:  %-9s   %-10s   %-10s  %-10s  %-10s  %-10s"
         massIndex = [(int(self.results[i].mass), i) for i in range(len(self.results))]
         massIndex.sort()
         for mass, index in massIndex:
             result = self.results[index]
             if result.empty():
                 continue
-            print "%3s:  %-9s   %-8s   %-8s  %-8s  %-8s  %-8s" % (result.mass, result.observed, result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
+            print format % (result.mass, result.observed, result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
         print
     
     def saveJson(self, data={}):
