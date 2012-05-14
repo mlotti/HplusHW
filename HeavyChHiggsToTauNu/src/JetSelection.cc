@@ -32,14 +32,15 @@ namespace HPlus {
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fEMfractionCut(iConfig.getUntrackedParameter<double>("EMfractionCut")),
     fMaxDR(iConfig.getUntrackedParameter<double>("cleanTauDR")),
-    fMinNumberOfJets(iConfig.getUntrackedParameter<uint32_t>("minNumber")),
+    fNumberOfJets(iConfig.getUntrackedParameter<uint32_t>("jetNumber"), iConfig.getUntrackedParameter<std::string>("jetNumberCutDirection")),
     fJetIdMaxNeutralHadronEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMaxNeutralHadronEnergyFraction")),
     fJetIdMaxNeutralEMEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMaxNeutralEMEnergyFraction")),
     fJetIdMinNumberOfDaughters(iConfig.getUntrackedParameter<uint32_t>("jetIdMinNumberOfDaughters")),
     fJetIdMinChargedHadronEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMinChargedHadronEnergyFraction")),
     fJetIdMinChargedMultiplicity(iConfig.getUntrackedParameter<uint32_t>("jetIdMinChargedMultiplicity")),
     fJetIdMaxChargedEMEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMaxChargedEMEnergyFraction")),
-    fBetaCut(iConfig.getUntrackedParameter<double>("betaCut")),
+    fBetaCut(iConfig.getUntrackedParameter<double>("betaCut"), iConfig.getUntrackedParameter<std::string>("betaCutDirection")),
+    fBetaSrc(iConfig.getUntrackedParameter<std::string>("betaCutSource")),
     fCleanCutCount(eventCounter.addSubCounter("Jet main","Jet cleaning")),
     fJetIdCount(eventCounter.addSubCounter("Jet main", "Jet ID")),
     fEMfractionCutCount(eventCounter.addSubCounter("Jet main","Jet EMfrac ")),
@@ -268,7 +269,7 @@ namespace HPlus {
       //double myBetaMax = iJet->userFloat("BetaMax");
       double myBetaStar = iJet->userFloat("BetaStar");
       double myMeanDR = iJet->userFloat("DRMean");
-      bool myIsPVJetStatus = (iJet->userInt("LdgTrackBelongsToSelectedPV") == 1);
+      bool myIsPVJetStatus = (iJet->userInt("LdgTrackBelongsToSelectedPV") == 1); // FIXME: do MC matching
       // Fill histograms after eta and pt cuts
       if (std::abs(iJet->eta()) < fEtaCut && iJet->pt() > fPtCut) {
         if (myIsPVJetStatus) {
@@ -287,8 +288,7 @@ namespace HPlus {
           hMeanDRVsPUfake->Fill(myMeanDR, nVertices, fEventWeight.getWeight());
         }
       }
-      //if(std::isnan(iJet->userFloat("BetaPV"))) continue;
-      if(iJet->userFloat("Beta") < fBetaCut) continue;
+      if (fBetaCut.passedCut(iJet->userFloat(fBetaSrc))) continue;
       increment(fBetaCutSubCount);
 
       hPt->Fill(iJet->pt(), fEventWeight.getWeight());
@@ -309,7 +309,6 @@ namespace HPlus {
       if(!(iJet->pt() > fPtCut)) continue;
       increment(fPtCutSubCount);
       ++ptCutPassed;
-      
 
       // Fill histograms for selected jets
       hPtSelectedJets->Fill(iJet->pt());
@@ -358,33 +357,33 @@ namespace HPlus {
     if (fSelectedJets.size() > 2 ) hjetMaxEMFraction->Fill(maxEMfraction, fEventWeight.getWeight());
     iNHadronicJets = fSelectedJets.size();
     iNHadronicJetsInFwdDir = fNotSelectedJets.size();
-    
-    passEvent = fSelectedJets.size() >= fMinNumberOfJets;
-    
-    if (cleanPassed >= fMinNumberOfJets) 
+
+    passEvent = fNumberOfJets.passedCut(fSelectedJets.size());
+
+    if (fNumberOfJets.passedCut(cleanPassed))
       increment(fCleanCutCount);
 
 	  //    if(maxEMfraction < fEMfractionCut+ 0.1 )increment(fEMfraction08CutCount);
     //    if(maxEMfraction < fEMfractionCut )increment(fEMfraction07CutCount);
 
     // Set veto flags for event with high EM fraction of a selected jet
-    if (jetIdPassed >= fMinNumberOfJets)
+    if (fNumberOfJets.passedCut(jetIdPassed))
       increment(fJetIdCount);
 
-    if(EMfractionCutPassed >= fMinNumberOfJets)
+    if(fNumberOfJets.passedCut(EMfractionCutPassed))
       increment(fEMfractionCutCount);
 
-    if (ptCutPassed >= fMinNumberOfJets)
+    if (fNumberOfJets.passedCut(ptCutPassed))
       increment(fPtCutCount);
 
-    if (etaCutPassed >= fMinNumberOfJets)
+    if (fNumberOfJets.passedCut(etaCutPassed))
       increment(fEtaCutCount);
 
     if (passEvent && maxEMfraction >= 0.8 ) {
       increment(fEMfraction08CutCount);
       bEMFraction08Veto = true;
     }
-      
+
     if (passEvent && maxEMfraction < 0.7 ) {
       increment(fEMfraction07CutCount);
       bEMFraction07Veto = true;
