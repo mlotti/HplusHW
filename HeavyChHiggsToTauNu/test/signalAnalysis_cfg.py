@@ -85,15 +85,15 @@ myOptimisation.addTauPtVariation([40.0, 50.0])
 #myOptimisation.addTauIsolationVariation([])
 #myOptimisation.addTauIsolationContinuousVariation([])
 myOptimisation.addRtauVariation([0.0, 0.7])
-#myOptimisation.addJetNumberVariation(["GEQ3", "GEQ4"])
+#myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
 #myOptimisation.addJetEtVariation([20.0, 30.0])
-#myOptimisation.addJetBetaVariation([])
+#myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
 #myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
-#myOptimisation.addBjetDiscriminatorVariation([])
-#myOptimisation.addBjetEtVariation([])
-#myOptimisation.addBjetNumberVariation([GEQ1, GEQ2])
+#myOptimisation.addBJetDiscriminatorVariation([0.679, 0.244])
+#myOptimisation.addBJetEtVariation([])
+#myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
 #myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
-#myOptimisation.addTopRecoVatiation(["None"])
+#myOptimisation.addTopRecoVatiation(["None"]) # Valid options: None, chi, std, Wselection
 if doOptimisation:
     doSystematics = True # Make sure that systematics are run
     doFillTree = False # Make sure that tree filling is disabled or root file size explodes
