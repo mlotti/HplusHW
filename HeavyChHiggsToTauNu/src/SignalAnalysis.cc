@@ -53,7 +53,7 @@ namespace HPlus {
     fTopChiSelectionCounter(eventCounter.addSubCounter(prefix,":Top Chi Selection cut")),
     fTopWithBSelectionCounter(eventCounter.addSubCounter(prefix,":Top with B Selection cut")),
     fTopWithWSelectionCounter(eventCounter.addSubCounter(prefix,":Top with W Selection cut")),
-    fSelectedEventsCounter(eventCounter.addCounter("EWKfaketaus:SelectedEvents")) { }
+    fSelectedEventsCounter(eventCounter.addSubCounter(prefix,"EWKfaketaus:SelectedEvents")) { }
   SignalAnalysis::CounterGroup::~CounterGroup() { }
 
   SignalAnalysis::SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
@@ -200,7 +200,7 @@ namespace HPlus {
     hMet = makeTH<TH1F>(*fs, "Met", "Met", 500, 0.0, 500.0);
     hMetAfterCuts = makeTH<TH1F>(*fs, "Met_AfterCuts", "Met_AfterCuts", 400, 0.0, 400.0);
     
-    hSelectionFlow = makeTH<TH1F>(*fs, "SignalSelectionFlow", "SignalSelectionFlow;;N_{events}", 8, 0, 8);
+    hSelectionFlow = makeTH<TH1F>(*fs, "SignalSelectionFlow", "SignalSelectionFlow;;N_{events}", 12, 0, 12);
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTrigger,"Trigger");
     //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderVertexSelection,"Vertex");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTauID,"#tau ID");
@@ -210,6 +210,7 @@ namespace HPlus {
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderJetSelection,"jet sel.");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderBTagSelection,"b-jet sel.");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderDeltaPhiSelection,"#Delta#phi(#tau,MET) cut");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderSelectedEvents,"Selected events");
     //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderFakeMETVeto,"Further QCD rej.");
     //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTopSelection,"Top mass");
     hSelectionFlowVsVertices = makeTH<TH2F>(*fs, "SignalSelectionFlowVsVertices", "SignalSelectionFlowVsVertices;N_{vertices};Step", 50, 0, 50, 9, 0, 9);

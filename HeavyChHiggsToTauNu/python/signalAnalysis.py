@@ -23,6 +23,7 @@ def createEDFilter(param):
         fakeMETVeto = param.fakeMETVeto,
         jetTauInvMass = param.jetTauInvMass,
         deltaPhiTauMET = param.deltaPhiTauMET,
+        topReconstruction = param.topReconstruction,
         topSelection = param.topSelection,
         bjetSelection = param.bjetSelection,
         topChiSelection = param.topChiSelection,

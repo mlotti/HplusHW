@@ -238,14 +238,14 @@ if dataVersion.isData() and options.tauEmbeddingInput == 0 and doPrescalesForDat
 # Print output
 #print "\nAnalysis is blind:", process.signalAnalysis.blindAnalysisStatus, "\n"
 print "Trigger:", process.signalAnalysis.trigger
-print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode
+print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode.value()
 print "VertexWeight:",process.signalAnalysis.vertexWeight
-print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut
-#print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
-print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
-print "TauSelection src:", process.signalAnalysis.tauSelection.src
-print "TauSelection isolation:", process.signalAnalysis.tauSelection.isolationDiscriminator
-print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode
+print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut.value()
+#print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection.value()
+print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection.value()
+print "TauSelection src:", process.signalAnalysis.tauSelection.src.value()
+print "TauSelection isolation:", process.signalAnalysis.tauSelection.isolationDiscriminator.value()
+print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode.value()
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
