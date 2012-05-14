@@ -136,7 +136,11 @@ def doLimitError(limits):
 def divideGraph(num, denom):
     gr = ROOT.TGraph(num)
     for i in xrange(gr.GetN()):
-        gr.SetPoint(i, gr.GetX()[i], gr.GetY()[i]/denom.GetY()[i])
+        y = denom.GetY()[i]
+        val = 0
+        if y != 0:
+            val = gr.GetY()[i]/y
+        gr.SetPoint(i, gr.GetX()[i], val)
     return gr
 
 _finalstateLabels = {
@@ -148,7 +152,7 @@ _finalstateLabels = {
 
 _finalstateYmax = {
     "etau": 0.4,
-    "muta": 0.4,
+    "mutau": 0.4,
     "emu": 0.8,
     "default": 0.15,
 }
@@ -248,9 +252,10 @@ class BRLimits:
     def print2(self):
         print
         print "                  Expected"
-        print "Mass  Observed    Median     -2sigma   -1sigma   +1sigma   +2sigma"
+        print "Mass  Observed    Median       -2sigma     -1sigma     +1sigma     +2sigma"
+        format = "%3s:  %-9s   %-10s   %-10s  %-10s  %-10s  %-10s"
         for i in xrange(len(self.mass_string)):
-            print "%3s:  %-9s   %-8s   %-8s  %-8s  %-8s  %-8s" % (self.mass_string[i], self.observed_string[i], self.expectedMedian_string[i], self.expectedMinus2_string[i], self.expectedMinus1_string[i], self.expectedPlus1_string[i], self.expectedPlus2_string[i])
+            print format % (self.mass_string[i], self.observed_string[i], self.expectedMedian_string[i], self.expectedMinus2_string[i], self.expectedMinus1_string[i], self.expectedPlus1_string[i], self.expectedPlus2_string[i])
         print
 
     def observedGraph(self):
