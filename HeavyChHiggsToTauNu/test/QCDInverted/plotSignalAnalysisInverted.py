@@ -44,7 +44,7 @@ btagging = True # for normalisation with btagging
 
 # for histograms
 topmass = False
-deltaPhi160 = True
+deltaPhi180 = True
 
 def usage():
     print "\n"
@@ -295,15 +295,16 @@ def mtComparison(datasets):
     
     ## After standard cuts
     if (deltaPhi180):
-        mt4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet4050")])
-        mt5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet5060")])
-        mt6070 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet6070")])
-        mt7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet7080")])
-        mt80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet80100")])
-        mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet100120")])
-        mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet120150")])
-        mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet150")])
-        mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet")])
+        mt4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag4050")])
+        mt5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag5060")])
+        mt6070 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag6070")])
+        mt7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag7080")])
+        mt80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag80100")])
+        mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag100120")])
+        mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag120150")])
+        mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag150")])
+        mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag")])
+        mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdBtag")])
              
 
   ## With MET > 70 GeV
@@ -341,7 +342,7 @@ def mtComparison(datasets):
         mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi120150")])
         mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi150")])
         mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi")])
-
+        mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdPhi")])
 
     print " norm factors ",norm_inc,norm_4050,norm_5060,norm_6070,norm_7080,norm_80100,norm_100120,norm_120150,norm_150
 
@@ -442,7 +443,13 @@ def mtComparison(datasets):
     mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
     hmt = mt.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi")
     hmt.Scale(norm_inc)
-
+    
+    mtBaseline._setLegendStyles()
+    mtBaseline._setLegendLabels()
+    mtBaseline.histoMgr.setHistoDrawStyleAll("P")
+    mtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+    hmtBaseline = mtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
+    hmtBaseline.Scale(norm_inc)
         
     hmtSum = hmt4050.Clone("mtSum")
     hmtSum.SetName("mtSum")
@@ -522,7 +529,13 @@ def mtComparison(datasets):
     hmtSum.SetFillColor(4)
     hmtSum.Draw("same")
     
-       
+    hmtBaseline.SetMarkerColor(1)
+    hmtBaseline.SetMarkerSize(1)
+    hmtBaseline.SetMarkerStyle(24)
+    hmtBaseline.SetFillColor(1)
+    hmtBaseline.Draw("same")
+
+    
     tex1 = ROOT.TLatex(0.65,0.7,"No binning")
 #    tex1 = ROOT.TLatex(0.3,0.4,"No binning")
     tex1.SetNDC()

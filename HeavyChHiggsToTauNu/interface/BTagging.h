@@ -8,6 +8,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DirectionalCut.h"
 
 namespace edm {
   class ParameterSet;
@@ -90,7 +91,7 @@ namespace HPlus {
     const double fEtaCut;
     const std::string fDiscriminator;
     const double fDiscrCut;
-    const uint32_t fMin;
+    DirectionalCut fNumberOfBJets;
 
     // Lookup tables for scale factors
     BTaggingScaleFactor fBTaggingScaleFactor;

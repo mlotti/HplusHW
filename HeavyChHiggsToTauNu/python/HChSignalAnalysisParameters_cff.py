@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 # Blind analysis - do not fill final counter and histogram for data if true
-blindAnalysisStatus = cms.untracked.bool(True);
+blindAnalysisStatus = cms.untracked.bool(False);
 
 singleTauMetTriggerPaths = [
 #    "HLT_SingleLooseIsoTau20",
@@ -126,7 +126,9 @@ jetSelectionBase = cms.untracked.PSet(
     cleanTauDR = cms.untracked.double(0.5), # cone for rejecting jets around tau jet
     ptCut = cms.untracked.double(20.0),
     etaCut = cms.untracked.double(2.4),
-    minNumber = cms.untracked.uint32(3), # minimum number of selected jets
+    minNumber = cms.untracked.uint32(3), # minimum number of selected jets # FIXME rename minNumber to jetNumber
+    jetNumber = cms.untracked.uint32(3), # minimum number of selected jets # FIXME rename minNumber to jetNumber
+    jetNumberCutDirection = cms.untracked.string("GEQ"), # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
     # Jet ID cuts
     jetIdMaxNeutralHadronEnergyFraction = cms.untracked.double(0.99),
     jetIdMaxNeutralEMEnergyFraction = cms.untracked.double(0.99),
@@ -135,7 +137,10 @@ jetSelectionBase = cms.untracked.PSet(
     jetIdMinChargedMultiplicity = cms.untracked.uint32(0),
     jetIdMaxChargedEMEnergyFraction = cms.untracked.double(0.99),
     # Pileup cleaning
-    betaCut = cms.untracked.double(0.7), # disabled
+    betaCut = cms.untracked.double(0.0), # disabled
+    betaCutSource = cms.untracked.string("beta"), # tag name in user floats
+    betaCutDirection = cms.untracked.string("GT"), # direction of beta cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
+
     # Experimental
     EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )
@@ -179,10 +184,15 @@ bTagging = cms.untracked.PSet(
     discriminatorCut = cms.untracked.double(0.679),
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
-    minNumber = cms.untracked.uint32(1),
+    minNumber = cms.untracked.uint32(1), #FIXME change minNumber to jetNumber
+    jetNumber = cms.untracked.uint32(1), #FIXME change minNumber to jetNumber
+    jetNumberCutDirection = cms.untracked.string("GEQ") # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
 )
 
-transverseMassCut = cms.untracked.double(100)
+deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
+topReconstruction = cms.untracked.string("None") # Options: None
+
+transverseMassCut = cms.untracked.double(100) # Not used
 
 EvtTopology = cms.untracked.PSet(
     #discriminator = cms.untracked.string("test"),
@@ -270,21 +280,24 @@ topChiSelection = cms.untracked.PSet(
     TopMassLow = cms.untracked.double(120.0),
     TopMassHigh = cms.untracked.double(300.0),
     Chi2Cut = cms.untracked.double(5.0),
-    src = cms.untracked.InputTag("genParticles") 
+    src = cms.untracked.InputTag("genParticles"),
+    enabled = cms.untracked.bool(False)
 )
 
 topWithBSelection = cms.untracked.PSet(
     TopMassLow = cms.untracked.double(120.0),
     TopMassHigh = cms.untracked.double(300.0),
     Chi2Cut = cms.untracked.double(5.0),
-    src = cms.untracked.InputTag("genParticles")
+    src = cms.untracked.InputTag("genParticles"),
+    enabled = cms.untracked.bool(False)
 )
 
 topWithWSelection = cms.untracked.PSet(
     TopMassLow = cms.untracked.double(120.0),
     TopMassHigh = cms.untracked.double(300.0),
     Chi2Cut = cms.untracked.double(5.0),
-    src = cms.untracked.InputTag("genParticles")
+    src = cms.untracked.InputTag("genParticles"),
+    enabled = cms.untracked.bool(False)
 )
 
 tree = cms.untracked.PSet(
