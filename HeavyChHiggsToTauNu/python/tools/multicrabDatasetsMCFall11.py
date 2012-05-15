@@ -20,7 +20,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size;  53 GB, 19 files
+                "number_of_jobs": 30, # Adjusted for PATtuple file size;  53 GB, 19 files
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -35,7 +35,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -50,7 +50,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -65,7 +65,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
              "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -80,7 +80,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -95,7 +95,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-150_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -110,7 +110,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-155_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -125,7 +125,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -141,7 +141,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-80_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -156,7 +156,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-90_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -171,7 +171,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-100_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -186,7 +186,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-120_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -201,7 +201,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-140_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -216,7 +216,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-150_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -231,7 +231,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-155_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -246,7 +246,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-160_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -263,7 +263,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/HplusTB_M-180_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -278,7 +278,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/HplusTB_M-190_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -293,7 +293,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/HplusTB_M-200_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -308,7 +308,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/HplusTB_M-220_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -323,7 +323,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/HplusTB_M-250_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -338,7 +338,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/HplusTB_M-300_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -358,7 +358,7 @@ datasets = {
         "data": {
            "AOD": {
                "datasetpath": "/QCD_Pt-30to50_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-               "number_of_jobs": 200, # Adjusted for PATtuple file size
+               "number_of_jobs": 10, # Adjusted for PATtuple file size
            },
         },
     },
@@ -370,7 +370,7 @@ datasets = {
         "data": {
            "AOD": {
                "datasetpath": "/QCD_Pt-50to80_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-               "number_of_jobs": 200, # Adjusted for PATtuple file size
+               "number_of_jobs": 10, # Adjusted for PATtuple file size
            },
         },
     },
@@ -382,7 +382,7 @@ datasets = {
         "data": {
            "AOD": {
                "datasetpath": "/QCD_Pt-80to120_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-               "number_of_jobs": 200, # Adjusted for PATtuple file size
+               "number_of_jobs": 10, # Adjusted for PATtuple file size
            },
         },
     },
@@ -395,7 +395,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt-120to170_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 200, # Adjusted for PATtuple file size
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
             },
         },
     },
@@ -407,7 +407,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 2000, # Adjusted for PATtuple file size
+                "number_of_jobs": 40, # Adjusted for PATtuple file size
             },
         },
     },
@@ -419,7 +419,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt-300to470_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 200 # Adjusted for PATtuple file size
+                "number_of_jobs": 40 # Adjusted for PATtuple file size
             },
         }
     },
@@ -431,7 +431,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 490,  # Adjusted for PATtuple file size
+                "number_of_jobs": 50,  # Adjusted for PATtuple file size
             },
         }
     },
@@ -446,7 +446,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/WW_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size; file size 890 GB, 252-275 files, expected output max. 185 MB/file
+                "number_of_jobs": 10, # Adjusted for PATtuple file size; file size 890 GB, 252-275 files, expected output max. 185 MB/file
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -463,7 +463,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/WZ_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size, expected output max. 185 MB/file
+                "number_of_jobs": 10, # Adjusted for PATtuple file size, expected output max. 185 MB/file
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -480,7 +480,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/ZZ_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size, expected output max. 185 MB/file
+                "number_of_jobs": 10, # Adjusted for PATtuple file size, expected output max. 185 MB/file
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -502,7 +502,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 490, # Adjusted for PATtuple file size ; file size 15214; 3938 files, expected output max. 266 MB/file, obs 60 MB / file
+                "number_of_jobs": 490, # Adjusted for PATtuple file size ; file size 15214; 3938 files, 4-5 hours cpu, 60 MB output
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -519,7 +519,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 490, # Adjusted for PATtuple file size ; file size 16000 GB, 4500 files, expected output max. 37 MB/file
+                "number_of_jobs": 200, # Adjusted for PATtuple file size ; file size 16000 GB, 4500 files, 1.5 hours cpu, 65 MB output
                 #"se_white_list": ["T2_FI_HIP"],
             },
             "pattuple_v25": {
@@ -555,7 +555,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/W3Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size ; expected output max. 56 MB/file, obs 20-22 MB / file
+                "number_of_jobs": 30, # Adjusted for PATtuple file size ; expected output max. 56 MB/file, 3.5 hours cpu, 45 MB output
                 #"se_white_list": ["T2_FI_HIP"],
             },
             "pattuple_v25": {
@@ -573,7 +573,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/W4Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 70, # Adjusted for PATtuple file size ; expected output max. 144 MB/file, obs 20-22 MB / file
+                "number_of_jobs": 20, # Adjusted for PATtuple file size ; expected output max. 144 MB/file, 3.5 hours cpu, 45 MB output
                 #"se_white_list": ["T2_FI_HIP"],
             },
             "pattuple_v25": {
@@ -591,7 +591,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 300, # Adjusted for PATtuple file size ; file size 6945 GB, 1964 files, expected output max. 46 MB/file, obs 40 MB / file
+                "number_of_jobs": 100, # Adjusted for PATtuple file size ; file size 6945 GB, 1964 files, 0.5 hours cpu, 60 MB output
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -631,7 +631,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/T_TuneZ2_t-channel_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 20, # Adjusted for PATtuple file size ; 866 GB, 395 files, expected output max. 47 MB/file, obs 15-20 MB / file
+                "number_of_jobs": 8, # Adjusted for PATtuple file size ; 866 GB, 395 files, 3 hours cpu, 40 MB output
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -648,7 +648,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 20, # Adjusted for PATtuple file size, expected output max. 47 MB/file, obs 15-20 MB / file
+                "number_of_jobs": 8, # Adjusted for PATtuple file size, 4 hours cpu, 50 MB output
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -665,7 +665,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 10, # Adjusted for PATtuple file size ; 210 GB, 69 files, expected output max. 28 MB/file, obs 15-20 MB / file
+                "number_of_jobs": 7, # Adjusted for PATtuple file size ; 210 GB, 69 files, 3 hours cpu, 30 MB output
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -682,7 +682,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 10, # Adjusted for PATtuple file size, expected output max. 15 MB/file, obs 15-20 MB / file
+                "number_of_jobs": 7, # Adjusted for PATtuple file size, 3 hours cpu, 30 MB output
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
@@ -716,7 +716,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 10, # Adjusted for PATtuple file size, expected output max. 30 MB/file, obs 15-20 MB / file
+                "number_of_jobs": 3, # Adjusted for PATtuple file size, 0.5 hours cpu, 50 MB output
             },
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
