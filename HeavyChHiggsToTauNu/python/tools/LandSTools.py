@@ -121,6 +121,9 @@ class MultiCrabLandS:
             "codeVersion": git.getCommitId(),
             "clsType": self.clsType.name(),
         }
+        clsConfig = self.clsType.getConfiguration()
+        if clsConfig != None:
+            self.configuration["clsConfig"] = clsConfig
 
         for mass in self.massPoints:
             for dc in datacardPatterns:
@@ -287,6 +290,11 @@ class ValuePerMass:
     def getValue(self, mass):
         return self.values.get(mass, self.default)
 
+    def serialize(self):
+        ret = {"default": self.default}
+        ret.update(self.values)
+        return ret
+
 class LEPType:
     def __init__(self, options=lepHybridOptions, toysPerJob=None, firstSeed=defaultFirstSeed, rMin=None, rMax=None):
         self.options = options
@@ -300,6 +308,9 @@ class LEPType:
 
     def name(self):
         return "LEP"
+
+    def getConfiguration(self):
+        return None
 
     def clone(self, **kwargs):
         args = _updateArgs(kwargs, self, ["options", "toysPerJob", "firstSeed", "rMin", "rMax"])
@@ -358,7 +369,7 @@ class LEPType:
         output.write("CMSSW.number_of_jobs = %d\n" % numJobs)
         output.write("CMSSW.output_file = lands.out,split_m%sHybrid_limitbands.root,split_m%sHybrid_limits_tree.root\n" % (mass, mass))
 
-    def getResult(self, path, mass):
+    def getResult(self, path, mass, clsConfig):
         result = Result(mass)
         self._parseObserved(result, path, mass)
         self._parseExpected(result, path, mass)
@@ -428,7 +439,7 @@ class LEPType:
         return True
 
 class LHCType:
-    def __init__(self, options=lhcHybridOptions, toysCLsb=None, toysCLb=None, firstSeed=defaultFirstSeed, vR=None, rMin=None, rMax=None):
+    def __init__(self, options=lhcHybridOptions, toysCLsb=None, toysCLb=None, firstSeed=defaultFirstSeed, vR=None, rMin=None, rMax=None, scanRmin=None, scanRmax=None):
         self.options = lhcHybridOptions
         self.firstSeed = firstSeed
 
@@ -444,13 +455,22 @@ class LHCType:
         self.rMin = ValuePerMass(_ifNotNoneElse(rMin, lhcHybridRmin))
         self.rMax = ValuePerMass(_ifNotNoneElse(rMax, lhcHybridRmax))
 
+        self.scanRmin = ValuePerMass(scanRmin)
+        self.scanRmax = ValuePerMass(scanRmax)
+        self.configuration = {}
+        self.configuration["scanRmin"] = self.scanRmin.serialize()
+        self.configuration["scanRmax"] = self.scanRmax.serialize()
+
         self.scripts = {}
 
     def name(self):
         return "LHC"
 
+    def getConfiguration(self):
+        return self.configuration
+
     def clone(self, **kwargs):
-        args = _updateArgs(kwargs, self, ["options", "toysCLsb", "toysCLb", "firstSeed", "vR", "rMin", "rMax"])
+        args = _updateArgs(kwargs, self, ["options", "toysCLsb", "toysCLb", "firstSeed", "vR", "rMin", "rMax", "scanRmin", "scanRmax"])
         return LHCType(**args)
 
     def setDirectory(self, dirname):
@@ -484,7 +504,7 @@ class LHCType:
         output.write("CMSSW.number_of_jobs = %d\n" % numJobs)
         output.write("CMSSW.output_file = lands.out,split_m%s_m2lnQ.root\n" % mass)
 
-    def getResult(self, path, mass):
+    def getResult(self, path, mass, clsConfig):
         result = Result(mass)
 
         rootFile = os.path.join(path, "Limit_m%s"%mass, "res", "histograms-Limit_m%s.root"%mass)
@@ -496,10 +516,23 @@ class LHCType:
         if not os.path.exists(fitScript):
             raise Exception("Did not find fit script '%s'" % fitScript)
         p = subprocess.Popen(["root", "-l", "-n", "-b", fitScript+"+"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        commands = [
+
+        commands = []
+
+        if clsConfig != None and "scanRmin" in clsConfig:
+            scanRmin = ValuePerMass(clsConfig["scanRmin"])
+            val = scanRmin.getValue(mass)
+            if val != None:
+                commands.append("scanRmin = %s" % val)
+        if clsConfig != None and "scanRmax" in clsConfig:
+            scanRmax = ValuePerMass(clsConfig["scanRmax"])
+            val = scanRmax.getValue(mass)
+            if val != None:
+                commands.append("scanRmax = %s" % val)
+        commands.extend([
             'run("%s", "plot_m%s")' % (rootFile, mass),
             ".q"
-            ]
+            ])
         output = p.communicate("\n".join(commands)+"\n")[0]
 #        print output
         f = open(os.path.join(path, "fitRvsCLs_m%s_output.txt"%mass), "w")
@@ -532,10 +565,16 @@ class LHCType:
         return result
 
 class LHCTypeAsymptotic:
-    def __init__(self, options=lhcAsymptoticOptions, rMin=None, rMax=None):
+    def __init__(self, options=lhcAsymptoticOptions, rMin=None, rMax=None, vR=None):
         self.options = options
         self.rMin = ValuePerMass(_ifNotNoneElse(rMin, lhcAsymptoticRmin))
-        self.rMax = valuePerMass(_ifNotNoneElse(rMax, lhcAsymptoticRmax))
+        self.rMax = ValuePerMass(_ifNotNoneElse(rMax, lhcAsymptoticRmax))
+
+        def assertvR(value):
+            if value != None and len(value) != 2:
+                raise Exception("vR should be pair (min, max), got length %d: %s" % (len(value), str(value)))
+        self.vR = ValuePerMass(vR)
+        self.vR.forEachValue(assertvR)
 
         self.obsScripts = {}
         self.expScripts = {}
@@ -543,8 +582,11 @@ class LHCTypeAsymptotic:
     def name(self):
         return "LHCAsymptotic"
 
+    def getConfiguration(self):
+        return None
+
     def clone(self, **kwargs):
-        args = _updateArgs(kwargs, self, ["options", "rMin", "rMax"])
+        args = _updateArgs(kwargs, self, ["options", "rMin", "rMax", "vR"])
         return LHCTypeAsymptotic(**args)
 
     def setDirectory(self, dirname):
@@ -557,6 +599,10 @@ class LHCTypeAsymptotic:
     def _createObs(self, mass, datacardFiles):
         fileName = "runLandS_Observed_m" + mass
         opts = commonOptions + " " + self.options + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        vR = self.vR.getValue(mass)
+        if vR != None:
+            opts += " -vR [%s,%s,x1.05]" % vR
+
         command = [
             "#!/bin/sh",
             "",
@@ -567,7 +613,11 @@ class LHCTypeAsymptotic:
 
     def _createExp(self, mass, datacardFiles):
         fileName = "runLandS_Expected_m" + mass
-        opts = commonOptions + " " + self.options + " --rMin %s --rMax %s" % (self.rMin.getValue(mas), self.rMax.getValue(mass))
+        opts = commonOptions + " " + self.options + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        vR = self.vR.getValue(mass)
+        if vR != None:
+            opts += " -vR [%s,%s,x1.05]" % vR
+
         command = [
             "#!/bin/sh",
             "",
@@ -835,8 +885,13 @@ class ParseLandsOutput:
 
         # Read in the results
         self.results = ResultContainer(self.path)
+        try:
+            clsConfig = self.config["clsConfig"]
+        except KeyError:
+            clsConfig = None
         for mass in self.config["masspoints"]:
-            self.results.append(self.clsType.getResult(self.path, mass))
+            self.results.append(self.clsType.getResult(self.path, mass, clsConfig))
+            print "Processed mass point %s" % mass
 
 
 #	self.subdir_re         = re.compile("(?P<label>(Expected|Observed)_m)(?P<mass>(\d*$))")

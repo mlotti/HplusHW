@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from optparse import OptionParser
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
 
 lepType = True
@@ -25,7 +27,7 @@ def main(opts):
 #            ]
         }
 
-    opts.lepType:
+    if opts.lepType:
         lands.generateMultiCrab(
             massPoints = lands.allMassPoints,
             datacardPatterns = [lands.taujetsDatacardPattern],
@@ -34,13 +36,21 @@ def main(opts):
             numberOfJobs = 10,
             postfix = postfix+"_lep_toys1k",
             crabScheduler=crabScheduler, crabOptions=crabOptions)
-    opts.lhcType:
+    if opts.lhcType:
         lands.generateMultiCrab(
             massPoints = lands.allMassPoints,
             datacardPatterns = [lands.taujetsDatacardPattern],
             rootfilePatterns = [lands.taujetsRootfilePattern],
-            clsType = lands.LHCType(toysCLsb={"default": 600, "140": 300},
-                                    toysCLb={"default": 300, "140": 150},
+            clsType = lands.LHCType(toysCLsb={"default": 150,
+                                              "100": 120,
+                                              "150": 600,
+                                              "160": 600,
+                                              },
+                                    toysCLb={"default": 75,
+                                             "100": 60,
+                                             "150": 300,
+                                             "160": 300,
+                                             },
                                     vR={"default": None,
                                         # Initially obtained from asymp. limit as min/max of +-2 sigma and observed
                                         # After that, with trial and error of hybrid limit (e.g. by looking plot*.gif plots)
@@ -53,11 +63,15 @@ def main(opts):
                                     ),
             #numberOfJobs = {"default": 5, "140": 10},
             #postfix = postfix+"_lhc_jobs5_sb600_b300",
-            numberOfJobs = {"default": 40, "140": 80},
+            numberOfJobs = {"default": 160,
+                            "100": 200,
+                            "150": 40,
+                            "160": 40,
+                            },
             #numberOfJobs = {"default": 80, "140": 160},
-            postfix = postfix+"_lhc_jobs40_sb600_b300",
+            postfix = postfix+"_lhc_jobs160_sb150_b75",
             crabScheduler=crabScheduler, crabOptions=crabOptions)
-    opts.lhcTypeAsymptotic:
+    if opts.lhcTypeAsymptotic:
         lands.produceLHCAsymptotic(
             massPoints = lands.allMassPoints,
             datacardPatterns = [lands.taujetsDatacardPattern],

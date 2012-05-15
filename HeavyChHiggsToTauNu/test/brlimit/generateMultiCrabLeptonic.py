@@ -31,67 +31,96 @@ crabOptions = {
 
 massPoints = lands.allMassPoints
 #massPoints = ["155", "160"]
+massPoints = ["160"]
 
 def main(opts):
     postfix = "taujets"
 
 
-    opts.mutau:
+    if opts.mutau:
         generate(opts, lands.mutauDatacardPattern, "mutau",
                  lepRmax={"default": "0.05",
                           "160": "0.3",
                           },
                  lhcRmax="0.5",
-                 lhcvR={"default": ("0.02", "0.12"),
+                 lhcvR={"default": ("0.02", "0.2"),
+                        "150": ("0.03", "0.3"),
                         "155": ("0.03", "0.4"),
                         "160": ("0.03", "0.5"),
                         },
+                 lhcScanRmin={"default": None,
+                              "160": "0.02",
+                              },
+                 lhcScanRmax={"default": None,
+                              "160": "0.5",
+                              },
+                 lhcToysCLsb={"default": 600,
+                              "160": 300
+                              },
+                 lhcToysCLb={"default": 300,
+                             "160": 150
+                             },
                  lhcJobs = {"default": 5,
-                            "160": 10
+                            "160": 20
                             },
-                 lhcAsyRmax="0.2")
-    opts.etau:
+                 lhcAsyRmax="0.2",
+                 )
+
+    if opts.etau:
         generate(opts, lands.etauDatacardPattern,  "etau",
                  lepRmax={"default": "0.05",
                           "160": "0.3"
                           },
                  lhcRmax="0.5",
-                 lhcvR={"default": ("0.03", "0.15"),
-                        "140": ("0.04", "0.18"),
-                        "150": ("0.05", "0.21"),
-                        "155": ("0.05", "0.5"),
+                 lhcvR={"default": ("0.02", "0.25"),
+                        "140": ("0.03", "0.3"),
+                        "150": ("0.04", "0.4"),
+                        "155": ("0.04", "0.4"),
                         "160": ("0.05", "0.6"),
                         },
+                 lhcScanRmin={"default": None,
+                              "140": "0.02",
+                              "155": "0.02",
+                              "160": "0.02",
+                              },
+                 lhcScanRmax={"default": None,
+                              "140": "0.4",
+                              "155": "0.5",
+                              "160": "0.5",
+                              },
                  lhcToysCLsb=600, lhcToysCLb=300, lhcPostfix="jobs10_sb_600_b300",
-                 lhcJobs = {"default": 10,
-                            "160": 20,
+                 lhcJobs = {"default": 20,
+                            "155": 40,
+#                            "160": 40,
+                            "160": 400,
                             },
                  lhcAsyRmax="0.2")
-    opts.emu:
+
+    if opts.emu:
         generate(opts, lands.emuDatacardPattern,   "emu",   lepRmax="0.3")
 
 def generate(opts, datacard, postfix,
              lepRmax=None,
-             lhcRmax=None, lhcvR=None, lhcToysCLsb=1200, lhcToysCLb=600, lhcJobs=5, lhcPostfix="jobs5_sb1200_b600",
-             lhcAsyRmax=None):
-    opts.lepType:
+             lhcRmax=None, lhcvR=None, lhcToysCLsb=1200, lhcToysCLb=600, lhcJobs=5, lhcPostfix="jobs5_sb1200_b600", lhcScanRmin=None, lhcScanRmax=None,
+             lhcAsyRmax=None, lhcAsyvR=None):
+    if opts.lepType:
         lands.generateMultiCrab(
             massPoints = massPoints, datacardPatterns = [datacard], rootfilePatterns = [],
             clsType = lands.LEPType(toysPerJob=1000, rMax=lepRmax),
             numberOfJobs = 1,
             postfix = postfix+"_lep_toys1k",
             crabScheduler=crabScheduler, crabOptions=crabOptions)
-    opts.lhcType:
+    if opts.lhcType:
         lands.generateMultiCrab(
             massPoints = massPoints, datacardPatterns = [datacard], rootfilePatterns = [],
-            clsType = lands.LHCType(toysCLsb=lhcToysCLsb, toysCLb=lhcToysCLb, rMax=lhcRmax, vR=lhcvR),
+            clsType = lands.LHCType(toysCLsb=lhcToysCLsb, toysCLb=lhcToysCLb, rMax=lhcRmax, vR=lhcvR, scanRmin=lhcScanRmin, scanRmax=lhcScanRmax),
             numberOfJobs = lhcJobs,
             postfix = postfix+"_lhc_"+lhcPostfix,
             crabScheduler=crabScheduler, crabOptions=crabOptions)
-    opts.lhcTypeAsymptotic:
+    if opts.lhcTypeAsymptotic:
         lands.produceLHCAsymptotic(
             massPoints = massPoints, datacardPatterns = [datacard], rootfilePatterns = [],
-            clsType = lands.LHCTypeAsymptotic(rMax=lhcAsyRmax, vR=lhcvR),
+            clsType = lands.LHCTypeAsymptotic(rMax=lhcAsyRmax, vR=lhcAsyvR),
             postfix = postfix+"_lhcasy"
             )
     
@@ -114,4 +143,4 @@ if __name__ == "__main__":
 
     (opts, args) = parser.parse_args()
 
-    main()
+    main(opts)
