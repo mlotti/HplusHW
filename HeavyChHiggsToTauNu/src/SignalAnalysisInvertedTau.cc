@@ -176,7 +176,9 @@ namespace HPlus {
     hMETBeforeTauId = makeTH<TH1F>(*fs, "Met_BeforeTauId", "Met_BeforeTauId", 500, 0.0, 500.0);
     hMETBaselineTauId = makeTH<TH1F>(*fs,"MET_BaseLineTauId", "MET_BaseLineTauId;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     hMETInvertedTauId = makeTH<TH1F>(*fs, "MET_InvertedTauId", "MET_InvertedTauId;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
-    hMETBaselineTauIdJets = makeTH<TH1F>(*fs, "MET_BaseLineTauIdJets", "MET_BaseLineTauIdJets;PF MET", 400, 0.0, 400.0);
+    //    TauIdJets = makeTH<TH1F>(*fs, "MET_BaseLineTauIdJets", "MET_BaseLineTauIdJets;PF MET", 400, 0.0, 400.0);
+
+    hMETBaselineTauIdJets = makeTH<TH1F>(*fs, "MET_BaseLineTauIdJets", "MET_BaseLineTauIdJets", 400, 0.0, 400.0);
     hMETBaselineTauIdJets150 = makeTH<TH1F>(*fs, "MET_BaseLineTauIdJets150", "MET_BaseLineTauIdJets150", 400, 0.0, 400.0);
     hMETBaselineTauIdJets120150 = makeTH<TH1F>(*fs, "MET_BaseLineTauIdJets120150", "MET_BaseLineTauIdJets120150;PF MET", 400, 0.0, 400.0);
     hMETBaselineTauIdJets100120 = makeTH<TH1F>(*fs, "MET_BaseLineTauIdJets100120", "MET_BaseLineTauIdJets100120;PF MET", 400, 0.0, 400.0);
@@ -185,7 +187,7 @@ namespace HPlus {
     hMETBaselineTauIdJets6070 = makeTH<TH1F>(*fs, "MET_BaseLineTauIdJets6070", "MET_BaseLineTauIdJets6070;PF MET", 400, 0.0, 400.0);
     hMETBaselineTauIdJets5060 = makeTH<TH1F>(*fs, "MET_BaseLineTauIdJets5060", "MET_BaseLineTauIdJets5060;PF MET", 400, 0.0, 400.0);
     hMETBaselineTauIdJets4050 = makeTH<TH1F>(*fs, "MET_BaseLineTauIdJets4050", "MET_BaseLineTauIdJets4050;PF MET", 400, 0.0, 400.0);
-
+    
     hMETBaselineTauIdBtag = makeTH<TH1F>(*fs, "MET_BaseLineTauIdBtag", "MET_BaseLineTauIdBtag;PF MET", 400, 0.0, 400.0);
     hMETBaselineTauIdBtag150 = makeTH<TH1F>(*fs, "MET_BaseLineTauIdBtag150", "MET_BaseLineTauIdBtag150;PF MET", 400, 0.0, 400.0);
     hMETBaselineTauIdBtag120150 = makeTH<TH1F>(*fs, "MET_BaseLineTauIdBtag120150", "MET_BaseLineTauIdBtag120150;PF MET", 400, 0.0, 400.0);
@@ -195,26 +197,47 @@ namespace HPlus {
     hMETBaselineTauIdBtag6070 = makeTH<TH1F>(*fs, "MET_BaseLineTauIdBtag6070", "MET_BaseLineTauIdBtag6070;PF MET", 400, 0.0, 400.0);
     hMETBaselineTauIdBtag5060 = makeTH<TH1F>(*fs, "MET_BaseLineTauIdBtag5060", "MET_BaseLineTauIdBtag5060;PF MET", 400, 0.0, 400.0);
     hMETBaselineTauIdBtag4050 = makeTH<TH1F>(*fs, "MET_BaseLineTauIdBtag4050", "MET_BaseLineTauIdBtag4050;PF MET", 400, 0.0, 400.0);
+  
+    hMTBaselineTauIdJet = makeTH<TH1F>(*fs, "MTBaseLineTauIdJet", "MTBaseLineTauIdJet", 400, 0., 400.);
+    //    hMTBaselineTauIdJet2 = makeTH<TH1F>(*fs, "MTBaseLineTauIdJet2", "MTBaseLineTauIdJet2", 400, 0., 400.);
+    hMTBaselineTauIdJet150 = makeTH<TH1F>(*fs, "MTBaseLineTauIdJet150", "MTBaseLineTauIdJet150", 400, 0., 400.);
+    hMTBaselineTauIdJet120150 = makeTH<TH1F>(*fs, "MTBaseLineTauIdJet120150", "MTBaseLineTauIdJet120150", 400, 0., 400.);
+    hMTBaselineTauIdJet100120 = makeTH<TH1F>(*fs, "MTBaseLineTauIdJet100120", "MTBaseLineTauIdJet100120", 400, 0., 400.);
+    hMTBaselineTauIdJet80100 = makeTH<TH1F>(*fs, "MTBaseLineTauIdJet80100", "MTBaseLineTauIdJet80100", 400, 0., 400.);
+    hMTBaselineTauIdJet7080 = makeTH<TH1F>(*fs, "MTBaseLineTauIdJet7080", "MTBaseLineTauIdJet7080", 400, 0., 400.);
+    hMTBaselineTauIdJet6070 = makeTH<TH1F>(*fs, "MTBaseLineTauIdJet6070", "MTBaseLineTauIdJet6070", 400, 0., 400.);
+    hMTBaselineTauIdJet5060 = makeTH<TH1F>(*fs, "MTBaseLineTauIdJet5060", "MTBaseLineTauIdJet5060", 400, 0., 400.);
+    hMTBaselineTauIdJet4050 = makeTH<TH1F>(*fs, "MTBaseLineTauIdJet4050", "MTBaseLineTauIdJet4050", 400, 0., 400.);
+  
+     hMTBaselineTauIdBtag = makeTH<TH1F>(*fs, "MTBaseLineTauIdBtag", "MTBaseLineTauIdBtag;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMTBaselineTauIdBtag150 = makeTH<TH1F>(*fs, "MTBaseLineTauIdBtag150", "MTBaseLineTauIdBtag150", 400, 0., 400.);
+    hMTBaselineTauIdBtag120150 = makeTH<TH1F>(*fs, "MTBaseLineTauIdBtag120150", "MTBaseLineTauIdBtag120150", 400, 0., 400.);
+    hMTBaselineTauIdBtag100120 = makeTH<TH1F>(*fs, "MTBaseLineTauIdBtag100120", "MTBaseLineTauIdBtag100120", 400, 0., 400.);
+    hMTBaselineTauIdBtag80100 = makeTH<TH1F>(*fs, "MTBaseLineTauIdBtag80100", "MTBaseLineTauIdBtag80100", 400, 0., 400.);
+    hMTBaselineTauIdBtag7080 = makeTH<TH1F>(*fs, "MTBaseLineTauIdBtag7080", "MTBaseLineTauIdBtag7080", 400, 0., 400.);
+    hMTBaselineTauIdBtag6070 = makeTH<TH1F>(*fs, "MTBaseLineTauIdBtag6070", "MTBaseLineTauIdBtag6070", 400, 0., 400.);
+    hMTBaselineTauIdBtag5060 = makeTH<TH1F>(*fs, "MTBaseLineTauIdBtag5060", "MTBaseLineTauIdBtag5060", 400, 0., 400.);
+    hMTBaselineTauIdBtag4050 = makeTH<TH1F>(*fs, "MTBaseLineTauIdBtag4050", "MTBaseLineTauIdBtag4050", 400, 0., 400.);
 
-    hMTBaselineTauIdBtag = makeTH<TH1F>(*fs, "MTBaseLineTauIdBtag", "MTBaseLineTauIdBtag;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
-    hMTBaselineTauIdBtag150 = makeTH<TH1F>(*fs, "MTBaselineTauIdBtag150", "MTBaselineTauIdBtag150", 400, 0., 400.);
-    hMTBaselineTauIdBtag120150 = makeTH<TH1F>(*fs, "MTBaselineTauIdBtag120150", "MTBaselineTauIdBtag120150", 400, 0., 400.);
-    hMTBaselineTauIdBtag100120 = makeTH<TH1F>(*fs, "MTBaselineTauIdBtag100120", "MTBaselineTauIdBtag100120", 400, 0., 400.);
-    hMTBaselineTauIdBtag80100 = makeTH<TH1F>(*fs, "MTBaselineTauIdBtag80100", "MTBaselineTauIdBtag80100", 400, 0., 400.);
-    hMTBaselineTauIdBtag7080 = makeTH<TH1F>(*fs, "MTBaselineTauIdBtag7080", "MTBaselineTauIdBtag7080", 400, 0., 400.);
-    hMTBaselineTauIdBtag6070 = makeTH<TH1F>(*fs, "MTBaselineTauIdBtag6070", "MTBaselineTauIdBtag6070", 400, 0., 400.);
-    hMTBaselineTauIdBtag5060 = makeTH<TH1F>(*fs, "MTBaselineTauIdBtag5060", "MTBaselineTauIdBtag5060", 400, 0., 400.);
-    hMTBaselineTauIdBtag4050 = makeTH<TH1F>(*fs, "MTBaselineTauIdBtag4050", "MTBaselineTauIdBtag4050", 400, 0., 400.);
+    hMTBaselineTauIdPhi = makeTH<TH1F>(*fs, "MTBaseLineTauIdPhi", "MTBaseLineTauIdPhi;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMTBaselineTauIdPhi150 = makeTH<TH1F>(*fs, "MTBaseLineTauIdPhi150", "MTBaseLineTauIdPhi150", 400, 0., 400.);
+    hMTBaselineTauIdPhi120150 = makeTH<TH1F>(*fs, "MTBaseLineTauIdPhi120150", "MTBaseLineTauIdPhi120150", 400, 0., 400.);
+    hMTBaselineTauIdPhi100120 = makeTH<TH1F>(*fs, "MTBaseLineTauIdPhi100120", "MTBaseLineTauIdPhi100120", 400, 0., 400.);
+    hMTBaselineTauIdPhi80100 = makeTH<TH1F>(*fs, "MTBaseLineTauIdPhi80100", "MTBaseLineTauIdPhi80100", 400, 0., 400.);
+    hMTBaselineTauIdPhi7080 = makeTH<TH1F>(*fs, "MTBaseLineTauIdPhi7080", "MTBaseLineTauIdPhi7080", 400, 0., 400.);
+    hMTBaselineTauIdPhi6070 = makeTH<TH1F>(*fs, "MTBaseLineTauIdPhi6070", "MTBaseLineTauIdPhi6070", 400, 0., 400.);
+    hMTBaselineTauIdPhi5060 = makeTH<TH1F>(*fs, "MTBaseLineTauIdPhi5060", "MTBaseLineTauIdPhi5060", 400, 0., 400.);
+    hMTBaselineTauIdPhi4050 = makeTH<TH1F>(*fs, "MTBaseLineTauIdPhi4050", "MTBaseLineTauIdPhi4050", 400, 0., 400.);
 
-    hMTBaselineTauIdTopMass = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass", "MTBaselineTauIdTopMass", 400, 0., 400.);
-    hMTBaselineTauIdTopMass150 = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass150", "MTBaselineTauIdTopMass150", 400, 0., 400.);
-    hMTBaselineTauIdTopMass120150 = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass120150", "MTBaselineTauIdTopMass120150", 400, 0., 400.);
-    hMTBaselineTauIdTopMass100120 = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass100120", "MTBaselineTauIdTopMass100120", 400, 0., 400.);
-    hMTBaselineTauIdTopMass80100 = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass80100", "MTBaselineTauIdTopMass80100", 400, 0., 400.);
-    hMTBaselineTauIdTopMass7080 = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass7080", "MTBaselineTauIdTopMass7080", 400, 0., 400.);
-    hMTBaselineTauIdTopMass6070 = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass6070", "MTBaselineTauIdTopMass6070", 400, 0., 400.);
-    hMTBaselineTauIdTopMass5060 = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass5060", "MTBaselineTauIdTopMass5060", 400, 0., 400.);
-    hMTBaselineTauIdTopMass4050 = makeTH<TH1F>(*fs, "MTBaselineTauIdTopMass4050", "MTBaselineTauIdTopMass4050", 400, 0., 400.);
+    hMTBaselineTauIdTopMass = makeTH<TH1F>(*fs, "MTBaseLineTauIdTopMass", "MTBaseLineTauIdTopMass", 400, 0., 400.);
+    hMTBaselineTauIdTopMass150 = makeTH<TH1F>(*fs, "MTBaseLineTauIdTopMass150", "MTBaseLineTauIdTopMass150", 400, 0., 400.);
+    hMTBaselineTauIdTopMass120150 = makeTH<TH1F>(*fs, "MTBaseLineTauIdTopMass120150", "MTBaseLineTauIdTopMass120150", 400, 0., 400.);
+    hMTBaselineTauIdTopMass100120 = makeTH<TH1F>(*fs, "MTBaseLineTauIdTopMass100120", "MTBaseLineTauIdTopMass100120", 400, 0., 400.);
+    hMTBaselineTauIdTopMass80100 = makeTH<TH1F>(*fs, "MTBaseLineTauIdTopMass80100", "MTBaseLineTauIdTopMass80100", 400, 0., 400.);
+    hMTBaselineTauIdTopMass7080 = makeTH<TH1F>(*fs, "MTBaseLineTauIdTopMass7080", "MTBaseLineTauIdTopMass7080", 400, 0., 400.);
+    hMTBaselineTauIdTopMass6070 = makeTH<TH1F>(*fs, "MTBaseLineTauIdTopMass6070", "MTBaseLineTauIdTopMass6070", 400, 0., 400.);
+    hMTBaselineTauIdTopMass5060 = makeTH<TH1F>(*fs, "MTBaseLineTauIdTopMass5060", "MTBaseLineTauIdTopMass5060", 400, 0., 400.);
+    hMTBaselineTauIdTopMass4050 = makeTH<TH1F>(*fs, "MTBaseLineTauIdTopMass4050", "MTBaseLineTauIdTopMass4050", 400, 0., 400.);
 
    
     hMTInvertedTauIdJet = makeTH<TH1F>(*fs, "MTInvertedTauIdJet", "MTInvertedTauIdJet", 400, 0., 400.);
@@ -247,15 +270,15 @@ namespace HPlus {
     hMTInvertedTauIdMet5060 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet5060", "MTInvertedTauIdMet5060", 400, 0., 400.);
     hMTInvertedTauIdMet4050 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet4050", "MTInvertedTauIdMet4050", 400, 0., 400.);
 
-    hMTInvertedTauIdJetPhi = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi", "MTInvertedTauIdJetPhi", 400, 0., 400.);
-    hMTInvertedTauIdJetPhi150 = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi150", "MTInvertedTauIdJetPhi150", 400, 0., 400.);
-    hMTInvertedTauIdJetPhi120150 = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi120150", "MTInvertedTauIdJetPhi120150", 400, 0., 400.);
-    hMTInvertedTauIdJetPhi100120 = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi100120", "MTInvertedTauIdJetPhi100120", 400, 0., 400.);
-    hMTInvertedTauIdJetPhi80100 = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi80100", "MTInvertedTauIdJetPhi80100", 400, 0., 400.);
-    hMTInvertedTauIdJetPhi7080 = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi7080", "MTInvertedTauIdJetPhi7080", 400, 0., 400.);
-    hMTInvertedTauIdJetPhi6070 = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi6070", "MTInvertedTauIdJetPhi6070", 400, 0., 400.);
-    hMTInvertedTauIdJetPhi5060 = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi5060", "MTInvertedTauIdJetPhi5060", 400, 0., 400.);
-    hMTInvertedTauIdJetPhi4050 = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi4050", "MTInvertedTauIdJetPhi4050", 400, 0., 400.);
+    hMTInvertedTauIdJetPhi = makeTH<TH1F>(*fs, "MTInvertedTauIdPhi", "MTInvertedTauIdPhi", 400, 0., 400.);
+    hMTInvertedTauIdJetPhi150 = makeTH<TH1F>(*fs, "MTInvertedTauIdPhi150", "MTInvertedTauIdPhi150", 400, 0., 400.);
+    hMTInvertedTauIdJetPhi120150 = makeTH<TH1F>(*fs, "MTInvertedTauIdPhi120150", "MTInvertedTauIdPhi120150", 400, 0., 400.);
+    hMTInvertedTauIdJetPhi100120 = makeTH<TH1F>(*fs, "MTInvertedTauIdPhi100120", "MTInvertedTauIdPhi100120", 400, 0., 400.);
+    hMTInvertedTauIdJetPhi80100 = makeTH<TH1F>(*fs, "MTInvertedTauIdPhi80100", "MTInvertedTauIdPhi80100", 400, 0., 400.);
+    hMTInvertedTauIdJetPhi7080 = makeTH<TH1F>(*fs, "MTInvertedTauIdPhi7080", "MTInvertedTauIdPhi7080", 400, 0., 400.);
+    hMTInvertedTauIdJetPhi6070 = makeTH<TH1F>(*fs, "MTInvertedTauIdPhi6070", "MTInvertedTauIdPhi6070", 400, 0., 400.);
+    hMTInvertedTauIdJetPhi5060 = makeTH<TH1F>(*fs, "MTInvertedTauIdPhi5060", "MTInvertedTauIdPhi5060", 400, 0., 400.);
+    hMTInvertedTauIdJetPhi4050 = makeTH<TH1F>(*fs, "MTInvertedTauIdPhi4050", "MTInvertedTauIdPhi4050", 400, 0., 400.);
 
     hTopMass = makeTH<TH1F>(*fs, "TopMass", "TopMass", 400, 0., 400.);
     hTopMass150 = makeTH<TH1F>(*fs, "TopMass150", "TopMass150", 400, 0., 400.);
@@ -278,7 +301,8 @@ namespace HPlus {
     hMTInvertedTauIdTopMass4050 = makeTH<TH1F>(*fs, "MTInvertedTauIdTopMass4050", "MTInvertedTauIdTopMass4050", 400, 0., 400.);
 
     hDeltaPhi = makeTH<TH1F>(*fs, "deltaPhi", "deltaPhi;#Delta#phi(tau,MET);N_{events", 360, 0.0, 360.0);
-    hMTBaselineTauIdJet = makeTH<TH1F>(*fs, "MT_BaseLineTauIdJets", "MT_BaseLineTauIdJets;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    //    hMTBaselineTauIdJet = makeTH<TH1F>(*fs, "MT_BaseLineTauIdJets", "MT_BaseLineTauIdJets;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+
     hMETInvertedTauIdJets = makeTH<TH1F>(*fs, "MET_InvertedTauIdJets", "MET_InvertedTauIdJets;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     hMETInvertedTauIdJets150 = makeTH<TH1F>(*fs, "MET_InvertedTauIdJets150", "MET_InvertedTauIdJets150;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     hMETInvertedTauIdJets120150 = makeTH<TH1F>(*fs, "MET_InvertedTauIdJets120150", "MET_InvertedTauIdJets120150", 400, 0.0, 400.0);
@@ -455,7 +479,7 @@ namespace HPlus {
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()) );
    
-      
+   
 
   // baseline tau-id
 
@@ -473,13 +497,23 @@ namespace HPlus {
 	    // Count baseline events
 	    if(btagData.passedEvent()) hMet_AfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 	    if(metData.passedEvent()) {	
-	      increment(fBaselineMetCounter);   
+	      increment(fBaselineMetCounter); 
+	      hMTBaselineTauIdJet->Fill(transverseMass, fEventWeight.getWeight());  
+	      if ( tauData.getSelectedTau()->pt() > 150  ) hMTBaselineTauIdJet150->Fill(transverseMass, fEventWeight.getWeight());
+	      if ( tauData.getSelectedTau()->pt() > 120 && tauData.getSelectedTau()->pt() < 150 ) hMTBaselineTauIdJet120150->Fill(transverseMass, fEventWeight.getWeight());
+	      if ( tauData.getSelectedTau()->pt() > 100 && tauData.getSelectedTau()->pt() < 120 ) hMTBaselineTauIdJet100120->Fill(transverseMass, fEventWeight.getWeight());
+	      if ( tauData.getSelectedTau()->pt() > 80 && tauData.getSelectedTau()->pt() < 100  ) hMTBaselineTauIdJet80100->Fill(transverseMass, fEventWeight.getWeight());
+	      if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hMTBaselineTauIdJet7080->Fill(transverseMass, fEventWeight.getWeight());
+	      if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMTBaselineTauIdJet6070->Fill(transverseMass, fEventWeight.getWeight());
+	      if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMTBaselineTauIdJet5060->Fill(transverseMass, fEventWeight.getWeight());
+	      if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMTBaselineTauIdJet4050->Fill(transverseMass, fEventWeight.getWeight());
+	   
 	      if(btagData.passedEvent()) {
 		increment(fBaselineBtagCounter);
 		if ( deltaPhi*57.3 < 160) {
 		  increment(fBaselineDphi160Counter);
 		if ( deltaPhi*57.3 < 130) increment(fBaselineDphi130Counter);
-		  hMETBaselineTauIdBtagDphi->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 
+		//		  hMETBaselineTauIdBtagDphi->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 
 		  if (TopChiSelectionData.passedEvent() ) {
 		    increment(fBaselineTopChiSelectionCounter);    
 		    hTransverseMassTopChiSelection->Fill(transverseMass, fEventWeight.getWeight());  
@@ -487,8 +521,8 @@ namespace HPlus {
 		}
 	      }
 	    }
-	    if(metData.passedEvent()) hMTBaselineTauIdJet->Fill(transverseMass, fEventWeight.getWeight()); 
-
+	    //	    if(metData.passedEvent()) hMTBaselineTauIdJet->Fill(transverseMass, fEventWeight.getWeight()); 
+	 
 	    if(btagData.passedEvent()) {
 	      hMETBaselineTauIdBtag->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 
 	      if ( tauData.getSelectedTau()->pt() > 150  ) hMETBaselineTauIdBtag150->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
@@ -514,22 +548,34 @@ namespace HPlus {
 		if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMTBaselineTauIdBtag6070->Fill(transverseMass, fEventWeight.getWeight()); 
 		if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMTBaselineTauIdBtag5060->Fill(transverseMass, fEventWeight.getWeight()); 
 		if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMTBaselineTauIdBtag4050->Fill(transverseMass, fEventWeight.getWeight());
-		
-		if (TopChiSelectionData.passedEvent() ) {
-		  hMTBaselineTauIdTopMass->Fill(transverseMass, fEventWeight.getWeight()); 
-		  if ( tauData.getSelectedTau()->pt() > 150  ) hMTBaselineTauIdTopMass150->Fill(transverseMass, fEventWeight.getWeight()); 
-		  if ( tauData.getSelectedTau()->pt() > 120 && tauData.getSelectedTau()->pt() < 150 ) hMTBaselineTauIdTopMass120150->Fill(transverseMass, fEventWeight.getWeight()); 
-		  if ( tauData.getSelectedTau()->pt() > 100 && tauData.getSelectedTau()->pt() < 120 ) hMTBaselineTauIdTopMass100120->Fill(transverseMass, fEventWeight.getWeight()); 
-		  if ( tauData.getSelectedTau()->pt() > 80 && tauData.getSelectedTau()->pt() < 100 ) hMTBaselineTauIdTopMass80100->Fill(transverseMass, fEventWeight.getWeight()); 
-		  if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hMTBaselineTauIdTopMass7080->Fill(transverseMass, fEventWeight.getWeight()); 
-		  if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMTBaselineTauIdTopMass6070->Fill(transverseMass, fEventWeight.getWeight()); 
-		  if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMTBaselineTauIdTopMass5060->Fill(transverseMass, fEventWeight.getWeight()); 
-		  if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMTBaselineTauIdTopMass4050->Fill(transverseMass, fEventWeight.getWeight());
+
+		if ( deltaPhi*57.3 < 160) {
+		  hMTBaselineTauIdPhi->Fill(transverseMass, fEventWeight.getWeight());   
+		  if ( tauData.getSelectedTau()->pt() > 150  ) hMTBaselineTauIdPhi150->Fill(transverseMass, fEventWeight.getWeight()); 
+		  if ( tauData.getSelectedTau()->pt() > 120 && tauData.getSelectedTau()->pt() < 150 ) hMTBaselineTauIdPhi120150->Fill(transverseMass, fEventWeight.getWeight()); 
+		  if ( tauData.getSelectedTau()->pt() > 100 && tauData.getSelectedTau()->pt() < 120 ) hMTBaselineTauIdPhi100120->Fill(transverseMass, fEventWeight.getWeight()); 
+		  if ( tauData.getSelectedTau()->pt() > 80 && tauData.getSelectedTau()->pt() < 100 ) hMTBaselineTauIdPhi80100->Fill(transverseMass, fEventWeight.getWeight()); 
+		  if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hMTBaselineTauIdPhi7080->Fill(transverseMass, fEventWeight.getWeight()); 
+		  if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMTBaselineTauIdPhi6070->Fill(transverseMass, fEventWeight.getWeight()); 
+		  if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMTBaselineTauIdPhi5060->Fill(transverseMass, fEventWeight.getWeight()); 
+		  if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMTBaselineTauIdPhi4050->Fill(transverseMass, fEventWeight.getWeight());
+	       
+		  if (TopChiSelectionData.passedEvent() ) {
+		    hMTBaselineTauIdTopMass->Fill(transverseMass, fEventWeight.getWeight()); 
+		    if ( tauData.getSelectedTau()->pt() > 150  ) hMTBaselineTauIdTopMass150->Fill(transverseMass, fEventWeight.getWeight()); 
+		    if ( tauData.getSelectedTau()->pt() > 120 && tauData.getSelectedTau()->pt() < 150 ) hMTBaselineTauIdTopMass120150->Fill(transverseMass, fEventWeight.getWeight()); 
+		    if ( tauData.getSelectedTau()->pt() > 100 && tauData.getSelectedTau()->pt() < 120 ) hMTBaselineTauIdTopMass100120->Fill(transverseMass, fEventWeight.getWeight()); 
+		    if ( tauData.getSelectedTau()->pt() > 80 && tauData.getSelectedTau()->pt() < 100 ) hMTBaselineTauIdTopMass80100->Fill(transverseMass, fEventWeight.getWeight()); 
+		    if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hMTBaselineTauIdTopMass7080->Fill(transverseMass, fEventWeight.getWeight()); 
+		    if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMTBaselineTauIdTopMass6070->Fill(transverseMass, fEventWeight.getWeight()); 
+		    if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMTBaselineTauIdTopMass5060->Fill(transverseMass, fEventWeight.getWeight()); 
+		    if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMTBaselineTauIdTopMass4050->Fill(transverseMass, fEventWeight.getWeight());
+		  }
 		}
+		
 	      }
 	    }
-
-
+	   
 	    hMETBaselineTauIdJets->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());  
 	    if ( tauData.getSelectedTau()->pt() > 150  ) hMETBaselineTauIdJets150->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 	    if ( tauData.getSelectedTau()->pt() > 120 && tauData.getSelectedTau()->pt() < 150 ) hMETBaselineTauIdJets120150->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
@@ -539,10 +585,13 @@ namespace HPlus {
 	    if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMETBaselineTauIdJets6070->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 	    if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMETBaselineTauIdJets5060->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 	    if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMETBaselineTauIdJets4050->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+	   
+
 	  }
 	}
       }
     }
+   
 
     // TauID, inverted TauID, veto on isolated tau
     if(!tauData.selectedTausDoNotPassIsolation())  return false; 
@@ -550,6 +599,7 @@ namespace HPlus {
     increment(fTauVetoAfterTauIDCounter);
 
     hMETInvertedTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());  
+
 
     //    if(!tauData.passedEvent()) return false; // Require at least one tau candidate
     // plot leading track without pt cut

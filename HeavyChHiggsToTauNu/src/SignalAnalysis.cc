@@ -91,18 +91,23 @@ namespace HPlus {
     fTauVetoAfterDeltaPhiCounter(eventCounter.addCounter("TauVeto after DeltaPhi cut")),
     fRealTauAfterDeltaPhiCounter(eventCounter.addCounter("Real tau after deltaPhi cut")),
     fRealTauAfterDeltaPhiTauVetoCounter(eventCounter.addCounter("Real tau after deltaPhi+tauveto cut")),
+
     fTauIsHadronFromHplusCounter(eventCounter.addCounter("Tau from H+ ->tau->hadrons")),
-    fTauIsHadronFromWCounter(eventCounter.addCounter("Tau from W ->tau->hadrons")),
+    fTauIsElectronFromHplusCounter(eventCounter.addCounter("Tau from H+ ->tau->electron")),
+    fTauIsMuonFromHplusCounter(eventCounter.addCounter("Tau from H+ ->tau->muon")),
     fTauIsElectronFromWCounter(eventCounter.addCounter("Tau from W->e")),
     fTauIsMuonFromWCounter(eventCounter.addCounter("Tau from W->mu")),
     fTauIsQuarkFromWCounter(eventCounter.addCounter("Tau from W->qq")),
+    fTauIsElectronFromWTauCounter(eventCounter.addCounter("Tau from W->tau->e")),
+    fTauIsMuonFromWTauCounter(eventCounter.addCounter("Tau from W->tau->mu")),
+    fTauIsHadronFromWTauCounter(eventCounter.addCounter("Tau from W->tau->hadrons")),
     fTauIsElectronFromBottomCounter(eventCounter.addCounter("Tau from top->bottom->e")),
     fTauIsMuonFromBottomCounter(eventCounter.addCounter("Tau from top->bottom->mu")),
     fTauIsHadronFromBottomCounter(eventCounter.addCounter("Tau from top->bottom->hadron")),
     fTauIsElectronFromJetCounter(eventCounter.addCounter("Tau from jet->e")),
     fTauIsMuonFromJetCounter(eventCounter.addCounter("Tau from jet->mu")),
     fTauIsHadronFromJetCounter(eventCounter.addCounter("Tau from jet->hadron")),
-    fTauIsElectronFromTauCounter(eventCounter.addCounter("Tau from tau->electron")),
+
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
     fdeltaPhiTauMET160FakeMetCounter(eventCounter.addCounter("deltaPhi160 and fake MET veto")),
     fForwardJetVetoCounter(eventCounter.addCounter("forward jet veto")),
@@ -586,82 +591,94 @@ namespace HPlus {
     if (deltaPhi > 160) return false;
 
 
+    // Origin and type of selected tau
     if (!iEvent.isRealData()) {
       edm::Handle <reco::GenParticleCollection> genParticles;
       iEvent.getByLabel("genParticles", genParticles);
       bool myTauFoundStatus = false;
       bool myLeptonVetoStatus = false;
-      bool electronFromW = false;
-      bool muonFromW = false;
-      bool quarkFromW = false;
-      bool FromBottom = false;
-      bool FromJet = false;
-      bool tauFromHplus = false;
-      bool tauFromW = false;
-      bool electronFound = false;
-      bool muonFound = false;
-      bool tauFound = false;
 
+      
+      reco::GenParticle parton;
+
+      double minDeltaR = 99999;
       for (size_t i=0; i < genParticles->size(); ++i) {
 	const reco::Candidate & p = (*genParticles)[i];
-	// Check match with tau
-	if (reco::deltaR(p, tauData.getSelectedTau()->p4()) < 0.3) {
-	  if (p.pt() > 5 && p.pdgId()!= std::abs(p.pdgId()) ) {
-	    
-	    std::vector<const reco::GenParticle*> mothers = getMothers(p);
-	    int motherId=9999;
-	    
-	    bool wInMothers = false;
-	    bool topInMothers = false;
-	    bool bottomInMothers = false;
-	    bool tauInMothers = false;
-	    bool hplusInMothers = false;
+	if (p.pt() > 5 && p.pdgId()!= std::abs(p.pdgId()) ) {
+	  if (reco::deltaR(p, tauData.getSelectedTau()->leadPFChargedHadrCand()->p4()) < 0.3) {
+	    if (std::abs(p.pdgId()) == 15) myTauFoundStatus = true;
+	  }
 
-	    for(size_t d=0; d<mothers.size(); ++d) {
-	      const reco::GenParticle dparticle = *mothers[d];
-	      motherId = dparticle.pdgId();
-	      if( abs(motherId) == 24 ) {
-		wInMothers = true;
-		if (std::abs(p.pdgId()) == 11 ) electronFromW = true;
-		if (std::abs(p.pdgId()) == 13 ) muonFromW = true;
-		if (std::abs(p.pdgId()) < 6 ) quarkFromW = true;
-	      }
-	      if( abs(motherId) == 6 ) topInMothers = true;
-	      if( abs(motherId) == 5 ) bottomInMothers = true;
-	      if( abs(motherId) == 15 ) tauInMothers = true;
-	      if( abs(motherId) == 37 ) hplusInMothers = true;	      
-	    }
-
-	    if (std::abs(p.pdgId()) == 11 ) electronFound = true;
-	    if (std::abs(p.pdgId()) == 13 ) muonFound = true;
-	    if (std::abs(p.pdgId()) == 15 ) tauFound = true;
-	    if (bottomInMothers && !wInMothers  ) FromBottom = true;
-	    //	    if (bottomInMothers && !wInMothers && std::abs(p.pdgId()) == 13 ) muonFromBottom = true;
-	    //	    if (bottomInMothers && !wInMothers && std::abs(p.pdgId()) != 13 && std::abs(p.pdgId()) != 11 ) hadronFromBottom = true;
-
-	    if (!bottomInMothers && !wInMothers ) FromJet = true;
-	    //	    if (!bottomInMothers && !wInMothers && std::abs(p.pdgId()) == 13 ) muonFromJet = true;
-	    //	    if (!bottomInMothers && !wInMothers && !hplusInMothers  ) hadronFromJet = true;
-	    if (hplusInMothers && std::abs(p.pdgId()) == 15 ) tauFromHplus = true;
-	    if (wInMothers && std::abs(p.pdgId()) == 15 ) tauFromW = true;
-
-	    if (std::abs(p.pdgId()) == 11 || std::abs(p.pdgId()) == 13 || std::abs(p.pdgId()) == 15) {
-	      //	      std::cout << " p.pdgId() " << p.pdgId()<< " mom " <<  p.p4().pt() <<  " tau " <<  tauData.getSelectedTau()->p4().pt() << std::endl;
-	      //	      printImmediateMothers(p);
-              // match found
-	      if (std::abs(p.pdgId()) == 11 || std::abs(p.pdgId()) == 13) {
-		myLeptonVetoStatus = true;
-		i = genParticles->size(); // finish loop
-	      }
-	      if (std::abs(p.pdgId()) == 15) myTauFoundStatus = true;
-	    }
+	  double deltaR = reco::deltaR(p, tauData.getSelectedTau()->leadPFChargedHadrCand()->p4());
+	  if (deltaR < minDeltaR) {
+	    minDeltaR = deltaR;
+	    parton = (*genParticles)[i];
 	  }
 	}
       }
+    
+     
+      std::vector<const reco::GenParticle*> mothers = getMothers(parton);
+      int motherId=9999;      
+      bool wInMothers = false;
+      bool topInMothers = false;
+      bool bottomInMothers = false;
+      bool tauInMothers = false;
+      bool hplusInMothers = false;
+ 
+      for(size_t d=0; d<mothers.size(); ++d) {
+	const reco::GenParticle dparticle = *mothers[d];
+	motherId = dparticle.pdgId();
+	if( abs(motherId) == 24 ) wInMothers = true;
+	if( abs(motherId) == 6 ) topInMothers = true;
+	if( abs(motherId) == 5 ) bottomInMothers = true;
+	if( abs(motherId) == 15 ) tauInMothers = true;
+	if( abs(motherId) == 37 ) hplusInMothers = true;
+    	      
+      }
+
+      bool FromBottom = false;
+      bool FromJet = false;    
+      bool FromHplusTau = false;
+      bool FromWTau = false;
+      bool FromW = false;
+     
+      if (bottomInMothers && !wInMothers  ) FromBottom = true;
+      if (!bottomInMothers && !wInMothers && !hplusInMothers ) FromJet = true;
+      if (hplusInMothers && tauInMothers ) FromHplusTau = true;
+      if (wInMothers && tauInMothers ) FromWTau = true;
+      if (wInMothers && !tauInMothers ) FromW = true;
+
+      if (FromBottom && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromBottomCounter);
+      if (FromBottom && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromBottomCounter);
+      if (FromBottom && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11 ) increment(fTauIsHadronFromBottomCounter);
+      
+
+      if (FromJet && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromJetCounter); 
+      if (FromJet && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromJetCounter);
+      if (FromJet && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11)  increment(fTauIsHadronFromJetCounter);
+
+      //      if (hplusInMothers && std::abs(parton.pdgId()) == 15 ) tauFromHplus = true;
+      if (hplusInMothers && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromHplusCounter);
+      if (hplusInMothers && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromHplusCounter);
+      if (hplusInMothers && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11 ) increment(fTauIsHadronFromHplusCounter);
+
+      if (FromW && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromWCounter);
+      if (FromW && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromWCounter);
+      if (FromW && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11 ) increment(fTauIsQuarkFromWCounter);
+
+      if (FromWTau && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromWTauCounter);
+      if (FromWTau && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromWTauCounter);
+      if (FromWTau && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11 ) increment(fTauIsHadronFromWTauCounter);
+
+      //      if (wInMothers && std::abs(parton.pdgId()) == 15 ) tauFromW = true; 
+
+
       if (myTauFoundStatus && !myLeptonVetoStatus) {
 	increment(fRealTauAfterDeltaPhiCounter);
 	if (!vetoTauData.passedEvent()) increment(fRealTauAfterDeltaPhiTauVetoCounter);
       }
+      /*
       if (electronFromW ) increment(fTauIsElectronFromWCounter);
       //      if (electronFound ) increment(fTauIsElectronFromWCounter);
       if (muonFromW ) increment(fTauIsMuonFromWCounter);  
@@ -672,12 +689,12 @@ namespace HPlus {
       if (FromJet && electronFound ) increment(fTauIsElectronFromJetCounter);
       if (FromJet &&  muonFound ) increment(fTauIsMuonFromJetCounter);  
       if (FromJet && !electronFound &&  !muonFound &&  !tauFound) increment(fTauIsHadronFromJetCounter);
-      if (tauFromHplus && !electronFound &&  !muonFound) increment(fTauIsHadronFromHplusCounter);
+      //      if (tauFromHplus && !electronFound &&  !muonFound) increment(fTauIsHadronFromHplusCounter);
       if (tauFromW && !electronFound &&  !muonFound) increment(fTauIsHadronFromWCounter);
       if (electronFound &&  tauFound) increment(fTauIsElectronFromTauCounter);
-
+      */
     }
-
+      
     if (!vetoTauData.passedEvent()) {
       increment(fTauVetoAfterDeltaPhiCounter);
       hTransverseMassTauVeto->Fill(transverseMass, fEventWeight.getWeight()); 

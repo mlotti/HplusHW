@@ -147,18 +147,23 @@ namespace HPlus {
     Count fTauVetoAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiTauVetoCounter;
+
     Count fTauIsHadronFromHplusCounter;
-    Count fTauIsHadronFromWCounter;
+    Count fTauIsElectronFromHplusCounter;
+    Count fTauIsMuonFromHplusCounter;
+    Count fTauIsQuarkFromWCounter;
     Count fTauIsElectronFromWCounter;
     Count fTauIsMuonFromWCounter;
-    Count fTauIsQuarkFromWCounter;
+    Count fTauIsHadronFromWTauCounter;
+    Count fTauIsElectronFromWTauCounter;
+    Count fTauIsMuonFromWTauCounter;
     Count fTauIsElectronFromBottomCounter;
     Count fTauIsMuonFromBottomCounter;
     Count fTauIsHadronFromBottomCounter;
     Count fTauIsElectronFromJetCounter;
     Count fTauIsMuonFromJetCounter;
     Count fTauIsHadronFromJetCounter;
-    Count fTauIsElectronFromTauCounter;
+   
     Count fFakeMETVetoCounter;
     Count fdeltaPhiTauMET160FakeMetCounter;
     Count fForwardJetVetoCounter;
