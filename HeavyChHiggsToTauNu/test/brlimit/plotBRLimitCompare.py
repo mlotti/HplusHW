@@ -24,17 +24,23 @@ def main():
 def compareTauJets():
     doCompare("taujets", [
             # (name, dir)
-            #("LHC-CLs", "LandS*taujets_lhc_*"),
-            ("LHC-CLs", "LandSMultiCrab_120513_210815_taujets_lhc_jobs40_sb600_b300"),
-            ("LHC-CLs (asymp)", "LandS*taujets_lhcasy"),
+            ("LHC-CLs", "LandS*taujets_lhc_*"),
+            ("LHC-CLs (asymp)", "LandS*taujets_lhcasy_*"),
             ("LEP-CLs", "LandS*taujets_lep_*"),
             ])
 
     doCompare("emu", [
             # (name, dir)
             ("LHC-CLs", "LandS*emu_lhc_*"),
-            ("LHC-CLs (asymp)", "LandS*emu_lhcasy"),
+            ("LHC-CLs (asymp)", "LandS*emu_lhcasy_*"),
             ("LEP-CLs", "LandS*emu_lep_*"),
+            ])
+
+    doCompare("mutau", [
+            # (name, dir)
+            ("LHC-CLs", "LandS*mutau_lhc_*"),
+            ("LHC-CLs (asymp)", "LandS*mutau_lhcasy_*"),
+            ("LEP-CLs", "LandS*mutau_lep_*"),
             ])
 
 

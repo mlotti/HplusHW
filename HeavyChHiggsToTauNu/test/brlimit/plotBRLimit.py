@@ -235,7 +235,7 @@ class BRLimits:
         if len(self.finalstates) == 1:
             return "%s final state" % _finalstateLabels[self.finalstates[0]]
 
-        ret = ", ".join([_finalstateLabels(x) for x in self.finalstates[:-1]])
+        ret = ", ".join([_finalstateLabels[x] for x in self.finalstates[:-1]])
         ret += ", and %s final states" % _finalstateLabels[self.finalstates[-1]]
         return ret
 
