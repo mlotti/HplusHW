@@ -329,6 +329,12 @@ vertexWeight = cms.untracked.PSet(
     enabled = cms.bool(False),
 )
 
+vertexWeightReader = cms.untracked.PSet(
+    PUVertexWeightSrc = cms.InputTag("PUVertexWeightNominal"),
+    vertexSrc = vertexWeight.vertexSrc,
+    enabled = cms.bool(False)
+)
+
 def triggerBin(pt, efficiency, uncertainty):
     return cms.PSet(
         pt = cms.double(pt),
@@ -459,8 +465,9 @@ def setDataTriggerEfficiency(dataVersion, era):
 # Weighting by instantaneous luminosity, and the number of true
 # simulated pile up interactions
 # See test/PUtools for tools to generate distributions and links to twiki
+# 
 
-def setPileupWeight(dataVersion, pset=vertexWeight, era="Run2011A", suffix=""):
+def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, psetReader=vertexWeightReader, era="Run2011A", suffix=""):
     if dataVersion.isData():
         return
     if dataVersion.isS6():
@@ -470,18 +477,34 @@ def setPileupWeight(dataVersion, pset=vertexWeight, era="Run2011A", suffix=""):
     elif dataVersion.isHighPU():
 	# High PU - disable vertex reweighting
         pset.enabled = False
+        psetReader.enabled = False
         return
     else:
         raise Exception("No PU reweighting support for anything else than Fall11 S6 scenario at the moment")
     pset.enabled = True
+    psetReader.enabled = True
 
     if era == "Run2011A" or era == "Run2011B":
-        dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData"+era+suffix+".root"
+        pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData"+era.replace("Run","")+suffix+".root"
     elif era == "Run2011A+B":
-        dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011"+suffix+".root"
+        pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011"+suffix+".root"
     else:
         raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'Run2011A', 'Run2011B', 'Run2011A+B'" % era)
-    dataPUdistributionLabel = "pileup"
+    pset.dataPUdistributionLabel = "pileup"
+    # Make procuder for weights and add it to common sequence
+    PUWeightProducer = cms.EDProducer("HPlusVertexWeightProducer",
+                                      vertexSrc = pset.vertexSrc,
+                                      puSummarySrc = pset.puSummarySrc,
+                                      enabled = pset.enabled,
+                                      dataPUdistribution = pset.dataPUdistribution,
+                                      dataPUdistributionLabel = pset.dataPUdistributionLabel,
+                                      mcPUdistribution = pset.mcPUdistribution,
+                                      mcPUdistributionLabel = pset.mcPUdistributionLabel,
+                                      alias = cms.string("PUVertexWeight"+suffix)
+    )
+    setattr(process, "PUWeightProducer"+suffix, PUWeightProducer)
+    commonSequence *= PUWeightProducer
+    psetReader.PUVertexWeightSrc = "PUWeightProducer"+suffix
 
 # Tau selection
 def forEachTauSelection(function):

@@ -157,7 +157,7 @@ namespace HPlus {
     fCorrelationAnalysis(eventCounter, eventWeight),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
     fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), eventWeight),
-    fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
+    fVertexWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeightReader")),
     fVertexAssignmentAnalysis(eventCounter, eventWeight),
     fFakeTauIdentifier(fEventWeight, "TauID"),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
@@ -298,12 +298,12 @@ namespace HPlus {
     fTree.setPrescaleWeight(fEventWeight.getWeight());
 
 //------ Vertex weight
-    std::pair<double, size_t> weightSize = fVertexWeight.getWeightAndSize(iEvent, iSetup);
     if(!iEvent.isRealData()) {
-      fEventWeight.multiplyWeight(weightSize.first);
-      fTree.setPileupWeight(weightSize.first);
+      const double myVertexWeight = fVertexWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(myVertexWeight);
+      fTree.setPileupWeight(myVertexWeight);
     }
-    int nVertices = weightSize.second;
+    int nVertices = fVertexWeightReader.getNumberOfVertices(iEvent, iSetup);
     hVerticesBeforeWeight->Fill(nVertices);
     hVerticesAfterWeight->Fill(nVertices, fEventWeight.getWeight());
     fTree.setNvertices(nVertices);
@@ -320,8 +320,8 @@ namespace HPlus {
     if(triggerData.hasTriggerPath()) // protection if TriggerSelection is disabled
       fTree.setHltTaus(triggerData.getTriggerTaus());
 
-    hVerticesTriggeredBeforeWeight->Fill(weightSize.second);
-    hVerticesTriggeredAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
+    hVerticesTriggeredBeforeWeight->Fill(nVertices);
+    hVerticesTriggeredAfterWeight->Fill(nVertices, fEventWeight.getWeight());
 
 //------ GenParticle analysis (must be done here when we effectively trigger all MC)
     if (!iEvent.isRealData()) {

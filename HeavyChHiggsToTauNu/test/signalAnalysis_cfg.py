@@ -74,7 +74,7 @@ doJESVariation = False
 
 # Perform the signal analysis with the PU weight variations
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
-doPUWeightVariation = False
+doPUWeightVariation = not False
 
 # Do variations for optimisation
 doOptimisation = False
@@ -190,7 +190,7 @@ if applyTriggerScaleFactor and dataVersion.isMC():
 puweight = "Run2011A"
 if len(options.puWeightEra) > 0:
     puweight = options.puWeightEra
-param.setPileupWeight(dataVersion, pset=param.vertexWeight, era=puweight) # Reweight by true PU distribution 
+param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, pset=param.vertexWeight, psetReader=param.vertexWeightReader, era=puweight) # Reweight by true PU distribution
 param.setDataTriggerEfficiency(dataVersion, era=puweight)
 print "PU weight era =",puweight
 
@@ -230,7 +230,10 @@ process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
 process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
 process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
 #User DB for btag eff
-process.CondDBCommon.connect = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
+btagDB = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
+if options.runOnCrab != 0:
+    btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
+process.CondDBCommon.connect = btagDB
 process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
 process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
 #param.bTagging.UseBTagDB  = cms.untracked.bool(True)
@@ -526,17 +529,17 @@ if doJESVariation or doSystematics:
 
 
 def addPUWeightVariation(name):
+    # Up variation
     module = getattr(process, name).clone()
     module.Tree.fill = False
-    module.vertexWeight
-    param.setPileupWeight(dataVersion, pset=module.vertexWeight, era=puweight, suffix="up")
+    param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, era=puweight, suffix="up")
     addAnalysis(process, name+"PUWeightPlus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
-
+    # Down variation
     module = module.clone()
-    param.setPileupWeight(dataVersion, pset=module.vertexWeight, era=puweight, suffix="down")
+    param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, era=puweight, suffix="down")
     addAnalysis(process, name+"PUWeightMinus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
