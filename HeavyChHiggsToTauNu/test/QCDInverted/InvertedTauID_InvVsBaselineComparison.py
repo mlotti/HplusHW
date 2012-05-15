@@ -35,10 +35,13 @@ def usage():
     sys.exit()
 
 def main():
+    if len(sys.argv) < 2:
+        usage()
+
 
 #    HISTONAME = "MET_InvertedTauIdJets"
-    HISTONAME = "MET_InvertedTauIdBtag"
-#    HISTONAME = "MTInvertedTauIdBtag"
+#    HISTONAME = "MET_InvertedTauIdBtag"
+    HISTONAME = "MTInvertedTauIdBtag"
 
     invertedhisto = HISTONAME
     baselinehisto = HISTONAME.replace("Inverted","BaseLine")

@@ -135,6 +135,7 @@ namespace HPlus {
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fNJetsCounter;
+    Count fBTaggingBeforeMETCounter;
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fdeltaPhiTauMET10Counter;
@@ -253,6 +254,8 @@ namespace HPlus {
     TH1 *hMETInvertedTauIdJets6070;
     TH1 *hMETInvertedTauIdJets5060;
     TH1 *hMETInvertedTauIdJets4050;
+
+    TH1 *hMETInvertedTauIdBtag;
     TH1 *hMETInvertedTauIdBtag150;
     TH1 *hMETInvertedTauIdBtag120150;
     TH1 *hMETInvertedTauIdBtag100120;
@@ -261,7 +264,8 @@ namespace HPlus {
     TH1 *hMETInvertedTauIdBtag6070;
     TH1 *hMETInvertedTauIdBtag5060;
     TH1 *hMETInvertedTauIdBtag4050;
-    TH1 *hMTBaselineTauIdJet;
+
+ 
     TH1 *hMTBaselineTauIdBtag150;
     TH1 *hMTBaselineTauIdBtag120150;
     TH1 *hMTBaselineTauIdBtag100120;
@@ -270,7 +274,39 @@ namespace HPlus {
     TH1 *hMTBaselineTauIdBtag6070;
     TH1 *hMTBaselineTauIdBtag5060;
     TH1 *hMTBaselineTauIdBtag4050;
+
+    TH1 *hMTBaselineTauIdJet150;
+    TH1 *hMTBaselineTauIdJet120150;
+    TH1 *hMTBaselineTauIdJet100120;
+    TH1 *hMTBaselineTauIdJet80100;
+    TH1 *hMTBaselineTauIdJet7080;
+    TH1 *hMTBaselineTauIdJet6070;
+    TH1 *hMTBaselineTauIdJet5060;
+    TH1 *hMTBaselineTauIdJet4050;
+
+    TH1 *hMTBaselineTauIdPhi150;
+    TH1 *hMTBaselineTauIdPhi120150;
+    TH1 *hMTBaselineTauIdPhi100120;
+    TH1 *hMTBaselineTauIdPhi80100;
+    TH1 *hMTBaselineTauIdPhi7080;
+    TH1 *hMTBaselineTauIdPhi6070;
+    TH1 *hMTBaselineTauIdPhi5060;
+    TH1 *hMTBaselineTauIdPhi4050;
+    TH1 *hMTBaselineTauIdPhi;
+
     TH1 *hMTInvertedTauIdJets;
+    TH1 *hMTBaselineTauIdJet;
+
+    TH1 *hMTInvertedTauIdPhi;
+    TH1 *hMTInvertedTauIdPhi150;
+    TH1 *hMTInvertedTauIdPhi120150;
+    TH1 *hMTInvertedTauIdPhi100120;
+    TH1 *hMTInvertedTauIdPhi80100;
+    TH1 *hMTInvertedTauIdPhi7080;
+    TH1 *hMTInvertedTauIdPhi6070;
+    TH1 *hMTInvertedTauIdPhi5060;
+    TH1 *hMTInvertedTauIdPhi4050;
+
     TH1 *hMTInvertedTauIdJet;
     TH1 *hMTInvertedTauIdJet150;
     TH1 *hMTInvertedTauIdJet120150;
@@ -280,6 +316,16 @@ namespace HPlus {
     TH1 *hMTInvertedTauIdJet6070;
     TH1 *hMTInvertedTauIdJet5060;
     TH1 *hMTInvertedTauIdJet4050;
+
+    TH1 *hMTInvertedTauIdBtag;
+    TH1 *hMTInvertedTauIdBtag150;
+    TH1 *hMTInvertedTauIdBtag120150;
+    TH1 *hMTInvertedTauIdBtag100120;
+    TH1 *hMTInvertedTauIdBtag80100;
+    TH1 *hMTInvertedTauIdBtag7080;
+    TH1 *hMTInvertedTauIdBtag6070;
+    TH1 *hMTInvertedTauIdBtag5060;
+    TH1 *hMTInvertedTauIdBtag4050;
 
     TH1 *hMTInvertedTauIdMet;
     TH1 *hMTInvertedTauIdMet150;
@@ -326,17 +372,14 @@ namespace HPlus {
     TH1 *hMETInvertedTauIdLoose4070;
     TH1 *hMETInvertedTauIdLoose70150;
     TH1 *hMETBaselineTauIdBtag;
-    TH1 *hMETInvertedTauIdBtag;
     //    TH1 *hMTBaselineTauIdJets;
     TH1 *hMTInvertedTauIdLoose;
 
     //    TH1 *hMTInvertedTauIdJets;
     TH1 *hMTBaselineTauIdBtag;
-    TH1 *hMTInvertedTauIdBtag;
     TH1 *hMETBaselineTauIdBtagDphi;
     TH1 *hMETInvertedTauIdBtagDphi;
-    //    TH1 *hMETInvertedTauIdBtag;
-    //    TH1 *hMTInvertedTauIdBtag;
+ 
     TH1 *hSelectedTauEt;
     TH1 *hSelectedTauEta;
     TH1 *hSelectedTauPhi;

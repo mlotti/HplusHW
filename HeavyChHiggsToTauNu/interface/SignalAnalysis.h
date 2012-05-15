@@ -138,9 +138,36 @@ namespace HPlus {
     Count fTauVetoAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiTauVetoCounter;
+
+    Count fTauIsHadronFromHplusCounter;
+    Count fTauIsElectronFromHplusCounter;
+    Count fTauIsMuonFromHplusCounter;
+    Count fTauIsQuarkFromWCounter;
+    Count fTauIsElectronFromWCounter;
+    Count fTauIsMuonFromWCounter;
+    Count fTauIsHadronFromWTauCounter;
+    Count fTauIsElectronFromWTauCounter;
+    Count fTauIsMuonFromWTauCounter;
+    Count fTauIsElectronFromBottomCounter;
+    Count fTauIsMuonFromBottomCounter;
+    Count fTauIsHadronFromBottomCounter;
+    Count fTauIsElectronFromJetCounter;
+    Count fTauIsMuonFromJetCounter;
+    Count fTauIsHadronFromJetCounter;
+   
     Count fFakeMETVetoCounter;
     Count fdeltaPhiTauMET160FakeMetCounter;
     Count fForwardJetVetoCounter;
+    Count fTopSelectionCounter;
+    Count fTopChiSelectionCounter;
+    Count fTopChiSelection250Counter;
+    Count fTopChiSelection220Counter;
+    Count fTopWithBSelectionCounter;
+    Count fTopWithBSelection250Counter;
+    Count fTopWithBSelection220Counter;
+    Count fTopWithWSelectionCounter;
+    Count fTopWithWSelection250Counter;
+    Count fTopWithWSelection220Counter;
     Count ftransverseMassCut70Counter;
     Count ftransverseMassCut80Counter;
     Count ftransverseMass70TauVetoCounter;
@@ -156,11 +183,7 @@ namespace HPlus {
     Count ftransverseMassCut80NoRtauCounter;
     Count ftransverseMassCut100NoRtauCounter;
     Count fZmassVetoCounter;
-    Count fTopSelectionCounter;
-    Count fTopChiSelectionCounter;
     Count fTopChiSelectionNarrowCounter;
-    Count fTopWithBSelectionCounter;
-    Count fTopWithWSelectionCounter;
     Count fSelectedEventsCounter;
 
     TriggerSelection fTriggerSelection;
@@ -212,6 +235,15 @@ namespace HPlus {
     TH1 *hTransverseMassTauVeto;
     TH1 *hTransverseMassAfterDeltaPhi;
     TH1 *hEWKFakeTausTransverseMass;
+    TH1 *hTransverseMassFakeMetVeto;
+    TH1 *hTransverseMassAfterDeltaPhi160;
+    TH1 *hTransverseMassAfterDeltaPhi130;
+    TH1 *hTransverseMassAfterDeltaPhi90;
+    TH1 *hNonQCDTypeIITransverseMass;
+    TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi130;
+    TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi160;
+    TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi90;
+
     TH1 *hDeltaPhi;
     TH1 *hDeltaPhiJetMet;
     TH1 *hAlphaT;

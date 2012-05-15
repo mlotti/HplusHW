@@ -46,7 +46,7 @@ doTauEmbeddingTauSelectionScan = False
 doTauEmbeddingLikePreselection = False
 
 # Apply beta cut for jets to reject PU jets
-betaCutForJets = 0.0 # Disable by setting to 0.0; if you want to enable, set to 0.2
+betaCutForJets = 0.7 # Disable by setting to 0.0; if you want to enable, set to 0.2
 
 #########
 # Flags for options in the signal analysis
@@ -123,10 +123,11 @@ process.source = cms.Source('PoolSource',
     # For testing in lxplus
     #dataVersion.getAnalysisDefaultFileCastor()
     # For testing in jade
-    dataVersion.getAnalysisDefaultFileMadhatter()
+#    dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau_173236-173692_2011A_Nov08/Tau/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_173236-173692_2011A_Nov08//d7b7dcb6c55f2b2177021b8423a82913/pattuple_10_1_9l2.root",
     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau_175860-180252_2011B_Nov19/Tau/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_175860-180252_2011B_Nov19//28e7e0ab56ad4146eca1efa805cd10f4/pattuple_100_1_jnU.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_5_1_Hkv.root"
     )
 )
 
