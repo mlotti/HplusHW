@@ -187,6 +187,8 @@ prefix = "multicrab"
 if "QCD" in cfg:
     prefix += "_QCD"
 
+multicrab.appendArgAll("runOnCrab=1")
+
 # Generate configuration only?
 configOnly=True
 #configOnly=False
