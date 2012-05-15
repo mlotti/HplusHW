@@ -10,7 +10,7 @@
 ###########################################################################
 
 import ROOT
-#ROOT.gROOT.SetBatch(True)
+ROOT.gROOT.SetBatch(True)
 from ROOT import *
 import math
 import sys
@@ -28,11 +28,33 @@ from InvertedTauID import *
 
 ReBinning = True
 
-def main():
+def usage():
+    print "\n"
+    print "### Usage:   InvertedTauID_InvVsBaselineComparison.py <multicrab dir>\n"
+    print "\n"
+    sys.exit()
 
+def main():
+    if len(sys.argv) < 2:
+        usage()
+
+
+#    HISTONAME = "MET_InvertedTauIdJets"
+#    HISTONAME = "MET_InvertedTauIdBtag"
+    HISTONAME = "MTInvertedTauIdBtag"
+
+    invertedhisto = HISTONAME
+    baselinehisto = HISTONAME.replace("Inverted","BaseLine")
+
+    dirs = []
+    if len(sys.argv) < 2:
+        usage()
+
+    dirs.append(sys.argv[1])
     
     # Create all datasets from a multicrab task
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    #datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters)
 
     # As we use weighted counters for MC normalisation, we have to
     # update the all event count to a separately defined value because
@@ -73,17 +95,17 @@ def main():
     invertedQCD = InvertedTauID()
     invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
 
-    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdBtag")
-    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdBtag")
+    metBase = plots.DataMCPlot(datasets, analysis+"/"+baselinehisto)
+    metInver = plots.DataMCPlot(datasets, analysis+"/"+invertedhisto)
 
     # Rebin before subtracting
     metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     
-    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBtag")
-    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBtag") 
-    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_BaselineTauIdBtag")
-    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_BaselineTauIdBtag")
+    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/"+invertedhisto)
+    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/"+invertedhisto) 
+    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/"+baselinehisto)
+    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/"+baselinehisto)
 
     if ReBinning:
         rebinfactor = 1.3
@@ -116,6 +138,7 @@ def main():
     invertedQCD.comparison(metInverted_data,metBase_QCD)
 
     invertedQCD.cutefficiency(metInverted_data,metBase_QCD)
+
 
 if __name__ == "__main__":
     main()

@@ -176,15 +176,19 @@ MET = cms.untracked.PSet(
 
 bTagging = cms.untracked.PSet(
     # jetBProbabilityBJetTags,jetProbabilityBJetTags,trackCountingHighPurBJetTags,trackCountingHighEffBJetTags,simpleSecondaryVertexHighEffBJetTags,simpleSecondaryVertexHighPurBJetTags,combinedSecondaryVertexBJetTags,combinedSecondaryVertexMVABJetTags,softMuonBJetTags,softMuonByPtBJetTags,softMuonByIP3dBJetTags
-#   OP: JPL = 0.275, LPM = 0.545, JPT = 0.790, CSVL = 0.244, CSVM = 0.679, CSVT = 0.898
+#   OP: JPL = 0.275, JPM = 0.545, JPT = 0.790, CSVL = 0.244, CSVM = 0.679, CSVT = 0.898
 #    discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
     discriminator = cms.untracked.string("combinedSecondaryVertexBJetTags"),
+#    discriminator = cms.untracked.string("jetProbabilityBJetTags"),   
     discriminatorCut = cms.untracked.double(0.679),
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(1), #FIXME change minNumber to jetNumber
     jetNumber = cms.untracked.uint32(1), #FIXME change minNumber to jetNumber
-    jetNumberCutDirection = cms.untracked.string("GEQ") # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
+    jetNumberCutDirection = cms.untracked.string("GEQ"), # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
+    UseBTagDB      = cms.untracked.bool(False),
+    BTagDBAlgo     = cms.untracked.string("TCHEL"),
+    BTagUserDBAlgo = cms.untracked.string("BTAGTCHEL_hplusBtagDB_TTJets")
 )
 
 deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
@@ -284,7 +288,7 @@ topChiSelection = cms.untracked.PSet(
 
 topWithBSelection = cms.untracked.PSet(
     TopMassLow = cms.untracked.double(120.0),
-    TopMassHigh = cms.untracked.double(250.0),
+    TopMassHigh = cms.untracked.double(300.0),
     Chi2Cut = cms.untracked.double(5.0),
     src = cms.untracked.InputTag("genParticles"),
     enabled = cms.untracked.bool(False)
@@ -292,7 +296,7 @@ topWithBSelection = cms.untracked.PSet(
 
 topWithWSelection = cms.untracked.PSet(
     TopMassLow = cms.untracked.double(120.0),
-    TopMassHigh = cms.untracked.double(250.0),
+    TopMassHigh = cms.untracked.double(300.0),
     Chi2Cut = cms.untracked.double(5.0),
     src = cms.untracked.InputTag("genParticles"),
     enabled = cms.untracked.bool(False)

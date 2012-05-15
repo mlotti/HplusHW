@@ -269,8 +269,11 @@ namespace HPlus {
       //double myBetaMax = iJet->userFloat("BetaMax");
       double myBetaStar = iJet->userFloat("BetaStar");
       double myMeanDR = iJet->userFloat("DRMean");
+
       bool myIsPVJetStatus = (iJet->userInt("LdgTrackBelongsToSelectedPV") == 1); // FIXME: do MC matching
+
       // Fill histograms after eta and pt cuts
+      
       if (std::abs(iJet->eta()) < fEtaCut && iJet->pt() > fPtCut) {
         if (myIsPVJetStatus) {
           hBetaGenuine->Fill(myBeta, fEventWeight.getWeight());
