@@ -37,7 +37,7 @@ treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger
 
 #QCDfromData = True
 QCDfromData = False
-deltaPhi180 = False
+deltaPhi160 = False
 deltaPhi130 = False
 
 btagging = True # for normalisation with btagging
@@ -98,6 +98,8 @@ def main():
     # Remove signals other than M120
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
+    datasets.merge("EWK", ["WJets", "DYJetsToLL", "SingleTop", "Diboson","TTJets"], keepSources=True)
+
 
     datasets_lands = datasets.deepCopy()
 
@@ -305,7 +307,7 @@ def mtComparison(datasets):
         mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag150")])
         mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag")])
         mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdBtag")])
-             
+        mtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTBaseLineTauIdBtag")])             
 
   ## With MET > 70 GeV
                         
@@ -449,7 +451,13 @@ def mtComparison(datasets):
     mtBaseline.histoMgr.setHistoDrawStyleAll("P")
     mtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
     hmtBaseline = mtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
-    hmtBaseline.Scale(norm_inc)
+
+    mtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    mtEWK._setLegendStyles()
+    mtEWK._setLegendLabels()
+    mtEWK.histoMgr.setHistoDrawStyleAll("P")
+    mtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+    hmtEWK = mtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
         
     hmtSum = hmt4050.Clone("mtSum")
     hmtSum.SetName("mtSum")
@@ -517,7 +525,7 @@ def mtComparison(datasets):
     
     canvas3 = ROOT.TCanvas("canvas3","",500,500)
 #    canvas3.SetLogy()
-#    hmt.SetMaximum(120.0)
+    hmt.SetMaximum(120.0)
     hmt.SetMarkerColor(2)
     hmt.SetMarkerSize(1)
     hmt.SetMarkerStyle(21)
@@ -534,7 +542,16 @@ def mtComparison(datasets):
     hmtBaseline.SetMarkerStyle(24)
     hmtBaseline.SetFillColor(1)
     hmtBaseline.Draw("same")
+#    hmtBaseline_QCD = hmtBaseline.Clone("QCD")
+#    hmtBaseline_QCD.Add(hmtEWK,-1)
+#    hmtBaseline_QCD.Draw("same")
 
+
+    hmtEWK.SetMarkerColor(7)
+    hmtEWK.SetMarkerSize(1)
+    hmtEWK.SetMarkerStyle(23)
+    hmtEWK.SetFillColor(7)
+    hmtEWK.Draw("same")
     
     tex1 = ROOT.TLatex(0.65,0.7,"No binning")
 #    tex1 = ROOT.TLatex(0.3,0.4,"No binning")

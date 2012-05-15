@@ -184,6 +184,7 @@ namespace HPlus {
     Count ftransverseMassCut100NoRtauCounter;
     Count fZmassVetoCounter;
 
+
     Count fSelectedEventsCounter;
 
     TriggerSelection fTriggerSelection;
@@ -234,9 +235,10 @@ namespace HPlus {
     TH1 *hTransverseMassMET70;
     TH1 *hTransverseMassTauVeto;
     TH1 *hTransverseMassAfterDeltaPhi;
-    
+
+    TH1 *hEWKFakeTausTransverseMass;
     TH1 *hTransverseMassFakeMetVeto;
-    /*
+    
     TH1 *hTransverseMassAfterDeltaPhi160;
     TH1 *hTransverseMassAfterDeltaPhi130;
     TH1 *hTransverseMassAfterDeltaPhi90;
@@ -244,8 +246,8 @@ namespace HPlus {
     TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi130;
     TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi160;
     TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi90;
-    */
-    TH1 *hEWKFakeTausTransverseMass;
+    
+   
 
     TH1 *hDeltaPhi;
     TH1 *hDeltaPhiJetMet;
