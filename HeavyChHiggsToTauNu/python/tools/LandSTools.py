@@ -515,7 +515,8 @@ class LHCType:
         fitScript = os.path.join(findOrInstallLandS(directory=True), "test", "fitRvsCLs.C")
         if not os.path.exists(fitScript):
             raise Exception("Did not find fit script '%s'" % fitScript)
-        p = subprocess.Popen(["root", "-l", "-n", "-b", fitScript+"+"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        rootCommand = ["root", "-l", "-n", "-b", fitScript+"+"]
+        p = subprocess.Popen(rootCommand, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
         commands = []
 
@@ -531,11 +532,14 @@ class LHCType:
                 commands.append("scanRmax = %s" % val)
         commands.extend([
             'run("%s", "plot_m%s")' % (rootFile, mass),
+#            'run("%s", "plot_m%s", "bands", -1, 1)' % (rootFile, mass), # for debug output of the script
             ".q"
             ])
         output = p.communicate("\n".join(commands)+"\n")[0]
 #        print output
         f = open(os.path.join(path, "fitRvsCLs_m%s_output.txt"%mass), "w")
+        f.write(" ".join(rootCommand)+"\n\n")
+        f.write("\n".join(commands)+"\n\n")
         f.write(output)
         f.write("\n")
         f.close()
