@@ -185,7 +185,10 @@ bTagging = cms.untracked.PSet(
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(1), #FIXME change minNumber to jetNumber
     jetNumber = cms.untracked.uint32(1), #FIXME change minNumber to jetNumber
-    jetNumberCutDirection = cms.untracked.string("GEQ") # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
+    jetNumberCutDirection = cms.untracked.string("GEQ"), # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
+    UseBTagDB      = cms.untracked.bool(False),
+    BTagDBAlgo     = cms.untracked.string("TCHEL"),
+    BTagUserDBAlgo = cms.untracked.string("BTAGTCHEL_hplusBtagDB_TTJets")
 )
 
 deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
