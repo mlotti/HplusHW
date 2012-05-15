@@ -16,7 +16,9 @@ namespace edm {
   class Event;
   class EventSetup;
 }
-
+namespace reco {
+  class Vertex;
+}
 namespace HPlus {
   class VetoTauSelection {
   public:
@@ -51,13 +53,15 @@ namespace HPlus {
     edm::InputTag fOneAndThreeProngTauSrc;
     edm::InputTag fThreeProngTauSrc;
     edm::InputTag fSrc;
-    
+    edm::Ptr<reco::Vertex> thePV_;
+   
     TauSelection fTauSelection;
     FakeTauIdentifier fFakeTauIdentifier;
     
     EventWeight& fEventWeight;
 
     Count fAllEventsCounter;
+    //    Count fVetoTauCandidatesCounter;
     Count fVetoTausSelectedCounter;
     Count fEventsCompatibleWithZMassCounter;
     Count fSelectedEventsCounter;
@@ -75,6 +79,7 @@ namespace HPlus {
     TH1* hSelectedFakeTauByPhi;
     TH1* hSelectedGenuineTauDiTauMass;
     TH1* hSelectedFakeTauDiTauMass;
+    TH1* hSelectedTaus;
     
     edm::PtrVector<pat::Tau> fSelectedVetoTaus;
   };

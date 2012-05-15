@@ -410,6 +410,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     betaPrototype = cms.EDProducer("HPlusPATJetViewBetaEmbedder",
         jetSrc = cms.InputTag("patJetsAK5PF"),
         vertexSrc = cms.InputTag("offlinePrimaryVertices"),
+        generalTracksSrc = cms.InputTag("generalTracks"),
         embedPrefix = cms.string("")
     )
 
@@ -1132,6 +1133,7 @@ class PF2PATBuilder:
         # Embed beta and betastar to pat::Jet
         betaPrototype = cms.EDProducer("HPlusPATJetViewBetaEmbedder",
             jetSrc = cms.InputTag("patJets"+postfix),
+            generalTracksSrc = cms.InputTag("generalTracks"),
             vertexSrc = cms.InputTag("offlinePrimaryVertices"),
             embedPrefix = cms.string("")
         )

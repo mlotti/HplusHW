@@ -8,137 +8,88 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import sort
 # data structures for the config file information
 
 class ObservationInput:
-    def __init__(self, counterDir, counter, shapeHisto):
-	self.setChannel(1)
-	self.setCounterDir(counterDir)
-	self.setCounter(counter)
+    def __init__(self, dirPrefix, rateCounter, datasetDefinitions, shapeHisto):
+	self.setDirPrefix(dirPrefix)
+	self.setRateCounter(rateCounter)
+	self.setDatasetDefinitions(datasetDefinitions)
 	self.setShapeHisto(shapeHisto)
-	self.setFunction("Counter")
-	self.setCounterHisto(os.path.join(counterDir,"counter"))
 
-    def setChannel(self,channel):
-	self.channel = channel
+    def setDirPrefix(self,dir):
+	self.dirPrefix = dir
 
-    def setCounterDir(self,dir):
-	self.counterDir = dir
+    def setRateCounter(self,rateCounter):
+	self.rateCounter = rateCounter
 
-    def setCounter(self,counter):
-	self.counter    = counter
+    def setDatasetDefinitions(self,datasetDefinitions):
+        self.datasetDefinitions = datasetDefinitions
 
     def setShapeHisto(self,histo):
 	self.shapeHisto = histo
 
-    def setFunction(self,function):
-	self.function = function
+    def getDirPrefix(self):
+        return self.dirPrefix
 
-    def setCounterHisto(self,histo):
-	self.counterHisto = histo
+    def getRateCounter(self):
+        return self.rateCounter
 
-    def setPaths(self, path, subpaths):
-	self.path     = path
-	self.subpaths = subpaths
-
-	self.Print()
-
-    def getChannel(self):
-        return self.channel
-        
-    def getCounterDir(self):
-        return self.counterDir
-        
-    def getCounter(self):
-        return self.counter
-        
     def getShapeHisto(self):
         return self.shapeHisto
-        
-    def getFunction(self):
-        return self.function
-        
-    def getCounterHisto(self):
-        return self.counterHisto
-
-    def getPath(self):
-        return self.path
-
-    def getSubPaths(self):
-        return self.subpaths
 
     def Print(self):
 	print "ObservationInput :"
-	print "    channel     ",self.channel
-	print "    counterdir  ",self.counterDir
-	print "    counter     ",self.counter
+	print "    dirPrefix   ",self.dirPrefix
+	print "    rate counter",self.rateCounter
 	print "    shapeHisto  ",self.shapeHisto
-	print "    function    ",self.function
-	print "    counterHisto",self.counterHisto
-	print "    path        ",self.path
-	print "    data        ",self.subpaths
 
 class DataGroup:
     def __init__(self, 
-                 name = "",
-                 channel = 1, 
                  landsProcess = -999,
-		 function = "", 
-                 mass = -1, 
+                 validMassPoints = [],
                  label = "", 
                  nuisances = [], 
                  shapeHisto = "", 
-                 rootpath="", 
-                 counter = "",
-                 path = "", 
-                 subpath = "", 
-		 ewkmcpaths = "",
-                 normalization = 1):
-        self.name          = name
-	self.channel       = channel
+                 dirPrefix = "",
+                 rateCounter = "",
+                 datasetType = "",
+                 datasetDefinitions = [],
+                 MCEWKDatasetDefinitions = [],
+                 QCDfactorisedInfo = None,
+                 additionalNormalisation = 1.0):
 	self.landsProcess  = landsProcess
-        self.function      = function
-	self.mass          = mass
-	self.label	   = label
+	self.validMassPoints = validMassPoints
+	self.label         = label
 	self.nuisances     = nuisances
 	self.shapeHisto    = shapeHisto
-        self.rootpath      = rootpath
-	self.counter       = counter
-	self.path	   = path
-	self.subpath	   = subpath
-	self.ewkmcpaths    = ewkmcpaths
-	self.normalization = normalization
+	self.dirPrefix    = dirPrefix
+	self.rateCounter   = rateCounter
+        self.datasetType   = datasetType
+        self.datasetDefinitions = datasetDefinitions
+        self.MCEWKDatasetDefinitions = MCEWKDatasetDefinitions
+        self.QCDfactorisedInfo = QCDfactorisedInfo
+        self.additionalNormalisation = additionalNormalisation
 
     def getId(self):
 	return self.label
 
     def clone(self):
-	return DataGroup(name         = self.name,
-                         channel      = self.channel,
-                         landsProcess = self.landsProcess,
-			 function     = self.function,
-                         mass         = self.mass,
+	return DataGroup(landsProcess = self.landsProcess,
+                         validMassPoints = self.validMassPoints,
                          label        = self.label,
                          nuisances    = self.nuisances,
                          shapeHisto   = self.shapeHisto,
-                         rootpath     = self.rootpath,
-			 counter      = self.counter,
-                         path         = self.path,
-                         ewkmcpaths   = self.ewkmcpaths,
-                         subpath      = self.subpath,
-                         normalization= self.normalization)
-
-    def setName(self,name):
-	self.name = name
-
-    def setChannel(self,channel):
-	self.channel = channel
+                         dirPrefix   = self.dirPrefix,
+                         rateCounter  = self.rateCounter,
+                         datasetType  = self.datasetType,
+                         datasetDefinitions = self.datasetDefinitions,
+                         MCEWKDatasetDefinitions = self.MCEWKDatasetDefinitions,
+                         QCDfactorisedInfo = self.QCDfactorisedInfo,
+                         additionalNormalisation= self.additionalNormalisation)
 
     def setLandSProcess(self,landsProcess):
 	self.landsProcess = landsProcess
 
-    def setMass(self,mass):
-	self.mass = mass
-
-    def setFunction(self,function):
-	self.function = function
+    def setValidMassPoints(self,validMassPoints):
+	self.validMassPoints = validMassPoints
 
     def setLabel(self, label):
 	self.label = label
@@ -149,60 +100,56 @@ class DataGroup:
     def setShapeHisto(self,histo):
 	self.shapeHisto = histo
 
-    def setRootpath(self,path):
-        self.rootpath = rootpath
-        
-    def setCounter(self,counter):
-	self.counter = counter
+    def setCounterHisto(self,dirPrefix):
+	self.dirPrefix = dirPrefix
 
-    def setPath(self,path):
-	self.path = path
+    def setRateCounter(self, rateCounter):
+        self.rateCounter = rateCounter
 
-    def setSubPaths(self,path):
-	self.subpath = path
+    def setDatasetType(self,datasetType):
+        self.datasetType = datasetType
 
-    def setEWKMCPaths(self,paths):
-	self.ewkmcpaths = paths
+    def setDatasetDefinitions(self,datasetDefinitions):
+        self.datasetDefinitions = datasetDefinitions
 
-    def setNormalization(self,value):
-	self.normalization = value
+    def setMCEWKDatasetDefinitions(self,MCEWKDatasetDefinitions):
+        self.MCEWKDatasetDefinitions = MCEWKDatasetDefinitions
 
-    def exists(self):
-	if len(self.path) > 0:
-	    return True
-	return False
+    def setQCDfactorisedInfo(self,QCDfactorisedInfo):
+        self.QCDfactorisedInfo = QCDfactorisedInfo
+
+    def setAdditionalNormalisation(self,value):
+	self.additionaNormalisation = value
 
     def Print(self):
-        print "    Name         ",self.name
-	print "    Channel      ",self.channel
 	print "    Label        ",self.label
 	print "    LandS process",self.landsProcess
-	print "    Mass         ",self.mass
-        print "    Rootpath     ",self.rootpath
-	print "    Counter      ",self.counter
-	print "    Path         ",self.path
-	print "    Subpaths     ",self.subpath
-	print "    Normalization",self.normalization
+	print "    Valid mass points",self.validMassPoints
+	print "    dir. prefix      ",self.dirPrefix
+	print "    datasetType  ",self.datasetType
+	print "    datasetDefinitions",self.datasetDefinitions
+	print "    MCEWKDatasetDefinitions",self.MCEWKDatasetDefinitions
+	print "    Additional normalisation",self.additionalNormalisation
 	print "    Nuisances    ",self.nuisances
-	print
-
-class DataGroupInput:
-    def __init__(self):
-	self.datagroups = {}
-
-    def add(self,datagroup):
-	if datagroup.exists():
-	    self.datagroups[datagroup.getId()] = datagroup
-
-    def get(self,key):
-	return self.datagroups[key]
-
-    def Print(self):
-	print "DataGroups"
-        print "NuisanceTable"
-        for key in sorted(self.datagroups.keys()):
-            self.datagroups[key].Print()
         print
+
+#class DataGroupInput:
+#    def __init__(self):
+#	self.datagroups = {}
+#
+#    def add(self,datagroup):
+#	if datagroup.exists():
+#	    self.datagroups[datagroup.getId()] = datagroup
+#
+#    def get(self,key):
+#	return self.datagroups[key]
+#
+#    def Print(self):
+#	print "DataGroups"
+#        print "NuisanceTable"
+#        for key in sorted(self.datagroups.keys()):
+#            self.datagroups[key].Print()
+#        print
 
 
 class Nuisance:
@@ -211,30 +158,32 @@ class Nuisance:
 		label="",
 		distr="",
 		function = "",
+		QCDmode = "",
 		value = -1,
-		counterHisto = "",
+		upperValue = -1,
 		counter = "",
 		numerator = -1, 
 		denominator = -1, 
-		paths = [],
+		histoDir = [],
 		histograms = [],
-		normalization = [], 
-		extranorm = 1, 
-		reserved = False):
+		normalisation = [],
+		scaling = 1.0,
+		addUncertaintyInQuadrature = 0.0):
 	self.setId(id)
 	self.setLabel(label)
 	self.setDistribution(distr)
 	self.setFunction(function)
+	self.setQCDmode(QCDmode)
 	self.setValue(value)
-        self.setCounterHisto(counterHisto)
+	self.setUpperValue(upperValue)
 	self.setCounter(counter)
 	self.setNumerator(numerator)
 	self.setDenominator(denominator)
-        self.setPaths(paths)
+        self.setHistoDir(histoDir)
 	self.setHistograms(histograms)
-        self.setNormalization(normalization)
-	self.setExtraNormalization(extranorm)
-	self.setReserved(reserved)
+        self.setNormalisation(normalisation)
+        self.setScaling(scaling)
+        self.setAddUncertaintyInQuadrature(addUncertaintyInQuadrature)
 
     def setId(self,id):
 	self.id = id
@@ -248,11 +197,17 @@ class Nuisance:
     def setFunction(self, function):
 	self.function = function
 
+    def setQCDmode(self, QCDmode):
+        self.QCDmode = QCDmode
+
     def setValue(self,value):
 	self.value = value
 
+    def setUpperValue(self,upperValue):
+        self.upperValue = upperValue
+
     def setCounterHisto(self, value):
-	self.counterHisto = value
+	self.dirPrefix = value
 
     def setCounter(self, value):
 	self.counter = value
@@ -263,20 +218,20 @@ class Nuisance:
     def setDenominator(self,value):
 	self.denominator = value
 
-    def setPaths(self, paths):
-	self.paths = paths
+    def setHistoDir(self, histoDir):
+	self.histoDir = histoDir
 
     def setHistograms(self, histo):
 	self.histo = histo
 
-    def setNormalization(self, norm):
+    def setNormalisation(self, norm):
 	self.norm = norm
 
-    def setExtraNormalization(self, norm):
-	self.extranorm = norm
+    def setScaling(self, scaling):
+        self.scaling = scaling
 
-    def setReserved(self,value):
-	self.reserved = value
+    def setAddUncertaintyInQuadrature(self, addUncertaintyInQuadrature):
+        self.addUncertaintyInQuadrature = addUncertaintyInQuadrature
 
     def getId(self):
 	return self.id
@@ -284,53 +239,52 @@ class Nuisance:
     def Print(self):
 	print "    ID            =",self.id
 	print "    Label         =",self.label
-	if not self.reserved:
-  	    print "    Distribution  =",self.distr
-	    print "    Function      =",self.function
-	    if self.value > 0:
-	        print "    Value         =",self.value
-	    if len(self.counterHisto) > 0:
-		print "    CounterHisto  =",self.counterHisto
-	    if len(self.counter) > 0:
-                print "    Counter       =",self.counter
-	    if len(self.paths) > 0:
-		print "    Paths         =",self.paths
-	    if len(self.histo) > 0:
-	        print "    Histograms    =",self.histo
-	    if len(self.norm) > 0:
-	        print "    Normalization =",self.norm
+        print "    Distribution  =",self.distr
+        print "    Function      =",self.function
+        if self.value > 0:
+            print "    Value         =",self.value
+        if len(self.dirPrefix) > 0:
+            print "    CounterHisto  =",self.dirPrefix
+        if len(self.counter) > 0:
+            print "    Counter       =",self.counter
+        if len(self.paths) > 0:
+            print "    Paths         =",self.paths
+        if len(self.histo) > 0:
+            print "    Histograms    =",self.histo
+        if len(self.norm) > 0:
+            print "    Normalisation =",self.norm
 	print
 
-class NuisanceTable:
-    def __init__(self):
-	self.nuisances = {}
+#class NuisanceTable:
+    #def __init__(self):
+	#self.nuisances = {}
 
-    def add(self,n):
-	if not self.exists(n):
-	    self.nuisances[n.getId()] = n
-	else:
-	    print "\nWarning, key",n.getId(),"already reserved to Nuisance"
-	    self.nuisances[n.getId()].Print()
-	    print "Exiting.."
-	    sys.exit()
+    #def add(self,n):
+	#if not self.exists(n):
+	    #self.nuisances[n.getId()] = n
+	#else:
+	    #print "\nWarning, key",n.getId(),"already reserved to Nuisance"
+	    #self.nuisances[n.getId()].Print()
+	    #print "Exiting.."
+	    #sys.exit()
 
-    def get(self,key):
-        return self.nuisances[key]
+    #def get(self,key):
+        #return self.nuisances[key]
 
-    def merge(self,n1,n2):
-	print
+    #def merge(self,n1,n2):
+	#print "merging nuisances is not yet implemented"
 
-    def reserve(self, ids, comment):
-	for id in ids:
-	    self.add(Nuisance(id=id,label=comment,distr= "lnN",function="Constant",value=0,reserved=True))
+    #def reserve(self, ids, comment):
+	#for id in ids:
+	    #self.add(Nuisance(id=id,label=comment,distr= "lnN",function="Constant",value=0,reserved=True))
 
-    def exists(self, n):
-	if n.getId() in self.nuisances:
-	    return True
-	return False
+    #def exists(self, n):
+	#if n.getId() in self.nuisances:
+	    #return True
+	#return False
 
-    def Print(self):
-	print "NuisanceTable"
-	for key in sort(self.nuisances.keys()):
-	    self.nuisances[key].Print()
-	print
+    #def Print(self):
+	#print "NuisanceTable"
+	#for key in sort(self.nuisances.keys()):
+	    #self.nuisances[key].Print()
+	#print

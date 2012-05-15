@@ -45,6 +45,8 @@ doTauEmbeddingTauSelectionScan = False
 # Do embedding-like preselection for signal analysis
 doTauEmbeddingLikePreselection = False
 
+# Apply beta cut for jets to reject PU jets
+betaCutForJets = 0.0 # Disable by setting to 0.0; if you want to enable, set to 0.2
 
 #########
 # Flags for options in the signal analysis
@@ -54,12 +56,12 @@ doTauEmbeddingLikePreselection = False
 doPrescalesForData = False
 
 # Tree filling
-doFillTree = True
+doFillTree = False
 
 applyTriggerScaleFactor = True
 
-#PF2PATVersion = "PFlow" # For normal PF2PAT
-PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
+PF2PATVersion = "PFlow" # For normal PF2PAT
+#PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
 
 ### Systematic uncertainty flags ###
 # Running of systematic variations is controlled by the global flag
@@ -74,6 +76,28 @@ doJESVariation = False
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
 doPUWeightVariation = False
 
+# Do variations for optimisation
+doOptimisation = False
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
+myOptimisation = HPlusOptimisationScheme()
+myOptimisation.addTauPtVariation([40.0, 50.0])
+#myOptimisation.addTauIsolationVariation([])
+#myOptimisation.addTauIsolationContinuousVariation([])
+myOptimisation.addRtauVariation([0.0, 0.7])
+#myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
+#myOptimisation.addJetEtVariation([20.0, 30.0])
+#myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
+#myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
+#myOptimisation.addBJetDiscriminatorVariation([0.679, 0.244])
+#myOptimisation.addBJetEtVariation([])
+#myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
+#myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
+#myOptimisation.addTopRecoVatiation(["None"]) # Valid options: None, chi, std, Wselection
+if doOptimisation:
+    doSystematics = True # Make sure that systematics are run
+    doFillTree = False # Make sure that tree filling is disabled or root file size explodes
+    # FIXME add here "light' mode running
 
 ################################################################################
 
@@ -215,6 +239,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
 sequence = MetCorrection.addCorrectedMet(process, process.signalAnalysis, postfix=PF2PATVersion)
 process.commonSequence *= sequence
 
+# Set beta variable for jets
+process.signalAnalysis.jetSelection.betaCut = betaCutForJets
+
 # Prescale fetching done automatically for data
 if dataVersion.isData() and options.tauEmbeddingInput == 0 and doPrescalesForData:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
@@ -224,16 +251,16 @@ if dataVersion.isData() and options.tauEmbeddingInput == 0 and doPrescalesForDat
     process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output
-print "\nAnalysis is blind:", process.signalAnalysis.blindAnalysisStatus, "\n"
+#print "\nAnalysis is blind:", process.signalAnalysis.blindAnalysisStatus, "\n"
 print "Trigger:", process.signalAnalysis.trigger
-print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode
+print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode.value()
 print "VertexWeight:",process.signalAnalysis.vertexWeight
-print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut
-#print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
-print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
-print "TauSelection src:", process.signalAnalysis.tauSelection.src
-print "TauSelection isolation:", process.signalAnalysis.tauSelection.isolationDiscriminator
-print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode
+print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut.value()
+#print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection.value()
+print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection.value()
+print "TauSelection src:", process.signalAnalysis.tauSelection.src.value()
+print "TauSelection isolation:", process.signalAnalysis.tauSelection.isolationDiscriminator.value()
+print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode.value()
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
@@ -260,6 +287,13 @@ process.signalAnalysisPath = cms.Path(
 if doMETResolution:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.METResolutionAnalysis_cfi")
     process.signalAnalysisPath += process.metResolutionAnalysis
+
+# Optimisation
+variationModuleNames = []
+if doOptimisation:
+    # Make variation modules
+    variationModuleNames.extend(myOptimisation.generateVariations(process,additionalCounters,process.commonSequence,process.signalAnalysis,"signalAnalysis"))
+
 
 # Summer PAS cuts
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
@@ -345,13 +379,14 @@ if doRtau0 and not hasattr(process, "signalAnalysisRtau0"):
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
 
-
 def getSignalAnalysisModuleNames():
     modules = ["signalAnalysis"]
     if doSummerPAS:
         modules.append("signalAnalysisRtau0MET70")
     if doRtau0:
         modules.append("signalAnalysisRtau0")
+    if doOptimisation:
+        modules.extend(variationModuleNames)
     return modules
 
 # To have tau embedding like preselection

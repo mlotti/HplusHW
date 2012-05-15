@@ -38,9 +38,13 @@ treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger
 #QCDfromData = True
 QCDfromData = False
 deltaPhi180 = False
-deltaPhi160 = True
 deltaPhi130 = False
-btagging = True
+
+btagging = True # for normalisation with btagging
+
+# for histograms
+topmass = False
+deltaPhi160 = True
 
 def usage():
     print "\n"
@@ -228,6 +232,8 @@ def doPlots(datasets):
 #    topMassComparison(datasets)
 #    topPtComparison(datasets) 
 #    vertexComparison(datasets)
+
+
     mtComparison(datasets)
     metComparison(datasets)
     
@@ -245,8 +251,8 @@ def doCounters(datasets):
 
 #    print eventCounter.getSubCounterTable("GlobalMuon_ID").format()
 
-    print eventCounter.getSubCounterTable("tauIDTauSelection").format()
-    print eventCounter.getSubCounterTable("TauIDPassedEvt::tauID_HPSTight").format()
+#    print eventCounter.getSubCounterTable("tauIDTauSelection").format()
+#    print eventCounter.getSubCounterTable("TauIDPassedEvt::tauID_HPSTight").format()
 #    print eventCounter.getSubCounterTable("TauIDPassedJets::tauID_HPSTight").format()
     print eventCounter.getSubCounterTable("b-tagging").format()
     print eventCounter.getSubCounterTable("Jet selection").format()
@@ -268,7 +274,17 @@ def doCounters(datasets):
 try:
     from QCDInvertedNormalizationFactors import *
     norm_inc = QCDInvertedNormalization["inclusive"]
-except ImportError:
+    norm_4050 = QCDInvertedNormalization["4050"]
+    norm_5060 = QCDInvertedNormalization["5060"]        
+    norm_6070 = QCDInvertedNormalization["6070"]
+    norm_7080 = QCDInvertedNormalization["7080"]
+    norm_80100 = QCDInvertedNormalization["80100"]
+    norm_100120 = QCDInvertedNormalization["100120"]
+    norm_120150 = QCDInvertedNormalization["120150"]
+    norm_150 = QCDInvertedNormalization["150"]
+
+
+except ImportError:   
     print
     print "    WARNING, QCDInvertedNormalizationFactors.py not found!"
     print "    Run script InvertedTauID_Normalization.py to generate QCDInvertedNormalizationFactors.py"
@@ -301,8 +317,8 @@ def mtComparison(datasets):
 #    mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet120150")])
 #    mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet150")])
 #    mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet")])
-## After deltaPhi < 130 cut
-    if (deltaPhi130):
+
+    if (topmass):
         mt4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass4050")])
         mt5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass5060")])
         mt6070 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass6070")])
@@ -327,7 +343,7 @@ def mtComparison(datasets):
         mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJetPhi")])
 
 
-
+    print " norm factors ",norm_inc,norm_4050,norm_5060,norm_6070,norm_7080,norm_80100,norm_100120,norm_120150,norm_150
 
 #    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
 #    mt4050._setLegend(histograms.createLegend())
@@ -337,13 +353,16 @@ def mtComparison(datasets):
     mt4050._setLegendLabels()
     mt4050.histoMgr.setHistoDrawStyleAll("P")
 
-    mt4050.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))    
+    mt4050.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))    
 
 
 
-    hmt4050 = mt4050.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet4050")
+    hmt4050 = mt4050.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi4050")
+    hmtSum2 = hmt4050.Clone("mtSum2")
+    print "Integral 4050  = ",hmt4050.Integral()
     if (btagging):
-        hmt4050.Scale(0.00926618859472)   # btag
+#        hmt4050.Scale(0.00926618859472)   # btag
+        hmt4050.Scale(norm_4050)   # btag
     else:
         hmt4050.Scale(0.00903051176553)  # jets
     
@@ -351,9 +370,12 @@ def mtComparison(datasets):
     mt5060._setLegendLabels()
     mt5060.histoMgr.setHistoDrawStyleAll("P")
     mt5060.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
-    hmt5060 = mt5060.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet5060")
+    hmt5060 = mt5060.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi5060")
+    hmtSum2.Add(hmt5060)
+    print "Integral 5060  = ",hmt5060.Integral()
     if (btagging):
-        hmt5060.Scale(0.00734036139081) #btag
+#        hmt5060.Scale(0.00734036139081) #btag
+       hmt5060.Scale(norm_5060) #btag
     else:
         hmt5060.Scale(0.00734356165245) #jets
     
@@ -361,9 +383,12 @@ def mtComparison(datasets):
     mt6070._setLegendLabels()
     mt6070.histoMgr.setHistoDrawStyleAll("P")
     mt6070.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))    
-    hmt6070 = mt6070.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet6070")
+    hmt6070 = mt6070.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi6070")
+    hmtSum2.Add(hmt6070)
+    print "Integral 6070  = ",hmt6070.Integral()
     if (btagging):
-        hmt6070.Scale(0.00639483478917) #btag
+#        hmt6070.Scale(0.00639483478917) #btag
+        hmt6070.Scale(norm_6070) #btag
     else:
         hmt6070.Scale(0.00602980674872) # jets
     
@@ -371,9 +396,12 @@ def mtComparison(datasets):
     mt7080._setLegendLabels()
     mt7080.histoMgr.setHistoDrawStyleAll("P")
     mt7080.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20)) 
-    hmt7080 = mt7080.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet7080")
+    hmt7080 = mt7080.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi7080")
+    hmtSum2.Add(hmt7080)
+    print "Integral 7080  = ",hmt7080.Integral()
     if (btagging):
-        hmt7080.Scale(0.00305291117148) # btag
+#        hmt7080.Scale(0.00305291117148) # btag
+        hmt7080.Scale(norm_7080) #btag
     else:
         hmt7080.Scale(0.00592912119185) #jets
     
@@ -381,9 +409,12 @@ def mtComparison(datasets):
     mt80100._setLegendLabels()
     mt80100.histoMgr.setHistoDrawStyleAll("P")
     mt80100.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20)) 
-    hmt80100 = mt80100.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet80100")
+    hmt80100 = mt80100.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi80100")
+    hmtSum2.Add(hmt80100)
+    print "Integral 80100  = ",hmt80100.Integral()
     if (btagging):
-        hmt80100.Scale(0.00739504574301)  #btag
+#        hmt80100.Scale(0.00739504574301)  #btag
+        hmt80100.Scale(norm_80100) #btag
     else:
         hmt80100.Scale(0.00428978785202) #jets
     
@@ -391,9 +422,12 @@ def mtComparison(datasets):
     mt100120._setLegendLabels()
     mt100120.histoMgr.setHistoDrawStyleAll("P")
     mt100120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))     
-    hmt100120 = mt100120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet100120")
+    hmt100120 = mt100120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi100120")
+    hmtSum2.Add(hmt100120)
+    print "Integral 100120  = ",hmt100120.Integral()
     if (btagging):
-        hmt100120.Scale(0.00629352541869) #btag
+#        hmt100120.Scale(0.00629352541869) #btag
+        hmt100120.Scale(norm_100120) #btag
     else:
         hmt100120.Scale(0.00660273694354) #jets
     
@@ -401,9 +435,12 @@ def mtComparison(datasets):
     mt120150._setLegendLabels()
     mt120150.histoMgr.setHistoDrawStyleAll("P")
     mt120150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))      
-    hmt120150 = mt120150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet120150")
+    hmt120150 = mt120150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi120150")
+    hmtSum2.Add(hmt120150)
+    print "Integral 120150  = ",hmt120150.Integral()
     if (btagging):
-        hmt120150.Scale(0.00320604463821) # btag
+#        hmt120150.Scale(0.00320604463821) # btag
+        hmt120150.Scale(norm_120150) #btag
     else:
         hmt120150.Scale(0.00433342965036) #jets
     
@@ -411,9 +448,12 @@ def mtComparison(datasets):
     mt150._setLegendLabels()
     mt150.histoMgr.setHistoDrawStyleAll("P")
     mt150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
-    hmt150 = mt150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet150")
+    hmt150 = mt150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi150")
+    hmtSum2.Add(hmt150)
+    print "Integral 150  = ",hmt150.Integral()
     if (btagging):
-        hmt150.Scale(0.00196125593388) #btag
+#        hmt150.Scale(0.00196125593388) #btag
+        hmt150.Scale(norm_150) #btag 
     else:
         hmt150.Scale(0.00155574283764) #jets
         
@@ -421,7 +461,7 @@ def mtComparison(datasets):
     mt._setLegendLabels()
     mt.histoMgr.setHistoDrawStyleAll("P")
     mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
-    hmt = mt.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet")
+    hmt = mt.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi")
 
 # with b tagging
     if (btagging):
@@ -487,8 +527,9 @@ def mtComparison(datasets):
             canvas.Print("mtComparison_3jets_dphi130.C")  
         
 ##    rtauGen(mt4050, "transverseMass_vs_pttau", rebin=20)
-    print "Integral  = ",hmtSum.Integral()
-    
+    print "Integral with bins  = ",hmtSum.Integral()
+    print "Integral2 with bins  = ",hmtSum2.Integral()
+    print "Integral inclusive  = ",hmt.Integral()    
 ############
     canvas2 = ROOT.TCanvas("canvas2","",500,500)   
     hmtSum.Draw()
@@ -501,7 +542,7 @@ def mtComparison(datasets):
     
     canvas3 = ROOT.TCanvas("canvas3","",500,500)
 #    canvas3.SetLogy()
-#    hmt.SetMaximum(3.0)
+    hmt.SetMaximum(120.0)
     hmt.SetMarkerColor(2)
     hmt.SetMarkerSize(1)
     hmt.SetMarkerStyle(21)
@@ -578,9 +619,9 @@ def mtComparison(datasets):
         if(deltaPhi160):
             canvas3.Print("mtInverted_btag_dphi160.png")
             canvas3.Print("mtInverted_btag_dphi160.C")
-        if(deltaPhi130):
-            canvas3.Print("mtInverted_btag_dphi130.png")
-            canvas3.Print("mtInverted_btag_dphi130.C")   
+        if(topmass):
+            canvas3.Print("mtInverted_btag_topmass.png")
+            canvas3.Print("mtInverted_btag_topmass.C")   
     else:
         if(deltaPhi180): 
             canvas3.Print("mtInverted_3jets.png")

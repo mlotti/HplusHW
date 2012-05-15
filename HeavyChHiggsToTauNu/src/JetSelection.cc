@@ -10,6 +10,8 @@
 
 #include "Math/GenVector/VectorUtil.h"
 #include "TH1F.h"
+#include "TH2F.h"
+#include <cmath>
 
 #include<algorithm>
 
@@ -30,13 +32,15 @@ namespace HPlus {
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fEMfractionCut(iConfig.getUntrackedParameter<double>("EMfractionCut")),
     fMaxDR(iConfig.getUntrackedParameter<double>("cleanTauDR")),
-    fMinNumberOfJets(iConfig.getUntrackedParameter<uint32_t>("minNumber")),
+    fNumberOfJets(iConfig.getUntrackedParameter<uint32_t>("jetNumber"), iConfig.getUntrackedParameter<std::string>("jetNumberCutDirection")),
     fJetIdMaxNeutralHadronEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMaxNeutralHadronEnergyFraction")),
     fJetIdMaxNeutralEMEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMaxNeutralEMEnergyFraction")),
     fJetIdMinNumberOfDaughters(iConfig.getUntrackedParameter<uint32_t>("jetIdMinNumberOfDaughters")),
     fJetIdMinChargedHadronEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMinChargedHadronEnergyFraction")),
     fJetIdMinChargedMultiplicity(iConfig.getUntrackedParameter<uint32_t>("jetIdMinChargedMultiplicity")),
     fJetIdMaxChargedEMEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMaxChargedEMEnergyFraction")),
+    fBetaCut(iConfig.getUntrackedParameter<double>("betaCut"), iConfig.getUntrackedParameter<std::string>("betaCutDirection")),
+    fBetaSrc(iConfig.getUntrackedParameter<std::string>("betaCutSource")),
     fCleanCutCount(eventCounter.addSubCounter("Jet main","Jet cleaning")),
     fJetIdCount(eventCounter.addSubCounter("Jet main", "Jet ID")),
     fEMfractionCutCount(eventCounter.addSubCounter("Jet main","Jet EMfrac ")),
@@ -54,6 +58,7 @@ namespace HPlus {
     fchargedEmEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "chargedEmEnergyFractionCut")),
     fJetIdSubCount(eventCounter.addSubCounter("Jet selection", "Jet ID")),
     fEMfractionCutSubCount(eventCounter.addSubCounter("Jet selection", "EMfraction")),
+    fBetaCutSubCount(eventCounter.addSubCounter("Jet selection", "Beta cut")),
     fEtaCutSubCount(eventCounter.addSubCounter("Jet selection", "eta cut")),
     fPtCutSubCount(eventCounter.addSubCounter("Jet selection", "pt cut")),
 
@@ -84,6 +89,20 @@ namespace HPlus {
     hFourthJetPt = makeTH<TH1F>(myDir, "fourthJet_pt", "fourthJet_pt;p_{T} of fourth jet, GeV/c;Events", 300, 0., 600.);
     hFourthJetEta = makeTH<TH1F>(myDir, "fourthJet_eta", "fourthJet_eta;#eta of fourth jet;Events", 250, -5., 5.); 
     hFourthJetPhi = makeTH<TH1F>(myDir, "fourthJet_phi", "fourthJet_phi;#phi of fourth jet;Events", 72, -3.14159, 3.14159); 
+
+    // Histograms for PU analysis
+    hBetaGenuine = makeTH<TH1F>(myDir, "betaGenuine", "betaGenuine;#beta variable, PV jets;Events", 100, 0., 1.);
+    hBetaStarGenuine = makeTH<TH1F>(myDir, "betaStarGenuine", "betaStarGenuine;#beta* variable, PV jets;Events", 100, 0., 1.);
+    hMeanDRgenuine = makeTH<TH1F>(myDir, "meanDRGenuine", "meanDRGenuine;Mean #DeltaR, PV jets;Events", 100, 0., 4.);
+    hBetaFake = makeTH<TH1F>(myDir, "betaPU", "betaPU;#beta variable, PU jets;Events", 100, 0., 1.);
+    hBetaStarFake = makeTH<TH1F>(myDir, "betaStarPU", "betaStarPU;#beta* variable, PU jets;Events", 100, 0., 1.);
+    hMeanDRfake = makeTH<TH1F>(myDir, "meanDRPU", "meanDRPU;Mean #DeltaR, PU jets;Events", 100, 0., 4.);
+    hBetaVsPUgenuine = makeTH<TH2F>(myDir, "betaVsPUGenuine", "betaVSPUGenuine;#beta variable, PV jets;Number of vertices", 100, 0., 1., 50, 0., 50.);
+    hBetaStarVsPUgenuine = makeTH<TH2F>(myDir, "betaVsPUStarGenuine", "betaStarVsPUGenuine;#beta* variable, PV jets;Events", 100, 0., 1., 50, 0., 50.);
+    hMeanDRVsPUgenuine = makeTH<TH2F>(myDir, "meanDRVsPUGenuine", "meanDRVsPUGenuine;Mean #DeltaR, PV jets;Events", 100, 0., 4., 50, 0., 50.);
+    hBetaVsPUfake = makeTH<TH2F>(myDir, "betaVsPUFake", "betaVsPUFake;#beta variable, PU jets;Events", 100, 0., 1., 50, 0., 50.);
+    hBetaStarVsPUfake = makeTH<TH2F>(myDir, "betaStarVsPUFake", "betaStarVsPUFake;#beta* variable, PU jets;Events", 100, 0., 1., 50, 0., 50.);
+    hMeanDRVsPUfake = makeTH<TH2F>(myDir, "meanDRVsPUFake", "meanDRVsPUFake;Mean #DeltaR, PU jets;Events", 100, 0., 4., 50, 0., 50.);
 
     // Histograms for excluded jets (i.e. matching in DeltaR to tau jet)
     TFileDirectory myExcludedJetsDir = myDir.mkdir("ExcludedJets");
@@ -136,7 +155,7 @@ namespace HPlus {
 
   JetSelection::~JetSelection() {}
 
-  JetSelection::Data JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau) {
+  JetSelection::Data JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr< reco::Candidate >& tau, int nVertices) {
     // Reset variables
     iNHadronicJets = -1;
     iNHadronicJetsInFwdDir = -1;
@@ -145,7 +164,7 @@ namespace HPlus {
     bEMFraction07Veto = false;
 
     bool passEvent = false;
-  
+
     edm::Handle<edm::View<pat::Jet> > hjets;
     iEvent.getByLabel(fSrc, hjets);
 
@@ -162,7 +181,7 @@ namespace HPlus {
     size_t etaCutPassed = 0;
     double maxEMfraction = 0;
     size_t EMfractionCutPassed = 0;
-    
+
     std::vector<edm::Ptr<pat::Jet> > tmpSelectedJets;
     tmpSelectedJets.reserve(jets.size());
 
@@ -223,7 +242,7 @@ namespace HPlus {
 
       if(!(iJet->neutralEmEnergyFraction() < fJetIdMaxNeutralEMEnergyFraction)) continue;
       increment(fneutralEmEnergyFractionCutSubCount);
-    
+
       if(fabs(iJet->eta()) < 2.4) {
         if(!(iJet->chargedHadronEnergyFraction() > fJetIdMinChargedHadronEnergyFraction)) continue;
         increment(fchargedHadronEnergyFractionCutSubCount);
@@ -245,6 +264,32 @@ namespace HPlus {
       ++EMfractionCutPassed;
       increment(fEMfractionCutSubCount);
 
+      // against PU cut (beta or betaStar)
+      double myBeta = iJet->userFloat("Beta");
+      //double myBetaMax = iJet->userFloat("BetaMax");
+      double myBetaStar = iJet->userFloat("BetaStar");
+      double myMeanDR = iJet->userFloat("DRMean");
+      bool myIsPVJetStatus = (iJet->userInt("LdgTrackBelongsToSelectedPV") == 1); // FIXME: do MC matching
+      // Fill histograms after eta and pt cuts
+      if (std::abs(iJet->eta()) < fEtaCut && iJet->pt() > fPtCut) {
+        if (myIsPVJetStatus) {
+          hBetaGenuine->Fill(myBeta, fEventWeight.getWeight());
+          hBetaStarGenuine->Fill(myBetaStar, fEventWeight.getWeight());
+          hMeanDRgenuine->Fill(myMeanDR, fEventWeight.getWeight());
+          hBetaVsPUgenuine->Fill(myBeta, nVertices, fEventWeight.getWeight());
+          hBetaStarVsPUgenuine->Fill(myBetaStar, nVertices, fEventWeight.getWeight());
+          hMeanDRVsPUgenuine->Fill(myMeanDR, nVertices, fEventWeight.getWeight());
+        } else {
+          hBetaFake->Fill(myBeta, fEventWeight.getWeight());
+          hBetaStarFake->Fill(myBetaStar, fEventWeight.getWeight());
+          hMeanDRfake->Fill(myMeanDR, fEventWeight.getWeight());
+          hBetaVsPUfake->Fill(myBeta, nVertices, fEventWeight.getWeight());
+          hBetaStarVsPUfake->Fill(myBetaStar, nVertices, fEventWeight.getWeight());
+          hMeanDRVsPUfake->Fill(myMeanDR, nVertices, fEventWeight.getWeight());
+        }
+      }
+      if (fBetaCut.passedCut(iJet->userFloat(fBetaSrc))) continue;
+      increment(fBetaCutSubCount);
 
       hPt->Fill(iJet->pt(), fEventWeight.getWeight());
       hEta->Fill(iJet->eta(), fEventWeight.getWeight());
@@ -264,7 +309,6 @@ namespace HPlus {
       if(!(iJet->pt() > fPtCut)) continue;
       increment(fPtCutSubCount);
       ++ptCutPassed;
-      
 
       // Fill histograms for selected jets
       hPtSelectedJets->Fill(iJet->pt());
@@ -313,33 +357,33 @@ namespace HPlus {
     if (fSelectedJets.size() > 2 ) hjetMaxEMFraction->Fill(maxEMfraction, fEventWeight.getWeight());
     iNHadronicJets = fSelectedJets.size();
     iNHadronicJetsInFwdDir = fNotSelectedJets.size();
-    
-    passEvent = fSelectedJets.size() >= fMinNumberOfJets;
-    
-    if (cleanPassed >= fMinNumberOfJets) 
+
+    passEvent = fNumberOfJets.passedCut(fSelectedJets.size());
+
+    if (fNumberOfJets.passedCut(cleanPassed))
       increment(fCleanCutCount);
 
 	  //    if(maxEMfraction < fEMfractionCut+ 0.1 )increment(fEMfraction08CutCount);
     //    if(maxEMfraction < fEMfractionCut )increment(fEMfraction07CutCount);
 
     // Set veto flags for event with high EM fraction of a selected jet
-    if (jetIdPassed >= fMinNumberOfJets)
+    if (fNumberOfJets.passedCut(jetIdPassed))
       increment(fJetIdCount);
 
-    if(EMfractionCutPassed >= fMinNumberOfJets)
+    if(fNumberOfJets.passedCut(EMfractionCutPassed))
       increment(fEMfractionCutCount);
 
-    if (ptCutPassed >= fMinNumberOfJets)
+    if (fNumberOfJets.passedCut(ptCutPassed))
       increment(fPtCutCount);
 
-    if (etaCutPassed >= fMinNumberOfJets)
+    if (fNumberOfJets.passedCut(etaCutPassed))
       increment(fEtaCutCount);
 
     if (passEvent && maxEMfraction >= 0.8 ) {
       increment(fEMfraction08CutCount);
       bEMFraction08Veto = true;
     }
-      
+
     if (passEvent && maxEMfraction < 0.7 ) {
       increment(fEMfraction07CutCount);
       bEMFraction07Veto = true;

@@ -1,41 +1,76 @@
 #! /usr/bin/env python
 
+import os
 import sys
-
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ConstantExtractor import ConstantExtractor
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ExtractorBase import ExtractorMode
+import imp
+from optparse import OptionParser
+import gc
+import cPickle
+import ROOT
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DataCardGenerator as DataCard
-    
-def usage():
-    print 
-    print "### Usage:   datacardGenerator.py <datacardfile>\n"
-    print 
-    sys.exit()
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 
-def main():
+def main(opts):
+    #gc.set_debug(gc.DEBUG_LEAK | gc.DEBUG_STATS)
+    #gc.set_debug(gc.DEBUG_STATS)
+    #ROOT.SetMemoryPolicy(ROOT.kMemoryStrict)
+    #gc.set_debug(gc.DEBUG_STATS)
+    print "Loading datacard:", opts.datacard
+    config = load_module(opts.datacard)
 
-    if len(sys.argv) == 1:
-        usage()
+    # If user insisted on certain QCD method on command line, produce datacards only for that QCD method
+    # Otherwise produce cards for all QCD methods
+    myQCDMethods = [DataCard.DatacardQCDMethod.FACTORISED, DataCard.DatacardQCDMethod.INVERTED]
+    if opts.useQCDfactorised:
+        myQCDMethods = [DataCard.DatacardQCDMethod.FACTORISED]
+    elif opts.useQCDinverted:
+        myQCDMethods = [DataCard.DatacardQCDMethod.INVERTED]
 
-    config = load_module(sys.argv[1])
+    # Produce cards
+    for method in myQCDMethods:
+        DataCard.DataCardGenerator(config,opts,method)
 
-    multicrabPaths = PathFinder.MulticrabPathFinder(config)
+    print "\nDatacard generator is done."
 
-    datacardgenerator = DataCard.DataCardGenerator(config)
+    #gc.collect()
+    #ROOT.SetMemoryPolicy( ROOT.kMemoryHeuristics)
+    #memoryDump()
 
-    if multicrabPaths.getQCDFactorizedExists():
-        datacardgenerator.generate(multicrabPaths.getQCDFactorizedPaths())
+def memoryDump():
+    dump = open("memory_pickle.txt", 'w')
+    for obj in gc.get_objects():
+        i = id(obj)
+        size = sys.getsizeof(obj, 0)
+        #    referrers = [id(o) for o in gc.get_referrers(obj) if hasattr(o, '__class__')]
+        referents = [id(o) for o in gc.get_referents(obj) if hasattr(o, '__class__')]
+        if hasattr(obj, '__class__'):
+            cls = str(obj.__class__)
+            cPickle.dump({'id': i, 'class': cls, 'size': size, 'referents': referents}, dump)
 
-    if multicrabPaths.getQCDInvertedExists():
-        datacardgenerator.generate(multicrabPaths.getQCDInvertedPaths())
-
-    c = ConstantExtractor (mode=ExtractorMode.NUISANCE, exid="TST2", description="test", constantValue=0.123)
-    c.printDebugInfo()
-    
-    datacardgenerator = DataCard.DataCardGenerator(sys.argv[1])
-    datacardgenerator.generate()
 
 if __name__ == "__main__":
-    main()
+    parser = OptionParser(usage="Usage: %prog [options]")
+    parser.add_option("-x", "--datacard", dest="datacard", action="store", help="Name (incl. path) of the datacard to be used as an input")
+    parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
+    parser.add_option("--QCDfactorised", dest="useQCDfactorised", action="store_true", default=False, help="Use factorised method for QCD measurement")
+    parser.add_option("--QCDinverted", dest="useQCDinverted", action="store_true", default=False, help="Use inverted method for QCD measurement")
+    parser.add_option("--debugConfig", dest="debugConfig", action="store_true", default=False, help="Enable debugging print for config parsing")
+    parser.add_option("--debugMining", dest="debugMining", action="store_true", default=False, help="Enable debugging print for data mining")
+    parser.add_option("--debugQCD", dest="debugQCD", action="store_true", default=False, help="Enable debugging print for QCD measurement")
+    (opts, args) = parser.parse_args()
+
+    myStatus = True
+    if opts.datacard == None:
+        print ErrorStyle()+"Error: Missing datacard!"+NormalStyle()+"\n"
+        myStatus = False
+    if opts.useQCDfactorised and opts.useQCDinverted:
+        print ErrorStyle()+"Error: use either '--QCDfactorised' or '--QCDinverted' (only one can exist in the datacard)"+NormalStyle()
+        myStatus = False
+    if not myStatus:
+        parser.print_help()
+        sys.exit()
+    # Run main program
+    main(opts)

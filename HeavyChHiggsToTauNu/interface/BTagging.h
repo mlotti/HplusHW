@@ -8,6 +8,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DirectionalCut.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTaggingScaleFactorFromDB.h"
 
@@ -107,6 +108,7 @@ namespace HPlus {
     const double fEtaCut;
     const std::string fDiscriminator;
     const double fDiscrCut;
+    DirectionalCut fNumberOfBJets;
     const uint32_t fMin;
 
     BTaggingScaleFactorFromDB *btagDB;

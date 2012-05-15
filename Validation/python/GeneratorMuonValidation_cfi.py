@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff import *
 
 generatorMuonValidation = cms.EDAnalyzer("MuonValidation",
@@ -10,9 +10,17 @@ generatorMuonValidation = cms.EDAnalyzer("MuonValidation",
     MCRecoMatchingCone = cms.double(0.2)
 )
 
+print "########################################################"
+print "# WARNING: in Validation/python/GeneratorMuonValidation"
+print "# tightenedMuons and tauEmbeddingMuons were removed"
+print "# from sequence - fix if necessary!"
+print "########################################################"
+
+#tightMuons = getTightMuonsDefinition()
+
 generatorMuonValidationSequence = cms.Sequence(
-    tightMuons *
-    tightenedMuons *
-    tauEmbeddingMuons *
+#    tightMuons *
+#    tightenedMuons *
+#    tauEmbeddingMuons *
     generatorMuonValidation
 )
