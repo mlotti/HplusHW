@@ -16,8 +16,10 @@ def main():
 def update(mass):
     f = ROOT.TFile.Open("lands_histograms_hplushadronic_m%d.root" % mass, "UPDATE")
 
-    cloneHisto(f, "QCD", 12)
-    cloneHisto(f, "EWK_Tau", 19)
+#    cloneHisto(f, "QCD", 12)
+#    cloneHisto(f, "EWK_Tau", 19)
+    cloneHisto(f, "HH%d_1"%mass, 17)
+    cloneHisto(f, "HW%d_1"%mass, 18)
 
     f.Close()
 
@@ -31,7 +33,7 @@ def cloneHisto(f, name, index):
         err = h.GetBinError(bin)
         hUp.SetBinContent(bin, val+err)
         hUp.SetBinError(bin, 0)
-        hDown.SetBinContent(bin, val-err)
+        hDown.SetBinContent(bin, max(val-err, 0))
         hDown.SetBinError(bin, 0)
 
     hUp.Write()
