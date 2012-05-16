@@ -506,14 +506,11 @@ class ShapeExtractor(ExtractorBase):
             h = myDatasetRootHisto.getHistogram()
             # Check histogram dimensions
             if h.GetXaxis().GetXmin() != self._histoSpecs[1]:
-                print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Obtained shape histogram has xmin=%f (should be %f)!"%(h.GetXaxis().GetXmin(), self._histoSpecs[1])
-                sys.exit()
+                raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Obtained shape histogram has xmin=%f (should be %f)!"%(h.GetXaxis().GetXmin(), self._histoSpecs[1]))
             if h.GetXaxis().GetXmax() != self._histoSpecs[2]:
-                print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Obtained shape histogram has xmax=%f (should be %f)!"%(h.GetXaxis().GetXmax(), self._histoSpecs[2])
-                sys.exit()
+                raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Obtained shape histogram has xmax=%f (should be %f)!"%(h.GetXaxis().GetXmax(), self._histoSpecs[2]))
             if h.GetXaxis().GetNbins() % self._histoSpecs[0] != 0:
-                print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Obtained shape histogram has nbins=%d which is not rebinnable to %d)!"%(h.GetXaxis().GetNbins(), self._histoSpecs[0])
-                sys.exit()
+                raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Obtained shape histogram has nbins=%d which is not rebinnable to %d)!"%(h.GetXaxis().GetNbins(), self._histoSpecs[0]))
             # Rebin
             if h.GetXaxis().GetNbins() != self._histoSpecs[0]:
                 h.Rebin(h.GetXaxis().GetNbins() / self._histoSpecs[0])

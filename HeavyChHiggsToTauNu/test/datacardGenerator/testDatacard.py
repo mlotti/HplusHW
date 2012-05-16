@@ -18,7 +18,12 @@ FakeRateCounter = "nonQCDType2:deltaphi160"
 # Shape histogram definitions
 SignalShapeHisto = "transverseMassAfterDeltaPhi160"
 FakeShapeHisto = "NonQCDTypeIITransverseMassAfterDeltaPhi160"
-ShapeHistogramsDimensions = [20, 0.0, 400.0]  # bins, min, max
+ShapeHistogramsDimensions = { "bins": 20,
+                              "rangeMin": 0.0,
+                              "rangeMax": 400.0,
+                              "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                              "xtitle": "Transverse mass / GeV",
+                              "ytitle": "Events" }
 
 # Options
 OptionReplaceEmbeddingByMC = False
