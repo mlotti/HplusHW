@@ -33,17 +33,20 @@ def usage():
 
 def main(argv):
 
-#    HISTONAME = "TauIdJets"
-    HISTONAME = "TauIdBtag"
+    HISTONAME = "TauIdJets"
+#    HISTONAME = "TauIdBtag"
 
     dirs = []
     if len(sys.argv) < 2:
 	usage()
 
     dirs.append(sys.argv[1])
+
+
+
     
     # Create all datasets from a multicrab task
-#    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    # datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
     datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters)
 
     # As we use weighted counters for MC normalisation, we have to
@@ -72,8 +75,8 @@ def main(argv):
     plots.mergeWHandHH(datasets)
 
     datasets.merge("EWK", [
-	    "TTJets",
-            "WJets",
+	    "TTJets"
+            "WJets"
             "DYJetsToLL",
             "SingleTop",
             "Diboson"
@@ -87,10 +90,10 @@ def main(argv):
 
 
 
-    bins = ["inclusive"]
-#    bins = ["4050","5060","6070","7080","80100","100120","120150","150"]
+#    bins = ["inclusive"]
+    bins = ["4050","5060","6070","7080","80100","100120","120150","150"]
 #    bins = ["4050"]
-
+            
 
     for bin in bins:
 
@@ -121,7 +124,7 @@ def main(argv):
         invertedQCD.getNormalization()
 
     invertedQCD.Summary()
-    invertedQCD.WriteNormalizationToFile("QCDInvertedNormalizationFactors.py")
+    invertedQCD.WriteNormalizationToFile("QCDInvertedNormalizationFactorsRun.py")
 
 
 if __name__ == "__main__":

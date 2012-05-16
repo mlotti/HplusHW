@@ -46,7 +46,7 @@ doTauEmbeddingTauSelectionScan = False
 doTauEmbeddingLikePreselection = False
 
 # Apply beta cut for jets to reject PU jets
-betaCutForJets = 0.0 # Disable by setting to 0.0; if you want to enable, set to 0.2
+betaCutForJets = 0.7 # Disable by setting to 0.0; if you want to enable, set to 0.2
 
 #########
 # Flags for options in the signal analysis
@@ -56,12 +56,12 @@ betaCutForJets = 0.0 # Disable by setting to 0.0; if you want to enable, set to 
 doPrescalesForData = False
 
 # Tree filling
-doFillTree = True
+doFillTree = False
 
 applyTriggerScaleFactor = True
 
-#PF2PATVersion = "PFlow" # For normal PF2PAT
-PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
+PF2PATVersion = "PFlow" # For normal PF2PAT
+#PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
 
 ### Systematic uncertainty flags ###
 # Running of systematic variations is controlled by the global flag
@@ -74,8 +74,30 @@ doJESVariation = False
 
 # Perform the signal analysis with the PU weight variations
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
-doPUWeightVariation = False
+doPUWeightVariation = not False
 
+# Do variations for optimisation
+doOptimisation = False
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
+myOptimisation = HPlusOptimisationScheme()
+myOptimisation.addTauPtVariation([40.0, 50.0])
+#myOptimisation.addTauIsolationVariation([])
+#myOptimisation.addTauIsolationContinuousVariation([])
+myOptimisation.addRtauVariation([0.0, 0.7])
+#myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
+#myOptimisation.addJetEtVariation([20.0, 30.0])
+#myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
+#myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
+#myOptimisation.addBJetDiscriminatorVariation([0.679, 0.244])
+#myOptimisation.addBJetEtVariation([])
+#myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
+#myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
+#myOptimisation.addTopRecoVatiation(["None"]) # Valid options: None, chi, std, Wselection
+if doOptimisation:
+    doSystematics = True # Make sure that systematics are run
+    doFillTree = False # Make sure that tree filling is disabled or root file size explodes
+    # FIXME add here "light' mode running
 
 ################################################################################
 
@@ -98,13 +120,15 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
 #    "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v18/pattuple_v18_TTJets_TuneZ2_Summer11_9_1_bfN.root"
+#    "file:/tmp/slehti/TTJets_TuneZ2_Summer11_pattuple_266_1_at8.root"
     # For testing in lxplus
     #dataVersion.getAnalysisDefaultFileCastor()
     # For testing in jade
-    dataVersion.getAnalysisDefaultFileMadhatter()
+#    dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau_173236-173692_2011A_Nov08/Tau/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_173236-173692_2011A_Nov08//d7b7dcb6c55f2b2177021b8423a82913/pattuple_10_1_9l2.root",
     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau_175860-180252_2011B_Nov19/Tau/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_175860-180252_2011B_Nov19//28e7e0ab56ad4146eca1efa805cd10f4/pattuple_100_1_jnU.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_5_1_Hkv.root"
     )
 )
 
@@ -166,7 +190,7 @@ if applyTriggerScaleFactor and dataVersion.isMC():
 puweight = "Run2011A"
 if len(options.puWeightEra) > 0:
     puweight = options.puWeightEra
-param.setPileupWeight(dataVersion, pset=param.vertexWeight, era=puweight) # Reweight by true PU distribution 
+param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, pset=param.vertexWeight, psetReader=param.vertexWeightReader, era=puweight) # Reweight by true PU distribution
 param.setDataTriggerEfficiency(dataVersion, era=puweight)
 print "PU weight era =",puweight
 
@@ -197,6 +221,23 @@ if not doFillTree:
 # Change default tau algorithm here if needed
 #process.signalAnalysis.tauSelection.tauSelectionHPSTightTauBased # HPS Tight is the default
 
+# Btagging DB
+process.load("CondCore.DBCommon.CondDBCommon_cfi")
+#MC measurements
+process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
+process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
+#Data measurements
+process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
+process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
+#User DB for btag eff
+btagDB = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
+if options.runOnCrab != 0:
+    btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
+process.CondDBCommon.connect = btagDB
+process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
+process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
+#param.bTagging.UseBTagDB  = cms.untracked.bool(True)
+
 # Add type 1 MET
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
 sequence = MetCorrection.addCorrectedMet(process, process.signalAnalysis, postfix=PF2PATVersion)
@@ -214,16 +255,16 @@ if dataVersion.isData() and options.tauEmbeddingInput == 0 and doPrescalesForDat
     process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output
-print "\nAnalysis is blind:", process.signalAnalysis.blindAnalysisStatus, "\n"
+#print "\nAnalysis is blind:", process.signalAnalysis.blindAnalysisStatus, "\n"
 print "Trigger:", process.signalAnalysis.trigger
-print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode
+print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode.value()
 print "VertexWeight:",process.signalAnalysis.vertexWeight
-print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut
-#print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
-print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
-print "TauSelection src:", process.signalAnalysis.tauSelection.src
-print "TauSelection isolation:", process.signalAnalysis.tauSelection.isolationDiscriminator
-print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode
+print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut.value()
+#print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection.value()
+print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection.value()
+print "TauSelection src:", process.signalAnalysis.tauSelection.src.value()
+print "TauSelection isolation:", process.signalAnalysis.tauSelection.isolationDiscriminator.value()
+print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode.value()
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
@@ -250,6 +291,13 @@ process.signalAnalysisPath = cms.Path(
 if doMETResolution:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.METResolutionAnalysis_cfi")
     process.signalAnalysisPath += process.metResolutionAnalysis
+
+# Optimisation
+variationModuleNames = []
+if doOptimisation:
+    # Make variation modules
+    variationModuleNames.extend(myOptimisation.generateVariations(process,additionalCounters,process.commonSequence,process.signalAnalysis,"signalAnalysis"))
+
 
 # Summer PAS cuts
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
@@ -335,13 +383,14 @@ if doRtau0 and not hasattr(process, "signalAnalysisRtau0"):
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
 
-
 def getSignalAnalysisModuleNames():
     modules = ["signalAnalysis"]
     if doSummerPAS:
         modules.append("signalAnalysisRtau0MET70")
     if doRtau0:
         modules.append("signalAnalysisRtau0")
+    if doOptimisation:
+        modules.extend(variationModuleNames)
     return modules
 
 # To have tau embedding like preselection
@@ -480,17 +529,17 @@ if doJESVariation or doSystematics:
 
 
 def addPUWeightVariation(name):
+    # Up variation
     module = getattr(process, name).clone()
     module.Tree.fill = False
-    module.vertexWeight
-    param.setPileupWeight(dataVersion, pset=module.vertexWeight, era=puweight, suffix="up")
+    param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, era=puweight, suffix="up")
     addAnalysis(process, name+"PUWeightPlus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
-
+    # Down variation
     module = module.clone()
-    param.setPileupWeight(dataVersion, pset=module.vertexWeight, era=puweight, suffix="down")
+    param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, era=puweight, suffix="down")
     addAnalysis(process, name+"PUWeightMinus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,

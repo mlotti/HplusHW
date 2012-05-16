@@ -103,7 +103,7 @@ if applyTriggerScaleFactor and dataVersion.isMC():
 puweight = "Run2011A"
 if len(options.puWeightEra) > 0:
     puweight = options.puWeightEra
-param.setPileupWeightFor2011(dataVersion, era=puweight) # Reweight by true PU distribution
+param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, pset=param.vertexWeight, psetReader=param.vertexWeightReader, era=puweight) # Reweight by true PU distribution
 param.setDataTriggerEfficiency(dataVersion, era=puweight)
 
 #Reminder(from HChSignalAnalysisParameters_cff.py):

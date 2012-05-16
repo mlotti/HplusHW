@@ -51,7 +51,7 @@ namespace HPlus {
     //fWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_weighted"),
     //fNonWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_nonWeighted"),
     fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, eventWeight),
-    fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
+    fVertexWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeightReader")),
     fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fEventWeight),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     fFactorizationTable(iConfig, "METTables")
@@ -221,14 +221,15 @@ namespace HPlus {
 
 ///////// Start vertex reweighting
     // Apply PU re-weighting (Vertex weight)
-    std::pair<double, size_t> weightSize = fVertexWeight.getWeightAndSize(iEvent, iSetup);
-    if(!iEvent.isRealData()) { 
-      fEventWeight.multiplyWeight(weightSize.first);
-      fTree.setPileupWeight(weightSize.first);
+    if(!iEvent.isRealData()) {
+      const double myVertexWeight = fVertexWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(myVertexWeight);
+      fTree.setPileupWeight(myVertexWeight);
     }
-    hVerticesBeforeWeight->Fill(weightSize.second);
-    hVerticesAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
-    fTree.setNvertices(weightSize.second);
+    int nVertices = fVertexWeightReader.getNumberOfVertices(iEvent, iSetup);
+    hVerticesBeforeWeight->Fill(nVertices);
+    hVerticesAfterWeight->Fill(nVertices, fEventWeight.getWeight());
+    fTree.setNvertices(nVertices);
 
 ///////// Start trigger
     // Trigger and HLT_MET cut; or trigger efficiency parametrisation

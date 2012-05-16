@@ -51,7 +51,7 @@ namespace HPlus {
     fTopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, eventWeight),
     fTopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, eventWeight),
     fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, eventWeight),
-    fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
+    fVertexWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeightReader")),
     fFakeTauIdentifier(fEventWeight, "TauCandidates"),
     fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fEventWeight),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
@@ -155,15 +155,15 @@ namespace HPlus {
 
 
 //------ Vertex weight
-    std::pair<double, size_t> weightSize = fVertexWeight.getWeightAndSize(iEvent, iSetup);
     if(!iEvent.isRealData()) {
-      fEventWeight.multiplyWeight(weightSize.first);
-      fTree.setPileupWeight(weightSize.first);
+      const double myVertexWeight = fVertexWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(myVertexWeight);
+      fTree.setPileupWeight(myVertexWeight);
     }
-    hVerticesBeforeWeight->Fill(weightSize.second);
-    hVerticesAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
-    fTree.setNvertices(weightSize.second);
-    
+    int nVertices = fVertexWeightReader.getNumberOfVertices(iEvent, iSetup);
+    hVerticesBeforeWeight->Fill(nVertices);
+    hVerticesAfterWeight->Fill(nVertices, fEventWeight.getWeight());
+    fTree.setNvertices(nVertices);
     increment(fAllCounter);
 
 
@@ -174,8 +174,8 @@ namespace HPlus {
     hSelectionFlow->Fill(kQCDOrderTrigger, fEventWeight.getWeight());
     fTree.setHltTaus(triggerData.getTriggerTaus());
 
-    hVerticesBeforeWeight->Fill(weightSize.second);
-    hVerticesAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
+    hVerticesBeforeWeight->Fill(nVertices);
+    hVerticesAfterWeight->Fill(nVertices, fEventWeight.getWeight());
 
 
 //------ GenParticle analysis (must be done here when we effectively trigger all MC)
@@ -190,6 +190,7 @@ namespace HPlus {
     if (!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
     //hSelectionFlow->Fill(kQCDOrderVertexSelection, fEventWeight.getWeight());
+    
   
     
 //------ Tau candidate selection
@@ -248,7 +249,7 @@ namespace HPlus {
 
 
 //------ Jet selection
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau());
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau(), nVertices);
     if (!jetData.passedEvent()) return false;
     increment(fJetSelectionCounter);
     hSelectionFlow->Fill(kQCDOrderJetSelection, fEventWeight.getWeight());

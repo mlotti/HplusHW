@@ -73,6 +73,10 @@ def main():
 
     # Remove signals other than M120
     #datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "W2Jets" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "W3Jets" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "W4Jets" in name, datasets.getAllDatasetNames()))
+    
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     
@@ -162,7 +166,7 @@ def doPlots(datasets):
     tauEta(createPlot("SelectedTau/SelectedTau_eta_AfterTauID"),"SelectedTau_eta_AfterTauID", rebin=10, opts={"ymin": 1e-1, "ymaxfactor": 40, "xmin": -2.5, "xmax": 2.5}, moveLegend={"dy":0.01, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.3, y=0.85))
     tauPhi(createPlot("SelectedTau/SelectedTau_phi_AfterTauID"), "SelectedTau_phi_AfterTauID", rebin=10)
     
-#    rtau(createPlot("SelectedTau/SelectedTau_Rtau_AfterTauID"), "SelectedTau_Rtau_AfterTauID", rebin=10, opts={"ymin": 1e-2, "ymaxfactor": 5, "xmax": 1.1}, moveLegend={"dx": -0.5,"dy": 0.05}, textFunction=lambda: addMassBRText(x=0.31, y=0.22), cutLine=0.7)
+    rtau(createPlot("SelectedTau/SelectedTau_Rtau_AfterTauID"), "SelectedTau_Rtau_AfterTauID", rebin=10, opts={"ymin": 1e-2, "ymaxfactor": 5, "xmax": 1.1}, moveLegend={"dx": -0.5,"dy": 0.05}, textFunction=lambda: addMassBRText(x=0.31, y=0.22), cutLine=0.7)
     
 #    rtau(createPlot("tauID/TauID_RtauCut"), "TauID_Rtau", rebin=2, opts={"ymin": 1e-2, "ymaxfactor": 15, "xmax": 1.1}, moveLegend={"dx": -0.5,"dy": 0.02}, textFunction=lambda: addMassBRText(x=0.31, y=0.22), cutLine=0.7)
     
@@ -182,7 +186,7 @@ def doPlots(datasets):
     selectionFlow(createPlot("SignalSelectionFlow"), "SignalSelectionFlow", rebin=1)
     
     leadingTrack(createPlot("SelectedTau/SelectedTau_TauLeadingTrackPt"),"SelectedTau_TauLeadingTrackPt", rebin=10)
-#    rtau(createPlot("genRtau1ProngHp"), "genRtau1ProngHp")
+#    rtau(createPlot("genRtau1ProngHp"), "genRtauTopMassWithChi.png1ProngHp")
 #    rtau(createPlot("genRtau1ProngW"), "genRtau1ProngW")
    
 #    tauCandPt(createPlot("TauSelection_all_tau_candidates_pt"), step="begin")
@@ -213,27 +217,30 @@ def doPlots(datasets):
     drawPlot(createPlot("Btagging/NumberOfBtaggedJets"), "NumberOfBJets", xlabel="Number of selected b jets", ylabel="Events", opts={"xmax": 6}, textFunction=lambda: addMassBRText(x=0.45, y=0.87), cutLine=1)
 
   # top mass
-#    drawPlot(createPlot("TopChiSelection/TopMass"), "TopMassWithChi", rebin=25, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=50)
-    drawPlot(createPlot("TopChiSelection/WMass"), "WMassWithChi", rebin=25, log=False, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=50)
-    drawPlot(createPlot("TopWithBSelection/TopMass"), "TopMassWithBsel", rebin=25, log=False,xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=50)
-    drawPlot(createPlot("TopWithBSelection/WMass"), "WMassWithBsel", rebin=25, log=False,xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=50)
+    drawPlot(createPlot("TopChiSelection/TopMass"), "TopMassWithChi", rebin=20, log=False, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=300)
+    drawPlot(createPlot("TopChiSelection/WMass"), "WMassWithChi", rebin=20, log=False, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=50)
     
-    topMass(createPlot("TopChiSelection/TopMass"), "TopMassWithChi", rebin=10)   
+    drawPlot(createPlot("TopWithBSelection/TopMass"), "TopMassWithBsel", rebin=20, log=False,xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=250)
+    drawPlot(createPlot("TopWithBSelection/WMass"), "WMassWithBsel", rebin=20, log=False,xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    
+#    drawPlot(createPlot("TopChiSelection/TopMass"), "TopMassWithChiSel", rebin=20, log=False,xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    
+#    topMass(createPlot("TopChiSelection/TopMass"), "TopMassWithChi", rebin=10)   
     # Transverse mass
 #    transverseMass(createPlot("TauEmbeddingAnalysis_afterTauId_TransverseMass"))
     transverseMass2(createPlot("transverseMass"), "transverseMass_standard", rebin=20)
-    transverseMass2(createPlot("transverseMassMET70"), "transverseMassMET70", rebin=20)
-    transverseMass2(createPlot("transverseMassAfterDeltaPhi"), "transverseMassAfterDeltaPhi", rebin=20)    
-#    transverseMass2(createPlot("transverseMassAfterDeltaPhi160"), "transverseMassAfterDeltaPhi160", rebin=20)
-#    transverseMass2(createPlot("transverseMassAfterDeltaPhi130"), "transverseMassAfterDeltaPhi130", rebin=20)
-#    transverseMass2(createPlot("transverseMassBeforeFakeMet"), "transverseMassBeforeFakeMet", rebin=20)
+#    transverseMass2(createPlot("transverseMassMET70"), "transverseMassMET70", rebin=20)
+    transverseMass2(createPlot("NonQCDTypeIITransverseMassAfterDeltaPhi160"), "NonQCDTypeIITransverseMassAfterDeltaPhi160", rebin=20)    
+    transverseMass2(createPlot("transverseMassAfterDeltaPhi160"), "transverseMassAfterDeltaPhi160", rebin=20)
+    transverseMass2(createPlot("transverseMassAfterDeltaPhi130"), "transverseMassAfterDeltaPhi130", rebin=20)
+    transverseMass2(createPlot("transverseMassFakeMetVeto"), "transverseMassFakeMetVeto", rebin=20)
 
     transverseMass2(createPlot("transverseMass"), "transverseMass", rebin=20, log=False, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
-    transverseMass2(createPlot("transverseMassAfterDeltaPhi160"), "transverseMassAfterDeltaPhi160", rebin=20, log=False, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+###    transverseMass2(createPlot("transverseMassAfterDeltaPhi160"), "transverseMassAfterDeltaPhi160", rebin=20, log=False, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
     transverseMass2(createPlot("transverseMassTopChiSelection"), "transverseMassTopChiSelection", rebin=20, log=False, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
-    transverseMass2(createPlot("transverseMassTopSelection"), "transverseMassTopSelection", rebin=20, log=False, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
-    transverseMass2(createPlot("transverseMassTopBjetSelection"), "transverseMassTopBjetSelection", rebin=20, log=False, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
-    transverseMass2(createPlot("transverseMassTauVeto"), "transverseMassWithTauVeto", rebin=20, log=False, textFunction=lambda: addMassBRText(x=0.4, y=0.87)) 
+###    transverseMass2(createPlot("transverseMassTopSelection"), "transverseMassTopSelection", rebin=20, log=False, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+##    transverseMass2(createPlot("transverseMassTopBjetSelection"), "transverseMassTopBjetSelection", rebin=20, log=False, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+###    transverseMass2(createPlot("transverseMassTauVeto"), "transverseMassWithTauVeto", rebin=20, log=False, textFunction=lambda: addMassBRText(x=0.4, y=0.87)) 
     if QCDfromData:
         plot = replaceQCDfromData(createPlot("transverseMass"), datasetsQCD, analysis+"/transverseMass")
         transverseMass2(plot, "transverseMass", rebin=20)
@@ -309,6 +316,7 @@ def doPlots(datasets):
 
 #    genComparison(datasets)
 #    zMassComparison(datasets)
+    genQuarkComparison(datasets)
     topMassComparison(datasets)
     
     topMassPurity(datasets) 
@@ -346,7 +354,7 @@ def doCounters(datasets):
     print eventCounter.getSubCounterTable("b-tagging").format()
     print eventCounter.getSubCounterTable("Jet selection").format()
     print eventCounter.getSubCounterTable("Jet main").format()    
-
+    print eventCounter.getSubCounterTable("VetoTauSelection").format() 
 
     
 #    latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.2f"))
@@ -462,6 +470,28 @@ def topMassPurity(datasets):
     rtauGen(top, "topMassPurity", rebin=10, defaultStyles=False)
 
     
+def genQuarkComparison(datasets):
+    def createHisto(path, name):
+        drh = datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+path)
+        drh.setName(name)
+        return drh
+    
+    quark = plots.PlotBase([
+        createHisto("/BjetSelection/PtBquarkFromTopSide", "b quark from top side"),
+        createHisto("/BjetSelection/PtQquarkFromTopSide", "q quark from top"),]) 
+    quark.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    quark._setLegendStyles()
+    quark._setLegendLabels()
+    st1 = styles.StyleCompound([styles.styles[2]])
+    st2 = styles.StyleCompound([styles.styles[1]])
+    st3 = styles.StyleCompound([styles.styles[0]])
+    st1.append(styles.StyleLine(lineColor=4, lineWidth=2))
+    st2.append(styles.StyleLine(lineStyle=2, lineWidth=3))
+    st3.append(styles.StyleLine(lineStyle=3,lineColor=1, lineWidth=3))
+    quark.histoMgr.forHisto("b quark from top side", st3)
+    quark.histoMgr.forHisto("q quark from top", st1)
+#    mt.histoMgr.setHistoDrawStyleAll("P")
+    rtauGen(quark, "ptQuarks", rebin=3, defaultStyles=False)
 
     
 ##############def genComparison(datasets):
@@ -675,6 +705,8 @@ def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
         xlabel = "m_{top} (GeV/c^{2})"
     if "vertex" in name:
         xlabel = "Raw PF E_{T}^{miss} (GeV)"
+    if "Quark" in name:
+        xlabel = "p_{T} (GeV)"
 
     if "Rtau" in name:
         ylabel = "A.u."
@@ -711,7 +743,8 @@ def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
     h.getPad().SetLogy(True)
     if "Mass" in name:
         h.getPad().SetLogy(False)
-
+    if "Quark" in name:
+        h.getPad().SetLogy(False)
     leg = histograms.createLegend(0.4, 0.75, 0.6, 0.9)
     if "topMass" in name:
         leg = histograms.moveLegend(leg, dx=0.2)
