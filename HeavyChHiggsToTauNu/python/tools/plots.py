@@ -583,6 +583,28 @@ def _createRatio(rootHisto1, rootHisto2, ytitle, isBinomial=False):
     elif isinstance(rootHisto1, ROOT.TGraph) and isinstance(rootHisto2, ROOT.TGraph):
         if isBinomial:
             raise Exception("isBinomial is not supported for TGraph input")
+
+        if not rootHisto1.GetN() == rootHisto2.GetN():
+	    xfound = []
+	    for i in range(rootHisto1.GetN()):
+		for j in range(rootHisto2.GetN()):
+		    if rootHisto1.GetX()[i] == rootHisto2.GetX()[j]:
+			xfound.append(rootHisto1.GetX()[i])
+	    for i in range(rootHisto1.GetN()):
+		found = False
+		for x in xfound:
+		    if rootHisto1.GetX()[i] == x:
+			found = True
+		if not found:
+		    rootHisto1.RemovePoint(i)
+            for j in range(rootHisto2.GetN()):
+                found = False
+                for x in xfound:
+                    if rootHisto2.GetX()[j] == x:
+                        found = True
+                if not found:
+                    rootHisto1.RemovePoint(j)
+
         xvalues = []
         yvalues = []
         yerrs = []
