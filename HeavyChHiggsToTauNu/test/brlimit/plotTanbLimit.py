@@ -70,6 +70,7 @@ def main():
 def doPlot(name, graphs, limits, xlabel):
     obs = graphs["obs"]
     excluded = ROOT.TGraph(obs)
+    excluded.SetName("ExcludedArea")
     excluded.SetFillColor(ROOT.kGray)
     excluded.SetPoint(obs.GetN(), obs.GetX()[obs.GetN()-1], 2*tanbMax)
     excluded.SetPoint(obs.GetN(), obs.GetX()[0], 2*tanbMax)

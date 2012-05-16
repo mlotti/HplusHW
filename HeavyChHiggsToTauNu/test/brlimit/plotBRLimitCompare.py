@@ -19,7 +19,10 @@ def main():
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
-    compareTauJets()
+#    compareTauJets()
+#    compareLeptonic()
+#    compareCombination()
+    compareCombinationSanitychecksLHC()
 
 def compareTauJets():
     doCompare("taujets", [
@@ -29,6 +32,7 @@ def compareTauJets():
             ("LEP-CLs", "LandS*taujets_lep_*"),
             ])
 
+def compareLeptonic():
     doCompare("emu", [
             # (name, dir)
             ("LHC-CLs", "LandS*emu_lhc_*"),
@@ -41,6 +45,30 @@ def compareTauJets():
             ("LHC-CLs", "LandS*mutau_lhc_*"),
             ("LHC-CLs (asymp)", "LandS*mutau_lhcasy_*"),
             ("LEP-CLs", "LandS*mutau_lep_*"),
+            ])
+
+    doCompare("etau", [
+            # (name, dir)
+#            ("LHC-CLs", "LandS*etau_lhc_*"),
+            ("LHC-CLs", "LandSMultiCrab_etau_lhc_jobs10_sb_600_b300_120514_151345/"),
+            ("LHC-CLs (asymp)", "LandS*etau_lhcasy_*"),
+            ("LEP-CLs", "LandS*etau_lep_*"),
+            ])
+
+def compareCombination():
+    doCompare("combination", [
+            # (name, dir)
+#            ("LHC-CLs", "LandS*combination_lhc_jobs*"),
+            ("LHC-CLs", "LandSMultiCrab_combination_lhc_jobs10_sb300_b150_120514_173610"),
+            ("LHC-CLs (asymp)", "LandS*combination_lhcasy_*"),
+            ("LEP-CLs", "LandS*combination_lep_*"),
+            ])
+
+def compareCombinationSanitychecksLHC():
+    doCompare("combination_migrad_vs_minos", [
+            # (name, dir)
+            ("Migrad", "LandS*combination_lhc_sanitycheck_migrad_*"),
+            ("Minos", "LandS*combination_lhc_sanitycheck_minos_*"),
             ])
 
 
@@ -70,15 +98,15 @@ def doCompare(name, compareList):
 
     legendLabels2 = legendLabels + [None]*len(legendLabels)
 
-    doPlot(limits, legendLabels2,
-           [brlimit.divideGraph(l.expectedGraph(sigma=+1), l.expectedGraph()) for l in limits] +
-           [brlimit.divideGraph(l.expectedGraph(sigma=-1), l.expectedGraph()) for l in limits],
-           name+"_expectedSigma1Relative", "Expected #pm1#sigma / median", opts={"ymaxfactor": 1.2})
+    # doPlot(limits, legendLabels2,
+    #        [brlimit.divideGraph(l.expectedGraph(sigma=+1), l.expectedGraph()) for l in limits] +
+    #        [brlimit.divideGraph(l.expectedGraph(sigma=-1), l.expectedGraph()) for l in limits],
+    #        name+"_expectedSigma1Relative", "Expected #pm1#sigma / median", opts={"ymaxfactor": 1.2})
 
-    doPlot(limits, legendLabels2,
-           [brlimit.divideGraph(l.expectedGraph(sigma=+2), l.expectedGraph()) for l in limits] +
-           [brlimit.divideGraph(l.expectedGraph(sigma=-2), l.expectedGraph()) for l in limits],
-           name+"_expectedSigma2Relative", "Expected #pm2#sigma / median", opts={"ymaxfactor": 1.2})
+    # doPlot(limits, legendLabels2,
+    #        [brlimit.divideGraph(l.expectedGraph(sigma=+2), l.expectedGraph()) for l in limits] +
+    #        [brlimit.divideGraph(l.expectedGraph(sigma=-2), l.expectedGraph()) for l in limits],
+    #        name+"_expectedSigma2Relative", "Expected #pm2#sigma / median", opts={"ymaxfactor": 1.2})
 
     doPlot(limits, legendLabels2,
            [l.expectedGraph(sigma=+1) for l in limits] +
@@ -122,7 +150,10 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, opts={}):
         r.SetLineStyle(1)
     plot.histoMgr.forEachHisto(sty)
     plot.histoMgr.setHistoLegendLabelMany(ll)
-    plot.setLegend(histograms.createLegend(0.48, 0.75, 0.85, 0.92))
+    legend = histograms.createLegend(0.48, 0.75, 0.85, 0.92)
+    if len(limits[0].getFinalstates()) > 1:
+        legend = histograms.moveLegend(legend, dy=-0.1)
+    plot.setLegend(legend)
     opts_ = {"ymin": 0}
     opts_.update(opts)
     plot.createFrame(name, opts=opts_)
@@ -168,7 +199,11 @@ def doPlot2(limits, legendLabels, name):
         ll["Exp%d"%i] = "%s exp. median" % legendLabels[i]
 
     plot.histoMgr.setHistoLegendLabelMany(ll)
-    plot.setLegend(histograms.moveLegend(histograms.createLegend(0.48, 0.75, 0.85, 0.92), dx=-0.02))
+
+    legend = histograms.moveLegend(histograms.createLegend(0.48, 0.75, 0.85, 0.92), dx=-0.02)
+    if len(limits[0].getFinalstates()) > 1:
+        legend = histograms.moveLegend(legend, dy=-0.1)
+    plot.setLegend(legend)
 
     plot.createFrame(name+"_limits", opts={"ymin": 0, "ymax": limits[0].getFinalstateYmax()})
     plot.frame.GetXaxis().SetTitle("m_{H^{+}} (GeV)")

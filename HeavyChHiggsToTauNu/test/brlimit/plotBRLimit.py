@@ -41,7 +41,10 @@ def doBRlimit(limits):
             "Expected1": "Expected median #pm 1#sigma",
             "Expected2": "Expected median #pm 2#sigma"
             })
-    plot.setLegend(histograms.createLegend(0.48, 0.75, 0.85, 0.92))
+    legend = histograms.createLegend(0.48, 0.75, 0.85, 0.92)
+    if len(limits.getFinalstates()) > 1:
+        legend = histograms.moveLegend(legend, dy=-0.1)
+    plot.setLegend(legend)
 
     plot.createFrame("limitsBr", opts={"ymin": 0, "ymax": limits.getFinalstateYmax()})
     plot.frame.GetXaxis().SetTitle("m_{H^{+}} (GeV)")
