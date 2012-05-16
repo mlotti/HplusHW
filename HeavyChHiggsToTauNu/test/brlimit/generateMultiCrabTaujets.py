@@ -12,6 +12,10 @@ lepType = False
 lhcType = False
 lhcTypeAsymptotic = False
 
+massPoints = lands.allMassPoints
+#massPoints = ["150", "155", "160"]
+#massPoints = ["155"]
+
 def main(opts):
     postfix = "taujets"
 
@@ -29,7 +33,7 @@ def main(opts):
 
     if opts.lepType:
         lands.generateMultiCrab(
-            massPoints = lands.allMassPoints,
+            massPoints = massPoints,
             datacardPatterns = [lands.taujetsDatacardPattern],
             rootfilePatterns = [lands.taujetsRootfilePattern],
             clsType = lands.LEPType(toysPerJob=100),
@@ -38,7 +42,7 @@ def main(opts):
             crabScheduler=crabScheduler, crabOptions=crabOptions)
     if opts.lhcType:
         lands.generateMultiCrab(
-            massPoints = lands.allMassPoints,
+            massPoints = massPoints,
             datacardPatterns = [lands.taujetsDatacardPattern],
             rootfilePatterns = [lands.taujetsRootfilePattern],
             clsType = lands.LHCType(toysCLsb={"default": 150,
@@ -59,21 +63,27 @@ def main(opts):
                                         "120": ("0.005", "0.08"), 
                                         "140": ("0.005", "0.05"), 
                                         "155": ("0.005", "0.05"), 
+
+                                        # For rebin40
+#                                        "150": ("0.005", "0.05"), 
+#                                        "160": ("0.004", "0.04"), 
                                         }
                                     ),
             #numberOfJobs = {"default": 5, "140": 10},
             #postfix = postfix+"_lhc_jobs5_sb600_b300",
             numberOfJobs = {"default": 160,
                             "100": 200,
+                            # For nominal
                             "150": 40,
                             "160": 40,
+                            # For rebin40
                             },
             #numberOfJobs = {"default": 80, "140": 160},
             postfix = postfix+"_lhc_jobs160_sb150_b75",
             crabScheduler=crabScheduler, crabOptions=crabOptions)
     if opts.lhcTypeAsymptotic:
         lands.produceLHCAsymptotic(
-            massPoints = lands.allMassPoints,
+            massPoints = massPoints,
             datacardPatterns = [lands.taujetsDatacardPattern],
             rootfilePatterns = [lands.taujetsRootfilePattern],
             postfix = postfix+"_lhcasy"

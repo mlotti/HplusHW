@@ -31,7 +31,7 @@ crabOptions = {
 
 massPoints = lands.allMassPoints
 #massPoints = ["155", "160"]
-massPoints = ["160"]
+#massPoints = ["160"]
 
 def main(opts):
     postfix = "taujets"
@@ -64,6 +64,9 @@ def main(opts):
                             "160": 20
                             },
                  lhcAsyRmax="0.2",
+                 lhcAsyOptsExp={"default": lands.lhcAsymptoticOptionsExpected, # for migrad
+                                "160": lands.lhcAsymptoticOptionsObserved, # for minos instead of migrad
+                                }
                  )
 
     if opts.etau:
@@ -91,10 +94,14 @@ def main(opts):
                  lhcToysCLsb=600, lhcToysCLb=300, lhcPostfix="jobs10_sb_600_b300",
                  lhcJobs = {"default": 20,
                             "155": 40,
-#                            "160": 40,
-                            "160": 400,
+                            "160": 40,
                             },
-                 lhcAsyRmax="0.2")
+                 lhcAsyRmax="0.2",
+                 lhcAsyOptsExp={"default": lands.lhcAsymptoticOptionsExpected, # for migrad
+                                "155": lands.lhcAsymptoticOptionsObserved, # for minos
+                                "160": lands.lhcAsymptoticOptionsObserved, # for minos
+                                }
+                 )
 
     if opts.emu:
         generate(opts, lands.emuDatacardPattern,   "emu",   lepRmax="0.3")
@@ -102,7 +109,7 @@ def main(opts):
 def generate(opts, datacard, postfix,
              lepRmax=None,
              lhcRmax=None, lhcvR=None, lhcToysCLsb=1200, lhcToysCLb=600, lhcJobs=5, lhcPostfix="jobs5_sb1200_b600", lhcScanRmin=None, lhcScanRmax=None,
-             lhcAsyRmax=None, lhcAsyvR=None):
+             lhcAsyRmax=None, lhcAsyvR=None, lhcAsyOptsObs=None, lhcAsyOptsExp=None):
     if opts.lepType:
         lands.generateMultiCrab(
             massPoints = massPoints, datacardPatterns = [datacard], rootfilePatterns = [],
@@ -120,7 +127,7 @@ def generate(opts, datacard, postfix,
     if opts.lhcTypeAsymptotic:
         lands.produceLHCAsymptotic(
             massPoints = massPoints, datacardPatterns = [datacard], rootfilePatterns = [],
-            clsType = lands.LHCTypeAsymptotic(rMax=lhcAsyRmax, vR=lhcAsyvR),
+            clsType = lands.LHCTypeAsymptotic(rMax=lhcAsyRmax, vR=lhcAsyvR, optionsObserved=lhcAsyOptsObs, optionsExpected=lhcAsyOptsExp),
             postfix = postfix+"_lhcasy"
             )
     

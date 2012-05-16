@@ -1,4 +1,17 @@
-#!/usr/bin/env python
+## \package LandSTools
+# Python interface for running LandS with multicrab
+#
+# The interface for casual user is provided by the functions
+# generateMultiCrab() (for LEP-CLs and LHC-CLs) and
+# produceLHCAsymptotic (for LHC-CLs asymptotic).
+#
+# The multicrab configuration generation saves various parameters to
+# taskdir/configuration.json, to be used in by landsMergeHistograms.py
+# script. The script uses tools from this module, which write the
+# limit results to taskdir/limits.json. I preferred simple text format
+# over ROOT files due to the ability to read/modify the result files
+# easily. Since the amount of information in the result file is
+# relatively small, the performance penalty should be negligible.
 
 import os
 import re
@@ -13,55 +26,123 @@ import subprocess
 import multicrab
 import git
 
+## The LandS CVS tag to be used
+LandS_tag	    = "HEAD" # Recommended by Mingshui 10.5.2012 at 23:23:22 EEST
 #LandS_tag           = "V3-04-01_eps" # this one is in the Tapio's scripts
 #LandS_tag           = "t3-04-13"
-LandS_tag	    = "HEAD" # Recommended by Mingshui 10.5.2012 at 23:23:22 EEST
 
+## Common command-line options to LandS
+#
+# These options are common for all CLs flavours, channels, and mass
+# points. At the moment the only such option is the physics model.
 commonOptions  = "--PhysicsModel ChargedHiggs"
 
+## Default command-line options for LEP-CLs
 lepHybridOptions = "-M Hybrid --bQuickEstimateInitialLimit 0"
+## Default number of toys for expected limits for LEP-CLs
 lepHybridToys = 50
+## Default "Rmin" parameter for LEP-CLs
 lepHybridRmin = "0"
+## Default "Rmax" parameter for LEP-CLs
 lepHybridRmax = "0.09"
 
-lhcHybridOptions = "-M Hybrid --freq --ExpectationHints Asymptotic --scanRs 1 --PLalgorithm Migrad --maximumFunctionCallsInAFit 500000 --minuitSTRATEGY 1"
+
+## Command-line options with Minos minimizer LHC-CLs (hybrid) (needed for some mass points of combination)
+lhcHybridOptionsMinos = "-M Hybrid --freq --scanRs 1 --maximumFunctionCallsInAFit 500000 --minuitSTRATEGY 1"
+## Default command-line options for LHC-CLs (hybrid)
+lhcHybridOptions = lhcHybridOptionsMinos + "  --PLalgorithm Migrad"
+## Default number of toys for CLsb for LHC-CLs (hybrid)
 lhcHybridToysCLsb = 300
+## Default number of toys for CLb for LHC-CLs (hybrid)
 lhcHybridToysCLb = 150
+## Default "Rmin" parameter for LHC-CLs (hybrid)
 lhcHybridRmin = "0"
+## Default "Rmax" parameter for LHC-CLs (hybrid)
 lhcHybridRmax = "1"
 
-lhcAsymptoticOptions = "-M Asymptotic --maximumFunctionCallsInAFit 500000"
+## Default command line options for LHC-CLs (asymptottic)
+lhcAsymptoticOptionsObserved = "-M Asymptotic --maximumFunctionCallsInAFit 500000"
+lhcAsymptoticOptionsExpected = lhcAsymptoticOptionsObserved + " --PLalgorithm Migrad"
+## Default "Rmin" parameter for LHC-CLs (asymptotic)
 lhcAsymptoticRmin = "0"
+## Default "Rmax" parameter for LHC-CLs (asymptotic)
 lhcAsymptoticRmax = "1"
 
+## Default options are LEP-CLs
 defaultOptions = lepHybridOptions
+## Default number of crab jobs
 defaultNumberOfJobs = 20
 
+## Default number of first random number seed in the jobs
 defaultFirstSeed = 1000
 
+## List of all mass points
 allMassPoints = ["80", "100", "120", "140", "150", "155", "160"]
+## Default mass points
 defaultMassPoints = ["120"]
 
-# Patterns of input files, %s denotes the place of the mass
+## Pattern for tau+jets datacard files (%s denotes the place of the mass)
 taujetsDatacardPattern = "lands_datacard_hplushadronic_m%s.txt"
+## Pattern for mu+tau datacard files (%s denotes the place of the mass)
 mutauDatacardPattern = "datacard_m%s_mutau_miso_20mar12.txt"
+## Pattern for e+tau datacard files (%s denotes the place of the mass)
 etauDatacardPattern = "datacard_m%s_etau_miso_20mar12.txt"
+## Pattern for e+mu datacard files (%s denotes the place of the mass)
 emuDatacardPattern = "datacard_m%s_emu_nobtag_20mar12.txt"
 
+## Pattern for tau+jets shape root files (%s denotes the place of the mass)
 taujetsRootfilePattern = "lands_histograms_hplushadronic_m%s.root"
 
+## Default list of datacard patterns
 defaultDatacardPatterns = [
     taujetsDatacardPattern,
     emuDatacardPattern,
     etauDatacardPattern,
     mutauDatacardPattern
     ]
-defaultDatacardPatterns = [defaultDatacardPatterns[i] for i in [3, 1, 0, 2]] # order in my first crab tests
+#defaultDatacardPatterns = [defaultDatacardPatterns[i] for i in [3, 1, 0, 2]] # order in my first crab tests
 
+## Default list of shape root files
 defaultRootfilePatterns = [
     taujetsRootfilePattern
 ]
 
+## Generate multicrab configuration for LEP-CLs or LHC-CLs (hybrid)
+#
+# \param massPoints         List of mass points to calculate the limit for
+#                           (list of strings)
+# \param datacardPatterns   List of datacard patterns to include in the
+#                           limit calculation (list of strings, each
+#                           string should have '%s' to denote the
+#                           position of the mass)
+# \param rootfilePatterns   List of shape ROOT file patterns to include
+#                           in the limit calculation (list of strings,
+#                           each string should have '%s' to denote the
+#                           position of the mass)
+# \param clsType            Object defining the CLs flavour (should be either
+#                           LEPType, or LHCType). If None, the default
+#                           (LEPType) is used
+# \param numberOfJobs       Number of crab jobs. Can be a number, which is
+#                           then used for all mass points, or a
+#                           dictionary to have mass-specific numbers
+#                           of jobs. See ValuePerMass for more
+#                           information of the dictionary. If None,
+#                           the default value (defaultNumberOfJobs) is
+#                           used.
+# \param crabScheduler      CRAB scheduler to use (default is arc, if you
+#                           want to submit from lxplus, use "glite").
+#                           In principle it should be possible to
+#                           submit to LSF with a proper scheduler.
+# \param crabOptions        Dictionary for specifying additional CRAB
+#                           options. The keys correspond to the
+#                           sections in crab.cfg. The values are lists
+#                           containing lines to be appended to the
+#                           section.
+# \param postfix            String to be added to the multicrab task directory
+#                           name
+#
+# The CLs-flavour specific options are controlled by the constructors
+# of LEPType and LHCType classes.
 def generateMultiCrab(massPoints=defaultMassPoints,
                       datacardPatterns=defaultDatacardPatterns,
                       rootfilePatterns=defaultRootfilePatterns,
@@ -85,6 +166,25 @@ def generateMultiCrab(massPoints=defaultMassPoints,
     lands.writeMultiCrabCfg(njobs)
     lands.printInstruction()
 
+## Run LandS for the LHC-CLs asymptotic limit
+#
+# \param massPoints         List of mass points to calculate the limit for
+#                           (list of strings)
+# \param datacardPatterns   List of datacard patterns to include in the
+#                           limit calculation (list of strings, each
+#                           string should have '%s' to denote the
+#                           position of the mass)
+# \param rootfilePatterns   List of shape ROOT file patterns to include
+#                           in the limit calculation (list of strings,
+#                           each string should have '%s' to denote the
+#                           position of the mass)
+# \param clsType            Object defining the CLs flavour (should be
+#                           LHCTypeAsymptotic). If None, the default
+#                           (LHCTypeAsymptotic) is used
+# \param postfix            String to be added to the multicrab task directory
+#                           name
+#
+# The options of LHCTypeAsymptotic are controlled by the constructor.
 def produceLHCAsymptotic(massPoints=defaultMassPoints,
                          datacardPatterns=defaultDatacardPatterns,
                          rootfilePatterns=defaultRootfilePatterns,
@@ -102,7 +202,21 @@ def produceLHCAsymptotic(massPoints=defaultMassPoints,
     lands.writeLandsScripts()
     lands.runLandSForAsymptotic()
 
+
+## Class to generate (LEP-CLs, LHC-CLs) multicrab configuration, or run (LHC-CLs asymptotic) LandS
+#
+# The class is not intended to be used directly by casual user, but
+# from generateMultiCrab() and produceLHCAsymptotic()
 class MultiCrabLandS:
+    ## Constructor
+    #
+    # \param massPoints         List of mass points to calculate the limit for
+    # \param datacardPatterns   List of datacard patterns to include in the
+    #                           limit calculation
+    # \param rootfilePatterns   List of shape ROOT file patterns to include
+    #                           in the limit calculation
+    # \param clsType            Object defining the CLs flavour (should be either
+    #                           LEPType, or LHCType).
     def __init__(self, massPoints, datacardPatterns, rootfilePatterns, clsType):
         self.exe = findOrInstallLandS()
         self.clsType = clsType.clone()
@@ -147,6 +261,9 @@ class MultiCrabLandS:
             print "Rootfile patterns:", ", ".join(rootfilePatterns)
 	    sys.exit(1)
 
+    ## Create the multicrab task directory
+    #
+    # \param postfix   Additional string to be included in the directory name
     def createMultiCrabDir(self, postfix):
         prefix = "LandSMultiCrab"
         if len(postfix) > 0:
@@ -154,6 +271,7 @@ class MultiCrabLandS:
 	self.dirname = multicrab.createTaskDir(prefix=prefix)
         self.clsType.setDirectory(self.dirname)
 
+    ## Copy input files for LandS (datacards, rootfiles) to the multicrab directory
     def copyLandsInputFiles(self):
         for d in [self.datacards, self.rootfiles]:
             for mass, files in d.iteritems():
@@ -161,10 +279,18 @@ class MultiCrabLandS:
                     shutil.copy(f, self.dirname)
         shutil.copy(self.exe, self.dirname)        
 
+    ## Write LandS shell scripts to the multicrab directory
     def writeLandsScripts(self):
         for mass, datacardFiles in self.datacards.iteritems():
             self.clsType.createScripts(mass, datacardFiles)
 
+    ## Write crab.cfg to the multicrab directory
+    # \param crabScheduler      CRAB scheduler to use
+    # \param crabOptions        Dictionary for specifying additional CRAB
+    #                           options. The keys correspond to the
+    #                           sections in crab.cfg. The values are lists
+    #                           containing lines to be appended to the
+    #                           section.
     def writeCrabCfg(self, crabScheduler, crabOptions):
 	filename = os.path.join(self.dirname, "crab.cfg")
 	fOUT = open(filename,'w')
@@ -203,6 +329,10 @@ class MultiCrabLandS:
 
 	fOUT.close()
 
+    ## Write multicrab.cfg to the multicrab directory
+    #
+    # \param numberOfJobs   ValuePerMass object holding the information
+    #                       of number of crab jobs (per mass point)
     def writeMultiCrabCfg(self, numberOfJobs):
 	filename = os.path.join(self.dirname, "multicrab.cfg")
         fOUT = open(filename,'w')
@@ -229,6 +359,10 @@ class MultiCrabLandS:
         print "cd",self.dirname,"&& multicrab -create"
 
 
+    ## Run LandS for the asymptotic limit
+    #
+    # This is so fast at the moment that using crab jobs for that
+    # would be waste of resources and everybodys time.
     def runLandSForAsymptotic(self):
         print "Running LandS for asymptotic limits, saving results to %s" % self.dirname
         f = open(os.path.join(self.dirname, "configuration.json"), "wb")
@@ -245,31 +379,22 @@ class MultiCrabLandS:
         fname = results.saveJson()
         print "Wrote results to %s" % fname
 
-def _updateArgs(kwargs, obj, names):
-    for k in kwargs.keys():
-        if not k in names:
-            raise Exception("Unknown keyword argument '%s', known arguments are %s" % ", ".join(names))
-
-    args = {}
-    for n in names:
-        args[n] = kwargs.get(n, getattr(obj, n))
-    return args
-
-def _writeScript(filename, content):
-    fOUT = open(filename, 'w')
-    fOUT.write(content)
-    fOUT.close()
-
-    # make the script executable
-    st = os.stat(filename)
-    os.chmod(filename, st.st_mode | stat.S_IXUSR)
-
-def _ifNotNoneElse(value, default):
-    if value == None:
-        return default
-    return value
-
+## Helper class to manage mass-specific configuration values
 class ValuePerMass:
+    ## Constructor
+    #
+    # \param dictionary   Input dictionary/ValuePerMass object/value
+    #
+    # If dictionary is dictionary, it must have a "default" key, and
+    # it may have more than or equal to zero keys for the mass points.
+    # The value of the "default" key is used as the default value for
+    # those mass points for which the specific value is not given.
+    #
+    # If the dictionary is ValuePerMass object, the default and
+    # per-mass values are copied from it.
+    #
+    # If the dictionary is something else, it is used as the default
+    # value for all masses
     def __init__(self, dictionary):
         self.values = {}
         if isinstance(dictionary, dict):
@@ -282,22 +407,36 @@ class ValuePerMass:
         else:
             self.default = dictionary
 
+    ## Apply a function for all values
+    #
+    # \param function   Function taking one parameter (the value), the
+    #                   return value is not used
+    #
+    # This allows sanity checks to be performed on the values.
     def forEachValue(self, function):
         function(self.default)
         for value in self.values.values():
             function(value)
 
+    ## Get the value for a given mass point
     def getValue(self, mass):
         return self.values.get(mass, self.default)
 
+    ## Serialize the object to a dictionary
+    #
+    # Another ValuePerMass can be constructed from the dictionary. The
+    # dictionary can be written to a JSON file, allowing the
+    # ValuePerMass to be constructed from other scripts.
     def serialize(self):
         ret = {"default": self.default}
         ret.update(self.values)
         return ret
 
+## Definition of the LEP-type CLs (with hybrid treatment of nuisance parameters)
 class LEPType:
-    def __init__(self, options=lepHybridOptions, toysPerJob=None, firstSeed=defaultFirstSeed, rMin=None, rMax=None):
-        self.options = options
+    ## Constructor
+    def __init__(self, options=None, toysPerJob=None, firstSeed=defaultFirstSeed, rMin=None, rMax=None):
+        self.options = ValuePerMass(_ifNotNoneElse(options, lepHybridOptions))
         self.firstSeed = firstSeed
         self.toysPerJob = ValuePerMass(_ifNotNoneElse(toysPerJob, lepHybridToys))
         self.rMin = ValuePerMass(_ifNotNoneElse(rMin, lepHybridRmin))
@@ -325,7 +464,7 @@ class LEPType:
 
     def _createObs(self, mass, datacardFiles):
         fileName = "runLandS_Observed_m" + mass
-        opts = commonOptions + " " + self.options + " --initialRmin %s --initialRmax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        opts = commonOptions + " " + self.options.getValue(mass) + " --initialRmin %s --initialRmax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         command = [
             "#!/bin/sh",
             "",
@@ -341,7 +480,7 @@ class LEPType:
 
     def _createExp(self, mass, datacardFiles):
         fileName = "runLandS_Expected_m" + mass
-        opts = commonOptions + " " + self.options + " --initialRmin %s --initialRmax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        opts = commonOptions + " " + self.options.getValue(mass) + " --initialRmin %s --initialRmax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         command = [
             "#!/bin/sh",
             "",
@@ -439,8 +578,9 @@ class LEPType:
         return True
 
 class LHCType:
-    def __init__(self, options=lhcHybridOptions, toysCLsb=None, toysCLb=None, firstSeed=defaultFirstSeed, vR=None, rMin=None, rMax=None, scanRmin=None, scanRmax=None):
-        self.options = lhcHybridOptions
+    def __init__(self, options=None, toysCLsb=None, toysCLb=None, firstSeed=defaultFirstSeed, vR=None, rMin=None, rMax=None, scanRmin=None, scanRmax=None):
+        self.options = ValuePerMass(_ifNotNoneElse(options, lhcHybridOptions))
+
         self.firstSeed = firstSeed
 
         self.toysCLsb = ValuePerMass(_ifNotNoneElse(toysCLsb, lhcHybridToysCLsb))
@@ -478,9 +618,11 @@ class LHCType:
 
     def createScripts(self, mass, datacardFiles):
         filename = "runLandS_m%s" % mass
-        opts = commonOptions + " " + self.options + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        opts = commonOptions + " " + self.options.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         vR = self.vR.getValue(mass)
-        if vR != None:
+        if vR == None:
+            opts += " --ExpectationHints Asymptotic"
+        else:
             opts += " -vR [%s,%s,x1.05]" % vR
         command = [
             "#!/bin/sh",
@@ -569,8 +711,9 @@ class LHCType:
         return result
 
 class LHCTypeAsymptotic:
-    def __init__(self, options=lhcAsymptoticOptions, rMin=None, rMax=None, vR=None):
-        self.options = options
+    def __init__(self, optionsObserved=None, optionsExpected=None, rMin=None, rMax=None, vR=None):
+        self.optionsObserved = ValuePerMass(_ifNotNoneElse(optionsObserved, lhcAsymptoticOptionsObserved))
+        self.optionsExpected = ValuePerMass(_ifNotNoneElse(optionsExpected, lhcAsymptoticOptionsExpected))
         self.rMin = ValuePerMass(_ifNotNoneElse(rMin, lhcAsymptoticRmin))
         self.rMax = ValuePerMass(_ifNotNoneElse(rMax, lhcAsymptoticRmax))
 
@@ -590,7 +733,7 @@ class LHCTypeAsymptotic:
         return None
 
     def clone(self, **kwargs):
-        args = _updateArgs(kwargs, self, ["options", "rMin", "rMax", "vR"])
+        args = _updateArgs(kwargs, self, ["optionsObserved", "optionsExpected", "rMin", "rMax", "vR"])
         return LHCTypeAsymptotic(**args)
 
     def setDirectory(self, dirname):
@@ -602,7 +745,7 @@ class LHCTypeAsymptotic:
 
     def _createObs(self, mass, datacardFiles):
         fileName = "runLandS_Observed_m" + mass
-        opts = commonOptions + " " + self.options + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        opts = commonOptions + " " + self.optionsObserved.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         vR = self.vR.getValue(mass)
         if vR != None:
             opts += " -vR [%s,%s,x1.05]" % vR
@@ -617,7 +760,7 @@ class LHCTypeAsymptotic:
 
     def _createExp(self, mass, datacardFiles):
         fileName = "runLandS_Expected_m" + mass
-        opts = commonOptions + " " + self.options + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
+        opts = commonOptions + " " + self.optionsExpected.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         vR = self.vR.getValue(mass)
         if vR != None:
             opts += " -vR [%s,%s,x1.05]" % vR
@@ -625,7 +768,7 @@ class LHCTypeAsymptotic:
         command = [
             "#!/bin/sh",
             "",
-            "./lands.exe %s --minuitSTRATEGY 2 --PLalgorithm Migrad -n exp_m%s -D asimov_b -d %s" % (opts, mass, " ".join(datacardFiles)),
+            "./lands.exe %s --minuitSTRATEGY 2 -n exp_m%s -D asimov_b -d %s" % (opts, mass, " ".join(datacardFiles)),
             ]
         _writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.expScripts[mass] = fileName
@@ -988,3 +1131,44 @@ def findOrInstallLandS(directory=False):
             return landsDirAbs
         else:
             return landsExe
+
+## Helper function to update keyword argument dictionary
+#
+# \param kwargs    Dictionary for keyword arguments
+# \param obj       Object
+# \param names     List of attribute names
+#
+# Constructs a new dictionary, where key,value pairs are taken from
+# kwargs for all attribute names, or if some name does not exist in
+# the kwargs, the value is taken from the object.
+#
+# The kwargs may not contain any other keys than the ones in names
+# (typo protection)
+def _updateArgs(kwargs, obj, names):
+    for k in kwargs.keys():
+        if not k in names:
+            raise Exception("Unknown keyword argument '%s', known arguments are %s" % ", ".join(names))
+
+    args = {}
+    for n in names:
+        args[n] = kwargs.get(n, getattr(obj, n))
+    return args
+
+## Write content to file, and make the file executable
+#
+# \param filename   Path to file
+# \param content    String to write to the file
+def _writeScript(filename, content):
+    fOUT = open(filename, 'w')
+    fOUT.write(content)
+    fOUT.close()
+
+    # make the script executable
+    st = os.stat(filename)
+    os.chmod(filename, st.st_mode | stat.S_IXUSR)
+
+## Pick default value if value is None
+def _ifNotNoneElse(value, default):
+    if value == None:
+        return default
+    return value
