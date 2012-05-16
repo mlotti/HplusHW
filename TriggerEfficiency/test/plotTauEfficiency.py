@@ -28,11 +28,15 @@ def main():
 
     histograms.createLegend.moveDefaults(dh=-0.2)
 
-    ROOT.gROOT.LoadMacro(os.path.join(os.environ["CMSSW_BASE"], "src/HiggsAnalysis/TriggerEfficiency/test/pilupWeight.C+"))
+    macroPath = os.path.join(os.environ["CMSSW_BASE"], "src/HiggsAnalysis/TriggerEfficiency/test/pileupWeight.C+")
+    macroPath = macroPath.replace("../src/","")
+    ROOT.gROOT.LoadMacro(macroPath)
 
     doPlots(1)
     doPlots(2)
     doPlots(3)
+    doPlots(4)
+    #doPlots(5)
 
 
 def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
@@ -41,35 +45,48 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
     offlineSelection += "&& 1/PFTauInvPt > 20"
     offlineSelection += "&& PFTauProng == 1"
     offlineSelection += "&& againstElectronMedium > 0.5 && againstMuonTight > 0.5"
-    offlineSelection += "&& byTightIsolation > 0.5"
+#    offlineSelection += "&& byTightIsolation > 0.5"
+    offlineSelection += "&& byVLooseCombinedIsolationDeltaBetaCorr > 0.5"
     offlineSelection += "&& MuonTauInvMass < 80"
 
     offlineTauPt40 = "PFTauPt > 40"
 
     if runrange == 1: # May10+Prompt-v4 (160431-167913)
-        lumi = 217.056000+966.249000
+        lumi = 1177
         #l1Trigger = "(L1_SingleTauJet52 || L1_SingleJet68)"
         #hltTrigger = "(run >= 160341 && run <= 165633 && (HLT_IsoPFTau35_Trk20_MET45_v1 || HLT_IsoPFTau35_Trk20_MET45_v2 || HLT_IsoPFTau35_Trk20_MET45_v4 || HLT_IsoPFTau35_Trk20_MET45_v6))"
         #hltTrigger += "|| (run >= 165970 && run <= 167913 && (HLT_IsoPFTau35_Trk20_MET60_v2 || HLT_IsoPFTau35_Trk20_MET60_v3 || HLT_IsoPFTau35_Trk20_MET60_v4)"
-        runs = "run >= 160431 && run <= 167913"
-        runsText = "160431-167913"
+        runs = "run >= 160404 && run <= 167913"
+        runsText = "160404-167913"
         offlineTriggerData = "((HLT_IsoMu17_v5 || HLT_IsoMu17_v6 || HLT_IsoMu17_v8) && MuonPt > 17)" # runs 160404-165633, unprescaled
         offlineTriggerData += "|| ((HLT_IsoMu17_v9 || HLT_IsoMu17_v11) && MuonPt > 17)"              # runs 165970-167913, PRESCALED
     elif runrange == 2: # Prompt-v6 (172620-173198), Aug05 (170722-172619) is missing!
-        lumi = 412.749000
+        lumi = 792.288
         runs = "run >= 170722 && run <= 173198"
-        runsText = "172620-173198"
+        runsText = "170826-173198"
         offlineTriggerData = "HLT_IsoMu17_v13 && MuonPt > 17"# runs 17022-172619, PRESCALED
     elif runrange == 3: # Prompt-v6 (173236-173692)
-        lumi = 265.313000
+        lumi = 264.831
         runs = "run >= 173236 && run <= 173692";
         runsText = "173236-173692"
         offlineTriggerData = "HLT_IsoMu20_v9 && MuonPt > 20"
+    elif runrange == 4: # Run2011B-Tau-PromptSkim-v1 (175860-179889)
+        lumi = 2739
+        runs = "run >= 175860 && run <= 179889"
+        runsText = "175860-179889"
+#        offlineTriggerData = "HLT_IsoMu20_v9 && MuonPt > 20"
+        offlineTriggerData = "HLT_IsoMu15_L1ETM20_v3 && MuonPt > 15"
+    elif runrange == 5: # Run2011B-Tau-PromptSkim-v1 (179959-180252) 
+        lumi = 2739
+        runs = "run >= 179959 && run <= 180252"
+        runsText = "179959-180252"
+        offlineTriggerData = "HLT_IsoMu15_L1ETM20_v3 && MuonPt > 15"
     else:
         raise Exception("Invalid run range %d" % runrange)
 
     offlineTriggerData = "(%s) && %s" % (offlineTriggerData, runs)
-    offlineTriggerMc = "HLT_IsoMu17_v5 && MuonPt > 17"
+#    offlineTriggerMc = "HLT_IsoMu17_v5 && MuonPt > 17"
+    offlineTriggerMc = "HLT_IsoMu17_v14 && MuonPt > 17"
 
     muMetMt = "sqrt( 2 * MuonPt * MET * (1-cos(MuonPhi-METphi)) )"
     muMetMtCut = muMetMt+" < 40"
@@ -194,9 +211,9 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
 
     sel1 = offlineSelection1+"&&"+l1SelectionJetReco
     sel2 = offlineSelection2+"&&"+l1SelectionJetReco
-    plotter.plotDistribution(prefix+"L1JetEt", "L1JetEt>>foo4(40,0,160)", sel1, sel2, mcWeight, xlabel="L1 jet E_{T} (GeV)")
-    plotter.plotDistribution(prefix+"L1TauJetEt", "L1JetEt>>foo4(40,0,160)", sel1+"&&hasMatchedL1TauJet", sel2+"&&hasMatchedL1TauJet", mcWeight, xlabel="L1 jet E_{T} (GeV)")
-    plotter.plotDistribution(prefix+"L1CenJetEt", "L1JetEt>>foo4(40,0,160)", sel1+"&&hasMatchedL1CenJet", sel2+"&&hasMatchedL1CenJet", mcWeight, xlabel="L1 jet E_{T} (GeV)")
+####    plotter.plotDistribution(prefix+"L1JetEt", "L1JetEt>>foo4(40,0,160)", sel1, sel2, mcWeight, xlabel="L1 jet E_{T} (GeV)")
+####    plotter.plotDistribution(prefix+"L1TauJetEt", "L1JetEt>>foo4(40,0,160)", sel1+"&&hasMatchedL1TauJet", sel2+"&&hasMatchedL1TauJet", mcWeight, xlabel="L1 jet E_{T} (GeV)")
+####    plotter.plotDistribution(prefix+"L1CenJetEt", "L1JetEt>>foo4(40,0,160)", sel1+"&&hasMatchedL1CenJet", sel2+"&&hasMatchedL1CenJet", mcWeight, xlabel="L1 jet E_{T} (GeV)")
 
     # Efficiencies
     hnumpt = ROOT.TH1F("hnumpt", "hnumpt", len(ptbins)-1, array.array("d", ptbins))
@@ -209,42 +226,42 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
     denom2 = offlineSelection2
     num1 = denom1+"&&"+l1SelectionJetReco
     num2 = denom2+"&&"+l1SelectionJetReco
-    plotter.plotEfficiency(prefix+"Tau1_L1Eff_1JetReco_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="L1 jet reco efficiency", moveLegend={"dy": -0.2})
+####    plotter.plotEfficiency(prefix+"Tau1_L1Eff_1JetReco_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="L1 jet reco efficiency", moveLegend={"dy": -0.2})
 
     denom1 = num1
     denom2 = num2
     num1 = denom1+"&&"+l1SelectionTauVeto
     num2 = denom2+"&&"+l1SelectionTauVeto
-    plotter.plotEfficiency(prefix+"Tau1_L1Eff_2TauVeto_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="L1 tau veto efficiency", moveLegend={"dy": -0.2})
+####    plotter.plotEfficiency(prefix+"Tau1_L1Eff_2TauVeto_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="L1 tau veto efficiency", moveLegend={"dy": -0.2})
 
     denom1 = num1
     denom2 = num2
     num1 = denom1+"&&"+l1SelectionIsolation
     num2 = denom2+"&&"+l1SelectionIsolation
-    plotter.plotEfficiency(prefix+"Tau1_L1Eff_3TauIsolation_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="L1 tau isolation efficiency", moveLegend={"dy": -0.2})
+####    plotter.plotEfficiency(prefix+"Tau1_L1Eff_3TauIsolation_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="L1 tau isolation efficiency", moveLegend={"dy": -0.2})
 
     denom1 = offlineSelection1
     denom2 = offlineSelection2
     num1 = denom1+"&&"+l1SelectionTau
     num2 = denom2+"&&"+l1SelectionTau
-    plotter.plotEfficiency(prefix+"Tau1_L1Eff_4TauJet_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="L1 tau jet efficiency", moveLegend={"dy": -0.2})
+####    plotter.plotEfficiency(prefix+"Tau1_L1Eff_4TauJet_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="L1 tau jet efficiency", moveLegend={"dy": -0.2})
 
     num1 = denom1+"&&"+l1SelectionCen
     num2 = denom2+"&&"+l1SelectionCen
-    plotter.plotEfficiency(prefix+"Tau1_L1Eff_5CenJet_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="L1 central jet efficiency")
+####    plotter.plotEfficiency(prefix+"Tau1_L1Eff_5CenJet_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="L1 central jet efficiency")
 
     denom1 = offlineSelection1+"&&"+l1SelectionJetReco
     denom2 = offlineSelection2+"&&"+l1SelectionJetReco
     num1 = denom1+"&&"+l1Selection1
     num2 = denom2+"&&"+l1Selection2
-    plotter.plotEfficiency(prefix+"Tau1_L1Eff_6TauCenEtThreshold_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="L1 jet E_{T} threshold efficiency")
+####    plotter.plotEfficiency(prefix+"Tau1_L1Eff_6TauCenEtThreshold_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="L1 jet E_{T} threshold efficiency")
 
     denom1 = offlineSelection1
     denom2 = offlineSelection2
     num1 = denom1+"&&"+l1Selection1
     num2 = denom2+"&&"+l1Selection2
-    plotter.plotEfficiency(prefix+"Tau2_L1Eff_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="Level-1 tau efficiency")
-
+####    plotter.plotEfficiency(prefix+"Tau2_L1Eff_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="Level-1 tau efficiency")
+    
     # HLT
     denom1 = num1
     denom2 = num2
@@ -253,7 +270,7 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
     print "########################################"
     print num2
     print denom2
-    plotter.plotEfficiency(prefix+"Tau2_L20Eff_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="Level-2 tau efficiency")
+####    plotter.plotEfficiency(prefix+"Tau2_L20Eff_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="Level-2 tau efficiency")
     #plotter.plotEfficiency(prefix+"Tau2_L20Eff_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, opts=optspt, xlabel=xlabel, ylabel="Level-2 tau efficiency")
     print "========================================"
 
@@ -261,19 +278,19 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
     denom2 = num2
     num1 = denom1+"&&"+l25Selection
     num2 = denom2+"&&"+l25Selection
-    plotter.plotEfficiency(prefix+"Tau2_L25Eff_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="Level-2.5 tau efficiency", moveLegend={"dy": -0.4})
+####    plotter.plotEfficiency(prefix+"Tau2_L25Eff_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="Level-2.5 tau efficiency", moveLegend={"dy": -0.4})
 
     denom1 = num1
     denom2 = num2
     num1 = denom1+"&&"+l3Selection1
     num2 = denom2+"&&"+l3Selection2
-    plotter.plotEfficiency(prefix+"Tau2_L3Eff_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="Level-3 tau efficiency", moveLegend={"dy": -0.4})
+####    plotter.plotEfficiency(prefix+"Tau2_L3Eff_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="Level-3 tau efficiency", moveLegend={"dy": -0.4})
 
     denom1 = And(offlineSelection1, l1Selection1)
     denom2 = And(offlineSelection2, l1Selection2)
     num1 = And(denom1, l2Selection, l25Selection, l3Selection1)
     num2 = And(denom2, l2Selection, l25Selection, l3Selection2)
-    plotter.plotEfficiency(prefix+"Tau3_HLT_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="HLT tau efficiency")
+####    plotter.plotEfficiency(prefix+"Tau3_HLT_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="HLT tau efficiency")
 
     denom1 = offlineSelection1
     denom2 = offlineSelection2
@@ -293,6 +310,13 @@ def getFilesData(runrange, highPurity):
     tmp = ""
     if highPurity:
         tmp = "-highpurity"
+    if runrange < 3:
+        return ["/home/slehti/public/Trigger/TriggerEfficiency/data/tteffAnalysis_SingleMuRun2011A_Tau_08Nov2011_v6_RAW_RECO_TTEffSkim_v444_V00_10_01_v2/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root"]
+    if runrange == 3:
+        return ["/home/slehti/public/Trigger/TriggerEfficiency/data/tteffAnalysis_SingleMuRun2011A_Tau_08Nov2011_v6_RAW_RECO_TTEffSkim_v444_V00_10_01_v2/tteffAnalysis-hltpftau-hpspftau"+tmp+".root"]
+    if runrange >= 4:
+        return ["/home/slehti/public/Trigger/TriggerEfficiency/data/tteffAnalysis_SingleMuRun2011B_Tau_PromptSkim_v1_v444_V00_10_01_v2/tteffAnalysis-hltpftau-hpspftau"+tmp+".root"]
+    
     return [
         # 160431_167913
         ["files/tteffAnalysis_SingleMu_Run2011A_Tau_May10ReReco_v1_v428_1_V00_09_07/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root",
@@ -303,12 +327,14 @@ def getFilesData(runrange, highPurity):
         # 173236_173692_v428
         ["files/tteffAnalysis_SingleMu_Run2011A_Tau_PromptSkim_v6_v428_1_V00_09_07/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root"]
         ][runrange-1]
+    
 
 def getFilesMc(highPurity):
     tmp = ""
     if highPurity:
         tmp += "-highpurity"
-    return ["files/tteffAnalysis_DYtoTauTau_M-20_TuneP0_7TeV-pythia6-tauola_Summer11-PU_S4_START42_V11-v2_v428_1_V00_09_07/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root"]
+    return ["/home/slehti/public/Trigger/TriggerEfficiency/data/tteffAnalysis_DYToTauTau_M_20_TuneZ2_7TeV_pythia6_tauola_Fall11_PU_S6_START42_V14B_v1_v444_V00_10_01_v3/tteffAnalysis-hltpftau-hpspftau"+tmp+".root"]
+#files/tteffAnalysis_DYtoTauTau_M-20_TuneP0_7TeV-pythia6-tauola_Summer11-PU_S4_START42_V11-v2_v428_1_V00_09_07/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root"]
 
 
 class EfficiencyCalculator:
@@ -403,6 +429,9 @@ class Plotter:
 
         eff1 = ROOT.TGraphAsymmErrors(n1, d1)
         eff2 = ROOT.TGraphAsymmErrors(n2, d2)
+
+        x = ROOT.Double(0)
+        y = ROOT.Double(0)
 
         styles.dataStyle.apply(eff1)
         styles.mcStyle.apply(eff2)
