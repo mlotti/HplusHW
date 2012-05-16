@@ -208,6 +208,9 @@ namespace HPlus {
     hTransverseMassTopWithWSelection = makeTH<TH1F>(*fs, "transverseMassTopWithWSelection", "transverseMassTopWithWSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassTauVeto = makeTH<TH1F>(*fs, "transverseMassTauVeto", "transverseMassTauVeto;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
 
+    hmtTest_metcut = makeTH<TH1F>(*fs, "mtTest_metcut", "mtTest_metcut", 200, 0., 400.);
+    hmtTest_jetcut = makeTH<TH1F>(*fs, "mtTest_jetcut", "mtTest_jetcut", 200, 0., 400.);
+    hmtTest_btagcut = makeTH<TH1F>(*fs, "mtTest_btagcut", "mtTest_btagcut", 200, 0., 400.);
 
     hEWKFakeTausTransverseMass = makeTH<TH1F>(*fs, "EWKFakeTausTransverseMass", "EWKFakeTausTransverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassFakeMetVeto = makeTH<TH1F>(*fs, "transverseMassFakeMetVeto", "transverseMassFakeMetVeto;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
@@ -341,6 +344,11 @@ namespace HPlus {
     increment(fPrimaryVertexCounter);
     //hSelectionFlow->Fill(kSignalOrderVertexSelection, fEventWeight.getWeight());
 
+ 
+   
+    
+
+
 //------ TauID
     // Store weight of event
     // TauID
@@ -393,9 +401,26 @@ namespace HPlus {
       hEMFractionElectrons->Fill(tauData.getSelectedTau()->emFraction(), fEventWeight.getWeight());
     hEMFractionAll->Fill(tauData.getSelectedTau()->emFraction(), fEventWeight.getWeight());
 
+    /*
+    // for testing
+ // MET
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
 
-
-  
+    if(metData.passedEvent()) {
+      // transverse mass
+      double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()) );
+      hmtTest_metcut->Fill(transverseMass, fEventWeight.getWeight());
+      if(jetData.passedEvent()) {
+	hmtTest_jetcut->Fill(transverseMass, fEventWeight.getWeight());
+	// b tagging, no event cut
+	if(btagData.passedEvent()) {
+	  hmtTest_btagcut->Fill(transverseMass, fEventWeight.getWeight());
+	}
+      }
+    }
+    */  
 //------ Veto against second tau in event
     VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauData.getSelectedTau());
     //    if (vetoTauData.passedEvent()) return false;
@@ -455,12 +480,14 @@ namespace HPlus {
 //------ Obtain rest of data objects      
     if (fTree.isActive()) {
       // MET
+     
       METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
       // transverse mass
       //double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()) );
       // b tagging, no event cut
       BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
       // Top reco, no event cut
+     
       TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
       BjetSelection::Data BjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), tauData.getSelectedTau(), metData.getSelectedMET());
   

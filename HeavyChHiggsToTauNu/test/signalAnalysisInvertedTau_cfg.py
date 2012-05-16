@@ -61,8 +61,8 @@ doFillTree = True
 
 applyTriggerScaleFactor = True
 
-#PF2PATVersion = "PFlow" # For normal PF2PAT
-PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
+PF2PATVersion = "PFlow" # For normal PF2PAT
+#PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
 
 ### Systematic uncertainty flags ###
 # Running of systematic variations is controlled by the global flag

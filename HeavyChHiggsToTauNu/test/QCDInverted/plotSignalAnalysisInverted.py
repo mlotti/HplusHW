@@ -64,9 +64,11 @@ def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters)
     #datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-    datasets.updateNAllEventsToPUWeighted()
+#    datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()
+    datasets.updateNAllEventsToPUWeighted()
 
+    
     # Take QCD from data
     datasetsQCD = None
 
@@ -99,7 +101,9 @@ def main():
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     datasets.merge("EWK", ["WJets", "DYJetsToLL", "SingleTop", "Diboson","TTJets"], keepSources=True)
-
+    datasets.remove(filter(lambda name: "W2Jets" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "W3Jets" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "W4Jets" in name, datasets.getAllDatasetNames()))
 
     datasets_lands = datasets.deepCopy()
 
@@ -176,7 +180,6 @@ def doPlots(datasets):
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdPhi"), "MTInvertedTauIdPhi", rebin=20)
 #    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdMet"), "MTInvertedTauIdMet", rebin=10)  
 
-
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMass"), "transverseMass", rebin=20)
     path = analysis+"/transverseMass"
     transverseMass2(plots.DataMCPlot(datasets, path), "transverseMass", rebin=20)
@@ -235,7 +238,7 @@ def doPlots(datasets):
 #    topPtComparison(datasets) 
 #    vertexComparison(datasets)
 
-
+    mtTest(datasets)
     mtComparison(datasets)
     metComparison(datasets)
     
@@ -292,6 +295,86 @@ except ImportError:
     print "    Run script InvertedTauID_Normalization.py to generate QCDInvertedNormalizationFactors.py"
     print
     sys.exit()
+    
+def mtTest(datasets):
+    
+    ## After standard cut
+    mtData = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/mtTest_metcut")])
+    mtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/mtTest_metcut")])
+    mtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+
+    mtData._setLegendStyles()
+    mtData._setLegendLabels()
+    mtData.histoMgr.setHistoDrawStyleAll("P")
+    mtData.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    hmtData = mtData.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/mtTest_metcut")
+    
+    mtEWK._setLegendStyles()
+    mtEWK._setLegendLabels()
+    mtEWK.histoMgr.setHistoDrawStyleAll("P")
+    mtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    hmtEWK = mtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/mtTest_metcut")
+    
+    canvas30 = ROOT.TCanvas("canvas30","",500,500)
+#    canvas3.SetLogy()
+#    hmtData.SetMaximum(120.0)
+    hmtData.SetMarkerColor(2)
+    hmtData.SetMarkerSize(1)
+    hmtData.SetMarkerStyle(22)
+    hmtData.Draw("EP")
+     
+    hmtEWK.SetMarkerColor(4)
+    hmtEWK.SetMarkerSize(1)
+    hmtEWK.SetMarkerStyle(24)
+    hmtEWK.SetFillColor(4)
+    hmtEWK.Draw("same")
+    
+        
+    tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       2.18 fb^{-1}       CMS Preliminary ")
+    tex4.SetNDC()
+    tex4.SetTextSize(20)
+    tex4.Draw()
+    
+    tex5 = ROOT.TLatex(0.5,0.8,"After MET cut")
+    tex5.SetNDC()
+    tex5.SetTextSize(20)
+    tex5.Draw()
+        
+    hmtData.GetYaxis().SetTitle("Events / 10 GeV/c^{2}")
+#    hmt.GetYaxis().SetTitleSize(20.0)
+    hmtData.GetYaxis().SetTitleOffset(1.5)
+    hmtData.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
+
+    tex1 = ROOT.TLatex(0.65,0.7,"Data")
+    tex1.SetNDC()
+    tex1.SetTextSize(23)
+    tex1.Draw()    
+    marker1 = ROOT.TMarker(0.6,0.715,hmtData.GetMarkerStyle())
+#    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
+    marker1.SetNDC()
+    marker1.SetMarkerColor(hmtData.GetMarkerColor())
+    marker1.SetMarkerSize(0.9*hmtData.GetMarkerSize())
+    marker1.Draw()
+    
+    tex2 = ROOT.TLatex(0.65,0.6,"EWK")
+    tex2.SetNDC()
+    tex2.SetTextSize(23)
+    tex2.Draw()    
+    marker2 = ROOT.TMarker(0.6,0.615,hmtEWK.GetMarkerStyle())
+#    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
+    marker2.SetNDC()
+    marker2.SetMarkerColor(hmtEWK.GetMarkerColor())
+    marker2.SetMarkerSize(0.9*hmtEWK.GetMarkerSize())
+    marker2.Draw()
+    
+    canvas30.Print("mt_metcut.png")
+    canvas30.Print("mt_metcut_btag.C")
+ 
+
+
+
+
+        
 
 def mtComparison(datasets):
     

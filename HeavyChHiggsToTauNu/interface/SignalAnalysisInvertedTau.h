@@ -200,6 +200,11 @@ namespace HPlus {
     TH1 *hTransverseMassDeltaPhi160;
     TH1 *hTransverseMassTopChiSelection;
     TH1 *hTransverseMassTopBjetSelection;
+    TH1 *hmtTest_metcut;
+    TH1 *hmtTest_noTaumetcut;
+    TH1 *hmtTest_jetcut;
+    TH1 *hmtTest_btagcut;
+
     TH1 *hDeltaPhi;
     TH1 *hDeltaPhiJetMet;
     TH1 *hAlphaT;

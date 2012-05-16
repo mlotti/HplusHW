@@ -227,6 +227,11 @@ namespace HPlus {
     TH1 *hVerticesTriggeredAfterWeight;
     
     // Transverse mass histograms
+    TH1 *hmtTest_metcut;
+    TH1 *hmtTest_jetcut;
+    TH1 *hmtTest_btagcut;
+
+
     TH1 *hTransverseMass;
     TH1 *hTransverseMassTopSelection;
     TH1 *hTransverseMassTopChiSelection;

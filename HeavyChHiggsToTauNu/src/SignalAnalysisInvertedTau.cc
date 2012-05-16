@@ -153,6 +153,13 @@ namespace HPlus {
     hTransverseMassTopDeltaPhiFakeMET =  makeTH<TH1F>(*fs, "transverseMassTopDeltaPhiFakeMET", "transverseMassTopDeltaPhiFakeMET;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassTopChiSelection = makeTH<TH1F>(*fs, "transverseMassTopChiSelection", "transverseMassTopChiSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassTopBjetSelection = makeTH<TH1F>(*fs, "transverseMassTopBjetSelection", "transverseMassTopBjetSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+
+    hmtTest_metcut = makeTH<TH1F>(*fs, "mtTest_metcut", "mtTest_metcut", 200, 0., 400.);
+    hmtTest_noTaumetcut = makeTH<TH1F>(*fs, "mtTest_noTaumetcut", "mtTest_noTaumetcut", 200, 0., 400.);
+    hmtTest_jetcut = makeTH<TH1F>(*fs, "mtTest_jetcut", "mtTest_jetcut", 200, 0., 400.);
+    hmtTest_btagcut = makeTH<TH1F>(*fs, "mtTest_btagcut", "mtTest_btagcut", 200, 0., 400.);
+
+
     hDeltaPhi = makeTH<TH1F>(*fs, "deltaPhi", "deltaPhi;#Delta#phi(tau,MET);N_{events} / 10 degrees", 360, 0., 180.);
     hDeltaPhiJetMet = makeTH<TH1F>(*fs, "deltaPhiJetMet", "deltaPhiJetMet", 400, 0., 3.2);  
     hAlphaT = makeTH<TH1F>(*fs, "alphaT", "alphaT", 100, 0.0, 5.0);
@@ -477,15 +484,25 @@ namespace HPlus {
 
     TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
-    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()) );
+    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()) );   
    
-   
+    if(metData.passedEvent()) hmtTest_noTaumetcut->Fill(transverseMass, fEventWeight.getWeight());
 
   // baseline tau-id
 
     if (tauData.selectedTauPassesDiscriminator(myTauIsolation, 0.5)  && tauData.selectedTauPassesNProngs() && tauData.selectedTauPassesRtau() ) {
 
-
+      if(metData.passedEvent()) {
+	hmtTest_metcut->Fill(transverseMass, fEventWeight.getWeight());
+	if(jetData.passedEvent()) {
+	  hmtTest_jetcut->Fill(transverseMass, fEventWeight.getWeight());
+	  // b tagging, no event cut
+	  if(btagData.passedEvent()) {
+	    hmtTest_btagcut->Fill(transverseMass, fEventWeight.getWeight());
+	  }
+	}
+      }
+    
       hMETBaselineTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
       increment(fBaselineTauIDCounter);
       if (electronVetoData.passedEvent()) {
