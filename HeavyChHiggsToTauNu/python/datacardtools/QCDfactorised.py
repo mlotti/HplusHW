@@ -179,7 +179,8 @@ class QCDfactorisedCalculator():
         myError = 0.0
         nominatorCount = nominator.getCount1D(idx)
         denominatorCount = denominator.getCount1D(idx)
-        if denominator.getCount1D(idx) > 0:
+        #print "1D eff: nom=%f, denom=%f:"%(nominatorCount.value(),denominatorCount.value())
+        if denominatorCount.value() > 0:
             myValue = nominatorCount.value() / denominatorCount.value()
             myError = myValue*sqrt(pow(nominatorCount.uncertainty()/nominatorCount.value(),2)+pow(denominatorCount.uncertainty()/denominatorCount.value(),2))
         return Count(myValue,myError)
@@ -243,7 +244,8 @@ class QCDfactorisedColumn(DatacardColumn):
                  datasetMgrColumnForQCDMCEWK = "",
                  additionalNormalisationFactor = 1.0,
                  dirPrefix = "",
-                 QCDfactorisedInfo = None):
+                 QCDfactorisedInfo = None,
+                 debugMode = False):
         DatacardColumn.__init__(self,
                                 label = "QCDfact",
                                 landsProcess = landsProcess,
@@ -262,6 +264,7 @@ class QCDfactorisedColumn(DatacardColumn):
         self._assumedMCEWKSystUncertainty = QCDfactorisedInfo["assumedMCEWKSystUncertainty"]
         # Other initialisation
         self._infoHistograms = []
+        self._debugMode = debugMode
 
     ## Do data mining and cache results
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors):
@@ -323,6 +326,7 @@ class QCDfactorisedColumn(DatacardColumn):
                     myHistograms = []
                     if e.isShapeNuisance():
                         print WarningStyle()+"FIXME: mT plot calculation missing in QCD factorised"+NormalStyle()
+                        # FIXME
                         #myHistograms.extend(e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
                     # Cache result
                     self._nuisanceResults.append(ExtractorResult(e.getId(),
@@ -352,15 +356,27 @@ class QCDfactorisedColumn(DatacardColumn):
                 hMtMCEWK = dsetRootHistoMtMCEWK.getHistogram()
                 if hMtMCEWK == None:
                     raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Cannot find histogram "+histoName+" for QCD factorised MC EWK!")
+                if self._debugMode:
+                    print "  QCDfactorised / mT shape: bin %d, data=%f, MC EWK=%f, QCD=%f"%(i,hMtData.Integral(0,hMtData.GetNbinsX()+1),hMtMCEWK.Integral(0,hMtMCEWK.GetNbinsX()+1),hMtData.Integral(0,hMtData.GetNbinsX()+1)-hMtMCEWK.Integral(0,hMtMCEWK.GetNbinsX()+1))
                 # Obtain empty histogram
                 hMtBin = myShapeModifier.createEmptyShapeHistogram("QCDFact_MtShape_bin_%d"%i)
                 # Add data and subtract MCEWK
                 myShapeModifier.addShape(source=hMtData,dest=hMtBin)
                 myShapeModifier.subtractShape(source=hMtMCEWK,dest=hMtBin)
                 myShapeModifier.finaliseShape(dest=hMtBin)
+                # Check for negative bins
+                for k in range(1,hMtBin.GetNbinsX()+1):
+                    if hMtBin.GetBinContent(k) < 0.0:
+                        print WarningStyle()+"Warning: QCD factorised"+NormalStyle()+" in mT shape bin %d, histo bin %d is negative (%f / tot:%f), it is set to zero but total normalisation is maintained"%(i,k,hMtBin.GetBinContent(k),hMtBin.Integral())
+                        myIntegral = hMtBin.Integral()
+                        hMtBin.SetBinContent(k,0.0)
+                        if (hMtBin.Integral() > 0.0):
+                            hMtBin.Scale(myIntegral / hMtBin.Integral())
                 # Multiply by efficiency of leg 2
                 myEfficiency = QCDCalculator.getLeg2Efficiency1D(i)
                 hMtBin.Scale(myEfficiency.value())
+                if self._debugMode:
+                    print "  QCDfactorised / mT shape: bin %d, eff=%f, eff*QCD=%f"%(i,myEfficiency.value(),hMtBin.Integral())
                 # Add to total mT shape histogram
                 myShapeModifier.addShape(source=hMtBin,dest=h)
                 # Store mT bin histogram for info
@@ -381,7 +397,7 @@ class QCDfactorisedColumn(DatacardColumn):
     ## Saves information histograms into a histogram
     def saveQCDInfoHistograms(self, outputDir):
         # Open root file for saving
-        myRootFilename = outputDir+"QCDMeasurementFactorisedInfo.root"
+        myRootFilename = outputDir+"/QCDMeasurementFactorisedInfo.root"
         myRootFile = ROOT.TFile.Open(myRootFilename, "RECREATE")
         if myRootFile == None:
             print ErrorStyle()+"Error:"+NormalStyle()+" Cannot open file '"+myRootFilename+"' for output!"

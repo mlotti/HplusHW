@@ -514,7 +514,15 @@ class ShapeExtractor(ExtractorBase):
             # Add here substraction of negative bins, if necessary
             for k in range(1, h.GetNbinsX()+1):
                 if h.GetBinContent(k) < 0.0:
-                    print WarningStyle()+"Warning: Rate/Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shape histo bin %d is negative (%f)"%(k,h.GetBinContent(k))
+                    if self.isRate() or self.isObservation():
+                        print WarningStyle()+"Warning: Column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" rate histo bin %d is negative (%f), it is set to zero but total normalisation is maintained"%(k,h.GetBinContent(k))
+                        myIntegral = h.Integral()
+                        h.SetBinContent(k, 0.0)
+                        if h.Integral() > 0:
+                            h.Scale(myIntegral / h.Integral())
+                    else:
+                        print WarningStyle()+"Warning: Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shape histo bin %d is negative (%f), it is forced to zero"%(k,h.GetBinContent(k))
+                        h.SetBinContent(k, 0.0)
             myHistograms.append(h)
         # Make histograms for shape stat
         if self._distribution == "shapeStat":
@@ -526,9 +534,11 @@ class ShapeExtractor(ExtractorBase):
                 myHistograms[0].SetBinContent(k, myHistograms[0].GetBinContent(k) - myHistograms[0].GetBinError(k))
                 myHistograms[1].SetBinContent(k, myHistograms[1].GetBinContent(k) + myHistograms[1].GetBinError(k))
                 if myHistograms[0].GetBinContent(k) < 0:
-                    print WarningStyle()+"Warning: shapeStat Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shapeDown histo bin %d is negative (%f)"%(k,myHistograms[0].GetBinContent(k))
+                    print WarningStyle()+"Warning: shapeStat Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shapeDown histo bin %d is negative (%f), it is forced to zero"%(k,myHistograms[0].GetBinContent(k))
+                    myHistograms[0].SetBinContent(k, 0.0)
                 if myHistograms[1].GetBinContent(k) < 0:
-                    print WarningStyle()+"Warning: shapeStat Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shapeUp histo bin %d is negative (%f)"%(k,myHistograms[0].GetBinContent(k))
+                    print WarningStyle()+"Warning: shapeStat Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shapeUp histo bin %d is negative (%f), it is forced to zero"%(k,myHistograms[0].GetBinContent(k))
+                    myHistograms[1].SetBinContent(k, 0.0)
         # No source for histograms for empty column; create an empty histogram with correct dimensions
         if (self.isRate() or self.isObservation()) and datasetColumn.typeIsEmptyColum():
             h = myShapeModifier.createEmptyShapeHistogram(myLabels[0])

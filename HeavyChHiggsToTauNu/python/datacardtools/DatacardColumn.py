@@ -100,6 +100,14 @@ class DatacardColumn():
     def typeIsQCD(self):
         return self._datasetType == MulticrabDirectoryDataType.QCDFACTORISED or self._datasetType == MulticrabDirectoryDataType.QCDINVERTED
 
+    ## Returns true if the column is QCD factorised
+    def typeIsQCDfactorised(self):
+        return self._datasetType == MulticrabDirectoryDataType.QCDFACTORISED
+
+    ## Returns true if the column is QCD inverted
+    def typeIsQCDinverted(self):
+        return self._datasetType == MulticrabDirectoryDataType.QCDINVERTED
+
     ## Returns true if the column is empty (uses no datasets)
     def typeIsEmptyColum(self):
         return self._datasetType == MulticrabDirectoryDataType.DUMMY

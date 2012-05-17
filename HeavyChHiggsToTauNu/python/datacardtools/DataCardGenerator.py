@@ -276,7 +276,8 @@ class DataCardGenerator:
                                                    datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK,
                                                    additionalNormalisationFactor = dg.additionalNormalisation,
                                                    dirPrefix = dg.dirPrefix,
-                                                   QCDfactorisedInfo = dg.QCDfactorisedInfo)
+                                                   QCDfactorisedInfo = dg.QCDfactorisedInfo,
+                                                   debugMode = self._opts.debugQCD)
                 else:
                     myColumn = DatacardColumn(label=dg.label,
                                               landsProcess=dg.landsProcess,

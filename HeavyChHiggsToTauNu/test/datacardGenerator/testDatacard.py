@@ -22,6 +22,7 @@ ShapeHistogramsDimensions = { "bins": 20,
                               "rangeMin": 0.0,
                               "rangeMax": 400.0,
                               "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                              #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
                               "xtitle": "Transverse mass / GeV",
                               "ytitle": "Events" }
 
