@@ -362,7 +362,7 @@ class QCDfactorisedColumn(DatacardColumn):
                 hMtBin = myShapeModifier.createEmptyShapeHistogram("QCDFact_MtShape_bin_%d"%i)
                 # Add data and subtract MCEWK
                 myShapeModifier.addShape(source=hMtData,dest=hMtBin)
-                myShapeModifier.subtractShape(source=hMtMCEWK,dest=hMtBin)
+                myShapeModifier.subtractShape(source=hMtMCEWK,dest=hMtBin,purityCheck=True)
                 myShapeModifier.finaliseShape(dest=hMtBin)
                 # Check for negative bins
                 for k in range(1,hMtBin.GetNbinsX()+1):
