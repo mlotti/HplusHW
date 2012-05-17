@@ -362,7 +362,15 @@ class QCDfactorisedColumn(DatacardColumn):
                 hMtBin = myShapeModifier.createEmptyShapeHistogram("QCDFact_MtShape_bin_%d"%i)
                 # Add data and subtract MCEWK
                 myShapeModifier.addShape(source=hMtData,dest=hMtBin)
-                myShapeModifier.subtractShape(source=hMtMCEWK,dest=hMtBin,purityCheck=True)
+                myMessages = []
+                myMessages.extend(myShapeModifier.subtractShape(source=hMtMCEWK,dest=hMtBin,purityCheck=True))
+                if len(myMessages) > 0:
+                    myTotal = hMtBin.Integral(0,hMtBin.GetNbinsX()+1)
+                    for m in myMessages:
+                        # Filter out only important warnings of inpurity (impact more than one percent to whole bin)
+                        if myTotal > 0.0:
+                            if m[1] / myTotal > 0.01:
+                                print WarningStyle()+"Warning:"+NormalStyle()+" low purity in QCD factorised mT shape for bin %d (impact %f events / total=%f : %s"%(i,m[1],myTotal,m[0])
                 myShapeModifier.finaliseShape(dest=hMtBin)
                 # Check for negative bins
                 for k in range(1,hMtBin.GetNbinsX()+1):

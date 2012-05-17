@@ -41,15 +41,19 @@ class ShapeHistoModifier():
 
 
     ## Adds shape from the source to the destination histogram
+    # Returns list of possible messages
     def addShape(self, source, dest):
-        self._calculateShape(source,dest,"+")
+        return self._calculateShape(source,dest,"+")
 
     ## Adds shape from the source to the destination histogram
+    # Returns list of possible messages
     def subtractShape(self, source, dest, purityCheck=False):
-        self._calculateShape(source,dest,"-",purityCheck)
+        return self._calculateShape(source,dest,"-",purityCheck)
 
     ## Adds or subtracts the shape from the source to the destination histogram
+    # Returns list of possible messages
     def _calculateShape(self, source, dest, operation, purityCheck=False):
+        myMsgList = []
         # Check that binning is meaningful
         for iDest in range(1,dest.GetNbinsX()+2):
             minExists = False
@@ -100,8 +104,8 @@ class ShapeHistoModifier():
                         if dest.GetBinContent(iDest) > 0.0:
                           myResidual = dest.GetBinContent(iDest)-countSum
                           myPurity = myResidual/dest.GetBinContent(iDest)
-                            if myPurity < 0.5:
-                                print WarningStyle()+"Warning:"+NormalStyle()+" shape histo bin %d purity is low! (purity=%f, event count=%f)"%(iDest,myPurity,myResidual)
+                          if myPurity < 0.5:
+                               myMsgList.append(["Shape histo bin %d purity is low! (purity=%f, event count=%f)"%(iDest,myPurity,myResidual),myResidual])
                     dest.SetBinContent(iDest, dest.GetBinContent(iDest)-countSum)
                 else:
                     raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Unknown operation (only + or - are valid)!")
@@ -113,10 +117,17 @@ class ShapeHistoModifier():
         if operation == "+":
             dest.SetBinContent(self._nbins+1, dest.GetBinContent(self._nbins+1)+countSum)
         elif operation == "-":
+            if purityCheck:
+                if dest.GetBinContent(iDest) > 0.0:
+                  myResidual = dest.GetBinContent(iDest)-countSum
+                  myPurity = myResidual/dest.GetBinContent(iDest)
+                  if myPurity < 0.5:
+                        myMsgList.append(["Shape histo bin %d purity is low! (purity=%f, event count=%f)"%(iDest,myPurity,myResidual),myResidual])
             dest.SetBinContent(self._nbins+1, dest.GetBinContent(self._nbins+1)-countSum)
         else:
             raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Unknown operation (only + or - are valid)!")
         dest.SetBinError(self._nbins+1, dest.GetBinError(self._nbins+1)+errorSum)
+        return myMsgList
 
     ## Finalises the destination histogram (takes sqrt of the errors)
     def finaliseShape(self, dest):
