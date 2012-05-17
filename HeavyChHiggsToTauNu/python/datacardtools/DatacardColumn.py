@@ -135,7 +135,7 @@ class DatacardColumn():
 
         if myMsg != "":
             print ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+"\n"+myMsg
-            sys.exit()
+            raise Exception()
 
     ## Returns true if column is enabled for given mass point
     def isActiveForMass(self, mass):
@@ -175,6 +175,7 @@ class DatacardColumn():
 
     ## Do data mining and cache results
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors):
+        print "...",self._label
         # Obtain rate
         #sys.stdout.write("\r... data mining in progress: Column="+self._label+", obtaining Rate...                                                          ")
         #sys.stdout.flush()
@@ -226,7 +227,7 @@ class DatacardColumn():
                                                                  myHistograms))
             if not myFoundStatus:
                 print "\n"+ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Cannot find nuisance with id '"+nid+"'!"
-                sys.exit()
+                raise Exception()
         #print "\nData mining done"
 
     ## Returns rate for column

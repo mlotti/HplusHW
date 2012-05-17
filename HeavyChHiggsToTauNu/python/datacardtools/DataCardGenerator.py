@@ -110,8 +110,21 @@ class DataCardGenerator:
             mymsg += "- missing field 'FakeShapeHisto' (string, name of histogram for the shape)\n"
         if self._config.ShapeHistogramsDimensions == None:
             mymsg += "- missing field 'ShapeHistogramsDimensions' (list of number of bins, minimum, and maximum)\n"
-        elif len(self._config.ShapeHistogramsDimensions) != 3:
-            mymsg += "- field 'ShapeHistogramsDimensions' has to contain a list of three parameters (number of bins, minimum, and maximum)\n"
+        elif not isinstance(self._config.ShapeHistogramsDimensions, dict):
+            mymsg += "- field 'ShapeHistogramsDimensions' has to be of type dictionary with keys: bins, rangeMin, rangeMax, variableBinSizeLowEdges, xtitle, ytitle)\n"
+        else:
+            if not "bins" in self._config.ShapeHistogramsDimensions.keys():
+                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key bins (int)\n"
+            elif not "rangeMin" in self._config.ShapeHistogramsDimensions.keys():
+                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key rangeMin (float)\n"
+            elif not "rangeMax" in self._config.ShapeHistogramsDimensions.keys():
+                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key rangeMax (float)\n"
+            elif not "variableBinSizeLowEdges" in self._config.ShapeHistogramsDimensions.keys():
+                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key variableBinSizeLowEdges (list of floats, can be empty list)\n"
+            elif not "xtitle" in self._config.ShapeHistogramsDimensions.keys():
+                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key xtitle (string)\n"
+            elif not "ytitle" in self._config.ShapeHistogramsDimensions.keys():
+                mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key ytitle (string)\n"
         if self._config.Observation == None:
             mymsg += "- missing field 'Observation' (ObservationInput object)\n"
         if self._config.DataGroups == None:
@@ -126,7 +139,8 @@ class DataCardGenerator:
         if mymsg != "":
             print ErrorStyle()+"Error in config '"+self._opts.datacard+"'!"+NormalStyle()+"\n"
             print mymsg
-            sys.exit()
+            raise Exception()
+        sys.exit
 
     ## Reads datagroup definitions from columns and initialises datasets
     def createDatacardColumns(self):
@@ -326,7 +340,7 @@ class DataCardGenerator:
                 print "Options are:"
                 for dsetfull in allNames:
                     print "  "+dsetfull
-                sys.exit()
+                raise Exception()
         return myResult
 
     ## Check landsProcess in datacard columns
@@ -342,7 +356,7 @@ class DataCardGenerator:
                     else:
                         if myFirstValue + i != c.getLandsProcess():
                             print ErrorStyle()+"Error:"+NormalStyle()+" cannot find LandS process '"+str(myFirstValue+i)+"' in data groups for mass = %d! (need to have consecutive numbers; add group with such landsProcess or check input file)"%m
-                            sys.exit()
+                            raise Exception()
                     i += 1
 
     ## Creates extractors for nuisances
@@ -384,7 +398,7 @@ class DataCardGenerator:
                                                                    description = n.label,
                                                                    mode = myMode))
             elif n.function == "Shape":
-                self._extractors.append(ShapeExtractor(self._config.ShapeHistogramsDimensions,
+                self._extractors.append(ShapeExtractor(histoSpecs = self._config.ShapeHistogramsDimensions,
                                                        counterItem = n.counter,
                                                        histoDirs = n.histoDir,
                                                        histograms = n.histo,
@@ -426,7 +440,7 @@ class DataCardGenerator:
             else:
                 print ErrorStyle()+"Error in nuisance with id='"+n.id+"':"+NormalStyle()+" unknown or missing field function '"+n.function+"' (string)!"
                 print "Options are: 'Constant', 'Counter', 'maxCounter', 'Shape', 'ScaleFactor', 'Ratio', 'QCDFactorised'"
-                sys.exit()
+                raise Exception()
         # Create reserved nuisances
         for n in self._config.ReservedNuisances:
             self._extractors.append(ConstantExtractor(exid = n[0], constantValue = 0.0, distribution = "lnN", description = n[1], mode = myMode))
@@ -440,7 +454,7 @@ class DataCardGenerator:
             for j in range(0,len(self._extractors)):
                 if self._extractors[i].isId(self._extractors[j].getId()) and i != j:
                     print ErrorStyle()+"Error:"+NormalStyle()+" You have defined two nuisances with id='"++"'! The id has to be unique!"
-                    sys.exit()
+                    raise Exception()
         # Merge nuisances
         self.mergeNuisances()
         # Check consecutive id's
@@ -461,7 +475,7 @@ class DataCardGenerator:
                     myFoundStatus = True
             if not myFoundStatus:
                 print ErrorStyle()+"Error in merging Nuisances:"+NormalStyle()+" cannot find a nuisance with id '"+mset[0]+"'!"
-                sys.exit()
+                raise Exception()
             # assign master to slave nuisances
             for i in range(1, len(mset)):
                 myFoundStatus = False
@@ -471,6 +485,6 @@ class DataCardGenerator:
                         myFoundStatus = True
                 if not myFoundStatus:
                     print ErrorStyle()+"Error in merging Nuisances:"+NormalStyle()+" tried to merge '"+mset[i]+"' (slave) to '"+mset[0]+"' (master) but could not find a nuisance with id '"+mset[i]+"'!"
-                    sys.exit()
+                    raise Exception()
         print "Merged Nuisances"
 

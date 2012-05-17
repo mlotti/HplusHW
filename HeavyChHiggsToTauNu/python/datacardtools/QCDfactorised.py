@@ -174,11 +174,11 @@ class QCDfactorisedCalculator():
     def getLeg2Efficiency1D(self,idx):
         return self._getEfficiency1D(self._leg2Counts, self._basicCount,idx)
 
-    def getEfficiency1D(self,nominator,denominator,idx):
+    def _getEfficiency1D(self,nominator,denominator,idx):
         myValue = -1.0
         myError = 0.0
-        nominatorCount = nominator.getCount1D(i)
-        denominatorCount = denominator.getCount1D(i)
+        nominatorCount = nominator.getCount1D(idx)
+        denominatorCount = denominator.getCount1D(idx)
         if denominator.getCount1D(idx) > 0:
             myValue = nominatorCount.value() / denominatorCount.value()
             myError = myValue*sqrt(pow(nominatorCount.uncertainty()/nominatorCount.value(),2)+pow(denominatorCount.uncertainty()/denominatorCount.value(),2))
@@ -198,7 +198,7 @@ class QCDfactorisedCalculator():
             for i in range(1, h.GetNbinsX()+1):
                 myEfficiency = self._getEfficiency1D(nominator,denominator,i)
                 h.SetBinContent(i, myEfficiency.value())
-                h.SetBinError(i, myEfficency.uncertainty())
+                h.SetBinError(i, myEfficiency.uncertainty())
         else:
             print WarningStyle()+"Warning: QCD:Factorised: Efficiency histogram not yet supported for more than 1 dimensions"+NormalStyle()
         return h
@@ -265,26 +265,27 @@ class QCDfactorisedColumn(DatacardColumn):
 
     ## Do data mining and cache results
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors):
+        print "...",self._label
         # Make event count objects
         myBigBoxEventCount = QCDEventCount(histoPrefix=self._dirPrefix,
                                            histoName=self._afterBigboxSource,
                                            dsetMgr=dsetMgr,
-                                           destMgrDataColumn=self._datasetMgrColumn,
-                                           destMgrMCEWKColumn=self._datasetMgrColumnForQCDMCEWK,
+                                           dsetMgrDataColumn=self._datasetMgrColumn,
+                                           dsetMgrMCEWKColumn=self._datasetMgrColumnForQCDMCEWK,
                                            luminosity=luminosity,
                                            assumedMCEWKSystUncertainty=self._assumedMCEWKSystUncertainty)
         myMETLegEventCount = QCDEventCount(histoPrefix=self._dirPrefix,
                                            histoName=self._afterMETLegSource,
                                            dsetMgr=dsetMgr,
-                                           destMgrDataColumn=self._datasetMgrColumn,
-                                           destMgrMCEWKColumn=self._datasetMgrColumnForQCDMCEWK,
+                                           dsetMgrDataColumn=self._datasetMgrColumn,
+                                           dsetMgrMCEWKColumn=self._datasetMgrColumnForQCDMCEWK,
                                            luminosity=luminosity,
                                            assumedMCEWKSystUncertainty=self._assumedMCEWKSystUncertainty)
         myTauLegEventCount = QCDEventCount(histoPrefix=self._dirPrefix,
                                            histoName=self._afterTauLegSource,
                                            dsetMgr=dsetMgr,
-                                           destMgrDataColumn=self._datasetMgrColumn,
-                                           destMgrMCEWKColumn=self._datasetMgrColumnForQCDMCEWK,
+                                           dsetMgrDataColumn=self._datasetMgrColumn,
+                                           dsetMgrMCEWKColumn=self._datasetMgrColumnForQCDMCEWK,
                                            luminosity=luminosity,
                                            assumedMCEWKSystUncertainty=self._assumedMCEWKSystUncertainty)
         # Make purity histograms
@@ -297,17 +298,13 @@ class QCDfactorisedColumn(DatacardColumn):
         self._infoHistograms.append(myQCDCalculator.getLeg1EfficiencyHistogram())
         self._infoHistograms.append(myQCDCalculator.getLeg2EfficiencyHistogram())
         # Make mT shape histogram
-        self._createMtShapeHistogram(config, myQCDCalculator, myBigBoxEventCount)
-        
-        
-
-        myRateHistograms = [] #FIXME
+        myRateHistograms = []
+        myRateHistograms.append(self._createMtShapeHistogram(config, dsetMgr, myQCDCalculator, myBigBoxEventCount, luminosity))
         # Cache result
         self._rateResult = ExtractorResult("rate",
                                            "rate",
                                            myQCDCalculator.getNQCD(),
                                            myRateHistograms)
-
         # Construct results for nuisances
         for nid in self._nuisanceIds:
             #sys.stdout.write("\r... data mining in progress: Column="+self._label+", obtaining Nuisance="+nid+"...                                              ")
@@ -337,19 +334,22 @@ class QCDfactorisedColumn(DatacardColumn):
                 sys.exit()
         #print "\nData mining done"
 
-    def _createMtShapeHistogram(self, config, QCDCalculator, QCDCount):
+    def _createMtShapeHistogram(self, config, dsetMgr, QCDCalculator, QCDCount, luminosity):
         # Create mT histogram
         myShapeModifier = ShapeHistoModifier(config.ShapeHistogramsDimensions)
         h = myShapeModifier.createEmptyShapeHistogram(self._label)
         # Loop over bins
         if QCDCount.is1D():
             for i in range(1,QCDCount.getNbinsX()+1):
-                # Get histograms for bin
-                histoName = self._dirPrefix+"/"+self._basicMtHisto+"bin_%d"%(i-1)
-                hMtData = dsetMgr.getDataset(self._datasetMgrColumn).getDatasetRootHisto(histoName)
+                # Get histograms for bin and normalise MC histograms
+                histoName = self._dirPrefix+"/"+self._basicMtHisto+"_bin%d"%(i-1)
+                dsetRootHistoMtData = dsetMgr.getDataset(self._datasetMgrColumn).getDatasetRootHisto(histoName)
+                hMtData = dsetRootHistoMtData.getHistogram()
                 if hMtData == None:
                     raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Cannot find histogram "+histoName+" for QCD factorised data!")
-                hMtMCEWK = dsetMgr.getDataset(self._datasetMgrColumnForQCDMCEWK).getDatasetRootHisto(histoName)
+                dsetRootHistoMtMCEWK = dsetMgr.getDataset(self._datasetMgrColumnForQCDMCEWK).getDatasetRootHisto(histoName)
+                dsetRootHistoMtMCEWK.normalizeToLuminosity(luminosity)
+                hMtMCEWK = dsetRootHistoMtMCEWK.getHistogram()
                 if hMtMCEWK == None:
                     raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Cannot find histogram "+histoName+" for QCD factorised MC EWK!")
                 # Obtain empty histogram
@@ -366,14 +366,16 @@ class QCDfactorisedColumn(DatacardColumn):
                 # Store mT bin histogram for info
                 self._infoHistograms.append(hMtBin)
                 # Delete data and MC EWK histograms from memory
-                myHisto.IsA().Destructor(hMtData)
-                myHisto.IsA().Destructor(hMtMCEWK)
+                hMtData.IsA().Destructor(hMtData)
+                hMtMCEWK.IsA().Destructor(hMtMCEWK)
+        elif QCDCount.is2D():
+            print "fixme"
         else:
             print WarningStyle()+"Warning: QCD:Factorised: mT histogram not yet supported for more than 1 dimensions"+NormalStyle()
         # Finalise
         myShapeModifier.finaliseShape(dest=h)
         # Normalise total mT histogram to NQCD
-        h.Scale(QCDCalculator*getNQCD / h.Integrate(0,h.GetNbinsX()+2))
+        h.Scale(QCDCalculator.getNQCD() / h.Integral(0,h.GetNbinsX()+2))
         return h
 
     ## Saves information histograms into a histogram
