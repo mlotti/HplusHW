@@ -77,15 +77,18 @@ doJESVariation = False
 doPUWeightVariation = not False
 
 # Do variations for optimisation
+# Note: Keep number of variations below 200 to keep file sizes reasonable
+# Note: Currently it is not possible to vary the tau selection -related variables, because only one JES and MET producer is made (tau selection influences type I MET correction and JES)
+
 doOptimisation = False
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
 myOptimisation = HPlusOptimisationScheme()
-myOptimisation.addTauPtVariation([40.0, 50.0])
+#myOptimisation.addTauPtVariation([40.0, 50.0])
 #myOptimisation.addTauIsolationVariation([])
 #myOptimisation.addTauIsolationContinuousVariation([])
-myOptimisation.addRtauVariation([0.0, 0.7])
-#myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
+#myOptimisation.addRtauVariation([0.0, 0.7])
+myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
 #myOptimisation.addJetEtVariation([20.0, 30.0])
 #myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
 #myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
@@ -221,6 +224,7 @@ if not doFillTree:
 # Change default tau algorithm here if needed
 #process.signalAnalysis.tauSelection.tauSelectionHPSTightTauBased # HPS Tight is the default
 
+
 # Btagging DB
 process.load("CondCore.DBCommon.CondDBCommon_cfi")
 #MC measurements
@@ -236,7 +240,7 @@ if options.runOnCrab != 0:
 process.CondDBCommon.connect = btagDB
 process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
 process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
-#param.bTagging.UseBTagDB  = cms.untracked.bool(True)
+param.bTagging.UseBTagDB  = cms.untracked.bool(False) # FIXME: True does not work with systematics! (some clash with condDB betweeen btag and JES)
 
 # Add type 1 MET
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
@@ -526,7 +530,7 @@ if doJESVariation or doSystematics:
             addJESVariation(name, doJetUnclusteredVariation)
     else:
         print "JES variation disabled for data (not meaningful for data)"
-
+    print "Added JES variation for %d modules"%len(modules)
 
 def addPUWeightVariation(name):
     # Up variation
@@ -561,7 +565,7 @@ if doPUWeightVariation or doSystematics:
             addPUWeightVariation(name)
     else:
         print "PU weight variation disabled for data (not meaningful for data)"
-
+    print "Added PU weight variation for %d modules"%len(modules)
 
 # Signal analysis with various tightened muon selections for tau embedding
 if options.tauEmbeddingInput != 0 and doTauEmbeddingMuonSelectionScan:
