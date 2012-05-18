@@ -25,6 +25,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 
+DATAPATH = "/home/slehti/public/Trigger/TriggerEfficiency/data"
+
 def main():
     style = tdrstyle.TDRStyle()
 
@@ -345,11 +347,11 @@ def getFilesData(runrange, highPurity):
     if highPurity:
         tmp = "-highpurity"
     if runrange < 3:
-        return ["/home/slehti/public/Trigger/TriggerEfficiency/data/tteffAnalysis_SingleMuRun2011A_Tau_08Nov2011_v6_RAW_RECO_TTEffSkim_v444_V00_10_01_v2/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root"]
+        return [os.path.join(DATAPATH,"tteffAnalysis_SingleMuRun2011A_Tau_08Nov2011_v6_RAW_RECO_TTEffSkim_v444_V00_10_01_v2/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root")]
     if runrange == 3:
-        return ["/home/slehti/public/Trigger/TriggerEfficiency/data/tteffAnalysis_SingleMuRun2011A_Tau_08Nov2011_v6_RAW_RECO_TTEffSkim_v444_V00_10_01_v2/tteffAnalysis-hltpftau-hpspftau"+tmp+".root"]
+        return [os.path.join(DATAPATH,"tteffAnalysis_SingleMuRun2011A_Tau_08Nov2011_v6_RAW_RECO_TTEffSkim_v444_V00_10_01_v2/tteffAnalysis-hltpftau-hpspftau"+tmp+".root")]
     if runrange >= 4:
-        return ["/home/slehti/public/Trigger/TriggerEfficiency/data/tteffAnalysis_SingleMuRun2011B_Tau_PromptSkim_v1_v444_V00_10_01_v2/tteffAnalysis-hltpftau-hpspftau"+tmp+".root"]
+        return [os.path.join(DATAPATH,"tteffAnalysis_SingleMuRun2011B_Tau_PromptSkim_v1_v444_V00_10_01_v2/tteffAnalysis-hltpftau-hpspftau"+tmp+".root")]
     
     return [
         # 160431_167913
@@ -367,7 +369,7 @@ def getFilesMc(highPurity):
     tmp = ""
     if highPurity:
         tmp += "-highpurity"
-    return ["/home/slehti/public/Trigger/TriggerEfficiency/data/tteffAnalysis_DYToTauTau_M_20_TuneZ2_7TeV_pythia6_tauola_Fall11_PU_S6_START42_V14B_v1_v444_V00_10_01_v3/tteffAnalysis-hltpftau-hpspftau"+tmp+".root"]
+    return [os.path.join(DATAPATH,"tteffAnalysis_DYToTauTau_M_20_TuneZ2_7TeV_pythia6_tauola_Fall11_PU_S6_START42_V14B_v1_v444_V00_10_01_v3/tteffAnalysis-hltpftau-hpspftau"+tmp+".root")]
 #files/tteffAnalysis_DYtoTauTau_M-20_TuneP0_7TeV-pythia6-tauola_Summer11-PU_S4_START42_V11-v2_v428_1_V00_09_07/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root"]
 
 
