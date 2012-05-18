@@ -106,7 +106,7 @@ class TableProducer:
 
     ## Generates datacards
     def makeDataCards(self):
-        # Obtain observation line
+        # Loop over mass points
         for m in self._config.MassPoints:
             print "\n"+HighlightStyle()+"Generating datacard for mass point %d for "%m +self._outputPrefix+NormalStyle()
             # Open output root file
@@ -156,6 +156,10 @@ class TableProducer:
             myRootFile.Write()
             myRootFile.Close()
             print "Written shape root file to:",myRootFilename
+        # Save additional info
+        for c in self._datasetGroups:
+            if c.typeIsQCDfactorised():
+                c.saveQCDInfoHistograms(self._dirname)
 
     ## Generates header of datacard
     def _generateHeader(self, mass):

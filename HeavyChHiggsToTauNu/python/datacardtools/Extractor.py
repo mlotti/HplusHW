@@ -6,6 +6,7 @@
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter import EventCounter
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import _histoToCounter
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
 from math import pow,sqrt
 import sys
 import ROOT
@@ -459,9 +460,9 @@ class ShapeExtractor(ExtractorBase):
             else:
                 print ErrorStyle()+"Error in Nuisance with id='"+str(self._exid)+"':"+NormalStyle()+" unknown option '"+self._distribution+"' for distribution! Options are 'shapeStat' and 'shapeQ'."
                 sys.exit()
-        if len(self._histoSpecs) != 3:
-            print ErrorStyle()+"Error in config:"+NormalStyle()+" need to specify to ShapeHistogramsDimensions as list, example = [20,0.0,400.0] (i.e. nbins, min, max)!"
-            sys.exit()
+        #if len(self._histoSpecs) != 3:
+        #    print ErrorStyle()+"Error in config:"+NormalStyle()+" need to specify to ShapeHistogramsDimensions as list, example = [20,0.0,400.0] (i.e. nbins, min, max)!"
+        #    sys.exit()
 
     ## Method for extracking result
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -498,51 +499,49 @@ class ShapeExtractor(ExtractorBase):
             myLabels = [myPrefix+"_"+str(int(self._masterExID))+"Down",
                         myPrefix+"_"+str(int(self._masterExID))+"Up"]
         myHistograms = []
+        myShapeModifier = ShapeHistoModifier(self._histoSpecs)
         for i in range (0, len(self._histoDirs)):
-            # Obtain histogram
+            # Create empty shape histogram
+            h = myShapeModifier.createEmptyShapeHistogram(myLabels[i])
+            # Obtain source histogram
             myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoDirs[i]+"/"+self._histograms[i])
             if myDatasetRootHisto.isMC():
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
-            h = myDatasetRootHisto.getHistogram()
-            # Check histogram dimensions
-            if h.GetXaxis().GetXmin() != self._histoSpecs[1]:
-                print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Obtained shape histogram has xmin=%f (should be %f)!"%(h.GetXaxis().GetXmin(), self._histoSpecs[1])
-                sys.exit()
-            if h.GetXaxis().GetXmax() != self._histoSpecs[2]:
-                print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Obtained shape histogram has xmax=%f (should be %f)!"%(h.GetXaxis().GetXmax(), self._histoSpecs[2])
-                sys.exit()
-            if h.GetXaxis().GetNbins() % self._histoSpecs[0] != 0:
-                print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Obtained shape histogram has nbins=%d which is not rebinnable to %d)!"%(h.GetXaxis().GetNbins(), self._histoSpecs[0])
-                sys.exit()
-            # Rebin
-            if h.GetXaxis().GetNbins() != self._histoSpecs[0]:
-                h.Rebin(h.GetXaxis().GetNbins() / self._histoSpecs[0])
-            # Set name to histogram
-            h.SetName(myLabels[i])
-            h.SetTitle(myLabels[i])
-            # Extract overflow bin as an independent bin
-            h.GetXaxis().Set(self._histoSpecs[0]+1,self._histoSpecs[1],self._histoSpecs[2]+h.GetXaxis().GetBinWidth(1))
+            hSource = myDatasetRootHisto.getHistogram()
+            myShapeModifier.addShape(dest=h,source=hSource)
+            myShapeModifier.finaliseShape(dest=h)
+            hSource.IsA().Destructor(hSource)
             # Add here substraction of negative bins, if necessary
             for k in range(1, h.GetNbinsX()+1):
                 if h.GetBinContent(k) < 0.0:
-                    print WarningStyle()+"Warning: Rate/Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shape histo bin %d is negative (%f)"%(k,h.GetBinContent(k))
+                    if self.isRate() or self.isObservation():
+                        print WarningStyle()+"Warning: Column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" rate histo bin %d is negative (%f), it is set to zero but total normalisation is maintained"%(k,h.GetBinContent(k))
+                        myIntegral = h.Integral()
+                        h.SetBinContent(k, 0.0)
+                        if h.Integral() > 0:
+                            h.Scale(myIntegral / h.Integral())
+                    else:
+                        print WarningStyle()+"Warning: Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shape histo bin %d is negative (%f), it is forced to zero"%(k,h.GetBinContent(k))
+                        h.SetBinContent(k, 0.0)
             myHistograms.append(h)
         # Make histograms for shape stat
         if self._distribution == "shapeStat":
             # Make second histogram by cloning
             myHistograms.append(myHistograms[0].Clone(myLabels[1]))
+            myHistograms[1].SetTitle(myLabels[1])
             # Substract/Add one sigma to get Down/Up variation
             for k in range(1, myHistograms[0].GetNbinsX()+1):
                 myHistograms[0].SetBinContent(k, myHistograms[0].GetBinContent(k) - myHistograms[0].GetBinError(k))
                 myHistograms[1].SetBinContent(k, myHistograms[1].GetBinContent(k) + myHistograms[1].GetBinError(k))
                 if myHistograms[0].GetBinContent(k) < 0:
-                    print WarningStyle()+"Warning: shapeStat Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shapeDown histo bin %d is negative (%f)"%(k,myHistograms[0].GetBinContent(k))
+                    print WarningStyle()+"Warning: shapeStat Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shapeDown histo bin %d is negative (%f), it is forced to zero"%(k,myHistograms[0].GetBinContent(k))
+                    myHistograms[0].SetBinContent(k, 0.0)
                 if myHistograms[1].GetBinContent(k) < 0:
-                    print WarningStyle()+"Warning: shapeStat Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shapeUp histo bin %d is negative (%f)"%(k,myHistograms[0].GetBinContent(k))
+                    print WarningStyle()+"Warning: shapeStat Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shapeUp histo bin %d is negative (%f), it is forced to zero"%(k,myHistograms[0].GetBinContent(k))
+                    myHistograms[1].SetBinContent(k, 0.0)
         # No source for histograms for empty column; create an empty histogram with correct dimensions
         if (self.isRate() or self.isObservation()) and datasetColumn.typeIsEmptyColum():
-            myBinWidth = (self._histoSpecs[2] - self._histoSpecs[1]) / self._histoSpecs[0]
-            h = ROOT.TH1F(myLabels[0], myLabels[0], self._histoSpecs[0]+1,self._histoSpecs[1],self._histoSpecs[2]+myBinWidth)
+            h = myShapeModifier.createEmptyShapeHistogram(myLabels[0])
             myHistograms.append(h)
         # Return result
         return myHistograms
