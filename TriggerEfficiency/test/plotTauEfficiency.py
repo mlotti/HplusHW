@@ -7,11 +7,13 @@
 # Needs ROOT >= 5.30 (for TEfficiency)
 #
 # Author: Matti Kortelainen
+# Modified 18052012/S.Lehti
 #
 ######################################################################
 
 import os
 import array
+import re
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -53,6 +55,7 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
 
     if runrange == 1: # May10+Prompt-v4 (160431-167913)
         lumi = 1177
+        label = "L1_SingleTauJet52 OR L1_SingleJet68 + HLT_IsoPFTau35_Trk20_MET45"
         #l1Trigger = "(L1_SingleTauJet52 || L1_SingleJet68)"
         #hltTrigger = "(run >= 160341 && run <= 165633 && (HLT_IsoPFTau35_Trk20_MET45_v1 || HLT_IsoPFTau35_Trk20_MET45_v2 || HLT_IsoPFTau35_Trk20_MET45_v4 || HLT_IsoPFTau35_Trk20_MET45_v6))"
         #hltTrigger += "|| (run >= 165970 && run <= 167913 && (HLT_IsoPFTau35_Trk20_MET60_v2 || HLT_IsoPFTau35_Trk20_MET60_v3 || HLT_IsoPFTau35_Trk20_MET60_v4)"
@@ -62,16 +65,19 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
         offlineTriggerData += "|| ((HLT_IsoMu17_v9 || HLT_IsoMu17_v11) && MuonPt > 17)"              # runs 165970-167913, PRESCALED
     elif runrange == 2: # Prompt-v6 (172620-173198), Aug05 (170722-172619) is missing!
         lumi = 792.288
+        label = "L1_Jet52_Central + HLT_IsoPFTau35_Trk20_MET60"
         runs = "run >= 170722 && run <= 173198"
         runsText = "170826-173198"
         offlineTriggerData = "HLT_IsoMu17_v13 && MuonPt > 17"# runs 17022-172619, PRESCALED
     elif runrange == 3: # Prompt-v6 (173236-173692)
         lumi = 264.831
+        label = "L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011A)"
         runs = "run >= 173236 && run <= 173692";
         runsText = "173236-173692"
         offlineTriggerData = "HLT_IsoMu20_v9 && MuonPt > 20"
     elif runrange == 4: # Run2011B-Tau-PromptSkim-v1 (175860-179889)
         lumi = 2739
+        label = "L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)"
         runs = "run >= 175860 && run <= 179889"
         runsText = "175860-179889"
 #        offlineTriggerData = "HLT_IsoMu20_v9 && MuonPt > 20"
@@ -296,7 +302,7 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
     denom2 = offlineSelection2
     num1 = And(denom1, l1Selection1, l2Selection, l25Selection, l3Selection1)
     num2 = And(denom2, l1Selection1, l2Selection, l25Selection, l3Selection2)
-    plotter.plotEfficiency(prefix+"Tau3_L1HLT_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="Level-1 + HLT tau efficiency", fit=True, fitMin=20., fitMax=150., drawText=True, printResults=True)
+    effratio = plotter.plotEfficiency(prefix+"Tau3_L1HLT_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="Level-1 + HLT tau efficiency", fit=True, fitMin=20., fitMax=150., drawText=True, printResults=True)
 
     denom1 = And(denom1, offlineTauPt40)
     denom2 = And(denom2, offlineTauPt40)
@@ -305,6 +311,34 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
     plotter.plotEfficiency(prefix+"Tau4_L1HLT_PFTauEta", "PFTauEta>>heta(4, -2.1, 2.1)", num1, denom1, num2, denom2, mcWeight, xlabel="#tau-jet #eta")
     plotter.plotEfficiency(prefix+"Tau4_L1HLT_PFTauPhi", "PFTauPhi>>heta(4, -3.1416, 3.1416)", num1, denom1, num2, denom2, mcWeight, xlabel="#tau-jet #phi")
 
+    dumpParameters(plotDir,label,runsText,lumi,effratio)
+
+def dumpParameters(path,label,runrange,lumi,effratio):
+
+    runrange_re = re.compile("(?P<firstRun>(\d+))-(?P<lastRun>(\d+))")
+    match = runrange_re.search(runrange)
+    if not match:
+        print "Run range not valid",runrange
+        sys.exit()
+
+    fName = os.path.join(path,"dataParameters.py")
+    fOUT = open(fName,"w")
+    fOUT.write("        # "+label+"\n")
+    fOUT.write("        runs_"+match.group("firstRun")+"_"+match.group("lastRun")+" = cms.PSet(\n")
+    fOUT.write("            firstRun = cms.uint32("+match.group("firstRun")+"),\n")
+    fOUT.write("            lastRun = cms.uint32("+match.group("lastRun")+"),\n")
+    fOUT.write("            luminosity = cms.double(%s), # 1/pb\n"%lumi)
+    fOUT.write("            bins = cms.VPSet(\n")
+
+    for i in range(effratio.histoMgr.getHistos()[0].getRootHisto().GetN()):
+        binLowEdge = effratio.histoMgr.getHistos()[0].getRootHisto().GetX()[i]
+        binLowEdge-= effratio.histoMgr.getHistos()[0].getRootHisto().GetErrorX(i)
+        ratio = effratio.ratios[0].getRootGraph().GetY()[i]
+        error = max(effratio.ratios[0].getRootGraph().GetErrorYhigh(i),effratio.ratios[0].getRootGraph().GetErrorYlow(i))
+        fOUT.write("                triggerBin("+str(binLowEdge)+", "+str(ratio)+", "+str(error)+"),\n")
+    fOUT.write("            ),\n")
+    fOUT.write("        ),\n")
+                                                                         
 
 def getFilesData(runrange, highPurity):
     tmp = ""
@@ -497,6 +531,7 @@ class Plotter:
 
         p.getFrame2().GetYaxis().SetTitle("Ratio")
         p.save()
+        return p
 
     def _fit(self, name, graph, min, max, xpos=0):
         function = ROOT.TF1("fit"+name, "0.5*[0]*(1+TMath::Erf( (sqrt(x)-sqrt([1]))/(sqrt(2)*[2]) ))", min, max);
