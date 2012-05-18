@@ -12,9 +12,29 @@ lepType = False
 lhcType = False
 lhcTypeAsymptotic = False
 
-massPoints = lands.allMassPoints
+#massPoints = lands.allMassPoints
 #massPoints = ["150", "155", "160"]
-#massPoints = ["155"]
+massPoints = ["155"]
+
+ntoys = {
+    # njobs, ntoysCLsb, ntoysCLb
+    "default": (160, 150, 75),
+    "100":     (200, 120, 60),
+    # for nominal
+    "150":     (40,  600, 300),
+    "160":     (40,  600, 300),
+}
+def _ntoys(index):
+    ret = {}
+    for key, value in ntoys.iteritems():
+        ret[key] = value[index]
+    return ret
+def _njobs():
+    return _ntoys(0)
+def _ntoysCLsb():
+    return _ntoys(1)
+def _ntoysCLb():
+    return _ntoys(2)
 
 def main(opts):
     postfix = "taujets"
@@ -45,16 +65,8 @@ def main(opts):
             massPoints = massPoints,
             datacardPatterns = [lands.taujetsDatacardPattern],
             rootfilePatterns = [lands.taujetsRootfilePattern],
-            clsType = lands.LHCType(toysCLsb={"default": 150,
-                                              "100": 120,
-                                              "150": 600,
-                                              "160": 600,
-                                              },
-                                    toysCLb={"default": 75,
-                                             "100": 60,
-                                             "150": 300,
-                                             "160": 300,
-                                             },
+            clsType = lands.LHCType(toysCLsb=_ntoysCLsb(),
+                                    toysCLb=_ntoysCLb(),
                                     vR={"default": None,
                                         # Initially obtained from asymp. limit as min/max of +-2 sigma and observed
                                         # After that, with trial and error of hybrid limit (e.g. by looking plot*.gif plots)
@@ -67,17 +79,15 @@ def main(opts):
                                         # For rebin40
 #                                        "150": ("0.005", "0.05"), 
 #                                        "160": ("0.004", "0.04"), 
+                                        # For testing without JES
+#                                        "150": ("0.005", "0.1"), 
+#                                        "155": ("0.005", "0.1"), 
+#                                        "160": ("0.004", "0.1"), 
                                         }
                                     ),
             #numberOfJobs = {"default": 5, "140": 10},
             #postfix = postfix+"_lhc_jobs5_sb600_b300",
-            numberOfJobs = {"default": 160,
-                            "100": 200,
-                            # For nominal
-                            "150": 40,
-                            "160": 40,
-                            # For rebin40
-                            },
+            numberOfJobs = _njobs(),
             #numberOfJobs = {"default": 80, "140": 160},
             postfix = postfix+"_lhc_jobs160_sb150_b75",
             crabScheduler=crabScheduler, crabOptions=crabOptions)
