@@ -27,4 +27,6 @@ else
     export PYTHONPATH=$PYTHONPATH:$PWD/.python
 fi
 
-export PATH=$PATH:$PWD/../scripts
+#export PATH=$PATH:$PWD/../scripts
+export PATH=$PATH:${PWD}/../../HeavyChHiggsToTauNu/scripts
+export CMSSW_BASE=${PWD}/../../../..
