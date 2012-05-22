@@ -12,7 +12,7 @@ if [ ! -e .python/HiggsAnalysis ]; then
     touch .python/HiggsAnalysis/__init__.py
 fi
 if [ ! -e .python/HiggsAnalysis/HeavyChHiggsToTauNu ]; then
-    ln -s $PWD/../python .python/HiggsAnalysis/HeavyChHiggsToTauNu
+    ln -s $PWD/../../HeavyChHiggsToTauNu/python .python/HiggsAnalysis/HeavyChHiggsToTauNu
     touch .python/HiggsAnalysis/HeavyChHiggsToTauNu/__init__.py
     for d in .python/HiggsAnalysis/HeavyChHiggsToTauNu/*; do
         if [ -d $d ]; then
@@ -24,9 +24,9 @@ fi
 if [ "x$PYTHONPATH" = "x" ]; then
     export PYTHONPATH=$PWD/.python
 else
-    export PYTHONPATH=$PYTHONPATH:$PWD/.python
+    export PYTHONPATH=$PWD/.python:$PYTHONPATH
 fi
 
 #export PATH=$PATH:$PWD/../scripts
-export PATH=$PATH:${PWD}/../../HeavyChHiggsToTauNu/scripts
-export CMSSW_BASE=${PWD}/../../../..
+export PATH=$PATH:$PWD/../../HeavyChHiggsToTauNu/scripts
+export CMSSW_BASE=$PWD/../../../..
