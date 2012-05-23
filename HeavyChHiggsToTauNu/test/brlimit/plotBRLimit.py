@@ -13,6 +13,13 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
+forPaper = False
+#forPaper = True
+
+unit = "GeV/c^{2}"
+if forPaper:
+    unit = "GeV"
+
 def main():
     limits = BRLimits()
 
@@ -47,7 +54,7 @@ def doBRlimit(limits):
     plot.setLegend(legend)
 
     plot.createFrame("limitsBr", opts={"ymin": 0, "ymax": limits.getFinalstateYmax()})
-    plot.frame.GetXaxis().SetTitle("m_{H^{+}} (GeV)")
+    plot.frame.GetXaxis().SetTitle("m_{H^{+}} (%s)"%unit)
     plot.frame.GetYaxis().SetTitle("95% CL limit for BR(t#rightarrow bH^{+})")
 
     plot.draw()
@@ -113,7 +120,7 @@ def doLimitError(limits):
     plot.setLegend(histograms.moveLegend(histograms.createLegend(0.48, 0.75, 0.85, 0.92), dx=0.1, dy=-0.1))
 
     plot.createFrame("limitsBrRelativeUncertainty", opts={"ymin": 0, "ymaxfactor": 1.5})
-    plot.frame.GetXaxis().SetTitle("m_{H^{+}} (GeV)")
+    plot.frame.GetXaxis().SetTitle("m_{H^{+}} (%s)"%unit)
     plot.frame.GetYaxis().SetTitle("Uncertainty/limit")
 
     plot.draw()
