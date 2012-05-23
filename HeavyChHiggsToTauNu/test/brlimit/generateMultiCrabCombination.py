@@ -13,8 +13,8 @@ lhcTypeAsymptotic = False
 #lhcTypeAsymptotic = True
 
 massPoints = lands.allMassPoints
-massPoints = massPoints[1:]
-massPoints = ["80", "160"]
+#massPoints = massPoints[1:]
+#massPoints = ["80", "160"]
 
 def main(opts):
     postfix = "combination"
@@ -47,22 +47,16 @@ def main(opts):
             massPoints = massPoints,
             datacardPatterns = datacards,
             rootfilePatterns = [lands.taujetsRootfilePattern],
-            clsType = lands.LHCType(toysCLsb={"default": 100,
-                                              "160": 100,
-                                              },
-                                    toysCLb={"default": 50,
-                                             "160": 50
-                                             },
+            clsType = lands.LHCType(toysCLsb=100,
+                                    toysCLb=50,
                                     vR=("0.005", "0.06"),
                                     options = {"default": lands.lhcHybridOptions,
                                                "80": lands.lhcHybridOptionsMinos,
                                                "160": lands.lhcHybridOptionsMinos,
                                                },
                                     ),
-            numberOfJobs = {"default": 120,
-                            "160": 120
-                            },
-            postfix = postfix+"_lhc_jobs10_sb300_b150",
+            numberOfJobs = 120,
+            postfix = postfix+"_lhc_jobs120_sb100_b50",
             crabScheduler=crabScheduler, crabOptions=crabOptions)
     if opts.lhcTypeAsymptotic:
         lands.produceLHCAsymptotic(

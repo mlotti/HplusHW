@@ -12,9 +12,9 @@ lepType = False
 lhcType = False
 lhcTypeAsymptotic = False
 
-#massPoints = lands.allMassPoints
+massPoints = lands.allMassPoints
 #massPoints = ["150", "155", "160"]
-massPoints = ["155"]
+#massPoints = ["155"]
 
 ntoys = {
     # njobs, ntoysCLsb, ntoysCLb
@@ -85,10 +85,7 @@ def main(opts):
 #                                        "160": ("0.004", "0.1"), 
                                         }
                                     ),
-            #numberOfJobs = {"default": 5, "140": 10},
-            #postfix = postfix+"_lhc_jobs5_sb600_b300",
             numberOfJobs = _njobs(),
-            #numberOfJobs = {"default": 80, "140": 160},
             postfix = postfix+"_lhc_jobs160_sb150_b75",
             crabScheduler=crabScheduler, crabOptions=crabOptions)
     if opts.lhcTypeAsymptotic:
