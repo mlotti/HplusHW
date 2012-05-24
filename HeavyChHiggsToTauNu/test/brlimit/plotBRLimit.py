@@ -16,15 +16,28 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 forPaper = False
 #forPaper = True
 
-unit = "GeV/c^{2}"
-if forPaper:
-    unit = "GeV"
+def unit():
+    if forPaper:
+        return "GeV"
+    return "GeV/c^{2}"
+
+BR = "#it{B}"
+process = "t #rightarrow H^{+}b, H^{+} #rightarrow #tau#nu"
+BRassumption = "%s(H^{+} #rightarrow #tau#nu) = 1"%BR
+BRlimit = "95%% CL limit for %s(t#rightarrow bH^{+})"%BR
+tanblimit = "tan #beta"
+def mHplus():
+    return "m_{H^{+}} (%s)" % unit()
+def mA():
+    return "m_{A} (%s)" % unit()
 
 def main():
     limits = BRLimits()
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
+    if forPaper:
+        histograms.cmsTextMode = histograms.CMSMode.PAPER
 
     doBRlimit(limits)
     doLimitError(limits)
@@ -54,8 +67,8 @@ def doBRlimit(limits):
     plot.setLegend(legend)
 
     plot.createFrame("limitsBr", opts={"ymin": 0, "ymax": limits.getFinalstateYmax()})
-    plot.frame.GetXaxis().SetTitle("m_{H^{+}} (%s)"%unit)
-    plot.frame.GetYaxis().SetTitle("95% CL limit for BR(t#rightarrow bH^{+})")
+    plot.frame.GetXaxis().SetTitle(mHplus())
+    plot.frame.GetYaxis().SetTitle(BRlimit)
 
     plot.draw()
 
@@ -65,9 +78,9 @@ def doBRlimit(limits):
 
     size = 20
     x = 0.2
-    histograms.addText(x, 0.88, "t #rightarrow H^{+}b, H^{+} #rightarrow #tau#nu", size=size)
+    histograms.addText(x, 0.88, process, size=size)
     histograms.addText(x, 0.84, limits.getFinalstateText(), size=size)
-    histograms.addText(x, 0.79, "BR(H^{+} #rightarrow #tau#nu) = 1", size=size)
+    histograms.addText(x, 0.79, BRassumption, size=size)
 
     plot.save()
 
@@ -120,7 +133,7 @@ def doLimitError(limits):
     plot.setLegend(histograms.moveLegend(histograms.createLegend(0.48, 0.75, 0.85, 0.92), dx=0.1, dy=-0.1))
 
     plot.createFrame("limitsBrRelativeUncertainty", opts={"ymin": 0, "ymaxfactor": 1.5})
-    plot.frame.GetXaxis().SetTitle("m_{H^{+}} (%s)"%unit)
+    plot.frame.GetXaxis().SetTitle(mHplus())
     plot.frame.GetYaxis().SetTitle("Uncertainty/limit")
 
     plot.draw()
@@ -131,9 +144,9 @@ def doLimitError(limits):
 
     size = 20
     x = 0.2
-    histograms.addText(x, 0.88, "t #rightarrow H^{+}b, H^{+} #rightarrow #tau#nu", size=size)
+    histograms.addText(x, 0.88, process, size=size)
     histograms.addText(x, 0.84, limits.getFinalstateText(), size=size)
-    histograms.addText(x, 0.79, "BR(H^{+} #rightarrow #tau#nu) = 1", size=size)
+    histograms.addText(x, 0.79, BRassumption, size=size)
 
     size = 22
     x = 0.55
@@ -168,7 +181,7 @@ _finalstateYmax = {
 }
 
 class BRLimits:
-    def __init__(self, directory="."):
+    def __init__(self, directory=".", excludeMassPoints=[]):
         resultfile="limits.json"
         configfile="configuration.json"
 
@@ -185,6 +198,8 @@ class BRLimits:
         floatString = [(float(self.mass[i]), self.mass[i]) for i in range(len(self.mass))]
         floatString.sort()
         self.mass = [pair[1] for pair in floatString]
+        if len(excludeMassPoints) > 0:
+            self.mass = filter(lambda m: not m in excludeMassPoints, self.mass)
 
         firstMassPoint = limits["masspoints"][self.mass[0]]
 

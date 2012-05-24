@@ -19,10 +19,10 @@ def main():
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
-#    compareTauJets()
-#    compareLeptonic()
-#    compareCombination()
-    compareCombinationSanitychecksLHC()
+    compareTauJets()
+    compareLeptonic()
+    compareCombination()
+#    compareCombinationSanitychecksLHC()
 
 def compareTauJets():
     doCompare("taujets", [
@@ -85,16 +85,16 @@ def doCompare(name, compareList):
             raise Exception("No directories for pattern '%s'" % path)
         directory = dirs[-1]
         print "Picked %s" % directory
-        limits.append(brlimit.BRLimits(directory))
+        limits.append(brlimit.BRLimits(directory, excludeMassPoints=["155"]))
 
     doPlot2(limits, legendLabels, name)
 
     ymax = limits[0].getFinalstateYmax()
     doPlot(limits, legendLabels, [l.observedGraph() for l in limits],
-           name+"_observed", "95% CL limit for BR(t#rightarrow bH^{+})", opts={"ymax": ymax})
+           name+"_observed", brlimit.BRlimit, opts={"ymax": ymax})
 
     doPlot(limits, legendLabels, [l.expectedGraph() for l in limits],
-           name+"_expectedMedian", "95% CL limit for BR(t#rightarrow bH^{+})", opts={"ymax": ymax})
+           name+"_expectedMedian", brlimit.BRlimit, opts={"ymax": ymax})
 
     legendLabels2 = legendLabels + [None]*len(legendLabels)
 
@@ -158,7 +158,7 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, opts={}):
     opts_.update(opts)
     plot.createFrame(name, opts=opts_)
 
-    plot.frame.GetXaxis().SetTitle("m_{H^{+}} (GeV)")
+    plot.frame.GetXaxis().SetTitle(brlimit.mHplus())
     plot.frame.GetYaxis().SetTitle(ylabel)
 
     plot.draw()
@@ -169,9 +169,9 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, opts={}):
 
     size = 20
     x = 0.2
-    histograms.addText(x, 0.88, "t #rightarrow H^{+}b, H^{+} #rightarrow #tau#nu", size=size)
+    histograms.addText(x, 0.88, brlimit.process, size=size)
     histograms.addText(x, 0.84, limits[0].getFinalstateText(), size=size)
-    histograms.addText(x, 0.79, "BR(H^{+} #rightarrow #tau#nu) = 1", size=size)
+    histograms.addText(x, 0.79, brlimit.BRassumption, size=size)
 
     plot.save()
 
@@ -206,8 +206,8 @@ def doPlot2(limits, legendLabels, name):
     plot.setLegend(legend)
 
     plot.createFrame(name+"_limits", opts={"ymin": 0, "ymax": limits[0].getFinalstateYmax()})
-    plot.frame.GetXaxis().SetTitle("m_{H^{+}} (GeV)")
-    plot.frame.GetYaxis().SetTitle("95% CL limit for BR(t#rightarrow bH^{+})")
+    plot.frame.GetXaxis().SetTitle(brlimit.mHplus())
+    plot.frame.GetYaxis().SetTitle(brlimit.BRlimit)
 
     plot.draw()
 
@@ -217,9 +217,9 @@ def doPlot2(limits, legendLabels, name):
 
     size = 20
     x = 0.2
-    histograms.addText(x, 0.88, "t #rightarrow H^{+}b, H^{+} #rightarrow #tau#nu", size=size)
+    histograms.addText(x, 0.88, brlimit.process, size=size)
     histograms.addText(x, 0.84, limits[0].getFinalstateText(), size=size)
-    histograms.addText(x, 0.79, "BR(H^{+} #rightarrow #tau#nu) = 1", size=size)
+    histograms.addText(x, 0.79, brlimit.BRassumption, size=size)
 
     plot.save()
 
