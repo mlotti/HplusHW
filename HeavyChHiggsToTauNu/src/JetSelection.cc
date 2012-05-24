@@ -8,6 +8,9 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
 
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/Math/interface/deltaR.h"
+
 #include "Math/GenVector/VectorUtil.h"
 #include "TH1F.h"
 #include "TH2F.h"
@@ -185,6 +188,11 @@ namespace HPlus {
     std::vector<edm::Ptr<pat::Jet> > tmpSelectedJets;
     tmpSelectedJets.reserve(jets.size());
 
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    if (!iEvent.isRealData()) {
+      iEvent.getByLabel("genParticles", genParticles);
+    }
+
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
       increment(fAllSubCount);
@@ -270,12 +278,27 @@ namespace HPlus {
       double myBetaStar = iJet->userFloat("BetaStar");
       double myMeanDR = iJet->userFloat("DRMean");
 
-      bool myIsPVJetStatus = (iJet->userInt("LdgTrackBelongsToSelectedPV") == 1); // FIXME: do MC matching
-
+      //bool myIsPVJetStatusByLdgTrack = (iJet->userInt("LdgTrackBelongsToSelectedPV") == 1);
+      // Do MC matching of jet to a quark or gluon
+      double minDeltaR = 99999;
+      bool myIsPVJetStatusByMCMatching = false;
+      if (!iEvent.isRealData()) {
+        for (size_t i=0; i < genParticles->size(); ++i) {
+          const reco::Candidate & p = (*genParticles)[i];
+          if ((std::abs(p.pdgId()) >= 1 && std::abs(p.pdgId()) <= 5) || std::abs(p.pdgId()) == 21) {
+            // Particle is a quark (not a top quark) or a gluon
+            if (p.pt() > 15) {
+              // Quark or gluon momentum is at least 15 GeV
+              if (reco::deltaR(p, *iJet) < 0.3) {
+                myIsPVJetStatusByMCMatching = true;
+              }
+            }
+          }
+        }
+      }
       // Fill histograms after eta and pt cuts
-      
       if (std::abs(iJet->eta()) < fEtaCut && iJet->pt() > fPtCut) {
-        if (myIsPVJetStatus) {
+        if (myIsPVJetStatusByMCMatching) {
           hBetaGenuine->Fill(myBeta, fEventWeight.getWeight());
           hBetaStarGenuine->Fill(myBetaStar, fEventWeight.getWeight());
           hMeanDRgenuine->Fill(myMeanDR, fEventWeight.getWeight());

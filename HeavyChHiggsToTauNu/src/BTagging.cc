@@ -268,8 +268,12 @@ namespace HPlus {
     hBTagAbsoluteUncertainty = makeTH<TH1F>(myDir, "BTagAbsoluteUncertainty", "BTagAbsoluteUncertainty;Absolute Uncertainty;N_{events}", 3000, 0., 3.);
 
     // BTagging scale factors from DB
-    btagDB = new BTaggingScaleFactorFromDB(iConfig);
-    if(FactorsFromDB) fBTaggingScaleFactor.UseDB(btagDB);
+    if(FactorsFromDB) {
+      btagDB = new BTaggingScaleFactorFromDB(iConfig);
+      fBTaggingScaleFactor.UseDB(btagDB);
+    }
+    else
+      btagDB = 0;
 
     // BTagging scale factors for b-flavor jets (source: BTV-11-001)
     double fScaleFactorBFlavor = 0.95;
@@ -336,7 +340,7 @@ namespace HPlus {
   }
 
   BTagging::~BTagging() {
-	delete btagDB;
+    if(btagDB) delete btagDB;
   }
 
   BTagging::Data BTagging::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets) {
@@ -357,7 +361,7 @@ namespace HPlus {
     bool bMatch = false;
     bool qMatch = false;
 
-    btagDB->setup(iSetup);
+    if(btagDB) btagDB->setup(iSetup);
       
     // Calculate 
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
