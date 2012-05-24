@@ -471,10 +471,22 @@ class QCDfactorisedColumn(DatacardColumn):
                         myResult = myQCDCalculator.getSystUncertainty()
                     # Obtain histograms
                     myHistograms = []
-                    if e.isShapeNuisance():
-                        print WarningStyle()+"FIXME: mT plot calculation missing in QCD factorised"+NormalStyle()
-                        # FIXME
-                        #myHistograms.extend(e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
+                    if e.getQCDmode() == "shapestat":
+                        # Clone rate histogram as up and down histograms
+                        myHistograms.append(myRateHistograms[0].Clone(self._label+"_%dDown"%int(e.getMasterId())))
+                        myHistograms[0].SetTitle(self._label+"_%dDown"%int(e.getMasterId()))
+                        myHistograms.append(myRateHistograms[0].Clone(self._label+"_%dUp"%int(e.getMasterId())))
+                        myHistograms[1].SetTitle(self._label+"_%dUp"%int(e.getMasterId()))
+                        # Substract/Add one sigma to get Down/Up variation
+                        for k in range(1, myHistograms[0].GetNbinsX()+1):
+                            myHistograms[0].SetBinContent(k, myHistograms[0].GetBinContent(k) - myHistograms[0].GetBinError(k))
+                            myHistograms[1].SetBinContent(k, myHistograms[1].GetBinContent(k) + myHistograms[1].GetBinError(k))
+                            if myHistograms[0].GetBinContent(k) < 0:
+                                print WarningStyle()+"Warning: shapeStat Nuisance with id='"+e.getId()+"' for column '"+self._label+"':"+NormalStyle()+" shapeDown histo bin %d is negative (%f), it is forced to zero"%(k,myHistograms[0].GetBinContent(k))
+                                myHistograms[0].SetBinContent(k, 0.0)
+                            if myHistograms[1].GetBinContent(k) < 0:
+                                print WarningStyle()+"Warning: shapeStat Nuisance with id='"+e.getId()+"' for column '"+self._label+"':"+NormalStyle()+" shapeUp histo bin %d is negative (%f), it is forced to zero"%(k,myHistograms[0].GetBinContent(k))
+                                myHistograms[1].SetBinContent(k, 0.0)
                     # Cache result
                     self._nuisanceResults.append(ExtractorResult(e.getId(),
                                                                  e.getMasterId(),
