@@ -87,7 +87,7 @@ class QCDEventCount():
     def getMCSystError1D(self,idx):
         if not (isinstance(self._hData,ROOT.TH1F) or isinstance(self._hData,ROOT.TH1D)):
             Exception(ErrorStyle()+"QCD factorised / factorisation data has more than 1 dimension!"+NormalStyle())
-        return self._hMC.GetBinError(idx) * self._assumedMCEWKSystUncertainty
+        return self._hMC.GetBinContent(idx) * self._assumedMCEWKSystUncertainty
 
     def getTotalError(self,idx):
         if not (isinstance(self._hData,ROOT.TH1F) or isinstance(self._hData,ROOT.TH1D)):
