@@ -60,8 +60,9 @@ lhcHybridRmin = "0"
 ## Default "Rmax" parameter for LHC-CLs (hybrid)
 lhcHybridRmax = "1"
 
-## Default command line options for LHC-CLs (asymptottic)
+## Default command line options for LHC-CLs (asymptotic, observed limit)
 lhcAsymptoticOptionsObserved = "-M Asymptotic --maximumFunctionCallsInAFit 500000"
+## Default command line options for LHC-CLs (asymptotic, expected limit)
 lhcAsymptoticOptionsExpected = lhcAsymptoticOptionsObserved + " --PLalgorithm Migrad"
 ## Default "Rmin" parameter for LHC-CLs (asymptotic)
 lhcAsymptoticRmin = "0"
@@ -433,8 +434,36 @@ class ValuePerMass:
         return ret
 
 ## Definition of the LEP-type CLs (with hybrid treatment of nuisance parameters)
+#
+# The method itself is described in the CMS-NOTE-2011-005 appendix A.1.2
+#
+# Calculating limits involves one job for observed limit and N jobs
+# for the expected limits for one mass point. A crab task is created
+# for both (separately). For the expected limits, the output root
+# files are merged, and then LandS is ran one time for the merged root
+# file. This is taken care of with the \a landsMergeHistograms.py
+# script.
 class LEPType:
     ## Constructor
+    #
+    # \param options     Command line options for LandS. String,
+    #                    dictionary (see ValuePerMass), or None for
+    #                    default (lepHybridOptions)
+    # \param toysPerJob  Number of toys per job for expected limits
+    #                    (\a -t parameter). Number, dictionary (see
+    #                    ValuePerMass), or None for default
+    #                    (lepHybridToys)
+    # \param firstSeed   First random number seed for the jobs (actually
+    #                    first seed is firstSeed+1).
+    # \param rMin        The \a --initialRmin parameter for LandS. String,
+    #                    dictionary (see ValuePerMass), or None for
+    #                    default (lepHybridRmin)
+    # \param rMax        The \a --initialRmax parameter for LandS. String,
+    #                    dictionary (see ValuePerMass), or None for
+    #                    default (lepHybridRmax)
+    #
+    # Note: if you add any parameters to the constructor, add the
+    # parameters to the clone() method correspondingly.
     def __init__(self, options=None, toysPerJob=None, firstSeed=defaultFirstSeed, rMin=None, rMax=None):
         self.options = ValuePerMass(_ifNotNoneElse(options, lepHybridOptions))
         self.firstSeed = firstSeed
@@ -445,23 +474,42 @@ class LEPType:
         self.expScripts = {}
         self.obsScripts = {}
 
+    ## Return the name of the CLs flavour (for serialization to configuration.json)
     def name(self):
         return "LEP"
 
+    ## Get the configuration dictionary for serialization.
+    #
+    # LEP-type CLs does not need any specific information to be stored
     def getConfiguration(self):
         return None
 
+    ## Clone the object, possibly overriding some options
+    #
+    # \param kwargs   Keyword arguments, can be any of the arguments of
+    #                 __init__(), with the same meaning.
     def clone(self, **kwargs):
         args = _updateArgs(kwargs, self, ["options", "toysPerJob", "firstSeed", "rMin", "rMax"])
         return LEPType(**args)
 
+    ## Set the multicrab directory path
+    #
+    # \param dirname   Path to the multicrab directory
     def setDirectory(self, dirname):
         self.dirname = dirname
-        
+
+    ## Create the job scripts for a single mass point
+    #
+    # \param mass            String for the mass point
+    # \param datacardFiles   List of strings for datacard file names of the mass point
     def createScripts(self, mass, datacardFiles):
         self._createObs(mass, datacardFiles)
         self._createExp(mass, datacardFiles)
 
+    ## Create the observed job script for a single mass point
+    #
+    # \param mass            String for the mass point
+    # \param datacardFiles   List of strings for datacard file names of the mass point
     def _createObs(self, mass, datacardFiles):
         fileName = "runLandS_Observed_m" + mass
         opts = commonOptions + " " + self.options.getValue(mass) + " --initialRmin %s --initialRmax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
@@ -478,6 +526,10 @@ class LEPType:
         _writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.obsScripts[mass] = fileName
 
+    ## Create the expected job script for a single mass point
+    #
+    # \param mass            String for the mass point
+    # \param datacardFiles   List of strings for datacard file names of the mass point
     def _createExp(self, mass, datacardFiles):
         fileName = "runLandS_Expected_m" + mass
         opts = commonOptions + " " + self.options.getValue(mass) + " --initialRmin %s --initialRmax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
@@ -493,7 +545,13 @@ class LEPType:
             ]
         _writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.expScripts[mass] = fileName
-    
+
+    ## Write the multicrab configuration snippet of a single mass point
+    #
+    # \param output      Output stream to write the contents
+    # \param mass        String for the mass point
+    # \param inputFiles  List of strings for the (additional) input files to pack in the crab job
+    # \param numJobs     Number of jobs for the expected task
     def writeMultiCrabConfig(self, output, mass, inputFiles, numJobs):
         output.write("[Observed_m%s]\n" % mass)
         output.write("USER.script_exe = %s\n" % self.obsScripts[mass])
@@ -508,12 +566,30 @@ class LEPType:
         output.write("CMSSW.number_of_jobs = %d\n" % numJobs)
         output.write("CMSSW.output_file = lands.out,split_m%sHybrid_limitbands.root,split_m%sHybrid_limits_tree.root\n" % (mass, mass))
 
+    ## Construct the Result object for a single mass point
+    #
+    # \param path       Path to the multicrab directory
+    # \param mass       String for the mass point
+    # \param clsConfig  Dictionary of the CLs-flavour-specific
+    #                   configuration (stored in configuration.json).
+    #                   Not used by LEPType, but needed for consistent
+    #                   interface
+    #
+    # \return Result object containing the limits for the mass point
     def getResult(self, path, mass, clsConfig):
         result = Result(mass)
         self._parseObserved(result, path, mass)
         self._parseExpected(result, path, mass)
         return result
 
+    ## Read the observed limit and insert to the Result
+    #
+    # \param result  Result object to modify
+    # \param path    Path to the multicrab directory
+    # \param mass    String for the mass point
+    #
+    # Reads the result from the lands.out file (which is fine since
+    # there is only one job for observed limit)
     def _parseObserved(self, result, path, mass):
         landsOutFiles = glob.glob(os.path.join(path, "Observed_m%s"%mass, "res", "lands_*.out"))
         if len(landsOutFiles) == 0:
@@ -532,6 +608,15 @@ class LEPType:
                 return
         raise Exception("Unable to parse observed result from '%s'" % landsOutFiles[0])
 
+    ## Read the expected limits and insert to the Result
+    #
+    # \param result  Result object to modify
+    # \param path    Path to the multicrab directory
+    # \param mass    String for the mass point
+    #
+    # Runds LandS for the merged root file, and reads the expected
+    # limits (median, +-1/2sigma) from the output. LandS is run only
+    # if the merged output file does not exist
     def _parseExpected(self, result, path, mass):
         mergedFilename = "lands_merged.out"
         crabRes = os.path.join(path, "Expected_m%s"%mass, "res")
@@ -555,6 +640,14 @@ class LEPType:
 
         raise Exception("Unable to parse expected result from '%s'" % fname)
 
+    ## Run LandS for the merged root file
+    #
+    # \param resDir           Path to the \a res directory of the crab task
+    # \param mergedfilename   Name of the merged root file in the \a resDir
+    # \param mass             String for the mass point
+    #
+    # \return True, if the result file exists (either before or after
+    #         the merge), False, if LandS failed for any reason
     def _runLandSForMerge(self, resDir, mergedFilename, mass):
         targetFile = os.path.join(resDir, mergedFilename)
         if os.path.exists(targetFile):
@@ -577,7 +670,58 @@ class LEPType:
         f.close()
         return True
 
+## Definition of the LHC-type CLs (with the frequentist treatment of nuisance parameters)
+#
+# The method itself is described in the CMS-NOTE-2011-005 section 2.
+#
+# In this case the crab jobs are needed only for the toy MC for the
+# sampling distributions of the test statistic. This toy MC is reused
+# for the expected limits. Consequence is that a single crab task of N
+# jobs gives the information for both the observed and the expected
+# limits. Again the root files must be merged, and this time a root
+# macro is run (instead of LandS) to produce the limits. This is taken
+# care of with the \a landsMergeHistograms.py script.
 class LHCType:
+    ## Constructor
+    #
+    # \param options     Command line options for LandS. String,
+    #                    dictionary (see ValuePerMass), or None for
+    #                    default (lhcHybridOptions)
+    # \param toysCLsb    Number of toys per job for CLsb (\a
+    #                    --nToysForCLsb parameter). Number, dictionary
+    #                    (see ValuePerMass), or None for default
+    #                    (lhcHybridToysCLsb)
+    # \param toysCLb     Number of toys per job for CLb (\a
+    #                    --nToysForCLb parameter). Number, dictionary
+    #                    (see ValuePerMass), or None for default
+    #                    (lhcHybridToysCLb)
+    # \param firstSeed   First random number seed for the jobs (actually
+    #                    first seed is firstSeed+1).
+    # \param vR          The \a -vR parameter for LandS. Pair of strings,
+    #                    dictionary (see ValuePerMass), or None for
+    #                    not to add \a -vR parameter.
+    # \param rMin        The \a --rMin parameter for LandS. String,
+    #                    dictionary (see ValuePerMass), or None for
+    #                    default (lhcHybridRmin)
+    # \param rMax        The \a --rMax parameter for LandS. String,
+    #                    dictionary (see ValuePerMass), or None for
+    #                    default (lhcHybridRmax)
+    # \param scanRmin The \a scanRmin parameter for \a fitRvsCLs.C
+    #                    macro. String, dictionary (see ValuePerMass),
+    #                    or None for not to add the \a scanRmin
+    #                    parameter.
+    # \param scanRmax    The \a scanRmax parameter for \a fitRvsCLs.C
+    #                    macro. String, dictionary (see ValuePerMass),
+    #                    or None for not to add the \a scanRmin
+    #                    parameter.
+    #
+    # Note: if you add any parameters to the constructor, add the
+    # parameters to the clone() method correspondingly.
+    #
+    # The \a scanRmin and \a scanRmax parameters are saved to the \a
+    # configuration.json file, and can be overridden by editing the
+    # file between the multicrab configuration generation and the call
+    # to \a landsMergeHistograms.py.
     def __init__(self, options=None, toysCLsb=None, toysCLb=None, firstSeed=defaultFirstSeed, vR=None, rMin=None, rMax=None, scanRmin=None, scanRmax=None):
         self.options = ValuePerMass(_ifNotNoneElse(options, lhcHybridOptions))
 
@@ -603,19 +747,34 @@ class LHCType:
 
         self.scripts = {}
 
+    ## Return the name of the CLs flavour (for serialization to configuration.json)
     def name(self):
         return "LHC"
 
+    ## Get the configuration dictionary for serialization.
+    #
+    # For LHC-type CLs the \ə scanRmin and \a scanRmax are stored
     def getConfiguration(self):
         return self.configuration
 
+    ## Clone the object, possibly overriding some options
+    #
+    # \param kwargs   Keyword arguments, can be any of the arguments of
+    #                 __init__(), with the same meaning.
     def clone(self, **kwargs):
         args = _updateArgs(kwargs, self, ["options", "toysCLsb", "toysCLb", "firstSeed", "vR", "rMin", "rMax", "scanRmin", "scanRmax"])
         return LHCType(**args)
 
+    ## Set the multicrab directory path
+    #
+    # \param dirname   Path to the multicrab directory
     def setDirectory(self, dirname):
         self.dirname = dirname
 
+    ## Create the job script for a single mass point
+    #
+    # \param mass            String for the mass point
+    # \param datacardFiles   List of strings for datacard file names of the mass point
     def createScripts(self, mass, datacardFiles):
         filename = "runLandS_m%s" % mass
         opts = commonOptions + " " + self.options.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
@@ -639,6 +798,12 @@ class LHCType:
         _writeScript(os.path.join(self.dirname, filename), "\n".join(command)+"\n")
         self.scripts[mass] = filename
 
+    ## Write the multicrab configuration snippet of a single mass point
+    #
+    # \param output      Output stream to write the contents
+    # \param mass        String for the mass point
+    # \param inputFiles  List of strings for the (additional) input files to pack in the crab job
+    # \param numJobs     Number of jobs for the expected task
     def writeMultiCrabConfig(self, output, mass, inputFiles, numJobs):
         output.write("[Limit_m%s]\n" % mass)
         output.write("USER.script_exe = %s\n" % self.scripts[mass])
@@ -646,6 +811,18 @@ class LHCType:
         output.write("CMSSW.number_of_jobs = %d\n" % numJobs)
         output.write("CMSSW.output_file = lands.out,split_m%s_m2lnQ.root\n" % mass)
 
+    ## Construct the Result object for a single mass point
+    #
+    # \param path       Path to the multicrab directory
+    # \param mass       String for the mass point
+    # \param clsConfig  Dictionary of the CLs-flavour-specific
+    #                   configuration (stored in configuration.json).
+    #
+    # \return Result object containing the limits for the mass point
+    #
+    # Runs the \a fitRvsCLs.C macro for the merged root file, and
+    # reads the observed and expected limits from the output. The
+    # script output is also stored in a text file for later referecence.
     def getResult(self, path, mass, clsConfig):
         result = Result(mass)
 
@@ -710,7 +887,42 @@ class LHCType:
 
         return result
 
+## Definition of the LHC-type CLs (with the asymptotic treatment of nuisance parameters)
+#
+# The method itself is described in the CMS-NOTE-2011-005 appendix A.1.3.
+#
+# At the moment running the asymptotic limit is so fast that running
+# it via crab would be waste of time and resources from everybodys
+# point of view. Instead, the LandS is run at the "multicrab
+# configuration generation" stage. To have similar usage to the other
+# CLs flavours, the results are stored in a multicrab task directory.
+#
+# Because no crab is involved, the user interface is different. This
+# is achieved with the produceLHCAsymptotic() function instead of the
+# generateMultiCrab().
 class LHCTypeAsymptotic:
+    ## Constructor
+    #
+    # \param optionsObserved  Command line options for LandS for the
+    #                         observed limit. String, dictionary (see
+    #                         ValuePerMass), or None for default
+    #                         (lhcAsymptoticOptionsObserved)
+    # \param optionsExpected  Command line options for LandS for the
+    #                         expected limit. String, dictionary (see
+    #                         ValuePerMass), or None for default
+    #                         (lhcAsymptoticOptionsExpected)
+    # \param rMin             The \a --rMin parameter for LandS. String,
+    #                         dictionary (see ValuePerMass), or None for
+    #                         default (lhcAsymptoticRmin)
+    # \param rMax             The \a --rMax parameter for LandS. String,
+    #                         dictionary (see ValuePerMass), or None for
+    #                         default (lhcAsymptoticRmax)
+    # \param vR               The \a -vR parameter for LandS. Pair of strings,
+    #                         dictionary (see ValuePerMass), or None for
+    #                         not to add \a -vR parameter.
+    #
+    # Note: if you add any parameters to the constructor, add the
+    # parameters to the clone() method correspondingly.
     def __init__(self, optionsObserved=None, optionsExpected=None, rMin=None, rMax=None, vR=None):
         self.optionsObserved = ValuePerMass(_ifNotNoneElse(optionsObserved, lhcAsymptoticOptionsObserved))
         self.optionsExpected = ValuePerMass(_ifNotNoneElse(optionsExpected, lhcAsymptoticOptionsExpected))
@@ -726,23 +938,42 @@ class LHCTypeAsymptotic:
         self.obsScripts = {}
         self.expScripts = {}
 
+    ## Return the name of the CLs flavour (for serialization to configuration.json)
     def name(self):
         return "LHCAsymptotic"
 
+    ## Get the configuration dictionary for serialization.
+    #
+    # LHC-type asymptotic CLs does not need any specific information to be stored
     def getConfiguration(self):
         return None
 
+    ## Clone the object, possibly overriding some options
+    #
+    # \param kwargs   Keyword arguments, can be any of the arguments of
+    #                 __init__(), with the same meaning.
     def clone(self, **kwargs):
         args = _updateArgs(kwargs, self, ["optionsObserved", "optionsExpected", "rMin", "rMax", "vR"])
         return LHCTypeAsymptotic(**args)
 
+    ## Set the multicrab directory path
+    #
+    # \param dirname   Path to the multicrab directory
     def setDirectory(self, dirname):
         self.dirname = dirname
 
+    ## Create the job scripts for a single mass point
+    #
+    # \param mass            String for the mass point
+    # \param datacardFiles   List of strings for datacard file names of the mass point
     def createScripts(self, mass, datacardFiles):
         self._createObs(mass, datacardFiles)
         self._createExp(mass, datacardFiles)
 
+    ## Create the observed job script for a single mass point
+    #
+    # \param mass            String for the mass point
+    # \param datacardFiles   List of strings for datacard file names of the mass point
     def _createObs(self, mass, datacardFiles):
         fileName = "runLandS_Observed_m" + mass
         opts = commonOptions + " " + self.optionsObserved.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
@@ -758,6 +989,10 @@ class LHCTypeAsymptotic:
         _writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.obsScripts[mass] = fileName
 
+    ## Create the expected job script for a single mass point
+    #
+    # \param mass            String for the mass point
+    # \param datacardFiles   List of strings for datacard file names of the mass point
     def _createExp(self, mass, datacardFiles):
         fileName = "runLandS_Expected_m" + mass
         opts = commonOptions + " " + self.optionsExpected.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
@@ -773,12 +1008,23 @@ class LHCTypeAsymptotic:
         _writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.expScripts[mass] = fileName
 
+    ## Run LandS for the observed and expected limits for a single mass point
+    #
+    # \param mass   String for the mass point
+    #
+    # \return Result object containing the limits for the mass point
     def runLandS(self, mass):
         result = Result(mass)
         self._runObserved(result, mass)
         self._runExpected(result, mass)
         return result
 
+    ## Helper method to run a script
+    #
+    # \param script      Path to the script to run
+    # \param outputfile  Path to a file to store the script output
+    #
+    # \ŗeturn The output of the script as a string
     def _run(self, script, outputfile):
         exe = findOrInstallLandS()
         pwd = os.getcwd()
@@ -798,6 +1044,10 @@ class LHCTypeAsymptotic:
 
         return output
 
+    ## Run LandS for the observed limit
+    #
+    # \param result  Result object to modify
+    # \param mass    String for the mass point
     def _runObserved(self, result, mass):
         script = self.obsScripts[mass]
         output = self._run(script, "obs_m%s_output.txt"%mass)
@@ -814,6 +1064,10 @@ class LHCTypeAsymptotic:
         print output
         raise Exception("Unable to parse the output of command '%s'" % script)
 
+    ## Run LandS for the expected limit
+    #
+    # \param result  Result object to modify
+    # \param mass    String for the mass point
     def _runExpected(self, result, mass):
         script = self.expScripts[mass]
         output = self._run(script, "exp_m%s_output.txt"%mass)
@@ -834,7 +1088,12 @@ class LHCTypeAsymptotic:
         print output
         raise Exception("Unable to parse the output of command '%s'" % script)
 
+## Class to hold the limit results
+#
+# \todo This class could be simplified if we can get rid of \a
+# mkBrLimits.py script.
 class Result:
+    ## Constructor
     def __init__(self, mass = None, observed = None, expected = None, expectedPlus1Sigma = None, expectedPlus2Sigma = None, expectedMinus1Sigma = None, expectedMinus2Sigma = None):
         self.mass                = mass
         self.observed            = observed
@@ -844,19 +1103,28 @@ class Result:
         self.expectedMinus1Sigma = expectedMinus1Sigma
         self.expectedMinus2Sigma = expectedMinus2Sigma
 
+    ## Convert the string values to floating point
+    #
+    # \todo Could be removed
     def toFloat(self):
         for attr in ["mass", "observed", "expected", "expectedPlus1Sigma", "expectedPlus2Sigma", "expectedMinus1Sigma", "expectedMinus2Sigma"]:
             setattr(self, attr, float(getattr(self, attr)))
 
+    ## Check if the result is empty, i.e. no limits has been assigned
     def empty(self):
         return self.observed == None and self.expected == None
 
-
+    ## Check if result already exists
+    #
+    # \todo Could be removed
     def Exists(self, result):
         if self.mass == result.mass:
             return True
         return False
         
+    ## Add another result to this
+    #
+    # \todo Could be removed
     def Add(self, result):
         if self.mass == result.mass:
             if self.observed == None:
@@ -868,6 +1136,9 @@ class Result:
                 self.expectedMinus1Sigma = result.expectedMinus1Sigma
                 self.expectedMinus2Sigma = result.expectedMinus2Sigma
   
+    ## Print the result
+    #
+    # \todo Could be removed
     def Print(self):
         print "Mass = ",self.mass
         print "    Observed = ",self.observed
@@ -878,7 +1149,11 @@ class Result:
 #        print "     +2sigma = ",self.expectedPlus2Sigma," -2sigma = ",self.expectedMinus2Sigma
 
 
+## Collection of Result objects
 class ResultContainer:
+    ## Constructor
+    #
+    # \param path  Path to the multicrab directory (where configuration.json exists)
     def __init__(self, path):
         self.path = path
 
@@ -896,16 +1171,22 @@ class ResultContainer:
                 taujetsDc = dc
                 break
         if taujetsDc != None:
-            self.readLuminosityTaujets(taujetsDc % self.config["masspoints"][0])
+            self._readLuminosityTaujets(taujetsDc % self.config["masspoints"][0])
         else:
-            self.readLuminosityLeptonic(self.config["datacards"][0] % self.config["masspoints"][0])
+            self._readLuminosityLeptonic(self.config["datacards"][0] % self.config["masspoints"][0])
 
         self.results = []
 
+    ## Append a result object to the list
+    #
+    # \param obj   Result object
     def append(self, obj):
         self.results.append(obj)
 
-    def readLuminosityTaujets(self, filename):
+    ## Read luminosity from a datacard assuming it follows the tau+jets convention
+    #
+    # \param filename  Name of the datacard file inside the multicrab directory
+    def _readLuminosityTaujets(self, filename):
         lumi_re = re.compile("luminosity=[\S| ]*(?P<lumi>\d+\.\d+)")
         fname = os.path.join(self.path, filename)
         f = open(fname)
@@ -917,7 +1198,12 @@ class ResultContainer:
                 return
         raise Exception("Did not find luminosity information from '%s'" % fname)
 
-    def readLuminosityLeptonic(self, filename):
+    ## Read luminosity from a datacard assuming it follows the leptonic convention
+    #
+    # \param filename  Name of the datacard file inside the multicrab directory
+    #
+    # \todo This needs to be updated, it get's the scale wrong
+    def _readLuminosityLeptonic(self, filename):
         scale_re = re.compile("lumi scale (?P<scale>\S+)")
         lumi_re = re.compile("lumi=(?P<lumi>\S+)")
         scale = None
@@ -941,9 +1227,11 @@ class ResultContainer:
             lumi *= scale
         self.lumi = str(lumi)
 
+    ## Get the integrated luminosity as a string in 1/pb
     def getLuminosity(self):
         return self.lumi
 
+    ## Print the limits
     def print2(self):
         print
         print "                  Expected"
@@ -958,6 +1246,9 @@ class ResultContainer:
             print format % (result.mass, result.observed, result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
         print
     
+    ## Store the results in a limits.json file
+    #
+    # \param data   Dictionary of additional data to be stored
     def saveJson(self, data={}):
         output = {}
         output.update(data)
@@ -1002,7 +1293,9 @@ class ResultContainer:
         f.close()
         return fname
 
-
+## Convert the error bands in Result object from absolute to relative
+#
+# \todo Could be removed
 def ConvertToErrorBands(result):
     return Result(float(result.mass),
                   float(result.observed),
@@ -1012,7 +1305,15 @@ def ConvertToErrorBands(result):
                   float(result.expected) - float(result.expectedMinus1Sigma),
                   float(result.expected) - float(result.expectedMinus2Sigma))
 
+## Class to parse the limits from LandS output
+#
+# This is used from \a landsMergeHistograms.py to read the LandS
+# output. The limits are stored in \a limits.json file for easier
+# subsequent access.
 class ParseLandsOutput:
+    ## Constructor
+    #
+    # \param path   Path to the multicrab directory
     def __init__(self, path):
 	self.path = path
 	self.lumi = 0
@@ -1041,19 +1342,20 @@ class ParseLandsOutput:
             print "Processed mass point %s" % mass
 
 
-#	self.subdir_re         = re.compile("(?P<label>(Expected|Observed)_m)(?P<mass>(\d*$))")
-#	self.landsRootFile_re  = re.compile("histograms-Expected_m(?P<mass>(\d*))\.root$")
-#	self.landsOutFile_re   = re.compile("lands(?P<label>(\S*|_merged))\.out$")
-#	self.landsObsResult_re = re.compile("= (?P<value>\d+\.\d+)\s+\+/-\s+(?P<error>\d+\.\S+)")
-#	self.landsExpResult_re = re.compile("BANDS    (?P<minus2>(\d*\.\d*))(    )(?P<minus1>(\d*\.\d*))(    )(?P<mean>(\d*\.\d*))(    )(?P<plus1>(\d*\.\d*))(    )(?P<plus2>(\d*\.\d*))(    )(?P<median>(\d*\.\d*))")
-
+    ## Get the integrated luminosity as a string in 1/pb
     def getLuminosity(self):
 	return self.results.getLuminosity()
 
+    ## Print the results
+    #
+    # \todo Could be removed in favour of print2()
     def Print(self):
 	for result in self.results.results:
 	    result.Print()
 
+    ## Save the results to a text file
+    #
+    # \todo Could be removed in favour of saveJson()
     def Save(self, dOUT):
 	outputFileNaming = "output_lands_datacard_hplushadronic_m"
 
@@ -1074,17 +1376,33 @@ class ParseLandsOutput:
                        str(result.expectedPlus2Sigma))
 	    fOUT.close()
 
+    ## Print the results
     def print2(self):
         self.results.print2()
 
+    ## Save the results to \a limits.json file
     def saveJson(self):
         fname = self.results.saveJson()
         print "Wrote results to %s" % fname
 
+    ## Get the limit data
+    #
+    # \todo Could be removed
     def Data(self):
 	return self.results.results
 
 
+## Find or install the LandS
+#
+# \param directory   Return the path to the LandS directory (True), or to lands.exe (False)
+#
+# \return Absolute path to lands.exe (if \a directory was False), or
+#         to LandS directory (if \a directory was True)
+#
+# Looks for LandS in
+# $CMSSW_BASE/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/brlimit. If
+# found, return the path. If not found, install LandS and return the
+# path. Installation consists of cvs checkout and compilation with make.
 def findOrInstallLandS(directory=False):
     try:
         cmsswBase = os.environ["CMSSW_BASE"]
