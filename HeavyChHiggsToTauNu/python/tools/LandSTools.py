@@ -19,6 +19,7 @@ import sys
 import glob
 import stat
 import json
+import time
 import random
 import shutil
 import subprocess
@@ -159,7 +160,8 @@ def generateMultiCrab(opts,
     if clsType == None:
         cls = LEPType()
 
-    print "Computing limits with LandS and %s CLs flavour" % cls.nameHuman()
+    print "Computing limits with %s CLs flavour" % cls.nameHuman()
+    print "Computing limits with LandS version %s" % landsInstall.getVersion()
 
     njobs = ValuePerMass(_ifNotNoneElse(numberOfJobs, defaultNumberOfJobs))
 
@@ -216,7 +218,8 @@ def produceLHCAsymptotic(opts,
     if clsType == None:
         cls = LHCTypeAsymptotic()
 
-    print "Computing limits with LandS and %s CLs flavour" % cls.nameHuman()
+    print "Computing limits with %s CLs flavour" % cls.nameHuman()
+    print "Computing limits with LandS version %s" % landsInstall.getVersion()
 
     for d in opts.dirs:
         lands = MultiCrabLandS(massPoints, datacardPatterns, rootfilePatterns, cls)
@@ -287,7 +290,7 @@ class MultiCrabLandS:
             raise Exception("Datacard directory '%s' does not exist" % d)
 
         self.datacardDirectory = directory
-        self.exe = findOrInstallLandS()
+        self.exe = landsInstall.findExe()
         self.clsType = clsType.clone()
         self.jobsCreated = False
 
@@ -739,7 +742,7 @@ class LEPType:
         if os.path.exists(targetFile):
             return True
 
-        exe = findOrInstallLandS()
+        exe = landsInstall.findExe()
         rootFile = os.path.join(resDir, "histograms-Expected_m%s.root" % mass)
         if not os.path.exists(rootFile):
             print "Merged root file '%s' does not exist, did you run landsMergeHistograms.py?" % rootFile
@@ -921,7 +924,7 @@ class LHCType:
             print "Merged root file '%s' does not exist, did you run landsMergeHistograms.py?" % rootFile
             return result
 
-        fitScript = os.path.join(findOrInstallLandS(directory=True), "test", "fitRvsCLs.C")
+        fitScript = os.path.join(landsInstall.findDir(), "test", "fitRvsCLs.C")
         if not os.path.exists(fitScript):
             raise Exception("Did not find fit script '%s'" % fitScript)
         rootCommand = ["root", "-l", "-n", "-b", fitScript+"+"]
@@ -1120,7 +1123,7 @@ class LHCTypeAsymptotic:
     #
     # \return The output of the script as a string
     def _run(self, script, outputfile):
-        exe = findOrInstallLandS()
+        exe = landsInstall.findExe()
         pwd = os.getcwd()
         os.chdir(self.dirname)
 
@@ -1485,64 +1488,76 @@ class ParseLandsOutput:
     def Data(self):
 	return self.results.results
 
-
-## Find or install the LandS
-#
-# \param directory   Return the path to the LandS directory (True), or to lands.exe (False)
-#
-# \return Absolute path to lands.exe (if \a directory was False), or
-#         to LandS directory (if \a directory was True)
+## Class to contain LandS installation information
 #
 # Looks for LandS in
 # $CMSSW_BASE/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/brlimit. If
 # found, return the path. If not found, install LandS and return the
 # path. Installation consists of cvs checkout and compilation with make.
-def findOrInstallLandS(directory=False):
-    try:
-        cmsswBase = os.environ["CMSSW_BASE"]
-    except KeyError:
-        raise Exception("Did you 'cmsenv'? I can't find $CMSSW_BASE environment variable")
+class LandSInstaller:
+    ## Constructor
+    #
+    # \param tag   CVS Tag of LandS to checkout
+    def __init__(self, tag=LandS_tag):
+        self.tag = tag
 
-    brlimitBase = os.path.join(cmsswBase, "src", "HiggsAnalysis", "HeavyChHiggsToTauNu", "test", "brlimit")
-    landsDir = "LandS_"+LandS_tag
-    landsDirAbs = os.path.join(brlimitBase, landsDir)
-    landsExe = os.path.join(landsDirAbs, "test", "lands.exe")
-    if os.path.exists(landsDirAbs):
+    ## Get LandS version string
+    def getVersion(self):
+        if self.tag != "HEAD":
+            return self.tag
+        landsExe = self.findExe()
+        mtime = os.path.getmtime(landsExe)
+        mtime = time.localtime(mtime) # seconds -> structure in local time
+        return "HEAD (compiled at %s)" % time.strftime("%Y%m%d-%H%M%S", mtime)
+        
+    ## Get the path to the LandS directory
+    def findDir(self):
+        try:
+            cmsswBase = os.environ["CMSSW_BASE"]
+        except KeyError:
+            raise Exception("Did you 'cmsenv'? I can't find $CMSSW_BASE environment variable")
+        
+        brlimitBase = os.path.join(cmsswBase, "src", "HiggsAnalysis", "HeavyChHiggsToTauNu", "test", "brlimit")
+        landsDir = "LandS_"+self.tag
+        landsDirAbs = os.path.join(brlimitBase, landsDir)
+        if not os.path.exists(landsDirAbs):
+            pwd = os.getcwd()
+            os.chdir(brlimitBase)
+
+            command = ["cvs", "checkout", "-r", LandS_tag, "-d", landsDir, "UserCode/mschen/LandS"]
+            ret = subprocess.call(command)
+            if ret != 0:
+                raise Exception("cvs checkout failed (exit code %d), command '%s'" % (ret, " ".join(command)))
+            if not os.path.exists(landsDir):
+                raise Exception("cvs checkout failed to create directory '%s' under '%s'" % (brlimitBase, landsDir))
+    
+            os.chdir(landsDir)
+            ret = subprocess.call(["make", "clean"])
+            if ret != 0:
+                raise Exception("Compiling LandS failed (exit code %d), command 'make clean'" % ret)
+            ret = subprocess.call(["make"])
+            if ret != 0:
+                raise Exception("Compiling LandS failed (exit code %d), command 'make'" % ret)
+    
+            if not os.path.isfile(landsExe):
+                raise Exception("After LandS checkout and compilation, the lands.exe is not found in '%s'" % landsExe)
+    
+            os.chdir(pwd)
+
+        return landsDirAbs
+
+    ## Get the path to the lands.exe
+    def findExe(self):
+        landsDirAbs = self.findDir()
+        landsExe = os.path.join(landsDirAbs, "test", "lands.exe")
         if not os.path.isfile(landsExe):
-            raise Exception("Found LandS directory in '%s', but not lands.exe in '%s'" % (landsDirAbs, landsExe))
+            raise Exception("Found LandS directory '%s', but not lands.exe as '%s'" % (landsDirAbs, landsExe))
 
-        if directory:
-            return landsDirAbs
-        else:
-            return landsExe
-    else:
-        pwd = os.getcwd()
-        os.chdir(brlimitBase)
+        return landsExe
 
-        command = ["cvs", "checkout", "-r", LandS_tag, "-d", landsDir, "UserCode/mschen/LandS"]
-        ret = subprocess.call(command)
-        if ret != 0:
-            raise Exception("cvs checkout failed (exit code %d), command '%s'" % (ret, " ".join(command)))
-        if not os.path.exists(landsDir):
-            raise Exception("cvs checkout failed to create directory '%s' under '%s'" % (brlimitBase, landsDir))
+## Object to contain LandS installation information
+landsInstall = LandSInstaller()
 
-        os.chdir(landsDir)
-        ret = subprocess.call(["make", "clean"])
-        if ret != 0:
-            raise Exception("Compiling LandS failed (exit code %d), command 'make clean'" % ret)
-        ret = subprocess.call(["make"])
-        if ret != 0:
-            raise Exception("Compiling LandS failed (exit code %d), command 'make'" % ret)
-
-        if not os.path.isfile(landsExe):
-            raise Exception("After LandS checkout and compilation, the lands.exe is not found in '%s'" % landsExe)
-
-        os.chdir(pwd)
-
-        if directory:
-            return landsDirAbs
-        else:
-            return landsExe
 
 ## Helper function to update keyword argument dictionary
 #
