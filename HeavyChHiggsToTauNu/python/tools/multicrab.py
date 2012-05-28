@@ -253,11 +253,18 @@ def checkCrabInPath():
             raise e
 
 ## Create 'standard' multicrab task directory and return the name of it.
-def createTaskDir(prefix="multicrab", postfix=""):
+#
+# \param prefix   Prefix string to the directory (before timestamp)
+# \param postfix  Postfix string to the directory (after timestamp)
+# \param path     Path to a directory where to create the multicrab
+#                 directory (if None, crete to working directory)
+def createTaskDir(prefix="multicrab", postfix="", path=None):
     dirname = prefix+"_" + time.strftime("%y%m%d_%H%M%S")
     if len(postfix) > 0:
         dirname += "_" + postfix
-    os.mkdir(dirname)
+    if path != None:
+        dirname = os.path.join(path, dirname)
+    os.makedirs(dirname)
     return dirname
 
 ## Print all multicrab datasets
