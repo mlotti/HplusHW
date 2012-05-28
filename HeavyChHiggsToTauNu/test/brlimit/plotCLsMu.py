@@ -79,7 +79,11 @@ def doPlot(rootfile):
     plot.frame.GetXaxis().SetNdivisions(1005)
     plot.frame.GetYaxis().SetTitle("CL_{s}")
 
-    plot.appendPlotObject(expoFit)
+    expoFit.SetLineColor(ROOT.kBlue-9)
+    # skip the vertical non-solid lines
+    lines = filter(lambda l: l.GetLineStyle() == 1 or l.GetX1() != l.GetX2(), lines)
+
+    plot.prependPlotObject(expoFit)
     for l in lines:
         plot.appendPlotObject(l)
 
