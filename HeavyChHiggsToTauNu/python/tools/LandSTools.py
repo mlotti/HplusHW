@@ -161,6 +161,8 @@ def generateMultiCrab(opts,
 
     njobs = ValuePerMass(_ifNotNoneElse(numberOfJobs, defaultNumberOfJobs))
 
+    landsObjects = []
+
     for d in opts.dirs:
         lands = MultiCrabLandS(d, massPoints, datacardPatterns, rootfilePatterns, cls)
         lands.createMultiCrabDir(postfix)
@@ -168,6 +170,16 @@ def generateMultiCrab(opts,
         lands.writeLandsScripts()
         lands.writeCrabCfg(crabScheduler, crabOptions)
         lands.writeMultiCrabCfg(njobs)
+
+        landsObjects.append(lands)
+
+    if opts.multicrabCreate:
+        for lands in landsObjects:
+            lands.createMultiCrab()
+
+    for lands in landsObjects:
+        if len(landsObjects) > 1:
+            print
         lands.printInstruction()
 
 
@@ -234,6 +246,8 @@ def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None):
     # Datacard directories
     parser.add_option("-d", "--dir", dest="dirs", type="string", action="append", default=[],
                       help="Datacard directories to create the LandS MultiCrab tasks into (default: use the working directory")
+    parser.add_option("--create", dest="multicrabCreate", action="store_true", default=False,
+                      help="Run 'multicrab -create' for each multicrab task directory")
 
     return parser
 
@@ -271,6 +285,7 @@ class MultiCrabLandS:
         self.datacardDirectory = directory
         self.exe = findOrInstallLandS()
         self.clsType = clsType.clone()
+        self.jobsCreated = False
 
         self.massPoints = massPoints
         self.datacards = {}
@@ -398,9 +413,29 @@ class MultiCrabLandS:
         json.dump(self.configuration, f, sort_keys=True, indent=2)
         f.close()
 
+    ## Run 'multicrab create' inside the multicrab directory
+    def createMultiCrab(self):
+        print "Creating multicrab task %s" % self.dirname
+        print
+        print "############################################################"
+        print
+        pwd = os.getcwd()
+        os.chdir(self.dirname)
+        ret = subprocess.call(["multicrab", "-create"])
+        if ret != 0:
+            raise Exception("'multicrab -create' failed with exit code %d in directory '%s'" % (ret, self.dirname))
+        os.chdir(pwd)
+        print
+        print "############################################################"
+        print
+
     def printInstruction(self):
-	print "Multicrab cfg created. Type"
-        print "cd",self.dirname,"&& multicrab -create"
+        if self.jobsCreated:
+            print "Multicrab cfg and jobs created. Type"
+            print "cd %s && multicrab -submit" % self.dirname
+        else:
+            print "Multicrab cfg created. Type"
+            print "cd %s && multicrab -create" % self.dirname
 
 
     ## Run LandS for the asymptotic limit
