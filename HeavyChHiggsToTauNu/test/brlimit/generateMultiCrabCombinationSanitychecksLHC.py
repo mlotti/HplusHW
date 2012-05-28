@@ -3,7 +3,7 @@
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
 
 
-def main():
+def main(opts):
     postfix = "combination_lhc"
 
     datacards = [lands.taujetsDatacardPattern,
@@ -23,6 +23,7 @@ def main():
     massPoints = lands.allMassPoints
 
     lands.generateMultiCrab(
+        opts,
         massPoints = massPoints[1:-1],
         datacardPatterns = datacards,
         rootfilePatterns = [lands.taujetsRootfilePattern],
@@ -35,6 +36,7 @@ def main():
         crabScheduler=crabScheduler, crabOptions=crabOptions)
 
     lands.generateMultiCrab(
+        opts,
         massPoints = massPoints,
         datacardPatterns = datacards,
         rootfilePatterns = [lands.taujetsRootfilePattern],
@@ -50,4 +52,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = lands.createOptionParser(lepType, lhcType, lhcTypeAsymptotic)
+    opts = lands.parseOptionParser(parser)
+    main(opts)

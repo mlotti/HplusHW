@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from optparse import OptionParser
-
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
 
 lepType = False
@@ -35,6 +33,7 @@ def main(opts):
 
     if opts.lepType:
         lands.generateMultiCrab(
+            opts,
             massPoints = massPoints,
             datacardPatterns = datacards,
             rootfilePatterns = [lands.taujetsRootfilePattern],
@@ -44,6 +43,7 @@ def main(opts):
             crabScheduler=crabScheduler, crabOptions=crabOptions)
     if opts.lhcType:
         lands.generateMultiCrab(
+            opts,
             massPoints = massPoints,
             datacardPatterns = datacards,
             rootfilePatterns = [lands.taujetsRootfilePattern],
@@ -60,6 +60,7 @@ def main(opts):
             crabScheduler=crabScheduler, crabOptions=crabOptions)
     if opts.lhcTypeAsymptotic:
         lands.produceLHCAsymptotic(
+            opts,
             massPoints = massPoints,
             datacardPatterns = datacards,
             rootfilePatterns = [lands.taujetsRootfilePattern],
@@ -67,14 +68,6 @@ def main(opts):
             )
 
 if __name__ == "__main__":
-    parser = OptionParser(usage="Usage: %prog [options]")
-    parser.add_option("--lep", dest="lepType", default=lepType, action="store_true",
-                      help="Use hybrid LEP-CLs (default %s)" % str(lepType))
-    parser.add_option("--lhc", dest="lhcType", default=lepType, action="store_true",
-                      help="Use hybrid LHC-CLs (default %s)" % str(lepType))
-    parser.add_option("--lhcasy", dest="lhcTypeAsymptotic", default=lepType, action="store_true",
-                      help="Use asymptotic LHC-CLs (default %s)" % str(lepType))
-
-    (opts, args) = parser.parse_args()
-
+    parser = lands.createOptionParser(lepType, lhcType, lhcTypeAsymptotic)
+    opts = lands.parseOptionParser(parser)
     main(opts)

@@ -22,6 +22,7 @@ import json
 import random
 import shutil
 import subprocess
+from optparse import OptionParser
 
 import multicrab
 import git
@@ -109,7 +110,7 @@ defaultRootfilePatterns = [
 ]
 
 ## Generate multicrab configuration for LEP-CLs or LHC-CLs (hybrid)
-#
+# \param opts               optparse.OptionParser object, constructed with createOptionParser()
 # \param massPoints         List of mass points to calculate the limit for
 #                           (list of strings)
 # \param datacardPatterns   List of datacard patterns to include in the
@@ -144,7 +145,8 @@ defaultRootfilePatterns = [
 #
 # The CLs-flavour specific options are controlled by the constructors
 # of LEPType and LHCType classes.
-def generateMultiCrab(massPoints=defaultMassPoints,
+def generateMultiCrab(opts,
+                      massPoints=defaultMassPoints,
                       datacardPatterns=defaultDatacardPatterns,
                       rootfilePatterns=defaultRootfilePatterns,
                       clsType=None,
@@ -159,16 +161,18 @@ def generateMultiCrab(massPoints=defaultMassPoints,
 
     njobs = ValuePerMass(_ifNotNoneElse(numberOfJobs, defaultNumberOfJobs))
 
-    lands = MultiCrabLandS(massPoints, datacardPatterns, rootfilePatterns, cls)
-    lands.createMultiCrabDir(postfix)
-    lands.copyLandsInputFiles()
-    lands.writeLandsScripts()
-    lands.writeCrabCfg(crabScheduler, crabOptions)
-    lands.writeMultiCrabCfg(njobs)
-    lands.printInstruction()
+    for d in opts.dirs:
+        lands = MultiCrabLandS(d, massPoints, datacardPatterns, rootfilePatterns, cls)
+        lands.createMultiCrabDir(postfix)
+        lands.copyLandsInputFiles()
+        lands.writeLandsScripts()
+        lands.writeCrabCfg(crabScheduler, crabOptions)
+        lands.writeMultiCrabCfg(njobs)
+        lands.printInstruction()
+
 
 ## Run LandS for the LHC-CLs asymptotic limit
-#
+# \param opts               optparse.OptionParser object, constructed with createOptionParser()
 # \param massPoints         List of mass points to calculate the limit for
 #                           (list of strings)
 # \param datacardPatterns   List of datacard patterns to include in the
@@ -186,7 +190,8 @@ def generateMultiCrab(massPoints=defaultMassPoints,
 #                           name
 #
 # The options of LHCTypeAsymptotic are controlled by the constructor.
-def produceLHCAsymptotic(massPoints=defaultMassPoints,
+def produceLHCAsymptotic(opts,
+                         massPoints=defaultMassPoints,
                          datacardPatterns=defaultDatacardPatterns,
                          rootfilePatterns=defaultRootfilePatterns,
                          clsType = None,
@@ -197,12 +202,52 @@ def produceLHCAsymptotic(massPoints=defaultMassPoints,
     if clsType == None:
         cls = LHCTypeAsymptotic()
 
-    lands = MultiCrabLandS(massPoints, datacardPatterns, rootfilePatterns, cls)
-    lands.createMultiCrabDir(postfix)
-    lands.copyLandsInputFiles()
-    lands.writeLandsScripts()
-    lands.runLandSForAsymptotic()
+    for d in opts.dirs:
+        lands = MultiCrabLandS(massPoints, datacardPatterns, rootfilePatterns, cls)
+        lands.createMultiCrabDir(postfix)
+        lands.copyLandsInputFiles()
+        lands.writeLandsScripts()
+        lands.runLandSForAsymptotic()
 
+## Create OptionParser, and add common LandS options to OptionParser object
+#
+# \param lepDefault     Boolean for the default value of --lep switch (if None, switch is not added)
+# \param lhcDefault     Boolean for the default value of --lhc switch (if None, switch is not added)
+# \param lhcasyDefault  Boolean for the default value of --lhcasy switch (if None, switch is not added)
+#
+# \return optparse.OptionParser object
+def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None):
+    parser = OptionParser(usage="Usage: %prog [options] [datacard directories]\nDatacard directories can be given either as the last arguments, or with -d.")
+
+    # Switches for different CLs flavours, the interpretation of these
+    # is in the generate* scripts (i.e. in the caller responsibility)
+    if lepDefault != None:
+        parser.add_option("--lep", dest="lepType", default=lepDefault, action="store_true",
+                          help="Use hybrid LEP-CLs (default %s)" % str(lepDefault))
+    if lhcDefault != None:
+        parser.add_option("--lhc", dest="lhcType", default=lhcDefault, action="store_true",
+                          help="Use hybrid LHC-CLs (default %s)" % str(lhcDefault))
+    if lhcasyDefault != None:
+        parser.add_option("--lhcasy", dest="lhcTypeAsymptotic", default=lhcasyDefault, action="store_true",
+                          help="Use asymptotic LHC-CLs (default %s)" % str(lhcasyDefault))
+
+    # Datacard directories
+    parser.add_option("-d", "--dir", dest="dirs", type="string", action="append", default=[],
+                      help="Datacard directories to create the LandS MultiCrab tasks into (default: use the working directory")
+
+    return parser
+
+## Parse OptionParser object
+#
+# \param parser   optparse.OptionParser object
+#
+# \return Options object
+def parseOptionParser(parser):
+    (opts, args) = parser.parse_args()
+    opts.dirs.extend(args)
+    if len(opts.dirs) == 0:
+        opts.dirs = ["."]
+    return opts
 
 ## Class to generate (LEP-CLs, LHC-CLs) multicrab configuration, or run (LHC-CLs asymptotic) LandS
 #
@@ -211,6 +256,7 @@ def produceLHCAsymptotic(massPoints=defaultMassPoints,
 class MultiCrabLandS:
     ## Constructor
     #
+    # \param directory          Datacard directory
     # \param massPoints         List of mass points to calculate the limit for
     # \param datacardPatterns   List of datacard patterns to include in the
     #                           limit calculation
@@ -218,7 +264,11 @@ class MultiCrabLandS:
     #                           in the limit calculation
     # \param clsType            Object defining the CLs flavour (should be either
     #                           LEPType, or LHCType).
-    def __init__(self, massPoints, datacardPatterns, rootfilePatterns, clsType):
+    def __init__(self, directory, massPoints, datacardPatterns, rootfilePatterns, clsType):
+        if not os.path.isdir(directory):
+            raise Exception("Datacard directory '%s' does not exist" % d)
+
+        self.datacardDirectory = directory
         self.exe = findOrInstallLandS()
         self.clsType = clsType.clone()
 
@@ -242,25 +292,18 @@ class MultiCrabLandS:
 
         for mass in self.massPoints:
             for dc in datacardPatterns:
-                fname = dc % mass
+                fname = os.path.join(self.datacardDirectory, dc % mass)
                 if not os.path.isfile(fname):
                     raise Exception("Datacard file '%s' does not exist!" % fname)
 
                 multicrab._addToDictList(self.datacards, mass, fname)
 
             for rf in rootfilePatterns:
-                fname = rf % mass
+                fname = os.path.join(self.datacardDirectory, rf % mass)
                 if not os.path.isfile(fname):
                     raise Exception("ROOT file (for shapes) '%s' does not exist!" % fname)
 
                 multicrab._addToDictList(self.rootfiles, mass, fname)
-
-        if len(self.datacards) == 0:
-	    print "No LandS datacards found in this directory!"
-            print "Mass points:", ", ".join(self.massPoints)
-            print "Datacard patterns:", ", ".join(datacardPatterns)
-            print "Rootfile patterns:", ", ".join(rootfilePatterns)
-	    sys.exit(1)
 
     ## Create the multicrab task directory
     #
@@ -269,7 +312,7 @@ class MultiCrabLandS:
         prefix = "LandSMultiCrab"
         if len(postfix) > 0:
             prefix += "_"+postfix
-	self.dirname = multicrab.createTaskDir(prefix=prefix)
+	self.dirname = multicrab.createTaskDir(prefix=prefix, path=self.datacardDirectory)
         self.clsType.setDirectory(self.dirname)
 
     ## Copy input files for LandS (datacards, rootfiles) to the multicrab directory
@@ -278,7 +321,7 @@ class MultiCrabLandS:
             for mass, files in d.iteritems():
                 for f in files:
                     shutil.copy(f, self.dirname)
-        shutil.copy(self.exe, self.dirname)        
+        shutil.copy(self.exe, self.dirname)
 
     ## Write LandS shell scripts to the multicrab directory
     def writeLandsScripts(self):
@@ -753,7 +796,7 @@ class LHCType:
 
     ## Get the configuration dictionary for serialization.
     #
-    # For LHC-type CLs the \ə scanRmin and \a scanRmax are stored
+    # For LHC-type CLs the \a scanRmin and \a scanRmax are stored
     def getConfiguration(self):
         return self.configuration
 
@@ -1024,7 +1067,7 @@ class LHCTypeAsymptotic:
     # \param script      Path to the script to run
     # \param outputfile  Path to a file to store the script output
     #
-    # \ŗeturn The output of the script as a string
+    # \return The output of the script as a string
     def _run(self, script, outputfile):
         exe = findOrInstallLandS()
         pwd = os.getcwd()

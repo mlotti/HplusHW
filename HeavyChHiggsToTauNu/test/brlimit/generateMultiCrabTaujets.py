@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from optparse import OptionParser
-
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
 
 lepType = True
@@ -53,6 +51,7 @@ def main(opts):
 
     if opts.lepType:
         lands.generateMultiCrab(
+            opts,
             massPoints = massPoints,
             datacardPatterns = [lands.taujetsDatacardPattern],
             rootfilePatterns = [lands.taujetsRootfilePattern],
@@ -62,6 +61,7 @@ def main(opts):
             crabScheduler=crabScheduler, crabOptions=crabOptions)
     if opts.lhcType:
         lands.generateMultiCrab(
+            opts,
             massPoints = massPoints,
             datacardPatterns = [lands.taujetsDatacardPattern],
             rootfilePatterns = [lands.taujetsRootfilePattern],
@@ -75,14 +75,6 @@ def main(opts):
                                         "120": ("0.005", "0.08"), 
                                         "140": ("0.005", "0.05"), 
                                         "155": ("0.005", "0.05"), 
-
-                                        # For rebin40
-#                                        "150": ("0.005", "0.05"), 
-#                                        "160": ("0.004", "0.04"), 
-                                        # For testing without JES
-#                                        "150": ("0.005", "0.1"), 
-#                                        "155": ("0.005", "0.1"), 
-#                                        "160": ("0.004", "0.1"), 
                                         }
                                     ),
             numberOfJobs = _njobs(),
@@ -90,6 +82,7 @@ def main(opts):
             crabScheduler=crabScheduler, crabOptions=crabOptions)
     if opts.lhcTypeAsymptotic:
         lands.produceLHCAsymptotic(
+            opts,
             massPoints = massPoints,
             datacardPatterns = [lands.taujetsDatacardPattern],
             rootfilePatterns = [lands.taujetsRootfilePattern],
@@ -97,14 +90,6 @@ def main(opts):
             )
 
 if __name__ == "__main__":
-    parser = OptionParser(usage="Usage: %prog [options]")
-    parser.add_option("--lep", dest="lepType", default=lepType, action="store_true",
-                      help="Use hybrid LEP-CLs (default %s)" % str(lepType))
-    parser.add_option("--lhc", dest="lhcType", default=lepType, action="store_true",
-                      help="Use hybrid LHC-CLs (default %s)" % str(lepType))
-    parser.add_option("--lhcasy", dest="lhcTypeAsymptotic", default=lepType, action="store_true",
-                      help="Use asymptotic LHC-CLs (default %s)" % str(lepType))
-
-    (opts, args) = parser.parse_args()
-
+    parser = lands.createOptionParser(lepType, lhcType, lhcTypeAsymptotic)
+    opts = lands.parseOptionParser(parser)
     main(opts)

@@ -2,7 +2,7 @@
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
 
-def main():
+def main(opts):
     massPoints = ["160"]
     datacards_a = [
         lands.taujetsDatacardPattern,
@@ -30,6 +30,7 @@ def main():
     
 
     lands.generateMultiCrab(
+        opts,
         massPoints = massPoints, datacardPatterns = datacards_a,  rootfilePatterns = rootfiles,
         clsType=clsA,
         numberOfJobs = njobs,
@@ -37,6 +38,7 @@ def main():
         crabScheduler=crabScheduler, crabOptions=crabOptions)
 
     lands.generateMultiCrab(
+        opts,
         massPoints = massPoints, datacardPatterns = datacards_a,  rootfilePatterns = rootfiles,
         clsType = clsAS,
         numberOfJobs = njobs,
@@ -45,6 +47,7 @@ def main():
 
 
     lands.generateMultiCrab(
+        opts,
         massPoints = massPoints, datacardPatterns = datacards_b,  rootfilePatterns = rootfiles,
         clsType = clsA,
         numberOfJobs = njobs,
@@ -52,6 +55,7 @@ def main():
         crabScheduler=crabScheduler, crabOptions=crabOptions)
 
     lands.generateMultiCrab(
+        opts,
         massPoints = massPoints, datacardPatterns = datacards_b,  rootfilePatterns = rootfiles,
         clsType = clsAS,
         numberOfJobs = njobs,
@@ -60,6 +64,7 @@ def main():
 
 
     lands.generateMultiCrab(
+        opts,
         massPoints = massPoints, datacardPatterns = datacards_a,  rootfilePatterns = rootfiles,
         clsType = clsB,
         numberOfJobs = njobs,
@@ -67,6 +72,7 @@ def main():
         crabScheduler=crabScheduler, crabOptions=crabOptions)
 
     lands.generateMultiCrab(
+        opts,
         massPoints = massPoints, datacardPatterns = datacards_a,  rootfilePatterns = rootfiles,
         clsType = clsBS,
         numberOfJobs = njobs,
@@ -75,4 +81,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = lands.createOptionParser()
+    opts = lands.parseOptionParser(parser)
+    main(opts)

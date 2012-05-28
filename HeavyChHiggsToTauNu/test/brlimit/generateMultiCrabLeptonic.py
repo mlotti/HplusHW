@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from optparse import OptionParser
-
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
 
 lepType = False
@@ -112,6 +110,7 @@ def generate(opts, datacard, postfix,
              lhcAsyRmax=None, lhcAsyvR=None, lhcAsyOptsObs=None, lhcAsyOptsExp=None):
     if opts.lepType:
         lands.generateMultiCrab(
+            opts,
             massPoints = massPoints, datacardPatterns = [datacard], rootfilePatterns = [],
             clsType = lands.LEPType(toysPerJob=1000, rMax=lepRmax),
             numberOfJobs = 1,
@@ -119,6 +118,7 @@ def generate(opts, datacard, postfix,
             crabScheduler=crabScheduler, crabOptions=crabOptions)
     if opts.lhcType:
         lands.generateMultiCrab(
+            opts,
             massPoints = massPoints, datacardPatterns = [datacard], rootfilePatterns = [],
             clsType = lands.LHCType(toysCLsb=lhcToysCLsb, toysCLb=lhcToysCLb, rMax=lhcRmax, vR=lhcvR, scanRmin=lhcScanRmin, scanRmax=lhcScanRmax),
             numberOfJobs = lhcJobs,
@@ -126,6 +126,7 @@ def generate(opts, datacard, postfix,
             crabScheduler=crabScheduler, crabOptions=crabOptions)
     if opts.lhcTypeAsymptotic:
         lands.produceLHCAsymptotic(
+            opts,
             massPoints = massPoints, datacardPatterns = [datacard], rootfilePatterns = [],
             clsType = lands.LHCTypeAsymptotic(rMax=lhcAsyRmax, vR=lhcAsyvR, optionsObserved=lhcAsyOptsObs, optionsExpected=lhcAsyOptsExp),
             postfix = postfix+"_lhcasy"
@@ -133,21 +134,13 @@ def generate(opts, datacard, postfix,
     
 
 if __name__ == "__main__":
-    parser = OptionParser(usage="Usage: %prog [options]")
-    parser.add_option("--lep", dest="lepType", default=lepType, action="store_true",
-                      help="Use hybrid LEP-CLs (default %s)" % str(lepType))
-    parser.add_option("--lhc", dest="lhcType", default=lepType, action="store_true",
-                      help="Use hybrid LHC-CLs (default %s)" % str(lepType))
-    parser.add_option("--lhcasy", dest="lhcTypeAsymptotic", default=lepType, action="store_true",
-                      help="Use asymptotic LHC-CLs (default %s)" % str(lepType))
+    parser = lands.createOptionParser(lepType, lhcType, lhcTypeAsymptotic)
     parser.add_option("--etau", dest="etau", default=etau, action="store_true",
-                      help="Generate for e+tau final state (default %s)" % str(lepType))
+                      help="Generate for e+tau final state (default %s)" % str(etau))
     parser.add_option("--mutau", dest="mutau", default=mutau, action="store_true",
-                      help="Generate for mu+tau final state (default %s)" % str(lepType))
+                      help="Generate for mu+tau final state (default %s)" % str(mutau))
     parser.add_option("--emu", dest="emu", default=emu, action="store_true",
-                      help="Generate for e+mu final state (default %s)" % str(lepType))
+                      help="Generate for e+mu final state (default %s)" % str(emu))
 
-
-    (opts, args) = parser.parse_args()
-
+    opts = lands.parseOptionParser(parser)
     main(opts)
