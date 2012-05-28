@@ -159,6 +159,8 @@ def generateMultiCrab(opts,
     if clsType == None:
         cls = LEPType()
 
+    print "Computing limits with LandS and %s CLs flavour" % cls.nameHuman()
+
     njobs = ValuePerMass(_ifNotNoneElse(numberOfJobs, defaultNumberOfJobs))
 
     landsObjects = []
@@ -213,6 +215,8 @@ def produceLHCAsymptotic(opts,
     cls = clsType
     if clsType == None:
         cls = LHCTypeAsymptotic()
+
+    print "Computing limits with LandS and %s CLs flavour" % cls.nameHuman()
 
     for d in opts.dirs:
         lands = MultiCrabLandS(massPoints, datacardPatterns, rootfilePatterns, cls)
@@ -556,6 +560,10 @@ class LEPType:
     def name(self):
         return "LEP"
 
+    ## Return human-readable name of the CLs flavour
+    def nameHuman(self):
+        return "LEP-type hybrid"
+
     ## Get the configuration dictionary for serialization.
     #
     # LEP-type CLs does not need any specific information to be stored
@@ -829,6 +837,10 @@ class LHCType:
     def name(self):
         return "LHC"
 
+    ## Return human-readable name of the CLs flavour
+    def nameHuman(self):
+        return "LHC-type hybrid"
+
     ## Get the configuration dictionary for serialization.
     #
     # For LHC-type CLs the \a scanRmin and \a scanRmax are stored
@@ -1019,6 +1031,10 @@ class LHCTypeAsymptotic:
     ## Return the name of the CLs flavour (for serialization to configuration.json)
     def name(self):
         return "LHCAsymptotic"
+
+    ## Return human-readable name of the CLs flavour
+    def nameHuman(self):
+        return "LHC-type asymptotic"
 
     ## Get the configuration dictionary for serialization.
     #
