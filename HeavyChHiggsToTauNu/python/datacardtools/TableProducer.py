@@ -187,7 +187,6 @@ class TableProducer:
         if self._opts.debugMining:
             print "  Observation is %d"%myObsCount
         myResult = "Observation    %d\n"%myObsCount
-        # FIXME add here call to store histograms from nuisance to root file
         return myResult
 
     ## Generates header for rate table as list
@@ -225,7 +224,6 @@ class TableProducer:
                 if self._opts.debugMining:
                     print "  Rate for '%s' = %.3f"%(c.getLabel(),myRateValue)
                 myRow.append("%.3f"%myRateValue)
-                # FIXME add here call to store histograms from nuisance to root file
         myResult.append(myRow)
         return myResult
 
@@ -488,4 +486,51 @@ class TableProducer:
 
     ## Prints systematics summary table
     def makeSystematicsSummary(self):
+        myColumnOrder = ["HH",
+                         "HW",
+                         "QCD",
+                         "EWK_Tau",
+                         "EWK_DY",
+                         "EWK_VV",
+                         "EWK_tt_faketau",
+                         "EWK_W_faketau",
+                         "EWK_t_faketau"]
+        myNuisanceOrder = [["01","$\tau - p_T^{miss}$ trigger"], # trg
+                           ["03", "$\tau$ jet ID (excl. $R_\tau$"], # tau ID
+                           ["04", "jet, $\mathcal{l}\to\tau$ mis-ID"], # tau mis-ID
+                           ["07", "JES+JER+MET+$R_\tau$"], # energy scale
+                           ["09", "lepton veto"], # lepton veto
+                           ["10", "b-jet tagging"], # b tagging
+                           ["11", "jet$\to$b mis-ID"], # b mis-tagging
+                           ["12", "multi-jet stat."], # QCD stat.
+                           ["13", "multi-jet syst."], # QCD syst.
+                           ["19", "EWK+$t\bar{t}$ $\tau$ stat."], # embedding stat.
+                           ["14", "multi-jet contam."], # QCD contamination in embedding
+                           ["15", "$f_{W\to\tau\to\mu}"], # tau decays to muons in embedding
+                           ["16", "muon selections"], # muon selections in embedding
+                           ["34", "pile-up"], # pile-up
+                           [["17","18","19","22","24","25","26","27"], "simulation stat."], # MC statistics
+                           [["28","29","30","31","32"], "cross section"], # cross section
+                           ["33", "luminosity"]] # luminosity
+        for columnName in myColumnOrder:
+            myMin = 9990.0
+            myMax = -1.0
+            for c in self._datasetGroups:
+                if columnName in c.getLabel():
+                    # Correct column found, now find nuisance
+                    for n in myNuisanceOrder:
+                        if isinstance(n[0], list):
+                            for nid in n[0]:
+                                if c.hasNuisanceByMasterId(nid):
+                                    myValue = c.getNuisanceResultByMasterId(nid)
+                                    if isinstance(myValue, list):
+
+                                    else:
+
+                        else:
+                            if c.hasNuisanceByMasterId(n[0]):
+                                myValue = c.getNuisanceResultByMasterId(n[0])
+
+        
+        
         print WarningStyle()+"FIXME makeSystematicsSummary is not yet implemented ..."+NormalStyle()
