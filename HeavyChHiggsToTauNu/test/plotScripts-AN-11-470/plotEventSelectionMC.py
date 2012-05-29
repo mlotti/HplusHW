@@ -82,8 +82,8 @@ def doPlots(datasets):
         return plots.DataMCPlot(datasets, analysis+"/"+name, **kwargs)
 
     def addMassBRText(plot, x, y):
-        mass = "m_{H^{#pm}} = 120 GeV/c^{2}"
-        br = "BR(t #rightarrow bH^{#pm})=0.05"
+        mass = "m_{H^{+}} = 120 GeV/c^{2}"
+        br = "#it{B}(t #rightarrow H^{+}b)=0.05"
         size = 20
         separation= 0.04
         plot.appendPlotObject(histograms.PlotText(x, y, mass, size=size))
