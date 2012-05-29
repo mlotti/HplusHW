@@ -786,7 +786,7 @@ class LHCType:
     #                    (lhcHybridToysCLb)
     # \param firstSeed   First random number seed for the jobs (actually
     #                    first seed is firstSeed+1).
-    # \param vR          The \a -vR parameter for LandS. Pair of strings,
+    # \param vR          The \a -vR parameter for LandS. Pair/triple of strings,
     #                    dictionary (see ValuePerMass), or None for
     #                    not to add \a -vR parameter.
     # \param rMin        The \a --rMin parameter for LandS. String,
@@ -820,8 +820,8 @@ class LHCType:
         self.toysCLb = ValuePerMass(_ifNotNoneElse(toysCLb, lhcHybridToysCLb))
 
         def assertvR(value):
-            if value != None and len(value) != 2:
-                raise Exception("vR should be pair (min, max), got length %d: %s" % (len(value), str(value)))
+            if value != None and len(value) != 2 and len(value) != 3:
+                raise Exception("vR should be pair (min, max) or triple (min, max, factor), got length %d: %s" % (len(value), str(value)))
         self.vR = ValuePerMass(vR)
         self.vR.forEachValue(assertvR)
 
@@ -874,8 +874,12 @@ class LHCType:
         vR = self.vR.getValue(mass)
         if vR == None:
             opts += " --ExpectationHints Asymptotic"
-        else:
+        elif len(vR) == 2:
             opts += " -vR [%s,%s,x1.05]" % vR
+        elif len(vR) == 3:
+            opts += " -vR [%s,%s,%s]" % vR
+        else:
+            raise Exception("Assert: len(vR) = %d" % len(vR))
         command = [
             "#!/bin/sh",
             "",
@@ -1010,7 +1014,7 @@ class LHCTypeAsymptotic:
     # \param rMax             The \a --rMax parameter for LandS. String,
     #                         dictionary (see ValuePerMass), or None for
     #                         default (lhcAsymptoticRmax)
-    # \param vR               The \a -vR parameter for LandS. Pair of strings,
+    # \param vR               The \a -vR parameter for LandS. Pair/triple of strings,
     #                         dictionary (see ValuePerMass), or None for
     #                         not to add \a -vR parameter.
     #
@@ -1023,8 +1027,8 @@ class LHCTypeAsymptotic:
         self.rMax = ValuePerMass(_ifNotNoneElse(rMax, lhcAsymptoticRmax))
 
         def assertvR(value):
-            if value != None and len(value) != 2:
-                raise Exception("vR should be pair (min, max), got length %d: %s" % (len(value), str(value)))
+            if value != None and len(value) != 2 and len(value) != 3:
+                raise Exception("vR should be pair (min, max) or triple (min, max, factor), got length %d: %s" % (len(value), str(value)))
         self.vR = ValuePerMass(vR)
         self.vR.forEachValue(assertvR)
 
@@ -1076,7 +1080,12 @@ class LHCTypeAsymptotic:
         opts = commonOptions + " " + self.optionsObserved.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         vR = self.vR.getValue(mass)
         if vR != None:
-            opts += " -vR [%s,%s,x1.05]" % vR
+            if len(vR) == 2:
+                opts += " -vR [%s,%s,x1.05]" % vR
+            elif len(vR) == 3:
+                opts += " -vR [%s,%s,%s]" % vR
+            else:
+                raise Exception("Assert: len(vR) = %d" % len(vR))
 
         command = [
             "#!/bin/sh",
@@ -1095,7 +1104,12 @@ class LHCTypeAsymptotic:
         opts = commonOptions + " " + self.optionsExpected.getValue(mass) + " --rMin %s --rMax %s" % (self.rMin.getValue(mass), self.rMax.getValue(mass))
         vR = self.vR.getValue(mass)
         if vR != None:
-            opts += " -vR [%s,%s,x1.05]" % vR
+            if len(vR) == 2:
+                opts += " -vR [%s,%s,x1.05]" % vR
+            elif len(vR) == 3:
+                opts += " -vR [%s,%s,%s]" % vR
+            else:
+                raise Exception("Assert: len(vR) = %d" % len(vR))
 
         command = [
             "#!/bin/sh",
