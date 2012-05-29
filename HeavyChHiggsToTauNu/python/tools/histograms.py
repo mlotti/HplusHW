@@ -197,7 +197,7 @@ def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
         format = ".%df" % (abs(ndigis)+1)
         format = "%"+format
     format += " %s"
-    
+    format = "L="+format    
 
     addText(x, y, format % (lumi/1000., unit), textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
@@ -508,10 +508,15 @@ def dist2rej(hdist, **kwargs):
 # \param kwargs  Dictionary of keyword arguments to parse
 #
 # <b>Keyword arguments</b>
-# \li\a ymin     Minimum value of Y axis
-# \li\a ymax     Maximum value of Y axis
-# \li\a xmin     Minimum value of X axis
-# \li\a xmax     Maximum value of X axis
+# \li\a ymin        Minimum value of Y axis
+# \li\a ymax        Maximum value of Y axis
+# \li\a xmin        Minimum value of X axis
+# \li\a xmax        Maximum value of X axis
+# \li\a xmaxlist    List of possible maximum values of X axis. The
+#                   smallest value larger than the xmax in list of
+#                   histograms is picked. If all values are smaller
+#                   than the xmax of histograms, the xmax of
+#                   histograms is used.
 # \li\a ymaxfactor  Maximum value of Y is \a ymax*\a ymaxfactor (default 1.1)
 # \li\a yminfactor  Minimum value of Y is \a ymax*\a yminfactor (yes, calculated from \a ymax )
 #
@@ -540,6 +545,10 @@ def _boundsArgs(histos, kwargs):
         kwargs["xmin"] = min([h.getXmin() for h in histos])
     if not "xmax" in kwargs:
         kwargs["xmax"] = max([h.getXmax() for h in histos])
+        if "xmaxlist" in kwargs:
+            largerThanMax = filter(lambda n: n > kwargs["xmax"], kwargs["xmaxlist"])
+            if len(largerThanMax) > 0:
+                kwargs["xmax"] = min(largerThanMax)
 
 ## Draw a frame
 #
@@ -857,6 +866,9 @@ class Histo:
 
     ## Set the legend label
     #
+    # If the legend label is set to None, this Histo is not added to
+    # TLegend in addToLegend()
+    #
     # \param label  New histogram label for TLegend
     def setLegendLabel(self, label):
         self.legendLabel = label
@@ -869,10 +881,15 @@ class Histo:
 
     ## Add the histogram to a TLegend
     #
+    # If the legend label is None, do not add this Histo to TLegend
+    #
     # \param legend   TLegend object
     def addToLegend(self, legend):
+        if self.legendLabel == None:
+            return
+
         # Hack to get the black border to the legend, only if the legend style is fill
-        if "f" in self.legendStyle.lower():
+        if "f" == self.legendStyle.lower():
             h = self.rootHisto.Clone(self.rootHisto.GetName()+"_forLegend")
             if hasattr(h, "SetDirectory"):
                 h.SetDirectory(0)
