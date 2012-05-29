@@ -734,22 +734,6 @@ namespace HPlus {
 	increment(fRealTauAfterDeltaPhiCounter);
 	if (!vetoTauData.passedEvent()) increment(fRealTauAfterDeltaPhiTauVetoCounter);
       }
-
-      /*
-      if (electronFromW ) increment(fTauIsElectronFromWCounter);
-      //      if (electronFound ) increment(fTauIsElectronFromWCounter);
-      if (muonFromW ) increment(fTauIsMuonFromWCounter);  
-      if (quarkFromW ) increment(fTauIsQuarkFromWCounter);
-      if (FromBottom && electronFound ) increment(fTauIsElectronFromBottomCounter);
-      if (FromBottom  &&  muonFound) increment(fTauIsMuonFromBottomCounter);  
-      if (FromBottom && !electronFound &&  !muonFound &&  !tauFound ) increment(fTauIsHadronFromBottomCounter);
-      if (FromJet && electronFound ) increment(fTauIsElectronFromJetCounter);
-      if (FromJet &&  muonFound ) increment(fTauIsMuonFromJetCounter);  
-      if (FromJet && !electronFound &&  !muonFound &&  !tauFound) increment(fTauIsHadronFromJetCounter);
-      //      if (tauFromHplus && !electronFound &&  !muonFound) increment(fTauIsHadronFromHplusCounter);
-      if (tauFromW && !electronFound &&  !muonFound) increment(fTauIsHadronFromWCounter);
-      if (electronFound &&  tauFound) increment(fTauIsElectronFromTauCounter);
-      */
     }
       
     if (!vetoTauData.passedEvent()) {
@@ -775,7 +759,7 @@ namespace HPlus {
 
     if (TopChiSelectionData.passedEvent() ) {
       double topmass = TopChiSelectionData.getTopMass();
-      increment(fTopChiSelectionCounter);
+      //      increment(fTopChiSelectionCounter);
       if (topmass < 250 ) increment(fTopChiSelection250Counter);
       if (topmass < 220 ) increment(fTopChiSelection220Counter);
       //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
@@ -798,7 +782,7 @@ namespace HPlus {
       TopWithBSelection::Data TopWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData.getBjetTopSide());
       TopWithWSelection::Data TopWithWSelectionData = fTopWithWSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData.getBjetTopSide());    
       if (TopWithBSelectionData.passedEvent() ) {
-        increment(fTopWithBSelectionCounter);
+	//        increment(fTopWithBSelectionCounter);
 	double topmass = TopWithBSelectionData.getTopMass();
 	if (topmass < 250 ) increment(fTopWithBSelection250Counter);
 	if (topmass < 220 ) increment(fTopWithBSelection220Counter);
@@ -812,7 +796,7 @@ namespace HPlus {
       }
       
       if (TopWithWSelectionData.passedEvent() ) {
-        increment(fTopWithWSelectionCounter);
+	//        increment(fTopWithWSelectionCounter);
 	double topmass = TopWithBSelectionData.getTopMass();
 	if (topmass < 250 ) increment(fTopWithWSelection250Counter);
 	if (topmass < 220 ) increment(fTopWithWSelection220Counter);
