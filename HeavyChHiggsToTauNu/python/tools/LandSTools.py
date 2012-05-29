@@ -1200,19 +1200,16 @@ class LHCTypeAsymptotic:
         raise Exception("Unable to parse the output of command '%s'" % script)
 
 ## Class to hold the limit results
-#
-# \todo This class could be simplified if we can get rid of \a
-# mkBrLimits.py script.
 class Result:
     ## Constructor
-    def __init__(self, mass = None, observed = None, expected = None, expectedPlus1Sigma = None, expectedPlus2Sigma = None, expectedMinus1Sigma = None, expectedMinus2Sigma = None):
+    def __init__(self, mass):
         self.mass                = mass
-        self.observed            = observed
-        self.expected            = expected
-        self.expectedPlus1Sigma  = expectedPlus1Sigma
-        self.expectedPlus2Sigma  = expectedPlus2Sigma
-        self.expectedMinus1Sigma = expectedMinus1Sigma
-        self.expectedMinus2Sigma = expectedMinus2Sigma
+        self.observed            = None
+        self.expected            = None
+
+    ## Check if the result is empty, i.e. no limits has been assigned
+    def empty(self):
+        return self.observed == None and self.expected == None
 
 ## Collection of Result objects
 class ResultContainer:
