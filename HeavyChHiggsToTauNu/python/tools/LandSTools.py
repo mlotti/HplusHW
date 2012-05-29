@@ -1214,52 +1214,6 @@ class Result:
         self.expectedMinus1Sigma = expectedMinus1Sigma
         self.expectedMinus2Sigma = expectedMinus2Sigma
 
-    ## Convert the string values to floating point
-    #
-    # \todo Could be removed
-    def toFloat(self):
-        for attr in ["mass", "observed", "expected", "expectedPlus1Sigma", "expectedPlus2Sigma", "expectedMinus1Sigma", "expectedMinus2Sigma"]:
-            setattr(self, attr, float(getattr(self, attr)))
-
-    ## Check if the result is empty, i.e. no limits has been assigned
-    def empty(self):
-        return self.observed == None and self.expected == None
-
-    ## Check if result already exists
-    #
-    # \todo Could be removed
-    def Exists(self, result):
-        if self.mass == result.mass:
-            return True
-        return False
-        
-    ## Add another result to this
-    #
-    # \todo Could be removed
-    def Add(self, result):
-        if self.mass == result.mass:
-            if self.observed == None:
-                self.observed = result.observed
-            if self.expected == None:
-                self.expected            = result.expected
-                self.expectedPlus1Sigma  = result.expectedPlus1Sigma
-                self.expectedPlus2Sigma  = result.expectedPlus2Sigma
-                self.expectedMinus1Sigma = result.expectedMinus1Sigma
-                self.expectedMinus2Sigma = result.expectedMinus2Sigma
-  
-    ## Print the result
-    #
-    # \todo Could be removed
-    def Print(self):
-        print "Mass = ",self.mass
-        print "    Observed = ",self.observed
-        print "    Expected = ",self.expected
-        print "     -1sigma = ",self.expectedMinus1Sigma," +1sigma = ",self.expectedPlus1Sigma
-        print "     -2sigma = ",self.expectedMinus2Sigma," +2sigma = ",self.expectedPlus2Sigma
-#        print "     +1sigma = ",self.expectedPlus1Sigma," -1sigma = ",self.expectedMinus1Sigma
-#        print "     +2sigma = ",self.expectedPlus2Sigma," -2sigma = ",self.expectedMinus2Sigma
-
-
 ## Collection of Result objects
 class ResultContainer:
     ## Constructor
@@ -1404,18 +1358,6 @@ class ResultContainer:
         f.close()
         return fname
 
-## Convert the error bands in Result object from absolute to relative
-#
-# \todo Could be removed
-def ConvertToErrorBands(result):
-    return Result(float(result.mass),
-                  float(result.observed),
-                  float(result.expected),
-                  float(result.expectedPlus1Sigma) - float(result.expected),
-                  float(result.expectedPlus2Sigma) - float(result.expected), 
-                  float(result.expected) - float(result.expectedMinus1Sigma),
-                  float(result.expected) - float(result.expectedMinus2Sigma))
-
 ## Class to parse the limits from LandS output
 #
 # This is used from \a landsMergeHistograms.py to read the LandS
@@ -1458,36 +1400,6 @@ class ParseLandsOutput:
 	return self.results.getLuminosity()
 
     ## Print the results
-    #
-    # \todo Could be removed in favour of print2()
-    def Print(self):
-	for result in self.results.results:
-	    result.Print()
-
-    ## Save the results to a text file
-    #
-    # \todo Could be removed in favour of saveJson()
-    def Save(self, dOUT):
-	outputFileNaming = "output_lands_datacard_hplushadronic_m"
-
-	if not os.isdir(dOUT):
-            os.mkdir(dOUT)
-
-	print "Saving in",dOUT
-	for result in self.results.results:
-	    fileName = outputFileNaming + result.mass
-	    print "    ",fileName
-	    fileName = dOUT + "/" + fileName
-	    fOUT = open(fileName, 'w')
-	    fOUT.write(str(result.observed) + "\n")
-	    fOUT.write(str(result.expectedMinus2Sigma) + " " + \
-                       str(result.expectedMinus1Sigma) + " " + \
-                       str(result.expected) + " " + \
-                       str(result.expectedPlus1Sigma) + " " + \
-                       str(result.expectedPlus2Sigma))
-	    fOUT.close()
-
-    ## Print the results
     def print2(self):
         self.results.print2()
 
@@ -1496,11 +1408,6 @@ class ParseLandsOutput:
         fname = self.results.saveJson()
         print "Wrote results to %s" % fname
 
-    ## Get the limit data
-    #
-    # \todo Could be removed
-    def Data(self):
-	return self.results.results
 
 ## Class to contain LandS installation information
 #
