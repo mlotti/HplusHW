@@ -782,15 +782,15 @@ void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, doubl
   // For SelectionFlow plot, comment/uncomment manually :(
   //tex->DrawLatex(0.87, -0.41, "Step");
 
-  tex = new TLatex(0.28,0.865,"m_{H^{#pm}} = 120 GeV/c^{2}");
+  tex = new TLatex(0.28,0.865,"m_{H^{+}} = 120 GeV/c^{2}");
   if(bPaperStatus)
-    tex = new TLatex(0.28,0.865,"m_{H^{#pm}} = 120 GeV");
+    tex = new TLatex(0.28,0.865,"m_{H^{+}} = 120 GeV");
   tex->SetNDC();
   tex->SetTextFont(63);
   tex->SetTextSize(20);
   tex->SetLineWidth(2);
   tex->Draw();
-  tex = new TLatex(0.28,0.805,"BR(t#rightarrowbH^{#pm})=0.05");
+  tex = new TLatex(0.28,0.805,"#it{B}(t#rightarrowH^{+}b)=0.05");
   tex->SetNDC();
   tex->SetTextFont(63);
   tex->SetTextSize(20);
