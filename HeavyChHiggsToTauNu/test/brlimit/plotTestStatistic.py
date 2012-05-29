@@ -11,8 +11,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
-
-import plotBRLimit as brlimit
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.limit as limit
 
 nbins = 100
 
@@ -120,7 +119,7 @@ def doPlot(mass, mu, mul=None):
     histograms.addText(x, 0.88, "Observed", size=size)
     histograms.addText(x, 0.85, "value", size=size)
 
-    histograms.addText(0.62, 0.78, "m_{H^{+}} = %s %s" % (mass, brlimit.unit()), size=size)
+    histograms.addText(0.62, 0.78, "m_{H^{+}} = %s %s" % (mass, limit.massUnit()), size=size)
 
 #    size = 20
 #    x = 0.2

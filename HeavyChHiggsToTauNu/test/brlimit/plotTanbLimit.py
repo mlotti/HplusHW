@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 import sys
-import json
-import array
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -11,19 +9,17 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-
-import plotBRLimit as brlimit
-import mkBrLimits_processTanbPlots as tanb
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.limit as limit
 
 tanbMax = 60
 mu = 200
 
 def main():
-    limits = brlimit.BRLimits()
+    limits = limit.BRLimits()
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    if brlimit.forPaper:
+    if limit.forPaper:
         histograms.cmsTextMode = histograms.CMSMode.PAPER
 
     # Get BR limits
@@ -36,11 +32,11 @@ def main():
 
     # Remove m=80
     for gr in graphs.values():
-        tanb.cleanGraph(gr, minX=100)
+        limit.cleanGraph(gr, minX=100)
 
     # Get theory uncertainties on observed
-    obs_th_plus = tanb.getObservedPlus(obs);   obs_th_plus.SetName("ObservedTheoryPlus")
-    obs_th_minus = tanb.getObservedMinus(obs); obs_th_minus.SetName("ObservedTheoryMinus")
+    obs_th_plus = limit.getObservedPlus(obs)
+    obs_th_minus = limit.getObservedMinus(obs)
     for gr in [obs_th_plus, obs_th_minus]:
         gr.SetLineWidth(3)
         gr.SetLineStyle(5)
@@ -52,19 +48,19 @@ def main():
     global mu
     for key in graphs.keys():
         removeNotValid = not (key in ["exp1", "exp2"])
-        graphs[key] = tanb.graphToTanBeta(graphs[key], mu, removeNotValid)
+        graphs[key] = limit.graphToTanBeta(graphs[key], mu, removeNotValid)
 
-    doPlot("limitsTanb_mh", graphs, limits, brlimit.mHplus())
+    doPlot("limitsTanb_mh", graphs, limits, limit.mHplus())
     
     for gr in graphs.values():
-        tanb.graphToMa(gr)
+        limit.graphToMa(gr)
 
-    doPlot("limitsTanb_ma", graphs, limits, brlimit.mA())
+    doPlot("limitsTanb_ma", graphs, limits, limit.mA())
 
 
     # Mu variations
     mus = [1000, 200, -200, -1000]
-    muGraphs = [(tanb.graphToTanBeta(obs, m), m) for m in mus]
+    muGraphs = [(limit.graphToTanBeta(obs, m), m) for m in mus]
 
     def muStyle(h, markerStyle, lineStyle, color):
         rh = h.getRootHisto()
@@ -79,11 +75,11 @@ def main():
           lambda h: muStyle(h, 20, 1, 1),
           lambda h: muStyle(h, 20, 2, 1),
           lambda h: muStyle(h, 21, 2, 4)]
-    doPlotMu("limitsTanb_mus_mh", muGraphs, st, limits, brlimit.mHplus())
+    doPlotMu("limitsTanb_mus_mh", muGraphs, st, limits, limit.mHplus())
 
     for gr, mu in muGraphs:
-        tanb.graphToMa(gr)
-    doPlotMu("limitsTanb_mus_ma", muGraphs, st, limits, brlimit.mA())
+        limit.graphToMa(gr)
+    doPlotMu("limitsTanb_mus_ma", muGraphs, st, limits, limit.mA())
 
 def doPlot(name, graphs, limits, xlabel):
     obs = graphs["obs"]
@@ -118,7 +114,7 @@ def doPlot(name, graphs, limits, xlabel):
 
     plot.createFrame(name, opts={"ymin": 0, "ymax": tanbMax})
     plot.frame.GetXaxis().SetTitle(xlabel)
-    plot.frame.GetYaxis().SetTitle(brlimit.tanblimit)
+    plot.frame.GetYaxis().SetTitle(limit.tanblimit)
 
     plot.draw()
 
@@ -128,11 +124,11 @@ def doPlot(name, graphs, limits, xlabel):
 
     size = 20
     x = 0.2
-    histograms.addText(x, 0.9, brlimit.process, size=size)
+    histograms.addText(x, 0.9, limit.process, size=size)
     histograms.addText(x, 0.863, limits.getFinalstateText(), size=size)
     histograms.addText(x, 0.815, "MSSM m_{h}^{max}", size=size)
-    histograms.addText(x, 0.775, brlimit.BRassumption, size=size)
-    histograms.addText(x, 0.735, "#mu=%d %s"%(mu, brlimit.unit()), size=size)
+    histograms.addText(x, 0.775, limit.BRassumption, size=size)
+    histograms.addText(x, 0.735, "#mu=%d %s"%(mu, limit.massUnit()), size=size)
 
     plot.save()
 
@@ -141,7 +137,7 @@ def doPlotMu(name, graphs, styleList, limits, xlabel):
     ll = {}
     for gr, mu in graphs:
         objs.append(histograms.HistoGraph(gr, "Obs%d"%mu, drawStyle="LP", legendStyle="lp"))
-        ll["Obs%d"%mu] = "Observed, #mu=%d %s" % (mu, brlimit.unit())
+        ll["Obs%d"%mu] = "Observed, #mu=%d %s" % (mu, limit.massUnit())
 
     plot = plots.PlotBase(objs)
     plot.histoMgr.forEachHisto(styles.Generator(styleList))
@@ -150,7 +146,7 @@ def doPlotMu(name, graphs, styleList, limits, xlabel):
 
     plot.createFrame(name, opts={"ymin": 0, "ymax": tanbMax})
     plot.frame.GetXaxis().SetTitle(xlabel)
-    plot.frame.GetYaxis().SetTitle(brlimit.tanblimit)
+    plot.frame.GetYaxis().SetTitle(limit.tanblimit)
 
     plot.draw()
 
@@ -160,10 +156,10 @@ def doPlotMu(name, graphs, styleList, limits, xlabel):
 
     size = 20
     x = 0.2
-    histograms.addText(x, 0.9, brlimit.process, size=size)
+    histograms.addText(x, 0.9, limit.process, size=size)
     histograms.addText(x, 0.863, limits.getFinalstateText(), size=size)
     histograms.addText(x, 0.815, "MSSM m_{h}^{max}", size=size)
-    histograms.addText(x, 0.775, brlimit.BRassumption, size=size)
+    histograms.addText(x, 0.775, limit.BRassumption, size=size)
 
     plot.save()
 

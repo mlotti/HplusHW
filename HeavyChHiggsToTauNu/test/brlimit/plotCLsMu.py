@@ -11,8 +11,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
-
-import plotBRLimit as brlimit
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.limit as limit
 
 name_re = re.compile("plot_m(?P<mass>\d+)_(?P<name>[^.]+)\.root")
 
@@ -98,7 +97,7 @@ def doPlot(rootfile):
 
     size = 20
     x = 0.62
-    histograms.addText(x, 0.85, "m_{H^{+}} = %s %s" % (mass, brlimit.unit()), size=size)
+    histograms.addText(x, 0.85, "m_{H^{+}} = %s %s" % (mass, limit.massUnit()), size=size)
     histograms.addText(x, 0.81, labelName, size=size)
 
     plot.save()

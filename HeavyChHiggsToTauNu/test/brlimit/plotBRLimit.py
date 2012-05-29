@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
-import os
 import sys
-import json
-import array
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -12,31 +9,16 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
-
-forPaper = False
-#forPaper = True
-
-def unit():
-    if forPaper:
-        return "GeV"
-    return "GeV/c^{2}"
-
-BR = "#it{B}"
-process = "t #rightarrow H^{+}b, H^{+} #rightarrow #tau#nu"
-BRassumption = "%s(H^{+} #rightarrow #tau#nu) = 1"%BR
-BRlimit = "95%% CL limit for %s(t#rightarrow bH^{+})"%BR
-tanblimit = "tan #beta"
-def mHplus():
-    return "m_{H^{+}} (%s)" % unit()
-def mA():
-    return "m_{A} (%s)" % unit()
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.limit as limit
 
 def main():
-    limits = BRLimits()
+    limits = limit.BRLimits()
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    if forPaper:
+    # Set the paper mode
+    #limit.forPaper = True
+    if limit.forPaper:
         histograms.cmsTextMode = histograms.CMSMode.PAPER
 
     doBRlimit(limits)
@@ -66,9 +48,9 @@ def doBRlimit(limits):
         legend = histograms.moveLegend(legend, dy=-0.1)
     plot.setLegend(legend)
 
-    plot.createFrame("limitsBr", opts={"ymin": 0, "ymax": limits.getFinalstateYmax()})
-    plot.frame.GetXaxis().SetTitle(mHplus())
-    plot.frame.GetYaxis().SetTitle(BRlimit)
+    plot.createFrame("limitsBr", opts={"ymin": 0, "ymax": limits.getFinalstateYmaxBR()})
+    plot.frame.GetXaxis().SetTitle(limit.mHplus())
+    plot.frame.GetYaxis().SetTitle(limit.BRlimit)
 
     plot.draw()
 
@@ -78,9 +60,9 @@ def doBRlimit(limits):
 
     size = 20
     x = 0.2
-    histograms.addText(x, 0.88, process, size=size)
+    histograms.addText(x, 0.88, limit.process, size=size)
     histograms.addText(x, 0.84, limits.getFinalstateText(), size=size)
-    histograms.addText(x, 0.79, BRassumption, size=size)
+    histograms.addText(x, 0.79, limit.BRassumption, size=size)
 
     plot.save()
 
@@ -133,7 +115,7 @@ def doLimitError(limits):
     plot.setLegend(histograms.moveLegend(histograms.createLegend(0.48, 0.75, 0.85, 0.92), dx=0.1, dy=-0.1))
 
     plot.createFrame("limitsBrRelativeUncertainty", opts={"ymin": 0, "ymaxfactor": 1.5})
-    plot.frame.GetXaxis().SetTitle(mHplus())
+    plot.frame.GetXaxis().SetTitle(limit.mHplus())
     plot.frame.GetYaxis().SetTitle("Uncertainty/limit")
 
     plot.draw()
@@ -144,9 +126,9 @@ def doLimitError(limits):
 
     size = 20
     x = 0.2
-    histograms.addText(x, 0.88, process, size=size)
+    histograms.addText(x, 0.88, limit.process, size=size)
     histograms.addText(x, 0.84, limits.getFinalstateText(), size=size)
-    histograms.addText(x, 0.79, BRassumption, size=size)
+    histograms.addText(x, 0.79, limit.BRassumption, size=size)
 
     size = 22
     x = 0.55
@@ -166,264 +148,8 @@ def divideGraph(num, denom):
         gr.SetPoint(i, gr.GetX()[i], val)
     return gr
 
-_finalstateLabels = {
-    "taujets": "#tau_{h}+jets",
-    "etau"   : "e#tau_{h}",
-    "mutau"  : "#mu#tau_{h}",
-    "emu"    : "e#mu",
-}
 
-_finalstateYmax = {
-    "etau": 0.4,
-    "mutau": 0.4,
-    "emu": 0.8,
-    "default": 0.15,
-}
-
-class BRLimits:
-    def __init__(self, directory=".", excludeMassPoints=[]):
-        resultfile="limits.json"
-        configfile="configuration.json"
-
-        f = open(os.path.join(directory, resultfile), "r")
-        limits = json.load(f)
-        f.close()
-
-        self.lumi = float(limits["luminosity"])
-
-        self.mass = limits["masspoints"].keys()
-        members = ["mass"]
-
-        # sort mass
-        floatString = [(float(self.mass[i]), self.mass[i]) for i in range(len(self.mass))]
-        floatString.sort()
-        self.mass = [pair[1] for pair in floatString]
-        if len(excludeMassPoints) > 0:
-            self.mass = filter(lambda m: not m in excludeMassPoints, self.mass)
-
-        firstMassPoint = limits["masspoints"][self.mass[0]]
-
-        if "observed" in firstMassPoint:
-            self.observed = [limits["masspoints"][m]["observed"] for m in self.mass]
-            members.append("observed")
-            if "observed_error" in firstMassPoint:
-                self.observedError = [limits["masspoints"][m]["observed_error"] for m in self.mass]
-                members.append("observedError")
-
-        self.expectedMedian = [limits["masspoints"][m]["expected"]["median"] for m in self.mass]
-        self.expectedMinus2 = [limits["masspoints"][m]["expected"]["-2sigma"] for m in self.mass]
-        self.expectedMinus1 = [limits["masspoints"][m]["expected"]["-1sigma"] for m in self.mass]
-        self.expectedPlus1 = [limits["masspoints"][m]["expected"]["+1sigma"] for m in self.mass]
-        self.expectedPlus2 = [limits["masspoints"][m]["expected"]["+2sigma"] for m in self.mass]
-        members.extend(["expected"+p for p in ["Median", "Minus2", "Minus1", "Plus1", "Plus2"]])
-        if "median_error" in firstMassPoint["expected"]:
-            self.expectedMedianError = [limits["masspoints"][m]["expected"]["median_error"] for m in self.mass]
-            self.expectedMinus2Error = [limits["masspoints"][m]["expected"]["-2sigma_error"] for m in self.mass]
-            self.expectedMinus1Error = [limits["masspoints"][m]["expected"]["-1sigma_error"] for m in self.mass]
-            self.expectedPlus1Error = [limits["masspoints"][m]["expected"]["+1sigma_error"] for m in self.mass]
-            self.expectedPlus2Error = [limits["masspoints"][m]["expected"]["+2sigma_error"] for m in self.mass]
-            members.extend(["expected"+p+"Error" for p in ["Median", "Minus2", "Minus1", "Plus1", "Plus2"]])
-
-        for attr in members:
-            setattr(self, attr+"_string", [m for m in getattr(self, attr)])
-            setattr(self, attr, [float(m) for m in getattr(self, attr)])
-
-       
-
-        f = open(os.path.join(directory, configfile), "r")
-        config = json.load(f)
-        f.close()
-
-        self.finalstates = []
-        def hasDatacard(name):
-            for datacard in config["datacards"]:
-                if name in datacard:
-                    return True
-            return False
-
-        if hasDatacard("_hplushadronic_"):
-            self.finalstates.append("taujets")
-        if hasDatacard("_etau_"):
-            self.finalstates.append("etau")
-        if hasDatacard("_mutau_"):
-            self.finalstates.append("mutau")
-        if hasDatacard("_emu_"):
-            self.finalstates.append("emu")
-
-    def getLuminosity(self):
-        return self.lumi
-
-    def getFinalstates(self):
-        return self.finalstates
-
-    def getFinalstateText(self):
-        if len(self.finalstates) == 1:
-            return "%s final state" % _finalstateLabels[self.finalstates[0]]
-
-        ret = ", ".join([_finalstateLabels[x] for x in self.finalstates[:-1]])
-        ret += ", and %s final states" % _finalstateLabels[self.finalstates[-1]]
-        return ret
-
-    def getFinalstateYmax(self):
-        if len(self.finalstates) == 1:
-            try:
-                ymax = _finalstateYmax[self.finalstates[0]]
-            except KeyError:
-                ymax = _finalstateYmax["default"]
-        else:
-            ymax = _finalstateYmax["default"]
-        return ymax
-
-    def print2(self):
-        print
-        print "                  Expected"
-        print "Mass  Observed    Median       -2sigma     -1sigma     +1sigma     +2sigma"
-        format = "%3s:  %-9s   %-10s   %-10s  %-10s  %-10s  %-10s"
-        for i in xrange(len(self.mass_string)):
-            print format % (self.mass_string[i], self.observed_string[i], self.expectedMedian_string[i], self.expectedMinus2_string[i], self.expectedMinus1_string[i], self.expectedPlus1_string[i], self.expectedPlus2_string[i])
-        print
-
-    def observedGraph(self):
-        if not hasattr(self, "observed"):
-            return None
-
-        gr = ROOT.TGraph(len(self.mass),
-                         array.array("d", self.mass),
-                         array.array("d", self.observed)
-                         )
-        gr.SetMarkerStyle(21)
-        gr.SetMarkerSize(1.5)
-        gr.SetMarkerColor(ROOT.kBlack)
-        gr.SetLineWidth(3)
-        gr.SetLineColor(ROOT.kBlack)
-        gr.SetName("Observed")
-
-        return gr
-
-    def observedErrorGraph(self):
-        if not hasattr(self, "observedError"):
-            return None
-
-        gr = ROOT.TGraph(len(self.mass),
-                         array.array("d", self.mass),
-                         array.array("d", self.observedError)
-                         )
-        gr.SetMarkerStyle(21)
-        gr.SetMarkerSize(1.5)
-        gr.SetMarkerColor(ROOT.kBlack)
-        gr.SetLineWidth(3)
-        gr.SetLineColor(ROOT.kBlack)
-        gr.SetName("ObservedError")
-
-        return gr
-
-    def _expectedGraph(self, postfix, sigma):
-        massArray = array.array("d", self.mass)
-        massErr = array.array("d", [0]*len(self.mass))
-        if sigma == 0:
-            gr = ROOT.TGraph(len(self.mass), massArray, array.array("d", getattr(self, "expectedMedian"+postfix)))
-            gr.SetName("Expected"+postfix)
-        elif sigma == 1:
-            gr = ROOT.TGraph(len(self.mass), massArray, array.array("d", getattr(self, "expectedPlus1"+postfix)))
-            gr.SetName("ExpectedPlus1Sigma"+postfix)
-        elif sigma == -1:
-            gr = ROOT.TGraph(len(self.mass), massArray, array.array("d", getattr(self, "expectedMinus1"+postfix)))
-            gr.SetName("ExpectedMinus1Sigma"+postfix)
-        elif sigma == 2:
-            gr = ROOT.TGraph(len(self.mass), massArray, array.array("d", getattr(self, "expectedPlus2"+postfix)))
-            gr.SetName("ExpectedPlus2Sigma"+postfix)
-        elif sigma == -2:
-            gr = ROOT.TGraph(len(self.mass), massArray, array.array("d", getattr(self, "expectedMinus2"+postfix)))
-            gr.SetName("ExpectedMinus2Sigma"+postfix)
-        else:
-            raise Exception("Invalid value of sigma '%d', valid values are 0,1,2" % sigma)
-
-        gr.SetLineStyle(2)
-        gr.SetLineWidth(3)
-        gr.SetLineColor(ROOT.kBlack)
-        gr.SetMarkerStyle(20)
-
-        return gr
-
-    def expectedGraph(self, sigma=0):
-        return self._expectedGraph("", sigma)
-
-    def expectedErrorGraph(self, sigma=0):
-        if not hasattr(self, "expectedMedianError"):
-            return None
-        return self._expectedGraph("Error", sigma)
-
-    def expectedBandGraph(self, sigma):
-        massArray = array.array("d", self.mass)
-        massErr = array.array("d", [0]*len(self.mass))
-        if sigma == 1:
-            tmp1 = self.mass[:]
-            tmp1.reverse()
-            tmp2 = self.expectedPlus1[:]
-            tmp2.reverse()
-
-            gr = ROOT.TGraph(2*len(self.mass),
-                             array.array("d", self.mass+tmp1),
-                             array.array("d", self.expectedMinus1 + tmp2))
-
-            gr.SetFillColor(ROOT.kGreen-3)
-            gr.SetName("Expected1Sigma")
-        elif sigma == 2:
-            tmp1 = self.mass[:]
-            tmp1.reverse()
-            tmp2 = self.expectedPlus2[:]
-            tmp2.reverse()
-
-#            print self.mass+tmp1
-#            print self.expectedMinus2+tmp2
-
-            gr = ROOT.TGraph(2*len(self.mass),
-                             array.array("d", self.mass+tmp1),
-                             array.array("d", self.expectedMinus2 + tmp2))
-
-            gr.SetFillColor(ROOT.kYellow)
-            gr.SetName("Expected2Sigma")
-        else:
-            raise Exception("Invalid value of sigma '%d', valid values are 0,1,2" % sigma)
-
-        gr.SetLineStyle(2)
-        gr.SetLineWidth(3)
-        gr.SetLineColor(ROOT.kBlack)
-        gr.SetMarkerStyle(20)
-
-        return gr
-                                          
-    # def expectedGraphNew(self, sigma=0):
-    #     massArray = array.array("d", self.mass)
-    #     massErr = array.array("d", [0]*len(self.mass))
-    #     medianArray = array.array("d", self.expectedMedian)
-    #     if sigma == 0:
-    #         gr = ROOT.TGraph(len(self.mass), massArray, medianArray)
-    #         gr.SetName("Expected")
-    #     elif sigma == 1:
-    #         gr = ROOT.TGraphAsymmErrors(len(self.mass), massArray, medianArray, massErr, massErr,
-    #                                     array.array("d", [self.expectedMedian[i]-self.expectedMinus1[i] for i in xrange(len(self.mass))]),
-    #                                     array.array("d", [self.expectedPlus1[i]-self.expectedMedian[i] for i in xrange(len(self.mass))]))
-    #         gr.SetFillColor(ROOT.kGreen-3)
-    #         gr.SetName("Expected1Sigma")
-    #     elif sigma == 2:
-    #         gr = ROOT.TGraphAsymmErrors(len(self.mass), massArray, medianArray, massErr, massErr,
-    #                                     array.array("d", [self.expectedMedian[i]-self.expectedMinus2[i] for i in xrange(len(self.mass))]),
-    #                                     array.array("d", [self.expectedPlus2[i]-self.expectedMedian[i] for i in xrange(len(self.mass))]))
-    #         gr.SetFillColor(ROOT.kYellow)
-    #         gr.SetName("Expected2Sigma")
-    #     else:
-    #         raise Exception("Invalid value of sigma '%d', valid values are 0,1,2" % sigma)
-
-    #     gr.SetLineStyle(2)
-    #     gr.SetLineWidth(3)
-    #     gr.SetLineColor(ROOT.kBlack)
-    #     gr.SetMarkerStyle(20)
-
-    #     return gr
-
-
-                           
+                          
 
 if __name__ == "__main__":
     main()
