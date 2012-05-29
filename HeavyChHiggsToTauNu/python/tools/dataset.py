@@ -6,7 +6,6 @@
 # dataset management, but are placed here due to some dependencies.
 
 import glob, os, sys, re
-import json
 import math
 import copy
 
@@ -1972,6 +1971,8 @@ class DatasetManager:
     # luminosities must be done before merging the data datasets to
     # one.
     def loadLuminosities(self, fname="lumi.json"):
+        import json
+
         for d in self.datasets:
             jsonname = os.path.join(d.basedir, fname)
             if not os.path.exists(jsonname):
