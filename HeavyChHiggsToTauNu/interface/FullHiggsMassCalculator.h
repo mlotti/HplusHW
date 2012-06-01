@@ -17,6 +17,7 @@ namespace edm {
 }
 
 class TH1;
+class TVector3;
 
 namespace HPlus {
   class FullHiggsMassCalculator {
@@ -34,10 +35,15 @@ namespace HPlus {
       const bool fPassedEvent;
     };
 
-    FullHiggsMassCalculator(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    FullHiggsMassCalculator(EventCounter& eventCounter, EventWeight& eventWeight);
     ~FullHiggsMassCalculator();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData);
+    void myBJet();
+
+  private:
+    bool doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet);
+    void doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool doHistogramming = true);
 
   private:
     // EventWeight object
