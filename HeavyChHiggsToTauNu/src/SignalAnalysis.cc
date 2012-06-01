@@ -294,6 +294,7 @@ namespace HPlus {
   void SignalAnalysis::produces(edm::EDFilter *producer) const {
     if(fProduce) {
       producer->produces<std::vector<pat::Tau> >("selectedTaus");
+      producer->produces<std::vector<pat::Tau> >("selectedVetoTaus");
       producer->produces<std::vector<pat::Jet> >("selectedJets");
       producer->produces<std::vector<pat::Jet> >("selectedBJets");
       producer->produces<std::vector<pat::Electron> >("selectedVetoElectrons");
@@ -423,9 +424,21 @@ namespace HPlus {
     */  
 //------ Veto against second tau in event
     VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauData.getSelectedTau());
-    //    if (vetoTauData.passedEvent()) return false;
-    //    increment(fVetoTauCounter);
-    if (!vetoTauData.passedEvent()) increment(fVetoTauCounter);
+    if (vetoTauData.passedEvent()) return false;
+    increment(fVetoTauCounter);
+    //    if (!vetoTauData.passedEvent()) increment(fVetoTauCounter);
+
+
+    bool realVetoTauFound = false;
+    //    for(edm::PtrVector<pat::Tau>::const_iterator iTau = vetoTauData.getSelectedVetoTaus().begin(); iTau != vetoTauData.getSelectedVetoTaus().end(); ++iTau) {
+      //     double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET()));
+      //      hDeltaPhiJetMet->Fill(jetDeltaPhi*57.3, fEventWeight.getWeight());
+      //      FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, **(iTau));
+      //      bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(myTauMatch); // True if the selected tau is a fake
+      //      if (!myFakeTauStatus) realVetoTauFound = true;
+    //    }
+    //    std::cout << " realVetoTauFound " << realVetoTauFound  << " selectedVetoTaus =" << vetoTauData.getSelectedVetoTaus().size() << std::endl;
+
 
 //------ Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
@@ -543,17 +556,20 @@ namespace HPlus {
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderMETSelection, fEventWeight.getWeight());
     fillEWKFakeTausCounters(myTauMatch, kSignalOrderMETSelection, tauData);
 
+    //    return false;
 
 //------ b tagging cut
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     hCtrlNbjets->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
     if(!btagData.passedEvent()) return false;
     increment(fBTaggingCounter);
+
     // Apply scale factor as weight to event
     if (!iEvent.isRealData()) {
       btagData.fillScaleFactorHistograms(); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
       fEventWeight.multiplyWeight(btagData.getScaleFactor());
     }
+   
     increment(fBTaggingScaleFactorCounter);
     hSelectionFlow->Fill(kSignalOrderBTagSelection, fEventWeight.getWeight());
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderBTagSelection, fEventWeight.getWeight());
@@ -564,7 +580,7 @@ namespace HPlus {
       copyPtrToVector(btagData.getSelectedJets(), *saveBJets);
       iEvent.put(saveBJets, "selectedBJets");
     }
-
+   
 
 //------ Delta phi(tau,MET) cut
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees

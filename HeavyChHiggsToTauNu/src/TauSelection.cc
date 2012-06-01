@@ -525,7 +525,7 @@ namespace HPlus {
         hTightGammaMaxPtBeforeIsolation->Fill(iTau->userFloat("byTightGammaMaxPt"), fEventWeight.getWeight());
         hTightGammaSumPtBeforeIsolation->Fill(iTau->userFloat("byTightGammaSumPt"), fEventWeight.getWeight());
         hTightGammaOccupancyBeforeIsolation->Fill((float)iTau->userInt("byTightGammaOccupancy"), fEventWeight.getWeight());
-        if (!fTauID->passIsolation(iTau)) continue;
+	if (!fTauID->passIsolation(iTau)) continue;
         hTightChargedMaxPtAfterIsolation->Fill(iTau->userFloat("byTightChargedMaxPt"), fEventWeight.getWeight());
         hTightChargedSumPtAfterIsolation->Fill(iTau->userFloat("byTightChargedSumPt"), fEventWeight.getWeight());
         hTightChargedOccupancyAfterIsolation->Fill((float)iTau->userInt("byTightChargedOccupancy"), fEventWeight.getWeight());

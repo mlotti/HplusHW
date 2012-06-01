@@ -90,12 +90,15 @@ tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
 )
 
 vetoTauBase = tauSelectionHPSVeryLooseTauBased.clone(
+    src = "selectedPatTausHpsPFTau",
+#    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     ptCut = cms.untracked.double(15), # jet pt > value
-    etaCut = cms.untracked.double(2.5), # jet |eta| < value
+    etaCut = cms.untracked.double(2.4), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(5.0), # ldg. track > value
 #    isolationDiscriminator = "byVLooseIsolation",
+#    isolationDiscriminator = "byIsolation05",
     rtauCut = cms.untracked.double(0.0), # rtau > value
-    nprongs = cms.untracked.uint32(1) # number of prongs (options: 1, 3, or 13 == 1 || 3)
+    nprongs = cms.untracked.uint32(13) # number of prongs (options: 1, 3, or 13 == 1 || 3)
 )
 
 vetoTauSelection = cms.untracked.PSet(
@@ -140,7 +143,6 @@ jetSelectionBase = cms.untracked.PSet(
     betaCut = cms.untracked.double(0.0), # disabled
     betaCutSource = cms.untracked.string("beta"), # tag name in user floats
     betaCutDirection = cms.untracked.string("GT"), # direction of beta cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
-
     # Experimental
     EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )

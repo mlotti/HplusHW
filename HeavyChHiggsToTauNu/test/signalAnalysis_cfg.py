@@ -27,9 +27,11 @@ doRtau0 = False # Rtau>0, MET>50
 # Perform b tagging scanning
 doBTagScan = False
 
+
 # fill tree for btagging eff study
 doBTagTree = False
 
+    
 # Perform Rtau scanning
 doRtauScan = False
 
@@ -126,9 +128,19 @@ process.source = cms.Source('PoolSource',
     # For testing in jade
 #    dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_34_1_YeG.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_39_1_egt.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_8_1_N9K.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_35_1_qIb.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_29_1_uO4.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_9_1_OVD.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_12_1_epl.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_20_1_X0Q.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_37_1_IVo.root"
+
     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau_173236-173692_2011A_Nov08/Tau/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_173236-173692_2011A_Nov08//d7b7dcb6c55f2b2177021b8423a82913/pattuple_10_1_9l2.root",
     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau_175860-180252_2011B_Nov19/Tau/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_175860-180252_2011B_Nov19//28e7e0ab56ad4146eca1efa805cd10f4/pattuple_100_1_jnU.root",
-    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_5_1_Hkv.root"
+#    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_5_1_Hkv.root"
     )
 )
 
@@ -221,19 +233,20 @@ if not doFillTree:
 # Change default tau algorithm here if needed
 #process.signalAnalysis.tauSelection.tauSelectionHPSTightTauBased # HPS Tight is the default
 
+
 # Btagging DB
-process.load("CondCore.DBCommon.CondDBCommon_cfi")
+#process.load("CondCore.DBCommon.CondDBCommon_cfi")
 #MC measurements
-process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
-process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
+#process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
+#process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
 #Data measurements
-process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
-process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
+#process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
+#process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
 #User DB for btag eff
-process.CondDBCommon.connect = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
-process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
-process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
-#param.bTagging.UseBTagDB  = cms.untracked.bool(True)
+#process.CondDBCommon.connect = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
+#process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
+#process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
+param.bTagging.UseBTagDB  = cms.untracked.bool(False)
 
 # Add type 1 MET
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
@@ -260,6 +273,7 @@ print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", pr
 #print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection.value()
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection.value()
 print "TauSelection src:", process.signalAnalysis.tauSelection.src.value()
+print "TauVetoSelection src:", process.signalAnalysis.vetoTauSelection.tauSelection.src.value()
 print "TauSelection isolation:", process.signalAnalysis.tauSelection.isolationDiscriminator.value()
 print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode.value()
 
