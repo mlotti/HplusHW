@@ -28,7 +28,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
 
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h" // PU re-weight
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeightReader.h" // PU re-weight
 
 
 #include "TTree.h"
@@ -162,7 +162,7 @@ namespace HPlus {
     //SelectedEventsAnalyzer fNonWeightedSelectedEventsAnalyzer;
     GenParticleAnalysis fGenparticleAnalysis;   
     //
-    VertexWeight fVertexWeight;
+    VertexWeightReader fVertexWeightReader;
     TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
 
     SignalAnalysisTree fTree;

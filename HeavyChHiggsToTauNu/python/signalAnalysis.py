@@ -33,6 +33,7 @@ def createEDFilter(param):
         transverseMassCut = param.transverseMassCut,
         EvtTopology = param.EvtTopology,
         vertexWeight = param.vertexWeight,
+        vertexWeightReader = param.vertexWeightReader,
         GenParticleAnalysis = param.GenParticleAnalysis,
         Tree = param.tree,
     )

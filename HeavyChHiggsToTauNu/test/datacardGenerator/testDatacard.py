@@ -1,8 +1,8 @@
 DataCardName    = 'myDummyTestName'
-#Path            = '/mnt/flustre/slehti/HplusDataForLands'
-Path            = '/home/wendland/data/lands/lands_HIG-11-019'
-MassPoints      = [80,90,100,120,140,150,155,160]
-#MassPoints      = [160]
+Path            = '/mnt/flustre/slehti/HplusDataForLands'
+#Path            = '/home/wendland/data/lands/lands_HIG-11-019'
+#MassPoints      = [80,90,100,120,140,150,155,160]
+MassPoints      = [160]
 
 # Specify name of EDFilter or EDAnalyser process that produced the root files
 SignalAnalysis  = "signalAnalysis"
@@ -18,7 +18,13 @@ FakeRateCounter = "nonQCDType2:deltaphi160"
 # Shape histogram definitions
 SignalShapeHisto = "transverseMassAfterDeltaPhi160"
 FakeShapeHisto = "NonQCDTypeIITransverseMassAfterDeltaPhi160"
-ShapeHistogramsDimensions = [20, 0.0, 400.0]  # bins, min, max
+ShapeHistogramsDimensions = { "bins": 20,
+                              "rangeMin": 0.0,
+                              "rangeMax": 400.0,
+                              "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                              #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
+                              "xtitle": "Transverse mass / GeV",
+                              "ytitle": "Events" }
 
 # Options
 OptionReplaceEmbeddingByMC = False

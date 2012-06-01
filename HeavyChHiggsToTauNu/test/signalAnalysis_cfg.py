@@ -76,18 +76,21 @@ doJESVariation = False
 
 # Perform the signal analysis with the PU weight variations
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
-doPUWeightVariation = False
+doPUWeightVariation = not False
 
 # Do variations for optimisation
+# Note: Keep number of variations below 200 to keep file sizes reasonable
+# Note: Currently it is not possible to vary the tau selection -related variables, because only one JES and MET producer is made (tau selection influences type I MET correction and JES)
+
 doOptimisation = False
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
 myOptimisation = HPlusOptimisationScheme()
-myOptimisation.addTauPtVariation([40.0, 50.0])
+#myOptimisation.addTauPtVariation([40.0, 50.0])
 #myOptimisation.addTauIsolationVariation([])
 #myOptimisation.addTauIsolationContinuousVariation([])
-myOptimisation.addRtauVariation([0.0, 0.7])
-#myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
+#myOptimisation.addRtauVariation([0.0, 0.7])
+myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
 #myOptimisation.addJetEtVariation([20.0, 30.0])
 #myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
 #myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
@@ -202,7 +205,7 @@ if applyTriggerScaleFactor and dataVersion.isMC():
 puweight = "Run2011A"
 if len(options.puWeightEra) > 0:
     puweight = options.puWeightEra
-param.setPileupWeight(dataVersion, pset=param.vertexWeight, era=puweight) # Reweight by true PU distribution 
+param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, pset=param.vertexWeight, psetReader=param.vertexWeightReader, era=puweight) # Reweight by true PU distribution
 param.setDataTriggerEfficiency(dataVersion, era=puweight)
 print "PU weight era =",puweight
 
@@ -243,10 +246,18 @@ if not doFillTree:
 #process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
 #process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
 #User DB for btag eff
-#process.CondDBCommon.connect = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
+
+#btagDB = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
+#if options.runOnCrab != 0:
+#    btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
+###########process.CondDBCommon.connect = btagDB
+    
+#process.load("CondCore.DBCommon.CondDBCommon_cfi")
+
 #process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
 #process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
-param.bTagging.UseBTagDB  = cms.untracked.bool(False)
+param.bTagging.UseBTagDB  = cms.untracked.bool(False) # FIXME: True does not work with systematics! (some clash with condDB betweeen btag and JES)
+
 
 # Add type 1 MET
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
@@ -286,6 +297,8 @@ process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     printSubCounters = cms.untracked.bool(False), # Default False
     printAvailableCounters = cms.untracked.bool(False),
 )
+
+
 if len(additionalCounters) > 0:
     process.signalAnalysisCounters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
 
@@ -537,20 +550,20 @@ if doJESVariation or doSystematics:
             addJESVariation(name, doJetUnclusteredVariation)
     else:
         print "JES variation disabled for data (not meaningful for data)"
-
+    print "Added JES variation for %d modules"%len(modules)
 
 def addPUWeightVariation(name):
+    # Up variation
     module = getattr(process, name).clone()
     module.Tree.fill = False
-    module.vertexWeight
-    param.setPileupWeight(dataVersion, pset=module.vertexWeight, era=puweight, suffix="up")
+    param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, era=puweight, suffix="up")
     addAnalysis(process, name+"PUWeightPlus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
-
+    # Down variation
     module = module.clone()
-    param.setPileupWeight(dataVersion, pset=module.vertexWeight, era=puweight, suffix="down")
+    param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, era=puweight, suffix="down")
     addAnalysis(process, name+"PUWeightMinus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
@@ -572,7 +585,9 @@ if doPUWeightVariation or doSystematics:
             addPUWeightVariation(name)
     else:
         print "PU weight variation disabled for data (not meaningful for data)"
-
+    print "Added PU weight variation for %d modules"%len(modules)
+    
+print "Test1"
 
 # Signal analysis with various tightened muon selections for tau embedding
 if options.tauEmbeddingInput != 0 and doTauEmbeddingMuonSelectionScan:
@@ -580,7 +595,7 @@ if options.tauEmbeddingInput != 0 and doTauEmbeddingMuonSelectionScan:
 
 if doTauEmbeddingTauSelectionScan:
     tauEmbeddingCustomisations.addTauAnalyses(process, "signalAnalysis", process.signalAnalysis, process.commonSequence, additionalCounters)
-
+print "Test2"
 # Print tau discriminators from one tau from one event. Note that if
 # the path below is commented, the discriminators are not printed.
 process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyzer",
