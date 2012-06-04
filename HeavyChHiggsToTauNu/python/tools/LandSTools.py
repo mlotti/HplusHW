@@ -895,6 +895,24 @@ class LHCType:
         _writeScript(os.path.join(self.dirname, filename), "\n".join(command)+"\n")
         self.scripts[mass] = filename
 
+        # Produce also scripts for ML fit, they're not run on the grid however
+        opts = commonOptions + " -M MaxLikelihoodFit -v 1"
+        b_file = "mlfit_b_m%s_output.txt" % mass
+        b_file2 = "mlfit_b_m%s.txt" % mass
+        sb_file = "mlfit_sb_m%s_output.txt" % mass
+        sb_file2 = "mlfit_sb_m%s.txt" % mass
+        command = [
+            "#!/bin/sh",
+            "",
+            "./lands.exe %s -n mlfit_sb_m%s --rMin 0 --rMax 0.2 -d %s > %s 2>&1" % (opts, mass, " ".join(datacardFiles), sb_file),
+            "./lands.exe %s -n mlfit_b_m%s --scanRs 1 -vR 0 -d %s > %s 2>&1" % (opts, mass, " ".join(datacardFiles), b_file),
+            "tail -n 200 %s | fgrep par > %s" % (b_file, b_file2),
+            "fgrep par %s > %s" % (sb_file, sb_file2),
+            'echo "ML fit results are in %s and %s"' % (sb_file2, b_file2)
+            ]
+        _writeScript(os.path.join(self.dirname, "runLandS_m%s_mlfit" % mass), "\n".join(command)+"\n")
+        
+
     ## Write the multicrab configuration snippet of a single mass point
     #
     # \param output      Output stream to write the contents
