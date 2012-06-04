@@ -1476,10 +1476,10 @@ class LandSInstaller:
             if ret != 0:
                 raise Exception("Compiling LandS failed (exit code %d), command 'make'" % ret)
     
-            if not os.path.isfile(landsExe):
-                raise Exception("After LandS checkout and compilation, the lands.exe is not found in '%s'" % landsExe)
-    
             os.chdir(pwd)
+            print
+            print "LandS version %s installed at %s" % (self.tag, landsDirAbs)
+            print
 
         return landsDirAbs
 
