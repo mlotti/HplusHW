@@ -923,12 +923,28 @@ class PlotBase:
         # histogram
         self.getPad().RedrawAxis()
 
+
+    ## Set the integrated luminosity of the data
+    #
+    # \param lumi   Integrated luminosity (in pb^-1)
+    def setLuminosity(self, lumi):
+        self.luminosity = lumi
+
     ## Add text for integrated luminosity
     #
     # \param x   X coordinate (in NDC, None for the default value)
     # \param y   Y coordinate (in NDC, None for the default value)
+    #
+    # Takes luminosity from self.luminosity member set by
+    # setLuminosity() method if it exists. Otherwise forwards the call
+    # to self.histoMgr. If setLuminosity() has been called with None,
+    # no luminosity text is added.
     def addLuminosityText(self, x=None, y=None):
-        self.histoMgr.addLuminosityText(x, y)
+        if hasattr(self, "luminosity"):
+            if self.luminosity != None:
+                histograms.addLuminosityText(x, y, self.luminosity)
+        else:
+            self.histoMgr.addLuminosityText(x, y)
 
     ## Save the plot to file(s)
     #
@@ -1454,16 +1470,6 @@ class DataMCPlot2(PlotBase, PlotRatioBase):
                                    self.histoMgr.getHisto("StackedMC").getSumRootHisto(),
                                    "Data/MC", **kwargs)
 
-    ## Set the integrated luminosity of the data
-    #
-    # \param lumi   Integrated luminosity (in pb^-1)
-    def setLuminosity(self, lumi):
-        self.luminosity = lumi
-
-    def addLuminosityText(self, x=None, y=None):
-        if hasattr(self, "luminosity"):
-            histograms.addLuminosityText(x, y, self.luminosity)
-
     ## Add cut box and/or line
     #
     # \param args    Positional arguments (forwarded to plots._createCutBoxAndLine())
@@ -1555,17 +1561,6 @@ class ComparisonPlot(PlotBase, PlotRatioBase):
         PlotBase.draw(self)
         PlotRatioBase._draw(self)
 
-    ## Set the integrated luminosity of the data
-    #
-    # \param lumi   Integrated luminosity (in pb^-1)
-    def setLuminosity(self, lumi):
-        self.luminosity = lumi
-
-    def addLuminosityText(self, x=None, y=None):
-        if hasattr(self, "luminosity"):
-            histograms.addLuminosityText(x, y, self.luminosity)
-
-
 
 ## Class to compare many histograms to one histogram
 #
@@ -1619,16 +1614,6 @@ class ComparisonManyPlot(PlotBase, PlotRatioBase):
     def draw(self):
         PlotBase.draw(self)
         PlotRatioBase._draw(self)
-
-    ## Set the integrated luminosity of the data
-    #
-    # \param lumi   Integrated luminosity (in pb^-1)
-    def setLuminosity(self, lumi):
-        self.luminosity = lumi
-
-    def addLuminosityText(self, x=None, y=None):
-        if hasattr(self, "luminosity"):
-            histograms.addLuminosityText(x, y, self.luminosity)
 
 
 ## Base class for plot drawing functions
