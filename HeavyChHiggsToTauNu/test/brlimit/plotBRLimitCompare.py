@@ -17,7 +17,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.limit as limit
 def main():
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-#    histograms.cmsTextMode = histograms.CMSMode.NONE
+    histograms.cmsTextMode = histograms.CMSMode.NONE
 
 #    compareTauJets()
 #    compareLeptonic()
@@ -77,10 +77,16 @@ def compareCombinationSanitychecksLHC():
 def compareTauJetsDeltaPhi():
     doCompare("taujets_deltaphi", [
               # (name, dir)
-              ("Without #Delta#phi cut", "datacards_220312_123012_fully_hadronic_2011A_MET50_withRtau_NoDeltaPhi_withShapes_shapeStat/LandSMultiCrab_taujets_lhc_*"),
+              ("Without #Delta#phi selection", "datacards_220312_123012_fully_hadronic_2011A_MET50_withRtau_NoDeltaPhi_withShapes_shapeStat/LandSMultiCrab_taujets_lhc_*"),
               ("#Delta#phi < 160^{o}", "combination_new/LandS*taujets_lhc_*"),
               ("#Delta#phi < 130^{o}", "datacards_220312_122901_fully_hadronic_2011A_MET50_withRtau_DeltaPhi130_withShapes_shapeStat/LandSMultiCrab_taujets_lhc_*")
-              ])
+              ],
+              expectedMedianOpts={"ymax": 0.07},
+              expectedSigma1Opts={"ymax": 0.1},
+              expectedSigma1RelativeOpts={"ymax": 2.2, "ymin": 0.4},
+              expectedSigma2RelativeOpts={"ymax": 3.6, "ymin": 0.3},
+              moveLegend={"dh": -0.04}
+              )
             
 
 
@@ -102,34 +108,42 @@ def doCompare(name, compareList, **kwargs):
     doPlot2(limits, legendLabels, name)
 
     limitOpts = kwargs.get("limitOpts", {"ymax": limits[0].getFinalstateYmaxBR()})
+    expectedSigmaRelativeOpts = kwargs.get("expectedSigmaRelativeOpts", {"ymaxfactor": 1.2})
+    moveLegend = kwargs.get("moveLegend", {})
+
     doPlot(limits, legendLabels, [l.observedGraph() for l in limits],
-           name+"_observed", limit.BRlimit, opts=kwargs.get("observedOpts", limitOpts))
+           name+"_observed", limit.BRlimit, opts=kwargs.get("observedOpts", limitOpts), moveLegend=moveLegend,
+           plotLabel="Observed")
 
     doPlot(limits, legendLabels, [l.expectedGraph() for l in limits],
-           name+"_expectedMedian", limit.BRlimit, opts=kwargs.get("expectedMedian", limitOpts))
+           name+"_expectedMedian", limit.BRlimit, opts=kwargs.get("expectedMedianOpts", limitOpts), moveLegend=moveLegend,
+           plotLabel="Expected median")
 
     legendLabels2 = legendLabels + [None]*len(legendLabels)
 
-    expectedSigmaRelativeOpts = kwargs.get("expectedSigmaRelativeOpts", {"ymaxfactor": 1.2})
     doPlot(limits, legendLabels2,
            [limit.divideGraph(l.expectedGraph(sigma=+1), l.expectedGraph()) for l in limits] +
            [limit.divideGraph(l.expectedGraph(sigma=-1), l.expectedGraph()) for l in limits],
-           name+"_expectedSigma1Relative", "Expected #pm1#sigma / median", opts=kwargs.get("expectedSigma1RelativeOpts", expectedSigmaRelativeOpts))
+           name+"_expectedSigma1Relative", "Expected #pm1#sigma / median", opts=kwargs.get("expectedSigma1RelativeOpts", expectedSigmaRelativeOpts), moveLegend=moveLegend,
+           plotLabel="Expected #pm1#sigma / median")
 
     doPlot(limits, legendLabels2,
            [limit.divideGraph(l.expectedGraph(sigma=+2), l.expectedGraph()) for l in limits] +
            [limit.divideGraph(l.expectedGraph(sigma=-2), l.expectedGraph()) for l in limits],
-           name+"_expectedSigma2Relative", "Expected #pm2#sigma / median", opts=kwargs.get("expectedSigma2RelativeOpts", expectedSigmaRelativeOpts))
+           name+"_expectedSigma2Relative", "Expected #pm2#sigma / median", opts=kwargs.get("expectedSigma2RelativeOpts", expectedSigmaRelativeOpts), moveLegend=moveLegend,
+           plotLabel="Expected #pm2#sigma / median")
 
     doPlot(limits, legendLabels2,
            [l.expectedGraph(sigma=+1) for l in limits] +
            [l.expectedGraph(sigma=-1) for l in limits],
-           name+"_expectedSigma1", "Expected #pm1#sigma", opts=kwargs.get("expectedSigma1Opts", limitOpts))
+           name+"_expectedSigma1", "Expected #pm1#sigma", opts=kwargs.get("expectedSigma1Opts", limitOpts), moveLegend=moveLegend,
+           plotLabel="Expexted #pm1sigma")
 
     doPlot(limits, legendLabels2,
            [l.expectedGraph(sigma=+2) for l in limits] +
            [l.expectedGraph(sigma=-2) for l in limits],
-           name+"_expectedSigma2", "Expected #pm2#sigma", opts=kwargs.get("expectedSigma2Opts", limitOpts))
+           name+"_expectedSigma2", "Expected #pm2#sigma", opts=kwargs.get("expectedSigma2Opts", limitOpts), moveLegend=moveLegend,
+           plotLabel="Expected #pm2sigma")
 
     # doPlot(limits, legendLabels,
     #        [limit.divideGraph(l.expectedGraph(sigma=+1), l.expectedGraph()) for l in limits]
@@ -148,7 +162,7 @@ def doCompare(name, compareList, **kwargs):
     #        name+"_expectedSigma2Minus", "Expected -2#sigma / median", opts={"ymaxfactor": 1.2})
 
 
-def doPlot(limits, legendLabels, graphs, name, ylabel, opts={}):
+def doPlot(limits, legendLabels, graphs, name, ylabel, opts={}, plotLabel=None, moveLegend={}):
     hg = []
     ll = {}
     for i in xrange(len(graphs)):
@@ -166,6 +180,9 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, opts={}):
     legend = histograms.createLegend(0.48, 0.75, 0.85, 0.92)
     if len(limits[0].getFinalstates()) > 1:
         legend = histograms.moveLegend(legend, dy=-0.1)
+    if plotLabel:
+        legend = histograms.moveLegend(legend, dy=-0.04)
+    legend = histograms.moveLegend(legend, **moveLegend)
     plot.setLegend(legend)
     opts_ = {"ymin": 0}
     opts_.update(opts)
@@ -185,6 +202,8 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, opts={}):
     histograms.addText(x, 0.88, limit.process, size=size)
     histograms.addText(x, 0.84, limits[0].getFinalstateText(), size=size)
     histograms.addText(x, 0.79, limit.BRassumption, size=size)
+    if plotLabel:
+        histograms.addText(legend.GetX1()+0.01, legend.GetY2(), plotLabel, size=size)
 
     plot.save()
 
