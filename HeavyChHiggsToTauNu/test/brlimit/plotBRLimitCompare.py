@@ -14,16 +14,17 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.limit as limit
 
-import plotBRLimit as brlimit
-
 def main():
     # Apply TDR style
     style = tdrstyle.TDRStyle()
+#    histograms.cmsTextMode = histograms.CMSMode.NONE
 
-    compareTauJets()
-    compareLeptonic()
-    compareCombination()
+#    compareTauJets()
+#    compareLeptonic()
+#    compareCombination()
 #    compareCombinationSanitychecksLHC()
+
+    compareTauJetsDeltaPhi()
 
 def compareTauJets():
     doCompare("taujets", [
@@ -73,9 +74,19 @@ def compareCombinationSanitychecksLHC():
             ])
 
 
+def compareTauJetsDeltaPhi():
+    doCompare("taujets_deltaphi", [
+              # (name, dir)
+              ("Without #Delta#phi cut", "datacards_220312_123012_fully_hadronic_2011A_MET50_withRtau_NoDeltaPhi_withShapes_shapeStat/LandSMultiCrab_taujets_lhc_*"),
+              ("#Delta#phi < 160^{o}", "combination_new/LandS*taujets_lhc_*"),
+              ("#Delta#phi < 130^{o}", "datacards_220312_122901_fully_hadronic_2011A_MET50_withRtau_DeltaPhi130_withShapes_shapeStat/LandSMultiCrab_taujets_lhc_*")
+              ])
+            
+
+
 styleList = [styles.Style(24, ROOT.kBlack)] + styles.getStyles()
 
-def doCompare(name, compareList):
+def doCompare(name, compareList, **kwargs):
     legendLabels = []
     limits = []
     for label, path in compareList:
@@ -90,49 +101,50 @@ def doCompare(name, compareList):
 
     doPlot2(limits, legendLabels, name)
 
-    ymax = limits[0].getFinalstateYmax()
+    limitOpts = kwargs.get("limitOpts", {"ymax": limits[0].getFinalstateYmaxBR()})
     doPlot(limits, legendLabels, [l.observedGraph() for l in limits],
-           name+"_observed", limit.BRlimit, opts={"ymax": ymax})
+           name+"_observed", limit.BRlimit, opts=kwargs.get("observedOpts", limitOpts))
 
     doPlot(limits, legendLabels, [l.expectedGraph() for l in limits],
-           name+"_expectedMedian", limit.BRlimit, opts={"ymax": ymax})
+           name+"_expectedMedian", limit.BRlimit, opts=kwargs.get("expectedMedian", limitOpts))
 
     legendLabels2 = legendLabels + [None]*len(legendLabels)
 
-    # doPlot(limits, legendLabels2,
-    #        [brlimit.divideGraph(l.expectedGraph(sigma=+1), l.expectedGraph()) for l in limits] +
-    #        [brlimit.divideGraph(l.expectedGraph(sigma=-1), l.expectedGraph()) for l in limits],
-    #        name+"_expectedSigma1Relative", "Expected #pm1#sigma / median", opts={"ymaxfactor": 1.2})
+    expectedSigmaRelativeOpts = kwargs.get("expectedSigmaRelativeOpts", {"ymaxfactor": 1.2})
+    doPlot(limits, legendLabels2,
+           [limit.divideGraph(l.expectedGraph(sigma=+1), l.expectedGraph()) for l in limits] +
+           [limit.divideGraph(l.expectedGraph(sigma=-1), l.expectedGraph()) for l in limits],
+           name+"_expectedSigma1Relative", "Expected #pm1#sigma / median", opts=kwargs.get("expectedSigma1RelativeOpts", expectedSigmaRelativeOpts))
 
-    # doPlot(limits, legendLabels2,
-    #        [brlimit.divideGraph(l.expectedGraph(sigma=+2), l.expectedGraph()) for l in limits] +
-    #        [brlimit.divideGraph(l.expectedGraph(sigma=-2), l.expectedGraph()) for l in limits],
-    #        name+"_expectedSigma2Relative", "Expected #pm2#sigma / median", opts={"ymaxfactor": 1.2})
+    doPlot(limits, legendLabels2,
+           [limit.divideGraph(l.expectedGraph(sigma=+2), l.expectedGraph()) for l in limits] +
+           [limit.divideGraph(l.expectedGraph(sigma=-2), l.expectedGraph()) for l in limits],
+           name+"_expectedSigma2Relative", "Expected #pm2#sigma / median", opts=kwargs.get("expectedSigma2RelativeOpts", expectedSigmaRelativeOpts))
 
     doPlot(limits, legendLabels2,
            [l.expectedGraph(sigma=+1) for l in limits] +
            [l.expectedGraph(sigma=-1) for l in limits],
-           name+"_expectedSigma1", "Expected #pm1#sigma", opts={"ymax": ymax})
+           name+"_expectedSigma1", "Expected #pm1#sigma", opts=kwargs.get("expectedSigma1Opts", limitOpts))
 
     doPlot(limits, legendLabels2,
            [l.expectedGraph(sigma=+2) for l in limits] +
            [l.expectedGraph(sigma=-2) for l in limits],
-           name+"_expectedSigma2", "Expected #pm2#sigma", opts={"ymax": ymax})
+           name+"_expectedSigma2", "Expected #pm2#sigma", opts=kwargs.get("expectedSigma2Opts", limitOpts))
 
     # doPlot(limits, legendLabels,
-    #        [brlimit.divideGraph(l.expectedGraph(sigma=+1), l.expectedGraph()) for l in limits]
+    #        [limit.divideGraph(l.expectedGraph(sigma=+1), l.expectedGraph()) for l in limits]
     #        name+"_expectedSigma1Plus", "Expected +1#sigma / median", opts={"ymaxfactor": 1.2})
 
     # doPlot(limits, legendLabels,
-    #        [brlimit.divideGraph(l.expectedGraph(sigma=+2), l.expectedGraph()) for l in limits]
+    #        [limit.divideGraph(l.expectedGraph(sigma=+2), l.expectedGraph()) for l in limits]
     #        name+"_expectedSigma2Plus", "Expected +2#sigma / median", opts={"ymaxfactor": 1.2})
 
     # doPlot(limits, legendLabels,
-    #        [brlimit.divideGraph(l.expectedGraph(sigma=-1), l.expectedGraph()) for l in limits],
+    #        [limit.divideGraph(l.expectedGraph(sigma=-1), l.expectedGraph()) for l in limits],
     #        name+"_expectedSigma1Minus", "Expected -1#sigma / median", opts={"ymaxfactor": 1.2})
 
     # doPlot(limits, legendLabels,
-    #        [brlimit.divideGraph(l.expectedGraph(sigma=-2), l.expectedGraph()) for l in limits],
+    #        [limit.divideGraph(l.expectedGraph(sigma=-2), l.expectedGraph()) for l in limits],
     #        name+"_expectedSigma2Minus", "Expected -2#sigma / median", opts={"ymaxfactor": 1.2})
 
 
@@ -206,7 +218,7 @@ def doPlot2(limits, legendLabels, name):
         legend = histograms.moveLegend(legend, dy=-0.1)
     plot.setLegend(legend)
 
-    plot.createFrame(name+"_limits", opts={"ymin": 0, "ymax": limits[0].getFinalstateYmax()})
+    plot.createFrame(name+"_limits", opts={"ymin": 0, "ymax": limits[0].getFinalstateYmaxBR()})
     plot.frame.GetXaxis().SetTitle(limit.mHplus())
     plot.frame.GetYaxis().SetTitle(limit.BRlimit)
 

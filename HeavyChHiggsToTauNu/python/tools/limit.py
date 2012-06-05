@@ -473,3 +473,19 @@ def graphToMh(graph):
         print mA, mZ, i, graph.GetN()
         mH = math.sqrt(mA*mA + mW*mW)
         graph.SetPoint(i, mH, tanb)
+
+## Divide two TGraphs
+#
+# \param num    Numerator TGraph
+# \param denom  Denominator TGraph
+#
+# \return new TGraph as the ratio of the two TGraphs
+def divideGraph(num, denom):
+    gr = ROOT.TGraph(num)
+    for i in xrange(gr.GetN()):
+        y = denom.GetY()[i]
+        val = 0
+        if y != 0:
+            val = gr.GetY()[i]/y
+        gr.SetPoint(i, gr.GetX()[i], val)
+    return gr
