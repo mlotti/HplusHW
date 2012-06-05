@@ -948,7 +948,7 @@ class PlotDrawerTauEmbeddingEmbeddedNormal(PlotDrawerTauEmbedding):
             p.appendPlotObject(histograms.PlotText(x, y, "Embedded data min/max", size=17)); y-= 0.03
         if hasattr(p, "embeddingVariation"):
             p.appendPlotObject(histograms.PlotText(x, y, "[  ]", size=17, color=p.embeddingVariation.GetMarkerColor())); x += 0.05
-            p.appendPlotObject(histograms.PlotText(x, y, "Embedded MC min/max", size=17)); y-= 0.03
+            p.appendPlotObject(histograms.PlotText(x, y, "Embedded sim. min/max", size=17)); y-= 0.03
 
         self.addCutLineBox(p, **kwargs)
         self.finish(p, xlabel, **kwargs)
@@ -1026,13 +1026,14 @@ class PlotCreatorMany:
         legLabel = plots._legendLabels.get(self.datasetName, self.datasetName)
         legLabelEmb = legLabel
         if legLabel != "Data":
-            legLabel += " MC"
+            legLabel += " sim."
         residual = ""
         if self.isResidual:
             embedded = "Emb. "
-            residual = " + res. MC"
-        legLabelEmb += " MC"
+            residual = " + res. sim."
+        legLabelEmb += " sim."
 
+        p.setLuminosity(lumi)
         p.histoMgr.setHistoLegendLabelMany({
                 "Embedded":     embedded + legLabelEmb + residual,
                 "Normal":       "Normal " + legLabel,
