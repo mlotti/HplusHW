@@ -1601,6 +1601,8 @@ class PlotDrawer:
     #
     # \param ylabel              Default Y axis title
     # \param log                 Should Y axis be in log scale by default?
+    # \param ratio               Draw the ratio pad?
+    # \param ratioYlabel         The Y axis title for the ratio pad (None for default)
     # \param opts                Default frame bounds linear scale (see histograms._boundsArgs())
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
@@ -1612,6 +1614,7 @@ class PlotDrawer:
                  ylabel="Occurrances / %.0f",
                  log=False,
                  ratio=False,
+                 ratioYlabel=None,
                  opts={},
                  optsLog={},
                  opts2={},
@@ -1623,6 +1626,7 @@ class PlotDrawer:
         self.ylabelDefault = ylabel
         self.logDefault = log
         self.ratioDefault = ratio
+        self.ratioYlabel = ratioYlabel
         self.optsDefault = {"ymin": 0, "ymaxfactor": 1.1}
         self.optsDefault.update(opts)
         self.optsLogDefault = {"ymin": 0.01, "ymaxfactor": 2}
@@ -1696,10 +1700,11 @@ class PlotDrawer:
     # \param kwargs  Keyword arguments (see below)
     #
     # <b>Keyword arguments</b>
-    # \li\a log      Should Y axis be in log scale? (default given in __init__()/setDefaults())
-    # \li\a opts     Frame bounds (defaults given in __init__()/setDefaults())
-    # \li\a opts2    Ratio pad bounds (defaults given in __init__()/setDefaults())
-    # \li\a ratio    Should ratio pad be drawn? (default given in __init__()/setDefaults())
+    # \li\a log          Should Y axis be in log scale? (default given in __init__()/setDefaults())
+    # \li\a opts         Frame bounds (defaults given in __init__()/setDefaults())
+    # \li\a opts2        Ratio pad bounds (defaults given in __init__()/setDefaults())
+    # \li\a ratio        Should ratio pad be drawn? (default given in __init__()/setDefaults())
+    # \li\a ratioYlabel  The Y axis title for the ratio pad (None for default)
     def createFrame(self, p, name, **kwargs):
         log = kwargs.get("log", self.logDefault)
 
@@ -1729,6 +1734,12 @@ class PlotDrawer:
         p.createFrame(name, **args)
         if log:
             p.getPad().SetLogy(log)
+
+        # Override ratio ytitle
+        ratioYlabel = kwargs.get("ratioYlabel", self.ratioYlabel)
+        if ratio and ratioYlabel != None:
+            p.getFrame2().GetYaxis().SetTitle(ratioYlabel)
+
 
     ## Add a legend to the plot
     #
