@@ -1057,6 +1057,8 @@ class HistoStacked(Histo):
     # List of histograms.Histo objects which are stacked
 
 ## Represents TGraph objects
+#
+# \todo The way to detect TGraph from TGraphErrors or TGraphAsymmErrors is really ugly
 class HistoGraph(Histo):
     ## Constructor
     #
@@ -1074,35 +1076,35 @@ class HistoGraph(Histo):
         return [func(values[i], i) for i in xrange(0, self.getRootGraph().GetN())]
 
     def getXmin(self):
-        if isinstance(self.getRootGraph(), ROOT.TGraph):
+        if isinstance(self.getRootGraph(), ROOT.TGraphErrors) or isinstance(self.getRootGraph(), ROOT.TGraphAsymmErrors):
+            function = lambda val, i: val-self.getRootGraph().GetErrorXlow(i)
+        else:
             # TGraph.GetError[XY]{low,high} return -1 ...
             function = lambda val, i: val
-        else:
-            function = lambda val, i: val-self.getRootGraph().GetErrorXlow(i)
         return min(self._values(self.getRootGraph().GetX(), function))
 
     def getXmax(self):
-        if isinstance(self.getRootGraph(), ROOT.TGraph):
+        if isinstance(self.getRootGraph(), ROOT.TGraphErrors) or isinstance(self.getRootGraph(), ROOT.TGraphAsymmErrors):
+            function = lambda val, i: val+self.getRootGraph().GetErrorXhigh(i)
+        else:
             # TGraph.GetError[XY]{low,high} return -1 ...
             function = lambda val, i: val
-        else:
-            function = lambda val, i: val+self.getRootGraph().GetErrorXhigh(i)
         return max(self._values(self.getRootGraph().GetX(), function))
 
     def getYmin(self):
-        if isinstance(self.getRootGraph(), ROOT.TGraph):
+        if isinstance(self.getRootGraph(), ROOT.TGraphErrors) or isinstance(self.getRootGraph(), ROOT.TGraphAsymmErrors):
+            function = lambda val, i: val-self.getRootGraph().GetErrorYlow(i)
+        else:
             # TGraph.GetError[XY]{low,high} return -1 ...
             function = lambda val, i: val
-        else:
-            function = lambda val, i: val-self.getRootGraph().GetErrorYlow(i)
         return min(self._values(self.getRootGraph().GetY(), function))
 
     def getYmax(self):
-        if isinstance(self.getRootGraph(), ROOT.TGraph):
+        if isinstance(self.getRootGraph(), ROOT.TGraphErrors) or isinstance(self.getRootGraph(), ROOT.TGraphAsymmErrors):
+            function = lambda val, i: val+self.getRootGraph().GetErrorYhigh(i)
+        else:
             # TGraph.GetError[XY]{low,high} return -1 ...
             function = lambda val, i: val
-        else:
-            function = lambda val, i: val+self.getRootGraph().GetErrorYhigh(i)
         return max(self._values(self.getRootGraph().GetY(), function))
 
     def getBinWidth(self, bin):
