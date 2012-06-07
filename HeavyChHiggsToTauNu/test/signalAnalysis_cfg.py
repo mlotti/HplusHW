@@ -312,6 +312,8 @@ print "TauSelection src:", process.signalAnalysis.tauSelection.src.value()
 print "TauVetoSelection src:", process.signalAnalysis.vetoTauSelection.tauSelection.src.value()
 print "TauSelection isolation:", process.signalAnalysis.tauSelection.isolationDiscriminator.value()
 print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode.value()
+print "VetoTauSelection src:", process.signalAnalysis.vetoTauSelection.tauSelection.src.value()
+
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
