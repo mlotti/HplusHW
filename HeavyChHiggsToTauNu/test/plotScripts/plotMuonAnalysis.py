@@ -112,7 +112,7 @@ def main():
     style = tdrstyle.TDRStyle()
     #histograms.createLegend.moveDefaults(dx=-0.15)
     plots._legendLabels["QCD_Pt20_MuEnriched"] = "QCD"
-    histograms.createLegend.moveDefaults(dx=-0.02)
+    histograms.createLegend.moveDefaults(dx=-0.04)
 
     doPlots(datasets)
 #    printCounters(datasets)
@@ -122,7 +122,7 @@ def main():
 def doPlots(datasets):
     def createPlot(name, **kwargs):
         return plots.DataMCPlot(datasets, name, **kwargs)
-    drawPlot = plots.PlotDrawer(stackMCHistograms=True, addMCUncertainty=True, log=True, ratio=True)
+    drawPlot = plots.PlotDrawer(stackMCHistograms=True, addMCUncertainty=True, log=True, ratio=True, ratioYlabel="Ratio")
 
     selections = [
         ("Full_", And(muonSelection, muonVeto, electronVeto, jetSelection)),

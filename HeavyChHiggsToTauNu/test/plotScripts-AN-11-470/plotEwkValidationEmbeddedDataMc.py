@@ -55,6 +55,7 @@ def main():
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
+    histograms.cmsTextMode = histograms.CMSMode.NONE
     tauEmbedding.normalize=True
     tauEmbedding.era = "Run2011A"
 
@@ -116,7 +117,7 @@ def doPlots(datasetsEmb):
 
     # After b tagging
     treeDraw = dataset.TreeDraw(analysisEmb+"/tree", weight=tauEmbedding.signalNtuple.weightBTagging)
-    tdMt = treeDraw.clone(varexp="%s >>tmp(20,0,400)" % tauEmbedding.signalNtuple.mtExpression)
+    tdMt = treeDraw.clone(varexp="%s >>tmp(15,0,300)" % tauEmbedding.signalNtuple.mtExpression)
     tdDeltaPhi = treeDraw.clone(varexp="%s >>tmp(18, 0, 180)" % tauEmbedding.signalNtuple.deltaPhiExpression)
 
     # DeltaPhi
@@ -133,6 +134,10 @@ def doPlots(datasetsEmb):
 
         p = createPlot(tdMt.clone(selection=And(*selection)))
         p.appendPlotObject(histograms.PlotText(0.5, 0.62, label, size=20))
+        if "DeltaPhi160":
+            histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
+        else:
+            histograms.cmsTextMode = histograms.CMSMode.NONE
         drawPlot(p, prefix+"transverseMass_"+name, "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts={"ymax": 35}, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}", log=False)
 
 

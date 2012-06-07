@@ -65,6 +65,7 @@ def main():
     plots.mergeRenameReorderForDataMC(datasetsSig)
 
     style = tdrstyle.TDRStyle()
+    histograms.cmsTextMode = histograms.CMSMode.NONE
     histograms.createLegend.moveDefaults(dx=-0.32, dh=-0.15)
     tauEmbedding.normalize=True
     tauEmbedding.era = "Run2011A"
@@ -78,11 +79,11 @@ def main():
 
     # JES plots
     jesAnalyses = [
-        ("Baseline", baseline),
+        ("Nominal", baseline),
         ("Plus", plusJES),
         ("Minus", minusJES)
         ]
-    doPlot(datasetsEmb, jesAnalyses, "transverseMass", "mt_variated_btagging", "Without #Delta#phi(#tau jet, E_{T}^{miss}) cut")
+    doPlot(datasetsEmb, jesAnalyses, "transverseMass", "mt_variated_btagging", "Without #Delta#phi(#tau jet, E_{T}^{miss}) selection")
     doPlot(datasetsEmb, jesAnalyses, "transverseMassAfterDeltaPhi160", "mt_variated_deltaPhi160", "#Delta#phi(#tau jet, E_{T}^{miss}) < 160^{o}")
     doPlot(datasetsEmb, jesAnalyses, "transverseMassAfterDeltaPhi130", "mt_variated_deltaPhi130", "#Delta#phi(#tau jet, E_{T}^{miss}) < 130^{o}")
 
@@ -97,8 +98,8 @@ def main():
 
 def doPlot(datasetsEmb, analyses, path, name, text):
     histos = []
-    legends = {"Plus": "#tau-jet energy scale variated by +3 %",
-               "Minus": "#tau-jet energy scale variated by -3 %"}
+    legends = {"Plus": "#tau-jet energy scale varied by +3 %",
+               "Minus": "#tau-jet energy scale varied by -3 %"}
 
     for aname, analysis in analyses:
         (rootHisto, tmp) = datasetsEmb.getHistogram("Data", analysis+"/"+path)
@@ -110,15 +111,15 @@ def doPlot(datasetsEmb, analyses, path, name, text):
 
     p = plots.ComparisonManyPlot(histos[0], histos[1:])
 
-    styles.dataStyle(p.histoMgr.getHisto("Baseline"))
+    styles.dataStyle(p.histoMgr.getHisto("Nominal"))
     styles.mcStyle(p.histoMgr.getHisto("Plus"))
     styles.mcStyle2(p.histoMgr.getHisto("Minus"))
     p.histoMgr.getHisto("Minus").getRootHisto().SetMarkerSize(2)
     p.setLuminosity(datasetsEmb.getLuminosity())
-    p.appendPlotObject(histograms.PlotText(0.5, 0.55, text, size=20))
+    p.appendPlotObject(histograms.PlotText(0.45, 0.55, text, size=20))
 
     plots.drawPlot(p, name, "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", ylabel="Events / %d GeV/c^{2}",
-                   rebin=20, ratio=True, opts={"ymax": 35}, opts2={"ymax": 2}, addLuminosityText=True)
+                   rebin=20, ratio=True, opts={"ymax": 35, "xmax": 300}, opts2={"ymax": 2}, addLuminosityText=True)
 
 def doCounters(datasetsEmbResidual, jesAnalyses, step):
     datasetsEmb = datasetsEmbResidual.datasetsEmb
@@ -205,15 +206,15 @@ def doCounters(datasetsEmbResidual, jesAnalyses, step):
         count = col.getCount(name=step)
         values[name] = count.value()
         values[name+"Unc"] = count.uncertainty()
-    plusDiff = abs(values["Baseline"] - values["Plus"])
-    minusDiff = abs(values["Baseline"] - values["Minus"])
+    plusDiff = abs(values["Nominal"] - values["Plus"])
+    minusDiff = abs(values["Nominal"] - values["Minus"])
     maxDiff = max(plusDiff, minusDiff)
-    rel = maxDiff / values["Baseline"]
-    print "JES baseline %.2f, plus %.2f, minus %.2f, rel. unc. %.2f" % (values["Baseline"], values["Plus"], values["Minus"], rel*100)
+    rel = maxDiff / values["Nominal"]
+    print "JES baseline %.2f, plus %.2f, minus %.2f, rel. unc. %.2f" % (values["Nominal"], values["Plus"], values["Minus"], rel*100)
     addRow("Tau energy scale", dataset.Count(rel))
 
     # stat. unc.
-    addRow("Control sample stat. uncertainty", dataset.Count(values["BaselineUnc"] / values["Baseline"]))
+    addRow("Control sample stat. uncertainty", dataset.Count(values["NominalUnc"] / values["Nominal"]))
 
     # W->tau->mu fraction
     addRow("Fraction of W->tau->mu events", dataset.Count(unc_wtaumu))

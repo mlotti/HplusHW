@@ -77,6 +77,8 @@ def main():
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
+    histograms.cmsTextMode = histograms.CMSMode.SIMULATION
+    histograms.cmsText[histograms.CMSMode.SIMULATION] = "Simulation"
     histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
     tauEmbedding.normalize = True
     tauEmbedding.era = "Run2011A"
@@ -94,7 +96,7 @@ def main():
     dop("Diboson")
 
 
-drawPlotCommon = tauEmbedding.PlotDrawerTauEmbeddingEmbeddedNormal(ylabel="Events / %.0f GeV/c", stackMCHistograms=False, log=True, addMCUncertainty=True, ratio=True)
+drawPlotCommon = tauEmbedding.PlotDrawerTauEmbeddingEmbeddedNormal(ylabel="Events / %.0f GeV/c", stackMCHistograms=False, log=True, addMCUncertainty=True, ratio=True, addLuminosityText=True)
 
 def doTauPlots(datasetsEmb, datasetsSig, datasetName):
     lumi = datasetsEmb.getLuminosity()
@@ -211,7 +213,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
     # Tree cut definitions
     treeDraw = dataset.TreeDraw("dummy", weight=tauEmbedding.signalNtuple.weightBTagging)
     tdDeltaPhi = treeDraw.clone(varexp="%s >>tmp(18, 0, 180)" % tauEmbedding.signalNtuple.deltaPhiExpression)
-    tdMt = treeDraw.clone(varexp="%s >>tmp(20,0,400)" % tauEmbedding.signalNtuple.mtExpression)
+    tdMt = treeDraw.clone(varexp="%s >>tmp(15,0,300)" % tauEmbedding.signalNtuple.mtExpression)
 
     # DeltapPhi
     xlabel = "#Delta#phi(#tau jet, E_{T}^{miss}) (^{o})"

@@ -85,6 +85,8 @@ def do(onlyWjets, mcEvents, normalize, formatCounters, formatPlots):
 
 
     style = tdrstyle.TDRStyle()
+    histograms.cmsTextMode = histograms.CMSMode.SIMULATION
+    histograms.cmsText[histograms.cmsTextMode] = "Simulation"
 
     tauEmbedding.normalize=normalize
     tauEmbedding.era = "Run2011A"
@@ -203,7 +205,7 @@ def doPlots(table, onlyWjets, mcEvents, normalize, lumi):
         name = table.getColumnNames()[icol]
         label = plots._legendLabels.get(name, name)
         if name != "Data":
-            label += " MC"
+            label += " simulation"
         h = ROOT.TH1F(name, name, nrows, 0, nrows)
         h2 = ROOT.TH1F(name+"_dist", name, *(binning.get(name, (10, 0, 100))))
         mean = dataset.Count(0, 0)
@@ -245,7 +247,7 @@ def doPlots(table, onlyWjets, mcEvents, normalize, lumi):
         p.histoMgr.setHistoDrawStyle(name, "EP")
         p.createFrame("fluctuation_"+name, opts={"ymin": 0, "ymaxfactor": 1.2, "nbins": nrows})
         p.frame.GetXaxis().SetTitle("Embedding trial number")
-        ylabel = "MC"
+        ylabel = "Simulation"
         if name == "Data":
             ylabel = "Data"
         ylabel += " events"
@@ -288,12 +290,12 @@ def doPlots(table, onlyWjets, mcEvents, normalize, lumi):
 
         p.legend = leg
 
-        p.appendPlotObject(histograms.PlotText(0.48, 0.2, label, size=20))
+        p.appendPlotObject(histograms.PlotText(0.65, 0.33, label, size=20))
         p.draw()
-        histograms.addCmsPreliminaryText()
+        if name != "Data":
+            histograms.addCmsPreliminaryText(text="Simulation")
         histograms.addEnergyText()
-        if name == "Data":
-            histograms.addLuminosityText(None, None, lumi)
+        histograms.addLuminosityText(None, None, lumi)
         p.save()
 
         ###############
@@ -334,7 +336,7 @@ def doPlots(table, onlyWjets, mcEvents, normalize, lumi):
 
         p.appendPlotObject(h2, "FUNC")
         p.appendPlotObject(stat)
-        p.appendPlotObject(histograms.PlotText(0.75, 0.88, label, size=20))
+        p.appendPlotObject(histograms.PlotText(0.65, 0.88, label, size=20))
         # fv = createLine2(value)
         # leg.AddEntry(fv, "Fit of values", "L")
         # p.appendPlotObject(fv)
@@ -346,8 +348,10 @@ def doPlots(table, onlyWjets, mcEvents, normalize, lumi):
 
         p.draw()
 
-        histograms.addCmsPreliminaryText()
+        if name != "Data":
+            histograms.addCmsPreliminaryText(text="Simulation")
         histograms.addEnergyText()
+        histograms.addLuminosityText(None, None, lumi)
         p.save()
 
 

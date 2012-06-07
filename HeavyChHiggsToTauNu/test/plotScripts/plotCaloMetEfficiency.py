@@ -426,7 +426,7 @@ def plotTurnOn(datasets, pathAll, pathPassed, commonText, dataText=None, mcText=
     
     p.createFrame(name, createRatio=ratio, opts=opts, opts2=opts2)
     if ratio:
-        p.getFrame2().GetYaxis().SetTitle("Data / MC")
+        p.getFrame2().GetYaxis().SetTitle("Ratio")
         p.cf.canvas.cd(2)
         p.line1 = plots._createRatioLine(p.cf.frame.getXmin(), p.cf.frame.getXmax(), 0.9)
         p.line2 = plots._createRatioLine(p.cf.frame.getXmin(), p.cf.frame.getXmax(), 1.1)
@@ -537,8 +537,10 @@ def plotMet(h, name, xlabel, rebin=1, ratio=False, opts={}, opts2={}):
 
     #h.createFrameFraction(name, opts=opts)
     h.createFrame(name+"_"+runs, opts=opts_, createRatio=ratio, opts2=opts2)
+    if ratio:
+        h.getFrame2().GetYaxis().SetTitle("Ratio")
     ROOT.gPad.SetLogy(True)
-    h.setLegend(histograms.moveLegend(histograms.createLegend())) #, dx=-0.12))
+    h.setLegend(histograms.moveLegend(histograms.createLegend() , dx=-0.04))
     h.appendPlotObject(histograms.PlotText(0.42, 0.89, "Runs %s"%runs, size=17))
     common(h, xlabel, ylabel)
 
@@ -548,7 +550,7 @@ def common(h, xlabel, ylabel, addLuminosityText=True, afterDraw=None):
     h.draw()
     if afterDraw != None:
         afterDraw()
-    histograms.addCmsPreliminaryText()
+#    histograms.addCmsPreliminaryText()
     histograms.addEnergyText()
     if addLuminosityText:
         h.addLuminosityText()

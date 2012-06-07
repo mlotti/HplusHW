@@ -279,7 +279,7 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
     denom2 = offlineSelection2
     num1 = And(denom1, l1Selection1, l2Selection, l25Selection, l3Selection1)
     num2 = And(denom2, l1Selection1, l2Selection, l25Selection, l3Selection2)
-    plotter.plotEfficiency(prefix+"Tau3_L1HLT_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="Level-1 + HLT tau efficiency", fit=True, fitMin=20., fitMax=150., drawText=True, printResults=True)
+    plotter.plotEfficiency(prefix+"Tau3_L1HLT_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="Level-1 + HLT #tau efficiency", fit=True, fitMin=20., fitMax=150., drawText=True, printResults=True)
 
     denom1 = And(denom1, offlineTauPt40)
     denom2 = And(denom2, offlineTauPt40)
@@ -461,8 +461,8 @@ class Plotter:
             for bin in xrange(1, n1.GetNbinsX()+1):
                 i = bin-1
                 print "Bin low edge %.0f" % n1.GetBinLowEdge(bin)
-                print "   1: efficiency %.7f +- %.7f" % (eff1.GetY()[i], max(eff1.GetErrorYhigh(i), eff1.GetErrorYlow(i)))
-                print "   2: efficiency %.7f +- %.7f" % (eff2.GetY()[i], max(eff2.GetErrorYhigh(i), eff2.GetErrorYlow(i)))
+                print "   1: efficiency %.7f +- %.7f = %7.1f / %7.1f" % (eff1.GetY()[i], max(eff1.GetErrorYhigh(i), eff1.GetErrorYlow(i)), n1.GetBinContent(bin), d1.GetBinContent(bin))
+                print "   2: efficiency %.7f +- %.7f = %7.1f / %7.1f" % (eff2.GetY()[i], max(eff2.GetErrorYhigh(i), eff2.GetErrorYlow(i)), n2.GetBinContent(bin), d2.GetBinContent(bin))
                 print "   ratio:        %.7f +- %.7f" % (ratio.getRootGraph().GetY()[i], max(ratio.getRootGraph().GetErrorYhigh(i), ratio.getRootGraph().GetErrorYlow(i)))
             print
 
@@ -500,7 +500,7 @@ class Plotter:
             plot.frame.GetYaxis().SetTitle(ylabel)
 
         plot.draw()
-        histograms.addCmsPreliminaryText()
+#        histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
         histograms.addLuminosityText(None, None, self.lumi)
 
