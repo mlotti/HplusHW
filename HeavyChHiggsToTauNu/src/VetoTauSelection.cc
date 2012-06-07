@@ -66,12 +66,12 @@ namespace HPlus {
     hSelectedTauNumber = makeTH<TH1F>(myDir, "SelectedTauNumber", "SelectedTauNumber;Number of selected veto #tau jets;Jets", 4, 0, 4);
     for (int i = 1; i <= hCandidateTauNumber->GetNbinsX(); ++i)
       hSelectedTauNumber->GetXaxis()->SetBinLabel(i, hCandidateTauNumber->GetXaxis()->GetBinLabel(i));
-    hTauCandFromWPt = makeTH<TH1F>(myDir, "TauCandFromWPt", "TauCandFromWPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hTauCandAllPt = makeTH<TH1F>(myDir, "TauCandAllPt", "TauCandAllPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hSelectedGenuineTauByPt = makeTH<TH1F>(myDir, "SelectedGenuineTauByPt", "SelectedGenuineTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hTauCandFromWPt = makeTH<TH1F>(myDir, "TauCandFromWPt", "TauCandFromWPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 80, 0, 400);
+    hTauCandAllPt = makeTH<TH1F>(myDir, "TauCandAllPt", "TauCandAllPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 80, 0, 400);
+    hSelectedGenuineTauByPt = makeTH<TH1F>(myDir, "SelectedGenuineTauByPt", "SelectedGenuineTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 80, 0, 400);
     hSelectedGenuineTauByEta = makeTH<TH1F>(myDir, "SelectedGenuineTauByEta", "SelectedGenuineTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
     hSelectedGenuineTauByPhi = makeTH<TH1F>(myDir, "SelectedGenuineTauByPhi", "SelectedGenuineTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
-    hSelectedFakeTauByPt = makeTH<TH1F>(myDir, "SelectedFakeTauByPt", "SelectedFakeTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hSelectedFakeTauByPt = makeTH<TH1F>(myDir, "SelectedFakeTauByPt", "SelectedFakeTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 80, 0, 400);
     hSelectedFakeTauByEta = makeTH<TH1F>(myDir, "SelectedFakeTauByEta", "SelectedFakeTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
     hSelectedFakeTauByPhi = makeTH<TH1F>(myDir, "SelectedFakeTauByPhi", "SelectedFakeTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
     hSelectedGenuineTauDiTauMass = makeTH<TH1F>(myDir, "SelectedGenuineTauDitauMass", "SelectedGenuineTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
@@ -188,7 +188,7 @@ namespace HPlus {
       //      double myValue = (*it)->userFloat("byTightChargedMaxPt");
       //      double myLdgTrackPt = (*it)->leadPFChargedHadrCand()->pt();
     
-      }
+     
      
       FakeTauIdentifier::MCSelectedTauMatchType myMatch = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
       if (myMatch == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
@@ -214,6 +214,7 @@ namespace HPlus {
     mySelectedTauMomentum.SetXYZM(selectedTau->px(), selectedTau->py(), selectedTau->pz(), 1.777);
     for (edm::PtrVector<pat::Tau>::iterator it = myTauData.getSelectedTaus().begin(); it != myTauData.getSelectedTaus().end(); ++it) {
       // Store to result vector
+
       fSelectedVetoTaus.push_back(*it);
       // Count how many selected veto taus are genuine taus
       FakeTauIdentifier::MCSelectedTauMatchType myMatch = fFakeTauIdentifier.matchTauToMC(iEvent, **it);

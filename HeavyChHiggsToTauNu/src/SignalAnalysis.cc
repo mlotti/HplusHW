@@ -424,20 +424,13 @@ namespace HPlus {
     */  
 //------ Veto against second tau in event
     VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauData.getSelectedTau());
-    if (vetoTauData.passedEvent()) return false;
-    increment(fVetoTauCounter);
-    //    if (!vetoTauData.passedEvent()) increment(fVetoTauCounter);
+    //    if (vetoTauData.passedEvent()) return false; // tau veto
+    //    if (!vetoTauData.passedEvent()) return false; // select events with add. taus
+    //    if (vetoTauData.getSelectedVetoTaus().size() > 0 ) return false;
+    //    increment(fVetoTauCounter);
+    if (!vetoTauData.passedEvent()) increment(fVetoTauCounter);
 
 
-    bool realVetoTauFound = false;
-    //    for(edm::PtrVector<pat::Tau>::const_iterator iTau = vetoTauData.getSelectedVetoTaus().begin(); iTau != vetoTauData.getSelectedVetoTaus().end(); ++iTau) {
-      //     double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET()));
-      //      hDeltaPhiJetMet->Fill(jetDeltaPhi*57.3, fEventWeight.getWeight());
-      //      FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, **(iTau));
-      //      bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(myTauMatch); // True if the selected tau is a fake
-      //      if (!myFakeTauStatus) realVetoTauFound = true;
-    //    }
-    //    std::cout << " realVetoTauFound " << realVetoTauFound  << " selectedVetoTaus =" << vetoTauData.getSelectedVetoTaus().size() << std::endl;
 
 
 //------ Global electron veto

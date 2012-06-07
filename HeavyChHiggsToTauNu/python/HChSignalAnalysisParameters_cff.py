@@ -95,6 +95,7 @@ vetoTauBase = tauSelectionHPSVeryLooseTauBased.clone(
     ptCut = cms.untracked.double(15), # jet pt > value
     etaCut = cms.untracked.double(2.4), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(5.0), # ldg. track > value
+#    leadingObjectPtCut = cms.untracked.double(5.0), # ldg. track > value
 #    isolationDiscriminator = "byVLooseIsolation",
 #    isolationDiscriminator = "byIsolation05",
     rtauCut = cms.untracked.double(0.0), # rtau > value

@@ -48,7 +48,7 @@ def main():
     # Take QCD from data
     datasetsQCD = None
     if QCDfromData:
-        datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_8_patch2/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_111123_132128/multicrab.cfg", counters=counters)
+        datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_4_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_120604_183248/multicrab.cfg", counters=counters)
         datasetsQCD.loadLuminosities()
         datasetsQCD.mergeData()
         datasetsQCD.remove(datasetsQCD.getMCDatasetNames())
@@ -186,6 +186,9 @@ def doPlots(datasets):
     selectionFlow(createPlot("SignalSelectionFlow"), "SignalSelectionFlow", rebin=1)
     
     leadingTrack(createPlot("SelectedTau/SelectedTau_TauLeadingTrackPt"),"SelectedTau_TauLeadingTrackPt", rebin=10)
+
+
+   
 #    rtau(createPlot("genRtau1ProngHp"), "genRtauTopMassWithChi.png1ProngHp")
 #    rtau(createPlot("genRtau1ProngW"), "genRtau1ProngW")
    
@@ -201,6 +204,15 @@ def doPlots(datasets):
 #    drawPlot(createPlot("GlobalMuonVeto/GlobalMuonPt_identified_eta"), "muonPt", rebin=3, xlabel="p_{T}^{muon} (GeV/c)", ylabel="Identified muons / %.0f GeV/c", opts={"xmax": 250}, textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=15)
 #    drawPlot(createPlot("GlobalMuonVeto/GlobalMuonEta_identified"), "muonEta", rebin=3, xlabel="#eta^{muon}", ylabel="Identified muons / %.1f", opts={"xmin": -3, "xmax": 3, "ymaxfactor": 40}, moveLegend={"dy":0.01, "dx":-0.07, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=[-2.5, 2.5])
 
+# tau veto
+    drawPlot(createPlot("TauVeto/TauSelection_selected_taus_pt"), "SelectedVetoTausPt", rebin=2, xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="#tau jets / %.0f GeV/c", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=15)
+    drawPlot(createPlot("VetoTauSelection/SelectedFakeTauByPt"), "SelectedFakeVetoTauPt", rebin=2, xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="#tau jets / %.0f GeV/c", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=15)
+    drawPlot(createPlot("VetoTauSelection/SelectedFakeTauByEta"), "SelectedFakeVetoTauEta", rebin=2, xlabel="#eta^{#tau jet}", ylabel="#tau jets / %.1f", opts={"ymaxfactor": 110}, moveLegend={"dy":0.01, "dx":-0.2, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.4, y=0.22), cutLine=[-2.4, 2.4])     
+    drawPlot(createPlot("VetoTauSelection/SelectedGenuineTauByPt"), "SelectedGenuineVetoTauPt", rebin=2, xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="#tau jets / %.0f GeV/c", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=15)
+    drawPlot(createPlot("VetoTauSelection/SelectedGenuineTauByEta"), "SelectedGenuineVetoTauEta", rebin=2, xlabel="#eta^{#tau jet}", ylabel="#tau jets / %.1f", opts={"ymaxfactor": 110}, moveLegend={"dy":0.01, "dx":-0.2, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.4, y=0.22), cutLine=[-2.4, 2.4])
+    drawPlot(createPlot("VetoTauSelection/SelectedFakeTauDitauMass"), "SelectedFakeTauDitauMass", rebin=2, xlabel="m_{#tau#tau} (GeV/c^{2})", ylabel="Events / %.0f GeV/c^{2}", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.3, y=0.87))
+    drawPlot(createPlot("VetoTauSelection/SelectedGenuineTauDitauMass"), "SelectedGenuineTauDitauMass", rebin=2, xlabel="m_{#tau#tau} (GeV/c^{2})", ylabel="Events / %.0f GeV/c^{2}", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.3, y=0.87))
+    
     # Jet selection
     drawPlot(createPlot("JetSelection/jet_pt_central"), "centralJetPt", rebin=5, xlabel="p_{T}^{jet} (GeV/c)", ylabel="Jets / %.0f GeV/c", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=30)
     drawPlot(createPlot("JetSelection/jet_pt"), "jetPt", rebin=5, xlabel="p_{T}^{jet} (GeV/c)", ylabel="Jets / %.0f GeV/c", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=30)
