@@ -1,4 +1,4 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter2.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 
 #include "FWCore/Framework/interface/LuminosityBlock.h"
 #include "FWCore/Utilities/interface/Exception.h"
@@ -87,7 +87,7 @@ namespace HPlus {
     edm::Handle<edm::MergeableCounter> hcount;
     for(size_t i=0; i<inputCountTags_.size(); ++i) {
       iBlock.getByLabel(inputCountTags_[i], hcount);
-      incrementCount(0, i, hcount->value);
+      allCounters_.at(0).values.at(i) += hcount->value;
     }
   }
 
@@ -103,7 +103,7 @@ namespace HPlus {
     for(std::vector<Counter>::const_iterator iCounter = allCounters_.begin(); iCounter != allCounters_.end(); ++iCounter) {
       size_t ncounts = iCounter->labels.size();
       TH1F *counts = counterDir.make<TH1F>(iCounter->name.c_str(), iCounter->name.c_str(), ncounts, 0, ncounts);
-      counts->Sumw();
+      counts->Sumw2();
       for(size_t i=0; i<ncounts; ++i) {
         size_t bin = i+1;
         counts->SetBinContent(bin, iCounter->values[i]);
@@ -112,7 +112,7 @@ namespace HPlus {
       }
 
       counts = weightedDir.make<TH1F>(iCounter->name.c_str(), iCounter->name.c_str(), ncounts, 0, ncounts);
-      counts->Sumw();
+      counts->Sumw2();
       for(size_t i=0; i<ncounts; ++i) {
         size_t bin = i+1;
         counts->SetBinContent(bin, iCounter->weights[i]);
@@ -123,7 +123,7 @@ namespace HPlus {
   }
 
   size_t EventCounter::findOrInsertCounter(const std::string& name) {
-    std::vector<Counter>::iterator found = std::find_if(allCounters_.begin(), allCounters_.end(), std::bindnd(std::mem_fun_ref(&EventCounter::Counter::equalName), name));
+    std::vector<Counter>::iterator found = std::find_if(allCounters_.begin(), allCounters_.end(), std::bind2nd(std::mem_fun_ref(&EventCounter::Counter::equalName), name));
     if(found != allCounters_.end())
       return found - allCounters_.begin();
     size_t index = allCounters_.size();
