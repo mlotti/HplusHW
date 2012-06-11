@@ -71,7 +71,8 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     # For tau variation for type I MET, we need the selected tau only
     m = cms.EDFilter("HPlusTauSelectorFilter",
         tauSelection = prototype.tauSelection.clone(),
-        filter = cms.bool(False)
+        filter = cms.bool(False),
+        eventCounter = cms.untracked.PSet(counters=cms.untracked.VInputTag())
     )
     selectedTauName = add(name+"SelectedTauForVariation", m)
     m = tauVariation.clone(
@@ -179,20 +180,15 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     #analysis.MET.type2Src = type2MetVariationName
     setattr(process, analysisName, analysis)
     
-    # Construct the counters module
-    counters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-        counterNames = cms.untracked.InputTag(analysisName, "counterNames"),
-        counterInstances = cms.untracked.InputTag(analysisName, "counterInstances")
-    )
+    # Configure the event counter
+    analysis.eventCounter.printMainCounter = cms.untracked.bool(False)
     if len(additionalCounters) > 0:
-        counters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
-    setattr(process, countersName, counters)
+        analysis.eventCounter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
 
     # Construct the path
     path = cms.Path(
         process.commonSequence *
         sequence *
-        analysis *
-        counters
+        analysis
     )
     setattr(process, pathName, path)
