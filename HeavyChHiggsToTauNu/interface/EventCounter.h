@@ -43,13 +43,7 @@ namespace HPlus {
     Count addCounter(const std::string& name);
     Count addSubCounter(const std::string& base, const std::string& name);
 
-    void incrementCount(size_t counterIndex, size_t countIndex, int value) {
-      Counter& counter = allCounters_.at(counterIndex);
-      counter.values.at(countIndex) += value;
-      double dval = value * (*eventWeightPointer);
-      counter.weights.at(countIndex) += dval;
-      counter.weightsSquared.at(countIndex) += dval*dval;
-    }
+    void incrementCount(size_t counterIndex, size_t countIndex, int value);
     void setWeightPointer(const double* ptr) { eventWeightPointer = ptr; }
 
     void beginLuminosityBlock(const edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup);

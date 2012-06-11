@@ -14,7 +14,6 @@
 #include<algorithm>
 #include<functional>
 #include<memory>
-#include<cstdio>
 
 namespace {
   static const double defaultWeight = 1.0;
@@ -41,7 +40,7 @@ namespace HPlus {
     allCounters_.push_back(Counter("counter")); // ensure main counter has always index 0
 
     // The first elements in the in main counter are from the external edm::MergeableCounters
-    const edm::ParameterSet& pset = iConfig.getParameter<edm::ParameterSet>("eventCounter");
+    const edm::ParameterSet& pset = iConfig.getUntrackedParameter<edm::ParameterSet>("eventCounter");
     inputCountTags_ = pset.getUntrackedParameter<std::vector<edm::InputTag> >("counters");
     for(size_t i=0; i<inputCountTags_.size(); ++i) {
       allCounters_[0].insert(inputCountTags_[i].encode());
@@ -52,7 +51,6 @@ namespace HPlus {
   Count EventCounter::addCounter(const std::string& name) {
     if(finalized)
       throw cms::Exception("LogicError") << "Tried to add counter '" << name << "', but EventCounter::produces has already been called!" << std::endl;
-
 
     size_t counterIndex = findOrInsertCounter("counter");
     if(allCounters_[counterIndex].contains(name))
@@ -78,6 +76,14 @@ namespace HPlus {
     size_t countIndex = allCounters_[counterIndex].insert(name);
 
     return Count(this, counterIndex, countIndex);
+  }
+
+  void EventCounter::incrementCount(size_t counterIndex, size_t countIndex, int value) {
+    Counter& counter = allCounters_.at(counterIndex);
+    counter.values.at(countIndex) += value;
+    double dval = value * (*eventWeightPointer);
+    counter.weights.at(countIndex) += dval;
+    counter.weightsSquared.at(countIndex) += dval*dval;
   }
 
   void EventCounter::beginLuminosityBlock(const edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
@@ -133,7 +139,7 @@ namespace HPlus {
 
 
   Count::Count(EventCounter *counter, size_t counterIndex, size_t countIndex):
-    counter_(counter), counterIndex_(counterIndex), countIndex_(countIndex_) {}
+    counter_(counter), counterIndex_(counterIndex), countIndex_(countIndex) {}
   Count::~Count() {}
 
 
