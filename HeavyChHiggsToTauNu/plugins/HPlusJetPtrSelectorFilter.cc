@@ -22,7 +22,6 @@ class HPlusJetPtrSelectorFilter: public edm::EDFilter {
   virtual void endJob();
 
   virtual bool beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
-  virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
@@ -39,14 +38,13 @@ class HPlusJetPtrSelectorFilter: public edm::EDFilter {
 };
 
 HPlusJetPtrSelectorFilter::HPlusJetPtrSelectorFilter(const edm::ParameterSet& iConfig):
-  eventCounter(),
+  eventCounter(iConfig),
   eventWeight(iConfig),
   fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
   fTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
   fFilter(iConfig.getParameter<bool>("filter")),
   fThrow(iConfig.getParameter<bool>("throw"))
 {
-  eventCounter.produces(this);
   produces<Product>();
   produces<bool>();
   eventCounter.setWeightPointer(eventWeight.getWeightPtr());
@@ -83,12 +81,8 @@ bool HPlusJetPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup
   return !fFilter || (fFilter && passed);
 }
 
-bool HPlusJetPtrSelectorFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
-  eventCounter.endLuminosityBlock(iBlock, iSetup);
-  return false;
-}
-
 void HPlusJetPtrSelectorFilter::endJob() {
+  eventCounter.endJob();
 }
 
 //define this as a plug-in

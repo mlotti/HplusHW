@@ -18,7 +18,6 @@ class HPlusQCDMeasurementProducer: public edm::EDProducer {
   virtual void endJob();
 
   virtual void beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
-  virtual void endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
@@ -26,9 +25,8 @@ class HPlusQCDMeasurementProducer: public edm::EDProducer {
 };
 
 HPlusQCDMeasurementProducer::HPlusQCDMeasurementProducer(const edm::ParameterSet& pset):
-  eventCounter(), eventWeight(pset), analysis(pset, eventCounter, eventWeight)
+  eventCounter(pset), eventWeight(pset), analysis(pset, eventCounter, eventWeight)
 {
-  eventCounter.produces(this);
   eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
 HPlusQCDMeasurementProducer::~HPlusQCDMeasurementProducer() {}
@@ -42,11 +40,8 @@ void HPlusQCDMeasurementProducer::produce(edm::Event& iEvent, const edm::EventSe
   analysis.produce(iEvent, iSetup);
 }
 
-void HPlusQCDMeasurementProducer::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
-  eventCounter.endLuminosityBlock(iBlock, iSetup);
-}
-
 void HPlusQCDMeasurementProducer::endJob() {
+  eventCounter.endJob();
 }
 
 //define this as a plug-in

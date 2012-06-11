@@ -18,7 +18,6 @@ class HPlusSignalAnalysisInvertedTauFilter: public edm::EDFilter {
   virtual void endJob();
 
   virtual bool beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
-  virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
@@ -26,9 +25,8 @@ class HPlusSignalAnalysisInvertedTauFilter: public edm::EDFilter {
 };
 
 HPlusSignalAnalysisInvertedTauFilter::HPlusSignalAnalysisInvertedTauFilter(const edm::ParameterSet& pset):
-  eventCounter(), eventWeight(pset), analysis(pset, eventCounter, eventWeight)
+  eventCounter(pset), eventWeight(pset), analysis(pset, eventCounter, eventWeight)
 {
-  eventCounter.produces(this);
   eventCounter.setWeightPointer(eventWeight.getWeightPtr());
   analysis.produces(this);
 }
@@ -44,12 +42,8 @@ bool HPlusSignalAnalysisInvertedTauFilter::filter(edm::Event& iEvent, const edm:
   return analysis.filter(iEvent, iSetup);
 }
 
-bool HPlusSignalAnalysisInvertedTauFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
-  eventCounter.endLuminosityBlock(iBlock, iSetup);
-  return true;
-}
-
 void HPlusSignalAnalysisInvertedTauFilter::endJob() {
+  eventCounter.endJob();
 }
 
 //define this as a plug-in

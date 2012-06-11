@@ -23,7 +23,6 @@ class HPlusGlobalElectronVetoFilter: public edm::EDFilter {
   virtual void endJob();
 
   virtual bool beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
-  virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
@@ -32,12 +31,11 @@ class HPlusGlobalElectronVetoFilter: public edm::EDFilter {
 };
 
 HPlusGlobalElectronVetoFilter::HPlusGlobalElectronVetoFilter(const edm::ParameterSet& iConfig):
-  eventCounter(),
+  eventCounter(iConfig),
   eventWeight(iConfig),
   fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
   fFilter(iConfig.getParameter<bool>("filter"))
 {
-  eventCounter.produces(this);
   produces<bool>();
   eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
@@ -58,12 +56,8 @@ bool HPlusGlobalElectronVetoFilter::filter(edm::Event& iEvent, const edm::EventS
   return !fFilter || (fFilter && passed);
 }
 
-bool HPlusGlobalElectronVetoFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
-  eventCounter.endLuminosityBlock(iBlock, iSetup);
-  return false;
-}
-
 void HPlusGlobalElectronVetoFilter::endJob() {
+  eventCounter.endJob();
 }
 
 //define this as a plug-in

@@ -18,7 +18,6 @@ class HPlusQCDMeasurementBasicFilter : public edm::EDFilter {
   virtual void endJob();
 
   virtual bool beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
-  virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
@@ -26,9 +25,8 @@ class HPlusQCDMeasurementBasicFilter : public edm::EDFilter {
 };
 
 HPlusQCDMeasurementBasicFilter::HPlusQCDMeasurementBasicFilter(const edm::ParameterSet& pset):
-  eventCounter(), eventWeight(pset), analysis(pset, eventCounter, eventWeight)
+  eventCounter(pset), eventWeight(pset), analysis(pset, eventCounter, eventWeight)
 {
-  eventCounter.produces(this);
   eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
 HPlusQCDMeasurementBasicFilter::~HPlusQCDMeasurementBasicFilter() {}
@@ -43,12 +41,8 @@ bool HPlusQCDMeasurementBasicFilter::filter(edm::Event& iEvent, const edm::Event
   return analysis.filter(iEvent, iSetup);
 }
 
-bool HPlusQCDMeasurementBasicFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
-  eventCounter.endLuminosityBlock(iBlock, iSetup);
-  return true;
-}
-
 void HPlusQCDMeasurementBasicFilter::endJob() {
+  eventCounter.endJob();
 }
 
 //define this as a plug-in
