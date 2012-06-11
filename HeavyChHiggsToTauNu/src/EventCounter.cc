@@ -3,6 +3,7 @@
 #include "FWCore/Framework/interface/LuminosityBlock.h"
 #include "FWCore/Utilities/interface/Exception.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
@@ -36,7 +37,10 @@ namespace HPlus {
     return index;
   }
 
-  EventCounter::EventCounter(const edm::ParameterSet& iConfig): finalized(false), eventWeightPointer(&defaultWeight) {
+  EventCounter::EventCounter(const edm::ParameterSet& iConfig):
+    eventWeightPointer(&defaultWeight),
+    finalized(false)
+  {
     allCounters_.push_back(Counter("counter")); // ensure main counter has always index 0
 
     // The first elements in the in main counter are from the external edm::MergeableCounters
@@ -45,6 +49,9 @@ namespace HPlus {
     for(size_t i=0; i<inputCountTags_.size(); ++i) {
       allCounters_[0].insert(inputCountTags_[i].encode());
     }
+
+    printMainCounter = pset.getUntrackedParameter<bool>("printMainCounter", false);
+    printSubCounters = pset.getUntrackedParameter<bool>("printSubCounters", false);
   }
   EventCounter::~EventCounter() {}
 
@@ -106,6 +113,7 @@ namespace HPlus {
     TFileDirectory weightedDir = counterDir.mkdir("weighted");
 
     // Write contents to histograms
+    std::string cat("EventCounts");
     for(std::vector<Counter>::const_iterator iCounter = allCounters_.begin(); iCounter != allCounters_.end(); ++iCounter) {
       size_t ncounts = iCounter->labels.size();
       TH1F *counts = counterDir.make<TH1F>(iCounter->name.c_str(), iCounter->name.c_str(), ncounts, 0, ncounts);
@@ -114,7 +122,18 @@ namespace HPlus {
         size_t bin = i+1;
         counts->SetBinContent(bin, iCounter->values[i]);
         counts->SetBinError(bin, std::sqrt(static_cast<double>(iCounter->values[i])));
-        counts->GetXaxis()->SetBinLabel(bin, iCounter->name.c_str());
+        counts->GetXaxis()->SetBinLabel(bin, iCounter->labels[i].c_str());
+      }
+      if( (printMainCounter && iCounter == allCounters_.begin()) || printSubCounters ) {
+        const size_t name_w = 50;
+        const size_t count_w = 20;
+        edm::LogVerbatim(cat) << "========================================" << std::endl;
+        edm::LogVerbatim(cat) << "Event counts in " << iCounter->name << " " <<  std::endl;
+        edm::LogVerbatim(cat) << std::endl << std::endl;
+        edm::LogVerbatim(cat) << std::setw(name_w) << std::left << "Counter" << std::setw(count_w) << std::right << "Counts" << std::endl;
+        for(size_t i=0; i<ncounts; ++i) {
+          edm::LogVerbatim(cat) << std::setw(name_w) << std::left << iCounter->labels[i] << std::setw(count_w) << std::right << iCounter->values[i] << std::endl;          
+        }
       }
 
       counts = weightedDir.make<TH1F>(iCounter->name.c_str(), iCounter->name.c_str(), ncounts, 0, ncounts);
@@ -123,7 +142,7 @@ namespace HPlus {
         size_t bin = i+1;
         counts->SetBinContent(bin, iCounter->weights[i]);
         counts->SetBinError(bin, std::sqrt(iCounter->weightsSquared[i]));
-        counts->GetXaxis()->SetBinLabel(bin, iCounter->name.c_str());
+        counts->GetXaxis()->SetBinLabel(bin, iCounter->labels[i].c_str());
       }
     }
   }

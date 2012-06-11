@@ -55,8 +55,10 @@ namespace HPlus {
     std::vector<edm::InputTag> inputCountTags_;
     std::vector<Counter> allCounters_; // main counter is always at index 0
 
-    mutable bool finalized;
     const double* eventWeightPointer;
+    mutable bool finalized;
+    bool printMainCounter;
+    bool printSubCounters;
   };
 
   class Count {
