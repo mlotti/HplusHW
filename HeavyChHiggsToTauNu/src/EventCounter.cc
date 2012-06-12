@@ -94,8 +94,6 @@ namespace HPlus {
   }
 
   void EventCounter::beginLuminosityBlock(const edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
-    eventWeightPointer = &defaultWeight;
-
     // Read counts from file
     edm::Handle<edm::MergeableCounter> hcount;
     for(size_t i=0; i<inputCountTags_.size(); ++i) {
