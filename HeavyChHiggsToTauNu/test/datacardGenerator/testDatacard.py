@@ -1,6 +1,6 @@
 DataCardName    = 'myDummyTestName'
-Path            = '/mnt/flustre/slehti/HplusDataForLands'
-#Path            = '/home/wendland/data/lands/lands_HIG-11-019'
+#Path            = '/mnt/flustre/slehti/HplusDataForLands'
+Path            = '/home/wendland/data/lands/lands_HIG-11-019'
 #MassPoints      = [80,90,100,120,140,150,155,160]
 MassPoints      = [160]
 
@@ -25,19 +25,11 @@ ShapeHistogramsDimensions = { "bins": 20,
                               #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
                               "xtitle": "Transverse mass / GeV",
                               "ytitle": "Events" }
-
 # Options
 OptionReplaceEmbeddingByMC = False
 
 # Options for reports and article
 OptionBr = 0.05  # Br(t->bH+)
-
-
-#FIXME move
-#import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
-#multicrabPaths = PathFinder.MulticrabPathFinder(Path)
-#signalPath = multicrabPaths.getSignalPath()
-#signalDataPaths = multicrabPaths.getSubPaths(signalPath,"^Tau_\S+")
 
 ##############################################################################
 # Observation definition (how to retrieve number of observed events)
