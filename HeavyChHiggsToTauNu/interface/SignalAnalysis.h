@@ -111,6 +111,7 @@ namespace HPlus {
   private:
     CounterGroup* getCounterGroupByTauMatch(FakeTauIdentifier::MCSelectedTauMatchType tauMatch);
     void fillEWKFakeTausCounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData);
+    void doMCAnalysisOfSelectedEvents(edm::Event& iEvent, const TauSelection::Data& tauData, const VetoTauSelection::Data& vetoTauData);
 
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisProducer
@@ -155,10 +156,7 @@ namespace HPlus {
     Count fTauIsElectronFromJetCounter;
     Count fTauIsMuonFromJetCounter;
     Count fTauIsHadronFromJetCounter;
-   
-    Count fFakeMETVetoCounter;
-    Count fdeltaPhiTauMET160FakeMetCounter;
-    Count fForwardJetVetoCounter;
+
     Count fTopSelectionCounter;
     Count fTopChiSelectionCounter;
     Count fTopChiSelection250Counter;
@@ -169,22 +167,9 @@ namespace HPlus {
     Count fTopWithWSelectionCounter;
     Count fTopWithWSelection250Counter;
     Count fTopWithWSelection220Counter;
-    Count ftransverseMassCut70Counter;
-    Count ftransverseMassCut80Counter;
-    Count ftransverseMass70TauVetoCounter;
-    Count ftransverseMass80TauVetoCounter;
-    Count ftransverseMass70TopChiSelCounter;
-    Count ftransverseMass70TopWithBSelCounter;
-    Count ftransverseMass70TopWithWSelCounter;
-    Count ftransverseMass70TopSelCounter;
-    Count ftransverseMass80TopChiSelCounter;
-    Count ftransverseMass80TopWithBSelCounter;
-    Count ftransverseMass80TopWithWSelCounter;
-    Count ftransverseMass80TopSelCounter;
-    Count ftransverseMassCut80NoRtauCounter;
-    Count ftransverseMassCut100NoRtauCounter;
-    Count fZmassVetoCounter;
     Count fTopChiSelectionNarrowCounter;
+    
+    Count fFakeMETVetoCounter;
     Count fSelectedEventsCounter;
 
     TriggerSelection fTriggerSelection;
@@ -248,6 +233,7 @@ namespace HPlus {
 
     TH1 *hDeltaPhi;
     TH1 *hDeltaPhiJetMet;
+    TH1 *hMaxDeltaPhiJetMet;
     TH1 *hAlphaT;
     TH1 *hAlphaTInvMass;
     TH2 *hAlphaTVsRtau;

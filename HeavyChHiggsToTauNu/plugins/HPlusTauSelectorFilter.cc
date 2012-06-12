@@ -27,12 +27,11 @@ class HPlusTauSelectorFilterT: public edm::EDFilter {
  public:
 
   explicit HPlusTauSelectorFilterT(const edm::ParameterSet& iConfig):
-    eventCounter(),
+    eventCounter(iConfig),
     eventWeight(iConfig),
     fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
     fFilter(iConfig.getParameter<bool>("filter"))
   {
-    eventCounter.produces(this);
     produces<Product>();
     produces<bool>();
     eventCounter.setWeightPointer(eventWeight.getWeightPtr());
@@ -59,9 +58,8 @@ class HPlusTauSelectorFilterT: public edm::EDFilter {
     eventCounter.beginLuminosityBlock(iBlock, iSetup);
     return true;
   }
-  virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
-    eventCounter.endLuminosityBlock(iBlock, iSetup);
-    return true;
+  virtual void endJob() {
+    eventCounter.endJob();
   }
 
   HPlus::EventCounter eventCounter;

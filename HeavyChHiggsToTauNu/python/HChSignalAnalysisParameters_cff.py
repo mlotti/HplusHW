@@ -318,6 +318,10 @@ tree = cms.untracked.PSet(
     genParticleSrc = cms.untracked.InputTag("genParticles")
 )
 
+eventCounter = cms.untracked.PSet(
+    counters = cms.untracked.VInputTag()
+)
+
 vertexWeight = cms.untracked.PSet(
     vertexSrc = cms.InputTag("goodPrimaryVertices"),
 #    vertexSrc = cms.InputTag("goodPrimaryVertices10"),

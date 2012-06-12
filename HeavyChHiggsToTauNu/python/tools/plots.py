@@ -583,6 +583,28 @@ def _createRatio(rootHisto1, rootHisto2, ytitle, isBinomial=False):
     elif isinstance(rootHisto1, ROOT.TGraph) and isinstance(rootHisto2, ROOT.TGraph):
         if isBinomial:
             raise Exception("isBinomial is not supported for TGraph input")
+
+        if not rootHisto1.GetN() == rootHisto2.GetN():
+	    xfound = []
+	    for i in range(rootHisto1.GetN()):
+		for j in range(rootHisto2.GetN()):
+		    if rootHisto1.GetX()[i] == rootHisto2.GetX()[j]:
+			xfound.append(rootHisto1.GetX()[i])
+	    for i in range(rootHisto1.GetN()):
+		found = False
+		for x in xfound:
+		    if rootHisto1.GetX()[i] == x:
+			found = True
+		if not found:
+		    rootHisto1.RemovePoint(i)
+            for j in range(rootHisto2.GetN()):
+                found = False
+                for x in xfound:
+                    if rootHisto2.GetX()[j] == x:
+                        found = True
+                if not found:
+                    rootHisto1.RemovePoint(j)
+
         xvalues = []
         yvalues = []
         yerrs = []
@@ -591,11 +613,12 @@ def _createRatio(rootHisto1, rootHisto2, ytitle, isBinomial=False):
             if yval == 0:
                 continue
             xvalues.append(rootHisto1.GetX()[i])
-            yvalues.append(rootHisto1.GetY()[i] / yval)
+            yvalue = rootHisto1.GetY()[i] / yval
+            yvalues.append(yvalue)
             err1 = max(rootHisto1.GetErrorYhigh(i), rootHisto1.GetErrorYlow(i))
             err2 = max(rootHisto2.GetErrorYhigh(i), rootHisto2.GetErrorYlow(i))
-            yerrs.append( yvalues[i]* math.sqrt( _divideOrZero(err1, rootHisto1.GetY()[i])**2 +
-                                                 _divideOrZero(err2, rootHisto2.GetY()[i])**2 ) )
+            yerrs.append( yvalue * math.sqrt( _divideOrZero(err1, rootHisto1.GetY()[i])**2 +
+                                              _divideOrZero(err2, rootHisto2.GetY()[i])**2 ) )
 
         gr = ROOT.TGraphAsymmErrors()
         if len(xvalues) > 0:
@@ -900,12 +923,28 @@ class PlotBase:
         # histogram
         self.getPad().RedrawAxis()
 
+
+    ## Set the integrated luminosity of the data
+    #
+    # \param lumi   Integrated luminosity (in pb^-1)
+    def setLuminosity(self, lumi):
+        self.luminosity = lumi
+
     ## Add text for integrated luminosity
     #
     # \param x   X coordinate (in NDC, None for the default value)
     # \param y   Y coordinate (in NDC, None for the default value)
+    #
+    # Takes luminosity from self.luminosity member set by
+    # setLuminosity() method if it exists. Otherwise forwards the call
+    # to self.histoMgr. If setLuminosity() has been called with None,
+    # no luminosity text is added.
     def addLuminosityText(self, x=None, y=None):
-        self.histoMgr.addLuminosityText(x, y)
+        if hasattr(self, "luminosity"):
+            if self.luminosity != None:
+                histograms.addLuminosityText(x, y, self.luminosity)
+        else:
+            self.histoMgr.addLuminosityText(x, y)
 
     ## Save the plot to file(s)
     #
@@ -1431,16 +1470,6 @@ class DataMCPlot2(PlotBase, PlotRatioBase):
                                    self.histoMgr.getHisto("StackedMC").getSumRootHisto(),
                                    "Data/MC", **kwargs)
 
-    ## Set the integrated luminosity of the data
-    #
-    # \param lumi   Integrated luminosity (in pb^-1)
-    def setLuminosity(self, lumi):
-        self.luminosity = lumi
-
-    def addLuminosityText(self, x=None, y=None):
-        if hasattr(self, "luminosity"):
-            histograms.addLuminosityText(x, y, self.luminosity)
-
     ## Add cut box and/or line
     #
     # \param args    Positional arguments (forwarded to plots._createCutBoxAndLine())
@@ -1532,17 +1561,6 @@ class ComparisonPlot(PlotBase, PlotRatioBase):
         PlotBase.draw(self)
         PlotRatioBase._draw(self)
 
-    ## Set the integrated luminosity of the data
-    #
-    # \param lumi   Integrated luminosity (in pb^-1)
-    def setLuminosity(self, lumi):
-        self.luminosity = lumi
-
-    def addLuminosityText(self, x=None, y=None):
-        if hasattr(self, "luminosity"):
-            histograms.addLuminosityText(x, y, self.luminosity)
-
-
 
 ## Class to compare many histograms to one histogram
 #
@@ -1596,16 +1614,6 @@ class ComparisonManyPlot(PlotBase, PlotRatioBase):
     def draw(self):
         PlotBase.draw(self)
         PlotRatioBase._draw(self)
-
-    ## Set the integrated luminosity of the data
-    #
-    # \param lumi   Integrated luminosity (in pb^-1)
-    def setLuminosity(self, lumi):
-        self.luminosity = lumi
-
-    def addLuminosityText(self, x=None, y=None):
-        if hasattr(self, "luminosity"):
-            histograms.addLuminosityText(x, y, self.luminosity)
 
 
 ## Base class for plot drawing functions

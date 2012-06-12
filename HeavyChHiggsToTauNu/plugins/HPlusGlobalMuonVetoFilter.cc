@@ -23,7 +23,6 @@ class HPlusGlobalMuonVetoFilter: public edm::EDFilter {
   virtual void endJob();
 
   virtual bool beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
-  virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
@@ -33,13 +32,12 @@ class HPlusGlobalMuonVetoFilter: public edm::EDFilter {
 };
 
 HPlusGlobalMuonVetoFilter::HPlusGlobalMuonVetoFilter(const edm::ParameterSet& iConfig):
-  eventCounter(),
+  eventCounter(iConfig),
   eventWeight(iConfig),
   fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
   fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc")),
   fFilter(iConfig.getParameter<bool>("filter"))
 {
-  eventCounter.produces(this);
   produces<bool>();
   eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
@@ -67,12 +65,8 @@ bool HPlusGlobalMuonVetoFilter::filter(edm::Event& iEvent, const edm::EventSetup
   return !fFilter || (fFilter && passed);
 }
 
-bool HPlusGlobalMuonVetoFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
-  eventCounter.endLuminosityBlock(iBlock, iSetup);
-  return false;
-}
-
 void HPlusGlobalMuonVetoFilter::endJob() {
+  eventCounter.endJob();
 }
 
 //define this as a plug-in

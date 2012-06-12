@@ -274,15 +274,10 @@ print "VetoTauSelection src:", process.signalAnalysis.vetoTauSelection.tauSelect
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
-process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-    counterNames = cms.untracked.InputTag("signalAnalysis", "counterNames"),
-    counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances"),
-    printMainCounter = cms.untracked.bool(True),
-    printSubCounters = cms.untracked.bool(False), # Default False
-    printAvailableCounters = cms.untracked.bool(False),
-)
+process.signalAnalysis.eventCounter.printMainCounter = cms.untracked.bool(True)
+#process.signalAnalysis.eventCounter.printSubCounters = cms.untracked.bool(True)
 if len(additionalCounters) > 0:
-    process.signalAnalysisCounters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
+    process.signalAnalysis.eventCounter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
 
 # PickEvent module and the main Path. The picked events are only the
 # ones selected by the golden analysis defined above.
@@ -290,7 +285,6 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
 process.signalAnalysisPath = cms.Path(
     process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
     process.signalAnalysis *
-    process.signalAnalysisCounters *
     process.PickEvents
 )
 

@@ -230,8 +230,6 @@ class HPlusOptimisationScheme():
                                                                   myModule.bTagging.jetNumber = (int)(self.getNumberFromCutWithDirection(bjetNumber))
                                                                   myModule.deltaPhiTauMET = dphi
                                                                   # FIXME add top variation here
-                                                                  #myVariationName += "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                                                                  myVariationName = "var%d"%nVariations
                                                                   # Add analysis
                                                                   addAnalysis(process, myVariationName, myModule,
                                                                               preSequence=commonSequence,

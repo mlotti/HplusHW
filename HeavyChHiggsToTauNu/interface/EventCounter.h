@@ -10,65 +10,55 @@
 
 // Forward declarations
 namespace edm {
-  class EDProducer;
-  class EDFilter;
+  class ParameterSet;
   class LuminosityBlock;
   class EventSetup;
+  class InputTag;
 }
+class TFileDirectory;
 
 namespace HPlus {
   class Count;
 
   // Prevent copying
   class EventCounter: private boost::noncopyable {
-    struct CountValue {
-      CountValue(const std::string& n, const std::string& i, int v, double w);
-      bool equalName(std::string n) const;
-      template <typename T>
-      void produces(T *producer) const;
-      void produce(edm::LuminosityBlock *block) const;
-      void reset();
+    struct Counter {
+      Counter(const std::string& n);
+      bool equalName(const std::string n) const;
+      bool contains(const std::string& l) const;
+
+      size_t insert(const std::string& label);
 
       std::string name;
-      std::string instance;
-      std::string instanceWeights;
-      std::string instanceWeightsSquared;
-      int value;
-      double weight;
-      double weightSquared;
+      std::vector<std::string> labels;
+      std::vector<long int> values;
+      std::vector<double> weights;
+      std::vector<double> weightsSquared;
     };
-    typedef std::vector<CountValue> CountVector;
   public:
 
-    EventCounter();
+    EventCounter(const edm::ParameterSet& iConfig);
     ~EventCounter();
 
     Count addCounter(const std::string& name);
     Count addSubCounter(const std::string& base, const std::string& name);
 
-    void incrementCount(size_t index, int value) {
-      counter_[index].value += value;
-      counter_[index].weight += *eventWeightPointer;
-      counter_[index].weightSquared += *eventWeightPointer * *eventWeightPointer;
-    }
+    void incrementCount(size_t counterIndex, size_t countIndex, int value);
     void setWeightPointer(const double* ptr) { eventWeightPointer = ptr; }
 
-    void produces(edm::EDProducer *producer) const;
-    void produces(edm::EDFilter *producer) const;
-
-    void beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup);
-    void endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) const;
+    void beginLuminosityBlock(const edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup);
+    void endJob();
 
   private:
-    template <typename T>
-    void producesInternal(T *producer) const;
+    size_t findOrInsertCounter(const std::string& name);
 
-    CountVector counter_;
-    std::map<std::string, uint32_t> counterIndices; // yes, map<string, ...> is BAD for performance,
-                                                    // but this is used only at the construction time of the analysis, 
-                                                    // so it should be more or less okay
-    mutable bool finalized;
+    std::vector<edm::InputTag> inputCountTags_;
+    std::vector<Counter> allCounters_; // main counter is always at index 0
+
     const double* eventWeightPointer;
+    mutable bool finalized;
+    bool printMainCounter;
+    bool printSubCounters;
   };
 
   class Count {
@@ -80,7 +70,7 @@ namespace HPlus {
 
     void increment(int value=1) {
       check();
-      counter_->incrementCount(index_, value);
+      counter_->incrementCount(counterIndex_, countIndex_, value);
     }
 
   private:
@@ -88,12 +78,13 @@ namespace HPlus {
     Count(); // NOT IMPLEMENTED
 
     // Prevent construction outside HPlusEventCounter
-    Count(EventCounter *counter, size_t index);
+    Count(EventCounter *counter, size_t counterIndex, size_t countIndex);
 
     void check() const;
 
     EventCounter *counter_;
-    size_t index_;
+    size_t counterIndex_;
+    size_t countIndex_;
   };
 
   inline

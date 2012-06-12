@@ -85,55 +85,38 @@ namespace HPlus {
     fRealTauAfterDeltaPhiCounter(eventCounter.addCounter("Real tau after deltaPhi cut")),
     fRealTauAfterDeltaPhiTauVetoCounter(eventCounter.addCounter("Real tau after deltaPhi+tauveto cut")),
 
-    fTauIsHadronFromHplusCounter(eventCounter.addCounter("Tau from H+ ->tau->hadrons")),
-    fTauIsElectronFromHplusCounter(eventCounter.addCounter("Tau from H+ ->tau->electron")),
-    fTauIsMuonFromHplusCounter(eventCounter.addCounter("Tau from H+ ->tau->muon")),
-    fTauIsElectronFromWCounter(eventCounter.addCounter("Tau from W->e")),
-    fTauIsMuonFromWCounter(eventCounter.addCounter("Tau from W->mu")),
-    fTauIsQuarkFromWCounter(eventCounter.addCounter("Tau from W->qq")),
-    fTauIsElectronFromWTauCounter(eventCounter.addCounter("Tau from W->tau->e")),
-    fTauIsMuonFromWTauCounter(eventCounter.addCounter("Tau from W->tau->mu")),
-    fTauIsHadronFromWTauCounter(eventCounter.addCounter("Tau from W->tau->hadrons")),
-    fTauIsElectronFromBottomCounter(eventCounter.addCounter("Tau from top->bottom->e")),
-    fTauIsMuonFromBottomCounter(eventCounter.addCounter("Tau from top->bottom->mu")),
-    fTauIsHadronFromBottomCounter(eventCounter.addCounter("Tau from top->bottom->hadron")),
-    fTauIsElectronFromJetCounter(eventCounter.addCounter("Tau from jet->e")),
-    fTauIsMuonFromJetCounter(eventCounter.addCounter("Tau from jet->mu")),
-    fTauIsHadronFromJetCounter(eventCounter.addCounter("Tau from jet->hadron")),
+    fTauIsHadronFromHplusCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from H+ ->tau->hadrons")),
+    fTauIsElectronFromHplusCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from H+ ->tau->electron")),
+    fTauIsMuonFromHplusCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from H+ ->tau->muon")),
+    fTauIsQuarkFromWCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->qq")),
+    fTauIsElectronFromWCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->e")),
+    fTauIsMuonFromWCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->mu")),
+    fTauIsHadronFromWTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->tau->hadrons")),
+    fTauIsElectronFromWTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->tau->e")),
+    fTauIsMuonFromWTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->tau->mu")),
+    fTauIsElectronFromBottomCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from top->bottom->e")),
+    fTauIsMuonFromBottomCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from top->bottom->mu")),
+    fTauIsHadronFromBottomCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from top->bottom->hadron")),
+    fTauIsElectronFromJetCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from jet->e")),
+    fTauIsMuonFromJetCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from jet->mu")),
+    fTauIsHadronFromJetCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from jet->hadron")),
 
-    fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
-    fdeltaPhiTauMET160FakeMetCounter(eventCounter.addCounter("deltaPhi160 and fake MET veto")),
-    fForwardJetVetoCounter(eventCounter.addCounter("forward jet veto")),
-    fTopSelectionCounter(eventCounter.addCounter("Top pT Selection 120-300")),
-    fTopChiSelectionCounter(eventCounter.addCounter("Top ChiSelection 120-300")),
-    fTopChiSelection250Counter(eventCounter.addCounter("Top ChiSelection 120-250")),
-    fTopChiSelection220Counter(eventCounter.addCounter("Top ChiSelection 120-220")),
-    fTopWithBSelectionCounter(eventCounter.addCounter("Top with B Selection 120-300")),
-    fTopWithBSelection250Counter(eventCounter.addCounter("Top with B Selection 120-250")),
-    fTopWithBSelection220Counter(eventCounter.addCounter("Top with B Selection 120-220")),
-    fTopWithWSelectionCounter(eventCounter.addCounter("Top with W Selection 120-300")),
-    fTopWithWSelection250Counter(eventCounter.addCounter("Top with W Selection 120-250")),
-    fTopWithWSelection220Counter(eventCounter.addCounter("Top with W Selection 120-220")),
-    ftransverseMassCut70Counter(eventCounter.addCounter("transverseMass > 70")),
-    ftransverseMassCut80Counter(eventCounter.addCounter("transverseMass > 80")),
-    ftransverseMass70TauVetoCounter(eventCounter.addCounter("transverseMass > 70 tau veto")),
-    ftransverseMass80TauVetoCounter(eventCounter.addCounter("transverseMass > 80 tau veto")),
-    ftransverseMass70TopChiSelCounter(eventCounter.addCounter("transverseMass > 70 TopChiSel")),
-    ftransverseMass70TopWithBSelCounter(eventCounter.addCounter("transverseMass > 70 TopWithBSel")),
-    ftransverseMass70TopWithWSelCounter(eventCounter.addCounter("transverseMass > 70 TopWithWSel")),
-    ftransverseMass70TopSelCounter(eventCounter.addCounter("transverseMass > 70 TopSel")),
-    ftransverseMass80TopChiSelCounter(eventCounter.addCounter("transverseMass > 80 TopChiSel")),
-    ftransverseMass80TopWithBSelCounter(eventCounter.addCounter("transverseMass > 80 TopWithBSel")),
-    ftransverseMass80TopWithWSelCounter(eventCounter.addCounter("transverseMass > 80 TopWithWSel")),
-    ftransverseMass80TopSelCounter(eventCounter.addCounter("transverseMass > 80 TopSel")),
-    ftransverseMassCut80NoRtauCounter(eventCounter.addCounter("transverseMass > 60 no Rtau")),
-    ftransverseMassCut100NoRtauCounter(eventCounter.addCounter("transverseMass > 80 no Rtau")),
-    fZmassVetoCounter(eventCounter.addCounter("ZmassVetoCounter")),
-    //fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")),
-    //fTopChiSelectionCounter(eventCounter.addCounter("Top ChiSelection cut")),
-    fTopChiSelectionNarrowCounter(eventCounter.addCounter("Top ChiSelection small window")),
-    //fTopWithBSelectionCounter(eventCounter.addCounter("Top with B Selection cut")),
-    //fTopWithWSelectionCounter(eventCounter.addCounter("Top with W Selection cut")),
+    fTopSelectionCounter(eventCounter.addCounter("Top selection")),
+    fTopChiSelectionCounter(eventCounter.addSubCounter("top", "Top ChiSelection 120-300")),
+    fTopChiSelection250Counter(eventCounter.addSubCounter("top", "Top ChiSelection 120-250")),
+    fTopChiSelection220Counter(eventCounter.addSubCounter("top", "Top ChiSelection 120-220")),
+    fTopWithBSelectionCounter(eventCounter.addSubCounter("top", "Top with B Selection 120-300")),
+    fTopWithBSelection250Counter(eventCounter.addSubCounter("top", "Top with B Selection 120-250")),
+    fTopWithBSelection220Counter(eventCounter.addSubCounter("top", "Top with B Selection 120-220")),
+    fTopWithWSelectionCounter(eventCounter.addSubCounter("top", "Top with W Selection 120-300")),
+    fTopWithWSelection250Counter(eventCounter.addSubCounter("top", "Top with W Selection 120-250")),
+    fTopWithWSelection220Counter(eventCounter.addSubCounter("top", "Top with W Selection 120-220")),
+    //fTopSelectionCounter(eventCounter.addSubCounter("top", "Top Selection cut")),
+    //fTopChiSelectionCounter(eventCounter.addSubCounter("top", "Top ChiSelection cut")),
+    fTopChiSelectionNarrowCounter(eventCounter.addSubCounter("top", "Top ChiSelection small window")),
+    //fTopWithBSelectionCounter(eventCounter.addSubCounter("top", "Top with B Selection cut")),
+    //fTopWithWSelectionCounter(eventCounter.addSubCounter("top", "Top with W Selection cut")),
+    fFakeMETVetoCounter(eventCounter.addCounter("FakeMETVeto")),
     fSelectedEventsCounter(eventCounter.addCounter("Selected events")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
@@ -212,10 +195,11 @@ namespace HPlus {
     hNonQCDTypeIITransverseMassAfterDeltaPhi130 = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMassAfterDeltaPhi130", "NonQCDTypeIITransverseMassAfterDeltaPhi130;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hNonQCDTypeIITransverseMassAfterDeltaPhi90 = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMassAfterDeltaPhi90", "NonQCDTypeIITransverseMassAfterDeltaPhi90;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     
-    hDeltaPhi = makeTH<TH1F>(*fs, "deltaPhi", "deltaPhi;#Delta#phi(tau,MET);N_{events} / 10 degrees", 360, 0., 180.);
-    hDeltaPhiJetMet = makeTH<TH1F>(*fs, "deltaPhiJetMet", "deltaPhiJetMet", 360, 0., 180.);  
+    hDeltaPhi = makeTH<TH1F>(*fs, "deltaPhi", "deltaPhi;#Delta#phi(tau,MET);N_{events} / 10 degrees", 180, 0., 180.);
+    hDeltaPhiJetMet = makeTH<TH1F>(*fs, "deltaPhiJetMet", "deltaPhiJetMet", 180, 0., 180.);
+    hMaxDeltaPhiJetMet = makeTH<TH1F>(*fs, "maxDeltaPhiJetMet", "maxDeltaPhiJetMet", 180, 0., 180.);
     hAlphaT = makeTH<TH1F>(*fs, "alphaT", "alphaT", 100, 0.0, 5.0);
-    hAlphaTInvMass = makeTH<TH1F>(*fs, "alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
+    hAlphaTInvMass = makeTH<TH1F>(*fs, "alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);
     hAlphaTVsRtau = makeTH<TH2F>(*fs, "alphaT(y)-Vs-Rtau(x)", "alphaT-Vs-Rtau",  120, 0.0, 1.2, 500, 0.0, 5.0);
     //    hMet_AfterTauSelection = makeTH<TH1F>(*fs, "met_AfterTauSelection", "met_AfterTauSelection", 100, 0.0, 400.0);
     //    hMet_BeforeTauSelection = makeTH<TH1F>(*fs, "met_BeforeTauSelection", "met_BeforeTauSelection", 100, 0.0, 400.0);
@@ -310,7 +294,7 @@ namespace HPlus {
     fTree.setNvertices(nVertices);
 
     increment(fAllCounter);
-    
+
 //------ Apply trigger and HLT_MET cut or trigger parametrisation
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if (!triggerData.passedEvent()) return false;
@@ -562,6 +546,7 @@ namespace HPlus {
     if (TopChiSelectionData.passedEvent() ) {
       double topmass = TopChiSelectionData.getTopMass();
       increment(fTopChiSelectionCounter);
+      if (topmass < 250 ) increment(fTopChiSelection250Counter);
       if (topmass < 220 ) increment(fTopChiSelectionNarrowCounter);
       //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
       hTransverseMassTopChiSelection->Fill(transverseMass, fEventWeight.getWeight());
@@ -574,21 +559,19 @@ namespace HPlus {
       TopWithWSelection::Data TopWithWSelectionData = fTopWithWSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData.getBjetTopSide());
       if (TopWithBSelectionData.passedEvent() ) {
         increment(fTopWithBSelectionCounter);
-        //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-        //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
+        double topmass = TopWithBSelectionData.getTopMass();
+        if (topmass < 250 ) increment(fTopWithBSelection250Counter);
+        if (topmass < 220 ) increment(fTopWithBSelection220Counter);
         hTransverseMassTopBjetSelection->Fill(transverseMass, fEventWeight.getWeight()); 
-        //if(transverseMass > 70 ) increment(ftransverseMass70TopWithBSelCounter); 
-        //if(transverseMass > 80 ) increment(ftransverseMass80TopWithBSelCounter);   
       }
 
       if (TopWithWSelectionData.passedEvent() ) {
         myTopRecoWithWSelectionStatus = true;
         increment(fTopWithWSelectionCounter);
-        //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-        //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
+        double topmass = TopWithWSelectionData.getTopMass();
+        if (topmass < 250 ) increment(fTopWithWSelection250Counter);
+        if (topmass < 220 ) increment(fTopWithWSelection220Counter);
         hTransverseMassTopWithWSelection->Fill(transverseMass, fEventWeight.getWeight()); 
-        //if(transverseMass > 70 ) increment(ftransverseMass70TopWithWSelCounter); 
-        //if(transverseMass > 80 ) increment(ftransverseMass80TopWithWSelCounter);   
       }
     }
     // Select events depending on top resonctruction
@@ -615,216 +598,33 @@ namespace HPlus {
     fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
 
 //------ Experimental cuts, counters, and histograms
+    doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData);
 
-    // Origin and type of selected tau
-    if (!iEvent.isRealData()) {
-      edm::Handle <reco::GenParticleCollection> genParticles;
-      iEvent.getByLabel("genParticles", genParticles);
-      bool myTauFoundStatus = false;
-      bool myLeptonVetoStatus = false;
-
-      
-      reco::GenParticle parton;
-
-      double minDeltaR = 99999;
-      for (size_t i=0; i < genParticles->size(); ++i) {
-	const reco::Candidate & p = (*genParticles)[i];
-	if (p.pt() > 5 && p.pdgId()!= std::abs(p.pdgId()) ) {
-	  if (reco::deltaR(p, tauData.getSelectedTau()->leadPFChargedHadrCand()->p4()) < 0.3) {
-	    if (std::abs(p.pdgId()) == 15) myTauFoundStatus = true;
-	  }
-
-	  double deltaR = reco::deltaR(p, tauData.getSelectedTau()->leadPFChargedHadrCand()->p4());
-	  if (deltaR < minDeltaR) {
-	    minDeltaR = deltaR;
-	    parton = (*genParticles)[i];
-	  }
-	}
-      }
-    
-     
-      std::vector<const reco::GenParticle*> mothers = getMothers(parton);
-      int motherId=9999;      
-      bool wInMothers = false;
-      bool topInMothers = false;
-      bool bottomInMothers = false;
-      bool tauInMothers = false;
-      bool hplusInMothers = false;
- 
-      for(size_t d=0; d<mothers.size(); ++d) {
-	const reco::GenParticle dparticle = *mothers[d];
-	motherId = dparticle.pdgId();
-	if( abs(motherId) == 24 ) wInMothers = true;
-	if( abs(motherId) == 6 ) topInMothers = true;
-	if( abs(motherId) == 5 ) bottomInMothers = true;
-	if( abs(motherId) == 15 ) tauInMothers = true;
-	if( abs(motherId) == 37 ) hplusInMothers = true;
-    	      
-      }
-
-      bool FromBottom = false;
-      bool FromJet = false;    
-      bool FromHplusTau = false;
-      bool FromWTau = false;
-      bool FromW = false;
-     
-      if (bottomInMothers && !wInMothers  ) FromBottom = true;
-      if (!bottomInMothers && !wInMothers && !hplusInMothers ) FromJet = true;
-      if (hplusInMothers && tauInMothers ) FromHplusTau = true;
-      if (wInMothers && tauInMothers ) FromWTau = true;
-      if (wInMothers && !tauInMothers ) FromW = true;
-
-      if (FromBottom && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromBottomCounter);
-      if (FromBottom && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromBottomCounter);
-      if (FromBottom && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11 ) increment(fTauIsHadronFromBottomCounter);
-      
-
-      if (FromJet && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromJetCounter); 
-      if (FromJet && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromJetCounter);
-      if (FromJet && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11)  increment(fTauIsHadronFromJetCounter);
-
-      //      if (hplusInMothers && std::abs(parton.pdgId()) == 15 ) tauFromHplus = true;
-      if (hplusInMothers && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromHplusCounter);
-      if (hplusInMothers && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromHplusCounter);
-      if (hplusInMothers && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11 ) increment(fTauIsHadronFromHplusCounter);
-
-      if (FromW && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromWCounter);
-      if (FromW && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromWCounter);
-      if (FromW && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11 ) increment(fTauIsQuarkFromWCounter);
-
-      if (FromWTau && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromWTauCounter);
-      if (FromWTau && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromWTauCounter);
-      if (FromWTau && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11 ) increment(fTauIsHadronFromWTauCounter);
-
-      //      if (wInMothers && std::abs(parton.pdgId()) == 15 ) tauFromW = true; 
-
-
-      if (myTauFoundStatus && !myLeptonVetoStatus) {
-	increment(fRealTauAfterDeltaPhiCounter);
-	if (!vetoTauData.passedEvent()) increment(fRealTauAfterDeltaPhiTauVetoCounter);
-      }
-
-      /*
-      if (electronFromW ) increment(fTauIsElectronFromWCounter);
-      //      if (electronFound ) increment(fTauIsElectronFromWCounter);
-      if (muonFromW ) increment(fTauIsMuonFromWCounter);  
-      if (quarkFromW ) increment(fTauIsQuarkFromWCounter);
-      if (FromBottom && electronFound ) increment(fTauIsElectronFromBottomCounter);
-      if (FromBottom  &&  muonFound) increment(fTauIsMuonFromBottomCounter);  
-      if (FromBottom && !electronFound &&  !muonFound &&  !tauFound ) increment(fTauIsHadronFromBottomCounter);
-      if (FromJet && electronFound ) increment(fTauIsElectronFromJetCounter);
-      if (FromJet &&  muonFound ) increment(fTauIsMuonFromJetCounter);  
-      if (FromJet && !electronFound &&  !muonFound &&  !tauFound) increment(fTauIsHadronFromJetCounter);
-      //      if (tauFromHplus && !electronFound &&  !muonFound) increment(fTauIsHadronFromHplusCounter);
-      if (tauFromW && !electronFound &&  !muonFound) increment(fTauIsHadronFromWCounter);
-      if (electronFound &&  tauFound) increment(fTauIsElectronFromTauCounter);
-      */
-    }
-      
     if (!vetoTauData.passedEvent()) {
       increment(fTauVetoAfterDeltaPhiCounter);
       hTransverseMassTauVeto->Fill(transverseMass, fEventWeight.getWeight()); 
     }
 
-
-
     // plot deltaPhi(jet,met)
+    double myMaxDeltaPhiJetMET = 0.0;
     for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getSelectedJets().begin(); iJet != jetData.getSelectedJets().end(); ++iJet) {
-      double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET()));
-      hDeltaPhiJetMet->Fill(jetDeltaPhi*57.3, fEventWeight.getWeight());
+      double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET())) * 57.3;
+      hDeltaPhiJetMet->Fill(jetDeltaPhi, fEventWeight.getWeight());
+      if (jetDeltaPhi > myMaxDeltaPhiJetMET)
+        myMaxDeltaPhiJetMET = jetDeltaPhi;
     }
+    hMaxDeltaPhiJetMet->Fill(myMaxDeltaPhiJetMET, fEventWeight.getWeight());
 
-
-    // Calculate alphaT
-    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTau()), jetData.getSelectedJets());   
-
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJets(), metData.getSelectedMET());
-
-
-    if (TopChiSelectionData.passedEvent() ) {
-      double topmass = TopChiSelectionData.getTopMass();
-      increment(fTopChiSelectionCounter);
-      if (topmass < 250 ) increment(fTopChiSelection250Counter);
-      if (topmass < 220 ) increment(fTopChiSelection220Counter);
-      //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-      if (!(bBlindAnalysisStatus && iEvent.isRealData())) {
-        hTransverseMassTopChiSelection->Fill(transverseMass, fEventWeight.getWeight());
-      }
-    } 
-     
-
-/*    int njets30 = 0;
-    for(edm::PtrVector<pat::Jet>::const_iterator iter = jetData.getSelectedJets().begin(); iter != jetData.getSelectedJets().end(); ++iter) {
-      edm::Ptr<pat::Jet> iJet = *iter;
-      if (iJet->pt() < 30) continue;
-      njets30++;
-    }*/
-
-    if (BjetSelectionData.passedEvent() ) {
-        
-      TopWithBSelection::Data TopWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData.getBjetTopSide());
-      TopWithWSelection::Data TopWithWSelectionData = fTopWithWSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData.getBjetTopSide());    
-      if (TopWithBSelectionData.passedEvent() ) {
-        increment(fTopWithBSelectionCounter);
-	double topmass = TopWithBSelectionData.getTopMass();
-	if (topmass < 250 ) increment(fTopWithBSelection250Counter);
-	if (topmass < 220 ) increment(fTopWithBSelection220Counter);
-        //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-        if (!(bBlindAnalysisStatus && iEvent.isRealData())) {
-	  //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-	  hTransverseMassTopBjetSelection->Fill(transverseMass, fEventWeight.getWeight()); 
-	  if(transverseMass > 70 ) increment(ftransverseMass70TopWithBSelCounter); 
-	  if(transverseMass > 80 ) increment(ftransverseMass80TopWithBSelCounter);   
-	}    
-      }
-      
-      if (TopWithWSelectionData.passedEvent() ) {
-        increment(fTopWithWSelectionCounter);
-	double topmass = TopWithBSelectionData.getTopMass();
-	if (topmass < 250 ) increment(fTopWithWSelection250Counter);
-	if (topmass < 220 ) increment(fTopWithWSelection220Counter);
-        //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-        if (!(bBlindAnalysisStatus && iEvent.isRealData())) {
-	  //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-	  hTransverseMassTopWithWSelection->Fill(transverseMass, fEventWeight.getWeight()); 
-	  if(transverseMass > 70 ) increment(ftransverseMass70TopWithWSelCounter); 
-	  if(transverseMass > 80 ) increment(ftransverseMass80TopWithWSelCounter);   
-	}    
-      }
-     
-    }
-
-    
     // Fake MET veto a.k.a. further QCD suppression
     //    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup,  tauData.getSelectedTau(), jetData.getSelectedJets(), metData.getSelectedMET());
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJets(), metData.getSelectedMET());
     if (fakeMETData.passedEvent() ) {
       increment(fFakeMETVetoCounter);
       hTransverseMassFakeMetVeto->Fill(transverseMass, fEventWeight.getWeight());
     }
- 
-      
-    //hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());
 
-    //fillEWKFakeTausCounters(myTauMatch, kSignalOrderFakeMETVeto, tauData);
-
-
-    //fillEWKFakeTausCounters(myTauMatch, kSignalOrderFakeMETVeto, tauData);
-    
-/*    if(transverseMass > 70 ) {
-      increment(ftransverseMassCut70Counter);
-      if (!vetoTauData.passedEvent()) increment(ftransverseMass70TauVetoCounter);
-      if (TopChiSelectionData.passedEvent() )  increment(ftransverseMass70TopChiSelCounter);
-      //      if (TopWithBSelectionData.passedEvent() )  increment(ftransverseMass70TopWithBSelCounter);
-      if (TopSelectionData.passedEvent() )  increment(ftransverseMass70TopSelCounter);
-    }
-    if(transverseMass > 80 ) {
-      increment(ftransverseMassCut80Counter);
-      if (!vetoTauData.passedEvent()) increment(ftransverseMass80TauVetoCounter);
-      if (TopChiSelectionData.passedEvent() )  increment(ftransverseMass80TopChiSelCounter);
-      //      if (TopWithBSelectionData.passedEvent() )  increment(ftransverseMass80TopWithBSelCounter);
-      if (TopSelectionData.passedEvent() )  increment(ftransverseMass80TopSelCounter);
-    }
-*/
+    // Calculate alphaT
+    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTau()), jetData.getSelectedJets());   
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
     // Alpha T
@@ -845,6 +645,113 @@ namespace HPlus {
     hMetAfterCuts->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
     return true;
+  }
+
+  void SignalAnalysis::doMCAnalysisOfSelectedEvents(edm::Event& iEvent, const TauSelection::Data& tauData, const VetoTauSelection::Data& vetoTauData) {
+    if (iEvent.isRealData()) return;
+
+    // Origin and type of selected tau
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    bool myTauFoundStatus = false;
+    bool myLeptonVetoStatus = false;
+
+    
+    reco::GenParticle parton;
+
+    double minDeltaR = 99999;
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      if (p.pt() > 5 && p.pdgId()!= std::abs(p.pdgId()) ) {
+        if (reco::deltaR(p, tauData.getSelectedTau()->leadPFChargedHadrCand()->p4()) < 0.3) {
+          if (std::abs(p.pdgId()) == 15) myTauFoundStatus = true;
+        }
+
+        double deltaR = reco::deltaR(p, tauData.getSelectedTau()->leadPFChargedHadrCand()->p4());
+        if (deltaR < minDeltaR) {
+          minDeltaR = deltaR;
+          parton = (*genParticles)[i];
+        }
+      }
+    }
+  
+    
+    std::vector<const reco::GenParticle*> mothers = getMothers(parton);
+    int motherId=9999;      
+    bool wInMothers = false;
+    bool topInMothers = false;
+    bool bottomInMothers = false;
+    bool tauInMothers = false;
+    bool hplusInMothers = false;
+
+    for(size_t d=0; d<mothers.size(); ++d) {
+      const reco::GenParticle dparticle = *mothers[d];
+      motherId = dparticle.pdgId();
+      if( abs(motherId) == 24 ) wInMothers = true;
+      if( abs(motherId) == 6 ) topInMothers = true;
+      if( abs(motherId) == 5 ) bottomInMothers = true;
+      if( abs(motherId) == 15 ) tauInMothers = true;
+      if( abs(motherId) == 37 ) hplusInMothers = true;
+            
+    }
+
+    bool FromBottom = false;
+    bool FromJet = false;    
+    bool FromHplusTau = false;
+    bool FromWTau = false;
+    bool FromW = false;
+    
+    if (bottomInMothers && !wInMothers  ) FromBottom = true;
+    if (!bottomInMothers && !wInMothers && !hplusInMothers ) FromJet = true;
+    if (hplusInMothers && tauInMothers ) FromHplusTau = true;
+    if (wInMothers && tauInMothers ) FromWTau = true;
+    if (wInMothers && !tauInMothers ) FromW = true;
+
+    if (FromBottom && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromBottomCounter);
+    if (FromBottom && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromBottomCounter);
+    if (FromBottom && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11 ) increment(fTauIsHadronFromBottomCounter);
+    
+
+    if (FromJet && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromJetCounter); 
+    if (FromJet && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromJetCounter);
+    if (FromJet && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11)  increment(fTauIsHadronFromJetCounter);
+
+    //      if (hplusInMothers && std::abs(parton.pdgId()) == 15 ) tauFromHplus = true;
+    if (hplusInMothers && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromHplusCounter);
+    if (hplusInMothers && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromHplusCounter);
+    if (hplusInMothers && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11 ) increment(fTauIsHadronFromHplusCounter);
+
+    if (FromW && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromWCounter);
+    if (FromW && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromWCounter);
+    if (FromW && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11 ) increment(fTauIsQuarkFromWCounter);
+
+    if (FromWTau && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromWTauCounter);
+    if (FromWTau && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromWTauCounter);
+    if (FromWTau && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11 ) increment(fTauIsHadronFromWTauCounter);
+
+    //      if (wInMothers && std::abs(parton.pdgId()) == 15 ) tauFromW = true; 
+
+
+    if (myTauFoundStatus && !myLeptonVetoStatus) {
+      increment(fRealTauAfterDeltaPhiCounter);
+      if (!vetoTauData.passedEvent()) increment(fRealTauAfterDeltaPhiTauVetoCounter);
+    }
+
+    /*
+    if (electronFromW ) increment(fTauIsElectronFromWCounter);
+    //      if (electronFound ) increment(fTauIsElectronFromWCounter);
+    if (muonFromW ) increment(fTauIsMuonFromWCounter);  
+    if (quarkFromW ) increment(fTauIsQuarkFromWCounter);
+    if (FromBottom && electronFound ) increment(fTauIsElectronFromBottomCounter);
+    if (FromBottom  &&  muonFound) increment(fTauIsMuonFromBottomCounter);  
+    if (FromBottom && !electronFound &&  !muonFound &&  !tauFound ) increment(fTauIsHadronFromBottomCounter);
+    if (FromJet && electronFound ) increment(fTauIsElectronFromJetCounter);
+    if (FromJet &&  muonFound ) increment(fTauIsMuonFromJetCounter);  
+    if (FromJet && !electronFound &&  !muonFound &&  !tauFound) increment(fTauIsHadronFromJetCounter);
+    //      if (tauFromHplus && !electronFound &&  !muonFound) increment(fTauIsHadronFromHplusCounter);
+    if (tauFromW && !electronFound &&  !muonFound) increment(fTauIsHadronFromWCounter);
+    if (electronFound &&  tauFound) increment(fTauIsElectronFromTauCounter);
+    */
   }
 
   SignalAnalysis::CounterGroup* SignalAnalysis::getCounterGroupByTauMatch(FakeTauIdentifier::MCSelectedTauMatchType tauMatch) {
