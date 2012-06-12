@@ -1,5 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerMETEmulation.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/Common/interface/Handle.h"
@@ -15,15 +15,14 @@ namespace HPlus {
     fTriggerMETEmulation(triggerMETEmulation), fPassedEvent(passedEvent) {}
   TriggerMETEmulation::Data::~Data() {}
 
-  TriggerMETEmulation::TriggerMETEmulation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  TriggerMETEmulation::TriggerMETEmulation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
-    fmetEmulationCutCount(eventCounter.addSubCounter("Trigger MET emulation","Trigger met emulation cut")),
-    fEventWeight(eventWeight)
+    fmetEmulationCutCount(eventCounter.addSubCounter("Trigger MET emulation","Trigger met emulation cut"))
   {
     edm::Service<TFileService> fs;
-    hMetBeforeEmulation = makeTH<TH1F>(*fs, "MetBeforeEmulation", "MetBeforeEmul", 100, 0.0, 300.0);
-    hMetAfterEmulation = makeTH<TH1F>(*fs, "MetAfterEmulation", "MetAfterEmul", 100, 0.0, 300.0);
+    hMetBeforeEmulation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "MetBeforeEmulation", "MetBeforeEmul", 100, 0.0, 300.0);
+    hMetAfterEmulation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "MetAfterEmulation", "MetAfterEmul", 100, 0.0, 300.0);
   }
 
   TriggerMETEmulation::~TriggerMETEmulation() {}
@@ -36,10 +35,10 @@ namespace HPlus {
 
     edm::Ptr<reco::MET> met = hmet->ptrAt(0);
 
-    hMetBeforeEmulation->Fill(met->et(), fEventWeight.getWeight());
+    hMetBeforeEmulation->Fill(met->et());
     if(met->et() > fmetEmulationCut) {
       passEvent = true;
-      hMetAfterEmulation->Fill(met->et(), fEventWeight.getWeight());
+      hMetAfterEmulation->Fill(met->et());
       increment(fmetEmulationCutCount);
     }
     fSelectedTriggerMET = met;

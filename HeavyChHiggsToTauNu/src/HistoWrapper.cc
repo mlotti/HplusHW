@@ -18,6 +18,10 @@ namespace HPlus {
   }
   HistoWrapper::~HistoWrapper() {
     // Do not destroy histogram objects (they are owned by the root file)
+    for (std::vector<WrappedTH1*>::iterator it = fAllTH1Histos.begin(); it != fAllTH1Histos.end(); ++it)
+      delete *it;
+    for (std::vector<WrappedTH2*>::iterator it = fAllTH2Histos.begin(); it != fAllTH2Histos.end(); ++it)
+      delete *it;
   }
 
   WrappedTH1::WrappedTH1(EventWeight& eventWeight, TH1* histo, bool isActive)

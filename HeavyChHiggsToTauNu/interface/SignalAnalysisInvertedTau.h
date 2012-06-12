@@ -27,6 +27,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
+
 namespace edm {
   class ParameterSet;
   class Event;
@@ -110,6 +112,7 @@ namespace HPlus {
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisInvertedTauProducer
     EventWeight& fEventWeight;
+    HistoWrapper fHistoWrapper;
 
     //    const double ftransverseMassCut;
     const bool bBlindAnalysisStatus;

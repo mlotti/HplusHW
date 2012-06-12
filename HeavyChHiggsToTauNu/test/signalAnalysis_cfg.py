@@ -60,7 +60,7 @@ doFillTree = False
 
 # Set level of how many histograms are stored to files
 # options are: 'Vital' (least histograms), 'Informative', 'Debug' (all histograms)
-myHistogramAmbientLevel = "Informative"
+myHistogramAmbientLevel = "Debug"
 
 # Apply trigger scale factor or not
 applyTriggerScaleFactor = True
@@ -79,7 +79,7 @@ doJESVariation = False
 
 # Perform the signal analysis with the PU weight variations
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
-doPUWeightVariation = not False
+doPUWeightVariation = False
 
 # Do variations for optimisation
 # Note: Keep number of variations below 200 to keep file sizes reasonable

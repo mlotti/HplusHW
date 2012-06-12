@@ -30,6 +30,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeightReader.h" // PU re-weight
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "TTree.h"
 #include "TH2F.h"
@@ -117,6 +118,7 @@ namespace HPlus {
 
     // We need a reference in order to use the same object (and not a copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;
+    HistoWrapper fHistoWrapper;
 
     // Counters - order is important
     Count fAllCounter;

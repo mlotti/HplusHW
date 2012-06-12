@@ -14,6 +14,7 @@
 namespace HPlus {
   QCDMeasurementBasic::QCDMeasurementBasic(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fEventWeight(eventWeight),
+    fHistoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
     fAllCounter(eventCounter.addCounter("allEvents")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger_and_HLT_MET")),
     fPrimaryVertexCounter(eventCounter.addCounter("PrimaryVertex")),
@@ -29,7 +30,7 @@ namespace HPlus {
     fBTaggingCounter(eventCounter.addCounter("bTagging")),
     fOneProngTauIDWithoutRtauCounter(eventCounter.addCounter("TauID_noRtau")),
     fOneProngTauIDWithRtauCounter(eventCounter.addCounter("TauID_withRtau")),
-    fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
+    fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, fHistoWrapper),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
