@@ -6,17 +6,15 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 
 namespace edm {
   class ParameterSet;
 }
 
-class TH1;
-
 namespace HPlus {
-  class TopWithBSelection;
+  class HistoWrapper;
+  class WrappedTH1;
 
   class TopWithBSelection {
   public:
@@ -43,7 +41,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
     
-    TopWithBSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    TopWithBSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~TopWithBSelection();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> bjet);
@@ -73,27 +71,25 @@ namespace HPlus {
     // Counters
     Count fTopWithBMassCount;
 
-    // EventWeight object
-    EventWeight& fEventWeight;
     edm::InputTag fSrc;
-    
+
     // Histograms
-    TH1 *hPtTopChiCut;
-    TH1 *hPtTop;
-    TH1 *hjjbMass;
-    TH1 *htopMass;
-    TH1 *htopMassMatch;
-    TH1 *htopMassChiCut;
-    TH1 *hWMass;
-    TH1 *hWMassMatch;
-    TH1 *hWMassChiCut;
-    TH1 *hChi2Min;
-    TH1 *htopMassBMatch;
-    TH1 *hWMassBMatch;
-    TH1 *htopMassQMatch;
-    TH1 *hWMassQMatch;
-    TH1 *htopMassMatchWrongB;
-    TH1 *hWMassMatchWrongB;    
+    WrappedTH1 *hPtTopChiCut;
+    WrappedTH1 *hPtTop;
+    WrappedTH1 *hjjbMass;
+    WrappedTH1 *htopMass;
+    WrappedTH1 *htopMassMatch;
+    WrappedTH1 *htopMassChiCut;
+    WrappedTH1 *hWMass;
+    WrappedTH1 *hWMassMatch;
+    WrappedTH1 *hWMassChiCut;
+    WrappedTH1 *hChi2Min;
+    WrappedTH1 *htopMassBMatch;
+    WrappedTH1 *hWMassBMatch;
+    WrappedTH1 *htopMassQMatch;
+    WrappedTH1 *hWMassQMatch;
+    WrappedTH1 *htopMassMatchWrongB;
+    WrappedTH1 *hWMassMatchWrongB;    
   
     // Variables
     double topMass;

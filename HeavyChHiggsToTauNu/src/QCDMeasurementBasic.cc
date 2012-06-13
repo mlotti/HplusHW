@@ -2,13 +2,11 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
-#include "TH1F.h"
-#include "TH2F.h"
 #include "TNamed.h"
 
 namespace HPlus {
@@ -31,27 +29,27 @@ namespace HPlus {
     fOneProngTauIDWithoutRtauCounter(eventCounter.addCounter("TauID_noRtau")),
     fOneProngTauIDWithRtauCounter(eventCounter.addCounter("TauID_withRtau")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, fHistoWrapper),
-    fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
-    fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
-    fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
-    fNonIsolatedElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("NonIsolatedElectronVeto"), eventCounter, eventWeight),
-    fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
-    fNonIsolatedMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("NonIsolatedMuonVeto"), eventCounter, eventWeight),
-    fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
-    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET"),
-    //fInvMassVetoOnJets(iConfig.getUntrackedParameter<edm::ParameterSet>("InvMassVetoOnJets"), eventCounter, eventWeight),
-    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
-    fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
-    //fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
-    //fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, eventWeight),
-    //fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
+    fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, fHistoWrapper),
+    fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, fHistoWrapper),
+    fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, fHistoWrapper),
+    fNonIsolatedElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("NonIsolatedElectronVeto"), eventCounter, fHistoWrapper),
+    fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, fHistoWrapper),
+    fNonIsolatedMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("NonIsolatedMuonVeto"), eventCounter, fHistoWrapper),
+    fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, fHistoWrapper),
+    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, fHistoWrapper, "MET"),
+    //fInvMassVetoOnJets(iConfig.getUntrackedParameter<edm::ParameterSet>("InvMassVetoOnJets"), eventCounter, fHistoWrapper),
+    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
+    fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, fHistoWrapper),
+    //fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, fHistoWrapper),
+    //fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, fHistoWrapper),
+    //fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, fHistoWrapper),
     //fWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_weighted"),
     //fNonWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_nonWeighted"),
-    fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, eventWeight),
-    fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, eventWeight),
-    fTopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, eventWeight),
-    fTopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, eventWeight),
-    fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, eventWeight),
+    fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, fHistoWrapper),
+    fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, fHistoWrapper),
+    fTopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, fHistoWrapper),
+    fTopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, fHistoWrapper),
+    fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
     fVertexWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeightReader")),
     fFakeTauIdentifier(fEventWeight, "TauCandidates"),
     fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fEventWeight),
@@ -65,8 +63,8 @@ namespace HPlus {
     fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
 
     // Book histograms
-    hVerticesBeforeWeight = makeTH<TH1F>(*fs, "verticesBeforeWeight", "Number of vertices without weightingVertices;N_{events} / 1 Vertex", 30, 0, 30);
-    hVerticesAfterWeight =  makeTH<TH1F>(*fs, "verticesAfterWeight", "Number of vertices with weighting; Vertices;N_{events} / 1 Vertex", 30, 0, 30);
+    hVerticesBeforeWeight = fHistoWrapper->makeTH<TH1F>(*fs, "verticesBeforeWeight", "Number of vertices without weightingVertices;N_{events} / 1 Vertex", 30, 0, 30);
+    hVerticesAfterWeight =  fHistoWrapper->makeTH<TH1F>(*fs, "verticesAfterWeight", "Number of vertices with weighting; Vertices;N_{events} / 1 Vertex", 30, 0, 30);
 
     // Histograms for later change of factorization map
     // Tau pT factorisation bins
@@ -86,26 +84,26 @@ namespace HPlus {
     int myTransverseMassBins = static_cast<int>(fTransverseMassBinLowEdges.size()) + 1;
 
     // Other control histograms
-    //hTauCandidateSelectionIsolatedPtMax = makeTH<TH1F>(*fs, "QCD_SelectedTauCandidateMaxIsolatedPt", "QCD_SelectedTauCandidateMaxIsolatedPt;Isol. track p_{T}, GeV/c; N_{jets} / 1 GeV/c", 100, 0., 100.);
+    //hTauCandidateSelectionIsolatedPtMax = fHistoWrapper->makeTH<TH1F>(*fs, "QCD_SelectedTauCandidateMaxIsolatedPt", "QCD_SelectedTauCandidateMaxIsolatedPt;Isol. track p_{T}, GeV/c; N_{jets} / 1 GeV/c", 100, 0., 100.);
 
     // Histograms for standard selections (i.e. big box)
     TFileDirectory myDir = fs->mkdir("QCDStandardSelections");
-    hAfterTauCandidateSelection = makeTH<TH1F>(myDir, "AfterTauCandidateSelection", "AfterTauCandidateSelection;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
-    hAfterIsolatedElectronVeto = makeTH<TH1F>(myDir, "AfterIsolatedElectronVeto", "AfterIsolatedElectronVeto;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
-    hAfterIsolatedMuonVeto = makeTH<TH1F>(myDir, "AfterIsolatedMuonVeto", "AfterIsolatedMuonVeto;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
-    hAfterJetSelection = makeTH<TH1F>(myDir, "AfterJetSelection", "AfterJetSelection;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
-    hFakeTauAfterTauCandidateSelection = makeTH<TH1F>(myDir, "FakeTauAfterTauCandidateSelection", "FakeTauAfterTauCandidateSelection;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
-    hFakeTauAfterIsolatedElectronVeto = makeTH<TH1F>(myDir, "FakeTauAfterIsolatedElectronVeto", "FakeTauAfterIsolatedElectronVeto;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
-    hFakeTauAfterIsolatedMuonVeto = makeTH<TH1F>(myDir, "FakeTauAfterIsolatedMuonVeto", "FakeTauAfterIsolatedMuonVeto;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
-    hFakeTauAfterJetSelection = makeTH<TH1F>(myDir, "FakeTauAfterJetSelection", "FakeTauAfterJetSelection;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
-    hAfterTauCandidateSelectionAndTauID = makeTH<TH1F>(myDir, "AfterTauCandidateSelectionAndTauID", "AfterTauCandidateSelectionAndTauID;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
-    hAfterIsolatedElectronVetoAndTauID = makeTH<TH1F>(myDir, "AfterIsolatedElectronVetoAndTauID", "AfterIsolatedElectronVetoAndTauID;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
-    hAfterIsolatedMuonVetoAndTauID = makeTH<TH1F>(myDir, "AfterIsolatedMuonVetoAndTauID", "AfterIsolatedMuonVetoAndTauID;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
-    hAfterJetSelectionAndTauID = makeTH<TH1F>(myDir, "AfterJetSelectionAndTauID", "AfterJetSelectionAndTauID;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
+    hAfterTauCandidateSelection = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "AfterTauCandidateSelection", "AfterTauCandidateSelection;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
+    hAfterIsolatedElectronVeto = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "AfterIsolatedElectronVeto", "AfterIsolatedElectronVeto;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
+    hAfterIsolatedMuonVeto = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "AfterIsolatedMuonVeto", "AfterIsolatedMuonVeto;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
+    hAfterJetSelection = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "AfterJetSelection", "AfterJetSelection;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
+    hFakeTauAfterTauCandidateSelection = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "FakeTauAfterTauCandidateSelection", "FakeTauAfterTauCandidateSelection;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
+    hFakeTauAfterIsolatedElectronVeto = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "FakeTauAfterIsolatedElectronVeto", "FakeTauAfterIsolatedElectronVeto;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
+    hFakeTauAfterIsolatedMuonVeto = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "FakeTauAfterIsolatedMuonVeto", "FakeTauAfterIsolatedMuonVeto;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
+    hFakeTauAfterJetSelection = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "FakeTauAfterJetSelection", "FakeTauAfterJetSelection;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
+    hAfterTauCandidateSelectionAndTauID = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "AfterTauCandidateSelectionAndTauID", "AfterTauCandidateSelectionAndTauID;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
+    hAfterIsolatedElectronVetoAndTauID = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "AfterIsolatedElectronVetoAndTauID", "AfterIsolatedElectronVetoAndTauID;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
+    hAfterIsolatedMuonVetoAndTauID = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "AfterIsolatedMuonVetoAndTauID", "AfterIsolatedMuonVetoAndTauID;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
+    hAfterJetSelectionAndTauID = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "AfterJetSelectionAndTauID", "AfterJetSelectionAndTauID;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
 
-    hMtAfterJetSelection = makeTH<TH2F>(myDir, "MtAfterJetSelection", "MtAfterJetSelection;tau p_{T} bin;transverse mass bin", myTauPtBins, 0., myTauPtBins, myTransverseMassBins, 0., myTransverseMassBins);
+    hMtAfterJetSelection = fHistoWrapper->makeTH<TH2F>(HistoWrapper::kVital, myDir, "MtAfterJetSelection", "MtAfterJetSelection;tau p_{T} bin;transverse mass bin", myTauPtBins, 0., myTauPtBins, myTransverseMassBins, 0., myTransverseMassBins);
     
-    hSelectionFlow = makeTH<TH1F>(myDir, "QCD_SelectionFlow", "QCD_SelectionFlow;;N_{events}", 12, 0, 12);
+    hSelectionFlow = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "QCD_SelectionFlow", "QCD_SelectionFlow;;N_{events}", 12, 0, 12);
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTrigger,"Trigger");
     //hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderVertexSelection,"Vertex");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTauCandidateSelection,"#tau candidate");
@@ -163,7 +161,7 @@ namespace HPlus {
     }
     int nVertices = fVertexWeightReader.getNumberOfVertices(iEvent, iSetup);
     hVerticesBeforeWeight->Fill(nVertices);
-    hVerticesAfterWeight->Fill(nVertices, fEventWeight.getWeight());
+    hVerticesAfterWeight->Fill(nVertices);
     fTree.setNvertices(nVertices);
     increment(fAllCounter);
 
@@ -172,11 +170,11 @@ namespace HPlus {
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if (!triggerData.passedEvent()) return false;
     increment(fTriggerAndHLTMetCutCounter);
-    hSelectionFlow->Fill(kQCDOrderTrigger, fEventWeight.getWeight());
+    hSelectionFlow->Fill(kQCDOrderTrigger);
     fTree.setHltTaus(triggerData.getTriggerTaus());
 
     hVerticesBeforeWeight->Fill(nVertices);
-    hVerticesAfterWeight->Fill(nVertices, fEventWeight.getWeight());
+    hVerticesAfterWeight->Fill(nVertices);
 
 
 //------ GenParticle analysis (must be done here when we effectively trigger all MC)
@@ -190,7 +188,7 @@ namespace HPlus {
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
     if (!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
-    //hSelectionFlow->Fill(kQCDOrderVertexSelection, fEventWeight.getWeight());
+    //hSelectionFlow->Fill(kQCDOrderVertexSelection);
     
   
     
@@ -203,61 +201,61 @@ namespace HPlus {
     // note: do not require here that only one tau has been found; instead take first item from mySelectedTau as the tau in the event
     increment(fTauSelectionCounter);
     // Apply trigger scale factor here, because it depends only on tau
-    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauCandidateData.getSelectedTau()), iEvent.isRealData());
+    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauCandidateData.getSelectedTau()), iEvent.isRealData(), fEventWeight);
     fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
     increment(fOneSelectedTauCounter);
-    hSelectionFlow->Fill(kQCDOrderTauCandidateSelection, fEventWeight.getWeight());
+    hSelectionFlow->Fill(kQCDOrderTauCandidateSelection);
     // Obtain MC matching - for EWK without genuine taus
     FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauCandidateData.getSelectedTau()));
     bool myTypeIIStatus = fFakeTauIdentifier.isFakeTau(myTauMatch); // True if the selected tau is a fake
     // Obtain tau pT bin index
     int myTauPtBinIndex = getTauPtBinIndex(tauCandidateData.getSelectedTau()->pt());
-    hAfterTauCandidateSelection->Fill(myTauPtBinIndex, fEventWeight.getWeight());
-    if (myTypeIIStatus) hFakeTauAfterTauCandidateSelection->Fill(myTauPtBinIndex, fEventWeight.getWeight());
+    hAfterTauCandidateSelection->Fill(myTauPtBinIndex);
+    if (myTypeIIStatus) hFakeTauAfterTauCandidateSelection->Fill(myTauPtBinIndex);
 
     // Obtain boolean for rest of tauID
     bool myPassedTauIDStatus = tauCandidateData.selectedTauPassesFullTauID();
     // Control plot
-    if (myPassedTauIDStatus) hAfterTauCandidateSelectionAndTauID->Fill(myTauPtBinIndex, fEventWeight.getWeight());
+    if (myPassedTauIDStatus) hAfterTauCandidateSelectionAndTauID->Fill(myTauPtBinIndex);
 
 
 //------ Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return false;
     increment(fGlobalElectronVetoCounter);
-    hSelectionFlow->Fill(kQCDOrderElectronVeto, fEventWeight.getWeight());
-    hAfterIsolatedElectronVeto->Fill(myTauPtBinIndex, fEventWeight.getWeight());
-    if (myTypeIIStatus) hFakeTauAfterIsolatedElectronVeto->Fill(myTauPtBinIndex, fEventWeight.getWeight());
+    hSelectionFlow->Fill(kQCDOrderElectronVeto);
+    hAfterIsolatedElectronVeto->Fill(myTauPtBinIndex);
+    if (myTypeIIStatus) hFakeTauAfterIsolatedElectronVeto->Fill(myTauPtBinIndex);
     /*NonIsolatedElectronVeto::Data nonIsolatedElectronVetoData = fNonIsolatedElectronVeto.analyze(iEvent, iSetup);
     if (!nonIsolatedElectronVetoData.passedEvent())  return false;
     increment(fNonIsolatedElectronVetoCounter);*/
     // Control plot
-    if (myPassedTauIDStatus) hAfterIsolatedElectronVetoAndTauID->Fill(myTauPtBinIndex, fEventWeight.getWeight());
+    if (myPassedTauIDStatus) hAfterIsolatedElectronVetoAndTauID->Fill(myTauPtBinIndex);
 
 
 //------ Global muon veto
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!muonVetoData.passedEvent()) return false;
     increment(fGlobalMuonVetoCounter);
-    hSelectionFlow->Fill(kQCDOrderMuonVeto, fEventWeight.getWeight());
-    hAfterIsolatedMuonVeto->Fill(myTauPtBinIndex, fEventWeight.getWeight());
-    if (myTypeIIStatus) hFakeTauAfterIsolatedMuonVeto->Fill(myTauPtBinIndex, fEventWeight.getWeight());
+    hSelectionFlow->Fill(kQCDOrderMuonVeto);
+    hAfterIsolatedMuonVeto->Fill(myTauPtBinIndex);
+    if (myTypeIIStatus) hFakeTauAfterIsolatedMuonVeto->Fill(myTauPtBinIndex);
     /*NonIsolatedMuonVeto::Data nonIsolatedMuonVetoData = fNonIsolatedMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!nonIsolatedMuonVetoData.passedEvent()) return; 
     increment(fNonIsolatedMuonVetoCounter);*/
     // Control plot
-    if (myPassedTauIDStatus) hAfterIsolatedMuonVetoAndTauID->Fill(myTauPtBinIndex, fEventWeight.getWeight());
+    if (myPassedTauIDStatus) hAfterIsolatedMuonVetoAndTauID->Fill(myTauPtBinIndex);
 
 
 //------ Jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau(), nVertices);
     if (!jetData.passedEvent()) return false;
     increment(fJetSelectionCounter);
-    hSelectionFlow->Fill(kQCDOrderJetSelection, fEventWeight.getWeight());
-    hAfterJetSelection->Fill(myTauPtBinIndex, fEventWeight.getWeight());
-    if (myTypeIIStatus) hFakeTauAfterJetSelection->Fill(myTauPtBinIndex, fEventWeight.getWeight());
+    hSelectionFlow->Fill(kQCDOrderJetSelection);
+    hAfterJetSelection->Fill(myTauPtBinIndex);
+    if (myTypeIIStatus) hFakeTauAfterJetSelection->Fill(myTauPtBinIndex);
     // Control plot
-    if (myPassedTauIDStatus) hAfterJetSelectionAndTauID->Fill(myTauPtBinIndex, fEventWeight.getWeight());
+    if (myPassedTauIDStatus) hAfterJetSelectionAndTauID->Fill(myTauPtBinIndex);
 
 
 //------ Standard selections is done, obtain data objects, fill tree, and loop over analysis variations
@@ -346,114 +344,114 @@ namespace HPlus {
     for (int i = 0; i < nTauPtBins; ++i) {
       myLabel.str("");
       myLabel << "SelectedTau_pT_AfterStandardSelections_taupTbin" << i;
-      hCtrlSelectedTauPtAfterStandardSelections.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 80, 0.0, 400.0));
+      hCtrlSelectedTauPtAfterStandardSelections.push_back(fHistoWrapper->makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 80, 0.0, 400.0));
       myLabel.str("");
       myLabel << "SelectedTau_eta_AfterStandardSelections_taupTbin" << i;
-      hCtrlSelectedTauEtaAfterStandardSelections.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 60, -3.0, 3.0));
+      hCtrlSelectedTauEtaAfterStandardSelections.push_back(fHistoWrapper->makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 60, -3.0, 3.0));
       myLabel.str("");
       myLabel << "SelectedTau_phi_AfterStandardSelections_taupTbin" << i;
-      hCtrlSelectedTauPhiAfterStandardSelections.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 360, -3.1415926, 3.1415926));
+      hCtrlSelectedTauPhiAfterStandardSelections.push_back(fHistoWrapper->makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 360, -3.1415926, 3.1415926));
       myLabel.str("");
       myLabel << "SelectedTau_etavsphi_AfterStandardSelections_taupTbin" << i;
-      hCtrlSelectedTauEtaVsPhiAfterStandardSelections.push_back(makeTH<TH2F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 60, -3.0, 3.0, 36, -3.1415926, 3.1415926));
+      hCtrlSelectedTauEtaVsPhiAfterStandardSelections.push_back(fHistoWrapper->makeTH<TH2F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 60, -3.0, 3.0, 36, -3.1415926, 3.1415926));
       myLabel.str("");
       myLabel << "SelectedTau_LeadingTrackPt_AfterStandardSelections_taupTbin" << i;
-      hCtrlSelectedTauLeadingTrkPtAfterStandardSelections.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 80, 0.0, 400.0));
+      hCtrlSelectedTauLeadingTrkPtAfterStandardSelections.push_back(fHistoWrapper->makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 80, 0.0, 400.0));
       myLabel.str("");
       myLabel << "SelectedTau_Rtau_AfterStandardSelections_taupTbin" << i;
-      hCtrlSelectedTauRtauAfterStandardSelections.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 120, 0., 1.2));
+      hCtrlSelectedTauRtauAfterStandardSelections.push_back(fHistoWrapper->makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 120, 0., 1.2));
       myLabel.str("");
       myLabel << "SelectedTau_p_AfterStandardSelections_taupTbin" << i;
-      hCtrlSelectedTauPAfterStandardSelections.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 80, 0.0, 400.0));
+      hCtrlSelectedTauPAfterStandardSelections.push_back(fHistoWrapper->makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 80, 0.0, 400.0));
       myLabel.str("");
       myLabel << "SelectedTau_LeadingTrackP_AfterStandardSelections_taupTbin" << i;
-      hCtrlSelectedTauLeadingTrkPAfterStandardSelections.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 80, 0.0, 400.0));
+      hCtrlSelectedTauLeadingTrkPAfterStandardSelections.push_back(fHistoWrapper->makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 80, 0.0, 400.0));
       myLabel.str("");
       myLabel << "IdentifiedElectronPt_AfterStandardSelections_taupTbin" << i;
-      hCtrlIdentifiedElectronPtAfterStandardSelections.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 20, 0., 20.));
+      hCtrlIdentifiedElectronPtAfterStandardSelections.push_back(fHistoWrapper->makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 20, 0., 20.));
       myLabel.str("");
       myLabel << "IdentifiedMuonPt_AfterStandardSelections_taupTbin" << i;
-      hCtrlIdentifiedMuonPtAfterStandardSelections.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 20, 0., 20.));
+      hCtrlIdentifiedMuonPtAfterStandardSelections.push_back(fHistoWrapper->makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 20, 0., 20.));
       myLabel.str("");
       myLabel << "Njets_taupTbin" << i;
-      hCtrlNjets.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 10, 0., 10.));
+      hCtrlNjets.push_back(fHistoWrapper->makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 10, 0., 10.));
       myLabel.str("");
       myLabel << "MET_taupTbin" << i;
-      hCtrlMET.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 100, 0., 500.));
+      hCtrlMET.push_back(fHistoWrapper->makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 100, 0., 500.));
       myLabel.str("");
       myLabel << "NBjets_taupTbin" << i;
-      hCtrlNbjets.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 10, 0., 10.));
+      hCtrlNbjets.push_back(fHistoWrapper->makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 10, 0., 10.));
       myLabel.str("");
       myLabel << "DeltaPhi_taupTbin" << i;
-      hCtrlDeltaPhi.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 36, 0., 180.));
+      hCtrlDeltaPhi.push_back(fHistoWrapper->makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 36, 0., 180.));
     }
 
     TFileDirectory myDir = fs->mkdir(myName.str());
-    /*hAfterTauCandidateSelection = makeTH<TH1F>(myDir, "AfterTauCandidateSelection", "AfterTauCandidateSelection", nTauPtBins, 0, nTauPtBins);
-    hAfterElectronLeptonVeto= makeTH<TH1F>(myDir, "AfterElectronLeptonVeto", "AfterElectronLeptonVeto", nTauPtBins, 0, nTauPtBins);
-    hAfterMuonLeptonVeto = makeTH<TH1F>(myDir, "AfterMuonLeptonVeto", "AfterMuonLeptonVeto", nTauPtBins, 0, nTauPtBins);
-    hAfterJetSelection = makeTH<TH1F>(myDir, "AfterJetSelection", "AfterJetSelection", nTauPtBins, 0, nTauPtBins);*/
-    hLeg1AfterMET = makeTH<TH1F>(myDir, "Leg1AfterMET", "Leg1AfterMET", nTauPtBins, 0, nTauPtBins);
-    hLeg1AfterBTagging = makeTH<TH1F>(myDir, "Leg1AfterBTagging", "Leg1AfterBTagging", nTauPtBins, 0, nTauPtBins);
-    hLeg1AfterDeltaPhiTauMET = makeTH<TH1F>(myDir, "Leg1AfterDeltaPhiTauMET", "Leg1AfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
-    hLeg1AfterTopSelection = makeTH<TH1F>(myDir, "Leg1AfterTopSelection", "Leg1AfterTopSelection", nTauPtBins, 0, nTauPtBins);
-    hLeg1AfterTopChiSelection = makeTH<TH1F>(myDir, "Leg1AfterTopChiSelection", "Leg1AfterTopChiSelection", nTauPtBins, 0, nTauPtBins);
-    hLeg1AfterTopWithBSelection = makeTH<TH1F>(myDir, "Leg1AfterTopWithBSelection", "Leg1AfterTopWithBSelection", nTauPtBins, 0, nTauPtBins);
-    fSFUncertaintyAfterMetLeg = new ScaleFactorUncertaintyManager("AfterMETLeg", myName.str());
-    hLeg2AfterTauIDNoRtau = makeTH<TH1F>(myDir, "Leg2AfterTauIDNoRtau", "Leg2AfterTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
-    hLeg2AfterTauIDWithRtau = makeTH<TH1F>(myDir, "Leg2AfterTauIDWithRtau", "Leg2AfterTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
-    fSFUncertaintyAfterTauLeg = new ScaleFactorUncertaintyManager("AfterTauLeg", myName.str());
-    hFakeTauLeg1AfterMET = makeTH<TH1F>(myDir, "FakeTauLeg1AfterMET", "FakeTauLeg1AfterMET", nTauPtBins, 0, nTauPtBins);
-    hFakeTauLeg1AfterBTagging = makeTH<TH1F>(myDir, "FakeTauLeg1AfterBTagging", "FakeTauLeg1AfterBTagging", nTauPtBins, 0, nTauPtBins);
-    hFakeTauLeg1AfterDeltaPhiTauMET = makeTH<TH1F>(myDir, "FakeTauLeg1AfterDeltaPhiTauMET", "FakeTauLeg1AfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
-    hFakeTauLeg2AfterTauIDNoRtau = makeTH<TH1F>(myDir, "FakeTauLeg2AfterTauIDNoRtau", "FakeTauLeg2AfterTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
-    hFakeTauLeg2AfterTauIDWithRtau = makeTH<TH1F>(myDir, "FakeTauLeg2AfterTauIDWithRtau", "FakeTauLeg2AfterTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
+    /*hAfterTauCandidateSelection = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "AfterTauCandidateSelection", "AfterTauCandidateSelection", nTauPtBins, 0, nTauPtBins);
+    hAfterElectronLeptonVeto= fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "AfterElectronLeptonVeto", "AfterElectronLeptonVeto", nTauPtBins, 0, nTauPtBins);
+    hAfterMuonLeptonVeto = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "AfterMuonLeptonVeto", "AfterMuonLeptonVeto", nTauPtBins, 0, nTauPtBins);
+    hAfterJetSelection = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "AfterJetSelection", "AfterJetSelection", nTauPtBins, 0, nTauPtBins);*/
+    hLeg1AfterMET = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "Leg1AfterMET", "Leg1AfterMET", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterBTagging = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "Leg1AfterBTagging", "Leg1AfterBTagging", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterDeltaPhiTauMET = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "Leg1AfterDeltaPhiTauMET", "Leg1AfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterTopSelection = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "Leg1AfterTopSelection", "Leg1AfterTopSelection", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterTopChiSelection = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "Leg1AfterTopChiSelection", "Leg1AfterTopChiSelection", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterTopWithBSelection = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "Leg1AfterTopWithBSelection", "Leg1AfterTopWithBSelection", nTauPtBins, 0, nTauPtBins);
+    fSFUncertaintyAfterMetLeg = new ScaleFactorUncertaintyManager("AfterMETLeg", myName.str(), fHistoWrapper);
+    hLeg2AfterTauIDNoRtau = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "Leg2AfterTauIDNoRtau", "Leg2AfterTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
+    hLeg2AfterTauIDWithRtau = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "Leg2AfterTauIDWithRtau", "Leg2AfterTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
+    fSFUncertaintyAfterTauLeg = new ScaleFactorUncertaintyManager("AfterTauLeg", myName.str(), fHistoWrapper);
+    hFakeTauLeg1AfterMET = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "FakeTauLeg1AfterMET", "FakeTauLeg1AfterMET", nTauPtBins, 0, nTauPtBins);
+    hFakeTauLeg1AfterBTagging = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "FakeTauLeg1AfterBTagging", "FakeTauLeg1AfterBTagging", nTauPtBins, 0, nTauPtBins);
+    hFakeTauLeg1AfterDeltaPhiTauMET = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "FakeTauLeg1AfterDeltaPhiTauMET", "FakeTauLeg1AfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
+    hFakeTauLeg2AfterTauIDNoRtau = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "FakeTauLeg2AfterTauIDNoRtau", "FakeTauLeg2AfterTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
+    hFakeTauLeg2AfterTauIDWithRtau = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "FakeTauLeg2AfterTauIDWithRtau", "FakeTauLeg2AfterTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
     // Transverse mass histograms
-    hMtLegAfterMET = makeTH<TH1F>(myDir, "MtLegAfterMET", "MtLegAfterMET", nTauPtBins, 0, nTauPtBins);
-    hMtLegAfterDeltaPhiTauMET = makeTH<TH1F>(myDir, "MtLegAfterDeltaPhiTauMET", "MtLegAfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
-    fSFUncertaintyMtAfterMETAndDeltaPhi = new ScaleFactorUncertaintyManager("MtAfterMETAndDeltaPhi", myName.str());
-    hMtLegAfterMETAndTauIDNoRtau = makeTH<TH1F>(myDir, "MtLegAfterTauIDNoRtau", "MtLegAfterTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
-    hMtLegAfterMETAndTauIDWithRtau = makeTH<TH1F>(myDir, "MtLegAfterTauIDWithRtau", "MtLegAfterTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
-    fSFUncertaintyMtAfterTauID = new ScaleFactorUncertaintyManager("MtAfterTauID", myName.str());
-    hMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau = makeTH<TH1F>(myDir, "MtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau", "MtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
+    hMtLegAfterMET = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "MtLegAfterMET", "MtLegAfterMET", nTauPtBins, 0, nTauPtBins);
+    hMtLegAfterDeltaPhiTauMET = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "MtLegAfterDeltaPhiTauMET", "MtLegAfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
+    fSFUncertaintyMtAfterMETAndDeltaPhi = new ScaleFactorUncertaintyManager("MtAfterMETAndDeltaPhi", myName.str(), fHistoWrapper);
+    hMtLegAfterMETAndTauIDNoRtau = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "MtLegAfterTauIDNoRtau", "MtLegAfterTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
+    hMtLegAfterMETAndTauIDWithRtau = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "MtLegAfterTauIDWithRtau", "MtLegAfterTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
+    fSFUncertaintyMtAfterTauID = new ScaleFactorUncertaintyManager("MtAfterTauID", myName.str(), fHistoWrapper);
+    hMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "MtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau", "MtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
     fSFUncertaintyMtAfterMETAndDeltaPhiAndInvertedTauID = new ScaleFactorUncertaintyManager("MtAfterMETAndDeltaPhiAndInvertedTauID", myName.str());
-    hFakeTauMtLegAfterDeltaPhiTauMET = makeTH<TH1F>(myDir, "FakeTauMtLegAfterDeltaPhiTauMET", "FakeTauMtLegAfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
-    hFakeTauMtLegAfterMET = makeTH<TH1F>(myDir, "FakeTauMtLegAfterMET", "FakeTauMtLegAfterMET", nTauPtBins, 0, nTauPtBins);
-    hFakeTauMtLegAfterMETAndTauIDNoRtau = makeTH<TH1F>(myDir, "FakeTauMtLegAfterTauIDNoRtau", "FakeTauMtLegAfterTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
-    hFakeTauMtLegAfterMETAndTauIDWithRtau = makeTH<TH1F>(myDir, "FakeTauMtLegAfterTauIDWithRtau", "MFakeTautLegAfterTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
-    hFakeTauMtLegAfterMETAndInvertedTauIDNoRtau = makeTH<TH1F>(myDir, "FakeTauMtLegAfterInvertedTauIDNoRtau", "FakeTauMtLegAfterInvertedTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
-    hFakeTauMtLegAfterMETAndInvertedTauIDWithRtau = makeTH<TH1F>(myDir, "FakeTauMtLegAfterInvertedTauIDWithRtau", "MFakeTautLegAfterInvertedTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
+    hFakeTauMtLegAfterDeltaPhiTauMET = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "FakeTauMtLegAfterDeltaPhiTauMET", "FakeTauMtLegAfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
+    hFakeTauMtLegAfterMET = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "FakeTauMtLegAfterMET", "FakeTauMtLegAfterMET", nTauPtBins, 0, nTauPtBins);
+    hFakeTauMtLegAfterMETAndTauIDNoRtau = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "FakeTauMtLegAfterTauIDNoRtau", "FakeTauMtLegAfterTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
+    hFakeTauMtLegAfterMETAndTauIDWithRtau = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "FakeTauMtLegAfterTauIDWithRtau", "MFakeTautLegAfterTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
+    hFakeTauMtLegAfterMETAndInvertedTauIDNoRtau = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "FakeTauMtLegAfterInvertedTauIDNoRtau", "FakeTauMtLegAfterInvertedTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
+    hFakeTauMtLegAfterMETAndInvertedTauIDWithRtau = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "FakeTauMtLegAfterInvertedTauIDWithRtau", "MFakeTautLegAfterInvertedTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
 
-    h2DMtLegAfterDeltaPhiTauMET = makeTH<TH2F>(myDir, "2DMtLegAfterDeltaPhiTauMET", "2DMtLegAfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins, nMtBins, 0, nMtBins);
-    h2DMtLegAfterMETAndTauIDNoRtau = makeTH<TH2F>(myDir, "hMtLegAfterMETAndTauIDNoRtau", "hMtLegAfterMETAndTauIDNoRtau", nTauPtBins, 0, nTauPtBins, nMtBins, 0, nMtBins);
-    h2DMtLegAfterMETAndTauIDWithRtau = makeTH<TH2F>(myDir, "hMtLegAfterMETAndTauIDNoRtau", "hMtLegAfterMETAndTauIDNoRtau", nTauPtBins, 0, nTauPtBins, nMtBins, 0, nMtBins);
-    h2DMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau = makeTH<TH2F>(myDir, "h2DMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau", "h2DMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau", nTauPtBins, 0, nTauPtBins, nMtBins, 0, nMtBins);
+    h2DMtLegAfterDeltaPhiTauMET = fHistoWrapper->makeTH<TH2F>(HistoWrapper::kVital, myDir, "2DMtLegAfterDeltaPhiTauMET", "2DMtLegAfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins, nMtBins, 0, nMtBins);
+    h2DMtLegAfterMETAndTauIDNoRtau = fHistoWrapper->makeTH<TH2F>(HistoWrapper::kVital, myDir, "hMtLegAfterMETAndTauIDNoRtau", "hMtLegAfterMETAndTauIDNoRtau", nTauPtBins, 0, nTauPtBins, nMtBins, 0, nMtBins);
+    h2DMtLegAfterMETAndTauIDWithRtau = fHistoWrapper->makeTH<TH2F>(HistoWrapper::kVital, myDir, "hMtLegAfterMETAndTauIDNoRtau", "hMtLegAfterMETAndTauIDNoRtau", nTauPtBins, 0, nTauPtBins, nMtBins, 0, nMtBins);
+    h2DMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau = fHistoWrapper->makeTH<TH2F>(HistoWrapper::kVital, myDir, "h2DMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau", "h2DMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau", nTauPtBins, 0, nTauPtBins, nMtBins, 0, nMtBins);
 
     for (int i = 0; i < nTauPtBins; ++i) {
       myName.str("");
       myName << "MtShapeAfterMETAndDeltaPhi_bin" << i;
-      hMtShapesAfterMETAndDeltaPhi.push_back(makeTH<TH1F>(myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
+      hMtShapesAfterMETAndDeltaPhi.push_back(fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
       myName.str("");
       myName << "FakeTauMtShapeAfterMETAndDeltaPhi_bin" << i;
-      hFakeTauMtShapesAfterMETAndDeltaPhi.push_back(makeTH<TH1F>(myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
+      hFakeTauMtShapesAfterMETAndDeltaPhi.push_back(fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
       myName.str("");
       myName << "MtShapeAfterMETAndBTaggingAndDeltaPhi_bin" << i;
-      hMtShapesAfterMETAndBTaggingAndDeltaPhi.push_back(makeTH<TH1F>(myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
+      hMtShapesAfterMETAndBTaggingAndDeltaPhi.push_back(fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
       myName.str("");
       myName << "MtShapeAfterMETAndBTaggingAndDeltaPhiAndTopSelection_bin" << i;
-      hMtShapesAfterMETAndBTaggingAndDeltaPhiAndTopSelection.push_back(makeTH<TH1F>(myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
+      hMtShapesAfterMETAndBTaggingAndDeltaPhiAndTopSelection.push_back(fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
       myName.str("");
       myName << "MtShapeAfterMETAndBTaggingAndDeltaPhiAndTopChiSelection_bin" << i;
-      hMtShapesAfterMETAndBTaggingAndDeltaPhiAndTopChiSelection.push_back(makeTH<TH1F>(myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
+      hMtShapesAfterMETAndBTaggingAndDeltaPhiAndTopChiSelection.push_back(fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
       myName.str("");
       myName << "MtShapeAfterMETAndBTaggingAndDeltaPhiAndTopWithBSelection_bin" << i;
-      hMtShapesAfterMETAndBTaggingAndDeltaPhiAndTopWithBSelection.push_back(makeTH<TH1F>(myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
+      hMtShapesAfterMETAndBTaggingAndDeltaPhiAndTopWithBSelection.push_back(fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
       myName.str("");
       myName << "MtShapeAfterMETAndDeltaPhiAndInvertedTau_bin" << i; 
-      hMtShapesAfterMETAndDeltaPhiAndInvertedTau.push_back(makeTH<TH1F>(myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
+      hMtShapesAfterMETAndDeltaPhiAndInvertedTau.push_back(fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
       myName.str("");
       myName << "FakeTauMtShapeAfterMETAndDeltaPhiAndInvertedTau_bin" << i;
-      hFakeTauMtShapesAfterMETAndDeltaPhiAndInvertedTau.push_back(makeTH<TH1F>(myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
+      hFakeTauMtShapesAfterMETAndDeltaPhiAndInvertedTau.push_back(fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
     }
   }
   

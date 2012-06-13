@@ -3,7 +3,6 @@
 #define HiggsAnalysis_HeavyChHiggsToTauNu_SelectionCounterPackager_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 #include <string>
 #include <vector>
@@ -12,10 +11,9 @@
 #include "TH2.h"
 #include "TObject.h"
 
-// FIXME: add histogramming
-// FIXME: add counter
-
 namespace HPlus {
+  class HistoWrapper;
+
   class SelectionCounterItem {
    public:
     SelectionCounterItem(Count passedCounter, Count subCounter, TH1* histogram);
@@ -55,7 +53,7 @@ namespace HPlus {
      * sub counters and local counters can be grouped together
      * making the code more readable 
      */
-    SelectionCounterPackager(EventCounter& eventCounter, EventWeight& eventWeight);
+    SelectionCounterPackager(EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~SelectionCounterPackager();
 
     /// Returns index of the created sub counter
@@ -65,9 +63,9 @@ namespace HPlus {
     /// Increments the passed counters per event (call after all objects such as jets have been handled)
     void incrementPassedCounters();
     /// Fills 1D histogram (weight is taken automatically into account)
-    void fill(size_t index, float value) { fSelectionCounterItems.at(index).fill(value, fEventWeight.getWeight()); }
+    void fill(size_t index, float value) { fSelectionCounterItems.at(index).fill(value); }
     /// Fills 2D histogram (weight is taken automatically into account)
-    void fill(size_t index, float valueX, float valueY) { fSelectionCounterItems.at(index).fill(valueX, valueY, fEventWeight.getWeight()); }
+    void fill(size_t index, float valueX, float valueY) { fSelectionCounterItems.at(index).fill(valueX, valueY); }
     /// Resets the local counters
     void reset();
 
@@ -78,7 +76,6 @@ namespace HPlus {
 
    private:
     EventCounter& fEventCounter;
-    EventWeight& fEventWeight;
     std::vector<SelectionCounterItem> fSelectionCounterItems;
   };
   

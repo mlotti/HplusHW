@@ -11,9 +11,9 @@ namespace pat {
   class Tau;
 }
 
-class TH1;
-
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
   class EventWeight;
 
   class TriggerEfficiencyScaleFactor {
@@ -43,7 +43,7 @@ namespace HPlus {
       const TriggerEfficiencyScaleFactor *fTesf;
     };
 
-    TriggerEfficiencyScaleFactor(const edm::ParameterSet& iConfig, EventWeight& eventWeight);
+    TriggerEfficiencyScaleFactor(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper);
     ~TriggerEfficiencyScaleFactor();
 
     void setRun(unsigned run);
@@ -64,7 +64,7 @@ namespace HPlus {
     double scaleFactorRelativeUncertainty(const pat::Tau& tau) const;
     double scaleFactorAbsoluteUncertainty(const pat::Tau& tau) const;
 
-    Data applyEventWeight(const pat::Tau& tau, bool isData);
+    Data applyEventWeight(const pat::Tau& tau, bool isData, HPlus::EventWeight& eventWeight);
 
   private:
     struct DataValue {
@@ -101,13 +101,11 @@ namespace HPlus {
     std::vector<double> fScaleValues;
     std::vector<double> fScaleUncertainties;
 
-    EventWeight& fEventWeight;
-
     const DataValue *fCurrentRunData;
 
-    TH1 *hScaleFactor;
-    TH1 *hScaleFactorRelativeUncertainty;
-    TH1 *hScaleFactorAbsoluteUncertainty;
+    WrappedTH1 *hScaleFactor;
+    WrappedTH1 *hScaleFactorRelativeUncertainty;
+    WrappedTH1 *hScaleFactorAbsoluteUncertainty;
 
     Mode fMode;
     double fWeight;

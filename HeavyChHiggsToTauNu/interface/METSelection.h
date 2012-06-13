@@ -9,7 +9,6 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 namespace edm {
   class ParameterSet;
@@ -17,9 +16,10 @@ namespace edm {
   class EventSetup;
 }
 
-class TH1;
-
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
+
   class METSelection {
   public:
     /**
@@ -49,7 +49,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
     
-    METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, std::string label);
+    METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label);
     ~METSelection();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
@@ -78,15 +78,12 @@ namespace HPlus {
     // Counters
     Count fMetCutCount;
 
-    // EventWeight object
-    EventWeight& fEventWeight;
-    
     // Histograms
-    TH1 *hMet;
-    TH1 *hMetSignif;
-    TH1 *hMetSumEt;
-    TH1 *hMetDivSumEt;
-    TH1 *hMetDivSqrSumEt;
+    WrappedTH1 *hMet;
+    WrappedTH1 *hMetSignif;
+    WrappedTH1 *hMetSumEt;
+    WrappedTH1 *hMetDivSumEt;
+    WrappedTH1 *hMetDivSqrSumEt;
 
     // MET objects
     edm::Ptr<reco::MET> fSelectedMET;

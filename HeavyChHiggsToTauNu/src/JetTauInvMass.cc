@@ -1,5 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetTauInvMass.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -9,22 +9,20 @@
 #include "DataFormats/Common/interface/View.h"
 
 #include "Math/GenVector/VectorUtil.h"
-#include "TH1F.h"
 
 namespace HPlus {
   JetTauInvMass::Data::Data(const JetTauInvMass *jetTauInvMass, bool passedEvent):
     fJetTauInvMass(jetTauInvMass), fPassedEvent(passedEvent) {}
   JetTauInvMass::Data::~Data() {}
   
-  JetTauInvMass::JetTauInvMass(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):    
+  JetTauInvMass::JetTauInvMass(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):    
       fMassResolution(iConfig.getUntrackedParameter<double>("ZmassResolution")),
       //     fMassFromZll(iConfig.getUntrackedParameter<double>("ZmassFromZll")),
-      fInvMassCutCount(eventCounter.addSubCounter("Jet-Tau invariant mass", "Jet-Tau invariant mass")),  
-    fEventWeight(eventWeight)
+      fInvMassCutCount(eventCounter.addSubCounter("Jet-Tau invariant mass", "Jet-Tau invariant mass"))
   {
     edm::Service<TFileService> fs;
-    hTauJetMass = makeTH<TH1F>(*fs, "TauJetMass", "TauJetMass", 400, 0., 400.);
-    hClosestMass = makeTH<TH1F>(*fs, "TauJetMassClosest", "TauJetMassClosest", 400, 0., 400.);
+    hTauJetMass = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "TauJetMass", "TauJetMass", 400, 0., 400.);
+    hClosestMass = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "TauJetMassClosest", "TauJetMassClosest", 400, 0., 400.);
   }
 
   JetTauInvMass::~JetTauInvMass() {}

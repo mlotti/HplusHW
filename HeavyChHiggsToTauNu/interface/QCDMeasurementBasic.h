@@ -36,7 +36,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "TTree.h"
-#include "TH2F.h"
 #include <vector>
 
 namespace edm {
@@ -45,16 +44,13 @@ namespace edm {
   class EventSetup;
 }
 
-class TH1;
-class TH2;
-
-namespace HPlus { 
+namespace HPlus {
   class QCDMeasurementBasic {  
     class AnalysisVariation {
     public:
       AnalysisVariation(double METcut, double deltaPhiTauMETCut, int tauIsolation, int nTauPtBins, int nMtBins);
       ~AnalysisVariation();
-      
+
       void analyse(bool isRealData, const float maxElectronPt, const float maxMuonPt, const int njets, const METSelection::Data& METData, const TauSelection::Data& tauCandidateData,const BTagging::Data& btagData, int tauPtBinIndex, double weightAfterVertexReweight, TriggerEfficiencyScaleFactor::Data& trgEffData, FakeTauIdentifier::MCSelectedTauMatchType tauMatch, double mTBinIndex, const TopSelection::Data& topSelectionData, const BjetSelection::Data& bjetSelectionData, const TopChiSelection::Data& topChiSelectionData, const TopWithBSelection::Data& topWithBSelectionData);
 
     private:
@@ -62,68 +58,68 @@ namespace HPlus {
       double fDeltaPhiTauMETCut;
       int iTauIsolation;
       // Control plots
-      std::vector<TH1*> hCtrlSelectedTauPtAfterStandardSelections;
-      std::vector<TH1*> hCtrlSelectedTauEtaAfterStandardSelections;
-      std::vector<TH1*> hCtrlSelectedTauPhiAfterStandardSelections;
-      std::vector<TH2*> hCtrlSelectedTauEtaVsPhiAfterStandardSelections;
-      std::vector<TH1*> hCtrlSelectedTauLeadingTrkPtAfterStandardSelections;
-      std::vector<TH1*> hCtrlSelectedTauRtauAfterStandardSelections;
-      std::vector<TH1*> hCtrlSelectedTauPAfterStandardSelections;
-      std::vector<TH1*> hCtrlSelectedTauLeadingTrkPAfterStandardSelections;
-      std::vector<TH1*> hCtrlIdentifiedElectronPtAfterStandardSelections;
-      std::vector<TH1*> hCtrlIdentifiedMuonPtAfterStandardSelections;
-      std::vector<TH1*> hCtrlNjets; // Nbjets in bins of tau pT
-      std::vector<TH1*> hCtrlMET; // Nbjets in bins of tau pT
-      std::vector<TH1*> hCtrlNbjets; // Nbjets in bins of tau pT
-      std::vector<TH1*> hCtrlDeltaPhi; // DeltaPhi in bins of tau pT
+      std::vector<WrappedTH1*> hCtrlSelectedTauPtAfterStandardSelections;
+      std::vector<WrappedTH1*> hCtrlSelectedTauEtaAfterStandardSelections;
+      std::vector<WrappedTH1*> hCtrlSelectedTauPhiAfterStandardSelections;
+      std::vector<WrappedTH2*> hCtrlSelectedTauEtaVsPhiAfterStandardSelections;
+      std::vector<WrappedTH1*> hCtrlSelectedTauLeadingTrkPtAfterStandardSelections;
+      std::vector<WrappedTH1*> hCtrlSelectedTauRtauAfterStandardSelections;
+      std::vector<WrappedTH1*> hCtrlSelectedTauPAfterStandardSelections;
+      std::vector<WrappedTH1*> hCtrlSelectedTauLeadingTrkPAfterStandardSelections;
+      std::vector<WrappedTH1*> hCtrlIdentifiedElectronPtAfterStandardSelections;
+      std::vector<WrappedTH1*> hCtrlIdentifiedMuonPtAfterStandardSelections;
+      std::vector<WrappedTH1*> hCtrlNjets; // Nbjets in bins of tau pT
+      std::vector<WrappedTH1*> hCtrlMET; // Nbjets in bins of tau pT
+      std::vector<WrappedTH1*> hCtrlNbjets; // Nbjets in bins of tau pT
+      std::vector<WrappedTH1*> hCtrlDeltaPhi; // DeltaPhi in bins of tau pT
 
       // event counts in bins of tau jet pt
-      TH1F* hLeg1AfterDeltaPhiTauMET;
-      TH1F* hLeg1AfterMET;
-      TH1F* hLeg1AfterBTagging;
-      TH1F* hLeg1AfterTopSelection;
-      TH1F* hLeg1AfterTopChiSelection;
-      TH1F* hLeg1AfterTopWithBSelection;
+       WrappedTH1* hLeg1AfterDeltaPhiTauMET;
+       WrappedTH1* hLeg1AfterMET;
+       WrappedTH1* hLeg1AfterBTagging;
+       WrappedTH1* hLeg1AfterTopSelection;
+       WrappedTH1* hLeg1AfterTopChiSelection;
+       WrappedTH1* hLeg1AfterTopWithBSelection;
       ScaleFactorUncertaintyManager* fSFUncertaintyAfterMetLeg;
-      TH1F* hLeg2AfterTauIDNoRtau;
-      TH1F* hLeg2AfterTauIDWithRtau;
+       WrappedTH1* hLeg2AfterTauIDNoRtau;
+       WrappedTH1* hLeg2AfterTauIDWithRtau;
       ScaleFactorUncertaintyManager* fSFUncertaintyAfterTauLeg;
       // event counts in bins of tau jet pt for transverse mass
-      TH1F* hMtLegAfterMET;
-      TH1F* hMtLegAfterDeltaPhiTauMET;
+       WrappedTH1* hMtLegAfterMET;
+       WrappedTH1* hMtLegAfterDeltaPhiTauMET;
       ScaleFactorUncertaintyManager* fSFUncertaintyMtAfterMETAndDeltaPhi;
-      TH1F* hMtLegAfterMETAndTauIDNoRtau;
-      TH1F* hMtLegAfterMETAndTauIDWithRtau;
+       WrappedTH1* hMtLegAfterMETAndTauIDNoRtau;
+       WrappedTH1* hMtLegAfterMETAndTauIDWithRtau;
       ScaleFactorUncertaintyManager* fSFUncertaintyMtAfterTauID;
-      TH1F* hMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau;
+       WrappedTH1* hMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau;
       ScaleFactorUncertaintyManager* fSFUncertaintyMtAfterMETAndDeltaPhiAndInvertedTauID;
-      std::vector<TH1F*> hMtShapesAfterMETAndDeltaPhi;
-      std::vector<TH1F*> hMtShapesAfterMETAndBTaggingAndDeltaPhi;
-      std::vector<TH1F*> hMtShapesAfterMETAndBTaggingAndDeltaPhiAndTopSelection;
-      std::vector<TH1F*> hMtShapesAfterMETAndBTaggingAndDeltaPhiAndTopChiSelection;
-      std::vector<TH1F*> hMtShapesAfterMETAndBTaggingAndDeltaPhiAndTopWithBSelection;
-      std::vector<TH1F*> hMtShapesAfterMETAndDeltaPhiAndInvertedTau;
+      std::vector< WrappedTH1*> hMtShapesAfterMETAndDeltaPhi;
+      std::vector< WrappedTH1*> hMtShapesAfterMETAndBTaggingAndDeltaPhi;
+      std::vector< WrappedTH1*> hMtShapesAfterMETAndBTaggingAndDeltaPhiAndTopSelection;
+      std::vector< WrappedTH1*> hMtShapesAfterMETAndBTaggingAndDeltaPhiAndTopChiSelection;
+      std::vector< WrappedTH1*> hMtShapesAfterMETAndBTaggingAndDeltaPhiAndTopWithBSelection;
+      std::vector< WrappedTH1*> hMtShapesAfterMETAndDeltaPhiAndInvertedTau;
       // event counts in bins of tau jet pt and transverse mass for transverse mass
-      TH2F* h2DMtLegAfterDeltaPhiTauMET;
-      TH2F* h2DMtLegAfterMETAndTauIDNoRtau;
-      TH2F* h2DMtLegAfterMETAndTauIDWithRtau;
-      TH2F* h2DMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau;
+      WrappedTH2* h2DMtLegAfterDeltaPhiTauMET;
+      WrappedTH2* h2DMtLegAfterMETAndTauIDNoRtau;
+      WrappedTH2* h2DMtLegAfterMETAndTauIDWithRtau;
+      WrappedTH2* h2DMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau;
 
       // Fake tau histograms (type II)
-      TH1F* hFakeTauLeg1AfterDeltaPhiTauMET;
-      TH1F* hFakeTauLeg1AfterMET;
-      TH1F* hFakeTauLeg1AfterBTagging;
-      TH1F* hFakeTauLeg2AfterTauIDNoRtau;
-      TH1F* hFakeTauLeg2AfterTauIDWithRtau;
+       WrappedTH1* hFakeTauLeg1AfterDeltaPhiTauMET;
+       WrappedTH1* hFakeTauLeg1AfterMET;
+       WrappedTH1* hFakeTauLeg1AfterBTagging;
+       WrappedTH1* hFakeTauLeg2AfterTauIDNoRtau;
+       WrappedTH1* hFakeTauLeg2AfterTauIDWithRtau;
       // Transverse mass histograms
-      TH1F* hFakeTauMtLegAfterDeltaPhiTauMET;
-      TH1F* hFakeTauMtLegAfterMET;
-      TH1F* hFakeTauMtLegAfterMETAndTauIDNoRtau;
-      TH1F* hFakeTauMtLegAfterMETAndTauIDWithRtau;
-      TH1F* hFakeTauMtLegAfterMETAndInvertedTauIDNoRtau;
-      TH1F* hFakeTauMtLegAfterMETAndInvertedTauIDWithRtau;
-      std::vector<TH1F*> hFakeTauMtShapesAfterMETAndDeltaPhi;
-      std::vector<TH1F*> hFakeTauMtShapesAfterMETAndDeltaPhiAndInvertedTau;
+       WrappedTH1* hFakeTauMtLegAfterDeltaPhiTauMET;
+       WrappedTH1* hFakeTauMtLegAfterMET;
+       WrappedTH1* hFakeTauMtLegAfterMETAndTauIDNoRtau;
+       WrappedTH1* hFakeTauMtLegAfterMETAndTauIDWithRtau;
+       WrappedTH1* hFakeTauMtLegAfterMETAndInvertedTauIDNoRtau;
+       WrappedTH1* hFakeTauMtLegAfterMETAndInvertedTauIDWithRtau;
+      std::vector< WrappedTH1*> hFakeTauMtShapesAfterMETAndDeltaPhi;
+      std::vector< WrappedTH1*> hFakeTauMtShapesAfterMETAndDeltaPhiAndInvertedTau;
       
     };
     
@@ -142,7 +138,7 @@ namespace HPlus {
   };
   
   public:
-    explicit QCDMeasurementBasic(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    explicit QCDMeasurementBasic(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper);
     ~QCDMeasurementBasic();
 
     // Interface towards the EDProducer
@@ -216,33 +212,33 @@ namespace HPlus {
     std::vector<double> fTransverseMassBinLowEdges;
     
     // Histograms
-    TH1 *hVerticesBeforeWeight;
-    TH1 *hVerticesAfterWeight;
+    WrappedTH1* hVerticesBeforeWeight;
+    WrappedTH1* hVerticesAfterWeight;
     
     // event counts in bins of tau jet pt
-    TH1F* hAfterTauCandidateSelection;
-    TH1F* hAfterIsolatedElectronVeto;
-    TH1F* hAfterIsolatedMuonVeto;
-    TH1F* hAfterJetSelection;
+     WrappedTH1* hAfterTauCandidateSelection;
+     WrappedTH1* hAfterIsolatedElectronVeto;
+     WrappedTH1* hAfterIsolatedMuonVeto;
+     WrappedTH1* hAfterJetSelection;
     // Fake tau counts (type II)
-    TH1F* hFakeTauAfterTauCandidateSelection;
-    TH1F* hFakeTauAfterIsolatedElectronVeto;
-    TH1F* hFakeTauAfterIsolatedMuonVeto;
-    TH1F* hFakeTauAfterJetSelection;
+     WrappedTH1* hFakeTauAfterTauCandidateSelection;
+     WrappedTH1* hFakeTauAfterIsolatedElectronVeto;
+     WrappedTH1* hFakeTauAfterIsolatedMuonVeto;
+     WrappedTH1* hFakeTauAfterJetSelection;
     // Histograms for obtaining control plots
-    TH1F* hAfterTauCandidateSelectionAndTauID;
-    TH1F* hAfterIsolatedElectronVetoAndTauID;
-    TH1F* hAfterIsolatedMuonVetoAndTauID;
-    TH1F* hAfterJetSelectionAndTauID;
+     WrappedTH1* hAfterTauCandidateSelectionAndTauID;
+     WrappedTH1* hAfterIsolatedElectronVetoAndTauID;
+     WrappedTH1* hAfterIsolatedMuonVetoAndTauID;
+     WrappedTH1* hAfterJetSelectionAndTauID;
 
     // Other control histograms
-    //TH1 *hTauCandidateSelectionIsolatedPtMax;
+    //WrappedTH1* hTauCandidateSelectionIsolatedPtMax;
 
     // event counts in bins of tau jet pt and transverse mass
-    TH2* hMtAfterJetSelection;
+    WrappedTH2* hMtAfterJetSelection;
 
     // Other histograms
-    TH1 *hSelectionFlow;
+    WrappedTH1 *hSelectionFlow;
 
   };
 }

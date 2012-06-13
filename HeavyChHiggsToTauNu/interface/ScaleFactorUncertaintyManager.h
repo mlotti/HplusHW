@@ -6,28 +6,29 @@
 
 #include <string>
 
-class TH1F;
-
 namespace edm {
   class ParameterSet;
   class Event;
 }
 
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
+
   class ScaleFactorUncertaintyManager {
   public:
-    explicit ScaleFactorUncertaintyManager(const std::string& name, const std::string& directory = "");
+    explicit ScaleFactorUncertaintyManager(const std::string& name, const std::string& directory = "", HistoWrapper& histoWrapper);
     ~ScaleFactorUncertaintyManager();
 
     void setScaleFactorUncertainties(double eventWeight, double triggerSF, double triggerSFAbsUncertainty, double btagSF, double btagSFAbsUncertainty);
 
   private:
-    TH1F* hTriggerSF;
-    TH1F* hTriggerSFAbsUncertainty;
-    TH1F* hTriggerSFAbsUncertaintyCounts;
-    TH1F* hBtagSF;
-    TH1F* hBtagSFAbsUncertainty;
-    TH1F* hBtagSFAbsUncertaintyCounts;
+     WrappedTH1* hTriggerSF;
+     WrappedTH1* hTriggerSFAbsUncertainty;
+     WrappedTH1* hTriggerSFAbsUncertaintyCounts;
+     WrappedTH1* hBtagSF;
+     WrappedTH1* hBtagSFAbsUncertainty;
+     WrappedTH1* hBtagSFAbsUncertaintyCounts;
   };
 }
 

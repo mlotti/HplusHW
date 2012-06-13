@@ -52,7 +52,7 @@ namespace HPlus {
 
         edm::Service<TFileService> fs;
         if(fs.isAvailable()) {
-          hDR = fs->make<TH1F>("deltaR", "DeltaR(obj, tau)", 60, 0, 6);
+          hDR = fs->make< WrappedTH1>("deltaR", "DeltaR(obj, tau)", 60, 0, 6);
         }
       }
 

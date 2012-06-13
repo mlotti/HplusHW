@@ -1,5 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 namespace HPlus {
   
@@ -13,7 +13,7 @@ namespace HPlus {
     } else if (level == "Debug") {
       fAmbientLevel = kDebug;
     } else {
-      throw cms::Exception("config") << "HistoWrapper: Error in ambient histogram level! Valid options are: 'Vital', 'Informative', 'Debug' (you specified: '" << level << "'";
+      throw cms::Exception("Configuration") << "HistoWrapper: Error in ambient histogram level! Valid options are: 'Vital', 'Informative', 'Debug' (you specified: '" << level << "'";
     }
   }
   HistoWrapper::~HistoWrapper() {
@@ -22,6 +22,15 @@ namespace HPlus {
       delete *it;
     for (std::vector<WrappedTH2*>::iterator it = fAllTH2Histos.begin(); it != fAllTH2Histos.end(); ++it)
       delete *it;
+  }
+
+  bool HistoWrapper::checkIfDirExists(TDirectory& d, std::string name) {
+    for (size_t i = 0; i < d.GetNkeys(); ++i) {
+      std::string s = d.GetListOfKeys().At(i).GetTitle();
+      if (s == name)
+        return true;
+    }
+    return false;
   }
 
   WrappedTH1::WrappedTH1(EventWeight& eventWeight, TH1* histo, bool isActive)

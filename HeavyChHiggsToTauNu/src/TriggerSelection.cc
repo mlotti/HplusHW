@@ -13,8 +13,6 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
-#include "TH1F.h"
-
 namespace HPlus {
   TriggerSelection::Data::Data(const TriggerSelection *triggerSelection, const TriggerPath *triggerPath, bool passedEvent):
     fTriggerSelection(triggerSelection), fTriggerPath(triggerPath), fPassedEvent(passedEvent) {}
@@ -57,9 +55,9 @@ namespace HPlus {
     hHltMetSelected = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "Trigger_HLT_MET_Selected", "HLT_MET_Selected;HLT_MET, GeV;N_{events} / 3 GeV", 100, 0., 300.);
     hTriggerParametrisationWeight = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "Trigger_Parametrisation_Weight", "Trigger_Parametrisation_Weight;Weight*1000;N_{events} / 0.1 percent", 1000, 0., 1000.);
     hControlSelectionType = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "Control_Trigger_Selection_Type", "Control_Trigger_Selection_Type;;N_{events}", 3, 0., 3.);
-    hControlSelectionType->getHisto()->GetXaxis()->SetBinLabel(1, "byTriggerBit");
-    hControlSelectionType->getHisto()->GetXaxis()->SetBinLabel(2, "byTriggerBit+ScaleFactor");
-    hControlSelectionType->getHisto()->GetXaxis()->SetBinLabel(3, "byTriggerEffParam");
+    hControlSelectionType->GetXaxis()->SetBinLabel(1, "byTriggerBit");
+    hControlSelectionType->GetXaxis()->SetBinLabel(2, "byTriggerBit+ScaleFactor");
+    hControlSelectionType->GetXaxis()->SetBinLabel(3, "byTriggerEffParam");
   }
 
   TriggerSelection::~TriggerSelection() {

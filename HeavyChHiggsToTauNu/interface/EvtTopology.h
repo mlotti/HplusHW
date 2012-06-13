@@ -28,7 +28,6 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MathFunctions.h"
 
@@ -40,9 +39,9 @@ namespace edm {
   class ParameterSet;
 }
 
-class TH1;
-
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedWrappedTH1;
 
   class EvtTopology {
   public:
@@ -76,7 +75,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
 
-    EvtTopology(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    EvtTopology(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~EvtTopology();
 
     Data analyze( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
@@ -92,16 +91,13 @@ namespace HPlus {
     Count fEvtTopologyCount;
     Count fAlphaTCutCount;
 
-    // EventWeight object
-    EventWeight& fEventWeight;
-
     // Histograms
-    TH1 *hAlphaT;
+    WrappedTH1 *hAlphaT;
     /*
-      TH1 *hDiJetInvMass;
-      TH1 *hDiJetInvMassCutFail;
-      TH1 *hDiJetInvMassCutPass;
-      TH1 *hDiJetInvMassWCutFail;
+      WrappedTH1 *hDiJetInvMass;
+      WrappedTH1 *hDiJetInvMassCutFail;
+      WrappedTH1 *hDiJetInvMassCutPass;
+      WrappedTH1 *hDiJetInvMassWCutFail;
     */
     
     // Other variables

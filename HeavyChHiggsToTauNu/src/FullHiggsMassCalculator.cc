@@ -2,7 +2,7 @@
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -14,7 +14,6 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 #include "TMath.h"
-#include "TH1F.h"
 
 namespace HPlus {
   FullHiggsMassCalculator::Data::Data(const FullHiggsMassCalculator* calculator, bool passEvent)
@@ -22,25 +21,22 @@ namespace HPlus {
     fPassedEvent(passEvent) { }
   FullHiggsMassCalculator::Data::~Data() { }
 
-  FullHiggsMassCalculator::FullHiggsMassCalculator(EventCounter& eventCounter, EventWeight& eventWeight)
-  : fEventWeight(eventWeight)
- //   fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc")),
-  {
+  FullHiggsMassCalculator::FullHiggsMassCalculator(HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper) {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("FullHiggsMass");
-    //hWeights = makeTH<TH1F>("pileupReweightWeights", "Reweighting weight distribution", 100, 0, 10);
-    hHiggsMass = makeTH<TH1F>(myDir, "HiggsMass", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMassReal = makeTH<TH1F>(myDir, "HiggsMassReal", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMassImaginary = makeTH<TH1F>(myDir, "HiggsMassImaginary", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hTopMass = makeTH<TH1F>(myDir, "TopMass", "Top mass;m_{top} (GeV)", 100, 0, 500);
-    hTopMassRejected = makeTH<TH1F>(myDir, "TopMassRejected", "Top mass;m_{top} (GeV)", 100, 0, 500);
-    hTopMassReal = makeTH<TH1F>(myDir, "TopMassReal", "Top mass;m_{top} (GeV)", 100, 0, 500);
-    hTopMassRealRejected = makeTH<TH1F>(myDir, "TopMassRealRejected", "Top mass;m_{top} (GeV)", 100, 0, 500);
-    hTopMassImaginary = makeTH<TH1F>(myDir, "TopMassImaginary", "Top mass;m_{top} (GeV)", 100, 0, 500);
-    hTopMassImaginaryRejected = makeTH<TH1F>(myDir, "TopMassImaginaryRejected", "Top mass;m_{top} (GeV)", 100, 0, 500);
-    hNeutrinoZSolution = makeTH<TH1F>(myDir, "NeutrinoZSolution", "Neutrino Z solution;p_{#nu,z} (GeV)", 100, -500, 500);
-    hNeutrinoPtSolution = makeTH<TH1F>(myDir, "NeutrinoPtSolution", "Neutrino pT solution;p_{#nu,T} (GeV)", 100, 0, 500);
-    hNeutrinoPtDifference = makeTH<TH1F>(myDir, "NeutrinoPtDifference", "Neutrino pT difference;p_{#nu,T} (GeV)", 200, -500, 500);
+    //hWeights = histoWrapper->makeTH<TH1F>("pileupReweightWeights", "Reweighting weight distribution", 100, 0, 10);
+    hHiggsMass = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMass", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMassReal = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "HiggsMassReal", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMassImaginary = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "HiggsMassImaginary", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hTopMass = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass", "Top mass;m_{top} (GeV)", 100, 0, 500);
+    hTopMassRejected = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMassRejected", "Top mass;m_{top} (GeV)", 100, 0, 500);
+    hTopMassReal = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMassReal", "Top mass;m_{top} (GeV)", 100, 0, 500);
+    hTopMassRealRejected = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMassRealRejected", "Top mass;m_{top} (GeV)", 100, 0, 500);
+    hTopMassImaginary = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMassImaginary", "Top mass;m_{top} (GeV)", 100, 0, 500);
+    hTopMassImaginaryRejected = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMassImaginaryRejected", "Top mass;m_{top} (GeV)", 100, 0, 500);
+    hNeutrinoZSolution = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "NeutrinoZSolution", "Neutrino Z solution;p_{#nu,z} (GeV)", 100, -500, 500);
+    hNeutrinoPtSolution = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "NeutrinoPtSolution", "Neutrino pT solution;p_{#nu,T} (GeV)", 100, 0, 500);
+    hNeutrinoPtDifference = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "NeutrinoPtDifference", "Neutrino pT difference;p_{#nu,T} (GeV)", 200, -500, 500);
 
       //edm::FileInPath myDataPUdistribution = iConfig.getParameter<edm::FileInPath>("dataPUdistribution");
   }
@@ -122,10 +118,10 @@ namespace HPlus {
         fNeutrinoZSolution = mySolution2;
         fTopMassSolution = myTopMassSolution2;
         if (doHistogramming)
-          hTopMassRealRejected->Fill(myTopMassSolution1, fEventWeight.getWeight());
+          hTopMassRealRejected->Fill(myTopMassSolution1);
       } else {
         if (doHistogramming)
-          hTopMassRealRejected->Fill(myTopMassSolution2, fEventWeight.getWeight());
+          hTopMassRealRejected->Fill(myTopMassSolution2);
       }
       // Calculate Higgs boson mass
       double myNeutrinoEnergy = TMath::Sqrt(TMath::Power(met.Perp(),2) + TMath::Power(fNeutrinoZSolution,2));
@@ -159,10 +155,10 @@ namespace HPlus {
         fNeutrinoPtSolution = mySolution2;
         fTopMassSolution = myTopMassSolution2;
         if (doHistogramming)
-          hTopMassImaginaryRejected->Fill(myTopMassSolution1, fEventWeight.getWeight());
+          hTopMassImaginaryRejected->Fill(myTopMassSolution1);
       } else {
         if (doHistogramming)
-          hTopMassImaginaryRejected->Fill(myTopMassSolution2, fEventWeight.getWeight());
+          hTopMassImaginaryRejected->Fill(myTopMassSolution2);
       }
       // Calculate Higgs boson mass
       double alphaPrime = (tau.X() * met.X() + tau.Y() * met.Y()) / met.Perp();
@@ -174,28 +170,28 @@ namespace HPlus {
     }
     // Fill top mass histograms
     if (doHistogramming) {
-      hTopMass->Fill(fTopMassSolution, fEventWeight.getWeight());
+      hTopMass->Fill(fTopMassSolution);
       if (discriminant >= 0.0) {
-        hTopMassReal->Fill(fTopMassSolution, fEventWeight.getWeight());
+        hTopMassReal->Fill(fTopMassSolution);
       } else {
-        hTopMassImaginary->Fill(fTopMassSolution, fEventWeight.getWeight());
+        hTopMassImaginary->Fill(fTopMassSolution);
       }
     }
     // Fill neutrino histograms
     if (doHistogramming) {
-      hNeutrinoZSolution->Fill(fNeutrinoZSolution, fEventWeight.getWeight());
+      hNeutrinoZSolution->Fill(fNeutrinoZSolution);
       if (fNeutrinoPtSolution > 0.0) {
-        hNeutrinoPtSolution->Fill(fNeutrinoPtSolution, fEventWeight.getWeight());
-        hNeutrinoPtDifference->Fill(fNeutrinoPtSolution-met.Perp(), fEventWeight.getWeight());
+        hNeutrinoPtSolution->Fill(fNeutrinoPtSolution);
+        hNeutrinoPtDifference->Fill(fNeutrinoPtSolution-met.Perp());
       }
     }
     std::cout << "mHiggs, " << fHiggsMassSolution << std::endl;
     if (doHistogramming) {
-      hHiggsMass->Fill(fHiggsMassSolution, fEventWeight.getWeight());
+      hHiggsMass->Fill(fHiggsMassSolution);
       if (discriminant >= 0.0) {
-        hHiggsMassReal->Fill(fHiggsMassSolution, fEventWeight.getWeight());
+        hHiggsMassReal->Fill(fHiggsMassSolution);
       } else {
-        hHiggsMassImaginary->Fill(fHiggsMassSolution, fEventWeight.getWeight());
+        hHiggsMassImaginary->Fill(fHiggsMassSolution);
       }
     }
   }

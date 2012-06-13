@@ -1,9 +1,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SelectionCounterPackager.h"
 
 namespace HPlus {
-  SelectionCounterPackager::SelectionCounterPackager(EventCounter& eventCounter, EventWeight& eventWeight)
-  : fEventCounter(eventCounter),
-    fEventWeight(eventWeight) { }
+  SelectionCounterPackager::SelectionCounterPackager(HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper)
+  : fEventCounter(eventCounter) { }
   
   SelectionCounterPackager::~SelectionCounterPackager() { }
   
@@ -13,7 +12,7 @@ namespace HPlus {
     std::stringstream mySubCounterBase;
     mySubCounterBase << "TauIDPassedJets::" << base; 
     SelectionCounterItem myItem(
-      fEventCounter.addSubCounter(myPassedCounterBase.str(), name), 
+      fEventCounter.addSubCounter(myPassedCounterBase.str(), name),
       fEventCounter.addSubCounter(mySubCounterBase.str(), name),
       histogram);
     fSelectionCounterItems.push_back(myItem);
@@ -36,15 +35,13 @@ namespace HPlus {
   }
 
   SelectionCounterItem::SelectionCounterItem(Count passedCounter, Count subCounter, TH1* histogram)
-  : //fEventWeight(eventWeight),
-    fPassedCounter(passedCounter),
+  : fPassedCounter(passedCounter),
     fSubCounter(subCounter),
     fLocalCounter(0),
     fHistogram(histogram) { }
 
   SelectionCounterItem::SelectionCounterItem(Count passedCounter, Count subCounter, TH2* histogram)
-  : //fEventWeight(eventWeight),
-    fPassedCounter(passedCounter),
+  : fPassedCounter(passedCounter),
     fSubCounter(subCounter),
     fLocalCounter(0),
     fHistogram(histogram) { }

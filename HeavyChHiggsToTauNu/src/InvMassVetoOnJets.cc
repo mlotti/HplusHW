@@ -10,10 +10,9 @@
 //#######################################################################
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/InvMassVetoOnJets.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "TH1F.h"
 #include "Math/GenVector/VectorUtil.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 
@@ -23,7 +22,7 @@ namespace HPlus {
     fInvMassVetoOnJets(invMassVetoOnJets), fPassedEvent(passedEvent) {}
   InvMassVetoOnJets::Data::~Data() {}
 
-  InvMassVetoOnJets::InvMassVetoOnJets(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  InvMassVetoOnJets::InvMassVetoOnJets(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fSetTrueToUseModule(iConfig.getUntrackedParameter<bool>("setTrueToUseModule")),
@@ -36,29 +35,20 @@ namespace HPlus {
     fInvMassTopWindow10SubCount(eventCounter.addSubCounter("InvMassTopWindow", "InvMassWindow10")),
     fInvMassTopWindow15SubCount(eventCounter.addSubCounter("InvMassTopWindow", "InvMassWindow15")),
     fInvMassTopWindow20SubCount(eventCounter.addSubCounter("InvMassTopWindow", "InvMassWindow20")),
-    fInvMassTopWindow25SubCount(eventCounter.addSubCounter("InvMassTopWindow", "InvMassWindow25")),
-    fEventWeight(eventWeight)
+    fInvMassTopWindow25SubCount(eventCounter.addSubCounter("InvMassTopWindow", "InvMassWindow25"))
   {
     edm::Service<TFileService> fs;
+    TFileDirectory myDir = fs->mkdir("InvMassVetoOnJets");
     // Histograms
-    hDiJetInvMass           = fs->make<TH1F>("DiJetInvMass", "DiJetInvMass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
-    hDiJetInvMass->Sumw2();
-    hDiJetInvMassCutFail    = fs->make<TH1F>("DiJetInvMassCutFail", "DiJetInvMassCutFail;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
-    hDiJetInvMassCutFail->Sumw2();
-    hDiJetInvMassCutPass    = fs->make<TH1F>("DiJetInvMassCutPass", "DiJetInvMassCutPass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
-    hDiJetInvMassCutPass->Sumw2();
-    hTriJetInvMass          = fs->make<TH1F>("TriJetInvMass", "TriJetInvMass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
-    hTriJetInvMass->Sumw2();
-    hTriJetInvMassCutFail   = fs->make<TH1F>("TriJetInvMassCutFail", "TriJetInvMassCutFail;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
-    hTriJetInvMassCutFail->Sumw2();
-    hTriJetInvMassCutPass   = fs->make<TH1F>("TriJetInvMassCutPass", "TriJetInvMassCutPass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
-    hTriJetInvMassCutPass->Sumw2();
-    hInvMass                = fs->make<TH1F>("InvMass", "InvMass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
-    hInvMass->Sumw2();
-    hInvMassCutFail         = fs->make<TH1F>("InvMassCutFail", "InvMassCutFail;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
-    hInvMassCutFail->Sumw2();
-    hInvMassCutPass         = fs->make<TH1F>("InvMassCutPass", "InvMassCutPass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
-    hInvMassCutPass->Sumw2();
+    hDiJetInvMass           = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "DiJetInvMass", "DiJetInvMass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hDiJetInvMassCutFail    = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "DiJetInvMassCutFail", "DiJetInvMassCutFail;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hDiJetInvMassCutPass    = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "DiJetInvMassCutPass", "DiJetInvMassCutPass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hTriJetInvMass          = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TriJetInvMass", "TriJetInvMass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hTriJetInvMassCutFail   = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TriJetInvMassCutFail", "TriJetInvMassCutFail;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hTriJetInvMassCutPass   = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TriJetInvMassCutPass", "TriJetInvMassCutPass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hInvMass                = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "InvMass", "InvMass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hInvMassCutFail         = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "InvMassCutFail", "InvMassCutFail;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hInvMassCutPass         = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "InvMassCutPass", "InvMassCutPass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
   }
 
   InvMassVetoOnJets::~InvMassVetoOnJets() {}
@@ -120,8 +110,8 @@ namespace HPlus {
       const LorentzVector myWCandidate ( (*jet1)->p4()+(*jet2)->p4() );
       double DiJetInvMass = myWCandidate.M();
 
-      hInvMass->Fill(DiJetInvMass, fEventWeight.getWeight());
-      hDiJetInvMass->Fill(DiJetInvMass, fEventWeight.getWeight());
+      hInvMass->Fill(DiJetInvMass);
+      hDiJetInvMass->Fill(DiJetInvMass);
 
       /// Increment counters with variable mass window. Take no action
       if( DiJetInvMass <= (WMass+WMassWindow10) && DiJetInvMass >= (WMass-WMassWindow10) ) increment(fInvMassWWindow10SubCount);
@@ -132,15 +122,15 @@ namespace HPlus {
       /// Now, make decision on DiJet Mass
       if( DiJetInvMass <= (WMass+WMassWindow10) && DiJetInvMass >= (WMass-WMassWindow10) ){
 	bInvMassWithinWWindow = true;
-	hDiJetInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
-	hInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
-	hDiJetInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
+	hDiJetInvMassCutFail->Fill(DiJetInvMass);
+	hInvMassCutFail->Fill(DiJetInvMass);
+	hDiJetInvMassCutFail->Fill(DiJetInvMass);
 	increment(fDiJetsCutSubCount);
 	// return Data(this, false);
       } else{
 	// bInvMassWithinWWindow = false;
-	hDiJetInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
-	hInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
+	hDiJetInvMassCutPass->Fill(DiJetInvMass);
+	hInvMassCutPass->Fill(DiJetInvMass);
       }
 
     }//eof: else if(jets.size()==2){
@@ -167,8 +157,8 @@ namespace HPlus {
 	  double DiJetInvMass = myWCandidate.M();
 	  
 	  /// Fill histograms
-	  hDiJetInvMass->Fill(DiJetInvMass, fEventWeight.getWeight());
-	  hInvMass->Fill(DiJetInvMass, fEventWeight.getWeight());
+	  hDiJetInvMass->Fill(DiJetInvMass);
+	  hInvMass->Fill(DiJetInvMass);
 	  
 	  /// Increment counters with variable mass window. Take no action
 	  if( DiJetInvMass <= (WMass+WMassWindow10) && DiJetInvMass >= (WMass-WMassWindow10) ) increment(fInvMassWWindow10SubCount);
@@ -179,14 +169,14 @@ namespace HPlus {
 	  /// Make decision on DiJet Mass
 	  if( DiJetInvMass <= (WMass+WMassWindow) && DiJetInvMass >= (WMass-WMassWindow) ){
 	    bInvMassWithinWWindow = true;
-	    hDiJetInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
-	    hInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
+	    hDiJetInvMassCutFail->Fill(DiJetInvMass);
+	    hInvMassCutFail->Fill(DiJetInvMass);
 	    increment(fDiJetsCutSubCount);
 	    // return Data(this, false);
 	  } else{
 	    // bInvMassWithinWWindow = false; // don't want to do this as if a combination within the window was found before I lose the info
-	    hDiJetInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
-	    hInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
+	    hDiJetInvMassCutPass->Fill(DiJetInvMass);
+	    hInvMassCutPass->Fill(DiJetInvMass);
 	  }
 	  /// Loop over jet collection - oth Jet, where: o = n+1 = m+2
 	  for(edm::PtrVector<pat::Jet>::const_iterator jet3 = jet+2; jet3 != jets.end(); ++jet3) {
@@ -201,8 +191,8 @@ namespace HPlus {
 	    double TriJetInvMass = myTopCandidate.M();
 	    
 	    /// Fill histograms
-	    hTriJetInvMass->Fill(TriJetInvMass, fEventWeight.getWeight());
-	    hInvMass->Fill(TriJetInvMass, fEventWeight.getWeight());
+	    hTriJetInvMass->Fill(TriJetInvMass);
+	    hInvMass->Fill(TriJetInvMass);
 	    
 	    /// Increment counters with variable mass window. Take no action
 	    if( TriJetInvMass <= (TopMass+TopMassWindow10) && TriJetInvMass >= (TopMass-TopMassWindow10) ) increment(fInvMassTopWindow10SubCount);
@@ -213,14 +203,14 @@ namespace HPlus {
 	    /// Make decision on TriJet Mass
 	    if( TriJetInvMass <= (TopMass+TopMassWindow) && DiJetInvMass >= (TopMass-TopMassWindow) ){
 	      bInvMassWithinTopWindow = true;
-	      hTriJetInvMassCutFail->Fill(TriJetInvMass, fEventWeight.getWeight());
-	      hInvMassCutFail->Fill(TriJetInvMass, fEventWeight.getWeight());
+	      hTriJetInvMassCutFail->Fill(TriJetInvMass);
+	      hInvMassCutFail->Fill(TriJetInvMass);
 	      increment(fTriJetsCutSubCount);
 	      // return Data(this, false);
 	    } else{
 	      // bInvMassWithinTopWindow = false;
-	      hTriJetInvMassCutPass->Fill(TriJetInvMass, fEventWeight.getWeight());
-	      hInvMassCutPass->Fill(TriJetInvMass, fEventWeight.getWeight());
+	      hTriJetInvMassCutPass->Fill(TriJetInvMass);
+	      hInvMassCutPass->Fill(TriJetInvMass);
 	    }
 	  }//eof: third jet loop
 	}//eof: second jet loop

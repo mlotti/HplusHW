@@ -1,11 +1,10 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "Math/GenVector/VectorUtil.h"
-#include "TH1F.h"
 
 #include <limits>
 
@@ -28,37 +27,34 @@ namespace HPlus {
     fTopSelection(topSelection), fPassedEvent(passedEvent) {}
   TopSelection::Data::~Data() {}
 
-  TopSelection::TopSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  TopSelection::TopSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
     fTopMassLow(iConfig.getUntrackedParameter<double>("TopMassLow")),
     fTopMassHigh(iConfig.getUntrackedParameter<double>("TopMassHigh")),
     fTopMassCount(eventCounter.addSubCounter("Top mass","Top Mass cut")),
-    fEventWeight(eventWeight),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src"))
   {
     edm::Service<TFileService> fs;
 
     TFileDirectory myDir = fs->mkdir("TopSelection");
-        
-    hPtjjb = makeTH<TH1F>(myDir, "Pt_jjb", "Pt_jjb", 200, 0., 800.);
-    hPtmax = makeTH<TH1F>(myDir, "Ptmax", "Ptmax", 200, 0., 800.);
-    hPtmaxMatch = makeTH<TH1F>(myDir, "PtmaxMatch", "PtmaxMatch", 200, 0., 800.);
-    hPtmaxBMatch = makeTH<TH1F>(myDir, "PtmaxBMatch", "PtmaxBMatch", 200, 0., 800.);
-    hPtmaxQMatch = makeTH<TH1F>(myDir, "PtmaxQMatch", "PtmaxQMatch", 200, 0., 800.);
-    hPtmaxMatchWrongB = makeTH<TH1F>(myDir, "PtmaxMatchWrongB", "PtmaxMatchWrongB", 200, 0., 800.);
 
-    hjjbMass = makeTH<TH1F>(myDir, "jjbMass", "jjbMass", 400, 0., 400.);
-    htopMass = makeTH<TH1F>(myDir, "TopMass", "TopMass", 400, 0., 400.);
-    hWMass = makeTH<TH1F>(myDir, "WMass", "WMass", 400, 0., 200.);
-    htopMassMatch = makeTH<TH1F>(myDir, "TopMass_fullMatch", "TopMass_fullMatch", 400, 0., 400.);
-    hWMassMatch = makeTH<TH1F>(myDir, "WMass_fullMatch", "WMass_fullMatchMatch", 400, 0., 200.);
-    htopMassBMatch = makeTH<TH1F>(myDir, "TopMass_bMatch", "TopMass_bMatch", 400, 0., 400.);
-    hWMassBMatch = makeTH<TH1F>(myDir, "WMass_bMatch", "WMass_bMatch", 400, 0., 200.);
-    htopMassQMatch = makeTH<TH1F>(myDir, "TopMass_qMatch", "TopMass_qMatch", 400, 0., 400.);
-    hWMassQMatch = makeTH<TH1F>(myDir, "WMass_qMatch", "WMass_qMatch", 400, 0., 200.);
-    htopMassMatchWrongB = makeTH<TH1F>(myDir, "TopMass_MatchWrongB", "TopMass_MatchWrongB", 400, 0., 400.);
-    hWMassMatchWrongB = makeTH<TH1F>(myDir, "WMass_MatchWrongB", "WMass_MatchWrongB", 400, 0., 200.);
+    hPtjjb = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "Pt_jjb", "Pt_jjb", 160, 0., 800.);
+    hPtmax = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "Ptmax", "Ptmax", 160, 0., 800.);
+    hPtmaxMatch = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtmaxMatch", "PtmaxMatch", 160, 0., 800.);
+    hPtmaxBMatch = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtmaxBMatch", "PtmaxBMatch", 160, 0., 800.);
+    hPtmaxQMatch = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtmaxQMatch", "PtmaxQMatch", 160, 0., 800.);
+    hPtmaxMatchWrongB = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtmaxMatchWrongB", "PtmaxMatchWrongB", 160, 0., 800.);
 
-   
+    hjjbMass = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "jjbMass", "jjbMass", 80, 0., 400.);
+    htopMass = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMass", "TopMass", 80, 0., 400.);
+    hWMass = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass", "WMass", 100, 0., 200.);
+    htopMassMatch = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMass_fullMatch", "TopMass_fullMatch", 80, 0., 400.);
+    hWMassMatch = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "WMass_fullMatch", "WMass_fullMatchMatch", 100, 0., 200.);
+    htopMassBMatch = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMass_bMatch", "TopMass_bMatch", 80, 0., 400.);
+    hWMassBMatch = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "WMass_bMatch", "WMass_bMatch", 100, 0., 200.);
+    htopMassQMatch = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMass_qMatch", "TopMass_qMatch", 80, 0., 400.);
+    hWMassQMatch = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "WMass_qMatch", "WMass_qMatch", 100, 0., 200.);
+    htopMassMatchWrongB = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMass_MatchWrongB", "TopMass_MatchWrongB", 80, 0., 400.);
+    hWMassMatchWrongB = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "WMass_MatchWrongB", "WMass_MatchWrongB", 100, 0., 200.);
   }
 
   TopSelection::~TopSelection() {}
@@ -95,8 +91,8 @@ namespace HPlus {
           XYZTLorentzVector candTop = iJet1->p4() + iJet2->p4() + iJetb->p4();
           XYZTLorentzVector candW = iJet1->p4() + iJet2->p4();
 	
-	  hPtjjb->Fill(candTop.Pt(), fEventWeight.getWeight());
-	  hjjbMass->Fill(candTop.M(), fEventWeight.getWeight());
+	  hPtjjb->Fill(candTop.Pt());
+	  hjjbMass->Fill(candTop.M());
 
 	  if (candTop.Pt() > ptmax ) {
 	    Jet1 = iJet1;
@@ -111,9 +107,9 @@ namespace HPlus {
       }
     }
 
-    hPtmax->Fill(ptmax, fEventWeight.getWeight());
-    htopMass->Fill(topMass, fEventWeight.getWeight());
-    hWMass->Fill(W.M(), fEventWeight.getWeight());
+    hPtmax->Fill(ptmax);
+    htopMass->Fill(topMass);
+    hWMass->Fill(W.M());
 
 
 
@@ -182,24 +178,24 @@ namespace HPlus {
       
 
        if ( bMatchTopSide && Jet1Match && Jet2Match) {
-	 htopMassMatch->Fill(top.M(), fEventWeight.getWeight());
-	 hWMassMatch->Fill(W.M(), fEventWeight.getWeight()); 
-	 hPtmaxMatch->Fill(ptmax, fEventWeight.getWeight());
+	 htopMassMatch->Fill(top.M());
+	 hWMassMatch->Fill(W.M()); 
+	 hPtmaxMatch->Fill(ptmax);
        }
        if ( bMatchHiggsSide && Jet1Match && Jet2Match) {
-	 htopMassMatchWrongB->Fill(top.M(), fEventWeight.getWeight());
-	 hWMassMatchWrongB->Fill(W.M(), fEventWeight.getWeight()); 
-	 hPtmaxMatchWrongB->Fill(ptmax, fEventWeight.getWeight());
+	 htopMassMatchWrongB->Fill(top.M());
+	 hWMassMatchWrongB->Fill(W.M()); 
+	 hPtmaxMatchWrongB->Fill(ptmax);
        }
        if ( bMatchTopSide ) {
-	 htopMassBMatch->Fill(top.M(), fEventWeight.getWeight());
-	 hWMassBMatch->Fill(W.M(), fEventWeight.getWeight()); 
-	 hPtmaxBMatch->Fill(ptmax, fEventWeight.getWeight());
+	 htopMassBMatch->Fill(top.M());
+	 hWMassBMatch->Fill(W.M()); 
+	 hPtmaxBMatch->Fill(ptmax);
        }
        if ( Jet1Match && Jet2Match ) {
-	 htopMassQMatch->Fill(top.M(), fEventWeight.getWeight());
-	 hWMassQMatch->Fill(W.M(), fEventWeight.getWeight());
-	 hPtmaxQMatch->Fill(ptmax, fEventWeight.getWeight()); 
+	 htopMassQMatch->Fill(top.M());
+	 hWMassQMatch->Fill(W.M());
+	 hPtmaxQMatch->Fill(ptmax); 
        }
     }
 

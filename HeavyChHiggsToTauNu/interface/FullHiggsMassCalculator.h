@@ -16,10 +16,12 @@ namespace edm {
   class EventSetup;
 }
 
-class TH1;
 class TVector3;
 
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
+
   class FullHiggsMassCalculator {
   public:
     class Data {
@@ -35,7 +37,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
 
-    FullHiggsMassCalculator(EventCounter& eventCounter, EventWeight& eventWeight);
+    FullHiggsMassCalculator(EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~FullHiggsMassCalculator();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData);
@@ -46,11 +48,6 @@ namespace HPlus {
     void doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool doHistogramming = true);
 
   private:
-    // EventWeight object
-    EventWeight& fEventWeight;
-    //edm::InputTag fVertexSrc;
-    //TH1 *hWeights;
-
     // Calculated results
     double fTopMassSolution;
     double fNeutrinoZSolution;
@@ -58,18 +55,18 @@ namespace HPlus {
     double fHiggsMassSolution;
 
     // Histograms
-    TH1* hHiggsMass;
-    TH1* hHiggsMassReal;
-    TH1* hHiggsMassImaginary;
-    TH1* hTopMass;
-    TH1* hTopMassRejected;
-    TH1* hTopMassReal;
-    TH1* hTopMassRealRejected;
-    TH1* hTopMassImaginary;
-    TH1* hTopMassImaginaryRejected;
-    TH1* hNeutrinoZSolution;
-    TH1* hNeutrinoPtSolution;
-    TH1* hNeutrinoPtDifference;
+    WrappedTH1* hHiggsMass;
+    WrappedTH1* hHiggsMassReal;
+    WrappedTH1* hHiggsMassImaginary;
+    WrappedTH1* hTopMass;
+    WrappedTH1* hTopMassRejected;
+    WrappedTH1* hTopMassReal;
+    WrappedTH1* hTopMassRealRejected;
+    WrappedTH1* hTopMassImaginary;
+    WrappedTH1* hTopMassImaginaryRejected;
+    WrappedTH1* hNeutrinoZSolution;
+    WrappedTH1* hNeutrinoPtSolution;
+    WrappedTH1* hNeutrinoPtDifference;
   };
 }
 

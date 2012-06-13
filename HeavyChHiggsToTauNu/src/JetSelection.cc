@@ -1,5 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -12,8 +12,6 @@
 #include "DataFormats/Math/interface/deltaR.h"
 
 #include "Math/GenVector/VectorUtil.h"
-#include "TH1F.h"
-#include "TH2F.h"
 #include <cmath>
 
 #include<algorithm>
@@ -29,7 +27,7 @@ namespace HPlus {
     fJetSelection(jetSelection), fPassedEvent(passedEvent) {}
   JetSelection::Data::~Data() {}
   
-  JetSelection::JetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  JetSelection::JetSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
@@ -63,95 +61,93 @@ namespace HPlus {
     fEMfractionCutSubCount(eventCounter.addSubCounter("Jet selection", "EMfraction")),
     fBetaCutSubCount(eventCounter.addSubCounter("Jet selection", "Beta cut")),
     fEtaCutSubCount(eventCounter.addSubCounter("Jet selection", "eta cut")),
-    fPtCutSubCount(eventCounter.addSubCounter("Jet selection", "pt cut")),
-
-    fEventWeight(eventWeight)
+    fPtCutSubCount(eventCounter.addSubCounter("Jet selection", "pt cut"))
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("JetSelection");
-    
-    hPt = makeTH<TH1F>(myDir, "jet_pt", "het_pt", 300, 0., 600.);
-    hPtCentral = makeTH<TH1F>(myDir, "jet_pt_central", "jet_pt_central", 300, 0., 600.);
-    hEta = makeTH<TH1F>(myDir, "jet_eta", "jet_eta", 250, -5., 5.);
-    hPhi = makeTH<TH1F>(myDir, "jet_phi", "jet_phi", 320, -3.2, 3.2);
-    hNumberOfSelectedJets = makeTH<TH1F>(myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
-    hjetEMFraction = makeTH<TH1F>(myDir, "jetEMFraction", "jetEMFraction", 400, 0., 1.0);
-    hjetChargedEMFraction = makeTH<TH1F>(myDir, "chargedJetEMFraction", "chargedJetEMFraction", 400, 0., 1.0);
-    hjetMaxEMFraction = makeTH<TH1F>(myDir, "jetMaxEMFraction", "jetMaxEMFraction", 400, 0., 1.0);  
-    hMinDeltaRToOppositeDirectionOfTau = makeTH<TH1F>(myDir, "jet_MinDeltaRToOppositeDirectionOfTau", "jet_MinDeltaRToOppositeDirectionOfTau", 50, 0., 5.);
 
-    hFirstJetPt = makeTH<TH1F>(myDir, "firstJet_pt", "firstJet_pt;p_{T} of first jet, GeV/c;Events", 300, 0., 600.);
-    hFirstJetEta = makeTH<TH1F>(myDir, "firstJet_eta", "firstJet_eta;#eta of first jet;Events", 250, -5., 5.); 
-    hFirstJetPhi = makeTH<TH1F>(myDir, "firstJet_phi", "firstJet_phi;#phi of first jet;Events", 72, -3.14159, 3.14159); 
-    hSecondJetPt = makeTH<TH1F>(myDir, "secondJet_pt", "secondJet_pt;p_{T} of second jet, GeV/c;Events", 300, 0., 600.);
-    hSecondJetEta = makeTH<TH1F>(myDir, "secondJet_eta", "secondJet_eta;#eta of second jet;Events", 250, -5., 5.); 
-    hSecondJetPhi = makeTH<TH1F>(myDir, "secondJet_phi", "secondJet_phi;#phi of second jet;Events", 72, -3.14159, 3.14159); 
-    hThirdJetPt = makeTH<TH1F>(myDir, "thirdJet_pt", "thirdJet_pt;p_{T} of third jet, GeV/c;Events", 300, 0., 600.);
-    hThirdJetEta = makeTH<TH1F>(myDir, "thirdJet_eta", "thirdJet_eta;#eta of third jet;Events", 250, -5., 5.); 
-    hThirdJetPhi = makeTH<TH1F>(myDir, "thirdJet_phi", "thirdJet_phi;#phi of third jet;Events", 72, -3.14159, 3.14159); 
-    hFourthJetPt = makeTH<TH1F>(myDir, "fourthJet_pt", "fourthJet_pt;p_{T} of fourth jet, GeV/c;Events", 300, 0., 600.);
-    hFourthJetEta = makeTH<TH1F>(myDir, "fourthJet_eta", "fourthJet_eta;#eta of fourth jet;Events", 250, -5., 5.); 
-    hFourthJetPhi = makeTH<TH1F>(myDir, "fourthJet_phi", "fourthJet_phi;#phi of fourth jet;Events", 72, -3.14159, 3.14159); 
+    hPt = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_pt", "het_pt", 120, 0., 600.);
+    hPtCentral = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_pt_central", "jet_pt_central", 120, 0., 600.);
+    hEta = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_eta", "jet_eta", 100, -5., 5.);
+    hPhi = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_phi", "jet_phi", 72, -3.1415926, 3.1415926);
+    hNumberOfSelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
+    hjetEMFraction = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jetEMFraction", "jetEMFraction", 400, 0., 1.0);
+    hjetChargedEMFraction = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "chargedJetEMFraction", "chargedJetEMFraction", 400, 0., 1.0);
+    hjetMaxEMFraction = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jetMaxEMFraction", "jetMaxEMFraction", 400, 0., 1.0);  
+    hMinDeltaRToOppositeDirectionOfTau = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_MinDeltaRToOppositeDirectionOfTau", "jet_MinDeltaRToOppositeDirectionOfTau", 50, 0., 5.);
+
+    hFirstJetPt = histoWrapper->makeTH<TH1F>(myDir, "firstJet_pt", "firstJet_pt;p_{T} of first jet, GeV/c;Events", 300, 0., 600.);
+    hFirstJetEta = histoWrapper->makeTH<TH1F>(myDir, "firstJet_eta", "firstJet_eta;#eta of first jet;Events", 250, -5., 5.); 
+    hFirstJetPhi = histoWrapper->makeTH<TH1F>(myDir, "firstJet_phi", "firstJet_phi;#phi of first jet;Events", 72, -3.14159, 3.14159); 
+    hSecondJetPt = histoWrapper->makeTH<TH1F>(myDir, "secondJet_pt", "secondJet_pt;p_{T} of second jet, GeV/c;Events", 300, 0., 600.);
+    hSecondJetEta = histoWrapper->makeTH<TH1F>(myDir, "secondJet_eta", "secondJet_eta;#eta of second jet;Events", 250, -5., 5.); 
+    hSecondJetPhi = histoWrapper->makeTH<TH1F>(myDir, "secondJet_phi", "secondJet_phi;#phi of second jet;Events", 72, -3.14159, 3.14159); 
+    hThirdJetPt = histoWrapper->makeTH<TH1F>(myDir, "thirdJet_pt", "thirdJet_pt;p_{T} of third jet, GeV/c;Events", 300, 0., 600.);
+    hThirdJetEta = histoWrapper->makeTH<TH1F>(myDir, "thirdJet_eta", "thirdJet_eta;#eta of third jet;Events", 250, -5., 5.); 
+    hThirdJetPhi = histoWrapper->makeTH<TH1F>(myDir, "thirdJet_phi", "thirdJet_phi;#phi of third jet;Events", 72, -3.14159, 3.14159); 
+    hFourthJetPt = histoWrapper->makeTH<TH1F>(myDir, "fourthJet_pt", "fourthJet_pt;p_{T} of fourth jet, GeV/c;Events", 300, 0., 600.);
+    hFourthJetEta = histoWrapper->makeTH<TH1F>(myDir, "fourthJet_eta", "fourthJet_eta;#eta of fourth jet;Events", 250, -5., 5.); 
+    hFourthJetPhi = histoWrapper->makeTH<TH1F>(myDir, "fourthJet_phi", "fourthJet_phi;#phi of fourth jet;Events", 72, -3.14159, 3.14159); 
 
     // Histograms for PU analysis
-    hBetaGenuine = makeTH<TH1F>(myDir, "betaGenuine", "betaGenuine;#beta variable, PV jets;Events", 100, 0., 1.);
-    hBetaStarGenuine = makeTH<TH1F>(myDir, "betaStarGenuine", "betaStarGenuine;#beta* variable, PV jets;Events", 100, 0., 1.);
-    hMeanDRgenuine = makeTH<TH1F>(myDir, "meanDRGenuine", "meanDRGenuine;Mean #DeltaR, PV jets;Events", 100, 0., 4.);
-    hBetaFake = makeTH<TH1F>(myDir, "betaPU", "betaPU;#beta variable, PU jets;Events", 100, 0., 1.);
-    hBetaStarFake = makeTH<TH1F>(myDir, "betaStarPU", "betaStarPU;#beta* variable, PU jets;Events", 100, 0., 1.);
-    hMeanDRfake = makeTH<TH1F>(myDir, "meanDRPU", "meanDRPU;Mean #DeltaR, PU jets;Events", 100, 0., 4.);
-    hBetaVsPUgenuine = makeTH<TH2F>(myDir, "betaVsPUGenuine", "betaVSPUGenuine;#beta variable, PV jets;Number of vertices", 100, 0., 1., 50, 0., 50.);
-    hBetaStarVsPUgenuine = makeTH<TH2F>(myDir, "betaVsPUStarGenuine", "betaStarVsPUGenuine;#beta* variable, PV jets;Events", 100, 0., 1., 50, 0., 50.);
-    hMeanDRVsPUgenuine = makeTH<TH2F>(myDir, "meanDRVsPUGenuine", "meanDRVsPUGenuine;Mean #DeltaR, PV jets;Events", 100, 0., 4., 50, 0., 50.);
-    hBetaVsPUfake = makeTH<TH2F>(myDir, "betaVsPUFake", "betaVsPUFake;#beta variable, PU jets;Events", 100, 0., 1., 50, 0., 50.);
-    hBetaStarVsPUfake = makeTH<TH2F>(myDir, "betaStarVsPUFake", "betaStarVsPUFake;#beta* variable, PU jets;Events", 100, 0., 1., 50, 0., 50.);
-    hMeanDRVsPUfake = makeTH<TH2F>(myDir, "meanDRVsPUFake", "meanDRVsPUFake;Mean #DeltaR, PU jets;Events", 100, 0., 4., 50, 0., 50.);
+    hBetaGenuine = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "betaGenuine", "betaGenuine;#beta variable, PV jets;Events", 100, 0., 1.);
+    hBetaStarGenuine = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "betaStarGenuine", "betaStarGenuine;#beta* variable, PV jets;Events", 100, 0., 1.);
+    hMeanDRgenuine = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "meanDRGenuine", "meanDRGenuine;Mean #DeltaR, PV jets;Events", 100, 0., 4.);
+    hBetaFake = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "betaPU", "betaPU;#beta variable, PU jets;Events", 100, 0., 1.);
+    hBetaStarFake = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "betaStarPU", "betaStarPU;#beta* variable, PU jets;Events", 100, 0., 1.);
+    hMeanDRfake = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "meanDRPU", "meanDRPU;Mean #DeltaR, PU jets;Events", 100, 0., 4.);
+    hBetaVsPUgenuine = histoWrapper->makeTH<TH2F>(HistoWrapper::kInformative, myDir, "betaVsPUGenuine", "betaVSPUGenuine;#beta variable, PV jets;Number of vertices", 100, 0., 1., 50, 0., 50.);
+    hBetaStarVsPUgenuine = histoWrapper->makeTH<TH2F>(HistoWrapper::kInformative, myDir, "betaVsPUStarGenuine", "betaStarVsPUGenuine;#beta* variable, PV jets;Events", 100, 0., 1., 50, 0., 50.);
+    hMeanDRVsPUgenuine = histoWrapper->makeTH<TH2F>(HistoWrapper::kInformative, myDir, "meanDRVsPUGenuine", "meanDRVsPUGenuine;Mean #DeltaR, PV jets;Events", 100, 0., 4., 50, 0., 50.);
+    hBetaVsPUfake = histoWrapper->makeTH<TH2F>(HistoWrapper::kInformative, myDir, "betaVsPUFake", "betaVsPUFake;#beta variable, PU jets;Events", 100, 0., 1., 50, 0., 50.);
+    hBetaStarVsPUfake = histoWrapper->makeTH<TH2F>(HistoWrapper::kInformative, myDir, "betaStarVsPUFake", "betaStarVsPUFake;#beta* variable, PU jets;Events", 100, 0., 1., 50, 0., 50.);
+    hMeanDRVsPUfake = histoWrapper->makeTH<TH2F>(HistoWrapper::kInformative, myDir, "meanDRVsPUFake", "meanDRVsPUFake;Mean #DeltaR, PU jets;Events", 100, 0., 4., 50, 0., 50.);
 
     // Histograms for excluded jets (i.e. matching in DeltaR to tau jet)
     TFileDirectory myExcludedJetsDir = myDir.mkdir("ExcludedJets");
-    hPtExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_pt", "jet_pt", 40, 0., 400.);
-    hEtaExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_eta", "jet_eta", 50, -2.5, 2.5);
-    hPhiExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_phi", "jet_phi", 72, -3.14159, 3.41459);
-    hNeutralEmEnergyFractionExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_NeutralEmEnergyFraction", "jet_NeutralEmEnergyFraction", 100, 0., 1.);
-    hNeutralMultiplicityExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_EmEnergyFraction", "jet_EmEnergyFraction", 100, 0., 1.);
-    hNeutralHadronEnergyFractionExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_NeutralHadronFraction", "jet_NeutralHadronEnergyFraction", 100, 0., 1.);
-    hNeutralHadronMultiplicityExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_NeutralHadronMultiplicity", "jet_NeutralHadronMultiplicity", 100, 0., 100.);
-    hPhotonEnergyFractionExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_PhotonEnergyFraction", "jet_PhotonEnergyFraction", 100, 0., 1.);
-    hPhotonMultiplicityExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_PhotonMultiplicity", "jet_PhotonMultiplicity", 100, 0., 100.);
-    hMuonEnergyFractionExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_MuonEnergyFraction", "jet_MuonEnergyFraction", 100, 0., 1.);
-    hMuonMultiplicityExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_NeutralHadronMultiplicity", "jet_NeutralHadronMultiplicity", 100, 0., 100.);
-    hChargedHadronEnergyFractionExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_ChargedHadronEnergyFraction", "jet_ChargedHadronEnergyFraction", 100, 0., 1.);
-    hChargedEmEnergyFractionExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_ChargedEmEnergyFraction", "jet_ChargedEmEnergyFraction", 100, 0., 1.);
-    hChargedMultiplicityExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_ChargedMultiplicity", "jet_ChargedMultiplicity", 100, 0., 100.);
-    hPartonFlavourExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_PartonFlavour", "jet_PartonFlavour", 30, 0., 30.);
-    hJECFactorExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_JECFactor", "jet_JECFactor", 100, 0., 10.);
-    hN60ExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_N60", "jet_MultiplicityCarrying60PercentOfEnergy", 100, 0., 100.);
-    hTowersAreaExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_TowersArea", "jet_TowersArea", 100, 0., 10.);
-    hJetChargeExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_JECFactor", "jet_JECFactor", 10, -5., 5.);
-    hPtDiffToGenJetExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_PtDiffToGenJet", "jet_PtDiffToGenJet", 100, 0., 10.);
+    hPtExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_pt", "jet_pt", 40, 0., 400.);
+    hEtaExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_eta", "jet_eta", 50, -2.5, 2.5);
+    hPhiExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_phi", "jet_phi", 72, -3.14159, 3.41459);
+    hNeutralEmEnergyFractionExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_NeutralEmEnergyFraction", "jet_NeutralEmEnergyFraction", 100, 0., 1.);
+    hNeutralMultiplicityExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_EmEnergyFraction", "jet_EmEnergyFraction", 100, 0., 1.);
+    hNeutralHadronEnergyFractionExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_NeutralHadronFraction", "jet_NeutralHadronEnergyFraction", 100, 0., 1.);
+    hNeutralHadronMultiplicityExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_NeutralHadronMultiplicity", "jet_NeutralHadronMultiplicity", 100, 0., 100.);
+    hPhotonEnergyFractionExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_PhotonEnergyFraction", "jet_PhotonEnergyFraction", 100, 0., 1.);
+    hPhotonMultiplicityExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_PhotonMultiplicity", "jet_PhotonMultiplicity", 100, 0., 100.);
+    hMuonEnergyFractionExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_MuonEnergyFraction", "jet_MuonEnergyFraction", 100, 0., 1.);
+    hMuonMultiplicityExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_NeutralHadronMultiplicity", "jet_NeutralHadronMultiplicity", 100, 0., 100.);
+    hChargedHadronEnergyFractionExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_ChargedHadronEnergyFraction", "jet_ChargedHadronEnergyFraction", 100, 0., 1.);
+    hChargedEmEnergyFractionExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_ChargedEmEnergyFraction", "jet_ChargedEmEnergyFraction", 100, 0., 1.);
+    hChargedMultiplicityExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_ChargedMultiplicity", "jet_ChargedMultiplicity", 100, 0., 100.);
+    hPartonFlavourExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_PartonFlavour", "jet_PartonFlavour", 30, 0., 30.);
+    hJECFactorExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_JECFactor", "jet_JECFactor", 100, 0., 10.);
+    hN60ExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_N60", "jet_MultiplicityCarrying60PercentOfEnergy", 100, 0., 100.);
+    hTowersAreaExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_TowersArea", "jet_TowersArea", 100, 0., 10.);
+    hJetChargeExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_JECFactor", "jet_JECFactor", 10, -5., 5.);
+    hPtDiffToGenJetExcludedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myExcludedJetsDir, "jet_PtDiffToGenJet", "jet_PtDiffToGenJet", 100, 0., 10.);
 
     // Histograms for selected jets
     TFileDirectory mySelectedJetsDir = myDir.mkdir("SelectedJets");
-    hPtSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_pt", "jet_pt", 40, 0., 400.);
-    hEtaSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_eta", "jet_eta", 50, -2.5, 2.5);
-    hPhiSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_phi", "jet_phi", 72, -3.14159, 3.41459);
-    hNeutralEmEnergyFractionSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_NeutralEmEnergyFraction", "jet_NeutralEmEnergyFraction", 100, 0., 1.);
-    hNeutralMultiplicitySelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_EmEnergyFraction", "jet_EmEnergyFraction", 100, 0., 1.);
-    hNeutralHadronEnergyFractionSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_NeutralHadronFraction", "jet_NeutralHadronEnergyFraction", 100, 0., 1.);
-    hNeutralHadronMultiplicitySelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_NeutralHadronMultiplicity", "jet_NeutralHadronMultiplicity", 100, 0., 100.);
-    hPhotonEnergyFractionSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_PhotonEnergyFraction", "jet_PhotonEnergyFraction", 100, 0., 1.);
-    hPhotonMultiplicitySelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_PhotonMultiplicity", "jet_PhotonMultiplicity", 100, 0., 100.);
-    hMuonEnergyFractionSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_MuonEnergyFraction", "jet_MuonEnergyFraction", 100, 0., 1.);
-    hMuonMultiplicitySelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_NeutralHadronMultiplicity", "jet_NeutralHadronMultiplicity", 100, 0., 100.);
-    hChargedHadronEnergyFractionSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_ChargedHadronEnergyFraction", "jet_ChargedHadronEnergyFraction", 100, 0., 1.);
-    hChargedEmEnergyFractionSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_ChargedEmEnergyFraction", "jet_ChargedEmEnergyFraction", 100, 0., 1.);
-    hChargedMultiplicitySelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_ChargedMultiplicity", "jet_ChargedMultiplicity", 100, 0., 100.);
-    hPartonFlavourSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_PartonFlavour", "jet_PartonFlavour", 30, 0., 30.);
-    hJECFactorSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_JECFactor", "jet_JECFactor", 100, 0., 10.);
-    hN60SelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_N60", "jet_MultiplicityCarrying60PercentOfEnergy", 100, 0., 100.);
-    hTowersAreaSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_TowersArea", "jet_TowersArea", 100, 0., 10.);
-    hJetChargeSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_JECFactor", "jet_JECFactor", 10, -5., 5.);
-    hPtDiffToGenJetSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_PtDiffToGenJet", "jet_PtDiffToGenJet", 100, 0., 10.);
+    hPtSelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_pt", "jet_pt", 40, 0., 400.);
+    hEtaSelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_eta", "jet_eta", 50, -2.5, 2.5);
+    hPhiSelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_phi", "jet_phi", 72, -3.14159, 3.41459);
+    hNeutralEmEnergyFractionSelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_NeutralEmEnergyFraction", "jet_NeutralEmEnergyFraction", 100, 0., 1.);
+    hNeutralMultiplicitySelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_EmEnergyFraction", "jet_EmEnergyFraction", 100, 0., 1.);
+    hNeutralHadronEnergyFractionSelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_NeutralHadronFraction", "jet_NeutralHadronEnergyFraction", 100, 0., 1.);
+    hNeutralHadronMultiplicitySelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_NeutralHadronMultiplicity", "jet_NeutralHadronMultiplicity", 100, 0., 100.);
+    hPhotonEnergyFractionSelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_PhotonEnergyFraction", "jet_PhotonEnergyFraction", 100, 0., 1.);
+    hPhotonMultiplicitySelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_PhotonMultiplicity", "jet_PhotonMultiplicity", 100, 0., 100.);
+    hMuonEnergyFractionSelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_MuonEnergyFraction", "jet_MuonEnergyFraction", 100, 0., 1.);
+    hMuonMultiplicitySelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_NeutralHadronMultiplicity", "jet_NeutralHadronMultiplicity", 100, 0., 100.);
+    hChargedHadronEnergyFractionSelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_ChargedHadronEnergyFraction", "jet_ChargedHadronEnergyFraction", 100, 0., 1.);
+    hChargedEmEnergyFractionSelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_ChargedEmEnergyFraction", "jet_ChargedEmEnergyFraction", 100, 0., 1.);
+    hChargedMultiplicitySelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_ChargedMultiplicity", "jet_ChargedMultiplicity", 100, 0., 100.);
+    hPartonFlavourSelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_PartonFlavour", "jet_PartonFlavour", 30, 0., 30.);
+    hJECFactorSelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_JECFactor", "jet_JECFactor", 100, 0., 10.);
+    hN60SelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_N60", "jet_MultiplicityCarrying60PercentOfEnergy", 100, 0., 100.);
+    hTowersAreaSelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_TowersArea", "jet_TowersArea", 100, 0., 10.);
+    hJetChargeSelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_JECFactor", "jet_JECFactor", 10, -5., 5.);
+    hPtDiffToGenJetSelectedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_PtDiffToGenJet", "jet_PtDiffToGenJet", 100, 0., 10.);
 
     fMinDeltaRToOppositeDirectionOfTau = 999.;
  }
@@ -264,8 +260,8 @@ namespace HPlus {
       // The following methods return the energy fractions w.r.t. raw jet energy (as they should be)
       double EMfrac = iJet->chargedEmEnergyFraction() + iJet->neutralEmEnergyFraction();
       double chargedEMfrac = iJet->chargedEmEnergyFraction();
-      hjetEMFraction->Fill(EMfrac, fEventWeight.getWeight());
-      hjetChargedEMFraction->Fill(chargedEMfrac, fEventWeight.getWeight());
+      hjetEMFraction->Fill(EMfrac);
+      hjetChargedEMFraction->Fill(chargedEMfrac);
       if ( EMfrac > maxEMfraction ) maxEMfraction =  EMfrac;
 
       if (EMfrac > fEMfractionCut) continue;
@@ -299,27 +295,27 @@ namespace HPlus {
       // Fill histograms after eta and pt cuts
       if (std::abs(iJet->eta()) < fEtaCut && iJet->pt() > fPtCut) {
         if (myIsPVJetStatusByMCMatching) {
-          hBetaGenuine->Fill(myBeta, fEventWeight.getWeight());
-          hBetaStarGenuine->Fill(myBetaStar, fEventWeight.getWeight());
-          hMeanDRgenuine->Fill(myMeanDR, fEventWeight.getWeight());
-          hBetaVsPUgenuine->Fill(myBeta, nVertices, fEventWeight.getWeight());
-          hBetaStarVsPUgenuine->Fill(myBetaStar, nVertices, fEventWeight.getWeight());
-          hMeanDRVsPUgenuine->Fill(myMeanDR, nVertices, fEventWeight.getWeight());
+          hBetaGenuine->Fill(myBeta);
+          hBetaStarGenuine->Fill(myBetaStar);
+          hMeanDRgenuine->Fill(myMeanDR);
+          hBetaVsPUgenuine->Fill(myBeta, nVertices);
+          hBetaStarVsPUgenuine->Fill(myBetaStar, nVertices);
+          hMeanDRVsPUgenuine->Fill(myMeanDR, nVertices);
         } else {
-          hBetaFake->Fill(myBeta, fEventWeight.getWeight());
-          hBetaStarFake->Fill(myBetaStar, fEventWeight.getWeight());
-          hMeanDRfake->Fill(myMeanDR, fEventWeight.getWeight());
-          hBetaVsPUfake->Fill(myBeta, nVertices, fEventWeight.getWeight());
-          hBetaStarVsPUfake->Fill(myBetaStar, nVertices, fEventWeight.getWeight());
-          hMeanDRVsPUfake->Fill(myMeanDR, nVertices, fEventWeight.getWeight());
+          hBetaFake->Fill(myBeta);
+          hBetaStarFake->Fill(myBetaStar);
+          hMeanDRfake->Fill(myMeanDR);
+          hBetaVsPUfake->Fill(myBeta, nVertices);
+          hBetaStarVsPUfake->Fill(myBetaStar, nVertices);
+          hMeanDRVsPUfake->Fill(myMeanDR, nVertices);
         }
       }
       if (fBetaCut.passedCut(iJet->userFloat(fBetaSrc))) continue;
       increment(fBetaCutSubCount);
 
-      hPt->Fill(iJet->pt(), fEventWeight.getWeight());
-      hEta->Fill(iJet->eta(), fEventWeight.getWeight());
-      hPhi->Fill(iJet->phi(), fEventWeight.getWeight());
+      hPt->Fill(iJet->pt());
+      hEta->Fill(iJet->eta());
+      hPhi->Fill(iJet->phi());
 
       // eta cut
       if(!(std::abs(iJet->eta()) < fEtaCut)){
@@ -329,7 +325,7 @@ namespace HPlus {
       increment(fEtaCutSubCount);
       ++etaCutPassed;
 
-      hPtCentral->Fill(iJet->pt(), fEventWeight.getWeight());
+      hPtCentral->Fill(iJet->pt());
 
       // pt cut
       if(!(iJet->pt() > fPtCut)) continue;
@@ -379,8 +375,8 @@ namespace HPlus {
     for(size_t i=0; i<tmpSelectedJets.size(); ++i)
       fSelectedJets.push_back(tmpSelectedJets[i]);
 
-    hNumberOfSelectedJets->Fill(fSelectedJets.size(), fEventWeight.getWeight());
-    if (fSelectedJets.size() > 2 ) hjetMaxEMFraction->Fill(maxEMfraction, fEventWeight.getWeight());
+    hNumberOfSelectedJets->Fill(fSelectedJets.size());
+    if (fSelectedJets.size() > 2 ) hjetMaxEMFraction->Fill(maxEMfraction);
     iNHadronicJets = fSelectedJets.size();
     iNHadronicJetsInFwdDir = fNotSelectedJets.size();
 

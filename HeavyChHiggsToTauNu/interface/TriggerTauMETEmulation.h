@@ -7,7 +7,6 @@
 #include "DataFormats/METReco/interface/MET.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 #include "DataFormats/Math/interface/LorentzVector.h"
 
@@ -21,9 +20,10 @@ namespace edm {
   class EventSetup;
 }
 
-class TH1;
-
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
+
   class TriggerTauMETEmulation {
   public:
     /**
@@ -45,8 +45,8 @@ namespace HPlus {
       const TriggerTauMETEmulation *fTriggerTauMETEmulation;
       const bool fPassedEvent;
     };
-    
-    TriggerTauMETEmulation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+
+    TriggerTauMETEmulation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~TriggerTauMETEmulation();
 
     typedef math::XYZTLorentzVector LorentzVector;
@@ -58,18 +58,15 @@ namespace HPlus {
     HLTTauEmulation* hltTauEmulation;
     HLTMETEmulation* hltMETEmulation;
 /*
-    TH1* h_alltau;
-    TH1* h_allmet;
-    TH1* h_tau;
-    TH1* h_met;
-    TH1* h_taumet_tau;
-    TH1* h_taumet_met;
+    WrappedTH1* h_alltau;
+    WrappedTH1* h_allmet;
+    WrappedTH1* h_tau;
+    WrappedTH1* h_met;
+    WrappedTH1* h_taumet_tau;
+    WrappedTH1* h_taumet_met;
 */
     // Counters
 //    Count fmetEmulationCutCount;
-
-    // Event weight object
-    EventWeight& fEventWeight;
 
   };
 }

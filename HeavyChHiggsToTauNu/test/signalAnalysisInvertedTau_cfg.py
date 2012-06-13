@@ -59,6 +59,10 @@ doPrescalesForData = False
 # Tree filling
 doFillTree = True
 
+# Set level of how many histograms are stored to files
+# options are: 'Vital' (least histograms), 'Informative', 'Debug' (all histograms)
+myHistogramAmbientLevel = "Debug"
+
 applyTriggerScaleFactor = True
 
 #PF2PATVersion = "PFlow" # For normal PF2PAT
@@ -199,7 +203,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysisInvertedTau as signalAnal
 process.signalAnalysis = signalAnalysis.createEDFilter(param)
 if not doFillTree:
     process.signalAnalysis.Tree.fill = cms.untracked.bool(False)
-# process.signalAnalysis.GlobalMuonVeto = param.NonIsolatedMuonVeto
+process.signalAnalysis.histogramAmbientLevel = myHistogramAmbientLevel
 # Change default tau algorithm here if needed
 #process.signalAnalysis.tauSelection.tauSelectionHPSTightTauBased # HPS Tight is the default
 

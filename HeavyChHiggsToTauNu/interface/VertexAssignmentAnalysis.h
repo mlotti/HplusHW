@@ -7,14 +7,14 @@
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
-
-class TH1;
 
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
+
   class VertexAssignmentAnalysis {
   public:
-    VertexAssignmentAnalysis(EventCounter& eventCounter, EventWeight& eventWeight);
+    VertexAssignmentAnalysis(EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~VertexAssignmentAnalysis();
 
     /// Analyses the compatibility of the tau and the primary vertex
@@ -22,35 +22,30 @@ namespace HPlus {
 
   private:
     FakeTauIdentifier fFakeTauIdentifier;
-    
-    EventWeight& fEventWeight;
 
     Count fAllEventsWithGenuineTaus;
     Count fGenuineTausWithCorrectPV;
     Count fAllEventsWithFakeTaus;
     Count fFakeTausWithCorrectPV;
-    
+
     edm::Ptr<reco::Vertex> fSelectedVertex;
     // histograms
-    TH1* hGenuineTauAllEventsByTauZ;
-    TH1* hGenuineTauPassedEventsByTauZ;
-    TH1* hGenuineTauAllEventsByPt;
-    TH1* hGenuineTauPassedEventsByPt;
-    TH1* hGenuineTauAllEventsByEta;
-    TH1* hGenuineTauPassedEventsByEta;
-    TH1* hGenuineTauAllEventsByPhi;
-    TH1* hGenuineTauPassedEventsByPhi;
-    TH1* hFakeTauAllEventsByTauZ;
-    TH1* hFakeTauPassedEventsByTauZ;
-    TH1* hFakeTauAllEventsByPt;
-    TH1* hFakeTauPassedEventsByPt;
-    TH1* hFakeTauAllEventsByEta;
-    TH1* hFakeTauPassedEventsByEta;
-    TH1* hFakeTauAllEventsByPhi;
-    TH1* hFakeTauPassedEventsByPhi;
-    
-    
-    
+    WrappedTH1* hGenuineTauAllEventsByTauZ;
+    WrappedTH1* hGenuineTauPassedEventsByTauZ;
+    WrappedTH1* hGenuineTauAllEventsByPt;
+    WrappedTH1* hGenuineTauPassedEventsByPt;
+    WrappedTH1* hGenuineTauAllEventsByEta;
+    WrappedTH1* hGenuineTauPassedEventsByEta;
+    WrappedTH1* hGenuineTauAllEventsByPhi;
+    WrappedTH1* hGenuineTauPassedEventsByPhi;
+    WrappedTH1* hFakeTauAllEventsByTauZ;
+    WrappedTH1* hFakeTauPassedEventsByTauZ;
+    WrappedTH1* hFakeTauAllEventsByPt;
+    WrappedTH1* hFakeTauPassedEventsByPt;
+    WrappedTH1* hFakeTauAllEventsByEta;
+    WrappedTH1* hFakeTauPassedEventsByEta;
+    WrappedTH1* hFakeTauAllEventsByPhi;
+    WrappedTH1* hFakeTauPassedEventsByPhi;
   };
 }
 

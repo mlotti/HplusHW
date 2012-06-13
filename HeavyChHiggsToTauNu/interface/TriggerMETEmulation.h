@@ -14,13 +14,11 @@ namespace edm {
   class EventSetup;
 }
 
-class TH1;
-
 namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
   class WrappedTH2;
-  
+
   class TriggerMETEmulation {
   public:
     /**

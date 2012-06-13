@@ -5,7 +5,7 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 
 #include "DataFormats/PatCandidates/interface/TriggerObject.h"
-
+// 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
@@ -27,14 +27,10 @@ namespace pat {
   class TriggerEvent;
 }
 
-class WrappedTH1;
-
 namespace HPlus {
   class EventCounter;
   class HistoWrapper;
   class WrappedTH1;
-  class WrappedTH2;
-
 
   class TriggerSelection {
   enum TriggerSelectionType {

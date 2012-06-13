@@ -9,7 +9,7 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+
 
 /// The class is designed so that when the methond analyze is called it returns FALSE if a Global Muon is found passing all criteria. 
 /// It returns TRUE if no muons are found or if the muons present do NOT satisfy the "Selection of muons" as chosen by TTbar analyses.
@@ -19,10 +19,10 @@ namespace edm {
   class EventSetup;
 }
 
-class TH1;
-#include "TH2.h"
-
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedWrappedTH1;
+
   class GlobalMuonVeto {
   public:
     /**
@@ -58,7 +58,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
     
-    GlobalMuonVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    GlobalMuonVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~GlobalMuonVeto();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
@@ -115,30 +115,27 @@ namespace HPlus {
     Count fMuonIDSubCountTMLastStationOptimizedBarrelLowPtTight;
     Count fMuonIDSubCountOther;
 
-    // EventWeight object
-    EventWeight& fEventWeight;
-
     // Histograms
-    TH1 *hMuonPt;
-    TH1 *hMuonEta;
-    TH1 *hMuonPt_identified_eta;
-    TH1 *hMuonEta_identified;
-    TH1 *hMuonPt_matchingMCmuon;
-    TH1 *hMuonEta_matchingMCmuon;
-    TH1 *hMuonPt_matchingMCmuonFromW;
-    TH1 *hMuonEta_matchingMCmuonFromW;
-    TH1 *hMuonPt_InnerTrack;
-    TH1 *hMuonEta_InnerTrack;
-    TH1 *hMuonPt_GlobalTrack;
-    TH1 *hMuonEta_GlobalTrack;
-    TH1 *hMuonPt_AfterSelection;
-    TH1 *hMuonEta_AfterSelection;
-    TH1 *hMuonPt_InnerTrack_AfterSelection;
-    TH1 *hMuonEta_InnerTrack_AfterSelection;
-    TH1 *hMuonPt_GlobalTrack_AfterSelection;
-    TH1 *hMuonEta_GlobalTrack_AfterSelection;
-    TH1 *hMuonImpactParameter;
-    TH1 *hMuonZdiff;
+    WrappedTH1 *hMuonPt;
+    WrappedTH1 *hMuonEta;
+    WrappedTH1 *hMuonPt_identified_eta;
+    WrappedTH1 *hMuonEta_identified;
+    WrappedTH1 *hMuonPt_matchingMCmuon;
+    WrappedTH1 *hMuonEta_matchingMCmuon;
+    WrappedTH1 *hMuonPt_matchingMCmuonFromW;
+    WrappedTH1 *hMuonEta_matchingMCmuonFromW;
+    WrappedTH1 *hMuonPt_InnerTrack;
+    WrappedTH1 *hMuonEta_InnerTrack;
+    WrappedTH1 *hMuonPt_GlobalTrack;
+    WrappedTH1 *hMuonEta_GlobalTrack;
+    WrappedTH1 *hMuonPt_AfterSelection;
+    WrappedTH1 *hMuonEta_AfterSelection;
+    WrappedTH1 *hMuonPt_InnerTrack_AfterSelection;
+    WrappedTH1 *hMuonEta_InnerTrack_AfterSelection;
+    WrappedTH1 *hMuonPt_GlobalTrack_AfterSelection;
+    WrappedTH1 *hMuonEta_GlobalTrack_AfterSelection;
+    WrappedTH1 *hMuonImpactParameter;
+    WrappedTH1 *hMuonZdiff;
     // pt and eta of muon with highest pt passing the selections
     float fSelectedMuonPt;
     float fSelectedMuonEta;

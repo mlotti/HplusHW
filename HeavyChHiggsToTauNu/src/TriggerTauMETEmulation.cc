@@ -1,5 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerTauMETEmulation.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/Common/interface/Handle.h"
@@ -15,27 +15,24 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 
 #include "Math/VectorUtil.h"
-#include "TH1F.h"
 
 namespace HPlus {
   TriggerTauMETEmulation::Data::Data(const TriggerTauMETEmulation *TriggerTauMETEmulation, bool passedEvent):
     fTriggerTauMETEmulation(TriggerTauMETEmulation), fPassedEvent(passedEvent) {}
   TriggerTauMETEmulation::Data::~Data() {}
 
-  TriggerTauMETEmulation::TriggerTauMETEmulation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
-    fEventWeight(eventWeight)
-  {
+  TriggerTauMETEmulation::TriggerTauMETEmulation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper) {
         l1Emulation     = new L1Emulation(iConfig);
         hltTauEmulation = new HLTTauEmulation(iConfig);
         hltMETEmulation = new HLTMETEmulation(iConfig);
 /*
         edm::Service<TFileService> fs;
-        h_alltau = makeTH<TH1F>(*fs, "h_alltau", "h_alltau", 25, 0, 100);
-        h_allmet = makeTH<TH1F>(*fs, "h_allmet", "h_allmet", 25, 0, 100);
-        h_tau    = makeTH<TH1F>(*fs, "h_tau", "h_tau", 25, 0, 100);
-        h_met    = makeTH<TH1F>(*fs, "h_met", "h_met", 25, 0, 100);
-        h_taumet_tau = makeTH<TH1F>(*fs, "h_taumet_tau", "h_taumet_tau", 25, 0, 100);
-        h_taumet_met = makeTH<TH1F>(*fs, "h_taumet_met", "h_taumet_met", 25, 0, 100);
+        h_alltau = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_alltau", "h_alltau", 25, 0, 100);
+        h_allmet = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_allmet", "h_allmet", 25, 0, 100);
+        h_tau    = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_tau", "h_tau", 25, 0, 100);
+        h_met    = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_met", "h_met", 25, 0, 100);
+        h_taumet_tau = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_taumet_tau", "h_taumet_tau", 25, 0, 100);
+        h_taumet_met = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_taumet_met", "h_taumet_met", 25, 0, 100);
 */
   }
 

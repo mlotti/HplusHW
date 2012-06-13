@@ -1,13 +1,11 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "Math/GenVector/VectorUtil.h"
-
-#include "TH1F.h"
 
 std::vector<const reco::GenParticle*>   getImmediateMothers(const reco::Candidate&);
 std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
@@ -211,7 +209,7 @@ namespace HPlus {
         }
   }
 
-  BTagging::BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  BTagging::BTagging(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
@@ -228,44 +226,42 @@ namespace HPlus {
     fTaggedNoTaggedJet(eventCounter.addSubCounter("b-tagging", "no b-tagged jet")),
     fTaggedOneTaggedJet(eventCounter.addSubCounter("b-tagging", "one b-tagged jet")),
     fTaggedTwoTaggedJets(eventCounter.addSubCounter("b-tagging", "two b-tagged jets")),
-    fEventWeight(eventWeight),
     //    fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta  cut")),
-    //   fEventWeight(eventWeight),
     fMaxDiscriminatorValue(0)
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("Btagging");
-    hDiscr = makeTH<TH1F>(myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
-    hPt = makeTH<TH1F>(myDir, "bjet_pt", "bjet_pt", 400, 0., 400.);
-    hDiscrB = makeTH<TH1F>(myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
-    hPtB17 = makeTH<TH1F>(myDir, "realbjet17_pt", "realbjet17_pt", 400, 0., 400.);
-    hEtaB17 = makeTH<TH1F>(myDir, "realbjet17_eta", "realbjet17_eta", 400, -5., 5.);
-    hPtB33 = makeTH<TH1F>(myDir, "realbjet33_pt", "realbjet33_pt", 400, 0., 400.);
-    hEtaB33 = makeTH<TH1F>(myDir, "realbjet33_eta", "realbjet33_eta", 400, -5., 5.);
-    hPtBnoTag = makeTH<TH1F>(myDir, "realbjetNotag_pt", "realbjetNotag_pt", 400, 0., 400.);
-    hEtaBnoTag = makeTH<TH1F>(myDir, "realbjetNotag_eta", "realbjetNotag_eta", 400, -5., 5.);
-    hDiscrQ = makeTH<TH1F>(myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
-    hPtQ17 = makeTH<TH1F>(myDir, "realqjet17_pt", "realqjet17_pt", 400, 0., 400.);
-    hEtaQ17 = makeTH<TH1F>(myDir, "realqjet17_eta", "realqjet17_pt", 400, -5., 5.);
-    hPtQ33 = makeTH<TH1F>(myDir, "realqjet33_pt", "realqjet33_pt", 400, 0., 400.);
-    hEtaQ33 = makeTH<TH1F>(myDir, "realqjet33_eta", "realqjet33_pt", 400, -5., 5.);
-    hPtQnoTag = makeTH<TH1F>(myDir, "realqjetNotag_pt", "realqjetNotag_pt", 400, 0., 400.);
-    hEtaQnoTag = makeTH<TH1F>(myDir, "realqjetNotag_eta", "realqjetNotag_pt", 400, -5., 5.);
-    hPt1 = makeTH<TH1F>(myDir, "bjet1_pt", "bjet1_pt", 100, 0., 400.);
-    hPt2 = makeTH<TH1F>(myDir, "bjet2_pt", "bjet2_pt", 100, 0., 400.);
-    hEta = makeTH<TH1F>(myDir, "bjet_eta", "bjet_pt", 400, -5., 5.);
-    hEta1 = makeTH<TH1F>(myDir, "bjet1_eta", "bjet1_pt", 100, -5., 5.);
-    hEta2 = makeTH<TH1F>(myDir, "bjet2_eta", "bjet2_pt", 100, -5., 5.);
-    hNumberOfBtaggedJets = makeTH<TH1F>(myDir, "NumberOfBtaggedJets", "NumberOfBtaggedJets", 15, 0., 15.);
+    hDiscr = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
+    hPt = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "bjet_pt", "bjet_pt", 400, 0., 400.);
+    hDiscrB = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
+    hPtB17 = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjet17_pt", "realbjet17_pt", 400, 0., 400.);
+    hEtaB17 = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjet17_eta", "realbjet17_eta", 400, -5., 5.);
+    hPtB33 = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjet33_pt", "realbjet33_pt", 400, 0., 400.);
+    hEtaB33 = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjet33_eta", "realbjet33_eta", 400, -5., 5.);
+    hPtBnoTag = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetNotag_pt", "realbjetNotag_pt", 400, 0., 400.);
+    hEtaBnoTag = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetNotag_eta", "realbjetNotag_eta", 400, -5., 5.);
+    hDiscrQ = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
+    hPtQ17 = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjet17_pt", "realqjet17_pt", 400, 0., 400.);
+    hEtaQ17 = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjet17_eta", "realqjet17_pt", 400, -5., 5.);
+    hPtQ33 = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjet33_pt", "realqjet33_pt", 400, 0., 400.);
+    hEtaQ33 = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjet33_eta", "realqjet33_pt", 400, -5., 5.);
+    hPtQnoTag = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetNotag_pt", "realqjetNotag_pt", 400, 0., 400.);
+    hEtaQnoTag = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetNotag_eta", "realqjetNotag_pt", 400, -5., 5.);
+    hPt1 = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_pt", "bjet1_pt", 100, 0., 400.);
+    hPt2 = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_pt", "bjet2_pt", 100, 0., 400.);
+    hEta = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "bjet_eta", "bjet_pt", 400, -5., 5.);
+    hEta1 = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_eta", "bjet1_pt", 100, -5., 5.);
+    hEta2 = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_eta", "bjet2_pt", 100, -5., 5.);
+    hNumberOfBtaggedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfBtaggedJets", "NumberOfBtaggedJets", 15, 0., 15.);
     
-    hScaleFactor = makeTH<TH1F>(myDir, "scaleFactor", "scaleFactor;b-tag/mistag scale factor;N_{events}/0.05", 100, 0., 5.);
-    hMCMatchForPassedJets = makeTH<TH1F>(myDir, "MCMatchForPassedJets", "MCMatchForPassedJets;;N_{jets}", 3, 0., 3.);
+    hScaleFactor = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "scaleFactor", "scaleFactor;b-tag/mistag scale factor;N_{events}/0.05", 100, 0., 5.);
+    hMCMatchForPassedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "MCMatchForPassedJets", "MCMatchForPassedJets;;N_{jets}", 3, 0., 3.);
     hMCMatchForPassedJets->GetXaxis()->SetBinLabel(1, "b jet");
     hMCMatchForPassedJets->GetXaxis()->SetBinLabel(2, "light jet");
     hMCMatchForPassedJets->GetXaxis()->SetBinLabel(3, "no match");
 
-    hBTagRelativeUncertainty = makeTH<TH1F>(myDir, "BTagRelativeUncertainty", "BTagRelativeUncertainty;Relative Uncertainty;N_{events}", 3000, 0., 3.);
-    hBTagAbsoluteUncertainty = makeTH<TH1F>(myDir, "BTagAbsoluteUncertainty", "BTagAbsoluteUncertainty;Absolute Uncertainty;N_{events}", 3000, 0., 3.);
+    hBTagRelativeUncertainty = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "BTagRelativeUncertainty", "BTagRelativeUncertainty;Relative Uncertainty;N_{events}", 3000, 0., 3.);
+    hBTagAbsoluteUncertainty = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "BTagAbsoluteUncertainty", "BTagAbsoluteUncertainty;Absolute Uncertainty;N_{events}", 3000, 0., 3.);
 
     // BTagging scale factors from DB
     if(FactorsFromDB) {
@@ -422,45 +418,45 @@ namespace HPlus {
       float discr = iJet->bDiscriminator(fDiscriminator);
       //      if (bmatchedJet ) {
       if (bMatch ) {
-	hPtBnoTag->Fill(iJet->pt(), fEventWeight.getWeight());
-	hEtaBnoTag->Fill(iJet->eta(), fEventWeight.getWeight());
+	hPtBnoTag->Fill(iJet->pt());
+	hEtaBnoTag->Fill(iJet->eta());
 	//	std::cout << " discr. b-matched   "  << discr << " discr cut   "  << fDiscrCut  << std::endl;	
 	//	if(discr > fDiscrCut ) {
 	if(discr > 3.3 ) {
-	  hPtB33->Fill(iJet->pt(), fEventWeight.getWeight());
-	  hEtaB33->Fill(iJet->eta(), fEventWeight.getWeight());
+	  hPtB33->Fill(iJet->pt());
+	  hEtaB33->Fill(iJet->eta());
 	}
 	if(discr > 1.7 ) {
-	  hPtB17->Fill(iJet->pt(), fEventWeight.getWeight());
-	  hEtaB17->Fill(iJet->eta(), fEventWeight.getWeight());
+	  hPtB17->Fill(iJet->pt());
+	  hEtaB17->Fill(iJet->eta());
 	}
-	hDiscrB->Fill(discr, fEventWeight.getWeight());
+	hDiscrB->Fill(discr);
       }
       //      if (qmatchedJet ) {
       if (qMatch ) {
-	hPtQnoTag->Fill(iJet->pt(), fEventWeight.getWeight());
-	hEtaQnoTag->Fill(iJet->eta(), fEventWeight.getWeight());
+	hPtQnoTag->Fill(iJet->pt());
+	hEtaQnoTag->Fill(iJet->eta());
 	//	std::cout << " discr. q-matched  "  << discr <<  discr << " discr cut   "  << fDiscrCut << std::endl;
 	//	if(discr > fDiscrCut ) {
 	if(discr > 3.3 ) {
-	  hPtQ33->Fill(iJet->pt(), fEventWeight.getWeight());
-	  hEtaQ33->Fill(iJet->eta(), fEventWeight.getWeight());
+	  hPtQ33->Fill(iJet->pt());
+	  hEtaQ33->Fill(iJet->eta());
 	}
 	if(discr > 1.7 ) {
-	  hPtQ17->Fill(iJet->pt(), fEventWeight.getWeight());
-	  hEtaQ17->Fill(iJet->eta(), fEventWeight.getWeight());
+	  hPtQ17->Fill(iJet->pt());
+	  hEtaQ17->Fill(iJet->eta());
 	}
-	hDiscrQ->Fill(discr, fEventWeight.getWeight());
+	hDiscrQ->Fill(discr);
       }
 
-      
-      hDiscr->Fill(discr, fEventWeight.getWeight());
+
+      hDiscr->Fill(discr);
       if(!(discr > fDiscrCut)) continue;
       increment(fTaggedSubCount);
       //      ++passed;
 
-      hPt->Fill(iJet->pt(), fEventWeight.getWeight());
-      hEta->Fill(iJet->eta(), fEventWeight.getWeight());
+      hPt->Fill(iJet->pt());
+      hEta->Fill(iJet->eta());
 
       if(fabs(iJet->eta()) > fEtaCut ) continue;
       increment(fTaggedEtaCutSubCount);
@@ -473,23 +469,23 @@ namespace HPlus {
 
       fSelectedJets.push_back(iJet);
     } // end of jet loop
-    
+
     // Obtain and apply scale factor for MC events
     if (!iEvent.isRealData())
       applyScaleFactor(jets, fSelectedJets);
 
     // Fill histograms
-    hNumberOfBtaggedJets->Fill(fSelectedJets.size(), fEventWeight.getWeight());
+    hNumberOfBtaggedJets->Fill(fSelectedJets.size());
     iNBtags = fSelectedJets.size();
 
     ////////////////////////////////
     if( passed > 0) {
-      hPt1->Fill(fSelectedJets[0]->pt(), fEventWeight.getWeight());
-      hEta1->Fill(fSelectedJets[0]->eta(), fEventWeight.getWeight());
+      hPt1->Fill(fSelectedJets[0]->pt());
+      hEta1->Fill(fSelectedJets[0]->eta());
     }
     if( passed > 1) {
-      hPt2->Fill(fSelectedJets[1]->pt(), fEventWeight.getWeight());
-      hEta2->Fill(fSelectedJets[1]->eta(), fEventWeight.getWeight());
+      hPt2->Fill(fSelectedJets[1]->pt());
+      hEta2->Fill(fSelectedJets[1]->eta());
     }
        // plot deltaPhi(bjet,tau jet)
     //      double deltaPhi = -999;    
@@ -554,19 +550,19 @@ namespace HPlus {
 	fLightJetsPassedPt.push_back(iJet);
 ////        ++nLightJetsPassed; // no MC match; assume its a light flavor jet
         //std::cout << "zero pointer genParticle" << std::endl;
-        hMCMatchForPassedJets->Fill(2);
+        hMCMatchForPassedJets->Fill(2, 1.0);
       } else {
         //std::cout << "pid=" << myParticle->pdgId() << std::endl;
         if (std::abs(myParticle->pdgId()) == 5) {
 ////	  fBJetsPassedPt.push_back((*iJet).pt());
 	  fBJetsPassedPt.push_back(iJet);
 ////          ++nBJetsPassed;
-          hMCMatchForPassedJets->Fill(0);
+          hMCMatchForPassedJets->Fill(0, 1.0);
         } else {
 ////	  fLightJetsPassedPt.push_back((*iJet).pt());
 	  fLightJetsPassedPt.push_back(iJet);
 ////          ++nLightJetsPassed;
-          hMCMatchForPassedJets->Fill(1);
+          hMCMatchForPassedJets->Fill(1, 1.0);
         }
       }
     }
@@ -582,11 +578,11 @@ namespace HPlus {
 
     //std::cout << "bjets=" << nBJets << ", light jets=" << nLightJets << ", scale factor=" << fScaleFactor << std::endl;
   }
-  
+
   void BTagging::Data::fillScaleFactorHistograms() {
-    fBTagging->hScaleFactor->Fill(fBTagging->fScaleFactor, fBTagging->fEventWeight.getWeight());
-    fBTagging->hBTagAbsoluteUncertainty->Fill(fBTagging->fScaleFactorAbsoluteUncertainty, fBTagging->fEventWeight.getWeight());
-    fBTagging->hBTagRelativeUncertainty->Fill(fBTagging->fScaleFactorRelativeUncertainty, fBTagging->fEventWeight.getWeight());
+    fBTagging->hScaleFactor->Fill(fBTagging->fScaleFactor);
+    fBTagging->hBTagAbsoluteUncertainty->Fill(fBTagging->fScaleFactorAbsoluteUncertainty);
+    fBTagging->hBTagRelativeUncertainty->Fill(fBTagging->fScaleFactorRelativeUncertainty);
   }
 
 }

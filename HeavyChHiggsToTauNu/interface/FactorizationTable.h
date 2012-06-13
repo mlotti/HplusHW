@@ -6,7 +6,6 @@
 #include <string>
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "TH1F.h"
 
 namespace HPlus {
   /**
@@ -53,7 +52,7 @@ namespace HPlus {
     
     std::string fTauAlgorithm;
     
-    TH1* hUsedCoefficients;
+    WrappedTH1* hUsedCoefficients;
   };
 }
 

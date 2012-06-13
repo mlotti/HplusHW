@@ -9,7 +9,6 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/METReco/interface/GenMET.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 namespace edm {
   class ParameterSet;
@@ -17,9 +16,10 @@ namespace edm {
   class EventSetup;
 }
 
-class TH1;
-
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
+  
   class   GenParticleAnalysis {
   public:
     class Data {
@@ -35,7 +35,7 @@ namespace HPlus {
       const GenParticleAnalysis *fAnalysis;
     };
 
-    GenParticleAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    GenParticleAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~GenParticleAnalysis();
 
     Data analyze(const edm::Event&, const edm::EventSetup&);
@@ -44,7 +44,7 @@ namespace HPlus {
     // double doQCDmAnalysis(const edm::Event&, const edm::EventSetup&); // works
 
   private:
-    void init();
+    void init(HistoWrapper& histoWrapper);
     /*
     std::vector<const reco::GenParticle*> getImmediateMothers(const reco::Candidate&);
     std::vector<const reco::GenParticle*> getMothers(const reco::Candidate&);
@@ -60,61 +60,58 @@ namespace HPlus {
     void printDaughters(const reco::Candidate& );
     */
 
-    
-    // EventWeight object
-    EventWeight& fEventWeight;
     edm::InputTag fSrc;
     edm::InputTag fMetSrc;
     edm::InputTag fOneProngTauSrc;
     edm::InputTag fOneAndThreeProngTauSrc;
     edm::InputTag fThreeProngTauSrc;
-    
+
     // Histograms
-    TH1 *hHpMass;
-    TH1 *hTauStatus;
-    TH1 *hRtau1pHp;
-    TH1 *hRtau13pHp;
-    TH1 *hRtau3pHp;
-    TH1 *hRtau1pW;
-    TH1 *hRtau13pW;
-    TH1 *hRtau3pW;
-    TH1 *hptVisibleTau1pHp;
-    TH1 *hptVisibleTau13pHp;
-    TH1 *hptVisibleTau3pHp;
-    TH1 *hptVisibleTau1pW;
-    TH1 *hptVisibleTau13pW;
-    TH1 *hptVisibleTau3pW;
-    TH1 *hLeadingTrack1pHp;
-    TH1 *hLeadingTrack1pW;
-    TH1 *hEtaVisibleTau1pHp;
-    TH1 *hEtaVisibleTau1pW;
-    TH1 *hTauMass1pHp;
-    TH1 *hTauMass1pW;
-    TH1 *hThetaCM1pHp;
-    TH1 *hThetaCM1pW;
-    TH1 *hMagCM1pHp;
-    TH1 *hMagCM1pW;	 
-    TH1 *hBquarkMultiplicity;
-    TH1 *hBquarkStatus2Multiplicity;
-    TH1 *hBquarkStatus3Multiplicity;
-    TH1 *hBquarkFromTopEta;
-    TH1 *hBquarkNotFromTopEta;
-    TH1 *hBquarkFromTopPt;
-    TH1 *hBquarkNotFromTopPt;
-    TH1 *hBquarkFromTopDeltaRTau;
-    TH1 *hBquarkNotFromTopDeltaRTau;
-    TH1 *hGenBquarkFromHiggsSideEta;
-    TH1 *hGenBquarkFromHiggsSidePt;
-    TH1 *hGenDeltaRHiggsSide;
-    TH1 *hGenBquarkFromTopSideEta;
-    TH1 *hGenBquarkFromTopSidePt;
-    TH1 *hGenDeltaRTopSide;
-    TH1 *hTopPt;
-    TH1 *hTopPt_wrongB;
-    TH1 *hGenMET;
-    TH1 *hWPt;
-    TH1 *hWEta;
-    TH1 *hWPhi;
+    WrappedTH1 *hHpMass;
+    WrappedTH1 *hTauStatus;
+    WrappedTH1 *hRtau1pHp;
+    WrappedTH1 *hRtau13pHp;
+    WrappedTH1 *hRtau3pHp;
+    WrappedTH1 *hRtau1pW;
+    WrappedTH1 *hRtau13pW;
+    WrappedTH1 *hRtau3pW;
+    WrappedTH1 *hptVisibleTau1pHp;
+    WrappedTH1 *hptVisibleTau13pHp;
+    WrappedTH1 *hptVisibleTau3pHp;
+    WrappedTH1 *hptVisibleTau1pW;
+    WrappedTH1 *hptVisibleTau13pW;
+    WrappedTH1 *hptVisibleTau3pW;
+    WrappedTH1 *hLeadingTrack1pHp;
+    WrappedTH1 *hLeadingTrack1pW;
+    WrappedTH1 *hEtaVisibleTau1pHp;
+    WrappedTH1 *hEtaVisibleTau1pW;
+    WrappedTH1 *hTauMass1pHp;
+    WrappedTH1 *hTauMass1pW;
+    WrappedTH1 *hThetaCM1pHp;
+    WrappedTH1 *hThetaCM1pW;
+    WrappedTH1 *hMagCM1pHp;
+    WrappedTH1 *hMagCM1pW;	 
+    WrappedTH1 *hBquarkMultiplicity;
+    WrappedTH1 *hBquarkStatus2Multiplicity;
+    WrappedTH1 *hBquarkStatus3Multiplicity;
+    WrappedTH1 *hBquarkFromTopEta;
+    WrappedTH1 *hBquarkNotFromTopEta;
+    WrappedTH1 *hBquarkFromTopPt;
+    WrappedTH1 *hBquarkNotFromTopPt;
+    WrappedTH1 *hBquarkFromTopDeltaRTau;
+    WrappedTH1 *hBquarkNotFromTopDeltaRTau;
+    WrappedTH1 *hGenBquarkFromHiggsSideEta;
+    WrappedTH1 *hGenBquarkFromHiggsSidePt;
+    WrappedTH1 *hGenDeltaRHiggsSide;
+    WrappedTH1 *hGenBquarkFromTopSideEta;
+    WrappedTH1 *hGenBquarkFromTopSidePt;
+    WrappedTH1 *hGenDeltaRTopSide;
+    WrappedTH1 *hTopPt;
+    WrappedTH1 *hTopPt_wrongB;
+    WrappedTH1 *hGenMET;
+    WrappedTH1 *hWPt;
+    WrappedTH1 *hWEta;
+    WrappedTH1 *hWPhi;
 
     edm::Ptr<reco::GenMET> fGenMet;
   };

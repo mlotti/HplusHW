@@ -1,5 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIDBase.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -8,7 +8,7 @@
 #include <iomanip>
 
 namespace HPlus {
-  TauIDBase::TauIDBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel, TFileDirectory& myDir):
+  TauIDBase::TauIDBase(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper, const std::string& baseLabel, TFileDirectory& myDir):
     fMyDir(myDir),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
@@ -19,8 +19,7 @@ namespace HPlus {
     fIsolationDiscriminator(iConfig.getUntrackedParameter<std::string>("isolationDiscriminator")),
     fIsolationDiscriminatorContinuousCutPoint(iConfig.getUntrackedParameter<double>("isolationDiscriminatorContinuousCutPoint")),
     fRtauCut(iConfig.getUntrackedParameter<double>("rtauCut")),
-    fCounterPackager(eventCounter, eventWeight),
-    fEventWeight(eventWeight)
+    fCounterPackager(eventCounter, histoWrapper)
   {
     // Check that input parameters are valid
     if (fProngCount != 1 && fProngCount != 3 && fProngCount != 13) {
@@ -39,10 +38,10 @@ namespace HPlus {
     fBaseLabel = mySuffix.str();
     
     // Histograms
-    hEtaTauCands_nocut = makeTH<TH1F>(fMyDir,
+    hEtaTauCands_nocut = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, fMyDir,
       "hEtaTauCands_nocuts",
       "hEtaTauCands_nocuts;#tau #eta;N_{jets} / 0.1",60, -3., 3.);
-    hEtaTauCands_ptcut = makeTH<TH1F>(fMyDir,
+    hEtaTauCands_ptcut = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, fMyDir,
       "hEtaTauCands_ptcut",
       "hEtaTauCands_ptcut;#tau #eta;N_{jets} / 0.1",60, -3., 3.);
     
@@ -50,12 +49,12 @@ namespace HPlus {
     fIDAllTauCandidates = fCounterPackager.addSubCounter(baseLabel, "AllTauCandidates", 0);
     fIDDecayModeFinding = fCounterPackager.addSubCounter(baseLabel, "DecayModeFinding", 0);
     fIDJetPtCut = fCounterPackager.addSubCounter(baseLabel, "TauJetPt",
-      makeTH<TH1F>(fMyDir, "TauCand_JetPt", "TauJetPt;#tau jet p_{T}, GeV/c;N_{jets} / 2 GeV/c", 100, 0., 200.));
+      histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, fMyDir, "TauCand_JetPt", "TauJetPt;#tau jet p_{T}, GeV/c;N_{jets} / 5 GeV/c", 80, 0., 400.));
     fIDJetEtaCut = fCounterPackager.addSubCounter(baseLabel, "TauJetEta",
-      makeTH<TH1F>(fMyDir, "TauCand_JetEta", "TauJetEta;#tau jet #eta;N_{jets} / 0.1", 60, -3., 3.));
+      histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, fMyDir, "TauCand_JetEta", "TauJetEta;#tau jet #eta;N_{jets} / 0.1", 60, -3., 3.));
     fIDLdgTrackExistsCut = fCounterPackager.addSubCounter(baseLabel, "TauLdgTrackExists", 0);
     fIDLdgTrackPtCut = fCounterPackager.addSubCounter(baseLabel, "TauLdgTrackPtCut",
-      makeTH<TH1F>(fMyDir, "TauCand_LdgTrackPtCut", "TauLdgTrackPtCut;#tau leading track, GeV/c; N_{jets} / 2 GeV/c", 100, 0., 200.));
+      histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, fMyDir, "TauCand_LdgTrackPtCut", "TauLdgTrackPtCut;#tau leading track, GeV/c; N_{jets} / 2 GeV/c", 100, 0., 200.));
     fIDECALFiducialCutCracksOnly = fCounterPackager.addSubCounter(baseLabel, "TauECALFiducialCutsCracks", 0);
     fIDECALFiducialCut = fCounterPackager.addSubCounter(baseLabel, "TauECALFiducialCutsCracksAndGap", 0);
     fIDAgainstElectronCut = fCounterPackager.addSubCounter(baseLabel, "TauAgainstElectronCut", 0);
@@ -63,11 +62,11 @@ namespace HPlus {
     // Initialize counter objects for tau identification
     fIDIsolationCut = fCounterPackager.addSubCounter(baseLabel, "TauIsolation", 0);
     fIDNProngsCut = fCounterPackager.addSubCounter(baseLabel, "TauProngCut",
-      makeTH<TH1F>(fMyDir, "TauID_NProngsCut", "TauNProngsCut;N_{#tau prong};N_{jets}", 10, 0., 10.));
+      histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, fMyDir, "TauID_NProngsCut", "TauNProngsCut;N_{#tau prong};N_{jets}", 10, 0., 10.));
     fIDRTauCut = fCounterPackager.addSubCounter(baseLabel, "TauRtauCut",
-      makeTH<TH1F>(fMyDir, "TauID_RtauCut", "TauRtauCut;R_{#tau}=p^{ldg.track}/E^{vis.#tau jet};N_{jets} / 0.02", 60, 0., 1.2));
+      histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, fMyDir, "TauID_RtauCut", "TauRtauCut;R_{#tau}=p^{ldg.track}/E^{vis.#tau jet};N_{jets} / 0.02", 60, 0., 1.2));
     // Histograms
-    hRtauVsEta = makeTH<TH2F>(fMyDir, "TauID_RtauDetail_RtauVsEta", "RtauVsEta;R_{#tau};#tau eta", 60, 0.0, 1.2, 60, -3., 3.); // FIXME: check if this is necessary
+    hRtauVsEta = histoWrapper->makeTH<TH2F>(HistoWrapper::kDebug, fMyDir, "TauID_RtauDetail_RtauVsEta", "RtauVsEta;R_{#tau};#tau eta", 60, 0.0, 1.2, 60, -3., 3.);
   }
 
   TauIDBase::~TauIDBase() { }
@@ -81,10 +80,10 @@ namespace HPlus {
     double myJetPt = tau->pt();
     double myJetEta = tau->eta();
     fCounterPackager.fill(fIDJetPtCut, myJetPt);
-    hEtaTauCands_nocut->Fill(myJetEta, fEventWeight.getWeight());
+    hEtaTauCands_nocut->Fill(myJetEta);
     if(!(myJetPt > fPtCut)) return false;
     fCounterPackager.incrementSubCount(fIDJetPtCut);
-    hEtaTauCands_ptcut->Fill(myJetEta, fEventWeight.getWeight());
+    hEtaTauCands_ptcut->Fill(myJetEta);
     // Jet eta cut
     fCounterPackager.fill(fIDJetEtaCut, myJetEta);
     if(!(std::abs(myJetEta) < fEtaCut)) return false;

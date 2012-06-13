@@ -2,11 +2,6 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_FakeTauIdentifier_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_FakeTauIdentifier_h
 
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
-
-#include "TH1F.h"
-
-
 namespace edm {
   class Event;
 }
@@ -16,6 +11,9 @@ namespace reco {
 }
 
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
+
   class FakeTauIdentifier {
   public:
     enum MCSelectedTauMatchType {
@@ -39,19 +37,17 @@ namespace HPlus {
       kkFromHplusTau
     };
 
-    FakeTauIdentifier(EventWeight& eventWeight, std::string label);
+    FakeTauIdentifier(HistoWrapper& histoWrapper, std::string label);
     ~FakeTauIdentifier();
     
     MCSelectedTauMatchType matchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau);
     bool isFakeTau(MCSelectedTauMatchType type) { return !(type == kkTauToTau || type == kkTauToTauAndTauOutsideAcceptance); }
     
   private:
-    EventWeight& fEventWeight;
-    
-    TH1* hTauMatchType;
-    TH1* hTauOrigin;
-    TH1* hMuOrigin;
-    TH1* hElectronOrigin;
+    WrappedTH1* hTauMatchType;
+    WrappedTH1* hTauOrigin;
+    WrappedTH1* hMuOrigin;
+    WrappedTH1* hElectronOrigin;
   };
 }
 
