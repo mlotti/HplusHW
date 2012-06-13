@@ -128,12 +128,12 @@ def doPlots(datasetsEmb):
 
     # Transverse mass
     for name, label, selection in [
-        ("3AfterBTagging", "Without #Delta#phi(#tau jet, E_{T}^{miss}) cut", [tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut]),
+        ("3AfterBTagging", "Without #Delta#phi(#tau jet, E_{T}^{miss}) selection", [tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut]),
         ("4AfterDeltaPhi160", "#Delta#phi(#tau jet, E_{T}^{miss}) < 160^{o}", [tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut, tauEmbedding.signalNtuple.deltaPhi160Cut]),
         ("5AfterDeltaPhi130", "#Delta#phi(#tau jet, E_{T}^{miss}) < 130^{o}", [tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut, tauEmbedding.signalNtuple.deltaPhi130Cut])]:
 
         p = createPlot(tdMt.clone(selection=And(*selection)))
-        p.appendPlotObject(histograms.PlotText(0.5, 0.62, label, size=20))
+        p.appendPlotObject(histograms.PlotText(0.42, 0.62, label, size=20))
         if "DeltaPhi160":
             histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
         else:
