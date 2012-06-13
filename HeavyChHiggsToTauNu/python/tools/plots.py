@@ -298,7 +298,8 @@ _legendLabels = {
 
     "QCDdata": "QCD (data driven)",
 
-    "DYJetsToLL":            "DY+jets",
+#    "DYJetsToLL":            "DY+jets",
+    "DYJetsToLL":            "Z/#gamma*+jets",
     "QCD_Pt20_MuEnriched":   "QCD (#mu enr.), #hat{p}_{T} > 20",
 
     "SingleTop":             "Single t",
