@@ -313,7 +313,7 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
 # \param kwargs        Keyword arguments (see below) 
 # 
 # <b>Keyword arguments</b>
-# \li \a counters      String for a directory name inside the ROOT files for the event counter histograms (default: 'signalAnalysisCounters').
+# \li \a counters      String for a directory name inside the ROOT files for the event counter histograms (default: 'signalAnalysis/counters').
 # \li Rest are forwarded to dataset.Dataset.__init__()
 #
 # \return DatasetManager object
@@ -335,7 +335,7 @@ def getDatasetsFromRootFiles(rootFileList, **kwargs):
 ## Default command line options
 _optionDefaults = {
     "input": "histograms-*.root",
-    "counterdir": "signalAnalysisCounters"
+    "counterdir": "signalAnalysis/counters"
 }
 
 ## Add common dataset options to OptionParser object.
