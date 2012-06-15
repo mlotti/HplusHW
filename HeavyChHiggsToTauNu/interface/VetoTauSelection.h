@@ -45,14 +45,14 @@ namespace HPlus {
 
   private:
     // Parameters set in config file
+    edm::InputTag fSrc;
+    edm::InputTag fOneProngTauSrc;
+    edm::InputTag fOneAndThreeProngTauSrc;
+    edm::InputTag fThreeProngTauSrc;
     const double fZMass;
     const double fZMassWindow;
     edm::InputTag fTauSource;
     edm::InputTag fMetSrc;
-    edm::InputTag fOneProngTauSrc;
-    edm::InputTag fOneAndThreeProngTauSrc;
-    edm::InputTag fThreeProngTauSrc;
-    edm::InputTag fSrc;
     edm::Ptr<reco::Vertex> thePV_;
 
     TauSelection fTauSelection;

@@ -65,26 +65,26 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("GlobalMuonVeto");
     
-    hMuonPt = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonPt", "GlobalMuonPt;isolated muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 80, 0., 400.);
-    hMuonEta = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonEta", "GlobalMuonEta;isolated muon #eta;N_{muons} / 0.1", 60, -3., 3.);
-    hMuonEta_identified = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalMuonEta_identified", "GlobalMuonEta;isolated muon #eta;N_{muons} / 0.1", 60, -3., 3.);
-    hMuonPt_identified_eta = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalMuonPt_identified_eta", "GlobalMuonPt;isolated muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 80, 0., 400.);
-    hMuonPt_matchingMCmuon = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPtmatchingMCmuon", "GlobalMuonPtmatchingMCmuon", 400, 0., 400.);
-    hMuonEta_matchingMCmuon = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEtamatchingMCmuon", "GlobalMuonEtamatchingMCmuon", 400, -3., 3.);
-    hMuonPt_matchingMCmuonFromW = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPtmatchingMCmuonFromW", "GlobalMuonPtmatchingMCmuonFromW", 400, 0., 400.);
-    hMuonEta_matchingMCmuonFromW = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEtamatchingMCmuonFromW", "GlobalMuonEtamatchingMCmuonFromW", 400, -3., 3.);
-    hMuonPt_InnerTrack = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPt_InnerTrack", "GlobalMuonPt_InnerTrack", 100, 0., 400.);
-    hMuonEta_InnerTrack = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEta_InnerTrack", "GlobalMuonEta_InnerTrack", 60, -3., 3.);
-    hMuonPt_GlobalTrack = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPt_GlobalTrack", "GlobalMuonPt_GlobalTrack", 100, 0., 400.);
-    hMuonEta_GlobalTrack = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEta_GlobalTrack", "GlobalMuonEta_GlobalTrack", 60, -3., 3.);
-    hMuonPt_AfterSelection  = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPt_AfterSelection", "GlobalMuonPt_AfterSelection", 100, 0., 400.);
-    hMuonEta_AfterSelection = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEta_AfterSelection", "GlobalMuonEta_AfterSelection", 60, -3., 3.);
-    hMuonPt_InnerTrack_AfterSelection  = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPt_InnerTrack_AfterSelection", "GlobalMuonPt_InnerTrack_AfterSelection", 100, 0., 400.);
-    hMuonEta_InnerTrack_AfterSelection = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEta_InnerTrack_AfterSelection", "GlobalMuonEta_InnerTrack_AfterSelection", 60, -3., 3.);
-    hMuonPt_GlobalTrack_AfterSelection  = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPt_GlobalTrack_AfterSelection", "GlobalMuonPt_GlobalTrack_AfterSelection", 100, 0., 400.);
-    hMuonEta_GlobalTrack_AfterSelection = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEta_GlobalTrack_AfterSelection", "GlobalMuonEta_GlobalTrack_AfterSelection", 60, -3., 3.);
-    hMuonImpactParameter = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "MuonImpactParameter", "MuonImpactParameter", 100, 0., 0.1);
-    hMuonZdiff = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "MuonZdiff", "MuonZdiff", 100, 0., 10.);
+    hMuonPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonPt", "GlobalMuonPt;isolated muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 80, 0., 400.);
+    hMuonEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonEta", "GlobalMuonEta;isolated muon #eta;N_{muons} / 0.1", 60, -3., 3.);
+    hMuonEta_identified = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalMuonEta_identified", "GlobalMuonEta;isolated muon #eta;N_{muons} / 0.1", 60, -3., 3.);
+    hMuonPt_identified_eta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalMuonPt_identified_eta", "GlobalMuonPt;isolated muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 80, 0., 400.);
+    hMuonPt_matchingMCmuon = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPtmatchingMCmuon", "GlobalMuonPtmatchingMCmuon", 400, 0., 400.);
+    hMuonEta_matchingMCmuon = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEtamatchingMCmuon", "GlobalMuonEtamatchingMCmuon", 400, -3., 3.);
+    hMuonPt_matchingMCmuonFromW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPtmatchingMCmuonFromW", "GlobalMuonPtmatchingMCmuonFromW", 400, 0., 400.);
+    hMuonEta_matchingMCmuonFromW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEtamatchingMCmuonFromW", "GlobalMuonEtamatchingMCmuonFromW", 400, -3., 3.);
+    hMuonPt_InnerTrack = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPt_InnerTrack", "GlobalMuonPt_InnerTrack", 100, 0., 400.);
+    hMuonEta_InnerTrack = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEta_InnerTrack", "GlobalMuonEta_InnerTrack", 60, -3., 3.);
+    hMuonPt_GlobalTrack = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPt_GlobalTrack", "GlobalMuonPt_GlobalTrack", 100, 0., 400.);
+    hMuonEta_GlobalTrack = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEta_GlobalTrack", "GlobalMuonEta_GlobalTrack", 60, -3., 3.);
+    hMuonPt_AfterSelection  = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPt_AfterSelection", "GlobalMuonPt_AfterSelection", 100, 0., 400.);
+    hMuonEta_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEta_AfterSelection", "GlobalMuonEta_AfterSelection", 60, -3., 3.);
+    hMuonPt_InnerTrack_AfterSelection  = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPt_InnerTrack_AfterSelection", "GlobalMuonPt_InnerTrack_AfterSelection", 100, 0., 400.);
+    hMuonEta_InnerTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEta_InnerTrack_AfterSelection", "GlobalMuonEta_InnerTrack_AfterSelection", 60, -3., 3.);
+    hMuonPt_GlobalTrack_AfterSelection  = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPt_GlobalTrack_AfterSelection", "GlobalMuonPt_GlobalTrack_AfterSelection", 100, 0., 400.);
+    hMuonEta_GlobalTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEta_GlobalTrack_AfterSelection", "GlobalMuonEta_GlobalTrack_AfterSelection", 60, -3., 3.);
+    hMuonImpactParameter = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "MuonImpactParameter", "MuonImpactParameter", 100, 0., 0.1);
+    hMuonZdiff = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "MuonZdiff", "MuonZdiff", 100, 0., 10.);
  
     // Check here that the muon selection is reasonable
     if(fMuonSelection != "All" &&

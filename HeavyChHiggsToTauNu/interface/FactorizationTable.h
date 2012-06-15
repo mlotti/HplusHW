@@ -7,6 +7,8 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
+class TH1;
+
 namespace HPlus {
   /**
    * Class for containing a lookup table of factorized coefficients
@@ -52,7 +54,7 @@ namespace HPlus {
     
     std::string fTauAlgorithm;
     
-    WrappedTH1* hUsedCoefficients;
+    TH1* hUsedCoefficients;
   };
 }
 

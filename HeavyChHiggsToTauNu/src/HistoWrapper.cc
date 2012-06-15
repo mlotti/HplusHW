@@ -1,5 +1,4 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 namespace HPlus {
   
@@ -24,9 +23,9 @@ namespace HPlus {
       delete *it;
   }
 
-  bool HistoWrapper::checkIfDirExists(TDirectory& d, std::string name) {
-    for (size_t i = 0; i < d.GetNkeys(); ++i) {
-      std::string s = d.GetListOfKeys().At(i).GetTitle();
+  bool HistoWrapper::checkIfDirExists(TDirectory* d, std::string name) const {
+    for (int i = 0; i < d->GetNkeys(); ++i) {
+      std::string s = d->GetListOfKeys()->At(i)->GetTitle();
       if (s == name)
         return true;
     }

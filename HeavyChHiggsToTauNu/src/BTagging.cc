@@ -214,9 +214,9 @@ namespace HPlus {
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
     fDiscrCut(iConfig.getUntrackedParameter<double>("discriminatorCut")),
+    fNumberOfBJets(iConfig.getUntrackedParameter<uint32_t>("jetNumber"),iConfig.getUntrackedParameter<std::string>("jetNumberCutDirection")),
     fMin(iConfig.getUntrackedParameter<uint32_t>("minNumber")),
     FactorsFromDB(iConfig.getUntrackedParameter<bool>("UseBTagDB",false)),
-    fNumberOfBJets(iConfig.getUntrackedParameter<uint32_t>("jetNumber"),iConfig.getUntrackedParameter<std::string>("jetNumberCutDirection")),
     fTaggedCount(eventCounter.addSubCounter("b-tagging main","b-tagging")),
     fAllSubCount(eventCounter.addSubCounter("b-tagging", "all jets")),
     fTaggedSubCount(eventCounter.addSubCounter("b-tagging", "tagged")),
@@ -231,37 +231,39 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("Btagging");
-    hDiscr = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
-    hPt = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "bjet_pt", "bjet_pt", 400, 0., 400.);
-    hDiscrB = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
-    hPtB17 = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjet17_pt", "realbjet17_pt", 400, 0., 400.);
-    hEtaB17 = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjet17_eta", "realbjet17_eta", 400, -5., 5.);
-    hPtB33 = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjet33_pt", "realbjet33_pt", 400, 0., 400.);
-    hEtaB33 = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjet33_eta", "realbjet33_eta", 400, -5., 5.);
-    hPtBnoTag = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetNotag_pt", "realbjetNotag_pt", 400, 0., 400.);
-    hEtaBnoTag = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetNotag_eta", "realbjetNotag_eta", 400, -5., 5.);
-    hDiscrQ = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
-    hPtQ17 = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjet17_pt", "realqjet17_pt", 400, 0., 400.);
-    hEtaQ17 = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjet17_eta", "realqjet17_pt", 400, -5., 5.);
-    hPtQ33 = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjet33_pt", "realqjet33_pt", 400, 0., 400.);
-    hEtaQ33 = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjet33_eta", "realqjet33_pt", 400, -5., 5.);
-    hPtQnoTag = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetNotag_pt", "realqjetNotag_pt", 400, 0., 400.);
-    hEtaQnoTag = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetNotag_eta", "realqjetNotag_pt", 400, -5., 5.);
-    hPt1 = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_pt", "bjet1_pt", 100, 0., 400.);
-    hPt2 = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_pt", "bjet2_pt", 100, 0., 400.);
-    hEta = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "bjet_eta", "bjet_pt", 400, -5., 5.);
-    hEta1 = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_eta", "bjet1_pt", 100, -5., 5.);
-    hEta2 = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_eta", "bjet2_pt", 100, -5., 5.);
-    hNumberOfBtaggedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfBtaggedJets", "NumberOfBtaggedJets", 15, 0., 15.);
+    hDiscr = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
+    hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "bjet_pt", "bjet_pt", 400, 0., 400.);
+    hDiscrB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
+    hPtB17 = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjet17_pt", "realbjet17_pt", 400, 0., 400.);
+    hEtaB17 = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjet17_eta", "realbjet17_eta", 400, -5., 5.);
+    hPtB33 = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjet33_pt", "realbjet33_pt", 400, 0., 400.);
+    hEtaB33 = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjet33_eta", "realbjet33_eta", 400, -5., 5.);
+    hPtBnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetNotag_pt", "realbjetNotag_pt", 400, 0., 400.);
+    hEtaBnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetNotag_eta", "realbjetNotag_eta", 400, -5., 5.);
+    hDiscrQ = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
+    hPtQ17 = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjet17_pt", "realqjet17_pt", 400, 0., 400.);
+    hEtaQ17 = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjet17_eta", "realqjet17_pt", 400, -5., 5.);
+    hPtQ33 = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjet33_pt", "realqjet33_pt", 400, 0., 400.);
+    hEtaQ33 = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjet33_eta", "realqjet33_pt", 400, -5., 5.);
+    hPtQnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetNotag_pt", "realqjetNotag_pt", 400, 0., 400.);
+    hEtaQnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetNotag_eta", "realqjetNotag_pt", 400, -5., 5.);
+    hPt1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_pt", "bjet1_pt", 100, 0., 400.);
+    hPt2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_pt", "bjet2_pt", 100, 0., 400.);
+    hEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "bjet_eta", "bjet_pt", 400, -5., 5.);
+    hEta1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_eta", "bjet1_pt", 100, -5., 5.);
+    hEta2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_eta", "bjet2_pt", 100, -5., 5.);
+    hNumberOfBtaggedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfBtaggedJets", "NumberOfBtaggedJets", 15, 0., 15.);
     
-    hScaleFactor = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "scaleFactor", "scaleFactor;b-tag/mistag scale factor;N_{events}/0.05", 100, 0., 5.);
-    hMCMatchForPassedJets = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "MCMatchForPassedJets", "MCMatchForPassedJets;;N_{jets}", 3, 0., 3.);
-    hMCMatchForPassedJets->GetXaxis()->SetBinLabel(1, "b jet");
-    hMCMatchForPassedJets->GetXaxis()->SetBinLabel(2, "light jet");
-    hMCMatchForPassedJets->GetXaxis()->SetBinLabel(3, "no match");
+    hScaleFactor = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "scaleFactor", "scaleFactor;b-tag/mistag scale factor;N_{events}/0.05", 100, 0., 5.);
+    hMCMatchForPassedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "MCMatchForPassedJets", "MCMatchForPassedJets;;N_{jets}", 3, 0., 3.);
+    if (hMCMatchForPassedJets->isActive()) {
+      hMCMatchForPassedJets->GetXaxis()->SetBinLabel(1, "b jet");
+      hMCMatchForPassedJets->GetXaxis()->SetBinLabel(2, "light jet");
+      hMCMatchForPassedJets->GetXaxis()->SetBinLabel(3, "no match");
+    }
 
-    hBTagRelativeUncertainty = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "BTagRelativeUncertainty", "BTagRelativeUncertainty;Relative Uncertainty;N_{events}", 3000, 0., 3.);
-    hBTagAbsoluteUncertainty = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "BTagAbsoluteUncertainty", "BTagAbsoluteUncertainty;Absolute Uncertainty;N_{events}", 3000, 0., 3.);
+    hBTagRelativeUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "BTagRelativeUncertainty", "BTagRelativeUncertainty;Relative Uncertainty;N_{events}", 3000, 0., 3.);
+    hBTagAbsoluteUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "BTagAbsoluteUncertainty", "BTagAbsoluteUncertainty;Absolute Uncertainty;N_{events}", 3000, 0., 3.);
 
     // BTagging scale factors from DB
     if(FactorsFromDB) {

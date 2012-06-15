@@ -38,7 +38,7 @@ namespace HPlus {
   /// Wrapper class for TH2 object
   class WrappedTH2 {
   public:
-    WrappedTH2(EventWeight& eventWeight, WrappedTH2* histo, bool isActive);
+    WrappedTH2(EventWeight& eventWeight, TH2* histo, bool isActive);
     ~WrappedTH2();
 
     /// Returns true if the histogram exists
@@ -54,7 +54,7 @@ namespace HPlus {
 
   private:
     EventWeight& fEventWeight;
-    WrappedTH2* h;
+    TH2* h;
     bool bIsActive;
   };
 
@@ -76,14 +76,9 @@ namespace HPlus {
     WrappedTH1* makeTH(HistoLevel level, TFileDirectory& fd, const Arg1& a1, const Arg2& a2, const Arg3& a3,
                        const Arg4& a4, const Arg5& a5) {
       if (level <= fAmbientLevel) {
-        TFileDirectory myDir = fd;
-        if (level == kDebug) {
-          if (!checkIfDirExists(fd, "Debug"))
-            myDir = fs->mkdir("Debug");
-          else
-            myDir = fs->cd("Debug");
-        }
-        T* histo = myDir.make<T>(a1, a2, a3, a4, a5);
+        // making a separate directory for debug histograms is not that easy here;
+        // it should be done at the level of code which is calling this command
+        T* histo = fd.make<T>(a1, a2, a3, a4, a5);
         histo->Sumw2();
         fAllTH1Histos.push_back(new WrappedTH1(fEventWeight, histo, true));
       } else {
@@ -99,27 +94,22 @@ namespace HPlus {
     WrappedTH2* makeTH(HistoLevel level, TFileDirectory& fd, const Arg1& a1, const Arg2& a2, const Arg3& a3,
                        const Arg4& a4, const Arg5& a5, const Arg6& a6, const Arg7& a7, const Arg8& a8) {
       if (level <= fAmbientLevel) {
-        TFileDirectory myDir = fd;
-        if (level == kDebug) {
-          if (!checkIfDirExists(fd, "Debug"))
-            myDir = fs->mkdir("Debug");
-          else
-            myDir = fs->cd("Debug");
-        }
-        T* histo = myDir.make<T>(a1, a2, a3, a4, a5, a6, a7, a8);
+        T* histo = fd.make<T>(a1, a2, a3, a4, a5, a6, a7, a8);
         histo->Sumw2();
         fAllTH2Histos.push_back(new WrappedTH2(fEventWeight, histo, true));
       } else {
         // Histogram is suppressed
-        WrappedTH2* histo = 0;
+        TH2* histo = 0;
         fAllTH2Histos.push_back(new WrappedTH2(fEventWeight, histo, false));
       }
       return fAllTH2Histos.at(fAllTH2Histos.size()-1);
     }
+    /// Returns the event weight
+    double getWeight() const { return fEventWeight.getWeight(); }
 
   private:
     /// Method for checking if a directory exists
-    bool checkIfDirExists(TDirectory& d, std::string name) const;
+    bool checkIfDirExists(TDirectory* d, std::string name) const;
 
   private:
     /// EventWeight object

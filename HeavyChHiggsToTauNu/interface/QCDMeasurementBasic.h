@@ -48,7 +48,7 @@ namespace HPlus {
   class QCDMeasurementBasic {  
     class AnalysisVariation {
     public:
-      AnalysisVariation(double METcut, double deltaPhiTauMETCut, int tauIsolation, int nTauPtBins, int nMtBins);
+      AnalysisVariation(double METcut, double deltaPhiTauMETCut, int tauIsolation, int nTauPtBins, int nMtBins, HistoWrapper& histoWrapper);
       ~AnalysisVariation();
 
       void analyse(bool isRealData, const float maxElectronPt, const float maxMuonPt, const int njets, const METSelection::Data& METData, const TauSelection::Data& tauCandidateData,const BTagging::Data& btagData, int tauPtBinIndex, double weightAfterVertexReweight, TriggerEfficiencyScaleFactor::Data& trgEffData, FakeTauIdentifier::MCSelectedTauMatchType tauMatch, double mTBinIndex, const TopSelection::Data& topSelectionData, const BjetSelection::Data& bjetSelectionData, const TopChiSelection::Data& topChiSelectionData, const TopWithBSelection::Data& topWithBSelectionData);
@@ -138,7 +138,7 @@ namespace HPlus {
   };
   
   public:
-    explicit QCDMeasurementBasic(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper);
+    explicit QCDMeasurementBasic(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::EventWeight& eventWeight);
     ~QCDMeasurementBasic();
 
     // Interface towards the EDProducer

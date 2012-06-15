@@ -7,6 +7,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 
 namespace {
@@ -29,7 +30,8 @@ class HPlusTauSelectorFilterT: public edm::EDFilter {
   explicit HPlusTauSelectorFilterT(const edm::ParameterSet& iConfig):
     eventCounter(iConfig),
     eventWeight(iConfig),
-    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
+    histoWrapper(eventWeight, "Debug"),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, histoWrapper),
     fFilter(iConfig.getParameter<bool>("filter"))
   {
     produces<Product>();
@@ -64,6 +66,7 @@ class HPlusTauSelectorFilterT: public edm::EDFilter {
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
+  HPlus::HistoWrapper histoWrapper;
   HPlus::TauSelection fOneProngTauSelection;
   bool fFilter;
 };

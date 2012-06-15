@@ -11,9 +11,9 @@ namespace edm {
   class Event;
 }
 
+class TH1;
+
 namespace HPlus {
-  class HistoWrapper;
-  class WrappedTH1;
   /**
     Class for keeping the event weight (from prescale and from factorizing)
   **/
@@ -34,9 +34,9 @@ namespace HPlus {
     edm::InputTag fPrescaleSrc;
     bool fPrescaleAvailableStatus;
     double fWeight;
-    WrappedTH1* hPrescaleHistoLowScale;
-    WrappedTH1* hPrescaleHistoMediumScale;
-    WrappedTH1* hPrescaleHistoHighScale;
+    TH1* hPrescaleHistoLowScale;
+    TH1* hPrescaleHistoMediumScale;
+    TH1* hPrescaleHistoHighScale;
   };
 }
 

@@ -40,22 +40,22 @@ namespace HPlus {
 
     TFileDirectory myDir = fs->mkdir("TopWithBSelection");
 
-    hPtTop = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtTop", "PtTop", 100, 0., 400.);
-    hPtTopChiCut = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtTopChiCut", "PtTopChiCut", 100, 0., 400.);
-    hjjbMass = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "jjbMass", "jjbMass", 80, 0., 400);
-    htopMass = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMass", "TopMass", 80, 0., 400);
-    hWMass = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass", "WMass", 100, 0., 200.);
-    htopMassMatch = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMass_fullMatch", "TopMass_fullMatch", 80, 0., 400);
-    hWMassMatch = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "WMass_fullMatch", "WMass_fullMatchMatch", 100, 0., 200.);
-    htopMassBMatch = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMass_bMatch", "TopMass_bMatch", 80, 0., 400);
-    hWMassBMatch = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "WMass_bMatch", "WMass_bMatch", 100, 0., 200.);
-    htopMassQMatch = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMass_qMatch", "TopMass_qMatch", 80, 0., 400);
-    hWMassQMatch = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "WMass_qMatch", "WMass_qMatch", 100, 0., 200.);
-    htopMassMatchWrongB = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMass_MatchWrongB", "TopMass_MatchWrongB", 80, 0., 400);
-    hWMassMatchWrongB = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "WMass_MatchWrongB", "WMass_MatchWrongB", 100, 0., 200.);
-    hChi2Min = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "Chi2Min", "Chi2Min", 200, 0., 40.);
-    htopMassChiCut = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMassChiCut", "TopMassChiCut", 80, 0., 400);
-    hWMassChiCut = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMassChiCut", "WMassChiCut", 100, 0., 200.);
+    hPtTop = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtTop", "PtTop", 100, 0., 400.);
+    hPtTopChiCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtTopChiCut", "PtTopChiCut", 100, 0., 400.);
+    hjjbMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "jjbMass", "jjbMass", 80, 0., 400);
+    htopMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TopMass", "TopMass", 80, 0., 400);
+    hWMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "WMass", "WMass", 100, 0., 200.);
+    htopMassMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMass_fullMatch", "TopMass_fullMatch", 80, 0., 400);
+    hWMassMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "WMass_fullMatch", "WMass_fullMatchMatch", 100, 0., 200.);
+    htopMassBMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMass_bMatch", "TopMass_bMatch", 80, 0., 400);
+    hWMassBMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "WMass_bMatch", "WMass_bMatch", 100, 0., 200.);
+    htopMassQMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMass_qMatch", "TopMass_qMatch", 80, 0., 400);
+    hWMassQMatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "WMass_qMatch", "WMass_qMatch", 100, 0., 200.);
+    htopMassMatchWrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMass_MatchWrongB", "TopMass_MatchWrongB", 80, 0., 400);
+    hWMassMatchWrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "WMass_MatchWrongB", "WMass_MatchWrongB", 100, 0., 200.);
+    hChi2Min = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "Chi2Min", "Chi2Min", 200, 0., 40.);
+    htopMassChiCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMassChiCut", "TopMassChiCut", 80, 0., 400);
+    hWMassChiCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "WMassChiCut", "WMassChiCut", 100, 0., 200.);
   }
 
   TopWithBSelection::~TopWithBSelection() {}

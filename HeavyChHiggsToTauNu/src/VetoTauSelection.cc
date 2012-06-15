@@ -56,25 +56,29 @@ namespace HPlus {
     // Initialise histograms
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("VetoTauSelection");
-    hCandidateTauNumber = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "CandidateTauNumber", "CandidateTauNumber;Number of veto #tau candidates;Jets", 4, 0, 4);
-    hCandidateTauNumber->GetXaxis()->SetBinLabel(1, "Genuine #tau");
-    hCandidateTauNumber->GetXaxis()->SetBinLabel(2, "e#rightarrow#tau");
-    hCandidateTauNumber->GetXaxis()->SetBinLabel(3, "#mu#rightarrow#tau");
-    hCandidateTauNumber->GetXaxis()->SetBinLabel(4, "jet#rightarrow#tau");
-    hSelectedTauNumber = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedTauNumber", "SelectedTauNumber;Number of selected veto #tau jets;Jets", 4, 0, 4);
-    for (int i = 1; i <= hCandidateTauNumber->getHisto()->GetNbinsX(); ++i)
-      hSelectedTauNumber->GetXaxis()->SetBinLabel(i, hCandidateTauNumber->GetXaxis()->GetBinLabel(i));
-    hTauCandFromWPt = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauCandFromWPt", "TauCandFromWPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hTauCandAllPt = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauCandAllPt", "TauCandAllPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hSelectedGenuineTauByPt = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauByPt", "SelectedGenuineTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hSelectedGenuineTauByEta = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauByEta", "SelectedGenuineTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
-    hSelectedGenuineTauByPhi = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauByPhi", "SelectedGenuineTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
-    hSelectedFakeTauByPt = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauByPt", "SelectedFakeTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hSelectedFakeTauByEta = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauByEta", "SelectedFakeTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
-    hSelectedFakeTauByPhi = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauByPhi", "SelectedFakeTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
-    hSelectedGenuineTauDiTauMass = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauDitauMass", "SelectedGenuineTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
-    hSelectedFakeTauDiTauMass = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauDitauMass", "SelectedFakeTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
-    hSelectedTaus = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "SelectedTausPerEvent", "SelectedTausPerEvent", 10, 0, 10);
+    hCandidateTauNumber = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "CandidateTauNumber", "CandidateTauNumber;Number of veto #tau candidates;Jets", 4, 0, 4);
+    if (hCandidateTauNumber->isActive()) {
+      hCandidateTauNumber->GetXaxis()->SetBinLabel(1, "Genuine #tau");
+      hCandidateTauNumber->GetXaxis()->SetBinLabel(2, "e#rightarrow#tau");
+      hCandidateTauNumber->GetXaxis()->SetBinLabel(3, "#mu#rightarrow#tau");
+      hCandidateTauNumber->GetXaxis()->SetBinLabel(4, "jet#rightarrow#tau");
+    }
+    hSelectedTauNumber = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedTauNumber", "SelectedTauNumber;Number of selected veto #tau jets;Jets", 4, 0, 4);
+    if (hSelectedTauNumber->isActive()) {
+      for (int i = 1; i <= hCandidateTauNumber->getHisto()->GetNbinsX(); ++i)
+        hSelectedTauNumber->GetXaxis()->SetBinLabel(i, hCandidateTauNumber->GetXaxis()->GetBinLabel(i));
+    }
+    hTauCandFromWPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauCandFromWPt", "TauCandFromWPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hTauCandAllPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauCandAllPt", "TauCandAllPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hSelectedGenuineTauByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauByPt", "SelectedGenuineTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hSelectedGenuineTauByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauByEta", "SelectedGenuineTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
+    hSelectedGenuineTauByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauByPhi", "SelectedGenuineTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
+    hSelectedFakeTauByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauByPt", "SelectedFakeTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hSelectedFakeTauByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauByEta", "SelectedFakeTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
+    hSelectedFakeTauByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauByPhi", "SelectedFakeTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
+    hSelectedGenuineTauDiTauMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauDitauMass", "SelectedGenuineTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
+    hSelectedFakeTauDiTauMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauDitauMass", "SelectedFakeTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
+    hSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "SelectedTausPerEvent", "SelectedTausPerEvent", 10, 0, 10);
   }
 
   VetoTauSelection::~VetoTauSelection() {}

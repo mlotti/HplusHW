@@ -7,6 +7,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 
 class HPlusMETPtrSelectorFilter: public edm::EDFilter {
@@ -24,6 +25,7 @@ class HPlusMETPtrSelectorFilter: public edm::EDFilter {
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
+  HPlus::HistoWrapper histoWrapper;
   HPlus::METSelection fMETSelection;
   edm::InputTag fTauSrc;
   edm::InputTag fJetSrc;
@@ -32,7 +34,8 @@ class HPlusMETPtrSelectorFilter: public edm::EDFilter {
 HPlusMETPtrSelectorFilter::HPlusMETPtrSelectorFilter(const edm::ParameterSet& iConfig):
   eventCounter(iConfig),
   eventWeight(iConfig),
-  fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET"),
+  histoWrapper(eventWeight, "Debug"),
+  fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, histoWrapper, "MET"),
   fTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
   fJetSrc(iConfig.getUntrackedParameter<edm::InputTag>("jetSrc"))
 {

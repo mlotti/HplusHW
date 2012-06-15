@@ -24,19 +24,18 @@ namespace HPlus {
   FullHiggsMassCalculator::FullHiggsMassCalculator(HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper) {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("FullHiggsMass");
-    //hWeights = histoWrapper->makeTH<TH1F>("pileupReweightWeights", "Reweighting weight distribution", 100, 0, 10);
-    hHiggsMass = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMass", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMassReal = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "HiggsMassReal", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hHiggsMassImaginary = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "HiggsMassImaginary", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    hTopMass = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass", "Top mass;m_{top} (GeV)", 100, 0, 500);
-    hTopMassRejected = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMassRejected", "Top mass;m_{top} (GeV)", 100, 0, 500);
-    hTopMassReal = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMassReal", "Top mass;m_{top} (GeV)", 100, 0, 500);
-    hTopMassRealRejected = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMassRealRejected", "Top mass;m_{top} (GeV)", 100, 0, 500);
-    hTopMassImaginary = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMassImaginary", "Top mass;m_{top} (GeV)", 100, 0, 500);
-    hTopMassImaginaryRejected = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMassImaginaryRejected", "Top mass;m_{top} (GeV)", 100, 0, 500);
-    hNeutrinoZSolution = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "NeutrinoZSolution", "Neutrino Z solution;p_{#nu,z} (GeV)", 100, -500, 500);
-    hNeutrinoPtSolution = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "NeutrinoPtSolution", "Neutrino pT solution;p_{#nu,T} (GeV)", 100, 0, 500);
-    hNeutrinoPtDifference = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "NeutrinoPtDifference", "Neutrino pT difference;p_{#nu,T} (GeV)", 200, -500, 500);
+    hHiggsMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMass", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMassReal = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "HiggsMassReal", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMassImaginary = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "HiggsMassImaginary", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hTopMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass", "Top mass;m_{top} (GeV)", 100, 0, 500);
+    hTopMassRejected = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMassRejected", "Top mass;m_{top} (GeV)", 100, 0, 500);
+    hTopMassReal = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMassReal", "Top mass;m_{top} (GeV)", 100, 0, 500);
+    hTopMassRealRejected = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMassRealRejected", "Top mass;m_{top} (GeV)", 100, 0, 500);
+    hTopMassImaginary = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMassImaginary", "Top mass;m_{top} (GeV)", 100, 0, 500);
+    hTopMassImaginaryRejected = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TopMassImaginaryRejected", "Top mass;m_{top} (GeV)", 100, 0, 500);
+    hNeutrinoZSolution = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "NeutrinoZSolution", "Neutrino Z solution;p_{#nu,z} (GeV)", 100, -500, 500);
+    hNeutrinoPtSolution = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "NeutrinoPtSolution", "Neutrino pT solution;p_{#nu,T} (GeV)", 100, 0, 500);
+    hNeutrinoPtDifference = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "NeutrinoPtDifference", "Neutrino pT difference;p_{#nu,T} (GeV)", 200, -500, 500);
 
       //edm::FileInPath myDataPUdistribution = iConfig.getParameter<edm::FileInPath>("dataPUdistribution");
   }

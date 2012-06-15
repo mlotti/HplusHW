@@ -20,7 +20,7 @@ namespace edm {
 
 namespace HPlus {
   class HistoWrapper;
-  class WrappedWrappedTH1;
+  class WrappedTH1;
   /**
    * Class for checking the smallest DeltaPhi of the MET and the selected jets and 
    */

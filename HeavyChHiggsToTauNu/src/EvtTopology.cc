@@ -182,12 +182,12 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("EvtTopologyAlphaT");
-    hAlphaT = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "alphaT", "alphaT", 50, 0.0, 5.0);
+    hAlphaT = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "alphaT", "alphaT", 50, 0.0, 5.0);
     /*
-    hDiJetInvMass      = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EvtTopology_DiJetInvMass", "EvtTopology_DiJetInvMass", 1000, 0.0, 1000.0);
-    hDiJetInvMassCutFail    = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EvtTopology_DiJetInvMassCutFail", "EvtTopology_DiJetInvMassCutFail", 1000, 0.0, 1000.0);
-    hDiJetInvMassCutPass    = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EvtTopology_DiJetInvMassCutPass", "EvtTopology_DiJetInvMassCutPass", 1000, 0.0, 1000.0);
-    hDiJetInvMassWCutFail   = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EvtTopology_DiJetInvMassWCutFail", "EvtTopology_DiJetInvMassWCutFail", 1000, 0.0, 1000.0);
+    hDiJetInvMass      = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EvtTopology_DiJetInvMass", "EvtTopology_DiJetInvMass", 1000, 0.0, 1000.0);
+    hDiJetInvMassCutFail    = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EvtTopology_DiJetInvMassCutFail", "EvtTopology_DiJetInvMassCutFail", 1000, 0.0, 1000.0);
+    hDiJetInvMassCutPass    = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EvtTopology_DiJetInvMassCutPass", "EvtTopology_DiJetInvMassCutPass", 1000, 0.0, 1000.0);
+    hDiJetInvMassWCutFail   = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EvtTopology_DiJetInvMassWCutFail", "EvtTopology_DiJetInvMassWCutFail", 1000, 0.0, 1000.0);
     */
   }
 

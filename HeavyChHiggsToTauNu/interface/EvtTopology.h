@@ -41,7 +41,7 @@ namespace edm {
 
 namespace HPlus {
   class HistoWrapper;
-  class WrappedWrappedTH1;
+  class WrappedTH1;
 
   class EvtTopology {
   public:

@@ -22,12 +22,12 @@ namespace HPlus {
   void CorrelationAnalysis::init(HistoWrapper& histoWrapper){
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("BCorrelationAnalysis");
-    hPtB1 = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_pt", "bjet1_pt", 100, 0., 200.);
-    hPtB2 = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_pt", "bjet2_pt", 100, 0., 200.);
-    hEtaB1 = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_eta", "bjet1_eta", 60, -3., 3.);
-    hEtaB2 = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_eta", "bjet2_eta", 60, -3., 3.);
-    hDeltaR_tauB1 = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaR_tauB1", "DeltaR_tauB1", 100, 0., 5.);
-    hDeltaR_tauB2 = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaR_tauB2", "DeltaR_tauB2", 100, 0., 5.);
+    hPtB1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_pt", "bjet1_pt", 100, 0., 200.);
+    hPtB2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_pt", "bjet2_pt", 100, 0., 200.);
+    hEtaB1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_eta", "bjet1_eta", 60, -3., 3.);
+    hEtaB2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_eta", "bjet2_eta", 60, -3., 3.);
+    hDeltaR_tauB1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaR_tauB1", "DeltaR_tauB1", 100, 0., 5.);
+    hDeltaR_tauB2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaR_tauB2", "DeltaR_tauB2", 100, 0., 5.);
   }
 
   void CorrelationAnalysis::analyze(const edm::PtrVector<reco::Candidate>& input1,const edm::PtrVector<reco::Candidate>& input2){
@@ -41,14 +41,14 @@ namespace HPlus {
       if (ntaus > 1 ) continue;
       if( input2.size() > 0 ) {
         DeltaR_tauB1 = reco::deltaR((*iCand1), *(input2[0]));
-        hDeltaR_tauB1->Fill(DeltaR_tauB1, fEventWeight.getWeight());
-        hPtB1->Fill((input2[0])->pt(), fEventWeight.getWeight());
-        hEtaB1->Fill((input2[0])->eta(), fEventWeight.getWeight());
+        hDeltaR_tauB1->Fill(DeltaR_tauB1);
+        hPtB1->Fill((input2[0])->pt());
+        hEtaB1->Fill((input2[0])->eta());
         if( input2.size() > 1 ) {
           DeltaR_tauB2 = reco::deltaR((*iCand1), *(input2[1]));
-          hDeltaR_tauB2->Fill(DeltaR_tauB2, fEventWeight.getWeight());
-          hPtB2->Fill((input2[1])->pt(), fEventWeight.getWeight());
-          hEtaB2->Fill((input2[1])->eta(), fEventWeight.getWeight());
+          hDeltaR_tauB2->Fill(DeltaR_tauB2);
+          hPtB2->Fill((input2[1])->pt());
+          hEtaB2->Fill((input2[1])->eta());
         }
       }
       ntaus++;

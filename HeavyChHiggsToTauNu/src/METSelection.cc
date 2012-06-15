@@ -42,11 +42,11 @@ namespace HPlus {
     else
       throw cms::Exception("Configuration") << "Invalid value for select '" << select << "', valid values are raw, type1, type2" << std::endl;
     
-    hMet = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "met", "met", 80, 0., 400.);
-    hMetSignif = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "metSignif", "metSignif", 100, 0., 50.);
-    hMetSumEt  = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "metSumEt", "metSumEt", 30, 0., 1500.);
-    hMetDivSumEt = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hMetDivSumEt", "hMetDivSumEt", 50, 0., 1.);
-    hMetDivSqrSumEt = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hMetDivSqrSumEt", "hMetDivSqrSumEt", 50, 0., 1.);
+    hMet = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "met", "met", 80, 0., 400.);
+    hMetSignif = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "metSignif", "metSignif", 100, 0., 50.);
+    hMetSumEt  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "metSumEt", "metSumEt", 30, 0., 1500.);
+    hMetDivSumEt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hMetDivSumEt", "hMetDivSumEt", 50, 0., 1.);
+    hMetDivSqrSumEt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hMetDivSqrSumEt", "hMetDivSqrSumEt", 50, 0., 1.);
   }
 
   METSelection::~METSelection() {}

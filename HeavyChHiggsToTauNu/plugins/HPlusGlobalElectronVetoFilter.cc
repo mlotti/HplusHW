@@ -9,6 +9,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
 
 class HPlusGlobalElectronVetoFilter: public edm::EDFilter {
@@ -26,6 +27,7 @@ class HPlusGlobalElectronVetoFilter: public edm::EDFilter {
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
+  HPlus::HistoWrapper histoWrapper;
   HPlus::GlobalElectronVeto fGlobalElectronVeto;
   bool fFilter;
 };
@@ -33,7 +35,8 @@ class HPlusGlobalElectronVetoFilter: public edm::EDFilter {
 HPlusGlobalElectronVetoFilter::HPlusGlobalElectronVetoFilter(const edm::ParameterSet& iConfig):
   eventCounter(iConfig),
   eventWeight(iConfig),
-  fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
+  histoWrapper(eventWeight, "Debug"),
+  fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, histoWrapper),
   fFilter(iConfig.getParameter<bool>("filter"))
 {
   produces<bool>();

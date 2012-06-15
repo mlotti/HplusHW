@@ -51,23 +51,23 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("GlobalElectronVeto");
     
-    hElectronPt  = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronPt", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 80, 0.0, 400.0);
-    hElectronEta = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronEta", "GlobalElectronEta;isolated electron #eta;N_{electrons} / 0.1", 60, -3.0, 3.0);
-    hElectronEta_identified = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalElectronEta_identified", "GlobalElectronEta_identified;isolated electron #eta;N_{electrons} / 0.1", 60, -3.0, 3.0);
-    hElectronPt_identified  = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalElectronPt_identified", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 80, 0.0, 400.0);
+    hElectronPt  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronPt", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 80, 0.0, 400.0);
+    hElectronEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronEta", "GlobalElectronEta;isolated electron #eta;N_{electrons} / 0.1", 60, -3.0, 3.0);
+    hElectronEta_identified = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalElectronEta_identified", "GlobalElectronEta_identified;isolated electron #eta;N_{electrons} / 0.1", 60, -3.0, 3.0);
+    hElectronPt_identified  = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalElectronPt_identified", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 80, 0.0, 400.0);
 
-    hElectronPt_matchingMCelectron  = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_matchingMCelectron", "GlobalElectronPt_matchingMCelectron", 400, 0.0, 400.0);
-    hElectronEta_matchingMCelectron = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronEta_matchingMCelectron", "GlobalElectronEta_matchingMCelectron", 400, -3.0, 3.0);
-    hElectronPt_matchingMCelectronFromW  = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_matchingMCelectronFromW", "GlobalElectronPt_matchingMCelectronFromW", 400, 0.0, 400.0);
-    hElectronEta_matchingMCelectronFromW = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronEta_matchingMCelectronFromW", "GlobalElectronEta_matchingMCelectronFromW", 400, -3.0, 3.0);
-    hElectronPt_gsfTrack  = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_gsfTrack", "GlobalElectronPt_gsfTrack", 400, 0.0, 400.0);
-    hElectronEta_gsfTrack = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronEta_gsfTrack", "GlobalElectronEta_gsfTrack", 300, -3.0, 3.0);
-    hElectronEta_superCluster = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronEta_superCluster", "GlobalElectronEta_superCluster", 60, -3.0, 3.0);
-    hElectronPt_AfterSelection = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 100, 0.0, 200.0);
-    hElectronEta_AfterSelection = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_AfterSelection", "GlobalElectronEta_AfterSelection", 60, -3.0, 3.0);
-    hElectronPt_gsfTrack_AfterSelection = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsfTrack_AfterSelection", 100, 0.0, 200.0);
-    hElectronEta_gsfTrack_AfterSelection = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsTrack_AfterSelection", 60, -3.0, 3.0);
-    hElectronImpactParameter = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, myDir, "ElectronImpactParameter", "ElectronImpactParameter", 100, 0.0, 0.1);
+    hElectronPt_matchingMCelectron  = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_matchingMCelectron", "GlobalElectronPt_matchingMCelectron", 400, 0.0, 400.0);
+    hElectronEta_matchingMCelectron = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronEta_matchingMCelectron", "GlobalElectronEta_matchingMCelectron", 400, -3.0, 3.0);
+    hElectronPt_matchingMCelectronFromW  = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_matchingMCelectronFromW", "GlobalElectronPt_matchingMCelectronFromW", 400, 0.0, 400.0);
+    hElectronEta_matchingMCelectronFromW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronEta_matchingMCelectronFromW", "GlobalElectronEta_matchingMCelectronFromW", 400, -3.0, 3.0);
+    hElectronPt_gsfTrack  = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_gsfTrack", "GlobalElectronPt_gsfTrack", 400, 0.0, 400.0);
+    hElectronEta_gsfTrack = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronEta_gsfTrack", "GlobalElectronEta_gsfTrack", 300, -3.0, 3.0);
+    hElectronEta_superCluster = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronEta_superCluster", "GlobalElectronEta_superCluster", 60, -3.0, 3.0);
+    hElectronPt_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 100, 0.0, 200.0);
+    hElectronEta_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_AfterSelection", "GlobalElectronEta_AfterSelection", 60, -3.0, 3.0);
+    hElectronPt_gsfTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsfTrack_AfterSelection", 100, 0.0, 200.0);
+    hElectronEta_gsfTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsTrack_AfterSelection", 60, -3.0, 3.0);
+    hElectronImpactParameter = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "ElectronImpactParameter", "ElectronImpactParameter", 100, 0.0, 0.1);
 
     bUseLooseID = false;
     bUseRobustLooseID = false;
@@ -541,7 +541,7 @@ namespace HPlus {
       bElecElectronDistanceCut = true;
 
       // 4) Transverse Impact Parameter wrt BeamSpot, applied on the gsfTrack of the Electron candidate
-      hElectronImpactParameter->Fill(myTransverseImpactPar,fEventWeight.getWeight()); 
+      hElectronImpactParameter->Fill(myTransverseImpactPar);
       if(myTransverseImpactPar > 0.04) continue;
       bElecTransvImpactParCut = true;
       

@@ -27,12 +27,12 @@ namespace HPlus {
         hltMETEmulation = new HLTMETEmulation(iConfig);
 /*
         edm::Service<TFileService> fs;
-        h_alltau = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_alltau", "h_alltau", 25, 0, 100);
-        h_allmet = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_allmet", "h_allmet", 25, 0, 100);
-        h_tau    = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_tau", "h_tau", 25, 0, 100);
-        h_met    = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_met", "h_met", 25, 0, 100);
-        h_taumet_tau = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_taumet_tau", "h_taumet_tau", 25, 0, 100);
-        h_taumet_met = histoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_taumet_met", "h_taumet_met", 25, 0, 100);
+        h_alltau = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_alltau", "h_alltau", 25, 0, 100);
+        h_allmet = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_allmet", "h_allmet", 25, 0, 100);
+        h_tau    = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_tau", "h_tau", 25, 0, 100);
+        h_met    = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_met", "h_met", 25, 0, 100);
+        h_taumet_tau = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_taumet_tau", "h_taumet_tau", 25, 0, 100);
+        h_taumet_met = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "h_taumet_met", "h_taumet_met", 25, 0, 100);
 */
   }
 

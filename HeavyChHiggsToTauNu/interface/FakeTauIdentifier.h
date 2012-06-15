@@ -2,6 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_FakeTauIdentifier_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_FakeTauIdentifier_h
 
+#include <string>
+
 namespace edm {
   class Event;
 }

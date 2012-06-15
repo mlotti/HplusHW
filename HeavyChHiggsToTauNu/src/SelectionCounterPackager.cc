@@ -1,12 +1,14 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SelectionCounterPackager.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
+
 namespace HPlus {
-  SelectionCounterPackager::SelectionCounterPackager(HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper)
+  SelectionCounterPackager::SelectionCounterPackager(HPlus::EventCounter& eventCounter)
   : fEventCounter(eventCounter) { }
-  
+
   SelectionCounterPackager::~SelectionCounterPackager() { }
-  
-  size_t SelectionCounterPackager::addSubCounter(const std::string& base, const std::string& name, TH1* histogram) {
+
+  size_t SelectionCounterPackager::addSubCounter(const std::string& base, const std::string& name, WrappedTH1* histogram) {
     std::stringstream myPassedCounterBase;
     myPassedCounterBase << "TauIDPassedEvt::" << base; 
     std::stringstream mySubCounterBase;
@@ -26,7 +28,7 @@ namespace HPlus {
       (*it).reset();
     }
   }
-  
+
   void SelectionCounterPackager::incrementPassedCounters() {
     for (std::vector<SelectionCounterItem>::iterator it = fSelectionCounterItems.begin();
       it != fSelectionCounterItems.end(); ++it) {
@@ -34,26 +36,26 @@ namespace HPlus {
     }
   }
 
-  SelectionCounterItem::SelectionCounterItem(Count passedCounter, Count subCounter, TH1* histogram)
+  SelectionCounterItem::SelectionCounterItem(Count passedCounter, Count subCounter, WrappedTH1* histogram)
   : fPassedCounter(passedCounter),
     fSubCounter(subCounter),
     fLocalCounter(0),
-    fHistogram(histogram) { }
+    fHistogramTH1(histogram) { }
 
-  SelectionCounterItem::SelectionCounterItem(Count passedCounter, Count subCounter, TH2* histogram)
+  SelectionCounterItem::SelectionCounterItem(Count passedCounter, Count subCounter, WrappedTH2* histogram)
   : fPassedCounter(passedCounter),
     fSubCounter(subCounter),
     fLocalCounter(0),
-    fHistogram(histogram) { }
+    fHistogramTH2(histogram) { }
 
   SelectionCounterItem::~SelectionCounterItem() { }
 
-  void SelectionCounterItem::fill(float value, float weight) const { 
-    dynamic_cast<TH1*>(fHistogram)->Fill(value, weight);
+  void SelectionCounterItem::fill(float value) const {
+    fHistogramTH1->Fill(value);
   }
 
-  void SelectionCounterItem::fill(float valueX, float valueY, float weight) const { 
-    dynamic_cast<TH2*>(fHistogram)->Fill(valueX, valueY, weight);
+  void SelectionCounterItem::fill(float valueX, float valueY) const {
+    fHistogramTH2->Fill(valueX, valueY);
   }
 
   void SelectionCounterItem::incrementSubCounter() {

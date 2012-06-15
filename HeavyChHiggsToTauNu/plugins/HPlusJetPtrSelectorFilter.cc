@@ -8,6 +8,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 
 class HPlusJetPtrSelectorFilter: public edm::EDFilter {
@@ -25,6 +26,7 @@ class HPlusJetPtrSelectorFilter: public edm::EDFilter {
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
+  HPlus::HistoWrapper histoWrapper;
   HPlus::JetSelection fJetSelection;
   edm::InputTag fTauSrc;
   bool fFilter;
@@ -40,7 +42,8 @@ class HPlusJetPtrSelectorFilter: public edm::EDFilter {
 HPlusJetPtrSelectorFilter::HPlusJetPtrSelectorFilter(const edm::ParameterSet& iConfig):
   eventCounter(iConfig),
   eventWeight(iConfig),
-  fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
+  histoWrapper(eventWeight, "Debug"),
+  fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, histoWrapper),
   fTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
   fFilter(iConfig.getParameter<bool>("filter")),
   fThrow(iConfig.getParameter<bool>("throw"))

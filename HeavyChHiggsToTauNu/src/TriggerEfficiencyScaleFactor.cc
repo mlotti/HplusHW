@@ -137,20 +137,20 @@ namespace HPlus {
   
     edm::Service<TFileService> fs;
     TFileDirectory dir = fs->mkdir("TriggerScaleFactor");
-    hScaleFactor = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, dir, "TriggerScaleFactor", "TriggerScaleFactor;TriggerScaleFactor;N_{events}/0.01", 200., 0., 2.0);
+    hScaleFactor = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, dir, "TriggerScaleFactor", "TriggerScaleFactor;TriggerScaleFactor;N_{events}/0.01", 200., 0., 2.0);
 
     const size_t NBUF = 10;
     char buf[NBUF];
-    TH1 *hsf = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, dir, "ScaleFactor", "Scale factor;Tau p_{T} bin;Scale factor", fPtBinLowEdges.size()+1, 0, fPtBinLowEdges.size()+1);
-    TH1 *hsfu = histoWrapper->makeTH<TH1F>(HistoWrapper::kVital, dir, "ScaleFactorUncertainty", "Scale factor;Tau p_{T} bin;Scale factor uncertainty", fPtBinLowEdges.size()+1, 0, fPtBinLowEdges.size()+1);
-    hsf->SetBinContent(1, 1); hsf->GetXaxis()->SetBinLabel(1, "control");
-    hsfu->SetBinContent(1, 1); hsf->GetXaxis()->SetBinLabel(1, "control");
+    WrappedTH1 *hsf = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, dir, "ScaleFactor", "Scale factor;Tau p_{T} bin;Scale factor", fPtBinLowEdges.size()+1, 0, fPtBinLowEdges.size()+1);
+    WrappedTH1 *hsfu = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, dir, "ScaleFactorUncertainty", "Scale factor;Tau p_{T} bin;Scale factor uncertainty", fPtBinLowEdges.size()+1, 0, fPtBinLowEdges.size()+1);
+    hsf->getHisto()->SetBinContent(1, 1); hsf->GetXaxis()->SetBinLabel(1, "control");
+    hsfu->getHisto()->SetBinContent(1, 1); hsf->GetXaxis()->SetBinLabel(1, "control");
     for(size_t i=0; i<fPtBinLowEdges.size(); ++i) {
       size_t bin = i+2;
       snprintf(buf, NBUF, "%.0f", fPtBinLowEdges[i]);
 
-      hsf->SetBinContent(bin, scaleFactor(i));
-      hsfu->SetBinContent(bin, scaleFactorAbsoluteUncertainty(i));
+      hsf->getHisto()->SetBinContent(bin, scaleFactor(i));
+      hsfu->getHisto()->SetBinContent(bin, scaleFactorAbsoluteUncertainty(i));
       hsf->GetXaxis()->SetBinLabel(bin, buf);
       hsfu->GetXaxis()->SetBinLabel(bin, buf);
     }

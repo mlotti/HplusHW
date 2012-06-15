@@ -7,6 +7,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VetoTauSelection.h"
 
 class HPlusVetoTauPtrSelectorFilter: public edm::EDFilter {
@@ -25,6 +26,7 @@ class HPlusVetoTauPtrSelectorFilter: public edm::EDFilter {
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
+  HPlus::HistoWrapper histoWrapper;
   HPlus::VetoTauSelection fVetoTauSelection;
   edm::InputTag fTauSrc;
   bool fFilter;
@@ -40,7 +42,8 @@ class HPlusVetoTauPtrSelectorFilter: public edm::EDFilter {
 HPlusVetoTauPtrSelectorFilter::HPlusVetoTauPtrSelectorFilter(const edm::ParameterSet& iConfig):
   eventCounter(iConfig),
   eventWeight(iConfig),
-  fVetoTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("vetoTauSelection"), eventCounter, eventWeight),
+  histoWrapper(eventWeight, "Debug"),
+  fVetoTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("vetoTauSelection"), eventCounter, histoWrapper),
   fTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
   fFilter(iConfig.getParameter<bool>("filter"))
 {

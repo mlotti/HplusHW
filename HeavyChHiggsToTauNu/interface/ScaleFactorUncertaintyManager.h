@@ -17,7 +17,7 @@ namespace HPlus {
 
   class ScaleFactorUncertaintyManager {
   public:
-    explicit ScaleFactorUncertaintyManager(const std::string& name, const std::string& directory = "", HistoWrapper& histoWrapper);
+    explicit ScaleFactorUncertaintyManager(HistoWrapper& histoWrapper, const std::string& name, const std::string& directory = "");
     ~ScaleFactorUncertaintyManager();
 
     void setScaleFactorUncertainties(double eventWeight, double triggerSF, double triggerSFAbsUncertainty, double btagSF, double btagSFAbsUncertainty);

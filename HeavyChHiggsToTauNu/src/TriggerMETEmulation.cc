@@ -19,8 +19,8 @@ namespace HPlus {
     fmetEmulationCutCount(eventCounter.addSubCounter("Trigger MET emulation","Trigger met emulation cut"))
   {
     edm::Service<TFileService> fs;
-    hMetBeforeEmulation = histoWrapper.histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, *fs, "MetBeforeEmulation", "MetBeforeEmul", 100, 0.0, 300.0);
-    hMetAfterEmulation = histoWrapper.histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, *fs, "MetAfterEmulation", "MetAfterEmul", 100, 0.0, 300.0);
+    hMetBeforeEmulation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "MetBeforeEmulation", "MetBeforeEmul", 100, 0.0, 300.0);
+    hMetAfterEmulation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "MetAfterEmulation", "MetAfterEmul", 100, 0.0, 300.0);
   }
 
   TriggerMETEmulation::~TriggerMETEmulation() {}

@@ -112,7 +112,7 @@ namespace HPlus {
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, fHistoWrapper),
     fCorrelationAnalysis(eventCounter, fHistoWrapper),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
-    fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fEventWeight),
+    fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fHistoWrapper),
     fVertexWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeightReader")),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     // Non-QCD Type II related
@@ -134,214 +134,214 @@ namespace HPlus {
     fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
 
     // Book histograms filled in the analysis body
-    hVerticesBeforeWeight = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesBeforeWeight", "Number of vertices without weighting", 30, 0, 30);
-    hVerticesAfterWeight = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesAfterWeight", "Number of vertices with weighting", 30, 0, 30);
-    hVerticesTriggeredBeforeWeight = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesTriggeredBeforeWeight", "Number of vertices without weighting", 30, 0, 30);
-    hVerticesTriggeredAfterWeight = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesTriggeredAfterWeight", "Number of vertices with weighting", 30, 0, 30);
-    //    hmetAfterTrigger = fHistoWrapper->makeTH<TH1F>(*fs, "metAfterTrigger", "metAfterTrigger", 50, 0., 200.);
-    hTransverseMass = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
-    hTransverseMassWithTopCut = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassWithTopCut", "transverseMassWithTopCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
-    hTransverseMassAfterVeto = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassAfterVeto", "transverseMassAfterVeto;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
-    hTransverseMassBeforeVeto = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassBeforeVeto", "transverseMassBeforeVeto;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
-    hTransverseMassNoMet = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassNoMet", "transverseMassNoMet;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
-    hTransverseMassNoMetBtag = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassNoMetBtag", "transverseMassNoMetBtag;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
-    hTransverseMassBeforeFakeMet = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassBeforeFakeMet", "transverseMassBeforeFakeMet;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
-    hTransverseMassDeltaPhiUpperCut = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassDeltaPhiUpperCut", "transverseMassDeltaPhiUpperCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
+    hVerticesBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesBeforeWeight", "Number of vertices without weighting", 30, 0, 30);
+    hVerticesAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesAfterWeight", "Number of vertices with weighting", 30, 0, 30);
+    hVerticesTriggeredBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesTriggeredBeforeWeight", "Number of vertices without weighting", 30, 0, 30);
+    hVerticesTriggeredAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesTriggeredAfterWeight", "Number of vertices with weighting", 30, 0, 30);
+    //    hmetAfterTrigger = fHistoWrapper.makeTH<TH1F>(*fs, "metAfterTrigger", "metAfterTrigger", 50, 0., 200.);
+    hTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
+    hTransverseMassWithTopCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassWithTopCut", "transverseMassWithTopCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
+    hTransverseMassAfterVeto = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassAfterVeto", "transverseMassAfterVeto;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
+    hTransverseMassBeforeVeto = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassBeforeVeto", "transverseMassBeforeVeto;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
+    hTransverseMassNoMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassNoMet", "transverseMassNoMet;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
+    hTransverseMassNoMetBtag = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassNoMetBtag", "transverseMassNoMetBtag;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
+    hTransverseMassBeforeFakeMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassBeforeFakeMet", "transverseMassBeforeFakeMet;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
+    hTransverseMassDeltaPhiUpperCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassDeltaPhiUpperCut", "transverseMassDeltaPhiUpperCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
 
 
-    hTransverseMassDeltaPhi160 =  fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassDeltaPhi160", "transverseMassDeltaPhi160;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.); 
-    hTransverseMassDeltaPhi130 =  fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassDeltaPhi130", "transverseMassDeltaPhi130;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
-    hTransverseMassTopDeltaPhiFakeMET =  fHistoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassTopDeltaPhiFakeMET", "transverseMassTopDeltaPhiFakeMET;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
-    hTransverseMassTopChiSelection = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassTopChiSelection", "transverseMassTopChiSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
-    hTransverseMassTopBjetSelection = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassTopBjetSelection", "transverseMassTopBjetSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
-    hDeltaPhi = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhi", "deltaPhi;#Delta#phi(tau,MET);N_{events} / 10 degrees", 360, 0., 180.);
-    hDeltaPhiJetMet = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "deltaPhiJetMet", "deltaPhiJetMet", 400, 0., 3.2);  
-    hAlphaT = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "alphaT", "alphaT", 100, 0.0, 5.0);
-    hAlphaTInvMass = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
-    hAlphaTVsRtau = fHistoWrapper->makeTH<TH2F>(HistoWrapper::kDebug, *fs, "alphaT(y)-Vs-Rtau(x)", "alphaT-Vs-Rtau",  120, 0.0, 1.2, 500, 0.0, 5.0);
-    hMet_AfterBTagging = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "MET_AfterBTagging", "MET_AfterBTagging;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hTransverseMassDeltaPhi160 =  fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassDeltaPhi160", "transverseMassDeltaPhi160;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.); 
+    hTransverseMassDeltaPhi130 =  fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassDeltaPhi130", "transverseMassDeltaPhi130;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
+    hTransverseMassTopDeltaPhiFakeMET =  fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassTopDeltaPhiFakeMET", "transverseMassTopDeltaPhiFakeMET;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
+    hTransverseMassTopChiSelection = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassTopChiSelection", "transverseMassTopChiSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
+    hTransverseMassTopBjetSelection = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "transverseMassTopBjetSelection", "transverseMassTopBjetSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 80, 0., 400.);
+    hDeltaPhi = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhi", "deltaPhi;#Delta#phi(tau,MET);N_{events} / 10 degrees", 360, 0., 180.);
+    hDeltaPhiJetMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "deltaPhiJetMet", "deltaPhiJetMet", 400, 0., 3.2);  
+    hAlphaT = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "alphaT", "alphaT", 100, 0.0, 5.0);
+    hAlphaTInvMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
+    hAlphaTVsRtau = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kDebug, *fs, "alphaT(y)-Vs-Rtau(x)", "alphaT-Vs-Rtau",  120, 0.0, 1.2, 500, 0.0, 5.0);
+    hMet_AfterBTagging = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "MET_AfterBTagging", "MET_AfterBTagging;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     
-    hMETBeforeMETCut = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BeforeMETCut", "MET_BeforeMETCut;PF MET, GeV;N_{events} / 10 GeV", 80, 0.0, 400.0);
-    hSelectedTauEt = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_pT_AfterTauID", "SelectedTau_pT_AfterTauID;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 400, 0.0, 400.0);
-    //    hSelectedTauEtMetCut = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_pT_AfterTauID_MetCut", "SelectedTau_pT_AfterTauID_MetCut;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 400, 0.0, 400.0);
-    hSelectedTauEta = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_eta_AfterTauID", "SelectedTau_eta_AfterTauID;#tau #eta;N_{events} / 0.1", 300, -3.0, 3.0);
-    hSelectedTauEtAfterCuts = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_pT_AfterCuts", "SelectedTau_pT_AfterCuts;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 40, 0.0, 400.0);
-    hSelectedTauEtaAfterCuts = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_eta_AfterCuts", "SelectedTau_eta_AfterCuts;#tau #eta;N_{events} / 0.1", 30, -3.0, 3.0);
-    hSelectedTauPhi = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_phi_AfterTauID", "SelectedTau_eta_AfterTauID;#tau #eta;N_{events} / 0.087", 360, -3.1415926, 3.1415926);
-    hSelectedTauRtau = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_Rtau_AfterTauID", "SelectedTau_Rtau_AfterTauID;R_{#tau};N_{events} / 0.1", 360, 0., 1.2);
-    hSelectedTauRtauAfterCuts = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_Rtau_AfterCuts", "SelectedTau_Rtau_AfterCuts;R_{#tau};N_{events} / 0.1", 360, 0., 1.2);
-    hSelectedTauLeadingTrackPt = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_TauLeadingTrackPt", "SelectedTau_TauLeadingTrackPt;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 400, 0.0, 400.0);
-    hSelectedTauLeadingTrackPtMetCut = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_TauLeadingTrackPt_MetCut", "SelectedTau_TauLeadingTrackPt_MetCut;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 400, 0.0, 400.0);
+    hMETBeforeMETCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BeforeMETCut", "MET_BeforeMETCut;PF MET, GeV;N_{events} / 10 GeV", 80, 0.0, 400.0);
+    hSelectedTauEt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_pT_AfterTauID", "SelectedTau_pT_AfterTauID;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 400, 0.0, 400.0);
+    //    hSelectedTauEtMetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_pT_AfterTauID_MetCut", "SelectedTau_pT_AfterTauID_MetCut;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 400, 0.0, 400.0);
+    hSelectedTauEta = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_eta_AfterTauID", "SelectedTau_eta_AfterTauID;#tau #eta;N_{events} / 0.1", 300, -3.0, 3.0);
+    hSelectedTauEtAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_pT_AfterCuts", "SelectedTau_pT_AfterCuts;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 40, 0.0, 400.0);
+    hSelectedTauEtaAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_eta_AfterCuts", "SelectedTau_eta_AfterCuts;#tau #eta;N_{events} / 0.1", 30, -3.0, 3.0);
+    hSelectedTauPhi = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_phi_AfterTauID", "SelectedTau_eta_AfterTauID;#tau #eta;N_{events} / 0.087", 360, -3.1415926, 3.1415926);
+    hSelectedTauRtau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_Rtau_AfterTauID", "SelectedTau_Rtau_AfterTauID;R_{#tau};N_{events} / 0.1", 360, 0., 1.2);
+    hSelectedTauRtauAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_Rtau_AfterCuts", "SelectedTau_Rtau_AfterCuts;R_{#tau};N_{events} / 0.1", 360, 0., 1.2);
+    hSelectedTauLeadingTrackPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_TauLeadingTrackPt", "SelectedTau_TauLeadingTrackPt;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 400, 0.0, 400.0);
+    hSelectedTauLeadingTrackPtMetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_TauLeadingTrackPt_MetCut", "SelectedTau_TauLeadingTrackPt_MetCut;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 400, 0.0, 400.0);
 
-    hMetAfterCuts = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "Met_AfterCuts", "Met_AfterCuts", 500, 0.0, 500.0);
-    hMETBeforeTauId = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "Met_BeforeTauId", "Met_BeforeTauId", 500, 0.0, 500.0);
-    hMETBaselineTauId = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs,"MET_BaseLineTauId", "MET_BaseLineTauId;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
-    hMETInvertedTauId = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauId", "MET_InvertedTauId;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
-    //    TauIdJets = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets", "MET_BaseLineTauIdJets;PF MET", 400, 0.0, 400.0);
+    hMetAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "Met_AfterCuts", "Met_AfterCuts", 500, 0.0, 500.0);
+    hMETBeforeTauId = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "Met_BeforeTauId", "Met_BeforeTauId", 500, 0.0, 500.0);
+    hMETBaselineTauId = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs,"MET_BaseLineTauId", "MET_BaseLineTauId;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETInvertedTauId = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauId", "MET_InvertedTauId;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    //    TauIdJets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets", "MET_BaseLineTauIdJets;PF MET", 400, 0.0, 400.0);
 
-    hMETBaselineTauIdJets = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets", "MET_BaseLineTauIdJets", 400, 0.0, 400.0);
-    hMETBaselineTauIdJets150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets150", "MET_BaseLineTauIdJets150", 400, 0.0, 400.0);
-    hMETBaselineTauIdJets120150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets120150", "MET_BaseLineTauIdJets120150;PF MET", 400, 0.0, 400.0);
-    hMETBaselineTauIdJets100120 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets100120", "MET_BaseLineTauIdJets100120;PF MET", 400, 0.0, 400.0);
-    hMETBaselineTauIdJets80100 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets80100", "MET_BaseLineTauIdJets80100;PF MET", 400, 0.0, 400.0);
-    hMETBaselineTauIdJets7080 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets7080", "MET_BaseLineTauIdJets7080;PF MET", 400, 0.0, 400.0);
-    hMETBaselineTauIdJets6070 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets6070", "MET_BaseLineTauIdJets6070;PF MET", 400, 0.0, 400.0);
-    hMETBaselineTauIdJets5060 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets5060", "MET_BaseLineTauIdJets5060;PF MET", 400, 0.0, 400.0);
-    hMETBaselineTauIdJets4050 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets4050", "MET_BaseLineTauIdJets4050;PF MET", 400, 0.0, 400.0);
+    hMETBaselineTauIdJets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets", "MET_BaseLineTauIdJets", 400, 0.0, 400.0);
+    hMETBaselineTauIdJets150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets150", "MET_BaseLineTauIdJets150", 400, 0.0, 400.0);
+    hMETBaselineTauIdJets120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets120150", "MET_BaseLineTauIdJets120150;PF MET", 400, 0.0, 400.0);
+    hMETBaselineTauIdJets100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets100120", "MET_BaseLineTauIdJets100120;PF MET", 400, 0.0, 400.0);
+    hMETBaselineTauIdJets80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets80100", "MET_BaseLineTauIdJets80100;PF MET", 400, 0.0, 400.0);
+    hMETBaselineTauIdJets7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets7080", "MET_BaseLineTauIdJets7080;PF MET", 400, 0.0, 400.0);
+    hMETBaselineTauIdJets6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets6070", "MET_BaseLineTauIdJets6070;PF MET", 400, 0.0, 400.0);
+    hMETBaselineTauIdJets5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets5060", "MET_BaseLineTauIdJets5060;PF MET", 400, 0.0, 400.0);
+    hMETBaselineTauIdJets4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdJets4050", "MET_BaseLineTauIdJets4050;PF MET", 400, 0.0, 400.0);
     
-    hMETBaselineTauIdBtag = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag", "MET_BaseLineTauIdBtag;PF MET", 400, 0.0, 400.0);
-    hMETBaselineTauIdBtag150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag150", "MET_BaseLineTauIdBtag150;PF MET", 400, 0.0, 400.0);
-    hMETBaselineTauIdBtag120150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag120150", "MET_BaseLineTauIdBtag120150;PF MET", 400, 0.0, 400.0);
-    hMETBaselineTauIdBtag100120 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag100120", "MET_BaseLineTauIdBtag100120;PF MET", 400, 0.0, 400.0);
-    hMETBaselineTauIdBtag80100 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag80100", "MET_BaseLineTauIdBtag80100;PF MET", 400, 0.0, 400.0);
-    hMETBaselineTauIdBtag7080 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag7080", "MET_BaseLineTauIdBtag7080;PF MET", 400, 0.0, 400.0);
-    hMETBaselineTauIdBtag6070 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag6070", "MET_BaseLineTauIdBtag6070;PF MET", 400, 0.0, 400.0);
-    hMETBaselineTauIdBtag5060 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag5060", "MET_BaseLineTauIdBtag5060;PF MET", 400, 0.0, 400.0);
-    hMETBaselineTauIdBtag4050 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag4050", "MET_BaseLineTauIdBtag4050;PF MET", 400, 0.0, 400.0);
+    hMETBaselineTauIdBtag = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag", "MET_BaseLineTauIdBtag;PF MET", 400, 0.0, 400.0);
+    hMETBaselineTauIdBtag150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag150", "MET_BaseLineTauIdBtag150;PF MET", 400, 0.0, 400.0);
+    hMETBaselineTauIdBtag120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag120150", "MET_BaseLineTauIdBtag120150;PF MET", 400, 0.0, 400.0);
+    hMETBaselineTauIdBtag100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag100120", "MET_BaseLineTauIdBtag100120;PF MET", 400, 0.0, 400.0);
+    hMETBaselineTauIdBtag80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag80100", "MET_BaseLineTauIdBtag80100;PF MET", 400, 0.0, 400.0);
+    hMETBaselineTauIdBtag7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag7080", "MET_BaseLineTauIdBtag7080;PF MET", 400, 0.0, 400.0);
+    hMETBaselineTauIdBtag6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag6070", "MET_BaseLineTauIdBtag6070;PF MET", 400, 0.0, 400.0);
+    hMETBaselineTauIdBtag5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag5060", "MET_BaseLineTauIdBtag5060;PF MET", 400, 0.0, 400.0);
+    hMETBaselineTauIdBtag4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtag4050", "MET_BaseLineTauIdBtag4050;PF MET", 400, 0.0, 400.0);
   
-    hMTBaselineTauIdJet = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet", "MTBaseLineTauIdJet", 400, 0., 400.);
-    //    hMTBaselineTauIdJet2 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet2", "MTBaseLineTauIdJet2", 400, 0., 400.);
-    hMTBaselineTauIdJet150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet150", "MTBaseLineTauIdJet150", 400, 0., 400.);
-    hMTBaselineTauIdJet120150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet120150", "MTBaseLineTauIdJet120150", 400, 0., 400.);
-    hMTBaselineTauIdJet100120 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet100120", "MTBaseLineTauIdJet100120", 400, 0., 400.);
-    hMTBaselineTauIdJet80100 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet80100", "MTBaseLineTauIdJet80100", 400, 0., 400.);
-    hMTBaselineTauIdJet7080 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet7080", "MTBaseLineTauIdJet7080", 400, 0., 400.);
-    hMTBaselineTauIdJet6070 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet6070", "MTBaseLineTauIdJet6070", 400, 0., 400.);
-    hMTBaselineTauIdJet5060 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet5060", "MTBaseLineTauIdJet5060", 400, 0., 400.);
-    hMTBaselineTauIdJet4050 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet4050", "MTBaseLineTauIdJet4050", 400, 0., 400.);
+    hMTBaselineTauIdJet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet", "MTBaseLineTauIdJet", 400, 0., 400.);
+    //    hMTBaselineTauIdJet2 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet2", "MTBaseLineTauIdJet2", 400, 0., 400.);
+    hMTBaselineTauIdJet150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet150", "MTBaseLineTauIdJet150", 400, 0., 400.);
+    hMTBaselineTauIdJet120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet120150", "MTBaseLineTauIdJet120150", 400, 0., 400.);
+    hMTBaselineTauIdJet100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet100120", "MTBaseLineTauIdJet100120", 400, 0., 400.);
+    hMTBaselineTauIdJet80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet80100", "MTBaseLineTauIdJet80100", 400, 0., 400.);
+    hMTBaselineTauIdJet7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet7080", "MTBaseLineTauIdJet7080", 400, 0., 400.);
+    hMTBaselineTauIdJet6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet6070", "MTBaseLineTauIdJet6070", 400, 0., 400.);
+    hMTBaselineTauIdJet5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet5060", "MTBaseLineTauIdJet5060", 400, 0., 400.);
+    hMTBaselineTauIdJet4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdJet4050", "MTBaseLineTauIdJet4050", 400, 0., 400.);
   
-     hMTBaselineTauIdBtag = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag", "MTBaseLineTauIdBtag;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
-    hMTBaselineTauIdBtag150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag150", "MTBaseLineTauIdBtag150", 400, 0., 400.);
-    hMTBaselineTauIdBtag120150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag120150", "MTBaseLineTauIdBtag120150", 400, 0., 400.);
-    hMTBaselineTauIdBtag100120 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag100120", "MTBaseLineTauIdBtag100120", 400, 0., 400.);
-    hMTBaselineTauIdBtag80100 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag80100", "MTBaseLineTauIdBtag80100", 400, 0., 400.);
-    hMTBaselineTauIdBtag7080 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag7080", "MTBaseLineTauIdBtag7080", 400, 0., 400.);
-    hMTBaselineTauIdBtag6070 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag6070", "MTBaseLineTauIdBtag6070", 400, 0., 400.);
-    hMTBaselineTauIdBtag5060 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag5060", "MTBaseLineTauIdBtag5060", 400, 0., 400.);
-    hMTBaselineTauIdBtag4050 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag4050", "MTBaseLineTauIdBtag4050", 400, 0., 400.);
+     hMTBaselineTauIdBtag = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag", "MTBaseLineTauIdBtag;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMTBaselineTauIdBtag150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag150", "MTBaseLineTauIdBtag150", 400, 0., 400.);
+    hMTBaselineTauIdBtag120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag120150", "MTBaseLineTauIdBtag120150", 400, 0., 400.);
+    hMTBaselineTauIdBtag100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag100120", "MTBaseLineTauIdBtag100120", 400, 0., 400.);
+    hMTBaselineTauIdBtag80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag80100", "MTBaseLineTauIdBtag80100", 400, 0., 400.);
+    hMTBaselineTauIdBtag7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag7080", "MTBaseLineTauIdBtag7080", 400, 0., 400.);
+    hMTBaselineTauIdBtag6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag6070", "MTBaseLineTauIdBtag6070", 400, 0., 400.);
+    hMTBaselineTauIdBtag5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag5060", "MTBaseLineTauIdBtag5060", 400, 0., 400.);
+    hMTBaselineTauIdBtag4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdBtag4050", "MTBaseLineTauIdBtag4050", 400, 0., 400.);
 
-    hMTBaselineTauIdPhi = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi", "MTBaseLineTauIdPhi;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
-    hMTBaselineTauIdPhi150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi150", "MTBaseLineTauIdPhi150", 400, 0., 400.);
-    hMTBaselineTauIdPhi120150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi120150", "MTBaseLineTauIdPhi120150", 400, 0., 400.);
-    hMTBaselineTauIdPhi100120 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi100120", "MTBaseLineTauIdPhi100120", 400, 0., 400.);
-    hMTBaselineTauIdPhi80100 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi80100", "MTBaseLineTauIdPhi80100", 400, 0., 400.);
-    hMTBaselineTauIdPhi7080 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi7080", "MTBaseLineTauIdPhi7080", 400, 0., 400.);
-    hMTBaselineTauIdPhi6070 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi6070", "MTBaseLineTauIdPhi6070", 400, 0., 400.);
-    hMTBaselineTauIdPhi5060 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi5060", "MTBaseLineTauIdPhi5060", 400, 0., 400.);
-    hMTBaselineTauIdPhi4050 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi4050", "MTBaseLineTauIdPhi4050", 400, 0., 400.);
+    hMTBaselineTauIdPhi = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi", "MTBaseLineTauIdPhi;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMTBaselineTauIdPhi150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi150", "MTBaseLineTauIdPhi150", 400, 0., 400.);
+    hMTBaselineTauIdPhi120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi120150", "MTBaseLineTauIdPhi120150", 400, 0., 400.);
+    hMTBaselineTauIdPhi100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi100120", "MTBaseLineTauIdPhi100120", 400, 0., 400.);
+    hMTBaselineTauIdPhi80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi80100", "MTBaseLineTauIdPhi80100", 400, 0., 400.);
+    hMTBaselineTauIdPhi7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi7080", "MTBaseLineTauIdPhi7080", 400, 0., 400.);
+    hMTBaselineTauIdPhi6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi6070", "MTBaseLineTauIdPhi6070", 400, 0., 400.);
+    hMTBaselineTauIdPhi5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi5060", "MTBaseLineTauIdPhi5060", 400, 0., 400.);
+    hMTBaselineTauIdPhi4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdPhi4050", "MTBaseLineTauIdPhi4050", 400, 0., 400.);
 
-    hMTBaselineTauIdTopMass = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass", "MTBaseLineTauIdTopMass", 400, 0., 400.);
-    hMTBaselineTauIdTopMass150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass150", "MTBaseLineTauIdTopMass150", 400, 0., 400.);
-    hMTBaselineTauIdTopMass120150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass120150", "MTBaseLineTauIdTopMass120150", 400, 0., 400.);
-    hMTBaselineTauIdTopMass100120 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass100120", "MTBaseLineTauIdTopMass100120", 400, 0., 400.);
-    hMTBaselineTauIdTopMass80100 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass80100", "MTBaseLineTauIdTopMass80100", 400, 0., 400.);
-    hMTBaselineTauIdTopMass7080 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass7080", "MTBaseLineTauIdTopMass7080", 400, 0., 400.);
-    hMTBaselineTauIdTopMass6070 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass6070", "MTBaseLineTauIdTopMass6070", 400, 0., 400.);
-    hMTBaselineTauIdTopMass5060 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass5060", "MTBaseLineTauIdTopMass5060", 400, 0., 400.);
-    hMTBaselineTauIdTopMass4050 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass4050", "MTBaseLineTauIdTopMass4050", 400, 0., 400.);
-
-   
-    hMTInvertedTauIdJet = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet", "MTInvertedTauIdJet", 400, 0., 400.);
-    hMTInvertedTauIdJet150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet150", "MTInvertedTauIdJet150", 400, 0., 400.);
-    hMTInvertedTauIdJet120150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet120150", "MTInvertedTauIdJet120150", 400, 0., 400.);
-    hMTInvertedTauIdJet100120 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet100120", "MTInvertedTauIdJet100120", 400, 0., 400.);
-    hMTInvertedTauIdJet80100 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet80100", "MTInvertedTauIdJet80100", 400, 0., 400.);
-    hMTInvertedTauIdJet7080 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet7080", "MTInvertedTauIdJet7080", 400, 0., 400.);
-    hMTInvertedTauIdJet6070 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet6070", "MTInvertedTauIdJet6070", 400, 0., 400.);
-    hMTInvertedTauIdJet5060 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet5060", "MTInvertedTauIdJet5060", 400, 0., 400.);
-    hMTInvertedTauIdJet4050 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet4050", "MTInvertedTauIdJet4050", 400, 0., 400.);
-
-    hMTInvertedTauIdBtag = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag", "MTInvertedTauIdBtag", 400, 0., 400.);
-    hMTInvertedTauIdBtag150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag150", "MTInvertedTauIdBtag150", 400, 0., 400.);
-    hMTInvertedTauIdBtag120150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag120150", "MTInvertedTauIdBtag120150", 400, 0., 400.);
-    hMTInvertedTauIdBtag100120 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag100120", "MTInvertedTauIdBtag100120", 400, 0., 400.);
-    hMTInvertedTauIdBtag80100 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag80100", "MTInvertedTauIdBtag80100", 400, 0., 400.);
-    hMTInvertedTauIdBtag7080 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag7080", "MTInvertedTauIdBtag7080", 400, 0., 400.);
-    hMTInvertedTauIdBtag6070 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag6070", "MTInvertedTauIdBtag6070", 400, 0., 400.);
-    hMTInvertedTauIdBtag5060 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag5060", "MTInvertedTauIdBtag5060", 400, 0., 400.);
-    hMTInvertedTauIdBtag4050 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag4050", "MTInvertedTauIdBtag4050", 400, 0., 400.);
-
-    hMTInvertedTauIdMet = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet", "MTInvertedTauIdMet", 400, 0., 400.);
-    hMTInvertedTauIdMet150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet150", "MTInvertedTauIdMet150", 400, 0., 400.);
-    hMTInvertedTauIdMet120150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet120150", "MTInvertedTauIdMet120150", 400, 0., 400.);
-    hMTInvertedTauIdMet100120 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet100120", "MTInvertedTauIdMet100120", 400, 0., 400.);
-    hMTInvertedTauIdMet80100 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet80100", "MTInvertedTauIdMet80100", 400, 0., 400.);
-    hMTInvertedTauIdMet7080 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet7080", "MTInvertedTauIdMet7080", 400, 0., 400.);
-    hMTInvertedTauIdMet6070 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet6070", "MTInvertedTauIdMet6070", 400, 0., 400.);
-    hMTInvertedTauIdMet5060 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet5060", "MTInvertedTauIdMet5060", 400, 0., 400.);
-    hMTInvertedTauIdMet4050 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet4050", "MTInvertedTauIdMet4050", 400, 0., 400.);
-
-    hMTInvertedTauIdJetPhi = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi", "MTInvertedTauIdPhi", 400, 0., 400.);
-    hMTInvertedTauIdJetPhi150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi150", "MTInvertedTauIdPhi150", 400, 0., 400.);
-    hMTInvertedTauIdJetPhi120150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi120150", "MTInvertedTauIdPhi120150", 400, 0., 400.);
-    hMTInvertedTauIdJetPhi100120 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi100120", "MTInvertedTauIdPhi100120", 400, 0., 400.);
-    hMTInvertedTauIdJetPhi80100 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi80100", "MTInvertedTauIdPhi80100", 400, 0., 400.);
-    hMTInvertedTauIdJetPhi7080 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi7080", "MTInvertedTauIdPhi7080", 400, 0., 400.);
-    hMTInvertedTauIdJetPhi6070 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi6070", "MTInvertedTauIdPhi6070", 400, 0., 400.);
-    hMTInvertedTauIdJetPhi5060 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi5060", "MTInvertedTauIdPhi5060", 400, 0., 400.);
-    hMTInvertedTauIdJetPhi4050 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi4050", "MTInvertedTauIdPhi4050", 400, 0., 400.);
-
-    hTopMass = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass", "TopMass", 400, 0., 400.);
-    hTopMass150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass150", "TopMass150", 400, 0., 400.);
-    hTopMass120150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass120150", "TopMass120150", 400, 0., 400.);
-    hTopMass100120 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass100120", "TopMass100120", 400, 0., 400.);
-    hTopMass80100 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass80100", "TopMass80100", 400, 0., 400.);
-    hTopMass7080 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass7080", "TopMass7080", 400, 0., 400.);
-    hTopMass6070 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass6070", "TopMass6070", 400, 0., 400.);
-    hTopMass5060 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass5060", "TopMass5060", 400, 0., 400.);
-    hTopMass4050 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass4050", "TopMass4050", 400, 0., 400.);
-
-    hMTInvertedTauIdTopMass = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass", "MTInvertedTauIdTopMass", 400, 0., 400.);
-    hMTInvertedTauIdTopMass150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass150", "MTInvertedTauIdTopMass150", 400, 0., 400.);
-    hMTInvertedTauIdTopMass120150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass120150", "MTInvertedTauIdTopMass120150", 400, 0., 400.);
-    hMTInvertedTauIdTopMass100120 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass100120", "MTInvertedTauIdTopMass100120", 400, 0., 400.);
-    hMTInvertedTauIdTopMass80100 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass80100", "MTInvertedTauIdTopMass80100", 400, 0., 400.);
-    hMTInvertedTauIdTopMass7080 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass7080", "MTInvertedTauIdTopMass7080", 400, 0., 400.);
-    hMTInvertedTauIdTopMass6070 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass6070", "MTInvertedTauIdTopMass6070", 400, 0., 400.);
-    hMTInvertedTauIdTopMass5060 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass5060", "MTInvertedTauIdTopMass5060", 400, 0., 400.);
-    hMTInvertedTauIdTopMass4050 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass4050", "MTInvertedTauIdTopMass4050", 400, 0., 400.);
-
-    hDeltaPhi = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhi", "deltaPhi;#Delta#phi(tau,MET);N_{events", 360, 0.0, 360.0);
-    //    hMTBaselineTauIdJet = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MT_BaseLineTauIdJets", "MT_BaseLineTauIdJets;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
-
-    hMETInvertedTauIdJets = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets", "MET_InvertedTauIdJets;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
-    hMETInvertedTauIdJets150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets150", "MET_InvertedTauIdJets150;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
-    hMETInvertedTauIdJets120150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets120150", "MET_InvertedTauIdJets120150", 400, 0.0, 400.0);
-    hMETInvertedTauIdJets100120 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets100120", "MET_InvertedTauIdJets100120", 400, 0.0, 400.0); 
-    hMETInvertedTauIdJets80100 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets80100", "MET_InvertedTauIdJets80100", 400, 0.0, 400.0); 
-    hMETInvertedTauIdJets7080 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets7080", "MET_InvertedTauIdJets7080", 400, 0.0, 400.0); 
-    hMETInvertedTauIdJets6070 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets6070", "MET_InvertedTauIdJets6070", 400, 0.0, 400.0); 
-    hMETInvertedTauIdJets5060 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets5060", "MET_InvertedTauIdJets5060", 400, 0.0, 400.0); 
-    hMETInvertedTauIdJets4050 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets4050", "MET_InvertedTauIdJets4050", 400, 0.0, 400.0); 
+    hMTBaselineTauIdTopMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass", "MTBaseLineTauIdTopMass", 400, 0., 400.);
+    hMTBaselineTauIdTopMass150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass150", "MTBaseLineTauIdTopMass150", 400, 0., 400.);
+    hMTBaselineTauIdTopMass120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass120150", "MTBaseLineTauIdTopMass120150", 400, 0., 400.);
+    hMTBaselineTauIdTopMass100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass100120", "MTBaseLineTauIdTopMass100120", 400, 0., 400.);
+    hMTBaselineTauIdTopMass80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass80100", "MTBaseLineTauIdTopMass80100", 400, 0., 400.);
+    hMTBaselineTauIdTopMass7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass7080", "MTBaseLineTauIdTopMass7080", 400, 0., 400.);
+    hMTBaselineTauIdTopMass6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass6070", "MTBaseLineTauIdTopMass6070", 400, 0., 400.);
+    hMTBaselineTauIdTopMass5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass5060", "MTBaseLineTauIdTopMass5060", 400, 0., 400.);
+    hMTBaselineTauIdTopMass4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass4050", "MTBaseLineTauIdTopMass4050", 400, 0., 400.);
 
    
-    hMETInvertedTauIdBtag = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag", "MET_InvertedTauIdBtag;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
-    hMETInvertedTauIdBtag150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag150", "MET_InvertedTauIdBtag150;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
-    hMETInvertedTauIdBtag120150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag120150", "MET_InvertedTauIdBtag120150", 400, 0.0, 400.0);
-    hMETInvertedTauIdBtag100120 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag100120", "MET_InvertedTauIdBtag100120", 400, 0.0, 400.0); 
-    hMETInvertedTauIdBtag80100 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag80100", "MET_InvertedTauIdBtag80100", 400, 0.0, 400.0); 
-    hMETInvertedTauIdBtag7080 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag7080", "MET_InvertedTauIdBtag7080", 400, 0.0, 400.0); 
-    hMETInvertedTauIdBtag6070 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag6070", "MET_InvertedTauIdBtag6070", 400, 0.0, 400.0); 
-    hMETInvertedTauIdBtag5060 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag5060", "MET_InvertedTauIdBtag5060", 400, 0.0, 400.0); 
-    hMETInvertedTauIdBtag4050 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag4050", "MET_InvertedTauIdBtag4050", 400, 0.0, 400.0); 
+    hMTInvertedTauIdJet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet", "MTInvertedTauIdJet", 400, 0., 400.);
+    hMTInvertedTauIdJet150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet150", "MTInvertedTauIdJet150", 400, 0., 400.);
+    hMTInvertedTauIdJet120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet120150", "MTInvertedTauIdJet120150", 400, 0., 400.);
+    hMTInvertedTauIdJet100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet100120", "MTInvertedTauIdJet100120", 400, 0., 400.);
+    hMTInvertedTauIdJet80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet80100", "MTInvertedTauIdJet80100", 400, 0., 400.);
+    hMTInvertedTauIdJet7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet7080", "MTInvertedTauIdJet7080", 400, 0., 400.);
+    hMTInvertedTauIdJet6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet6070", "MTInvertedTauIdJet6070", 400, 0., 400.);
+    hMTInvertedTauIdJet5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet5060", "MTInvertedTauIdJet5060", 400, 0., 400.);
+    hMTInvertedTauIdJet4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet4050", "MTInvertedTauIdJet4050", 400, 0., 400.);
 
-    //   hMTInvertedTauIdJets = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MT_InvertedTauIdJets", "MT_InvertedTauIdJets;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
-    //    hMETInvertedTauIdLoose = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdLoose", "MET_InvertedTauIdLoose;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
-    //    hMETInvertedTauIdLoose150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdLoose150", "MET_InvertedTauIdLoose150;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
-    //    hMETInvertedTauIdLoose4070 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJLoose4070", "MET_InvertedTauIdLoose4070;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
-    //   hMETInvertedTauIdLoose70150 = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdLoose70150", "MET_InvertedTauIdLoose70150;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0); 
-    //    hMTInvertedTauIdLoose = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MT_InvertedTauIdLoose", "MT_InvertedTauIdLoose;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMTInvertedTauIdBtag = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag", "MTInvertedTauIdBtag", 400, 0., 400.);
+    hMTInvertedTauIdBtag150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag150", "MTInvertedTauIdBtag150", 400, 0., 400.);
+    hMTInvertedTauIdBtag120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag120150", "MTInvertedTauIdBtag120150", 400, 0., 400.);
+    hMTInvertedTauIdBtag100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag100120", "MTInvertedTauIdBtag100120", 400, 0., 400.);
+    hMTInvertedTauIdBtag80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag80100", "MTInvertedTauIdBtag80100", 400, 0., 400.);
+    hMTInvertedTauIdBtag7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag7080", "MTInvertedTauIdBtag7080", 400, 0., 400.);
+    hMTInvertedTauIdBtag6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag6070", "MTInvertedTauIdBtag6070", 400, 0., 400.);
+    hMTInvertedTauIdBtag5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag5060", "MTInvertedTauIdBtag5060", 400, 0., 400.);
+    hMTInvertedTauIdBtag4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag4050", "MTInvertedTauIdBtag4050", 400, 0., 400.);
+
+    hMTInvertedTauIdMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet", "MTInvertedTauIdMet", 400, 0., 400.);
+    hMTInvertedTauIdMet150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet150", "MTInvertedTauIdMet150", 400, 0., 400.);
+    hMTInvertedTauIdMet120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet120150", "MTInvertedTauIdMet120150", 400, 0., 400.);
+    hMTInvertedTauIdMet100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet100120", "MTInvertedTauIdMet100120", 400, 0., 400.);
+    hMTInvertedTauIdMet80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet80100", "MTInvertedTauIdMet80100", 400, 0., 400.);
+    hMTInvertedTauIdMet7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet7080", "MTInvertedTauIdMet7080", 400, 0., 400.);
+    hMTInvertedTauIdMet6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet6070", "MTInvertedTauIdMet6070", 400, 0., 400.);
+    hMTInvertedTauIdMet5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet5060", "MTInvertedTauIdMet5060", 400, 0., 400.);
+    hMTInvertedTauIdMet4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet4050", "MTInvertedTauIdMet4050", 400, 0., 400.);
+
+    hMTInvertedTauIdJetPhi = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi", "MTInvertedTauIdPhi", 400, 0., 400.);
+    hMTInvertedTauIdJetPhi150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi150", "MTInvertedTauIdPhi150", 400, 0., 400.);
+    hMTInvertedTauIdJetPhi120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi120150", "MTInvertedTauIdPhi120150", 400, 0., 400.);
+    hMTInvertedTauIdJetPhi100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi100120", "MTInvertedTauIdPhi100120", 400, 0., 400.);
+    hMTInvertedTauIdJetPhi80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi80100", "MTInvertedTauIdPhi80100", 400, 0., 400.);
+    hMTInvertedTauIdJetPhi7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi7080", "MTInvertedTauIdPhi7080", 400, 0., 400.);
+    hMTInvertedTauIdJetPhi6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi6070", "MTInvertedTauIdPhi6070", 400, 0., 400.);
+    hMTInvertedTauIdJetPhi5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi5060", "MTInvertedTauIdPhi5060", 400, 0., 400.);
+    hMTInvertedTauIdJetPhi4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi4050", "MTInvertedTauIdPhi4050", 400, 0., 400.);
+
+    hTopMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass", "TopMass", 400, 0., 400.);
+    hTopMass150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass150", "TopMass150", 400, 0., 400.);
+    hTopMass120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass120150", "TopMass120150", 400, 0., 400.);
+    hTopMass100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass100120", "TopMass100120", 400, 0., 400.);
+    hTopMass80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass80100", "TopMass80100", 400, 0., 400.);
+    hTopMass7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass7080", "TopMass7080", 400, 0., 400.);
+    hTopMass6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass6070", "TopMass6070", 400, 0., 400.);
+    hTopMass5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass5060", "TopMass5060", 400, 0., 400.);
+    hTopMass4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMass4050", "TopMass4050", 400, 0., 400.);
+
+    hMTInvertedTauIdTopMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass", "MTInvertedTauIdTopMass", 400, 0., 400.);
+    hMTInvertedTauIdTopMass150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass150", "MTInvertedTauIdTopMass150", 400, 0., 400.);
+    hMTInvertedTauIdTopMass120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass120150", "MTInvertedTauIdTopMass120150", 400, 0., 400.);
+    hMTInvertedTauIdTopMass100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass100120", "MTInvertedTauIdTopMass100120", 400, 0., 400.);
+    hMTInvertedTauIdTopMass80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass80100", "MTInvertedTauIdTopMass80100", 400, 0., 400.);
+    hMTInvertedTauIdTopMass7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass7080", "MTInvertedTauIdTopMass7080", 400, 0., 400.);
+    hMTInvertedTauIdTopMass6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass6070", "MTInvertedTauIdTopMass6070", 400, 0., 400.);
+    hMTInvertedTauIdTopMass5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass5060", "MTInvertedTauIdTopMass5060", 400, 0., 400.);
+    hMTInvertedTauIdTopMass4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdTopMass4050", "MTInvertedTauIdTopMass4050", 400, 0., 400.);
+
+    hDeltaPhi = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhi", "deltaPhi;#Delta#phi(tau,MET);N_{events", 360, 0.0, 360.0);
+    //    hMTBaselineTauIdJet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MT_BaseLineTauIdJets", "MT_BaseLineTauIdJets;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+
+    hMETInvertedTauIdJets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets", "MET_InvertedTauIdJets;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETInvertedTauIdJets150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets150", "MET_InvertedTauIdJets150;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETInvertedTauIdJets120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets120150", "MET_InvertedTauIdJets120150", 400, 0.0, 400.0);
+    hMETInvertedTauIdJets100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets100120", "MET_InvertedTauIdJets100120", 400, 0.0, 400.0); 
+    hMETInvertedTauIdJets80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets80100", "MET_InvertedTauIdJets80100", 400, 0.0, 400.0); 
+    hMETInvertedTauIdJets7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets7080", "MET_InvertedTauIdJets7080", 400, 0.0, 400.0); 
+    hMETInvertedTauIdJets6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets6070", "MET_InvertedTauIdJets6070", 400, 0.0, 400.0); 
+    hMETInvertedTauIdJets5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets5060", "MET_InvertedTauIdJets5060", 400, 0.0, 400.0); 
+    hMETInvertedTauIdJets4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets4050", "MET_InvertedTauIdJets4050", 400, 0.0, 400.0); 
+
    
-    hMETInvertedTauIdBtagDphi = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtagDphi", "MET_InvertedTauIdBtagDphi;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
-    hMETBaselineTauIdBtagDphi = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtagDphi", "MET_BaseLineTauIdBtagDphi;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETInvertedTauIdBtag = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag", "MET_InvertedTauIdBtag;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETInvertedTauIdBtag150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag150", "MET_InvertedTauIdBtag150;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETInvertedTauIdBtag120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag120150", "MET_InvertedTauIdBtag120150", 400, 0.0, 400.0);
+    hMETInvertedTauIdBtag100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag100120", "MET_InvertedTauIdBtag100120", 400, 0.0, 400.0); 
+    hMETInvertedTauIdBtag80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag80100", "MET_InvertedTauIdBtag80100", 400, 0.0, 400.0); 
+    hMETInvertedTauIdBtag7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag7080", "MET_InvertedTauIdBtag7080", 400, 0.0, 400.0); 
+    hMETInvertedTauIdBtag6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag6070", "MET_InvertedTauIdBtag6070", 400, 0.0, 400.0); 
+    hMETInvertedTauIdBtag5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag5060", "MET_InvertedTauIdBtag5060", 400, 0.0, 400.0); 
+    hMETInvertedTauIdBtag4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtag4050", "MET_InvertedTauIdBtag4050", 400, 0.0, 400.0); 
+
+    //   hMTInvertedTauIdJets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MT_InvertedTauIdJets", "MT_InvertedTauIdJets;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    //    hMETInvertedTauIdLoose = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdLoose", "MET_InvertedTauIdLoose;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    //    hMETInvertedTauIdLoose150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdLoose150", "MET_InvertedTauIdLoose150;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    //    hMETInvertedTauIdLoose4070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJLoose4070", "MET_InvertedTauIdLoose4070;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    //   hMETInvertedTauIdLoose70150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdLoose70150", "MET_InvertedTauIdLoose70150;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0); 
+    //    hMTInvertedTauIdLoose = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MT_InvertedTauIdLoose", "MT_InvertedTauIdLoose;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+   
+    hMETInvertedTauIdBtagDphi = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtagDphi", "MET_InvertedTauIdBtagDphi;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETBaselineTauIdBtagDphi = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauIdBtagDphi", "MET_BaseLineTauIdBtagDphi;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
 
     
-    hSelectedTauEtMetCut = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_pT_AfterMetCut", "SelectedTau_pT_AfterMetCut;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 400, 0.0, 400.0);
-    hSelectedTauEtaMetCut = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_eta_AfterMetCut", "SelectedTau_eta_AfterMetCut;#tau #eta;N_{events} / 0.1", 300, -3.0, 3.0);
-    hSelectedTauPhiMetCut = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_phi_AfterMetCut", "SelectedTau_eta_AfterMetCut;#tau #eta;N_{events} / 0.087", 360, -3.1415926, 3.1415926);
-    hSelectedTauRtauMetCut = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_Rtau_AfterMetCut", "SelectedTau_Rtau_AfterMetCut;R_{#tau};N_{events} / 0.1", 360, 0., 1.2);
+    hSelectedTauEtMetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_pT_AfterMetCut", "SelectedTau_pT_AfterMetCut;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 400, 0.0, 400.0);
+    hSelectedTauEtaMetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_eta_AfterMetCut", "SelectedTau_eta_AfterMetCut;#tau #eta;N_{events} / 0.1", 300, -3.0, 3.0);
+    hSelectedTauPhiMetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_phi_AfterMetCut", "SelectedTau_eta_AfterMetCut;#tau #eta;N_{events} / 0.087", 360, -3.1415926, 3.1415926);
+    hSelectedTauRtauMetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_Rtau_AfterMetCut", "SelectedTau_Rtau_AfterMetCut;R_{#tau};N_{events} / 0.1", 360, 0., 1.2);
 
-    hSelectionFlow = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "SignalSelectionFlow", "SignalSelectionFlow;;N_{events}", 7, 0, 7);
+    hSelectionFlow = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SignalSelectionFlow", "SignalSelectionFlow;;N_{events}", 7, 0, 7);
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTrigger,"Trigger");
     //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderVertexSelection,"Vertex");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTauID,"#tau ID");
@@ -353,11 +353,11 @@ namespace HPlus {
     //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderFakeMETVeto,"Further QCD rej.");
     //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTopSelection,"Top mass");
 
-    hEMFractionAll = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "NonQCDTypeII_FakeTau_EMFraction_All", "FakeTau_EMFraction_All", 22, 0., 1.1);
-    hEMFractionElectrons = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kDebug, *fs, "NonQCDTypeII_FakeTau_EMFraction_Electrons", "FakeTau_EMFraction_Electrons", 22, 0., 1.1);
+    hEMFractionAll = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "NonQCDTypeII_FakeTau_EMFraction_All", "FakeTau_EMFraction_All", 22, 0., 1.1);
+    hEMFractionElectrons = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "NonQCDTypeII_FakeTau_EMFraction_Electrons", "FakeTau_EMFraction_Electrons", 22, 0., 1.1);
     
-    hNonQCDTypeIISelectedTauEtAfterCuts = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "NonQCDTypeII_SelectedTau_pT_AfterCuts", "SelectedTau_pT_AfterCuts;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 40, 0.0, 400.0);
-    hNonQCDTypeIISelectedTauEtaAfterCuts = fHistoWrapper->makeTH<TH1F>(HistoWrapper::kVital, *fs, "NonQCDTypeII_SelectedTau_eta_AfterCuts", "SelectedTau_eta_AfterCuts;#tau #eta;N_{events} / 0.1", 30, -3.0, 3.0);
+    hNonQCDTypeIISelectedTauEtAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NonQCDTypeII_SelectedTau_pT_AfterCuts", "SelectedTau_pT_AfterCuts;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 40, 0.0, 400.0);
+    hNonQCDTypeIISelectedTauEtaAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NonQCDTypeII_SelectedTau_eta_AfterCuts", "SelectedTau_eta_AfterCuts;#tau #eta;N_{events} / 0.1", 30, -3.0, 3.0);
 
     fTree.init(*fs);
   }

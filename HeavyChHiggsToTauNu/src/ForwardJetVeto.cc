@@ -26,13 +26,13 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("ForwardJetVeto");
 
-    hForwJetEt = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ForwJetEt", "ForwJetEt", 100, 0., 200.);
-    hForwJetEta = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ForwJetEta", "ForwJetEta", 100, -5., 5.);
-    hMaxForwJetEt = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MaxForwJetEt", "MaxForwJetEt", 100, 0., 100.);
-    hEtSumCentral = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtSumCentral", "EtSumCentral", 100, 0., 1000.);
-    hEtSumForward = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtSumForward", "EtSumForward", 100, 0., 1000.);
-    hEtMetSumRatio = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtMetSumRatio", "EtMetSumRatio", 100, 0., 2.);
-    hEtSumRatio = histoWrapper->makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtSumRatio", "EtSumRatio", 100, 0., 2.);
+    hForwJetEt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ForwJetEt", "ForwJetEt", 100, 0., 200.);
+    hForwJetEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ForwJetEta", "ForwJetEta", 100, -5., 5.);
+    hMaxForwJetEt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MaxForwJetEt", "MaxForwJetEt", 100, 0., 100.);
+    hEtSumCentral = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtSumCentral", "EtSumCentral", 100, 0., 1000.);
+    hEtSumForward = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtSumForward", "EtSumForward", 100, 0., 1000.);
+    hEtMetSumRatio = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtMetSumRatio", "EtMetSumRatio", 100, 0., 2.);
+    hEtSumRatio = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtSumRatio", "EtSumRatio", 100, 0., 2.);
   }
 
   ForwardJetVeto::~ForwardJetVeto() {}

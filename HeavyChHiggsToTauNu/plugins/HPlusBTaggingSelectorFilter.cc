@@ -8,6 +8,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 
 class HPlusBTaggingPtrSelectorFilter: public edm::EDFilter {
@@ -25,6 +26,7 @@ class HPlusBTaggingPtrSelectorFilter: public edm::EDFilter {
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
+  HPlus::HistoWrapper histoWrapper;
   HPlus::BTagging fBTagging;
   edm::InputTag fJetSrc;
   bool fFilter;
@@ -40,7 +42,8 @@ class HPlusBTaggingPtrSelectorFilter: public edm::EDFilter {
 HPlusBTaggingPtrSelectorFilter::HPlusBTaggingPtrSelectorFilter(const edm::ParameterSet& iConfig):
   eventCounter(iConfig),
   eventWeight(iConfig),
-  fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("btagging"), eventCounter, eventWeight),
+  histoWrapper(eventWeight, "Debug"),
+  fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("btagging"), eventCounter, histoWrapper),
   fJetSrc(iConfig.getParameter<edm::InputTag>("jetSrc")),
   fFilter(iConfig.getParameter<bool>("filter")),
   fThrow(iConfig.getUntrackedParameter<bool>("throw"))

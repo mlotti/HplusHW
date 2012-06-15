@@ -7,24 +7,24 @@
 #include <string>
 #include <vector>
 
-#include "TH1.h"
-#include "TH2.h"
 #include "TObject.h"
 
 namespace HPlus {
   class HistoWrapper;
-
+  class WrappedTH1;
+  class WrappedTH2;
+  
   class SelectionCounterItem {
    public:
-    SelectionCounterItem(Count passedCounter, Count subCounter, TH1* histogram);
-    SelectionCounterItem(Count passedCounter, Count subCounter, TH2* histogram);
+    SelectionCounterItem(Count passedCounter, Count subCounter, WrappedTH1* histogram);
+    SelectionCounterItem(Count passedCounter, Count subCounter, WrappedTH2* histogram);
     ~SelectionCounterItem();
     
     bool hasPassedCounts() const { return (fLocalCounter > 0); }
     bool hasNoPassedCounts() const { return (fLocalCounter == 0); }
     
-    void fill(float value, float weight) const;
-    void fill(float valueX, float valueY, float weight) const;
+    void fill(float value) const;
+    void fill(float valueX, float valueY) const;
     void reset() { fLocalCounter = 0; }
     void incrementSubCounter();
     void incrementPassedCounter();
@@ -42,7 +42,8 @@ namespace HPlus {
     Count fSubCounter;
     int fLocalCounter;
     /// Histogram related to the selection item; more specific histogramming can be implemented elsewhere
-    TObject* fHistogram;
+    WrappedTH1* fHistogramTH1;
+    WrappedTH2* fHistogramTH2;
   };
   
   class SelectionCounterPackager {
@@ -53,11 +54,13 @@ namespace HPlus {
      * sub counters and local counters can be grouped together
      * making the code more readable 
      */
-    SelectionCounterPackager(EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    SelectionCounterPackager(EventCounter& eventCounter);
     ~SelectionCounterPackager();
 
     /// Returns index of the created sub counter
-    size_t addSubCounter(const std::string& base, const std::string& name, TH1* histogram);
+    size_t addSubCounter(const std::string& base, const std::string& name, WrappedTH1* histogram);
+    /// Returns index of the created sub counter
+    size_t addSubCounter(const std::string& base, const std::string& name, WrappedTH2* histogram);
     /// Increments the sub counter corresponding to the index
     void incrementSubCount(size_t index) { fSelectionCounterItems.at(index).incrementSubCounter(); }
     /// Increments the passed counters per event (call after all objects such as jets have been handled)
@@ -76,6 +79,7 @@ namespace HPlus {
 
    private:
     EventCounter& fEventCounter;
+
     std::vector<SelectionCounterItem> fSelectionCounterItems;
   };
   

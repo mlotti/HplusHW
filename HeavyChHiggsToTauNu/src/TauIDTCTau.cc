@@ -51,7 +51,7 @@ namespace HPlus {
 
   bool TauIDTCTau::passRTauCut(const edm::Ptr<pat::Tau> tau) {
     double myRtauValue = getRtauValue(tau);
-    hRtauVsEta->Fill(myRtauValue, tau->eta(), fEventWeight.getWeight());
+    hRtauVsEta->Fill(myRtauValue, tau->eta());
     fCounterPackager.fill(fIDRTauCut, myRtauValue);
     if (!(myRtauValue > fRtauCut)) return false;
     fCounterPackager.incrementSubCount(fIDRTauCut);
