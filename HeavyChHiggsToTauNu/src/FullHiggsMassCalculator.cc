@@ -16,14 +16,17 @@
 #include "TMath.h"
 #include "TH1F.h"
 
+
+
+
 namespace HPlus {
   FullHiggsMassCalculator::Data::Data(const FullHiggsMassCalculator* calculator, bool passEvent)
   : fCalculator(calculator),
     fPassedEvent(passEvent) { }
   FullHiggsMassCalculator::Data::~Data() { }
 
-  FullHiggsMassCalculator::FullHiggsMassCalculator(EventCounter& eventCounter, EventWeight& eventWeight)
-  : fEventWeight(eventWeight)
+  FullHiggsMassCalculator::FullHiggsMassCalculator(EventCounter& eventCounter, EventWeight& eventWeight):
+      fEventWeight(eventWeight)
  //   fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc")),
   {
     edm::Service<TFileService> fs;
@@ -41,6 +44,8 @@ namespace HPlus {
     hNeutrinoZSolution = makeTH<TH1F>(myDir, "NeutrinoZSolution", "Neutrino Z solution;p_{#nu,z} (GeV)", 100, -500, 500);
     hNeutrinoPtSolution = makeTH<TH1F>(myDir, "NeutrinoPtSolution", "Neutrino pT solution;p_{#nu,T} (GeV)", 100, 0, 500);
     hNeutrinoPtDifference = makeTH<TH1F>(myDir, "NeutrinoPtDifference", "Neutrino pT difference;p_{#nu,T} (GeV)", 200, -500, 500);
+    hSolution1PzDifference = makeTH<TH1F>(myDir, "SolutionMinPzDifference", "Neutrino/MinSolution pz difference;(GeV)", 200, 0, 1000);
+    hSolution2PzDifference = makeTH<TH1F>(myDir, "SolutionMaxPzDifference", "Neutrino/MaxSolution pz difference;(GeV)", 200, 0, 1000);
 
       //edm::FileInPath myDataPUdistribution = iConfig.getParameter<edm::FileInPath>("dataPUdistribution");
   }
@@ -48,9 +53,10 @@ namespace HPlus {
 
 
   FullHiggsMassCalculator::Data FullHiggsMassCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData) {
+    NeutrinoPz = 0.;
     bool myPassedStatus = true;
     // 1) find b-jet
-    // FIXME: add to b-tagging second b-jet threshold of 20 GeV
+    // FIXME: add to b-taging second b-jet threshold of 20 GeV
     TVector3 myBJetVector;
     double myMinDeltaR = 99.0;
     edm::Ptr<pat::Jet> myBJet;
@@ -62,6 +68,10 @@ namespace HPlus {
         myBJetVector.SetXYZ((*iBjet)->px(), (*iBjet)->py(), (*iBjet)->pz());
       }
     }
+
+
+
+
     // match in MC to see if it was the correct one
     if (!iEvent.isRealData())
       bool myMatchStatus = doMCMatching(iEvent, tauData.getSelectedTau(), myBJet);
@@ -69,6 +79,7 @@ namespace HPlus {
     // 2) set tau and MET info
     TVector3 myTauVector(tauData.getSelectedTau()->px(), tauData.getSelectedTau()->py(), tauData.getSelectedTau()->pz());
     TVector3 myMETVector(metData.getSelectedMET()->px(), metData.getSelectedMET()->py(), metData.getSelectedMET()->pz());
+   
 
     // 3) calculate
     doCalculate(myTauVector, myBJetVector, myMETVector);
@@ -76,7 +87,12 @@ namespace HPlus {
     // Return data object
     return FullHiggsMassCalculator::Data(this, myPassedStatus);
   }
-  
+ 
+
+
+
+
+ 
   void FullHiggsMassCalculator::doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool doHistogramming) {
     // Initialise
     double fTopMassSolution = -1.0;
@@ -87,6 +103,7 @@ namespace HPlus {
     const double myTopMass = 173.4;
     const double myBQuarkMass = 4.19;
     TVector3 myTauPlusBVector = tau + bjet;
+    double SolutionMax = -1;
 
     double myDeltaSquared = TMath::Power(myTopMass,2) - TMath::Power(myTauMass,2) - TMath::Power(myBQuarkMass,2);
     //    double a = 2.0 * (met.X() * myTauPlusBVector.X() + met.Y() * myTauPlusBVector.Y()) + myDeltaSquared;
@@ -107,6 +124,7 @@ namespace HPlus {
     std::cout << "tau+b energy, " << myTauPlusBEnergy << std::endl;
     std::cout << "discriminant, " << discriminant << std::endl;
 
+
     if (discriminant > 0.0) {
       // Two real solutions exist
       double mySolution1 = (-a*myTauPlusBVector.Z() - myTauPlusBEnergy * TMath::Sqrt(discriminant))
@@ -120,14 +138,16 @@ namespace HPlus {
       double myTopMassSolution2 = TMath::Sqrt(TMath::Power(myTauMass,2)+TMath::Power(myBQuarkMass,2)
         + 2.0 * TMath::Sqrt(TMath::Power(met.Perp(),2) + TMath::Power(mySolution2,2)) * myTauPlusBEnergy
         - 2.0 * (myTauPlusBVector.X() * met.X() + myTauPlusBVector.Y() * met.Y() + myTauPlusBVector.Z() * mySolution2));
-      std::cout << "real solution, nu_Z, " << mySolution1 << ", " << mySolution2 << std::endl;
+      std::cout << "real solution1,solution2, nu_Z, " << mySolution1 << ", " << mySolution2 << ", " << NeutrinoPz <<  std::endl;
       std::cout << "real solution, mtop, " << myTopMassSolution1 << ", " << myTopMassSolution2 << std::endl;
       fNeutrinoZSolution = mySolution1;
+      SolutionMax = mySolution2;
       fTopMassSolution = myTopMassSolution1;
 
       if (TMath::Abs(mySolution2) <  TMath::Abs(mySolution1)) {      
 	//      if (TMath::Abs(myTopMassSolution2 - myTopMass) < TMath::Abs(myTopMassSolution1 - myTopMass)) {
         fNeutrinoZSolution = mySolution2;
+	SolutionMax = mySolution1;
         fTopMassSolution = myTopMassSolution2;
         if (doHistogramming)
           hTopMassRealRejected->Fill(myTopMassSolution1, fEventWeight.getWeight());
@@ -135,7 +155,14 @@ namespace HPlus {
         if (doHistogramming)
           hTopMassRealRejected->Fill(myTopMassSolution2, fEventWeight.getWeight());
       }
-     
+ 
+
+      double deltaPzMin = TMath::Abs(NeutrinoPz - fNeutrinoZSolution);
+      double deltaPzMax = TMath::Abs(NeutrinoPz - SolutionMax);
+      hSolution1PzDifference->Fill(deltaPzMin, fEventWeight.getWeight());
+      hSolution2PzDifference->Fill(deltaPzMax, fEventWeight.getWeight());
+
+    
       // Calculate Higgs boson mass
       double myNeutrinoEnergy = TMath::Sqrt(TMath::Power(met.Perp(),2) + TMath::Power(fNeutrinoZSolution,2));
       fHiggsMassSolution = TMath::Sqrt(TMath::Power(myTauMass,2)
@@ -172,8 +199,11 @@ namespace HPlus {
       double myTopMassSolution2 = TMath::Sqrt(TMath::Power(myTauMass,2)+TMath::Power(myBQuarkMass,2)
         + 2.0 * TMath::Sqrt(TMath::Power(mySolution2,2) + TMath::Power(fNeutrinoZSolution,2)) * myTauPlusBEnergy
         - 2.0 * (alpha * mySolution2 + myTauPlusBVector.Z() * fNeutrinoZSolution));
-      std::cout << "imag solution, nu_Z/alpha/nu_T, " << fNeutrinoZSolution << ", " << alpha << ", " << mySolution1 << ", " << mySolution2 << std::endl;
-      std::cout << "imag solution, mtop, " << myTopMassSolution1 << ", " << myTopMassSolution2 << std::endl;
+      std::cout << "imag solution, nu_Z/alpha/nu_T, " << fNeutrinoZSolution << ", " << alpha << ", " << mySolution1 << ", " << mySolution2  << std::endl;
+   
+  
+
+
       fNeutrinoPtSolution = mySolution1;
       fTopMassSolution = myTopMassSolution1;
       if (TMath::Abs(myTopMassSolution2 - myTopMass) < TMath::Abs(myTopMassSolution1 - myTopMass)) {
@@ -326,6 +356,8 @@ namespace HPlus {
     myVisibleTau.SetXYZ(myVisibleTau.X()+myTauFromHiggs->px(),
                         myVisibleTau.Y()+myTauFromHiggs->py(),
                         myVisibleTau.Z()+myTauFromHiggs->pz());
+    NeutrinoPz =  myNeutrinoes.Pz();
+
     std::cout << "FullMass: tau pt=" << myVisibleTau.Perp() << " prongs=" << myChargedCount << " leptonicDecay=" << myLeptonicTauDecayStatus << ", neutrino pt=" << myNeutrinoes.Perp() << std::endl;
     // Make MC matching of bjet
     double myDeltaRBJet = ROOT::Math::VectorUtil::DeltaR(bjet->p4(), myHiggsSideBJet->p4());

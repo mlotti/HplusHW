@@ -36,6 +36,8 @@ namespace HPlus {
     };
 
     FullHiggsMassCalculator(EventCounter& eventCounter, EventWeight& eventWeight);
+    //    FullHiggsMassCalculator(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+
     ~FullHiggsMassCalculator();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData);
@@ -46,6 +48,7 @@ namespace HPlus {
     void doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool doHistogramming = true);
 
   private:
+
     // EventWeight object
     EventWeight& fEventWeight;
     //edm::InputTag fVertexSrc;
@@ -56,6 +59,7 @@ namespace HPlus {
     double fNeutrinoZSolution;
     double fNeutrinoPtSolution;
     double fHiggsMassSolution;
+    double NeutrinoPz;
 
     // Histograms
     TH1* hHiggsMass;
@@ -70,6 +74,9 @@ namespace HPlus {
     TH1* hNeutrinoZSolution;
     TH1* hNeutrinoPtSolution;
     TH1* hNeutrinoPtDifference;
+    TH1* hSolution1PzDifference;
+    TH1* hSolution2PzDifference;
+
   };
 }
 
