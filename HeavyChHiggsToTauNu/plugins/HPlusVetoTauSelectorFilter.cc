@@ -22,7 +22,7 @@ class HPlusVetoTauPtrSelectorFilter: public edm::EDFilter {
   virtual bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
   virtual void endJob();
 
-  virtual bool beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
+  virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
@@ -54,8 +54,8 @@ HPlusVetoTauPtrSelectorFilter::HPlusVetoTauPtrSelectorFilter(const edm::Paramete
 HPlusVetoTauPtrSelectorFilter::~HPlusVetoTauPtrSelectorFilter() {}
 void HPlusVetoTauPtrSelectorFilter::beginJob() {}
 
-bool HPlusVetoTauPtrSelectorFilter::beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
-  eventCounter.beginLuminosityBlock(iBlock, iSetup);
+bool HPlusVetoTauPtrSelectorFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
+  eventCounter.endLuminosityBlock(iBlock, iSetup);
   return true;
 }
 

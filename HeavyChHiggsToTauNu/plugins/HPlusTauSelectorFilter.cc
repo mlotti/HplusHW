@@ -56,8 +56,8 @@ class HPlusTauSelectorFilterT: public edm::EDFilter {
     return !fFilter || (fFilter && passed);
   }
 
-  virtual bool beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
-    eventCounter.beginLuminosityBlock(iBlock, iSetup);
+  virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
+    eventCounter.endLuminosityBlock(iBlock, iSetup);
     return true;
   }
   virtual void endJob() {

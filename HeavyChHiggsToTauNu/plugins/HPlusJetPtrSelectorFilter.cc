@@ -22,7 +22,7 @@ class HPlusJetPtrSelectorFilter: public edm::EDFilter {
   virtual bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
   virtual void endJob();
 
-  virtual bool beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
+  virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
@@ -55,8 +55,8 @@ HPlusJetPtrSelectorFilter::HPlusJetPtrSelectorFilter(const edm::ParameterSet& iC
 HPlusJetPtrSelectorFilter::~HPlusJetPtrSelectorFilter() {}
 void HPlusJetPtrSelectorFilter::beginJob() {}
 
-bool HPlusJetPtrSelectorFilter::beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
-  eventCounter.beginLuminosityBlock(iBlock, iSetup);
+bool HPlusJetPtrSelectorFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
+  eventCounter.endLuminosityBlock(iBlock, iSetup);
   return true;
 }
 

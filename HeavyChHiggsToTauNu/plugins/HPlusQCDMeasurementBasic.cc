@@ -17,7 +17,7 @@ class HPlusQCDMeasurementBasicFilter : public edm::EDFilter {
   virtual bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
   virtual void endJob();
 
-  virtual bool beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
+  virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
@@ -32,8 +32,8 @@ HPlusQCDMeasurementBasicFilter::HPlusQCDMeasurementBasicFilter(const edm::Parame
 HPlusQCDMeasurementBasicFilter::~HPlusQCDMeasurementBasicFilter() {}
 void HPlusQCDMeasurementBasicFilter::beginJob() {}
 
-bool HPlusQCDMeasurementBasicFilter::beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
-  eventCounter.beginLuminosityBlock(iBlock, iSetup);
+bool HPlusQCDMeasurementBasicFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
+  eventCounter.endLuminosityBlock(iBlock, iSetup);
   return true;
 }
 
