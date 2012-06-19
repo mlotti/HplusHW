@@ -53,9 +53,13 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     sequence = cms.Sequence()
     setattr(process, sequenceName, sequence)
     def add(n, module):
-        setattr(process, n, module)
+        if not hasattr(process, n):
+            setattr(process, n, module)
+            mod = module
+        else:
+            mod = getattr(process, n)
         seq = getattr(process, sequenceName) # I don't know why accessing 'sequence' doesn't work
-        seq *= module
+        seq *= mod
         return n
 
     objectVariationRaw = []
