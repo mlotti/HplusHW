@@ -93,7 +93,7 @@ namespace HPlus {
     counter.weightsSquared.at(countIndex) += dval*dval;
   }
 
-  void EventCounter::beginLuminosityBlock(const edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
+  void EventCounter::endLuminosityBlock(const edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
     // Read counts from file
     edm::Handle<edm::MergeableCounter> hcount;
     for(size_t i=0; i<inputCountTags_.size(); ++i) {

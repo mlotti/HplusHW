@@ -46,7 +46,7 @@ namespace HPlus {
     void incrementCount(size_t counterIndex, size_t countIndex, int value);
     void setWeightPointer(const double* ptr) { eventWeightPointer = ptr; }
 
-    void beginLuminosityBlock(const edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup);
+    void endLuminosityBlock(const edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup);
     void endJob();
 
   private:
