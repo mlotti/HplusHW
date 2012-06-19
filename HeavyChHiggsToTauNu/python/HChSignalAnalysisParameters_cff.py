@@ -1,7 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 
 # Blind analysis - do not fill final counter and histogram for data if true
-blindAnalysisStatus = cms.untracked.bool(False);
+blindAnalysisStatus = cms.untracked.bool(False)
+
+# Ambient level for filling histograms (options: Vital, Informative, Debug)
+histogramAmbientLevel = cms.untracked.string("Debug")
 
 singleTauMetTriggerPaths = [
 #    "HLT_SingleLooseIsoTau20",
@@ -184,8 +187,8 @@ bTagging = cms.untracked.PSet(
 #    discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
     discriminator = cms.untracked.string("combinedSecondaryVertexBJetTags"),
 #    discriminator = cms.untracked.string("jetProbabilityBJetTags"),   
-    discriminatorCut = cms.untracked.double(0.679),
-    ptCut = cms.untracked.double(30.0),
+    discriminatorCut = cms.untracked.double(0.244),
+    ptCut = cms.untracked.double(20.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(1), #FIXME change minNumber to jetNumber
     jetNumber = cms.untracked.uint32(1), #FIXME change minNumber to jetNumber
@@ -194,6 +197,7 @@ bTagging = cms.untracked.PSet(
     BTagDBAlgo     = cms.untracked.string("TCHEL"),
     BTagUserDBAlgo = cms.untracked.string("BTAGTCHEL_hplusBtagDB_TTJets")
 )
+
 
 deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
 topReconstruction = cms.untracked.string("None") # Options: None
@@ -321,6 +325,10 @@ tree = cms.untracked.PSet(
         "againstMuonTight",
     ),
     genParticleSrc = cms.untracked.InputTag("genParticles")
+)
+
+eventCounter = cms.untracked.PSet(
+    counters = cms.untracked.VInputTag()
 )
 
 vertexWeight = cms.untracked.PSet(

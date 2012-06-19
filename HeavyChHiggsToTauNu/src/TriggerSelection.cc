@@ -1,5 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Common/interface/TriggerNames.h"
@@ -13,19 +13,16 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
-#include "TH1F.h"
-
 namespace HPlus {
   TriggerSelection::Data::Data(const TriggerSelection *triggerSelection, const TriggerPath *triggerPath, bool passedEvent):
     fTriggerSelection(triggerSelection), fTriggerPath(triggerPath), fPassedEvent(passedEvent) {}
   TriggerSelection::Data::~Data() {}
   
-  TriggerSelection::TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  TriggerSelection::TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
     fTriggerSrc(iConfig.getUntrackedParameter<edm::InputTag>("triggerSrc")),
     fPatSrc(iConfig.getUntrackedParameter<edm::InputTag>("patSrc")),
     fMetCut(iConfig.getUntrackedParameter<double>("hltMetCut")),
-    fEventWeight(eventWeight),
-    fTriggerCaloMet(iConfig.getUntrackedParameter<edm::ParameterSet>("caloMetSelection"), eventCounter, eventWeight),
+    fTriggerCaloMet(iConfig.getUntrackedParameter<edm::ParameterSet>("caloMetSelection"), eventCounter, histoWrapper),
     fTriggerAllCount(eventCounter.addSubCounter("Trigger", "All events")),
     fTriggerPathCount(eventCounter.addSubCounter("Trigger debug", "Path passed")),
     fTriggerBitCount(eventCounter.addSubCounter("Trigger","Bit passed")), 
@@ -52,15 +49,17 @@ namespace HPlus {
     // Histograms
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("Trigger");
-    
-    hHltMetBeforeTrigger = makeTH<TH1F>(myDir, "Trigger_HLT_MET_Before_Trigger", "HLT_MET_After_Trigger;HLT_MET, GeV;N_{events} / 3 GeV", 100, 0., 300.);
-    hHltMetAfterTrigger = makeTH<TH1F>(myDir, "Trigger_HLT_MET_After_Trigger", "HLT_MET_After_Trigger;HLT_MET, GeV;N_{events} / 3 GeV", 100, 0., 300.);
-    hHltMetSelected = makeTH<TH1F>(myDir, "Trigger_HLT_MET_Selected", "HLT_MET_Selected;HLT_MET, GeV;N_{events} / 3 GeV", 100, 0., 300.);
-    hTriggerParametrisationWeight = makeTH<TH1F>(myDir, "Trigger_Parametrisation_Weight", "Trigger_Parametrisation_Weight;Weight*1000;N_{events} / 0.1 percent", 1000, 0., 1000.);
-    hControlSelectionType = makeTH<TH1F>(myDir, "Control_Trigger_Selection_Type", "Control_Trigger_Selection_Type;;N_{events}", 3, 0., 3.);
-    hControlSelectionType->GetXaxis()->SetBinLabel(1, "byTriggerBit");
-    hControlSelectionType->GetXaxis()->SetBinLabel(2, "byTriggerBit+ScaleFactor");
-    hControlSelectionType->GetXaxis()->SetBinLabel(3, "byTriggerEffParam");
+
+    hHltMetBeforeTrigger = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "Trigger_HLT_MET_Before_Trigger", "HLT_MET_After_Trigger;HLT_MET, GeV;N_{events} / 3 GeV", 100, 0., 300.);
+    hHltMetAfterTrigger = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "Trigger_HLT_MET_After_Trigger", "HLT_MET_After_Trigger;HLT_MET, GeV;N_{events} / 3 GeV", 100, 0., 300.);
+    hHltMetSelected = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "Trigger_HLT_MET_Selected", "HLT_MET_Selected;HLT_MET, GeV;N_{events} / 3 GeV", 100, 0., 300.);
+    hTriggerParametrisationWeight = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "Trigger_Parametrisation_Weight", "Trigger_Parametrisation_Weight;Weight*1000;N_{events} / 0.1 percent", 1000, 0., 1000.);
+    hControlSelectionType = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "Control_Trigger_Selection_Type", "Control_Trigger_Selection_Type;;N_{events}", 3, 0., 3.);
+    if (hControlSelectionType->isActive()) {
+      hControlSelectionType->GetXaxis()->SetBinLabel(1, "byTriggerBit");
+      hControlSelectionType->GetXaxis()->SetBinLabel(2, "byTriggerBit+ScaleFactor");
+      hControlSelectionType->GetXaxis()->SetBinLabel(3, "byTriggerEffParam");
+    }
   }
 
   TriggerSelection::~TriggerSelection() {
@@ -72,7 +71,7 @@ namespace HPlus {
     TriggerPath* returnPath = NULL;
     increment(fTriggerAllCount);
 
-    hControlSelectionType->Fill(fTriggerSelectionType, fEventWeight.getWeight());
+    hControlSelectionType->Fill(fTriggerSelectionType);
     if (fTriggerSelectionType == kTriggerSelectionByTriggerBit) {
       passEvent = passedTriggerBit(iEvent, iSetup, returnPath);
     }
@@ -185,15 +184,15 @@ namespace HPlus {
         
         increment(fTriggerHltMetExistsCount);
         fHltMet = hltMets[0];
-        hHltMetBeforeTrigger->Fill(fHltMet->et(), fEventWeight.getWeight());
+        hHltMetBeforeTrigger->Fill(fHltMet->et());
         if (passEvent)
-          hHltMetAfterTrigger->Fill(fHltMet->et(), fEventWeight.getWeight());
+          hHltMetAfterTrigger->Fill(fHltMet->et());
 
         // Cut on HLT MET
         if(fHltMet->et() <= fMetCut) {
           passEvent = false;
         } else if (passEvent) {
-          hHltMetSelected->Fill(fHltMet->et(), fEventWeight.getWeight());
+          hHltMetSelected->Fill(fHltMet->et());
         }
         if(passEvent)
           increment(fTriggerHltMetPassedCount);

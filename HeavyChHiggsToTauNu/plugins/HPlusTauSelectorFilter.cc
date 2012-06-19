@@ -7,6 +7,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 
 namespace {
@@ -27,12 +28,12 @@ class HPlusTauSelectorFilterT: public edm::EDFilter {
  public:
 
   explicit HPlusTauSelectorFilterT(const edm::ParameterSet& iConfig):
-    eventCounter(),
+    eventCounter(iConfig),
     eventWeight(iConfig),
-    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
+    histoWrapper(eventWeight, "Debug"),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, histoWrapper),
     fFilter(iConfig.getParameter<bool>("filter"))
   {
-    eventCounter.produces(this);
     produces<Product>();
     produces<bool>();
     eventCounter.setWeightPointer(eventWeight.getWeightPtr());
@@ -59,13 +60,13 @@ class HPlusTauSelectorFilterT: public edm::EDFilter {
     eventCounter.beginLuminosityBlock(iBlock, iSetup);
     return true;
   }
-  virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
-    eventCounter.endLuminosityBlock(iBlock, iSetup);
-    return true;
+  virtual void endJob() {
+    eventCounter.endJob();
   }
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
+  HPlus::HistoWrapper histoWrapper;
   HPlus::TauSelection fOneProngTauSelection;
   bool fFilter;
 };

@@ -60,6 +60,11 @@ doPrescalesForData = False
 # Tree filling
 doFillTree = False
 
+# Set level of how many histograms are stored to files
+# options are: 'Vital' (least histograms), 'Informative', 'Debug' (all histograms)
+myHistogramAmbientLevel = "Debug"
+
+# Apply trigger scale factor or not
 applyTriggerScaleFactor = True
 
 PF2PATVersion = "PFlow" # For normal PF2PAT
@@ -76,7 +81,7 @@ doJESVariation = False
 
 # Perform the signal analysis with the PU weight variations
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
-doPUWeightVariation = not False
+doPUWeightVariation = False
 
 # Do variations for optimisation
 # Note: Keep number of variations below 200 to keep file sizes reasonable
@@ -102,6 +107,7 @@ myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
 if doOptimisation:
     doSystematics = True # Make sure that systematics are run
     doFillTree = False # Make sure that tree filling is disabled or root file size explodes
+    myHistogramAmbientLevel = "Vital" # Set histogram level to least histograms to reduce output file sizes
     # FIXME add here "light' mode running
 
 ################################################################################
@@ -257,30 +263,30 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
 process.signalAnalysis = signalAnalysis.createEDFilter(param)
 if not doFillTree:
     process.signalAnalysis.Tree.fill = cms.untracked.bool(False)
+process.signalAnalysis.histogramAmbientLevel = myHistogramAmbientLevel
+
 # process.signalAnalysis.GlobalMuonVeto = param.NonIsolatedMuonVeto
 # Change default tau algorithm here if needed
 #process.signalAnalysis.tauSelection.tauSelectionHPSTightTauBased # HPS Tight is the default
 
-
 # Btagging DB
-#process.load("CondCore.DBCommon.CondDBCommon_cfi")
-#MC measurements
-#process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
-#process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
-#Data measurements
-#process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
-#process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
-#User DB for btag eff
 
-#btagDB = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
-#if options.runOnCrab != 0:
-#    btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
-###########process.CondDBCommon.connect = btagDB
+if False: #FIXME
+    process.load("CondCore.DBCommon.CondDBCommon_cfi")
+    #MC measurements
+    process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
+    process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
+    #Data measurements
+    process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
+    process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
+    #User DB for btag eff
+    btagDB = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
+    if options.runOnCrab != 0:
+        btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
+    process.CondDBCommon.connect = btagDB
+    process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
+    process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
     
-#process.load("CondCore.DBCommon.CondDBCommon_cfi")
-
-#process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
-#process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
 param.bTagging.UseBTagDB  = cms.untracked.bool(False) # FIXME: True does not work with systematics! (some clash with condDB betweeen btag and JES)
 
 
@@ -302,6 +308,7 @@ if dataVersion.isData() and options.tauEmbeddingInput == 0 and doPrescalesForDat
 
 # Print output
 #print "\nAnalysis is blind:", process.signalAnalysis.blindAnalysisStatus, "\n"
+print "Histogram level:", process.signalAnalysis.histogramAmbientLevel.value()
 print "Trigger:", process.signalAnalysis.trigger
 print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode.value()
 print "VertexWeight:",process.signalAnalysis.vertexWeight
@@ -314,20 +321,14 @@ print "TauSelection isolation:", process.signalAnalysis.tauSelection.isolationDi
 print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode.value()
 print "VetoTauSelection src:", process.signalAnalysis.vetoTauSelection.tauSelection.src.value()
 
-
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
-process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-    counterNames = cms.untracked.InputTag("signalAnalysis", "counterNames"),
-    counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances"),
-    printMainCounter = cms.untracked.bool(True),
-    printSubCounters = cms.untracked.bool(False), # Default False
-    printAvailableCounters = cms.untracked.bool(False),
-)
 
+process.signalAnalysis.eventCounter.printMainCounter = cms.untracked.bool(True)
+#process.signalAnalysis.eventCounter.printSubCounters = cms.untracked.bool(True)
 
 if len(additionalCounters) > 0:
-    process.signalAnalysisCounters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
+    process.signalAnalysis.eventCounter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
 
 # PickEvent module and the main Path. The picked events are only the
 # ones selected by the golden analysis defined above.
@@ -335,7 +336,6 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
 process.signalAnalysisPath = cms.Path(
     process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
     process.signalAnalysis *
-    process.signalAnalysisCounters *
     process.PickEvents
 )
 

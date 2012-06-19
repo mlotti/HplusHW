@@ -27,6 +27,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
+
 namespace edm {
   class ParameterSet;
   class Event;
@@ -34,8 +36,6 @@ namespace edm {
   class EDFilter;
 }
 
-class TH1;
-class TH2;
 class TTree;
 
 namespace HPlus {
@@ -110,6 +110,7 @@ namespace HPlus {
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisInvertedTauProducer
     EventWeight& fEventWeight;
+    HistoWrapper fHistoWrapper;
 
     //    const double ftransverseMassCut;
     const bool bBlindAnalysisStatus;
@@ -182,228 +183,225 @@ namespace HPlus {
     SignalAnalysisTree fTree;
 
     // Histograms
-    TH1 *hVerticesBeforeWeight;
-    TH1 *hVerticesAfterWeight;
-    TH1 *hVerticesTriggeredBeforeWeight;
-    TH1 *hVerticesTriggeredAfterWeight;
-    TH1 *hTransverseMass;
-    TH1 *hTransverseMassWithTopCut;
-    TH1 *hTransverseMassAfterVeto;
-    TH1 *hTransverseMassBeforeVeto;
-    TH1 *hTransverseMassNoMet;
-    TH1 *hTransverseMassNoMetBtag;
-    TH1 *hTransverseMassBeforeFakeMet;
-    TH1 *hTransverseMassDeltaPhiUpperCut;
-    TH1 *hTransverseMassTopRtauDeltaPhiFakeMET;
-    TH1 *hTransverseMassTopDeltaPhiFakeMET;
-    TH1 *hTransverseMassDeltaPhi130;
-    TH1 *hTransverseMassDeltaPhi160;
-    TH1 *hTransverseMassTopChiSelection;
-    TH1 *hTransverseMassTopBjetSelection;
-    TH1 *hmtTest_metcut;
-    TH1 *hmtTest_noTaumetcut;
-    TH1 *hmtTest_jetcut;
-    TH1 *hmtTest_btagcut;
 
-    TH1 *hDeltaPhi;
-    TH1 *hDeltaPhiJetMet;
-    TH1 *hAlphaT;
-    TH1 *hAlphaTInvMass;
-    TH2 *hAlphaTVsRtau;
+    WrappedTH1 *hVerticesBeforeWeight;
+    WrappedTH1 *hVerticesAfterWeight;
+    WrappedTH1 *hVerticesTriggeredBeforeWeight;
+    WrappedTH1 *hVerticesTriggeredAfterWeight;
+    WrappedTH1 *hTransverseMass;
+    WrappedTH1 *hTransverseMassWithTopCut;
+    WrappedTH1 *hTransverseMassAfterVeto;
+    WrappedTH1 *hTransverseMassBeforeVeto;
+    WrappedTH1 *hTransverseMassNoMet;
+    WrappedTH1 *hTransverseMassNoMetBtag;
+    WrappedTH1 *hTransverseMassBeforeFakeMet;
+    WrappedTH1 *hTransverseMassDeltaPhiUpperCut;
+    WrappedTH1 *hTransverseMassTopRtauDeltaPhiFakeMET;
+    WrappedTH1 *hTransverseMassTopDeltaPhiFakeMET;
+    WrappedTH1 *hTransverseMassDeltaPhi130;
+    WrappedTH1 *hTransverseMassDeltaPhi160;
+    WrappedTH1 *hTransverseMassTopChiSelection;
+    WrappedTH1 *hTransverseMassTopBjetSelection;
+    WrappedTH1 *hDeltaPhi;
+    WrappedTH1 *hDeltaPhiJetMet;
+    WrappedTH1 *hAlphaT;
+    WrappedTH1 *hAlphaTInvMass;
+    WrappedTH2 *hAlphaTVsRtau;
+
     // Histograms for validation at every Selection Cut step
-    TH1 *hMet_AfterTauSelection;
-    TH1 *hMet_AfterBTagging;
-    TH1 *hMet_AfterEvtTopology;
-    TH1 *hMETBeforeMETCut;
-    TH1 *hMETBeforeTauId;
-    TH1 *hMETBaselineTauId;
-    TH1 *hMETInvertedTauId;
-    TH1 *hMETBaselineTauIdJets;
-    TH1 *hMETBaselineTauIdJets150;
-    TH1 *hMETBaselineTauIdJets120150;
-    TH1 *hMETBaselineTauIdJets100120;
-    TH1 *hMETBaselineTauIdJets80100;
-    TH1 *hMETBaselineTauIdJets7080;
-    TH1 *hMETBaselineTauIdJets6070;
-    TH1 *hMETBaselineTauIdJets5060;
-    TH1 *hMETBaselineTauIdJets4050;
+    WrappedTH1 *hMet_AfterTauSelection;
+    WrappedTH1 *hMet_AfterBTagging;
+    WrappedTH1 *hMet_AfterEvtTopology;
+    WrappedTH1 *hMETBeforeMETCut;
+    WrappedTH1 *hMETBeforeTauId;
+    WrappedTH1 *hMETBaselineTauId;
+    WrappedTH1 *hMETInvertedTauId;
+    WrappedTH1 *hMETBaselineTauIdJets;
+    WrappedTH1 *hMETBaselineTauIdJets150;
+    WrappedTH1 *hMETBaselineTauIdJets120150;
+    WrappedTH1 *hMETBaselineTauIdJets100120;
+    WrappedTH1 *hMETBaselineTauIdJets80100;
+    WrappedTH1 *hMETBaselineTauIdJets7080;
+    WrappedTH1 *hMETBaselineTauIdJets6070;
+    WrappedTH1 *hMETBaselineTauIdJets5060;
+    WrappedTH1 *hMETBaselineTauIdJets4050;
 
 
-    //    TH1 *hMETBaselineTauIdBtag;
-    TH1 *hMETBaselineTauIdBtag150;
-    TH1 *hMETBaselineTauIdBtag120150;
-    TH1 *hMETBaselineTauIdBtag100120;
-    TH1 *hMETBaselineTauIdBtag80100;
-    TH1 *hMETBaselineTauIdBtag7080;
-    TH1 *hMETBaselineTauIdBtag6070;
-    TH1 *hMETBaselineTauIdBtag5060;
-    TH1 *hMETBaselineTauIdBtag4050;
+    //    WrappedTH1 *hMETBaselineTauIdBtag;
+    WrappedTH1 *hMETBaselineTauIdBtag150;
+    WrappedTH1 *hMETBaselineTauIdBtag120150;
+    WrappedTH1 *hMETBaselineTauIdBtag100120;
+    WrappedTH1 *hMETBaselineTauIdBtag80100;
+    WrappedTH1 *hMETBaselineTauIdBtag7080;
+    WrappedTH1 *hMETBaselineTauIdBtag6070;
+    WrappedTH1 *hMETBaselineTauIdBtag5060;
+    WrappedTH1 *hMETBaselineTauIdBtag4050;
 
-    TH1 *hMTBaselineTauIdTopMass;
-    TH1 *hMTBaselineTauIdTopMass150;
-    TH1 *hMTBaselineTauIdTopMass120150;
-    TH1 *hMTBaselineTauIdTopMass100120;
-    TH1 *hMTBaselineTauIdTopMass80100;
-    TH1 *hMTBaselineTauIdTopMass7080;
-    TH1 *hMTBaselineTauIdTopMass6070;
-    TH1 *hMTBaselineTauIdTopMass5060;
-    TH1 *hMTBaselineTauIdTopMass4050;
+    WrappedTH1 *hMTBaselineTauIdTopMass;
+    WrappedTH1 *hMTBaselineTauIdTopMass150;
+    WrappedTH1 *hMTBaselineTauIdTopMass120150;
+    WrappedTH1 *hMTBaselineTauIdTopMass100120;
+    WrappedTH1 *hMTBaselineTauIdTopMass80100;
+    WrappedTH1 *hMTBaselineTauIdTopMass7080;
+    WrappedTH1 *hMTBaselineTauIdTopMass6070;
+    WrappedTH1 *hMTBaselineTauIdTopMass5060;
+    WrappedTH1 *hMTBaselineTauIdTopMass4050;
 
 
-    TH1 *hMETInvertedTauIdJets;
-    TH1 *hMETInvertedTauIdJets150;
-    TH1 *hMETInvertedTauIdJets120150;
-    TH1 *hMETInvertedTauIdJets100120;
-    TH1 *hMETInvertedTauIdJets80100;
-    TH1 *hMETInvertedTauIdJets7080;
-    TH1 *hMETInvertedTauIdJets6070;
-    TH1 *hMETInvertedTauIdJets5060;
-    TH1 *hMETInvertedTauIdJets4050;
+    WrappedTH1 *hMETInvertedTauIdJets;
+    WrappedTH1 *hMETInvertedTauIdJets150;
+    WrappedTH1 *hMETInvertedTauIdJets120150;
+    WrappedTH1 *hMETInvertedTauIdJets100120;
+    WrappedTH1 *hMETInvertedTauIdJets80100;
+    WrappedTH1 *hMETInvertedTauIdJets7080;
+    WrappedTH1 *hMETInvertedTauIdJets6070;
+    WrappedTH1 *hMETInvertedTauIdJets5060;
+    WrappedTH1 *hMETInvertedTauIdJets4050;
 
-    TH1 *hMETInvertedTauIdBtag;
-    TH1 *hMETInvertedTauIdBtag150;
-    TH1 *hMETInvertedTauIdBtag120150;
-    TH1 *hMETInvertedTauIdBtag100120;
-    TH1 *hMETInvertedTauIdBtag80100;
-    TH1 *hMETInvertedTauIdBtag7080;
-    TH1 *hMETInvertedTauIdBtag6070;
-    TH1 *hMETInvertedTauIdBtag5060;
-    TH1 *hMETInvertedTauIdBtag4050;
+    WrappedTH1 *hMETInvertedTauIdBtag;
+    WrappedTH1 *hMETInvertedTauIdBtag150;
+    WrappedTH1 *hMETInvertedTauIdBtag120150;
+    WrappedTH1 *hMETInvertedTauIdBtag100120;
+    WrappedTH1 *hMETInvertedTauIdBtag80100;
+    WrappedTH1 *hMETInvertedTauIdBtag7080;
+    WrappedTH1 *hMETInvertedTauIdBtag6070;
+    WrappedTH1 *hMETInvertedTauIdBtag5060;
+    WrappedTH1 *hMETInvertedTauIdBtag4050;
 
  
-    TH1 *hMTBaselineTauIdBtag150;
-    TH1 *hMTBaselineTauIdBtag120150;
-    TH1 *hMTBaselineTauIdBtag100120;
-    TH1 *hMTBaselineTauIdBtag80100;
-    TH1 *hMTBaselineTauIdBtag7080;
-    TH1 *hMTBaselineTauIdBtag6070;
-    TH1 *hMTBaselineTauIdBtag5060;
-    TH1 *hMTBaselineTauIdBtag4050;
+    WrappedTH1 *hMTBaselineTauIdBtag150;
+    WrappedTH1 *hMTBaselineTauIdBtag120150;
+    WrappedTH1 *hMTBaselineTauIdBtag100120;
+    WrappedTH1 *hMTBaselineTauIdBtag80100;
+    WrappedTH1 *hMTBaselineTauIdBtag7080;
+    WrappedTH1 *hMTBaselineTauIdBtag6070;
+    WrappedTH1 *hMTBaselineTauIdBtag5060;
+    WrappedTH1 *hMTBaselineTauIdBtag4050;
 
-    TH1 *hMTBaselineTauIdJet150;
-    TH1 *hMTBaselineTauIdJet120150;
-    TH1 *hMTBaselineTauIdJet100120;
-    TH1 *hMTBaselineTauIdJet80100;
-    TH1 *hMTBaselineTauIdJet7080;
-    TH1 *hMTBaselineTauIdJet6070;
-    TH1 *hMTBaselineTauIdJet5060;
-    TH1 *hMTBaselineTauIdJet4050;
+    WrappedTH1 *hMTBaselineTauIdJet150;
+    WrappedTH1 *hMTBaselineTauIdJet120150;
+    WrappedTH1 *hMTBaselineTauIdJet100120;
+    WrappedTH1 *hMTBaselineTauIdJet80100;
+    WrappedTH1 *hMTBaselineTauIdJet7080;
+    WrappedTH1 *hMTBaselineTauIdJet6070;
+    WrappedTH1 *hMTBaselineTauIdJet5060;
+    WrappedTH1 *hMTBaselineTauIdJet4050;
 
-    TH1 *hMTBaselineTauIdPhi150;
-    TH1 *hMTBaselineTauIdPhi120150;
-    TH1 *hMTBaselineTauIdPhi100120;
-    TH1 *hMTBaselineTauIdPhi80100;
-    TH1 *hMTBaselineTauIdPhi7080;
-    TH1 *hMTBaselineTauIdPhi6070;
-    TH1 *hMTBaselineTauIdPhi5060;
-    TH1 *hMTBaselineTauIdPhi4050;
-    TH1 *hMTBaselineTauIdPhi;
+    WrappedTH1 *hMTBaselineTauIdPhi150;
+    WrappedTH1 *hMTBaselineTauIdPhi120150;
+    WrappedTH1 *hMTBaselineTauIdPhi100120;
+    WrappedTH1 *hMTBaselineTauIdPhi80100;
+    WrappedTH1 *hMTBaselineTauIdPhi7080;
+    WrappedTH1 *hMTBaselineTauIdPhi6070;
+    WrappedTH1 *hMTBaselineTauIdPhi5060;
+    WrappedTH1 *hMTBaselineTauIdPhi4050;
+    WrappedTH1 *hMTBaselineTauIdPhi;
 
-    TH1 *hMTInvertedTauIdJets;
-    TH1 *hMTBaselineTauIdJet;
+    WrappedTH1 *hMTInvertedTauIdJets;
+    WrappedTH1 *hMTBaselineTauIdJet;
 
-    TH1 *hMTInvertedTauIdPhi;
-    TH1 *hMTInvertedTauIdPhi150;
-    TH1 *hMTInvertedTauIdPhi120150;
-    TH1 *hMTInvertedTauIdPhi100120;
-    TH1 *hMTInvertedTauIdPhi80100;
-    TH1 *hMTInvertedTauIdPhi7080;
-    TH1 *hMTInvertedTauIdPhi6070;
-    TH1 *hMTInvertedTauIdPhi5060;
-    TH1 *hMTInvertedTauIdPhi4050;
+    WrappedTH1 *hMTInvertedTauIdPhi;
+    WrappedTH1 *hMTInvertedTauIdPhi150;
+    WrappedTH1 *hMTInvertedTauIdPhi120150;
+    WrappedTH1 *hMTInvertedTauIdPhi100120;
+    WrappedTH1 *hMTInvertedTauIdPhi80100;
+    WrappedTH1 *hMTInvertedTauIdPhi7080;
+    WrappedTH1 *hMTInvertedTauIdPhi6070;
+    WrappedTH1 *hMTInvertedTauIdPhi5060;
+    WrappedTH1 *hMTInvertedTauIdPhi4050;
 
-    TH1 *hMTInvertedTauIdJet;
-    TH1 *hMTInvertedTauIdJet150;
-    TH1 *hMTInvertedTauIdJet120150;
-    TH1 *hMTInvertedTauIdJet100120;
-    TH1 *hMTInvertedTauIdJet80100;
-    TH1 *hMTInvertedTauIdJet7080;
-    TH1 *hMTInvertedTauIdJet6070;
-    TH1 *hMTInvertedTauIdJet5060;
-    TH1 *hMTInvertedTauIdJet4050;
+    WrappedTH1 *hMTInvertedTauIdJet;
+    WrappedTH1 *hMTInvertedTauIdJet150;
+    WrappedTH1 *hMTInvertedTauIdJet120150;
+    WrappedTH1 *hMTInvertedTauIdJet100120;
+    WrappedTH1 *hMTInvertedTauIdJet80100;
+    WrappedTH1 *hMTInvertedTauIdJet7080;
+    WrappedTH1 *hMTInvertedTauIdJet6070;
+    WrappedTH1 *hMTInvertedTauIdJet5060;
+    WrappedTH1 *hMTInvertedTauIdJet4050;
 
-    TH1 *hMTInvertedTauIdBtag;
-    TH1 *hMTInvertedTauIdBtag150;
-    TH1 *hMTInvertedTauIdBtag120150;
-    TH1 *hMTInvertedTauIdBtag100120;
-    TH1 *hMTInvertedTauIdBtag80100;
-    TH1 *hMTInvertedTauIdBtag7080;
-    TH1 *hMTInvertedTauIdBtag6070;
-    TH1 *hMTInvertedTauIdBtag5060;
-    TH1 *hMTInvertedTauIdBtag4050;
+    WrappedTH1 *hMTInvertedTauIdBtag;
+    WrappedTH1 *hMTInvertedTauIdBtag150;
+    WrappedTH1 *hMTInvertedTauIdBtag120150;
+    WrappedTH1 *hMTInvertedTauIdBtag100120;
+    WrappedTH1 *hMTInvertedTauIdBtag80100;
+    WrappedTH1 *hMTInvertedTauIdBtag7080;
+    WrappedTH1 *hMTInvertedTauIdBtag6070;
+    WrappedTH1 *hMTInvertedTauIdBtag5060;
+    WrappedTH1 *hMTInvertedTauIdBtag4050;
 
-    TH1 *hMTInvertedTauIdMet;
-    TH1 *hMTInvertedTauIdMet150;
-    TH1 *hMTInvertedTauIdMet120150;
-    TH1 *hMTInvertedTauIdMet100120;
-    TH1 *hMTInvertedTauIdMet80100;
-    TH1 *hMTInvertedTauIdMet7080;
-    TH1 *hMTInvertedTauIdMet6070;
-    TH1 *hMTInvertedTauIdMet5060;
-    TH1 *hMTInvertedTauIdMet4050;
+    WrappedTH1 *hMTInvertedTauIdMet;
+    WrappedTH1 *hMTInvertedTauIdMet150;
+    WrappedTH1 *hMTInvertedTauIdMet120150;
+    WrappedTH1 *hMTInvertedTauIdMet100120;
+    WrappedTH1 *hMTInvertedTauIdMet80100;
+    WrappedTH1 *hMTInvertedTauIdMet7080;
+    WrappedTH1 *hMTInvertedTauIdMet6070;
+    WrappedTH1 *hMTInvertedTauIdMet5060;
+    WrappedTH1 *hMTInvertedTauIdMet4050;
 
-    TH1 *hMTInvertedTauIdJetPhi;
-    TH1 *hMTInvertedTauIdJetPhi150;
-    TH1 *hMTInvertedTauIdJetPhi120150;
-    TH1 *hMTInvertedTauIdJetPhi100120;
-    TH1 *hMTInvertedTauIdJetPhi80100;
-    TH1 *hMTInvertedTauIdJetPhi7080;
-    TH1 *hMTInvertedTauIdJetPhi6070;
-    TH1 *hMTInvertedTauIdJetPhi5060;
-    TH1 *hMTInvertedTauIdJetPhi4050;
+    WrappedTH1 *hMTInvertedTauIdJetPhi;
+    WrappedTH1 *hMTInvertedTauIdJetPhi150;
+    WrappedTH1 *hMTInvertedTauIdJetPhi120150;
+    WrappedTH1 *hMTInvertedTauIdJetPhi100120;
+    WrappedTH1 *hMTInvertedTauIdJetPhi80100;
+    WrappedTH1 *hMTInvertedTauIdJetPhi7080;
+    WrappedTH1 *hMTInvertedTauIdJetPhi6070;
+    WrappedTH1 *hMTInvertedTauIdJetPhi5060;
+    WrappedTH1 *hMTInvertedTauIdJetPhi4050;
 
-    TH1 *hTopMass;
-    TH1 *hTopMass150;
-    TH1 *hTopMass120150;
-    TH1 *hTopMass100120;
-    TH1 *hTopMass80100;
-    TH1 *hTopMass7080;
-    TH1 *hTopMass6070;
-    TH1 *hTopMass5060;
-    TH1 *hTopMass4050;
+    WrappedTH1 *hTopMass;
+    WrappedTH1 *hTopMass150;
+    WrappedTH1 *hTopMass120150;
+    WrappedTH1 *hTopMass100120;
+    WrappedTH1 *hTopMass80100;
+    WrappedTH1 *hTopMass7080;
+    WrappedTH1 *hTopMass6070;
+    WrappedTH1 *hTopMass5060;
+    WrappedTH1 *hTopMass4050;
 
-    TH1 *hMTInvertedTauIdTopMass;
-    TH1 *hMTInvertedTauIdTopMass150;
-    TH1 *hMTInvertedTauIdTopMass120150;
-    TH1 *hMTInvertedTauIdTopMass100120;
-    TH1 *hMTInvertedTauIdTopMass80100;
-    TH1 *hMTInvertedTauIdTopMass7080;
-    TH1 *hMTInvertedTauIdTopMass6070;
-    TH1 *hMTInvertedTauIdTopMass5060;
-    TH1 *hMTInvertedTauIdTopMass4050;
+    WrappedTH1 *hMTInvertedTauIdTopMass;
+    WrappedTH1 *hMTInvertedTauIdTopMass150;
+    WrappedTH1 *hMTInvertedTauIdTopMass120150;
+    WrappedTH1 *hMTInvertedTauIdTopMass100120;
+    WrappedTH1 *hMTInvertedTauIdTopMass80100;
+    WrappedTH1 *hMTInvertedTauIdTopMass7080;
+    WrappedTH1 *hMTInvertedTauIdTopMass6070;
+    WrappedTH1 *hMTInvertedTauIdTopMass5060;
+    WrappedTH1 *hMTInvertedTauIdTopMass4050;
 
-    TH1 *hMETInvertedTauIdLoose;
-    TH1 *hMETInvertedTauIdLoose150;
-    TH1 *hMETInvertedTauIdLoose4070;
-    TH1 *hMETInvertedTauIdLoose70150;
-    TH1 *hMETBaselineTauIdBtag;
-    //    TH1 *hMTBaselineTauIdJets;
-    TH1 *hMTInvertedTauIdLoose;
+    WrappedTH1 *hMETInvertedTauIdLoose;
+    WrappedTH1 *hMETInvertedTauIdLoose150;
+    WrappedTH1 *hMETInvertedTauIdLoose4070;
+    WrappedTH1 *hMETInvertedTauIdLoose70150;
+    WrappedTH1 *hMETBaselineTauIdBtag;
+    //    WrappedTH1 *hMTBaselineTauIdJets;
+    WrappedTH1 *hMTInvertedTauIdLoose;
 
-    //    TH1 *hMTInvertedTauIdJets;
-    TH1 *hMTBaselineTauIdBtag;
-    TH1 *hMETBaselineTauIdBtagDphi;
-    TH1 *hMETInvertedTauIdBtagDphi;
+    //    WrappedTH1 *hMTInvertedTauIdJets;
+    WrappedTH1 *hMTBaselineTauIdBtag;
+    WrappedTH1 *hMETBaselineTauIdBtagDphi;
+    WrappedTH1 *hMETInvertedTauIdBtagDphi;
  
-    TH1 *hSelectedTauEt;
-    TH1 *hSelectedTauEta;
-    TH1 *hSelectedTauPhi;
-    TH1 *hSelectedTauRtau;
-    TH1 *hSelectedTauLeadingTrackPt;
-    TH1 *hSelectedTauLeadingTrackPtMetCut;
-    TH1 *hSelectedTauRtauAfterCuts;
-    TH1 *hSelectedTauEtMetCut;
-    TH1 *hSelectedTauEtaMetCut;
-    TH1 *hSelectedTauPhiMetCut;
-    TH1 *hSelectedTauEtAfterCuts;
-    TH1 *hSelectedTauEtaAfterCuts;
-    TH1 *hMetAfterCuts;
-    TH1 *hNonQCDTypeIISelectedTauEtAfterCuts;
-    TH1 *hNonQCDTypeIISelectedTauEtaAfterCuts;
-    TH1 *hTransverseMassDeltaPhiUpperCutFakeMet; 
-    TH1 *hSelectedTauRtauMetCut;
+    WrappedTH1 *hSelectedTauEt;
+    WrappedTH1 *hSelectedTauEta;
+    WrappedTH1 *hSelectedTauPhi;
+    WrappedTH1 *hSelectedTauRtau;
+    WrappedTH1 *hSelectedTauLeadingTrackPt;
+    WrappedTH1 *hSelectedTauLeadingTrackPtMetCut;
+    WrappedTH1 *hSelectedTauRtauAfterCuts;
+    WrappedTH1 *hSelectedTauEtMetCut;
+    WrappedTH1 *hSelectedTauEtaMetCut;
+    WrappedTH1 *hSelectedTauPhiMetCut;
+    WrappedTH1 *hSelectedTauEtAfterCuts;
+    WrappedTH1 *hSelectedTauEtaAfterCuts;
+    WrappedTH1 *hMetAfterCuts;
+    WrappedTH1 *hNonQCDTypeIISelectedTauEtAfterCuts;
+    WrappedTH1 *hNonQCDTypeIISelectedTauEtaAfterCuts;
+    WrappedTH1 *hTransverseMassDeltaPhiUpperCutFakeMet; 
+    WrappedTH1 *hSelectedTauRtauMetCut;
 
-    TH1 *hSelectionFlow;
+    WrappedTH1 *hSelectionFlow;
 
     CounterGroup fNonQCDTypeIIGroup;
     CounterGroup fAllTausCounterGroup;
@@ -417,8 +415,8 @@ namespace HPlus {
     CounterGroup fGenuineToTausAndTauOutsideAcceptanceCounterGroup;
     CounterGroup fJetToTausAndTauOutsideAcceptanceCounterGroup;
 
-    TH1 *hEMFractionAll;
-    TH1 *hEMFractionElectrons;
+    WrappedTH1 *hEMFractionAll;
+    WrappedTH1 *hEMFractionElectrons;
 
     bool fProduce;
   };

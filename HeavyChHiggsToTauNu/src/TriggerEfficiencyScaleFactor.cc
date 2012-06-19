@@ -1,13 +1,11 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
-
-#include "TH1F.h"
 
 #include<cmath>
 #include<algorithm>
@@ -28,8 +26,8 @@ namespace HPlus {
   TriggerEfficiencyScaleFactor::Data::Data(const TriggerEfficiencyScaleFactor *tesf): fTesf(tesf) {}
   TriggerEfficiencyScaleFactor::Data::~Data() {}
   
-  TriggerEfficiencyScaleFactor::TriggerEfficiencyScaleFactor(const edm::ParameterSet& iConfig, EventWeight& eventWeight):
-    fEventWeight(eventWeight), fCurrentRunData(0) {
+  TriggerEfficiencyScaleFactor::TriggerEfficiencyScaleFactor(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper):
+    fCurrentRunData(0) {
 
     std::string mode = iConfig.getUntrackedParameter<std::string>("mode");
     if(mode == "efficiency")
@@ -139,20 +137,20 @@ namespace HPlus {
   
     edm::Service<TFileService> fs;
     TFileDirectory dir = fs->mkdir("TriggerScaleFactor");
-    hScaleFactor = makeTH<TH1F>(dir, "TriggerScaleFactor", "TriggerScaleFactor;TriggerScaleFactor;N_{events}/0.01", 200., 0., 2.0);
+    hScaleFactor = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, dir, "TriggerScaleFactor", "TriggerScaleFactor;TriggerScaleFactor;N_{events}/0.01", 200., 0., 2.0);
 
     const size_t NBUF = 10;
     char buf[NBUF];
-    TH1 *hsf = makeTH<TH1F>(dir, "ScaleFactor", "Scale factor;Tau p_{T} bin;Scale factor", fPtBinLowEdges.size()+1, 0, fPtBinLowEdges.size()+1);
-    TH1 *hsfu = makeTH<TH1F>(dir, "ScaleFactorUncertainty", "Scale factor;Tau p_{T} bin;Scale factor uncertainty", fPtBinLowEdges.size()+1, 0, fPtBinLowEdges.size()+1);
-    hsf->SetBinContent(1, 1); hsf->GetXaxis()->SetBinLabel(1, "control");
-    hsfu->SetBinContent(1, 1); hsf->GetXaxis()->SetBinLabel(1, "control");
+    WrappedTH1 *hsf = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, dir, "ScaleFactor", "Scale factor;Tau p_{T} bin;Scale factor", fPtBinLowEdges.size()+1, 0, fPtBinLowEdges.size()+1);
+    WrappedTH1 *hsfu = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, dir, "ScaleFactorUncertainty", "Scale factor;Tau p_{T} bin;Scale factor uncertainty", fPtBinLowEdges.size()+1, 0, fPtBinLowEdges.size()+1);
+    hsf->getHisto()->SetBinContent(1, 1); hsf->GetXaxis()->SetBinLabel(1, "control");
+    hsfu->getHisto()->SetBinContent(1, 1); hsf->GetXaxis()->SetBinLabel(1, "control");
     for(size_t i=0; i<fPtBinLowEdges.size(); ++i) {
       size_t bin = i+2;
       snprintf(buf, NBUF, "%.0f", fPtBinLowEdges[i]);
 
-      hsf->SetBinContent(bin, scaleFactor(i));
-      hsfu->SetBinContent(bin, scaleFactorAbsoluteUncertainty(i));
+      hsf->getHisto()->SetBinContent(bin, scaleFactor(i));
+      hsfu->getHisto()->SetBinContent(bin, scaleFactorAbsoluteUncertainty(i));
       hsf->GetXaxis()->SetBinLabel(bin, buf);
       hsfu->GetXaxis()->SetBinLabel(bin, buf);
     }
@@ -265,7 +263,7 @@ namespace HPlus {
     return fScaleUncertainties[i];
   }
 
-  TriggerEfficiencyScaleFactor::Data TriggerEfficiencyScaleFactor::applyEventWeight(const pat::Tau& tau, bool isData) {
+  TriggerEfficiencyScaleFactor::Data TriggerEfficiencyScaleFactor::applyEventWeight(const pat::Tau& tau, bool isData, EventWeight& eventWeight) {
     fWeight = 1.0;
     fWeightAbsUnc = 0.0;
     fWeightRelUnc = 0.0;
@@ -274,7 +272,7 @@ namespace HPlus {
       fWeightAbsUnc = scaleFactorAbsoluteUncertainty(tau);
       fWeightRelUnc = scaleFactorRelativeUncertainty(tau);
 
-      hScaleFactor->Fill(fWeight, fEventWeight.getWeight());
+      hScaleFactor->Fill(fWeight);
     }
     else if(fMode == kEfficiency) {
       if(isData) {
@@ -300,7 +298,7 @@ namespace HPlus {
         */
       }
     }
-    fEventWeight.multiplyWeight(fWeight);
+    eventWeight.multiplyWeight(fWeight);
     return Data(this);
   }
 }

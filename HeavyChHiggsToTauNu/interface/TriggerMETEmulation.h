@@ -7,7 +7,6 @@
 #include "DataFormats/METReco/interface/MET.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 namespace edm {
   class ParameterSet;
@@ -15,9 +14,11 @@ namespace edm {
   class EventSetup;
 }
 
-class TH1;
-
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
+  class WrappedTH2;
+
   class TriggerMETEmulation {
   public:
     /**
@@ -40,7 +41,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
     
-    TriggerMETEmulation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    TriggerMETEmulation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~TriggerMETEmulation();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
@@ -57,12 +58,9 @@ namespace HPlus {
     // Counters
     Count fmetEmulationCutCount;
 
-    // Event weight object
-    EventWeight& fEventWeight;
-
     // Histograms
-    TH1 *hMetBeforeEmulation;
-    TH1 *hMetAfterEmulation;
+    WrappedTH1 *hMetBeforeEmulation;
+    WrappedTH1 *hMetAfterEmulation;
 
     // Selected jets
     edm::Ptr<reco::MET> fSelectedTriggerMET;

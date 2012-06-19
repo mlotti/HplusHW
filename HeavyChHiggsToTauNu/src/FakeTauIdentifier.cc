@@ -1,5 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Common/interface/Handle.h"
@@ -12,45 +12,52 @@
 
 namespace HPlus {
   
-  FakeTauIdentifier::FakeTauIdentifier(HPlus::EventWeight& eventWeight, std::string label) :
-  fEventWeight(eventWeight) {
+  FakeTauIdentifier::FakeTauIdentifier(HPlus::HistoWrapper& histoWrapper, std::string label) {
     edm::Service<TFileService> fs;
     // Create histograms
     TFileDirectory myDir = fs->mkdir("FakeTauIdentifier_"+label);
-    hTauMatchType = makeTH<TH1F>(myDir, "TauMatchType", "TauMatchType", 9, 0, 9);
-    hTauMatchType->GetXaxis()->SetBinLabel(1+kkNoMC, "NoMatch");
-    hTauMatchType->GetXaxis()->SetBinLabel(1+kkElectronToTau, "e#rightarrow#tau");
-    hTauMatchType->GetXaxis()->SetBinLabel(1+kkMuonToTau, "#mu#rightarrow#tau");
-    hTauMatchType->GetXaxis()->SetBinLabel(1+kkTauToTau, "genuine #tau");
-    hTauMatchType->GetXaxis()->SetBinLabel(1+kkJetToTau, "jet#rightarrow#tau");
-    hTauMatchType->GetXaxis()->SetBinLabel(1+kkElectronToTauAndTauOutsideAcceptance, "e#rightarrow#tau, #tau outside");
-    hTauMatchType->GetXaxis()->SetBinLabel(1+kkMuonToTauAndTauOutsideAcceptance, "#mu#rightarrow#tau, #tau outside");
-    hTauMatchType->GetXaxis()->SetBinLabel(1+kkTauToTauAndTauOutsideAcceptance, "genuine #tau, #tau outside");
-    hTauMatchType->GetXaxis()->SetBinLabel(1+kkJetToTauAndTauOutsideAcceptance, "jet#rightarrow#tau, #tau outside");
-    hTauOrigin = makeTH<TH1F>(myDir, "TauOrigin", "TauOrigin", 7, 0, 7);
-    hTauOrigin->GetXaxis()->SetBinLabel(1+kkUnknownOrigin, "unknown");
-    hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromW, "from W");
-    hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromZ, "from Z");
-    hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromHplus, "from H+");
-    hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromWTau, "from W#rightarrow#tau");
-    hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromZTauTau, "from Z#rightarrow#tautau");
-    hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromHplusTau, "from H+#rightarrow#tau");
-    hMuOrigin = makeTH<TH1F>(myDir, "MuOrigin", "MuOrigin", 7, 0, 7);
-    hMuOrigin->GetXaxis()->SetBinLabel(1+kkUnknownOrigin, "unknown");
-    hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromW, "from W");
-    hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromZ, "from Z");
-    hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromHplus, "from H+");
-    hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromWTau, "from W#rightarrow#tau");
-    hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromZTauTau, "from Z#rightarrow#tautau");
-    hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromHplusTau, "from H+#rightarrow#tau");
-    hElectronOrigin = makeTH<TH1F>(myDir, "ElectronOrigin", "ElectronOrigin", 7, 0, 7);
-    hElectronOrigin->GetXaxis()->SetBinLabel(1+kkUnknownOrigin, "unknown");
-    hElectronOrigin->GetXaxis()->SetBinLabel(1+kkFromW, "from W");
-    hElectronOrigin->GetXaxis()->SetBinLabel(1+kkFromZ, "from Z");
-    hElectronOrigin->GetXaxis()->SetBinLabel(1+kkFromHplus, "from H+");
-    hElectronOrigin->GetXaxis()->SetBinLabel(1+kkFromWTau, "from W#rightarrow#tau");
-    hElectronOrigin->GetXaxis()->SetBinLabel(1+kkFromZTauTau, "from Z#rightarrow#tautau");
-    hElectronOrigin->GetXaxis()->SetBinLabel(1+kkFromHplusTau, "from H+#rightarrow#tau");
+    hTauMatchType = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TauMatchType", "TauMatchType", 9, 0, 9);
+    if (hTauMatchType->isActive()) {
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkNoMC, "NoMatch");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkElectronToTau, "e#rightarrow#tau");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkMuonToTau, "#mu#rightarrow#tau");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkTauToTau, "genuine #tau");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkJetToTau, "jet#rightarrow#tau");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkElectronToTauAndTauOutsideAcceptance, "e#rightarrow#tau, #tau outside");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkMuonToTauAndTauOutsideAcceptance, "#mu#rightarrow#tau, #tau outside");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkTauToTauAndTauOutsideAcceptance, "genuine #tau, #tau outside");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkJetToTauAndTauOutsideAcceptance, "jet#rightarrow#tau, #tau outside");
+    }
+    hTauOrigin = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TauOrigin", "TauOrigin", 7, 0, 7);
+    if (hTauOrigin->isActive()) {
+      hTauOrigin->GetXaxis()->SetBinLabel(1+kkUnknownOrigin, "unknown");
+      hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromW, "from W");
+      hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromZ, "from Z");
+      hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromHplus, "from H+");
+      hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromWTau, "from W#rightarrow#tau");
+      hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromZTauTau, "from Z#rightarrow#tautau");
+      hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromHplusTau, "from H+#rightarrow#tau");
+    }
+    hMuOrigin = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "MuOrigin", "MuOrigin", 7, 0, 7);
+    if (hMuOrigin->isActive()) {
+      hMuOrigin->GetXaxis()->SetBinLabel(1+kkUnknownOrigin, "unknown");
+      hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromW, "from W");
+      hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromZ, "from Z");
+      hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromHplus, "from H+");
+      hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromWTau, "from W#rightarrow#tau");
+      hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromZTauTau, "from Z#rightarrow#tautau");
+      hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromHplusTau, "from H+#rightarrow#tau");
+    }
+    hElectronOrigin = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "ElectronOrigin", "ElectronOrigin", 7, 0, 7);
+    if (hElectronOrigin->isActive()) {
+      hElectronOrigin->GetXaxis()->SetBinLabel(1+kkUnknownOrigin, "unknown");
+      hElectronOrigin->GetXaxis()->SetBinLabel(1+kkFromW, "from W");
+      hElectronOrigin->GetXaxis()->SetBinLabel(1+kkFromZ, "from Z");
+      hElectronOrigin->GetXaxis()->SetBinLabel(1+kkFromHplus, "from H+");
+      hElectronOrigin->GetXaxis()->SetBinLabel(1+kkFromWTau, "from W#rightarrow#tau");
+      hElectronOrigin->GetXaxis()->SetBinLabel(1+kkFromZTauTau, "from Z#rightarrow#tautau");
+      hElectronOrigin->GetXaxis()->SetBinLabel(1+kkFromHplusTau, "from H+#rightarrow#tau");
+    }
   }
   
   FakeTauIdentifier::~FakeTauIdentifier() {
@@ -148,13 +155,13 @@ namespace HPlus {
     }
     
     // fill histograms
-    hTauMatchType->Fill(myMatchType, fEventWeight.getWeight());
+    hTauMatchType->Fill(myMatchType);
     if (isMCElectron)
-      hElectronOrigin->Fill(myOriginType, fEventWeight.getWeight());
+      hElectronOrigin->Fill(myOriginType);
     else if (isMCMuon)
-      hMuOrigin->Fill(myOriginType, fEventWeight.getWeight());
+      hMuOrigin->Fill(myOriginType);
     else if (isMCTau)
-      hTauOrigin->Fill(myOriginType, fEventWeight.getWeight());
+      hTauOrigin->Fill(myOriginType);
     
     return myMatchType;
   }

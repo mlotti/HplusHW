@@ -1,5 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIDTCTau.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -11,8 +11,8 @@
 #include "TH1F.h"
 
 namespace HPlus {
-  TauIDTCTau::TauIDTCTau(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, std::string label, TFileDirectory& myDir):
-    TauIDBase(iConfig, eventCounter, eventWeight, label+"_TCTau", myDir)
+  TauIDTCTau::TauIDTCTau(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label, TFileDirectory& myDir):
+    TauIDBase(iConfig, eventCounter, histoWrapper, label+"_TCTau", myDir)
   { }
 
   TauIDTCTau::~TauIDTCTau() { }
@@ -51,7 +51,7 @@ namespace HPlus {
 
   bool TauIDTCTau::passRTauCut(const edm::Ptr<pat::Tau> tau) {
     double myRtauValue = getRtauValue(tau);
-    hRtauVsEta->Fill(myRtauValue, tau->eta(), fEventWeight.getWeight());
+    hRtauVsEta->Fill(myRtauValue, tau->eta());
     fCounterPackager.fill(fIDRTauCut, myRtauValue);
     if (!(myRtauValue > fRtauCut)) return false;
     fCounterPackager.incrementSubCount(fIDRTauCut);

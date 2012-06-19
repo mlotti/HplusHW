@@ -76,7 +76,7 @@ def doLimitError(limits):
     expErrors = [limits.expectedErrorGraph(sigma=s) for s in order]
     if expErrors[0] != None:
         exps = [limits.expectedGraph(sigma=s) for s in order]
-        expRelErrors = [(divideGraph(expErrors[i], exps[i]), "ExpRelErr%d"%i) for i in xrange(len(exps))]
+        expRelErrors = [(limit.divideGraph(expErrors[i], exps[i]), "ExpRelErr%d"%i) for i in xrange(len(exps))]
         expLabels = {
             "ExpRelErr0": "Expected median",
             "ExpRelErr1": "Expected +1#sigma",
@@ -89,7 +89,7 @@ def doLimitError(limits):
     if obsErr != None:
         obs = limits.observedGraph()
         if obs != None:
-            obsRelErrors = [(divideGraph(obsErr, obs), "ObsRelErr")]
+            obsRelErrors = [(limit.divideGraph(obsErr, obs), "ObsRelErr")]
             obsLabels = {"ObsRelErr": "Observed"}
 
     if len(expRelErrors) == 0 and len(obsRelErrors) == 0:
@@ -137,19 +137,6 @@ def doLimitError(limits):
 
     plot.save()
 
-
-def divideGraph(num, denom):
-    gr = ROOT.TGraph(num)
-    for i in xrange(gr.GetN()):
-        y = denom.GetY()[i]
-        val = 0
-        if y != 0:
-            val = gr.GetY()[i]/y
-        gr.SetPoint(i, gr.GetX()[i], val)
-    return gr
-
-
-                          
 
 if __name__ == "__main__":
     main()

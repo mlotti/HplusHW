@@ -1,5 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/Common/interface/Handle.h"
@@ -9,14 +9,12 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
-#include "TH1F.h"
-
 namespace HPlus {
   METSelection::Data::Data(const METSelection *metSelection, bool passedEvent):
     fMETSelection(metSelection), fPassedEvent(passedEvent) {}
   METSelection::Data::~Data() {}
-  
-  METSelection::METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, std::string label):
+
+  METSelection::METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label):
     fRawSrc(iConfig.getUntrackedParameter<edm::InputTag>("rawSrc")),
     fType1Src(iConfig.getUntrackedParameter<edm::InputTag>("type1Src")),
     fType2Src(iConfig.getUntrackedParameter<edm::InputTag>("type2Src")),
@@ -27,8 +25,7 @@ namespace HPlus {
     fJetType1Threshold(iConfig.getUntrackedParameter<double>("jetType1Threshold")),
     fJetOffsetCorrLabel(iConfig.getUntrackedParameter<std::string>("jetOffsetCorrLabel")),
     //fType2ScaleFactor(iConfig.getUntrackedParameter<double>("type2ScaleFactor")),
-    fMetCutCount(eventCounter.addSubCounter(label+"_MET","MET cut")),
-    fEventWeight(eventWeight)
+    fMetCutCount(eventCounter.addSubCounter(label+"_MET","MET cut"))
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir(label);
@@ -45,11 +42,11 @@ namespace HPlus {
     else
       throw cms::Exception("Configuration") << "Invalid value for select '" << select << "', valid values are raw, type1, type2" << std::endl;
     
-    hMet = makeTH<TH1F>(myDir, "met", "met", 400, 0., 400.);
-    hMetSignif = makeTH<TH1F>(myDir, "metSignif", "metSignif", 100, 0., 50.);
-    hMetSumEt  = makeTH<TH1F>(myDir, "metSumEt", "metSumEt", 50, 0., 1500.);
-    hMetDivSumEt = makeTH<TH1F>(myDir, "hMetDivSumEt", "hMetDivSumEt", 50, 0., 1.);
-    hMetDivSqrSumEt = makeTH<TH1F>(myDir, "hMetDivSqrSumEt", "hMetDivSqrSumEt", 50, 0., 1.);
+    hMet = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "met", "met", 80, 0., 400.);
+    hMetSignif = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "metSignif", "metSignif", 100, 0., 50.);
+    hMetSumEt  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "metSumEt", "metSumEt", 30, 0., 1500.);
+    hMetDivSumEt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hMetDivSumEt", "hMetDivSumEt", 50, 0., 1.);
+    hMetDivSqrSumEt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hMetDivSqrSumEt", "hMetDivSqrSumEt", 50, 0., 1.);
   }
 
   METSelection::~METSelection() {}
@@ -114,13 +111,13 @@ namespace HPlus {
     else
       throw cms::Exception("LogicError") << "This should never happen at " << __FILE__ << ":" << __LINE__ << std::endl;
 
-    hMet->Fill(met->et(), fEventWeight.getWeight());
-    hMetSignif->Fill(met->significance(), fEventWeight.getWeight());
-    hMetSumEt->Fill(met->sumEt(), fEventWeight.getWeight());
+    hMet->Fill(met->et());
+    hMetSignif->Fill(met->significance());
+    hMetSumEt->Fill(met->sumEt());
     double sumEt = met->sumEt();
     if(sumEt != 0){
-        hMetDivSumEt->Fill(met->et()/sumEt, fEventWeight.getWeight());
-        hMetDivSqrSumEt->Fill(met->et()/sumEt, fEventWeight.getWeight());
+        hMetDivSumEt->Fill(met->et()/sumEt);
+        hMetDivSqrSumEt->Fill(met->et()/sumEt);
     }
 
     if(met->et() > fMetCut) {

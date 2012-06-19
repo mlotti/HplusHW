@@ -29,7 +29,7 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MathFunctions.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
@@ -43,10 +43,10 @@ namespace edm {
   class ParameterSet;
 }
 
-class TH1;
-
 namespace HPlus {
-  
+  class HistoWrapper;
+  class WrappedTH1;
+
   class InvMassVetoOnJets {
   public:
 
@@ -71,7 +71,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
 
-    InvMassVetoOnJets(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    InvMassVetoOnJets(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~InvMassVetoOnJets();
 
     // Data analyze( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
@@ -95,23 +95,20 @@ namespace HPlus {
     Count fInvMassTopWindow20SubCount;
     Count fInvMassTopWindow25SubCount;
 
-    // EventWeight object
-    EventWeight& fEventWeight;
-
     // Histograms
-    TH1 *hDiJetInvMass;
-    TH1 *hDiJetInvMassCutFail;
-    TH1 *hDiJetInvMassCutPass;
-    TH1 *hDiJetInvMassWCutFail;
+    WrappedTH1 *hDiJetInvMass;
+    WrappedTH1 *hDiJetInvMassCutFail;
+    WrappedTH1 *hDiJetInvMassCutPass;
+    WrappedTH1 *hDiJetInvMassWCutFail;
 
-    TH1 *hTriJetInvMass;
-    TH1 *hTriJetInvMassCutFail;
-    TH1 *hTriJetInvMassCutPass;
-    TH1 *hTriJetInvMassTopCutFail;
+    WrappedTH1 *hTriJetInvMass;
+    WrappedTH1 *hTriJetInvMassCutFail;
+    WrappedTH1 *hTriJetInvMassCutPass;
+    WrappedTH1 *hTriJetInvMassTopCutFail;
 
-    TH1 *hInvMass;
-    TH1 *hInvMassCutFail;
-    TH1 *hInvMassCutPass;
+    WrappedTH1 *hInvMass;
+    WrappedTH1 *hInvMassCutFail;
+    WrappedTH1 *hInvMassCutPass;
 
   };
 }

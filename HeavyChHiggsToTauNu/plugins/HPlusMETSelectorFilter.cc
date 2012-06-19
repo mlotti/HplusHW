@@ -7,6 +7,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 
 class HPlusMETPtrSelectorFilter: public edm::EDFilter {
@@ -21,23 +22,23 @@ class HPlusMETPtrSelectorFilter: public edm::EDFilter {
   virtual void endJob();
 
   virtual bool beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
-  virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
+  HPlus::HistoWrapper histoWrapper;
   HPlus::METSelection fMETSelection;
   edm::InputTag fTauSrc;
   edm::InputTag fJetSrc;
 };
 
 HPlusMETPtrSelectorFilter::HPlusMETPtrSelectorFilter(const edm::ParameterSet& iConfig):
-  eventCounter(),
+  eventCounter(iConfig),
   eventWeight(iConfig),
-  fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET"),
+  histoWrapper(eventWeight, "Debug"),
+  fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, histoWrapper, "MET"),
   fTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
   fJetSrc(iConfig.getUntrackedParameter<edm::InputTag>("jetSrc"))
 {
-  eventCounter.produces(this);
   eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
 HPlusMETPtrSelectorFilter::~HPlusMETPtrSelectorFilter() {}
@@ -62,12 +63,8 @@ bool HPlusMETPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup
   return true;
 }
 
-bool HPlusMETPtrSelectorFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
-  eventCounter.endLuminosityBlock(iBlock, iSetup);
-  return false;
-}
-
 void HPlusMETPtrSelectorFilter::endJob() {
+  eventCounter.endJob();
 }
 
 //define this as a plug-in

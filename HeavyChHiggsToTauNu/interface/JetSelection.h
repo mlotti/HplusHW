@@ -8,7 +8,6 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DirectionalCut.h"
 
 namespace edm {
@@ -17,10 +16,11 @@ namespace edm {
   class EventSetup;
 }
 
-class TH1;
-class TH2;
-
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
+  class WrappedTH2;
+
   class JetSelection {
   public:
       /**
@@ -44,13 +44,13 @@ namespace HPlus {
       const int getHadronicJetCountInFwdDir() const { return fJetSelection->iNHadronicJetsInFwdDir; }
       const bool eventHasJetWithEMFraction07() const { return fJetSelection->bEMFraction07Veto; }
       const bool eventHasJetWithEMFraction08() const { return fJetSelection->bEMFraction08Veto; }
-      
+
     private:
       const JetSelection *fJetSelection;
       const bool fPassedEvent;
     };
-       
-    JetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+
+    JetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~JetSelection();
 
     // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate
@@ -100,88 +100,85 @@ namespace HPlus {
     Count fEtaCutSubCount;
     Count fPtCutSubCount;
 
-    // EventWeight object
-    EventWeight& fEventWeight;
-    
     // Histograms
-    TH1 *hPt;
-    TH1 *hPtCentral;
-    TH1 *hEta;
-    TH1 *hPhi;
-    TH1 *hNumberOfSelectedJets;
-    TH1 *hjetEMFraction;
-    TH1 *hjetChargedEMFraction;
-    TH1 *hjetMaxEMFraction;
-    TH1 *hMinDeltaRToOppositeDirectionOfTau;
-    TH1 *hFirstJetPt;
-    TH1 *hSecondJetPt;
-    TH1 *hThirdJetPt;
-    TH1 *hFourthJetPt;
-    TH1 *hFirstJetEta;
-    TH1 *hSecondJetEta;
-    TH1 *hThirdJetEta;
-    TH1 *hFourthJetEta;
-    TH1 *hFirstJetPhi;
-    TH1 *hSecondJetPhi;
-    TH1 *hThirdJetPhi;
-    TH1 *hFourthJetPhi;
+    WrappedTH1 *hPt;
+    WrappedTH1 *hPtCentral;
+    WrappedTH1 *hEta;
+    WrappedTH1 *hPhi;
+    WrappedTH1 *hNumberOfSelectedJets;
+    WrappedTH1 *hjetEMFraction;
+    WrappedTH1 *hjetChargedEMFraction;
+    WrappedTH1 *hjetMaxEMFraction;
+    WrappedTH1 *hMinDeltaRToOppositeDirectionOfTau;
+    WrappedTH1 *hFirstJetPt;
+    WrappedTH1 *hSecondJetPt;
+    WrappedTH1 *hThirdJetPt;
+    WrappedTH1 *hFourthJetPt;
+    WrappedTH1 *hFirstJetEta;
+    WrappedTH1 *hSecondJetEta;
+    WrappedTH1 *hThirdJetEta;
+    WrappedTH1 *hFourthJetEta;
+    WrappedTH1 *hFirstJetPhi;
+    WrappedTH1 *hSecondJetPhi;
+    WrappedTH1 *hThirdJetPhi;
+    WrappedTH1 *hFourthJetPhi;
 
     // PU analysis
-    TH1 *hBetaGenuine;
-    TH1 *hBetaStarGenuine;
-    TH1 *hMeanDRgenuine;
-    TH1 *hBetaFake;
-    TH1 *hBetaStarFake;
-    TH1 *hMeanDRfake;
-    TH2 *hBetaVsPUgenuine;
-    TH2 *hBetaStarVsPUgenuine;
-    TH2 *hMeanDRVsPUgenuine;
-    TH2 *hBetaVsPUfake;
-    TH2 *hBetaStarVsPUfake;
-    TH2 *hMeanDRVsPUfake;
+    WrappedTH1 *hBetaGenuine;
+    WrappedTH1 *hBetaStarGenuine;
+    WrappedTH1 *hMeanDRgenuine;
+    WrappedTH1 *hBetaFake;
+    WrappedTH1 *hBetaStarFake;
+    WrappedTH1 *hMeanDRfake;
+    WrappedTH2 *hBetaVsPUgenuine;
+    WrappedTH2 *hBetaStarVsPUgenuine;
+    WrappedTH2 *hMeanDRVsPUgenuine;
+    WrappedTH2 *hBetaVsPUfake;
+    WrappedTH2 *hBetaStarVsPUfake;
+    WrappedTH2 *hMeanDRVsPUfake;
 
     // Histograms for jet composition
-    TH1 *hPtExcludedJets;
-    TH1 *hEtaExcludedJets;
-    TH1 *hPhiExcludedJets;
-    TH1 *hNeutralEmEnergyFractionExcludedJets;
-    TH1 *hNeutralMultiplicityExcludedJets;
-    TH1 *hNeutralHadronEnergyFractionExcludedJets;
-    TH1 *hNeutralHadronMultiplicityExcludedJets;
-    TH1 *hPhotonEnergyFractionExcludedJets;
-    TH1 *hPhotonMultiplicityExcludedJets;
-    TH1 *hMuonEnergyFractionExcludedJets;
-    TH1 *hMuonMultiplicityExcludedJets;
-    TH1 *hChargedHadronEnergyFractionExcludedJets;
-    TH1 *hChargedEmEnergyFractionExcludedJets;
-    TH1 *hChargedMultiplicityExcludedJets;
-    TH1 *hPartonFlavourExcludedJets;
-    TH1 *hJECFactorExcludedJets;
-    TH1 *hN60ExcludedJets;
-    TH1 *hTowersAreaExcludedJets;
-    TH1 *hJetChargeExcludedJets;
-    TH1 *hPtDiffToGenJetExcludedJets;
+    WrappedTH1 *hPtExcludedJets;
+    WrappedTH1 *hEtaExcludedJets;
+    WrappedTH1 *hPhiExcludedJets;
+    WrappedTH1 *hNeutralEmEnergyFractionExcludedJets;
+    WrappedTH1 *hNeutralMultiplicityExcludedJets;
+    WrappedTH1 *hNeutralHadronEnergyFractionExcludedJets;
+    WrappedTH1 *hNeutralHadronMultiplicityExcludedJets;
+    WrappedTH1 *hPhotonEnergyFractionExcludedJets;
+    WrappedTH1 *hPhotonMultiplicityExcludedJets;
+    WrappedTH1 *hMuonEnergyFractionExcludedJets;
+    WrappedTH1 *hMuonMultiplicityExcludedJets;
+    WrappedTH1 *hChargedHadronEnergyFractionExcludedJets;
+    WrappedTH1 *hChargedEmEnergyFractionExcludedJets;
+    WrappedTH1 *hChargedMultiplicityExcludedJets;
+    WrappedTH1 *hPartonFlavourExcludedJets;
+    WrappedTH1 *hJECFactorExcludedJets;
+    WrappedTH1 *hN60ExcludedJets;
+    WrappedTH1 *hTowersAreaExcludedJets;
+    WrappedTH1 *hJetChargeExcludedJets;
+    WrappedTH1 *hPtDiffToGenJetExcludedJets;
 
-    TH1 *hPtSelectedJets;
-    TH1 *hEtaSelectedJets;
-    TH1 *hPhiSelectedJets;
-    TH1 *hNeutralEmEnergyFractionSelectedJets;
-    TH1 *hNeutralMultiplicitySelectedJets;
-    TH1 *hNeutralHadronEnergyFractionSelectedJets;
-    TH1 *hNeutralHadronMultiplicitySelectedJets;
-    TH1 *hPhotonEnergyFractionSelectedJets;
-    TH1 *hPhotonMultiplicitySelectedJets;
-    TH1 *hMuonEnergyFractionSelectedJets;
-    TH1 *hMuonMultiplicitySelectedJets;
-    TH1 *hChargedHadronEnergyFractionSelectedJets;
-    TH1 *hChargedEmEnergyFractionSelectedJets;
-    TH1 *hChargedMultiplicitySelectedJets;
-    TH1 *hPartonFlavourSelectedJets;
-    TH1 *hJECFactorSelectedJets;
-    TH1 *hN60SelectedJets;
-    TH1 *hTowersAreaSelectedJets;
-    TH1 *hJetChargeSelectedJets;
-    TH1 *hPtDiffToGenJetSelectedJets;
+    WrappedTH1 *hPtSelectedJets;
+    WrappedTH1 *hEtaSelectedJets;
+    WrappedTH1 *hPhiSelectedJets;
+    WrappedTH1 *hNeutralEmEnergyFractionSelectedJets;
+    WrappedTH1 *hNeutralMultiplicitySelectedJets;
+    WrappedTH1 *hNeutralHadronEnergyFractionSelectedJets;
+    WrappedTH1 *hNeutralHadronMultiplicitySelectedJets;
+    WrappedTH1 *hPhotonEnergyFractionSelectedJets;
+    WrappedTH1 *hPhotonMultiplicitySelectedJets;
+    WrappedTH1 *hMuonEnergyFractionSelectedJets;
+    WrappedTH1 *hMuonMultiplicitySelectedJets;
+    WrappedTH1 *hChargedHadronEnergyFractionSelectedJets;
+    WrappedTH1 *hChargedEmEnergyFractionSelectedJets;
+    WrappedTH1 *hChargedMultiplicitySelectedJets;
+    WrappedTH1 *hPartonFlavourSelectedJets;
+    WrappedTH1 *hJECFactorSelectedJets;
+    WrappedTH1 *hN60SelectedJets;
+    WrappedTH1 *hTowersAreaSelectedJets;
+    WrappedTH1 *hJetChargeSelectedJets;
+    WrappedTH1 *hPtDiffToGenJetSelectedJets;
 
     // All jets
     edm::PtrVector<pat::Jet> fAllJets;

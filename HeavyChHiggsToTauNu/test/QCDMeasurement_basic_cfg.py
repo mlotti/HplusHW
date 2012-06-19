@@ -32,6 +32,10 @@ JESUnclusteredMETVariation = 0.10
 # Tree filling
 doFillTree = False
 
+# Set level of how many histograms are stored to files
+# options are: 'Vital' (least histograms), 'Informative', 'Debug' (all histograms)
+myHistogramAmbientLevel = "Debug"
+
 applyTriggerScaleFactor = True
 
 #PF2PATVersion = "PFlow" # For normal PF2PAT
@@ -138,31 +142,35 @@ param.InvMassVetoOnJets.setTrueToUseModule = False
 
 ##############################################################################
 process.QCDMeasurement = cms.EDFilter("HPlusQCDMeasurementBasicFilter",
-    trigger = param.trigger,
-    triggerEfficiencyScaleFactor = param.triggerEfficiencyScaleFactor,
-    primaryVertexSelection = param.primaryVertexSelection,
-    tauSelection = param.tauSelectionHPSMediumTauBased,
-    GlobalElectronVeto = param.GlobalElectronVeto,
-    NonIsolatedElectronVeto = param.NonIsolatedElectronVeto,
-    GlobalMuonVeto = param.GlobalMuonVeto,
-    NonIsolatedMuonVeto = param.NonIsolatedMuonVeto,
-    jetSelection = param.jetSelection,
-    EvtTopology = param.EvtTopology,              ### only for histogramming reasons - does not affect analysis
-    InvMassVetoOnJets = param.InvMassVetoOnJets,  ### only for histogramming reasons - does not affect analysis
-    bTagging = param.bTagging,
-    MET = param.MET,
-    fakeMETVeto = param.fakeMETVeto,
-    topSelection = param.topSelection,
-    bjetSelection = param.bjetSelection,                                      
-    topChiSelection = param.topChiSelection,                                  
-    topWithBSelection = param.topWithBSelection,
-    forwardJetVeto = param.forwardJetVeto,
-    GenParticleAnalysis = param.GenParticleAnalysis,
-    vertexWeight = param.vertexWeight,
-    tauIsolationCalculator = cms.untracked.PSet(
-    vertexSrc = cms.InputTag("offlinePrimaryVertices")
-    ), # needed for calculating isolation on the fly to determine which tau jet is most isolated
-    Tree = param.tree,
+    blindAnalysisStatus = param.blindAnalysisStatus,
+    histogramAmbientLevel = param.histogramAmbientLevel,
+    trigger = param.trigger.clone(),
+    triggerEfficiencyScaleFactor = param.triggerEfficiencyScaleFactor.clone(),
+    primaryVertexSelection = param.primaryVertexSelection.clone(),
+    GlobalElectronVeto = param.GlobalElectronVeto.clone(),
+    GlobalMuonVeto = param.GlobalMuonVeto.clone(),
+    tauSelection = param.tauSelectionHPSMediumTauBased.clone(),
+    vetoTauSelection = param.vetoTauSelection.clone(),
+    jetSelection = param.jetSelection.clone(),
+    MET = param.MET.clone(),
+    bTagging = param.bTagging.clone(),
+    fakeMETVeto = param.fakeMETVeto.clone(),
+    jetTauInvMass = param.jetTauInvMass.clone(),
+    deltaPhiTauMET = param.deltaPhiTauMET,
+    topReconstruction = param.topReconstruction,
+    topSelection = param.topSelection.clone(),
+    bjetSelection = param.bjetSelection.clone(),
+    topChiSelection = param.topChiSelection.clone(),
+    topWithBSelection = param.topWithBSelection.clone(),
+    topWithWSelection = param.topWithWSelection.clone(),
+    forwardJetVeto = param.forwardJetVeto.clone(),
+    transverseMassCut = param.transverseMassCut,
+    EvtTopology = param.EvtTopology.clone(),
+    vertexWeight = param.vertexWeight.clone(),
+    vertexWeightReader = param.vertexWeightReader.clone(),
+    GenParticleAnalysis = param.GenParticleAnalysis.clone(),
+    Tree = param.tree.clone(),
+    eventCounter = param.eventCounter.clone()
 )
 # Factorization (quick and dirty version)
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetTableFactorization_cfi as mettables
@@ -181,7 +189,7 @@ process.QCDMeasurement.factorization.factorizationTables = mettableCoeff.METTabl
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
 sequence = MetCorrection.addCorrectedMet(process, process.QCDMeasurement, postfix=PF2PATVersion)
 process.commonSequence *= sequence
-        
+
 # Prescale fetching done automatically for data
 if dataVersion.isData() and not disablePrescales:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
@@ -193,6 +201,8 @@ if dataVersion.isData() and not disablePrescales:
 # Disable filling of TTree
 if not doFillTree:
     process.QCDMeasurement.Tree.fill = cms.untracked.bool(False)
+
+process.QCDMeasurement.histogramAmbientLevel = myHistogramAmbientLevel
 
 # Print output
 print "\ntree will be filled:", process.QCDMeasurement.Tree.fill

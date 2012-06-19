@@ -14,7 +14,7 @@ namespace edm {
 
 namespace HPlus {
   class EventCounter;
-  class EventWeight;
+  class HistoWrapper;
 
   class VertexSelection {
   public:
@@ -31,7 +31,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
 
-    VertexSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    VertexSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~VertexSelection();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
@@ -39,8 +39,6 @@ namespace HPlus {
   private:
     edm::InputTag fSrc;
     bool fEnabled;
-
-    EventWeight& fEventWeight;
 
     edm::Ptr<reco::Vertex> fSelectedVertex;
   };

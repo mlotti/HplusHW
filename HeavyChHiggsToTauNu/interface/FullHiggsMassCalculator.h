@@ -9,6 +9,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 
 namespace edm {
   class ParameterSet;
@@ -16,10 +17,12 @@ namespace edm {
   class EventSetup;
 }
 
-class TH1;
 class TVector3;
 
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
+
   class FullHiggsMassCalculator {
   public:
     class Data {
@@ -29,18 +32,21 @@ namespace HPlus {
 
       bool passedEvent() const { return fPassedEvent; }
       double getHiggsMass() const { return fCalculator->fHiggsMassSolution; }
+      //      const edm::Ptr<pat::Jet>& getSelectedBjet() const { return fCalculator->selectedBjet; }
+
 
     private:
       const FullHiggsMassCalculator* fCalculator;
       const bool fPassedEvent;
     };
 
-    FullHiggsMassCalculator(EventCounter& eventCounter, EventWeight& eventWeight);
-    //    FullHiggsMassCalculator(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+
+    FullHiggsMassCalculator(EventCounter& eventCounter, HistoWrapper& histoWrapper);
 
     ~FullHiggsMassCalculator();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData);
+    //    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData, const TopChiSelection::Data TopChiSelectionData );
     void myBJet();
 
   private:
@@ -49,8 +55,9 @@ namespace HPlus {
 
   private:
 
+
     // EventWeight object
-    EventWeight& fEventWeight;
+    /////////////////////////////////////////////    EventWeight& fEventWeight;
     //edm::InputTag fVertexSrc;
     //TH1 *hWeights;
 
@@ -60,23 +67,26 @@ namespace HPlus {
     double fNeutrinoPtSolution;
     double fHiggsMassSolution;
     double NeutrinoPz;
+    //    edm::Ptr<pat::Jet> selectedBjet;
 
     // Histograms
-    TH1* hHiggsMass;
-    TH1* hHiggsMassReal;
-    TH1* hHiggsMassImaginary;
-    TH1* hTopMass;
-    TH1* hTopMassRejected;
-    TH1* hTopMassReal;
-    TH1* hTopMassRealRejected;
-    TH1* hTopMassImaginary;
-    TH1* hTopMassImaginaryRejected;
-    TH1* hNeutrinoZSolution;
-    TH1* hNeutrinoPtSolution;
-    TH1* hNeutrinoPtDifference;
-    TH1* hSolution1PzDifference;
-    TH1* hSolution2PzDifference;
-
+ 
+    WrappedTH1* hSolution1PzDifference;
+    WrappedTH1* hSolution2PzDifference;
+    WrappedTH2* hSolution12PzDifference;
+    WrappedTH1* hHiggsMass;
+    WrappedTH1* hHiggsMassReal;
+    WrappedTH1* hHiggsMassImaginary;
+    WrappedTH1* hTopMass;
+    WrappedTH1* hTopMassRejected;
+    WrappedTH1* hTopMassReal;
+    WrappedTH1* hTopMassRealRejected;
+    WrappedTH1* hTopMassImaginary;
+    WrappedTH1* hTopMassImaginaryRejected;
+    WrappedTH1* hNeutrinoZSolution;
+    WrappedTH1* hNeutrinoPtSolution;
+    WrappedTH1* hNeutrinoPtDifference;
+   
   };
 }
 

@@ -7,6 +7,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VetoTauSelection.h"
 
 class HPlusVetoTauPtrSelectorFilter: public edm::EDFilter {
@@ -22,10 +23,10 @@ class HPlusVetoTauPtrSelectorFilter: public edm::EDFilter {
   virtual void endJob();
 
   virtual bool beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
-  virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
+  HPlus::HistoWrapper histoWrapper;
   HPlus::VetoTauSelection fVetoTauSelection;
   edm::InputTag fTauSrc;
   bool fFilter;
@@ -39,13 +40,13 @@ class HPlusVetoTauPtrSelectorFilter: public edm::EDFilter {
 };
 
 HPlusVetoTauPtrSelectorFilter::HPlusVetoTauPtrSelectorFilter(const edm::ParameterSet& iConfig):
-  eventCounter(),
+  eventCounter(iConfig),
   eventWeight(iConfig),
-  fVetoTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("vetoTauSelection"), eventCounter, eventWeight),
+  histoWrapper(eventWeight, "Debug"),
+  fVetoTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("vetoTauSelection"), eventCounter, histoWrapper),
   fTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
   fFilter(iConfig.getParameter<bool>("filter"))
 {
-  eventCounter.produces(this);
   produces<Product>();
   produces<bool>();
   eventCounter.setWeightPointer(eventWeight.getWeightPtr());
@@ -86,12 +87,8 @@ bool HPlusVetoTauPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventS
   return !fFilter || (fFilter && passed);
 }
 
-bool HPlusVetoTauPtrSelectorFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
-  eventCounter.endLuminosityBlock(iBlock, iSetup);
-  return false;
-}
-
 void HPlusVetoTauPtrSelectorFilter::endJob() {
+  eventCounter.endJob();
 }
 
 //define this as a plug-in

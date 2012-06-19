@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FactorizationTable.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
 #include <iostream>
 
@@ -6,6 +7,8 @@
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+
+#include "TH1.h"
 
 namespace HPlus {
   FactorizationTable::FactorizationTable(const edm::ParameterSet& iConfig) :
@@ -93,7 +96,7 @@ namespace HPlus {
     int myCoefficientBinCount = getCoefficientTableSize();
     std::string myName = "FactorizationTableCoefficients_"+tableNamePrefix;
     std::string myLabel = myName+";bin;weight coefficient";
-    hUsedCoefficients = fs->make<TH1F>(myName.c_str(), myLabel.c_str(), myCoefficientBinCount, 0., myCoefficientBinCount);
+    hUsedCoefficients = makeTH<TH1F>(*fs, myName.c_str(), myLabel.c_str(), myCoefficientBinCount, 0., myCoefficientBinCount);
     for (size_t i = 0; i < fWeightTable.size(); ++i) {
       hUsedCoefficients->Fill(i, fWeightTable[i]);
     }

@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import MET as defaultMETSelection
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 hPlusMETPtrSelectorFilter = cms.EDFilter("HPlusMETPtrSelectorFilter",
-	MET = defaultMETSelection
+	MET = param.MET.clone(),
+        eventCounter = param.eventCounter.clone()
 )

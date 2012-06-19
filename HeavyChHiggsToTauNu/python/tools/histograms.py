@@ -16,14 +16,16 @@ import dataset
 
 ## Enumeration class for CMS text mode
 class CMSMode:
-    PRELIMINARY = 0
-    PAPER = 1
-    SIMULATION = 2
+    NONE = 0
+    PRELIMINARY = 1
+    PAPER = 2
+    SIMULATION = 3
 
 ## Global variable to hold CMS text mode
 cmsTextMode = CMSMode.PRELIMINARY
 ## Global dictionary to hold the CMS text labels
 cmsText = {
+    CMSMode.NONE: "",
     CMSMode.PRELIMINARY: "CMS Preliminary",
     CMSMode.PAPER: "CMS",
     CMSMode.SIMULATION : "CMS Simulation"
@@ -197,7 +199,7 @@ def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
         format = ".%df" % (abs(ndigis)+1)
         format = "%"+format
     format += " %s"
-    format = "L="+format    
+    format = "L="+format
 
     addText(x, y, format % (lumi/1000., unit), textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
@@ -1422,7 +1424,7 @@ class HistoManagerImpl:
     # \param name         Name of the unceratinty histogram
     # \param legendLabel  Legend label for the uncertainty histogram
     # \param nameList     List of histogram names to include to the uncertainty band (\a None corresponds all MC)
-    def addMCUncertainty(self, style, name="MCuncertainty", legendLabel="MC stat. unc.", nameList=None):
+    def addMCUncertainty(self, style, name="MCuncertainty", legendLabel="Sim. stat. unc.", nameList=None):
         mcHistos = filter(lambda x: x.isMC(), self.drawList)
         if len(mcHistos) == 0:
             print >> sys.stderr, "WARNING: Tried to create MC uncertainty histogram, but there are not MC histograms!"

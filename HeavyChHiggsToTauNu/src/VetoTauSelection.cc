@@ -9,12 +9,11 @@
 
 #include "RecoTauTag/TauTagTools/interface/TauTagTools.h"
 
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "TMath.h"
-#include "TH1.h"
 #include "TLorentzVector.h"
 
 
@@ -39,7 +38,7 @@ namespace HPlus {
 
   VetoTauSelection::Data::~Data() { }
   
-  VetoTauSelection::VetoTauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight) :
+  VetoTauSelection::VetoTauSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper) :
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fOneProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneProngTauSrc")),
     fOneAndThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneAndThreeProngTauSrc")),
@@ -47,9 +46,8 @@ namespace HPlus {
     fZMass(iConfig.getUntrackedParameter<double>("Zmass")),
     fZMassWindow(iConfig.getUntrackedParameter<double>("ZmassWindow")),
     fTauSource(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection").getUntrackedParameter<edm::InputTag>("src")),
-    fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, "TauVeto"),
-    fFakeTauIdentifier(eventWeight, "VetoTauSelection"),
-    fEventWeight(eventWeight),
+    fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, histoWrapper, "TauVeto"),
+    fFakeTauIdentifier(histoWrapper, "VetoTauSelection"),
     fAllEventsCounter(eventCounter.addSubCounter("VetoTauSelection","All events")),
     //    fVetoTauCandidatesCounter(eventCounter.addSubCounter("VetoTauSelection","Veto tau candidates"));
     fVetoTausSelectedCounter(eventCounter.addSubCounter("VetoTauSelection","Veto taus found")),
@@ -58,25 +56,30 @@ namespace HPlus {
     // Initialise histograms
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("VetoTauSelection");
-    hCandidateTauNumber = makeTH<TH1F>(myDir, "CandidateTauNumber", "CandidateTauNumber;Number of veto #tau candidates;Jets", 4, 0, 4);
-    hCandidateTauNumber->GetXaxis()->SetBinLabel(1, "Genuine #tau");
-    hCandidateTauNumber->GetXaxis()->SetBinLabel(2, "e#rightarrow#tau");
-    hCandidateTauNumber->GetXaxis()->SetBinLabel(3, "#mu#rightarrow#tau");
-    hCandidateTauNumber->GetXaxis()->SetBinLabel(4, "jet#rightarrow#tau");
-    hSelectedTauNumber = makeTH<TH1F>(myDir, "SelectedTauNumber", "SelectedTauNumber;Number of selected veto #tau jets;Jets", 4, 0, 4);
-    for (int i = 1; i <= hCandidateTauNumber->GetNbinsX(); ++i)
-      hSelectedTauNumber->GetXaxis()->SetBinLabel(i, hCandidateTauNumber->GetXaxis()->GetBinLabel(i));
-    hTauCandFromWPt = makeTH<TH1F>(myDir, "TauCandFromWPt", "TauCandFromWPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 80, 0, 400);
-    hTauCandAllPt = makeTH<TH1F>(myDir, "TauCandAllPt", "TauCandAllPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 80, 0, 400);
-    hSelectedGenuineTauByPt = makeTH<TH1F>(myDir, "SelectedGenuineTauByPt", "SelectedGenuineTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 80, 0, 400);
-    hSelectedGenuineTauByEta = makeTH<TH1F>(myDir, "SelectedGenuineTauByEta", "SelectedGenuineTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
-    hSelectedGenuineTauByPhi = makeTH<TH1F>(myDir, "SelectedGenuineTauByPhi", "SelectedGenuineTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
-    hSelectedFakeTauByPt = makeTH<TH1F>(myDir, "SelectedFakeTauByPt", "SelectedFakeTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 80, 0, 400);
-    hSelectedFakeTauByEta = makeTH<TH1F>(myDir, "SelectedFakeTauByEta", "SelectedFakeTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
-    hSelectedFakeTauByPhi = makeTH<TH1F>(myDir, "SelectedFakeTauByPhi", "SelectedFakeTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
-    hSelectedGenuineTauDiTauMass = makeTH<TH1F>(myDir, "SelectedGenuineTauDitauMass", "SelectedGenuineTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
-    hSelectedFakeTauDiTauMass = makeTH<TH1F>(myDir, "SelectedFakeTauDitauMass", "SelectedFakeTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
-    hSelectedTaus= makeTH<TH1F>(myDir, "SelectedTausPerEvent", "SelectedTausPerEvent", 20, 0, 20);
+
+    hCandidateTauNumber = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "CandidateTauNumber", "CandidateTauNumber;Number of veto #tau candidates;Jets", 4, 0, 4);
+    if (hCandidateTauNumber->isActive()) {
+      hCandidateTauNumber->GetXaxis()->SetBinLabel(1, "Genuine #tau");
+      hCandidateTauNumber->GetXaxis()->SetBinLabel(2, "e#rightarrow#tau");
+      hCandidateTauNumber->GetXaxis()->SetBinLabel(3, "#mu#rightarrow#tau");
+      hCandidateTauNumber->GetXaxis()->SetBinLabel(4, "jet#rightarrow#tau");
+    }
+    hSelectedTauNumber = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedTauNumber", "SelectedTauNumber;Number of selected veto #tau jets;Jets", 4, 0, 4);
+    if (hSelectedTauNumber->isActive()) {
+      for (int i = 1; i <= hCandidateTauNumber->getHisto()->GetNbinsX(); ++i)
+        hSelectedTauNumber->GetXaxis()->SetBinLabel(i, hCandidateTauNumber->GetXaxis()->GetBinLabel(i));
+    }
+    hTauCandFromWPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauCandFromWPt", "TauCandFromWPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hTauCandAllPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauCandAllPt", "TauCandAllPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hSelectedGenuineTauByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauByPt", "SelectedGenuineTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hSelectedGenuineTauByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauByEta", "SelectedGenuineTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
+    hSelectedGenuineTauByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauByPhi", "SelectedGenuineTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
+    hSelectedFakeTauByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauByPt", "SelectedFakeTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hSelectedFakeTauByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauByEta", "SelectedFakeTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
+    hSelectedFakeTauByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauByPhi", "SelectedFakeTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
+    hSelectedGenuineTauDiTauMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauDitauMass", "SelectedGenuineTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
+    hSelectedFakeTauDiTauMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauDitauMass", "SelectedFakeTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
+    hSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "SelectedTausPerEvent", "SelectedTausPerEvent", 10, 0, 10);
   }
 
   VetoTauSelection::~VetoTauSelection() {}
@@ -147,7 +150,7 @@ namespace HPlus {
 	    double deltaR = reco::deltaR( *tau, **it);
 	    if ( deltaR < 0.2 && tauFromW) {
 	      tauCandFromW = true;
-	      hTauCandFromWPt->Fill((*it)->pt(), fEventWeight.getWeight()); 
+	      hTauCandFromWPt->Fill((*it)->pt()); 
 	    }
 	  }
 	}
@@ -181,7 +184,7 @@ namespace HPlus {
     // Count how many taus (excluding the selected tau) are available in the event
     for (edm::PtrVector<pat::Tau>::iterator it = myVetoTauCandidates.begin(); it != myVetoTauCandidates.end(); ++it) {
       //     increment(fVetoTauCandidatesCounter);
-      hTauCandAllPt->Fill((*it)->pt(), fEventWeight.getWeight()); 
+      hTauCandAllPt->Fill((*it)->pt()); 
       //      double ptLead = (*it)->leadTrack()->pt();
       //      double emfrac = (*it)->emFraction();
       //      double isolSum = (*it)->isolationTracksPtSum();
@@ -192,13 +195,13 @@ namespace HPlus {
      
       FakeTauIdentifier::MCSelectedTauMatchType myMatch = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
       if (myMatch == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
-        hCandidateTauNumber->Fill(0., fEventWeight.getWeight());
+        hCandidateTauNumber->Fill(0.);
       else if (myMatch == FakeTauIdentifier::kkElectronToTau || FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance)
-        hCandidateTauNumber->Fill(1, fEventWeight.getWeight());
+        hCandidateTauNumber->Fill(1);
       else if (myMatch == FakeTauIdentifier::kkMuonToTau || FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance)
-        hCandidateTauNumber->Fill(2, fEventWeight.getWeight());
+        hCandidateTauNumber->Fill(2);
       else if (myMatch == FakeTauIdentifier::kkJetToTau || FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance)
-        hCandidateTauNumber->Fill(3, fEventWeight.getWeight());
+        hCandidateTauNumber->Fill(3);
     }
     // Do tau selection on the veto tau candidates
     TauSelection::Data myTauData = fTauSelection.analyze(iEvent, iSetup, myVetoTauCandidates);
@@ -219,25 +222,25 @@ namespace HPlus {
       // Count how many selected veto taus are genuine taus
       FakeTauIdentifier::MCSelectedTauMatchType myMatch = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
       if (myMatch == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
-        hSelectedTauNumber->Fill(0., fEventWeight.getWeight());
+        hSelectedTauNumber->Fill(0.);
       else if (myMatch == FakeTauIdentifier::kkElectronToTau || FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance)
-        hSelectedTauNumber->Fill(1, fEventWeight.getWeight());
+        hSelectedTauNumber->Fill(1);
       else if (myMatch == FakeTauIdentifier::kkMuonToTau || FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance)
-        hSelectedTauNumber->Fill(2, fEventWeight.getWeight());
+        hSelectedTauNumber->Fill(2);
       else if (myMatch == FakeTauIdentifier::kkJetToTau || FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance)
-        hSelectedTauNumber->Fill(3, fEventWeight.getWeight());
+        hSelectedTauNumber->Fill(3);
 
       bool isGenuineTau = !(fFakeTauIdentifier.isFakeTau(myMatch));
       if (isGenuineTau) {
         // Genuine tau
-        hSelectedGenuineTauByPt->Fill((*it)->pt(), fEventWeight.getWeight());
-        hSelectedGenuineTauByEta->Fill((*it)->eta(), fEventWeight.getWeight());
-        hSelectedGenuineTauByPhi->Fill((*it)->phi(), fEventWeight.getWeight());
+        hSelectedGenuineTauByPt->Fill((*it)->pt());
+        hSelectedGenuineTauByEta->Fill((*it)->eta());
+        hSelectedGenuineTauByPhi->Fill((*it)->phi());
       } else {
         // Fake tau
-        hSelectedFakeTauByPt->Fill((*it)->pt(), fEventWeight.getWeight());
-        hSelectedFakeTauByEta->Fill((*it)->eta(), fEventWeight.getWeight());
-        hSelectedFakeTauByPhi->Fill((*it)->phi(), fEventWeight.getWeight());
+        hSelectedFakeTauByPt->Fill((*it)->pt());
+        hSelectedFakeTauByEta->Fill((*it)->eta());
+        hSelectedFakeTauByPhi->Fill((*it)->phi());
       }
       // Add the taus up and get the ditau mass
       TLorentzVector myVetoTauMomentum;
@@ -256,13 +259,13 @@ namespace HPlus {
       }
       */
       if (isGenuineTau) {
-          hSelectedGenuineTauDiTauMass->Fill(myDitauMass, fEventWeight.getWeight());
+          hSelectedGenuineTauDiTauMass->Fill(myDitauMass);
         } else {
-          hSelectedFakeTauDiTauMass->Fill(myDitauMass, fEventWeight.getWeight());
+          hSelectedFakeTauDiTauMass->Fill(myDitauMass);
       }
     }
     //    if (myTauData.passedEvent()) myVetoStatus = true;
-    hSelectedTaus->Fill(numberOfTaus, fEventWeight.getWeight());
+    hSelectedTaus->Fill(numberOfTaus);
     // Return the end result
     if (myVetoStatus)
       increment(fEventsCompatibleWithZMassCounter);

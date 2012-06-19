@@ -51,7 +51,7 @@
 // For "k"=16 ( 00010110 in 8bit representation) we have after the second loop: 0 1 1 1 0
 //#########################################################################################################################################
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "TH1F.h"
@@ -173,21 +173,21 @@ namespace HPlus {
     fEvtTopology(evtTopology), fPassedEvent(passedEvent) {}
   EvtTopology::Data::~Data() {}
 
-  EvtTopology::EvtTopology(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  EvtTopology::EvtTopology(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
     // fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
     // fDiscrCut(iConfig.getUntrackedParameter<double>("discriminatorCut")),
     fAlphaTCut(iConfig.getUntrackedParameter<double>("alphaT")),
     fEvtTopologyCount(eventCounter.addSubCounter("EvtTopology main","EvtTopology cut")),
-    fAlphaTCutCount(eventCounter.addSubCounter("EvtTopology", "alphaT")),
-    fEventWeight(eventWeight)
+    fAlphaTCutCount(eventCounter.addSubCounter("EvtTopology", "alphaT"))
   {
     edm::Service<TFileService> fs;
-    hAlphaT = makeTH<TH1F>(*fs, "alphaT", "alphaT", 50, 0.0, 5.0);
+    TFileDirectory myDir = fs->mkdir("EvtTopologyAlphaT");
+    hAlphaT = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "alphaT", "alphaT", 50, 0.0, 5.0);
     /*
-    hDiJetInvMass      = makeTH<TH1F>(*fs, "EvtTopology_DiJetInvMass", "EvtTopology_DiJetInvMass", 1000, 0.0, 1000.0);
-    hDiJetInvMassCutFail    = makeTH<TH1F>(*fs, "EvtTopology_DiJetInvMassCutFail", "EvtTopology_DiJetInvMassCutFail", 1000, 0.0, 1000.0);
-    hDiJetInvMassCutPass    = makeTH<TH1F>(*fs, "EvtTopology_DiJetInvMassCutPass", "EvtTopology_DiJetInvMassCutPass", 1000, 0.0, 1000.0);
-    hDiJetInvMassWCutFail   = makeTH<TH1F>(*fs, "EvtTopology_DiJetInvMassWCutFail", "EvtTopology_DiJetInvMassWCutFail", 1000, 0.0, 1000.0);
+    hDiJetInvMass      = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EvtTopology_DiJetInvMass", "EvtTopology_DiJetInvMass", 1000, 0.0, 1000.0);
+    hDiJetInvMassCutFail    = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EvtTopology_DiJetInvMassCutFail", "EvtTopology_DiJetInvMassCutFail", 1000, 0.0, 1000.0);
+    hDiJetInvMassCutPass    = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EvtTopology_DiJetInvMassCutPass", "EvtTopology_DiJetInvMassCutPass", 1000, 0.0, 1000.0);
+    hDiJetInvMassWCutFail   = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EvtTopology_DiJetInvMassWCutFail", "EvtTopology_DiJetInvMassWCutFail", 1000, 0.0, 1000.0);
     */
   }
 
@@ -306,7 +306,7 @@ namespace HPlus {
     } // in the future one might add Ht cut or Jt cut or Invariant mass Cuts.
     
     /// Fill Histos
-    hAlphaT->Fill(sAlpha.fAlphaT, fEventWeight.getWeight());
+    hAlphaT->Fill(sAlpha.fAlphaT);
 
     // if(vDiJetMassesNoTau.size()>1){std::cout << "*** bool EvtTopology::analyze(...) *** Found " << vDiJetMassesNoTau.size() << " jets in the Pseudo-Jet without the tau-Jet. This means there are " << (oMath.Factorial(vDiJetMassesNoTau.size())/(oMath.Factorial(vDiJetMassesNoTau.size()-2)*2)) << " possible DiJet mass combinations." << std::endl;}
 

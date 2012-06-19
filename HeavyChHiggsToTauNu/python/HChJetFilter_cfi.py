@@ -1,9 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import jetSelection
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 hPlusJetPtrSelectorFilter = cms.EDFilter("HPlusJetPtrSelectorFilter",
-	jetSelection = jetSelection.clone(),
+	jetSelection = param.jetSelection.clone(),
         tauSrc = cms.untracked.InputTag("patTausHpsPFTauTauTriggerMatched"),
         filter = cms.bool(True),
         throw = cms.bool(True),
+        eventCounter = param.eventCounter.clone()
 )

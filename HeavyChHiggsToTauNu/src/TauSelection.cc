@@ -1,5 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIDPFTauBasedAlgorithms.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIDTCTau.h"
@@ -15,8 +15,6 @@
 #include "Math/GenVector/VectorUtil.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
-
-#include "TH1F.h"
 
 namespace {
   bool isolationLessThan(const edm::Ptr<pat::Tau>& a, const edm::Ptr<pat::Tau>& b) {
@@ -174,24 +172,23 @@ namespace HPlus {
   }
   
   // TauSelection methods ------------------------------------------------
-  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, std::string label):
+  TauSelection::TauSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper, std::string label):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fSelection(iConfig.getUntrackedParameter<std::string>("selection")),
     fTauID(0),
     fOperationMode(kNormalTauID),
-    fTauFound(eventCounter.addSubCounter(label,"Tau found")),
-    fEventWeight(eventWeight)
+    fTauFound(eventCounter.addSubCounter(label,"Tau found"))
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir(label);
     
     // Create tauID algorithm handler
     //if(fSelection == "PFTauTaNCBased")
-    //  fTauID = new TauIDPFTaNC(iConfig, eventCounter, eventWeight, "TaNC", myDir);
+    //  fTauID = new TauIDPFTaNC(iConfig, eventCounter, histoWrapper, "TaNC", myDir);
     if(fSelection == "HPSTauBased")
-      fTauID = new TauIDPFHPS(iConfig, eventCounter, eventWeight, label+"_HPS", myDir);
+      fTauID = new TauIDPFHPS(iConfig, eventCounter, histoWrapper, label+"_HPS", myDir);
     //else if(fSelection == "CombinedHPSTaNCTauBased")
-    //  fTauID = new TauIDPFCombinedHPSTaNC(iConfig, eventCounter, eventWeight, "HPS+TaNC", myDir);
+    //  fTauID = new TauIDPFCombinedHPSTaNC(iConfig, eventCounter, histoWrapper, "HPS+TaNC", myDir);
     else throw cms::Exception("Configuration") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: HPSTauBased (you chose '" << fSelection << "')" << std::endl;
     
     // Define tau selection operation mode
@@ -218,139 +215,144 @@ namespace HPlus {
     float myTauJetNumberMin = 0.;
     float myTauJetNumberMax = 20.; 
     // Pt
-    hPtTauCandidates = makeTH<TH1F>(myDir,
+    hPtTauCandidates = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_all_tau_candidates_pt",
       "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
       myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
-    hPtSelectedTauCandidates = makeTH<TH1F>(myDir,
+    hPtSelectedTauCandidates = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_cleaned_tau_candidates_pt",
       "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
       myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
-    hPtSelectedTaus = makeTH<TH1F>(myDir,
+    hPtSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir,
       "TauSelection_selected_taus_pt",
       "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
       myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
     // Eta
-    hEtaTauCandidates = makeTH<TH1F>(myDir,
+    hEtaTauCandidates = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_all_tau_candidates_eta",
       "tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
-    hEtaSelectedTauCandidates = makeTH<TH1F>(myDir,
+    hEtaSelectedTauCandidates = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_cleaned_tau_candidates_eta",
       "cleaned_tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
-    hEtaSelectedTaus = makeTH<TH1F>(myDir,
+    hEtaSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir,
       "TauSelection_selected_taus_eta",
       "selected_tau_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
     // Eta vs. phi
-    hEtaPhiTauCandidates = makeTH<TH2F>(myDir,
+    hEtaPhiTauCandidates = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir,
       "TauSelection_all_tau_candidates_eta_vs_phi",
       "tau_candidates_eta_vs_phi;#tau #eta;#tau phi",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax,
       myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
-    hEtaPhiSelectedTauCandidates = makeTH<TH2F>(myDir,
+    hEtaPhiSelectedTauCandidates = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir,
       "TauSelection_cleaned_tau_candidates_eta_vs_phi",
       "cleaned_tau_candidates_eta_vs_phi;#tau #eta;#tau phi",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax,
       myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
-    hEtaPhiSelectedTaus = makeTH<TH2F>(myDir,
+    hEtaPhiSelectedTaus = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir,
       "TauSelection_selected_taus_eta_vs_phi",
       "selected_tau_eta_vs_phi;#tau #eta;#tau phi",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax,
       myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
     // Phi
-    hPhiTauCandidates = makeTH<TH1F>(myDir,
+    hPhiTauCandidates = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_all_tau_candidates_phi",
       "tau_candidates_phi;#tau #phi;N_{jets} / 0.087",
       myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
-    hPhiSelectedTauCandidates = makeTH<TH1F>(myDir,
+    hPhiSelectedTauCandidates = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_cleaned_tau_candidates_phi",
       "cleaned_tau_candidates_phi;#tau #phi;N_{jets} / 0.087",
       myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
-    hPhiSelectedTaus = makeTH<TH1F>(myDir,
+    hPhiSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_selected_taus_phi",
       "selected_tau_phi;#tau #phi;N_{jets} / 0.087",
       myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
     // N
-    hNumberOfTauCandidates = makeTH<TH1F>(myDir,
+    hNumberOfTauCandidates = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_all_tau_candidates_N",
       "tau_candidates_N;Number of #tau's;N_{jets}",
       myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
-    hNumberOfSelectedTauCandidates = makeTH<TH1F>(myDir,
+    hNumberOfSelectedTauCandidates = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_cleaned_tau_candidates_N",
       "cleaned_tau_candidates_N;Number of #tau's;N_{jets}",
       myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
-    hNumberOfSelectedTaus = makeTH<TH1F>(myDir,
+    hNumberOfSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir,
       "TauSelection_selected_taus_N",
       "selected_tau_N;Number of #tau's;N_{jets}",
       myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
     // MC purity
-    hMCPurityOfTauCandidates = makeTH<TH1F>(myDir,
+    hMCPurityOfTauCandidates = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_all_tau_candidates_MC_purity",
       "tau_candidates_MC_purity;;N_{jets}", 4, 0., 4.);
-    hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(1, "#tau from H#pm");
-    hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(2, "#tau from W#pm");
-    hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(3, "Other #tau source");
-    hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(4, "No MC #tau match");
-    hMCPurityOfSelectedTauCandidates = makeTH<TH1F>(myDir,
+    if (hMCPurityOfTauCandidates->isActive()) {
+      hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(1, "#tau from H#pm");
+      hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(2, "#tau from W#pm");
+      hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(3, "Other #tau source");
+      hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(4, "No MC #tau match");
+    }
+    hMCPurityOfSelectedTauCandidates = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_cleaned_tau_candidates_MC_purity",
       "cleaned_tau_candidates_MC_purity;;N_{jets}", 4, 0., 4.);
-    hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(1, "#tau from H#pm");
-    hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(2, "#tau from W#pm");
-    hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(3, "Other #tau source");
-    hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(4, "No MC #tau match");
-    hMCPurityOfSelectedTaus = makeTH<TH1F>(myDir,
+    if (hMCPurityOfSelectedTauCandidates->isActive()) {
+      hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(1, "#tau from H#pm");
+      hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(2, "#tau from W#pm");
+      hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(3, "Other #tau source");
+      hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(4, "No MC #tau match");
+    }
+    hMCPurityOfSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_selected_taus_MC_purity",
       "selected_tau_MC_purity;;N_{jets}", 4, 0., 4.);
-    hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(1, "#tau from H#pm");
-    hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(2, "#tau from W#pm");
-    hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(3, "Other #tau source");
-    hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(4, "No MC #tau match");
+    if (hMCPurityOfSelectedTaus->isActive()) {
+      hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(1, "#tau from H#pm");
+      hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(2, "#tau from W#pm");
+      hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(3, "Other #tau source");
+      hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(4, "No MC #tau match");
+    }
 
     // Isolation variables
-    hVLooseIsoNcands = makeTH<TH1F>(myDir, "TauSelection_all_tau_candidates_VLooseIsoNCands", "Number of isolation candidates in VLoose", 100, 0, 100);
-    hLooseIsoNcands = makeTH<TH1F>(myDir, "TauSelection_all_tau_candidates_LooseIsoNCands", "Number of isolation candidates in Loose", 100, 0, 100);
-    hMediumIsoNcands = makeTH<TH1F>(myDir, "TauSelection_all_tau_candidates_MediumIsoNCands", "Number of isolation candidates in Medium", 100, 0, 100);
-    hTightIsoNcands = makeTH<TH1F>(myDir, "TauSelection_all_tau_candidates_TightIsoNCands", "Number of isolation candidates in Tight", 100, 0, 100);
+    hVLooseIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauSelection_all_tau_candidates_VLooseIsoNCands", "Number of isolation candidates in VLoose", 100, 0, 100);
+    hLooseIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauSelection_all_tau_candidates_LooseIsoNCands", "Number of isolation candidates in Loose", 100, 0, 100);
+    hMediumIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauSelection_all_tau_candidates_MediumIsoNCands", "Number of isolation candidates in Medium", 100, 0, 100);
+    hTightIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauSelection_all_tau_candidates_TightIsoNCands", "Number of isolation candidates in Tight", 100, 0, 100);
 
     // Operating mode of tau ID -- for quick validating that tau selection is doing what is expected 
-    hTauIdOperatingMode = makeTH<TH1F>(myDir, "tauSelection_operating_mode", "tau_operating_mode;;N_{events}", 3, 0., 3.);
-    hTauIdOperatingMode->GetXaxis()->SetBinLabel(1, "Control");
-    hTauIdOperatingMode->GetXaxis()->SetBinLabel(2, "Normal tau ID");
-    hTauIdOperatingMode->GetXaxis()->SetBinLabel(3, "tauCandidateSelectionOnly");
+    hTauIdOperatingMode = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "tauSelection_operating_mode", "tau_operating_mode;;N_{events}", 3, 0., 3.);
+    if (hTauIdOperatingMode->isActive()) {
+      hTauIdOperatingMode->GetXaxis()->SetBinLabel(1, "Control");
+      hTauIdOperatingMode->GetXaxis()->SetBinLabel(2, "Normal tau ID");
+      hTauIdOperatingMode->GetXaxis()->SetBinLabel(3, "tauCandidateSelectionOnly");
+    }
 
-    hNTriggerMatchedTaus = makeTH<TH1F>(myDir, "N_TriggerMatchedTaus", "NTriggerMatchedTaus;N(trigger matched taus);N_{events}", 10, 0., 10.);
-    hNTriggerMatchedSeparateTaus = makeTH<TH1F>(myDir, "N_TriggerMatchedSeparateTaus", "NTriggerMatchedSeparateTaus;N(trigger matched separate taus);N_{events}", 10, 0., 10.);
+    hNTriggerMatchedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "N_TriggerMatchedTaus", "NTriggerMatchedTaus;N(trigger matched taus);N_{events}", 10, 0., 10.);
+    hNTriggerMatchedSeparateTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "N_TriggerMatchedSeparateTaus", "NTriggerMatchedSeparateTaus;N(trigger matched separate taus);N_{events}", 10, 0., 10.);
 
-    hIsolationPFChargedHadrCandsPtSum = makeTH<TH1F>(myDir, "IsolationPFChargedHadrCandsPtSum", "IsolationPFChargedHadrCandsPtSum;IsolationPFChargedHadrCandsPtSum;N_{tau candidates}", 200, 0., 100.);
-    hIsolationPFGammaCandsEtSum = makeTH<TH1F>(myDir, "IsolationPFGammaCandEtSum", "IsolationPFGammaCandEtSum;IsolationPFGammaCandEtSum;N_{tau candidates}", 200, 0., 100.);
+    hIsolationPFChargedHadrCandsPtSum = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "IsolationPFChargedHadrCandsPtSum", "IsolationPFChargedHadrCandsPtSum;IsolationPFChargedHadrCandsPtSum;N_{tau candidates}", 200, 0., 100.);
+    hIsolationPFGammaCandsEtSum = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "IsolationPFGammaCandEtSum", "IsolationPFGammaCandEtSum;IsolationPFGammaCandEtSum;N_{tau candidates}", 200, 0., 100.);
 
-    hTightChargedMaxPtBeforeIsolation = makeTH<TH1F>(myDir, "TightChargedMaxPtBeforeIsolation", "TightChargedMaxPtBeforeIsolation;TightChargedMaxPt;N_{tau candidates}", 200, 0., 100.);
-    hTightChargedSumPtBeforeIsolation = makeTH<TH1F>(myDir, "TightChargedSumPtBeforeIsolation", "TightChargedSumPtBeforeIsolation;TightChargedSumPt;N_{tau candidates}", 200, 0., 100.);
-    hTightChargedOccupancyBeforeIsolation = makeTH<TH1F>(myDir, "TightChargedOccupancyBeforeIsolation", "TightChargedOccupancyBeforeIsolation;TightChargedOccupancy;N_{tau candidates}", 100, 0., 100.);
-    hTightGammaMaxPtBeforeIsolation = makeTH<TH1F>(myDir, "TightGammaMaxPtBeforeIsolation", "TightGammaMaxPtBeforeIsolation;TightGammaMaxPt;N_{tau candidates}", 200, 0., 100.);
-    hTightGammaSumPtBeforeIsolation = makeTH<TH1F>(myDir, "TightGammaSumPtBeforeIsolation", "TightGammaSumPtBeforeIsolation;TightGammaSumPt;N_{tau candidates}", 200, 0., 100.);
-    hTightGammaOccupancyBeforeIsolation = makeTH<TH1F>(myDir, "TightGammaOccupancyBeforeIsolation", "TightGammaOccupancyBeforeIsolation;TightGammaOccupancy;N_{tau candidates}", 100, 0., 100.); 
-    
-    hTightChargedMaxPtAfterIsolation = makeTH<TH1F>(myDir, "TightChargedMaxPtAfterIsolation", "TightChargedMaxPtAfterIsolation;TightChargedMaxPt;N_{tau candidates}", 200, 0., 100.);
-    hTightChargedSumPtAfterIsolation = makeTH<TH1F>(myDir, "TightChargedSumPtAfterIsolation", "TightChargedSumPtAfterIsolation;TightChargedSumPt;N_{tau candidates}", 200, 0., 100.);
-    hTightChargedOccupancyAfterIsolation = makeTH<TH1F>(myDir, "TightChargedOccupancyAfterIsolation", "TightChargedOccupancyAfterIsolation;TightChargedOccupancy;N_{tau candidates}", 100, 0., 100.);
-    hTightGammaMaxPtAfterIsolation = makeTH<TH1F>(myDir, "TightGammaMaxPtAfterIsolation", "TightGammaMaxPtAfterIsolation;TightGammaMaxPt;N_{tau candidates}", 200, 0., 100.);
-    hTightGammaSumPtAfterIsolation = makeTH<TH1F>(myDir, "TightGammaSumPtAfterIsolation", "TightGammaSumPtAfterIsolation;TightGammaSumPt;N_{tau candidates}", 200, 0., 100.);
-    hTightGammaOccupancyAfterIsolation = makeTH<TH1F>(myDir, "TightGammaOccupancyAfterIsolation", "TightGammaOccupancyAfterIsolation;TightGammaOccupancy;N_{tau candidates}", 100, 0., 100.); 
+    hTightChargedMaxPtBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightChargedMaxPtBeforeIsolation", "TightChargedMaxPtBeforeIsolation;TightChargedMaxPt;N_{tau candidates}", 200, 0., 100.);
+    hTightChargedSumPtBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightChargedSumPtBeforeIsolation", "TightChargedSumPtBeforeIsolation;TightChargedSumPt;N_{tau candidates}", 200, 0., 100.);
+    hTightChargedOccupancyBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightChargedOccupancyBeforeIsolation", "TightChargedOccupancyBeforeIsolation;TightChargedOccupancy;N_{tau candidates}", 100, 0., 100.);
+    hTightGammaMaxPtBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightGammaMaxPtBeforeIsolation", "TightGammaMaxPtBeforeIsolation;TightGammaMaxPt;N_{tau candidates}", 200, 0., 100.);
+    hTightGammaSumPtBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightGammaSumPtBeforeIsolation", "TightGammaSumPtBeforeIsolation;TightGammaSumPt;N_{tau candidates}", 200, 0., 100.);
+    hTightGammaOccupancyBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightGammaOccupancyBeforeIsolation", "TightGammaOccupancyBeforeIsolation;TightGammaOccupancy;N_{tau candidates}", 100, 0., 100.); 
 
-    hHPSDecayMode = makeTH<TH1F>(myDir, "HPSDecayMode", "HPSDecayMode;HPSDecayMode;N_{tau candidates}",100,0,100);
-    
-    
-    //tau->emFraction()
+    hTightChargedMaxPtAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightChargedMaxPtAfterIsolation", "TightChargedMaxPtAfterIsolation;TightChargedMaxPt;N_{tau candidates}", 200, 0., 100.);
+    hTightChargedSumPtAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightChargedSumPtAfterIsolation", "TightChargedSumPtAfterIsolation;TightChargedSumPt;N_{tau candidates}", 200, 0., 100.);
+    hTightChargedOccupancyAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightChargedOccupancyAfterIsolation", "TightChargedOccupancyAfterIsolation;TightChargedOccupancy;N_{tau candidates}", 100, 0., 100.);
+    hTightGammaMaxPtAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightGammaMaxPtAfterIsolation", "TightGammaMaxPtAfterIsolation;TightGammaMaxPt;N_{tau candidates}", 200, 0., 100.);
+    hTightGammaSumPtAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightGammaSumPtAfterIsolation", "TightGammaSumPtAfterIsolation;TightGammaSumPt;N_{tau candidates}", 200, 0., 100.);
+    hTightGammaOccupancyAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightGammaOccupancyAfterIsolation", "TightGammaOccupancyAfterIsolation;TightGammaOccupancy;N_{tau candidates}", 100, 0., 100.); 
+
+    hHPSDecayMode = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HPSDecayMode", "HPSDecayMode;HPSDecayMode;N_{tau candidates}",100,0,100);
   }
 
   TauSelection::~TauSelection() {
     if (fTauID) delete fTauID;
   }
 
-  TauSelection::Data TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {   
+  TauSelection::Data TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     bool passEvent = false;
     // Obtain tau collection from src specified in config
     edm::Handle<edm::View<pat::Tau> > htaus;
@@ -469,7 +471,7 @@ namespace HPlus {
   bool TauSelection::doTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
     // Document operation mode
     fillOperationModeHistogram();
-    
+
     // Initialize
     fSelectedTaus.clear();
     fSelectedTaus.reserve(taus.size());
@@ -486,9 +488,9 @@ namespace HPlus {
         if (myDeltaR>0.5) ++mySeparateCounter;
       }
       if (mySeparateCounter)
-        hNTriggerMatchedSeparateTaus->Fill(taus.size(),fEventWeight.getWeight());
+        hNTriggerMatchedSeparateTaus->Fill(taus.size());
     }
-    hNTriggerMatchedTaus->Fill(taus.size(),fEventWeight.getWeight());
+    hNTriggerMatchedTaus->Fill(taus.size());
 
     // Need std:vector in order to be able to use std::sort
     std::vector<edm::Ptr<pat::Tau> > tmpSelectedTauCandidates;
@@ -499,7 +501,7 @@ namespace HPlus {
       const edm::Ptr<pat::Tau> iTau = *iter;
 
       fillHistogramsForTauCandidates(iTau, iEvent);
-      
+
       // Tau candidate selections
       fTauID->incrementAllCandidates();
       if (!fTauID->passDecayModeFinding(iTau)) continue;
@@ -514,24 +516,26 @@ namespace HPlus {
       if (fOperationMode == kNormalTauID) {
       
         // Standard tau ID (necessary for the tau selection logic) 
-        hIsolationPFChargedHadrCandsPtSum->Fill(iTau->isolationPFChargedHadrCandsPtSum(), fEventWeight.getWeight());
-        hIsolationPFGammaCandsEtSum->Fill(iTau->isolationPFGammaCandsEtSum(), fEventWeight.getWeight());
+        hIsolationPFChargedHadrCandsPtSum->Fill(iTau->isolationPFChargedHadrCandsPtSum());
+        hIsolationPFGammaCandsEtSum->Fill(iTau->isolationPFGammaCandsEtSum());
 
-        hHPSDecayMode->Fill(iTau->decayMode(), fEventWeight.getWeight());
+        hHPSDecayMode->Fill(iTau->decayMode());
 
-        hTightChargedMaxPtBeforeIsolation->Fill(iTau->userFloat("byTightChargedMaxPt"), fEventWeight.getWeight());
-        hTightChargedSumPtBeforeIsolation->Fill(iTau->userFloat("byTightChargedSumPt"), fEventWeight.getWeight());
-        hTightChargedOccupancyBeforeIsolation->Fill((float)iTau->userInt("byTightChargedOccupancy"), fEventWeight.getWeight());
-        hTightGammaMaxPtBeforeIsolation->Fill(iTau->userFloat("byTightGammaMaxPt"), fEventWeight.getWeight());
-        hTightGammaSumPtBeforeIsolation->Fill(iTau->userFloat("byTightGammaSumPt"), fEventWeight.getWeight());
-        hTightGammaOccupancyBeforeIsolation->Fill((float)iTau->userInt("byTightGammaOccupancy"), fEventWeight.getWeight());
-	if (!fTauID->passIsolation(iTau)) continue;
-        hTightChargedMaxPtAfterIsolation->Fill(iTau->userFloat("byTightChargedMaxPt"), fEventWeight.getWeight());
-        hTightChargedSumPtAfterIsolation->Fill(iTau->userFloat("byTightChargedSumPt"), fEventWeight.getWeight());
-        hTightChargedOccupancyAfterIsolation->Fill((float)iTau->userInt("byTightChargedOccupancy"), fEventWeight.getWeight());
-        hTightGammaMaxPtAfterIsolation->Fill(iTau->userFloat("byTightGammaMaxPt"), fEventWeight.getWeight());
-        hTightGammaSumPtAfterIsolation->Fill(iTau->userFloat("byTightGammaSumPt"), fEventWeight.getWeight());
-        hTightGammaOccupancyAfterIsolation->Fill((float)iTau->userInt("byTightGammaOccupancy"), fEventWeight.getWeight());
+
+        hTightChargedMaxPtBeforeIsolation->Fill(iTau->userFloat("byTightChargedMaxPt"));
+        hTightChargedSumPtBeforeIsolation->Fill(iTau->userFloat("byTightChargedSumPt"));
+        hTightChargedOccupancyBeforeIsolation->Fill((float)iTau->userInt("byTightChargedOccupancy"));
+        hTightGammaMaxPtBeforeIsolation->Fill(iTau->userFloat("byTightGammaMaxPt"));
+        hTightGammaSumPtBeforeIsolation->Fill(iTau->userFloat("byTightGammaSumPt"));
+        hTightGammaOccupancyBeforeIsolation->Fill((float)iTau->userInt("byTightGammaOccupancy"));
+        if (!fTauID->passIsolation(iTau)) continue;
+        hTightChargedMaxPtAfterIsolation->Fill(iTau->userFloat("byTightChargedMaxPt"));
+        hTightChargedSumPtAfterIsolation->Fill(iTau->userFloat("byTightChargedSumPt"));
+        hTightChargedOccupancyAfterIsolation->Fill((float)iTau->userInt("byTightChargedOccupancy"));
+        hTightGammaMaxPtAfterIsolation->Fill(iTau->userFloat("byTightGammaMaxPt"));
+        hTightGammaSumPtAfterIsolation->Fill(iTau->userFloat("byTightGammaSumPt"));
+        hTightGammaOccupancyAfterIsolation->Fill((float)iTau->userInt("byTightGammaOccupancy"));
+
         if (!fTauID->passNProngsCut(iTau)) continue;
         if (!fTauID->passRTauCut(iTau)) continue;
       }
@@ -554,10 +558,10 @@ namespace HPlus {
     // Handle counters
     fTauID->updatePassedCounters();
     // Fill number of taus histograms
-    hNumberOfTauCandidates->Fill(static_cast<float>(taus.size()), fEventWeight.getWeight());
-    hNumberOfSelectedTauCandidates->Fill(static_cast<float>(fSelectedTauCandidates.size()), fEventWeight.getWeight());
+    hNumberOfTauCandidates->Fill(static_cast<float>(taus.size()));
+    hNumberOfSelectedTauCandidates->Fill(static_cast<float>(fSelectedTauCandidates.size()));
     if (fOperationMode != kTauCandidateSelectionOnly) {
-      hNumberOfSelectedTaus->Fill(static_cast<float>(fSelectedTaus.size()), fEventWeight.getWeight());
+      hNumberOfSelectedTaus->Fill(static_cast<float>(fSelectedTaus.size()));
     }
 
     // Handle result of tau candidate selection only
@@ -585,44 +589,44 @@ namespace HPlus {
   }
 
   void TauSelection::fillOperationModeHistogram() {
-    hTauIdOperatingMode->Fill(0., fEventWeight.getWeight()); // Control
+    hTauIdOperatingMode->Fill(0.); // Control
     if (fOperationMode == kNormalTauID)
-      hTauIdOperatingMode->Fill(1., fEventWeight.getWeight());
+      hTauIdOperatingMode->Fill(1.);
     else if (fOperationMode == kTauCandidateSelectionOnly)
-      hTauIdOperatingMode->Fill(2., fEventWeight.getWeight());
+      hTauIdOperatingMode->Fill(2.);
   }
 
   void TauSelection::fillHistogramsForTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent) {
     double myTauPt = tau->pt();
     double myTauEta = tau->eta();
     double myTauPhi = tau->phi();
-    hPtTauCandidates->Fill(myTauPt, fEventWeight.getWeight());
-    hEtaTauCandidates->Fill(myTauEta, fEventWeight.getWeight());
-    hPhiTauCandidates->Fill(myTauPhi, fEventWeight.getWeight());
-    hEtaPhiTauCandidates->Fill(myTauEta, myTauPhi, fEventWeight.getWeight());
+    hPtTauCandidates->Fill(myTauPt);
+    hEtaTauCandidates->Fill(myTauEta);
+    hPhiTauCandidates->Fill(myTauPhi);
+    hEtaPhiTauCandidates->Fill(myTauEta, myTauPhi);
     // Purity
     if (!iEvent.isRealData()) {
-      ObtainMCPurity(tau, iEvent, hMCPurityOfTauCandidates); 
+      ObtainMCPurity(tau, iEvent, hMCPurityOfTauCandidates);
     }
 
-    hVLooseIsoNcands->Fill(tau->userInt("byVLooseOccupancy"), fEventWeight.getWeight());
-    hLooseIsoNcands->Fill(tau->userInt("byLooseOccupancy"), fEventWeight.getWeight());
-    hMediumIsoNcands->Fill(tau->userInt("byMediumOccupancy"), fEventWeight.getWeight());
-    hTightIsoNcands->Fill(tau->userInt("byTightOccupancy"), fEventWeight.getWeight());
+    hVLooseIsoNcands->Fill(tau->userInt("byVLooseOccupancy"));
+    hLooseIsoNcands->Fill(tau->userInt("byLooseOccupancy"));
+    hMediumIsoNcands->Fill(tau->userInt("byMediumOccupancy"));
+    hTightIsoNcands->Fill(tau->userInt("byTightOccupancy"));
   }
   
   void TauSelection::fillHistogramsForSelectedTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent) {
     double myTauPt = tau->pt();
     double myTauEta = tau->eta();
     double myTauPhi = tau->phi();
-    hPtSelectedTauCandidates->Fill(myTauPt, fEventWeight.getWeight());
-    hEtaSelectedTauCandidates->Fill(myTauEta, fEventWeight.getWeight());
-    hPhiSelectedTauCandidates->Fill(myTauPhi, fEventWeight.getWeight());
-    hEtaPhiSelectedTauCandidates->Fill(myTauEta, myTauPhi, fEventWeight.getWeight());
+    hPtSelectedTauCandidates->Fill(myTauPt);
+    hEtaSelectedTauCandidates->Fill(myTauEta);
+    hPhiSelectedTauCandidates->Fill(myTauPhi);
+    hEtaPhiSelectedTauCandidates->Fill(myTauEta, myTauPhi);
 
     // Purity
     if (!iEvent.isRealData()) {
-      ObtainMCPurity(tau, iEvent, hMCPurityOfSelectedTauCandidates); 
+      ObtainMCPurity(tau, iEvent, hMCPurityOfSelectedTauCandidates);
     }
   }
   
@@ -630,16 +634,16 @@ namespace HPlus {
     double myTauPt = tau->pt();
     double myTauEta = tau->eta();
     double myTauPhi = tau->phi();
-    hPtSelectedTaus->Fill(myTauPt, fEventWeight.getWeight());
-    hEtaSelectedTaus->Fill(myTauEta, fEventWeight.getWeight());
+    hPtSelectedTaus->Fill(myTauPt);
+    hEtaSelectedTaus->Fill(myTauEta);
 
-    hPhiSelectedTaus->Fill(myTauPhi, fEventWeight.getWeight());
-    hEtaPhiSelectedTaus->Fill(myTauEta, myTauPhi, fEventWeight.getWeight());
+    hPhiSelectedTaus->Fill(myTauPhi);
+    hEtaPhiSelectedTaus->Fill(myTauEta, myTauPhi);
 
     // Purity
     if (!iEvent.isRealData()) {
-      ObtainMCPurity(tau, iEvent, hMCPurityOfSelectedTaus); 
-    }  
+      ObtainMCPurity(tau, iEvent, hMCPurityOfSelectedTaus);
+    }
   }
 
   TauSelection::Data TauSelection::setSelectedTau(edm::Ptr<pat::Tau>& tau, bool passEvent) {
@@ -650,7 +654,7 @@ namespace HPlus {
     return Data(this, passEvent);
   }
 
-  void TauSelection::ObtainMCPurity(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent, TH1* histogram) {
+  void TauSelection::ObtainMCPurity(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent, WrappedTH1* histogram) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
     for (size_t i=0; i < genParticles->size(); ++i) {  
@@ -665,19 +669,19 @@ namespace HPlus {
             if (!dparticle) continue;
             int idmother = std::abs(dparticle->pdgId());
             if (idmother == 37) { // H+
-              histogram->Fill(0., fEventWeight.getWeight());
+              histogram->Fill(0.);
               return;
             }
             if (idmother == 24) { // W+
-              histogram->Fill(1., fEventWeight.getWeight());
+              histogram->Fill(1.);
               return;
             }
           }
-          histogram->Fill(2., fEventWeight.getWeight()); // Other source of tau (B decays)
+          histogram->Fill(2.); // Other source of tau (B decays)
         }
       }
     }
-    histogram->Fill(3., fEventWeight.getWeight()); // No MC match found
+    histogram->Fill(3.); // No MC match found
   }
 
 /*  void TauSelection::findBestTau(edm::PtrVector<pat::Tau>& bestTau, edm::PtrVector<pat::Tau>& taus) {

@@ -1,14 +1,12 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
-
-#include "TH1F.h"
 
 #include <sstream>
 
 namespace HPlus {
-  ScaleFactorUncertaintyManager::ScaleFactorUncertaintyManager(const std::string& name, const std::string& directory) {
+  ScaleFactorUncertaintyManager::ScaleFactorUncertaintyManager(HPlus::HistoWrapper& histoWrapper, const std::string& name, const std::string& directory) {
     edm::Service<TFileService> fs;
 
     // Book histograms
@@ -21,24 +19,24 @@ namespace HPlus {
     // Trigger SF
     s.str("");
     s << "TriggerScaleFactor_" << name;
-    hTriggerSF = makeTH<TH1F>(myDir, s.str().c_str(), s.str().c_str(), 200., 0., 2.0);
+    hTriggerSF = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 200., 0., 2.0);
     s.str("");
     s << "TriggerScaleFactorAbsUncert_" << name;
-    hTriggerSFAbsUncertainty = makeTH<TH1F>(myDir, s.str().c_str(), s.str().c_str(), 20000., 0., 2);
+    hTriggerSFAbsUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 20000., 0., 2);
     s.str("");
     s << "TriggerScaleFactorAbsUncertCounts_" << name;
-    hTriggerSFAbsUncertaintyCounts = makeTH<TH1F>(myDir, s.str().c_str(), s.str().c_str(), 1, 0., 1);
+    hTriggerSFAbsUncertaintyCounts = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 1, 0., 1);
 
     // btag SF
     s.str("");
     s << "BtagScaleFactor_" << name;
-    hBtagSF = makeTH<TH1F>(myDir, s.str().c_str(), s.str().c_str(), 200., 0., 2.0);
+    hBtagSF = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 200., 0., 2.0);
     s.str("");
     s << "BtagScaleFactorAbsUncert_" << name;
-    hBtagSFAbsUncertainty = makeTH<TH1F>(myDir, s.str().c_str(), s.str().c_str(), 20000., 0., 2);
+    hBtagSFAbsUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 20000., 0., 2);
     s.str("");
     s << "BtagScaleFactorAbsUncertCounts_" << name;
-    hBtagSFAbsUncertaintyCounts = makeTH<TH1F>(myDir, s.str().c_str(), s.str().c_str(), 1, 0., 1);
+    hBtagSFAbsUncertaintyCounts = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 1, 0., 1);
 
   }
 
