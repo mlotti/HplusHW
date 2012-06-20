@@ -40,6 +40,7 @@ class PythonWriter:
     def __init__(self):
         self.ranges = []
         self.mcs    = []
+        self.selection = ""
 
     def addParameters(self,path,label,runrange,lumi,eff):
         self.ranges.append(self.Parameters(label,runrange,lumi,eff))
@@ -52,6 +53,9 @@ class PythonWriter:
                 labelFound = True
         if not labelFound:
             self.mcs.append(self.Parameters(label,"","",eff))
+
+    def SaveOfflineSelection(self,selection):
+        self.selection = selection
 
     def dumpParameters(self,path,label,runrange,lumi,eff):
 
@@ -88,6 +92,8 @@ class PythonWriter:
         fOUT.write("    # ),\n")
         fOUT.write("    # The parameters of the trigger efficiency parametrizations,\n")
         fOUT.write("    # looked dynamically from TriggerEfficiency_cff.py\n\n")
+
+        fOUT.write("    # Offline selection: "+self.selection+"\n\n")
 
         fOUT.write("    dataParameters = cms.PSet(\n")
         for r in self.ranges:
@@ -175,6 +181,8 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
 #    offlineSelection += "&& byLooseCombinedIsolationDeltaBetaCorr > 0.5"
     offlineSelection += "&& byMediumCombinedIsolationDeltaBetaCorr > 0.5"
     offlineSelection += "&& MuonTauInvMass < 80"
+
+    pythonWriter.SaveOfflineSelection(offlineSelection)
 
     offlineTauPt40 = "PFTauPt > 40"
 
