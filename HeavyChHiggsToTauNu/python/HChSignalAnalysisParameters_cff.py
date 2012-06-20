@@ -342,13 +342,6 @@ vertexWeightReader = cms.untracked.PSet(
     enabled = cms.bool(False)
 )
 
-def triggerBin(pt, efficiency, uncertainty):
-    return cms.PSet(
-        pt = cms.double(pt),
-        efficiency = cms.double(efficiency),
-        uncertainty = cms.double(uncertainty)
-    )
-
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency_cff as TriggerEfficiency
 triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
 

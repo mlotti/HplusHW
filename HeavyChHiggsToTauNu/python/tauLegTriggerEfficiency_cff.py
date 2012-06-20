@@ -1,4 +1,12 @@
 # the original one
+import FWCore.ParameterSet.Config as cms
+
+def triggerBin(pt, efficiency, uncertainty):
+    return cms.PSet(
+        pt = cms.double(pt),
+        efficiency = cms.double(efficiency),
+        uncertainty = cms.double(uncertainty)
+    )
 
 tauLegEfficiency = cms.untracked.PSet(
     # The selected triggers for the efficiency. If one trigger is
