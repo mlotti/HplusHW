@@ -169,8 +169,11 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
     offlineSelection += "&& 1/PFTauInvPt > 20"
     offlineSelection += "&& PFTauProng == 1"
     offlineSelection += "&& againstElectronMedium > 0.5 && againstMuonTight > 0.5"
+#    offlineSelection += "&& againstElectronMVA > 0.5 && againstMuonTight > 0.5"
 #    offlineSelection += "&& byTightIsolation > 0.5"
-    offlineSelection += "&& byVLooseCombinedIsolationDeltaBetaCorr > 0.5"
+#    offlineSelection += "&& byVLooseCombinedIsolationDeltaBetaCorr > 0.5"
+#    offlineSelection += "&& byLooseCombinedIsolationDeltaBetaCorr > 0.5"
+    offlineSelection += "&& byMediumCombinedIsolationDeltaBetaCorr > 0.5"
     offlineSelection += "&& MuonTauInvMass < 80"
 
     offlineTauPt40 = "PFTauPt > 40"
