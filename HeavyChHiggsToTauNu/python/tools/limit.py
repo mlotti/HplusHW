@@ -458,13 +458,18 @@ def graphToMa(graph):
         mZ = 91.1876 #Z mass from PDG
         mW = 80.398
         print mH, tanb, "BR: ", BRdataInterface.get_mA(mH,tanb,200)
-        mA = math.sqrt(mH*mH - mW*mW)
+        ### Tree level relation, HO correction available from values calculated with FH, should use it. 20.6.2012/S.Lehti
+	### mA = math.sqrt(mH*mH - mW*mW)
+	mA = BRdataInterface.get_mA(mH,tanb,200)
         graph.SetPoint(i, mA, tanb)
 
 ## Convert from mA space to mH+
 #
 # \param graph   TGraph with mA to be modified
 def graphToMh(graph):
+    print "File tools/limit.py, function graphToMh"
+    print "Do not use until the mass calculation is fixed. This function should not be needed anyway. 20.6.2012/S.Lehti"
+    sys.exit()
     for i in xrange(0, graph.GetN()):
         mA = graph.GetX()[i]
         tanb = graph.GetY()[i]
