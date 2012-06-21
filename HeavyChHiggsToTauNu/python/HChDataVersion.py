@@ -79,7 +79,6 @@ class DataVersion:
     def __init__(self, dataVersion):
         if dataVersion == "42Xmc":
             dataVersion = "42XmcS4"
-
         if not dataVersion in config:
             names = config.keys()
             names.sort()
@@ -118,7 +117,7 @@ class DataVersion:
         return not self.is_data
 
     def isS4(self):
-        return self.isMC() and ("S4" in self.version or "S6" in self.version)
+        return self.isMC() and ("S4" in self.version)
 
     def isS6(self):
         return self.isMC() and "S6" in self.version

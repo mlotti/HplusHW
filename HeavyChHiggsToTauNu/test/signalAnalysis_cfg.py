@@ -9,6 +9,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 dataVersion="44XmcS6"     # Fall11 MC
 #dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
 
+# Set the data scenario for vertex/pileup weighting
+# options: Run2011A, Run2011B, Run2011A+B
+puweight = "Run2011A+B"
+
 ##########
 # Flags for additional signal analysis modules
 # Perform the signal analysis with all tau ID algorithms in addition
@@ -196,8 +200,6 @@ if applyTriggerScaleFactor and dataVersion.isMC():
     param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
 
 # Set the data scenario for vertex/pileup weighting
-# options: Run2011A, Run2011B, Run2011A+B
-puweight = "Run2011A"
 if len(options.puWeightEra) > 0:
     puweight = options.puWeightEra
 param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, pset=param.vertexWeight, psetReader=param.vertexWeightReader, era=puweight) # Reweight by true PU distribution
@@ -274,7 +276,10 @@ if dataVersion.isData() and options.tauEmbeddingInput == 0 and doPrescalesForDat
 print "Histogram level:", process.signalAnalysis.histogramAmbientLevel.value()
 print "Trigger:", process.signalAnalysis.trigger
 print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode.value()
-print "VertexWeight:",process.signalAnalysis.vertexWeight
+print "Trigger scale factor data:", process.signalAnalysis.triggerEfficiencyScaleFactor.dataSelect.value()
+print "Trigger scale factor MC:", process.signalAnalysis.triggerEfficiencyScaleFactor.mcSelect.value()
+print "VertexWeight data distribution:",process.signalAnalysis.vertexWeight.dataPUdistribution.value()
+print "VertexWeight mc distribution:",process.signalAnalysis.vertexWeight.mcPUdistribution.value()
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut.value()
 #print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection.value()
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection.value()

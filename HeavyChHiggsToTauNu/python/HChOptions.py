@@ -103,13 +103,11 @@ def getOptions(options=None):
 
 def getOptionsDataVersion(dataVersion, options=None, useDefaultSignalTrigger=True):
     options = getOptions(options)
-
     if options.dataVersion != "":
         dataVersion = options.dataVersion
     print "Data version is", dataVersion
 
     dataVersion = DataVersion(dataVersion)
-
     if useDefaultSignalTrigger and len(options.trigger) == 0 and dataVersion.isMC():
         options.trigger = [dataVersion.getDefaultSignalTrigger()]
 
