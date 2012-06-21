@@ -93,15 +93,16 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.addTauIsolationVariation([])
 #myOptimisation.addTauIsolationContinuousVariation([])
 #myOptimisation.addRtauVariation([0.0, 0.7])
-myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
-#myOptimisation.addJetEtVariation([20.0, 30.0])
+#myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
+myOptimisation.addJetEtVariation([20.0, 30.0])
 #myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
 #myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
 #myOptimisation.addBJetDiscriminatorVariation([0.679, 0.244])
 #myOptimisation.addBJetEtVariation([])
-#myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
-#myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
+myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
+myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
 #myOptimisation.addTopRecoVatiation(["None"]) # Valid options: None, chi, std, Wselection
+myOptimisation.disableMaxVariations()
 if doOptimisation:
     doSystematics = True # Make sure that systematics are run
     doFillTree = False # Make sure that tree filling is disabled or root file size explodes
@@ -233,21 +234,23 @@ process.signalAnalysis.histogramAmbientLevel = myHistogramAmbientLevel
 #process.signalAnalysis.tauSelection.tauSelectionHPSTightTauBased # HPS Tight is the default
 
 # Btagging DB
-if False: #FIXME
-    process.load("CondCore.DBCommon.CondDBCommon_cfi")
-    #MC measurements
-    process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
-    process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
-    #Data measurements
-    process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
-    process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
-    #User DB for btag eff
-    btagDB = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
-    if options.runOnCrab != 0:
-        btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
-    process.CondDBCommon.connect = btagDB
-    process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
-    process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
+process.load("CondCore.DBCommon.CondDBCommon_cfi")
+#MC measurements
+process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
+process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
+#Data measurements
+process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
+process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
+#User DB for btag eff
+btagDB = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
+if options.runOnCrab != 0:
+    print "BTagDB: Assuming that you are running on CRAB"
+    btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
+else:
+    print "BTagDB: Assuming that you are not running on CRAB (if you are running on CRAB, add to job parameters in multicrab.cfg runOnCrab=1)"
+process.CondDBCommon.connect = btagDB
+process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
+process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
 param.bTagging.UseBTagDB  = cms.untracked.bool(False) # FIXME: True does not work with systematics! (some clash with condDB betweeen btag and JES)
 
 # Add type 1 MET
@@ -290,11 +293,12 @@ if len(additionalCounters) > 0:
 # PickEvent module and the main Path. The picked events are only the
 # ones selected by the golden analysis defined above.
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
-process.signalAnalysisPath = cms.Path(
-    process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
-    process.signalAnalysis *
-    process.PickEvents
-)
+if not doOptimisation:
+    process.signalAnalysisPath = cms.Path(
+        process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
+        process.signalAnalysis *
+        process.PickEvents
+    )
 
 if doMETResolution:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.METResolutionAnalysis_cfi")
@@ -392,7 +396,9 @@ if doRtau0 and not hasattr(process, "signalAnalysisRtau0"):
                 signalAnalysisCounters=True)
 
 def getSignalAnalysisModuleNames():
-    modules = ["signalAnalysis"]
+    modules = []
+    if not doOptimisation:
+        modules.append("signalAnalysis")
     if doSummerPAS:
         modules.append("signalAnalysisRtau0MET70")
     if doRtau0:
