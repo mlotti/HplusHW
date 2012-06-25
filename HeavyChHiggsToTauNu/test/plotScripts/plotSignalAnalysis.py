@@ -30,19 +30,27 @@ analysis = "signalAnalysis"
 #analysis = "signalOptimisation/QCDAnalysisVariation_tauPt40_rtau0_btag2_METcut60_FakeMETCut0"
 #analysis = "signalAnalysisTauSelectionHPSTightTauBased2"
 #analysis = "signalAnalysisBtaggingTest2"
-counters = analysis+"Counters"
+counters = analysis+"/counters"
 
 treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger*weightPrescale")
 
 #QCDfromData = True
 QCDfromData = False
 
+mcOnly = False
+mcOnly = True
+mcOnlyLumi = 5000 # pb
+
 
 # main function
 def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-    datasets.loadLuminosities()
+    if mcOnly:
+        datasets.remove(datasets.getDataDatasetNames())
+        histograms.cmsTextMode = histograms.CMSMode.SIMULATION
+    else:
+        datasets.loadLuminosities()
     datasets.updateNAllEventsToPUWeighted()
 
     # Take QCD from data
@@ -68,7 +76,10 @@ def main():
 
     plots.mergeRenameReorderForDataMC(datasets)
 
-    print "Int.Lumi",datasets.getDataset("Data").getLuminosity()
+    if mcOnly:
+        print "Int.Lumi (manually set)",mcOnlyLumi
+    else:
+        print "Int.Lumi",datasets.getDataset("Data").getLuminosity()
     print "norm=",datasets.getDataset("TTToHplusBWB_M120").getNormFactor()
 
     # Remove signals other than M120
@@ -119,30 +130,15 @@ def main():
     # Create plots
     doPlots(datasets)
 
-    # Write mt histograms to ROOT file
-    #writeTransverseMass(datasets_lands)
-
     # Print counters
     doCounters(datasets)
 
-# write histograms to file
-def writeTransverseMass(datasets_lands):
-    mt = plots.DataMCPlot(datasets_lands, analysis+"/transverseMass")
-    mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
-    f = ROOT.TFile.Open(output, "RECREATE")
-    mt_data = mt.histoMgr.getHisto("Data").getRootHisto().Clone("mt_data")
-    mt_data.SetDirectory(f)
-    mt_hw = mt.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto().Clone("mt_hw")
-    mt_hw.SetDirectory(f)
-    mt_hh = mt.histoMgr.getHisto("TTToHplusBHminusB_M120").getRootHisto().Clone("mt_hh")
-    mt_hh.SetDirectory(f)
-    f.Write()
-    f.Close()
-
-
 def doPlots(datasets):
     def createPlot(name, **kwargs):
-        return plots.DataMCPlot(datasets, analysis+"/"+name, **kwargs)
+        if mcOnly:
+            return plots.MCPlot(datasets, analysis+"/"+name, normalizeToLumi=mcOnlyLumi, **kwargs)
+        else:
+            return plots.DataMCPlot(datasets, analysis+"/"+name, **kwargs)
 
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
