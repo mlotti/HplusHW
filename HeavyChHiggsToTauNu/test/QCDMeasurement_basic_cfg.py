@@ -8,26 +8,21 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 dataVersion="44XmcS6"     # Fall11 MC
 #dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
 
+# Set the data scenario for vertex/pileup weighting
+# options: Run2011A, Run2011B, Run2011A+B
+puweight = "Run2011A+B"
+
+# Apply beta cut for jets to reject PU jets
+betaCutForJets = 0.7 # Disable by setting to 0.0; if you want to enable, set to 0.2
 
 ##########
 # Flags for additional signal analysis modules
 # Perform the signal analysis with all tau ID algorithms in addition
 # to the "golden" analysis
 
-#for QCD control plots
-doAllTauIds = False
-
-# Perform b tagging scanning
-doBTagScan = False
-
-doJetThresholdScan = True
-
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
-doJESVariation = False
-JESVariation = 0.03
-JESEtaVariation = 0.02
-JESUnclusteredMETVariation = 0.10
+doSystematics = False
 
 # Tree filling
 doFillTree = False
@@ -38,13 +33,39 @@ myHistogramAmbientLevel = "Debug"
 
 applyTriggerScaleFactor = True
 
-#PF2PATVersion = "PFlow" # For normal PF2PAT
-PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
+PF2PATVersion = "PFlow" # For normal PF2PAT
+#PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
 
-# Temporary switch for disabling prescales (produces tons of unnecessary output
-# with Btau data where no prescale is needed at the moment) 
-disablePrescales = True
+# Enable/disable prescales for data
+doPrescalesForData = False
 
+# Do variations for optimisation
+# Note: Keep number of variations below 200 to keep file sizes reasonable
+# Note: Currently it is not possible to vary the tau selection -related variables, because only one JES and MET producer is made (tau selection influences type I MET correction and JES)
+
+doOptimisation = False
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
+myOptimisation = HPlusOptimisationScheme()
+#myOptimisation.addTauPtVariation([40.0, 50.0])
+#myOptimisation.addTauIsolationVariation([])
+#myOptimisation.addTauIsolationContinuousVariation([])
+#myOptimisation.addRtauVariation([0.0, 0.7])
+#myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
+myOptimisation.addJetEtVariation([20.0, 30.0])
+#myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
+#myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
+#myOptimisation.addBJetDiscriminatorVariation([0.679, 0.244])
+#myOptimisation.addBJetEtVariation([])
+myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
+myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
+#myOptimisation.addTopRecoVatiation(["None"]) # Valid options: None, chi, std, Wselection
+myOptimisation.disableMaxVariations()
+if doOptimisation:
+    doSystematics = True # Make sure that systematics are run
+    doFillTree = False # Make sure that tree filling is disabled or root file size explodes
+    myHistogramAmbientLevel = "Vital" # Set histogram level to least histograms to reduce output file sizes
+    # FIXME add here "light' mode running
 
 
 ################################################################################
@@ -54,7 +75,6 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 
 ################################################################################
 # Define the process
-#process = cms.Process("HChQCDMeasurementMethod3Part2")
 process = cms.Process("HChQCDMeasurementMethodBasic")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
@@ -85,8 +105,8 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 # Uncomment the following in order to print the counters at the end of
 # the job (note that if many other modules are being run in the same
 # job, their INFO messages are printed too)
-process.MessageLogger.cerr.threshold = cms.untracked.string("INFO") #tmp
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+#process.MessageLogger.cerr.threshold = cms.untracked.string("INFO") #tmp
+#process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 # Fragment to run PAT on the fly if requested from command line
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
@@ -97,48 +117,35 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
 process.infoPath = addConfigInfo(process, options, dataVersion)
 
 ################################################################################
-# qcdMeasurementMethod3 module
-
-# Primary vertex selection
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
-addPrimaryVertexSelection(process, process.commonSequence)
-
 # Import default parameter set and make necessary tweaks
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
 param.trigger.triggerSrc.setProcessName(dataVersion.getTriggerProcess())
-# Set tau selection mode (options: 'tauCandidateSelectionOnly', 'tauCandidateSelectionOnlyReversedRtau')
+# Set tau selection mode (options: 'tauCandidateSelectionOnly')
 # other options (use not recommended here): 'standard'
 param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
 
 # Set tau sources to trigger matched tau collections
+#param.setAllTauSelectionSrcSelectedPatTaus()
 param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
-
-# Trigger with scale factors (at the moment hard coded)
-if applyTriggerScaleFactor and dataVersion.isMC():
-    param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
 
 # Switch to PF2PAT objects
 #param.changeCollectionsToPF2PAT()
 param.changeCollectionsToPF2PAT(postfix=PF2PATVersion)
 
+# Trigger with scale factors (at the moment hard coded)
+if applyTriggerScaleFactor and dataVersion.isMC():
+    param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
+
 # Set the data scenario for vertex/pileup weighting
-puweight = "Run2011A"
 if len(options.puWeightEra) > 0:
     puweight = options.puWeightEra
 param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, pset=param.vertexWeight, psetReader=param.vertexWeightReader, era=puweight) # Reweight by true PU distribution
 param.setDataTriggerEfficiency(dataVersion, era=puweight)
-
-#Reminder(from HChSignalAnalysisParameters_cff.py):
-#def setTriggerPileupFor2011(**kwargs):
-#    setEfficiencyTriggersFor2011(**kwargs)
-#    setPileupWeightFor2011()
+print "PU weight era =",puweight
 
 # Overwrite necessary values here
-#param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met) attikis
-#param.trigger.hltMetCut = 0.0 
-print "\nhltMetCut:", param.trigger.hltMetCut
-param.InvMassVetoOnJets.setTrueToUseModule = False
+
 
 ##############################################################################
 process.QCDMeasurement = cms.EDFilter("HPlusQCDMeasurementBasicFilter",
@@ -164,25 +171,42 @@ process.QCDMeasurement = cms.EDFilter("HPlusQCDMeasurementBasicFilter",
     topWithBSelection = param.topWithBSelection.clone(),
     topWithWSelection = param.topWithWSelection.clone(),
     forwardJetVeto = param.forwardJetVeto.clone(),
-    transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology.clone(),
     vertexWeight = param.vertexWeight.clone(),
     vertexWeightReader = param.vertexWeightReader.clone(),
     GenParticleAnalysis = param.GenParticleAnalysis.clone(),
     Tree = param.tree.clone(),
-    eventCounter = param.eventCounter.clone()
+    eventCounter = param.eventCounter.clone(),
+    factorisationTauPtBinLowEdges = cms.untracked.vdouble(40., 50., 60., 70., 80., 100., 120., 150.),
+    factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0), # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
+    factorisationNVerticesBinLowEdges = cms.untracked.vint32(5, 10, 15, 20, 25, 30),
+    factorisationTransverseMassRange = cms.untracked.vdouble(40., 0., 400.),
+    factorisationFullMassRange = cms.untracked.vdouble(50., 0., 500.),
 )
-# Factorization (quick and dirty version)
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetTableFactorization_cfi as mettables
-import HiggsAnalysis.HeavyChHiggsToTauNu.METTableFactorization_NoFactorization_cfi as mettableCoeff
-#process.QCDMeasurement.factorization = cms.untracked.PSet()
-#mettableCoeff.METTableFactorizationCoefficients.METTables_Coefficients = cms.untracked.vdouble( *(
-#0.0, 0.0, 0.0223602484, 0.0263059, 0.0210332103, 0.016273393, 0.018639329, 0.0176211454, 0.0183615819, 0.0159055926, 0.025789813, 0.0652346858
-#) )
-mettableCoeff.METTableFactorizationCoefficients.factorizationSourceName = cms.untracked.string('PMET70_afterJetSelection_fromData_v3')
+if not doFillTree:
+    process.QCDMeasurement.Tree.fill = cms.untracked.bool(False)
+process.QCDMeasurement.histogramAmbientLevel = myHistogramAmbientLevel
 
-process.QCDMeasurement.factorization = mettables.METTableParameters
-process.QCDMeasurement.factorization.factorizationTables = mettableCoeff.METTableFactorizationCoefficients
+# Btagging DB
+process.load("CondCore.DBCommon.CondDBCommon_cfi")
+#MC measurements
+process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
+process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
+#Data measurements
+process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
+process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
+#User DB for btag eff
+btagDB = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
+if options.runOnCrab != 0:
+    print "BTagDB: Assuming that you are running on CRAB"
+    btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
+else:
+    print "BTagDB: Assuming that you are not running on CRAB (if you are running on CRAB, add to job parameters in multicrab.cfg runOnCrab=1)"
+process.CondDBCommon.connect = btagDB
+process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
+process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
+param.bTagging.UseBTagDB  = cms.untracked.bool(False)
+
 # Type 1 MET
 
 # Add type 1 MET
@@ -190,146 +214,78 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
 sequence = MetCorrection.addCorrectedMet(process, process.QCDMeasurement, postfix=PF2PATVersion)
 process.commonSequence *= sequence
 
+# Set beta variable for jets
+process.signalAnalysis.jetSelection.betaCut = betaCutForJets
+
 # Prescale fetching done automatically for data
-if dataVersion.isData() and not disablePrescales:
+if dataVersion.isData() and doPrescalesForData:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
     process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
     process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
     process.commonSequence *= process.hplusPrescaleWeightProducer
     process.QCDMeasurement.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
-# Disable filling of TTree
-if not doFillTree:
-    process.QCDMeasurement.Tree.fill = cms.untracked.bool(False)
-
-process.QCDMeasurement.histogramAmbientLevel = myHistogramAmbientLevel
-
 # Print output
-print "\ntree will be filled:", process.QCDMeasurement.Tree.fill
-print "\nVertexWeight:", process.QCDMeasurement.vertexWeight
+print "\ntree will be filled:", process.QCDMeasurement.Tree.fill.value()
+print "\nVertexWeight:", process.QCDMeasurement.vertexWeight.value()
 print "\nTrigger:", process.QCDMeasurement.trigger
 print "\nPV Selection:", process.QCDMeasurement.primaryVertexSelection
-print "\nTauSelection operating mode:", process.QCDMeasurement.tauSelection.operatingMode
-print "TauSelection src:", process.QCDMeasurement.tauSelection.src
-print "TauSelection selection:", process.QCDMeasurement.tauSelection.selection
-print "TauSelection isolation:", process.QCDMeasurement.tauSelection.isolationDiscriminator
-print "TauSelection ptCut:", process.QCDMeasurement.tauSelection.ptCut
-print "TauSelection etacut:", process.QCDMeasurement.tauSelection.etaCut
-print "TauSelection leadingTrackPtCut:", process.QCDMeasurement.tauSelection.leadingTrackPtCut
-print "TauSelection rtauCut:", process.QCDMeasurement.tauSelection.rtauCut
-print "TauSelection nprongs:", process.QCDMeasurement.tauSelection.nprongs
-print "\nMET:", process.QCDMeasurement.MET
-print "\nGlobalElectronVeto:", process.QCDMeasurement.GlobalElectronVeto
-print "\nNonIsolatedElectronVeto:", process.QCDMeasurement.NonIsolatedElectronVeto
-print "\nGlobalMuonVeto:", process.QCDMeasurement.GlobalMuonVeto
-print "\nNonIsolatedMuonVeto:", process.QCDMeasurement.NonIsolatedMuonVeto
-print "\nJetSelection:", process.QCDMeasurement.jetSelection
-print "\nbTagging: ", process.QCDMeasurement.bTagging
-print "\nFakeMETVeto:", process.QCDMeasurement.fakeMETVeto
-print "\nEvtTopology:", process.QCDMeasurement.EvtTopology
-#print "\nMetTables:", process.QCDMeasurement.factorization
-print "\nTopSelection:", process.QCDMeasurement.topSelection
-print "****************************************************"
-print "\nInvMassVetoOnJets:", process.QCDMeasurement.InvMassVetoOnJets
-print "\nEvtTopology:", process.QCDMeasurement.EvtTopology
-print "\nForwardJetVeto:", process.QCDMeasurement.forwardJetVeto
+print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode.value()
+print "Trigger scale factor data:", process.signalAnalysis.triggerEfficiencyScaleFactor.dataSelect.value()
+print "Trigger scale factor MC:", process.signalAnalysis.triggerEfficiencyScaleFactor.mcSelect.value()
+print "VertexWeight data distribution:",process.signalAnalysis.vertexWeight.dataPUdistribution.value()
+print "VertexWeight mc distribution:",process.signalAnalysis.vertexWeight.mcPUdistribution.value()
+print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut.value()
+print "\nTauSelection operating mode:", process.QCDMeasurement.tauSelection.operatingMode.value()
+print "TauSelection src:", process.QCDMeasurement.tauSelection.src.value()
+print "TauSelection selection:", process.QCDMeasurement.tauSelection.selection.value()
+print "TauSelection isolation:", process.QCDMeasurement.tauSelection.isolationDiscriminator.value()
+print "TauSelection rtauCut:", process.QCDMeasurement.tauSelection.rtauCut.value()
+print "VetoTauSelection src:", process.signalAnalysis.vetoTauSelection.tauSelection.src.value()
+
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
-process.QCDMeasurementCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-    counterNames = cms.untracked.InputTag("QCDMeasurement", "counterNames"),
-    counterInstances = cms.untracked.InputTag("QCDMeasurement", "counterInstances"),
-    printMainCounter = cms.untracked.bool(True),
-#    printSubCounters = cms.untracked.bool(True),
-#    printAvailableCounters = cms.untracked.bool(False),
-)
+process.QCDMeasurement.eventCounter.printMainCounter = cms.untracked.bool(True)
+#process.QCDMeasurement.eventCounter.printMainCounter = cms.untracked.bool(False)
 if len(additionalCounters) > 0:
-    process.QCDMeasurementCounters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
+    process.QCDMeasurement.eventCounter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
 
 # PickEvent module and the main Path. The picked events are only the
 # ones selected by the golden analysis defined above.
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
-process.QCDMeasurementPath = cms.Path(
-    process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
-    process.QCDMeasurement *
-    process.QCDMeasurementCounters
-    #* process.PickEvents
-)
+if not doOptimisation:
+    process.QCDMeasurementPath = cms.Path(
+        process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
+        process.QCDMeasurement *
+        process.PickEvents
+    )
+
+# Optimisation
+variationModuleNames = []
+if doOptimisation:
+    # Make variation modules
+    variationModuleNames.extend(myOptimisation.generateVariations(process,additionalCounters,process.commonSequence,process.signalAnalysis,"signalAnalysis"))
+
+def getQCDMeasurementModuleNames():
+    modules = []
+    if not doOptimisation:
+        modules.append("QCDMeasurement")
+    if doOptimisation:
+        modules.extend(variationModuleNames)
+    return modules
 
 ################################################################################
-# The signal analysis with different tau ID algorithms
-# # FIXME
-# Run the analysis for the different tau ID algorithms at the same job
-# as the golden analysis. It is significantly more efficiency to run
-# many analyses in a single job compared to many jobs (this avoids
-# some of the I/O and grid overhead). The fragment below creates the
-# following histogram directories
-# QCDMeasurementTauSelectionShrinkingConeCutBased
-# QCDMeasurementTauSelectionShrinkingConeTaNCBased
-# QCDMeasurementTauSelectionCaloTauCutBased
-# QCDMeasurementTauSelectionHPSTightTauBased
-# QCDMeasurementTauSelectionCombinedHPSTaNCBased
-#
-# The corresponding Counter directories have "Counters" postfix, and
-# cms.Paths "Path" postfix. The paths are run independently of each
-# other. It is important to give the process.commonSequence for the
-# function, so that it will be run before the analysis module in the
-# Path. Then, in case PAT is run on the fly, the framework runs the
-# analysis module after PAT (and runs PAT only once).
-if doAllTauIds:
-    module = process.QCDMeasurement.clone()
-    module.Tree.fill = False #attikis (default is False)
-    param.addTauIdAnalyses(process, dataVersion, "QCDMeasurement", module, process.commonSequence, additionalCounters)
-
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
-if doJetThresholdScan:
-    moduleA = process.QCDMeasurement.clone()
-    moduleA.jetSelection.ptCut = 20.0
-    addAnalysis(process, "QCDMeasurement3Jets20", moduleA,
-                preSequence=process.commonSequence,
-                additionalCounters=additionalCounters,
-                signalAnalysisCounters=True)
-    moduleB = process.QCDMeasurement.clone()
-    moduleB.jetSelection.ptCut = 20.0
-    moduleB.jetSelection.minNumber = 4
-    addAnalysis(process, "QCDMeasurement4Jets20", moduleB,
-                preSequence=process.commonSequence,
-                additionalCounters=additionalCounters,
-                signalAnalysisCounters=True)
-    moduleC = process.QCDMeasurement.clone()
-    moduleC.jetSelection.ptCut = 20.0
-    moduleC.jetSelection.minNumber = 4
-    moduleC.bTagging.minNumber = 2
-    addAnalysis(process, "QCDMeasurement4Jets20TwoBjets", moduleC,
-                preSequence=process.commonSequence,
-                additionalCounters=additionalCounters,
-                signalAnalysisCounters=True)
-
-
-################################################################################
-# The signal analysis with jet energy scale variation
+# The QCD measurement with jet energy scale variation
 #
 # If the flag is true, create two paths for the variation in plus and
-# minus, and clone the signal analysis and counter modules to the
+# minus, and clone the QCD measurement and counter modules to the
 # paths. The tau, jet and MET collections to adjust are taken from the
-# configuration of the golden analysis. The fragment below creates the
-# following histogram directories
-# QCDMeasurementCountersJESPlus05
-# QCDMeasurementCountersJESMinus05
+# configuration of the golden analysis. The fragment below creates
+# additional directories with suffix JES...
 from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVariationAnalysis
-if doJESVariation:
-    # FIXME: copy new code from signal analysis 
-    # In principle here could be more than two JES variation analyses
-    JESs = "%02d" % int(JESVariation*100)
-    JESe = "%02d" % int(JESEtaVariation*100)
-    JESm = "%02d" % int(JESUnclusteredMETVariation*100)
-    module = process.QCDMeasurement.clone()
-    module.Tree.fill = False
-    module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
-
-    addJESVariationAnalysis(process, dataVersion, "QCDMeasurement", "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, module, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
-    addJESVariationAnalysis(process, dataVersion, "QCDMeasurement", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
-    addJESVariationAnalysis(process, dataVersion, "QCDMeasurement", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, module, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
-    addJESVariationAnalysis(process, dataVersion, "QCDMeasurement", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
+def addJESVariation(name, doJetUnclusteredVariation):
+    print "fixme"
+    # FIXME: copy new code from signal analysis
 
 # Print tau discriminators from one tau from one event. Note that if
 # the path below is commented, the discriminators are not printed.
@@ -341,34 +297,57 @@ process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyz
 #    process.tauDiscriminatorPrint
 #)
 
+# PU weight variation
+# Adds two directories (up and down)
+def addPUWeightVariation(name):
+    # Up variation
+    module = getattr(process, name).clone()
+    module.Tree.fill = False
+    param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, era=puweight, suffix="up")
+    addAnalysis(process, name+"PUWeightPlus", module,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+    # Down variation
+    module = module.clone()
+    param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, era=puweight, suffix="down")
+    addAnalysis(process, name+"PUWeightMinus", module,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+
+if doSystematics:
+    doJetUnclusteredVariation = True
+    modules = getSignalAnalysisModuleNames()
+
+    # JES variation is relevant for MC only
+    if dataVersion.isMC():
+        for name in modules:
+            addJESVariation(name, doJetUnclusteredVariation)
+    else:
+        print "JES variation disabled for data (not meaningful for data)"
+    print "Added JES variation for %d modules"%len(modules)
+    # PU weight variation is relevant for MC only
+    if dataVersion.isMC():
+        for name in modules:
+            addPUWeightVariation(name)
+    else:
+        print "PU weight variation disabled for data (not meaningful for data)"
+    print "Added PU weight variation for %d modules"%len(modules)
 
 ################################################################################
 #for QCD control plots
-if doAllTauIds:
-    process.out = cms.OutputModule("PoolOutputModule",
-                                   fileName = cms.untracked.string('output.root'),
-                                   outputCommands = cms.untracked.vstring(
-        "keep *_*_*_HChQCDMeasurement_*_*_*",
-        "drop *_*_counterNames_*",
-        "drop *_*_counterInstances_*"
-        #	"drop *",
-        #	"keep *",
-        #        "keep edmMergeableCounter_*_*_*"
-        )
+process.out = cms.OutputModule("PoolOutputModule",
+                                fileName = cms.untracked.string('output.root'),
+                                outputCommands = cms.untracked.vstring(
+    "keep *_*_*_HChQCDMeasurement",
+    "drop *_*_counterNames_*",
+    "drop *_*_counterInstances_*"
+    #	"drop *",
+    #	"keep *",
+    #        "keep edmMergeableCounter_*_*_*"
+    )
                                    )
-else:
-    process.out = cms.OutputModule("PoolOutputModule",
-                                   fileName = cms.untracked.string('output.root'),
-                                   outputCommands = cms.untracked.vstring(
-        "keep *_*_*_HChQCDMeasurement",
-        "drop *_*_counterNames_*",
-        "drop *_*_counterInstances_*"
-        #	"drop *",
-        #	"keep *",
-        #        "keep edmMergeableCounter_*_*_*"
-        )
-                                   )
-    
 
 # Uncomment the following line to get also the event output (can be
 # useful for debugging purposes)
