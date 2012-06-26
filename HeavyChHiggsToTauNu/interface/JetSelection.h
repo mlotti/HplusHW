@@ -39,6 +39,7 @@ namespace HPlus {
       bool passedEvent() const { return fPassedEvent; }
       const edm::PtrVector<pat::Jet>& getAllJets() const { return fJetSelection->fAllJets; }
       const edm::PtrVector<pat::Jet>& getSelectedJets() const { return fJetSelection->fSelectedJets; }
+      const edm::PtrVector<pat::Jet>& getSelectedJetsPt20() const { return fJetSelection->fSelectedJetsPt20; }
       bool testPassStatus(size_t value) const { return fJetSelection->fNumberOfJets.passedCut(value); }
       const int getHadronicJetCount() const { return fJetSelection->iNHadronicJets; }
       const int getHadronicJetCountInFwdDir() const { return fJetSelection->iNHadronicJetsInFwdDir; }
@@ -184,6 +185,7 @@ namespace HPlus {
     edm::PtrVector<pat::Jet> fAllJets;
     // Selected jets
     edm::PtrVector<pat::Jet> fSelectedJets;
+    edm::PtrVector<pat::Jet> fSelectedJetsPt20;
     // Not Selected jets
     edm::PtrVector<pat::Jet> fNotSelectedJets;
     int iNHadronicJets;

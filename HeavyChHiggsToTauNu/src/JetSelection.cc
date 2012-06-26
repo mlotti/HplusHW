@@ -328,6 +328,9 @@ namespace HPlus {
       hPtCentral->Fill(iJet->pt());
 
       // pt cut
+      if (iJet->pt() > 20.0)
+        fSelectedJetsPt20.push_back(iJet);
+
       if(!(iJet->pt() > fPtCut)) continue;
       increment(fPtCutSubCount);
       ++ptCutPassed;
