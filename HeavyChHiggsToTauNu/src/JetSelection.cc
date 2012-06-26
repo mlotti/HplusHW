@@ -171,6 +171,7 @@ namespace HPlus {
     fAllJets = hjets->ptrVector();
 
     fSelectedJets.clear();
+    fSelectedJetsPt20.clear();
     fNotSelectedJets.clear();
     fNotSelectedJets.reserve(jets.size());
 
@@ -319,7 +320,7 @@ namespace HPlus {
 
       // eta cut
       if(!(std::abs(iJet->eta()) < fEtaCut)){
-	fNotSelectedJets.push_back(iJet);
+	fNotSelectedJets.push_back(*iter);
 	continue;
       }
       increment(fEtaCutSubCount);
