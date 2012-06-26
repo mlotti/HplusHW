@@ -45,7 +45,6 @@ namespace HPlus {
   FullHiggsMassCalculator::Data FullHiggsMassCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData) {
     bool myPassedStatus = true;
     // 1) find b-jet
-    // FIXME: add to b-tagging second b-jet threshold of 20 GeV
     TVector3 myBJetVector;
     double myMinDeltaR = 99.0;
     edm::Ptr<pat::Jet> myBJet;
@@ -66,12 +65,12 @@ namespace HPlus {
     TVector3 myMETVector(metData.getSelectedMET()->px(), metData.getSelectedMET()->py(), metData.getSelectedMET()->pz());
 
     // 3) calculate
-    // FIXME doCalculate(myTauVector, myBJetVector, myMETVector);
+    doCalculate(myTauVector, myBJetVector, myMETVector);
 
     // Return data object
     return FullHiggsMassCalculator::Data(this, myPassedStatus);
   }
-  
+
   void FullHiggsMassCalculator::doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool doHistogramming) {
     // Initialise
     double fTopMassSolution = -1.0;
@@ -194,7 +193,7 @@ namespace HPlus {
       }
     }
   }
-  
+
   bool FullHiggsMassCalculator::doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
@@ -304,14 +303,14 @@ namespace HPlus {
     // Make MC matching of bjet
     double myDeltaRBJet = ROOT::Math::VectorUtil::DeltaR(bjet->p4(), myHiggsSideBJet->p4());
     std::cout << "FullMass: bjet deltaR = " << myDeltaRBJet << std::endl;
-    if (myDeltaRBJet > 0.4) return false;
+    //if (myDeltaRBJet > 0.4) return false;
     // Make MC matching of tau jet
     double myDeltaRTau = ROOT::Math::VectorUtil::DeltaR(tau->p4(), myTauFromHiggs->p4());
     std::cout << "FullMass: tau deltaR = " << myDeltaRTau << std::endl;
-    if (myDeltaRTau > 0.4) return false;
+    //if (myDeltaRTau > 0.4) return false;
     // Calculate result
     TVector3 myBJetVector(myHiggsSideBJet->px(), myHiggsSideBJet->py(), myHiggsSideBJet->pz());
-    doCalculate(myVisibleTau, myBJetVector, myNeutrinoes, true);
+    //doCalculate(myVisibleTau, myBJetVector, myNeutrinoes, true);
     return true;
   }
 }
