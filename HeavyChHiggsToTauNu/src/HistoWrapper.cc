@@ -21,6 +21,8 @@ namespace HPlus {
       delete *it;
     for (std::vector<WrappedTH2*>::iterator it = fAllTH2Histos.begin(); it != fAllTH2Histos.end(); ++it)
       delete *it;
+    for (std::vector<WrappedTH3*>::iterator it = fAllTH3Histos.begin(); it != fAllTH3Histos.end(); ++it)
+      delete *it;
   }
 
   bool HistoWrapper::checkIfDirExists(TDirectory* d, std::string name) const {
@@ -45,5 +47,12 @@ namespace HPlus {
   bIsActive(isActive) { }
 
   WrappedTH2::~WrappedTH2() { }
+
+  WrappedTH3::WrappedTH3(EventWeight& eventWeight, TH3* histo, bool isActive)
+  : fEventWeight(eventWeight),
+  h(histo),
+  bIsActive(isActive) { }
+
+  WrappedTH3::~WrappedTH3() { }
 
 }
