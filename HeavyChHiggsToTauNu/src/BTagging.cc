@@ -454,7 +454,7 @@ namespace HPlus {
       }
 
       // pt cut
-      if(iJet->pt() > fPtCut ) continue;
+      if(iJet->pt() < fPtCut ) continue;
       increment(fTaggedPtCutSubCount);
       // eta cut
       if(fabs(iJet->eta()) > fEtaCut ) continue;
