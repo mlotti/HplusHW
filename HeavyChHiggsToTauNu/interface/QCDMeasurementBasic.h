@@ -24,6 +24,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SelectedEventsAnalyzer.h"
@@ -36,6 +37,9 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
+
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "TTree.h"
 #include <vector>
@@ -82,14 +86,20 @@ namespace HPlus {
     int getShapeBinIndex(double tauPt, double tauEta, int nvtx);
 
   private:
-    // Different forks of analysis
-    std::vector<AnalysisVariation> fAnalyses;
 
     // We need a reference in order to use the same object (and not a copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;
     HistoWrapper fHistoWrapper;
     const double fDeltaPhiCutValue;
     const std::string fTopRecoName; // Name of selected top reconstruction algorithm
+
+    std::vector<double> fTauPtBinLowEdges;
+    std::vector<double> fTauEtaBinLowEdges;
+    std::vector<int> fNVerticesBinLowEdges;
+    std::vector<double> fTransverseMassRange; // Range from config
+    std::vector<double> fFullMassRange; // Range from config
+    std::vector<double> fTransverseMassBinLowEdges;
+    std::vector<double> fFullMassRangeBinLowEdges;
 
     // Counters - order is important
     Count fAllCounter;
@@ -142,14 +152,6 @@ namespace HPlus {
 
     SignalAnalysisTree fTree;
     ScaleFactorUncertaintyManager fSFUncertaintyAfterStandardSelections;
-
-    std::vector<double> fTauPtBinLowEdges;
-    std::vector<double> fTauEtaBinLowEdges;
-    std::vector<int> fNVerticesBinLowEdges;
-    std::vector<double> fTransverseMassRange; // Range from config
-    std::vector<double> fFullMassRange; // Range from config
-    std::vector<double> fTransverseMassBinLowEdges;
-    std::vector<double> fFullMassRangeBinLowEdges;
 
     // Histograms
     WrappedTH1* hVerticesBeforeWeight;

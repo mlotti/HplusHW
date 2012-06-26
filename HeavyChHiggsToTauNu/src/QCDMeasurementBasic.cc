@@ -4,9 +4,6 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
-
 #include "TNamed.h"
 
 namespace HPlus {
@@ -25,6 +22,7 @@ namespace HPlus {
     fPrimaryVertexCounter(eventCounter.addCounter("PrimaryVertex")),
     fTausExistCounter(eventCounter.addCounter("TauCandSelection")),
     fControlPlotsMultipleTausCounter(eventCounter.addCounter("Rejected in ctrl plots (multiple taus)")),
+    fTriggerScaleFactorCounter(eventCounter.addCounter("Trg scale factor")),
     fVetoTauCounter(eventCounter.addCounter("VetoTauSelection")),
     fElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
     fMuonVetoCounter(eventCounter.addCounter("GlobalMuonVeto")),
@@ -33,6 +31,7 @@ namespace HPlus {
     fNJetsCounter(eventCounter.addCounter("JetSelection")),
     fMETCounter(eventCounter.addCounter("MET")),
     fBTaggingCounter(eventCounter.addCounter("bTagging")),
+    fBTaggingScaleFactorCounter(eventCounter.addCounter("btag scale factor")),
     fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhiTauMET")),
     fMaxDeltaPhiJetMETCounter(eventCounter.addCounter("maxDeltaPhiJetMET")),
     fTopSelectionCounter(eventCounter.addCounter("top selection")),
@@ -188,8 +187,6 @@ namespace HPlus {
 
 
 //------ Tau candidate selection
-    // Store weight of event
-    double myWeightBeforeTauID = fEventWeight.getWeight();
     // Do tau candidate selection
     TauSelection::Data tauCandidateData = fTauSelection.analyze(iEvent, iSetup);
     if (!tauCandidateData.passedEvent()) return false;
@@ -205,23 +202,25 @@ namespace HPlus {
     int myTauEtaBinIndex = getTauPtBinIndex(tauCandidateData.getSelectedTau()->eta());
 
     // Obtain boolean for rest of tauID for control plots
-    bool myPassedTauIDStatus = tauCandidateData.selectedTauPassesFullTauID();
+    //bool myPassedTauIDStatus = tauCandidateData.selectedTauPassesFullTauID();
     // Count how many tau candidates actually pass tau ID
+    /*
     if (myPassedTauIDStatus) {
       int myFullTauIDPassedCount = 0;
-      for (edm::PtrVector<pat::Tau>::iterators it = tauCandidateData.getSelectedTaus().begin(); it != tauCandidateData.getSelectedTaus().end(); ++it) {
+      for (edm::PtrVector<pat::Tau>::iterator it = tauCandidateData.getSelectedTaus().begin(); it != tauCandidateData.getSelectedTaus().end(); ++it) {
         if ((*it)->selectedTauPassesFullTauID())
           ++myFullTauIDPassedCount;
       }
       // Require exactly 1 tau
       if (myFullTauIDPassedCount > 1)
         myPassedTauIDStatus = false;
-    }
+    }*/
 
 //------ Veto against second tau in event
     VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau());
     //    if (vetoTauData.passedEvent()) return false;
     if (!vetoTauData.passedEvent()) increment(fVetoTauCounter);
+    // Note: no return statement should be added here
 
 
 //------ Global electron veto
@@ -252,7 +251,6 @@ namespace HPlus {
     if (!jetData.passedEvent()) return false;
     increment(fNJetsCounter);
     hSelectionFlow->Fill(kQCDOrderJetSelection);
-    hAfterJetSelection->Fill(myTauPtBinIndex);
     // Control plot
     hAfterJetSelection->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
 
@@ -313,7 +311,7 @@ namespace HPlus {
     hLeg1AfterMET->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
 
     // b tagging cut
-    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     if(!btagData.passedEvent()) return false;
     increment(fBTaggingCounter);
     // Apply scale factor as weight to event
@@ -347,7 +345,7 @@ namespace HPlus {
     TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     bool myTopRecoWithWSelectionStatus = false;
-    BjetSelection::Data BjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), tauData.getSelectedTau(), metData.getSelectedMET());
+    BjetSelection::Data BjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), tauCandidateData.getSelectedTau(), metData.getSelectedMET());
     double myTopWithBSelectionTopMass = 0.0;
     if (BjetSelectionData.passedEvent() ) {
       TopWithBSelection::Data TopWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData.getBjetTopSide());
@@ -448,8 +446,8 @@ namespace HPlus {
     int myTauPtBins = static_cast<int>(fTauPtBinLowEdges.size()) + 1;
     int myTauEtaBins = static_cast<int>(fTauEtaBinLowEdges.size()) + 1;
     int myNVerticesBins = static_cast<int>(fNVerticesBinLowEdges.size()) + 1;
-    std::string myTitle = "shape_"+title
-    TFileDirectory myDir = fs->mkdir(myTitle.str().c_str());
+    std::string myTitle = "shape_"+title;
+    TFileDirectory myDir = fs->mkdir(myTitle.c_str());
     for (int i = 0; i < myTauPtBins; ++i) {
       for (int j = 0; j < myTauEtaBins; ++j) {
         for (int k = 0; k < myNVerticesBins; ++k) {
@@ -466,7 +464,7 @@ namespace HPlus {
     int myNVerticesBins = static_cast<int>(fNVerticesBinLowEdges.size()) + 1;
     int myTauPtBin = getTauPtBinIndex(tauPt);
     int myTauEtaBin = getTauEtaBinIndex(tauEta);
-    int myVtxBin = getNVerticesBinIndex((nvtx);
+    int myVtxBin = getNVerticesBinIndex(nvtx);
     return myVtxBin + myTauEtaBin*myNVerticesBins + myTauPtBin*myNVerticesBins*myTauEtaBins;
   }
 }
