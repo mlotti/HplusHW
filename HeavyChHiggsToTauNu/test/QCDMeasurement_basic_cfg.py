@@ -275,6 +275,8 @@ def getQCDMeasurementModuleNames():
         modules.extend(variationModuleNames)
     return modules
 
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
+
 ################################################################################
 # The QCD measurement with jet energy scale variation
 #
@@ -302,6 +304,7 @@ process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyz
 # Adds two directories (up and down)
 def addPUWeightVariation(name):
     # Up variation
+    return
     module = getattr(process, name).clone()
     module.Tree.fill = False
     param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, era=puweight, suffix="up")
