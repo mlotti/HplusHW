@@ -109,7 +109,6 @@ namespace HPlus {
     const double fLeadingDiscrCut;
     const double fSubLeadingDiscrCut;
     DirectionalCut fNumberOfBJets;
-    const uint32_t fMin;
 
     BTaggingScaleFactorFromDB *btagDB;
     bool FactorsFromDB;
