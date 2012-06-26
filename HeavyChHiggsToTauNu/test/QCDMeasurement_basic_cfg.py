@@ -55,7 +55,8 @@ myOptimisation = HPlusOptimisationScheme()
 myOptimisation.addJetEtVariation([20.0, 30.0])
 #myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
 #myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
-#myOptimisation.addBJetDiscriminatorVariation([0.679, 0.244])
+#myOptimisation.addBJetLeadingDiscriminatorVariation([0.898, 0.679])
+#myOptimisation.addBJetSubLeadingDiscriminatorVariation([0.679, 0.244])
 #myOptimisation.addBJetEtVariation([])
 myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
 myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
@@ -215,7 +216,7 @@ sequence = MetCorrection.addCorrectedMet(process, process.QCDMeasurement, postfi
 process.commonSequence *= sequence
 
 # Set beta variable for jets
-process.signalAnalysis.jetSelection.betaCut = betaCutForJets
+process.QCDMeasurement.jetSelection.betaCut = betaCutForJets
 
 # Prescale fetching done automatically for data
 if dataVersion.isData() and doPrescalesForData:
@@ -227,21 +228,21 @@ if dataVersion.isData() and doPrescalesForData:
 
 # Print output
 print "\ntree will be filled:", process.QCDMeasurement.Tree.fill.value()
-print "\nVertexWeight:", process.QCDMeasurement.vertexWeight.value()
-print "\nTrigger:", process.QCDMeasurement.trigger
-print "\nPV Selection:", process.QCDMeasurement.primaryVertexSelection
-print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode.value()
-print "Trigger scale factor data:", process.signalAnalysis.triggerEfficiencyScaleFactor.dataSelect.value()
-print "Trigger scale factor MC:", process.signalAnalysis.triggerEfficiencyScaleFactor.mcSelect.value()
-print "VertexWeight data distribution:",process.signalAnalysis.vertexWeight.dataPUdistribution.value()
-print "VertexWeight mc distribution:",process.signalAnalysis.vertexWeight.mcPUdistribution.value()
-print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut.value()
+#print "\nVertexWeight:", process.QCDMeasurement.vertexWeight.value()
+#print "\nTrigger:", process.QCDMeasurement.trigger
+#print "\nPV Selection:", process.QCDMeasurement.primaryVertexSelection
+print "Trigger scale factor mode:", process.QCDMeasurement.triggerEfficiencyScaleFactor.mode.value()
+print "Trigger scale factor data:", process.QCDMeasurement.triggerEfficiencyScaleFactor.dataSelect.value()
+print "Trigger scale factor MC:", process.QCDMeasurement.triggerEfficiencyScaleFactor.mcSelect.value()
+print "VertexWeight data distribution:",process.QCDMeasurement.vertexWeight.dataPUdistribution.value()
+print "VertexWeight mc distribution:",process.QCDMeasurement.vertexWeight.mcPUdistribution.value()
+print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.QCDMeasurement.trigger.hltMetCut.value()
 print "\nTauSelection operating mode:", process.QCDMeasurement.tauSelection.operatingMode.value()
 print "TauSelection src:", process.QCDMeasurement.tauSelection.src.value()
 print "TauSelection selection:", process.QCDMeasurement.tauSelection.selection.value()
 print "TauSelection isolation:", process.QCDMeasurement.tauSelection.isolationDiscriminator.value()
 print "TauSelection rtauCut:", process.QCDMeasurement.tauSelection.rtauCut.value()
-print "VetoTauSelection src:", process.signalAnalysis.vetoTauSelection.tauSelection.src.value()
+print "VetoTauSelection src:", process.QCDMeasurement.vetoTauSelection.tauSelection.src.value()
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
@@ -264,7 +265,7 @@ if not doOptimisation:
 variationModuleNames = []
 if doOptimisation:
     # Make variation modules
-    variationModuleNames.extend(myOptimisation.generateVariations(process,additionalCounters,process.commonSequence,process.signalAnalysis,"signalAnalysis"))
+    variationModuleNames.extend(myOptimisation.generateVariations(process,additionalCounters,process.commonSequence,process.QCDMeasurement,"QCDMeasurement"))
 
 def getQCDMeasurementModuleNames():
     modules = []

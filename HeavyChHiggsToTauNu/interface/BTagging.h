@@ -106,7 +106,8 @@ namespace HPlus {
     const double fPtCut;
     const double fEtaCut;
     const std::string fDiscriminator;
-    const double fDiscrCut;
+    const double fLeadingDiscrCut;
+    const double fSubLeadingDiscrCut;
     DirectionalCut fNumberOfBJets;
     const uint32_t fMin;
 
@@ -123,6 +124,7 @@ namespace HPlus {
 
     Count fAllSubCount;
     Count fTaggedSubCount;
+    Count fTaggedPtCutSubCount;
     Count fTaggedEtaCutSubCount;
     Count fTaggedAllRealBJetsSubCount;
     Count fTaggedTaggedRealBJetsSubCount;
@@ -135,17 +137,17 @@ namespace HPlus {
     WrappedTH1 *hPt;
     WrappedTH1 *hEta;
     WrappedTH1 *hDiscrB;
-    WrappedTH1 *hPtB33;
-    WrappedTH1 *hEtaB33;
-    WrappedTH1 *hPtB17;
-    WrappedTH1 *hEtaB17;
+    WrappedTH1 *hPtBCSVT;
+    WrappedTH1 *hEtaBCSVT;
+    WrappedTH1 *hPtBCSVM;
+    WrappedTH1 *hEtaBCSVM;
     WrappedTH1 *hPtBnoTag;
     WrappedTH1 *hEtaBnoTag;
     WrappedTH1 *hDiscrQ;
-    WrappedTH1 *hPtQ33;
-    WrappedTH1 *hEtaQ33;
-    WrappedTH1 *hPtQ17;
-    WrappedTH1 *hEtaQ17;
+    WrappedTH1 *hPtQCSVT;
+    WrappedTH1 *hEtaQCSVT;
+    WrappedTH1 *hPtQCSVM;
+    WrappedTH1 *hEtaQCSVM;
     WrappedTH1 *hPtQnoTag;
     WrappedTH1 *hEtaQnoTag;
     WrappedTH1 *hPt1;
