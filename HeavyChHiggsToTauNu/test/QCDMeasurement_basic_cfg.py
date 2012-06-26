@@ -178,9 +178,9 @@ process.QCDMeasurement = cms.EDFilter("HPlusQCDMeasurementBasicFilter",
     GenParticleAnalysis = param.GenParticleAnalysis.clone(),
     Tree = param.tree.clone(),
     eventCounter = param.eventCounter.clone(),
-    factorisationTauPtBinLowEdges = cms.untracked.vdouble(40., 50., 60., 70., 80., 100., 120., 150.),
-    factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0), # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
-    factorisationNVerticesBinLowEdges = cms.untracked.vint32(5, 10, 15, 20, 25, 30),
+    factorisationTauPtBinLowEdges = cms.untracked.vdouble(50., 60., 70., 80., 100., 120., 150.),
+    factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5), # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
+    factorisationNVerticesBinLowEdges = cms.untracked.vint32(10, 20, 30),
     factorisationTransverseMassRange = cms.untracked.vdouble(40., 0., 400.),
     factorisationFullMassRange = cms.untracked.vdouble(50., 0., 500.),
 )

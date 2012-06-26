@@ -60,10 +60,10 @@ namespace HPlus {
     kQCDOrderMuonVeto,
     kQCDOrderJetSelection,
     kQCDOrderTauID,
-    kQCDOrderRtau,
     kQCDOrderMET,
     kQCDOrderBTag,
     kQCDOrderDeltaPhiTauMET,
+    kQCDOrderMaxDeltaPhiJetMET,
     kQCDOrderTopSelection
   };
 
@@ -83,7 +83,8 @@ namespace HPlus {
     int getMtBinIndex(double mt);
     int getFullMassBinIndex(double mass);
     void createShapeHistograms(edm::Service< TFileService >& fs, std::vector< HPlus::WrappedTH1* >& container, string title, int nbins, double min, double max);
-    int getShapeBinIndex(double tauPt, double tauEta, int nvtx);
+    int getShapeBinIndex(int tauPtBin, int tauEtaBin, int nvtxBin);
+    void setAxisLabelsForTH3(WrappedTH3* h);
 
   private:
 
@@ -172,10 +173,10 @@ namespace HPlus {
     WrappedTH3* hLeg2AfterTauID;
 
     // Mt shapes
-    std::vector<WrappedTH1*> hMtShapesAfterJetSelection;
+    //std::vector<WrappedTH1*> hMtShapesAfterJetSelection;
     std::vector<WrappedTH1*> hMtShapesAfterFullMETLeg;
     //std::vector<WrappedTH1*> hMtShapesAfterMetLegNoBtagging;
-    std::vector<WrappedTH1*> hFullMassShapesAfterJetSelection;
+    //std::vector<WrappedTH1*> hFullMassShapesAfterJetSelection;
     std::vector<WrappedTH1*> hFullMassShapesAfterFullMETLeg;
     //std::vector<WrappedTH1*> hFullMassShapesAfterMetLegNoBtagging;
 
