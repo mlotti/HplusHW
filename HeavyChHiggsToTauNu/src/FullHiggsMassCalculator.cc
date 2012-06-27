@@ -86,7 +86,7 @@ namespace HPlus {
     double myTauPlusBEnergy = TMath::Sqrt(TMath::Power(myTauPlusBVector.Mag(),2)+TMath::Power(myTauMass+myBQuarkMass,2));
     double discriminant = TMath::Power(a,2) + 4.0 * TMath::Power(myTauPlusBVector.Z(),2) * TMath::Power(met.Perp(),2)
       - 4.0 * TMath::Power(met.Perp(),2) * (TMath::Power(myTauPlusBEnergy,2));
-    std::cout << "tau+b:, " << myTauPlusBVector.X() << ", " << myTauPlusBVector.Y() << ", " << myTauPlusBVector.Z() << std::endl;
+    /*std::cout << "tau+b:, " << myTauPlusBVector.X() << ", " << myTauPlusBVector.Y() << ", " << myTauPlusBVector.Z() << std::endl;
     std::cout << "tau:, " << tau.X() << ", " << tau.Y() << ", " << tau.Z() << std::endl;
     std::cout << "bjet:, " << bjet.X() << ", " << bjet.Y() << ", " << bjet.Z() << std::endl;
     std::cout << "MET:, " << met.X() << ", " << met.Y() << ", " << met.Z() << std::endl;
@@ -94,7 +94,7 @@ namespace HPlus {
     std::cout << "a, " << a << std::endl;
     std::cout << "tau+b energy, " << myTauPlusBEnergy << std::endl;
     std::cout << "discriminant, " << discriminant << std::endl;
-
+    */
     if (discriminant > 0.0) {
       // Two real solutions exist
       double mySolution1 = (-a*myTauPlusBVector.Z() - myTauPlusBEnergy * TMath::Sqrt(discriminant))
@@ -108,8 +108,8 @@ namespace HPlus {
       double myTopMassSolution2 = TMath::Sqrt(TMath::Power(myTauMass,2)+TMath::Power(myBQuarkMass,2)
         + 2.0 * TMath::Sqrt(TMath::Power(met.Perp(),2) + TMath::Power(mySolution2,2)) * myTauPlusBEnergy
         - 2.0 * (myTauPlusBVector.X() * met.X() + myTauPlusBVector.Y() * met.Y() + myTauPlusBVector.Z() * mySolution2));
-      std::cout << "real solution, nu_Z, " << mySolution1 << ", " << mySolution2 << ", mc z, " << met.Z() << std::endl;
-      std::cout << "real solution, mtop, " << myTopMassSolution1 << ", " << myTopMassSolution2 << std::endl;
+      //std::cout << "real solution, nu_Z, " << mySolution1 << ", " << mySolution2 << ", mc z, " << met.Z() << std::endl;
+      //std::cout << "real solution, mtop, " << myTopMassSolution1 << ", " << myTopMassSolution2 << std::endl;
       fNeutrinoZSolution = mySolution1;
       fTopMassSolution = myTopMassSolution1;
       if (TMath::Abs(myTopMassSolution2 - myTopMass) < TMath::Abs(myTopMassSolution1 - myTopMass)) {
@@ -145,8 +145,8 @@ namespace HPlus {
       double myTopMassSolution2 = TMath::Sqrt(TMath::Power(myTauMass,2)+TMath::Power(myBQuarkMass,2)
         + 2.0 * TMath::Sqrt(TMath::Power(mySolution2,2) + TMath::Power(fNeutrinoZSolution,2)) * myTauPlusBEnergy
         - 2.0 * (alpha * mySolution2 + myTauPlusBVector.Z() * fNeutrinoZSolution));
-      std::cout << "imag solution, nu_Z/alpha/nu_T, " << fNeutrinoZSolution << ", " << alpha << ", " << mySolution1 << ", " << mySolution2 << ", mc z, " << met.Z() << ", mc pt, " << met.Perp() << std::endl;
-      std::cout << "imag solution, mtop, " << myTopMassSolution1 << ", " << myTopMassSolution2 << std::endl;
+      //std::cout << "imag solution, nu_Z/alpha/nu_T, " << fNeutrinoZSolution << ", " << alpha << ", " << mySolution1 << ", " << mySolution2 << ", mc z, " << met.Z() << ", mc pt, " << met.Perp() << std::endl;
+      //std::cout << "imag solution, mtop, " << myTopMassSolution1 << ", " << myTopMassSolution2 << std::endl;
       fNeutrinoPtSolution = mySolution1;
       fTopMassSolution = myTopMassSolution1;
       if (TMath::Abs(myTopMassSolution2 - myTopMass) < TMath::Abs(myTopMassSolution1 - myTopMass)) {
@@ -164,7 +164,7 @@ namespace HPlus {
       fHiggsMassSolution = TMath::Sqrt(TMath::Power(myTauMass,2)
         + 2.0 * TMath::Sqrt(TMath::Power(tau.Mag(),2) + TMath::Power(myTauMass,2)) * myNeutrinoEnergy
         - 2.0 * alphaPrime * fNeutrinoPtSolution);
-      std::cout << "alpha prime/Enu, " << alphaPrime << ", " << myNeutrinoEnergy << std::endl;
+      //std::cout << "alpha prime/Enu, " << alphaPrime << ", " << myNeutrinoEnergy << std::endl;
     }
     // Fill top mass histograms
     if (doHistogramming) {
@@ -183,7 +183,7 @@ namespace HPlus {
         hNeutrinoPtDifference->Fill(fNeutrinoPtSolution-met.Perp());
       }
     }
-    std::cout << "mHiggs, " << fHiggsMassSolution << std::endl;
+    //std::cout << "mHiggs, " << fHiggsMassSolution << std::endl;
     if (doHistogramming) {
       hHiggsMass->Fill(fHiggsMassSolution);
       if (discriminant >= 0.0) {
@@ -204,21 +204,21 @@ namespace HPlus {
       if (TMath::Abs(p.pdgId()) == 37)
         myHiggsLine = i;
     }
-    std::cout << "FullMass: Higgs line " << myHiggsLine << std::endl;
+    //std::cout << "FullMass: Higgs line " << myHiggsLine << std::endl;
     if (!myHiggsLine) return false;
     // Find top, from which Higgs comes from
     reco::Candidate* myHiggsSideTop = const_cast<reco::Candidate*>(genParticles->at(myHiggsLine).mother());
     bool myStatus = true;
     while (myStatus) {
       if (!myHiggsSideTop) myStatus = false;
-      std::cout << "FullMass: Higgs side mother = " << myHiggsSideTop->pdgId() << std::endl;
+      //std::cout << "FullMass: Higgs side mother = " << myHiggsSideTop->pdgId() << std::endl;
       if (TMath::Abs(myHiggsSideTop->pdgId()) == 6) myStatus = false;
       if (myStatus)
         myHiggsSideTop = const_cast<reco::Candidate*>(myHiggsSideTop->mother());
     }
     if (!myHiggsSideTop)
       return false;
-    std::cout << "FullMass: Higgs side top selected " << std::endl;
+    //std::cout << "FullMass: Higgs side top selected " << std::endl;
     // Look at Higgs side top daughters to find b jet
     reco::Candidate* myHiggsSideBJet = 0;
     for (size_t i=0; i < genParticles->size(); ++i) {
@@ -230,7 +230,7 @@ namespace HPlus {
           if (!myBMother) {
             myStatus = false;
           } else {
-            std::cout << "FullMass: B quark mother = " << myBMother->pdgId() << std::endl;
+            //std::cout << "FullMass: B quark mother = " << myBMother->pdgId() << std::endl;
             if (TMath::Abs(myBMother->pdgId()) == 6) {
               myStatus = false;
               double myDeltaR = ROOT::Math::VectorUtil::DeltaR(myBMother->p4(), myHiggsSideTop->p4());
@@ -246,7 +246,7 @@ namespace HPlus {
       }
     }
     if (!myHiggsSideBJet) return false;
-    std::cout << "FullMass: Higgs side bjet found, pt=" << myHiggsSideBJet->pt() << ", eta=" << myHiggsSideBJet->eta() << std::endl;
+    //std::cout << "FullMass: Higgs side bjet found, pt=" << myHiggsSideBJet->pt() << ", eta=" << myHiggsSideBJet->eta() << std::endl;
     // Look if tau decays into one prong (hadronic)
     reco::Candidate* myTauFromHiggs = 0;
     TVector3 myNeutrinoes(0.0, 0.0, 0.0);
@@ -275,7 +275,7 @@ namespace HPlus {
               myStatus = false;
               if (myId == 15) {
                 myTauFromHiggs = const_cast<reco::Candidate*>(&p);
-                std::cout << "FullMass: tau found" << std::endl;
+                //std::cout << "FullMass: tau found" << std::endl;
               } else if (myId == 11 || myId == 13) {
                 myLeptonicTauDecayStatus = true;
               } else if (myId == 12 || myId == 14 || myId == 16) {
@@ -299,14 +299,14 @@ namespace HPlus {
     myVisibleTau.SetXYZ(myVisibleTau.X()+myTauFromHiggs->px(),
                         myVisibleTau.Y()+myTauFromHiggs->py(),
                         myVisibleTau.Z()+myTauFromHiggs->pz());
-    std::cout << "FullMass: tau pt=" << myVisibleTau.Perp() << " prongs=" << myChargedCount << " leptonicDecay=" << myLeptonicTauDecayStatus << ", neutrino pt=" << myNeutrinoes.Perp() << std::endl;
+    //std::cout << "FullMass: tau pt=" << myVisibleTau.Perp() << " prongs=" << myChargedCount << " leptonicDecay=" << myLeptonicTauDecayStatus << ", neutrino pt=" << myNeutrinoes.Perp() << std::endl;
     // Make MC matching of bjet
     double myDeltaRBJet = ROOT::Math::VectorUtil::DeltaR(bjet->p4(), myHiggsSideBJet->p4());
-    std::cout << "FullMass: bjet deltaR = " << myDeltaRBJet << std::endl;
+    //std::cout << "FullMass: bjet deltaR = " << myDeltaRBJet << std::endl;
     //if (myDeltaRBJet > 0.4) return false;
     // Make MC matching of tau jet
     double myDeltaRTau = ROOT::Math::VectorUtil::DeltaR(tau->p4(), myTauFromHiggs->p4());
-    std::cout << "FullMass: tau deltaR = " << myDeltaRTau << std::endl;
+    //std::cout << "FullMass: tau deltaR = " << myDeltaRTau << std::endl;
     //if (myDeltaRTau > 0.4) return false;
     // Calculate result
     TVector3 myBJetVector(myHiggsSideBJet->px(), myHiggsSideBJet->py(), myHiggsSideBJet->pz());
