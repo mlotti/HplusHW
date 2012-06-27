@@ -56,7 +56,7 @@ namespace HPlus {
     NeutrinoPz = 0.;
     bool myPassedStatus = true;
     // 1) find b-jet
-    // FIXME: add to b-taging second b-jet threshold of 20 GeV
+
     TVector3 myBJetVector;
     double myMinDeltaR = 99.0;
     edm::Ptr<pat::Jet> myBJet;
@@ -89,12 +89,9 @@ namespace HPlus {
     // Return data object
     return FullHiggsMassCalculator::Data(this, myPassedStatus);
   }
- 
 
 
 
-
- 
   void FullHiggsMassCalculator::doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool doHistogramming) {
     // Initialise
     double fTopMassSolution = -1.0;
@@ -253,7 +250,7 @@ namespace HPlus {
       }
     }
   }
-  
+
   bool FullHiggsMassCalculator::doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
@@ -364,6 +361,7 @@ namespace HPlus {
     //    std::cout << "FullMass: tau pt=" << myVisibleTau.Perp() << " prongs=" << myChargedCount << " leptonicDecay=" << myLeptonicTauDecayStatus << ", neutrino pt=" << myNeutrinoes.Perp() << std::endl;
     // Make MC matching of bjet
     double myDeltaRBJet = ROOT::Math::VectorUtil::DeltaR(bjet->p4(), myHiggsSideBJet->p4());
+
     //    std::cout << "FullMass: bjet deltaR = " << myDeltaRBJet << std::endl;
     if (myDeltaRBJet > 0.4) return false;
     // Make MC matching of tau jet
@@ -373,6 +371,7 @@ namespace HPlus {
     // Calculate result
     TVector3 myBJetVector(myHiggsSideBJet->px(), myHiggsSideBJet->py(), myHiggsSideBJet->pz());
     //    doCalculate(myVisibleTau, myBJetVector, myNeutrinoes, true);
+
     return true;
   }
 }

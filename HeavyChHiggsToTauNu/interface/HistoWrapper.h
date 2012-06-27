@@ -7,6 +7,7 @@
 
 #include "TH1.h"
 #include "TH2.h"
+#include "TH3.h"
 
 #include <string>
 #include <vector>
@@ -58,6 +59,29 @@ namespace HPlus {
     bool bIsActive;
   };
 
+  /// Wrapper class for TH3 object
+  class WrappedTH3 {
+  public:
+    WrappedTH3(EventWeight& eventWeight, TH3* histo, bool isActive);
+    ~WrappedTH3();
+
+    /// Returns true if the histogram exists
+    bool isActive() const { return bIsActive; }
+    /// Returns pointer to the histogram (Note: it can be a zero pointer if the histogram is not active)
+    TH3* getHisto() { return h; }
+    /// Returns the x axis of the histogram for bin label modification
+    TAxis* GetXaxis() { return h->GetXaxis(); }
+    /// Fills histogram (if it exists) with event weight
+    template<typename Arg1, typename Arg2> void Fill(const Arg1& a1, const Arg2& a2) { if (bIsActive) h->Fill(a1, a2, fEventWeight.getWeight()); }
+    /// Fills histogram (if it exists) with custom event weight
+    template<typename Arg1, typename Arg2, typename Arg3> void Fill(const Arg1& a1, const Arg2& a2, const Arg3& a3) { if (bIsActive) h->Fill(a1, a2, a3); }
+
+  private:
+    EventWeight& fEventWeight;
+    TH3* h;
+    bool bIsActive;
+  };
+
   /// Class for wrapping the making of histogram; calling Sumw2; and setting the event weight by default (can be overridden)
   class HistoWrapper {
   public:
@@ -104,6 +128,24 @@ namespace HPlus {
       }
       return fAllTH2Histos.at(fAllTH2Histos.size()-1);
     }
+    /// Wraps the making of histogram; histogram is created only if the ambient level is low enough
+    template<typename T, typename Arg1, typename Arg2, typename Arg3, typename Arg4,
+           typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9,
+           typename Arg10, typename Arg11>
+    WrappedTH3* makeTH(HistoLevel level, TFileDirectory& fd, const Arg1& a1, const Arg2& a2, const Arg3& a3,
+                       const Arg4& a4, const Arg5& a5, const Arg6& a6, const Arg7& a7, const Arg8& a8,
+                       const Arg9& a9, const Arg10& a10, const Arg11& a11) {
+      if (level <= fAmbientLevel) {
+        T* histo = fd.make<T>(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
+        histo->Sumw2();
+        fAllTH3Histos.push_back(new WrappedTH3(fEventWeight, histo, true));
+      } else {
+        // Histogram is suppressed
+        TH3* histo = 0;
+        fAllTH3Histos.push_back(new WrappedTH3(fEventWeight, histo, false));
+      }
+      return fAllTH3Histos.at(fAllTH3Histos.size()-1);
+    }
     /// Returns the event weight
     double getWeight() const { return fEventWeight.getWeight(); }
 
@@ -119,6 +161,7 @@ namespace HPlus {
 
     std::vector<WrappedTH1*> fAllTH1Histos;
     std::vector<WrappedTH2*> fAllTH2Histos;
+    std::vector<WrappedTH3*> fAllTH3Histos;
   };
 
 }

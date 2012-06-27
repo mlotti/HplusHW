@@ -15,9 +15,6 @@ puweight = "Run2011A+B"
 
 ##########
 # Flags for additional signal analysis modules
-# Perform the signal analysis with all tau ID algorithms in addition
-# to the "golden" analysis
-doAllTauIds = False
 
 # Apply summer PAS style cuts
 doSummerPAS = False # Rtau>0, MET>70
@@ -103,10 +100,11 @@ myOptimisation = HPlusOptimisationScheme()
 myOptimisation.addJetEtVariation([20.0, 30.0])
 #myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
 #myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
-#myOptimisation.addBJetDiscriminatorVariation([0.679, 0.244])
+#myOptimisation.addBJetLeadingDiscriminatorVariation([0.898, 0.679])
+#myOptimisation.addBJetSubLeadingDiscriminatorVariation([0.679, 0.244])
 #myOptimisation.addBJetEtVariation([])
-myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
-myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
+#myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
+#myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
 #myOptimisation.addTopRecoVatiation(["None"]) # Valid options: None, chi, std, Wselection
 myOptimisation.disableMaxVariations()
 if doOptimisation:
@@ -276,24 +274,6 @@ process.signalAnalysis.histogramAmbientLevel = myHistogramAmbientLevel
 #process.signalAnalysis.tauSelection.tauSelectionHPSTightTauBased # HPS Tight is the default
 
 # Btagging DB
-
-
-if False: #FIXME
-    process.load("CondCore.DBCommon.CondDBCommon_cfi")
-    #MC measurements
-    process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
-    process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
-    #Data measurements
-    process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
-    process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
-    #User DB for btag eff
-    btagDB = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
-    if options.runOnCrab != 0:
-        btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
-    process.CondDBCommon.connect = btagDB
-    process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
-    process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
-    
 if False:
     process.load("CondCore.DBCommon.CondDBCommon_cfi")
     #MC measurements
@@ -312,8 +292,9 @@ if False:
         process.CondDBCommon.connect = btagDB
         process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
         process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
+        
+param.bTagging.UseBTagDB  = cms.untracked.bool(False)
 
-param.bTagging.UseBTagDB  = cms.untracked.bool(False) # FIXME: True does not work with systematics! (some clash with condDB betweeen btag and JES)
 
 
 # Add type 1 MET
@@ -534,32 +515,6 @@ if options.tauEmbeddingInput:
                     preSequence=process.commonSequence,
                     additionalCounters=additionalCounters,
                     signalAnalysisCounters=True)
-
-
-################################################################################
-# The signal analysis with different tau ID algorithms
-#
-# Run the analysis for the different tau ID algorithms at the same job
-# as the golden analysis. It is significantly more efficiency to run
-# many analyses in a single job compared to many jobs (this avoids
-# some of the I/O and grid overhead). The fragment below creates the
-# following histogram directories
-# signalAnalysisTauSelectionShrinkingConeCutBased
-# signalAnalysisTauSelectionShrinkingConeTaNCBased
-# signalAnalysisTauSelectionCaloTauCutBased
-# signalAnalysisTauSelectionHPSTightTauBased
-# signalAnalysisTauSelectionCombinedHPSTaNCBased
-#
-# The corresponding Counter directories have "Counters" postfix, and
-# cms.Paths "Path" postfix. The paths are run independently of each
-# other. It is important to give the process.commonSequence for the
-# function, so that it will be run before the analysis module in the
-# Path. Then, in case PAT is run on the fly, the framework runs the
-# analysis module after PAT (and runs PAT only once).
-if doAllTauIds:
-    module = process.signalAnalysis.clone()
-    module.Tree.fill = False
-    param.addTauIdAnalyses(process, dataVersion, "signalAnalysis", module, process.commonSequence, additionalCounters)
 
 ################################################################################
 # The signal analysis with jet energy scale variation
