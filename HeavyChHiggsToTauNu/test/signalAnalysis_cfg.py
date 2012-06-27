@@ -273,10 +273,10 @@ process.signalAnalysis.histogramAmbientLevel = myHistogramAmbientLevel
 # Change default tau algorithm here if needed
 #process.signalAnalysis.tauSelection.tauSelectionHPSTightTauBased # HPS Tight is the default
 
-# Btagging DB
 if False:
+    # Btagging DB
     process.load("CondCore.DBCommon.CondDBCommon_cfi")
-    #MC measurements
+    #MC measurements 
     process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
     process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
     #Data measurements
@@ -289,10 +289,10 @@ if False:
         btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
     else:
         print "BTagDB: Assuming that you are not running on CRAB (if you are running on CRAB, add to job parameters in multicrab.cfg runOnCrab=1)"
-        process.CondDBCommon.connect = btagDB
-        process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
-        process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
-        
+    process.CondDBCommon.connect = btagDB
+    process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
+    process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
+    
 param.bTagging.UseBTagDB  = cms.untracked.bool(False)
 
 
