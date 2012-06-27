@@ -8,6 +8,7 @@
 #
 # Author: Matti Kortelainen
 # Modified 18052012/S.Lehti
+# Modified 20062012/S.Lehti
 #
 ######################################################################
 
@@ -27,6 +28,128 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 
 DATAPATH = "/home/slehti/public/Trigger/TriggerEfficiency/data"
 
+
+class PythonWriter:
+    class Parameters:
+        def __init__(self, label,runrange,lumi,eff):
+            self.label    = label
+            self.runrange = runrange
+            self.lumi     = lumi
+            self.eff      = eff
+
+    def __init__(self):
+        self.ranges = []
+        self.mcs    = []
+        self.selection = ""
+
+    def addParameters(self,path,label,runrange,lumi,eff):
+        self.ranges.append(self.Parameters(label,runrange,lumi,eff))
+        self.dumpParameters(path,label,runrange,lumi,eff)
+
+    def addMCParameters(self,label,eff):
+        labelFound = False
+        for mc in self.mcs:
+            if mc.label == label:
+                labelFound = True
+        if not labelFound:
+            self.mcs.append(self.Parameters(label,"","",eff))
+
+    def SaveOfflineSelection(self,selection):
+        self.selection = selection
+
+    def dumpParameters(self,path,label,runrange,lumi,eff):
+
+        fName = os.path.join(path,"dataParameters.py")
+        fOUT = open(fName,"w")
+
+        self.writeParameters(fOUT,label,runrange,lumi,eff)
+
+    def write(self,fName):
+        fOUT = open(fName,"w")
+        self.timeStamp(fOUT)
+
+        fOUT.write("import FWCore.ParameterSet.Config as cms\n\n")
+
+        fOUT.write("def triggerBin(pt, efficiency, uncertainty):\n")
+        fOUT.write("    return cms.PSet(\n")
+        fOUT.write("        pt = cms.double(pt),\n")
+        fOUT.write("        efficiency = cms.double(efficiency),\n")
+        fOUT.write("        uncertainty = cms.double(uncertainty)\n")
+        fOUT.write("    )\n\n")
+
+        fOUT.write("tauLegEfficiency = cms.untracked.PSet(\n")
+
+        fOUT.write("    # The selected triggers for the efficiency. If one trigger is\n")
+        fOUT.write("    # given, the parametrization of it is used as it is (i.e.\n")
+        fOUT.write("    # luminosity below is ignored). If multiple triggers are given,\n")
+        fOUT.write("    # their parametrizations are used weighted by the luminosities\n")
+        fOUT.write("    # given below.\n")
+        fOUT.write("    # selectTriggers = cms.VPSet(\n")
+        fOUT.write("    #     cms.PSet(\n")
+        fOUT.write("    #         trigger = cms.string(\"HLT_IsoPFTau35_Trk20_EPS\"),\n")
+        fOUT.write("    #         luminosity = cms.double(0)\n")
+        fOUT.write("    #     ),\n")
+        fOUT.write("    # ),\n")
+        fOUT.write("    # The parameters of the trigger efficiency parametrizations,\n")
+        fOUT.write("    # looked dynamically from TriggerEfficiency_cff.py\n\n")
+
+        fOUT.write("    # Offline selection: "+self.selection+"\n\n")
+
+        fOUT.write("    dataParameters = cms.PSet(\n")
+        for r in self.ranges:
+            self.writeParameters(fOUT,r.label,r.runrange,r.lumi,r.eff)
+        fOUT.write("    ),\n")
+
+        fOUT.write("    mcParameters = cms.PSet(\n")
+        for mc in self.mcs:
+            self.writeMCParameters(fOUT,mc.label,mc.eff)
+        fOUT.write("    ),\n")
+
+        fOUT.write("    dataSelect = cms.vstring(),\n")
+        fOUT.write("    mcSelect = cms.string(\""+self.mcs[0].label+"\"),\n")
+        fOUT.write("    mode = cms.untracked.string(\"disabled\") # dataEfficiency, scaleFactor, disabled\n")
+        fOUT.write(")\n")
+
+    def writeParameters(self,fOUT,label,runrange,lumi,eff):
+        runrange_re = re.compile("(?P<firstRun>(\d+))-(?P<lastRun>(\d+))")
+        match = runrange_re.search(runrange)
+        if not match:
+            print "Run range not valid",runrange
+            sys.exit()
+
+        fOUT.write("        # "+label+"\n")
+        fOUT.write("        runs_"+match.group("firstRun")+"_"+match.group("lastRun")+" = cms.PSet(\n")
+        fOUT.write("            firstRun = cms.uint32("+match.group("firstRun")+"),\n")
+        fOUT.write("            lastRun = cms.uint32("+match.group("lastRun")+"),\n")
+        fOUT.write("            luminosity = cms.double(%s), # 1/pb\n"%lumi)
+        self.writeBins(fOUT,label,eff)
+        fOUT.write("        ),\n")
+
+    def writeMCParameters(self,fOUT,label,eff):
+        fOUT.write("        "+label+"= cms.PSet(\n")
+        self.writeBins(fOUT,label,eff,ihisto=1)
+        fOUT.write("        ),\n")
+
+    def writeBins(self,fOUT,label,eff,ihisto=0):
+        fOUT.write("            bins = cms.VPSet(\n")
+        for i in range(eff.histoMgr.getHistos()[ihisto].getRootHisto().GetN()):
+            binLowEdge = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetX()[i]
+            binLowEdge-= eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorX(i)
+            efficiency = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetY()[i]
+            error      = max(eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYhigh(i),eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYlow(i))
+#            efficiency = eff.ratios[0].getRootGraph().GetY()[i]
+#            error = max(eff.ratios[0].getRootGraph().GetErrorYhigh(i),eff.ratios[0].getRootGraph().GetErrorYlow(i))
+            fOUT.write("                triggerBin("+str(binLowEdge)+", "+str(efficiency)+", "+str(error)+"),\n")
+        fOUT.write("            ),\n")
+
+    def timeStamp(self,fOUT):
+        import datetime
+        time = datetime.datetime.now().ctime()
+        fOUT.write("# Generated on "+time+"\n")
+        fOUT.write("# by HiggsAnalysis/TriggerEfficiency/test/plotTauEfficiency.py\n\n")
+
+pythonWriter = PythonWriter()
+
 def main():
     style = tdrstyle.TDRStyle()
 
@@ -36,12 +159,15 @@ def main():
     macroPath = macroPath.replace("../src/","")
     ROOT.gROOT.LoadMacro(macroPath)
 
-    doPlots(1)
-    doPlots(2)
-    doPlots(3)
-    doPlots(4)
-    #doPlots(5)
+    highPurity = True
 
+    doPlots(1,highPurity=highPurity)
+    doPlots(2,highPurity=highPurity)
+    doPlots(3,highPurity=highPurity)
+    doPlots(4,highPurity=highPurity)
+    #doPlots(5,highPurity=highPurity)
+
+    pythonWriter.write("tauLegTriggerEfficiency_cff.py")
 
 def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
     ### Offline selection definition
@@ -49,15 +175,20 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
     offlineSelection += "&& 1/PFTauInvPt > 20"
     offlineSelection += "&& PFTauProng == 1"
     offlineSelection += "&& againstElectronMedium > 0.5 && againstMuonTight > 0.5"
+#    offlineSelection += "&& againstElectronMVA > 0.5 && againstMuonTight > 0.5"
 #    offlineSelection += "&& byTightIsolation > 0.5"
-    offlineSelection += "&& byVLooseCombinedIsolationDeltaBetaCorr > 0.5"
+#    offlineSelection += "&& byVLooseCombinedIsolationDeltaBetaCorr > 0.5"
+#    offlineSelection += "&& byLooseCombinedIsolationDeltaBetaCorr > 0.5"
+    offlineSelection += "&& byMediumCombinedIsolationDeltaBetaCorr > 0.5"
     offlineSelection += "&& MuonTauInvMass < 80"
+
+    pythonWriter.SaveOfflineSelection(offlineSelection)
 
     offlineTauPt40 = "PFTauPt > 40"
 
     if runrange == 1: # May10+Prompt-v4 (160431-167913)
-        lumi = 1177
-        label = "L1_SingleTauJet52 OR L1_SingleJet68 + HLT_IsoPFTau35_Trk20_MET45"
+        lumi = 1197
+        label = "L1_SingleTauJet52 OR L1_SingleJet68 + HLT_IsoPFTau35_Trk20_MET45 (Run2011A)"
         #l1Trigger = "(L1_SingleTauJet52 || L1_SingleJet68)"
         #hltTrigger = "(run >= 160341 && run <= 165633 && (HLT_IsoPFTau35_Trk20_MET45_v1 || HLT_IsoPFTau35_Trk20_MET45_v2 || HLT_IsoPFTau35_Trk20_MET45_v4 || HLT_IsoPFTau35_Trk20_MET45_v6))"
         #hltTrigger += "|| (run >= 165970 && run <= 167913 && (HLT_IsoPFTau35_Trk20_MET60_v2 || HLT_IsoPFTau35_Trk20_MET60_v3 || HLT_IsoPFTau35_Trk20_MET60_v4)"
@@ -66,26 +197,31 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
         offlineTriggerData = "((HLT_IsoMu17_v5 || HLT_IsoMu17_v6 || HLT_IsoMu17_v8) && MuonPt > 17)" # runs 160404-165633, unprescaled
         offlineTriggerData += "|| ((HLT_IsoMu17_v9 || HLT_IsoMu17_v11) && MuonPt > 17)"              # runs 165970-167913, PRESCALED
     elif runrange == 2: # Prompt-v6 (172620-173198), Aug05 (170722-172619) is missing!
-        lumi = 792.288
-        label = "L1_Jet52_Central + HLT_IsoPFTau35_Trk20_MET60"
+        lumi = 870.119
+        label = "L1_Jet52_Central + HLT_IsoPFTau35_Trk20_MET60 (Run2011A)"
         runs = "run >= 170722 && run <= 173198"
         runsText = "170826-173198"
         offlineTriggerData = "HLT_IsoMu17_v13 && MuonPt > 17"# runs 17022-172619, PRESCALED
     elif runrange == 3: # Prompt-v6 (173236-173692)
-        lumi = 264.831
+        lumi = 265.715
         label = "L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011A)"
         runs = "run >= 173236 && run <= 173692";
         runsText = "173236-173692"
         offlineTriggerData = "HLT_IsoMu20_v9 && MuonPt > 20"
     elif runrange == 4: # Run2011B-Tau-PromptSkim-v1 (175860-179889)
-        lumi = 2739
+        lumi = 2762
         label = "L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)"
-        runs = "run >= 175860 && run <= 179889"
-        runsText = "175860-179889"
+####        runs = "run >= 175860 && run <= 179889"
+####        runsText = "175860-179889"
+#### Merged runrange5 with runrange4 to approximate runrange5 efficiency with runrange4 efficiency.
+#### The error should be small. Reason: too low statistics for an efficiency estimate for runrange5.
+#### 20.6.2012/S.Lehti
+        runs = "run >= 175860 && run <= 180252"
+        runsText = "175860-180252"
 #        offlineTriggerData = "HLT_IsoMu20_v9 && MuonPt > 20"
         offlineTriggerData = "HLT_IsoMu15_L1ETM20_v3 && MuonPt > 15"
     elif runrange == 5: # Run2011B-Tau-PromptSkim-v1 (179959-180252) 
-        lumi = 2739
+        lumi = 2762
         runs = "run >= 179959 && run <= 180252"
         runsText = "179959-180252"
         offlineTriggerData = "HLT_IsoMu15_L1ETM20_v3 && MuonPt > 15"
@@ -138,23 +274,26 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
     l1SelectionTau = And(l1SelectionJetReco, l1SelectionTauVeto, l1SelectionIsolation)
     l1SelectionCen = And(l1SelectionJetReco, Not(And(l1SelectionTauVeto, l1SelectionIsolation)))
     l1Selection1 = "((L1TauVeto==0 && L1IsolationRegions_2GeV>=7 && L1JetEt>52) || (!(L1TauVeto==0 && L1IsolationRegions_2GeV>=7) && L1JetEt > 68)) && hasMatchedL1Jet"
-    l1Selection2 = l1Selection1
-
+#    l1Selection2 = l1Selection1
+    l1Selection2 = "L1JetEt > 52 && hasMatchedL1Jet" # Fall11 MC
+    
     if runrange >= 2:
         l1TriggerName1 = "Jet52_Central"
         l1CenEta = 52
         l1Selection1 = "L1JetEt > 52 && hasMatchedL1Jet"
-        if sameTrigger12:
-            l1Selection2 = l1Selection1
-            l1TriggerName2 = l1TriggerName1
 
+    if sameTrigger12:
+        l1Selection2 = l1Selection1
+        l1TriggerName2 = l1TriggerName1
+    
     # L2 and 2.5
     l2Selection = "hasMatchedL2Jet == 1 && L2JetEt > 35"
     l25Selection = "l25Et > 35 && foundTracksInJet && l25Pt > 20"
 
     # L3
     l3Selection1 = "primaryVertexIsValid && l25TrkIsoPtMax < 1.0 && l25EcalIsoEtMax < 1.5"
-    l3Selection2 = l3Selection1
+#    l3Selection2 = l3Selection1
+    l3Selection2 = "primaryVertexIsValid && l25TrkIsoPtMax < 1.0"
     if runrange >= 3:
         hltTriggerName1 = " MediumIsoPFTau35_Trk20"
         l3Selection1 = "primaryVertexIsValid && l25TrkIsoPtMax < 1.0"
@@ -188,7 +327,7 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
             plotDir += "LowPur"
         
         if not dataMcSameTrigger:
-            plotDir += "McSummer11"
+            plotDir += "McFall11"
     else:
         plotDir += "LowVsHighPur"
 
@@ -206,8 +345,8 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
     prefix = "Data2011_"
 
     mcWeight = None
-    if dataVsMc:
-        mcWeight = "pileupWeightEPS(MCNPU)"
+####    if dataVsMc:
+####        mcWeight = "pileupWeightEPS(MCNPU)"
 
     # Distributions
     ROOT.gStyle.SetErrorX(0.5)
@@ -303,8 +442,8 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
     denom1 = offlineSelection1
     denom2 = offlineSelection2
     num1 = And(denom1, l1Selection1, l2Selection, l25Selection, l3Selection1)
-    num2 = And(denom2, l1Selection1, l2Selection, l25Selection, l3Selection2)
-    effratio = plotter.plotEfficiency(prefix+"Tau3_L1HLT_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="Level-1 + HLT tau efficiency", fit=True, fitMin=20., fitMax=150., drawText=True, printResults=True)
+    num2 = And(denom2, l1Selection2, l2Selection, l25Selection, l3Selection2)
+    efficiency = plotter.plotEfficiency(prefix+"Tau3_L1HLT_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="Level-1 + HLT tau efficiency", fit=True, fitMin=20., fitMax=150., drawText=True, printResults=True)
 
     denom1 = And(denom1, offlineTauPt40)
     denom2 = And(denom2, offlineTauPt40)
@@ -313,34 +452,10 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
     plotter.plotEfficiency(prefix+"Tau4_L1HLT_PFTauEta", "PFTauEta>>heta(4, -2.1, 2.1)", num1, denom1, num2, denom2, mcWeight, xlabel="#tau-jet #eta")
     plotter.plotEfficiency(prefix+"Tau4_L1HLT_PFTauPhi", "PFTauPhi>>heta(4, -3.1416, 3.1416)", num1, denom1, num2, denom2, mcWeight, xlabel="#tau-jet #phi")
 
-    dumpParameters(plotDir,label,runsText,lumi,effratio)
+    #dumpParameters(plotDir,label,runsText,lumi,efficiency)
+    pythonWriter.addParameters(plotDir,label,runsText,lumi,efficiency)
+    pythonWriter.addMCParameters("Fall11",efficiency)
 
-def dumpParameters(path,label,runrange,lumi,effratio):
-
-    runrange_re = re.compile("(?P<firstRun>(\d+))-(?P<lastRun>(\d+))")
-    match = runrange_re.search(runrange)
-    if not match:
-        print "Run range not valid",runrange
-        sys.exit()
-
-    fName = os.path.join(path,"dataParameters.py")
-    fOUT = open(fName,"w")
-    fOUT.write("        # "+label+"\n")
-    fOUT.write("        runs_"+match.group("firstRun")+"_"+match.group("lastRun")+" = cms.PSet(\n")
-    fOUT.write("            firstRun = cms.uint32("+match.group("firstRun")+"),\n")
-    fOUT.write("            lastRun = cms.uint32("+match.group("lastRun")+"),\n")
-    fOUT.write("            luminosity = cms.double(%s), # 1/pb\n"%lumi)
-    fOUT.write("            bins = cms.VPSet(\n")
-
-    for i in range(effratio.histoMgr.getHistos()[0].getRootHisto().GetN()):
-        binLowEdge = effratio.histoMgr.getHistos()[0].getRootHisto().GetX()[i]
-        binLowEdge-= effratio.histoMgr.getHistos()[0].getRootHisto().GetErrorX(i)
-        ratio = effratio.ratios[0].getRootGraph().GetY()[i]
-        error = max(effratio.ratios[0].getRootGraph().GetErrorYhigh(i),effratio.ratios[0].getRootGraph().GetErrorYlow(i))
-        fOUT.write("                triggerBin("+str(binLowEdge)+", "+str(ratio)+", "+str(error)+"),\n")
-    fOUT.write("            ),\n")
-    fOUT.write("        ),\n")
-                                                                         
 
 def getFilesData(runrange, highPurity):
     tmp = ""
@@ -351,8 +466,8 @@ def getFilesData(runrange, highPurity):
     if runrange == 3:
         return [os.path.join(DATAPATH,"tteffAnalysis_SingleMuRun2011A_Tau_08Nov2011_v6_RAW_RECO_TTEffSkim_v444_V00_10_01_v2/tteffAnalysis-hltpftau-hpspftau"+tmp+".root")]
     if runrange >= 4:
-        return [os.path.join(DATAPATH,"tteffAnalysis_SingleMuRun2011B_Tau_PromptSkim_v1_v444_V00_10_01_v2/tteffAnalysis-hltpftau-hpspftau"+tmp+".root")]
-    
+#        return [os.path.join(DATAPATH,"tteffAnalysis_SingleMuRun2011B_Tau_PromptSkim_v1_v444_V00_10_01_v2/tteffAnalysis-hltpftau-hpspftau"+tmp+".root")]
+        return [os.path.join(DATAPATH,"tteffAnalysis_MET_Run2011B_v1_RAW_v444_V00_10_01_v3/tteffAnalysis-hltpftau-hpspftau"+tmp+".root")]
     return [
         # 160431_167913
         ["files/tteffAnalysis_SingleMu_Run2011A_Tau_May10ReReco_v1_v428_1_V00_09_07/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root",
@@ -369,7 +484,8 @@ def getFilesMc(highPurity):
     tmp = ""
     if highPurity:
         tmp += "-highpurity"
-    return [os.path.join(DATAPATH,"tteffAnalysis_DYToTauTau_M_20_TuneZ2_7TeV_pythia6_tauola_Fall11_PU_S6_START42_V14B_v1_v444_V00_10_01_v3/tteffAnalysis-hltpftau-hpspftau"+tmp+".root")]
+    return [os.path.join(DATAPATH,"tteffAnalysis_DYToTauTau_M_20_CT10_TuneZ2_7TeV_powheg_pythia_tauola_Fall11_PU_S6_START42_V14B_v1_RAW__v444_V00_10_01_v3/tteffAnalysis-hltpftau-hpspftau"+tmp+".root")]
+#    return [os.path.join(DATAPATH,"tteffAnalysis_DYToTauTau_M_20_TuneZ2_7TeV_pythia6_tauola_Fall11_PU_S6_START42_V14B_v1_v444_V00_10_01_v3/tteffAnalysis-hltpftau-hpspftau"+tmp+".root")]
 #files/tteffAnalysis_DYtoTauTau_M-20_TuneP0_7TeV-pythia6-tauola_Summer11-PU_S4_START42_V11-v2_v428_1_V00_09_07/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root"]
 
 
@@ -569,6 +685,7 @@ class Plotter:
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
         histograms.addLuminosityText(None, None, self.lumi)
+
 
 
 if __name__ == "__main__":

@@ -4,8 +4,9 @@ import os, sys
 import ROOT
 from optparse import OptionParser
 
-def showSubdirectoryContents(directory, path):
-    print "Directory "+path
+def showSubdirectoryContents(directory, path, level):
+    if opts.treelevel and level <= 0:
+        print "Directory "+path
     myTotalCount = 0
     # Loop over keys in file
     for i in range(0, directory.GetNkeys()):
@@ -14,11 +15,13 @@ def showSubdirectoryContents(directory, path):
         if myKey.IsFolder():
             mySubpath = path+myKey.GetTitle()+"/"
             mySubdir = directory.GetDirectory(mySubpath)
-            myTotalCount += showSubdirectoryContents(mySubdir, mySubpath)
+            myTotalCount += showSubdirectoryContents(mySubdir, mySubpath, level+1)
         else:
             myTotalCount += myKey.GetNbytes()
-            print "  %.3f kb %s %s"%(float(myKey.GetNbytes()) / 1024.0, myKey.GetClassName(), myKey.GetName())
-    print "%.3f kb (total of directory %s)\n"%(float(myTotalCount) / 1024.0, path)
+            if opts.treelevel and level <= 0:
+                print "  %.3f kB %s %s"%(float(myKey.GetNbytes()) / 1024.0, myKey.GetClassName(), myKey.GetName())
+    if opts.treelevel and level <= 1:
+        print "%.3f k (total of directory %s)\n"%(float(myTotalCount) / 1024.0, path)
     return myTotalCount
 
 def showRootFileContents(opts):
@@ -29,12 +32,13 @@ def showRootFileContents(opts):
             print "Error opening file",myFilename
             sys.exit()
         mySubDir = myFile.GetDirectory("/")
-        myTotalCount = showSubdirectoryContents(mySubDir, "/")
-        print "\n%.3f kb (File total size)\n"%(float(myTotalCount) / 1024.0)
+        myTotalCount = showSubdirectoryContents(mySubDir, "/", 0)
+        print "\n%.3f kB (File total size)\n"%(float(myTotalCount) / 1024.0)
 
 if __name__ == "__main__" :
     parser = OptionParser(usage="Usage: %prog [options]")
     parser.add_option("-i", dest="filename", action="append", help="name of root file")
+    parser.add_option("--treelevel", dest="treelevel", action="store_true", default=False, help="Do not enter directories")
     (opts, args) = parser.parse_args()
 
     # Check that proper arguments were given

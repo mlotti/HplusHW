@@ -38,7 +38,7 @@ treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger
 QCDfromData = False
 
 mcOnly = False
-mcOnly = True
+#mcOnly = True
 mcOnlyLumi = 5000 # pb
 
 
@@ -233,7 +233,7 @@ def doPlots(datasets):
     
 #    drawPlot(createPlot("TopChiSelection/TopMass"), "TopMassWithChiSel", rebin=20, log=False,xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
 
-###    drawPlot(createPlot("FullHiggsMass/HiggsMass"), "HiggsMass", rebin=2, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("FullHiggsMass/HiggsMass"), "HiggsMass", rebin=2, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
 
     
 #    topMass(createPlot("TopChiSelection/TopMass"), "TopMassWithChi", rebin=10)   
@@ -241,7 +241,7 @@ def doPlots(datasets):
 #    transverseMass(createPlot("TauEmbeddingAnalysis_afterTauId_TransverseMass"))
     transverseMass2(createPlot("transverseMass"), "transverseMass_standard", rebin=20)
 #    transverseMass2(createPlot("transverseMassMET70"), "transverseMassMET70", rebin=20)
-    transverseMass2(createPlot("NonQCDTypeIITransverseMassAfterDeltaPhi160"), "NonQCDTypeIITransverseMassAfterDeltaPhi160", rebin=20)    
+#    transverseMass2(createPlot("NonQCDTypeIITransverseMassAfterDeltaPhi160"), "NonQCDTypeIITransverseMassAfterDeltaPhi160", rebin=20)    
 #    transverseMass2(createPlot("transverseMassAfterDeltaPhi160"), "transverseMassAfterDeltaPhi160", rebin=20)
 #    transverseMass2(createPlot("transverseMassAfterDeltaPhi130"), "transverseMassAfterDeltaPhi130", rebin=20)
 #    transverseMass2(createPlot("transverseMassFakeMetVeto"), "transverseMassFakeMetVeto", rebin=20)
@@ -327,10 +327,10 @@ def doPlots(datasets):
 
 #    genComparison(datasets)
 #    zMassComparison(datasets)
-    genQuarkComparison(datasets)
-    topMassComparison(datasets)
+#    genQuarkComparison(datasets)
+#    topMassComparison(datasets)
     
-    topMassPurity(datasets) 
+#    topMassPurity(datasets) 
 #    vertexComparison(datasets)
 #    mtComparison(datasets)
 #    rtauComparison(datasets)
@@ -348,7 +348,7 @@ def doCounters(datasets):
         ]
 
     eventCounter.normalizeMCByLuminosity()
-#    eventCounter.normalizeMCToLuminosity(73)
+#    eventCounter.normalizeMCToLuminosity(mcOnlyLumi)
     print "============================================================"
     print "Main counter (MC normalized by collision data luminosity)"
     mainTable = eventCounter.getMainCounterTable()
@@ -365,7 +365,8 @@ def doCounters(datasets):
     print eventCounter.getSubCounterTable("b-tagging").format()
     print eventCounter.getSubCounterTable("Jet selection").format()
     print eventCounter.getSubCounterTable("Jet main").format()    
-    print eventCounter.getSubCounterTable("VetoTauSelection").format() 
+    print eventCounter.getSubCounterTable("VetoTauSelection").format()
+    print eventCounter.getSubCounterTable("top").format() 
 
     
 #    latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.2f"))

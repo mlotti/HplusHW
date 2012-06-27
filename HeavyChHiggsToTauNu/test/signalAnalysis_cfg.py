@@ -9,6 +9,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 dataVersion="44XmcS6"     # Fall11 MC
 #dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
 
+# Set the data scenario for vertex/pileup weighting
+# options: Run2011A, Run2011B, Run2011A+B
+puweight = "Run2011A+B"
+
 ##########
 # Flags for additional signal analysis modules
 # Perform the signal analysis with all tau ID algorithms in addition
@@ -95,15 +99,16 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.addTauIsolationVariation([])
 #myOptimisation.addTauIsolationContinuousVariation([])
 #myOptimisation.addRtauVariation([0.0, 0.7])
-myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
-#myOptimisation.addJetEtVariation([20.0, 30.0])
+#myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
+myOptimisation.addJetEtVariation([20.0, 30.0])
 #myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
 #myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
 #myOptimisation.addBJetDiscriminatorVariation([0.679, 0.244])
 #myOptimisation.addBJetEtVariation([])
-#myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
-#myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
+myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
+myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
 #myOptimisation.addTopRecoVatiation(["None"]) # Valid options: None, chi, std, Wselection
+myOptimisation.disableMaxVariations()
 if doOptimisation:
     doSystematics = True # Make sure that systematics are run
     doFillTree = False # Make sure that tree filling is disabled or root file size explodes
@@ -235,8 +240,6 @@ if applyTriggerScaleFactor and dataVersion.isMC():
     param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
 
 # Set the data scenario for vertex/pileup weighting
-# options: Run2011A, Run2011B, Run2011A+B
-puweight = "Run2011A"
 if len(options.puWeightEra) > 0:
     puweight = options.puWeightEra
 param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, pset=param.vertexWeight, psetReader=param.vertexWeightReader, era=puweight) # Reweight by true PU distribution
@@ -274,6 +277,7 @@ process.signalAnalysis.histogramAmbientLevel = myHistogramAmbientLevel
 
 # Btagging DB
 
+
 if False: #FIXME
     process.load("CondCore.DBCommon.CondDBCommon_cfi")
     #MC measurements
@@ -290,6 +294,25 @@ if False: #FIXME
     process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
     process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
     
+if False:
+    process.load("CondCore.DBCommon.CondDBCommon_cfi")
+    #MC measurements
+    process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
+    process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
+    #Data measurements
+    process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
+    process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
+    #User DB for btag eff
+    btagDB = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
+    if options.runOnCrab != 0:
+        print "BTagDB: Assuming that you are running on CRAB"
+        btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
+    else:
+        print "BTagDB: Assuming that you are not running on CRAB (if you are running on CRAB, add to job parameters in multicrab.cfg runOnCrab=1)"
+        process.CondDBCommon.connect = btagDB
+        process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
+        process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
+
 param.bTagging.UseBTagDB  = cms.untracked.bool(False) # FIXME: True does not work with systematics! (some clash with condDB betweeen btag and JES)
 
 
@@ -314,7 +337,10 @@ if dataVersion.isData() and options.tauEmbeddingInput == 0 and doPrescalesForDat
 print "Histogram level:", process.signalAnalysis.histogramAmbientLevel.value()
 print "Trigger:", process.signalAnalysis.trigger
 print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode.value()
-print "VertexWeight:",process.signalAnalysis.vertexWeight
+print "Trigger scale factor data:", process.signalAnalysis.triggerEfficiencyScaleFactor.dataSelect.value()
+print "Trigger scale factor MC:", process.signalAnalysis.triggerEfficiencyScaleFactor.mcSelect.value()
+print "VertexWeight data distribution:",process.signalAnalysis.vertexWeight.dataPUdistribution.value()
+print "VertexWeight mc distribution:",process.signalAnalysis.vertexWeight.mcPUdistribution.value()
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut.value()
 #print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection.value()
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection.value()
@@ -336,11 +362,12 @@ if len(additionalCounters) > 0:
 # PickEvent module and the main Path. The picked events are only the
 # ones selected by the golden analysis defined above.
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
-process.signalAnalysisPath = cms.Path(
-    process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
-    process.signalAnalysis *
-    process.PickEvents
-)
+if not doOptimisation:
+    process.signalAnalysisPath = cms.Path(
+        process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
+        process.signalAnalysis *
+        process.PickEvents
+    )
 
 if doMETResolution:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.METResolutionAnalysis_cfi")
@@ -438,7 +465,9 @@ if doRtau0 and not hasattr(process, "signalAnalysisRtau0"):
                 signalAnalysisCounters=True)
 
 def getSignalAnalysisModuleNames():
-    modules = ["signalAnalysis"]
+    modules = []
+    if not doOptimisation:
+        modules.append("signalAnalysis")
     if doSummerPAS:
         modules.append("signalAnalysisRtau0MET70")
     if doRtau0:

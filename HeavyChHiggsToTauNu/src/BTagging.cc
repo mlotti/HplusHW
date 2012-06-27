@@ -251,11 +251,11 @@ namespace HPlus {
     hEtaQ33 = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjet33_eta", "realqjet33_pt", 400, -5., 5.);
     hPtQnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetNotag_pt", "realqjetNotag_pt", 400, 0., 400.);
     hEtaQnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetNotag_eta", "realqjetNotag_pt", 400, -5., 5.);
-    hPt1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_pt", "bjet1_pt", 100, 0., 400.);
-    hPt2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_pt", "bjet2_pt", 100, 0., 400.);
-    hEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "bjet_eta", "bjet_pt", 400, -5., 5.);
-    hEta1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_eta", "bjet1_pt", 100, -5., 5.);
-    hEta2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_eta", "bjet2_pt", 100, -5., 5.);
+    hPt1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_pt", "bjet1_pt", 200, 0., 400.);
+    hPt2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_pt", "bjet2_pt", 200, 0., 400.);
+    hEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "bjet_eta", "bjet_pt", 250, -5., 5.);
+    hEta1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_eta", "bjet1_pt", 250, -5., 5.);
+    hEta2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_eta", "bjet2_pt", 250, -5., 5.);
     hNumberOfBtaggedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfBtaggedJets", "NumberOfBtaggedJets", 15, 0., 15.);
     
     hScaleFactor = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "scaleFactor", "scaleFactor;b-tag/mistag scale factor;N_{events}/0.05", 100, 0., 5.);
@@ -359,6 +359,7 @@ namespace HPlus {
 
     size_t passed = 0;
     int passed_CSVM  = 0;
+    int passed_CSVL  = 0;
     int passed_CSVM30 = 0;
     bool bmatchedJet = false;
     bool qmatchedJet = false;
@@ -458,13 +459,10 @@ namespace HPlus {
       }
 
 
-      hDiscr->Fill(discr);
-      if(!(discr > fDiscrCut)) continue;
-      increment(fTaggedSubCount);
-      //      ++passed;
-
-      hPt->Fill(iJet->pt());
-      hEta->Fill(iJet->eta());
+      if(discr > fDiscrCut) {
+	hPt->Fill(iJet->pt());
+	hEta->Fill(iJet->eta());
+      }
 
       if(fabs(iJet->eta()) > fEtaCut ) continue;
       increment(fTaggedEtaCutSubCount);
@@ -472,6 +470,14 @@ namespace HPlus {
 
       if(iJet->pt() < fPtCut ) continue;
       increment(fTaggedPtCutSubCount);
+
+      if(discr > 0.244 ) ++passed_CSVL;
+
+
+      hDiscr->Fill(discr);
+      if(!(discr > fDiscrCut)) continue;
+      increment(fTaggedSubCount);
+      //      ++passed;
 
       if (discr > fMaxDiscriminatorValue)
         fMaxDiscriminatorValue = discr;
@@ -505,7 +511,7 @@ namespace HPlus {
     ////////////////////////////////
     if( passed > 0) {
       hPt1->Fill(fSelectedJets[0]->pt());
-      hEta1->Fill(fSelectedJets[0]->eta());
+      hEta1->Fill(fSelectedJets[0]->eta());  
     }
     if( passed > 1) {
       hPt2->Fill(fSelectedJets[1]->pt());
@@ -520,12 +526,12 @@ namespace HPlus {
     if( passed == 0)   increment(fTaggedNoTaggedJet);
     else if( passed == 1)   increment(fTaggedOneTaggedJet);
     else if( passed == 2)   increment(fTaggedTwoTaggedJets);
-    else if( passed = 2 && passed_CSVM == 1 )  increment(fTaggedLooseMediumJets);
+    else if( passed_CSVL > 1 && passed_CSVM > 0 )  increment(fTaggedLooseMediumJets);
 
+    //    if( passed_CSVL > 1 && passed_CSVM > 0 )   std::cout << " B tagging: 1 loose and 1 medium " << std::endl;
     // one loose and one medium b jet
-    if (passed > 1 && passed_CSVM > 0 ) passEvent = true;
 
-   
+    if (passed_CSVL > 1 && passed_CSVM > 0 ) passEvent = true;
     //    passEvent = fNumberOfBJets.passedCut(passed);
     if (passEvent)
       increment(fTaggedCount);

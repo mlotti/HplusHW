@@ -22,7 +22,7 @@ class HPlusBTaggingPtrSelectorFilter: public edm::EDFilter {
   virtual bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
   virtual void endJob();
 
-  virtual bool beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
+  virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
@@ -55,8 +55,8 @@ HPlusBTaggingPtrSelectorFilter::HPlusBTaggingPtrSelectorFilter(const edm::Parame
 HPlusBTaggingPtrSelectorFilter::~HPlusBTaggingPtrSelectorFilter() {}
 void HPlusBTaggingPtrSelectorFilter::beginJob() {}
 
-bool HPlusBTaggingPtrSelectorFilter::beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
-  eventCounter.beginLuminosityBlock(iBlock, iSetup);
+bool HPlusBTaggingPtrSelectorFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
+  eventCounter.endLuminosityBlock(iBlock, iSetup);
   return true;
 }
 
