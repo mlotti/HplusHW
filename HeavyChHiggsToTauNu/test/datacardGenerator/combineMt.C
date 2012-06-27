@@ -125,7 +125,7 @@ void plot(int mass) {
   hFrame->SetLineStyle(0);
   hFrame->SetMarkerStyle(20);
   //hFrame->SetXTitle("Transverse mass (#tau jet, E_{T}^{miss}) (GeV/c^{2})");
-  hFrame->SetXTitle("m_{T} (GeV)");
+  hFrame->SetXTitle("m_{T} (GeV/c^{2})");
   hFrame->SetYTitle("Events / 20 GeV/c^{2}");
   if (paperStatus) {
     //hFrame->SetXTitle("Transverse mass (#tau_{h}, E_{T}^{miss}) (GeV)");
@@ -257,7 +257,7 @@ void plot(int mass) {
   hFrameAgreement->GetXaxis()->SetTitleOffset(3.2);
   hFrameAgreement->GetYaxis()->SetTitleOffset(1.3);
   hFrameAgreement->SetXTitle(hFrame->GetXaxis()->GetTitle());
-  hFrameAgreement->SetYTitle("Data/#Sigmabkg");
+  hFrameAgreement->SetYTitle("Data/Bkgnd");
   hFrameAgreement->Draw();
   hAgreement->Draw("e2 same");
   // Plot line at zero
@@ -270,8 +270,8 @@ void plot(int mass) {
   hAgreementLine->SetLineWidth(2);
   hAgreementLine->SetLineStyle(3);
   hAgreementLine->Draw("hist same");
-  hAgreement->Draw("same");
-  hAgreementRelUncert->Draw("[]");
+  hAgreement->Draw("ex0 same");
+  //hAgreementRelUncert->Draw("[]");
   pad->RedrawAxis();
 
   myCanvas->cd();
@@ -298,16 +298,17 @@ void plot(int mass) {
   hFrame->GetXaxis()->SetTitleSize(0);
   hFrame->GetXaxis()->SetLabelSize(0);
   hFrame->GetYaxis()->SetTitleFont(43);
-  hFrame->GetYaxis()->SetTitleSize(33);
+  //hFrame->GetYaxis()->SetTitleSize(33);
+  hFrame->GetYaxis()->SetTitleSize(27);
   hFrame->GetYaxis()->SetTitleOffset(1.3);
   
   // Draw objects
   hFrame->Draw();
   exp->Draw("hist same");
-  uncert->Draw("E2 same");
+  //uncert->Draw("E2 same");
   hExpBkgTotalUncert->Draw("E2 same");
   // Data
-  data->Draw("same");
+  data->Draw("ex0 same");
   
   //signal->Draw("same");
   TLegend *leg = new TLegend(0.53,0.6,0.87,0.91,NULL,"brNDC");
@@ -323,16 +324,17 @@ void plot(int mass) {
   s.str("");
   s << "with H^{#pm}#rightarrow#tau^{#pm}#nu";
   entry = leg->AddEntry(signal, s.str().c_str(), "L");
-  entry = leg->AddEntry(qcd, "QCD (meas.)", "F");
-  entry = leg->AddEntry(ewktau, "EWK genuine #tau (meas.)", "F");
-  entry = leg->AddEntry(fakes, "EWK fake #tau (MC)", "F");
-  entry = leg->AddEntry(uncert, "stat. uncert.", "F");
+  entry = leg->AddEntry(qcd, "multijets (from data)", "F");
+  entry = leg->AddEntry(ewktau, "EWK+t#bar{t} #tau (from data)", "F");
+  entry = leg->AddEntry(fakes, "EWK+t#bar{t} no-#tau (simul.)", "F");
+  //entry = leg->AddEntry(uncert, "stat. uncert.", "F");
   entry = leg->AddEntry(hExpBkgTotalUncert, "stat. #oplus syst. uncert.", "F");
   leg->Draw();
   
   string myTitle = "CMS Preliminary";
   if (paperStatus)
     myTitle = "CMS";
+  myTitle = "";
 
   TLatex *tex = new TLatex(0.62,0.945,myTitle.c_str());
   tex->SetNDC();

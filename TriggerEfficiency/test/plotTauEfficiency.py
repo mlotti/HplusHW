@@ -153,7 +153,7 @@ pythonWriter = PythonWriter()
 def main():
     style = tdrstyle.TDRStyle()
 
-    histograms.createLegend.moveDefaults(dh=-0.2)
+    histograms.createLegend.moveDefaults(dh=-0.18)
 
     macroPath = os.path.join(os.environ["CMSSW_BASE"], "src/HiggsAnalysis/TriggerEfficiency/test/pileupWeight.C+")
     macroPath = macroPath.replace("../src/","")
@@ -311,7 +311,8 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
         files1 = getFilesData(runrange, highPurity)
         files2 = getFilesMc(highPurity)
         legend1 = "Data"
-        legend2 = "MC Z#rightarrow#tau#tau"
+#        legend2 = "MC Z#rightarrow#tau#tau"
+        legend2 = "Z/#gamma* #rightarrow #tau#tau\nsimulation"
     else:
         files1 = getFilesData(runrange, True)
         files2 = getFilesData(runrange, False)
