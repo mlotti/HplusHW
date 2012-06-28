@@ -58,8 +58,8 @@ myOptimisation.addJetEtVariation([20.0, 30.0])
 #myOptimisation.addBJetLeadingDiscriminatorVariation([0.898, 0.679])
 #myOptimisation.addBJetSubLeadingDiscriminatorVariation([0.679, 0.244])
 #myOptimisation.addBJetEtVariation([])
-myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
-myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
+#myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
+#myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
 #myOptimisation.addTopRecoVatiation(["None"]) # Valid options: None, chi, std, Wselection
 myOptimisation.disableMaxVariations()
 if doOptimisation:
@@ -322,7 +322,7 @@ def addPUWeightVariation(name):
 
 if doSystematics:
     doJetUnclusteredVariation = True
-    modules = getSignalAnalysisModuleNames()
+    modules = getQCDMeasurementModuleNames()
 
     # JES variation is relevant for MC only
     if dataVersion.isMC():

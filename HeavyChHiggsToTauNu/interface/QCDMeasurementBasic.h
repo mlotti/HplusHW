@@ -103,7 +103,7 @@ namespace HPlus {
     std::vector<double> fFullMassRangeBinLowEdges;
 
     // Counters - order is important
-    Count fAllCounter;
+    Count fVertexReweighting;
     Count fTriggerCounter;
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;

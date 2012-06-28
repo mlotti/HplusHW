@@ -18,7 +18,7 @@ namespace HPlus {
     fNVerticesBinLowEdges(iConfig.getUntrackedParameter<std::vector<int> >("factorisationNVerticesBinLowEdges")),
     fTransverseMassRange(iConfig.getUntrackedParameter<std::vector<double> >("factorisationTransverseMassRange")),
     fFullMassRange(iConfig.getUntrackedParameter<std::vector<double> >("factorisationFullMassRange")),
-    fAllCounter(eventCounter.addCounter("allEvents")),
+    fVertexReweighting(eventCounter.addCounter("Vertex reweighting")),
     fTriggerCounter(eventCounter.addCounter("Trigger_and_HLT_MET")),
     fPrimaryVertexCounter(eventCounter.addCounter("PrimaryVertex")),
     fTausExistCounter(eventCounter.addCounter("TauCandSelection")),
@@ -174,8 +174,7 @@ namespace HPlus {
     hVerticesAfterWeight->Fill(nVertices);
     fTree.setNvertices(nVertices);
     hSelectionFlow->Fill(kQCDOrderVertexSelection);
-    increment(fAllCounter);
-
+    increment(fVertexReweighting);
 
 //------ Apply trigger and HLT_MET cut or trigger parametrisation
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
