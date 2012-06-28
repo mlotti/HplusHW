@@ -137,6 +137,7 @@ namespace HPlus {
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
     Count fDeltaPhiTauMETCounter;
+    Count fHiggsMassCutCounter;
     Count fTauVetoAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiTauVetoCounter;
@@ -167,9 +168,9 @@ namespace HPlus {
     Count fTopWithWSelectionCounter;
     Count fTopWithWSelection250Counter;
     Count fTopWithWSelection220Counter;
-    Count fTopChiSelectionNarrowCounter;
-    
+    Count fTopChiSelectionNarrowCounter;   
     Count fFakeMETVetoCounter;
+
     Count fSelectedEventsCounter;
 
     TriggerSelection fTriggerSelection;
@@ -226,6 +227,7 @@ namespace HPlus {
     WrappedTH1 *hTransverseMassAfterDeltaPhi160;
     WrappedTH1 *hTransverseMassAfterDeltaPhi130;
     WrappedTH1 *hTransverseMassAfterDeltaPhi90;
+
 
     WrappedTH1 *hDeltaPhi;
     WrappedTH1 *hDeltaPhiJetMet;

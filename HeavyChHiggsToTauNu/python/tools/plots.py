@@ -1304,6 +1304,14 @@ class MCPlot(PlotSameBase):
         self._setLegendLabels()
         self._setPlotStyles()
 
+    ## Create TCanvas and frames for the histogram
+    #
+    # \param filename     Name for TCanvas (becomes the file name)
+    # \param createRatio  Create also the ratio pad (ignored, provided to have similar interface with DataMCPlot)
+    # \param kwargs       Keyword arguments, forwarded to PlotSameBase.createFrame() or PlotRatioBase._createFrameRatio()
+    def createFrame(self, filename, createRatio=False, **kwargs):
+        PlotSameBase.createFrame(self, filename, **kwargs)
+
     ## This is provided to have similar interface with DataMCPlot
     def createFrameFraction(self, filename, **kwargs):
         if "opts2" in kwargs:

@@ -9,6 +9,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 
 namespace edm {
   class ParameterSet;
@@ -31,16 +32,21 @@ namespace HPlus {
 
       bool passedEvent() const { return fPassedEvent; }
       double getHiggsMass() const { return fCalculator->fHiggsMassSolution; }
+      //      const edm::Ptr<pat::Jet>& getSelectedBjet() const { return fCalculator->selectedBjet; }
+
 
     private:
       const FullHiggsMassCalculator* fCalculator;
       const bool fPassedEvent;
     };
 
+
     FullHiggsMassCalculator(EventCounter& eventCounter, HistoWrapper& histoWrapper);
+
     ~FullHiggsMassCalculator();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData);
+    //    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData, const TopChiSelection::Data TopChiSelectionData );
     void myBJet();
 
   private:
@@ -48,13 +54,26 @@ namespace HPlus {
     void doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool doHistogramming = true);
 
   private:
+
+
+    // EventWeight object
+    /////////////////////////////////////////////    EventWeight& fEventWeight;
+    //edm::InputTag fVertexSrc;
+    //TH1 *hWeights;
+
     // Calculated results
     double fTopMassSolution;
     double fNeutrinoZSolution;
     double fNeutrinoPtSolution;
     double fHiggsMassSolution;
+    double NeutrinoPz;
+    //    edm::Ptr<pat::Jet> selectedBjet;
 
     // Histograms
+ 
+    WrappedTH1* hSolution1PzDifference;
+    WrappedTH1* hSolution2PzDifference;
+    WrappedTH2* hSolution12PzDifference;
     WrappedTH1* hHiggsMass;
     WrappedTH1* hHiggsMassReal;
     WrappedTH1* hHiggsMassImaginary;
@@ -67,6 +86,7 @@ namespace HPlus {
     WrappedTH1* hNeutrinoZSolution;
     WrappedTH1* hNeutrinoPtSolution;
     WrappedTH1* hNeutrinoPtDifference;
+   
   };
 }
 

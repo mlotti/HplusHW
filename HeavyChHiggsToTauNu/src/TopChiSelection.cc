@@ -111,7 +111,8 @@ namespace HPlus {
 	    chi2Min = chi2;
 	    Jet1 = iJet1;
 	    Jet2 = iJet2;
-	    Jetb = iJetb;            
+	    Jetb = iJetb;  
+	    bjetInTop  = iJetb;             
             top = candTop;
 	    W = candW;
 	    topmassfound = true;

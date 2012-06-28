@@ -183,6 +183,7 @@ namespace HPlus {
     SignalAnalysisTree fTree;
 
     // Histograms
+
     WrappedTH1 *hVerticesBeforeWeight;
     WrappedTH1 *hVerticesAfterWeight;
     WrappedTH1 *hVerticesTriggeredBeforeWeight;
@@ -206,6 +207,7 @@ namespace HPlus {
     WrappedTH1 *hAlphaT;
     WrappedTH1 *hAlphaTInvMass;
     WrappedTH2 *hAlphaTVsRtau;
+
     // Histograms for validation at every Selection Cut step
     WrappedTH1 *hMet_AfterTauSelection;
     WrappedTH1 *hMet_AfterBTagging;
