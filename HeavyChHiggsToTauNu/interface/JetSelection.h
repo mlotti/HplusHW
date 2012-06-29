@@ -82,12 +82,14 @@ namespace HPlus {
     // Counters
     Count fCleanCutCount;
     Count fJetIdCount;
+    Count fBetaCutCount;
     Count fEMfractionCutCount;
     Count fEtaCutCount;
     Count fPtCutCount;
     Count fAllSubCount;
     Count fEMfraction08CutCount;
     Count fEMfraction07CutCount;
+    Count fEventKilledByBetaCutCount;
     Count fCleanCutSubCount;
     Count fneutralHadronEnergyFractionCutSubCount;
     Count fneutralEmEnergyFractionCutSubCount;
