@@ -50,6 +50,7 @@ namespace HPlus {
     fEventWeight(eventWeight),
     fHistoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
     bBlindAnalysisStatus(iConfig.getUntrackedParameter<bool>("blindAnalysisStatus")),
+    fDeltaPhiCutValue(iConfig.getUntrackedParameter<double>("deltaPhiTauMET")),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),
@@ -61,6 +62,7 @@ namespace HPlus {
     fBaselineJetsCounter(eventCounter.addCounter("Baseline, njets")),
     fBaselineMetCounter(eventCounter.addCounter("Baseline, MET")),
     fBaselineBtagCounter(eventCounter.addCounter("Baseline, btagging")),
+    fBaselineDeltaPhiTauMETCounter(eventCounter.addCounter("Baseline,DeltaPhi(Tau,MET) upper limit")),
     fBaselineDphi160Counter(eventCounter.addCounter("Baseline, deltaPhi160")),
     fBaselineDphi130Counter(eventCounter.addCounter("Baseline, deltaPhi130")),
     fBaselineTopChiSelectionCounter(eventCounter.addCounter("Top BaselineChiSelection cut")),
@@ -76,6 +78,8 @@ namespace HPlus {
     fMETCounter(eventCounter.addCounter("MET")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fdeltaPhiTauMET10Counter(eventCounter.addCounter("deltaPhiTauMET lower limit")),
+    fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhi(Tau,MET) upper limit")),
+    fHiggsMassCutCounter(eventCounter.addCounter("HiggsMassCut")),
     fdeltaPhiTauMET160Counter(eventCounter.addCounter("deltaPhiTauMET160 limit")),
     fdeltaPhiTauMET130Counter(eventCounter.addCounter("deltaPhiTauMET130 limit")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
@@ -107,6 +111,7 @@ namespace HPlus {
     fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
     fTopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, fHistoWrapper),
     fTopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, fHistoWrapper),
+    fFullHiggsMassCalculator(eventCounter, fHistoWrapper),
     //    ftransverseMassCut(iConfig.getUntrackedParameter<edm::ParameterSet>("transverseMassCut")),
     fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, fHistoWrapper),
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, fHistoWrapper),
@@ -404,6 +409,8 @@ namespace HPlus {
     if (!triggerData.passedEvent()) return false;
     increment(fTriggerCounter);
     hSelectionFlow->Fill(kSignalOrderTrigger);
+    if(triggerData.hasTriggerPath()) // protection if TriggerSelection is disabled
+      fTree.setHltTaus(triggerData.getTriggerTaus());
 
     hVerticesTriggeredBeforeWeight->Fill(nVertices);
     hVerticesTriggeredAfterWeight->Fill(nVertices);
@@ -483,15 +490,17 @@ namespace HPlus {
     BjetSelection::Data BjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), tauData.getSelectedTau(), metData.getSelectedMET());
 
     TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
-    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()) );   
+   double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
    
-    //    if(metData.passedEvent()) hmtTest_noTaumetcut->Fill(transverseMass, fEventWeight.getWeight());
+    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()) );
+   
+    FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
+    //    fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
+
 
   // baseline tau-id
 
     if (tauData.selectedTauPassesDiscriminator(myTauIsolation, 0.5)  && tauData.selectedTauPassesNProngs() && tauData.selectedTauPassesRtau() ) {
-
 
 
       hMETBaselineTauId->Fill(metData.getSelectedMET()->et());
@@ -519,9 +528,11 @@ namespace HPlus {
 	   
 	      if(btagData.passedEvent()) {
 		increment(fBaselineBtagCounter);
-		if ( deltaPhi*57.3 < 160) {
+		if ( deltaPhi < 160) {
 		  increment(fBaselineDphi160Counter);
-		if ( deltaPhi*57.3 < 130) increment(fBaselineDphi130Counter);
+		  fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
+
+		if ( deltaPhi < 130) increment(fBaselineDphi130Counter);
 		//		  hMETBaselineTauIdBtagDphi->Fill(metData.getSelectedMET()->et()); 
 		  if (TopChiSelectionData.passedEvent() ) {
 		    increment(fBaselineTopChiSelectionCounter);    
@@ -798,6 +809,12 @@ namespace HPlus {
     }
     
 
+    //    FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
+    fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
+    double HiggsMass = FullHiggsMassData.getHiggsMass();
+    if (HiggsMass > 100 && HiggsMass < 200 ) increment(fHiggsMassCutCounter);
+
+
     double topMass = TopChiSelectionData.getTopMass();
     hTopMass->Fill(topMass);
     // top mass with binning    
@@ -838,23 +855,31 @@ namespace HPlus {
     }
    // mt for inverted tau with deltaphi cut
 
-    if ( deltaPhi*57.3 < 160 ) {
-      hMTInvertedTauIdJetPhi->Fill(transverseMass); 
-      increment(fdeltaPhiTauMET160Counter);
-      if ( tauData.getSelectedTau()->pt() > 150  ) hMTInvertedTauIdJetPhi150->Fill(transverseMass); 
-      if ( tauData.getSelectedTau()->pt() > 120 && tauData.getSelectedTau()->pt() < 150 ) hMTInvertedTauIdJetPhi120150->Fill(transverseMass); 
-      if ( tauData.getSelectedTau()->pt() > 100 && tauData.getSelectedTau()->pt() < 120 ) hMTInvertedTauIdJetPhi100120->Fill(transverseMass); 
-      if ( tauData.getSelectedTau()->pt() > 80 && tauData.getSelectedTau()->pt() < 100 ) hMTInvertedTauIdJetPhi80100->Fill(transverseMass); 
-      if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hMTInvertedTauIdJetPhi7080->Fill(transverseMass); 
-      if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMTInvertedTauIdJetPhi6070->Fill(transverseMass); 
-      if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMTInvertedTauIdJetPhi5060->Fill(transverseMass); 
-      if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMTInvertedTauIdJetPhi4050->Fill(transverseMass); 
-    }
 
-       
 
-    //    if ( deltaPhi*57.3 < 130 ) {
-    if (TopChiSelectionData.passedEvent()  &&  deltaPhi*57.3 < 160 ) {
+
+    //    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
+    hDeltaPhi->Fill(deltaPhi);
+    if (deltaPhi > fDeltaPhiCutValue) return false;
+    increment(fDeltaPhiTauMETCounter);
+
+
+    hMTInvertedTauIdJetPhi->Fill(transverseMass); 
+    increment(fdeltaPhiTauMET160Counter);
+    if ( tauData.getSelectedTau()->pt() > 150  ) hMTInvertedTauIdJetPhi150->Fill(transverseMass); 
+    if ( tauData.getSelectedTau()->pt() > 120 && tauData.getSelectedTau()->pt() < 150 ) hMTInvertedTauIdJetPhi120150->Fill(transverseMass); 
+    if ( tauData.getSelectedTau()->pt() > 100 && tauData.getSelectedTau()->pt() < 120 ) hMTInvertedTauIdJetPhi100120->Fill(transverseMass); 
+    if ( tauData.getSelectedTau()->pt() > 80 && tauData.getSelectedTau()->pt() < 100 ) hMTInvertedTauIdJetPhi80100->Fill(transverseMass); 
+    if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hMTInvertedTauIdJetPhi7080->Fill(transverseMass); 
+    if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMTInvertedTauIdJetPhi6070->Fill(transverseMass); 
+    if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMTInvertedTauIdJetPhi5060->Fill(transverseMass); 
+    if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMTInvertedTauIdJetPhi4050->Fill(transverseMass); 
+ 
+  
+  
+
+  //    if ( deltaPhi*57.3 < 130 ) {
+    if (TopChiSelectionData.passedEvent() ) {
       hMTInvertedTauIdTopMass->Fill(transverseMass);
       increment(fdeltaPhiTauMET130Counter); 
       if ( tauData.getSelectedTau()->pt() > 150  ) hMTInvertedTauIdTopMass150->Fill(transverseMass); 
@@ -868,16 +893,10 @@ namespace HPlus {
     }
 
 
-
-
-    //    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
     hDeltaPhi->Fill(deltaPhi*57.3);
     if ( deltaPhi*57.3 > 10) increment(fdeltaPhiTauMET10Counter); 
 
 
- 
-    if ( deltaPhi*57.3 > 160) return false;
-    hTransverseMassDeltaPhiUpperCut->Fill(transverseMass);  
      
 
     // plot deltaPhi(jet,met)
@@ -932,6 +951,7 @@ namespace HPlus {
     }
     //hSelectionFlow->Fill(kSignalOrderFakeMETVeto);
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderFakeMETVeto, tauData);
+
 
 
 

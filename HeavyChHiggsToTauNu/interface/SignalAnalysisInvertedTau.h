@@ -26,7 +26,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
-
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 namespace edm {
@@ -114,7 +114,7 @@ namespace HPlus {
 
     //    const double ftransverseMassCut;
     const bool bBlindAnalysisStatus;
-
+    const double fDeltaPhiCutValue;
     Count fAllCounter;
     Count fTriggerCounter;
     Count fPrimaryVertexCounter;
@@ -125,6 +125,8 @@ namespace HPlus {
     Count fBaselineJetsCounter;
     Count fBaselineMetCounter;
     Count fBaselineBtagCounter;
+    Count fBaselineDeltaPhiTauMETCounter;
+    Count fHiggsMassCutCounter;
     Count fBaselineDphi160Counter;
     Count fBaselineDphi130Counter;
     Count fBaselineTopChiSelectionCounter;
@@ -139,6 +141,7 @@ namespace HPlus {
     Count fBTaggingBeforeMETCounter;
     Count fMETCounter;
     Count fBTaggingCounter;
+    Count fDeltaPhiTauMETCounter;
     Count fdeltaPhiTauMET10Counter;
     Count fdeltaPhiTauMET160Counter;
     Count fdeltaPhiTauMET130Counter;
@@ -170,6 +173,7 @@ namespace HPlus {
     JetTauInvMass fJetTauInvMass;
     TopSelection fTopSelection;
     BjetSelection fBjetSelection;
+    FullHiggsMassCalculator fFullHiggsMassCalculator;
     TopChiSelection fTopChiSelection;
     TopWithBSelection fTopWithBSelection;
     GenParticleAnalysis fGenparticleAnalysis;

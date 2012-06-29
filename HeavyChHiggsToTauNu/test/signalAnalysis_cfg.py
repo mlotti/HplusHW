@@ -66,6 +66,7 @@ doFillTree = False
 myHistogramAmbientLevel = "Debug"
 
 # Apply trigger scale factor or not
+
 applyTriggerScaleFactor = True
 
 PF2PATVersion = "PFlow" # For normal PF2PAT
@@ -88,7 +89,7 @@ doPUWeightVariation = False
 # Note: Keep number of variations below 200 to keep file sizes reasonable
 # Note: Currently it is not possible to vary the tau selection -related variables, because only one JES and MET producer is made (tau selection influences type I MET correction and JES)
 
-doOptimisation = False
+doOptimisation = True
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
 myOptimisation = HPlusOptimisationScheme()
@@ -97,9 +98,9 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.addTauIsolationContinuousVariation([])
 #myOptimisation.addRtauVariation([0.0, 0.7])
 #myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
-myOptimisation.addJetEtVariation([20.0, 30.0])
+#myOptimisation.addJetEtVariation([20.0, 30.0])
 #myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
-#myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
+myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
 #myOptimisation.addBJetLeadingDiscriminatorVariation([0.898, 0.679])
 #myOptimisation.addBJetSubLeadingDiscriminatorVariation([0.679, 0.244])
 #myOptimisation.addBJetEtVariation([])
