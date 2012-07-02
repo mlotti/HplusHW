@@ -15,9 +15,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 def main(opts):
     datasets = None
     if len(opts.files) > 0:
-        datasets = dataset.getDatasetsFromRootFiles( [(x,x) for x in opts.files], counters=opts.counterdir, weightedCounters=False)
+        datasets = dataset.getDatasetsFromRootFiles( [(x,x) for x in opts.files], counters=opts.counterdir, weightedCounters=opts.weighted)
     else:
-        datasets = dataset.getDatasetsFromMulticrabCfg(opts=opts, counters=opts.counterdir, weightedCounters=False)
+        datasets = dataset.getDatasetsFromMulticrabCfg(opts=opts, counters=opts.counterdir, weightedCounters=opts.weighted)
 
     if os.path.exists(opts.lumifile):
         datasets.loadLuminosities(opts.lumifile)
@@ -28,6 +28,7 @@ def main(opts):
     counters = opts.counterdir
     if opts.weighted:
         counters += "/weighted"
+        datasets.updateNAllEventsToPUWeighted()
     eventCounter = counter.EventCounter(datasets, counters=counters)
     
 
@@ -82,7 +83,7 @@ if __name__ == "__main__":
     multicrab.addOptions(parser)
     dataset.addOptions(parser)
     parser.add_option("--weighted", dest="weighted", default=False, action="store_true",
-                      help="Use weighted counters (i.e. adds '/weighted' to the counter directory patg)")
+                      help="Use weighted counters (i.e. adds '/weighted' to the counter directory path)")
     parser.add_option("--mode", "-m", dest="mode", type="string", default="events",
                       help="Output mode; available: 'events', 'xsect', 'eff' (default: 'events')")
     parser.add_option("--csv", dest="csv", action="store_true", default=False,

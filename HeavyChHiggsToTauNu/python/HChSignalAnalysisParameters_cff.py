@@ -144,8 +144,8 @@ jetSelectionBase = cms.untracked.PSet(
     jetIdMinChargedMultiplicity = cms.untracked.uint32(0),
     jetIdMaxChargedEMEnergyFraction = cms.untracked.double(0.99),
     # Pileup cleaning
-    betaCut = cms.untracked.double(0.0), # disabled
-    betaCutSource = cms.untracked.string("beta"), # tag name in user floats
+    betaCut = cms.untracked.double(0.7), # disabled
+    betaCutSource = cms.untracked.string("Beta"), # tag name in user floats
     betaCutDirection = cms.untracked.string("GT"), # direction of beta cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
     # Experimental
     EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
@@ -189,9 +189,9 @@ bTagging = cms.untracked.PSet(
 #    discriminator = cms.untracked.string("jetProbabilityBJetTags"),   
     leadingDiscriminatorCut = cms.untracked.double(0.679), # used for best bjet candidates (best discriminator)
     subleadingDiscriminatorCut = cms.untracked.double(0.244), # used for other bjet candidates
-    ptCut = cms.untracked.double(30.0),
+    ptCut = cms.untracked.double(20.0),
     etaCut = cms.untracked.double(2.4),
-    jetNumber = cms.untracked.uint32(1),
+    jetNumber = cms.untracked.uint32(2),
     jetNumberCutDirection = cms.untracked.string("GEQ"), # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
     UseBTagDB      = cms.untracked.bool(False),
     BTagDBAlgo     = cms.untracked.string("TCHEL"),

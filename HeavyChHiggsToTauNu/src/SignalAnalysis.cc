@@ -104,7 +104,7 @@ namespace HPlus {
     fTauIsMuonFromJetCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from jet->mu")),
     fTauIsHadronFromJetCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from jet->hadron")),
 
-    fTopSelectionCounter(eventCounter.addCounter("Top selection")),
+    fTopSelectionCounter(eventCounter.addSubCounter("top", "Top selection")),
     fTopChiSelectionCounter(eventCounter.addSubCounter("top", "Top ChiSelection 120-300")),
     fTopChiSelection250Counter(eventCounter.addSubCounter("top", "Top ChiSelection 120-250")),
     fTopChiSelection220Counter(eventCounter.addSubCounter("top", "Top ChiSelection 120-220")),
