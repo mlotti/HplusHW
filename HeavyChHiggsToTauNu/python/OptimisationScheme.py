@@ -217,38 +217,36 @@ class HPlusOptimisationScheme():
                                                     for bjetNumber in self._bjetNumberVariation:
                                                         for dphi in self._deltaPhiVariation:
                                                             for topreco in self._topRecoVatiation:
-                                                                # make sanity checks
-                                                                if bjetEt >= jetEt:
-                                                                      nVariations += 1
-                                                                      # Construct name for variation
-                                                                      myVariationName = self.getVariationName(analysisName,taupt,tauIsol,tauIsolCont,rtau,jetNumber,jetEt,jetBeta,met,bjetNumber,bjetEt,bjetLeadingDiscr,bjetSubLeadingDiscr,dphi,topreco)
-                                                                      #print "Generating variation",myVariationName
-                                                                      # Clone module and make changes
-                                                                      myModule = nominalAnalysis.clone()
-                                                                      myModule.tauSelection.ptCut = taupt
-                                                                      myModule.tauSelection.isolationDiscriminator = tauIsol
-                                                                      myModule.tauSelection.isolationDiscriminatorContinuousCutPoint = tauIsolCont
-                                                                      myModule.tauSelection.rtauCut = rtau
-                                                                      myModule.jetSelection.ptCut = jetEt
-                                                                      myModule.jetSelection.betaCut = self.getNumberFromCutWithDirection(jetBeta)
-                                                                      myModule.jetSelection.betaCutDirection = self.getOperatorFromCutWithDirection(jetBeta)
-                                                                      myModule.jetSelection.jetNumberCutDirection = self.getOperatorFromCutWithDirection(jetNumber)
-                                                                      myModule.jetSelection.jetNumber = (int)(self.getNumberFromCutWithDirection(jetNumber))
-                                                                      myModule.MET.METCut = met
-                                                                      myModule.bTagging.leadingDiscriminatorCut = bjetLeadingDiscr
-                                                                      myModule.bTagging.subleadingDiscriminatorCut = bjetSubLeadingDiscr
-                                                                      myModule.bTagging.ptCut = bjetEt
-                                                                      myModule.bTagging.jetNumberCutDirection = self.getOperatorFromCutWithDirection(bjetNumber)
-                                                                      myModule.bTagging.jetNumber = (int)(self.getNumberFromCutWithDirection(bjetNumber))
-                                                                      myModule.deltaPhiTauMET = dphi
-                                                                      # FIXME add top variation here
-                                                                      # Add analysis
-                                                                      addAnalysis(process, myVariationName, myModule,
-                                                                                  preSequence=commonSequence,
-                                                                                  additionalCounters=additionalCounters,
-                                                                                  signalAnalysisCounters=True)
-                                                                      variationModuleNames.append(myVariationName)
-                                                                      print myVariationName
+                                                                nVariations += 1
+                                                                # Construct name for variation
+                                                                myVariationName = self.getVariationName(analysisName,taupt,tauIsol,tauIsolCont,rtau,jetNumber,jetEt,jetBeta,met,bjetNumber,bjetEt,bjetLeadingDiscr,bjetSubLeadingDiscr,dphi,topreco)
+                                                                #print "Generating variation",myVariationName
+                                                                # Clone module and make changes
+                                                                myModule = nominalAnalysis.clone()
+                                                                myModule.tauSelection.ptCut = taupt
+                                                                myModule.tauSelection.isolationDiscriminator = tauIsol
+                                                                myModule.tauSelection.isolationDiscriminatorContinuousCutPoint = tauIsolCont
+                                                                myModule.tauSelection.rtauCut = rtau
+                                                                myModule.jetSelection.ptCut = jetEt
+                                                                myModule.jetSelection.betaCut = self.getNumberFromCutWithDirection(jetBeta)
+                                                                myModule.jetSelection.betaCutDirection = self.getOperatorFromCutWithDirection(jetBeta)
+                                                                myModule.jetSelection.jetNumberCutDirection = self.getOperatorFromCutWithDirection(jetNumber)
+                                                                myModule.jetSelection.jetNumber = (int)(self.getNumberFromCutWithDirection(jetNumber))
+                                                                myModule.MET.METCut = met
+                                                                myModule.bTagging.leadingDiscriminatorCut = bjetLeadingDiscr
+                                                                myModule.bTagging.subleadingDiscriminatorCut = bjetSubLeadingDiscr
+                                                                myModule.bTagging.ptCut = bjetEt
+                                                                myModule.bTagging.jetNumberCutDirection = self.getOperatorFromCutWithDirection(bjetNumber)
+                                                                myModule.bTagging.jetNumber = (int)(self.getNumberFromCutWithDirection(bjetNumber))
+                                                                myModule.deltaPhiTauMET = dphi
+                                                                # FIXME add top variation here
+                                                                # Add analysis
+                                                                addAnalysis(process, myVariationName, myModule,
+                                                                            preSequence=commonSequence,
+                                                                            additionalCounters=additionalCounters,
+                                                                            signalAnalysisCounters=True)
+                                                                variationModuleNames.append(myVariationName)
+                                                                print myVariationName
         if self._maxVariations > 0:
             if nVariations > self._maxVariations:
                 print "You generated %d variations, which is more than the safety limit (%d)!"%(nVariations,self._maxVariations)
