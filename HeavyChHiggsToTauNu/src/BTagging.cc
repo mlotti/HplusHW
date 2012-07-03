@@ -213,14 +213,15 @@ namespace HPlus {
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
-    fDiscrCut(iConfig.getUntrackedParameter<double>("discriminatorCut")),
+    fLeadingDiscrCut(iConfig.getUntrackedParameter<double>("leadingDiscriminatorCut")),
+    fSubLeadingDiscrCut(iConfig.getUntrackedParameter<double>("subleadingDiscriminatorCut")),
     fNumberOfBJets(iConfig.getUntrackedParameter<uint32_t>("jetNumber"),iConfig.getUntrackedParameter<std::string>("jetNumberCutDirection")),
-    fMin(iConfig.getUntrackedParameter<uint32_t>("minNumber")),
     FactorsFromDB(iConfig.getUntrackedParameter<bool>("UseBTagDB",false)),
     fTaggedCount(eventCounter.addSubCounter("b-tagging main","b-tagging")),
     fAllSubCount(eventCounter.addSubCounter("b-tagging", "all jets")),
     fTaggedSubCount(eventCounter.addSubCounter("b-tagging", "tagged")),
-    fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta  cut")),  
+    fTaggedPtCutSubCount(eventCounter.addSubCounter("b-tagging", "pt cut")),  
+    fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta cut")),  
     fTaggedAllRealBJetsSubCount(eventCounter.addSubCounter("b-tagging", "All real b jets")),
     fTaggedTaggedRealBJetsSubCount(eventCounter.addSubCounter("b-tagging", "Btagged real b jets")),
     fTaggedNoTaggedJet(eventCounter.addSubCounter("b-tagging", "no b-tagged jet")),
@@ -232,27 +233,27 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("Btagging");
     hDiscr = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
-    hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "bjet_pt", "bjet_pt", 400, 0., 400.);
+    hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "bjet_pt", "bjet_pt", 80, 0., 400.);
     hDiscrB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
-    hPtB17 = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjet17_pt", "realbjet17_pt", 400, 0., 400.);
-    hEtaB17 = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjet17_eta", "realbjet17_eta", 400, -5., 5.);
-    hPtB33 = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjet33_pt", "realbjet33_pt", 400, 0., 400.);
-    hEtaB33 = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjet33_eta", "realbjet33_eta", 400, -5., 5.);
-    hPtBnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetNotag_pt", "realbjetNotag_pt", 400, 0., 400.);
-    hEtaBnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetNotag_eta", "realbjetNotag_eta", 400, -5., 5.);
+    hPtBCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjetCSVM_pt", "realbjetCSVM_pt", 80, 0., 400.);
+    hEtaBCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjetCSVM_eta", "realbjetCSVM_eta", 100, -5., 5.);
+    hPtBCSVT = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjetCSVT_pt", "realbjetCSVT_pt", 80, 0., 400.);
+    hEtaBCSVT = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realbjetCSVT_eta", "realbjetCSVT_eta", 100, -5., 5.);
+    hPtBnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetNotag_pt", "realbjetNotag_pt", 80, 0., 400.);
+    hEtaBnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realbjetNotag_eta", "realbjetNotag_eta", 100, -5., 5.);
     hDiscrQ = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
-    hPtQ17 = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjet17_pt", "realqjet17_pt", 400, 0., 400.);
-    hEtaQ17 = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjet17_eta", "realqjet17_pt", 400, -5., 5.);
-    hPtQ33 = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjet33_pt", "realqjet33_pt", 400, 0., 400.);
-    hEtaQ33 = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjet33_eta", "realqjet33_pt", 400, -5., 5.);
-    hPtQnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetNotag_pt", "realqjetNotag_pt", 400, 0., 400.);
-    hEtaQnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetNotag_eta", "realqjetNotag_pt", 400, -5., 5.);
-    hPt1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_pt", "bjet1_pt", 100, 0., 400.);
-    hPt2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_pt", "bjet2_pt", 100, 0., 400.);
-    hEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "bjet_eta", "bjet_pt", 400, -5., 5.);
+    hPtQCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjetCSVM_pt", "realqjetCSVM_pt", 80, 0., 400.);
+    hEtaQCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjetCSVM_eta", "realqjetCSVM_pt", 100, -5., 5.);
+    hPtQCSVT = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjetCSVT_pt", "realqjetCSVT_pt", 80, 0., 400.);
+    hEtaQCSVT = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "realqjetCSVT_eta", "realqjetCSVT_pt", 100, -5., 5.);
+    hPtQnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetNotag_pt", "realqjetNotag_pt", 80, 0., 400.);
+    hEtaQnoTag = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "realqjetNotag_eta", "realqjetNotag_pt", 100, -5., 5.);
+    hPt1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_pt", "bjet1_pt", 80, 0., 400.);
+    hPt2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_pt", "bjet2_pt", 80, 0., 400.);
+    hEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "bjet_eta", "bjet_pt", 100, -5., 5.);
     hEta1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_eta", "bjet1_pt", 100, -5., 5.);
     hEta2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_eta", "bjet2_pt", 100, -5., 5.);
-    hNumberOfBtaggedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfBtaggedJets", "NumberOfBtaggedJets", 15, 0., 15.);
+    hNumberOfBtaggedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfBtaggedJets", "NumberOfBtaggedJets", 10, 0., 10.);
     
     hScaleFactor = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "scaleFactor", "scaleFactor;b-tag/mistag scale factor;N_{events}/0.05", 100, 0., 5.);
     hMCMatchForPassedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "MCMatchForPassedJets", "MCMatchForPassedJets;;N_{jets}", 3, 0., 3.);
@@ -353,14 +354,15 @@ namespace HPlus {
     fSelectedJets.clear();
     fSelectedJets.reserve(jets.size());
 
-    size_t passed = 0;
     bool bmatchedJet = false;
     bool qmatchedJet = false;
     bool bMatch = false;
     bool qMatch = false;
 
     if(btagDB) btagDB->setup(iSetup);
-      
+    
+    edm::PtrVector<pat::Jet> mySelectedLeadingBjets;
+    edm::PtrVector<pat::Jet> mySelectedSubLeadingBjets;
     // Calculate 
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
@@ -424,13 +426,13 @@ namespace HPlus {
 	hEtaBnoTag->Fill(iJet->eta());
 	//	std::cout << " discr. b-matched   "  << discr << " discr cut   "  << fDiscrCut  << std::endl;	
 	//	if(discr > fDiscrCut ) {
-	if(discr > 3.3 ) {
-	  hPtB33->Fill(iJet->pt());
-	  hEtaB33->Fill(iJet->eta());
+	if(discr > 0.898) {
+	  hPtBCSVT->Fill(iJet->pt());
+	  hEtaBCSVT->Fill(iJet->eta());
 	}
-	if(discr > 1.7 ) {
-	  hPtB17->Fill(iJet->pt());
-	  hEtaB17->Fill(iJet->eta());
+	if(discr > 0.679) {
+	  hPtBCSVM->Fill(iJet->pt());
+	  hEtaBCSVM->Fill(iJet->eta());
 	}
 	hDiscrB->Fill(discr);
       }
@@ -440,37 +442,55 @@ namespace HPlus {
 	hEtaQnoTag->Fill(iJet->eta());
 	//	std::cout << " discr. q-matched  "  << discr <<  discr << " discr cut   "  << fDiscrCut << std::endl;
 	//	if(discr > fDiscrCut ) {
-	if(discr > 3.3 ) {
-	  hPtQ33->Fill(iJet->pt());
-	  hEtaQ33->Fill(iJet->eta());
+	if(discr > 0.898) {
+	  hPtQCSVT->Fill(iJet->pt());
+	  hEtaQCSVT->Fill(iJet->eta());
 	}
-	if(discr > 1.7 ) {
-	  hPtQ17->Fill(iJet->pt());
-	  hEtaQ17->Fill(iJet->eta());
+	if(discr > 0.679) {
+	  hPtQCSVM->Fill(iJet->pt());
+	  hEtaQCSVM->Fill(iJet->eta());
 	}
 	hDiscrQ->Fill(discr);
       }
 
-
+      // pt cut
+      if(iJet->pt() < fPtCut ) continue;
+      increment(fTaggedPtCutSubCount);
+      // eta cut
+      if(fabs(iJet->eta()) > fEtaCut ) continue;
+      increment(fTaggedEtaCutSubCount);
+      // discriminator cut
       hDiscr->Fill(discr);
-      if(!(discr > fDiscrCut)) continue;
+      if (discr > fLeadingDiscrCut) {
+        mySelectedLeadingBjets.push_back(iJet);
+      } else if (discr > fSubLeadingDiscrCut){
+        mySelectedSubLeadingBjets.push_back(iJet);
+      } else {
+        continue;
+      }
       increment(fTaggedSubCount);
-      //      ++passed;
 
       hPt->Fill(iJet->pt());
       hEta->Fill(iJet->eta());
 
-      if(fabs(iJet->eta()) > fEtaCut ) continue;
-      increment(fTaggedEtaCutSubCount);
       if (discr > fMaxDiscriminatorValue)
         fMaxDiscriminatorValue = discr;
 
-      ++passed;
+      //++passed;
       if( bmatchedJet )   increment(fTaggedTaggedRealBJetsSubCount);
 
-
-      fSelectedJets.push_back(iJet);
     } // end of jet loop
+
+    // Loop over selected leading and subleading b jets
+    for(edm::PtrVector<pat::Jet>::const_iterator iJet = mySelectedLeadingBjets.begin(); iJet != mySelectedLeadingBjets.end(); ++iJet) {
+      fSelectedJets.push_back(*iJet);
+    }
+    if (mySelectedLeadingBjets.size() > 0) {
+      // Fill only, if the bjet with the tighter tag has been found so that histogramming is right
+      for(edm::PtrVector<pat::Jet>::const_iterator iJet = mySelectedSubLeadingBjets.begin(); iJet != mySelectedSubLeadingBjets.end(); ++iJet) {
+        fSelectedJets.push_back(*iJet);
+      }
+    }
 
     // Obtain and apply scale factor for MC events
     if (!iEvent.isRealData())
@@ -481,11 +501,11 @@ namespace HPlus {
     iNBtags = fSelectedJets.size();
 
     ////////////////////////////////
-    if( passed > 0) {
+    if(fSelectedJets.size() > 0) {
       hPt1->Fill(fSelectedJets[0]->pt());
       hEta1->Fill(fSelectedJets[0]->eta());
     }
-    if( passed > 1) {
+    if(fSelectedJets.size() > 1) {
       hPt2->Fill(fSelectedJets[1]->pt());
       hEta2->Fill(fSelectedJets[1]->eta());
     }
@@ -495,11 +515,11 @@ namespace HPlus {
       //	  deltaPhi = DeltaPhi::reconstruct(*(iJet), *(met));
       //	  hDeltaPhiJetMet->Fill(deltaPhi*57.3);
       //      }
-    if( passed == 0)   increment(fTaggedNoTaggedJet);
-    else if( passed == 1)   increment(fTaggedOneTaggedJet);
-    else if( passed == 2)   increment(fTaggedTwoTaggedJets);
+    if(fSelectedJets.size() == 0)   increment(fTaggedNoTaggedJet);
+    else if(fSelectedJets.size() == 1)   increment(fTaggedOneTaggedJet);
+    else if(fSelectedJets.size() == 2)   increment(fTaggedTwoTaggedJets);
 
-    passEvent = fNumberOfBJets.passedCut(passed);
+    passEvent = fNumberOfBJets.passedCut(fSelectedJets.size());
     if (passEvent)
       increment(fTaggedCount);
 

@@ -24,6 +24,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SelectedEventsAnalyzer.h"
@@ -36,6 +37,9 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
+
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "TTree.h"
 #include <vector>
@@ -56,10 +60,10 @@ namespace HPlus {
     kQCDOrderMuonVeto,
     kQCDOrderJetSelection,
     kQCDOrderTauID,
-    kQCDOrderRtau,
     kQCDOrderMET,
     kQCDOrderBTag,
     kQCDOrderDeltaPhiTauMET,
+    kQCDOrderMaxDeltaPhiJetMET,
     kQCDOrderTopSelection
   };
 
@@ -79,11 +83,10 @@ namespace HPlus {
     int getMtBinIndex(double mt);
     int getFullMassBinIndex(double mass);
     void createShapeHistograms(edm::Service< TFileService >& fs, std::vector< HPlus::WrappedTH1* >& container, string title, int nbins, double min, double max);
-    int getShapeBinIndex(double tauPt, double tauEta, int nvtx);
+    int getShapeBinIndex(int tauPtBin, int tauEtaBin, int nvtxBin);
+    void setAxisLabelsForTH3(WrappedTH3* h);
 
   private:
-    // Different forks of analysis
-    std::vector<AnalysisVariation> fAnalyses;
 
     // We need a reference in order to use the same object (and not a copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;
@@ -91,8 +94,16 @@ namespace HPlus {
     const double fDeltaPhiCutValue;
     const std::string fTopRecoName; // Name of selected top reconstruction algorithm
 
+    std::vector<double> fTauPtBinLowEdges;
+    std::vector<double> fTauEtaBinLowEdges;
+    std::vector<int> fNVerticesBinLowEdges;
+    std::vector<double> fTransverseMassRange; // Range from config
+    std::vector<double> fFullMassRange; // Range from config
+    std::vector<double> fTransverseMassBinLowEdges;
+    std::vector<double> fFullMassRangeBinLowEdges;
+
     // Counters - order is important
-    Count fAllCounter;
+    Count fVertexReweighting;
     Count fTriggerCounter;
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
@@ -143,14 +154,6 @@ namespace HPlus {
     SignalAnalysisTree fTree;
     ScaleFactorUncertaintyManager fSFUncertaintyAfterStandardSelections;
 
-    std::vector<double> fTauPtBinLowEdges;
-    std::vector<double> fTauEtaBinLowEdges;
-    std::vector<int> fNVerticesBinLowEdges;
-    std::vector<double> fTransverseMassRange; // Range from config
-    std::vector<double> fFullMassRange; // Range from config
-    std::vector<double> fTransverseMassBinLowEdges;
-    std::vector<double> fFullMassRangeBinLowEdges;
-
     // Histograms
     WrappedTH1* hVerticesBeforeWeight;
     WrappedTH1* hVerticesAfterWeight;
@@ -170,10 +173,10 @@ namespace HPlus {
     WrappedTH3* hLeg2AfterTauID;
 
     // Mt shapes
-    std::vector<WrappedTH1*> hMtShapesAfterJetSelection;
+    //std::vector<WrappedTH1*> hMtShapesAfterJetSelection;
     std::vector<WrappedTH1*> hMtShapesAfterFullMETLeg;
     //std::vector<WrappedTH1*> hMtShapesAfterMetLegNoBtagging;
-    std::vector<WrappedTH1*> hFullMassShapesAfterJetSelection;
+    //std::vector<WrappedTH1*> hFullMassShapesAfterJetSelection;
     std::vector<WrappedTH1*> hFullMassShapesAfterFullMETLeg;
     //std::vector<WrappedTH1*> hFullMassShapesAfterMetLegNoBtagging;
 

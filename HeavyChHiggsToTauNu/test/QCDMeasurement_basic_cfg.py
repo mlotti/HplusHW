@@ -55,10 +55,11 @@ myOptimisation = HPlusOptimisationScheme()
 myOptimisation.addJetEtVariation([20.0, 30.0])
 #myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
 #myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
-#myOptimisation.addBJetDiscriminatorVariation([0.679, 0.244])
+#myOptimisation.addBJetLeadingDiscriminatorVariation([0.898, 0.679])
+#myOptimisation.addBJetSubLeadingDiscriminatorVariation([0.679, 0.244])
 #myOptimisation.addBJetEtVariation([])
-myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
-myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
+#myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
+#myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
 #myOptimisation.addTopRecoVatiation(["None"]) # Valid options: None, chi, std, Wselection
 myOptimisation.disableMaxVariations()
 if doOptimisation:
@@ -177,9 +178,9 @@ process.QCDMeasurement = cms.EDFilter("HPlusQCDMeasurementBasicFilter",
     GenParticleAnalysis = param.GenParticleAnalysis.clone(),
     Tree = param.tree.clone(),
     eventCounter = param.eventCounter.clone(),
-    factorisationTauPtBinLowEdges = cms.untracked.vdouble(40., 50., 60., 70., 80., 100., 120., 150.),
-    factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0), # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
-    factorisationNVerticesBinLowEdges = cms.untracked.vint32(5, 10, 15, 20, 25, 30),
+    factorisationTauPtBinLowEdges = cms.untracked.vdouble(50., 60., 70., 80., 100., 120., 150.),
+    factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5), # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
+    factorisationNVerticesBinLowEdges = cms.untracked.vint32(10, 20, 30),
     factorisationTransverseMassRange = cms.untracked.vdouble(40., 0., 400.),
     factorisationFullMassRange = cms.untracked.vdouble(50., 0., 500.),
 )
@@ -215,7 +216,7 @@ sequence = MetCorrection.addCorrectedMet(process, process.QCDMeasurement, postfi
 process.commonSequence *= sequence
 
 # Set beta variable for jets
-process.signalAnalysis.jetSelection.betaCut = betaCutForJets
+process.QCDMeasurement.jetSelection.betaCut = betaCutForJets
 
 # Prescale fetching done automatically for data
 if dataVersion.isData() and doPrescalesForData:
@@ -227,21 +228,21 @@ if dataVersion.isData() and doPrescalesForData:
 
 # Print output
 print "\ntree will be filled:", process.QCDMeasurement.Tree.fill.value()
-print "\nVertexWeight:", process.QCDMeasurement.vertexWeight.value()
-print "\nTrigger:", process.QCDMeasurement.trigger
-print "\nPV Selection:", process.QCDMeasurement.primaryVertexSelection
-print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode.value()
-print "Trigger scale factor data:", process.signalAnalysis.triggerEfficiencyScaleFactor.dataSelect.value()
-print "Trigger scale factor MC:", process.signalAnalysis.triggerEfficiencyScaleFactor.mcSelect.value()
-print "VertexWeight data distribution:",process.signalAnalysis.vertexWeight.dataPUdistribution.value()
-print "VertexWeight mc distribution:",process.signalAnalysis.vertexWeight.mcPUdistribution.value()
-print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut.value()
+#print "\nVertexWeight:", process.QCDMeasurement.vertexWeight.value()
+#print "\nTrigger:", process.QCDMeasurement.trigger
+#print "\nPV Selection:", process.QCDMeasurement.primaryVertexSelection
+print "Trigger scale factor mode:", process.QCDMeasurement.triggerEfficiencyScaleFactor.mode.value()
+print "Trigger scale factor data:", process.QCDMeasurement.triggerEfficiencyScaleFactor.dataSelect.value()
+print "Trigger scale factor MC:", process.QCDMeasurement.triggerEfficiencyScaleFactor.mcSelect.value()
+print "VertexWeight data distribution:",process.QCDMeasurement.vertexWeight.dataPUdistribution.value()
+print "VertexWeight mc distribution:",process.QCDMeasurement.vertexWeight.mcPUdistribution.value()
+print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.QCDMeasurement.trigger.hltMetCut.value()
 print "\nTauSelection operating mode:", process.QCDMeasurement.tauSelection.operatingMode.value()
 print "TauSelection src:", process.QCDMeasurement.tauSelection.src.value()
 print "TauSelection selection:", process.QCDMeasurement.tauSelection.selection.value()
 print "TauSelection isolation:", process.QCDMeasurement.tauSelection.isolationDiscriminator.value()
 print "TauSelection rtauCut:", process.QCDMeasurement.tauSelection.rtauCut.value()
-print "VetoTauSelection src:", process.signalAnalysis.vetoTauSelection.tauSelection.src.value()
+print "VetoTauSelection src:", process.QCDMeasurement.vetoTauSelection.tauSelection.src.value()
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
@@ -264,7 +265,7 @@ if not doOptimisation:
 variationModuleNames = []
 if doOptimisation:
     # Make variation modules
-    variationModuleNames.extend(myOptimisation.generateVariations(process,additionalCounters,process.commonSequence,process.signalAnalysis,"signalAnalysis"))
+    variationModuleNames.extend(myOptimisation.generateVariations(process,additionalCounters,process.commonSequence,process.QCDMeasurement,"QCDMeasurement"))
 
 def getQCDMeasurementModuleNames():
     modules = []
@@ -273,6 +274,8 @@ def getQCDMeasurementModuleNames():
     if doOptimisation:
         modules.extend(variationModuleNames)
     return modules
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
 
 ################################################################################
 # The QCD measurement with jet energy scale variation
@@ -301,6 +304,7 @@ process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyz
 # Adds two directories (up and down)
 def addPUWeightVariation(name):
     # Up variation
+    return
     module = getattr(process, name).clone()
     module.Tree.fill = False
     param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, era=puweight, suffix="up")
@@ -318,7 +322,7 @@ def addPUWeightVariation(name):
 
 if doSystematics:
     doJetUnclusteredVariation = True
-    modules = getSignalAnalysisModuleNames()
+    modules = getQCDMeasurementModuleNames()
 
     # JES variation is relevant for MC only
     if dataVersion.isMC():

@@ -4,10 +4,8 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
-
 #include "TNamed.h"
+#include <iomanip>
 
 namespace HPlus {
   QCDMeasurementBasic::QCDMeasurementBasic(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
@@ -20,11 +18,12 @@ namespace HPlus {
     fNVerticesBinLowEdges(iConfig.getUntrackedParameter<std::vector<int> >("factorisationNVerticesBinLowEdges")),
     fTransverseMassRange(iConfig.getUntrackedParameter<std::vector<double> >("factorisationTransverseMassRange")),
     fFullMassRange(iConfig.getUntrackedParameter<std::vector<double> >("factorisationFullMassRange")),
-    fAllCounter(eventCounter.addCounter("allEvents")),
+    fVertexReweighting(eventCounter.addCounter("Vertex reweighting")),
     fTriggerCounter(eventCounter.addCounter("Trigger_and_HLT_MET")),
     fPrimaryVertexCounter(eventCounter.addCounter("PrimaryVertex")),
     fTausExistCounter(eventCounter.addCounter("TauCandSelection")),
     fControlPlotsMultipleTausCounter(eventCounter.addCounter("Rejected in ctrl plots (multiple taus)")),
+    fTriggerScaleFactorCounter(eventCounter.addCounter("Trg scale factor")),
     fVetoTauCounter(eventCounter.addCounter("VetoTauSelection")),
     fElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
     fMuonVetoCounter(eventCounter.addCounter("GlobalMuonVeto")),
@@ -33,6 +32,7 @@ namespace HPlus {
     fNJetsCounter(eventCounter.addCounter("JetSelection")),
     fMETCounter(eventCounter.addCounter("MET")),
     fBTaggingCounter(eventCounter.addCounter("bTagging")),
+    fBTaggingScaleFactorCounter(eventCounter.addCounter("btag scale factor")),
     fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhiTauMET")),
     fMaxDeltaPhiJetMETCounter(eventCounter.addCounter("maxDeltaPhiJetMET")),
     fTopSelectionCounter(eventCounter.addCounter("top selection")),
@@ -95,17 +95,26 @@ namespace HPlus {
     }
     // Factorisation histograms
     TFileDirectory myDir = fs->mkdir("factorisation");
+    hAfterJetSelection = fHistoWrapper.makeTH<TH3F>(HistoWrapper::kVital, myDir, "AfterJetSelection", "AfterJetSelection", myTauPtBins, 0., myTauPtBins, myTauEtaBins, 0., myTauEtaBins, myNVerticesBins, 0., myNVerticesBins);
+    setAxisLabelsForTH3(hAfterJetSelection);
     hLeg1AfterMET = fHistoWrapper.makeTH<TH3F>(HistoWrapper::kVital, myDir, "Leg1AfterMET", "Leg1AfterMET", myTauPtBins, 0., myTauPtBins, myTauEtaBins, 0., myTauEtaBins, myNVerticesBins, 0., myNVerticesBins);
+    setAxisLabelsForTH3(hLeg1AfterMET);
     hLeg1AfterBTagging = fHistoWrapper.makeTH<TH3F>(HistoWrapper::kVital, myDir, "Leg1AfterBTagging", "Leg1AfterBTagging", myTauPtBins, 0., myTauPtBins, myTauEtaBins, 0., myTauEtaBins, myNVerticesBins, 0., myNVerticesBins);
+    setAxisLabelsForTH3(hLeg1AfterBTagging);
     hLeg1AfterDeltaPhiTauMET = fHistoWrapper.makeTH<TH3F>(HistoWrapper::kVital, myDir, "Leg1AfterDeltaPhiTauMET", "Leg1AfterDeltaPhiTauMET", myTauPtBins, 0., myTauPtBins, myTauEtaBins, 0., myTauEtaBins, myNVerticesBins, 0., myNVerticesBins);
+    setAxisLabelsForTH3(hLeg1AfterDeltaPhiTauMET);
+    hLeg1AfterMaxDeltaPhiJetMET = fHistoWrapper.makeTH<TH3F>(HistoWrapper::kVital, myDir, "Leg1AfterMaxDeltaPhiJetMET", "Leg1AfterMaxDeltaPhiJetMET", myTauPtBins, 0., myTauPtBins, myTauEtaBins, 0., myTauEtaBins, myNVerticesBins, 0., myNVerticesBins);
+    setAxisLabelsForTH3(hLeg1AfterMaxDeltaPhiJetMET);
     hLeg1AfterTopSelection = fHistoWrapper.makeTH<TH3F>(HistoWrapper::kVital, myDir, "Leg1AfterTopSelection", "Leg1AfterTopSelection", myTauPtBins, 0., myTauPtBins, myTauEtaBins, 0., myTauEtaBins, myNVerticesBins, 0., myNVerticesBins);
+    setAxisLabelsForTH3(hLeg1AfterTopSelection);
     hLeg2AfterTauID = fHistoWrapper.makeTH<TH3F>(HistoWrapper::kVital, myDir, "Leg2AfterTauID", "Leg2AfterTauID", myTauPtBins, 0., myTauPtBins, myTauEtaBins, 0., myTauEtaBins, myNVerticesBins, 0., myNVerticesBins);
+    setAxisLabelsForTH3(hLeg2AfterTauID);
 
     // Mt and full mass shape histograms
-    createShapeHistograms(fs, hMtShapesAfterJetSelection, "MtShapesAfterJetSelection", fTransverseMassRange[0], fTransverseMassRange[1], fTransverseMassRange[2]);
+    //createShapeHistograms(fs, hMtShapesAfterJetSelection, "MtShapesAfterJetSelection", fTransverseMassRange[0], fTransverseMassRange[1], fTransverseMassRange[2]);
     createShapeHistograms(fs, hMtShapesAfterFullMETLeg, "MtShapesAfterFullMETLeg", fTransverseMassRange[0], fTransverseMassRange[1], fTransverseMassRange[2]);
     //createShapeHistograms(fs, hMtShapesAfterMetLegNoBtagging, "MtShapesAfterMetLegNoBtagging", fTransverseMassRange[0], fTransverseMassRange[1], fTransverseMassRange[2]);
-    createShapeHistograms(fs, hFullMassShapesAfterJetSelection, "FullMassShapesAfterJetSelection", fFullMassRange[0], fFullMassRange[1], fFullMassRange[2]);
+    //createShapeHistograms(fs, hFullMassShapesAfterJetSelection, "FullMassShapesAfterJetSelection", fFullMassRange[0], fFullMassRange[1], fFullMassRange[2]);
     createShapeHistograms(fs, hFullMassShapesAfterFullMETLeg, "FullMassShapesAfterFullMETLeg", fFullMassRange[0], fFullMassRange[1], fFullMassRange[2]);
     //createShapeHistograms(fs, hFullMassShapesAfterMetLegNoBtagging, "FullMassShapesAfterMetLegNoBtagging", fFullMassRange[0], fFullMassRange[1], fFullMassRange[2]);
 
@@ -120,13 +129,20 @@ namespace HPlus {
     // Other control histograms
 
     // Selection flow histogram
-    hSelectionFlow = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "QCD_SelectionFlow", "QCD_SelectionFlow;;N_{events}", 12, 0, 12);
+    hSelectionFlow = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "QCD_SelectionFlow", "QCD_SelectionFlow;;N_{events}", 12, 0, 12);
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTrigger,"Trigger");
-    //hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderVertexSelection,"Vertex");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderVertexSelection,"Vertex");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTauCandidateSelection,"#tau cand.");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderElectronVeto,"Isol. e veto");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMuonVeto,"Isol. #mu veto");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderJetSelection,"N_{jets}");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTauID,"tauID");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMET,"MET");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderBTag,"N_{b jets}");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderDeltaPhiTauMET,"#Delta#phi(#tau,MET)");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMaxDeltaPhiJetMET,"#Delta#phi(jet,MET)");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTopSelection,"top reco");
+    
 
     fTree.enableNonIsoLeptons(true);
     fTree.init(*fs);
@@ -158,8 +174,7 @@ namespace HPlus {
     hVerticesAfterWeight->Fill(nVertices);
     fTree.setNvertices(nVertices);
     hSelectionFlow->Fill(kQCDOrderVertexSelection);
-    increment(fAllCounter);
-
+    increment(fVertexReweighting);
 
 //------ Apply trigger and HLT_MET cut or trigger parametrisation
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
@@ -188,8 +203,6 @@ namespace HPlus {
 
 
 //------ Tau candidate selection
-    // Store weight of event
-    double myWeightBeforeTauID = fEventWeight.getWeight();
     // Do tau candidate selection
     TauSelection::Data tauCandidateData = fTauSelection.analyze(iEvent, iSetup);
     if (!tauCandidateData.passedEvent()) return false;
@@ -202,26 +215,28 @@ namespace HPlus {
     hSelectionFlow->Fill(kQCDOrderTauCandidateSelection);
     // Obtain tau pT bin index
     int myTauPtBinIndex = getTauPtBinIndex(tauCandidateData.getSelectedTau()->pt());
-    int myTauEtaBinIndex = getTauPtBinIndex(tauCandidateData.getSelectedTau()->eta());
+    int myTauEtaBinIndex = getTauEtaBinIndex(tauCandidateData.getSelectedTau()->eta());
 
     // Obtain boolean for rest of tauID for control plots
-    bool myPassedTauIDStatus = tauCandidateData.selectedTauPassesFullTauID();
+    //bool myPassedTauIDStatus = tauCandidateData.selectedTauPassesFullTauID();
     // Count how many tau candidates actually pass tau ID
+    /*
     if (myPassedTauIDStatus) {
       int myFullTauIDPassedCount = 0;
-      for (edm::PtrVector<pat::Tau>::iterators it = tauCandidateData.getSelectedTaus().begin(); it != tauCandidateData.getSelectedTaus().end(); ++it) {
+      for (edm::PtrVector<pat::Tau>::iterator it = tauCandidateData.getSelectedTaus().begin(); it != tauCandidateData.getSelectedTaus().end(); ++it) {
         if ((*it)->selectedTauPassesFullTauID())
           ++myFullTauIDPassedCount;
       }
       // Require exactly 1 tau
       if (myFullTauIDPassedCount > 1)
         myPassedTauIDStatus = false;
-    }
+    }*/
 
 //------ Veto against second tau in event
     VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau());
     //    if (vetoTauData.passedEvent()) return false;
     if (!vetoTauData.passedEvent()) increment(fVetoTauCounter);
+    // Note: no return statement should be added here
 
 
 //------ Global electron veto
@@ -252,7 +267,6 @@ namespace HPlus {
     if (!jetData.passedEvent()) return false;
     increment(fNJetsCounter);
     hSelectionFlow->Fill(kQCDOrderJetSelection);
-    hAfterJetSelection->Fill(myTauPtBinIndex);
     // Control plot
     hAfterJetSelection->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
 
@@ -299,7 +313,7 @@ namespace HPlus {
 // ----- Tau ID leg (factorisation
     if (tauCandidateData.selectedTauPassesFullTauID()) {
       hLeg2AfterTauID->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
-      
+      hSelectionFlow->Fill(kQCDOrderTauID);
       // On purpose: No return statement for false (factorisation)
     }
 
@@ -313,7 +327,7 @@ namespace HPlus {
     hLeg1AfterMET->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
 
     // b tagging cut
-    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     if(!btagData.passedEvent()) return false;
     increment(fBTaggingCounter);
     // Apply scale factor as weight to event
@@ -341,13 +355,14 @@ namespace HPlus {
       if (jetDeltaPhi > myMaxDeltaPhiJetMET)
         myMaxDeltaPhiJetMET = jetDeltaPhi;
     }
+    hSelectionFlow->Fill(kQCDOrderMaxDeltaPhiJetMET);
     hCtrlMaxDeltaPhiJetMET[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(myMaxDeltaPhiJetMET);
     hLeg1AfterMaxDeltaPhiJetMET->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
 
     TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     bool myTopRecoWithWSelectionStatus = false;
-    BjetSelection::Data BjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), tauData.getSelectedTau(), metData.getSelectedMET());
+    BjetSelection::Data BjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), tauCandidateData.getSelectedTau(), metData.getSelectedMET());
     double myTopWithBSelectionTopMass = 0.0;
     if (BjetSelectionData.passedEvent() ) {
       TopWithBSelection::Data TopWithBSelectionData = fTopWithBSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), BjetSelectionData.getBjetTopSide());
@@ -376,6 +391,7 @@ namespace HPlus {
     if (!myPassedTopRecoStatus)
       return false;
     increment(fTopSelectionCounter);
+    hSelectionFlow->Fill(kQCDOrderTopSelection);
     hLeg1AfterTopSelection->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
 
     // MET leg selection passed
@@ -448,8 +464,8 @@ namespace HPlus {
     int myTauPtBins = static_cast<int>(fTauPtBinLowEdges.size()) + 1;
     int myTauEtaBins = static_cast<int>(fTauEtaBinLowEdges.size()) + 1;
     int myNVerticesBins = static_cast<int>(fNVerticesBinLowEdges.size()) + 1;
-    std::string myTitle = "shape_"+title
-    TFileDirectory myDir = fs->mkdir(myTitle.str().c_str());
+    std::string myTitle = "shape_"+title;
+    TFileDirectory myDir = fs->mkdir(myTitle.c_str());
     for (int i = 0; i < myTauPtBins; ++i) {
       for (int j = 0; j < myTauEtaBins; ++j) {
         for (int k = 0; k < myNVerticesBins; ++k) {
@@ -461,13 +477,60 @@ namespace HPlus {
     }
   }
 
-  int QCDMeasurementBasic::getShapeBinIndex(double tauPt, double tauEta, int nvtx) {
+  int QCDMeasurementBasic::getShapeBinIndex(int tauPtBin, int tauEtaBin, int nvtxBin) {
     int myTauEtaBins = static_cast<int>(fTauEtaBinLowEdges.size()) + 1;
     int myNVerticesBins = static_cast<int>(fNVerticesBinLowEdges.size()) + 1;
-    int myTauPtBin = getTauPtBinIndex(tauPt);
-    int myTauEtaBin = getTauEtaBinIndex(tauEta);
-    int myVtxBin = getNVerticesBinIndex((nvtx);
-    return myVtxBin + myTauEtaBin*myNVerticesBins + myTauPtBin*myNVerticesBins*myTauEtaBins;
+    //std::cout << " bin=" << tauPtBin << " taueta=" << tauEtaBin << " nvtx=" << nvtxBin << std::endl;
+    //std::cout << "total index=" << nvtxBin + tauEtaBin*myNVerticesBins + tauPtBin*myNVerticesBins*myTauEtaBins << endl;
+    return nvtxBin + tauEtaBin*myNVerticesBins + tauPtBin*myNVerticesBins*myTauEtaBins;
+  }
+
+  void QCDMeasurementBasic::setAxisLabelsForTH3(WrappedTH3* h) {
+    // Set axis titles and labels
+    if (h->isActive()) {
+      h->getHisto()->SetXTitle("#tau p_{T}, GeV/c");
+      for (int i = 1; i <= h->getHisto()->GetNbinsX(); ++i) {
+        std::stringstream s;
+        if (i == 1) {
+          s << "<" << static_cast<int>(fTauPtBinLowEdges[0]);
+          h->getHisto()->GetXaxis()->SetBinLabel(i, s.str().c_str());
+        } else if (i ==  h->getHisto()->GetNbinsX()) {
+          s << ">" << static_cast<int>(fTauPtBinLowEdges[fTauPtBinLowEdges.size()-1]);
+          h->getHisto()->GetXaxis()->SetBinLabel(h->getHisto()->GetNbinsX(), s.str().c_str());
+        } else {
+          s << static_cast<int>(fTauPtBinLowEdges[i-2]) << "-" << static_cast<int>(fTauPtBinLowEdges[i-1]);
+          h->getHisto()->GetXaxis()->SetBinLabel(i, s.str().c_str());
+        }
+      }
+      h->getHisto()->SetYTitle("#tau #eta");
+      for (int i = 1; i <= h->getHisto()->GetNbinsY(); ++i) {
+        std::stringstream s;
+        if (i == 1) {
+          s << "<" << setprecision(2) << fTauEtaBinLowEdges[0];
+          h->getHisto()->GetYaxis()->SetBinLabel(i, s.str().c_str());
+        } else if (i == h->getHisto()->GetNbinsY()) {
+          s << ">" << setprecision(2) << fTauEtaBinLowEdges[fTauEtaBinLowEdges.size()-1];
+          h->getHisto()->GetYaxis()->SetBinLabel(h->getHisto()->GetNbinsY(), s.str().c_str());
+        } else {
+          s << setprecision(2) << fTauEtaBinLowEdges[i-2] << ".." << setprecision(2) << fTauEtaBinLowEdges[i-1];
+          h->getHisto()->GetYaxis()->SetBinLabel(i, s.str().c_str());
+        }
+      }
+      h->getHisto()->SetZTitle("N_{vertices}");
+      for (int i = 1; i <= h->getHisto()->GetNbinsZ(); ++i) {
+        std::stringstream s;
+        if (i == 1) {
+          s << "<" << static_cast<int>(fNVerticesBinLowEdges[0]);
+          h->getHisto()->GetZaxis()->SetBinLabel(i, s.str().c_str());
+        } else if (i == h->getHisto()->GetNbinsZ()) {
+          s << ">" << static_cast<int>(fNVerticesBinLowEdges[fNVerticesBinLowEdges.size()-1]);
+          h->getHisto()->GetZaxis()->SetBinLabel(h->getHisto()->GetNbinsZ(), s.str().c_str());
+        } else {
+          s << static_cast<int>(fNVerticesBinLowEdges[i-2]) << ".." << static_cast<int>(fNVerticesBinLowEdges[i-1]);
+          h->getHisto()->GetZaxis()->SetBinLabel(i, s.str().c_str());
+        }
+      }
+    }
   }
 }
 

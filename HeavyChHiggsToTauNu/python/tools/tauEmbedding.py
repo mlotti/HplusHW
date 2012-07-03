@@ -151,11 +151,11 @@ def decayModeCustomize(h):
     n = 5
     if hasattr(h, "getFrame1"):
         h.getFrame1().GetXaxis().SetNdivisions(n)
-        h.getFrame1().GetXaxis().SetNdivisions(n)
+        xaxis = h.getFrame2().GetXaxis()
     else:
-        h.getFrame().GetXaxis().SetNdivisions(n)
+        xaxis = h.getFrame().GetXaxis()
 
-    xaxis = h.getFrame().GetXaxis()
+    xaxis.SetNdivisions(n)
     xaxis.SetBinLabel(1, "#pi^{#pm}")
     xaxis.SetBinLabel(2, "#pi^{#pm}#pi^{0}")
     xaxis.SetBinLabel(3, "#pi^{#pm}#pi^{0}#pi^{0}")
@@ -830,6 +830,7 @@ class PlotDrawerTauEmbedding(plots.PlotDrawer):
         self.createFrame(p, name, **kwargs)
         self.setLegend(p, **kwargs)
         self.addCutLineBox(p, **kwargs)
+        self.customise(p, **kwargs)
         self.finish(p, xlabel, **kwargs)
 
 ## Default plot drawer object for tau embedding (embedded data vs. embedded MC) plots
@@ -906,6 +907,7 @@ class PlotDrawerTauEmbeddingEmbeddedNormal(PlotDrawerTauEmbedding):
             p.appendPlotObject(histograms.PlotText(x, y, "Embedded sim. min/max", size=17)); y-= 0.03
 
         self.addCutLineBox(p, **kwargs)
+        self.customise(p, **kwargs)
         self.finish(p, xlabel, **kwargs)
 
 ## Plot creator for embedded vs. normal plots

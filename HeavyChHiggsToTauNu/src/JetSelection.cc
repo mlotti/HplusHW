@@ -44,12 +44,14 @@ namespace HPlus {
     fBetaSrc(iConfig.getUntrackedParameter<std::string>("betaCutSource")),
     fCleanCutCount(eventCounter.addSubCounter("Jet main","Jet cleaning")),
     fJetIdCount(eventCounter.addSubCounter("Jet main", "Jet ID")),
+    fBetaCutCount(eventCounter.addSubCounter("Jet main","beta cut")),
     fEMfractionCutCount(eventCounter.addSubCounter("Jet main","Jet EMfrac ")),
     fEtaCutCount(eventCounter.addSubCounter("Jet main","Jet eta cut")),
     fPtCutCount(eventCounter.addSubCounter("Jet main","Jet pt cut")),
     fAllSubCount(eventCounter.addSubCounter("Jet selection", "all jets")),
     fEMfraction08CutCount(eventCounter.addSubCounter("Jet main","Jet EMfrac < 0.8")),
     fEMfraction07CutCount(eventCounter.addSubCounter("Jet main","Jet EMfrac < 0.7")),
+    fEventKilledByBetaCutCount(eventCounter.addSubCounter("Jet main","Event killed by beta cut")),
     fCleanCutSubCount(eventCounter.addSubCounter("Jet selection", "cleaning")),
     fneutralHadronEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "neutralHadronEnergyFractionCut")),
     fneutralEmEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "neutralEmEnergyFractionCut")),
@@ -171,11 +173,14 @@ namespace HPlus {
     fAllJets = hjets->ptrVector();
 
     fSelectedJets.clear();
+    fSelectedJetsPt20.clear();
     fNotSelectedJets.clear();
     fNotSelectedJets.reserve(jets.size());
 
     size_t cleanPassed = 0;
     size_t jetIdPassed = 0;
+    size_t killedByBetaCut = 0;
+    size_t betaCutPassed = 0;
     size_t ptCutPassed = 0;
     size_t etaCutPassed = 0;
     double maxEMfraction = 0;
@@ -310,16 +315,21 @@ namespace HPlus {
           hMeanDRVsPUfake->Fill(myMeanDR, nVertices);
         }
       }
-      if (fBetaCut.passedCut(iJet->userFloat(fBetaSrc))) continue;
+      if (!fBetaCut.passedCut(iJet->userFloat(fBetaSrc))) {
+        // Count how many jets, that otherwise would have been selected, are killed by beta cut
+        if (std::abs(iJet->eta()) < fEtaCut && iJet->pt() > fPtCut)
+          ++killedByBetaCut;
+        continue;
+      }
       increment(fBetaCutSubCount);
-
+      ++betaCutPassed;
       hPt->Fill(iJet->pt());
       hEta->Fill(iJet->eta());
       hPhi->Fill(iJet->phi());
 
       // eta cut
       if(!(std::abs(iJet->eta()) < fEtaCut)){
-	fNotSelectedJets.push_back(iJet);
+	fNotSelectedJets.push_back(*iter);
 	continue;
       }
       increment(fEtaCutSubCount);
@@ -328,6 +338,9 @@ namespace HPlus {
       hPtCentral->Fill(iJet->pt());
 
       // pt cut
+      if (iJet->pt() > 20.0)
+        fSelectedJetsPt20.push_back(iJet);
+
       if(!(iJet->pt() > fPtCut)) continue;
       increment(fPtCutSubCount);
       ++ptCutPassed;
@@ -382,6 +395,10 @@ namespace HPlus {
 
     passEvent = fNumberOfJets.passedCut(fSelectedJets.size());
 
+    if (fNumberOfJets.passedCut(fSelectedJets.size()+killedByBetaCut)) {
+      increment(fEventKilledByBetaCutCount);
+    }
+
     if (fNumberOfJets.passedCut(cleanPassed))
       increment(fCleanCutCount);
 
@@ -391,6 +408,9 @@ namespace HPlus {
     // Set veto flags for event with high EM fraction of a selected jet
     if (fNumberOfJets.passedCut(jetIdPassed))
       increment(fJetIdCount);
+
+    if (fNumberOfJets.passedCut(betaCutPassed))
+      increment(fBetaCutCount);
 
     if(fNumberOfJets.passedCut(EMfractionCutPassed))
       increment(fEMfractionCutCount);

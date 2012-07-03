@@ -16,8 +16,8 @@
 
 using namespace std;
 
-bool bPaperStatus = true; // Set to true if you want paper style figures
-//bool bPaperStatus = false; // Set to true if you want paper style figures
+//bool bPaperStatus = true; // Set to true if you want paper style figures
+bool bPaperStatus = false; // Set to true if you want paper style figures
 
 class ControlPlot {
 public:
@@ -318,7 +318,7 @@ public:
   bool extract(vector<TFile*>& qcdData, vector<TFile*>& qcdMCEWK, vector<TFile*>& ewkData, vector<TFile*>& fakes, vector<TFile*>& hh, vector<TFile*>& hw, vector<TFile*>& signalData);
   void getIntegral(double& nqcd, double& newk, double& nfakes, double& nhh, double& nhw, double& ndata, double min = -1, double max = -1);
   void getIntegralUncert(double& nqcd, double& newk, double& nfakes, double& nhh, double& nhw, double &ndata, double min = -1, double max = -1);
-  void makePlot(double xmin, double xmax, double ymin, double ymax, double delta, string xtitle, string ytitle, double br, double mass, bool logy = true);
+  void makePlot(double xmin, double xmax, double ymin, double ymax, double delta, string xtitle, string ytitle, double br, double mass, bool logy = true, bool isPreliminary=true, bool axisFromFrame=false);
   string getLabel() { return sLabel; }
 
   void printInfo(TH1* h, string label);
@@ -487,7 +487,7 @@ void Manager::setRelativeUncertainty(int bin, double QCDUncert, double EWKUncert
   }
 }
 
-void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, double delta, string xtitle, string ytitle, double br, double mass, bool logy) {
+void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, double delta, string xtitle, string ytitle, double br, double mass, bool logy, bool isPreliminary, bool axisFromFrame) {
   cout << endl << "Making plots for " << sLabel << endl;
   stringstream s;
   // Make canvas
@@ -657,10 +657,16 @@ void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, doubl
   hAgreement->GetXaxis()->SetTitleOffset(3.2);
   hAgreement->GetYaxis()->SetTitleOffset(1.3);
   hAgreement->SetXTitle(xtitle.c_str());
-  hAgreement->SetYTitle("Data/#Sigmabkg");
+  hAgreement->SetYTitle("Data/Bkgnd");
+  if(axisFromFrame) {
+    hAgreement->GetXaxis()->SetLabelOffset(hFrame->GetXaxis()->GetLabelOffset());
+    hAgreement->GetXaxis()->SetLabelSize(hFrame->GetXaxis()->GetLabelSize());
+  }
+
   hAgreement->Draw("e2");
   // Plot line at zero
   TH1* hAgreementLine = dynamic_cast<TH1*>(hFrame->Clone());
+  hAgreementLine->SetMinimum(0);
   for (int i = 1; i <= hAgreementLine->GetNbinsX(); ++i) {
     hAgreementLine->SetBinContent(i,1.0);
     hAgreementLine->SetBinError(i,0.0);
@@ -669,9 +675,11 @@ void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, doubl
   hAgreementLine->SetLineWidth(2);
   hAgreementLine->SetLineStyle(3);
   hAgreementLine->Draw("hist same");
-  hAgreement->Draw("same");
+  hAgreement->Draw("ex0 same");
+  /*
   if (bRelUncertInUse)
     hAgreementRelUncert->Draw("[]");
+  */
   pad->RedrawAxis();
   
   // ylempi pad x-akseli label size ja title size 0
@@ -729,10 +737,11 @@ void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, doubl
   // Draw
   hFrame->Draw();
   hBkg->Draw("hist same");
-  hBkgUncert->Draw("E2 same");
   if (bRelUncertInUse)
     hBkgRelUncert->Draw("E2 same");
-  hData->Draw("same");
+  else
+    hBkgUncert->Draw("E2 same");
+  hData->Draw("ex0 same");
 
 
   // Legend
@@ -749,30 +758,34 @@ void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, doubl
   s.str("");
   s << "with H^{#pm}#rightarrow#tau^{#pm}#nu";
   entry = leg->AddEntry(hSignal, s.str().c_str(), "L");
-  entry = leg->AddEntry(hQCD, "QCD (meas.)", "F");
-  entry = leg->AddEntry(hEWK, "EWK genuine #tau (meas.)", "F");
-  entry = leg->AddEntry(hFakes, "EWK fake #tau (MC)", "F");
-  entry = leg->AddEntry(hBkgUncert, "stat. uncert.", "F");
+  entry = leg->AddEntry(hQCD, "multijets (from data)", "F");
+  entry = leg->AddEntry(hEWK, "EWK+t#bar{t} #tau (from data)", "F");
+  entry = leg->AddEntry(hFakes, "EWK+t#bar{t} no-#tau (simul.)", "F");
   if (bRelUncertInUse)
     entry = leg->AddEntry(hBkgRelUncert, "stat. #oplus syst. uncert.", "F");
+  else
+    entry = leg->AddEntry(hBkgUncert, "stat. uncert.", "F");
   leg->Draw();
 
-  string myTitle = "CMS Preliminary";
-  if (bPaperStatus)
-    myTitle = "CMS";
-  TLatex* tex = new TLatex(0.62,0.945,myTitle.c_str());
-  tex->SetNDC();
-  tex->SetTextFont(43);
-  tex->SetTextSize(27);
-  tex->SetLineWidth(2);
-  tex->Draw();
+  TLatex *tex = 0;
+  if(isPreliminary) {
+    string myTitle = "CMS Preliminary";
+    if (bPaperStatus)
+      myTitle = "CMS";
+    tex = new TLatex(0.62,0.945,myTitle.c_str());
+    tex->SetNDC();
+    tex->SetTextFont(43);
+    tex->SetTextSize(27);
+    tex->SetLineWidth(2);
+    tex->Draw();
+  }
   tex = new TLatex(0.2,0.945,"#sqrt{s} = 7 TeV");
   tex->SetNDC();
   tex->SetTextFont(43);
   tex->SetTextSize(27);
   tex->SetLineWidth(2);
   tex->Draw();
-  tex = new TLatex(0.43,0.945,"2.3 fb^{-1}");
+  tex = new TLatex(0.43,0.945,"L=2.3 fb^{-1}");
   tex->SetNDC();
   tex->SetTextFont(43);
   tex->SetTextSize(27);
@@ -1021,7 +1034,7 @@ int main() {
   myMuonPt->makePlot(0, 250, 5e-3, 1e3, 0.5, "Identified isolated muon p_{T}, GeV/c", "Events / 2 GeV/c", myBr, myMassPoint);
   */
   myMet->makePlot(0, 449, 2e-2, 5e2, 0.7, "Uncorrected PF E_{T}^{miss} (GeV)", "Events / 25 GeV", myBr, myMassPoint);
-  myNjets->makePlot(3, 7.9, 5e-3, 5e3, 0.7, "Number of selected jets", "Events", myBr, myMassPoint);
+  myNjets->makePlot(3, 7.9, 5e-3, 5e3, 0.7, "Number of selected jets", "Events", myBr, myMassPoint, true, false);
   myNBjets->makePlot(0, 4.9, 2e-1, 1.1e3, 0.5, "Number of selected b jets", "Events", myBr, myMassPoint);
   myDeltaPhi->makePlot(0, 180, 2e-1, 2e2, 1.8, "#Delta#phi(#tau jet, E_{T}^{miss}) (^{o})", "Events / 20^{o}", myBr, myMassPoint);
 
@@ -1031,11 +1044,13 @@ int main() {
     nbins = 4;
 
   TH1* hSelectionFlowFrame = new TH1D("SelectionFlow","SelectionFlow",nbins,0,nbins);
-  hSelectionFlowFrame->GetXaxis()->SetBinLabel(1, "#tau_{h}+#geq3j"); //"N_{jets}");
+  hSelectionFlowFrame->GetXaxis()->SetBinLabel(1, "#geq3j"); //"N_{jets}");
   hSelectionFlowFrame->GetXaxis()->SetBinLabel(2, "E_{T}^{miss}>50");
-  hSelectionFlowFrame->GetXaxis()->SetBinLabel(3, "#geq1 btags");//"N_{b jets}");
+  hSelectionFlowFrame->GetXaxis()->SetBinLabel(3, "b tag");//"N_{b jets}");
   hSelectionFlowFrame->GetXaxis()->SetBinLabel(4, "#Delta#phi<160^{o}");
-  hSelectionFlowFrame->SetXTitle("Step");
+  hSelectionFlowFrame->GetXaxis()->SetLabelSize(22);
+  hSelectionFlowFrame->GetXaxis()->SetLabelOffset(0.01);
+  hSelectionFlowFrame->SetXTitle("Selection step");
   if (nbins >= 5)
     hSelectionFlowFrame->GetXaxis()->SetBinLabel(5, "#Delta#phi<130^{o}");
   TH1* hSelectionFlowQCD = dynamic_cast<TH1*>(hSelectionFlowFrame->Clone("SelectionFlowQCD"));
@@ -1052,7 +1067,7 @@ int main() {
     addEntryToSelectionFlow(myDeltaPhi,5,hSelectionFlowQCD,hSelectionFlowEWK,hSelectionFlowFakes,hSelectionFlowHH,hSelectionFlowHW,hSelectionFlowData, 0., 130.);
   Manager* mySelectionFlow = new Manager("SelectionFlow",hSelectionFlowFrame,hSelectionFlowQCD,hSelectionFlowEWK,hSelectionFlowFakes,hSelectionFlowHH,hSelectionFlowHW,hSelectionFlowData);
   mySelectionFlow->setRelativeUncertainty(-1, 0.038, 0.131, 0.241, 0., 0.); // removing btag uncertainty makes very little difference
-  mySelectionFlow->makePlot(0, nbins, 1, 4e3*1.5, 0.3, "Step", "Events", myBr, myMassPoint, !false);
+  mySelectionFlow->makePlot(0, nbins, 5, 2500, 0.3, "Selection step", "Events", myBr, myMassPoint, !false, false, true);
   /*
   TFile* myOutFile = TFile::Open("controlPlots.root","RECREATE");
   myOutFile->cd();
