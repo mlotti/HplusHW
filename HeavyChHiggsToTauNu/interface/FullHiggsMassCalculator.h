@@ -10,6 +10,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
+#include "TVector3.h"
 
 namespace edm {
   class ParameterSet;
@@ -29,8 +30,8 @@ namespace HPlus {
     public:
       Data(const FullHiggsMassCalculator* calculator, bool passEvent);
       ~Data();
-
       bool passedEvent() const { return fPassedEvent; }
+      const edm::Ptr<pat::Jet>& getBjetHiggsSide() const { return fCalculator->BjetHiggsSide; }
       double getHiggsMass() const { return fCalculator->fHiggsMassSolution; }
       //      const edm::Ptr<pat::Jet>& getSelectedBjet() const { return fCalculator->selectedBjet; }
 
@@ -51,7 +52,7 @@ namespace HPlus {
 
   private:
     bool doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet);
-    void doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool doHistogramming = true);
+    void doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool myMatchStaus=false, bool doHistogramming = true);
 
   private:
 
@@ -67,7 +68,10 @@ namespace HPlus {
     double fNeutrinoPtSolution;
     double fHiggsMassSolution;
     double NeutrinoPz;
-    //    edm::Ptr<pat::Jet> selectedBjet;
+    TVector3 visibleTau;
+    TVector3 mcNeutrinos;
+    TVector3 mcBjetHiggsSide;
+    //   edm::Ptr<pat::Jet> mcBjetHiggsSide;
 
     // Histograms
  
@@ -75,6 +79,8 @@ namespace HPlus {
     WrappedTH1* hSolution2PzDifference;
     WrappedTH2* hSolution12PzDifference;
     WrappedTH1* hHiggsMass;
+    WrappedTH1* hHiggsMass_TauBmatch;
+    WrappedTH1* hHiggsMass_TauBMETmatch;
     WrappedTH1* hHiggsMassReal;
     WrappedTH1* hHiggsMassImaginary;
     WrappedTH1* hTopMass;
@@ -86,6 +92,9 @@ namespace HPlus {
     WrappedTH1* hNeutrinoZSolution;
     WrappedTH1* hNeutrinoPtSolution;
     WrappedTH1* hNeutrinoPtDifference;
+ 
+    edm::Ptr<pat::Jet> BjetHiggsSide;
+
    
   };
 }

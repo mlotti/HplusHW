@@ -30,6 +30,8 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("FullHiggsMass");
     hHiggsMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMass", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_TauBmatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMassTauBmatch", "Higgs massTauBmatch;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMass_TauBMETmatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMassTauBMETmatch", "Higgs massTauBMETmatch;m_{H^{+}} (GeV)", 100, 0, 500);
     hHiggsMassReal = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "HiggsMassReal", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
     hHiggsMassImaginary = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "HiggsMassImaginary", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
     hTopMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass", "Top mass;m_{top} (GeV)", 100, 0, 500);
@@ -44,7 +46,7 @@ namespace HPlus {
     hSolution1PzDifference = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SolutionMinPzDifference", "Neutrino/MinSolution pz difference;(GeV)", 200, 0, 1000);
     hSolution2PzDifference = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SolutionMaxPzDifference", "Neutrino/MaxSolution pz difference;(GeV)", 200, 0, 1000);
 
-   hSolution12PzDifference = histoWrapper.makeTH<TH2F>(HistoWrapper::kDebug, myDir, "MinSolution", "MaxSolution ", 100, 0, 1000, 100, 0, 1000);
+    hSolution12PzDifference = histoWrapper.makeTH<TH2F>(HistoWrapper::kDebug, myDir, "MinSolution", "MaxSolution ", 100, 0, 1000, 100, 0, 1000);
       //edm::FileInPath myDataPUdistribution = iConfig.getParameter<edm::FileInPath>("dataPUdistribution");
   }
   FullHiggsMassCalculator::~FullHiggsMassCalculator() {}
@@ -54,6 +56,10 @@ namespace HPlus {
     //  FullHiggsMassCalculator::Data FullHiggsMassCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData, const TopChiSelection::Data TopChiSelectionData ) {
     
     NeutrinoPz = 0.;
+    visibleTau.SetXYZ(0,0,0);
+    mcNeutrinos.SetXYZ(0,0,0);
+    mcBjetHiggsSide.SetXYZ(0,0,0);   
+
     bool myPassedStatus = true;
     // 1) find b-jet
 
@@ -67,6 +73,7 @@ namespace HPlus {
       if (myDeltaR < myMinDeltaR) {
         myMinDeltaR = myDeltaR;
         myBJet = *iBjet;
+        BjetHiggsSide = *iBjet;
         myBJetVector.SetXYZ((*iBjet)->px(), (*iBjet)->py(), (*iBjet)->pz());
       }
     }
@@ -75,8 +82,9 @@ namespace HPlus {
 
 
     // match in MC to see if it was the correct one
+    bool myMatchStatus = false;
     if (!iEvent.isRealData())
-      bool myMatchStatus = doMCMatching(iEvent, tauData.getSelectedTau(), myBJet);
+      myMatchStatus = doMCMatching(iEvent, tauData.getSelectedTau(), myBJet);
 
     // 2) set tau and MET info
     TVector3 myTauVector(tauData.getSelectedTau()->px(), tauData.getSelectedTau()->py(), tauData.getSelectedTau()->pz());
@@ -84,7 +92,7 @@ namespace HPlus {
    
 
     // 3) calculate
-    doCalculate(myTauVector, myBJetVector, myMETVector);
+    doCalculate(myTauVector, myBJetVector, myMETVector, myMatchStatus);
 
     // Return data object
     return FullHiggsMassCalculator::Data(this, myPassedStatus);
@@ -92,7 +100,7 @@ namespace HPlus {
 
 
 
-  void FullHiggsMassCalculator::doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool doHistogramming) {
+  void FullHiggsMassCalculator::doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool myMatchStatus,  bool doHistogramming) {
     // Initialise
     double fTopMassSolution = -1.0;
     double fNeutrinoZSolution = -1.0;
@@ -245,9 +253,15 @@ namespace HPlus {
     }
 
     //std::cout << "mHiggs, " << fHiggsMassSolution << std::endl;
+    // transverse neutrino matching
+    double DeltaPhi = (mcNeutrinos.X() * met.X() + mcNeutrinos.Y() * met.Y()) / mcNeutrinos.Perp()/ met.Perp();
+
 
     if (doHistogramming) {
       hHiggsMass->Fill(fHiggsMassSolution);
+      if ( myMatchStatus) hHiggsMass_TauBmatch->Fill(fHiggsMassSolution);
+      if ( myMatchStatus && DeltaPhi < 0.4) hHiggsMass_TauBMETmatch->Fill(fHiggsMassSolution);
+  
       if (discriminant >= 0.0) {
         hHiggsMassReal->Fill(fHiggsMassSolution);
       } else {
@@ -255,6 +269,11 @@ namespace HPlus {
       }
     }
   }
+
+
+
+
+
 
   bool FullHiggsMassCalculator::doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet) {
     edm::Handle <reco::GenParticleCollection> genParticles;
@@ -274,13 +293,8 @@ namespace HPlus {
     reco::Candidate* myHiggsSideTop = const_cast<reco::Candidate*>(genParticles->at(myHiggsLine).mother());
     bool myStatus = true;
     while (myStatus) {
-      //<<<<<<< HEAD
-      //      if (!myHiggsSideTop) myStatus = false;
+      if (!myHiggsSideTop) myStatus = false;
 
-      //=======
-      if (!myHiggsSideTop)
-        return false;
-      //>>>>>>> lauri/master
       //std::cout << "FullMass: Higgs side mother = " << myHiggsSideTop->pdgId() << std::endl;
 
       if (TMath::Abs(myHiggsSideTop->pdgId()) == 6) myStatus = false;
@@ -377,8 +391,10 @@ namespace HPlus {
     myVisibleTau.SetXYZ(myVisibleTau.X()+myTauFromHiggs->px(),
                         myVisibleTau.Y()+myTauFromHiggs->py(),
                         myVisibleTau.Z()+myTauFromHiggs->pz());
-
+    visibleTau =  myVisibleTau;
+    mcNeutrinos = myNeutrinoes;
     NeutrinoPz =  myNeutrinoes.Pz();
+    mcBjetHiggsSide.SetXYZ(myHiggsSideBJet->p4().px(),myHiggsSideBJet->p4().py(),myHiggsSideBJet->p4().pz());
 
     //    std::cout << "FullMass: tau pt=" << myVisibleTau.Perp() << " prongs=" << myChargedCount << " leptonicDecay=" << myLeptonicTauDecayStatus << ", neutrino pt=" << myNeutrinoes.Perp() << std::endl;
     // Make MC matching of bjet

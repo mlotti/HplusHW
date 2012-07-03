@@ -49,7 +49,7 @@ doTauEmbeddingTauSelectionScan = False
 doTauEmbeddingLikePreselection = False
 
 # Apply beta cut for jets to reject PU jets
-betaCutForJets = 0.7 # Disable by setting to 0.0; if you want to enable, set to 0.2
+betaCutForJets = 0.2 # Disable by setting to 0.0; if you want to enable, set to 0.2
 
 #########
 # Flags for options in the signal analysis
@@ -128,8 +128,8 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChSignalAnalysis")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20) )
 
 process.source = cms.Source('PoolSource',
@@ -170,11 +170,11 @@ process.source = cms.Source('PoolSource',
      "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_2_1_sW6.root",
      "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_14_1_jeq.root",
      "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_6_1_3fp.root",
-     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_26_1_RrQ.root",
-     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_18_1_4Fc.root",
-     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_22_1_JnR.root",
-     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_31_1_hNk.root",
-     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_28_1_c4O.root"
+     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_26_1_RrQ.root"
+#     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_18_1_4Fc.root",
+#     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_22_1_JnR.root",
+#     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_31_1_hNk.root",
+#     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_28_1_c4O.root"
     
 
     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau_173236-173692_2011A_Nov08/Tau/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_173236-173692_2011A_Nov08//d7b7dcb6c55f2b2177021b8423a82913/pattuple_10_1_9l2.root",

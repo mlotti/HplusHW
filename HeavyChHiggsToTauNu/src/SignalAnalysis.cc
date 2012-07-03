@@ -36,6 +36,7 @@ namespace HPlus {
     fDeltaPhiCounter(eventCounter.addCounter("EWKfaketaus:deltaphi")),
     fFakeMETVetoCounter(eventCounter.addCounter("EWKfaketaus:fake MET veto")),
     fTopSelectionCounter(eventCounter.addCounter("EWKfaketaus:Top Selection cut")),
+    fTopWithMHSelectionCounter(eventCounter.addCounter("EWKfaketaus:Top Higgs mass Selection cut")),
     fTopChiSelectionCounter(eventCounter.addCounter("EWKfaketaus:Top Chi Selection cut")),
     //    fTopChiSelectionNarrowCounter(eventCounter.addCounter("EWKfaketaus:Top Chi Selection small window")),
     fTopWithBSelectionCounter(eventCounter.addCounter("EWKfaketaus:Top with B Selection cut")),
@@ -54,6 +55,7 @@ namespace HPlus {
     fTopSelectionCounter(eventCounter.addSubCounter(prefix,":Top Selection cut")),
     //fTopSelectionNarrowCounter(eventCounter.addSubCounter(prefix,":Top Selection small window")),
     fTopChiSelectionCounter(eventCounter.addSubCounter(prefix,":Top Chi Selection cut")),
+    fTopWithMHSelectionCounter(eventCounter.addSubCounter(prefix,":Top after Inv Mass Selection cut")),
     fTopWithBSelectionCounter(eventCounter.addSubCounter(prefix,":Top with B Selection cut")),
     fTopWithWSelectionCounter(eventCounter.addSubCounter(prefix,":Top with W Selection cut")),
     fSelectedEventsCounter(eventCounter.addSubCounter(prefix,"EWKfaketaus:SelectedEvents")) { }
@@ -83,6 +85,7 @@ namespace HPlus {
     fBTaggingScaleFactorCounter(eventCounter.addCounter("btagging scale factor")),
     fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhi(Tau,MET) upper limit")),
     fHiggsMassCutCounter(eventCounter.addCounter("HiggsMassCut")),
+    fTopWithMHSelectionCounter(eventCounter.addCounter("Top after Inv Mass selection")),
     fTauVetoAfterDeltaPhiCounter(eventCounter.addCounter("TauVeto after DeltaPhi cut")),
     fRealTauAfterDeltaPhiCounter(eventCounter.addCounter("Real tau after deltaPhi cut")),
     fRealTauAfterDeltaPhiTauVetoCounter(eventCounter.addCounter("Real tau after deltaPhi+tauveto cut")),
@@ -136,6 +139,7 @@ namespace HPlus {
     fTopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, fHistoWrapper),
     fTopWithBSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithBSelection"), eventCounter, fHistoWrapper),
     fTopWithWSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithWSelection"), eventCounter, fHistoWrapper),
+    fTopWithMHSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topWithMHSelection"), eventCounter, fHistoWrapper),
     fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
 
     //   ftransverseMassCut(iConfig.getUntrackedParameter<edm::ParameterSet>("transverseMassCut")),
@@ -195,7 +199,7 @@ namespace HPlus {
     hEWKFakeTausTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "EWKFakeTausTransverseMass", "EWKFakeTausTransverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassFakeMetVeto = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "transverseMassFakeMetVeto", "transverseMassFakeMetVeto;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
 
-    
+    hTopMassWithMH = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "TopMassWithMH", "TopMassWithMH, GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);    
     hDeltaPhi = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhi", "deltaPhi;#Delta#phi(tau,MET);N_{events} / 10 degrees", 180, 0., 180.);
     hDeltaPhiJetMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiJetMet", "deltaPhiJetMet", 180, 0., 180.);
     hMaxDeltaPhiJetMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "maxDeltaPhiJetMet", "maxDeltaPhiJetMet", 180, 0., 180.);
@@ -219,6 +223,7 @@ namespace HPlus {
     hEWKFakeTausSelectedTauEtaAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, mySelectedTauDir, "EWKFakeTaus_SelectedTau_eta_AfterCuts", "SelectedTau_eta_AfterCuts;#tau #eta;N_{events} / 0.1", 250, -5.0, 5.0);
 
     hMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "Met", "Met", 200, 0.0, 500.0);
+    hMetWithBtagging = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MetWithBtagging", "MetWithBtagging", 200, 0.0, 500.0);
     hMetAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "Met_AfterCuts", "Met_AfterCuts", 200, 0.0, 500.0);
     
     hSelectionFlow = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SignalSelectionFlow", "SignalSelectionFlow;;N_{events}", 12, 0, 12);
@@ -515,10 +520,15 @@ namespace HPlus {
     hCtrlIdentifiedMuonPtAfterStandardSelections->Fill(muonVetoData.getSelectedMuonPtBeforePtCut());
     hCtrlNjetsAfterStandardSelections->Fill(jetData.getHadronicJetCount());
 
+  
 
 //------ MET cut
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
     hMet->Fill(metData.getSelectedMET()->et(),fEventWeight.getWeight()); 
+
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    if(btagData.passedEvent()) hMetWithBtagging->Fill(metData.getSelectedMET()->et(),fEventWeight.getWeight()); 
+
     hCtrlMET->Fill(metData.getSelectedMET()->et());
     if(!metData.passedEvent()) return false;
     increment(fMETCounter);
@@ -529,7 +539,7 @@ namespace HPlus {
 
 
 //------ b tagging cut
-    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+//    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     hCtrlNbjets->Fill(btagData.getBJetCount());
     if(!btagData.passedEvent()) return false;
     increment(fBTaggingCounter);
@@ -638,10 +648,23 @@ namespace HPlus {
                                                                btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
 
 
+
+
     FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
-    fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
     double HiggsMass = FullHiggsMassData.getHiggsMass();
-    if (HiggsMass > 100 && HiggsMass < 200 ) increment(fHiggsMassCutCounter);
+    double ptBjet = FullHiggsMassData.getBjetHiggsSide()->pt();
+ 
+    if (HiggsMass > 100 && HiggsMass < 200 ) {
+      increment(fHiggsMassCutCounter);
+      TopWithMHSelection::Data TopWithMHSelectionData = fTopWithMHSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), FullHiggsMassData.getBjetHiggsSide() );
+      if (TopWithMHSelectionData.passedEvent() ) {
+	double topmass = TopWithMHSelectionData.getTopMass();
+	//	std::cout << "Higgs mass " << HiggsMass << " ptBjet " << ptBjet << " topmass " << topmass  << std::endl;
+	hTopMassWithMH->Fill(topmass); 
+	increment(fTopWithMHSelectionCounter);
+      }
+    }
+
 
 
 //------ Experimental cuts, counters, and histograms

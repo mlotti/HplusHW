@@ -311,6 +311,14 @@ topWithWSelection = cms.untracked.PSet(
     enabled = cms.untracked.bool(False)
 )
 
+topWithMHSelection = cms.untracked.PSet(
+    TopMassLow = cms.untracked.double(120.0),
+    TopMassHigh = cms.untracked.double(300.0),
+    Chi2Cut = cms.untracked.double(5.0),
+    src = cms.untracked.InputTag("genParticles"),
+    enabled = cms.untracked.bool(False)
+)
+
 tree = cms.untracked.PSet(
     fill = cms.untracked.bool(True),
     fillJetEnergyFractions = cms.untracked.bool(True),

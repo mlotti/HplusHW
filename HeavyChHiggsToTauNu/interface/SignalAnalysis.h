@@ -24,6 +24,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithMHSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
@@ -81,6 +82,7 @@ namespace HPlus {
       //      Count fTopChiSelectionNarrowCounter;
       Count fTopWithBSelectionCounter;
       Count fTopWithWSelectionCounter;
+      Count fTopWithMHSelectionCounter;
       Count fSelectedEventsCounter;
     };
   enum SignalSelectionOrder {
@@ -160,6 +162,7 @@ namespace HPlus {
 
     Count fTopSelectionCounter;
     Count fTopChiSelectionCounter;
+    Count fTopWithMHSelectionCounter;
     Count fTopChiSelection250Counter;
     Count fTopChiSelection220Counter;
     Count fTopWithBSelectionCounter;
@@ -188,6 +191,7 @@ namespace HPlus {
     TopChiSelection fTopChiSelection;
     TopWithBSelection fTopWithBSelection;
     TopWithWSelection fTopWithWSelection;
+    TopWithMHSelection fTopWithMHSelection;
     BjetSelection fBjetSelection;
     //    BjetWithPtSelection fBjetWithPtSelection;
     FullHiggsMassCalculator fFullHiggsMassCalculator;
@@ -228,6 +232,7 @@ namespace HPlus {
     WrappedTH1 *hTransverseMassAfterDeltaPhi130;
     WrappedTH1 *hTransverseMassAfterDeltaPhi90;
 
+    WrappedTH1 *hTopMassWithMH;
 
     WrappedTH1 *hDeltaPhi;
     WrappedTH1 *hDeltaPhiJetMet;
@@ -238,6 +243,7 @@ namespace HPlus {
     // Histograms for validation at every Selection Cut step
     WrappedTH1 *hSelectedTauEt;
     WrappedTH1 *hMet;
+    WrappedTH1 *hMetWithBtagging;
     WrappedTH1 *hSelectedTauEta;
     WrappedTH1 *hSelectedTauPhi;
     WrappedTH1 *hSelectedTauRtau;

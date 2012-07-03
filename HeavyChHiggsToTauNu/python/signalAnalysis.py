@@ -30,6 +30,7 @@ def createEDFilter(param):
         topChiSelection = param.topChiSelection.clone(),
         topWithBSelection = param.topWithBSelection.clone(),
         topWithWSelection = param.topWithWSelection.clone(),
+        topWithMHSelection = param.topWithMHSelection.clone(),
         forwardJetVeto = param.forwardJetVeto.clone(),
         transverseMassCut = param.transverseMassCut,
         EvtTopology = param.EvtTopology.clone(),
