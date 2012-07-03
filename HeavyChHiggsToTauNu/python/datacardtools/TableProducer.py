@@ -523,9 +523,9 @@ class TableProducer:
                             for nid in n[0]:
                                 if c.hasNuisanceByMasterId(nid):
                                     myValue = c.getNuisanceResultByMasterId(nid)
-                                    if isinstance(myValue, list):
-
-                                    else:
+#                                    if isinstance(myValue, list):
+# FIXME !!!
+#                                    else:
 
                         else:
                             if c.hasNuisanceByMasterId(n[0]):

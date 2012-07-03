@@ -409,6 +409,7 @@ class QCDfactorisedColumn(DatacardColumn):
         self._afterTauLegSource = QCDfactorisedInfo["afterTauLegSource"]
         self._basicMtHisto = QCDfactorisedInfo["basicMtHisto"]
         self._assumedMCEWKSystUncertainty = QCDfactorisedInfo["assumedMCEWKSystUncertainty"]
+        self._factorisationMapAxisLabels = QCDfactorisedInfo["factorisationMapAxisLabels"]
         # Other initialisation
         self._infoHistograms = []
         self._debugMode = debugMode
