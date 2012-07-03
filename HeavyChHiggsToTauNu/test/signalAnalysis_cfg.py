@@ -49,7 +49,7 @@ doTauEmbeddingTauSelectionScan = False
 doTauEmbeddingLikePreselection = False
 
 # Apply beta cut for jets to reject PU jets
-betaCutForJets = 0.7 # Disable by setting to 0.0; if you want to enable, set to 0.2
+betaCutForJets = 0.0 # Disable by setting to 0.0; if you want to enable, set to 0.2
 
 #########
 # Flags for options in the signal analysis
@@ -330,6 +330,7 @@ print "TauVetoSelection src:", process.signalAnalysis.vetoTauSelection.tauSelect
 print "TauSelection isolation:", process.signalAnalysis.tauSelection.isolationDiscriminator.value()
 print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode.value()
 print "VetoTauSelection src:", process.signalAnalysis.vetoTauSelection.tauSelection.src.value()
+print "Beta cut: ", process.signalAnalysis.jetSelection.betaCutSource.value(), process.signalAnalysis.jetSelection.betaCutDirection.value(), process.signalAnalysis.jetSelection.betaCut.value()
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)

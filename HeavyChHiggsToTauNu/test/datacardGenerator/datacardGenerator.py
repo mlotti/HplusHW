@@ -13,6 +13,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DataCardGenerator as Data
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
 def main(opts):
     #gc.set_debug(gc.DEBUG_LEAK | gc.DEBUG_STATS)
@@ -30,15 +31,67 @@ def main(opts):
     elif opts.useQCDinverted:
         myQCDMethods = [DataCard.DatacardQCDMethod.INVERTED]
 
+    # Find list of optimisation jobs, if they exist
+    multicrabPaths = PathFinder.MulticrabPathFinder(config.Path)
+    myModules = []
+    if config.SignalAnalysis != None:
+        myModules = obtainOptimisationVariationList(multicrabPaths.getSignalPath())
+    if config.QCDFactorisedAnalysis != None:
+        myQCDFactList = obtainOptimisationVariationList(multicrabPaths.getQCDFactorisedPath())
+        if len(myModules) == 0:
+            myModules.extend(myQCDFactList)
+    if config.QCDInvertedAnalysis != None:
+        myQCDInvList = obtainOptimisationVariationList(multicrabPaths.getQCDInvertedPath())
+        if len(myModules) == 0:
+            myModules.extend(myQCDInvList)
+
     # Produce cards
     for method in myQCDMethods:
-        DataCard.DataCardGenerator(config,opts,method)
-
+        for module in myModules:
+            if method == DataCard.DatacardQCDMethod.FACTORISED:
+                if "Opt" in module:
+                    if module not in myQCDFactList:
+                        print "Module '"+module+"' exists in signal analysis but not in QCD factorised, skipping ..."
+                    else:
+                        DataCard.DataCardGenerator(config,opts,method,module)
+                else:
+                    DataCard.DataCardGenerator(config,opts,method,None)
+            if method == DataCard.DatacardQCDMethod.INVERTED:
+                if "Opt" in module:
+                    if module not in myQCDInvList:
+                        print "Module '"+module+"' exists in signal analysis but not in QCD inverted, skipping ..."
+                    else:
+                        DataCard.DataCardGenerator(config,opts,method,module)
+                else:
+                    DataCard.DataCardGenerator(config,opts,method,None)
     print "\nDatacard generator is done."
 
     #gc.collect()
     #ROOT.SetMemoryPolicy( ROOT.kMemoryHeuristics)
     #memoryDump()
+
+def obtainOptimisationVariationList(taskPath):
+    if not os.path.exists(taskPath):
+        return []
+    taskDirs = multicrab.getTaskDirectories(None, taskPath+"/multicrab.cfg")
+    # take first task and obtain its result histogram
+    myRootFile = None
+    for task in taskDirs:
+        myFilename = task+"/res/histograms-"+os.path.basename(task)+".root"
+        if os.path.exists(myFilename):
+            myRootFile = ROOT.TFile.Open(myFilename)
+            # root file is opened, loop over keys to find directories
+            myModules = []
+            for i in range(0, myRootFile.GetNkeys()):
+                myKey = myRootFile.GetListOfKeys().At(i)
+                if myKey.IsFolder():
+                    # Ignore systematics directories
+                    if not "Plus" in myKey.GetTitle() and not "Minus" in myKey.GetTitle() and not "configInfo" in myKey.GetTitle():
+                        myModules.append(myKey.GetTitle())
+            myRootFile.Close()
+            return myModules
+    # No root file has been found
+    return []
 
 def memoryDump():
     dump = open("memory_pickle.txt", 'w')
