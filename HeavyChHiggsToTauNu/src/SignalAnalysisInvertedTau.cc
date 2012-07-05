@@ -472,6 +472,7 @@ namespace HPlus {
     std::string myTauIsolation = "byMediumCombinedIsolationDeltaBetaCorr";
 
 
+
     // Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup,  tauData.getSelectedTau(),  nVertices); 
 
@@ -493,10 +494,11 @@ namespace HPlus {
    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
    
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()) );
-   
-    FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
-    //    fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
 
+   
+    //    FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
+    //    fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
+    
 
   // baseline tau-id
 
@@ -612,6 +614,7 @@ namespace HPlus {
       }
     }
    
+
 
     // TauID, inverted TauID, veto on isolated tau
     if(!tauData.selectedTausDoNotPassIsolation())  return false; 
@@ -809,8 +812,8 @@ namespace HPlus {
     }
     
 
-    //    FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
-    fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
+    FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
+    //     fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
     double HiggsMass = FullHiggsMassData.getHiggsMass();
     if (HiggsMass > 100 && HiggsMass < 200 ) increment(fHiggsMassCutCounter);
 

@@ -216,10 +216,13 @@ def doPlots(datasets):
     drawPlot(createPlot("JetSelection/jet_eta"), "jetEta", rebin=4, xlabel="#eta^{jet}", ylabel="Jets / %.1f", opts={"ymaxfactor": 110}, moveLegend={"dy":0.01, "dx":-0.2, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.4, y=0.22), cutLine=[-2.4, 2.4])
     drawPlot(createPlot("JetSelection/jet_phi"), "jetPhi", rebin=10, xlabel="#phi^{jet}", ylabel="Jets / %.2f", textFunction=lambda: addMassBRText(x=0.3, y=0.87))
     drawPlot(createPlot("JetSelection/NumberOfSelectedJets"), "NumberOfJets", xlabel="Number of selected jets", ylabel="Events", opts={"xmax": 10}, textFunction=lambda: addMassBRText(x=0.67, y=0.6), cutLine=3)
+    drawPlot(createPlot("JetSelection/betaGenuine"), "betaGenuine", rebin=1,xlabel="Beta", ylabel="Jets / %.0f GeV/c", textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=30)
+    drawPlot(createPlot("JetSelection/betaPU"), "betaPU", rebin=1,  xlabel="Beta", ylabel="Jets / %.0f GeV/c", textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=30)
 
+        
     # MET
     drawPlot(createPlot("Met"), "Met", rebin=2, xlabel="Raw PF E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", opts={"xmin": 20, "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=40)
-
+    drawPlot(createPlot("MetWithBtagging"), "MetWithBtagging", rebin=2, xlabel="Raw PF E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", opts={"xmin": 20, "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=40)
     # b jets
     drawPlot(createPlot("Btagging/bjet_pt"), "bjetPt", rebin=15, xlabel="p_{T}^{b-tagged jet} (GeV/c)", ylabel="b-tagged jets / %.0f GeV/c", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
     drawPlot(createPlot("Btagging/bjet_eta"), "bjetEta", rebin=8, xlabel="#eta^{b-tagged jet}", ylabel="b-tagged jets / %.1f", opts={"ymaxfactor": 30, "xmin": -2.4, "xmax": 2.4}, moveLegend={"dy":0.01, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
@@ -334,8 +337,8 @@ def doPlots(datasets):
     
 #    topMassPurity(datasets) 
 #    vertexComparison(datasets)
-#    mtComparison(datasets)
-    InvMassComparison(datasets)
+    mtComparison(datasets)
+#    InvMassComparison(datasets)
 #    rtauComparison(datasets)
     
 
@@ -376,23 +379,23 @@ def doCounters(datasets):
 #    print eventCounter.getMainCounterTable().format(latexFormat)
 
 
-#def vertexComparison(datasets):
-#    signal = "TTToHplusBWB_M120_Summer11"
-#    background = "TTToHplusBWB_M120_Summer11"
-#    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/verticesBeforeWeight"),
-#                                 datasets.getDataset(background).getDatasetRootHisto(analysis+"/verticesAfterWeight")),
-#            "vertices_H120")
+def vertexComparison(datasets):
+    signal = "TTToHplusBWB_M120_Summer11"
+    background = "TTToHplusBWB_M120_Summer11"
+    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/verticesBeforeWeight"),
+                                 datasets.getDataset(background).getDatasetRootHisto(analysis+"/verticesAfterWeight")),
+            "vertices_H120")
 
 def mtComparison(datasets):
     mt = plots.PlotBase([
-        datasets.getDataset("TTToHplus_M150").getDatasetRootHisto(analysis+"/transverseMass"),
-#        datasets.getDataset("TTToHplus_M90").getDatasetRootHisto(analysis+"/transverseMass"),
-#        datasets.getDataset("TTToHplus_M100").getDatasetRootHisto(analysis+"/transverseMass"),
-        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/transverseMass"),
-#        datasets.getDataset("TTToHplus_M140").getDatasetRootHisto(analysis+"/transverseMass"),
-#        datasets.getDataset("TTToHplus_M150").getDatasetRootHisto(analysis+"/transverseMass"),
-#        datasets.getDataset("TTToHplus_M155").getDatasetRootHisto(analysis+"/transverseMass"),
-        datasets.getDataset("TTToHplus_M160").getDatasetRootHisto(analysis+"/transverseMass"),
+        datasets.getDataset("TTToHplusBWB_M150").getDatasetRootHisto(analysis+"/transverseMass"),
+#        datasets.getDataset("TTToHplusBMB_M90").getDatasetRootHisto(analysis+"/transverseMass"),
+#        datasets.getDataset("TTToHplusBMB_M100").getDatasetRootHisto(analysis+"/transverseMass"),
+        datasets.getDataset("TTToHplusBMB_M120").getDatasetRootHisto(analysis+"/transverseMass"),
+#        datasets.getDataset("TTToHplusBMB_M140").getDatasetRootHisto(analysis+"/transverseMass"),
+#        datasets.getDataset("TTToHplusBMB_M150").getDatasetRootHisto(analysis+"/transverseMass"),
+#        datasets.getDataset("TTToHplusBMB_M155").getDatasetRootHisto(analysis+"/transverseMass"),
+        datasets.getDataset("TTToHplusBMB_M160").getDatasetRootHisto(analysis+"/transverseMass"),
         ])
     mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mt._setLegendStyles()
