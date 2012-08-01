@@ -87,7 +87,8 @@ class DataCardGenerator:
         if self._optimisationVariation == None:
             print "Evaluating default analysis\n"
         else:
-            print "Evaluating variation:", self._optimisationVariation+"\n"
+            print "Evaluating variation: "+HighlightStyle()+self._optimisationVariation+NormalStyle()+"\n"
+            myOutputPrefix += "_"+self._optimisationVariation
 
         # Create columns (dataset groups)
         self.createDatacardColumns()

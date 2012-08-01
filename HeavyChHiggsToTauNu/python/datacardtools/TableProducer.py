@@ -1,5 +1,5 @@
-## \package Extractor
-# Classes for extracting observation/rate/nuisance from datasets
+## \package TableProducer
+# Classes for producing output
 #
 #
 
@@ -89,8 +89,10 @@ class TableProducer:
             if n.isPrintable():
                 self._nNuisances += 1
         # Make directory for output
-        self._dirname = "datacards_"+self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName
+        self._dirname = "datacards_"+self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName.replace(" ","_")
         os.mkdir(self._dirname)
+        self._infoDirname = self._dirname + "/info"
+        os.mkdir(self._infoDirname)
 
         # Make datacards
         self.makeDataCards()
@@ -159,7 +161,14 @@ class TableProducer:
         # Save additional info
         for c in self._datasetGroups:
             if c.typeIsQCDfactorised():
-                c.saveQCDInfoHistograms(self._dirname)
+                c.saveQCDInfoHistograms(self._infoDirname)
+                myFilename = self._infoDirname+"/QCDfactorisedMessages.txt"
+                myFile = open(myFilename, "w")
+                myMessages = c.getMessages()
+                for m in myMessages:
+                    myFile.write(m+"\n")
+                myFile.close()
+                print "QCD factorised messages written to:",myFilename
 
     ## Generates header of datacard
     def _generateHeader(self, mass):
@@ -183,6 +192,8 @@ class TableProducer:
     ## Generates observation lines
     def _generateObservationLine(self):
         # Obtain observed number of events
+        if self._observation == None:
+            return "Observation    is not specified\n"
         myObsCount = self._observation.getRateResult()
         if self._opts.debugMining:
             print "  Observation is %d"%myObsCount
@@ -300,7 +311,8 @@ class TableProducer:
     ## Save histograms to root file
     def _saveHistograms(self,rootFile,mass):
         # Observation
-        self._observation.setResultHistogramsToRootFile(rootFile)
+        if self._observation != None:
+            self._observation.setResultHistogramsToRootFile(rootFile)
         # Loop over columns
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
             if c.isActiveForMass(mass):
@@ -310,6 +322,9 @@ class TableProducer:
     def _calculateCellWidths(self,widths,table):
         myResult = widths
         # Initialise widths if necessary
+        if len(table) == 0:
+          return myResult
+
         for i in range(len(widths),len(table[0])):
             myResult.append(0)
         # Loop over table cells
@@ -363,7 +378,7 @@ class TableProducer:
             myOutput += self._getTableOutput(myWidths,myNuisanceTable)
             myOutput += "\n"
         # Save output to file
-        myFilename = self._dirname+"/shapeVariationResults.txt"
+        myFilename = self._infoDirname+"/shapeVariationResults.txt"
         myFile = open(myFilename, "w")
         myFile.write(myOutput)
         myFile.close()
@@ -372,7 +387,8 @@ class TableProducer:
     ## Prints event yield summary table
     def makeEventYieldSummary(self):
         Data = EventYieldSummary()
-        Data.extract(self._opts,self._config,self._observation,self._extractors)
+        if self._observation != None:
+            Data.extract(self._opts,self._config,self._observation,self._extractors)
         for m in self._config.MassPoints:
             HH = EventYieldSummary()
             HW = EventYieldSummary()
@@ -434,7 +450,7 @@ class TableProducer:
                 myOutput += "+%4.0f -%4.0f (syst.)\n"%(TotalExpected.getAbsoluteSystUp(), TotalExpected.getAbsoluteSystDown())
             myOutput += "                            Observed: %5d\n\n"%Data.getRate() #FIXME add blinding
             # Save output to file
-            myFilename = self._dirname+"/EventYieldSummary_m%d.txt"%m
+            myFilename = self._infoDirname+"/EventYieldSummary_m%d.txt"%m
             myFile = open(myFilename, "w")
             myFile.write(myOutput)
             myFile.close()
@@ -477,7 +493,7 @@ class TableProducer:
             myOutputLatex += "\\end{table}\n"
             myOutputLatex += "\\renewcommand{\\arraystretch}{1}\n"
             # Save output to file
-            myFilename = self._dirname+"/EventYieldSummary_m%d_"%(m) +self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName+".tex"
+            myFilename = self._infoDirname+"/EventYieldSummary_m%d_"%(m) +self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName.replace(" ","_")+".tex"
             myFile = open(myFilename, "w")
             myFile.write(myOutputLatex)
             myFile.close()
