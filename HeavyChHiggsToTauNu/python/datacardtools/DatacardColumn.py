@@ -183,7 +183,7 @@ class DatacardColumn():
 
     ## Do data mining and cache results
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors):
-        print "...",self._label
+        print "... processing column: "+HighlightStyle()+self._label+NormalStyle()
         # Obtain rate
         #sys.stdout.write("\r... data mining in progress: Column="+self._label+", obtaining Rate...                                                          ")
         #sys.stdout.flush()
