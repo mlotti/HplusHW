@@ -11,7 +11,7 @@ namespace HPlus {
     /**
      * Implementation of the HPS tau ID functionality
      */
-    TauIDPFHPS(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel, TFileDirectory& myDir);
+    TauIDPFHPS(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, const std::string& baseLabel, TFileDirectory& myDir);
     ~TauIDPFHPS();
 
     bool passDecayModeFinding(const edm::Ptr<pat::Tau>& tau);
@@ -23,7 +23,7 @@ namespace HPlus {
     /**
      * Implementation of the TaNC tau ID functionality
      */
-    TauIDPFTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, std::string label, TFileDirectory& myDir);
+    TauIDPFTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label, TFileDirectory& myDir);
     ~TauIDPFTaNC();
 
     bool passDecayModeFinding(const edm::Ptr<pat::Tau>& tau);
@@ -39,7 +39,7 @@ namespace HPlus {
 //    /**
 //     * Implementation of the Combined TaNC+HPS tau ID functionality
 //     */
-//    TauIDPFShrinkingConeCombinedHPSTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir);
+//    TauIDPFShrinkingConeCombinedHPSTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, int prongCount, std::string label, TFileDirectory& myDir);
 //    ~TauIDPFShrinkingConeCombinedHPSTaNC();
 //
 //    bool passDecayModeFinding(const edm::Ptr<pat::Tau>& tau);

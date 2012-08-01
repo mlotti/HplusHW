@@ -6,7 +6,6 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DirectionalCut.h"
 
@@ -16,10 +15,10 @@ namespace edm {
   class ParameterSet;
 }
 
-class TH1;
-
 namespace HPlus {
   class JetSelection;
+  class HistoWrapper;
+  class WrappedTH1;
 
   class BTagging {
     class BTaggingScaleFactor {
@@ -89,8 +88,8 @@ namespace HPlus {
       const BTagging *fBTagging;
       const bool fPassedEvent;
     };
-    
-    BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);  
+
+    BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~BTagging();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
@@ -100,30 +99,31 @@ namespace HPlus {
   private:
     void applyScaleFactor(const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
 
-    // Input parameters                                                                                                                                                                          
+    // Input parameters
     edm::InputTag fSrc;
 
     // Input parameters
     const double fPtCut;
     const double fEtaCut;
     const std::string fDiscriminator;
-    const double fDiscrCut;
+    const double fLeadingDiscrCut;
+    const double fSubLeadingDiscrCut;
     DirectionalCut fNumberOfBJets;
-    const uint32_t fMin;
 
     BTaggingScaleFactorFromDB *btagDB;
     bool FactorsFromDB;
 
     // Lookup tables for scale factors
     BTaggingScaleFactor fBTaggingScaleFactor;
-    TH1* hBTagAbsoluteUncertainty;
-    TH1* hBTagRelativeUncertainty;
+    WrappedTH1* hBTagAbsoluteUncertainty;
+    WrappedTH1* hBTagRelativeUncertainty;
 
     // Counters
     Count fTaggedCount;
 
     Count fAllSubCount;
     Count fTaggedSubCount;
+    Count fTaggedPtCutSubCount;
     Count fTaggedEtaCutSubCount;
     Count fTaggedAllRealBJetsSubCount;
     Count fTaggedTaggedRealBJetsSubCount;
@@ -131,35 +131,32 @@ namespace HPlus {
     Count fTaggedOneTaggedJet;
     Count fTaggedTwoTaggedJets;
 
-    // EventWeight object
-    EventWeight& fEventWeight;
-
     // Histograms
-    TH1 *hDiscr;
-    TH1 *hPt;
-    TH1 *hEta;
-    TH1 *hDiscrB;
-    TH1 *hPtB33;
-    TH1 *hEtaB33;
-    TH1 *hPtB17;
-    TH1 *hEtaB17;
-    TH1 *hPtBnoTag;
-    TH1 *hEtaBnoTag;
-    TH1 *hDiscrQ;
-    TH1 *hPtQ33;
-    TH1 *hEtaQ33;
-    TH1 *hPtQ17;
-    TH1 *hEtaQ17;
-    TH1 *hPtQnoTag;
-    TH1 *hEtaQnoTag;
-    TH1 *hPt1;
-    TH1 *hEta1;
-    TH1 *hPt2;
-    TH1 *hEta2;
-    TH1 *hNumberOfBtaggedJets;
-    TH1 *hScaleFactor;
-    TH1 *hMCMatchForPassedJets;
-    TH1 *hControlBTagUncertaintyMode;
+    WrappedTH1 *hDiscr;
+    WrappedTH1 *hPt;
+    WrappedTH1 *hEta;
+    WrappedTH1 *hDiscrB;
+    WrappedTH1 *hPtBCSVT;
+    WrappedTH1 *hEtaBCSVT;
+    WrappedTH1 *hPtBCSVM;
+    WrappedTH1 *hEtaBCSVM;
+    WrappedTH1 *hPtBnoTag;
+    WrappedTH1 *hEtaBnoTag;
+    WrappedTH1 *hDiscrQ;
+    WrappedTH1 *hPtQCSVT;
+    WrappedTH1 *hEtaQCSVT;
+    WrappedTH1 *hPtQCSVM;
+    WrappedTH1 *hEtaQCSVM;
+    WrappedTH1 *hPtQnoTag;
+    WrappedTH1 *hEtaQnoTag;
+    WrappedTH1 *hPt1;
+    WrappedTH1 *hEta1;
+    WrappedTH1 *hPt2;
+    WrappedTH1 *hEta2;
+    WrappedTH1 *hNumberOfBtaggedJets;
+    WrappedTH1 *hScaleFactor;
+    WrappedTH1 *hMCMatchForPassedJets;
+    WrappedTH1 *hControlBTagUncertaintyMode;
     // Selected jets
     edm::PtrVector<pat::Jet> fSelectedJets;
     int iNBtags;

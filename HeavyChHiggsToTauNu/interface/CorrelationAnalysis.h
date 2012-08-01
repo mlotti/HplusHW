@@ -7,7 +7,6 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 namespace edm {
   class ParameterSet;
@@ -15,32 +14,30 @@ namespace edm {
   class EventSetup;
 }
 
-class TH1;
-
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
+
   class CorrelationAnalysis {
   public:
-    CorrelationAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
-    CorrelationAnalysis(EventCounter& eventCounter, EventWeight& eventWeight);
+    CorrelationAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    CorrelationAnalysis(EventCounter& eventCounter, HistoWrapper& histoWrapper);
     //CorrelationAnalysis();
     ~CorrelationAnalysis();
 
     // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate
     void analyze(const edm::PtrVector<reco::Candidate>&,const edm::PtrVector<reco::Candidate>&);
-  
+
   private:
-    void init();
-    
-    // EventWeight object
-    EventWeight& fEventWeight;
-    
+    void init(HistoWrapper& histoWrapper);
+
     // Histograms
-    TH1 *hPtB1;
-    TH1 *hPtB2;
-    TH1 *hEtaB1;
-    TH1 *hEtaB2;
-    TH1 *hDeltaR_tauB1;
-    TH1 *hDeltaR_tauB2;
+    WrappedTH1 *hPtB1;
+    WrappedTH1 *hPtB2;
+    WrappedTH1 *hEtaB1;
+    WrappedTH1 *hEtaB2;
+    WrappedTH1 *hDeltaR_tauB1;
+    WrappedTH1 *hDeltaR_tauB2;
   };
 }
 

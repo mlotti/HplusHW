@@ -7,9 +7,7 @@
 #include "DataFormats/PatCandidates/interface/Tau.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIDBase.h"
-
 
 namespace edm {
   class ParameterSet;
@@ -17,10 +15,11 @@ namespace edm {
   class EventSetup;
 }
 
-class TH1;
-#include "TH2.h"
-
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
+  class WrappedTH2;
+
   class TauSelection {
   public:
     /**
@@ -72,7 +71,7 @@ namespace HPlus {
       kTauCandidateSelectionOnly // Only tau candidate selection is applied
     };
 
-    TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, std::string label = "TauSelection");
+    TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label = "TauSelection");
     ~TauSelection();
 
     /// Default tauID
@@ -102,7 +101,7 @@ namespace HPlus {
     void fillHistogramsForTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
     void fillHistogramsForSelectedTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
     void fillHistogramsForSelectedTaus(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
-    void ObtainMCPurity(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent, TH1* histogram);
+    void ObtainMCPurity(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent, WrappedTH1* histogram);
     //void findBestTau(edm::PtrVector<pat::Tau>& bestTau, edm::PtrVector<pat::Tau>& taus);
 
   private:
@@ -120,56 +119,53 @@ namespace HPlus {
     // Counters
     Count fTauFound;
 
-    // EventWeight object
-    EventWeight& fEventWeight;
-
     // Histograms
-    TH1 *hTauIdOperatingMode;
-    TH1 *hPtTauCandidates; // Tau candidates == all taus in the pat::Tau collection
-    TH1 *hPtSelectedTauCandidates; // Cleaned tau candidates == taus after jet et, jet eta, ldg pt, e/mu veto 
-    TH1 *hPtSelectedTaus; // Selected taus == after all tauID cuts
-    TH1 *hEtaTauCandidates;
-    TH1 *hEtaSelectedTauCandidates;
-    TH1 *hEtaSelectedTaus;
+    WrappedTH1 *hTauIdOperatingMode;
+    WrappedTH1 *hPtTauCandidates; // Tau candidates == all taus in the pat::Tau collection
+    WrappedTH1 *hPtSelectedTauCandidates; // Cleaned tau candidates == taus after jet et, jet eta, ldg pt, e/mu veto 
+    WrappedTH1 *hPtSelectedTaus; // Selected taus == after all tauID cuts
+    WrappedTH1 *hEtaTauCandidates;
+    WrappedTH1 *hEtaSelectedTauCandidates;
+    WrappedTH1 *hEtaSelectedTaus;
 
-    TH2 *hEtaPhiTauCandidates;
-    TH2 *hEtaPhiSelectedTauCandidates;
-    TH2 *hEtaPhiSelectedTaus;
+    WrappedTH2 *hEtaPhiTauCandidates;
+    WrappedTH2 *hEtaPhiSelectedTauCandidates;
+    WrappedTH2 *hEtaPhiSelectedTaus;
 
-    TH1 *hPhiTauCandidates;
-    TH1 *hPhiSelectedTauCandidates;
-    TH1 *hPhiSelectedTaus;
-    TH1 *hNumberOfTauCandidates;
-    TH1 *hNumberOfSelectedTauCandidates;
-    TH1 *hNumberOfSelectedTaus;
-    TH1 *hMCPurityOfTauCandidates;
-    TH1 *hMCPurityOfSelectedTauCandidates;
-    TH1 *hMCPurityOfSelectedTaus;
+    WrappedTH1 *hPhiTauCandidates;
+    WrappedTH1 *hPhiSelectedTauCandidates;
+    WrappedTH1 *hPhiSelectedTaus;
+    WrappedTH1 *hNumberOfTauCandidates;
+    WrappedTH1 *hNumberOfSelectedTauCandidates;
+    WrappedTH1 *hNumberOfSelectedTaus;
+    WrappedTH1 *hMCPurityOfTauCandidates;
+    WrappedTH1 *hMCPurityOfSelectedTauCandidates;
+    WrappedTH1 *hMCPurityOfSelectedTaus;
 
-    TH1 *hNTriggerMatchedTaus;
-    TH1 *hNTriggerMatchedSeparateTaus;
+    WrappedTH1 *hNTriggerMatchedTaus;
+    WrappedTH1 *hNTriggerMatchedSeparateTaus;
 
-    TH1 *hIsolationPFChargedHadrCandsPtSum;
-    TH1 *hIsolationPFGammaCandsEtSum;
+    WrappedTH1 *hIsolationPFChargedHadrCandsPtSum;
+    WrappedTH1 *hIsolationPFGammaCandsEtSum;
 
-    TH1 *hTightChargedMaxPtBeforeIsolation;
-    TH1 *hTightChargedSumPtBeforeIsolation;
-    TH1 *hTightChargedOccupancyBeforeIsolation;
-    TH1 *hTightGammaMaxPtBeforeIsolation;
-    TH1 *hTightGammaSumPtBeforeIsolation;
-    TH1 *hTightGammaOccupancyBeforeIsolation;
-    TH1 *hTightChargedMaxPtAfterIsolation;
-    TH1 *hTightChargedSumPtAfterIsolation;
-    TH1 *hTightChargedOccupancyAfterIsolation;
-    TH1 *hTightGammaMaxPtAfterIsolation;
-    TH1 *hTightGammaSumPtAfterIsolation;
-    TH1 *hTightGammaOccupancyAfterIsolation;
-    TH1 *hHPSDecayMode;
+    WrappedTH1 *hTightChargedMaxPtBeforeIsolation;
+    WrappedTH1 *hTightChargedSumPtBeforeIsolation;
+    WrappedTH1 *hTightChargedOccupancyBeforeIsolation;
+    WrappedTH1 *hTightGammaMaxPtBeforeIsolation;
+    WrappedTH1 *hTightGammaSumPtBeforeIsolation;
+    WrappedTH1 *hTightGammaOccupancyBeforeIsolation;
+    WrappedTH1 *hTightChargedMaxPtAfterIsolation;
+    WrappedTH1 *hTightChargedSumPtAfterIsolation;
+    WrappedTH1 *hTightChargedOccupancyAfterIsolation;
+    WrappedTH1 *hTightGammaMaxPtAfterIsolation;
+    WrappedTH1 *hTightGammaSumPtAfterIsolation;
+    WrappedTH1 *hTightGammaOccupancyAfterIsolation;
+    WrappedTH1 *hHPSDecayMode;
 
-    TH1 *hVLooseIsoNcands;
-    TH1 *hLooseIsoNcands;
-    TH1 *hMediumIsoNcands;
-    TH1 *hTightIsoNcands;
+    WrappedTH1 *hVLooseIsoNcands;
+    WrappedTH1 *hLooseIsoNcands;
+    WrappedTH1 *hMediumIsoNcands;
+    WrappedTH1 *hTightIsoNcands;
 
     // Selected tau
     edm::PtrVector<pat::Tau> fSelectedTauCandidates;

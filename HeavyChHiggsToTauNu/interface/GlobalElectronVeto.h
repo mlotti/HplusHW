@@ -7,7 +7,7 @@
 #include "DataFormats/PatCandidates/interface/Electron.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+
 
 #include "FWCore/Framework/interface/ESHandle.h"
 #include <DataFormats/BeamSpot/interface/BeamSpot.h>
@@ -26,10 +26,10 @@ namespace edm {
   class EventSetup;
 }
 
-class TH1;
-#include "TH2.h"
-
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
+
   class GlobalElectronVeto {
   public:
     /**
@@ -57,7 +57,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
 
-    GlobalElectronVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    GlobalElectronVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~GlobalElectronVeto();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup); // Official Electron ID
@@ -103,27 +103,24 @@ namespace HPlus {
     Count fElecIDSubCountSimpleEleId80relIso;
     Count fElecIDSubCountSimpleEleId70relIso;
     Count fElecIDSubCountSimpleEleId60relIso;
-    
-    // EventWeight object
-    EventWeight& fEventWeight;
 
     // Histograms
-    TH1 *hElectronPt;
-    TH1 *hElectronEta;
-    TH1 *hElectronPt_identified_eta;
-    TH1 *hElectronEta_identified;
-    TH1 *hElectronPt_matchingMCelectron;
-    TH1 *hElectronEta_matchingMCelectron;
-    TH1 *hElectronPt_matchingMCelectronFromW;
-    TH1 *hElectronEta_matchingMCelectronFromW;
-    TH1 *hElectronPt_gsfTrack;
-    TH1 *hElectronEta_gsfTrack;
-    TH1 *hElectronPt_AfterSelection;
-    TH1 *hElectronEta_AfterSelection;
-    TH1 *hElectronPt_gsfTrack_AfterSelection;
-    TH1 *hElectronEta_gsfTrack_AfterSelection;
-    TH1 *hElectronImpactParameter;
-    TH1 *hElectronEta_superCluster;
+    WrappedTH1 *hElectronPt;
+    WrappedTH1 *hElectronEta;
+    WrappedTH1 *hElectronPt_identified;
+    WrappedTH1 *hElectronEta_identified;
+    WrappedTH1 *hElectronPt_matchingMCelectron;
+    WrappedTH1 *hElectronEta_matchingMCelectron;
+    WrappedTH1 *hElectronPt_matchingMCelectronFromW;
+    WrappedTH1 *hElectronEta_matchingMCelectronFromW;
+    WrappedTH1 *hElectronPt_gsfTrack;
+    WrappedTH1 *hElectronEta_gsfTrack;
+    WrappedTH1 *hElectronPt_AfterSelection;
+    WrappedTH1 *hElectronEta_AfterSelection;
+    WrappedTH1 *hElectronPt_gsfTrack_AfterSelection;
+    WrappedTH1 *hElectronEta_gsfTrack_AfterSelection;
+    WrappedTH1 *hElectronImpactParameter;
+    WrappedTH1 *hElectronEta_superCluster;
 
     // pt and eta of highest pt electron passing the selection
     float fSelectedElectronPt;

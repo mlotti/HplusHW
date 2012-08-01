@@ -184,7 +184,7 @@ def common(h, xlabel, ylabel, addLuminosityText=True, afterDraw=None):
     h.draw()
     if afterDraw != None:
         afterDraw()
-    histograms.addCmsPreliminaryText()
+#    histograms.addCmsPreliminaryText()
     histograms.addEnergyText()
     if addLuminosityText:
         h.addLuminosityText()

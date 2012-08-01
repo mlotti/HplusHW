@@ -1,13 +1,13 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIDPFTauBasedAlgorithms.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 namespace HPlus {
   // TauIDPFHPS ---------------------------------------------
-  TauIDPFHPS::TauIDPFHPS(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel, TFileDirectory& myDir):
-    TauIDPFTauBase(iConfig, eventCounter, eventWeight, baseLabel, myDir)
+  TauIDPFHPS::TauIDPFHPS(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, const std::string& baseLabel, TFileDirectory& myDir):
+    TauIDPFTauBase(iConfig, eventCounter, histoWrapper, baseLabel, myDir)
   { }
   TauIDPFHPS::~TauIDPFHPS() { }
 
@@ -18,8 +18,8 @@ namespace HPlus {
   }
 
   // TauIDPFTaNC --------------------------------------------
-  TauIDPFTaNC::TauIDPFTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, std::string label, TFileDirectory& myDir):
-    TauIDPFTauBase(iConfig, eventCounter, eventWeight, label, myDir)
+  TauIDPFTaNC::TauIDPFTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label, TFileDirectory& myDir):
+    TauIDPFTauBase(iConfig, eventCounter, histoWrapper, label, myDir)
   { }
 
   TauIDPFTaNC::~TauIDPFTaNC() { }
@@ -32,8 +32,8 @@ namespace HPlus {
 
   // TauIDPFCombinedHPSTaNC --------------------------------------------
   /*
-    TauIDPFCombinedHPSTaNC::TauIDPFCombinedHPSTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir):
-    TauIDPFHPSBase(iConfig, eventCounter, eventWeight, label, myDir)
+    TauIDPFCombinedHPSTaNC::TauIDPFCombinedHPSTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, int prongCount, std::string label, TFileDirectory& myDir):
+    TauIDPFHPSBase(iConfig, eventCounter, histoWrapper, label, myDir)
   { }
 
   TauIDPFCombinedHPSTaNC::~TauIDPFCombinedHPSTaNC() { }

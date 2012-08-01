@@ -460,43 +460,123 @@ datasets = {
 
     # QCD backgrounds
     # Cross sections are from https://twiki.cern.ch/twiki/bin/view/CMS/ReProcessingSummer2011
-#    "QCD_Pt120to170_TuneZ2_Fall11": {
-#        "dataVersion": "44XmcS6",
-#        "crossSection": 1.151e+05,
-#        "data": {
-#            "AOD": {
-#                "datasetpath": "/QCD_Pt-120to170_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-#                "number_of_jobs": 490, # Adjusted for PATtuple file size
-#            },
-#        },
-#    },
-#    "QCD_Pt170to300_TuneZ2_Fall11": {
-#        "dataVersion": "44XmcS6",
-#        "crossSection": 2.426e+04,
-#        "data": {
-#            "AOD": {
-#                "datasetpath": "/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-#                "number_of_jobs": 490, # Adjusted for PATtuple file size
-#            },
-#        },
-#    },
-#    "QCD_Pt300to470_TuneZ2_Fall11": {
-#        "dataVersion": "44XmcS6",
-#        "crossSection": 1.168e+03,
-#        "data": {
-#            "AOD": {
-#                "datasetpath": "/QCD_Pt-300to470_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-#                "number_of_jobs": 490 # Adjusted for PATtuple file size
-#            },
-#        }
-#    },
-    "QCD_Pt20_MuEnriched_TuneZ2_Fall11": {
+
+    "QCD_Pt30to50_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "crossSection": 5.312e+07,
+        "args": { "triggerMC": "1" },
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        "data": {
+           "AOD": {
+               "datasetpath": "/QCD_Pt-30to50_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
+               "number_of_jobs": 10, # Adjusted for PATtuple file size
+           },
+           "pattuple_v25b": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-30to50_TuneZ2_7TeV_pythia6/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_QCD_Pt30to50_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
+                "number_of_jobs": 1 # 32 evt
+            },
+        },
+    },
+    "QCD_Pt50to80_TuneZ2_Fall11": {
+        "dataVersion":  "44XmcS6",
+        "crossSection": 6.359e+06,
+        "args": { "triggerMC": "1" },
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        "data": {
+           "AOD": {
+               "datasetpath": "/QCD_Pt-50to80_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
+               "number_of_jobs": 10, # Adjusted for PATtuple file size
+           },
+           "pattuple_v25b": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-50to80_TuneZ2_7TeV_pythia6/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_QCD_Pt50to80_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
+                "number_of_jobs": 1 # 677 evt
+            },
+        },
+    },
+    "QCD_Pt80to120_TuneZ2_Fall11": {
+        "dataVersion": "44XmcS6",
+        "crossSection": 7.843e+05,
+        "args": { "triggerMC": "1" },
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        "data": {
+           "AOD": {
+               "datasetpath": "/QCD_Pt-80to120_TuneZ2_7TeV_pythia6/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_QCD_Pt80to120_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER#eddb4a2e-3ec6-4b89-aa7e-9d8952587d37",
+               "number_of_jobs": 1, # Adjusted for PATtuple file size
+           },
+           "pattuple_v25b": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-80to120_TuneZ2_7TeV_pythia6/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_QCD_Pt80to120_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
+                "number_of_jobs": 1 # 6152 evt
+            },
+        },
+    },
+    "QCD_Pt120to170_TuneZ2_Fall11": {
+        "dataVersion": "44XmcS6",
+        "crossSection": 1.151e+05,
+        "args": { "triggerMC": "1" },
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt-120to170_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
+            },
+            "pattuple_v25b": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-120to170_TuneZ2_7TeV_pythia6/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_QCD_Pt120to170_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
+                "number_of_jobs": 1 # 26115 evt
+            },
+        },
+    },
+    "QCD_Pt170to300_TuneZ2_Fall11": {
+        "dataVersion": "44XmcS6",
+        "crossSection": 2.426e+04,
+        "args": { "triggerMC": "1" },
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
+                "number_of_jobs": 40, # Adjusted for PATtuple file size
+            },
+            "pattuple_v25b": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_QCD_Pt170to300_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
+                "number_of_jobs": 4 # 83237 evt
+            },
+        },
+    },
+    "QCD_Pt300to470_TuneZ2_Fall11": {
+        "dataVersion": "44XmcS6",
+        "crossSection": 1.168e+03,
+        "args": { "triggerMC": "1" },
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt-300to470_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
+                "number_of_jobs": 40 # Adjusted for PATtuple file size
+            },
+            "pattuple_v25b": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-300to470_TuneZ2_7TeV_pythia6/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_QCD_Pt300to470_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
+                "number_of_jobs": 10 # 219207 evt
+            },
+        }
+    },
+    "QCD_Pt20_MuEnriched_TuneZ2_Fall11": {
+        "dataVersion": "44XmcS6", 
         "crossSection": 296600000.*0.0002855,
+        "args": { "triggerMC": "1" },
+#        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM",
-                "number_of_jobs": 2000,  # Adjusted for PATtuple file size
+                "number_of_jobs": 50,  # Adjusted for PATtuple file size
+            },
+            "pattuple_v25b": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_QCD_Pt20_MuEnriched_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
+                "number_of_jobs": 2 # 39802 evt
             },
         }
     },

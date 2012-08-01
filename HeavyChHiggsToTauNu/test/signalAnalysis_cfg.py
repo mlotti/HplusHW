@@ -9,11 +9,12 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 dataVersion="44XmcS6"     # Fall11 MC
 #dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
 
+# Set the data scenario for vertex/pileup weighting
+# options: Run2011A, Run2011B, Run2011A+B
+puweight = "Run2011A+B"
+
 ##########
 # Flags for additional signal analysis modules
-# Perform the signal analysis with all tau ID algorithms in addition
-# to the "golden" analysis
-doAllTauIds = False
 
 # Apply summer PAS style cuts
 doSummerPAS = False # Rtau>0, MET>70
@@ -46,7 +47,7 @@ doTauEmbeddingTauSelectionScan = False
 doTauEmbeddingLikePreselection = False
 
 # Apply beta cut for jets to reject PU jets
-betaCutForJets = 0.7 # Disable by setting to 0.0; if you want to enable, set to 0.2
+betaCutForJets = 0.0 # Disable by setting to 0.0; if you want to enable, set to 0.2
 
 #########
 # Flags for options in the signal analysis
@@ -58,6 +59,11 @@ doPrescalesForData = False
 # Tree filling
 doFillTree = False
 
+# Set level of how many histograms are stored to files
+# options are: 'Vital' (least histograms), 'Informative', 'Debug' (all histograms)
+myHistogramAmbientLevel = "Debug"
+
+# Apply trigger scale factor or not
 applyTriggerScaleFactor = True
 
 PF2PATVersion = "PFlow" # For normal PF2PAT
@@ -74,7 +80,7 @@ doJESVariation = False
 
 # Perform the signal analysis with the PU weight variations
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
-doPUWeightVariation = not False
+doPUWeightVariation = False
 
 # Do variations for optimisation
 # Note: Keep number of variations below 200 to keep file sizes reasonable
@@ -88,18 +94,21 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.addTauIsolationVariation([])
 #myOptimisation.addTauIsolationContinuousVariation([])
 #myOptimisation.addRtauVariation([0.0, 0.7])
-myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
-#myOptimisation.addJetEtVariation([20.0, 30.0])
+#myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
+myOptimisation.addJetEtVariation([20.0, 30.0])
 #myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
 #myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
-#myOptimisation.addBJetDiscriminatorVariation([0.679, 0.244])
+#myOptimisation.addBJetLeadingDiscriminatorVariation([0.898, 0.679])
+#myOptimisation.addBJetSubLeadingDiscriminatorVariation([0.679, 0.244])
 #myOptimisation.addBJetEtVariation([])
 #myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
 #myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
 #myOptimisation.addTopRecoVatiation(["None"]) # Valid options: None, chi, std, Wselection
+myOptimisation.disableMaxVariations()
 if doOptimisation:
     doSystematics = True # Make sure that systematics are run
     doFillTree = False # Make sure that tree filling is disabled or root file size explodes
+    myHistogramAmbientLevel = "Vital" # Set histogram level to least histograms to reduce output file sizes
     # FIXME add here "light' mode running
 
 ################################################################################
@@ -189,8 +198,6 @@ if applyTriggerScaleFactor and dataVersion.isMC():
     param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
 
 # Set the data scenario for vertex/pileup weighting
-# options: Run2011A, Run2011B, Run2011A+B
-puweight = "Run2011A"
 if len(options.puWeightEra) > 0:
     puweight = options.puWeightEra
 param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, pset=param.vertexWeight, psetReader=param.vertexWeightReader, era=puweight) # Reweight by true PU distribution
@@ -220,10 +227,11 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
 process.signalAnalysis = signalAnalysis.createEDFilter(param)
 if not doFillTree:
     process.signalAnalysis.Tree.fill = cms.untracked.bool(False)
+process.signalAnalysis.histogramAmbientLevel = myHistogramAmbientLevel
+
 # process.signalAnalysis.GlobalMuonVeto = param.NonIsolatedMuonVeto
 # Change default tau algorithm here if needed
 #process.signalAnalysis.tauSelection.tauSelectionHPSTightTauBased # HPS Tight is the default
-
 
 # Btagging DB
 process.load("CondCore.DBCommon.CondDBCommon_cfi")
@@ -236,11 +244,14 @@ process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
 #User DB for btag eff
 btagDB = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
 if options.runOnCrab != 0:
+    print "BTagDB: Assuming that you are running on CRAB"
     btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
+else:
+    print "BTagDB: Assuming that you are not running on CRAB (if you are running on CRAB, add to job parameters in multicrab.cfg runOnCrab=1)"
 process.CondDBCommon.connect = btagDB
 process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
 process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
-param.bTagging.UseBTagDB  = cms.untracked.bool(False) # FIXME: True does not work with systematics! (some clash with condDB betweeen btag and JES)
+param.bTagging.UseBTagDB  = cms.untracked.bool(False)
 
 # Add type 1 MET
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
@@ -260,37 +271,38 @@ if dataVersion.isData() and options.tauEmbeddingInput == 0 and doPrescalesForDat
 
 # Print output
 #print "\nAnalysis is blind:", process.signalAnalysis.blindAnalysisStatus, "\n"
+print "Histogram level:", process.signalAnalysis.histogramAmbientLevel.value()
 print "Trigger:", process.signalAnalysis.trigger
 print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode.value()
-print "VertexWeight:",process.signalAnalysis.vertexWeight
+print "Trigger scale factor data:", process.signalAnalysis.triggerEfficiencyScaleFactor.dataSelect.value()
+print "Trigger scale factor MC:", process.signalAnalysis.triggerEfficiencyScaleFactor.mcSelect.value()
+print "VertexWeight data distribution:",process.signalAnalysis.vertexWeight.dataPUdistribution.value()
+print "VertexWeight mc distribution:",process.signalAnalysis.vertexWeight.mcPUdistribution.value()
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut.value()
 #print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection.value()
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection.value()
 print "TauSelection src:", process.signalAnalysis.tauSelection.src.value()
 print "TauSelection isolation:", process.signalAnalysis.tauSelection.isolationDiscriminator.value()
 print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode.value()
+print "VetoTauSelection src:", process.signalAnalysis.vetoTauSelection.tauSelection.src.value()
+print "Beta cut: ", process.signalAnalysis.jetSelection.betaCutSource.value(), process.signalAnalysis.jetSelection.betaCutDirection.value(), process.signalAnalysis.jetSelection.betaCut.value()
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
-process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-    counterNames = cms.untracked.InputTag("signalAnalysis", "counterNames"),
-    counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances"),
-    printMainCounter = cms.untracked.bool(True),
-    printSubCounters = cms.untracked.bool(False), # Default False
-    printAvailableCounters = cms.untracked.bool(False),
-)
+process.signalAnalysis.eventCounter.printMainCounter = cms.untracked.bool(True)
+#process.signalAnalysis.eventCounter.printSubCounters = cms.untracked.bool(True)
 if len(additionalCounters) > 0:
-    process.signalAnalysisCounters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
+    process.signalAnalysis.eventCounter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
 
 # PickEvent module and the main Path. The picked events are only the
 # ones selected by the golden analysis defined above.
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
-process.signalAnalysisPath = cms.Path(
-    process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
-    process.signalAnalysis *
-    process.signalAnalysisCounters *
-    process.PickEvents
-)
+if not doOptimisation:
+    process.signalAnalysisPath = cms.Path(
+        process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
+        process.signalAnalysis *
+        process.PickEvents
+    )
 
 if doMETResolution:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.METResolutionAnalysis_cfi")
@@ -388,7 +400,9 @@ if doRtau0 and not hasattr(process, "signalAnalysisRtau0"):
                 signalAnalysisCounters=True)
 
 def getSignalAnalysisModuleNames():
-    modules = ["signalAnalysis"]
+    modules = []
+    if not doOptimisation:
+        modules.append("signalAnalysis")
     if doSummerPAS:
         modules.append("signalAnalysisRtau0MET70")
     if doRtau0:
@@ -455,32 +469,6 @@ if options.tauEmbeddingInput:
                     preSequence=process.commonSequence,
                     additionalCounters=additionalCounters,
                     signalAnalysisCounters=True)
-
-
-################################################################################
-# The signal analysis with different tau ID algorithms
-#
-# Run the analysis for the different tau ID algorithms at the same job
-# as the golden analysis. It is significantly more efficiency to run
-# many analyses in a single job compared to many jobs (this avoids
-# some of the I/O and grid overhead). The fragment below creates the
-# following histogram directories
-# signalAnalysisTauSelectionShrinkingConeCutBased
-# signalAnalysisTauSelectionShrinkingConeTaNCBased
-# signalAnalysisTauSelectionCaloTauCutBased
-# signalAnalysisTauSelectionHPSTightTauBased
-# signalAnalysisTauSelectionCombinedHPSTaNCBased
-#
-# The corresponding Counter directories have "Counters" postfix, and
-# cms.Paths "Path" postfix. The paths are run independently of each
-# other. It is important to give the process.commonSequence for the
-# function, so that it will be run before the analysis module in the
-# Path. Then, in case PAT is run on the fly, the framework runs the
-# analysis module after PAT (and runs PAT only once).
-if doAllTauIds:
-    module = process.signalAnalysis.clone()
-    module.Tree.fill = False
-    param.addTauIdAnalyses(process, dataVersion, "signalAnalysis", module, process.commonSequence, additionalCounters)
 
 ################################################################################
 # The signal analysis with jet energy scale variation

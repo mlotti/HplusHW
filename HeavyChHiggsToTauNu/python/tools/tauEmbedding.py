@@ -151,11 +151,11 @@ def decayModeCustomize(h):
     n = 5
     if hasattr(h, "getFrame1"):
         h.getFrame1().GetXaxis().SetNdivisions(n)
-        h.getFrame1().GetXaxis().SetNdivisions(n)
+        xaxis = h.getFrame2().GetXaxis()
     else:
-        h.getFrame().GetXaxis().SetNdivisions(n)
+        xaxis = h.getFrame().GetXaxis()
 
-    xaxis = h.getFrame().GetXaxis()
+    xaxis.SetNdivisions(n)
     xaxis.SetBinLabel(1, "#pi^{#pm}")
     xaxis.SetBinLabel(2, "#pi^{#pm}#pi^{0}")
     xaxis.SetBinLabel(3, "#pi^{#pm}#pi^{0}#pi^{0}")
@@ -830,6 +830,7 @@ class PlotDrawerTauEmbedding(plots.PlotDrawer):
         self.createFrame(p, name, **kwargs)
         self.setLegend(p, **kwargs)
         self.addCutLineBox(p, **kwargs)
+        self.customise(p, **kwargs)
         self.finish(p, xlabel, **kwargs)
 
 ## Default plot drawer object for tau embedding (embedded data vs. embedded MC) plots
@@ -903,9 +904,10 @@ class PlotDrawerTauEmbeddingEmbeddedNormal(PlotDrawerTauEmbedding):
             p.appendPlotObject(histograms.PlotText(x, y, "Embedded data min/max", size=17)); y-= 0.03
         if hasattr(p, "embeddingVariation"):
             p.appendPlotObject(histograms.PlotText(x, y, "[  ]", size=17, color=p.embeddingVariation.GetMarkerColor())); x += 0.05
-            p.appendPlotObject(histograms.PlotText(x, y, "Embedded MC min/max", size=17)); y-= 0.03
+            p.appendPlotObject(histograms.PlotText(x, y, "Embedded sim. min/max", size=17)); y-= 0.03
 
         self.addCutLineBox(p, **kwargs)
+        self.customise(p, **kwargs)
         self.finish(p, xlabel, **kwargs)
 
 ## Plot creator for embedded vs. normal plots
@@ -981,13 +983,14 @@ class PlotCreatorMany:
         legLabel = plots._legendLabels.get(self.datasetName, self.datasetName)
         legLabelEmb = legLabel
         if legLabel != "Data":
-            legLabel += " MC"
+            legLabel += " sim."
         residual = ""
         if self.isResidual:
             embedded = "Emb. "
-            residual = " + res. MC"
-        legLabelEmb += " MC"
+            residual = " + res. sim."
+        legLabelEmb += " sim."
 
+        p.setLuminosity(lumi)
         p.histoMgr.setHistoLegendLabelMany({
                 "Embedded":     embedded + legLabelEmb + residual,
                 "Normal":       "Normal " + legLabel,

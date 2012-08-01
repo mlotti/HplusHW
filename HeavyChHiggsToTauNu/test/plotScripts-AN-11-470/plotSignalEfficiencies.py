@@ -64,31 +64,36 @@ def main():
 
     wh = [
         "TTToHplusBWB_M80",
-        "TTToHplusBWB_M90",
+#        "TTToHplusBWB_M90",
         "TTToHplusBWB_M100",
         "TTToHplusBWB_M120",
         "TTToHplusBWB_M140",
         "TTToHplusBWB_M150",
-        "TTToHplusBWB_M155",
+#        "TTToHplusBWB_M155",
         "TTToHplusBWB_M160",
         ]
     hh = [
         "TTToHplusBHminusB_M80",
-        "TTToHplusBHminusB_M90",
+#        "TTToHplusBHminusB_M90",
         "TTToHplusBHminusB_M100",
         "TTToHplusBHminusB_M120",
         "TTToHplusBHminusB_M140",
         "TTToHplusBHminusB_M150",
-        "TTToHplusBHminusB_M155",
+#        "TTToHplusBHminusB_M155",
         "TTToHplusBHminusB_M160",
         ]
+    xvalues = [80,
+#               90,
+               100, 120, 140, 150,
+#               155,
+               160]
 
-    doPlots(mainTable, wh, "HW", True)
-    doPlots(mainTable, wh, "HW", False)
-    doPlots(mainTable, hh, "HH", True)
-    doPlots(mainTable, hh, "HH", False)
+    doPlots(mainTable, xvalues, wh, "HW", True)
+    doPlots(mainTable, xvalues, wh, "HW", False)
+    doPlots(mainTable, xvalues, hh, "HH", True)
+    doPlots(mainTable, xvalues, hh, "HH", False)
 
-def doPlots(mainTable, signalDatasets, signalPostfix, consequtive=True):
+def doPlots(mainTable, xvalues, signalDatasets, signalPostfix, consequtive=True):
     allName = "All events"
     cuts = [
         "Trigger and HLT_MET cut",
@@ -104,7 +109,6 @@ def doPlots(mainTable, signalDatasets, signalPostfix, consequtive=True):
         "deltaPhiTauMET<160",
         ]
 
-    xvalues = [80, 90, 100, 120, 140, 150, 155, 160]
     xerrs = [0]*len(xvalues)
     yvalues = {}
     yerrs = {}
@@ -181,7 +185,7 @@ def doPlots(mainTable, signalDatasets, signalPostfix, consequtive=True):
 
     canvasFrame = histograms.CanvasFrame([histograms.HistoGraph(g, "", "") for g in glist], name, **opts)
     canvasFrame.frame.GetYaxis().SetTitle("Selection efficiency")
-    canvasFrame.frame.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
+    canvasFrame.frame.GetXaxis().SetTitle("m_{H^{+}} (GeV/c^{2})")
     canvasFrame.canvas.SetLogy(True)
     canvasFrame.frame.Draw()
 

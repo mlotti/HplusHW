@@ -9,7 +9,6 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/METReco/interface/GenMET.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 
@@ -20,11 +19,9 @@ namespace edm {
   class EventSetup;
 }
 
-class TH1;
-
-
 namespace HPlus {
-  class BjetSelection;
+  class HistoWrapper;
+  class WrappedTH1;
 
   class BjetSelection {
   public:
@@ -52,7 +49,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
     
-    BjetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    BjetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~BjetSelection();
 
 
@@ -76,49 +73,45 @@ namespace HPlus {
     void printDaughters(const reco::Candidate& );
     */
 
-
-    // EventWeight object
-    EventWeight& fEventWeight;
     edm::InputTag fSrc;
     edm::InputTag fOneProngTauSrc;
     edm::InputTag fOneAndThreeProngTauSrc;
-    
-    // Histograms
-    TH1 *hDeltaRmaxFromTop;
-    TH1 *hDeltaRtauBtauSide;
-    TH1 *hDeltaRHadTauBtauSide;
-    TH1 *hDeltaRHadTauBtopSide;
-    TH1 *hDeltaMinTauB;
-    TH1 *hDeltaMaxTauB;
-    TH1 *hPtBjetTauSide;
-    TH1 *hEtaBjetTauSide;
-    TH1 *hPtBjetTopSide;
-    TH1 *hEtaBjetTopSide;
-    TH1 *hPtBjetMax;
-    TH1 *hEtaBjetMax;
-    TH1 *hPtBjetMaxTrue;
-    TH1 *hEtaBjetMaxTrue;
-    TH1 *hDeltaMinTauBTrue;
-    TH1 *hDeltaMaxTopBTrue;
-    TH1 *hPtBjetTauSideTrue;
-    TH1 *hEtaBjetTauSideTrue;
-    TH1 *hPtBjetTopSideTrue;
-    TH1 *hBquarkFromTopSideEta;
-    TH1 *hBquarkFromTopSidePt;
-    TH1 *hEtaBjetTopSideTrue;
-    TH1 *hBquarkFromHiggsSideEta;
-    TH1 *hBquarkFromHiggsSidePt;
-    TH1 *hQquarkFromTopSideEta;
-    TH1 *hQquarkFromTopSidePt;
- 
 
-    TH1 *hDeltaTauB;
-    TH1 *hMassTopTop;
-    TH1 *hMassTopHiggs;
-    TH1 *hMassW;
-    TH1 *hPtTopTop;
-    TH1 *hPtTopHiggs;
-    TH1 *hPtW;
+    // Histograms
+    WrappedTH1 *hDeltaRmaxFromTop;
+    WrappedTH1 *hDeltaRtauBtauSide;
+    WrappedTH1 *hDeltaRHadTauBtauSide;
+    WrappedTH1 *hDeltaRHadTauBtopSide;
+    WrappedTH1 *hDeltaMinTauB;
+    WrappedTH1 *hDeltaMaxTauB;
+    WrappedTH1 *hPtBjetTauSide;
+    WrappedTH1 *hEtaBjetTauSide;
+    WrappedTH1 *hPtBjetTopSide;
+    WrappedTH1 *hEtaBjetTopSide;
+    WrappedTH1 *hPtBjetMax;
+    WrappedTH1 *hEtaBjetMax;
+    WrappedTH1 *hPtBjetMaxTrue;
+    WrappedTH1 *hEtaBjetMaxTrue;
+    WrappedTH1 *hDeltaMinTauBTrue;
+    WrappedTH1 *hDeltaMaxTopBTrue;
+    WrappedTH1 *hPtBjetTauSideTrue;
+    WrappedTH1 *hEtaBjetTauSideTrue;
+    WrappedTH1 *hPtBjetTopSideTrue;
+    WrappedTH1 *hBquarkFromTopSideEta;
+    WrappedTH1 *hBquarkFromTopSidePt;
+    WrappedTH1 *hEtaBjetTopSideTrue;
+    WrappedTH1 *hBquarkFromHiggsSideEta;
+    WrappedTH1 *hBquarkFromHiggsSidePt;
+    WrappedTH1 *hQquarkFromTopSideEta;
+    WrappedTH1 *hQquarkFromTopSidePt;
+
+    WrappedTH1 *hDeltaTauB;
+    WrappedTH1 *hMassTopTop;
+    WrappedTH1 *hMassTopHiggs;
+    WrappedTH1 *hMassW;
+    WrappedTH1 *hPtTopTop;
+    WrappedTH1 *hPtTopHiggs;
+    WrappedTH1 *hPtW;
 
     // Variables
     edm::Ptr<pat::Jet> BjetTauSide;

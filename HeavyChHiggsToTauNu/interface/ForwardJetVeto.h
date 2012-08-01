@@ -6,14 +6,11 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/METReco/interface/MET.h"
-
-#include "TH1.h"
 
 namespace edm {
   class ParameterSet;
@@ -22,6 +19,8 @@ namespace edm {
 }
 
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
   /**
    * Class for checking the smallest DeltaPhi of the MET and the selected jets and 
    */
@@ -48,7 +47,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
     
-    ForwardJetVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    ForwardJetVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~ForwardJetVeto();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::MET>& met);
@@ -67,22 +66,16 @@ namespace HPlus {
     Count fEtSumRatioSubCount;
     Count fEtMetSumRatioSubCount;
  
-  
-
-    // EventWeight object
-    EventWeight& fEventWeight;
-    
     // Data
 
-    
     // Histograms
-    TH1 *hMaxForwJetEt;
-    TH1 *hForwJetEt;
-    TH1 *hForwJetEta;
-    TH1 *hEtSumCentral;
-    TH1 *hEtSumForward;
-    TH1 *hEtSumRatio;
-    TH1 *hEtMetSumRatio;
+    WrappedTH1 *hMaxForwJetEt;
+    WrappedTH1 *hForwJetEt;
+    WrappedTH1 *hForwJetEta;
+    WrappedTH1 *hEtSumCentral;
+    WrappedTH1 *hEtSumForward;
+    WrappedTH1 *hEtSumRatio;
+    WrappedTH1 *hEtMetSumRatio;
   };
 }
 

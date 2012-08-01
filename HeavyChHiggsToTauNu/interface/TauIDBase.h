@@ -7,7 +7,6 @@
 #include "DataFormats/PatCandidates/interface/Tau.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SelectionCounterPackager.h"
 
 #include "CommonTools/Utils/interface/TFileDirectory.h"
@@ -18,12 +17,13 @@ namespace edm {
   class EventSetup;
 }
 
-class TH1;
-#include "TH2.h"
-
 #include <string>
 
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
+  class WrappedTH2;
+
   class TauIDBase {
   public:
 
@@ -31,7 +31,7 @@ namespace HPlus {
      * Base class for tau ID operations.
      * Actual tau ID specific classes are inherited from this class.
      */
-    TauIDBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel, TFileDirectory& myDir);
+    TauIDBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, const std::string& baseLabel, TFileDirectory& myDir);
     virtual ~TauIDBase();
 
     /// Returns true, if the tau candidate conditions are fulfilled (jet et, eta, ldg pt, e/mu veto) 
@@ -84,15 +84,13 @@ namespace HPlus {
     size_t fIDNProngsCut;
     size_t fIDRTauCut;
 
-    /// EventWeight object
-    EventWeight& fEventWeight;
     /// Label of the specific tau ID algorithm (applied to counters and histograms)
     std::string fBaseLabel;
 
     // Histograms
-    TH2* hRtauVsEta;
-    TH1F* hEtaTauCands_nocut;
-    TH1F* hEtaTauCands_ptcut;
+    WrappedTH2* hRtauVsEta;
+    WrappedTH1* hEtaTauCands_nocut;
+    WrappedTH1* hEtaTauCands_ptcut;
   };
 }
 

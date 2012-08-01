@@ -7,6 +7,7 @@
 #include "DataFormats/Common/interface/View.h"
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 
 namespace HPlus {
@@ -14,10 +15,9 @@ namespace HPlus {
     fVertexSelection(vertexSelection), fPassedEvent(passedEvent) {}
   VertexSelection::Data::~Data() {}
 
-  VertexSelection::VertexSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  VertexSelection::VertexSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HistoWrapper& histoWrapper):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
-    fEnabled(iConfig.getUntrackedParameter<bool>("enabled")),
-    fEventWeight(eventWeight)
+    fEnabled(iConfig.getUntrackedParameter<bool>("enabled"))
   {}
 
   VertexSelection::~VertexSelection() {}
