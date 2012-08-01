@@ -1328,10 +1328,11 @@ class Dataset:
     # the memory footprint and not hit the limit of number of open
     # files
     def close(self):
-#        print "Closing", self.file.GetName()
-        self.file.Close("R")
-        self.file.Delete()
-        del self.file
+        if self.file != None:
+            self.file.Close("R")
+            self.file.Delete()
+            del self.file
+            self.file = None
 
     ## Clone the Dataset object
     # 

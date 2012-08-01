@@ -146,7 +146,10 @@ class TableProducer:
             myCard += self._getTableOutput(myWidths,myNuisanceTable)
             # Print datacard to screen if requested
             if self._opts.showDatacard:
-                print myCard
+                if self._config.BlindAnalysis:
+                    print WarningStyle()+"You are BLINDED: Refused cowardly to print datacard on screen (you're not supposed to look at it)!"+NormalStyle()
+                else:
+                    print myCard
             # Save datacard to file
             myFile = open(myFilename, "w")
             myFile.write(myCard)
@@ -448,7 +451,10 @@ class TableProducer:
                 myOutput += "+- %4.0f (syst.)\n"%(TotalExpected.getAbsoluteSystUp())
             else:
                 myOutput += "+%4.0f -%4.0f (syst.)\n"%(TotalExpected.getAbsoluteSystUp(), TotalExpected.getAbsoluteSystDown())
-            myOutput += "                            Observed: %5d\n\n"%Data.getRate() #FIXME add blinding
+            if self._config.BlindAnalysis:
+                myOutput += "                            Observed: BLINDED\n\n"
+            else:
+                myOutput += "                            Observed: %5d\n\n"%Data.getRate()
             # Save output to file
             myFilename = self._infoDirname+"/EventYieldSummary_m%d.txt"%m
             myFile = open(myFilename, "w")
@@ -487,7 +493,10 @@ class TableProducer:
                 myOutputLatex += " \\pm %4.0f $ \\\\ \n"%(TotalExpected.getAbsoluteSystUp())
             else:
                 myOutputLatex += "~^{+%4.0f}){-%4.0f} $ \\\\ \n"%(TotalExpected.getAbsoluteSystUp(), TotalExpected.getAbsoluteSystDown())
-            myOutputLatex += "  Observed: & %4d \\\\ \n"%Data.getRate() #FIXME add blinding
+            if self._config.BlindAnalysis:
+                myOutputLatex += "  Observed: & BLINDED \\\\ \n"
+            else:
+                myOutputLatex += "  Observed: & %4d \\\\ \n"%Data.getRate()
             myOutputLatex += "  \\hline\n"
             myOutputLatex += "  \\end{tabular}\n"
             myOutputLatex += "\\end{table}\n"

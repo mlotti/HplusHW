@@ -44,12 +44,48 @@ def main(opts):
         myQCDInvList = obtainOptimisationVariationList(multicrabPaths.getQCDInvertedPath())
         if len(myModules) == 0:
             myModules.extend(myQCDInvList)
+    # Print module list, if asked
+    if opts.listVariations == True:
+        print "Available modules found (use -v to add by index number)"
+        for i in range(0,len(myModules)):
+            if myModules[i] == None:
+                print "  %d: (default module)"%i
+            else:
+                print "  %d: %s"%(i,myModules[i])
+        sys.exit()
 
+    # Select variations from modules
+    myVariations = []
+    if opts.variationId != None:
+        for varid in opts.variationId:
+            if varid < len(myModules):
+                myVariations.append(myModules[varid])
+            else:
+                print "List of available variations:"
+                if myModules[i] == None:
+                    print "  %d: (default module)"%i
+                else:
+                    print "  %d: %s"%(i,myModules[i])
+                raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" you asked for variation %d, which is not available (see above list)!")
+    else:
+        myVariations.extend(myModules)
+    # Print info about selected variations
+    print CaptionStyle()+"*** Datacard generator ***"+NormalStyle()+"\n"
+    print "Cards will be generaged for following variations (use -v to add a variation by its index number)"
+    for v in myVariations:
+        if v == None:
+            print "  (default module)"
+        else:
+            print "  "+v
+    print "Altogether %d variations\n"%len(myVariations)
     # Produce cards
+    myCounter = 0
     for method in myQCDMethods:
-        for module in myModules:
+        for module in myVariations:
+            myCounter += 1
+            print "\n"+HighlightStyle()+"Variation %d/%d ..."%(myCounter,len(myVariations))+NormalStyle()+"\n"
             if method == DataCard.DatacardQCDMethod.FACTORISED:
-                if "Opt" in module:
+                if module != None:
                     if module not in myQCDFactList:
                         print "Module '"+module+"' exists in signal analysis but not in QCD factorised, skipping ..."
                     else:
@@ -57,7 +93,7 @@ def main(opts):
                 else:
                     DataCard.DataCardGenerator(config,opts,method,None)
             if method == DataCard.DatacardQCDMethod.INVERTED:
-                if "Opt" in module:
+                if module != None:
                     if module not in myQCDInvList:
                         print "Module '"+module+"' exists in signal analysis but not in QCD inverted, skipping ..."
                     else:
@@ -86,8 +122,16 @@ def obtainOptimisationVariationList(taskPath):
                 myKey = myRootFile.GetListOfKeys().At(i)
                 if myKey.IsFolder():
                     # Ignore systematics directories
-                    if not "Plus" in myKey.GetTitle() and not "Minus" in myKey.GetTitle() and not "configInfo" in myKey.GetTitle():
-                        myModules.append(myKey.GetTitle())
+                    myTitle = myKey.GetTitle()
+                    if not "Plus" in myTitle and not "Minus" in myTitle and not "configInfo" in myTitle:
+                        myName = myTitle
+                        if myTitle.find("Opt") > 0:
+                            # Remove prefix
+                            myName = myTitle[myTitle.find("Opt"):len(myTitle)]
+                        else:
+                            # Fall back to default
+                            myName = None
+                        myModules.append(myName)
             myRootFile.Close()
             return myModules
     # No root file has been found
@@ -140,6 +184,7 @@ def testShapeHistogram():
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     parser.add_option("-x", "--datacard", dest="datacard", action="store", help="Name (incl. path) of the datacard to be used as an input")
+    parser.add_option("-l", "--listVariations", dest="listVariations", action="store_true", default=False, help="Print a list of available variations")
     parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
     parser.add_option("--QCDfactorised", dest="useQCDfactorised", action="store_true", default=False, help="Use factorised method for QCD measurement")
     parser.add_option("--QCDinverted", dest="useQCDinverted", action="store_true", default=False, help="Use inverted method for QCD measurement")
@@ -147,6 +192,7 @@ if __name__ == "__main__":
     parser.add_option("--debugMining", dest="debugMining", action="store_true", default=False, help="Enable debugging print for data mining")
     parser.add_option("--debugQCD", dest="debugQCD", action="store_true", default=False, help="Enable debugging print for QCD measurement")
     parser.add_option("--debugShapeHistogram", dest="debugShapeHistogram", action="store_true", default=False, help="Debug shape histogram modifying algorithm")
+    parser.add_option("-v", "--variation", dest="variationId", type="int", action="append", help="Evaluates specified variations")
     (opts, args) = parser.parse_args()
 
     myStatus = True

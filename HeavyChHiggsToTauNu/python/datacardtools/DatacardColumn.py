@@ -189,7 +189,7 @@ class DatacardColumn():
         #sys.stdout.flush()
         myRateResult = None
         myRateHistograms = []
-        if self.typeIsEmptyColum():
+        if self.typeIsEmptyColum() or dsetMgr == None:
             myRateResult = 0.0
             myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [], [], ExtractorMode.RATE, description="empty")
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
@@ -223,10 +223,12 @@ class DatacardColumn():
                 if e.getId() == nid:
                     myFoundStatus = True
                     # Obtain result
-                    myResult = e.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
+                    myResult = 0.0
+                    if dsetMgr != None:
+                        myResult = e.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
                     # Obtain histograms
                     myHistograms = []
-                    if e.isShapeNuisance():
+                    if e.isShapeNuisance() and dsetMgr != None:
                         myHistograms.extend(e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
                     # Cache result
                     self._nuisanceResults.append(ExtractorResult(e.getId(),

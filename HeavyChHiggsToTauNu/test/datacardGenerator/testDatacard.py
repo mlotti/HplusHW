@@ -1,35 +1,60 @@
 DataCardName    = 'myDummyTestName'
 #Path            = '/mnt/flustre/slehti/HplusDataForLands'
-Path            = '/home/wendland/data/lands/lands_HIG-11-019'
+Path            = '/home/wendland/data/v25b/test1'
 #MassPoints      = [80,90,100,120,140,150,155,160]
-MassPoints      = [160]
+MassPoints      = [120]
+
+BlindAnalysis   = True
 
 # Specify name of EDFilter or EDAnalyser process that produced the root files
 SignalAnalysis  = "signalAnalysis"
+EmbeddingAnalysis     = None
 QCDFactorisedAnalysis = "QCDMeasurement"
-QCDInvertedAnalysis = "" # FIXME
+QCDInvertedAnalysis = None # FIXME
 
-RootFileName    = "histograms.root" #FIXME
+RootFileName    = "histograms.root"
 
 # Rate counter definitions
-SignalRateCounter = "deltaPhiTauMET<160"
-FakeRateCounter = "nonQCDType2:deltaphi160"
+SignalRateCounter = "Selected events"
+FakeRateCounter = "EWKfaketaus:SelectedEvents"
 
-# Shape histogram definitions
-SignalShapeHisto = "transverseMassAfterDeltaPhi160"
-FakeShapeHisto = "NonQCDTypeIITransverseMassAfterDeltaPhi160"
-ShapeHistogramsDimensions = { "bins": 20,
-                              "rangeMin": 0.0,
-                              "rangeMax": 400.0,
-                              "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                              #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
-                              "xtitle": "Transverse mass / GeV",
-                              "ytitle": "Events" }
 # Options
-OptionReplaceEmbeddingByMC = False
+OptionMassShape = "TransverseMass"
+#optionMassShape = "FullMass"
+OptionReplaceEmbeddingByMC = True
+OptionIncludeSystematics = False # Set to true if the JES and PU uncertainties were produced
+OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
 
 # Options for reports and article
 OptionBr = 0.05  # Br(t->bH+)
+
+# Shape histogram definitions
+SignalShapeHisto = ""
+FakeShapeHisto = ""
+ShapeHistogramsDimensions = {}
+
+if OptionMassShape == "TransverseMass":
+    SignalShapeHisto = "transverseMass"
+    FakeShapeHisto = "EWKFakeTausTransverseMass"
+    ShapeHistogramsDimensions = { "bins": 20,
+                                  "rangeMin": 0.0,
+                                  "rangeMax": 400.0,
+                                  "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                                  #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
+                                  "xtitle": "Transverse mass / GeV",
+                                  "ytitle": "Events" }
+elif OptionMassShape == "FullMass":
+    SignalShapeHisto = "transverseMass" #### FIXME
+    FakeShapeHisto = "EWKFakeTausTransverseMass" #### FIXME
+    ShapeHistogramsDimensions = { "bins": 25,
+                                  "rangeMin": 0.0,
+                                  "rangeMax": 500.0,
+                                  "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                                  #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
+                                  "xtitle": "Full mass / GeV",
+                                  "ytitle": "Events" }
+
+DataCardName += "_"+OptionMassShape
 
 ##############################################################################
 # Observation definition (how to retrieve number of observed events)
@@ -70,21 +95,42 @@ for mass in MassPoints:
     hwx.setDatasetDefinitions(["TTToHplusBWB_M"+str(mass)]),
     DataGroups.append(hwx)
 
-DataGroups.append(DataGroup(
-    label        = "QCDfact",
-    landsProcess = 3,
-    validMassPoints = MassPoints,
-    dirPrefix   = QCDFactorisedAnalysis,
-    datasetType  = "QCD factorised",
-    datasetDefinitions = ["Tau_"],
-    MCEWKDatasetDefinitions = ["TTJets","WJets","DY","WW","WZ","ZZ","T_","Tbar_"],
-    nuisances    = ["12","13","40b"],
-    QCDfactorisedInfo = { "afterBigboxSource": "QCDStandardSelections/AfterJetSelection",
-                          "afterMETLegSource": "QCDMeasurementVariation_METcut50_DeltaPhiTauMETCut160_tauIsol1/Leg1AfterDeltaPhiTauMET",
-                          "afterTauLegSource": "QCDMeasurementVariation_METcut50_DeltaPhiTauMETCut160_tauIsol1/Leg2AfterTauIDWithRtau",
-                          "basicMtHisto": "QCDMeasurementVariation_METcut50_DeltaPhiTauMETCut160_tauIsol1/MtShapeAfterMETAndDeltaPhi",
-                          "assumedMCEWKSystUncertainty": 0.20 }
-))
+if OptionMassShape == "TransverseMass":
+    DataGroups.append(DataGroup(
+        label        = "QCDfact",
+        landsProcess = 3,
+        validMassPoints = MassPoints,
+        dirPrefix   = QCDFactorisedAnalysis,
+        datasetType  = "QCD factorised",
+        datasetDefinitions = ["Tau_"],
+        MCEWKDatasetDefinitions = ["TTJets","WJets","DY","WW","WZ","ZZ","T_","Tbar_"],
+        nuisances    = ["12","13","40b"],
+        QCDfactorisedInfo = { "afterBigboxSource": "factorisation/AfterJetSelection",
+                              "afterMETLegSource": "factorisation/Leg1AfterTopSelection",
+                              "afterTauLegSource": "factorisation/Leg2AfterTauID",
+                              "basicMtHisto": "shape_MtShapesAfterFullMETLeg/MtShapesAfterFullMETLeg", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
+                              "assumedMCEWKSystUncertainty": 0.20,
+                              "factorisationMapAxisLabels": ["#tau p_{T}, GeV", "#tau #eta", "N_{vertices}"],
+        }
+    ))
+elif OptionMassShape == "FullMass":
+    DataGroups.append(DataGroup(
+        label        = "QCDfact",
+        landsProcess = 3,
+        validMassPoints = MassPoints,
+        dirPrefix   = QCDFactorisedAnalysis,
+        datasetType  = "QCD factorised",
+        datasetDefinitions = ["Tau_"],
+        MCEWKDatasetDefinitions = ["TTJets","WJets","DY","WW","WZ","ZZ","T_","Tbar_"],
+        nuisances    = ["12","13","40b"],
+        QCDfactorisedInfo = { "afterBigboxSource": "factorisation/AfterJetSelection",
+                              "afterMETLegSource": "factorisation/Leg1AfterTopSelection",
+                              "afterTauLegSource": "factorisation/Leg2AfterTauID",
+                              "basicMtHisto": "shape_FullMassShapesAfterFullMETLeg/FullMassShapesAfterFullMETLeg", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
+                              "assumedMCEWKSystUncertainty": 0.20,
+                              "factorisationMapAxisLabels": ["#tau p_{T}, GeV", "#tau #eta", "N_{vertices}"],
+        }
+    ))
 
 DataGroups.append(DataGroup(
     label        = "QCDinv",
@@ -233,6 +279,8 @@ ReservedNuisances.append(["08", "reserved for leptonic"])
 ReservedNuisances.append(["20", "reserved for leptonic"])
 ReservedNuisances.append(["21", "reserved for leptonic"])
 ReservedNuisances.append(["23", "reserved for leptonic"])
+if OptionPurgeReservedLines:
+    ReservedNuisances = []
 
 Nuisances = []
 
@@ -242,8 +290,8 @@ Nuisances.append(Nuisance(
     distr         = "lnN",
     function      = "ScaleFactor",
     histoDir      = ["signalAnalysis/ScaleFactorUncertainties/"],
-    histograms    = ["TriggerScaleFactorAbsUncert_AfterDeltaPhi160"],
-    normalisation = ["signalAnalysis/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterDeltaPhi160"],
+    histograms    = ["TriggerScaleFactorAbsUncert_AfterSelection"],
+    normalisation = ["signalAnalysis/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterSelection"],
     addUncertaintyInQuadrature = 0.10 # MET leg uncertainty
 ))
 
@@ -264,8 +312,8 @@ Nuisances.append(Nuisance(
                      "signalAnalysisEmbedded/ScaleFactorUncertainties/"],
     histograms    = ["TriggerScaleFactorAbsUncert_AfterDeltaPhi160",
                      "TriggerScaleFactorAbsUncert_AfterDeltaPhi160"],
-    normalisation = ["signalAnalysisNormal/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterDeltaPhi160",
-                     "signalAnalysisEmbedded/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterDeltaPhi160"],
+    normalisation = ["signalAnalysisNormal/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterSelection",
+                     "signalAnalysisEmbedded/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterSelection"],
     addUncertaintyInQuadrature = 0.10 # MET leg uncertainty
 ))
 
@@ -285,41 +333,66 @@ Nuisances.append(Nuisance(
     value         = 0.15
 ))
 
-Nuisances.append(Nuisance(
-    id            = "07",
-    label         = "JES/JER/MET/Rtau effect on mT shape",
-    distr         = "shapeQ",
-    function      = "Shape",
-    counter       = SignalRateCounter,
-    histoDir      = ["signalAnalysisJESPlus03eta02METMinus10",
-                     "signalAnalysisJESMinus03eta02METPlus10"],
-    histograms    = [SignalShapeHisto,
-                     SignalShapeHisto]
-))
+if OptionIncludeSystematics:
+    Nuisances.append(Nuisance(
+        id            = "07",
+        label         = "JES/JER/MET/Rtau effect on mT shape",
+        distr         = "shapeQ",
+        function      = "Shape",
+        counter       = SignalRateCounter,
+        histoDir      = ["signalAnalysisJESPlus03eta02METMinus10",
+                        "signalAnalysisJESMinus03eta02METPlus10"],
+        histograms    = [SignalShapeHisto,
+                        SignalShapeHisto]
+    ))
 
-Nuisances.append(Nuisance(
-    id            = "07b",
-    label         = "JES/JER/MET/Rtau effect on mT shape",
-    distr         = "shapeQ",
-    function      = "Shape",
-    counter       = FakeRateCounter,
-    histoDir      = ["signalAnalysisJESPlus03eta02METMinus10",
-                     "signalAnalysisJESMinus03eta02METPlus10"],
-    histograms    = [FakeShapeHisto,
-                     FakeShapeHisto]
-))
+    Nuisances.append(Nuisance(
+        id            = "07b",
+        label         = "JES/JER/MET/Rtau effect on mT shape",
+        distr         = "shapeQ",
+        function      = "Shape",
+        counter       = FakeRateCounter,
+        histoDir      = ["signalAnalysisJESPlus03eta02METMinus10",
+                        "signalAnalysisJESMinus03eta02METPlus10"],
+        histograms    = [FakeShapeHisto,
+                        FakeShapeHisto]
+    ))
 
-Nuisances.append(Nuisance(
-    id            = "07c",
-    label         = "JES/JER/MET/Rtau effect on mT shape",
-    distr         = "shapeQ",
-    function      = "Shape",
-    counter       = SignalRateCounter,
-    histoDir      = ["signalAnalysisJESPlus03eta02METMinus00",
-                     "signalAnalysisJESMinus03eta02METPlus00"],
-    histograms    = [SignalShapeHisto,
-                     SignalShapeHisto]
-))
+    Nuisances.append(Nuisance(
+        id            = "07c",
+        label         = "JES/JER/MET/Rtau effect on mT shape",
+        distr         = "shapeQ",
+        function      = "Shape",
+        counter       = SignalRateCounter,
+        histoDir      = ["signalAnalysisJESPlus03eta02METMinus00",
+                        "signalAnalysisJESMinus03eta02METPlus00"],
+        histograms    = [SignalShapeHisto,
+                        SignalShapeHisto]
+    ))
+else:
+    Nuisances.append(Nuisance(
+        id            = "07",
+        label         = "NON-EXACT VALUE for JES/JER/MET/Rtau effect on mT shape",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.10,
+    ))
+
+    Nuisances.append(Nuisance(
+        id            = "07b",
+        label         = "NON-EXACT VALUE for JES/JER/MET/Rtau effect on mT shape",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.10,
+    ))
+
+    Nuisances.append(Nuisance(
+        id            = "07c",
+        label         = "NON-EXACT VALUE for JES/JER/MET/Rtau effect on mT shape",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.07,
+    ))
 
 Nuisances.append(Nuisance(
     id            = "09",
@@ -337,8 +410,8 @@ Nuisances.append(Nuisance(
     distr         = "lnN",
     function      = "ScaleFactor",
     histoDir      = ["signalAnalysis/ScaleFactorUncertainties/"],
-    histograms    = ["BtagScaleFactorAbsUncert_AfterDeltaPhi160"],
-    normalisation = ["signalAnalysis/ScaleFactorUncertainties/BtagScaleFactorAbsUncertCounts_AfterDeltaPhi160"]
+    histograms    = ["BtagScaleFactorAbsUncert_AfterSelection"],
+    normalisation = ["signalAnalysis/ScaleFactorUncertainties/BtagScaleFactorAbsUncertCounts_AfterSelection"]
 ))
 
 Nuisances.append(Nuisance(
@@ -347,8 +420,8 @@ Nuisances.append(Nuisance(
     distr         = "lnN",
     function      = "ScaleFactor",
     histoDir      = ["signalAnalysis/ScaleFactorUncertainties/"],
-    histograms    = ["BtagScaleFactorAbsUncert_AfterDeltaPhi160"],
-    normalisation = ["signalAnalysis/ScaleFactorUncertainties/BtagScaleFactorAbsUncertCounts_AfterDeltaPhi160"]
+    histograms    = ["BtagScaleFactorAbsUncert_AfterSelection"],
+    normalisation = ["signalAnalysis/ScaleFactorUncertainties/BtagScaleFactorAbsUncertCounts_AfterSelection"]
 ))
 
 Nuisances.append(Nuisance(
@@ -357,8 +430,8 @@ Nuisances.append(Nuisance(
     distr         = "lnN",
     function      = "ScaleFactor",
     histoDir      = ["signalAnalysisNormal/ScaleFactorUncertainties/"],
-    histograms    = ["BtagScaleFactorAbsUncert_AfterDeltaPhi160"],
-    normalisation = ["signalAnalysisNormal/ScaleFactorUncertainties/BtagScaleFactorAbsUncertCounts_AfterDeltaPhi160"]
+    histograms    = ["BtagScaleFactorAbsUncert_AfterSelection"],
+    normalisation = ["signalAnalysisNormal/ScaleFactorUncertainties/BtagScaleFactorAbsUncertCounts_AfterSelection"]
 ))
 
 Nuisances.append(Nuisance(
@@ -530,27 +603,44 @@ Nuisances.append(Nuisance(
     value         = 0.022
 ))
 
-Nuisances.append(Nuisance(
-    id            = "34",
-    label         = "pileup",
-    distr         = "lnN",
-    function      = "pileupUncertainty",
-    histoDir      = ["signalAnalysisCounters", # nominal
-                     "signalAnalysisPUWeightMinusCounters", # minus
-                     "signalAnalysisPUWeightPlusCounters"], # up
-    counter       = SignalRateCounter
-))
+if OptionIncludeSystematics:
+    Nuisances.append(Nuisance(
+        id            = "34",
+        label         = "pileup",
+        distr         = "lnN",
+        function      = "pileupUncertainty",
+        histoDir      = ["signalAnalysisCounters", # nominal
+                        "signalAnalysisPUWeightMinusCounters", # minus
+                        "signalAnalysisPUWeightPlusCounters"], # up
+        counter       = SignalRateCounter
+    ))
 
-Nuisances.append(Nuisance(
-    id            = "34b",
-    label         = "pileup",
-    distr         = "lnN",
-    function      = "pileupUncertainty",
-    histoDir      = ["signalAnalysisCounters", # nominal
-                     "signalAnalysisPUWeightMinusCounters", # minus
-                     "signalAnalysisPUWeightPlusCounters"], # up
-    counter       = FakeRateCounter
-))
+    Nuisances.append(Nuisance(
+        id            = "34b",
+        label         = "pileup",
+        distr         = "lnN",
+        function      = "pileupUncertainty",
+        histoDir      = ["signalAnalysisCounters", # nominal
+                        "signalAnalysisPUWeightMinusCounters", # minus
+                        "signalAnalysisPUWeightPlusCounters"], # up
+        counter       = FakeRateCounter
+    ))
+else:
+    Nuisances.append(Nuisance(
+        id            = "34",
+        label         = "pileup",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.05
+    ))
+
+    Nuisances.append(Nuisance(
+        id            = "34b",
+        label         = "pileup",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.05
+    ))
 
 Nuisances.append(Nuisance(
     id            = "35",
