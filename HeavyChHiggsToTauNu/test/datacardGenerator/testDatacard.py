@@ -2,7 +2,8 @@ DataCardName    = 'myDummyTestName'
 #Path            = '/mnt/flustre/slehti/HplusDataForLands'
 Path            = '/home/wendland/data/v25b/test1'
 #MassPoints      = [80,90,100,120,140,150,155,160]
-MassPoints      = [120]
+MassPoints      = [80,120,160]
+#MassPoints      = [120]
 
 BlindAnalysis   = True
 
@@ -770,12 +771,13 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "MET",
     QCDFactHistoPath = "shape_CtrlLeg1AfterMET",
     QCDFactHistoName = "CtrlLeg1AfterMET",
-    details          = { "bins": 20,
+    details          = { "bins": 13,
                          "rangeMin": 0.0,
                          "rangeMax": 400.0,
-                         "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                         "xtitle": "E_T^{miss}, GeV",
+                         "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
+                         "xtitle": "E_{T}^{miss}",
                          "ytitle": "Events",
+                         "unit": "GeV",
                          "logy": True,
                          "DeltaRatio": 0.5,
                          "ymin": 0.9,
@@ -800,6 +802,7 @@ ControlPlots.append(ControlPlotInput(
                          "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
                          "xtitle": "Number of selected b jets",
                          "ytitle": "Events",
+                         "unit": "",
                          "logy": True,
                          "DeltaRatio": 0.5,
                          "ymin": 0.9,
@@ -822,8 +825,9 @@ ControlPlots.append(ControlPlotInput(
                          "rangeMin": 0.0,
                          "rangeMax": 180.0,
                          "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                         "xtitle": "#Delta#phi(#tau_{h},E_T^{miss}), ^{o}",
+                         "xtitle": "#Delta#phi(#tau_{h},E_{T}^{miss})",
                          "ytitle": "Events",
+                         "unit": "^{o}",
                          "logy": True,
                          "DeltaRatio": 0.5,
                          "ymin": 0.9,
@@ -846,8 +850,9 @@ ControlPlots.append(ControlPlotInput(
                          "rangeMin": 0.0,
                          "rangeMax": 180.0,
                          "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                         "xtitle": "max(#Delta#phi(jet,E_T^{miss}), ^{o}",
+                         "xtitle": "max(#Delta#phi(jet,E_{T}^{miss})",
                          "ytitle": "Events",
+                         "unit": "^{o}",
                          "logy": True,
                          "DeltaRatio": 0.5,
                          "ymin": 0.9,
@@ -870,8 +875,9 @@ ControlPlots.append(ControlPlotInput(
                          "rangeMin": 0.0,
                          "rangeMax": 400.0,
                          "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                         "xtitle": "mT(#tau_{h},E_T^{miss}), GeV/c^{2}",
+                         "xtitle": "mT(#tau_{h},E_{T}^{miss})",
                          "ytitle": "Events",
+                         "unit": "GeV/c^{2}",
                          "logy": False,
                          "DeltaRatio": 0.5,
                          "ymin": 0.9,
@@ -894,8 +900,9 @@ ControlPlots.append(ControlPlotInput(
                          "rangeMin": 0.0,
                          "rangeMax": 500.0,
                          "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                         "xtitle": "m(#tau_{h},E^{miss}), GeV/c^{2}",
+                         "xtitle": "m(#tau_{h},E^{miss})",
                          "ytitle": "Events",
+                         "unit": "GeV/c^{2}",
                          "logy": False,
                          "DeltaRatio": 0.5,
                          "ymin": 0.9,
