@@ -5,6 +5,7 @@
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorBase
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ControlPlotMaker import ControlPlotMaker
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 
 from math import pow,sqrt
@@ -97,6 +98,9 @@ class TableProducer:
         # Make datacards
         self.makeDataCards()
 
+        # Make control plots
+        ControlPlotMaker(self._opts, self._config, self._dirname, self._luminosity, self._observation, self._datasetGroups)
+
         # Make other reports
         print "\n"+HighlightStyle()+"Generating reports"+NormalStyle()
         # Print table of shape variation for shapeQ nuisances
@@ -161,7 +165,7 @@ class TableProducer:
             myRootFile.Write()
             myRootFile.Close()
             print "Written shape root file to:",myRootFilename
-        # Save additional info
+        # Save additional info for QCD factorised
         for c in self._datasetGroups:
             if c.typeIsQCDfactorised():
                 c.saveQCDInfoHistograms(self._infoDirname)

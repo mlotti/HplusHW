@@ -208,4 +208,5 @@ if __name__ == "__main__":
         parser.print_help()
         sys.exit()
     # Run main program
+    ROOT.gROOT.SetBatch() # no flashing canvases
     main(opts)

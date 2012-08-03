@@ -17,7 +17,7 @@ class ExtractorResult():
         self._exId = exId
         self._masterId = masterId
         self._result = result
-        self._histograms = histograms
+        self._histograms = histograms # histograms going into the datacard root file
         self._tempHistos = [] # Needed to make histograms going into root file persistent
 
     def getId(self):
@@ -33,7 +33,7 @@ class ExtractorResult():
         # Note: Do not call destructor for the tempHistos.
         #       Closing the root file to which they have been assigned to destructs them.
         #       i.e. it is enough to just clear the list.
-        self._tempHistos = [] 
+        #self._tempHistos = []
         for h in self._histograms:
             htemp = h.Clone(h.GetTitle())
             htemp.SetDirectory(rootfile)
@@ -75,6 +75,7 @@ class DatacardColumn():
         self._rateResult = None
         self._nuisanceIds = nuisanceIds
         self._nuisanceResults = []
+        self._controlPlots = []
         self._datasetMgrColumn = datasetMgrColumn
         self._datasetMgrColumnForQCDMCEWK  = datasetMgrColumnForQCDMCEWK
         self._additionalNormalisationFactor = additionalNormalisationFactor
@@ -181,8 +182,22 @@ class DatacardColumn():
     def getDatasetMgrColumnForQCDMCEWK(self):
         return self._datasetMgrColumnForQCDMCEWK
 
+    ## Returns the module name, i.e. directory prefix in the root file
+    def getDirPrefix(self):
+        return self._dirPrefix
+
+    ## Get correct control plot
+    def getControlPlotByTitle(self, title):
+        for h in self._controlPlots:
+            if title in h.GetTitle():
+                return h
+        print "Available control plot names:"
+        for h in self._controlPlots:
+            print "  "+h.GetTitle()
+        raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Could not find control plot by title '%s' in column %s!"%(title, self._label))
+
     ## Do data mining and cache results
-    def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors):
+    def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors, controlPlotExtractors):
         print "... processing column: "+HighlightStyle()+self._label+NormalStyle()
         # Obtain rate
         #sys.stdout.write("\r... data mining in progress: Column="+self._label+", obtaining Rate...                                                          ")
@@ -193,11 +208,8 @@ class DatacardColumn():
             myRateResult = 0.0
             myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [], [], ExtractorMode.RATE, description="empty")
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
-        elif self.typeIsQCD():
-            print WarningStyle()+"Warning: rate not implemented for QCD yet, setting rate to zero"+NormalStyle()  #FIXME
-            myRateResult = 0.0
-            myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [], [], ExtractorMode.RATE, description="empty")
-            myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
+        #elif self.typeIsQCD():
+            # should never be reached for QCD factorised
         else:
             myExtractor = None
             myShapeExtractor = None
@@ -214,7 +226,7 @@ class DatacardColumn():
                                            "rate",
                                            myRateResult,
                                            myRateHistograms)
-        # Obtain nuisances
+        # Obtain results for nuisances
         for nid in self._nuisanceIds:
             #sys.stdout.write("\r... data mining in progress: Column="+self._label+", obtaining Nuisance="+nid+"...                                              ")
             #sys.stdout.flush()
@@ -238,7 +250,11 @@ class DatacardColumn():
             if not myFoundStatus:
                 print "\n"+ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Cannot find nuisance with id '"+nid+"'!"
                 raise Exception()
-        #print "\nData mining done"
+        # Obtain results for control plots
+        for c in controlPlotExtractors:
+            if dsetMgr != None:
+                self._controlPlots.append(c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
+                #print "added ctrl plot %s for %s"%(c._histoTitle,self._label)
 
     ## Returns rate for column
     def getRateResult(self):

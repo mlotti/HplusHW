@@ -42,6 +42,7 @@ class DataCardGenerator:
         self._luminosity = -1
         self._columns = []
         self._extractors = []
+        self._controlPlotExtractors = []
         self._QCDMethod = QCDMethod
         self._replaceEmbeddingWithMC = False
         self._doSignalAnalysis = True
@@ -95,8 +96,15 @@ class DataCardGenerator:
             myOutputPrefix += "_"+self._optimisationVariation
 
         # Create columns (dataset groups)
-        self.createDatacardColumns()
+        myLuminosities = self.createDatacardColumns()
         self.checkDatacardColumns()
+
+        # create extractors and control plot extractors
+        self.createExtractors()
+        self.createControlPlots()
+
+        # do data mining to cache results into datacard column objects
+        self.doDataMining(myLuminosities)
 
         # Make datacards
         TableProducer(opts, config, myOutputPrefix, self._luminosity, self._observation, self._columns, self._extractors)
@@ -173,6 +181,9 @@ class DataCardGenerator:
             mymsg += "- missing field 'Nuisances' (list of Nuisance objects)\n"
         elif len(self._config.Nuisances) == 0:
             mymsg += "- need to specify at least one Nuisance to field 'Nuisances' (list of Nuisance objects)\n"
+        if self._config.ControlPlots == None:
+            print WarningStyle()+"Warning:"+NormalStyle()+" You did not specify any ControlPlots in the config (ControlPlots is list of ControlPlotInput objects)!"
+            print "  Please check if this was intended."
         # determine if datacard was ok
         if mymsg != "":
             print ErrorStyle()+"Error in config '"+self._opts.datacard+"'!"+NormalStyle()
@@ -348,8 +359,9 @@ class DataCardGenerator:
                 if self._opts.debugConfig:
                     myColumn.printDebug()
         print "Data groups converted to datacard columns"
-        # create extractors
-        self.createExtractors()
+        return myLuminosities
+
+    def doDataMining(self, luminosities):
         # Obtain main counter tables
         print "Obtaining main counter tables"
         myEventCounterTables = []
@@ -357,14 +369,15 @@ class DataCardGenerator:
             if self._dsetMgrs[i] != None:
                 # Obtain main event counter table
                 myEventCounter = counter.EventCounter(self._dsetMgrs[i])
-                myEventCounter.normalizeMCToLuminosity(myLuminosities[i])
+                myEventCounter.normalizeMCToLuminosity(luminosities[i])
                 myEventCounterTables.append(myEventCounter.getMainCounterTable())
             else:
                 myEventCounterTables.append([])
         # Do data mining and cache results
         print "Starting data mining"
         if self._doSignalAnalysis:
-            self._observation.doDataMining(self._config,self._dsetMgrs[1],myLuminosities[1],myEventCounterTables[1],self._extractors)
+            # Handle observation separately
+            self._observation.doDataMining(self._config,self._dsetMgrs[1],luminosities[1],myEventCounterTables[1],self._extractors,self._controlPlotExtractors)
         for c in self._columns:
             myIndex = 0
             if c.typeIsObservation() or c.typeIsSignal():
@@ -373,8 +386,8 @@ class DataCardGenerator:
                 myIndex = 2
             if c.typeIsQCD():
                 myIndex = 3
-
-            c.doDataMining(self._config,self._dsetMgrs[myIndex],myLuminosities[myIndex],myEventCounterTables[myIndex],self._extractors)
+            # Do mining for datacard columns
+            c.doDataMining(self._config,self._dsetMgrs[myIndex],luminosities[myIndex],myEventCounterTables[myIndex],self._extractors,self._controlPlotExtractors)
         print "\nData mining has been finished, results (and histograms) have been ingeniously cached"
 
     ## Closes files in dataset managers
@@ -547,3 +560,16 @@ class DataCardGenerator:
                     raise Exception()
         print "Merged Nuisances"
 
+
+    ## Creates extractors for nuisances
+    def createControlPlots(self):
+        # Protection to create extractors only once
+        if len(self._controlPlotExtractors) > 0:
+            return
+
+        # Loop over control plot inputs, create extractors for all other columns except QCD factorised
+        for c in self._config.ControlPlots:
+            self._controlPlotExtractors.append(ControlPlotExtractor(histoSpecs = c.details,
+                                               histoTitle = c.title,
+                                               histoDirs = c.signalHistoPath,
+                                               histoNames = c.signalHistoName))

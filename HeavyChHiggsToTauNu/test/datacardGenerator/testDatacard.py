@@ -71,6 +71,8 @@ Observation = ObservationInput(dirPrefix=SignalAnalysis,
 #
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import DataGroup
 DataGroups = []
+EmbeddingIdList = []
+EWKFakeIdList = []
 
 signalTemplate = DataGroup(datasetType="Signal",
                            shapeHisto=SignalShapeHisto,
@@ -146,7 +148,8 @@ DataGroups.append(DataGroup(
 ))
 
 if not OptionReplaceEmbeddingByMC:
-     # EWK + ttbar with genuine taus
+    # EWK + ttbar with genuine taus
+    EmbeddingIdList = [4,5,6]
     DataGroups.append(DataGroup(
         label        = "EWK_Tau",
         landsProcess = 4,
@@ -182,6 +185,7 @@ if not OptionReplaceEmbeddingByMC:
     ))
 
     # EWK + ttbar with fake taus
+    EWKFakeIdList = [1,7,8]
     DataGroups.append(DataGroup(
         label        = "EWK_tt_faketau",
         landsProcess = 1,
@@ -217,6 +221,7 @@ if not OptionReplaceEmbeddingByMC:
     ))
 else:
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
+    EmbeddingIdList = [4,5,6]
     DataGroups.append(DataGroup(
         label        = "MC_EWK_Tau",
         landsProcess = 4,
@@ -232,7 +237,7 @@ else:
         label        = "MC_EWK_DY",
         landsProcess = 5,
         shapeHisto   = SignalShapeHisto,
-        datasetType  = "Embedding",
+        datasetType  = "Signal",
         datasetDefinitions   = ["DYJetsToLL"],
         dirPrefix   = SignalAnalysis,
         rateCounter  = SignalRateCounter,
@@ -243,7 +248,7 @@ else:
         label        = "MC_EWK_VV",
         landsProcess = 6,
         shapeHisto   = SignalShapeHisto,
-        datasetType  = "Embedding",
+        datasetType  = "Signal",
         datasetDefinitions   = ["WW","WZ","ZZ"],
         dirPrefix   = SignalAnalysis,
         rateCounter  = SignalRateCounter,
@@ -750,3 +755,152 @@ MergeNuisances.append(["15","15b"])
 MergeNuisances.append(["16","16b"])
 MergeNuisances.append(["34","34b"])
 MergeNuisances.append(["40","40b","40c"])
+
+# Control plots
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ControlPlotInput
+ControlPlots = []
+ControlPlots.append(ControlPlotInput(
+    title            = "MET",
+    signalHHid       = [-1],
+    signalHWid       = [0],
+    QCDid            = [3],
+    embeddingId      = EmbeddingIdList,
+    EWKfakeId        = EWKFakeIdList,
+    signalHistoPath  = "ControlPlots",
+    signalHistoName  = "MET",
+    QCDFactHistoPath = "shape_CtrlLeg1AfterMET",
+    QCDFactHistoName = "CtrlLeg1AfterMET",
+    details          = { "bins": 20,
+                         "rangeMin": 0.0,
+                         "rangeMax": 400.0,
+                         "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                         "xtitle": "E_T^{miss}, GeV",
+                         "ytitle": "Events",
+                         "logy": True,
+                         "DeltaRatio": 0.5,
+                         "ymin": 0.9,
+                         "ymax": 2e3},
+    blindedRange     = [], # specify range min,max if blinding applies to this control plot
+))
+
+ControlPlots.append(ControlPlotInput(
+    title            = "BJetSelection",
+    signalHHid       = [-1],
+    signalHWid       = [0],
+    QCDid            = [3],
+    embeddingId      = EmbeddingIdList,
+    EWKfakeId        = EWKFakeIdList,
+    signalHistoPath  = "ControlPlots",
+    signalHistoName  = "NBjets",
+    QCDFactHistoPath = "shape_CtrlLeg1AfterNbjets",
+    QCDFactHistoName = "CtrlLeg1AfterNbjets",
+    details          = { "bins": 6,
+                         "rangeMin": 0.0,
+                         "rangeMax": 6.0,
+                         "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                         "xtitle": "Number of selected b jets",
+                         "ytitle": "Events",
+                         "logy": True,
+                         "DeltaRatio": 0.5,
+                         "ymin": 0.9,
+                         "ymax": 3e3},
+    blindedRange     = [], # specify range min,max if blinding applies to this control plot
+))
+
+ControlPlots.append(ControlPlotInput(
+    title            = "DeltaPhi",
+    signalHHid       = [-1],
+    signalHWid       = [0],
+    QCDid            = [3],
+    embeddingId      = EmbeddingIdList,
+    EWKfakeId        = EWKFakeIdList,
+    signalHistoPath  = "",
+    signalHistoName  = "deltaPhi",
+    QCDFactHistoPath = "shape_CtrlLeg1AfterDeltaPhiTauMET",
+    QCDFactHistoName = "CtrlLeg1AfterDeltaPhiTauMET",
+    details          = { "bins": 9,
+                         "rangeMin": 0.0,
+                         "rangeMax": 180.0,
+                         "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                         "xtitle": "#Delta#phi(#tau_{h},E_T^{miss}), ^{o}",
+                         "ytitle": "Events",
+                         "logy": True,
+                         "DeltaRatio": 0.5,
+                         "ymin": 0.9,
+                         "ymax": 3e2},
+    blindedRange     = [-1, 300], # specify range min,max if blinding applies to this control plot
+))
+
+ControlPlots.append(ControlPlotInput(
+    title            = "MaxDeltaPhi",
+    signalHHid       = [-1],
+    signalHWid       = [0],
+    QCDid            = [3],
+    embeddingId      = EmbeddingIdList,
+    EWKfakeId        = EWKFakeIdList,
+    signalHistoPath  = "",
+    signalHistoName  = "maxDeltaPhiJetMet",
+    QCDFactHistoPath = "shape_CtrlLeg1AfterMaxDeltaPhiJetMET",
+    QCDFactHistoName = "CtrlLeg1AfterMaxDeltaPhiJetMET",
+    details          = { "bins": 9,
+                         "rangeMin": 0.0,
+                         "rangeMax": 180.0,
+                         "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                         "xtitle": "max(#Delta#phi(jet,E_T^{miss}), ^{o}",
+                         "ytitle": "Events",
+                         "logy": True,
+                         "DeltaRatio": 0.5,
+                         "ymin": 0.9,
+                         "ymax": 5e2},
+    blindedRange     = [-1, 300], # specify range min,max if blinding applies to this control plot
+))
+
+ControlPlots.append(ControlPlotInput(
+    title            = "TransverseMass",
+    signalHHid       = [-1],
+    signalHWid       = [0],
+    QCDid            = [3],
+    embeddingId      = EmbeddingIdList,
+    EWKfakeId        = EWKFakeIdList,
+    signalHistoPath  = "",
+    signalHistoName  = "transverseMass",
+    QCDFactHistoPath = "shape_MtShapesAfterFullMETLeg",
+    QCDFactHistoName = "MtShapesAfterFullMETLeg",
+    details          = { "bins": 20,
+                         "rangeMin": 0.0,
+                         "rangeMax": 400.0,
+                         "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                         "xtitle": "mT(#tau_{h},E_T^{miss}), GeV/c^{2}",
+                         "ytitle": "Events",
+                         "logy": False,
+                         "DeltaRatio": 0.5,
+                         "ymin": 0.9,
+                         "ymax": 2e2},
+    blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
+))
+
+ControlPlots.append(ControlPlotInput(
+    title            = "FullMass",
+    signalHHid       = [-1],
+    signalHWid       = [0],
+    QCDid            = [3],
+    embeddingId      = EmbeddingIdList,
+    EWKfakeId        = EWKFakeIdList,
+    signalHistoPath  = "FullHiggsMass",
+    signalHistoName  = "HiggsMass",
+    QCDFactHistoPath = "shape_FullMassShapesAfterFullMETLeg",
+    QCDFactHistoName = "FullMassShapesAfterFullMETLeg",
+    details          = { "bins": 25,
+                         "rangeMin": 0.0,
+                         "rangeMax": 500.0,
+                         "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                         "xtitle": "m(#tau_{h},E^{miss}), GeV/c^{2}",
+                         "ytitle": "Events",
+                         "logy": False,
+                         "DeltaRatio": 0.5,
+                         "ymin": 0.9,
+                         "ymax": 1e2},
+    blindedRange     = [60, 240], # specify range min,max if blinding applies to this control plot
+))
+
+

@@ -748,31 +748,33 @@ class QCDfactorisedColumn(DatacardColumn):
         return self._messages
 
     ## Do data mining and cache results
-    def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors):
+    def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors, controlPlotExtractors):
         print "... processing column: "+HighlightStyle()+self._label+NormalStyle()
+        if dsetMgr == None:
+            raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" You called data mining for QCD factorised, but you disabled it config. Such undertaking is currently not supported.")
         print "... Calculating NQCD value ..."
         # Make event count objects
         myBigBoxEventCount = QCDEventCount(histoPrefix=self._dirPrefix,
-                                           histoName=self._afterBigboxSource,
-                                           dsetMgr=dsetMgr,
-                                           dsetMgrDataColumn=self._datasetMgrColumn,
-                                           dsetMgrMCEWKColumn=self._datasetMgrColumnForQCDMCEWK,
-                                           luminosity=luminosity,
-                                           assumedMCEWKSystUncertainty=self._assumedMCEWKSystUncertainty)
+                                          histoName=self._afterBigboxSource,
+                                          dsetMgr=dsetMgr,
+                                          dsetMgrDataColumn=self._datasetMgrColumn,
+                                          dsetMgrMCEWKColumn=self._datasetMgrColumnForQCDMCEWK,
+                                          luminosity=luminosity,
+                                          assumedMCEWKSystUncertainty=self._assumedMCEWKSystUncertainty)
         myMETLegEventCount = QCDEventCount(histoPrefix=self._dirPrefix,
-                                           histoName=self._afterMETLegSource,
-                                           dsetMgr=dsetMgr,
-                                           dsetMgrDataColumn=self._datasetMgrColumn,
-                                           dsetMgrMCEWKColumn=self._datasetMgrColumnForQCDMCEWK,
-                                           luminosity=luminosity,
-                                           assumedMCEWKSystUncertainty=self._assumedMCEWKSystUncertainty)
+                                          histoName=self._afterMETLegSource,
+                                          dsetMgr=dsetMgr,
+                                          dsetMgrDataColumn=self._datasetMgrColumn,
+                                          dsetMgrMCEWKColumn=self._datasetMgrColumnForQCDMCEWK,
+                                          luminosity=luminosity,
+                                          assumedMCEWKSystUncertainty=self._assumedMCEWKSystUncertainty)
         myTauLegEventCount = QCDEventCount(histoPrefix=self._dirPrefix,
-                                           histoName=self._afterTauLegSource,
-                                           dsetMgr=dsetMgr,
-                                           dsetMgrDataColumn=self._datasetMgrColumn,
-                                           dsetMgrMCEWKColumn=self._datasetMgrColumnForQCDMCEWK,
-                                           luminosity=luminosity,
-                                           assumedMCEWKSystUncertainty=self._assumedMCEWKSystUncertainty)
+                                          histoName=self._afterTauLegSource,
+                                          dsetMgr=dsetMgr,
+                                          dsetMgrDataColumn=self._datasetMgrColumn,
+                                          dsetMgrMCEWKColumn=self._datasetMgrColumnForQCDMCEWK,
+                                          luminosity=luminosity,
+                                          assumedMCEWKSystUncertainty=self._assumedMCEWKSystUncertainty)
         # Make control plot for NQCD event counts
         self._infoHistograms.extend(myBigBoxEventCount.getEventCountHistograms())
         self._infoHistograms.extend(myMETLegEventCount.getEventCountHistograms())
@@ -794,19 +796,25 @@ class QCDfactorisedColumn(DatacardColumn):
         # Print result
         print "... NQCD = %f +- %f (%% stat.) +- %f (%% syst.)"%(myQCDCalculator.getNQCD(),myQCDCalculator.getStatUncertainty(),myQCDCalculator.getSystUncertainty())
         print "... Contracted NQCD = %f +- %f (%% stat.) +- %f (%% syst.)"%(myQCDCalculator.getContractedNQCD(),myQCDCalculator.getContractedStatUncertainty(),myQCDCalculator.getContractedSystUncertainty())
-        # Make mT shape histogram
+        # Make shape histogram
         print "... Calculating shape ..."
-        myRateHistograms = []
-        myRateHistograms.append(self._createMtShapeHistogram(config, dsetMgr, myQCDCalculator, myBigBoxEventCount, luminosity))
-        # Cache result
-        self._rateResult = ExtractorResult("rate",
-                                           "rate",
-                                           myQCDCalculator.getNQCD(),
-                                           myRateHistograms)
+        myRateHistograms=[]
+        hRateShape = self._createMtShapeHistogram(config, dsetMgr, myQCDCalculator, myBigBoxEventCount, luminosity,
+                                                  config.ShapeHistogramsDimensions, self._label, self._dirPrefix, self._basicMtHisto,
+                                                  saveDetailedInfo = not True) ##### FIXME
+        # Normalise rate shape to NQCD
+        if hRateShape.Integral() > 0:
+            hRateShape.Scale(myQCDCalculator.getNQCD() / hRateShape.Integral())
+        myRateHistograms.append(hRateShape)
         # Obtain messages
         self._messages.extend(myBigBoxEventCount.getMessages())
         self._messages.extend(myMETLegEventCount.getMessages())
         self._messages.extend(myTauLegEventCount.getMessages())
+        # Cache result for rate
+        self._rateResult = ExtractorResult("rate",
+                                           "rate",
+                                           myQCDCalculator.getNQCD(),
+                                           myRateHistograms)
         # Construct results for nuisances
         print "... Constructing result ..."
         for nid in self._nuisanceIds:
@@ -846,24 +854,32 @@ class QCDfactorisedColumn(DatacardColumn):
                                                                  myResult,
                                                                  myHistograms))
             if not myFoundStatus:
-                print "\n"+ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Cannot find nuisance with id '"+nid+"'!"
-                sys.exit()
-        #print "\nData mining done"
+                raise Exception("\n"+ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Cannot find nuisance with id '"+nid+"'!")
+        # Obtain results for control plots
+        print "... Obtaining control plots ..."
+        if config.ControlPlots != None and dsetMgr != None:
+            for c in config.ControlPlots:
+                print "     "+c.title
+                hShape = self._createMtShapeHistogram(config, dsetMgr, myQCDCalculator, myBigBoxEventCount, luminosity,
+                                                      c.details, c.title, self._dirPrefix+"/"+c.QCDFactHistoPath, c.QCDFactHistoName)
+                self._controlPlots.append(hShape)
 
-    def _createMtShapeHistogram(self, config, dsetMgr, QCDCalculator, QCDCount, luminosity):
-        # Create mT histogram
-        myShapeModifier = ShapeHistoModifier(config.ShapeHistogramsDimensions)
-        h = myShapeModifier.createEmptyShapeHistogram(self._label)
-        # Loop over bins
+    def _createMtShapeHistogram(self, config, dsetMgr, QCDCalculator, QCDCount, luminosity, histoSpecs, title, histoDir, histoName, saveDetailedInfo = False):
+        # Create empty shape histogram
+        myShapeModifier = ShapeHistoModifier(histoSpecs)
+        h = myShapeModifier.createEmptyShapeHistogram(title)
+        # Obtain bin dimensions
         nbinsY = 1
         if QCDCount.is2D() or QCDCount.is3D():
             nbinsY = QCDCount.getNbinsY()
         nbinsZ = 1
         if QCDCount.is3D():
             nbinsZ = QCDCount.getNbinsZ()
-        myName = "QCDFact_MtShape_Total"
+        # Create info histogram with all info in one
+        myName = "QCDFact_ShapeSummary_%s_Total"%title
         hTot = ROOT.TH2F(myName,myName,h.GetNbinsX()*QCDCount.getNbinsY(),0,h.GetNbinsX()*QCDCount.getNbinsY(),QCDCount.getNbinsX()*QCDCount.getNbinsZ(),0,QCDCount.getNbinsX()*QCDCount.getNbinsZ())
         hTot.SetZTitle("Events")
+        # Setup axis titles for total histogram
         for i in range(1,h.GetNbinsX()+1):
             for j in range(1,nbinsY+1):
                 if i == h.GetNbinsX()+1:
@@ -873,37 +889,37 @@ class QCDfactorisedColumn(DatacardColumn):
         for i in range(1,QCDCount.getNbinsX()+1):
             for k in range(1,nbinsZ+1):
                 hTot.GetYaxis().SetBinLabel(k+(i-1)*nbinsZ, "("+QCDCount.getBinLabel("X",i)+";"+QCDCount.getBinLabel("Z",k))
+        # Loop over bins
         for i in range(1,QCDCount.getNbinsX()+1):
             for j in range(1,nbinsY+1):
                 for k in range(1,nbinsZ+1):
-                    # Get histograms for bin and normalise MC histograms
-                    histoName = self._dirPrefix+"/"+self._basicMtHisto+"_%d"%(i-1)
+                    # Determine suffix for histograms
+                    myFactorisationSuffix = "_%d"%(i-1)
                     if QCDCount.is2D() or QCDCount.is3D():
-                        histoName += "_%d"%(j-1)
+                        myFactorisationSuffix += "_%d"%(j-1)
                     if QCDCount.is3D():
-                        histoName += "_%d"%(k-1)
-                    dsetRootHistoMtData = dsetMgr.getDataset(self._datasetMgrColumn).getDatasetRootHisto(histoName)
-                    hMtData = dsetRootHistoMtData.getHistogram()
-                    if hMtData == None:
-                        raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Cannot find histogram "+histoName+" for QCD factorised data!")
-                    dsetRootHistoMtMCEWK = dsetMgr.getDataset(self._datasetMgrColumnForQCDMCEWK).getDatasetRootHisto(histoName)
-                    dsetRootHistoMtMCEWK.normalizeToLuminosity(luminosity)
-                    hMtMCEWK = dsetRootHistoMtMCEWK.getHistogram()
-                    if hMtMCEWK == None:
-                        raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Cannot find histogram "+histoName+" for QCD factorised MC EWK!")
+                        myFactorisationSuffix += "_%d"%(k-1)
+                    # Get histograms for the bin for data and MC EWK
+                    myFullHistoName = "%s/%s%s"%(histoDir,histoName,myFactorisationSuffix)
+                    hMtData = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumn, myFullHistoName, luminosity)
+                    hMtMCEWK = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumnForQCDMCEWK, myFullHistoName, luminosity)
                     if self._debugMode:
-                        print "  QCDfactorised / mT shape: bin %d, data=%f, MC EWK=%f, QCD=%f"%(i,hMtData.Integral(0,hMtData.GetNbinsX()+1),hMtMCEWK.Integral(0,hMtMCEWK.GetNbinsX()+1),hMtData.Integral(0,hMtData.GetNbinsX()+1)-hMtMCEWK.Integral(0,hMtMCEWK.GetNbinsX()+1))
-                    # Obtain empty histogram
-                    myOutHistoName = "QCDFact_MtShape_QCD_bin_%d_%d_%d"%(i,j,k)
+                        print "  QCDfactorised / %s: bin%s, data=%f, MC EWK=%f, QCD=%f"%(title,myFactorisationSuffix,hMtData.Integral(0,hMtData.GetNbinsX()+1),hMtMCEWK.Integral(0,hMtMCEWK.GetNbinsX()+1),hMtData.Integral(0,hMtData.GetNbinsX()+1)-hMtMCEWK.Integral(0,hMtMCEWK.GetNbinsX()+1))
+                    # Obtain empty histograms
+                    myOutHistoName = "QCDFact_%s_QCD_bin%s"%(title,myFactorisationSuffix)
                     hMtBin = myShapeModifier.createEmptyShapeHistogram(myOutHistoName)
-                    myOutHistoName = "QCDFact_MtShape_Data_bin_%d_%d_%d"%(i,j,k)
-                    hMtBinData = myShapeModifier.createEmptyShapeHistogram(myOutHistoName)
-                    myOutHistoName = "QCDFact_MtShape_EWK_bin_%d_%d_%d"%(i,j,k)
-                    hMtBinEWK = myShapeModifier.createEmptyShapeHistogram(myOutHistoName)
-                    # Add data and subtract MCEWK
+                    hMtBinData = None
+                    hMtBinEWK = None
+                    if saveDetailedInfo:
+                        myOutHistoName = "QCDFact_%s_Data_bin%s"%(title,myFactorisationSuffix)
+                        hMtBinData = myShapeModifier.createEmptyShapeHistogram(myOutHistoName)
+                        myOutHistoName = "QCDFact_%s_MCEWK_bin%s"%(title,myFactorisationSuffix)
+                        hMtBinEWK = myShapeModifier.createEmptyShapeHistogram(myOutHistoName)
+                    # Add data to histograms
                     myShapeModifier.addShape(source=hMtData,dest=hMtBin)
                     myShapeModifier.addShape(source=hMtData,dest=hMtBinData)
                     myShapeModifier.addShape(source=hMtMCEWK,dest=hMtBinEWK)
+                    # Subtract MC EWK from data to obtain QCD
                     myMessages = []
                     myMessages.extend(myShapeModifier.subtractShape(source=hMtMCEWK,dest=hMtBin,purityCheck=True))
                     if len(myMessages) > 0:
@@ -912,11 +928,12 @@ class QCDfactorisedColumn(DatacardColumn):
                             # Filter out only important warnings of inpurity (impact more than one percent to whole bin)
                             if myTotal > 0.0:
                                 if m[1] / myTotal > 0.01:
-                                    self._messages.extend(WarningStyle()+"Warning:"+NormalStyle()+" low purity in QCD factorised mT shape for bin %d,%d,%d (impact %f events / total=%f : %s"%(i,j,k,m[1],myTotal,m[0]))
+                                    self._messages.extend(WarningStyle()+"Warning:"+NormalStyle()+" low purity in QCD factorised shape for bin %d,%d,%d (impact %f events / total=%f : %s"%(i,j,k,m[1],myTotal,m[0]))
+                    # Finalise shape (underflow added to first bin, overflow added to last bin, variances converted to std.deviations)
                     myShapeModifier.finaliseShape(dest=hMtBin)
                     myShapeModifier.finaliseShape(dest=hMtBinData)
                     myShapeModifier.finaliseShape(dest=hMtBinEWK)
-                    # Check for negative bins
+                    # Remove negative bins, but retain original normalisation
                     for a in range(1,hMtBin.GetNbinsX()+1):
                         if hMtBin.GetBinContent(a) < 0.0:
                             #print WarningStyle()+"Warning: QCD factorised"+NormalStyle()+" in mT shape bin %d,%d,%d, histo bin %d is negative (%f / tot:%f), it is set to zero but total normalisation is maintained"%(i,j,k,a,hMtBin.GetBinContent(a),hMtBin.Integral())
@@ -924,33 +941,44 @@ class QCDfactorisedColumn(DatacardColumn):
                             hMtBin.SetBinContent(a,0.0)
                             if (hMtBin.Integral() > 0.0):
                                 hMtBin.Scale(myIntegral / hMtBin.Integral())
-                    # Multiply by efficiency of leg 2
+                    # Multiply by efficiency of leg 2 (tau leg)
                     myEfficiency = QCDCalculator.getLeg2Efficiency(i,j,k)
                     if myEfficiency.value() > 0.0:
                         hMtBin.Scale(myEfficiency.value())
-                        hMtBinData.Scale(myEfficiency.value())
-                        hMtBinEWK.Scale(myEfficiency.value())
+                        if saveDetailedInfo:
+                            hMtBinData.Scale(myEfficiency.value())
+                            hMtBinEWK.Scale(myEfficiency.value())
                     if self._debugMode:
                         print "  QCDfactorised / mT shape: bin %d_%d_%d, eff=%f, eff*QCD=%f"%(i,j,k,myEfficiency.value(),hMtBin.Integral())
-                    # Add to total mT shape histogram
+                    # Add to total shape histogram
                     myShapeModifier.addShape(source=hMtBin,dest=h)
-                    # Add to total histogram
+                    # Add to total info histogram
                     for l in range (1, hMtBin.GetNbinsX()+1):
                         hTot.SetBinContent(l+(j-1)*h.GetNbinsX(), k+(i-1)*nbinsZ, hMtBin.GetBinContent(l))
                         hTot.SetBinError(l+(j-1)*h.GetNbinsX(), k+(i-1)*nbinsZ, hMtBin.GetBinError(l))
                     # Store mT bin histogram for info
-                    self._infoHistograms.append(hMtBin)
-                    self._infoHistograms.append(hMtBinData)
-                    self._infoHistograms.append(hMtBinEWK)
+                    if saveDetailedInfo:
+                        self._infoHistograms.append(hMtBin)
+                        self._infoHistograms.append(hMtBinData)
+                        self._infoHistograms.append(hMtBinEWK)
+                    else:
+                        hMtBin.IsA().Destructor(hMtBin)
                     # Delete data and MC EWK histograms from memory
                     hMtData.IsA().Destructor(hMtData)
                     hMtMCEWK.IsA().Destructor(hMtMCEWK)
         self._infoHistograms.append(hTot)
-        # Finalise
+        # Finalise and return
         myShapeModifier.finaliseShape(dest=h)
-        # Normalise total mT histogram to NQCD
-        if h.Integral() > 0:
-            h.Scale(QCDCalculator.getNQCD() / h.Integral())
+        return h
+
+    ## Extracts a shape histogram for a given bin
+    def _extractShapeHistogram(self, dsetMgr, datasetMgrColumn, histoName, luminosity):
+        dsetRootHistoMtData = dsetMgr.getDataset(datasetMgrColumn).getDatasetRootHisto(histoName)
+        if dsetRootHistoMtData.isMC():
+            dsetRootHistoMtData.normalizeToLuminosity(luminosity)
+        h = dsetRootHistoMtData.getHistogram()
+        if h == None:
+            raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Cannot find histogram "+histoName+" for QCD factorised shape")
         return h
 
     ## Saves information histograms into a histogram
@@ -989,9 +1017,6 @@ class QCDfactorisedColumn(DatacardColumn):
         # Cleanup (closing the root file destroys the objects assigned to it, do not redestroy the histos in the _infoHistograms list
         self._infoHistograms = []
         print "QCD Measurement factorised info histograms saved to:",myRootFilename
-
-    ## var _infoHistograms
-    # Histograms for information and documentation of the QCD measurement
 
 ## QCDfactorisedExtractor class
 # It is essentially wrapper for QCD mode string

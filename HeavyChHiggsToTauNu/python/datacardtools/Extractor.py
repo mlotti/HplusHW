@@ -19,6 +19,7 @@ class ExtractorMode:
     NUISANCE = 3
     ASYMMETRICNUISANCE = 4
     SHAPENUISANCE = 5
+    CONTROLPLOT = 6
 
 ## ExtractorBase class
 class ExtractorBase:
@@ -548,11 +549,69 @@ class ShapeExtractor(ExtractorBase):
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
-        print "MaxCounterExtractor"
+        print "ShapeExtractor"
+        print "- specs:",self._histoSpecs
+        print "- histoDirs:",self._histoDirs
+        print "- histograms:",self._histograms
         print "- counter item = ", self._counterItem
         ExtractorBase.printDebugInfo(self)
 
-    ## \var _counterDirs
-    # List of directories (without /weighted/counter suffix ) for counter histograms; first needs to be the nominal counter
-    ## \var _counterItem
-    # Name of item (label) in counter histogram
+## ControlPlotExtractor class
+# Extracts histograms for control plot
+class ControlPlotExtractor(ExtractorBase):
+    ## Constructor, note that if multiplet directories and names are given, the second, third, etc. are substracted from the first one
+    def __init__(self, histoSpecs, histoTitle, histoDirs, histoNames):
+        ExtractorBase.__init__(self, mode=ExtractorMode.CONTROLPLOT, exid="-1", distribution="-", description="-")
+        self._histoSpecs = histoSpecs
+        self._histoTitle = histoTitle
+        self._histoDirs = []
+        if isinstance(histoDirs, list):
+            self._histoDirs.extend(histoDirs)
+        else:
+            self._histoDirs.append(histoDirs)
+        self._histoNames = []
+        if isinstance(histoNames, list):
+            self._histoNames.extend(histoNames)
+        else:
+            self._histoNames.append(histoNames)
+        if len(self._histoDirs) != len(self._histoNames):
+            raise Exception (ErrorStyle()+"Error in ControlPlot "+histoTitle+":"+NormalStyle()+" need to specify equal amount of histoDirs and histoNames!")
+
+    ## Method for extracking result
+    def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        print WarningStyle()+"Did you actually call extractResult for a ControlPlot by name "+self._histoTitle+"? (you shouldn't)"+NormalStyle()
+        return 0.0 # Dummy number, this method
+
+    ## Virtual method for extracting histograms
+    def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        # Create an empty histogram
+        myLabel = datasetColumn.getLabel()+"_"+self._histoTitle
+        myShapeModifier = ShapeHistoModifier(self._histoSpecs)
+        h = myShapeModifier.createEmptyShapeHistogram(myLabel)
+        for i in range (0, len(self._histoDirs)):
+            # Obtain histogram from dataset
+            myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(datasetColumn.getDirPrefix()+"/"+self._histoDirs[i]+"/"+self._histoNames[i])
+            if myDatasetRootHisto.isMC():
+                myDatasetRootHisto.normalizeToLuminosity(luminosity)
+            hSource = myDatasetRootHisto.getHistogram()
+            if i == 0:
+                myShapeModifier.addShape(dest=h,source=hSource)
+            else:
+                myShapeModifier.subtractShape(dest=h,source=hSource)
+            hSource.IsA().Destructor(hSource)
+        # Finalise histogram
+        myShapeModifier.finaliseShape(dest=h)
+        # Add here substraction of negative bins, if necessary
+        # ... no use case currently, therefore no code added
+        # Return result
+        return h
+
+    ## Virtual method for printing debug information
+    def printDebugInfo(self):
+        print "ControlPlotExtractor"
+        print "- title:",self._histoTitle
+        print "- specs:",self._histoSpecs
+        print "- histoDirs:",self._histoDirs
+        print "- histoNames:",self._histoNames
+        ExtractorBase.printDebugInfo(self)
+

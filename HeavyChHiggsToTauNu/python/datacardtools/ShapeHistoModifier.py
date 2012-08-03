@@ -53,6 +53,8 @@ class ShapeHistoModifier():
     ## Adds or subtracts the shape from the source to the destination histogram
     # Returns list of possible messages
     def _calculateShape(self, source, dest, operation, purityCheck=False):
+        if source == None or dest == None:
+            return []
         myMsgList = []
         # Check that binning is meaningful
         for iDest in range(1,dest.GetNbinsX()+2):
@@ -131,6 +133,8 @@ class ShapeHistoModifier():
 
     ## Finalises the destination histogram (takes sqrt of the errors)
     def finaliseShape(self, dest):
+        if dest == None:
+            return
         # Move underflow events to first bin
         dest.SetBinContent(1, dest.GetBinContent(1)+dest.GetBinContent(0))
         dest.SetBinError(1, dest.GetBinError(1)+dest.GetBinError(0))
