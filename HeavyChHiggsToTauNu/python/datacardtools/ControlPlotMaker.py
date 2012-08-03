@@ -40,12 +40,19 @@ class ControlPlotMaker:
                 hEWKfake = self._getControlPlot(m, c.details, c.EWKfakeId, c.title,"EWKfake"+myMassSuffix)
                 hData = self._getControlPlot(m, c.details, None, c.title,"Data"+myMassSuffix, c.blindedRange)
                 # Obtain total expected and total signal
-                hExpected = self._getExpectedPlot(c.details, c.title, [hQCD, hEmbedded, hEWKfake])
-                hSignal = self._getSignalPlot(c.details, c.title, hSignalHH, hSignalHW)
+                hExpected = self._getExpectedPlot(c.details, c.title+myMassSuffix, [hQCD, hEmbedded, hEWKfake])
+                hSignal = self._getSignalPlot(c.details, c.title+myMassSuffix, hSignalHH, hSignalHW)
                 # Obtain ratio plot
                 hRatio = self._getRatioPlot(c.title+myMassSuffix, hData, hExpected)
                 # Construct plot and save
                 self._construct(m, c.details,"M%d_ControlPlot_"%m+c.title,hFrame,hData,hSignal,hQCD,hEmbedded,hEWKfake,hExpected,hRatio,luminosity)
+                # Delete histograms from memory
+                hQCD.IsA().Destructor(hQCD)
+                hEmbedded.IsA().Destructor(hEmbedded)
+                hEWKfake.IsA().Destructor(hEWKfake)
+                hExpected.IsA().Destructor(hExpected)
+                hSignal.IsA().Destructor(hSignal)
+                # Other histograms don't give a warning about possible memory leak (why ???)
         print "Control plots done"
 
         # FIXME add selection flow plot

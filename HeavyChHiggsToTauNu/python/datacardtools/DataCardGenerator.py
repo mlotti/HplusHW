@@ -392,6 +392,7 @@ class DataCardGenerator:
 
     ## Closes files in dataset managers
     def closeFiles(self):
+        print "Closing open input files"
         for i in range(0,len(self._dsetMgrs)):
             if self._dsetMgrs[i] != None:
                 self._dsetMgrs[i].close()
