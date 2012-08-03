@@ -37,14 +37,14 @@ treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger
 
 #QCDfromData = True
 QCDfromData = False
-deltaPhi180 = False
+deltaPhi160 = False
 deltaPhi130 = False
 
 btagging = True # for normalisation with btagging
 
 # for histograms
 topmass = False
-deltaPhi160 = True
+deltaPhi180 = True
 
 def usage():
     print "\n"
@@ -64,9 +64,11 @@ def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters)
     #datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-    datasets.updateNAllEventsToPUWeighted()
+#    datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()
+    datasets.updateNAllEventsToPUWeighted()
 
+    
     # Take QCD from data
     datasetsQCD = None
 
@@ -98,6 +100,10 @@ def main():
     # Remove signals other than M120
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
+    datasets.merge("EWK", ["WJets", "DYJetsToLL", "SingleTop", "Diboson","TTJets"], keepSources=True)
+    datasets.remove(filter(lambda name: "W2Jets" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "W3Jets" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "W4Jets" in name, datasets.getAllDatasetNames()))
 
     datasets_lands = datasets.deepCopy()
 
@@ -174,7 +180,6 @@ def doPlots(datasets):
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdPhi"), "MTInvertedTauIdPhi", rebin=20)
 #    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdMet"), "MTInvertedTauIdMet", rebin=10)  
 
-
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMass"), "transverseMass", rebin=20)
     path = analysis+"/transverseMass"
     transverseMass2(plots.DataMCPlot(datasets, path), "transverseMass", rebin=20)
@@ -233,7 +238,7 @@ def doPlots(datasets):
 #    topPtComparison(datasets) 
 #    vertexComparison(datasets)
 
-
+    mtTest(datasets)
     mtComparison(datasets)
     metComparison(datasets)
     
@@ -290,21 +295,102 @@ except ImportError:
     print "    Run script InvertedTauID_Normalization.py to generate QCDInvertedNormalizationFactors.py"
     print
     sys.exit()
+    
+def mtTest(datasets):
+    
+    ## After standard cut
+    mtData = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/mtTest_metcut")])
+    mtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/mtTest_metcut")])
+    mtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+
+    mtData._setLegendStyles()
+    mtData._setLegendLabels()
+    mtData.histoMgr.setHistoDrawStyleAll("P")
+    mtData.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    hmtData = mtData.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/mtTest_metcut")
+    
+    mtEWK._setLegendStyles()
+    mtEWK._setLegendLabels()
+    mtEWK.histoMgr.setHistoDrawStyleAll("P")
+    mtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    hmtEWK = mtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/mtTest_metcut")
+    
+    canvas30 = ROOT.TCanvas("canvas30","",500,500)
+#    canvas3.SetLogy()
+#    hmtData.SetMaximum(120.0)
+    hmtData.SetMarkerColor(2)
+    hmtData.SetMarkerSize(1)
+    hmtData.SetMarkerStyle(22)
+    hmtData.Draw("EP")
+     
+    hmtEWK.SetMarkerColor(4)
+    hmtEWK.SetMarkerSize(1)
+    hmtEWK.SetMarkerStyle(24)
+    hmtEWK.SetFillColor(4)
+    hmtEWK.Draw("same")
+    
+        
+    tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       2.18 fb^{-1}       CMS Preliminary ")
+    tex4.SetNDC()
+    tex4.SetTextSize(20)
+    tex4.Draw()
+    
+    tex5 = ROOT.TLatex(0.5,0.8,"After MET cut")
+    tex5.SetNDC()
+    tex5.SetTextSize(20)
+    tex5.Draw()
+        
+    hmtData.GetYaxis().SetTitle("Events / 10 GeV/c^{2}")
+#    hmt.GetYaxis().SetTitleSize(20.0)
+    hmtData.GetYaxis().SetTitleOffset(1.5)
+    hmtData.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
+
+    tex1 = ROOT.TLatex(0.65,0.7,"Data")
+    tex1.SetNDC()
+    tex1.SetTextSize(23)
+    tex1.Draw()    
+    marker1 = ROOT.TMarker(0.6,0.715,hmtData.GetMarkerStyle())
+#    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
+    marker1.SetNDC()
+    marker1.SetMarkerColor(hmtData.GetMarkerColor())
+    marker1.SetMarkerSize(0.9*hmtData.GetMarkerSize())
+    marker1.Draw()
+    
+    tex2 = ROOT.TLatex(0.65,0.6,"EWK")
+    tex2.SetNDC()
+    tex2.SetTextSize(23)
+    tex2.Draw()    
+    marker2 = ROOT.TMarker(0.6,0.615,hmtEWK.GetMarkerStyle())
+#    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
+    marker2.SetNDC()
+    marker2.SetMarkerColor(hmtEWK.GetMarkerColor())
+    marker2.SetMarkerSize(0.9*hmtEWK.GetMarkerSize())
+    marker2.Draw()
+    
+    canvas30.Print("mt_metcut.png")
+    canvas30.Print("mt_metcut_btag.C")
+ 
+
+
+
+
+        
 
 def mtComparison(datasets):
     
     ## After standard cuts
     if (deltaPhi180):
-        mt4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet4050")])
-        mt5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet5060")])
-        mt6070 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet6070")])
-        mt7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet7080")])
-        mt80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet80100")])
-        mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet100120")])
-        mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet120150")])
-        mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet150")])
-        mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet")])
-             
+        mt4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag4050")])
+        mt5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag5060")])
+        mt6070 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag6070")])
+        mt7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag7080")])
+        mt80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag80100")])
+        mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag100120")])
+        mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag120150")])
+        mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag150")])
+        mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag")])
+        mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdBtag")])
+        mtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTBaseLineTauIdBtag")])             
 
   ## With MET > 70 GeV
                         
@@ -341,7 +427,7 @@ def mtComparison(datasets):
         mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi120150")])
         mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi150")])
         mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi")])
-
+        mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdPhi")])
 
     print " norm factors ",norm_inc,norm_4050,norm_5060,norm_6070,norm_7080,norm_80100,norm_100120,norm_120150,norm_150
 
@@ -442,7 +528,19 @@ def mtComparison(datasets):
     mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
     hmt = mt.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi")
     hmt.Scale(norm_inc)
+    
+    mtBaseline._setLegendStyles()
+    mtBaseline._setLegendLabels()
+    mtBaseline.histoMgr.setHistoDrawStyleAll("P")
+    mtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+    hmtBaseline = mtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
 
+    mtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    mtEWK._setLegendStyles()
+    mtEWK._setLegendLabels()
+    mtEWK.histoMgr.setHistoDrawStyleAll("P")
+    mtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+    hmtEWK = mtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
         
     hmtSum = hmt4050.Clone("mtSum")
     hmtSum.SetName("mtSum")
@@ -510,7 +608,7 @@ def mtComparison(datasets):
     
     canvas3 = ROOT.TCanvas("canvas3","",500,500)
 #    canvas3.SetLogy()
-#    hmt.SetMaximum(120.0)
+    hmt.SetMaximum(120.0)
     hmt.SetMarkerColor(2)
     hmt.SetMarkerSize(1)
     hmt.SetMarkerStyle(21)
@@ -522,7 +620,22 @@ def mtComparison(datasets):
     hmtSum.SetFillColor(4)
     hmtSum.Draw("same")
     
-       
+    hmtBaseline.SetMarkerColor(1)
+    hmtBaseline.SetMarkerSize(1)
+    hmtBaseline.SetMarkerStyle(24)
+    hmtBaseline.SetFillColor(1)
+    hmtBaseline.Draw("same")
+#    hmtBaseline_QCD = hmtBaseline.Clone("QCD")
+#    hmtBaseline_QCD.Add(hmtEWK,-1)
+#    hmtBaseline_QCD.Draw("same")
+
+
+    hmtEWK.SetMarkerColor(7)
+    hmtEWK.SetMarkerSize(1)
+    hmtEWK.SetMarkerStyle(23)
+    hmtEWK.SetFillColor(7)
+    hmtEWK.Draw("same")
+    
     tex1 = ROOT.TLatex(0.65,0.7,"No binning")
 #    tex1 = ROOT.TLatex(0.3,0.4,"No binning")
     tex1.SetNDC()

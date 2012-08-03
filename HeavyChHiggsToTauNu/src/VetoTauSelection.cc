@@ -56,6 +56,7 @@ namespace HPlus {
     // Initialise histograms
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("VetoTauSelection");
+
     hCandidateTauNumber = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "CandidateTauNumber", "CandidateTauNumber;Number of veto #tau candidates;Jets", 4, 0, 4);
     if (hCandidateTauNumber->isActive()) {
       hCandidateTauNumber->GetXaxis()->SetBinLabel(1, "Genuine #tau");
@@ -189,39 +190,9 @@ namespace HPlus {
       //      double isolSum = (*it)->isolationTracksPtSum();
       //      double myValue = (*it)->userFloat("byTightChargedMaxPt");
       //      double myLdgTrackPt = (*it)->leadPFChargedHadrCand()->pt();
-      /*
-      double minTrackPt = 0.8;
-      int minPixelHits = 0;
-      int minTrackHits = 3;
-      double maxIP = 0.03;
-      double maxChi2 = 100;
-      double maxDeltaZ = 0.2;
-      double minGammaEt = 0.8;
-      *sumPt = 0;
-      *maxPt = 0;
-      *occupancy = 0;
-      reco::PFCandidateRefVector allCands = (*it)->isolationPFChargedHadrCands();
-      if(allCands.isNonnull()) {
-        reco::PFCandidateRefVector chargedCands = TauTagTools::filteredPFChargedHadrCands(allCands,
-                                                                                          minTrackPt,
-                                                                                          minPixelHits,
-                                                                                          minTrackHits,
-                                                                                          maxIP,
-                                                                                          maxChi2,
-                                                                                          maxDeltaZ,
-                                                                                          *thePV_,
-                                                                                          thePV_->position().z());
-        *occupancy = *occupancy + chargedCands.size();
-        for(size_t i=0; i<chargedCands.size(); ++i) {
-          double pt = chargedCands[i]->pt();
-          *sumPt = *sumPt + pt;
-          *maxPt = std::max(*maxPt, pt);
-        }
+    
      
-	std::cout << " allCands " << allCands << " sumPt  " << *sumPt << std::endl;
-      
-      }
-      */
+     
       FakeTauIdentifier::MCSelectedTauMatchType myMatch = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
       if (myMatch == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
         hCandidateTauNumber->Fill(0.);
@@ -246,6 +217,7 @@ namespace HPlus {
     mySelectedTauMomentum.SetXYZM(selectedTau->px(), selectedTau->py(), selectedTau->pz(), 1.777);
     for (edm::PtrVector<pat::Tau>::iterator it = myTauData.getSelectedTaus().begin(); it != myTauData.getSelectedTaus().end(); ++it) {
       // Store to result vector
+
       fSelectedVetoTaus.push_back(*it);
       // Count how many selected veto taus are genuine taus
       FakeTauIdentifier::MCSelectedTauMatchType myMatch = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
@@ -276,7 +248,7 @@ namespace HPlus {
       myVetoTauMomentum += mySelectedTauMomentum;
       double myDitauMass = myVetoTauMomentum.M();
       // Check if ditau mass is compatible with Z mass
-      if (myDitauMass <  100 ) 	{
+      if (myDitauMass <  1000 ) 	{
 	myVetoStatus = true;
 	numberOfTaus++;
       }

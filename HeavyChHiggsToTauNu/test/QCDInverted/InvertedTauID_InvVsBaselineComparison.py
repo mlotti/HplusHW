@@ -26,7 +26,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 from InvertedTauID import *
 
-ReBinning = True
+ReBinning = False
 
 def usage():
     print "\n"

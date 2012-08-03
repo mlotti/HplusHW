@@ -8,6 +8,7 @@ import FWCore.ParameterSet.Config as cms
 def createEDFilter(param):
     return cms.EDFilter("HPlusSignalAnalysisInvertedTauFilter",
         blindAnalysisStatus = param.blindAnalysisStatus,
+	histogramAmbientLevel = param.histogramAmbientLevel,
         trigger = param.trigger,
         triggerEfficiencyScaleFactor = param.triggerEfficiencyScaleFactor,
         primaryVertexSelection = param.primaryVertexSelection,
@@ -22,6 +23,8 @@ def createEDFilter(param):
         bTagging = param.bTagging,
         fakeMETVeto = param.fakeMETVeto,
         jetTauInvMass = param.jetTauInvMass,
+        deltaPhiTauMET = param.deltaPhiTauMET,
+	topReconstruction = param.topReconstruction,
         topSelection = param.topSelection,
         bjetSelection = param.bjetSelection,                                      
         topChiSelection = param.topChiSelection,                                  
@@ -31,6 +34,8 @@ def createEDFilter(param):
         transverseMassCut = param.transverseMassCut,
         EvtTopology = param.EvtTopology,
         vertexWeight = param.vertexWeight,
+        vertexWeightReader = param.vertexWeightReader.clone(),
         GenParticleAnalysis = param.GenParticleAnalysis,
-        Tree = param.tree,
+        Tree = param.tree.clone(),
+        eventCounter = param.eventCounter.clone()
     )
