@@ -521,6 +521,7 @@ namespace HPlus {
 
         hHPSDecayMode->Fill(iTau->decayMode());
 
+
         hTightChargedMaxPtBeforeIsolation->Fill(iTau->userFloat("byTightChargedMaxPt"));
         hTightChargedSumPtBeforeIsolation->Fill(iTau->userFloat("byTightChargedSumPt"));
         hTightChargedOccupancyBeforeIsolation->Fill((float)iTau->userInt("byTightChargedOccupancy"));
@@ -534,6 +535,7 @@ namespace HPlus {
         hTightGammaMaxPtAfterIsolation->Fill(iTau->userFloat("byTightGammaMaxPt"));
         hTightGammaSumPtAfterIsolation->Fill(iTau->userFloat("byTightGammaSumPt"));
         hTightGammaOccupancyAfterIsolation->Fill((float)iTau->userInt("byTightGammaOccupancy"));
+
         if (!fTauID->passNProngsCut(iTau)) continue;
         if (!fTauID->passRTauCut(iTau)) continue;
       }

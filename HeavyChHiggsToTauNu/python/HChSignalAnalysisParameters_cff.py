@@ -93,12 +93,16 @@ tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
 )
 
 vetoTauBase = tauSelectionHPSVeryLooseTauBased.clone(
+    src = "selectedPatTausHpsPFTau",
+#    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     ptCut = cms.untracked.double(15), # jet pt > value
-    etaCut = cms.untracked.double(2.5), # jet |eta| < value
+    etaCut = cms.untracked.double(2.4), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(5.0), # ldg. track > value
+#    leadingObjectPtCut = cms.untracked.double(5.0), # ldg. track > value
 #    isolationDiscriminator = "byVLooseIsolation",
+#    isolationDiscriminator = "byIsolation05",
     rtauCut = cms.untracked.double(0.0), # rtau > value
-    nprongs = cms.untracked.uint32(1) # number of prongs (options: 1, 3, or 13 == 1 || 3)
+    nprongs = cms.untracked.uint32(13) # number of prongs (options: 1, 3, or 13 == 1 || 3)
 )
 
 vetoTauSelection = cms.untracked.PSet(
@@ -185,14 +189,15 @@ bTagging = cms.untracked.PSet(
 #    discriminator = cms.untracked.string("jetProbabilityBJetTags"),   
     leadingDiscriminatorCut = cms.untracked.double(0.679), # used for best bjet candidates (best discriminator)
     subleadingDiscriminatorCut = cms.untracked.double(0.244), # used for other bjet candidates
-    ptCut = cms.untracked.double(30.0),
+    ptCut = cms.untracked.double(20.0),
     etaCut = cms.untracked.double(2.4),
-    jetNumber = cms.untracked.uint32(1),
+    jetNumber = cms.untracked.uint32(2),
     jetNumberCutDirection = cms.untracked.string("GEQ"), # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
     UseBTagDB      = cms.untracked.bool(False),
     BTagDBAlgo     = cms.untracked.string("TCHEL"),
     BTagUserDBAlgo = cms.untracked.string("BTAGTCHEL_hplusBtagDB_TTJets")
 )
+
 
 deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
 topReconstruction = cms.untracked.string("None") # Options: None
@@ -279,6 +284,7 @@ bjetSelection = cms.untracked.PSet(
   oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
   oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng") 
 )
+
 
 
 topChiSelection = cms.untracked.PSet(
