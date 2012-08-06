@@ -781,8 +781,9 @@ ControlPlots.append(ControlPlotInput(
                          "logy": True,
                          "DeltaRatio": 0.5,
                          "ymin": 0.9,
-                         "ymax": 2e3},
+                         "ymax": -1},
     blindedRange     = [], # specify range min,max if blinding applies to this control plot
+    flowPlotCaption  = "E_{T}^{miss}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
@@ -806,8 +807,9 @@ ControlPlots.append(ControlPlotInput(
                          "logy": True,
                          "DeltaRatio": 0.5,
                          "ymin": 0.9,
-                         "ymax": 3e3},
+                         "ymax": -1},
     blindedRange     = [], # specify range min,max if blinding applies to this control plot
+    flowPlotCaption  = "N_{b jets}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
@@ -831,8 +833,9 @@ ControlPlots.append(ControlPlotInput(
                          "logy": True,
                          "DeltaRatio": 0.5,
                          "ymin": 0.9,
-                         "ymax": 3e2},
+                         "ymax": -1},
     blindedRange     = [-1, 300], # specify range min,max if blinding applies to this control plot
+    flowPlotCaption  = "#Delta#phi(#tau_{h},E_{T}^{miss})", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
@@ -856,8 +859,9 @@ ControlPlots.append(ControlPlotInput(
                          "logy": True,
                          "DeltaRatio": 0.5,
                          "ymin": 0.9,
-                         "ymax": 5e2},
+                         "ymax": -1},
     blindedRange     = [-1, 300], # specify range min,max if blinding applies to this control plot
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
@@ -881,8 +885,9 @@ ControlPlots.append(ControlPlotInput(
                          "logy": False,
                          "DeltaRatio": 0.5,
                          "ymin": 0.9,
-                         "ymax": 2e2},
+                         "ymax": -1},
     blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
@@ -906,8 +911,9 @@ ControlPlots.append(ControlPlotInput(
                          "logy": False,
                          "DeltaRatio": 0.5,
                          "ymin": 0.9,
-                         "ymax": 1e2},
+                         "ymax": -1},
     blindedRange     = [60, 240], # specify range min,max if blinding applies to this control plot
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 

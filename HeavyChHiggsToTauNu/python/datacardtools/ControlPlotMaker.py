@@ -6,7 +6,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle import TDRStyle
 
-from math import pow,sqrt
+from math import pow,sqrt,log10
 import os
 import sys
 import ROOT
@@ -26,9 +26,10 @@ class ControlPlotMaker:
 
         # Make control plots
         print "\n"+HighlightStyle()+"Generating control plots"+NormalStyle()
-        for c in self._config.ControlPlots:
-            # Loop over mass points
-            for m in self._config.MassPoints:
+        # Loop over mass points
+        for m in self._config.MassPoints:
+            selectionFlow = SelectionFlowPlotMaker(config, m)
+            for c in self._config.ControlPlots:
                 myMassSuffix = "_M%d"%m
                 # Obtain frame
                 hFrame = self._makeFrame(c.title+myMassSuffix+"Frame", c.details)
@@ -44,8 +45,14 @@ class ControlPlotMaker:
                 hSignal = self._getSignalPlot(c.details, c.title+myMassSuffix, hSignalHH, hSignalHW)
                 # Obtain ratio plot
                 hRatio = self._getRatioPlot(c.title+myMassSuffix, hData, hExpected)
+                # Add data to selection flow plot
+                if c.flowPlotCaption != "":
+                    if len(c.blindedRange) > 0:
+                        selectionFlow.addColumn(label=c.flowPlotCaption,signal=hSignal,qcd=hQCD,EWKtau=hEmbedded,EWKfake=hEWKfake,data=None,expected=hExpected)
+                    else:
+                        selectionFlow.addColumn(label=c.flowPlotCaption,signal=hSignal,qcd=hQCD,EWKtau=hEmbedded,EWKfake=hEWKfake,data=hData,expected=hExpected)
                 # Construct plot and save
-                self._construct(m, c.details,"M%d_ControlPlot_"%m+c.title,hFrame,hData,hSignal,hQCD,hEmbedded,hEWKfake,hExpected,hRatio,luminosity)
+                self._construct(m,c.details,"M%d_ControlPlot_"%m+c.title,hFrame,hData,hSignal,hQCD,hEmbedded,hEWKfake,hExpected,hRatio,luminosity)
                 # Delete histograms from memory
                 hQCD.IsA().Destructor(hQCD)
                 hEmbedded.IsA().Destructor(hEmbedded)
@@ -53,6 +60,12 @@ class ControlPlotMaker:
                 hExpected.IsA().Destructor(hExpected)
                 hSignal.IsA().Destructor(hSignal)
                 # Other histograms don't give a warning about possible memory leak (why ???)
+            # Make selection flow plot
+            hSelectionFlowRatio = self._getRatioPlot("SelectionFlow"+myMassSuffix,selectionFlow.data,selectionFlow.expected)
+            self._construct(mass=m,details=selectionFlow.plotDetails,title="M%d_SelectionFlow_"%m,
+                            hFrame=selectionFlow.hFrame,hData=selectionFlow.data,hSignal=selectionFlow.signal,
+                            hQCD=selectionFlow.qcd,hEmbedded=selectionFlow.EWKtau,hEWKfake=selectionFlow.EWKfake,
+                            hExpected=selectionFlow.expected,hRatio=hSelectionFlowRatio,luminosity=luminosity)
         print "Control plots done"
 
         # FIXME add selection flow plot
@@ -157,6 +170,64 @@ class ControlPlotMaker:
         tex.SetLineWidth(2)
         return tex
 
+    # Returns scale factor for max y to avoid overlap of captions or legend
+    def _getMaxYFactor(self, low, high, width):
+        if low/width < 0.145:
+            if high/width > 0.145:
+                return 0.81
+            else:
+                return 1.0
+        elif low/width < 0.44:
+            if high/width > 0.44:
+                return 0.61
+            elif high/width > 0.145:
+                return 0.81
+            else:
+                return 1.0
+        else:
+            return 0.61
+
+    # calculate maximum for frame
+    def _findMaxY(self, hSignal, hExpected, hData, logstatus):
+        myMax = 0.0
+        histoWidth = hSignal.GetXaxis().GetBinUpEdge(hSignal.GetNbinsX()+1) - hSignal.GetXaxis().GetBinLowEdge(0)
+        for i in range(1,hSignal.GetNbinsX()+1):
+            myCeiling = self._getMaxYFactor(hSignal.GetXaxis().GetBinLowEdge(i),hSignal.GetXaxis().GetBinUpEdge(i),histoWidth)
+            if logstatus:
+                if hExpected.GetBinError(i) > hSignal.GetBinContent(i):
+                    value = hExpected.GetBinContent(i)+hExpected.GetBinError(i)
+                    if value > 0:
+                        value = pow(10,log10(value)/myCeiling)*1.5
+                        if value > myMax:
+                            myMax = value
+                else:
+                    value = hExpected.GetBinContent(i) + hSignal.GetBinContent(i)
+                    if value > 0:
+                        value = pow(10,log10(value)/myCeiling)*1.5
+                        if value > myMax:
+                            myMax = value
+                value = hData.GetBinContent(i) + hData.GetBinError(i)
+                if value > 0:
+                    value = pow(10,log10(value)/myCeiling)*1.5
+                    if value > myMax:
+                        myMax = value
+            else:
+                if hExpected.GetBinError(i) > hSignal.GetBinContent(i):
+                    value = hExpected.GetBinError(i)+hExpected.GetBinError(i)
+                    value = value/myCeiling*1.1
+                    if value > myMax:
+                        myMax = value
+                else:
+                    value = hExpected.GetBinContent(i) + hSignal.GetBinContent(i)
+                    value = value/myCeiling*1.1
+                    if value > myMax:
+                        myMax = value
+                value = hData.GetBinContent(i) + hData.GetBinError(i)
+                value = value/myCeiling*1.1
+                if value > myMax:
+                    myMax = value
+        return myMax
+
     ## Constructs canvas object and saves it
     def _construct(self,mass,details,title,hFrame,hData,hSignal,hQCD,hEmbedded,hEWKfake,hExpected,hRatio,luminosity):
         myStyle = TDRStyle()
@@ -167,7 +238,10 @@ class ControlPlotMaker:
         c.cd()
         # Set histo settings
         hFrame.SetMinimum(details["ymin"])
-        hFrame.SetMaximum(details["ymax"])
+        if hFrame.SetMaximum(details["ymax"]) < 0:
+            hFrame.SetMaximum(self._findMaxY(hSignal,hExpected,hData,details["logy"]))
+        else:
+            hFrame.SetMaximum(details["ymax"])
         hFrame.SetXTitle("")
         # Construct range string to y-axis
         if len(details["unit"]) > 0:
@@ -321,3 +395,62 @@ class ControlPlotMaker:
         c.Print(self._dirname+"/"+title+".C")
         c.Close()
         print "Control plot %s generated"%(self._dirname+"/"+title+".png")
+
+class SelectionFlowPlotMaker:
+    def __init__(self, config, mass):
+        self._config = config
+        self._mass = mass
+        # Calculate number of bins
+        myBinCount = 0
+        for c in self._config.ControlPlots:
+            if c.flowPlotCaption != "":
+                myBinCount += 1
+        self.plotDetails = { "bins": myBinCount,
+                            "rangeMin": 0.0,
+                            "rangeMax": myBinCount,
+                            "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                            "xtitle": "Step",
+                            "ytitle": "Events",
+                            "unit": "",
+                            "logy": True,
+                            "DeltaRatio": 0.5,
+                            "ymin": 0.9,
+                            "ymax": -1 }
+        # Make an empty frame
+        myPlotName = "SelectionFlow_%d"%mass
+        self.hFrame = ROOT.TH1F(myPlotName,myPlotName,myBinCount,0,myBinCount)
+        self.hFrame.SetYTitle("Events")
+        # Make empty histograms for HH, HW, QCD, EWKtau, EWKfake, datacard
+        self.signal = self.hFrame.Clone("SelectionFlow_signal_%d"%mass)
+        self.qcd = self.hFrame.Clone("SelectionFlow_qcd_%d"%mass)
+        self.EWKtau = self.hFrame.Clone("SelectionFlow_EWKtau_%d"%mass)
+        self.EWKfake = self.hFrame.Clone("SelectionFlow_EWKfake_%d"%mass)
+        self.data = self.hFrame.Clone("SelectionFlow_data_%d"%mass)
+        self.expected = self.hFrame.Clone("SelectionFlow_expected_%d"%mass)
+        # Initialise column pointer
+        self._myCurrentColumn = 0
+
+    def addColumn(self,label,signal,qcd,EWKtau,EWKfake,data,expected):
+        self._myCurrentColumn += 1
+        self.data.GetXaxis().SetBinLabel(self._myCurrentColumn, label)
+        self._addColumnData(signal,self.signal,self._myCurrentColumn)
+        self._addColumnData(qcd,self.qcd,self._myCurrentColumn)
+        self._addColumnData(EWKtau,self.EWKtau,self._myCurrentColumn)
+        self._addColumnData(EWKfake,self.EWKfake,self._myCurrentColumn)
+        if data != None:
+            self._addColumnData(data,self.data,self._myCurrentColumn)
+        else:
+            # Blinding
+            self.data.SetBinContent(self._myCurrentColumn,-1)
+            self.data.SetBinError(self._myCurrentColumn,0)
+        self._addColumnData(expected,self.expected,self._myCurrentColumn)
+        print label, self.data.GetXaxis().GetBinLabel(self._myCurrentColumn)
+
+    def _addColumnData(self,source,dest,bin):
+        # Set value
+        dest.SetBinContent(bin,source.Integral())
+        # Set error
+        myError = 0.0
+        for i in range(1,source.GetNbinsX()+1):
+            myError += pow(source.GetBinError(i),2)
+        dest.SetBinError(bin,sqrt(myError))
