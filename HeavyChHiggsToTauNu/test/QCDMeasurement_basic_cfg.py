@@ -13,7 +13,7 @@ dataVersion="44XmcS6"     # Fall11 MC
 puweight = "Run2011A+B"
 
 # Apply beta cut for jets to reject PU jets
-betaCutForJets = 0.7 # Disable by setting to 0.0; if you want to enable, set to 0.2
+betaCutForJets = 0.0 # Disable by setting to 0.0; if you want to enable, set to 0.2
 
 ##########
 # Flags for additional signal analysis modules
@@ -179,8 +179,10 @@ process.QCDMeasurement = cms.EDFilter("HPlusQCDMeasurementBasicFilter",
     Tree = param.tree.clone(),
     eventCounter = param.eventCounter.clone(),
     factorisationTauPtBinLowEdges = cms.untracked.vdouble(50., 60., 70., 80., 100., 120., 150.),
-    factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5), # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
-    factorisationNVerticesBinLowEdges = cms.untracked.vint32(10, 20, 30),
+    #factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5), # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
+    #factorisationNVerticesBinLowEdges = cms.untracked.vint32(10, 20),
+    factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-10.),
+    factorisationNVerticesBinLowEdges = cms.untracked.vint32(-10),
     factorisationTransverseMassRange = cms.untracked.vdouble(40., 0., 400.),
     factorisationFullMassRange = cms.untracked.vdouble(50., 0., 500.),
 )
@@ -243,7 +245,7 @@ print "TauSelection selection:", process.QCDMeasurement.tauSelection.selection.v
 print "TauSelection isolation:", process.QCDMeasurement.tauSelection.isolationDiscriminator.value()
 print "TauSelection rtauCut:", process.QCDMeasurement.tauSelection.rtauCut.value()
 print "VetoTauSelection src:", process.QCDMeasurement.vetoTauSelection.tauSelection.src.value()
-
+print "Jets:", process.QCDMeasurement.jetSelection
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
 process.QCDMeasurement.eventCounter.printMainCounter = cms.untracked.bool(True)
