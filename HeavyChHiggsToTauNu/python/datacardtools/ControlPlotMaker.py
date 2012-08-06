@@ -68,11 +68,10 @@ class ControlPlotMaker:
                             hExpected=selectionFlow.expected,hRatio=hSelectionFlowRatio,luminosity=luminosity)
         print "Control plots done"
 
-        # FIXME add selection flow plot
-
     def _getControlPlot(self, mass, details, columnIdList, title, titleSuffix, blindedRange = []):
         myShapeModifier = ShapeHistoModifier(details)
         myHisto = myShapeModifier.createEmptyShapeHistogram(title+titleSuffix)
+        mySystHisto = myShapeModifier.createEmptyShapeHistogram(title+"Syst"+titleSuffix)
         if columnIdList == None:
             # Data
             h = self._observation.getControlPlotByTitle(title)
@@ -85,13 +84,27 @@ class ControlPlotMaker:
                         if g.getLandsProcess() == c:
                             h = g.getControlPlotByTitle(title)
                             # Add systematic uncertainty (yes, we have here access to full systematics!)
-                            #FIXME
+                            mySystError = 0.0
+                            for result in g.getNuisanceResults():
+                                if not result.resultIsStatUncertainty(): # ignore stat. uncert.
+                                    # Check if there is shape uncertainty histogram (take average error from plus and minus)
+                                    if len(result.getHistograms()) > 0:
+                                        hError = result.getAveragedUncertaintyHistogram()
+                                        myShapeModifier.addShape(source=hError,dest=mySystHisto)
+                                        hError.IsA().Destructor(hError)
+                                    else:
+                                        # Just a constant for systematics, use same value for all bins
+                                        mySystError += pow(result.getResultAverage(),2)
+                            # Apply systematic uncertainty to shape histogram
+                            for i in range(1,h.GetNbinsX()+1):
+                                h.SetBinError(i,h.GetBinError(i)+pow(mySystError*10,2)+mySystHisto.GetBinError(i))
                             # Downscale MC ttbar according to branching ratio
                             if c == 1 or c == 2:
                                 h.Scale(pow(1.0-self._config.OptionBr,2))
                             # Add to total histogram
                             myShapeModifier.addShape(source=h,dest=myHisto)
         myShapeModifier.finaliseShape(dest=myHisto)
+        mySystHisto.IsA().Destructor(mySystHisto)
         # Apply blinding for data, if necessary
         if columnIdList == None and len(blindedRange) > 0:
             # Loop over bins and remove entries inside blinded range
@@ -444,8 +457,7 @@ class SelectionFlowPlotMaker:
             self.data.SetBinContent(self._myCurrentColumn,-1)
             self.data.SetBinError(self._myCurrentColumn,0)
         self._addColumnData(expected,self.expected,self._myCurrentColumn)
-        print label, self.data.GetXaxis().GetBinLabel(self._myCurrentColumn)
-
+ 
     def _addColumnData(self,source,dest,bin):
         # Set value
         dest.SetBinContent(bin,source.Integral())

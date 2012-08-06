@@ -852,7 +852,8 @@ class QCDfactorisedColumn(DatacardColumn):
                     self._nuisanceResults.append(ExtractorResult(e.getId(),
                                                                  e.getMasterId(),
                                                                  myResult,
-                                                                 myHistograms))
+                                                                 myHistograms,
+                                                                 e.getQCDmode() == "statistics" or e.getQCDmode() == "shapestat"))
             if not myFoundStatus:
                 raise Exception("\n"+ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Cannot find nuisance with id '"+nid+"'!")
         # Obtain results for control plots
