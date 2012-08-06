@@ -3,6 +3,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 
+#include "TLorentzVector.h"
+
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -336,7 +338,7 @@ namespace HPlus {
     // plot leading track without pt cut
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
     increment(fTausExistCounter);
-    if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
+    //if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
     increment(fOneTauCounter);
     // Obtain MC matching - for EWK without genuine taus
     FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
@@ -352,6 +354,7 @@ namespace HPlus {
     // Apply trigger scale factor here, because it depends only on tau
     TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauData.getSelectedTau()), iEvent.isRealData(), fEventWeight);
     fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
+
     increment(fTriggerScaleFactorCounter);
     hSelectionFlow->Fill(kSignalOrderTauID);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderTauID);
@@ -416,7 +419,7 @@ namespace HPlus {
     //    NonIsolatedElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     hCtrlIdentifiedElectronPt->Fill(electronVetoData.getSelectedElectronPtBeforePtCut());
     if (!electronVetoData.passedEvent()) return false;
-    increment(fElectronVetoCounter);   
+    increment(fElectronVetoCounter);
     hSelectionFlow->Fill(kSignalOrderElectronVeto);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderElectronVeto);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderElectronVeto);
@@ -445,7 +448,7 @@ namespace HPlus {
       copyPtrToVector(muonVetoData.getSelectedMuonsBeforePtAndEtaCuts(), *saveMuons);
       iEvent.put(saveMuons, "selectedVetoMuonsBeforePtAndEtaCuts");
     }
-  
+
 //------ Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
     hCtrlNjets->Fill(jetData.getHadronicJetCount());
@@ -642,7 +645,6 @@ namespace HPlus {
     fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
     double HiggsMass = FullHiggsMassData.getHiggsMass();
     if (HiggsMass > 100 && HiggsMass < 200 ) increment(fHiggsMassCutCounter);
-
 
 //------ Experimental cuts, counters, and histograms
     doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData);
@@ -924,5 +926,9 @@ namespace HPlus {
       if (myFakeTauStatus) fEWKFakeTausGroup.incrementSelectedEventsCounter();
       getCounterGroupByTauMatch(tauMatch)->incrementSelectedEventsCounter();
     }
+  }
+
+  double SignalAnalysis::calculateMuonTauSystemInvatiantMass(const TauSelection::Data& tauData, const GlobalMuonVeto::Data& muonData) const {
+    return 0.0;
   }
 }

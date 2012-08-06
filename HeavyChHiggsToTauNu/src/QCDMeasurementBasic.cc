@@ -30,12 +30,14 @@ namespace HPlus {
     //fNonIsolatedElectronVetoCounter(eventCounter.addCounter("NonIsolatedElectronVeto")),
     //fNonIsolatedMuonVetoCounter(eventCounter.addCounter("NonIsolatedMuonVeto")),
     fNJetsCounter(eventCounter.addCounter("JetSelection")),
+    fFullTauIDCounter(eventCounter.addCounter("FullTauIDCounter")),
     fMETCounter(eventCounter.addCounter("MET")),
     fBTaggingCounter(eventCounter.addCounter("bTagging")),
     fBTaggingScaleFactorCounter(eventCounter.addCounter("btag scale factor")),
     fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhiTauMET")),
     fMaxDeltaPhiJetMETCounter(eventCounter.addCounter("maxDeltaPhiJetMET")),
     fTopSelectionCounter(eventCounter.addCounter("top selection")),
+    fCoincidenceCounter(eventCounter.addCounter("coincidence of both legs")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, fHistoWrapper),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, fHistoWrapper),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, fHistoWrapper),
@@ -311,9 +313,12 @@ namespace HPlus {
     }
 
 // ----- Tau ID leg (factorisation
+    bool myPassedTauLegStatus = false;
     if (tauCandidateData.selectedTauPassesFullTauID()) {
       hLeg2AfterTauID->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
       hSelectionFlow->Fill(kQCDOrderTauID);
+      increment(fFullTauIDCounter);
+      myPassedTauLegStatus = true;
       // On purpose: No return statement for false (factorisation)
     }
 
@@ -321,13 +326,14 @@ namespace HPlus {
     // MET cut
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau(), jetData.getAllJets());
     hCtrlMET[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(metData.getSelectedMET()->et());
-    if(!metData.passedEvent()) return false;
+    if(!metData.passedEvent() && metData.getSelectedMET()->et()<100) return false;
     increment(fMETCounter);
     hSelectionFlow->Fill(kQCDOrderMET);
     hLeg1AfterMET->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
 
     // b tagging cut
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    hCtrlNbjets[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(btagData.getBJetCount());
     if(!btagData.passedEvent()) return false;
     increment(fBTaggingCounter);
     // Apply scale factor as weight to event
@@ -338,7 +344,6 @@ namespace HPlus {
     increment(fBTaggingScaleFactorCounter);
     hSelectionFlow->Fill(kQCDOrderBTag);
     hLeg1AfterBTagging->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
-    hCtrlNbjets[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(btagData.getBJetCount());
 
     // Delta phi(tau,MET) cut
     double deltaPhi = DeltaPhi::reconstruct(*(tauCandidateData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
@@ -348,8 +353,8 @@ namespace HPlus {
     hSelectionFlow->Fill(kQCDOrderDeltaPhiTauMET);
     hLeg1AfterDeltaPhiTauMET->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
 
-    // Max Delta phi(jet/tau,MET) cut
-    double myMaxDeltaPhiJetMET = deltaPhi;
+    // Max Delta phi(jet,MET) cut
+    double myMaxDeltaPhiJetMET = 0.0;
     for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getSelectedJets().begin(); iJet != jetData.getSelectedJets().end(); ++iJet) {
       double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET())) * 57.3;
       if (jetDeltaPhi > myMaxDeltaPhiJetMET)
@@ -395,7 +400,12 @@ namespace HPlus {
     hLeg1AfterTopSelection->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
 
     // MET leg selection passed
-
+    if (myPassedTauLegStatus) {
+      increment(fCoincidenceCounter);
+      //std::cout << "first selected tau pt=" << tauCandidateData.getSelectedTau()->leadPFChargedHadrCand()->pt() << " trg SF=" << triggerWeight.getEventWeight() << "\tnjets" << jetData.getHadronicJetCount() << std::endl;
+    }
+    
+    
     // Obtain transverseMass
     double transverseMass = TransverseMass::reconstruct(*(tauCandidateData.getSelectedTau()), *(metData.getSelectedMET()));
     hMtShapesAfterFullMETLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(transverseMass);
