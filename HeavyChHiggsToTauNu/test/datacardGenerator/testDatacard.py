@@ -1,6 +1,6 @@
 DataCardName    = 'myDummyTestName'
 #Path            = '/mnt/flustre/slehti/HplusDataForLands'
-Path            = '/home/wendland/data/v25b/test1'
+Path            = '/home/wendland/data/v25b/test2'
 #MassPoints      = [80,90,100,120,140,150,155,160]
 MassPoints      = [80,120,160]
 #MassPoints      = [120]
@@ -106,7 +106,8 @@ if OptionMassShape == "TransverseMass":
         dirPrefix   = QCDFactorisedAnalysis,
         datasetType  = "QCD factorised",
         datasetDefinitions = ["Tau_"],
-        MCEWKDatasetDefinitions = ["TTJets","WJets","DY","WW","WZ","ZZ","T_","Tbar_"],
+        #MCEWKDatasetDefinitions = ["TTJets","WJets","DY","WW","WZ","ZZ","T_","Tbar_"],
+        MCEWKDatasetDefinitions = ["TTJets","W2Jets","W3Jets","W4Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
         nuisances    = ["12","13","40b"],
         QCDfactorisedInfo = { "afterBigboxSource": "factorisation/AfterJetSelection",
                               "afterMETLegSource": "factorisation/Leg1AfterTopSelection",
@@ -124,7 +125,8 @@ elif OptionMassShape == "FullMass":
         dirPrefix   = QCDFactorisedAnalysis,
         datasetType  = "QCD factorised",
         datasetDefinitions = ["Tau_"],
-        MCEWKDatasetDefinitions = ["TTJets","WJets","DY","WW","WZ","ZZ","T_","Tbar_"],
+        #MCEWKDatasetDefinitions = ["TTJets","WJets","DY","WW","WZ","ZZ","T_","Tbar_"],
+        MCEWKDatasetDefinitions = ["TTJets","W2Jets","W3Jets","W4Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
         nuisances    = ["12","13","40b"],
         QCDfactorisedInfo = { "afterBigboxSource": "factorisation/AfterJetSelection",
                               "afterMETLegSource": "factorisation/Leg1AfterTopSelection",
@@ -228,7 +230,8 @@ else:
         landsProcess = 4,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Signal",
-        datasetDefinitions = ["TTJets", "WJets_", "Tbar_", "T_"],
+        #datasetDefinitions = ["TTJets", "W2Jets","W3Jets","W4Jets", "Tbar_", "T_"],
+        datasetDefinitions = ["TTJets", "WJets", "Tbar_", "T_"],
         dirPrefix   = SignalAnalysis,
         rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
@@ -295,9 +298,9 @@ Nuisances.append(Nuisance(
     label         = "tau+MET trg scale factor",
     distr         = "lnN",
     function      = "ScaleFactor",
-    histoDir      = ["signalAnalysis/ScaleFactorUncertainties/"],
+    histoDir      = ["ScaleFactorUncertainties"],
     histograms    = ["TriggerScaleFactorAbsUncert_AfterSelection"],
-    normalisation = ["signalAnalysis/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterSelection"],
+    normalisation = ["TriggerScaleFactorAbsUncertCounts_AfterSelection"],
     addUncertaintyInQuadrature = 0.10 # MET leg uncertainty
 ))
 
@@ -314,12 +317,12 @@ Nuisances.append(Nuisance(
     label         = "tau+MET trg scale factor",
     distr         = "lnN",
     function      = "ScaleFactor",
-    histoDir      = ["signalAnalysisNormal/ScaleFactorUncertainties/",
-                     "signalAnalysisEmbedded/ScaleFactorUncertainties/"],
+    histoDir      = ["ScaleFactorUncertainties",
+                     "ScaleFactorUncertainties"],
     histograms    = ["TriggerScaleFactorAbsUncert_AfterDeltaPhi160",
                      "TriggerScaleFactorAbsUncert_AfterDeltaPhi160"],
-    normalisation = ["signalAnalysisNormal/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterSelection",
-                     "signalAnalysisEmbedded/ScaleFactorUncertainties/TriggerScaleFactorAbsUncertCounts_AfterSelection"],
+    normalisation = ["TriggerScaleFactorAbsUncertCounts_AfterSelection",
+                     "TriggerScaleFactorAbsUncertCounts_AfterSelection"],
     addUncertaintyInQuadrature = 0.10 # MET leg uncertainty
 ))
 
@@ -415,9 +418,9 @@ Nuisances.append(Nuisance(
     label         = "btagging",
     distr         = "lnN",
     function      = "ScaleFactor",
-    histoDir      = ["signalAnalysis/ScaleFactorUncertainties/"],
+    histoDir      = ["ScaleFactorUncertainties"],
     histograms    = ["BtagScaleFactorAbsUncert_AfterSelection"],
-    normalisation = ["signalAnalysis/ScaleFactorUncertainties/BtagScaleFactorAbsUncertCounts_AfterSelection"]
+    normalisation = ["BtagScaleFactorAbsUncertCounts_AfterSelection"]
 ))
 
 Nuisances.append(Nuisance(
@@ -425,9 +428,9 @@ Nuisances.append(Nuisance(
     label         = "mistagging",
     distr         = "lnN",
     function      = "ScaleFactor",
-    histoDir      = ["signalAnalysis/ScaleFactorUncertainties/"],
+    histoDir      = ["ScaleFactorUncertainties"],
     histograms    = ["BtagScaleFactorAbsUncert_AfterSelection"],
-    normalisation = ["signalAnalysis/ScaleFactorUncertainties/BtagScaleFactorAbsUncertCounts_AfterSelection"]
+    normalisation = ["BtagScaleFactorAbsUncertCounts_AfterSelection"]
 ))
 
 Nuisances.append(Nuisance(
@@ -435,9 +438,9 @@ Nuisances.append(Nuisance(
     label         = "mistagging",
     distr         = "lnN",
     function      = "ScaleFactor",
-    histoDir      = ["signalAnalysisNormal/ScaleFactorUncertainties/"],
+    histoDir      = ["ScaleFactorUncertainties/"],
     histograms    = ["BtagScaleFactorAbsUncert_AfterSelection"],
-    normalisation = ["signalAnalysisNormal/ScaleFactorUncertainties/BtagScaleFactorAbsUncertCounts_AfterSelection"]
+    normalisation = ["BtagScaleFactorAbsUncertCounts_AfterSelection"]
 ))
 
 Nuisances.append(Nuisance(
@@ -694,7 +697,7 @@ Nuisances.append(Nuisance(
     distr         = "shapeStat",
     function      = "Shape",
     counter       = SignalRateCounter,
-    histoDir      = [SignalAnalysis],
+    histoDir      = [""],
     histograms    = [SignalShapeHisto],
 ))
 
@@ -712,7 +715,7 @@ Nuisances.append(Nuisance(
     distr         = "shapeStat",
     function      = "Shape",
     counter       = FakeRateCounter,
-    histoDir      = [SignalAnalysis],
+    histoDir      = [""],
     histograms    = [FakeShapeHisto],
 ))
 
@@ -769,6 +772,7 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "ControlPlots",
     signalHistoName  = "MET",
+    QCDFactNormalisation = "factorisation/Leg1AfterMET",
     QCDFactHistoPath = "shape_CtrlLeg1AfterMET",
     QCDFactHistoName = "CtrlLeg1AfterMET",
     details          = { "bins": 13,
@@ -795,6 +799,7 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "ControlPlots",
     signalHistoName  = "NBjets",
+    QCDFactNormalisation = "factorisation/Leg1AfterBTagging",
     QCDFactHistoPath = "shape_CtrlLeg1AfterNbjets",
     QCDFactHistoName = "CtrlLeg1AfterNbjets",
     details          = { "bins": 6,
@@ -821,6 +826,7 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "",
     signalHistoName  = "deltaPhi",
+    QCDFactNormalisation = "factorisation/Leg1AfterDeltaPhiTauMET",
     QCDFactHistoPath = "shape_CtrlLeg1AfterDeltaPhiTauMET",
     QCDFactHistoName = "CtrlLeg1AfterDeltaPhiTauMET",
     details          = { "bins": 9,
@@ -847,6 +853,7 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "",
     signalHistoName  = "maxDeltaPhiJetMet",
+    QCDFactNormalisation = "factorisation/Leg1AfterMaxDeltaPhiJetMET",
     QCDFactHistoPath = "shape_CtrlLeg1AfterMaxDeltaPhiJetMET",
     QCDFactHistoName = "CtrlLeg1AfterMaxDeltaPhiJetMET",
     details          = { "bins": 9,
@@ -873,6 +880,7 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "",
     signalHistoName  = "transverseMass",
+    QCDFactNormalisation = "factorisation/Leg1AfterTopSelection",
     QCDFactHistoPath = "shape_MtShapesAfterFullMETLeg",
     QCDFactHistoName = "MtShapesAfterFullMETLeg",
     details          = { "bins": 20,
@@ -899,6 +907,7 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "FullHiggsMass",
     signalHistoName  = "HiggsMass",
+    QCDFactNormalisation = "factorisation/Leg1AfterTopSelection",
     QCDFactHistoPath = "shape_FullMassShapesAfterFullMETLeg",
     QCDFactHistoName = "FullMassShapesAfterFullMETLeg",
     details          = { "bins": 25,

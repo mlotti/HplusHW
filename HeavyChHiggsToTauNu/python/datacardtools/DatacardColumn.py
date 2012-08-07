@@ -249,10 +249,10 @@ class DatacardColumn():
             myShapeExtractor = None
             if self.typeIsObservation():
                 myExtractor = CounterExtractor(self._rateCounter, ExtractorMode.OBSERVATION)
-                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [self._dirPrefix], [self._shapeHisto], ExtractorMode.OBSERVATION)
+                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [""], [self._shapeHisto], ExtractorMode.OBSERVATION)
             else:
                 myExtractor = CounterExtractor(self._rateCounter, ExtractorMode.RATE)
-                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [self._dirPrefix], [self._shapeHisto], ExtractorMode.RATE)
+                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [""], [self._shapeHisto], ExtractorMode.RATE)
             myRateResult = myExtractor.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
         # Cache result

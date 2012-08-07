@@ -54,18 +54,22 @@ class ControlPlotMaker:
                 # Construct plot and save
                 self._construct(m,c.details,"M%d_ControlPlot_"%m+c.title,hFrame,hData,hSignal,hQCD,hEmbedded,hEWKfake,hExpected,hRatio,luminosity)
                 # Delete histograms from memory
+                hSignalHH.IsA().Destructor(hSignalHH)
+                hSignalHW.IsA().Destructor(hSignalHW)
+                hData.IsA().Destructor(hData)
                 hQCD.IsA().Destructor(hQCD)
                 hEmbedded.IsA().Destructor(hEmbedded)
                 hEWKfake.IsA().Destructor(hEWKfake)
                 hExpected.IsA().Destructor(hExpected)
                 hSignal.IsA().Destructor(hSignal)
-                # Other histograms don't give a warning about possible memory leak (why ???)
+                hRatio.IsA().Destructor(hRatio)
             # Make selection flow plot
             hSelectionFlowRatio = self._getRatioPlot("SelectionFlow"+myMassSuffix,selectionFlow.data,selectionFlow.expected)
             self._construct(mass=m,details=selectionFlow.plotDetails,title="M%d_SelectionFlow_"%m,
                             hFrame=selectionFlow.hFrame,hData=selectionFlow.data,hSignal=selectionFlow.signal,
                             hQCD=selectionFlow.qcd,hEmbedded=selectionFlow.EWKtau,hEWKfake=selectionFlow.EWKfake,
                             hExpected=selectionFlow.expected,hRatio=hSelectionFlowRatio,luminosity=luminosity)
+            hSelectionFlowRatio.IsA().Destructor(hSelectionFlowRatio)
         print "Control plots done"
 
     def _getControlPlot(self, mass, details, columnIdList, title, titleSuffix, blindedRange = []):
@@ -97,7 +101,7 @@ class ControlPlotMaker:
                                         mySystError += pow(result.getResultAverage(),2)
                             # Apply systematic uncertainty to shape histogram
                             for i in range(1,h.GetNbinsX()+1):
-                                h.SetBinError(i,h.GetBinError(i)+pow(mySystError*10,2)+mySystHisto.GetBinError(i))
+                                h.SetBinError(i,sqrt(h.GetBinError(i)+pow(mySystError*10,2)+mySystHisto.GetBinError(i)))
                             # Downscale MC ttbar according to branching ratio
                             if c == 1 or c == 2:
                                 h.Scale(pow(1.0-self._config.OptionBr,2))
