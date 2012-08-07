@@ -51,8 +51,8 @@ doTauEmbeddingLikePreselection = False
 # Apply beta cut for jets to reject PU jets
 betaCutForJets = 0.0 # Disable by setting to 0.0; if you want to enable, set to 0.2
 
-#########
-# Flags for options in the signal analysis
+######### 
+#Flags for options in the signal analysis
 
 # Keep / Ignore prescaling for data (suppresses greatly error messages 
 # in datasets with or-function of triggers)

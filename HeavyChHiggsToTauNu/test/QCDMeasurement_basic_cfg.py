@@ -63,7 +63,7 @@ myOptimisation.addJetEtVariation([20.0, 30.0])
 #myOptimisation.addTopRecoVatiation(["None"]) # Valid options: None, chi, std, Wselection
 myOptimisation.disableMaxVariations()
 if doOptimisation:
-    doSystematics = True # Make sure that systematics are run
+    doSystematics = False # Make sure that systematics are run (not needed for QCD)
     doFillTree = False # Make sure that tree filling is disabled or root file size explodes
     myHistogramAmbientLevel = "Vital" # Set histogram level to least histograms to reduce output file sizes
     # FIXME add here "light' mode running
@@ -179,10 +179,8 @@ process.QCDMeasurement = cms.EDFilter("HPlusQCDMeasurementBasicFilter",
     Tree = param.tree.clone(),
     eventCounter = param.eventCounter.clone(),
     factorisationTauPtBinLowEdges = cms.untracked.vdouble(50., 60., 70., 80., 100., 120., 150.),
-    #factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5), # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
-    #factorisationNVerticesBinLowEdges = cms.untracked.vint32(10, 20),
-    factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-10.),
-    factorisationNVerticesBinLowEdges = cms.untracked.vint32(-10),
+    factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5), # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
+    factorisationNVerticesBinLowEdges = cms.untracked.vint32(10),
     factorisationTransverseMassRange = cms.untracked.vdouble(40., 0., 400.),
     factorisationFullMassRange = cms.untracked.vdouble(50., 0., 500.),
 )
