@@ -27,7 +27,7 @@ OptionIncludeSystematics = True # Set to true if the JES and PU uncertainties we
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
 
 # Options for reports and article
-OptionBr = 0.03  # Br(t->bH+)
+OptionBr = 0.05  # Br(t->bH+)
 
 # Shape histogram definitions
 SignalShapeHisto = ""
@@ -766,6 +766,33 @@ MergeNuisances.append(["40","40b","40c"])
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ControlPlotInput
 ControlPlots = []
 ControlPlots.append(ControlPlotInput(
+    title            = "Njets",
+    signalHHid       = [-1],
+    signalHWid       = [0],
+    QCDid            = [3],
+    embeddingId      = EmbeddingIdList,
+    EWKfakeId        = EWKFakeIdList,
+    signalHistoPath  = "ControlPlots",
+    signalHistoName  = "Njets",
+    QCDFactNormalisation = "factorisation/AfterJetSelection",
+    QCDFactHistoPath = "shape_CtrlLeg1AfterNjets",
+    QCDFactHistoName = "CtrlLeg1AfterNjets",
+    details          = { "bins": 5,
+                         "rangeMin": 3.0,
+                         "rangeMax": 8.0,
+                         "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                         "xtitle": "Number of selected jets",
+                         "ytitle": "Events",
+                         "unit": "",
+                         "logy": True,
+                         "DeltaRatio": 0.5,
+                         "ymin": 0.9,
+                         "ymax": -1},
+    blindedRange     = [], # specify range min,max if blinding applies to this control plot
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+))
+
+ControlPlots.append(ControlPlotInput(
     title            = "MET",
     signalHHid       = [-1],
     signalHWid       = [0],
@@ -774,7 +801,7 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "ControlPlots",
     signalHistoName  = "MET",
-    QCDFactNormalisation = "factorisation/Leg1AfterMET",
+    QCDFactNormalisation = "factorisation/AfterJetSelection",
     QCDFactHistoPath = "shape_CtrlLeg1AfterMET",
     QCDFactHistoName = "CtrlLeg1AfterMET",
     details          = { "bins": 13,
@@ -789,7 +816,7 @@ ControlPlots.append(ControlPlotInput(
                          "ymin": 0.9,
                          "ymax": -1},
     blindedRange     = [], # specify range min,max if blinding applies to this control plot
-    flowPlotCaption  = "E_{T}^{miss}", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = "#tau_{h}+#geq3j", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
@@ -801,7 +828,7 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "ControlPlots",
     signalHistoName  = "NBjets",
-    QCDFactNormalisation = "factorisation/Leg1AfterBTagging",
+    QCDFactNormalisation = "factorisation/Leg1AfterMET",
     QCDFactHistoPath = "shape_CtrlLeg1AfterNbjets",
     QCDFactHistoName = "CtrlLeg1AfterNbjets",
     details          = { "bins": 6,
@@ -816,7 +843,7 @@ ControlPlots.append(ControlPlotInput(
                          "ymin": 0.9,
                          "ymax": -1},
     blindedRange     = [], # specify range min,max if blinding applies to this control plot
-    flowPlotCaption  = "N_{b jets}", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = "E_{T}^{miss}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
@@ -828,7 +855,7 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "",
     signalHistoName  = "deltaPhi",
-    QCDFactNormalisation = "factorisation/Leg1AfterDeltaPhiTauMET",
+    QCDFactNormalisation = "factorisation/Leg1AfterBTagging",
     QCDFactHistoPath = "shape_CtrlLeg1AfterDeltaPhiTauMET",
     QCDFactHistoName = "CtrlLeg1AfterDeltaPhiTauMET",
     details          = { "bins": 9,
@@ -843,7 +870,7 @@ ControlPlots.append(ControlPlotInput(
                          "ymin": 0.9,
                          "ymax": -1},
     blindedRange     = [-1, 300], # specify range min,max if blinding applies to this control plot
-    flowPlotCaption  = "#Delta#phi(#tau_{h},E_{T}^{miss})", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = "N_{b jets}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
@@ -855,7 +882,7 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "",
     signalHistoName  = "maxDeltaPhiJetMet",
-    QCDFactNormalisation = "factorisation/Leg1AfterMaxDeltaPhiJetMET",
+    QCDFactNormalisation = "factorisation/Leg1AfterDeltaPhiTauMET",
     QCDFactHistoPath = "shape_CtrlLeg1AfterMaxDeltaPhiJetMET",
     QCDFactHistoName = "CtrlLeg1AfterMaxDeltaPhiJetMET",
     details          = { "bins": 9,
@@ -870,7 +897,7 @@ ControlPlots.append(ControlPlotInput(
                          "ymin": 0.9,
                          "ymax": -1},
     blindedRange     = [-1, 300], # specify range min,max if blinding applies to this control plot
-    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = "#Delta#phi(#tau_{h},E_{T}^{miss})", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
@@ -923,7 +950,7 @@ ControlPlots.append(ControlPlotInput(
                          "DeltaRatio": 0.5,
                          "ymin": 0.9,
                          "ymax": -1},
-    blindedRange     = [60, 240], # specify range min,max if blinding applies to this control plot
+    blindedRange     = [50, 1000], # specify range min,max if blinding applies to this control plot
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
