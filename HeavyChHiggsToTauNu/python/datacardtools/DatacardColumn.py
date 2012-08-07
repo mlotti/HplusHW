@@ -8,6 +8,7 @@ import sys
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+from math import sqrt,pow
 
 ## ExtractorResult
 # Helper class to cache the result for each extractor in each datacard column
@@ -33,9 +34,9 @@ class ExtractorResult():
 
     def getResultAverage(self):
         if isinstance(self._result, list):
-            myValue = 0
+            myValue = 0.0
             for r in self._result:
-                myValue += r
+                myValue += abs(r)
             myValue = myValue / len(self._result)
             return myValue
         else:
@@ -57,17 +58,21 @@ class ExtractorResult():
             htemp.SetDirectory(rootfile)
             self._tempHistos.append(htemp)
 
-    def getAveragedUncertaintyHistogram(self):
+    def getContractedShapeUncertainty(self,hNominal):
         if len(self._histograms) == 0:
             return None
-        hSum = self._histograms[0].Clone("Sum")
-        for i in range(0, self._histograms[0].GetNbinsX()+2):
-            myError = 0.0
-            for h in self._histograms:
-                myError += h.GetBinError(i)
-            hSum.SetBinContent(i,0.0)
-            hSum.SetBinError(i,myError / len(self._histograms))
-        return hSum
+        myResidualSum = 0.0
+        myAverageSum = 0.0
+        if len(self._histograms) == 2:
+            # Calculate average error as sqrt(sum((max-min)/2)**2) and central value as (max+min) / 2
+            for i in range(0, self._histograms[0].GetNbinsX()+2):
+                myResidualSum += pow((self._histograms[0].GetBinContent(i)-self._histograms[1].GetBinContent(i))/2,2)
+                myAverageSum += hNominal.GetBinContent(i)
+            if myAverageSum > 0:
+                return sqrt(myResidualSum) / myAverageSum
+            else:
+                return 0.0
+        return 0.0
 
 # DatacardColumn class
 class DatacardColumn():
@@ -298,6 +303,14 @@ class DatacardColumn():
         if self._rateResult.getResult() == None:
             raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
         return self._rateResult.getResult()
+
+    ## Returns rate histogram for column
+    def getRateHistogram(self):
+        if self._rateResult == None:
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
+        if self._rateResult.getHistograms() == None:
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate histograms have not been cached! (did you forget to call doDataMining()?)")
+        return self._rateResult.getHistograms()[0]
 
     ## Returns true if column has a nuisance Id
     def hasNuisanceByMasterId(self, id):

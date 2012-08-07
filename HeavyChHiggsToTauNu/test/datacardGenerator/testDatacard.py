@@ -23,11 +23,11 @@ FakeRateCounter = "EWKfaketaus:SelectedEvents"
 OptionMassShape = "TransverseMass"
 #optionMassShape = "FullMass"
 OptionReplaceEmbeddingByMC = True
-OptionIncludeSystematics = False # Set to true if the JES and PU uncertainties were produced
+OptionIncludeSystematics = True # Set to true if the JES and PU uncertainties were produced
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
 
 # Options for reports and article
-OptionBr = 0.05  # Br(t->bH+)
+OptionBr = 0.03  # Br(t->bH+)
 
 # Shape histogram definitions
 SignalShapeHisto = ""
@@ -86,7 +86,7 @@ for mass in MassPoints:
     hhx.setLabel("HH"+str(mass)+"_a")
     hhx.setLandSProcess(-1)
     hhx.setValidMassPoints(myMassList)
-    hhx.setNuisances(["01","03","07","09","10","17","28","33","34"])
+    hhx.setNuisances(["01","03","45","46","47","09","10","17","28","33","34"])
     hhx.setDatasetDefinitions(["TTToHplusBHminusB_M"+str(mass)]),
     DataGroups.append(hhx)
 
@@ -94,7 +94,7 @@ for mass in MassPoints:
     hwx.setLabel("HW"+str(mass)+"_a")
     hwx.setLandSProcess(0)
     hwx.setValidMassPoints(myMassList)
-    hwx.setNuisances(["01","03","07","09","10","18","28","33","34"])
+    hwx.setNuisances(["01","03","45","46","47","09","10","18","28","33","34"])
     hwx.setDatasetDefinitions(["TTToHplusBWB_M"+str(mass)]),
     DataGroups.append(hwx)
 
@@ -173,7 +173,7 @@ if not OptionReplaceEmbeddingByMC:
         dirPrefix   = SignalAnalysis,
         rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01c","03","07","09","11b","15b","16b","31","33","34","24"]
+        nuisances    = ["01c","03","45","46","47","09","11b","15b","16b","31","33","34","24"]
     ))
     DataGroups.append(DataGroup(
         label        = "EWK_VV",
@@ -184,7 +184,7 @@ if not OptionReplaceEmbeddingByMC:
         dirPrefix   = SignalAnalysis,
         rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01c","03","07","09","11b","15b","16b","32","33","34","27"]
+        nuisances    = ["01c","03","45","46","47","09","11b","15b","16b","32","33","34","27"]
     ))
 
     # EWK + ttbar with fake taus
@@ -235,7 +235,7 @@ else:
         dirPrefix   = SignalAnalysis,
         rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01b","03","07","14","15","16","19","40"]
+        nuisances    = ["01b","03","45","46","47","14","15","16","19","40"]
     ))
     DataGroups.append(DataGroup(
         label        = "MC_EWK_DY",
@@ -246,7 +246,7 @@ else:
         dirPrefix   = SignalAnalysis,
         rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01","03","07","09","11","15b","16b","31","33","34","24"]
+        nuisances    = ["01","03","45","46","47","09","11","15b","16b","31","33","34","24"]
     ))
     DataGroups.append(DataGroup(
         label        = "MC_EWK_VV",
@@ -257,7 +257,7 @@ else:
         dirPrefix   = SignalAnalysis,
         rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01","03","07","09","11","15b","16b","32","33","34","27"]
+        nuisances    = ["01","03","45","46","47","09","11","15b","16b","32","33","34","27"]
     ))
     DataGroups.append(DataGroup(
         label        = "empty",
@@ -278,6 +278,8 @@ DataGroups.append(DataGroup(
 
 ##############################################################################
 # Definition of nuisance parameters
+#
+# Note: Remember to include 'stat.' into the label of nuistances of statistical nature
 #
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import Nuisance
 ReservedNuisances = []
@@ -344,43 +346,43 @@ Nuisances.append(Nuisance(
 
 if OptionIncludeSystematics:
     Nuisances.append(Nuisance(
-        id            = "07",
-        label         = "JES/JER/MET/Rtau effect on mT shape",
+        id            = "45",
+        label         = "TES effect on shape",
         distr         = "shapeQ",
         function      = "Shape",
         counter       = SignalRateCounter,
-        histoDir      = ["signalAnalysisJESPlus03eta02METMinus10",
-                        "signalAnalysisJESMinus03eta02METPlus10"],
+        histoDir      = ["TESPlus",
+                        "TESMinus"],
         histograms    = [SignalShapeHisto,
                         SignalShapeHisto]
     ))
 
     Nuisances.append(Nuisance(
-        id            = "07b",
-        label         = "JES/JER/MET/Rtau effect on mT shape",
-        distr         = "shapeQ",
-        function      = "Shape",
-        counter       = FakeRateCounter,
-        histoDir      = ["signalAnalysisJESPlus03eta02METMinus10",
-                        "signalAnalysisJESMinus03eta02METPlus10"],
-        histograms    = [FakeShapeHisto,
-                        FakeShapeHisto]
-    ))
-
-    Nuisances.append(Nuisance(
-        id            = "07c",
-        label         = "JES/JER/MET/Rtau effect on mT shape",
+        id            = "46",
+        label         = "JES effect on shape",
         distr         = "shapeQ",
         function      = "Shape",
         counter       = SignalRateCounter,
-        histoDir      = ["signalAnalysisJESPlus03eta02METMinus00",
-                        "signalAnalysisJESMinus03eta02METPlus00"],
+        histoDir      = ["JESPlus",
+                        "JESMinus"],
+        histograms    = [SignalShapeHisto,
+                        SignalShapeHisto]
+    ))
+
+    Nuisances.append(Nuisance(
+        id            = "47",
+        label         = "MET unclustered scale effect on shape",
+        distr         = "shapeQ",
+        function      = "Shape",
+        counter       = SignalRateCounter,
+        histoDir      = ["METPlus",
+                        "METMinus"],
         histograms    = [SignalShapeHisto,
                         SignalShapeHisto]
     ))
 else:
     Nuisances.append(Nuisance(
-        id            = "07",
+        id            = "45",
         label         = "NON-EXACT VALUE for JES/JER/MET/Rtau effect on mT shape",
         distr         = "lnN",
         function      = "Constant",
@@ -388,7 +390,7 @@ else:
     ))
 
     Nuisances.append(Nuisance(
-        id            = "07b",
+        id            = "46",
         label         = "NON-EXACT VALUE for JES/JER/MET/Rtau effect on mT shape",
         distr         = "lnN",
         function      = "Constant",
@@ -396,7 +398,7 @@ else:
     ))
 
     Nuisances.append(Nuisance(
-        id            = "07c",
+        id            = "47",
         label         = "NON-EXACT VALUE for JES/JER/MET/Rtau effect on mT shape",
         distr         = "lnN",
         function      = "Constant",
@@ -501,7 +503,7 @@ Nuisances.append(Nuisance(
 
 Nuisances.append(Nuisance(
     id            = "17",
-    label         = "MC signal statistics, HH",
+    label         = "MC signal stat., HH",
     distr         = "lnN",
     function      = "Counter",
     counter       = SignalRateCounter,
@@ -509,7 +511,7 @@ Nuisances.append(Nuisance(
 
 Nuisances.append(Nuisance(
     id            = "18",
-    label         = "MC signal statistics, HW",
+    label         = "MC signal stat., HW",
     distr         = "lnN",
     function      = "Counter",
     counter       = SignalRateCounter,
@@ -533,7 +535,7 @@ Nuisances.append(Nuisance(
 
 Nuisances.append(Nuisance(
     id            = "24",
-    label         = "Z->tautau MC stat",
+    label         = "Z->tautau MC stat.",
     distr         = "lnN",
     function      = "Counter",
     counter       = SignalRateCounter,
@@ -557,7 +559,7 @@ Nuisances.append(Nuisance(
 
 Nuisances.append(Nuisance(
     id            = "27",
-    label         = "diboson MC stat",
+    label         = "diboson MC stat.",
     distr         = "lnN",
     function      = "Counter",
     counter       = FakeRateCounter
@@ -618,9 +620,9 @@ if OptionIncludeSystematics:
         label         = "pileup",
         distr         = "lnN",
         function      = "pileupUncertainty",
-        histoDir      = ["signalAnalysisCounters", # nominal
-                        "signalAnalysisPUWeightMinusCounters", # minus
-                        "signalAnalysisPUWeightPlusCounters"], # up
+        histoDir      = ["", # nominal
+                        "PUWeightMinus", # minus
+                        "PUWeightPlus"], # up
         counter       = SignalRateCounter
     ))
 
@@ -629,15 +631,15 @@ if OptionIncludeSystematics:
         label         = "pileup",
         distr         = "lnN",
         function      = "pileupUncertainty",
-        histoDir      = ["signalAnalysisCounters", # nominal
-                        "signalAnalysisPUWeightMinusCounters", # minus
-                        "signalAnalysisPUWeightPlusCounters"], # up
+        histoDir      = ["", # nominal
+                        "PUWeightMinus", # minus
+                        "PUWeightPlus"], # up
         counter       = FakeRateCounter
     ))
 else:
     Nuisances.append(Nuisance(
         id            = "34",
-        label         = "pileup",
+        label         = "FAKE pileup",
         distr         = "lnN",
         function      = "Constant",
         value         = 0.05
@@ -645,7 +647,7 @@ else:
 
     Nuisances.append(Nuisance(
         id            = "34b",
-        label         = "pileup",
+        label         = "FAKE pileup",
         distr         = "lnN",
         function      = "Constant",
         value         = 0.05
@@ -753,7 +755,7 @@ Nuisances.append(Nuisance(
 
 MergeNuisances = []
 MergeNuisances.append(["01","01b","01c"])
-MergeNuisances.append(["07","07b","07c"])
+#MergeNuisances.append(["07","07b","07c"])
 MergeNuisances.append(["11","11b"])
 MergeNuisances.append(["15","15b"])
 MergeNuisances.append(["16","16b"])
@@ -883,10 +885,10 @@ ControlPlots.append(ControlPlotInput(
     QCDFactNormalisation = "factorisation/Leg1AfterTopSelection",
     QCDFactHistoPath = "shape_MtShapesAfterFullMETLeg",
     QCDFactHistoName = "MtShapesAfterFullMETLeg",
-    details          = { "bins": 20,
+    details          = { "bins": 13,
                          "rangeMin": 0.0,
                          "rangeMax": 400.0,
-                         "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                         "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
                          "xtitle": "mT(#tau_{h},E_{T}^{miss})",
                          "ytitle": "Events",
                          "unit": "GeV/c^{2}",
@@ -910,10 +912,10 @@ ControlPlots.append(ControlPlotInput(
     QCDFactNormalisation = "factorisation/Leg1AfterTopSelection",
     QCDFactHistoPath = "shape_FullMassShapesAfterFullMETLeg",
     QCDFactHistoName = "FullMassShapesAfterFullMETLeg",
-    details          = { "bins": 25,
+    details          = { "bins": 13,
                          "rangeMin": 0.0,
                          "rangeMax": 500.0,
-                         "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                         "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
                          "xtitle": "m(#tau_{h},E^{miss})",
                          "ytitle": "Events",
                          "unit": "GeV/c^{2}",

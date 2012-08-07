@@ -278,10 +278,9 @@ class PileupUncertaintyExtractor(ExtractorBase):
         # Normalise with up/down to get up/down histograms
         # mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.UP) #FIXME
         # mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.DOWN) #FIXME
-
         for d in self._counterDirs:
-            myHistoPath = d+"/weighted/counter"
-            datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoPath)
+            myHistoName = datasetColumn.getDirPrefix()+d+"/counters/weighted/counter"
+            datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             datasetRootHisto.normalizeToLuminosity(luminosity)
             myHisto = datasetRootHisto.getHistogram()
             counterList = _histoToCounter(myHisto)
@@ -292,7 +291,7 @@ class PileupUncertaintyExtractor(ExtractorBase):
                     myResult.append(count)
                     myFoundStatus = True
             if not myFoundStatus:
-                raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!")
+                raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoName+"'!")
         # Revert back to nominal normalisation
         # mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.NOMINAL) #FIXME
         # Loop over results
@@ -458,8 +457,8 @@ class ShapeExtractor(ExtractorBase):
         if self._distribution == "shapeQ":
             myNominalRateCount = mainCounterTable.getCount(rowName=self._counterItem, colName=datasetColumn.getDatasetMgrColumn()).value()
             for i in range (0, len(self._histoDirs)):
-                myHistoPath = self._histoDirs[i]+"Counters/weighted/counter"
-                datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoPath)
+                myHistoName = datasetColumn.getDirPrefix()+self._histoDirs[i]+"/counters/weighted/counter"
+                datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
                 if datasetRootHisto.isMC():
                     datasetRootHisto.normalizeToLuminosity(luminosity)
                 myHisto = datasetRootHisto.getHistogram()
@@ -468,7 +467,10 @@ class ShapeExtractor(ExtractorBase):
                 myFoundStatus = False # to ensure that the first counter of given name is taken
                 for name, count in counterList:
                     if name == self._counterItem and not myFoundStatus:
-                        myResult.append(abs(count.value()/myNominalRateCount-1.0))
+                        if myNominalRateCount > 0:
+                            myResult.append(abs(count.value()/myNominalRateCount-1.0))
+                        else:
+                            myResult.append(0.0)
                         myFoundStatus = True
                 if not myFoundStatus:
                     raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!")
@@ -490,7 +492,8 @@ class ShapeExtractor(ExtractorBase):
             # Create empty shape histogram
             h = myShapeModifier.createEmptyShapeHistogram(myLabels[i])
             # Obtain source histogram
-            myHistoName = datasetColumn.getDirPrefix()+"/"+self._histoDirs[i]+"/"+self._histograms[i]
+            myHistoName = datasetColumn.getDirPrefix()+self._histoDirs[i]+"/"+self._histograms[i]
+            #print "group",datasetColumn.getLabel(),"id",self._exid,"histo",myHistoName
             myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             if myDatasetRootHisto.isMC():
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
