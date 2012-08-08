@@ -44,7 +44,17 @@ btagging = True # for normalisation with btagging
 
 # for histograms
 topmass = False
-deltaPhi180 = True
+deltaPhi180 = False
+deltaPhiDistribution = False
+
+HiggsMass = False
+HiggsMassPhi140 = True
+
+
+
+mcOnly = False
+#mcOnly = True
+mcOnlyLumi = 5000 # pb
 
 def usage():
     print "\n"
@@ -147,6 +157,13 @@ def writeTransverseMass(datasets_lands):
 
 
 def doPlots(datasets):
+    def createPlot(name, **kwargs):
+        if mcOnly:
+            return plots.MCPlot(datasets, analysis+"/"+name, normalizeToLumi=mcOnlyLumi, **kwargs)
+        else:
+            return plots.DataMCPlot(datasets, analysis+"/"+name, **kwargs)
+
+   
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
 
@@ -180,9 +197,9 @@ def doPlots(datasets):
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdPhi"), "MTInvertedTauIdPhi", rebin=20)
 #    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdMet"), "MTInvertedTauIdMet", rebin=10)  
 
-    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMass"), "transverseMass", rebin=20)
+    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMass"), "transverseMass", rebin=5)
     path = analysis+"/transverseMass"
-    transverseMass2(plots.DataMCPlot(datasets, path), "transverseMass", rebin=20)
+    transverseMass2(plots.DataMCPlot(datasets, path), "transverseMass", rebin=5)
     if QCDfromData:
         plot = replaceQCDfromData(plots.DataMCPlot(datasets, path), datasetsQCD, path)
         transverseMass2(plot, "transverseMass", rebin=20)
@@ -198,8 +215,8 @@ def doPlots(datasets):
     jetEMFraction(plots.DataMCPlot(datasets, analysis+"/JetSelection/jetEMFraction"), "jetEMFraction", rebin=20)
 #    jetEMFraction(plots.DataMCPlot(datasets, analysis+"/JetSelection/chargedJetEMFraction"), "chargedJetEMFraction", rebin=20)
    
-    jetPt(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_pt"), "bjetPt", rebin=30)
-    jetEta(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_eta"), "bjetEta", rebin=30)
+    jetPt(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_pt"), "bjetPt", rebin=2)
+    jetEta(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_eta"), "bjetEta", rebin=2)
     numberOfJets(plots.DataMCPlot(datasets, analysis+"/Btagging/NumberOfBtaggedJets"), "NumberOfBJets")
     
     jetPt(plots.DataMCPlot(datasets, analysis+"/GlobalElectronVeto/GlobalElectronPt"), "electronPt")
@@ -215,9 +232,21 @@ def doPlots(datasets):
     topMass(plots.DataMCPlot(datasets, analysis+"/TopSelection/jjbMass"), "jjbMass")
     topMass(plots.DataMCPlot(datasets, analysis+"/TopChiSelection/TopMass"), "topMass_chi")
 
+     # Delta phi
+#    deltaPhi(createPlot("TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
+#    deltaPhi2(createPlot("deltaPhi"), "DeltaPhiTauMet", rebin=10, moveLegend={"dx":-0.21}, textFunction=lambda: addMassBRText(x=0.2, y=0.87), cutLine=[160, 130])
+    deltaPhi2(createPlot("FakeMETVeto/Closest_DeltaPhi_of_MET_and_selected_jets"), "DeltaPhiJetMet")
+    
+    transverseMass2(plots.DataMCPlot(datasets, analysis+"/FullHiggsMass/HiggsMass"), "HiggsMass", rebin=1)
   
-    met2(plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets"), "MET_BaseLineTauIdJets", rebin=20)
-    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets"), "MET_InvertedTauIdJets", rebin=20)
+#    drawPlot(createPlot("FullHiggsMass/HiggsMass"), "HiggsMass", rebin=2, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400})
+    
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets"), "MET_BaseLineTauIdJets", rebin=10)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets"), "MET_InvertedTauIdJets", rebin=10)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdBtag"), "MET_BaseLineTauIdBtag", rebin=10)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdBtag"), "MET_InvertedTauIdBtag", rebin=10)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdBtagDphi"), "MET_BaseLineTauIdBtagDphi", rebin=10)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdBtagDphi"), "MET_InvertedTauIdBtagDphi", rebin=10)
 #    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdAllCuts"), "MET_InvertedTauIdAllCuts", rebin=10)   
 #    met2(plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdAllCuts"), "MET_BaseLineTauIdAllCuts", rebin=10)
 #    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdAllCuts"), "MET_InvertedTauIdAllCuts", rebin=10)    
@@ -244,6 +273,11 @@ def doPlots(datasets):
     
 def doCounters(datasets):
     eventCounter = counter.EventCounter(datasets)
+    
+    ewkDatasets = [
+        "WJets", "TTJets",
+        "DYJetsToLL", "SingleTop", "Diboson"
+        ]
 
     # append row from the tree to the main counter
 #    eventCounter.getMainCounter().appendRow("MET > 70", treeDraw.clone(selection="met_p4.Et() > 70"))
@@ -252,17 +286,27 @@ def doCounters(datasets):
 #    eventCounter.normalizeMCToLuminosity(73)
     print "============================================================"
     print "Main counter (MC normalized by collision data luminosity)"
-    print eventCounter.getMainCounterTable().format()
+    mainTable = eventCounter.getMainCounterTable()
+#    mainTable.insertColumn(2, counter.sumColumn("EWKMCsum", [mainTable.getColumn(name=name) for name in ewkDatasets]))
+   # Default
+#    cellFormat = counter.TableFormatText()
+    # No uncertainties
+    cellFormat = counter.TableFormatText(cellFormat=counter.CellFormatText(valueOnly=True))
+    print mainTable.format(cellFormat)
+
+
 
 #    print eventCounter.getSubCounterTable("GlobalMuon_ID").format()
 
 #    print eventCounter.getSubCounterTable("tauIDTauSelection").format()
 #    print eventCounter.getSubCounterTable("TauIDPassedEvt::tauID_HPSTight").format()
 #    print eventCounter.getSubCounterTable("TauIDPassedJets::tauID_HPSTight").format()
-    print eventCounter.getSubCounterTable("b-tagging").format()
-    print eventCounter.getSubCounterTable("Jet selection").format()
-    print eventCounter.getSubCounterTable("Jet main").format()    
-
+    print eventCounter.getSubCounterTable("b-tagging").format(cellFormat)
+    print eventCounter.getSubCounterTable("Jet selection").format(cellFormat)
+    print eventCounter.getSubCounterTable("Jet main").format(cellFormat)    
+#    print eventCounter.getSubCounterTable("VetoTauSelection").format(cellFormat)
+#    print eventCounter.getSubCounterTable("top").format(cellFormat)
+    
     
 #    latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.2f"))
 #    print eventCounter.getMainCounterTable().format(latexFormat)
@@ -429,6 +473,46 @@ def mtComparison(datasets):
         mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi")])
         mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdPhi")])
 
+
+        ## deltaPhi distribution
+    if (deltaPhiDistribution):
+        mt4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted4050")])
+        mt5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted5060")])
+        mt6070 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted6070")])
+        mt7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted7080")])
+        mt80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted80100")])
+        mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted100120")])
+        mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted120150")])
+        mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted150")])
+        mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted")])
+        mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdPhi")])
+
+
+                ## deltaPhi distribution
+    if (HiggsMass):
+        mt4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass4050")])
+        mt5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass5060")])
+        mt6070 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass6070")])
+        mt7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggMass7080")])
+        mt80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass80100")])
+        mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass100120")])
+        mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass120150")])
+        mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass150")])
+        mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass")])
+
+    if (HiggsMassPhi140):
+        mt4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi4050")])
+        mt5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi5060")])
+        mt6070 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi6070")])
+        mt7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi7080")])
+        mt80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi80100")])
+        mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassphi100120")])
+        mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi120150")])
+        mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi150")])
+        mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi")])
+        
+        mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdPhi")])
+
     print " norm factors ",norm_inc,norm_4050,norm_5060,norm_6070,norm_7080,norm_80100,norm_100120,norm_120150,norm_150
 
 #    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
@@ -535,12 +619,12 @@ def mtComparison(datasets):
     mtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
     hmtBaseline = mtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
 
-    mtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-    mtEWK._setLegendStyles()
-    mtEWK._setLegendLabels()
-    mtEWK.histoMgr.setHistoDrawStyleAll("P")
-    mtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
-    hmtEWK = mtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
+#    mtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+#    mtEWK._setLegendStyles()
+#    mtEWK._setLegendLabels()
+#    mtEWK.histoMgr.setHistoDrawStyleAll("P")
+#    mtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+#    hmtEWK = mtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
         
     hmtSum = hmt4050.Clone("mtSum")
     hmtSum.SetName("mtSum")
@@ -587,6 +671,16 @@ def mtComparison(datasets):
     if(deltaPhi130):
         canvas.Print("mtComparison_dphi130.png")
         canvas.Print("mtComparison_dphi130.C")
+    if(deltaPhiDistribution):
+        canvas.Print("deltaPhiInverted.png")
+        canvas.Print("deltaPhiInverted.C")
+    if(HiggsMass):
+        canvas.Print("HiggsMassInverted.png")
+        canvas.Print("HiggsMassInverted.C")
+        
+    if(HiggsMassPhi140):
+        canvas.Print("HiggsMassInvertedPhi140.png")
+        canvas.Print("HiggsMassInvertedPhi140.C")
     if(topmass):
         canvas.Print("mtComparison_dphi160_topmass.png")
         canvas.Print("mtComparison_dphi160_topmass.C")
@@ -601,7 +695,15 @@ def mtComparison(datasets):
     hmtSum.Draw()
     hmtSum.GetYaxis().SetTitle("Events")
     hmtSum.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
-    canvas2.Print("mtSum_PhiCut.png")
+    if (deltaPhi160):
+        canvas2.Print("mtSum_PhiCut.png")
+    if (deltaPhiDistribution):
+        canvas2.Print("deltaPhiInvertedSum.png")
+
+    if (HiggsMass):
+        canvas2.Print("HiggsMassSum.png")
+    if (HiggsMassPhi140):
+        canvas2.Print("HiggsMassSumPhi140.png")
 
 ###########
 
@@ -629,12 +731,11 @@ def mtComparison(datasets):
 #    hmtBaseline_QCD.Add(hmtEWK,-1)
 #    hmtBaseline_QCD.Draw("same")
 
-
-    hmtEWK.SetMarkerColor(7)
-    hmtEWK.SetMarkerSize(1)
-    hmtEWK.SetMarkerStyle(23)
-    hmtEWK.SetFillColor(7)
-    hmtEWK.Draw("same")
+#    hmtEWK.SetMarkerColor(7)
+#    hmtEWK.SetMarkerSize(1)
+#    hmtEWK.SetMarkerStyle(23)
+#    hmtEWK.SetFillColor(7)
+#    hmtEWK.Draw("same")
     
     tex1 = ROOT.TLatex(0.65,0.7,"No binning")
 #    tex1 = ROOT.TLatex(0.3,0.4,"No binning")
@@ -764,7 +865,92 @@ def metComparison(datasets):
     
 #def topMassComparison(datasets):
 #    signal = "TTToHplusBWB_M120"
+#    bavs_real")
+
+#def topPtComparison(datasets):
+#    signal = "TTToHplusBWB_M120"
 #    background = "TTToHplusBWB_M120"
+#    rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/TopSelection/Pt_jjb"),
+#                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/TopSelection/Pt_jjbmax"),
+#                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/TopSelection/Pt_top")]),
+#             "topPt_all_vs_real")
+
+
+
+# Helper function to flip the last two parts of the histogram name
+# e.g. ..._afterTauId_DeltaPhi -> DeltaPhi_afterTauId
+def flipName(name):
+    tmp = name.split("_")
+    return tmp[-1] + "_" + tmp[-2]
+
+# Common drawing function
+def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, addMCUncertainty=True, ratio=False, opts={}, opts2={}, moveLegend={}, textFunction=None, cutLine=None, cutBox=None):
+    if cutLine != None and cutBox != None:
+        raise Exception("Both cutLine and cutBox were given, only either one can exist")
+
+    if rebin > 1:
+        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    ylab = ylabel
+    if "%" in ylabel:
+        ylab = ylabel % h.binWidth()
+
+    scaleMCfromWmunu(h)
+    h.stackMCHistograms()
+    if addMCUncertainty:
+        h.addMCUncertainty()
+
+    _opts = {"ymin": 0.01, "ymaxfactor": 2}
+    if not log:
+        _opts["ymin"] = 0
+        _opts["ymaxfactor"] = 1.1
+    _opts2 = {"ymin": 0.5, "ymax": 1.5}
+    _opts.update(opts)
+    _opts2.update(opts2)
+
+    #if log:
+    #    name = name + "_log"
+    h.createFrame(name, createRatio=ratio, opts=_opts, opts2=_opts2)
+    if log:
+        h.getPad().SetLogy(log)
+    h.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
+
+    # Add cut line and/or box
+    if cutLine != None:
+        lst = cutLine
+        if not isinstance(lst, list):
+            lst = [lst]
+
+        for line in lst:
+            h.addCutBoxAndLine(line, box=False, line=True)
+    if cutBox != None:
+        lst = cutBox
+        if not isinstance(lst, list):
+            lst = [lst]
+
+        for box in lst:
+            h.addCutBoxAndLine(**box)
+
+    common(h, xlabel, ylab, textFunction=textFunction)
+
+# Common formatting
+def common(h, xlabel, ylabel, addLuminosityText=True, textFunction=None):
+    h.frame.GetXaxis().SetTitle(xlabel)
+    h.frame.GetYaxis().SetTitle(ylabel)
+    h.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    if addLuminosityText:
+        h.addLuminosityText()
+    if textFunction != None:
+        textFunction()
+    h.save()
+
+# Functions below are for plot-specific formattings. They all take the
+# plot object as an argument, then apply some formatting to it, draw
+# it and finally save it to files.
+
+
+
 #    rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/TopSelection/Mass_jjbMax"),
 #                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/Mass_Top"),
 #                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/TopSelection/MassMax_Top")]),
@@ -777,6 +963,18 @@ def metComparison(datasets):
 #                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/TopSelection/Pt_jjbmax"),
 #                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/TopSelection/Pt_top")]),
 #             "topPt_all_vs_real")
+
+
+
+
+
+
+
+
+
+
+
+
 
 def scaleMC(histo, scale):
     if histo.isMC():
@@ -1302,13 +1500,15 @@ def transverseMass2(h,name, rebin=10, ratio=False):
     #h.stackMCSignalHistograms()
     h.stackMCHistograms(stackSignal=False)#stackSignal=True)
     h.addMCUncertainty()
-    
+   
 #    name = name+"_log"
     opts = {"ymin": 0.001, "ymaxfactor": 2.0,"xmax": 350 }
 #    opts = {"xmax": 200 }
     opts2 = {"ymin": 0, "ymax": 3}
     h.createFrame(name, opts=opts, createRatio=ratio, opts2=opts2)
     h.getPad().SetLogy(True)
+    if "Higgs" in name:
+        h.getPad().SetLogy(False) 
     h.setLegend(histograms.createLegend(0.7, 0.68, 0.9, 0.93))
     common(h, xlabel, ylabel)
        

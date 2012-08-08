@@ -134,6 +134,7 @@ namespace HPlus {
     Count fVetoTauCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
+    Count fMetCutBeforeJetCutCounter;
     Count fNJetsCounter;
     Count fMETCounter;
     Count fBTaggingCounter;
@@ -243,6 +244,7 @@ namespace HPlus {
     // Histograms for validation at every Selection Cut step
     WrappedTH1 *hSelectedTauEt;
     WrappedTH1 *hMet;
+    WrappedTH1 *hMet_beforeJetCut;
     WrappedTH1 *hMetWithBtagging;
     WrappedTH1 *hSelectedTauEta;
     WrappedTH1 *hSelectedTauPhi;

@@ -72,7 +72,7 @@ namespace HPlus {
     hPtCentral = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_pt_central", "jet_pt_central", 120, 0., 600.);
     hEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_eta", "jet_eta", 100, -5., 5.);
     hPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_phi", "jet_phi", 72, -3.1415926, 3.1415926);
-    hNumberOfSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
+    hNumberOfSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 30, 0., 30.);
     hjetEMFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jetEMFraction", "jetEMFraction", 100, 0., 1.0);
     hjetChargedEMFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "chargedJetEMFraction", "chargedJetEMFraction", 100, 0., 1.0);
     hjetMaxEMFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jetMaxEMFraction", "jetMaxEMFraction", 100, 0., 1.0);

@@ -79,6 +79,7 @@ namespace HPlus {
     fVetoTauCounter(eventCounter.addCounter("tau veto")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
+    fMetCutBeforeJetCutCounter(eventCounter.addCounter("MET cut Before Jets")),
     fNJetsCounter(eventCounter.addCounter("njets")),
     fMETCounter(eventCounter.addCounter("MET")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
@@ -224,6 +225,7 @@ namespace HPlus {
 
     hMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "Met", "Met", 200, 0.0, 500.0);
     hMetWithBtagging = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MetWithBtagging", "MetWithBtagging", 200, 0.0, 500.0);
+    hMet_beforeJetCut  = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "Met_beforeJetCut", "Met_beforeJetCut", 200, 0.0, 500.0);  
     hMetAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "Met_AfterCuts", "Met_AfterCuts", 200, 0.0, 500.0);
     
     hSelectionFlow = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SignalSelectionFlow", "SignalSelectionFlow;;N_{events}", 12, 0, 12);
@@ -450,9 +452,16 @@ namespace HPlus {
       copyPtrToVector(muonVetoData.getSelectedMuonsBeforePtAndEtaCuts(), *saveMuons);
       iEvent.put(saveMuons, "selectedVetoMuonsBeforePtAndEtaCuts");
     }
-  
+
+
+
 //------ Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
+
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
+    hMet_beforeJetCut->Fill(metData.getSelectedMET()->et());  
+    if(metData.passedEvent()) increment(fMetCutBeforeJetCutCounter);
+
     hCtrlNjets->Fill(jetData.getHadronicJetCount());
     if(!jetData.passedEvent()) return false;
     increment(fNJetsCounter);
@@ -523,8 +532,8 @@ namespace HPlus {
   
 
 //------ MET cut
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
-    hMet->Fill(metData.getSelectedMET()->et(),fEventWeight.getWeight()); 
+//    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
+    hMet->Fill(metData.getSelectedMET()->et()); 
 
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     if(btagData.passedEvent()) hMetWithBtagging->Fill(metData.getSelectedMET()->et(),fEventWeight.getWeight()); 
@@ -536,6 +545,7 @@ namespace HPlus {
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderMETSelection);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderMETSelection);
     fillEWKFakeTausCounters(myTauMatch, kSignalOrderMETSelection, tauData);
+
 
 
 //------ b tagging cut

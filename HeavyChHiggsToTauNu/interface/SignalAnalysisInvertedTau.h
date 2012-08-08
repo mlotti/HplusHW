@@ -142,6 +142,7 @@ namespace HPlus {
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fDeltaPhiTauMETCounter;
+    Count fdeltaPhiTauMET140Counter;
     Count fdeltaPhiTauMET10Counter;
     Count fdeltaPhiTauMET160Counter;
     Count fdeltaPhiTauMET130Counter;
@@ -201,7 +202,7 @@ namespace HPlus {
     WrappedTH1 *hTransverseMassBeforeFakeMet;
     WrappedTH1 *hTransverseMassDeltaPhiUpperCut;
     WrappedTH1 *hTransverseMassTopRtauDeltaPhiFakeMET;
-    WrappedTH1 *hTransverseMassTopDeltaPhiFakeMET;
+    WrappedTH1 *hTransverseMassFakeMET;
     WrappedTH1 *hTransverseMassDeltaPhi130;
     WrappedTH1 *hTransverseMassDeltaPhi160;
     WrappedTH1 *hTransverseMassTopChiSelection;
@@ -354,6 +355,16 @@ namespace HPlus {
     WrappedTH1 *hMTInvertedTauIdJetPhi5060;
     WrappedTH1 *hMTInvertedTauIdJetPhi4050;
 
+    WrappedTH1 *hDeltaPhiInverted;
+    WrappedTH1 *hDeltaPhiInverted150;
+    WrappedTH1 *hDeltaPhiInverted120150;
+    WrappedTH1 *hDeltaPhiInverted100120;
+    WrappedTH1 *hDeltaPhiInverted80100;
+    WrappedTH1 *hDeltaPhiInverted7080;
+    WrappedTH1 *hDeltaPhiInverted6070;
+    WrappedTH1 *hDeltaPhiInverted5060;
+    WrappedTH1 *hDeltaPhiInverted4050;
+
     WrappedTH1 *hTopMass;
     WrappedTH1 *hTopMass150;
     WrappedTH1 *hTopMass120150;
@@ -363,6 +374,26 @@ namespace HPlus {
     WrappedTH1 *hTopMass6070;
     WrappedTH1 *hTopMass5060;
     WrappedTH1 *hTopMass4050;
+
+    WrappedTH1 *hHiggsMass;
+    WrappedTH1 *hHiggsMass150;
+    WrappedTH1 *hHiggsMass120150;
+    WrappedTH1 *hHiggsMass100120;
+    WrappedTH1 *hHiggsMass80100;
+    WrappedTH1 *hHiggsMass7080;
+    WrappedTH1 *hHiggsMass6070;
+    WrappedTH1 *hHiggsMass5060;
+    WrappedTH1 *hHiggsMass4050;
+
+    WrappedTH1 *hHiggsMassPhi;
+    WrappedTH1 *hHiggsMassPhi150;
+    WrappedTH1 *hHiggsMassPhi120150;
+    WrappedTH1 *hHiggsMassPhi100120;
+    WrappedTH1 *hHiggsMassPhi80100;
+    WrappedTH1 *hHiggsMassPhi7080;
+    WrappedTH1 *hHiggsMassPhi6070;
+    WrappedTH1 *hHiggsMassPhi5060;
+    WrappedTH1 *hHiggsMassPhi4050;
 
     WrappedTH1 *hMTInvertedTauIdTopMass;
     WrappedTH1 *hMTInvertedTauIdTopMass150;
