@@ -94,12 +94,14 @@ class TableProducer:
         os.mkdir(self._dirname)
         self._infoDirname = self._dirname + "/info"
         os.mkdir(self._infoDirname)
+        self._ctrlPlotDirname = self._dirname + "/controlPlots"
+        os.mkdir(self._ctrlPlotDirname)
 
         # Make datacards
         self.makeDataCards()
 
         # Make control plots
-        ControlPlotMaker(self._opts, self._config, self._dirname, self._luminosity, self._observation, self._datasetGroups)
+        ControlPlotMaker(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
 
         # Make other reports
         print "\n"+HighlightStyle()+"Generating reports"+NormalStyle()
