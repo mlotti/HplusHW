@@ -91,18 +91,9 @@ class ControlPlotMaker:
                             mySystError = 0.0
                             for result in g.getNuisanceResults():
                                 if not result.resultIsStatUncertainty(): # ignore stat. uncert.
-                                    # Check if there is shape uncertainty histogram (take average error from plus and minus)
-                                    if len(result.getHistograms()) > 0:
-                                        #hError = result.getAveragedUncertaintyHistogram()
-                                        #myShapeModifier.addShape(source=hError,dest=mySystHisto)
-                                        #hError.IsA().Destructor(hError)
-                                        # Contract histogram to a number weighted by the bins
-                                        mySystError += pow(result.getContractedShapeUncertainty(g.getRateHistogram()),2)
-                                        #print "group",g.getLabel(),"id",result.getId(),"syst",result.getContractedShapeUncertainty(g.getRateHistogram())
-                                    else:
-                                        # Just a constant for systematics, use same value for all bins
-                                        mySystError += pow(result.getResultAverage(),2)
-                                        #print "group",g.getLabel(),"id",result.getId(),"syst",result.getResultAverage()
+                                    # take average error from plus and minus if nuisance is shape stat or asymmetric
+                                    mySystError += pow(result.getResultAverage(),2)
+                                    #print "group",g.getLabel(),"id",result.getId(),"syst",result.getResultAverage()
                             # Apply systematic uncertainty to shape histogram
                             #print "group",g.getLabel(),"syst=",sqrt(mySystError)
                             for i in range(1,h.GetNbinsX()+1):
