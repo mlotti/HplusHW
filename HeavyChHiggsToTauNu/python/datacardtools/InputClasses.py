@@ -299,10 +299,13 @@ class ControlPlotInput:
                  EWKfakeId,
                  signalHistoPath,
                  signalHistoName,
+                 QCDFactNormalisation,
                  QCDFactHistoPath,
                  QCDFactHistoName,
                  details,
-                 blindedRange):
+                 blindedRange,
+                 evaluationRange,
+                 flowPlotCaption):
         self.title = title
         self.signalHHid = signalHHid
         self.signalHWid = signalHWid
@@ -311,7 +314,10 @@ class ControlPlotInput:
         self.EWKfakeId = EWKfakeId
         self.signalHistoPath = signalHistoPath
         self.signalHistoName = signalHistoName
+        self.QCDFactNormalisation = QCDFactNormalisation
         self.QCDFactHistoPath = QCDFactHistoPath
         self.QCDFactHistoName = QCDFactHistoName
         self.details = details
         self.blindedRange = blindedRange
+        self.evaluationRange = evaluationRange
+        self.flowPlotCaption = flowPlotCaption
