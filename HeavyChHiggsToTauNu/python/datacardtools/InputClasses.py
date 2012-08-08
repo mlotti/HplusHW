@@ -304,6 +304,7 @@ class ControlPlotInput:
                  QCDFactHistoName,
                  details,
                  blindedRange,
+                 evaluationRange,
                  flowPlotCaption):
         self.title = title
         self.signalHHid = signalHHid
@@ -318,4 +319,5 @@ class ControlPlotInput:
         self.QCDFactHistoName = QCDFactHistoName
         self.details = details
         self.blindedRange = blindedRange
+        self.evaluationRange = evaluationRange
         self.flowPlotCaption = flowPlotCaption

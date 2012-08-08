@@ -5,6 +5,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import Datac
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle import TDRStyle
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count
 
 from math import pow,sqrt,log10
 import os
@@ -23,6 +24,8 @@ class ControlPlotMaker:
         self._luminosity = luminosity
         self._observation = observation
         self._datasetGroups = datasetGroups
+
+        myEvaluator = SignalAreaEvaluator()
 
         # Make control plots
         print "\n"+HighlightStyle()+"Generating control plots"+NormalStyle()
@@ -51,6 +54,9 @@ class ControlPlotMaker:
                         selectionFlow.addColumn(label=c.flowPlotCaption,signal=hSignal,qcd=hQCD,EWKtau=hEmbedded,EWKfake=hEWKfake,data=None,expected=hExpected)
                     else:
                         selectionFlow.addColumn(label=c.flowPlotCaption,signal=hSignal,qcd=hQCD,EWKtau=hEmbedded,EWKfake=hEWKfake,data=hData,expected=hExpected)
+                # Evaluate signal region
+                if len(c.evaluationRange) > 0:
+                    SignalAreaEvaluator.addColumn(m,c.title,c.evaluationRange,hSignal,hQCD,hEmbedded,hEWKfake)
                 # Construct plot and save
                 self._construct(m,c.details,"M%d_ControlPlot_"%m+c.title,hFrame,hData,hSignal,hQCD,hEmbedded,hEWKfake,hExpected,hRatio,luminosity)
                 # Delete histograms from memory
@@ -70,6 +76,7 @@ class ControlPlotMaker:
                             hQCD=selectionFlow.qcd,hEmbedded=selectionFlow.EWKtau,hEWKfake=selectionFlow.EWKfake,
                             hExpected=selectionFlow.expected,hRatio=hSelectionFlowRatio,luminosity=luminosity)
             hSelectionFlowRatio.IsA().Destructor(hSelectionFlowRatio)
+        SignalAreaEvaluator.save()
         print "Control plots done"
 
     def _getControlPlot(self, mass, details, columnIdList, title, titleSuffix, blindedRange = []):
@@ -408,6 +415,50 @@ class ControlPlotMaker:
         c.Print(self._dirname+"/"+title+".C")
         c.Close()
         print "Control plot %s generated"%(self._dirname+"/"+title+".png")
+
+class SignalAreaEvaluator:
+    def __init__(self):
+        self._output = ""
+
+    def addEntry(self,mass,title,evaluationRange,hSignal,hQCD,hEmbedded,hEWKfake):
+        # Obtain event counts
+        mySignal = self._evaluate(evaluationRange,hSignal)
+        myQCD = self._evaluate(evaluationRange,hQCD)
+        myEmbedded =  = self._evaluate(evaluationRange,hEmbedded)
+        myEWKfake = self._evaluate(evaluationRange,hEWKfake)
+        # Produce output
+        myOutput = "%s, mass=%d, range=%d-%d\n"%(title,mass,evaluationRange[0],evaluationRange[1])
+        myOutput += "  signal: %f +- %f "%(mySignal.value(),mySignal.uncertainty())
+        myOutput += "  QCD: %f +- %f "%(myQCD.value(),myQCD.uncertainty())
+        myOutput += "  EWKtau: %f +- %f "%(myEmbedded.value(),myEmbedded.uncertainty())
+        myOutput += "  EWKfake: %f +- %f "%(myEWKfake.value(),myEWKfake.uncertainty())
+        myExpected = Count(0.0, 0.0)
+        myExpected.add(myQCD)
+        myExpected.add(myEmbedded)
+        myExpected.add(myEWKfake)
+        myOutput += "  Total expected: %f +- %f"%(myExpected.value(),myExpected.uncertainty())
+        mySignal.divide(myExpected)
+        myOutput += "  signal/expected: %f +- %f "%(mySignal.value(),mySignal.uncertainty())
+        myOutput += "\n"
+        self._output += myOutput
+
+    def save(self,dirname):
+        myFilename = dirname+"/signalAreaEvaluation.txt"
+        myFile = open(myFilename, "w")
+        myFile.write(self._output)
+        myFile.close()
+        print "Signal area evaluation written to: "+myFilename
+        self._output = ""
+
+    def _evaluate(self,evaluationRange,h):
+        myResult = 0.0
+        myError = 0.0
+        for i in range(1,h.GetNbinsX()+1):
+            if (h.GetXaxis().GetBinLowEdge(i) >= evaluationRange[0] and
+                h.GetXaxis().GetBinUpEdge(i) <= evaluationRange[1]):
+                myResult += h.GetBinContent(i)
+                myError += pow(h.GetBinError(i),2)
+        return Count(myResult,sqrt(myError))
 
 class SelectionFlowPlotMaker:
     def __init__(self, config, mass):

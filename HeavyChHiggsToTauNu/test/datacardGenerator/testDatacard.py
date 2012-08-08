@@ -789,6 +789,7 @@ ControlPlots.append(ControlPlotInput(
                          "ymin": 0.9,
                          "ymax": -1},
     blindedRange     = [], # specify range min,max if blinding applies to this control plot
+    evaluationRange  = [], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
@@ -816,6 +817,7 @@ ControlPlots.append(ControlPlotInput(
                          "ymin": 0.9,
                          "ymax": -1},
     blindedRange     = [], # specify range min,max if blinding applies to this control plot
+    evaluationRange  = [], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "#tau_{h}+#geq3j", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
@@ -843,6 +845,7 @@ ControlPlots.append(ControlPlotInput(
                          "ymin": 0.9,
                          "ymax": -1},
     blindedRange     = [], # specify range min,max if blinding applies to this control plot
+    evaluationRange  = [], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "E_{T}^{miss}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
@@ -870,6 +873,7 @@ ControlPlots.append(ControlPlotInput(
                          "ymin": 0.9,
                          "ymax": -1},
     blindedRange     = [-1, 300], # specify range min,max if blinding applies to this control plot
+    evaluationRange  = [], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "N_{b jets}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
@@ -897,6 +901,7 @@ ControlPlots.append(ControlPlotInput(
                          "ymin": 0.9,
                          "ymax": -1},
     blindedRange     = [-1, 300], # specify range min,max if blinding applies to this control plot
+    evaluationRange  = [], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "#Delta#phi(#tau_{h},E_{T}^{miss})", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
@@ -924,6 +929,7 @@ ControlPlots.append(ControlPlotInput(
                          "ymin": 0.9,
                          "ymax": -1},
     blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
+    evaluationRange  = [60, 180], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
@@ -951,6 +957,7 @@ ControlPlots.append(ControlPlotInput(
                          "ymin": 0.9,
                          "ymax": -1},
     blindedRange     = [50, 1000], # specify range min,max if blinding applies to this control plot
+    evaluationRange  = [80, 180], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
