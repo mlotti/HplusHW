@@ -56,7 +56,7 @@ class ControlPlotMaker:
                         selectionFlow.addColumn(label=c.flowPlotCaption,signal=hSignal,qcd=hQCD,EWKtau=hEmbedded,EWKfake=hEWKfake,data=hData,expected=hExpected)
                 # Evaluate signal region
                 if len(c.evaluationRange) > 0:
-                    SignalAreaEvaluator.addColumn(m,c.title,c.evaluationRange,hSignal,hQCD,hEmbedded,hEWKfake)
+                    myEvaluator.addEntry(m,c.title,c.evaluationRange,hSignal,hQCD,hEmbedded,hEWKfake)
                 # Construct plot and save
                 self._construct(m,c.details,"M%d_ControlPlot_"%m+c.title,hFrame,hData,hSignal,hQCD,hEmbedded,hEWKfake,hExpected,hRatio,luminosity)
                 # Delete histograms from memory
@@ -76,7 +76,7 @@ class ControlPlotMaker:
                             hQCD=selectionFlow.qcd,hEmbedded=selectionFlow.EWKtau,hEWKfake=selectionFlow.EWKfake,
                             hExpected=selectionFlow.expected,hRatio=hSelectionFlowRatio,luminosity=luminosity)
             hSelectionFlowRatio.IsA().Destructor(hSelectionFlowRatio)
-        SignalAreaEvaluator.save()
+        myEvaluator.save(dirname)
         print "Control plots done"
 
     def _getControlPlot(self, mass, details, columnIdList, title, titleSuffix, blindedRange = []):
@@ -424,21 +424,21 @@ class SignalAreaEvaluator:
         # Obtain event counts
         mySignal = self._evaluate(evaluationRange,hSignal)
         myQCD = self._evaluate(evaluationRange,hQCD)
-        myEmbedded =  = self._evaluate(evaluationRange,hEmbedded)
+        myEmbedded = self._evaluate(evaluationRange,hEmbedded)
         myEWKfake = self._evaluate(evaluationRange,hEWKfake)
         # Produce output
         myOutput = "%s, mass=%d, range=%d-%d\n"%(title,mass,evaluationRange[0],evaluationRange[1])
-        myOutput += "  signal: %f +- %f "%(mySignal.value(),mySignal.uncertainty())
-        myOutput += "  QCD: %f +- %f "%(myQCD.value(),myQCD.uncertainty())
-        myOutput += "  EWKtau: %f +- %f "%(myEmbedded.value(),myEmbedded.uncertainty())
-        myOutput += "  EWKfake: %f +- %f "%(myEWKfake.value(),myEWKfake.uncertainty())
+        myOutput += "  signal: %f +- %f\n"%(mySignal.value(),mySignal.uncertainty())
+        myOutput += "  QCD: %f +- %f\n"%(myQCD.value(),myQCD.uncertainty())
+        myOutput += "  EWKtau: %f +- %f\n"%(myEmbedded.value(),myEmbedded.uncertainty())
+        myOutput += "  EWKfake: %f +- %f\n"%(myEWKfake.value(),myEWKfake.uncertainty())
         myExpected = Count(0.0, 0.0)
         myExpected.add(myQCD)
         myExpected.add(myEmbedded)
         myExpected.add(myEWKfake)
-        myOutput += "  Total expected: %f +- %f"%(myExpected.value(),myExpected.uncertainty())
+        myOutput += "  Total expected: %f +- %f\n"%(myExpected.value(),myExpected.uncertainty())
         mySignal.divide(myExpected)
-        myOutput += "  signal/expected: %f +- %f "%(mySignal.value(),mySignal.uncertainty())
+        myOutput += "  signal/expected: %f +- %f\n"%(mySignal.value(),mySignal.uncertainty())
         myOutput += "\n"
         self._output += myOutput
 
@@ -447,7 +447,7 @@ class SignalAreaEvaluator:
         myFile = open(myFilename, "w")
         myFile.write(self._output)
         myFile.close()
-        print "Signal area evaluation written to: "+myFilename
+        print HighlightStyle()+"Signal area evaluation written to: "+NormalStyle()+myFilename
         self._output = ""
 
     def _evaluate(self,evaluationRange,h):
