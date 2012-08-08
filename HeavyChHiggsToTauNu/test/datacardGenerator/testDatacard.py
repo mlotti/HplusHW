@@ -773,7 +773,7 @@ ControlPlots.append(ControlPlotInput(
     embeddingId      = EmbeddingIdList,
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "ControlPlots",
-    signalHistoName  = "Njets",
+    signalHistoName  = "Njets_AfterStandardSelections",
     QCDFactNormalisation = "factorisation/AfterJetSelection",
     QCDFactHistoPath = "shape_CtrlLeg1AfterNjets",
     QCDFactHistoName = "CtrlLeg1AfterNjets",
