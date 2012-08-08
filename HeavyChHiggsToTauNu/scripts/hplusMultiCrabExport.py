@@ -24,6 +24,7 @@ def main(opts, args):
         if not os.path.exists(d+"/lumi.json"):
             print "... Could not find lumi.json, if you wish to include it, run hplusLumiCalc.py"
 	else:
+            print "  adding file %s/lumi.json"%d
             tar.add("%s/lumi.json"%d)
         for f in ["%s/*py"%d, "%s/*cfg"%d, "%s/*/res/histograms-*root"%d]:
             list = glob.glob(f)
