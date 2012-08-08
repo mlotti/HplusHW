@@ -90,7 +90,7 @@ class TableProducer:
             if n.isPrintable():
                 self._nNuisances += 1
         # Make directory for output
-        self._dirname = "datacards_"+self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName.replace(" ","_")
+        self._dirname = "datacards_"+self._timestamp+self._config.DataCardName.replace(" ","_")+"_"+self._outputPrefix+"_"
         os.mkdir(self._dirname)
         self._infoDirname = self._dirname + "/info"
         os.mkdir(self._infoDirname)
