@@ -17,6 +17,11 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 
 namespace {
+  
+  bool tauEtGreaterThan(const edm::Ptr<pat::Tau>& a, const edm::Ptr<pat::Tau>& b) {
+    return (a->pt() > b->pt());
+  }
+
   bool isolationLessThan(const edm::Ptr<pat::Tau>& a, const edm::Ptr<pat::Tau>& b) {
     // Return true if a becomes before b, false if b becomes before a
     
@@ -57,10 +62,12 @@ namespace {
     // discriminators, but it's possible that it's not.
     return a->userFloat("byTightChargedMaxPt") < b->userFloat("byTightChargedMaxPt");
   }
-
+/*
   bool isolationProngRtauLessThan(const edm::Ptr<pat::Tau>& a, const edm::Ptr<pat::Tau>& b) {
+    // FIXME: not safe to use this method. better to first look at nprongs and rtau and after that make comparison based on isolation
+
     // Return true if a becomes before b, false if b becomes before a
-    
+
     // Do first comparisons of the isolation discriminators, because
     // they are bullet proof way of using exactly the same isolation
     // defitions as in the discriminators
@@ -89,10 +96,9 @@ namespace {
         return true;
 
     }
-
     // At this point bot a and b are in the same isolation class. Next
     // see, if either is one prong
-    size_t aProng = a->signalPFChargedHadrCands().size(); // FIXME: does not work for TCTau
+    size_t aProng = a->signalPFChargedHadrCands().size(); // FIXdoes not work for TCTau
     size_t bProng = b->signalPFChargedHadrCands().size();
 
     if(aProng == 1 && bProng != 1)
@@ -106,7 +112,7 @@ namespace {
     double bRtau = b->leadPFChargedHadrCand()->p() / b->p();
 
     return aRtau < bRtau;
-  }
+  }*/
 }
 
 namespace HPlus {
@@ -547,13 +553,101 @@ namespace HPlus {
     // Sort taus in an order of isolation, most isolated first
     //std::sort(tmpSelectedTauCandidates.begin(), tmpSelectedTauCandidates.end(), isolationLessThan); // sort by isolation only
     //std::sort(tmpSelectedTaus.begin(), tmpSelectedTaus.end(), isolationLessThan);
-    std::sort(tmpSelectedTauCandidates.begin(), tmpSelectedTauCandidates.end(), isolationProngRtauLessThan); // sort by isolation, prong and Rtau
-    std::sort(tmpSelectedTaus.begin(), tmpSelectedTaus.end(), isolationProngRtauLessThan);
-    for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i)
-      fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+    std::sort(tmpSelectedTauCandidates.begin(), tmpSelectedTauCandidates.end(), tauEtGreaterThan); // sort by Et
+
+    // Sort tau candidates into order of likeliness of passing the full tau ID (a bit complicated)
+    // 1) Check if more than 1 tau candidate passes Nprong cut
+    std::vector<edm::Ptr<pat::Tau> > tmpNprongPassed;
+    std::vector<edm::Ptr<pat::Tau> > tmpRtauPassed;
+    std::vector<edm::Ptr<pat::Tau> > tmpIsolationPassed;
+    for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+      if (fTauID->passNProngsCut(tmpSelectedTauCandidates[i]))
+        tmpNprongPassed.push_back(tmpSelectedTauCandidates[i]);
+    }
+    if (tmpNprongPassed.size() == 0) {
+      // none pass, just take the most isolated one
+      std::sort(tmpSelectedTauCandidates.begin(), tmpSelectedTauCandidates.end(), isolationLessThan);
+    } else if (tmpNprongPassed.size() == 1) {
+      // Put the found one to the top of the list
+      fSelectedTauCandidates.push_back(tmpNprongPassed[0]);
+      for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+        if (!fTauID->passNProngsCut(tmpSelectedTauCandidates[i]))
+          fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+      }
+    } else {
+      // Multiple taus have passed nprongs, lets see how many pass also the rtau cut
+      for(size_t i=0; i<tmpNprongPassed.size(); ++i) {
+        if (fTauID->passRTauCut(tmpNprongPassed[i]))
+          tmpRtauPassed.push_back(tmpNprongPassed[i]);
+      }
+      if (tmpRtauPassed.size() == 0) {
+        // none pass, just take the most isolated one
+        std::sort(tmpNprongPassed.begin(), tmpNprongPassed.end(), isolationLessThan);
+        for(size_t i=0; i<tmpNprongPassed.size(); ++i) {
+          fSelectedTauCandidates.push_back(tmpNprongPassed[i]);
+        }
+        for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+          bool match = false;
+          for(size_t j=0; j<tmpNprongPassed.size(); ++j) {
+            if (tmpSelectedTauCandidates[i] == tmpNprongPassed[j])
+              match = true;
+          }
+          if (!match) fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+        }
+      } else if (tmpRtauPassed.size() == 1) {
+        // Put the one that passed both nprongs and rtau to the top of the list
+        fSelectedTauCandidates.push_back(tmpRtauPassed[0]);
+        for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+          if (tmpSelectedTauCandidates[i] != tmpRtauPassed[0])
+            fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+        }
+      } else {
+        // Multiple taus have passed nprongs and rtau, lets see how many pass also the isolation cut
+        std::sort(tmpRtauPassed.begin(), tmpRtauPassed.end(), isolationLessThan);
+        for(size_t i=0; i<tmpRtauPassed.size(); ++i) {
+          if (fTauID->passIsolation(tmpRtauPassed[i]))
+            tmpIsolationPassed.push_back(tmpRtauPassed[i]);
+        }
+        if (tmpIsolationPassed.size() == 0) {
+          // none pass, take the most isolated one
+          for(size_t i=0; i<tmpRtauPassed.size(); ++i) {
+            fSelectedTauCandidates.push_back(tmpRtauPassed[i]);
+          }
+          for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+            bool match = false;
+            for(size_t j=0; j<tmpRtauPassed.size(); ++j) {
+              if (tmpSelectedTauCandidates[i] == tmpRtauPassed[j])
+                match = true;
+            }
+            if (!match) fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+          }
+        } else if (tmpIsolationPassed.size() == 1) {
+          // Put the passed one to the top of the list
+          fSelectedTauCandidates.push_back(tmpIsolationPassed[0]);
+          for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+            if (tmpSelectedTauCandidates[i] != tmpIsolationPassed[0])
+              fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+          }
+        } else {
+          // Multiple taus have passed nprongs, rtau, and isolation; take most energetic one
+          std::sort(tmpIsolationPassed.begin(), tmpIsolationPassed.end(), tauEtGreaterThan);
+          for(size_t i=0; i<tmpIsolationPassed.size(); ++i) {
+            fSelectedTauCandidates.push_back(tmpIsolationPassed[i]);
+          }
+        }
+      }
+    }
+    
+    if (fSelectedTauCandidates.size() == 0) {
+      for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i)
+        fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+    }
+    
+    // Sort selected taus (i.e. passed full tau ID) by Et
+    std::sort(tmpSelectedTaus.begin(), tmpSelectedTaus.end(), tauEtGreaterThan);
     for(size_t i=0; i<tmpSelectedTaus.size(); ++i)
       fSelectedTaus.push_back(tmpSelectedTaus[i]);
- 
+
 
     // Handle counters
     fTauID->updatePassedCounters();

@@ -30,12 +30,17 @@ namespace HPlus {
     //fNonIsolatedElectronVetoCounter(eventCounter.addCounter("NonIsolatedElectronVeto")),
     //fNonIsolatedMuonVetoCounter(eventCounter.addCounter("NonIsolatedMuonVeto")),
     fNJetsCounter(eventCounter.addCounter("JetSelection")),
+    fFullTauIDCounter(eventCounter.addCounter("FullTauIDCounter")),
     fMETCounter(eventCounter.addCounter("MET")),
     fBTaggingCounter(eventCounter.addCounter("bTagging")),
     fBTaggingScaleFactorCounter(eventCounter.addCounter("btag scale factor")),
     fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhiTauMET")),
     fMaxDeltaPhiJetMETCounter(eventCounter.addCounter("maxDeltaPhiJetMET")),
     fTopSelectionCounter(eventCounter.addCounter("top selection")),
+    fCoincidenceAfterMETCounter(eventCounter.addCounter("coincidence after MET")),
+    fCoincidenceAfterBjetsCounter(eventCounter.addCounter("coincidence after Btag")),
+    fCoincidenceAfterDeltaPhiCounter(eventCounter.addCounter("coincidence after Delta phi")),
+    fCoincidenceAfterSelectionCounter(eventCounter.addCounter("coincidence after full selection")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, fHistoWrapper),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, fHistoWrapper),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, fHistoWrapper),
@@ -124,7 +129,7 @@ namespace HPlus {
     createShapeHistograms(fs, hCtrlNbjets, "CtrlLeg1AfterNbjets", 10, 0., 10.0);
     createShapeHistograms(fs, hCtrlDeltaPhiTauMET, "CtrlLeg1AfterDeltaPhiTauMET", 36, 0., 180.);
     createShapeHistograms(fs, hCtrlMaxDeltaPhiJetMET, "CtrlLeg1AfterMaxDeltaPhiJetMET", 36, 0., 180.);
-    createShapeHistograms(fs, hCtrlTopMass, "CtrlLeg1AfterMaxDeltaPhiJetMET", 80, 0., 400.);
+    createShapeHistograms(fs, hCtrlTopMass, "CtrlLeg1AfterTopMass", 80, 0., 400.);
 
     // Other control histograms
 
@@ -175,7 +180,7 @@ namespace HPlus {
     fTree.setNvertices(nVertices);
     hSelectionFlow->Fill(kQCDOrderVertexSelection);
     increment(fVertexReweighting);
-
+    if (nVertices > 7) return false; // FIXME
 //------ Apply trigger and HLT_MET cut or trigger parametrisation
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if (!triggerData.passedEvent()) return false;
@@ -311,9 +316,12 @@ namespace HPlus {
     }
 
 // ----- Tau ID leg (factorisation
+    bool myPassedTauLegStatus = false;
     if (tauCandidateData.selectedTauPassesFullTauID()) {
       hLeg2AfterTauID->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
       hSelectionFlow->Fill(kQCDOrderTauID);
+      increment(fFullTauIDCounter);
+      myPassedTauLegStatus = true;
       // On purpose: No return statement for false (factorisation)
     }
 
@@ -325,9 +333,11 @@ namespace HPlus {
     increment(fMETCounter);
     hSelectionFlow->Fill(kQCDOrderMET);
     hLeg1AfterMET->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
+    if (myPassedTauLegStatus) increment(fCoincidenceAfterMETCounter);
 
     // b tagging cut
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    hCtrlNbjets[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(btagData.getBJetCount());
     if(!btagData.passedEvent()) return false;
     increment(fBTaggingCounter);
     // Apply scale factor as weight to event
@@ -338,7 +348,7 @@ namespace HPlus {
     increment(fBTaggingScaleFactorCounter);
     hSelectionFlow->Fill(kQCDOrderBTag);
     hLeg1AfterBTagging->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
-    hCtrlNbjets[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(btagData.getBJetCount());
+    if (myPassedTauLegStatus) increment(fCoincidenceAfterBjetsCounter);
 
     // Delta phi(tau,MET) cut
     double deltaPhi = DeltaPhi::reconstruct(*(tauCandidateData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
@@ -347,9 +357,10 @@ namespace HPlus {
     increment(fDeltaPhiTauMETCounter);
     hSelectionFlow->Fill(kQCDOrderDeltaPhiTauMET);
     hLeg1AfterDeltaPhiTauMET->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
+    if (myPassedTauLegStatus) increment(fCoincidenceAfterDeltaPhiCounter);
 
-    // Max Delta phi(jet/tau,MET) cut
-    double myMaxDeltaPhiJetMET = deltaPhi;
+    // Max Delta phi(jet,MET) cut
+    double myMaxDeltaPhiJetMET = 0.0;
     for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getSelectedJets().begin(); iJet != jetData.getSelectedJets().end(); ++iJet) {
       double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET())) * 57.3;
       if (jetDeltaPhi > myMaxDeltaPhiJetMET)
@@ -395,7 +406,12 @@ namespace HPlus {
     hLeg1AfterTopSelection->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
 
     // MET leg selection passed
-
+    if (myPassedTauLegStatus) {
+      increment(fCoincidenceAfterSelectionCounter);
+      //std::cout << "first selected tau pt=" << tauCandidateData.getSelectedTau()->leadPFChargedHadrCand()->pt() << " trg SF=" << triggerWeight.getEventWeight() << "\tnjets" << jetData.getHadronicJetCount() << std::endl;
+    }
+    
+    
     // Obtain transverseMass
     double transverseMass = TransverseMass::reconstruct(*(tauCandidateData.getSelectedTau()), *(metData.getSelectedMET()));
     hMtShapesAfterFullMETLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(transverseMass);

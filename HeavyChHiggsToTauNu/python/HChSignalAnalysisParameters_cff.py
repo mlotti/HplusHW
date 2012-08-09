@@ -191,11 +191,11 @@ bTagging = cms.untracked.PSet(
     subleadingDiscriminatorCut = cms.untracked.double(0.244), # used for other bjet candidates
     ptCut = cms.untracked.double(20.0),
     etaCut = cms.untracked.double(2.4),
-    jetNumber = cms.untracked.uint32(2),
+    jetNumber = cms.untracked.uint32(1),
     jetNumberCutDirection = cms.untracked.string("GEQ"), # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
     UseBTagDB      = cms.untracked.bool(False),
-    BTagDBAlgo     = cms.untracked.string("TCHEL"),
-    BTagUserDBAlgo = cms.untracked.string("BTAGTCHEL_hplusBtagDB_TTJets")
+    BTagDBAlgo     = cms.untracked.string("TCHEL"), #FIXME
+    BTagUserDBAlgo = cms.untracked.string("BTAGTCHEL_hplusBtagDB_TTJets") #FIXME
 )
 
 

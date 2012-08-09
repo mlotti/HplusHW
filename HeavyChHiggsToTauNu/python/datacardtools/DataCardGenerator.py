@@ -227,7 +227,6 @@ class DataCardGenerator:
         # Make dataset managers
         self._dsetMgrs = [None] # needed for datasetType==None
         if self._doSignalAnalysis:
-            print self._config.SignalAnalysis+self._optimisationVariation+"/counters"
             self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=mySignalPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+self._optimisationVariation+"/counters"))
         else:
             self._dsetMgrs.append(None)

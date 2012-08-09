@@ -24,7 +24,7 @@ class ShapeHistoModifier():
             # Create bins with uniform width
             binwidth = (self._max-self._min) / self._nbins
             for i in range(0,self._nbins):
-                self._binLowEdges.append(i*binwidth)
+                self._binLowEdges.append(i*binwidth+self._min)
         if debugMode:
             print "ShapeHistoModifier: nbins=%d, range=%f-%f"%(self._nbins,self._min,self._max)
             print"  bin low edges:",self._binLowEdges
