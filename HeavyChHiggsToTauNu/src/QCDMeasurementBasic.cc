@@ -180,7 +180,6 @@ namespace HPlus {
     fTree.setNvertices(nVertices);
     hSelectionFlow->Fill(kQCDOrderVertexSelection);
     increment(fVertexReweighting);
-    if (nVertices > 7) return false; // FIXME
 //------ Apply trigger and HLT_MET cut or trigger parametrisation
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if (!triggerData.passedEvent()) return false;

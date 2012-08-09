@@ -298,7 +298,6 @@ namespace HPlus {
     hVerticesAfterWeight->Fill(nVertices);
     fTree.setNvertices(nVertices);
 
-    if (nVertices > 7) return false; // FIXME
     increment(fAllCounter);
 
 //------ Apply trigger and HLT_MET cut or trigger parametrisation
