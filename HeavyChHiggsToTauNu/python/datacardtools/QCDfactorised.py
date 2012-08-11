@@ -866,18 +866,20 @@ class QCDfactorisedColumn(DatacardColumn):
             if not myFoundStatus:
                 raise Exception("\n"+ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Cannot find nuisance with id '"+nid+"'!")
         # Obtain results for control plots
-        print "... Obtaining control plots ..."
-        if config.ControlPlots != None and dsetMgr != None:
-            for c in config.ControlPlots:
-                hShape = self._createShapeHistogram(config, dsetMgr, myQCDCalculator, myBigBoxEventCount, luminosity,
-                                                    c.details, c.title, self._dirPrefix+"/"+c.QCDFactHistoPath, c.QCDFactHistoName)
-                # Normalise
-                myEventCount = self._getQCDEventCount(dsetMgr=dsetMgr, histoName=c.QCDFactNormalisation, luminosity=luminosity)
-                myQCDCalculator = QCDfactorisedCalculator(myBigBoxEventCount, myEventCount, myTauLegEventCount)
-                hShape.Scale(myQCDCalculator.getNQCD() / hShape.Integral())
-                print "     "+c.title+", NQCD=%f"%myQCDCalculator.getNQCD()
-                myEventCount.clean()
-                self._controlPlots.append(hShape)
+        if config.OptionDoControlPlots != None:
+            if config.OptionDoControlPlots:
+                print "... Obtaining control plots ..."
+                if config.ControlPlots != None and dsetMgr != None:
+                    for c in config.ControlPlots:
+                        hShape = self._createShapeHistogram(config, dsetMgr, myQCDCalculator, myBigBoxEventCount, luminosity,
+                                                            c.details, c.title, self._dirPrefix+"/"+c.QCDFactHistoPath, c.QCDFactHistoName)
+                        # Normalise
+                        myEventCount = self._getQCDEventCount(dsetMgr=dsetMgr, histoName=c.QCDFactNormalisation, luminosity=luminosity)
+                        myQCDCalculator = QCDfactorisedCalculator(myBigBoxEventCount, myEventCount, myTauLegEventCount)
+                        hShape.Scale(myQCDCalculator.getNQCD() / hShape.Integral())
+                        print "     "+c.title+", NQCD=%f"%myQCDCalculator.getNQCD()
+                        myEventCount.clean()
+                        self._controlPlots.append(hShape)
         # Clean up
         myQCDCalculator.clean()
 
