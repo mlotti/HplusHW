@@ -294,7 +294,7 @@ class DatacardColumn():
         if config.OptionDoControlPlots != None:
             if config.OptionDoControlPlots:
                 for c in controlPlotExtractors:
-                    if dsetMgr != None:a
+                    if dsetMgr != None:
                         self._controlPlots.append(c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
                         #print "added ctrl plot %s for %s"%(c._histoTitle,self._label)
 
