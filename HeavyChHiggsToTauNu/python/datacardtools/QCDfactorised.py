@@ -503,11 +503,11 @@ class QCDfactorisedCalculator():
         self._nQCDHistograms = []
         self._count(basicCounts, leg1Counts, leg2Counts, doHistograms)
         # Count NQCD by doing first contraction to one axis
-        self._contractedCount(basicCounts, leg1Counts, leg2Counts, "X")
+        self._contractedCount(basicCounts, leg1Counts, leg2Counts, "X", doHistograms)
         if basicCounts.is2D() or basicCounts.is3D():
-            self._contractedCount(basicCounts, leg1Counts, leg2Counts, "Y")
+            self._contractedCount(basicCounts, leg1Counts, leg2Counts, "Y", doHistograms)
         if basicCounts.is3D():
-            self._contractedCount(basicCounts, leg1Counts, leg2Counts, "Z")
+            self._contractedCount(basicCounts, leg1Counts, leg2Counts, "Z", doHistograms)
 
     def clean(self):
         self._basicCount.clean()
@@ -765,13 +765,15 @@ class QCDfactorisedCalculator():
         self._MCStatUncertainty = sqrt(self._MCStatUncertainty)
         self._MCSystUncertainty = sqrt(self._MCSystUncertainty)
 
-    def _contractedCount(self, basicCounts, leg1Counts, leg2Counts, axis):
+    def _contractedCount(self, basicCounts, leg1Counts, leg2Counts, axis, doHistograms = False):
         h = None
+        heff1 = None
+        heff2 = None
+        heff12 = None
         contractedNQCD = 0
         contractedDataUncertainty = 0
         contractedMCStatUncertainty = 0
         contractedMCSystUncertainty = 0
-        myName = "Contracted_NQCD_axis%s"%axis
         myBins = 0
         if axis == "X":
             myBins = basicCounts.getNbinsX()
@@ -779,22 +781,25 @@ class QCDfactorisedCalculator():
             myBins = basicCounts.getNbinsY()
         elif axis == "Z":
             myBins = basicCounts.getNbinsZ()
-        h = ROOT.TH1F(myName,myName,myBins,0,myBins)
-        h.SetYTitle(myName)
-        myName = "Contracted_EffLeg1_axis%s"%axis
-        heff1 = ROOT.TH1F(myName,myName,myBins,0,myBins)
-        heff1.SetYTitle(myName)
-        myName = "Contracted_EffLeg2_axis%s"%axis
-        heff2 = ROOT.TH1F(myName,myName,myBins,0,myBins)
-        heff2.SetYTitle(myName)
-        myName = "Contracted_EffLeg1AndLeg2_axis%s"%axis
-        heff12 = ROOT.TH1F(myName,myName,myBins,0,myBins)
-        heff12.SetYTitle(myName)
+        if doHistograms:
+            myName = "Contracted_NQCD_axis%s"%axis
+            h = ROOT.TH1F(myName,myName,myBins,0,myBins)
+            h.SetYTitle(myName)
+            myName = "Contracted_EffLeg1_axis%s"%axis
+            heff1 = ROOT.TH1F(myName,myName,myBins,0,myBins)
+            heff1.SetYTitle(myName)
+            myName = "Contracted_EffLeg2_axis%s"%axis
+            heff2 = ROOT.TH1F(myName,myName,myBins,0,myBins)
+            heff2.SetYTitle(myName)
+            myName = "Contracted_EffLeg1AndLeg2_axis%s"%axis
+            heff12 = ROOT.TH1F(myName,myName,myBins,0,myBins)
+            heff12.SetYTitle(myName)
         for i in range (1,myBins+1):
-            h.GetXaxis().SetBinLabel(i,basicCounts.getBinLabel(axis,i))
-            heff1.GetXaxis().SetBinLabel(i,basicCounts.getBinLabel(axis,i))
-            heff2.GetXaxis().SetBinLabel(i,basicCounts.getBinLabel(axis,i))
-            heff12.GetXaxis().SetBinLabel(i,basicCounts.getBinLabel(axis,i))
+            if doHistograms:
+                h.GetXaxis().SetBinLabel(i,basicCounts.getBinLabel(axis,i))
+                heff1.GetXaxis().SetBinLabel(i,basicCounts.getBinLabel(axis,i))
+                heff2.GetXaxis().SetBinLabel(i,basicCounts.getBinLabel(axis,i))
+                heff12.GetXaxis().SetBinLabel(i,basicCounts.getBinLabel(axis,i))
             myBasicCounts = basicCounts.getContracted1DQCDCount(i,axis).value()
             myLeg1Counts = leg1Counts.getContracted1DQCDCount(i,axis).value()
             myLeg2Counts = leg2Counts.getContracted1DQCDCount(i,axis).value()
@@ -832,7 +837,7 @@ class QCDfactorisedCalculator():
             contractedMCStatUncertainty += myMCStatUncert
             contractedMCSystUncertainty += myMCSystUncert
             # Fill histogram
-            if myCount > 0:
+            if myCount > 0 and doHistograms:
                 h.SetBinContent(i, myCount)
                 h.SetBinError(i, sqrt(myDataUncert+myMCStatUncert+myMCSystUncert))
                 if myEff1 > 0:
@@ -844,10 +849,11 @@ class QCDfactorisedCalculator():
                 if myEff1 > 0 and myEff2 > 0:
                     heff12.SetBinContent(i, myEff1*myEff2)
                     heff12.SetBinError(i, sqrt(pow(myEff2,2)*myEff1Uncert + pow(myEff1,2)*myEff2Uncert))
-        self._nQCDHistograms.append(h)
-        self._nQCDHistograms.append(heff1)
-        self._nQCDHistograms.append(heff2)
-        self._nQCDHistograms.append(heff12)
+        if doHistograms:
+            self._nQCDHistograms.append(h)
+            self._nQCDHistograms.append(heff1)
+            self._nQCDHistograms.append(heff2)
+            self._nQCDHistograms.append(heff12)
         self._contractedNQCD[axis] = contractedNQCD
         self._contractedDataUncertainty[axis] = sqrt(contractedDataUncertainty)
         self._contractedMCStatUncertainty[axis] = sqrt(contractedMCStatUncertainty)
