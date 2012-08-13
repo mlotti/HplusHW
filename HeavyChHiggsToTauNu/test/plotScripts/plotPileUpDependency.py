@@ -24,18 +24,25 @@ def main(opts):
             taskName = os.path.split(crabDir)[1]
             rootFile = ROOT.TFile.Open(os.path.join(crabDir, "res", "histograms-%s.root"%taskName))
             if rootFile.IsZombie():
-                sys.exit()
+                raise Exception ("Error: File 'histograms-%s.root' not found!"%taskName)
             # Get histogram
-            h = rootFile.Get("signalAnalysis/SignalSelectionFlowVsVertices")
-            if h == 0:
-                sys.exit()
+            histoName = "signalAnalysis/SignalSelectionFlowVsVertices"
+            if opts.variation != None:
+                histoName = "%s/SignalSelectionFlowVsVertices"%opts.variation[0]
+            h = rootFile.Get(histoName)
+            if h == None:
+                raise Exception ("Error: histogram '%s' not found in ile 'histograms-%s.root'!"%(histoName,taskName))
             histos.append(h)
             labels.append(taskName)
     # We have the histograms and names, lets loop over the selection steps
+    makePlots(histos,labels,False)
+    makePlots(histos,labels,True)
+
+def makePlots(histos,labels,totalEff):
     idx = 0
     for i in range(0, histos[0].GetNbinsY()-1):
-        myvtxbins = 35
-        myrebinfactor = 5
+        myvtxbins = 30
+        myrebinfactor = 1
         hout = ROOT.TH1F("PUdependency","PUdependency",myvtxbins,0,myvtxbins)
         hout.SetMinimum(0.0)
         hout.SetMaximum(1.1)
@@ -45,9 +52,12 @@ def main(opts):
         else:
             hout.SetYTitle("Efficiency of "+histos[0].GetYaxis().GetBinLabel(i+1))
         myGraphs = []
+        myTotalGraphs = []
         myLines = []
         myMin = 1.0
         myMax = 0.0
+        myTotalMin = 1.0
+        myTotalMax = 0.0
         for j in range(0,len(histos)):
             idx += 1
             htotal = ROOT.TH1F("htot"+str(idx),"htot",hout.GetNbinsX(),0,hout.GetNbinsX())
@@ -57,21 +67,19 @@ def main(opts):
                     # dphi<160 vs. trg
                     htotal.SetBinContent(k, histos[j].GetBinContent(k, 1))
                     htotal.SetBinError(k, histos[j].GetBinError(k, 1))
-                    hpassed.SetBinContent(k, histos[j].GetBinContent(k, histos[0].GetNbinsY()-1))
-                    hpassed.SetBinError(k, histos[j].GetBinError(k, histos[0].GetNbinsY()-1))                 
+                    hpassed.SetBinContent(k, histos[j].GetBinContent(k, histos[j].GetNbinsY()-1))
+                    hpassed.SetBinError(k, histos[j].GetBinError(k, histos[j].GetNbinsY()-1))
                 else:
-                    htotal.SetBinContent(k, histos[j].GetBinContent(k, i))
-                    htotal.SetBinError(k, histos[j].GetBinError(k, i))
+                    if totalEff:
+                        htotal.SetBinContent(k, histos[j].GetBinContent(k, 1))
+                        htotal.SetBinError(k, histos[j].GetBinError(k, 1))
+                    else:
+                        htotal.SetBinContent(k, histos[j].GetBinContent(k, i))
+                        htotal.SetBinError(k, histos[j].GetBinError(k, i))
                     hpassed.SetBinContent(k, histos[j].GetBinContent(k, i+1))
                     hpassed.SetBinError(k, histos[j].GetBinError(k, i+1))
             htotal.Rebin(myrebinfactor)
             hpassed.Rebin(myrebinfactor)
-            hpassed.Divide(htotal)
-            for k in range(0, htotal.GetNbinsX()):
-                if hpassed.GetBinContent(k)+hpassed.GetBinError(k) > myMax and htotal.GetBinContent(k+1) > 0:
-                    myMax = hpassed.GetBinContent(k)+hpassed.GetBinError(k)
-                if hpassed.GetBinContent(k)-hpassed.GetBinError(k) < myMin and hpassed.GetBinContent(k)-hpassed.GetBinError(k) > 0 and htotal.GetBinContent(k+1) > 0 and hpassed.GetBinContent(k+1) > 0:
-                    myMin = hpassed.GetBinContent(k)-hpassed.GetBinError(k)
             mycolor = 2+j
             if mycolor > 4:
                 mycolor += 1
@@ -80,6 +88,12 @@ def main(opts):
             hpassed.SetMarkerSize(1.0)
             hpassed.SetMarkerColor(mycolor)
             hpassed.SetMarkerStyle(21+j)
+            hpassed.Divide(htotal)
+            for k in range(0, htotal.GetNbinsX()):
+                if hpassed.GetBinContent(k)+hpassed.GetBinError(k) > myMax and htotal.GetBinContent(k+1) > 0:
+                    myMax = hpassed.GetBinContent(k)+hpassed.GetBinError(k)
+                if hpassed.GetBinContent(k)-hpassed.GetBinError(k) < myMin and hpassed.GetBinContent(k)-hpassed.GetBinError(k) > 0 and htotal.GetBinContent(k+1) > 0 and hpassed.GetBinContent(k+1) > 0:
+                    myMin = hpassed.GetBinContent(k)-hpassed.GetBinError(k)
             myGraphs.append(hpassed)
             hcloned = hpassed.Clone("hclone"+str(idx))
             myfit = ROOT.TF1("myfunc",myfitfunc,5.0,30.0,1)
@@ -98,6 +112,7 @@ def main(opts):
             myLines.append(myline)
         # plot graph
         c = ROOT.TCanvas()
+        c.SetLogy()
         if myMin > 0.0:
             hout.SetMinimum(myMin)
         if myMax < 1.0:
@@ -114,14 +129,27 @@ def main(opts):
         for g in myGraphs:
             g.Draw("e same")
         leg = ROOT.TLegend(0.6, 0.6, 0.9, 0.9, "", "brNDC")
+        leg.SetBorderSize(0)
+        leg.SetTextFont(63)
+        leg.SetTextSize(18)
+        leg.SetLineColor(1)
+        leg.SetLineStyle(1)
+        leg.SetLineWidth(1)
+        leg.SetFillColor(0)
         for g in range(0,len(myGraphs)):
             leg.AddEntry(myGraphs[g], labels[g], "lv")
-        #leg.Draw()
-        c.Print("pileUpDependency_%d_"%i+opts.multicrabdir[0]+".png")
+        leg.Draw()
+        if totalEff:
+            c.Print("pileUpDependency_totalEff_%d_"%i+opts.multicrabdir[0]+".png")
+        else:
+            c.Print("pileUpDependency_%d_"%i+opts.multicrabdir[0]+".png")
+        c.Close()
+
 
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     parser.add_option("--mdir", dest="multicrabdir", action="append", help="name of multicrab dir (multiple directories can be specified with multiple --mdir arguments)")
+    parser.add_option("-v", dest="variation", action="append", help="name of variation")
     (opts, args) = parser.parse_args()
     
     # Check that proper arguments were given
