@@ -929,6 +929,14 @@ class QCDfactorisedColumn(DatacardColumn):
                     myFullHistoName = "%s/%s%s"%(histoDir,histoName,myFactorisationSuffix)
                     hMtData = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumn, myFullHistoName, luminosity)
                     hMtMCEWK = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumnForQCDMCEWK, myFullHistoName, luminosity)
+                    if title == "Njets": ## FIXME
+                        for a in range(0,hMtData.GetNbinsX()+1):
+                            if a <= 3:
+                                hMtData.SetBinContent(a,0.0)
+                                hMtData.SetBinError(a,0.0)
+                                hMtMCEWK.SetBinContent(a,0.0)
+                                hMtMCEWK.SetBinError(a,0.0)
+                                #print "bin=%d, data=%f"%(a,hMtData.GetBinContent(a))
                     if self._debugMode:
                         print "  QCDfactorised / %s: bin%s, data=%f, MC EWK=%f, QCD=%f"%(title,myFactorisationSuffix,hMtData.Integral(0,hMtData.GetNbinsX()+1),hMtMCEWK.Integral(0,hMtMCEWK.GetNbinsX()+1),hMtData.Integral(0,hMtData.GetNbinsX()+1)-hMtMCEWK.Integral(0,hMtMCEWK.GetNbinsX()+1))
                     # Obtain empty histograms
@@ -974,8 +982,11 @@ class QCDfactorisedColumn(DatacardColumn):
                         if saveDetailedInfo:
                             hMtBinData.Scale(myEfficiency.value())
                             hMtBinEWK.Scale(myEfficiency.value())
+                    else:
+                        # Do not take this bin into account if cannot obtain efficiency
+                        hMtBin.Reset()
                     if self._debugMode:
-                        print "  QCDfactorised / mT shape: bin %d_%d_%d, eff=%f, eff*QCD=%f"%(i,j,k,myEfficiency.value(),hMtBin.Integral())
+                        print "  QCDfactorised / %s shape: bin %d_%d_%d, eff=%f, eff*QCD=%f"%(title,i,j,k,myEfficiency.value(),hMtBin.Integral())
                     # Add to total shape histogram
                     myShapeModifier.addShape(source=hMtBin,dest=h)
                     # Add to total info histogram
