@@ -101,7 +101,13 @@ class TableProducer:
         self.makeDataCards()
 
         # Make control plots
-        ControlPlotMaker(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
+        if self._config.OptionDoControlPlots != None:
+            if self._config.OptionDoControlPlots:
+                ControlPlotMaker(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
+            else:
+                print "\n"+HighlightStyle()+"Skipped making of data-driven Control plots."+NormalStyle()+" To enable, set OptionDoControlPlots = True in the input datacard."
+        else:
+            print "\n"+HighlightStyle()+"Skipped making of data-driven Control plots."+NormalStyle()+" To enable, set OptionDoControlPlots = True in the input datacard."
 
         # Make other reports
         print "\n"+HighlightStyle()+"Generating reports"+NormalStyle()

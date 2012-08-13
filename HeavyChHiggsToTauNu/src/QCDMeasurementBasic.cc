@@ -37,7 +37,10 @@ namespace HPlus {
     fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhiTauMET")),
     fMaxDeltaPhiJetMETCounter(eventCounter.addCounter("maxDeltaPhiJetMET")),
     fTopSelectionCounter(eventCounter.addCounter("top selection")),
-    fCoincidenceCounter(eventCounter.addCounter("coincidence of both legs")),
+    fCoincidenceAfterMETCounter(eventCounter.addCounter("coincidence after MET")),
+    fCoincidenceAfterBjetsCounter(eventCounter.addCounter("coincidence after Btag")),
+    fCoincidenceAfterDeltaPhiCounter(eventCounter.addCounter("coincidence after Delta phi")),
+    fCoincidenceAfterSelectionCounter(eventCounter.addCounter("coincidence after full selection")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, fHistoWrapper),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, fHistoWrapper),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, fHistoWrapper),
@@ -126,7 +129,7 @@ namespace HPlus {
     createShapeHistograms(fs, hCtrlNbjets, "CtrlLeg1AfterNbjets", 10, 0., 10.0);
     createShapeHistograms(fs, hCtrlDeltaPhiTauMET, "CtrlLeg1AfterDeltaPhiTauMET", 36, 0., 180.);
     createShapeHistograms(fs, hCtrlMaxDeltaPhiJetMET, "CtrlLeg1AfterMaxDeltaPhiJetMET", 36, 0., 180.);
-    createShapeHistograms(fs, hCtrlTopMass, "CtrlLeg1AfterMaxDeltaPhiJetMET", 80, 0., 400.);
+    createShapeHistograms(fs, hCtrlTopMass, "CtrlLeg1AfterTopMass", 80, 0., 400.);
 
     // Other control histograms
 
@@ -177,7 +180,6 @@ namespace HPlus {
     fTree.setNvertices(nVertices);
     hSelectionFlow->Fill(kQCDOrderVertexSelection);
     increment(fVertexReweighting);
-
 //------ Apply trigger and HLT_MET cut or trigger parametrisation
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if (!triggerData.passedEvent()) return false;
@@ -326,10 +328,11 @@ namespace HPlus {
     // MET cut
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau(), jetData.getAllJets());
     hCtrlMET[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(metData.getSelectedMET()->et());
-    if(!metData.passedEvent() && metData.getSelectedMET()->et()<100) return false;
+    if(!metData.passedEvent()) return false;
     increment(fMETCounter);
     hSelectionFlow->Fill(kQCDOrderMET);
     hLeg1AfterMET->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
+    if (myPassedTauLegStatus) increment(fCoincidenceAfterMETCounter);
 
     // b tagging cut
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
@@ -344,6 +347,7 @@ namespace HPlus {
     increment(fBTaggingScaleFactorCounter);
     hSelectionFlow->Fill(kQCDOrderBTag);
     hLeg1AfterBTagging->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
+    if (myPassedTauLegStatus) increment(fCoincidenceAfterBjetsCounter);
 
     // Delta phi(tau,MET) cut
     double deltaPhi = DeltaPhi::reconstruct(*(tauCandidateData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
@@ -352,6 +356,7 @@ namespace HPlus {
     increment(fDeltaPhiTauMETCounter);
     hSelectionFlow->Fill(kQCDOrderDeltaPhiTauMET);
     hLeg1AfterDeltaPhiTauMET->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
+    if (myPassedTauLegStatus) increment(fCoincidenceAfterDeltaPhiCounter);
 
     // Max Delta phi(jet,MET) cut
     double myMaxDeltaPhiJetMET = 0.0;
@@ -401,7 +406,7 @@ namespace HPlus {
 
     // MET leg selection passed
     if (myPassedTauLegStatus) {
-      increment(fCoincidenceCounter);
+      increment(fCoincidenceAfterSelectionCounter);
       //std::cout << "first selected tau pt=" << tauCandidateData.getSelectedTau()->leadPFChargedHadrCand()->pt() << " trg SF=" << triggerWeight.getEventWeight() << "\tnjets" << jetData.getHadronicJetCount() << std::endl;
     }
     

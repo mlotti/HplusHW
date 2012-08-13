@@ -120,7 +120,11 @@ namespace HPlus {
     Count fDeltaPhiTauMETCounter;
     Count fMaxDeltaPhiJetMETCounter;
     Count fTopSelectionCounter;
-    Count fCoincidenceCounter;
+    Count fCoincidenceAfterMETCounter;
+    Count fCoincidenceAfterBjetsCounter;
+    Count fCoincidenceAfterDeltaPhiCounter;
+    Count fCoincidenceAfterSelectionCounter;
+
     // Counters for propagating result into signal region from reversed rtau control region
 
     // The order here defines the order the subcounters are printed at the program termination

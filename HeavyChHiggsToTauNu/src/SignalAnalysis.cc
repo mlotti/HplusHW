@@ -69,7 +69,7 @@ namespace HPlus {
     fDeltaPhiCutValue(iConfig.getUntrackedParameter<double>("deltaPhiTauMET")),
     fTopRecoName(iConfig.getUntrackedParameter<std::string>("topReconstruction")),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
-    fAllCounter(eventCounter.addCounter("All events")),
+    fAllCounter(eventCounter.addCounter("Offline selection begins")),
     fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),
     fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
@@ -532,7 +532,7 @@ namespace HPlus {
 
 
 //------ b tagging cut
-    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     hCtrlNbjets->Fill(btagData.getBJetCount());
     if(!btagData.passedEvent()) return false;
     increment(fBTaggingCounter);
@@ -563,6 +563,17 @@ namespace HPlus {
     hSelectionFlow->Fill(kSignalOrderDeltaPhiSelection);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderDeltaPhiSelection);
     fillEWKFakeTausCounters(myTauMatch, kSignalOrderDeltaPhiSelection, tauData);
+
+    // plot deltaPhi(jet,met)
+    double myMaxDeltaPhiJetMET = 0.0;
+    for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getSelectedJets().begin(); iJet != jetData.getSelectedJets().end(); ++iJet) {
+      double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET())) * 57.3;
+      hDeltaPhiJetMet->Fill(jetDeltaPhi);
+      if (jetDeltaPhi > myMaxDeltaPhiJetMET)
+        myMaxDeltaPhiJetMET = jetDeltaPhi;
+    }
+    hMaxDeltaPhiJetMet->Fill(myMaxDeltaPhiJetMET);
+
 
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()) );
 
@@ -642,7 +653,6 @@ namespace HPlus {
 
 
     FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
-    fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
     double HiggsMass = FullHiggsMassData.getHiggsMass();
     if (HiggsMass > 100 && HiggsMass < 200 ) increment(fHiggsMassCutCounter);
 
@@ -656,15 +666,6 @@ namespace HPlus {
       hTransverseMassTauVeto->Fill(transverseMass); 
     }
 
-    // plot deltaPhi(jet,met)
-    double myMaxDeltaPhiJetMET = 0.0;
-    for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getSelectedJets().begin(); iJet != jetData.getSelectedJets().end(); ++iJet) {
-      double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET())) * 57.3;
-      hDeltaPhiJetMet->Fill(jetDeltaPhi);
-      if (jetDeltaPhi > myMaxDeltaPhiJetMET)
-        myMaxDeltaPhiJetMET = jetDeltaPhi;
-    }
-    hMaxDeltaPhiJetMet->Fill(myMaxDeltaPhiJetMET);
 
 
 
@@ -926,9 +927,5 @@ namespace HPlus {
       if (myFakeTauStatus) fEWKFakeTausGroup.incrementSelectedEventsCounter();
       getCounterGroupByTauMatch(tauMatch)->incrementSelectedEventsCounter();
     }
-  }
-
-  double SignalAnalysis::calculateMuonTauSystemInvatiantMass(const TauSelection::Data& tauData, const GlobalMuonVeto::Data& muonData) const {
-    return 0.0;
   }
 }
