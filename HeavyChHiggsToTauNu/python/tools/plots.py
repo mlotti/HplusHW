@@ -340,7 +340,8 @@ _legendLabels = {
 
     "QCDdata": "QCD (data driven)",
 
-    "DYJetsToLL":            "DY+jets",
+#    "DYJetsToLL":            "DY+jets",
+    "DYJetsToLL":            "Z/#gamma*+jets",
     "QCD_Pt20_MuEnriched":   "QCD (#mu enr.), #hat{p}_{T} > 20",
 
     "SingleTop":             "Single t",
@@ -583,6 +584,28 @@ def _createRatio(rootHisto1, rootHisto2, ytitle, isBinomial=False):
     elif isinstance(rootHisto1, ROOT.TGraph) and isinstance(rootHisto2, ROOT.TGraph):
         if isBinomial:
             raise Exception("isBinomial is not supported for TGraph input")
+
+        if not rootHisto1.GetN() == rootHisto2.GetN():
+	    xfound = []
+	    for i in range(rootHisto1.GetN()):
+		for j in range(rootHisto2.GetN()):
+		    if rootHisto1.GetX()[i] == rootHisto2.GetX()[j]:
+			xfound.append(rootHisto1.GetX()[i])
+	    for i in range(rootHisto1.GetN()):
+		found = False
+		for x in xfound:
+		    if rootHisto1.GetX()[i] == x:
+			found = True
+		if not found:
+		    rootHisto1.RemovePoint(i)
+            for j in range(rootHisto2.GetN()):
+                found = False
+                for x in xfound:
+                    if rootHisto2.GetX()[j] == x:
+                        found = True
+                if not found:
+                    rootHisto1.RemovePoint(j)
+
         xvalues = []
         yvalues = []
         yerrs = []
@@ -591,11 +614,12 @@ def _createRatio(rootHisto1, rootHisto2, ytitle, isBinomial=False):
             if yval == 0:
                 continue
             xvalues.append(rootHisto1.GetX()[i])
-            yvalues.append(rootHisto1.GetY()[i] / yval)
+            yvalue = rootHisto1.GetY()[i] / yval
+            yvalues.append(yvalue)
             err1 = max(rootHisto1.GetErrorYhigh(i), rootHisto1.GetErrorYlow(i))
             err2 = max(rootHisto2.GetErrorYhigh(i), rootHisto2.GetErrorYlow(i))
-            yerrs.append( yvalues[i]* math.sqrt( _divideOrZero(err1, rootHisto1.GetY()[i])**2 +
-                                                 _divideOrZero(err2, rootHisto2.GetY()[i])**2 ) )
+            yerrs.append( yvalue * math.sqrt( _divideOrZero(err1, rootHisto1.GetY()[i])**2 +
+                                              _divideOrZero(err2, rootHisto2.GetY()[i])**2 ) )
 
         gr = ROOT.TGraphAsymmErrors()
         if len(xvalues) > 0:
@@ -900,12 +924,28 @@ class PlotBase:
         # histogram
         self.getPad().RedrawAxis()
 
+
+    ## Set the integrated luminosity of the data
+    #
+    # \param lumi   Integrated luminosity (in pb^-1)
+    def setLuminosity(self, lumi):
+        self.luminosity = lumi
+
     ## Add text for integrated luminosity
     #
     # \param x   X coordinate (in NDC, None for the default value)
     # \param y   Y coordinate (in NDC, None for the default value)
+    #
+    # Takes luminosity from self.luminosity member set by
+    # setLuminosity() method if it exists. Otherwise forwards the call
+    # to self.histoMgr. If setLuminosity() has been called with None,
+    # no luminosity text is added.
     def addLuminosityText(self, x=None, y=None):
-        self.histoMgr.addLuminosityText(x, y)
+        if hasattr(self, "luminosity"):
+            if self.luminosity != None:
+                histograms.addLuminosityText(x, y, self.luminosity)
+        else:
+            self.histoMgr.addLuminosityText(x, y)
 
     ## Save the plot to file(s)
     #
@@ -1264,6 +1304,14 @@ class MCPlot(PlotSameBase):
         self._setLegendLabels()
         self._setPlotStyles()
 
+    ## Create TCanvas and frames for the histogram
+    #
+    # \param filename     Name for TCanvas (becomes the file name)
+    # \param createRatio  Create also the ratio pad (ignored, provided to have similar interface with DataMCPlot)
+    # \param kwargs       Keyword arguments, forwarded to PlotSameBase.createFrame() or PlotRatioBase._createFrameRatio()
+    def createFrame(self, filename, createRatio=False, **kwargs):
+        PlotSameBase.createFrame(self, filename, **kwargs)
+
     ## This is provided to have similar interface with DataMCPlot
     def createFrameFraction(self, filename, **kwargs):
         if "opts2" in kwargs:
@@ -1431,16 +1479,6 @@ class DataMCPlot2(PlotBase, PlotRatioBase):
                                    self.histoMgr.getHisto("StackedMC").getSumRootHisto(),
                                    "Data/MC", **kwargs)
 
-    ## Set the integrated luminosity of the data
-    #
-    # \param lumi   Integrated luminosity (in pb^-1)
-    def setLuminosity(self, lumi):
-        self.luminosity = lumi
-
-    def addLuminosityText(self, x=None, y=None):
-        if hasattr(self, "luminosity"):
-            histograms.addLuminosityText(x, y, self.luminosity)
-
     ## Add cut box and/or line
     #
     # \param args    Positional arguments (forwarded to plots._createCutBoxAndLine())
@@ -1532,17 +1570,6 @@ class ComparisonPlot(PlotBase, PlotRatioBase):
         PlotBase.draw(self)
         PlotRatioBase._draw(self)
 
-    ## Set the integrated luminosity of the data
-    #
-    # \param lumi   Integrated luminosity (in pb^-1)
-    def setLuminosity(self, lumi):
-        self.luminosity = lumi
-
-    def addLuminosityText(self, x=None, y=None):
-        if hasattr(self, "luminosity"):
-            histograms.addLuminosityText(x, y, self.luminosity)
-
-
 
 ## Class to compare many histograms to one histogram
 #
@@ -1596,16 +1623,6 @@ class ComparisonManyPlot(PlotBase, PlotRatioBase):
     def draw(self):
         PlotBase.draw(self)
         PlotRatioBase._draw(self)
-
-    ## Set the integrated luminosity of the data
-    #
-    # \param lumi   Integrated luminosity (in pb^-1)
-    def setLuminosity(self, lumi):
-        self.luminosity = lumi
-
-    def addLuminosityText(self, x=None, y=None):
-        if hasattr(self, "luminosity"):
-            histograms.addLuminosityText(x, y, self.luminosity)
 
 
 ## Base class for plot drawing functions
@@ -1669,26 +1686,31 @@ class PlotDrawer:
     # \param ylabel              Default Y axis title
     # \param log                 Should Y axis be in log scale by default?
     # \param ratio               Should the ratio pad be drawn?
+    # \param ratioYlabel         The Y axis title for the ratio pad (None for default)
     # \param opts                Default frame bounds linear scale (see histograms._boundsArgs())
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
     # \param addLuminosityText   Should luminosity text be drawn?
     # \param stackMCHistograms   Should MC histograms be stacked?
     # \param addMCUncertainty    Should MC total (stat) uncertainty be drawn()
+    # \param cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis
     def __init__(self,
                  ylabel="Occurrances / %.0f",
                  log=False,
                  ratio=False,
+                 ratioYlabel=None,
                  opts={},
                  optsLog={},
                  opts2={},
                  addLuminosityText=False,
                  stackMCHistograms=False,
                  addMCUncertainty=False,
+                 cmsText=None,
                  ):
         self.ylabelDefault = ylabel
         self.logDefault = log
         self.ratioDefault = ratio
+        self.ratioYlabel = ratioYlabel
         self.optsDefault = {"ymin": 0, "ymaxfactor": 1.1}
         self.optsDefault.update(opts)
         self.optsLogDefault = {"ymin": 0.01, "ymaxfactor": 2}
@@ -1698,6 +1720,7 @@ class PlotDrawer:
         self.addLuminosityTextDefault = addLuminosityText
         self.stackMCHistogramsDefault = stackMCHistograms
         self.addMCUncertainty = addMCUncertainty
+        self.cmsText = cmsText
 
     ## Modify the defaults
     #
@@ -1761,10 +1784,11 @@ class PlotDrawer:
     # \param kwargs  Keyword arguments (see below)
     #
     # <b>Keyword arguments</b>
-    # \li\a log      Should Y axis be in log scale? (default given in __init__()/setDefaults())
-    # \li\a opts     Frame bounds (defaults given in __init__()/setDefaults())
-    # \li\a opts2    Ratio pad bounds (defaults given in __init__()/setDefaults())
-    # \li\a ratio    Should ratio pad be drawn? (default given in __init__()/setDefaults())
+    # \li\a log          Should Y axis be in log scale? (default given in __init__()/setDefaults())
+    # \li\a opts         Frame bounds (defaults given in __init__()/setDefaults())
+    # \li\a opts2        Ratio pad bounds (defaults given in __init__()/setDefaults())
+    # \li\a ratio        Should ratio pad be drawn? (default given in __init__()/setDefaults())
+    # \li\a ratioYlabel  The Y axis title for the ratio pad (None for default)
     def createFrame(self, p, name, **kwargs):
         log = kwargs.get("log", self.logDefault)
 
@@ -1794,6 +1818,12 @@ class PlotDrawer:
         p.createFrame(name, **args)
         if log:
             p.getPad().SetLogy(log)
+
+        # Override ratio ytitle
+        ratioYlabel = kwargs.get("ratioYlabel", self.ratioYlabel)
+        if ratio and ratioYlabel != None:
+            p.getFrame2().GetYaxis().SetTitle(ratioYlabel)
+
 
     ## Add a legend to the plot
     #
@@ -1857,6 +1887,7 @@ class PlotDrawer:
     # <b>Keyword arguments</b>
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
+    # \li\a cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis (default given in __init__()/setDefaults())
     #
     # In addition of drawing and saving the plot, handles the X and Y
     # axis titles, and "CMS Preliminary", "sqrt(s)" and luminosity
@@ -1869,7 +1900,8 @@ class PlotDrawer:
         p.frame.GetXaxis().SetTitle(xlabel)
         p.frame.GetYaxis().SetTitle(ylab)
         p.draw()
-        histograms.addCmsPreliminaryText()
+        cmsText = kwargs.get("cmsText", self.cmsText)
+        histograms.addCmsPreliminaryText(text=cmsText)
         histograms.addEnergyText()
         if kwargs.get("addLuminosityText", self.addLuminosityTextDefault):
             p.addLuminosityText()

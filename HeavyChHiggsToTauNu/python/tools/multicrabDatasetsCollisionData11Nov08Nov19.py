@@ -35,6 +35,12 @@ datasets = {
                 "number_of_jobs": 15, # 4629090 evt, 40-80 MB / file
                 "lumiMask": "Nov08ReReco",
             },
+            "pattuple_v25b": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_Tau_160431-167913_2011A_Nov08-6a35806d4ee51a0fcded80eb169c9c26/USER",
+                "number_of_jobs": 15, # 4629090 evt, 40-80 MB / file
+                "lumiMask": "Nov08ReReco",
+            },
         }
     },
     # break of range because of trigger eff. boundary
@@ -55,7 +61,12 @@ datasets = {
                 "number_of_jobs": 3, # 754860 evt, 30 MB / file
                 "lumiMask": "Nov08ReReco",
             },
-
+            "pattuple_v25b": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_Tau_170722-173198_2011A_Nov08-bf69bd8220530b9ba3ad7a1d882490f3/USER",
+                "number_of_jobs": 3, # 754860 evt, 30 MB / file
+                "lumiMask": "Nov08ReReco",
+            },
         }
     },
     # break of range because of trigger eff. boundary
@@ -73,6 +84,12 @@ datasets = {
             "pattuple_v25": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_173236-173692_2011A_Nov08-d7b7dcb6c55f2b2177021b8423a82913/USER",
+                "number_of_jobs": 2, # 407038 evt
+                "lumiMask": "Nov08ReReco",
+            },
+            "pattuple_v25b": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_Tau_173236-173692_2011A_Nov08-466fa79a18d5f55ecd74f61a06585be0/USER",
                 "number_of_jobs": 2, # 407038 evt
                 "lumiMask": "Nov08ReReco",
             },
@@ -99,6 +116,12 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_175860-180252_2011B_Nov19-28e7e0ab56ad4146eca1efa805cd10f4/USER",
                 "number_of_jobs": 20, # 5691371 evt, 30 MB / file
+                "lumiMask": "Nov08ReReco",
+            },
+            "pattuple_v25b": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_Tau_175860-180252_2011B_Nov19-b2a9ba9a3b361daafe58fb023a257e1b/USER",
+                "number_of_jobs": 30, # 5691371 evt, 30 MB / file
                 "lumiMask": "Nov08ReReco",
             },
         }

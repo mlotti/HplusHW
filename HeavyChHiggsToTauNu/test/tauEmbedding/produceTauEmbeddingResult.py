@@ -68,6 +68,7 @@ def main():
 
     datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByCrossSection=True)
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
+    datasetsSig.updateNAllEventsToPUWeighted()
     datasetsEmb.forEach(lambda d: d.mergeData())
     datasetsEmb.setLumiFromData()
 

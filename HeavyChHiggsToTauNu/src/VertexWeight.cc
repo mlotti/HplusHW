@@ -18,10 +18,7 @@ namespace HPlus {
   VertexWeight::VertexWeight(const edm::ParameterSet& iConfig):
     fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc")),
     fPuSummarySrc(iConfig.getParameter<edm::InputTag>("puSummarySrc")),
-    fMeanShifter(iConfig.getParameter<double>("shiftMeanAmount")),
-    fUseSimulatedPileup(iConfig.getParameter<bool>("useSimulatedPileup")),
-    fEnabled(iConfig.getParameter<bool>("enabled")),
-    fShiftMean(iConfig.getParameter<bool>("shiftMean"))
+    fEnabled(iConfig.getParameter<bool>("enabled"))
   {
     edm::Service<TFileService> fs;
     hWeights = fs->make<TH1F>("pileupReweightWeights", "Reweighting weight distribution", 100, 0, 10);
@@ -29,50 +26,14 @@ namespace HPlus {
     if(!fEnabled)
       return;
 
-    if(fShiftMean && !fUseSimulatedPileup) {
-      throw cms::Exception("Configuration") << "VertexWeight: shiftMean can be used only with the reweighting by simulated PU interactions (not reconstructed vertices)" << std::endl;
-    }
-
-    std::string method = iConfig.getParameter<std::string>("method");
-    if(method == "intime") {
-      fMethod = kIntime;
-    //else if(method == "3D") {
-      //fMethod = k3D;
-    }
-    else
-      throw cms::Exception("Configuration") << "VertexWeight: method can be only 'intime'" << std::endl;
-
-    if(fUseSimulatedPileup) {
-      std::string mcDistName = "mcDistIntime";
-      std::string dataDistName = "dataDistIntime";
-      if(fMethod == k3D) {
-        mcDistName = "mcDist3D";
-        dataDistName = "dataDist3D";
-      }
-
-      std::vector<double> mcDist = iConfig.getParameter<std::vector<double> >(mcDistName);
-      std::vector<double> dataDist = iConfig.getParameter<std::vector<double> >(dataDistName);
-      std::vector<float> mcDistF; mcDistF.reserve(mcDist.size());
-      std::vector<float> dataDistF; dataDistF.reserve(dataDistF.size());
-      std::copy(mcDist.begin(), mcDist.end(), std::back_inserter(mcDistF));
-      std::copy(dataDist.begin(), dataDist.end(), std::back_inserter(dataDistF));
-
-      // std::cout << "mcDistF.size() " << mcDistF.size() << " dataDistF.size() " << dataDistF.size() << std::endl;
-      /* if(fMethod == k3D) {
-        fLumi3DWeights = edm::Lumi3DReWeighting(mcDistF, dataDistF, "pileup");
-        std::string fileName = iConfig.getParameter<std::string>("weightFile3D");
-        if(fileName.size() == 0) {
-          float scale = 1; // FIXME, scale taken from hat, needed to get the code compile in 44x. 16.1.2012/SL
-          fLumi3DWeights.weight3D_init(scale);
-          throw cms::Exception("Configuration") << "VwetexWeight: weightFile3D was empty, thus the file for 3D weights was then generated with a name 'Weight3D.root'" << std::endl;
-        }
-        edm::FileInPath fip(fileName);
-        fLumi3DWeights.weight3D_init(fip.fullPath());
-      } */ 
-      fLumiWeights = edm::LumiReWeighting(mcDistF, dataDistF);
-    } else {
-      fWeights = iConfig.getParameter<std::vector<double> >("weights");
-    }
+    // Obtain data and mc distribution root files and labels
+    // Both histograms are normalised to unit area (make sure they have same number of bins)
+    edm::FileInPath myDataPUdistribution = iConfig.getParameter<edm::FileInPath>("dataPUdistribution");
+    std::string myDataPUdistributionLabel = iConfig.getParameter<std::string>("dataPUdistributionLabel");
+    edm::FileInPath myMCPUdistribution = iConfig.getParameter<edm::FileInPath>("mcPUdistribution");
+    std::string myMCPUdistributionLabel = iConfig.getParameter<std::string>("mcPUdistributionLabel");
+    
+    fLumiWeights = edm::LumiReWeighting(myMCPUdistribution.fullPath(), myDataPUdistribution.fullPath(), myMCPUdistributionLabel, myDataPUdistributionLabel);
   }
   VertexWeight::~VertexWeight() {}
 
@@ -87,53 +48,30 @@ namespace HPlus {
       return std::make_pair(1.0, vertSize);
     }
 
-    double weight = std::numeric_limits<double>::quiet_NaN();
-    if(fUseSimulatedPileup) {
-      // See https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
-      edm::Handle<std::vector<PileupSummaryInfo> >  hpu;
-      iEvent.getByLabel(fPuSummarySrc, hpu);
+    //double weight = std::numeric_limits<double>::quiet_NaN();
 
-      int n0 = -1;
-      int nm1 = -1;
-      int np1 = -1;
-      for(std::vector<PileupSummaryInfo>::const_iterator iPV = hpu->begin(); iPV != hpu->end(); ++iPV) {
-        if(iPV->getBunchCrossing() == -1)
-          nm1 = iPV->getPU_NumInteractions();
-        else if(iPV->getBunchCrossing() == 0)
-          n0 = iPV->getPU_NumInteractions();
-        else if(iPV->getBunchCrossing() == 1)
-          np1 = iPV->getPU_NumInteractions();
-      }
-      if(n0 < 0)
-        throw cms::Exception("Assert") << "VertexWeight: Didn't find the number of interactions for BX 0" << std::endl;;
-      if(fMethod == kIntime) {
-        weight = fLumiWeights.weight(n0);
-      }
-      /*else if(fMethod == k3D) {
-        if(nm1 < 0)
-          throw cms::Exception("Assert") << "VertexWeight: Didn't find the number of interactions for BX -1" << std::endl;;
-        if(np1 < 0)
-          throw cms::Exception("Assert") << "VertexWeight: Didn't find the number of interactions for BX +1" << std::endl;;
+    // See https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
+    edm::Handle<std::vector<PileupSummaryInfo> >  hpu;
+    iEvent.getByLabel(fPuSummarySrc, hpu);
 
-        weight = fLumi3DWeights.weight3D(nm1, n0, np1);
-      }*/
-      else {
-        throw cms::Exception("Assert") << "This should never be reached at " << __FILE__ << ":" << __LINE__ << std::endl;
-      }
-      
-      // See https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
-      if(fShiftMean) {
-        weight = weight*fMeanShifter.ShiftWeight( n0 );
-      }
+    int n0 = -1;
+    int nm1 = -1;
+    int np1 = -1;
+    for(std::vector<PileupSummaryInfo>::const_iterator iPV = hpu->begin(); iPV != hpu->end(); ++iPV) {
+      if(iPV->getBunchCrossing() == -1)
+        nm1 = iPV->getTrueNumInteractions();
+      else if(iPV->getBunchCrossing() == 0)
+        n0 = iPV->getTrueNumInteractions();
+      else if(iPV->getBunchCrossing() == 1)
+        np1 = iPV->getTrueNumInteractions();
     }
-    else {
-      size_t n = vertSize;
-      if(n >= fWeights.size())
-        n = fWeights.size() - 1;
-      weight = fWeights[n];
-    }
+    if(n0 < 0)
+      throw cms::Exception("Assert") << "VertexWeight: Didn't find the number of interactions for BX 0" << std::endl;;
 
-    /// Return "Vertex Weight" according to the number of vertices found in Event
+    // Obtain weight
+    double weight = fLumiWeights.weight(n0);
+    
+    // Return "Vertex Weight" according to the number of vertices found in Event
     hWeights->Fill(weight);
     return std::make_pair(weight, vertSize);
   }

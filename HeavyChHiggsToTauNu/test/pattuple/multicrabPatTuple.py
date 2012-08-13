@@ -7,10 +7,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 multicrab = Multicrab("crab_pat.cfg", lumiMaskDir="..")
 
 datasets = [
-<<<<<<< HEAD
-=======
 
->>>>>>> lauri/pattuplev25
 ########
 #
 # 44X
@@ -93,6 +90,11 @@ datasets = [
 #        "WW_TuneZ2_Fall11",
 #        "WZ_TuneZ2_Fall11",
 #        "ZZ_TuneZ2_Fall11",
+
+        # High PU
+#        "TTToHplusBWB_M90_Fall11_Ave32_50ns",
+#        "TTToHplusBWB_M160_Fall11_Ave32_50ns",
+#        "TTJets_TuneZ2_Fall11_Ave32_50ns"
 ]
 
 multicrab.extendDatasets("AOD", datasets)

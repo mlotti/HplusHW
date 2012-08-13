@@ -12,12 +12,13 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters/weighted"
+counters = analysis+"Counters"
 
 treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup")
 
 def main():
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets.updateNAllEventsToPUWeighted()
 #    datasets.loadLuminosities()
 #    datasets = btaggingWJets.root
 #    plots.mergeRenameReorderForDataMC(datasets)

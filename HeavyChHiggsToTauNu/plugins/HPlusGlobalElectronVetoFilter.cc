@@ -9,6 +9,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
 
 class HPlusGlobalElectronVetoFilter: public edm::EDFilter {
@@ -22,30 +23,30 @@ class HPlusGlobalElectronVetoFilter: public edm::EDFilter {
   virtual bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
   virtual void endJob();
 
-  virtual bool beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
   virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
+  HPlus::HistoWrapper histoWrapper;
   HPlus::GlobalElectronVeto fGlobalElectronVeto;
   bool fFilter;
 };
 
 HPlusGlobalElectronVetoFilter::HPlusGlobalElectronVetoFilter(const edm::ParameterSet& iConfig):
-  eventCounter(),
+  eventCounter(iConfig),
   eventWeight(iConfig),
-  fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
+  histoWrapper(eventWeight, "Debug"),
+  fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, histoWrapper),
   fFilter(iConfig.getParameter<bool>("filter"))
 {
-  eventCounter.produces(this);
   produces<bool>();
   eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
 HPlusGlobalElectronVetoFilter::~HPlusGlobalElectronVetoFilter() {}
 void HPlusGlobalElectronVetoFilter::beginJob() {}
 
-bool HPlusGlobalElectronVetoFilter::beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
-  eventCounter.beginLuminosityBlock(iBlock, iSetup);
+bool HPlusGlobalElectronVetoFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
+  eventCounter.endLuminosityBlock(iBlock, iSetup);
   return true;
 }
 
@@ -58,12 +59,8 @@ bool HPlusGlobalElectronVetoFilter::filter(edm::Event& iEvent, const edm::EventS
   return !fFilter || (fFilter && passed);
 }
 
-bool HPlusGlobalElectronVetoFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
-  eventCounter.endLuminosityBlock(iBlock, iSetup);
-  return false;
-}
-
 void HPlusGlobalElectronVetoFilter::endJob() {
+  eventCounter.endJob();
 }
 
 //define this as a plug-in

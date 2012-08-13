@@ -1,5 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -29,50 +29,49 @@ namespace HPlus {
     fBjetSelection(bjetSelection), fPassedEvent(passedEvent) {}
   BjetSelection::Data::~Data() {}
 
-  BjetSelection::BjetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  BjetSelection::BjetSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fOneProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneProngTauSrc")),
-    fOneAndThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneAndThreeProngTauSrc")),
-    fEventWeight(eventWeight)
+    fOneAndThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneAndThreeProngTauSrc"))
   {
 
     edm::Service<TFileService> fs;
 
     TFileDirectory myDir = fs->mkdir("BjetSelection");
 
-    hDeltaRmaxFromTop = makeTH<TH1F>(myDir, "DeltaRmaxFromTop", "DeltaRmaxFromTop", 200, 0., 6.);
-    hDeltaMinTauB = makeTH<TH1F>(myDir, "DeltaMinTauB", "DeltaMinTauB", 200, 0., 6.);
-    hDeltaMaxTauB = makeTH<TH1F>(myDir, "DeltaMaxTauB", "DeltaMaxTauB", 200, 0., 6.);
-    hPtBjetTauSide = makeTH<TH1F>(myDir, "PtBjetTauSide", "PtBjetTauSide", 200, 0., 400.);
-    hEtaBjetTauSide = makeTH<TH1F>(myDir, "EtaBjetTauSide", "EtaBjetTauSide", 250, -5., 5.);
-    hPtBjetTopSide = makeTH<TH1F>(myDir, "PtBjetTopSide", "PtBjetTopSide", 200, 0., 400.);
-    hEtaBjetTopSide = makeTH<TH1F>(myDir, "EtaBjetTopSide", "EtaBjetTopSide", 250, -5.,5.);
-    hPtBjetMax = makeTH<TH1F>(myDir, "PtBjetMax", "PtBjetMax", 200, 0., 400.);
-    hEtaBjetMax = makeTH<TH1F>(myDir, "EtaBjetMax", "EtaBjetMax", 250, -5.,5.);
-    hPtBjetMaxTrue = makeTH<TH1F>(myDir, "PtBjetMaxTrue", "PtBjetMaxTrue", 200, 0., 400.);
-    hEtaBjetMaxTrue = makeTH<TH1F>(myDir, "EtaBjetMaxTrue", "EtaBjetMaxTrue", 250, -5.,5.);
-    hDeltaMinTauBTrue = makeTH<TH1F>(myDir, "DeltaMinTauBTrue", "DeltaMinTauBTrue", 200, 0., 6.);
-    hDeltaMaxTopBTrue = makeTH<TH1F>(myDir, "DeltaMaxTopBTrue", "DeltaMaxTopBTrue", 200, 0., 6.);
-    hPtBjetTauSideTrue = makeTH<TH1F>(myDir, "PtBjetTauSideTrue", "PtBjetTauSideTrue", 200, 0., 400.);
-    hEtaBjetTauSideTrue = makeTH<TH1F>(myDir, "EtaBjetTauSideTrue", "EtaBjetTauSideTrue", 250, -5., 5.);
-    hPtBjetTopSideTrue = makeTH<TH1F>(myDir, "PtBjetTopSideTrue", "PtBjetTopSideTrue", 200, 0., 400.);
-    hEtaBjetTopSideTrue = makeTH<TH1F>(myDir, "EtaBjetTopSideTrue", "EtaBjetTopSideTrue", 250, -5.,5.);
-    hMassTopTop = makeTH<TH1F>(myDir, "MassTopTop_matchJets", "MassTopTop_matchJets",400, 0.,400.);
-    hMassTopHiggs = makeTH<TH1F>(myDir, "MassTopHiggs_matchJets", "MassTopHiggs_matchJets",400, 0.,400.);
-    hMassW = makeTH<TH1F>(myDir, "MassW_matchJets", "MassW_matchJets",300, 0.,300.);
-    hPtTopTop = makeTH<TH1F>(myDir, "PtTopTop_matchJets", "PtTopTop_matchJets",200, 0.,400.);
-    hPtTopHiggs = makeTH<TH1F>(myDir, "PtTopHiggs_matchJets", "PtTopHiggs_matchJets",200, 0.,400.);
-    hPtW = makeTH<TH1F>(myDir, "PtW_matchJets", "PtW_matchJets",200, 0.,400.);
-    hBquarkFromHiggsSideEta = makeTH<TH1F>(myDir, "EtaBquarkFromHiggsSide", "EtaBquarkFromHiggsSide", 250, -5.,5.);
-    hBquarkFromHiggsSidePt = makeTH<TH1F>(myDir, "PtBquarkFromHiggsSide", "PtBquarkFromHiggsSide", 200, 0.,400.);
-    hBquarkFromTopSideEta = makeTH<TH1F>(myDir, "EtaBquarkFromTopSide", "EtaBquarkFromTopSide", 250, -5.,5.);
-    hBquarkFromTopSidePt = makeTH<TH1F>(myDir, "PtBquarkFromTopSide", "PtBquarkFromTopSide", 200, 0.,400.);
-    hQquarkFromTopSidePt = makeTH<TH1F>(myDir, "PtQquarkFromTopSide", "PtQquarkFromTopSide", 200, 0.,400.);
-    hQquarkFromTopSideEta = makeTH<TH1F>(myDir, "EtaQquarkFromTopSide", "EtaQquarkFromTopSide", 250, -5.,5.);
-    hDeltaRtauBtauSide = makeTH<TH1F>(myDir, "DeltaRtauBtauSide", "DeltaRtauBtauSide", 200, 0., 6.);
-    hDeltaRHadTauBtauSide = makeTH<TH1F>(myDir, "DeltaRHadTauBtauSide", "DeltaRHadTauBtauSide", 200, 0., 6.);
-    hDeltaRHadTauBtopSide = makeTH<TH1F>(myDir, "DeltaRHadTauBtopSide", "DeltaRHadTauBtopSide", 200, 0., 6.);
-    hDeltaTauB = makeTH<TH1F>(myDir, "DeltaTauB", "DeltaTauB", 200, 0., 6.);
+    hDeltaRmaxFromTop = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "DeltaRmaxFromTop", "DeltaRmaxFromTop", 200, 0., 6.);
+    hDeltaMinTauB = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "DeltaMinTauB", "DeltaMinTauB", 200, 0., 6.);
+    hDeltaMaxTauB = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "DeltaMaxTauB", "DeltaMaxTauB", 200, 0., 6.);
+    hPtBjetTauSide = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtBjetTauSide", "PtBjetTauSide", 200, 0., 400.);
+    hEtaBjetTauSide = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EtaBjetTauSide", "EtaBjetTauSide", 250, -5., 5.);
+    hPtBjetTopSide = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtBjetTopSide", "PtBjetTopSide", 200, 0., 400.);
+    hEtaBjetTopSide = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EtaBjetTopSide", "EtaBjetTopSide", 250, -5.,5.);
+    hPtBjetMax = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtBjetMax", "PtBjetMax", 200, 0., 400.);
+    hEtaBjetMax = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EtaBjetMax", "EtaBjetMax", 250, -5.,5.);
+    hPtBjetMaxTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtBjetMaxTrue", "PtBjetMaxTrue", 200, 0., 400.);
+    hEtaBjetMaxTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EtaBjetMaxTrue", "EtaBjetMaxTrue", 250, -5.,5.);
+    hDeltaMinTauBTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "DeltaMinTauBTrue", "DeltaMinTauBTrue", 200, 0., 6.);
+    hDeltaMaxTopBTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "DeltaMaxTopBTrue", "DeltaMaxTopBTrue", 200, 0., 6.);
+    hPtBjetTauSideTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtBjetTauSideTrue", "PtBjetTauSideTrue", 200, 0., 400.);
+    hEtaBjetTauSideTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EtaBjetTauSideTrue", "EtaBjetTauSideTrue", 250, -5., 5.);
+    hPtBjetTopSideTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtBjetTopSideTrue", "PtBjetTopSideTrue", 200, 0., 400.);
+    hEtaBjetTopSideTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EtaBjetTopSideTrue", "EtaBjetTopSideTrue", 250, -5.,5.);
+    hMassTopTop = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "MassTopTop_matchJets", "MassTopTop_matchJets",400, 0.,400.);
+    hMassTopHiggs = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "MassTopHiggs_matchJets", "MassTopHiggs_matchJets",400, 0.,400.);
+    hMassW = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "MassW_matchJets", "MassW_matchJets",300, 0.,300.);
+    hPtTopTop = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtTopTop_matchJets", "PtTopTop_matchJets",200, 0.,400.);
+    hPtTopHiggs = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtTopHiggs_matchJets", "PtTopHiggs_matchJets",200, 0.,400.);
+    hPtW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtW_matchJets", "PtW_matchJets",200, 0.,400.);
+    hBquarkFromHiggsSideEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EtaBquarkFromHiggsSide", "EtaBquarkFromHiggsSide", 250, -5.,5.);
+    hBquarkFromHiggsSidePt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtBquarkFromHiggsSide", "PtBquarkFromHiggsSide", 200, 0.,400.);
+    hBquarkFromTopSideEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EtaBquarkFromTopSide", "EtaBquarkFromTopSide", 250, -5.,5.);
+    hBquarkFromTopSidePt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtBquarkFromTopSide", "PtBquarkFromTopSide", 200, 0.,400.);
+    hQquarkFromTopSidePt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtQquarkFromTopSide", "PtQquarkFromTopSide", 200, 0.,400.);
+    hQquarkFromTopSideEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "EtaQquarkFromTopSide", "EtaQquarkFromTopSide", 250, -5.,5.);
+    hDeltaRtauBtauSide = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "DeltaRtauBtauSide", "DeltaRtauBtauSide", 200, 0., 6.);
+    hDeltaRHadTauBtauSide = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "DeltaRHadTauBtauSide", "DeltaRHadTauBtauSide", 200, 0., 6.);
+    hDeltaRHadTauBtopSide = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "DeltaRHadTauBtopSide", "DeltaRHadTauBtopSide", 200, 0., 6.);
+    hDeltaTauB = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "DeltaTauB", "DeltaTauB", 200, 0., 6.);
     
 
   }
@@ -127,7 +126,7 @@ namespace HPlus {
 	BjetMaxPt = iJetb;
       }
       double deltaRtau = ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJetb->p4());
-      hDeltaTauB->Fill(deltaRtau, fEventWeight.getWeight());  
+      hDeltaTauB->Fill(deltaRtau);  
       if ( deltaRtau > deltaRMax) {
 	deltaRMax = deltaRtau;	
 	bjetTopSideFound = true;
@@ -137,11 +136,11 @@ namespace HPlus {
 
 
     if( !bjetTopSideFound  ) return Data(this, passEvent);
-    hPtBjetTopSide->Fill(BjetTopSide->pt(), fEventWeight.getWeight());
-    hEtaBjetTopSide->Fill(BjetTopSide->eta(), fEventWeight.getWeight());
-    hDeltaMaxTauB->Fill(deltaRMax, fEventWeight.getWeight()); 
-    hPtBjetMax->Fill(BjetMaxPt->pt(), fEventWeight.getWeight());  
-    hEtaBjetMax->Fill(BjetMaxPt->eta(), fEventWeight.getWeight());  
+    hPtBjetTopSide->Fill(BjetTopSide->pt());
+    hEtaBjetTopSide->Fill(BjetTopSide->eta());
+    hDeltaMaxTauB->Fill(deltaRMax); 
+    hPtBjetMax->Fill(BjetMaxPt->pt());  
+    hEtaBjetMax->Fill(BjetMaxPt->eta());  
     //    std::cout << " Jets.size() " << jets.size()<< " bjets.size() " << bjets.size() <<" nonbjets " << nonbjets << std::endl; 
     /*
     // hardest b jet in opposite hemisphere
@@ -149,7 +148,7 @@ namespace HPlus {
     for(edm::PtrVector<pat::Jet>::const_iterator iterb = bjets.begin(); iterb != bjets.end(); ++iterb) {
       edm::Ptr<pat::Jet> iJetb = *iterb;
       double deltaRtau = ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJetb->p4());
-      hDeltaTauB->Fill(deltaRtau, fEventWeight.getWeight());  
+      hDeltaTauB->Fill(deltaRtau);  
       if ( deltaRtau > 2.0 ) {
 	if ( iJetb->pt() > pTmax) {
 	  pTmax = iJetb->pt();	
@@ -159,9 +158,9 @@ namespace HPlus {
       }
     }
     if( !bjetTopSideFound  ) return Data(this, passEvent);
-    hPtBjetTopSide->Fill(BjetTopSide->pt(), fEventWeight.getWeight());
-    hEtaBjetTopSide->Fill(BjetTopSide->eta(), fEventWeight.getWeight());
-    hDeltaMaxTauB->Fill(deltaRMax, fEventWeight.getWeight()); 
+    hPtBjetTopSide->Fill(BjetTopSide->pt());
+    hEtaBjetTopSide->Fill(BjetTopSide->eta());
+    hDeltaMaxTauB->Fill(deltaRMax); 
     */
 
 
@@ -180,9 +179,9 @@ namespace HPlus {
     }
 
     if( bjetTauSideFound  ) {
-      hDeltaMinTauB->Fill(deltaRMin, fEventWeight.getWeight()); 
-      hPtBjetTauSide->Fill(BjetTauSide->pt(), fEventWeight.getWeight());
-      hEtaBjetTauSide->Fill(BjetTauSide->eta(), fEventWeight.getWeight());
+      hDeltaMinTauB->Fill(deltaRMin); 
+      hPtBjetTauSide->Fill(BjetTauSide->pt());
+      hEtaBjetTauSide->Fill(BjetTauSide->eta());
     }
 
    
@@ -232,12 +231,12 @@ namespace HPlus {
 	if(hasImmediateMother(p,6) || hasImmediateMother(p,-6)) {
 	  if ( id * idHiggsSide < 0 ) {
 	    bquarkTopSide.push_back(p.p4());
-	    hBquarkFromTopSideEta->Fill(bEta, fEventWeight.getWeight());
-	    hBquarkFromTopSidePt->Fill(bPt, fEventWeight.getWeight());
+	    hBquarkFromTopSideEta->Fill(bEta);
+	    hBquarkFromTopSidePt->Fill(bPt);
 	  }
 	  if ( id * idHiggsSide > 0 ) {
-	    hBquarkFromHiggsSideEta->Fill(bEta, fEventWeight.getWeight());
-	    hBquarkFromHiggsSidePt->Fill(bPt, fEventWeight.getWeight());
+	    hBquarkFromHiggsSideEta->Fill(bEta);
+	    hBquarkFromHiggsSidePt->Fill(bPt);
 	  }	  
 	  // 	    printImmediateMothers(p);
 	  //	std::cout << " b quark1 " << id <<  " idHiggsSide " <<   idHiggsSide << std::endl;
@@ -278,8 +277,8 @@ namespace HPlus {
 	bEta = p.eta();
 	bPt = p.pt();
 	if(hasImmediateMother(p,24) || hasImmediateMother(p,-24)) {
-	  hQquarkFromTopSideEta->Fill(bEta, fEventWeight.getWeight());
-	  hQquarkFromTopSidePt->Fill(bPt, fEventWeight.getWeight());
+	  hQquarkFromTopSideEta->Fill(bEta);
+	  hQquarkFromTopSidePt->Fill(bPt);
 	  QquarksTopSide.push_back(p.p4());
 	  for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter ) {
 	    edm::Ptr<pat::Jet> iJet = *iter;
@@ -310,8 +309,8 @@ namespace HPlus {
 	    if (ROOT::Math::VectorUtil::DeltaR(iJet1->p4(), iJet2->p4()) < 0.4) continue;
 	    XYZTLorentzVector candW = iJet1->p4() + iJet2->p4();
 	    
-	    hPtW->Fill(candW.Pt(), fEventWeight.getWeight());
-	    hMassW->Fill(candW.M(), fEventWeight.getWeight());
+	    hPtW->Fill(candW.Pt());
+	    hMassW->Fill(candW.M());
 	  
 	    if (bjetsTopSide.size() == 1) {	  
 	      for(edm::PtrVector<pat::Jet>::const_iterator iterb = bjetsTopSide.begin(); iterb != bjetsTopSide.end(); ++iterb) {
@@ -321,8 +320,8 @@ namespace HPlus {
 		
 		XYZTLorentzVector candTop= iJet1->p4() + iJet2->p4() + iJetb->p4();
 		
-		hPtTopTop->Fill(candTop.Pt(), fEventWeight.getWeight());
-		hMassTopTop->Fill(candTop.M(), fEventWeight.getWeight());	
+		hPtTopTop->Fill(candTop.Pt());
+		hMassTopTop->Fill(candTop.M());	
 	      }
 	    }
 	    if (bjetsHiggsSide.size() == 1) {	  
@@ -333,8 +332,8 @@ namespace HPlus {
 		
 		XYZTLorentzVector candTop= iJet1->p4() + iJet2->p4() + iJetb->p4();
 		
-		hPtTopHiggs->Fill(candTop.Pt(), fEventWeight.getWeight());
-		hMassTopHiggs->Fill(candTop.M(), fEventWeight.getWeight());
+		hPtTopHiggs->Fill(candTop.Pt());
+		hMassTopHiggs->Fill(candTop.M());
 		
 	      }
 	    }
@@ -373,11 +372,11 @@ namespace HPlus {
 	    //	  printImmediateMothers(p);
 	    //	    std::cout << " p " << p.p4() <<  " tau " <<  tau.p4() << std::endl;
 	    if ( id * idHiggsSide > 0 ) {
-	      //	      hBquarkFromHiggsSideEta->Fill(bEta, fEventWeight.getWeight());
-	      //	      hBquarkFromHiggsSidePt->Fill(bPt, fEventWeight.getWeight());
+	      //	      hBquarkFromHiggsSideEta->Fill(bEta);
+	      //	      hBquarkFromHiggsSidePt->Fill(bPt);
 	      if ( tausFromHp.size() > 0) {
 		double deltaRtaub = ROOT::Math::VectorUtil::DeltaR(tausFromHp[0],p.p4() );
-		hDeltaRtauBtauSide->Fill(deltaRtaub, fEventWeight.getWeight());      
+		hDeltaRtauBtauSide->Fill(deltaRtaub);      
 	      }
 	      // test with b jet from tau side
 	      double deltaR = ROOT::Math::VectorUtil::DeltaR(BjetTauSide->p4(),p.p4() );
@@ -387,9 +386,9 @@ namespace HPlus {
 	  }
 	} 
 	if(bjetHiggsSide) {
-	  hDeltaMinTauBTrue->Fill(deltaRMin, fEventWeight.getWeight());      
-	  hPtBjetTauSideTrue->Fill(BjetTauSide->pt(), fEventWeight.getWeight());
-	  hEtaBjetTauSideTrue->Fill(BjetTauSide->eta(), fEventWeight.getWeight());
+	  hDeltaMinTauBTrue->Fill(deltaRMin);      
+	  hPtBjetTauSideTrue->Fill(BjetTauSide->pt());
+	  hEtaBjetTauSideTrue->Fill(BjetTauSide->eta());
 	}
       }
       
@@ -405,8 +404,8 @@ namespace HPlus {
 	  if(hasImmediateMother(p,6) || hasImmediateMother(p,-6)) {
 	    if ( id * idHiggsSide < 0 ) {
 	      //	      printImmediateMothers(p);
-	      //	      hBquarkFromTopSideEta->Fill(bEta, fEventWeight.getWeight());
-	      //	      hBquarkFromTopSidePt->Fill(bPt, fEventWeight.getWeight());
+	      //	      hBquarkFromTopSideEta->Fill(bEta);
+	      //	      hBquarkFromTopSidePt->Fill(bPt);
 	      // test with b jet from tau side
 	      double deltaR = ROOT::Math::VectorUtil::DeltaR(BjetTopSide->p4(),p.p4() ); 
 	      if ( deltaR < 0.4) bjetTopSide = true;
@@ -414,9 +413,9 @@ namespace HPlus {
 	  }
 	}
 	if(  bjetTopSide ) {
-	  hDeltaMaxTopBTrue->Fill(deltaRMax, fEventWeight.getWeight());     
-	  hPtBjetTopSideTrue->Fill(BjetTopSide->pt(), fEventWeight.getWeight());
-	  hEtaBjetTopSideTrue->Fill(BjetTopSide->eta(), fEventWeight.getWeight());
+	  hDeltaMaxTopBTrue->Fill(deltaRMax);     
+	  hPtBjetTopSideTrue->Fill(BjetTopSide->pt());
+	  hEtaBjetTopSideTrue->Fill(BjetTopSide->eta());
 	}
       } 
 
@@ -424,8 +423,8 @@ namespace HPlus {
       if ( bquarkTopSide.size() == 1 && bjetMaxFound ) {
 	double deltaR = ROOT::Math::VectorUtil::DeltaR(BjetMaxPt->p4() ,bquarkTopSide[0] );
 	if (deltaR < 0.4) {
-	  hPtBjetMaxTrue->Fill(BjetMaxPt->pt(), fEventWeight.getWeight());
-	  hEtaBjetMaxTrue->Fill(BjetMaxPt->eta(), fEventWeight.getWeight());
+	  hPtBjetMaxTrue->Fill(BjetMaxPt->pt());
+	  hEtaBjetMaxTrue->Fill(BjetMaxPt->eta());
 	}
       }
       
@@ -451,11 +450,11 @@ namespace HPlus {
 	  if(hasImmediateMother(p,6) || hasImmediateMother(p,-6)) {
 	    if ( id * idHiggsSide > 0 ) {
 	      double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() ,*tau );
-	      hDeltaRHadTauBtauSide->Fill(deltaR, fEventWeight.getWeight());
+	      hDeltaRHadTauBtauSide->Fill(deltaR);
 	    }
 	    if ( id * idHiggsSide < 0 ) {
 	      double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() ,*tau );
-	      hDeltaRHadTauBtopSide->Fill(deltaR, fEventWeight.getWeight());
+	      hDeltaRHadTauBtopSide->Fill(deltaR);
 	    }
 	  }  
 	}
@@ -476,7 +475,7 @@ namespace HPlus {
       }
 
       //      std::cout << " deltaRmax " << deltaRmax << std::endl;
-      if (deltaRmax > 0 ) hDeltaRmaxFromTop->Fill(deltaRmax, fEventWeight.getWeight());      
+      if (deltaRmax > 0 ) hDeltaRmaxFromTop->Fill(deltaRmax);      
     }
 
 

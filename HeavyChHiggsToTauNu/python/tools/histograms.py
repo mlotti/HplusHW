@@ -14,6 +14,26 @@ import ROOT
 
 import dataset
 
+## Enumeration class for CMS text mode
+class CMSMode:
+    NONE = 0
+    PRELIMINARY = 1
+    PAPER = 2
+    SIMULATION = 3
+
+## Global variable to hold CMS text mode
+cmsTextMode = CMSMode.PRELIMINARY
+## Global dictionary to hold the CMS text labels
+cmsText = {
+    CMSMode.NONE: "",
+    CMSMode.PRELIMINARY: "CMS Preliminary",
+    CMSMode.PAPER: "CMS",
+    CMSMode.SIMULATION : "CMS Simulation"
+    }
+
+## Default energy text
+energyText = "7 TeV"
+
 ## Class to provide default positions of the various texts.
 #
 # The attributes which can be set are the x and y coordinates and the
@@ -138,25 +158,32 @@ class PlotText:
 #
 # \param x   X coordinate of the text (None for default value)
 # \param y   Y coordinate of the text (None for default value)
-def addCmsPreliminaryText(x=None, y=None):
+def addCmsPreliminaryText(x=None, y=None, text=None):
     (x, y) = textDefaults.getValues("cmsPreliminary", x, y)
-    addText(x, y, "CMS Preliminary", textDefaults.getSize("cmsPreliminary"), bold=False)
+    if text == None:
+        txt  = cmsText[cmsTextMode]
+    else:
+        txt = text
+    addText(x, y, txt, textDefaults.getSize("cmsPreliminary"), bold=False)
 
 ## Draw the center-of-mass energy text to the current TPad
 #
 # \param x   X coordinate of the text (None for default value)
 # \param y   Y coordinate of the text (None for default value)
-# \param s   Center-of-mass energy text with the unit
-def addEnergyText(x=None, y=None, s="7 TeV"):
+# \param s   Center-of-mass energy text with the unit (None for the default value, dataset.energyText
+def addEnergyText(x=None, y=None, s=None):
     (x, y) = textDefaults.getValues("energy", x, y)
-    addText(x, y, "#sqrt{s} = "+s, textDefaults.getSize("energy"), bold=False)
+    text = energyText
+    if s != None:
+        text = s
+    addText(x, y, "#sqrt{s} = "+text, textDefaults.getSize("energy"), bold=False)
 
 ## Draw the integrated luminosity text to the current TPad
 #
 # \param x     X coordinate of the text (None for default value)
 # \param y     Y coordinate of the text (None for default value)
-# \param lumi  Value of the integrated luminosity
-# \param unit  Unit of the integrated luminosity value
+# \param lumi  Value of the integrated luminosity in pb^-1
+# \param unit  Unit of the integrated luminosity value (should be fb^-1)
 def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
     (x, y) = textDefaults.getValues("lumi", x, y)
     lumiInFb = lumi/1000.
@@ -172,7 +199,7 @@ def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
         format = ".%df" % (abs(ndigis)+1)
         format = "%"+format
     format += " %s"
-    
+    format = "L="+format
 
     addText(x, y, format % (lumi/1000., unit), textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
@@ -483,10 +510,15 @@ def dist2rej(hdist, **kwargs):
 # \param kwargs  Dictionary of keyword arguments to parse
 #
 # <b>Keyword arguments</b>
-# \li\a ymin     Minimum value of Y axis
-# \li\a ymax     Maximum value of Y axis
-# \li\a xmin     Minimum value of X axis
-# \li\a xmax     Maximum value of X axis
+# \li\a ymin        Minimum value of Y axis
+# \li\a ymax        Maximum value of Y axis
+# \li\a xmin        Minimum value of X axis
+# \li\a xmax        Maximum value of X axis
+# \li\a xmaxlist    List of possible maximum values of X axis. The
+#                   smallest value larger than the xmax in list of
+#                   histograms is picked. If all values are smaller
+#                   than the xmax of histograms, the xmax of
+#                   histograms is used.
 # \li\a ymaxfactor  Maximum value of Y is \a ymax*\a ymaxfactor (default 1.1)
 # \li\a yminfactor  Minimum value of Y is \a ymax*\a yminfactor (yes, calculated from \a ymax )
 #
@@ -515,6 +547,10 @@ def _boundsArgs(histos, kwargs):
         kwargs["xmin"] = min([h.getXmin() for h in histos])
     if not "xmax" in kwargs:
         kwargs["xmax"] = max([h.getXmax() for h in histos])
+        if "xmaxlist" in kwargs:
+            largerThanMax = filter(lambda n: n > kwargs["xmax"], kwargs["xmaxlist"])
+            if len(largerThanMax) > 0:
+                kwargs["xmax"] = min(largerThanMax)
 
 ## Draw a frame
 #
@@ -832,6 +868,9 @@ class Histo:
 
     ## Set the legend label
     #
+    # If the legend label is set to None, this Histo is not added to
+    # TLegend in addToLegend()
+    #
     # \param label  New histogram label for TLegend
     def setLegendLabel(self, label):
         self.legendLabel = label
@@ -844,10 +883,15 @@ class Histo:
 
     ## Add the histogram to a TLegend
     #
+    # If the legend label is None, do not add this Histo to TLegend
+    #
     # \param legend   TLegend object
     def addToLegend(self, legend):
+        if self.legendLabel == None:
+            return
+
         # Hack to get the black border to the legend, only if the legend style is fill
-        if "f" in self.legendStyle.lower():
+        if "f" == self.legendStyle.lower():
             h = self.rootHisto.Clone(self.rootHisto.GetName()+"_forLegend")
             if hasattr(h, "SetDirectory"):
                 h.SetDirectory(0)
@@ -1030,6 +1074,8 @@ class HistoStacked(Histo):
     # List of histograms.Histo objects which are stacked
 
 ## Represents TGraph objects
+#
+# \todo The way to detect TGraph from TGraphErrors or TGraphAsymmErrors is really ugly
 class HistoGraph(Histo):
     ## Constructor
     #
@@ -1047,16 +1093,36 @@ class HistoGraph(Histo):
         return [func(values[i], i) for i in xrange(0, self.getRootGraph().GetN())]
 
     def getXmin(self):
-        return min(self._values(self.getRootGraph().GetX(), lambda val, i: val-self.getRootGraph().GetErrorXlow(i)))
+        if isinstance(self.getRootGraph(), ROOT.TGraphErrors) or isinstance(self.getRootGraph(), ROOT.TGraphAsymmErrors):
+            function = lambda val, i: val-self.getRootGraph().GetErrorXlow(i)
+        else:
+            # TGraph.GetError[XY]{low,high} return -1 ...
+            function = lambda val, i: val
+        return min(self._values(self.getRootGraph().GetX(), function))
 
     def getXmax(self):
-        return max(self._values(self.getRootGraph().GetX(), lambda val, i: val+self.getRootGraph().GetErrorXhigh(i)))
+        if isinstance(self.getRootGraph(), ROOT.TGraphErrors) or isinstance(self.getRootGraph(), ROOT.TGraphAsymmErrors):
+            function = lambda val, i: val+self.getRootGraph().GetErrorXhigh(i)
+        else:
+            # TGraph.GetError[XY]{low,high} return -1 ...
+            function = lambda val, i: val
+        return max(self._values(self.getRootGraph().GetX(), function))
 
     def getYmin(self):
-        return min(self._values(self.getRootGraph().GetY(), lambda val, i: val-self.getRootGraph().GetErrorYlow(i)))
+        if isinstance(self.getRootGraph(), ROOT.TGraphErrors) or isinstance(self.getRootGraph(), ROOT.TGraphAsymmErrors):
+            function = lambda val, i: val-self.getRootGraph().GetErrorYlow(i)
+        else:
+            # TGraph.GetError[XY]{low,high} return -1 ...
+            function = lambda val, i: val
+        return min(self._values(self.getRootGraph().GetY(), function))
 
     def getYmax(self):
-        return max(self._values(self.getRootGraph().GetY(), lambda val, i: val+self.getRootGraph().GetErrorYhigh(i)))
+        if isinstance(self.getRootGraph(), ROOT.TGraphErrors) or isinstance(self.getRootGraph(), ROOT.TGraphAsymmErrors):
+            function = lambda val, i: val+self.getRootGraph().GetErrorYhigh(i)
+        else:
+            # TGraph.GetError[XY]{low,high} return -1 ...
+            function = lambda val, i: val
+        return max(self._values(self.getRootGraph().GetY(), function))
 
     def getBinWidth(self, bin):
         raise Exception("getBinWidth() is meaningless for HistoGraph (name %s)" % self.getName())
@@ -1360,7 +1426,7 @@ class HistoManagerImpl:
     # \param name         Name of the unceratinty histogram
     # \param legendLabel  Legend label for the uncertainty histogram
     # \param nameList     List of histogram names to include to the uncertainty band (\a None corresponds all MC)
-    def addMCUncertainty(self, style, name="MCuncertainty", legendLabel="MC stat. unc.", nameList=None):
+    def addMCUncertainty(self, style, name="MCuncertainty", legendLabel="Sim. stat. unc.", nameList=None):
         mcHistos = filter(lambda x: x.isMC(), self.drawList)
         if len(mcHistos) == 0:
             print >> sys.stderr, "WARNING: Tried to create MC uncertainty histogram, but there are not MC histograms!"

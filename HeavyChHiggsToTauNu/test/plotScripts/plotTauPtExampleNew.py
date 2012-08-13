@@ -26,7 +26,8 @@ style = tdrstyle.TDRStyle()
 
 # Construct datasets as stated in the multicrab.cfg of the execution
 # directory. The returned object is of type DatasetManager.
-datasets = dataset.getDatasetsFromMulticrabCfg(counters = "qcdMeasurementMethod2Part1Counters/weighted")
+datasets = dataset.getDatasetsFromMulticrabCfg(counters = "qcdMeasurementMethod2Part1Counters")
+datasets.updateNAllEventsToPUWeighted()
 
 # Construct datasets from the given list of CRAB task directories
 #datasets = dataset.getDatasetsFromCrabDirs(["QCD_Pt120to170"])

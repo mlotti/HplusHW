@@ -75,7 +75,7 @@ treeDraw = dataset.TreeDraw(analysis+"/tree", weight=weight)
 def main():
     counters = analysis+"Counters"
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-    tauEmbedding.updateAllEventsToWeighted(datasets)
+    datasets.updateNAllEventsToPUWeighted()
 
     if era == "EPS":
         datasets.remove([
@@ -103,33 +103,36 @@ def main():
     styleGenerator = styles.generator(fill=True)
 
     style = tdrstyle.TDRStyle()
+
     plots._legendLabels["QCD_Pt20_MuEnriched"] = "QCD"
-    histograms.createLegend.moveDefaults(dx=-0.02)
+    histograms.createLegend.moveDefaults(dx=-0.04)
 
     doPlots(datasets)
-    printCounters(datasets)
+#    printCounters(datasets)
 
 def doPlots(datasets):
     def createPlot(name, **kwargs):
         return plots.DataMCPlot(datasets, name, **kwargs)
     drawPlot = plots.PlotDrawer(stackMCHistograms=True, addMCUncertainty=True, log=True, ratio=True, addLuminosityText=True,
+                                ratioYlabel="Ratio",
                                 optsLog={"ymin": 1e-1}, opts2={"ymin": 0, "ymax": 2})
 
     selections = [
         ("Full_", And(muonSelection, muonVeto, electronVeto, jetSelection)),
-        ("FullNoIso_", And(muonSelectionNoIso, muonVetoNoIso, electronVeto, jetSelectionNoIso)),
+#        ("FullNoIso_", And(muonSelectionNoIso, muonVetoNoIso, electronVeto, jetSelectionNoIso)),
 #        ("Analysis_", "&&".join([muonSelection, muonVeto, electronVeto, jetSelection, metcut, btagging])),
         ]
 
     for name, selection in selections:
         tdMuon = treeDraw.clone(selection=selection)
 
-
+        histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
         td = tdMuon.clone(varexp="muons_p4.Pt() >>tmp(40,0,400)")
         drawPlot(createPlot(td), name+"muon_pt_log", "Muon p_{T} (GeV/c)", ylabel="Events / %.0f GeV/c", cutBox={"cutValue":40, "greaterThan":True})
 
+        histograms.cmsTextMode = histograms.CMSMode.NONE
         td = tdMuon.clone(varexp="pfMet_p4.Pt() >>tmp(40,0,400)")
-        drawPlot(createPlot(td), name+"met_log", "E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV")
+        drawPlot(createPlot(td), name+"met_log", "Uncorrected PF E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV")
 
         td = tdMuon.clone(varexp="sqrt(2 * muons_p4.Pt() * pfMet_p4.Et() * (1-cos(muons_p4.Phi()-pfMet_p4.Phi()))) >>tmp(40,0,400)")
         drawPlot(createPlot(td), name+"mt_log", "m_{T}(#mu, E_{T}^{miss}) (GeV/c^{2})", ylabel="Events / %.0f GeV/c^{2}")

@@ -31,8 +31,6 @@ analysis = "QCDMeasurement"
 #analysis = "signalAnalysisTauSelectionHPSTightTauBased2"
 #analysis = "signalAnalysisBtaggingTest2"
 counters = analysis+"Counters"
-countersWeighted = counters
-countersWeighted += "/weighted"
 
 # main function
 def main():
@@ -50,7 +48,8 @@ def main():
 #                     "Tau_165970-166164_Prompt", "Tau_166374-167043_Prompt", "Tau_167078-167784_Prompt", "Tau_165088-165633_Prompt"
 #                     "Tau_163270-163869_May10","Tau_161217-163261_May10", "Tau_160431-161176_May10"
                      ])
-    
+
+    datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()
 
     # Take signals from 42X
@@ -142,7 +141,7 @@ def main():
 #    vertexComparison(datasets)
 
 
-    eventCounter = counter.EventCounter(datasets, counters=countersWeighted)
+    eventCounter = counter.EventCounter(datasets)
 
     eventCounter.normalizeMCByLuminosity()
 #    eventCounter.normalizeMCToLuminosity(73)

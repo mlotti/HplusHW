@@ -1762,7 +1762,9 @@ class SimpleCounter:
         self.datasetRootHisto.scale(value)
 
     def _createCounter(self):
-        self.counter = [x[1] for x in dataset._histoToCounter(self.datasetRootHisto.getHistogram())]
+        h = self.datasetRootHisto.getHistogram()
+        self.counter = [x[1] for x in dataset._histoToCounter(h)]
+        h.Delete()
 
     ## Get the name of the dataset
     def getName(self):
@@ -1900,11 +1902,11 @@ class EventCounter:
     ## Constructor
     #
     # \param datasets            dataset.DatasetManager object
-    # \param countNameFunction   Function for mapping the X axis bin labels to count names
-    # \param counters            Counter directory within the dataset.Dataset TFiles
+    # \param countNameFunction   Function for mapping the X axis bin labels to count names (optional)
+    # \param counters            Counter directory within the dataset.Dataset TFiles (if not given, use the counter from dataset.DatasetManager object)
     #
     # Creates counter.Counter for the main counter and each subcounter
-    def __init__(self, datasets, countNameFunction=None, counters=None):
+    def __init__(self, datasets, countNameFunction=None, counters=None, mainCounterOnly=False):
         counterNames = {}
 
         if len(datasets.getAllDatasets()) == 0:
@@ -1919,7 +1921,6 @@ class EventCounter:
                 else:
                     if counterDir != dataset.getCounterDirectory():
                         raise Exception("Sanity check failed, datasets have different counter directories!")
-
         # Pick all possible names of counters
         for dataset in datasets.getAllDatasets():
             for name in dataset.getDirectoryContent(counterDir, lambda obj: isinstance(obj, ROOT.TH1)):
@@ -1932,11 +1933,12 @@ class EventCounter:
 
         self.mainCounter = Counter(datasets.getDatasetRootHistos(counterDir+"/counter"), countNameFunction)
         self.subCounters = {}
-        for subname in counterNames.keys():
-            try:
-                self.subCounters[subname] = Counter(datasets.getDatasetRootHistos(counterDir+"/"+subname), countNameFunction)
-            except:
-                pass
+        if not mainCounterOnly:
+            for subname in counterNames.keys():
+                try:
+                    self.subCounters[subname] = Counter(datasets.getDatasetRootHistos(counterDir+"/"+subname), countNameFunction)
+                except:
+                    pass
 
         self.normalization = "None"
 

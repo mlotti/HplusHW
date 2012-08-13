@@ -43,9 +43,6 @@ def convertLumi(lumi, unit):
         raise Exception("Unsupported luminosity unit %s"%unit)
 
 def main(opts, args):
-    if opts.report:
-        multicrab.checkCrabInPath()
-
     cell = "\|\s+(?P<%s>\S+)\s+"
 
     lumi_re = re.compile((cell % "deliveredls")+
@@ -70,6 +67,7 @@ def main(opts, args):
                 continue
     
             if opts.report:
+                multicrab.checkCrabInPath()
                 cmd = ["crab", "-report", "-c", d]
                 if opts.verbose:
                     print " ".join(cmd)

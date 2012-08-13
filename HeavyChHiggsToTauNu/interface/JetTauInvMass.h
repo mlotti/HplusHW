@@ -6,16 +6,15 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 
 namespace edm {
   class ParameterSet;
 }
 
-class TH1;
-
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
 
   class JetTauInvMass {
   public:
@@ -42,7 +41,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
     
-    JetTauInvMass(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    JetTauInvMass(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~JetTauInvMass();
 
     //    Data analyze(const edm::PtrVector<pat::Jet>& taus, const edm::PtrVector<pat::Jet>& jets);
@@ -57,12 +56,9 @@ namespace HPlus {
     // Counters
     Count fInvMassCutCount;
 
-    // EventWeight object
-    EventWeight& fEventWeight;
-    
     // Histograms
-    TH1 *hTauJetMass;
-    TH1 *hClosestMass;
+    WrappedTH1 *hTauJetMass;
+    WrappedTH1 *hClosestMass;
 
     // Selected jets
     //    edm::PtrVector<pat::Jet> fSelectedJets;

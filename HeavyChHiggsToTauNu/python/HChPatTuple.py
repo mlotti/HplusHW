@@ -410,6 +410,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     betaPrototype = cms.EDProducer("HPlusPATJetViewBetaEmbedder",
         jetSrc = cms.InputTag("patJetsAK5PF"),
         vertexSrc = cms.InputTag("offlinePrimaryVertices"),
+        generalTracksSrc = cms.InputTag("generalTracks"),
         embedPrefix = cms.string("")
     )
 
@@ -1072,7 +1073,8 @@ class PF2PATBuilder:
 
         # First, for isolated electrons (PF2PAT default) 
         # Simple cut-based ElectronID  seems to work as simply as this
-        addPatElectronID(self.process, getattr(self.process, "patElectrons"+postfix))
+        addPatElectronID(self.process, getattr(self.process, "patElectrons"+postfix)) # FIXME replace this with a producer that produces user ints of latest recommended PF isolations
+        # FIXME Add also GSF electrons!
 
         # Then, for all electrons (not necessarily needed, but let's keep them when we're still studying the PU effects)
         allPostfix = "All"
@@ -1132,6 +1134,7 @@ class PF2PATBuilder:
         # Embed beta and betastar to pat::Jet
         betaPrototype = cms.EDProducer("HPlusPATJetViewBetaEmbedder",
             jetSrc = cms.InputTag("patJets"+postfix),
+            generalTracksSrc = cms.InputTag("generalTracks"),
             vertexSrc = cms.InputTag("offlinePrimaryVertices"),
             embedPrefix = cms.string("")
         )

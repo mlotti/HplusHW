@@ -6,14 +6,11 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/METReco/interface/MET.h"
-
-#include "TH1.h"
 
 namespace edm {
   class ParameterSet;
@@ -22,6 +19,8 @@ namespace edm {
 }
 
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
   /**
    * Class for checking the smallest DeltaPhi of the MET and the selected jets and 
    */
@@ -48,7 +47,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
     
-    FakeMETVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    FakeMETVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~FakeMETVeto();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup,  const edm::Ptr<reco::Candidate>& tau , const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met);
@@ -60,9 +59,6 @@ namespace HPlus {
     // Counters
     //Count f;
 
-    // EventWeight object
-    EventWeight& fEventWeight;
-    
     // Data
     /// Smallest DeltaPhi of MET and selected jets or tau
     double fClosestDeltaPhi;
@@ -70,12 +66,12 @@ namespace HPlus {
     double fClosestDeltaPhiToTaus;
     
     // Histograms
-    TH1 *hClosestDeltaPhi;
-    TH1 *hClosestDeltaPhiToJets;
-    TH1 *hClosestDeltaPhiToTaus;
-    TH1 *hClosestDeltaPhiZoom;
-    TH1 *hClosestDeltaPhiToJetsZoom;
-    TH1 *hClosestDeltaPhiToTausZoom;
+    WrappedTH1 *hClosestDeltaPhi;
+    WrappedTH1 *hClosestDeltaPhiToJets;
+    WrappedTH1 *hClosestDeltaPhiToTaus;
+    WrappedTH1 *hClosestDeltaPhiZoom;
+    WrappedTH1 *hClosestDeltaPhiToJetsZoom;
+    WrappedTH1 *hClosestDeltaPhiToTausZoom;
   };
 }
 

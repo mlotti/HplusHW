@@ -12,12 +12,13 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters/weighted"
+counters = analysis+"Counters"
 
 def main():
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
 #    datasets.loadLuminosities()
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
+    datasets.updateNAllEventsToPUWeighted()
     plots.mergeRenameReorderForDataMC(datasets)
     xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
     plots.mergeWHandHH(datasets)

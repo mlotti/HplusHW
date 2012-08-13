@@ -44,6 +44,7 @@ else:
     datasetsData = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(embeddingData, "multicrab.cfg"), counters=counters)
     datasetsData.loadLuminosities()
     datasets.extend(datasetsData)
+datasets.updateNAllEventsToPUWeighted()
 
 # Datasets from the original signal analysis
 datasetsExpected = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(signalAnalysis, "multicrab.cfg"), counters=counters)
@@ -60,6 +61,7 @@ datasetsExpected.remove([
     "Tau_167078-167784_Prompt",
     "Tau_167786-167913_Prompt_Wed"
     ])
+datasetsExpected.updateNAllEventsToPUWeighted()
 
 plots.mergeRenameReorderForDataMC(datasetsExpected)
 plots.mergeRenameReorderForDataMC(datasets)

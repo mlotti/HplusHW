@@ -38,8 +38,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 analysisEmb = "signalAnalysisCaloMet60TEff"
 analysisSig = "signalAnalysisGenuineTau" # require that the selected tau is genuine, valid comparison after njets
 
-counters = "Counters/weighted"
-
 plotStyles = styles.styles[0:2]
 plotStyles[0] = styles.StyleCompound([plotStyles[0], styles.StyleMarker(markerStyle=21, markerSize=1.2)])
 
@@ -51,6 +49,7 @@ def main():
     # Create the dataset objects
     datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
+    datasetsSig.updateNAllEventsToPUWeighted()
 
     # Remove signal and W+3jets datasets
     datasetsEmb.remove(filter(lambda name: "HplusTB" in name, datasetsEmb.getAllDatasetNames()))
@@ -74,8 +73,9 @@ def main():
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
+    histograms.cmsTextMode = histograms.CMSMode.NONE
     ROOT.gStyle.SetEndErrorSize(5)
-    histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
+    histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.49, x2=0.9)
     tauEmbedding.normalize=True
     tauEmbedding.era = "Run2011A"
 
@@ -85,7 +85,7 @@ def main():
     # I.e. Data will be embedded data + res. MC, and EWKMC embedded MC + res. MC
     datasetsEmbCorrected = tauEmbedding.DatasetsResidual(datasetsEmb, datasetsSig, analysisEmb, analysisSig, ["DYJetsToLL", "WW"], totalNames=["Data", "EWKMC"])
 
-#    doPlots(datasetsEmbCorrected, datasetsSig, "EWKMC")
+    doPlots(datasetsEmbCorrected, datasetsSig, "EWKMC")
     doCounters(datasetsEmbCorrected, datasetsSig)
 
 def doPlots(datasetsEmb, datasetsSig, datasetName):
@@ -133,7 +133,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
     drawControlPlot("SelectedTau_LeadingTrackPt_AfterStandardSelections", "#tau-jet ldg. charged particle p_{T} (GeV/c)", opts=update(opts, {"xmax": 300}), rebin=2, cutBox={"cutValue": 20, "greaterThan": True})
 
     opts = {"ymin": 1e-1, "ymaxfactor": 5}
-    moveLegend = {"dx": -0.25}
+    moveLegend = {"dx": -0.22}
     if datasetName == "Diboson":
         opts["ymin"] = 1e-2
     drawControlPlot("SelectedTau_Rtau_AfterStandardSelections", "R_{#tau} = p^{ldg. charged particle}/p^{#tau jet}", opts=update(opts, {"xmin": 0.65, "xmax": 1.05}), rebin=5, ylabel="Events / %.2f", moveLegend=moveLegend, cutBox={"cutValue":0.7, "greaterThan":True})
@@ -142,7 +142,9 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
     drawControlPlot("Njets_AfterStandardSelections", "Number of jets", ylabel="Events")
 
     # After Njets
-    drawControlPlot("MET", "Uncorrected PF E_{T}^{miss} (GeV)", rebin=5, opts=update(opts, {"xmax": 400}), cutLine=50)
+    drawControlPlot("MET", "Uncorrected PF E_{T}^{miss} (GeV)", rebin=5, opts=update(opts, {"xmax": 400}), cutLine=50,
+                    moveLegend={"dx": -0.2, "dy": -0.55}
+                    )
 
     # after MET
     moveLegend = {
@@ -150,12 +152,12 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
         "DYJetsToLL": {},
         "SingleTop": {},
         "Diboson": {}
-        }.get(datasetName, {"dx": -0.23, "dy": -0.5})
+        }.get(datasetName, {"dx": -0.2, "dy": -0.5})
     drawControlPlot("NBjets", "Number of selected b jets", opts=update(opts, {"xmax": 6}), ylabel="Events", moveLegend=moveLegend, cutLine=1)
 
     # Tree cut definitions
     treeDraw = dataset.TreeDraw("dummy", weight=tauEmbedding.signalNtuple.weightBTagging)
-    tdMt = treeDraw.clone(varexp="%s >>tmp(20,0,400)" % tauEmbedding.signalNtuple.mtExpression)
+    tdMt = treeDraw.clone(varexp="%s >>tmp(15,0,300)" % tauEmbedding.signalNtuple.mtExpression)
     tdDeltaPhi = treeDraw.clone(varexp="%s >>tmp(18, 0, 180)" % tauEmbedding.signalNtuple.deltaPhiExpression)
 
     # DeltapPhi
@@ -199,21 +201,23 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
         }.get(datasetName, {"ymin": 0, "ymax": 2})
     
     p = createPlot(tdMt.clone(selection=selection))
+    histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
     p.appendPlotObject(histograms.PlotText(0.6, 0.7, "#Delta#phi(#tau jet, E_{T}^{miss}) < 160^{o}", size=20))
     drawPlot(p, prefix+"transverseMass_4AfterDeltaPhi160", "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts=opts, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}", log=False)
+    histograms.cmsTextMode = histograms.CMSMode.NONE
 
 def doCounters(datasetsEmb, datasetsSig):
     rows = ["njets", "MET", "btagging scale factor", "deltaPhiTauMET<160", "deltaPhiTauMET<130"]
     residuals = ["DYJetsToLL residual", "WW residual"]
 
     # Normal MC
-    eventCounterNormal = counter.EventCounter(datasetsSig, counters=analysisSig+counters)
+    eventCounterNormal = counter.EventCounter(datasetsSig)
     eventCounterNormal.normalizeMCToLuminosity(datasetsEmb.getLuminosity())
     tableNormal = eventCounterNormal.getMainCounterTable()
     tableNormal.keepOnlyRows(rows)
 
     # Embedded data and MC, residual MC
-    eventCounter = tauEmbedding.EventCounterResidual(datasetsEmb, counters=analysisEmb+counters)
+    eventCounter = tauEmbedding.EventCounterResidual(datasetsEmb)
     table = eventCounter.getMainCounterTable()
     table.keepOnlyRows(rows)
 

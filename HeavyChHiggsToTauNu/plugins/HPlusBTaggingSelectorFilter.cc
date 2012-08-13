@@ -8,6 +8,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 
 class HPlusBTaggingPtrSelectorFilter: public edm::EDFilter {
@@ -21,11 +22,11 @@ class HPlusBTaggingPtrSelectorFilter: public edm::EDFilter {
   virtual bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
   virtual void endJob();
 
-  virtual bool beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
   virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
+  HPlus::HistoWrapper histoWrapper;
   HPlus::BTagging fBTagging;
   edm::InputTag fJetSrc;
   bool fFilter;
@@ -39,14 +40,14 @@ class HPlusBTaggingPtrSelectorFilter: public edm::EDFilter {
 };
 
 HPlusBTaggingPtrSelectorFilter::HPlusBTaggingPtrSelectorFilter(const edm::ParameterSet& iConfig):
-  eventCounter(),
+  eventCounter(iConfig),
   eventWeight(iConfig),
-  fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("btagging"), eventCounter, eventWeight),
+  histoWrapper(eventWeight, "Debug"),
+  fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("btagging"), eventCounter, histoWrapper),
   fJetSrc(iConfig.getParameter<edm::InputTag>("jetSrc")),
   fFilter(iConfig.getParameter<bool>("filter")),
   fThrow(iConfig.getUntrackedParameter<bool>("throw"))
 {
-  eventCounter.produces(this);
   produces<Product>();
   produces<bool>();
   eventCounter.setWeightPointer(eventWeight.getWeightPtr());
@@ -54,8 +55,8 @@ HPlusBTaggingPtrSelectorFilter::HPlusBTaggingPtrSelectorFilter(const edm::Parame
 HPlusBTaggingPtrSelectorFilter::~HPlusBTaggingPtrSelectorFilter() {}
 void HPlusBTaggingPtrSelectorFilter::beginJob() {}
 
-bool HPlusBTaggingPtrSelectorFilter::beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
-  eventCounter.beginLuminosityBlock(iBlock, iSetup);
+bool HPlusBTaggingPtrSelectorFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
+  eventCounter.endLuminosityBlock(iBlock, iSetup);
   return true;
 }
 
@@ -86,12 +87,8 @@ bool HPlusBTaggingPtrSelectorFilter::filter(edm::Event& iEvent, const edm::Event
   return !fFilter || (fFilter && passed);
 }
 
-bool HPlusBTaggingPtrSelectorFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
-  eventCounter.endLuminosityBlock(iBlock, iSetup);
-  return false;
-}
-
 void HPlusBTaggingPtrSelectorFilter::endJob() {
+  eventCounter.endJob();
 }
 
 //define this as a plug-in

@@ -26,19 +26,12 @@ namespace HPlus {
     double getWeight(const edm::Event& iEvent, const edm::EventSetup& iSetup) const;
 
   private:
-    enum Method {kIntime, k3D};
-
     edm::InputTag fVertexSrc;
     edm::InputTag fPuSummarySrc;
     mutable edm::LumiReWeighting fLumiWeights; // the weight() methods are NOT const...
     //mutable edm::Lumi3DReWeighting fLumi3DWeights;
-    mutable reweight::PoissonMeanShifter fMeanShifter;
-    std::vector<double> fWeights;
     TH1 *hWeights;
-    Method fMethod;
-    bool fUseSimulatedPileup;
     bool fEnabled;
-    bool fShiftMean;
   };
 }
 

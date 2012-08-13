@@ -42,6 +42,7 @@ namespace HPlus {
     ~SignalAnalysisTree();
 
     void init(TFileDirectory& dir);
+    bool isActive() const { return fDoFill; }
 
     void setPrescaleWeight(double w) { fPrescaleWeight = w; }
     void setPileupWeight(double w)   { fPileupWeight = w; }

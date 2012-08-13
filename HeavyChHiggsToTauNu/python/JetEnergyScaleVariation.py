@@ -37,7 +37,7 @@ unclusteredVariation = cms.EDProducer("ShiftedMETcorrInputProducer",
     shiftBy = cms.double(+1) # +1/-1 for +-1 sigma variation
 )
 
-def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, additionalCounters, tauVariationSigma, jetVariationSigma=None, unclusteredVariationSigma=None, postfix="PFlow"):
+def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, additionalCounters, tauVariationSigma=None, jetVariationSigma=None, unclusteredVariationSigma=None, postfix="PFlow"):
     variationName = name
     tauVariationName = name+"TauVariation"
     jetVariationForRawMetName = name+"JetVariationForRawMet"
@@ -53,38 +53,44 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     sequence = cms.Sequence()
     setattr(process, sequenceName, sequence)
     def add(n, module):
-        setattr(process, n, module)
+        if not hasattr(process, n):
+            setattr(process, n, module)
+            mod = module
+        else:
+            mod = getattr(process, n)
         seq = getattr(process, sequenceName) # I don't know why accessing 'sequence' doesn't work
-        seq *= module
+        seq *= mod
         return n
 
     objectVariationRaw = []
     objectVariationType1p2 = []
 
     # Tau variation (for analysis)
-    tauv = tauVariation.clone(
-        src = prototype.tauSelection.src.value(),
-        shiftBy = tauVariationSigma
-    )
-    add(tauVariationName, tauv)
+    if tauVariationSigma != None:
+        tauv = tauVariation.clone(
+            src = prototype.tauSelection.src.value(),
+            shiftBy = tauVariationSigma
+        )
+        add(tauVariationName, tauv)
 
-    # For tau variation for type I MET, we need the selected tau only
-    m = cms.EDFilter("HPlusTauSelectorFilter",
-        tauSelection = prototype.tauSelection.clone(),
-        filter = cms.bool(False)
-    )
-    selectedTauName = add(name+"SelectedTauForVariation", m)
-    m = tauVariation.clone(
-        src = selectedTauName
-    )
-    selectedVariatedTauName = add(name+"SelectedTauVariated", m)
-    metCorr = objectVariationToMet.clone(
-        srcOriginal = selectedTauName,
-        srcShifted = selectedVariatedTauName
-    )
-    n = add(tauVariationName+"METCorr", metCorr)
-    objectVariationRaw.append(cms.InputTag(n))
-    objectVariationType1p2.append(cms.InputTag(n))
+        # For tau variation for type I MET, we need the selected tau only
+        m = cms.EDFilter("HPlusTauSelectorFilter",
+            tauSelection = prototype.tauSelection.clone(),
+            filter = cms.bool(False),
+            eventCounter = cms.untracked.PSet(counters=cms.untracked.VInputTag())
+        )
+        selectedTauName = add(name+"SelectedTauForVariation", m)
+        m = tauVariation.clone(
+            src = selectedTauName
+        )
+        selectedVariatedTauName = add(name+"SelectedTauVariated", m)
+        metCorr = objectVariationToMet.clone(
+            srcOriginal = selectedTauName,
+            srcShifted = selectedVariatedTauName
+        )
+        n = add(tauVariationName+"METCorr", metCorr)
+        objectVariationRaw.append(cms.InputTag(n))
+        objectVariationType1p2.append(cms.InputTag(n))
 
     # Jet variation for raw MET
     if jetVariationSigma != None:
@@ -171,7 +177,8 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     # Construct the signal analysis module for this variation
     # Use variated taus, jets and MET
     analysis = prototype.clone()
-    analysis.tauSelection.src = tauVariationName
+    if tauVariationSigma != None:
+        analysis.tauSelection.src = tauVariationName
     if jetVariationSigma != None:
         analysis.jetSelection.src = jetVariationName
     analysis.MET.rawSrc = rawMetVariationName
@@ -179,20 +186,15 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     #analysis.MET.type2Src = type2MetVariationName
     setattr(process, analysisName, analysis)
     
-    # Construct the counters module
-    counters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-        counterNames = cms.untracked.InputTag(analysisName, "counterNames"),
-        counterInstances = cms.untracked.InputTag(analysisName, "counterInstances")
-    )
+    # Configure the event counter
+    analysis.eventCounter.printMainCounter = cms.untracked.bool(False)
     if len(additionalCounters) > 0:
-        counters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
-    setattr(process, countersName, counters)
+        analysis.eventCounter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
 
     # Construct the path
     path = cms.Path(
         process.commonSequence *
         sequence *
-        analysis *
-        counters
+        analysis
     )
     setattr(process, pathName, path)

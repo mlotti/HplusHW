@@ -6,16 +6,16 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 
 namespace edm {
   class ParameterSet;
 }
 
-class TH1;
-
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
+
   class TopChiSelection;
 
   class TopChiSelection {
@@ -37,13 +37,14 @@ namespace HPlus {
       bool passedEvent() const { return fPassedEvent; }
       const double getTopMass() const { return fTopChiSelection->topMass; }
       const XYZTLorentzVector& getTopP4() const { return fTopChiSelection->top; }
+      const edm::Ptr<pat::Jet>& getSelectedBjet() const { return fTopChiSelection->bjetInTop; }
 
     private:
       const TopChiSelection *fTopChiSelection;
       const bool fPassedEvent;
     };
     
-    TopChiSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    TopChiSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~TopChiSelection();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
@@ -72,28 +73,26 @@ namespace HPlus {
     // Counters
     Count fTopChiMassCount;
 
-    // EventWeight object
-    EventWeight& fEventWeight;
     edm::InputTag fSrc;
     
     // Histograms
     
-    TH1 *hPtTopChiCut;
-    TH1 *hPtTop;
-    TH1 *hjjbMass;
-    TH1 *htopMass;
-    TH1 *htopMassMatch;
-    TH1 *htopMassChiCut;
-    TH1 *hWMass;
-    TH1 *hWMassMatch;
-    TH1 *hWMassChiCut;
-    TH1 *hChi2Min;
-    TH1 *htopMassBMatch;
-    TH1 *hWMassBMatch;
-    TH1 *htopMassQMatch;
-    TH1 *hWMassQMatch;
-    TH1 *htopMassMatchWrongB;
-    TH1 *hWMassMatchWrongB;
+    WrappedTH1 *hPtTopChiCut;
+    WrappedTH1 *hPtTop;
+    WrappedTH1 *hjjbMass;
+    WrappedTH1 *htopMass;
+    WrappedTH1 *htopMassMatch;
+    WrappedTH1 *htopMassChiCut;
+    WrappedTH1 *hWMass;
+    WrappedTH1 *hWMassMatch;
+    WrappedTH1 *hWMassChiCut;
+    WrappedTH1 *hChi2Min;
+    WrappedTH1 *htopMassBMatch;
+    WrappedTH1 *hWMassBMatch;
+    WrappedTH1 *htopMassQMatch;
+    WrappedTH1 *hWMassQMatch;
+    WrappedTH1 *htopMassMatchWrongB;
+    WrappedTH1 *hWMassMatchWrongB;
 
   
     // Variables
@@ -101,6 +100,7 @@ namespace HPlus {
     double wMass;
     XYZTLorentzVector top;
     XYZTLorentzVector W;
+    edm::Ptr<pat::Jet> bjetInTop;
   };
 }
 

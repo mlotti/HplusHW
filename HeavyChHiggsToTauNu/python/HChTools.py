@@ -15,6 +15,9 @@ def addConfigInfo(process, options, dataVersion):
     if codeVersion != None:
         process.configInfo.codeVersion = cms.untracked.string(codeVersion)
 
+    if len(options.puWeightEra) > 0:
+        process.configInfo.era = cms.untracked.string(options.puWeightEra)
+
     return cms.Path(process.configInfo)
 
 def insertPSetContentsTo(src, dst):
@@ -60,27 +63,31 @@ def addAnalysis(process, analysisName, analysisModule, preSequence=None, additio
     pathName = analysisName+"Path"
 
     # Counter module
-    counter = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-        printMainCounter = cms.untracked.bool(False),
-        printSubCounters = cms.untracked.bool(False),
-        printAvailableCounters = cms.untracked.bool(False),
-    )
     if signalAnalysisCounters:
-        counter.counterNames = cms.untracked.InputTag(analysisName, "counterNames")
-        counter.counterInstances = cms.untracked.InputTag(analysisName, "counterInstances")
-    if len(additionalCounters) > 0:
-        counter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
+        analysisModule.eventCounter.printMainCounter = cms.untracked.bool(False)
+        if len(additionalCounters) > 0:
+            analysisModule.eventCounter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
+    else:
+        counter = cms.EDAnalyzer("HPlusEventCountAnalyzer",
+            printMainCounter = cms.untracked.bool(False),
+            printSubCounters = cms.untracked.bool(False),
+            printAvailableCounters = cms.untracked.bool(False),
+        )
+        if len(additionalCounters) > 0:
+            counter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
 
     # Path
     path = cms.Path()
     if preSequence != None:
         path *= preSequence
     path *= analysisModule
-    path *= counter
+
+    if not signalAnalysisCounters:
+        path *= counter
+        setattr(process, counterName, counter)
 
     # Add modules and path to process
     setattr(process, analysisName, analysisModule)
-    setattr(process, counterName, counter)
     setattr(process, pathName, path)
 
 # Add an object selector, count filter and event counter for one cut

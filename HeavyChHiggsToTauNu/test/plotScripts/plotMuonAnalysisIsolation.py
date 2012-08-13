@@ -75,11 +75,13 @@ def main():
     sel = muonAnalysis.Selections(mainAnalysis)
     selection = sel.selectionJet
 
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=mainAnalysis+"countAnalyzer/weighted")
+    datasets = dataset.getDatasetsFromMulticrabCfg(counters=mainAnalysis+"countAnalyzer")
+    datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()
 #    datasets.remove(["SingleMu_163270-163869_Prompt", "SingleMu_162803-163261_Prompt", "SingleMu_160431-161016_Prompt"])
 
-    datasets41x = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/mkortela/hplus/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/multicrab_muonAnalysis_chargedGamma_110617_002143/multicrab.cfg", counters=mainAnalysis+"countAnalyzer/weighted")
+    datasets41x = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/mkortela/hplus/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/multicrab_muonAnalysis_chargedGamma_110617_002143/multicrab.cfg", counters=mainAnalysis+"countAnalyzer")
+    datasets41x.updateNAllEventsToPUWeighted()
     datasets41x.selectAndReorder(["TToBLNu_s-channel_TuneZ2_Spring11", "TToBLNu_t-channel_TuneZ2_Spring11", "TToBLNu_tW-channel_TuneZ2_Spring11",
                                   "WW_TuneZ2_Spring11", "WZ_TuneZ2_Spring11", "ZZ_TuneZ2_Spring11"])
     datasets.extend(datasets41x)
@@ -132,7 +134,8 @@ def main():
     b_count = {}
     sum_count = {}
     for isoAnalysis in [mainAnalysis]+tauIsoAnalyses:
-        dsets = dataset.getDatasetsFromMulticrabCfg(counters=isoAnalysis+"countAnalyzer/weighted")
+        dsets = dataset.getDatasetsFromMulticrabCfg(counters=isoAnalysis+"countAnalyzer")
+        dsets.updateNAllEventsToPUWeighted()
         dsets.loadLuminosities()
         plots.mergeRenameReorderForDataMC(dsets)
         dsets.merge("Signal2", signals)

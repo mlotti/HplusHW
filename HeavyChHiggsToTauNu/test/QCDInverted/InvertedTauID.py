@@ -18,6 +18,8 @@ import copy
 import re,os
 import datetime
 
+import array
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
@@ -27,7 +29,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters/weighted"
+counters = analysis+"Counters"
 
 def Linear(x,par):
     return par[0]*x[0] + par[1]
@@ -319,7 +321,10 @@ class InvertedTauID:
         iBin = 1
         nBins = hError.GetNbinsX()
         while iBin < nBins:
-	    hError.SetBinContent(iBin,abs(hError.GetBinContent(iBin) - 1))
+	    x = hError.GetBinCenter(iBin)
+	    y = abs(hError.GetBinContent(iBin) - 1)
+	    hError.SetBinContent(iBin,y)
+	    print iBin,x,y
 	    iBin = iBin + 1
 
         hError.GetYaxis().SetTitle("abs( (#varepsilon^{Inverted} - #varepsilon^{Baseline})/#varepsilon^{Baseline} )")
@@ -340,8 +345,8 @@ class InvertedTauID:
 	rangeMin = hError.GetXaxis().GetXmin()
         rangeMax = hError.GetXaxis().GetXmax()
 #	rangeMax = 80
-	rangeMax = 120
-#	rangeMax = 380
+#	rangeMax = 120
+	rangeMax = 380
         
         numberOfParameters = 2
 
@@ -351,7 +356,7 @@ class InvertedTauID:
 		return ErrorFunction(x,par)
 
         theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
-        theFit.SetParLimits(0,0.01,0.03)
+        theFit.SetParLimits(0,0.01,0.05)
         theFit.SetParLimits(1,50,150)
 
 #	theFit.FixParameter(0,0.02)
@@ -471,7 +476,7 @@ class InvertedTauID:
         while i < numberOfParameters:
             fitPars = fitPars + " " + str(self.parInvQCD[i])
             i = i + 1
-        print fitPars
+        print "QCD fit parameters",fitPars
 	self.nFitInvQCD = theFit.Integral(0,1000,self.parInvQCD)
         print "Integral ",self.normInvQCD*self.nFitInvQCD
 
@@ -594,7 +599,7 @@ class InvertedTauID:
                            
         self.parMCEWK = theFit.GetParameters()
         
-        print fitPars
+        print "EWK MC fit parameters",fitPars
         self.nMCEWK = theFit.Integral(0,1000,self.parMCEWK)
         print "Integral ",self.normEWK*self.nMCEWK
 
@@ -662,7 +667,7 @@ class InvertedTauID:
         while i < numberOfParameters:
             fitPars = fitPars + " " + str(par[i])
             i = i + 1
-        print fitPars
+        print "QCD+EWK fit parameters",fitPars
 	nBaseQCD = par[0]
 	self.QCDfraction = par[1]
 	if len(self.label) > 0:

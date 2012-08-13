@@ -1,5 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/Common/interface/Handle.h"
@@ -8,14 +8,12 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
-#include "TH1F.h"
-
 namespace HPlus {
   ForwardJetVeto::Data::Data(const ForwardJetVeto *forwardJetVeto, bool passedEvent):
     fForwardJetVeto(forwardJetVeto), fPassedEvent(passedEvent) {}
   ForwardJetVeto::Data::~Data() {}
   
-  ForwardJetVeto::ForwardJetVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  ForwardJetVeto::ForwardJetVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fForwJetEtaCut(iConfig.getUntrackedParameter<double>("ForwJetEtaCut")),
     fForwJetEtCut(iConfig.getUntrackedParameter<double>("ForwJetEtCut")),
@@ -24,19 +22,17 @@ namespace HPlus {
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fForwardJetSubCount(eventCounter.addSubCounter("Forward jet veto","Forward jet cut")),
     fEtSumRatioSubCount(eventCounter.addSubCounter("Forward jet veto","EtSum(forward/central) cut")),
-    fEtMetSumRatioSubCount(eventCounter.addSubCounter("Forward jet veto","EtMetSum(forward/central) cut")),
-    //fCount(eventCounter.addCounter(" ")),
-    fEventWeight(eventWeight) {
+    fEtMetSumRatioSubCount(eventCounter.addSubCounter("Forward jet veto","EtMetSum(forward/central) cut")) {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("ForwardJetVeto");
 
-    hForwJetEt = makeTH<TH1F>(myDir, "ForwJetEt", "ForwJetEt", 100, 0., 200.);
-    hForwJetEta = makeTH<TH1F>(myDir, "ForwJetEta", "ForwJetEta", 100, -5., 5.);
-    hMaxForwJetEt = makeTH<TH1F>(myDir, "MaxForwJetEt", "MaxForwJetEt", 100, 0., 100.);
-    hEtSumCentral = makeTH<TH1F>(myDir, "EtSumCentral", "EtSumCentral", 100, 0., 1000.);
-    hEtSumForward = makeTH<TH1F>(myDir, "EtSumForward", "EtSumForward", 100, 0., 1000.);
-    hEtMetSumRatio = makeTH<TH1F>(myDir, "EtMetSumRatio", "EtMetSumRatio", 100, 0., 2.);
-    hEtSumRatio = makeTH<TH1F>(myDir, "EtSumRatio", "EtSumRatio", 100, 0., 2.);
+    hForwJetEt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ForwJetEt", "ForwJetEt", 100, 0., 200.);
+    hForwJetEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ForwJetEta", "ForwJetEta", 100, -5., 5.);
+    hMaxForwJetEt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MaxForwJetEt", "MaxForwJetEt", 100, 0., 100.);
+    hEtSumCentral = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtSumCentral", "EtSumCentral", 100, 0., 1000.);
+    hEtSumForward = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtSumForward", "EtSumForward", 100, 0., 1000.);
+    hEtMetSumRatio = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtMetSumRatio", "EtMetSumRatio", 100, 0., 2.);
+    hEtSumRatio = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtSumRatio", "EtSumRatio", 100, 0., 2.);
   }
 
   ForwardJetVeto::~ForwardJetVeto() {}
@@ -65,22 +61,22 @@ namespace HPlus {
       if (fabs(iJet->eta()) > fForwJetEtaCut && iJet->pt() > fForwJetEtCut ) { 
 	EtSumForward += iJet->pt();
       }
-      if(fabs(iJet->eta()) > fForwJetEtaCut) hForwJetEt->Fill(iJet->pt(), fEventWeight.getWeight());
-      if (iJet->pt() > fForwJetEtCut ) hForwJetEta->Fill(iJet->eta(), fEventWeight.getWeight());
+      if(fabs(iJet->eta()) > fForwJetEtaCut) hForwJetEt->Fill(iJet->pt());
+      if (iJet->pt() > fForwJetEtCut ) hForwJetEta->Fill(iJet->eta());
       if (fabs(iJet->eta()) < fForwJetEtaCut ) continue;
       if (iJet->pt() > maxEt) {
 	maxEt = iJet->pt();
       }
     }
-    hMaxForwJetEt->Fill(maxEt, fEventWeight.getWeight());
+    hMaxForwJetEt->Fill(maxEt);
     if (EtSumCentral > 0) EtSumRatio = EtSumForward /EtSumCentral;
-    hEtSumRatio->Fill(EtSumRatio, fEventWeight.getWeight());
+    hEtSumRatio->Fill(EtSumRatio);
     // Add MET in the central sum
     EtSumCentral +=  met->et();
     if (EtSumCentral > 0) EtMetSumRatio = EtSumForward /EtSumCentral;
-    hEtSumCentral->Fill(EtSumCentral, fEventWeight.getWeight());
-    hEtSumForward->Fill(EtSumForward, fEventWeight.getWeight());
-    hEtMetSumRatio->Fill(EtMetSumRatio, fEventWeight.getWeight());
+    hEtSumCentral->Fill(EtSumCentral);
+    hEtSumForward->Fill(EtSumForward);
+    hEtMetSumRatio->Fill(EtMetSumRatio);
 
     if (maxEt < fForwJetEtCut) increment(fForwardJetSubCount);
     if (EtSumRatio < fEtSumRatioCut) increment(fEtSumRatioSubCount);

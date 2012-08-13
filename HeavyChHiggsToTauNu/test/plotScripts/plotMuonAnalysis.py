@@ -73,7 +73,7 @@ treeDraw = dataset.TreeDraw(analysis+"/tree", weight=weight)
 def main():
     counters = analysis+"Counters"
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-    tauEmbedding.updateAllEventsToWeighted(datasets)
+    datasets.updateNAllEventsToPUWeighted()
 
     #datasets.remove(filter(lambda name: name != "SingleMu_Mu_166374-167043_Prompt" and name != "TTJets_TuneZ2_Summer11", datasets.getAllDatasetNames()))
     if era == "EPS":
@@ -112,7 +112,7 @@ def main():
     style = tdrstyle.TDRStyle()
     #histograms.createLegend.moveDefaults(dx=-0.15)
     plots._legendLabels["QCD_Pt20_MuEnriched"] = "QCD"
-    histograms.createLegend.moveDefaults(dx=-0.02)
+    histograms.createLegend.moveDefaults(dx=-0.04)
 
     doPlots(datasets)
 #    printCounters(datasets)
@@ -122,7 +122,7 @@ def main():
 def doPlots(datasets):
     def createPlot(name, **kwargs):
         return plots.DataMCPlot(datasets, name, **kwargs)
-    drawPlot = plots.PlotDrawer(stackMCHistograms=True, addMCUncertainty=True, log=True, ratio=True)
+    drawPlot = plots.PlotDrawer(stackMCHistograms=True, addMCUncertainty=True, log=True, ratio=True, ratioYlabel="Ratio")
 
     selections = [
         ("Full_", And(muonSelection, muonVeto, electronVeto, jetSelection)),
@@ -508,23 +508,7 @@ def muonIsoQcd(plot, prefix=""):
 
 ############################################################
 
-class PrefixModify:
-    def __init__(self):
-        self.remove = []
-    def addPrefix(self, prefix):
-        self.remove.append(prefix)
-
-    def __call__(self, name):
-        for r in self.remove:
-            name = name.replace(r, "")
-        return name
-
 def makeEventCounter(ds):
-    modifyCountNames = PrefixModify()
-    for d in ds.getAllDatasets():
-        prefix = d.getPrefix()
-        if prefix != "":
-            modifyCountNames.addPrefix(prefix)
     return counter.EventCounter(ds, modifyCountNames)
 
 def addSumColumn(table):

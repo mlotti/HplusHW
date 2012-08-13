@@ -4,8 +4,6 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIDBase.h"
 
-#include "TH1F.h"
-
 namespace HPlus {
   class TauIDPFTauBase : public TauIDBase {
   public:
@@ -14,7 +12,7 @@ namespace HPlus {
      * Base class for PF tau ID operations.
      * Actual tau ID specific classes are inherited from this class.
      */
-    TauIDPFTauBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel, TFileDirectory& myDir);
+    TauIDPFTauBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, const std::string& baseLabel, TFileDirectory& myDir);
     virtual ~TauIDPFTauBase();
 
     /// Returns true, if the tau candidate conditions are fulfilled (jet et, eta, ldg pt, e/mu veto) 
@@ -28,13 +26,13 @@ namespace HPlus {
     // Tau ID selections concerning isolation (track, ECAL) are implemented in the specific tau ID classes
 
   private:
-    TH1F* hRtauOneProngZeroPiZero;
-    TH1F* hRtauOneProngOnePiZero;
-    TH1F* hRtauOneProngTwoPiZero;
-    TH1F* hRtauOneProngOther;
-    TH1F* hRtauThreeProngZeroPiZero;
-    TH1F* hRtauThreeProngOnePiZero;
-    TH1F* hRtauThreeProngOther;
+    WrappedTH1* hRtauOneProngZeroPiZero;
+    WrappedTH1* hRtauOneProngOnePiZero;
+    WrappedTH1* hRtauOneProngTwoPiZero;
+    WrappedTH1* hRtauOneProngOther;
+    WrappedTH1* hRtauThreeProngZeroPiZero;
+    WrappedTH1* hRtauThreeProngOnePiZero;
+    WrappedTH1* hRtauThreeProngOther;
   };
 }
 

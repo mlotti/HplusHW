@@ -30,7 +30,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 
 analysisEmb = "signalAnalysisCaloMet60TEff"
-counters = "Counters/weighted"
 signal_br_tH = 0.03 # agreed to use 3 % as with QCD
 
 def main():
@@ -68,7 +67,7 @@ def main():
 
 
 def doCounters(datasetsEmb):
-    eventCounter = tauEmbedding.EventCounterMany(datasetsEmb, counters=analysisEmb+counters, normalize=True)
+    eventCounter = tauEmbedding.EventCounterMany(datasetsEmb, normalize=True)
 
     #row = "btagging scale factor"
     row = "deltaPhiTauMET<160"

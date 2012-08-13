@@ -6,7 +6,8 @@
 #include <string>
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "TH1F.h"
+
+class TH1;
 
 namespace HPlus {
   /**

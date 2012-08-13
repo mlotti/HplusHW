@@ -24,7 +24,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configuration
 analysis = "signalAnalysis"
-counters = analysis+"Counters/weighted"
+counters = analysis+"Counters"
 
 # main function
 def main():
@@ -45,6 +45,7 @@ def main():
 
     
     
+    datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()
 
     # Take signals from 42X
@@ -64,6 +65,7 @@ def main():
                      "Tau_167786-167913_Prompt_Wed"
                      ])
     datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="multicrab.cfg", counters=counters)
+    datasetsSignal.updateNAllEventsToPUWeighted()
 
     xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
 

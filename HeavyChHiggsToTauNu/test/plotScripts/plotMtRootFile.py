@@ -9,12 +9,13 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters/weighted"
+counters = analysis+"Counters"
 outputFile = "lands.root"
 
 def main():
     # Create all datasets from a multicrab task
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets.updateNAllEventsToPUWeighted()
 
     # Read integrated luminosities of data datasets from lumi.json
     datasets.loadLuminosities()

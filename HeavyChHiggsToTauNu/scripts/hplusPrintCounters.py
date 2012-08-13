@@ -15,9 +15,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 def main(opts):
     datasets = None
     if len(opts.files) > 0:
-        datasets = dataset.getDatasetsFromRootFiles( [(x,x) for x in opts.files], counters=opts.counterdir)
+        datasets = dataset.getDatasetsFromRootFiles( [(x,x) for x in opts.files], counters=opts.counterdir, weightedCounters=False)
     else:
-        datasets = dataset.getDatasetsFromMulticrabCfg(opts=opts, counters=opts.counterdir)
+        datasets = dataset.getDatasetsFromMulticrabCfg(opts=opts, counters=opts.counterdir, weightedCounters=False)
 
     if os.path.exists(opts.lumifile):
         datasets.loadLuminosities(opts.lumifile)

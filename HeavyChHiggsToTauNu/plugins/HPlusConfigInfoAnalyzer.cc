@@ -31,6 +31,7 @@ class HPlusConfigInfoAnalyzer: public edm::EDAnalyzer {
 private:
   std::string dataVersion;
   std::string codeVersion;
+  std::string era;
   double crossSection;
   bool isData;
   bool hasCrossSection;
@@ -40,6 +41,7 @@ private:
 HPlusConfigInfoAnalyzer::HPlusConfigInfoAnalyzer(const edm::ParameterSet& pset): 
   dataVersion(pset.getUntrackedParameter<std::string>("dataVersion", "")),
   codeVersion(pset.getUntrackedParameter<std::string>("codeVersion", "")),
+  era(pset.getUntrackedParameter<std::string>("era", "")),
   crossSection(std::numeric_limits<double>::quiet_NaN()),
   isData(false),
   hasCrossSection(false), hasIsData(false)
@@ -86,6 +88,8 @@ void HPlusConfigInfoAnalyzer::endJob() {
 
   TNamed *dv = fs->make<TNamed>("dataVersion", dataVersion.c_str());
   TNamed *cv = fs->make<TNamed>("codeVersion", codeVersion.c_str());
+  if(era.length() > 0)
+    TNamed *e = fs->make<TNamed>("era", era.c_str());
 }
 
 //define this as a plug-in

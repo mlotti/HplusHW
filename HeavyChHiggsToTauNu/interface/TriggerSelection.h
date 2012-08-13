@@ -5,7 +5,7 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 
 #include "DataFormats/PatCandidates/interface/TriggerObject.h"
-
+// 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
@@ -27,11 +27,10 @@ namespace pat {
   class TriggerEvent;
 }
 
-class TH1;
-
 namespace HPlus {
-  class EventWeight;
   class EventCounter;
+  class HistoWrapper;
+  class WrappedTH1;
 
   class TriggerSelection {
   enum TriggerSelectionType {
@@ -99,7 +98,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
 
-    TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~TriggerSelection();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
@@ -113,9 +112,8 @@ namespace HPlus {
     const edm::InputTag fPatSrc;
     const double fMetCut;
 
-    EventWeight& fEventWeight;
     TriggerMETEmulation fTriggerCaloMet;
-    
+
     // Counters
     Count fTriggerAllCount;
     Count fTriggerPathCount;
@@ -129,11 +127,11 @@ namespace HPlus {
     TriggerSelectionType fTriggerSelectionType;
     
     // Histograms
-    TH1 *hHltMetBeforeTrigger;
-    TH1 *hHltMetAfterTrigger;
-    TH1 *hHltMetSelected;
-    TH1 *hTriggerParametrisationWeight;
-    TH1 *hControlSelectionType;
+    WrappedTH1 *hHltMetBeforeTrigger;
+    WrappedTH1 *hHltMetAfterTrigger;
+    WrappedTH1 *hHltMetSelected;
+    WrappedTH1 *hTriggerParametrisationWeight;
+    WrappedTH1 *hControlSelectionType;
 
     // Analysis results
     pat::TriggerObjectRef fHltMet;

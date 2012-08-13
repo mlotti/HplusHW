@@ -6,12 +6,12 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/Event.h"
 
-#include "TH1F.h"
-
 namespace edm {
   //class ParameterSet;
   class Event;
 }
+
+class TH1;
 
 namespace HPlus {
   /**
@@ -34,9 +34,9 @@ namespace HPlus {
     edm::InputTag fPrescaleSrc;
     bool fPrescaleAvailableStatus;
     double fWeight;
-    TH1F* hPrescaleHistoLowScale;
-    TH1F* hPrescaleHistoMediumScale;
-    TH1F* hPrescaleHistoHighScale;
+    TH1* hPrescaleHistoLowScale;
+    TH1* hPrescaleHistoMediumScale;
+    TH1* hPrescaleHistoHighScale;
   };
 }
 
