@@ -197,7 +197,9 @@ namespace HPlus {
     hEWKFakeTausTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "EWKFakeTausTransverseMass", "EWKFakeTausTransverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassFakeMetVeto = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "transverseMassFakeMetVeto", "transverseMassFakeMetVeto;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
 
-    
+    hFullMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "fullMass", "fullMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 5 GeV/c^{2}", 100, 0., 500.);
+    hEWKFakeTausFullMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "EWKFakeTausFullMass", "EWKFakeTausFullMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 5 GeV/c^{2}", 100, 0., 500.);
+
     hDeltaPhi = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhi", "deltaPhi;#Delta#phi(tau,MET);N_{events} / 10 degrees", 180, 0., 180.);
     hDeltaPhiJetMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiJetMet", "deltaPhiJetMet", 180, 0., 180.);
     hMaxDeltaPhiJetMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "maxDeltaPhiJetMet", "maxDeltaPhiJetMet", 180, 0., 180.);
@@ -561,6 +563,7 @@ namespace HPlus {
     if (deltaPhi > fDeltaPhiCutValue) return false;
     increment(fDeltaPhiTauMETCounter);
     hSelectionFlow->Fill(kSignalOrderDeltaPhiSelection);
+    hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderDeltaPhiSelection);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderDeltaPhiSelection);
     fillEWKFakeTausCounters(myTauMatch, kSignalOrderDeltaPhiSelection, tauData);
 
@@ -641,6 +644,8 @@ namespace HPlus {
       myPassedTopRecoStatus = myTopRecoWithWSelectionStatus;
     if (!myPassedTopRecoStatus)
       return false;
+    hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderTopSelection);
+    if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderTopSelection);
 
 //------ Transverse mass and control plots
     increment(fSelectedEventsCounter);
@@ -651,10 +656,15 @@ namespace HPlus {
                                                                triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
                                                                btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
 
-
     FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
     double HiggsMass = FullHiggsMassData.getHiggsMass();
     if (HiggsMass > 100 && HiggsMass < 200 ) increment(fHiggsMassCutCounter);
+    hFullMass->Fill(HiggsMass);
+    if (myFakeTauStatus)
+      hEWKFakeTausFullMass->Fill(HiggsMass);
+
+    hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderSelectedEvents);
+    if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderSelectedEvents);
 
 //------ Experimental cuts, counters, and histograms
     doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData);
