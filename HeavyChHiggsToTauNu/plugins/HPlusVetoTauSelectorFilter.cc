@@ -43,7 +43,9 @@ HPlusVetoTauPtrSelectorFilter::HPlusVetoTauPtrSelectorFilter(const edm::Paramete
   eventCounter(iConfig),
   eventWeight(iConfig),
   histoWrapper(eventWeight, "Debug"),
-  fVetoTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("vetoTauSelection"), eventCounter, histoWrapper),
+  fVetoTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("vetoTauSelection"),
+                    iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"),
+                    eventCounter, histoWrapper),
   fTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
   fFilter(iConfig.getParameter<bool>("filter"))
 {

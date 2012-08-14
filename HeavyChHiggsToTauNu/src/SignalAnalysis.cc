@@ -128,7 +128,9 @@ namespace HPlus {
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, fHistoWrapper),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, fHistoWrapper),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, fHistoWrapper),
-    fVetoTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("vetoTauSelection"), eventCounter, fHistoWrapper),
+    fVetoTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("vetoTauSelection"),
+                      iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"),
+                      eventCounter, fHistoWrapper),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, fHistoWrapper),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, fHistoWrapper, "MET"),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, fHistoWrapper),
@@ -148,8 +150,8 @@ namespace HPlus {
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
     fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fHistoWrapper),
     fVertexWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeightReader")),
-    fVertexAssignmentAnalysis(eventCounter, fHistoWrapper),
-    fFakeTauIdentifier(fHistoWrapper, "TauID"),
+    fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
+    fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     // Scale factor uncertainties
     fSFUncertaintiesAfterSelection(fHistoWrapper, "AfterSelection"),
@@ -337,15 +339,18 @@ namespace HPlus {
     // TauID
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return false; // Require at least one tau
+    // Obtain MC matching - for EWK without genuine taus
+    FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
+    bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(myTauMatch); // True if the selected tau is a fake
+    if(fOnlyGenuineTaus && myFakeTauStatus) return false;
+    // Apply scale factor for fake tau
+    if (!iEvent.isRealData())
+      fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(myTauMatch, tauData.getSelectedTau()->eta()));
     // plot leading track without pt cut
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
     increment(fTausExistCounter);
     //if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
     increment(fOneTauCounter);
-    // Obtain MC matching - for EWK without genuine taus
-    FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
-    bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(myTauMatch); // True if the selected tau is a fake
-    if(fOnlyGenuineTaus && myFakeTauStatus) return false;
     // Primary vertex assignment analysis - diagnostics only
     fVertexAssignmentAnalysis.analyze(iEvent.isRealData(), pvData.getSelectedVertex(), tauData.getSelectedTau(), myTauMatch);
     // For data, set the current run number (needed for tau embedding
@@ -654,6 +659,9 @@ namespace HPlus {
     if (myFakeTauStatus) hEWKFakeTausTransverseMass->Fill(transverseMass);
     fSFUncertaintiesAfterSelection.setScaleFactorUncertainties(fEventWeight.getWeight(),
                                                                triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
+                                                               myFakeTauStatus,
+                                                               fFakeTauIdentifier.getFakeTauScaleFactor(myTauMatch, tauData.getSelectedTau()->eta()),
+                                                               fFakeTauIdentifier.getFakeTauSystematics(myTauMatch, tauData.getSelectedTau()->eta()),
                                                                btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
 
     FullHiggsMassCalculator::Data FullHiggsMassData = fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
