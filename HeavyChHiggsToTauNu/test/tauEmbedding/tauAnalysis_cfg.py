@@ -4,8 +4,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 ################################################################################
 # Configuration
 
-#dataVersion = "42Xdata"
-dataVersion = "42Xmc"
+#dataVersion = "44Xdata"
+dataVersion = "44XmcS6"
 
 debug = False
 #debug = True
@@ -62,27 +62,19 @@ addPrimaryVertexSelection(process, process.commonSequence)
 
 # Pileup weights
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-process.pileupWeightEPS = cms.EDProducer("HPlusVertexWeightProducer",
-    alias = cms.string("pileupWeightEPS"),
-)
-process.pileupWeightRun2011AnoEPS = process.pileupWeightEPS.clone(
-    alias = "pileupWeightRun2011AnoEPS"
-)
-process.pileupWeightRun2011A = process.pileupWeightEPS.clone(
-    alias = "pileupWeightRun2011A"
-)
-param.setPileupWeightFor2011(dataVersion, era="EPS")
-insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeightEPS)
-param.setPileupWeightFor2011(dataVersion, era="Run2011A-EPS")
-insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeightRun2011AnoEPS)
-param.setPileupWeightFor2011(dataVersion, era="Run2011A")
-insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeightRun2011A)
-
-process.commonSequence *= (
-    process.pileupWeightEPS *
-    process.pileupWeightRun2011AnoEPS *
-    process.pileupWeightRun2011A
-)
+puWeights = [
+    ("Run2011A", "Run2011A"),
+    ("Run2011B", "Run2011B"),
+    ("Run2011A+B", "Run2011AB")
+    ]
+for era, name in puWeights:
+    modname = "pileupWeight"+name
+    setattr(process, modname, cms.EDProducer("HPlusVertexWeightProducer",
+        alias = cms.string(modname),
+    ))
+    param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, era=era)
+    insertPSetContentsTo(param.vertexWeight.clone(), getattr(process, modname))
+    process.commonSequence *= getattr(process, modname)
 
 # Embedding-like preselection
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
@@ -101,12 +93,11 @@ ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
     mets = cms.PSet(
         pfMet_p4 = cms.InputTag("patMETsPF"),
     ),
-    doubles = cms.PSet(
-        weightPileup_EPS = cms.InputTag("pileupWeightEPS"),
-        weightPileup_Run2011AnoEPS = cms.InputTag("pileupWeightRun2011AnoEPS"),
-        weightPileup_Run2011A = cms.InputTag("pileupWeightRun2011A")
-    ),
+    doubles = cms.PSet(),
 )
+for era, name in puWeights:
+    setattr(ntuple.doubles, "weightPileup_"+name, cms.InputTag("pileupWeight"+name))
+
 tauIds = [
     "decayModeFinding",
     "againstMuonLoose", "againstMuonTight", "againstElectronLoose", "againstElectronMedium", "againstElectronTight",
@@ -136,3 +127,7 @@ prototype = cms.EDProducer("HPlusEventCountProducer",
 )
 for label in eventCounters:
     process.globalReplace(label, prototype.clone())
+
+#f = open("configDump.py", "w")
+#f.write(process.dumpPython())
+#f.close()
