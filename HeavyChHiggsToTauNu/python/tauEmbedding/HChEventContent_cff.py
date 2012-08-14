@@ -8,7 +8,7 @@ HChEventContent = cms.PSet(
         "keep *_selectedPatPhotons*_*_*",
         "keep *_selectedPatElectrons*_*_*",
         "keep *_selectedPatJets*_*_*",
-        "keep *_goodJets_*_*",
+        "keep *_goodJets*_*_*",
         "keep *_selectedPatTaus*_*_*",
         "keep *_tauEmbeddingMuons_*_*",
         "keep *_patTriggerEvent_*_*",
