@@ -1130,7 +1130,7 @@ class PF2PATBuilder:
             m = proto.clone(result=name)
             self.beginSequence *= m
             setattr(self.process, name+postfix+postfixMuon, m)
-            setattr(getattr(self.process, "patMuons"+postfix+postfixMuon).userData.userFloats, name, cms.InputTag(name+postfix+postfixMuon))
+            getattr(self.process, "patMuons"+postfix+postfixMuon).userData.userFloats.src.append(cms.InputTag(name+postfix+postfixMuon))
     
         # HLT Matching
         if self.doMuonHLTMatching:
