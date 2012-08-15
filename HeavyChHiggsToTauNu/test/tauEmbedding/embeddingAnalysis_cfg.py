@@ -4,8 +4,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 ################################################################################
 # Configuration
 
-#dataVersion = "42Xdata"
-dataVersion = "42Xmc"
+#dataVersion = "44Xdata"
+dataVersion = "44XmcS6"
 
 debug = False
 #debug = True
@@ -35,7 +35,8 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_2_X/TTJets_TuneZ2_Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_embedding_v13_1/22559ec2c5e66c0c33625ecb67add84e/embedded_13_1_Ha1.root"
+#        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_2_X/TTJets_TuneZ2_Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_embedding_v13_1/22559ec2c5e66c0c33625ecb67add84e/embedded_13_1_Ha1.root"
+        "file:embedded.root"
     ),
     inputCommands = cms.untracked.vstring(
         "keep *",
@@ -60,7 +61,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 patArgs = {
     "doPatTauIsoDeposits": True
 }
-process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, plainPatArgs=patArgs)
+process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
@@ -78,12 +79,13 @@ if dataVersion.isData():
     recoProcess = "RECO"
 
 # Calculate PF MET for 
-from CommonTools.ParticleFlow.pfMET_cfi import pfMET
-process.pfMETOriginalNoMuon = pfMET.clone(
-    src = cms.InputTag("dimuonsGlobal", "forMixing"),
-    jets = cms.InputTag("ak5PFJets")
-)
-process.commonSequence *= process.pfMETOriginalNoMuon
+# FIXME: this is somehow broken ATM
+# from CommonTools.ParticleFlow.pfMET_cfi import pfMET
+# process.pfMETOriginalNoMuon = pfMET.clone(
+#     src = cms.InputTag("dimuonsGlobal", "forMixing"),
+#     jets = cms.InputTag("ak5PFJets")
+# )
+# process.commonSequence *= process.pfMETOriginalNoMuon
 
 # Recalculate gen MET
 # True MET
@@ -190,27 +192,23 @@ addPrimaryVertexSelection(process, process.commonSequence)
 
 # Pileup weights
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-process.pileupWeightEPS = cms.EDProducer("HPlusVertexWeightProducer",
-    alias = cms.string("pileupWeightEPS"),
-)
-process.pileupWeightRun2011AnoEPS = process.pileupWeightEPS.clone(
-    alias = "pileupWeightRun2011AnoEPS"
-)
-process.pileupWeightRun2011A = process.pileupWeightEPS.clone(
-    alias = "pileupWeightRun2011A"
-)
-param.setPileupWeightFor2011(dataVersion, era="EPS")
-insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeightEPS)
-param.setPileupWeightFor2011(dataVersion, era="Run2011A-EPS")
-insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeightRun2011AnoEPS)
-param.setPileupWeightFor2011(dataVersion, era="Run2011A")
-insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeightRun2011A)
+puWeights = [
+    ("Run2011A", "Run2011A"),
+    ("Run2011B", "Run2011B"),
+    ("Run2011A+B", "Run2011AB")
+    ]
+for era, name in puWeights:
+    modname = "pileupWeight"+name
+    setattr(process, modname, cms.EDProducer("HPlusVertexWeightProducer",
+        alias = cms.string(modname),
+    ))
+    param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, era=era)
+    insertPSetContentsTo(param.vertexWeight.clone(), getattr(process, modname))
+    process.commonSequence *= getattr(process, modname)
 
-process.commonSequence *= (
-    process.pileupWeightEPS *
-    process.pileupWeightRun2011AnoEPS *
-    process.pileupWeightRun2011A
-)
+# Switch to PF2PAT objects
+PF2PATVersion = "PFlow"
+param.changeCollectionsToPF2PAT(postfix=PF2PATVersion)
 
 
 muons = cms.InputTag("tauEmbeddingMuons")
@@ -227,9 +225,10 @@ process.commonSequence *= process.firstPrimaryVertex
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+tauEmbeddingCustomisations.PF2PATVersion = PF2PATVersion
 muons = cms.InputTag(tauEmbeddingCustomisations.addMuonIsolationEmbedding(process, process.commonSequence, muons.value()))
 additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param))
-taus = cms.InputTag("patTausHpsPFTauTauEmbeddingMuonMatched")
+taus = cms.InputTag("patTaus"+PF2PATVersion+"TauEmbeddingMuonMatched")
 
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
@@ -240,7 +239,7 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     muonFunctions = cms.PSet(),
     tauSrc = cms.InputTag(taus.value()),
     tauFunctions = cms.PSet(),
-    jetSrc = cms.InputTag("selectedPatJets"),
+    jetSrc = cms.InputTag("selectedPatJets"+PF2PATVersion),
     jetFunctions = cms.PSet(
         tche = cms.string("bDiscriminator('trackCountingHighEffBJetTags')"),
     ),
@@ -249,13 +248,9 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     mets = cms.PSet(
         pfMet_p4 = cms.InputTag(pfMET.value()),
         pfMetOriginal_p4 = cms.InputTag(pfMETOriginal.value()),
-        pfMetOriginalNoMuon_p4 = cms.InputTag("pfMETOriginalNoMuon"),
+#        pfMetOriginalNoMuon_p4 = cms.InputTag("pfMETOriginalNoMuon"), # FIXME: broken ATM
     ),
-    doubles = cms.PSet(
-        weightPileup_EPS = cms.InputTag("pileupWeightEPS"),
-        weightPileup_Run2011AnoEPS = cms.InputTag("pileupWeightRun2011AnoEPS"),
-        weightPileup_Run2011A = cms.InputTag("pileupWeightRun2011A")
-    ),
+    doubles = cms.PSet(),
 )
 muonIsolations = ["trackIso", "caloIso", "pfChargedIso", "pfNeutralIso", "pfGammaIso", "tauTightIc04ChargedIso", "tauTightIc04GammaIso"]
 #print isolations
@@ -277,6 +272,8 @@ if dataVersion.isMC():
     ntuple.mets.genMetCaloAndNonPromptOriginal_p4 = cms.InputTag("genMetCaloAndNonPrompt", "", hltProcess)
     ntuple.mets.genMetNuSumEmbedded_p4 = cms.InputTag("genMetNuEmbedded")
     ntuple.mets.genMetNuSumOriginal_p4 = cms.InputTag("genMetNuOriginal")
+for era, name in puWeights:
+    setattr(ntuple.doubles, "weightPileup_"+name, cms.InputTag("pileupWeight"+name))
 
 addAnalysis(process, "tauNtuple", ntuple,
             preSequence=process.commonSequence,
@@ -290,11 +287,15 @@ for label, module in process.producers_().iteritems():
     if module.type_() == "EventCountProducer":
         eventCounters.append(label)
 prototype = cms.EDProducer("HPlusEventCountProducer",
-    weightSrc = cms.InputTag("pileupWeightRun2011A")
+    weightSrc = cms.InputTag("pileupWeight"+puWeights[-1][1])
 )
 for label in eventCounters:
     process.globalReplace(label, prototype.clone())
 
+
+#f = open("configDump.py", "w")
+#f.write(process.dumpPython())
+#f.close()
 
 
 # Embedding analyzer

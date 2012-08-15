@@ -3,12 +3,12 @@ import FWCore.ParameterSet.Config as cms
 HChEventContent = cms.PSet(
     outputCommands = cms.untracked.vstring(
         "keep edmMergeableCounter_*_*_*", # in lumi block
-        "keep *_selectedPatMuons_*_*",
+        "keep *_selectedPatMuons*_*_*",
         "keep *_tightMuons*_*_*",
-        "keep *_selectedPatPhotons_*_*",
-        "keep *_selectedPatElectrons_*_*",
+        "keep *_selectedPatPhotons*_*_*",
+        "keep *_selectedPatElectrons*_*_*",
         "keep *_selectedPatJets*_*_*",
-        "keep *_goodJets_*_*",
+        "keep *_goodJets*_*_*",
         "keep *_selectedPatTaus*_*_*",
         "keep *_tauEmbeddingMuons_*_*",
         "keep *_patTriggerEvent_*_*",
