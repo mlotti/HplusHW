@@ -5,7 +5,9 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 #dataVersion = "39Xredigi"
 #dataVersion = "39Xdata"
 #dataVersion = "311Xredigi"
-dataVersion = "42Xmc"
+dataVersion = "44XmcS6"
+
+PF2PATVersion = "PFlow"
 
 ################################################################################
 
@@ -37,7 +39,8 @@ process.source = cms.Source('PoolSource',
         #dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
-    "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_2_X/TTJets_TuneZ2_Summer11_1/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_skim_v13_2/6ce8de2c5b6c0c9ed414998577b7e28d/skim_982_1_xgs.root"
+#    "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_2_X/TTJets_TuneZ2_Summer11_1/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_skim_v13_2/6ce8de2c5b6c0c9ed414998577b7e28d/skim_982_1_xgs.root"
+        "file:skim.root"
   )
 )
 
@@ -62,43 +65,36 @@ patArgs = {"doPatTrigger": False,
            "doPatElectronID": True,
            "doTauHLTMatching": False,
            }
-process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, plainPatArgs=patArgs)
+process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
 #process.commonSequence.remove(process.goodPrimaryVertices10)
-if options.doPat == 0:
-    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
-    process.commonSequence *= (
-        process.goodPrimaryVertices *
-        process.goodPrimaryVertices10
-    )
+# if options.doPat == 0:
+#     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
+#     process.commonSequence *= (
+#         process.goodPrimaryVertices *
+#         process.goodPrimaryVertices10
+#     )
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
 # Pileup weights
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-process.pileupWeightEPS = cms.EDProducer("HPlusVertexWeightProducer",
-    alias = cms.string("pileupWeightEPS"),
-)
-process.pileupWeightRun2011AnoEPS = process.pileupWeightEPS.clone(
-    alias = "pileupWeightRun2011AnoEPS"
-)
-process.pileupWeightRun2011A = process.pileupWeightEPS.clone(
-    alias = "pileupWeightRun2011A"
-)
-param.setPileupWeightFor2011(dataVersion, era="EPS")
-insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeightEPS)
-param.setPileupWeightFor2011(dataVersion, era="Run2011A-EPS")
-insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeightRun2011AnoEPS)
-param.setPileupWeightFor2011(dataVersion, era="Run2011A")
-insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeightRun2011A)
-
-process.commonSequence *= (
-    process.pileupWeightEPS *
-    process.pileupWeightRun2011AnoEPS *
-    process.pileupWeightRun2011A
-)
+param.changeCollectionsToPF2PAT(PF2PATVersion)
+puWeights = [
+    ("Run2011A", "Run2011A"),
+    ("Run2011B", "Run2011B"),
+    ("Run2011A+B", "Run2011AB")
+    ]
+for era, name in puWeights:
+    modname = "pileupWeight"+name
+    setattr(process, modname, cms.EDProducer("HPlusVertexWeightProducer",
+        alias = cms.string(modname),
+    ))
+    param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, era=era)
+    insertPSetContentsTo(param.vertexWeight.clone(), getattr(process, modname))
+    process.commonSequence *= getattr(process, modname)
     
 # Add the muon selection counters, as this is done after the skim
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
-additionalCounters.extend(MuonSelection.muonSelectionCounters)
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as MuonSelection
+additionalCounters.extend(MuonSelection.getMuonSelectionCountersForEmbedding(PF2PATVersion))
 
 # Add configuration information to histograms.root
 process.infoPath = addConfigInfo(process, options, dataVersion)
@@ -111,12 +107,13 @@ process.firstPrimaryVertex = cms.EDProducer("HPlusFirstVertexSelector",
 process.commonSequence *= process.firstPrimaryVertex
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
-muons = customisations.addMuonIsolationEmbedding(process, process.commonSequence, "selectedPatMuons")
+customisations.PF2PATVersion = PF2PATVersion
+muons = "selectedPatMuons"+PF2PATVersion
+#muons = customisations.addMuonIsolationEmbedding(process, process.commonSequence, muons)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as ElectronVeto
-process.eveto = cms.EDFilter("HPlusGlobalElectronVetoFilter",
-    GlobalElectronVeto = param.GlobalElectronVeto.clone(),
-    filter = cms.bool(False)
+process.eveto = ElectronVeto.hPlusGlobalElectronVetoFilter.clone(
+    filter = False
 )
 process.commonSequence *= process.eveto
 
@@ -148,7 +145,7 @@ process.commonSequence *= (
 additionalCounters.append("preselectedMuons40Count")
 
 process.preselectedJets = cms.EDFilter("PATJetSelector",
-    src = cms.InputTag("goodJets"),
+    src = cms.InputTag("goodJets"+PF2PATVersion),
     cut = cms.string(
     "pt() > 30 && abs(eta()) < 2.4"
     "&& numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99"
@@ -187,20 +184,25 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
         caloMetNoHF_p4 = cms.InputTag("metNoHF"),
         pfMet_p4 = cms.InputTag("pfMet"),
     ),
-    doubles = cms.PSet(
-        weightPileup_EPS = cms.InputTag("pileupWeightEPS"),
-        weightPileup_Run2011AnoEPS = cms.InputTag("pileupWeightRun2011AnoEPS"),
-        weightPileup_Run2011A = cms.InputTag("pileupWeightRun2011A")
-    ),
+    doubles = cms.PSet(),
     bools = cms.PSet(
         ElectronVetoPassed = cms.InputTag("eveto")
     ),
 )
+for era, name in puWeights:
+    setattr(ntuple.doubles, "weightPileup_"+name, cms.InputTag("pileupWeight"+name))
+
 #isolations = muonAnalysis.isolations.keys()
 isolations = ["trackIso", "caloIso", "pfChargedIso", "pfNeutralIso", "pfGammaIso", "tauTightIc04ChargedIso", "tauTightIc04GammaIso"]
 #print isolations
 for name in isolations:
     setattr(ntuple.muonFunctions, name, cms.string(muonAnalysis.isolations[name]))
+userFloats = []
+for name in ["pfNeutralHadrons", "pfChargedAll", "pfPUChargedHadrons", "pfPhotons", "pfChargedHadrons"]:
+    userFloats.extend(["iso01to04_"+name, "iso01to03_"+name])
+for name in userFloats:
+    setattr(ntuple.muonFunctions, name, cms.string("userFloat('%s')" % name))
+
 
 addAnalysis(process, "muonNtuple", ntuple,
             preSequence=process.commonSequence,
