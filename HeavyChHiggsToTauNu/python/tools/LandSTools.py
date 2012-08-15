@@ -29,7 +29,7 @@ import multicrab
 import git
 
 ## The LandS CVS tag to be used
-LandS_tag = "t3-05-05_chargedHiggs" # Given by Mingshui 4.6.2012 at 16:04:56 EEST
+LandS_tag = "t3-06-05" # Given by Mingshui 15.8.2012 at 11:56 EEST
 #LandS_tag	    = "HEAD" # Recommended by Mingshui 10.5.2012 at 23:23:22 EEST
 #LandS_tag           = "V3-04-01_eps" # this one is in the Tapio's scripts
 #LandS_tag           = "t3-04-13"
