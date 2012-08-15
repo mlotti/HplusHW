@@ -293,7 +293,11 @@ namespace HPlus {
     reco::Candidate* myHiggsSideTop = const_cast<reco::Candidate*>(genParticles->at(myHiggsLine).mother());
     bool myStatus = true;
     while (myStatus) {
-      if (!myHiggsSideTop) myStatus = false;
+
+//      if (!myHiggsSideTop) myStatus = false;
+      if (!myHiggsSideTop)
+        return false;
+
 
       //std::cout << "FullMass: Higgs side mother = " << myHiggsSideTop->pdgId() << std::endl;
 

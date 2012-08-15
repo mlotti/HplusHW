@@ -1,10 +1,11 @@
-## \package Extractor
-# Classes for extracting observation/rate/nuisance from datasets
+## \package TableProducer
+# Classes for producing output
 #
 #
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorBase
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ControlPlotMaker import ControlPlotMaker
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 
 from math import pow,sqrt
@@ -89,11 +90,18 @@ class TableProducer:
             if n.isPrintable():
                 self._nNuisances += 1
         # Make directory for output
-        self._dirname = "datacards_"+self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName
+        self._dirname = "datacards_"+self._timestamp+self._config.DataCardName.replace(" ","_")+"_"+self._outputPrefix+"_"
         os.mkdir(self._dirname)
+        self._infoDirname = self._dirname + "/info"
+        os.mkdir(self._infoDirname)
+        self._ctrlPlotDirname = self._dirname + "/controlPlots"
+        os.mkdir(self._ctrlPlotDirname)
 
         # Make datacards
         self.makeDataCards()
+
+        # Make control plots
+        ControlPlotMaker(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
 
         # Make other reports
         print "\n"+HighlightStyle()+"Generating reports"+NormalStyle()
@@ -144,7 +152,10 @@ class TableProducer:
             myCard += self._getTableOutput(myWidths,myNuisanceTable)
             # Print datacard to screen if requested
             if self._opts.showDatacard:
-                print myCard
+                if self._config.BlindAnalysis:
+                    print WarningStyle()+"You are BLINDED: Refused cowardly to print datacard on screen (you're not supposed to look at it)!"+NormalStyle()
+                else:
+                    print myCard
             # Save datacard to file
             myFile = open(myFilename, "w")
             myFile.write(myCard)
@@ -156,10 +167,17 @@ class TableProducer:
             myRootFile.Write()
             myRootFile.Close()
             print "Written shape root file to:",myRootFilename
-        # Save additional info
+        # Save additional info for QCD factorised
         for c in self._datasetGroups:
             if c.typeIsQCDfactorised():
-                c.saveQCDInfoHistograms(self._dirname)
+                c.saveQCDInfoHistograms(self._infoDirname)
+                myFilename = self._infoDirname+"/QCDfactorisedMessages.txt"
+                myFile = open(myFilename, "w")
+                myMessages = c.getMessages()
+                for m in myMessages:
+                    myFile.write(m+"\n")
+                myFile.close()
+                print HighlightStyle()+"QCD factorised messages written to: "+NormalStyle()+myFilename
 
     ## Generates header of datacard
     def _generateHeader(self, mass):
@@ -183,6 +201,8 @@ class TableProducer:
     ## Generates observation lines
     def _generateObservationLine(self):
         # Obtain observed number of events
+        if self._observation == None:
+            return "Observation    is not specified\n"
         myObsCount = self._observation.getRateResult()
         if self._opts.debugMining:
             print "  Observation is %d"%myObsCount
@@ -300,7 +320,8 @@ class TableProducer:
     ## Save histograms to root file
     def _saveHistograms(self,rootFile,mass):
         # Observation
-        self._observation.setResultHistogramsToRootFile(rootFile)
+        if self._observation != None:
+            self._observation.setResultHistogramsToRootFile(rootFile)
         # Loop over columns
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
             if c.isActiveForMass(mass):
@@ -310,6 +331,9 @@ class TableProducer:
     def _calculateCellWidths(self,widths,table):
         myResult = widths
         # Initialise widths if necessary
+        if len(table) == 0:
+          return myResult
+
         for i in range(len(widths),len(table[0])):
             myResult.append(0)
         # Loop over table cells
@@ -332,13 +356,17 @@ class TableProducer:
         return myResult
 
     ## Converts a list into a string
-    def _getTableOutput(self,widths,table):
+    def _getTableOutput(self,widths,table,latexMode=False):
         myResult = ""
         for row in table:
             for i in range(0,len(row)):
                 if i != 0:
                     myResult += " "
+                    if latexMode:
+                        myResult += "& "
                 myResult += row[i].ljust(widths[i])
+            if latexMode:
+                myResult += " \\\\ "
             myResult += "\n"
         return myResult
 
@@ -363,16 +391,17 @@ class TableProducer:
             myOutput += self._getTableOutput(myWidths,myNuisanceTable)
             myOutput += "\n"
         # Save output to file
-        myFilename = self._dirname+"/shapeVariationResults.txt"
+        myFilename = self._infoDirname+"/shapeVariationResults.txt"
         myFile = open(myFilename, "w")
         myFile.write(myOutput)
         myFile.close()
-        print "Shape variation tables written to:",myFilename
+        print HighlightStyle()+"Shape variation tables written to: "+NormalStyle()+myFilename
 
     ## Prints event yield summary table
     def makeEventYieldSummary(self):
         Data = EventYieldSummary()
-        Data.extract(self._opts,self._config,self._observation,self._extractors)
+        if self._observation != None:
+            Data.extract(self._opts,self._config,self._observation,self._extractors)
         for m in self._config.MassPoints:
             HH = EventYieldSummary()
             HW = EventYieldSummary()
@@ -432,13 +461,16 @@ class TableProducer:
                 myOutput += "+- %4.0f (syst.)\n"%(TotalExpected.getAbsoluteSystUp())
             else:
                 myOutput += "+%4.0f -%4.0f (syst.)\n"%(TotalExpected.getAbsoluteSystUp(), TotalExpected.getAbsoluteSystDown())
-            myOutput += "                            Observed: %5d\n\n"%Data.getRate() #FIXME add blinding
+            if self._config.BlindAnalysis:
+                myOutput += "                            Observed: BLINDED\n\n"
+            else:
+                myOutput += "                            Observed: %5d\n\n"%Data.getRate()
             # Save output to file
-            myFilename = self._dirname+"/EventYieldSummary_m%d.txt"%m
+            myFilename = self._infoDirname+"/EventYieldSummary_m%d.txt"%m
             myFile = open(myFilename, "w")
             myFile.write(myOutput)
             myFile.close()
-            print "Event yield summary for mass %d written to: "%m +myFilename
+            print HighlightStyle()+"Event yield summary for mass %d written to: "%m +NormalStyle()+myFilename
 
             myOutputLatex = "% table auto generated by datacard generator on "+self._timestamp+" for "+self._config.DataCardName+" / "+self._outputPrefix+"\n"
             myOutputLatex += "\\renewcommand{\\arraystretch}{1.2}\n"
@@ -471,18 +503,29 @@ class TableProducer:
                 myOutputLatex += " \\pm %4.0f $ \\\\ \n"%(TotalExpected.getAbsoluteSystUp())
             else:
                 myOutputLatex += "~^{+%4.0f}){-%4.0f} $ \\\\ \n"%(TotalExpected.getAbsoluteSystUp(), TotalExpected.getAbsoluteSystDown())
-            myOutputLatex += "  Observed: & %4d \\\\ \n"%Data.getRate() #FIXME add blinding
+            if self._config.BlindAnalysis:
+                myOutputLatex += "  Observed: & BLINDED \\\\ \n"
+            else:
+                myOutputLatex += "  Observed: & %4d \\\\ \n"%Data.getRate()
             myOutputLatex += "  \\hline\n"
             myOutputLatex += "  \\end{tabular}\n"
             myOutputLatex += "\\end{table}\n"
             myOutputLatex += "\\renewcommand{\\arraystretch}{1}\n"
             # Save output to file
-            myFilename = self._dirname+"/EventYieldSummary_m%d_"%(m) +self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName+".tex"
+            myFilename = self._infoDirname+"/EventYieldSummary_m%d_"%(m) +self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName.replace(" ","_")+".tex"
             myFile = open(myFilename, "w")
             myFile.write(myOutputLatex)
             myFile.close()
-            print "Latex table of event yield summary for mass %d written to: "%m +myFilename
+            print HighlightStyle()+"Latex table of event yield summary for mass %d written to: "%m +NormalStyle()+myFilename
 
+    ## Returns a string with proper numerical formatting
+    def _getFormattedSystematicsNumber(self,value):
+        if abs(value) > 0.1:
+            return "%.0f"%(abs(value)*100)
+        elif abs(value) > 0.001:
+            return "%.1f"%(abs(value)*100)
+        else:
+            return "<0.1"
 
     ## Prints systematics summary table
     def makeSystematicsSummary(self):
@@ -495,42 +538,128 @@ class TableProducer:
                          "EWK_tt_faketau",
                          "EWK_W_faketau",
                          "EWK_t_faketau"]
-        myNuisanceOrder = [["01","$\tau - p_T^{miss}$ trigger"], # trg
-                           ["03", "$\tau$ jet ID (excl. $R_\tau$"], # tau ID
-                           ["04", "jet, $\mathcal{l}\to\tau$ mis-ID"], # tau mis-ID
-                           ["07", "JES+JER+MET+$R_\tau$"], # energy scale
+        myNuisanceOrder = [["01","$\\tau - p_T^{miss}$ trigger"], # trg
+                           ["03", "$\\tau$ jet ID (excl. $R_\\tau$"], # tau ID
+                           ["04", "jet, $\\mathcal{l}\\to\\tau$ mis-ID"], # tau mis-ID
+                           ["45", "TES"], # energy scale
+                           ["46", "JES"], # energy scale
+                           ["47", "Unclustered MET ES"], # energy scale
                            ["09", "lepton veto"], # lepton veto
                            ["10", "b-jet tagging"], # b tagging
-                           ["11", "jet$\to$b mis-ID"], # b mis-tagging
+                           ["11", "jet$\\to$b mis-ID"], # b mis-tagging
                            ["12", "multi-jet stat."], # QCD stat.
                            ["13", "multi-jet syst."], # QCD syst.
-                           ["19", "EWK+$t\bar{t}$ $\tau$ stat."], # embedding stat.
+                           ["19", "EWK+$t\\bar{t}$ $\\tau$ stat."], # embedding stat.
                            ["14", "multi-jet contam."], # QCD contamination in embedding
-                           ["15", "$f_{W\to\tau\to\mu}"], # tau decays to muons in embedding
+                           ["15", "$f_{W\\to\\tau\\to\\mu}"], # tau decays to muons in embedding
                            ["16", "muon selections"], # muon selections in embedding
                            ["34", "pile-up"], # pile-up
                            [["17","18","19","22","24","25","26","27"], "simulation stat."], # MC statistics
                            [["28","29","30","31","32"], "cross section"], # cross section
                            ["33", "luminosity"]] # luminosity
-        for columnName in myColumnOrder:
-            myMin = 9990.0
-            myMax = -1.0
-            for c in self._datasetGroups:
-                if columnName in c.getLabel():
-                    # Correct column found, now find nuisance
-                    for n in myNuisanceOrder:
+        # Make table
+        myTable = []
+        for n in myNuisanceOrder:
+            myRow = [n[1]]
+            for columnName in myColumnOrder:
+                myMinValue = 9999.0
+                myMaxValue = -9999.0
+                mySavedMinResult = None
+                mySavedMaxResult = None
+                for c in self._datasetGroups:
+                    if columnName in c.getLabel():
+                        # Correct column found, now check if column has nuisance
                         if isinstance(n[0], list):
                             for nid in n[0]:
                                 if c.hasNuisanceByMasterId(nid):
-                                    myValue = c.getNuisanceResultByMasterId(nid)
-#                                    if isinstance(myValue, list):
-# FIXME !!!
-#                                    else:
-
+                                    myResult = c.getFullNuisanceResultByMasterId(nid)
+                                    myValue = myResult.getResultAverage()
+                                    if myValue < myMinValue:
+                                        myMinValue = myValue
+                                        mySavedMinResult = myResult.getResult()
+                                    if myValue > myMaxValue:
+                                        myMaxValue = myValue
+                                        mySavedMaxResult = myResult.getResult()
                         else:
                             if c.hasNuisanceByMasterId(n[0]):
-                                myValue = c.getNuisanceResultByMasterId(n[0])
-
-        
-        
-        print WarningStyle()+"FIXME makeSystematicsSummary is not yet implemented ..."+NormalStyle()
+                                myResult = c.getFullNuisanceResultByMasterId(n[0])
+                                myValue = myResult.getResultAverage()
+                                if myValue < myMinValue:
+                                    myMinValue = myValue
+                                    mySavedMinResult = myResult.getResult()
+                                if myValue > myMaxValue:
+                                    myMaxValue = myValue
+                                    mySavedMaxResult = myResult.getResult()
+                myStr = ""
+                if mySavedMinResult == None:
+                    myStr = ""
+                elif abs(myMinValue-myMaxValue)<0.001:
+                    if isinstance(mySavedMaxResult, list):
+                        # Asymmetric
+                        if mySavedMaxResult[0]>=0 and mySavedMaxResult[1]>=0:
+                            myValue = (mySavedMaxResult[0]+mySavedMaxResult[1])/2.0
+                            myStr = "%s"%(self._getFormattedSystematicsNumber(myValue))
+                        else:
+                            myStr = "_{-%s}^{+%s}"%(self._getFormattedSystematicsNumber(mySavedMaxResult[0]),
+                                                    self._getFormattedSystematicsNumber(mySavedMaxResult[1]))
+                    else:
+                        # Symmetric
+                        myStr = self._getFormattedSystematicsNumber(mySavedMaxResult)
+                else:
+                    # Range
+                    if isinstance(mySavedMaxResult, list):
+                        # Asymmetric range
+                        if mySavedMaxResult[0]>=0 and mySavedMaxResult[1]>=0:
+                            myValueUp = (mySavedMaxResult[0]+mySavedMaxResult[1])/2.0
+                            myValueDown = (mySavedMinResult[0]+mySavedMinResult[1])/2.0
+                            myStr = "%s..%s"%(self._getFormattedSystematicsNumber(myValueDown),
+                                              self._getFormattedSystematicsNumber(myValueUp))
+                        else:
+                            myStr = "_{-%s..%s}^{+%s..%s}"%(self._getFormattedSystematicsNumber(mySavedMinResult[0]),
+                                                            self._getFormattedSystematicsNumber(mySavedMaxResult[0]),
+                                                            self._getFormattedSystematicsNumber(mySavedMinResult[1]),
+                                                            self._getFormattedSystematicsNumber(mySavedMaxResult[1]))
+                    else:
+                        # Symmetric range
+                        myStr = "%s..%s"%(self._getFormattedSystematicsNumber(mySavedMinResult),
+                                          self._getFormattedSystematicsNumber(mySavedMaxResult))
+                myRow.append(myStr)
+            myTable.append(myRow)
+        # Make table
+        myOutput = "% table auto generated by datacard generator on "+self._timestamp+" for "+self._config.DataCardName+" / "+self._outputPrefix+"\n"
+        myOutput += "\\renewcommand{\\arraystretch}{1.2}\n"
+        myOutput += "\\begin{table}%%[h]\n"
+        myOutput += "\\begin{center}\n"
+        myOutput += "\\caption{The systematic uncertainties (in \\%%) for the backgrounds\n"
+        myOutput += "and the signal from \\ttTobHpmbHmp (HH) and \\ttTobWpmbHmp (WH)\n"
+        myOutput += "processes at $\\mHpm=80$--$160\\GeVcc$.\n"
+        myOutput += "\\label{tab:summary:systematics}\n"
+        myOutput += "\\vskip 0.1 in\n"
+        myOutput += "\\noindent\\makebox[\\textwidth]{\n"
+        myOutput += "\\begin{tabular}{l|cc|c|ccc|ccc}\n"
+        myOutput += "\\hline\n"
+        myOutput += "& HH   &  WH  &  QCD & \\multicolumn{3}{c|}{EWK+$t\\bar{t}$ genuine $\\tau$}\n"
+        myOutput += "& \\multicolumn{3}{c}{EWK+$t\\bar{t}$~$\\tau$~fakes}\n"
+        # Captions
+        myCaptionLine = [["","","","","Emb.data","Res.DY","Res.WW","$t\\bar{t}$","tW","W+jets"]]
+        # Calculate dimensions of tables
+        myWidths = []
+        myWidths = self._calculateCellWidths(myWidths, myTable)
+        myWidths = self._calculateCellWidths(myWidths, myCaptionLine)
+        mySeparatorLine = self._getSeparatorLine(myWidths)
+        # Add caption and table
+        myOutput += self._getTableOutput(myWidths,myCaptionLine,True)
+        myOutput += "\\hline\n"
+        myOutput += self._getTableOutput(myWidths,myTable,True)
+        myOutput += "\\hline\n"
+        myOutput += "\\end{tabular}\n"
+        myOutput += "}\n"
+        myOutput += "\\end{center}\n"
+        myOutput += "\\end{table}\n"
+        myOutput += "\\renewcommand{\\arraystretch}{1}\n"
+        # Save output to file
+        myFilename = self._infoDirname+"/SystematicsSummary_"+self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName.replace(" ","_")+".tex"
+        myFile = open(myFilename, "w")
+        myFile.write(myOutput)
+        myFile.close()
+        print HighlightStyle()+"Latex table of systematics summary written to: "+NormalStyle()+myFilename

@@ -12,6 +12,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NonIsolatedElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CorrelationAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetTauInvMass.h"
@@ -140,9 +141,10 @@ namespace HPlus {
     Count fNJetsCounter;
     Count fBTaggingBeforeMETCounter;
     Count fMETCounter;
+    Count fBjetVetoCounter;
     Count fBTaggingCounter;
     Count fDeltaPhiTauMETCounter;
-    Count fdeltaPhiTauMET140Counter;
+    //    Count fDeltaPhiTauMET140Counter;
     Count fdeltaPhiTauMET10Counter;
     Count fdeltaPhiTauMET160Counter;
     Count fdeltaPhiTauMET130Counter;
@@ -164,6 +166,7 @@ namespace HPlus {
     TriggerSelection fTriggerSelection;
     VertexSelection fPrimaryVertexSelection;
     GlobalElectronVeto fGlobalElectronVeto;
+    //    NonIsolatedElectronVeto fNonIsolatedElectronVeto;
     GlobalMuonVeto fGlobalMuonVeto;
     //    TauSelection fOneProngTauSelection;
     TauSelection fTauSelection;
@@ -223,6 +226,7 @@ namespace HPlus {
     WrappedTH1 *hMETInvertedTauId;
     WrappedTH1 *hMETBaselineTauIdJets;
     WrappedTH1 *hMETBaselineTauIdJets150;
+    WrappedTH1 *hMETBaselineTauIdJets120;
     WrappedTH1 *hMETBaselineTauIdJets120150;
     WrappedTH1 *hMETBaselineTauIdJets100120;
     WrappedTH1 *hMETBaselineTauIdJets80100;
@@ -234,6 +238,7 @@ namespace HPlus {
 
     //    WrappedTH1 *hMETBaselineTauIdBtag;
     WrappedTH1 *hMETBaselineTauIdBtag150;
+    WrappedTH1 *hMETBaselineTauIdBtag120;
     WrappedTH1 *hMETBaselineTauIdBtag120150;
     WrappedTH1 *hMETBaselineTauIdBtag100120;
     WrappedTH1 *hMETBaselineTauIdBtag80100;
@@ -242,8 +247,20 @@ namespace HPlus {
     WrappedTH1 *hMETBaselineTauIdBtag5060;
     WrappedTH1 *hMETBaselineTauIdBtag4050;
 
+    WrappedTH1 *hMETBaselineTauIdBveto;
+    WrappedTH1 *hMETBaselineTauIdBveto150;
+    WrappedTH1 *hMETBaselineTauIdBveto120;
+    WrappedTH1 *hMETBaselineTauIdBveto120150;
+    WrappedTH1 *hMETBaselineTauIdBveto100120;
+    WrappedTH1 *hMETBaselineTauIdBveto80100;
+    WrappedTH1 *hMETBaselineTauIdBveto7080;
+    WrappedTH1 *hMETBaselineTauIdBveto6070;
+    WrappedTH1 *hMETBaselineTauIdBveto5060;
+    WrappedTH1 *hMETBaselineTauIdBveto4050;
+
     WrappedTH1 *hMTBaselineTauIdTopMass;
     WrappedTH1 *hMTBaselineTauIdTopMass150;
+    WrappedTH1 *hMTBaselineTauIdTopMass120;
     WrappedTH1 *hMTBaselineTauIdTopMass120150;
     WrappedTH1 *hMTBaselineTauIdTopMass100120;
     WrappedTH1 *hMTBaselineTauIdTopMass80100;
@@ -255,6 +272,7 @@ namespace HPlus {
 
     WrappedTH1 *hMETInvertedTauIdJets;
     WrappedTH1 *hMETInvertedTauIdJets150;
+    WrappedTH1 *hMETInvertedTauIdJets120;
     WrappedTH1 *hMETInvertedTauIdJets120150;
     WrappedTH1 *hMETInvertedTauIdJets100120;
     WrappedTH1 *hMETInvertedTauIdJets80100;
@@ -265,6 +283,7 @@ namespace HPlus {
 
     WrappedTH1 *hMETInvertedTauIdBtag;
     WrappedTH1 *hMETInvertedTauIdBtag150;
+    WrappedTH1 *hMETInvertedTauIdBtag120;
     WrappedTH1 *hMETInvertedTauIdBtag120150;
     WrappedTH1 *hMETInvertedTauIdBtag100120;
     WrappedTH1 *hMETInvertedTauIdBtag80100;
@@ -273,8 +292,19 @@ namespace HPlus {
     WrappedTH1 *hMETInvertedTauIdBtag5060;
     WrappedTH1 *hMETInvertedTauIdBtag4050;
 
+    WrappedTH1 *hMETInvertedTauIdBveto;
+    WrappedTH1 *hMETInvertedTauIdBveto150;
+    WrappedTH1 *hMETInvertedTauIdBveto120;
+    WrappedTH1 *hMETInvertedTauIdBveto120150;
+    WrappedTH1 *hMETInvertedTauIdBveto100120;
+    WrappedTH1 *hMETInvertedTauIdBveto80100;
+    WrappedTH1 *hMETInvertedTauIdBveto7080;
+    WrappedTH1 *hMETInvertedTauIdBveto6070;
+    WrappedTH1 *hMETInvertedTauIdBveto5060;
+    WrappedTH1 *hMETInvertedTauIdBveto4050;
  
     WrappedTH1 *hMTBaselineTauIdBtag150;
+    WrappedTH1 *hMTBaselineTauIdBtag120;
     WrappedTH1 *hMTBaselineTauIdBtag120150;
     WrappedTH1 *hMTBaselineTauIdBtag100120;
     WrappedTH1 *hMTBaselineTauIdBtag80100;
@@ -284,6 +314,7 @@ namespace HPlus {
     WrappedTH1 *hMTBaselineTauIdBtag4050;
 
     WrappedTH1 *hMTBaselineTauIdJet150;
+    WrappedTH1 *hMTBaselineTauIdJet120;
     WrappedTH1 *hMTBaselineTauIdJet120150;
     WrappedTH1 *hMTBaselineTauIdJet100120;
     WrappedTH1 *hMTBaselineTauIdJet80100;
@@ -293,6 +324,7 @@ namespace HPlus {
     WrappedTH1 *hMTBaselineTauIdJet4050;
 
     WrappedTH1 *hMTBaselineTauIdPhi150;
+    WrappedTH1 *hMTBaselineTauIdPhi120;
     WrappedTH1 *hMTBaselineTauIdPhi120150;
     WrappedTH1 *hMTBaselineTauIdPhi100120;
     WrappedTH1 *hMTBaselineTauIdPhi80100;
@@ -307,6 +339,7 @@ namespace HPlus {
 
     WrappedTH1 *hMTInvertedTauIdPhi;
     WrappedTH1 *hMTInvertedTauIdPhi150;
+    WrappedTH1 *hMTInvertedTauIdPhi120;
     WrappedTH1 *hMTInvertedTauIdPhi120150;
     WrappedTH1 *hMTInvertedTauIdPhi100120;
     WrappedTH1 *hMTInvertedTauIdPhi80100;
@@ -317,6 +350,7 @@ namespace HPlus {
 
     WrappedTH1 *hMTInvertedTauIdJet;
     WrappedTH1 *hMTInvertedTauIdJet150;
+    WrappedTH1 *hMTInvertedTauIdJet120;
     WrappedTH1 *hMTInvertedTauIdJet120150;
     WrappedTH1 *hMTInvertedTauIdJet100120;
     WrappedTH1 *hMTInvertedTauIdJet80100;
@@ -327,6 +361,7 @@ namespace HPlus {
 
     WrappedTH1 *hMTInvertedTauIdBtag;
     WrappedTH1 *hMTInvertedTauIdBtag150;
+    WrappedTH1 *hMTInvertedTauIdBtag120;
     WrappedTH1 *hMTInvertedTauIdBtag120150;
     WrappedTH1 *hMTInvertedTauIdBtag100120;
     WrappedTH1 *hMTInvertedTauIdBtag80100;
@@ -337,6 +372,7 @@ namespace HPlus {
 
     WrappedTH1 *hMTInvertedTauIdMet;
     WrappedTH1 *hMTInvertedTauIdMet150;
+    WrappedTH1 *hMTInvertedTauIdMet120;
     WrappedTH1 *hMTInvertedTauIdMet120150;
     WrappedTH1 *hMTInvertedTauIdMet100120;
     WrappedTH1 *hMTInvertedTauIdMet80100;
@@ -346,6 +382,7 @@ namespace HPlus {
     WrappedTH1 *hMTInvertedTauIdMet4050;
 
     WrappedTH1 *hMTInvertedTauIdJetPhi;
+    WrappedTH1 *hMTInvertedTauIdJetPhi120;
     WrappedTH1 *hMTInvertedTauIdJetPhi150;
     WrappedTH1 *hMTInvertedTauIdJetPhi120150;
     WrappedTH1 *hMTInvertedTauIdJetPhi100120;
@@ -357,6 +394,7 @@ namespace HPlus {
 
     WrappedTH1 *hDeltaPhiInverted;
     WrappedTH1 *hDeltaPhiInverted150;
+    WrappedTH1 *hDeltaPhiInverted120;
     WrappedTH1 *hDeltaPhiInverted120150;
     WrappedTH1 *hDeltaPhiInverted100120;
     WrappedTH1 *hDeltaPhiInverted80100;
@@ -367,6 +405,7 @@ namespace HPlus {
 
     WrappedTH1 *hTopMass;
     WrappedTH1 *hTopMass150;
+    WrappedTH1 *hTopMass120;
     WrappedTH1 *hTopMass120150;
     WrappedTH1 *hTopMass100120;
     WrappedTH1 *hTopMass80100;
@@ -377,6 +416,7 @@ namespace HPlus {
 
     WrappedTH1 *hHiggsMass;
     WrappedTH1 *hHiggsMass150;
+    WrappedTH1 *hHiggsMass120;
     WrappedTH1 *hHiggsMass120150;
     WrappedTH1 *hHiggsMass100120;
     WrappedTH1 *hHiggsMass80100;
@@ -387,6 +427,7 @@ namespace HPlus {
 
     WrappedTH1 *hHiggsMassPhi;
     WrappedTH1 *hHiggsMassPhi150;
+    WrappedTH1 *hHiggsMassPhi120;
     WrappedTH1 *hHiggsMassPhi120150;
     WrappedTH1 *hHiggsMassPhi100120;
     WrappedTH1 *hHiggsMassPhi80100;
@@ -397,6 +438,7 @@ namespace HPlus {
 
     WrappedTH1 *hMTInvertedTauIdTopMass;
     WrappedTH1 *hMTInvertedTauIdTopMass150;
+    WrappedTH1 *hMTInvertedTauIdTopMass120;
     WrappedTH1 *hMTInvertedTauIdTopMass120150;
     WrappedTH1 *hMTInvertedTauIdTopMass100120;
     WrappedTH1 *hMTInvertedTauIdTopMass80100;

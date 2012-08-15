@@ -50,7 +50,7 @@ class WeightedAllEvents:
         if int(unweighted) != int(self.unweighted):
             print "%s: Unweighted all events from analysis %d, unweighted all events from _weightedAllEvents %d, using their ratio for setting the weighted all events" % (name, int(unweighted), int(self.unweighted))
             nweighted = unweighted * nweighted/self.unweighted
-        print nweighted
+        print "Using weighted event count for "+name+":",nweighted
         return nweighted
 
     ## \var unweighted
@@ -1328,10 +1328,11 @@ class Dataset:
     # the memory footprint and not hit the limit of number of open
     # files
     def close(self):
-#        print "Closing", self.file.GetName()
-        self.file.Close("R")
-        self.file.Delete()
-        del self.file
+        if self.file != None:
+            self.file.Close("R")
+            self.file.Delete()
+            del self.file
+            self.file = None
 
     ## Clone the Dataset object
     # 

@@ -13,6 +13,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
+//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NonIsolatedElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CorrelationAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetTauInvMass.h"
@@ -132,6 +133,7 @@ namespace HPlus {
     Count fTriggerScaleFactorCounter;
     Count fGenuineTauCounter;
     Count fVetoTauCounter;
+    Count fElectronMatchingTauCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fMetCutBeforeJetCutCounter;

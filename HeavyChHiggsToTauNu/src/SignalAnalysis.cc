@@ -3,6 +3,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 
+#include "TLorentzVector.h"
+
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -69,7 +71,7 @@ namespace HPlus {
     fDeltaPhiCutValue(iConfig.getUntrackedParameter<double>("deltaPhiTauMET")),
     fTopRecoName(iConfig.getUntrackedParameter<std::string>("topReconstruction")),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
-    fAllCounter(eventCounter.addCounter("All events")),
+    fAllCounter(eventCounter.addCounter("Offline selection begins")),
     fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),
     fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
@@ -78,6 +80,7 @@ namespace HPlus {
     fGenuineTauCounter(eventCounter.addCounter("Tau is genuine")),
     fVetoTauCounter(eventCounter.addCounter("tau veto")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
+    fElectronMatchingTauCounter(eventCounter.addCounter("Loose electron matching tau")),
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
     fMetCutBeforeJetCutCounter(eventCounter.addCounter("MET cut Before Jets")),
     fNJetsCounter(eventCounter.addCounter("njets")),
@@ -303,6 +306,7 @@ namespace HPlus {
     hVerticesAfterWeight->Fill(nVertices);
     fTree.setNvertices(nVertices);
 
+    //    if (nVertices > 7) return false; // FIXME
     increment(fAllCounter);
 
 //------ Apply trigger and HLT_MET cut or trigger parametrisation
@@ -343,7 +347,7 @@ namespace HPlus {
     // plot leading track without pt cut
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
     increment(fTausExistCounter);
-    if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
+    //if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
     increment(fOneTauCounter);
     // Obtain MC matching - for EWK without genuine taus
     FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
@@ -359,6 +363,7 @@ namespace HPlus {
     // Apply trigger scale factor here, because it depends only on tau
     TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauData.getSelectedTau()), iEvent.isRealData(), fEventWeight);
     fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
+
     increment(fTriggerScaleFactorCounter);
     hSelectionFlow->Fill(kSignalOrderTauID);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderTauID);
@@ -409,21 +414,22 @@ namespace HPlus {
     */  
 //------ Veto against second tau in event
     VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauData.getSelectedTau());
-    //    if (vetoTauData.passedEvent()) return false; // tau veto
+    if (vetoTauData.passedEvent()) return false; // tau veto
     //    if (!vetoTauData.passedEvent()) return false; // select events with add. taus
     //    if (vetoTauData.getSelectedVetoTaus().size() > 0 ) return false;
-    //    increment(fVetoTauCounter);
-    if (!vetoTauData.passedEvent()) increment(fVetoTauCounter);
+    increment(fVetoTauCounter);
+    //    if (!vetoTauData.passedEvent()) increment(fVetoTauCounter);
 
 
 
 
 //------ Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
-    //    NonIsolatedElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
+    //    NonIsolatedElectronVeto::Data electronVetoData = fNonIsolatedElectronVeto.analyze(iEvent, iSetup);
     hCtrlIdentifiedElectronPt->Fill(electronVetoData.getSelectedElectronPtBeforePtCut());
+
     if (!electronVetoData.passedEvent()) return false;
-    increment(fElectronVetoCounter);   
+    increment(fElectronVetoCounter);
     hSelectionFlow->Fill(kSignalOrderElectronVeto);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderElectronVeto);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderElectronVeto);
@@ -433,7 +439,19 @@ namespace HPlus {
       copyPtrToVector(electronVetoData.getSelectedElectrons(), *saveElectrons);
       iEvent.put(saveElectrons, "selectedVetoElectrons");
     }
+    /*    
+    bool electronTauMatch = false;
+    for(edm::PtrVector<pat::Electron>::const_iterator iEle = electronVetoData.getSelectedLooseElectrons().begin(); iEle != electronVetoData.getSelectedLooseElectrons().end(); ++iEle) {
 
+      double deltaRElectronTau = ROOT::Math::VectorUtil::DeltaR((*iEle)->p4()  , tauData.getSelectedTau()->p4()); 
+      if( deltaRElectronTau < 0.5) electronTauMatch = true;  
+      //      hDeltaPhiJetMet->Fill(deltaPhiJetMet*57.3);
+    }
+    if (electronTauMatch ) return false;
+    */
+    if (electronVetoData.getSelectedLooseElectrons().size() > 0 ) increment(fElectronMatchingTauCounter);
+    
+ 
 
 //------ Global muon veto
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
@@ -454,7 +472,6 @@ namespace HPlus {
     }
 
 
-
 //------ Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
 
@@ -463,7 +480,8 @@ namespace HPlus {
     if(metData.passedEvent()) increment(fMetCutBeforeJetCutCounter);
 
     hCtrlNjets->Fill(jetData.getHadronicJetCount());
-    if(!jetData.passedEvent()) return false;
+    if(!jetData.passedEvent()) return false; 
+
     increment(fNJetsCounter);
     hSelectionFlow->Fill(kSignalOrderJetSelection);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderJetSelection);
@@ -535,7 +553,8 @@ namespace HPlus {
 //    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
     hMet->Fill(metData.getSelectedMET()->et()); 
 
-    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    //    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     if(btagData.passedEvent()) hMetWithBtagging->Fill(metData.getSelectedMET()->et(),fEventWeight.getWeight()); 
 
     hCtrlMET->Fill(metData.getSelectedMET()->et());
@@ -549,7 +568,9 @@ namespace HPlus {
 
 
 //------ b tagging cut
+
 //    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+//    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     hCtrlNbjets->Fill(btagData.getBJetCount());
     if(!btagData.passedEvent()) return false;
     increment(fBTaggingCounter);
@@ -580,6 +601,17 @@ namespace HPlus {
     hSelectionFlow->Fill(kSignalOrderDeltaPhiSelection);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderDeltaPhiSelection);
     fillEWKFakeTausCounters(myTauMatch, kSignalOrderDeltaPhiSelection, tauData);
+
+    // plot deltaPhi(jet,met)
+    double myMaxDeltaPhiJetMET = 0.0;
+    for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getSelectedJets().begin(); iJet != jetData.getSelectedJets().end(); ++iJet) {
+      double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET())) * 57.3;
+      hDeltaPhiJetMet->Fill(jetDeltaPhi);
+      if (jetDeltaPhi > myMaxDeltaPhiJetMET)
+        myMaxDeltaPhiJetMET = jetDeltaPhi;
+    }
+    hMaxDeltaPhiJetMet->Fill(myMaxDeltaPhiJetMET);
+
 
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()) );
 
@@ -677,25 +709,18 @@ namespace HPlus {
 
 
 
+
 //------ Experimental cuts, counters, and histograms
     doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData);
 
 
-
+   // transverse mass and inv mass with tau veto
     if (!vetoTauData.passedEvent()) {
       increment(fTauVetoAfterDeltaPhiCounter);
-      hTransverseMassTauVeto->Fill(transverseMass); 
+      hTransverseMassTauVeto->Fill(transverseMass);
+      //      hHiggsMassTauVeto->Fill(HiggsMass); 
     }
 
-    // plot deltaPhi(jet,met)
-    double myMaxDeltaPhiJetMET = 0.0;
-    for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getSelectedJets().begin(); iJet != jetData.getSelectedJets().end(); ++iJet) {
-      double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET())) * 57.3;
-      hDeltaPhiJetMet->Fill(jetDeltaPhi);
-      if (jetDeltaPhi > myMaxDeltaPhiJetMET)
-        myMaxDeltaPhiJetMET = jetDeltaPhi;
-    }
-    hMaxDeltaPhiJetMet->Fill(myMaxDeltaPhiJetMET);
 
 
 

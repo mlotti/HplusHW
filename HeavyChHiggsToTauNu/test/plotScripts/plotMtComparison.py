@@ -20,7 +20,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters"
+counters = analysis+"/counters"
 
 treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup")
 
@@ -38,39 +38,40 @@ def main():
 
 
 
-    datasets2 = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_4_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_120601_113246/multicrab.cfg", counters=counters)
+    datasets2 = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysisJune/CMSSW_4_4_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_120812_204356/multicrab.cfg", counters=counters)
     datasets2.updateNAllEventsToPUWeighted()
     datasets2.loadLuminosities()
     plots.mergeRenameReorderForDataMC(datasets2)
 
 
-    datasets3 = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_4_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_120607_075512/multicrab.cfg", counters=counters)
-    datasets3.updateNAllEventsToPUWeighted()
-    datasets3.loadLuminosities()
-    plots.mergeRenameReorderForDataMC(datasets3)
+#    datasets3 = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_4_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_120607_075512/multicrab.cfg", counters=counters)
+#    datasets3.updateNAllEventsToPUWeighted()
+#    datasets3.loadLuminosities()
+#    plots.mergeRenameReorderForDataMC(datasets3)
 #    datasets2.selectAndReorder(["TTJets_TuneZ2_Fall11","TTToHplusBWB_M120_Fall11"])
 #    datasets2.rename("TTJets_TuneZ2_Fall11","TTJets2")
 #    datasets2.rename("TTToHplusBWB_M120_Fall11","TTToHplusBWB_M120_2")     
 #    datasets.extend(datasets2)     
 
-    plot(datasets, datasets2, datasets3)
-       
+#    plot(datasets, datasets2, datasets3)
+    
+    plot(datasets, datasets2)
     printCounters(datasets)
 
 
 
 
 
-def plot(datasets, datasets2, datasets3):
+def plot(datasets, datasets2):
     
 
     mtVeto = plots.PlotBase([datasets2.getDataset("TTJets").getDatasetRootHisto(analysis+"/transverseMass")])
-    mtNoVeto = plots.PlotBase([datasets3.getDataset("TTJets").getDatasetRootHisto(analysis+"/transverseMass")])
-    mtAntiVeto = plots.PlotBase([datasets.getDataset("TTJets").getDatasetRootHisto(analysis+"/transverseMass")])
+    mtNoVeto = plots.PlotBase([datasets.getDataset("TTJets").getDatasetRootHisto(analysis+"/transverseMass")])
+#    mtAntiVeto = plots.PlotBase([datasets3.getDataset("TTJets").getDatasetRootHisto(analysis+"/transverseMass")])
     
     mtVeto.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mtNoVeto.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-    mtAntiVeto.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+#    mtAntiVeto.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
   
     
     mtVeto._setLegendStyles()
@@ -85,11 +86,11 @@ def plot(datasets, datasets2, datasets3):
     mtNoVeto.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))    
     hmtNoVeto = mtNoVeto.histoMgr.getHisto("TTJets").getRootHisto().Clone(analysis+"/transversemass")
     
-    mtAntiVeto._setLegendStyles()
-    mtAntiVeto._setLegendLabels()
-    mtAntiVeto.histoMgr.setHistoDrawStyleAll("P")
-    mtAntiVeto.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))    
-    hmtAntiVeto = mtAntiVeto.histoMgr.getHisto("TTJets").getRootHisto().Clone(analysis+"/transversemass")
+#    mtAntiVeto._setLegendStyles()
+#    mtAntiVeto._setLegendLabels()
+#    mtAntiVeto.histoMgr.setHistoDrawStyleAll("P")
+#    mtAntiVeto.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))    
+#    hmtAntiVeto = mtAntiVeto.histoMgr.getHisto("TTJets").getRootHisto().Clone(analysis+"/transversemass")
 
 
   
@@ -104,15 +105,15 @@ def plot(datasets, datasets2, datasets3):
     hmtVeto.Draw("EP")
 
     
-    hmtNoVeto.SetMarkerColor(7)
+    hmtNoVeto.SetMarkerColor(4)
     hmtNoVeto.SetMarkerSize(1)
     hmtNoVeto.SetMarkerStyle(20)
     hmtNoVeto.Draw("same")
     
-    hmtAntiVeto.SetMarkerColor(4)
-    hmtAntiVeto.SetMarkerSize(1)
-    hmtAntiVeto.SetMarkerStyle(21)
-    hmtAntiVeto.Draw("same")
+#    hmtAntiVeto.SetMarkerColor(4)
+#    hmtAntiVeto.SetMarkerSize(1)
+#    hmtAntiVeto.SetMarkerStyle(21)
+#    hmtAntiVeto.Draw("same")
     
     hmtVeto.GetYaxis().SetTitle("Events / 20 GeV/c^{2}")
     hmtVeto.GetYaxis().SetTitleOffset(1.5)
@@ -139,15 +140,15 @@ def plot(datasets, datasets2, datasets3):
     marker3.SetMarkerSize(0.9*hmtVeto.GetMarkerSize())
     marker3.Draw()
     
-    tex2 = ROOT.TLatex(0.55,0.5,"With additional #tau jets") 
-    tex2.SetNDC()
-    tex2.SetTextSize(20)
-    tex2.Draw()    
-    marker2 = ROOT.TMarker(0.5,0.52,hmtAntiVeto.GetMarkerStyle())
-    marker2.SetNDC()
-    marker2.SetMarkerColor(hmtAntiVeto.GetMarkerColor())
-    marker2.SetMarkerSize(0.9*hmtAntiVeto.GetMarkerSize())
-    marker2.Draw()
+#    tex2 = ROOT.TLatex(0.55,0.5,"With additional #tau jets") 
+#    tex2.SetNDC()
+#    tex2.SetTextSize(20)
+#    tex2.Draw()    
+#    marker2 = ROOT.TMarker(0.5,0.52,hmtAntiVeto.GetMarkerStyle())
+#    marker2.SetNDC()
+#    marker2.SetMarkerColor(hmtAntiVeto.GetMarkerColor())
+#    marker2.SetMarkerSize(0.9*hmtAntiVeto.GetMarkerSize())
+#    marker2.Draw()
 
     
     tex4 = ROOT.TLatex(0.2,0.95,"7 TeV                        CMS Preliminary ")
@@ -167,12 +168,12 @@ def plot(datasets, datasets2, datasets3):
 ############################################################
 
     mtVeto2 = plots.PlotBase([datasets2.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/transverseMass")])
-    mtNoVeto2 = plots.PlotBase([datasets3.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/transverseMass")])
-    mtAntiVeto2 = plots.PlotBase([datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/transverseMass")])
+    mtNoVeto2 = plots.PlotBase([datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/transverseMass")])
+#    mtAntiVeto2 = plots.PlotBase([datasets3.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/transverseMass")])
     
     mtVeto2.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mtNoVeto2.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-    mtAntiVeto2.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+#    mtAntiVeto2.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
   
     
     mtVeto2._setLegendStyles()
@@ -187,17 +188,17 @@ def plot(datasets, datasets2, datasets3):
     mtNoVeto2.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))    
     hmtNoVeto2 = mtNoVeto2.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto().Clone(analysis+"/transversemass")
     
-    mtAntiVeto2._setLegendStyles()
-    mtAntiVeto2._setLegendLabels()
-    mtAntiVeto2.histoMgr.setHistoDrawStyleAll("P")
-    mtAntiVeto2.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))    
-    hmtAntiVeto2 = mtAntiVeto2.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto().Clone(analysis+"/transversemass")
+#    mtAntiVeto2._setLegendStyles()
+#    mtAntiVeto2._setLegendLabels()
+#    mtAntiVeto2.histoMgr.setHistoDrawStyleAll("P")
+#    mtAntiVeto2.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))    
+#    hmtAntiVeto2 = mtAntiVeto2.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto().Clone(analysis+"/transversemass")
 
 
   
     
     canvas4 = ROOT.TCanvas("canvas4","",500,500)
-#    canvas3.SetLogy()
+#    canvas4.SetLogy()
 #    hmtVetohptIsolEff.SetMaximum(0.1)
     hmtVeto2.SetMinimum(0.002)
     hmtVeto2.SetMarkerColor(2)
@@ -205,15 +206,15 @@ def plot(datasets, datasets2, datasets3):
     hmtVeto2.SetMarkerStyle(24)
     hmtVeto2.Draw("EP")
 
-    hmtNoVeto2.SetMarkerColor(7)
+    hmtNoVeto2.SetMarkerColor(4)
     hmtNoVeto2.SetMarkerSize(1)
     hmtNoVeto2.SetMarkerStyle(20)
     hmtNoVeto2.Draw("same")
     
-    hmtAntiVeto2.SetMarkerColor(4)
-    hmtAntiVeto2.SetMarkerSize(1)
-    hmtAntiVeto2.SetMarkerStyle(21)
-    hmtAntiVeto2.Draw("same")
+#    hmtAntiVeto2.SetMarkerColor(4)
+#    hmtAntiVeto2.SetMarkerSize(1)
+#    hmtAntiVeto2.SetMarkerStyle(21)
+#    hmtAntiVeto2.Draw("same")
     
     hmtVeto2.GetYaxis().SetTitle("Events / 20 GeV/c^{2}")
 
@@ -239,15 +240,15 @@ def plot(datasets, datasets2, datasets3):
     marker3.SetMarkerColor(hmtVeto2.GetMarkerColor())
     marker3.SetMarkerSize(0.9*hmtVeto2.GetMarkerSize())
     marker3.Draw()  
-    tex2 = ROOT.TLatex(0.55,0.5,"With additional #tau jets") 
-    tex2.SetNDC()
-    tex2.SetTextSize(20)
-    tex2.Draw()    
-    marker2 = ROOT.TMarker(0.5,0.51,hmtAntiVeto2.GetMarkerStyle())
-    marker2.SetNDC()
-    marker2.SetMarkerColor(hmtAntiVeto2.GetMarkerColor())
-    marker2.SetMarkerSize(0.9*hmtAntiVeto2.GetMarkerSize())
-    marker2.Draw()
+#    tex2 = ROOT.TLatex(0.55,0.5,"With additional #tau jets") 
+#    tex2.SetNDC()
+#    tex2.SetTextSize(20)
+#    tex2.Draw()    
+#    marker2 = ROOT.TMarker(0.5,0.51,hmtAntiVeto2.GetMarkerStyle())
+#    marker2.SetNDC()
+#    marker2.SetMarkerColor(hmtAntiVeto2.GetMarkerColor())
+#    marker2.SetMarkerSize(0.9*hmtAntiVeto2.GetMarkerSize())
+#    marker2.Draw()
 
     
     tex4 = ROOT.TLatex(0.2,0.95,"7 TeV                        CMS Preliminary ")

@@ -8,16 +8,19 @@ import sys
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+from math import sqrt,pow
 
 ## ExtractorResult
 # Helper class to cache the result for each extractor in each datacard column
 class ExtractorResult():
     ## Constructor(
-    def __init__(self, exId = "-1", masterId = "-1", result=None, histograms=None):
+    def __init__(self, exId = "-1", masterId = "-1", result=None, histograms=None, resultIsStat=False):
         self._exId = exId
         self._masterId = masterId
         self._result = result
-        self._histograms = histograms
+        self._resultIsStat = resultIsStat
+
+        self._histograms = histograms # histograms going into the datacard root file
         self._tempHistos = [] # Needed to make histograms going into root file persistent
 
     def getId(self):
@@ -29,15 +32,47 @@ class ExtractorResult():
     def getResult(self):
         return self._result
 
+    def getResultAverage(self):
+        if isinstance(self._result, list):
+            myValue = 0.0
+            for r in self._result:
+                myValue += abs(r)
+            myValue = myValue / len(self._result)
+            return myValue
+        else:
+            return self._result
+
+    def resultIsStatUncertainty(self):
+        return self._resultIsStat
+
+    def getHistograms(self):
+        return self._histograms
+
     def linkHistogramsToRootFile(self,rootfile):
         # Note: Do not call destructor for the tempHistos.
         #       Closing the root file to which they have been assigned to destructs them.
         #       i.e. it is enough to just clear the list.
-        self._tempHistos = [] 
+        #self._tempHistos = []
         for h in self._histograms:
             htemp = h.Clone(h.GetTitle())
             htemp.SetDirectory(rootfile)
             self._tempHistos.append(htemp)
+
+    def getContractedShapeUncertainty(self,hNominal):
+        if len(self._histograms) == 0:
+            return None
+        myResidualSum = 0.0
+        myAverageSum = 0.0
+        if len(self._histograms) == 2:
+            # Calculate average error as sqrt(sum((max-min)/2)**2) and central value as (max+min) / 2
+            for i in range(0, self._histograms[0].GetNbinsX()+2):
+                myResidualSum += pow((self._histograms[0].GetBinContent(i)-self._histograms[1].GetBinContent(i))/2,2)
+                myAverageSum += hNominal.GetBinContent(i)
+            if myAverageSum > 0:
+                return sqrt(myResidualSum) / myAverageSum
+            else:
+                return 0.0
+        return 0.0
 
 # DatacardColumn class
 class DatacardColumn():
@@ -75,6 +110,7 @@ class DatacardColumn():
         self._rateResult = None
         self._nuisanceIds = nuisanceIds
         self._nuisanceResults = []
+        self._controlPlots = []
         self._datasetMgrColumn = datasetMgrColumn
         self._datasetMgrColumnForQCDMCEWK  = datasetMgrColumnForQCDMCEWK
         self._additionalNormalisationFactor = additionalNormalisationFactor
@@ -166,8 +202,12 @@ class DatacardColumn():
         return self._rateCounter
 
     ## Returns the list of nuisance IDs
-    def getNuisances(self):
-        return self._nuisances
+    def getNuisanceIds(self):
+        return self._nuisanceIds
+
+    ## Returns list of results for nuisances
+    def getNuisanceResults(self):
+        return self._nuisanceResults
 
     ## Returns dataset manager
     def getDatasetMgr(self):
@@ -181,32 +221,43 @@ class DatacardColumn():
     def getDatasetMgrColumnForQCDMCEWK(self):
         return self._datasetMgrColumnForQCDMCEWK
 
+    ## Returns the module name, i.e. directory prefix in the root file
+    def getDirPrefix(self):
+        return self._dirPrefix
+
+    ## Get correct control plot
+    def getControlPlotByTitle(self, title):
+        for h in self._controlPlots:
+            if title in h.GetTitle():
+                return h
+        print "Available control plot names:"
+        for h in self._controlPlots:
+            print "  "+h.GetTitle()
+        raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Could not find control plot by title '%s' in column %s!"%(title, self._label))
+
     ## Do data mining and cache results
-    def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors):
-        print "...",self._label
+    def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors, controlPlotExtractors):
+        print "... processing column: "+HighlightStyle()+self._label+NormalStyle()
         # Obtain rate
         #sys.stdout.write("\r... data mining in progress: Column="+self._label+", obtaining Rate...                                                          ")
         #sys.stdout.flush()
         myRateResult = None
         myRateHistograms = []
-        if self.typeIsEmptyColum():
+        if self.typeIsEmptyColum() or dsetMgr == None:
             myRateResult = 0.0
             myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [], [], ExtractorMode.RATE, description="empty")
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
-        elif self.typeIsQCD():
-            print WarningStyle()+"Warning: rate not implemented for QCD yet, setting rate to zero"+NormalStyle()  #FIXME
-            myRateResult = 0.0
-            myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [], [], ExtractorMode.RATE, description="empty")
-            myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
+        #elif self.typeIsQCD():
+            # should never be reached for QCD factorised
         else:
             myExtractor = None
             myShapeExtractor = None
             if self.typeIsObservation():
                 myExtractor = CounterExtractor(self._rateCounter, ExtractorMode.OBSERVATION)
-                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [self._dirPrefix], [self._shapeHisto], ExtractorMode.OBSERVATION)
+                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [""], [self._shapeHisto], ExtractorMode.OBSERVATION)
             else:
                 myExtractor = CounterExtractor(self._rateCounter, ExtractorMode.RATE)
-                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [self._dirPrefix], [self._shapeHisto], ExtractorMode.RATE)
+                myShapeExtractor = ShapeExtractor(config.ShapeHistogramsDimensions, self._rateCounter, [""], [self._shapeHisto], ExtractorMode.RATE)
             myRateResult = myExtractor.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
             myRateHistograms.extend(myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
         # Cache result
@@ -214,7 +265,7 @@ class DatacardColumn():
                                            "rate",
                                            myRateResult,
                                            myRateHistograms)
-        # Obtain nuisances
+        # Obtain results for nuisances
         for nid in self._nuisanceIds:
             #sys.stdout.write("\r... data mining in progress: Column="+self._label+", obtaining Nuisance="+nid+"...                                              ")
             #sys.stdout.flush()
@@ -223,20 +274,27 @@ class DatacardColumn():
                 if e.getId() == nid:
                     myFoundStatus = True
                     # Obtain result
-                    myResult = e.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
+                    myResult = 0.0
+                    if dsetMgr != None:
+                        myResult = e.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
                     # Obtain histograms
                     myHistograms = []
-                    if e.isShapeNuisance():
+                    if e.isShapeNuisance() and dsetMgr != None:
                         myHistograms.extend(e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
                     # Cache result
                     self._nuisanceResults.append(ExtractorResult(e.getId(),
                                                                  e.getMasterId(),
                                                                  myResult,
-                                                                 myHistograms))
+                                                                 myHistograms,
+                                                                 "Stat." in e.getDescription() or "stat." in e.getDescription() or e.getDistribution()=="shapeStat"))
             if not myFoundStatus:
                 print "\n"+ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Cannot find nuisance with id '"+nid+"'!"
                 raise Exception()
-        #print "\nData mining done"
+        # Obtain results for control plots
+        for c in controlPlotExtractors:
+            if dsetMgr != None:
+                self._controlPlots.append(c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
+                #print "added ctrl plot %s for %s"%(c._histoTitle,self._label)
 
     ## Returns rate for column
     def getRateResult(self):
@@ -245,6 +303,14 @@ class DatacardColumn():
         if self._rateResult.getResult() == None:
             raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
         return self._rateResult.getResult()
+
+    ## Returns rate histogram for column
+    def getRateHistogram(self):
+        if self._rateResult == None:
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
+        if self._rateResult.getHistograms() == None:
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Rate histograms have not been cached! (did you forget to call doDataMining()?)")
+        return self._rateResult.getHistograms()[0]
 
     ## Returns true if column has a nuisance Id
     def hasNuisanceByMasterId(self, id):
@@ -262,7 +328,17 @@ class DatacardColumn():
         for result in self._nuisanceResults:
             if id == result.getMasterId():
                 return result.getResult()
-                #return nid.doExtract(self._datasetMgrColumn
+        raise Exception("Nuisance with id='"+id+"' not found in data group '"+self._label+"'! Check first with hasNuisance(id) that data group has the nuisance.")
+
+    ## Returns full nuisance for column (as string)
+    def getFullNuisanceResultByMasterId(self, id):
+        if self._nuisanceResults == None:
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Nuisance values have not been cached! (did you forget to call doDataMining()?)")
+        if len(self._nuisanceResults) == 0:
+            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Nuisance values have not been cached! (did you forget to call doDataMining()?)")
+        for result in self._nuisanceResults:
+            if id == result.getMasterId():
+                return result
         raise Exception("Nuisance with id='"+id+"' not found in data group '"+self._label+"'! Check first with hasNuisance(id) that data group has the nuisance.")
 
     ## Stores the cached result histograms to root file

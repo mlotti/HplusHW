@@ -108,6 +108,7 @@ namespace HPlus {
     fSelectedElectronPtBeforePtCut = -1.0;
     fSelectedElectronEta = -999.99;
     fSelectedElectrons.clear();
+    fSelectedLooseElectrons.clear();
 
     if(!bUseCustomElectronID) return Data(this, ElectronSelection(iEvent,iSetup));
     else{
@@ -248,7 +249,8 @@ namespace HPlus {
       else if( (bUseSimpleEleId80relIsoID) && (fElecIDSimpleEleId80relIso == 7) ) thisPassedID = true;
       else if( (bUseSimpleEleId70relIsoID) && (fElecIDSimpleEleId70relIso == 7) ) thisPassedID = true;
       else if( (bUseSimpleEleId60relIsoID) && (fElecIDSimpleEleId60relIso == 7) ) thisPassedID = true;
-      
+
+     
       if(!thisPassedID) continue;
       fSelectedElectrons.push_back(*iElectron);
       bPassedElecID = true;
@@ -269,7 +271,7 @@ namespace HPlus {
       if (std::abs(myElectronEta) >= fElecEtaCut) continue;
       bElecEtaCut = true;
 
-
+      if (bElecIDIsRobustLoose ) fSelectedLooseElectrons.push_back(*iElectron);
 
       // If Electron survives all cuts (1->3) then it is considered an isolated Electron. Now find the max Electron Pt.
 	if (thisPassedID && myElectronPt > myHighestElecPt) {
@@ -344,6 +346,8 @@ namespace HPlus {
     // Make a boolean that describes whether a Global Electron (passing all selection criteria) is found.
     bool bDecision = bElecPresent*bElecHasGsfTrkOrTrk*bElecPtCut*bElecEtaCut*bPassedElecID*bElecFiducialVolumeCut;
 
+
+
     // Now store the highest Electron Pt and Eta
     fSelectedElectronPt = myHighestElecPt;
     fSelectedElectronEta = myHighestElecEta;
@@ -357,6 +361,8 @@ namespace HPlus {
     return true;
     
   }//eof: bool GlobalElectronVeto::ElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+
+
 
   bool GlobalElectronVeto::CustomElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     

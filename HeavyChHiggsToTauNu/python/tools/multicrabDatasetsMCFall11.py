@@ -701,7 +701,7 @@ datasets = {
     },
     "W2Jets_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
-        "crossSection": 1, # FIXME
+        "crossSection": 1435.0, # taken from PREP
         "args": { "triggerMC": "1" },
         "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
@@ -724,7 +724,7 @@ datasets = {
     },
     "W3Jets_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
-        "crossSection": 1, # FIXME
+        "crossSection": 304.2, # taken from PREP
         "args": { "triggerMC": "1" },
         "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
@@ -747,7 +747,7 @@ datasets = {
     },
     "W4Jets_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
-        "crossSection": 1, # FIXME
+        "crossSection": 172.6, # taken from PREP
         "args": { "triggerMC": "1" },
         "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {

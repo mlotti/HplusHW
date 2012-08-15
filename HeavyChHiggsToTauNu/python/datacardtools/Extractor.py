@@ -19,6 +19,7 @@ class ExtractorMode:
     NUISANCE = 3
     ASYMMETRICNUISANCE = 4
     SHAPENUISANCE = 5
+    CONTROLPLOT = 6
 
 ## ExtractorBase class
 class ExtractorBase:
@@ -96,8 +97,7 @@ class ExtractorBase:
     def getCounterHistogram(self, rootFile, counterHisto):
         histo = rootFile.Get(counterHisto)
         if not histo:
-            print ErrorStyle()+"Error:"+NormalStyle()+" Cannot find counter histogram '"+counterHisto+"'!"
-            sys.exit()
+            raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Cannot find counter histogram '"+counterHisto+"'!")
         return histo
 
     ## Returns index to bin corresponding to first matching label in a counter histogram
@@ -105,8 +105,7 @@ class ExtractorBase:
         for i in range(1, histo.GetNbinsX()+1):
             if histo.GetXaxis().GetBinLabel(i) == myBinLabel:
                 return i
-        print ErrorStyle()+"Error:"+NormalStyle()+" Cannot find counter by name "+counterItem+"!"
-        sys.exit()
+        raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Cannot find counter by name "+counterItem+"!")
 
     ## Virtual method for extracking information
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -219,8 +218,7 @@ class MaxCounterExtractor(ExtractorBase):
         self._counterItem = counterItem
         self._counterDirs = counterDirs
         if len(self._counterDirs) < 2:
-            print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"':"+NormalStyle()+" need to specify at least two directories for counters!"
-            sys.exit()
+            raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"':"+NormalStyle()+" need to specify at least two directories for counters!")
 
     ## Method for extracking information
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -238,8 +236,7 @@ class MaxCounterExtractor(ExtractorBase):
                     myResult.append(count)
                     myFoundStatus = True
             if not myFoundStatus:
-                print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!"
-                sys.exit()
+                raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!")
         # Loop over results
         myMaxValue = 0.0
         # Protect for div by zero
@@ -272,8 +269,7 @@ class PileupUncertaintyExtractor(ExtractorBase):
         self._counterItem = counterItem
         self._counterDirs = counterDirs
         if len(self._counterDirs) < 2:
-            print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"':"+NormalStyle()+" need to specify at least two directories for counters!"
-            sys.exit()
+            raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"':"+NormalStyle()+" need to specify at least two directories for counters!")
 
     ## Method for extracking information
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -282,10 +278,9 @@ class PileupUncertaintyExtractor(ExtractorBase):
         # Normalise with up/down to get up/down histograms
         # mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.UP) #FIXME
         # mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.DOWN) #FIXME
-
         for d in self._counterDirs:
-            myHistoPath = d+"/weighted/counter"
-            datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoPath)
+            myHistoName = datasetColumn.getDirPrefix()+d+"/counters/weighted/counter"
+            datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             datasetRootHisto.normalizeToLuminosity(luminosity)
             myHisto = datasetRootHisto.getHistogram()
             counterList = _histoToCounter(myHisto)
@@ -296,8 +291,7 @@ class PileupUncertaintyExtractor(ExtractorBase):
                     myResult.append(count)
                     myFoundStatus = True
             if not myFoundStatus:
-                print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!"
-                sys.exit()
+                raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoName+"'!")
         # Revert back to nominal normalisation
         # mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.NOMINAL) #FIXME
         # Loop over results
@@ -372,8 +366,7 @@ class ScaleFactorExtractor(ExtractorBase):
         self._normalisation = normalisation
         self._addSystInQuadrature = addSystInQuadrature
         if len(self._histoDirs) != len(self._normalisation) or len(self._histoDirs) != len(self._histograms):
-            print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" need to specify equal amount of histoDirs, histograms and normalisation histograms!"
-            sys.exit()
+            raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" need to specify equal amount of histoDirs, histograms and normalisation histograms!")
 
     ## Method for extracking information
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -381,18 +374,18 @@ class ScaleFactorExtractor(ExtractorBase):
         for i in range (0, len(self._histoDirs)):
             myTotal = 0.0
             mySum = 0.0
-            myValueRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoDirs[i]+"/"+self._histograms[i])
+            myHistoName = datasetColumn.getDirPrefix()+"/"+self._histoDirs[i]+"/"+self._histograms[i]
+            myValueRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             myValueRootHisto.normalizeToLuminosity(luminosity)
             hValues = myValueRootHisto.getHistogram()
             if hValues == None:
-                print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot open histogram '"+self._histoDirs[i]+"/"+self._histograms[i]+"'!"
-                sys.exit()
-            myNormalisationRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoDirs[i]+"/"+self._normalisation[i])
+                raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot open histogram '"+myHistoName+"'!")
+            myHistoName = datasetColumn.getDirPrefix()+"/"+self._histoDirs[i]+"/"+self._normalisation[i]
+            myNormalisationRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             myNormalisationRootHisto.normalizeToLuminosity(luminosity)
             hNormalisation = myNormalisationRootHisto.getHistogram()
             if hNormalisation == None:
-                print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot open histogram '"+self._histoDirs[i]+"/"+self._normalisation[i]+"'!"
-                sys.exit()
+                raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot open histogram '"+myHistoName+"'!")
             for j in range (1, hValues.GetNbinsX()+1):
                 mySum += pow(hValues.GetBinContent(j) * hValues.GetBinCenter(j),2)
             myTotal = hNormalisation.GetBinContent(1)
@@ -435,34 +428,27 @@ class ShapeExtractor(ExtractorBase):
         self._histograms = histograms
         self._counterItem = counterItem
         if len(self._histoDirs) != len(self._histograms):
-            print ErrorStyle()+"Error in Rate/Nuisance with id='"+str(self._exid)+"':"+NormalStyle()+" need to specify equal amount of histoDirs and histograms!"
-            sys.exit()
+            raise Exception(ErrorStyle()+"Error in Rate/Nuisance with id='"+str(self._exid)+"':"+NormalStyle()+" need to specify equal amount of histoDirs and histograms!")
         if len(self._histoDirs) == 0 and self._description != "empty":
-            print ErrorStyle()+"Error in Rate/Nuisance with id='"+str(self._exid)+"':"+NormalStyle()+" need to specify histoDirs and histograms!"
-            sys.exit()
+            raise Exception(ErrorStyle()+"Error in Rate/Nuisance with id='"+str(self._exid)+"':"+NormalStyle()+" need to specify histoDirs and histograms!")
         if (self.isRate() or self.isObservation()):
             # Rate or observation needs to have exactly one entry (unless empty)
             if len(self._histoDirs) > 1:
-                print ErrorStyle()+"Error in Observation/Rate:"+NormalStyle()+"need to specify exactly one entry in both histoDirs and histograms!"
-                sys.exit()
+                raise Exception(ErrorStyle()+"Error in Observation/Rate:"+NormalStyle()+"need to specify exactly one entry in both histoDirs and histograms!")
         else:
             # Shape nuisance
             if self._distribution == "shapeQ":
                 # Shape variation nuisance needs to have exactly two entries (down, up)
                 if len(self._histoDirs) != 2:
-                    print ErrorStyle()+"Error in Nuisance with id='"+str(self._exid)+"' (shapeQ):"+NormalStyle()+" need to specify exactly two entries (down and up) in both histoDirs and histograms!"
-                    sys.exit()
+                    raise Exception(ErrorStyle()+"Error in Nuisance with id='"+str(self._exid)+"' (shapeQ):"+NormalStyle()+" need to specify exactly two entries (down and up) in both histoDirs and histograms!")
             elif self._distribution == "shapeStat":
                 # Shape variation nuisance needs to have exactly one entry
                 if len(self._histoDirs) != 1:
-                    print ErrorStyle()+"Error in Nuisance with id='"+str(self._exid)+"' (shapeStat):"+NormalStyle()+" need to specify exactly one entry in both histoDirs and histograms!"
-                    sys.exit()
+                    raise Exception(ErrorStyle()+"Error in Nuisance with id='"+str(self._exid)+"' (shapeStat):"+NormalStyle()+" need to specify exactly one entry in both histoDirs and histograms!")
             else:
-                print ErrorStyle()+"Error in Nuisance with id='"+str(self._exid)+"':"+NormalStyle()+" unknown option '"+self._distribution+"' for distribution! Options are 'shapeStat' and 'shapeQ'."
-                sys.exit()
+                raise Exception(ErrorStyle()+"Error in Nuisance with id='"+str(self._exid)+"':"+NormalStyle()+" unknown option '"+self._distribution+"' for distribution! Options are 'shapeStat' and 'shapeQ'.")
         #if len(self._histoSpecs) != 3:
-        #    print ErrorStyle()+"Error in config:"+NormalStyle()+" need to specify to ShapeHistogramsDimensions as list, example = [20,0.0,400.0] (i.e. nbins, min, max)!"
-        #    sys.exit()
+        #    raise Exception(ErrorStyle()+"Error in config:"+NormalStyle()+" need to specify to ShapeHistogramsDimensions as list, example = [20,0.0,400.0] (i.e. nbins, min, max)!")
 
     ## Method for extracking result
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -471,8 +457,8 @@ class ShapeExtractor(ExtractorBase):
         if self._distribution == "shapeQ":
             myNominalRateCount = mainCounterTable.getCount(rowName=self._counterItem, colName=datasetColumn.getDatasetMgrColumn()).value()
             for i in range (0, len(self._histoDirs)):
-                myHistoPath = self._histoDirs[i]+"Counters/weighted/counter"
-                datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoPath)
+                myHistoName = datasetColumn.getDirPrefix()+self._histoDirs[i]+"/counters/weighted/counter"
+                datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
                 if datasetRootHisto.isMC():
                     datasetRootHisto.normalizeToLuminosity(luminosity)
                 myHisto = datasetRootHisto.getHistogram()
@@ -481,11 +467,13 @@ class ShapeExtractor(ExtractorBase):
                 myFoundStatus = False # to ensure that the first counter of given name is taken
                 for name, count in counterList:
                     if name == self._counterItem and not myFoundStatus:
-                        myResult.append(abs(count.value()/myNominalRateCount-1.0))
+                        if myNominalRateCount > 0:
+                            myResult.append(abs(count.value()/myNominalRateCount-1.0))
+                        else:
+                            myResult.append(0.0)
                         myFoundStatus = True
                 if not myFoundStatus:
-                    print ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!"
-                    sys.exit()
+                    raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot find counter name '"+self._counterItem+"' in histogram '"+myHistoPath+"'!")
         return myResult
 
     ## Virtual method for extracting histograms
@@ -504,7 +492,9 @@ class ShapeExtractor(ExtractorBase):
             # Create empty shape histogram
             h = myShapeModifier.createEmptyShapeHistogram(myLabels[i])
             # Obtain source histogram
-            myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoDirs[i]+"/"+self._histograms[i])
+            myHistoName = datasetColumn.getDirPrefix()+self._histoDirs[i]+"/"+self._histograms[i]
+            #print "group",datasetColumn.getLabel(),"id",self._exid,"histo",myHistoName
+            myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             if myDatasetRootHisto.isMC():
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
             hSource = myDatasetRootHisto.getHistogram()
@@ -548,11 +538,69 @@ class ShapeExtractor(ExtractorBase):
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
-        print "MaxCounterExtractor"
+        print "ShapeExtractor"
+        print "- specs:",self._histoSpecs
+        print "- histoDirs:",self._histoDirs
+        print "- histograms:",self._histograms
         print "- counter item = ", self._counterItem
         ExtractorBase.printDebugInfo(self)
 
-    ## \var _counterDirs
-    # List of directories (without /weighted/counter suffix ) for counter histograms; first needs to be the nominal counter
-    ## \var _counterItem
-    # Name of item (label) in counter histogram
+## ControlPlotExtractor class
+# Extracts histograms for control plot
+class ControlPlotExtractor(ExtractorBase):
+    ## Constructor, note that if multiplet directories and names are given, the second, third, etc. are substracted from the first one
+    def __init__(self, histoSpecs, histoTitle, histoDirs, histoNames):
+        ExtractorBase.__init__(self, mode=ExtractorMode.CONTROLPLOT, exid="-1", distribution="-", description="-")
+        self._histoSpecs = histoSpecs
+        self._histoTitle = histoTitle
+        self._histoDirs = []
+        if isinstance(histoDirs, list):
+            self._histoDirs.extend(histoDirs)
+        else:
+            self._histoDirs.append(histoDirs)
+        self._histoNames = []
+        if isinstance(histoNames, list):
+            self._histoNames.extend(histoNames)
+        else:
+            self._histoNames.append(histoNames)
+        if len(self._histoDirs) != len(self._histoNames):
+            raise Exception (ErrorStyle()+"Error in ControlPlot "+histoTitle+":"+NormalStyle()+" need to specify equal amount of histoDirs and histoNames!")
+
+    ## Method for extracking result
+    def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        print WarningStyle()+"Did you actually call extractResult for a ControlPlot by name "+self._histoTitle+"? (you shouldn't)"+NormalStyle()
+        return 0.0 # Dummy number, this method
+
+    ## Virtual method for extracting histograms
+    def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        # Create an empty histogram
+        myLabel = datasetColumn.getLabel()+"_"+self._histoTitle
+        myShapeModifier = ShapeHistoModifier(self._histoSpecs)
+        h = myShapeModifier.createEmptyShapeHistogram(myLabel)
+        for i in range (0, len(self._histoDirs)):
+            # Obtain histogram from dataset
+            myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(datasetColumn.getDirPrefix()+"/"+self._histoDirs[i]+"/"+self._histoNames[i])
+            if myDatasetRootHisto.isMC():
+                myDatasetRootHisto.normalizeToLuminosity(luminosity)
+            hSource = myDatasetRootHisto.getHistogram()
+            if i == 0:
+                myShapeModifier.addShape(dest=h,source=hSource)
+            else:
+                myShapeModifier.subtractShape(dest=h,source=hSource)
+            hSource.IsA().Destructor(hSource)
+        # Finalise histogram
+        myShapeModifier.finaliseShape(dest=h)
+        # Add here substraction of negative bins, if necessary
+        # ... no use case currently, therefore no code added
+        # Return result
+        return h
+
+    ## Virtual method for printing debug information
+    def printDebugInfo(self):
+        print "ControlPlotExtractor"
+        print "- title:",self._histoTitle
+        print "- specs:",self._histoSpecs
+        print "- histoDirs:",self._histoDirs
+        print "- histoNames:",self._histoNames
+        ExtractorBase.printDebugInfo(self)
+
