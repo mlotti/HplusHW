@@ -104,60 +104,59 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
         signalCone = cms.double(0.1),
         isolationCone = cms.double(0.5)
     )
-    name = "patMuonsWithTight"+postfix
-    setattr(process, name, tight)
+    # name = "patMuonsWithTight"+postfix
+    # setattr(process, name, tight)
+    name = muons
 
-    medium = tight.clone(
-        candSrc = name,
-        embedPrefix = "byMedium",
-    )
-    name = "patMuonsWithMedium"+postfix
-    setattr(process, name, medium)
+    # medium = tight.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byMedium",
+    # )
+    # name = "patMuonsWithMedium"+postfix
+    # setattr(process, name, medium)
 
-    loose = tight.clone(
-        candSrc = name,
-        embedPrefix = "byLoose",
-    )
-    name = "patMuonsWithLoose"+postfix
-    setattr(process, name, loose)
+    # loose = tight.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byLoose",
+    # )
+    # name = "patMuonsWithLoose"+postfix
+    # setattr(process, name, loose)
 
-    vloose = tight.clone(
-        candSrc = name,
-        embedPrefix = "byVLoose",
-    )
-    name = "patMuonsWithVLoose"+postfix
-    setattr(process, name, vloose)
+    # vloose = tight.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byVLoose",
+    # )
+    # name = "patMuonsWithVLoose"+postfix
+    # setattr(process, name, vloose)
 
     tight.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByTightIsolation.qualityCuts.clone()
-    medium.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByMediumIsolation.qualityCuts.clone()
-    loose.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByLooseIsolation.qualityCuts.clone()
-    vloose.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByVLooseIsolation.qualityCuts.clone()
-    #HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByTightIsolation.qualityCuts.isolationQualityCuts, tight)
-    #HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByMediumIsolation.qualityCuts.isolationQualityCuts, medium)
-    #HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByLooseIsolation.qualityCuts.isolationQualityCuts, loose)
-    #HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByVLooseIsolation.qualityCuts.isolationQualityCuts, vloose)
+    # medium.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByMediumIsolation.qualityCuts.clone()
+    # loose.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByLooseIsolation.qualityCuts.clone()
+    # vloose.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByVLooseIsolation.qualityCuts.clone()
 
-    sequence *= (tight * medium * loose *vloose)
+    # sequence *= (tight * medium * loose *vloose)
 
     #######################
-    m = tight.clone(
-        candSrc = name,
-        embedPrefix = "byTightSc015",
-        signalCone = 0.15
-    )
-    name = "patMuonsWithTightSc015"+postfix
-    setattr(process, name, m)
-    sequence *= m
+    # m = tight.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byTightSc015",
+    #     signalCone = 0.15
+    # )
+    # name = "patMuonsWithTightSc015"+postfix
+    # setattr(process, name, m)
+    # sequence *= m
 
-    m = tight.clone(
-        candSrc = name,
-        embedPrefix = "byTightSc02",
-        signalCone = 0.2
-    )
-    name = "patMuonsWithTightSc02"+postfix
-    setattr(process, name, m)
-    sequence *= m
+    # m = tight.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byTightSc02",
+    #     signalCone = 0.2
+    # )
+    # name = "patMuonsWithTightSc02"+postfix
+    # setattr(process, name, m)
+    # sequence *= m
 
+    ## This is the one used for HIG-11-019 paper
+    # I.e. counting in annulus 0.1 < DR < 0.4
     m = tight.clone(
         candSrc = name,
         embedPrefix = "byTightIc04",
@@ -167,58 +166,110 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
     setattr(process, name, m)
     sequence *= m
 
-    m = m.clone(
-        candSrc = name,
-        embedPrefix = "byTightSc015Ic04",
-        signalCone = 0.15
-    )
-    name = "patMuonsWithTightSc015Ic04"+postfix
-    setattr(process, name, m)
-    sequence *= m
 
-    m = m.clone(
-        candSrc = name,
-        embedPrefix = "byTightSc02Ic04",
-        signalCone = 0.2
-    )
-    name = "patMuonsWithTightSc02Ic04"+postfix
-    setattr(process, name, m)
-    sequence *= m
+    # m = m.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byTightSc015Ic04",
+    #     signalCone = 0.15
+    # )
+    # name = "patMuonsWithTightSc015Ic04"+postfix
+    # setattr(process, name, m)
+    # sequence *= m
 
-    #######################
-    m = tight.clone(
-        candSrc = name,
-        embedPrefix = "byTightSc0",
-        signalCone = 0.01
-    )
-    name = "patMuonsWithTightSc0"+postfix
-    setattr(process, name, m)
-    sequence *= m
-
-    m = m.clone(
-        candSrc = name,
-        embedPrefix = "byTightSc0Ic04",
-        isolationCone = 0.4,
-    )
-    name = "patMuonsWithTightSc0Ic04"+postfix
-    setattr(process, name, m)
-    sequence *= m
-
-    m = m.clone(
-        candSrc = name,
-        embedPrefix = "byTightSc0Ic04Noq",
-        #minTrackHits = 0,
-        #minTrackPt = 0.0,
-        #maxTrackChi2 = 9999.,
-        #minTrackPixelHits = 0,
-        #minGammaEt = 0.0,
-        #maxDeltaZ = 9999.,
-    )
-    name = "patMuonsWithTightSc0Ic04Noq"+postfix
-    setattr(process, name, m)
-    sequence *= m
+    # m = m.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byTightSc02Ic04",
+    #     signalCone = 0.2
+    # )
+    # name = "patMuonsWithTightSc02Ic04"+postfix
+    # setattr(process, name, m)
+    # sequence *= m
 
     #######################
+    # m = tight.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byTightSc0",
+    #     signalCone = 0.01
+    # )
+    # name = "patMuonsWithTightSc0"+postfix
+    # setattr(process, name, m)
+    # sequence *= m
+
+    # m = m.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byTightSc0Ic04",
+    #     isolationCone = 0.4,
+    # )
+    # name = "patMuonsWithTightSc0Ic04"+postfix
+    # setattr(process, name, m)
+    # sequence *= m
+
+    # m = m.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byTightSc0Ic04Noq",
+    #     #minTrackHits = 0,
+    #     #minTrackPt = 0.0,
+    #     #maxTrackChi2 = 9999.,
+    #     #minTrackPixelHits = 0,
+    #     #minGammaEt = 0.0,
+    #     #maxDeltaZ = 9999.,
+    # )
+    # name = "patMuonsWithTightSc0Ic04Noq"+postfix
+    # setattr(process, name, m)
+    # sequence *= m
+
+    #######################
+    # DeltaBeta-based isolation for embedding, for now this configuration is only a guess
+    import RecoMuon.MuonIsolation.muonPFIsolationValues_cff as muonPFIsolation
+    def construct(isoModule, isoKey, vetos=[]):
+        deposit = isoModule.deposits[0]
+        pset = cms.PSet(
+            embedName = cms.string(isoKey),
+            deltaR = deposit.deltaR,
+            skipDefaultVeto = deposit.skipDefaultVeto,
+            mode = deposit.mode,
+            isolationKey = cms.string(isoKey),
+            vetos = cms.vstring(deposit.vetos)
+        )
+        pset.vetos.extend(vetos)
+        return pset
+
+    # In 0.1 < DR < 0.4
+    isolation = cms.EDProducer("HPlusPATMuonViewIsoDepositIsolationEmbedder",
+        src = cms.InputTag(name),
+        embedPrefix = cms.string("iso01to04_"),
+        deposits = cms.VPSet(
+            construct(muonPFIsolation.muPFIsoValueNeutral04, "pfNeutralHadrons", vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValueChargedAll04, "pfChargedAll",  vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValuePU04, "pfPUChargedHadrons",    vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValueGamma04, "pfPhotons",          vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValueCharged04, "pfChargedHadrons", vetos=["ConeVeto(0.1)"]),
+        )
+    )
+    name = "patMuonsWithIso01to04"+postfix
+    setattr(process, name, isolation)
+    sequence *= isolation
+
+
+    # In 0.1 < DR < 0.3
+    isolation = cms.EDProducer("HPlusPATMuonViewIsoDepositIsolationEmbedder",
+        src = cms.InputTag(name),
+        embedPrefix = cms.string("iso01to03_"),
+        deposits = cms.VPSet(
+            construct(muonPFIsolation.muPFIsoValueNeutral03, "pfNeutralHadrons", vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValueChargedAll03, "pfChargedAll",  vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValuePU03, "pfPUChargedHadrons",    vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValueGamma03, "pfPhotons",          vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValueCharged03, "pfChargedHadrons", vetos=["ConeVeto(0.1)"]),
+        )
+    )
+    name = "patMuonsWithIso01to03"+postfix
+    setattr(process, name, isolation)
+    sequence *= isolation
+
+
+    #######################
+    # Abuse the isolation function to embed generator matching
     gen = cms.EDProducer("HPlusPATMuonViewGenEmbedder",
         candSrc = cms.InputTag(name),
         genParticleSrc = cms.InputTag("genParticles"),
