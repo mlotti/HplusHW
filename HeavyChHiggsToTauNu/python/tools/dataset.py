@@ -48,9 +48,9 @@ class WeightedAllEvents:
         except KeyError:
             raise Exception("Invalid weight type %d, see dataset.PileupWeightType" % weightType)
         if int(unweighted) != int(self.unweighted):
-            print "%s: Unweighted all events from analysis %d, unweighted all events from _weightedAllEvents %d, using their ratio for setting the weighted all events" % (name, int(unweighted), int(self.unweighted))
             nweighted = unweighted * nweighted/self.unweighted
-        print "Using weighted event count for "+name+":",nweighted
+            print "%s: Unweighted all events from analysis %d, unweighted all events from _weightedAllEvents %d, using their ratio for setting the weighted all events (weight=%f)" % (name, int(unweighted), int(self.unweighted), nweighted)
+        #print "Using weighted event count for "+name+":",nweighted
         return nweighted
 
     ## \var unweighted
@@ -1473,7 +1473,6 @@ class Dataset:
             h = self.file.Get(pname)
             if h == None:
                 raise Exception("Unable to find histogram '%s' from file '%s'" % (pname, self.file.GetName()))
-
             name = h.GetName()+"_"+self.name
             h.SetName(name.translate(None, "-+.:;"))
         return DatasetRootHisto(h, self)

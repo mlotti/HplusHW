@@ -8,13 +8,17 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 
+namespace edm {
+  class ParameterSet;
+}
+
 namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
 
   class VertexAssignmentAnalysis {
   public:
-    VertexAssignmentAnalysis(EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    VertexAssignmentAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~VertexAssignmentAnalysis();
 
     /// Analyses the compatibility of the tau and the primary vertex

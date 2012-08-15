@@ -106,7 +106,7 @@ myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
 #myOptimisation.addBJetEtVariation([])
 #myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
 #myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
-#myOptimisation.addTopRecoVatiation(["None"]) # Valid options: None, chi, std, Wselection
+#myOptimisation.addTopRecoVariation(["None","chi"]) # Valid options: None, chi, std, Wselection
 myOptimisation.disableMaxVariations()
 if doOptimisation:
     doSystematics = True # Make sure that systematics are run
