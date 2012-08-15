@@ -16,11 +16,12 @@ massPoints = lands.allMassPoints
 
 ntoys = {
     # njobs, ntoysCLsb, ntoysCLb
-    "default": (160, 150, 75),
-    "100":     (200, 120, 60),
+    #"default": (160, 150, 75),
+    "default": (40, 150, 75),
+    #"100":     (200, 120, 60),
     # for nominal
-    "150":     (40,  600, 300),
-    "160":     (40,  600, 300),
+    #"150":     (40,  600, 300),
+    #"160":     (40,  600, 300),
 }
 def _ntoys(index):
     ret = {}

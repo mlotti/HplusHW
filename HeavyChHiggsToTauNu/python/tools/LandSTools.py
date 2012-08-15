@@ -81,7 +81,7 @@ defaultNumberOfJobs = 20
 defaultFirstSeed = 1000
 
 ## List of all mass points
-allMassPoints = ["80", "100", "120", "140", "150", "155", "160"]
+allMassPoints = ["80", "90", "120", "140", "150", "155", "160"] # FIXME, currently mass point 100 is not available
 ## Default mass points
 defaultMassPoints = ["120"]
 
@@ -666,9 +666,10 @@ class LEPType:
     #                   interface
     #
     # \return Result object containing the limits for the mass point
-    def getResult(self, path, mass, clsConfig):
+    def getResult(self, path, mass, clsConfig, unblindedStatus=False):
         result = Result(mass)
-        self._parseObserved(result, path, mass)
+        if unblindedStatus:
+            self._parseObserved(result, path, mass)
         self._parseExpected(result, path, mass)
         return result
 
@@ -939,7 +940,7 @@ class LHCType:
     # Runs the \a fitRvsCLs.C macro for the merged root file, and
     # reads the observed and expected limits from the output. The
     # script output is also stored in a text file for later referecence.
-    def getResult(self, path, mass, clsConfig):
+    def getResult(self, path, mass, clsConfig, unblindedStatus=False):
         result = Result(mass)
 
         rootFile = os.path.join(path, "Limit_m%s"%mass, "res", "histograms-Limit_m%s.root"%mass)
@@ -971,6 +972,13 @@ class LHCType:
             ".q"
             ])
         output = p.communicate("\n".join(commands)+"\n")[0]
+        # Dirty hack: apply blinding by removing files for observed
+        if not unblindedStatus:
+            if os.path.exists("plot_m%s_observed.gif"%mass):
+                os.remove("plot_m%s_observed.gif"%mass)
+            if os.path.exists("plot_m%s_observed.root"%mass):
+                os.remove("plot_m%s_observed.root"%mass)
+
 #        print output
         f = open(os.path.join(path, "fitRvsCLs_m%s_output.txt"%mass), "w")
         f.write(" ".join(rootCommand)+"\n\n")
@@ -978,13 +986,14 @@ class LHCType:
         f.write(output)
         f.write("\n")
         f.close()
-
         lines = output.split("\n")
         lines.reverse()
+
         def res(s):
             return "(?P<%s>[^+]+)\+/-(?P<%se>[^,]+)" % (s, s)
         result_re = re.compile("EXPECTED LIMIT BANDS.+mass=[^:]+:\s*" + res("obs") + ",\s+" +
                                res("m2s") + ",\s+" + res("m1s") + ",\s+" + res("med") + ",\s+" + res("p1s") + ",\s+" + res("p2s"))
+
         for line in lines:
             match = result_re.search(line)
             if match:
@@ -1313,7 +1322,7 @@ class ResultContainer:
         return self.lumi
 
     ## Print the limits
-    def print2(self):
+    def print2(self,unblindedStatus=False):
         print
         print "                  Expected"
         print "Mass  Observed    Median       -2sigma     -1sigma     +1sigma     +2sigma"
@@ -1324,13 +1333,16 @@ class ResultContainer:
             result = self.results[index]
             if result.empty():
                 continue
-            print format % (result.mass, result.observed, result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
+            if unblindedStatus:
+                print format % (result.mass, result.observed, result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
+            else:
+                print format % (result.mass, "BLINDED", result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
         print
     
     ## Store the results in a limits.json file
     #
     # \param data   Dictionary of additional data to be stored
-    def saveJson(self, data={}):
+    def saveJson(self, data={}, unblindedStatus=False):
         output = {}
         output.update(data)
         output.update({
@@ -1345,19 +1357,34 @@ class ResultContainer:
             if result.empty():
                 continue
 
-            output["masspoints"][result.mass] = {
-                "mass": result.mass,
-                "observed": result.observed,
-                "expected": {
-                    "-2sigma": result.expectedMinus2Sigma,
-                    "-1sigma": result.expectedMinus1Sigma,
-                    "median": result.expected,
-                    "+1sigma": result.expectedPlus1Sigma,
-                    "+2sigma": result.expectedPlus2Sigma,
+            if unblindedStatus:
+                output["masspoints"][result.mass] = {
+                    "mass": result.mass,
+                    "observed": result.observed,
+                    "expected": {
+                        "-2sigma": result.expectedMinus2Sigma,
+                        "-1sigma": result.expectedMinus1Sigma,
+                        "median": result.expected,
+                        "+1sigma": result.expectedPlus1Sigma,
+                        "+2sigma": result.expectedPlus2Sigma,
+                        }
                     }
-                }
-            if hasattr(result, "observedError"):
-                output["masspoints"][result.mass]["observed_error"] = result.observedError
+            else:
+                output["masspoints"][result.mass] = {
+                    "mass": result.mass,
+                    "observed": 0,
+                    "expected": {
+                        "-2sigma": result.expectedMinus2Sigma,
+                        "-1sigma": result.expectedMinus1Sigma,
+                        "median": result.expected,
+                        "+1sigma": result.expectedPlus1Sigma,
+                        "+2sigma": result.expectedPlus2Sigma,
+                        }
+                    }
+
+            if unblindedStatus:
+                if hasattr(result, "observedError"):
+                    output["masspoints"][result.mass]["observed_error"] = result.observedError
             if hasattr(result, "expectedError"):
                 output["masspoints"][result.mass]["expected"].update({
                         "-2sigma_error": result.expectedMinus2SigmaError,
@@ -1383,7 +1410,7 @@ class ParseLandsOutput:
     ## Constructor
     #
     # \param path   Path to the multicrab directory
-    def __init__(self, path):
+    def __init__(self, path, unblindedStatus=False):
 	self.path = path
 	self.lumi = 0
 
@@ -1407,7 +1434,7 @@ class ParseLandsOutput:
         except KeyError:
             clsConfig = None
         for mass in self.config["masspoints"]:
-            self.results.append(self.clsType.getResult(self.path, mass, clsConfig))
+            self.results.append(self.clsType.getResult(self.path, mass, clsConfig, unblindedStatus))
             print "Processed mass point %s" % mass
 
 
@@ -1416,8 +1443,8 @@ class ParseLandsOutput:
 	return self.results.getLuminosity()
 
     ## Print the results
-    def print2(self):
-        self.results.print2()
+    def print2(self,unblindedStatus=False):
+        self.results.print2(unblindedStatus)
 
     ## Save the results to \a limits.json file
     def saveJson(self):
