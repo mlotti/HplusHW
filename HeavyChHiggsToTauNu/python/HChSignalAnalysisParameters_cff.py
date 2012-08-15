@@ -54,7 +54,7 @@ tauSelectionBase = cms.untracked.PSet(
     ptCut = cms.untracked.double(40), # jet pt > value
     etaCut = cms.untracked.double(2.1), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
-    againstElectronDiscriminator = cms.untracked.string("againstElectronMedium"), # discriminator against electrons
+    againstElectronDiscriminator = cms.untracked.string("againstElectronMVA"), # discriminator against electrons
     againstMuonDiscriminator = cms.untracked.string("againstMuonTight"), # discriminator for against muons
     isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr"), # discriminator for isolation
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1.0), # cut point for continuous isolation discriminator, applied only if it is non-zero
@@ -126,6 +126,46 @@ tauSelectionNames = ["TauSelectionHPSTightTauBasedTauTriggerMatched",
 #tauSelection = tauSelectionHPSLooseTauBased
 tauSelection = tauSelectionHPSMediumTauBased
 
+# The fake tau SF and systematics numbers apply for 2011 data
+# Source: https://twiki.cern.ch/twiki/bin/view/CMS/TauIDRecommendation
+fakeTauSFandSystematicsBase = cms.untracked.PSet(
+    scalefactorFakeTauBarrelElectron = cms.untracked.double(1.0),
+    scalefactorFakeTauEndcapElectron = cms.untracked.double(1.0),
+    scalefactorFakeTauBarrelMuon = cms.untracked.double(1.0),
+    scalefactorFakeTauEndcapMuon = cms.untracked.double(1.0),
+    scalefactorFakeTauBarrelJet = cms.untracked.double(1.0),
+    scalefactorFakeTauEndcapJet = cms.untracked.double(1.0),
+    systematicsFakeTauBarrelElectron = cms.untracked.double(0.0),
+    systematicsFakeTauEndcapElectron = cms.untracked.double(0.0),
+    systematicsFakeTauBarrelMuon = cms.untracked.double(0.3),
+    systematicsFakeTauEndcapMuon = cms.untracked.double(0.3),
+    systematicsFakeTauBarrelJet = cms.untracked.double(0.2),
+    systematicsFakeTauEndcapJet = cms.untracked.double(0.2)
+)
+
+fakeTauSFandSystematicsAgainstElectronMedium = fakeTauSFandSystematicsBase.clone(
+    scalefactorFakeTauBarrelElectron = cms.untracked.double(0.95),
+    scalefactorFakeTauEndcapElectron = cms.untracked.double(0.75),
+    systematicsFakeTauBarrelElectron = cms.untracked.double(0.10),
+    systematicsFakeTauEndcapElectron = cms.untracked.double(0.15),
+)
+
+fakeTauSFandSystematicsAgainstElectronMVA = fakeTauSFandSystematicsBase.clone(
+    scalefactorFakeTauBarrelElectron = cms.untracked.double(0.85),
+    scalefactorFakeTauEndcapElectron = cms.untracked.double(0.65),
+    systematicsFakeTauBarrelElectron = cms.untracked.double(0.20),
+    systematicsFakeTauEndcapElectron = cms.untracked.double(0.25),
+)
+
+fakeTauSFandSystematics = None
+if tauSelection.againstElectronDiscriminator.value() == "againstElectronMedim":
+    fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMedium
+elif tauSelection.againstElectronDiscriminator.value() == "againstElectronMVA":
+    fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMVA
+else:
+    print "Warning: You used as againstElectronDiscriminator in tauSelection '%s', for which the fake tau systematics are not supported!"%tauSelection.againstElectronDiscriminator.value()
+    fakeTauSFandSystematics = fakeTauSFandSystematicsBase
+
 jetSelectionBase = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatJets"),       # Calo jets
     #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"), # JPT jets 
@@ -187,14 +227,14 @@ bTagging = cms.untracked.PSet(
 #    discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
     discriminator = cms.untracked.string("combinedSecondaryVertexBJetTags"),
 #    discriminator = cms.untracked.string("jetProbabilityBJetTags"),   
-    leadingDiscriminatorCut = cms.untracked.double(0.679), # used for best bjet candidates (best discriminator)
+    leadingDiscriminatorCut = cms.untracked.double(0.898), # used for best bjet candidates (best discriminator)
     subleadingDiscriminatorCut = cms.untracked.double(0.244), # used for other bjet candidates
     ptCut = cms.untracked.double(20.0),
     etaCut = cms.untracked.double(2.4),
     jetNumber = cms.untracked.uint32(1),
     jetNumberCutDirection = cms.untracked.string("GEQ"), # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
     UseBTagDB      = cms.untracked.bool(False),
-    BTagDBAlgo     = cms.untracked.string("TCHEL"), #FIXME
+    BTagDBAlgo     = cms.untracked.string("TCHEL"), #FIXME TCHEL
     BTagUserDBAlgo = cms.untracked.string("BTAGTCHEL_hplusBtagDB_TTJets") #FIXME
 )
 

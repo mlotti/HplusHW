@@ -108,15 +108,34 @@ class QCDEventCount():
         else:
             Exception(ErrorStyle()+"QCD factorised / factorisation data has more than 3 dimensions!"+NormalStyle())
 
-    def getContracted1DDataError(self,idx):
+    def getContracted1DDataError(self,idx,axis="X"):
         myUncert = 0.0
-        if self.is2D():
-            for j in range(1,self.getNbinsY()+1):
-                myUncert += (self._hData.GetBinError(idx,j))**2
-        elif self.is3D():
-            for j in range(1,self.getNbinsY()+1):
-                for k in range(1,self.getNbinsZ()+1):
-                    myUncert += (self._hData.GetBinError(idx,j,k))**2
+        if self.is3D():
+            if axis == "X":
+                for j in range(1,self.getNbinsY()+1):
+                    for k in range(1,self.getNbinsZ()+1):
+                        myUncert += (self._hData.GetBinError(idx,j,k))**2
+            elif axis == "Y":
+                for i in range(1,self.getNbinsX()+1):
+                    for k in range(1,self.getNbinsZ()+1):
+                        myUncert += (self._hData.GetBinError(i,idx,k))**2
+            elif axis == "Z":
+                for i in range(1,self.getNbinsX()+1):
+                    for j in range(1,self.getNbinsY()+1):
+                        myUncert += (self._hData.GetBinError(i,j,idx))**2
+            else:
+              raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" valid options for axis are X, Y, and Z (you tried '"+axis+"')")
+        elif self.is2D():
+            if axis == "X":
+                for j in range(1,self.getNbinsY()+1):
+                    myUncert += (self._hData.GetBinError(idx,j))**2
+            elif axis == "Y":
+                for i in range(1,self.getNbinsX()+1):
+                    myUncert += (self._hData.GetBinError(i,idx))**2
+            else:
+              raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" valid options for axis are X, Y, and Z (you tried '"+axis+"')")
+        elif self.is1D():
+            myUncert += (self._hData.GetBinError(idx))**2
         return sqrt(myUncert)
 
     ## Returns stat. error (MC only)
@@ -130,15 +149,34 @@ class QCDEventCount():
         else:
             Exception(ErrorStyle()+"QCD factorised / factorisation data has more than 3 dimensions!"+NormalStyle())
 
-    def getContracted1DMCStatError(self,idx):
+    def getContracted1DMCStatError(self,idx,axis="X"):
         myUncert = 0.0
-        if self.is2D():
-            for j in range(1,self.getNbinsY()+1):
-                myUncert += (self._hMC.GetBinError(idx,j))**2
-        elif self.is3D():
-            for j in range(1,self.getNbinsY()+1):
-                for k in range(1,self.getNbinsZ()+1):
-                    myUncert += (self._hMC.GetBinError(idx,j,k))**2
+        if self.is3D():
+            if axis == "X":
+                for j in range(1,self.getNbinsY()+1):
+                    for k in range(1,self.getNbinsZ()+1):
+                        myUncert += (self._hMC.GetBinError(idx,j,k))**2
+            elif axis == "Y":
+                for i in range(1,self.getNbinsX()+1):
+                    for k in range(1,self.getNbinsZ()+1):
+                        myUncert += (self._hMC.GetBinError(i,idx,k))**2
+            elif axis == "Z":
+                for i in range(1,self.getNbinsX()+1):
+                    for j in range(1,self.getNbinsY()+1):
+                        myUncert += (self._hMC.GetBinError(i,j,idx))**2
+            else:
+              raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" valid options for axis are X, Y, and Z (you tried '"+axis+"')")
+        elif self.is2D():
+            if axis == "X":
+                for j in range(1,self.getNbinsY()+1):
+                    myUncert += (self._hMC.GetBinError(idx,j))**2
+            elif axis == "Y":
+                for i in range(1,self.getNbinsX()+1):
+                    myUncert += (self._hMC.GetBinError(i,idx))**2
+            else:
+              raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" valid options for axis are X, Y, and Z (you tried '"+axis+"')")
+        elif self.is1D():
+            myUncert += (self._hMC.GetBinError(idx))**2
         return sqrt(myUncert)
 
     ## Returns syst. error (MC only)
@@ -152,8 +190,8 @@ class QCDEventCount():
         else:
             Exception(ErrorStyle()+"QCD factorised / factorisation data has more than 3 dimensions!"+NormalStyle())
 
-    def getContracted1DMCSystError(self,idx):
-        return self.getContracted1DMCStatError(idx) * self._assumedMCEWKSystUncertainty
+    def getContracted1DMCSystError(self,idx,axis="X"):
+        return self.getContracted1DMCStatError(idx,axis) * self._assumedMCEWKSystUncertainty
 
     ## Returns stat.+syst. uncertainty
     def getTotalError(self,idx,idy=-1,idz=-1):
@@ -187,22 +225,49 @@ class QCDEventCount():
 
     ## Returns the count object for data-MC for a bin on first variation parameter, other parameters are contracted (i.e. summed)
     ## (uncertainty = stat.+syst. uncertainty)
-    def getContracted1DQCDCount(self,idx):
+    def getContracted1DQCDCount(self,idx,axis="X"):
         # Obtain value and its uncertainty
         myData = 0.0
         myMC = 0.0
         myUncert = 0.0
-        if self.is2D():
-            for j in range(1,self.getNbinsY()+1):
-                myData += self.getDataCount(idx,j)
-                myMC += self.getMCCount(idx,j)
-                myUncert += (self.getTotalError(idx,j))**2
-        elif self.is3D():
-            for j in range(1,self.getNbinsY()+1):
-                for k in range(1,self.getNbinsZ()+1):
-                    myData += self.getDataCount(idx,j,k)
-                    myMC += self.getMCCount(idx,j,k)
-                    myUncert += (self.getTotalError(idx,j,k))**2
+        if self.is3D():
+            if axis == "X":
+                for j in range(1,self.getNbinsY()+1):
+                    for k in range(1,self.getNbinsZ()+1):
+                        myData += self.getDataCount(idx,j,k)
+                        myMC += self.getMCCount(idx,j,k)
+                        myUncert += (self.getTotalError(idx,j,k))**2
+            elif axis == "Y":
+                for i in range(1,self.getNbinsX()+1):
+                    for k in range(1,self.getNbinsZ()+1):
+                        myData += self.getDataCount(i,idx,k)
+                        myMC += self.getMCCount(i,idx,k)
+                        myUncert += (self.getTotalError(i,idx,k))**2
+            elif axis == "Z":
+                for i in range(1,self.getNbinsX()+1):
+                    for j in range(1,self.getNbinsY()+1):
+                        myData += self.getDataCount(i,j,idx)
+                        myMC += self.getMCCount(i,j,idx)
+                        myUncert += (self.getTotalError(i,j,idx))**2
+            else:
+              raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" valid options for axis are X, Y, and Z (you tried '"+axis+"')")
+        elif self.is2D():
+            if axis == "X":
+                for j in range(1,self.getNbinsY()+1):
+                    myData += self.getDataCount(idx,j)
+                    myMC += self.getMCCount(idx,j)
+                    myUncert += (self.getTotalError(idx,j))**2
+            elif axis == "Y":
+                for i in range(1,self.getNbinsX()+1):
+                    myData += self.getDataCount(i,idx)
+                    myMC += self.getMCCount(i,idx)
+                    myUncert += (self.getTotalError(i,idx))**2
+            else:
+              raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" valid options for axis are X, Y, and Z (you tried '"+axis+"')")
+        elif self.is1D():
+            myData += self.getDataCount(idx)
+            myMC += self.getMCCount(idx)
+            myUncert += (self.getTotalError(idx))**2
         myResult = myData - myMC
         myResultError = sqrt(myUncert)
         # Obtain uncertainty # Check negative result
@@ -425,10 +490,10 @@ class QCDfactorisedCalculator():
         self._MCSystUncertainty = 0.0
 
         # NQCD with only first parameter (others contracted)
-        self._contractedNQCD = 0.0
-        self._contractedDataUncertainty = 0.0
-        self._contractedMCStatUncertainty = 0.0
-        self._contractedMCSystUncertainty = 0.0
+        self._contractedNQCD = {}
+        self._contractedDataUncertainty = {}
+        self._contractedMCStatUncertainty = {}
+        self._contractedMCSystUncertainty = {}
 
         self._basicCount = basicCounts
         self._leg1Counts = leg1Counts
@@ -437,7 +502,12 @@ class QCDfactorisedCalculator():
         # Count NQCD
         self._nQCDHistograms = []
         self._count(basicCounts, leg1Counts, leg2Counts, doHistograms)
-        self._contractedCount(basicCounts, leg1Counts, leg2Counts, doHistograms)
+        # Count NQCD by doing first contraction to one axis
+        self._contractedCount(basicCounts, leg1Counts, leg2Counts, "X", doHistograms)
+        if basicCounts.is2D() or basicCounts.is3D():
+            self._contractedCount(basicCounts, leg1Counts, leg2Counts, "Y", doHistograms)
+        if basicCounts.is3D():
+            self._contractedCount(basicCounts, leg1Counts, leg2Counts, "Z", doHistograms)
 
     def clean(self):
         self._basicCount.clean()
@@ -447,8 +517,8 @@ class QCDfactorisedCalculator():
     def getNQCD(self):
         return self._NQCD
 
-    def getContractedNQCD(self):
-        return self._contractedNQCD
+    def getContractedNQCD(self,axis):
+        return self._contractedNQCD[axis]
 
     def getNQCDHistograms(self):
         return self._nQCDHistograms
@@ -468,11 +538,11 @@ class QCDfactorisedCalculator():
     def getSystUncertainty(self):
         return self.getMCSystUncertainty()
 
-    def getContractedStatUncertainty(self):
-        return sqrt(pow(self._contractedDataUncertainty,2)+pow(self._contractedMCStatUncertainty,2)) / self._contractedNQCD
+    def getContractedStatUncertainty(self,axis):
+        return sqrt(pow(self._contractedDataUncertainty[axis],2)+pow(self._contractedMCStatUncertainty[axis],2)) / self._contractedNQCD[axis]
 
-    def getContractedSystUncertainty(self):
-        return self._contractedMCSystUncertainty / self._contractedNQCD
+    def getContractedSystUncertainty(self,axis):
+        return self._contractedMCSystUncertainty[axis] / self._contractedNQCD[axis]
 
     def getTotalUncertainty(self):
         return sqrt(pow(self._dataUncertainty,2)+pow(self._MCStatUncertainty,2)+pow(self._getMCSystUncertainty,2)) / self._NQCD
@@ -494,18 +564,18 @@ class QCDfactorisedCalculator():
             #print "1D eff: nom=%f, denom=%f, value=%f +- %f:"%(nominatorCount.value(),denominatorCount.value(),myValue,myError)
         return Count(myValue,myError)
 
-    def getContracted1DLeg1Efficiency(self,idx):
+    def getContracted1DLeg1Efficiency(self,idx,axis):
         return self._getContracted1DEfficiency(self._leg1Counts,self._basicCount,idx)
 
-    def getContracted1DLeg2Efficiency(self,idx):
+    def getContracted1DLeg2Efficiency(self,idx,axis):
         return self._getContracted1DEfficiency(self._leg2Counts,self._basicCount,idx)
 
     ## Returns the efficiency for a bin on first variation parameter, other parameters are contracted (i.e. summed)
-    def _getContracted1DEfficiency(self,nominator,denominator,idx):
+    def _getContracted1DEfficiency(self,nominator,denominator,idx,axis):
         myValue = -1.0
         myError = 0.0
-        nominatorCount = nominator.getContracted1DQCDCount(idx,idy,idz)
-        denominatorCount = denominator.getContracted1DQCDCount(idx,idy,idz)
+        nominatorCount = nominator.getContracted1DQCDCount(idx,axis)
+        denominatorCount = denominator.getContracted1DQCDCount(idx,axis)
         if denominatorCount.value() > 0 and nominatorCount.value() > 0:
             myValue = nominatorCount.value() / denominatorCount.value()
             myError = myValue*sqrt(pow(nominatorCount.uncertainty()/nominatorCount.value(),2)+pow(denominatorCount.uncertainty()/denominatorCount.value(),2))
@@ -695,43 +765,99 @@ class QCDfactorisedCalculator():
         self._MCStatUncertainty = sqrt(self._MCStatUncertainty)
         self._MCSystUncertainty = sqrt(self._MCSystUncertainty)
 
-    def _contractedCount(self, basicCounts, leg1Counts, leg2Counts, doHistograms=False):
+    def _contractedCount(self, basicCounts, leg1Counts, leg2Counts, axis, doHistograms = False):
         h = None
+        heff1 = None
+        heff2 = None
+        heff12 = None
+        contractedNQCD = 0
+        contractedDataUncertainty = 0
+        contractedMCStatUncertainty = 0
+        contractedMCSystUncertainty = 0
+        myBins = 0
+        if axis == "X":
+            myBins = basicCounts.getNbinsX()
+        elif axis == "Y":
+            myBins = basicCounts.getNbinsY()
+        elif axis == "Z":
+            myBins = basicCounts.getNbinsZ()
         if doHistograms:
-            myName = "Contracted_NQCD"
-            h = ROOT.TH1F(myName,myName,basicCounts.getNbinsX(),0,basicCounts.getNbinsX())
-            h.SetYTitle("Contracted_NQCD")
-        for i in range (1,basicCounts.getNbinsX()+1):
+            myName = "Contracted_NQCD_axis%s"%axis
+            h = ROOT.TH1F(myName,myName,myBins,0,myBins)
+            h.SetYTitle(myName)
+            myName = "Contracted_EffLeg1_axis%s"%axis
+            heff1 = ROOT.TH1F(myName,myName,myBins,0,myBins)
+            heff1.SetYTitle(myName)
+            myName = "Contracted_EffLeg2_axis%s"%axis
+            heff2 = ROOT.TH1F(myName,myName,myBins,0,myBins)
+            heff2.SetYTitle(myName)
+            myName = "Contracted_EffLeg1AndLeg2_axis%s"%axis
+            heff12 = ROOT.TH1F(myName,myName,myBins,0,myBins)
+            heff12.SetYTitle(myName)
+        for i in range (1,myBins+1):
             if doHistograms:
-                h.GetXaxis().SetBinLabel(i,basicCounts.getBinLabel("X",i))
-            myBasicCounts = basicCounts.getContracted1DQCDCount(i).value()
-            myLeg1Counts = leg1Counts.getContracted1DQCDCount(i).value()
-            myLeg2Counts = leg2Counts.getContracted1DQCDCount(i).value()
+                h.GetXaxis().SetBinLabel(i,basicCounts.getBinLabel(axis,i))
+                heff1.GetXaxis().SetBinLabel(i,basicCounts.getBinLabel(axis,i))
+                heff2.GetXaxis().SetBinLabel(i,basicCounts.getBinLabel(axis,i))
+                heff12.GetXaxis().SetBinLabel(i,basicCounts.getBinLabel(axis,i))
+            myBasicCounts = basicCounts.getContracted1DQCDCount(i,axis).value()
+            myLeg1Counts = leg1Counts.getContracted1DQCDCount(i,axis).value()
+            myLeg2Counts = leg2Counts.getContracted1DQCDCount(i,axis).value()
             myCount = 0.0
             myDataUncert = 0.0
             myMCStatUncert = 0.0
             myMCSystUncert = 0.0
+            myEff1 = 0.0
+            myEff2 = 0.0
+            myEff1Uncert = 0.0
+            myEff2Uncert = 0.0
             # Protect calculation against div by zero
-            if (myBasicCounts > 0.0):
+            if myBasicCounts > 0.0:
                 myCount = myLeg1Counts * myLeg2Counts / myBasicCounts
                 # Calculate uncertainty as f=a*b  (i.e. ignore basic counts uncertainty since it is the denominator to avoid double counting of uncertainties)
-                myDataUncert = pow(myLeg2Counts*leg1Counts.getContracted1DDataError(i)/myBasicCounts,2) + pow(myLeg1Counts*leg2Counts.getContracted1DDataError(i)/myBasicCounts,2)
-                myMCStatUncert = pow(myLeg2Counts*leg1Counts.getContracted1DMCStatError(i)/myBasicCounts,2) + pow(myLeg1Counts*leg2Counts.getContracted1DMCStatError(i)/myBasicCounts,2)
-                myMCSystUncert = pow(myLeg2Counts*leg1Counts.getContracted1DMCSystError(i)/myBasicCounts,2) + pow(myLeg1Counts*leg2Counts.getContracted1DMCSystError(i)/myBasicCounts,2)
-            # Make sum
-            self._contractedNQCD += myCount
-            self._contractedDataUncertainty += myDataUncert
-            self._contractedMCStatUncertainty += myMCStatUncert
-            self._contractedMCSystUncertainty += myMCSystUncert
+                myDataUncert = pow(myLeg2Counts*leg1Counts.getContracted1DDataError(i,axis)/myBasicCounts,2) + pow(myLeg1Counts*leg2Counts.getContracted1DDataError(i,axis)/myBasicCounts,2)
+                myMCStatUncert = pow(myLeg2Counts*leg1Counts.getContracted1DMCStatError(i,axis)/myBasicCounts,2) + pow(myLeg1Counts*leg2Counts.getContracted1DMCStatError(i,axis)/myBasicCounts,2)
+                myMCSystUncert = pow(myLeg2Counts*leg1Counts.getContracted1DMCSystError(i,axis)/myBasicCounts,2) + pow(myLeg1Counts*leg2Counts.getContracted1DMCSystError(i,axis)/myBasicCounts,2)
+                # Calculate efficiencies
+                myEff1 = myLeg1Counts / myBasicCounts
+                if myEff1 > 0.0:
+                    myEff1Uncert = (pow(basicCounts.getContracted1DDataError(i,axis)/myBasicCounts,2) +
+                                    pow(leg1Counts.getContracted1DDataError(i,axis)/myLeg1Counts,2) +
+                                    pow(basicCounts.getContracted1DMCStatError(i,axis)/myBasicCounts,2) +
+                                    pow(leg1Counts.getContracted1DMCStatError(i,axis)/myLeg1Counts,2)) * pow(myEff1,2)
+                myEff2 = myLeg2Counts / myBasicCounts
+                if myEff2 > 0.0:
+                    myEff2Uncert = (pow(basicCounts.getContracted1DDataError(i,axis)/myBasicCounts,2) +
+                                    pow(leg2Counts.getContracted1DDataError(i,axis)/myLeg2Counts,2) +
+                                    pow(basicCounts.getContracted1DMCStatError(i,axis)/myBasicCounts,2) +
+                                    pow(leg2Counts.getContracted1DMCStatError(i,axis)/myLeg2Counts,2)) * pow(myEff2,2)
+            # Make total sum
+            contractedNQCD += myCount
+            contractedDataUncertainty += myDataUncert
+            contractedMCStatUncertainty += myMCStatUncert
+            contractedMCSystUncertainty += myMCSystUncert
             # Fill histogram
             if myCount > 0 and doHistograms:
                 h.SetBinContent(i, myCount)
                 h.SetBinError(i, sqrt(myDataUncert+myMCStatUncert+myMCSystUncert))
+                if myEff1 > 0:
+                    heff1.SetBinContent(i, myEff1)
+                    heff1.SetBinError(i, sqrt(myEff1Uncert))
+                if myEff2 > 0:
+                    heff2.SetBinContent(i, myEff2)
+                    heff2.SetBinError(i, sqrt(myEff2Uncert))
+                if myEff1 > 0 and myEff2 > 0:
+                    heff12.SetBinContent(i, myEff1*myEff2)
+                    heff12.SetBinError(i, sqrt(pow(myEff2,2)*myEff1Uncert + pow(myEff1,2)*myEff2Uncert))
         if doHistograms:
             self._nQCDHistograms.append(h)
-        self._contractedDataUncertainty = sqrt(self._contractedDataUncertainty)
-        self._contractedMCStatUncertainty = sqrt(self._contractedMCStatUncertainty)
-        self._contractedMCSystUncertainty = sqrt(self._contractedMCSystUncertainty)
+            self._nQCDHistograms.append(heff1)
+            self._nQCDHistograms.append(heff2)
+            self._nQCDHistograms.append(heff12)
+        self._contractedNQCD[axis] = contractedNQCD
+        self._contractedDataUncertainty[axis] = sqrt(contractedDataUncertainty)
+        self._contractedMCStatUncertainty[axis] = sqrt(contractedMCStatUncertainty)
+        self._contractedMCSystUncertainty[axis] = sqrt(contractedMCSystUncertainty)
 
 ## class QCDfactorisedColumn
 # Inherits from DatacardColumn and extends its functionality to calculate the QCD measurement and its result in one go
@@ -804,7 +930,11 @@ class QCDfactorisedColumn(DatacardColumn):
         self._infoHistograms.extend(myQCDCalculator.getLeg2EfficiencyHistogram())
         # Print result
         print "... NQCD = %f +- %f (%% stat.) +- %f (%% syst.)"%(myQCDCalculator.getNQCD(),myQCDCalculator.getStatUncertainty(),myQCDCalculator.getSystUncertainty())
-        print "... Contracted NQCD = %f +- %f (%% stat.) +- %f (%% syst.)"%(myQCDCalculator.getContractedNQCD(),myQCDCalculator.getContractedStatUncertainty(),myQCDCalculator.getContractedSystUncertainty())
+        print "... Contracted NQCD for x axis= %f +- %f (%% stat.) +- %f (%% syst.)"%(myQCDCalculator.getContractedNQCD("X"),myQCDCalculator.getContractedStatUncertainty("X"),myQCDCalculator.getContractedSystUncertainty("X"))
+        if myBigBoxEventCount.is2D() or myBigBoxEventCount.is3D():
+            print "... Contracted NQCD for y axis= %f +- %f (%% stat.) +- %f (%% syst.)"%(myQCDCalculator.getContractedNQCD("Y"),myQCDCalculator.getContractedStatUncertainty("Y"),myQCDCalculator.getContractedSystUncertainty("Y"))
+        if myBigBoxEventCount.is3D():
+            print "... Contracted NQCD for z axis= %f +- %f (%% stat.) +- %f (%% syst.)"%(myQCDCalculator.getContractedNQCD("Z"),myQCDCalculator.getContractedStatUncertainty("Z"),myQCDCalculator.getContractedSystUncertainty("Z"))
         # Make shape histogram
         print "... Calculating shape (looping over %d histograms)..."%myBigBoxEventCount.getTotalDimension()
         myRateHistograms=[]
@@ -866,18 +996,20 @@ class QCDfactorisedColumn(DatacardColumn):
             if not myFoundStatus:
                 raise Exception("\n"+ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Cannot find nuisance with id '"+nid+"'!")
         # Obtain results for control plots
-        print "... Obtaining control plots ..."
-        if config.ControlPlots != None and dsetMgr != None:
-            for c in config.ControlPlots:
-                hShape = self._createShapeHistogram(config, dsetMgr, myQCDCalculator, myBigBoxEventCount, luminosity,
-                                                    c.details, c.title, self._dirPrefix+"/"+c.QCDFactHistoPath, c.QCDFactHistoName)
-                # Normalise
-                myEventCount = self._getQCDEventCount(dsetMgr=dsetMgr, histoName=c.QCDFactNormalisation, luminosity=luminosity)
-                myQCDCalculator = QCDfactorisedCalculator(myBigBoxEventCount, myEventCount, myTauLegEventCount)
-                hShape.Scale(myQCDCalculator.getNQCD() / hShape.Integral())
-                print "     "+c.title+", NQCD=%f"%myQCDCalculator.getNQCD()
-                myEventCount.clean()
-                self._controlPlots.append(hShape)
+        if config.OptionDoControlPlots != None:
+            if config.OptionDoControlPlots:
+                print "... Obtaining control plots ..."
+                if config.ControlPlots != None and dsetMgr != None:
+                    for c in config.ControlPlots:
+                        hShape = self._createShapeHistogram(config, dsetMgr, myQCDCalculator, myBigBoxEventCount, luminosity,
+                                                            c.details, c.title, self._dirPrefix+"/"+c.QCDFactHistoPath, c.QCDFactHistoName)
+                        # Normalise
+                        myEventCount = self._getQCDEventCount(dsetMgr=dsetMgr, histoName=c.QCDFactNormalisation, luminosity=luminosity)
+                        myQCDCalculator = QCDfactorisedCalculator(myBigBoxEventCount, myEventCount, myTauLegEventCount)
+                        hShape.Scale(myQCDCalculator.getNQCD() / hShape.Integral())
+                        print "     "+c.title+", NQCD=%f"%myQCDCalculator.getNQCD()
+                        myEventCount.clean()
+                        self._controlPlots.append(hShape)
         # Clean up
         myQCDCalculator.clean()
 
@@ -929,6 +1061,14 @@ class QCDfactorisedColumn(DatacardColumn):
                     myFullHistoName = "%s/%s%s"%(histoDir,histoName,myFactorisationSuffix)
                     hMtData = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumn, myFullHistoName, luminosity)
                     hMtMCEWK = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumnForQCDMCEWK, myFullHistoName, luminosity)
+                    if title == "Njets": ## FIXME
+                        for a in range(0,hMtData.GetNbinsX()+1):
+                            if a <= 3:
+                                hMtData.SetBinContent(a,0.0)
+                                hMtData.SetBinError(a,0.0)
+                                hMtMCEWK.SetBinContent(a,0.0)
+                                hMtMCEWK.SetBinError(a,0.0)
+                                #print "bin=%d, data=%f"%(a,hMtData.GetBinContent(a))
                     if self._debugMode:
                         print "  QCDfactorised / %s: bin%s, data=%f, MC EWK=%f, QCD=%f"%(title,myFactorisationSuffix,hMtData.Integral(0,hMtData.GetNbinsX()+1),hMtMCEWK.Integral(0,hMtMCEWK.GetNbinsX()+1),hMtData.Integral(0,hMtData.GetNbinsX()+1)-hMtMCEWK.Integral(0,hMtMCEWK.GetNbinsX()+1))
                     # Obtain empty histograms
@@ -974,8 +1114,11 @@ class QCDfactorisedColumn(DatacardColumn):
                         if saveDetailedInfo:
                             hMtBinData.Scale(myEfficiency.value())
                             hMtBinEWK.Scale(myEfficiency.value())
+                    else:
+                        # Do not take this bin into account if cannot obtain efficiency
+                        hMtBin.Reset()
                     if self._debugMode:
-                        print "  QCDfactorised / mT shape: bin %d_%d_%d, eff=%f, eff*QCD=%f"%(i,j,k,myEfficiency.value(),hMtBin.Integral())
+                        print "  QCDfactorised / %s shape: bin %d_%d_%d, eff=%f, eff*QCD=%f"%(title,i,j,k,myEfficiency.value(),hMtBin.Integral())
                     # Add to total shape histogram
                     myShapeModifier.addShape(source=hMtBin,dest=h)
                     # Add to total info histogram
@@ -1042,7 +1185,7 @@ class QCDfactorisedColumn(DatacardColumn):
         myRootFile.Close()
         # Cleanup (closing the root file destroys the objects assigned to it, do not redestroy the histos in the _infoHistograms list
         self._infoHistograms = []
-        print "QCD Measurement factorised info histograms saved to:",myRootFilename
+        print "\n"+HighlightStyle()+"QCD Measurement factorised info histograms saved to: "+NormalStyle()+myRootFilename
 
 ## QCDfactorisedExtractor class
 # It is essentially wrapper for QCD mode string

@@ -231,30 +231,42 @@ class DataCardGenerator:
         else:
             self._dsetMgrs.append(None)
         if self._doEmbeddingAnalysis:
+            print "***"
             self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myEmbeddingPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+self._optimisationVariation+"/counters"))
         else:
             self._dsetMgrs.append(None)
         self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myQCDPath+"/multicrab.cfg", counters=myQCDCounters))
+        # Set normalisation and obtain dataset names and luminosities
         myAllDatasetNames = []
         myLuminosities = []
-        for mgr in self._dsetMgrs:
-            if mgr != None:
+        for i in range(0,len(self._dsetMgrs)):
+            if self._dsetMgrs[i] != None:
                 # update normalisation info
-                mgr.updateNAllEventsToPUWeighted()
-                mgr.loadLuminosities()
+                self._dsetMgrs[i].updateNAllEventsToPUWeighted()
+                self._dsetMgrs[i].loadLuminosities()
                 # Obtain all dataset names
-                myAllDatasetNames.append(mgr.getAllDatasetNames())
+                myAllDatasetNames.append(self._dsetMgrs[i].getAllDatasetNames())
                 # Obtain luminosity
                 myLuminosity = 0.0
-                for d in mgr.getDataDatasets():
+                for d in self._dsetMgrs[i].getDataDatasets():
                     myLuminosity += d.getLuminosity()
                 myLuminosities.append(myLuminosity)
+                # Print info
+                myMsg = HighlightStyle()+"DatasetManager info before merging for "
+                if i == 1:
+                    myMsg += "signal"
+                elif i == 2:
+                    myMsg += "EWKtau"
+                elif i == 3:
+                    myMsg += "QCD"
+                print myMsg+NormalStyle()
+                self._dsetMgrs[i].printInfo()
             else:
                 myAllDatasetNames.append([])
                 myLuminosities.append(0.0)
         print "Luminosity is set to:"
         print "  signal multicrab: "+HighlightStyle()+"%f 1/pb"%myLuminosities[1] +NormalStyle()
-        print "     EWK multicrab: "+HighlightStyle()+"%f 1/pb"%myLuminosities[2] +NormalStyle()
+        print "  EWKtau multicrab: "+HighlightStyle()+"%f 1/pb"%myLuminosities[2] +NormalStyle()
         print "     QCD multicrab: "+HighlightStyle()+"%f 1/pb"%myLuminosities[3] +NormalStyle()
         self._luminosity = myLuminosities[1]
         # Check that luminosities are compatible
@@ -358,6 +370,17 @@ class DataCardGenerator:
                 if self._opts.debugConfig:
                     myColumn.printDebug()
         print "Data groups converted to datacard columns"
+        for i in range(0,len(self._dsetMgrs)):
+            if self._dsetMgrs[i] != None:
+                myMsg = HighlightStyle()+"DatasetManager info after merging datasets for "
+                if i == 1:
+                    myMsg += "signal"
+                elif i == 2:
+                    myMsg += "EWKtau"
+                elif i == 3:
+                    myMsg += "QCD"
+                print myMsg+NormalStyle()
+                self._dsetMgrs[i].printInfo()
         return myLuminosities
 
     def doDataMining(self, luminosities):
@@ -367,11 +390,11 @@ class DataCardGenerator:
         for i in range(0,len(self._dsetMgrs)):
             if self._dsetMgrs[i] != None:
                 # Obtain main event counter table
-                myEventCounter = counter.EventCounter(self._dsetMgrs[i])
+                myEventCounter = counter.EventCounter(self._dsetMgrs[i],None,None,True)
                 myEventCounter.normalizeMCToLuminosity(luminosities[i])
                 myEventCounterTables.append(myEventCounter.getMainCounterTable())
             else:
-                myEventCounterTables.append([])
+                myEventCounterTables.append(None)
         # Do data mining and cache results
         print "Starting data mining"
         if self._doSignalAnalysis:

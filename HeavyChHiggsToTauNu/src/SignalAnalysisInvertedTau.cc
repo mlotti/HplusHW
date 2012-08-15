@@ -113,6 +113,7 @@ namespace HPlus {
     fCorrelationAnalysis(eventCounter, fHistoWrapper),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
     fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fHistoWrapper),
+    fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fVertexWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeightReader")),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     // Non-QCD Type II related
@@ -432,11 +433,15 @@ namespace HPlus {
     edm::PtrVector<pat::Tau> myBestTauCandidate;
     if (tauData.getSelectedTaus().size())
       myBestTauCandidate.push_back(tauData.getSelectedTau());
+    // Obtain MC matching - for EWK without genuine taus
+    FakeTauIdentifier::MCSelectedTauMatchType myMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
+    // Apply scale factor for fake tau
+    if (!iEvent.isRealData())
+      fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(myMatch, tauData.getSelectedTau()->eta()));
 
-   
-    if(tauData.getSelectedTaus().size() == 0) return false; // at least one tau candidate
+    //if(tauData.getSelectedTaus().size() == 0) return false; // at least one tau candidate
     increment(fTausExistCounter);
-        
+
     // nprongs
     if (!tauData.selectedTauPassesNProngs()) return false;
     increment(fNprongsAfterTauIDCounter);
@@ -448,7 +453,7 @@ namespace HPlus {
     if (!tauData.selectedTauPassesRtau()) return false;
     increment(fRtauAfterTauIDCounter);
     // now tau ID has been applied
-   
+
 
     if(iEvent.isRealData())
       fTriggerEfficiencyScaleFactor.setRun(iEvent.id().run());

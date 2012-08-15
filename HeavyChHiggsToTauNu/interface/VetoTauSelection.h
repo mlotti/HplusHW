@@ -37,7 +37,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
 
-    VetoTauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    VetoTauSelection(const edm::ParameterSet& iConfig, const edm::ParameterSet& fakeTauSFandSystematicsConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~VetoTauSelection();
 
     /// Analyses the compatibility of the tau and the primary vertex

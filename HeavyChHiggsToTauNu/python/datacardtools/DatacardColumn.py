@@ -291,10 +291,12 @@ class DatacardColumn():
                 print "\n"+ErrorStyle()+"Error (data group ='"+self._label+"'):"+NormalStyle()+" Cannot find nuisance with id '"+nid+"'!"
                 raise Exception()
         # Obtain results for control plots
-        for c in controlPlotExtractors:
-            if dsetMgr != None:
-                self._controlPlots.append(c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
-                #print "added ctrl plot %s for %s"%(c._histoTitle,self._label)
+        if config.OptionDoControlPlots != None:
+            if config.OptionDoControlPlots:
+                for c in controlPlotExtractors:
+                    if dsetMgr != None:
+                        self._controlPlots.append(c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor))
+                        #print "added ctrl plot %s for %s"%(c._histoTitle,self._label)
 
     ## Returns rate for column
     def getRateResult(self):
