@@ -239,7 +239,7 @@ class HPlusOptimisationScheme():
                                                                 myModule.bTagging.jetNumberCutDirection = self.getOperatorFromCutWithDirection(bjetNumber)
                                                                 myModule.bTagging.jetNumber = (int)(self.getNumberFromCutWithDirection(bjetNumber))
                                                                 myModule.deltaPhiTauMET = dphi
-                                                                # FIXME add top variation here
+                                                                myModule.topReconstruction = topreco
                                                                 # Add analysis
                                                                 addAnalysis(process, myVariationName, myModule,
                                                                             preSequence=commonSequence,

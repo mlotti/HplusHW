@@ -14,8 +14,8 @@
 #include "TMath.h"
 
 namespace HPlus {
-  VertexAssignmentAnalysis::VertexAssignmentAnalysis(HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
-    fFakeTauIdentifier(histoWrapper, "VertexAssignment"),
+  VertexAssignmentAnalysis::VertexAssignmentAnalysis(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
+    fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), histoWrapper, "VertexAssignment"),
     fAllEventsWithGenuineTaus(eventCounter.addSubCounter("VtxAssignment","genuine tau/all events")),
     fGenuineTausWithCorrectPV(eventCounter.addSubCounter("VtxAssignment","genuine tau/passed events")),
     fAllEventsWithFakeTaus(eventCounter.addSubCounter("VtxAssignment","fake tau/all events")),

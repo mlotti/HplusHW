@@ -228,6 +228,10 @@ namespace HPlus {
     WrappedTH1 *hTransverseMassAfterDeltaPhi130;
     WrappedTH1 *hTransverseMassAfterDeltaPhi90;
 
+    // Full mass histograms
+    WrappedTH1 *hFullMass;
+    WrappedTH1 *hEWKFakeTausFullMass;
+
 
     WrappedTH1 *hDeltaPhi;
     WrappedTH1 *hDeltaPhiJetMet;
