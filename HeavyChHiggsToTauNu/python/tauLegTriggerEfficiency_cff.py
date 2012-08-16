@@ -159,6 +159,7 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA = cms
                 triggerBin(40.0, 0.5, 0.176478356266),
                 triggerBin(50.0, 1.0, 0.458641675296),
                 triggerBin(60.0, 1.0, 0.36887757085),
+                triggerBin(80.0, 1.0, 0.36887757085), # Manually added
             ),
         ),
         # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)
@@ -250,6 +251,7 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA = cms.
                 triggerBin(40.0, 0.5, 0.176478356266),
                 triggerBin(50.0, 1.0, 0.458641675296),
                 triggerBin(60.0, 1.0, 0.36887757085),
+                triggerBin(80.0, 1.0, 0.36887757085), # Manually added
             ),
         ),
         # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)
@@ -341,6 +343,7 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium = c
                 triggerBin(40.0, 0.5, 0.161982400205),
                 triggerBin(50.0, 1.0, 0.458641675296),
                 triggerBin(60.0, 1.0, 0.36887757085),
+                triggerBin(80.0, 1.0, 0.36887757085), # Manually added
             ),
         ),
         # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)
