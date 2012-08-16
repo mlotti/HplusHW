@@ -128,6 +128,8 @@ namespace HPlus {
     // Control plots
     createShapeHistograms(fs, hCtrlNjets, "CtrlLeg1AfterNjets", 10, 0., 10.);
     createShapeHistograms(fs, hCtrlMET, "CtrlLeg1AfterMET", 100, 0.0, 500.0);
+    createShapeHistograms(fs, hCtrlMETAfterBtagging, "CtrlLeg1AfterMETAfterBtagging", 100, 0.0, 500.0);
+    createShapeHistograms(fs, hCtrlMETAfterBtaggingAndDeltaPhi, "CtrlLeg1AfterMETAfterBtaggingAndDeltaPhi", 100, 0.0, 500.0);
     createShapeHistograms(fs, hCtrlNbjets, "CtrlLeg1AfterNbjets", 10, 0., 10.0);
     createShapeHistograms(fs, hCtrlDeltaPhiTauMET, "CtrlLeg1AfterDeltaPhiTauMET", 36, 0., 180.);
     createShapeHistograms(fs, hCtrlMaxDeltaPhiJetMET, "CtrlLeg1AfterMaxDeltaPhiJetMET", 36, 0., 180.);
@@ -362,6 +364,7 @@ namespace HPlus {
     hSelectionFlow->Fill(kQCDOrderBTag);
     hLeg1AfterBTagging->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
     if (myPassedTauLegStatus) increment(fCoincidenceAfterBjetsCounter);
+    hCtrlMETAfterBtagging[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(metData.getSelectedMET()->et());
 
     // Delta phi(tau,MET) cut
     hCtrlDeltaPhiTauMET[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(deltaPhi);
@@ -370,6 +373,7 @@ namespace HPlus {
     hSelectionFlow->Fill(kQCDOrderDeltaPhiTauMET);
     hLeg1AfterDeltaPhiTauMET->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
     if (myPassedTauLegStatus) increment(fCoincidenceAfterDeltaPhiCounter);
+    hCtrlMETAfterBtaggingAndDeltaPhi[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(metData.getSelectedMET()->et());
 
     // Max Delta phi(jet,MET) cut
     double myMaxDeltaPhiJetMET = 0.0;
