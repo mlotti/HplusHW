@@ -211,10 +211,8 @@ namespace HPlus {
       bElecHasGsfTrkOrTrk = true;
       
       // Electron Variables (Pt, Eta etc..)
-      float myElectronPt  = myGsfTrackRef->pt();
-      float myElectronEta = myGsfTrackRef->eta();
-/*      float myElectronPt  = (*iElectron)->pt();
-      float myElectronEta = (*iElectron)->eta();*/
+      float myElectronPt  = (*iElectron)->pt();
+      float myElectronEta = (*iElectron)->eta();
       // float myElectronPhi = (*iElectron)->phi();
 
       // Fill histos with all-Electrons Pt and Eta
