@@ -16,11 +16,12 @@ massPoints = lands.allMassPoints
 
 ntoys = {
     # njobs, ntoysCLsb, ntoysCLb
-    "default": (160, 150, 75),
-    "100":     (200, 120, 60),
+    #"default": (160, 150, 75),
+    "default": (40, 150, 75),
+    #"100":     (200, 120, 60),
     # for nominal
-    "150":     (40,  600, 300),
-    "160":     (40,  600, 300),
+    #"150":     (40,  600, 300),
+    #"160":     (40,  600, 300),
 }
 def _ntoys(index):
     ret = {}
@@ -70,11 +71,14 @@ def main(opts):
                                     vR={"default": None,
                                         # Initially obtained from asymp. limit as min/max of +-2 sigma and observed
                                         # After that, with trial and error of hybrid limit (e.g. by looking plot*.gif plots)
-                                        "80":  ("0.01",  "0.15"), 
-                                        "100": ("0.005", "0.15"), 
-                                        "120": ("0.005", "0.08"), 
-                                        "140": ("0.005", "0.05"), 
-                                        "155": ("0.005", "0.05"), 
+                                        "80":  ("0.001",  "0.08", "x1.05"), 
+                                        "90":  ("0.001",  "0.08", "x1.05"), 
+                                        "100": ("0.001", "0.08", "x1.05"), 
+                                        "120": ("0.001", "0.04", "x1.05"), 
+                                        "140": ("0.0005", "0.03", "x1.05"), 
+                                        "150": ("0.0005", "0.03", "x1.05"),
+                                        "155": ("0.0005", "0.02", "x1.05"),
+                                        "160": ("0.0005", "0.02", "x1.05"), 
                                         }
                                     ),
             numberOfJobs = _njobs(),

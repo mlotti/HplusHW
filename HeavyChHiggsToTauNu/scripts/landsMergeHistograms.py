@@ -37,17 +37,20 @@ def main(opts, args):
 
     # Run LandS to do obtain the results
     print "Running LandS for merged expected results"
-    result = lands.ParseLandsOutput(".")
-#    result.print2()
+    result = lands.ParseLandsOutput(".", opts.unblinded)
+    #result.print2(opts.unblinded)
     result.saveJson()
 
     # Plot the BR limit
+    limitArgs = ""
+    if opts.unblinded:
+        limitArgs += " --unblinded"
     try:
         cmsswBase = os.environ["CMSSW_BASE"]
     except KeyError:
         raise Exception("Did you 'cmsenv'? I can't find $CMSSW_BASE environment variable")
     script = os.path.join(cmsswBase, "src", "HiggsAnalysis", "HeavyChHiggsToTauNu", "test", "brlimit", "plotBRLimit.py")
-    ret = subprocess.call([script])
+    ret = subprocess.call([script,limitArgs])
     if ret != 0:
         raise Exception("plotBRLimit.py failed with exit code %d, command was\n%s" % (ret, script))
 
@@ -69,6 +72,8 @@ if __name__ == "__main__":
                       help="Don't run hplusMergeHistograms (i.e. run only LandS for the merged output)")
     parser.add_option("--delete", dest="delete", default=False, action="store_true",
                       help="Delete the source files to save disk space (default is to keep the files)")
+    parser.add_option("--unblinded", dest="unblinded", default=False, action="store_true",
+                      help="Draw observation to limit plots")
 
     (opts, args) = parser.parse_args()
 

@@ -329,6 +329,8 @@ print "TauSelection isolation:", process.signalAnalysis.tauSelection.isolationDi
 print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode.value()
 print "VetoTauSelection src:", process.signalAnalysis.vetoTauSelection.tauSelection.src.value()
 print "Beta cut: ", process.signalAnalysis.jetSelection.betaCutSource.value(), process.signalAnalysis.jetSelection.betaCutDirection.value(), process.signalAnalysis.jetSelection.betaCut.value()
+print "electrons: ", process.signalAnalysis.GlobalElectronVeto
+print "muons: ", process.signalAnalysis.GlobalMuonVeto
 print "jets: ", process.signalAnalysis.jetSelection
 
 # Counter analyzer (in order to produce compatible root file with the
