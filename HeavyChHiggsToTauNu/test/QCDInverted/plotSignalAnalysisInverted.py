@@ -50,7 +50,8 @@ deltaPhiDistribution = False
 HiggsMass = False
 HiggsMassPhi140 = True
 
-
+lastPtBin150 = False
+lastPtBin120 = True
 
 mcOnly = False
 #mcOnly = True
@@ -191,8 +192,12 @@ def doPlots(datasets):
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet7080"), "MTInvertedTauIdJet7080", rebin=20)
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet80100"), "MTInvertedTauIdJet80100", rebin=20)
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet100120"), "MTInvertedTauIdJet100120", rebin=20)
-    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet120150"), "MTInvertedTauIdJet120150", rebin=20)
-    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet150"), "MTInvertedTauIdJet150", rebin=20)                       
+    if lastPtBin150: 
+        transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet120150"), "MTInvertedTauIdJet120150", rebin=20)
+        transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet150"), "MTInvertedTauIdJet150", rebin=20)
+    if lastPtBin120: 
+        transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet150"), "MTInvertedTauIdJet120", rebin=20)
+                
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet"), "MTInvertedTauIdJet", rebin=20)
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdPhi"), "MTInvertedTauIdPhi", rebin=20)
 #    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdMet"), "MTInvertedTauIdMet", rebin=10)  
@@ -329,9 +334,11 @@ try:
     norm_7080 = QCDInvertedNormalization["7080"]
     norm_80100 = QCDInvertedNormalization["80100"]
     norm_100120 = QCDInvertedNormalization["100120"]
-    norm_120150 = QCDInvertedNormalization["120150"]
-    norm_150 = QCDInvertedNormalization["150"]
-
+    if lastPtBin150: 
+        norm_120150 = QCDInvertedNormalization["120150"]
+        norm_150 = QCDInvertedNormalization["150"]
+    if lastPtBin120: 
+        norm_120 = QCDInvertedNormalization["120"]
 
 except ImportError:   
     print
@@ -430,8 +437,11 @@ def mtComparison(datasets):
         mt7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag7080")])
         mt80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag80100")])
         mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag100120")])
-        mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag120150")])
-        mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag150")])
+        if lastPtBin150: 
+            mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag120150")])
+            mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag150")])
+        if lastPtBin120: 
+            mt120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag120")])
         mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag")])
         mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdBtag")])
         mtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTBaseLineTauIdBtag")])             
@@ -455,8 +465,13 @@ def mtComparison(datasets):
         mt7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass7080")])
         mt80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass80100")])
         mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass100120")])
-        mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass120150")])
-        mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass150")])
+        if lastPtBin150:
+            mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass120150")])
+            mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass150")])
+        if lastPtBin120:
+           mt120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass120")])
+
+                
         mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass")])
 
 
@@ -468,8 +483,11 @@ def mtComparison(datasets):
         mt7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi7080")])
         mt80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi80100")])
         mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi100120")])
-        mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi120150")])
-        mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi150")])
+        if lastPtBin150:
+            mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi120150")])
+            mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi150")])
+        if lastPtBin120:
+            mt120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi120")])
         mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi")])
         mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdPhi")])
 
@@ -482,8 +500,11 @@ def mtComparison(datasets):
         mt7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted7080")])
         mt80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted80100")])
         mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted100120")])
-        mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted120150")])
-        mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted150")])
+        if lastPtBin150:
+            mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted120150")])
+            mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted150")])
+        if lastPtBin120:
+            mt120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted120")])
         mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted")])
         mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdPhi")])
 
@@ -496,8 +517,11 @@ def mtComparison(datasets):
         mt7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggMass7080")])
         mt80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass80100")])
         mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass100120")])
-        mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass120150")])
-        mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass150")])
+        if lastPtBin150:
+            mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass120150")])
+            mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass150")])
+        if lastPtBin120: 
+            mt120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass120")])
         mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass")])
 
     if (HiggsMassPhi140):
@@ -507,13 +531,19 @@ def mtComparison(datasets):
         mt7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi7080")])
         mt80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi80100")])
         mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi100120")])
-        mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi120150")])
-        mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi150")])
+        if lastPtBin150:
+            mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi120150")])
+            mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi150")])
+        if lastPtBin120:
+            mt120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi120")])
         mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi")])
         
         mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdPhi")])
-
-    print " norm factors ",norm_inc,norm_4050,norm_5060,norm_6070,norm_7080,norm_80100,norm_100120,norm_120150,norm_150
+        
+    if lastPtBin150:
+        print " norm factors ",norm_inc,norm_4050,norm_5060,norm_6070,norm_7080,norm_80100,norm_100120,norm_120150,norm_150
+    if lastPtBin120:
+        print " norm factors ",norm_inc,norm_4050,norm_5060,norm_6070,norm_7080,norm_80100,norm_100120,norm_120
 
 #    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
 #    mt4050._setLegend(histograms.createLegend())
@@ -585,27 +615,36 @@ def mtComparison(datasets):
     print "Integral 100120  = ",hmt100120.Integral()    
     hmt100120.Scale(norm_100120) 
 
-    
-    mt120150._setLegendStyles()
-    mt120150._setLegendLabels()
-    mt120150.histoMgr.setHistoDrawStyleAll("P")
-    mt120150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))      
-    hmt120150 = mt120150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi120150")
-    hmtSum2.Add(hmt120150)
-    print "Integral 120150  = ",hmt120150.Integral()
-    hmt120150.Scale(norm_120150) 
 
-    
-    mt150._setLegendStyles()
-    mt150._setLegendLabels()
-    mt150.histoMgr.setHistoDrawStyleAll("P")
-    mt150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
-    hmt150 = mt150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi150")
-    hmtSum2.Add(hmt150)
-    print "Integral 150  = ",hmt150.Integral()
-    hmt150.Scale(norm_150) 
-
+    if lastPtBin150:    
+        mt120150._setLegendStyles()
+        mt120150._setLegendLabels()
+        mt120150.histoMgr.setHistoDrawStyleAll("P")
+        mt120150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))      
+        hmt120150 = mt120150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi120150")
+        hmtSum2.Add(hmt120150)
+        print "Integral 120150  = ",hmt120150.Integral()
+        hmt120150.Scale(norm_120150) 
         
+        
+        mt150._setLegendStyles()
+        mt150._setLegendLabels()
+        mt150.histoMgr.setHistoDrawStyleAll("P")
+        mt150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+        hmt150 = mt150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi150")
+        hmtSum2.Add(hmt150)
+        print "Integral 150  = ",hmt150.Integral()
+        hmt150.Scale(norm_150)
+        
+    if lastPtBin120:
+        mt120._setLegendStyles()
+        mt120._setLegendLabels()
+        mt120.histoMgr.setHistoDrawStyleAll("P")
+        mt120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+        hmt120 = mt120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi120")
+        hmtSum2.Add(hmt120)
+        print "Integral 120  = ",hmt120.Integral()
+        hmt120.Scale(norm_120)
     mt._setLegendStyles()
     mt._setLegendLabels()
     mt.histoMgr.setHistoDrawStyleAll("P")
@@ -634,9 +673,12 @@ def mtComparison(datasets):
     hmtSum.Add(hmt7080)
     hmtSum.Add(hmt80100)
     hmtSum.Add(hmt100120)
-    hmtSum.Add(hmt120150)
-    hmtSum.Add(hmt150)
-    
+    if lastPtBin150:
+        hmtSum.Add(hmt120150)
+        hmtSum.Add(hmt150)
+    if lastPtBin120:
+        hmtSum.Add(hmt120)
+        
     canvas = ROOT.TCanvas("canvas","",500,500)
     canvas.Divide(3,3)
     canvas.cd(1)
@@ -653,13 +695,19 @@ def mtComparison(datasets):
     hmt80100.Draw()
     canvas.cd(6)
     hmt100120.Draw()
-    canvas.cd(7)
-    hmt120150.Draw()
-    canvas.cd(8)
-    hmt150.Draw()
-    
-    canvas.cd(9)
-    hmtSum.Draw()
+    if lastPtBin150:
+        canvas.cd(7)
+        hmt120150.Draw()
+        canvas.cd(8)
+        hmt150.Draw()    
+        canvas.cd(9)
+        hmtSum.Draw()
+    if lastPtBin120:
+        canvas.cd(7)
+        hmt120.Draw()
+        canvas.cd(8)
+        hmtSum.Draw()
+        
 #    canvas.Print("mtComparison_PhiCut.png")
 #    if(btagging):
     if(deltaPhi180): 

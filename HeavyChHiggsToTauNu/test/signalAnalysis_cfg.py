@@ -11,7 +11,7 @@ dataVersion="44XmcS6"     # Fall11 MC
 
 # Set the data scenario for vertex/pileup weighting
 # options: Run2011A, Run2011B, Run2011A+B
-puweight = "Run2011A+B"
+puweight = "Run2011A"
 
 ##########
 # Flags for additional signal analysis modules
@@ -258,9 +258,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 param.overrideTriggerFromOptions(options)
 param.trigger.triggerSrc.setProcessName(dataVersion.getTriggerProcess())
 # Set tau selection mode to 'standard'
-param.setAllTauSelectionOperatingMode('standard')
+#param.setAllTauSelectionOperatingMode('standard')
 #
-#param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
+param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
 
 # Set tau sources to trigger matched tau collections
 #param.setAllTauSelectionSrcSelectedPatTaus()

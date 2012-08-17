@@ -97,7 +97,7 @@ def main():
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     
     # Remove QCD
-    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
+#    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
     histograms.createLegend.moveDefaults(dx=-0.02)
     histograms.createLegend.moveDefaults(dh=-0.03)
     
@@ -112,7 +112,7 @@ def main():
     # Set the signal cross sections to a value from MSSM
 #    xsect.setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=200)
 
-    plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section
+#    plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section
 
 
     # Replace signal dataset with EWK+signal
@@ -201,7 +201,7 @@ def doPlots(datasets):
 #    tauCandPhi(createPlot("TauSelection_all_tau_candidates_phi"), step="begin" )
 
     # Electron veto
-    drawPlot(createPlot("GlobalElectronVeto/GlobalElectronPt_identified"), "electronPt", rebin=3, xlabel="p_{T}^{electron} (GeV/c)", ylabel="Identified electrons / %.0f GeV/c", opts={"xmax": 250}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=15)
+    drawPlot(createPlot("GlobalElectronVeto/GlobalElectronPt_identified"), "electronPt", rebin=3, xlabel="p_{T}^{electron} (GeV/c)", ylabel="Identified electrons / %.0f GeV/c", opts={"xmax": 250,"xmin": 0}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=15)
     drawPlot(createPlot("GlobalElectronVeto/GlobalElectronEta_identified"), "electronEta", rebin=3, xlabel="#eta^{electron}", ylabel="Identified electrons / %.1f", opts={"xmin": -3, "xmax": 3, "ymaxfactor": 50}, moveLegend={"dy":0.01, "dx":-0.07, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=[-2.5, 2.5])
 
     # Muon veto
@@ -341,7 +341,8 @@ def doPlots(datasets):
 #    mtComparison(datasets)
 #    MetComparison(datasets)
 #    BetaComparison(datasets)
-#    InvMassComparison(datasets)
+#    HiggsMassComparison(datasets)
+    InvMassComparison(datasets)
 #    rtauComparison(datasets)
     
 
@@ -381,8 +382,10 @@ def doCounters(datasets):
     print eventCounter.getSubCounterTable("Jet selection").format(cellFormat)
     print eventCounter.getSubCounterTable("Jet main").format(cellFormat)    
     print eventCounter.getSubCounterTable("VetoTauSelection").format(cellFormat)
-#    print eventCounter.getSubCounterTable("GlobalMuonVeto").format(cellFormat)
-#    print eventCounter.getSubCounterTable("GlobalElectronVeto").format(cellFormat)
+    print eventCounter.getSubCounterTable("GlobalMuon ID").format(cellFormat)
+    print eventCounter.getSubCounterTable("GlobalMuon Selection").format(cellFormat) 
+    print eventCounter.getSubCounterTable("GlobalElectron ID").format(cellFormat)
+    print eventCounter.getSubCounterTable("GlobalElectron Selection").format(cellFormat)  
 #    print eventCounter.getSubCounterTable("top").format(cellFormat) 
 
     
@@ -473,12 +476,37 @@ def BetaComparison(datasets):
     st1.append(styles.StyleLine(lineWidth=3))
     st2.append(styles.StyleLine(lineStyle=2, lineWidth=3))
     st3.append(styles.StyleLine(lineStyle=3, lineWidth=3))
-    mt.histoMgr.forHisto("betaGenuine", st1)
-    mt.histoMgr.forHisto("betaPU", st2)
+#    mt.histoMgr.forHisto("betaGenuine", st1)
+#    mt.histoMgr.forHisto("betaPU", st2)
+    mt.histoMgr.forHisto(datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/JetSelection/betaGenuine"), st1)
+    mt.histoMgr.forHisto(datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/JetSelection/betaPU"), st2)
+    mt.histoMgr.forHisto(datasets.getDataset("Data").getDatasetRootHisto(analysis+"/JetSelection/betaPU"), st3) 
     mt.histoMgr.setHistoDrawStyleAll("P")
     rtauGen(mt, "BetaComparison_H120", rebin=5, defaultStyles=False)
 
     
+def HiggsMassComparison(datasets):
+    mt = plots.PlotBase([
+        datasets.getDataset("TTToHplusBWB_M80").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMass"),
+        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMass"),
+        datasets.getDataset("TTToHplusBWB_M160").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMass")
+        ])
+    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    mt._setLegendStyles()
+    mt._setLegendLabels()
+    st1 = styles.StyleCompound([styles.styles[2]])
+    st2 = styles.StyleCompound([styles.styles[1]])
+    st3 = styles.StyleCompound([styles.styles[0]])
+    st1.append(styles.StyleLine(lineWidth=3))
+    st2.append(styles.StyleLine(lineStyle=2, lineWidth=3))
+    st3.append(styles.StyleLine(lineStyle=3, lineWidth=3))
+
+    mt.histoMgr.forHisto("TTToHplusBWB_M80", st1)
+    mt.histoMgr.forHisto("TTToHplusBWB_M120", st2)
+    mt.histoMgr.forHisto("TTToHplusBWB_M160", st3) 
+#    mt.histoMgr.setHistoDrawStyleAll("P")
+    rtauGen(mt, "HiggsMassVsMass", rebin=2, defaultStyles=False)
+
 def InvMassComparison(datasets):
     mt = plots.PlotBase([
         datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMass"),
@@ -498,15 +526,15 @@ def InvMassComparison(datasets):
     mt.histoMgr.forHisto("HiggsMassTauBmatch", st2)
     mt.histoMgr.forHisto("HiggsMassTauBMETmatch", st3)
 #    mt.histoMgr.setHistoDrawStyleAll("P")
-    rtauGen(mt, "HiggsMass_matching", rebin=20, defaultStyles=False)
+    rtauGen(mt, "HiggsMass_matching", rebin=2, defaultStyles=False)
 
     
 def rtauComparison(datasets):
     mt = plots.PlotBase([
-        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/tauID/TauID_Rtau_DecayModeOneProng_ZeroPiZero"),
-        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/tauID/TauID_Rtau_DecayModeOneProng_OnePiZero"),
-        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/tauID/TauID_Rtau_DecayModeOneProng_TwoPiZero"),
-        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/tauID/TauID_Rtau_DecayModeOneProng_Other")])
+        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/tauID/TauID_Rtau_DecayModeOneProng_ZeroPiZero"),
+        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/tauID/TauID_Rtau_DecayModeOneProng_OnePiZero"),
+        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/tauID/TauID_Rtau_DecayModeOneProng_TwoPiZero"),
+        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/tauID/TauID_Rtau_DecayModeOneProng_Other")])
     mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mt._setLegendStyles()
     mt._setLegendLabels()
@@ -804,17 +832,22 @@ def vertexCount(h, prefix="", postfix="", ratio=True):
         h.save()
 
 def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
-    h.setDefaultStyles()
     if defaultStyles:
+        h.setDefaultStyles()
         h.histoMgr.forEachHisto(styles.generator())
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
 
     
     xlabel = "p^{leading track} / p^{#tau jet}"
+    xlabel = "#beta^{jet}"
     ylabel = "Events / %.2f" % h.binWidth()
     if "Mass" in name:
         xlabel = "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})"
+        ylabel = "Events / %.0f GeV/c^{2}" % h.binWidth()
+#        xlabel = "m (GeV/c^{2})"
+    if "HiggsMass" in name:
+        xlabel = "m_{H^{#pm}} (GeV/c^{2})"
         ylabel = "Events / %.0f GeV/c^{2}" % h.binWidth()
 #        xlabel = "m (GeV/c^{2})"
     if "topMass" in name:
@@ -823,15 +856,15 @@ def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
         xlabel = "Raw PF E_{T}^{miss} (GeV)"
     if "Quark" in name:
         xlabel = "p_{T} (GeV)"
-
+    if "Beta" in name:
+        xlabel = "#beta^{jet}"
     if "Rtau" in name:
         ylabel = "A.u."
     elif "Pt" in name:
         xlabel = "p_{T}(GeV/c)"
     elif "vertices" in name:
         xlabel = "N_{vertices}"
-    if "beta" in name:
-        xlabel = "#beta^{jet}"
+
 
         
     kwargs = {"ymin": 0.1, "xmax": 1.0}
@@ -848,7 +881,7 @@ def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
         kwargs = {"ymin": 0.1, "xmax": 400}
     elif "DecayMode" in name:
         kwargs = {"ymin": 0.1, "xmax": 1.1}
-    elif "beta" in name:
+    elif "Beta" in name:
         kwargs = {"ymin": 0.01, "xmax": 1.0}     
 #    kwargs["opts"] = {"ymin": 0, "xmax": 14, "ymaxfactor": 1.1}}
     if ratio:
@@ -867,7 +900,7 @@ def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
         h.getPad().SetLogy(False)
     if "Quark" in name:
         h.getPad().SetLogy(False)
-    leg = histograms.createLegend(0.4, 0.75, 0.6, 0.9)
+    leg = histograms.createLegend(0.6, 0.75, 0.8, 0.9)
     if "topMass" in name:
         leg = histograms.moveLegend(leg, dx=0.2)
     h.setLegend(leg)
