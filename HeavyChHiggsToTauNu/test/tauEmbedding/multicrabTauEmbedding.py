@@ -6,8 +6,8 @@ from optparse import OptionParser
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 # Default processing step
-defaultStep = "skim"
-#defaultStep = "embedding"
+#defaultStep = "skim"
+defaultStep = "embedding"
 #defaultStep = "analysis"
 #defaultStep = "analysisTau"
 #defaultStep = "signalAnalysis"
@@ -39,13 +39,13 @@ defaultVersions = [
 #    "v13_3_seedTest9",
 #    "v13_3_seedTest10",
 #    "v14"
-    "v44_1"
+    "v2011_1"
 ]
 
 # Define the processing steps: input dataset, configuration file, output file
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
 #          "skim_copy":      {"input": "tauembedding_skim_v13",         "config": "copy_cfg.py"}, 
-          "embedding":      {"input": "tauembedding_skim_v13", "config": "embed.py",   "output": "embedded.root"},
+          "embedding":      {"input": "tauembedding_skim_v2011_2", "config": "embed.py",   "output": "embedded.root"},
           "analysis":       {"input": "tauembedding_embedding_%s",  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau":    {"input": "pattuple_v18",                       "config": "tauAnalysis_cfg.py"},
           "signalAnalysis": {"input": "tauembedding_embedding_%s",  "config": "../signalAnalysis_cfg.py"},
@@ -89,20 +89,20 @@ datasetsData2011B = [
 datasetsData2011 = datasetsData2011A + datasetsData2011B
 datasetsMCnoQCD = [
     "TTJets_TuneZ2_Fall11",
-    "WJets_TuneZ2_Fall11",
-    "DYJetsToLL_M50_TuneZ2_Fall11",
-    "W2Jets_TuneZ2_Fall11",
-    "W3Jets_TuneZ2_Fall11",
-    "W4Jets_TuneZ2_Fall11",
-    "T_t-channel_TuneZ2_Fall11",
-    "Tbar_t-channel_TuneZ2_Fall11",
-    "T_tW-channel_TuneZ2_Fall11",
-    "Tbar_tW-channel_TuneZ2_Fall11",
-    "T_s-channel_TuneZ2_Fall11",
-    "Tbar_s-channel_TuneZ2_Fall11",
-    "WW_TuneZ2_Fall11",
-    "WZ_TuneZ2_Fall11",
-    "ZZ_TuneZ2_Fall11",
+#    "WJets_TuneZ2_Fall11",
+#    "DYJetsToLL_M50_TuneZ2_Fall11",
+#    "W2Jets_TuneZ2_Fall11",
+#    "W3Jets_TuneZ2_Fall11",
+#    "W4Jets_TuneZ2_Fall11",
+#    "T_t-channel_TuneZ2_Fall11",
+#    "Tbar_t-channel_TuneZ2_Fall11",
+#    "T_tW-channel_TuneZ2_Fall11",
+#    "Tbar_tW-channel_TuneZ2_Fall11",
+#    "T_s-channel_TuneZ2_Fall11",
+#    "Tbar_s-channel_TuneZ2_Fall11",
+#    "WW_TuneZ2_Fall11",
+#    "WZ_TuneZ2_Fall11",
+#    "ZZ_TuneZ2_Fall11",
 ]
 datasetsMCQCD = [
     "QCD_Pt20_MuEnriched_TuneZ2_Fall11",
@@ -125,6 +125,12 @@ datasetsSignal = [
     "TTToHplusBHminusB_M155_Fall11",
     "TTToHplusBHminusB_M160_Fall11",
 ]
+
+datasetsData2011 = []
+#datasetsMCnoQCD = []
+datasetsMCQCD = []
+datasetsSignal = []
+
 
 # Override the default number of jobs
 # Goal: ~5 hour jobs
@@ -277,8 +283,17 @@ def createTasks(opts, step, version=None):
 
     # Modification function for skim/embedding steps
     def modify(dataset):
+        # Remove skimming of trigger or jets
+        for key in dataset.data.keys():
+            if key == "skimConfig":
+                del dataset.data[key]
+            elif key == "args":
+                arglist = dataset.data[key]
+                for argkey in arglist.keys():
+                    if argkey == "triggerMC":
+                        del arglist[argkey]
+        # Proceed
         name = ""
-    
         if dataset.isData() or step != "skim":
             dataset.appendLine("CMSSW.total_number_of_lumis = -1")
         else:
