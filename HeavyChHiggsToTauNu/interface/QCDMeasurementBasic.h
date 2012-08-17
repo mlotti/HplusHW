@@ -189,6 +189,8 @@ namespace HPlus {
     // Control plots
     std::vector<WrappedTH1*> hCtrlNjets; // Njets in bins of tau pT
     std::vector<WrappedTH1*> hCtrlMET; // MET in bins of tau pT
+    std::vector<WrappedTH1*> hCtrlMETAfterBtagging; // MET in bins of tau pT
+    std::vector<WrappedTH1*> hCtrlMETAfterBtaggingAndDeltaPhi; // MET in bins of tau pT
     std::vector<WrappedTH1*> hCtrlNbjets; // Nbjets in bins of tau pT
     std::vector<WrappedTH1*> hCtrlDeltaPhiTauMET; // DeltaPhi(tau,MET) in bins of tau pT
     std::vector<WrappedTH1*> hCtrlMaxDeltaPhiJetMET; // DeltaPhi(jet/tau,MET) in bins of tau pT

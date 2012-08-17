@@ -41,8 +41,8 @@ def main(opts):
 def makePlots(histos,labels,totalEff):
     idx = 0
     for i in range(0, histos[0].GetNbinsY()-1):
-        myvtxbins = 30
-        myrebinfactor = 1
+        myvtxbins = 24
+        myrebinfactor = 2
         hout = ROOT.TH1F("PUdependency","PUdependency",myvtxbins,0,myvtxbins)
         hout.SetMinimum(0.0)
         hout.SetMaximum(1.1)
@@ -123,12 +123,13 @@ def makePlots(histos,labels,totalEff):
         if i == 0:
             c.SetLogy()
         hout.Draw()
-        for l in myLines:
-            l.Draw("h same")
+        #for l in myLines:
+        #    l.Draw("h same")
         myGraphs.reverse()
         for g in myGraphs:
             g.Draw("e same")
-        leg = ROOT.TLegend(0.6, 0.6, 0.9, 0.9, "", "brNDC")
+        #leg = ROOT.TLegend(0.6, 0.6, 0.9, 0.9, "", "brNDC")
+        leg = ROOT.TLegend(0.2, 0.2, 0.4, 0.4, "", "brNDC")
         leg.SetBorderSize(0)
         leg.SetTextFont(63)
         leg.SetTextSize(18)
@@ -136,6 +137,7 @@ def makePlots(histos,labels,totalEff):
         leg.SetLineStyle(1)
         leg.SetLineWidth(1)
         leg.SetFillColor(0)
+        myGraphs.reverse()
         for g in range(0,len(myGraphs)):
             leg.AddEntry(myGraphs[g], labels[g], "lv")
         leg.Draw()

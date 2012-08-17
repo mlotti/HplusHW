@@ -171,13 +171,16 @@ class BRLimits:
         return ymax
 
     ## Print the BR limits
-    def print2(self):
+    def print2(self,unblindedStatus=False):
         print
         print "                  Expected"
         print "Mass  Observed    Median       -2sigma     -1sigma     +1sigma     +2sigma"
         format = "%3s:  %-9s   %-10s   %-10s  %-10s  %-10s  %-10s"
         for i in xrange(len(self.mass_string)):
-            print format % (self.mass_string[i], self.observed_string[i], self.expectedMedian_string[i], self.expectedMinus2_string[i], self.expectedMinus1_string[i], self.expectedPlus1_string[i], self.expectedPlus2_string[i])
+            if unblindedStatus:
+                print format % (self.mass_string[i], self.observed_string[i], self.expectedMedian_string[i], self.expectedMinus2_string[i], self.expectedMinus1_string[i], self.expectedPlus1_string[i], self.expectedPlus2_string[i])
+            else:
+                print format % (self.mass_string[i], "BLINDED", self.expectedMedian_string[i], self.expectedMinus2_string[i], self.expectedMinus1_string[i], self.expectedPlus1_string[i], self.expectedPlus2_string[i])
         print
 
     ## Construct TGraph for the observed limit
