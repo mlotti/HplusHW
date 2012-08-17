@@ -27,6 +27,17 @@ namespace HPlus {
     s << "TriggerScaleFactorAbsUncertCounts_" << name;
     hTriggerSFAbsUncertaintyCounts = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 1, 0., 1);
 
+    // Fake tau SF / systematics
+    s.str("");
+    s << "FakeTauScaleFactor_" << name;
+    hFakeTauSF = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 200., 0., 2.0);
+    s.str("");
+    s << "FakeTauAbsUncert_" << name;
+    hFakeTauAbsUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 20000., 0., 2);
+    s.str("");
+    s << "FakeTauAbsUncertCounts_" << name;
+    hFakeTauAbsUncertaintyCounts = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 1, 0., 1);
+
     // btag SF
     s.str("");
     s << "BtagScaleFactor_" << name;
@@ -42,7 +53,7 @@ namespace HPlus {
 
   ScaleFactorUncertaintyManager::~ScaleFactorUncertaintyManager() {}
 
-  void ScaleFactorUncertaintyManager::setScaleFactorUncertainties(double eventWeight, double triggerSF, double triggerSFAbsUncertainty, double btagSF, double btagSFAbsUncertainty) {
+  void ScaleFactorUncertaintyManager::setScaleFactorUncertainties(double eventWeight, double triggerSF, bool isFakeTau, double triggerSFAbsUncertainty, double fakeTauSF, double fakeTauAbsUncertainty, double btagSF, double btagSFAbsUncertainty) {
     // To calculate relative uncertainty, use
     //   sqrt(sum_i((N_i * abs_uncert_i)^2)) / sum_i (N_i*w_i)
     //   i.e. sqrt(sum_i((getBinContent(i) * getBinCenter(i))^2) / AbsUncertaintyCounts->GetBinContent(0);
@@ -50,6 +61,12 @@ namespace HPlus {
     hTriggerSF->Fill(triggerSF);
     hTriggerSFAbsUncertainty->Fill(triggerSFAbsUncertainty, eventWeight / triggerSF);
     hTriggerSFAbsUncertaintyCounts->Fill(0.0, eventWeight); // weight should include also trg SF
+    // Fake tau SF and systematics
+    if (isFakeTau) {
+      hFakeTauSF->Fill(fakeTauSF);
+      hFakeTauAbsUncertainty->Fill(fakeTauAbsUncertainty, eventWeight / fakeTauSF);
+      hFakeTauAbsUncertaintyCounts->Fill(0.0, eventWeight);
+    }
     // btag SF
     hBtagSF->Fill(btagSF);
     hBtagSFAbsUncertainty->Fill(btagSFAbsUncertainty, eventWeight / btagSF);
