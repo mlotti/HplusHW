@@ -11,7 +11,7 @@ dataVersion="44XmcS6"     # Fall11 MC
 
 # Set the data scenario for vertex/pileup weighting
 # options: Run2011A, Run2011B, Run2011A+B
-puweight = "Run2011B"
+puweight = "Run2011A+B"
 
 ##########
 # Flags for additional signal analysis modules
