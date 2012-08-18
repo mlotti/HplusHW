@@ -6,8 +6,8 @@ from optparse import OptionParser
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 # Default processing step
-defaultStep = "skim"
-#defaultStep = "embedding"
+#defaultStep = "skim"
+defaultStep = "embedding"
 #defaultStep = "analysis"
 #defaultStep = "analysisTau"
 #defaultStep = "signalAnalysis"
@@ -17,7 +17,7 @@ defaultStep = "skim"
 # Default era of data to use (meaningful only for signalAnalysis and muonAnalysis)
 #defaultEra = "EPS"
 #defaultEra = "Run2011A-EPS"
-defaultEra = "Run2011A"
+defaultEra = "Run2011"
 
 # Default embedding version(s) to use
 defaultVersions = [
@@ -39,13 +39,13 @@ defaultVersions = [
 #    "v13_3_seedTest9",
 #    "v13_3_seedTest10",
 #    "v14"
-    "v44_1"
+    "v2011_1"
 ]
 
 # Define the processing steps: input dataset, configuration file, output file
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
 #          "skim_copy":      {"input": "tauembedding_skim_v13",         "config": "copy_cfg.py"}, 
-          "embedding":      {"input": "tauembedding_skim_v13", "config": "embed.py",   "output": "embedded.root"},
+          "embedding":      {"input": "tauembedding_skim_v2011_2", "config": "embed.py",   "output": "embedded.root"},
           "analysis":       {"input": "tauembedding_embedding_%s",  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau":    {"input": "pattuple_v18",                       "config": "tauAnalysis_cfg.py"},
           "signalAnalysis": {"input": "tauembedding_embedding_%s",  "config": "../signalAnalysis_cfg.py"},
@@ -69,16 +69,16 @@ dirPrefix = ""
 #    "Mu_147196-149294_Apr21", # HLT_Mu15_v1
 #]
 datasetsData2011A = [
-    "SingleMu_Mu_160431-163261_2001A_Nov08",  # HLT_Mu20_v1
-    "SingleMu_Mu_163270-163869_2001A_Nov08",  # HLT_Mu24_v2
-    "SingleMu_Mu_165088-166150_2001A_Nov08", # HLT_Mu30_v3
-    "SingleMu_Mu_166161-166164_2001A_Nov08", # HLT_Mu40_v1
-    "SingleMu_Mu_166346-166346_2001A_Nov08", # HLT_Mu40_v2
-    "SingleMu_Mu_166374-167043_2001A_Nov08", # HLT_Mu40_v1
-    "SingleMu_Mu_167078-167913_2001A_Nov08", # HLT_Mu40_v3
-    "SingleMu_Mu_170722-172619_2001A_Nov08",  # HLT_Mu40_v5
-    "SingleMu_Mu_172620-173198_2001A_Nov08", # HLT_Mu40_v5
-    "SingleMu_Mu_173236-173692_2001A_Nov08", # HLT_Mu40_eta2p1_v1
+    "SingleMu_Mu_160431-163261_2011A_Nov08",  # HLT_Mu20_v1
+    "SingleMu_Mu_163270-163869_2011A_Nov08",  # HLT_Mu24_v2
+    "SingleMu_Mu_165088-166150_2011A_Nov08", # HLT_Mu30_v3
+    "SingleMu_Mu_166161-166164_2011A_Nov08", # HLT_Mu40_v1
+    "SingleMu_Mu_166346-166346_2011A_Nov08", # HLT_Mu40_v2
+    "SingleMu_Mu_166374-167043_2011A_Nov08", # HLT_Mu40_v1
+    "SingleMu_Mu_167078-167913_2011A_Nov08", # HLT_Mu40_v3
+    "SingleMu_Mu_170722-172619_2011A_Nov08",  # HLT_Mu40_v5
+    "SingleMu_Mu_172620-173198_2011A_Nov08", # HLT_Mu40_v5
+    "SingleMu_Mu_173236-173692_2011A_Nov08", # HLT_Mu40_eta2p1_v1
 ]
 datasetsData2011B = [
     "SingleMu_Mu_173693-177452_2011B_Nov19", # HLT_Mu40_eta2p1_v1
@@ -86,21 +86,23 @@ datasetsData2011B = [
     "SingleMu_Mu_178411-179889_2011B_Nov19", # HLT_Mu40_eta2p1_v4
     "SingleMu_Mu_179942-180371_2011B_Nov19", # HLT_Mu40_eta2p1_v5
 ]
-datasetsData2011 = datasetsData2011_Run2011A + datasetsData2011_Run2011B
+datasetsData2011 = datasetsData2011A + datasetsData2011B
 datasetsMCnoQCD = [
     "TTJets_TuneZ2_Fall11",
-    "WJets_TuneZ2_Fall11",
-    "DYJetsToLL_M50_TuneZ2_Fall11",
-    "W3Jets_TuneZ2_Fall11",
-    "T_t-channel_TuneZ2_Fall11",
-    "Tbar_t-channel_TuneZ2_Fall11",
-    "T_tW-channel_TuneZ2_Fall11",
-    "Tbar_tW-channel_TuneZ2_Fall11",
-    "T_s-channel_TuneZ2_Fall11",
-    "Tbar_s-channel_TuneZ2_Fall11",
-    "WW_TuneZ2_Fall11",
-    "WZ_TuneZ2_Fall11",
-    "ZZ_TuneZ2_Fall11",
+#    "WJets_TuneZ2_Fall11",
+#    "DYJetsToLL_M50_TuneZ2_Fall11",
+#    "W2Jets_TuneZ2_Fall11",
+#    "W3Jets_TuneZ2_Fall11",
+#    "W4Jets_TuneZ2_Fall11",
+#    "T_t-channel_TuneZ2_Fall11",
+#    "Tbar_t-channel_TuneZ2_Fall11",
+#    "T_tW-channel_TuneZ2_Fall11",
+#    "Tbar_tW-channel_TuneZ2_Fall11",
+#    "T_s-channel_TuneZ2_Fall11",
+#    "Tbar_s-channel_TuneZ2_Fall11",
+#    "WW_TuneZ2_Fall11",
+#    "WZ_TuneZ2_Fall11",
+#    "ZZ_TuneZ2_Fall11",
 ]
 datasetsMCQCD = [
     "QCD_Pt20_MuEnriched_TuneZ2_Fall11",
@@ -124,11 +126,19 @@ datasetsSignal = [
     "TTToHplusBHminusB_M160_Fall11",
 ]
 
+datasetsData2011 = []
+#datasetsMCnoQCD = []
+datasetsMCQCD = []
+datasetsSignal = []
+
 
 # Override the default number of jobs
 # Goal: ~5 hour jobs
 skimNjobs = { 
     "WJets_TuneZ2_Fall11": 1000, # ~10 hours
+    "W2Jets_TuneZ2_Fall11": 490,
+    "W3Jets_TuneZ2_Fall11": 490,            
+    "W4Jets_TuneZ2_Fall11": 490, 
     "TTJets_TuneZ2_Fall11": 2500,
     "QCD_Pt20_MuEnriched_TuneZ2_Fall11": 490,
     "DYJetsToLL_M50_TuneZ2_Fall11": 1000,
@@ -273,8 +283,17 @@ def createTasks(opts, step, version=None):
 
     # Modification function for skim/embedding steps
     def modify(dataset):
+        # Remove skimming of trigger or jets
+        for key in dataset.data.keys():
+            if key == "skimConfig":
+                del dataset.data[key]
+            elif key == "args":
+                arglist = dataset.data[key]
+                for argkey in arglist.keys():
+                    if argkey == "triggerMC":
+                        del arglist[argkey]
+        # Proceed
         name = ""
-    
         if dataset.isData() or step != "skim":
             dataset.appendLine("CMSSW.total_number_of_lumis = -1")
         else:

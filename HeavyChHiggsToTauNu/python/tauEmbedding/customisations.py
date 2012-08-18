@@ -300,10 +300,45 @@ def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix
     sequence *= m
     counters.append(cname)
 
+    # FIXME: ugly hack to calculate muon isolation on the fly (this is the wrong place to do it)
+    import RecoMuon.MuonIsolation.muonPFIsolationValues_cff as muonPFIsolation
+    def construct(isoModule, isoKey, vetos=[]):
+        deposit = isoModule.deposits[0]
+        pset = cms.PSet(
+            embedName = cms.string(isoKey),
+            deltaR = deposit.deltaR,
+            skipDefaultVeto = deposit.skipDefaultVeto,
+            mode = deposit.mode,
+            isolationKey = cms.string(isoKey),
+            vetos = cms.vstring(deposit.vetos)
+        )
+        pset.vetos.extend(vetos)
+        return pset
+    isolation = cms.EDProducer("HPlusPATMuonViewIsoDepositIsolationEmbedder",
+        src = cms.InputTag(name),
+        embedPrefix = cms.string("ontheflyiso_"),
+        deposits = cms.VPSet(
+            construct(x, "pfNeutralHadrons", vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValueChargedAll04, "pfChargedAll",  vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValuePU04, "pfPUChargedHadrons",    vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValueGamma04, "pfPhotons",          vetos=["ConeVeto(0.1)", "Threshold(0.5)"]),
+            construct(muonPFIsolation.muPFIsoValueCharged04, "pfChargedHadrons", vetos=["ConeVeto(0.1)", "Threshold(0.5)"]),
+        )
+    )
+    name = "patMuonsWithIso01to04"+postfix
+    setattr(process, name, isolation)
+    sequence *= isolation
+    # end ugly hack
+
+
+    # The old counting-tight in 0.1 < DR < 0.4 annulus
+    #isoExpr = "(%s)==0" % muonAnalysis.isolations["tauTightIc04Iso"]
+    isoExpr = "(userFloat('ontheflyiso_pfChargedHadrons') + max(userFloat('ontheflyiso_pfPhotons')-0.5*userFloat('pfPUChargedHadrons'), 0)) < 1"
+
     if enableIsolation:
 #        counters.extend(addMuonRelativeIsolation(process, sequence, prefix=prefix+"Isolation", cut=0.1))
         import muonAnalysis
-        counters.extend(addMuonIsolation(process, sequence, prefix+"Isolation", "(%s)==0" % muonAnalysis.isolations["tauTightIc04Iso"]))
+        counters.extend(addMuonIsolation(process, sequence, prefix+"Isolation", isoExpr))
     counters.extend(addMuonVeto(process, sequence, param, prefix+"MuonVeto"))
     counters.extend(addElectronVeto(process, sequence, param, prefix+"ElectronVeto"))
     counters.extend(addMuonJetSelection(process, sequence, prefix+"JetSelection"))

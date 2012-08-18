@@ -1,4 +1,5 @@
 import re
+import sys
 
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.Modules import _Module
@@ -6,6 +7,11 @@ from FWCore.ParameterSet.Modules import _Module
 import FWCore.ParameterSet.VarParsing as VarParsing
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
+
+# Note: This file is adapted from TauAnalysis/MCEmbeddingTools/python/pf_01_customizeAll.py
+# Check that file in CVS for changes
+# Note: replace in original removedInputMuons,pfcands with dimuonsGlobal,forMixing
+# Mixed means in practice hybrid
 
 # Searches for self.lookFor module in cms.Path. When found, next and prev module is stored
 class SeqVisitor(object):
@@ -45,6 +51,15 @@ class SeqVisitor(object):
 
 
 def customise(process):
+    # Catch the case when this config is run from cmsDriver, it won't work due to VarParsing
+    # First protect against crab job creation, then the no-argument case
+    if hasattr(sys, "argv") and len(sys.argv) > 0:
+        if "cmsDriver" in sys.argv[0]:
+            print "Running pf_customise from cmsDriver, not executing running() further due to VarParsing"
+            return
+        else:
+            print "Running pf_customise"
+  
     # Command line arguments
     import FWCore.ParameterSet.VarParsing as VarParsing
     options = VarParsing.VarParsing ('analysis')
@@ -54,7 +69,7 @@ def customise(process):
                       VarParsing.VarParsing.varType.int,
                       "should I override beamspot in globaltag?")
 
-    options, dataVersion = getOptionsDataVersion("42Xmc", options)
+    options, dataVersion = getOptionsDataVersion("44XmcS6", options)
 
     hltProcessName = dataVersion.getTriggerProcess()
     recoProcessName = dataVersion.getRecoProcess()
@@ -164,14 +179,21 @@ def customise(process):
     )
     process.offlinePrimaryVerticesWithBS.TrackLabel = cms.InputTag("tmfTracks")
     process.offlinePrimaryVertices.TrackLabel = cms.InputTag("tmfTracks")
-    process.muons.TrackExtractorPSet.inputTrackCollection = cms.InputTag("tmfTracks")
-
-    if  hasattr(process, "iterativeTracking"):
-        process.iterativeTracking *= process.tmfTracks
-    elif hasattr(process, "trackCollectionMerging"):
-        process.trackCollectionMerging *= process.tmfTracks
+    #print process.muons
+    if hasattr(process.muons, "TrackExtractorPSet"):
+        # <= 42X
+        process.muons.TrackExtractorPSet.inputTrackCollection = cms.InputTag("tmfTracks")
+    elif hasattr(process, "muons1stStep") and hasattr(process.muons1stStep, "TrackExtractorPSet"):
+       # >= 44X
+       process.muons1stStep.TrackExtractorPSet.inputTrackCollection = cms.InputTag("tmfTracks")
     else:
-        raise Exception("Cannot find tracking sequence")
+       raise Exception("Problem in overriding track collection for reco::Muon producer")
+
+    # Ensure that tmfTracks is always run after generalTracks (to mix the original and embedded tracks)
+    for p in process.paths:
+        pth = getattr(process, p)
+        if "generalTracks" in pth.moduleNames():
+            pth.replace(process.generalTracks, process.generalTracks*process.tmfTracks)
 
 
     # it should be the best solution to take the original beam spot for the
@@ -181,11 +203,11 @@ def customise(process):
         seq =  getattr(process,s)
         seq.remove(process.offlineBeamSpot) 
 
+    # Remove beam halo Id
     try:
         process.metreco.remove(process.BeamHaloId)
     except:
         pass
-
 
     # Disable lumi producer
     process.localreco_HcalNZS.remove(process.lumiProducer)
@@ -193,29 +215,57 @@ def customise(process):
 
     # PFCandidate embedding
     process.particleFlowORG = process.particleFlow.clone()
-    if hasattr(process,"famosParticleFlowSequence"):
-        process.famosParticleFlowSequence.remove(process.pfPhotonTranslatorSequence)
-        process.famosParticleFlowSequence.remove(process.pfElectronTranslatorSequence)
-        process.famosParticleFlowSequence.remove(process.particleFlow)
-        process.famosParticleFlowSequence.__iadd__(process.particleFlowORG)
-        process.famosParticleFlowSequence.__iadd__(process.particleFlow)
-        process.famosParticleFlowSequence.__iadd__(process.pfElectronTranslatorSequence)
-        process.famosParticleFlowSequence.__iadd__(process.pfPhotonTranslatorSequence)
-    elif hasattr(process,"particleFlowReco"):
-        process.particleFlowReco.remove(process.pfPhotonTranslatorSequence)
-        process.particleFlowReco.remove(process.pfElectronTranslatorSequence)
-        process.particleFlowReco.remove(process.particleFlow)
-        process.particleFlowReco.__iadd__(process.particleFlowORG)
-        process.particleFlowReco.__iadd__(process.particleFlow)
-        process.particleFlowReco.__iadd__(process.pfElectronTranslatorSequence)
-        process.particleFlowReco.__iadd__(process.pfPhotonTranslatorSequence)
+    # Since CMSSW 4_4 the particleFlow reco works a bit differently. The step is
+    # twofold, first particleFlowTmp is created and then the final particleFlow
+    # collection. What we do in this case is that we merge the final ParticleFlow
+    # collection. For the muon reconstruction, we also merge particleFlowTmp in
+    # order to get PF-based isolation right.
+    if hasattr(process, 'particleFlowTmp'):
+        process.particleFlowTmpMixed = cms.EDProducer('PFCandidateMixer',
+            col1 = cms.untracked.InputTag("dimuonsGlobal","forMixing"),
+            col2 = cms.untracked.InputTag("particleFlowTmp", ""),
+            trackCol = cms.untracked.InputTag("tmfTracks"),
+            # Don't produce value maps:
+            muons = cms.untracked.InputTag(""),
+            gsfElectrons = cms.untracked.InputTag("")
+        )
+        process.muons.PFCandidates = cms.InputTag("particleFlowTmpMixed")
+
+        for p in process.paths:
+            if "particleFlow" in pth.moduleNames():
+                pth.replace(process.particleFlow, process.particleFlowORG*process.particleFlow)
+            if "muons" in pth.moduleNames():
+                pth.replace(process.muons, process.particleFlowTmpMixed*process.muons)
     else:
-        raise "Cannot find pflow sequence"
+        # CMSSW_4_2
+        if hasattr(process,"famosParticleFlowSequence"):
+            process.famosParticleFlowSequence.remove(process.pfPhotonTranslatorSequence)
+            process.famosParticleFlowSequence.remove(process.pfElectronTranslatorSequence)
+            process.famosParticleFlowSequence.remove(process.particleFlow)
+            process.famosParticleFlowSequence.__iadd__(process.particleFlowORG)
+            process.famosParticleFlowSequence.__iadd__(process.particleFlow)
+            process.famosParticleFlowSequence.__iadd__(process.pfElectronTranslatorSequence)
+            process.famosParticleFlowSequence.__iadd__(process.pfPhotonTranslatorSequence)
+        elif hasattr(process,"particleFlowReco"):
+            process.particleFlowReco.remove(process.pfPhotonTranslatorSequence)
+            process.particleFlowReco.remove(process.pfElectronTranslatorSequence)
+            process.particleFlowReco.remove(process.particleFlow)
+            process.particleFlowReco.__iadd__(process.particleFlowORG)
+            process.particleFlowReco.__iadd__(process.particleFlow)
+            process.particleFlowReco.__iadd__(process.pfElectronTranslatorSequence)
+            process.particleFlowReco.__iadd__(process.pfPhotonTranslatorSequence)
+        else:
+            raise "Cannot find pflow sequence"
+        process.pfSelectedElectrons.src = cms.InputTag("particleFlowORG")
+        process.pfSelectedPhotons.src   = cms.InputTag("particleFlowORG")
 
     process.particleFlow =  cms.EDProducer('PFCandidateMixer',
-        col1 = cms.untracked.InputTag("dimuonsGlobal","forMixing"),
+        #col1 = cms.untracked.InputTag("removedInputMuons","pfCands"), # this is ok in 5_2
+        col1 = cms.untracked.InputTag("dimuonsGlobal","forMixing"), # this works for 4_2 and 4_4
         col2 = cms.untracked.InputTag("particleFlowORG", ""),
-        trackCol = cms.untracked.InputTag("tmfTracks")
+        trackCol = cms.untracked.InputTag("tmfTracks"),
+        muons = cms.untracked.InputTag("muons"),
+        gsfElectrons = cms.untracked.InputTag("gsfElectrons","",recoProcessName)
     )
 
     # Set the empty event filter source
@@ -228,7 +278,7 @@ def customise(process):
         target = process.particleFlow
 
         lookForPFInput = ["particleFlow"]
-     
+
         seqVis = SeqVisitor(target)
         seqVis.prepareSearch()
         seqVis.setLookFor(target)
@@ -268,8 +318,8 @@ def customise(process):
         pfOutputCommands.append("keep *_%s_*_%s" % (label, processName))
     outputModule.outputCommands.extend(pfOutputCommands)
 
-    process.pfSelectedElectrons.src = "particleFlowORG"
-    process.pfSelectedPhotons.src = "particleFlowORG"
+    #process.pfSelectedElectrons.src = "particleFlowORG" # 4_2 legacy, already included above
+    #process.pfSelectedPhotons.src = "particleFlowORG"   # 4_2 legacy, already included above
 
 
     # Setup/remove some HLT/DQM stuff whcih doesn't work
