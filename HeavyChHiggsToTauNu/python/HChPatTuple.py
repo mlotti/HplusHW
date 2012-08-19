@@ -107,6 +107,7 @@ class PATBuilder:
 
         if options.tauEmbeddingInput != 0:
             # Select the tau objects deltaR matched to the original muon objects
+            # Note: PF2Pat version is selected at the beginning of customisations.py
             from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations import addTauEmbeddingMuonTaus
             process.patMuonTauSequence = addTauEmbeddingMuonTaus(process)
             process.patSequence *= process.patMuonTauSequence
@@ -1607,13 +1608,16 @@ def addPFElectronIsolation(process, module):
 
     ## Iso deposits
     # Set the electron source to 'gsfElectrons'
-    process.elPFIsoDepositCharged.src = "gsfElectrons"
-    process.elPFIsoDepositChargedAll.src = "gsfElectrons"
-    process.elPFIsoDepositNeutral.src = "gsfElectrons"
-    process.elPFIsoDepositGamma.src = "gsfElectrons"
-    process.elPFIsoDepositPU.src = "gsfElectrons"
+    #print "process.elPFIsoDepositCharged.src =",process.elPFIsoDepositCharged.src
+    electronSrc = "gsfElectrons"
+    process.elPFIsoDepositCharged.src = electronSrc
+    process.elPFIsoDepositChargedAll.src = electronSrc
+    process.elPFIsoDepositNeutral.src = electronSrc
+    process.elPFIsoDepositGamma.src = electronSrc
+    process.elPFIsoDepositPU.src = electronSrc
 
     # Without CHS (neutral hadrons and photons are not modified by CHS)
+    #print "process.elPFIsoDepositChargedNoChs =",process.elPFIsoDepositChargedNoChs.src
     process.elPFIsoDepositChargedNoChs = isoDepositReplace("gsfElectrons", "pfAllChargedHadronsNoChs")
     process.elPFIsoDepositChargedAllNoChs = isoDepositReplace("gsfElectrons", "pfAllChargedParticlesNoChs")
     process.electronPFIsolationDepositsSequence *= (

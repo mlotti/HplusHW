@@ -107,6 +107,10 @@ def customise(process):
             "keep *_globalMuons_*_%s" % recoProcessName,
             "keep *_offlineBeamSpot_*_%s" % recoProcessName,
             "keep *_gtDigis_*_%s" % recoProcessName,
+            "keep recoGsfElectronCores_*_*_%s" % recoProcessName,
+            "keep *_gsfElectrons_*_%s" % recoProcessName,
+            "keep *_photons_*_%s" % recoProcessName,
+            "keep *_photonCore_*_%s" % recoProcessName,
             "keep *_l1GtTriggerMenuLite_*_%s" % recoProcessName, # in run block
             "keep *_conditionsInEdm_*_%s" % recoProcessName, # in run block
             "keep *_addPileupInfo*_*_%s" % recoProcessName, # for MC
@@ -125,6 +129,9 @@ def customise(process):
             "keep *_globalMuons_*_%s" % processName,
             "keep *_offlinePrimaryVertices_*_%s" % processName,
             "keep edmMergeableCounter_*_*_%s" % processName,
+
+            "keep *_*Electron*_*_%s" % processName,
+            "keep *_eid*_*_*",
     ])
 #    re_procName = re.compile("_\*$")
 #    outputModule.outputCommands.extend([re_procName.sub("_"+processName, x) for x in process.RECOSIMEventContent.outputCommands])
@@ -265,7 +272,8 @@ def customise(process):
         col2 = cms.untracked.InputTag("particleFlowORG", ""),
         trackCol = cms.untracked.InputTag("tmfTracks"),
         muons = cms.untracked.InputTag("muons"),
-        gsfElectrons = cms.untracked.InputTag("gsfElectrons","",recoProcessName)
+        gsfElectrons = cms.untracked.InputTag("gsfElectrons","",recoProcessName) # FIXME does this work?
+        #gsfElectrons = cms.untracked.InputTag("")
     )
 
     # Set the empty event filter source
