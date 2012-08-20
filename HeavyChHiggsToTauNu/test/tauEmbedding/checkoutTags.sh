@@ -34,6 +34,3 @@ cvs up -r1.7 AnalysisDataFormats/EWK/src/classes.h
 cvs up -r1.7 AnalysisDataFormats/EWK/src/classes_def.xml
 cvs up -r1.3 AnalysisDataFormats/EWK/BuildFile.xml
 
-echo "Please edit the file:"
-echo TauAnalysis/MCEmbeddingTools/plugins/SelectReplacementCandidates.cc
-echo "and replace deltaR with reco::deltaR"
