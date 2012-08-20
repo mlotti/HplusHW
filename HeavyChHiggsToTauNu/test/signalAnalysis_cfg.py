@@ -646,3 +646,6 @@ process.out = cms.OutputModule("PoolOutputModule",
 # useful for debugging purposes)
 #process.outpath = cms.EndPath(process.out)
 
+#f = open("configDump.py", "w")
+#f.write(process.dumpPython())
+#f.close()

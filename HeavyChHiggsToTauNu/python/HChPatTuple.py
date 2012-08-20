@@ -200,15 +200,34 @@ class PATBuilder:
                                  "doPatElectronID": False})
         sequence = addPF2PAT(self.process, dataVersion, doPatTrigger=False, patArgs=pargs, pvSelectionConfig=pvSelectionConfig)
 
-        # Remove dependencies on gsfElectrons and photons
+        # Remove patElectrons and patPhotons altogether for the hybrid events
         if dataVersion.isMC():
-            for name in ["", "All", "Chs", "ChsAll"]:
-                getattr(self.process, "patElectronsPFlow"+name).addGenMatch = False
-                getattr(self.process, "makePatElectronsPFlow"+name).remove(getattr(self.process, "electronMatchPFlow"+name))
-            for name in ["", "Chs"]:
-                getattr(self.process, "patPhotonsPFlow"+name).addGenMatch = False
-                getattr(self.process, "makePatPhotonsPFlow"+name).remove(getattr(self.process, "photonMatchPFlow"+name))
-                getattr(self.process, "patDefaultSequencePFlow"+name).remove(getattr(self.process, "photonMatchPFlow"+name))
+            self.process.patDefaultSequencePFlow.remove(self.process.makePatElectronsPFlow)
+            self.process.patDefaultSequencePFlow.remove(self.process.makePatElectronsPFlowAll)
+            self.process.patDefaultSequencePFlowChs.remove(self.process.makePatElectronsPFlowChs)
+            self.process.patDefaultSequencePFlowChs.remove(self.process.makePatElectronsPFlowChsAll)
+            self.process.patDefaultSequencePFlow.remove(self.process.photonMatchPFlow)
+            self.process.patDefaultSequencePFlowChs.remove(self.process.photonMatchPFlowChs)
+            del self.process.photonMatchPFlow
+            del self.process.photonMatchPFlowChs
+        else:
+            # Thanks to difference sequence structure we have to do this separately for data
+            self.process.patDefaultSequencePFlow.remove(self.process.patElectronsPFlow)
+            self.process.patDefaultSequencePFlow.remove(self.process.patElectronsPFlowAll)
+            self.process.patDefaultSequencePFlowChs.remove(self.process.patElectronsPFlowChs)
+            self.process.patDefaultSequencePFlowChs.remove(self.process.patElectronsPFlowChsAll)
+        self.process.patDefaultSequencePFlow.remove(self.process.selectedPatElectronsPFlow)
+        self.process.patDefaultSequencePFlow.remove(self.process.selectedPatElectronsPFlowAll)
+        self.process.patDefaultSequencePFlowChs.remove(self.process.selectedPatElectronsPFlowChs)
+        self.process.patDefaultSequencePFlowChs.remove(self.process.selectedPatElectronsPFlowChsAll)
+        del self.process.patElectronsPFlow
+        del self.process.patElectronsPFlowAll
+        del self.process.patElectronsPFlowChs
+        del self.process.patElectronsPFlowChsAll
+        del self.process.selectedPatElectronsPFlow
+        del self.process.selectedPatElectronsPFlowAll
+        del self.process.selectedPatElectronsPFlowChs
+        del self.process.selectedPatElectronsPFlowChsAll
 
 
         # Remove soft muon/electron b tagging discriminators as they are not

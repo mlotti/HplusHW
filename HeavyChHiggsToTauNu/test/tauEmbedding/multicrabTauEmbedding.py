@@ -39,7 +39,9 @@ defaultVersions = [
 #    "v13_3_seedTest9",
 #    "v13_3_seedTest10",
 #    "v14"
-    "v44_1"
+#    "v44_1",
+    "v44_1_seed1",
+#    "v44_1_seed2",
 ]
 
 # Define the processing steps: input dataset, configuration file, output file
@@ -89,20 +91,20 @@ datasetsData2011B = [
 datasetsData2011 = datasetsData2011A + datasetsData2011B
 datasetsMCnoQCD = [
     "TTJets_TuneZ2_Fall11",
-#    "WJets_TuneZ2_Fall11",
-#    "DYJetsToLL_M50_TuneZ2_Fall11",
-#    "W2Jets_TuneZ2_Fall11",
-#    "W3Jets_TuneZ2_Fall11",
-#    "W4Jets_TuneZ2_Fall11",
-#    "T_t-channel_TuneZ2_Fall11",
-#    "Tbar_t-channel_TuneZ2_Fall11",
-#    "T_tW-channel_TuneZ2_Fall11",
-#    "Tbar_tW-channel_TuneZ2_Fall11",
-#    "T_s-channel_TuneZ2_Fall11",
-#    "Tbar_s-channel_TuneZ2_Fall11",
-#    "WW_TuneZ2_Fall11",
-#    "WZ_TuneZ2_Fall11",
-#    "ZZ_TuneZ2_Fall11",
+    "WJets_TuneZ2_Fall11",
+    "DYJetsToLL_M50_TuneZ2_Fall11",
+    #"W2Jets_TuneZ2_Fall11",
+    #"W3Jets_TuneZ2_Fall11",
+    #"W4Jets_TuneZ2_Fall11",
+    "T_t-channel_TuneZ2_Fall11",
+    "Tbar_t-channel_TuneZ2_Fall11",
+    "T_tW-channel_TuneZ2_Fall11",
+    "Tbar_tW-channel_TuneZ2_Fall11",
+    "T_s-channel_TuneZ2_Fall11",
+    "Tbar_s-channel_TuneZ2_Fall11",
+    "WW_TuneZ2_Fall11",
+    "WZ_TuneZ2_Fall11",
+    "ZZ_TuneZ2_Fall11",
 ]
 datasetsMCQCD = [
     "QCD_Pt20_MuEnriched_TuneZ2_Fall11",
@@ -128,7 +130,7 @@ datasetsSignal = [
 
 datasetsData2011 = []
 #datasetsMCnoQCD = []
-datasetsMCQCD = []
+#datasetsMCQCD = []
 datasetsSignal = []
 #datasetsData2011 = datasetsData2011B
 

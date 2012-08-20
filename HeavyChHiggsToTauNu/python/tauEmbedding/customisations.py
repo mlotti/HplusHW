@@ -97,9 +97,6 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
     import RecoTauTag.Configuration.RecoPFTauTag_cff as RecoPFTauTag
 
-    if PF2PATVersion != postfix:
-        print "\n*** Warning: tauEmbedding/customisations.py:addMuonIsolationEmbedding called with postfix=%s, which is different than default PF2PATVersion=%s!\n"%(postfix,PF2PATVersion)
-
     tight = cms.EDProducer("HPlusPATMuonViewTauLikeIsolationEmbedder",
         candSrc = cms.InputTag(muons),
         pfCandSrc = cms.InputTag(pfcands),
@@ -240,7 +237,7 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
 
     # In 0.1 < DR < 0.4
     isolation = cms.EDProducer("HPlusPATMuonViewIsoDepositIsolationEmbedder",
-        src = cms.InputTag(muons),
+        src = cms.InputTag(name),
         embedPrefix = cms.string("iso01to04_"),
         deposits = cms.VPSet(
             construct(muonPFIsolation.muPFIsoValueNeutral04, "pfNeutralHadrons", vetos=["ConeVeto(0.1)"]),
@@ -257,7 +254,7 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
 
     # In 0.1 < DR < 0.3
     isolation = cms.EDProducer("HPlusPATMuonViewIsoDepositIsolationEmbedder",
-        src = cms.InputTag(muons),
+        src = cms.InputTag(name),
         embedPrefix = cms.string("iso01to03_"),
         deposits = cms.VPSet(
             construct(muonPFIsolation.muPFIsoValueNeutral03, "pfNeutralHadrons", vetos=["ConeVeto(0.1)"]),

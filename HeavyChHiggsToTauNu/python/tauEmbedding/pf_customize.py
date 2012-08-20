@@ -337,6 +337,8 @@ def customise(process):
         process.schedule.remove(process.DQM_FEDIntegrity_v2)
     if hasattr(process, "DQM_FEDIntegrity_v3"):
         process.schedule.remove(process.DQM_FEDIntegrity_v3)
+    if hasattr(process, "DQM_FEDIntegrity_v5"):
+        process.schedule.remove(process.DQM_FEDIntegrity_v5)
     if hasattr(process, "HLTAnalyzerEndpath"):
         process.schedule.remove(process.HLTAnalyzerEndpath)
         del process.HLTAnalyzerEndpath
