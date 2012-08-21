@@ -40,7 +40,8 @@ process.source = cms.Source('PoolSource',
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
 #    "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_2_X/TTJets_TuneZ2_Summer11_1/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_skim_v13_2/6ce8de2c5b6c0c9ed414998577b7e28d/skim_982_1_xgs.root"
-        "file:skim.root"
+#        "file:skim.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Tauembedding_skim_v44_1_TTJets_TuneZ2_Fall11//2f6341f5a210122b891e378fe7516bcf/skim_1001_1_qUS.root"
   )
 )
 
@@ -110,6 +111,10 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customis
 customisations.PF2PATVersion = PF2PATVersion
 muons = "selectedPatMuons"+PF2PATVersion
 #muons = customisations.addMuonIsolationEmbedding(process, process.commonSequence, muons)
+isolation = customisations.constructMuonIsolationOnTheFly(muons)
+muons = muons+"Iso"
+setattr(process, muons, isolation)
+process.commonSequence *= isolation
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as ElectronVeto
 process.eveto = ElectronVeto.hPlusGlobalElectronVetoFilter.clone(
@@ -146,12 +151,7 @@ additionalCounters.append("preselectedMuons40Count")
 
 process.preselectedJets = cms.EDFilter("PATJetSelector",
     src = cms.InputTag("goodJets"+PF2PATVersion),
-    cut = cms.string(
-    "pt() > 30 && abs(eta()) < 2.4"
-    "&& numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99"
-    "&& neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFraction < 0.99"
-    "&& chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0" # eta < 2.4, so don't need the requirement here
-    ),
+    cut = cms.string(customisations.jetSelection)
 )
 process.preselectedJetsFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("preselectedJets"),
@@ -172,7 +172,17 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
     genParticleSrc = cms.InputTag("genParticles"),
     muonSrc = cms.InputTag("preselectedMuons"),
     muonFunctions = cms.PSet(
-        dB = cms.string("dB()")
+        dB = cms.string("dB()"),
+        pfChargedHadrons = cms.string("chargedHadronIso()"),
+        pfNeutralHadrons = cms.string("neutralHadronIso()"),
+        pfPhotons = cms.string("photonIso()"),
+        pfPUChargedHadrons = cms.string("puChargedHadronIso()"),
+        
+        pfChargedHadrons_01to04 = cms.string("userFloat('ontheflyiso_pfChargedHadrons')"),
+        pfNeutralHadrons_01to04 = cms.string("userFloat('ontheflyiso_pfNeutralHadrons')"),
+        pfPhotons_01to04 = cms.string("userFloat('ontheflyiso_pfPhotons')"),
+        pfPUChargedHadrons_01to04 = cms.string("userFloat('ontheflyiso_pfPUChargedHadrons')"),
+
         #name = cms.string("function")
     ),
     jetSrc = cms.InputTag("preselectedJets"),
