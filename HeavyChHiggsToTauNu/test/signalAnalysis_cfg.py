@@ -49,7 +49,7 @@ doTauEmbeddingTauSelectionScan = False
 doTauEmbeddingLikePreselection = False
 
 # Apply beta cut for jets to reject PU jets
-betaCutForJets = 0.0 # Disable by setting to 0.0; if you want to enable, set to 0.2
+betaCutForJets = 0.2 # Disable by setting to 0.0; if you want to enable, set to 0.2
 
 ######### 
 #Flags for options in the signal analysis
@@ -187,14 +187,14 @@ if options.tauEmbeddingInput != 0:
         raise Exception("In tau embedding input mode, set also doPat=1")
 
     process.source.fileNames = [
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_2_X/SingleMu_165088-166150_Prompt/SingleMu/PromptReco_v4_AOD_165088_tauembedding_embedding_v13/9a509078f648b588515c15f2e17e813c/embedded_19_1_YAU.root"
+        "file:/mnt/flustre/wendland/embedded_latest.root"
         ]
     process.maxEvents.input = 10
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 if options.tauEmbeddingInput != 0:
-    process.GlobalTag.globaltag = "START42_V13::All"
+    process.GlobalTag.globaltag = "START44_V13::All"
 print "GlobalTag="+process.GlobalTag.globaltag.value()
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
@@ -646,3 +646,6 @@ process.out = cms.OutputModule("PoolOutputModule",
 # useful for debugging purposes)
 #process.outpath = cms.EndPath(process.out)
 
+#f = open("configDump.py", "w")
+#f.write(process.dumpPython())
+#f.close()

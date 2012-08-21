@@ -477,7 +477,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 43,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/WW_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -494,7 +494,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 18.2,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/WZ_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -511,7 +511,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 5.9,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/ZZ_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -550,7 +550,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 31314, # [2], NNLO
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -568,7 +568,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 1435.0, # taken from PREP
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/W2Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -586,7 +586,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 304.2, # taken from PREP
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/W3Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -604,7 +604,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 172.6, # taken from PREP
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/W4Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -622,7 +622,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 3048, # [2], NNLO
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -639,7 +639,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 9611, # Madgraph gives this number
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/DYJetsToLL_M-10To50_TuneZ2_7TeV-madgraph/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -662,7 +662,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 41.92,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/T_TuneZ2_t-channel_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -679,7 +679,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 22.65,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -696,7 +696,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 7.87,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -713,7 +713,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 7.87,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -730,7 +730,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 3.19,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/T_TuneZ2_s-channel_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -747,7 +747,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 1.44,
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",

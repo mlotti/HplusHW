@@ -551,7 +551,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-08Nov2011-v1/AOD",
                 "number_of_jobs": 140, # Adjusted for skim file size
-                "lumiMask": "May10ReReco"
+                "lumiMask": "DCSONLY11"
             },
         },
     },

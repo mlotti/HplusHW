@@ -3,6 +3,22 @@ import FWCore.ParameterSet.Config as cms
 
 # write as function , params: process and postfix
 
+def getTightMuonsDefinition(postfix=""):
+    tightMuons = cms.EDFilter("PATMuonSelector",
+        src = cms.InputTag("selectedPatMuons"+postfix+"All"),
+        cut = cms.string(
+        "isGlobalMuon() && isTrackerMuon()"
+        "&& pt() > 35 && abs(eta()) < 2.1"
+        "&& muonID('GlobalMuonPromptTight')"
+        "&& innerTrack().numberOfValidHits() > 10"
+        "&& innerTrack().hitPattern().pixelLayersWithMeasurement() >= 1"
+        "&& numberOfMatches() > 1"
+        "&& abs(dB()) < 0.02"
+    #    "&& (isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt() < 0.05",
+        )
+    )
+    return tightMuons
+
 def addMuonSelectionForEmbedding(process, postfix=""):
     muonSelectionAllEvents = cms.EDProducer("EventCountProducer")
     setattr(process, "muonSelectionAllEvents"+postfix, muonSelectionAllEvents)
@@ -29,19 +45,7 @@ def addMuonSelectionForEmbedding(process, postfix=""):
     muonSelectionPrimaryVertex = cms.EDProducer("EventCountProducer")
     setattr(process, "muonSelectionPrimaryVertex"+postfix, muonSelectionPrimaryVertex)
 
-    tightMuons = cms.EDFilter("PATMuonSelector",
-        src = cms.InputTag("selectedPatMuons"+postfix+"All"),
-        cut = cms.string(
-        "isGlobalMuon() && isTrackerMuon()"
-        "&& pt() > 35 && abs(eta()) < 2.1"
-        "&& muonID('GlobalMuonPromptTight')"
-        "&& innerTrack().numberOfValidHits() > 10"
-        "&& innerTrack().hitPattern().pixelLayersWithMeasurement() >= 1"
-        "&& numberOfMatches() > 1"
-        "&& abs(dB()) < 0.02"
-    #    "&& (isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt() < 0.05",
-        )
-    )
+    tightMuons = getTightMuonsDefinition(postfix=postfix)
     setattr(process, "tightMuons"+postfix, tightMuons)
     
     #tightMuonsZ = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
