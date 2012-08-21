@@ -17,7 +17,7 @@ defaultStep = "embedding"
 # Default era of data to use (meaningful only for signalAnalysis and muonAnalysis)
 #defaultEra = "EPS"
 #defaultEra = "Run2011A-EPS"
-defaultEra = "Run2011"
+defaultEra = "Run2011A+B"
 
 # Default embedding version(s) to use
 defaultVersions = [
@@ -39,8 +39,8 @@ defaultVersions = [
 #    "v13_3_seedTest9",
 #    "v13_3_seedTest10",
 #    "v14"
-#    "v44_1",
-    "v44_1_seed1",
+   "v44_1",
+#    "v44_1_seed1",
 #    "v44_1_seed2",
 ]
 
@@ -91,20 +91,20 @@ datasetsData2011B = [
 datasetsData2011 = datasetsData2011A + datasetsData2011B
 datasetsMCnoQCD = [
     "TTJets_TuneZ2_Fall11",
-    "WJets_TuneZ2_Fall11",
-    "DYJetsToLL_M50_TuneZ2_Fall11",
+    #"WJets_TuneZ2_Fall11",
+    #"DYJetsToLL_M50_TuneZ2_Fall11",
     #"W2Jets_TuneZ2_Fall11",
     #"W3Jets_TuneZ2_Fall11",
     #"W4Jets_TuneZ2_Fall11",
-    "T_t-channel_TuneZ2_Fall11",
-    "Tbar_t-channel_TuneZ2_Fall11",
-    "T_tW-channel_TuneZ2_Fall11",
-    "Tbar_tW-channel_TuneZ2_Fall11",
-    "T_s-channel_TuneZ2_Fall11",
-    "Tbar_s-channel_TuneZ2_Fall11",
-    "WW_TuneZ2_Fall11",
-    "WZ_TuneZ2_Fall11",
-    "ZZ_TuneZ2_Fall11",
+    #"T_t-channel_TuneZ2_Fall11",
+    #"Tbar_t-channel_TuneZ2_Fall11",
+    #"T_tW-channel_TuneZ2_Fall11",
+    #"Tbar_tW-channel_TuneZ2_Fall11",
+    #"T_s-channel_TuneZ2_Fall11",
+    #"Tbar_s-channel_TuneZ2_Fall11",
+    #"WW_TuneZ2_Fall11",
+    #"WZ_TuneZ2_Fall11",
+    #"ZZ_TuneZ2_Fall11",
 ]
 datasetsMCQCD = [
     "QCD_Pt20_MuEnriched_TuneZ2_Fall11",
@@ -128,9 +128,9 @@ datasetsSignal = [
     "TTToHplusBHminusB_M160_Fall11",
 ]
 
-datasetsData2011 = []
-#datasetsMCnoQCD = []
-#datasetsMCQCD = []
+#datasetsData2011 = []
+datasetsMCnoQCD = []
+datasetsMCQCD = []
 datasetsSignal = []
 #datasetsData2011 = datasetsData2011B
 
@@ -238,7 +238,7 @@ def createTasks(opts, step, version=None):
     if step in ["embedding", "analysis", "signalAnalysis"]:
         dirName += "_"+version
     if step in ["analysis", "signalAnalysis"]:
-        dirName += "_"+opts.era
+        dirName += "_"+opts.era.replace("+","")
 
 
     multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
@@ -255,7 +255,7 @@ def createTasks(opts, step, version=None):
                 datasets.extend(datasetsData2011A)
             if opts.era == "Run2011B":
                 datasets.extend(datasetsData2011B)
-            if opts.era == "Run2011":
+            if opts.era == "Run2011A+B":
                 datasets.extend(datasetsData2011)
             else:
                 raise Exception("Unsupported era %s" % opts.era)
@@ -363,11 +363,12 @@ def createTasks(opts, step, version=None):
     def modifyAnalysis(dataset):
         if dataset.isMC():
             dataset.appendArg("puWeightEra="+opts.era)
+            dataset.appendArg("runOnCrab=1") # Needed for btag scale factor mechanism
         if step == "signalAnalysis":
             dataset.appendArg("tauEmbeddingInput=1")
             dataset.appendArg("doPat=1")
-            if dataset.getName() in datasetsData2011_Run2011A_noEPS:
-                dataset.appendArg("tauEmbeddingCaloMet=caloMetSum")
+#            if dataset.getName() in datasetsData2011_Run2011A_noEPS:
+#                dataset.appendArg("tauEmbeddingCaloMet=caloMetSum")
     #    if step == "analysisTau":
     #        if dataset.getName() == "WJets":
     #            dataset.setNumberOfJobs(100)

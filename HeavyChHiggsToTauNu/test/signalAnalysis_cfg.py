@@ -189,7 +189,7 @@ if options.tauEmbeddingInput != 0:
     process.source.fileNames = [
         "file:/mnt/flustre/wendland/embedded_latest.root"
         ]
-    process.maxEvents.input = 10
+    process.maxEvents.input = 20
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
