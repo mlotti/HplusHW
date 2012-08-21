@@ -292,16 +292,7 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
 
     return name
 
-def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix="muonFinalSelection"):
-    counters = []
-
-    cname = prefix+"AllEvents"
-    m = cms.EDProducer("EventCountProducer")
-    setattr(process, cname, m)
-    sequence *= m
-    counters.append(cname)
-
-    # FIXME: ugly hack to calculate muon isolation on the fly (this is the wrong place to do it)
+def constructMuonIsolationOnTheFly(inputMuons):
     import RecoMuon.MuonIsolation.muonPFIsolationValues_cff as muonPFIsolation
     def construct(isoModule, isoKey, vetos=[]):
         deposit = isoModule.deposits[0]
@@ -316,8 +307,8 @@ def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix
         pset.vetos.extend(vetos)
         return pset
     global tauEmbeddingMuons
-    isolation = cms.EDProducer("HPlusPATMuonViewIsoDepositIsolationEmbedder",
-        src = cms.InputTag(tauEmbeddingMuons),
+    module = cms.EDProducer("HPlusPATMuonViewIsoDepositIsolationEmbedder",
+        src = cms.InputTag(inputMuons),
         embedPrefix = cms.string("ontheflyiso_"),
         deposits = cms.VPSet(
             construct(muonPFIsolation.muPFIsoValueNeutral04, "pfNeutralHadrons", vetos=["ConeVeto(0.1)"]),
@@ -327,6 +318,20 @@ def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix
             construct(muonPFIsolation.muPFIsoValueCharged04, "pfChargedHadrons", vetos=["ConeVeto(0.1)", "Threshold(0.8)"]),
         )
     )
+    return module
+
+def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix="muonFinalSelection"):
+    counters = []
+
+    cname = prefix+"AllEvents"
+    m = cms.EDProducer("EventCountProducer")
+    setattr(process, cname, m)
+    sequence *= m
+    counters.append(cname)
+
+    # FIXME: ugly hack to calculate muon isolation on the fly (this is the wrong place to do it)
+    global tauEmbeddingMuons
+    isolation = constructMuonIsolation(tauEmbeddingMuons)
     name = "patMuonsUserOnTheFlyIso"+PF2PATVersion
     tauEmbeddingMuons = name
     setattr(process, name, isolation)
