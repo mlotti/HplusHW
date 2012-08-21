@@ -340,9 +340,9 @@ def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix
     # Obtain delta beta from RecoTauTag/Configuration/python/HPSPFTaus_cff.py
     # FIXME: does it matter if the PU charged hadrons are not calculated in cone 0.8?
     # FIXME: the k-parameter for the PU charged hadrons can be changed (chosen by optimisation)
-    isoExpr = "(userFloat('ontheflyiso_pfChargedHadrons') + max(userFloat('ontheflyiso_pfPhotons')-0.27386*userFloat('ontheflyiso_pfPUChargedHadrons'), 0)) < 1"
+    #isoExpr = "(userFloat('ontheflyiso_pfChargedHadrons') + max(userFloat('ontheflyiso_pfPhotons')-0.27386*userFloat('ontheflyiso_pfPUChargedHadrons'), 0)) < 1"
     #isoExpr = "(userFloat('ontheflyiso_pfChargedHadrons') + max(userFloat('ontheflyiso_pfPhotons')-0.5*userFloat('pfPUChargedHadrons'), 0)) < 1"
-    #isoExpr = "1==1"
+    isoExpr = "1==1"
     if enableIsolation:
         print "*** Isolation for muon is enabled ***"
 #        counters.extend(addMuonRelativeIsolation(process, sequence, prefix=prefix+"Isolation", cut=0.1))
