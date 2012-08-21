@@ -97,9 +97,6 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
     import RecoTauTag.Configuration.RecoPFTauTag_cff as RecoPFTauTag
 
-    if PF2PATVersion != postfix:
-        print "\n*** Warning: tauEmbedding/customisations.py:addMuonIsolationEmbedding called with postfix=%s, which is different than default PF2PATVersion=%s!\n"%(postfix,PF2PATVersion)
-
     tight = cms.EDProducer("HPlusPATMuonViewTauLikeIsolationEmbedder",
         candSrc = cms.InputTag(muons),
         pfCandSrc = cms.InputTag(pfcands),
@@ -240,7 +237,7 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
 
     # In 0.1 < DR < 0.4
     isolation = cms.EDProducer("HPlusPATMuonViewIsoDepositIsolationEmbedder",
-        src = cms.InputTag(muons),
+        src = cms.InputTag(name),
         embedPrefix = cms.string("iso01to04_"),
         deposits = cms.VPSet(
             construct(muonPFIsolation.muPFIsoValueNeutral04, "pfNeutralHadrons", vetos=["ConeVeto(0.1)"]),
@@ -257,7 +254,7 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
 
     # In 0.1 < DR < 0.3
     isolation = cms.EDProducer("HPlusPATMuonViewIsoDepositIsolationEmbedder",
-        src = cms.InputTag(muons),
+        src = cms.InputTag(name),
         embedPrefix = cms.string("iso01to03_"),
         deposits = cms.VPSet(
             construct(muonPFIsolation.muPFIsoValueNeutral03, "pfNeutralHadrons", vetos=["ConeVeto(0.1)"]),
@@ -318,8 +315,9 @@ def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix
         )
         pset.vetos.extend(vetos)
         return pset
+    global tauEmbeddingMuons
     isolation = cms.EDProducer("HPlusPATMuonViewIsoDepositIsolationEmbedder",
-        src = cms.InputTag("tauEmbeddingMuons"),
+        src = cms.InputTag(tauEmbeddingMuons),
         embedPrefix = cms.string("ontheflyiso_"),
         deposits = cms.VPSet(
             construct(muonPFIsolation.muPFIsoValueNeutral04, "pfNeutralHadrons", vetos=["ConeVeto(0.1)"]),
@@ -330,6 +328,7 @@ def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix
         )
     )
     name = "patMuonsUserOnTheFlyIso"+PF2PATVersion
+    tauEmbeddingMuons = name
     setattr(process, name, isolation)
     sequence *= isolation
     # FIXME end ugly hack
@@ -341,9 +340,11 @@ def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix
     # Obtain delta beta from RecoTauTag/Configuration/python/HPSPFTaus_cff.py
     # FIXME: does it matter if the PU charged hadrons are not calculated in cone 0.8?
     # FIXME: the k-parameter for the PU charged hadrons can be changed (chosen by optimisation)
-    isoExpr = "(userFloat('ontheflyiso_pfChargedHadrons') + max(userFloat('ontheflyiso_pfPhotons')-0.27386*userFloat('pfPUChargedHadrons'), 0)) < 1"
-
+    isoExpr = "(userFloat('ontheflyiso_pfChargedHadrons') + max(userFloat('ontheflyiso_pfPhotons')-0.27386*userFloat('ontheflyiso_pfPUChargedHadrons'), 0)) < 1"
+    #isoExpr = "(userFloat('ontheflyiso_pfChargedHadrons') + max(userFloat('ontheflyiso_pfPhotons')-0.5*userFloat('pfPUChargedHadrons'), 0)) < 1"
+    #isoExpr = "1==1"
     if enableIsolation:
+        print "*** Isolation for muon is enabled ***"
 #        counters.extend(addMuonRelativeIsolation(process, sequence, prefix=prefix+"Isolation", cut=0.1))
         import muonAnalysis
         counters.extend(addMuonIsolation(process, sequence, prefix+"Isolation", isoExpr))

@@ -189,7 +189,7 @@ if options.tauEmbeddingInput != 0:
     process.source.fileNames = [
         "file:/mnt/flustre/wendland/embedded_latest.root"
         ]
-    process.maxEvents.input = 10
+    process.maxEvents.input = 20
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -646,3 +646,6 @@ process.out = cms.OutputModule("PoolOutputModule",
 # useful for debugging purposes)
 #process.outpath = cms.EndPath(process.out)
 
+#f = open("configDump.py", "w")
+#f.write(process.dumpPython())
+#f.close()

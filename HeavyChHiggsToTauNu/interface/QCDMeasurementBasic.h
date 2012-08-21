@@ -176,20 +176,26 @@ namespace HPlus {
     WrappedTH3* hLeg1AfterDeltaPhiTauMET;
     WrappedTH3* hLeg1AfterMaxDeltaPhiJetMET;
     WrappedTH3* hLeg1AfterTopSelection;
+    WrappedTH3* hLeg2AfterTauIDNoRtau;
     WrappedTH3* hLeg2AfterTauID;
 
     // Mt shapes
-    //std::vector<WrappedTH1*> hMtShapesAfterJetSelection;
+    std::vector<WrappedTH1*> hMtShapesAfterStandardSelection;
     std::vector<WrappedTH1*> hMtShapesAfterFullMETLeg;
     std::vector<WrappedTH1*> hMtShapesAfterMetLegNoBtagging;
+    std::vector<WrappedTH1*> hMtShapesAfterTauIDNoRtau;
+    std::vector<WrappedTH1*> hMtShapesAfterTauID;
     //std::vector<WrappedTH1*> hFullMassShapesAfterJetSelection;
     std::vector<WrappedTH1*> hFullMassShapesAfterFullMETLeg;
     //std::vector<WrappedTH1*> hFullMassShapesAfterMetLegNoBtagging;
 
     // Control plots
     std::vector<WrappedTH1*> hCtrlNjets; // Njets in bins of tau pT
+    std::vector<WrappedTH1*> hCtrlMETAfterStandardSelections; // MET in bins of tau pT
     std::vector<WrappedTH1*> hCtrlMET; // MET in bins of tau pT
     std::vector<WrappedTH1*> hCtrlMETAfterBtagging; // MET in bins of tau pT
+    std::vector<WrappedTH1*> hCtrlMETAfterTauIDNoRtau; // MET in bins of tau pT
+    std::vector<WrappedTH1*> hCtrlMETAfterFullTauID; // MET in bins of tau pT
     std::vector<WrappedTH1*> hCtrlMETAfterBtaggingAndDeltaPhi; // MET in bins of tau pT
     std::vector<WrappedTH1*> hCtrlNbjets; // Nbjets in bins of tau pT
     std::vector<WrappedTH1*> hCtrlDeltaPhiTauMET; // DeltaPhi(tau,MET) in bins of tau pT
