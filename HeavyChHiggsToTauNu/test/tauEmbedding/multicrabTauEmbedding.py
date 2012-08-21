@@ -52,7 +52,7 @@ config = {"skim":           {"input": "AOD",                           "config":
           "analysisTau":    {"input": "pattuple_v18",                       "config": "tauAnalysis_cfg.py"},
           "signalAnalysis": {"input": "tauembedding_embedding_%s",  "config": "../signalAnalysis_cfg.py"},
           "muonAnalysis":   {"input": "tauembedding_skim_v13",          "config": "muonAnalysisFromSkim_cfg.py"},
-          "caloMetEfficiency": {"input": "tauembedding_skim_v13",         "config": "caloMetEfficiency_cfg.py"},
+          "caloMetEfficiency": {"input": "tauembedding_skim_v44_1",         "config": "caloMetEfficiency_cfg.py"},
           }
 
 
@@ -270,6 +270,15 @@ def createTasks(opts, step, version=None):
     dataInput = config[step]["input"]
     if step in ["analysis", "signalAnalysis"]:
         dataInput = dataInput % version
+
+    # Hack for JSON files
+    if step in ["signalAnalysis", "analysisTau", "muonAnalysis", "caloMetEfficiency"]:
+        import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabDatasets as multicrabDatasets
+        for dataset in datasets:
+            if not "SingleMu" in dataset: # is data
+                continue
+            multicrabDatasets.datasets[dataset]["data"][dataInput]["lumiMask"] = "Nov08ReReco"
+
     multicrab.extendDatasets(dataInput, datasets)
 
     multicrab.appendLineAll("GRID.maxtarballsize = 15")
