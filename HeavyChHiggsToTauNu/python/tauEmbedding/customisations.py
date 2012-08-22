@@ -2,8 +2,6 @@ import FWCore.ParameterSet.Config as cms
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as HChSignalAnalysisParameters
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as ElectronVeto
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalMuonVetoFilter_cfi as MuonVeto
 
 PF2PATVersion = "PFlow"
 #PF2PATVersion = "PFlowChs"
@@ -769,18 +767,22 @@ def addGeneratorTauFilter(process, sequence, filterInaccessible=False, prefix="g
 
     return counters
 
-def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPreselection"):
+def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPreselection", pileupWeight=None):
     counters = []
 
+    genTauSequence = cms.Sequence()
     # Create PU weight producer for the counters
-    pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
-        alias = cms.string("pileupWeight"),
-    )
-    HChTools.insertPSetContentsTo(param.vertexWeight.clone(), pileupWeight)
-    setattr(process, prefix+"PileupWeight", pileupWeight)
-
+    if pileupWeight == None:
+        puModule = cms.EDProducer("HPlusVertexWeightProducer",
+            alias = cms.string("pileupWeight"),
+        )
+        HChTools.insertPSetContentsTo(param.vertexWeight.clone(), puModule)
+        pileupWeight = prefix+"PileupWeight"
+        setattr(process, puModule)
+        genTauSequence *= puModule
+    
     counterPrototype = cms.EDProducer("HPlusEventCountProducer",
-        weightSrc = cms.InputTag(prefix+"PileupWeight")
+        weightSrc = cms.InputTag(pileupWeight)
     )
 
     allCount = counterPrototype.clone()
@@ -805,8 +807,7 @@ def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPresel
     setattr(process, prefix+"GenTauCount", genTausCount)
     counters.append(prefix+"GenTauCount")
 
-    genTauSequence = cms.Sequence(
-        pileupWeight *
+    genTauSequence *= (
         allCount *
         genTaus * genTausFilter * genTausCount
     )
@@ -815,19 +816,22 @@ def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPresel
 
     return counters
 
-
-def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLikePreselection", disableTrigger=True):
+def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLikePreselection", disableTrigger=True, pileupWeight=None):
     counters = []
 
+    genTauSequence = cms.Sequence()
     # Create PU weight producer for the counters
-    pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
-        alias = cms.string("pileupWeight"),
-    )
-    HChTools.insertPSetContentsTo(param.vertexWeight.clone(), pileupWeight)
-    setattr(process, prefix+"PileupWeight", pileupWeight)
-
+    if pileupWeight == None:
+        puModule = cms.EDProducer("HPlusVertexWeightProducer",
+            alias = cms.string("pileupWeight"),
+        )
+        HChTools.insertPSetContentsTo(param.vertexWeight.clone(), puModule)
+        pileupWeight = prefix+"PileupWeight"
+        setattr(process, pileupWeight, puModule)
+        genTauSequence *= puModule
+    
     counterPrototype = cms.EDProducer("HPlusEventCountProducer",
-        weightSrc = cms.InputTag(prefix+"PileupWeight")
+        weightSrc = cms.InputTag(pileupWeight)
     )
 
     # Disable trigger
@@ -877,7 +881,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
 
     # Tau selection
     genTauReco = cms.EDProducer("HPlusPATTauCandViewDeltaRSelector",
-        src = cms.InputTag("selectedPatTausHpsPFTau"), # not trigger matched
+        src = cms.InputTag("selectedPatTaus"+PF2PATVersion), # not trigger matched
         refSrc = cms.InputTag(genTauFirstName),
         deltaR = cms.double(0.5),
     )
@@ -922,8 +926,10 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     setattr(process, cleanedMuonsName, cleanedMuons)
 
     # Electron and muon veto
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as ElectronVeto
     eveto = ElectronVeto.hPlusGlobalElectronVetoFilter.clone()
     evetoCount = counterPrototype.clone()
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalMuonVetoFilter_cfi as MuonVeto
     muveto = MuonVeto.hPlusGlobalMuonVetoFilter.clone() 
     muvetoCount = counterPrototype.clone()
     setattr(process, prefix+"ElectronVeto", eveto)
@@ -954,8 +960,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     setattr(process, cleanedJetsName+"Count", cleanedJetsCount)
     counters.append(cleanedJetsName+"Count")
 
-    genTauSequence = cms.Sequence(
-        pileupWeight *
+    genTauSequence *= (
         allCount *
         pvFilter * pvFilterCount *
         genTaus * genTausFilter * genTausCount * genTauFirst * genTauReco *
