@@ -88,6 +88,38 @@ def setCaloMetSum(process, sequence, options, dataVersion):
     setattr(process, name, m)
     sequence *= m
 
+def addMuonTriggerFix(process, dataVersion, sequence, options):
+    if dataVersion.isData() and len(options.trigger) == 0:
+        raise Exception("You must give 'trigger' command line argument for data")
+
+    # Count all events
+    process.muonTriggerFixAllEvents = cms.EDProducer("EventCountProducer")
+    sequence *= process.muonTriggerFixAllEvents
+
+    trigger = options.trigger
+    if len(trigger) == 0:
+        trigger = "HLT_Mu40_eta2p1_v1"
+
+    print "########################################"
+    print "#"
+    print "# Applying fix for missing muon trigger in embedding skim for MC"
+    print "# Trigger: %s" % trigger
+    print "#"
+    print "########################################"
+
+    from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
+    process.muonTriggerFixFilter = triggerResultsFilter.clone()
+    process.muonTriggerFixFilter.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
+    process.muonTriggerFixFilter.l1tResults = cms.InputTag("")
+    #process.TriggerFilter.throw = cms.bool(False) # Should it throw an exception if the trigger product is not found
+    process.muonTriggerFixFilter.triggerConditions = cms.vstring(trigger)
+    sequence *= process.muonTriggerFixFilter
+
+    process.muonTriggerFixPassed = cms.EDProducer("EventCountProducer")
+    sequence *= process.muonTriggerFixPassed
+
+    return ["muonTriggerFixAllEvents", "muonTriggerFixPassed"]
+
 def addMuonIsolationEmbeddingForSignalAnalysis(process, sequence, **kwargs):
     global tauEmbeddingMuons
     muons = addMuonIsolationEmbedding(process, sequence, tauEmbeddingMuons, **kwargs)
