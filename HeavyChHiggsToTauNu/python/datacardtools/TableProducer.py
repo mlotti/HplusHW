@@ -185,13 +185,22 @@ class TableProducer:
                     myFile.write(m+"\n")
                 myFile.close()
                 print HighlightStyle()+"QCD factorised messages written to: "+NormalStyle()+myFilename
+
                 myFilename = self._infoDirname+"/QCDfactorised_table_NQCD_yield.tex"
                 myFile = open(myFilename, "w")
-                myFile.write("Auto generated from datacard generator; to produce, run datacard generator and have a look into the produced info directory\n")
-                myFile.write("%% %s"%self._generateHeader()+"\n")
+                myFile.write("% Auto generated from datacard generator; to produce, run datacard generator and have a look into the produced info directory\n")
+                myFile.write("%% %s \n"%self._generateHeader().replace("Date","% Date"))
                 myFile.write(c.getYieldTable())
                 myFile.close()
                 print HighlightStyle()+"QCD factorised event yield table written to: "+NormalStyle()+myFilename
+
+                myFilename = self._infoDirname+"/QCDfactorised_table_NQCD_yield_contracted.tex"
+                myFile = open(myFilename, "w")
+                myFile.write("% Auto generated from datacard generator; to produce, run datacard generator and have a look into the produced info directory\n")
+                myFile.write("%% %s \n"%self._generateHeader().replace("Date","% Date"))
+                myFile.write(c.getCompactYieldTable())
+                myFile.close()
+                print HighlightStyle()+"QCD factorised compact event yield table written to: "+NormalStyle()+myFilename
 
     ## Generates header of datacard
     def _generateHeader(self, mass=None):
