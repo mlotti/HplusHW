@@ -16,8 +16,11 @@ set -e
 # 24.6.2011/M.Kortelainen CMSSW_4_2_4_patch1 Removed AnalysisDataFormats/EWK
 # 28.6.2011/M.Kortelainen CMSSW_4_2_5 Updated MCEmbeddingTools tag
 # 10.7.2011/M.Kortelainen CMSSW_4_2_5 Included AnalysisDataFormats/EWK back
+# 13.8.2012/M.Kortelainen CMSSW_4_4_4 Fix compilation of SelectReplacementCandidates.cc
 
 cvs co -r V00-00-13 TauAnalysis/MCEmbeddingTools
+cvs up -r 1.7 TauAnalysis/MCEmbeddingTools/plugins/SelectReplacementCandidates.cc
+
 cvs co -r V01-13-00 MuonAnalysis/MuonAssociators
 cvs up -r 1.4 MuonAnalysis/MuonAssociators/python/patMuonsWithTrigger_cff.py
 
@@ -30,3 +33,7 @@ addpkg AnalysisDataFormats/EWK
 cvs up -r1.7 AnalysisDataFormats/EWK/src/classes.h
 cvs up -r1.7 AnalysisDataFormats/EWK/src/classes_def.xml
 cvs up -r1.3 AnalysisDataFormats/EWK/BuildFile.xml
+
+echo "Please edit the file:"
+echo TauAnalysis/MCEmbeddingTools/plugins/SelectReplacementCandidates.cc
+echo "and replace deltaR with reco::deltaR"

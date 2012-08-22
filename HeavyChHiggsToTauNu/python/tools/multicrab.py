@@ -1084,7 +1084,6 @@ class Multicrab:
 
             os.chdir(dirname)
             subprocess.call(["multicrab", "-create"])
-
             print
             print "############################################################"
             print

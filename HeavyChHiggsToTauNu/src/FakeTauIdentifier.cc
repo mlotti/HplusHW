@@ -12,7 +12,20 @@
 
 namespace HPlus {
   
-  FakeTauIdentifier::FakeTauIdentifier(HPlus::HistoWrapper& histoWrapper, std::string label) {
+  FakeTauIdentifier::FakeTauIdentifier(const edm::ParameterSet& iConfig, HPlus::HistoWrapper& histoWrapper, std::string label):
+    fSFFakeTauBarrelElectron(iConfig.getUntrackedParameter<double>("scalefactorFakeTauBarrelElectron")),
+    fSFFakeTauEndcapElectron(iConfig.getUntrackedParameter<double>("scalefactorFakeTauEndcapElectron")),
+    fSFFakeTauBarrelMuon(iConfig.getUntrackedParameter<double>("scalefactorFakeTauBarrelMuon")),
+    fSFFakeTauEndcapMuon(iConfig.getUntrackedParameter<double>("scalefactorFakeTauEndcapMuon")),
+    fSFFakeTauBarrelJet(iConfig.getUntrackedParameter<double>("scalefactorFakeTauBarrelJet")),
+    fSFFakeTauEndcapJet(iConfig.getUntrackedParameter<double>("scalefactorFakeTauEndcapJet")),
+    fSystematicsFakeTauBarrelElectron(iConfig.getUntrackedParameter<double>("systematicsFakeTauBarrelElectron")),
+    fSystematicsFakeTauEndcapElectron(iConfig.getUntrackedParameter<double>("systematicsFakeTauEndcapElectron")),
+    fSystematicsFakeTauBarrelMuon(iConfig.getUntrackedParameter<double>("systematicsFakeTauBarrelMuon")),
+    fSystematicsFakeTauEndcapMuon(iConfig.getUntrackedParameter<double>("systematicsFakeTauEndcapMuon")),
+    fSystematicsFakeTauBarrelJet(iConfig.getUntrackedParameter<double>("systematicsFakeTauBarrelJet")),
+    fSystematicsFakeTauEndcapJet(iConfig.getUntrackedParameter<double>("systematicsFakeTauEndcapJet"))
+  {
     edm::Service<TFileService> fs;
     // Create histograms
     TFileDirectory myDir = fs->mkdir("FakeTauIdentifier_"+label);
@@ -165,5 +178,51 @@ namespace HPlus {
     
     return myMatchType;
   }
-  
+
+  double FakeTauIdentifier::getFakeTauScaleFactor(FakeTauIdentifier::MCSelectedTauMatchType matchType, double eta) {
+    if (matchType == FakeTauIdentifier::kkElectronToTau || matchType == FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance) {
+      if (std::fabs(eta) < 1.5) {
+        return fSFFakeTauBarrelElectron;
+      } else {
+        return fSFFakeTauEndcapElectron;
+      }
+    } else if (matchType == FakeTauIdentifier::kkMuonToTau || matchType == FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance) {
+      if (std::fabs(eta) < 1.5) {
+        return fSFFakeTauBarrelMuon;
+      } else {
+        return fSFFakeTauEndcapMuon;
+      }
+    } else if (matchType == FakeTauIdentifier::kkJetToTau || matchType == FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance) {
+      if (std::fabs(eta) < 1.5) {
+        return fSFFakeTauBarrelJet;
+      } else {
+        return fSFFakeTauEndcapJet;
+      }
+    }
+    return 1.0;
+  }
+
+  double FakeTauIdentifier::getFakeTauSystematics(MCSelectedTauMatchType matchType, double eta) {
+    if (matchType == FakeTauIdentifier::kkElectronToTau || matchType == FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance) {
+      if (std::fabs(eta) < 1.5) {
+        return fSystematicsFakeTauBarrelElectron;
+      } else {
+        return fSystematicsFakeTauEndcapElectron;
+      }
+    } else if (matchType == FakeTauIdentifier::kkMuonToTau || matchType == FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance) {
+      if (std::fabs(eta) < 1.5) {
+        return fSystematicsFakeTauBarrelMuon;
+      } else {
+        return fSystematicsFakeTauEndcapMuon;
+      }
+    } else if (matchType == FakeTauIdentifier::kkJetToTau || matchType == FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance) {
+      if (std::fabs(eta) < 1.5) {
+        return fSystematicsFakeTauBarrelJet;
+      } else {
+        return fSystematicsFakeTauEndcapJet;
+      }
+    }
+    return 0.0;
+  }
+
 }

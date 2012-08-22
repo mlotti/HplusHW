@@ -16,7 +16,7 @@ TauolaPolar = cms.PSet(
 #)
 
 tightenedMuons = cms.EDFilter("PATMuonSelector",
-    src = cms.InputTag("tightMuons"),
+    src = cms.InputTag("tightMuonsPFlow"),
     cut = cms.string("pt() > 40 && abs(eta()) < 2.1")
 )
 tightenedMuonsFilter = cms.EDFilter("CandViewCountFilter",
@@ -31,7 +31,8 @@ tightenedMuonsCount = cms.EDProducer("EventCountProducer")
 #)
 tauEmbeddingMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag("tightenedMuons"),
-    cut = cms.string("(userInt('byTightIc04ChargedOccupancy') + userInt('byTightIc04GammaOccupancy')) == 0")
+    cut = cms.string("") # FIXME: removed for determining proper muon ID that does not bias tau ID
+#    cut = cms.string("(userInt('byTightIc04ChargedOccupancy') + userInt('byTightIc04GammaOccupancy')) == 0")
 )
 tauEmbeddingMuonsFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("tauEmbeddingMuons"),

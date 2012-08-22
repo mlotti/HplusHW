@@ -5,11 +5,19 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as HChS
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as ElectronVeto
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalMuonVetoFilter_cfi as MuonVeto
 
+PF2PATVersion = "PFlow"
+#PF2PATVersion = "PFlowChs"
+
+allPatMuons = "selectedPatMuons"+PF2PATVersion
 tauEmbeddingMuons = "tauEmbeddingMuons"
+
+allPatTaus = "patTaus"+PF2PATVersion
+
 jetSelection = "pt() > 30 && abs(eta()) < 2.4"
 jetSelection += "&& numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99"
 jetSelection += "&& neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFraction < 0.99"
 jetSelection += "&& chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0"
+jetSelection += "&& userFloat('Beta') > 0.2"
 
 def customiseParamForTauEmbedding(param, options, dataVersion):
     # Change the triggers to muon
@@ -31,7 +39,7 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
     param.triggerEfficiencyScaleFactor.mode = "disabled"
 
     # Use PatJets and PFMet directly
-    param.changeJetCollection(moduleLabel="selectedPatJets") # these are really AK5PF
+    param.changeJetCollection(moduleLabel="selectedPatJets"+PF2PATVersion) # these are really AK5PF
     #param.MET.rawSrc = "pfMet" # no PAT object at the moment
 
     # Use the muons where the original muon is removed in global muon veto
@@ -39,17 +47,11 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
     param.GlobalElectronVeto.ElectronCollectionName.setProcessName("MUONSKIM")
 
     # Use the taus matched to the original muon in tau selections
-    postfix = "TauEmbeddingMuonMatched"
-    #param.setAllTauSelectionSrcSelectedPatTaus()
+    # Notice that only the version corresponding to PF2PATVersion is produced
+    replacePostfix = "TauEmbeddingMuonMatched"
     def replaceTauSrc(mod):
-        mod.src.setModuleLabel(mod.src.getModuleLabel().replace("TauTriggerMatched", postfix))
+        mod.src.setModuleLabel(mod.src.getModuleLabel().replace("TriggerMatched"+PF2PATVersion, replacePostfix))
     param.forEachTauSelection(replaceTauSrc)
-
-    # Remove TCTau
-    i = param.tauSelections.index(param.tauSelectionCaloTauCutBased)
-    print "Removing %s from the list of tau selections" % param.tauSelectionNames[i]
-    del param.tauSelections[i]
-    del param.tauSelectionNames[i]
 
     # Set the analyzer
     param.tree.tauEmbeddingInput = cms.untracked.bool(True)
@@ -91,7 +93,7 @@ def addMuonIsolationEmbeddingForSignalAnalysis(process, sequence, **kwargs):
     muons = addMuonIsolationEmbedding(process, sequence, tauEmbeddingMuons, **kwargs)
     tauEmbeddingMuons = muons
 
-def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", primaryVertex="firstPrimaryVertex", postfix=""):
+def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", primaryVertex="firstPrimaryVertex",postfix=""):
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
     import RecoTauTag.Configuration.RecoPFTauTag_cff as RecoPFTauTag
 
@@ -103,60 +105,59 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
         signalCone = cms.double(0.1),
         isolationCone = cms.double(0.5)
     )
-    name = "patMuonsWithTight"+postfix
-    setattr(process, name, tight)
+    # name = "patMuonsWithTight"+postfix
+    # setattr(process, name, tight)
+    name = muons
 
-    medium = tight.clone(
-        candSrc = name,
-        embedPrefix = "byMedium",
-    )
-    name = "patMuonsWithMedium"+postfix
-    setattr(process, name, medium)
+    # medium = tight.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byMedium",
+    # )
+    # name = "patMuonsWithMedium"+postfix
+    # setattr(process, name, medium)
 
-    loose = tight.clone(
-        candSrc = name,
-        embedPrefix = "byLoose",
-    )
-    name = "patMuonsWithLoose"+postfix
-    setattr(process, name, loose)
+    # loose = tight.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byLoose",
+    # )
+    # name = "patMuonsWithLoose"+postfix
+    # setattr(process, name, loose)
 
-    vloose = tight.clone(
-        candSrc = name,
-        embedPrefix = "byVLoose",
-    )
-    name = "patMuonsWithVLoose"+postfix
-    setattr(process, name, vloose)
+    # vloose = tight.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byVLoose",
+    # )
+    # name = "patMuonsWithVLoose"+postfix
+    # setattr(process, name, vloose)
 
     tight.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByTightIsolation.qualityCuts.clone()
-    medium.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByMediumIsolation.qualityCuts.clone()
-    loose.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByLooseIsolation.qualityCuts.clone()
-    vloose.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByVLooseIsolation.qualityCuts.clone()
-    #HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByTightIsolation.qualityCuts.isolationQualityCuts, tight)
-    #HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByMediumIsolation.qualityCuts.isolationQualityCuts, medium)
-    #HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByLooseIsolation.qualityCuts.isolationQualityCuts, loose)
-    #HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByVLooseIsolation.qualityCuts.isolationQualityCuts, vloose)
+    # medium.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByMediumIsolation.qualityCuts.clone()
+    # loose.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByLooseIsolation.qualityCuts.clone()
+    # vloose.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByVLooseIsolation.qualityCuts.clone()
 
-    sequence *= (tight * medium * loose *vloose)
+    # sequence *= (tight * medium * loose *vloose)
 
     #######################
-    m = tight.clone(
-        candSrc = name,
-        embedPrefix = "byTightSc015",
-        signalCone = 0.15
-    )
-    name = "patMuonsWithTightSc015"+postfix
-    setattr(process, name, m)
-    sequence *= m
+    # m = tight.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byTightSc015",
+    #     signalCone = 0.15
+    # )
+    # name = "patMuonsWithTightSc015"+postfix
+    # setattr(process, name, m)
+    # sequence *= m
 
-    m = tight.clone(
-        candSrc = name,
-        embedPrefix = "byTightSc02",
-        signalCone = 0.2
-    )
-    name = "patMuonsWithTightSc02"+postfix
-    setattr(process, name, m)
-    sequence *= m
+    # m = tight.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byTightSc02",
+    #     signalCone = 0.2
+    # )
+    # name = "patMuonsWithTightSc02"+postfix
+    # setattr(process, name, m)
+    # sequence *= m
 
+    ## This is the one used for HIG-11-019 paper
+    # I.e. counting in annulus 0.1 < DR < 0.4
     m = tight.clone(
         candSrc = name,
         embedPrefix = "byTightIc04",
@@ -166,58 +167,110 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
     setattr(process, name, m)
     sequence *= m
 
-    m = m.clone(
-        candSrc = name,
-        embedPrefix = "byTightSc015Ic04",
-        signalCone = 0.15
-    )
-    name = "patMuonsWithTightSc015Ic04"+postfix
-    setattr(process, name, m)
-    sequence *= m
 
-    m = m.clone(
-        candSrc = name,
-        embedPrefix = "byTightSc02Ic04",
-        signalCone = 0.2
-    )
-    name = "patMuonsWithTightSc02Ic04"+postfix
-    setattr(process, name, m)
-    sequence *= m
+    # m = m.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byTightSc015Ic04",
+    #     signalCone = 0.15
+    # )
+    # name = "patMuonsWithTightSc015Ic04"+postfix
+    # setattr(process, name, m)
+    # sequence *= m
 
-    #######################
-    m = tight.clone(
-        candSrc = name,
-        embedPrefix = "byTightSc0",
-        signalCone = 0.01
-    )
-    name = "patMuonsWithTightSc0"+postfix
-    setattr(process, name, m)
-    sequence *= m
-
-    m = m.clone(
-        candSrc = name,
-        embedPrefix = "byTightSc0Ic04",
-        isolationCone = 0.4,
-    )
-    name = "patMuonsWithTightSc0Ic04"+postfix
-    setattr(process, name, m)
-    sequence *= m
-
-    m = m.clone(
-        candSrc = name,
-        embedPrefix = "byTightSc0Ic04Noq",
-        #minTrackHits = 0,
-        #minTrackPt = 0.0,
-        #maxTrackChi2 = 9999.,
-        #minTrackPixelHits = 0,
-        #minGammaEt = 0.0,
-        #maxDeltaZ = 9999.,
-    )
-    name = "patMuonsWithTightSc0Ic04Noq"+postfix
-    setattr(process, name, m)
-    sequence *= m
+    # m = m.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byTightSc02Ic04",
+    #     signalCone = 0.2
+    # )
+    # name = "patMuonsWithTightSc02Ic04"+postfix
+    # setattr(process, name, m)
+    # sequence *= m
 
     #######################
+    # m = tight.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byTightSc0",
+    #     signalCone = 0.01
+    # )
+    # name = "patMuonsWithTightSc0"+postfix
+    # setattr(process, name, m)
+    # sequence *= m
+
+    # m = m.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byTightSc0Ic04",
+    #     isolationCone = 0.4,
+    # )
+    # name = "patMuonsWithTightSc0Ic04"+postfix
+    # setattr(process, name, m)
+    # sequence *= m
+
+    # m = m.clone(
+    #     candSrc = name,
+    #     embedPrefix = "byTightSc0Ic04Noq",
+    #     #minTrackHits = 0, #FIXME PFlow added, make sure that correct collection is taken (i.e. not CHS)
+    #     #minTrackPt = 0.0,
+    #     #maxTrackChi2 = 9999.,
+    #     #minTrackPixelHits = 0,
+    #     #minGammaEt = 0.0,
+    #     #maxDeltaZ = 9999.,
+    # )
+    # name = "patMuonsWithTightSc0Ic04Noq"+postfix
+    # setattr(process, name, m)
+    # sequence *= m
+
+    #######################
+    # DeltaBeta-based isolation for embedding, for now this configuration is only a guess
+    import RecoMuon.MuonIsolation.muonPFIsolationValues_cff as muonPFIsolation
+    def construct(isoModule, isoKey, vetos=[]):
+        deposit = isoModule.deposits[0]
+        pset = cms.PSet(
+            embedName = cms.string(isoKey),
+            deltaR = deposit.deltaR,
+            skipDefaultVeto = deposit.skipDefaultVeto,
+            mode = deposit.mode,
+            isolationKey = cms.string(isoKey),
+            vetos = cms.vstring(deposit.vetos)
+        )
+        pset.vetos.extend(vetos)
+        return pset
+
+    # In 0.1 < DR < 0.4
+    isolation = cms.EDProducer("HPlusPATMuonViewIsoDepositIsolationEmbedder",
+        src = cms.InputTag(name),
+        embedPrefix = cms.string("iso01to04_"),
+        deposits = cms.VPSet(
+            construct(muonPFIsolation.muPFIsoValueNeutral04, "pfNeutralHadrons", vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValueChargedAll04, "pfChargedAll",  vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValuePU04, "pfPUChargedHadrons",    vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValueGamma04, "pfPhotons",          vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValueCharged04, "pfChargedHadrons", vetos=["ConeVeto(0.1)"]),
+        )
+    )
+    name = "patMuonsWithIso01to04"+postfix
+    setattr(process, name, isolation)
+    sequence *= isolation
+
+
+    # In 0.1 < DR < 0.3
+    isolation = cms.EDProducer("HPlusPATMuonViewIsoDepositIsolationEmbedder",
+        src = cms.InputTag(name),
+        embedPrefix = cms.string("iso01to03_"),
+        deposits = cms.VPSet(
+            construct(muonPFIsolation.muPFIsoValueNeutral03, "pfNeutralHadrons", vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValueChargedAll03, "pfChargedAll",  vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValuePU03, "pfPUChargedHadrons",    vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValueGamma03, "pfPhotons",          vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValueCharged03, "pfChargedHadrons", vetos=["ConeVeto(0.1)"]),
+        )
+    )
+    name = "patMuonsWithIso01to03"+postfix
+    setattr(process, name, isolation)
+    sequence *= isolation
+
+
+    #######################
+    # Abuse the isolation function to embed generator matching
     gen = cms.EDProducer("HPlusPATMuonViewGenEmbedder",
         candSrc = cms.InputTag(name),
         genParticleSrc = cms.InputTag("genParticles"),
@@ -248,10 +301,53 @@ def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix
     sequence *= m
     counters.append(cname)
 
+    # FIXME: ugly hack to calculate muon isolation on the fly (this is the wrong place to do it)
+    import RecoMuon.MuonIsolation.muonPFIsolationValues_cff as muonPFIsolation
+    def construct(isoModule, isoKey, vetos=[]):
+        deposit = isoModule.deposits[0]
+        pset = cms.PSet(
+            embedName = cms.string(isoKey),
+            deltaR = deposit.deltaR,
+            skipDefaultVeto = deposit.skipDefaultVeto,
+            mode = deposit.mode,
+            isolationKey = cms.string(isoKey),
+            vetos = cms.vstring(deposit.vetos)
+        )
+        pset.vetos.extend(vetos)
+        return pset
+    global tauEmbeddingMuons
+    isolation = cms.EDProducer("HPlusPATMuonViewIsoDepositIsolationEmbedder",
+        src = cms.InputTag(tauEmbeddingMuons),
+        embedPrefix = cms.string("ontheflyiso_"),
+        deposits = cms.VPSet(
+            construct(muonPFIsolation.muPFIsoValueNeutral04, "pfNeutralHadrons", vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValueChargedAll04, "pfChargedAll",  vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValuePU04, "pfPUChargedHadrons",    vetos=["ConeVeto(0.1)", "Threshold(0.5)"]),
+            construct(muonPFIsolation.muPFIsoValueGamma04, "pfPhotons",          vetos=["ConeVeto(0.1)", "Threshold(0.8)"]),
+            construct(muonPFIsolation.muPFIsoValueCharged04, "pfChargedHadrons", vetos=["ConeVeto(0.1)", "Threshold(0.8)"]),
+        )
+    )
+    name = "patMuonsUserOnTheFlyIso"+PF2PATVersion
+    tauEmbeddingMuons = name
+    setattr(process, name, isolation)
+    sequence *= isolation
+    # FIXME end ugly hack
+
+
+    # The old counting-tight in 0.1 < DR < 0.4 annulus
+    #isoExpr = "(%s)==0" % muonAnalysis.isolations["tauTightIc04Iso"]
+    # Medium iso PF tau combined delta beta
+    # Obtain delta beta from RecoTauTag/Configuration/python/HPSPFTaus_cff.py
+    # FIXME: does it matter if the PU charged hadrons are not calculated in cone 0.8?
+    # FIXME: the k-parameter for the PU charged hadrons can be changed (chosen by optimisation)
+    #isoExpr = "(userFloat('ontheflyiso_pfChargedHadrons') + max(userFloat('ontheflyiso_pfPhotons')-0.27386*userFloat('ontheflyiso_pfPUChargedHadrons'), 0)) < 1"
+    #isoExpr = "(userFloat('ontheflyiso_pfChargedHadrons') + max(userFloat('ontheflyiso_pfPhotons')-0.5*userFloat('pfPUChargedHadrons'), 0)) < 1"
+    isoExpr = "1==1"
     if enableIsolation:
+        print "*** Isolation for muon is enabled ***"
 #        counters.extend(addMuonRelativeIsolation(process, sequence, prefix=prefix+"Isolation", cut=0.1))
         import muonAnalysis
-        counters.extend(addMuonIsolation(process, sequence, prefix+"Isolation", "(%s)==0" % muonAnalysis.isolations["tauTightIc04Iso"]))
+        counters.extend(addMuonIsolation(process, sequence, prefix+"Isolation", isoExpr))
     counters.extend(addMuonVeto(process, sequence, param, prefix+"MuonVeto"))
     counters.extend(addElectronVeto(process, sequence, param, prefix+"ElectronVeto"))
     counters.extend(addMuonJetSelection(process, sequence, prefix+"JetSelection"))
@@ -266,11 +362,10 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
     filter = prefix+"Filter"
     counter = prefix
 
-    import muonSelectionPF_cff as muonSelection
     from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
     m1 = cleanPatJets.clone(
 #        src = "selectedPatJets",
-        src = "goodJets", # we should use the pat::Jets constructed in the 
+        src = "goodJets"+PF2PATVersion, # we should use the pat::Jets constructed in the 
         preselection = cms.string(jetSelection),
         checkOverlaps = cms.PSet(
             muons = cms.PSet(
@@ -284,7 +379,10 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
             )
         )
     )
-    m2 = muonSelection.goodJetFilter.clone(src=selector, minNumber=3)
+    m2 = cms.EDFilter("CandViewCountFilter",
+        src = cms.InputTag(selector),
+        minNumber = cms.uint32(3)
+    )
     m3 = cms.EDProducer("EventCountProducer")
 
     setattr(process, selector, m1)
@@ -300,13 +398,11 @@ def addMuonVeto(process, sequence, param, prefix="muonSelectionMuonVeto"):
     filter = prefix+"Filter"
     counter = prefix
 
-    m1 = cms.EDFilter("HPlusGlobalMuonVetoFilter",
-        vertexSrc = cms.InputTag("firstPrimaryVertex"),
-        GlobalMuonVeto = param.GlobalMuonVeto.clone(
-            MuonCollectionName = cms.untracked.InputTag("selectedPatMuonsEmbeddingMuonCleaned")
-        ),
-        filter = cms.bool(True)              
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalMuonVetoFilter_cfi as muonVetoFilter_cfi
+    m1 = muonVetoFilter_cfi.hPlusGlobalMuonVetoFilter.clone(
+        vertexSrc = "firstPrimaryVertex"
     )
+    m1.GlobalMuonVeto.MuonCollectionName = "selectedPatMuonsEmbeddingMuonCleaned"
     m2 = cms.EDProducer("EventCountProducer")
 
     setattr(process, filter, m1)
@@ -320,10 +416,8 @@ def addElectronVeto(process, sequence, param, prefix="muonSelectionElectronVeto"
     filter = prefix+"Filter"
     counter = prefix
 
-    m1 = cms.EDFilter("HPlusGlobalElectronVetoFilter",
-        GlobalElectronVeto = param.GlobalElectronVeto.clone(),
-        filter = cms.bool(True)
-    )
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as electronVetoFilter_cfi
+    m1 = electronVetoFilter_cfi.hPlusGlobalElectronVetoFilter.clone()
     m2 = cms.EDProducer("EventCountProducer")
 
     setattr(process, filter, m1)
@@ -537,10 +631,10 @@ def addTauAnalyses(process, prefix, prototype, commonSequence, additionalCounter
     
 
 
-def selectedMuonCleanedMuons(selectedMuon, allMuons="selectedPatMuons"):
+def selectedMuonCleanedMuons(selectedMuon, allMuons=allPatMuons):
     from PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi import cleanPatMuons
     module = cleanPatMuons.clone(
-        src = cms.InputTag("selectedPatMuons"),
+        src = cms.InputTag(allMuons),
         checkOverlaps = cms.PSet(
             muons = cms.PSet(
                 src                 = cms.InputTag(selectedMuon),
@@ -565,18 +659,13 @@ def addTauEmbeddingMuonTaus(process):
     seq *= process.selectedPatMuonsEmbeddingMuonCleaned
 
     # Select the taus matching to the original muon
-    prototype = cms.EDProducer("HPlusPATTauCandViewDeltaRSelector",
-        src = cms.InputTag("dummy"),
+    m = cms.EDProducer("HPlusPATTauCandViewDeltaRSelector",
+        src = cms.InputTag(allPatTaus),
         refSrc = cms.InputTag(tauEmbeddingMuons),
         deltaR = cms.double(0.1),
     )
-
-    for tau in ["patTausHpsPFTau", "patTausHpsTancPFTau"]:
-        m = prototype.clone(
-            src = tau
-        )
-        setattr(process, tau+"TauEmbeddingMuonMatched", m)
-        seq *= m
+    setattr(process, allPatTaus+"TauEmbeddingMuonMatched", m)
+    seq *= m
 
     return seq
 
