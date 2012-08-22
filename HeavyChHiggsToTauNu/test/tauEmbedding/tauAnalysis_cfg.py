@@ -10,6 +10,8 @@ dataVersion = "44XmcS6"
 debug = False
 #debug = True
 
+PF2PATVersion = "PFlow"
+
 ################################################################################
 
 # Command line arguments (options) and DataVersion object
@@ -19,8 +21,8 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("TauEmbeddingAnalysis")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -28,9 +30,13 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 process.source = cms.Source('PoolSource',
 #    duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v18/8eea754df021b160abed50fa738aa521/pattuple_19_2_514.root"
+#        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v18/8eea754df021b160abed50fa738aa521/pattuple_19_2_514.root"
+        "file:/mnt/flustre/wendland/AODSIM_PU_S6_START44_V9B_7TeV/Fall11_TTJets_TuneZ2_7TeV-madgraph-tauola_AODSIM_PU_S6_START44_V9B-v1_testfile.root"
   )
 )
+
+options.doPat=1
+
 ################################################################################
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
@@ -39,7 +45,16 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 
 # Fragment to run PAT on the fly if requested from command line
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
+process.out = cms.OutputModule("PoolOutputModule",
+    fileName = cms.untracked.string('dummy.root'),
+    outputCommands = cms.untracked.vstring(),
+)
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
+del process.out
+if options.doPat != 0:
+    # Disable the tau pT cut
+    process.selectedPatTausPFlow.cut = ""
+    process.selectedPatTausPFlowChs.cut = ""
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
@@ -57,11 +72,12 @@ process.infoPath = addConfigInfo(process, options, dataVersion)
 
 
 # Vertex selection
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
-addPrimaryVertexSelection(process, process.commonSequence)
+#from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
+#addPrimaryVertexSelection(process, process.commonSequence)
 
 # Pileup weights
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+param.changeCollectionsToPF2PAT(PF2PATVersion)
 puWeights = [
     ("Run2011A", "Run2011A"),
     ("Run2011B", "Run2011B"),
@@ -74,11 +90,25 @@ for era, name in puWeights:
     ))
     param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, era=era)
     insertPSetContentsTo(param.vertexWeight.clone(), getattr(process, modname))
-    process.commonSequence *= getattr(process, modname)
+    process.commonSequence.insert(0, getattr(process, modname))
+# FIXME: this is only a consequence of the swiss-knive effect...
+process.commonSequence.remove(process.goodPrimaryVertices)
+process.commonSequence.insert(0, process.goodPrimaryVertices)
 
 # Embedding-like preselection
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
+tauEmbeddingCustomisations.PF2PATVersion = PF2PATVersion
+if options.doPat != 0:
+    # To optimise, perform the generator level preselection before running PAT
+    counters = tauEmbeddingCustomisations.addGenuineTauPreselection(process, process.commonSequence, param, pileupWeight="pileupWeight"+puWeights[-1][1])
+    process.commonSequence.remove(process.genuineTauPreselectionSequence)
+    puModule = getattr(process, "pileupWeight"+puWeights[-1][1])
+    process.commonSequence.replace(puModule, puModule*process.genuineTauPreselectionSequence)
+    additionalCounters = counters+additionalCounters
+
 additionalCounters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.commonSequence, param))
+
+
 
 ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
     selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
@@ -91,7 +121,7 @@ ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
     ),
     genParticleSrc = cms.InputTag("genParticles"),
     mets = cms.PSet(
-        pfMet_p4 = cms.InputTag("patMETsPF"),
+        pfMet_p4 = cms.InputTag("patMETs"+PF2PATVersion),
     ),
     doubles = cms.PSet(),
 )
@@ -100,8 +130,10 @@ for era, name in puWeights:
 
 tauIds = [
     "decayModeFinding",
-    "againstMuonLoose", "againstMuonTight", "againstElectronLoose", "againstElectronMedium", "againstElectronTight",
-    "byVLooseIsolation", "byLooseIsolation", "byMediumIsolation", "byTightIsolation"
+    "againstMuonLoose", "againstMuonTight",
+    "againstElectronLoose", "againstElectronMedium", "againstElectronTight", "againstElectronMVA",
+    "byVLooseIsolation", "byLooseIsolation", "byMediumIsolation", "byTightIsolation",
+    "byLooseCombinedIsolationDeltaBetaCorr", "byMediumCombinedIsolationDeltaBetaCorr", "byTightCombinedIsolationDeltaBetaCorr",
     ]
 for name in tauIds:
     setattr(ntuple.tauFunctions, name, cms.string("tauID('%s')"%name))
@@ -123,7 +155,7 @@ for label, module in process.producers_().iteritems():
     if module.type_() == "EventCountProducer":
         eventCounters.append(label)
 prototype = cms.EDProducer("HPlusEventCountProducer",
-    weightSrc = cms.InputTag("pileupWeightRun2011A")
+    weightSrc = cms.InputTag("pileupWeight"+puWeights[-1][1])
 )
 for label in eventCounters:
     process.globalReplace(label, prototype.clone())
