@@ -9,8 +9,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 ################################################################################
 # Configuration
 
-#dataVersion = "42Xmc"
-dataVersion = "42Xdata"
+#dataVersion = "44XmcS6"
+dataVersion = "44Xdata"
 
 ################################################################################
 
@@ -20,14 +20,18 @@ options, dataVersion = getOptionsDataVersion(dataVersion, useDefaultSignalTrigge
 inputFiles = []
 trigger = ""
 if len(options.trigger) == 0:
+    # Old 42X
     #(trg, inputFiles) = ("HLT_IsoMu12_v1", ["/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/SingleMu_160431-163261_May10/SingleMu/Run2011A_May10ReReco_v1_AOD_160431_pattuple_v19b/c0ae6cd4b6a7f4894060bf4c50b6b08b/pattuple_91_1_NEp.root"])
     #(trg, inputFiles) = ("HLT_IsoMu17_v6", ["/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/SingleMu_163270-163869_May10/SingleMu/Run2011A_May10ReReco_v1_AOD_163270_pattuple_v19b/4be8b2cd98e864fb2d0886a3cbadb57d/pattuple_273_1_DZW.root"])
     #(trg, inputFiles) = ("HLT_IsoMu24_v5", ["/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/SingleMu_165970-166150_Prompt/SingleMu/Run2011A_PromptReco_v4_AOD_165970_pattuple_v19b/a6e4aebe0f8be894b90b6ef44bce7d28/pattuple_99_1_1co.root"])
     #(trg, inputFiles) = ("HLT_IsoMu24_v8", ["/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/SingleMu_172620-173198_Prompt/SingleMu/Run2011A_PromptReco_v6_AOD_172620_pattuple_v19b/3a653e1bd941d76d28bcbdfed0228b46/pattuple_93_1_7kA.root"])
-    (trg, inputFiles) = ("HLT_IsoMu30_eta2p1_v3", ["/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/SingleMu_173236-173692_Prompt/SingleMu/Run2011A_PromptReco_v6_AOD_173236_pattuple_v19b/4c451d8c6536329916254ceeac99b134/pattuple_101_2_hJS.root"])
+    #(trg, inputFiles) = ("HLT_IsoMu30_eta2p1_v3", ["/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/SingleMu_173236-173692_Prompt/SingleMu/Run2011A_PromptReco_v6_AOD_173236_pattuple_v19b/4c451d8c6536329916254ceeac99b134/pattuple_101_2_hJS.root"])
+
+    (trg, inputFiles) = ("HLT_IsoMu30_eta2p1_v7", ["file:/mnt/flustre/mkortela/data/SingleMu/Run2011B-19Nov2011-v1/AOD/E427794E-151B-E111-976B-1CC1DE1CE56C.root"]) # Run 180241
 
     if dataVersion.isMC():
-        (trg, inputFiles) = ("HLT_IsoMu12_v1", ["/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/DYJetsToLL_M50_TuneZ2_Summer11/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v19b/9436cd413e1f831f4594f528a53faac6/pattuple_1001_2_sEX.root"])
+        #(trg, inputFiles) = ("HLT_IsoMu12_v1", ["/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/DYJetsToLL_M50_TuneZ2_Summer11/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v19b/9436cd413e1f831f4594f528a53faac6/pattuple_1001_2_sEX.root"])
+        raise Exception("No test file for MC at the moment")
 
     options.trigger = [trg]
 elif len(options.trigger) > 1:
@@ -56,7 +60,7 @@ isomu20filter_v8 = "hltSingleMuL2QualIsoL3IsoFiltered20"
 isomu24filter_v8 = "hltSingleMuL2QualIsoL3IsoFiltered24"
 isomu30filter_v8 = "hltSingleMuL2QualIsoL3IsoFiltered30"
 
-# Run2011 3e33
+# Run2011 3e33-5e33
 mu24filter_v8 = "hltSingleMu24L2QualL3Filtered24"
 mu24eta2p1filter = "hltL3fL1sMu14Eta2p1L1f0L2f14QL3Filtered24"
 mu30eta2p1filter = "hltL3fL1sMu14Eta2p1L1f0L2f14QL3Filtered30"
@@ -83,7 +87,7 @@ filters = [
     ("HLT_IsoMu17",        isomu17filter),    # 163270-165633
     ("HLT_IsoMu24",        isomu24filter),    # 165970-167913
     ("HLT_IsoMu24_v8",     isomu24filter_v8), # 170722-173198 
-    ("HLT_IsoMu30_eta2p1", isomu30eta2p1filter)  # 173236-178380
+    ("HLT_IsoMu30_eta2p1", isomu30eta2p1filter)  # 173236-180252
 ]
 filters.reverse()
 triggerFilter = None
@@ -102,7 +106,8 @@ print "Trigger %s, filter %s" % (trigger, triggerFilter)
 process = cms.Process("TagProbe")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -135,13 +140,18 @@ process.infoPath = addConfigInfo(process, options, dataVersion)
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 patArgs = {
 #    "doPatTaus": False,
-    "doPatMET": False,
+#    "doPatMET": False,
     "doPatElectronID": False,
-    "doPatCalo": False,
-    "doBTagging": False,
+#    "doPatCalo": False,
+#    "doBTagging": False,
     "doTauHLTMatching": False,
     }
-process.commonSequence, counters = addPatOnTheFly(process, options, dataVersion, plainPatArgs=patArgs, doMcPreselection=False)
+process.out = cms.OutputModule("PoolOutputModule",
+    fileName = cms.untracked.string('dummy.root'),
+    outputCommands = cms.untracked.vstring(),
+)
+process.commonSequence, counters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
+del process.out
 
 # Pileup weighting
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
@@ -150,10 +160,10 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
     alias = cms.string("pileupWeight"),
 )
-puweight = "Run2011A"
+puweight = "Run2011A+B"
 if len(options.puWeightEra) > 0:
         puweight = options.puWeightEra
-param.setPileupWeightFor2011(dataVersion, era=puweight)
+param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, era=puweight)
 insertPSetContentsTo(param.vertexWeight, process.pileupWeight)
 if dataVersion.isData():
     process.pileupWeight.enabled = False
@@ -215,7 +225,7 @@ counters.append("goodPrimaryVertexCount")
 # Isolation embedding
 #import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
 #muons = customisations.addMuonIsolationEmbedding(process, process.commonSequence, muons=muons)
-muons = "selectedPatMuons"
+muons = "selectedPatMuonsPFlowAll"
 
 
 # Preselection by tracks
@@ -253,6 +263,11 @@ counters.append("zCandsCount")
 process.commonSequence *= (process.zCands * process.zCandsFilter * process.zCandsCount)
 
 # Tag and Probe definitions
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
+sumIsoRel = muonAnalysis.isolations["sumIsoRel"]
+pfSumIsoRel = muonAnalysis.isolations["pfSumIsoRel"]
+pfSumIsoRelDeltaBeta = muonAnalysis.isolations["pfSumIsoRelDeltaBeta"]
+
 process.tagMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag(muons),
     cut = cms.string(
@@ -263,8 +278,9 @@ process.tagMuons = cms.EDFilter("PATMuonSelector",
         "&& innerTrack().hitPattern.pixelLayersWithMeasurement() >= 1"
         "&& numberOfMatches() > 1"
         "&& abs(dB()) < 0.02"
-        "&& (isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt() < 0.1"
-        "&& !triggerObjectMatchesByFilter('%s').empty()" % triggerFilter
+#        "&& (isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt() < 0.1"
+        "&& %s < 0.12" # tight working point in https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#The2011Data
+        "&& !triggerObjectMatchesByFilter('%s').empty()" % (pfSumIsoRelDeltaBeta, triggerFilter)
     ),
 )
 #process.tagMuons = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
@@ -346,11 +362,6 @@ process.tagAndProbeSequence = cms.Sequence(
     process.tagProbes
 )
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
-sumIsoRel = muonAnalysis.isolations["sumIsoRel"]
-pfSumIsoRel = muonAnalysis.isolations["pfSumIsoRel"]
-
-
 variables = cms.PSet(
     pt     = cms.string("pt"),
     eta    = cms.string("eta"),
@@ -361,15 +372,17 @@ variables = cms.PSet(
     #
 #    sumIsoRel = cms.string(sumIsoRel),
 #    pfSumIsoRel = cms.string(pfSumIsoRel),
+    pfSumIsoRelDeltaBeta = cms.string(pfSumIsoRelDeltaBeta),
 
     # external variables
     dz = cms.InputTag("probeMuonsVertexZ"),
 )
 
-for key, value in muonAnalysis.isolations.iteritems():
-    if "SumPt" in key or "MaxPt" in key:
-        continue
-    setattr(variables, key, cms.string(value))
+# These would be some trials of the old counting-isolations
+#for key, value in muonAnalysis.isolations.iteritems():
+#    if "SumPt" in key or "MaxPt" in key:
+#        continue
+#    setattr(variables, key, cms.string(value))
 
 
 def matchString(filters):
@@ -406,10 +419,12 @@ process.tnpTree = cms.EDAnalyzer("TagProbeFitTreeProducer",
         isID         = cms.string("muonID('GlobalMuonPromptTight')"),
         hitQuality   = cms.string("innerTrack().numberOfValidHits() > 10 && innerTrack().hitPattern.pixelLayersWithMeasurement() >= 1 && numberOfMatches() > 1"),
         dB           = cms.string("abs(dB()) < 0.02"),
-        sumIsoRel10   = cms.string("%s < 0.1" % sumIsoRel),
-        sumIsoRel15   = cms.string("%s < 0.15" % sumIsoRel),
+#        sumIsoRel10   = cms.string("%s < 0.1" % sumIsoRel),
+#        sumIsoRel15   = cms.string("%s < 0.15" % sumIsoRel),
         pfSumIsoRel10   = cms.string("%s < 0.1" % pfSumIsoRel),
         pfSumIsoRel15   = cms.string("%s < 0.15" % pfSumIsoRel),
+        pfSimIsoRelDeltaBeta12 = cms.string("%s < 0.12" % pfSumIsoRelDeltaBeta),
+        pfSimIsoRelDeltaBeta20 = cms.string("%s < 0.20" % pfSumIsoRelDeltaBeta),
         fullSelection = cms.string(
             "isGlobalMuon() && isTrackerMuon()"
             "&& pt() > 30 && abs(eta()) < 2.1"
@@ -418,7 +433,7 @@ process.tnpTree = cms.EDAnalyzer("TagProbeFitTreeProducer",
             "&& innerTrack().hitPattern.pixelLayersWithMeasurement() >= 1"
             "&& numberOfMatches() > 1"
             "&& abs(dB()) < 0.02"
-            "&& (isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt() < 0.1"
+#            "&& (isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt() < 0.1"
             "&& !triggerObjectMatchesByFilter('%s').empty()" % triggerFilter
         ),
 
@@ -440,7 +455,7 @@ process.tnpTree = cms.EDAnalyzer("TagProbeFitTreeProducer",
 # Count analyzer
 process.tnpCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     counters = cms.untracked.VInputTag([cms.InputTag(c) for c in counters]),
-#                                     printMainCounter = cms.untracked.bool(True),
+    printMainCounter = cms.untracked.bool(True),
 )
 
 
@@ -463,3 +478,7 @@ process.path = cms.Path(
 # )
 # for label in eventCounters:
 #     process.globalReplace(label, prototype.clone())
+
+#f = open("configDump", "w")
+#f.write(process.dumpPython())
+#f.close()

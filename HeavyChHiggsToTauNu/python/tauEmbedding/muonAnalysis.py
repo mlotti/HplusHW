@@ -7,9 +7,13 @@ isolations0304 = {
     "trackIso": "isolationR03().sumPt",
     "caloIso": "isolationR03().emEt+isolationR03().hadEt",
     # 'standard' PF isolation
-    "pfChargedIso": "isoDeposit('PfChargedHadronIso').depositWithin(0.4)",
-    "pfNeutralIso": "isoDeposit('PfNeutralHadronIso').depositWithin(0.4)",
-    "pfGammaIso": "isoDeposit('PfGammaIso').depositWithin(0.4)",
+#    "pfChargedIso": "isoDeposit('PfChargedHadronIso').depositWithin(0.4)",
+#    "pfNeutralIso": "isoDeposit('PfNeutralHadronIso').depositWithin(0.4)",
+#    "pfGammaIso": "isoDeposit('PfGammaIso').depositWithin(0.4)",
+    "pfChargedIso": "chargedHadronIso()",
+    "pfNeutralIso": "neutralHadronIso()",
+    "pfGammaIso":   "photonIso()",
+    "pfPUChargedIso": "puChargedHadronIso()",
 }
 isolations05 = {
     # Detector iso
@@ -27,6 +31,7 @@ isolations["sumIso"] = "%s+%s" % (isolations["trackIso"], isolations["caloIso"])
 isolations["pfSumIso"] = "%s+%s+%s" % (isolations["pfChargedIso"], isolations["pfNeutralIso"], isolations["pfGammaIso"])
 for key, value in isolations.items():
     isolations[key+"Rel"] = "(%s)/pt" % value
+isolations["pfSumIsoRelDeltaBeta"] = "(%s + max(%s+%s - 0.5*%s, 0))/pt()" % (isolations["pfChargedIso"], isolations["pfNeutralIso"], isolations["pfGammaIso"], isolations["pfPUChargedIso"])
 
 def _tauIso(name):
     return "userInt('by%sChargedOccupancy')+userInt('by%sGammaOccupancy')" % (name, name)
