@@ -21,6 +21,7 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("TauEmbeddingAnalysis")
 
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
@@ -148,6 +149,27 @@ addAnalysis(process, "tauNtuple", ntuple,
             additionalCounters=additionalCounters,
             signalAnalysisCounters=False)
 process.tauNtupleCounters.printMainCounter = True
+
+addSignalAnalysis = True
+if addSignalAnalysis:
+    # Run signal analysis module on the same go with the embedding preselection without tau+MET trigger
+    import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
+    module = signalAnalysis.createEDFilter(param)
+    module.Tree.fill = cms.untracked.bool(False)
+    module.eventCounter.printMainCounter = cms.untracked.bool(True)
+
+    # Add type 1 MET
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
+    sequence = MetCorrection.addCorrectedMet(process, module, postfix=PF2PATVersion)
+    process.commonSequence *= sequence
+
+    # Counters
+    if len(additionalCounters) > 0:
+        module.eventCounter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
+
+    setattr(process, "signalAnalysisTauEmbeddingLikePreselection", module)
+    process.signalAnalysisPath = cms.Path(process.commonSequence * module)
+
 
 # Replace all event counters with the weighted one
 eventCounters = []
