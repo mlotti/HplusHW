@@ -5,8 +5,8 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 ################################################################################
 # Configuration
 
-dataVersion = "44XmcS6"
-#dataVersion = "44Xdata"
+#dataVersion = "44XmcS6"
+dataVersion = "44Xdata"
 
 debug = False
 #debug = True
@@ -35,7 +35,8 @@ process.source = cms.Source('PoolSource',
         #dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Tauembedding_skim_v44_1_TTJets_TuneZ2_Fall11//2f6341f5a210122b891e378fe7516bcf/skim_1001_1_qUS.root"
+        #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Tauembedding_skim_v44_1_TTJets_TuneZ2_Fall11//2f6341f5a210122b891e378fe7516bcf/skim_1001_1_qUS.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/SingleMu_Mu_173693-177452_2011B_Nov19/SingleMu/Tauembedding_skim_v44_1_SingleMu_Mu_173693-177452_2011B_Nov19//079054b3ab4c4121ae105c34f9c44ff5/skim_100_1_Khr.root"
   )
 )
 ###############################################################################
@@ -84,8 +85,17 @@ for era, name in puWeights:
     ))
     param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, era=era)
     insertPSetContentsTo(param.vertexWeight.clone(), getattr(process, modname))
-    process.commonSequence *= getattr(process, modname)
-    
+    process.commonSequence.insert(0, getattr(process, modname))
+# FIXME: this is only a consequence of the swiss-knive effect...
+process.commonSequence.remove(process.goodPrimaryVertices)
+process.commonSequence.insert(0, process.goodPrimaryVertices)
+# FIXME: and this one because HBHENoiseFilter is not stored in embedding skims of v44_1
+if dataVersion.isData():
+    process.HBHENoiseSequence = cms.Sequence()
+    process.commonSequence.replace(process.HBHENoiseFilter, process.HBHENoiseSequence*process.HBHENoiseFilter)
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection as DataSelection
+    DataSelection.addHBHENoiseFilterResultProducer(process, process.HBHENoiseSequence)
+
 # Add the muon selection counters, as this is done after the skim
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as MuonSelection
 additionalCounters.extend(MuonSelection.getMuonSelectionCountersForEmbedding(postfix=PF2PATVersion))
@@ -94,11 +104,6 @@ additionalCounters.extend(MuonSelection.getMuonSelectionCountersForEmbedding(pos
 process.infoPath = addConfigInfo(process, options, dataVersion)
 
 ################################################################################
-
-process.firstPrimaryVertex = cms.EDProducer("HPlusFirstVertexSelector",
-    src = cms.InputTag("offlinePrimaryVertices")
-)
-process.commonSequence *= process.firstPrimaryVertex
 
 # Add type 1 MET
 #import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis # use signalAnalysis only to transfer the type1 MET collection (quick hack)
