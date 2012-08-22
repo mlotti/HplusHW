@@ -331,7 +331,7 @@ def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix
 
     # FIXME: ugly hack to calculate muon isolation on the fly (this is the wrong place to do it)
     global tauEmbeddingMuons
-    isolation = constructMuonIsolation(tauEmbeddingMuons)
+    isolation = constructMuonIsolationOnTheFly(tauEmbeddingMuons)
     name = "patMuonsUserOnTheFlyIso"+PF2PATVersion
     tauEmbeddingMuons = name
     setattr(process, name, isolation)
