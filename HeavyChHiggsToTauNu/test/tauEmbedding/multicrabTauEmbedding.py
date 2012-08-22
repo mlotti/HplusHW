@@ -292,11 +292,11 @@ def createTasks(opts, step, version=None):
         for key in dataset.data.keys():
             if key == "skimConfig":
                 del dataset.data[key]
-            elif key == "args":
-                arglist = dataset.data[key]
-                for argkey in arglist.keys():
-                    if argkey == "triggerMC":
-                        del arglist[argkey]
+            #elif key == "args":
+                #arglist = dataset.data[key]
+                #for argkey in arglist.keys():
+                    #if argkey == "triggerMC":
+                        #del arglist[argkey]
         # Proceed
         name = ""
         if dataset.isData() or step != "skim":
