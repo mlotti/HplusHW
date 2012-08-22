@@ -509,10 +509,16 @@ class QCDfactorisedCalculator():
         if basicCounts.is3D():
             self._contractedCount(basicCounts, leg1Counts, leg2Counts, "Z", doHistograms)
 
+        # Make yield table
+        self._yieldTable = self.createYieldTable()
+
     def clean(self):
         self._basicCount.clean()
         self._leg1Counts.clean()
         self._leg2Counts.clean()
+
+    def getYieldTable(self):
+        return self._yieldTable
 
     def getNQCD(self):
         return self._NQCD
@@ -641,6 +647,24 @@ class QCDfactorisedCalculator():
              raise Exception(ErrorStyle()+"Warning: QCD:Factorised: Efficiency histogram not yet supported for more than 1 dimensions"+NormalStyle())
         return hlist
 
+    def getNQCDForBin(self,idx,idy=-1,idz=-1):
+        myBasicCounts = self._basicCount.getQCDCount(idx,idy,idz).value()
+        myLeg1Counts = self._leg1Counts.getQCDCount(idx,idy,idz).value()
+        myLeg2Counts = self._leg2Counts.getQCDCount(idx,idy,idz).value()
+        myCount = 0.0
+        myDataUncert = 0.0
+        myMCStatUncert = 0.0
+        myMCSystUncert = 0.0
+        # Protect calculation against div by zero
+        if (myBasicCounts > 0.0):
+            myCount = myLeg1Counts * myLeg2Counts / myBasicCounts
+            # Calculate uncertainty as f=a*b  (i.e. ignore basic counts uncertainty since it is the denominator to avoid double counting of uncertainties)
+            # df = sqrt((b*da)^2 + (a*db)^2)
+            myDataUncert   = sqrt(pow(myLeg2Counts*self._leg1Counts.getDataError(idx,idy,idz)  /myBasicCounts,2) + pow(myLeg1Counts*self._leg2Counts.getDataError(idx,idy,idz)  /myBasicCounts,2))
+            myMCStatUncert = sqrt(pow(myLeg2Counts*self._leg1Counts.getMCStatError(idx,idy,idz)/myBasicCounts,2) + pow(myLeg1Counts*self._leg2Counts.getMCStatError(idx,idy,idz)/myBasicCounts,2))
+            myMCSystUncert = sqrt(pow(myLeg2Counts*self._leg1Counts.getMCSystError(idx,idy,idz)/myBasicCounts,2) + pow(myLeg1Counts*self._leg2Counts.getMCSystError(idx,idy,idz)/myBasicCounts,2))
+        return [myCount,myDataUncert,myMCStatUncert,myMCSystUncert]
+
     def _count(self, basicCounts, leg1Counts, leg2Counts, doHistograms=False):
         if basicCounts.is1D():
             h = None
@@ -649,29 +673,15 @@ class QCDfactorisedCalculator():
                 h.Reset()
                 h.SetYTitle("NQCD")
             for i in range (1,basicCounts.getNbinsX()+1):
-                myBasicCounts = basicCounts.getQCDCount(i).value()
-                myLeg1Counts = leg1Counts.getQCDCount(i).value()
-                myLeg2Counts = leg2Counts.getQCDCount(i).value()
-                myCount = 0.0
-                myDataUncert = 0.0
-                myMCStatUncert = 0.0
-                myMCSystUncert = 0.0
-                # Protect calculation against div by zero
-                if (myBasicCounts > 0.0):
-                    myCount = myLeg1Counts * myLeg2Counts / myBasicCounts
-                    # Calculate uncertainty as f=a*b  (i.e. ignore basic counts uncertainty since it is the denominator to avoid double counting of uncertainties)
-                    myDataUncert = pow(myLeg2Counts*leg1Counts.getDataError(i)/myBasicCounts,2) + pow(myLeg1Counts*leg2Counts.getDataError(i)/myBasicCounts,2)
-                    myMCStatUncert = pow(myLeg2Counts*leg1Counts.getMCStatError(i)/myBasicCounts,2) + pow(myLeg1Counts*leg2Counts.getMCStatError(i)/myBasicCounts,2)
-                    myMCSystUncert = pow(myLeg2Counts*leg1Counts.getMCSystError(i)/myBasicCounts,2) + pow(myLeg1Counts*leg2Counts.getMCSystError(i)/myBasicCounts,2)
-                # Make sum
-                self._NQCD += myCount
-                self._dataUncertainty += myDataUncert
-                self._MCStatUncertainty += myMCStatUncert
-                self._MCSystUncertainty += myMCSystUncert
+                myNQCD = self.getNQCDForBin(i)
+                self._NQCD += myNQCD[0]
+                self._dataUncertainty += pow(myNQCD[1],2)
+                self._MCStatUncertainty += pow(myNQCD[2],2)
+                self._MCSystUncertainty += pow(myNQCD[3],2)
                 # Fill histogram
                 if myCount > 0 and doHistograms:
-                    h.SetBinContent(i, myCount)
-                    h.SetBinError(i, sqrt(myDataUncert+myMCStatUncert+myMCSystUncert))
+                    h.SetBinContent(i, myNQCD[0])
+                    h.SetBinError(i, sqrt(pow(myNQCD[1],2)+pow(myNQCD[2],2)+pow(myNQCD[3],2)))
             if doHistograms:
                 self._nQCDHistograms.append(h)
         elif basicCounts.is2D():
@@ -682,29 +692,15 @@ class QCDfactorisedCalculator():
                 h.SetZTitle("NQCD")
             for i in range (1,basicCounts.getNbinsX()+1):
                 for j in range (1,basicCounts.getNbinsY()+1):
-                    myBasicCounts = basicCounts.getQCDCount(i,j).value()
-                    myLeg1Counts = leg1Counts.getQCDCount(i,j).value()
-                    myLeg2Counts = leg2Counts.getQCDCount(i,j).value()
-                    myCount = 0.0
-                    myDataUncert = 0.0
-                    myMCStatUncert = 0.0
-                    myMCSystUncert = 0.0
-                    # Protect calculation against div by zero
-                    if (myBasicCounts > 0.0):
-                        myCount = myLeg1Counts * myLeg2Counts / myBasicCounts
-                        # Calculate uncertainty as f=a*b  (i.e. ignore basic counts uncertainty since it is the denominator to avoid double counting of uncertainties)
-                        myDataUncert = pow(myLeg2Counts*leg1Counts.getDataError(i,j)/myBasicCounts,2) + pow(myLeg1Counts*leg2Counts.getDataError(i,j)/myBasicCounts,2)
-                        myMCStatUncert = pow(myLeg2Counts*leg1Counts.getMCStatError(i,j)/myBasicCounts,2) + pow(myLeg1Counts*leg2Counts.getMCStatError(i,j)/myBasicCounts,2)
-                        myMCSystUncert = pow(myLeg2Counts*leg1Counts.getMCSystError(i,j)/myBasicCounts,2) + pow(myLeg1Counts*leg2Counts.getMCSystError(i,j)/myBasicCounts,2)
-                    # Make sum
-                    self._NQCD += myCount
-                    self._dataUncertainty += myDataUncert
-                    self._MCStatUncertainty += myMCStatUncert
-                    self._MCSystUncertainty += myMCSystUncert
+                    myNQCD = self.getNQCDForBin(i,j)
+                    self._NQCD += myNQCD[0]
+                    self._dataUncertainty += pow(myNQCD[1],2)
+                    self._MCStatUncertainty += pow(myNQCD[2],2)
+                    self._MCSystUncertainty += pow(myNQCD[3],2)
                     # Fill histogram
                     if myCount > 0 and doHistograms:
-                        h.SetBinContent(i, j, myCount)
-                        h.SetBinError(i, j, sqrt(myDataUncert+myMCStatUncert+myMCSystUncert))
+                        h.SetBinContent(i, j, myNQCD[0])
+                        h.SetBinError(i, j, sqrt(pow(myNQCD[1],2)+pow(myNQCD[2],2)+pow(myNQCD[3],2)))
             if doHistograms:
                 self._nQCDHistograms.append(h)
         elif basicCounts.is3D():
@@ -728,31 +724,17 @@ class QCDfactorisedCalculator():
                 # Calculate NQCD
                 for j in range (1,basicCounts.getNbinsY()+1):
                     for k in range (1,basicCounts.getNbinsZ()+1):
-                        myBasicCounts = basicCounts.getQCDCount(i,j,k).value()
-                        myLeg1Counts = leg1Counts.getQCDCount(i,j,k).value()
-                        myLeg2Counts = leg2Counts.getQCDCount(i,j,k).value()
-                        myCount = 0.0
-                        myDataUncert = 0.0
-                        myMCStatUncert = 0.0
-                        myMCSystUncert = 0.0
-                        # Protect calculation against div by zero
-                        if (myBasicCounts > 0.0):
-                            myCount = myLeg1Counts * myLeg2Counts / myBasicCounts
-                            # Calculate uncertainty as f=a*b  (i.e. ignore basic counts uncertainty since it is the denominator to avoid double counting of uncertainties)
-                            myDataUncert = pow(myLeg2Counts*leg1Counts.getDataError(i,j,k)/myBasicCounts,2) + pow(myLeg1Counts*leg2Counts.getDataError(i,j,k)/myBasicCounts,2)
-                            myMCStatUncert = pow(myLeg2Counts*leg1Counts.getMCStatError(i,j,k)/myBasicCounts,2) + pow(myLeg1Counts*leg2Counts.getMCStatError(i,j,k)/myBasicCounts,2)
-                            myMCSystUncert = pow(myLeg2Counts*leg1Counts.getMCSystError(i,j,k)/myBasicCounts,2) + pow(myLeg1Counts*leg2Counts.getMCSystError(i,j,k)/myBasicCounts,2)
-                        # Make sum
-                        self._NQCD += myCount
-                        self._dataUncertainty += myDataUncert
-                        self._MCStatUncertainty += myMCStatUncert
-                        self._MCSystUncertainty += myMCSystUncert
+                        myNQCD = self.getNQCDForBin(i,j,k)
+                        self._NQCD += myNQCD[0]
+                        self._dataUncertainty += pow(myNQCD[1],2)
+                        self._MCStatUncertainty += pow(myNQCD[2],2)
+                        self._MCSystUncertainty += pow(myNQCD[3],2)
                         # Fill histogram
-                        if myCount > 0 and doHistograms:
-                            h.SetBinContent(j,k,myCount)
-                            h.SetBinError(j,k,sqrt(myDataUncert+myMCStatUncert+myMCSystUncert))
-                            hTot.SetBinContent(j,k+(i-1)*basicCounts.getNbinsZ(),myCount)
-                            hTot.SetBinError(j,k+(i-1)*basicCounts.getNbinsZ(),sqrt(myDataUncert+myMCStatUncert+myMCSystUncert))
+                        if myNQCD[0] > 0 and doHistograms:
+                            h.SetBinContent(j,k,myNQCD[0])
+                            h.SetBinError(j,k,sqrt(pow(myNQCD[1],2)+pow(myNQCD[2],2)+pow(myNQCD[3],2)))
+                            hTot.SetBinContent(j,k+(i-1)*basicCounts.getNbinsZ(),myNQCD[0])
+                            hTot.SetBinError(j,k+(i-1)*basicCounts.getNbinsZ(),sqrt(pow(myNQCD[1],2)+pow(myNQCD[2],2)+pow(myNQCD[3],2)))
                 if doHistograms:
                     self._nQCDHistograms.append(h)
             if doHistograms:
@@ -859,6 +841,92 @@ class QCDfactorisedCalculator():
         self._contractedMCStatUncertainty[axis] = sqrt(contractedMCStatUncertainty)
         self._contractedMCSystUncertainty[axis] = sqrt(contractedMCSystUncertainty)
 
+    def createYieldTable(self):
+        myOutput = ""
+        for i in range(1,self._basicCount.getNbinsX()+1):
+            for k in range(1,self._basicCount.getNbinsZ()+1):
+                myTableStructure = "l"
+                myBasicDataRow = "$N^{\\text{data}}_{\\text{basic sel.},ijk}$ "
+                myBasicEWKRow = "$N^{\\text{EWK MC}}_{\\text{basic sel.},ijk}$ "
+                myBasicPurityRow = "Purity after basic sel. "
+                myMetDataRow = "$N^{\\text{data}}_{\\text{\\MET+btag+}\\Delta\\phi,ijk}$ "
+                myMetEWKRow = "$N^{\\text{EWK MC}}_{\\text{\\MET+btag}+\\Delta\\phi,ijk}$ "
+                myMetPurityRow = "Purity after \\MET+btag+$\\Delta\\phi$ "
+                myTauDataRow = "$N^{\\text{data}}_{\\text{presel.},ijk}$ "
+                myTauEWKRow = "$N^{\\text{EWK MC}}_{\\text{presel.},ijk}$ "
+                myTauPurityRow = "Purity after presel. "
+                myMetEffRow = "$\\varepsilon_{\\text{\\MET+btag+}\\Delta\\phi,ijk}$"
+                myNQCDRow = "$N^{\\text{QCD}}_{ijk}$"
+                myPtCaption = "$\\tau$ jet candidate \\pT bin"
+                myEtaCaption = "$\\tau$ jet candidate $\\eta$ bin"
+                myPtCaption += "& \\multicolumn{3}{c}{%s \\Gevc}"%(self._basicCount.getBinLabel("X",i).replace("<","$<$").replace(">","$>$"))
+                for j in range(1,self._basicCount.getNbinsY()+1):
+                    myTableStructure += "l"
+                    myEtaCaption += "& \multicolumn{1}{c}{%s}"%(self._basicCount.getBinLabel("Y",j).replace("<","$<$").replace(">","$>$"))
+                    myBasicDataRow += "& %.1f $\\pm$ %.1f"%(self._basicCount.getDataCount(i,j,k),self._basicCount.getDataError(i,j,k))
+                    myBasicEWKRow += "& %.1f $\\pm$ %.1f $\\pm$ %.1f"%(self._basicCount.getMCCount(i,j,k),self._basicCount.getMCStatError(i,j,k),self._basicCount.getMCSystError(i,j,k))
+                    myPurity = self._basicCount.getPurity(i,j,k)
+                    myBasicPurityRow += "& %.2f $\\pm$ %.2f"%(myPurity.value(),myPurity.uncertainty())
+                    myMetDataRow += "& %.1f $\\pm$ %.1f"%(self._leg1Counts.getDataCount(i,j,k),self._leg1Counts.getDataError(i,j,k))
+                    myMetEWKRow += "& %.1f $\\pm$ %.1f $\\pm$ %.1f"%(self._leg1Counts.getMCCount(i,j,k),self._leg1Counts.getMCStatError(i,j,k),self._leg1Counts.getMCSystError(i,j,k))
+                    myPurity = self._leg1Counts.getPurity(i,j,k)
+                    myMetPurityRow += "& %.2f $\\pm$ %.2f"%(myPurity.value(),myPurity.uncertainty())
+                    myTauDataRow += "& %.1f $\\pm$ %.1f"%(self._leg2Counts.getDataCount(i,j,k),self._leg2Counts.getDataError(i,j,k))
+                    myTauEWKRow += "& %.1f $\\pm$ %.1f $\\pm$ %.1f"%(self._leg2Counts.getMCCount(i,j,k),self._leg2Counts.getMCStatError(i,j,k),self._leg2Counts.getMCSystError(i,j,k))
+                    myPurity = self._leg2Counts.getPurity(i,j,k)
+                    myTauPurityRow += "& %.2f $\\pm$ %.2f"%(myPurity.value(),myPurity.uncertainty())
+                    myMetEfficiency = self.getLeg1Efficiency(i,j,k)
+                    myMetEffRow += "& %.3f $\\pm$ %.3f"%(myMetEfficiency.value(),myMetEfficiency.uncertainty())
+                    myNQCD = self.getNQCDForBin(i,j,k)
+                    myNQCDRow += "& %.1f $\\pm$ %.1f $\\pm$ %.1f"%(myNQCD[0],sqrt(pow(myNQCD[1],2)+pow(myNQCD[2],2)),myNQCD[3])
+                # Construct table
+                if k == 1:
+                    myOutput += "\\renewcommand{\\arraystretch}{1.2}\n"
+                    myOutput += "\\begin{table}\n"
+                    myOutput += "\\caption{Analytical breakdown of the \\NQcd estimate, showing the number of data and EWK MC events and\n"
+                    myOutput += "  the purity of the sample after standard selections, after basic selections plus \\MET+btag+$\\Delta\\phi$, and\n"
+                    myOutput += "  after all preselections. The efficiency of \\MET+btag+$\\Delta\\phi$ relative to basic selections and \n"
+                    myOutput += "  the estimate for the number of QCD multi-jet events in the signal region (\\NQcd) are shown.\n"
+                    myOutput += "  The numbers are shown for tau candidate \\pT bin %s \\GeVc.\n"%(self._basicCount.getBinLabel("X",i).replace("<","$<$").replace(">","$>$"))
+                    myOutput += "  The top table is for $N_{\\text{vertices}} < 8$,\n"
+                    myOutput += "  whereas the bottom table is for $N_{\\text{vertices}} \geq 8$.\n"
+                    myOutput += "  Wherever appropriate, the systematic uncertainty is shown in addition to the statistical uncertainty. } \n"
+                    myOutput += "\\label{tab:background:qcdfact:evtyield:bin%d}\n"%(i)
+                    myOutput += "\\vspace{1cm}\n"
+                    myOutput += "%% NQCD analytical breakdown for tau pT bin %s and Nvtx bin = %s\n"%(self._basicCount.getBinLabel("X",i).replace("<","$<$").replace(">","$>$"),self._basicCount.getBinLabel("Z",k).replace("<","$<$").replace(">","$>$"))
+                else:
+                    myOutput += "\\\\ \n"
+                    myOutput += "\\\\ \n"
+                myOutput += "\\begin{tabular}{%s}\n"%myTableStructure
+                myOutput += "\\hline\n"
+                myOutput += "%s \\\\ \n"%myPtCaption
+                myOutput += "%s \\\\ \n"%myEtaCaption
+                myOutput += "\\hline\n"
+                myOutput += "%s \\\\ \n"%myBasicDataRow
+                myOutput += "%s \\\\ \n"%myBasicEWKRow
+                myOutput += "%s \\\\ \n"%myBasicPurityRow
+                myOutput += "\\hline\n"
+                myOutput += "%s \\\\ \n"%myMetDataRow
+                myOutput += "%s \\\\ \n"%myMetEWKRow
+                myOutput += "%s \\\\ \n"%myMetPurityRow
+                myOutput += "\\hline\n"
+                myOutput += "%s \\\\ \n"%myTauDataRow
+                myOutput += "%s \\\\ \n"%myTauEWKRow
+                myOutput += "%s \\\\ \n"%myTauPurityRow
+                myOutput += "\\hline\n"
+                myOutput += "%s \\\\ \n"%myMetEffRow
+                myOutput += "%s \\\\ \n"%myNQCDRow
+                myOutput += "\\hline\n"
+                myOutput += "\\end{tabular}\n"
+                if k == 2:
+                    myOutput += "\\end{table}\n"
+                    myOutput += "\\renewcommand{\\arraystretch}{1.0}\n"
+                    myOutput += "\\newpage\n\n"
+        return myOutput
+
+    def createCompactYieldTable(self):
+        print "a"
+
 ## class QCDfactorisedColumn
 # Inherits from DatacardColumn and extends its functionality to calculate the QCD measurement and its result in one go
 # Note that only method one needs to add is 'doDataMining'; other methods are private
@@ -895,10 +963,14 @@ class QCDfactorisedColumn(DatacardColumn):
         self._infoHistograms = []
         self._debugMode = debugMode
         self._messages = []
+        self._yieldTable = ""
 
     ## Returns list of messages
     def getMessages(self):
         return self._messages
+
+    def getYieldTable(self):
+        return self._yieldTable
 
     ## Do data mining and cache results
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors, controlPlotExtractors):
@@ -924,6 +996,7 @@ class QCDfactorisedColumn(DatacardColumn):
         self._infoHistograms.extend(myTauLegEventCount.getPurityHistogram())
         # Calculate result of NQCD
         myQCDCalculator = QCDfactorisedCalculator(myBigBoxEventCount, myMETLegEventCount, myTauLegEventCount, True)
+        self._yieldTable = myQCDCalculator.getYieldTable()
         self._infoHistograms.extend(myQCDCalculator.getNQCDHistograms())
         # Make efficiency histograms
         self._infoHistograms.extend(myQCDCalculator.getLeg1EfficiencyHistogram())
