@@ -968,7 +968,8 @@ class QCDfactorisedColumn(DatacardColumn):
                     if e.getQCDmode() == "statistics":
                         myResult = myQCDCalculator.getStatUncertainty()
                     elif e.getQCDmode() == "systematics":
-                        myResult = myQCDCalculator.getSystUncertainty()
+                        #myResult = myQCDCalculator.getSystUncertainty()
+                        myResult = sqrt(pow(myQCDCalculator.getSystUncertainty(),2)+pow(0.10,2))
                     # Obtain histograms
                     myHistograms = []
                     if e.getQCDmode() == "shapestat":

@@ -32,6 +32,7 @@ class ControlPlotMaker:
         # Loop over mass points
         for m in self._config.MassPoints:
             selectionFlow = SelectionFlowPlotMaker(config, m)
+            myBlindingCount = 0
             for c in self._config.ControlPlots:
                 myMassSuffix = "_M%d"%m
                 # Obtain frame
@@ -46,14 +47,19 @@ class ControlPlotMaker:
                 # Obtain total expected and total signal
                 hExpected = self._getExpectedPlot(c.details, c.title+myMassSuffix, [hQCD, hEmbedded, hEWKfake])
                 hSignal = self._getSignalPlot(c.details, c.title+myMassSuffix, hSignalHH, hSignalHW)
-                # Obtain ratio plot
-                hRatio = self._getRatioPlot(c.title+myMassSuffix, hData, hExpected)
                 # Add data to selection flow plot
                 if c.flowPlotCaption != "":
-                    if len(c.blindedRange) > 0:
+                    if myBlindingCount > 0:
                         selectionFlow.addColumn(label=c.flowPlotCaption,signal=hSignal,qcd=hQCD,EWKtau=hEmbedded,EWKfake=hEWKfake,data=None,expected=hExpected)
                     else:
                         selectionFlow.addColumn(label=c.flowPlotCaption,signal=hSignal,qcd=hQCD,EWKtau=hEmbedded,EWKfake=hEWKfake,data=hData,expected=hExpected)
+                    if len(c.blindedRange) > 0:
+                        myBlindingCount += 1
+                # Apply blinding 
+                if len(c.blindedRange) > 0:
+                    self._applyBlinding(hData,c.blindedRange)
+                # Obtain ratio plot
+                hRatio = self._getRatioPlot(c.title+myMassSuffix, hData, hExpected)
                 # Evaluate signal region
                 if len(c.evaluationRange) > 0:
                     myEvaluator.addEntry(m,c.title,c.evaluationRange,hSignal,hQCD,hEmbedded,hEWKfake)
@@ -112,17 +118,16 @@ class ControlPlotMaker:
                             myShapeModifier.addShape(source=h,dest=myHisto)
         myShapeModifier.finaliseShape(dest=myHisto)
         #mySystHisto.IsA().Destructor(mySystHisto)
-        # Apply blinding for data, if necessary
-        if columnIdList == None and len(blindedRange) > 0:
-            # Loop over bins and remove entries inside blinded range
-            for i in range (1, myHisto.GetNbinsX()+1):
-                # Blind if any edge of the current bin is inside the blinded range or if bin spans over the blinded range
-                if ((myHisto.GetXaxis().GetBinLowEdge(i) >= blindedRange[0] and myHisto.GetXaxis().GetBinLowEdge(i) <= blindedRange[1]) or
-                    (myHisto.GetXaxis().GetBinUpEdge(i) >= blindedRange[0] and myHisto.GetXaxis().GetBinUpEdge(i) <= blindedRange[1]) or 
-                    (myHisto.GetXaxis().GetBinLowEdge(i) <= blindedRange[0] and myHisto.GetXaxis().GetBinUpEdge(i) >= blindedRange[1])):
-                    myHisto.SetBinContent(i, -1.0)
-                    myHisto.SetBinError(i, 0.0)
         return myHisto
+
+    def _applyBlinding(self,myHisto,blindedRange = []):
+        for i in range (1, myHisto.GetNbinsX()+1):
+            # Blind if any edge of the current bin is inside the blinded range or if bin spans over the blinded range
+            if ((myHisto.GetXaxis().GetBinLowEdge(i) >= blindedRange[0] and myHisto.GetXaxis().GetBinLowEdge(i) <= blindedRange[1]) or
+                (myHisto.GetXaxis().GetBinUpEdge(i) >= blindedRange[0] and myHisto.GetXaxis().GetBinUpEdge(i) <= blindedRange[1]) or 
+                (myHisto.GetXaxis().GetBinLowEdge(i) <= blindedRange[0] and myHisto.GetXaxis().GetBinUpEdge(i) >= blindedRange[1])):
+                myHisto.SetBinContent(i, -1.0)
+                myHisto.SetBinError(i, 0.0)
 
     def _getExpectedPlot(self, details, title, hlist):
         myShapeModifier = ShapeHistoModifier(details)
@@ -394,8 +399,9 @@ class ControlPlotMaker:
         entry = leg.AddEntry(hData, "Data", "P")
         entry = leg.AddEntry(hSignal, "with H^{#pm}#rightarrow#tau^{#pm}#nu", "L")
         entry = leg.AddEntry(hQCD, "multijets (from data)", "F")
-        entry = leg.AddEntry(hEmbedded, "EWK+t#bar{t} #tau (from data)", "F")
-        entry = leg.AddEntry(hEWKfake, "EWK+t#bar{t} no-#tau (simul.)", "F")
+        entry = leg.AddEntry(hEmbedded, "MC EWK+t#bar{t}", "F")
+        #entry = leg.AddEntry(hEmbedded, "EWK+t#bar{t} #tau (from data)", "F") FIXME
+        #entry = leg.AddEntry(hEWKfake, "EWK+t#bar{t} no-#tau (simul.)", "F") FIXME
         entry = leg.AddEntry(hExpected, "stat. #oplus syst. uncert.", "F")
         leg.Draw()
         # Labels
