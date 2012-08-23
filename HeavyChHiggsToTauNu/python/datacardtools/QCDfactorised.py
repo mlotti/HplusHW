@@ -338,7 +338,15 @@ class QCDEventCount():
         if self.is3D():
             myName = "purity_"+self._histoname.replace("/","_")+"_Total"
             hTot = ROOT.TH2F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY(),self._hData.GetNbinsX()*self._hData.GetNbinsZ(),0,self._hData.GetNbinsX()*self._hData.GetNbinsZ())
+            myName = "purity_"+self._histoname.replace("/","_")+"_contractedX"
+            hContractedX = ROOT.TH1F(myName,myName,self._hData.GetNbinsX(),0,self._hData.GetNbinsX())
             for i in range(1,self._hData.GetNbinsX()+1):
+                # Fill contracted histogram
+                myContractedPurity = self.getContracted1DPurity(i,"X")
+                hContractedX.SetBinContent(i, myContractedPurity.value())
+                hContractedX.SetBinError(i, myContractedPurity.uncertainty())
+                hContractedX.GetXaxis().SetBinLabel(i,self._hData.GetXaxis().GetBinLabel(i))
+                hContractedX.SetYTitle("Purity")
                 # Generate one 2D histo for each x bin
                 myName = "purity_"+self._histoname.replace("/","_")+"_bin_%d"%(i)
                 h = ROOT.TH2F(myName,myName,self._hData.GetNbinsY(),0,self._hData.GetNbinsY(),self._hData.GetNbinsZ(),0,self._hData.GetNbinsZ())
@@ -362,6 +370,7 @@ class QCDEventCount():
                             print WarningStyle()+"Warning: QCD factorised: Purity in %s bin %d,%d,%d is low (%f +- %f)!"%(self._histoname,i,j,k,myPurity.value(),myPurity.uncertainty())+NormalStyle()
                 hlist.append(h)
             hlist.append(hTot)
+            hlist.append(hContractedX)
         elif self.is2D():
             h = self._hData.Clone("purity_"+self._histoname.replace("/","_"))
             h.Reset()
@@ -1292,6 +1301,10 @@ class QCDfactorisedColumn(DatacardColumn):
                 hTot.GetYaxis().SetBinLabel(k+(i-1)*nbinsZ, "("+QCDCount.getBinLabel("X",i)+";"+QCDCount.getBinLabel("Z",k))
         # Loop over bins
         for i in range(1,QCDCount.getNbinsX()+1):
+            myName = "QCDFact_ShapeSummary_%s_ContractedX_bin_%d"%(title,i)
+            hTotContractedX = myShapeModifier.createEmptyShapeHistogram(myName)
+            myName = "QCDFact_ShapeSummary_%s_ContractedXContractedEff_bin_%d"%(title,i)
+            hTotContractedXeff = myShapeModifier.createEmptyShapeHistogram(myName)
             for j in range(1,nbinsY+1):
                 for k in range(1,nbinsZ+1):
                     # Determine suffix for histograms
@@ -1334,6 +1347,25 @@ class QCDfactorisedColumn(DatacardColumn):
                     myShapeModifier.finaliseShape(dest=hMtBin)
                     myShapeModifier.finaliseShape(dest=hMtBinData)
                     myShapeModifier.finaliseShape(dest=hMtBinEWK)
+                    # Add to contracted histogram
+                    myShapeModifier.addShape(source=hMtBin,dest=hTotContractedXeff)
+                    # Multiply by efficiency of leg 2 (tau leg)
+                    myEfficiency = QCDCalculator.getLeg2Efficiency(i,j,k)
+                    if myEfficiency.value() > 0.0:
+                        for l in range(1,hMtBin.GetNbinsX()+1):
+                            hMtBin.SetBinError(l,sqrt(pow(hMtBin.GetBinError(l)*myEfficiency.value(),2)+pow(hMtBin.GetBinContent(l)*myEfficiency.uncertainty(),2)))
+                            hMtBin.SetBinContent(l,hMtBin.GetBinContent(l)*myEfficiency.value())
+                        if saveDetailedInfo:
+                            hMtBinData.Scale(myEfficiency.value()) #FIXME
+                            hMtBinEWK.Scale(myEfficiency.value())
+                    else:
+                        # Do not take this bin into account if cannot obtain efficiency
+                        hMtBin.Reset()
+                    if self._debugMode:
+                        print "  QCDfactorised / %s shape: bin %d_%d_%d, eff=%f, eff*QCD=%f"%(title,i,j,k,myEfficiency.value(),hMtBin.Integral())
+                    # Add to total shape histogram
+                    #myShapeModifier.addShape(source=hMtBin,dest=h) # important to do before handling negative bins
+                    myShapeModifier.addShape(source=hMtBin,dest=hTotContractedX)
                     # Remove negative bins, but retain original normalisation
                     for a in range(1,hMtBin.GetNbinsX()+1):
                         if hMtBin.GetBinContent(a) < 0.0:
@@ -1342,20 +1374,6 @@ class QCDfactorisedColumn(DatacardColumn):
                             hMtBin.SetBinContent(a,0.0)
                             if (hMtBin.Integral() > 0.0):
                                 hMtBin.Scale(myIntegral / hMtBin.Integral())
-                    # Multiply by efficiency of leg 2 (tau leg)
-                    myEfficiency = QCDCalculator.getLeg2Efficiency(i,j,k)
-                    if myEfficiency.value() > 0.0:
-                        hMtBin.Scale(myEfficiency.value())
-                        if saveDetailedInfo:
-                            hMtBinData.Scale(myEfficiency.value())
-                            hMtBinEWK.Scale(myEfficiency.value())
-                    else:
-                        # Do not take this bin into account if cannot obtain efficiency
-                        hMtBin.Reset()
-                    if self._debugMode:
-                        print "  QCDfactorised / %s shape: bin %d_%d_%d, eff=%f, eff*QCD=%f"%(title,i,j,k,myEfficiency.value(),hMtBin.Integral())
-                    # Add to total shape histogram
-                    myShapeModifier.addShape(source=hMtBin,dest=h)
                     # Add to total info histogram
                     for l in range (1, hMtBin.GetNbinsX()+1):
                         hTot.SetBinContent(l+(j-1)*h.GetNbinsX(), k+(i-1)*nbinsZ, hMtBin.GetBinContent(l))
@@ -1370,9 +1388,28 @@ class QCDfactorisedColumn(DatacardColumn):
                     # Delete data and MC EWK histograms from memory
                     hMtData.IsA().Destructor(hMtData)
                     hMtMCEWK.IsA().Destructor(hMtMCEWK)
+            myEfficiency = QCDCalculator.getContracted1DLeg2Efficiency(i,"X")
+            myShapeModifier.finaliseShape(dest=hTotContractedX)
+            myShapeModifier.finaliseShape(dest=hTotContractedXeff)
+            if myEfficiency.value() > 0.0:
+                hTotContractedXeff.SetBinError(l,sqrt(pow(hTotContractedXeff.GetBinError(l)*myEfficiency.value(),2)+pow(hTotContractedXeff.GetBinContent(l)*myEfficiency.uncertainty(),2)))
+                hTotContractedXeff.SetBinContent(l,hTotContractedXeff.GetBinContent(l)*myEfficiency.value())
+                #hTotContractedX.Scale(myEfficiency.value()) # FIXME should I also apply uncert of efficiency to weighted shape?
+            self._infoHistograms.append(hTotContractedX)
+            self._infoHistograms.append(hTotContractedXeff)
+            myShapeModifier.addShape(source=hTotContractedXeff,dest=h)
         self._infoHistograms.append(hTot)
         # Finalise and return
         myShapeModifier.finaliseShape(dest=h)
+        # Remove negative bins, but retain original normalisation
+        for a in range(1,h.GetNbinsX()+1):
+            if h.GetBinContent(a) < 0.0:
+                #print WarningStyle()+"Warning: QCD factorised"+NormalStyle()+" in mT shape bin %d,%d,%d, histo bin %d is negative (%f / tot:%f), it is set to zero but total normalisation is maintained"%(i,j,k,a,hMtBin.GetBinContent(a),hMtBin.Integral())
+                myIntegral = h.Integral()
+                h.SetBinContent(a,0.0)
+                if (h.Integral() > 0.0):
+                    h.Scale(myIntegral / h.Integral())
+
         return h
 
     ## Extracts a shape histogram for a given bin
@@ -1422,20 +1459,21 @@ class QCDfactorisedColumn(DatacardColumn):
                     myMessages = []
                     myMessages.extend(myShapeModifier.subtractShape(source=hMtMCEWK,dest=hMtBin,purityCheck=False))
                     # Finalise shape (underflow added to first bin, overflow added to last bin, variances converted to std.deviations)
-                    myShapeModifier.finaliseShape(dest=hMtBin)
-                    # Remove negative bins, but retain original normalisation
-                    for a in range(1,hMtBin.GetNbinsX()+1):
-                        if hMtBin.GetBinContent(a) < 0.0:
-                            #print WarningStyle()+"Warning: QCD factorised"+NormalStyle()+" in mT shape bin %d,%d,%d, histo bin %d is negative (%f / tot:%f), it is set to zero but total normalisation is maintained"%(i,j,k,a,hMtBin.GetBinContent(a),hMtBin.Integral())
-                            myIntegral = hMtBin.Integral()
-                            hMtBin.SetBinContent(a,0.0)
-                            if (hMtBin.Integral() > 0.0):
-                                hMtBin.Scale(myIntegral / hMtBin.Integral())
+                    myShapeModifier.finaliseShape(dest=hMtBin) # do not correct here for negative bins!
+                    myShapeModifier.addShape(source=hMtBin,dest=h)
                     # Add to total shape histogram
-                    myShapeModifier.addShape(source=hMtBin,dest=h) # FIXME check if adding needs to be done before setting bins to zero
                     # Store mT bin histogram for info
                     self._infoHistograms.append(hMtBin)
             # Finalise
+            # Remove negative bins, but retain original normalisation
+            for a in range(1,hMtBin.GetNbinsX()+1):
+                if h.GetBinContent(a) < 0.0:
+                    #print WarningStyle()+"Warning: QCD factorised"+NormalStyle()+" in mT shape bin %d,%d,%d, histo bin %d is negative (%f / tot:%f), it is set to zero but total normalisation is maintained"%(i,j,k,a,hMtBin.GetBinContent(a),hMtBin.Integral())
+                    myIntegral = hMtBin.Integral()
+                    h.SetBinContent(a,0.0)
+                    h.SetBinError(a,0.0)
+                    if (h.Integral() > 0.0):
+                        h.Scale(myIntegral / h.Integral())
             myShapeModifier.finaliseShape(dest=h)
             self._infoHistograms.append(h)
 
