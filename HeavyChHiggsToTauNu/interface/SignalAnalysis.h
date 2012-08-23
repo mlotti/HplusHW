@@ -242,7 +242,7 @@ namespace HPlus {
     WrappedTH1 *hEWKFakeTausFullMass;
 
 
-
+    WrappedTH1 *hDeltaPhiNoBtagging;
     WrappedTH1 *hDeltaPhi;
     WrappedTH1 *hDeltaPhiJetMet;
     WrappedTH1 *hMaxDeltaPhiJetMet;

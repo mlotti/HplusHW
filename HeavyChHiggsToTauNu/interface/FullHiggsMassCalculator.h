@@ -74,11 +74,17 @@ namespace HPlus {
     //   edm::Ptr<pat::Jet> mcBjetHiggsSide;
 
     // Histograms
+
+
+    Count fAllSolutionsCutSubCount;
+    Count fRealDiscriminantCutSubCount;
+    Count fImaginarySolutionCutSubCount;
  
     WrappedTH1* hSolution1PzDifference;
     WrappedTH1* hSolution2PzDifference;
     WrappedTH2* hSolution12PzDifference;
     WrappedTH1* hHiggsMass;
+    WrappedTH1* hHiggsMassDPz100;
     WrappedTH1* hHiggsMass_TauBmatch;
     WrappedTH1* hHiggsMass_TauBMETmatch;
     WrappedTH1* hHiggsMassReal;

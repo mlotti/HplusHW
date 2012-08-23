@@ -26,10 +26,15 @@ namespace HPlus {
  
 
 
-  FullHiggsMassCalculator::FullHiggsMassCalculator(HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper) {
+  FullHiggsMassCalculator::FullHiggsMassCalculator(HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
+    fAllSolutionsCutSubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "All solutions")),
+    fRealDiscriminantCutSubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Real Discriminant")),
+    fImaginarySolutionCutSubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Imaginary solution"))
+{
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("FullHiggsMass");
     hHiggsMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMass", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+    hHiggsMassDPz100 = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMassDPz100", "Higgs massDPz100;m_{H^{+}} (GeV)", 100, 0, 500);
     hHiggsMass_TauBmatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMassTauBmatch", "Higgs massTauBmatch;m_{H^{+}} (GeV)", 100, 0, 500);
     hHiggsMass_TauBMETmatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMassTauBMETmatch", "Higgs massTauBMETmatch;m_{H^{+}} (GeV)", 100, 0, 500);
     hHiggsMassReal = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "HiggsMassReal", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
@@ -111,6 +116,7 @@ namespace HPlus {
     const double myBQuarkMass = 4.19;
     TVector3 myTauPlusBVector = tau + bjet;
     double SolutionMax = -1;
+    double deltaNeutrinoZSolution = -999;
 
     double myDeltaSquared = TMath::Power(myTopMass,2) - TMath::Power(myTauMass,2) - TMath::Power(myBQuarkMass,2);
     //    double a = 2.0 * (met.X() * myTauPlusBVector.X() + met.Y() * myTauPlusBVector.Y()) + myDeltaSquared;
@@ -132,8 +138,9 @@ namespace HPlus {
     std::cout << "tau+b energy, " << myTauPlusBEnergy << std::endl;
     std::cout << "discriminant, " << discriminant << std::endl;
     */
-
+    increment(fAllSolutionsCutSubCount);
     if (discriminant > 0.0) {
+      increment(fRealDiscriminantCutSubCount);
       // Two real solutions exist
       double mySolution1 = (-a*myTauPlusBVector.Z() - myTauPlusBEnergy * TMath::Sqrt(discriminant))
         / (2.0 * (TMath::Power(myTauPlusBVector.Z(),2) - TMath::Power(myTauPlusBEnergy,2)));
@@ -169,6 +176,8 @@ namespace HPlus {
 
       double deltaPzMin = TMath::Abs(NeutrinoPz - fNeutrinoZSolution);
       double deltaPzMax = TMath::Abs(NeutrinoPz - SolutionMax);
+      deltaNeutrinoZSolution = deltaPzMin;
+
       hSolution1PzDifference->Fill(deltaPzMin);
       hSolution2PzDifference->Fill(deltaPzMax);
 
@@ -191,6 +200,7 @@ namespace HPlus {
       */
 
     } else {
+      increment(fImaginarySolutionCutSubCount);
       // Two imaginary solutions exist; take real solutions as solution for neutrino Z and solve neutrino pT from discriminant = 0 equation
       fNeutrinoZSolution = (-a*myTauPlusBVector.Z())
         / (2.0 * (TMath::Power(myTauPlusBVector.Z(),2) - TMath::Power(myTauPlusBEnergy,2)));
@@ -259,6 +269,7 @@ namespace HPlus {
 
     if (doHistogramming) {
       hHiggsMass->Fill(fHiggsMassSolution);
+      if (deltaNeutrinoZSolution < 50) hHiggsMassDPz100->Fill(fHiggsMassSolution);
       if ( myMatchStatus) hHiggsMass_TauBmatch->Fill(fHiggsMassSolution);
       if ( myMatchStatus && DeltaPhi < 0.4) hHiggsMass_TauBMETmatch->Fill(fHiggsMassSolution);
   
