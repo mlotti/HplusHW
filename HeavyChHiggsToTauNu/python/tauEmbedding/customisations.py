@@ -292,16 +292,7 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
 
     return name
 
-def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix="muonFinalSelection"):
-    counters = []
-
-    cname = prefix+"AllEvents"
-    m = cms.EDProducer("EventCountProducer")
-    setattr(process, cname, m)
-    sequence *= m
-    counters.append(cname)
-
-    # FIXME: ugly hack to calculate muon isolation on the fly (this is the wrong place to do it)
+def constructMuonIsolationOnTheFly(inputMuons, embedPrefix="ontheflyiso_"):
     import RecoMuon.MuonIsolation.muonPFIsolationValues_cff as muonPFIsolation
     def construct(isoModule, isoKey, vetos=[]):
         deposit = isoModule.deposits[0]
@@ -316,17 +307,36 @@ def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix
         pset.vetos.extend(vetos)
         return pset
     global tauEmbeddingMuons
-    isolation = cms.EDProducer("HPlusPATMuonViewIsoDepositIsolationEmbedder",
-        src = cms.InputTag(tauEmbeddingMuons),
-        embedPrefix = cms.string("ontheflyiso_"),
+    module = cms.EDProducer("HPlusPATMuonViewIsoDepositIsolationEmbedder",
+        src = cms.InputTag(inputMuons),
+        embedPrefix = cms.string(embedPrefix),
         deposits = cms.VPSet(
-            construct(muonPFIsolation.muPFIsoValueNeutral04, "pfNeutralHadrons", vetos=["ConeVeto(0.1)"]),
-            construct(muonPFIsolation.muPFIsoValueChargedAll04, "pfChargedAll",  vetos=["ConeVeto(0.1)"]),
-            construct(muonPFIsolation.muPFIsoValuePU04, "pfPUChargedHadrons",    vetos=["ConeVeto(0.1)", "Threshold(0.5)"]),
-            construct(muonPFIsolation.muPFIsoValueGamma04, "pfPhotons",          vetos=["ConeVeto(0.1)", "Threshold(0.8)"]),
-            construct(muonPFIsolation.muPFIsoValueCharged04, "pfChargedHadrons", vetos=["ConeVeto(0.1)", "Threshold(0.8)"]),
+            construct(muonPFIsolation.muPFIsoValueNeutral03, "pfNeutralHadrons", vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValueChargedAll03, "pfChargedAll",  vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValuePU03, "pfPUChargedHadrons",    vetos=["ConeVeto(0.1)", "Threshold(0.5)"]),
+            construct(muonPFIsolation.muPFIsoValueGamma03, "pfPhotons",          vetos=["ConeVeto(0.1)", "Threshold(0.8)"]),
+            construct(muonPFIsolation.muPFIsoValueCharged03, "pfChargedHadrons", vetos=["ConeVeto(0.1)", "Threshold(0.8)"]),
+            #construct(muonPFIsolation.muPFIsoValueNeutral04, "pfNeutralHadrons", vetos=["ConeVeto(0.1)"]),
+            #construct(muonPFIsolation.muPFIsoValueChargedAll04, "pfChargedAll",  vetos=["ConeVeto(0.1)"]),
+            #construct(muonPFIsolation.muPFIsoValuePU04, "pfPUChargedHadrons",    vetos=["ConeVeto(0.1)", "Threshold(0.5)"]),
+            #construct(muonPFIsolation.muPFIsoValueGamma04, "pfPhotons",          vetos=["ConeVeto(0.1)", "Threshold(0.8)"]),
+            #construct(muonPFIsolation.muPFIsoValueCharged04, "pfChargedHadrons", vetos=["ConeVeto(0.1)", "Threshold(0.8)"]),
         )
     )
+    return module
+
+def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix="muonFinalSelection"):
+    counters = []
+
+    cname = prefix+"AllEvents"
+    m = cms.EDProducer("EventCountProducer")
+    setattr(process, cname, m)
+    sequence *= m
+    counters.append(cname)
+
+    # FIXME: ugly hack to calculate muon isolation on the fly (this is the wrong place to do it)
+    global tauEmbeddingMuons
+    isolation = constructMuonIsolationOnTheFly(tauEmbeddingMuons)
     name = "patMuonsUserOnTheFlyIso"+PF2PATVersion
     tauEmbeddingMuons = name
     setattr(process, name, isolation)
@@ -341,8 +351,8 @@ def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix
     # FIXME: does it matter if the PU charged hadrons are not calculated in cone 0.8?
     # FIXME: the k-parameter for the PU charged hadrons can be changed (chosen by optimisation)
     #isoExpr = "(userFloat('ontheflyiso_pfChargedHadrons') + max(userFloat('ontheflyiso_pfPhotons')-0.27386*userFloat('ontheflyiso_pfPUChargedHadrons'), 0)) < 1"
-    #isoExpr = "(userFloat('ontheflyiso_pfChargedHadrons') + max(userFloat('ontheflyiso_pfPhotons')-0.5*userFloat('pfPUChargedHadrons'), 0)) < 1"
-    isoExpr = "1==1"
+    isoExpr = "(userFloat('ontheflyiso_pfChargedHadrons') + max(userFloat('ontheflyiso_pfPhotons')-0.5*userFloat('ontheflyiso_pfPUChargedHadrons'), 0)) < 2"
+    #isoExpr = "1==1" # Ugliness squared, we apply the isolation on the fly calculated from the above user floats
     if enableIsolation:
         print "*** Isolation for muon is enabled ***"
 #        counters.extend(addMuonRelativeIsolation(process, sequence, prefix=prefix+"Isolation", cut=0.1))

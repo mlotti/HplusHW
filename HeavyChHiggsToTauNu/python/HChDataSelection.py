@@ -42,19 +42,7 @@ def addDataSelection(process, dataVersion, options, calculateEventCleaning=False
 
     # Produce results for filters
 
-    # Reject events with anomalous HCAL noise, see
-    # https://twiki.cern.ch/twiki/bin/view/CMS/HBHEAnomalousSignals2011
-    # https://hypernews.cern.ch/HyperNews/CMS/get/hcal-noise/93.html
-    # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#HBHE_Noise_Filter
-    process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
-    process.HBHENoiseFilterResultProducerMETWG = process.HBHENoiseFilterResultProducer.clone()
-    process.HBHENoiseFilterResultProducer.minNumIsolatedNoiseChannels = 9999
-    process.HBHENoiseFilterResultProducer.minIsolatedNoiseSumE = 9999
-    process.HBHENoiseFilterResultProducer.minIsolatedNoiseSumEt = 9999
-    seq *= (
-        process.HBHENoiseFilterResultProducer *
-        process.HBHENoiseFilterResultProducerMETWG
-    )
+    addHBHENoisefilterResultProducer(process, seq)
 
     if calculateEventCleaning:
         # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#ECAL_dead_cell_filter
@@ -72,6 +60,22 @@ def addDataSelection(process, dataVersion, options, calculateEventCleaning=False
 dataSelectionCounters = [
     "allEvents", "passedTrigger", "passedScrapingVeto"
     ]
+
+def addHBHENoiseFilterResultProducer(process, sequence):
+    # Reject events with anomalous HCAL noise, see
+    # https://twiki.cern.ch/twiki/bin/view/CMS/HBHEAnomalousSignals2011
+    # https://hypernews.cern.ch/HyperNews/CMS/get/hcal-noise/93.html
+    # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#HBHE_Noise_Filter
+    process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
+    process.HBHENoiseFilterResultProducerMETWG = process.HBHENoiseFilterResultProducer.clone()
+    process.HBHENoiseFilterResultProducer.minNumIsolatedNoiseChannels = 9999
+    process.HBHENoiseFilterResultProducer.minIsolatedNoiseSumE = 9999
+    process.HBHENoiseFilterResultProducer.minIsolatedNoiseSumEt = 9999
+    sequence *= (
+        process.HBHENoiseFilterResultProducer *
+        process.HBHENoiseFilterResultProducerMETWG
+    )
+    
 
 def addHBHENoiseFilter(process, sequence):
     process.HBHENoiseFilter = cms.EDFilter("HPlusBoolFilter",

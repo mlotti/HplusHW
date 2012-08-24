@@ -29,9 +29,12 @@ tightenedMuonsCount = cms.EDProducer("EventCountProducer")
 #    filter = cms.bool(False),
 #    maxNumber = cms.uint32(1)
 #)
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
+tightenedMuonsWithIso = customisations.constructMuonIsolationOnTheFly("tightenedMuons", embedPrefix="embeddingStep")
+
 tauEmbeddingMuons = cms.EDFilter("PATMuonSelector",
-    src = cms.InputTag("tightenedMuons"),
-    cut = cms.string("") # FIXME: removed for determining proper muon ID that does not bias tau ID
+    src = cms.InputTag("tightenedMuonsWithIso"),
+    cut = cms.string("(userFloat('embeddingStep_pfChargedHadrons') + max(userFloat('embeddingStep_pfPhotons')-0.5*userFloat('embeddingStep_pfPUChargedHadrons'), 0)) < 2") 
 #    cut = cms.string("(userInt('byTightIc04ChargedOccupancy') + userInt('byTightIc04GammaOccupancy')) == 0")
 )
 tauEmbeddingMuonsFilter = cms.EDFilter("CandViewCountFilter",
@@ -111,6 +114,7 @@ try:
         tightenedMuons *
         tightenedMuonsFilter *
         tightenedMuonsCount *
+        tightenedMuonsWithIso *
         tauEmbeddingMuons *
         tauEmbeddingMuonsFilter *
         tauEmbeddingMuonsCount *

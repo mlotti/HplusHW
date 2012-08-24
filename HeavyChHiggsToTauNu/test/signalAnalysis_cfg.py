@@ -289,7 +289,8 @@ if options.tauEmbeddingInput != 0:
     tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, options, dataVersion)
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, options, dataVersion)
     if tauEmbeddingFinalizeMuonSelection:
-        applyIsolation = not doTauEmbeddingMuonSelectionScan
+        #applyIsolation = not doTauEmbeddingMuonSelectionScan
+        applyIsolation = False
         additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
                                                                                    enableIsolation=applyIsolation))
 if doBTagTree:
