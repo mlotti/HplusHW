@@ -4,7 +4,7 @@ import FWCore.ParameterSet.Config as cms
 # write as function , params: process and postfix
 
 def getTightMuonsDefinition(postfix=""):
-     tightMuons = cms.EDFilter("PATMuonSelector",
+    tightMuons = cms.EDFilter("PATMuonSelector",
         src = cms.InputTag("selectedPatMuons"+postfix+"All"),
         cut = cms.string(
         "isGlobalMuon() && isTrackerMuon()"

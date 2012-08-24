@@ -17,7 +17,7 @@ defaultStep = "embedding"
 # Default era of data to use (meaningful only for signalAnalysis and muonAnalysis)
 #defaultEra = "EPS"
 #defaultEra = "Run2011A-EPS"
-defaultEra = "Run2011"
+defaultEra = "Run2011A+B"
 
 # Default embedding version(s) to use
 defaultVersions = [
@@ -39,13 +39,15 @@ defaultVersions = [
 #    "v13_3_seedTest9",
 #    "v13_3_seedTest10",
 #    "v14"
-    "v2011_1"
+   "v44_1",
+#    "v44_1_seed1",
+#    "v44_1_seed2",
 ]
 
 # Define the processing steps: input dataset, configuration file, output file
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
 #          "skim_copy":      {"input": "tauembedding_skim_v13",         "config": "copy_cfg.py"}, 
-          "embedding":      {"input": "tauembedding_skim_v2011_2", "config": "embed.py",   "output": "embedded.root"},
+          "embedding":      {"input": "tauembedding_skim_v44_1", "config": "embed.py",   "output": "embedded.root"},
           "analysis":       {"input": "tauembedding_embedding_%s",  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau":    {"input": "pattuple_v18",                       "config": "tauAnalysis_cfg.py"},
           "signalAnalysis": {"input": "tauembedding_embedding_%s",  "config": "../signalAnalysis_cfg.py"},
@@ -89,20 +91,20 @@ datasetsData2011B = [
 datasetsData2011 = datasetsData2011A + datasetsData2011B
 datasetsMCnoQCD = [
     "TTJets_TuneZ2_Fall11",
-#    "WJets_TuneZ2_Fall11",
-#    "DYJetsToLL_M50_TuneZ2_Fall11",
-#    "W2Jets_TuneZ2_Fall11",
-#    "W3Jets_TuneZ2_Fall11",
-#    "W4Jets_TuneZ2_Fall11",
-#    "T_t-channel_TuneZ2_Fall11",
-#    "Tbar_t-channel_TuneZ2_Fall11",
-#    "T_tW-channel_TuneZ2_Fall11",
-#    "Tbar_tW-channel_TuneZ2_Fall11",
-#    "T_s-channel_TuneZ2_Fall11",
-#    "Tbar_s-channel_TuneZ2_Fall11",
-#    "WW_TuneZ2_Fall11",
-#    "WZ_TuneZ2_Fall11",
-#    "ZZ_TuneZ2_Fall11",
+    #"WJets_TuneZ2_Fall11",
+    #"DYJetsToLL_M50_TuneZ2_Fall11",
+    #"W2Jets_TuneZ2_Fall11",
+    #"W3Jets_TuneZ2_Fall11",
+    #"W4Jets_TuneZ2_Fall11",
+    #"T_t-channel_TuneZ2_Fall11",
+    #"Tbar_t-channel_TuneZ2_Fall11",
+    #"T_tW-channel_TuneZ2_Fall11",
+    #"Tbar_tW-channel_TuneZ2_Fall11",
+    #"T_s-channel_TuneZ2_Fall11",
+    #"Tbar_s-channel_TuneZ2_Fall11",
+    #"WW_TuneZ2_Fall11",
+    #"WZ_TuneZ2_Fall11",
+    #"ZZ_TuneZ2_Fall11",
 ]
 datasetsMCQCD = [
     "QCD_Pt20_MuEnriched_TuneZ2_Fall11",
@@ -126,22 +128,23 @@ datasetsSignal = [
     "TTToHplusBHminusB_M160_Fall11",
 ]
 
-datasetsData2011 = []
-#datasetsMCnoQCD = []
+#datasetsData2011 = []
+datasetsMCnoQCD = []
 datasetsMCQCD = []
 datasetsSignal = []
+#datasetsData2011 = datasetsData2011B
 
 
 # Override the default number of jobs
 # Goal: ~5 hour jobs
-skimNjobs = { 
-    "WJets_TuneZ2_Fall11": 1000, # ~10 hours
+skimNjobs = {
+    "WJets_TuneZ2_Fall11": 990, # ~10 hours
     "W2Jets_TuneZ2_Fall11": 490,
     "W3Jets_TuneZ2_Fall11": 490,            
     "W4Jets_TuneZ2_Fall11": 490, 
-    "TTJets_TuneZ2_Fall11": 2500,
+    "TTJets_TuneZ2_Fall11": 2490,
     "QCD_Pt20_MuEnriched_TuneZ2_Fall11": 490,
-    "DYJetsToLL_M50_TuneZ2_Fall11": 1000,
+    "DYJetsToLL_M50_TuneZ2_Fall11": 990,
     "T_t-channel_TuneZ2_Fall11": 490,
     "Tbar_t-channel_TuneZ2_Fall11": 160,
     "T_tW-channel_TuneZ2_Fall11": 90,
@@ -153,26 +156,28 @@ skimNjobs = {
     "ZZ_TuneZ2_Fall11": 350,
     }
 muonAnalysisNjobs = { # goal: 30k events/job # FIXME these need to be updated
-    "SingleMu_Mu_160431-163261_May10": 2,
-    "SingleMu_Mu_163270-163869_May10": 5,
-    "SingleMu_Mu_165088-166150_Prompt": 6,
-    "SingleMu_Mu_166161-166164_Prompt": 1,
-    "SingleMu_Mu_166346-166346_Prompt": 1,
-    "SingleMu_Mu_166374-167043_Prompt": 4,
-    "SingleMu_Mu_167078-167913_Prompt": 3,
-    "SingleMu_Mu_170722-172619_Aug05": 5,
-    "SingleMu_Mu_172620-173198_Prompt": 8,
-#    "SingleMu_Mu_173236-173692_Prompt": 4,
-    "SingleMu_Mu_173236-176023_Prompt": 6,
-    
+    "SingleMu_Mu_160431-163261_2011A_Nov08": 2, # HLT_Mu20_v1
+    "SingleMu_Mu_163270-163869_2011A_Nov08": 3, # HLT_Mu24_v2
+    "SingleMu_Mu_165088-166150_2011A_Nov08": 4, # HLT_Mu30_v3
+    "SingleMu_Mu_166161-166164_2011A_Nov08": 1, # HLT_Mu40_v1
+    "SingleMu_Mu_166346-166346_2011A_Nov08": 1, # HLT_Mu40_v2
+    "SingleMu_Mu_166374-167043_2011A_Nov08": 6, # HLT_Mu40_v1
+    "SingleMu_Mu_167078-167913_2011A_Nov08": 3, # HLT_Mu40_v3
+    "SingleMu_Mu_170722-172619_2011A_Nov08": 6, # HLT_Mu40_v5
+    "SingleMu_Mu_172620-173198_2011A_Nov08": 6, # HLT_Mu40_v5
+    "SingleMu_Mu_173236-173692_2011A_Nov08": 4, # HLT_Mu40_eta2p1_v1
+    "SingleMu_Mu_173693-177452_2011B_Nov19": 16, # HLT_Mu40_eta2p1_v1
+    "SingleMu_Mu_177453-178380_2011B_Nov19": 11, # HLT_Mu40_eta2p1_v1
+    "SingleMu_Mu_178411-179889_2011B_Nov19": 11, # HLT_Mu40_eta2p1_v4
+    "SingleMu_Mu_179942-180371_2011B_Nov19": 2, # HLT_Mu40_eta2p1_v5
     "WJets_TuneZ2_Fall11": 60,
-    "TTJets_TuneZ2_Fall11": 17,
+    "TTJets_TuneZ2_Fall11": 300, # njobs_skim / 3
     "QCD_Pt20_MuEnriched_TuneZ2_Fall11": 5,
-    "DYJetsToLL_M50_TuneZ2_Fall11": 15,
-    "T_t-channel_TuneZ2_Fall11": 3,
+    "DYJetsToLL_M50_TuneZ2_Fall11": 20,
+    "T_t-channel_TuneZ2_Fall11": 2,
     "Tbar_t-channel_TuneZ2_Fall11": 2,
-    "T_tW-channel_TuneZ2_Fall11": 4,
-    "Tbar_tW-channel_TuneZ2_Fall11": 4,
+    "T_tW-channel_TuneZ2_Fall11": 2,
+    "Tbar_tW-channel_TuneZ2_Fall11": 1,
     "T_s-channel_TuneZ2_Fall11": 1,
     "Tbar_s-channel_TuneZ2_Fall11": 1,
     "WW_TuneZ2_Fall11": 8,
@@ -233,7 +238,7 @@ def createTasks(opts, step, version=None):
     if step in ["embedding", "analysis", "signalAnalysis"]:
         dirName += "_"+version
     if step in ["analysis", "signalAnalysis"]:
-        dirName += "_"+opts.era
+        dirName += "_"+opts.era.replace("+","")
 
 
     multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
@@ -250,7 +255,7 @@ def createTasks(opts, step, version=None):
                 datasets.extend(datasetsData2011A)
             if opts.era == "Run2011B":
                 datasets.extend(datasetsData2011B)
-            if opts.era == "Run2011":
+            if opts.era == "Run2011A+B":
                 datasets.extend(datasetsData2011)
             else:
                 raise Exception("Unsupported era %s" % opts.era)
@@ -358,11 +363,12 @@ def createTasks(opts, step, version=None):
     def modifyAnalysis(dataset):
         if dataset.isMC():
             dataset.appendArg("puWeightEra="+opts.era)
+            dataset.appendArg("runOnCrab=1") # Needed for btag scale factor mechanism
         if step == "signalAnalysis":
             dataset.appendArg("tauEmbeddingInput=1")
             dataset.appendArg("doPat=1")
-            if dataset.getName() in datasetsData2011_Run2011A_noEPS:
-                dataset.appendArg("tauEmbeddingCaloMet=caloMetSum")
+#            if dataset.getName() in datasetsData2011_Run2011A_noEPS:
+#                dataset.appendArg("tauEmbeddingCaloMet=caloMetSum")
     #    if step == "analysisTau":
     #        if dataset.getName() == "WJets":
     #            dataset.setNumberOfJobs(100)

@@ -34,6 +34,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexAssignmentAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingMuonIsolationQuantifier.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
@@ -121,6 +122,7 @@ namespace HPlus {
     EventWeight& fEventWeight;
     HistoWrapper fHistoWrapper;
     const bool bBlindAnalysisStatus;
+    const bool bTauEmbeddingStatus;
     const double fDeltaPhiCutValue;
     const std::string fTopRecoName; // Name of selected top reconstruction algorithm
     //    const double ftransverseMassCut;
@@ -206,7 +208,8 @@ namespace HPlus {
     VertexWeightReader fVertexWeightReader;
     VertexAssignmentAnalysis fVertexAssignmentAnalysis;
     FakeTauIdentifier fFakeTauIdentifier;
-    
+    TauEmbeddingMuonIsolationQuantifier fTauEmbeddingMuonIsolationQuantifier;
+
     SignalAnalysisTree fTree;
 
     // Scale factor uncertainties
@@ -223,6 +226,7 @@ namespace HPlus {
     // Transverse mass histograms
     WrappedTH1 *hTransverseMass;
     WrappedTH1 *hTransverseMassNoBtagging;
+    WrappedTH1 *hTransverseMassNoBtaggingWithRtau;
     WrappedTH1 *hTransverseMassTopSelection;
     WrappedTH1 *hTransverseMassTopChiSelection;
     WrappedTH1 *hTransverseMassTopBjetSelection;

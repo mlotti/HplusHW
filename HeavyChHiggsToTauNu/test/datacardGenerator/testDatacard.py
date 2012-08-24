@@ -1,10 +1,11 @@
 DataCardName    = 'myDummyTestName'
 #Path            = '/mnt/flustre/slehti/HplusDataForLands'
-Path            = '/home/wendland/data/v25b/test4medium'
+Path            = '/home/wendland/data/v25b/test6'
 #Path            = '/home/wendland/data/v25b/test3loose'
 #MassPoints      = [80,90,100,120,140,150,155,160]
-MassPoints      = [80,120,160]
-#MassPoints      = [120]
+MassPoints      = [80,90,120,140,150,155,160]
+#MassPoints      = [80,120,160]
+MassPoints      = [120]
 
 BlindAnalysis   = True
 
@@ -22,13 +23,14 @@ FakeRateCounter = "EWKfaketaus:SelectedEvents"
 
 # Options
 OptionMassShape = "TransverseMass"
-#optionMassShape = "FullMass"
+#OptionMassShape = "FullMass"
 OptionReplaceEmbeddingByMC = True
-OptionIncludeSystematics = False # Set to true if the JES and PU uncertainties were produced
+OptionIncludeSystematics = True # Set to true if the JES and PU uncertainties were produced
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
+OptionDoControlPlots = True
 
 # Options for reports and article
-OptionBr = 0.05  # Br(t->bH+)
+OptionBr = 0.03  # Br(t->bH+)
 
 # Shape histogram definitions
 SignalShapeHisto = ""
@@ -46,8 +48,8 @@ if OptionMassShape == "TransverseMass":
                                   "xtitle": "Transverse mass / GeV",
                                   "ytitle": "Events" }
 elif OptionMassShape == "FullMass":
-    SignalShapeHisto = "transverseMass" #### FIXME
-    FakeShapeHisto = "EWKFakeTausTransverseMass" #### FIXME
+    SignalShapeHisto = "FullHiggsMass/HiggsMass"
+    FakeShapeHisto = "FIXME" #### FIXME
     ShapeHistogramsDimensions = { "bins": 25,
                                   "rangeMin": 0.0,
                                   "rangeMax": 500.0,
@@ -163,7 +165,7 @@ if not OptionReplaceEmbeddingByMC:
         dirPrefix   = SignalAnalysis,
         rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01b","03","07c","14","15","16","19","40"]
+        nuisances    = ["01b","03","45","46","47","14","15","16","19","40"]
     ))
     DataGroups.append(DataGroup(
         label        = "EWK_DY",
@@ -199,7 +201,7 @@ if not OptionReplaceEmbeddingByMC:
         dirPrefix   = SignalAnalysis,
         rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01","04","07b","09","10","28","33","34b","35"]
+        nuisances    = ["01","04","45","46","47","09","10","28","33","34b","35"]
     ))
     DataGroups.append(DataGroup(
         label        = "EWK_W_faketau",
@@ -210,7 +212,7 @@ if not OptionReplaceEmbeddingByMC:
         dirPrefix   = SignalAnalysis,
         rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01","04","07b","09","11","29","33","34b","37"]
+        nuisances    = ["01","04","45","46","47","09","11","29","33","34b","37"]
     ))
     DataGroups.append(DataGroup(
         label        = "EWK_t_faketau",
@@ -221,7 +223,7 @@ if not OptionReplaceEmbeddingByMC:
         dirPrefix   = SignalAnalysis,
         rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01","04","07b","09","10","30","33","34b","38"]
+        nuisances    = ["01","04","45","46","47","09","10","30","33","34b","38"]
     ))
 else:
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
@@ -387,7 +389,7 @@ else:
         label         = "NON-EXACT VALUE for JES/JER/MET/Rtau effect on mT shape",
         distr         = "lnN",
         function      = "Constant",
-        value         = 0.10,
+        value         = 0.03,
     ))
 
     Nuisances.append(Nuisance(
@@ -395,7 +397,7 @@ else:
         label         = "NON-EXACT VALUE for JES/JER/MET/Rtau effect on mT shape",
         distr         = "lnN",
         function      = "Constant",
-        value         = 0.10,
+        value         = 0.03,
     ))
 
     Nuisances.append(Nuisance(
@@ -403,7 +405,7 @@ else:
         label         = "NON-EXACT VALUE for JES/JER/MET/Rtau effect on mT shape",
         distr         = "lnN",
         function      = "Constant",
-        value         = 0.07,
+        value         = 0.01,
     ))
 
 Nuisances.append(Nuisance(
@@ -846,7 +848,7 @@ ControlPlots.append(ControlPlotInput(
                          "DeltaRatio": 0.5,
                          "ymin": 0.9,
                          "ymax": -1},
-    blindedRange     = [], # specify range min,max if blinding applies to this control plot
+    blindedRange     = [1.5,10], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "E_{T}^{miss}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
@@ -932,7 +934,7 @@ ControlPlots.append(ControlPlotInput(
                          "ymax": -1},
     blindedRange     = [-1, 400], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "W reco", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
@@ -960,7 +962,7 @@ ControlPlots.append(ControlPlotInput(
                          "ymax": -1},
     blindedRange     = [-1, 400], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "top reco", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
@@ -1014,7 +1016,7 @@ ControlPlots.append(ControlPlotInput(
                          "DeltaRatio": 0.5,
                          "ymin": 0.9,
                          "ymax": -1},
-    blindedRange     = [50, 1000], # specify range min,max if blinding applies to this control plot
+    blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [80, 180], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))

@@ -17,6 +17,7 @@ jetSelection = "pt() > 30 && abs(eta()) < 2.4"
 jetSelection += "&& numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99"
 jetSelection += "&& neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFraction < 0.99"
 jetSelection += "&& chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0"
+jetSelection += "&& userFloat('Beta') > 0.2"
 
 def customiseParamForTauEmbedding(param, options, dataVersion):
     # Change the triggers to muon
@@ -38,7 +39,7 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
     param.triggerEfficiencyScaleFactor.mode = "disabled"
 
     # Use PatJets and PFMet directly
-    param.changeJetCollection(moduleLabel="selectedPatJets") # these are really AK5PF
+    param.changeJetCollection(moduleLabel="selectedPatJets"+PF2PATVersion) # these are really AK5PF
     #param.MET.rawSrc = "pfMet" # no PAT object at the moment
 
     # Use the muons where the original muon is removed in global muon veto
@@ -46,10 +47,10 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
     param.GlobalElectronVeto.ElectronCollectionName.setProcessName("MUONSKIM")
 
     # Use the taus matched to the original muon in tau selections
-    postfix = "TauEmbeddingMuonMatched"
-    #param.setAllTauSelectionSrcSelectedPatTaus()
+    # Notice that only the version corresponding to PF2PATVersion is produced
+    replacePostfix = "TauEmbeddingMuonMatched"
     def replaceTauSrc(mod):
-        mod.src.setModuleLabel(mod.src.getModuleLabel().replace("TauTriggerMatched", postfix))
+        mod.src.setModuleLabel(mod.src.getModuleLabel().replace("TriggerMatched"+PF2PATVersion, replacePostfix))
     param.forEachTauSelection(replaceTauSrc)
 
     # Set the analyzer
@@ -92,7 +93,7 @@ def addMuonIsolationEmbeddingForSignalAnalysis(process, sequence, **kwargs):
     muons = addMuonIsolationEmbedding(process, sequence, tauEmbeddingMuons, **kwargs)
     tauEmbeddingMuons = muons
 
-def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", primaryVertex="firstPrimaryVertex", postfix=""):
+def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", primaryVertex="firstPrimaryVertex",postfix=""):
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
     import RecoTauTag.Configuration.RecoPFTauTag_cff as RecoPFTauTag
 
@@ -207,7 +208,7 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
     # m = m.clone(
     #     candSrc = name,
     #     embedPrefix = "byTightSc0Ic04Noq",
-    #     #minTrackHits = 0,
+    #     #minTrackHits = 0, #FIXME PFlow added, make sure that correct collection is taken (i.e. not CHS)
     #     #minTrackPt = 0.0,
     #     #maxTrackChi2 = 9999.,
     #     #minTrackPixelHits = 0,
@@ -314,28 +315,36 @@ def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix
         )
         pset.vetos.extend(vetos)
         return pset
+    global tauEmbeddingMuons
     isolation = cms.EDProducer("HPlusPATMuonViewIsoDepositIsolationEmbedder",
-        src = cms.InputTag(name),
+        src = cms.InputTag(tauEmbeddingMuons),
         embedPrefix = cms.string("ontheflyiso_"),
         deposits = cms.VPSet(
-            construct(x, "pfNeutralHadrons", vetos=["ConeVeto(0.1)"]),
+            construct(muonPFIsolation.muPFIsoValueNeutral04, "pfNeutralHadrons", vetos=["ConeVeto(0.1)"]),
             construct(muonPFIsolation.muPFIsoValueChargedAll04, "pfChargedAll",  vetos=["ConeVeto(0.1)"]),
-            construct(muonPFIsolation.muPFIsoValuePU04, "pfPUChargedHadrons",    vetos=["ConeVeto(0.1)"]),
-            construct(muonPFIsolation.muPFIsoValueGamma04, "pfPhotons",          vetos=["ConeVeto(0.1)", "Threshold(0.5)"]),
-            construct(muonPFIsolation.muPFIsoValueCharged04, "pfChargedHadrons", vetos=["ConeVeto(0.1)", "Threshold(0.5)"]),
+            construct(muonPFIsolation.muPFIsoValuePU04, "pfPUChargedHadrons",    vetos=["ConeVeto(0.1)", "Threshold(0.5)"]),
+            construct(muonPFIsolation.muPFIsoValueGamma04, "pfPhotons",          vetos=["ConeVeto(0.1)", "Threshold(0.8)"]),
+            construct(muonPFIsolation.muPFIsoValueCharged04, "pfChargedHadrons", vetos=["ConeVeto(0.1)", "Threshold(0.8)"]),
         )
     )
-    name = "patMuonsWithIso01to04"+postfix
+    name = "patMuonsUserOnTheFlyIso"+PF2PATVersion
+    tauEmbeddingMuons = name
     setattr(process, name, isolation)
     sequence *= isolation
-    # end ugly hack
+    # FIXME end ugly hack
 
 
     # The old counting-tight in 0.1 < DR < 0.4 annulus
     #isoExpr = "(%s)==0" % muonAnalysis.isolations["tauTightIc04Iso"]
-    isoExpr = "(userFloat('ontheflyiso_pfChargedHadrons') + max(userFloat('ontheflyiso_pfPhotons')-0.5*userFloat('pfPUChargedHadrons'), 0)) < 1"
-
+    # Medium iso PF tau combined delta beta
+    # Obtain delta beta from RecoTauTag/Configuration/python/HPSPFTaus_cff.py
+    # FIXME: does it matter if the PU charged hadrons are not calculated in cone 0.8?
+    # FIXME: the k-parameter for the PU charged hadrons can be changed (chosen by optimisation)
+    #isoExpr = "(userFloat('ontheflyiso_pfChargedHadrons') + max(userFloat('ontheflyiso_pfPhotons')-0.27386*userFloat('ontheflyiso_pfPUChargedHadrons'), 0)) < 1"
+    #isoExpr = "(userFloat('ontheflyiso_pfChargedHadrons') + max(userFloat('ontheflyiso_pfPhotons')-0.5*userFloat('pfPUChargedHadrons'), 0)) < 1"
+    isoExpr = "1==1"
     if enableIsolation:
+        print "*** Isolation for muon is enabled ***"
 #        counters.extend(addMuonRelativeIsolation(process, sequence, prefix=prefix+"Isolation", cut=0.1))
         import muonAnalysis
         counters.extend(addMuonIsolation(process, sequence, prefix+"Isolation", isoExpr))

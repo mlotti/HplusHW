@@ -68,6 +68,7 @@ namespace HPlus {
     fEventWeight(eventWeight),
     fHistoWrapper(fEventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
     bBlindAnalysisStatus(iConfig.getUntrackedParameter<bool>("blindAnalysisStatus")),
+    bTauEmbeddingStatus(iConfig.getUntrackedParameter<bool>("tauEmbeddingStatus")),
     fDeltaPhiCutValue(iConfig.getUntrackedParameter<double>("deltaPhiTauMET")),
     fTopRecoName(iConfig.getUntrackedParameter<std::string>("topReconstruction")),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
@@ -158,6 +159,7 @@ namespace HPlus {
     fVertexWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeightReader")),
     fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
+    fTauEmbeddingMuonIsolationQuantifier(eventCounter, fHistoWrapper),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     // Scale factor uncertainties
     fSFUncertaintiesAfterSelection(fHistoWrapper, "AfterSelection"),
@@ -198,6 +200,7 @@ namespace HPlus {
 
     hTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassNoBtagging = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassNoBtagging", "transverseMassNoBtagging;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
+    hTransverseMassNoBtaggingWithRtau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassNoBtaggingWithRtau", "transverseMassNoBtaggingWithRtau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassTopSelection = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "transverseMassTopSelection", "transverseMassTopSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassTopChiSelection = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "transverseMassTopChiSelection", "transverseMassTopChiSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassTopBjetSelection = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "transverseMassTopBjetSelection", "transverseMassTopBjetSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
@@ -298,6 +301,9 @@ namespace HPlus {
   }
 
   bool SignalAnalysis::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    if (bTauEmbeddingStatus)
+      fTauEmbeddingMuonIsolationQuantifier.analyzeAfterTrigger(iEvent, iSetup);
+
     fEventWeight.updatePrescale(iEvent); // set prescale
     fTree.setPrescaleWeight(fEventWeight.getWeight());
 
@@ -339,10 +345,6 @@ namespace HPlus {
     if(!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
     //hSelectionFlow->Fill(kSignalOrderVertexSelection);
-
- 
-   
-    
 
 
 //------ TauID
@@ -501,6 +503,9 @@ namespace HPlus {
       copyPtrToVector(jetData.getSelectedJets(), *saveJets);
       iEvent.put(saveJets, "selectedJets");
     }
+    if (bTauEmbeddingStatus)
+      fTauEmbeddingMuonIsolationQuantifier.analyzeAfterJets(iEvent, iSetup);
+
 
 //------ Obtain rest of data objects      
     if (fTree.isActive()) {
@@ -579,7 +584,7 @@ namespace HPlus {
 //------ Delta phi(tau,MET) cut
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
     hDeltaPhiNoBtagging->Fill(deltaPhi);
-
+    if (tauData.selectedTauPassesRtau())  hTransverseMassNoBtaggingWithRtau->Fill(transverseMass); 
 
 //------ b tagging cut
 
