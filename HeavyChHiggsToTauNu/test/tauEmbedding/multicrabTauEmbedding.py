@@ -39,15 +39,15 @@ defaultVersions = [
 #    "v13_3_seedTest9",
 #    "v13_3_seedTest10",
 #    "v14"
-   "v44_1",
-#    "v44_1_seed1",
-#    "v44_1_seed2",
+    #"v44_2",
+    "v44_2_seed1",
+    #"v44_2_seed2",
 ]
 
 # Define the processing steps: input dataset, configuration file, output file
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
 #          "skim_copy":      {"input": "tauembedding_skim_v13",         "config": "copy_cfg.py"}, 
-          "embedding":      {"input": "tauembedding_skim_v44_1", "config": "embed.py",   "output": "embedded.root"},
+          "embedding":      {"input": "tauembedding_skim_v44_2", "config": "embed.py",   "output": "embedded.root"},
           "analysis":       {"input": "tauembedding_embedding_%s",  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau":    {"input": "pattuple_v18",                       "config": "tauAnalysis_cfg.py"},
           "signalAnalysis": {"input": "tauembedding_embedding_%s",  "config": "../signalAnalysis_cfg.py"},
@@ -91,20 +91,20 @@ datasetsData2011B = [
 datasetsData2011 = datasetsData2011A + datasetsData2011B
 datasetsMCnoQCD = [
     "TTJets_TuneZ2_Fall11",
-    #"WJets_TuneZ2_Fall11",
-    #"DYJetsToLL_M50_TuneZ2_Fall11",
+    "WJets_TuneZ2_Fall11",
+    "DYJetsToLL_M50_TuneZ2_Fall11",
     #"W2Jets_TuneZ2_Fall11",
     #"W3Jets_TuneZ2_Fall11",
     #"W4Jets_TuneZ2_Fall11",
-    #"T_t-channel_TuneZ2_Fall11",
-    #"Tbar_t-channel_TuneZ2_Fall11",
-    #"T_tW-channel_TuneZ2_Fall11",
-    #"Tbar_tW-channel_TuneZ2_Fall11",
-    #"T_s-channel_TuneZ2_Fall11",
-    #"Tbar_s-channel_TuneZ2_Fall11",
-    #"WW_TuneZ2_Fall11",
-    #"WZ_TuneZ2_Fall11",
-    #"ZZ_TuneZ2_Fall11",
+    "T_t-channel_TuneZ2_Fall11",
+    "Tbar_t-channel_TuneZ2_Fall11",
+    "T_tW-channel_TuneZ2_Fall11",
+    "Tbar_tW-channel_TuneZ2_Fall11",
+    "T_s-channel_TuneZ2_Fall11",
+    "Tbar_s-channel_TuneZ2_Fall11",
+    "WW_TuneZ2_Fall11",
+    "WZ_TuneZ2_Fall11",
+    "ZZ_TuneZ2_Fall11",
 ]
 datasetsMCQCD = [
     "QCD_Pt20_MuEnriched_TuneZ2_Fall11",

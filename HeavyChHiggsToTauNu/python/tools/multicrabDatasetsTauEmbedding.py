@@ -55,10 +55,10 @@ njobs = {
     "TTToHplusBHminusB_M155_Fall11":     {"skim":   6, "embedding":  1},
     "TTToHplusBHminusB_M160_Fall11":     {"skim":   6, "embedding":  1},
 
-    "TTJets_TuneZ2_Fall11":              {"skim": 350, "embedding": 298}, # 11 s per event
-    "WJets_TuneZ2_Fall11":               {"skim": 100, "embedding": 27},
+    "TTJets_TuneZ2_Fall11":              {"skim": 350, "embedding": 490}, # 3 s per event
+    "WJets_TuneZ2_Fall11":               {"skim": 100, "embedding": 90},
     "W3Jets_TuneZ2_Fall11":              {"skim": 140, "embedding": 42},
-    "DYJetsToLL_M50_TuneZ2_Fall11":      {"skim": 230, "embedding": 96},
+    "DYJetsToLL_M50_TuneZ2_Fall11":      {"skim": 230, "embedding": 90},
     "T_t-channel_TuneZ2_Fall11":         {"skim":  20, "embedding":  6},
     "Tbar_t-channel_TuneZ2_Fall11":      {"skim":  12, "embedding":  3},
     "T_tW-channel_TuneZ2_Fall11":        {"skim":  20, "embedding":  6},
@@ -68,7 +68,7 @@ njobs = {
     "WW_TuneZ2_Fall11":                  {"skim":  35, "embedding": 11},
     "WZ_TuneZ2_Fall11":                  {"skim":  35, "embedding": 12},
     "ZZ_TuneZ2_Fall11":                  {"skim":  30, "embedding": 13},
-    "QCD_Pt20_MuEnriched_TuneZ2_Fall11": {"skim":  15, "embedding": 5},
+    "QCD_Pt20_MuEnriched_TuneZ2_Fall11": {"skim":  15, "embedding": 10},
  }
 
 
@@ -105,7 +105,7 @@ def addTo(datasets):
                             "number_of_jobs": njobs[name][step]
                         }
                         })
-    add("skim", "v44_1", {
+    add("skim", "v44_2", {
         "SingleMu_Mu_160431-163261_2011A_Nov08":    "/SingleMu/local-Tauembedding_skim_v44_1_SingleMu_Mu_160431-163261_2011A_Nov08-6737569d0ee6ba050f12f3fbcd64a5d3/USER",
         "SingleMu_Mu_163270-163869_2011A_Nov08":    "/SingleMu/local-Tauembedding_skim_v44_1_SingleMu_Mu_163270-163869_2011A_Nov08-d3a0af9fc688d9afa24da75a2e0e0200/USER",
         "SingleMu_Mu_165088-166150_2011A_Nov08":    "/SingleMu/local-Tauembedding_skim_v44_1_SingleMu_Mu_165088-166150_2011A_Nov08-e797495150949b4843549690f201c608/USER",
@@ -152,7 +152,7 @@ def addTo(datasets):
         "QCD_Pt20_MuEnriched_TuneZ2_Fall11": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Tauembedding_skim_v44_1_QCD_Pt20_MuEnriched_TuneZ2_Fall11-2f6341f5a210122b891e378fe7516bcf/USER",
         })
 
-    add("embedding", "v44_1", {
+    add("embedding", "v44_2", {
         "SingleMu_Mu_160431-163261_2011A_Nov08":    "",
         "SingleMu_Mu_163270-163869_2011A_Nov08":    "",
         "SingleMu_Mu_165088-166150_2011A_Nov08":    "",
@@ -183,23 +183,23 @@ def addTo(datasets):
         #"TTToHplusBHminusB_M150_Fall11":     "",
         #"TTToHplusBHminusB_M155_Fall11":     "",
         #"TTToHplusBHminusB_M160_Fall11":     "",
-        "TTJets_TuneZ2_Fall11":              "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Tauembedding_embedding_v44_1_TTJets_TuneZ2_Fall11-54abb4e9db78d3d82f9d8c37ab9b50f7/USER",
-        "WJets_TuneZ2_Fall11":               "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Tauembedding_embedding_v44_1_WJets_TuneZ2_Fall11-54abb4e9db78d3d82f9d8c37ab9b50f7/USER",
+        "TTJets_TuneZ2_Fall11":              "",
+        "WJets_TuneZ2_Fall11":               "",
         #"W3Jets_TuneZ2_Fall11":              "",
-        "DYJetsToLL_M50_TuneZ2_Fall11":      "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Tauembedding_embedding_v44_1_DYJetsToLL_M50_TuneZ2_Fall11-54abb4e9db78d3d82f9d8c37ab9b50f7/USER",
-        "T_t-channel_TuneZ2_Fall11":         "/T_TuneZ2_t-channel_7TeV-powheg-tauola/local-Tauembedding_embedding_v44_1_T_t-channel_TuneZ2_Fall11-54abb4e9db78d3d82f9d8c37ab9b50f7/USER",
-        "Tbar_t-channel_TuneZ2_Fall11":      "/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/local-Tauembedding_embedding_v44_1_Tbar_t-channel_TuneZ2_Fall11-54abb4e9db78d3d82f9d8c37ab9b50f7/USER",
-        "T_tW-channel_TuneZ2_Fall11":        "/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Tauembedding_embedding_v44_1_T_tW-channel_TuneZ2_Fall11-54abb4e9db78d3d82f9d8c37ab9b50f7/USER",
+        "DYJetsToLL_M50_TuneZ2_Fall11":      "",
+        "T_t-channel_TuneZ2_Fall11":         "",
+        "Tbar_t-channel_TuneZ2_Fall11":      "",
+        "T_tW-channel_TuneZ2_Fall11":        "",
         "Tbar_tW-channel_TuneZ2_Fall11":     "",
-        "T_s-channel_TuneZ2_Fall11":         "/T_TuneZ2_s-channel_7TeV-powheg-tauola/local-Tauembedding_embedding_v44_1_T_s-channel_TuneZ2_Fall11-54abb4e9db78d3d82f9d8c37ab9b50f7/USER",
-        "Tbar_s-channel_TuneZ2_Fall11":      "/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/local-Tauembedding_embedding_v44_1_Tbar_s-channel_TuneZ2_Fall11-54abb4e9db78d3d82f9d8c37ab9b50f7/USER",
-        "WW_TuneZ2_Fall11":                  "/WW_TuneZ2_7TeV_pythia6_tauola/local-Tauembedding_embedding_v44_1_WW_TuneZ2_Fall11-54abb4e9db78d3d82f9d8c37ab9b50f7/USER",
-        "WZ_TuneZ2_Fall11":                  "/WZ_TuneZ2_7TeV_pythia6_tauola/local-Tauembedding_embedding_v44_1_WZ_TuneZ2_Fall11-54abb4e9db78d3d82f9d8c37ab9b50f7/USER",
-        "ZZ_TuneZ2_Fall11":                  "/ZZ_TuneZ2_7TeV_pythia6_tauola/local-Tauembedding_embedding_v44_1_ZZ_TuneZ2_Fall11-54abb4e9db78d3d82f9d8c37ab9b50f7/USER",
-        "QCD_Pt20_MuEnriched_TuneZ2_Fall11": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Tauembedding_embedding_v44_1_QCD_Pt20_MuEnriched_TuneZ2_Fall11-54abb4e9db78d3d82f9d8c37ab9b50f7/USER",
+        "T_s-channel_TuneZ2_Fall11":         "",
+        "Tbar_s-channel_TuneZ2_Fall11":      "",
+        "WW_TuneZ2_Fall11":                  "",
+        "WZ_TuneZ2_Fall11":                  "",
+        "ZZ_TuneZ2_Fall11":                  "",
+        "QCD_Pt20_MuEnriched_TuneZ2_Fall11": "",
         })
 
-    add("skim", "v44_1_seed1", {
+    add("skim", "v44_2_seed1", {
         "SingleMu_Mu_160431-163261_2011A_Nov08":    "/SingleMu/local-Tauembedding_skim_v44_1_SingleMu_Mu_160431-163261_2011A_Nov08-6737569d0ee6ba050f12f3fbcd64a5d3/USER",
         "SingleMu_Mu_163270-163869_2011A_Nov08":    "/SingleMu/local-Tauembedding_skim_v44_1_SingleMu_Mu_163270-163869_2011A_Nov08-d3a0af9fc688d9afa24da75a2e0e0200/USER",
         "SingleMu_Mu_165088-166150_2011A_Nov08":    "/SingleMu/local-Tauembedding_skim_v44_1_SingleMu_Mu_165088-166150_2011A_Nov08-e797495150949b4843549690f201c608/USER",
@@ -246,7 +246,7 @@ def addTo(datasets):
         "QCD_Pt20_MuEnriched_TuneZ2_Fall11": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Tauembedding_skim_v44_1_QCD_Pt20_MuEnriched_TuneZ2_Fall11-2f6341f5a210122b891e378fe7516bcf/USER",
         })
 
-    add("skim", "v44_1_seed2", {
+    add("skim", "v44_2_seed2", {
         "SingleMu_Mu_160431-163261_2011A_Nov08":    "/SingleMu/local-Tauembedding_skim_v44_1_SingleMu_Mu_160431-163261_2011A_Nov08-6737569d0ee6ba050f12f3fbcd64a5d3/USER",
         "SingleMu_Mu_163270-163869_2011A_Nov08":    "/SingleMu/local-Tauembedding_skim_v44_1_SingleMu_Mu_163270-163869_2011A_Nov08-d3a0af9fc688d9afa24da75a2e0e0200/USER",
         "SingleMu_Mu_165088-166150_2011A_Nov08":    "/SingleMu/local-Tauembedding_skim_v44_1_SingleMu_Mu_165088-166150_2011A_Nov08-e797495150949b4843549690f201c608/USER",
