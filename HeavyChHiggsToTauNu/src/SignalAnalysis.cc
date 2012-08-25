@@ -66,6 +66,7 @@ namespace HPlus {
     fEventWeight(eventWeight),
     fHistoWrapper(fEventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
     bBlindAnalysisStatus(iConfig.getUntrackedParameter<bool>("blindAnalysisStatus")),
+    bTauEmbeddingStatus(iConfig.getUntrackedParameter<bool>("tauEmbeddingStatus")),
     fDeltaPhiCutValue(iConfig.getUntrackedParameter<double>("deltaPhiTauMET")),
     fTopRecoName(iConfig.getUntrackedParameter<std::string>("topReconstruction")),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
@@ -153,6 +154,7 @@ namespace HPlus {
     fVertexWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeightReader")),
     fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
+    fTauEmbeddingMuonIsolationQuantifier(eventCounter, fHistoWrapper),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     // Scale factor uncertainties
     fSFUncertaintiesAfterSelection(fHistoWrapper, "AfterSelection"),
@@ -292,6 +294,9 @@ namespace HPlus {
   }
 
   bool SignalAnalysis::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    if (bTauEmbeddingStatus)
+      fTauEmbeddingMuonIsolationQuantifier.analyzeAfterTrigger(iEvent, iSetup);
+
     fEventWeight.updatePrescale(iEvent); // set prescale
     fTree.setPrescaleWeight(fEventWeight.getWeight());
 
@@ -333,10 +338,6 @@ namespace HPlus {
     if(!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
     //hSelectionFlow->Fill(kSignalOrderVertexSelection);
-
- 
-   
-    
 
 
 //------ TauID
@@ -475,6 +476,9 @@ namespace HPlus {
       copyPtrToVector(jetData.getSelectedJets(), *saveJets);
       iEvent.put(saveJets, "selectedJets");
     }
+    if (bTauEmbeddingStatus)
+      fTauEmbeddingMuonIsolationQuantifier.analyzeAfterJets(iEvent, iSetup);
+
 
 //------ Obtain rest of data objects      
     if (fTree.isActive()) {

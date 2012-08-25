@@ -47,6 +47,9 @@ class PATBuilder:
         if dataVersion.isData():
             # Append the data selection counters for data
             self.counters.extend(HChDataSelection.dataSelectionCounters[:])
+        elif dataVersion.isMC() and options.triggerMC != 0:
+            # If MC preselection is enabled, add the counters from there
+            self.counters = HChMcSelection.mcSelectionCounters[:]
 
         if options.tauEmbeddingInput != 0:
             # Add the tau embedding counters, if that's the input
@@ -54,9 +57,6 @@ class PATBuilder:
             self.counters.extend(MuonSelection.getMuonSelectionCountersForEmbedding("PFlow"))
             self.counters.extend(MuonSelection.getMuonSelectionCountersForEmbedding("PFlowChs"))
             self.counters.extend(PFEmbeddingSource.muonSelectionCounters)
-        elif dataVersion.isMC() and options.triggerMC != 0:
-            # If MC preselection is enabled, add the counters from there
-            self.counters = HChMcSelection.mcSelectionCounters[:]
 
         if options.doPat == 0:
             # Not running PAT, assuming that the job is taking pattuples as input

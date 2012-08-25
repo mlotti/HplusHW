@@ -17,7 +17,7 @@ defaultStep = "embedding"
 # Default era of data to use (meaningful only for signalAnalysis and muonAnalysis)
 #defaultEra = "EPS"
 #defaultEra = "Run2011A-EPS"
-defaultEra = "Run2011"
+defaultEra = "Run2011A+B"
 
 # Default embedding version(s) to use
 defaultVersions = [
@@ -39,20 +39,20 @@ defaultVersions = [
 #    "v13_3_seedTest9",
 #    "v13_3_seedTest10",
 #    "v14"
-#    "v44_1",
-    "v44_1_seed1",
-#    "v44_1_seed2",
+    #"v44_2",
+    "v44_2_seed1",
+    #"v44_2_seed2",
 ]
 
 # Define the processing steps: input dataset, configuration file, output file
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
 #          "skim_copy":      {"input": "tauembedding_skim_v13",         "config": "copy_cfg.py"}, 
-          "embedding":      {"input": "tauembedding_skim_v44_1", "config": "embed.py",   "output": "embedded.root"},
+          "embedding":      {"input": "tauembedding_skim_v44_2", "config": "embed.py",   "output": "embedded.root"},
           "analysis":       {"input": "tauembedding_embedding_%s",  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau":    {"input": "pattuple_v18",                       "config": "tauAnalysis_cfg.py"},
           "signalAnalysis": {"input": "tauembedding_embedding_%s",  "config": "../signalAnalysis_cfg.py"},
           "muonAnalysis":   {"input": "tauembedding_skim_v13",          "config": "muonAnalysisFromSkim_cfg.py"},
-          "caloMetEfficiency": {"input": "tauembedding_skim_v13",         "config": "caloMetEfficiency_cfg.py"},
+          "caloMetEfficiency": {"input": "tauembedding_skim_v44_1",         "config": "caloMetEfficiency_cfg.py"},
           }
 
 
@@ -128,9 +128,9 @@ datasetsSignal = [
     "TTToHplusBHminusB_M160_Fall11",
 ]
 
-datasetsData2011 = []
-#datasetsMCnoQCD = []
-#datasetsMCQCD = []
+#datasetsData2011 = []
+datasetsMCnoQCD = []
+datasetsMCQCD = []
 datasetsSignal = []
 #datasetsData2011 = datasetsData2011B
 
@@ -238,7 +238,7 @@ def createTasks(opts, step, version=None):
     if step in ["embedding", "analysis", "signalAnalysis"]:
         dirName += "_"+version
     if step in ["analysis", "signalAnalysis"]:
-        dirName += "_"+opts.era
+        dirName += "_"+opts.era.replace("+","")
 
 
     multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
@@ -255,7 +255,7 @@ def createTasks(opts, step, version=None):
                 datasets.extend(datasetsData2011A)
             if opts.era == "Run2011B":
                 datasets.extend(datasetsData2011B)
-            if opts.era == "Run2011":
+            if opts.era == "Run2011A+B":
                 datasets.extend(datasetsData2011)
             else:
                 raise Exception("Unsupported era %s" % opts.era)
@@ -270,6 +270,15 @@ def createTasks(opts, step, version=None):
     dataInput = config[step]["input"]
     if step in ["analysis", "signalAnalysis"]:
         dataInput = dataInput % version
+
+    # Hack for JSON files
+    if step in ["signalAnalysis", "analysisTau", "muonAnalysis", "caloMetEfficiency"]:
+        import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabDatasets as multicrabDatasets
+        for dataset in datasets:
+            if not "SingleMu" in dataset: # is data
+                continue
+            multicrabDatasets.datasets[dataset]["data"][dataInput]["lumiMask"] = "Nov08ReReco"
+
     multicrab.extendDatasets(dataInput, datasets)
 
     multicrab.appendLineAll("GRID.maxtarballsize = 15")
@@ -292,11 +301,11 @@ def createTasks(opts, step, version=None):
         for key in dataset.data.keys():
             if key == "skimConfig":
                 del dataset.data[key]
-            elif key == "args":
-                arglist = dataset.data[key]
-                for argkey in arglist.keys():
-                    if argkey == "triggerMC":
-                        del arglist[argkey]
+            #elif key == "args":
+                #arglist = dataset.data[key]
+                #for argkey in arglist.keys():
+                    #if argkey == "triggerMC":
+                        #del arglist[argkey]
         # Proceed
         name = ""
         if dataset.isData() or step != "skim":
@@ -363,11 +372,12 @@ def createTasks(opts, step, version=None):
     def modifyAnalysis(dataset):
         if dataset.isMC():
             dataset.appendArg("puWeightEra="+opts.era)
+            dataset.appendArg("runOnCrab=1") # Needed for btag scale factor mechanism
         if step == "signalAnalysis":
             dataset.appendArg("tauEmbeddingInput=1")
             dataset.appendArg("doPat=1")
-            if dataset.getName() in datasetsData2011_Run2011A_noEPS:
-                dataset.appendArg("tauEmbeddingCaloMet=caloMetSum")
+#            if dataset.getName() in datasetsData2011_Run2011A_noEPS:
+#                dataset.appendArg("tauEmbeddingCaloMet=caloMetSum")
     #    if step == "analysisTau":
     #        if dataset.getName() == "WJets":
     #            dataset.setNumberOfJobs(100)

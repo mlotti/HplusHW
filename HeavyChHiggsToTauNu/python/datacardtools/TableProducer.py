@@ -179,15 +179,36 @@ class TableProducer:
                 c.saveQCDInfoHistograms(self._infoDirname)
                 myFilename = self._infoDirname+"/QCDfactorisedMessages.txt"
                 myFile = open(myFilename, "w")
+                myFile.write(self._generateHeader())
                 myMessages = c.getMessages()
                 for m in myMessages:
                     myFile.write(m+"\n")
                 myFile.close()
                 print HighlightStyle()+"QCD factorised messages written to: "+NormalStyle()+myFilename
 
+                myFilename = self._infoDirname+"/QCDfactorised_table_NQCD_yield.tex"
+                myFile = open(myFilename, "w")
+                myFile.write("% Auto generated from datacard generator; to produce, run datacard generator and have a look into the produced info directory\n")
+                myFile.write("%% %s \n"%self._generateHeader().replace("Date","% Date"))
+                myFile.write(c.getYieldTable())
+                myFile.close()
+                print HighlightStyle()+"QCD factorised event yield table written to: "+NormalStyle()+myFilename
+
+                myFilename = self._infoDirname+"/QCDfactorised_table_NQCD_yield_contracted.tex"
+                myFile = open(myFilename, "w")
+                myFile.write("% Auto generated from datacard generator; to produce, run datacard generator and have a look into the produced info directory\n")
+                myFile.write("%% %s \n"%self._generateHeader().replace("Date","% Date"))
+                myFile.write(c.getCompactYieldTable())
+                myFile.close()
+                print HighlightStyle()+"QCD factorised compact event yield table written to: "+NormalStyle()+myFilename
+
     ## Generates header of datacard
-    def _generateHeader(self, mass):
-        myString = "Description: LandS datacard (auto generated) mass=%d, luminosity=%f 1/fb, %s/%s\n"%(mass,self._luminosity,self._config.DataCardName,self._outputPrefix)
+    def _generateHeader(self, mass=None):
+        myString = ""
+        if mass == None:
+            myString += "Description: LandS datacard (auto generated) luminosity=%f 1/fb, %s/%s\n"%(self._luminosity,self._config.DataCardName,self._outputPrefix)
+        else:
+            myString += "Description: LandS datacard (auto generated) mass=%d, luminosity=%f 1/fb, %s/%s\n"%(mass,self._luminosity,self._config.DataCardName,self._outputPrefix)
         myString += "Date: %s\n"%time.ctime()
         return myString
 

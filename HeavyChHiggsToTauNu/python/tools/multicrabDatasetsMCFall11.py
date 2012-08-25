@@ -54,7 +54,7 @@ datasets = {
             },
             "pattuple_v25b": { # This version is corrected
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBHminusB_M-100_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBHminusB_M100_Fall11-867f8948ab405c5cced92453543fca46/USER",
+                "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25bfix_nojetskim_TTToHplusBWB_M100_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 218200 evt
             },
         }
@@ -175,7 +175,7 @@ datasets = {
             },
             "pattuple_v25b": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBHminusB_M-100_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBHminusB_M100_Fall11-867f8948ab405c5cced92453543fca46/USER",
+                "datasetpath": "/TTToHplusBHminusB_M-100_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25bfix_nojetskim_TTToHplusBHminusB_M100_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 217600 evt
             },
         }

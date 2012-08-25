@@ -189,7 +189,7 @@ if options.tauEmbeddingInput != 0:
     process.source.fileNames = [
         "file:/mnt/flustre/wendland/embedded_latest.root"
         ]
-    process.maxEvents.input = 10
+    process.maxEvents.input = 100
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -250,7 +250,8 @@ if options.tauEmbeddingInput != 0:
     tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, options, dataVersion)
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, options, dataVersion)
     if tauEmbeddingFinalizeMuonSelection:
-        applyIsolation = not doTauEmbeddingMuonSelectionScan
+        #applyIsolation = not doTauEmbeddingMuonSelectionScan
+        applyIsolation = False
         additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
                                                                                    enableIsolation=applyIsolation))
 if doBTagTree:
@@ -266,6 +267,9 @@ process.signalAnalysis = signalAnalysis.createEDFilter(param)
 if not doFillTree:
     process.signalAnalysis.Tree.fill = cms.untracked.bool(False)
 process.signalAnalysis.histogramAmbientLevel = myHistogramAmbientLevel
+
+if options.tauEmbeddingInput != 0:
+    process.signalAnalysis.tauEmbeddingStatus = True
 
 # process.signalAnalysis.GlobalMuonVeto = param.NonIsolatedMuonVeto
 # Change default tau algorithm here if needed

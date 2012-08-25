@@ -386,7 +386,7 @@ datasets = {
         "runs": (172620, 173198), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
-                "datasetpath": "/SingleMu/Run2011A-DCSONLY11-v6/AOD",
+                "datasetpath": "/SingleMu/Run2011A-08Nov2011-v1/AOD",
                 "number_of_jobs": 1000, # Adjusted for PATtuple file size (~330 in reality)
                 "lumiMask": "DCSONLY11"
             },
