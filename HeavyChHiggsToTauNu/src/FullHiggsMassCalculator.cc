@@ -60,6 +60,7 @@ namespace HPlus {
     TVector3 myBJetVector;
     double myMinDeltaR = 99.0;
     edm::Ptr<pat::Jet> myBJet;
+    // Loop over bjets with tight tag
     for (edm::PtrVector<pat::Jet>::iterator iBjet = bData.getSelectedJets().begin(); iBjet != bData.getSelectedJets().end(); ++iBjet) {
       //      double DeltaJet = ROOT::Math::VectorUtil::DeltaR((*iBjet)->p4(), TopChiSelectionData.getSelectedBjet()->p4());
       //      if (DeltaJet < 0.001) continue;
@@ -70,7 +71,15 @@ namespace HPlus {
         myBJetVector.SetXYZ((*iBjet)->px(), (*iBjet)->py(), (*iBjet)->pz());
       }
     }
-
+    // Loop over bjets with looser tag
+    for (edm::PtrVector<pat::Jet>::iterator iBjet = bData.getSelectedSubLeadingJets().begin(); iBjet != bData.getSelectedSubLeadingJets().end(); ++iBjet) {
+      double myDeltaR = ROOT::Math::VectorUtil::DeltaR((*iBjet)->p4(), tauData.getSelectedTau()->p4());
+      if (myDeltaR < myMinDeltaR) {
+        myMinDeltaR = myDeltaR;
+        myBJet = *iBjet;
+        myBJetVector.SetXYZ((*iBjet)->px(), (*iBjet)->py(), (*iBjet)->pz());
+      }
+    }
     //    std::cout << "B jet in Higgs mass:  myMinDeltaR " << myMinDeltaR  << " pt " << myBJet->pt() << " eta  " << myBJet->eta() << std::endl;
 
 

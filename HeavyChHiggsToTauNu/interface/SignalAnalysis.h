@@ -170,10 +170,10 @@ namespace HPlus {
     Count fTopWithWSelectionCounter;
     Count fTopWithWSelection250Counter;
     Count fTopWithWSelection220Counter;
-    Count fTopChiSelectionNarrowCounter;   
+    Count fTopChiSelectionNarrowCounter;
     Count fFakeMETVetoCounter;
-
     Count fSelectedEventsCounter;
+    Count fSelectedEventsCounterWithGenuineBjets;
 
     TriggerSelection fTriggerSelection;
     VertexSelection fPrimaryVertexSelection;
@@ -278,6 +278,9 @@ namespace HPlus {
     WrappedTH1* hCtrlNjetsAfterStandardSelections;
     WrappedTH1* hCtrlMET;
     WrappedTH1* hCtrlNbjets;
+    WrappedTH2* hCtrlJetMatrixAfterJetSelection;
+    WrappedTH2* hCtrlJetMatrixAfterMET;
+    WrappedTH2* hCtrlJetMatrixAfterMET100;
 
     // CounterGroups for EWK fake taus (aka non-QCD type 2(
     CounterGroup fEWKFakeTausGroup;
