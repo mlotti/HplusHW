@@ -49,9 +49,9 @@ config = {"skim":           {"input": "AOD",                           "config":
 #          "skim_copy":      {"input": "tauembedding_skim_v13",         "config": "copy_cfg.py"}, 
           "embedding":      {"input": "tauembedding_skim_v44_2", "config": "embed.py",   "output": "embedded.root"},
           "analysis":       {"input": "tauembedding_embedding_%s",  "config": "embeddingAnalysis_cfg.py"},
-          "analysisTau":    {"input": "pattuple_v18",                       "config": "tauAnalysis_cfg.py"},
+          "analysisTau":    {"input": "AOD",                        "config": "tauAnalysis_cfg.py"},
           "signalAnalysis": {"input": "tauembedding_embedding_%s",  "config": "../signalAnalysis_cfg.py"},
-          "muonAnalysis":   {"input": "tauembedding_skim_v13",          "config": "muonAnalysisFromSkim_cfg.py"},
+          "muonAnalysis":   {"input": "tauembedding_skim_v44_1",          "config": "muonAnalysisFromSkim_cfg.py"},
           "caloMetEfficiency": {"input": "tauembedding_skim_v44_1",         "config": "caloMetEfficiency_cfg.py"},
           }
 
@@ -170,19 +170,19 @@ muonAnalysisNjobs = { # goal: 30k events/job # FIXME these need to be updated
     "SingleMu_Mu_177453-178380_2011B_Nov19": 11, # HLT_Mu40_eta2p1_v1
     "SingleMu_Mu_178411-179889_2011B_Nov19": 11, # HLT_Mu40_eta2p1_v4
     "SingleMu_Mu_179942-180371_2011B_Nov19": 2, # HLT_Mu40_eta2p1_v5
-    "WJets_TuneZ2_Fall11": 60,
-    "TTJets_TuneZ2_Fall11": 300, # njobs_skim / 3
-    "QCD_Pt20_MuEnriched_TuneZ2_Fall11": 5,
-    "DYJetsToLL_M50_TuneZ2_Fall11": 20,
+    "WJets_TuneZ2_Fall11": 15,
+    "TTJets_TuneZ2_Fall11": 50,
+    "QCD_Pt20_MuEnriched_TuneZ2_Fall11": 3,
+    "DYJetsToLL_M50_TuneZ2_Fall11": 10,
     "T_t-channel_TuneZ2_Fall11": 2,
     "Tbar_t-channel_TuneZ2_Fall11": 2,
     "T_tW-channel_TuneZ2_Fall11": 2,
     "Tbar_tW-channel_TuneZ2_Fall11": 1,
     "T_s-channel_TuneZ2_Fall11": 1,
     "Tbar_s-channel_TuneZ2_Fall11": 1,
-    "WW_TuneZ2_Fall11": 8,
-    "WZ_TuneZ2_Fall11": 8,
-    "ZZ_TuneZ2_Fall11": 8,
+    "WW_TuneZ2_Fall11": 4,
+    "WZ_TuneZ2_Fall11": 4,
+    "ZZ_TuneZ2_Fall11": 4,
     }
 
 

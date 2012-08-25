@@ -249,6 +249,10 @@ if options.tauEmbeddingInput != 0:
     #tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
     tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, options, dataVersion)
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, options, dataVersion)
+    if dataVersion.isMC():
+        process.muonTriggerFixSequence = cms.Sequence()
+        additionalCounters.extend(tauEmbeddingCustomisations.addMuonTriggerFix(process, dataVersion, process.muonTriggerFixSequence, options))
+        process.commonSequence.replace(process.patSequence, process.muonTriggerFixSequence*process.patSequence)
     if tauEmbeddingFinalizeMuonSelection:
         #applyIsolation = not doTauEmbeddingMuonSelectionScan
         applyIsolation = False
