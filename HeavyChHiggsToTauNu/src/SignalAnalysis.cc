@@ -123,6 +123,7 @@ namespace HPlus {
     //fTopWithWSelectionCounter(eventCounter.addSubCounter("top", "Top with W Selection cut")),
     fFakeMETVetoCounter(eventCounter.addCounter("FakeMETVeto")),
     fSelectedEventsCounter(eventCounter.addCounter("Selected events")),
+    fSelectedEventsCounterWithGenuineBjets(eventCounter.addCounter("Selected events with genuine bjets")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, fHistoWrapper),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, fHistoWrapper),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, fHistoWrapper),
@@ -268,6 +269,10 @@ namespace HPlus {
     hCtrlNjetsAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "Njets_AfterStandardSelections", "Njets_AfterStandardSelections;Number of selected jets;N_{events}", 7, 3., 10.);
     hCtrlMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "MET", "MET;MET, GeV;N_{events} / 10 GeV", 100, 0., 500.);
     hCtrlNbjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "NBjets", "NBjets;Number of identified b-jets;N_{events}", 10, 0., 10.);
+
+    hCtrlJetMatrixAfterJetSelection = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myCtrlDir, "JetMatrixAfterJetSelection", "JetMatrixAfterJetSelection;Number of selected jets;Number of selected b jets", 7, 3., 10.,7, 0., 7.);
+    hCtrlJetMatrixAfterMET = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myCtrlDir, "JetMatrixAfterMET", "JetMatrixAfterMET;Number of selected jets;Number of selected b jets", 7, 3., 10.,7, 0., 7.);
+    hCtrlJetMatrixAfterMET100 = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myCtrlDir, "JetMatrixAfterMET100", "JetMatrixAfterMET100;Number of selected jets;Number of selected b jets", 7, 3., 10.,7, 0., 7.);
 
     fTree.init(*fs);
   }
@@ -525,18 +530,34 @@ namespace HPlus {
     hCtrlIdentifiedMuonPtAfterStandardSelections->Fill(muonVetoData.getSelectedMuonPtBeforePtCut());
     hCtrlNjetsAfterStandardSelections->Fill(jetData.getHadronicJetCount());
 
+    
+    
+    
+
 
 //------ MET cut
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
     hMet->Fill(metData.getSelectedMET()->et(),fEventWeight.getWeight()); 
     hCtrlMET->Fill(metData.getSelectedMET()->et());
+    // Obtain delta phi and transverse mass here, but do not yet cut on them
+    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
+    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
+    int nBjets = fBTagging.analyzeOnlyBJetCount(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    if (transverseMass > 40 && transverseMass < 100)
+      hCtrlJetMatrixAfterJetSelection->Fill(jetData.getHadronicJetCount(), nBjets);
+    // Now cut on MET
     if(!metData.passedEvent()) return false;
     increment(fMETCounter);
     hSelectionFlow->Fill(kSignalOrderMETSelection);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderMETSelection);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderMETSelection);
     fillEWKFakeTausCounters(myTauMatch, kSignalOrderMETSelection, tauData);
-
+    // Plot jet matrix
+    if (transverseMass > 40 && transverseMass < 100) {
+      hCtrlJetMatrixAfterMET->Fill(jetData.getHadronicJetCount(), nBjets);
+      if (metData.getSelectedMET()->et() > 100.0)
+        hCtrlJetMatrixAfterMET100->Fill(jetData.getHadronicJetCount(), nBjets);
+    }
 
 //------ b tagging cut
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
@@ -563,7 +584,6 @@ namespace HPlus {
    
 
 //------ Delta phi(tau,MET) cut
-    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
     hDeltaPhi->Fill(deltaPhi);
     if (deltaPhi > fDeltaPhiCutValue) return false;
     increment(fDeltaPhiTauMETCounter);
@@ -581,9 +601,6 @@ namespace HPlus {
         myMaxDeltaPhiJetMET = jetDeltaPhi;
     }
     hMaxDeltaPhiJetMet->Fill(myMaxDeltaPhiJetMET);
-
-
-    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()) );
 
 //------ Top reconstruction
 
@@ -654,6 +671,7 @@ namespace HPlus {
 
 //------ Transverse mass and control plots
     increment(fSelectedEventsCounter);
+    if (btagData.hasGenuineBJets()) increment(fSelectedEventsCounterWithGenuineBjets);
     fillEWKFakeTausCounters(myTauMatch, kSignalOrderSelectedEvents, tauData);
     hTransverseMass->Fill(transverseMass);
     if (myFakeTauStatus) hEWKFakeTausTransverseMass->Fill(transverseMass);

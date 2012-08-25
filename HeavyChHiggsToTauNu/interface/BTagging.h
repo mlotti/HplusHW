@@ -77,11 +77,13 @@ namespace HPlus {
 
       bool passedEvent() const { return fPassedEvent; }
       const edm::PtrVector<pat::Jet>& getSelectedJets() const { return fBTagging->fSelectedJets; }
+      const edm::PtrVector<pat::Jet>& getSelectedSubLeadingJets() const { return fBTagging->fSelectedSubLeadingJets; }
       const int getBJetCount() const { return fBTagging->iNBtags; }
       const double getMaxDiscriminatorValue() const { return fBTagging->fMaxDiscriminatorValue; }
       const double getScaleFactor() const { return fBTagging->fScaleFactor; }
       const double getScaleFactorAbsoluteUncertainty() const { return fBTagging->fScaleFactorAbsoluteUncertainty; }
       const double getScaleFactorRelativeUncertainty() const { return fBTagging->fScaleFactorRelativeUncertainty; }
+      const bool hasGenuineBJets() const;
       void fillScaleFactorHistograms();
 
     private:
@@ -94,10 +96,12 @@ namespace HPlus {
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
 
+    int analyzeOnlyBJetCount(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
+
     const std::string getDiscriminator() const { return fDiscriminator; }
 
   private:
-    void applyScaleFactor(const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
+    void calculateScaleFactor(const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
 
     // Input parameters
     edm::InputTag fSrc;
@@ -154,11 +158,13 @@ namespace HPlus {
     WrappedTH1 *hPt2;
     WrappedTH1 *hEta2;
     WrappedTH1 *hNumberOfBtaggedJets;
+    WrappedTH1 *hNumberOfBtaggedJetsIncludingSubLeading;
     WrappedTH1 *hScaleFactor;
     WrappedTH1 *hMCMatchForPassedJets;
     WrappedTH1 *hControlBTagUncertaintyMode;
     // Selected jets
     edm::PtrVector<pat::Jet> fSelectedJets;
+    edm::PtrVector<pat::Jet> fSelectedSubLeadingJets;
     int iNBtags;
     double fMaxDiscriminatorValue;
     double fScaleFactor;
