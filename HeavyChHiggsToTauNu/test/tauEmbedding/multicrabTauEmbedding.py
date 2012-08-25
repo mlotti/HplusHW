@@ -39,8 +39,8 @@ defaultVersions = [
 #    "v13_3_seedTest9",
 #    "v13_3_seedTest10",
 #    "v14"
-    #"v44_2",
-    "v44_2_seed1",
+    "v44_2",
+    #"v44_2_seed1",
     #"v44_2_seed2",
 ]
 
@@ -129,8 +129,8 @@ datasetsSignal = [
 ]
 
 #datasetsData2011 = []
-datasetsMCnoQCD = []
-datasetsMCQCD = []
+#datasetsMCnoQCD = []
+#datasetsMCQCD = []
 datasetsSignal = []
 #datasetsData2011 = datasetsData2011B
 
