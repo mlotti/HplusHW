@@ -39,8 +39,8 @@ defaultVersions = [
 #    "v13_3_seedTest9",
 #    "v13_3_seedTest10",
 #    "v14"
-    "v44_2",
-    #"v44_2_seed1",
+    #"v44_2",
+    "v44_2_seed1",
     #"v44_2_seed2",
 ]
 
