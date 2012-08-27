@@ -1,3 +1,4 @@
+
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
@@ -86,6 +87,7 @@ namespace HPlus {
     fMetCutBeforeJetCutCounter(eventCounter.addCounter("MET cut Before Jets")),
     fNJetsCounter(eventCounter.addCounter("njets")),
     fMETCounter(eventCounter.addCounter("MET")),
+    //    fRtauAfterMetCounter(eventCounter.Counter("Rtau after MET")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fBTaggingScaleFactorCounter(eventCounter.addCounter("btagging scale factor")),
     fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhi(Tau,MET) upper limit")),
@@ -584,7 +586,10 @@ namespace HPlus {
 //------ Delta phi(tau,MET) cut
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
     hDeltaPhiNoBtagging->Fill(deltaPhi);
-    if (tauData.selectedTauPassesRtau())  hTransverseMassNoBtaggingWithRtau->Fill(transverseMass); 
+    if (tauData.selectedTauPassesRtau()) {
+      hTransverseMassNoBtaggingWithRtau->Fill(transverseMass); 
+      //      increment(fRtauAfterMetCounter);
+    }
 
 //------ b tagging cut
 

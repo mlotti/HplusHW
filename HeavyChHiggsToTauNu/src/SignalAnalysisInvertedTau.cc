@@ -76,6 +76,7 @@ namespace HPlus {
     fNJetsCounter(eventCounter.addCounter("njets")),
     fBTaggingBeforeMETCounter(eventCounter.addCounter("btagging before MET")),
     fMETCounter(eventCounter.addCounter("MET")),
+    fRtauAfterMETCounter(eventCounter.addCounter("Rtau after MET cut")),
     fBjetVetoCounter(eventCounter.addCounter("Veto on hard b jets")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fdeltaPhiTauMET10Counter(eventCounter.addCounter("deltaPhiTauMET lower limit")),
@@ -267,7 +268,7 @@ namespace HPlus {
     hMTBaselineTauIdTopMass5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass5060", "MTBaseLineTauIdTopMass5060", 400, 0., 400.);
     hMTBaselineTauIdTopMass4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTBaseLineTauIdTopMass4050", "MTBaseLineTauIdTopMass4050", 400, 0., 400.);
 
-   
+    hMTInvertedTauIdJetWithRtau  = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJetWithRtau", "MTInvertedTauIdJetWithRtau", 400, 0., 400.);
     hMTInvertedTauIdJet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet", "MTInvertedTauIdJet", 400, 0., 400.);
     hMTInvertedTauIdJet150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet150", "MTInvertedTauIdJet150", 400, 0., 400.);
     hMTInvertedTauIdJet120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet120", "MTInvertedTauIdJet120", 400, 0., 400.);
@@ -871,7 +872,11 @@ namespace HPlus {
     hSelectedTauPhiMetCut->Fill(tauData.getSelectedTau()->phi());
     hSelectedTauRtauMetCut->Fill(tauData.getRtauOfSelectedTau());  
  
-  
+
+    if (tauData.selectedTauPassesRtau())  {
+      hMTInvertedTauIdJetWithRtau->Fill(transverseMass); 
+      increment(fRtauAfterMETCounter); 
+    } 
    // mt for inverted tau before b tagging
     hMTInvertedTauIdJet->Fill(transverseMass); 
     if ( tauData.getSelectedTau()->pt() > 150  ) hMTInvertedTauIdJet150->Fill(transverseMass); 

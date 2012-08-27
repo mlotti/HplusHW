@@ -142,6 +142,7 @@ namespace HPlus {
     Count fNJetsCounter;
     Count fBTaggingBeforeMETCounter;
     Count fMETCounter;
+    Count fRtauAfterMETCounter;
     Count fBjetVetoCounter;
     Count fBTaggingCounter;
     Count fDeltaPhiTauMETCounter;
@@ -350,6 +351,7 @@ namespace HPlus {
     WrappedTH1 *hMTInvertedTauIdPhi5060;
     WrappedTH1 *hMTInvertedTauIdPhi4050;
 
+    WrappedTH1 *hMTInvertedTauIdJetWithRtau;
     WrappedTH1 *hMTInvertedTauIdJet;
     WrappedTH1 *hMTInvertedTauIdJet150;
     WrappedTH1 *hMTInvertedTauIdJet120;

@@ -76,6 +76,7 @@ namespace HPlus {
       Count fMuonVetoCounter;
       Count fMETCounter;
       Count fNJetsCounter;
+      //      Count fRtauAfterMetCounter;
       Count fBTaggingCounter;
       Count fDeltaPhiCounter;
       Count fFakeMETVetoCounter;

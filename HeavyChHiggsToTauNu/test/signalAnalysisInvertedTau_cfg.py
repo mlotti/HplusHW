@@ -15,9 +15,6 @@ puweight = "Run2011A+B"
 
 ##########
 # Flags for additional signal analysis modules
-# Perform the signal analysis with all tau ID algorithms in addition
-# to the "golden" analysis
-doAllTauIds = False
 
 # Apply summer PAS style cuts
 doSummerPAS = False # Rtau>0, MET>70
@@ -54,8 +51,8 @@ doTauEmbeddingLikePreselection = False
 # Apply beta cut for jets to reject PU jets
 betaCutForJets = 0.2 # Disable by setting to 0.0; if you want to enable, set to 0.2
 
-#########
-# Flags for options in the signal analysis
+######### 
+#Flags for options in the signal analysis
 
 # Keep / Ignore prescaling for data (suppresses greatly error messages 
 # in datasets with or-function of triggers)
@@ -69,6 +66,7 @@ doFillTree = False
 myHistogramAmbientLevel = "Debug"
 
 # Apply trigger scale factor or not
+
 applyTriggerScaleFactor = True
 
 PF2PATVersion = "PFlow" # For normal PF2PAT
@@ -100,20 +98,20 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.addTauIsolationContinuousVariation([])
 #myOptimisation.addRtauVariation([0.0, 0.7])
 #myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
-myOptimisation.addJetEtVariation([20.0, 30.0])
+#myOptimisation.addJetEtVariation([20.0, 30.0])
 #myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
-#myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
-#myOptimisation.addBJetDiscriminatorVariation([0.679, 0.244])
+myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
+#myOptimisation.addBJetLeadingDiscriminatorVariation([0.898, 0.679])
+#myOptimisation.addBJetSubLeadingDiscriminatorVariation([0.679, 0.244])
 #myOptimisation.addBJetEtVariation([])
-myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
-myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
-#myOptimisation.addTopRecoVatiation(["None"]) # Valid options: None, chi, std, Wselection
+#myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
+#myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
+#myOptimisation.addTopRecoVariation(["None","chi"]) # Valid options: None, chi, std, Wselection
 myOptimisation.disableMaxVariations()
 if doOptimisation:
     doSystematics = True # Make sure that systematics are run
     doFillTree = False # Make sure that tree filling is disabled or root file size explodes
     myHistogramAmbientLevel = "Vital" # Set histogram level to least histograms to reduce output file sizes
-    # FIXME add here "light' mode running
 
 ################################################################################
 
@@ -143,6 +141,7 @@ process.source = cms.Source('PoolSource',
 #    dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
 
+
      "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_34_1_YeG.root",
      "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_39_1_egt.root",
      "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_8_1_N9K.root",
@@ -171,12 +170,47 @@ process.source = cms.Source('PoolSource',
      "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_2_1_sW6.root",
      "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_14_1_jeq.root",
      "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_6_1_3fp.root",
-     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_26_1_RrQ.root",
-     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_18_1_4Fc.root",
-     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_22_1_JnR.root",
-     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_31_1_hNk.root",
-     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_28_1_c4O.root"
+     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_26_1_RrQ.root"
+#     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_18_1_4Fc.root",
+#     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_22_1_JnR.root",
+#     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_31_1_hNk.root",
+#     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_28_1_c4O.root"
     
+
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_34_1_YeG.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_39_1_egt.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_8_1_N9K.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_35_1_qIb.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_29_1_uO4.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_9_1_OVD.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_12_1_epl.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_20_1_X0Q.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_37_1_IVo.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_33_1_Zry.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_7_1_I5X.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_15_1_28m.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_24_1_yX8.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_30_1_EUo.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_25_1_NoY.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_38_1_hgD.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_27_1_vg1.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_19_1_RBQ.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_1_1_de4.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_17_1_LnY.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_44_1_uJn.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_40_1_N6N.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_5_1_Hkv.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_46_1_7Z0.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_49_1_uOC.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_2_1_sW6.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_14_1_jeq.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_6_1_3fp.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_26_1_RrQ.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_18_1_4Fc.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_22_1_JnR.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_31_1_hNk.root",
+     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M120_Fall11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11/867f8948ab405c5cced92453543fca46/pattuple_28_1_c4O.root"
+
 
     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau_173236-173692_2011A_Nov08/Tau/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_173236-173692_2011A_Nov08//d7b7dcb6c55f2b2177021b8423a82913/pattuple_10_1_9l2.root",
     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau_175860-180252_2011B_Nov19/Tau/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_175860-180252_2011B_Nov19//28e7e0ab56ad4146eca1efa805cd10f4/pattuple_100_1_jnU.root",
@@ -191,14 +225,14 @@ if options.tauEmbeddingInput != 0:
         raise Exception("In tau embedding input mode, set also doPat=1")
 
     process.source.fileNames = [
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_2_X/SingleMu_165088-166150_Prompt/SingleMu/PromptReco_v4_AOD_165088_tauembedding_embedding_v13/9a509078f648b588515c15f2e17e813c/embedded_19_1_YAU.root"
+        "file:/mnt/flustre/wendland/embedded_latest.root"
         ]
-    process.maxEvents.input = 10
+    process.maxEvents.input = 100
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 if options.tauEmbeddingInput != 0:
-    process.GlobalTag.globaltag = "START42_V13::All"
+    process.GlobalTag.globaltag = "START44_V13::All"
 print "GlobalTag="+process.GlobalTag.globaltag.value()
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
@@ -225,6 +259,7 @@ param.overrideTriggerFromOptions(options)
 param.trigger.triggerSrc.setProcessName(dataVersion.getTriggerProcess())
 # Set tau selection mode to 'standard'
 #param.setAllTauSelectionOperatingMode('standard')
+#
 param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
 
 # Set tau sources to trigger matched tau collections
@@ -254,7 +289,8 @@ if options.tauEmbeddingInput != 0:
     tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, options, dataVersion)
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, options, dataVersion)
     if tauEmbeddingFinalizeMuonSelection:
-        applyIsolation = not doTauEmbeddingMuonSelectionScan
+        #applyIsolation = not doTauEmbeddingMuonSelectionScan
+        applyIsolation = False
         additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
                                                                                    enableIsolation=applyIsolation))
 if doBTagTree:
@@ -264,6 +300,8 @@ if doBTagTree:
     param.bTagging.discriminatorCut = cms.untracked.double(-999)
     param.GlobalMuonVeto.MuonPtCut = cms.untracked.double(999)
 
+
+
 # Signal analysis module for the "golden analysis"
 import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysisInvertedTau as signalAnalysis
 process.signalAnalysis = signalAnalysis.createEDFilter(param)
@@ -271,49 +309,34 @@ if not doFillTree:
     process.signalAnalysis.Tree.fill = cms.untracked.bool(False)
 process.signalAnalysis.histogramAmbientLevel = myHistogramAmbientLevel
 
+if options.tauEmbeddingInput != 0:
+    process.signalAnalysis.tauEmbeddingStatus = True
+
 # process.signalAnalysis.GlobalMuonVeto = param.NonIsolatedMuonVeto
 # Change default tau algorithm here if needed
 #process.signalAnalysis.tauSelection.tauSelectionHPSTightTauBased # HPS Tight is the default
 
 # Btagging DB
-
-
-if False: #FIXME
-    process.load("CondCore.DBCommon.CondDBCommon_cfi")
-    #MC measurements
-    process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
-    process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
-    #Data measurements
-    process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
-    process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
-    #User DB for btag eff
-    btagDB = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
-    if options.runOnCrab != 0:
-        btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
-    process.CondDBCommon.connect = btagDB
-    process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
-    process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
+process.load("CondCore.DBCommon.CondDBCommon_cfi")
+#MC measurements 
+process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
+process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
+#Data measurements
+process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
+process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
+#User DB for btag eff
+btagDB = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
+if options.runOnCrab != 0:
+    print "BTagDB: Assuming that you are running on CRAB"
+    btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
+else:
+    print "BTagDB: Assuming that you are not running on CRAB (if you are running on CRAB, add to job parameters in multicrab.cfg runOnCrab=1)"
+process.CondDBCommon.connect = btagDB
+process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
+process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
     
-if False:
-    process.load("CondCore.DBCommon.CondDBCommon_cfi")
-    #MC measurements
-    process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
-    process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
-    #Data measurements
-    process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
-    process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
-    #User DB for btag eff
-    btagDB = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
-    if options.runOnCrab != 0:
-        print "BTagDB: Assuming that you are running on CRAB"
-        btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
-    else:
-        print "BTagDB: Assuming that you are not running on CRAB (if you are running on CRAB, add to job parameters in multicrab.cfg runOnCrab=1)"
-        process.CondDBCommon.connect = btagDB
-        process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
-        process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
+param.bTagging.UseBTagDB  = cms.untracked.bool(False)
 
-param.bTagging.UseBTagDB  = cms.untracked.bool(False) # FIXME: True does not work with systematics! (some clash with condDB betweeen btag and JES)
 
 
 # Add type 1 MET
@@ -349,6 +372,10 @@ print "TauVetoSelection src:", process.signalAnalysis.vetoTauSelection.tauSelect
 print "TauSelection isolation:", process.signalAnalysis.tauSelection.isolationDiscriminator.value()
 print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode.value()
 print "VetoTauSelection src:", process.signalAnalysis.vetoTauSelection.tauSelection.src.value()
+print "Beta cut: ", process.signalAnalysis.jetSelection.betaCutSource.value(), process.signalAnalysis.jetSelection.betaCutDirection.value(), process.signalAnalysis.jetSelection.betaCut.value()
+print "electrons: ", process.signalAnalysis.GlobalElectronVeto
+print "muons: ", process.signalAnalysis.GlobalMuonVeto
+print "jets: ", process.signalAnalysis.jetSelection
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
@@ -535,32 +562,6 @@ if options.tauEmbeddingInput:
                     additionalCounters=additionalCounters,
                     signalAnalysisCounters=True)
 
-
-################################################################################
-# The signal analysis with different tau ID algorithms
-#
-# Run the analysis for the different tau ID algorithms at the same job
-# as the golden analysis. It is significantly more efficiency to run
-# many analyses in a single job compared to many jobs (this avoids
-# some of the I/O and grid overhead). The fragment below creates the
-# following histogram directories
-# signalAnalysisTauSelectionShrinkingConeCutBased
-# signalAnalysisTauSelectionShrinkingConeTaNCBased
-# signalAnalysisTauSelectionCaloTauCutBased
-# signalAnalysisTauSelectionHPSTightTauBased
-# signalAnalysisTauSelectionCombinedHPSTaNCBased
-#
-# The corresponding Counter directories have "Counters" postfix, and
-# cms.Paths "Path" postfix. The paths are run independently of each
-# other. It is important to give the process.commonSequence for the
-# function, so that it will be run before the analysis module in the
-# Path. Then, in case PAT is run on the fly, the framework runs the
-# analysis module after PAT (and runs PAT only once).
-if doAllTauIds:
-    module = process.signalAnalysis.clone()
-    module.Tree.fill = False
-    param.addTauIdAnalyses(process, dataVersion, "signalAnalysis", module, process.commonSequence, additionalCounters)
-
 ################################################################################
 # The signal analysis with jet energy scale variation
 #
@@ -580,14 +581,17 @@ def addJESVariation(name, doJetUnclusteredVariation):
     module.Tree.fill = False        
     module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
 
+    addJESVariationAnalysis(process, dataVersion, name, "TESPlus",  module, additionalCounters, tauVariationSigma=1.0, postfix=PF2PATVersion)
+    addJESVariationAnalysis(process, dataVersion, name, "TESMinus", module, additionalCounters, tauVariationSigma=-1.0, postfix=PF2PATVersion)
+
     if doJetUnclusteredVariation:
-        addJESVariationAnalysis(process, dataVersion, name, "JESPlusMETPlus",  module, additionalCounters, tauVariationSigma=1.0, jetVariationSigma=1.0, unclusteredVariationSigma=1.0, postfix=PF2PATVersion)
-        addJESVariationAnalysis(process, dataVersion, name, "JESPlusMETMinus",  module, additionalCounters, tauVariationSigma=1.0, jetVariationSigma=1.0, unclusteredVariationSigma=-1.0, postfix=PF2PATVersion)
-        addJESVariationAnalysis(process, dataVersion, name, "JESMinusMETPlus",  module, additionalCounters, tauVariationSigma=-1.0, jetVariationSigma=-1.0, unclusteredVariationSigma=1.0, postfix=PF2PATVersion)
-        addJESVariationAnalysis(process, dataVersion, name, "JESMinusMETMinus",  module, additionalCounters, tauVariationSigma=-1.0, jetVariationSigma=-1.0, unclusteredVariationSigma=-1.0, postfix=PF2PATVersion)
-    else:
-        addJESVariationAnalysis(process, dataVersion, name, "TESPlus",  module, additionalCounters, tauVariationSigma=1.0, postfix=PF2PATVersion)
-        addJESVariationAnalysis(process, dataVersion, name, "TESMinus",  module, additionalCounters, tauVariationSigma=-1.0, postfix=PF2PATVersion)
+        # Do all variations beyond TES
+        addJESVariationAnalysis(process, dataVersion, name, "JESPlus",  module, additionalCounters, jetVariationSigma=1.0, postfix=PF2PATVersion)
+        addJESVariationAnalysis(process, dataVersion, name, "JESMinus", module, additionalCounters, jetVariationSigma=-1.0, postfix=PF2PATVersion)
+        #addJESVariationAnalysis(process, dataVersion, name, "JERPlus",  module, additionalCounters, VariationSigma=1.0, postfix=PF2PATVersion)
+        #addJESVariationAnalysis(process, dataVersion, name, "JERMinus", module, additionalCounters, VariationSigma=-1.0, postfix=PF2PATVersion)
+        addJESVariationAnalysis(process, dataVersion, name, "METPlus",  module, additionalCounters, unclusteredVariationSigma=1.0, postfix=PF2PATVersion)
+        addJESVariationAnalysis(process, dataVersion, name, "METMinus", module, additionalCounters, unclusteredVariationSigma=-1.0, postfix=PF2PATVersion)
 
 if doJESVariation or doSystematics:
     doJetUnclusteredVariation = True
@@ -686,3 +690,6 @@ process.out = cms.OutputModule("PoolOutputModule",
 # useful for debugging purposes)
 #process.outpath = cms.EndPath(process.out)
 
+#f = open("configDump.py", "w")
+#f.write(process.dumpPython())
+#f.close()
