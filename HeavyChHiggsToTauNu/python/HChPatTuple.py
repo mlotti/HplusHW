@@ -103,6 +103,8 @@ class PATBuilder:
             self.process.patSequence = self.addPat(dataVersion, patArgs=pargs, pvSelectionConfig=options.pvSelectionConfig)
     
         # Add event filters if requested
+        if options.tauEmbeddingInput == 1:
+            doHBHENoiseFilter = False
         self.addFilters(dataVersion, self.process.eventPreSelection, doTotalKinematicsFilter, doHBHENoiseFilter, doPhysicsDeclared, patOnTheFly=True)
 
         if options.tauEmbeddingInput != 0:
@@ -156,7 +158,8 @@ class PATBuilder:
             if doPhysicsDeclared:
                 self.counters.extend(HChDataSelection.addPhysicsDeclaredBit(self.process, sequence))
             if doHBHENoiseFilter:
-                self.counters.extend(HChDataSelection.addHBHENoiseFilter(self.process, sequence))
+                #HChDataSelection.addHBHENoiseFilterResultProducer(self.process, sequence) # does not work for embedding (signalAnalysis step)
+                self.counters.extend(HChDataSelection.addHBHENoiseFilter(self.process, sequence)) # does not work for embedding (signalAnalysis step)
         elif dataVersion.isMC() and doTotalKinematicsFilter:
             # TotalKinematicsFilter for managing with buggy LHE+Pythia samples
             if patOnTheFly:

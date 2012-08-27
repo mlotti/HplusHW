@@ -27,6 +27,14 @@ namespace HPlus {
     fBTagging(bTagging), fPassedEvent(passedEvent) {}
   BTagging::Data::~Data() {}
 
+  const bool BTagging::Data::hasGenuineBJets() const {
+    for (edm::PtrVector<pat::Jet>::const_iterator iter = fBTagging->fSelectedJets.begin(); iter != fBTagging->fSelectedJets.end(); ++iter) {
+      int myFlavor = std::abs((*iter)->partonFlavour());
+      if (myFlavor == 5) return true;
+    }
+    return false;
+  }
+
   BTagging::BTaggingScaleFactor::BTaggingScaleFactor() {
 	btagdb = 0;
   }
@@ -254,6 +262,7 @@ namespace HPlus {
     hEta1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_eta", "bjet1_pt", 100, -5., 5.);
     hEta2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_eta", "bjet2_pt", 100, -5., 5.);
     hNumberOfBtaggedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfBtaggedJets", "NumberOfBtaggedJets", 10, 0., 10.);
+    hNumberOfBtaggedJetsIncludingSubLeading = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfBtaggedJetsIncludingSubLeading", "NumberOfBtaggedJetsIncludingSubLeading", 10, 0., 10.);
     
     hScaleFactor = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "scaleFactor", "scaleFactor;b-tag/mistag scale factor;N_{events}/0.05", 100, 0., 5.);
     hMCMatchForPassedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "MCMatchForPassedJets", "MCMatchForPassedJets;;N_{jets}", 3, 0., 3.);
@@ -353,6 +362,8 @@ namespace HPlus {
 
     fSelectedJets.clear();
     fSelectedJets.reserve(jets.size());
+    fSelectedSubLeadingJets.clear();
+    fSelectedSubLeadingJets.reserve(jets.size());
 
     bool bmatchedJet = false;
     bool qmatchedJet = false;
@@ -360,9 +371,7 @@ namespace HPlus {
     bool qMatch = false;
 
     if(btagDB) btagDB->setup(iSetup);
-    
-    edm::PtrVector<pat::Jet> mySelectedLeadingBjets;
-    edm::PtrVector<pat::Jet> mySelectedSubLeadingBjets;
+
     // Calculate 
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
@@ -373,7 +382,6 @@ namespace HPlus {
 	edm::Handle <reco::GenParticleCollection> genParticles;
 	iEvent.getByLabel("genParticles", genParticles);
 
-	
 	for (size_t i=0; i < genParticles->size(); ++i){
 	  const reco::Candidate & p = (*genParticles)[i];
 	  int id = p.pdgId();
@@ -398,24 +406,12 @@ namespace HPlus {
 
 	}
 	//////////////////////////////////////////////
-
-
-
-	for (size_t i=0; i < genParticles->size(); ++i) {
-	  const reco::Candidate & p = (*genParticles)[i];
-	  if (p.status() != 2 ) continue;
-	  //	  if (reco::deltaR(p, iJet->p4()) < 0.2) std::cout << "  id jet   "  <<  p.pdgId()   << std::endl;
-	  if (std::abs(p.pdgId()) == 5) {	    
-	    if (reco::deltaR(p, iJet->p4()) < 0.2) {
-	      bmatchedJet = true;
-	    }
-	  }
-	  if (std::abs(p.pdgId()) < 4 || p.pdgId() == 21 ) {	    
-	    if (reco::deltaR(p, iJet->p4()) < 0.2) {
-	      qmatchedJet = true;
-	    }
-	  }
-	}
+        int myFlavor = std::abs(iJet->partonFlavour());
+        if (myFlavor == 5) {
+          bmatchedJet = true;
+        } else {
+          qmatchedJet = true;
+        }
       }
       if( bmatchedJet )   increment(fTaggedAllRealBJetsSubCount);
 
@@ -462,9 +458,9 @@ namespace HPlus {
       // discriminator cut
       hDiscr->Fill(discr);
       if (discr > fLeadingDiscrCut) {
-        mySelectedLeadingBjets.push_back(iJet);
+        fSelectedJets.push_back(iJet);
       } else if (discr > fSubLeadingDiscrCut){
-        mySelectedSubLeadingBjets.push_back(iJet);
+        fSelectedSubLeadingJets.push_back(iJet);
       } else {
         continue;
       }
@@ -481,23 +477,13 @@ namespace HPlus {
 
     } // end of jet loop
 
-    // Loop over selected leading and subleading b jets
-    for(edm::PtrVector<pat::Jet>::const_iterator iJet = mySelectedLeadingBjets.begin(); iJet != mySelectedLeadingBjets.end(); ++iJet) {
-      fSelectedJets.push_back(*iJet);
-    }
-    if (mySelectedLeadingBjets.size() > 0) {
-      // Fill only, if the bjet with the tighter tag has been found so that histogramming is right
-      for(edm::PtrVector<pat::Jet>::const_iterator iJet = mySelectedSubLeadingBjets.begin(); iJet != mySelectedSubLeadingBjets.end(); ++iJet) {
-        fSelectedJets.push_back(*iJet);
-      }
-    }
-
-    // Obtain and apply scale factor for MC events
+    // Calculate scale factor for MC events
     if (!iEvent.isRealData())
-      applyScaleFactor(jets, fSelectedJets);
+      calculateScaleFactor(jets, fSelectedJets);
 
     // Fill histograms
     hNumberOfBtaggedJets->Fill(fSelectedJets.size());
+    hNumberOfBtaggedJetsIncludingSubLeading->Fill(fSelectedJets.size()+fSelectedSubLeadingJets.size());
     iNBtags = fSelectedJets.size();
 
     ////////////////////////////////
@@ -526,7 +512,37 @@ namespace HPlus {
     return Data(this, passEvent);
   }
 
-  void BTagging::applyScaleFactor(const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
+  int BTagging::analyzeOnlyBJetCount(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets) {
+    edm::PtrVector<pat::Jet> mySelectedLeadingBjets;
+    edm::PtrVector<pat::Jet> mySelectedSubLeadingBjets;
+    // Calculate
+    for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
+      edm::Ptr<pat::Jet> iJet = *iter;
+      float discr = iJet->bDiscriminator(fDiscriminator);
+      // pt cut
+      if(iJet->pt() < fPtCut ) continue;
+      // eta cut
+      if(fabs(iJet->eta()) > fEtaCut ) continue;
+      // discriminator cut
+      if (discr > fLeadingDiscrCut) {
+        mySelectedLeadingBjets.push_back(iJet);
+      } else if (discr > fSubLeadingDiscrCut){
+        mySelectedSubLeadingBjets.push_back(iJet);
+      } else {
+        continue;
+      }
+      if (discr > fMaxDiscriminatorValue)
+        fMaxDiscriminatorValue = discr;
+    } // end of jet loop
+
+    // Calculate scale factor for MC events
+    //if (!iEvent.isRealData())
+      //calculateScaleFactor(jets, mySelectedLeadingBjets);
+
+    return mySelectedLeadingBjets.size();
+  }
+
+  void BTagging::calculateScaleFactor(const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
     // Count number of b jets and light jets
 ////    int nBJetsPassed = 0;
 ////    std::vector<double> fBJetsPassedPt;
@@ -548,44 +564,25 @@ namespace HPlus {
 	if (iJet == *iBjet) myJetTaggedStatus = true;
       }
       if (myJetTaggedStatus) continue; // no double counting
-
-      const reco::GenParticle* myParticle = (*iJet).genParton();
-      if (myParticle == 0) { // no MC match; assume its a light flavor jet
-////	fLightJetsFailedPt.push_back((*iJet).pt());
-	fLightJetsFailedPt.push_back(iJet);
+      // analyze jet flavor
+      int myFlavor = std::abs(iJet->partonFlavour());
+      if (myFlavor == 5) {
+        fBJetsFailedPt.push_back(iJet);
       } else {
-        if (std::abs(myParticle->pdgId()) == 5) {
-////	  fBJetsFailedPt.push_back((*iJet).pt());
-	  fBJetsFailedPt.push_back(iJet);
-        } else {
-////	  fLightJetsFailedPt.push_back((*iJet).pt());
-	  fLightJetsFailedPt.push_back(iJet);
-        }
+        fLightJetsFailedPt.push_back(iJet);
       }
     }
     // Loop over b-tagged jets
     for (edm::PtrVector<pat::Jet>::const_iterator iter = bjets.begin(); iter != bjets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
-      const reco::GenParticle* myParticle = (*iJet).genParton();
-      if (myParticle == 0) {
-////	fLightJetsPassedPt.push_back((*iJet).pt());
-	fLightJetsPassedPt.push_back(iJet);
-////        ++nLightJetsPassed; // no MC match; assume its a light flavor jet
-        //std::cout << "zero pointer genParticle" << std::endl;
-        hMCMatchForPassedJets->Fill(2, 1.0);
+      // analyze jet flavor
+      int myFlavor = std::abs(iJet->partonFlavour());
+      if (myFlavor == 5) {
+        fBJetsPassedPt.push_back(iJet);
+        hMCMatchForPassedJets->Fill(1, 1.0);
       } else {
-        //std::cout << "pid=" << myParticle->pdgId() << std::endl;
-        if (std::abs(myParticle->pdgId()) == 5) {
-////	  fBJetsPassedPt.push_back((*iJet).pt());
-	  fBJetsPassedPt.push_back(iJet);
-////          ++nBJetsPassed;
-          hMCMatchForPassedJets->Fill(0, 1.0);
-        } else {
-////	  fLightJetsPassedPt.push_back((*iJet).pt());
-	  fLightJetsPassedPt.push_back(iJet);
-////          ++nLightJetsPassed;
-          hMCMatchForPassedJets->Fill(1, 1.0);
-        }
+        fLightJetsPassedPt.push_back(iJet);
+        hMCMatchForPassedJets->Fill(2, 1.0);
       }
     }
     // Calculate scalefactor
