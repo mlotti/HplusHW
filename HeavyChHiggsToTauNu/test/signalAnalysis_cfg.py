@@ -187,9 +187,12 @@ if options.tauEmbeddingInput != 0:
         raise Exception("In tau embedding input mode, set also doPat=1")
 
     process.source.fileNames = [
-        "file:/mnt/flustre/wendland/embedded_latest.root"
+        #"file:/mnt/flustre/wendland/embedded_latest.root"
+        "file:/home/wendland/v25_embed/CMSSW_4_4_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/embedded.root"
+        # For testing data
+        #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/SingleMu_Mu_160431-163261_2011A_Nov08/SingleMu/Tauembedding_embedding_v44_2_SingleMu_Mu_160431-163261_2011A_Nov08/c7fbae985f4002d5d76ea04408a27e38/embedded_1_1_Lka.root"
         ]
-    process.maxEvents.input = 100
+    process.maxEvents.input = 10
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -249,6 +252,10 @@ if options.tauEmbeddingInput != 0:
     #tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
     tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, options, dataVersion)
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, options, dataVersion)
+    if dataVersion.isMC():
+        process.muonTriggerFixSequence = cms.Sequence()
+        additionalCounters.extend(tauEmbeddingCustomisations.addMuonTriggerFix(process, dataVersion, process.muonTriggerFixSequence, options))
+        process.commonSequence.replace(process.patSequence, process.muonTriggerFixSequence*process.patSequence)
     if tauEmbeddingFinalizeMuonSelection:
         #applyIsolation = not doTauEmbeddingMuonSelectionScan
         applyIsolation = False

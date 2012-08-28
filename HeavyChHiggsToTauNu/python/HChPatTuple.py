@@ -101,7 +101,7 @@ class PATBuilder:
                 print "Trigger used for tau matching:", pargs["matchingTauTrigger"]
 
             self.process.patSequence = self.addPat(dataVersion, patArgs=pargs, pvSelectionConfig=options.pvSelectionConfig)
-    
+
         # Add event filters if requested
         self.addFilters(dataVersion, self.process.eventPreSelection, doTotalKinematicsFilter, doHBHENoiseFilter, doPhysicsDeclared, patOnTheFly=True)
 
@@ -156,6 +156,7 @@ class PATBuilder:
             if doPhysicsDeclared:
                 self.counters.extend(HChDataSelection.addPhysicsDeclaredBit(self.process, sequence))
             if doHBHENoiseFilter:
+                HChDataSelection.addHBHENoiseFilterResultProducer(self.process, sequence)
                 self.counters.extend(HChDataSelection.addHBHENoiseFilter(self.process, sequence))
         elif dataVersion.isMC() and doTotalKinematicsFilter:
             # TotalKinematicsFilter for managing with buggy LHE+Pythia samples

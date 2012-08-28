@@ -6,7 +6,7 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 #dataVersion = "39Xdata"
 #dataVersion = "311Xredigi"
 dataVersion = "44XmcS6"
-dataVersion = "44Xdata"
+#dataVersion = "44Xdata"
 
 PF2PATVersion = "PFlow"
 
@@ -118,9 +118,15 @@ process.infoPath = addConfigInfo(process, options, dataVersion)
 #)
 #process.commonSequence *= process.firstPrimaryVertex
 
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
 customisations.PF2PATVersion = PF2PATVersion
-muons = "selectedPatMuons"+PF2PATVersion
+
+# FIXME: hack to apply trigger in MC
+if dataVersion.isMC():
+    additionalCounters.extend(customisations.addMuonTriggerFix(process, dataVersion, process.commonSequence, options))
+
+muons = "selectedPatMuons"+PF2PATVersion+"All"
 #muons = customisations.addMuonIsolationEmbedding(process, process.commonSequence, muons)
 isolation = customisations.constructMuonIsolationOnTheFly(muons)
 muons = muons+"Iso"
