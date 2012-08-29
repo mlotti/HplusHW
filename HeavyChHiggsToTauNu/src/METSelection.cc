@@ -51,13 +51,14 @@ namespace HPlus {
 
   METSelection::~METSelection() {}
 
-  METSelection::Data METSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
+  METSelection::Data METSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
     bool passEvent = false;
     edm::Handle<edm::View<reco::MET> > hrawmet;
     iEvent.getByLabel(fRawSrc, hrawmet);
 
     edm::Handle<edm::View<reco::MET> > htype1met;
-    iEvent.getByLabel(fType1Src, htype1met);
+    if (fType1Src.label() != "")
+      iEvent.getByLabel(fType1Src, htype1met);
 
     /*
     edm::Handle<edm::View<reco::MET> > htype2met;
@@ -80,7 +81,7 @@ namespace HPlus {
     // Set the handles, if object available
     if(hrawmet.isValid())
       fRawMET = hrawmet->ptrAt(0);
-    if(htype1met.isValid()) {
+    if(htype1met.isValid() && fType1Src.label() != "") {
       fType1METCorrected.clear();
       fType1MET = htype1met->ptrAt(0);
       fType1METCorrected.push_back(undoJetCorrectionForSelectedTau(fType1MET, selectedTau, allJets, kType1));
@@ -129,7 +130,7 @@ namespace HPlus {
     return Data(this, passEvent);
   }
 
-  reco::MET METSelection::undoJetCorrectionForSelectedTau(const edm::Ptr<reco::MET>& met, const edm::Ptr<pat::Tau>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, Select type) {
+  reco::MET METSelection::undoJetCorrectionForSelectedTau(const edm::Ptr<reco::MET>& met, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets, Select type) {
     /**
      * When the type I/II corrections are done, it is assumed (for
      * simplicity at that point) that the type I correction should be
