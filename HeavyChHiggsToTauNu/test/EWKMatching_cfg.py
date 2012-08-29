@@ -313,11 +313,26 @@ if len(additionalCounters) > 0:
 # ones selected by the golden analysis defined above.
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
 if not doOptimisation:
-    process.signalAnalysisPath = cms.Path(
-        process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
-        process.signalAnalysis *
-        process.PickEvents
-    )
+    if (options.hasMCBJetsFilter != 0):
+        print "Adding bjet filter, setting to",options.hasMCBJetsFilter
+        process.MCbjetFilter = cms.EDFilter("HPlusMCHasBJetFilter",
+            hasBjets = cms.untracked.bool(True)
+        )
+        if (options.hasMCBJetsFilter == -1):
+            process.MCbjetFilter.hasBjets = cms.untracked.bool(False)
+
+        process.signalAnalysisPath = cms.Path(
+            process.MCbjetFilter *
+            process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
+            process.signalAnalysis *
+            process.PickEvents
+        )
+    else:
+        process.signalAnalysisPath = cms.Path(
+            process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
+            process.signalAnalysis *
+            process.PickEvents
+        )
 
 if doMETResolution:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.METResolutionAnalysis_cfi")

@@ -39,8 +39,8 @@ defaultVersions = [
 #    "v13_3_seedTest9",
 #    "v13_3_seedTest10",
 #    "v14"
-    #"v44_2",
-    "v44_2_seed1",
+    "v44_2",
+    #"v44_2_seed1",
     #"v44_2_seed2",
     #"v44_2fix", # for hybrid event production only
     #"v44_2fix_seed1", # for hybrid event production only
@@ -54,6 +54,7 @@ config = {"skim":           {"input": "AOD",                           "config":
           "analysis":       {"input": "tauembedding_embedding_%s",  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau":    {"input": "AOD",                        "config": "tauAnalysis_cfg.py"},
           "signalAnalysis": {"input": "tauembedding_embedding_%s",  "config": "../signalAnalysis_cfg.py"},
+          "EWKMatching":    {"input": "tauembedding_embedding_%s",  "config": "../EWKMatching_cfg.py"},
           "muonAnalysis":   {"input": "tauembedding_skim_v44_1",          "config": "muonAnalysisFromSkim_cfg.py"},
           "caloMetEfficiency": {"input": "tauembedding_skim_v44_1",         "config": "caloMetEfficiency_cfg.py"},
           }
@@ -132,8 +133,8 @@ datasetsSignal = [
 ]
 
 #datasetsData2011 = []
-datasetsMCnoQCD = []
-datasetsMCQCD = []
+#datasetsMCnoQCD = []
+#datasetsMCQCD = []
 datasetsSignal = []
 #datasetsData2011 = datasetsData2011B
 
@@ -209,7 +210,7 @@ def main():
         versions = defaultVersions
 
     tmp = "Processing step %s" % step
-    if step in ["skim", "embedding", "analysis", "signalAnalysis"]:
+    if step in ["skim", "embedding", "analysis", "signalAnalysis","EWKMatching"]:
         inputOutput = "input"
         if step in ["skim", "embedding"]:
             inputOutput = "output"
@@ -234,13 +235,13 @@ def main():
 
 def createTasks(opts, step, version=None):
     crabcfg = "crab.cfg"
-    if step in ["analysis", "analysisTau", "signalAnalysis", "muonAnalysis", "caloMetEfficiency"]:
+    if step in ["analysis", "analysisTau", "signalAnalysis", "muonAnalysis", "caloMetEfficiency","EWKMatching"]:
         crabcfg = "../crab_analysis.cfg"
 
     dirName = opts.midfix
-    if step in ["embedding", "analysis", "signalAnalysis"]:
+    if step in ["embedding", "analysis", "signalAnalysis","EWKMatching"]:
         dirName += "_"+version
-    if step in ["analysis", "signalAnalysis"]:
+    if step in ["analysis", "signalAnalysis","EWKMatching"]:
         dirName += "_"+opts.era.replace("+","")
 
 
@@ -253,7 +254,7 @@ def createTasks(opts, step, version=None):
         datasets.extend(datasetsMCnoQCD)
     else:
     #    datasets.extend(datasetsData2010)
-        if step in ["analysis", "signalAnalysis"]:
+        if step in ["analysis", "signalAnalysis","EWKMatching"]:
             if opts.era == "Run2011A":
                 datasets.extend(datasetsData2011A)
             if opts.era == "Run2011B":
@@ -267,15 +268,15 @@ def createTasks(opts, step, version=None):
         datasets.extend(datasetsMCnoQCD)
         datasets.extend(datasetsMCQCD)
     
-    if step in ["skim", "embedding", "signalAnalysis"]:
+    if step in ["skim", "embedding", "signalAnalysis","EWKMatching"]:
         datasets.extend(datasetsSignal)
 
     dataInput = config[step]["input"]
-    if step in ["analysis", "signalAnalysis"]:
+    if step in ["analysis", "signalAnalysis","EWKMatching"]:
         dataInput = dataInput % version
 
     # Hack for JSON files
-    if step in ["signalAnalysis", "analysisTau", "muonAnalysis", "caloMetEfficiency"]:
+    if step in ["signalAnalysis", "analysisTau", "muonAnalysis", "caloMetEfficiency","EWKMatching"]:
         import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabDatasets as multicrabDatasets
         for dataset in datasets:
             if not "SingleMu" in dataset: # is data
@@ -376,7 +377,7 @@ def createTasks(opts, step, version=None):
         if dataset.isMC():
             dataset.appendArg("puWeightEra="+opts.era)
             dataset.appendArg("runOnCrab=1") # Needed for btag scale factor mechanism
-        if step == "signalAnalysis":
+        if step in ["signalAnalysis","EWKMatching"]:
             for key in dataset.data.keys():
                 if key == "skimConfig":
                     del dataset.data[key]
@@ -403,7 +404,7 @@ def createTasks(opts, step, version=None):
             pass
         
     # Apply the modifications
-    if step in ["analysis", "analysisTau","signalAnalysis"]:
+    if step in ["analysis", "analysisTau","signalAnalysis","EWKMatching"]:
         if step != "signalAnalysis":
             multicrab.appendLineAll("CMSSW.output_file = histograms.root")
         multicrab.forEachDataset(modifyAnalysis)
