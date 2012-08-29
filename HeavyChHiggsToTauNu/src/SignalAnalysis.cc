@@ -381,7 +381,6 @@ namespace HPlus {
     // Apply trigger scale factor here, because it depends only on tau
     TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauData.getSelectedTau()), iEvent.isRealData(), fEventWeight);
     fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
-
     increment(fTriggerScaleFactorCounter);
     hSelectionFlow->Fill(kSignalOrderTauID);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderTauID);
@@ -402,7 +401,6 @@ namespace HPlus {
     hSelectedTauEt->Fill(tauData.getSelectedTau()->pt());
     hSelectedTauEta->Fill(tauData.getSelectedTau()->eta());
     hSelectedTauPhi->Fill(tauData.getSelectedTau()->phi());
-
 
     fAllTausCounterGroup.incrementOneTauCounter();
     fillEWKFakeTausCounters(myTauMatch, kSignalOrderTauID, tauData);
@@ -729,9 +727,10 @@ namespace HPlus {
     fillEWKFakeTausCounters(myTauMatch, kSignalOrderSelectedEvents, tauData);
     hTransverseMass->Fill(transverseMass);
     if (myFakeTauStatus) hEWKFakeTausTransverseMass->Fill(transverseMass);
-    fSFUncertaintiesAfterSelection.setScaleFactorUncertainties(fEventWeight.getWeight(),
-                                                               triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
-                                                               myFakeTauStatus,
+    fSFUncertaintiesAfterSelection.setScaleFactorUncertainties(myFakeTauStatus,
+                                                               fEventWeight.getWeight(),
+                                                               triggerWeight.getEventWeight(),
+                                                               triggerWeight.getEventWeightAbsoluteUncertainty(),
                                                                fFakeTauIdentifier.getFakeTauScaleFactor(myTauMatch, tauData.getSelectedTau()->eta()),
                                                                fFakeTauIdentifier.getFakeTauSystematics(myTauMatch, tauData.getSelectedTau()->eta()),
                                                                btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());

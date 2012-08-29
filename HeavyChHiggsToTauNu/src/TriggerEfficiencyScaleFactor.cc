@@ -99,6 +99,7 @@ namespace HPlus {
 
     // Calculate the scale factor in tau pt bins as data/MC, where
     // data is the luminosity weighted average.
+    std::cout << "Scale factor uncertainties:" << std::endl;
     for(size_t i=0; i<fPtBinLowEdges.size(); ++i) {
       double dataValue = 0;
       double dataUncertaintySquared = 0;
@@ -133,6 +134,8 @@ namespace HPlus {
 
       fScaleValues.push_back(scaleFactor);
       fScaleUncertainties.push_back(scaleFactorAbsoluteUncertainty);
+
+      std::cout << "SF for bin " << fPtBinLowEdges[i] << ": scale factor " << scaleFactor << " +- " << scaleFactorAbsoluteUncertainty << std::endl;
     }
   
     edm::Service<TFileService> fs;

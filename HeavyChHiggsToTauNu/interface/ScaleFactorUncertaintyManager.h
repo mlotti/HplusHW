@@ -20,7 +20,10 @@ namespace HPlus {
     explicit ScaleFactorUncertaintyManager(HistoWrapper& histoWrapper, const std::string& name, const std::string& directory = "");
     ~ScaleFactorUncertaintyManager();
 
-    void setScaleFactorUncertainties(double eventWeight, double triggerSF, bool isFakeTau, double triggerSFAbsUncertainty, double fakeTauSF, double fakeTauAbsUncertainty, double btagSF, double btagSFAbsUncertainty);
+    void setScaleFactorUncertainties(bool isFakeTau, double eventWeight,
+                                     double triggerSF, double triggerSFAbsUncertainty,
+                                     double fakeTauSF, double fakeTauAbsUncertainty,
+                                     double btagSF, double btagSFAbsUncertainty);
 
   private:
      WrappedTH1* hTriggerSF;
