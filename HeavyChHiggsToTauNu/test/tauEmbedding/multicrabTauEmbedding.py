@@ -42,12 +42,15 @@ defaultVersions = [
     #"v44_2",
     "v44_2_seed1",
     #"v44_2_seed2",
+    #"v44_2fix", # for hybrid event production only
+    #"v44_2fix_seed1", # for hybrid event production only
+    #"v44_2fix_seed2", # for hybrid event production only
 ]
 
 # Define the processing steps: input dataset, configuration file, output file
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
 #          "skim_copy":      {"input": "tauembedding_skim_v13",         "config": "copy_cfg.py"}, 
-          "embedding":      {"input": "tauembedding_skim_v44_2", "config": "embed.py",   "output": "embedded.root"},
+          "embedding":      {"input": "tauembedding_skim_v44_2fix", "config": "embed.py",   "output": "embedded.root"},
           "analysis":       {"input": "tauembedding_embedding_%s",  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau":    {"input": "AOD",                        "config": "tauAnalysis_cfg.py"},
           "signalAnalysis": {"input": "tauembedding_embedding_%s",  "config": "../signalAnalysis_cfg.py"},
@@ -129,8 +132,8 @@ datasetsSignal = [
 ]
 
 #datasetsData2011 = []
-#datasetsMCnoQCD = []
-#datasetsMCQCD = []
+datasetsMCnoQCD = []
+datasetsMCQCD = []
 datasetsSignal = []
 #datasetsData2011 = datasetsData2011B
 
@@ -374,8 +377,17 @@ def createTasks(opts, step, version=None):
             dataset.appendArg("puWeightEra="+opts.era)
             dataset.appendArg("runOnCrab=1") # Needed for btag scale factor mechanism
         if step == "signalAnalysis":
+            for key in dataset.data.keys():
+                if key == "skimConfig":
+                    del dataset.data[key]
             dataset.appendArg("tauEmbeddingInput=1")
             dataset.appendArg("doPat=1")
+            if dataset.isData():
+                for key in dataset.data.keys():
+                    if key == "trigger":
+                        del dataset.data[key]
+                dataset.appendArg("triggerMC=1")
+                dataset.appendArg("runOnCrab=1")
 #            if dataset.getName() in datasetsData2011_Run2011A_noEPS:
 #                dataset.appendArg("tauEmbeddingCaloMet=caloMetSum")
     #    if step == "analysisTau":
