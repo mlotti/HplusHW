@@ -37,7 +37,7 @@ def main(myFile):
     #makeQCDValidationPlots(myRootFile, validationSpecs)
     validationSpecs = { "denominator": "METvalidation_CtrlLeg1METAfterStandardSelections",
                         "denominatorTitle": "Basic selections",
-                        "nominator":   "METvalidation_CtrlLeg1METAfterFullTauID",
+                        "nominator":   "METvalidation_CtrlLeg1METAfterFullTauIDMET20",
                         "nominatorTitle": "Basic selections + tau ID (with R_{#tau} cut)",
                         "bins": [8],
                         "title": "QCDfactorised_validation_MET_1D_Full",
@@ -69,7 +69,7 @@ def main(myFile):
                         "ytitle": "A.u. / 20 GeV/c^{2}"
                         }
     #makeQCDValidationPlots(myRootFile, validationSpecs)
-    validationSpecs = { "denominator": "mTvalidation_MtShapesAfterStandardSelection",
+    validationSpecs = { "denominator": "mTvalidation_MtShapesAfterStandardSelectionMET20",
                         "denominatorTitle": "Basic selections",
                         "nominator":   "mTvalidation_MtShapesAfterTauID",
                         "nominatorTitle": "Basic selections + tau ID (with R_{#tau} cut)",
@@ -446,7 +446,7 @@ def makeQCDPurityPlot(myRootFile):
     h1.SetXTitle("#tau-jet candidate p_{T} bin, GeV/c")
     h1.SetYTitle("Purity of selected sample")
     h2 = getHisto(myRootFile,"purity_factorisation_Leg1AfterTopSelection_contractedX")
-    h3 = getHisto(myRootFile,"purity_factorisation_Leg2AfterTauID_contractedX")
+    h3 = getHisto(myRootFile,"purity_factorisation_Leg2AfterTauIDMET20_contractedX")
     # Set styles
     setHistoStyle([h1,h2,h3])
     h1.GetXaxis().SetTitleOffset(1.4)

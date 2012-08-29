@@ -1392,9 +1392,10 @@ class QCDfactorisedColumn(DatacardColumn):
             myShapeModifier.finaliseShape(dest=hTotContractedX)
             myShapeModifier.finaliseShape(dest=hTotContractedXeff)
             if myEfficiency.value() > 0.0:
-                hTotContractedXeff.SetBinError(l,sqrt(pow(hTotContractedXeff.GetBinError(l)*myEfficiency.value(),2)+pow(hTotContractedXeff.GetBinContent(l)*myEfficiency.uncertainty(),2)))
-                hTotContractedXeff.SetBinContent(l,hTotContractedXeff.GetBinContent(l)*myEfficiency.value())
-                #hTotContractedX.Scale(myEfficiency.value()) # FIXME should I also apply uncert of efficiency to weighted shape?
+                for l in range (1, hTotContractedXeff.GetNbinsX()+1):
+                    hTotContractedXeff.SetBinError(l,sqrt(pow(hTotContractedXeff.GetBinError(l)*myEfficiency.value(),2)+pow(hTotContractedXeff.GetBinContent(l)*myEfficiency.uncertainty(),2)))
+                    hTotContractedXeff.SetBinContent(l,hTotContractedXeff.GetBinContent(l)*myEfficiency.value())
+                    #hTotContractedX.Scale(myEfficiency.value()) # FIXME should I also apply uncert of efficiency to weighted shape?
             self._infoHistograms.append(hTotContractedX)
             self._infoHistograms.append(hTotContractedXeff)
             myShapeModifier.addShape(source=hTotContractedXeff,dest=h)
