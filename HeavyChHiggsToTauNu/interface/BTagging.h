@@ -97,6 +97,9 @@ namespace HPlus {
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
 
     int analyzeOnlyBJetCount(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
+    double analyzeOnlyBJetScaleFactor(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets) {
+      analyzeOnlyBJetCount(iEvent,iSetup,jets); return fScaleFactor;
+    }
 
     const std::string getDiscriminator() const { return fDiscriminator; }
 
