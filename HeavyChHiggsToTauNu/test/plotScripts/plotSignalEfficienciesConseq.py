@@ -75,22 +75,22 @@ def doCounters(datasets):
     mainTable = eventCounter.getMainCounterTable()
 
     signalDatasets = [
-        "TTToHplusBWB_M80",
-        "TTToHplusBWB_M90",
-        "TTToHplusBWB_M100",
-        "TTToHplusBWB_M120",
-        "TTToHplusBWB_M140",
-        "TTToHplusBWB_M150",
-        "TTToHplusBWB_M155",
-        "TTToHplusBWB_M160",
-#        "TTToHplusBHminusB_M80",
-#        "TTToHplusBHminusB_M90",
-#        "TTToHplusBHminusB_M100",
-#        "TTToHplusBHminusB_M120",
-#        "TTToHplusBHminusB_M140",
-#        "TTToHplusBHminusB_M150",
-#        "TTToHplusBHminusB_M155",
-#        "TTToHplusBHminusB_M160",
+#        "TTToHplusBWB_M80",
+#        "TTToHplusBWB_M90",
+#        "TTToHplusBWB_M100",
+#        "TTToHplusBWB_M120",
+#        "TTToHplusBWB_M140",
+#        "TTToHplusBWB_M150",
+#        "TTToHplusBWB_M155",
+#        "TTToHplusBWB_M160",
+        "TTToHplusBHminusB_M80",
+        "TTToHplusBHminusB_M90",
+        "TTToHplusBHminusB_M100",
+        "TTToHplusBHminusB_M120",
+        "TTToHplusBHminusB_M140",
+        "TTToHplusBHminusB_M150",
+        "TTToHplusBHminusB_M155",
+        "TTToHplusBHminusB_M160",
         ]
     allName = "All events"
 
@@ -225,7 +225,7 @@ def doCounters(datasets):
                         
     glist = [gtrig, gtau, gveto, gjets, gmet, gbtag, gdphi ]
     
-    opts = {"xmin": 75, "xmax": 165, "ymin": 0.065}
+    opts = {"xmin": 75, "xmax": 165, "ymin": 0.09}
     canvasFrame = histograms.CanvasFrame([histograms.HistoGraph(g, "", "") for g in glist], "SignalEfficiencyConseq", **opts)
     canvasFrame.frame.GetYaxis().SetTitle("Selection efficiency")
     canvasFrame.frame.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
@@ -238,7 +238,16 @@ def doCounters(datasets):
     histograms.addEnergyText()
     histograms.addCmsPreliminaryText()
 
-    legend = histograms.createLegend(x1=0.2, y1=0.35, x2=0.6, y2=0.7)
+    
+    
+    tex5 = ROOT.TLatex(120,0.11,"t#bar{t} -> bH^{#pm}bH^{#pm}")
+#    tex5.SetNDC()
+    tex5.SetTextSize(25)
+    tex5.Draw()
+
+
+
+    legend = histograms.createLegend(x1=0.2, y1=0.36, x2=0.5, y2=0.65)
 
     legend.AddEntry(gtrig,"Trigger", "lp"); 
     legend.AddEntry(gtau, "#tau identification", "lp"); 
