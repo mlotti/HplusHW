@@ -53,7 +53,10 @@ namespace HPlus {
 
   ScaleFactorUncertaintyManager::~ScaleFactorUncertaintyManager() {}
 
-  void ScaleFactorUncertaintyManager::setScaleFactorUncertainties(double eventWeight, double triggerSF, bool isFakeTau, double triggerSFAbsUncertainty, double fakeTauSF, double fakeTauAbsUncertainty, double btagSF, double btagSFAbsUncertainty) {
+  void ScaleFactorUncertaintyManager::setScaleFactorUncertainties(bool isFakeTau, double eventWeight,
+                                                                  double triggerSF, double triggerSFAbsUncertainty,
+                                                                  double fakeTauSF, double fakeTauAbsUncertainty,
+                                                                  double btagSF, double btagSFAbsUncertainty) {
     // To calculate relative uncertainty, use
     //   sqrt(sum_i((N_i * abs_uncert_i)^2)) / sum_i (N_i*w_i)
     //   i.e. sqrt(sum_i((getBinContent(i) * getBinCenter(i))^2) / AbsUncertaintyCounts->GetBinContent(0);
