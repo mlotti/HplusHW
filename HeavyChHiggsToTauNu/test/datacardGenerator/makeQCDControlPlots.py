@@ -14,7 +14,7 @@ def main(myFile):
         raise Exception("Error: Failed to open root file '%s'!"%myRootFile)
     print "Opened file:",myFile
     # Do plots
-    if True:
+    if False    :
         #makeQCDPUdependancyPlot(myRootFile)
         makeQCDNQCDPlot(myRootFile)
         makeQCDPurityPlot(myRootFile)
@@ -24,25 +24,26 @@ def main(myFile):
 
 
     # MET validation plots 1D
-    validationSpecs = { "denominator": "METvalidation_CtrlLeg1METAfterStandardSelections",
-                        "denominatorTitle": "Basic selections",
-                        #"nominator":   "METvalidation_CtrlLeg1METAfterFullTauID",
-                        "nominator":   "METvalidation_CtrlLeg1METAfterTauIDNoRtau",
-                        "nominatorTitle": "Basic selections + tau ID (no R_{#tau} cut)",
-                        "bins": [8],
-                        "title": "QCDfactorised_validation_MET_1D_NoRtau",
-                        "logy": "True",
-                        "ytitle": "A.u. / 20-200 GeV"
-                        }
+    suffix = "MET30"
+    #validationSpecs = { "denominator": "METvalidation_CtrlLeg1METAfterStandardSelections"+suffix,
+                        #"denominatorTitle": "Basic selections",
+                        ##"nominator":   "METvalidation_CtrlLeg1METAfterFullTauID",
+                        #"nominator":   "METvalidation_CtrlLeg1METAfterTauIDNoRtau"+suffix,
+                        #"nominatorTitle": "Basic selections + tau ID (no R_{#tau} cut)",
+                        #"bins": [8],
+                        #"title": "QCDfactorised_validation_MET_1D_NoRtau",
+                        #"logy": "True",
+                        #"ytitle": "A.u. / 20-200 GeV"
+                        #}
     #makeQCDValidationPlots(myRootFile, validationSpecs)
-    validationSpecs = { "denominator": "METvalidation_CtrlLeg1METAfterStandardSelections",
+    validationSpecs = { "denominator": "METvalidation_CtrlLeg1METAfterStandardSelections"+suffix,
                         "denominatorTitle": "Basic selections",
-                        "nominator":   "METvalidation_CtrlLeg1METAfterFullTauIDMET20",
+                        "nominator":   "METvalidation_CtrlLeg1METAfterFullTauID"+suffix,
                         "nominatorTitle": "Basic selections + tau ID (with R_{#tau} cut)",
                         "bins": [8],
                         "title": "QCDfactorised_validation_MET_1D_Full",
                         "logy": "True",
-                        "ytitle": "A.u. / 20-200 GeV"
+                        "ytitle": "A.u. / 10 GeV"
                         }
     makeQCDValidationPlots(myRootFile, validationSpecs)
     # MET validation plots 3D
@@ -58,20 +59,21 @@ def main(myFile):
                         #}
     #makeQCDValidationPlots(myRootFile, validationSpecs)
     # mT validation plots 1D
-    validationSpecs = { "denominator": "mTvalidation_MtShapesAfterStandardSelection",
-                        "denominatorTitle": "Basic selections",
-                        #"nominator":   "mTvalidation_MtShapesAfterTauID",
-                        "nominator":   "mTvalidation_MtShapesAfterTauIDNoRtau",
-                        "nominatorTitle": "Basic selections + tau ID (no R_{#tau} cut)",
-                        "bins": [8],
-                        "title": "QCDfactorised_validation_mT_1D_NoRtau",
-                        "logy": "True",
-                        "ytitle": "A.u. / 20 GeV/c^{2}"
-                        }
+    #validationSpecs = { "denominator": "mTvalidation_MtShapesAfterStandardSelection",
+                        #"denominatorTitle": "Basic selections",
+                        ##"nominator":   "mTvalidation_MtShapesAfterTauID",
+                        #"nominator":   "mTvalidation_MtShapesAfterTauIDNoRtau",
+                        #"nominatorTitle": "Basic selections + tau ID (no R_{#tau} cut)",
+                        #"bins": [8],
+                        #"title": "QCDfactorised_validation_mT_1D_NoRtau",
+                        #"logy": "True",
+                        #"ytitle": "A.u. / 20 GeV/c^{2}"
+                        #}
     #makeQCDValidationPlots(myRootFile, validationSpecs)
-    validationSpecs = { "denominator": "mTvalidation_MtShapesAfterStandardSelectionMET20",
+    validationSpecs = { "denominator": "mTvalidation_MtShapesAfterStandardSelection"+suffix,
                         "denominatorTitle": "Basic selections",
-                        "nominator":   "mTvalidation_MtShapesAfterTauID",
+                        #"nominator":   "mTvalidation_MtShapesAfterStandardSelection",
+                        "nominator":   "mTvalidation_MtShapesAfterTauID"+suffix,
                         "nominatorTitle": "Basic selections + tau ID (with R_{#tau} cut)",
                         "bins": [8],
                         "title": "QCDfactorised_validation_mT_1D_Full",
@@ -231,7 +233,10 @@ def makeQCDValidationPlots(myRootFile,specs):
                         myTotalErrorSquared += pow(myRatio*myWeight,2)
                 myCombinedTotal += myTotal
                 myCombinedTotalErrorSquared += myTotalErrorSquared
-                print "Error: ",sqrt(myTotalErrorSquared/myTotal)*100.0," %"
+                if myTotal > 0:
+                    print "Error: ",sqrt(myTotalErrorSquared/myTotal)*100.0," %"
+                else:
+                    print "Error: -- %"
                 # Get extrema
                 myFactor = 1.1
                 if specs["logy"]:

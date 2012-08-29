@@ -231,8 +231,8 @@ class DataCardGenerator:
         else:
             self._dsetMgrs.append(None)
         if self._doEmbeddingAnalysis:
-            print "***"
-            self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myEmbeddingPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+self._optimisationVariation+"/counters"))
+            #self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myEmbeddingPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+self._optimisationVariation+"/counters")) #FIXME
+            self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myEmbeddingPath+"/multicrab.cfg", counters=self._config.EmbeddingAnalysis+"/counters"))
         else:
             self._dsetMgrs.append(None)
         self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myQCDPath+"/multicrab.cfg", counters=myQCDCounters))
@@ -349,17 +349,30 @@ class DataCardGenerator:
                                                    QCDfactorisedInfo = dg.QCDfactorisedInfo,
                                                    debugMode = self._opts.debugQCD)
                 else:
-                    myColumn = DatacardColumn(label=dg.label,
-                                              landsProcess=dg.landsProcess,
-                                              enabledForMassPoints = dg.validMassPoints,
-                                              datasetType = dg.datasetType,
-                                              rateCounter = dg.rateCounter,
-                                              nuisanceIds = dg.nuisances,
-                                              datasetMgrColumn = myMergedName,
-                                              datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK,
-                                              additionalNormalisationFactor = dg.additionalNormalisation,
-                                              dirPrefix = dg.dirPrefix+self._optimisationVariation,
-                                              shapeHisto = dg.shapeHisto)
+                    if dg.datasetType == "Embedding":
+                        myColumn = DatacardColumn(label=dg.label,
+                                                  landsProcess=dg.landsProcess,
+                                                  enabledForMassPoints = dg.validMassPoints,
+                                                  datasetType = dg.datasetType,
+                                                  rateCounter = dg.rateCounter,
+                                                  nuisanceIds = dg.nuisances,
+                                                  datasetMgrColumn = myMergedName,
+                                                  datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK,
+                                                  additionalNormalisationFactor = dg.additionalNormalisation,
+                                                  dirPrefix = dg.dirPrefix, # FIXME
+                                                  shapeHisto = dg.shapeHisto)
+                    else:
+                        myColumn = DatacardColumn(label=dg.label,
+                                                  landsProcess=dg.landsProcess,
+                                                  enabledForMassPoints = dg.validMassPoints,
+                                                  datasetType = dg.datasetType,
+                                                  rateCounter = dg.rateCounter,
+                                                  nuisanceIds = dg.nuisances,
+                                                  datasetMgrColumn = myMergedName,
+                                                  datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK,
+                                                  additionalNormalisationFactor = dg.additionalNormalisation,
+                                                  dirPrefix = dg.dirPrefix+self._optimisationVariation,
+                                                  shapeHisto = dg.shapeHisto)
                 # Disable non-active QCD measurements
                 if dg.datasetType == "QCD factorised" and self._QCDMethod == DatacardQCDMethod.INVERTED:
                     myColumn.disable()

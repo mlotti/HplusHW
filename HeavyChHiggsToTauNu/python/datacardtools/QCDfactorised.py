@@ -617,6 +617,15 @@ class QCDfactorisedCalculator():
     def getLeg2Efficiency(self,idx,idy=-1,idz=-1):
         return self._getEfficiency(self._leg2Counts, self._basicCount,idx,idy,idz)
 
+    def getLeg2EWKMCCounts(self,idx,idy=-1,idz=-1):
+        return self._leg2Counts.getMCCount(idx,idy,idz)
+
+    def getQCDBasicCounts(self,idx,idy=-1,idz=-1):
+        return self._basicCount.getQCDCount(idx,idy,idz)
+
+    def getLeg2StatUncertainty(self,idx,idy=-1,idz=-1):
+        return sqrt(pow(self._leg2Counts.getMCStatError(idx,idy,idz),2)+pow(self._leg2Counts.getDataError(idx,idy,idz),2))
+
     def _getEfficiency(self,nominator,denominator,idx,idy=-1,idz=-1):
         myValue = -1.0
         myError = 0.0
@@ -1274,6 +1283,27 @@ class QCDfactorisedColumn(DatacardColumn):
                              luminosity=luminosity,
                              assumedMCEWKSystUncertainty=self._assumedMCEWKSystUncertainty)
 
+    def getEWKMCRelativeSystematicUncertainty(self,tauPtBin):
+        myTauTrgUncertainty = 0.0
+        if tauPtBin == 1:
+            myTauTrgUncertainty = 0.061 / 0.92
+        elif tauPtBin == 2:
+            myTauTrgUncertainty = 0.11 / 0.91
+        elif tauPtBin == 3 or tauPtBin == 4:
+            myTauTrgUncertainty = 0.13 / 1.00
+        elif tauPtBin <=8:
+            myTauTrgUncertainty = 0.34 / 0.91
+        else:
+            raise Exception("tau trigger scale factor uncertainty not defined for tau pt bin ",tauPtBin)
+        # tau trg uncert + trg MET leg uncert + tauID + ES + btag
+        # i.e. tau trg uncert (+) 16.6 %
+        myRelativeSystUncertainty = sqrt(pow(myTauTrgUncertainty,2)
+                                         +pow(0.10,2) # trg MET leg
+                                         +pow(0.10,2) # tau ID (take into account a portion of fake taus)
+                                         +pow(0.07,2) # energy scale
+                                         +pow(0.05,2)) # btagging
+        return myRelativeSystUncertainty
+
     def _createShapeHistogram(self, config, dsetMgr, QCDCalculator, QCDCount, luminosity, histoSpecs, title, histoDir, histoName, saveDetailedInfo = False):
         # Create empty shape histogram
         myShapeModifier = ShapeHistoModifier(histoSpecs)
@@ -1317,6 +1347,10 @@ class QCDfactorisedColumn(DatacardColumn):
                     myFullHistoName = "%s/%s%s"%(histoDir,histoName,myFactorisationSuffix)
                     hMtData = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumn, myFullHistoName, luminosity)
                     hMtMCEWK = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumnForQCDMCEWK, myFullHistoName, luminosity)
+                    # Add proper systematics to shape for MC EWK
+                    for l in range (0, hMtMCEWK.GetNbinsX()+2):
+                        myAbsSystUncertainty = self.getEWKMCRelativeSystematicUncertainty(i)* hMtMCEWK.GetBinContent(l)
+                        hMtMCEWK.SetBinError(l,sqrt(pow(hMtMCEWK.GetBinError(l),2) + pow(myAbsSystUncertainty,2)))
                     if self._debugMode:
                         print "  QCDfactorised / %s: bin%s, data=%f, MC EWK=%f, QCD=%f"%(title,myFactorisationSuffix,hMtData.Integral(0,hMtData.GetNbinsX()+1),hMtMCEWK.Integral(0,hMtMCEWK.GetNbinsX()+1),hMtData.Integral(0,hMtData.GetNbinsX()+1)-hMtMCEWK.Integral(0,hMtMCEWK.GetNbinsX()+1))
                     # Obtain empty histograms
@@ -1352,8 +1386,15 @@ class QCDfactorisedColumn(DatacardColumn):
                     # Multiply by efficiency of leg 2 (tau leg)
                     myEfficiency = QCDCalculator.getLeg2Efficiency(i,j,k)
                     if myEfficiency.value() > 0.0:
+                        myMCEWKLeg2Counts = QCDCalculator.getLeg2EWKMCCounts(i,j,k)
+                        myLeg2Stat = QCDCalculator.getLeg2StatUncertainty(i,j,k)
+                        myBasicCounts = QCDCalculator.getQCDBasicCounts(i,j,k).value()
                         for l in range(1,hMtBin.GetNbinsX()+1):
-                            hMtBin.SetBinError(l,sqrt(pow(hMtBin.GetBinError(l)*myEfficiency.value(),2)+pow(hMtBin.GetBinContent(l)*myEfficiency.uncertainty(),2)))
+                            # the mT bin already contains stat + syst
+                            myStatUncertaintySquared = pow(myLeg2Stat,2)
+                            mySystUncertaintySquared = pow(myMCEWKLeg2Counts*self.getEWKMCRelativeSystematicUncertainty(i),2)
+                            hMtBin.SetBinError(l,sqrt(pow(hMtBin.GetBinError(l)*myEfficiency.value(),2)
+                                                     +pow(hMtBin.GetBinContent(l) / myBasicCounts,2)*(myStatUncertaintySquared+mySystUncertaintySquared)))
                             hMtBin.SetBinContent(l,hMtBin.GetBinContent(l)*myEfficiency.value())
                         if saveDetailedInfo:
                             hMtBinData.Scale(myEfficiency.value()) #FIXME
@@ -1364,7 +1405,7 @@ class QCDfactorisedColumn(DatacardColumn):
                     if self._debugMode:
                         print "  QCDfactorised / %s shape: bin %d_%d_%d, eff=%f, eff*QCD=%f"%(title,i,j,k,myEfficiency.value(),hMtBin.Integral())
                     # Add to total shape histogram
-                    #myShapeModifier.addShape(source=hMtBin,dest=h) # important to do before handling negative bins
+                    myShapeModifier.addShape(source=hMtBin,dest=h) # important to do before handling negative bins
                     myShapeModifier.addShape(source=hMtBin,dest=hTotContractedX)
                     # Remove negative bins, but retain original normalisation
                     for a in range(1,hMtBin.GetNbinsX()+1):
@@ -1393,12 +1434,13 @@ class QCDfactorisedColumn(DatacardColumn):
             myShapeModifier.finaliseShape(dest=hTotContractedXeff)
             if myEfficiency.value() > 0.0:
                 for l in range (1, hTotContractedXeff.GetNbinsX()+1):
+                    # Make sure that uncertainty from efficiency is propagated to final shape
+                    # Systematics has already been applied on MC EWK; they are assumed to cancel out on tau leg efficiency
                     hTotContractedXeff.SetBinError(l,sqrt(pow(hTotContractedXeff.GetBinError(l)*myEfficiency.value(),2)+pow(hTotContractedXeff.GetBinContent(l)*myEfficiency.uncertainty(),2)))
                     hTotContractedXeff.SetBinContent(l,hTotContractedXeff.GetBinContent(l)*myEfficiency.value())
-                    #hTotContractedX.Scale(myEfficiency.value()) # FIXME should I also apply uncert of efficiency to weighted shape?
             self._infoHistograms.append(hTotContractedX)
             self._infoHistograms.append(hTotContractedXeff)
-            myShapeModifier.addShape(source=hTotContractedXeff,dest=h)
+            #myShapeModifier.addShape(source=hTotContractedXeff,dest=h)
         self._infoHistograms.append(hTot)
         # Finalise and return
         myShapeModifier.finaliseShape(dest=h)
@@ -1451,6 +1493,10 @@ class QCDfactorisedColumn(DatacardColumn):
                     myFullHistoName = "%s/%s%s"%(histoDir,histoName,myFactorisationSuffix)
                     hMtData = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumn, myFullHistoName, luminosity)
                     hMtMCEWK = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumnForQCDMCEWK, myFullHistoName, luminosity)
+                    # Add MC EWK systematics
+                    for l in range (0, hMtMCEWK.GetNbinsX()+2):
+                        myAbsSystUncertainty = self.getEWKMCRelativeSystematicUncertainty(i)* hMtMCEWK.GetBinContent(l)
+                        hMtMCEWK.SetBinError(l,sqrt(pow(hMtMCEWK.GetBinError(l),2) + pow(myAbsSystUncertainty,2)))
                     # Obtain empty histograms
                     myOutHistoName = "QCDFact_%s_QCD_bin%s"%(title,myFactorisationSuffix)
                     hMtBin = myShapeModifier.createEmptyShapeHistogram(myOutHistoName)
@@ -1467,14 +1513,14 @@ class QCDfactorisedColumn(DatacardColumn):
                     self._infoHistograms.append(hMtBin)
             # Finalise
             # Remove negative bins, but retain original normalisation
-            for a in range(1,hMtBin.GetNbinsX()+1):
-                if h.GetBinContent(a) < 0.0:
-                    #print WarningStyle()+"Warning: QCD factorised"+NormalStyle()+" in mT shape bin %d,%d,%d, histo bin %d is negative (%f / tot:%f), it is set to zero but total normalisation is maintained"%(i,j,k,a,hMtBin.GetBinContent(a),hMtBin.Integral())
-                    myIntegral = hMtBin.Integral()
-                    h.SetBinContent(a,0.0)
-                    h.SetBinError(a,0.0)
-                    if (h.Integral() > 0.0):
-                        h.Scale(myIntegral / h.Integral())
+            #for a in range(1,hMtBin.GetNbinsX()+1):
+                #if h.GetBinContent(a) < 0.0:
+                    ##print WarningStyle()+"Warning: QCD factorised"+NormalStyle()+" in mT shape bin %d,%d,%d, histo bin %d is negative (%f / tot:%f), it is set to zero but total normalisation is maintained"%(i,j,k,a,hMtBin.GetBinContent(a),hMtBin.Integral())
+                    #myIntegral = hMtBin.Integral()
+                    #h.SetBinContent(a,0.0)
+                    #h.SetBinError(a,0.0)
+                    #if (h.Integral() > 0.0):
+                        #h.Scale(myIntegral / h.Integral())
             myShapeModifier.finaliseShape(dest=h)
             self._infoHistograms.append(h)
 

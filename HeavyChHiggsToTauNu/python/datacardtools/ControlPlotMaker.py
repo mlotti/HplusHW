@@ -99,13 +99,19 @@ class ControlPlotMaker:
                     # Find column with correct id
                     for c in columnIdList:
                         if g.getLandsProcess() == c:
-                            h = g.getControlPlotByTitle(title)
+                            h = None
+                            if c == 5 or c == 6:
+                                h = myHisto.Clone("dummy%d"%c)
+                                h.Reset()
+                            else:
+                                h = g.getControlPlotByTitle(title)
                             # Add systematic uncertainty (yes, we have here access to full systematics!)
                             mySystError = 0.0
                             for result in g.getNuisanceResults():
                                 if not result.resultIsStatUncertainty(): # ignore stat. uncert.
                                     # take average error from plus and minus if nuisance is shape stat or asymmetric
-                                    mySystError += pow(result.getResultAverage(),2)
+                                    if not ("QCD" in g.getLabel()):
+                                        mySystError += pow(result.getResultAverage(),2)
                                     #print "group",g.getLabel(),"id",result.getId(),"syst",result.getResultAverage()
                             # Apply systematic uncertainty to shape histogram
                             #print "group",g.getLabel(),"syst=",sqrt(mySystError)
@@ -399,9 +405,9 @@ class ControlPlotMaker:
         entry = leg.AddEntry(hData, "Data", "P")
         entry = leg.AddEntry(hSignal, "with H^{#pm}#rightarrow#tau^{#pm}#nu", "L")
         entry = leg.AddEntry(hQCD, "multijets (from data)", "F")
-        entry = leg.AddEntry(hEmbedded, "MC EWK+t#bar{t}", "F")
-        #entry = leg.AddEntry(hEmbedded, "EWK+t#bar{t} #tau (from data)", "F") FIXME
-        #entry = leg.AddEntry(hEWKfake, "EWK+t#bar{t} no-#tau (simul.)", "F") FIXME
+        #entry = leg.AddEntry(hEmbedded, "MC EWK+t#bar{t}", "F")
+        entry = leg.AddEntry(hEmbedded, "EWK+t#bar{t} #tau (from data)", "F")
+        entry = leg.AddEntry(hEWKfake, "EWK+t#bar{t} no-#tau (simul.)", "F")
         entry = leg.AddEntry(hExpected, "stat. #oplus syst. uncert.", "F")
         leg.Draw()
         # Labels
