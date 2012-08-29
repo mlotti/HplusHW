@@ -25,6 +25,7 @@ def main(myFile):
 
     # MET validation plots 1D
     suffix = "MET30"
+    suffix = ""
     #validationSpecs = { "denominator": "METvalidation_CtrlLeg1METAfterStandardSelections"+suffix,
                         #"denominatorTitle": "Basic selections",
                         ##"nominator":   "METvalidation_CtrlLeg1METAfterFullTauID",
