@@ -514,6 +514,7 @@ namespace HPlus {
   }
 
   int BTagging::analyzeOnlyBJetCount(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets) {
+    fScaleFactor = 1.0;
     edm::PtrVector<pat::Jet> mySelectedLeadingBjets;
     edm::PtrVector<pat::Jet> mySelectedSubLeadingBjets;
     // Calculate
@@ -537,8 +538,8 @@ namespace HPlus {
     } // end of jet loop
 
     // Calculate scale factor for MC events
-    //if (!iEvent.isRealData())
-      //calculateScaleFactor(jets, mySelectedLeadingBjets);
+    if (!iEvent.isRealData())
+      calculateScaleFactor(jets, mySelectedLeadingBjets);
 
     return mySelectedLeadingBjets.size();
   }
