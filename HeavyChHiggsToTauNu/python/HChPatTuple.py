@@ -156,7 +156,8 @@ class PATBuilder:
             if doPhysicsDeclared:
                 self.counters.extend(HChDataSelection.addPhysicsDeclaredBit(self.process, sequence))
             if doHBHENoiseFilter:
-                HChDataSelection.addHBHENoiseFilterResultProducer(self.process, sequence)
+                if patOnTheFly:
+                    HChDataSelection.addHBHENoiseFilterResultProducer(self.process, sequence)
                 self.counters.extend(HChDataSelection.addHBHENoiseFilter(self.process, sequence))
         elif dataVersion.isMC() and doTotalKinematicsFilter:
             # TotalKinematicsFilter for managing with buggy LHE+Pythia samples
