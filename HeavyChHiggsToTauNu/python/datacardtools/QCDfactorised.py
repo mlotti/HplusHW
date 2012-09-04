@@ -585,7 +585,7 @@ class QCDfactorisedCalculator():
                                          +pow(0.10,2) # trg MET leg
                                          +pow(0.10,2) # tau ID (take into account a portion of fake taus)
                                          +pow(0.07,2) # energy scale
-                                         +pow(0.05,2)) # btagging
+                                         +pow(0.05,2)    # btagging
                                          +pow(0.10,2)) # xsection
         return myRelativeSystUncertainty
 

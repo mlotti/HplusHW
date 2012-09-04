@@ -99,12 +99,7 @@ class ControlPlotMaker:
                     # Find column with correct id
                     for c in columnIdList:
                         if g.getLandsProcess() == c:
-                            h = None
-                            if c == 5 or c == 6:
-                                h = myHisto.Clone("dummy%d"%c)
-                                h.Reset()
-                            else:
-                                h = g.getControlPlotByTitle(title)
+                            h = g.getControlPlotByTitle(title)
                             # Add systematic uncertainty (yes, we have here access to full systematics!)
                             mySystError = 0.0
                             for result in g.getNuisanceResults():

@@ -166,6 +166,11 @@ namespace HPlus {
     WrappedTH1* hVerticesTriggeredBeforeWeight;
     WrappedTH1* hVerticesTriggeredAfterWeight;
 
+    WrappedTH2* hTauEtaVsPhiAfterMETLegCollinear;
+    WrappedTH2* hTauEtaVsPhiAfterMETLegCollinearOpposite;
+    WrappedTH2* hTauEtaVsPhiAfterMETLegBackToBack;
+    WrappedTH2* hTauEtaVsPhiAfterMETLegBackToBackOpposite;
+
     // Other histograms
     WrappedTH1 *hSelectionFlow;
 
@@ -185,7 +190,7 @@ namespace HPlus {
     WrappedTH3* hLeg2AfterTauIDMET20;
     WrappedTH3* hLeg2AfterTauIDMET30;
 
-    // Mt shapes
+    // Mt shapesstd::vector<WrappedTH1*> hFeatureMinEtaOfSelectedJetToGap;
     std::vector<WrappedTH1*> hMtShapesAfterStandardSelection;
     std::vector<WrappedTH1*> hMtShapesAfterStandardSelectionMET20;
     std::vector<WrappedTH1*> hMtShapesAfterStandardSelectionMET30;
@@ -205,6 +210,7 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlNjets; // Njets in bins of tau pT
     std::vector<WrappedTH1*> hCtrlNjetsMET20; // Njets in bins of tau pT
     std::vector<WrappedTH1*> hCtrlNjetsMET30; // Njets in bins of tau pT
+    std::vector<WrappedTH1*> hCtrlNjetsAfterMET; // Njets in bins of tau pT
     std::vector<WrappedTH1*> hCtrlMETAfterStandardSelections; // MET in bins of tau pT
     std::vector<WrappedTH1*> hCtrlMETAfterStandardSelectionsMET20; // MET in bins of tau pT
     std::vector<WrappedTH1*> hCtrlMETAfterStandardSelectionsMET30; // MET in bins of tau pT
@@ -222,6 +228,23 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlMaxDeltaPhiJetMET; // DeltaPhi(jet/tau,MET) in bins of tau pT
     std::vector<WrappedTH1*> hCtrlTopMass; // top mass in bins of tau pT
 
+    // Feature plots
+    std::vector<WrappedTH1*> hFeatureMinEtaOfSelectedJetToGapAfterBasicSelection;
+    std::vector<WrappedTH1*> hFeatureMinEtaOfSelectedJetToGapAfterMETLeg;
+    std::vector<WrappedTH1*> hFeatureMinEtaOfSelectedJetToGapAfterTauLeg;
+    std::vector<WrappedTH1*> hFeatureEtaSpreadOfSelectedJetsAfterBasicSelection;
+    std::vector<WrappedTH1*> hFeatureEtaSpreadOfSelectedJetsAfterMETLeg;
+    std::vector<WrappedTH1*> hFeatureEtaSpreadOfSelectedJetsAfterTauLeg;
+    std::vector<WrappedTH1*> hFeatureAverageEtaOfSelectedJetsAfterBasicSelection;
+    std::vector<WrappedTH1*> hFeatureAverageEtaOfSelectedJetsAfterMETLeg;
+    std::vector<WrappedTH1*> hFeatureAverageEtaOfSelectedJetsAfterTauLeg;
+    std::vector<WrappedTH1*> hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterBasicSelection; // Try to think of a longer name for sake of self documentation?
+    std::vector<WrappedTH1*> hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterMETLeg;
+    std::vector<WrappedTH1*> hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterTauLeg;
+
+# FIXME  mT in bins of njets
+    
+#FIXME  njets after met
   };
 }
 

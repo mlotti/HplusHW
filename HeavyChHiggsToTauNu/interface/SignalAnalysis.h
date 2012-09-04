@@ -207,6 +207,7 @@ namespace HPlus {
 
     // Scale factor uncertainties
     ScaleFactorUncertaintyManager fSFUncertaintiesAfterSelection;
+    ScaleFactorUncertaintyManager fEWKFakeTausSFUncertaintiesAfterSelection;
 
     // Histograms
     
@@ -230,6 +231,8 @@ namespace HPlus {
     WrappedTH1 *hTransverseMassAfterDeltaPhi160;
     WrappedTH1 *hTransverseMassAfterDeltaPhi130;
     WrappedTH1 *hTransverseMassAfterDeltaPhi90;
+    WrappedTH2 *hTransverseMassVsNjets;
+    WrappedTH2 *hEWKFakeTausTransverseMassVsNjets;
 
     // Full mass histograms
     WrappedTH1 *hFullMass;
@@ -265,6 +268,7 @@ namespace HPlus {
     WrappedTH1* hCtrlIdentifiedElectronPt;
     WrappedTH1* hCtrlIdentifiedMuonPt;
     WrappedTH1* hCtrlNjets;
+    WrappedTH1* hCtrlNjetsAfterMET;
     WrappedTH1* hCtrlSelectedTauPtAfterStandardSelections;
     WrappedTH1* hCtrlSelectedTauEtaAfterStandardSelections;
     WrappedTH1* hCtrlSelectedTauPhiAfterStandardSelections;
@@ -282,7 +286,7 @@ namespace HPlus {
     WrappedTH2* hCtrlJetMatrixAfterMET;
     WrappedTH2* hCtrlJetMatrixAfterMET100;
 
-    // CounterGroups for EWK fake taus (aka non-QCD type 2(
+    // CounterGroups for EWK fake taus (aka non-QCD type 2)
     CounterGroup fEWKFakeTausGroup;
     CounterGroup fAllTausCounterGroup;
     CounterGroup fElectronToTausCounterGroup;

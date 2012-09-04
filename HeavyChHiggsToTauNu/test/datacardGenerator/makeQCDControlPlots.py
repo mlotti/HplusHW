@@ -8,17 +8,23 @@ def main(myFile):
     # Set style
     myStyle = TDRStyle()
     myStyle.setOptStat(False)
+    myStyle.tdrStyle.SetPalette(1)
+    myStyle.tdrStyle.SetPaintTextFormat(".1g")
+    myStyle.tdrStyle.SetTextFont(42)
+    myStyle.tdrStyle.SetTextSize(24)
+    #myStyle.tdrStyle.SetTextSizePixels(20000)
     # Open file
     myRootFile = ROOT.TFile.Open(myFile)
     if myRootFile == None:
         raise Exception("Error: Failed to open root file '%s'!"%myRootFile)
     print "Opened file:",myFile
     # Do plots
-    if False    :
+    if True:
         #makeQCDPUdependancyPlot(myRootFile)
         makeQCDNQCDPlot(myRootFile)
         makeQCDPurityPlot(myRootFile)
         makeQCDEfficiencyPlot(myRootFile)
+        makeQCDShapeBreakDown(myRootFile)
 
     makeTransverseMassPlots(myRootFile, "QCDFact_ShapeSummary_QCDfact_ContractedX", title="QCDfactorised_mtShapes", bins=[8])
 
@@ -60,17 +66,17 @@ def main(myFile):
                         #}
     #makeQCDValidationPlots(myRootFile, validationSpecs)
     # mT validation plots 1D
-    #validationSpecs = { "denominator": "mTvalidation_MtShapesAfterStandardSelection",
-                        #"denominatorTitle": "Basic selections",
+    validationSpecs = { "denominator": "mTvalidation_MtShapesAfterStandardSelection"+suffix,
+                        "denominatorTitle": "Basic selections",
                         ##"nominator":   "mTvalidation_MtShapesAfterTauID",
-                        #"nominator":   "mTvalidation_MtShapesAfterTauIDNoRtau",
-                        #"nominatorTitle": "Basic selections + tau ID (no R_{#tau} cut)",
-                        #"bins": [8],
-                        #"title": "QCDfactorised_validation_mT_1D_NoRtau",
-                        #"logy": "True",
-                        #"ytitle": "A.u. / 20 GeV/c^{2}"
-                        #}
-    #makeQCDValidationPlots(myRootFile, validationSpecs)
+                        "nominator":   "mTvalidation_MtShapesAfterTauIDNoRtau"+suffix,
+                        "nominatorTitle": "Basic selections + tau ID (no R_{#tau} cut)",
+                        "bins": [8],
+                        "title": "QCDfactorised_validation_mT_1D_NoRtau",
+                        "logy": "True",
+                        "ytitle": "A.u. / 20 GeV/c^{2}"
+                        }
+    makeQCDValidationPlots(myRootFile, validationSpecs)
     validationSpecs = { "denominator": "mTvalidation_MtShapesAfterStandardSelection"+suffix,
                         "denominatorTitle": "Basic selections",
                         #"nominator":   "mTvalidation_MtShapesAfterStandardSelection",
@@ -452,7 +458,7 @@ def makeQCDPurityPlot(myRootFile):
     h1.SetXTitle("#tau-jet candidate p_{T} bin, GeV/c")
     h1.SetYTitle("Purity of selected sample")
     h2 = getHisto(myRootFile,"purity_factorisation_Leg1AfterTopSelection_contractedX")
-    h3 = getHisto(myRootFile,"purity_factorisation_Leg2AfterTauIDMET20_contractedX")
+    h3 = getHisto(myRootFile,"purity_factorisation_Leg2AfterTauID_contractedX")
     # Set styles
     setHistoStyle([h1,h2,h3])
     h1.GetXaxis().SetTitleOffset(1.4)
@@ -527,6 +533,38 @@ def makeQCDEfficiencyPlot(myRootFile):
     entry = leg.AddEntry(hLeg1, "#varepsilon_{E_{T}^{miss}+btag+#Delta#phi}", "P")
     entry = leg.AddEntry(hLeg2, "#varepsilon_{#tau ID}", "P")
     leg.Draw()
+    # Labels
+    o=createTopCaption()
+    # Make graph
+    c.Print(title+".png")
+    c.Close()
+
+def makeQCDShapeBreakDown(myRootFile):
+    title = "QCDfactorised_mt_breakdown"
+    c = makeCanvas(title,False)
+    c.SetLeftMargin(0.19)
+    c.SetRightMargin(0.15)
+    c.SetBottomMargin(0.20)
+    # Get plots
+    h = getHisto(myRootFile,"QCDFact_ShapeSummary_TransverseMass_Total")
+    # Set styles
+    setHistoStyle([h])
+    h.GetXaxis().SetTitleOffset(2.2)
+    h.GetYaxis().SetTitleOffset(2.1)
+    for i in range(1,h.GetNbinsX()+1):
+        h.GetXaxis().SetBinLabel(i,h.GetXaxis().GetBinLabel(i).replace("(","").replace("; all",""))
+    for i in range(1,h.GetNbinsY()+1):
+        h.GetYaxis().SetBinLabel(i,h.GetYaxis().GetBinLabel(i).replace("(","").replace(";all","").replace("<50","40-50"))
+    h.GetXaxis().SetLabelSize(20)
+    h.GetXaxis().LabelsOption("v")
+    h.GetYaxis().SetLabelSize(20)
+    h.GetZaxis().SetLabelSize(20)
+    h.SetXTitle("m_{T}(#tau, E_{T}^{miss}), GeV/c^{2}")
+    h.SetYTitle("#tau-jet candidate p_{T}, GeV/c")
+    
+    # Draw
+    h.Draw("COLZ,text")
+    #h.Draw("text")
     # Labels
     o=createTopCaption()
     # Make graph
