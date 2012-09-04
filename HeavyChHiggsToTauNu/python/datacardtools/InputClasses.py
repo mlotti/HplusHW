@@ -299,6 +299,8 @@ class ControlPlotInput:
                  EWKfakeId,
                  signalHistoPath,
                  signalHistoName,
+                 EWKfakeHistoPath,
+                 EWKfakeHistoName,
                  QCDFactNormalisation,
                  QCDFactHistoPath,
                  QCDFactHistoName,
@@ -314,6 +316,8 @@ class ControlPlotInput:
         self.EWKfakeId = EWKfakeId
         self.signalHistoPath = signalHistoPath
         self.signalHistoName = signalHistoName
+        self.EWKfakeHistoPath = EWKfakeHistoPath
+        self.EWKfakeHistoName = EWKfakeHistoName
         self.QCDFactNormalisation = QCDFactNormalisation
         self.QCDFactHistoPath = QCDFactHistoPath
         self.QCDFactHistoName = QCDFactHistoName

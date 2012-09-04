@@ -45,6 +45,10 @@ namespace HPlus {
       const int getHadronicJetCountInFwdDir() const { return fJetSelection->iNHadronicJetsInFwdDir; }
       const bool eventHasJetWithEMFraction07() const { return fJetSelection->bEMFraction07Veto; }
       const bool eventHasJetWithEMFraction08() const { return fJetSelection->bEMFraction08Veto; }
+      const double getMinEtaOfSelectedJetToGap() const { return fJetSelection->fMinEtaOfSelectedJetToGap; }
+      const double getEtaSpreadOfSelectedJets() const { return fJetSelection->fEtaSpreadOfSelectedJets; }
+      const double getAverageEtaOfSelectedJets() const { return fJetSelection->fAverageEtaOfSelectedJets; }
+      const double getAverageSelectedJetsEtaDistanceToTauEta() const { return fJetSelection->fAverageSelectedJetsEtaDistanceToTauEta; }
 
     private:
       const JetSelection *fJetSelection;
@@ -125,6 +129,7 @@ namespace HPlus {
     WrappedTH1 *hSecondJetPhi;
     WrappedTH1 *hThirdJetPhi;
     WrappedTH1 *hFourthJetPhi;
+    WrappedTH1 *hMinEtaOfSelectedJetToGap;
 
     // PU analysis
     WrappedTH1 *hBetaGenuine;
@@ -195,6 +200,10 @@ namespace HPlus {
     bool bEMFraction08Veto;
     bool bEMFraction07Veto;
     float fMinDeltaRToOppositeDirectionOfTau;
+    double fMinEtaOfSelectedJetToGap;
+    double fEtaSpreadOfSelectedJets;
+    double fAverageEtaOfSelectedJets;
+    double fAverageSelectedJetsEtaDistanceToTauEta;
   };
 }
 

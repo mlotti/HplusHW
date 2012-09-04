@@ -13,6 +13,7 @@
 
 #include "Math/GenVector/VectorUtil.h"
 #include <cmath>
+#include "TVector3.h"
 
 #include<algorithm>
 
@@ -90,6 +91,7 @@ namespace HPlus {
     hFourthJetPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "fourthJet_pt", "fourthJet_pt;p_{T} of fourth jet, GeV/c;Events", 120, 0., 600.);
     hFourthJetEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "fourthJet_eta", "fourthJet_eta;#eta of fourth jet;Events", 100, -5., 5.); 
     hFourthJetPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "fourthJet_phi", "fourthJet_phi;#phi of fourth jet;Events", 72, -3.14159, 3.14159); 
+    hMinEtaOfSelectedJetToGap = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "minEtaOfSelectedJetToGap", "minEtaOfSelectedJetToGap;abs(jet #eta - 1.5);Events", 60, 0, 3.0);
 
     // Histograms for PU analysis
     hBetaGenuine = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "betaGenuine", "betaGenuine;#beta variable, PV jets;Events", 100, 0., 1.);
@@ -163,6 +165,10 @@ namespace HPlus {
     fMinDeltaRToOppositeDirectionOfTau = 999.;
     bEMFraction08Veto = false;
     bEMFraction07Veto = false;
+    fMinEtaOfSelectedJetToGap = 999;
+    fEtaSpreadOfSelectedJets = 999;
+    fAverageEtaOfSelectedJets = 999;
+    fAverageSelectedJetsEtaDistanceToTauEta = 999;
 
     bool passEvent = false;
 
@@ -451,6 +457,32 @@ namespace HPlus {
     }
     hMinDeltaRToOppositeDirectionOfTau->Fill(fMinDeltaRToOppositeDirectionOfTau);
 
+    // Calculate minimum distance in eta of a selected jet and the gap between barrel and endcap
+    double myMinEta = 999.0;
+    for(edm::PtrVector<pat::Jet>::const_iterator iter = fSelectedJets.begin(); iter != fSelectedJets.end(); ++iter) {
+      double myValue = std::abs((*iter)->eta() - 1.5);
+      if (myValue < myMinEta)
+        myValue = myMinEta;
+    }
+    fMinEtaOfSelectedJetToGap = myMinEta;
+    hMinEtaOfSelectedJetToGap->Fill(fMinEtaOfSelectedJetToGap);
+    // Calculate the eta range over which the selected jets are spanned; and the average eta of the jets
+    myMinEta = 999.0;
+    myMaxEta = -999.0;
+    TVector3 myMegaJet(0., 0., 0.);
+    for(edm::PtrVector<pat::Jet>::const_iterator iter = fSelectedJets.begin(); iter != fSelectedJets.end(); ++iter) {
+      if ((*iter)->eta() > myMaxEta)
+        myMaxEta = (*iter)->eta();
+      if ((*iter)->eta() < myMinEta)
+        myMinEta = (*iter)->eta();
+      TVector3 myJet((*iter)->px(), (*iter)->py(), (*iter)->pz());
+      myMegaJet += myJet;
+    }
+    fEtaSpreadOfSelectedJets = myMaxEta - myMinEta;
+    fAverageEtaOfSelectedJets = myMegaJet.Eta();
+    fAverageSelectedJetsEtaDistanceToTauEta = std::abs(myMegaJet.Eta - tau->eta());
+
+    // Everything has been done now return
     return Data(this, passEvent);
   }
 }

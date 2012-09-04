@@ -43,6 +43,7 @@ class DataCardGenerator:
         self._columns = []
         self._extractors = []
         self._controlPlotExtractors = []
+        self._controlPlotExtractorsEWKfake = []
         self._QCDMethod = QCDMethod
         self._replaceEmbeddingWithMC = False
         self._doSignalAnalysis = True
@@ -231,8 +232,8 @@ class DataCardGenerator:
         else:
             self._dsetMgrs.append(None)
         if self._doEmbeddingAnalysis:
-            print "***"
-            self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myEmbeddingPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+self._optimisationVariation+"/counters"))
+            #self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myEmbeddingPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+self._optimisationVariation+"/counters")) #FIXME
+            self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myEmbeddingPath+"/multicrab.cfg", counters=self._config.EmbeddingAnalysis+"/counters"))
         else:
             self._dsetMgrs.append(None)
         self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myQCDPath+"/multicrab.cfg", counters=myQCDCounters))
@@ -349,17 +350,30 @@ class DataCardGenerator:
                                                    QCDfactorisedInfo = dg.QCDfactorisedInfo,
                                                    debugMode = self._opts.debugQCD)
                 else:
-                    myColumn = DatacardColumn(label=dg.label,
-                                              landsProcess=dg.landsProcess,
-                                              enabledForMassPoints = dg.validMassPoints,
-                                              datasetType = dg.datasetType,
-                                              rateCounter = dg.rateCounter,
-                                              nuisanceIds = dg.nuisances,
-                                              datasetMgrColumn = myMergedName,
-                                              datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK,
-                                              additionalNormalisationFactor = dg.additionalNormalisation,
-                                              dirPrefix = dg.dirPrefix+self._optimisationVariation,
-                                              shapeHisto = dg.shapeHisto)
+                    if dg.datasetType == "Embedding":
+                        myColumn = DatacardColumn(label=dg.label,
+                                                  landsProcess=dg.landsProcess,
+                                                  enabledForMassPoints = dg.validMassPoints,
+                                                  datasetType = dg.datasetType,
+                                                  rateCounter = dg.rateCounter,
+                                                  nuisanceIds = dg.nuisances,
+                                                  datasetMgrColumn = myMergedName,
+                                                  datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK,
+                                                  additionalNormalisationFactor = dg.additionalNormalisation,
+                                                  dirPrefix = dg.dirPrefix, # FIXME
+                                                  shapeHisto = dg.shapeHisto)
+                    else:
+                        myColumn = DatacardColumn(label=dg.label,
+                                                  landsProcess=dg.landsProcess,
+                                                  enabledForMassPoints = dg.validMassPoints,
+                                                  datasetType = dg.datasetType,
+                                                  rateCounter = dg.rateCounter,
+                                                  nuisanceIds = dg.nuisances,
+                                                  datasetMgrColumn = myMergedName,
+                                                  datasetMgrColumnForQCDMCEWK = myMergedNameForQCDMCEWK,
+                                                  additionalNormalisationFactor = dg.additionalNormalisation,
+                                                  dirPrefix = dg.dirPrefix+self._optimisationVariation,
+                                                  shapeHisto = dg.shapeHisto)
                 # Disable non-active QCD measurements
                 if dg.datasetType == "QCD factorised" and self._QCDMethod == DatacardQCDMethod.INVERTED:
                     myColumn.disable()
@@ -409,7 +423,11 @@ class DataCardGenerator:
             if c.typeIsQCD():
                 myIndex = 3
             # Do mining for datacard columns
-            c.doDataMining(self._config,self._dsetMgrs[myIndex],luminosities[myIndex],myEventCounterTables[myIndex],self._extractors,self._controlPlotExtractors)
+            # check if the column Id is in the list of EWK fake taus
+            if c.getLandsProcess() in self._config.EWKFakeIdList:
+                c.doDataMining(self._config,self._dsetMgrs[myIndex],luminosities[myIndex],myEventCounterTables[myIndex],self._extractors,self._controlPlotExtractorsEWKfake)
+            else:
+                c.doDataMining(self._config,self._dsetMgrs[myIndex],luminosities[myIndex],myEventCounterTables[myIndex],self._extractors,self._controlPlotExtractors)
         print "\nData mining has been finished, results (and histograms) have been ingeniously cached"
 
     ## Closes files in dataset managers
@@ -548,7 +566,7 @@ class DataCardGenerator:
         for i in range(0,len(self._extractors)):
             for j in range(0,len(self._extractors)):
                 if self._extractors[i].isId(self._extractors[j].getId()) and i != j:
-                    print ErrorStyle()+"Error:"+NormalStyle()+" You have defined two nuisances with id='"++"'! The id has to be unique!"
+                    print ErrorStyle()+"Error:"+NormalStyle()+" You have defined two nuisances with id='"+self._extractors[j].getId()+"'! The id has to be unique!"
                     raise Exception()
         # Merge nuisances
         self.mergeNuisances()
@@ -596,3 +614,7 @@ class DataCardGenerator:
                                                histoTitle = c.title,
                                                histoDirs = c.signalHistoPath,
                                                histoNames = c.signalHistoName))
+            self._controlPlotExtractorsEWKfake.append(ControlPlotExtractor(histoSpecs = c.details,
+                                                      histoTitle = c.title,
+                                                      histoDirs = c.EWKfakeHistoPath,
+                                                      histoNames = c.EWKfakeHistoName))

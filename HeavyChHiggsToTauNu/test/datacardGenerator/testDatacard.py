@@ -3,15 +3,16 @@ DataCardName    = 'myDummyTestName'
 Path            = '/home/wendland/data/v25b/freeze_forPREAPP'
 #Path            = '/home/wendland/data/v25b/test3loose'
 #MassPoints      = [80,90,100,120,140,150,155,160]
-MassPoints      = [80,90,120,140,150,155,160]
+MassPoints      = [80,90,100,120,140,150,155,160]
 #MassPoints      = [80,120,160]
-MassPoints      = [120]
+#MassPoints      = [120]
 
 BlindAnalysis   = True
 
 # Specify name of EDFilter or EDAnalyser process that produced the root files
 SignalAnalysis  = "signalAnalysis"
-EmbeddingAnalysis     = None
+#EmbeddingAnalysis     = "signalAnalysisCaloMet60TEff"
+EmbeddingAnalysis     = "signalAnalysisCaloMet60"
 QCDFactorisedAnalysis = "QCDMeasurement"
 QCDInvertedAnalysis = None # FIXME
 
@@ -24,7 +25,7 @@ FakeRateCounter = "EWKfaketaus:SelectedEvents"
 # Options
 OptionMassShape = "TransverseMass"
 #OptionMassShape = "FullMass"
-OptionReplaceEmbeddingByMC = True
+OptionReplaceEmbeddingByMC = False
 OptionIncludeSystematics = True # Set to true if the JES and PU uncertainties were produced
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
 OptionDoControlPlots = True
@@ -60,11 +61,11 @@ elif OptionMassShape == "FullMass":
 
 DataCardName += "_"+OptionMassShape
 
-QCDFactorisedMETShapeHistogramsDimensions = {  "bins": 9,
+QCDFactorisedMETShapeHistogramsDimensions = {  "bins": 10,
                                                "rangeMin": 0.0,
-                                               "rangeMax": 500.0,
+                                               "rangeMax": 100.0,
                                                #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                                               "variableBinSizeLowEdges": [0,20,40,60,80,100,150,200,300], # if an empty list is given, then uniform bin width is used
+                                               "variableBinSizeLowEdges": [0,10,20,30,40,50,60,70,80,90], # if an empty list is given, then uniform bin width is used
                                                "xtitle": "E_{T}^{miss}, GeV/c^{2}",
                                                "ytitle": "Events"}
 
@@ -97,7 +98,7 @@ for mass in MassPoints:
     hhx.setLabel("HH"+str(mass)+"_a")
     hhx.setLandSProcess(-1)
     hhx.setValidMassPoints(myMassList)
-    hhx.setNuisances(["01","03","45","46","47","09","10","17","28","33","34"])
+    hhx.setNuisances(["01","02","03","45","46","47","09","10","17","28","33","34"])
     hhx.setDatasetDefinitions(["TTToHplusBHminusB_M"+str(mass)]),
     DataGroups.append(hhx)
 
@@ -105,7 +106,7 @@ for mass in MassPoints:
     hwx.setLabel("HW"+str(mass)+"_a")
     hwx.setLandSProcess(0)
     hwx.setValidMassPoints(myMassList)
-    hwx.setNuisances(["01","03","45","46","47","09","10","18","28","33","34"])
+    hwx.setNuisances(["01","02","03","45","46","47","09","10","18","28","33","34"])
     hwx.setDatasetDefinitions(["TTToHplusBWB_M"+str(mass)]),
     DataGroups.append(hwx)
 
@@ -118,21 +119,35 @@ if OptionMassShape == "TransverseMass":
         dirPrefix   = QCDFactorisedAnalysis,
         datasetType  = "QCD factorised",
         datasetDefinitions = ["Tau_"],
-        #MCEWKDatasetDefinitions = ["TTJets","WJets","DY","WW","WZ","ZZ","T_","Tbar_"],
-        MCEWKDatasetDefinitions = ["TTJets","W2Jets","W3Jets","W4Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
+        MCEWKDatasetDefinitions = ["TTJets","WJets","DY","WW","WZ","ZZ","T_","Tbar_"],
+        #MCEWKDatasetDefinitions = ["TTJets","W2Jets","DY","WW","WZ","ZZ","T_","Tbar_"],
         nuisances    = ["12","13","40b"],
         QCDfactorisedInfo = { "afterBigboxSource": "factorisation/AfterJetSelection",
                               "afterMETLegSource": "factorisation/Leg1AfterTopSelection",
                               "afterTauLegSource": "factorisation/Leg2AfterTauID",
                               "validationMETShapeSource": ["shape_CtrlLeg1METAfterStandardSelections/CtrlLeg1METAfterStandardSelections",
-                                                            #"shape_CtrlLeg1METAfterTauIDNoRtau/CtrlLeg1METAfterTauIDNoRtau",
-                                                            "shape_CtrlLeg1METAfterFullTauID/CtrlLeg1METAfterFullTauID"],
+                                                           "shape_CtrlLeg1METAfterStandardSelectionsMET20/CtrlLeg1METAfterStandardSelectionsMET20",
+                                                           "shape_CtrlLeg1METAfterStandardSelectionsMET30/CtrlLeg1METAfterStandardSelectionsMET30",
+                                                            "shape_CtrlLeg1METAfterTauIDNoRtau/CtrlLeg1METAfterTauIDNoRtau",
+                                                            "shape_CtrlLeg1METAfterTauIDNoRtauMET20/CtrlLeg1METAfterTauIDNoRtauMET20",
+                                                            "shape_CtrlLeg1METAfterTauIDNoRtauMET30/CtrlLeg1METAfterTauIDNoRtauMET30",
+                                                            "shape_CtrlLeg1METAfterFullTauID/CtrlLeg1METAfterFullTauID",
+                                                            "shape_CtrlLeg1METAfterFullTauIDMET20/CtrlLeg1METAfterFullTauIDMET20",
+                                                            "shape_CtrlLeg1METAfterFullTauIDMET30/CtrlLeg1METAfterFullTauIDMET30",
+                                                            ],
                               "validationMETShapeDetails": QCDFactorisedMETShapeHistogramsDimensions,
                               "basicMtHisto": "shape_MtShapesAfterFullMETLeg/MtShapesAfterFullMETLeg", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
                               "validationMtShapeSource": ["shape_MtShapesAfterStandardSelection/MtShapesAfterStandardSelection",
-                                                           #"shape_MtShapesAfterTauIDNoRtau/MtShapesAfterTauIDNoRtau",
-                                                           "shape_MtShapesAfterTauID/MtShapesAfterTauID"],
-                              "assumedMCEWKSystUncertainty": 0.20,
+                                                          "shape_MtShapesAfterStandardSelectionMET20/MtShapesAfterStandardSelectionMET20",
+                                                          "shape_MtShapesAfterStandardSelectionMET30/MtShapesAfterStandardSelectionMET30",
+                                                           "shape_MtShapesAfterTauIDNoRtau/MtShapesAfterTauIDNoRtau",
+                                                           "shape_MtShapesAfterTauIDNoRtauMET20/MtShapesAfterTauIDNoRtauMET20",
+                                                           "shape_MtShapesAfterTauIDNoRtauMET30/MtShapesAfterTauIDNoRtauMET30",
+                                                           "shape_MtShapesAfterTauID/MtShapesAfterTauID",
+                                                           "shape_MtShapesAfterTauIDMET20/MtShapesAfterTauIDMET20",
+                                                           "shape_MtShapesAfterTauIDMET30/MtShapesAfterTauIDMET30",
+                                                           ],
+                              "assumedMCEWKSystUncertainty": 0.20, # has no effect anymore ...
                               "factorisationMapAxisLabels": ["#tau p_{T}, GeV", "#tau #eta", "N_{vertices}"],
         }
     ))
@@ -175,43 +190,57 @@ DataGroups.append(DataGroup(
 
 if not OptionReplaceEmbeddingByMC:
     # EWK + ttbar with genuine taus
-    EmbeddingIdList = [4,5,6]
+    EmbeddingIdList = [4]
     DataGroups.append(DataGroup(
         label        = "EWK_Tau",
         landsProcess = 4,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Embedding",
-        datasetDefinitions   = ["Data"],
-        dirPrefix   = SignalAnalysis,
+        datasetDefinitions   = ["SingleMu"],
+        dirPrefix   = EmbeddingAnalysis,
         rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01b","03","45","46","47","14","15","16","19","40"]
+        nuisances    = ["01b","03","14","15","16","19","40","48"]
+        #nuisances    = ["01b","03","45","14","15","16","19","40"]
     ))
-    DataGroups.append(DataGroup(
-        label        = "EWK_DY",
-        landsProcess = 5,
-        shapeHisto   = SignalShapeHisto,
-        datasetType  = "Embedding",
-        datasetDefinitions   = ["DYJetsToLL"],
-        dirPrefix   = SignalAnalysis,
-        rateCounter  = SignalRateCounter,
-        validMassPoints = MassPoints,
-        nuisances    = ["01c","03","45","46","47","09","11b","15b","16b","31","33","34","24"]
-    ))
-    DataGroups.append(DataGroup(
-        label        = "EWK_VV",
-        landsProcess = 6,
-        shapeHisto   = SignalShapeHisto,
-        datasetType  = "Embedding",
-        datasetDefinitions   = ["WW"], #,"WZ","ZZ"],
-        dirPrefix   = SignalAnalysis,
-        rateCounter  = SignalRateCounter,
-        validMassPoints = MassPoints,
-        nuisances    = ["01c","03","45","46","47","09","11b","15b","16b","32","33","34","27"]
-    ))
+    
+    #DataGroups.append(DataGroup(
+        #label        = "res_DY.",
+        #landsProcess = 5,
+        #datasetType  = "None",
+        #validMassPoints = MassPoints,
+    #))
+    #DataGroups.append(DataGroup(
+        #label        = "res_WW.",
+        #landsProcess = 6,
+        #datasetType  = "None",
+        #validMassPoints = MassPoints,
+    #))
+    #DataGroups.append(DataGroup(
+        #label        = "EWK_DY",
+        #landsProcess = 5,
+        #shapeHisto   = SignalShapeHisto,
+        #datasetType  = "Embedding",
+        #datasetDefinitions   = ["DYJetsToLL"],
+        #dirPrefix   = SignalAnalysis,
+        #rateCounter  = SignalRateCounter,
+        #validMassPoints = MassPoints,
+        #nuisances    = ["01c","03","45","46","47","09","11b","15b","16b","31","33","34","24"]
+    #))
+    #DataGroups.append(DataGroup(
+        #label        = "EWK_VV",
+        #landsProcess = 6,
+        #shapeHisto   = SignalShapeHisto,
+        #datasetType  = "Embedding",
+        #datasetDefinitions   = ["WW"], #,"WZ","ZZ"],
+        #dirPrefix   = SignalAnalysis,
+        #rateCounter  = SignalRateCounter,
+        #validMassPoints = MassPoints,
+        #nuisances    = ["01c","03","45","46","47","09","11b","15b","16b","32","33","34","27"]
+    #))
 
     # EWK + ttbar with fake taus
-    EWKFakeIdList = [1,7,8]
+    EWKFakeIdList = [1,5,6]
     DataGroups.append(DataGroup(
         label        = "EWK_tt_faketau",
         landsProcess = 1,
@@ -221,29 +250,29 @@ if not OptionReplaceEmbeddingByMC:
         dirPrefix   = SignalAnalysis,
         rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01","04","45","46","47","09","10","28","33","34b","35"]
+        nuisances    = ["01","02","04","45","46","47","09","10","28","33","34b","35"]
     ))
     DataGroups.append(DataGroup(
         label        = "EWK_W_faketau",
-        landsProcess = 7,
+        landsProcess = 5,
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
         datasetDefinitions   = ["WJets"],
         dirPrefix   = SignalAnalysis,
         rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01","04","45","46","47","09","11","29","33","34b","37"]
+        nuisances    = ["01","02","04","45","46","47","09","11","29","33","34b","37"]
     ))
     DataGroups.append(DataGroup(
         label        = "EWK_t_faketau",
-        landsProcess = 8,
+        landsProcess = 6,
         shapeHisto   = FakeShapeHisto,
         datasetType  = "Signal",
         datasetDefinitions   = ["T_", "Tbar_"],
         dirPrefix   = SignalAnalysis,
         rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01","04","45","46","47","09","10","30","33","34b","38"]
+        nuisances    = ["01","02","04","45","46","47","09","10","30","33","34b","38"]
     ))
 else:
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
@@ -306,7 +335,6 @@ DataGroups.append(DataGroup(
 #
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import Nuisance
 ReservedNuisances = []
-ReservedNuisances.append(["02", "reserved for leptonic"])
 ReservedNuisances.append(["05", "reserved for leptonic"])
 ReservedNuisances.append(["06", "reserved for leptonic"])
 ReservedNuisances.append(["08", "reserved for leptonic"])
@@ -320,21 +348,20 @@ Nuisances = []
 
 Nuisances.append(Nuisance(
     id            = "01",
-    label         = "tau+MET trg scale factor",
+    label         = "tau+MET trg tau part",
     distr         = "lnN",
     function      = "ScaleFactor",
     histoDir      = ["ScaleFactorUncertainties"],
     histograms    = ["TriggerScaleFactorAbsUncert_AfterSelection"],
     normalisation = ["TriggerScaleFactorAbsUncertCounts_AfterSelection"],
-    #addUncertaintyInQuadrature = 0.10 # MET leg uncertainty
 ))
 
 Nuisances.append(Nuisance(
-    id            = "01b", 
-    label         = "tau+MET trg efficiency",
-    distr         = "lnN", 
+    id            = "01b",
+    label         = "tau+MET trg MET part for EWKtau (temp)",
+    distr         = "lnN",
     function      = "Constant",
-    value         = 0.113
+    value         = 0.066
 ))
 
 Nuisances.append(Nuisance(
@@ -348,7 +375,15 @@ Nuisances.append(Nuisance(
                      "TriggerScaleFactorAbsUncert_AfterDeltaPhi160"],
     normalisation = ["TriggerScaleFactorAbsUncertCounts_AfterSelection",
                      "TriggerScaleFactorAbsUncertCounts_AfterSelection"],
-    addUncertaintyInQuadrature = 0.10 # MET leg uncertainty
+    #addUncertaintyInQuadrature = 0.10 # MET leg uncertainty
+))
+
+Nuisances.append(Nuisance(
+    id            = "02",
+    label         = "tau+MET trg MET part",
+    distr         = "lnN",
+    function      = "Constant",
+    value         = 0.10
 ))
 
 Nuisances.append(Nuisance(
@@ -363,8 +398,12 @@ Nuisances.append(Nuisance(
     id            = "04", 
     label         = "tau-jet mis ID (no Rtau)",  
     distr         = "lnN",
-    function      = "Constant",
-    value         = 0.15
+    function      = "ScaleFactor",
+    histoDir      = ["ScaleFactorUncertainties"],
+    histograms    = ["FakeTauAbsUncert_AfterSelection"],
+    normalisation = ["FakeTauAbsUncertCounts_AfterSelection"],
+    #function      = "Constant",
+    #value         = 0.15
 ))
 
 if OptionIncludeSystematics:
@@ -379,7 +418,17 @@ if OptionIncludeSystematics:
         histograms    = [SignalShapeHisto,
                         SignalShapeHisto]
     ))
-
+    #Nuisances.append(Nuisance(
+        #id            = "45b",
+        #label         = "TES effect on shape",
+        #distr         = "shapeQ",
+        #function      = "Shape",
+        #counter       = SignalRateCounter,
+        #histoDir      = ["TESPlus",
+                        #"TESMinus"],
+        #histograms    = [SignalShapeHisto,
+                        #SignalShapeHisto]
+    #))
     Nuisances.append(Nuisance(
         id            = "46",
         label         = "JES effect on shape",
@@ -402,6 +451,13 @@ if OptionIncludeSystematics:
                         "METMinus"],
         histograms    = [SignalShapeHisto,
                         SignalShapeHisto]
+    ))
+    Nuisances.append(Nuisance(
+        id            = "48",
+        label         = "Temporary TES for EWKtau",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.066,
     ))
 else:
     Nuisances.append(Nuisance(
@@ -510,10 +566,10 @@ Nuisances.append(Nuisance(
 
 Nuisances.append(Nuisance(
     id            = "16",
-    label         = "EWK with taus muon selection",
+    label         = "EWK with taus muon selection+ditau+mu trg",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.005
+    value         = 0.031
 ))
 
 Nuisances.append(Nuisance(
@@ -797,6 +853,8 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "ControlPlots",
     signalHistoName  = "Njets_AfterStandardSelections",
+    EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
+    EWKfakeHistoName  = "Njets_AfterStandardSelections",
     QCDFactNormalisation = "factorisation/AfterJetSelection",
     QCDFactHistoPath = "shape_CtrlLeg1AfterNjets",
     QCDFactHistoName = "CtrlLeg1AfterNjets",
@@ -825,6 +883,8 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "ControlPlots",
     signalHistoName  = "MET",
+    EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
+    EWKfakeHistoName  = "MET",
     QCDFactNormalisation = "factorisation/AfterJetSelection",
     QCDFactHistoPath = "shape_CtrlLeg1AfterMET",
     QCDFactHistoName = "CtrlLeg1AfterMET",
@@ -854,6 +914,8 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "ControlPlots",
     signalHistoName  = "NBjets",
+    EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
+    EWKfakeHistoName  = "NBjets",
     QCDFactNormalisation = "factorisation/Leg1AfterMET",
     QCDFactHistoPath = "shape_CtrlLeg1AfterNbjets",
     QCDFactHistoName = "CtrlLeg1AfterNbjets",
@@ -882,6 +944,8 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "",
     signalHistoName  = "deltaPhi",
+    EWKfakeHistoPath  = "",
+    EWKfakeHistoName  = "EWKFakeTausDeltaPhi",
     QCDFactNormalisation = "factorisation/Leg1AfterBTagging",
     QCDFactHistoPath = "shape_CtrlLeg1AfterDeltaPhiTauMET",
     QCDFactHistoName = "CtrlLeg1AfterDeltaPhiTauMET",
@@ -994,6 +1058,8 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "",
     signalHistoName  = "transverseMass",
+    EWKfakeHistoPath  = "",
+    EWKfakeHistoName  = "EWKFakeTausTransverseMass",
     QCDFactNormalisation = "factorisation/Leg1AfterTopSelection",
     QCDFactHistoPath = "shape_MtShapesAfterFullMETLeg",
     QCDFactHistoName = "MtShapesAfterFullMETLeg",
@@ -1010,7 +1076,7 @@ ControlPlots.append(ControlPlotInput(
                          "ymax": -1},
     blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [60, 180], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = "#Delta#phi(#tau_{h},E_{T}^{miss})", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
@@ -1022,6 +1088,8 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeId        = EWKFakeIdList,
     signalHistoPath  = "FullHiggsMass",
     signalHistoName  = "HiggsMass",
+    EWKfakeHistoPath  = "",
+    EWKfakeHistoName  = "EWKFakeTausFullMass",
     QCDFactNormalisation = "factorisation/Leg1AfterTopSelection",
     QCDFactHistoPath = "shape_FullMassShapesAfterFullMETLeg",
     QCDFactHistoName = "FullMassShapesAfterFullMETLeg",
