@@ -468,7 +468,7 @@ namespace HPlus {
     hMinEtaOfSelectedJetToGap->Fill(fMinEtaOfSelectedJetToGap);
     // Calculate the eta range over which the selected jets are spanned; and the average eta of the jets
     myMinEta = 999.0;
-    myMaxEta = -999.0;
+    double myMaxEta = -999.0;
     TVector3 myMegaJet(0., 0., 0.);
     for(edm::PtrVector<pat::Jet>::const_iterator iter = fSelectedJets.begin(); iter != fSelectedJets.end(); ++iter) {
       if ((*iter)->eta() > myMaxEta)
@@ -480,7 +480,7 @@ namespace HPlus {
     }
     fEtaSpreadOfSelectedJets = myMaxEta - myMinEta;
     fAverageEtaOfSelectedJets = myMegaJet.Eta();
-    fAverageSelectedJetsEtaDistanceToTauEta = std::abs(myMegaJet.Eta - tau->eta());
+    fAverageSelectedJetsEtaDistanceToTauEta = std::abs(myMegaJet.Eta() - tau->eta());
 
     // Everything has been done now return
     return Data(this, passEvent);

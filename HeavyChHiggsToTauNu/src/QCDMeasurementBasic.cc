@@ -82,10 +82,10 @@ namespace HPlus {
     hVerticesTriggeredBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "verticesTriggeredBeforeWeight", "Number of vertices triggered without weighting;Vertices;N_{events} / 1 Vertex", 50, 0, 50);
     hVerticesTriggeredAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "verticesTriggeredAfterWeight", "Number of vertices triggered with weighting; Vertices;N_{events} / 1 Vertex", 50, 0, 50);
 
-    hTauEtaVsPhiAfterMETLegCollinear = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "TauEtaVsPhiAfterMETLegCollinear", "TauEtaVsPhiAfterMETLegCollinear; #tau #eta;#tau #phi", 60, -3.0., 3.0., 360, -3.1415926, 3.1415926);
-    hTauEtaVsPhiAfterMETLegCollinearOpposite = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "TauEtaVsPhiAfterMETLegCollinearOpposite", "TauEtaVsPhiAfterMETLegCollinearOpposite; #tau #eta;#tau #phi", 60, -3.0., 3.0., 360, -3.1415926, 3.1415926);
-    hTauEtaVsPhiAfterMETLegBackToBack = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "TauEtaVsPhiAfterMETLegBackToBack", "TauEtaVsPhiAfterMETLegBackToBack; #tau #eta;#tau #phi", 60, -3.0., 3.0., 360, -3.1415926, 3.1415926);
-    hTauEtaVsPhiAfterMETLegBackToBackOpposite = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "TauEtaVsPhiAfterMETLegBackToBackOpposite", "TauEtaVsPhiAfterMETLegBackToBackOpposite; #tau #eta;#tau #phi", 60, -3.0., 3.0., 360, -3.1415926, 3.1415926);
+    hTauEtaVsPhiAfterMETLegCollinear = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "TauEtaVsPhiAfterMETLegCollinear", "TauEtaVsPhiAfterMETLegCollinear; #tau #eta;#tau #phi", 60, -3.0, 3.0, 360, -3.1415926, 3.1415926);
+    hTauEtaVsPhiAfterMETLegCollinearOpposite = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "TauEtaVsPhiAfterMETLegCollinearOpposite", "TauEtaVsPhiAfterMETLegCollinearOpposite; #tau #eta;#tau #phi", 60, -3.0, 3.0, 360, -3.1415926, 3.1415926);
+    hTauEtaVsPhiAfterMETLegBackToBack = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "TauEtaVsPhiAfterMETLegBackToBack", "TauEtaVsPhiAfterMETLegBackToBack; #tau #eta;#tau #phi", 60, -3.0, 3.0, 360, -3.1415926, 3.1415926);
+    hTauEtaVsPhiAfterMETLegBackToBackOpposite = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "TauEtaVsPhiAfterMETLegBackToBackOpposite", "TauEtaVsPhiAfterMETLegBackToBackOpposite; #tau #eta;#tau #phi", 60, -3.0, 3.0, 360, -3.1415926, 3.1415926);
 
     // Factorisation map
     int myTauPtBins = static_cast<int>(fTauPtBinLowEdges.size()) + 1;
@@ -337,7 +337,7 @@ namespace HPlus {
 
     hFeatureMinEtaOfSelectedJetToGapAfterBasicSelection->Fill(jetData.getMinEtaOfSelectedJetToGap());
     hFeatureEtaSpreadOfSelectedJetsAfterBasicSelection->Fill(jetData.getEtaSpreadOfSelectedJets());
-    hFeatureAverageEtaOfSelectedJetsAfterBasicSelection->Fill(jetData.getAverageEtaOfSelectedJets);
+    hFeatureAverageEtaOfSelectedJetsAfterBasicSelection->Fill(jetData.getAverageEtaOfSelectedJets());
     hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterBasicSelection->Fill(jetData.getAverageSelectedJetsEtaDistanceToTauEta());
 
 //------ Standard selections is done, obtain data objects, fill tree, and loop over analysis variations
@@ -430,7 +430,7 @@ namespace HPlus {
         }
         hFeatureMinEtaOfSelectedJetToGapAfterTauLeg->Fill(jetData.getMinEtaOfSelectedJetToGap());
         hFeatureEtaSpreadOfSelectedJetsAfterTauLeg->Fill(jetData.getEtaSpreadOfSelectedJets());
-        hFeatureAverageEtaOfSelectedJetsAfterTauLeg->Fill(jetData.getAverageEtaOfSelectedJets);
+        hFeatureAverageEtaOfSelectedJetsAfterTauLeg->Fill(jetData.getAverageEtaOfSelectedJets());
         hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterTauLeg->Fill(jetData.getAverageSelectedJetsEtaDistanceToTauEta());
         // On purpose: No return statement for false (factorisation)
       }
@@ -543,7 +543,7 @@ namespace HPlus {
 
     hFeatureMinEtaOfSelectedJetToGapAfterMETLeg->Fill(jetData.getMinEtaOfSelectedJetToGap());
     hFeatureEtaSpreadOfSelectedJetsAfterMETLeg->Fill(jetData.getEtaSpreadOfSelectedJets());
-    hFeatureAverageEtaOfSelectedJetsAfterMETLeg->Fill(jetData.getAverageEtaOfSelectedJets);
+    hFeatureAverageEtaOfSelectedJetsAfterMETLeg->Fill(jetData.getAverageEtaOfSelectedJets());
     hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterMETLeg->Fill(jetData.getAverageSelectedJetsEtaDistanceToTauEta());
 
     // Obtain transverseMass
