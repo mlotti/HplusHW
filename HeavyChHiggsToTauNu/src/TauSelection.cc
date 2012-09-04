@@ -584,7 +584,7 @@ namespace HPlus {
       if (tmpNprongPassed.size() == 0) {
         // none pass, take the most isolated one
         for(size_t i=0; i<tmpIsolationPassed.size(); ++i) {
-          fSelectedTauCandidates.push_back(tmpNprongPassed[i]);
+          fSelectedTauCandidates.push_back(tmpIsolationPassed[i]);
         }
         for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
           bool match = false;

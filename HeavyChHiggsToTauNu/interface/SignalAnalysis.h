@@ -207,6 +207,7 @@ namespace HPlus {
 
     // Scale factor uncertainties
     ScaleFactorUncertaintyManager fSFUncertaintiesAfterSelection;
+    ScaleFactorUncertaintyManager fEWKFakeTausSFUncertaintiesAfterSelection;
 
     // Histograms
     
@@ -230,6 +231,8 @@ namespace HPlus {
     WrappedTH1 *hTransverseMassAfterDeltaPhi160;
     WrappedTH1 *hTransverseMassAfterDeltaPhi130;
     WrappedTH1 *hTransverseMassAfterDeltaPhi90;
+    WrappedTH2 *hTransverseMassVsNjets;
+    WrappedTH2 *hEWKFakeTausTransverseMassVsNjets;
 
     // Full mass histograms
     WrappedTH1 *hFullMass;
@@ -237,6 +240,7 @@ namespace HPlus {
 
 
     WrappedTH1 *hDeltaPhi;
+    WrappedTH1 *hEWKFakeTausDeltaPhi;
     WrappedTH1 *hDeltaPhiJetMet;
     WrappedTH1 *hMaxDeltaPhiJetMet;
     WrappedTH1 *hAlphaT;
@@ -265,6 +269,7 @@ namespace HPlus {
     WrappedTH1* hCtrlIdentifiedElectronPt;
     WrappedTH1* hCtrlIdentifiedMuonPt;
     WrappedTH1* hCtrlNjets;
+    WrappedTH1* hCtrlNjetsAfterMET;
     WrappedTH1* hCtrlSelectedTauPtAfterStandardSelections;
     WrappedTH1* hCtrlSelectedTauEtaAfterStandardSelections;
     WrappedTH1* hCtrlSelectedTauPhiAfterStandardSelections;
@@ -278,11 +283,30 @@ namespace HPlus {
     WrappedTH1* hCtrlNjetsAfterStandardSelections;
     WrappedTH1* hCtrlMET;
     WrappedTH1* hCtrlNbjets;
+    // Control plots for fakes
+    WrappedTH1* hCtrlEWKFakeTausIdentifiedElectronPt;
+    WrappedTH1* hCtrlEWKFakeTausIdentifiedMuonPt;
+    WrappedTH1* hCtrlEWKFakeTausNjets;
+    WrappedTH1* hCtrlEWKFakeTausNjetsAfterMET;
+    WrappedTH1* hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections;
+    WrappedTH2* hCtrlEWKFakeTausSelectedTauEtaVsPhiAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausSelectedTauPAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausIdentifiedElectronPtAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausIdentifiedMuonPtAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausNjetsAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausMET;
+    WrappedTH1* hCtrlEWKFakeTausNbjets;
+
     WrappedTH2* hCtrlJetMatrixAfterJetSelection;
     WrappedTH2* hCtrlJetMatrixAfterMET;
     WrappedTH2* hCtrlJetMatrixAfterMET100;
 
-    // CounterGroups for EWK fake taus (aka non-QCD type 2(
+    // CounterGroups for EWK fake taus (aka non-QCD type 2)
     CounterGroup fEWKFakeTausGroup;
     CounterGroup fAllTausCounterGroup;
     CounterGroup fElectronToTausCounterGroup;

@@ -78,9 +78,14 @@ namespace HPlus {
 
     // Book histograms
     hVerticesBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesBeforeWeight", "Number of vertices without weighting;Vertices;N_{events} / 1 Vertex", 50, 0, 50);
-    hVerticesAfterWeight =  fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesAfterWeight", "Number of vertices with weighting; Vertices;N_{events} / 1 Vertex", 50, 0, 50);
+    hVerticesAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "verticesAfterWeight", "Number of vertices with weighting; Vertices;N_{events} / 1 Vertex", 50, 0, 50);
     hVerticesTriggeredBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "verticesTriggeredBeforeWeight", "Number of vertices triggered without weighting;Vertices;N_{events} / 1 Vertex", 50, 0, 50);
-    hVerticesTriggeredAfterWeight =  fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "verticesTriggeredAfterWeight", "Number of vertices triggered with weighting; Vertices;N_{events} / 1 Vertex", 50, 0, 50);
+    hVerticesTriggeredAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "verticesTriggeredAfterWeight", "Number of vertices triggered with weighting; Vertices;N_{events} / 1 Vertex", 50, 0, 50);
+
+    hTauEtaVsPhiAfterMETLegCollinear = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "TauEtaVsPhiAfterMETLegCollinear", "TauEtaVsPhiAfterMETLegCollinear; #tau #eta;#tau #phi", 60, -3.0, 3.0, 360, -3.1415926, 3.1415926);
+    hTauEtaVsPhiAfterMETLegCollinearOpposite = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "TauEtaVsPhiAfterMETLegCollinearOpposite", "TauEtaVsPhiAfterMETLegCollinearOpposite; #tau #eta;#tau #phi", 60, -3.0, 3.0, 360, -3.1415926, 3.1415926);
+    hTauEtaVsPhiAfterMETLegBackToBack = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "TauEtaVsPhiAfterMETLegBackToBack", "TauEtaVsPhiAfterMETLegBackToBack; #tau #eta;#tau #phi", 60, -3.0, 3.0, 360, -3.1415926, 3.1415926);
+    hTauEtaVsPhiAfterMETLegBackToBackOpposite = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "TauEtaVsPhiAfterMETLegBackToBackOpposite", "TauEtaVsPhiAfterMETLegBackToBackOpposite; #tau #eta;#tau #phi", 60, -3.0, 3.0, 360, -3.1415926, 3.1415926);
 
     // Factorisation map
     int myTauPtBins = static_cast<int>(fTauPtBinLowEdges.size()) + 1;
@@ -152,6 +157,7 @@ namespace HPlus {
     createShapeHistograms(fs, hCtrlNjets, "CtrlLeg1AfterNjets", 10, 0., 10.);
     createShapeHistograms(fs, hCtrlNjetsMET20, "CtrlLeg1AfterNjetsMET20", 10, 0., 10.);
     createShapeHistograms(fs, hCtrlNjetsMET30, "CtrlLeg1AfterNjetsMET30", 10, 0., 10.);
+    createShapeHistograms(fs, hCtrlNjetsAfterMET, "CtrlLeg1NJetsAfterMET", 10, 0., 10.);
     createShapeHistograms(fs, hCtrlMET, "CtrlLeg1AfterMET", 100, 0.0, 500.0);
     createShapeHistograms(fs, hCtrlMETAfterStandardSelections, "CtrlLeg1METAfterStandardSelections", 100, 0.0, 500.0);
     createShapeHistograms(fs, hCtrlMETAfterStandardSelectionsMET20, "CtrlLeg1METAfterStandardSelectionsMET20", 100, 0.0, 500.0);
@@ -168,6 +174,20 @@ namespace HPlus {
     createShapeHistograms(fs, hCtrlDeltaPhiTauMET, "CtrlLeg1AfterDeltaPhiTauMET", 36, 0., 180.);
     createShapeHistograms(fs, hCtrlMaxDeltaPhiJetMET, "CtrlLeg1AfterMaxDeltaPhiJetMET", 36, 0., 180.);
     createShapeHistograms(fs, hCtrlTopMass, "CtrlLeg1AfterTopMass", 80, 0., 400.);
+
+    // Feature plots
+    createShapeHistograms(fs, hFeatureMinEtaOfSelectedJetToGapAfterBasicSelection, "FeatureMinEtaOfSelectedJetToGapAfterBasicSelection", 30, 0, 3.0);
+    createShapeHistograms(fs, hFeatureMinEtaOfSelectedJetToGapAfterMETLeg, "FeatureMinEtaOfSelectedJetToGapAfterMETLeg", 30, 0, 3.0);
+    createShapeHistograms(fs, hFeatureMinEtaOfSelectedJetToGapAfterTauLeg, "FeatureMinEtaOfSelectedJetToGapAfterTauLeg", 30, 0, 3.0);
+    createShapeHistograms(fs, hFeatureEtaSpreadOfSelectedJetsAfterBasicSelection, "FeatureEtaSpreadOfSelectedJetsAfterBasicSelection", 60, 0, 6.0);
+    createShapeHistograms(fs, hFeatureEtaSpreadOfSelectedJetsAfterMETLeg, "FeatureEtaSpreadOfSelectedJetsAfterMETLeg", 60, 0, 6.0);
+    createShapeHistograms(fs, hFeatureEtaSpreadOfSelectedJetsAfterTauLeg, "FeatureEtaSpreadOfSelectedJetsAfterTauLeg", 60, 0, 6.0);
+    createShapeHistograms(fs, hFeatureAverageEtaOfSelectedJetsAfterBasicSelection, "FeatureAverageEtaOfSelectedJetsAfterBasicSelection", 60, 0, 6.0);
+    createShapeHistograms(fs, hFeatureAverageEtaOfSelectedJetsAfterMETLeg, "FeatureAverageEtaOfSelectedJetsAfterMETLeg", 60, 0, 6.0);
+    createShapeHistograms(fs, hFeatureAverageEtaOfSelectedJetsAfterTauLeg, "FeatureAverageEtaOfSelectedJetsAfterTauLeg", 60, 0, 6.0);
+    createShapeHistograms(fs, hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterBasicSelection, "FeatureAverageSelectedJetsEtaDistanceToTauEtaAfterBasicSelection", 60, 0, 6.0);
+    createShapeHistograms(fs, hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterMETLeg, "FeatureAverageSelectedJetsEtaDistanceToTauEtaAfterMETLeg", 60, 0, 6.0);
+    createShapeHistograms(fs, hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterTauLeg, "FeatureAverageSelectedJetsEtaDistanceToTauEtaAfterTauLeg", 60, 0, 6.0);
 
     // Other control histograms
 
@@ -315,6 +335,10 @@ namespace HPlus {
     hSelectionFlow->Fill(kQCDOrderJetSelection);
     hAfterJetSelection->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
 
+    hFeatureMinEtaOfSelectedJetToGapAfterBasicSelection[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getMinEtaOfSelectedJetToGap());
+    hFeatureEtaSpreadOfSelectedJetsAfterBasicSelection[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getEtaSpreadOfSelectedJets());
+    hFeatureAverageEtaOfSelectedJetsAfterBasicSelection[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getAverageEtaOfSelectedJets());
+    hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterBasicSelection[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getAverageSelectedJetsEtaDistanceToTauEta());
 
 //------ Standard selections is done, obtain data objects, fill tree, and loop over analysis variations
     if (fTree.isActive()) {
@@ -404,9 +428,14 @@ namespace HPlus {
             hLeg2AfterTauIDMET30->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
           }
         }
+        hFeatureMinEtaOfSelectedJetToGapAfterTauLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getMinEtaOfSelectedJetToGap());
+        hFeatureEtaSpreadOfSelectedJetsAfterTauLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getEtaSpreadOfSelectedJets());
+        hFeatureAverageEtaOfSelectedJetsAfterTauLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getAverageEtaOfSelectedJets());
+        hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterTauLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getAverageSelectedJetsEtaDistanceToTauEta());
         // On purpose: No return statement for false (factorisation)
       }
     }
+
 
 // ----- MET, btag, deltaPhi(tau,MET), top reco leg
     // MET cut
@@ -416,6 +445,7 @@ namespace HPlus {
     hSelectionFlow->Fill(kQCDOrderMET);
     hLeg1AfterMET->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
     if (myPassedTauLegStatus) increment(fCoincidenceAfterMETCounter);
+    hCtrlNjetsAfterMET[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getHadronicJetCount());
 
     // Obtain Delta phi(tau,MET) cut, but don't apply it
     double deltaPhi = DeltaPhi::reconstruct(*(tauCandidateData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
@@ -439,6 +469,16 @@ namespace HPlus {
     hLeg1AfterBTagging->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
     if (myPassedTauLegStatus) increment(fCoincidenceAfterBjetsCounter);
     hCtrlMETAfterBtagging[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(metData.getSelectedMET()->et());
+
+    double myOppositePhi = tauCandidateData.getSelectedTau()->phi() - 3.1415926;
+    if (myOppositePhi < -3.1415926) myOppositePhi += 2.0*3.1415926;
+    if (deltaPhi < 90) {
+      hTauEtaVsPhiAfterMETLegCollinear->Fill(tauCandidateData.getSelectedTau()->eta(), tauCandidateData.getSelectedTau()->phi());
+      hTauEtaVsPhiAfterMETLegCollinearOpposite->Fill(-tauCandidateData.getSelectedTau()->eta(), myOppositePhi);
+    } else {
+      hTauEtaVsPhiAfterMETLegBackToBack->Fill(tauCandidateData.getSelectedTau()->eta(), tauCandidateData.getSelectedTau()->phi());
+      hTauEtaVsPhiAfterMETLegBackToBackOpposite->Fill(-tauCandidateData.getSelectedTau()->eta(), myOppositePhi);
+    }
 
     // Delta phi(tau,MET) cut
     hCtrlDeltaPhiTauMET[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(deltaPhi);
@@ -500,6 +540,11 @@ namespace HPlus {
       increment(fCoincidenceAfterSelectionCounter);
       //std::cout << "first selected tau pt=" << tauCandidateData.getSelectedTau()->leadPFChargedHadrCand()->pt() << " trg SF=" << triggerWeight.getEventWeight() << "\tnjets" << jetData.getHadronicJetCount() << std::endl;
     }
+
+    hFeatureMinEtaOfSelectedJetToGapAfterMETLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getMinEtaOfSelectedJetToGap());
+    hFeatureEtaSpreadOfSelectedJetsAfterMETLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getEtaSpreadOfSelectedJets());
+    hFeatureAverageEtaOfSelectedJetsAfterMETLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getAverageEtaOfSelectedJets());
+    hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterMETLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getAverageSelectedJetsEtaDistanceToTauEta());
 
     // Obtain transverseMass
     hMtShapesAfterFullMETLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(transverseMass);
