@@ -7,6 +7,7 @@ import glob
 import subprocess
 import json
 from optparse import OptionParser
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import execute
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
@@ -28,6 +29,11 @@ def isMCTask(taskdir):
             break
     f.close()
     return mc
+
+def isEmpty(taskdir):
+    path = os.path.join(taskdir, "res")
+    files = execute("ls %s"%path)
+    return len(files)==0
 
 # Convert luminosity to pb^-1
 def convertLumi(lumi, unit):
@@ -64,6 +70,9 @@ def main(opts, args):
         for d in crabdirs:
             if isMCTask(d):
                 print "  Ignoring task directory '%s', it looks like MC" % d
+                continue
+            if isEmpty(d):
+                print "  Ignoring task directory '%s', it looks empty" % d
                 continue
     
             if opts.report:
