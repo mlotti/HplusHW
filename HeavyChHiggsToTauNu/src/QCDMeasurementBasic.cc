@@ -335,10 +335,10 @@ namespace HPlus {
     hSelectionFlow->Fill(kQCDOrderJetSelection);
     hAfterJetSelection->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
 
-    hFeatureMinEtaOfSelectedJetToGapAfterBasicSelection->Fill(jetData.getMinEtaOfSelectedJetToGap());
-    hFeatureEtaSpreadOfSelectedJetsAfterBasicSelection->Fill(jetData.getEtaSpreadOfSelectedJets());
-    hFeatureAverageEtaOfSelectedJetsAfterBasicSelection->Fill(jetData.getAverageEtaOfSelectedJets());
-    hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterBasicSelection->Fill(jetData.getAverageSelectedJetsEtaDistanceToTauEta());
+    hFeatureMinEtaOfSelectedJetToGapAfterBasicSelection[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getMinEtaOfSelectedJetToGap());
+    hFeatureEtaSpreadOfSelectedJetsAfterBasicSelection[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getEtaSpreadOfSelectedJets());
+    hFeatureAverageEtaOfSelectedJetsAfterBasicSelection[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getAverageEtaOfSelectedJets());
+    hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterBasicSelection[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getAverageSelectedJetsEtaDistanceToTauEta());
 
 //------ Standard selections is done, obtain data objects, fill tree, and loop over analysis variations
     if (fTree.isActive()) {
@@ -428,10 +428,10 @@ namespace HPlus {
             hLeg2AfterTauIDMET30->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
           }
         }
-        hFeatureMinEtaOfSelectedJetToGapAfterTauLeg->Fill(jetData.getMinEtaOfSelectedJetToGap());
-        hFeatureEtaSpreadOfSelectedJetsAfterTauLeg->Fill(jetData.getEtaSpreadOfSelectedJets());
-        hFeatureAverageEtaOfSelectedJetsAfterTauLeg->Fill(jetData.getAverageEtaOfSelectedJets());
-        hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterTauLeg->Fill(jetData.getAverageSelectedJetsEtaDistanceToTauEta());
+        hFeatureMinEtaOfSelectedJetToGapAfterTauLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getMinEtaOfSelectedJetToGap());
+        hFeatureEtaSpreadOfSelectedJetsAfterTauLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getEtaSpreadOfSelectedJets());
+        hFeatureAverageEtaOfSelectedJetsAfterTauLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getAverageEtaOfSelectedJets());
+        hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterTauLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getAverageSelectedJetsEtaDistanceToTauEta());
         // On purpose: No return statement for false (factorisation)
       }
     }
@@ -445,7 +445,7 @@ namespace HPlus {
     hSelectionFlow->Fill(kQCDOrderMET);
     hLeg1AfterMET->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
     if (myPassedTauLegStatus) increment(fCoincidenceAfterMETCounter);
-    hCtrlNjetsAfterMET->Fill(jetData.getHadronicJetCount());
+    hCtrlNjetsAfterMET[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getHadronicJetCount());
 
     // Obtain Delta phi(tau,MET) cut, but don't apply it
     double deltaPhi = DeltaPhi::reconstruct(*(tauCandidateData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
@@ -471,7 +471,7 @@ namespace HPlus {
     hCtrlMETAfterBtagging[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(metData.getSelectedMET()->et());
 
     double myOppositePhi = tauCandidateData.getSelectedTau()->phi() - 3.1415926;
-    if (myOppositePhi < 3.1415926) myOppositePhi += 2.0*3.1415926;
+    if (myOppositePhi < -3.1415926) myOppositePhi += 2.0*3.1415926;
     if (deltaPhi < 90) {
       hTauEtaVsPhiAfterMETLegCollinear->Fill(tauCandidateData.getSelectedTau()->eta(), tauCandidateData.getSelectedTau()->phi());
       hTauEtaVsPhiAfterMETLegCollinearOpposite->Fill(-tauCandidateData.getSelectedTau()->eta(), myOppositePhi);
@@ -541,10 +541,10 @@ namespace HPlus {
       //std::cout << "first selected tau pt=" << tauCandidateData.getSelectedTau()->leadPFChargedHadrCand()->pt() << " trg SF=" << triggerWeight.getEventWeight() << "\tnjets" << jetData.getHadronicJetCount() << std::endl;
     }
 
-    hFeatureMinEtaOfSelectedJetToGapAfterMETLeg->Fill(jetData.getMinEtaOfSelectedJetToGap());
-    hFeatureEtaSpreadOfSelectedJetsAfterMETLeg->Fill(jetData.getEtaSpreadOfSelectedJets());
-    hFeatureAverageEtaOfSelectedJetsAfterMETLeg->Fill(jetData.getAverageEtaOfSelectedJets());
-    hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterMETLeg->Fill(jetData.getAverageSelectedJetsEtaDistanceToTauEta());
+    hFeatureMinEtaOfSelectedJetToGapAfterMETLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getMinEtaOfSelectedJetToGap());
+    hFeatureEtaSpreadOfSelectedJetsAfterMETLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getEtaSpreadOfSelectedJets());
+    hFeatureAverageEtaOfSelectedJetsAfterMETLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getAverageEtaOfSelectedJets());
+    hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterMETLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getAverageSelectedJetsEtaDistanceToTauEta());
 
     // Obtain transverseMass
     hMtShapesAfterFullMETLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(transverseMass);

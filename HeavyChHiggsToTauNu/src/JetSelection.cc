@@ -287,7 +287,7 @@ namespace HPlus {
 
       //bool myIsPVJetStatusByLdgTrack = (iJet->userInt("LdgTrackBelongsToSelectedPV") == 1);
       // Do MC matching of jet to a quark or gluon
-      double minDeltaR = 99999;
+      //double minDeltaR = 99999;
       bool myIsPVJetStatusByMCMatching = false;
       if (!iEvent.isRealData()) {
         for (size_t i=0; i < genParticles->size(); ++i) {
@@ -462,7 +462,7 @@ namespace HPlus {
     for(edm::PtrVector<pat::Jet>::const_iterator iter = fSelectedJets.begin(); iter != fSelectedJets.end(); ++iter) {
       double myValue = std::abs((*iter)->eta() - 1.5);
       if (myValue < myMinEta)
-        myValue = myMinEta;
+        myMinEta = myValue;
     }
     fMinEtaOfSelectedJetToGap = myMinEta;
     hMinEtaOfSelectedJetToGap->Fill(fMinEtaOfSelectedJetToGap);
@@ -479,8 +479,10 @@ namespace HPlus {
       myMegaJet += myJet;
     }
     fEtaSpreadOfSelectedJets = myMaxEta - myMinEta;
-    fAverageEtaOfSelectedJets = myMegaJet.Eta();
-    fAverageSelectedJetsEtaDistanceToTauEta = std::abs(myMegaJet.Eta() - tau->eta());
+    if (myMegaJet.Z() > 0.0) {
+      fAverageEtaOfSelectedJets = myMegaJet.Eta();
+      fAverageSelectedJetsEtaDistanceToTauEta = std::abs(myMegaJet.Eta() - tau->eta());
+    }
 
     // Everything has been done now return
     return Data(this, passEvent);

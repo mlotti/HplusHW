@@ -242,9 +242,6 @@ namespace HPlus {
     std::vector<WrappedTH1*> hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterMETLeg;
     std::vector<WrappedTH1*> hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterTauLeg;
 
-# FIXME  mT in bins of njets
-    
-#FIXME  njets after met
   };
 }
 

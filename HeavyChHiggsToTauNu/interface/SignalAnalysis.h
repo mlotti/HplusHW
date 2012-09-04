@@ -287,6 +287,7 @@ namespace HPlus {
     WrappedTH1* hCtrlEWKFakeTausIdentifiedElectronPt;
     WrappedTH1* hCtrlEWKFakeTausIdentifiedMuonPt;
     WrappedTH1* hCtrlEWKFakeTausNjets;
+    WrappedTH1* hCtrlEWKFakeTausNjetsAfterMET;
     WrappedTH1* hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections;
     WrappedTH1* hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections;
     WrappedTH1* hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections;
