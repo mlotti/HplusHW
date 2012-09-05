@@ -300,6 +300,7 @@ class TableProducer:
                                             myValueString += "/%.3f"%(myValue[i]+1.0)
                                 else:
                                     # Assume that result is a plain number
+                                    #print "nid=",n.getId(),"c=",c.getLabel()
                                     myValueString += "%.3f"%(myValue+1.0)
                             if self._opts.debugMining:
                                 print "  Nuisance for '%s/%s' in column '%s': %s"%(n.getId(),n.getDescription(),c.getLabel(),myValueString)
@@ -452,7 +453,7 @@ class TableProducer:
                     else:
                         EWKFakes.add(mySummary)
             # Calculate signal yield
-            myBr = 0.05
+            myBr = self._config.OptionBr
             if self._config.OptionBr == None:
                 print WarningStyle()+"Warning: Br(t->bH+) has not been specified in config file, using default 0.05! To specify, add OptionBr=0.05 to the config file."+NormalStyle()
                 myBr = self._config.OptionBr

@@ -62,7 +62,7 @@ _finalstateYmaxBR = {
     "etau": 0.4,
     "mutau": 0.4,
     "emu": 0.8,
-    "default": 0.15,
+    "default": 0.06,
 }
 
 

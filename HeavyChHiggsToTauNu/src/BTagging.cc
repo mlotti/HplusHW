@@ -6,6 +6,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "Math/GenVector/VectorUtil.h"
+#include "TMath.h"
 
 std::vector<const reco::GenParticle*>   getImmediateMothers(const reco::Candidate&);
 std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
@@ -513,6 +514,7 @@ namespace HPlus {
   }
 
   int BTagging::analyzeOnlyBJetCount(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets) {
+    fScaleFactor = 1.0;
     edm::PtrVector<pat::Jet> mySelectedLeadingBjets;
     edm::PtrVector<pat::Jet> mySelectedSubLeadingBjets;
     // Calculate
@@ -536,8 +538,8 @@ namespace HPlus {
     } // end of jet loop
 
     // Calculate scale factor for MC events
-    //if (!iEvent.isRealData())
-      //calculateScaleFactor(jets, mySelectedLeadingBjets);
+    if (!iEvent.isRealData())
+      calculateScaleFactor(jets, mySelectedLeadingBjets);
 
     return mySelectedLeadingBjets.size();
   }
@@ -586,9 +588,31 @@ namespace HPlus {
       }
     }
     // Calculate scalefactor
+    // FIXME this is a dirty hack, numbers are from BTV-11-004 (see accompanying AN's)
+
+    double mySF = 1.0;
+    double mySFuncert = 0.0;
+    for (edm::PtrVector<pat::Jet>::const_iterator iter = fBJetsPassedPt.begin(); iter != fBJetsPassedPt.end(); ++iter) {
+      // This is independent of pT
+      mySF *= 0.96;
+      mySFuncert += 0.04*0.04;
+    }
+    for (edm::PtrVector<pat::Jet>::const_iterator iter = fLightJetsPassedPt.begin(); iter != fLightJetsPassedPt.end(); ++iter) {
+      mySF *= 1.17;
+      mySFuncert += 0.21*0.21;
+    }
+
+    fScaleFactor = mySF;
+    fScaleFactorAbsoluteUncertainty = TMath::Sqrt(mySFuncert);
+    fScaleFactorRelativeUncertainty = fScaleFactorAbsoluteUncertainty / mySF;
+    // FIXME end of dirty hack
+
+    /* this is the old code
     fScaleFactor = fBTaggingScaleFactor.getWeight(fBJetsPassedPt, fLightJetsPassedPt, fBJetsFailedPt, fLightJetsFailedPt);
     fScaleFactorRelativeUncertainty = fBTaggingScaleFactor.getRelativeUncertainty(fBJetsPassedPt, fLightJetsPassedPt, fBJetsFailedPt, fLightJetsFailedPt);
     fScaleFactorAbsoluteUncertainty = fBTaggingScaleFactor.getAbsoluteUncertainty(fBJetsPassedPt, fLightJetsPassedPt, fBJetsFailedPt, fLightJetsFailedPt);
+    */
+
     /*std::cout << "btagSF debug: jets=" << jets.size() << " bjets=" << bjets.size() << " nb=" << nBJetsPassed << ", nbf pT=";
     for (std::vector<double>::iterator it = fBJetsFailedPt.begin(); it != fBJetsFailedPt.end(); ++it) { std::cout << " " << *it; }
     std::cout << " nl=" << nLightJetsPassed << ", nlf pT=";

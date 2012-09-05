@@ -8,6 +8,11 @@ def main(myFile):
     # Set style
     myStyle = TDRStyle()
     myStyle.setOptStat(False)
+    myStyle.tdrStyle.SetPalette(1)
+    myStyle.tdrStyle.SetPaintTextFormat(".1g")
+    myStyle.tdrStyle.SetTextFont(42)
+    myStyle.tdrStyle.SetTextSize(24)
+    #myStyle.tdrStyle.SetTextSizePixels(20000)
     # Open file
     myRootFile = ROOT.TFile.Open(myFile)
     if myRootFile == None:
@@ -19,30 +24,33 @@ def main(myFile):
         makeQCDNQCDPlot(myRootFile)
         makeQCDPurityPlot(myRootFile)
         makeQCDEfficiencyPlot(myRootFile)
+        makeQCDShapeBreakDown(myRootFile)
 
     makeTransverseMassPlots(myRootFile, "QCDFact_ShapeSummary_QCDfact_ContractedX", title="QCDfactorised_mtShapes", bins=[8])
 
 
     # MET validation plots 1D
-    validationSpecs = { "denominator": "METvalidation_CtrlLeg1METAfterStandardSelections",
-                        "denominatorTitle": "Basic selections",
-                        #"nominator":   "METvalidation_CtrlLeg1METAfterFullTauID",
-                        "nominator":   "METvalidation_CtrlLeg1METAfterTauIDNoRtau",
-                        "nominatorTitle": "Basic selections + tau ID (no R_{#tau} cut)",
-                        "bins": [8],
-                        "title": "QCDfactorised_validation_MET_1D_NoRtau",
-                        "logy": "True",
-                        "ytitle": "A.u. / 20-200 GeV"
-                        }
+    suffix = "MET30"
+    suffix = ""
+    #validationSpecs = { "denominator": "METvalidation_CtrlLeg1METAfterStandardSelections"+suffix,
+                        #"denominatorTitle": "Basic selections",
+                        ##"nominator":   "METvalidation_CtrlLeg1METAfterFullTauID",
+                        #"nominator":   "METvalidation_CtrlLeg1METAfterTauIDNoRtau"+suffix,
+                        #"nominatorTitle": "Basic selections + tau ID (no R_{#tau} cut)",
+                        #"bins": [8],
+                        #"title": "QCDfactorised_validation_MET_1D_NoRtau",
+                        #"logy": "True",
+                        #"ytitle": "A.u. / 20-200 GeV"
+                        #}
     #makeQCDValidationPlots(myRootFile, validationSpecs)
-    validationSpecs = { "denominator": "METvalidation_CtrlLeg1METAfterStandardSelections",
+    validationSpecs = { "denominator": "METvalidation_CtrlLeg1METAfterStandardSelections"+suffix,
                         "denominatorTitle": "Basic selections",
-                        "nominator":   "METvalidation_CtrlLeg1METAfterFullTauID",
+                        "nominator":   "METvalidation_CtrlLeg1METAfterFullTauID"+suffix,
                         "nominatorTitle": "Basic selections + tau ID (with R_{#tau} cut)",
                         "bins": [8],
                         "title": "QCDfactorised_validation_MET_1D_Full",
                         "logy": "True",
-                        "ytitle": "A.u. / 20-200 GeV"
+                        "ytitle": "A.u. / 10 GeV"
                         }
     makeQCDValidationPlots(myRootFile, validationSpecs)
     # MET validation plots 3D
@@ -58,20 +66,21 @@ def main(myFile):
                         #}
     #makeQCDValidationPlots(myRootFile, validationSpecs)
     # mT validation plots 1D
-    validationSpecs = { "denominator": "mTvalidation_MtShapesAfterStandardSelection",
+    validationSpecs = { "denominator": "mTvalidation_MtShapesAfterStandardSelection"+suffix,
                         "denominatorTitle": "Basic selections",
-                        #"nominator":   "mTvalidation_MtShapesAfterTauID",
-                        "nominator":   "mTvalidation_MtShapesAfterTauIDNoRtau",
+                        ##"nominator":   "mTvalidation_MtShapesAfterTauID",
+                        "nominator":   "mTvalidation_MtShapesAfterTauIDNoRtau"+suffix,
                         "nominatorTitle": "Basic selections + tau ID (no R_{#tau} cut)",
                         "bins": [8],
                         "title": "QCDfactorised_validation_mT_1D_NoRtau",
                         "logy": "True",
                         "ytitle": "A.u. / 20 GeV/c^{2}"
                         }
-    #makeQCDValidationPlots(myRootFile, validationSpecs)
-    validationSpecs = { "denominator": "mTvalidation_MtShapesAfterStandardSelection",
+    makeQCDValidationPlots(myRootFile, validationSpecs)
+    validationSpecs = { "denominator": "mTvalidation_MtShapesAfterStandardSelection"+suffix,
                         "denominatorTitle": "Basic selections",
-                        "nominator":   "mTvalidation_MtShapesAfterTauID",
+                        #"nominator":   "mTvalidation_MtShapesAfterStandardSelection",
+                        "nominator":   "mTvalidation_MtShapesAfterTauID"+suffix,
                         "nominatorTitle": "Basic selections + tau ID (with R_{#tau} cut)",
                         "bins": [8],
                         "title": "QCDfactorised_validation_mT_1D_Full",
@@ -231,7 +240,10 @@ def makeQCDValidationPlots(myRootFile,specs):
                         myTotalErrorSquared += pow(myRatio*myWeight,2)
                 myCombinedTotal += myTotal
                 myCombinedTotalErrorSquared += myTotalErrorSquared
-                print "Error: ",sqrt(myTotalErrorSquared/myTotal)*100.0," %"
+                if myTotal > 0:
+                    print "Error: ",sqrt(myTotalErrorSquared/myTotal)*100.0," %"
+                else:
+                    print "Error: -- %"
                 # Get extrema
                 myFactor = 1.1
                 if specs["logy"]:
@@ -521,6 +533,38 @@ def makeQCDEfficiencyPlot(myRootFile):
     entry = leg.AddEntry(hLeg1, "#varepsilon_{E_{T}^{miss}+btag+#Delta#phi}", "P")
     entry = leg.AddEntry(hLeg2, "#varepsilon_{#tau ID}", "P")
     leg.Draw()
+    # Labels
+    o=createTopCaption()
+    # Make graph
+    c.Print(title+".png")
+    c.Close()
+
+def makeQCDShapeBreakDown(myRootFile):
+    title = "QCDfactorised_mt_breakdown"
+    c = makeCanvas(title,False)
+    c.SetLeftMargin(0.19)
+    c.SetRightMargin(0.15)
+    c.SetBottomMargin(0.20)
+    # Get plots
+    h = getHisto(myRootFile,"QCDFact_ShapeSummary_TransverseMass_Total")
+    # Set styles
+    setHistoStyle([h])
+    h.GetXaxis().SetTitleOffset(2.2)
+    h.GetYaxis().SetTitleOffset(2.1)
+    for i in range(1,h.GetNbinsX()+1):
+        h.GetXaxis().SetBinLabel(i,h.GetXaxis().GetBinLabel(i).replace("(","").replace("; all",""))
+    for i in range(1,h.GetNbinsY()+1):
+        h.GetYaxis().SetBinLabel(i,h.GetYaxis().GetBinLabel(i).replace("(","").replace(";all","").replace("<50","40-50"))
+    h.GetXaxis().SetLabelSize(20)
+    h.GetXaxis().LabelsOption("v")
+    h.GetYaxis().SetLabelSize(20)
+    h.GetZaxis().SetLabelSize(20)
+    h.SetXTitle("m_{T}(#tau, E_{T}^{miss}), GeV/c^{2}")
+    h.SetYTitle("#tau-jet candidate p_{T}, GeV/c")
+    
+    # Draw
+    h.Draw("COLZ,text")
+    #h.Draw("text")
     # Labels
     o=createTopCaption()
     # Make graph
