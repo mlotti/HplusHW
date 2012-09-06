@@ -10,9 +10,9 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Create Process
 process = cms.Process("HChPatTuple")
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5) )
 
 # Global tag
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
