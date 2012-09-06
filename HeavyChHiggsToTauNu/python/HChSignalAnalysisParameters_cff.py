@@ -446,13 +446,13 @@ def setDataTriggerEfficiency(dataVersion, era):
     if era == "EPS":
         triggerEfficiencyScaleFactor.dataSelect = ["runs_160404_167913"]
     elif era == "Run2011A":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_160404_167913", "runs_170826_173198", "runs_173236_173692"]
+        triggerEfficiencyScaleFactor.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692"]
     elif era == "Run2011A-EPS":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_170826_173198", "runs_173236_173692"]
+        triggerEfficiencyScaleFactor.dataSelect = ["runs_170722_173198", "runs_173236_173692"]
     elif era == "Run2011B":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_175860_180252"]
+        triggerEfficiencyScaleFactor.dataSelect = ["runs_175835_180252"]
     elif era == "Run2011A+B":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_160404_167913", "runs_170826_173198", "runs_173236_173692", "runs_175860_180252"]
+        triggerEfficiencyScaleFactor.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692", "runs_175835_180252"]
     else:
         raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011A+B'")
 

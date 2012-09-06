@@ -43,8 +43,8 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium = 
             ),
         ),
         # L1_Jet52_Central + HLT_IsoPFTau35_Trk20_MET60 (Run2011A)
-        runs_170826_173198 = cms.PSet(
-            firstRun = cms.uint32(170826),
+        runs_170722_173198 = cms.PSet(
+            firstRun = cms.uint32(170722),
             lastRun = cms.uint32(173198),
             luminosity = cms.double(870.119), # 1/pb
             bins = cms.VPSet(
@@ -71,8 +71,8 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium = 
             ),
         ),
         # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)
-        runs_175860_180252 = cms.PSet(
-            firstRun = cms.uint32(175860),
+        runs_175835_180252 = cms.PSet(
+            firstRun = cms.uint32(175835),
             lastRun = cms.uint32(180252),
             luminosity = cms.double(2762), # 1/pb
             bins = cms.VPSet(
@@ -135,8 +135,8 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA = cms
             ),
         ),
         # L1_Jet52_Central + HLT_IsoPFTau35_Trk20_MET60 (Run2011A)
-        runs_170826_173198 = cms.PSet(
-            firstRun = cms.uint32(170826),
+        runs_170722_173198 = cms.PSet(
+            firstRun = cms.uint32(170722),
             lastRun = cms.uint32(173198),
             luminosity = cms.double(870.119), # 1/pb
             bins = cms.VPSet(
@@ -163,8 +163,8 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA = cms
             ),
         ),
         # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)
-        runs_175860_180252 = cms.PSet(
-            firstRun = cms.uint32(175860),
+        runs_175835_180252 = cms.PSet(
+            firstRun = cms.uint32(175835),
             lastRun = cms.uint32(180252),
             luminosity = cms.double(2762), # 1/pb
             bins = cms.VPSet(
@@ -227,8 +227,8 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA = cms.
             ),
         ),
         # L1_Jet52_Central + HLT_IsoPFTau35_Trk20_MET60 (Run2011A)
-        runs_170826_173198 = cms.PSet(
-            firstRun = cms.uint32(170826),
+        runs_170722_173198 = cms.PSet(
+            firstRun = cms.uint32(170722),
             lastRun = cms.uint32(173198),
             luminosity = cms.double(870.119), # 1/pb
             bins = cms.VPSet(
@@ -255,8 +255,8 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA = cms.
             ),
         ),
         # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)
-        runs_175860_180252 = cms.PSet(
-            firstRun = cms.uint32(175860),
+        runs_175835_180252 = cms.PSet(
+            firstRun = cms.uint32(175835),
             lastRun = cms.uint32(180252),
             luminosity = cms.double(2762), # 1/pb
             bins = cms.VPSet(
@@ -319,8 +319,8 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium = c
             ),
         ),
         # L1_Jet52_Central + HLT_IsoPFTau35_Trk20_MET60 (Run2011A)
-        runs_170826_173198 = cms.PSet(
-            firstRun = cms.uint32(170826),
+        runs_170722_173198 = cms.PSet(
+            firstRun = cms.uint32(170722),
             lastRun = cms.uint32(173198),
             luminosity = cms.double(870.119), # 1/pb
             bins = cms.VPSet(
@@ -347,8 +347,8 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium = c
             ),
         ),
         # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)
-        runs_175860_180252 = cms.PSet(
-            firstRun = cms.uint32(175860),
+        runs_175835_180252 = cms.PSet(
+            firstRun = cms.uint32(175835),
             lastRun = cms.uint32(180252),
             luminosity = cms.double(2762), # 1/pb
             bins = cms.VPSet(
