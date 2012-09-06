@@ -205,6 +205,7 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
     jetSrc = cms.InputTag("preselectedJets"),
     jetFunctions = cms.PSet(
         tche = cms.string("bDiscriminator('trackCountingHighEffBJetTags')"),
+        csv = cms.string("bDiscriminator('combinedSecondaryVertexBJetTags')"),
     ),
     mets = cms.PSet(
         caloMet_p4 = cms.InputTag("met"),
