@@ -303,13 +303,6 @@ process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJe
     
 param.bTagging.UseBTagDB  = cms.untracked.bool(False)
 
-
-
-# Add type 1 MET
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
-sequence = MetCorrection.addCorrectedMet(process, process.signalAnalysis, postfix=PF2PATVersion)
-process.commonSequence *= sequence
-
 # Set beta variable for jets
 process.signalAnalysis.jetSelection.betaCut = betaCutForJets
 

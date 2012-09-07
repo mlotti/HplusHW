@@ -588,6 +588,8 @@ def changeCollectionsToPF2PAT(dataVersion, postfix="PFlow"):
         changeJetCollection(moduleLabel="smearedPatJets"+postfix)
 
     # MET
-    MET.rawSrc = "patMETsPFlow"
     MET.caloSrc = "Nonexistent"
     MET.tcSrc = "Nonexistent"
+    MET.rawSrc = "patPFMet"
+    MET.type1Src = "patType1CorrectedPFMet"
+    MET.type2Src = "patType1p2CorrectedPFMet"
