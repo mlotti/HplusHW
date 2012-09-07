@@ -55,8 +55,8 @@ doFillTree = True
 
 applyTriggerScaleFactor = True
 
-#PF2PATVersion = "PFlow" # For normal PF2PAT
-PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
+PF2PATVersion = "PFlow" # For normal PF2PAT
+#PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
 
 ### Systematic uncertainty flags ###
 # Running of systematic variations is controlled by the global flag
@@ -150,8 +150,7 @@ param.setAllTauSelectionOperatingMode('standard')
 param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
 # Switch to PF2PAT objects
-#param.changeCollectionsToPF2PAT()
-param.changeCollectionsToPF2PAT(postfix=PF2PATVersion)
+param.changeCollectionsToPF2PAT(dataVersion, postfix=PF2PATVersion)
 
 # Trigger with scale factors (at the moment hard coded)
 if applyTriggerScaleFactor and dataVersion.isMC():

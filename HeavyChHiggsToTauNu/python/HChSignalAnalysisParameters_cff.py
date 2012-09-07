@@ -590,7 +590,7 @@ def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processNa
 def changeJetCollection(**kwargs):
     _changeCollection([jetSelection.src, forwardJetVeto.src], **kwargs)
 
-def changeCollectionsToPF2PAT(postfix="PFlow"):
+def changeCollectionsToPF2PAT(dataVersion, postfix="PFlow"):
     # Taus
     hps = "selectedPatTaus"+postfix
     if "TriggerMatched" in tauSelectionHPSTightTauBased.src.value():
@@ -612,7 +612,10 @@ def changeCollectionsToPF2PAT(postfix="PFlow"):
     NonIsolatedElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
 
     # Jets
-    changeJetCollection(moduleLabel="selectedPatJets"+postfix)
+    if dataVersion.isData():
+        changeJetCollection(moduleLabel="selectedPatJets"+postfix)
+    else:
+        changeJetCollection(moduleLabel="smearedPatJets"+postfix)
 
     # MET
     MET.rawSrc = "patMETsPFlow"
