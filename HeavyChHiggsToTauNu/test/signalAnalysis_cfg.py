@@ -231,8 +231,7 @@ param.setAllTauSelectionOperatingMode('standard')
 param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
 # Switch to PF2PAT objects
-#param.changeCollectionsToPF2PAT()
-param.changeCollectionsToPF2PAT(postfix=PF2PATVersion)
+param.changeCollectionsToPF2PAT(dataVersion, postfix=PF2PATVersion)
 
 # Trigger with scale factors (at the moment hard coded)
 if applyTriggerScaleFactor and dataVersion.isMC():
