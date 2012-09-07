@@ -560,7 +560,7 @@ def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processNa
 def changeJetCollection(**kwargs):
     _changeCollection([jetSelection.src, forwardJetVeto.src], **kwargs)
 
-def changeCollectionsToPF2PAT(dataVersion, postfix="PFlow"):
+def changeCollectionsToPF2PAT(dataVersion, postfix="PFlow", useGSFElectrons=True):
     # Taus
     hps = "selectedPatTaus"+postfix
     if "TriggerMatched" in tauSelectionHPSTightTauBased.src.value():
@@ -578,8 +578,11 @@ def changeCollectionsToPF2PAT(dataVersion, postfix="PFlow"):
     NonIsolatedMuonVeto.MuonCollectionName = "selectedPatMuons"+postfix
 
     # Electrons
-    GlobalElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
-    NonIsolatedElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
+    if useGSFElectrons:
+        print "Using GSF electrons despite of PF2PAT"
+    else:
+        GlobalElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
+        NonIsolatedElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
 
     # Jets
     if dataVersion.isData():
