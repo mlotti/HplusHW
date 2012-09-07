@@ -1308,7 +1308,7 @@ class PF2PATBuilder:
         self.endSequence *= m
 
 
-def addPF2PAT(process, dataVersion, doPatTrigger=True, patArgs={}, pvSelectionConfig=""):
+def addPF2PAT(process, dataVersion, doPatTrigger=True, doChs=False, patArgs={}, pvSelectionConfig=""):
     # Hack to not to crash if something in PAT assumes process.out
     # hasOut = hasattr(process, "out")
     # outputCommands = []
@@ -1357,18 +1357,21 @@ def addPF2PAT(process, dataVersion, doPatTrigger=True, patArgs={}, pvSelectionCo
     postfixes.append("PFlow")
 
     # Then build with CHS
-    pflowChsBuilder = PF2PATBuilder(process, dataVersion, postfix="PFlowChs", chs=True, **patArgs)
-    postfixes.append("PFlowChs")
+    if doChs:
+        pflowChsBuilder = PF2PATBuilder(process, dataVersion, postfix="PFlowChs", chs=True, **patArgs)
+        postfixes.append("PFlowChs")
 
     # Then run our customizations. Its easier to understand if the
     # customizations are run after building both PFlow and PFlowChs,
     # since the cloning of patDefaultSequence by usePF2PAT()
     # interferes with the runMEtUncertainties()
     pflowBuilder.customize()
-    pflowChsBuilder.customize()
+    if doChs:
+        pflowChsBuilder.customize()
 
     outputCommands.extend(pflowBuilder.getOutputCommands())
-    outputCommands.extend(pflowChsBuilder.getOutputCommands())
+    if doChs:
+        outputCommands.extend(pflowChsBuilder.getOutputCommands())
 
     ### Trigger (as the last)
     if doPatTrigger:
