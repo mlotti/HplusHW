@@ -1381,6 +1381,19 @@ def addPF2PAT(process, dataVersion, doPatTrigger=True, doChs=False, patArgs={}, 
     if doChs:
         outputCommands.extend(pflowChsBuilder.getOutputCommands())
 
+
+    # Add GSF electrons (as that is the POG recommendation)
+    process.gsfPatElectronSequence = cms.Sequence()
+    if dataVersion.isMC():
+        process.gsfPatElectronSequence *= process.electronMatch
+    process.gsfPatElectronSequence *= (
+        process.patElectrons *
+        process.selectedPatElectrons
+    )
+    addPatElectronID(process, process.patElectrons)
+    outputCommands.append("keep *_selectedPatElectrons_*_*")
+
+
     ### Trigger (as the last)
     if doPatTrigger:
         outMod= ''
@@ -1476,6 +1489,7 @@ def addPF2PAT(process, dataVersion, doPatTrigger=True, doChs=False, patArgs={}, 
     ### Construct the sequences
     for pf in postfixes:
         sequence *= getattr(process, "patPF2PATSequence"+pf)
+    sequence *= process.gsfPatElectronSequence
     return sequence
 
 
