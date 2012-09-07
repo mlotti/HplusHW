@@ -200,36 +200,36 @@ class PATBuilder:
         pargs = patArgs.copy()
         self._setPatArgs(pargs, {"doTauHLTMatching": False,
                                  "doPatElectronID": False})
-        sequence = addPF2PAT(self.process, dataVersion, doPatTrigger=False, patArgs=pargs, pvSelectionConfig=pvSelectionConfig)
+        sequence = addPF2PAT(self.process, dataVersion, doPatTrigger=False, doChs=False, patArgs=pargs, pvSelectionConfig=pvSelectionConfig)
 
         # Remove patElectrons and patPhotons altogether for the hybrid events
         if dataVersion.isMC():
             self.process.patDefaultSequencePFlow.remove(self.process.makePatElectronsPFlow)
             self.process.patDefaultSequencePFlow.remove(self.process.makePatElectronsPFlowAll)
-            self.process.patDefaultSequencePFlowChs.remove(self.process.makePatElectronsPFlowChs)
-            self.process.patDefaultSequencePFlowChs.remove(self.process.makePatElectronsPFlowChsAll)
+            #self.process.patDefaultSequencePFlowChs.remove(self.process.makePatElectronsPFlowChs)
+            #self.process.patDefaultSequencePFlowChs.remove(self.process.makePatElectronsPFlowChsAll)
             self.process.patDefaultSequencePFlow.remove(self.process.photonMatchPFlow)
-            self.process.patDefaultSequencePFlowChs.remove(self.process.photonMatchPFlowChs)
+            #self.process.patDefaultSequencePFlowChs.remove(self.process.photonMatchPFlowChs)
             del self.process.photonMatchPFlow
-            del self.process.photonMatchPFlowChs
+            #del self.process.photonMatchPFlowChs
         else:
             # Thanks to difference sequence structure we have to do this separately for data
             self.process.patDefaultSequencePFlow.remove(self.process.patElectronsPFlow)
             self.process.patDefaultSequencePFlow.remove(self.process.patElectronsPFlowAll)
-            self.process.patDefaultSequencePFlowChs.remove(self.process.patElectronsPFlowChs)
-            self.process.patDefaultSequencePFlowChs.remove(self.process.patElectronsPFlowChsAll)
+            #self.process.patDefaultSequencePFlowChs.remove(self.process.patElectronsPFlowChs)
+            #self.process.patDefaultSequencePFlowChs.remove(self.process.patElectronsPFlowChsAll)
         self.process.patDefaultSequencePFlow.remove(self.process.selectedPatElectronsPFlow)
         self.process.patDefaultSequencePFlow.remove(self.process.selectedPatElectronsPFlowAll)
-        self.process.patDefaultSequencePFlowChs.remove(self.process.selectedPatElectronsPFlowChs)
-        self.process.patDefaultSequencePFlowChs.remove(self.process.selectedPatElectronsPFlowChsAll)
+        #self.process.patDefaultSequencePFlowChs.remove(self.process.selectedPatElectronsPFlowChs)
+        #self.process.patDefaultSequencePFlowChs.remove(self.process.selectedPatElectronsPFlowChsAll)
         del self.process.patElectronsPFlow
         del self.process.patElectronsPFlowAll
-        del self.process.patElectronsPFlowChs
-        del self.process.patElectronsPFlowChsAll
+        #del self.process.patElectronsPFlowChs
+        #del self.process.patElectronsPFlowChsAll
         del self.process.selectedPatElectronsPFlow
         del self.process.selectedPatElectronsPFlowAll
-        del self.process.selectedPatElectronsPFlowChs
-        del self.process.selectedPatElectronsPFlowChsAll
+        #del self.process.selectedPatElectronsPFlowChs
+        #del self.process.selectedPatElectronsPFlowChsAll
 
 
         # Remove soft muon/electron b tagging discriminators as they are not
@@ -239,10 +239,10 @@ class PATBuilder:
             label = tag.getModuleLabel()
             return "softMuon" not in label and "softElectron" not in label
         self.process.patJetsPFlow.discriminatorSources = filter(filterOutSoft, self.process.patJets.discriminatorSources)
-        self.process.patJetsPFlowChs.discriminatorSources = filter(filterOutSoft, self.process.patJets.discriminatorSources)
+        #self.process.patJetsPFlowChs.discriminatorSources = filter(filterOutSoft, self.process.patJets.discriminatorSources)
         for seq in [self.process.btagging,
                     self.process.btaggingJetTagsAODPFlow, self.process.btaggingTagInfosAODPFlow,
-                    self.process.btaggingJetTagsAODPFlowChs, self.process.btaggingTagInfosAODPFlowChs,
+                    #self.process.btaggingJetTagsAODPFlowChs, self.process.btaggingTagInfosAODPFlowChs,
                     ]:
             softMuonRemover = RemoveSoftMuonVisitor.RemoveSoftMuonVisitor()
             seq.visit(softMuonRemover)
@@ -250,24 +250,24 @@ class PATBuilder:
 
         # Use the merged track collection
         self.process.pfJetTracksAssociatorAtVertexPFlow.tracks.setModuleLabel("tmfTracks")
-        self.process.pfJetTracksAssociatorAtVertexPFlowChs.tracks.setModuleLabel("tmfTracks")
+        #self.process.pfJetTracksAssociatorAtVertexPFlowChs.tracks.setModuleLabel("tmfTracks")
         self.process.jetTracksAssociatorAtVertexPFlow.tracks.setModuleLabel("tmfTracks")
-        self.process.jetTracksAssociatorAtVertexPFlowChs.tracks.setModuleLabel("tmfTracks")
+        #self.process.jetTracksAssociatorAtVertexPFlowChs.tracks.setModuleLabel("tmfTracks")
 
         # Do jet-parton matching with the genParticles of the original event
         if dataVersion.isMC():
             self.process.patJetPartonsPFlow.src.setProcessName(dataVersion.getTriggerProcess())
-            self.process.patJetPartonsPFlowChs.src.setProcessName(dataVersion.getTriggerProcess())
+            #self.process.patJetPartonsPFlowChs.src.setProcessName(dataVersion.getTriggerProcess())
 
             self.process.patJetPartonMatchPFlow.matched.setProcessName(dataVersion.getTriggerProcess())
-            self.process.patJetPartonMatchPFlowChs.matched.setProcessName(dataVersion.getTriggerProcess())
+            #self.process.patJetPartonMatchPFlowChs.matched.setProcessName(dataVersion.getTriggerProcess())
 
             # in v13_3 embeddings the GenJets are done from the tau part, hence they are meaningless
             self.process.patJetsPFlow.addGenJetMatch = False
             self.process.patJetsPFlow.genJetMatch = ""
 
-            self.process.patJetsPFlowChs.addGenJetMatch = False
-            self.process.patJetsPFlowChs.genJetMatch = ""
+            #self.process.patJetsPFlowChs.addGenJetMatch = False
+            #self.process.patJetsPFlowChs.genJetMatch = ""
 
         # This is now somewhat WTF, is the normal b-tagging affected by this? (FIXME)
         # I can't replace the InputTag module labels in place, because they are shared between the two PATJetProducers
@@ -276,9 +276,9 @@ class PATBuilder:
             tags.append(cms.InputTag(inputTag.getModuleLabel()+"AODPFlow"))
         self.process.patJetsPFlow.discriminatorSources = tags
         tags = []
-        for inputTag in self.process.patJetsPFlowChs.discriminatorSources:
-            tags.append(cms.InputTag(inputTag.getModuleLabel()+"AODPFlowChs"))
-        self.process.patJetsPFlowChs.discriminatorSources = tags
+        #for inputTag in self.process.patJetsPFlowChs.discriminatorSources:
+        #    tags.append(cms.InputTag(inputTag.getModuleLabel()+"AODPFlowChs"))
+        #self.process.patJetsPFlowChs.discriminatorSources = tags
 
         # Another part of the PAT process.out hack
         if not hasOut:
@@ -1359,7 +1359,7 @@ class PF2PATBuilder:
         self.endSequence *= m
 
 
-def addPF2PAT(process, dataVersion, doPatTrigger=True, patArgs={}, pvSelectionConfig=""):
+def addPF2PAT(process, dataVersion, doPatTrigger=True, doChs=True, patArgs={}, pvSelectionConfig=""):
     # Hack to not to crash if something in PAT assumes process.out
     # hasOut = hasattr(process, "out")
     # outputCommands = []
@@ -1412,8 +1412,9 @@ def addPF2PAT(process, dataVersion, doPatTrigger=True, patArgs={}, pvSelectionCo
     postfixes.append("PFlow")
 
     # Then with CHS
-    pf2patBuilder.build(postfix="PFlowChs", chs=True)
-    postfixes.append("PFlowChs")
+    if doChs:
+        pf2patBuilder.build(postfix="PFlowChs", chs=True)
+        postfixes.append("PFlowChs")
 
     outputCommands.extend(pf2patBuilder.getOutputCommands())
 
