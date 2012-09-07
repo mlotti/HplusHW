@@ -1215,6 +1215,23 @@ class PF2PATBuilder:
 
         selectedPatJets = getattr(self.process, "selectedPatJets"+postfix)
         jets = selectedPatJets.src.value()
+        seq = getattr(self.process, "patDefaultSequence"+postfix)
+
+        if self.dataVersion.isData():
+            self.process.load("PhysicsTools.PatUtils.patPFMETCorrections_cff")
+            self.process.selectedPatJetsForMETtype1p2Corr.src = jets
+            self.process.selectedPatJetsForMETtype2Corr.src = jets
+            self.process.patPFMet.addGenMET = False
+
+            seq *= self.process.producePatPFMETCorrections
+            self.outputCommands.extend([
+                    "keep *_patPFMet_*_*",
+                    "keep *_patType1CorrectedPFMet_*_*",
+                    "keep *_patType1p2CorrectedPFMet_*_*",
+                    ])
+            return
+
+        # Following is for MC only
 
         outputModule = ""
         outdict = self.process.outputModules_()
@@ -1240,7 +1257,6 @@ class PF2PATBuilder:
 
         # The function call above adds metUncertaintySequence to
         # patDefaultSequence. We have to add it to patDefaultSequence PFlow manually
-        seq = getattr(self.process, "patDefaultSequence"+postfix)
         seq *= self.process.metUncertaintySequence
 
         # Add "selected"-collections for all jets
