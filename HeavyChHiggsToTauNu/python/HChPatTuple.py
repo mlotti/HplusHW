@@ -29,7 +29,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbed
 tauPreSelection = "pt() > 15"
 #tauPreSelection = ""
 
-jetPreSelection = "pt() > 7"
+jetPreSelection = "pt() > 10"
 #jetPreSelection = ""
 
 class PATBuilder:
