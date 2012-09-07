@@ -1213,7 +1213,8 @@ class PF2PATBuilder:
 
             return
 
-        jets = getattr(self.process, "selectedPatJets"+postfix).src.value()
+        selectedPatJets = getattr(self.process, "selectedPatJets"+postfix)
+        jets = selectedPatJets.src.value()
 
         outputModule = ""
         outdict = self.process.outputModules_()
@@ -1242,54 +1243,45 @@ class PF2PATBuilder:
         seq = getattr(self.process, "patDefaultSequence"+postfix)
         seq *= self.process.metUncertaintySequence
 
+        # Add "selected"-collections for all jets
+        # "All" name "shiftedPatJetsBetaEmbeddedPFlowEnUpForCorrMEt"
+        # "Selected" name "shiftedPatJetsPFlowEnUpForCorrMEt"
+        tmp = jets.replace("patJets", "")
+        shiftedJetNames = [ # These are the ones produced by runMEtUncertainties
+            "shiftedPatJets%sEnUpForCorrMEt" % tmp,
+            "shiftedPatJets%sEnDownForCorrMEt" % tmp,
+            "smearedPatJets%s" % tmp,
+            "smearedPatJets%sResUp" % tmp,
+            "smearedPatJets%sResDown" % tmp,
+            ]
+        selectedJetNames = []
+        for shiftedJet in shiftedJetNames:
+            m = selectedPatJets.clone(
+                src = shiftedJet
+            )
+            name = shiftedJet.replace(tmp, postfix)
+            setattr(self.process, name, m)
+            seq *= m
+            selectedJetNames.append(name)
+
         if outputModule != "":
             self.outputCommands.extend(self.process.out.outputCommands)
             self.process.out.outputCommands = []
 
 
-        # def add(name, module, keepInOutput=False):
-        #     setattr(self.process, name, module)
-        #     self.endSequence *= module
-        #     if keepInOutput:
-        #         self.outputCommands.append("keep *_%s_*_*" % name)
-        #     return name
-
-        # # Select jets with |eta| < 4.7
-        # m = patPFMETCorrections.selectedPatJetsForMETtype1p2Corr.clone(
-        #     src = jets
-        # )
-        # jetsForMETtype1p2 = add("selectedPatJetsForMETtype1p2Corr"+postfix, m)
-
-        # # Select jets with |eta| > 4.7
-        # m = patPFMETCorrections.selectedPatJetsForMETtype2Corr.clone(
-        #     src = jets
-        # )
-        # jetsForMETtype2 = add("selectedPatJetsForMETtype2Corr"+postfix, m)
-
-        # # Calculate corrections for type I and II from jets |eta| < 4.7
-        # m = patPFMETCorrections.patPFJetMETtype1p2Corr.clone(
-        #     src = jetsForMETtype1p2,
-        #     skipMuons = False # we don't have muons in the final state
-        # )
-        # if self.dataVersion.isData():
-        #     m.jetCorrLabel = "L2L3Residual"
-        # type1p2Corr = add("patPFJetMETtype1p2Corr"+postfix, m, True)
-
-        # # Calculate correction for type II from jets |eta| > 4.7
-        # m = patPFMETCorrections.patPFJetMETtype2Corr.clone(
-        #     src = jetsForMETtype2,
-        #     skipMuons = False
-        # )
-        # if self.dataVersion.isData():
-        #     m.jetCorrLabel = "L2L3Residual"
-        # type2Corr = add("patPFJetMETtype2Corr"+postfix, m, True)
-    
-
-        # # Produce Type II MET correction from unclustered PFCandidates
-        # m = cms.EDProducer("PFCandMETcorrInputProducer",
-        #     src = cms.InputTag("pfNoJet"+postfix)
-        # )
-        # add("pfCandMETcorr"+postfix, m, True)
+            processName = self.process.name_()
+            # Drop "all" shifted/smeared jet collections in favor of
+            # the "selected" collections. We don't need the
+            # "ForRawMEt" energy variations.
+            self.outputCommands.extend([
+                    "drop *_shiftedPatJetsBetaEmbedded%sEnUpForRawMEt_*_%s" % (postfix, processName),
+                    "drop *_shiftedPatJetsBetaEmbedded%sEnDownForRawMEt_*_%s" % (postfix, processName)
+                    ])
+            for n in shiftedJetNames:
+                self.outputCommands.append("drop *_%s_*_%s" % (n, processName))
+            # Keep the "selected" collections
+            for n in selectedJetNames:
+                self.outputCommands.append("keep *_%s_*_%s" % (n, processName))
 
    
     def _customizeEventCleaning(self, postfix):
