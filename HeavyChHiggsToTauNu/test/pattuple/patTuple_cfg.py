@@ -243,3 +243,6 @@ if len(options.skimConfig) > 0:
 # Output module in EndPath
 process.outpath = cms.EndPath(process.out)
 
+#f = open("configDump.py", "w")
+#f.write(process.dumpPython())
+#f.close()
