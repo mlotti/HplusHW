@@ -27,7 +27,8 @@ import plotTauEmbeddingSignalAnalysis as tauEmbedding
 
 
 analysis = "tauNtuple"
-counters = analysis+"Counters"
+analysis = "signalAnalysisCaloMet60TEff"
+counters = analysis+"/counters"
 
 #era = "EPS"
 #era = "Run2011A-EPS"

@@ -39,9 +39,9 @@ defaultVersions = [
 #    "v13_3_seedTest9",
 #    "v13_3_seedTest10",
 #    "v14"
-    "v44_2",
-    #"v44_2_seed1",
-    #"v44_2_seed2",
+#    "v44_3_seed0",
+    "v44_3_seed1",
+#    "v44_3_seed2",
     #"v44_2fix", # for hybrid event production only
     #"v44_2fix_seed1", # for hybrid event production only
     #"v44_2fix_seed2", # for hybrid event production only
@@ -132,7 +132,7 @@ datasetsSignal = [
     "TTToHplusBHminusB_M160_Fall11",
 ]
 
-#datasetsData2011 = []
+datasetsData2011 = []
 #datasetsMCnoQCD = []
 #datasetsMCQCD = []
 datasetsSignal = []
