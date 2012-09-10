@@ -81,7 +81,7 @@ defaultNumberOfJobs = 20
 defaultFirstSeed = 1000
 
 ## List of all mass points
-allMassPoints = ["80", "90", "120", "140", "150", "155", "160"] # FIXME, currently mass point 100 is not available
+allMassPoints = ["80", "90", "100", "120", "140", "150", "155", "160"] # FIXME, currently mass point 100 is not available
 ## Default mass points
 defaultMassPoints = ["120"]
 

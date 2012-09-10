@@ -42,7 +42,7 @@ def addDataSelection(process, dataVersion, options, calculateEventCleaning=False
 
     # Produce results for filters
 
-    addHBHENoisefilterResultProducer(process, seq)
+    addHBHENoiseFilterResultProducer(process, seq)
 
     if calculateEventCleaning:
         # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#ECAL_dead_cell_filter

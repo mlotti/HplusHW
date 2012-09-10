@@ -43,6 +43,10 @@ namespace HPlus {
     fJetIdMaxChargedEMEnergyFraction(iConfig.getUntrackedParameter<double>("jetIdMaxChargedEMEnergyFraction")),
     fBetaCut(iConfig.getUntrackedParameter<double>("betaCut"), iConfig.getUntrackedParameter<std::string>("betaCutDirection")),
     fBetaSrc(iConfig.getUntrackedParameter<std::string>("betaCutSource")),
+    fApplyVetoForDeadECALCells(iConfig.getUntrackedParameter<bool>("applyVetoForDeadECALCells")),
+    fDeadECALCellsVetoDeltaR(iConfig.getUntrackedParameter<double>("deadECALCellsVetoDeltaR")),
+    fAllCount(eventCounter.addSubCounter("Jet main","All events")),
+    fDeadECALCellVetoCount(eventCounter.addSubCounter("Jet main","Dead ECAL cells veto")),
     fCleanCutCount(eventCounter.addSubCounter("Jet main","Jet cleaning")),
     fJetIdCount(eventCounter.addSubCounter("Jet main", "Jet ID")),
     fBetaCutCount(eventCounter.addSubCounter("Jet main","beta cut")),
@@ -58,7 +62,7 @@ namespace HPlus {
     fneutralEmEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "neutralEmEnergyFractionCut")),
     fnumberOfDaughtersCutSubCount(eventCounter.addSubCounter("Jet selection", "numberOfDaughtersCut")),
     fchargedHadronEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "chargedHadronEnergyFractionCut")),
-    fchargedMultiplicityCutSubCount(eventCounter.addSubCounter("Jet selection", "fchargedMultiplicityCut")),  
+    fchargedMultiplicityCutSubCount(eventCounter.addSubCounter("Jet selection", "fchargedMultiplicityCut")),
     fchargedEmEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "chargedEmEnergyFractionCut")),
     fJetIdSubCount(eventCounter.addSubCounter("Jet selection", "Jet ID")),
     fEMfractionCutSubCount(eventCounter.addSubCounter("Jet selection", "EMfraction")),
@@ -199,6 +203,18 @@ namespace HPlus {
     if (!iEvent.isRealData()) {
       iEvent.getByLabel("genParticles", genParticles);
     }
+    increment(fAllCount);
+    // Check if any of the jets hits a dead ECAL cell
+    if (fApplyVetoForDeadECALCells) {
+      for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
+        // Ignore jets too close to tau
+        if(!(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), (*iter)->p4()) > fMaxDR)) continue;
+        if ((*iter)->pt() < 20.0) continue;
+        bool myStatus = fDeadECALCells.ObjectHitsDeadECALCell(*iter, fDeadECALCellsVetoDeltaR);
+        if (!myStatus) return Data(this, false);
+      }
+    }
+    increment(fDeadECALCellVetoCount);
 
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
@@ -287,7 +303,7 @@ namespace HPlus {
 
       //bool myIsPVJetStatusByLdgTrack = (iJet->userInt("LdgTrackBelongsToSelectedPV") == 1);
       // Do MC matching of jet to a quark or gluon
-      double minDeltaR = 99999;
+      //double minDeltaR = 99999;
       bool myIsPVJetStatusByMCMatching = false;
       if (!iEvent.isRealData()) {
         for (size_t i=0; i < genParticles->size(); ++i) {
@@ -460,9 +476,9 @@ namespace HPlus {
     // Calculate minimum distance in eta of a selected jet and the gap between barrel and endcap
     double myMinEta = 999.0;
     for(edm::PtrVector<pat::Jet>::const_iterator iter = fSelectedJets.begin(); iter != fSelectedJets.end(); ++iter) {
-      double myValue = std::abs((*iter)->eta() - 1.5);
+      double myValue = std::abs(std::abs((*iter)->eta()) - 1.5);
       if (myValue < myMinEta)
-        myValue = myMinEta;
+        myMinEta = myValue;
     }
     fMinEtaOfSelectedJetToGap = myMinEta;
     hMinEtaOfSelectedJetToGap->Fill(fMinEtaOfSelectedJetToGap);
@@ -479,8 +495,10 @@ namespace HPlus {
       myMegaJet += myJet;
     }
     fEtaSpreadOfSelectedJets = myMaxEta - myMinEta;
-    fAverageEtaOfSelectedJets = myMegaJet.Eta();
-    fAverageSelectedJetsEtaDistanceToTauEta = std::abs(myMegaJet.Eta() - tau->eta());
+    if (myMegaJet.Z() > 0.0) {
+      fAverageEtaOfSelectedJets = myMegaJet.Eta();
+      fAverageSelectedJetsEtaDistanceToTauEta = std::abs(myMegaJet.Eta() - tau->eta());
+    }
 
     // Everything has been done now return
     return Data(this, passEvent);

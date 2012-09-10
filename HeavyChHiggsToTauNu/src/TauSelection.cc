@@ -514,7 +514,8 @@ namespace HPlus {
       if (!fTauID->passKinematicSelection(iTau)) continue;
       if (!fTauID->passLeadingTrackCuts(iTau)) continue;
       if (!fTauID->passECALFiducialCuts(iTau)) continue;
-      if (!fTauID->passTauCandidateEAndMuVetoCuts(iTau)) continue;      
+      if (!fTauID->passTauCandidateEAndMuVetoCuts(iTau)) continue;
+      if (!fTauID->passVetoAgainstDeadECALCells(iTau)) continue;
       fillHistogramsForSelectedTauCandidates(iTau, iEvent);
       tmpSelectedTauCandidates.push_back(iTau);
       

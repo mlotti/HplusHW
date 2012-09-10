@@ -30,7 +30,7 @@ tightenedMuonsCount = cms.EDProducer("EventCountProducer")
 #    maxNumber = cms.uint32(1)
 #)
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
-tightenedMuonsWithIso = customisations.constructMuonIsolationOnTheFly("tightenedMuons", embedPrefix="embeddingStep")
+tightenedMuonsWithIso = customisations.constructMuonIsolationOnTheFly("tightenedMuons", embedPrefix="embeddingStep_")
 
 tauEmbeddingMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag("tightenedMuonsWithIso"),
