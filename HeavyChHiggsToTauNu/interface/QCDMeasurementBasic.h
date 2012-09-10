@@ -166,10 +166,37 @@ namespace HPlus {
     WrappedTH1* hVerticesTriggeredBeforeWeight;
     WrappedTH1* hVerticesTriggeredAfterWeight;
 
+    WrappedTH2* hTauEtaVsPhiAfterBasicSelectionsCollinear;
+    WrappedTH2* hTauEtaVsPhiAfterBasicSelectionsCollinearOpposite;
+    WrappedTH2* hTauEtaVsPhiAfterBasicSelectionsBackToBack;
+    WrappedTH2* hTauEtaVsPhiAfterBasicSelectionsBackToBackOpposite;
+    WrappedTH2* hTauEtaVsPhiAfterBasicSelectionsCollinearTight;
+    WrappedTH2* hTauEtaVsPhiAfterBasicSelectionsBackToBackTight;
     WrappedTH2* hTauEtaVsPhiAfterMETLegCollinear;
     WrappedTH2* hTauEtaVsPhiAfterMETLegCollinearOpposite;
     WrappedTH2* hTauEtaVsPhiAfterMETLegBackToBack;
     WrappedTH2* hTauEtaVsPhiAfterMETLegBackToBackOpposite;
+    WrappedTH2* hTauEtaVsPhiAfterMETLegCollinearTight;
+    WrappedTH2* hTauEtaVsPhiAfterMETLegBackToBackTight;
+    WrappedTH2* hTauEtaVsPhiAfterTauLegCollinear;
+    WrappedTH2* hTauEtaVsPhiAfterTauLegCollinearOpposite;
+    WrappedTH2* hTauEtaVsPhiAfterTauLegBackToBack;
+    WrappedTH2* hTauEtaVsPhiAfterTauLegBackToBackOpposite;
+    WrappedTH2* hTauEtaVsPhiAfterTauLegCollinearTight;
+    WrappedTH2* hTauEtaVsPhiAfterTauLegBackToBackTight;
+
+    WrappedTH2* hJetEtaVsPhiAfterBasicSelectionsCollinear;
+    WrappedTH2* hJetEtaVsPhiAfterBasicSelectionsCollinearTight;
+    WrappedTH2* hJetEtaVsPhiAfterBasicSelectionsBackToBack;
+    WrappedTH2* hJetEtaVsPhiAfterBasicSelectionsBackToBackTight;
+    WrappedTH2* hJetEtaVsPhiAfterMETLegCollinear;
+    WrappedTH2* hJetEtaVsPhiAfterMETLegCollinearTight;
+    WrappedTH2* hJetEtaVsPhiAfterMETLegBackToBack;
+    WrappedTH2* hJetEtaVsPhiAfterMETLegBackToBackTight;
+    WrappedTH2* hJetEtaVsPhiAfterTauLegCollinear;
+    WrappedTH2* hJetEtaVsPhiAfterTauLegCollinearTight;
+    WrappedTH2* hJetEtaVsPhiAfterTauLegBackToBack;
+    WrappedTH2* hJetEtaVsPhiAfterTauLegBackToBackTight;
 
     // Other histograms
     WrappedTH1 *hSelectionFlow;

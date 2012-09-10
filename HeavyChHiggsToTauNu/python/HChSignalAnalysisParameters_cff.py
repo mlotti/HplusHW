@@ -56,6 +56,7 @@ tauSelectionBase = cms.untracked.PSet(
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
     againstElectronDiscriminator = cms.untracked.string("againstElectronMVA"), # discriminator against electrons
     againstMuonDiscriminator = cms.untracked.string("againstMuonTight"), # discriminator for against muons
+    applyVetoForDeadECALCells = cms.untracked.bool(False), # set to true to exclude taus that are pointing to a dead ECAL cell
     isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr"), # discriminator for isolation
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1.0), # cut point for continuous isolation discriminator, applied only if it is non-zero
     rtauCut = cms.untracked.double(0.7), # rtau > value
@@ -187,6 +188,9 @@ jetSelectionBase = cms.untracked.PSet(
     betaCut = cms.untracked.double(0.2), # default 0.2
     betaCutSource = cms.untracked.string("Beta"), # tag name in user floats
     betaCutDirection = cms.untracked.string("GT"), # direction of beta cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
+    # Veto event if jet hits dead ECAL cell
+    applyVetoForDeadECALCells = cms.untracked.bool(False),
+    deadECALCellsVetoDeltaR = cms.untracked.double(0.07),
     # Experimental
     EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )
