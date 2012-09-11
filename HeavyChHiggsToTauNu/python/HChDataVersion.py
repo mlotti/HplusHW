@@ -61,7 +61,7 @@ config = {
         "recoProcess": "RECO",
         "signalTrigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
         #"patMadhatter": "file:/mnt/flustre/wendland/testsamples/pattuple_63_1_1Ed.root", # TTJets, v25b
-        "patMadhatter:" "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c/792142e4d0984f6b86a1b0c2d38da119/pattuple_98_1_tbC.root", # TTJets, v25c
+        "patMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c/792142e4d0984f6b86a1b0c2d38da119/pattuple_98_1_tbC.root", # TTJets, v25c
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTJets_TuneZ2_Fall11/f102f48f945c7d8b633b6cfb2ce7b4c8/pattuple_63_1_1Ed.root",
     },
     "44XmcAve32": {
