@@ -191,7 +191,7 @@ DataGroups.append(DataGroup(
     shapeHisto   = "mtSum",
     dirPrefix   = QCDInvertedAnalysis,
     rateCounter  = "deltaPhiTauMET160 limit",
-    additionalNormalisation= 0.0066,
+    additionalNormalisation = 0.0066,
     nuisances    = ["41","42","43","44"] # FIXME: add shape stat, i.e. 40x
 ))
 
@@ -207,6 +207,7 @@ if not OptionReplaceEmbeddingByMC:
         dirPrefix   = EmbeddingAnalysis,
         rateCounter  = SignalRateCounter,
         validMassPoints = MassPoints,
+        additionalNormalisation = 1.0907,
         nuisances    = ["01b","03","14","15","16","19","40","48"]
         #nuisances    = ["01b","03","45","14","15","16","19","40"]
     ))
@@ -257,7 +258,6 @@ if not OptionReplaceEmbeddingByMC:
         dirPrefix   = SignalAnalysis,
         rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
-        additionalNormalisation= 1.0907,
         nuisances    = ["01d","02","04","45","46","47","09","10b","28","33","34b","35"]
     ))
     DataGroups.append(DataGroup(
@@ -891,6 +891,7 @@ ControlPlots.append(ControlPlotInput(
                          "rangeMin": 3.0,
                          "rangeMax": 8.0,
                          "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                         "binLabels": ["3","4","5","6","7"], # leave empty to disable bin labels
                          "xtitle": "Number of selected jets",
                          "ytitle": "Events",
                          "unit": "",
@@ -922,6 +923,7 @@ ControlPlots.append(ControlPlotInput(
                          "rangeMax": 500.0,
                          #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
                          "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
+                         "binLabels": [], # leave empty to disable bin labels
                          "xtitle": "E_{T}^{miss}",
                          "ytitle": "Events",
                          "unit": "GeV",
@@ -952,6 +954,7 @@ ControlPlots.append(ControlPlotInput(
                          "rangeMin": 0.0,
                          "rangeMax": 5.0,
                          "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                         "binLabels": ["0","1","2","3","4"], # leave empty to disable bin labels
                          "xtitle": "Number of selected b jets",
                          "ytitle": "Events",
                          "unit": "",
@@ -978,10 +981,11 @@ ControlPlots.append(ControlPlotInput(
     QCDFactNormalisation = "factorisation/Leg1AfterBTagging",
     QCDFactHistoPath = "shape_CtrlLeg1AfterDeltaPhiTauMET",
     QCDFactHistoName = "CtrlLeg1AfterDeltaPhiTauMET",
-    details          = { "bins": 18,
+    details          = { "bins": 11,
                          "rangeMin": 0.0,
                          "rangeMax": 180.0,
-                         "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                         "variableBinSizeLowEdges": [0., 10., 20., 30., 40., 60., 80., 100., 120., 140., 160.], # if an empty list is given, then uniform bin width is used
+                         "binLabels": [], # leave empty to disable bin labels
                          "xtitle": "#Delta#phi(#tau_{h},E_{T}^{miss})",
                          "ytitle": "Events",
                          "unit": "^{o}",
@@ -1010,6 +1014,7 @@ ControlPlots.append(ControlPlotInput(
                          #"rangeMin": 0.0,
                          #"rangeMax": 180.0,
                          #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                         #"binLabels": [], # leave empty to disable bin labels
                          #"xtitle": "max(#Delta#phi(jet,E_{T}^{miss})",
                          #"ytitle": "Events",
                          #"unit": "^{o}",
@@ -1038,6 +1043,7 @@ ControlPlots.append(ControlPlotInput(
                          #"rangeMin": 0.0,
                          #"rangeMax": 200.0,
                          #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                         #"binLabels": [], # leave empty to disable bin labels
                          #"xtitle": "m_{jj}",
                          #"ytitle": "Events",
                          #"unit": "GeV/c^{2}",
@@ -1066,6 +1072,7 @@ ControlPlots.append(ControlPlotInput(
                          #"rangeMin": 0.0,
                          #"rangeMax": 400.0,
                          #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                         #"binLabels": [], # leave empty to disable bin labels
                          #"xtitle": "m_{bjj}",
                          #"ytitle": "Events",
                          #"unit": "GeV/c^{2}",
@@ -1096,6 +1103,7 @@ ControlPlots.append(ControlPlotInput(
                          "rangeMin": 0.0,
                          "rangeMax": 400.0,
                          "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
+                         "binLabels": [], # leave empty to disable bin labels
                          "xtitle": "mT(#tau_{h},E_{T}^{miss})",
                          "ytitle": "Events",
                          "unit": "GeV/c^{2}",
@@ -1126,6 +1134,7 @@ ControlPlots.append(ControlPlotInput(
                          "rangeMin": 0.0,
                          "rangeMax": 500.0,
                          "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
+                         "binLabels": [], # leave empty to disable bin labels
                          "xtitle": "m(#tau_{h},E^{miss})",
                          "ytitle": "Events",
                          "unit": "GeV/c^{2}",
@@ -1156,6 +1165,7 @@ ControlPlots.append(ControlPlotInput(
                          "rangeMin": 3.0,
                          "rangeMax": 8.0,
                          "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                         "binLabels": ["3","4","5","6","7"], # leave empty to disable bin labels
                          "xtitle": "Number of selected jets",
                          "ytitle": "Events",
                          "unit": "",
