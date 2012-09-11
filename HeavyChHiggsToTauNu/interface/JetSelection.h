@@ -9,6 +9,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DirectionalCut.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeadECALCells.h"
 
 namespace edm {
   class ParameterSet;
@@ -82,8 +83,14 @@ namespace HPlus {
     const double fJetIdMaxChargedEMEnergyFraction;
     DirectionalCut fBetaCut;
     std::string fBetaSrc;
+    const bool fApplyVetoForDeadECALCells;
+    const double fDeadECALCellsVetoDeltaR;
+
+    DeadECALCells fDeadECALCells;
 
     // Counters
+    Count fAllCount;
+    Count fDeadECALCellVetoCount;
     Count fCleanCutCount;
     Count fJetIdCount;
     Count fBetaCutCount;

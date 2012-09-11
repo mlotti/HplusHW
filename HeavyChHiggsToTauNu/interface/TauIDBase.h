@@ -8,6 +8,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SelectionCounterPackager.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeadECALCells.h"
 
 #include "CommonTools/Utils/interface/TFileDirectory.h"
 
@@ -40,6 +41,7 @@ namespace HPlus {
     bool passKinematicSelection(const edm::Ptr<pat::Tau> tau);
     virtual bool passLeadingTrackCuts(const edm::Ptr<pat::Tau> tau) = 0;
     bool passTauCandidateEAndMuVetoCuts(const edm::Ptr<pat::Tau> tau);
+    bool passVetoAgainstDeadECALCells(const edm::Ptr<pat::Tau> tau);
     bool passIsolation(const edm::Ptr<pat::Tau> tau);
     bool passAntiIsolation(const edm::Ptr<pat::Tau> tau);
     virtual bool passNProngsCut(const edm::Ptr<pat::Tau> tau) = 0;
@@ -61,6 +63,7 @@ namespace HPlus {
     const double fEtaCut;
     const double fLeadTrkPtCut;
     const std::string fAgainstElectronDiscriminator;
+    const bool fApplyVetoForDeadECALCells;
     const std::string fAgainstMuonDiscriminator;
     const size_t fProngCount;
     const std::string fIsolationDiscriminator;
@@ -79,10 +82,13 @@ namespace HPlus {
     size_t fIDECALFiducialCutCracksOnly;
     size_t fIDECALFiducialCut;
     size_t fIDAgainstElectronCut;
+    size_t fVetoAgainstDeadECALCells;
     size_t fIDAgainstMuonCut;
     size_t fIDIsolationCut;
     size_t fIDNProngsCut;
     size_t fIDRTauCut;
+
+    DeadECALCells fDeadECALCells;
 
     /// Label of the specific tau ID algorithm (applied to counters and histograms)
     std::string fBaseLabel;

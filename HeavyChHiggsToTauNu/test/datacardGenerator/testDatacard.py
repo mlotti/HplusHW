@@ -1,18 +1,17 @@
 DataCardName    = 'myDummyTestName'
-#Path            = '/mnt/flustre/slehti/HplusDataForLands'
 Path            = '/home/wendland/data/v25b/freeze_forPREAPP'
-#Path            = '/home/wendland/data/v25b/test3loose'
+Path            = '/home/wendland/data/v25b/v10'
 #MassPoints      = [80,90,100,120,140,150,155,160]
-MassPoints      = [80,90,100,120,140,150,155,160]
+#MassPoints      = [80,90,100,120,140,150,155,160]
 #MassPoints      = [80,120,160]
-#MassPoints      = [120]
+MassPoints      = [120]
 
 BlindAnalysis   = True
 
 # Specify name of EDFilter or EDAnalyser process that produced the root files
 SignalAnalysis  = "signalAnalysis"
-#EmbeddingAnalysis     = "signalAnalysisCaloMet60TEff"
-EmbeddingAnalysis     = "signalAnalysisCaloMet60"
+EmbeddingAnalysis     = "signalAnalysisCaloMet60TEff"
+#EmbeddingAnalysis     = "signalAnalysisCaloMet60"
 QCDFactorisedAnalysis = "QCDMeasurement"
 QCDInvertedAnalysis = None # FIXME
 
@@ -31,7 +30,7 @@ OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine
 OptionDoControlPlots = True
 
 # Options for reports and article
-OptionBr = 0.03  # Br(t->bH+)
+OptionBr = 0.01  # Br(t->bH+)
 
 # Shape histogram definitions
 SignalShapeHisto = ""
@@ -41,11 +40,11 @@ ShapeHistogramsDimensions = {}
 if OptionMassShape == "TransverseMass":
     SignalShapeHisto = "transverseMass"
     FakeShapeHisto = "EWKFakeTausTransverseMass"
-    ShapeHistogramsDimensions = { "bins": 20,
+    ShapeHistogramsDimensions = { "bins": 10,
                                   "rangeMin": 0.0,
                                   "rangeMax": 400.0,
-                                  "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
-                                  #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
+                                  #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                                  "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,200], # if an empty list is given, then uniform bin width is used
                                   "xtitle": "Transverse mass / GeV",
                                   "ytitle": "Events" }
 elif OptionMassShape == "FullMass":
@@ -61,13 +60,20 @@ elif OptionMassShape == "FullMass":
 
 DataCardName += "_"+OptionMassShape
 
-QCDFactorisedMETShapeHistogramsDimensions = {  "bins": 10,
-                                               "rangeMin": 0.0,
-                                               "rangeMax": 100.0,
-                                               #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
-                                               "variableBinSizeLowEdges": [0,10,20,30,40,50,60,70,80,90], # if an empty list is given, then uniform bin width is used
-                                               "xtitle": "E_{T}^{miss}, GeV/c^{2}",
-                                               "ytitle": "Events"}
+QCDFactorisedValidationMETShapeHistogramsDimensions = {  "bins": 8,
+                                                         "rangeMin": 0.0,
+                                                         "rangeMax": 100.0,
+                                                         #"variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160,180,200,250,300], # if an empty list is given, then uniform bin width is used
+                                                         "variableBinSizeLowEdges": [0,10,20,30,40,50,60,70], # if an empty list is given, then uniform bin width is used
+                                                         "xtitle": "E_{T}^{miss}, GeV/c^{2}",
+                                                         "ytitle": "Events"}
+QCDFactorisedValidationMtShapeHistogramsDimensions = { "bins": 9,
+                                                        "rangeMin": 0.0,
+                                                        "rangeMax": 400.0,
+                                                        #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                                                        "variableBinSizeLowEdges": [0,20,40,60,80,100,120,140,160], # if an empty list is given, then uniform bin width is used
+                                                        "xtitle": "Transverse mass / GeV",
+                                                        "ytitle": "Events" }
 
 ##############################################################################
 # Observation definition (how to retrieve number of observed events)
@@ -135,7 +141,7 @@ if OptionMassShape == "TransverseMass":
                                                             "shape_CtrlLeg1METAfterFullTauIDMET20/CtrlLeg1METAfterFullTauIDMET20",
                                                             "shape_CtrlLeg1METAfterFullTauIDMET30/CtrlLeg1METAfterFullTauIDMET30",
                                                             ],
-                              "validationMETShapeDetails": QCDFactorisedMETShapeHistogramsDimensions,
+                              "validationMETShapeDetails": QCDFactorisedValidationMETShapeHistogramsDimensions,
                               "basicMtHisto": "shape_MtShapesAfterFullMETLeg/MtShapesAfterFullMETLeg", # prefix for shape histograms in MET leg (will be weighted by tau leg efficiency)
                               "validationMtShapeSource": ["shape_MtShapesAfterStandardSelection/MtShapesAfterStandardSelection",
                                                           "shape_MtShapesAfterStandardSelectionMET20/MtShapesAfterStandardSelectionMET20",
@@ -147,6 +153,7 @@ if OptionMassShape == "TransverseMass":
                                                            "shape_MtShapesAfterTauIDMET20/MtShapesAfterTauIDMET20",
                                                            "shape_MtShapesAfterTauIDMET30/MtShapesAfterTauIDMET30",
                                                            ],
+                              "validationMtShapeDetails": QCDFactorisedValidationMtShapeHistogramsDimensions,
                               "assumedMCEWKSystUncertainty": 0.20, # has no effect anymore ...
                               "factorisationMapAxisLabels": ["#tau p_{T}, GeV", "#tau #eta", "N_{vertices}"],
         }
@@ -250,7 +257,8 @@ if not OptionReplaceEmbeddingByMC:
         dirPrefix   = SignalAnalysis,
         rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01","02","04","45","46","47","09","10","28","33","34b","35"]
+        additionalNormalisation= 1.0907,
+        nuisances    = ["01d","02","04","45","46","47","09","10b","28","33","34b","35"]
     ))
     DataGroups.append(DataGroup(
         label        = "EWK_W_faketau",
@@ -261,7 +269,7 @@ if not OptionReplaceEmbeddingByMC:
         dirPrefix   = SignalAnalysis,
         rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01","02","04","45","46","47","09","11","29","33","34b","37"]
+        nuisances    = ["01d","02","04","45","46","47","09","11b","29","33","34b","37"]
     ))
     DataGroups.append(DataGroup(
         label        = "EWK_t_faketau",
@@ -272,7 +280,7 @@ if not OptionReplaceEmbeddingByMC:
         dirPrefix   = SignalAnalysis,
         rateCounter  = FakeRateCounter,
         validMassPoints = MassPoints,
-        nuisances    = ["01","02","04","45","46","47","09","10","30","33","34b","38"]
+        nuisances    = ["01d","02","04","45","46","47","09","10b","30","33","34b","38"]
     ))
 else:
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
@@ -358,7 +366,7 @@ Nuisances.append(Nuisance(
 
 Nuisances.append(Nuisance(
     id            = "01b",
-    label         = "tau+MET trg MET part for EWKtau (temp)",
+    label         = "tau+MET trg tau part for EWKtau (temp)",
     distr         = "lnN",
     function      = "Constant",
     value         = 0.066
@@ -366,7 +374,7 @@ Nuisances.append(Nuisance(
 
 Nuisances.append(Nuisance(
     id            = "01c",
-    label         = "tau+MET trg scale factor",
+    label         = "tau+MET trg tau scale factor for EWK tau",
     distr         = "lnN",
     function      = "ScaleFactor",
     histoDir      = ["ScaleFactorUncertainties",
@@ -376,6 +384,16 @@ Nuisances.append(Nuisance(
     normalisation = ["TriggerScaleFactorAbsUncertCounts_AfterSelection",
                      "TriggerScaleFactorAbsUncertCounts_AfterSelection"],
     #addUncertaintyInQuadrature = 0.10 # MET leg uncertainty
+))
+
+Nuisances.append(Nuisance(
+    id            = "01d",
+    label         = "tau+MET trg tau part for EWK fake taus",
+    distr         = "lnN",
+    function      = "ScaleFactor",
+    histoDir      = ["ScaleFactorUncertainties"],
+    histograms    = ["TriggerScaleFactorAbsUncert_EWKFakeTausAfterSelection"],
+    normalisation = ["TriggerScaleFactorAbsUncertCounts_EWKFakeTausAfterSelection"],
 ))
 
 Nuisances.append(Nuisance(
@@ -505,6 +523,16 @@ Nuisances.append(Nuisance(
 ))
 
 Nuisances.append(Nuisance(
+    id            = "10b",
+    label         = "btagging for EWK fake taus",
+    distr         = "lnN",
+    function      = "ScaleFactor",
+    histoDir      = ["ScaleFactorUncertainties"],
+    histograms    = ["BtagScaleFactorAbsUncert_EWKFakeTausAfterSelection"],
+    normalisation = ["BtagScaleFactorAbsUncertCounts_EWKFakeTausAfterSelection"]
+))
+
+Nuisances.append(Nuisance(
     id            = "11",
     label         = "mistagging",
     distr         = "lnN",
@@ -516,12 +544,12 @@ Nuisances.append(Nuisance(
 
 Nuisances.append(Nuisance(
     id            = "11b",
-    label         = "mistagging",
+    label         = "mistagging EWK fake taus",
     distr         = "lnN",
     function      = "ScaleFactor",
-    histoDir      = ["ScaleFactorUncertainties/"],
-    histograms    = ["BtagScaleFactorAbsUncert_AfterSelection"],
-    normalisation = ["BtagScaleFactorAbsUncertCounts_AfterSelection"]
+    histoDir      = ["ScaleFactorUncertainties"],
+    histograms    = ["BtagScaleFactorAbsUncert_EWKFakeTausAfterSelection"],
+    normalisation = ["BtagScaleFactorAbsUncertCounts_EWKFakeTausAfterSelection"]
 ))
 
 Nuisances.append(Nuisance(
@@ -833,8 +861,9 @@ Nuisances.append(Nuisance(
 ))
 
 MergeNuisances = []
-MergeNuisances.append(["01","01b","01c"])
+MergeNuisances.append(["01","01b","01c","01d"])
 #MergeNuisances.append(["07","07b","07c"])
+MergeNuisances.append(["10","10b"])
 MergeNuisances.append(["11","11b"])
 MergeNuisances.append(["15","15b"])
 MergeNuisances.append(["16","16b"])
@@ -1109,4 +1138,33 @@ ControlPlots.append(ControlPlotInput(
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
+ControlPlots.append(ControlPlotInput(
+    title            = "NjetsAfterMET",
+    signalHHid       = [-1],
+    signalHWid       = [0],
+    QCDid            = [3],
+    embeddingId      = EmbeddingIdList,
+    EWKfakeId        = EWKFakeIdList,
+    signalHistoPath  = "ControlPlots",
+    signalHistoName  = "NjetsAfterMET",
+    EWKfakeHistoPath  = "ControlPlotsEWKFakeTaus",
+    EWKfakeHistoName  = "NjetsAfterMET",
+    QCDFactNormalisation = "factorisation/Leg1AfterMET",
+    QCDFactHistoPath = "shape_CtrlLeg1NJetsAfterMET",
+    QCDFactHistoName = "CtrlLeg1NJetsAfterMET",
+    details          = { "bins": 5,
+                         "rangeMin": 3.0,
+                         "rangeMax": 8.0,
+                         "variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
+                         "xtitle": "Number of selected jets",
+                         "ytitle": "Events",
+                         "unit": "",
+                         "logy": True,
+                         "DeltaRatio": 0.5,
+                         "ymin": 0.9,
+                         "ymax": -1},
+    blindedRange     = [], # specify range min,max if blinding applies to this control plot
+    evaluationRange  = [], # specify range to be evaluated and saved into a file
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+))
 
