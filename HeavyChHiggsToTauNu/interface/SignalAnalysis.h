@@ -145,6 +145,8 @@ namespace HPlus {
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
     Count fDeltaPhiTauMETCounter;
+    Count fMetCut80Counter;
+    Count fMetCut100Counter;
     Count fHiggsMassCutCounter;
     Count fTauVetoAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiCounter;
@@ -226,6 +228,8 @@ namespace HPlus {
     
     // Transverse mass histograms
     WrappedTH1 *hTransverseMass;
+    WrappedTH1 *hTransverseMassMet80;
+    WrappedTH1 *hTransverseMassMet100;
     WrappedTH1 *hTransverseMassNoBtagging;
     WrappedTH1 *hTransverseMassNoBtaggingWithRtau;
     WrappedTH1 *hTransverseMassTopSelection;
@@ -249,6 +253,7 @@ namespace HPlus {
 
     WrappedTH1 *hDeltaPhiNoBtagging;
     WrappedTH1 *hDeltaPhi;
+    WrappedTH1 *hEWKFakeTausDeltaPhi;
     WrappedTH1 *hDeltaPhiJetMet;
     WrappedTH1 *hMaxDeltaPhiJetMet;
     WrappedTH1 *hAlphaT;
@@ -276,6 +281,8 @@ namespace HPlus {
     WrappedTH2 *hSelectionFlowVsVerticesFakeTaus;
 
     // Control plots
+    WrappedTH1* hDeltaPtJetTau;
+    WrappedTH1* hDeltaRJetTau;
     WrappedTH1* hCtrlIdentifiedElectronPt;
     WrappedTH1* hCtrlIdentifiedMuonPt;
     WrappedTH1* hCtrlNjets;
@@ -292,6 +299,24 @@ namespace HPlus {
     WrappedTH1* hCtrlNjetsAfterStandardSelections;
     WrappedTH1* hCtrlMET;
     WrappedTH1* hCtrlNbjets;
+    // Control plots for fakes
+    WrappedTH1* hCtrlEWKFakeTausIdentifiedElectronPt;
+    WrappedTH1* hCtrlEWKFakeTausIdentifiedMuonPt;
+    WrappedTH1* hCtrlEWKFakeTausNjets;
+    WrappedTH1* hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections;
+    WrappedTH2* hCtrlEWKFakeTausSelectedTauEtaVsPhiAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausSelectedTauPAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausIdentifiedElectronPtAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausIdentifiedMuonPtAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausNjetsAfterStandardSelections;
+    WrappedTH1* hCtrlEWKFakeTausMET;
+    WrappedTH1* hCtrlEWKFakeTausNbjets;
+
     WrappedTH2* hCtrlJetMatrixAfterJetSelection;
     WrappedTH2* hCtrlJetMatrixAfterMET;
     WrappedTH2* hCtrlJetMatrixAfterMET100;

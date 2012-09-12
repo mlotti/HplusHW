@@ -75,22 +75,22 @@ def doCounters(datasets):
     mainTable = eventCounter.getMainCounterTable()
 
     signalDatasets = [
-#        "TTToHplusBWB_M80",
-#        "TTToHplusBWB_M90",
-#        "TTToHplusBWB_M100",
-#        "TTToHplusBWB_M120",
-#        "TTToHplusBWB_M140",
-#        "TTToHplusBWB_M150",
-#        "TTToHplusBWB_M155",
-#        "TTToHplusBWB_M160",
-        "TTToHplusBHminusB_M80",
-        "TTToHplusBHminusB_M90",
-        "TTToHplusBHminusB_M100",
-        "TTToHplusBHminusB_M120",
-        "TTToHplusBHminusB_M140",
-        "TTToHplusBHminusB_M150",
-        "TTToHplusBHminusB_M155",
-        "TTToHplusBHminusB_M160",
+        "TTToHplusBWB_M80",
+        "TTToHplusBWB_M90",
+        "TTToHplusBWB_M100",
+        "TTToHplusBWB_M120",
+        "TTToHplusBWB_M140",
+        "TTToHplusBWB_M150",
+        "TTToHplusBWB_M155",
+        "TTToHplusBWB_M160",
+#        "TTToHplusBHminusB_M80",
+#        "TTToHplusBHminusB_M90",
+#        "TTToHplusBHminusB_M100",
+#        "TTToHplusBHminusB_M120",
+#        "TTToHplusBHminusB_M140",
+#        "TTToHplusBHminusB_M150",
+#        "TTToHplusBHminusB_M155",
+#        "TTToHplusBHminusB_M160",
         ]
     allName = "All events"
 
@@ -145,11 +145,11 @@ def doCounters(datasets):
             if column.getRowNames().index(cut) == 13: ## MET
                 allCount = column.getCount(column.getRowNames().index("njets"))
                 
-            if column.getRowNames().index(cut) == 14: ## btagging
+            if column.getRowNames().index(cut) == 15: ## btagging
                 allCount = column.getCount(column.getRowNames().index("MET"))
 
             if column.getRowNames().index(cut) == 16: ## DeltaPhi(Tau,MET) upper limit
-                allCount = column.getCount(column.getRowNames().index("btagging"))
+                allCount = column.getCount(column.getRowNames().index("btagging scale factor"))
                                  
             eff = cutCount.clone()
             eff.divide(allCount) # N(cut) / N(all)
@@ -225,7 +225,7 @@ def doCounters(datasets):
                         
     glist = [gtrig, gtau, gveto, gjets, gmet, gbtag, gdphi ]
     
-    opts = {"xmin": 75, "xmax": 165, "ymin": 0.09}
+    opts = {"xmin": 75, "xmax": 165, "ymin": 0.06}
     canvasFrame = histograms.CanvasFrame([histograms.HistoGraph(g, "", "") for g in glist], "SignalEfficiencyConseq", **opts)
     canvasFrame.frame.GetYaxis().SetTitle("Selection efficiency")
     canvasFrame.frame.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
@@ -240,7 +240,9 @@ def doCounters(datasets):
 
     
     
-    tex5 = ROOT.TLatex(120,0.11,"t#bar{t} -> bH^{#pm}bH^{#pm}")
+#    tex5 = ROOT.TLatex(120,0.11,"t#bar{t} -> bH^{#pm}bH^{#pm}")
+    tex5 = ROOT.TLatex(120,0.3,"t#bar{t} -> bH^{#pm}bW")
+   
 #    tex5.SetNDC()
     tex5.SetTextSize(25)
     tex5.Draw()

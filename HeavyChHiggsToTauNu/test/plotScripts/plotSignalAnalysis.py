@@ -89,11 +89,7 @@ def main():
 
     # Remove signals other than M120
 #    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
-# Wjets!!
     datasets.remove(filter(lambda name: "W2Jets" in name, datasets.getAllDatasetNames()))
-#    datasets.remove(filter(lambda name: "WJets" in name, datasets.getAllDatasetNames()))
-
-    
     datasets.remove(filter(lambda name: "W3Jets" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "W4Jets" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "QCD_Pt20_MuEnriched" in name, datasets.getAllDatasetNames()))
@@ -102,7 +98,7 @@ def main():
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     
     # Remove QCD
-    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
+#    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
     histograms.createLegend.moveDefaults(dx=-0.02)
     histograms.createLegend.moveDefaults(dh=-0.03)
     
@@ -745,8 +741,8 @@ def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, a
     scaleMCfromWmunu(h)     
 #    h.stackMCSignalHistograms()
 
-#    h.stackMCHistograms(stackSignal=True)#stackSignal=True)    
-    h.stackMCHistograms()
+    h.stackMCHistograms(stackSignal=True)#stackSignal=True)    
+#    h.stackMCHistograms()
     
     if addMCUncertainty:
         h.addMCUncertainty()
