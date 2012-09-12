@@ -73,6 +73,10 @@ def getOptions(options=None):
                      "",
                      options.multiplicity.singleton, options.varType.string,
                      "What tau trigger efficiency to use for tau embedding normalisation")
+    options.register("doTauEmbeddingLikePreselection",
+                     0,
+                     options.multiplicity.singleton, options.varType.int,
+                     "Run 'tau embedding'-like preselection for normal MC")
     options.register("runOnCrab",
                      0,
                      options.multiplicity.singleton,

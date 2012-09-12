@@ -45,8 +45,6 @@ tauEmbeddingFinalizeMuonSelection = True
 doTauEmbeddingMuonSelectionScan = False
 # Do tau id scan for tau embedding normalisation (no tau embedding input required)
 doTauEmbeddingTauSelectionScan = False
-# Do embedding-like preselection for signal analysis
-doTauEmbeddingLikePreselection = False
 
 # Apply beta cut for jets to reject PU jets
 betaCutForJets = 0.2 # Disable by setting to 0.0; if you want to enable, set to 0.2
@@ -471,7 +469,12 @@ def getSignalAnalysisModuleNames():
     return modules
 
 # To have tau embedding like preselection
-if doTauEmbeddingLikePreselection:
+if options.doTauEmbeddingLikePreselection != 0:
+    if dataVersion.isData():
+        raise Exception("doTauEmbeddingLikePreselection is meaningless for data")
+    if options.tauEmbeddingInput != 0:
+        raise Exception("tauEmbegginInput clashes with doTauEmbeddingLikePreselection")
+
     # Preselection similar to tau embedding selection (genuine tau+3 jets+lepton vetoes), no tau+MET trigger required
     process.tauEmbeddingLikeSequence = cms.Sequence(process.commonSequence)
     module = process.signalAnalysis.clone()
@@ -564,9 +567,7 @@ if doJESVariation or doSystematics:
     doJetUnclusteredVariation = True
 
     modules = getSignalAnalysisModuleNames()
-    if doTauEmbeddingLikePreselection:
-        if options.tauEmbeddingInput != 0:
-            raise Exception("tauEmbegginInput clashes with doTauEmbeddingLikePreselection")
+    if options.doTauEmbeddingLikePreselection != 0:
         modules.extend([n+"GenuineTau" for n in modules])
 
     if options.tauEmbeddingInput != 0:
@@ -601,9 +602,7 @@ def addPUWeightVariation(name):
 
 if doPUWeightVariation or doSystematics:
     modules = getSignalAnalysisModuleNames()
-    if doTauEmbeddingLikePreselection:
-        if options.tauEmbeddingInput != 0:
-            raise Exception("tauEmbegginInput clashes with doTauEmbeddingLikePreselection")
+    if options.doTauEmbeddingLikePreselection != 0:
         modules.extend([n+"GenuineTau" for n in modules])
 
     if options.tauEmbeddingInput != 0:

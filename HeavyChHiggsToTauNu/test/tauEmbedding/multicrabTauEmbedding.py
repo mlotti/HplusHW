@@ -7,10 +7,11 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 # Default processing step
 #defaultStep = "skim"
-defaultStep = "embedding"
+#defaultStep = "embedding"
 #defaultStep = "analysis"
 #defaultStep = "analysisTau"
-#defaultStep = "signalAnalysis"
+defaultStep = "signalAnalysis"
+#defaultStep = "signalAnalysisGenTau"
 #defaultStep = "muonAnalysis"
 #defaultStep = "caloMetEfficiency"
 
@@ -54,6 +55,7 @@ config = {"skim":           {"input": "AOD",                           "config":
           "analysis":       {"input": "tauembedding_embedding_%s",  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau":    {"input": "AOD",                        "config": "tauAnalysis_cfg.py"},
           "signalAnalysis": {"input": "tauembedding_embedding_%s",  "config": "../signalAnalysis_cfg.py"},
+          "signalAnalysisGenTau": {"input": "pattuple_v25b",        "config": "../signalAnalysis_cfg.py"},
           "EWKMatching":    {"input": "tauembedding_embedding_%s",  "config": "../EWKMatching_cfg.py"},
           "muonAnalysis":   {"input": "tauembedding_skim_v44_1",          "config": "muonAnalysisFromSkim_cfg.py"},
           "caloMetEfficiency": {"input": "tauembedding_skim_v44_1",         "config": "caloMetEfficiency_cfg.py"},
@@ -235,13 +237,13 @@ def main():
 
 def createTasks(opts, step, version=None):
     crabcfg = "crab.cfg"
-    if step in ["analysis", "analysisTau", "signalAnalysis", "muonAnalysis", "caloMetEfficiency","EWKMatching"]:
+    if step in ["analysis", "analysisTau", "signalAnalysis", "signalAnalysisGenTau", "muonAnalysis", "caloMetEfficiency","EWKMatching"]:
         crabcfg = "../crab_analysis.cfg"
 
     dirName = opts.midfix
-    if step in ["embedding", "analysis", "signalAnalysis","EWKMatching"]:
+    if step in ["embedding", "analysis", "signalAnalysis", "EWKMatching"]:
         dirName += "_"+version
-    if step in ["analysis", "signalAnalysis","EWKMatching"]:
+    if step in ["analysis", "signalAnalysis", "EWKMatching"]:
         dirName += "_"+opts.era.replace("+","")
 
 
@@ -250,7 +252,7 @@ def createTasks(opts, step, version=None):
 
     # Select the datasets based on the processing step and data era
     datasets = []
-    if step == "analysisTau":
+    if step in ["analysisTau", "signalAnalysisGenTau"]:
         datasets.extend(datasetsMCnoQCD)
     else:
     #    datasets.extend(datasetsData2010)
@@ -391,6 +393,8 @@ def createTasks(opts, step, version=None):
                 dataset.appendArg("runOnCrab=1")
 #            if dataset.getName() in datasetsData2011_Run2011A_noEPS:
 #                dataset.appendArg("tauEmbeddingCaloMet=caloMetSum")
+        if step == "signalAnalysisGenTau":
+            dataset.appendArg("doTauEmbeddingLikePreselection=1")
     #    if step == "analysisTau":
     #        if dataset.getName() == "WJets":
     #            dataset.setNumberOfJobs(100)
@@ -404,7 +408,7 @@ def createTasks(opts, step, version=None):
             pass
         
     # Apply the modifications
-    if step in ["analysis", "analysisTau","signalAnalysis","EWKMatching"]:
+    if step in ["analysis", "analysisTau", "signalAnalysisGenTau", "signalAnalysis", "EWKMatching"]:
         if step != "signalAnalysis":
             multicrab.appendLineAll("CMSSW.output_file = histograms.root")
         multicrab.forEachDataset(modifyAnalysis)
