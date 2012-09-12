@@ -16,6 +16,7 @@
 
 import os
 import math
+import json
 import array
 from optparse import OptionParser
 
@@ -50,30 +51,46 @@ analysisSig = "signalAnalysisGenuineTau"
 
 def main():
     parser = OptionParser(usage="Usage: %prog [options] [embedding multicrab dirs]\n\nIf no multicrab directories are given, the ones in specified in HiggsAnalysis.HeavyChHiggstoTauNu.tools.tauEmbedding.dirEmbs are used.\nIf multicrab directories are given, you must also give the a signal analysis directory with --signalAnalysisDir.")
-    parser.add_option("--minimal", dest="minimal", action="store_true", default=False,
-                      help="Produce the minimal amount of histograms for datacard generation and data-driven control plots (fast)")
+#    parser.add_option("--minimal", dest="minimal", action="store_true", default=False,
+#                      help="Produce the minimal amount of histograms for datacard generation and data-driven control plots (fast)")
+    parser.add_option("--residual", dest="residual", action="store_true", default=False,
+                      help="Produce also the residual ditau backgrounds (default: False). If this is given, then also --signalAnalysisDir must be given if any multicrab directory is given")
     parser.add_option("--signalAnalysisDir", dest="signalAnalysisDir", default="",
                       help="Signal analysis multicrab directory, produced with 'doTauEmbeddingLikePreselection=True'. Needed if any embedding multicrab directory is given as argument.")
 
     (opts, args) = parser.parse_args()
 
     dirEmbs = tauEmbedding.dirEmbs
-    dirSig = tauEmbedding.dirSig
+    dirSig = None
+    if opts.residual:
+        dirSig = tauEmbedding.dirSig
+
     if len(args) > 0:
         dirEmbs = args
-        dirSig = opts.signalAnalysisDir
-        if len(dirSig):
-            raise Exception("When giving embedding multicrab directories as argument, must give the signal analysis directory too with --signalAnalysisDir")
+        if opts.residual:
+            dirSig = opts.signalAnalysisDir
+            if len(dirSig):
+                raise Exception("When giving embedding multicrab directories as argument, must give the signal analysis directory too with --signalAnalysisDir with --residual")
+
+    print "Embedding multicrab directories"
+    print "\n".join(dirEmbs)
+    print 
+    if opts.residual:
+        print "Normal MC multicrab directory (for residual)"
+        print dirSig
 
 
-    datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByCrossSection=True)
-    datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
-    datasetsSig.updateNAllEventsToPUWeighted()
+    datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"/counters", normalizeMCByCrossSection=True)
     datasetsEmb.forEach(lambda d: d.mergeData())
     datasetsEmb.setLumiFromData()
 
+    datasetsSig = None
+    if opts.residual:
+        datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"/counters")
+        datasetsSig.updateNAllEventsToPUWeighted()
+
     tauEmbedding.normalize=True
-    tauEmbedding.era = "Run2011A"
+    tauEmbedding.era = "Run2011AB"
 
 
     taskDir = multicrab.createTaskDir("embedded")
@@ -88,15 +105,25 @@ def main():
     f.write(git.getDiff()+"\n")
     f.close()
     f = open(os.path.join(taskDir, "inputInfo.txt"), "w")
-    f.write("Embedded directories:\n%s\n\nNormal directory:\n%s\n" % ("\n".join(dirEmbs), dirSig))
-    f.write("\nEmbedded analysis: %s\nNormal analysis: %s\n" % (analysisEmb, analysisSig))
+    f.write("Embedded directories:\n%s\n\n" % "\n".join(dirEmbs))
+    f.write("\nEmbedded analysis: %s\n" % analysisEmb)
+    if opts.residual:
+        f.write("\nNormal directory:\n%s\n" % dirSig)
+        f.write("\nNormal analysis: %s\n" % analysisSig)
     f.close()
+
+    # Save luminosity
+    data = {"Data": datasetsEmb.getLuminosity()}
+    f = open(os.path.join(taskDir, "lumi.json"), "w")
+    json.dump(data, f, indent=2)
+    f.close()            
 
     operate = lambda dn: operateDataset(taskDir, datasetsEmb, datasetsSig, dn)
 
     operate("Data")
-    operate("DYJetsToLL_M50_TuneZ2_Summer11")
-    operate("WW_TuneZ2_Summer11")
+    if opts.residual:
+        operate("DYJetsToLL_M50_TuneZ2_Fall11")
+        operate("WW_TuneZ2_Fall11")
 
 def operateDataset(taskDir, datasetsEmb, datasetsSig, datasetName):
     directory = os.path.join(taskDir, datasetName, "res")
@@ -107,7 +134,9 @@ def operateDataset(taskDir, datasetsEmb, datasetsSig, datasetName):
 
     of.cd()
 
-    counters = "Counters/weighted"
+    minimalResultHistograms = ["transverseMass", "fullMass"]
+
+    counters = "/counters/weighted"
     if datasetName == "Data":
         adder = RootHistoAdder(datasetsEmb, datasetName)
         def addDataHistos(mainDir="signalAnalysis", subDir="", **kwargs):
@@ -116,17 +145,15 @@ def operateDataset(taskDir, datasetsEmb, datasetsSig, datasetName):
             addDataHistos(mainDir, subDir=subDir+counters, isCounter=True, **kwargs)
 
         def addJESData(case):
-            addDataHistos(subDir=case, only=["transverseMass", "transverseMassAfterDeltaPhi160", "transverseMassAfterDeltaPhi130"])
+            addDataHistos(subDir=case, only=minimalResultHistograms)
             addDataCounters(subDir=case)
 
-        addDataHistos()
+        addDataHistos(skip=["counters"])
         addDataCounters()
 
         # tau ES uncertainty by variation
-        addJESData("JESPlus03eta02METPlus00")
-        addJESData("JESPlus03eta02METMinus00")
-        addJESData("JESMinus03eta02METPlus00")
-        addJESData("JESMinus03eta02METMinus00")
+        addJESData("TESPlus")
+        addJESData("TESMinus")
 
     else:
         adder = RootHistoAdderResidual(datasetsEmb, datasetsSig, datasetName)
@@ -156,12 +183,14 @@ def operateDataset(taskDir, datasetsEmb, datasetsSig, datasetName):
         # JES
         # Uncertainties are in same direction in both => for each variated case produce residual counts
         def addJES(case):
-            addMcHistos(subDir=case, only=["transverseMass", "transverseMassAfterDeltaPhi160", "transverseMassAfterDeltaPhi130"])
+            addMcHistos(subDir=case, only=minimalResultHistograms)
             addMcCounters(subDir=case)
-        addJES("JESPlus03eta02METPlus10")
-        addJES("JESPlus03eta02METMinus10")
-        addJES("JESMinus03eta02METPlus10")
-        addJES("JESMinus03eta02METMinus10")
+        addJESData("TESPlus")
+        addJESData("TESMinus")
+        addJESData("JESPlus")
+        addJESData("JESMinus")
+        addJESData("METPlus")
+        addJESData("METMinus")
 
         # Lepton veto
         # Pick the values only from normal (already done for trigger)
@@ -222,11 +251,18 @@ class RootHistoAdder:
         self.datasetsEmb = datasetsEmb
         self.datasetName = datasetName
 
-    def addRootHistos(self, of, dstName, srcEmbName, isCounter=False, only=None):
+    def addRootHistos(self, of, dstName, srcEmbName, isCounter=False, only=None, skip=None):
+        if only != None and skip != None:
+            raise Exception("Only either 'only' or 'skip' can be given, not both")
+
         split = dstName.split("/")
         thisDir = of
         for s in split:
-            thisDir = thisDir.mkdir(s)
+            d = thisDir.Get(s)
+            if d:
+                thisDir = d
+            else:
+                thisDir = thisDir.mkdir(s)
 
         arbitraryDataset = self.datasetsEmb.getDatasetFromFirst(self.datasetName)
 
@@ -235,6 +271,10 @@ class RootHistoAdder:
         
         if only != None:
             func = lambda n: n in only
+            subdirectories = filter(func, subdirectories)
+            histograms = filter(func, histograms)
+        if skip != None:
+            func = lambda n: not n in skip
             subdirectories = filter(func, subdirectories)
             histograms = filter(func, histograms)
 
@@ -287,11 +327,18 @@ class RootHistoAdderResidual:
     def setEmbeddedOnly(self, value):
         self.embeddedOnly = value
 
-    def addRootHistos(self, of, dstName, srcEmbName, srcSigName, isCounter=False, only=None):
+    def addRootHistos(self, of, dstName, srcEmbName, srcSigName, isCounter=False, only=None, skip=None):
+        if only != None and skip != None:
+            raise Exception("Only either 'only' or 'skip' can be given, not both")
+
         split = dstName.split("/")
         thisDir = of
         for s in split:
-            thisDir = thisDir.mkdir(s)
+            d = thisDir.Get(s)
+            if d:
+                thisDir = d
+            else:
+                thisDir = thisDir.mkdir(s)
 
         arbitraryDataset = self.datasetsEmb.getDatasetFromFirst(self.datasetName)
 
@@ -299,6 +346,10 @@ class RootHistoAdderResidual:
         histograms = arbitraryDataset.getDirectoryContent(srcEmbName, lambda x: isinstance(x, ROOT.TH1) and not isinstance(x, ROOT.TH2))
         if only != None:
             func = lambda n: n in only
+            subdirectories = filter(func, subdirectories)
+            histograms = filter(func, histograms)
+        if skip != None:
+            func = lambda n: not n in skip
             subdirectories = filter(func, subdirectories)
             histograms = filter(func, histograms)
 

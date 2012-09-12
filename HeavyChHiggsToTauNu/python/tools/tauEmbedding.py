@@ -207,7 +207,12 @@ def scaleMuTriggerIdEff(obj):
     elif era == "Run2011A-EPS":
         data = 0.879
     elif era == "Run2011A":
+        data = 0.881705 
+    elif era == "Run2011AB":
+        print "WARNING: using Run2011A mu trigger+ID efficiency. This should be updated!"
         data = 0.881705
+    else:
+        raise Exception("No mu trigger+ID efficiency available for era %s" % era)
     mc = 0.919829
 
     scaleHistosCounters(obj, scaleDataHisto, "scaleData", 1/data)
@@ -343,6 +348,10 @@ class DatasetsMany:
     ## Set the integrated luminosity from data dataset
     def setLumiFromData(self):
         self.lumi = self.getDatasetFromFirst("Data").getLuminosity()
+        for dm in self.datasetManagers:
+            mlumi = dm.getDataset("Data").getLuminosity()
+            if abs(mlumi-self.lumi)/self.lumi > 1e-3: # allow 1 per mille variations
+                raise Exception("Luminosity in some multicrab directory is %.5f, while it is %.5f in other(s)" % (mlumi, lumi))
 
     ## Get the integrated luminosity
     def getLuminosity(self):
