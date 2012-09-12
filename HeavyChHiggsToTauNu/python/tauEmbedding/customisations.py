@@ -783,7 +783,7 @@ def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPresel
         )
         HChTools.insertPSetContentsTo(param.vertexWeight.clone(), puModule)
         pileupWeight = prefix+"PileupWeight"
-        setattr(process, puModule)
+        setattr(process, pileupWeight, puModule)
         genTauSequence *= puModule
     
     counterPrototype = cms.EDProducer("HPlusEventCountProducer",
