@@ -247,12 +247,14 @@ process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
 process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
 process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
 #User DB for btag eff
-btagDB = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
 if options.runOnCrab != 0:
     print "BTagDB: Assuming that you are running on CRAB"
     btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
 else:
     print "BTagDB: Assuming that you are not running on CRAB (if you are running on CRAB, add to job parameters in multicrab.cfg runOnCrab=1)"
+    # This way signalAnalysis can be ran from any directory
+    import os
+    btagDB = "sqlite_file:%s/src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db" % os.environ["CMSSW_BASE"]
 process.CondDBCommon.connect = btagDB
 process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
 process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
