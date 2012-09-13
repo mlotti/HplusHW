@@ -210,9 +210,9 @@ jetSelectionTight = jetSelectionBase.clone(
 jetSelection = jetSelectionLoose # set default jet selection
 
 MET = cms.untracked.PSet(
-    rawSrc = cms.untracked.InputTag("patMETsPF"), # PF MET
-    type1Src = cms.untracked.InputTag("dummy"),
-    type2Src = cms.untracked.InputTag("dummy"),
+    rawSrc = cms.untracked.InputTag("patPFMet"), # PF MET
+    type1Src = cms.untracked.InputTag("patType1CorrectedPFMet"),
+    type2Src = cms.untracked.InputTag("patType1p2CorrectedPFMet"),
     caloSrc = cms.untracked.InputTag("patMETs"),
     tcSrc = cms.untracked.InputTag("patMETsTC"),
     select = cms.untracked.string("type1"), # raw, type1, type2
@@ -519,9 +519,9 @@ def setAllTauSelectionSrcSelectedPatTaus():
     tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTau"
 
 def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
-    tauSelectionHPSTightTauBased.src        = "patTausHpsPFTauTauTriggerMatched"
-    tauSelectionHPSMediumTauBased.src       = "patTausHpsPFTauTauTriggerMatched"
-    tauSelectionHPSLooseTauBased.src        = "patTausHpsPFTauTauTriggerMatched"
+    tauSelectionHPSTightTauBased.src        = "patTausHpsPFTauTriggerMatched"
+    tauSelectionHPSMediumTauBased.src       = "patTausHpsPFTauTriggerMatched"
+    tauSelectionHPSLooseTauBased.src        = "patTausHpsPFTauTriggerMatched"
     
 def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, additionalCounters):
     from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
@@ -563,6 +563,11 @@ def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processNa
 
 def changeJetCollection(**kwargs):
     _changeCollection([jetSelection.src, forwardJetVeto.src], **kwargs)
+
+def setJERSmearedJets(dataVersion):
+    if dataVersion.isMC():
+        print "Using JER-smeared jets"
+        changeJetCollection(moduleLabel="smearedPatJets")
 
 def changeCollectionsToPF2PAT(dataVersion, postfix="PFlow", useGSFElectrons=True):
     # Taus

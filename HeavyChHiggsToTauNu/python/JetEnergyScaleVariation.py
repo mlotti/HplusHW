@@ -2,8 +2,8 @@ import FWCore.ParameterSet.Config as cms
 import PhysicsTools.PatUtils.patPFMETCorrections_cff as patPFMETCorrections
 
 def _doCommon(process, prefix, name, prototype, additionalCounters, direction, postfix):
-    if postfix != "PFlow":
-        raise Exception("There are several assumptions of PFlow-postfix-only workflow")
+    if not postfix in ["", "PFlow"]:
+        raise Exception("There are several assumptions of standard PAT, or PF2PAT with PFlow-postfix-only workflow")
 
     if direction not in ["Up", "Down"]:
         raise Exception("direction should be 'Up' or 'Down', was '%s'" % direction)
@@ -26,23 +26,23 @@ def _doCommon(process, prefix, name, prototype, additionalCounters, direction, p
 
     return analysis
 
-def addJESVariation(process, prefix, name, prototype, additionalCounters, direction, postfix="PFlow"):
+def addJESVariation(process, prefix, name, prototype, additionalCounters, direction, postfix=""):
     analysis = _doCommon(process, prefix, name, prototype, additionalCounters, direction, postfix)
 
-    analysis.jetSelection.src = "shiftedPatJetsPFlowEn%sForCorrMEt" % direction
+    analysis.jetSelection.src = "shiftedPatJets%sEn%sForCorrMEt" % (postfix, direction)
     analysis.MET.rawSrc = "patPFMetJetEn%s" % direction
     analysis.MET.type1Src = "patType1CorrectedPFMetJetEn%s" % direction
     analysis.MET.type2Src = "patType1p2CorrectedPFMetJetEn%s" % direction
 
-def addJERVariation(process, prefix, name, prototype, additionalCounters, direction, postfix="PFlow"):
+def addJERVariation(process, prefix, name, prototype, additionalCounters, direction, postfix=""):
     analysis = _doCommon(process, prefix, name, prototype, additionalCounters, direction, postfix)
 
-    analysis.jetSelection.src = "smearedPatJetsPFlowRes%s" % direction
+    analysis.jetSelection.src = "smearedPatJets%sRes%s" % (postfix, direction)
     analysis.MET.rawSrc = "patPFMetJetRes%s" % direction
     analysis.MET.type1Src = "patType1CorrectedPFMetJetRes%s" % direction
     analysis.MET.type2Src = "patType1p2CorrectedPFMetJetRes%s" % direction
 
-def addUESVariation(process, prefix, name, prototype, additionalCounters, direction, postfix="PFlow"):
+def addUESVariation(process, prefix, name, prototype, additionalCounters, direction, postfix=""):
     analysis = _doCommon(process, prefix, name, prototype, additionalCounters, direction, postfix)
 
     analysis.MET.rawSrc = "patPFMetUnclusteredEn%s" % direction
@@ -59,7 +59,7 @@ objectVariationToMet = cms.EDProducer("ShiftedParticleMETcorrInputProducer",
     srcOriginal = cms.InputTag("selectedPatTaus"),
     srcShifted = cms.InputTag("selectedPatTausVariated")
 )
-def addTESVariation(process, prefix, name, prototype, additionalCounters, direction, postfix="PFlow"):
+def addTESVariation(process, prefix, name, prototype, additionalCounters, direction, postfix=""):
     tauVariationName = name+"TauVariation"
     rawMetVariationName = name+"RawMetVariation"
     type1MetVariationName = name+"Type1MetVariation"

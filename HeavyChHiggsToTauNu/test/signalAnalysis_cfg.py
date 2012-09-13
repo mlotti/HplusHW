@@ -66,9 +66,6 @@ myHistogramAmbientLevel = "Debug"
 # Apply trigger scale factor or not
 applyTriggerScaleFactor = True
 
-PF2PATVersion = "PFlow" # For normal PF2PAT
-#PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
-
 ### Systematic uncertainty flags ###
 # Running of systematic variations is controlled by the global flag
 # (below), or the individual flags
@@ -186,8 +183,8 @@ param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionSrcSelectedPatTaus()
 param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
-# Switch to PF2PAT objects
-param.changeCollectionsToPF2PAT(dataVersion, postfix=PF2PATVersion, useGSFElectrons=True)
+# Set jet sources to JER-smeared jets for MC
+param.setJERSmearedJets(dataVersion)
 
 # Trigger with scale factors (at the moment hard coded)
 if applyTriggerScaleFactor and dataVersion.isMC():
@@ -500,19 +497,19 @@ def addJESVariation(name, doJetUnclusteredVariation):
     module.Tree.fill = False        
     module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
 
-    jesVariation.addTESVariation(process, name, "TESPlus",  module, additionalCounters, "Up", postfix=PF2PATVersion)
-    jesVariation.addTESVariation(process, name, "TESMinus", module, additionalCounters, "Down", postfix=PF2PATVersion)
+    jesVariation.addTESVariation(process, name, "TESPlus",  module, additionalCounters, "Up")
+    jesVariation.addTESVariation(process, name, "TESMinus", module, additionalCounters, "Down")
 
     if doJetUnclusteredVariation:
         # Do all variations beyond TES
-        jesVariation.addJESVariation(process, name, "JESPlus",  module, additionalCounters, "Up", postfix=PF2PATVersion)
-        jesVariation.addJESVariation(process, name, "JESMinus", module, additionalCounters, "Down", postfix=PF2PATVersion)
+        jesVariation.addJESVariation(process, name, "JESPlus",  module, additionalCounters, "Up")
+        jesVariation.addJESVariation(process, name, "JESMinus", module, additionalCounters, "Down")
 
-        jesVariation.addJERVariation(process, name, "JERPlus",  module, additionalCounters, "Up", postfix=PF2PATVersion)
-        jesVariation.addJERVariation(process, name, "JERMinus", module, additionalCounters, "Down", postfix=PF2PATVersion)
+        jesVariation.addJERVariation(process, name, "JERPlus",  module, additionalCounters, "Up")
+        jesVariation.addJERVariation(process, name, "JERMinus", module, additionalCounters, "Down")
 
-        jesVariation.addUESVariation(process, name, "METPlus",  module, additionalCounters, "Up", postfix=PF2PATVersion)
-        jesVariation.addUESVariation(process, name, "METMinus", module, additionalCounters, "Down", postfix=PF2PATVersion)
+        jesVariation.addUESVariation(process, name, "METPlus",  module, additionalCounters, "Up")
+        jesVariation.addUESVariation(process, name, "METMinus", module, additionalCounters, "Down")
 
 if doJESVariation or doSystematics:
     doJetUnclusteredVariation = True
