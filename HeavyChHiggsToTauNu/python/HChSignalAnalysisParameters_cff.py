@@ -564,7 +564,7 @@ def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processNa
 def changeJetCollection(**kwargs):
     _changeCollection([jetSelection.src, forwardJetVeto.src], **kwargs)
 
-def changeCollectionsToPF2PAT(postfix="PFlow"):
+def changeCollectionsToPF2PAT(dataVersion, postfix="PFlow", useGSFElectrons=True):
     # Taus
     hps = "selectedPatTaus"+postfix
     if "TriggerMatched" in tauSelectionHPSTightTauBased.src.value():
@@ -582,13 +582,21 @@ def changeCollectionsToPF2PAT(postfix="PFlow"):
     NonIsolatedMuonVeto.MuonCollectionName = "selectedPatMuons"+postfix
 
     # Electrons
-    GlobalElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
-    NonIsolatedElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
+    if useGSFElectrons:
+        print "Using GSF electrons despite of PF2PAT"
+    else:
+        GlobalElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
+        NonIsolatedElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
 
     # Jets
-    changeJetCollection(moduleLabel="selectedPatJets"+postfix)
+    if dataVersion.isData():
+        changeJetCollection(moduleLabel="selectedPatJets"+postfix)
+    else:
+        changeJetCollection(moduleLabel="smearedPatJets"+postfix)
 
     # MET
-    MET.rawSrc = "patMETsPFlow"
     MET.caloSrc = "Nonexistent"
     MET.tcSrc = "Nonexistent"
+    MET.rawSrc = "patPFMet"
+    MET.type1Src = "patType1CorrectedPFMet"
+    MET.type2Src = "patType1p2CorrectedPFMet"

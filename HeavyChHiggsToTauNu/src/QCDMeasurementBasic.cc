@@ -176,6 +176,8 @@ namespace HPlus {
     createShapeHistograms(fs, hMtShapesAfterTauIDMET30, "MtShapesAfterTauIDMET30", fTransverseMassRange[0], fTransverseMassRange[1], fTransverseMassRange[2]);
     createShapeHistograms(fs, hMtShapesAfterFullMETLeg, "MtShapesAfterFullMETLeg", fTransverseMassRange[0], fTransverseMassRange[1], fTransverseMassRange[2]);
     createShapeHistograms(fs, hMtShapesAfterMetLegNoBtagging, "MtShapesAfterMetLegNoBtagging", fTransverseMassRange[0], fTransverseMassRange[1], fTransverseMassRange[2]);
+    createShapeHistograms(fs, hMtShapesAfterMet, "MtShapesAfterMet", fTransverseMassRange[0], fTransverseMassRange[1], fTransverseMassRange[2]);
+    createShapeHistograms(fs, hMtShapesAfterMetAndBTagging, "MtShapesAfterMetAndBTagging", fTransverseMassRange[0], fTransverseMassRange[1], fTransverseMassRange[2]);
     //createShapeHistograms(fs, hFullMassShapesAfterJetSelection, "FullMassShapesAfterJetSelection", fFullMassRange[0], fFullMassRange[1], fFullMassRange[2]);
     createShapeHistograms(fs, hFullMassShapesAfterFullMETLeg, "FullMassShapesAfterFullMETLeg", fFullMassRange[0], fFullMassRange[1], fFullMassRange[2]);
     //createShapeHistograms(fs, hFullMassShapesAfterMetLegNoBtagging, "FullMassShapesAfterMetLegNoBtagging", fFullMassRange[0], fFullMassRange[1], fFullMassRange[2]);
@@ -529,6 +531,7 @@ namespace HPlus {
       // Fill mT shape without btagging
       hMtShapesAfterMetLegNoBtagging[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(transverseMass);
     }
+    hMtShapesAfterMet[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(transverseMass);
 
     // b tagging cut
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
@@ -545,6 +548,7 @@ namespace HPlus {
     hLeg1AfterBTagging->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
     if (myPassedTauLegStatus) increment(fCoincidenceAfterBjetsCounter);
     hCtrlMETAfterBtagging[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(metData.getSelectedMET()->et());
+    hMtShapesAfterMetAndBTagging[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(transverseMass);
 
     for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getSelectedJets().begin(); iJet != jetData.getSelectedJets().end(); ++iJet) {
       if (deltaPhi < 90) {
