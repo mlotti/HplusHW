@@ -17,51 +17,37 @@ import cutstring
 ## Apply embedding normalization (muon efficiency, W->tau->mu factor
 normalize = True
 ## Data era
-era = "Run2011A"
+era = "Run2011AB"
 
 ## When doing the averaging, take the stat uncertainty as the average of the stat uncertanties of the trials
 uncertaintyByAverage = False
 
 ## Signal analysis multicrab directories for embedding trials
-dirEmbs_120131 = [
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_Run2011A_120131_123142",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest1_Run2011A_120131_133727",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest2_Run2011A_120131_135817",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest3_Run2011A_120131_141821",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest4_Run2011A_120131_143855",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest5_Run2011A_120131_145907",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest6_Run2011A_120131_152041",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest7_Run2011A_120131_154149",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest8_Run2011A_120131_160339",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest9_Run2011A_120131_162422",
+dirEmbs_120911 = [
+    "multicrab_signalAnalysis_systematics_v44_3_seed0_Run2011AB_120911_144711",
+    "multicrab_signalAnalysis_systematics_v44_3_seed1_Run2011AB_120911_152858",
+#    "multicrab_signalAnalysis_systematics_v44_3_seed2_Run2011AB_120911_162417"
 ]
 ## Signal analysis multicrab directories for embedding trials
 #
 # This variable is used to select from possibly multiple sets of embedding directories
-dirEmbs = dirEmbs_120131
+dirEmbs = dirEmbs_120911
 ## Signal analysis multicrab directory for normal MC
-dirSig = "../multicrab_compareEmbedding_Run2011A_120118_122555" # for 120118, 120126, 120131
+dirSig = "multicrab_signalAnalysisGenTau_systematics_120912_084953" # for 120911
 
 
 ## Tau analysis multicrab directories for embedding trials
-tauDirEmbs_120110 = [
-    "multicrab_analysis_v13_3_Run2011A_120110_150535",
-    "multicrab_analysis_v13_3_seedTest1_Run2011A_120110_203953",
-    "multicrab_analysis_v13_3_seedTest2_Run2011A_120110_205101",
-    "multicrab_analysis_v13_3_seedTest3_Run2011A_120110_210157",
-    "multicrab_analysis_v13_3_seedTest4_Run2011A_120110_211348",
-    "multicrab_analysis_v13_3_seedTest5_Run2011A_120110_212548",
-    "multicrab_analysis_v13_3_seedTest6_Run2011A_120126_211602",
-    "multicrab_analysis_v13_3_seedTest7_Run2011A_120110_214901",
-    "multicrab_analysis_v13_3_seedTest8_Run2011A_120110_220005",
-    "multicrab_analysis_v13_3_seedTest9_Run2011A_120110_221143",
+tauDirEmbs_120912 = [
+    "multicrab_analysis_systematics_v44_3_seed0_Run2011AB_120912_164347",
+#    "multicrab_analysis_systematics_v44_3_seed1_Run2011AB_120912_172300",
+#    "multicrab_analysis_systematics_v44_3_seed2_Run2011AB_120912_180734",
 ]
 ## Tau analysis multicrab directories for embedding trials
 #
 # This variable is used to select from possibly multiple sets of embedding directories
-tauDirEmbs = tauDirEmbs_120110
+tauDirEmbs = tauDirEmbs_120912
 ## Tau analysis multicrab directory for normal MC
-tauDirSig = "multicrab_analysisTau_111202_144918"
+tauDirSig = "multicrab_analysisTau_120822_200753"
 
 class Selections:
     def __init__(self, **kwargs):
@@ -109,9 +95,11 @@ tauNtuple.deltaPhi160Selection = "%s <= 160)" % tauNtuple.deltaPhiExpression
 tauNtuple.caloMetNoHF = "tecalometNoHF_p4.Pt() > 60"
 tauNtuple.caloMet = "tecalomet_p4.Pt() > 60"
 tauNtuple.weight = {
-    "EPS": "weightPileup_Run2011A",
-    "Run2011A-EPS": "pileupWeight_Run2011AnoEPS",
-    "Run2011A": "weightPileup_Run2011A"
+#    "EPS": "weightPileup_Run2011A",
+#    "Run2011A-EPS": "pileupWeight_Run2011AnoEPS",
+    "Run2011A": "weightPileup_Run2011A",
+    "Run2011B": "weightPileup_Run2011B",
+    "Run2011AB": "weightPileup_Run2011AB",
     }
 
 ## Customization function for decay mode plot (all decay modes)
@@ -426,6 +414,10 @@ class DatasetsMany:
     def getEfficiency(self, datasetName, numerator, denominator):
         effs = []
         for dm in self.datasetManagers:
+            if not dm.hasDataset(datasetName):
+                print "WARNING: no dataset %s in one of the managers, skipping the manager" % datasetName
+                continue
+
             ds = dm.getDataset(datasetName)
             num = ds.getDatasetRootHisto(numerator).getHistogram()
             den = ds.getDatasetRootHisto(denominator).getHistogram()
@@ -446,6 +438,9 @@ class DatasetsMany:
     def hasHistogram(self, datasetName, name):
         has = True
         for dm in self.datasetManagers:
+            if not dm.hasDataset(datasetName):
+                continue
+
             has = has and dm.getDataset(datasetName).hasRootHisto(name)
         return has
 
@@ -458,6 +453,10 @@ class DatasetsMany:
     def getHistograms(self, datasetName, name):
         histos = []
         for i, dm in enumerate(self.datasetManagers):
+            if not dm.hasDataset(datasetName):
+                print "WARNING: no dataset %s in one of the managers, skipping the manager" % datasetName
+                continue
+
             ds = dm.getDataset(datasetName)
             h = ds.getDatasetRootHisto(name)
             if h.isMC():
@@ -689,6 +688,18 @@ class EventCounterMany:
     # the individual trials
     def getMainCounterTable(self):
         return counter.meanTable([ec.getMainCounterTable() for ec in self.eventCounters], uncertaintyByAverage)
+
+    def getMainCounterTableColumn(self, colname):
+        tables = []
+        for ec in self.eventCounters:
+            if colname in ec.getMainCounter().getColumnNames():
+                t = ec.getMainCounterTable()
+                col = t.getColumn(name=colname)
+                tmp = counter.CounterTable()
+                tmp.appendColumn(col)
+                tables.append(tmp)
+
+        return counter.meanTable(tables, uncertaintyByAverage)
 
     ## Get subcounter table
     #
