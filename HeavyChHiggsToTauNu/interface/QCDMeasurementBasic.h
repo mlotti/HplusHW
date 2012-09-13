@@ -222,6 +222,8 @@ namespace HPlus {
     std::vector<WrappedTH1*> hMtShapesAfterStandardSelectionMET20;
     std::vector<WrappedTH1*> hMtShapesAfterStandardSelectionMET30;
     std::vector<WrappedTH1*> hMtShapesAfterFullMETLeg;
+    std::vector<WrappedTH1*> hMtShapesAfterMet;
+    std::vector<WrappedTH1*> hMtShapesAfterMetAndBTagging;
     std::vector<WrappedTH1*> hMtShapesAfterMetLegNoBtagging;
     std::vector<WrappedTH1*> hMtShapesAfterTauIDNoRtau;
     std::vector<WrappedTH1*> hMtShapesAfterTauID;
