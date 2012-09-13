@@ -243,6 +243,7 @@ print "TauSelection src:", process.QCDMeasurement.tauSelection.src.value()
 print "TauSelection selection:", process.QCDMeasurement.tauSelection.selection.value()
 print "TauSelection isolation:", process.QCDMeasurement.tauSelection.isolationDiscriminator.value()
 print "TauSelection rtauCut:", process.QCDMeasurement.tauSelection.rtauCut.value()
+print "TauSelection apply veto against dead ECAL cells:", process.QCDMeasurement.tauSelection.applyVetoForDeadECALCells.value()
 print "VetoTauSelection src:", process.QCDMeasurement.vetoTauSelection.tauSelection.src.value()
 print "Jets:", process.QCDMeasurement.jetSelection
 # Counter analyzer (in order to produce compatible root file with the

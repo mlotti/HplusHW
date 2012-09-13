@@ -14,6 +14,7 @@ namespace HPlus {
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fLeadTrkPtCut(iConfig.getUntrackedParameter<double>("leadingTrackPtCut")),
     fAgainstElectronDiscriminator(iConfig.getUntrackedParameter<std::string>("againstElectronDiscriminator")),
+    fApplyVetoForDeadECALCells(iConfig.getUntrackedParameter<bool>("applyVetoForDeadECALCells")),
     fAgainstMuonDiscriminator(iConfig.getUntrackedParameter<std::string>("againstMuonDiscriminator")),
     fProngCount(iConfig.getUntrackedParameter<uint32_t>("nprongs")),
     fIsolationDiscriminator(iConfig.getUntrackedParameter<std::string>("isolationDiscriminator")),
@@ -60,6 +61,7 @@ namespace HPlus {
     fIDECALFiducialCut = fCounterPackager.addSubCounter(baseLabel, "TauECALFiducialCutsCracksAndGap", myZeroHisto);
     fIDAgainstElectronCut = fCounterPackager.addSubCounter(baseLabel, "TauAgainstElectronCut", myZeroHisto);
     fIDAgainstMuonCut = fCounterPackager.addSubCounter(baseLabel, "TauAgainstMuonCut", myZeroHisto);
+    fVetoAgainstDeadECALCells = fCounterPackager.addSubCounter(baseLabel, "VetoAgainstDeadECALCells", myZeroHisto);
     // Initialize counter objects for tau identification
     fIDIsolationCut = fCounterPackager.addSubCounter(baseLabel, "TauIsolation", myZeroHisto);
     fIDNProngsCut = fCounterPackager.addSubCounter(baseLabel, "TauProngCut",
@@ -103,7 +105,17 @@ namespace HPlus {
     // All cuts passed, return true
     return true;
   }
-  
+
+  bool TauIDBase::passVetoAgainstDeadECALCells(const edm::Ptr<pat::Tau> tau) {
+    if (!fApplyVetoForDeadECALCells) {
+      fCounterPackager.incrementSubCount(fVetoAgainstDeadECALCells);
+      return true;
+    }
+    bool myStatus = fDeadECALCells.ObjectHitsDeadECALCell(tau, 0.07);
+    if (myStatus) fCounterPackager.incrementSubCount(fVetoAgainstDeadECALCells);
+    return myStatus;
+  }
+
   bool TauIDBase::passIsolation(const edm::Ptr<pat::Tau> tau) {
     // If no continuous cut point was set, set the default cut point for discrete discriminator
     if (fIsolationDiscriminatorContinuousCutPoint < 0) {
@@ -114,7 +126,7 @@ namespace HPlus {
     fCounterPackager.incrementSubCount(fIDIsolationCut);
     return true;
   }
-  
+
   bool TauIDBase::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
     if (fIsolationDiscriminatorContinuousCutPoint < 0) {
       if (tau->tauID(fIsolationDiscriminator) > 0.5)
