@@ -26,7 +26,13 @@ def main():
         #("Run2011A_Mu24", 77.851037, 145.599256231),
         #("Run2011A_Mu30", 53.748971+0.000176, 172.02642060600002),
         #("Run2011A_Mu40", 3.381858+4.153168+424.330775+109.639076+105.026041, 3.3818575699999998+4.153168108+424.33077485900003+83.549892354000008+95.750128408000009),
-        ("Run2011A_Mu20", getLumi(["SingleMu_160431-163261_May10"]), 20),
+	("Run2011A_Mu20", getLumi(["SingleMu_160431-163261_2011A_Nov08"]), 20),
+	("Run2011A_Mu24", getLumi(["SingleMu_163270-163869_2011A_Nov08"]), 20),
+	("Run2011A_Mu30", getLumi(["SingleMu_165088-165633_2011A_Nov08","SingleMu_165970-166150_2011A_Nov08"]), 20),
+	("Run2011A_Mu40", getLumi(["SingleMu_166161-166164_2011A_Nov08","SingleMu_166346-166346_2011A_Nov08","SingleMu_166374-166967_2011A_Nov08","SingleMu_167039-167043_2011A_Nov08","SingleMu_167078-167913_2011A_Nov08","SingleMu_170722-172619_2011A_Nov08","SingleMu_172620-173198_2011A_Nov08"]), 20),
+	("Run2011A_Mu40eta2p1", getLumi(["SingleMu_173236-173692_2011A_Nov08"]), 20),
+	("Run2011B_Mu40eta2p1", getLumi(["SingleMu_175860-176469_2011B_Nov19","SingleMu_176545-177053_2011B_Nov19","SingleMu_177074-177452_2011B_Nov19","SingleMu_177718-178380_2011B_Nov19","SingleMu_178420-178866_2011B_Nov19","SingleMu_178871-179889_2011B_Nov19","SingleMu_179959-180252_2011B_Nov19"]), 20),
+#        ("Run2011A_Mu20", getLumi(["SingleMu_160431-163261_May10"]), 20),
 #        ("Run2011A_Mu24", getLumi(["SingleMu_163270-163869_May10"]), 20),
 #        ("Run2011A_Mu30", getLumi(["SingleMu_165088-165633_Prompt", "SingleMu_165970-166150_Prompt"]), 20),
 #        ("Run2011A_Mu40", getLumi(["SingleMu_166161-166164_Prompt", "SingleMu_166346-166346_Prompt", "SingleMu_166374-166967_Prompt", "SingleMu_167039-167043_Prompt", "SingleMu_167078-167913_Prompt", "SingleMu_172620-173198_Prompt"]), 20),
@@ -73,6 +79,7 @@ def getEfficiency(postfix, style, lumi=None):
         "Run2011A_Mu30": ("HLT_Mu30", "165088-166150"),
         "Run2011A_Mu40": ("HLT_Mu40", "166161-167913, 172620-173198"),
         "Run2011A_Mu40eta2p1": ("HLT_Mu40eta2p1", "173236-173692"),
+	"Run2011B_Mu40eta2p1": ("HLT_Mu40eta2p1", "175860-180252"),
         "DY_Mu20": ("HLT_Mu20", "DY+jets MC"),
         }[postfix]
 
@@ -86,22 +93,25 @@ def getEfficiency(postfix, style, lumi=None):
     plotPostfix = "_tauTightIc04Iso_bin0"
 
     path = "tnpTree/All/%s_eff_plots" % cntfit
-    plot = "pt_PLOT_abseta_bin0_&"+plotPostfix
+####    plot = "pt_PLOT_abseta_bin0_&"+plotPostfix
+    plot = "pt_PLOT_abseta_bin0"
     graph = "hxy_%s_eff" % cntfit
 
     pathPt = "tnpTree/All_pt/%s_eff_plots" % cntfit
-    plotPt = "pt_PLOT_abseta_bin0_&"+plotPostfix
-
+####    plotPt = "pt_PLOT_abseta_bin0_&"+plotPostfix
+    plotPt = "pt_PLOT_abseta_bin0"
+    
     pathEta = "tnpTree/All_abseta/%s_eff_plots" % cntfit
-    #plotEta = "abseta_PLOT_pt_bin0"
-    plotEta = "abseta_PLOT_pt_bin0_&"+plotPostfix
+    plotEta = "abseta_PLOT_pt_bin0"
+####    plotEta = "abseta_PLOT_pt_bin0_&"+plotPostfix
     pathTriggerEta = "tnpTree/Trigger_abseta/%s_eff_plots" % cntfit
     plotTriggerEta = "abseta_PLOT_pt_bin0_&_tauTightIc04Iso_bin0_&_dB_pass_&_hitQuality_pass_&_isGlobalMuon_pass_&_isTrackerMuon_pass"
     pathIdEta = "tnpTree/Id_abseta/%s_eff_plots" % cntfit
     plotIdEta = "abseta_PLOT_pt_bin0_&_tauTightIc04Iso_bin0_&_isHLT%s_pass" % trig.replace("HLT_", "")
 
     pathPtEta = "tnpTree/All_pt_abseta/%s_eff_plots" % cntfit
-    plotPtEta = "abseta_pt_PLOT"+plotPostfix
+####    plotPtEta = "abseta_pt_PLOT"+plotPostfix
+    plotPtEta = "abseta_pt_PLOT"
     graphPtEta = plotPtEta
 
     ## Overall value
@@ -118,7 +128,8 @@ def getEfficiency(postfix, style, lumi=None):
             defaults = {"legendStyle": "l"}
             defaults.update(kwargs)
             graph_.GetZaxis().SetTitle("")
-            return plots.PlotBase([histograms.HistoBase(graph_, "efficiency", **defaults)])
+####            return plots.PlotBase([histograms.HistoBase(graph_, "efficiency", **defaults)])
+	    return plots.PlotBase([histograms.Histo(graph_, "efficiency", **defaults)])
         else:
             defaults = {"drawStyle": "EP"}
             defaults.update(kwargs)
@@ -191,22 +202,22 @@ def getEfficiency(postfix, style, lumi=None):
     style.setWide(False)
 
 
-    ### Trigger as a function of eta
-    canv = f.Get(pathTriggerEta+"/"+plotTriggerEta)
-    gr = canv.FindObject(graph).Clone()
-    name = "TagProbe_%s_Trigger_%s_%s" % (postfix, plotTriggerEta, graph)
-    p = createPlot(gr)
-    p.createFrame(name+"_Eta", xmax=2.2, **opts)
-    drawPlot(p, "Probe muon |#eta|", cutLine=2.1)
-    
-
-    ### ID as a function of eta
-    canv = f.Get(pathIdEta+"/"+plotIdEta)
-    gr = canv.FindObject(graph).Clone()
-    name = "TagProbe_%s_Id_%s_%s" % (postfix, plotIdEta, graph)
-    p = createPlot(gr)
-    p.createFrame(name+"_Eta", xmax=2.2, **opts)
-    drawPlot(p, "Probe muon |#eta|", cutLine=2.1)
+#    ### Trigger as a function of eta
+#    canv = f.Get(pathTriggerEta+"/"+plotTriggerEta)
+#    gr = canv.FindObject(graph).Clone()
+#    name = "TagProbe_%s_Trigger_%s_%s" % (postfix, plotTriggerEta, graph)
+#    p = createPlot(gr)
+#    p.createFrame(name+"_Eta", xmax=2.2, **opts)
+#    drawPlot(p, "Probe muon |#eta|", cutLine=2.1)
+#    
+#
+#    ### ID as a function of eta
+#    canv = f.Get(pathIdEta+"/"+plotIdEta)
+#    gr = canv.FindObject(graph).Clone()
+#    name = "TagProbe_%s_Id_%s_%s" % (postfix, plotIdEta, graph)
+#    p = createPlot(gr)
+#    p.createFrame(name+"_Eta", xmax=2.2, **opts)
+#    drawPlot(p, "Probe muon |#eta|", cutLine=2.1)
 
     print "%s overall efficiency %f + %f - %f" % (postfix, eff_value, eff_plus, eff_minus)
     return (eff_value, eff_plus, eff_minus)
