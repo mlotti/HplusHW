@@ -41,20 +41,6 @@ def addDataSelection(process, dataVersion, options, calculateEventCleaning=False
     seq *= process.passedScrapingVeto
 
     # Produce results for filters
-
-    addHBHENoiseFilterResultProducer(process, seq)
-
-    if calculateEventCleaning:
-        # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#ECAL_dead_cell_filter
-        # https://twiki.cern.ch/twiki/bin/view/CMS/SusyEcalMaskedCellSummary
-        process.load("JetMETAnalysis.ecalDeadCellTools.RA2TPfilter_cff")
-        process.ecalDeadCellTPfilter.taggingMode = True
-        process.EcalDeadCellEventFilter.taggingMode = True
-        seq *= (
-            process.ecalDeadCellTPfilter *
-            process.EcalDeadCellEventFilter
-        )
-
     return seq
 
 dataSelectionCounters = [
