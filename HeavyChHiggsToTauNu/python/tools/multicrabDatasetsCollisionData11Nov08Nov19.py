@@ -12,7 +12,7 @@ datasets = {
     "Tau_160431-167913_2011A_Nov08": {
         "dataVersion": "44Xdata",
         "args": {"triggerThrow": 0}, # needed for OR of triggers in separate run ranges
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "triggerOR": [
             "HLT_IsoPFTau35_Trk20_MET45_v1", # 160431-161176
             "HLT_IsoPFTau35_Trk20_MET45_v2", # 161216-163261
@@ -29,24 +29,24 @@ datasets = {
                 "number_of_jobs": 300, # was 350+200+350 
                 "lumiMask": "DCSONLY11"
             },
-            "pattuple_v25": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_160431-167913_2011A_Nov08-881cb2d7d3c99f0f42a75ac218718418/USER",
-                "number_of_jobs": 15, # 4629090 evt, 40-80 MB / file
-                "lumiMask": "Nov08ReReco",
-            },
             "pattuple_v25b": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_Tau_160431-167913_2011A_Nov08-6a35806d4ee51a0fcded80eb169c9c26/USER",
                 "number_of_jobs": 15, # 4629090 evt, 40-80 MB / file
                 "lumiMask": "Nov08ReReco",
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_08Nov2011_v1_AOD_160431_pattuple_v25c-71def38b05f792f2273b1e28fc6e4f12/USER",
+                "number_of_jobs": 20, # 7650822 evt, 40-80 MB / file
+                "lumiMask": "Nov08ReReco",
+           },
         }
     },
     # break of range because of trigger eff. boundary
     "Tau_170722-173198_2011A_Nov08": {
         "dataVersion": "44Xdata",
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "trigger": "HLT_IsoPFTau35_Trk20_MET60_v6",
         "runs": (170722, 173198), # This is prompt RECO, so check the run range again when running!
         "data": {
@@ -55,16 +55,16 @@ datasets = {
                 "number_of_jobs": 70, # was 110+110
                 "lumiMask": "DCSONLY11"
             },
-            "pattuple_v25": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_170722-173198_2011A_Nov08-5bcf905dbe9444950d7b4f5be3593e8c/USER",
-                "number_of_jobs": 3, # 754860 evt, 30 MB / file
-                "lumiMask": "Nov08ReReco",
-            },
             "pattuple_v25b": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_Tau_170722-173198_2011A_Nov08-bf69bd8220530b9ba3ad7a1d882490f3/USER",
                 "number_of_jobs": 3, # 754860 evt, 30 MB / file
+                "lumiMask": "Nov08ReReco",
+            },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_08Nov2011_v1_AOD_170722_pattuple_v25c-1997d8885939481988a1e591798fb84f/USER",
+                "number_of_jobs": 3, # 914344 evt, 30 MB / file
                 "lumiMask": "Nov08ReReco",
             },
         }
@@ -72,7 +72,7 @@ datasets = {
     # break of range because of trigger eff. boundary
     "Tau_173236-173692_2011A_Nov08": {
         "dataVersion": "44Xdata",
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "trigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
         "runs": (173236, 173692), # This is prompt RECO, so check the run range again when running!
         "data": {
@@ -81,16 +81,16 @@ datasets = {
                 "number_of_jobs": 30, # was 90
                 "lumiMask": "DCSONLY11"
             },
-            "pattuple_v25": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_173236-173692_2011A_Nov08-d7b7dcb6c55f2b2177021b8423a82913/USER",
-                "number_of_jobs": 2, # 407038 evt
-                "lumiMask": "Nov08ReReco",
-            },
             "pattuple_v25b": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_Tau_173236-173692_2011A_Nov08-466fa79a18d5f55ecd74f61a06585be0/USER",
                 "number_of_jobs": 2, # 407038 evt
+                "lumiMask": "Nov08ReReco",
+            },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_08Nov2011_v1_AOD_173236_pattuple_v25c-847c5b91b10d6ca1cca97c3366bcb9ca/USER",
+                "number_of_jobs": 2, # 470476 evt
                 "lumiMask": "Nov08ReReco",
             },
         }
@@ -99,29 +99,29 @@ datasets = {
     "Tau_175860-180252_2011B_Nov19": {
         "dataVersion": "44Xdata",
         "args": {"triggerThrow": 0}, # needed for OR of triggers in separate run ranges
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "triggerOR": [
             "HLT_MediumIsoPFTau35_Trk20_MET60_v1", # 175860-178380
             "HLT_MediumIsoPFTau35_Trk20_MET60_v5", # 178420-179889
             "HLT_MediumIsoPFTau35_Trk20_MET60_v6", # 179959-180252
         ],
-        "runs": (175860, 180252), # This is prompt RECO, so check the run range again when running!
+        "runs": (175832, 180252), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/Tau/Run2011B-19Nov2011-v1/AOD",
                 "number_of_jobs": 300, # was 400+230+250
                 "lumiMask": "DCSONLY11"
             },
-            "pattuple_v25": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_175860-180252_2011B_Nov19-28e7e0ab56ad4146eca1efa805cd10f4/USER",
-                "number_of_jobs": 20, # 5691371 evt, 30 MB / file
-                "lumiMask": "Nov08ReReco",
-            },
             "pattuple_v25b": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_Tau_175860-180252_2011B_Nov19-b2a9ba9a3b361daafe58fb023a257e1b/USER",
                 "number_of_jobs": 30, # 5691371 evt, 30 MB / file
+                "lumiMask": "Nov08ReReco",
+            },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011B_19Nov2011_v1_AOD_175835_pattuple_v25c-ab60dfb18d7993779cd7c862a842fc97/USER",
+                "number_of_jobs": 30, # 6284525 evt, 30 MB / file
                 "lumiMask": "Nov08ReReco",
             },
         }

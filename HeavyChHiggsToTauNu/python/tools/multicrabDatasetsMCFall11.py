@@ -706,8 +706,8 @@ datasets = {
             },
             "pattuple_v25c": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "",
-                "number_of_jobs": 2
+                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 50 # 3327519 evt
             },
         },
     },
