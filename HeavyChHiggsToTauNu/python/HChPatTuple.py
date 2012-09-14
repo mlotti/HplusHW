@@ -473,6 +473,7 @@ class StandardPATBuilder(PATBuilderBase):
         self.process.kt6PFJetsForEleIso.Rho_EtaMax = cms.double(2.5)
         self.beginSequence *= self.process.kt6PFJetsForEleIso
 
+
         # Simple cut-based ElectronID seems to work as simply as this
         # Note that this is OLD
         # https://twiki.cern.ch/twiki/bin/view/CMS/VbtfEleID2011
@@ -480,8 +481,10 @@ class StandardPATBuilder(PATBuilderBase):
         if self.doPatElectronID:
             addPatElectronID(self.process, self.process.patElectrons)
 
+        # Keep Conversion objects for later simple cut-based ID
         self.outputCommands.extend([
-                "keep *_selectedPatElectrons_*_*"
+                "keep *_selectedPatElectrons_*_*",
+                "keep *_allConversions_*_*",
                 ])
 
     def _customizePhotons(self):
