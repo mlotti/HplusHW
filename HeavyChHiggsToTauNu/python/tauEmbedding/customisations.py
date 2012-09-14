@@ -3,13 +3,18 @@ import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as HChSignalAnalysisParameters
 
-PF2PATVersion = "PFlow"
+PF2PATVersion = "" # empty for standard PAT
+#PF2PATVersion = "PFlow"
 #PF2PATVersion = "PFlowChs"
 
 allPatMuons = "selectedPatMuons"+PF2PATVersion
 tauEmbeddingMuons = "tauEmbeddingMuons"
 
-allPatTaus = "patTaus"+PF2PATVersion
+def getAllPatTaus():
+    if PF2PATVersion == "":
+        return "patTausHpsPFTau"
+    else:
+        return "patTaus"+PF2PATVersion
 
 jetSelection = "pt() > 30 && abs(eta()) < 2.4"
 jetSelection += "&& numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99"
@@ -700,11 +705,11 @@ def addTauEmbeddingMuonTaus(process):
 
     # Select the taus matching to the original muon
     m = cms.EDProducer("HPlusPATTauCandViewDeltaRSelector",
-        src = cms.InputTag(allPatTaus),
+        src = cms.InputTag(getAllPatTaus()),
         refSrc = cms.InputTag(tauEmbeddingMuons),
         deltaR = cms.double(0.1),
     )
-    setattr(process, allPatTaus+"TauEmbeddingMuonMatched", m)
+    setattr(process, getAllPatTaus()+"TauEmbeddingMuonMatched", m)
     seq *= m
 
     return seq

@@ -56,8 +56,9 @@ class PATBuilder:
         if options.tauEmbeddingInput != 0:
             # Add the tau embedding counters, if that's the input
             import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
-            self.counters.extend(MuonSelection.getMuonSelectionCountersForEmbedding("PFlow"))
-            self.counters.extend(MuonSelection.getMuonSelectionCountersForEmbedding("PFlowChs"))
+            self.counters.extend(MuonSelection.getMuonSelectionCountersForEmbedding(dataVersion))
+#            self.counters.extend(MuonSelection.getMuonSelectionCountersForEmbedding("PFlow"))
+#            self.counters.extend(MuonSelection.getMuonSelectionCountersForEmbedding("PFlowChs"))
             self.counters.extend(PFEmbeddingSource.muonSelectionCounters)
 
         if options.doPat == 0:
@@ -109,7 +110,7 @@ class PATBuilder:
 
         if options.tauEmbeddingInput != 0:
             # Select the tau objects deltaR matched to the original muon objects
-            # Note: PF2Pat version is selected at the beginning of customisations.py
+            # Note: PF2PAT version is selected at the beginning of customisations.py
             from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations import addTauEmbeddingMuonTaus
             process.patMuonTauSequence = addTauEmbeddingMuonTaus(process)
             process.patSequence *= process.patMuonTauSequence
@@ -202,28 +203,43 @@ class PATBuilder:
         # Construct PF2PAT
         pargs = patArgs.copy()
         self._setPatArgs(pargs, {"doTauHLTMatching": False,
+                                 "doMuonHLTMatching": False,
                                  "doPatElectronID": False})
         #sequence = addPF2PAT(self.process, dataVersion, doPatTrigger=False, doChs=False, patArgs=pargs, pvSelectionConfig=pvSelectionConfig)
-        #postdix = "PFlow"
+        #postfix = "PFlow"
         #elePostfixes = [postfix, "PFlowAll"] # + ["PFlowChs", "PFlowChsAll"]
+        #jetPostfix = postfix
         sequence = addStandardPAT(self.process, dataVersion, doPatTrigger=False, patArgs=pargs, pvSelectionConfig=pvSelectionConfig)
         postfix = ""
         elePostfixes = [""]
 
-        # Remove patElectrons and patPhotons altogether for the hybrid events
-        for fix in elePostfixes:
-            seq = getattr(self.process, "patDefaultSequence"+fix)
-            if dataVersion.isMC():
-                seq.remove(getattr(self.process, "makePatElectrons"+fix))
-                seq.remove(getattr(self.process, "photonMatch"+fix))
-                delattr(self.process, "photonMatch"+fix)
-            else:
-                # Thanks to difference sequence structure we have to do this separately for data
-                seq.remove(getattr(self.process, "patElectrons"+fix))
+        # # Remove patElectrons and patPhotons altogether for the hybrid events
+        # for fix in elePostfixes:
+        #     seq = getattr(self.process, "patDefaultSequence"+fix)
+        #     if dataVersion.isMC():
+        #         seq.remove(getattr(self.process, "makePatElectrons"+fix))
+        #         seq.remove(getattr(self.process, "photonMatch"+fix))
+        #         delattr(self.process, "photonMatch"+fix)
+        #     else:
+        #         # Thanks to difference sequence structure we have to do this separately for data
+        #         seq.remove(getattr(self.process, "patElectrons"+fix))
 
-            seq.remove(getattr(self.process, "selectedPatElectrons"+fix))
-            delattr(self.process, "patElectrons"+fix)
-            delattr(self.process, "selectedPatElectrons"+fix)
+        #     seq.remove(getattr(self.process, "selectedPatElectrons"+fix))
+        #     delattr(self.process, "patElectrons"+fix)
+        #     delattr(self.process, "selectedPatElectrons"+fix)
+        # Remove electrons, photons, muons from the hybrid events
+        removeSpecificPATObjects(self.process, ["Muons", "Electrons", "Photons"], outputModules=[])
+
+        # No need to run the "muon isolation for embedding" sequence 
+        self.process.patDefaultSequence.remove(self.process.muonIsolationEmbeddingSequence)
+
+        # Remove PFIso paths for muons and electrons
+        self.process.patDefaultSequence.remove(self.process.muIsoSequence)
+        self.process.patDefaultSequence.remove(self.process.eleIsoSequence)
+
+        # Remove pat caloMET
+        if postfix == "":
+            self.process.patDefaultSequence.remove(self.process.makePatMETs)
 
         # Remove soft muon/electron b tagging discriminators as they are not
         # well defined, cause technical problems and we don't use
@@ -231,7 +247,7 @@ class PATBuilder:
         def filterOutSoft(tag):
             label = tag.getModuleLabel()
             return "softMuon" not in label and "softElectron" not in label
-        getattr(self.process, "patJets"+fix).discriminatorSources = filter(filterOutSoft, self.process.patJets.discriminatorSources)
+        getattr(self.process, "patJets"+postfix).discriminatorSources = filter(filterOutSoft, self.process.patJets.discriminatorSources)
         #self.process.patJetsPFlowChs.discriminatorSources = filter(filterOutSoft, self.process.patJets.discriminatorSources)
         for seq in [self.process.btagging,
                     #self.process.btaggingJetTagsAODPFlow, self.process.btaggingTagInfosAODPFlow,
@@ -241,9 +257,14 @@ class PATBuilder:
             seq.visit(softMuonRemover)
             softMuonRemover.removeFound(self.process, seq)
 
+           
         # Use the merged track collection
-        getattr(self.process, "pfJetTracksAssociatorAtVertex"+postfix).tracks.setModuleLabel("tmfTracks")
-        getattr(self.process, "jetTracksAssociatorAtVertex"+postfix).tracks.setModuleLabel("tmfTracks")
+        if postfix == "":
+            self.process.jetTracksAssociatorAtVertex.tracks.setModuleLabel("tmfTracks")
+            self.process.ak5PFJetTracksAssociatorAtVertex.tracks.setModuleLabel("tmfTracks")
+        else:
+            getattr(self.process, "pfJetTracksAssociatorAtVertex"+postfix).tracks.setModuleLabel("tmfTracks")
+            getattr(self.process, "jetTracksAssociatorAtVertex"+postfix).tracks.setModuleLabel("tmfTracks")
 
         # Do jet-parton matching with the genParticles of the original event
         if dataVersion.isMC():
@@ -256,14 +277,16 @@ class PATBuilder:
 
         # This is now somewhat WTF, is the normal b-tagging affected by this? (FIXME)
         # I can't replace the InputTag module labels in place, because they are shared between the two PATJetProducers
-        tags = []
-        for inputTag in self.process.patJetsPFlow.discriminatorSources:
-            tags.append(cms.InputTag(inputTag.getModuleLabel()+"AODPFlow"))
-        getattr(self.process, "patJets"+postfix).discriminatorSources = tags
-        tags = []
-        #for inputTag in self.process.patJetsPFlowChs.discriminatorSources:
-        #    tags.append(cms.InputTag(inputTag.getModuleLabel()+"AODPFlowChs"))
-        #self.process.patJetsPFlowChs.discriminatorSources = tags
+        if postfix != "":
+            tags = []
+            for inputTag in getattr(self.process, "patJets"+postfix).discriminatorSources:
+                tags.append(cms.InputTag(inputTag.getModuleLabel()+"AOD"+postfix))
+            getattr(self.process, "patJets"+postfix).discriminatorSources = tags
+            tags = []
+            #for inputTag in self.process.patJetsPFlowChs.discriminatorSources:
+            #    tags.append(cms.InputTag(inputTag.getModuleLabel()+"AODPFlowChs"))
+            #self.process.patJetsPFlowChs.discriminatorSources = tags
+
 
         # Another part of the PAT process.out hack
         if not hasOut:
