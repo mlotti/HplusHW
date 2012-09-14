@@ -442,7 +442,18 @@ class StandardPATBuilder(PATBuilderBase):
     def _customizeElectrons(self):
         setPatLeptonDefaults(self.process.patElectrons, self.includePFCands)
 
-        # Simple cut-based ElectronID  seems to work as simply as this
+        # Calculate the "rho" for electron isolation "effective area"
+        # PU correction
+        # https://twiki.cern.ch/twiki/bin/view/CMS/EgammaEARhoCorrection
+        import RecoJets.JetProducers.kt4PFJets_cfi as kt4PFJets_cfi
+        self.process.kt6PFJetsForEleIso = kt4PFJets_cfi.kt4PFJets.clone( rParam = 0.6, doRhoFastjet = True )
+        self.process.kt6PFJetsForEleIso.Rho_EtaMax = cms.double(2.5)
+        self.beginSequence *= self.process.kt6PFJetsForEleIso
+
+        # Simple cut-based ElectronID seems to work as simply as this
+        # Note that this is OLD
+        # https://twiki.cern.ch/twiki/bin/view/CMS/VbtfEleID2011
+        # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
         if self.doPatElectronID:
             addPatElectronID(self.process, self.process.patElectrons)
 
