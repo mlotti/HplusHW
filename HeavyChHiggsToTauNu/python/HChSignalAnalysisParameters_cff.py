@@ -168,9 +168,7 @@ else:
     fakeTauSFandSystematics = fakeTauSFandSystematicsBase
 
 jetSelectionBase = cms.untracked.PSet(
-    #src = cms.untracked.InputTag("selectedPatJets"),       # Calo jets
-    #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"), # JPT jets 
-    src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
+    src = cms.untracked.InputTag("selectedPatJets"),  # PF jets
     cleanTauDR = cms.untracked.double(0.5), # cone for rejecting jets around tau jet
     ptCut = cms.untracked.double(20.0),
     etaCut = cms.untracked.double(2.4),
@@ -302,7 +300,7 @@ jetTauInvMass = cms.untracked.PSet(
 )
 
 forwardJetVeto = cms.untracked.PSet(
-  src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
+  src = cms.untracked.InputTag("selectedPatJets"),  # PF jets
   ptCut = cms.untracked.double(30),
   etaCut = cms.untracked.double(2.4),
   ForwJetEtCut = cms.untracked.double(10.0),

@@ -470,42 +470,40 @@ class StandardPATBuilder(PATBuilderBase):
         # Don't embed PFCandidates
         setPatJetDefaults(self.process.patJets)
 
-        # Add AK5PF jets
-        addJetCollection(self.process, cms.InputTag('ak5PFJets'),
-                         'AK5', 'PF',
-                         doJTA        = True,
-                         doBTagging   = True,
-                         jetCorrLabel = ('AK5PF', self.process.patJetCorrFactors.levels),
-                         doType1MET   = False,
-                         doL1Cleaning = False,
-                         doL1Counters = True,
-                         genJetCollection = cms.InputTag("ak5GenJets"),
-                         doJetID      = True
+        # Switch to AK5PF jets
+        setPatJetCorrDefaults(self.process.patJetCorrFactors, self.dataVersion, True)
+        switchJetCollection(self.process, cms.InputTag('ak5PFJets'),
+                            doJTA        = True,
+                            doBTagging   = True,
+                            jetCorrLabel = ('AK5PF', self.process.patJetCorrFactors.levels),
+                            doType1MET   = False,
+                            genJetCollection = cms.InputTag("ak5GenJets"),
+                            doJetID      = True
         )
-        setPatJetCorrDefaults(self.process.patJetCorrFactorsAK5PF, self.dataVersion, True)
 
         # Embed beta and betastar to pat::Jet
         self.process.patJetsBetaEmbedded = cms.EDProducer("HPlusPATJetViewBetaEmbedder",
-            jetSrc = cms.InputTag("patJetsAK5PF"),
+            jetSrc = cms.InputTag("patJets"),
             generalTracksSrc = cms.InputTag("generalTracks"),
             vertexSrc = cms.InputTag("offlinePrimaryVertices"),
             embedPrefix = cms.string("")
         )
-        self.process.selectedPatJetsAK5PF.src = "patJetsBetaEmbedded"
-        self.process.patDefaultSequence.replace(self.process.selectedPatJetsAK5PF,
-                                                self.process.patJetsBetaEmbedded*self.process.selectedPatJetsAK5PF)
+        self.process.selectedPatJets.src = "patJetsBetaEmbedded"
+        self.process.patDefaultSequence.replace(self.process.selectedPatJets,
+                                                self.process.patJetsBetaEmbedded*self.process.selectedPatJets)
 
         # jet pre-selection
-        self.process.selectedPatJetsAK5PF.cut = jetPreSelection
+        self.process.selectedPatJets.cut = jetPreSelection
 
         self.outputCommands.extend([
-                "drop *_selectedPatJets_*_*",
+                "keep *_selectedPatJets_*_*",
+                #"drop *_selectedPatJets_*_*",
                 #"keep *_selectedPatJetsAK5JPT_*_*",
-                "keep *_selectedPatJetsAK5PF_*_*",
-                'drop *_selectedPatJets_pfCandidates_*', ## drop for default patJets which are CaloJets
-                'drop *_*PF_caloTowers_*',
-                'drop *_*JPT_pfCandidates_*',
-                'drop *_*Calo_pfCandidates_*',
+                #"keep *_selectedPatJetsAK5PF_*_*",
+                #'drop *_selectedPatJets_pfCandidates_*', ## drop for default patJets which are CaloJets
+                #'drop *_*PF_caloTowers_*',
+                #'drop *_*JPT_pfCandidates_*',
+                #'drop *_*Calo_pfCandidates_*',
                 ])
 
 
@@ -576,7 +574,7 @@ class StandardPATBuilder(PATBuilderBase):
         # to remove contribution from jet energy corrections of those
         # jets which correspond isolated e/mu/tau
 
-        jets = self.process.selectedPatJetsAK5PF.src.value()
+        jets = self.process.selectedPatJets.src.value()
         seq = self.process.patDefaultSequence
 
         self.outputCommands.extend([
@@ -639,7 +637,7 @@ class StandardPATBuilder(PATBuilderBase):
             ]
         selectedJetNames = []
         for shiftedJet in shiftedJetNames:
-            m = self.process.selectedPatJetsAK5PF.clone(
+            m = self.process.selectedPatJets.clone(
                 src = shiftedJet
             )
             name = shiftedJet.replace(tmp, "")
@@ -695,7 +693,7 @@ class StandardPATBuilder(PATBuilderBase):
         from SandBox.Skims.trackingFailureFilter_cfi import trackingFailureFilter
         self.process.trackingFailureFilter = trackingFailureFilter.clone(
             taggingMode = True,
-            JetSource = "selectedPatJetsAK5PF",
+            JetSource = "selectedPatJets",
             VertexSource = "goodPrimaryVertices",
         )
         self.endSequence *= self.process.trackingFailureFilter

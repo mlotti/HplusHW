@@ -76,12 +76,6 @@ options.doPat=1
                                    calculateEventCleaning=True, # This requires the tags from test/pattuple/checkoutTags.sh
                                    )
 
-process.out.outputCommands.extend([
-        "drop *_selectedPatTausHpsTancPFTau_*_*",
-        "drop *_patTausHpsTancPFTauTauTriggerMatched_*_*",
-        "drop *_selectedPatJets_*_*",
-        ])
-
 # Prune GenParticles
 if dataVersion.isMC():
     process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
