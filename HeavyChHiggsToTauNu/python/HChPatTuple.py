@@ -465,6 +465,16 @@ class StandardPATBuilder(PATBuilderBase):
     def _customizeElectrons(self):
         setPatLeptonDefaults(self.process.patElectrons, self.includePFCands)
 
+        # Switch isolation cone to DR<0.3 (POG recommendation) from
+        # the DR<0.4 (PAT default) for the isolation values. We can
+        # still compute the isolation in an almost-arbitrary cone with
+        # iso deposits.
+        def coneTo03(inputTag):
+            inputTag.setModuleLabel(inputTag.getModuleLabel().replace("04", "03"))
+        for name in self.process.patElectrons.isolationValues.parameterNames_():
+            coneTo03(getattr(self.process.patElectrons.isolationValues, name))
+            coneTo03(getattr(self.process.patElectrons.isolationValuesNoPFId, name))
+
         # Calculate the "rho" for electron isolation "effective area"
         # PU correction
         # https://twiki.cern.ch/twiki/bin/view/CMS/EgammaEARhoCorrection
