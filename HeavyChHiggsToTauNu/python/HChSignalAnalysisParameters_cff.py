@@ -255,6 +255,9 @@ EvtTopology = cms.untracked.PSet(
 
 GlobalElectronVeto = cms.untracked.PSet(
     ElectronCollectionName = cms.untracked.InputTag("selectedPatElectrons"),
+    conversionSrc = cms.untracked.InputTag("allConversions"),
+    beamspotSrc = cms.untracked.InputTag("offlineBeamSpot"),
+    rhoSrc = cms.untracked.InputTag("kt6PFJetsForEleIso", "rho"),
     ElectronSelection = cms.untracked.string("simpleEleId95relIso"),
     ElectronPtCut = cms.untracked.double(15.0),
     ElectronEtaCut = cms.untracked.double(2.5)

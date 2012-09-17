@@ -17,10 +17,17 @@ rm SandBox/Skims/python/RA2Objects_cff.py
 rm SandBox/Skims/python/RA2Cleaning_cff.py
 
 # https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentification
+#
+# The tag is checked out in the analysis checkoutTags (because of
+# cut-based ID), but we can do the downloading of the xmls here.
+#
 # Downloads ~50 MB of xml, which compresses to ~8.5 MB with 'tar zcf'
-cvs co -r V00-00-16 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
+if [ ! -e EGamma/EGammaAnalysisTools ]; then
+    echo "ERROR: You should run HiggsAnalysis/HeavyChHiggsToTauNu/test/checkoutTags.sh first !"
+    exit 1
+fi
 cd EGamma/EGammaAnalysisTools/data
 rm -f *.xml # In case there are old files
 cat download.url | xargs wget
 cd ../../..
-rm EGamma/EGammaAnalysisTools/test/ElectronIsoAnalyzer.cc # Get rid of compilation error
+

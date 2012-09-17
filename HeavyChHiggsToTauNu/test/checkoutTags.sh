@@ -67,6 +67,7 @@ set -e
 # 19.3.2012/M.Kortelainen CMSSW_4_2_8_patch2 Updated lumi tag to include the pixel lumi
 # 28.3.2012/S.Lehti       CMSSW_4_4_4 Moved master to 444/ 444 tags
 # 13.9.2012/M.Kortelainen CMSSW_4_4_4 Updated PAT and tau tags
+# 17.9.2012/M.Kortelainen CMSSW_4_4_4 Cut-based electron ID tag
 
 
 # addpkg requires cmsenv
@@ -115,7 +116,25 @@ addpkg DataFormats/METReco        V03-03-07
 addpkg RecoLuminosity/LumiDB      V03-04-02
 
 # Electron ID
-# https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
+# https://twiki.cern.ch/twiki/bin/view/CMS/EgammaCutBasedIdentification
+# https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentification
+#
+# Now, this is a bit complex. The recommended tag for MVA ID (which is
+# produced in pattuple jobs) is V00-00-16 in the twiki abobe. However,
+# the recommended tag for the cut-based ID is CutBasedId_V00-00-05.
+# There seem to be non-trivial differences for the MVA-side between
+# the tags (cut-based is newer), so we do the following
+#
+# 1. Check out the full package with the MVA tag
+# 2. Check out classes needed for the cut-based id with the cut-based tag
+cvs co -r V00-00-16 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
+cvs up -r CutBasedId_V00-00-05 EGamma/EGammaAnalysisTools/src/EGammaCutBasedEleId.cc
+cvs up -r CutBasedId_V00-00-05 EGamma/EGammaAnalysisTools/interface/EGammaCutBasedEleId.h
+# EGammaCutBasedEleId.cc includes ElectronEffectiveArea.h, but the
+# version is the same in both tags
+#
+# Get rid of compilation error with the following command
+rm EGamma/EGammaAnalysisTools/test/ElectronIsoAnalyzer.cc 
 
 # Higgs skimms
 cvs co HiggsAnalysis/Skimming
