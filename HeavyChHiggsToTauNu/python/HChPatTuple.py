@@ -483,11 +483,6 @@ class StandardPATBuilder(PATBuilderBase):
         self.process.kt6PFJetsForEleIso.Rho_EtaMax = cms.double(2.5)
         self.beginSequence *= self.process.kt6PFJetsForEleIso
 
-
-        # Simple cut-based ElectronID seems to work as simply as this
-        # Note that this is OLD
-        # https://twiki.cern.ch/twiki/bin/view/CMS/VbtfEleID2011
-        # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
         if self.doPatElectronID:
             addPatElectronID(self.process, self.process.patElectrons)
 
@@ -809,8 +804,7 @@ def addStandardPAT(process, dataVersion, doPatTrigger=True, patArgs={}, pvSelect
 
     # Run simple electron ID sequence for once (default is to run it)
     if not "doPatElectronID" in patArgs or patArgs["doPatElectronID"]:
-        process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
-        sequence *= process.simpleEleIdSequence
+        addPatElectronIDProducers(process, sequence)
 
     # Customize PAT
     patBuilder = StandardPATBuilder(process, dataVersion, **patArgs)
@@ -1443,15 +1437,24 @@ def setPatLeptonDefaults(module, includePFCands):
     module.embedTrack = not includePFCands
 #    module.embedGenMatch = False
 
-def addPatElectronID(process, module, sequence=None):
-    if sequence != None:
-        process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
-        sequence.replace(module, (
-                process.simpleEleIdSequence *
-#            process.patElectronIsolation *
-                module
-        ))
+def addPatElectronIDProducers(process, sequence):
+    # Simple cut-based ElectronID seems to work as simply as this
+    # Note that this is OLD
+    # https://twiki.cern.ch/twiki/bin/view/CMS/VbtfEleID2011
+    # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
+    process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
+    sequence *= process.simpleEleIdSequence
 
+    # MVA ID, should be up-to-date
+    # https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentification
+    # Note that this requires that the CVS tags in
+    # test/pattuple/checkoutTags.sh are checked out
+    process.load("EGamma.EGammaAnalysisTools.electronIdMVAProducer_cfi")
+    sequence *= (process.mvaTrigV0 + process.mvaNonTrigV0)
+    
+
+def addPatElectronID(process, module):
+    # Simple cut-based electron ID (old)
     module.electronIDSources.simpleEleId95relIso = cms.InputTag("simpleEleId95relIso")
     module.electronIDSources.simpleEleId90relIso = cms.InputTag("simpleEleId90relIso")
     module.electronIDSources.simpleEleId85relIso = cms.InputTag("simpleEleId85relIso")
@@ -1464,6 +1467,10 @@ def addPatElectronID(process, module, sequence=None):
     module.electronIDSources.simpleEleId80cIso = cms.InputTag("simpleEleId80cIso")
     module.electronIDSources.simpleEleId70cIso = cms.InputTag("simpleEleId70cIso")
     module.electronIDSources.simpleEleId60cIso = cms.InputTag("simpleEleId60cIso")
+
+    # MVA ID
+    module.electronIDSources.mvaTrigV0 = cms.InputTag("mvaTrigV0")
+    module.electronIDSources.mvaNonTrigV0 = cms.InputTag("mvaNonTrigV0")
 
 
 def addPatTrigger(process, dataVersion, sequence):
@@ -1952,8 +1959,7 @@ def addPF2PAT(process, dataVersion, doPatTrigger=True, doChs=False, patArgs={}, 
 
     # Run simple electron ID sequence for once (default is to run it)
     if not "doPatElectronID" in patArgs or patArgs["doPatElectronID"]:
-        process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
-        sequence *= process.simpleEleIdSequence
+        addPatElectronIDProducers(process, sequence)
 
     # Note that although PF2PAT configurations are built here, they're
     # really executed after the "sequence" Sequence.
