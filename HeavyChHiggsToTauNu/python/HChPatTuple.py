@@ -33,6 +33,8 @@ tauPreSelection = "pt() > 15"
 jetPreSelection = "pt() > 10"
 #jetPreSelection = ""
 
+outputModuleName = "out"
+
 class PATBuilder:
     def __init__(self):
         pass
@@ -45,6 +47,8 @@ class PATBuilder:
 
         self.process = process
         self.counters = []
+
+        sequence = cms.Sequence()
 
         if dataVersion.isData():
             # Append the data selection counters for data
@@ -61,28 +65,37 @@ class PATBuilder:
 #            self.counters.extend(MuonSelection.getMuonSelectionCountersForEmbedding("PFlowChs"))
             self.counters.extend(PFEmbeddingSource.muonSelectionCounters)
 
+
         if options.doPat == 0:
             # Not running PAT, assuming that the job is taking pattuples as input
-            seq = cms.Sequence()
 
             # Add event filters if requested
-            self.addFilters(dataVersion, seq, doTotalKinematicsFilter, doHBHENoiseFilter, doPhysicsDeclared, patOnTheFly=False)
+            self.addFilters(dataVersion, sequence, doTotalKinematicsFilter, doHBHENoiseFilter, doPhysicsDeclared, patOnTheFly=False)
 
             # Add primary vertex selection
             # Selects the first primary vertex, applies the quality cuts to it
             # Applies quality cuts to all vertices too
-            HChPrimaryVertex.addPrimaryVertexSelection(process, seq)
+            HChPrimaryVertex.addPrimaryVertexSelection(process, sequence)
+
+            if options.tauEmbeddingInput != 0:
+                # Select the tau objects deltaR matched to the original muon objects
+                # Note: PF2PAT version is selected at the beginning of customisations.py
+                from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations import addTauEmbeddingMuonTaus
+                process.patMuonTauSequence = addTauEmbeddingMuonTaus(process)
+                sequence *= process.patMuonTauSequence
 
             if options.doTauHLTMatchingInAnalysis != 0:
-                raise Exception("doTauLHTMAtchingInAnalysis is not supported at the moment")
+                raise Exception("doTauLHTMatchingInAnalysis is not supported at the moment")
 #                self.process.patTausHpsPFTauTauTriggerMatched = HChTriggerMatching.createTauTriggerMatchingInAnalysis(options.trigger, "selectedPatTausHpsPFTau")
 #                seq *= process.patTausHpsPFTauTauTriggerMatched
-            return (seq, self.counters)
+            return (sequence, self.counters)
 
         # After this step we're running the PAT
         print "Running PAT on the fly"
         
         self.process.eventPreSelection = cms.Sequence()
+        sequence *= self.process.eventPreSelection
+
         if options.tauEmbeddingInput != 0:
             self.process.patSequence = self.addPatForTauEmbeddingInput(dataVersion, patArgs=patArgs, pvSelectionConfig=options.pvSelectionConfig)
         else:
@@ -104,54 +117,19 @@ class PATBuilder:
                 print "Trigger used for tau matching:", pargs["matchingTauTrigger"]
 
             self.process.patSequence = self.addPat(dataVersion, patArgs=pargs, pvSelectionConfig=options.pvSelectionConfig)
+        sequence *= self.process.patSequence
 
         # Add event filters if requested
         self.addFilters(dataVersion, self.process.eventPreSelection, doTotalKinematicsFilter, doHBHENoiseFilter, doPhysicsDeclared, patOnTheFly=True)
 
-        if options.tauEmbeddingInput != 0:
-            # Select the tau objects deltaR matched to the original muon objects
-            # Note: PF2PAT version is selected at the beginning of customisations.py
-            from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations import addTauEmbeddingMuonTaus
-            process.patMuonTauSequence = addTauEmbeddingMuonTaus(process)
-            process.patSequence *= process.patMuonTauSequence
+        return (sequence, self.counters)
 
-        # Build final sequence
-        dataPatSequence = cms.Sequence(
-            process.eventPreSelection *
-            process.patSequence
-        )
-
-        return (dataPatSequence, self.counters)
-
-    def addPat(self, dataVersion, patArgs, includePFCands=False, pvSelectionConfig=""):
+    def addPat(self, dataVersion, patArgs, pvSelectionConfig=""):
         # Add PF2PAT
         #sequence = addPF2PAT(self.process, dataVersion, patArgs=patArgs, pvSelectionConfig=pvSelectionConfig)
         sequence = addStandardPAT(self.process, dataVersion, patArgs=patArgs, pvSelectionConfig=pvSelectionConfig)
-
-        # Adjust event conent
-        outdict = self.process.outputModules_()
-        if outdict.has_key("out"):
-            out = outdict["out"]
-            out.outputCommands.extend([
-#                    "keep *_goodPrimaryVertices*_*_*",
-                    "keep *_offlinePrimaryVerticesSumPt_*_*",
-                    "keep *_offlineBeamSpot_*_*",
-                    ])
-    
-            if includePFCands:
-                out.outputCommands.extend([
-                        "keep *_particleFlow_*_*",
-                        "keep *_generalTracks_*_*",
-                        ])
-    
-        # ValueMap of sumPt of vertices
-        self.process.offlinePrimaryVerticesSumPt = cms.EDProducer("HPlusVertexViewSumPtComputer",
-            src = cms.InputTag("offlinePrimaryVertices")
-        )
-        sequence *= self.process.offlinePrimaryVerticesSumPt
         return sequence
  
-
     def addFilters(self, dataVersion, sequence,
                    doTotalKinematicsFilter,
                    doHBHENoiseFilter, doPhysicsDeclared,
@@ -191,7 +169,7 @@ class PATBuilder:
                     ])                    
 
 
-    def addPatForTauEmbeddingInput(self, dataVersion, patArgs, includePFCands=False, pvSelectionConfig=""):
+    def addPatForTauEmbeddingInput(self, dataVersion, patArgs, pvSelectionConfig=""):
         # Hack to not to crash if something in PAT assumes process.out
         hasOut = hasattr(self.process, "out")
         if not hasOut:
@@ -204,7 +182,10 @@ class PATBuilder:
         pargs = patArgs.copy()
         self._setPatArgs(pargs, {"doTauHLTMatching": False,
                                  "doMuonHLTMatching": False,
-                                 "doPatElectronID": False})
+                                 "doPatElectronID": False,
+                                 "doPatElectronMuon": False,
+                                 "includePFCands": True,
+                                 })
         #sequence = addPF2PAT(self.process, dataVersion, doPatTrigger=False, doChs=False, patArgs=pargs, pvSelectionConfig=pvSelectionConfig)
         #postfix = "PFlow"
         #elePostfixes = [postfix, "PFlowAll"] # + ["PFlowChs", "PFlowChsAll"]
@@ -229,13 +210,6 @@ class PATBuilder:
         #     delattr(self.process, "selectedPatElectrons"+fix)
         # Remove electrons, photons, muons from the hybrid events
         removeSpecificPATObjects(self.process, ["Muons", "Electrons", "Photons"], outputModules=[])
-
-        # No need to run the "muon isolation for embedding" sequence 
-        self.process.patDefaultSequence.remove(self.process.muonIsolationEmbeddingSequence)
-
-        # Remove PFIso paths for muons and electrons
-        self.process.patDefaultSequence.remove(self.process.muIsoSequence)
-        self.process.patDefaultSequence.remove(self.process.eleIsoSequence)
 
         # Remove pat caloMET
         if postfix == "":
@@ -351,6 +325,7 @@ class PATBuilderBase:
                  doHChTauDiscriminators=True, doPatTauIsoDeposits=False,
                  doTauHLTMatching=True, matchingTauTrigger=None,
                  doMuonHLTMatching=True,
+                 doPatElectronMuon=True,
                  doPatElectronID=True,
                  includePFCands=False,
                  calculateEventCleaning=False):
@@ -363,6 +338,7 @@ class PATBuilderBase:
         self.doTauHLTMatching = doTauHLTMatching
         self.matchingTauTrigger = matchingTauTrigger
         self.doMuonHLTMatching = doMuonHLTMatching
+        self.doPatElectronMuon = doPatElectronMuon
         self.doPatElectronID = doPatElectronID
         self.includePFCands = includePFCands
         self.calculateEventCleaning = calculateEventCleaning
@@ -388,19 +364,27 @@ class StandardPATBuilder(PATBuilderBase):
     def customize(self):
         out = None
         outdict = self.process.outputModules_()
-        if outdict.has_key("out"):
-            out = outdict["out"]
+        if outdict.has_key(outputModuleName):
+            out = outdict[outputModuleName]
 
         # Remove MC stuff if we have real data
         # This also adds the L2L3Residual JEC to the process.patJetCorrFactors
         if self.dataVersion.isData():
             o = []
             if out != None:
-                o = ["out"]
+                o = [outputModuleName]
             runOnData(self.process, outputModules=o)
 
+        # Keep PFCandidates?
+        if self.includePFCands:
+            self.outputCommands.extend([
+                    "keep *_particleFlow_*_*",
+                    "keep *_generalTracks_*_*",
+                    ])
+
         # Add PF isolation for electrons and muons
-        pfTools.usePFIso(self.process)
+        if self.doPatElectronMuon:
+            pfTools.usePFIso(self.process)
         # Apparently for data the sequences are such that the PFIso
         # sequences do not end up in patDefaultSequence
         if self.dataVersion.isData():
@@ -410,8 +394,9 @@ class StandardPATBuilder(PATBuilderBase):
                                                    self.process.muIsoSequence)
 
         # Customize physics objects
-        self._customizeMuons()
-        self._customizeElectrons()
+        if self.doPatElectronMuon:
+            self._customizeMuons()
+            self._customizeElectrons()
         self._customizePhotons()
         self._customizeJets()
         self._customizeTaus()
@@ -631,14 +616,14 @@ class StandardPATBuilder(PATBuilderBase):
 
         outputModule = ""
         outdict = self.process.outputModules_()
-        if outdict.has_key("out"):
-            outputModule = "out"
+        if outdict.has_key(outputModuleName):
+            outputModule = outputModuleName
             # Reset the OutputModule outputCommands to catch the event
             # content modifications done in the runMEtUncertainties.
             # Resetting is fine since the outputCommands are saved in
             # addPF2PAT() before a call to this method, and they are
             # set to proper values after a call to this method.
-            self.process.out.outputCommands = []
+            getattr(self.process, outputModule).outputCommands = []
 
         # Smear the jet energies by JER data/MC difference for MC only
         metUncertaintyTools.runMEtUncertainties(self.process,
@@ -756,8 +741,8 @@ def addStandardPAT(process, dataVersion, doPatTrigger=True, patArgs={}, pvSelect
     out = None
     outdict = process.outputModules_()
     outputCommands = []
-    if outdict.has_key("out"):
-        out = outdict["out"]
+    if outdict.has_key(outputModuleName):
+        out = outdict[outputModuleName]
         outputCommands = out.outputCommands[:]
 
     # Out usual event content
@@ -798,6 +783,19 @@ def addStandardPAT(process, dataVersion, doPatTrigger=True, patArgs={}, pvSelect
         )
         sequence *= process.VisibleTaus
         outputCommands.append("keep *_VisibleTaus_*_*")
+
+    # Vertex and Beamspot
+    outputCommands.extend([
+            "keep *_offlinePrimaryVerticesSumPt_*_*",
+            "keep *_offlineBeamSpot_*_*",
+            ])
+
+    # ValueMap of sumPt of vertices
+    process.offlinePrimaryVerticesSumPt = cms.EDProducer("HPlusVertexViewSumPtComputer",
+        src = cms.InputTag("offlinePrimaryVertices")
+    )
+    sequence *= process.offlinePrimaryVerticesSumPt
+
 
     # PAT
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
@@ -876,8 +874,8 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
                 calculateEventCleaning=False):
     out = None
     outdict = process.outputModules_()
-    if outdict.has_key("out"):
-        out = outdict["out"]
+    if outdict.has_key(outputModuleName):
+        out = outdict[outputModuleName]
 
     outputCommands = []
 
@@ -903,7 +901,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     if dataVersion.isData():
         o = []
         if out != None:
-            o = ["out"]
+            o = [outputModuleName]
         runOnData(process, outputModules=o)
 
     # Tracks (mainly needed for muon efficiency tag&probe studies
@@ -1833,8 +1831,8 @@ class PF2PATBuilder(PATBuilderBase):
 
         outputModule = ""
         outdict = self.process.outputModules_()
-        if outdict.has_key("out"):
-            outputModule = "out"
+        if outdict.has_key(outputModuleName):
+            outputModule = outputModuleName
             # Reset the OutputModule outputCommands to catch the event
             # content modifications done in the runMEtUncertainties.
             # Resetting is fine since the outputCommands are saved in
@@ -1922,7 +1920,7 @@ def addPF2PAT(process, dataVersion, doPatTrigger=True, doChs=False, patArgs={}, 
     print "########################################"
 
     # Hack to not to crash if something in PAT assumes process.out
-    # hasOut = hasattr(process, "out")
+    # hasOut = hasattr(process, outputModuleName)
     # outputCommands = []
     # outputCommandsBackup = []
     # if hasOut:
@@ -1935,8 +1933,8 @@ def addPF2PAT(process, dataVersion, doPatTrigger=True, doChs=False, patArgs={}, 
     out = None
     outdict = process.outputModules_()
     outputCommands = []
-    if outdict.has_key("out"):
-        out = outdict["out"]
+    if outdict.has_key(outputModuleName):
+        out = outdict[outputModuleName]
         outputCommands = out.outputCommands[:]
 
     sequence = cms.Sequence()
