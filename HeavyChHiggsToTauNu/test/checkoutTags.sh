@@ -68,7 +68,7 @@ set -e
 # 28.3.2012/S.Lehti       CMSSW_4_4_4 Moved master to 444/ 444 tags
 # 13.9.2012/M.Kortelainen CMSSW_4_4_4 Updated PAT and tau tags
 # 17.9.2012/M.Kortelainen CMSSW_4_4_4 Cut-based electron ID tag
-
+# 17.9.2012/S.Lehti       CMSSW_5_3_3 Update for 53X
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -81,25 +81,18 @@ eval $(scram runtime -sh)
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePFTauID#2012_CMSSW_4_X_X_Recipe
 #
 # Tau
-addpkg DataFormats/TauReco        CMSSW_5_2_4 # yes, this is correct
-addpkg RecoTauTag/TauTagTools     CMSSW_5_2_4
 addpkg RecoTauTag/RecoTau         V01-04-17 #equivalent to 04-14
 addpkg RecoTauTag/Configuration   V01-04-03
 addpkg CondFormats/EgammaObjects  V00-04-01
 addpkg PhysicsTools/IsolationAlgos # You need to recompile PAT packages which depend on DataFormats/TauReco
 # PAT
-addpkg DataFormats/PatCandidates  V06-05-01
-addpkg PhysicsTools/PatAlgos      V08-07-47
-addpkg PhysicsTools/PatUtils      V03-09-18-03
-addpkg CommonTools/ParticleFlow   V00-03-05-10
-addpkg FWCore/GuiBrowsers         V00-00-60
 ##### New tau discriminators, electron MVA discriminator
-cvs up -r 1.53 PhysicsTools/PatAlgos/python/tools/tauTools.py
+addpkg PhysicsTools/PatAlgos
+cvs up -r 1.53 PhysicsTools/PatAlgos/python/tools/tauTools.py 
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
-####addpkg RecoJets/Configuration     V02-04-17
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
-addpkg PhysicsTools/Utilities     V08-03-17
+
 
 # btagging scale factors
 # https://twiki.cern.ch/twiki/bin/view/CMS/BtagPerformanceDBV2
@@ -107,13 +100,10 @@ cvs co -r V00-04-11 RecoBTag/PerformanceDB
 
 # Type I/II MET
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis#HeadingFive
-addpkg JetMETCorrections/Type1MET V04-05-08
-addpkg PhysicsTools/PatUtils      b4_2_X_cvMEtCorr_13Feb2012_JEC11V12 # this appears to only add stuff on top of V03-09-18-02 in 444 release
-addpkg DataFormats/METReco        V03-03-07
+#addpkg PhysicsTools/PatUtils      b4_2_X_cvMEtCorr_13Feb2012_JEC11V12 # this appears to only add stuff on top of V03-09-18-02 in 444 release
 
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc
-addpkg RecoLuminosity/LumiDB      V03-04-02
 
 # Electron ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/EgammaCutBasedIdentification
