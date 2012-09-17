@@ -2,7 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_TriggerEfficiencyScaleFactor_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_TriggerEfficiencyScaleFactor_h
 
-#include<vector>
+#include <vector>
+#include <cstring>
 
 namespace edm {
   class ParameterSet;
