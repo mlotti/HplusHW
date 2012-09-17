@@ -1166,6 +1166,7 @@ class QCDfactorisedColumn(DatacardColumn):
         self._validationMETShapeSource = QCDfactorisedInfo["validationMETShapeSource"]
         self._validationMETShapeDetails = QCDfactorisedInfo["validationMETShapeDetails"]
         self._validationMtShapeSource = QCDfactorisedInfo["validationMtShapeSource"]
+        self._validationMtShapeDetails = QCDfactorisedInfo["validationMtShapeDetails"]
         # Other initialisation
         self._infoHistograms = []
         self._debugMode = debugMode
@@ -1245,7 +1246,7 @@ class QCDfactorisedColumn(DatacardColumn):
             self._createValidationHistograms(config,dsetMgr,myQCDCalculator,myBigBoxEventCount,luminosity,self._validationMETShapeDetails,
                                              "METvalidation", self._dirPrefix, METshape)
         for mTshape in self._validationMtShapeSource:
-            self._createValidationHistograms(config,dsetMgr,myQCDCalculator,myBigBoxEventCount,luminosity,config.ShapeHistogramsDimensions,
+            self._createValidationHistograms(config,dsetMgr,myQCDCalculator,myBigBoxEventCount,luminosity,self._validationMtShapeDetails,
                                              "mTvalidation", self._dirPrefix, mTshape)
         # Construct results for nuisances
         print "... Constructing result ..."

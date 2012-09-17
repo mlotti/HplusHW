@@ -73,6 +73,10 @@ def getOptions(options=None):
                      "",
                      options.multiplicity.singleton, options.varType.string,
                      "What tau trigger efficiency to use for tau embedding normalisation")
+    options.register("doTauEmbeddingLikePreselection",
+                     0,
+                     options.multiplicity.singleton, options.varType.int,
+                     "Run 'tau embedding'-like preselection for normal MC")
     options.register("runOnCrab",
                      0,
                      options.multiplicity.singleton,
@@ -113,7 +117,7 @@ def getOptionsDataVersion(dataVersion, options=None, useDefaultSignalTrigger=Tru
     print "Data version is", dataVersion
 
     dataVersion = DataVersion(dataVersion)
-    if useDefaultSignalTrigger and len(options.trigger) == 0 and dataVersion.isMC():
+    if useDefaultSignalTrigger and len(options.trigger) == 0 and dataVersion.isMC() and options.tauEmbeddingInput == 0:
         options.trigger = [dataVersion.getDefaultSignalTrigger()]
 
     return (options, dataVersion)
