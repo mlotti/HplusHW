@@ -20,7 +20,8 @@ trigger = options.trigger
 #trigger = "isHLTMu24"
 #trigger = "isHLTMu30"
 #trigger = "isHLTMu40"
-trigger = "isHLTMu40eta2p1"
+#trigger = "isHLTMu40eta2p1"
+
 
 print trigger
 
@@ -34,18 +35,34 @@ if options.mc:
     trigger = "isHLTMu20"
 else:
     (input, output) = {
-        "isHLTMu20": ([result("SingleMu_160431-163261_May10")], "Run2011A_Mu20"),
-        "isHLTMu24": ([result("SingleMu_163270-163869_May10")], "Run2011A_Mu24"),
-        "isHLTMu30": ([result("SingleMu_165088-165633_Prompt"), result("SingleMu_165970-166150_Prompt")], "Run2011A_Mu30"),
-        "isHLTMu40": ([result("SingleMu_166161-166164_Prompt"), result("SingleMu_166346-166346_Prompt"), result("SingleMu_166374-166967_Prompt"),
-                       result("SingleMu_167039-167043_Prompt"), result("SingleMu_167078-167913_Prompt"), result("SingleMu_170722-172619_Aug05"), result("SingleMu_172620-173198_Prompt")], "Run2011A_Mu40"),
-        "isHLTMu40eta2p1": ([result("SingleMu_173236-173692_Prompt")], "Run2011A_Mu40eta2p1")
+	"isHLTMu20": ([result("SingleMu_160431-163261_2011A_Nov08")], "Run2011A_Mu20"),
+	"isHLTMu24": ([result("SingleMu_163270-163869_2011A_Nov08")], "Run2011A_Mu24"),
+	"isHLTMu30": ([result("SingleMu_165088-165633_2011A_Nov08"), result("SingleMu_165970-166150_2011A_Nov08")], "Run2011A_Mu30"),
+	"isHLTMu40": ([result("SingleMu_166161-166164_2011A_Nov08"), result("SingleMu_166346-166346_2011A_Nov08"), result("SingleMu_166374-166967_2011A_Nov08"),
+                       result("SingleMu_167039-167043_2011A_Nov08"), result("SingleMu_167078-167913_2011A_Nov08"), result("SingleMu_170722-172619_2011A_Nov08"),
+                       result("SingleMu_172620-173198_2011A_Nov08")], "Run2011A_Mu40"),
+	"isHLTMu40eta2p1": ([result("SingleMu_173236-173692_2011A_Nov08")], "Run2011A_Mu40eta2p1"),
+	"isHLTMu40eta2p1Run2011B": ([result("SingleMu_175860-176469_2011B_Nov19"), 
+                                     result("SingleMu_176545-177053_2011B_Nov19"),
+                                     result("SingleMu_177074-177452_2011B_Nov19"),
+                                     result("SingleMu_177718-178380_2011B_Nov19"),
+                                     result("SingleMu_178420-178866_2011B_Nov19"),
+                                     result("SingleMu_178871-179889_2011B_Nov19"),
+                                     result("SingleMu_179959-180252_2011B_Nov19")], "Run2011B_Mu40eta2p1")
+###
+#        "isHLTMu20": ([result("SingleMu_160431-163261_May10")], "Run2011A_Mu20"),
+#        "isHLTMu24": ([result("SingleMu_163270-163869_May10")], "Run2011A_Mu24"),
+#        "isHLTMu30": ([result("SingleMu_165088-165633_Prompt"), result("SingleMu_165970-166150_Prompt")], "Run2011A_Mu30"),
+#        "isHLTMu40": ([result("SingleMu_166161-166164_Prompt"), result("SingleMu_166346-166346_Prompt"), result("SingleMu_166374-166967_Prompt"),
+#                       result("SingleMu_167039-167043_Prompt"), result("SingleMu_167078-167913_Prompt"), result("SingleMu_170722-172619_Aug05"), 
+#                       result("SingleMu_172620-173198_Prompt")], "Run2011A_Mu40"),
+#        "isHLTMu40eta2p1": ([result("SingleMu_173236-173692_Prompt")], "Run2011A_Mu40eta2p1")
         }[trigger]
-
+print "input",input
 output = "tagprobe_output_%s.root" % output
 
-input = cms.vstring("histograms.root")
-output = "tagprobe_output.root"
+#input = cms.vstring("histograms.root")
+#output = "tagprobe_output.root"
 
 
 process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
@@ -91,6 +108,7 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
         isHLTMu30 = cms.vstring("HLT_Mu30", "dummy[pass=1,fail=0]"),
         isHLTMu40 = cms.vstring("HLT_Mu40", "dummy[pass=1,fail=0]"),
         isHLTMu40eta2p1 = cms.vstring("HLT_Mu40eta2p1", "dummy[pass=1,fail=0]"),
+        isHLTMu40eta2p1Run2011B = cms.vstring("HLT_Mu40eta2p1Run2011B", "dummy[pass=1,fail=0]"),
         hitQuality = cms.vstring("Hit quality", "dummy[pass=1,fail=0]"),
         dB = cms.vstring("IPxy,z", "dummy[pass=1,fail=0]"),
 #        sumIsoRel10 = cms.vstring("Rel sum iso < 0.1", "dummy[pass=1,fail=0]"),
@@ -285,20 +303,23 @@ if adjustBins:
     #ptbins = range(30, 410, 10)
     #etabins = [x*0.21 for x in range(0, 11)] # 0.21 stepping [0, 2.1]
     #ptbins = [40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 52, 54, 56, 58, 60, 65, 70, 80, 90, 100]
-    etabins = [x*0.1 for x in range(0, 23)] # 0.1 stepping [0, 2.2]
+    #etabins = [x*0.1 for x in range(0, 23)] # 0.1 stepping [0, 2.2]
+    etabins = [0, 2.2]
     #ptBinsLow = [30, 34, 38, 39, 40, 41, 42, 44, 48, 50]
     #ptBinsMiddle = [54, 58, 62, 66, 70, 80, 90, 100]
     #ptBinsHigh = [150, 200, 400, 600, 1000]
     ptBinsLow = [30, 35, 40, 45, 50]
-    ptBinsMiddle = [55, 60, 65, 70, 80, 90, 100]
-    ptBinsHigh = [150, 200, 400, 600, 1000]
-    
-    if trigger == "isHLTMu24":
-        ptBinsHigh = [125, 150, 200, 300, 400, 600, 1000]
-    if trigger in ["isHLTMu30", "isHLTMu40", "isHLTMu40eta2p1"]:
-        ptBinsHigh += [125, 150, 200, 250, 300, 400, 500, 600, 800, 1000]
-    if "isHLTMu40" in trigger:
-        ptBinsLow = [30, 35, 39, 40, 41, 42, 45, 50]
+#    ptBinsMiddle = [55, 60, 65, 70, 80, 90, 100]
+#    ptBinsHigh = [150, 200, 400, 600, 1000]
+    ptBinsMiddle = [60, 70, 80, 90, 100]
+    ptBinsHigh = [120, 150, 1000] 
+   
+#    if trigger == "isHLTMu24":
+#        ptBinsHigh = [125, 150, 200, 300, 400, 600, 1000]
+#    if trigger in ["isHLTMu30", "isHLTMu40", "isHLTMu40eta2p1"]:
+#        ptBinsHigh += [125, 150, 200, 250, 300, 400, 500, 600, 800, 1000]
+#    if "isHLTMu40" in trigger:
+#        ptBinsLow = [30, 35, 39, 40, 41, 42, 45, 50]
     ptbins = ptBinsLow + ptBinsMiddle + ptBinsHigh
     print "pT bins", ptbins
     print "eta bins", etabins
