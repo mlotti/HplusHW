@@ -94,7 +94,6 @@ class PATBuilder:
         print "Running PAT on the fly"
         
         self.process.eventPreSelection = cms.Sequence()
-        sequence *= self.process.eventPreSelection
 
         if options.tauEmbeddingInput != 0:
             self.process.patSequence = self.addPatForTauEmbeddingInput(dataVersion, patArgs=patArgs, pvSelectionConfig=options.pvSelectionConfig)
@@ -117,6 +116,7 @@ class PATBuilder:
                 print "Trigger used for tau matching:", pargs["matchingTauTrigger"]
 
             self.process.patSequence = self.addPat(dataVersion, patArgs=pargs, pvSelectionConfig=options.pvSelectionConfig)
+        sequence *= self.process.eventPreSelection
         sequence *= self.process.patSequence
 
         # Add event filters if requested
