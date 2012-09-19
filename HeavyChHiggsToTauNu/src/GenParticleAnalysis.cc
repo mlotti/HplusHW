@@ -76,8 +76,12 @@ namespace HPlus {
     hBquarkStatus3Multiplicity = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_Status3_Multiplicity", "genBquark_Status3_Multiplicity", 20, -0.5, 19.5);
     hBquarkFromTopEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_FromTop_Eta", "genBquark_FromTop_Eta", 300, -6.0, 6.0);
     hBquarkNotFromTopEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_NotFromTop_Eta", "genBquark_NotFromTop_Eta", 300, -6.0, 6.0);
-    hBquarkFromTopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_FromTop_Pt", "genBquark_FromTop_Pt", 400, 0., 800.);
-    hBquarkNotFromTopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_NotFromTop_Pt", "genBquark_NotFromTop_Pt", 400, 0., 800.);
+    hBquarkFromTopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_FromTop_Pt", "genBquark_FromTop_Pt", 250, 0., 500.);
+    hBquarkNotFromTopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_NotFromTop_Pt", "genBquark_NotFromTop_Pt", 250, 0., 500.);
+    hBquarkFromTopEtaPtCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_FromTop_Eta_ptcut", "genBquark_FromTop_Eta_ptcut", 300, -6.0, 6.0);
+    hBquarkNotFromTopEtaPtCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_NotFromTop_Eta_ptcut", "genBquark_NotFromTop_Eta_ptcut", 300, -6.0, 6.0);
+    hBquarkFromTopPtEtaCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_FromTop_Pt_etacut", "genBquark_FromTop_Pt_etacut", 250, 0., 500.);
+    hBquarkNotFromTopPtEtaCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_NotFromTop_Pt_etacut", "genBquark_NotFromTop_Pt_etacut", 250, 0., 500.);
     hBquarkFromTopDeltaRTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_FromTop_DeltaRTau", "genBquark_FromTop_DeltaRTau", 300, 0., 8.);
     hBquarkNotFromTopDeltaRTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_NotFromTop_DeltaRTau", "genBquark_NotFromTop_DeltaRTau", 400, 0., 8.);
     hGenDeltaRHiggsSide= histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_FromHiggsSide_DeltaRTau", "genBquark_FromHiggsSide_DeltaRTau", 350, 0., 7.);
@@ -455,6 +459,8 @@ namespace HPlus {
       if(hasImmediateMother(p,6) || hasImmediateMother(p,-6)) {
         hBquarkFromTopEta->Fill(bEta);
         hBquarkFromTopPt->Fill(bPt);
+	if (bPt > 20) hBquarkFromTopEtaPtCut->Fill(bEta);
+        if (fabs(bEta) < 2.4) hBquarkFromTopPtEtaCut->Fill(bPt);
         for( LorentzVectorCollection::const_iterator tau = oneAndThreeProngTaus->begin();tau!=oneAndThreeProngTaus->end();++tau) {
           // Check that the tau comes from H+
           bool tauFromHp = false;
@@ -471,8 +477,8 @@ namespace HPlus {
         }
       }
       else {
-        hBquarkNotFromTopEta->Fill(bEta);
-        hBquarkNotFromTopPt->Fill(bPt);
+        if (bPt > 20) hBquarkNotFromTopEtaPtCut->Fill(bEta);
+        if (fabs(bEta) < 2.4) hBquarkNotFromTopPtEtaCut->Fill(bPt);
         for( LorentzVectorCollection::const_iterator tau = oneAndThreeProngTaus->begin();tau!=oneAndThreeProngTaus->end();++tau) {
           // Check that the tau comes from H+
           bool tauFromHp = false;

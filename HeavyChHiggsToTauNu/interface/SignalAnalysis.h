@@ -145,9 +145,15 @@ namespace HPlus {
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
     Count fDeltaPhiTauMETCounter;
+    Count fDeltaPhiLow30Counter;
+    Count fDeltaPhiLow60Counter;
+    Count fBjetVetoCounter;
     Count fMetCut80Counter;
     Count fMetCut100Counter;
     Count fHiggsMassCutCounter;
+    Count fTransverseMass80CutCounter;
+    Count fTransverseMass100CutCounter;
+    Count fTransverseMass120CutCounter;
     Count fTauVetoAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiTauVetoCounter;
@@ -228,6 +234,9 @@ namespace HPlus {
     
     // Transverse mass histograms
     WrappedTH1 *hTransverseMass;
+    WrappedTH1 *hTransverseMassSecondBveto;
+    WrappedTH1 *hTransverseMassPhi30;
+    WrappedTH1 *hTransverseMassPhi60;
     WrappedTH1 *hTransverseMassMet80;
     WrappedTH1 *hTransverseMassMet100;
     WrappedTH1 *hTransverseMassNoBtagging;
@@ -244,7 +253,7 @@ namespace HPlus {
     WrappedTH1 *hTransverseMassAfterDeltaPhi160;
     WrappedTH1 *hTransverseMassAfterDeltaPhi130;
     WrappedTH1 *hTransverseMassAfterDeltaPhi90;
-
+    WrappedTH2 *hDeltaPhiVsTransverseMass;
 
     // Full mass histograms
     WrappedTH1 *hFullMass;

@@ -98,6 +98,10 @@ namespace HPlus {
     WrappedTH1 *hBquarkNotFromTopEta;
     WrappedTH1 *hBquarkFromTopPt;
     WrappedTH1 *hBquarkNotFromTopPt;
+    WrappedTH1 *hBquarkFromTopEtaPtCut;
+    WrappedTH1 *hBquarkNotFromTopEtaPtCut;
+    WrappedTH1 *hBquarkFromTopPtEtaCut;
+    WrappedTH1 *hBquarkNotFromTopPtEtaCut;
     WrappedTH1 *hBquarkFromTopDeltaRTau;
     WrappedTH1 *hBquarkNotFromTopDeltaRTau;
     WrappedTH1 *hGenBquarkFromHiggsSideEta;

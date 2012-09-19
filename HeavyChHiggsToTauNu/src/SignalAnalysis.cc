@@ -91,9 +91,15 @@ namespace HPlus {
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fBTaggingScaleFactorCounter(eventCounter.addCounter("btagging scale factor")),
     fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhi(Tau,MET) upper limit")),
+    fDeltaPhiLow30Counter(eventCounter.addCounter("DeltaPhi(Tau,MET) > 30")),
+    fDeltaPhiLow60Counter(eventCounter.addCounter("DeltaPhi(Tau,MET) > 60")),
+    fBjetVetoCounter(eventCounter.addCounter("Veto on second b jet")),
     fMetCut80Counter(eventCounter.addCounter("MET>80")),
     fMetCut100Counter(eventCounter.addCounter("MET>100")),
     fHiggsMassCutCounter(eventCounter.addCounter("HiggsMassCut")),
+    fTransverseMass80CutCounter(eventCounter.addCounter("TransverseMass80Cut")),
+    fTransverseMass100CutCounter(eventCounter.addCounter("TransverseMass100Cut")),
+    fTransverseMass120CutCounter(eventCounter.addCounter("TransverseMass120Cut")),
     fTopWithMHSelectionCounter(eventCounter.addCounter("Top after Inv Mass selection")),
     fTauVetoAfterDeltaPhiCounter(eventCounter.addCounter("TauVeto after DeltaPhi cut")),
     fRealTauAfterDeltaPhiCounter(eventCounter.addCounter("Real tau after deltaPhi cut")),
@@ -204,6 +210,9 @@ namespace HPlus {
     //    hmetAfterTrigger = fHistoWrapper.makeTH<TH1F>(*fs, "metAfterTrigger", "metAfterTrigger", 50, 0., 200.);
 
     hTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
+    hTransverseMassPhi30 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassPhi30", "transverseMassPhi30;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
+    hTransverseMassPhi60 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassPhi60", "transverseMassPhi60;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
+    hTransverseMassSecondBveto = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassSecondBveto", "transverseMassSecondBveto;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassMet80 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassMet80", "transverseMassMet80;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassMet100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassMet100", "transverseMassMet100;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassNoBtagging = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassNoBtagging", "transverseMassNoBtagging;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
@@ -215,6 +224,8 @@ namespace HPlus {
     hTransverseMassTauVeto = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "transverseMassTauVeto", "transverseMassTauVeto;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hEWKFakeTausTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "EWKFakeTausTransverseMass", "EWKFakeTausTransverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassFakeMetVeto = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "transverseMassFakeMetVeto", "transverseMassFakeMetVeto;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
+
+    hDeltaPhiVsTransverseMass = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "DeltaPhiVsTransverseMass", "DeltaPhiVsTransverseMass",  180, 0., 180.,200, 0., 400.);
 
 
     hFullMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "fullMass", "fullMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 5 GeV/c^{2}", 100, 0., 500.);
@@ -715,6 +726,22 @@ namespace HPlus {
     }
     hMaxDeltaPhiJetMet->Fill(myMaxDeltaPhiJetMET);
 
+    // test lower bound of deltaPhi
+    if (deltaPhi > 30) {
+      increment(fDeltaPhiLow30Counter);
+      hTransverseMassPhi30->Fill(transverseMass);
+    }
+
+    if (deltaPhi > 60) {
+      increment(fDeltaPhiLow60Counter);
+      hTransverseMassPhi60->Fill(transverseMass);
+    }
+
+    // test second b jet veto
+    if( btagData.getSelectedJets().size() < 2) {
+      increment(fBjetVetoCounter);  
+      hTransverseMassSecondBveto->Fill(transverseMass);
+    }
 
 
     // Met test
@@ -725,8 +752,13 @@ namespace HPlus {
     if (metData.getSelectedMET()->et() > 100 ) {
       increment(fMetCut100Counter);
       hTransverseMassMet100->Fill(transverseMass);
-    }   
+    } 
 
+  
+    if (transverseMass  > 80 )  increment(fTransverseMass80CutCounter);
+    if (transverseMass  > 100 )  increment(fTransverseMass100CutCounter);
+    if (transverseMass  > 120 )  increment(fTransverseMass120CutCounter);  
+     
 //------ Top reconstruction
 
     // Top reco, no event cut
@@ -902,6 +934,8 @@ namespace HPlus {
       increment(fFakeMETVetoCounter);
       hTransverseMassFakeMetVeto->Fill(transverseMass);
     }
+
+    hDeltaPhiVsTransverseMass->Fill(fakeMETData.closestDeltaPhi(),transverseMass); 
 
     // Calculate alphaT
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTau()), jetData.getSelectedJets());   

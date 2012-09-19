@@ -89,23 +89,24 @@ doPUWeightVariation = False
 # Note: Keep number of variations below 200 to keep file sizes reasonable
 # Note: Currently it is not possible to vary the tau selection -related variables, because only one JES and MET producer is made (tau selection influences type I MET correction and JES)
 
-doOptimisation = False
+doOptimisation  = False
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
 myOptimisation = HPlusOptimisationScheme()
-#myOptimisation.addTauPtVariation([40.0, 50.0])
+
+#myOptimisation.addTauPtVariation([40.0, 50.0, 60.0, 70., 80.])
 #myOptimisation.addTauIsolationVariation([])
 #myOptimisation.addTauIsolationContinuousVariation([])
-#myOptimisation.addRtauVariation([0.0, 0.7])
+#myOptimisation.addRtauVariation([0.0, 0.7, 0.8])
 #myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
 #myOptimisation.addJetEtVariation([20.0, 30.0])
 #myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
-myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
+myOptimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
 #myOptimisation.addBJetLeadingDiscriminatorVariation([0.898, 0.679])
 #myOptimisation.addBJetSubLeadingDiscriminatorVariation([0.679, 0.244])
 #myOptimisation.addBJetEtVariation([])
 #myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
-#myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
+#myOptimisation.addDeltaPhiVariation([180.0,170.0,160.0,150.0])
 #myOptimisation.addTopRecoVariation(["None","chi"]) # Valid options: None, chi, std, Wselection
 myOptimisation.disableMaxVariations()
 if doOptimisation:
@@ -266,9 +267,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 param.overrideTriggerFromOptions(options)
 param.trigger.triggerSrc.setProcessName(dataVersion.getTriggerProcess())
 # Set tau selection mode to 'standard'
-#param.setAllTauSelectionOperatingMode('standard')
+param.setAllTauSelectionOperatingMode('standard')
 #
-param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
+#param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
 
 # Set tau sources to trigger matched tau collections
 #param.setAllTauSelectionSrcSelectedPatTaus()
