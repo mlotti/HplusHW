@@ -2070,3 +2070,132 @@ class DatasetManager:
     ## \var basedir
     # Directory (absolute/relative to current working directory) where
     # the luminosity JSON file is located (see loadLuminosities())
+
+## Helper class to plug NtupleCache to the existing framework
+#
+# User should not construct an object by herself, but use
+# NtupleCahce.histogram()
+class NtupleCacheDrawer:
+    ## Constructor
+    #
+    # \param ntupleCache   NtupleCache object
+    # \param histoName     Name of the histogram to obtain
+    def __init__(self, ntupleCache, histoName):
+        self.ntupleCache = ntupleCache
+        self.histoName = histoName
+
+    ## "Draw"
+    #
+    # \param rootFile     ROOT.TFile containing the TTree
+    # \param datasetName  Name of the dataset of the rootFile
+    #
+    # This method exploits the infrastucture we have for TreeDraw.
+    def draw(self, rootFile, datasetName):
+        self.ntupleCache.process(rootFile, datasetName)
+        return self.ntupleCache.getRootHisto(datasetName, self.histoName)
+
+## Ntuple processing with C macro and caching the result histograms
+#
+# 
+class NtupleCache:
+    ## Constructor
+    #
+    # \param treeName       Path to the TTree inside a ROOT file
+    # \param selector       Name of the selector class, should also correspond a .C file in \a test/ntuple
+    # \param selectorArgs   Optional arguments to the selector constructor
+    # \param process        Should the ntuple be processed? (if False, results are read from the cache file)
+    # \apram cacheFileName  Path to the cache file
+    #
+    # I would like to make \a process redundant, but so far I haven't
+    # figured out a bullet-proof method for that.
+    def __init__(self, treeName, selector, selectorArgs=[], process=True, cacheFileName="histogramCache.root"):
+        self.treeName = treeName
+        self.cacheFileName = cacheFileName
+        self.selectorName = selector
+        self.selectorArgs = selectorArgs
+        self.doProcess = process
+
+        self.macrosLoaded = False
+        self.processedDatasets = {}
+
+        base = os.path.join(os.environ["CMSSW_BASE"], "src", "HiggsAnalysis", "HeavyChHiggsToTauNu", "test", "ntuple")
+        self.macros = [
+            os.path.join(base, "BaseSelector.C"),
+            os.path.join(base, "Branches.C"),
+            os.path.join(base, self.selectorName+".C")
+            ]
+
+        self.cacheFile = None
+
+    ## Compile and load the macros
+    def _loadMacros(self):
+        for m in self.macros:
+            ret = ROOT.gROOT.LoadMacro(m+"+")
+            if ret != 0:
+                raise Exception("Failed to load "+m)
+
+    # def _isMacroNewerThanCacheFile(self):
+    #     latestMacroTime = max([os.path.getmtime(m) for m in self.macros])
+    #     cacheTime = 0
+    #     if os.path.exists(self.cacheFileName):
+    #         cacheTime = os.path.getmtime(self.cacheFileName)
+    #     return latestMacroTime > cacheTime
+
+    ## Process selector for a dataset
+    #
+    # \param rootFile     ROOT.TFile object
+    # \param datasetName  Name of the dataset
+    #
+    # Processes the self.treeName TTree from the rootFile.
+    def process(self, rootFile, datasetName):
+        #if not self.forceProcess and not self._isMacroNewerThanCacheFile():
+        #    return
+        if not self.doProcess:
+            return
+
+        if datasetName in self.processedDatasets:
+            return
+        self.processedDatasets[datasetName] = 1
+
+        if not self.macrosLoaded:
+            self._loadMacros()
+            self.macrosLoaded = True
+        
+        if self.cacheFile == None:
+            self.cacheFile = ROOT.TFile.Open(self.cacheFileName, "RECREATE")
+
+        directory = self.cacheFile.mkdir(datasetName)
+
+        tree = rootFile.Get(self.treeName)
+        if not tree:
+            raise Exception("TTree '%s' not found from file %s" % (self.treeName, rootFile.GetName()))
+
+        N = tree.GetEntries()
+        selector = ROOT.SelectorImp(N, getattr(ROOT, self.selectorName)(*self.selectorArgs))
+        selector.setOutput(directory)
+
+        print "Processing dataset", datasetName
+        tree.Process(selector)
+        directory.Write()
+
+    ## Get a histogram from the cache file
+    #
+    # \param datasetName   Name of the dataset for which histogram is to be obtained
+    # \apram histoName     Histogram name
+    def getRootHisto(self, datasetName, histoName):
+        if self.cacheFile == None:
+            if not os.path.exists(self.cacheFileName):
+                raise Exception("Assert: for some reason the cache file %s does not exist yet..." % self.cacheFileName)
+            self.cacheFile = ROOT.TFile.Open(self.cacheFileName)
+
+        path = "%s/%s" % (datasetName, histoName)
+        h = self.cacheFile.Get(path)
+        if not h:
+            raise Exception("Histogram '%s' not found from %s" % (path, self.cacheFile.GetName()))
+        return h
+
+    ## Create NtupleCacheDrawer for Dataset.getDatasetRootHisto()
+    #
+    # \param histoName   Histogram name to obtain
+    def histogram(self, histoName):
+        return NtupleCacheDrawer(self, histoName)
