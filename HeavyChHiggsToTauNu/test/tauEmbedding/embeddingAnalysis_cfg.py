@@ -236,19 +236,20 @@ additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(proce
 taus = cms.InputTag("patTaus"+PF2PATVersion+"TauEmbeddingMuonMatched")
 
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
 ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
     goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
+
     muonSrc = cms.InputTag(muons.value()),
-    muonFunctions = cms.PSet(),
+    muonFunctions = analysisConfig.muonFunctions.clone(),
+
     tauSrc = cms.InputTag(taus.value()),
-    tauFunctions = cms.PSet(),
+    tauFunctions = analysisConfig.tauFunctions.clone(),
+
     jetSrc = cms.InputTag("selectedPatJets"+PF2PATVersion),
-    jetFunctions = cms.PSet(
-        tche = cms.string("bDiscriminator('trackCountingHighEffBJetTags')"),
-        csv = cms.string("bDiscriminator('combinedSecondaryVertexBJetTags')"),
-    ),
+    jetFunctions = analysisConfig.jetFunctions.clone(),
+
     genParticleOriginalSrc = cms.InputTag("genParticles", "", "HLT"),
     genParticleEmbeddedSrc = cms.InputTag("genParticles"),
     mets = cms.PSet(
@@ -258,25 +259,8 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     ),
     doubles = cms.PSet(),
 )
-muonIsolations = ["trackIso", "caloIso", "pfChargedIso", "pfNeutralIso", "pfGammaIso", "tauTightIc04ChargedIso", "tauTightIc04GammaIso"]
-#print isolations
-for name in muonIsolations:
-    setattr(ntuple.muonFunctions, name, cms.string(muonAnalysis.isolations[name]))
-userFloats = []
-for name in ["pfNeutralHadrons", "pfChargedAll", "pfPUChargedHadrons", "pfPhotons", "pfChargedHadrons"]:
-    userFloats.extend(["iso01to04_"+name, "iso01to03_"+name])
-for name in userFloats:
-    setattr(ntuple.muonFunctions, name, cms.string("userFloat('%s')" % name))
 
-tauIds = [
-    "decayModeFinding",
-    "againstMuonLoose", "againstMuonTight",
-    "againstElectronLoose", "againstElectronMedium", "againstElectronTight", "againstElectronMVA",
-    "byVLooseIsolation", "byLooseIsolation", "byMediumIsolation", "byTightIsolation",
-    "byLooseCombinedIsolationDeltaBetaCorr", "byMediumCombinedIsolationDeltaBetaCorr", "byTightCombinedIsolationDeltaBetaCorr",
-    ]
-for name in tauIds:
-    setattr(ntuple.tauFunctions, name, cms.string("tauID('%s')"%name))
+
 if dataVersion.isMC():
     ntuple.mets.genMetTrueEmbedded_p4 = cms.InputTag("genMetTrueEmbedded")
     ntuple.mets.genMetTrueOriginal_p4 = cms.InputTag("genMetTrue", "", hltProcess)

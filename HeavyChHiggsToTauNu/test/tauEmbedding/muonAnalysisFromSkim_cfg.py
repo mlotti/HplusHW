@@ -128,8 +128,9 @@ customisations.PF2PATVersion = PF2PATVersion
 if dataVersion.isMC():
     additionalCounters.extend(customisations.addMuonTriggerFix(process, dataVersion, process.commonSequence, options))
 
-#muons = "selectedPatMuons"+PF2PATVersion+"All"
-muons = "tightMuons"+PF2PATVersion
+muons = "selectedPatMuons"+PF2PATVersion+"All"
+#muons = "selectedPatMuons"+PF2PATVersion
+#muons = "tightMuons"+PF2PATVersion
 #muons = customisations.addMuonIsolationEmbedding(process, process.commonSequence, muons)
 isolation = customisations.constructMuonIsolationOnTheFly(muons)
 muons = muons+"Iso"
@@ -186,35 +187,17 @@ process.commonSequence *= (
 additionalCounters.append("preselectedJetsCount")
 
 # Configuration
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
 ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
     patTriggerEvent = cms.InputTag("patTriggerEvent"),
     genParticleSrc = cms.InputTag("genParticles"),
     muonSrc = cms.InputTag("preselectedMuons"),
-    muonFunctions = cms.PSet(
-        dB = cms.string("dB()"),
-        pfChargedHadrons = cms.string("chargedHadronIso()"),
-        pfNeutralHadrons = cms.string("neutralHadronIso()"),
-        pfPhotons = cms.string("photonIso()"),
-        pfPUChargedHadrons = cms.string("puChargedHadronIso()"),
-        
-        pfChargedHadrons_01to04 = cms.string("userFloat('ontheflyiso_pfChargedHadrons')"),
-        pfNeutralHadrons_01to04 = cms.string("userFloat('ontheflyiso_pfNeutralHadrons')"),
-        pfPhotons_01to04 = cms.string("userFloat('ontheflyiso_pfPhotons')"),
-        pfPUChargedHadrons_01to04 = cms.string("userFloat('ontheflyiso_pfPUChargedHadrons')"),
+    muonFunctions = analysisConfig.muonFunctions.clone(),
 
-        #name = cms.string("function")
-    ),
     jetSrc = cms.InputTag("preselectedJets"),
-    jetFunctions = cms.PSet(
-        tche = cms.string("bDiscriminator('trackCountingHighEffBJetTags')"),
-        csv = cms.string("bDiscriminator('combinedSecondaryVertexBJetTags')"),
-    ),
-    mets = cms.PSet(
-        caloMet_p4 = cms.InputTag("met"),
-        caloMetNoHF_p4 = cms.InputTag("metNoHF"),
-        pfMet_p4 = cms.InputTag("pfMet"),
-    ),
+    jetFunctions = analysisConfig.jetFunctions.clone(),
+
+    mets = analysisConfig.mets.clone(),
     doubles = cms.PSet(),
     bools = cms.PSet(
         ElectronVetoPassed = cms.InputTag("eveto")
@@ -222,17 +205,6 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
 )
 for era, name in puWeights:
     setattr(ntuple.doubles, "weightPileup_"+name, cms.InputTag("pileupWeight"+name))
-
-#isolations = muonAnalysis.isolations.keys()
-isolations = ["trackIso", "caloIso", "pfChargedIso", "pfNeutralIso", "pfGammaIso", "tauTightIc04ChargedIso", "tauTightIc04GammaIso"]
-#print isolations
-for name in isolations:
-    setattr(ntuple.muonFunctions, name, cms.string(muonAnalysis.isolations[name]))
-userFloats = []
-for name in ["pfNeutralHadrons", "pfChargedAll", "pfPUChargedHadrons", "pfPhotons", "pfChargedHadrons"]:
-    userFloats.extend(["iso01to04_"+name, "iso01to03_"+name])
-for name in userFloats:
-    setattr(ntuple.muonFunctions, name, cms.string("userFloat('%s')" % name))
 
 
 addAnalysis(process, "muonNtuple", ntuple,
@@ -253,79 +225,6 @@ for label in eventCounters:
     process.globalReplace(label, prototype.clone())
 
 
-
-# def createAnalysis(name, postfix="", weightSrc=None, **kwargs):
-#     wSrc = weightSrc
-#     if dataVersion.isData():
-#         wSrc = None
-#     def create(**kwargs):
-#         muonAnalysis.createAnalysis(process, dataVersion, additionalCounters, name=name,
-#                                     trigger=trigger, jets="goodJets", met="pfMet",
-#                                     weightSrc = wSrc,
-#                                     **kwargs)
-
-#     prefix = name+postfix
-#     create(prefix=prefix, **kwargs)
-#     if not "doIsolationWithTau" in kwargs:
-#         for iso in [
-# #            "VLoose",
-# #            "Loose",
-# #            "Medium",
-# #            "Tight",
-# #            "TightSc015",
-# #            "TightSc02",
-#             "TightIc04",
-# #            "TightSc015Ic04",
-# #            "TightSc02Ic04",
-#             ]:
-#             create(prefix=prefix+"IsoTauLike"+iso, doMuonIsolation=True, muonIsolation="tau%sIso"%iso, muonIsolationCut=0.5, **kwargs)
-
-# #         for iso in [
-# #             "Tight",
-# #             "TightSc0",
-# #             "TightSc0Ic04",
-# #             "TightSc0Ic04Noq",
-# #             create(prefix=prefix+"IsoTauLikeRel"+iso, doMuonIsolation=True, muonIsolation="tau%sIsoRel"%iso, muonIsolationCut=
-
-# #    if not "doIsolationWithTau" in kwargs:
-# #        for iso in [
-# #            "VLoose",
-# #            "Loose",
-# #            "Medium",
-# #            "Tight",
-# #            ]:
-# #            create(prefix=prefix+"IsoTau"+iso, doIsolationWithTau=True, isolationWithTauDiscriminator="by%sIsolation"%iso, **kwargs)
-        
-#     create(prefix=prefix+"Aoc", afterOtherCuts=True, **kwargs)
-
-# def createAnalysis2(**kwargs):
-# #    createAnalysis("topMuJetRefMet", doIsolationWithTau=False, **kwargs)
-
-#     args = {}
-#     args.update(kwargs)
-#     postfix = kwargs.get("postfix", "")
-#     for pt, met, njets in [
-# #        (30, 20, 2),
-# #        (30, 20, 3),
-# #        (40, 20, 2),
-#         (40, 20, 3)
-#         ]:
-#         args["postfix"] = "Pt%dMet%dNJets%d%s" % (pt, met, njets, postfix)
-#         args["muonPtCut"] = pt
-#         args["metCut"] = met
-#         args["njets"] = njets
-#         createAnalysis("muonSelectionPF", **args)
-
-# createAnalysis2(muons=muons, allMuons=muons)
-# createAnalysis2(muons=muons, allMuons=muons, weightSrc="vertexWeight", postfix="VertexWeight")
-# #createAnalysis2(muons=muons, allMuons=muons, weightSrc="pileupWeight", postfix="PileupWeight")
-# #createAnalysis2(muons="tightMuonsZ")
-
-# # process.out = cms.OutputModule("PoolOutputModule",
-# #     fileName = cms.untracked.string('foo.root'),
-# #     outputCommands = cms.untracked.vstring(["keep *_*MuonVeto*_*_*"])
-# # )
-# # process.endPath = cms.EndPath(
-# #     process.out
-# # )
-
+#f = open("configDump.py", "w")
+#f.write(process.dumpPython())
+#f.close()

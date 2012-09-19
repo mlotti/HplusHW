@@ -110,17 +110,17 @@ if options.doPat != 0:
 additionalCounters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.commonSequence, param))
 
 
-
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
 ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
     selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
     goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
+
     tauSrc = cms.InputTag(param.tauSelection.src.value()), # this is set in addEmbeddingLikePreselection()
-    tauFunctions = cms.PSet(),
+    tauFunctions = analysisConfig.tauFunctions.clone(),
+
     jetSrc = cms.InputTag(param.jetSelection.src.value()),
-    jetFunctions = cms.PSet(
-        tche = cms.string("bDiscriminator('trackCountingHighEffBJetTags')"),
-        csv = cms.string("bDiscriminator('combinedSecondaryVertexBJetTags')"),
-    ),
+    jetFunctions = analysisConfig.jetFunctions.clone(),
+
     genParticleSrc = cms.InputTag("genParticles"),
     mets = cms.PSet(
         pfMet_p4 = cms.InputTag("patMETs"+PF2PATVersion),
