@@ -68,7 +68,9 @@ patArgs = {"doPatTrigger": False,
            "doPatElectronID": True,
            "doTauHLTMatching": False,
            }
-process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
+process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs,
+                                                            doHBHENoiseFilter=False,
+                                                            )
 #process.commonSequence.remove(process.goodPrimaryVertices10)
 # if options.doPat == 0:
 #     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
@@ -98,11 +100,11 @@ for era, name in puWeights:
 process.commonSequence.remove(process.goodPrimaryVertices)
 process.commonSequence.insert(0, process.goodPrimaryVertices)
 # FIXME: and this one because HBHENoiseFilter is not stored in embedding skims of v44_1
-if dataVersion.isData():
-    process.HBHENoiseSequence = cms.Sequence()
-    process.commonSequence.replace(process.HBHENoiseFilter, process.HBHENoiseSequence*process.HBHENoiseFilter)
-    import HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection as DataSelection
-    DataSelection.addHBHENoiseFilterResultProducer(process, process.HBHENoiseSequence)
+#if dataVersion.isData():
+#    process.HBHENoiseSequence = cms.Sequence()
+#    process.commonSequence.replace(process.HBHENoiseFilter, process.HBHENoiseSequence*process.HBHENoiseFilter)
+#    import HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection as DataSelection
+#    DataSelection.addHBHENoiseFilterResultProducer(process, process.HBHENoiseSequence)
     
 # Add the muon selection counters, as this is done after the skim
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as MuonSelection
@@ -126,7 +128,8 @@ customisations.PF2PATVersion = PF2PATVersion
 if dataVersion.isMC():
     additionalCounters.extend(customisations.addMuonTriggerFix(process, dataVersion, process.commonSequence, options))
 
-muons = "selectedPatMuons"+PF2PATVersion+"All"
+#muons = "selectedPatMuons"+PF2PATVersion+"All"
+muons = "tightMuons"+PF2PATVersion
 #muons = customisations.addMuonIsolationEmbedding(process, process.commonSequence, muons)
 isolation = customisations.constructMuonIsolationOnTheFly(muons)
 muons = muons+"Iso"

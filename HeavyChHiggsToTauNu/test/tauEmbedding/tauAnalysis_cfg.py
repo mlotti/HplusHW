@@ -119,6 +119,7 @@ ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
     jetSrc = cms.InputTag(param.jetSelection.src.value()),
     jetFunctions = cms.PSet(
         tche = cms.string("bDiscriminator('trackCountingHighEffBJetTags')"),
+        csv = cms.string("bDiscriminator('combinedSecondaryVertexBJetTags')"),
     ),
     genParticleSrc = cms.InputTag("genParticles"),
     mets = cms.PSet(

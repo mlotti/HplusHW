@@ -28,18 +28,27 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 # These are per-muon cuts
 muonKinematics = "(muons_p4.Pt() > 40 && abs(muons_p4.Eta()) < 2.1)"
 muondB = "(abs(muons_f_dB) < 0.02)"
-muonIsolation = "((muons_f_tauTightIc04ChargedIso + muons_f_tauTightIc04GammaIso) == 0)"
+#muonIsolation = "((muons_f_tauTightIc04ChargedIso + muons_f_tauTightIc04GammaIso) == 0)"
+#muonIsolation = "muons_f_pfChargedHadrons_01to04 < 2"
+muonIsolation = "((muons_f_pfChargedHadrons_01to04 + max(0, muons_f_pfPhotons_01to04 - 0.5*muons_f_pfPUChargedHadrons_01to04)) < 2)"
+muonStdIsolation = "((muons_f_pfChargedHadrons + max(0, muons_f_pfPhotons+muons_f_pfNeutralHadrons - 0.5*muons_f_pfPUChargedHadrons))/muons_p4.Pt() < 0.12)"
 muonSelection = "(%s && %s && %s)" % (muonKinematics, muondB, muonIsolation)
 muonSelectionNoIso = "(%s && %s)" % (muonKinematics, muondB)
+muonSelectionStdIso = "(%s && %s && %s)" % (muonKinematics, muondB, muonStdIsolation)
+#muonEventSelection = "Sum$(%s) == 1 && %s" % (muonSelection, muonSelection)
+#muonEventSelectionNoIso = "Sum$(%s) >= 1 && %s" % (muonSelectionNoIso, muonSelectionNoIso)
+#muonEventSelectionStdIso = "Sum$(%s) == 1 && %s" % (muonSelectionStdIso, muonSelectionStdIso)
 
 # Construct muon veto, first the muons accepted as veto muons
 muonVeto = "muons_p4.Pt() > 15 && abs(muons_p4.Eta()) < 2.5 && abs(muons_f_dB) < 0.02 && (muons_f_trackIso+muons_f_caloIso)/muons_p4.Pt() <= 0.15"
 # then exclude the selected muon (this will work only after the 'one selected muon' requirement)
 muonVetoNoIso = muonVeto + " && !"+muonSelectionNoIso
+muonVetoStdIso = muonVeto + " && !"+muonSelectionStdIso
 muonVeto += " && !"+muonSelection
 # then make it a sum cut
 muonVeto = "Sum$(%s) == 0" % muonVeto
 muonVetoNoIso = "Sum$(%s) == 0" % muonVetoNoIso
+muonVetoStdIso = "Sum$(%s) == 0" % muonVetoStdIso
 
 electronVeto = "ElectronVetoPassed"
 
@@ -51,56 +60,54 @@ electronVeto = "ElectronVetoPassed"
 #jetSelection = "Sum$(%s) >= 3" % jetSelection
 jetSelection = "jets_p4@.size() >= (3+Sum$(%s && muons_jetMinDR < 0.1))" % muonSelection
 jetSelectionNoIso = "jets_p4@.size() >= (3+Sum$(%s && muons_jetMinDR < 0.1))" % muonSelectionNoIso
+jetSelectionStdIso = "jets_p4@.size() >= (3+Sum$(%s && muons_jetMinDR < 0.1))" % muonSelectionStdIso
 
 metcut = "pfMet_p4.Pt() > 40"
 
-btagging = "Sum$(jets_f_tche > 1.7 && sqrt((jets_p4.Phi()-muons_p4.Phi())^2+(jets_p4.Eta()-muons_p4.Eta())^2) > 0.5) >= 1"
+#btagging = "Sum$(jets_f_tche > 1.7 && sqrt((jets_p4.Phi()-muons_p4.Phi())^2+(jets_p4.Eta()-muons_p4.Eta())^2) > 0.5) >= 1"
+btagging = "Sum$(jets_f_csv > 0.898 && sqrt((jets_p4.Phi()-muons_p4.Phi())^2+(jets_p4.Eta()-muons_p4.Eta())^2) > 0.5) >= 1"
+noBtagging = "Sum$(jets_f_csv > 0.898 && sqrt((jets_p4.Phi()-muons_p4.Phi())^2+(jets_p4.Eta()-muons_p4.Eta())^2) > 0.5) == 0"
+
 
 analysis = "muonNtuple"
+counters = analysis+"Counters"
+countersWeighted = counters+"/weighted"
 
-#era = "EPS"
-#era = "Run2011A-EPS"
-era = "Run2011A"
+#era = "Run2011A"
+#era = "Run2011B"
+era = "Run2011AB"
 
-weight = {"EPS": "pileupWeightEPS",
-          "Run2011A-EPS": "weightPileup_Run2011AnoEPS",
-          "Run2011A": "weightPileup_Run2011A",
-          }[era]
-#weight = ""
+weight = {
+    "Run2011A": "weightPileup_Run2011A",
+    "Run2011B": "weightPileup_Run2011B",
+    "Run2011AB": "weightPileup_Run2011AB",
+    }[era]
+weight = ""
+
+mcOnly = True
+mcOnly = False
+mcLuminosity = 5000.
 
 treeDraw = dataset.TreeDraw(analysis+"/tree", weight=weight)
 
 def main():
-    counters = analysis+"Counters"
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
     datasets.updateNAllEventsToPUWeighted()
 
-    #datasets.remove(filter(lambda name: name != "SingleMu_Mu_166374-167043_Prompt" and name != "TTJets_TuneZ2_Summer11", datasets.getAllDatasetNames()))
-    if era == "EPS":
-        datasets.remove([
-            "SingleMu_Mu_170722-172619_Aug05",
-            "SingleMu_Mu_172620-173198_Prompt",
-            "SingleMu_Mu_173236-173692_Prompt",
-        ])
-    elif era == "Run2011A-EPS":
-        datasets.remove([
-            "SingleMu_Mu_160431-163261_May10",
-            "SingleMu_Mu_163270-163869_May10",
-            "SingleMu_Mu_165088-166150_Prompt",
-            "SingleMu_Mu_166161-166164_Prompt",
-            "SingleMu_Mu_166346-166346_Prompt",
-            "SingleMu_Mu_166374-167043_Prompt",
-            "SingleMu_Mu_167078-167913_Prompt",
-
-#            "SingleMu_Mu_170722-172619_Aug05",
-#            "SingleMu_Mu_172620-173198_Prompt",
-#            "SingleMu_Mu_173236-173692_Prompt",
-            ])
-    elif era == "Run2011A":
+    if era == "Run2011A":
+        datasets.remove(filter(lambda name: "2011B_" in name, datasets.getDataDatasetNames()))
+    elif era == "Run2011B":
+        datasets.remove(filter(lambda name: "2011A_" in name, datasets.getDataDatasetNames()))
+    elif era == "Run2011AB":
         pass
 
+    datasets.remove(filter(lambda name: name != "SingleMu_Mu_173693-177452_2011B_Nov19", datasets.getDataDatasetNames()))
+
     #datasets.remove(datasets.getMCDatasetNames())
-    datasets.loadLuminosities()
+    if mcOnly:
+        datasets.remove(datasets.getDataDatasetNames())
+    else:
+        datasets.loadLuminosities()
 
     #datasetsMC = datasets.deepCopy()
     #datasetsMC.remove(datasets.getDataDatasetNames())
@@ -114,34 +121,63 @@ def main():
     plots._legendLabels["QCD_Pt20_MuEnriched"] = "QCD"
     histograms.createLegend.moveDefaults(dx=-0.04)
 
-    doPlots(datasets)
+#    doPlots(datasets)
+    printCounters(datasets, doDetails=True)
 #    printCounters(datasets)
 #    doPlotsWTauMu(datasets, "TTJets")
 #    doPlotsWTauMu(datasets, "WJets")
 
 def doPlots(datasets):
     def createPlot(name, **kwargs):
-        return plots.DataMCPlot(datasets, name, **kwargs)
-    drawPlot = plots.PlotDrawer(stackMCHistograms=True, addMCUncertainty=True, log=True, ratio=True, ratioYlabel="Ratio")
+        args = kwargs.copy()
+        if mcOnly:
+            args["normalizeToLumi"] = mcLuminosity
+        return plots.DataMCPlot(datasets, name, **args)
+    drawPlot = plots.PlotDrawer(stackMCHistograms=True, addMCUncertainty=True, log=True, ratio=not mcOnly, addLuminosityText=True,
+                                ratioYlabel="Ratio",
+                                optsLog={"ymin": 1e-1}, opts2={"ymin": 0, "ymax": 2})
+                                
 
     selections = [
         ("Full_", And(muonSelection, muonVeto, electronVeto, jetSelection)),
         ("FullNoIso_", And(muonSelectionNoIso, muonVetoNoIso, electronVeto, jetSelectionNoIso)),
+        ("FullStdIso_", And(muonSelectionStdIso, muonVetoStdIso, electronVeto, jetSelectionStdIso)),
+#        ("FullBTag_", And(muonSelection, muonVeto, electronVeto, jetSelection, btagging)),
+#        ("FullNoBTag_", And(muonSelection, muonVeto, electronVeto, jetSelection, noBtagging)),
 #        ("Analysis_", "&&".join([muonSelection, muonVeto, electronVeto, jetSelection, metcut, btagging])),
         ]
 
     for name, selection in selections:
+        print selection
         tdMuon = treeDraw.clone(selection=selection)
 
+        prefix = era+"_"+name
 
         td = tdMuon.clone(varexp="muons_p4.Pt() >>tmp(40,0,400)")
-        drawPlot(createPlot(td), name+"muon_pt_log", "Muon p_{T} (GeV/c)", ylabel="Events / %.0f GeV/c", cutBox={"cutValue":40, "greaterThan":True})
+        drawPlot(createPlot(td), prefix+"muon_pt_log", "Muon p_{T} (GeV/c)", ylabel="Events / %.0f GeV/c", cutBox={"cutValue":40, "greaterThan":True})
 
         td = tdMuon.clone(varexp="pfMet_p4.Pt() >>tmp(40,0,400)")
-        drawPlot(createPlot(td), name+"met_log", "E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV")
+        drawPlot(createPlot(td), prefix+"met_log", "Uncorrected PF E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV")
 
         td = tdMuon.clone(varexp="sqrt(2 * muons_p4.Pt() * pfMet_p4.Et() * (1-cos(muons_p4.Phi()-pfMet_p4.Phi()))) >>tmp(40,0,400)")
-        drawPlot(createPlot(td), name+"mt_log", "m_{T}(#mu, E_{T}^{miss}) (GeV/c^{2})", ylabel="Events / %.0f GeV/c^{2}")
+        drawPlot(createPlot(td), prefix+"mt_log", "m_{T}(#mu, E_{T}^{miss}) (GeV/c^{2})", ylabel="Events / %.0f GeV/c^{2}")
+
+        if "NoIso" in name:
+            td = tdMuon.clone(varexp="muons_f_pfChargedHadrons_01to04 >>tmp(50,0,5)")
+            drawPlot(createPlot(td), prefix+"pfChargedHadrons_log", "Charged hadron #Sigma p_{T} (GeV/c)", ylabel="Events / %.1f GeV/c")
+
+            td = tdMuon.clone(varexp="muons_f_pfPhotons_01to04 >>tmp(50,0,5)")
+            drawPlot(createPlot(td), prefix+"pfPhotons_log", "Photon #Sigma p_{T} (GeV/c)", ylabel="Events / %.1f GeV/c")
+
+            td = tdMuon.clone(varexp="muons_f_pfPUChargedHadrons_01to04 >>tmp(50,0,5)")
+            drawPlot(createPlot(td), prefix+"pfPUChargedHadrons_log", "PU charged hadron #Sigma p_{T} (GeV/c)", ylabel="Events / %.1f GeV/c")
+
+            td = tdMuon.clone(varexp="muons_f_pfChargedHadrons_01to04 + max(0, muons_f_pfPhotons_01to04 - 0.5*muons_f_pfPUChargedHadrons_01to04) >>tmp(50,0,5)")
+            drawPlot(createPlot(td), prefix+"pfIsolationVariable_log", "Isolation variable (GeV/c)", ylabel="Events / %.1f GeV/c")
+
+            td = tdMuon.clone(varexp="(muons_f_pfChargedHadrons + max(0, muons_f_pfPhotons+muons_f_pfNeutralHadrons - 0.5*muons_f_pfPUChargedHadrons))/pt() >>tmp(50,0,5)")
+            drawPlot(createPlot(td), prefix+"pfStdIsolationVariable_log", "Std isolation variable (GeV/c)", ylabel="Events / %.1f GeV/c")
+
 
 
 
@@ -221,43 +257,86 @@ def doPlotsWTauMu(datasets, name):
     p.save()
 
 
-def printCounters(datasets):
+def printCounters(datasets, doDetails=False):
     print "============================================================"
     print "Dataset info: "
     datasets.printInfo()
 
-    eventCounter = counter.EventCounter(datasets)
-    if True:
-        selection = "Sum$(%s) >= 1" % muonKinematics
+    if len(weight) == 0:
+        eventCounter = counter.EventCounter(datasets, counters=counters)
+    else:
+        eventCounter = counter.EventCounter(datasets)
+
+    selection = "Sum$(%s) >= 1" % muonKinematics
+    if doDetails:
         eventCounter.getMainCounter().appendRow("Muon kinematics", treeDraw.clone(selection=selection))
-        selection = "Sum$(%s && %s) >= 1" % (muonKinematics, muondB)
+    selection = "Sum$(%s && %s) >= 1" % (muonKinematics, muondB)
+    if doDetails:
         eventCounter.getMainCounter().appendRow("Muon IP", treeDraw.clone(selection=selection))
-        selection = "Sum$(%s && %s && %s) >= 1" % (muonKinematics, muondB, muonIsolation)
+    selection = "Sum$(%s && %s && %s) >= 1" % (muonKinematics, muondB, muonIsolation)
+    if doDetails:
         eventCounter.getMainCounter().appendRow("Muon isolation", treeDraw.clone(selection=selection))
-        selection = "Sum$(%s && %s && %s) == 1" % (muonKinematics, muondB, muonIsolation)
+    selection = "Sum$(%s && %s && %s) == 1" % (muonKinematics, muondB, muonIsolation)
+    if doDetails:
         print selection
         eventCounter.getMainCounter().appendRow("One selected muon", treeDraw.clone(selection=selection))
-        selection += "&&" +muonVeto
+    selection += "&&" +muonVeto
+    if doDetails:
         print selection
         eventCounter.getMainCounter().appendRow("Muon veto", treeDraw.clone(selection=selection))
-        selection += "&&" +electronVeto
+    selection += "&&" +electronVeto
+    if doDetails:
         print selection
         eventCounter.getMainCounter().appendRow("Electron veto", treeDraw.clone(selection=selection))
-        selection += "&&" +jetSelection
+    selection += "&&" +jetSelection
+    selectionNoIso = And("Sum$(%s && %s) == 1" % (muonKinematics, muondB), muonVeto, electronVeto, jetSelection)
+
+    if doDetails:
         print selection
         eventCounter.getMainCounter().appendRow("Jet selection", treeDraw.clone(selection=selection))
+    else:
+        print selection
+        print selectionNoIso
 
-    eventCounter.normalizeMCByLuminosity()
+        eventCounter.getMainCounter().appendRow("Sample before isolation", treeDraw.clone(selection=selectionNoIso))
+        eventCounter.getMainCounter().appendRow("Selected control sample", treeDraw.clone(selection=selection))
+
+
+    if mcOnly:
+        eventCounter.normalizeMCToLuminosity(mcLuminosity)
+    else:
+        eventCounter.normalizeMCByLuminosity()
 
     table = eventCounter.getMainCounterTable()
-    addSumColumn(table)
+    mcDatasets = filter(lambda n: n != "Data", table.getColumnNames())
+    col = 1
+    if mcOnly:
+        col = 0
+    table.insertColumn(col, counter.sumColumn("MCSum", [table.getColumn(name=name) for name in mcDatasets]))
+
+    if not doDetails:
+        table.keepOnlyRows(["Selected control sample", "Sample before isolation"])
+        # reorder columns
+        qcd = table.getColumn(name="QCD_Pt20_MuEnriched")
+        table.removeColumn(table.getColumnNames().index("QCD_Pt20_MuEnriched"))
+        table.insertColumn(5, qcd)
+
+        table.transpose()
 
     cellFormat = counter.TableFormatText(counter.CellFormatText(valueFormat='%.3f'))
-    print table.format(cellFormat)
+#    cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.1f'))
+    output = table.format(cellFormat)
+    print output
+    name = era+"_counters"
+    if len(weight) == 0:
+        name += "_nonweighted"
+    name += "_noiso"
+    f = open(name+".txt", "w")
+    f.write(output)
+    f.close()
 
 
-
-
+################## OLD STUFF ####################
 
 class SetTH1Directory:
     def __init__(self, value):

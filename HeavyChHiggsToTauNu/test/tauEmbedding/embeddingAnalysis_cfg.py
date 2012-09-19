@@ -13,7 +13,7 @@ debug = False
 ################################################################################
 
 # Command line arguments (options) and DataVersion object
-options, dataVersion = getOptionsDataVersion(dataVersion)
+options, dataVersion = getOptionsDataVersion(dataVersion, useDefaultSignalTrigger=False)
 options.doPat = 1
 options.tauEmbeddingInput = 1
 
@@ -212,7 +212,6 @@ process.commonSequence.insert(0, process.goodPrimaryVertices)
 PF2PATVersion = "PFlow"
 param.changeCollectionsToPF2PAT(postfix=PF2PATVersion)
 
-
 muons = cms.InputTag("tauEmbeddingMuons")
 #taus = cms.InputTag("selectedPatTausShrinkingConePFTau")
 taus = cms.InputTag("selectedPatTausHpsPFTau")
@@ -227,6 +226,10 @@ process.commonSequence *= process.firstPrimaryVertex
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+# FIXME: hack to apply trigger in MC
+if dataVersion.isMC():
+    additionalCounters.extend(tauEmbeddingCustomisations.addMuonTriggerFix(process, dataVersion, process.commonSequence, options))
+
 tauEmbeddingCustomisations.PF2PATVersion = PF2PATVersion
 muons = cms.InputTag(tauEmbeddingCustomisations.addMuonIsolationEmbedding(process, process.commonSequence, muons.value()))
 additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param))
