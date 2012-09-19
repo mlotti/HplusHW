@@ -6,7 +6,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as HChS
 PF2PATVersion = "PFlow"
 #PF2PATVersion = "PFlowChs"
 
-allPatMuons = "selectedPatMuons"+PF2PATVersion
+allPatMuons = "selectedPatMuons"+PF2PATVersion+"All::MUONSKIM" # We have to pick the ones of the original event
 tauEmbeddingMuons = "tauEmbeddingMuons"
 
 allPatTaus = "patTaus"+PF2PATVersion
