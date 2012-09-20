@@ -11,7 +11,7 @@ class DataHelper:
         self.xsec8_mcatnlo  = xsec8_mcatnlo
         self.brHp2taunu     = brHp2taunu
 
-Incides [mHp][tanb][mu]
+# Incides [mHp][tanb][mu]
 hplusXsec_mhmax = {
     180.0: {
         5.0: {
