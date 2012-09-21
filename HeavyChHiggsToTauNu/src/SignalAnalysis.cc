@@ -100,10 +100,27 @@ namespace HPlus {
     fTransverseMass80CutCounter(eventCounter.addCounter("TransverseMass80Cut")),
     fTransverseMass100CutCounter(eventCounter.addCounter("TransverseMass100Cut")),
     fTransverseMass120CutCounter(eventCounter.addCounter("TransverseMass120Cut")),
+    fTransverseMass100CutPhiLow30Counter(eventCounter.addCounter("TransverseMass100CutPhiLow30")),
+    fTransverseMass100CutPhiLow60Counter(eventCounter.addCounter("TransverseMass100CutPhiLow60")),
     fTopWithMHSelectionCounter(eventCounter.addCounter("Top after Inv Mass selection")),
     fTauVetoAfterDeltaPhiCounter(eventCounter.addCounter("TauVeto after DeltaPhi cut")),
     fRealTauAfterDeltaPhiCounter(eventCounter.addCounter("Real tau after deltaPhi cut")),
     fRealTauAfterDeltaPhiTauVetoCounter(eventCounter.addCounter("Real tau after deltaPhi+tauveto cut")),
+
+    fElectronNotInTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Electron not in tau")),
+    fElectronNotInTauFromWCounter(eventCounter.addSubCounter("MCinfo for selected events", "W->Electron not in tau")),
+    fElectronNotInTauFromBottomCounter(eventCounter.addSubCounter("MCinfo for selected events", "Bottom->Electron not in tau")),
+    fElectronNotInTauFromTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau->Electron not in tau")),
+
+    fMuonNotInTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Muon not in tau")),
+    fMuonNotInTauFromWCounter(eventCounter.addSubCounter("MCinfo for selected events", "W->Muon not in tau")),
+    fMuonNotInTauFromBottomCounter(eventCounter.addSubCounter("MCinfo for selected events", "Bottom->Muon not in tau")),
+    fMuonNotInTauFromTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau->Muon not in tau")),
+
+    fTauNotInTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau not in tau")),
+    fTauNotInTauFromWCounter(eventCounter.addSubCounter("MCinfo for selected events", "W->Tau not in tau")),
+    fTauNotInTauFromBottomCounter(eventCounter.addSubCounter("MCinfo for selected events", "Bottom->Tau not in tau")),
+    fTauNotInTauFromHplusCounter(eventCounter.addSubCounter("MCinfo for selected events", "Hplus->tau not in tau")),
 
 
     fTauIsHadronFromHplusCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from H+ ->tau->hadrons")),
@@ -208,6 +225,14 @@ namespace HPlus {
     hVerticesTriggeredBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesTriggeredBeforeWeight", "Number of vertices without weighting", 40, 0, 40);
     hVerticesTriggeredAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesTriggeredAfterWeight", "Number of vertices with weighting", 40, 0, 40);
     //    hmetAfterTrigger = fHistoWrapper.makeTH<TH1F>(*fs, "metAfterTrigger", "metAfterTrigger", 50, 0., 200.);
+
+    hGenMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "genMET", "genMET", 200, 0., 400.);
+    hdeltaPhiMetGenMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiMetGenMet", "deltaPhiMetGenMet", 180, 0., 180.); 
+    hdeltaEtMetGenMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaEtMetGenMet", "deltaEtMetGenMet", 200, -1., 1.); 
+    htransverseMassMuonNotInTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassMuonNotInTau", "transverseMassMuonNotInTau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
+    htransverseMassElectronNotInTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassElectronNotInTau", "transverseMassElectronNotInTau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
+    htransverseMassTauNotInTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassTauNotInTau", "transverseMassTauNotInTau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
+    htransverseMassMetReso02 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassMetReso02", "transverseMassMetReso02;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
 
     hTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassPhi30 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassPhi30", "transverseMassPhi30;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
@@ -381,10 +406,10 @@ namespace HPlus {
     hVerticesTriggeredAfterWeight->Fill(nVertices);
 
 //------ GenParticle analysis (must be done here when we effectively trigger all MC)
-    if (!iEvent.isRealData()) {
+//    if (!iEvent.isRealData()) {
       GenParticleAnalysis::Data genData = fGenparticleAnalysis.analyze(iEvent, iSetup);
-      fTree.setGenMET(genData.getGenMET());
-    }
+       if (!iEvent.isRealData()) fTree.setGenMET(genData.getGenMET());
+      //    }
 
 //------ Primary vertex
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
@@ -397,6 +422,8 @@ namespace HPlus {
     // Store weight of event
     // TauID
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
+
+
     if(!tauData.passedEvent()) return false; // Require at least one tau
     // Obtain MC matching - for EWK without genuine taus
     FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
@@ -729,11 +756,13 @@ namespace HPlus {
     // test lower bound of deltaPhi
     if (deltaPhi > 30) {
       increment(fDeltaPhiLow30Counter);
+      if (transverseMass  > 100 )  increment(fTransverseMass100CutPhiLow30Counter);
       hTransverseMassPhi30->Fill(transverseMass);
     }
 
     if (deltaPhi > 60) {
       increment(fDeltaPhiLow60Counter);
+      if (transverseMass  > 100 )  increment(fTransverseMass100CutPhiLow60Counter);
       hTransverseMassPhi60->Fill(transverseMass);
     }
 
@@ -853,8 +882,9 @@ namespace HPlus {
 
 
 //------ Experimental cuts, counters, and histograms
-    doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData);
-
+    if (!iEvent.isRealData()) {
+      doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData, metData, genData);
+    }
 
    // transverse mass and inv mass with tau veto
     if (!vetoTauData.passedEvent()) {
@@ -961,7 +991,7 @@ namespace HPlus {
     return true;
   }
 
-  void SignalAnalysis::doMCAnalysisOfSelectedEvents(edm::Event& iEvent, const TauSelection::Data& tauData, const VetoTauSelection::Data& vetoTauData) {
+  void SignalAnalysis::doMCAnalysisOfSelectedEvents(edm::Event& iEvent, const TauSelection::Data& tauData, const VetoTauSelection::Data& vetoTauData, const METSelection::Data& metData, const GenParticleAnalysis::Data& genData) {
     if (iEvent.isRealData()) return;
 
     // Origin and type of selected tau
@@ -969,17 +999,76 @@ namespace HPlus {
     iEvent.getByLabel("genParticles", genParticles);
     bool myTauFoundStatus = false;
     bool myLeptonVetoStatus = false;
+    bool otherTauFound = false;
+    bool electronFound = false;
+    bool muonFound = false;
+
+    hGenMET->Fill(genData.getGenMET()->pt());
+    double deltaPhiMetGenMet = DeltaPhi::reconstruct(*(genData.getGenMET()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
+    hdeltaPhiMetGenMet->Fill(deltaPhiMetGenMet);
+    hdeltaEtMetGenMet->Fill((genData.getGenMET()->pt() - metData.getSelectedMET()->pt())/genData.getGenMET()->pt());
+
+    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
+    if ((fabs(genData.getGenMET()->pt() - metData.getSelectedMET()->pt())/genData.getGenMET()->pt()) > 0.2) {
+      htransverseMassMetReso02->Fill(transverseMass);
+    }
 
     
     reco::GenParticle parton;
+    reco::GenParticle otherTau;
+    reco::GenParticle electron;
+    reco::GenParticle muon;
 
     double minDeltaR = 99999;
     for (size_t i=0; i < genParticles->size(); ++i) {
       const reco::Candidate & p = (*genParticles)[i];
-      if (p.pt() > 5 && p.pdgId()!= std::abs(p.pdgId()) ) {
+      //      if (p.pt() > 5 && p.pdgId()!= std::abs(p.pdgId()) ) {
+      if (p.pt() > 5 ) {
         if (reco::deltaR(p, tauData.getSelectedTau()->leadPFChargedHadrCand()->p4()) < 0.3) {
           if (std::abs(p.pdgId()) == 15) myTauFoundStatus = true;
         }
+	if (reco::deltaR(p, tauData.getSelectedTau()->leadPFChargedHadrCand()->p4()) > 0.3) {
+          if (std::abs(p.pdgId()) == 15) {
+	    otherTau = (*genParticles)[i]; 
+	    otherTauFound = true;
+	    std::vector<const reco::GenParticle*> tauMothers = getMothers(otherTau); 
+	    for(size_t d=0; d< tauMothers.size(); ++d) {
+	      const reco::GenParticle dparticle = *tauMothers[d];
+	      if( abs(dparticle.pdgId()) == 24 ) increment(fTauNotInTauFromWCounter);
+	      if( abs(dparticle.pdgId()) == 5 ) increment(fTauNotInTauFromBottomCounter);
+	      if( abs(dparticle.pdgId()) == 37 ) increment(fTauNotInTauFromHplusCounter); 	
+	    }
+	  }
+
+	  // electrons 
+          if (std::abs(p.pdgId()) == 11) {
+	    increment(fElectronNotInTauCounter);
+	    electronFound = true;
+	    electron = (*genParticles)[i]; 
+	    std::vector<const reco::GenParticle*> electronMothers = getMothers(electron); 
+	    for(size_t d=0; d<electronMothers.size(); ++d) {
+	      const reco::GenParticle dparticle = *electronMothers[d];
+	      if( abs(dparticle.pdgId()) == 24 ) increment(fElectronNotInTauFromWCounter);
+	      if( abs(dparticle.pdgId()) == 5 ) increment(fElectronNotInTauFromBottomCounter);
+	      if( abs(dparticle.pdgId()) == 15 ) increment(fElectronNotInTauFromTauCounter); 	
+	    }
+	  }
+	  // muons
+          if (std::abs(p.pdgId()) == 13) {
+	    increment(fMuonNotInTauCounter);
+	    muonFound = true;
+	    muon = (*genParticles)[i];
+	    std::vector<const reco::GenParticle*> muonMothers = getMothers(muon);
+	    
+	    for(size_t d=0; d< muonMothers.size(); ++d) {
+	      const reco::GenParticle dparticle = *muonMothers[d];
+	      if( abs(dparticle.pdgId()) == 24 ) increment(fMuonNotInTauFromWCounter);
+	      if( abs(dparticle.pdgId()) == 5 ) increment(fMuonNotInTauFromBottomCounter);
+	      if( abs(dparticle.pdgId()) == 15 ) increment(fMuonNotInTauFromTauCounter); 	
+	    }
+	  }
+        }
+
 
         double deltaR = reco::deltaR(p, tauData.getSelectedTau()->leadPFChargedHadrCand()->p4());
         if (deltaR < minDeltaR) {
@@ -989,7 +1078,26 @@ namespace HPlus {
       }
     }
   
-    
+    // origin of leptons (not in tau)
+    if (electronFound) {
+      //      increment(fElectronNotInTauCounter);
+      htransverseMassElectronNotInTau->Fill(transverseMass);
+    }
+
+    if (muonFound) {
+      increment(fMuonNotInTauCounter);
+      htransverseMassMuonNotInTau->Fill(transverseMass);
+    }
+
+    if (otherTauFound) {
+      increment(fTauNotInTauCounter);
+      htransverseMassTauNotInTau->Fill(transverseMass);
+    }
+
+
+
+
+
     std::vector<const reco::GenParticle*> mothers = getMothers(parton);
     int motherId=9999;      
     bool wInMothers = false;
@@ -1001,7 +1109,7 @@ namespace HPlus {
     for(size_t d=0; d<mothers.size(); ++d) {
       const reco::GenParticle dparticle = *mothers[d];
       motherId = dparticle.pdgId();
-      if( abs(motherId) == 24 ) wInMothers = true;
+      if( abs(motherId) == 24 ) wInMothers = true; 
       if( abs(motherId) == 6 ) topInMothers = true;
       if( abs(motherId) == 5 ) bottomInMothers = true;
       if( abs(motherId) == 15 ) tauInMothers = true;

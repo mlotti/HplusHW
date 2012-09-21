@@ -116,7 +116,7 @@ namespace HPlus {
   private:
     CounterGroup* getCounterGroupByTauMatch(FakeTauIdentifier::MCSelectedTauMatchType tauMatch);
     void fillEWKFakeTausCounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData);
-    void doMCAnalysisOfSelectedEvents(edm::Event& iEvent, const TauSelection::Data& tauData, const VetoTauSelection::Data& vetoTauData);
+    void doMCAnalysisOfSelectedEvents(edm::Event& iEvent, const TauSelection::Data& tauData, const VetoTauSelection::Data& vetoTauData, const METSelection::Data& metData, const GenParticleAnalysis::Data& genData);
 
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisProducer
@@ -154,9 +154,26 @@ namespace HPlus {
     Count fTransverseMass80CutCounter;
     Count fTransverseMass100CutCounter;
     Count fTransverseMass120CutCounter;
+    Count fTransverseMass100CutPhiLow30Counter;
+    Count fTransverseMass100CutPhiLow60Counter;
     Count fTauVetoAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiTauVetoCounter;
+
+    Count fElectronNotInTauCounter;
+    Count fElectronNotInTauFromWCounter;
+    Count fElectronNotInTauFromBottomCounter;
+    Count fElectronNotInTauFromTauCounter;
+
+    Count fMuonNotInTauCounter;
+    Count fMuonNotInTauFromWCounter;
+    Count fMuonNotInTauFromBottomCounter;
+    Count fMuonNotInTauFromTauCounter;
+
+    Count fTauNotInTauCounter;
+    Count fTauNotInTauFromWCounter;
+    Count fTauNotInTauFromBottomCounter;
+    Count fTauNotInTauFromHplusCounter;
 
     Count fTauIsHadronFromHplusCounter;
     Count fTauIsElectronFromHplusCounter;
@@ -231,6 +248,15 @@ namespace HPlus {
     WrappedTH1 *hVerticesAfterWeight;
     WrappedTH1 *hVerticesTriggeredBeforeWeight;
     WrappedTH1 *hVerticesTriggeredAfterWeight;
+
+    // MCAnalysis histograms
+    WrappedTH1 *hGenMET;
+    WrappedTH1 *hdeltaPhiMetGenMet;
+    WrappedTH1 *hdeltaEtMetGenMet;
+    WrappedTH1 *htransverseMassMuonNotInTau;
+    WrappedTH1 *htransverseMassElectronNotInTau;
+    WrappedTH1 *htransverseMassTauNotInTau;
+    WrappedTH1 *htransverseMassMetReso02;
     
     // Transverse mass histograms
     WrappedTH1 *hTransverseMass;
@@ -349,7 +375,7 @@ namespace HPlus {
     std::string fModuleLabel;
 
     bool fProduce;
-    bool fOnlyGenuineTaus;
+    bool fOnlyGenuineTaus; 
   };
 }
 

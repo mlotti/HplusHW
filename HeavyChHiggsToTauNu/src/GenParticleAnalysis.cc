@@ -101,6 +101,9 @@ namespace HPlus {
 
   GenParticleAnalysis::Data GenParticleAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
 
+
+    if (iEvent.isRealData()) return 0;
+
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel(fSrc, genParticles);
 
