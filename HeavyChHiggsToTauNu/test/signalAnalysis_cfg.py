@@ -231,8 +231,7 @@ param.setAllTauSelectionOperatingMode('standard')
 param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
 # Switch to PF2PAT objects
-#param.changeCollectionsToPF2PAT()
-param.changeCollectionsToPF2PAT(postfix=PF2PATVersion)
+param.changeCollectionsToPF2PAT(dataVersion, postfix=PF2PATVersion)
 
 # Trigger with scale factors (at the moment hard coded)
 if applyTriggerScaleFactor and dataVersion.isMC():
@@ -303,13 +302,6 @@ process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJe
 process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
     
 param.bTagging.UseBTagDB  = cms.untracked.bool(False)
-
-
-
-# Add type 1 MET
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
-sequence = MetCorrection.addCorrectedMet(process, process.signalAnalysis, postfix=PF2PATVersion)
-process.commonSequence *= sequence
 
 # Set beta variable for jets
 process.signalAnalysis.jetSelection.betaCut = betaCutForJets
@@ -539,7 +531,7 @@ if options.tauEmbeddingInput:
 # following histogram directories
 # signalAnalysisJESPlus05
 # signalAnalysisJESMinus05
-from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVariationAnalysis
+import HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation as jesVariation
 def addJESVariation(name, doJetUnclusteredVariation):
     jetVariationMode="all"
     module = getattr(process, name)
@@ -548,17 +540,19 @@ def addJESVariation(name, doJetUnclusteredVariation):
     module.Tree.fill = False        
     module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
 
-    addJESVariationAnalysis(process, dataVersion, name, "TESPlus",  module, additionalCounters, tauVariationSigma=1.0, postfix=PF2PATVersion)
-    addJESVariationAnalysis(process, dataVersion, name, "TESMinus", module, additionalCounters, tauVariationSigma=-1.0, postfix=PF2PATVersion)
+    jesVariation.addTESVariation(process, name, "TESPlus",  module, additionalCounters, "Up", postfix=PF2PATVersion)
+    jesVariation.addTESVariation(process, name, "TESMinus", module, additionalCounters, "Down", postfix=PF2PATVersion)
 
     if doJetUnclusteredVariation:
         # Do all variations beyond TES
-        addJESVariationAnalysis(process, dataVersion, name, "JESPlus",  module, additionalCounters, jetVariationSigma=1.0, postfix=PF2PATVersion)
-        addJESVariationAnalysis(process, dataVersion, name, "JESMinus", module, additionalCounters, jetVariationSigma=-1.0, postfix=PF2PATVersion)
-        #addJESVariationAnalysis(process, dataVersion, name, "JERPlus",  module, additionalCounters, VariationSigma=1.0, postfix=PF2PATVersion)
-        #addJESVariationAnalysis(process, dataVersion, name, "JERMinus", module, additionalCounters, VariationSigma=-1.0, postfix=PF2PATVersion)
-        addJESVariationAnalysis(process, dataVersion, name, "METPlus",  module, additionalCounters, unclusteredVariationSigma=1.0, postfix=PF2PATVersion)
-        addJESVariationAnalysis(process, dataVersion, name, "METMinus", module, additionalCounters, unclusteredVariationSigma=-1.0, postfix=PF2PATVersion)
+        jesVariation.addJESVariation(process, name, "JESPlus",  module, additionalCounters, "Up", postfix=PF2PATVersion)
+        jesVariation.addJESVariation(process, name, "JESMinus", module, additionalCounters, "Down", postfix=PF2PATVersion)
+
+        jesVariation.addJERVariation(process, name, "JERPlus",  module, additionalCounters, "Up", postfix=PF2PATVersion)
+        jesVariation.addJERVariation(process, name, "JERMinus", module, additionalCounters, "Down", postfix=PF2PATVersion)
+
+        jesVariation.addUESVariation(process, name, "METPlus",  module, additionalCounters, "Up", postfix=PF2PATVersion)
+        jesVariation.addUESVariation(process, name, "METMinus", module, additionalCounters, "Down", postfix=PF2PATVersion)
 
 if doJESVariation or doSystematics:
     doJetUnclusteredVariation = True
