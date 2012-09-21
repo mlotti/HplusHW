@@ -10,13 +10,13 @@ multicrab = Multicrab("crab_analysis.cfg", cfg)
 # Select the pattuple version to use as an input
 #pattupleVersion = "pattuple_v18"
 #pattupleVersion = "pattuple_v19"
-pattupleVersion = "pattuple_v25b"
+pattupleVersion = "pattuple_v25c"
 
 
 #era = "EPS"
-era = "Run2011A"
+#era = "Run2011A"
 #era = "Run2011B"
-#era = "Run2011A+B"
+era = "Run2011A+B"
 
 # Change this to true if you want to run the PAT on the fly (for
 # datasets where no pattuples are produced, or for testing something
@@ -73,6 +73,16 @@ datasetsRun2011B_v25b = [
        "Tau_175860-180252_2011B_Nov19",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
 ]
 
+# v25c
+datasetsRun2011A_v25c = [
+       "Tau_160431-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
+       "Tau_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
+       "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
+]
+datasetsRun2011B_v25c = [
+       "Tau_175860-180252_2011B_Nov19",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
+]
+
 
 
 datasetsMC = [
@@ -97,12 +107,12 @@ datasetsMC = [
         "TTToHplusBHminusB_M160_Fall11",
 
 	# MC Signal (heavy H+ from process pp->tbH+)
-        "HplusTB_M180_Fall11",
+#        "HplusTB_M180_Fall11",
         "HplusTB_M190_Fall11",
         "HplusTB_M200_Fall11",
         "HplusTB_M220_Fall11",
         "HplusTB_M250_Fall11",
-        "HplusTB_M300_Fall11",
+#        "HplusTB_M300_Fall11",
 
         # MC Background
         "QCD_Pt30to50_TuneZ2_Fall11",
@@ -147,6 +157,8 @@ elif era == "Run2011A+B":
         datasets += datasetsRun2011A_v19 + datasetsRun2011B_v19
     elif "v25b" in pattupleVersion:
         datasets += datasetsRun2011A_v25b + datasetsRun2011B_v25b
+    elif "v25c" in pattupleVersion:
+        datasets += datasetsRun2011A_v25c + datasetsRun2011B_v25c
 
 else:
     raise Exception("Wrong value for 'era' %s, supported are 'Run2011A', 'Run2011B', 'Run2011A+B'" % era)

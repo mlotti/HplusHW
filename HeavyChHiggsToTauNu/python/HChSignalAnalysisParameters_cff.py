@@ -56,6 +56,7 @@ tauSelectionBase = cms.untracked.PSet(
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
     againstElectronDiscriminator = cms.untracked.string("againstElectronMVA"), # discriminator against electrons
     againstMuonDiscriminator = cms.untracked.string("againstMuonTight"), # discriminator for against muons
+    applyVetoForDeadECALCells = cms.untracked.bool(False), # set to true to exclude taus that are pointing to a dead ECAL cell
     isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr"), # discriminator for isolation
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1.0), # cut point for continuous isolation discriminator, applied only if it is non-zero
     rtauCut = cms.untracked.double(0.7), # rtau > value
@@ -187,6 +188,9 @@ jetSelectionBase = cms.untracked.PSet(
     betaCut = cms.untracked.double(0.2), # default 0.2
     betaCutSource = cms.untracked.string("Beta"), # tag name in user floats
     betaCutDirection = cms.untracked.string("GT"), # direction of beta cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
+    # Veto event if jet hits dead ECAL cell
+    applyVetoForDeadECALCells = cms.untracked.bool(False),
+    deadECALCellsVetoDeltaR = cms.untracked.double(0.07),
     # Experimental
     EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )
@@ -446,13 +450,13 @@ def setDataTriggerEfficiency(dataVersion, era):
     if era == "EPS":
         triggerEfficiencyScaleFactor.dataSelect = ["runs_160404_167913"]
     elif era == "Run2011A":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_160404_167913", "runs_170826_173198", "runs_173236_173692"]
+        triggerEfficiencyScaleFactor.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692"]
     elif era == "Run2011A-EPS":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_170826_173198", "runs_173236_173692"]
+        triggerEfficiencyScaleFactor.dataSelect = ["runs_170722_173198", "runs_173236_173692"]
     elif era == "Run2011B":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_175860_180252"]
+        triggerEfficiencyScaleFactor.dataSelect = ["runs_175832_180252"]
     elif era == "Run2011A+B":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_160404_167913", "runs_170826_173198", "runs_173236_173692", "runs_175860_180252"]
+        triggerEfficiencyScaleFactor.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692", "runs_175832_180252"]
     else:
         raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011A+B'")
 

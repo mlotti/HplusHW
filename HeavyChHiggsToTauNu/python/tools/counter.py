@@ -926,6 +926,44 @@ def removeColumnsRowsNotInAll(tables):
 
     return tablesCopy
 
+## Remove rows not found in all tables
+#
+# \param tables  List of counter.CounterTable objects
+#
+# \return new list of new counter.CounterTable objects
+#
+# Mainly used from counter.meanTable() and counter.meanTableFit().
+# Needed in addition of removeColulmnsRowsNotInAll() in order to allow
+# partial embedding processing rounds (i.e. to not process all datasets)
+def removeRowsNotInAll(tables):
+    tablesCopy = [t.clone() for t in tables]
+
+    maxNrows = max([t.getNrows() for t in tables])
+    iRow = 0
+    while iRow < maxNrows:
+        if tablesCopy[0].getNrows() <= iRow:
+            for t in tablesCopy[1:]:
+                if table.getNrows() > iRow:
+                    table.removeRow(index=iRow)
+            maxNrows -= 1
+            continue
+
+        rowName = tablesCopy[0].getRowNames()[iRow]
+        shouldRowBeRemoved = False
+        for table in tablesCopy[1:]:
+            if table.getNrows() <= iRow or rowName != table.getRowNames()[iRow]:
+                shouldRowBeRemoved = True
+        if shouldRowBeRemoved:
+            for t in tablesCopy:
+                if t.getNrows() > iRow:
+                    t.removeRow(index=iRow)
+            maxNrows -= 1
+            continue
+        iRow += 1
+
+    return tablesCopy
+
+
 ## Create a new counter.CounterTable as the average of the tables
 #
 # \param tables  List of counter.CounterTable objects
@@ -940,8 +978,48 @@ def meanTable(tables, uncertaintyByAverage=False):
     if len(tables) == 0:
         raise Exception("Got 0 tables")
 
+    #tablesCopy = removeRowsNotInAll(tables)
+    tablesCopy = [t.clone() for t in tables]
+
+    # Do the average
+    table = tablesCopy[0]
+    rowNames = table.getRowNames()
+    colNames = table.getColumnNames()
+    for rowName in rowNames:
+        for colName in colNames:
+            count1 = table.getCount(rowName=rowName, colName=colName)
+            if count1 == None:
+                continue
+            count = count1.clone()
+            N = 1
+
+            for t in tablesCopy[1:]:
+                if colName not in t.getColumnNames():
+                    continue
+
+                count2 = t.getCount(rowName=rowName, colName=colName)
+                if count2 == None:
+                    count = None
+                    break
+                N += 1
+                if uncertaintyByAverage:
+                    count = dataset.Count(count.value()+count2.value(), count.uncertainty()+count2.uncertainty())
+                else:
+                    count.add(count2)
+
+            if count != None:
+                table.setCount2(dataset.Count(count.value()/N, count.uncertainty()/N), rowName=rowName, colName=colName)
+            else:
+                table.setCount2(None, rowName=rowName, colName=colName)
+    return table
+
+
+def meanTableFast(tables, uncertaintyByAverage=False):
+    if len(tables) == 0:
+        raise Exception("Got 0 tables")
+
     tablesCopy = removeColumnsRowsNotInAll(tables)
-    
+
     # Calculate the sums
     table = tablesCopy[0]
     nrows = table.getNrows()
@@ -1820,6 +1898,9 @@ class Counter:
     def forEachDataset(self, func):
         for c in self.counters:
             func(c)
+
+    def getColumnNames(self):
+        return [c.getName() for c in self.counters]
 
     ## Remove columns
     #

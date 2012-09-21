@@ -35,8 +35,7 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-#        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_2_X/TTJets_TuneZ2_Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_embedding_v13_1/22559ec2c5e66c0c33625ecb67add84e/embedded_13_1_Ha1.root"
-        "file:embedded.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Tauembedding_embedding_v44_3_seed0_TTJets_TuneZ2_Fall11/8bda05028676a01f201ca340afb9a6ec/embedded_1_1_aT5.root"
     ),
     inputCommands = cms.untracked.vstring(
         "keep *",
@@ -45,7 +44,7 @@ process.source = cms.Source('PoolSource',
 )
 if dataVersion.isData():
     process.source.fileNames = [
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_2_X/SingleMu_Mu_166374-167043_Prompt/SingleMu/PromptReco_v4_AOD_166374_tauembedding_embedding_v13_1/947a4a88c33687e763c591af079fc279/embedded_1_1_Bv7.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/SingleMu_Mu_160431-163261_2011A_Nov08/SingleMu/Tauembedding_embedding_v44_3_seed0_SingleMu_Mu_160431-163261_2011A_Nov08/8bda05028676a01f201ca340afb9a6ec/embedded_1_1_N9l.root"
         ]
 
 ################################################################################
@@ -204,7 +203,10 @@ for era, name in puWeights:
     ))
     param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, era=era)
     insertPSetContentsTo(param.vertexWeight.clone(), getattr(process, modname))
-    process.commonSequence *= getattr(process, modname)
+    process.commonSequence.insert(0, getattr(process, modname))
+# FIXME: this is only a consequence of the swiss-knive effect...
+process.commonSequence.remove(process.goodPrimaryVertices)
+process.commonSequence.insert(0, process.goodPrimaryVertices)
 
 # Switch to PF2PAT objects
 PF2PATVersion = "PFlow"
@@ -242,6 +244,7 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     jetSrc = cms.InputTag("selectedPatJets"+PF2PATVersion),
     jetFunctions = cms.PSet(
         tche = cms.string("bDiscriminator('trackCountingHighEffBJetTags')"),
+        csv = cms.string("bDiscriminator('combinedSecondaryVertexBJetTags')"),
     ),
     genParticleOriginalSrc = cms.InputTag("genParticles", "", "HLT"),
     genParticleEmbeddedSrc = cms.InputTag("genParticles"),
@@ -256,10 +259,18 @@ muonIsolations = ["trackIso", "caloIso", "pfChargedIso", "pfNeutralIso", "pfGamm
 #print isolations
 for name in muonIsolations:
     setattr(ntuple.muonFunctions, name, cms.string(muonAnalysis.isolations[name]))
+userFloats = []
+for name in ["pfNeutralHadrons", "pfChargedAll", "pfPUChargedHadrons", "pfPhotons", "pfChargedHadrons"]:
+    userFloats.extend(["iso01to04_"+name, "iso01to03_"+name])
+for name in userFloats:
+    setattr(ntuple.muonFunctions, name, cms.string("userFloat('%s')" % name))
+
 tauIds = [
     "decayModeFinding",
-    "againstMuonLoose", "againstMuonTight", "againstElectronLoose", "againstElectronMedium", "againstElectronTight",
-    "byVLooseIsolation", "byLooseIsolation", "byMediumIsolation", "byTightIsolation"
+    "againstMuonLoose", "againstMuonTight",
+    "againstElectronLoose", "againstElectronMedium", "againstElectronTight", "againstElectronMVA",
+    "byVLooseIsolation", "byLooseIsolation", "byMediumIsolation", "byTightIsolation",
+    "byLooseCombinedIsolationDeltaBetaCorr", "byMediumCombinedIsolationDeltaBetaCorr", "byTightCombinedIsolationDeltaBetaCorr",
     ]
 for name in tauIds:
     setattr(ntuple.tauFunctions, name, cms.string("tauID('%s')"%name))
