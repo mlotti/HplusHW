@@ -15,16 +15,16 @@ public:
     Muon(MyMuonCollection *mc, size_t i): MuonCollection::Muon(mc, i) {}
     ~Muon() {}
 
-    double chargedHadronIso_01to04() { return static_cast<MyMuonCollection *>(fCollection)->fChargedHadronIso_01to04.value()[fIndex]; }
-    double puChargedHadronIso_01to04() { return static_cast<MyMuonCollection *>(fCollection)->fPuChargedHadronIso_01to04.value()[fIndex]; }
-    double neutralHadronIso_01to04() { return static_cast<MyMuonCollection *>(fCollection)->fNeutralHadronIso_01to04.value()[fIndex]; }
-    double photonIso_01to04() { return static_cast<MyMuonCollection *>(fCollection)->fPhotonIso_01to04.value()[fIndex]; }
+    double chargedHadronIsoEmb() { return static_cast<MyMuonCollection *>(fCollection)->fChargedHadronIsoEmb.value()[fIndex]; }
+    double puChargedHadronIsoEmb() { return static_cast<MyMuonCollection *>(fCollection)->fPuChargedHadronIsoEmb.value()[fIndex]; }
+    double neutralHadronIsoEmb() { return static_cast<MyMuonCollection *>(fCollection)->fNeutralHadronIsoEmb.value()[fIndex]; }
+    double photonIsoEmb() { return static_cast<MyMuonCollection *>(fCollection)->fPhotonIsoEmb.value()[fIndex]; }
 
     double standardRelativeIsolation() {
       return (chargedHadronIso() + std::max(0.0, photonIso() + neutralHadronIso() - 0.5*puChargedHadronIso()))/p4().Pt();
     }
     double embeddingIsolation() {
-      return chargedHadronIso_01to04() + std::max(0.0, photonIso_01to04() - 0.5*puChargedHadronIso_01to04());
+      return chargedHadronIsoEmb() + std::max(0.0, photonIsoEmb() - 0.5*puChargedHadronIsoEmb());
     }
   };
 
@@ -34,28 +34,28 @@ public:
   void setupBranches(TTree *tree) {
     MuonCollection::setupBranches(tree);
 
-    fChargedHadronIso_01to04.setupBranch(tree, (fPrefix+"_f_pfChargedHadrons_01to04").c_str());
-    fPuChargedHadronIso_01to04.setupBranch(tree, (fPrefix+"_f_pfPUChargedHadrons_01to04").c_str());
-    fNeutralHadronIso_01to04.setupBranch(tree, (fPrefix+"_f_pfNeutralHadrons_01to04").c_str());
-    fPhotonIso_01to04.setupBranch(tree, (fPrefix+"_f_pfPhotons_01to04").c_str());
+    fChargedHadronIsoEmb.setupBranch(tree, (fPrefix+"_f_chargedHadronIsoEmb").c_str());
+    fPuChargedHadronIsoEmb.setupBranch(tree, (fPrefix+"_f_puChargedHadronIsoEmb").c_str());
+    fNeutralHadronIsoEmb.setupBranch(tree, (fPrefix+"_f_neutralHadronIsoEmb").c_str());
+    fPhotonIsoEmb.setupBranch(tree, (fPrefix+"_f_photonIsoEmb").c_str());
   }
   void setEntry(Long64_t entry) {
     MuonCollection::setEntry(entry);
 
-    fChargedHadronIso_01to04.setEntry(entry);
-    fPuChargedHadronIso_01to04.setEntry(entry);
-    fNeutralHadronIso_01to04.setEntry(entry);
-    fPhotonIso_01to04.setEntry(entry);
+    fChargedHadronIsoEmb.setEntry(entry);
+    fPuChargedHadronIsoEmb.setEntry(entry);
+    fNeutralHadronIsoEmb.setEntry(entry);
+    fPhotonIsoEmb.setEntry(entry);
   }
   Muon get(size_t i) {
     return Muon(this, i);
   }
 
 private:
-  BranchObj<std::vector<double> > fChargedHadronIso_01to04;
-  BranchObj<std::vector<double> > fPuChargedHadronIso_01to04;
-  BranchObj<std::vector<double> > fNeutralHadronIso_01to04;
-  BranchObj<std::vector<double> > fPhotonIso_01to04;
+  BranchObj<std::vector<double> > fChargedHadronIsoEmb;
+  BranchObj<std::vector<double> > fPuChargedHadronIsoEmb;
+  BranchObj<std::vector<double> > fNeutralHadronIsoEmb;
+  BranchObj<std::vector<double> > fPhotonIsoEmb;
 };
 
 // MuonAnalysisSelector
@@ -79,6 +79,7 @@ private:
   Branch<double> fPuWeight;
 
   Branch<bool> fElectronVetoPassed;
+  Branch<bool> fHBHENoiseFilterPassed;
 
   enum IsolationMode {
     kDisabled,
@@ -94,6 +95,7 @@ private:
   EventCounter::Count cMuonDB;
   EventCounter::Count cMuonIsolation;
   EventCounter::Count cMuonExactlyOne;
+  EventCounter::Count cHBHENoiseFilter;
   EventCounter::Count cMuonVeto;
   EventCounter::Count cElectronVeto;
   EventCounter::Count cJetSelection;
@@ -137,6 +139,7 @@ MuonAnalysisSelector::MuonAnalysisSelector(const std::string& puWeight, const st
   cMuonDB(fEventCounter.addCounter("Muon dB")),
   cMuonIsolation(fEventCounter.addCounter("Muon isolation")),
   cMuonExactlyOne(fEventCounter.addCounter("Muons == 1")),
+  cHBHENoiseFilter(fEventCounter.addCounter("HBHE noise filter (data)")), // Here only because it's here in the current embedding+signalAnalysis workflow
   cMuonVeto(fEventCounter.addCounter("Veto additional muons")),
   cElectronVeto(fEventCounter.addCounter("Electron veto")),
   cJetSelection(fEventCounter.addCounter("Jet selection"))
@@ -193,6 +196,7 @@ void MuonAnalysisSelector::setupBranches(TTree *tree) {
   if(!fPuWeightName.empty())
     fPuWeight.setupBranch(tree, fPuWeightName.c_str());
   fElectronVetoPassed.setupBranch(tree, "ElectronVetoPassed");
+  fHBHENoiseFilterPassed.setupBranch(tree, "HBHENoiseFilter");
   fRawMet.setupBranch(tree, "pfMet_p4");
 }
 
@@ -202,6 +206,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
   fJets.setEntry(entry);
   fPuWeight.setEntry(entry);
   fElectronVetoPassed.setEntry(entry);
+  fHBHENoiseFilterPassed.setEntry(entry);
   fRawMet.setEntry(entry);
 
   double weight = 1.0;
@@ -229,7 +234,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
 
   // dB
   for(size_t i=0; i<selectedMuons.size(); ++i) {
-    if(!(selectedMuons[i].dB() < 0.02)) continue;
+    if(!(std::abs(selectedMuons[i].dB()) < 0.02)) continue;
     tmp.push_back(selectedMuons[i]);
   }
   selectedMuons.swap(tmp);
@@ -258,10 +263,10 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
       }
       else if(fIsolationMode == kEmbedding) {
 
-        hMuonChargedHadronIso_AfterDB->Fill(muon.chargedHadronIso_01to04(), weight);
-        hMuonPuChargedHadronIso_AfterDB->Fill(muon.puChargedHadronIso_01to04(), weight);
-        hMuonNeutralHadronIso_AfterDB->Fill(muon.neutralHadronIso_01to04(), weight);
-        hMuonPhotonIso_AfterDB->Fill(muon.photonIso_01to04(), weight);
+        hMuonChargedHadronIso_AfterDB->Fill(muon.chargedHadronIsoEmb(), weight);
+        hMuonPuChargedHadronIso_AfterDB->Fill(muon.puChargedHadronIsoEmb(), weight);
+        hMuonNeutralHadronIso_AfterDB->Fill(muon.neutralHadronIsoEmb(), weight);
+        hMuonPhotonIso_AfterDB->Fill(muon.photonIsoEmb(), weight);
         hMuonIso_AfterDB->Fill(embIsoVar, weight);
 
         if(!(embIsoVar < 2)) continue;
@@ -282,21 +287,30 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
   // Fill
   hSelectedMuonPt_AfterMuonSelection->Fill(selectedMuon.p4().Pt(), weight);
 
+  // HBHENoiseFilter
+  if(isData() && !fHBHENoiseFilterPassed.value()) return true;
+  cHBHENoiseFilter.increment();
+
   // Muon veto
   int muonVetoCount = 0;
   for(size_t i=0; i<nmuons; ++i) {
     MyMuonCollection::Muon muon = fMuons.get(i);
-
     // Skip selected muon
     if(muon.index() == selectedMuon.index()) continue;
 
-    if(!(muon.p4().Pt() > 15)) continue;
+    if(!(muon.p4().Pt() >= 15)) continue;
     if(!(std::abs(muon.p4().Eta()) < 2.5)) continue;
-    if(!(muon.dB() < 0.02)) continue;
+    if(!(std::abs(muon.dB()) < 0.02)) continue;
     double isoVar = muon.trackIso()+muon.caloIso();
     isoVar = isoVar / muon.p4().Pt();
     if(!(isoVar <= 0.15)) continue;
     ++muonVetoCount;
+
+    /*
+    std::cout << "Event " << fEventInfo.event() << ":" << fEventInfo.lumi() << ":" << fEventInfo.run()
+              << " muon pt " << muon.p4().Pt() << " eta " << muon.p4().Eta() << " phi " << muon.p4().Phi()
+              << std::endl;
+    */
   }
   if(muonVetoCount > 0) return true;
   cMuonVeto.increment();
@@ -329,10 +343,10 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
   // Fill
   hSelectedMuonPt_AfterJetSelection->Fill(selectedMuon.p4().Pt(), weight);
 
-  hSelectedMuonChargedHadronEmbIso_AfterJetSelection->Fill(selectedMuon.chargedHadronIso_01to04(), weight);
-  hSelectedMuonPuChargedHadronEmbIso_AfterJetSelection->Fill(selectedMuon.puChargedHadronIso_01to04(), weight);
-  hSelectedMuonNeutralHadronEmbIso_AfterJetSelection->Fill(selectedMuon.neutralHadronIso_01to04(), weight);
-  hSelectedMuonPhotonEmbIso_AfterJetSelection->Fill(selectedMuon.photonIso_01to04(), weight);
+  hSelectedMuonChargedHadronEmbIso_AfterJetSelection->Fill(selectedMuon.chargedHadronIsoEmb(), weight);
+  hSelectedMuonPuChargedHadronEmbIso_AfterJetSelection->Fill(selectedMuon.puChargedHadronIsoEmb(), weight);
+  hSelectedMuonNeutralHadronEmbIso_AfterJetSelection->Fill(selectedMuon.neutralHadronIsoEmb(), weight);
+  hSelectedMuonPhotonEmbIso_AfterJetSelection->Fill(selectedMuon.photonIsoEmb(), weight);
 
   hSelectedMuonChargedHadronStdIso_AfterJetSelection->Fill(selectedMuon.chargedHadronIso(), weight);
   hSelectedMuonPuChargedHadronStdIso_AfterJetSelection->Fill(selectedMuon.puChargedHadronIso(), weight);

@@ -31,10 +31,10 @@ void MuonCollection::setupBranches(TTree *tree) {
   fTrackIso.setupBranch(tree, (fPrefix+"_f_trackIso").c_str());
   fCaloIso.setupBranch(tree, (fPrefix+"_f_caloIso").c_str());
 
-  fChargedHadronIso.setupBranch(tree, (fPrefix+"_f_pfChargedHadrons").c_str());
-  fPuChargedHadronIso.setupBranch(tree, (fPrefix+"_f_pfPUChargedHadrons").c_str());
-  fNeutralHadronIso.setupBranch(tree, (fPrefix+"_f_pfNeutralHadrons").c_str());
-  fPhotonIso.setupBranch(tree, (fPrefix+"_f_pfPhotons").c_str());
+  fChargedHadronIso.setupBranch(tree, (fPrefix+"_f_chargedHadronIso").c_str());
+  fPuChargedHadronIso.setupBranch(tree, (fPrefix+"_f_puChargedHadronIso").c_str());
+  fNeutralHadronIso.setupBranch(tree, (fPrefix+"_f_neutralHadronIso").c_str());
+  fPhotonIso.setupBranch(tree, (fPrefix+"_f_photonIso").c_str());
 }
 
 //////////////////// JetCollection ////////////////////

@@ -34,7 +34,7 @@ weight = {
     "Run2011B": "weightPileup_Run2011B",
     "Run2011AB": "weightPileup_Run2011AB",
     }[era]
-#weight = ""
+weight = ""
 
 mcOnly = True
 mcOnly = False
@@ -51,7 +51,23 @@ def main():
     elif era == "Run2011AB":
         pass
 
-    #datasets.remove(datasets.getMCDatasetNames())
+    #keepOnly = "SingleMu_Mu_160431-163261_2011A_Nov08"
+    #keepOnly = "SingleMu_Mu_163270-163869_2011A_Nov08"
+    #keepOnly = "SingleMu_Mu_165088-166150_2011A_Nov08"
+    #keepOnly = "SingleMu_Mu_166161-166164_2011A_Nov08"
+    #keepOnly = "SingleMu_Mu_166346-166346_2011A_Nov08"
+    #keepOnly = "SingleMu_Mu_166374-167043_2011A_Nov08"
+    #keepOnly = "SingleMu_Mu_167078-167913_2011A_Nov08"
+    #keepOnly = "SingleMu_Mu_170722-172619_2011A_Nov08"
+    #keepOnly = "SingleMu_Mu_172620-173198_2011A_Nov08"
+    #keepOnly = "SingleMu_Mu_173236-173692_2011A_Nov08"
+    #keepOnly = "SingleMu_Mu_173693-177452_2011B_Nov19"
+    #keepOnly = "SingleMu_Mu_177453-178380_2011B_Nov19"
+    #keepOnly = "SingleMu_Mu_178411-179889_2011B_Nov19"
+    #keepOnly = "SingleMu_Mu_179942-180371_2011B_Nov19"
+    #datasets.remove(filter(lambda name: name != keepOnly, datasets.getDataDatasetNames()))
+
+    datasets.remove(datasets.getMCDatasetNames())
     if mcOnly:
         datasets.remove(datasets.getDataDatasetNames())
     else:
@@ -71,18 +87,18 @@ def main():
 
     selections = [
         ("Full", "embedding"),
-        ("FullNoIso", "disabled"),
-        ("FullStandardIso", "standard")
+#        ("FullNoIso", "disabled"),
+#        ("FullStandardIso", "standard")
         ]
     for name, isolation in selections:
         ntupleCache = dataset.NtupleCache(analysis+"/tree", "MuonAnalysisSelector",
                                           selectorArgs=[weight, isolation],
                                           cacheFileName="histogramCache-%s.root" % name,
-                                          process=True
+                                          #process=False
                                           )
 
 
-        doPlots(datasets, name, ntupleCache)
+#        doPlots(datasets, name, ntupleCache)
         printCounters(datasets, name, ntupleCache)
 
 #    doPlotsWTauMu(datasets, "TTJets") FIXME
@@ -151,10 +167,11 @@ def printCounters(datasets, selectionName, ntupleCache):
 
     table = eventCounter.getMainCounterTable()
     mcDatasets = filter(lambda n: n != "Data", table.getColumnNames())
-    col = 1
-    if mcOnly:
-        col = 0
-    table.insertColumn(col, counter.sumColumn("MCSum", [table.getColumn(name=name) for name in mcDatasets]))
+    if len(mcDatasets) != 0:
+        col = 1
+        if mcOnly:
+            col = 0
+        table.insertColumn(col, counter.sumColumn("MCSum", [table.getColumn(name=name) for name in mcDatasets]))
 
     cellFormat = counter.TableFormatText(counter.CellFormatText(valueFormat='%.3f'))
 #    cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.1f'))
