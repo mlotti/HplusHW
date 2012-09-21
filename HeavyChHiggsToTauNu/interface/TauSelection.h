@@ -8,6 +8,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIDBase.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 
 namespace edm {
   class ParameterSet;
@@ -187,6 +188,14 @@ namespace HPlus {
     WrappedTH2 *hFakeJetEtaPhiAfterIsolationAndDeadVeto;
     WrappedTH2 *hFakeJetEtaPhiAfterNProngs;
     WrappedTH2 *hFakeJetEtaPhiAfterNProngsAndDeadVeto;
+
+    WrappedTH2 *hGenuineTauEtaPhiAfterKinematics;
+    WrappedTH2 *hGenuineTauEtaPhiAfterAgainstElectron;
+    WrappedTH2 *hGenuineTauEtaPhiAfterAgainstElectronAndDeadVeto;
+    WrappedTH2 *hGenuineTauEtaPhiAfterIsolation;
+    WrappedTH2 *hGenuineTauEtaPhiAfterIsolationAndDeadVeto;
+    WrappedTH2 *hGenuineTauEtaPhiAfterNProngs;
+    WrappedTH2 *hGenuineTauEtaPhiAfterNProngsAndDeadVeto;
 
     // Selected tau
     edm::PtrVector<pat::Tau> fSelectedTauCandidates;
