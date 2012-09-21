@@ -10,7 +10,8 @@ multicrab = Multicrab("crab_analysis.cfg", cfg)
 # Select the pattuple version to use as an input
 #pattupleVersion = "pattuple_v18"
 #pattupleVersion = "pattuple_v19"
-pattupleVersion = "pattuple_v25c"
+#pattupleVersion = "pattuple_v25c"
+pattupleVersion = "pattuple_v44_4"
 
 
 #era = "EPS"
