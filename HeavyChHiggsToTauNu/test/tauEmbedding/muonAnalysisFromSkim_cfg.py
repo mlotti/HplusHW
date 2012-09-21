@@ -127,6 +127,10 @@ customisations.PF2PATVersion = PF2PATVersion
 # FIXME: hack to apply trigger in MC
 if dataVersion.isMC():
     additionalCounters.extend(customisations.addMuonTriggerFix(process, dataVersion, process.commonSequence, options))
+# FIXME: hack to apply HBHENoiseFilter result in data
+if dataVersion.isData():
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection as dataSelection
+    dataSelection.addHBHENoiseFilterResultProducer(process, process.commonSequence)
 
 muons = "selectedPatMuons"+PF2PATVersion+"All"
 #muons = "selectedPatMuons"+PF2PATVersion
@@ -205,6 +209,9 @@ ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
 )
 for era, name in puWeights:
     setattr(ntuple.doubles, "weightPileup_"+name, cms.InputTag("pileupWeight"+name))
+if dataVersion.isData():
+    ntuple.bools.HBHENoiseFilter = cms.InputTag("HBHENoiseFilterResultProducer", "HBHENoiseFilterResult")
+    ntuple.bools.HBHENoiseFilterMETWG = cms.InputTag("HBHENoiseFilterResultProducerMETWG", "HBHENoiseFilterResult")
 
 
 addAnalysis(process, "muonNtuple", ntuple,
