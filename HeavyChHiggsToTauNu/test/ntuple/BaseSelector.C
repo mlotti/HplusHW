@@ -74,8 +74,7 @@ class SelectorImp: public TSelector {
 public:
 
   //SelectorImp(TTree * /*tree*/ =0);
-  SelectorImp(Long64_t entries);
-  SelectorImp(Long64_t entries, BaseSelector *selector);
+  SelectorImp(Long64_t entries, bool isMC, BaseSelector *selector);
   virtual ~SelectorImp();
   Int_t   Version() const;
   void    Begin(TTree *tree);
@@ -108,17 +107,13 @@ private:
 
 ClassImp(SelectorImp)
 
-SelectorImp::SelectorImp(Long64_t entries):
-  fEntries(entries), fProcessed(0),
-  fChain(0), fSelector(new BaseSelector()),
-  fPrintStep(20000), fPrintLastTime(0), fPrintAdaptCount(0)
-{}
-
-SelectorImp::SelectorImp(Long64_t entries, BaseSelector *selector):
+SelectorImp::SelectorImp(Long64_t entries, bool isMC, BaseSelector *selector):
   fEntries(entries), fProcessed(0),
   fChain(0), fSelector(selector),
   fPrintStep(20000), fPrintLastTime(0), fPrintAdaptCount(0)
-{}
+{
+  selector->setMCStatus(isMC);
+}
 
 SelectorImp::~SelectorImp() {
   delete fSelector;

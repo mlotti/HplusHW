@@ -671,10 +671,10 @@ class TreeDraw:
     ## Prodouce TH1 from a file
     #
     # \param rootFile     TFile object containing the TTree
-    # \param datasetName  Name of the dataset, the output TH1 contains
-    #                     this in the name. Mainly needed for compatible interface with
+    # \param datasetName  Dataset, the output TH1 contains the dataset name
+    #                     in the histogram name. Mainly needed for compatible interface with
     #                     dataset.TreeDrawCompound
-    def draw(self, rootFile, datasetName):
+    def draw(self, rootFile, dataset):
         if self.varexp != "" and not ">>" in self.varexp:
             raise Exception("varexp should include explicitly the histogram binning (%s)"%self.varexp)
 
@@ -735,7 +735,7 @@ class TreeDraw:
                 else:
                     raise Exception("Got null histogram for TTree::Draw() from file %s with selection '%s', and unable to infer the histogram limits or name from the varexp %s" % (rootFile.GetName(), selection, varexp))
 
-        h.SetName(datasetName+"_"+h.GetName())
+        h.SetName(dataset.getName()+"_"+h.GetName())
         h.SetDirectory(0)
         return h
 
@@ -777,9 +777,9 @@ class TreeScan:
     ## Process TTree
     #
     # \param rootFile     TFile object containing the TTree
-    # \param datasetName  Name of the dataset. Only needed for compatible interface with
+    # \param datasetName  Dataset object. Only needed for compatible interface with
     #                     dataset.TreeDrawCompound
-    def draw(self, rootFile, datasetName):
+    def draw(self, rootFile, dataset):
         tree = rootFile.Get(self.tree)
         if tree == None:
             raise Exception("No TTree '%s' in file %s" % (self.tree, rootFile.GetName()))
@@ -821,19 +821,20 @@ class TreeDrawCompound:
     ## Produce TH1
     #
     # \param rootFile     TFile object containing the TTree
-    # \param datasetName  Name of the dataset.
+    # \param datasetName  Dataset object
     #
     # The dataset.TreeDraw for which the call is forwarded is searched from
     # the datasetMap with the datasetName. If found, that object is
     # used. If not found, the default TreeDraw is used.
-    def draw(self, rootFile, datasetName):
+    def draw(self, rootFile, dataset):
         h = None
+        datasetName = dataset.getName()
         if datasetName in self.datasetMap:
             #print "Dataset %s in datasetMap" % datasetName, self.datasetMap[datasetName].selection
-            h = self.datasetMap[datasetName].draw(rootFile, datasetName)
+            h = self.datasetMap[datasetName].draw(rootFile, dataset)
         else:
             #print "Dataset %s with default" % datasetName, self.default.selection
-            h = self.default.draw(rootFile, datasetName)
+            h = self.default.draw(rootFile, dataset)
         return h
 
     ## Clone
@@ -1481,7 +1482,7 @@ class Dataset:
     def getDatasetRootHisto(self, name):
         h = None
         if hasattr(name, "draw"):
-            h = name.draw(self.file, self.getName())
+            h = name.draw(self.file, self)
         else:
             pname = name
             h = self.file.Get(pname)
@@ -2087,12 +2088,12 @@ class NtupleCacheDrawer:
     ## "Draw"
     #
     # \param rootFile     ROOT.TFile containing the TTree
-    # \param datasetName  Name of the dataset of the rootFile
+    # \param datasetName  Dataset object
     #
     # This method exploits the infrastucture we have for TreeDraw.
-    def draw(self, rootFile, datasetName):
-        self.ntupleCache.process(rootFile, datasetName)
-        return self.ntupleCache.getRootHisto(datasetName, self.histoName)
+    def draw(self, rootFile, dataset):
+        self.ntupleCache.process(rootFile, dataset)
+        return self.ntupleCache.getRootHisto(dataset, self.histoName)
 
 ## Ntuple processing with C macro and caching the result histograms
 #
@@ -2147,12 +2148,13 @@ class NtupleCache:
     # \param datasetName  Name of the dataset
     #
     # Processes the self.treeName TTree from the rootFile.
-    def process(self, rootFile, datasetName):
+    def process(self, rootFile, dataset):
         #if not self.forceProcess and not self._isMacroNewerThanCacheFile():
         #    return
         if not self.doProcess:
             return
 
+        datasetName = dataset.getName()
         if datasetName in self.processedDatasets:
             return
         self.processedDatasets[datasetName] = 1
@@ -2171,7 +2173,7 @@ class NtupleCache:
             raise Exception("TTree '%s' not found from file %s" % (self.treeName, rootFile.GetName()))
 
         N = tree.GetEntries()
-        selector = ROOT.SelectorImp(N, getattr(ROOT, self.selectorName)(*self.selectorArgs))
+        selector = ROOT.SelectorImp(N, dataset.isMC(), getattr(ROOT, self.selectorName)(*self.selectorArgs))
         selector.setOutput(directory)
 
         print "Processing dataset", datasetName
@@ -2180,15 +2182,15 @@ class NtupleCache:
 
     ## Get a histogram from the cache file
     #
-    # \param datasetName   Name of the dataset for which histogram is to be obtained
+    # \param Datase        Dataset object for which histogram is to be obtained
     # \apram histoName     Histogram name
-    def getRootHisto(self, datasetName, histoName):
+    def getRootHisto(self, dataset, histoName):
         if self.cacheFile == None:
             if not os.path.exists(self.cacheFileName):
                 raise Exception("Assert: for some reason the cache file %s does not exist yet..." % self.cacheFileName)
             self.cacheFile = ROOT.TFile.Open(self.cacheFileName)
 
-        path = "%s/%s" % (datasetName, histoName)
+        path = "%s/%s" % (dataset.getName(), histoName)
         h = self.cacheFile.Get(path)
         if not h:
             raise Exception("Histogram '%s' not found from %s" % (path, self.cacheFile.GetName()))

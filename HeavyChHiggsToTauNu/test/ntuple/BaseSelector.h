@@ -78,6 +78,8 @@ public:
   BaseSelector();
   virtual ~BaseSelector();
 
+  void setMCStatus(bool isMC_) { fIsMC = isMC_; }
+
   void setOutputExt(TDirectory *dir) {
     fEventCounter.setOutput(dir);
     setOutput(dir);
@@ -92,7 +94,13 @@ public:
   virtual bool process(Long64_t entry);
 
 protected:
+  bool isMC() const { return fIsMC; }
+  bool isData() const { return !isMC(); }
+
   EventCounter fEventCounter;
+
+private:
+  bool fIsMC;
 };
 
 #endif
