@@ -74,12 +74,14 @@ namespace HPlus {
   bool DeadECALCells::ObjectHitsDeadECALCell(const edm::Ptr<reco::Candidate>& candidate, double deltaR) const {
     double myEta = candidate->eta();
     double myPhi = candidate->phi();
+    double myHalfCellSize = 3.14159265 / 180.0;
     size_t myTableSize = fECALDeadCellEtaTable.size();
     for (size_t i = 0; i < myTableSize; ++i) {
       double myDeltaEta = myEta - fECALDeadCellEtaTable[i];
       double myDeltaPhi = myPhi - fECALDeadCellPhiTable[i];
-      double myDeltaR = std::sqrt(myDeltaEta*myDeltaEta + myDeltaPhi*myDeltaPhi);
-      if (myDeltaR < deltaR) return false;
+      if (myDeltaEta <= myHalfCellSize || myDeltaPhi <= myHalfCellSize) return false;
+      //double myDeltaR = std::sqrt(myDeltaEta*myDeltaEta + myDeltaPhi*myDeltaPhi);
+      //if (myDeltaR < deltaR) return false;
     }
     return true;
   }

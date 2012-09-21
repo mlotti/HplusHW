@@ -132,7 +132,7 @@ param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
 # Switch to PF2PAT objects
 #param.changeCollectionsToPF2PAT()
-param.changeCollectionsToPF2PAT(postfix=PF2PATVersion)
+param.changeCollectionsToPF2PAT(dataVersion, postfix=PF2PATVersion, useGSFElectrons=True)
 
 # Trigger with scale factors (at the moment hard coded)
 if applyTriggerScaleFactor and dataVersion.isMC():
@@ -209,13 +209,6 @@ process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJe
 process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
 param.bTagging.UseBTagDB  = cms.untracked.bool(False)
 
-# Type 1 MET
-
-# Add type 1 MET
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
-sequence = MetCorrection.addCorrectedMet(process, process.QCDMeasurement, postfix=PF2PATVersion)
-process.commonSequence *= sequence
-
 # Set beta variable for jets
 process.QCDMeasurement.jetSelection.betaCut = betaCutForJets
 
@@ -246,6 +239,7 @@ print "TauSelection rtauCut:", process.QCDMeasurement.tauSelection.rtauCut.value
 print "TauSelection apply veto against dead ECAL cells:", process.QCDMeasurement.tauSelection.applyVetoForDeadECALCells.value()
 print "VetoTauSelection src:", process.QCDMeasurement.vetoTauSelection.tauSelection.src.value()
 print "Jets:", process.QCDMeasurement.jetSelection
+
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
 process.QCDMeasurement.eventCounter.printMainCounter = cms.untracked.bool(True)
@@ -287,9 +281,9 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
 # paths. The tau, jet and MET collections to adjust are taken from the
 # configuration of the golden analysis. The fragment below creates
 # additional directories with suffix JES...
-from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVariationAnalysis
-def addJESVariation(name, doJetUnclusteredVariation):
-    print "fixme"
+#from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVariationAnalysis
+#def addJESVariation(name, doJetUnclusteredVariation):
+    #print "fixme"
     # FIXME: copy new code from signal analysis
 
 # Print tau discriminators from one tau from one event. Note that if
@@ -323,23 +317,24 @@ def addPUWeightVariation(name):
                 signalAnalysisCounters=True)
 
 if doSystematics:
-    doJetUnclusteredVariation = True
-    modules = getQCDMeasurementModuleNames()
+    print "### doSystematics not necessary for QCD ! ###"
+    #doJetUnclusteredVariation = True
+    #modules = getQCDMeasurementModuleNames()
 
-    # JES variation is relevant for MC only
-    if dataVersion.isMC():
-        for name in modules:
-            addJESVariation(name, doJetUnclusteredVariation)
-    else:
-        print "JES variation disabled for data (not meaningful for data)"
-    print "Added JES variation for %d modules"%len(modules)
-    # PU weight variation is relevant for MC only
-    if dataVersion.isMC():
-        for name in modules:
-            addPUWeightVariation(name)
-    else:
-        print "PU weight variation disabled for data (not meaningful for data)"
-    print "Added PU weight variation for %d modules"%len(modules)
+    ## JES variation is relevant for MC only
+    #if dataVersion.isMC():
+        #for name in modules:
+            #addJESVariation(name, doJetUnclusteredVariation)
+    #else:
+        #print "JES variation disabled for data (not meaningful for data)"
+    #print "Added JES variation for %d modules"%len(modules)
+    ## PU weight variation is relevant for MC only
+    #if dataVersion.isMC():
+        #for name in modules:
+            #addPUWeightVariation(name)
+    #else:
+        #print "PU weight variation disabled for data (not meaningful for data)"
+    #print "Added PU weight variation for %d modules"%len(modules)
 
 ################################################################################
 #for QCD control plots

@@ -1167,12 +1167,19 @@ class QCDfactorisedColumn(DatacardColumn):
         self._validationMETShapeDetails = QCDfactorisedInfo["validationMETShapeDetails"]
         self._validationMtShapeSource = QCDfactorisedInfo["validationMtShapeSource"]
         self._validationMtShapeDetails = QCDfactorisedInfo["validationMtShapeDetails"]
+        self._METCorrectionDetails = QCDfactorisedInfo["METShapeCorrections"]
+        self._MTCorrectionDetails = QCDfactorisedInfo["MTShapeCorrections"]
         # Other initialisation
         self._infoHistograms = []
         self._debugMode = debugMode
         self._messages = []
         self._yieldTable = ""
         self._compactYieldTable = ""
+        self._METCorrectionFactorsForTauPtBins = []
+        self._METCorrectionFactorUncertaintyForTauPtBins = []
+        self._MTCorrectionFactorsForTauPtBins = []
+        self._MTCorrectionFactorUncertaintyForTauPtBins = []
+
 
     ## Returns list of messages
     def getMessages(self):
@@ -1190,6 +1197,8 @@ class QCDfactorisedColumn(DatacardColumn):
         if dsetMgr == None:
             raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" You called data mining for QCD factorised, but you disabled it config. Such undertaking is currently not supported.")
         print "... Calculating NQCD value ..."
+        # Calculate correction for MET shape
+        self._calculateMETCorrectionFactors(dsetMgr, luminosity)
         # Make event count objects
         myBigBoxEventCount = self._getQCDEventCount(dsetMgr=dsetMgr, histoName=self._afterBigboxSource, luminosity=luminosity)
         myMETLegEventCount = self._getQCDEventCount(dsetMgr=dsetMgr, histoName=self._afterMETLegSource, luminosity=luminosity)
@@ -1226,7 +1235,7 @@ class QCDfactorisedColumn(DatacardColumn):
         myRateHistograms=[]
         hRateShape = self._createShapeHistogram(config, dsetMgr, myQCDCalculator, myBigBoxEventCount, luminosity,
                                                 config.ShapeHistogramsDimensions, self._label, self._dirPrefix, self._basicMtHisto,
-                                                saveDetailedInfo = True) ##### FIXME
+                                                saveDetailedInfo=True, makeCorrectionToShape=True) 
         # Normalise rate shape to NQCD
         if hRateShape.Integral() > 0:
             hRateShape.Scale(myQCDCalculator.getNQCD() / hRateShape.Integral())
@@ -1316,7 +1325,50 @@ class QCDfactorisedColumn(DatacardColumn):
                              luminosity=luminosity,
                              assumedMCEWKSystUncertainty=self._assumedMCEWKSystUncertainty)
 
-    def _createShapeHistogram(self, config, dsetMgr, QCDCalculator, QCDCount, luminosity, histoSpecs, title, histoDir, histoName, saveDetailedInfo = False):
+    def _calculateMETCorrectionFactors(self, dsetMgr, luminosity):
+        myBinEdges = self._METCorrectionDetails[self._METCorrectionDetails["name"]+"_CorrectionBinLeftEdges"]
+        myMETHistoSpecs = { "bins": len(myBinEdges),
+                            "rangeMin": 0.0,
+                            "rangeMax": 400.0,
+                            "variableBinSizeLowEdges": myBinEdges,
+                            "xtitle": "",
+                            "ytitle": "" }
+        myShapeModifier = ShapeHistoModifier(myMETHistoSpecs)
+        h = myShapeModifier.createEmptyShapeHistogram("dummy")
+        myBins = self._METCorrectionDetails["bins"]
+        # Loop over bins
+        print "***"
+        for i in range(0,myBins[0]):
+            for j in range(0,myBins[1]):
+                for k in range(0,myBins[2]):
+                    # Get data and MC EWK histogram
+                    myFullHistoName = self._dirPrefix+"/%s_%d_%d_%d"%(self._METCorrectionDetails["source"],i,j,k)
+                    hMtData = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumn, myFullHistoName, luminosity)
+                    hMtMCEWK = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumnForQCDMCEWK, myFullHistoName, luminosity)
+                    # Add to shape
+                    h.Reset()
+                    myShapeModifier.addShape(source=hMtData,dest=h)
+                    myShapeModifier.subtractShape(source=hMtMCEWK,dest=h,purityCheck=False)
+                    myShapeModifier.finaliseShape(dest=h)
+                    # Calculate nominal integral and corrected integral
+                    myNominalCount = h.Integral()
+                    myCorrections = self._METCorrectionDetails[self._METCorrectionDetails["name"]+"_Correction_bin_%d"%(i)]
+                    myCorrectionUncertainty = self._METCorrectionDetails[self._METCorrectionDetails["name"]+"_CorrectionUncertainty_bin_%d"%(i)]
+                    myCorrectedCount = 0.0
+                    myCorrectedUncertainty = 0.0
+                    for l in range(1,h.GetNbinsX()+1):
+                        print "%f, %f"%( h.GetBinContent(l), myCorrections[l-1])
+                        myCorrectedCount += h.GetBinContent(l)*myCorrections[l-1]
+                        myCorrectedUncertainty += pow(h.GetBinContent(l)*myCorrectionUncertainty[l-1],2)
+                    myCorrectedUncertainty = sqrt(myCorrectedUncertainty)
+                    print "*** MET correction %d: nominal = %f, corrected = %f +- %f"%(i,myNominalCount,myCorrectedCount,myCorrectedUncertainty)
+                    self._METCorrectionFactorsForTauPtBins.append(myCorrectedCount)
+                    self._METCorrectionFactorUncertaintyForTauPtBins.append(myCorrectedUncertainty)
+                    hMtData.IsA().Destructor(hMtData)
+                    hMtMCEWK.IsA().Destructor(hMtMCEWK)
+        h.IsA().Destructor(h)
+
+    def _createShapeHistogram(self, config, dsetMgr, QCDCalculator, QCDCount, luminosity, histoSpecs, title, histoDir, histoName, saveDetailedInfo=False, makeCorrectionToShape=False):
         # Create empty shape histogram
         myShapeModifier = ShapeHistoModifier(histoSpecs)
         h = myShapeModifier.createEmptyShapeHistogram(title)
@@ -1416,17 +1468,47 @@ class QCDfactorisedColumn(DatacardColumn):
                         hMtBin.Reset()
                     if self._debugMode:
                         print "  QCDfactorised / %s shape: bin %d_%d_%d, eff=%f, eff*QCD=%f"%(title,i,j,k,myEfficiency.value(),hMtBin.Integral())
+                    # Apply correction to mT
+####
+                    if makeCorrectionToShape and False:
+                        # Get data and MC EWK histogram
+                        myFullHistoName = self._dirPrefix+"/%s_%d_%d_%d"%(self._MTCorrectionDetails["source"],i,j,k)
+                        hCorrData = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumn, myFullHistoName, luminosity)
+                        hCorrMCEWK = self._extractShapeHistogram(dsetMgr, self._datasetMgrColumnForQCDMCEWK, myFullHistoName, luminosity)
+                        # Add to shape
+                        hCorr = myShapeModifier.createEmptyShapeHistogram(title)
+                        myShapeModifier.addShape(source=hCorrData,dest=hCorr)
+                        myShapeModifier.subtractShape(source=hCorrMCEWK,dest=hCorr,purityCheck=False)
+                        myShapeModifier.finaliseShape(dest=Corr)
+                        # Calculate nominal integral and corrected integral
+                        myNominalCount = h.Integral()
+                        myCorrections = self._MTCorrectionDetails[self._MTCorrectionDetails["name"]+"_Correction_bin_%d"%(i)]
+                        myCorrectionUncertainty = self._MTCorrectionDetails[self._MTCorrectionDetails["name"]+"_CorrectionUncertainty_bin_%d"%(i)]
+                        myCorrectedCount = 0.0
+                        myCorrectedUncertainty = 0.0
+                        for l in range(1,h.GetNbinsX()+1):
+                            print "%f, %f"%( hCorr.GetBinContent(l), myCorrections[l-1])
+                            myCorrectedCount += hCorr.GetBinContent(l)*myCorrections[l-1]
+                            myCorrectedUncertainty += pow(hCorr.GetBinContent(l)*myCorrectionUncertainty[l-1],2)
+                        myCorrectedUncertainty = sqrt(myCorrectedUncertainty)
+                        print "*** MT correction %d: nominal = %f, corrected = %f +- %f"%(i,myNominalCount,myCorrectedCount,myCorrectedUncertainty)
+                        self._MTCorrectionFactorsForTauPtBins.append(myCorrectedCount)
+                        self._MTCorrectionFactorUncertaintyForTauPtBins.append(myCorrectedUncertainty)
+                        hCorrData.IsA().Destructor(hCorr)
+                        hCorrData.IsA().Destructor(hCorrData)
+                        hCorrMCEWK.IsA().Destructor(hCorrMCEWK)
+####
                     # Add to total shape histogram
                     myShapeModifier.addShape(source=hMtBin,dest=h) # important to do before handling negative bins
                     myShapeModifier.addShape(source=hMtBin,dest=hTotContractedX)
                     # Remove negative bins, but retain original normalisation
-                    for a in range(1,hMtBin.GetNbinsX()+1):
-                        if hMtBin.GetBinContent(a) < 0.0:
-                            #print WarningStyle()+"Warning: QCD factorised"+NormalStyle()+" in mT shape bin %d,%d,%d, histo bin %d is negative (%f / tot:%f), it is set to zero but total normalisation is maintained"%(i,j,k,a,hMtBin.GetBinContent(a),hMtBin.Integral())
-                            myIntegral = hMtBin.Integral()
-                            hMtBin.SetBinContent(a,0.0)
-                            if (hMtBin.Integral() > 0.0):
-                                hMtBin.Scale(myIntegral / hMtBin.Integral())
+                    #for a in range(1,hMtBin.GetNbinsX()+1):
+                        #if hMtBin.GetBinContent(a) < 0.0:
+                            ##print WarningStyle()+"Warning: QCD factorised"+NormalStyle()+" in mT shape bin %d,%d,%d, histo bin %d is negative (%f / tot:%f), it is set to zero but total normalisation is maintained"%(i,j,k,a,hMtBin.GetBinContent(a),hMtBin.Integral())
+                            #myIntegral = hMtBin.Integral()
+                            #hMtBin.SetBinContent(a,0.0)
+                            #if (hMtBin.Integral() > 0.0):
+                                #hMtBin.Scale(myIntegral / hMtBin.Integral())
                     # Add to total info histogram
                     for l in range (1, hMtBin.GetNbinsX()+1):
                         hTot.SetBinContent(l+(j-1)*h.GetNbinsX(), k+(i-1)*nbinsZ, hMtBin.GetBinContent(l))

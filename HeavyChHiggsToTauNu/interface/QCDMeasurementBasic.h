@@ -217,11 +217,17 @@ namespace HPlus {
     WrappedTH3* hLeg2AfterTauIDMET20;
     WrappedTH3* hLeg2AfterTauIDMET30;
 
+    WrappedTH3* hABCDAfterBasicSelection;
+    WrappedTH3* hABCDAfterTauLeg;
+    WrappedTH3* hABCDAfterMETLeg;
+
     // Mt shapesstd::vector<WrappedTH1*> hFeatureMinEtaOfSelectedJetToGap;
     std::vector<WrappedTH1*> hMtShapesAfterStandardSelection;
     std::vector<WrappedTH1*> hMtShapesAfterStandardSelectionMET20;
     std::vector<WrappedTH1*> hMtShapesAfterStandardSelectionMET30;
     std::vector<WrappedTH1*> hMtShapesAfterFullMETLeg;
+    std::vector<WrappedTH1*> hMtShapesAfterMet;
+    std::vector<WrappedTH1*> hMtShapesAfterMetAndBTagging;
     std::vector<WrappedTH1*> hMtShapesAfterMetLegNoBtagging;
     std::vector<WrappedTH1*> hMtShapesAfterTauIDNoRtau;
     std::vector<WrappedTH1*> hMtShapesAfterTauID;
@@ -232,6 +238,11 @@ namespace HPlus {
     //std::vector<WrappedTH1*> hFullMassShapesAfterJetSelection;
     std::vector<WrappedTH1*> hFullMassShapesAfterFullMETLeg;
     //std::vector<WrappedTH1*> hFullMassShapesAfterMetLegNoBtagging;
+
+    std::vector<WrappedTH1*> hABCDMtShapesAfterBasicSelection;
+    std::vector<WrappedTH1*> hABCDMtShapesAfterTauLeg;
+    std::vector<WrappedTH1*> hABCDMtShapesAfterMETLeg;
+    std::vector<WrappedTH1*> hABCDMtShapesAfterMETLegNoBtag;
 
     // Control plots
     std::vector<WrappedTH1*> hCtrlNjets; // Njets in bins of tau pT
@@ -254,6 +265,12 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlDeltaPhiTauMET; // DeltaPhi(tau,MET) in bins of tau pT
     std::vector<WrappedTH1*> hCtrlMaxDeltaPhiJetMET; // DeltaPhi(jet/tau,MET) in bins of tau pT
     std::vector<WrappedTH1*> hCtrlTopMass; // top mass in bins of tau pT
+
+    // Control plots for ABCD
+    std::vector<WrappedTH1*> hABCDCtrlNJets;
+    std::vector<WrappedTH1*> hABCDCtrlMET;
+    std::vector<WrappedTH1*> hABCDCtrlNbjets;
+    std::vector<WrappedTH1*> hABCDCtrlDeltaPhiTauMET;
 
     // Feature plots
     std::vector<WrappedTH1*> hFeatureMinEtaOfSelectedJetToGapAfterBasicSelection;

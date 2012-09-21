@@ -40,8 +40,14 @@ datasets = {
                 "datasetpath": "/Tau/local-Run2011A_08Nov2011_v1_AOD_160431_pattuple_v25c-71def38b05f792f2273b1e28fc6e4f12/USER",
                 "number_of_jobs": 20, # 7650822 evt, 40-80 MB / file
                 "lumiMask": "Nov08ReReco",
-           },
-        }
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_08Nov2011_v1_AOD_160431_pattuple_v44_4-22fa40c1fbac4684dd3ccb0e713bd4b5/USER",
+                "number_of_jobs": 20, # 7694502 evt, 40-80 MB / file
+                "lumiMask": "Nov08ReReco",
+            },
+        },
     },
     # break of range because of trigger eff. boundary
     "Tau_170722-173198_2011A_Nov08": {
@@ -64,6 +70,12 @@ datasets = {
             "pattuple_v25c": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_08Nov2011_v1_AOD_170722_pattuple_v25c-1997d8885939481988a1e591798fb84f/USER",
+                "number_of_jobs": 3, # 914344 evt, 30 MB / file
+                "lumiMask": "Nov08ReReco",
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_08Nov2011_v1_AOD_170722_pattuple_v44_4-9ec211af2ee07b45d4ecbc81a3a92e63/USER",
                 "number_of_jobs": 3, # 914344 evt, 30 MB / file
                 "lumiMask": "Nov08ReReco",
             },
@@ -90,6 +102,12 @@ datasets = {
             "pattuple_v25c": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_08Nov2011_v1_AOD_173236_pattuple_v25c-847c5b91b10d6ca1cca97c3366bcb9ca/USER",
+                "number_of_jobs": 2, # 470476 evt
+                "lumiMask": "Nov08ReReco",
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_08Nov2011_v1_AOD_173236_pattuple_v44_4-525b16261b70f8b500033d7d0afaba83/USER",
                 "number_of_jobs": 2, # 470476 evt
                 "lumiMask": "Nov08ReReco",
             },
@@ -122,6 +140,12 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011B_19Nov2011_v1_AOD_175835_pattuple_v25c-ab60dfb18d7993779cd7c862a842fc97/USER",
                 "number_of_jobs": 30, # 6284525 evt, 30 MB / file
+                "lumiMask": "Nov08ReReco",
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011B_19Nov2011_v1_AOD_175860_pattuple_v44_4-af466d5c64c42a78ca457d4da73a4b82/USER",
+                "number_of_jobs": 30, # 6298060 evt, 30 MB / file
                 "lumiMask": "Nov08ReReco",
             },
         }

@@ -43,7 +43,9 @@ namespace HPlus {
 
       const edm::Ptr<reco::MET> getCaloMET() const { return fMETSelection->fCaloMET; }
       const edm::Ptr<reco::MET> getTcMET() const { return fMETSelection->fTcMET; }
-    
+
+      const double getCutValue() const { return fMETSelection->fMetCut; }
+
     private:
       const METSelection *fMETSelection;
       const bool fPassedEvent;
