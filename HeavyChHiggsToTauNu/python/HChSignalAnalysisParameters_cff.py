@@ -457,10 +457,10 @@ def setDataTriggerEfficiency(dataVersion, era):
         triggerEfficiencyScaleFactor.dataSelect = ["runs_170722_173198", "runs_173236_173692"]
     elif era == "Run2011B":
         triggerEfficiencyScaleFactor.dataSelect = ["runs_175832_180252"]
-    elif era == "Run2011A+B":
+    elif era == "Run2011AB":
         triggerEfficiencyScaleFactor.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692", "runs_175832_180252"]
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011A+B'")
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011AB'")
 
 
 # Weighting by instantaneous luminosity, and the number of true
@@ -487,10 +487,10 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
 
     if era == "Run2011A" or era == "Run2011B":
         pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData"+era.replace("Run","")+suffix+".root"
-    elif era == "Run2011A+B":
+    elif era == "Run2011AB":
         pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011"+suffix+".root"
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'Run2011A', 'Run2011B', 'Run2011A+B'" % era)
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'Run2011A', 'Run2011B', 'Run2011AB'" % era)
     pset.dataPUdistributionLabel = "pileup"
     # Make procuder for weights and add it to common sequence
     PUWeightProducer = cms.EDProducer("HPlusVertexWeightProducer",

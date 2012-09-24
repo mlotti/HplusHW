@@ -160,7 +160,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
     alias = cms.string("pileupWeight"),
 )
-puweight = "Run2011A+B"
+puweight = "Run2011AB"
 if len(options.puWeightEra) > 0:
         puweight = options.puWeightEra
 param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, era=puweight)

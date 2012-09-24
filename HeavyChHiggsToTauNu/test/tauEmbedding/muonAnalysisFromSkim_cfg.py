@@ -84,7 +84,7 @@ param.changeCollectionsToPF2PAT(PF2PATVersion)
 puWeights = [
     ("Run2011A", "Run2011A"),
     ("Run2011B", "Run2011B"),
-    ("Run2011A+B", "Run2011AB")
+    ("Run2011AB", "Run2011AB")
     ]
 for era, name in puWeights:
     modname = "pileupWeight"+name

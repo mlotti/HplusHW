@@ -161,7 +161,7 @@ _weightedAllEvents = {
         "QCD_Pt170to300_TuneZ2_Fall11": WeightedAllEvents(unweighted=6220160, weighted=6194092.620957, up=6222731.577817, down=6167568.648234),
         "QCD_Pt300to470_TuneZ2_Fall11": WeightedAllEvents(unweighted=6432669, weighted=6360307.883080, up=6380161.481108, down=6344053.485342),
     },
-    "Run2011A+B": {
+    "Run2011AB": {
         "TTToHplusBWB_M80_Fall11": WeightedAllEvents(unweighted=218200, weighted=219013.870316, up=219377.625194, down=218493.470983),
         "TTToHplusBWB_M90_Fall11": WeightedAllEvents(unweighted=218050, weighted=219357.887652, up=219509.256396, down=219030.077434),
         "TTToHplusBWB_M100_Fall11": WeightedAllEvents(unweighted=218200, weighted=219013.870316, up=219377.625194, down=218493.470983),

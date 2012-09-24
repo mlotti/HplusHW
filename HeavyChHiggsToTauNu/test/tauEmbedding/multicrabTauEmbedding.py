@@ -18,7 +18,7 @@ defaultStep = "signalAnalysis"
 # Default era of data to use (meaningful only for signalAnalysis and muonAnalysis)
 #defaultEra = "EPS"
 #defaultEra = "Run2011A-EPS"
-defaultEra = "Run2011A+B"
+defaultEra = "Run2011AB"
 
 # Default embedding version(s) to use
 defaultVersions = [
@@ -261,7 +261,7 @@ def createTasks(opts, step, version=None):
                 datasets.extend(datasetsData2011A)
             if opts.era == "Run2011B":
                 datasets.extend(datasetsData2011B)
-            if opts.era == "Run2011A+B":
+            if opts.era == "Run2011AB":
                 datasets.extend(datasetsData2011)
             else:
                 raise Exception("Unsupported era %s" % opts.era)

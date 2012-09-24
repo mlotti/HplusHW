@@ -17,7 +17,7 @@ pattupleVersion = "pattuple_v44_4"
 #era = "EPS"
 #era = "Run2011A"
 #era = "Run2011B"
-era = "Run2011A+B"
+era = "Run2011AB"
 
 # Change this to true if you want to run the PAT on the fly (for
 # datasets where no pattuples are produced, or for testing something
@@ -153,7 +153,7 @@ elif era == "Run2011B":
         datasets += datasetsRun2011B_v19
     elif "v25b" in pattupleVersion:
         datasets += datasetsRun2011B_v25b
-elif era == "Run2011A+B":
+elif era == "Run2011AB":
     if "v19" in pattupleVersion:
         datasets += datasetsRun2011A_v19 + datasetsRun2011B_v19
     elif "v25b" in pattupleVersion:
@@ -162,7 +162,7 @@ elif era == "Run2011A+B":
         datasets += datasetsRun2011A_v25c + datasetsRun2011B_v25c
 
 else:
-    raise Exception("Wrong value for 'era' %s, supported are 'Run2011A', 'Run2011B', 'Run2011A+B'" % era)
+    raise Exception("Wrong value for 'era' %s, supported are 'Run2011A', 'Run2011B', 'Run2011AB'" % era)
 datasets += datasetsMC
 
 # Add the datasest to the multicrab system
