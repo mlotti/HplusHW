@@ -42,6 +42,8 @@ aodDatasets = [
     "SingleMu_178420-178866_2011B_Nov19", # HLT_Mu40_eta2p1_v4
     "SingleMu_178871-179889_2011B_Nov19", # HLT_Mu40_eta2p1_v4
     "SingleMu_179959-180252_2011B_Nov19", # HLT_Mu40_eta2p1_v5
+
+    "DYJetsToLL_M50_TuneZ2_Fall11",
 ]
 
 # List of triggers we use to trigger the events for the Tag&Probe study

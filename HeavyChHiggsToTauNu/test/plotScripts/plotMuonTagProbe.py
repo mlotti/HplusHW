@@ -49,6 +49,7 @@ def main():
         print " lumi: %f %f" % (ownLumi, targetLumi)
         err = max(eff_plus, eff_minus)
 
+	targetLumi = ownLumi
         totalLumi += targetLumi
         totalEff += targetLumi * eff_value
         totalErr += targetLumi * err*err
