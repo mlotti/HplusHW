@@ -195,6 +195,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysis
 ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
     patTriggerEvent = cms.InputTag("patTriggerEvent"),
     genParticleSrc = cms.InputTag("genParticles"),
+    vertexSrc = cms.InputTag("goodPrimaryVertices"),
     muonSrc = cms.InputTag("preselectedMuons"),
     muonFunctions = analysisConfig.muonFunctions.clone(),
 
