@@ -369,6 +369,7 @@ namespace HPlus {
     // Store weight of event
     // TauID
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
+    fTauSelection.analyseFakeTauComposition(fFakeTauIdentifier,iEvent);
     if(!tauData.passedEvent()) return false; // Require at least one tau
     // Obtain MC matching - for EWK without genuine taus
     FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));

@@ -162,6 +162,13 @@ namespace HPlus {
     setAxisLabelsForTH3(hLeg2AfterTauIDNoRtauMET20);
     hLeg2AfterTauIDNoRtauMET30 = fHistoWrapper.makeTH<TH3F>(HistoWrapper::kVital, myDir, "Leg2AfterTauIDNoRtauMET30", "Leg2AfterTauIDNoRtauMET30", myTauPtBins, 0., myTauPtBins, myTauEtaBins, 0., myTauEtaBins, myNVerticesBins, 0., myNVerticesBins);
     setAxisLabelsForTH3(hLeg2AfterTauIDNoRtauMET30);
+    // ABCD factorisation
+    hABCDAfterBasicSelection = fHistoWrapper.makeTH<TH3F>(HistoWrapper::kVital, myDir, "ABCDAfterBasicSelection", "ABCDAfterBasicSelection", myTauPtBins, 0., myTauPtBins, myTauEtaBins, 0., myTauEtaBins, myNVerticesBins, 0., myNVerticesBins);
+    setAxisLabelsForTH3(hABCDAfterBasicSelection);
+    hABCDAfterTauLeg = fHistoWrapper.makeTH<TH3F>(HistoWrapper::kVital, myDir, "ABCDAfterTauLeg", "ABCDAfterTauLeg", myTauPtBins, 0., myTauPtBins, myTauEtaBins, 0., myTauEtaBins, myNVerticesBins, 0., myNVerticesBins);
+    setAxisLabelsForTH3(hABCDAfterTauLeg);
+    hABCDAfterMETLeg = fHistoWrapper.makeTH<TH3F>(HistoWrapper::kVital, myDir, "ABCDAfterMETLeg", "ABCDAfterMETLeg", myTauPtBins, 0., myTauPtBins, myTauEtaBins, 0., myTauEtaBins, myNVerticesBins, 0., myNVerticesBins);
+    setAxisLabelsForTH3(hABCDAfterMETLeg);
 
     // Mt and full mass shape histograms
     //createShapeHistograms(fs, hMtShapesAfterJetSelection, "MtShapesAfterJetSelection", fTransverseMassRange[0], fTransverseMassRange[1], fTransverseMassRange[2]);
@@ -181,6 +188,11 @@ namespace HPlus {
     //createShapeHistograms(fs, hFullMassShapesAfterJetSelection, "FullMassShapesAfterJetSelection", fFullMassRange[0], fFullMassRange[1], fFullMassRange[2]);
     createShapeHistograms(fs, hFullMassShapesAfterFullMETLeg, "FullMassShapesAfterFullMETLeg", fFullMassRange[0], fFullMassRange[1], fFullMassRange[2]);
     //createShapeHistograms(fs, hFullMassShapesAfterMetLegNoBtagging, "FullMassShapesAfterMetLegNoBtagging", fFullMassRange[0], fFullMassRange[1], fFullMassRange[2]);
+
+    createShapeHistograms(fs, hABCDMtShapesAfterBasicSelection, "ABCDMtShapesAfterBasicSelection", fTransverseMassRange[0], fTransverseMassRange[1], fTransverseMassRange[2]);
+    createShapeHistograms(fs, hABCDMtShapesAfterTauLeg, "ABCDMtShapesAfterTauLeg", fTransverseMassRange[0], fTransverseMassRange[1], fTransverseMassRange[2]);
+    createShapeHistograms(fs, hABCDMtShapesAfterMETLeg, "ABCDMtShapesAfterMETLeg", fTransverseMassRange[0], fTransverseMassRange[1], fTransverseMassRange[2]);
+    createShapeHistograms(fs, hABCDMtShapesAfterMETLegNoBtag, "ABCDMtShapesAfterMETLegNoBtag", fTransverseMassRange[0], fTransverseMassRange[1], fTransverseMassRange[2]);
 
     // Control plots
     createShapeHistograms(fs, hCtrlNjets, "CtrlLeg1AfterNjets", 10, 0., 10.);
@@ -203,6 +215,11 @@ namespace HPlus {
     createShapeHistograms(fs, hCtrlDeltaPhiTauMET, "CtrlLeg1AfterDeltaPhiTauMET", 36, 0., 180.);
     createShapeHistograms(fs, hCtrlMaxDeltaPhiJetMET, "CtrlLeg1AfterMaxDeltaPhiJetMET", 36, 0., 180.);
     createShapeHistograms(fs, hCtrlTopMass, "CtrlLeg1AfterTopMass", 80, 0., 400.);
+
+    createShapeHistograms(fs, hABCDCtrlNJets, "ABCDCtrlNJets", 10, 0., 10.);
+    createShapeHistograms(fs, hABCDCtrlMET, "ABCDCtrlMET", 100, 0.0, 500.0);
+    createShapeHistograms(fs, hABCDCtrlNbjets, "ABCDCtrlNbjets", 10, 0., 10.);
+    createShapeHistograms(fs, hABCDCtrlDeltaPhiTauMET, "ABCDCtrlDeltaPhiTauMET", 36, 0., 180.);
 
     // Feature plots
     createShapeHistograms(fs, hFeatureMinEtaOfSelectedJetToGapAfterBasicSelection, "FeatureMinEtaOfSelectedJetToGapAfterBasicSelection", 30, 0, 3.0);
@@ -453,7 +470,7 @@ namespace HPlus {
 
 // ----- Tau ID leg (factorisation
     bool myPassedTauLegStatus = false;
-    if (tauCandidateData.selectedTauPassesNProngs() and tauCandidateData.selectedTauPassesIsolation()) {
+    if (tauCandidateData.selectedTauPassesNProngs() && tauCandidateData.selectedTauPassesIsolation()) {
       hCtrlMETAfterTauIDNoRtau[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(metData.getSelectedMET()->et());
       hLeg2AfterTauIDNoRtau->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
       hMtShapesAfterTauIDNoRtau[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(transverseMass);
@@ -515,7 +532,21 @@ namespace HPlus {
         // On purpose: No return statement for false (factorisation)
       }
     }
-
+    // ABCD test
+    if (metData.getSelectedMET()->et() < metData.getCutValue()) {
+      if (tauCandidateData.selectedTauPassesNProngs() && tauCandidateData.selectedTauPassesRtau()) {
+        if (tauCandidateData.selectedTauPassesNProngsAndRtauButNotIsolation()) {
+          // Basic point for ABCD
+          hABCDAfterBasicSelection->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
+          hABCDMtShapesAfterBasicSelection[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(transverseMass);
+          hABCDCtrlNJets[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getHadronicJetCount());
+        } else {
+          // Tau leg for ABCD
+          hABCDAfterTauLeg->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
+          hABCDMtShapesAfterTauLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(transverseMass);
+        }
+      }
+    }
 
 // ----- MET, btag, deltaPhi(tau,MET), top reco leg
     // MET cut
@@ -530,12 +561,22 @@ namespace HPlus {
     if (deltaPhi < fDeltaPhiCutValue) {
       // Fill mT shape without btagging
       hMtShapesAfterMetLegNoBtagging[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(transverseMass);
+      if (tauCandidateData.selectedTauPassesNProngsAndRtauButNotIsolation()) {
+        // MET leg point without btag for ABCD
+        hABCDMtShapesAfterMETLegNoBtag[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(transverseMass);
+      }
     }
     hMtShapesAfterMet[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(transverseMass);
+    if (tauCandidateData.selectedTauPassesNProngsAndRtauButNotIsolation()) {
+      hABCDCtrlMET[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(metData.getSelectedMET()->et());
+    }
 
     // b tagging cut
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     hCtrlNbjets[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(btagData.getBJetCount());
+    if (tauCandidateData.selectedTauPassesNProngsAndRtauButNotIsolation()) {
+      hABCDCtrlNbjets[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(btagData.getBJetCount());
+    }
     if(!btagData.passedEvent()) return false;
     increment(fBTaggingCounter);
     // Apply scale factor as weight to event
@@ -576,6 +617,9 @@ namespace HPlus {
 
     // Delta phi(tau,MET) cut
     hCtrlDeltaPhiTauMET[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(deltaPhi);
+    if (tauCandidateData.selectedTauPassesNProngsAndRtauButNotIsolation()) {
+      hABCDCtrlDeltaPhiTauMET[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(deltaPhi);
+    }
     if (deltaPhi > fDeltaPhiCutValue) return false;
     increment(fDeltaPhiTauMETCounter);
     hSelectionFlow->Fill(kQCDOrderDeltaPhiTauMET);
@@ -654,6 +698,12 @@ namespace HPlus {
                                                                       fFakeTauIdentifier.getFakeTauScaleFactor(myTauMatch, tauCandidateData.getSelectedTau()->eta()),
                                                                       fFakeTauIdentifier.getFakeTauSystematics(myTauMatch, tauCandidateData.getSelectedTau()->eta()),
                                                                       btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+
+    if (tauCandidateData.selectedTauPassesNProngsAndRtauButNotIsolation()) {
+      // MET leg point for ABCD
+      hABCDAfterMETLeg->Fill(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex);
+      hABCDMtShapesAfterMETLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(transverseMass);
+    }
 
 //------ End of QCD measurement
     return true;

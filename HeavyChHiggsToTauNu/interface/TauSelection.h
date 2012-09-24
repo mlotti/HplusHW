@@ -8,6 +8,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIDBase.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 
 namespace edm {
   class ParameterSet;
@@ -58,6 +59,8 @@ namespace HPlus {
       const bool selectedTauPassesFullTauID() const { return selectedTauPassesIsolation() && selectedTauPassesNProngs() && selectedTauPassesRtau(); }
       /// Returns true if no candidates pass isolation
       const bool selectedTausDoNotPassIsolation() const;
+      /// Returns true if the selected tau passes NProngs and Rtau but not isolation
+      const bool selectedTauPassesNProngsAndRtauButNotIsolation() const;
       /// Returns true if the selected tau passes a specified discriminator
       const bool selectedTauPassesDiscriminator(std::string discr, double cutPoint) const;
       
@@ -88,6 +91,8 @@ namespace HPlus {
     Data setSelectedTau(edm::Ptr<pat::Tau>& tau, bool passedEvent);
     /// Method for getting operating mode (needed for tau specific weight maps)
     const TauSelectionOperationMode getOperationMode() const { return fOperationMode; }
+    /// Fill eta-phi histograms of fake taus (Note: do not use in final analysis, because it will fill multiple times counters and histograms)
+    void analyseFakeTauComposition(FakeTauIdentifier& fakeTauIdentifier, const edm::Event& iEvent);
 
   private:
     /// Method for doing tau selection
@@ -108,6 +113,7 @@ namespace HPlus {
     // Input parameters
     edm::InputTag fSrc;
     const std::string fSelection;
+    const bool fAnalyseFakeTauComposition;
 
     /// TauID object
     TauIDBase* fTauID;
@@ -166,6 +172,30 @@ namespace HPlus {
     WrappedTH1 *hLooseIsoNcands;
     WrappedTH1 *hMediumIsoNcands;
     WrappedTH1 *hTightIsoNcands;
+
+    WrappedTH2 *hFakeElectronEtaPhiAfterKinematics;
+    WrappedTH2 *hFakeElectronEtaPhiAfterAgainstElectron;
+    WrappedTH2 *hFakeElectronEtaPhiAfterAgainstElectronAndDeadVeto;
+    WrappedTH2 *hFakeElectronEtaPhiAfterIsolation;
+    WrappedTH2 *hFakeElectronEtaPhiAfterIsolationAndDeadVeto;
+    WrappedTH2 *hFakeElectronEtaPhiAfterNProngs;
+    WrappedTH2 *hFakeElectronEtaPhiAfterNProngsAndDeadVeto;
+
+    WrappedTH2 *hFakeJetEtaPhiAfterKinematics;
+    WrappedTH2 *hFakeJetEtaPhiAfterAgainstElectron;
+    WrappedTH2 *hFakeJetEtaPhiAfterAgainstElectronAndDeadVeto;
+    WrappedTH2 *hFakeJetEtaPhiAfterIsolation;
+    WrappedTH2 *hFakeJetEtaPhiAfterIsolationAndDeadVeto;
+    WrappedTH2 *hFakeJetEtaPhiAfterNProngs;
+    WrappedTH2 *hFakeJetEtaPhiAfterNProngsAndDeadVeto;
+
+    WrappedTH2 *hGenuineTauEtaPhiAfterKinematics;
+    WrappedTH2 *hGenuineTauEtaPhiAfterAgainstElectron;
+    WrappedTH2 *hGenuineTauEtaPhiAfterAgainstElectronAndDeadVeto;
+    WrappedTH2 *hGenuineTauEtaPhiAfterIsolation;
+    WrappedTH2 *hGenuineTauEtaPhiAfterIsolationAndDeadVeto;
+    WrappedTH2 *hGenuineTauEtaPhiAfterNProngs;
+    WrappedTH2 *hGenuineTauEtaPhiAfterNProngsAndDeadVeto;
 
     // Selected tau
     edm::PtrVector<pat::Tau> fSelectedTauCandidates;

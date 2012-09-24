@@ -118,6 +118,12 @@ class ControlPlotMaker:
                             # Add to total histogram
                             myShapeModifier.addShape(source=h,dest=myHisto)
         myShapeModifier.finaliseShape(dest=myHisto)
+        # Set bin labels, if specified
+        if len(details["binLabels"]) > 0:
+            if len(details["binLabels"]) != myHisto.GetNbinsX():
+                raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" control plot has %d bins, but %d bin labels were provided! (provide same number of labels as bins)"%(myHisto.GetNbinsX(),len(details["binLabels"])))
+            for i in range(1,myHisto.GetNbinsX()+1):
+                myHisto.GetXaxis().SetBinLabel(i,details["binLabels"][i-1])
         #mySystHisto.IsA().Destructor(mySystHisto)
         return myHisto
 
@@ -154,6 +160,7 @@ class ControlPlotMaker:
     def _makeFrame(self, title, details):
         myShapeModifier = ShapeHistoModifier(details)
         h = myShapeModifier.createEmptyShapeHistogram(title)
+        # Return histogram
         return h
 
     ## Divides two plots with each other
@@ -225,7 +232,6 @@ class ControlPlotMaker:
             if hExpected.GetBinContent(i) + hSignal.GetBinContent(i) > value:
                 value = hExpected.GetBinContent(i) + hSignal.GetBinContent(i)
             myCeiling = self._getMaxYFactor(hSignal.GetXaxis().GetBinLowEdge(i),hSignal.GetXaxis().GetBinUpEdge(i),histoWidth)
-            
             if logstatus:
                 value = pow(10,log10(value)/myCeiling)*1.5
             else:

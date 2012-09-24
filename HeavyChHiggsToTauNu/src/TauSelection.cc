@@ -172,6 +172,13 @@ namespace HPlus {
     return true;
   }
 
+  const bool TauSelection::Data::selectedTauPassesNProngsAndRtauButNotIsolation() const {
+    if (selectedTauPassesNProngs() && selectedTauPassesRtau()) {
+      return (!fTauSelection->fTauID->passIsolation(getSelectedTau()));
+    }
+    return false;
+  }
+
   const bool TauSelection::Data::selectedTauPassesDiscriminator(std::string discr, double cutPoint) const {
     if (!fPassedEvent) return false;
     return (getSelectedTau()->tauID(discr) > cutPoint);
@@ -181,6 +188,7 @@ namespace HPlus {
   TauSelection::TauSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper, std::string label):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fSelection(iConfig.getUntrackedParameter<std::string>("selection")),
+    fAnalyseFakeTauComposition(iConfig.getUntrackedParameter<bool>("analyseFakeTauComposition")),
     fTauID(0),
     fOperationMode(kNormalTauID),
     fTauFound(eventCounter.addSubCounter(label,"Tau found"))
@@ -352,6 +360,55 @@ namespace HPlus {
     hTightGammaOccupancyAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightGammaOccupancyAfterIsolation", "TightGammaOccupancyAfterIsolation;TightGammaOccupancy;N_{tau candidates}", 100, 0., 100.); 
 
     hHPSDecayMode = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HPSDecayMode", "HPSDecayMode;HPSDecayMode;N_{tau candidates}",100,0,100);
+
+    if (fAnalyseFakeTauComposition) {
+      std::string myFakeLabel = label+"_fakeAnalysis";
+      TFileDirectory myFakeDir = fs->mkdir(myFakeLabel);
+      hFakeElectronEtaPhiAfterKinematics = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "eToTauAfterKinematicalCuts", "eToTauAfterKinematicalCuts;e#rightarrow#tau #eta;e#rightarrow#tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hFakeElectronEtaPhiAfterAgainstElectron = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "eToTauAfterAgainstElectron", "eToTauAfterAgainstElectron;e#rightarrow#tau #eta;e#rightarrow#tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hFakeElectronEtaPhiAfterAgainstElectronAndDeadVeto = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "eToTauAfterAgainstElectronAndDeadVeto", "eToTauAfterAgainstElectronAndDeadVeto;e#rightarrow#tau #eta;e#rightarrow#tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hFakeElectronEtaPhiAfterIsolation = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "eToTauAfterIsolation", "eToTauAfterIsolation;e#rightarrow#tau #eta;e#rightarrow#tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hFakeElectronEtaPhiAfterIsolationAndDeadVeto = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "eToTauAfterIsolationAndDeadVeto", "eToTauAfterIsolationAndDeadVeto;e#rightarrow#tau #eta;e#rightarrow#tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hFakeElectronEtaPhiAfterNProngs = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "eToTauAfterNProngs", "eToTauAfterNProngs;e#rightarrow#tau #eta;e#rightarrow#tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hFakeElectronEtaPhiAfterNProngsAndDeadVeto = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "eToTauAfterNProngsAndDeadVeto", "eToTauAfterNProngsAndDeadVeto;e#rightarrow#tau #eta;e#rightarrow#tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+
+      hFakeJetEtaPhiAfterKinematics = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "jetToTauAfterKinematicalCuts", "jetToTauAfterKinematicalCuts;jet#rightarrow#tau #eta;jet#rightarrow#tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hFakeJetEtaPhiAfterAgainstElectron = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "jetToTauAfterAgainstElectron", "jetToTauAfterAgainstElectron;jet#rightarrow#tau #eta;jet#rightarrow#tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hFakeJetEtaPhiAfterAgainstElectronAndDeadVeto = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "jetToTauAfterAgainstElectronAndDeadVeto", "jetToTauAfterAgainstElectronAndDeadVeto;jet#rightarrow#tau #eta;jet#rightarrow#tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hFakeJetEtaPhiAfterIsolation = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "jetToTauAfterIsolation", "jetToTauAfterIsolation;jet#rightarrow#tau #eta;jet#rightarrow#tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hFakeJetEtaPhiAfterIsolationAndDeadVeto = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "jetToTauAfterIsolationAndDeadVeto", "jetToTauAfterIsolationAndDeadVeto;jet#rightarrow#tau #eta;jet#rightarrow#tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hFakeJetEtaPhiAfterNProngs = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "jetToTauAfterNProngs", "jetToTauAfterNProngs;jet#rightarrow#tau #eta;jet#rightarrow#tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hFakeJetEtaPhiAfterNProngsAndDeadVeto = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "jetToTauAfterNProngsAndDeadVeto", "jetToTauAfterNProngsAndDeadVeto;jet#rightarrow#tau #eta;jet#rightarrow#tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+
+      hGenuineTauEtaPhiAfterKinematics = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "GenuineTauAfterKinematicalCuts", "GenuineTauAfterKinematicalCuts;Genuine #tau #eta;Genuine #tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hGenuineTauEtaPhiAfterAgainstElectron = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "GenuineTauAfterAgainstElectron", "GenuineTauAfterAgainstElectron;Genuine #tau #eta;Genuine #tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hGenuineTauEtaPhiAfterAgainstElectronAndDeadVeto = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "GenuineTauAfterAgainstElectronAndDeadVeto", "GenuineTauAfterAgainstElectronAndDeadVeto;Genuine #tau #eta;Genuine #tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hGenuineTauEtaPhiAfterIsolation = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "GenuineTauAfterIsolation", "GenuineTauAfterIsolation;Genuine #tau #eta;Genuine #tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hGenuineTauEtaPhiAfterIsolationAndDeadVeto = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "GenuineTauAfterIsolationAndDeadVeto", "GenuineTauAfterIsolationAndDeadVeto;Genuine #tau #eta;Genuine #tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hGenuineTauEtaPhiAfterNProngs = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "GenuineTauAfterNProngs", "GenuineTauAfterNProngs;Genuine #tau #eta;Genuine #tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+      hGenuineTauEtaPhiAfterNProngsAndDeadVeto = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFakeDir,
+        "GenuineTauAfterNProngsAndDeadVeto", "GenuineTauAfterNProngsAndDeadVeto;Genuine #tau #eta;Genuine #tau phi", myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax, myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
+    }
   }
 
   TauSelection::~TauSelection() {
@@ -800,5 +857,70 @@ namespace HPlus {
     else
       bestTau.push_back(myBestTau);
   }*/
-  
+
+  // Notice that using this routine will cause tau ID histograms to be filled multiple times
+  void TauSelection::analyseFakeTauComposition(FakeTauIdentifier& fakeTauIdentifier, const edm::Event& iEvent) {
+    if (!fAnalyseFakeTauComposition) return;
+    // Get taus
+    edm::Handle<edm::View<pat::Tau> > htaus;
+    iEvent.getByLabel(fSrc, htaus);
+
+    for(edm::PtrVector<pat::Tau>::const_iterator iter = htaus->ptrVector().begin(); iter != htaus->ptrVector().end(); ++iter) {
+      const edm::Ptr<pat::Tau> iTau = *iter;
+      FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fakeTauIdentifier.matchTauToMC(iEvent, *iTau);
+      bool isElectron = (myTauMatch == FakeTauIdentifier::kkElectronToTau || myTauMatch == FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance);
+      bool isJet = (myTauMatch == FakeTauIdentifier::kkJetToTau || myTauMatch == FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance);
+      bool isTau = (myTauMatch == FakeTauIdentifier::kkTauToTau || myTauMatch == FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance);
+      bool isAtDeadCell = !fTauID->passVetoAgainstDeadECALCells(iTau);
+      // Tau candidate selections
+      if (!fTauID->passDecayModeFinding(iTau)) continue;
+      if (!fTauID->passKinematicSelection(iTau)) continue;
+      if (!fTauID->passLeadingTrackCuts(iTau)) continue;
+      //if (!fTauID->passECALFiducialCuts(iTau)) continue;
+      if (isElectron) {
+        hFakeElectronEtaPhiAfterKinematics->Fill(iTau->eta(),iTau->phi());
+      } else if (isJet) {
+        hFakeJetEtaPhiAfterKinematics->Fill(iTau->eta(),iTau->phi());
+      } else if (isTau) {
+        hGenuineTauEtaPhiAfterKinematics->Fill(iTau->eta(),iTau->phi());
+      }
+
+      if (!fTauID->passTauCandidateEAndMuVetoCuts(iTau)) continue;
+      if (isElectron) {
+        hFakeElectronEtaPhiAfterAgainstElectron->Fill(iTau->eta(),iTau->phi());
+        if (!isAtDeadCell) hFakeElectronEtaPhiAfterAgainstElectronAndDeadVeto->Fill(iTau->eta(),iTau->phi());
+      } else if (isJet) {
+        hFakeJetEtaPhiAfterAgainstElectron->Fill(iTau->eta(),iTau->phi());
+        if (!isAtDeadCell) hFakeJetEtaPhiAfterAgainstElectronAndDeadVeto->Fill(iTau->eta(),iTau->phi());
+      } else if (isTau) {
+        hGenuineTauEtaPhiAfterAgainstElectron->Fill(iTau->eta(),iTau->phi());
+        if (!isAtDeadCell) hGenuineTauEtaPhiAfterAgainstElectronAndDeadVeto->Fill(iTau->eta(),iTau->phi());
+      }
+
+      // Tau ID selections
+      if (!fTauID->passIsolation(iTau)) continue;
+      if (isElectron) {
+        hFakeElectronEtaPhiAfterIsolation->Fill(iTau->eta(),iTau->phi());
+        if (!isAtDeadCell) hFakeElectronEtaPhiAfterIsolationAndDeadVeto->Fill(iTau->eta(),iTau->phi());
+      } else if (isJet) {
+        hFakeJetEtaPhiAfterIsolation->Fill(iTau->eta(),iTau->phi());
+        if (!isAtDeadCell) hFakeJetEtaPhiAfterIsolationAndDeadVeto->Fill(iTau->eta(),iTau->phi());
+      } else if (isTau) {
+        hGenuineTauEtaPhiAfterIsolation->Fill(iTau->eta(),iTau->phi());
+        if (!isAtDeadCell) hGenuineTauEtaPhiAfterIsolationAndDeadVeto->Fill(iTau->eta(),iTau->phi());
+      }
+
+      if (!fTauID->passNProngsCut(iTau)) continue;
+      if (isElectron) {
+        hFakeElectronEtaPhiAfterNProngs->Fill(iTau->eta(),iTau->phi());
+        if (!isAtDeadCell) hFakeElectronEtaPhiAfterNProngsAndDeadVeto->Fill(iTau->eta(),iTau->phi());
+      } else if (isJet) {
+        hFakeJetEtaPhiAfterNProngs->Fill(iTau->eta(),iTau->phi());
+        if (!isAtDeadCell) hFakeJetEtaPhiAfterNProngsAndDeadVeto->Fill(iTau->eta(),iTau->phi());
+      } else if (isTau) {
+        hGenuineTauEtaPhiAfterNProngs->Fill(iTau->eta(),iTau->phi());
+        if (!isAtDeadCell) hGenuineTauEtaPhiAfterNProngsAndDeadVeto->Fill(iTau->eta(),iTau->phi());
+      }
+    }
+  }
 }
