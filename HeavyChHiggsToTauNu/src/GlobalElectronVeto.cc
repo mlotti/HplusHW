@@ -8,6 +8,12 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
 #include "Math/GenVector/VectorUtil.h"
+
+#include "DataFormats/EgammaCandidates/interface/ConversionFwd.h"
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "EGamma/EGammaAnalysisTools/interface/EGammaCutBasedEleId.h"
+
 #include <string>
 
 namespace HPlus {
@@ -15,8 +21,12 @@ namespace HPlus {
     fGlobalElectronVeto(globalElectronVeto), fPassedEvent(passedEvent) {}
   GlobalElectronVeto::Data::~Data() {}
   
-  GlobalElectronVeto::GlobalElectronVeto(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
+  GlobalElectronVeto::GlobalElectronVeto(const edm::ParameterSet& iConfig, const edm::InputTag& vertexSrc, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
     fElecCollectionName(iConfig.getUntrackedParameter<edm::InputTag>("ElectronCollectionName")),
+    fVertexSrc(vertexSrc),
+    fConversionSrc(iConfig.getUntrackedParameter<edm::InputTag>("conversionSrc")),
+    fBeamspotSrc(iConfig.getUntrackedParameter<edm::InputTag>("beamspotSrc")),
+    fRhoSrc(iConfig.getUntrackedParameter<edm::InputTag>("rhoSrc")),
     fElecSelection(iConfig.getUntrackedParameter<std::string>("ElectronSelection")),
     fElecPtCut(iConfig.getUntrackedParameter<double>("ElectronPtCut")),
     fElecEtaCut(iConfig.getUntrackedParameter<double>("ElectronEtaCut")),
@@ -140,8 +150,18 @@ namespace HPlus {
     if ( !myElectronHandle->size() ) return true;
 
     edm::Handle <reco::GenParticleCollection> genParticles;
-    iEvent.getByLabel("genParticles", genParticles);
-    
+    iEvent.getByLabel("genParticles", genParticles); // FIXME: bad habbit to hard-code InputTags
+
+    // Get Conversions, Vertices, BeamSpot, and Rho
+    edm::Handle<reco::ConversionCollection> hConversion;
+    iEvent.getByLabel(fConversionSrc, hConversion);
+    edm::Handle<reco::VertexCollection> hVertex;
+    iEvent.getByLabel(fVertexSrc, hVertex);
+    edm::Handle<reco::BeamSpot> hBeamspot;
+    iEvent.getByLabel(fBeamspotSrc, hBeamspot);
+    edm::Handle<double> hRho;
+    iEvent.getByLabel(fRhoSrc, hRho);
+
     // Reset/initialise variables
     float myHighestElecPt = -1.0;
     float myHighestElecPtBeforePtCut = -1.0;
@@ -158,6 +178,12 @@ namespace HPlus {
 
     // Loop over all Electrons
     for(edm::PtrVector<pat::Electron>::const_iterator iElectron = electrons.begin(); iElectron != electrons.end(); ++iElectron) {
+
+      // FIXME: here we just test the cut based ID for now
+      bool bVeto = EgammaCutBasedEleId::PassWP(EgammaCutBasedEleId::VETO, **iElectron, hConversion, *hBeamspot, hVertex,
+                                               (*iElectron)->chargedHadronIso(), (*iElectron)->photonIso(), (*iElectron)->neutralHadronIso(),
+                                               *hRho);
+      //std::cout << "Electron " << (iElectron-electrons.begin()) << "/" << electrons.size() << ": pass veto: " << bVeto << std::endl;
 
       // keep track of the electrons analyzed
       bElecPresent = true;

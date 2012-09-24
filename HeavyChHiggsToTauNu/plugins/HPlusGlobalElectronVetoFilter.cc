@@ -1,6 +1,7 @@
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/Utilities/interface/InputTag.h"
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
@@ -25,6 +26,7 @@ class HPlusGlobalElectronVetoFilter: public edm::EDFilter {
 
   virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
+  edm::InputTag fVertexSrc;
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
   HPlus::HistoWrapper histoWrapper;
@@ -33,10 +35,11 @@ class HPlusGlobalElectronVetoFilter: public edm::EDFilter {
 };
 
 HPlusGlobalElectronVetoFilter::HPlusGlobalElectronVetoFilter(const edm::ParameterSet& iConfig):
+  fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc")),
   eventCounter(iConfig),
   eventWeight(iConfig),
   histoWrapper(eventWeight, "Debug"),
-  fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, histoWrapper),
+  fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), fVertexSrc, eventCounter, histoWrapper),
   fFilter(iConfig.getParameter<bool>("filter"))
 {
   produces<bool>();

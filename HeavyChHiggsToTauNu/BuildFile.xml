@@ -18,6 +18,7 @@
 <use name="RecoBTag/PerformanceDB"/>
 <use name="CondFormats/PhysicsToolsObjects"/>
 <use name="RecoBTag/Records"/>
+<use name="EGamma/EGammaAnalysisTools"/>
 <export>
   <lib name="HiggsAnalysisHeavyChHiggsToTauNu"/>
 </export>

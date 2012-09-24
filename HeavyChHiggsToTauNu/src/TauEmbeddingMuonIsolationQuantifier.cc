@@ -13,7 +13,7 @@
 
 #include <cmath>
 
-
+// FIXME: hard-coded InputTags are bad, should be delivered via configuration
 namespace HPlus {
   //TauEmbeddingMuonIsolationQuantifier::TauEmbeddingMuonIsolationQuantifier(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
   //fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
@@ -34,7 +34,7 @@ namespace HPlus {
 
   void TauEmbeddingMuonIsolationQuantifier::analyzeAfterTrigger(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     edm::Handle<edm::View<pat::Muon> > myMuonHandle;
-    iEvent.getByLabel("patMuonsUserOnTheFlyIsoPFlow", myMuonHandle);
+    iEvent.getByLabel("patMuonsUserOnTheFlyIso", myMuonHandle);
     edm::PtrVector<pat::Muon> muons = myMuonHandle->ptrVector();
     // Loop over all Muons
     for(edm::PtrVector<pat::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
@@ -55,7 +55,7 @@ namespace HPlus {
 
   void TauEmbeddingMuonIsolationQuantifier::analyzeAfterJets(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     edm::Handle<edm::View<pat::Muon> > myMuonHandle;
-    iEvent.getByLabel("patMuonsUserOnTheFlyIsoPFlow", myMuonHandle);
+    iEvent.getByLabel("patMuonsUserOnTheFlyIso", myMuonHandle);
     edm::PtrVector<pat::Muon> muons = myMuonHandle->ptrVector();
     // Loop over all Muons
     for(edm::PtrVector<pat::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {

@@ -7,7 +7,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 multicrab = Multicrab("crab_pat.cfg", lumiMaskDir="..")
 
 datasets = [
-
 ########
 #
 # 44X
@@ -51,7 +50,7 @@ datasets = [
         # Signal MC (WH)
 #        "TTToHplusBWB_M80_Fall11",
 #        "TTToHplusBWB_M90_Fall11",
-#        "TTToHplusBWB_M100_Fall11",
+        "TTToHplusBWB_M100_Fall11",
 #        "TTToHplusBWB_M120_Fall11",
 #        "TTToHplusBWB_M140_Fall11",
 #        "TTToHplusBWB_M150_Fall11",
@@ -60,7 +59,7 @@ datasets = [
         # Signal MC (HH)
 #        "TTToHplusBHminusB_M80_Fall11",
 #        "TTToHplusBHminusB_M90_Fall11",
-#        "TTToHplusBHminusB_M100_Fall11",
+        "TTToHplusBHminusB_M100_Fall11",
 #        "TTToHplusBHminusB_M120_Fall11",
 #        "TTToHplusBHminusB_M140_Fall11",
 #        "TTToHplusBHminusB_M150_Fall11",
@@ -90,12 +89,24 @@ datasets = [
 #        "WW_TuneZ2_Fall11",
 #        "WZ_TuneZ2_Fall11",
 #        "ZZ_TuneZ2_Fall11",
+#        "QCD_Pt20_MuEnriched_TuneZ2_Fall11",
+#         "QCD_Pt30to50_TuneZ2_Fall11",
+#         "QCD_Pt50to80_TuneZ2_Fall11",
+#         "QCD_Pt80to120_TuneZ2_Fall11",
+#         "QCD_Pt120to170_TuneZ2_Fall11",
+#         "QCD_Pt170to300_TuneZ2_Fall11",
+#         "QCD_Pt300to470_TuneZ2_Fall11",
 
-        # High PU
-#        "TTToHplusBWB_M90_Fall11_Ave32_50ns",
-#        "TTToHplusBWB_M160_Fall11_Ave32_50ns",
-#        "TTJets_TuneZ2_Fall11_Ave32_50ns"
+######
+# 44X high PU
+#         "TTToHplusBWB_M90_Fall11_HighPU",
+#         "TTToHplusBWB_M160_Fall11_HighPU",
+#         "TTJets_TuneZ2_Fall11_HighPU",
 ]
+
+
+
+
 
 multicrab.extendDatasets("AOD", datasets)
 
@@ -113,7 +124,7 @@ def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
-    name += "_pattuple_v25"
+    name += "_pattuple_v26"
 
     # Add the begin run in the dataset name to the publish name in
     # order to distinguish pattuple datasets from the same PD

@@ -10,13 +10,9 @@ TauolaPolar = cms.PSet(
    UseTauolaPolarization = cms.bool(True)
 )
 
-#source = cms.Source("PoolSource",
-#        skipEvents = cms.untracked.uint32(0),
-#        fileNames = cms.untracked.vstring('/store/mc/Summer10/WJets_7TeV-madgraph-tauola/AODSIM/START36_V9_S09-v1/0046/E250F96A-CF7B-DF11-99E5-001BFCDBD1BE.root')
-#)
-
+### Tighten the muon selection (but no isolation yet)
 tightenedMuons = cms.EDFilter("PATMuonSelector",
-    src = cms.InputTag("tightMuonsPFlow"),
+    src = cms.InputTag("tightMuons"),
     cut = cms.string("pt() > 40 && abs(eta()) < 2.1")
 )
 tightenedMuonsFilter = cms.EDFilter("CandViewCountFilter",
@@ -24,6 +20,10 @@ tightenedMuonsFilter = cms.EDFilter("CandViewCountFilter",
     minNumber = cms.uint32(1)
 )
 tightenedMuonsCount = cms.EDProducer("EventCountProducer")
+
+
+### Muon isolation step
+
 #tauEmbeddingMuons = cms.EDFilter("HPlusSmallestRelIsoPATMuonViewSelector",
 #    src = cms.InputTag("tightenedMuons"),
 #    filter = cms.bool(False),
@@ -48,6 +48,9 @@ tauEmbeddingMuonsOneFilter = cms.EDFilter("PATCandViewCountFilter",
     maxNumber = cms.uint32(1),
 )
 tauEmbeddingMuonsOneCount = cms.EDProducer("EventCountProducer")
+
+### Jet selection finalization
+# Currently done as a part of the analysis job
 # tightenedJets = cms.EDFilter("PATJetSelector",
 #     src = cms.InputTag("selectedPatJets"),
 #     cut = cms.string(

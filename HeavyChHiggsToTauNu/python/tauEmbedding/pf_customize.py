@@ -75,13 +75,6 @@ def customise(process):
     recoProcessName = dataVersion.getRecoProcess()
     processName = process.name_()
 
-    # Tighten muon selection w.r.t. skim
-    import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
-    process.muonIsolationSequence = cms.Sequence()
-    muons = customisations.addMuonIsolationEmbedding(process, process.muonIsolationSequence, muons=process.tightenedMuons.src.value())
-    process.tightenedMuons.src = muons
-    process.ProductionFilterSequence.replace(process.tightenedMuons, process.muonIsolationSequence*process.tightenedMuons)
-
     # Setup output
     outputModule = None
     outdict = process.outputModules_()
@@ -353,4 +346,59 @@ def customise(process):
     print "#############################################################"
 
 
+    addPAT(process, options, dataVersion)
+
+    f = open("configDumpEmbed.py", "w")
+    f.write(process.dumpPython())
+    f.close()
+
     return process
+
+
+def addPAT(process, options, dataVersion):
+    options.doPat = 1
+    options.tauEmbeddingInput = 1
+
+    # Hacks to get PAT to work in a process with RECO
+    process.recoPFJets.remove(process.kt6PFJets)
+
+    # Set the output module name
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple as patConf
+    patConf.outputModuleName = "RECOSIMoutput"
+
+    # Adjust event content, start by dropping everything
+    out = getattr(process, patConf.outputModuleName)
+    out.outputCommands = [
+        "drop *",
+        "keep *_selectedPatMuons_*_*",
+        "keep *_tightMuons*_*_*",
+        "keep *_tauEmbeddingMuons_*_*",
+        "keep *_selectedPatElectrons_*_*",
+        "keep *_allConversions_*_*",
+        "keep recoCaloMETs_*_*_*",
+        "keep *_goodJets*_*_*",
+        "keep bool_*_*_*",
+    ]
+
+    # Add PAT
+    process.commonPatSequence, additionalCounters = patConf.addPatOnTheFly(process, options, dataVersion)
+
+    # Keep also smeared/shifted jets from MUONSKIM
+    processName = process.name_()
+    outComms = out.outputCommands[:]
+    for comm in outComms:
+        if "keep" in comm and "PatJets" in comm and processName in comm:
+            out.outputCommands.append(comm.replace(processName, "MUONSKIM"))
+
+    # Final adjustments to the event content
+    out.outputCommands.extend([
+            "drop *_addPileupInfo_*_"+processName,
+            "keep *_patTausHpsPFTau_*_"+processName,
+            "drop *_selectedPatTaus*_*_"+processName,
+            ])
+
+    process.patPath = cms.Path(process.ProductionFilterSequence*process.commonPatSequence)
+    process.schedule.append(process.patPath)
+
+    # More hacks to get PAT to work in a process with RECO
+

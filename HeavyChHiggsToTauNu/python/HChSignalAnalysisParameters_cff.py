@@ -168,9 +168,7 @@ else:
     fakeTauSFandSystematics = fakeTauSFandSystematicsBase
 
 jetSelectionBase = cms.untracked.PSet(
-    #src = cms.untracked.InputTag("selectedPatJets"),       # Calo jets
-    #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"), # JPT jets 
-    src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
+    src = cms.untracked.InputTag("selectedPatJets"),  # PF jets
     cleanTauDR = cms.untracked.double(0.5), # cone for rejecting jets around tau jet
     ptCut = cms.untracked.double(20.0),
     etaCut = cms.untracked.double(2.4),
@@ -210,9 +208,9 @@ jetSelectionTight = jetSelectionBase.clone(
 jetSelection = jetSelectionLoose # set default jet selection
 
 MET = cms.untracked.PSet(
-    rawSrc = cms.untracked.InputTag("patMETsPF"), # PF MET
-    type1Src = cms.untracked.InputTag("dummy"),
-    type2Src = cms.untracked.InputTag("dummy"),
+    rawSrc = cms.untracked.InputTag("patPFMet"), # PF MET
+    type1Src = cms.untracked.InputTag("patType1CorrectedPFMet"),
+    type2Src = cms.untracked.InputTag("patType1p2CorrectedPFMet"),
     caloSrc = cms.untracked.InputTag("patMETs"),
     tcSrc = cms.untracked.InputTag("patMETsTC"),
     select = cms.untracked.string("type1"), # raw, type1, type2
@@ -257,6 +255,9 @@ EvtTopology = cms.untracked.PSet(
 
 GlobalElectronVeto = cms.untracked.PSet(
     ElectronCollectionName = cms.untracked.InputTag("selectedPatElectrons"),
+    conversionSrc = cms.untracked.InputTag("allConversions"),
+    beamspotSrc = cms.untracked.InputTag("offlineBeamSpot"),
+    rhoSrc = cms.untracked.InputTag("kt6PFJetsForEleIso", "rho"),
     ElectronSelection = cms.untracked.string("simpleEleId95relIso"),
     ElectronPtCut = cms.untracked.double(15.0),
     ElectronEtaCut = cms.untracked.double(2.5)
@@ -302,7 +303,7 @@ jetTauInvMass = cms.untracked.PSet(
 )
 
 forwardJetVeto = cms.untracked.PSet(
-  src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
+  src = cms.untracked.InputTag("selectedPatJets"),  # PF jets
   ptCut = cms.untracked.double(30),
   etaCut = cms.untracked.double(2.4),
   ForwJetEtCut = cms.untracked.double(10.0),
@@ -519,9 +520,9 @@ def setAllTauSelectionSrcSelectedPatTaus():
     tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTau"
 
 def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
-    tauSelectionHPSTightTauBased.src        = "patTausHpsPFTauTauTriggerMatched"
-    tauSelectionHPSMediumTauBased.src       = "patTausHpsPFTauTauTriggerMatched"
-    tauSelectionHPSLooseTauBased.src        = "patTausHpsPFTauTauTriggerMatched"
+    tauSelectionHPSTightTauBased.src        = "patTausHpsPFTauTriggerMatched"
+    tauSelectionHPSMediumTauBased.src       = "patTausHpsPFTauTriggerMatched"
+    tauSelectionHPSLooseTauBased.src        = "patTausHpsPFTauTriggerMatched"
     
 def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, additionalCounters):
     from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
@@ -564,7 +565,12 @@ def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processNa
 def changeJetCollection(**kwargs):
     _changeCollection([jetSelection.src, forwardJetVeto.src], **kwargs)
 
-def changeCollectionsToPF2PAT(postfix="PFlow"):
+def setJERSmearedJets(dataVersion):
+    if dataVersion.isMC():
+        print "Using JER-smeared jets"
+        changeJetCollection(moduleLabel="smearedPatJets")
+
+def changeCollectionsToPF2PAT(dataVersion, postfix="PFlow", useGSFElectrons=True):
     # Taus
     hps = "selectedPatTaus"+postfix
     if "TriggerMatched" in tauSelectionHPSTightTauBased.src.value():
@@ -582,13 +588,21 @@ def changeCollectionsToPF2PAT(postfix="PFlow"):
     NonIsolatedMuonVeto.MuonCollectionName = "selectedPatMuons"+postfix
 
     # Electrons
-    GlobalElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
-    NonIsolatedElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
+    if useGSFElectrons:
+        print "Using GSF electrons despite of PF2PAT"
+    else:
+        GlobalElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
+        NonIsolatedElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
 
     # Jets
-    changeJetCollection(moduleLabel="selectedPatJets"+postfix)
+    if dataVersion.isData():
+        changeJetCollection(moduleLabel="selectedPatJets"+postfix)
+    else:
+        changeJetCollection(moduleLabel="smearedPatJets"+postfix)
 
     # MET
-    MET.rawSrc = "patMETsPFlow"
     MET.caloSrc = "Nonexistent"
     MET.tcSrc = "Nonexistent"
+    MET.rawSrc = "patPFMet"
+    MET.type1Src = "patType1CorrectedPFMet"
+    MET.type2Src = "patType1p2CorrectedPFMet"

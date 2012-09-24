@@ -4,8 +4,13 @@ import FWCore.ParameterSet.Config as cms
 # write as function , params: process and postfix
 
 def getTightMuonsDefinition(postfix=""):
+    src = "selectedPatMuons"
+    if postfix != "":
+        # Assume PF2PAT
+        src = "selectedPatMuons"+postfix+"All"
+
     tightMuons = cms.EDFilter("PATMuonSelector",
-        src = cms.InputTag("selectedPatMuons"+postfix+"All"),
+        src = cms.InputTag(src),
         cut = cms.string(
         "isGlobalMuon() && isTrackerMuon()"
         "&& pt() > 35 && abs(eta()) < 2.1"
@@ -23,6 +28,7 @@ def addMuonSelectionForEmbedding(process, postfix=""):
     muonSelectionAllEvents = cms.EDProducer("EventCountProducer")
     setattr(process, "muonSelectionAllEvents"+postfix, muonSelectionAllEvents)
     
+    ### Primary vertex
     muonFirstPrimaryVertex = cms.EDProducer("HPlusFirstVertexSelector",
         src = cms.InputTag("offlinePrimaryVertices")
     )
@@ -45,6 +51,7 @@ def addMuonSelectionForEmbedding(process, postfix=""):
     muonSelectionPrimaryVertex = cms.EDProducer("EventCountProducer")
     setattr(process, "muonSelectionPrimaryVertex"+postfix, muonSelectionPrimaryVertex)
 
+    ### Tight muon ID, with slightly relaxed pT cut and without isolation
     tightMuons = getTightMuonsDefinition(postfix=postfix)
     setattr(process, "tightMuons"+postfix, tightMuons)
     
@@ -81,6 +88,10 @@ def addMuonSelectionForEmbedding(process, postfix=""):
     #setattr(process, "tauEmbeddingMuonsFilter"+postfix, tauEmbeddingMuonsFilter)
     muonSelectionMuons = cms.EDProducer("EventCountProducer")
     setattr(process, "muonSelectionMuons"+postfix, muonSelectionMuons)
+
+    ### Jet selection
+    # As the muon selection is not yet final at this stage, do not
+    # clean the jets from selected muon before counting them.
 
     #from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import *
     #goodJets = cleanPatJets.clone(
@@ -143,11 +154,19 @@ def addMuonSelectionForEmbedding(process, postfix=""):
     )
     return muonSelectionSequence
     
-def getMuonSelectionCountersForEmbedding(postfix=""):
+def getMuonSelectionCountersForEmbedding(dataVersion, postfix=""):
     muonSelectionCounters = [
         "muonSelectionAllEvents"+postfix,
         "muonSelectionPrimaryVertex"+postfix,
         "muonSelectionMuons"+postfix,
-        "muonSelectionJets"+postfix
+        "muonSelectionJets"+postfix,
     ]
+    if dataVersion.isMC():
+        muonSelectionCounters.extend([
+            "muonSelectionJetsSmeared"+postfix, 
+            "muonSelectionJetsResDown"+postfix,
+            "muonSelectionJetsResUp"+postfix,
+            "muonSelectionJetsEnDown"+postfix,
+            "muonSelectionJetsEnUp"+postfix
+        ])
     return muonSelectionCounters
