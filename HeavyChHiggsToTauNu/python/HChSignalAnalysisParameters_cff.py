@@ -51,8 +51,8 @@ tauSelectionBase = cms.untracked.PSet(
     operatingMode = cms.untracked.string("standard"), # Standard tau ID (Tau candidate selection + tau ID applied)
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     selection = cms.untracked.string(""),
-#    ptCut = cms.untracked.double(40), # jet pt > value
-    ptCut = cms.untracked.double(50), # jet pt > value for heavy charged Higgs
+    ptCut = cms.untracked.double(40), # jet pt > value
+#    ptCut = cms.untracked.double(50), # jet pt > value for heavy charged Higgs
     etaCut = cms.untracked.double(2.1), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
     againstElectronDiscriminator = cms.untracked.string("againstElectronMVA"), # discriminator against electrons
@@ -215,8 +215,8 @@ MET = cms.untracked.PSet(
     caloSrc = cms.untracked.InputTag("patMETs"),
     tcSrc = cms.untracked.InputTag("patMETsTC"),
     select = cms.untracked.string("type1"), # raw, type1, type2
-#    METCut = cms.untracked.double(60.0),
-    METCut = cms.untracked.double(80.0), # MET cut for heavy charged Higgs
+    METCut = cms.untracked.double(60.0),
+#    METCut = cms.untracked.double(80.0), # MET cut for heavy charged Higgs
     
     # For type I/II correction
     tauJetMatchingCone = cms.untracked.double(0.5),
@@ -233,8 +233,8 @@ bTagging = cms.untracked.PSet(
 #    discriminator = cms.untracked.string("jetProbabilityBJetTags"),   
     leadingDiscriminatorCut = cms.untracked.double(0.898), # used for best bjet candidates (best discriminator)
     subleadingDiscriminatorCut = cms.untracked.double(0.679), # used for other bjet candidates
-#    ptCut = cms.untracked.double(20.0),
-    ptCut = cms.untracked.double(30.0), # for heavy charged Higgs
+    ptCut = cms.untracked.double(20.0),
+#    ptCut = cms.untracked.double(30.0), # for heavy charged Higgs
     etaCut = cms.untracked.double(2.4),
     jetNumber = cms.untracked.uint32(1),
     jetNumberCutDirection = cms.untracked.string("GEQ"), # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
@@ -319,6 +319,8 @@ GenParticleAnalysis = cms.untracked.PSet(
   oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"),
   threeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauThreeProng"),
 )
+
+
 topSelection = cms.untracked.PSet(
   TopMassLow = cms.untracked.double(100.0),
   TopMassHigh = cms.untracked.double(300.0),

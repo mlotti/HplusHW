@@ -36,6 +36,7 @@ namespace HPlus {
 
       bool passedEvent() const { return fPassedEvent; }
       const double getTopMass() const { return fTopChiSelection->topMass; }
+      const double getWMass() const { return fTopChiSelection->wMass; }
       const XYZTLorentzVector& getTopP4() const { return fTopChiSelection->top; }
       const edm::Ptr<pat::Jet>& getSelectedBjet() const { return fTopChiSelection->bjetInTop; }
 

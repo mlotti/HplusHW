@@ -68,9 +68,9 @@ namespace HPlus {
     fBaselineTopChiSelectionCounter(eventCounter.addCounter("Top BaselineChiSelection cut")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
     fTriggerScaleFactorCounter(eventCounter.addCounter("trigger scale factor")),
+    fNprongsAfterTauIDCounter(eventCounter.addCounter("Nprongs of best candidate")),
+    fRtauAfterTauIDCounter(eventCounter.addCounter("Rtau of best tau candidate")),
     fTauVetoAfterTauIDCounter(eventCounter.addCounter("Veto on isolated taus")),
-    fNprongsAfterTauIDCounter(eventCounter.addCounter("Nprongs for best candidate")),
-    fRtauAfterTauIDCounter(eventCounter.addCounter("RtauAfterTauID")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
     fNJetsCounter(eventCounter.addCounter("njets")),
@@ -511,23 +511,27 @@ namespace HPlus {
     //    std::cout << " weight before  = " << fEventWeight.getWeight() << " met " << Met <<  std::endl;
     //    hMETBeforeTauId->Fill(metData.getSelectedMET()->et());  
 
-
+ 
 
   
     // TauID
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup); 
     //    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
+    if(!tauData.passedEvent()) return false; // Require at least one tau
+    increment(fTausExistCounter);
+
     edm::PtrVector<pat::Tau> myBestTauCandidate;
+ 
     if (tauData.getSelectedTaus().size())
       myBestTauCandidate.push_back(tauData.getSelectedTau());
     // Obtain MC matching - for EWK without genuine taus
+                
     FakeTauIdentifier::MCSelectedTauMatchType myMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
     // Apply scale factor for fake tau
     if (!iEvent.isRealData())
       fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(myMatch, tauData.getSelectedTau()->eta()));
 
-    //if(tauData.getSelectedTaus().size() == 0) return false; // at least one tau candidate
-    increment(fTausExistCounter);
+    // tauID cut applied to inverted events   
 
     // nprongs
     if (!tauData.selectedTauPassesNProngs()) return false;
@@ -539,7 +543,6 @@ namespace HPlus {
     hSelectedTauRtau->Fill(tauData.getRtauOfSelectedTau());
     if (!tauData.selectedTauPassesRtau()) return false;
     increment(fRtauAfterTauIDCounter);
-    // now tau ID has been applied
 
 
     if(iEvent.isRealData())
@@ -709,7 +712,11 @@ namespace HPlus {
    
 
     // TauID, inverted TauID, veto on isolated tau
-    if(!tauData.selectedTausDoNotPassIsolation())  return false; 
+    //    if(tauData.selectedTauPassesIsolation())  return false;
+    //    if(!selectedTausDoNotPassIsolation()) return false;
+  
+    if (tauData.selectedTauPassesDiscriminator(myTauIsolation, 0.5)) return false;
+ 
     // veto was successfull
     increment(fTauVetoAfterTauIDCounter);
 

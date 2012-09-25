@@ -175,6 +175,10 @@ namespace HPlus {
     Count fTauNotInTauFromBottomCounter;
     Count fTauNotInTauFromHplusCounter;
 
+    Count fObservableMuonsCounter;
+    Count fObservableElectronsCounter;
+    Count fObservableTausCounter;
+
     Count fTauIsHadronFromHplusCounter;
     Count fTauIsElectronFromHplusCounter;
     Count fTauIsMuonFromHplusCounter;
@@ -240,6 +244,13 @@ namespace HPlus {
 
     // Scale factor uncertainties
     ScaleFactorUncertaintyManager fSFUncertaintiesAfterSelection;
+    ScaleFactorUncertaintyManager fEWKFakeTausSFUncertaintiesAfterSelection;
+
+
+    edm::InputTag fOneProngTauSrc;
+    edm::InputTag fOneAndThreeProngTauSrc;
+    edm::InputTag fThreeProngTauSrc;
+
 
     // Histograms
     
@@ -257,6 +268,13 @@ namespace HPlus {
     WrappedTH1 *htransverseMassElectronNotInTau;
     WrappedTH1 *htransverseMassTauNotInTau;
     WrappedTH1 *htransverseMassMetReso02;
+    WrappedTH1 *htransverseMassLeptonNotInTau;
+    WrappedTH1 *htransverseMassNoLeptonNotInTau;
+    WrappedTH1 *htransverseMassNoLeptonGoodMet;
+    WrappedTH1 *htransverseMassNoLeptonGoodMetGoodTau;
+    WrappedTH1 *htransverseMassLeptonRealSignalTau;
+    WrappedTH1 *htransverseMassLeptonFakeSignalTau;
+    WrappedTH1 *htransverseMassNoObservableLeptons;
     
     // Transverse mass histograms
     WrappedTH1 *hTransverseMass;
@@ -269,6 +287,7 @@ namespace HPlus {
     WrappedTH1 *hTransverseMassNoBtaggingWithRtau;
     WrappedTH1 *hTransverseMassTopSelection;
     WrappedTH1 *hTransverseMassTopChiSelection;
+    WrappedTH1 *hTransverseMassWmassCut;
     WrappedTH1 *hTransverseMassTopBjetSelection;
     WrappedTH1 *hTransverseMassTopWithWSelection;
     WrappedTH1 *hTransverseMassMET70;
@@ -280,6 +299,9 @@ namespace HPlus {
     WrappedTH1 *hTransverseMassAfterDeltaPhi130;
     WrappedTH1 *hTransverseMassAfterDeltaPhi90;
     WrappedTH2 *hDeltaPhiVsTransverseMass;
+    WrappedTH2 *hTransverseMassVsNjets;
+    WrappedTH2 *hEWKFakeTausTransverseMassVsNjets;
+
 
     // Full mass histograms
     WrappedTH1 *hFullMass;
@@ -321,6 +343,7 @@ namespace HPlus {
     WrappedTH1* hCtrlIdentifiedElectronPt;
     WrappedTH1* hCtrlIdentifiedMuonPt;
     WrappedTH1* hCtrlNjets;
+    WrappedTH1* hCtrlNjetsAfterMET;
     WrappedTH1* hCtrlSelectedTauPtAfterStandardSelections;
     WrappedTH1* hCtrlSelectedTauEtaAfterStandardSelections;
     WrappedTH1* hCtrlSelectedTauPhiAfterStandardSelections;
@@ -338,6 +361,7 @@ namespace HPlus {
     WrappedTH1* hCtrlEWKFakeTausIdentifiedElectronPt;
     WrappedTH1* hCtrlEWKFakeTausIdentifiedMuonPt;
     WrappedTH1* hCtrlEWKFakeTausNjets;
+    WrappedTH1* hCtrlEWKFakeTausNjetsAfterMET;
     WrappedTH1* hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections;
     WrappedTH1* hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections;
     WrappedTH1* hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections;
@@ -356,7 +380,7 @@ namespace HPlus {
     WrappedTH2* hCtrlJetMatrixAfterMET;
     WrappedTH2* hCtrlJetMatrixAfterMET100;
 
-    // CounterGroups for EWK fake taus (aka non-QCD type 2(
+    // CounterGroups for EWK fake taus (aka non-QCD type 2)
     CounterGroup fEWKFakeTausGroup;
     CounterGroup fAllTausCounterGroup;
     CounterGroup fElectronToTausCounterGroup;
