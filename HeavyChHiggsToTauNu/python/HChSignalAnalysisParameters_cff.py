@@ -439,26 +439,26 @@ def _getTriggerVertexArgs(kwargs):
         vargs["pset"] = module.vertexWeight
     return (effargs, vargs)
 
-def setDataTriggerEfficiency(dataVersion, era):
+def setDataTriggerEfficiency(dataVersion, era, pset=triggerEfficiencyScaleFactor):
     if dataVersion.isMC():
         if dataVersion.isS4():
-            triggerEfficiencyScaleFactor.mcSelect = "Summer11"
+            pset.mcSelect = "Summer11"
         elif dataVersion.isS6():
-            triggerEfficiencyScaleFactor.mcSelect = "Fall11"
+            pset.mcSelect = "Fall11"
         elif dataVersion.isHighPU():
-	    triggerEfficiencyScaleFactor.mode = "disabled"
+	    pset.mode = "disabled"
         else:
             raise Exception("MC trigger efficencies are available only for Summer11 and Fall11")
     if era == "EPS":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_160404_167913"]
+        pset.dataSelect = ["runs_160404_167913"]
     elif era == "Run2011A":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692"]
+        pset.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692"]
     elif era == "Run2011A-EPS":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_170722_173198", "runs_173236_173692"]
+        pset.dataSelect = ["runs_170722_173198", "runs_173236_173692"]
     elif era == "Run2011B":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_175832_180252"]
+        pset.dataSelect = ["runs_175832_180252"]
     elif era == "Run2011AB":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692", "runs_175832_180252"]
+        pset.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692", "runs_175832_180252"]
     else:
         raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011AB'")
 
@@ -503,9 +503,46 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
                                       mcPUdistributionLabel = pset.mcPUdistributionLabel,
                                       alias = cms.string("PUVertexWeight"+suffix)
     )
-    setattr(process, "PUWeightProducer"+suffix, PUWeightProducer)
+    name = "PUWeightProducer"+era+suffix
+    setattr(process, name, PUWeightProducer)
     commonSequence *= PUWeightProducer
-    psetReader.PUVertexWeightSrc = "PUWeightProducer"+suffix
+    psetReader.PUVertexWeightSrc = name
+
+def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, psetReader, suffix):
+    if dataVersion.isData():
+        return
+    if dataVersion.isS6():
+        # Fall11
+        pset.mcPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramMCFall11.root"
+        pset.mcPUdistributionLabel = "pileup"
+    elif dataVersion.isHighPU():
+	# High PU - disable vertex reweighting
+        pset.enabled = False
+        psetReader.enabled = False
+        return
+    else:
+        raise Exception("No PU reweighting support for anything else than Fall11 S6 scenario at the moment")
+    pset.enabled = True
+    psetReader.enabled = True
+
+    # None means to use the existing, just replace the suffix
+    pset.dataPUdistribution = pset.dataPUdistribution.value().replace(".root", suffix+".root")
+    pset.dataPUdistributionLabel = "pileup"
+    # Make procuder for weights and add it to common sequence
+    PUWeightProducer = cms.EDProducer("HPlusVertexWeightProducer",
+                                      vertexSrc = pset.vertexSrc,
+                                      puSummarySrc = pset.puSummarySrc,
+                                      enabled = pset.enabled,
+                                      dataPUdistribution = pset.dataPUdistribution,
+                                      dataPUdistributionLabel = pset.dataPUdistributionLabel,
+                                      mcPUdistribution = pset.mcPUdistribution,
+                                      mcPUdistributionLabel = pset.mcPUdistributionLabel,
+                                      alias = cms.string("PUVertexWeight"+suffix)
+    )
+    name = psetReader.PUVertexWeightSrc.value()+suffix
+    setattr(process, name, PUWeightProducer)
+    commonSequence *= PUWeightProducer
+    psetReader.PUVertexWeightSrc = name
 
 # Tau selection
 def forEachTauSelection(function):

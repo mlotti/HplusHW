@@ -493,19 +493,19 @@ def addJESVariation(name, doJetUnclusteredVariation):
     module.Tree.fill = False        
     module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
 
-    jesVariation.addTESVariation(process, name, "TESPlus",  module, additionalCounters, "Up")
-    jesVariation.addTESVariation(process, name, "TESMinus", module, additionalCounters, "Down")
+    jesVariation.addTESVariation(process, name, "TESPlus",  module, "Up")
+    jesVariation.addTESVariation(process, name, "TESMinus", module, "Down")
 
     if doJetUnclusteredVariation:
         # Do all variations beyond TES
-        jesVariation.addJESVariation(process, name, "JESPlus",  module, additionalCounters, "Up")
-        jesVariation.addJESVariation(process, name, "JESMinus", module, additionalCounters, "Down")
+        jesVariation.addJESVariation(process, name, "JESPlus",  module, "Up")
+        jesVariation.addJESVariation(process, name, "JESMinus", module, "Down")
 
-        jesVariation.addJERVariation(process, name, "JERPlus",  module, additionalCounters, "Up")
-        jesVariation.addJERVariation(process, name, "JERMinus", module, additionalCounters, "Down")
+        jesVariation.addJERVariation(process, name, "JERPlus",  module, "Up")
+        jesVariation.addJERVariation(process, name, "JERMinus", module, "Down")
 
-        jesVariation.addUESVariation(process, name, "METPlus",  module, additionalCounters, "Up")
-        jesVariation.addUESVariation(process, name, "METMinus", module, additionalCounters, "Down")
+        jesVariation.addUESVariation(process, name, "METPlus",  module, "Up")
+        jesVariation.addUESVariation(process, name, "METMinus", module, "Down")
 
 if doJESVariation or doSystematics:
     doJetUnclusteredVariation = True
