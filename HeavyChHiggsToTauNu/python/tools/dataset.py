@@ -8,6 +8,7 @@
 import glob, os, sys, re
 import math
 import copy
+import StringIO
 
 import ROOT
 
@@ -2030,8 +2031,9 @@ class DatasetManager:
         for dataset in self.datasets:
             dataset.updateNAllEventsToPUWeighted(**kwargs)
 
-    ## Print dataset information.
-    def printInfo(self):
+    ## Format dataset information
+    def formatInfo(self):
+        out = StringIO.StringIO()
         col1hdr = "Dataset"
         col2hdr = "Cross section (pb)"
         col3hdr = "Norm. factor"
@@ -2047,7 +2049,7 @@ class DatasetManager:
         c3skip = " "*(len(col3hdr)+2)
         c4skip = " "*(len(col4hdr)+2)
 
-        print (c1fmt%col1hdr)+"  "+col2hdr+"  "+col3hdr+"  "+col4hdr
+        out.write((c1fmt%col1hdr)+"  "+col2hdr+"  "+col3hdr+"  "+col4hdr+"\n")
         for dataset in self.datasets:
             line = (c1fmt % dataset.getName())
             if dataset.isMC():
@@ -2059,8 +2061,16 @@ class DatasetManager:
                     line += c3skip
             else:
                 line += c2skip+c3skip + c4fmt%dataset.getLuminosity()
-            print line
+            out.write(line)
+            out.write("\n")
 
+        ret = out.getvalue()
+        out.close()
+        return ret
+
+    ## Print dataset information.
+    def printInfo(self):
+        print self.formatInfo()
 
     ## \var datasets
     # List of dataset.Dataset (or dataset.DatasetMerged) objects to manage
