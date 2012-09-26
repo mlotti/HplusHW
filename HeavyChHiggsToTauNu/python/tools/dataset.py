@@ -249,6 +249,11 @@ def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
 # <b>Keyword arguments</b>
 # \li \a opts       Optional OptionParser object. Should have options added with addOptions() and multicrab.addOptions().
 # \li \a cfgfile    Path to the multicrab.cfg file (for default, see multicrab.getTaskDirectories())
+# \li \a dataEra    Optional data era string. If given, keeps data
+#                   datasets only from this era, and sets the
+#                   TDirectory path replacement scheme for MC
+#                   datasets. Forwarded to getDatasetsFromCrabDirs()
+#                   and eventually to dataset.Dataset.__init__()
 # \li Rest are forwarded to getDatasetsFromCrabDirs()
 #
 # \return DatasetManager object
@@ -267,9 +272,22 @@ def getDatasetsFromMulticrabCfg(**kwargs):
     else:
         taskDirs = multicrab.getTaskDirectories(opts)
 
+    dataEra = kwargs.get("dataEra", None)
+
     datasetMgr = getDatasetsFromCrabDirs(taskDirs, **_args)
     if len(dirname) > 0:
         datasetMgr._setBaseDirectory(dirname)
+
+    if dataEra != None:
+        if dataEra == "Run2011A":
+            datasetMgr.remove(filter(lambda name: not "2011A_" in name, datasetMgr.getDataDatasetNames()))
+        elif dataEra == "Run2011B":
+            datasetMgr.remove(filter(lambda name: not "2011B_" in name, datasetMgr.getDataDatasetNames()))
+        elif dataEra == "Run2011AB":
+            pass
+        else:
+            raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB" % dataEra)
+
     return datasetMgr
 
 ## Construct DatasetManager from a list of CRAB task directory names.
@@ -359,7 +377,8 @@ def getDatasetsFromRootFiles(rootFileList, **kwargs):
 ## Default command line options
 _optionDefaults = {
     "input": "histograms-*.root",
-    "counterdir": "signalAnalysis/counters"
+    "counterdir": "signalAnalysis/counters",
+    "analysisBaseName": "signalAnalysis",
 }
 
 ## Add common dataset options to OptionParser object.
@@ -1274,13 +1293,26 @@ class Dataset:
     #                          into account with \a useWeightedCounters
     #                          argument
     # \param weightedCounters  If True, pick the counters from the 'weighted' subdirectory
+    # \param analysisBaseName  Base part of the analysis directory name (None for default, specified in _optionDefaults, only applicable for MC)
+    # \param dataEra           String for data era (None for not to do the replacement, only applicable for MC)
+    # \param doEraReplace      Boolean flag to indicate if the era replacement should really be done
     # 
     # Opens the ROOT file, reads 'configInfo/configInfo' histogram
     # (if it exists), and reads the main event counter
     # ('counterDir/counters') if counterDir is not None. Reads also
     # 'configInfo/dataVersion' TNamed.
-    # """
-    def __init__(self, name, fname, counterDir, weightedCounters=True):
+    #
+    # With the v44_4 pattuples we improved the "Run2011 A vs. B vs AB"
+    # workflow such that for MC we run analyzers for all data eras.
+    # This means that the TDirectory names will be different for data
+    # and MC, such that in MC the era name is appended to the
+    # directory name. In order to easily pick the data eras from plot
+    # scripts, Dataset supports simple replacement scheme in the
+    # TDirectory names for all histogram accesses (so this deals with
+    # histograms for both plots and counters). The information must be
+    # given in the constructor, because the counters are read in the
+    # construction time.
+    def __init__(self, name, fname, counterDir, weightedCounters=True, analysisBaseName=None, dataEra=None, doEraReplace=True):
         self.name = name
         self._setBaseDirectory(os.path.dirname(os.path.dirname(os.path.dirname(fname))))
         self.file = ROOT.TFile.Open(fname)
@@ -1298,43 +1330,19 @@ class Dataset:
             raise Exception("Unable to determine dataVersion for dataset %s from file %s" % (name, fname))
         self.dataVersion = dataVersion.GetTitle()
 
-        era = configInfo.Get("era")
-        if era == None:
-            self.era = None
-        else:
-            self.era = era.GetTitle()
-
         self._isData = "data" in self.dataVersion
+        self._weightedCounters = weightedCounters
+        if analysisBaseName == None:
+            self._analysisBaseName = _optionDefaults["analysisBaseName"]
+        else:
+            self._analysisBaseName = analysisBaseName
+        self._dataEra = dataEra
+        self._doEraReplace = doEraReplace
         if counterDir != None:
-            self.counterDir = counterDir
-            self._origCounterDir = counterDir
-            d = self.file.Get(counterDir)
-            if d == None:
-                raise Exception("Could not find counter directory %s from file %s" % (counterDir, fname))
-            if d.Get("counter") != None:
-                ctr = _histoToCounter(d.Get("counter"))
-                self.nAllEventsUnweighted = ctr[0][1].value() # first counter, second element of the tuple
-            else:
-                if not weightedCounters:
-                    raise Exception("Could not find counter histogram in directory %s from file %s" % (self.counterDir, fname))
-                self.nAllEventsUnweighted = -1
-            self.nAllEventsWeighted = None
+            self._unweightedCounterDir = counterDir
+            self._weightedCounterDir = counterDir+"/weighted"
 
-            self.nAllEvents = self.nAllEventsUnweighted
-
-            if weightedCounters:
-                self.counterDir += "/weighted"
-                d = self.file.Get(self.counterDir)
-                if d == None:
-                    raise Exception("Could not find counter directory %s from file %s" % (self.counterDir, fname))
-                h = d.Get("counter")
-                if h == None:
-                    raise Exception("No TH1 'counter' in directory '%s' of ROOT file '%s'" % (self.counterDir, fname))
-                ctr = _histoToCounter(h)
-                h.Delete()
-                self.nAllEventsWeighted = ctr[0][1].value() # first counter, second element of the tuple
-
-                self.nAllEvents = self.nAllEventsWeighted
+            self._readCounters()
 
     ## Close the file
     #
@@ -1357,9 +1365,52 @@ class Dataset:
     # while also keeping the original ttbar with the original SM cross
     # section.
     def deepCopy(self):
-        d = Dataset(self.name, self.file.GetName(), self._origCounterDir, self.nAllEventsWeighted != None)
+        d = Dataset(self.name, self.file.GetName(), self._unweightedCounterDir, self._weightedCounters, self._analysisBaseName, self._dataEra, self._doEraReplace)
         d.info.update(self.info)
         return d
+
+    ## Get ROOT histogram (or actually any object from the analysis directory)
+    #
+    # \param name   Full path to the ROOT object within the ROOT file
+    #
+    # If dataset is MC, and the data era has been set, replaces the
+    # analysis base name part in \a name with one containing the data
+    # era.
+    def _getRootHisto(self, name):
+        if self.isMC() and self._dataEra != None and self._doEraReplace:
+            name = name.replace(self._analysisBaseName, self._analysisBaseName+self._dataEra, 1) # replace only the first occurrance
+        return self.file.Get(name)
+
+    ## Read counters
+    def _readCounters(self):
+        self.counterDir = self._unweightedCounterDir
+        d = self._getRootHisto(self.counterDir)
+        if d == None:
+            raise Exception("Could not find counter directory %s from file %s" % (self.counterDir, self.file.GetName()))
+        if d.Get("counter") != None:
+            ctr = _histoToCounter(d.Get("counter"))
+            self.nAllEventsUnweighted = ctr[0][1].value() # first counter, second element of the tuple
+        else:
+            if not self._weightedCounters:
+                raise Exception("Could not find counter histogram in directory %s from file %s" % (self.counterDir, self.file.GetName()))
+            self.nAllEventsUnweighted = -1
+        self.nAllEventsWeighted = None
+
+        self.nAllEvents = self.nAllEventsUnweighted
+
+        if self._weightedCounters:
+            self.counterDir = self._weightedCounterDir
+            d = self._getRootHisto(self.counterDir)
+            if d == None:
+                raise Exception("Could not find counter directory %s from file %s" % (self.counterDir, self.file.GetName()))
+            h = d.Get("counter")
+            if h == None:
+                raise Exception("No TH1 'counter' in directory '%s' of ROOT file '%s'" % (self.counterDir, self.file.GetName()))
+            ctr = _histoToCounter(h)
+            h.Delete()
+            self.nAllEventsWeighted = ctr[0][1].value() # first counter, second element of the tuple
+
+            self.nAllEvents = self.nAllEventsWeighted
 
     def getName(self):
         return self.name
@@ -1425,14 +1476,17 @@ class Dataset:
             return
 
         if era == None:
-            era = self.era
+            era = self._dataEra
         if era == None:
-            raise Exception("%s: tried to update number of all events to pile-up reweighted value, but the data era was not set in 'configInfo' nor was given as an argument" % self.getName())
+            raise Exception("%s: tried to update number of all events to pile-up reweighted value, but the data era was not set in the Dataset constructor nor was given as an argument" % self.getName())
 
         try:
             data = _weightedAllEvents[era]
         except KeyError:
             raise Exception("No weighted numbers of all events specified for data era '%s', see dataset._weightedAllEvents dictionary" % era)
+
+        if self.nAllEventsUnweighted < 0:
+            raise Exception("Number of all unweighted events is %d < 0, this is a symptom of missing unweighted counter" % self.nAllEventsUnweighted)
 
         try:
             self.nAllEvents = data[self.getName()].getWeighted(self.getName(), self.nAllEventsUnweighted, **kwargs)
@@ -1466,7 +1520,7 @@ class Dataset:
         if hasattr(name, "draw"):
             return True
         pname = name
-        return self.file.Get(pname) != None
+        return self._getRootHisto(pname) != None
 
     ## Get the dataset.DatasetRootHisto object for a named histogram.
     # 
@@ -1484,7 +1538,7 @@ class Dataset:
             h = name.draw(self.file, self.getName())
         else:
             pname = name
-            h = self.file.Get(pname)
+            h = self._getRootHisto(pname)
             if h == None:
                 raise Exception("Unable to find histogram '%s' from file '%s'" % (pname, self.file.GetName()))
             name = h.GetName()+"_"+self.name
@@ -1501,7 +1555,7 @@ class Dataset:
     # 
     # \return List of names in the directory.
     def getDirectoryContent(self, directory, predicate=lambda x: True):
-        d = self.file.Get(directory)
+        d = self._getRootHisto(directory)
         if d == None:
             raise Exception("No object %s in file %s" % (directory, self.file.GetName()))
         dirlist = d.GetListOfKeys()
@@ -1599,6 +1653,10 @@ class DatasetMerged:
         dm = DatasetMerged(self.name, [d.deepCopy() for d in self.datasets])
         dm.info.update(self.info)
         return dm
+
+    def setDirectoryPostfix(self, postfix):
+        for d in self.datasets:
+            d.setDirectoryPostfix(postfix)
 
     def getName(self):
         return self.name
