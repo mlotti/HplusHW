@@ -8,6 +8,7 @@
 #include<iostream>
 #include<iomanip>
 #include<stdexcept>
+#include<cmath>
 
 // EventCounter
 EventCounter::Count::Count(EventCounter& ec, size_t index):
@@ -29,7 +30,6 @@ EventCounter::Count EventCounter::addCounter(const std::string& name) {
 }
 void EventCounter::incrementCount(size_t countIndex) {
   values[countIndex] += 1;
-  // FIXME: weights...
   weights[countIndex] += fWeight;
   weightsSquared[countIndex] += (fWeight*fWeight);
 }
@@ -51,7 +51,7 @@ void EventCounter::serialize() {
     size_t bin = i+1;
     counter->SetBinContent(bin, values[i]);
     weightedCounter->SetBinContent(bin, weights[i]);
-    weightedCounter->SetBinError(bin, weightsSquared[i]);
+    weightedCounter->SetBinError(bin, std::sqrt(weightsSquared[i]));
   }
 }
 
