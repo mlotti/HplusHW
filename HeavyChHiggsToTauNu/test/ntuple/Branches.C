@@ -39,7 +39,7 @@ void MuonCollection::setupBranches(TTree *tree, bool isMC) {
   if(isMC) {
     fPdgId.setupBranch(tree, (fPrefix+"_pdgid").c_str());
     fMotherPdgId.setupBranch(tree, (fPrefix+"_mother_pdgid").c_str());
-    fMotherPdgId.setupBranch(tree, (fPrefix+"_grandmother_pdgid").c_str());
+    fGrandMotherPdgId.setupBranch(tree, (fPrefix+"_grandmother_pdgid").c_str());
   }
 }
 
