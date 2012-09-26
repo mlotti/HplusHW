@@ -7,12 +7,35 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation as jesVariation
 tooManyAnalyzersLimit = 100
 
 ## Infrastucture to help analysis configuration building
+#
+# This is the "master configuration" for analysis jobs. It is
+# organized as a class to keep the complexity under control (having
+# all the flags in a flat file, and all structure copy-pasted between
+# the different analysis configuration files started to become
+# unmanageable).
+#
+# Various options are set in the constructor, and the configuration
+# itself is built with e.g. buildSignalAnalysis(), which returns the
+# cms.Process object which should be assigned to a local 'process'
+# variable. It can, of course, be further customized in the analysis
+# job configuration file.
+#
+# Since there are now many dimensions creating arrays of analyzers
+# (data era, optimisation, systematics), the builder keeps track of
+# the number of analyzers created in each category and prints the
+# counts in the end. If the total count is too high
+# (tooManyAnalyzersLimit) and allowTooManyAnalyzers flag is False
+# (default), an exception is raised. These checks are made in order to
+# not to accidentally have gazillion analyzers.
 class ConfigBuilder:
     ## Constructor
     #
     # \param dataVersion   String for data version
     # \param dataEras      List of strings of data (or PU weight) eras. One
     #                      analyzer per era is constructed
+    #
+    # Other parameters are optional, and have their default values in
+    # below.
     def __init__(self, dataVersion, dataEras,
                  # Job options
                  processName = "Analysis",
@@ -84,18 +107,29 @@ class ConfigBuilder:
         self.analyzerCategories = []
 
 
+    ## Build configuration for signal analysis job
+    #
+    # \return cms.Process object, should be assigned to a local
+    #         'process' variable in the analysis job configuration file
     def buildSignalAnalysis(self):
         import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
         def create(param):
             return [signalAnalysis.createEDFilter(param)]
         return self._build(create, ["signalAnalysis"])
 
+    ## Accumulate the number of analyzers to a category
+    #
+    # \param key     Analyzer category name
+    # \param number  Number (of analyzers) to add to the cateogyr
     def _accumulateAnalyzers(self, key, number):
         if not key in self.numberOfAnalyzers:
             self.analyzerCategories.append(key)
 
         self.numberOfAnalyzers[key] = self.numberOfAnalyzers.get(key, 0) + number
 
+    ## Checks that the number of analyzers is sensible
+    #
+    # I.e. prints stats and might raise an exception)
     def _checkNumberOfAnalyzers(self):
         print "Created analyzers in following categories"
         width = max([len(cat) for cat in self.analyzerCategories]) 
@@ -115,6 +149,23 @@ class ConfigBuilder:
             else:
                 raise Exception("Total number of analyzers (%d) exceeds the suggested limit (%d). If you're sure you want to run so many analyzers, add 'allowTooManyAnalyzers=True' to the ConfigBuilder() constructor call." % (s, tooManyAnalyzersLimit))
 
+    ## Do the actual building of the configuration
+    #
+    # \param createAnalysesFunction Function, which takes
+    #                               HChSignalAnalysisParameters_cff as
+    #                               an argument, and returns a list of
+    #                               analysis modules (cms.EDFilter)
+    # \param analysisNames_         List of analysis module names
+    #
+    # \return cms.Process object
+    #
+    # We need to take in functions instead of the modules themselves,
+    # because the HChSignalAnalysisParameters_cff is configured in the
+    # body of this function.
+    #
+    # The modules created by the function are taken as the "main
+    # modules". E.g. data era, optimisation, systematic variation
+    # modules are created for each of the main modules.
     def _build(self, createAnalysesFunction, analysisNames_):
         # Common initialization
         (process, additionalCounters) = self._buildCommon()
@@ -227,6 +278,17 @@ class ConfigBuilder:
 
         return process
 
+    ## Build common part of the analysis configuration
+    #
+    # \return Tuple of cms.Process object, and list of additional counter names (to be read from the event)
+    #
+    # The steps include
+    # \li Create process
+    # \li Create source, set maxEvents
+    # \li Set GlobalTag
+    # \li Load HchCommon_cfi
+    # \li Run HChPatTuple.addPatOnTheFly
+    # \li Setup ConfigInfoAnalyzer
     def _buildCommon(self):
         # Setup process
         process = cms.Process(self.processName)
@@ -273,6 +335,9 @@ class ConfigBuilder:
 
         return (process, additionalCounters)
 
+    ## Configure HChSignalAnalysisParameters_cff
+    #
+    # \return HChSignalAnalysisParameters_cff module object
     def _buildParam(self):
         # Trigger from command line options
         import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
@@ -304,6 +369,10 @@ class ConfigBuilder:
 
         return param
 
+    ## Setup b tag DB
+    #
+    # \param process  cms.Process object
+    # \param param    HChSignalAnalysisParameters_cff module object
     def _useBTagDB(self, process, param):
         if not self.useBTagDB:
             return
@@ -329,6 +398,10 @@ class ConfigBuilder:
         process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
         param.bTagging.UseBTagDB  = False
 
+    ## Setup for tau embedding input
+    #
+    # \param process  cms.Process object
+    # \param param    HChSignalAnalysisParameters_cff module object
     def _customizeTauEmbeddingInput(self, process, param):
         if self.options.tauEmbeddingInput != 0:
             #tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
@@ -339,6 +412,10 @@ class ConfigBuilder:
                 applyIsolation = False
                 additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
                                                                                            enableIsolation=applyIsolation))
+
+    ## Print module configuration
+    #
+    # \param module   Analysis module
     def _printModule(self, module):
         #print "\nAnalysis is blind:", module.blindAnalysisStatus, "\n"
         print "Histogram level:", module.histogramAmbientLevel.value()
@@ -361,6 +438,12 @@ class ConfigBuilder:
         print "muons: ", module.GlobalMuonVeto
         print "jets: ", module.jetSelection
 
+
+    ## Build array of analyzers to scan various tau againstElectron discriminators
+    #
+    # \param process          cms.Process object
+    # \param analysisModules  List of analysis modules to be used as prototypes
+    # \param analysisNames    List of analysis module names
     def _buildAgainstElectronScan(self, process, analysisModules, analysisNames):
         if not self.doAgainstElectronScan:
             return
@@ -385,7 +468,12 @@ class ConfigBuilder:
                 N += 1
         self._accumulateAnalyzers("AgainstElectron scan", N)
  
-
+    ## Build "tau embedding"-like preselection for normal MC
+    #
+    # \param process             cms.Process object
+    # \param analysisModules     List of analysis modules to be used as prototypes
+    # \param analysisNames       List of analysis module names
+    # \param additionalCounters  List of strings for additional counters
     def _buildTauEmbeddingLikePreselection(self, process, analysisModules, analysisNames, additionalCounters):
         if self.options.doTauEmbeddingLikePreselection == 0:
             return []
@@ -441,6 +529,11 @@ class ConfigBuilder:
         self._accumulateAnalyzers("Tau embedding -like preselection", N)
         return retNames
 
+    ## Build additional analyses for tau embedding input
+    #
+    # \param process          cms.Process object
+    # \param analysisModules  List of analysis modules to be used as prototypes
+    # \param analysisNames    List of analysis module names
     def _additionalTauEmbeddingAnalyses(self, process, analysisModules, analysisNames):
         if self.options.tauEmbeddingInput == 0:
             return []
@@ -465,6 +558,10 @@ class ConfigBuilder:
         self._accumulateAnalyzers("Tau embedding analyses", N)
         return retNames
 
+    ## Build JES variation
+    #
+    # \param process                      cms.Process object
+    # \param analysisNamesForSystematics  Names of the analysis modules for which the JES variation should be done
     def _buildJESVariation(self, process, analysisNamesForSystematics):
         if not (self.doJESVariation or self.doSystematics):
             return
@@ -481,6 +578,11 @@ class ConfigBuilder:
             print "JES variation disabled for data (not meaningful for data)"
 
 
+    ## Add JES variation for one module
+    #
+    # \param process                    cms.Process object
+    # \param name                       Name of the module to be used as a prototype
+    # \param doJetUnclusteredVariation  Flag if JES+JER+UES variations should be done
     def _addJESVariation(self, process, name, doJetUnclusteredVariation):
         module = getattr(process, name)
 
@@ -508,6 +610,10 @@ class ConfigBuilder:
 
         self._accumulateAnalyzers("JES variation", N)
 
+    ## Build PU weight variation
+    #
+    # \param process                      cms.Process object
+    # \param analysisNamesForSystematics  Names of the analysis modules for which the PU weight variation should be done
     def _buildPUWeightVariation(self, process, analysisNamesForSystematics, param):
         if not (self.doPUWeightVariation or self.doSystematics):
             return
@@ -519,6 +625,11 @@ class ConfigBuilder:
         else:
             print "PU weight variation disabled for data (not meaningful for data)"
 
+    ## Add PU weight variation for one module
+    #
+    # \param process   cms.Process object
+    # \param name      Name of the module to be used as a prototype
+    # \param param     HChSignalAnalysisParameters_cff module object
     def _addPUWeightVariation(self, process, name, param):
         # Up variation
         module = getattr(process, name).clone()
