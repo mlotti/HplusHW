@@ -36,7 +36,7 @@ weight = {
     }[era]
 
 mcOnly = True
-#mcOnly = False
+mcOnly = False
 mcLuminosity = 5049.069000
 
 mergeMC = True
@@ -97,15 +97,15 @@ def main():
         ntupleCache = dataset.NtupleCache(analysis+"/tree", "MuonAnalysisSelector",
                                           selectorArgs=[weight, isolation],
                                           cacheFileName="histogramCache-%s.root" % name,
-                                          #process=False
+                                          #process=False,
                                           )
 
 
 #        doPlots(datasets, name, ntupleCache)
-        printCounters(datasets, name, ntupleCache)
+#        printCounters(datasets, name, ntupleCache)
 
-#    doPlotsWTauMu(datasets, "TTJets") FIXME
-#    doPlotsWTauMu(datasets, "WJets")  FIXME
+        doPlotsWTauMu(datasets, name, "TTJets", ntupleCache)
+        doPlotsWTauMu(datasets, name, "WJets", ntupleCache)
 
 def doPlots(datasets, selectionName, ntupleCache):
     def createPlot(name, **kwargs):
@@ -185,6 +185,82 @@ def plotEfficiency(datasets, allPath, passedPath, name, xlabel, rebinBins=None, 
         opts = {"ymin": 0.0, "ymax": 1.1}
 
         plots.drawPlot(p, name+"_"+dname, xlabel, addLuminosityText=dset.isData(), opts=opts, **kwargs)
+
+
+def doPlotsWTauMu(datasets, name, datasetName, ntupleCache):
+    ds = datasets.getDataset(datasetName)
+
+    # Take first unweighted histograms for the fraction plot
+    drh_all = ds.getDatasetRootHisto(ntupleCache.histogram("selectedMuonPt_AfterJetSelection_Unweighted"))
+    drh_pure = ds.getDatasetRootHisto(ntupleCache.histogram("selectedMuonPt_AfterJetSelection_MuFromW_Unweighted"))
+    hallUn = drh_all.getHistogram()
+    hpureUn = drh_pure.getHistogram()
+
+    # Then the correctly weighted for the main plot
+    drh_all = ds.getDatasetRootHisto(ntupleCache.histogram("selectedMuonPt_AfterJetSelection"))
+    drh_pure = ds.getDatasetRootHisto(ntupleCache.histogram("selectedMuonPt_AfterJetSelection_MuFromW"))
+    lumi = datasets.getDataset("Data").getLuminosity()
+    drh_all.normalizeToLuminosity(lumi)
+    drh_pure.normalizeToLuminosity(lumi)
+    hall = drh_all.getHistogram()
+    hpure = drh_pure.getHistogram()
+
+    hall.SetName("All")
+    hpure.SetName("Pure")
+
+    p = plots.ComparisonPlot(hall, hpure)
+    p.histoMgr.setHistoLegendLabelMany({
+            "All": "All muons",
+#            "Pure": "W#rightarrow#tau#rightarrow#mu"
+            "Pure": "W#rightarrow#mu"
+            })
+    p.histoMgr.forEachHisto(styles.generator())
+
+    hallErr = hall.Clone("AllError")
+    hallErr.SetFillColor(ROOT.kBlue-7)
+    hallErr.SetFillStyle(3004)
+    hallErr.SetMarkerSize(0)
+    p.prependPlotObject(hallErr, "E2")
+
+    hpureErr = hpure.Clone("PureErr")
+    hpureErr.SetFillColor(ROOT.kRed-7)
+    hpureErr.SetFillStyle(3005)
+    hpureErr.SetMarkerSize(0)
+    p.prependPlotObject(hpureErr, "E2")
+
+    p.createFrame(era+"_selectedMuonPt_AFterJetSelection_MuFromW_"+datasetName, createRatio=True, opts={"ymin": 1e-1, "ymaxfactor": 2}, opts2={"ymin": 0.9, "ymax": 1.05}
+                  )
+    p.setRatios([plots._createRatio(hpureUn, hallUn, "", isBinomial=True)])
+    xmin = p.frame.GetXaxis().GetXmin()
+    xmax = p.frame.GetXaxis().GetXmax()
+    val = 1-0.038479
+    l = ROOT.TLine(xmin, val, xmax, val)
+    l.SetLineWidth(2)
+    l.SetLineColor(ROOT.kBlue)
+    l.SetLineStyle(4)
+    p.prependPlotObjectToRatio(l)
+    #p.appendPlotObjectToRatio(histograms.PlotText(0.18, 0.61, "1-0.038", size=18, color=ROOT.kBlue))
+    p.appendPlotObjectToRatio(histograms.PlotText(0.18, 0.61, "0.038", size=18, color=ROOT.kBlue))
+    p.getFrame2().GetYaxis().SetTitle("W#rightarrow#mu fraction")
+
+    p.getPad().SetLogy(True)
+    p.setLegend(histograms.moveLegend(histograms.createLegend()))
+    tmp = hpureErr.Clone("tmp")
+    tmp.SetFillColor(ROOT.kBlack)
+    tmp.SetFillStyle(3013)
+    tmp.SetLineColor(ROOT.kWhite)
+    p.legend.AddEntry(tmp, "Stat. unc.", "F")
+
+    p.frame.GetXaxis().SetTitle("Muon p_{T} (GeV/c)")
+    p.frame.GetYaxis().SetTitle("Events / %.0f GeV/c" % p.binWidth())
+    p.appendPlotObject(histograms.PlotText(0.5, 0.9, plots._legendLabels.get(name, name), size=18))
+
+    p.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    p.save()
+
+
 
 printed = False
 def printCounters(datasets, selectionName, ntupleCache):

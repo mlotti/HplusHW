@@ -122,6 +122,7 @@ private:
   TH1F *hSelectedMuonPt_AfterMuonVeto;
   TH1F *hSelectedMuonPt_AfterElectronVeto;
   TH1F *hSelectedMuonPt_AfterJetSelection;
+  TH1F *hSelectedMuonPt_AfterJetSelection_Unweighted;
 
   TH1F *hSelectedMuonChargedHadronEmbIso_AfterJetSelection;
   TH1F *hSelectedMuonPuChargedHadronEmbIso_AfterJetSelection;
@@ -134,6 +135,14 @@ private:
 
   TH1F *hSelectedMuonEmbIso_AfterJetSelection;
   TH1F *hSelectedMuonStdIso_AfterJetSelection;
+
+  TH1F *hSelectedMuonPt_AfterJetSelection_MuFromW;
+  TH1F *hSelectedMuonPt_AfterJetSelection_MuFromTauFromW;
+  TH1F *hSelectedMuonPt_AfterJetSelection_MuOther;
+
+  TH1F *hSelectedMuonPt_AfterJetSelection_MuFromW_Unweighted;
+  TH1F *hSelectedMuonPt_AfterJetSelection_MuFromTauFromW_Unweighted;
+  TH1F *hSelectedMuonPt_AfterJetSelection_MuOther_Unweighted;
 
   TH1F *hRawMet_AfterJetSelection;
   TH1F *hTransverseMassRawMet_AfterJetSelection;
@@ -186,6 +195,7 @@ void MuonAnalysisSelector::setOutput(TDirectory *dir) {
   hSelectedMuonPt_AfterMuonVeto = makeTH<TH1F>("selectedMuonPt_AfterMuonVeto", "Selected muon pt", 40, 0, 400);
   hSelectedMuonPt_AfterElectronVeto = makeTH<TH1F>("selectedMuonPt_AfterElectronVeto", "Selected muon pt", 40, 0, 400);
   hSelectedMuonPt_AfterJetSelection = makeTH<TH1F>("selectedMuonPt_AfterJetSelection", "Selected muon pt", 40, 0, 400);
+  hSelectedMuonPt_AfterJetSelection_Unweighted = makeTH<TH1F>("selectedMuonPt_AfterJetSelection_Unweighted", "Selected muon pt", 40, 0, 400);
 
   hSelectedMuonChargedHadronEmbIso_AfterJetSelection = makeTH<TH1F>("selectedMuonChargedHadronEmbIso_AfterJetSelection", "", 50, 0, 5);
   hSelectedMuonPuChargedHadronEmbIso_AfterJetSelection = makeTH<TH1F>("selectedMuonPuChargedHadronEmbIso_AfterJetSelection", "", 50, 0, 5);
@@ -198,6 +208,13 @@ void MuonAnalysisSelector::setOutput(TDirectory *dir) {
 
   hSelectedMuonEmbIso_AfterJetSelection = makeTH<TH1F>("selectedMuonEmbIso_AfterJetSelection", "", 50, 0, 5);
   hSelectedMuonStdIso_AfterJetSelection = makeTH<TH1F>("selectedMuonStdIso_AfterJetSelection", "", 50, 0, 5);
+
+  hSelectedMuonPt_AfterJetSelection_MuFromW = makeTH<TH1F>("selectedMuonPt_AfterJetSelection_MuFromW", "Selected muon pt", 40, 0, 400);
+  hSelectedMuonPt_AfterJetSelection_MuFromTauFromW = makeTH<TH1F>("selectedMuonPt_AfterJetSelection_MuFromTauFromW", "Selected muon pt", 40, 0, 400);
+  hSelectedMuonPt_AfterJetSelection_MuOther = makeTH<TH1F>("selectedMuonPt_AfterJetSelection_MuOther", "Selected muon pt", 40, 0, 400);
+  hSelectedMuonPt_AfterJetSelection_MuFromW_Unweighted = makeTH<TH1F>("selectedMuonPt_AfterJetSelection_MuFromW_Unweighted", "Selected muon pt", 40, 0, 400);
+  hSelectedMuonPt_AfterJetSelection_MuFromTauFromW_Unweighted = makeTH<TH1F>("selectedMuonPt_AfterJetSelection_MuFromTauFromW_Unweighted", "Selected muon pt", 40, 0, 400);
+  hSelectedMuonPt_AfterJetSelection_MuOther_Unweighted = makeTH<TH1F>("selectedMuonPt_AfterJetSelection_MuOther_Unweighted", "Selected muon pt", 40, 0, 400);
 
   hRawMet_AfterJetSelection = makeTH<TH1F>("uncorrectedMet_AfterJetSelection", "Uncorrected PF MET", 40, 0, 400);
   hTransverseMassRawMet_AfterJetSelection = makeTH<TH1F>("transverseMassUncorrectedMet_AfterJetSelection", "Transverse mass", 40, 0, 400);
@@ -368,6 +385,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
 
   // Fill
   hSelectedMuonPt_AfterJetSelection->Fill(selectedMuon.p4().Pt(), weight);
+  hSelectedMuonPt_AfterJetSelection_Unweighted->Fill(selectedMuon.p4().Pt());
 
   hSelectedMuonChargedHadronEmbIso_AfterJetSelection->Fill(selectedMuon.chargedHadronIsoEmb(), weight);
   hSelectedMuonPuChargedHadronEmbIso_AfterJetSelection->Fill(selectedMuon.puChargedHadronIsoEmb(), weight);
@@ -381,6 +399,23 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
 
   hSelectedMuonEmbIso_AfterJetSelection->Fill(selectedMuon.embeddingIsolation(), weight);
   hSelectedMuonStdIso_AfterJetSelection->Fill(selectedMuon.standardRelativeIsolation(), weight);
+
+  if(isMC()) {
+    //std::cout << selectedMuon.pdgId() << " " << selectedMuon.motherPdgId() << " " << selectedMuon.grandMotherPdgId() << std::endl;
+    if(std::abs(selectedMuon.pdgId()) == 13) {
+      if(std::abs(selectedMuon.motherPdgId()) == 24) {
+        hSelectedMuonPt_AfterJetSelection_MuFromW->Fill(selectedMuon.p4().Pt(), weight);
+        hSelectedMuonPt_AfterJetSelection_MuFromW_Unweighted->Fill(selectedMuon.p4().Pt());
+      }
+      else if(std::abs(selectedMuon.motherPdgId()) == 15 && std::abs(selectedMuon.grandMotherPdgId()) == 24)
+        hSelectedMuonPt_AfterJetSelection_MuFromTauFromW->Fill(selectedMuon.p4().Pt(), weight);
+        hSelectedMuonPt_AfterJetSelection_MuFromTauFromW_Unweighted->Fill(selectedMuon.p4().Pt());
+    }
+    else {
+      hSelectedMuonPt_AfterJetSelection_MuOther->Fill(selectedMuon.p4().Pt(), weight);
+      hSelectedMuonPt_AfterJetSelection_MuOther_Unweighted->Fill(selectedMuon.p4().Pt());
+    }
+  }
 
   hRawMet_AfterJetSelection->Fill(fRawMet.value().Pt(), weight);
 

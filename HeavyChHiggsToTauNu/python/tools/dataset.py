@@ -2177,6 +2177,9 @@ class NtupleCache:
         
         if self.cacheFile == None:
             self.cacheFile = ROOT.TFile.Open(self.cacheFileName, "RECREATE")
+            self.cacheFile.cd()
+            argsNamed = ROOT.TNamed("selectorArgs", str(self.selectorArgs))
+            argsNamed.Write()
 
         directory = self.cacheFile.mkdir(datasetName)
 
