@@ -55,7 +55,7 @@ njobs = {
     "TTToHplusBHminusB_M155_Fall11":     {"skim":   6, "embedding":  1},
     "TTToHplusBHminusB_M160_Fall11":     {"skim":   6, "embedding":  1},
 
-    "TTJets_TuneZ2_Fall11":              {"skim": 350, "embedding": 490}, # 3 s per event
+    "TTJets_TuneZ2_Fall11":              {"skim": 490, "embedding": 490}, # 3 s per event
     "WJets_TuneZ2_Fall11":               {"skim": 100, "embedding": 70},
     "W3Jets_TuneZ2_Fall11":              {"skim": 140, "embedding": 42},
     "DYJetsToLL_M50_TuneZ2_Fall11":      {"skim": 230, "embedding": 70},
@@ -107,7 +107,7 @@ def addTo(datasets):
                         })
 
     # v44_4
-    add("skim", "v44_3", {
+    add("skim", "v44_4", {
         "SingleMu_Mu_160431-163261_2011A_Nov08":    "/SingleMu/local-08Nov2011_v1_AOD_Mu_tauembedding_skim_v44_4-e07a25cad22d42e9eabc76a200bf39f9/USER",
         "SingleMu_Mu_163270-163869_2011A_Nov08":    "/SingleMu/local-08Nov2011_v1_AOD_Mu_tauembedding_skim_v44_4-db1b4865ff8783ec17693b1b3ea6675b/USER",
         "SingleMu_Mu_165088-166150_2011A_Nov08":    "/SingleMu/local-08Nov2011_v1_AOD_Mu_tauembedding_skim_v44_4-29ffd120df5e1f64f829484c8f0108ff/USER",

@@ -34,7 +34,8 @@ tightenedMuonsWithIso = customisations.constructMuonIsolationOnTheFly("tightened
 
 tauEmbeddingMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag("tightenedMuonsWithIso"),
-    cut = cms.string("(userFloat('embeddingStep_pfChargedHadrons') + max(userFloat('embeddingStep_pfPhotons')-0.5*userFloat('embeddingStep_pfPUChargedHadrons'), 0)) < 2") 
+    cut = cms.string(""),
+#    cut = cms.string("(userFloat('embeddingStep_pfChargedHadrons') + max(userFloat('embeddingStep_pfPhotons')-0.5*userFloat('embeddingStep_pfPUChargedHadrons'), 0)) < 2") 
 #    cut = cms.string("(userInt('byTightIc04ChargedOccupancy') + userInt('byTightIc04GammaOccupancy')) == 0")
 )
 tauEmbeddingMuonsFilter = cms.EDFilter("CandViewCountFilter",

@@ -7,10 +7,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 # Default processing step
 #defaultStep = "skim"
-#defaultStep = "embedding"
+defaultStep = "embedding"
 #defaultStep = "analysis"
 #defaultStep = "analysisTau"
-defaultStep = "signalAnalysis"
+#defaultStep = "signalAnalysis"
 #defaultStep = "signalAnalysisGenTau"
 #defaultStep = "muonAnalysis"
 #defaultStep = "caloMetEfficiency"
@@ -46,20 +46,21 @@ defaultVersions = [
     #"v44_2fix", # for hybrid event production only
     #"v44_2fix_seed1", # for hybrid event production only
     #"v44_2fix_seed2", # for hybrid event production only
-    "v44_4"
+
+    "v44_4_seed0",
 ]
 
 # Define the processing steps: input dataset, configuration file, output file
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
 #          "skim_copy":      {"input": "tauembedding_skim_v13",         "config": "copy_cfg.py"}, 
-          "embedding":      {"input": "tauembedding_skim_v44_2fix", "config": "embed.py",   "output": "embedded.root"},
+          "embedding":      {"input": "tauembedding_skim_v44_4", "config": "embed.py",   "output": "embedded.root"},
           "analysis":       {"input": "tauembedding_embedding_%s",  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau":    {"input": "AOD",                        "config": "tauAnalysis_cfg.py"},
           "signalAnalysis": {"input": "tauembedding_embedding_%s",  "config": "../signalAnalysis_cfg.py"},
-          "signalAnalysisGenTau": {"input": "pattuple_v25b",        "config": "../signalAnalysis_cfg.py"},
+          "signalAnalysisGenTau": {"input": "pattuple_v44_4",        "config": "../signalAnalysis_cfg.py"},
           "EWKMatching":    {"input": "tauembedding_embedding_%s",  "config": "../EWKMatching_cfg.py"},
-          "muonAnalysis":   {"input": "tauembedding_skim_v44_1",          "config": "muonAnalysisFromSkim_cfg.py"},
-          "caloMetEfficiency": {"input": "tauembedding_skim_v44_1",         "config": "caloMetEfficiency_cfg.py"},
+          "muonAnalysis":   {"input": "tauembedding_skim_v44_4",          "config": "muonAnalysisFromSkim_cfg.py"},
+          "caloMetEfficiency": {"input": "tauembedding_skim_v44_4",         "config": "caloMetEfficiency_cfg.py"},
           }
 
 
@@ -141,9 +142,9 @@ datasetsMCQCD = []
 datasetsSignal = []
 #datasetsData2011 = datasetsData2011B
 
-#datasetsMCnoQCD = ["TTJets_TuneZ2_Fall11"]
+datasetsMCnoQCD = ["TTJets_TuneZ2_Fall11"]
 #datasetsMCnoQCD = ["WJets_TuneZ2_Fall11"]
-datasetsMCnoQCD = ["DYJetsToLL_M50_TuneZ2_Fall11"]
+#datasetsMCnoQCD = ["DYJetsToLL_M50_TuneZ2_Fall11"]
 
 # Override the default number of jobs
 # Goal: ~5 hour jobs
