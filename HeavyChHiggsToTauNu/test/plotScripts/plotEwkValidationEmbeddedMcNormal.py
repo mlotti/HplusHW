@@ -86,11 +86,26 @@ def main():
     tauEmbedding.normalize = True
     tauEmbedding.era = "Run2011AB"
 
+    f = open("datasetInfo.txt", "w")
+    f.write("Tau analysis, embedded\n")
+    f.write(tauDatasetsEmb.getFirstDatasetManager().formatInfo())
+    f.write("\n")
+    f.write("Tau analysis, normal\n")
+    f.write(tauDatasetsSig.formatInfo())
+    f.write("\n")
+    f.write("Signal analysis, embedded\n")
+    f.write(datasetsEmb.getFirstDatasetManager().formatInfo())
+    f.write("\n")
+    f.write("Signal analysis, normal\n")
+    f.write(datasetsSig.formatInfo())
+    f.write("\n")
+
     def dop(name):
 #        doTauPlots(tauDatasetsEmb, tauDatasetsSig, name)
-        doTauCounters(tauDatasetsEmb, tauDatasetsSig, name)
+#        doTauCounters(tauDatasetsEmb, tauDatasetsSig, name)
 #        doPlots(datasetsEmb, datasetsSig, name)
         doCounters(datasetsEmb, datasetsSig, name)
+        doCounters(datasetsEmb, datasetsSig, name, normalizeEmb=False)
 
     dop("TTJets")
 #    dop("WJets")
@@ -351,11 +366,11 @@ def doTauCounters(datasetsEmb, datasetsSig, datasetName):
     f.close()
     print "Printed tau efficiencies to", fname
 
-def doCounters(datasetsEmb, datasetsSig, datasetName):
+def doCounters(datasetsEmb, datasetsSig, datasetName, normalizeEmb=True):
     lumi = datasetsEmb.getLuminosity()
 
     # Counters
-    eventCounterEmb = tauEmbedding.EventCounterMany(datasetsEmb, counters=analysisEmb+"/counters")
+    eventCounterEmb = tauEmbedding.EventCounterMany(datasetsEmb, normalize=normalizeEmb) #, counters=analysisEmb+"/counters")
     eventCounterSig = counter.EventCounter(datasetsSig)
 
     def isNotThis(name):
@@ -400,13 +415,20 @@ def doCounters(datasetsEmb, datasetsSig, datasetName):
     col.setName("Normal")
     tableTau.appendColumn(col)
 
-    fname = "counters_selections_%s.txt"%datasetName
+    postfix = ""
+    if not normalizeEmb:
+        postfix="_notEmbNormalized"
+
+    fname = "counters_selections_%s%s.txt" % (datasetName, postfix)
     f = open(fname, "w")
     f.write(table.format())
     f.write("\n")
     f.write(tableTau.format())
     f.close()
     print "Printed selection counters to", fname
+
+    if not normalizeEmb:
+        return
 
 
     # Calculate efficiencies

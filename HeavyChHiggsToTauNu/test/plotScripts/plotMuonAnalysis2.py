@@ -34,15 +34,17 @@ weight = {
     "Run2011B": "weightPileup_Run2011B",
     "Run2011AB": "weightPileup_Run2011AB",
     }[era]
-weight = ""
 
 mcOnly = True
-mcOnly = False
-mcLuminosity = 5049.
+#mcOnly = False
+mcLuminosity = 5049.069000
+
+mergeMC = True
+#mergeMC = False
 
 def main():
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-    datasets.updateNAllEventsToPUWeighted()
+    datasets.updateNAllEventsToPUWeighted(era=era.replace("AB", "A+B"))
 
     if era == "Run2011A":
         datasets.remove(filter(lambda name: "2011B_" in name, datasets.getDataDatasetNames()))
@@ -67,7 +69,7 @@ def main():
     #keepOnly = "SingleMu_Mu_179942-180371_2011B_Nov19"
     #datasets.remove(filter(lambda name: name != keepOnly, datasets.getDataDatasetNames()))
 
-    datasets.remove(datasets.getMCDatasetNames())
+    #datasets.remove(datasets.getMCDatasetNames())
     if mcOnly:
         datasets.remove(datasets.getDataDatasetNames())
     else:
@@ -76,7 +78,8 @@ def main():
     #datasetsMC = datasets.deepCopy()
     #datasetsMC.remove(datasets.getDataDatasetNames())
     
-    plots.mergeRenameReorderForDataMC(datasets)
+    if mergeMC:
+        plots.mergeRenameReorderForDataMC(datasets)
     
     styleGenerator = styles.generator(fill=True)
 
@@ -125,6 +128,21 @@ def doPlots(datasets, selectionName, ntupleCache):
     drawPlot(createPlot(ntupleCache.histogram("transverseMassUncorrectedMet_AfterJetSelection")),
              prefix+"mt_log", "m_{T}(#mu, E_{T}^{miss}) (GeV/c^{2})", ylabel="Events / %.0f GeV/c^{2}")
 
+    plotEfficiency(datasets,
+                   allPath=ntupleCache.histogram("muonVertexCount_AfterDB"),
+                   passedPath=ntupleCache.histogram("muonVertexCount_AfterIsolation"),
+                   name=prefix+"muonIsolationEfficiency", xlabel="Number of good vertices", ylabel="Muon selection efficiency",
+                   rebinBins=range(0, 25)+[25, 30, 35, 40, 50]
+                   )
+
+    plotEfficiency(datasets,
+                   allPath=ntupleCache.histogram("muonVertexCount_AfterDB_MuFromW"),
+                   passedPath=ntupleCache.histogram("muonVertexCount_AfterIsolation_MuFromW"),
+                   name=prefix+"muonIsolationEfficiency_MuFromW", xlabel="Number of good vertices", ylabel="Muon selection efficiency",
+                   rebinBins=range(0, 25)+[25, 30, 35, 40, 50]
+                   )
+                   
+
     if "NoIso" in selectionName:
         drawPlot(createPlot(ntupleCache.histogram("selectedMuonChargedHadronEmbIso_AfterJetSelection")),
                  prefix+"chargedHadronIso_log", "Charged hadron #Sigma p_{T} (GeV/c)", ylabel="Events / %.1f GeV/c")
@@ -140,6 +158,33 @@ def doPlots(datasets, selectionName, ntupleCache):
 
         drawPlot(createPlot(ntupleCache.histogram("selectedMuonStdIso_AfterJetSelection")),
                  prefix+"standardIso_log", "Isolation variable", ylabel="Events / %.1f GeV/c")
+
+def plotEfficiency(datasets, allPath, passedPath, name, xlabel, rebinBins=None, **kwargs):
+    if mcOnly:
+        return
+
+    dnames = ["Data", "TTJets", "WJets", "QCD_Pt20_MuEnriched"]
+    def rebin(h):
+        return h.Rebin(len(rebinBins)-1, h.GetName(), array.array("d", rebinBins))
+    for dname in dnames:
+        dset = datasets.getDataset(dname)
+        allHisto = dset.getDatasetRootHisto(allPath).getHistogram()
+        passedHisto = dset.getDatasetRootHisto(passedPath).getHistogram()
+
+        if allHisto.Integral() < 1:
+            continue
+
+        if rebinBins != None:
+            allHisto = rebin(allHisto)
+            passedHisto = rebin(passedHisto)
+
+        eff = ROOT.TGraphAsymmErrors(passedHisto, allHisto, "cp") # 0.683 cl is default
+        p = plots.PlotBase([histograms.HistoGraph(eff, dname, "p", "P")])
+        if dset.isData():
+            p.setLuminosity(dset.getLuminosity())
+        opts = {"ymin": 0.0, "ymax": 1.1}
+
+        plots.drawPlot(p, name+"_"+dname, xlabel, addLuminosityText=dset.isData(), opts=opts, **kwargs)
 
 printed = False
 def printCounters(datasets, selectionName, ntupleCache):
@@ -160,10 +205,11 @@ def printCounters(datasets, selectionName, ntupleCache):
 
     eventCounter.getMainCounter().appendRows(ntupleCache.histogram(counterPath))
 
-    if mcOnly:
-        eventCounter.normalizeMCToLuminosity(mcLuminosity)
-    else:
-        eventCounter.normalizeMCByLuminosity()
+    if mergeMC:
+        if mcOnly:
+            eventCounter.normalizeMCToLuminosity(mcLuminosity)
+        else:
+            eventCounter.normalizeMCByLuminosity()
 
     table = eventCounter.getMainCounterTable()
     mcDatasets = filter(lambda n: n != "Data", table.getColumnNames())

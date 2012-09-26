@@ -7,6 +7,7 @@
 
 #include<iostream>
 #include<stdexcept>
+#include<cstdlib>
 
 class MyMuonCollection: public MuonCollection{
 public:
@@ -77,6 +78,7 @@ private:
 
   std::string fPuWeightName;
   Branch<double> fPuWeight;
+  Branch<unsigned> fVertexCount;
 
   Branch<bool> fElectronVetoPassed;
   Branch<bool> fHBHENoiseFilterPassed;
@@ -109,6 +111,12 @@ private:
 
   TH1F *hMuonEmbIso_AfterDB;
   TH1F *hMuonStdIso_AfterDB;
+
+  TH1F *hMuonVertexCount_AfterDB;
+  TH1F *hMuonVertexCount_AfterDB_MuFromW;
+
+  TH1F *hMuonVertexCount_AfterIsolation;
+  TH1F *hMuonVertexCount_AfterIsolation_MuFromW;
 
   TH1F *hSelectedMuonPt_AfterMuonSelection;
   TH1F *hSelectedMuonPt_AfterMuonVeto;
@@ -168,6 +176,12 @@ void MuonAnalysisSelector::setOutput(TDirectory *dir) {
   hMuonEmbIso_AfterDB = makeTH<TH1F>("muonEmbIso_AfterDB", "", 50, 0, 5);
   hMuonStdIso_AfterDB = makeTH<TH1F>("muonStdIso_AfterDB", "", 50, 0, 5);
 
+  hMuonVertexCount_AfterDB = makeTH<TH1F>("muonVertexCount_AfterDB", "", 50, 0, 50);
+  hMuonVertexCount_AfterDB_MuFromW = makeTH<TH1F>("muonVertexCount_AfterDB_MuFromW", "", 50, 0, 50);
+
+  hMuonVertexCount_AfterIsolation = makeTH<TH1F>("muonVertexCount_AfterIsolation", "", 50, 0, 50);
+  hMuonVertexCount_AfterIsolation_MuFromW = makeTH<TH1F>("muonVertexCount_AfterIsolation_MuFromW", "", 50, 0, 50);
+
   hSelectedMuonPt_AfterMuonSelection = makeTH<TH1F>("selectedMuonPt_AfterMuonSelection", "Selected muon pt", 40, 0, 400);
   hSelectedMuonPt_AfterMuonVeto = makeTH<TH1F>("selectedMuonPt_AfterMuonVeto", "Selected muon pt", 40, 0, 400);
   hSelectedMuonPt_AfterElectronVeto = makeTH<TH1F>("selectedMuonPt_AfterElectronVeto", "Selected muon pt", 40, 0, 400);
@@ -195,8 +209,10 @@ void MuonAnalysisSelector::setupBranches(TTree *tree) {
   fJets.setupBranches(tree);
   if(!fPuWeightName.empty())
     fPuWeight.setupBranch(tree, fPuWeightName.c_str());
+  fVertexCount.setupBranch(tree, "vertexCount");
   fElectronVetoPassed.setupBranch(tree, "ElectronVetoPassed");
-  fHBHENoiseFilterPassed.setupBranch(tree, "HBHENoiseFilter");
+  if(isData())
+    fHBHENoiseFilterPassed.setupBranch(tree, "HBHENoiseFilter");
   fRawMet.setupBranch(tree, "pfMet_p4");
 }
 
@@ -205,6 +221,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
   fMuons.setEntry(entry);
   fJets.setEntry(entry);
   fPuWeight.setEntry(entry);
+  fVertexCount.setEntry(entry);
   fElectronVetoPassed.setEntry(entry);
   fHBHENoiseFilterPassed.setEntry(entry);
   fRawMet.setEntry(entry);
@@ -252,6 +269,11 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
       hMuonStdIso_AfterDB->Fill(stdIsoVar, weight);
       hMuonEmbIso_AfterDB->Fill(embIsoVar, weight);
 
+      hMuonVertexCount_AfterDB->Fill(fVertexCount.value(), weight);
+      bool isMuFromW = isMC() && std::abs(muon.pdgId()) == 13 && std::abs(muon.motherPdgId()) == 24;
+      if(isMuFromW)
+        hMuonVertexCount_AfterDB_MuFromW->Fill(fVertexCount.value(), weight);
+
       if(fIsolationMode == kStandard) {
         hMuonChargedHadronIso_AfterDB->Fill(muon.chargedHadronIso(), weight);
         hMuonPuChargedHadronIso_AfterDB->Fill(muon.puChargedHadronIso(), weight);
@@ -271,6 +293,10 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
 
         if(!(embIsoVar < 2)) continue;
       }
+      hMuonVertexCount_AfterIsolation->Fill(fVertexCount.value(), weight);
+      if(isMuFromW)
+        hMuonVertexCount_AfterIsolation_MuFromW->Fill(fVertexCount.value(), weight);
+
       tmp.push_back(muon);
     }
     selectedMuons.swap(tmp);
