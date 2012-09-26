@@ -77,13 +77,6 @@ class PATBuilder:
             # Applies quality cuts to all vertices too
             HChPrimaryVertex.addPrimaryVertexSelection(process, sequence)
 
-            if options.tauEmbeddingInput != 0:
-                # Select the tau objects deltaR matched to the original muon objects
-                # Note: PF2PAT version is selected at the beginning of customisations.py
-                from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations import addTauEmbeddingMuonTaus
-                process.patMuonTauSequence = addTauEmbeddingMuonTaus(process)
-                sequence *= process.patMuonTauSequence
-
             if options.doTauHLTMatchingInAnalysis != 0:
                 raise Exception("doTauLHTMatchingInAnalysis is not supported at the moment")
 #                self.process.patTausHpsPFTauTauTriggerMatched = HChTriggerMatching.createTauTriggerMatchingInAnalysis(options.trigger, "selectedPatTausHpsPFTau")
@@ -184,7 +177,6 @@ class PATBuilder:
                                  "doMuonHLTMatching": False,
                                  "doPatElectronID": False,
                                  "doPatElectronMuon": False,
-                                 "includePFCands": True,
                                  })
         #sequence = addPF2PAT(self.process, dataVersion, doPatTrigger=False, doChs=False, patArgs=pargs, pvSelectionConfig=pvSelectionConfig)
         #postfix = "PFlow"
@@ -662,7 +654,7 @@ class StandardPATBuilder(PATBuilderBase):
             selectedJetNames.append(name)
 
         if outputModule != "":
-            self.outputCommands.extend(self.process.out.outputCommands)
+            self.outputCommands.extend(getattr(self.process, outputModule).outputCommands)
             self.process.out.outputCommands = []
 
 

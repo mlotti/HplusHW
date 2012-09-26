@@ -49,6 +49,31 @@ class SeqVisitor(object):
     def leave(self,visitee):
 	    pass
 
+def eventContent(recoProcessName, processName):
+    return [
+        "keep *_genParticles_*_%s" % recoProcessName,
+        "keep recoGenJets_*_*_%s" % recoProcessName,
+        "keep recoGenMETs_*_*_%s" % recoProcessName,
+        "keep *_pfMet_*_%s" % recoProcessName,
+        "keep *_offlinePrimaryVertices_*_%s" % recoProcessName,
+        "keep *_offlineBeamSpot_*_%s" % recoProcessName,
+        "keep *_gtDigis_*_%s" % recoProcessName,
+        "keep *_l1GtTriggerMenuLite_*_%s" % recoProcessName, # in run block
+        "keep *_conditionsInEdm_*_%s" % recoProcessName, # in run block
+        "keep *_addPileupInfo*_*_%s" % recoProcessName, # for MC
+        "keep HcalNoiseSummary_*_*_%s" % recoProcessName,
+        "keep *_dimuonsGlobal_*_%s" % processName,
+        "keep *_generator_weight_%s" % processName,
+        "keep *_genParticles_*_%s" % processName,
+        "keep recoGenJets_*_*_%s" % processName,
+        "keep recoGenMETs_*_*_%s" % processName,
+        "keep edmMergeableCounter_*_*_%s" % processName,
+        "keep *_tmfTracks_*_%s" % processName,
+        "keep *_offlinePrimaryVertices_*_%s" % processName,
+
+
+        ]
+
 
 def customise(process):
     # Catch the case when this config is run from cmsDriver, it won't work due to VarParsing
@@ -90,43 +115,24 @@ def customise(process):
     outputModule.outputCommands.extend(process.RECOSIMEventContent.outputCommands)
     outputModule.outputCommands.extend([
             "drop *_*_*_%s" % recoProcessName,
-            "keep *_genParticles_*_%s" % recoProcessName,
-            "keep recoGenJets_*_*_%s" % recoProcessName,
-            "keep recoGenMETs_*_*_%s" % recoProcessName,
-            "keep *_pfMet_*_%s" % recoProcessName,
-            "keep *_offlinePrimaryVertices_*_%s" % recoProcessName,
             "keep *_generalTracks_*_%s" % recoProcessName,
             "keep *_muons_*_%s" % recoProcessName,
             "keep *_globalMuons_*_%s" % recoProcessName,
-            "keep *_offlineBeamSpot_*_%s" % recoProcessName,
-            "keep *_gtDigis_*_%s" % recoProcessName,
             "keep recoGsfElectronCores_*_*_%s" % recoProcessName,
             "keep *_gsfElectrons_*_%s" % recoProcessName,
             "keep *_photons_*_%s" % recoProcessName,
             "keep *_photonCore_*_%s" % recoProcessName,
-            "keep *_l1GtTriggerMenuLite_*_%s" % recoProcessName, # in run block
-            "keep *_conditionsInEdm_*_%s" % recoProcessName, # in run block
-            "keep *_addPileupInfo*_*_%s" % recoProcessName, # for MC
-            "keep HcalNoiseSummary_*_*_%s" % recoProcessName,
 
             "drop *_*_*_%s" % processName,
-            "keep *_dimuonsGlobal_*_%s" % processName,
-            "keep *_generator_weight_%s" % processName,
-            "keep *_genParticles_*_%s" % processName,
-            "keep recoGenJets_*_*_%s" % processName,
-            "keep recoGenMETs_*_*_%s" % processName,
-            "keep edmMergeableCounter_*_*_%s" % processName,
             "keep *_particleFlow*_*_%s" % processName,
             "keep *_generalTracks_*_%s" % processName,
-            "keep *_tmfTracks_*_%s" % processName,
             "keep *_muons_*_%s" % processName,
             "keep *_globalMuons_*_%s" % processName,
-            "keep *_offlinePrimaryVertices_*_%s" % processName,
-            "keep edmMergeableCounter_*_*_%s" % processName,
 
             "keep *_*Electron*_*_%s" % processName,
             "keep *_eid*_*_*",
     ])
+    outputModule.outputCommands.extend(eventContent(recoProcessName, processName))
 #    re_procName = re.compile("_\*$")
 #    outputModule.outputCommands.extend([re_procName.sub("_"+processName, x) for x in process.RECOSIMEventContent.outputCommands])
     outputModule.outputCommands.extend(process.HChEventContent.outputCommands)
@@ -378,13 +384,23 @@ def addPAT(process, options, dataVersion):
         "keep recoCaloMETs_*_*_*",
         "keep *_goodJets*_*_*",
         "keep bool_*_*_*",
+        "keep *_patTriggerEvent_*_*",
+        "keep *_patTrigger_*_*",
     ]
 
     # Add PAT
     process.commonPatSequence, additionalCounters = patConf.addPatOnTheFly(process, options, dataVersion)
 
+    # Select the tau matching to the muon already here
+    # Also remove the embedding muon from the selected muons
+    from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations import addTauEmbeddingMuonTaus
+    process.patMuonTauSequence = addTauEmbeddingMuonTaus(process)
+    process.commonPatSequence *= process.patMuonTauSequence
+
     # Keep also smeared/shifted jets from MUONSKIM
     processName = process.name_()
+    skimProcessName = "MUONSKIM"
+    recoProcessName = dataVersion.getRecoProcess()
     outComms = out.outputCommands[:]
     for comm in outComms:
         if "keep" in comm and "PatJets" in comm and processName in comm:
@@ -393,8 +409,29 @@ def addPAT(process, options, dataVersion):
     # Final adjustments to the event content
     out.outputCommands.extend([
             "drop *_addPileupInfo_*_"+processName,
-            "keep *_patTausHpsPFTau_*_"+processName,
-            "drop *_selectedPatTaus*_*_"+processName,
+#            "keep *_patTausHpsPFTau_*_"+processName,
+#            "drop *_selectedPatTaus*_*_"+processName,
+            ])
+    out.outputCommands.extend(eventContent(recoProcessName, processName))
+    out.outputCommands.extend([
+            #"drop *_generalTracks_*_"+recoProcessName, # Tracks are needed for global muon veto, because the tracks were not embedded to pat::Muons in skim (FIXME)
+            "drop *_particleFlow_*_"+recoProcessName,
+            "keep *_generalTracks_*_"+recoProcessName,
+
+            "drop *_selectedPatTausHpsPFTau_*_"+skimProcessName,
+            "drop *_VisibleTaus_*_"+skimProcessName,
+            "drop *_selectedPatMuons_*_"+skimProcessName,
+            "drop *_selectedPatPhotons_*_"+skimProcessName,
+            "drop *_generalTracks20eta2p5_*_"+skimProcessName,
+            "drop *_goodJets*_*_"+skimProcessName,
+
+            "drop *_dimuonsGlobal_*_"+processName,
+            "drop *_tmfTracks_*_"+processName,
+#            "drop *_patTausHpsPFTau_*_"+processName,
+            "keep *_patTausHpsPFTauTauEmbeddingMuonMatched_*_"+processName,
+            "keep *_selectedPatMuonsEmbeddingMuonCleaned_*_"+processName,
+            "drop *_particleFlow_*_"+processName,
+            
             ])
 
     process.patPath = cms.Path(process.ProductionFilterSequence*process.commonPatSequence)

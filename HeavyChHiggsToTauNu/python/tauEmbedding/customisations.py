@@ -409,8 +409,7 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
 
     from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
     m1 = cleanPatJets.clone(
-#        src = "selectedPatJets",
-        src = "goodJets"+PF2PATVersion, # we should use the pat::Jets constructed in the 
+        src = "selectedPatJets"+PF2PATVersion, # FIXME: should use the smeared collection for MC
         preselection = cms.string(jetSelection),
         checkOverlaps = cms.PSet(
             muons = cms.PSet(
@@ -704,10 +703,10 @@ def addTauEmbeddingMuonTaus(process):
     seq *= process.selectedPatMuonsEmbeddingMuonCleaned
 
     # Select the taus matching to the original muon
-    m = cms.EDProducer("HPlusPATTauCandViewDeltaRSelector",
+    m = cms.EDProducer("HPlusPATTauCandViewClosestDeltaRSelector",
         src = cms.InputTag(getAllPatTaus()),
         refSrc = cms.InputTag(tauEmbeddingMuons),
-        deltaR = cms.double(0.1),
+        maxDeltaR = cms.double(0.5),
     )
     setattr(process, getAllPatTaus()+"TauEmbeddingMuonMatched", m)
     seq *= m
