@@ -2115,16 +2115,18 @@ class NtupleCache:
     # \param selector       Name of the selector class, should also correspond a .C file in \a test/ntuple
     # \param selectorArgs   Optional arguments to the selector constructor
     # \param process        Should the ntuple be processed? (if False, results are read from the cache file)
-    # \apram cacheFileName  Path to the cache file
+    # \param cacheFileName  Path to the cache file
+    # \param maxEvents     Maximum number of events to process (-1 for all events)
     #
     # I would like to make \a process redundant, but so far I haven't
     # figured out a bullet-proof method for that.
-    def __init__(self, treeName, selector, selectorArgs=[], process=True, cacheFileName="histogramCache.root"):
+    def __init__(self, treeName, selector, selectorArgs=[], process=True, cacheFileName="histogramCache.root", maxEvents=-1):
         self.treeName = treeName
         self.cacheFileName = cacheFileName
         self.selectorName = selector
         self.selectorArgs = selectorArgs
         self.doProcess = process
+        self.maxEvents = maxEvents
 
         self.macrosLoaded = False
         self.processedDatasets = {}
@@ -2183,11 +2185,19 @@ class NtupleCache:
             raise Exception("TTree '%s' not found from file %s" % (self.treeName, rootFile.GetName()))
 
         N = tree.GetEntries()
+        useMaxEvents = False
+        if self.maxEvents >= 0 and N > self.maxEvents:
+            useMaxEvents = True
+            N = self.maxEvents
         selector = ROOT.SelectorImp(N, dataset.isMC(), getattr(ROOT, self.selectorName)(*self.selectorArgs))
         selector.setOutput(directory)
 
         print "Processing dataset", datasetName
-        tree.Process(selector)
+        
+        if useMaxEvents:
+            tree.Process(selector, "", N)
+        else:
+            tree.Process(selector)
         directory.Write()
 
     ## Get a histogram from the cache file
