@@ -31,8 +31,8 @@ public:
   MyMuonCollection() {}
   ~MyMuonCollection() {}
 
-  void setupBranches(TTree *tree) {
-    MuonCollection::setupBranches(tree);
+  void setupBranches(TTree *tree, bool isMC) {
+    MuonCollection::setupBranches(tree, isMC);
 
     fChargedHadronIsoEmb.setupBranch(tree, (fPrefix+"_f_chargedHadronIsoEmb").c_str());
     fPuChargedHadronIsoEmb.setupBranch(tree, (fPrefix+"_f_puChargedHadronIsoEmb").c_str());
@@ -191,7 +191,7 @@ void MuonAnalysisSelector::setOutput(TDirectory *dir) {
 
 void MuonAnalysisSelector::setupBranches(TTree *tree) {
   fEventInfo.setupBranches(tree);
-  fMuons.setupBranches(tree);
+  fMuons.setupBranches(tree, isMC());
   fJets.setupBranches(tree);
   if(!fPuWeightName.empty())
     fPuWeight.setupBranch(tree, fPuWeightName.c_str());

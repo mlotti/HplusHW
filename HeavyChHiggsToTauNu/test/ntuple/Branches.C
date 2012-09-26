@@ -24,7 +24,7 @@ MuonCollection::MuonCollection(const std::string prefix):
 {}
 MuonCollection::~MuonCollection() {}
 
-void MuonCollection::setupBranches(TTree *tree) {
+void MuonCollection::setupBranches(TTree *tree, bool isMC) {
   fP4.setupBranch(tree, (fPrefix+"_p4").c_str());
   fDB.setupBranch(tree, (fPrefix+"_f_dB").c_str());
 
@@ -35,6 +35,12 @@ void MuonCollection::setupBranches(TTree *tree) {
   fPuChargedHadronIso.setupBranch(tree, (fPrefix+"_f_puChargedHadronIso").c_str());
   fNeutralHadronIso.setupBranch(tree, (fPrefix+"_f_neutralHadronIso").c_str());
   fPhotonIso.setupBranch(tree, (fPrefix+"_f_photonIso").c_str());
+
+  if(isMC) {
+    fPdgId.setupBranch(tree, (fPrefix+"_pdgid").c_str());
+    fMotherPdgId.setupBranch(tree, (fPrefix+"_mother_pdgid").c_str());
+    fMotherPdgId.setupBranch(tree, (fPrefix+"_grandmother_pdgid").c_str());
+  }
 }
 
 //////////////////// JetCollection ////////////////////

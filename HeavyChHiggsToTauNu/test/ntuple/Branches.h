@@ -116,6 +116,10 @@ public:
     double neutralHadronIso() { return fCollection->fNeutralHadronIso.value()[fIndex]; }
     double photonIso() { return fCollection->fPhotonIso.value()[fIndex]; }
 
+    int pdgId() { return fCollection->fPdgId.value()[fIndex]; }
+    int motherPdgId() { return fCollection->fMotherPdgId.value()[fIndex]; }
+    int grandMotherPdgId() { return fCollection->fGrandMotherPdgId.value()[fIndex]; }
+
   protected:
     MuonCollection *fCollection;
     size_t fIndex;
@@ -125,7 +129,7 @@ public:
   MuonCollection(const std::string prefix = "muons");
   ~MuonCollection();
 
-  void setupBranches(TTree *tree);
+  void setupBranches(TTree *tree, bool isMC);
   void setEntry(Long64_t entry) {
     fP4.setEntry(entry);
     fDB.setEntry(entry);
@@ -137,6 +141,10 @@ public:
     fPuChargedHadronIso.setEntry(entry);
     fNeutralHadronIso.setEntry(entry);
     fPhotonIso.setEntry(entry);
+
+    fPdgId.setEntry(entry);
+    fMotherPdgId.setEntry(entry);
+    fGrandMotherPdgId.setEntry(entry);
   }
 
   size_t size() {
@@ -161,6 +169,10 @@ private:
   BranchObj<std::vector<double> > fPuChargedHadronIso;
   BranchObj<std::vector<double> > fNeutralHadronIso;
   BranchObj<std::vector<double> > fPhotonIso;
+
+  BranchObj<std::vector<int> > fPdgId;
+  BranchObj<std::vector<int> > fMotherPdgId;
+  BranchObj<std::vector<int> > fGrandMotherPdgId;
 };
 
 // Jets
