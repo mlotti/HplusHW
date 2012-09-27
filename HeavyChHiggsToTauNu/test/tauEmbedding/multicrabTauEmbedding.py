@@ -46,7 +46,7 @@ defaultVersions = [
     #"v44_2fix", # for hybrid event production only
     #"v44_2fix_seed1", # for hybrid event production only
     #"v44_2fix_seed2", # for hybrid event production only
-    "v44_4"
+    "v44_4_1"
 ]
 
 # Define the processing steps: input dataset, configuration file, output file
@@ -299,10 +299,11 @@ def createTasks(opts, step, version=None):
 
 
     # Define the processing version number, meaningful for skim/embedding
+    dataname_re = re.compile("_(?P<first>\d\d\d\d\d\d)-(?P<last>\d\d\d\d\d\d)_")
     path_re = re.compile("_tauembedding_.*")
     tauname = "_tauembedding_%s_%s" % (step, version)
 
-    reco_re = re.compile("^Run[^_]+_(?P<reco>[^_]+_v\d+_[^_]+_)")
+    reco_re = re.compile("^(?P<reco>Run[^_]+_[^_]+_v\d+_[^_]+_)")
 
     # Let's do the naming like this until we get some answer from crab people
     multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
@@ -336,9 +337,12 @@ def createTasks(opts, step, version=None):
             name += tauname
     
             if dataset.isData():
-                frun = dataset.getName().split("_")[1].split("-")[0]
+                m = dataname_re.search(dataset.getName())
+                if not m:
+                    raise Exception("Regex '%s' did not find anything from '%s'" % (dataname_re.pattern, dataset.getName()))
+                firstRun = m.group("first")
                 m = reco_re.search(name)
-                name = reco_re.sub(m.group("reco")+frun+"_", name)
+                name = reco_re.sub(m.group("reco")+firstRun+"_", name)
     
             dataset.useServer(False)
     
