@@ -76,6 +76,30 @@ def _counterTh1AddBinFromTh1(counter, name, th1):
 
     return new
 
+## Add new bisn to counter TH1 from bins of another TH1
+#
+# \param counter   Counter TH1 to modify
+# \param th1       TH1 whose bins are copied
+#
+# Use case is the addition of rows to event counter
+# (counter.SimpleCounter) from a TH1.
+def _counterTh1AddBinsFromTh1(counter, th1):
+    newnbins = counter.GetNbinsX()+th1.GetNbinsX()
+    new = ROOT.TH1F(counter.GetName(), counter.GetTitle(), newnbins, 0, newnbins)
+    new.SetDirectory(0)
+    new.Sumw2()
+
+    # Copy bins
+    dstBin = 1
+    for histo in [counter, th1]:
+        for srcBin in xrange(1, histo.GetNbinsX()+1):
+            new.SetBinContent(dstBin, histo.GetBinContent(srcBin))
+            new.SetBinError(dstBin, histo.GetBinError(srcBin))
+            new.GetXaxis().SetBinLabel(dstBin, histo.GetXaxis().GetBinLabel(srcBin))
+            dstBin += 1
+
+    return new
+
 ## Extract the position of the first digit in a number
 def _numToDig(num):
     if num == 0:
@@ -1811,6 +1835,22 @@ class SimpleCounter:
         self.datasetRootHisto.modifyRootHisto(lambda oldHisto, newHisto: _counterTh1AddBinFromTh1(oldHisto, rowName, newHisto), drh)
         self.countNames.append(rowName)
 
+    ## Append rows from another TH1
+    #
+    # \param histoPath           Path to TH1
+    # \param countNameFunction   Function for mappting the X axis bin labels to count names
+    def appendRows(self, histoPath, countNameFunction=None):
+        if self.counter != None:
+            raise Exception("Can't add rows after the counters have been created!")
+
+        drh = self.datasetRootHisto.getDataset().getDatasetRootHisto(histoPath)
+        self.datasetRootHisto.modifyRootHisto(_counterTh1AddBinsFromTh1, drh)
+        
+        if countNameFunction != None:
+            self.countNames.extend([countNameFunction(x) for x in drh.getBinLabels()])
+        else:
+            self.countNames.extend(drh.getBinLabels())
+
     ## Set normalization scheme to unit area
     def normalizeToOne(self):
         if self.counter != None:
@@ -1919,6 +1959,12 @@ class Counter:
     # \param treeDraw   dataset.TreeDraw object containing the TTree name, event selection, and weighting
     def appendRow(self, rowName, treeDraw):
         self.forEachDataset(lambda x: x.appendRow(rowName, treeDraw))
+
+    ## Append rows from another TH1
+    #
+    # \param histoPath  Path to TH1
+    def appendRows(self, histoPath):
+        self.forEachDataset(lambda x: x.appendRows(histoPath))
 
     ## Set normalization scheme to unit area
     def normalizeToOne(self):

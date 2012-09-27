@@ -25,7 +25,7 @@ uncertaintyByAverage = False
 ## Signal analysis multicrab directories for embedding trials
 dirEmbs_120911 = [
     "multicrab_signalAnalysis_systematics_v44_3_seed0_Run2011AB_120911_144711",
-    "multicrab_signalAnalysis_systematics_v44_3_seed1_Run2011AB_120911_152858",
+#    "multicrab_signalAnalysis_systematics_v44_3_seed1_Run2011AB_120911_152858",
 #    "multicrab_signalAnalysis_systematics_v44_3_seed2_Run2011AB_120911_162417"
 ]
 ## Signal analysis multicrab directories for embedding trials
@@ -39,13 +39,17 @@ dirSig = "multicrab_signalAnalysisGenTau_systematics_120912_084953" # for 120911
 ## Tau analysis multicrab directories for embedding trials
 tauDirEmbs_120912 = [
     "multicrab_analysis_systematics_v44_3_seed0_Run2011AB_120912_164347",
-#    "multicrab_analysis_systematics_v44_3_seed1_Run2011AB_120912_172300",
+    "multicrab_analysis_systematics_v44_3_seed1_Run2011AB_120912_172300",
 #    "multicrab_analysis_systematics_v44_3_seed2_Run2011AB_120912_180734",
+]
+tauDirEmbs_120913 = [ # TTJets only
+    "multicrab_analysis_v44_3_seed0_Run2011AB_120913_212539",
+#    "multicrab_analysis_v44_3_seed1_Run2011AB_120913_220249"
 ]
 ## Tau analysis multicrab directories for embedding trials
 #
 # This variable is used to select from possibly multiple sets of embedding directories
-tauDirEmbs = tauDirEmbs_120912
+tauDirEmbs = tauDirEmbs_120913
 ## Tau analysis multicrab directory for normal MC
 tauDirSig = "multicrab_analysisTau_120822_200753"
 
@@ -71,11 +75,13 @@ tauNtuple.ecalFiducial += " || (0.770 < abs(taus_p4.Eta()) && abs(taus_p4.Eta())
 tauNtuple.ecalFiducial += " || (1.127 < abs(taus_p4.Eta()) && abs(taus_p4.Eta()) < 1.163)"
 tauNtuple.ecalFiducial += " || (1.460 < abs(taus_p4.Eta()) && abs(taus_p4.Eta()) < 1.558)" # gap
 tauNtuple.ecalFiducial += ")"
-tauNtuple.electronRejection = "taus_f_againstElectronMedium > 0.5"
+#tauNtuple.electronRejection = "taus_f_againstElectronMedium > 0.5"
+tauNtuple.electronRejection = "taus_f_againstElectronMVA > 0.5"
 tauNtuple.muonRejection = "taus_f_againstMuonTight > 0.5"
 
 # tau ID
-tauNtuple.tightIsolation = "taus_f_byTightIsolation > 0.5"
+#tauNtuple.tightIsolation = "taus_f_byTightIsolation > 0.5"
+tauNtuple.tightIsolation = "taus_f_byMediumCombinedIsolationDeltaBetaCorr > 0.5"
 tauNtuple.oneProng = "taus_signalPFChargedHadrCands_n == 1"
 tauNtuple.rtau = "%s > 0.7" % tauNtuple.rtauExpression
 
@@ -88,7 +94,8 @@ tauNtuple.pvSelection = "selectedPrimaryVertices_n >= 1"
 tauNtuple.metSelection = "pfMet_p4.Pt() > 50"
 tauNtuple.jetSelection = "jets_looseId && jets_p4.Pt() > 30 && abs(jets_p4.Eta()) < 2.4 && sqrt((jets_p4.Eta()-taus_p4[0].Eta())^2+(jets_p4.Phi()-taus_p4[0].Phi())^2) > 0.5"
 tauNtuple.jetEventSelection = "Sum$(%s) >= 3" % tauNtuple.jetSelection
-tauNtuple.btagSelection = "jets_f_tche > 1.7"
+#tauNtuple.btagSelection = "jets_f_tche > 1.7"
+tauNtuple.btagSelection = "jets_f_csv > 0.898" # CSVL = 0.244, CSVM = 0.679, CSVT = 0.898
 tauNtuple.btagEventSelection = "Sum$(%s && %s) >= 1" % (tauNtuple.jetSelection, tauNtuple.btagSelection)
 tauNtuple.deltaPhi160Selection = "%s <= 160)" % tauNtuple.deltaPhiExpression
 
@@ -671,6 +678,10 @@ class EventCounterMany:
         for ec in self.eventCounters:
             ec.getMainCounter().appendRow(*args, **kwargs)
 
+    def mainCounterAppendRows(self, *args, **kwargs):
+        for ec in self.eventCounters:
+            ec.getMainCounter().appendRows(*args, **kwargs)
+
     ## Append row from TTree to a sub counter
     #
     # \param name   Name of the subcounter
@@ -942,7 +953,7 @@ class PlotCreatorMany:
     # \param styles         List of plot styles
     # \param addData        Add embedded data?
     # \param addVariation   Add min/max values from embedding trials?
-    def __init__(self, analysisEmb, analysisSig, datasetsEmb, datasetsSig, datasetName, styles, addData=False, addVariation=False):
+    def __init__(self, analysisEmb, analysisSig, datasetsEmb, datasetsSig, datasetName, styles, addData=False, addVariation=False, ntupleCacheEmb=None, ntupleCacheSig=None):
         self.analysisEmb = analysisEmb
         self.analysisSig = analysisSig
         self.datasetsEmb = datasetsEmb # DatasetsMany
@@ -955,6 +966,9 @@ class PlotCreatorMany:
             self.isResidual = self.datasetsEmb.isResidualAdded(datasetName)
         except:
             self.isResidual = False
+
+        self.ntupleCacheEmb = ntupleCacheEmb
+        self.ntupleCacheSig = ntupleCacheSig
 
     ## Function call syntax for creating the plot
     #
@@ -970,6 +984,9 @@ class PlotCreatorMany:
         if isinstance(name, basestring):
             name2Emb = self.analysisEmb+"/"+name
             name2Sig = self.analysisSig+"/"+name
+        elif isinstance(name, dataset.NtupleCacheDrawer):
+            name2Emb = self.ntupleCacheEmb.histogram(name.histoName)
+            name2Sig = self.ntupleCacheSig.histogram(name.histoName)
         else: # assume TreeDraw
             name2Emb = name.clone(tree=self.analysisEmb+"/tree")
             name2Sig = name.clone(tree=self.analysisSig+"/tree")
