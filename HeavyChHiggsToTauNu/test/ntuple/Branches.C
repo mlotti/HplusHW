@@ -57,3 +57,29 @@ JetCollection::~JetCollection() {}
 void JetCollection::setupBranches(TTree *tree) {
   fP4.setupBranch(tree, (fPrefix+"_p4").c_str());
 }
+
+//////////////////// TauCollection ////////////////////
+TauCollection::Tau::Tau(TauCollection *mc, size_t i):
+  fCollection(mc), fIndex(i)
+{}
+TauCollection::Tau::~Tau() {}
+
+TauCollection::TauCollection(const std::string prefix):
+  fPrefix(prefix)
+{}
+TauCollection::~TauCollection() {}
+
+void TauCollection::setupBranches(TTree *tree) {
+  fP4.setupBranch(tree, (fPrefix+"_p4").c_str());
+  fLeadPFChargedHadrCandP4.setupBranch(tree, (fPrefix+"_leadPFChargedHadrCand_p4").c_str());
+  fSignalPFChargedHadrCandsCount.setupBranch(tree, (fPrefix+"_signalPFChargedHadrCands_n").c_str());
+  fDecayMode.setupBranch(tree, (fPrefix+"_decayMode").c_str());
+
+  fDecayModeFinding.setupBranch(tree, (fPrefix+"_f_decayModeFinding").c_str());
+  fAgainstMuonTight.setupBranch(tree, (fPrefix+"_f_againstMuonTight").c_str());
+  fAgainstElectronLoose.setupBranch(tree, (fPrefix+"_f_againstElectronLoose").c_str());
+  fAgainstElectronMedium.setupBranch(tree, (fPrefix+"_f_againstElectronMedium").c_str());
+  fAgainstElectronTight.setupBranch(tree, (fPrefix+"_f_againstElectronTight").c_str());
+  fAgainstElectronMVA.setupBranch(tree, (fPrefix+"_f_againstElectronMVA").c_str());
+  fMediumCombinedIsolationDeltaBetaCorr.setupBranch(tree, (fPrefix+"_f_byMediumCombinedIsolationDeltaBetaCorr").c_str());
+}

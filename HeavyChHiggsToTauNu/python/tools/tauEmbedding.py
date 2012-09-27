@@ -678,6 +678,10 @@ class EventCounterMany:
         for ec in self.eventCounters:
             ec.getMainCounter().appendRow(*args, **kwargs)
 
+    def mainCounterAppendRows(self, *args, **kwargs):
+        for ec in self.eventCounters:
+            ec.getMainCounter().appendRows(*args, **kwargs)
+
     ## Append row from TTree to a sub counter
     #
     # \param name   Name of the subcounter
@@ -949,7 +953,7 @@ class PlotCreatorMany:
     # \param styles         List of plot styles
     # \param addData        Add embedded data?
     # \param addVariation   Add min/max values from embedding trials?
-    def __init__(self, analysisEmb, analysisSig, datasetsEmb, datasetsSig, datasetName, styles, addData=False, addVariation=False):
+    def __init__(self, analysisEmb, analysisSig, datasetsEmb, datasetsSig, datasetName, styles, addData=False, addVariation=False, ntupleCacheEmb=None, ntupleCacheSig=None):
         self.analysisEmb = analysisEmb
         self.analysisSig = analysisSig
         self.datasetsEmb = datasetsEmb # DatasetsMany
@@ -962,6 +966,9 @@ class PlotCreatorMany:
             self.isResidual = self.datasetsEmb.isResidualAdded(datasetName)
         except:
             self.isResidual = False
+
+        self.ntupleCacheEmb = ntupleCacheEmb
+        self.ntupleCacheSig = ntupleCacheSig
 
     ## Function call syntax for creating the plot
     #
@@ -977,6 +984,9 @@ class PlotCreatorMany:
         if isinstance(name, basestring):
             name2Emb = self.analysisEmb+"/"+name
             name2Sig = self.analysisSig+"/"+name
+        elif isinstance(name, dataset.NtupleCacheDrawer):
+            name2Emb = self.ntupleCacheEmb.histogram(name.histoName)
+            name2Sig = self.ntupleCacheSig.histogram(name.histoName)
         else: # assume TreeDraw
             name2Emb = name.clone(tree=self.analysisEmb+"/tree")
             name2Sig = name.clone(tree=self.analysisSig+"/tree")

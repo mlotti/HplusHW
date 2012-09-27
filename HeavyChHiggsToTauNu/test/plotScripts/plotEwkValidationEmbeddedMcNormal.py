@@ -100,12 +100,18 @@ def main():
     f.write(datasetsSig.formatInfo())
     f.write("\n")
 
+    
+    ntupleCache = dataset.NtupleCache(tauAnalysisEmb+"/tree", "TauAnalysisSelector",
+                                      #process=False,
+                                      #maxEvents=100000,
+                                      )
+
     def dop(name):
-#        doTauPlots(tauDatasetsEmb, tauDatasetsSig, name)
-#        doTauCounters(tauDatasetsEmb, tauDatasetsSig, name)
+        doTauPlots(tauDatasetsEmb, tauDatasetsSig, name, ntupleCache)
+        doTauCounters(tauDatasetsEmb, tauDatasetsSig, name, ntupleCache)
 #        doPlots(datasetsEmb, datasetsSig, name)
-        doCounters(datasetsEmb, datasetsSig, name)
-        doCounters(datasetsEmb, datasetsSig, name, normalizeEmb=False)
+#        doCounters(datasetsEmb, datasetsSig, name)
+#        doCounters(datasetsEmb, datasetsSig, name, normalizeEmb=False)
 
     dop("TTJets")
 #    dop("WJets")
@@ -116,50 +122,44 @@ def main():
 
 drawPlotCommon = tauEmbedding.PlotDrawerTauEmbeddingEmbeddedNormal(ylabel="Events / %.0f GeV/c", stackMCHistograms=False, log=True, addMCUncertainty=True, ratio=True, addLuminosityText=True)
 
-def doTauPlots(datasetsEmb, datasetsSig, datasetName):
+def doTauPlots(datasetsEmb, datasetsSig, datasetName, ntupleCache):
     lumi = datasetsEmb.getLuminosity()
 
-    createPlot = tauEmbedding.PlotCreatorMany(tauAnalysisEmb, tauAnalysisSig, datasetsEmb, datasetsSig, datasetName, styles.getStyles())
+    createPlot = tauEmbedding.PlotCreatorMany(tauAnalysisEmb, tauAnalysisSig, datasetsEmb, datasetsSig, datasetName, styles.getStyles(),
+                                              ntupleCacheEmb=ntupleCache, ntupleCacheSig=ntupleCache)
 
     opts2def = {"DYJetsToLL": {"ymin":0, "ymax": 1.5}}.get(datasetName, {"ymin": 0.5, "ymax": 1.5})
     moveLegend = {"DYJetsToLL": {"dx": -0.02}}.get(datasetName, {})
 
-    treeDraw = dataset.TreeDraw("dummy", weight=tauEmbedding.tauNtuple.weight[tauEmbedding.era])
     def drawPlot(plot, name, *args, **kwargs):
         drawPlotCommon(plot, "mcembsig_"+datasetName+"_"+name, *args, **kwargs)
 
     # Decay mode finding
-    postfix = "_1AfterDecayModeFindingIsolationPtPre"
-    selection = And(*[getattr(tauEmbedding.tauNtuple, cut) for cut in ["decayModeFinding", "tightIsolation", "tauPtPreCut"]])
+    postfix = "_1AfterDecayModeFindingIsolation"
     opts2 = opts2def
-    drawPlot(createPlot(treeDraw.clone(varexp="taus_p4.Eta()>>tmp(25,-2.5,2.5", selection=selection)),
+    drawPlot(createPlot(ntupleCache.histogram("tauEta_AfterDecayModeFindingIsolation")),
              "tauEta"+postfix, "#tau-jet candidate #eta", ylabel="Events / %.1f", opts={"ymin": 1e-1}, opts2=opts2, moveLegend={"dx": -0.2, "dy": -0.45}, cutLine=[-2.1, 2.1])
-    drawPlot(createPlot(treeDraw.clone(varexp="taus_p4.Pt()>>tmp(25,0,250)", selection=selection)),
+    drawPlot(createPlot(ntupleCache.histogram("tauPt_AfterDecayModeFindingIsolation")),
              "tauPt"+postfix, "#tau-jet candidate p_{T} (GeV/c)", opts2=opts2, cutLine=40, moveLegend=moveLegend)
 
     # Eta cut
     postfix = "_2AfterEtaCut"
-    selection = And(*[getattr(tauEmbedding.tauNtuple, cut) for cut in ["decayModeFinding", "tightIsolation", "tauPtPreCut", "tauEtaCut"]])
-    drawPlot(createPlot(treeDraw.clone(varexp="taus_p4.Eta()>>tmp(25,-2.5,2.5", selection=selection)),
-             "tauEta"+postfix, "#tau-jet candidate #eta", ylabel="Events / %.1f", opts={"ymin": 1e-1}, opts2=opts2, moveLegend={"dx": -0.2, "dy": -0.45}, cutLine=[-2.1, 2.1])
-    drawPlot(createPlot(treeDraw.clone(varexp="taus_p4.Pt()>>tmp(25,0,250)", selection=selection)),
+    drawPlot(createPlot(ntupleCache.histogram("tauPt_AfterEtaCutIsolation")),
              "tauPt"+postfix, "#tau-jet candidate p_{T} (GeV/c)", opts2=opts2, cutLine=40, moveLegend=moveLegend)
 
     # Pt cut
     postfix = "_3AfterPtCut"
-    selection = And(*[getattr(tauEmbedding.tauNtuple, cut) for cut in ["decayModeFinding", "tightIsolation", "tauEtaCut", "tauPtCut"]])
-    drawPlot(createPlot(treeDraw.clone(varexp="taus_p4.Phi()>>tmp(32,-3.2,3.2", selection=selection)),
+    drawPlot(createPlot(ntupleCache.histogram("tauPhi_AfterPtCutIsolation")),
              "tauPhi"+postfix, "#tau-jet candidate #phi (rad)", ylabel="Events / %.1f", opts={"ymin": 1e-1}, opts2=opts2, moveLegend={"dx": -0.2, "dy": -0.45})
     opts2 = {"Diboson": {"ymin": 0, "ymax": 1.5}}.get(datasetName, opts2def)
-    drawPlot(createPlot(treeDraw.clone(varexp="taus_leadPFChargedHadrCand_p4.Pt()>>tmp(25,0,250)", selection=selection)),
+    drawPlot(createPlot(ntupleCache.histogram("tauLeadingTrackPt_AfterPtCutIsolation")),
              "tauLeadingTrackPt"+postfix, "#tau-jet ldg. charged particle p_{T} (GeV/c)", opts2=opts2, cutLine=20, moveLegend=moveLegend)
     opts2 = opts2def
 
     # Tau candidate selection
     postfix = "_4AfterTauCandidateSelection"
-    selection = tauEmbedding.tauNtuple.tauCandidateSelection
     opts2 = {"EWKMC": {"ymin": 0.5, "ymax": 2}}.get(datasetName, opts2def)
-    drawPlot(createPlot(treeDraw.clone(varexp=tauEmbedding.tauNtuple.decayModeExpression, selection=selection)),
+    drawPlot(createPlot(ntupleCache.histogram("tauDecayMode_AfterIsolation")),
              "tauDecayMode"+postfix+"", "", opts={"ymin": 1e-2, "ymaxfactor": 20, "nbins":5}, opts2=opts2,
              moveLegend=moveLegend,
              #moveLegend={"dy": 0.02, "dh": -0.02},
@@ -168,7 +168,6 @@ def doTauPlots(datasetsEmb, datasetsSig, datasetName):
 
     # One prong
     postfix = "_5AfterOneProng"
-    td = treeDraw.clone(selection=And(*[getattr(tauEmbedding.tauNtuple, cut) for cut in ["tauCandidateSelection", "oneProng"]]))
     #drawPlot(createPlot(td.clone(varexp="taus_p4.Pt()>>tmp(25,0,250)")),
     #         "tauPt"+postfix, "#tau-jet candidate p_{T} (GeV/c)", opts2={"ymin": 0, "ymax": 2})
     #drawPlot(createPlot(td.clone(varexp="taus_p4.P()>>tmp(25,0,250)")),
@@ -177,13 +176,12 @@ def doTauPlots(datasetsEmb, datasetsSig, datasetName):
     #         "tauLeadingTrackPt"+postfix, "#tau-jet ldg. charged particle p_{T} (GeV/c)", opts2={"ymin":0, "ymax": 2})
     #drawPlot(createPlot(td.clone(varexp="taus_leadPFChargedHadrCand_p4.P()>>tmp(25,0,250)")),
     #         "tauLeadingTrackP"+postfix, "#tau-jet ldg. charged particle p (GeV/c)", opts2={"ymin":0, "ymax": 2})
-    drawPlot(createPlot(td.clone(varexp=tauEmbedding.tauNtuple.rtauExpression+">>tmp(22, 0, 1.1)")),
+    drawPlot(createPlot(ntupleCache.histogram("tauRtau_AfterOneProng")),
              "rtau"+postfix, "R_{#tau} = p^{ldg. charged particle}/p^{#tau jet}", ylabel="Events / %.1f", opts={"ymin": 1e-2, "ymaxfactor": 5}, opts2=opts2, moveLegend={"dx":-0.34}, cutLine=0.7)
 
     # Full ID
     postfix = "_6AfterTauID"
-    selection = And(*[getattr(tauEmbedding.tauNtuple, cut) for cut in ["tauCandidateSelection", "tauID"]])
-    drawPlot(createPlot(treeDraw.clone(varexp="taus_p4.Pt()>>tmp(25,0,250)", selection=selection)),
+    drawPlot(createPlot(ntupleCache.histogram("tauRtau_AfterOneProng")),
              "tauPt"+postfix, "#tau-jet p_{T} (GeV/c)", opts2=opts2, moveLegend=moveLegend)
 
 
@@ -268,60 +266,25 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
     drawPlot(p, "transverseMass_4AfterDeltaPhi160", "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts=opts, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}", log=False, moveLegend=moveLegend)
 
 
-def doTauCounters(datasetsEmb, datasetsSig, datasetName):
+def doTauCounters(datasetsEmb, datasetsSig, datasetName, ntupleCache):
     lumi = datasetsEmb.getLuminosity()
-    treeDraw = dataset.TreeDraw("dummy", weight=tauEmbedding.tauNtuple.weight[tauEmbedding.era])
 
     # Take unweighted counters for embedded, to get a handle on the muon isolation efficiency
     eventCounterEmb = tauEmbedding.EventCounterMany(datasetsEmb, counters=tauAnalysisEmb+"Counters")
-    eventCounterSig = counter.EventCounter(datasetsSig)
+    eventCounterSig = counter.EventCounter(datasetsSig, counters=tauAnalysisEmb+"Counters")
 
     def isNotThis(name):
         return name != datasetName
 
     eventCounterEmb.removeColumns(filter(isNotThis, datasetsEmb.getAllDatasetNames()))
     eventCounterSig.removeColumns(filter(isNotThis, datasetsSig.getAllDatasetNames()))
+
+    eventCounterEmb.mainCounterAppendRows(ntupleCache.histogram("counters/weighted/counter"))
+    eventCounterSig.getMainCounter().appendRows(ntupleCache.histogram("counters/weighted/counter"))
+
     eventCounterSig.normalizeMCToLuminosity(lumi)
 
     effFormat = counter.TableFormatLaTeX(counter.CellFormatTeX(valueFormat="%.4f", withPrecision=2))
-
-    tdEmb = treeDraw.clone(tree=tauAnalysisEmb+"/tree")
-    tdSig = treeDraw.clone(tree=tauAnalysisSig+"/tree")
-    selectionsCumulative = []
-    tauSelectionsCumulative = []
-    rowNames = []
-    def sel(name, selection):
-        selectionsCumulative.append(selection)
-        sel = selectionsCumulative[:]
-        if len(tauSelectionsCumulative) > 0:
-            sel += ["Sum$(%s) >= 1" % "&&".join(tauSelectionsCumulative)]
-        sel = "&&".join(sel)
-        eventCounterEmb.mainCounterAppendRow(name, tdEmb.clone(selection=sel))
-        eventCounterSig.getMainCounter().appendRow(name, tdSig.clone(selection=sel))
-        rowNames.append(name)
-    def tauSel(name, selection):
-        tauSelectionsCumulative.append(selection)
-        sel = selectionsCumulative[:]
-        if len(tauSelectionsCumulative) > 0:
-            sel += ["Sum$(%s) >= 1" % "&&".join(tauSelectionsCumulative)]
-        sel = "&&".join(sel)
-        eventCounterEmb.mainCounterAppendRow(name, tdEmb.clone(selection=sel))
-        eventCounterSig.getMainCounter().appendRow(name, tdSig.clone(selection=sel))
-        rowNames.append(name)
-
-    sel(">= 1 tau candidate", "Length$(taus_p4) >= 1")
-    tauSel("Decay mode finding", tauEmbedding.tauNtuple.decayModeFinding)
-    tauSel("pT > 15", tauEmbedding.tauNtuple.tauPtPreCut)
-    tauSel("pT > 40", tauEmbedding.tauNtuple.tauPtCut)
-    tauSel("eta < 2.1", tauEmbedding.tauNtuple.tauEtaCut)
-    tauSel("leading track pT > 20", tauEmbedding.tauNtuple.tauLeadPt)
-    tauSel("ECAL fiducial", tauEmbedding.tauNtuple.ecalFiducial)
-    tauSel("againstElectron", tauEmbedding.tauNtuple.electronRejection)
-    tauSel("againstMuon", tauEmbedding.tauNtuple.muonRejection)
-    tauSel("isolation", tauEmbedding.tauNtuple.tightIsolation)
-    tauSel("oneProng", tauEmbedding.tauNtuple.oneProng)
-    tauSel("Rtau", tauEmbedding.tauNtuple.rtau)
-    sel("MET", tauEmbedding.tauNtuple.metSelection)
 
     table = counter.CounterTable()
     col = eventCounterEmb.getMainCounterTable().getColumn(name=datasetName)
@@ -333,7 +296,7 @@ def doTauCounters(datasetsEmb, datasetsSig, datasetName):
 
     fname = "counters_tau_"+datasetName+".txt"
     f = open(fname, "w")
-    f.write(table.format(effFormat))
+    f.write(table.format())
     f.write("\n")
     f.close()
     print "Printed tau counters to", fname
@@ -343,19 +306,30 @@ def doTauCounters(datasetsEmb, datasetsSig, datasetName):
     tableEff.appendColumn(counter.efficiencyColumn("Normal eff", table.getColumn(name="Normal")))
 
     embeddingMuonIsolationEff = tableEff.getCount(rowName="tauEmbeddingMuonsCount", colName="Embedded eff")
-    embeddingTauIsolationEff = tableEff.getCount(rowName="isolation", colName="Embedded eff")
+    embeddingTauIsolationEff = tableEff.getCount(rowName="Isolation", colName="Embedded eff")
     embeddingTotalIsolationEff = embeddingMuonIsolationEff.clone()
     embeddingTotalIsolationEff.multiply(embeddingTauIsolationEff)
 
     # Remove unnecessary rows
-    del rowNames[0]
+    rowNames = [
+#        "All events",
+        "Decay mode finding",
+        "Eta cut",
+        "Pt cut",
+        "Leading track pt",
+        "Against electron",
+        "Against muon",
+        "Isolation",
+        "One prong",
+        "Rtau",
+    ]
     tableEff.keepOnlyRows(rowNames)
-    rowIndex = tableEff.getRowNames().index("isolation")
+    rowIndex = tableEff.getRowNames().index("Isolation")
     tableEff.insertRow(rowIndex, counter.CounterRow("Mu isolation (emb)", ["Embedded eff", "Normal eff"],
                                                     [embeddingMuonIsolationEff, None]))
     tableEff.insertRow(rowIndex+1, counter.CounterRow("Tau isolation (emb)", ["Embedded eff", "Normal eff"],
                                                       [embeddingTauIsolationEff, None]))
-    tableEff.setCount2(embeddingTotalIsolationEff, rowName="isolation", colName="Embedded eff")
+    tableEff.setCount2(embeddingTotalIsolationEff, rowName="Isolation", colName="Embedded eff")
     #tableEff.setCount2(None, rowName="pT > 15", colName="Normal eff")
 
     #print table.format(effFormat)

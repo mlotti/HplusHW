@@ -1,5 +1,6 @@
 #include "BaseSelector.h"
 #include "Branches.h"
+#include "Configuration.h"
 
 #include "TDirectory.h"
 #include "TH1F.h"
@@ -258,8 +259,8 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
   // Muon kinematics
   for(size_t i=0; i<nmuons; ++i) {
     MyMuonCollection::Muon muon = fMuons.get(i);
-    if(!(muon.p4().Pt() > 40)) continue;
-    if(!(std::abs(muon.p4().Eta()) < 2.1)) continue;
+    if(!MuonID::pt(muon)) continue;
+    if(!MuonID::eta(muon)) continue;
     selectedMuons.push_back(muon);
   }
 
@@ -268,7 +269,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
 
   // dB
   for(size_t i=0; i<selectedMuons.size(); ++i) {
-    if(!(std::abs(selectedMuons[i].dB()) < 0.02)) continue;
+    if(!MuonID::dB(selectedMuons[i])) continue;
     tmp.push_back(selectedMuons[i]);
   }
   selectedMuons.swap(tmp);
@@ -298,7 +299,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
         hMuonPhotonIso_AfterDB->Fill(muon.photonIso(), weight);
         hMuonIso_AfterDB->Fill(stdIsoVar, weight);
 
-        if(!(stdIsoVar < 0.12)) continue;
+        if(!MuonID::standardRelativeIsolation(stdIsoVar)) continue;
       }
       else if(fIsolationMode == kEmbedding) {
 
@@ -308,7 +309,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
         hMuonPhotonIso_AfterDB->Fill(muon.photonIsoEmb(), weight);
         hMuonIso_AfterDB->Fill(embIsoVar, weight);
 
-        if(!(embIsoVar < 2)) continue;
+        if(!MuonID::embeddingIsolation(embIsoVar)) continue;
       }
       hMuonVertexCount_AfterIsolation->Fill(fVertexCount.value(), weight);
       if(isMuFromW)
@@ -341,12 +342,10 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
     // Skip selected muon
     if(muon.index() == selectedMuon.index()) continue;
 
-    if(!(muon.p4().Pt() >= 15)) continue;
-    if(!(std::abs(muon.p4().Eta()) < 2.5)) continue;
-    if(!(std::abs(muon.dB()) < 0.02)) continue;
-    double isoVar = muon.trackIso()+muon.caloIso();
-    isoVar = isoVar / muon.p4().Pt();
-    if(!(isoVar <= 0.15)) continue;
+    if(!MuonVeto::pt(muon)) continue;
+    if(!MuonVeto::eta(muon)) continue;
+    if(!MuonVeto::dB(muon)) continue;
+    if(!MuonVeto::subdetectorIsolation(muon)) continue;
     ++muonVetoCount;
 
     /*

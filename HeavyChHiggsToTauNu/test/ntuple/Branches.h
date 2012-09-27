@@ -214,4 +214,85 @@ private:
   BranchObj<std::vector<math::XYZTLorentzVector> > fP4;
 };
 
+// Taus
+class TauCollection {
+public:
+  class Tau {
+  public:
+    Tau(TauCollection *mc, size_t i);
+    ~Tau();
+
+    size_t index() const { return fIndex; }
+    const math::XYZTLorentzVector& p4() { return fCollection->fP4.value()[fIndex]; }
+    const math::XYZTLorentzVector& leadPFChargedHadrCandP4() { return fCollection->fLeadPFChargedHadrCandP4.value()[fIndex]; }
+    unsigned signalPFChargedHadrCandsCount() { return fCollection->fSignalPFChargedHadrCandsCount.value()[fIndex]; }
+    int decayMode() { return fCollection->fDecayMode.value()[fIndex]; }
+
+    double rtau() { return leadPFChargedHadrCandP4().P() / p4().P() -1e-10; }
+
+    double decayModeFinding() { return fCollection->fDecayModeFinding.value()[fIndex]; }
+
+    double againstMuonTight() { return fCollection->fAgainstMuonTight.value()[fIndex]; }
+
+    double againstElectronLoose() { return fCollection->fAgainstElectronLoose.value()[fIndex]; }
+    double againstElectronMedium() { return fCollection->fAgainstElectronMedium.value()[fIndex]; }
+    double againstElectronTight() { return fCollection->fAgainstElectronTight.value()[fIndex]; }
+    double againstElectronMVA() { return fCollection->fAgainstElectronMVA.value()[fIndex]; }
+
+    double mediumCombinedIsolationDeltaBetaCorr() { return fCollection->fMediumCombinedIsolationDeltaBetaCorr.value()[fIndex]; }
+
+  protected:
+    TauCollection *fCollection;
+    size_t fIndex;
+  };
+
+  TauCollection(const std::string prefix = "taus");
+  ~TauCollection();
+
+  void setupBranches(TTree *tree);
+  void setEntry(Long64_t entry) {
+    fP4.setEntry(entry);
+    fLeadPFChargedHadrCandP4.setEntry(entry);
+    fSignalPFChargedHadrCandsCount.setEntry(entry);
+    fDecayMode.setEntry(entry);
+
+    fDecayModeFinding.setEntry(entry);
+    fAgainstMuonTight.setEntry(entry);
+    fAgainstElectronLoose.setEntry(entry);
+    fAgainstElectronMedium.setEntry(entry);
+    fAgainstElectronTight.setEntry(entry);
+    fAgainstElectronMVA.setEntry(entry);
+    fMediumCombinedIsolationDeltaBetaCorr.setEntry(entry);
+  }
+
+  size_t size() {
+    return fP4.value().size();
+  }
+  Tau get(size_t i) {
+    return Tau(this, i);
+  }
+
+
+protected:
+  std::string fPrefix;
+
+private:
+  BranchObj<std::vector<math::XYZTLorentzVector> > fP4;
+  BranchObj<std::vector<math::XYZTLorentzVector> > fLeadPFChargedHadrCandP4;
+  BranchObj<std::vector<unsigned> > fSignalPFChargedHadrCandsCount;
+  BranchObj<std::vector<int> > fDecayMode;
+
+  BranchObj<std::vector<double> > fDecayModeFinding;
+
+  BranchObj<std::vector<double> > fAgainstMuonTight;
+
+  BranchObj<std::vector<double> > fAgainstElectronLoose;
+  BranchObj<std::vector<double> > fAgainstElectronMedium;
+  BranchObj<std::vector<double> > fAgainstElectronTight;
+  BranchObj<std::vector<double> > fAgainstElectronMVA;
+
+  BranchObj<std::vector<double> > fMediumCombinedIsolationDeltaBetaCorr;
+};
+
+
 #endif
