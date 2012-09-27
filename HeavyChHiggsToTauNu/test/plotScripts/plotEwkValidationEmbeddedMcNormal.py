@@ -43,6 +43,8 @@ tauAnalysisSig = "tauNtuple"
 analysisEmb = "signalAnalysis"
 analysisSig = "signalAnalysisTauEmbeddingLikePreselection"
 
+dataEra = "Run2011AB"
+
 def main():
     tauDirEmbs = [os.path.join("..", d) for d in tauEmbedding.tauDirEmbs]
     tauDirSig = "../"+tauEmbedding.tauDirSig
@@ -102,6 +104,7 @@ def main():
 
     
     ntupleCache = dataset.NtupleCache(tauAnalysisEmb+"/tree", "TauAnalysisSelector",
+                                      selectorArgs=[tauEmbedding.tauNtuple.weight[dataEra]],
                                       #process=False,
                                       #maxEvents=100000,
                                       )
@@ -181,7 +184,7 @@ def doTauPlots(datasetsEmb, datasetsSig, datasetName, ntupleCache):
 
     # Full ID
     postfix = "_6AfterTauID"
-    drawPlot(createPlot(ntupleCache.histogram("tauRtau_AfterOneProng")),
+    drawPlot(createPlot(ntupleCache.histogram("tauPt_AfterRtau")),
              "tauPt"+postfix, "#tau-jet p_{T} (GeV/c)", opts2=opts2, moveLegend=moveLegend)
 
 
