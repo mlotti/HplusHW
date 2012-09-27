@@ -382,6 +382,7 @@ def addPAT(process, options, dataVersion):
         "keep *_selectedPatElectrons_*_*",
         "keep *_allConversions_*_*",
         "keep recoCaloMETs_*_*_*",
+        "keep genMETs_*_*_*",
         "keep *_goodJets*_*_*",
         "keep bool_*_*_*",
         "keep *_patTriggerEvent_*_*",
