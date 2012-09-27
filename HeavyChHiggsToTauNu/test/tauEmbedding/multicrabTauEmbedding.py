@@ -295,7 +295,7 @@ def createTasks(opts, step, version=None):
     if step == "skim":
         multicrab.appendLineAll("GRID.maxtarballsize = 30")
     else:   
-        multicrab.appendLineAll("GRID.maxtarballsize = 15")
+        multicrab.appendLineAll("GRID.maxtarballsize = 20")
         multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
 
 
