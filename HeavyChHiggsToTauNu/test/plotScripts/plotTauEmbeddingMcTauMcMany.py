@@ -25,16 +25,11 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
-import plotTauEmbeddingTau as tauPlot
-import produceTauEmbeddingResult as result
-import plotTauEmbeddingTauMany as tauPlotMany
 
 analysisEmb = "tauNtuple"
 analysisSig = "tauNtuple"
 
-dirSig = "../multicrab_analysisTau_111202_144918"
-
-weight = "weightPileup_Run2011A"
+weight = weight=tauEmbedding.tauNtuple.weight[tauEmbedding.era]
 
 def main():
     tauDirEmbs = ["."] + [os.path.join("..", d) for d in tauEmbedding.tauDirEmbs[1:]]
@@ -45,15 +40,16 @@ def main():
     datasetsSig.updateNAllEventsToPUWeighted()
 
     datasetsEmb.forEach(plots.mergeRenameReorderForDataMC)
-    datasetsEmb.setLumiFromData()
+    #datasetsEmb.setLumiFromData()
+    datasetsEmb.lumi = 5049
     plots.mergeRenameReorderForDataMC(datasetsSig)
 
     def mergeEWK(datasets):
         datasets.merge("EWKMC", ["WJets", "TTJets"], keepSources=True)
         #datasets.merge("EWKMC", ["WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson"], keepSources=True)
-    mergeEWK(datasetsSig)
-    datasetsEmb.forEach(mergeEWK)
-    plots._legendLabels["EWKMC"] = "EWK"
+    #mergeEWK(datasetsSig)
+    #datasetsEmb.forEach(mergeEWK)
+    #plots._legendLabels["EWKMC"] = "EWK"
 
     style = tdrstyle.TDRStyle()
     histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
@@ -62,15 +58,15 @@ def main():
     tauEmbedding.era = "Run2011A"
 
     def dop(datasetName):
-        doPlots(datasetsEmb, datasetsSig, datasetName)
-#        doCounters(datasetsEmb, datasetsSig, datasetName)
+#        doPlots(datasetsEmb, datasetsSig, datasetName)
+        doCounters(datasetsEmb, datasetsSig, datasetName)
         print "%s done" % datasetName
     dop("TTJets")
-    dop("WJets")
-    dop("DYJetsToLL")
-    dop("SingleTop")
-    dop("Diboson")
-    dop("EWKMC")
+#    dop("WJets")
+#    dop("DYJetsToLL")
+#    dop("SingleTop")
+#    dop("Diboson")
+#    dop("EWKMC")
 
 def doPlots(datasetsEmb, datasetsSig, datasetName):
     lumi = datasetsEmb.getLuminosity()
@@ -112,7 +108,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
 
     # Decay mode finding
     postfix = "_1AfterDecayModeFindingIsolationPtPre"
-    td = treeDraw.clone(selection=And(tauPlot.decayModeFinding, tauPlot.tightIsolation, tauPlot.tauPtPreCut))
+    td = treeDraw.clone(selection=And(tauEmbedding.tauNtuple.decayModeFinding, tauEmbedding.tauNtuple.tightIsolation, tauEmbedding.tauNtuple.tauPtPreCut))
     opts2 = opts2def
     drawPlot(createPlot(td.clone(varexp="taus_p4.Eta()>>tmp(25,-2.5,2.5")),
              "tauEta"+postfix, "#tau-jet candidate #eta", ylabel="Events / %.1f", opts={"ymin": 1e-1}, opts2=opts2, moveLegend={"dx": -0.2, "dy": -0.45}, cutLine=[-2.1, 2.1])
@@ -121,7 +117,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
 
     # Eta cut
     postfix = "_2AfterEtaCut"
-    td = treeDraw.clone(selection=And(tauPlot.decayModeFinding, tauPlot.tightIsolation, tauPlot.tauPtPreCut, tauPlot.tauEtaCut))
+    td = treeDraw.clone(selection=And(tauEmbedding.tauNtuple.decayModeFinding, tauEmbedding.tauNtuple.tightIsolation, tauEmbedding.tauNtuple.tauPtPreCut, tauEmbedding.tauNtuple.tauEtaCut))
     drawPlot(createPlot(td.clone(varexp="taus_p4.Eta()>>tmp(25,-2.5,2.5")),
              "tauEta"+postfix, "#tau-jet candidate #eta", ylabel="Events / %.1f", opts={"ymin": 1e-1}, opts2=opts2, moveLegend={"dx": -0.2, "dy": -0.45}, cutLine=[-2.1, 2.1])
     drawPlot(createPlot(td.clone(varexp="taus_p4.Pt()>>tmp(25,0,250)")),
@@ -129,7 +125,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
 
     # Pt cut
     postfix = "_3AfterPtCut"
-    td = treeDraw.clone(selection=And(tauPlot.decayModeFinding, tauPlot.tightIsolation, tauPlot.tauEtaCut, tauPlot.tauPtCut))
+    td = treeDraw.clone(selection=And(tauEmbedding.tauNtuple.decayModeFinding, tauEmbedding.tauNtuple.tightIsolation, tauEmbedding.tauNtuple.tauEtaCut, tauEmbedding.tauNtuple.tauPtCut))
     drawPlot(createPlot(td.clone(varexp="taus_p4.Phi()>>tmp(32,-3.2,3.2")),
              "tauPhi"+postfix, "#tau-jet candidate #phi (rad)", ylabel="Events / %.1f", opts={"ymin": 1e-1}, opts2=opts2, moveLegend={"dx": -0.2, "dy": -0.45})
     opts2 = {"Diboson": {"ymin": 0, "ymax": 1.5}}.get(datasetName, opts2def)
@@ -139,17 +135,17 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
 
     # Tau candidate selection
     postfix = "_4AfterTauCandidateSelection"
-    td = treeDraw.clone(selection=tauPlot.tauCandidateSelection)
+    td = treeDraw.clone(selection=tauEmbedding.tauNtuple.tauCandidateSelection)
     opts2 = {"EWKMC": {"ymin": 0.5, "ymax": 2}}.get(datasetName, opts2def)
-    drawPlot(createPlot(td.clone(varexp=tauPlot.decayModeExp)),
+    drawPlot(createPlot(td.clone(varexp=tauEmbedding.tauNtuple.decayModeExpression)),
              "tauDecayMode"+postfix+"", "", opts={"ymin": 1e-2, "ymaxfactor": 20, "nbins":5}, opts2=opts2,
              #moveLegend={"dy": 0.02, "dh": -0.02},
-             function=tauPlot.decayModeCustomize)
+             function=tauEmbedding.tauNtuple.decayModeCustomize)
     opts2 = opts2def
 
     # One prong
     postfix = "_5AfterOneProng"
-    td = treeDraw.clone(selection=And(tauPlot.tauCandidateSelection, tauPlot.oneProng))
+    td = treeDraw.clone(selection=And(tauEmbedding.tauNtuple.tauCandidateSelection, tauEmbedding.tauNtuple.oneProng))
     #drawPlot(createPlot(td.clone(varexp="taus_p4.Pt()>>tmp(25,0,250)")),
     #         "tauPt"+postfix, "#tau-jet candidate p_{T} (GeV/c)", opts2={"ymin": 0, "ymax": 2})
     #drawPlot(createPlot(td.clone(varexp="taus_p4.P()>>tmp(25,0,250)")),
@@ -158,12 +154,12 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
     #         "tauLeadingTrackPt"+postfix, "#tau-jet ldg. charged particle p_{T} (GeV/c)", opts2={"ymin":0, "ymax": 2})
     #drawPlot(createPlot(td.clone(varexp="taus_leadPFChargedHadrCand_p4.P()>>tmp(25,0,250)")),
     #         "tauLeadingTrackP"+postfix, "#tau-jet ldg. charged particle p (GeV/c)", opts2={"ymin":0, "ymax": 2})
-    drawPlot(createPlot(td.clone(varexp=tauPlot.rtauExp+">>tmp(22, 0, 1.1)")),
+    drawPlot(createPlot(td.clone(varexp=tauEmbedding.tauNtuple.rtauExp+">>tmp(22, 0, 1.1)")),
              "rtau"+postfix, "R_{#tau} = p^{ldg. charged particle}/p^{#tau jet}", ylabel="Events / %.1f", opts={"ymin": 1e-2, "ymaxfactor": 5}, opts2=opts2, moveLegend={"dx":-0.34}, cutLine=0.7)
 
     # Full ID
     postfix = "_6AfterTauID"
-    td = treeDraw.clone(selection=And(tauPlot.tauCandidateSelection, tauPlot.tauID))
+    td = treeDraw.clone(selection=And(tauEmbedding.tauNtuple.tauCandidateSelection, tauEmbedding.tauNtuple.tauID))
     drawPlot(createPlot(td.clone(varexp="taus_p4.Pt()>>tmp(25,0,250)")),
              "tauPt"+postfix, "#tau-jet p_{T} (GeV/c)", opts2=opts2)
 
@@ -173,7 +169,7 @@ def doCounters(datasetsEmb, datasetsSig, datasetName):
     treeDraw = dataset.TreeDraw("dummy", weight=weight)
 
     # Counters
-    eventCounterEmb = result.EventCounterMany(datasetsEmb, counters=analysisEmb+"Counters")
+    eventCounterEmb = tauEmbedding.EventCounterMany(datasetsEmb, counters=analysisEmb+"Counters")
     eventCounterSig = counter.EventCounter(datasetsSig, counters=analysisSig+"Counters")
 
     def isNotThis(name):
@@ -208,22 +204,22 @@ def doCounters(datasetsEmb, datasetsSig, datasetName):
         eventCounterEmb.mainCounterAppendRow(name, tdEmb.clone(selection=sel))
         eventCounterSig.getMainCounter().appendRow(name, tdSig.clone(selection=sel))
 
-#    sel("Primary vertex", tauPlot.pvSelection)
+#    sel("Primary vertex", tauEmbedding.tauNtuple.pvSelection)
     sel(">= 1 tau candidate", "Length$(taus_p4) >= 1")
-    tauSel("Decay mode finding", tauPlot.decayModeFinding)
-    tauSel("pT > 15", "(taus_p4.Pt() > 15)")
-    tauSel("pT > 40", tauPlot.tauPtCut)
-    tauSel("eta < 2.1", tauPlot.tauEtaCut)
-    tauSel("leading track pT > 20", tauPlot.tauLeadPt)
-    tauSel("ECAL fiducial", tauPlot.ecalFiducial)
-    tauSel("againstElectron", tauPlot.electronRejection)
-    tauSel("againstMuon", tauPlot.muonRejection)
-    tauSel("isolation", tauPlot.tightIsolation)
-    tauSel("oneProng", tauPlot.oneProng)
-    tauSel("Rtau", tauPlot.rtau)
-    sel("3 jets", tauPlot.jetEventSelection)
-    sel("MET", tauPlot.metSelection)
-    sel("btag", tauPlot.btagEventSelection)
+    tauSel("Decay mode finding", tauEmbedding.tauNtuple.decayModeFinding)
+    tauSel("pT > 15", tauEmbedding.tauNtuple.tauPtPreCut)
+    tauSel("pT > 40", tauEmbedding.tauNtuple.tauPtCut)
+    tauSel("eta < 2.1", tauEmbedding.tauNtuple.tauEtaCut)
+    tauSel("leading track pT > 20", tauEmbedding.tauNtuple.tauLeadPt)
+    tauSel("ECAL fiducial", tauEmbedding.tauNtuple.ecalFiducial)
+    tauSel("againstElectron", tauEmbedding.tauNtuple.electronRejection)
+    tauSel("againstMuon", tauEmbedding.tauNtuple.muonRejection)
+    tauSel("isolation", tauEmbedding.tauNtuple.tightIsolation)
+    tauSel("oneProng", tauEmbedding.tauNtuple.oneProng)
+    tauSel("Rtau", tauEmbedding.tauNtuple.rtau)
+    sel("3 jets", tauEmbedding.tauNtuple.jetEventSelection)
+    sel("MET", tauEmbedding.tauNtuple.metSelection)
+    sel("btag", tauEmbedding.tauNtuple.btagEventSelection)
 
     table = counter.CounterTable()
     col = eventCounterEmb.getMainCounterTable().getColumn(name=datasetName)

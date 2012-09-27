@@ -31,8 +31,8 @@ import plotMuonAnalysis as muonAnalysis
 #analysis = "signalAnalysisRtau70"
 #analysis = "signalAnalysisRtau80"
 
-#postfix = ""
-#postfix = "CaloMet60"
+postfix = ""
+postfix = "CaloMet60"
 postfix = "CaloMet60TEff"
 
 analysis = "signalAnalysis"+postfix
@@ -64,14 +64,14 @@ analysisNoRtau = "signalAnalysisRtau0MET50"+postfix
 #analysis = "signalAnalysisJESMinus03eta02METPlus10"
 #analysis = "signalAnalysisJESPlus03eta02METMinus10"
 #analysis = "signalAnalysisJESMinus03eta02METMinus10"
-counters = analysis+"Counters"
+counters = analysis+"/counters"
 
 normalize = True
 #normalize = False
 
-#era = "EPS"
-#era = "Run2011A-EPS"
-era = "Run2011A"
+#era = "Run2011A"
+#era = "Run2011B"
+era = "Run2011AB"
 
 tauEmbedding.normalize = normalize
 tauEmbedding.era = era
@@ -107,28 +107,11 @@ def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
 
-    if era == "EPS":
-        datasets.remove([
-            "SingleMu_Mu_170722-172619_Aug05",
-            "SingleMu_Mu_172620-173198_Prompt",
-            "SingleMu_Mu_173236-173692_Prompt",
-        ])
-    elif era == "Run2011A-EPS":
-        datasets.remove([
-            "SingleMu_Mu_160431-163261_May10",
-            "SingleMu_Mu_163270-163869_May10",
-            "SingleMu_Mu_165088-166150_Prompt",
-            "SingleMu_Mu_166161-166164_Prompt",
-            "SingleMu_Mu_166346-166346_Prompt",
-            "SingleMu_Mu_166374-167043_Prompt",
-            "SingleMu_Mu_167078-167913_Prompt",
-
-#            "SingleMu_Mu_170722-172619_Aug05",
-#            "SingleMu_Mu_172620-173198_Prompt",
-#            "SingleMu_Mu_173236-173692_Prompt",
-
-            ])
-    elif era == "Run2011A":
+    if era == "Run2011A":
+        datasets.remove(filter(lambda name: "2011B_" in name, datasets.getDataDatasetNames()))
+    elif era == "Run2011B":
+        datasets.remove(filter(lambda name: "2011A_" in name, datasets.getDataDatasetNames()))
+    elif era == "Run2011AB":
         pass
     else:
         raise Exception("Unsupported era "+era)
@@ -140,7 +123,7 @@ def main():
 #    apply_v13_1_bugfix(datasets)
 
     plots.mergeRenameReorderForDataMC(datasets)
-    datasets.remove(["W3Jets"])
+#    datasets.remove(["W3Jets"])
 
 #    datasets.remove(["DYJetsToLL", "SingleTop", "Diboson", "QCD_Pt20_MuEnriched"])
 
@@ -177,7 +160,7 @@ def main():
 
     mcLumi = None
     if not datasets.hasDataset("Data"):
-        mcLumi = 2173
+        mcLumi = 5000
 
 #    scaleLumi.signalLumi = 43.4024599650000037
 #    scaleLumi.ewkLumi = datasets.getDataset("Data").getLuminosity()
@@ -191,7 +174,7 @@ def main():
     histograms.createLegend.moveDefaults(dh=-0.05)
     #histograms.createLegend.moveDefaults(dx=-0.18, dy=0.05, dh=-0.05)
 
-    doPlots(datasets, mcLumi)
+#    doPlots(datasets, mcLumi)
     doCounters(datasets, mcLumi)
 
 
@@ -397,12 +380,12 @@ def doCounters(datasets, mcLumi=None):
     tdCountDeltaPhi160 = tdCount.clone(selection="&&".join(sels+[metCut, bTaggingCut, deltaPhi160Cut]))
     tdCountDeltaPhi130 = tdCount.clone(selection="&&".join(sels+[metCut, bTaggingCut, deltaPhi130Cut]))
     tdCountDeltaPhi90 = tdCount.clone(selection="&&".join(sels+[metCut, bTaggingCut, deltaPhi90Cut]))
-    eventCounter.getMainCounter().appendRow("JetsForEffs", tdCount.clone(weight=weight, selection="&&".join(sels)))
-    eventCounter.getMainCounter().appendRow("METForEffs", tdCountMET)
-    eventCounter.getMainCounter().appendRow("BTagging", tdCountBTagging)
-    eventCounter.getMainCounter().appendRow("DeltaPhi < 160", tdCountDeltaPhi160)
-    eventCounter.getMainCounter().appendRow("DeltaPhi < 130", tdCountDeltaPhi130)
-    eventCounter.getMainCounter().appendRow("DeltaPhi < 90", tdCountDeltaPhi90)
+#    eventCounter.getMainCounter().appendRow("JetsForEffs", tdCount.clone(weight=weight, selection="&&".join(sels)))
+#    eventCounter.getMainCounter().appendRow("METForEffs", tdCountMET)
+#    eventCounter.getMainCounter().appendRow("BTagging", tdCountBTagging)
+#    eventCounter.getMainCounter().appendRow("DeltaPhi < 160", tdCountDeltaPhi160)
+#    eventCounter.getMainCounter().appendRow("DeltaPhi < 130", tdCountDeltaPhi130)
+#    eventCounter.getMainCounter().appendRow("DeltaPhi < 90", tdCountDeltaPhi90)
 
     td1 = tdCount.clone(selection=metCut+"&&"+bTaggingCut+"&& (tecalometNoHF_p4.Pt() > 60)")
     td2 = tdCount.clone(selection=metCut+"&&"+bTaggingCut+"&& (tecalomet_p4.Pt() > 60)")
@@ -411,9 +394,9 @@ def doCounters(datasets, mcLumi=None):
             "SingleMu_Mu_172620-173198_Prompt": td2,
             "SingleMu_Mu_173236-173692_Prompt": td2,
             })
-    eventCounter.getMainCounter().appendRow("BTagging+CaloMetNoHF", td1)
-    eventCounter.getMainCounter().appendRow("BTagging+CaloMet", td2)
-    eventCounter.getMainCounter().appendRow("BTagging+CaloMet(NoHF)", td3)
+#    eventCounter.getMainCounter().appendRow("BTagging+CaloMetNoHF", td1)
+#    eventCounter.getMainCounter().appendRow("BTagging+CaloMet", td2)
+#    eventCounter.getMainCounter().appendRow("BTagging+CaloMet(NoHF)", td3)
 
     if mcLumi != None:
         eventCounter.normalizeMCToLuminosity(mcLumi)
@@ -428,11 +411,9 @@ def doCounters(datasets, mcLumi=None):
 
     table = eventCounter.getMainCounterTable()
     mainTable = table
-    muonAnalysis.addSumColumn(table)
-    mainTable.insertColumn(2, counter.sumColumn("EWKMCsum", [mainTable.getColumn(name=name) for name in ewkDatasets]))
-#    table = eventCounter.getSubCounterTable("Trigger")
-    #    muonAnalysis.reorderCounterTable(table)
-    muonAnalysis.addDataMcRatioColumn(table)
+    #muonAnalysis.addSumColumn(table)
+    #mainTable.insertColumn(2, counter.sumColumn("EWKMCsum", [mainTable.getColumn(name=name) for name in ewkDatasets]))
+    #muonAnalysis.addDataMcRatioColumn(table)
     if datasets.hasDataset("EWKSignal"):
         mainTable.insertColumn(7, counter.divideColumn("SignalFraction", mainTable.getColumn(name="TTToHplus_"+keepSignal), mainTable.getColumn(name="EWKSignal")))
 
@@ -442,7 +423,7 @@ def doCounters(datasets, mcLumi=None):
     cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.3f'))
     print table.format(cellFormat)
 
-    tauTable = eventCounter.getSubCounterTable("TauIDPassedEvt::tauID_HPSTight")
+    tauTable = eventCounter.getSubCounterTable("TauIDPassedEvt::TauSelection_HPS")
     #muonAnalysis.addSumColumn(tauTable)
     tauTable.insertColumn(2, counter.sumColumn("EWKMCsum", [tauTable.getColumn(name=name) for name in ewkDatasets]))
     print tauTable.format(cellFormat)

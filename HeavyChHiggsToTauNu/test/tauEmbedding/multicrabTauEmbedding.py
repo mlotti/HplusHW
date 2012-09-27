@@ -274,9 +274,16 @@ def createTasks(opts, step, version=None):
             datasets.extend(datasetsData2011)
         datasets.extend(datasetsMCnoQCD)
         datasets.extend(datasetsMCQCD)
-    
+
     if step in ["skim", "embedding", "signalAnalysis","EWKMatching"]:
         datasets.extend(datasetsSignal)
+
+    if version == "v44_3_seed2":
+        # No TTJets in this embedding round
+        try:
+            datasets.remove("TTJets_TuneZ2_Fall11")
+        except ValueError:
+            pass
 
     dataInput = config[step]["input"]
     if step in ["analysis", "signalAnalysis","EWKMatching"]:

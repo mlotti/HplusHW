@@ -1759,8 +1759,17 @@ class PlotDrawer:
     # \li\a  rebin  If given and large than 1, rebin all histograms in the plot
     def rebin(self, p, **kwargs):
         reb = kwargs.get("rebin", 1)
-        if reb > 1:
-            p.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(reb))
+        if isinstance(reb, list):
+            if len(reb) < 2:
+                raise Exception("If 'rebin' is a list, it must have at least two elements")
+            n = len(reb)-1
+            def tmp(h):
+                h = h.getRootHisto()
+                return h.Rebin(n, h.GetName(), array.array("d", reb))
+            p.histoMgr.forEachHisto(tmp)
+        else:
+            if reb > 1:
+                p.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(reb))
 
     ## Stack MC histograms
     #

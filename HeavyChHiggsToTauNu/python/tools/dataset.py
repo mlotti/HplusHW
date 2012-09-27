@@ -8,6 +8,8 @@
 import glob, os, sys, re
 import math
 import copy
+import StringIO
+import hashlib
 
 import ROOT
 
@@ -689,11 +691,10 @@ class TreeDraw:
 
     ## Prodouce TH1 from a file
     #
-    # \param rootFile     TFile object containing the TTree
-    # \param datasetName  Name of the dataset, the output TH1 contains
-    #                     this in the name. Mainly needed for compatible interface with
+    # \param dataset      Dataset, the output TH1 contains the dataset name
+    #                     in the histogram name. Mainly needed for compatible interface with
     #                     dataset.TreeDrawCompound
-    def draw(self, rootFile, datasetName):
+    def draw(self, dataset):
         if self.varexp != "" and not ">>" in self.varexp:
             raise Exception("varexp should include explicitly the histogram binning (%s)"%self.varexp)
 
@@ -704,6 +705,7 @@ class TreeDraw:
             else:
                 selection = self.weight
 
+        rootFile = dataset.getRootFile()
         tree = rootFile.Get(self.tree)
         if tree == None:
             raise Exception("No TTree '%s' in file %s" % (self.tree, rootFile.GetName()))
@@ -754,7 +756,7 @@ class TreeDraw:
                 else:
                     raise Exception("Got null histogram for TTree::Draw() from file %s with selection '%s', and unable to infer the histogram limits or name from the varexp %s" % (rootFile.GetName(), selection, varexp))
 
-        h.SetName(datasetName+"_"+h.GetName())
+        h.SetName(dataset.getName()+"_"+h.GetName())
         h.SetDirectory(0)
         return h
 
@@ -795,10 +797,10 @@ class TreeScan:
 
     ## Process TTree
     #
-    # \param rootFile     TFile object containing the TTree
-    # \param datasetName  Name of the dataset. Only needed for compatible interface with
+    # \param datasetName  Dataset object. Only needed for compatible interface with
     #                     dataset.TreeDrawCompound
-    def draw(self, rootFile, datasetName):
+    def draw(self, dataset):
+        rootFile = dataset.getRootFile()
         tree = rootFile.Get(self.tree)
         if tree == None:
             raise Exception("No TTree '%s' in file %s" % (self.tree, rootFile.GetName()))
@@ -839,20 +841,20 @@ class TreeDrawCompound:
 
     ## Produce TH1
     #
-    # \param rootFile     TFile object containing the TTree
-    # \param datasetName  Name of the dataset.
+    # \param datasetName  Dataset object
     #
     # The dataset.TreeDraw for which the call is forwarded is searched from
     # the datasetMap with the datasetName. If found, that object is
     # used. If not found, the default TreeDraw is used.
-    def draw(self, rootFile, datasetName):
+    def draw(self, dataset):
         h = None
+        datasetName = dataset.getName()
         if datasetName in self.datasetMap:
             #print "Dataset %s in datasetMap" % datasetName, self.datasetMap[datasetName].selection
-            h = self.datasetMap[datasetName].draw(rootFile, datasetName)
+            h = self.datasetMap[datasetName].draw(dataset)
         else:
             #print "Dataset %s with default" % datasetName, self.default.selection
-            h = self.default.draw(rootFile, datasetName)
+            h = self.default.draw(dataset)
         return h
 
     ## Clone
@@ -1314,7 +1316,7 @@ class Dataset:
     # construction time.
     def __init__(self, name, fname, counterDir, weightedCounters=True, analysisBaseName=None, dataEra=None, doEraReplace=True):
         self.name = name
-        self._setBaseDirectory(os.path.dirname(os.path.dirname(os.path.dirname(fname))))
+        self._setBaseDirectory(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(fname)))))
         self.file = ROOT.TFile.Open(fname)
         if self.file == None:
             raise Exception("Unable to open ROOT file '%s'"%fname)
@@ -1457,6 +1459,9 @@ class Dataset:
     def getCounterDirectory(self):
         return self.counterDir
 
+    def getRootFile(self):
+        return self.file
+
     ## Set the number of all events (for normalization).
     #
     # This allows both overriding the value read from the event
@@ -1535,7 +1540,7 @@ class Dataset:
     def getDatasetRootHisto(self, name):
         h = None
         if hasattr(name, "draw"):
-            h = name.draw(self.file, self.getName())
+            h = name.draw(self)
         else:
             pname = name
             h = self._getRootHisto(pname)
@@ -1577,6 +1582,10 @@ class Dataset:
 
     def _setBaseDirectory(self,base):
         self.basedir = base
+
+    ## Get the path of the multicrab directory where this dataset originates
+    def getBaseDirectory(self):
+        return self.basedir
         
     ## \var name
     # Name of the dataset
@@ -2087,8 +2096,9 @@ class DatasetManager:
         for dataset in self.datasets:
             dataset.updateNAllEventsToPUWeighted(**kwargs)
 
-    ## Print dataset information.
-    def printInfo(self):
+    ## Format dataset information
+    def formatInfo(self):
+        out = StringIO.StringIO()
         col1hdr = "Dataset"
         col2hdr = "Cross section (pb)"
         col3hdr = "Norm. factor"
@@ -2104,7 +2114,7 @@ class DatasetManager:
         c3skip = " "*(len(col3hdr)+2)
         c4skip = " "*(len(col4hdr)+2)
 
-        print (c1fmt%col1hdr)+"  "+col2hdr+"  "+col3hdr+"  "+col4hdr
+        out.write((c1fmt%col1hdr)+"  "+col2hdr+"  "+col3hdr+"  "+col4hdr+"\n")
         for dataset in self.datasets:
             line = (c1fmt % dataset.getName())
             if dataset.isMC():
@@ -2116,8 +2126,16 @@ class DatasetManager:
                     line += c3skip
             else:
                 line += c2skip+c3skip + c4fmt%dataset.getLuminosity()
-            print line
+            out.write(line)
+            out.write("\n")
 
+        ret = out.getvalue()
+        out.close()
+        return ret
+
+    ## Print dataset information.
+    def printInfo(self):
+        print self.formatInfo()
 
     ## \var datasets
     # List of dataset.Dataset (or dataset.DatasetMerged) objects to manage
@@ -2128,3 +2146,156 @@ class DatasetManager:
     ## \var basedir
     # Directory (absolute/relative to current working directory) where
     # the luminosity JSON file is located (see loadLuminosities())
+
+## Helper class to plug NtupleCache to the existing framework
+#
+# User should not construct an object by herself, but use
+# NtupleCahce.histogram()
+class NtupleCacheDrawer:
+    ## Constructor
+    #
+    # \param ntupleCache   NtupleCache object
+    # \param histoName     Name of the histogram to obtain
+    def __init__(self, ntupleCache, histoName):
+        self.ntupleCache = ntupleCache
+        self.histoName = histoName
+
+    ## "Draw"
+    #
+    # \param datasetName  Dataset object
+    #
+    # This method exploits the infrastucture we have for TreeDraw.
+    def draw(self, dataset):
+        self.ntupleCache.process(dataset)
+        return self.ntupleCache.getRootHisto(dataset, self.histoName)
+
+## Ntuple processing with C macro and caching the result histograms
+#
+# 
+class NtupleCache:
+    ## Constructor
+    #
+    # \param treeName       Path to the TTree inside a ROOT file
+    # \param selector       Name of the selector class, should also correspond a .C file in \a test/ntuple
+    # \param selectorArgs   Optional arguments to the selector constructor
+    # \param process        Should the ntuple be processed? (if False, results are read from the cache file)
+    # \param cacheFileName  Path to the cache file
+    # \param maxEvents     Maximum number of events to process (-1 for all events)
+    #
+    # I would like to make \a process redundant, but so far I haven't
+    # figured out a bullet-proof method for that.
+    def __init__(self, treeName, selector, selectorArgs=[], process=True, cacheFileName="histogramCache.root", maxEvents=-1):
+        self.treeName = treeName
+        self.cacheFileName = cacheFileName
+        self.selectorName = selector
+        self.selectorArgs = selectorArgs
+        self.doProcess = process
+        self.maxEvents = maxEvents
+
+        self.macrosLoaded = False
+        self.processedDatasets = {}
+
+        base = os.path.join(os.environ["CMSSW_BASE"], "src", "HiggsAnalysis", "HeavyChHiggsToTauNu", "test", "ntuple")
+        self.macros = [
+            os.path.join(base, "BaseSelector.C"),
+            os.path.join(base, "Branches.C"),
+            os.path.join(base, self.selectorName+".C")
+            ]
+
+        self.cacheFile = None
+
+    ## Compile and load the macros
+    def _loadMacros(self):
+        for m in self.macros:
+            ret = ROOT.gROOT.LoadMacro(m+"+")
+            if ret != 0:
+                raise Exception("Failed to load "+m)
+
+    # def _isMacroNewerThanCacheFile(self):
+    #     latestMacroTime = max([os.path.getmtime(m) for m in self.macros])
+    #     cacheTime = 0
+    #     if os.path.exists(self.cacheFileName):
+    #         cacheTime = os.path.getmtime(self.cacheFileName)
+    #     return latestMacroTime > cacheTime
+
+    ## Process selector for a dataset
+    #
+    # \param dataset  Dataset object
+    #
+    # Processes the self.treeName TTree from the rootFile.
+    def process(self, dataset):
+        #if not self.forceProcess and not self._isMacroNewerThanCacheFile():
+        #    return
+        if not self.doProcess:
+            return
+
+        rootFile = dataset.getRootFile()
+        datasetName = dataset.getName()
+
+        pathDigest = hashlib.sha1(dataset.getBaseDirectory()).hexdigest() # I hope this is good-enough
+        procName = pathDigest+"_"+datasetName
+        if procName in self.processedDatasets:
+            return
+        self.processedDatasets[procName] = 1
+
+        if not self.macrosLoaded:
+            self._loadMacros()
+            self.macrosLoaded = True
+        
+        if self.cacheFile == None:
+            self.cacheFile = ROOT.TFile.Open(self.cacheFileName, "RECREATE")
+            self.cacheFile.cd()
+            argsNamed = ROOT.TNamed("selectorArgs", str(self.selectorArgs))
+            argsNamed.Write()
+
+        directory = self.cacheFile.Get(pathDigest)
+        if directory == None:
+            directory = self.cacheFile.mkdir(pathDigest)
+            directory.cd()
+            tmp = ROOT.TNamed("originalPath", dataset.getBaseDirectory())
+            tmp.Write()
+
+        directory = directory.mkdir(datasetName)
+
+        tree = rootFile.Get(self.treeName)
+        if not tree:
+            raise Exception("TTree '%s' not found from file %s" % (self.treeName, rootFile.GetName()))
+
+        N = tree.GetEntries()
+        useMaxEvents = False
+        if self.maxEvents >= 0 and N > self.maxEvents:
+            useMaxEvents = True
+            N = self.maxEvents
+        selector = ROOT.SelectorImp(N, dataset.isMC(), getattr(ROOT, self.selectorName)(*self.selectorArgs))
+        selector.setOutput(directory)
+
+        print "Processing dataset", datasetName
+        
+        if useMaxEvents:
+            tree.Process(selector, "", N)
+        else:
+            tree.Process(selector)
+        directory.Write()
+
+    ## Get a histogram from the cache file
+    #
+    # \param Datase        Dataset object for which histogram is to be obtained
+    # \apram histoName     Histogram name
+    def getRootHisto(self, dataset, histoName):
+        if self.cacheFile == None:
+            if not os.path.exists(self.cacheFileName):
+                raise Exception("Assert: for some reason the cache file %s does not exist yet..." % self.cacheFileName)
+            self.cacheFile = ROOT.TFile.Open(self.cacheFileName)
+
+        rootFile = dataset.getRootFile()
+        path = "%s/%s/%s" % (hashlib.sha1(dataset.getBaseDirectory()).hexdigest(), dataset.getName(), histoName)
+        h = self.cacheFile.Get(path)
+        if not h:
+            raise Exception("Histogram '%s' not found from %s" % (path, self.cacheFile.GetName()))
+        return h
+
+    ## Create NtupleCacheDrawer for Dataset.getDatasetRootHisto()
+    #
+    # \param histoName   Histogram name to obtain
+    def histogram(self, histoName):
+        return NtupleCacheDrawer(self, histoName)

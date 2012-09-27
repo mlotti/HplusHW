@@ -13,7 +13,7 @@ debug = False
 ################################################################################
 
 # Command line arguments (options) and DataVersion object
-options, dataVersion = getOptionsDataVersion(dataVersion)
+options, dataVersion = getOptionsDataVersion(dataVersion, useDefaultSignalTrigger=False)
 options.doPat = 1
 options.tauEmbeddingInput = 1
 
@@ -212,7 +212,6 @@ process.commonSequence.insert(0, process.goodPrimaryVertices)
 PF2PATVersion = "PFlow"
 param.changeCollectionsToPF2PAT(postfix=PF2PATVersion)
 
-
 muons = cms.InputTag("tauEmbeddingMuons")
 #taus = cms.InputTag("selectedPatTausShrinkingConePFTau")
 taus = cms.InputTag("selectedPatTausHpsPFTau")
@@ -227,25 +226,30 @@ process.commonSequence *= process.firstPrimaryVertex
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+# FIXME: hack to apply trigger in MC
+if dataVersion.isMC():
+    additionalCounters.extend(tauEmbeddingCustomisations.addMuonTriggerFix(process, dataVersion, process.commonSequence, options))
+
 tauEmbeddingCustomisations.PF2PATVersion = PF2PATVersion
 muons = cms.InputTag(tauEmbeddingCustomisations.addMuonIsolationEmbedding(process, process.commonSequence, muons.value()))
 additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param))
 taus = cms.InputTag("patTaus"+PF2PATVersion+"TauEmbeddingMuonMatched")
 
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
 ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
     goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
+
     muonSrc = cms.InputTag(muons.value()),
-    muonFunctions = cms.PSet(),
+    muonFunctions = analysisConfig.muonFunctions.clone(),
+
     tauSrc = cms.InputTag(taus.value()),
-    tauFunctions = cms.PSet(),
+    tauFunctions = analysisConfig.tauFunctions.clone(),
+
     jetSrc = cms.InputTag("selectedPatJets"+PF2PATVersion),
-    jetFunctions = cms.PSet(
-        tche = cms.string("bDiscriminator('trackCountingHighEffBJetTags')"),
-        csv = cms.string("bDiscriminator('combinedSecondaryVertexBJetTags')"),
-    ),
+    jetFunctions = analysisConfig.jetFunctions.clone(),
+
     genParticleOriginalSrc = cms.InputTag("genParticles", "", "HLT"),
     genParticleEmbeddedSrc = cms.InputTag("genParticles"),
     mets = cms.PSet(
@@ -255,25 +259,8 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     ),
     doubles = cms.PSet(),
 )
-muonIsolations = ["trackIso", "caloIso", "pfChargedIso", "pfNeutralIso", "pfGammaIso", "tauTightIc04ChargedIso", "tauTightIc04GammaIso"]
-#print isolations
-for name in muonIsolations:
-    setattr(ntuple.muonFunctions, name, cms.string(muonAnalysis.isolations[name]))
-userFloats = []
-for name in ["pfNeutralHadrons", "pfChargedAll", "pfPUChargedHadrons", "pfPhotons", "pfChargedHadrons"]:
-    userFloats.extend(["iso01to04_"+name, "iso01to03_"+name])
-for name in userFloats:
-    setattr(ntuple.muonFunctions, name, cms.string("userFloat('%s')" % name))
 
-tauIds = [
-    "decayModeFinding",
-    "againstMuonLoose", "againstMuonTight",
-    "againstElectronLoose", "againstElectronMedium", "againstElectronTight", "againstElectronMVA",
-    "byVLooseIsolation", "byLooseIsolation", "byMediumIsolation", "byTightIsolation",
-    "byLooseCombinedIsolationDeltaBetaCorr", "byMediumCombinedIsolationDeltaBetaCorr", "byTightCombinedIsolationDeltaBetaCorr",
-    ]
-for name in tauIds:
-    setattr(ntuple.tauFunctions, name, cms.string("tauID('%s')"%name))
+
 if dataVersion.isMC():
     ntuple.mets.genMetTrueEmbedded_p4 = cms.InputTag("genMetTrueEmbedded")
     ntuple.mets.genMetTrueOriginal_p4 = cms.InputTag("genMetTrue", "", hltProcess)
