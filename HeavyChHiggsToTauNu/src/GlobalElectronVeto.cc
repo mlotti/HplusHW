@@ -180,7 +180,7 @@ namespace HPlus {
     for(edm::PtrVector<pat::Electron>::const_iterator iElectron = electrons.begin(); iElectron != electrons.end(); ++iElectron) {
 
       // FIXME: here we just test the cut based ID for now
-      bool bVeto = EgammaCutBasedEleId::PassWP(EgammaCutBasedEleId::VETO, **iElectron, hConversion, *hBeamspot, hVertex,
+      bool bPassedIdVeto = EgammaCutBasedEleId::PassWP(EgammaCutBasedEleId::VETO, **iElectron, hConversion, *hBeamspot, hVertex,
                                                (*iElectron)->chargedHadronIso(), (*iElectron)->photonIso(), (*iElectron)->neutralHadronIso(),
                                                *hRho);
       //std::cout << "Electron " << (iElectron-electrons.begin()) << "/" << electrons.size() << ": pass veto: " << bVeto << std::endl;
@@ -189,6 +189,7 @@ namespace HPlus {
       bElecPresent = true;
       increment(fElecIDSubCountAllElectronCandidates);
 
+      /*
       //  Keep track of the ElectronID's. Just for my information
       bool bElecIDIsLoose = false;
       bool bElecIDIsRobustLoose = false;
@@ -197,7 +198,6 @@ namespace HPlus {
       bool bElecIDIsRobustHighEnergy = false;
 
       //      double HE = (*iElectron)->hadronicOverEm();
-    
 
       // Simple Electron ID's return 1 or 0 (true or false)
       if( (*iElectron)->electronID("eidLoose") ) bElecIDIsLoose = true;
@@ -228,7 +228,7 @@ namespace HPlus {
       if( fElecIDSimpleEleId80relIso == 7) increment(fElecIDSubCountSimpleEleId80relIso);
       if( fElecIDSimpleEleId70relIso == 7) increment(fElecIDSubCountSimpleEleId70relIso);
       if( fElecIDSimpleEleId60relIso == 7) increment(fElecIDSubCountSimpleEleId60relIso);
-
+*/
       // Obtain reference to an Electron track
       reco::GsfTrackRef myGsfTrackRef = (*iElectron)->gsfTrack(); // gsfElecs were selected to create the current PatTuples
       
@@ -263,7 +263,7 @@ namespace HPlus {
       bElecHasGsfTrkOrTrk = true;   
       // 1) Apply Electron ID (choose low efficiency => High Purity)
       bool thisPassedID = false;
-      if( (bUseLooseID) && (bElecIDIsLoose) ) thisPassedID = true;
+      /*if( (bUseLooseID) && (bElecIDIsLoose) ) thisPassedID = true;
       else if( (bUseRobustLooseID ) && (bElecIDIsRobustLoose) ) thisPassedID = true;
       else if( (bUseTightID) && (bElecIDIsTight) ) thisPassedID = true;
       else if( (bUseRobustTightID)         && (bElecIDIsRobustTight) ) thisPassedID = true;
@@ -274,7 +274,10 @@ namespace HPlus {
       else if( (bUseSimpleEleId80relIsoID) && (fElecIDSimpleEleId80relIso == 7) ) thisPassedID = true;
       else if( (bUseSimpleEleId70relIsoID) && (fElecIDSimpleEleId70relIso == 7) ) thisPassedID = true;
       else if( (bUseSimpleEleId60relIsoID) && (fElecIDSimpleEleId60relIso == 7) ) thisPassedID = true;
-      
+      */
+
+      if (bPassedIdVeto) thisPassedID = true;
+
       if(!thisPassedID) continue;
       fSelectedElectrons.push_back(*iElectron);
       bPassedElecID = true;
