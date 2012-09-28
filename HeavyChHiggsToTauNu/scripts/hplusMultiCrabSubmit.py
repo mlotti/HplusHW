@@ -61,8 +61,10 @@ def main(opts):
     if len(opts.resubmit) > 0:
         submitCommand = "-resubmit"
 
-    sites = opts.toSites.split(",")
+    sites = []
     siteSubmitIndex = 0
+    if len(opts.toSites) > 0:
+        sites = opts.toSites.split(",")
 
     # Submission loop
     njobsSubmitted = 0
