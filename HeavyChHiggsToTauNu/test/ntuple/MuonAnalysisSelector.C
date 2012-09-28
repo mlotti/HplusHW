@@ -91,6 +91,10 @@ private:
   };
   IsolationMode fIsolationMode;
 
+  TH1 *makePt(const char *name);
+  TH1 *makeIso(const char *name);
+  TH1 *makeVertexCount(const char *name);
+
   // Output
   // Counts
   EventCounter::Count cAll;
@@ -104,49 +108,50 @@ private:
   EventCounter::Count cJetSelection;
 
   // Histograms
-  TH1F *hMuonChargedHadronIso_AfterDB;
-  TH1F *hMuonPuChargedHadronIso_AfterDB;
-  TH1F *hMuonNeutralHadronIso_AfterDB;
-  TH1F *hMuonPhotonIso_AfterDB;
-  TH1F *hMuonIso_AfterDB;
+  TH1 *hMuonChargedHadronIso_AfterDB;
+  TH1 *hMuonPuChargedHadronIso_AfterDB;
+  TH1 *hMuonNeutralHadronIso_AfterDB;
+  TH1 *hMuonPhotonIso_AfterDB;
+  TH1 *hMuonIso_AfterDB;
 
-  TH1F *hMuonEmbIso_AfterDB;
-  TH1F *hMuonStdIso_AfterDB;
+  TH1 *hMuonEmbIso_AfterDB;
+  TH1 *hMuonStdIso_AfterDB;
 
-  TH1F *hMuonVertexCount_AfterDB;
-  TH1F *hMuonVertexCount_AfterDB_MuFromW;
+  TH1 *hMuonVertexCount_AfterDB;
+  TH1 *hMuonVertexCount_AfterDB_MuFromW;
 
-  TH1F *hMuonVertexCount_AfterIsolation;
-  TH1F *hMuonVertexCount_AfterIsolation_MuFromW;
+  TH1 *hMuonVertexCount_AfterIsolation;
+  TH1 *hMuonVertexCount_AfterIsolation_MuFromW;
 
-  TH1F *hSelectedMuonPt_AfterMuonSelection;
-  TH1F *hSelectedMuonPt_AfterMuonVeto;
-  TH1F *hSelectedMuonPt_AfterElectronVeto;
-  TH1F *hSelectedMuonPt_AfterJetSelection;
-  TH1F *hSelectedMuonPt_AfterJetSelection_Unweighted;
+  TH1 *hSelectedMuonPt_AfterMuonSelection;
+  TH1 *hSelectedMuonPt_AfterMuonVeto;
+  TH1 *hSelectedMuonPt_AfterElectronVeto;
+  TH1 *hSelectedMuonPt_AfterJetSelection;
+  TH1 *hSelectedMuonPt_AfterJetSelection_Unweighted;
 
-  TH1F *hSelectedMuonChargedHadronEmbIso_AfterJetSelection;
-  TH1F *hSelectedMuonPuChargedHadronEmbIso_AfterJetSelection;
-  TH1F *hSelectedMuonNeutralHadronEmbIso_AfterJetSelection;
-  TH1F *hSelectedMuonPhotonEmbIso_AfterJetSelection;
-  TH1F *hSelectedMuonChargedHadronStdIso_AfterJetSelection;
-  TH1F *hSelectedMuonPuChargedHadronStdIso_AfterJetSelection;
-  TH1F *hSelectedMuonNeutralHadronStdIso_AfterJetSelection;
-  TH1F *hSelectedMuonPhotonStdIso_AfterJetSelection;
+  TH1 *hSelectedMuonChargedHadronEmbIso_AfterJetSelection;
+  TH1 *hSelectedMuonPuChargedHadronEmbIso_AfterJetSelection;
+  TH1 *hSelectedMuonNeutralHadronEmbIso_AfterJetSelection;
+  TH1 *hSelectedMuonPhotonEmbIso_AfterJetSelection;
+  TH1 *hSelectedMuonChargedHadronStdIso_AfterJetSelection;
+  TH1 *hSelectedMuonPuChargedHadronStdIso_AfterJetSelection;
+  TH1 *hSelectedMuonNeutralHadronStdIso_AfterJetSelection;
+  TH1 *hSelectedMuonPhotonStdIso_AfterJetSelection;
 
-  TH1F *hSelectedMuonEmbIso_AfterJetSelection;
-  TH1F *hSelectedMuonStdIso_AfterJetSelection;
+  TH1 *hSelectedMuonEmbIso_AfterJetSelection;
+  TH1 *hSelectedMuonStdIso_AfterJetSelection;
 
-  TH1F *hSelectedMuonPt_AfterJetSelection_MuFromW;
-  TH1F *hSelectedMuonPt_AfterJetSelection_MuFromTauFromW;
-  TH1F *hSelectedMuonPt_AfterJetSelection_MuOther;
+  TH1 *hSelectedMuonPt_AfterJetSelection_MuFromW;
+  TH1 *hSelectedMuonPt_AfterJetSelection_MuFromTauFromW;
+  TH1 *hSelectedMuonPt_AfterJetSelection_MuOther;
 
-  TH1F *hSelectedMuonPt_AfterJetSelection_MuFromW_Unweighted;
-  TH1F *hSelectedMuonPt_AfterJetSelection_MuFromTauFromW_Unweighted;
-  TH1F *hSelectedMuonPt_AfterJetSelection_MuOther_Unweighted;
+  TH1 *hSelectedMuonPt_AfterJetSelection_MuFromW_Unweighted;
+  TH1 *hSelectedMuonPt_AfterJetSelection_MuFromTauFromW_Unweighted;
+  TH1 *hSelectedMuonPt_AfterJetSelection_MuOther_Unweighted;
 
-  TH1F *hRawMet_AfterJetSelection;
-  TH1F *hTransverseMassRawMet_AfterJetSelection;
+  TH1 *hRawMet_AfterJetSelection;
+  TH1 *hTransverseMassRawMet_AfterJetSelection;
+  TH1 *hVertexCount_AfterJetSelection;
 };
 
 MuonAnalysisSelector::MuonAnalysisSelector(const std::string& puWeight, const std::string& isolationMode):
@@ -173,52 +178,57 @@ MuonAnalysisSelector::MuonAnalysisSelector(const std::string& puWeight, const st
 }
 MuonAnalysisSelector::~MuonAnalysisSelector() {}
 
+TH1 *MuonAnalysisSelector::makePt(const char *name) { return makeTH<TH1F>(name, "Muon pt", 40, 0, 400); }
+TH1 *MuonAnalysisSelector::makeIso(const char *name) { return makeTH<TH1F>(name, "Muon isolation", 50, 0, 5); }
+TH1 *MuonAnalysisSelector::makeVertexCount(const char *name) { return makeTH<TH1F>(name, "Vertex count", 50, 0, 50); }
+
 void MuonAnalysisSelector::setOutput(TDirectory *dir) {
   if(dir)
     dir->cd();
 
-  hMuonChargedHadronIso_AfterDB = makeTH<TH1F>("muonChargedHadronIso_AfterDB", "", 50, 0, 5);
-  hMuonPuChargedHadronIso_AfterDB = makeTH<TH1F>("muonPuChargedHadronIso_AfterDB", "", 50, 0, 5);
-  hMuonNeutralHadronIso_AfterDB = makeTH<TH1F>("muonNeutralHadronIso_AfterDB", "", 50, 0, 5);
-  hMuonPhotonIso_AfterDB = makeTH<TH1F>("muonPhotonIso_AfterDB", "", 50, 0, 5);
-  hMuonIso_AfterDB = makeTH<TH1F>("muonIso_AfterDB", "", 50, 0, 5);
+  hMuonChargedHadronIso_AfterDB = makeIso("muonChargedHadronIso_AfterDB");
+  hMuonPuChargedHadronIso_AfterDB = makeIso("muonPuChargedHadronIso_AfterDB");
+  hMuonNeutralHadronIso_AfterDB = makeIso("muonNeutralHadronIso_AfterDB");
+  hMuonPhotonIso_AfterDB = makeIso("muonPhotonIso_AfterDB");
+  hMuonIso_AfterDB = makeIso("muonIso_AfterDB");
 
-  hMuonEmbIso_AfterDB = makeTH<TH1F>("muonEmbIso_AfterDB", "", 50, 0, 5);
-  hMuonStdIso_AfterDB = makeTH<TH1F>("muonStdIso_AfterDB", "", 50, 0, 5);
+  hMuonEmbIso_AfterDB = makeIso("muonEmbIso_AfterDB");
+  hMuonStdIso_AfterDB = makeIso("muonStdIso_AfterDB");
 
-  hMuonVertexCount_AfterDB = makeTH<TH1F>("muonVertexCount_AfterDB", "", 50, 0, 50);
-  hMuonVertexCount_AfterDB_MuFromW = makeTH<TH1F>("muonVertexCount_AfterDB_MuFromW", "", 50, 0, 50);
+  hMuonVertexCount_AfterDB = makeVertexCount("muonVertexCount_AfterDB");
+  hMuonVertexCount_AfterDB_MuFromW = makeVertexCount("muonVertexCount_AfterDB_MuFromW");
 
-  hMuonVertexCount_AfterIsolation = makeTH<TH1F>("muonVertexCount_AfterIsolation", "", 50, 0, 50);
-  hMuonVertexCount_AfterIsolation_MuFromW = makeTH<TH1F>("muonVertexCount_AfterIsolation_MuFromW", "", 50, 0, 50);
+  hMuonVertexCount_AfterIsolation = makeVertexCount("muonVertexCount_AfterIsolation");
+  hMuonVertexCount_AfterIsolation_MuFromW = makeVertexCount("muonVertexCount_AfterIsolation_MuFromW");
 
-  hSelectedMuonPt_AfterMuonSelection = makeTH<TH1F>("selectedMuonPt_AfterMuonSelection", "Selected muon pt", 40, 0, 400);
-  hSelectedMuonPt_AfterMuonVeto = makeTH<TH1F>("selectedMuonPt_AfterMuonVeto", "Selected muon pt", 40, 0, 400);
-  hSelectedMuonPt_AfterElectronVeto = makeTH<TH1F>("selectedMuonPt_AfterElectronVeto", "Selected muon pt", 40, 0, 400);
-  hSelectedMuonPt_AfterJetSelection = makeTH<TH1F>("selectedMuonPt_AfterJetSelection", "Selected muon pt", 40, 0, 400);
-  hSelectedMuonPt_AfterJetSelection_Unweighted = makeTH<TH1F>("selectedMuonPt_AfterJetSelection_Unweighted", "Selected muon pt", 40, 0, 400);
+  hSelectedMuonPt_AfterMuonSelection = makePt("selectedMuonPt_AfterMuonSelection");
+  hSelectedMuonPt_AfterMuonVeto = makePt("selectedMuonPt_AfterMuonVeto");
+  hSelectedMuonPt_AfterElectronVeto = makePt("selectedMuonPt_AfterElectronVeto");
+  hSelectedMuonPt_AfterJetSelection = makePt("selectedMuonPt_AfterJetSelection");
+  hSelectedMuonPt_AfterJetSelection_Unweighted = makePt("selectedMuonPt_AfterJetSelection_Unweighted");
 
-  hSelectedMuonChargedHadronEmbIso_AfterJetSelection = makeTH<TH1F>("selectedMuonChargedHadronEmbIso_AfterJetSelection", "", 50, 0, 5);
-  hSelectedMuonPuChargedHadronEmbIso_AfterJetSelection = makeTH<TH1F>("selectedMuonPuChargedHadronEmbIso_AfterJetSelection", "", 50, 0, 5);
-  hSelectedMuonNeutralHadronEmbIso_AfterJetSelection = makeTH<TH1F>("selectedMuonNeutralHadronEmbIso_AfterJetSelection", "", 50, 0, 5);
-  hSelectedMuonPhotonEmbIso_AfterJetSelection = makeTH<TH1F>("selectedMuonPhotonEmbIso_AfterJetSelection", "", 50, 0, 5);
-  hSelectedMuonChargedHadronStdIso_AfterJetSelection = makeTH<TH1F>("selectedMuonChargedHadronStdIso_AfterJetSelection", "", 50, 0, 5);
-  hSelectedMuonPuChargedHadronStdIso_AfterJetSelection = makeTH<TH1F>("selectedMuonPuChargedHadronStdIso_AfterJetSelection", "", 50, 0, 5);
-  hSelectedMuonNeutralHadronStdIso_AfterJetSelection = makeTH<TH1F>("selectedMuonNeutralHadronStdIso_AfterJetSelection", "", 50, 0, 5);
-  hSelectedMuonPhotonStdIso_AfterJetSelection = makeTH<TH1F>("selectedMuonPhotonStdIso_AfterJetSelection", "", 50, 0, 5);
+  hSelectedMuonChargedHadronEmbIso_AfterJetSelection = makeIso("selectedMuonChargedHadronEmbIso_AfterJetSelection");
+  hSelectedMuonPuChargedHadronEmbIso_AfterJetSelection = makeIso("selectedMuonPuChargedHadronEmbIso_AfterJetSelection");
+  hSelectedMuonNeutralHadronEmbIso_AfterJetSelection = makeIso("selectedMuonNeutralHadronEmbIso_AfterJetSelection");
+  hSelectedMuonPhotonEmbIso_AfterJetSelection = makeIso("selectedMuonPhotonEmbIso_AfterJetSelection");
+  hSelectedMuonChargedHadronStdIso_AfterJetSelection = makeIso("selectedMuonChargedHadronStdIso_AfterJetSelection");
+  hSelectedMuonPuChargedHadronStdIso_AfterJetSelection = makeIso("selectedMuonPuChargedHadronStdIso_AfterJetSelection");
+  hSelectedMuonNeutralHadronStdIso_AfterJetSelection = makeIso("selectedMuonNeutralHadronStdIso_AfterJetSelection");
+  hSelectedMuonPhotonStdIso_AfterJetSelection = makeIso("selectedMuonPhotonStdIso_AfterJetSelection");
 
-  hSelectedMuonEmbIso_AfterJetSelection = makeTH<TH1F>("selectedMuonEmbIso_AfterJetSelection", "", 50, 0, 5);
-  hSelectedMuonStdIso_AfterJetSelection = makeTH<TH1F>("selectedMuonStdIso_AfterJetSelection", "", 50, 0, 5);
+  hSelectedMuonEmbIso_AfterJetSelection = makeIso("selectedMuonEmbIso_AfterJetSelection");
+  hSelectedMuonStdIso_AfterJetSelection = makeIso("selectedMuonStdIso_AfterJetSelection");
 
-  hSelectedMuonPt_AfterJetSelection_MuFromW = makeTH<TH1F>("selectedMuonPt_AfterJetSelection_MuFromW", "Selected muon pt", 40, 0, 400);
-  hSelectedMuonPt_AfterJetSelection_MuFromTauFromW = makeTH<TH1F>("selectedMuonPt_AfterJetSelection_MuFromTauFromW", "Selected muon pt", 40, 0, 400);
-  hSelectedMuonPt_AfterJetSelection_MuOther = makeTH<TH1F>("selectedMuonPt_AfterJetSelection_MuOther", "Selected muon pt", 40, 0, 400);
-  hSelectedMuonPt_AfterJetSelection_MuFromW_Unweighted = makeTH<TH1F>("selectedMuonPt_AfterJetSelection_MuFromW_Unweighted", "Selected muon pt", 40, 0, 400);
-  hSelectedMuonPt_AfterJetSelection_MuFromTauFromW_Unweighted = makeTH<TH1F>("selectedMuonPt_AfterJetSelection_MuFromTauFromW_Unweighted", "Selected muon pt", 40, 0, 400);
-  hSelectedMuonPt_AfterJetSelection_MuOther_Unweighted = makeTH<TH1F>("selectedMuonPt_AfterJetSelection_MuOther_Unweighted", "Selected muon pt", 40, 0, 400);
+  hSelectedMuonPt_AfterJetSelection_MuFromW = makePt("selectedMuonPt_AfterJetSelection_MuFromW");
+  hSelectedMuonPt_AfterJetSelection_MuFromTauFromW = makePt("selectedMuonPt_AfterJetSelection_MuFromTauFromW");
+  hSelectedMuonPt_AfterJetSelection_MuOther = makePt("selectedMuonPt_AfterJetSelection_MuOther");
+  hSelectedMuonPt_AfterJetSelection_MuFromW_Unweighted = makePt("selectedMuonPt_AfterJetSelection_MuFromW_Unweighted");
+  hSelectedMuonPt_AfterJetSelection_MuFromTauFromW_Unweighted = makePt("selectedMuonPt_AfterJetSelection_MuFromTauFromW_Unweighted");
+  hSelectedMuonPt_AfterJetSelection_MuOther_Unweighted = makePt("selectedMuonPt_AfterJetSelection_MuOther_Unweighted");
 
   hRawMet_AfterJetSelection = makeTH<TH1F>("uncorrectedMet_AfterJetSelection", "Uncorrected PF MET", 40, 0, 400);
   hTransverseMassRawMet_AfterJetSelection = makeTH<TH1F>("transverseMassUncorrectedMet_AfterJetSelection", "Transverse mass", 40, 0, 400);
+  hVertexCount_AfterJetSelection = makeVertexCount("vertexCount_AfterJetSelection");
 }
 
 void MuonAnalysisSelector::setupBranches(TTree *tree) {
