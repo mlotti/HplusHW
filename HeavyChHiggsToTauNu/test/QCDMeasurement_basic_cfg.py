@@ -9,8 +9,8 @@ dataVersion="44XmcS6"     # Fall11 MC
 #dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
 
 # Set the data scenario for vertex/pileup weighting
-# options: Run2011A, Run2011B, Run2011A+B
-puweight = "Run2011A+B"
+# options: Run2011A, Run2011B, Run2011AB
+puweight = "Run2011AB"
 
 # Apply beta cut for jets to reject PU jets
 betaCutForJets = 0.0 # Disable by setting to 0.0; if you want to enable, set to 0.2

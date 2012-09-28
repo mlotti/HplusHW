@@ -2,10 +2,10 @@
 # processing use either CRAB or explicit file names in PoolSource
 
 # triggerProcess:  the process containing the HLT information
-# patCastor:         default file for PATtuple at castor
-# patMadhatter:      default file for PATtuple at madhatter
-# analysisCastor:    default file for analysis at castor
-# analysisMadhatter: default file for analysis at madhatter
+# patCastor:         default input file for PATtuple at castor
+# patMadhatter:      default input file for PATtuple at madhatter
+# analysisCastor:    default input file for analysis at castor
+# analysisMadhatter: default input file for analysis at madhatter
 config = {
     "42Xdata": {
         "triggerProcess": "HLT",
@@ -60,9 +60,8 @@ config = {
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
         "signalTrigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
-        #"patMadhatter": "file:/mnt/flustre/wendland/testsamples/pattuple_63_1_1Ed.root", # TTJets, v25b
-        "patMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c/792142e4d0984f6b86a1b0c2d38da119/pattuple_98_1_tbC.root", # TTJets, v25c
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c/792142e4d0984f6b86a1b0c2d38da119/pattuple_98_1_tbC.root", # TTJets, v25c
+        "patMadhatter": "file:/mnt/flustre/mkortela/data/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM/28ACFF78-0237-E111-97C7-00261894397B.root", 
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/f16be938188c46248667b60f0c9e7452/pattuple_7_1_ozc.root", # TTJets, v44_4
     },
     "44XmcAve32": {
         "simProcess": "SIM",

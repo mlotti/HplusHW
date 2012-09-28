@@ -25,6 +25,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventItem.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeMuonBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeJetBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeVertexBranches.h"
 
 #include "TTree.h"
 
@@ -52,6 +53,7 @@ private:
   edm::InputTag fGenParticleSrc;
 
   HPlus::TreeEventBranches fEventBranches;
+  HPlus::TreeVertexBranches fVertexBranches;
   HPlus::TreeMuonBranches fMuonBranches;
   std::vector<double> fMuonJetMinDR;
 
@@ -65,6 +67,7 @@ private:
 HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfig):
   fPatTriggerSrc(iConfig.getParameter<edm::InputTag>("patTriggerEvent")),
   fGenParticleSrc(iConfig.getParameter<edm::InputTag>("genParticleSrc")),
+  fVertexBranches(iConfig),
   fMuonBranches(iConfig),
   fJetBranches(iConfig, false)
 {
@@ -91,6 +94,7 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
   fTree = fs->make<TTree>("tree", "Tree");
 
   fEventBranches.book(fTree);
+  fVertexBranches.book(fTree);
   fMuonBranches.book(fTree);
   fTree->Branch("muons_jetMinDR", &fMuonJetMinDR);
 
@@ -113,6 +117,7 @@ void HPlusMuonNtupleAnalyzer::reset() {
   double nan = std::numeric_limits<double>::quiet_NaN();
  
   fEventBranches.reset();
+  fVertexBranches.reset();
   fMuonBranches.reset();
   fMuonJetMinDR.clear();
   fJetBranches.reset();
@@ -137,6 +142,8 @@ void HPlusMuonNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::Event
   edm::Handle<edm::View<reco::GenParticle> > hgenparticles;
   if(!iEvent.isRealData())
     iEvent.getByLabel(fGenParticleSrc, hgenparticles);
+
+  fVertexBranches.setValues(iEvent);
 
   // Muons
   if(iEvent.isRealData())

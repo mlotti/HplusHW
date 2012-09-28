@@ -3,13 +3,22 @@ import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as HChSignalAnalysisParameters
 
-PF2PATVersion = "PFlow"
+PF2PATVersion = "" # empty for standard PAT
+#PF2PATVersion = "PFlow"
 #PF2PATVersion = "PFlowChs"
 
-allPatMuons = "selectedPatMuons"+PF2PATVersion
+def getAllPatMuons():
+    if PF2PATVersion == "":
+        return "selectedPatMuons::MUONSKIM"
+    else:
+        return "selectedPatMuons"+PF2PATVersion+"All::MUONSKIM" # We have to pick the ones of the original event
 tauEmbeddingMuons = "tauEmbeddingMuons"
 
-allPatTaus = "patTaus"+PF2PATVersion
+def getAllPatTaus():
+    if PF2PATVersion == "":
+        return "patTausHpsPFTau"
+    else:
+        return "patTaus"+PF2PATVersion
 
 jetSelection = "pt() > 30 && abs(eta()) < 2.4"
 jetSelection += "&& numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99"
@@ -404,8 +413,7 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
 
     from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
     m1 = cleanPatJets.clone(
-#        src = "selectedPatJets",
-        src = "goodJets"+PF2PATVersion, # we should use the pat::Jets constructed in the 
+        src = "selectedPatJets"+PF2PATVersion, # FIXME: should use the smeared collection for MC
         preselection = cms.string(jetSelection),
         checkOverlaps = cms.PSet(
             muons = cms.PSet(
@@ -671,7 +679,9 @@ def addTauAnalyses(process, prefix, prototype, commonSequence, additionalCounter
     
 
 
-def selectedMuonCleanedMuons(selectedMuon, allMuons=allPatMuons):
+def selectedMuonCleanedMuons(selectedMuon, allMuons=None):
+    if allMuons == None:
+        allMuons = getAllPatMuons()
     from PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi import cleanPatMuons
     module = cleanPatMuons.clone(
         src = cms.InputTag(allMuons),
@@ -699,12 +709,12 @@ def addTauEmbeddingMuonTaus(process):
     seq *= process.selectedPatMuonsEmbeddingMuonCleaned
 
     # Select the taus matching to the original muon
-    m = cms.EDProducer("HPlusPATTauCandViewDeltaRSelector",
-        src = cms.InputTag(allPatTaus),
+    m = cms.EDProducer("HPlusPATTauCandViewClosestDeltaRSelector",
+        src = cms.InputTag(getAllPatTaus()),
         refSrc = cms.InputTag(tauEmbeddingMuons),
-        deltaR = cms.double(0.1),
+        maxDeltaR = cms.double(0.5),
     )
-    setattr(process, allPatTaus+"TauEmbeddingMuonMatched", m)
+    setattr(process, getAllPatTaus()+"TauEmbeddingMuonMatched", m)
     seq *= m
 
     return seq

@@ -36,6 +36,10 @@ namespace HPlus {
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
+    const edm::InputTag getSrc() const {
+      return fSrc;
+    }
+
   private:
     edm::InputTag fSrc;
     bool fEnabled;

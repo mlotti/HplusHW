@@ -66,6 +66,8 @@ set -e
 # 16.3.2012/S.Lehti        CMSSW_4_2_8 Added tag for btagging scale factors
 # 19.3.2012/M.Kortelainen CMSSW_4_2_8_patch2 Updated lumi tag to include the pixel lumi
 # 28.3.2012/S.Lehti       CMSSW_4_4_4 Moved master to 444/ 444 tags
+# 13.9.2012/M.Kortelainen CMSSW_4_4_4 Updated PAT and tau tags
+# 17.9.2012/M.Kortelainen CMSSW_4_4_4 Cut-based electron ID tag
 
 
 # addpkg requires cmsenv
@@ -75,17 +77,24 @@ eval $(scram runtime -sh)
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATReleaseNotes44X
 
 # Tau+PAT
-# https://hypernews.cern.ch/HyperNews/CMS/get/tauid/83/1/1/1/1.html
-# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePFTauID#CMSSW_4_X_X
+# https://hypernews.cern.ch/HyperNews/CMS/get/tauid/252.html
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePFTauID#2012_CMSSW_4_X_X_Recipe
 #
 # Tau
-addpkg RecoTauTag/TauTagTools     V01-02-01
-addpkg RecoTauTag/RecoTau         V01-02-16
-addpkg RecoTauTag/Configuration   V01-02-12
+addpkg DataFormats/TauReco        CMSSW_5_2_4 # yes, this is correct
+addpkg RecoTauTag/TauTagTools     CMSSW_5_2_4
+addpkg RecoTauTag/RecoTau         V01-04-17 #equivalent to 04-14
+addpkg RecoTauTag/Configuration   V01-04-03
+addpkg CondFormats/EgammaObjects  V00-04-01
+addpkg PhysicsTools/IsolationAlgos # You need to recompile PAT packages which depend on DataFormats/TauReco
 # PAT
-addpkg PhysicsTools/PatAlgos  # needed for the tauTools.py update below
+addpkg DataFormats/PatCandidates  V06-05-01
+addpkg PhysicsTools/PatAlgos      V08-07-47
+addpkg PhysicsTools/PatUtils      V03-09-18-03
+addpkg CommonTools/ParticleFlow   V00-03-05-10
+addpkg FWCore/GuiBrowsers         V00-00-60
 ##### New tau discriminators, electron MVA discriminator
-cvs co -r 1.47 PhysicsTools/PatAlgos/python/tools/tauTools.py
+cvs up -r 1.53 PhysicsTools/PatAlgos/python/tools/tauTools.py
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 ####addpkg RecoJets/Configuration     V02-04-17
@@ -107,7 +116,25 @@ addpkg DataFormats/METReco        V03-03-07
 addpkg RecoLuminosity/LumiDB      V03-04-02
 
 # Electron ID
-# https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
+# https://twiki.cern.ch/twiki/bin/view/CMS/EgammaCutBasedIdentification
+# https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentification
+#
+# Now, this is a bit complex. The recommended tag for MVA ID (which is
+# produced in pattuple jobs) is V00-00-16 in the twiki abobe. However,
+# the recommended tag for the cut-based ID is CutBasedId_V00-00-05.
+# There seem to be non-trivial differences for the MVA-side between
+# the tags (cut-based is newer), so we do the following
+#
+# 1. Check out the full package with the MVA tag
+# 2. Check out classes needed for the cut-based id with the cut-based tag
+cvs co -r V00-00-16 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
+cvs up -r CutBasedId_V00-00-05 EGamma/EGammaAnalysisTools/src/EGammaCutBasedEleId.cc
+cvs up -r CutBasedId_V00-00-05 EGamma/EGammaAnalysisTools/interface/EGammaCutBasedEleId.h
+# EGammaCutBasedEleId.cc includes ElectronEffectiveArea.h, but the
+# version is the same in both tags
+#
+# Get rid of compilation error with the following command
+rm EGamma/EGammaAnalysisTools/test/ElectronIsoAnalyzer.cc 
 
 # Higgs skimms
 cvs co HiggsAnalysis/Skimming

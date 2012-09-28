@@ -10,8 +10,8 @@ dataVersion="44XmcS6"     # Fall11 MC
 #dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
 
 # Set the data scenario for vertex/pileup weighting
-# options: Run2011A, Run2011B, Run2011A+B
-puweight = "Run2011A+B"
+# options: Run2011A, Run2011B, Run2011AB
+puweight = "Run2011AB"
 
 ##########
 # Flags for additional signal analysis modules
@@ -65,9 +65,6 @@ myHistogramAmbientLevel = "Debug"
 
 # Apply trigger scale factor or not
 applyTriggerScaleFactor = True
-
-PF2PATVersion = "PFlow" # For normal PF2PAT
-#PF2PATVersion = "PFlowChs" # For PF2PAT with CHS
 
 ### Systematic uncertainty flags ###
 # Running of systematic variations is controlled by the global flag
@@ -186,8 +183,8 @@ param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionSrcSelectedPatTaus()
 param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
-# Switch to PF2PAT objects
-param.changeCollectionsToPF2PAT(dataVersion, postfix=PF2PATVersion, useGSFElectrons=True)
+# Set jet sources to JER-smeared jets for MC
+param.setJERSmearedJets(dataVersion)
 
 # Trigger with scale factors (at the moment hard coded)
 if applyTriggerScaleFactor and dataVersion.isMC():
@@ -207,10 +204,6 @@ if options.tauEmbeddingInput != 0:
     #tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
     tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, options, dataVersion)
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, options, dataVersion)
-    if dataVersion.isMC():
-        process.muonTriggerFixSequence = cms.Sequence()
-        additionalCounters.extend(tauEmbeddingCustomisations.addMuonTriggerFix(process, dataVersion, process.muonTriggerFixSequence, options))
-        process.commonSequence.replace(process.patSequence, process.muonTriggerFixSequence*process.patSequence)
     if tauEmbeddingFinalizeMuonSelection:
         #applyIsolation = not doTauEmbeddingMuonSelectionScan
         applyIsolation = False
@@ -247,12 +240,14 @@ process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
 process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
 process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
 #User DB for btag eff
-btagDB = 'sqlite_file:../data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db'
 if options.runOnCrab != 0:
     print "BTagDB: Assuming that you are running on CRAB"
     btagDB = "sqlite_file:src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db"
 else:
     print "BTagDB: Assuming that you are not running on CRAB (if you are running on CRAB, add to job parameters in multicrab.cfg runOnCrab=1)"
+    # This way signalAnalysis can be ran from any directory
+    import os
+    btagDB = "sqlite_file:%s/src/HiggsAnalysis/HeavyChHiggsToTauNu/data/DBs/BTAGTCHEL_hplusBtagDB_TTJets.db" % os.environ["CMSSW_BASE"]
 process.CondDBCommon.connect = btagDB
 process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Pool_BTAGTCHEL_hplusBtagDB_TTJets")
 process.load ("HiggsAnalysis.HeavyChHiggsToTauNu.Btag_BTAGTCHEL_hplusBtagDB_TTJets")
@@ -498,19 +493,19 @@ def addJESVariation(name, doJetUnclusteredVariation):
     module.Tree.fill = False        
     module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
 
-    jesVariation.addTESVariation(process, name, "TESPlus",  module, additionalCounters, "Up", postfix=PF2PATVersion)
-    jesVariation.addTESVariation(process, name, "TESMinus", module, additionalCounters, "Down", postfix=PF2PATVersion)
+    jesVariation.addTESVariation(process, name, "TESPlus",  module, "Up")
+    jesVariation.addTESVariation(process, name, "TESMinus", module, "Down")
 
     if doJetUnclusteredVariation:
         # Do all variations beyond TES
-        jesVariation.addJESVariation(process, name, "JESPlus",  module, additionalCounters, "Up", postfix=PF2PATVersion)
-        jesVariation.addJESVariation(process, name, "JESMinus", module, additionalCounters, "Down", postfix=PF2PATVersion)
+        jesVariation.addJESVariation(process, name, "JESPlus",  module, "Up")
+        jesVariation.addJESVariation(process, name, "JESMinus", module, "Down")
 
-        jesVariation.addJERVariation(process, name, "JERPlus",  module, additionalCounters, "Up", postfix=PF2PATVersion)
-        jesVariation.addJERVariation(process, name, "JERMinus", module, additionalCounters, "Down", postfix=PF2PATVersion)
+        jesVariation.addJERVariation(process, name, "JERPlus",  module, "Up")
+        jesVariation.addJERVariation(process, name, "JERMinus", module, "Down")
 
-        jesVariation.addUESVariation(process, name, "METPlus",  module, additionalCounters, "Up", postfix=PF2PATVersion)
-        jesVariation.addUESVariation(process, name, "METMinus", module, additionalCounters, "Down", postfix=PF2PATVersion)
+        jesVariation.addUESVariation(process, name, "METPlus",  module, "Up")
+        jesVariation.addUESVariation(process, name, "METMinus", module, "Down")
 
 if doJESVariation or doSystematics:
     doJetUnclusteredVariation = True

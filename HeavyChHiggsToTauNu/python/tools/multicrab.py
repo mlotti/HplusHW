@@ -168,18 +168,20 @@ defaultSeBlacklist = [
     "T3_*", # Don't submit to T3's  
     "T2_UK_London_Brunel", # Noticeable fraction of submitted jobs fail due to stageout errors
     "ucl.ac.be", # Jobs end up in queuing, lot's of file open errors
-#    "iihe.ac.be", # Problematic site with server
+#    "iihe.ac.be", # Problematic site with server, long queue
     "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout, also jobs can queue long times
     "unl.edu", # Jobs can wait in queues for a looong time
-    "wisc.edu", # Stageout failures,
+#    "wisc.edu", # Stageout failures,
 #    "ingrid.pt", # Stageout failures
     "ucsd.edu", # Stageout failures
     "pi.infn.it", # Stageout failures
     "lnl.infn.it", # Stageout failures
-    "mit.edu", # MIT has some problems?
+#    "mit.edu", # MIT has some problems?
     "sprace.org.br", # Stageout failures
     "knu.ac.kr", # Stageout failures
-    "T2_US_*", # disable US because of low bandwidth
+#    "T2_US_*", # disable US because of low bandwidth
+    "kbfi.ee", # Files are not found
+    "cscs.ch", # Files are not found
     ]
 
 

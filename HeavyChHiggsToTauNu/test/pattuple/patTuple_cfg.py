@@ -54,25 +54,6 @@ process.out = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('pattuple.root'),
     outputCommands = cms.untracked.vstring(
         "drop *",
-        "keep *_genParticles_*_*",
-        "keep edmTriggerResults_*_*_*",
-#        "keep triggerTriggerEvent_*_*_*", # the information is alread in full PAT trigger
-        "keep L1GlobalTriggerReadoutRecord_*_*_*",   # needed for prescale provider
-#        "keep L1GlobalTriggerObjectMapRecord_*_*_*", # needed for prescale provider
-        "keep *_conditionsInEdm_*_*",
-        "keep edmMergeableCounter_*_*_*", # in lumi block
-        "keep PileupSummaryInfos_*_*_*", # only in MC
-        "keep *_offlinePrimaryVertices_*_*",
-        "keep *_l1GtTriggerMenuLite_*_*", # in run block, needed for prescale provider
-        "keep recoCaloMETs_*_*_*", # keep all calo METs (metNoHF is needed!)
-        "keep *_genMetTrue_*_*", # keep generator level MET
-        "keep *_kt6PFJets*_rho_HChPatTuple", # keep the rho of the event
-        "keep recoBeamHaloSummary_*_*_*", # keep beam halo summaries
-        "keep recoGlobalHaloData_*_*_*",
-        "keep *_HBHENoiseFilterResultProducer*_*_*", # keep the resulf of HBHENoiseFilterResultProducer*
-        "keep *_ecalDeadCellTPfilter*_*_*",
-        "keep *_EcalDeadCellEventFilter*_*_*",
-        "keep *_trackingFailureFilter*_*_*",
         ),
     dropMetaData = cms.untracked.string("ALL"),
     # Save only those events which passed the path (for possible
@@ -94,13 +75,6 @@ options.doPat=1
                                    doHBHENoiseFilter=False, # Only save the HBHE result to event, don't filter
                                    calculateEventCleaning=True, # This requires the tags from test/pattuple/checkoutTags.sh
                                    )
-
-process.out.outputCommands.extend([
-        "drop *_selectedPatTausHpsTancPFTau_*_*",
-        "drop *_patTausHpsTancPFTauTauTriggerMatched_*_*",
-        "drop *_selectedPatJets_*_*",
-        "drop patTriggerObjectStandAlones_patTrigger_*_*",
-        ])
 
 # Prune GenParticles
 if dataVersion.isMC():
@@ -138,15 +112,6 @@ if dataVersion.isMC():
 #    process.sPAT.replace(process.patSequence, process.genParticles*process.patSequence)
 
 
-if dataVersion.isData():
-    process.out.outputCommands.extend(["drop recoGenJets_*_*_*"])
-else:
-    process.out.outputCommands.extend([
-            "keep LHEEventProduct_*_*_*",
-            "keep GenEventInfoProduct_*_*_*",
-            "keep GenRunInfoProduct_*_*_*",
-            ])
-
 ################################################################################
 # Take our skim, run it independently of the rest of the job, don't
 # use it's result for selecting the events to save. It is used to just
@@ -159,15 +124,6 @@ if isinstance(myTrigger, basestring):
     myTrigger = [myTrigger]
 process.heavyChHiggsToTauNuHLTFilter.HLTPaths = myTrigger
 process.heavyChHiggsToTauNuHLTFilter.throw = False
-
-# TotalKinematicsFilter for managing with buggy LHE+Pythia samples
-# https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1489.html
-if dataVersion.isMC():
-    process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
-    process.totalKinematicsFilter.src.setProcessName(dataVersion.getSimProcess())
-    process.totalKinematicsFilterPath = cms.Path(
-        process.totalKinematicsFilter
-    )
 
 #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HLTTauEmulation_cff")
 #process.out.outputCommands.extend(["keep recoCaloTaus_caloTauHLTTauEmu_*_*"])
