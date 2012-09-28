@@ -57,7 +57,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
 
-    GlobalElectronVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    GlobalElectronVeto(const edm::ParameterSet& iConfig, const edm::InputTag& vertexSrc, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~GlobalElectronVeto();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup); // Official Electron ID
@@ -70,6 +70,10 @@ namespace HPlus {
 
     // Input parameters
     edm::InputTag fElecCollectionName;
+    edm::InputTag fVertexSrc;
+    edm::InputTag fConversionSrc;
+    edm::InputTag fBeamspotSrc;
+    edm::InputTag fRhoSrc;
     const std::string fElecSelection;
     const double fElecPtCut;
     const double fElecEtaCut;

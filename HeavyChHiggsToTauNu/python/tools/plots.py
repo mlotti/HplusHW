@@ -1687,6 +1687,7 @@ class PlotDrawer:
     # \param log                 Should Y axis be in log scale by default?
     # \param ratio               Should the ratio pad be drawn?
     # \param ratioYlabel         The Y axis title for the ratio pad (None for default)
+    # \param ratioInvert         Should the ratio be inverted?
     # \param opts                Default frame bounds linear scale (see histograms._boundsArgs())
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
@@ -1699,6 +1700,7 @@ class PlotDrawer:
                  log=False,
                  ratio=False,
                  ratioYlabel=None,
+                 ratioInvert=False,
                  opts={},
                  optsLog={},
                  opts2={},
@@ -1711,6 +1713,7 @@ class PlotDrawer:
         self.logDefault = log
         self.ratioDefault = ratio
         self.ratioYlabel = ratioYlabel
+        self.ratioInvert = ratioInvert
         self.optsDefault = {"ymin": 0, "ymaxfactor": 1.1}
         self.optsDefault.update(opts)
         self.optsLogDefault = {"ymin": 0.01, "ymaxfactor": 2}
@@ -1759,8 +1762,17 @@ class PlotDrawer:
     # \li\a  rebin  If given and large than 1, rebin all histograms in the plot
     def rebin(self, p, **kwargs):
         reb = kwargs.get("rebin", 1)
-        if reb > 1:
-            p.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(reb))
+        if isinstance(reb, list):
+            if len(reb) < 2:
+                raise Exception("If 'rebin' is a list, it must have at least two elements")
+            n = len(reb)-1
+            def tmp(h):
+                h = h.getRootHisto()
+                return h.Rebin(n, h.GetName(), array.array("d", reb))
+            p.histoMgr.forEachHisto(tmp)
+        else:
+            if reb > 1:
+                p.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(reb))
 
     ## Stack MC histograms
     #
@@ -1789,6 +1801,7 @@ class PlotDrawer:
     # \li\a opts2        Ratio pad bounds (defaults given in __init__()/setDefaults())
     # \li\a ratio        Should ratio pad be drawn? (default given in __init__()/setDefaults())
     # \li\a ratioYlabel  The Y axis title for the ratio pad (None for default)
+    # \li\a ratioInvert  Should the ratio be inverted?
     def createFrame(self, p, name, **kwargs):
         log = kwargs.get("log", self.logDefault)
 
@@ -1813,6 +1826,8 @@ class PlotDrawer:
         ratio = kwargs.get("ratio", self.ratioDefault)
         if ratio:
             args["createRatio"] = True
+        if kwargs.get("ratioInvert", self.ratioInvert):
+            args["invertRatio"] = True
 
         # Create frame
         p.createFrame(name, **args)

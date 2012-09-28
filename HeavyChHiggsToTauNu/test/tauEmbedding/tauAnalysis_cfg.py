@@ -82,7 +82,7 @@ param.changeCollectionsToPF2PAT(PF2PATVersion)
 puWeights = [
     ("Run2011A", "Run2011A"),
     ("Run2011B", "Run2011B"),
-    ("Run2011A+B", "Run2011AB")
+    ("Run2011AB", "Run2011AB")
     ]
 for era, name in puWeights:
     modname = "pileupWeight"+name
@@ -109,35 +109,33 @@ if options.doPat != 0:
 
 additionalCounters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.commonSequence, param))
 
+# Add type 1 MET
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
+sequence = MetCorrection.addCorrectedMet(process, param, postfix=PF2PATVersion)
+process.commonSequence *= sequence
 
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
 ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
     selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
     goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
+
     tauSrc = cms.InputTag(param.tauSelection.src.value()), # this is set in addEmbeddingLikePreselection()
-    tauFunctions = cms.PSet(),
+    tauFunctions = analysisConfig.tauFunctions.clone(),
+
     jetSrc = cms.InputTag(param.jetSelection.src.value()),
-    jetFunctions = cms.PSet(
-        tche = cms.string("bDiscriminator('trackCountingHighEffBJetTags')"),
-    ),
+    jetFunctions = analysisConfig.jetFunctions.clone(),
+
     genParticleSrc = cms.InputTag("genParticles"),
     mets = cms.PSet(
         pfMet_p4 = cms.InputTag("patMETs"+PF2PATVersion),
+        pfMetType1_p4 = cms.InputTag(param.MET.type1Src.value()), # Note that this MUST be corrected for the selected tau in the subsequent analysis!
     ),
     doubles = cms.PSet(),
 )
 for era, name in puWeights:
     setattr(ntuple.doubles, "weightPileup_"+name, cms.InputTag("pileupWeight"+name))
 
-tauIds = [
-    "decayModeFinding",
-    "againstMuonLoose", "againstMuonTight",
-    "againstElectronLoose", "againstElectronMedium", "againstElectronTight", "againstElectronMVA",
-    "byVLooseIsolation", "byLooseIsolation", "byMediumIsolation", "byTightIsolation",
-    "byLooseCombinedIsolationDeltaBetaCorr", "byMediumCombinedIsolationDeltaBetaCorr", "byTightCombinedIsolationDeltaBetaCorr",
-    ]
-for name in tauIds:
-    setattr(ntuple.tauFunctions, name, cms.string("tauID('%s')"%name))
 if dataVersion.isMC():
     ntuple.mets.genMetTrue_p4 = cms.InputTag("genMetTrue")
  #   ntuple.mets.genMetCalo_p4 = cms.InputTag("genMetCalo")
@@ -157,11 +155,6 @@ if addSignalAnalysis:
     module = signalAnalysis.createEDFilter(param)
     module.Tree.fill = cms.untracked.bool(False)
     module.eventCounter.printMainCounter = cms.untracked.bool(True)
-
-    # Add type 1 MET
-    import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
-    sequence = MetCorrection.addCorrectedMet(process, module, postfix=PF2PATVersion)
-    process.commonSequence *= sequence
 
     # Counters
     if len(additionalCounters) > 0:

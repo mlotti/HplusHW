@@ -56,10 +56,12 @@ tauSelectionBase = cms.untracked.PSet(
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
     againstElectronDiscriminator = cms.untracked.string("againstElectronMVA"), # discriminator against electrons
     againstMuonDiscriminator = cms.untracked.string("againstMuonTight"), # discriminator for against muons
+    applyVetoForDeadECALCells = cms.untracked.bool(False), # set to true to exclude taus that are pointing to a dead ECAL cell
     isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr"), # discriminator for isolation
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1.0), # cut point for continuous isolation discriminator, applied only if it is non-zero
     rtauCut = cms.untracked.double(0.7), # rtau > value
-    nprongs = cms.untracked.uint32(1) # number of prongs (options: 1, 3, or 13 == 1 || 3)
+    nprongs = cms.untracked.uint32(1), # number of prongs (options: 1, 3, or 13 == 1 || 3)
+    analyseFakeTauComposition = cms.untracked.bool(False),
 )
 
 # Only HPS should be used (ignore TCTau, plain PF, TaNC, and Combined HPS+TaNC)
@@ -167,9 +169,7 @@ else:
     fakeTauSFandSystematics = fakeTauSFandSystematicsBase
 
 jetSelectionBase = cms.untracked.PSet(
-    #src = cms.untracked.InputTag("selectedPatJets"),       # Calo jets
-    #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"), # JPT jets 
-    src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
+    src = cms.untracked.InputTag("selectedPatJets"),  # PF jets
     cleanTauDR = cms.untracked.double(0.5), # cone for rejecting jets around tau jet
     ptCut = cms.untracked.double(20.0),
     etaCut = cms.untracked.double(2.4),
@@ -187,6 +187,9 @@ jetSelectionBase = cms.untracked.PSet(
     betaCut = cms.untracked.double(0.2), # default 0.2
     betaCutSource = cms.untracked.string("Beta"), # tag name in user floats
     betaCutDirection = cms.untracked.string("GT"), # direction of beta cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
+    # Veto event if jet hits dead ECAL cell
+    applyVetoForDeadECALCells = cms.untracked.bool(False),
+    deadECALCellsVetoDeltaR = cms.untracked.double(0.07),
     # Experimental
     EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )
@@ -206,9 +209,9 @@ jetSelectionTight = jetSelectionBase.clone(
 jetSelection = jetSelectionLoose # set default jet selection
 
 MET = cms.untracked.PSet(
-    rawSrc = cms.untracked.InputTag("patMETsPF"), # PF MET
-    type1Src = cms.untracked.InputTag("dummy"),
-    type2Src = cms.untracked.InputTag("dummy"),
+    rawSrc = cms.untracked.InputTag("patPFMet"), # PF MET
+    type1Src = cms.untracked.InputTag("patType1CorrectedPFMet"),
+    type2Src = cms.untracked.InputTag("patType1p2CorrectedPFMet"),
     caloSrc = cms.untracked.InputTag("patMETs"),
     tcSrc = cms.untracked.InputTag("patMETsTC"),
     select = cms.untracked.string("type1"), # raw, type1, type2
@@ -253,6 +256,9 @@ EvtTopology = cms.untracked.PSet(
 
 GlobalElectronVeto = cms.untracked.PSet(
     ElectronCollectionName = cms.untracked.InputTag("selectedPatElectrons"),
+    conversionSrc = cms.untracked.InputTag("allConversions"),
+    beamspotSrc = cms.untracked.InputTag("offlineBeamSpot"),
+    rhoSrc = cms.untracked.InputTag("kt6PFJetsForEleIso", "rho"),
     ElectronSelection = cms.untracked.string("simpleEleId95relIso"),
     ElectronPtCut = cms.untracked.double(15.0),
     ElectronEtaCut = cms.untracked.double(2.5)
@@ -298,7 +304,7 @@ jetTauInvMass = cms.untracked.PSet(
 )
 
 forwardJetVeto = cms.untracked.PSet(
-  src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
+  src = cms.untracked.InputTag("selectedPatJets"),  # PF jets
   ptCut = cms.untracked.double(30),
   etaCut = cms.untracked.double(2.4),
   ForwJetEtCut = cms.untracked.double(10.0),
@@ -433,28 +439,28 @@ def _getTriggerVertexArgs(kwargs):
         vargs["pset"] = module.vertexWeight
     return (effargs, vargs)
 
-def setDataTriggerEfficiency(dataVersion, era):
+def setDataTriggerEfficiency(dataVersion, era, pset=triggerEfficiencyScaleFactor):
     if dataVersion.isMC():
         if dataVersion.isS4():
-            triggerEfficiencyScaleFactor.mcSelect = "Summer11"
+            pset.mcSelect = "Summer11"
         elif dataVersion.isS6():
-            triggerEfficiencyScaleFactor.mcSelect = "Fall11"
+            pset.mcSelect = "Fall11"
         elif dataVersion.isHighPU():
-	    triggerEfficiencyScaleFactor.mode = "disabled"
+	    pset.mode = "disabled"
         else:
             raise Exception("MC trigger efficencies are available only for Summer11 and Fall11")
     if era == "EPS":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_160404_167913"]
+        pset.dataSelect = ["runs_160404_167913"]
     elif era == "Run2011A":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_160404_167913", "runs_170826_173198", "runs_173236_173692"]
+        pset.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692"]
     elif era == "Run2011A-EPS":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_170826_173198", "runs_173236_173692"]
+        pset.dataSelect = ["runs_170722_173198", "runs_173236_173692"]
     elif era == "Run2011B":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_175860_180252"]
-    elif era == "Run2011A+B":
-        triggerEfficiencyScaleFactor.dataSelect = ["runs_160404_167913", "runs_170826_173198", "runs_173236_173692", "runs_175860_180252"]
+        pset.dataSelect = ["runs_175832_180252"]
+    elif era == "Run2011AB":
+        pset.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692", "runs_175832_180252"]
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011A+B'")
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011AB'")
 
 
 # Weighting by instantaneous luminosity, and the number of true
@@ -481,10 +487,10 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
 
     if era == "Run2011A" or era == "Run2011B":
         pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData"+era.replace("Run","")+suffix+".root"
-    elif era == "Run2011A+B":
+    elif era == "Run2011AB":
         pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011"+suffix+".root"
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'Run2011A', 'Run2011B', 'Run2011A+B'" % era)
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'Run2011A', 'Run2011B', 'Run2011AB'" % era)
     pset.dataPUdistributionLabel = "pileup"
     # Make procuder for weights and add it to common sequence
     PUWeightProducer = cms.EDProducer("HPlusVertexWeightProducer",
@@ -497,9 +503,46 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
                                       mcPUdistributionLabel = pset.mcPUdistributionLabel,
                                       alias = cms.string("PUVertexWeight"+suffix)
     )
-    setattr(process, "PUWeightProducer"+suffix, PUWeightProducer)
+    name = "PUWeightProducer"+era+suffix
+    setattr(process, name, PUWeightProducer)
     commonSequence *= PUWeightProducer
-    psetReader.PUVertexWeightSrc = "PUWeightProducer"+suffix
+    psetReader.PUVertexWeightSrc = name
+
+def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, psetReader, suffix):
+    if dataVersion.isData():
+        return
+    if dataVersion.isS6():
+        # Fall11
+        pset.mcPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramMCFall11.root"
+        pset.mcPUdistributionLabel = "pileup"
+    elif dataVersion.isHighPU():
+	# High PU - disable vertex reweighting
+        pset.enabled = False
+        psetReader.enabled = False
+        return
+    else:
+        raise Exception("No PU reweighting support for anything else than Fall11 S6 scenario at the moment")
+    pset.enabled = True
+    psetReader.enabled = True
+
+    # None means to use the existing, just replace the suffix
+    pset.dataPUdistribution = pset.dataPUdistribution.value().replace(".root", suffix+".root")
+    pset.dataPUdistributionLabel = "pileup"
+    # Make procuder for weights and add it to common sequence
+    PUWeightProducer = cms.EDProducer("HPlusVertexWeightProducer",
+                                      vertexSrc = pset.vertexSrc,
+                                      puSummarySrc = pset.puSummarySrc,
+                                      enabled = pset.enabled,
+                                      dataPUdistribution = pset.dataPUdistribution,
+                                      dataPUdistributionLabel = pset.dataPUdistributionLabel,
+                                      mcPUdistribution = pset.mcPUdistribution,
+                                      mcPUdistributionLabel = pset.mcPUdistributionLabel,
+                                      alias = cms.string("PUVertexWeight"+suffix)
+    )
+    name = psetReader.PUVertexWeightSrc.value()+suffix
+    setattr(process, name, PUWeightProducer)
+    commonSequence *= PUWeightProducer
+    psetReader.PUVertexWeightSrc = name
 
 # Tau selection
 def forEachTauSelection(function):
@@ -515,9 +558,9 @@ def setAllTauSelectionSrcSelectedPatTaus():
     tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTau"
 
 def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
-    tauSelectionHPSTightTauBased.src        = "patTausHpsPFTauTauTriggerMatched"
-    tauSelectionHPSMediumTauBased.src       = "patTausHpsPFTauTauTriggerMatched"
-    tauSelectionHPSLooseTauBased.src        = "patTausHpsPFTauTauTriggerMatched"
+    tauSelectionHPSTightTauBased.src        = "patTausHpsPFTauTriggerMatched"
+    tauSelectionHPSMediumTauBased.src       = "patTausHpsPFTauTriggerMatched"
+    tauSelectionHPSLooseTauBased.src        = "patTausHpsPFTauTriggerMatched"
     
 def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, additionalCounters):
     from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
@@ -560,7 +603,12 @@ def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processNa
 def changeJetCollection(**kwargs):
     _changeCollection([jetSelection.src, forwardJetVeto.src], **kwargs)
 
-def changeCollectionsToPF2PAT(postfix="PFlow"):
+def setJERSmearedJets(dataVersion):
+    if dataVersion.isMC():
+        print "Using JER-smeared jets"
+        changeJetCollection(moduleLabel="smearedPatJets")
+
+def changeCollectionsToPF2PAT(dataVersion, postfix="PFlow", useGSFElectrons=True):
     # Taus
     hps = "selectedPatTaus"+postfix
     if "TriggerMatched" in tauSelectionHPSTightTauBased.src.value():
@@ -578,13 +626,21 @@ def changeCollectionsToPF2PAT(postfix="PFlow"):
     NonIsolatedMuonVeto.MuonCollectionName = "selectedPatMuons"+postfix
 
     # Electrons
-    GlobalElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
-    NonIsolatedElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
+    if useGSFElectrons:
+        print "Using GSF electrons despite of PF2PAT"
+    else:
+        GlobalElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
+        NonIsolatedElectronVeto.ElectronCollectionName = "selectedPatElectrons"+postfix
 
     # Jets
-    changeJetCollection(moduleLabel="selectedPatJets"+postfix)
+    if dataVersion.isData():
+        changeJetCollection(moduleLabel="selectedPatJets"+postfix)
+    else:
+        changeJetCollection(moduleLabel="smearedPatJets"+postfix)
 
     # MET
-    MET.rawSrc = "patMETsPFlow"
     MET.caloSrc = "Nonexistent"
     MET.tcSrc = "Nonexistent"
+    MET.rawSrc = "patPFMet"
+    MET.type1Src = "patType1CorrectedPFMet"
+    MET.type2Src = "patType1p2CorrectedPFMet"

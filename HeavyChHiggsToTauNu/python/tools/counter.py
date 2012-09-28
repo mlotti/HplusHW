@@ -76,6 +76,30 @@ def _counterTh1AddBinFromTh1(counter, name, th1):
 
     return new
 
+## Add new bisn to counter TH1 from bins of another TH1
+#
+# \param counter   Counter TH1 to modify
+# \param th1       TH1 whose bins are copied
+#
+# Use case is the addition of rows to event counter
+# (counter.SimpleCounter) from a TH1.
+def _counterTh1AddBinsFromTh1(counter, th1):
+    newnbins = counter.GetNbinsX()+th1.GetNbinsX()
+    new = ROOT.TH1F(counter.GetName(), counter.GetTitle(), newnbins, 0, newnbins)
+    new.SetDirectory(0)
+    new.Sumw2()
+
+    # Copy bins
+    dstBin = 1
+    for histo in [counter, th1]:
+        for srcBin in xrange(1, histo.GetNbinsX()+1):
+            new.SetBinContent(dstBin, histo.GetBinContent(srcBin))
+            new.SetBinError(dstBin, histo.GetBinError(srcBin))
+            new.GetXaxis().SetBinLabel(dstBin, histo.GetXaxis().GetBinLabel(srcBin))
+            dstBin += 1
+
+    return new
+
 ## Extract the position of the first digit in a number
 def _numToDig(num):
     if num == 0:
@@ -926,6 +950,44 @@ def removeColumnsRowsNotInAll(tables):
 
     return tablesCopy
 
+## Remove rows not found in all tables
+#
+# \param tables  List of counter.CounterTable objects
+#
+# \return new list of new counter.CounterTable objects
+#
+# Mainly used from counter.meanTable() and counter.meanTableFit().
+# Needed in addition of removeColulmnsRowsNotInAll() in order to allow
+# partial embedding processing rounds (i.e. to not process all datasets)
+def removeRowsNotInAll(tables):
+    tablesCopy = [t.clone() for t in tables]
+
+    maxNrows = max([t.getNrows() for t in tables])
+    iRow = 0
+    while iRow < maxNrows:
+        if tablesCopy[0].getNrows() <= iRow:
+            for t in tablesCopy[1:]:
+                if table.getNrows() > iRow:
+                    table.removeRow(index=iRow)
+            maxNrows -= 1
+            continue
+
+        rowName = tablesCopy[0].getRowNames()[iRow]
+        shouldRowBeRemoved = False
+        for table in tablesCopy[1:]:
+            if table.getNrows() <= iRow or rowName != table.getRowNames()[iRow]:
+                shouldRowBeRemoved = True
+        if shouldRowBeRemoved:
+            for t in tablesCopy:
+                if t.getNrows() > iRow:
+                    t.removeRow(index=iRow)
+            maxNrows -= 1
+            continue
+        iRow += 1
+
+    return tablesCopy
+
+
 ## Create a new counter.CounterTable as the average of the tables
 #
 # \param tables  List of counter.CounterTable objects
@@ -940,8 +1002,48 @@ def meanTable(tables, uncertaintyByAverage=False):
     if len(tables) == 0:
         raise Exception("Got 0 tables")
 
+    #tablesCopy = removeRowsNotInAll(tables)
+    tablesCopy = [t.clone() for t in tables]
+
+    # Do the average
+    table = tablesCopy[0]
+    rowNames = table.getRowNames()
+    colNames = table.getColumnNames()
+    for rowName in rowNames:
+        for colName in colNames:
+            count1 = table.getCount(rowName=rowName, colName=colName)
+            if count1 == None:
+                continue
+            count = count1.clone()
+            N = 1
+
+            for t in tablesCopy[1:]:
+                if colName not in t.getColumnNames():
+                    continue
+
+                count2 = t.getCount(rowName=rowName, colName=colName)
+                if count2 == None:
+                    count = None
+                    break
+                N += 1
+                if uncertaintyByAverage:
+                    count = dataset.Count(count.value()+count2.value(), count.uncertainty()+count2.uncertainty())
+                else:
+                    count.add(count2)
+
+            if count != None:
+                table.setCount2(dataset.Count(count.value()/N, count.uncertainty()/N), rowName=rowName, colName=colName)
+            else:
+                table.setCount2(None, rowName=rowName, colName=colName)
+    return table
+
+
+def meanTableFast(tables, uncertaintyByAverage=False):
+    if len(tables) == 0:
+        raise Exception("Got 0 tables")
+
     tablesCopy = removeColumnsRowsNotInAll(tables)
-    
+
     # Calculate the sums
     table = tablesCopy[0]
     nrows = table.getNrows()
@@ -1733,6 +1835,22 @@ class SimpleCounter:
         self.datasetRootHisto.modifyRootHisto(lambda oldHisto, newHisto: _counterTh1AddBinFromTh1(oldHisto, rowName, newHisto), drh)
         self.countNames.append(rowName)
 
+    ## Append rows from another TH1
+    #
+    # \param histoPath           Path to TH1
+    # \param countNameFunction   Function for mappting the X axis bin labels to count names
+    def appendRows(self, histoPath, countNameFunction=None):
+        if self.counter != None:
+            raise Exception("Can't add rows after the counters have been created!")
+
+        drh = self.datasetRootHisto.getDataset().getDatasetRootHisto(histoPath)
+        self.datasetRootHisto.modifyRootHisto(_counterTh1AddBinsFromTh1, drh)
+        
+        if countNameFunction != None:
+            self.countNames.extend([countNameFunction(x) for x in drh.getBinLabels()])
+        else:
+            self.countNames.extend(drh.getBinLabels())
+
     ## Set normalization scheme to unit area
     def normalizeToOne(self):
         if self.counter != None:
@@ -1821,6 +1939,9 @@ class Counter:
         for c in self.counters:
             func(c)
 
+    def getColumnNames(self):
+        return [c.getName() for c in self.counters]
+
     ## Remove columns
     #
     # \param datasetNames   Names of datasets to remove
@@ -1838,6 +1959,12 @@ class Counter:
     # \param treeDraw   dataset.TreeDraw object containing the TTree name, event selection, and weighting
     def appendRow(self, rowName, treeDraw):
         self.forEachDataset(lambda x: x.appendRow(rowName, treeDraw))
+
+    ## Append rows from another TH1
+    #
+    # \param histoPath  Path to TH1
+    def appendRows(self, histoPath):
+        self.forEachDataset(lambda x: x.appendRows(histoPath))
 
     ## Set normalization scheme to unit area
     def normalizeToOne(self):

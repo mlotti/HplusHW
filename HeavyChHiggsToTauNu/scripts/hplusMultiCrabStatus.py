@@ -157,6 +157,8 @@ if __name__ == "__main__":
                       help="Show summary of hosts where the jobs are running")
     parser.add_option("--showJobs", dest="showJobs", action="store_true", default=False,
                       help="Show job numbers for each status type")
+    parser.add_option("-l", "--long", dest="long", action="store_true", default=False,
+                      help="Shorthand for '--showJobs --showHosts")
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
 
@@ -164,5 +166,9 @@ if __name__ == "__main__":
     if opts.resubmit not in ["all", "aborted", "done"]:
         codes = opts.resubmit.split(",")
         opts.resubmit = [int(c) for c in codes]
+
+    if opts.long:
+        opts.showHosts = True
+        opts.showJobs = True
 
     sys.exit(main(opts))
