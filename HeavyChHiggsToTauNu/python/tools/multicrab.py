@@ -374,6 +374,26 @@ def prettyJobnums(jobnums):
 
     return ",".join(ret)
 
+## Transform pretty job number string to list of job numbers
+#
+# \param prettyString   String for pretty job number list (of the form '1,2,3-6,9')
+#
+# \return List of ints for job numbers
+def prettyToJobList(prettyString):
+    commaSeparated = prettyString.split(",")
+    ret = []
+    for item in commaSeparated:
+        if "-" in item:
+            if item.count("-") != 1:
+                raise Exception("Item '%s' has more than 1 occurrances of '-', in string '%s'" % (item, prettyString))
+            (first, last) = item.split("-")
+            ret.extend(range(int(first), int(last)+1))
+        else:
+            ret.append(int(item))
+
+    return ret
+
+
 ## Get output of 'crab -status' of one CRAB task
 #
 # \param task   CRAB task directory name
