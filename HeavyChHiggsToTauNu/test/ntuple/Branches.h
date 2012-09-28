@@ -175,6 +175,51 @@ private:
   BranchObj<std::vector<int> > fGrandMotherPdgId;
 };
 
+// Embedding muons
+class EmbeddingMuonCollection: public MuonCollection {
+public:
+  class Muon: public MuonCollection::Muon {
+  public:
+    Muon(EmbeddingMuonCollection *mc, size_t i);
+    ~Muon();
+
+    double chargedHadronIsoEmb() { return static_cast<EmbeddingMuonCollection *>(fCollection)->fChargedHadronIsoEmb.value()[fIndex]; }
+    double puChargedHadronIsoEmb() { return static_cast<EmbeddingMuonCollection *>(fCollection)->fPuChargedHadronIsoEmb.value()[fIndex]; }
+    double neutralHadronIsoEmb() { return static_cast<EmbeddingMuonCollection *>(fCollection)->fNeutralHadronIsoEmb.value()[fIndex]; }
+    double photonIsoEmb() { return static_cast<EmbeddingMuonCollection *>(fCollection)->fPhotonIsoEmb.value()[fIndex]; }
+
+    double standardRelativeIsolation() {
+      return (chargedHadronIso() + std::max(0.0, photonIso() + neutralHadronIso() - 0.5*puChargedHadronIso()))/p4().Pt();
+    }
+    double embeddingIsolation() {
+      return chargedHadronIsoEmb() + std::max(0.0, photonIsoEmb() - 0.5*puChargedHadronIsoEmb());
+    }
+  };
+
+  EmbeddingMuonCollection();
+  ~EmbeddingMuonCollection();
+
+  void setupBranches(TTree *tree, bool isMC);
+  void setEntry(Long64_t entry) {
+    MuonCollection::setEntry(entry);
+
+    fChargedHadronIsoEmb.setEntry(entry);
+    fPuChargedHadronIsoEmb.setEntry(entry);
+    fNeutralHadronIsoEmb.setEntry(entry);
+    fPhotonIsoEmb.setEntry(entry);
+  }
+  Muon get(size_t i) {
+    return Muon(this, i);
+  }
+
+private:
+  BranchObj<std::vector<double> > fChargedHadronIsoEmb;
+  BranchObj<std::vector<double> > fPuChargedHadronIsoEmb;
+  BranchObj<std::vector<double> > fNeutralHadronIsoEmb;
+  BranchObj<std::vector<double> > fPhotonIsoEmb;
+};
+
+
 // Jets
 class JetCollection {
 public:

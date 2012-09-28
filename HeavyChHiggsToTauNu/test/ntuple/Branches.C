@@ -43,6 +43,21 @@ void MuonCollection::setupBranches(TTree *tree, bool isMC) {
   }
 }
 
+//////////////////// EmbeddingMuonCollection ////////////////////
+EmbeddingMuonCollection::Muon::Muon(EmbeddingMuonCollection *mc, size_t i): MuonCollection::Muon(mc, i) {}
+EmbeddingMuonCollection::Muon::~Muon() {}
+EmbeddingMuonCollection::EmbeddingMuonCollection() {}
+EmbeddingMuonCollection::~EmbeddingMuonCollection() {}
+void EmbeddingMuonCollection::setupBranches(TTree *tree, bool isMC) {
+  MuonCollection::setupBranches(tree, isMC);
+
+  fChargedHadronIsoEmb.setupBranch(tree, (fPrefix+"_f_chargedHadronIsoEmb").c_str());
+  fPuChargedHadronIsoEmb.setupBranch(tree, (fPrefix+"_f_puChargedHadronIsoEmb").c_str());
+  fNeutralHadronIsoEmb.setupBranch(tree, (fPrefix+"_f_neutralHadronIsoEmb").c_str());
+  fPhotonIsoEmb.setupBranch(tree, (fPrefix+"_f_photonIsoEmb").c_str());
+}
+
+
 //////////////////// JetCollection ////////////////////
 JetCollection::Jet::Jet(JetCollection *mc, size_t i):
   fCollection(mc), fIndex(i)
