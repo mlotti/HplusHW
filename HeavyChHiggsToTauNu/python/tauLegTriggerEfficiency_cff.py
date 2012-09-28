@@ -1,4 +1,4 @@
-# Generated on Fri Sep 28 12:20:55 2012
+# Generated on Fri Sep 28 14:28:01 2012
 # by HiggsAnalysis/TriggerEfficiency/test/plotTauEfficiency.py
 
 import FWCore.ParameterSet.Config as cms
@@ -88,12 +88,12 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium = 
     mcParameters = cms.PSet(
         Fall11= cms.PSet(
             bins = cms.VPSet(
-                triggerBin(20.0, 0.0272056953979, 0.00284876282392),
-                triggerBin(30.0, 0.201344161299, 0.00693524275204),
-                triggerBin(40.0, 0.627819548872, 0.013724342806),
-                triggerBin(50.0, 0.885375494071, 0.0236643186794),
-                triggerBin(60.0, 0.953271028037, 0.0303749116815),
-                triggerBin(80.0, 1.0, 0.0576587369394),
+                triggerBin(20.0, 0.0237136465324, 0.00367391569281),
+                triggerBin(30.0, 0.210781932977, 0.00937398019393),
+                triggerBin(40.0, 0.65418227216, 0.017618864849),
+                triggerBin(50.0, 0.864864864865, 0.034181229703),
+                triggerBin(60.0, 0.967213114754, 0.0416131309118),
+                triggerBin(80.0, 1.0, 0.0923494906334),
             ),
         ),
     ),
@@ -180,12 +180,12 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA = cms
     mcParameters = cms.PSet(
         Fall11= cms.PSet(
             bins = cms.VPSet(
-                triggerBin(20.0, 0.026908452764, 0.00306116020731),
-                triggerBin(30.0, 0.206459784674, 0.00745522715308),
-                triggerBin(40.0, 0.642673521851, 0.0145762386938),
-                triggerBin(50.0, 0.919431279621, 0.0233517731615),
-                triggerBin(60.0, 0.977011494253, 0.0295167127175),
-                triggerBin(80.0, 1.0, 0.0802770559325),
+                triggerBin(20.0, 0.0241397021058, 0.00400224440462),
+                triggerBin(30.0, 0.211014176663, 0.00996053457927),
+                triggerBin(40.0, 0.660056657224, 0.0187585885406),
+                triggerBin(50.0, 0.918699186992, 0.0326665715574),
+                triggerBin(60.0, 1.0, 0.0384134220123),
+                triggerBin(80.0, 1.0, 0.142229304965),
             ),
         ),
     ),
@@ -272,12 +272,12 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA = cms.
     mcParameters = cms.PSet(
         Fall11= cms.PSet(
             bins = cms.VPSet(
-                triggerBin(20.0, 0.026908452764, 0.00306116020731),
-                triggerBin(30.0, 0.206459784674, 0.00745522715308),
-                triggerBin(40.0, 0.642673521851, 0.0145762386938),
-                triggerBin(50.0, 0.919431279621, 0.0233517731615),
-                triggerBin(60.0, 0.977011494253, 0.0295167127175),
-                triggerBin(80.0, 1.0, 0.0802770559325),
+                triggerBin(20.0, 0.0241397021058, 0.00400224440462),
+                triggerBin(30.0, 0.211014176663, 0.00996053457927),
+                triggerBin(40.0, 0.660056657224, 0.0187585885406),
+                triggerBin(50.0, 0.918699186992, 0.0326665715574),
+                triggerBin(60.0, 1.0, 0.0384134220123),
+                triggerBin(80.0, 1.0, 0.142229304965),
             ),
         ),
     ),
@@ -364,12 +364,12 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium = c
     mcParameters = cms.PSet(
         Fall11= cms.PSet(
             bins = cms.VPSet(
-                triggerBin(20.0, 0.0272056953979, 0.00284876282392),
-                triggerBin(30.0, 0.201344161299, 0.00693524275204),
-                triggerBin(40.0, 0.627819548872, 0.013724342806),
-                triggerBin(50.0, 0.885375494071, 0.0236643186794),
-                triggerBin(60.0, 0.953271028037, 0.0303749116815),
-                triggerBin(80.0, 1.0, 0.0576587369394),
+                triggerBin(20.0, 0.0237136465324, 0.00367391569281),
+                triggerBin(30.0, 0.210781932977, 0.00937398019393),
+                triggerBin(40.0, 0.65418227216, 0.017618864849),
+                triggerBin(50.0, 0.864864864865, 0.034181229703),
+                triggerBin(60.0, 0.967213114754, 0.0416131309118),
+                triggerBin(80.0, 1.0, 0.0923494906334),
             ),
         ),
     ),
