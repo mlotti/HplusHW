@@ -61,9 +61,13 @@ def main(opts):
     if len(opts.resubmit) > 0:
         submitCommand = "-resubmit"
 
+    sites = opts.toSites.split(",")
+    siteSubmitIndex = 0
+
     # Submission loop
     njobsSubmitted = 0
     while njobsSubmitted < maxJobs:
+        # Construct list of jobs per task to submit
         njobsToSubmit = min(opts.jobs, maxJobs-njobsSubmitted, len(allJobs))
         njobsSubmitted += njobsToSubmit    
         jobsToSubmit = {}
@@ -71,9 +75,17 @@ def main(opts):
             job = allJobs.pop(0)
             multicrab._addToDictList(jobsToSubmit, job.task, job.id)
 
+        # If explicit list of sites to submit was given, get the site to submit this time
+        crabOptions = []
+        if len(sites) > 0:
+            site = sites[siteSubmitIndex]
+            siteSubmitIndex = (siteSubmitIndex+1) % len(sites)
+            crabOptions.append("-GRID.se_black_list= -GRID.se_white_list="+site)
+
+        # Actual submission
         for task, jobs in jobsToSubmit.iteritems():
             pretty = multicrab.prettyJobnums(jobs)
-            command = ["crab", "-c", task, submitCommand, pretty] + opts.crabArgs.split(" ")
+            command = ["crab", "-c", task, submitCommand, pretty] + opts.crabArgs.split(" ") + crabOptions
             print "Submitting %d jobs from task %s" % (len(jobs), task)
             print "Command", " ".join(command)
             if not opts.test:
@@ -84,6 +96,8 @@ def main(opts):
                         print message
                     else:
                         raise Exception()
+
+        # Sleep between submissions
         if njobsSubmitted < maxJobs:
             print "Submitted, sleeping %f seconds" % opts.sleep
             time.sleep(opts.sleep)
@@ -113,6 +127,8 @@ if __name__ == "__main__":
                       help="Continue submissions even if crab -submit fails for any reason")
     parser.add_option("--crabArgs", dest="crabArgs", default="",
                       help="String of options to pass to CRAB")
+    parser.add_option("--toSites", dest="toSites", default="",
+                      help="Comma separated list of sites to submit jobs. Jobs are submitted in a round-robin way to these sites. (conflicts with -GRID.(se|ce)_(white|black)_list in --crabArgs)")
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
 
@@ -120,6 +136,12 @@ if __name__ == "__main__":
         print "--resubmit conflicts with --firstJob and --lastJob"
         print opts.firstJob, opts.lastJob
         sys.exit(1)
+
+    if len(opts.toSites) > 0:
+        tmp = opts.crabArgs.lower()
+        if "-grid.se" in tmp or "-grid.ce" in tmp:
+            print "--toSites conflicts with '-GRID.(se|ce)_(white|black)_list' in --crabArgs"
+            sys.exit(1)
 
     sys.exit(main(opts))
 
