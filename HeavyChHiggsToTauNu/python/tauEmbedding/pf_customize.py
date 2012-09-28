@@ -49,11 +49,11 @@ class SeqVisitor(object):
     def leave(self,visitee):
 	    pass
 
-def eventContent(recoProcessName, processName):
+def eventContent(hltProcessName, recoProcessName, processName):
     return [
-        "keep *_genParticles_*_%s" % recoProcessName,
-        "keep recoGenJets_*_*_%s" % recoProcessName,
-        "keep recoGenMETs_*_*_%s" % recoProcessName,
+        "keep *_genParticles_*_%s" % hltProcessName,
+        "keep recoGenJets_*_*_%s" % hltProcessName,
+        "keep recoGenMETs_*_*_%s" % hltProcessName,
         "keep *_pfMet_*_%s" % recoProcessName,
         "keep *_offlinePrimaryVertices_*_%s" % recoProcessName,
         "keep *_offlineBeamSpot_*_%s" % recoProcessName,
@@ -132,7 +132,7 @@ def customise(process):
             "keep *_*Electron*_*_%s" % processName,
             "keep *_eid*_*_*",
     ])
-    outputModule.outputCommands.extend(eventContent(recoProcessName, processName))
+    outputModule.outputCommands.extend(eventContent(hltProcessName, recoProcessName, processName))
 #    re_procName = re.compile("_\*$")
 #    outputModule.outputCommands.extend([re_procName.sub("_"+processName, x) for x in process.RECOSIMEventContent.outputCommands])
     outputModule.outputCommands.extend(process.HChEventContent.outputCommands)
@@ -382,7 +382,6 @@ def addPAT(process, options, dataVersion):
         "keep *_selectedPatElectrons_*_*",
         "keep *_allConversions_*_*",
         "keep recoCaloMETs_*_*_*",
-        "keep genMETs_*_*_*",
         "keep *_goodJets*_*_*",
         "keep bool_*_*_*",
         "keep *_patTriggerEvent_*_*",
@@ -402,6 +401,7 @@ def addPAT(process, options, dataVersion):
     processName = process.name_()
     skimProcessName = "MUONSKIM"
     recoProcessName = dataVersion.getRecoProcess()
+    hltProcessName = dataVersion.getTriggerProcess()
     outComms = out.outputCommands[:]
     for comm in outComms:
         if "keep" in comm and "PatJets" in comm and processName in comm:
@@ -413,7 +413,7 @@ def addPAT(process, options, dataVersion):
 #            "keep *_patTausHpsPFTau_*_"+processName,
 #            "drop *_selectedPatTaus*_*_"+processName,
             ])
-    out.outputCommands.extend(eventContent(recoProcessName, processName))
+    out.outputCommands.extend(eventContent(hltProcessName, recoProcessName, processName))
     out.outputCommands.extend([
             "drop *_generalTracks_*_"+recoProcessName, # Tracks are needed for global muon veto, because the tracks were not embedded to pat::Muons in skim (FIXME)
             "drop *_particleFlow_*_"+recoProcessName,
