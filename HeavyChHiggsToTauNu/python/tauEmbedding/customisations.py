@@ -7,7 +7,11 @@ PF2PATVersion = "" # empty for standard PAT
 #PF2PATVersion = "PFlow"
 #PF2PATVersion = "PFlowChs"
 
-allPatMuons = "selectedPatMuons"+PF2PATVersion+"All::MUONSKIM" # We have to pick the ones of the original event
+def getAllPatMuons():
+    if PF2PATVersion == "":
+        return "selectedPatMuons::MUONSKIM"
+    else:
+        return "selectedPatMuons"+PF2PATVersion+"All::MUONSKIM" # We have to pick the ones of the original event
 tauEmbeddingMuons = "tauEmbeddingMuons"
 
 def getAllPatTaus():
@@ -675,7 +679,9 @@ def addTauAnalyses(process, prefix, prototype, commonSequence, additionalCounter
     
 
 
-def selectedMuonCleanedMuons(selectedMuon, allMuons=allPatMuons):
+def selectedMuonCleanedMuons(selectedMuon, allMuons=None):
+    if allMuons == None:
+        allMuons = getAllPatMuons()
     from PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi import cleanPatMuons
     module = cleanPatMuons.clone(
         src = cms.InputTag(allMuons),
