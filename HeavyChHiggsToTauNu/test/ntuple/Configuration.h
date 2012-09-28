@@ -13,8 +13,8 @@ namespace MuonID {
   template <typename T> bool standardRelativeIsolation(T& muon) { return standardRelativeIsolation(muon.standardRelativeIsolation()); }
   bool standardRelativeIsolation(double isoVar) { return isoVar < 0.12; }
 
-  template <typename T> bool embeddingIsolation(T& muon) { return embeddingIsolation(muon.embeddingIsolation()); }
-  bool embeddingIsolation(double isoVar) { return isoVar < 2; }
+  template <typename T> bool embeddingIsolation(T& muon) { return embeddingIsolationCut(muon.embeddingIsolation()); }
+  bool embeddingIsolationCut(double isoVar) { return isoVar < 2; }
 }
 
 namespace MuonVeto {

@@ -10,55 +10,6 @@
 #include<stdexcept>
 #include<cstdlib>
 
-class MyMuonCollection: public MuonCollection{
-public:
-  class Muon: public MuonCollection::Muon {
-  public:
-    Muon(MyMuonCollection *mc, size_t i): MuonCollection::Muon(mc, i) {}
-    ~Muon() {}
-
-    double chargedHadronIsoEmb() { return static_cast<MyMuonCollection *>(fCollection)->fChargedHadronIsoEmb.value()[fIndex]; }
-    double puChargedHadronIsoEmb() { return static_cast<MyMuonCollection *>(fCollection)->fPuChargedHadronIsoEmb.value()[fIndex]; }
-    double neutralHadronIsoEmb() { return static_cast<MyMuonCollection *>(fCollection)->fNeutralHadronIsoEmb.value()[fIndex]; }
-    double photonIsoEmb() { return static_cast<MyMuonCollection *>(fCollection)->fPhotonIsoEmb.value()[fIndex]; }
-
-    double standardRelativeIsolation() {
-      return (chargedHadronIso() + std::max(0.0, photonIso() + neutralHadronIso() - 0.5*puChargedHadronIso()))/p4().Pt();
-    }
-    double embeddingIsolation() {
-      return chargedHadronIsoEmb() + std::max(0.0, photonIsoEmb() - 0.5*puChargedHadronIsoEmb());
-    }
-  };
-
-  MyMuonCollection() {}
-  ~MyMuonCollection() {}
-
-  void setupBranches(TTree *tree, bool isMC) {
-    MuonCollection::setupBranches(tree, isMC);
-
-    fChargedHadronIsoEmb.setupBranch(tree, (fPrefix+"_f_chargedHadronIsoEmb").c_str());
-    fPuChargedHadronIsoEmb.setupBranch(tree, (fPrefix+"_f_puChargedHadronIsoEmb").c_str());
-    fNeutralHadronIsoEmb.setupBranch(tree, (fPrefix+"_f_neutralHadronIsoEmb").c_str());
-    fPhotonIsoEmb.setupBranch(tree, (fPrefix+"_f_photonIsoEmb").c_str());
-  }
-  void setEntry(Long64_t entry) {
-    MuonCollection::setEntry(entry);
-
-    fChargedHadronIsoEmb.setEntry(entry);
-    fPuChargedHadronIsoEmb.setEntry(entry);
-    fNeutralHadronIsoEmb.setEntry(entry);
-    fPhotonIsoEmb.setEntry(entry);
-  }
-  Muon get(size_t i) {
-    return Muon(this, i);
-  }
-
-private:
-  BranchObj<std::vector<double> > fChargedHadronIsoEmb;
-  BranchObj<std::vector<double> > fPuChargedHadronIsoEmb;
-  BranchObj<std::vector<double> > fNeutralHadronIsoEmb;
-  BranchObj<std::vector<double> > fPhotonIsoEmb;
-};
 
 // MuonAnalysisSelector
 class MuonAnalysisSelector: public BaseSelector {
@@ -237,7 +188,7 @@ void MuonAnalysisSelector::setupBranches(TTree *tree) {
   fJets.setupBranches(tree);
   if(!fPuWeightName.empty())
     fPuWeight.setupBranch(tree, fPuWeightName.c_str());
-  fVertexCount.setupBranch(tree, "vertexCount");
+  fVertexCount.setupBranch(tree, "vertex_count");
   fElectronVetoPassed.setupBranch(tree, "ElectronVetoPassed");
   if(isData())
     fHBHENoiseFilterPassed.setupBranch(tree, "HBHENoiseFilter");
@@ -263,12 +214,12 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
   cAll.increment();
 
   size_t nmuons = fMuons.size();
-  std::vector<MyMuonCollection::Muon> selectedMuons;
-  std::vector<MyMuonCollection::Muon> tmp;
+  std::vector<EmbeddingMuonCollection::Muon> selectedMuons;
+  std::vector<EmbeddingMuonCollection::Muon> tmp;
 
   // Muon kinematics
   for(size_t i=0; i<nmuons; ++i) {
-    MyMuonCollection::Muon muon = fMuons.get(i);
+    EmbeddingMuonCollection::Muon muon = fMuons.get(i);
     if(!MuonID::pt(muon)) continue;
     if(!MuonID::eta(muon)) continue;
     selectedMuons.push_back(muon);
@@ -290,7 +241,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
   // Isolation
   if(fIsolationMode != kDisabled) {
     for(size_t i=0; i<selectedMuons.size(); ++i) {
-      MyMuonCollection::Muon& muon = selectedMuons[i];
+      EmbeddingMuonCollection::Muon& muon = selectedMuons[i];
 
       double stdIsoVar = muon.standardRelativeIsolation();
       double embIsoVar = muon.embeddingIsolation();
@@ -319,7 +270,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
         hMuonPhotonIso_AfterDB->Fill(muon.photonIsoEmb(), weight);
         hMuonIso_AfterDB->Fill(embIsoVar, weight);
 
-        if(!MuonID::embeddingIsolation(embIsoVar)) continue;
+        if(!MuonID::embeddingIsolationCut(embIsoVar)) continue;
       }
       hMuonVertexCount_AfterIsolation->Fill(fVertexCount.value(), weight);
       if(isMuFromW)
@@ -337,7 +288,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
   if(selectedMuons.size() != 1) return true;
   cMuonExactlyOne.increment();
 
-  MyMuonCollection::Muon& selectedMuon = selectedMuons[0];
+  EmbeddingMuonCollection::Muon& selectedMuon = selectedMuons[0];
   // Fill
   hSelectedMuonPt_AfterMuonSelection->Fill(selectedMuon.p4().Pt(), weight);
 
@@ -348,7 +299,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
   // Muon veto
   int muonVetoCount = 0;
   for(size_t i=0; i<nmuons; ++i) {
-    MyMuonCollection::Muon muon = fMuons.get(i);
+    EmbeddingMuonCollection::Muon muon = fMuons.get(i);
     // Skip selected muon
     if(muon.index() == selectedMuon.index()) continue;
 
