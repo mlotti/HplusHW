@@ -3,8 +3,12 @@ import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions as HChOptions
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 import HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation as jesVariation
+from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
 
 tooManyAnalyzersLimit = 100
+
+defaultOptimisation = HPlusOptimisationScheme()
+#defaultOptimisation.addTauPtVariation([40.0, 50.0])
 
 ## Infrastucture to help analysis configuration building
 #
@@ -60,7 +64,7 @@ class ConfigBuilder:
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
-                 doOptimisation = False, optimisationScheme=None, # Do variations for optimisation
+                 doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
                  allowTooManyAnalyzers = False, # Allow arbitrary number of analyzers (beware, it might take looong to run and merge)
                  ):
         self.options, self.dataVersion = HChOptions.getOptionsDataVersion(dataVersion)
