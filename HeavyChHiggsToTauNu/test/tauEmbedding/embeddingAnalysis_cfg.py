@@ -14,7 +14,7 @@ debug = False
 
 # Command line arguments (options) and DataVersion object
 options, dataVersion = getOptionsDataVersion(dataVersion, useDefaultSignalTrigger=False)
-options.doPat = 1
+#options.doPat = 1
 options.tauEmbeddingInput = 1
 
 if debug:
@@ -35,7 +35,7 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Tauembedding_embedding_v44_3_seed0_TTJets_TuneZ2_Fall11/8bda05028676a01f201ca340afb9a6ec/embedded_1_1_aT5.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Tauembedding_embedding_v44_4_seed0_TTJets_TuneZ2_Fall11/e89cb1184437f798b6f9ed400ba3543f/embedded_119_1_LMb.root"
     ),
     inputCommands = cms.untracked.vstring(
         "keep *",
@@ -157,7 +157,7 @@ process.genMetSequence = cms.Sequence(
     process.genMetNuEmbedded
 )
 
-if dataVersion.isMC():
+if False and dataVersion.isMC(): # FIXME
     process.commonSequence *= process.genMetSequence
 
 
@@ -171,8 +171,8 @@ process.selectedPFCandsORG = process.selectedPFCands.clone(
     src = cms.InputTag("particleFlowORG")
 )
 
-process.commonSequence *= process.selectedPFCands
-process.commonSequence *= process.selectedPFCandsORG
+#process.commonSequence *= process.selectedPFCands
+#process.commonSequence *= process.selectedPFCandsORG
 
 
 if debug:
@@ -209,8 +209,8 @@ process.commonSequence.remove(process.goodPrimaryVertices)
 process.commonSequence.insert(0, process.goodPrimaryVertices)
 
 # Switch to PF2PAT objects
-PF2PATVersion = "PFlow"
-param.changeCollectionsToPF2PAT(postfix=PF2PATVersion)
+#PF2PATVersion = "PFlow"
+#param.changeCollectionsToPF2PAT(postfix=PF2PATVersion)
 
 muons = cms.InputTag("tauEmbeddingMuons")
 #taus = cms.InputTag("selectedPatTausShrinkingConePFTau")
@@ -229,11 +229,15 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 # FIXME: hack to apply trigger in MC
 if dataVersion.isMC():
     additionalCounters.extend(tauEmbeddingCustomisations.addMuonTriggerFix(process, dataVersion, process.commonSequence, options))
+param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
+tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, options, dataVersion)
 
-tauEmbeddingCustomisations.PF2PATVersion = PF2PATVersion
-muons = cms.InputTag(tauEmbeddingCustomisations.addMuonIsolationEmbedding(process, process.commonSequence, muons.value()))
-additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param))
-taus = cms.InputTag("patTaus"+PF2PATVersion+"TauEmbeddingMuonMatched")
+#tauEmbeddingCustomisations.PF2PATVersion = PF2PATVersion
+#muons = cms.InputTag(tauEmbeddingCustomisations.addMuonIsolationEmbedding(process, process.commonSequence, muons.value()))
+#additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param))
+#taus = cms.InputTag("patTaus"+PF2PATVersion+"TauEmbeddingMuonMatched")
+#taus = cms.InputTag("patTaus"+PF2PATVersion+"TauEmbeddingMuonMatched")
+taus = cms.InputTag(param.tauSelectionHPSMediumTauBased.src.value())
 
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
@@ -247,7 +251,7 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     tauSrc = cms.InputTag(taus.value()),
     tauFunctions = analysisConfig.tauFunctions.clone(),
 
-    jetSrc = cms.InputTag("selectedPatJets"+PF2PATVersion),
+    jetSrc = cms.InputTag("selectedPatJets"),
     jetFunctions = analysisConfig.jetFunctions.clone(),
 
     genParticleOriginalSrc = cms.InputTag("genParticles", "", "HLT"),
@@ -261,7 +265,7 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
 )
 
 
-if dataVersion.isMC():
+if False and dataVersion.isMC(): # FIXME
     ntuple.mets.genMetTrueEmbedded_p4 = cms.InputTag("genMetTrueEmbedded")
     ntuple.mets.genMetTrueOriginal_p4 = cms.InputTag("genMetTrue", "", hltProcess)
     ntuple.mets.genMetCaloEmbedded_p4 = cms.InputTag("genMetCaloEmbedded")
@@ -291,79 +295,6 @@ for label in eventCounters:
     process.globalReplace(label, prototype.clone())
 
 
-#f = open("configDump.py", "w")
+#f = open("configDumpEmbeddingAnalysis.py", "w")
 #f.write(process.dumpPython())
 #f.close()
-
-
-# Embedding analyzer
-# process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
-#     muonSrc = cms.untracked.InputTag(muons.value()),
-#     tauSrc = cms.untracked.InputTag(taus.value()),
-#     pfCandSrc = cms.untracked.InputTag("particleFlowORG"),
-# #    pfCandSrc = cms.untracked.InputTag("selectedPFCands"),
-#     vertexSrc = cms.untracked.InputTag("offlinePrimaryVertices"),
-#     genParticleOriginalSrc = cms.untracked.InputTag("genParticles", "", "HLT"),
-#     genParticleEmbeddedSrc = cms.untracked.InputTag("genParticles"),
-#     visibleTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"),
-# #    visibleTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
-#     mets = cms.untracked.PSet(
-#         Met = cms.untracked.PSet(
-#             embeddedSrc = cms.untracked.InputTag(pfMET.value()),
-#             originalSrc = cms.untracked.InputTag(pfMETOriginal.value())
-#         ),
-#         MetNoMuon = cms.untracked.PSet(
-#             embeddedSrc = cms.untracked.InputTag(pfMET.value()),
-#             originalSrc = cms.untracked.InputTag("pfMETOriginalNoMuon")
-#         ),
-#     ),
-
-#     muonTauMatchingCone = cms.untracked.double(0.5),
-#     metCut = cms.untracked.double(60),
-#     tauIsolationCalculator = cms.untracked.PSet(
-#         vertexSrc = cms.InputTag("offlinePrimaryVertices")
-#     )
-# )
-# if weight != None:
-#     process.EmbeddingAnalyzer.prescaleSource = cms.untracked.InputTag(weight)
-
-
-# # if dataVersion.isMC():
-# #     process.EmbeddingAnalyzer.GenMetTrue = cms.untracked.PSet(
-# #         embeddedSrc = cms.untracked.InputTag("genMetTrueEmbedded"),
-# #         originalSrc = cms.untracked.InputTag("genMetTrue", "", recoProcess)
-# #     )
-# #     process.EmbeddingAnalyzer.GenMetCalo = cms.untracked.PSet(
-# #         embeddedSrc = cms.untracked.InputTag("genMetCaloEmbedded"),
-# #         originalSrc = cms.untracked.InputTag("genMetCalo", "", recoProcess)
-# #     )
-# #     process.EmbeddingAnalyzer.GenMetCaloAndNonPrompt = cms.untracked.PSet(
-# #         embeddedSrc = cms.untracked.InputTag("genMetCaloAndNonPromptEmbedded"),
-# #         originalSrc = cms.untracked.InputTag("genMetCaloAndNonPrompt", "", recoProcess)
-# #     )
-# #     process.EmbeddingAnalyzer.GenMetNuSum = cms.untracked.PSet(
-# #          embeddedSrc = cms.untracked.InputTag("genMetNuEmbedded"),
-# #          originalSrc = cms.untracked.InputTag("genMetNuOriginal")
-# #     )
-
-# process.tauIdEmbeddingAnalyzer = process.EmbeddingAnalyzer.clone(
-#     tauSrc = cms.untracked.InputTag(selectedTaus.value())
-# )
-# process.tauPtIdEmbeddingAnalyzer = process.EmbeddingAnalyzer.clone(
-#     tauSrc = cms.untracked.InputTag(selectedTausPt.value())
-# )
-
-# #process.analysisSequence = 
-# process.analysisPath = cms.Path(
-#     process.commonSequence *
-#     process.EmbeddingAnalyzer# *
-# #    process.tauIdEmbeddingAnalyzer *
-# #    process.tauPtIdEmbeddingAnalyzer
-# )
-
-# # def _setMuon(module, muonSrc):
-# #     module.muonSrc = cms.untracked.InputTag(muonSrc)
-
-# # tauEmbeddingCustomisations.addMuonIsolationAnalyses(process, "EmbeddingAnalyzer", process.EmbeddingAnalyzer,
-# #                                                     process.commonSequence, [],
-# #                                                     modify=_setMuon, signalAnalysisCounters=False)
