@@ -415,9 +415,9 @@ def addPAT(process, options, dataVersion):
             ])
     out.outputCommands.extend(eventContent(recoProcessName, processName))
     out.outputCommands.extend([
-            #"drop *_generalTracks_*_"+recoProcessName, # Tracks are needed for global muon veto, because the tracks were not embedded to pat::Muons in skim (FIXME)
+            "drop *_generalTracks_*_"+recoProcessName, # Tracks are needed for global muon veto, because the tracks were not embedded to pat::Muons in skim (FIXME)
             "drop *_particleFlow_*_"+recoProcessName,
-            "keep *_generalTracks_*_"+recoProcessName,
+#            "keep *_generalTracks_*_"+recoProcessName,
 
             "drop *_selectedPatTausHpsPFTau_*_"+skimProcessName,
             "drop *_VisibleTaus_*_"+skimProcessName,
