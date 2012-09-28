@@ -41,9 +41,9 @@ namespace HPlus {
       tree->Branch("jets_elm", &fJetsElm);
       tree->Branch("jets_phm", &fJetsPhm);
       tree->Branch("jets_mum", &fJetsMum);
-      tree->Branch("jets_flavour", &fJetsFlavour);
-      tree->Branch("jets_id", &fJetsId);
     }
+    tree->Branch("jets_flavour", &fJetsFlavour);
+    tree->Branch("jets_genPartonPdgId", &fJetsGenPartonPdgId);
     tree->Branch("jets_jecToRaw", &fJetsJec);
     tree->Branch("jets_area", &fJetsArea);
     tree->Branch("jets_looseId", &fJetsLooseId);
@@ -69,14 +69,16 @@ namespace HPlus {
 
       int chm = jet.chargedHadronMultiplicity();
       int npr = jet.chargedMultiplicity() + jet.neutralMultiplicity();
-      int flavour = -999;
-      int jetid = -999;
       if (!iEvent.isRealData()) {
-	flavour = jet.partonFlavour();
 	const reco::GenParticle* myParticle = jet.genParton();
-	//	if (myParticle != 0 ) flavour = myParticle->pdgId();
+        int pdgId = 0;
+	if (myParticle != 0 ) pdgId = myParticle->pdgId();
+
+        fJetsFlavour.push_back(jet.partonFlavour());
+        fJetsGenPartonPdgId.push_back(pdgId);
       }
-     if(fJetComposition) {
+
+      if(fJetComposition) {
         double sum = chf+nhf+elf+phf+muf;
         if(std::abs(sum - 1.0) > 0.000001) {
           throw cms::Exception("Assert") << "The assumption that chf+nhf+elf+phf+muf=1 failed, the sum was " << (chf+nhf+elf+phf+muf)
@@ -97,8 +99,6 @@ namespace HPlus {
         fJetsElm.push_back(jet.electronMultiplicity());
         fJetsPhm.push_back(jet.photonMultiplicity());
         fJetsMum.push_back(jet.muonMultiplicity());
-	fJetsFlavour.push_back(flavour);
-	fJetsId.push_back(jetid);
       }
 
       fJetsJec.push_back(jet.jecFactor(0));
@@ -128,14 +128,14 @@ namespace HPlus {
       fJetsElf.clear();
       fJetsPhf.clear();
       fJetsMuf.clear();
-      fJetsFlavour.clear();
-      fJetsId.clear();
       fJetsChm.clear();
       fJetsNhm.clear();
       fJetsElm.clear();
       fJetsPhm.clear();
       fJetsMum.clear();
     }
+    fJetsFlavour.clear();
+    fJetsGenPartonPdgId.clear();
 
     fJetsJec.clear();
     fJetsArea.clear();
