@@ -5,10 +5,9 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 
 #include "DataFormats/Common/interface/View.h"
-#include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
-#include<vector>
+#include<string>
 
 namespace edm {
   class ParameterSet;
@@ -20,7 +19,7 @@ class TTree;
 namespace HPlus {
   class TreeVertexBranches {
   public:
-    TreeVertexBranches(const edm::ParameterSet& iConfig);
+    TreeVertexBranches(const edm::ParameterSet& iConfig, const std::string& prefix="vertex", const std::string& src="vertexSrc");
     ~TreeVertexBranches();
 
     void book(TTree *tree);
@@ -33,6 +32,7 @@ namespace HPlus {
     void setValues(const edm::View<reco::Vertex>& muons);
 
     edm::InputTag fVertexSrc;
+    std::string fPrefix;
 
     unsigned fVertexCount;
   };

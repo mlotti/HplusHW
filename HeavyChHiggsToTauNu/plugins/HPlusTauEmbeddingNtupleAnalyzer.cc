@@ -24,6 +24,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeMuonBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeTauBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeJetBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeVertexBranches.h"
 
 #include "TTree.h"
 
@@ -48,26 +49,23 @@ private:
 
   edm::InputTag fGenParticleOriginalSrc;
   edm::InputTag fGenParticleEmbeddedSrc;
-  edm::InputTag fSelectedPrimaryVertexSrc;
-  edm::InputTag fGoodPrimaryVertexSrc;
 
   HPlus::TreeEventBranches fEventBranches;
+  HPlus::TreeVertexBranches fSelectedVertexBranches;
+  HPlus::TreeVertexBranches fGoodVertexBranches;
   HPlus::TreeMuonBranches fMuonBranches;
   HPlus::TreeTauBranches fTauBranches;
   HPlus::TreeJetBranches fJetBranches;
 
   std::vector<MetItem> fMets;
   std::vector<DoubleItem> fDoubles;
-
-  int fNSelectedPrimaryVertices;
-  int fNGoodPrimaryVertices;
 };
 
 HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::ParameterSet& iConfig):
   fGenParticleOriginalSrc(iConfig.getParameter<edm::InputTag>("genParticleOriginalSrc")),
   fGenParticleEmbeddedSrc(iConfig.getParameter<edm::InputTag>("genParticleEmbeddedSrc")),
-  fSelectedPrimaryVertexSrc(iConfig.getParameter<edm::InputTag>("selectedPrimaryVertexSrc")),
-  fGoodPrimaryVertexSrc(iConfig.getParameter<edm::InputTag>("goodPrimaryVertexSrc")),
+  fSelectedVertexBranches(iConfig, "selectedPrimaryVertex", "selectedPrimaryVertexSrc"),
+  fGoodVertexBranches(iConfig, "goodPrimaryVertex", "goodPrimaryVertexSrc"),
   fMuonBranches(iConfig),
   fTauBranches(iConfig),
   fJetBranches(iConfig, false)
@@ -89,6 +87,8 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   fTree = fs->make<TTree>("tree", "Tree");
 
   fEventBranches.book(fTree);
+  fSelectedVertexBranches.book(fTree);
+  fGoodVertexBranches.book(fTree);
   fMuonBranches.book(fTree);
   fTauBranches.book(fTree);
   fJetBranches.book(fTree);
@@ -99,9 +99,6 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   for(size_t i=0; i<fDoubles.size(); ++i) {
     fTree->Branch(fDoubles[i].name.c_str(), &(fDoubles[i].value));
   }
-
-  fTree->Branch("selectedPrimaryVertices_n", &fNSelectedPrimaryVertices);
-  fTree->Branch("goodPrimaryVertices_n", &fNGoodPrimaryVertices);
 }
 
 HPlusTauEmbeddingNtupleAnalyzer::~HPlusTauEmbeddingNtupleAnalyzer() {}
@@ -110,6 +107,8 @@ void HPlusTauEmbeddingNtupleAnalyzer::reset() {
   double nan = std::numeric_limits<double>::quiet_NaN();
  
   fEventBranches.reset();
+  fSelectedVertexBranches.reset();
+  fGoodVertexBranches.reset();
   fMuonBranches.reset();
   fTauBranches.reset();
   fJetBranches.reset();
@@ -120,20 +119,12 @@ void HPlusTauEmbeddingNtupleAnalyzer::reset() {
   for(size_t i=0; i<fDoubles.size(); ++i) {
     fDoubles[i].value = nan;
   }
-
-  fNSelectedPrimaryVertices = -1;
-  fNGoodPrimaryVertices = -1;
 }
 
 void HPlusTauEmbeddingNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   fEventBranches.setValues(iEvent);
-
-  edm::Handle<edm::View<reco::Vertex> > hselectedvert;
-  edm::Handle<edm::View<reco::Vertex> > hgoodvert;
-  iEvent.getByLabel(fSelectedPrimaryVertexSrc, hselectedvert);
-  iEvent.getByLabel(fGoodPrimaryVertexSrc, hgoodvert);
-  fNSelectedPrimaryVertices = hselectedvert->size();
-  fNGoodPrimaryVertices = hgoodvert->size();
+  fSelectedVertexBranches.setValues(iEvent);
+  fGoodVertexBranches.setValues(iEvent);
 
   edm::Handle<edm::View<reco::GenParticle> > hgenparticlesOriginal;
   edm::Handle<edm::View<reco::GenParticle> > hgenparticlesEmbedded;

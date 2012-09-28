@@ -6,13 +6,14 @@
 #include "TTree.h"
 
 namespace HPlus {
-  TreeVertexBranches::TreeVertexBranches(const edm::ParameterSet& iConfig):
-    fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc"))
+  TreeVertexBranches::TreeVertexBranches(const edm::ParameterSet& iConfig, const std::string& prefix, const std::string& src):
+    fVertexSrc(iConfig.getParameter<edm::InputTag>(src)),
+    fPrefix(prefix)
   {}
   TreeVertexBranches::~TreeVertexBranches() {}
 
   void TreeVertexBranches::book(TTree *tree) {
-    tree->Branch("vertexCount", &fVertexCount);
+    tree->Branch((fPrefix+"_count").c_str(), &fVertexCount);
   }
   void TreeVertexBranches::setValues(const edm::Event& iEvent) {
     edm::Handle<edm::View<reco::Vertex> > hvertices;
