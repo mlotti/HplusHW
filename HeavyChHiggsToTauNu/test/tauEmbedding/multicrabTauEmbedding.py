@@ -47,20 +47,22 @@ defaultVersions = [
     #"v44_2fix_seed1", # for hybrid event production only
     #"v44_2fix_seed2", # for hybrid event production only
 #    "v44_4_seed0",
-    "v44_4_1"
+
+#    "v44_4_1" # skim version
+    "v44_4_1_muiso0"
 ]
 
 # Define the processing steps: input dataset, configuration file, output file
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
 #          "skim_copy":      {"input": "tauembedding_skim_v13",         "config": "copy_cfg.py"}, 
-          "embedding":      {"input": "tauembedding_skim_v44_4", "config": "embed.py",   "output": "embedded.root"},
+          "embedding":      {"input": "tauembedding_skim_v44_4_1", "config": "embed.py",   "output": "embedded.root"},
           "analysis":       {"input": "tauembedding_embedding_%s",  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau":    {"input": "AOD",                        "config": "tauAnalysis_cfg.py"},
           "signalAnalysis": {"input": "tauembedding_embedding_%s",  "config": "../signalAnalysis_cfg.py"},
           "signalAnalysisGenTau": {"input": "pattuple_v44_4",        "config": "../signalAnalysis_cfg.py"},
           "EWKMatching":    {"input": "tauembedding_embedding_%s",  "config": "../EWKMatching_cfg.py"},
-          "muonAnalysis":   {"input": "tauembedding_skim_v44_4",          "config": "muonAnalysisFromSkim_cfg.py"},
-          "caloMetEfficiency": {"input": "tauembedding_skim_v44_4",         "config": "caloMetEfficiency_cfg.py"},
+          "muonAnalysis":   {"input": "tauembedding_skim_v44_4_1",          "config": "muonAnalysisFromSkim_cfg.py"},
+          "caloMetEfficiency": {"input": "tauembedding_skim_v44_4_1",         "config": "caloMetEfficiency_cfg.py"},
           }
 
 
