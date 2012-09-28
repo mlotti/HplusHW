@@ -43,7 +43,7 @@ print "trigger:", trigger
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 del process.TFileService
-process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
+#process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 # Output module
 process.out = cms.OutputModule("PoolOutputModule",
@@ -70,8 +70,8 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
                                                             doHBHENoiseFilter=False, # Only save the HBHE result to event, don't filter
 )
 # In order to avoid transient references and generalTracks is available anyway
-if hasattr(process, "patMuons"):
-    process.patMuons.embedTrack = False
+#if hasattr(process, "patMuons"):
+#    process.patMuons.embedTrack = False
 #    process.patMuonsPFlow.embedTrack = False
 #    process.patMuonsPFlowChs.embedTrack = False
 
@@ -82,6 +82,62 @@ if hasattr(process, "patMuons"):
 # import re
 # name_re = re.compile("_\*$")
 # process.out.outputCommands.extend([name_re.sub("_MUONSKIM", x) for x in process.HChEventContent.outputCommands])
+
+# Drop some totally unnecessary products
+process.out.outputCommands.extend([
+        "drop *_towerMaker_*_*",
+        "drop *_hltTriggerSummaryAOD_*_*",
+        "drop *_reducedEcalRecHits*_*_*",
+        "drop *_multi5x5SuperClusters_*_*",
+        "drop recoPFJets_*_*_*",
+        "drop recoCaloJets_*_*_*",
+        "drop recoJPTJets_*_*_*",
+        "drop recoTrackJets_*_*_*",
+        "drop *_kt4JetID_*_*",
+        "drop *_kt6JetID_*_*",
+        "drop *_ak7JetID_*_*",
+        "drop *_kt4GenJets_*_*",
+        "drop *_kt6GenJets_*_*",
+        "drop *_ak7GenJets_*_*",
+        "drop *_kt4JetExtender_*_*",
+        "drop *_ak7JetExtender_*_*",
+        "drop *_ak7JetTracksAssociatorAtVertex_*_*",
+        "drop recoPFTaus_*_*_*",
+        "drop recoCaloTaus_*_*_*",
+#        "drop recoMuons_*_*_*", # needed for type I/II MET
+        "drop recoGsfElectrons_*_*_*",
+#        "drop recoGsfTracks_*_*_*", # needed for tau ID
+        "drop recoPhotons_*_*_*",
+
+        "drop *_hltL1GtObjectMap_*_*",
+        "drop recoDeDxDataedmValueMap_*_*_*",
+        "drop recoSuperClusters_*_*_*",
+        "drop recoCaloClusters_*_*_*",
+        "drop recoPreshowerClusters_*_*_*",
+        "drop *_castorreco_*_*",
+        "drop *_CastorTowerReco_*_*",
+        "drop *_reducedHcalRecHits_*_*",
+
+        "drop *_trackExtrapolator_*_*",
+        "drop *_standAloneMuons_*_*",
+        "drop *_conversionStepTracks_*_*",
+        "drop recoIsoDepositedmValueMap_*_*_*",
+        "drop recoCastorJetIDedmValueMap_*_*_*",
+        "drop recoPFTauDiscriminator_*_*_*",
+        "drop l1extra*_*_*_*",
+
+        "drop *_ak5JetID_*_*",
+        "drop *_ak5JetExtender_*_*",
+        "drop *_ak5JetTracksAssociatorAtVertex_*_*",
+        "drop *_muonsFromCosmics_*_*",
+        "drop *_muonsFromCosmics1Leg_*_*",
+        "drop *_uncleanedOnlyAllConversions_*_*",
+        "drop recoCaloTauTagInfos_*_*_*",
+        "drop *_generalV0Candidates_*_*",
+     
+        
+        
+])
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as muonSelection
 process.muonSelectionSequence = muonSelection.addMuonSelectionForEmbedding(process)
