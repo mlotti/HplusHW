@@ -3,8 +3,12 @@ import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions as HChOptions
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 import HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation as jesVariation
+from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
 
 tooManyAnalyzersLimit = 100
+
+defaultOptimisation = HPlusOptimisationScheme()
+#defaultOptimisation.addTauPtVariation([40.0, 50.0])
 
 ## Infrastucture to help analysis configuration building
 #
@@ -60,7 +64,7 @@ class ConfigBuilder:
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
-                 doOptimisation = False, optimisationScheme=None, # Do variations for optimisation
+                 doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
                  allowTooManyAnalyzers = False, # Allow arbitrary number of analyzers (beware, it might take looong to run and merge)
                  ):
         self.options, self.dataVersion = HChOptions.getOptionsDataVersion(dataVersion)
@@ -74,6 +78,7 @@ class ConfigBuilder:
         self.doAgainstElectronScan = doAgainstElectronScan
         self.doBTagTree = doBTagTree
         self.doMETResolution = doMETResolution
+        self.tauEmbeddingFinalizeMuonSelection = tauEmbeddingFinalizeMuonSelection
         self.doPrescalesForData = doPrescalesForData
         self.doFillTree = doFillTree
         self.histogramAmbientLevel = histogramAmbientLevel
@@ -177,7 +182,7 @@ class ConfigBuilder:
         self._useBTagDB(process, param)
 
         # Tau embedding input handling
-        self._customizeTauEmbeddingInput(process, param)
+        additionalCounters.extend(self._customizeTauEmbeddingInput(process, param))
 
         # Create analysis module(s)
         modules = createAnalysesFunction(param)
@@ -303,8 +308,8 @@ class ConfigBuilder:
         if self.useDefaultInputFiles:
             process.source.fileNames.append(self.dataVersion.getAnalysisDefaultFileMadhatter())
         if self.options.tauEmbeddingInput != 0:
-            if options.doPat == 0:
-                raise Exception("In tau embedding input mode, set also doPat=1")
+            if self.options.doPat != 0:
+                raise Exception("In tau embedding input mode, doPat must be 0 (from v44_4 onwards)")
             process.source.fileNames = []
 
         # Global tag
@@ -403,15 +408,17 @@ class ConfigBuilder:
     # \param process  cms.Process object
     # \param param    HChSignalAnalysisParameters_cff module object
     def _customizeTauEmbeddingInput(self, process, param):
+        ret = []
         if self.options.tauEmbeddingInput != 0:
             #tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
-            tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, options, self.dataVersion)
-            tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, options, self.dataVersion)
+            tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, self.options, self.dataVersion)
+            tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, self.options, self.dataVersion)
             if self.tauEmbeddingFinalizeMuonSelection:
                 # applyIsolation = not doTauEmbeddingMuonSelectionScan
                 applyIsolation = False
-                additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
-                                                                                           enableIsolation=applyIsolation))
+                ret.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
+                                                                            enableIsolation=applyIsolation))
+        return ret
 
     ## Print module configuration
     #
