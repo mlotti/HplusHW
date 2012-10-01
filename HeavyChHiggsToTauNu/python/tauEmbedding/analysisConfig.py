@@ -11,19 +11,19 @@ muonFunctions = cms.PSet(
     photonIso = cms.string("photonIso()"),
     puChargedHadronIso = cms.string("puChargedHadronIso()"),
         
-    chargedHadronIsoEmb = cms.string("userFloat('ontheflyiso_pfChargedHadrons')"),
-    neutralHadronIsoEmb = cms.string("userFloat('ontheflyiso_pfNeutralHadrons')"),
-    photonIsoEmb = cms.string("userFloat('ontheflyiso_pfPhotons')"),
-    puChargedHadronIsoEmb = cms.string("userFloat('ontheflyiso_pfPUChargedHadrons')"),
+    chargedHadronIsoEmb = cms.string("userFloat('embeddingStep_pfChargedHadrons')"),
+    neutralHadronIsoEmb = cms.string("userFloat('embeddingStep_pfNeutralHadrons')"),
+    photonIsoEmb = cms.string("userFloat('embeddingStep_pfPhotons')"),
+    puChargedHadronIsoEmb = cms.string("userFloat('embeddingStep_pfPUChargedHadrons')"),
 
     chargedHadronIsoEmb_01to04 = cms.string("userFloat('iso01to04_pfChargedHadrons')"),
     neutralHadronIsoEmb_01to04 = cms.string("userFloat('iso01to04_pfNeutralHadrons')"),
-    photonIsoEmb_01to04 = cms.string("userFloat('iso01to04_ontheflyiso_pfPhotons')"),
+    photonIsoEmb_01to04 = cms.string("userFloat('iso01to04_pfPhotons')"),
     puChargedHadronIsoEmb_01to04 = cms.string("userFloat('iso01to04_pfPUChargedHadrons')"),
 
     chargedHadronIsoEmb_01to03 = cms.string("userFloat('iso01to03_pfChargedHadrons')"),
     neutralHadronIsoEmb_01to03 = cms.string("userFloat('iso01to03_pfNeutralHadrons')"),
-    photonIsoEmb_01to03 = cms.string("userFloat('iso01to03_ontheflyiso_pfPhotons')"),
+    photonIsoEmb_01to03 = cms.string("userFloat('iso01to03_pfPhotons')"),
     puChargedHadronIsoEmb_01to03 = cms.string("userFloat('iso01to03_pfPUChargedHadrons')"),
 
     tauTightIc04Iso = cms.string("userInt('byTightIc04ChargedOccupancy')+userInt('by%TightIc04GammaOccupancy')"),
