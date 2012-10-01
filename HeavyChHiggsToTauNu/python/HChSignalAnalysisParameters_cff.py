@@ -51,7 +51,7 @@ tauSelectionBase = cms.untracked.PSet(
     operatingMode = cms.untracked.string("standard"), # Standard tau ID (Tau candidate selection + tau ID applied)
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     selection = cms.untracked.string(""),
-    ptCut = cms.untracked.double(40), # jet pt > value
+    ptCut = cms.untracked.double(41), # jet pt > value
     etaCut = cms.untracked.double(2.1), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
     againstElectronDiscriminator = cms.untracked.string("againstElectronMVA"), # discriminator against electrons
@@ -259,7 +259,7 @@ GlobalElectronVeto = cms.untracked.PSet(
     conversionSrc = cms.untracked.InputTag("allConversions"),
     beamspotSrc = cms.untracked.InputTag("offlineBeamSpot"),
     rhoSrc = cms.untracked.InputTag("kt6PFJetsForEleIso", "rho"),
-    ElectronSelection = cms.untracked.string("simpleEleId95relIso"),
+    ElectronSelection = cms.untracked.string("VETO"), # was simpleEleId95relIso
     ElectronPtCut = cms.untracked.double(15.0),
     ElectronEtaCut = cms.untracked.double(2.5)
 )
@@ -274,7 +274,7 @@ NonIsolatedElectronVeto = cms.untracked.PSet(
 GlobalMuonVeto = cms.untracked.PSet(
     MuonCollectionName = cms.untracked.InputTag("selectedPatMuons"),
     MuonSelection = cms.untracked.string("GlobalMuonPromptTight"),
-    MuonPtCut = cms.untracked.double(15.0),
+    MuonPtCut = cms.untracked.double(10.0),
     MuonEtaCut = cms.untracked.double(2.5),  
     MuonApplyIpz = cms.untracked.bool(False) # Apply IP-z cut
 )
