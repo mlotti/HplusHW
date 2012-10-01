@@ -3,8 +3,8 @@
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 
-#cfg = "signalAnalysis_cfg.py"
-cfg = "signalAnalysis2_cfg.py"
+cfg = "signalAnalysis_cfg.py"
+#cfg = "signalAnalysis2_cfg.py"
 #cfg = "QCDMeasurement_cfg.py"
 multicrab = Multicrab("crab_analysis.cfg", cfg)
 

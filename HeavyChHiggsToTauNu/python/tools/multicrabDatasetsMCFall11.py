@@ -850,7 +850,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 165, # [1,2], approx. NNLO
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
