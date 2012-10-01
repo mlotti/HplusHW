@@ -55,7 +55,7 @@ njobs = {
     "TTToHplusBHminusB_M155_Fall11":     {"skim":   6, "embedding":  1},
     "TTToHplusBHminusB_M160_Fall11":     {"skim":   6, "embedding":  1},
 
-    "TTJets_TuneZ2_Fall11":              {"skim": 490, "embedding": 490}, # 3 s per event
+    "TTJets_TuneZ2_Fall11":              {"skim": 990, "embedding": 490}, # 5 s per event
     "WJets_TuneZ2_Fall11":               {"skim": 100, "embedding": 70},
     "W3Jets_TuneZ2_Fall11":              {"skim": 140, "embedding": 42},
     "DYJetsToLL_M50_TuneZ2_Fall11":      {"skim": 230, "embedding": 70},
@@ -106,52 +106,9 @@ def addTo(datasets):
                         }
                         })
 
-    # v44_4_1
-    add("skim", "v44_4_1", {
-#         "SingleMu_Mu_160431-163261_2011A_Nov08":    "",
-#         "SingleMu_Mu_163270-163869_2011A_Nov08":    "",
-#         "SingleMu_Mu_165088-166150_2011A_Nov08":    "",
-#         "SingleMu_Mu_166161-166164_2011A_Nov08":    "",
-#         "SingleMu_Mu_166346-166346_2011A_Nov08":    "",
-#         "SingleMu_Mu_166374-167043_2011A_Nov08":    "",
-#         "SingleMu_Mu_167078-167913_2011A_Nov08":    "",
-#         "SingleMu_Mu_170722-172619_2011A_Nov08":    "",
-#         "SingleMu_Mu_172620-173198_2011A_Nov08":    "",
-#         "SingleMu_Mu_173236-173692_2011A_Nov08":    "",
-#         "SingleMu_Mu_173693-177452_2011B_Nov19":    "",
-#         "SingleMu_Mu_177453-178380_2011B_Nov19":    "",
-#         "SingleMu_Mu_178411-179889_2011B_Nov19":    "",
-#         "SingleMu_Mu_179942-180371_2011B_Nov19":    "",
-        #"TTToHplusBWB_M80_Fall11":           "",
-        #"TTToHplusBWB_M90_Fall11":           "",
-        #"TTToHplusBWB_M100_Fall11":          "",
-        #"TTToHplusBWB_M120_Fall11":          "",
-        #"TTToHplusBWB_M140_Fall11":          "",
-        #"TTToHplusBWB_M150_Fall11":          "",
-        #"TTToHplusBWB_M155_Fall11":          "",
-        #"TTToHplusBWB_M160_Fall11":          "",
-        #"TTToHplusBHminusB_M80_Fall11":      "",
-        #"TTToHplusBHminusB_M90_Fall11":      "",
-        #"TTToHplusBHminusB_M100_Fall11":     "",
-        #"TTToHplusBHminusB_M120_Fall11":     "",
-        #"TTToHplusBHminusB_M140_Fall11":     "",
-        #"TTToHplusBHminusB_M150_Fall11":     "",
-        #"TTToHplusBHminusB_M155_Fall11":     "",
-        #"TTToHplusBHminusB_M160_Fall11":     "",
-        "TTJets_TuneZ2_Fall11":              "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_1-80448358a193f69c52fb3eaa57e02bff/USER",
-#        "WJets_TuneZ2_Fall11":               "",
-#         #"W3Jets_TuneZ2_Fall11":              "",
-#         "DYJetsToLL_M50_TuneZ2_Fall11":      "",
-#         "T_t-channel_TuneZ2_Fall11":         "",
-#         "Tbar_t-channel_TuneZ2_Fall11":      "",
-#         "T_tW-channel_TuneZ2_Fall11":        "",
-#         "Tbar_tW-channel_TuneZ2_Fall11":     ","
-#         "T_s-channel_TuneZ2_Fall11":         "",
-#         "Tbar_s-channel_TuneZ2_Fall11":      "",
-#         "WW_TuneZ2_Fall11":                  "",
-#         "WZ_TuneZ2_Fall11":                  "",
-#         "ZZ_TuneZ2_Fall11":                  "",
-#         "QCD_Pt20_MuEnriched_TuneZ2_Fall11": "",
+    # v44_4_2
+    add("skim", "v44_4_2", {
+        "TTJets_TuneZ2_Fall11":              "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER",
         })
 
     # v44_4
