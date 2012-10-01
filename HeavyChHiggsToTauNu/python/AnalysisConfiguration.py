@@ -273,9 +273,9 @@ class ConfigBuilder:
         analysisNamesForSystematics.extend(self._additionalTauEmbeddingAnalyses(process, analysisModules, analysisNames))
 
         ## Systematics
-        print analysisNamesForSystematics
-        self._buildJESVariation(process, analysisNamesForSystematics)
-        self._buildPUWeightVariation(process, analysisNamesForSystematics, param)
+        if "QCDMeasurement" not in analysisNames_:
+            self._buildJESVariation(process, analysisNamesForSystematics)
+            self._buildPUWeightVariation(process, analysisNamesForSystematics, param)
 
         # Optional output
         if self.edmOutput:
