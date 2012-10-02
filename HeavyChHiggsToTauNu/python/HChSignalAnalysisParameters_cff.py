@@ -215,7 +215,7 @@ MET = cms.untracked.PSet(
     caloSrc = cms.untracked.InputTag("patMETs"),
     tcSrc = cms.untracked.InputTag("patMETsTC"),
     select = cms.untracked.string("type1"), # raw, type1, type2
-    METCut = cms.untracked.double(50.0),
+    METCut = cms.untracked.double(60.0),
 
     # For type I/II correction
     tauJetMatchingCone = cms.untracked.double(0.5),
@@ -231,7 +231,7 @@ bTagging = cms.untracked.PSet(
     discriminator = cms.untracked.string("combinedSecondaryVertexBJetTags"),
 #    discriminator = cms.untracked.string("jetProbabilityBJetTags"),   
     leadingDiscriminatorCut = cms.untracked.double(0.898), # used for best bjet candidates (best discriminator)
-    subleadingDiscriminatorCut = cms.untracked.double(0.244), # used for other bjet candidates
+    subleadingDiscriminatorCut = cms.untracked.double(0.898), # used for other bjet candidates
     ptCut = cms.untracked.double(20.0),
     etaCut = cms.untracked.double(2.4),
     jetNumber = cms.untracked.uint32(1),
