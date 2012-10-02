@@ -118,14 +118,10 @@ MuonAnalysisSelector::MuonAnalysisSelector(const std::string& puWeight, const st
   cElectronVeto(fEventCounter.addCounter("Electron veto")),
   cJetSelection(fEventCounter.addCounter("Jet selection"))
 {
-  if(isolationMode == "disabled")
-    fIsolationMode = kDisabled;
-  else if(isolationMode == "standard")
-    fIsolationMode = kStandard;
-  else if(isolationMode == "embedding")
-    fIsolationMode = kEmbedding;
-  else
-    throw std::runtime_error("isolationMode is '"+isolationMode+"', allowed values are 'disabled', 'standard', 'embedding'");
+  if     (isolationMode == "disabled")  fIsolationMode = kDisabled;
+  else if(isolationMode == "standard")  fIsolationMode = kStandard;
+  else if(isolationMode == "embedding") fIsolationMode = kEmbedding;
+  else throw std::runtime_error("isolationMode is '"+isolationMode+"', allowed values are 'disabled', 'standard', 'embedding'");
 }
 MuonAnalysisSelector::~MuonAnalysisSelector() {}
 
@@ -260,7 +256,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
         hMuonPhotonIso_AfterDB->Fill(muon.photonIso(), weight);
         hMuonIso_AfterDB->Fill(stdIsoVar, weight);
 
-        if(!MuonID::standardRelativeIsolation(stdIsoVar)) continue;
+        if(!MuonID::standardRelativeIsolationCut(stdIsoVar)) continue;
       }
       else if(fIsolationMode == kEmbedding) {
 
