@@ -49,7 +49,8 @@ defaultVersions = [
 #    "v44_4_seed0",
 
 #    "v44_4_2" # skim version
-    "v44_4_2_muiso0"
+#    "v44_4_2_muiso0"
+    "v44_4_2_seed0"
 ]
 
 # Define the processing steps: input dataset, configuration file, output file
