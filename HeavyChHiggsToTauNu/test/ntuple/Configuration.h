@@ -27,9 +27,22 @@ namespace MuonVeto {
 namespace TauID {
   template <typename T> bool decayModeFinding(T& tau) { return tau.decayModeFinding() > 0.5; }
   template <typename T> bool pt(T& tau) { return tau.p4().Pt() > 40; }
+  //template <typename T> bool pt(T& tau) { return tau.p4().Pt() > 41; }
   template <typename T> bool eta(T& tau) { return std::abs(tau.p4().Eta()) < 2.1; }
   template <typename T> bool leadingChargedHadrCandPt(T& tau) { return tau.leadPFChargedHadrCandP4().Pt() > 20; }
  
+  template <typename T> bool ecalCracks(T& tau) {
+    double eta = std::abs(tau.p4().Eta());
+    return !(eta < 0.018 ||
+             (eta > 0.423 && eta < 0.461) ||
+             (eta > 0.770 && eta < 0.806) ||
+             (eta > 1.127 && eta < 1.163));
+  }
+  template <typename T> bool ecalGap(T& tau) {
+    double eta = std::abs(tau.p4().Eta());
+    return !(eta > 1.460 && eta<1.558);
+  }
+
   template <typename T> bool againstElectron(T& tau) { return tau.againstElectronMVA() > 0.5; }
   template <typename T> bool againstMuon(T& tau) { return tau.againstMuonTight() > 0.5; }
 
