@@ -64,8 +64,10 @@ config = {"skim":           {"input": "AOD",                           "config":
 
 # "Midfix" for multicrab directory name
 dirPrefix = ""
+#dirPrefix = "_vital"
 #dirPrefix += "_Met50"
-#dirPrefix += "_systematics"
+if defaultStep in ["signalAnalysis", "signalAnalysisGenTau"]:
+    dirPrefix += "_systematics"
 
 #dirPrefix += "_test"
 #dirPrefix += "_debug"
@@ -306,7 +308,8 @@ def createTasks(opts, step, version=None):
     reco_re = re.compile("^Run[^_]+_(?P<reco>[^_]+_v\d+_[^_]+_)")
 
     # Let's do the naming like this until we get some answer from crab people
-    multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
+    if step in ["skim", "embedding"]:
+        multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
 
     # Modification function for skim/embedding steps
     def modify(dataset):
