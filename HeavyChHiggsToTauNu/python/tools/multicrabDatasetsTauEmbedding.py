@@ -110,7 +110,7 @@ def addTo(datasets):
     add("skim", "v44_4_2", {
         "SingleMu_Mu_160431-163261_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_160431_tauembedding_skim_v44_4_2-d9eec32ec495d473673489f496724114/USER",
         "SingleMu_Mu_163270-163869_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_163270_tauembedding_skim_v44_4_2-f2f022e2f1824ce67ef0c386cf58329f/USER",
-#         "SingleMu_Mu_165088-166150_2011A_Nov08":    "",
+        "SingleMu_Mu_165088-166150_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_165088_tauembedding_skim_v44_4_2-70b45374fbabe2248133e36a2cbe01e2/USER",
         "SingleMu_Mu_166161-166164_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_tauembedding_skim_v44_4_2-0a9e46f53bac3a3199fc5d08e63772d3/USER",
         "SingleMu_Mu_166346-166346_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166346_tauembedding_skim_v44_4_2-91fdceb3c5af341c67f22e9c64363c60/USER",
         "SingleMu_Mu_166374-167043_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166374_tauembedding_skim_v44_4_2-0a9e46f53bac3a3199fc5d08e63772d3/USER",
@@ -141,17 +141,17 @@ def addTo(datasets):
         "TTJets_TuneZ2_Fall11":              "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER",
         "WJets_TuneZ2_Fall11":               "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER",
 #         #"W3Jets_TuneZ2_Fall11":              "",
-#         "DYJetsToLL_M50_TuneZ2_Fall11":      "",
-#         "T_t-channel_TuneZ2_Fall11":         "",
-#         "Tbar_t-channel_TuneZ2_Fall11":      "",
-#         "T_tW-channel_TuneZ2_Fall11":        "",
-#         "Tbar_tW-channel_TuneZ2_Fall11":     ","
-#         "T_s-channel_TuneZ2_Fall11":         "",
-#         "Tbar_s-channel_TuneZ2_Fall11":      "",
-#         "WW_TuneZ2_Fall11":                  "",
-#         "WZ_TuneZ2_Fall11":                  "",
-#         "ZZ_TuneZ2_Fall11":                  "",
-#         "QCD_Pt20_MuEnriched_TuneZ2_Fall11": "",
+        "DYJetsToLL_M50_TuneZ2_Fall11":      "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER",
+        "T_t-channel_TuneZ2_Fall11":         "/T_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER",
+        "Tbar_t-channel_TuneZ2_Fall11":      "/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER",
+        "T_tW-channel_TuneZ2_Fall11":        "/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER",
+        "Tbar_tW-channel_TuneZ2_Fall11":     "/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER",
+        "T_s-channel_TuneZ2_Fall11":         "/T_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER",
+        "Tbar_s-channel_TuneZ2_Fall11":      "/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER",
+        "WW_TuneZ2_Fall11":                  "/WW_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER",
+        "WZ_TuneZ2_Fall11":                  "/WZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER",
+        "ZZ_TuneZ2_Fall11":                  "/ZZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER",
+        "QCD_Pt20_MuEnriched_TuneZ2_Fall11": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER",
         })
 
     add("embedding", "v44_4_2_muiso0", {
