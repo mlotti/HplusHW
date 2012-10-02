@@ -48,7 +48,7 @@ defaultVersions = [
     #"v44_2fix_seed2", # for hybrid event production only
 #    "v44_4_seed0",
 
-#    "v44_4_1" # skim version
+#    "v44_4_2" # skim version
     "v44_4_2_muiso0"
 ]
 
@@ -151,11 +151,11 @@ datasetsMCnoQCD = ["TTJets_TuneZ2_Fall11"]
 # Override the default number of jobs
 # Goal: ~5 hour jobs
 skimNjobs = {
-    "WJets_TuneZ2_Fall11": 990, # ~10 hours
+    "WJets_TuneZ2_Fall11": 990, # ~ 1.5 hour/100 MB
     "W2Jets_TuneZ2_Fall11": 490,
     "W3Jets_TuneZ2_Fall11": 490,
     "W4Jets_TuneZ2_Fall11": 490, 
-    "TTJets_TuneZ2_Fall11": 6490,
+    "TTJets_TuneZ2_Fall11": 4990, # ~1 hour/200 MB 
     "QCD_Pt20_MuEnriched_TuneZ2_Fall11": 490,
     "DYJetsToLL_M50_TuneZ2_Fall11": 990,
     "T_t-channel_TuneZ2_Fall11": 490,

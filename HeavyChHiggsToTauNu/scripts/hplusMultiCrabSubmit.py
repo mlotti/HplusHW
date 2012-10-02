@@ -20,11 +20,14 @@ def main(opts):
     taskDirs = multicrab.getTaskDirectories(opts)
     multicrab.checkCrabInPath()
 
-    if opts.resubmit == "failed" and len(taskDirs) != 1:
+    resubmitMode = (len(opts.resubmit) > 0)
+    resubmitIdListMode = (opts.resubmit not in ["failed", "aborted"])
+
+    if resubmitMode and resubmitIdListMode and len(taskDirs) != 1:
         print "Option '--resubmit job_id_list' can be used with only one task, trying to use with %d tasks" % len(taskDirs)
         return 1
 
-    if len(opts.resubmit) > 0 and opts.resubmit != "failed":
+    if resubmitMode and resubmitIdListMode:
         resubmitJobList = multicrab.prettyToJobList(opts.resubmit)
 
     # Obtain all jobs to be (re)submitted
@@ -35,15 +38,18 @@ def main(opts):
             continue
 
         jobs = multicrab.crabStatusToJobs(task)
-        if len(opts.resubmit) == 0: # normal submission
+        if not resubmitMode: # normal submission
             if not "Created" in jobs:
                 print "%s: no 'Created' jobs to submit" % task
                 continue
             allJobs.extend(filter(lambda j: isInRange(opts, j), jobs["Created"]))
-        elif opts.resubmit == "failed": # resubmit all failed jobs
+        elif not resubmitIdListMode: # resubmit all failed jobs
+            status = "all"
+            if opts.resubmit == "aborted":
+                status = "aborted"
             for joblist in jobs.itervalues():
                 for job in joblist:
-                    if job.failed("all"):
+                    if job.failed(status):
                         allJobs.append(job)
         else: # resubmit explicit list of jobs
             for joblist in jobs.itervalues():
@@ -120,7 +126,7 @@ if __name__ == "__main__":
     parser.add_option("--lastJob", dest="lastJob", type="int", default=-1,
                       help="Last job to submit (default: -1, i.e. last which exists)")
     parser.add_option("--resubmit", dest="resubmit", type="string", default="",
-                      help="Resubmit jobs. Can be list of job IDs, or 'failed' for all failed jobs (conflicts with --firstJob and --lastJob, and with explicit job ID list can be used with only one task).")
+                      help="Resubmit jobs. Can be list of job IDs, or 'failed'/'aborted' for (all failed)/aborted jobs (conflicts with --firstJob and --lastJob, and with explicit job ID list can be used with only one task).")
     parser.add_option("--sleep", dest="sleep", type="float", default=900.0,
                       help="Number of seconds to sleep between submissions (default: 900 s= 15 min)")
     parser.add_option("--test", dest="test", default=False, action="store_true",
