@@ -377,13 +377,13 @@ class StandardPATBuilder(PATBuilderBase):
         # Add PF isolation for electrons and muons
         if self.doPatElectronMuon:
             pfTools.usePFIso(self.process)
-        # Apparently for data the sequences are such that the PFIso
-        # sequences do not end up in patDefaultSequence
-        if self.dataVersion.isData():
-            self.process.patDefaultSequence.insert(0,
-                                                   self.process.pfParticleSelectionSequence +
-                                                   self.process.eleIsoSequence +
-                                                   self.process.muIsoSequence)
+            # Apparently for data the sequences are such that the PFIso
+            # sequences do not end up in patDefaultSequence
+            if self.dataVersion.isData():
+                self.process.patDefaultSequence.insert(0,
+                                                       self.process.pfParticleSelectionSequence +
+                                                       self.process.eleIsoSequence +
+                                                       self.process.muIsoSequence)
 
         # Customize physics objects
         if self.doPatElectronMuon:
