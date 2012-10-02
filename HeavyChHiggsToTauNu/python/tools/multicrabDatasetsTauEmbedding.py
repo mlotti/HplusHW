@@ -106,22 +106,22 @@ def addTo(datasets):
                         }
                         })
 
-    # v44_4_1
-    add("skim", "v44_4_1", {
-#         "SingleMu_Mu_160431-163261_2011A_Nov08":    "",
-#         "SingleMu_Mu_163270-163869_2011A_Nov08":    "",
+    # v44_4_2
+    add("skim", "v44_4_2", {
+        "SingleMu_Mu_160431-163261_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_160431_tauembedding_skim_v44_4_2-d9eec32ec495d473673489f496724114/USER",
+        "SingleMu_Mu_163270-163869_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_163270_tauembedding_skim_v44_4_2-f2f022e2f1824ce67ef0c386cf58329f/USER",
 #         "SingleMu_Mu_165088-166150_2011A_Nov08":    "",
-#         "SingleMu_Mu_166161-166164_2011A_Nov08":    "",
-#         "SingleMu_Mu_166346-166346_2011A_Nov08":    "",
-#         "SingleMu_Mu_166374-167043_2011A_Nov08":    "",
-#         "SingleMu_Mu_167078-167913_2011A_Nov08":    "",
-#         "SingleMu_Mu_170722-172619_2011A_Nov08":    "",
-#         "SingleMu_Mu_172620-173198_2011A_Nov08":    "",
-#         "SingleMu_Mu_173236-173692_2011A_Nov08":    "",
-#         "SingleMu_Mu_173693-177452_2011B_Nov19":    "",
-#         "SingleMu_Mu_177453-178380_2011B_Nov19":    "",
-#         "SingleMu_Mu_178411-179889_2011B_Nov19":    "",
-#         "SingleMu_Mu_179942-180371_2011B_Nov19":    "",
+        "SingleMu_Mu_166161-166164_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_tauembedding_skim_v44_4_2-0a9e46f53bac3a3199fc5d08e63772d3/USER",
+        "SingleMu_Mu_166346-166346_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166346_tauembedding_skim_v44_4_2-91fdceb3c5af341c67f22e9c64363c60/USER",
+        "SingleMu_Mu_166374-167043_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166374_tauembedding_skim_v44_4_2-0a9e46f53bac3a3199fc5d08e63772d3/USER",
+        "SingleMu_Mu_167078-167913_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_167078_tauembedding_skim_v44_4_2-c4a8eba430793887b650ad5b083c7ed7/USER",
+        "SingleMu_Mu_170722-172619_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_170722_tauembedding_skim_v44_4_2-859a149425fa4c077a5b33666a7b993a/USER",
+        "SingleMu_Mu_172620-173198_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_172620_tauembedding_skim_v44_4_2-859a149425fa4c077a5b33666a7b993a/USER",
+        "SingleMu_Mu_173236-173692_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_173236_tauembedding_skim_v44_4_2-e4bb75f1eb1d67eb9cca9dc53de3dd14/USER",
+        "SingleMu_Mu_173693-177452_2011B_Nov19":    "/SingleMu/local-Run2011B_19Nov2011_v1_AOD_173693_tauembedding_skim_v44_4_2-e4bb75f1eb1d67eb9cca9dc53de3dd14/USER",
+        "SingleMu_Mu_177453-178380_2011B_Nov19":    "/SingleMu/local-Run2011B_19Nov2011_v1_AOD_177453_tauembedding_skim_v44_4_2-e4bb75f1eb1d67eb9cca9dc53de3dd14/USER",
+        "SingleMu_Mu_178411-179889_2011B_Nov19":    "/SingleMu/local-Run2011B_19Nov2011_v1_AOD_178411_tauembedding_skim_v44_4_2-ce29afbda8ffd97a0d906ada6ad5e907/USER",
+        "SingleMu_Mu_179942-180371_2011B_Nov19":    "/SingleMu/local-Run2011B_19Nov2011_v1_AOD_179942_tauembedding_skim_v44_4_2-2fa526d919657b36eff79f06bc501a9c/USER",
         #"TTToHplusBWB_M80_Fall11":           "",
         #"TTToHplusBWB_M90_Fall11":           "",
         #"TTToHplusBWB_M100_Fall11":          "",
@@ -138,8 +138,8 @@ def addTo(datasets):
         #"TTToHplusBHminusB_M150_Fall11":     "",
         #"TTToHplusBHminusB_M155_Fall11":     "",
         #"TTToHplusBHminusB_M160_Fall11":     "",
-        "TTJets_TuneZ2_Fall11":              "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_1-80448358a193f69c52fb3eaa57e02bff/USER",
-#        "WJets_TuneZ2_Fall11":               "",
+        "TTJets_TuneZ2_Fall11":              "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER",
+        "WJets_TuneZ2_Fall11":               "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER",
 #         #"W3Jets_TuneZ2_Fall11":              "",
 #         "DYJetsToLL_M50_TuneZ2_Fall11":      "",
 #         "T_t-channel_TuneZ2_Fall11":         "",
@@ -152,6 +152,11 @@ def addTo(datasets):
 #         "WZ_TuneZ2_Fall11":                  "",
 #         "ZZ_TuneZ2_Fall11":                  "",
 #         "QCD_Pt20_MuEnriched_TuneZ2_Fall11": "",
+        })
+
+    # v44_4_1
+    add("skim", "v44_4_1", {
+        "TTJets_TuneZ2_Fall11":              "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_1-80448358a193f69c52fb3eaa57e02bff/USER",
         })
 
     # v44_4

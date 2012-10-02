@@ -148,7 +148,7 @@ datasetsMCnoQCD = ["TTJets_TuneZ2_Fall11"]
 # Override the default number of jobs
 # Goal: ~5 hour jobs
 skimNjobs = {
-    "WJets_TuneZ2_Fall11": 990, # ~ 1 hour/100 MB
+    "WJets_TuneZ2_Fall11": 990, # ~ 1.5 hour/100 MB
     "W2Jets_TuneZ2_Fall11": 490,
     "W3Jets_TuneZ2_Fall11": 490,
     "W4Jets_TuneZ2_Fall11": 490, 
