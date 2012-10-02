@@ -62,12 +62,12 @@ datasetsMC = [
         "TTToHplusBHminusB_M160_Fall11",
 
 	# MC Signal (heavy H+ from process pp->tbH+)
-#        "HplusTB_M180_Fall11",
+        "HplusTB_M180_Fall11",
         "HplusTB_M190_Fall11",
         "HplusTB_M200_Fall11",
         "HplusTB_M220_Fall11",
         "HplusTB_M250_Fall11",
-#        "HplusTB_M300_Fall11",
+        "HplusTB_M300_Fall11",
 
         # MC Background
         "QCD_Pt30to50_TuneZ2_Fall11",
