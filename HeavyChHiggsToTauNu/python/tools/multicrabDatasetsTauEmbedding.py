@@ -55,7 +55,7 @@ njobs = {
     "TTToHplusBHminusB_M155_Fall11":     {"skim":   6, "embedding":  1},
     "TTToHplusBHminusB_M160_Fall11":     {"skim":   6, "embedding":  1},
 
-    "TTJets_TuneZ2_Fall11":              {"skim": 990, "embedding": 490}, # 5 s per event
+    "TTJets_TuneZ2_Fall11":              {"skim": 990, "embedding": 20}, # embedding: 5 s per event
     "WJets_TuneZ2_Fall11":               {"skim": 100, "embedding": 70},
     "W3Jets_TuneZ2_Fall11":              {"skim": 140, "embedding": 42},
     "DYJetsToLL_M50_TuneZ2_Fall11":      {"skim": 230, "embedding": 70},
@@ -110,6 +110,10 @@ def addTo(datasets):
     add("skim", "v44_4_2", {
         "TTJets_TuneZ2_Fall11":              "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER",
         })
+    add("embedding", "v44_4_2_muiso0", {
+        "TTJets_TuneZ2_Fall11":              "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_muiso0-50da2d6a5b0c9c8a2f96f633ada0c1c6/USER",
+        })
+
 
     # v44_4
     add("skim", "v44_4", {
