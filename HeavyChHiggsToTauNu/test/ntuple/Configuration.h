@@ -10,8 +10,8 @@ namespace MuonID {
   template <typename T> bool eta(T& muon) { return std::abs(muon.p4().Eta()) < 2.1; }
   template <typename T> bool dB(T& muon) { return std::abs(muon.dB()) < 0.02; }
 
-  template <typename T> bool standardRelativeIsolation(T& muon) { return standardRelativeIsolation(muon.standardRelativeIsolation()); }
-  bool standardRelativeIsolation(double isoVar) { return isoVar < 0.12; }
+  template <typename T> bool standardRelativeIsolation(T& muon) { return standardRelativeIsolationCut(muon.standardRelativeIsolation()); }
+  bool standardRelativeIsolationCut(double isoVar) { return isoVar < 0.12; }
 
   template <typename T> bool embeddingIsolation(T& muon) { return embeddingIsolationCut(muon.embeddingIsolation()); }
   bool embeddingIsolationCut(double isoVar) { return isoVar < 2; }

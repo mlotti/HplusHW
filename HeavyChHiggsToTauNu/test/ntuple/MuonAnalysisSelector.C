@@ -260,7 +260,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
         hMuonPhotonIso_AfterDB->Fill(muon.photonIso(), weight);
         hMuonIso_AfterDB->Fill(stdIsoVar, weight);
 
-        if(!MuonID::standardRelativeIsolation(stdIsoVar)) continue;
+        if(!MuonID::standardRelativeIsolationCut(stdIsoVar)) continue;
       }
       else if(fIsolationMode == kEmbedding) {
 
