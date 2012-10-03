@@ -13,18 +13,21 @@ def addMcSelection(process, dataVersion, trigger):
     seq *= process.allEvents
 
     # Trigger
-    if len(trigger) > 0:
-        print "########################################"
-        print "#"
-        print "# Applying trigger filter for MC"
-        print "#"
-        print "########################################"
-        process.TriggerFilter = triggerResultsFilter.clone()
-        process.TriggerFilter.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
-        process.TriggerFilter.l1tResults = cms.InputTag("")
-        #process.TriggerFilter.throw = cms.bool(False) # Should it throw an exception if the trigger product is not found
-        process.TriggerFilter.triggerConditions = cms.vstring(trigger)
-        seq *= process.TriggerFilter
+    if len(trigger) == 0:
+        raise Exception("triggerMC=1 and no trigger is specified!")
+
+    print "########################################"
+    print "#"
+    print "# Applying trigger filter for MC"
+    print "# "+" OR ".join(trigger)
+    print "#"
+    print "########################################"
+    process.TriggerFilter = triggerResultsFilter.clone()
+    process.TriggerFilter.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
+    process.TriggerFilter.l1tResults = cms.InputTag("")
+    #process.TriggerFilter.throw = cms.bool(False) # Should it throw an exception if the trigger product is not found
+    process.TriggerFilter.triggerConditions = cms.vstring(trigger)
+    seq *= process.TriggerFilter
 
     process.passedTrigger = cms.EDProducer("EventCountProducer")
     seq *= process.passedTrigger

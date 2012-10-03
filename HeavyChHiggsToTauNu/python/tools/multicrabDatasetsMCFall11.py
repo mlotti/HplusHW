@@ -1,4 +1,4 @@
-## \package multicrabDatasetsMCFall11
+ ## \package multicrabDatasetsMCFall11
 #
 # Dataset definitions for Fall11 MC production (CMSSW 44x)
 #
@@ -11,12 +11,15 @@ import multicrabDatasetsCommon as common
 
 # Default signal cross section taken the same as ttbar
 
+# NOTE: v44_4 pattuples are skimmed for trigger bit for backgrounds, signal is unskimmed
+
 ## Dataset definitions
 datasets = {
     # Signal WH
     "TTToHplusBWB_M80_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -27,11 +30,22 @@ datasets = {
                 "datasetpath": "/TTToHplusBWB_M-80_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M80_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 218200 evt, 15-18 MB / file
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-80_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2 # 18274 evt, 31 MB / file
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-80_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 2
+            },
         }
     },
     "TTToHplusBWB_M90_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -42,11 +56,22 @@ datasets = {
                 "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M90_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 218200 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2 # 19323 evt, 33 MB / file
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 2
+            },
         }
     },
     "TTToHplusBWB_M100_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -57,11 +82,22 @@ datasets = {
                 "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25bfix_nojetskim_TTToHplusBWB_M100_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 218200 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2 # 20376 evt, 35 MB / file
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 2
+            },
         }
     },
     "TTToHplusBWB_M120_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -72,11 +108,22 @@ datasets = {
                 "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M120_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 218200 evt
             },
-       }
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2 # 23189 evt, 39 MB / file
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 2
+            },
+        }
     },
     "TTToHplusBWB_M140_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -87,11 +134,22 @@ datasets = {
                 "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M140_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 218200 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2 # 27563 evt, 44 MB / file
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 2
+            },
         }
     },
     "TTToHplusBWB_M150_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-150_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -102,11 +160,22 @@ datasets = {
                 "datasetpath": "/TTToHplusBWB_M-150_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M150_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 218900 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-150_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2 # 29846 evt, 47 MB / file
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-150_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 2
+            },
         }
     },
     "TTToHplusBWB_M155_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        #"args": { "triggerMC": "1" }, deliberately commented
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-155_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -117,11 +186,22 @@ datasets = {
                 "datasetpath": "/TTToHplusBWB_M-155_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M155_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 218900 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-155_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2 # 31034 evt, 48 MB / file
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-155_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "number_of_jobs": 2
+            },
         }
     },
     "TTToHplusBWB_M160_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -132,12 +212,23 @@ datasets = {
                 "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBWB_M160_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 218400 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2 # 32151 evt, 50 MB / file
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 2
+            },
         }
     },
     # Signal HH
     "TTToHplusBHminusB_M80_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-80_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -148,11 +239,22 @@ datasets = {
                 "datasetpath": "/TTToHplusBHminusB_M-80_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBHminusB_M80_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 218400 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBHminusB_M-80_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2 # 23781 evt, 39 MB / file
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBHminusB_M-80_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 2
+            },
         }
     },
     "TTToHplusBHminusB_M90_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-90_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -163,11 +265,22 @@ datasets = {
                 "datasetpath": "/TTToHplusBHminusB_M-90_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBHminusB_M90_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 218900 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBHminusB_M-90_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBHminusB_M-90_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 2
+            },
         }
     },
     "TTToHplusBHminusB_M100_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-100_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -178,11 +291,22 @@ datasets = {
                 "datasetpath": "/TTToHplusBHminusB_M-100_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25bfix_nojetskim_TTToHplusBHminusB_M100_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 217600 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBHminusB_M-100_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBHminusB_M-100_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 2
+            },
         }
     },
     "TTToHplusBHminusB_M120_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-120_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -193,11 +317,22 @@ datasets = {
                 "datasetpath": "/TTToHplusBHminusB_M-120_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBHminusB_M120_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 218800 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBHminusB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBHminusB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 2
+            },
         }
     },
     "TTToHplusBHminusB_M140_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-140_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -208,11 +343,22 @@ datasets = {
                 "datasetpath": "/TTToHplusBHminusB_M-140_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBHminusB_M140_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 218800 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBHminusB_M-140_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBHminusB_M-140_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 2
+            },
         }
     },
     "TTToHplusBHminusB_M150_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-150_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -223,11 +369,22 @@ datasets = {
                 "datasetpath": "/TTToHplusBHminusB_M-150_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBHminusB_M150_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 218800 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBHminusB_M-150_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBHminusB_M-150_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 2
+            },
         }
     },
     "TTToHplusBHminusB_M155_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        #"args": { "triggerMC": "1" }, deliberately commented
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-155_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -238,11 +395,22 @@ datasets = {
                 "datasetpath": "/TTToHplusBHminusB_M-155_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBHminusB_M155_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 217400 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBHminusB_M-155_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBHminusB_M-155_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "number_of_jobs": 2
+            },
         }
     },
     "TTToHplusBHminusB_M160_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-160_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -252,6 +420,16 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/TTToHplusBHminusB_M-160_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTToHplusBHminusB_M160_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 220000 evt
+            },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBHminusB_M-160_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBHminusB_M-160_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 2
             },
         }
     },
@@ -270,6 +448,16 @@ datasets = {
                 "datasetpath": "/HplusTB_M-180_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_HplusTB_M180_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 210823 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "", #FIXME not at T2!
+                "number_of_jobs": 2
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/HplusTB_M-180_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "number_of_jobs": 2
+            },
         }
     },
     "HplusTB_M190_Fall11": {
@@ -284,6 +472,16 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/HplusTB_M-190_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_HplusTB_M190_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 209075 evt
+            },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/HplusTB_M-190_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2 # 45737 evt, 67 MB / file
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/HplusTB_M-190_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "number_of_jobs": 2
             },
         }
     },
@@ -300,6 +498,16 @@ datasets = {
                 "datasetpath": "/HplusTB_M-200_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_HplusTB_M200_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 214140 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/HplusTB_M-200_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/HplusTB_M-200_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "number_of_jobs": 2
+            },
         }
     },
     "HplusTB_M220_Fall11": {
@@ -314,6 +522,16 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/HplusTB_M-220_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_HplusTB_M220_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 199960 evt
+            },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/HplusTB_M-220_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/HplusTB_M-220_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "number_of_jobs": 2
             },
         }
     },
@@ -330,6 +548,16 @@ datasets = {
                 "datasetpath": "/HplusTB_M-250_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_HplusTB_M250_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 202450 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/HplusTB_M-250_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/HplusTB_M-250_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "number_of_jobs": 2
+            },
         }
     },
     "HplusTB_M300_Fall11": {
@@ -344,6 +572,16 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/HplusTB_M-300_7TeV-pythia6-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_HplusTB_M300_Fall11-867f8948ab405c5cced92453543fca46/USER",
                 "number_of_jobs": 2 # 201457 evt
+            },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "", # FIXME: not at T2
+                "number_of_jobs": 2 # 56583 evt, 81 MB / file
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/HplusTB_M-300_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER#4853621d-d76b-42da-9a9a-faff0176f5a1",
+                "number_of_jobs": 2
             },
         }
     },
@@ -366,6 +604,16 @@ datasets = {
                 "datasetpath": "/QCD_Pt-30to50_TuneZ2_7TeV_pythia6/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_QCD_Pt30to50_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 1 # 32 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-30to50_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 1 # 32 evt
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-30to50_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 1 # 32 evt
+            },
         },
     },
     "QCD_Pt50to80_TuneZ2_Fall11": {
@@ -383,6 +631,16 @@ datasets = {
                 "datasetpath": "/QCD_Pt-50to80_TuneZ2_7TeV_pythia6/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_QCD_Pt50to80_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 1 # 677 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-50to80_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 1 # 677 evt
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-50to80_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 1 # 677 evt
+            },
         },
     },
     "QCD_Pt80to120_TuneZ2_Fall11": {
@@ -397,7 +655,17 @@ datasets = {
            },
            "pattuple_v25b": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/QCD_Pt-80to120_TuneZ2_7TeV_pythia6/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_QCD_Pt80to120_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
+                "datasetpath": "/QCD_Pt-80to120_TuneZ2_7TeV_pythia6/local/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_QCD_Pt80to120_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
+                "number_of_jobs": 1 # 6152 evt
+            },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-80to120_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 1 # 6152 evt
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-80to120_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
                 "number_of_jobs": 1 # 6152 evt
             },
         },
@@ -417,6 +685,16 @@ datasets = {
                 "datasetpath": "/QCD_Pt-120to170_TuneZ2_7TeV_pythia6/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_QCD_Pt120to170_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 1 # 26115 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-120to170_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 1 # 26243 evt
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-120to170_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 1 # 26243 evt
+            },
         },
     },
     "QCD_Pt170to300_TuneZ2_Fall11": {
@@ -432,6 +710,16 @@ datasets = {
             "pattuple_v25b": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_QCD_Pt170to300_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
+                "number_of_jobs": 4 # 83237 evt
+            },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 4 # 83237 evt
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
                 "number_of_jobs": 4 # 83237 evt
             },
         },
@@ -451,6 +739,16 @@ datasets = {
                 "datasetpath": "/QCD_Pt-300to470_TuneZ2_7TeV_pythia6/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_QCD_Pt300to470_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 10 # 219207 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-300to470_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 9 # 186974 evt (missing few jobs)
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-300to470_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 9 # 186974 evt
+            },
         }
     },
     "QCD_Pt20_MuEnriched_TuneZ2_Fall11": {
@@ -467,6 +765,11 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_QCD_Pt20_MuEnriched_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 2 # 39802 evt
+            },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "",  # not available
+                "number_of_jobs": 2
             },
         }
     },
@@ -488,6 +791,16 @@ datasets = {
                 "datasetpath": "/WW_TuneZ2_7TeV_pythia6_tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_WW_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 3 # 50032 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WW_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 3 # 77684 evt
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WW_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 3 #  evt
+            },
         },
     },
     "WZ_TuneZ2_Fall11": {
@@ -504,6 +817,16 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/WZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_WZ_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 2 # 44675 evt
+            },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 3 # 67793
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 3 #  evt
             },
         },
     },
@@ -522,6 +845,16 @@ datasets = {
                 "datasetpath": "/ZZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_ZZ_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 2
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/ZZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2 # 57239
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/ZZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 3 #  evt
+            },
         },
     },
 
@@ -533,7 +866,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 165, # [1,2], approx. NNLO
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -543,6 +876,16 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_TTJets_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 70 # 3125473 evt
+            },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 50 # 3327519 evt
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 50 # 3116576 evt (at time of first pub)
             },
         },
     },
@@ -562,6 +905,16 @@ datasets = {
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_WJets_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 8 # 180088
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 10 # 299195
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 10 # 299492 evt
+            },
         },
     },
     "W2Jets_TuneZ2_Fall11": {
@@ -579,6 +932,16 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/W2Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_W2Jets_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 19 # 267079
+            },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W2Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 20 # 404002
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W2Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 20 #  evt
             },
         },
     },
@@ -598,6 +961,16 @@ datasets = {
                 "datasetpath": "/W3Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_W3Jets_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 9 # 185741 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W3Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 10 # 221655
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W3Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 10 #  evt
+            },
         },
     },
     "W4Jets_TuneZ2_Fall11": {
@@ -616,6 +989,16 @@ datasets = {
                 "datasetpath": "/W4Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_W4Jets_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 12 # 580556 
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W4Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 12 # 604144
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W4Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 12 #  evt
+            },
         },
     },
     "DYJetsToLL_M50_TuneZ2_Fall11": { # Z+jets
@@ -632,6 +1015,16 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_DYJetsToLL_M50_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 3 # 51916 evt
+            },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2 # 71235 evt
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 2 # 71235 evt
             },
         }
     },
@@ -673,6 +1066,16 @@ datasets = {
                 "datasetpath": "/T_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_T_t-channel_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 1 # 49900 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/T_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 2 # 61815 evt
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/T_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 2 # 61815 evt
+            },
         },
     },
     "Tbar_t-channel_TuneZ2_Fall11": {
@@ -689,6 +1092,16 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_Tbar_t-channel_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 1 # 23601 evt
+            },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 1 # 29028 evt
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 1 # 29028 evt
             },
         },
     },
@@ -707,6 +1120,16 @@ datasets = {
                 "datasetpath": "/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_T_tW-channel_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 1 # 36882 evt
             },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 1 # 41707 evt
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 1 # 41707 evt
+            },
         },
     },
     "Tbar_tW-channel_TuneZ2_Fall11": {
@@ -724,7 +1147,17 @@ datasets = {
                 "datasetpath": "/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_Tbar_tW-channel_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 1 # 36369 evt
             },
-       },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 1 # 41142 evt
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 1 # 41142 evt
+            },
+        },
     },
     "T_s-channel_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
@@ -740,6 +1173,16 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/T_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_T_s-channel_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 1 # 3618 evt
+            },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/T_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 1 # 4241
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/T_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 1 # 4241 evt
             },
         },
     },
@@ -757,6 +1200,16 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_Tbar_s-channel_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER",
                 "number_of_jobs": 1 # 1685 evt
+            },
+            "pattuple_v25c": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v25c-792142e4d0984f6b86a1b0c2d38da119/USER",
+                "number_of_jobs": 1 # 1986 evt
+            },
+            "pattuple_v44_4": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER",
+                "number_of_jobs": 1 # 1986 evt
             },
         },
     },

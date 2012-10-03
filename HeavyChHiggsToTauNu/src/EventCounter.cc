@@ -38,6 +38,7 @@ namespace HPlus {
   }
 
   EventCounter::EventCounter(const edm::ParameterSet& iConfig):
+    label(iConfig.getParameter<std::string>("@module_label")),
     eventWeightPointer(&defaultWeight),
     finalized(false)
   {
@@ -126,7 +127,7 @@ namespace HPlus {
         const size_t name_w = 50;
         const size_t count_w = 20;
         edm::LogVerbatim(cat) << "========================================" << std::endl;
-        edm::LogVerbatim(cat) << "Event counts in " << iCounter->name << " " <<  std::endl;
+        edm::LogVerbatim(cat) << "Event counts in " << iCounter->name << " (module " << label << ")" << std::endl;
         edm::LogVerbatim(cat) << std::endl << std::endl;
         edm::LogVerbatim(cat) << std::setw(name_w) << std::left << "Counter" << std::setw(count_w) << std::right << "Counts" << std::endl;
         for(size_t i=0; i<ncounts; ++i) {

@@ -208,6 +208,9 @@ def makeQCDValidationPlots(myRootFile,specs):
     # loop
     myCombinedTotal = 0.0
     myCombinedTotalErrorSquared = 0.0
+    myCorrectionOutput = '"name": "%s",\n'%specs["title"]
+    myCorrectionOutput += '"bins": [%d, %d, %d],\n'%(nbinsX,nbinsY,nbinsZ)
+    myCorrectionBinning = ""
     for i in range(0,nbinsX):
         for j in range(0,nbinsY):
             for k in range(0,nbinsZ):
@@ -228,11 +231,36 @@ def makeQCDValidationPlots(myRootFile,specs):
                 normaliseAreaToUnity(hDenominator)
                 normaliseAreaToUnity(hNominator)
                 hDenominator.SetYTitle(specs["ytitle"])
+                # Obtain correction factor
+                myCorrection = '"%s_Correction_bin%s": ['%(specs["title"],myBinSuffix)
+                myCorrectionUncertainty = '"%s_CorrectionUncertainty_bin%s": ['%(specs["title"],myBinSuffix)
+                myCorrectionBinning = '"%s_CorrectionBinLeftEdges": ['%(specs["title"])
+                for l in range(1,hNominator.GetNbinsX()+1):
+                    if l > 1:
+                        myCorrection += ", "
+                        myCorrectionUncertainty += ", "
+                        myCorrectionBinning += ", "
+                    myValue = 1.0
+                    myUncert = 0.0
+                    if hDenominator.GetBinContent(l) > 0:
+                        myValue = hNominator.GetBinContent(l)/hDenominator.GetBinContent(l)
+                        if hNominator.GetBinContent(l) > 0:
+                            myUncert = myValue*sqrt(hNominator.GetBinError(l)/hNominator.GetBinContent(l)+hDenominator.GetBinError(l)/hDenominator.GetBinContent(l))
+                    myCorrection += "%f"%myValue
+                    myCorrectionUncertainty += "%f"%myUncert
+                    myCorrectionBinning += "%.2f"%hDenominator.GetXaxis().GetBinLowEdge(l)
+                myCorrection += "],"
+                myCorrectionUncertainty += "],"
+                myCorrectionBinning += "],"
+                if i == 0:
+                    myCorrectionOutput += myCorrectionBinning+"\n"
+                myCorrectionOutput += myCorrection+"\n"
+                myCorrectionOutput += myCorrectionUncertainty+"\n"
+
                 # Calculate difference
                 myTotal = 0.0
                 myTotalErrorSquared = 0.0
-                #for l in range(0,hNominator.GetNbinsX()+2):
-                for l in range(0,5):
+                for l in range(0,hNominator.GetNbinsX()+2):
                     if hDenominator.GetBinContent(l) > 0 and hNominator.GetBinContent(l):
                         myWeight = hNominatorUnscaled.GetBinContent(l)
                         myTotal += pow(myWeight,2)
@@ -334,6 +362,7 @@ def makeQCDValidationPlots(myRootFile,specs):
                 c.Print(myTitle+".png")
                 c.Close()
     print "\nCombined Error: ",sqrt(myCombinedTotalErrorSquared/myCombinedTotal)*100.0," %\n"
+    print "\nCorrection details:\n"+myCorrectionOutput
 
 def normaliseAreaToUnity(h):
     myValue = h.Integral(0,h.GetNbinsX()+2)

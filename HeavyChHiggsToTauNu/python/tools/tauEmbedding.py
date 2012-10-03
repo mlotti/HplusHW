@@ -17,51 +17,41 @@ import cutstring
 ## Apply embedding normalization (muon efficiency, W->tau->mu factor
 normalize = True
 ## Data era
-era = "Run2011A"
+era = "Run2011AB"
 
 ## When doing the averaging, take the stat uncertainty as the average of the stat uncertanties of the trials
 uncertaintyByAverage = False
 
 ## Signal analysis multicrab directories for embedding trials
-dirEmbs_120131 = [
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_Run2011A_120131_123142",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest1_Run2011A_120131_133727",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest2_Run2011A_120131_135817",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest3_Run2011A_120131_141821",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest4_Run2011A_120131_143855",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest5_Run2011A_120131_145907",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest6_Run2011A_120131_152041",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest7_Run2011A_120131_154149",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest8_Run2011A_120131_160339",
-    "multicrab_signalAnalysis_Met50_systematics_v13_3_seedTest9_Run2011A_120131_162422",
+dirEmbs_120911 = [
+    "multicrab_signalAnalysis_systematics_v44_3_seed0_Run2011AB_120911_144711",
+#    "multicrab_signalAnalysis_systematics_v44_3_seed1_Run2011AB_120911_152858",
+#    "multicrab_signalAnalysis_systematics_v44_3_seed2_Run2011AB_120911_162417"
 ]
 ## Signal analysis multicrab directories for embedding trials
 #
 # This variable is used to select from possibly multiple sets of embedding directories
-dirEmbs = dirEmbs_120131
+dirEmbs = dirEmbs_120911
 ## Signal analysis multicrab directory for normal MC
-dirSig = "../multicrab_compareEmbedding_Run2011A_120118_122555" # for 120118, 120126, 120131
+dirSig = "multicrab_signalAnalysisGenTau_systematics_120912_084953" # for 120911
 
 
 ## Tau analysis multicrab directories for embedding trials
-tauDirEmbs_120110 = [
-    "multicrab_analysis_v13_3_Run2011A_120110_150535",
-    "multicrab_analysis_v13_3_seedTest1_Run2011A_120110_203953",
-    "multicrab_analysis_v13_3_seedTest2_Run2011A_120110_205101",
-    "multicrab_analysis_v13_3_seedTest3_Run2011A_120110_210157",
-    "multicrab_analysis_v13_3_seedTest4_Run2011A_120110_211348",
-    "multicrab_analysis_v13_3_seedTest5_Run2011A_120110_212548",
-    "multicrab_analysis_v13_3_seedTest6_Run2011A_120126_211602",
-    "multicrab_analysis_v13_3_seedTest7_Run2011A_120110_214901",
-    "multicrab_analysis_v13_3_seedTest8_Run2011A_120110_220005",
-    "multicrab_analysis_v13_3_seedTest9_Run2011A_120110_221143",
+tauDirEmbs_120912 = [
+    "multicrab_analysis_systematics_v44_3_seed0_Run2011AB_120912_164347",
+    "multicrab_analysis_systematics_v44_3_seed1_Run2011AB_120912_172300",
+#    "multicrab_analysis_systematics_v44_3_seed2_Run2011AB_120912_180734",
+]
+tauDirEmbs_120913 = [ # TTJets only
+    "multicrab_analysis_v44_3_seed0_Run2011AB_120913_212539",
+#    "multicrab_analysis_v44_3_seed1_Run2011AB_120913_220249"
 ]
 ## Tau analysis multicrab directories for embedding trials
 #
 # This variable is used to select from possibly multiple sets of embedding directories
-tauDirEmbs = tauDirEmbs_120110
+tauDirEmbs = tauDirEmbs_120913
 ## Tau analysis multicrab directory for normal MC
-tauDirSig = "multicrab_analysisTau_111202_144918"
+tauDirSig = "multicrab_analysisTau_120822_200753"
 
 class Selections:
     def __init__(self, **kwargs):
@@ -85,11 +75,13 @@ tauNtuple.ecalFiducial += " || (0.770 < abs(taus_p4.Eta()) && abs(taus_p4.Eta())
 tauNtuple.ecalFiducial += " || (1.127 < abs(taus_p4.Eta()) && abs(taus_p4.Eta()) < 1.163)"
 tauNtuple.ecalFiducial += " || (1.460 < abs(taus_p4.Eta()) && abs(taus_p4.Eta()) < 1.558)" # gap
 tauNtuple.ecalFiducial += ")"
-tauNtuple.electronRejection = "taus_f_againstElectronMedium > 0.5"
+#tauNtuple.electronRejection = "taus_f_againstElectronMedium > 0.5"
+tauNtuple.electronRejection = "taus_f_againstElectronMVA > 0.5"
 tauNtuple.muonRejection = "taus_f_againstMuonTight > 0.5"
 
 # tau ID
-tauNtuple.tightIsolation = "taus_f_byTightIsolation > 0.5"
+#tauNtuple.tightIsolation = "taus_f_byTightIsolation > 0.5"
+tauNtuple.tightIsolation = "taus_f_byMediumCombinedIsolationDeltaBetaCorr > 0.5"
 tauNtuple.oneProng = "taus_signalPFChargedHadrCands_n == 1"
 tauNtuple.rtau = "%s > 0.7" % tauNtuple.rtauExpression
 
@@ -102,16 +94,19 @@ tauNtuple.pvSelection = "selectedPrimaryVertices_n >= 1"
 tauNtuple.metSelection = "pfMet_p4.Pt() > 50"
 tauNtuple.jetSelection = "jets_looseId && jets_p4.Pt() > 30 && abs(jets_p4.Eta()) < 2.4 && sqrt((jets_p4.Eta()-taus_p4[0].Eta())^2+(jets_p4.Phi()-taus_p4[0].Phi())^2) > 0.5"
 tauNtuple.jetEventSelection = "Sum$(%s) >= 3" % tauNtuple.jetSelection
-tauNtuple.btagSelection = "jets_f_tche > 1.7"
+#tauNtuple.btagSelection = "jets_f_tche > 1.7"
+tauNtuple.btagSelection = "jets_f_csv > 0.898" # CSVL = 0.244, CSVM = 0.679, CSVT = 0.898
 tauNtuple.btagEventSelection = "Sum$(%s && %s) >= 1" % (tauNtuple.jetSelection, tauNtuple.btagSelection)
 tauNtuple.deltaPhi160Selection = "%s <= 160)" % tauNtuple.deltaPhiExpression
 
 tauNtuple.caloMetNoHF = "tecalometNoHF_p4.Pt() > 60"
 tauNtuple.caloMet = "tecalomet_p4.Pt() > 60"
 tauNtuple.weight = {
-    "EPS": "weightPileup_Run2011A",
-    "Run2011A-EPS": "pileupWeight_Run2011AnoEPS",
-    "Run2011A": "weightPileup_Run2011A"
+#    "EPS": "weightPileup_Run2011A",
+#    "Run2011A-EPS": "pileupWeight_Run2011AnoEPS",
+    "Run2011A": "weightPileup_Run2011A",
+    "Run2011B": "weightPileup_Run2011B",
+    "Run2011AB": "weightPileup_Run2011AB",
     }
 
 ## Customization function for decay mode plot (all decay modes)
@@ -207,7 +202,12 @@ def scaleMuTriggerIdEff(obj):
     elif era == "Run2011A-EPS":
         data = 0.879
     elif era == "Run2011A":
+        data = 0.881705 
+    elif era == "Run2011AB":
+        print "WARNING: using Run2011A mu trigger+ID efficiency. This should be updated!"
         data = 0.881705
+    else:
+        raise Exception("No mu trigger+ID efficiency available for era %s" % era)
     mc = 0.919829
 
     scaleHistosCounters(obj, scaleDataHisto, "scaleData", 1/data)
@@ -343,6 +343,10 @@ class DatasetsMany:
     ## Set the integrated luminosity from data dataset
     def setLumiFromData(self):
         self.lumi = self.getDatasetFromFirst("Data").getLuminosity()
+        for dm in self.datasetManagers:
+            mlumi = dm.getDataset("Data").getLuminosity()
+            if abs(mlumi-self.lumi)/self.lumi > 1e-3: # allow 1 per mille variations
+                raise Exception("Luminosity in some multicrab directory is %.5f, while it is %.5f in other(s)" % (mlumi, lumi))
 
     ## Get the integrated luminosity
     def getLuminosity(self):
@@ -417,6 +421,10 @@ class DatasetsMany:
     def getEfficiency(self, datasetName, numerator, denominator):
         effs = []
         for dm in self.datasetManagers:
+            if not dm.hasDataset(datasetName):
+                print "WARNING: no dataset %s in one of the managers, skipping the manager" % datasetName
+                continue
+
             ds = dm.getDataset(datasetName)
             num = ds.getDatasetRootHisto(numerator).getHistogram()
             den = ds.getDatasetRootHisto(denominator).getHistogram()
@@ -437,6 +445,9 @@ class DatasetsMany:
     def hasHistogram(self, datasetName, name):
         has = True
         for dm in self.datasetManagers:
+            if not dm.hasDataset(datasetName):
+                continue
+
             has = has and dm.getDataset(datasetName).hasRootHisto(name)
         return has
 
@@ -449,6 +460,10 @@ class DatasetsMany:
     def getHistograms(self, datasetName, name):
         histos = []
         for i, dm in enumerate(self.datasetManagers):
+            if not dm.hasDataset(datasetName):
+                print "WARNING: no dataset %s in one of the managers, skipping the manager" % datasetName
+                continue
+
             ds = dm.getDataset(datasetName)
             h = ds.getDatasetRootHisto(name)
             if h.isMC():
@@ -663,6 +678,10 @@ class EventCounterMany:
         for ec in self.eventCounters:
             ec.getMainCounter().appendRow(*args, **kwargs)
 
+    def mainCounterAppendRows(self, *args, **kwargs):
+        for ec in self.eventCounters:
+            ec.getMainCounter().appendRows(*args, **kwargs)
+
     ## Append row from TTree to a sub counter
     #
     # \param name   Name of the subcounter
@@ -680,6 +699,18 @@ class EventCounterMany:
     # the individual trials
     def getMainCounterTable(self):
         return counter.meanTable([ec.getMainCounterTable() for ec in self.eventCounters], uncertaintyByAverage)
+
+    def getMainCounterTableColumn(self, colname):
+        tables = []
+        for ec in self.eventCounters:
+            if colname in ec.getMainCounter().getColumnNames():
+                t = ec.getMainCounterTable()
+                col = t.getColumn(name=colname)
+                tmp = counter.CounterTable()
+                tmp.appendColumn(col)
+                tables.append(tmp)
+
+        return counter.meanTable(tables, uncertaintyByAverage)
 
     ## Get subcounter table
     #
@@ -922,7 +953,7 @@ class PlotCreatorMany:
     # \param styles         List of plot styles
     # \param addData        Add embedded data?
     # \param addVariation   Add min/max values from embedding trials?
-    def __init__(self, analysisEmb, analysisSig, datasetsEmb, datasetsSig, datasetName, styles, addData=False, addVariation=False):
+    def __init__(self, analysisEmb, analysisSig, datasetsEmb, datasetsSig, datasetName, styles, addData=False, addVariation=False, ntupleCacheEmb=None, ntupleCacheSig=None):
         self.analysisEmb = analysisEmb
         self.analysisSig = analysisSig
         self.datasetsEmb = datasetsEmb # DatasetsMany
@@ -935,6 +966,9 @@ class PlotCreatorMany:
             self.isResidual = self.datasetsEmb.isResidualAdded(datasetName)
         except:
             self.isResidual = False
+
+        self.ntupleCacheEmb = ntupleCacheEmb
+        self.ntupleCacheSig = ntupleCacheSig
 
     ## Function call syntax for creating the plot
     #
@@ -950,6 +984,9 @@ class PlotCreatorMany:
         if isinstance(name, basestring):
             name2Emb = self.analysisEmb+"/"+name
             name2Sig = self.analysisSig+"/"+name
+        elif isinstance(name, dataset.NtupleCacheDrawer):
+            name2Emb = self.ntupleCacheEmb.histogram(name.histoName)
+            name2Sig = self.ntupleCacheSig.histogram(name.histoName)
         else: # assume TreeDraw
             name2Emb = name.clone(tree=self.analysisEmb+"/tree")
             name2Sig = name.clone(tree=self.analysisSig+"/tree")

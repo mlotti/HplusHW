@@ -62,11 +62,12 @@ def main(opts):
                 myVariations.append(myModules[varid])
             else:
                 print "List of available variations:"
-                if myModules[i] == None:
-                    print "  %d: (default module)"%i
-                else:
-                    print "  %d: %s"%(i,myModules[i])
-                raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" you asked for variation %d, which is not available (see above list)!")
+                for i in range(0,len(myModules)):
+                    if myModules[i] == None:
+                        print "  %d: (default module)"%i
+                    else:
+                        print "  %d: %s"%(i,myModules[i])
+                    raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" you asked for variation %d, which is not available (see above list)!")
     else:
         myVariations.extend(myModules)
     # Print info about selected variations
@@ -88,6 +89,7 @@ def main(opts):
                 if module != None:
                     if module not in myQCDFactList:
                         print "Module '"+module+"' exists in signal analysis but not in QCD factorised, skipping ..."
+                        print myQCDFactList
                     else:
                         DataCard.DataCardGenerator(config,opts,method,module)
                 else:

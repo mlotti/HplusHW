@@ -19,6 +19,7 @@
 #include "DataFormats/TrackReco/interface/TrackExtra.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/MuonReco/interface/MuonSelectors.h" 
+#include "EGamma/EGammaAnalysisTools/interface/EGammaCutBasedEleId.h"
 
 namespace edm {
   class ParameterSet;
@@ -29,6 +30,7 @@ namespace edm {
 namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
+  class WrappedTH2;
 
   class GlobalElectronVeto {
   public:
@@ -57,52 +59,36 @@ namespace HPlus {
       const bool fPassedEvent;
     };
 
-    GlobalElectronVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    GlobalElectronVeto(const edm::ParameterSet& iConfig, const edm::InputTag& vertexSrc, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~GlobalElectronVeto();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup); // Official Electron ID
-    Data analyzeCustomElecID(const edm::Event& iEvent, const edm::EventSetup& iSetup); // Requires General Tracks
-   
+
   private:
 
     bool ElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup); // Official Electron ID
-    bool CustomElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup); // Requires General Tracks
 
     // Input parameters
     edm::InputTag fElecCollectionName;
+    edm::InputTag fVertexSrc;
+    edm::InputTag fConversionSrc;
+    edm::InputTag fBeamspotSrc;
+    edm::InputTag fRhoSrc;
     const std::string fElecSelection;
     const double fElecPtCut;
     const double fElecEtaCut;
     
     // Counters
-    Count fGlobalElectronVetoCounter;
+    Count fElecSelectionSubCountAllEvents;
     Count fElecSelectionSubCountElectronPresent;
     Count fElecSelectionSubCountElectronHasGsfTrkOrTrk;
+    Count fElecSelectionSubCountFiducialVolumeCut;
+    Count fElecSelectionSubCountId;
     Count fElecSelectionSubCountPtCut;
     Count fElecSelectionSubCountEtaCut;
-    Count fElecSelectionSubCountFiducialVolumeCut;
+    Count fElecSelectionSubCountSelected;
     Count fElecSelectionSubCountMatchingMCelectron;
     Count fElecSelectionSubCountMatchingMCelectronFromW;
-    Count fElecSelectionSubCountElectronSelection;
-    Count fElecSelectionSubCountNLostHitsInTrkerCut;
-    Count fElecSelectionSubCountmyElectronDeltaCotThetaCut;
-    Count fElecSelectionSubCountmyElectronDistanceCut;
-    Count fElecSelectionSubCountTransvImpactParCut;
-    Count fElecSelectionSubCountDeltaRFromGlobalOrTrkerMuonCut;
-    Count fElecSelectionSubCountRelIsolationR03Cut;
-    // Sub-Counters (ElectronID) - just for my information
-    Count fElecIDSubCountAllElectronCandidates;
-    Count fElecIDSubCountElecIDLoose;
-    Count fElecIDSubCountElecIDRobustLoose;
-    Count fElecIDSubCountElecIDTight;
-    Count fElecIDSubCountElecIDRobustTight;
-    Count fElecIDSubCountElecIDRobustHighEnergy;
-    Count fElecIDSubCountSimpleEleId95relIso;
-    Count fElecIDSubCountSimpleEleId90relIso;
-    Count fElecIDSubCountSimpleEleId85relIso;
-    Count fElecIDSubCountSimpleEleId80relIso;
-    Count fElecIDSubCountSimpleEleId70relIso;
-    Count fElecIDSubCountSimpleEleId60relIso;
 
     // Histograms
     WrappedTH1 *hElectronPt;
@@ -122,24 +108,16 @@ namespace HPlus {
     WrappedTH1 *hElectronImpactParameter;
     WrappedTH1 *hElectronEta_superCluster;
 
+    WrappedTH2 *hElectronEtaPhiForSelectedElectrons;
+    WrappedTH2 *hMCElectronEtaPhiForPassedEvents;
+
     // pt and eta of highest pt electron passing the selection
     float fSelectedElectronPt;
     float fSelectedElectronEta;
     float fSelectedElectronPtBeforePtCut;
 
     // for Electron-ID Selection
-    bool bUseLooseID;
-    bool bUseRobustLooseID;
-    bool bUseTightID;
-    bool bUseRobustTightID;
-    bool bUseRobustHighEnergyID;
-    bool bUseSimpleEleId95relIsoID;
-    bool bUseSimpleEleId90relIsoID;
-    bool bUseSimpleEleId85relIsoID;
-    bool bUseSimpleEleId80relIsoID;
-    bool bUseSimpleEleId70relIsoID;
-    bool bUseSimpleEleId60relIsoID;
-    bool bUseCustomElectronID;
+    EgammaCutBasedEleId::WorkingPoint fElectronIdEnumerator;
 
     // Selected electrons
     edm::PtrVector<pat::Electron> fSelectedElectrons;

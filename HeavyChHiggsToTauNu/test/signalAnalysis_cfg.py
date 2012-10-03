@@ -1,56 +1,17 @@
 import FWCore.ParameterSet.Config as cms
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
-
-################################################################################
-# Configuration
 
 # Select the version of the data (needed only for interactice running,
 # overridden automatically from multicrab
 dataVersion="44XmcS6"     # Fall11 MC
 #dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
 
-# Set the data scenario for vertex/pileup weighting
-# options: Run2011A, Run2011B, Run2011A+B
-puweight = "Run2011A+B"
+dataEras = [
+    "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job
+    "Run2011A",
+    "Run2011B",
+]
 
-##########
-# Flags for additional signal analysis modules
-
-# Apply summer PAS style cuts
-doSummerPAS = False # Rtau>0, MET>70
-
-# Scan against electron discriminators
-doAgainstElectronScan = False
-
-# Disable Rtau
-doRtau0 = False # Rtau>0, MET>50
-
-# Perform b tagging scanning
-doBTagScan = False
-
-
-# fill tree for btagging eff study
-doBTagTree = False
-
-    
-# Perform Rtau scanning
-doRtauScan = False
-
-# Make MET resolution histograms
-doMETResolution = False
-
-# With tau embedding input, tighten the muon selection
-tauEmbeddingFinalizeMuonSelection = True
-# With tau embedding input, do the muon selection scan
-doTauEmbeddingMuonSelectionScan = False
-# Do tau id scan for tau embedding normalisation (no tau embedding input required)
-doTauEmbeddingTauSelectionScan = False
-# Do embedding-like preselection for signal analysis
-doTauEmbeddingLikePreselection = False
-
-# Apply beta cut for jets to reject PU jets
-betaCutForJets = 0.2 # Disable by setting to 0.0; if you want to enable, set to 0.2
-
+<<<<<<< HEAD
 ######### 
 #Flags for options in the signal analysis
 
@@ -91,6 +52,9 @@ doPUWeightVariation = False
 
 doOptimisation  = False
 
+=======
+# Note: Keep number of variations below 200 to keep file sizes reasonable
+>>>>>>> sami/master
 from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
 myOptimisation = HPlusOptimisationScheme()
 
@@ -108,22 +72,23 @@ myOptimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
 #myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
 #myOptimisation.addDeltaPhiVariation([180.0,170.0,160.0,150.0])
 #myOptimisation.addTopRecoVariation(["None","chi"]) # Valid options: None, chi, std, Wselection
-myOptimisation.disableMaxVariations()
-if doOptimisation:
-    doSystematics = True # Make sure that systematics are run
-    doFillTree = False # Make sure that tree filling is disabled or root file size explodes
-    myHistogramAmbientLevel = "Vital" # Set histogram level to least histograms to reduce output file sizes
+#myOptimisation.disableMaxVariations()
 
-################################################################################
+def customize(signalAnalysis):
+    # Apply beta cut for jets to reject PU jets
+    signalAnalysis.jetSelection.betaCut = 0.2 # Disable by setting to 0.0; if you want to enable, set to 0.2
 
-# Command line arguments (options) and DataVersion object
-options, dataVersion = getOptionsDataVersion(dataVersion)
+from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
+builder = ConfigBuilder(dataVersion, dataEras,
+                        maxEvents=1000, # default is -1
+                        customizeAnalysis=customize,
+                        #doAgainstElectronScan=True,
+                        #doSystematics=True,
+                        #histogramAmbientLevel = "Vital",
+                        #doOptimisation=True, optimisationScheme=myOptimisation
+                        )
 
-# These are needed for running against tau embedding samples, can be
-# given also from command line
-#options.doPat=1
-#options.tauEmbeddingInput=1
-
+<<<<<<< HEAD
 ################################################################################
 # Define the process
 process = cms.Process("HChSignalAnalysis")
@@ -229,13 +194,19 @@ process.source = cms.Source('PoolSource',
 if options.tauEmbeddingInput != 0:
     if  options.doPat == 0:
         raise Exception("In tau embedding input mode, set also doPat=1")
+=======
+process = builder.buildSignalAnalysis()
+>>>>>>> sami/master
 
+if builder.options.tauEmbeddingInput != 0:
     process.source.fileNames = [
-        #"file:/mnt/flustre/wendland/embedded_latest.root"
-        "file:/home/wendland/v25_embed/CMSSW_4_4_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/embedded.root"
+        #"file:embedded.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Tauembedding_embedding_v44_4_1_muiso0_TTJets_TuneZ2_Fall11/50da2d6a5b0c9c8a2f96f633ada0c1c6/embedded_1_1_GcS.root",
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Tauembedding_embedding_v44_4_1_muiso0_TTJets_TuneZ2_Fall11/50da2d6a5b0c9c8a2f96f633ada0c1c6/embedded_2_1_rhV.root",
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Tauembedding_embedding_v44_4_1_muiso0_TTJets_TuneZ2_Fall11/50da2d6a5b0c9c8a2f96f633ada0c1c6/embedded_3_1_aXd.root",
         # For testing data
-        #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/SingleMu_Mu_160431-163261_2011A_Nov08/SingleMu/Tauembedding_embedding_v44_2_SingleMu_Mu_160431-163261_2011A_Nov08/c7fbae985f4002d5d76ea04408a27e38/embedded_1_1_Lka.root"
         ]
+<<<<<<< HEAD
     process.maxEvents.input = 10
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -700,6 +671,9 @@ process.out = cms.OutputModule("PoolOutputModule",
 # Uncomment the following line to get also the event output (can be
 # useful for debugging purposes)
 #process.outpath = cms.EndPath(process.out)
+=======
+    #process.maxEvents.input = 10
+>>>>>>> sami/master
 
 #f = open("configDump.py", "w")
 #f.write(process.dumpPython())

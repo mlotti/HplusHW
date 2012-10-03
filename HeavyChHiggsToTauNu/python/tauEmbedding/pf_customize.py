@@ -49,6 +49,31 @@ class SeqVisitor(object):
     def leave(self,visitee):
 	    pass
 
+def eventContent(hltProcessName, recoProcessName, processName):
+    return [
+        "keep *_genParticles_*_%s" % hltProcessName,
+        "keep recoGenJets_*_*_%s" % hltProcessName,
+        "keep recoGenMETs_*_*_%s" % hltProcessName,
+        "keep *_pfMet_*_%s" % recoProcessName,
+        "keep *_offlinePrimaryVertices_*_%s" % recoProcessName,
+        "keep *_offlineBeamSpot_*_%s" % recoProcessName,
+        "keep *_gtDigis_*_%s" % recoProcessName,
+        "keep *_l1GtTriggerMenuLite_*_%s" % recoProcessName, # in run block
+        "keep *_conditionsInEdm_*_%s" % recoProcessName, # in run block
+        "keep *_addPileupInfo*_*_%s" % recoProcessName, # for MC
+        "keep HcalNoiseSummary_*_*_%s" % recoProcessName,
+        "keep *_dimuonsGlobal_*_%s" % processName,
+        "keep *_generator_weight_%s" % processName,
+        "keep *_genParticles_*_%s" % processName,
+        "keep recoGenJets_*_*_%s" % processName,
+        "keep recoGenMETs_*_*_%s" % processName,
+        "keep edmMergeableCounter_*_*_%s" % processName,
+        "keep *_tmfTracks_*_%s" % processName,
+        "keep *_offlinePrimaryVertices_*_%s" % processName,
+
+
+        ]
+
 
 def customise(process):
     # Catch the case when this config is run from cmsDriver, it won't work due to VarParsing
@@ -75,13 +100,6 @@ def customise(process):
     recoProcessName = dataVersion.getRecoProcess()
     processName = process.name_()
 
-    # Tighten muon selection w.r.t. skim
-    import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
-    process.muonIsolationSequence = cms.Sequence()
-    muons = customisations.addMuonIsolationEmbedding(process, process.muonIsolationSequence, muons=process.tightenedMuons.src.value())
-    process.tightenedMuons.src = muons
-    process.ProductionFilterSequence.replace(process.tightenedMuons, process.muonIsolationSequence*process.tightenedMuons)
-
     # Setup output
     outputModule = None
     outdict = process.outputModules_()
@@ -97,43 +115,24 @@ def customise(process):
     outputModule.outputCommands.extend(process.RECOSIMEventContent.outputCommands)
     outputModule.outputCommands.extend([
             "drop *_*_*_%s" % recoProcessName,
-            "keep *_genParticles_*_%s" % recoProcessName,
-            "keep recoGenJets_*_*_%s" % recoProcessName,
-            "keep recoGenMETs_*_*_%s" % recoProcessName,
-            "keep *_pfMet_*_%s" % recoProcessName,
-            "keep *_offlinePrimaryVertices_*_%s" % recoProcessName,
             "keep *_generalTracks_*_%s" % recoProcessName,
             "keep *_muons_*_%s" % recoProcessName,
             "keep *_globalMuons_*_%s" % recoProcessName,
-            "keep *_offlineBeamSpot_*_%s" % recoProcessName,
-            "keep *_gtDigis_*_%s" % recoProcessName,
             "keep recoGsfElectronCores_*_*_%s" % recoProcessName,
             "keep *_gsfElectrons_*_%s" % recoProcessName,
             "keep *_photons_*_%s" % recoProcessName,
             "keep *_photonCore_*_%s" % recoProcessName,
-            "keep *_l1GtTriggerMenuLite_*_%s" % recoProcessName, # in run block
-            "keep *_conditionsInEdm_*_%s" % recoProcessName, # in run block
-            "keep *_addPileupInfo*_*_%s" % recoProcessName, # for MC
-            "keep HcalNoiseSummary_*_*_%s" % recoProcessName,
 
             "drop *_*_*_%s" % processName,
-            "keep *_dimuonsGlobal_*_%s" % processName,
-            "keep *_generator_weight_%s" % processName,
-            "keep *_genParticles_*_%s" % processName,
-            "keep recoGenJets_*_*_%s" % processName,
-            "keep recoGenMETs_*_*_%s" % processName,
-            "keep edmMergeableCounter_*_*_%s" % processName,
             "keep *_particleFlow*_*_%s" % processName,
             "keep *_generalTracks_*_%s" % processName,
-            "keep *_tmfTracks_*_%s" % processName,
             "keep *_muons_*_%s" % processName,
             "keep *_globalMuons_*_%s" % processName,
-            "keep *_offlinePrimaryVertices_*_%s" % processName,
-            "keep edmMergeableCounter_*_*_%s" % processName,
 
             "keep *_*Electron*_*_%s" % processName,
             "keep *_eid*_*_*",
     ])
+    outputModule.outputCommands.extend(eventContent(hltProcessName, recoProcessName, processName))
 #    re_procName = re.compile("_\*$")
 #    outputModule.outputCommands.extend([re_procName.sub("_"+processName, x) for x in process.RECOSIMEventContent.outputCommands])
     outputModule.outputCommands.extend(process.HChEventContent.outputCommands)
@@ -353,4 +352,91 @@ def customise(process):
     print "#############################################################"
 
 
+    addPAT(process, options, dataVersion)
+
+    f = open("configDumpEmbed.py", "w")
+    f.write(process.dumpPython())
+    f.close()
+
     return process
+
+
+def addPAT(process, options, dataVersion):
+    options.doPat = 1
+    options.tauEmbeddingInput = 1
+
+    # Hacks to get PAT to work in a process with RECO
+    process.recoPFJets.remove(process.kt6PFJets)
+
+    # Set the output module name
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple as patConf
+    patConf.outputModuleName = "RECOSIMoutput"
+
+    # Adjust event content, start by dropping everything
+    out = getattr(process, patConf.outputModuleName)
+    out.outputCommands = [
+        "drop *",
+        "keep *_selectedPatMuons_*_*",
+        "keep *_tightMuons*_*_*",
+        "keep *_tauEmbeddingMuons_*_*",
+        "keep *_selectedPatElectrons_*_*",
+        "keep *_allConversions_*_*",
+        "keep recoCaloMETs_*_*_*",
+        "keep *_goodJets*_*_*",
+        "keep bool_*_*_*",
+        "keep *_patTriggerEvent_*_*",
+        "keep *_patTrigger_*_*",
+    ]
+
+    # Add PAT
+    process.commonPatSequence, additionalCounters = patConf.addPatOnTheFly(process, options, dataVersion)
+
+    # Select the tau matching to the muon already here
+    # Also remove the embedding muon from the selected muons
+    from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations import addTauEmbeddingMuonTaus
+    process.patMuonTauSequence = addTauEmbeddingMuonTaus(process)
+    process.commonPatSequence *= process.patMuonTauSequence
+
+    # Keep also smeared/shifted jets from MUONSKIM
+    processName = process.name_()
+    skimProcessName = "MUONSKIM"
+    recoProcessName = dataVersion.getRecoProcess()
+    hltProcessName = dataVersion.getTriggerProcess()
+    outComms = out.outputCommands[:]
+    for comm in outComms:
+        if "keep" in comm and "PatJets" in comm and processName in comm:
+            out.outputCommands.append(comm.replace(processName, "MUONSKIM"))
+
+    # Final adjustments to the event content
+    out.outputCommands.extend([
+            "drop *_addPileupInfo_*_"+processName,
+#            "keep *_patTausHpsPFTau_*_"+processName,
+#            "drop *_selectedPatTaus*_*_"+processName,
+            ])
+    out.outputCommands.extend(eventContent(hltProcessName, recoProcessName, processName))
+    out.outputCommands.extend([
+            "drop *_generalTracks_*_"+recoProcessName, # Tracks are needed for global muon veto, because the tracks were not embedded to pat::Muons in skim (FIXME)
+            "drop *_particleFlow_*_"+recoProcessName,
+#            "keep *_generalTracks_*_"+recoProcessName,
+
+            "drop *_selectedPatTausHpsPFTau_*_"+skimProcessName,
+            "drop *_VisibleTaus_*_"+skimProcessName,
+            "drop *_selectedPatMuons_*_"+skimProcessName,
+            "drop *_selectedPatPhotons_*_"+skimProcessName,
+            "drop *_generalTracks20eta2p5_*_"+skimProcessName,
+            "drop *_goodJets*_*_"+skimProcessName,
+
+            "drop *_dimuonsGlobal_*_"+processName,
+            "drop *_tmfTracks_*_"+processName,
+#            "drop *_patTausHpsPFTau_*_"+processName,
+            "keep *_patTausHpsPFTauTauEmbeddingMuonMatched_*_"+processName,
+            "keep *_selectedPatMuonsEmbeddingMuonCleaned_*_"+processName,
+            "drop *_particleFlow_*_"+processName,
+            
+            ])
+
+    process.patPath = cms.Path(process.ProductionFilterSequence*process.commonPatSequence)
+    process.schedule.append(process.patPath)
+
+    # More hacks to get PAT to work in a process with RECO
+

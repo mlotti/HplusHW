@@ -118,6 +118,12 @@ class ControlPlotMaker:
                             # Add to total histogram
                             myShapeModifier.addShape(source=h,dest=myHisto)
         myShapeModifier.finaliseShape(dest=myHisto)
+        # Set bin labels, if specified
+        if len(details["binLabels"]) > 0:
+            if len(details["binLabels"]) != myHisto.GetNbinsX():
+                raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" control plot has %d bins, but %d bin labels were provided! (provide same number of labels as bins)"%(myHisto.GetNbinsX(),len(details["binLabels"])))
+            for i in range(1,myHisto.GetNbinsX()+1):
+                myHisto.GetXaxis().SetBinLabel(i,details["binLabels"][i-1])
         #mySystHisto.IsA().Destructor(mySystHisto)
         return myHisto
 
@@ -154,6 +160,7 @@ class ControlPlotMaker:
     def _makeFrame(self, title, details):
         myShapeModifier = ShapeHistoModifier(details)
         h = myShapeModifier.createEmptyShapeHistogram(title)
+        # Return histogram
         return h
 
     ## Divides two plots with each other
@@ -218,40 +225,19 @@ class ControlPlotMaker:
         myMax = 0.0
         histoWidth = hSignal.GetXaxis().GetBinUpEdge(hSignal.GetNbinsX()+1) - hSignal.GetXaxis().GetBinLowEdge(0)
         for i in range(1,hSignal.GetNbinsX()+1):
+            #obtain max value for bin
+            value = hData.GetBinContent(i)+hData.GetBinError(i)
+            if hExpected.GetBinContent(i) + hExpected.GetBinError(i) > value:
+                value = hExpected.GetBinContent(i) + hExpected.GetBinError(i)
+            if hExpected.GetBinContent(i) + hSignal.GetBinContent(i) > value:
+                value = hExpected.GetBinContent(i) + hSignal.GetBinContent(i)
             myCeiling = self._getMaxYFactor(hSignal.GetXaxis().GetBinLowEdge(i),hSignal.GetXaxis().GetBinUpEdge(i),histoWidth)
             if logstatus:
-                if hExpected.GetBinError(i) > hSignal.GetBinContent(i):
-                    value = hExpected.GetBinContent(i)+hExpected.GetBinError(i)
-                    if value > 0:
-                        value = pow(10,log10(value)/myCeiling)*1.5
-                        if value > myMax:
-                            myMax = value
-                else:
-                    value = hExpected.GetBinContent(i) + hSignal.GetBinContent(i)
-                    if value > 0:
-                        value = pow(10,log10(value)/myCeiling)*1.5
-                        if value > myMax:
-                            myMax = value
-                value = hData.GetBinContent(i) + hData.GetBinError(i)
-                if value > 0:
-                    value = pow(10,log10(value)/myCeiling)*1.5
-                    if value > myMax:
-                        myMax = value
+                value = pow(10,log10(value)/myCeiling)*1.5
             else:
-                if hExpected.GetBinError(i) > hSignal.GetBinContent(i):
-                    value = hExpected.GetBinError(i)+hExpected.GetBinError(i)
-                    value = value/myCeiling*1.1
-                    if value > myMax:
-                        myMax = value
-                else:
-                    value = hExpected.GetBinContent(i) + hSignal.GetBinContent(i)
-                    value = value/myCeiling*1.1
-                    if value > myMax:
-                        myMax = value
-                value = hData.GetBinContent(i) + hData.GetBinError(i)
                 value = value/myCeiling*1.1
-                if value > myMax:
-                    myMax = value
+            if value > myMax:
+                myMax = value
         return myMax
 
     ## Constructs canvas object and saves it
