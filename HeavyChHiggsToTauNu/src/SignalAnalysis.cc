@@ -74,6 +74,7 @@ namespace HPlus {
     bTauEmbeddingStatus(iConfig.getUntrackedParameter<bool>("tauEmbeddingStatus")),
     fDeltaPhiCutValue(iConfig.getUntrackedParameter<double>("deltaPhiTauMET")),
     fTopRecoName(iConfig.getUntrackedParameter<std::string>("topReconstruction")),
+    fOneAndThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneAndThreeProngTauSrc")),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     fAllCounter(eventCounter.addCounter("Offline selection begins")),
     fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),
@@ -241,11 +242,13 @@ namespace HPlus {
     htransverseMassMetReso02 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassMetReso02", "transverseMassMetReso02;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     htransverseMassLeptonNotInTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassLeptonNotInTau", "transverseMassLeptonNotInTau", 200, 0., 400.);
     htransverseMassNoLeptonNotInTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassNoLeptonNotInTau", "transverseMassNoLeptonNotInTau", 200, 0., 400.);
-    htransverseMassLeptonRealSignalTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassNoLeptonRealSignalTau", "transverseMassNoLeptonRealSignalTau", 200, 0., 400.);
-    htransverseMassLeptonFakeSignalTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassNoLeptonFakeSignalTau", "transverseMassNoLeptonFakeSignalTau", 200, 0., 400.);
+    htransverseMassLeptonRealSignalTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassLeptonRealSignalTau", "transverseMassLeptonRealSignalTau", 200, 0., 400.);
+    htransverseMassLeptonFakeSignalTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassLeptonFakeSignalTau", "transverseMassLeptonFakeSignalTau", 200, 0., 400.);
     htransverseMassNoLeptonGoodMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassNoLeptonGoodMet", "transverseMassNoLeptonGoodMet", 200, 0., 400.);
     htransverseMassNoLeptonGoodMetGoodTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassNoLeptonGoodMetGoodTau", "transverseMassNoLeptonGoodMetGoodTau", 200, 0., 400.);
-    htransverseMassNoObservableLeptons= fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassObservableLeptons", "transverseMassObservableLeptons", 200, 0., 400.);
+    htransverseMassNoObservableLeptons= fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseNoMassObservableLeptons", "transverseMassNoObservableLeptons", 200, 0., 400.);
+    htransverseMassObservableLeptons= fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassObservableLeptons", "transverseMassObservableLeptons", 200, 0., 400.);
+
     hTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassPhi30 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassPhi30", "transverseMassPhi30;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassPhi60 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassPhi60", "transverseMassPhi60;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
@@ -1181,8 +1184,13 @@ namespace HPlus {
       htransverseMassNoLeptonNotInTau->Fill(transverseMass);
     }
 
-    if (!observableOtherTauFound && !observableElectronFound && !observableMuonFound ) {
+    if (observableOtherTauFound || observableElectronFound || observableMuonFound ) {
       //      increment(fTauNotInTauCounter);
+      htransverseMassObservableLeptons->Fill(transverseMass);
+    }
+
+    if (!observableOtherTauFound && !observableElectronFound && !observableMuonFound ) {
+      //      increment(fTauNotInTauCounter);                                                                                                                                               
       htransverseMassNoObservableLeptons->Fill(transverseMass);
     }
 

@@ -103,7 +103,7 @@ def main():
     datasets.remove(filter(lambda name: "W4Jets" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "QCD_Pt20_MuEnriched" in name, datasets.getAllDatasetNames()))
     
-    datasets.remove(filter(lambda name: "HplusTB" in name and not "M180" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "HplusTB" in name and not "M200" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
     
     # Remove QCD

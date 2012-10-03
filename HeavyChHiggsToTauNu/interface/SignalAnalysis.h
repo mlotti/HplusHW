@@ -275,6 +275,7 @@ namespace HPlus {
     WrappedTH1 *htransverseMassLeptonRealSignalTau;
     WrappedTH1 *htransverseMassLeptonFakeSignalTau;
     WrappedTH1 *htransverseMassNoObservableLeptons;
+    WrappedTH1 *htransverseMassObservableLeptons;
     
     // Transverse mass histograms
     WrappedTH1 *hTransverseMass;

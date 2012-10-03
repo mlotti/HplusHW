@@ -40,5 +40,6 @@ def createEDFilter(param):
         GenParticleAnalysis = param.GenParticleAnalysis.clone(),
         Tree = param.tree.clone(),
         eventCounter = param.eventCounter.clone(),
+        oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus","HadronicTauOneAndThreeProng"),
         tauEmbeddingStatus = cms.untracked.bool(False)
     )
