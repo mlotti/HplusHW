@@ -416,6 +416,10 @@ def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
 triggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
 
+# Muon trigger+ID efficiencies, for embedding normalization
+import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTriggerIDEfficiency
+embeddingMuonEfficiency = muonTriggerIDEfficiency.efficiency
+
 # Look up dynamically the triggers for which the parameters exist
 #import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff
 #for triggerName in filter(lambda n: len(n) > 4 and n[0:4] == "HLT_", dir(trigEff)):

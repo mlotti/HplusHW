@@ -44,6 +44,9 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
 
     param.trigger.selectionType = "disabled"
     param.triggerEfficiencyScaleFactor.mode = "disabled"
+    # For data, we have "select" all run periods for tau+MET trigger efficiency
+    if dataVersion.isData():
+        param.triggerEfficiencyScaleFactor.dataSelect = param.triggerEfficiencyScaleFactor.dataParameters.parameterNames_()
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets"+PF2PATVersion) # these are really AK5PF
