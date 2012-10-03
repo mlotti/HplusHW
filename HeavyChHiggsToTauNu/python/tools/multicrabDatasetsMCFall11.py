@@ -19,6 +19,7 @@ datasets = {
     "TTToHplusBWB_M80_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -36,7 +37,7 @@ datasets = {
             },
             "pattuple_v44_4": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBWB_M-80_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "datasetpath": "/TTToHplusBWB_M-80_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
                 "number_of_jobs": 2
             },
         }
@@ -44,6 +45,7 @@ datasets = {
     "TTToHplusBWB_M90_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -61,7 +63,7 @@ datasets = {
             },
             "pattuple_v44_4": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
                 "number_of_jobs": 2
             },
         }
@@ -69,6 +71,7 @@ datasets = {
     "TTToHplusBWB_M100_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -86,7 +89,7 @@ datasets = {
             },
             "pattuple_v44_4": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
                 "number_of_jobs": 2
             },
         }
@@ -94,6 +97,7 @@ datasets = {
     "TTToHplusBWB_M120_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -111,7 +115,7 @@ datasets = {
             },
             "pattuple_v44_4": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
                 "number_of_jobs": 2
             },
         }
@@ -119,6 +123,7 @@ datasets = {
     "TTToHplusBWB_M140_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -136,7 +141,7 @@ datasets = {
             },
             "pattuple_v44_4": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
                 "number_of_jobs": 2
             },
         }
@@ -144,6 +149,7 @@ datasets = {
     "TTToHplusBWB_M150_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-150_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -161,7 +167,7 @@ datasets = {
             },
             "pattuple_v44_4": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBWB_M-150_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "datasetpath": "/TTToHplusBWB_M-150_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
                 "number_of_jobs": 2
             },
         }
@@ -169,6 +175,7 @@ datasets = {
     "TTToHplusBWB_M155_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        #"args": { "triggerMC": "1" }, deliberately commented
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-155_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -194,6 +201,7 @@ datasets = {
     "TTToHplusBWB_M160_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -211,7 +219,7 @@ datasets = {
             },
             "pattuple_v44_4": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
                 "number_of_jobs": 2
             },
         }
@@ -220,6 +228,7 @@ datasets = {
     "TTToHplusBHminusB_M80_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-80_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -237,7 +246,7 @@ datasets = {
             },
             "pattuple_v44_4": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBHminusB_M-80_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "datasetpath": "/TTToHplusBHminusB_M-80_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
                 "number_of_jobs": 2
             },
         }
@@ -245,6 +254,7 @@ datasets = {
     "TTToHplusBHminusB_M90_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-90_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -262,7 +272,7 @@ datasets = {
             },
             "pattuple_v44_4": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "",
+                "datasetpath": "/TTToHplusBHminusB_M-90_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
                 "number_of_jobs": 2
             },
         }
@@ -270,6 +280,7 @@ datasets = {
     "TTToHplusBHminusB_M100_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-100_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -287,7 +298,7 @@ datasets = {
             },
             "pattuple_v44_4": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBHminusB_M-100_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "datasetpath": "/TTToHplusBHminusB_M-100_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
                 "number_of_jobs": 2
             },
         }
@@ -295,6 +306,7 @@ datasets = {
     "TTToHplusBHminusB_M120_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-120_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -312,7 +324,7 @@ datasets = {
             },
             "pattuple_v44_4": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBHminusB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "datasetpath": "/TTToHplusBHminusB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
                 "number_of_jobs": 2
             },
         }
@@ -320,6 +332,7 @@ datasets = {
     "TTToHplusBHminusB_M140_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-140_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -337,7 +350,7 @@ datasets = {
             },
             "pattuple_v44_4": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBHminusB_M-140_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "datasetpath": "/TTToHplusBHminusB_M-140_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
                 "number_of_jobs": 2
             },
         }
@@ -345,6 +358,7 @@ datasets = {
     "TTToHplusBHminusB_M150_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-150_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -362,7 +376,7 @@ datasets = {
             },
             "pattuple_v44_4": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBHminusB_M-150_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "datasetpath": "/TTToHplusBHminusB_M-150_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
                 "number_of_jobs": 2
             },
         }
@@ -370,6 +384,7 @@ datasets = {
     "TTToHplusBHminusB_M155_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        #"args": { "triggerMC": "1" }, deliberately commented
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-155_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -395,6 +410,7 @@ datasets = {
     "TTToHplusBHminusB_M160_Fall11": {
         "dataVersion": "44XmcS6",
         "crossSection": 165,
+        "args": { "triggerMC": "1" },
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-160_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",
@@ -412,7 +428,7 @@ datasets = {
             },
             "pattuple_v44_4": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBHminusB_M-160_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER",
+                "datasetpath": "/TTToHplusBHminusB_M-160_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER",
                 "number_of_jobs": 2
             },
         }
@@ -850,7 +866,7 @@ datasets = {
         "dataVersion": "44XmcS6",
         "crossSection": 165, # [1,2], approx. NNLO
         "args": { "triggerMC": "1" },
-        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
+        #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "data": {
             "AOD": {
                 "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM",

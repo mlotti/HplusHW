@@ -30,9 +30,12 @@ def result(task):
 
 (input, output) = (None, None)
 if options.mc:
-    input = result("DYJetsToLL_M50_TuneZ2_Summer11")
-    output = "DY_Mu20"
-    trigger = "isHLTMu20"
+    input = result("DYJetsToLL_M50_TuneZ2_Fall11")
+    output = "DY_Mu40eta2p1"
+    trigger = "isHLTMu40eta2p1"
+#    input = result("DYJetsToLL_M50_TuneZ2_Summer11")
+#    output = "DY_Mu20"
+#    trigger = "isHLTMu20"
 else:
     (input, output) = {
 	"isHLTMu20": ([result("SingleMu_160431-163261_2011A_Nov08")], "Run2011A_Mu20"),
@@ -169,7 +172,9 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
             UnbinnedVariables = cms.vstring("mass"),
             BinnedVariables = cms.PSet(
                 pt = cms.vdouble(40, 1000),
+#		pt = cms.vdouble(40, 41, 45, 50, 60, 70, 80, 90, 100, 1000),
                 abseta = cms.vdouble(0, 2.1),
+#		abseta = cms.vdouble(0,0.3,0.6,0.9,1.2,1.5,1.8,2.1),
 #                tauTightIc04Iso = cms.vdouble(0, 0.1),
 #                pt = cms.vdouble(0, 20, 40, 45, 50, 60, 70, 80, 90, 100, 1000),
             ),
@@ -223,6 +228,7 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
                 dB = cms.vstring("pass"),
                 pt = cms.vdouble(40, 1000),
                 abseta = cms.vdouble(0, 2.1),
+#		abseta = cms.vdouble(0,0.3,0.6,0.9,1.2,1.5,1.8,2.1),
 #                pt = cms.vdouble(40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 55, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 500, 600, 700, 800, 1000)
             ),
             #BinToPDFmap = cms.vstring("gaussPlusLinear")
@@ -240,6 +246,7 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
             BinnedVariables = cms.PSet(
                 pt = cms.vdouble(40, 1000),
                 abseta = cms.vdouble(0, 2.1),
+#		abseta = cms.vdouble(0,0.3,0.6,0.9,1.2,1.5,1.8,2.1),
 #                tauTightIc04Iso = cms.vdouble(0, 0.1),
             ),
             #BinToPDFmap = cms.vstring("gaussPlusLinear")
@@ -304,6 +311,7 @@ if adjustBins:
     #etabins = [x*0.21 for x in range(0, 11)] # 0.21 stepping [0, 2.1]
     #ptbins = [40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 52, 54, 56, 58, 60, 65, 70, 80, 90, 100]
     #etabins = [x*0.1 for x in range(0, 23)] # 0.1 stepping [0, 2.2]
+    #etabins = [0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2]
     etabins = [0, 2.2]
     #ptBinsLow = [30, 34, 38, 39, 40, 41, 42, 44, 48, 50]
     #ptBinsMiddle = [54, 58, 62, 66, 70, 80, 90, 100]

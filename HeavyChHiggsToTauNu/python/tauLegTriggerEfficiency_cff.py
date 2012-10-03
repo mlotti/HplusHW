@@ -134,7 +134,7 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA = cms
                 triggerBin(80.0, 1.0, 0.308024223477),
             ),
         ),
-        # L1_Jet52_Central + HLT_IsoPFTau35_Trk20_MET60 (Run2011A)                   
+        # L1_Jet52_Central + HLT_IsoPFTau35_Trk20_MET60 (Run2011A)
         runs_170722_173198 = cms.PSet(
             firstRun = cms.uint32(170722),
             lastRun = cms.uint32(173198),
@@ -162,7 +162,7 @@ tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA = cms
 		triggerBin(80.0, 1.0, 0.36887757085), # manually added
             ),
         ),
-        # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)             
+        # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)
         runs_175832_180252 = cms.PSet(
             firstRun = cms.uint32(175832),
             lastRun = cms.uint32(180252),
@@ -254,7 +254,7 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA = cms.
 		triggerBin(80.0, 1.0, 0.36887757085), # manually added
             ),
         ),
-        # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)             
+        # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)
         runs_175832_180252 = cms.PSet(
             firstRun = cms.uint32(175832),
             lastRun = cms.uint32(180252),
@@ -346,7 +346,7 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium = c
 		triggerBin(80.0, 1.0, 0.36887757085), # manually added
             ),
         ),
-        # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)             
+        # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)
         runs_175832_180252 = cms.PSet(
             firstRun = cms.uint32(175832),
             lastRun = cms.uint32(180252),

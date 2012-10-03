@@ -79,9 +79,10 @@ namespace HPlus {
     for (size_t i = 0; i < myTableSize; ++i) {
       double myDeltaEta = myEta - fECALDeadCellEtaTable[i];
       double myDeltaPhi = myPhi - fECALDeadCellPhiTable[i];
-      if (myDeltaEta <= myHalfCellSize || myDeltaPhi <= myHalfCellSize) return false;
-      //double myDeltaR = std::sqrt(myDeltaEta*myDeltaEta + myDeltaPhi*myDeltaPhi);
+      //if (myDeltaEta <= myHalfCellSize || myDeltaPhi <= myHalfCellSize) return false;
+      double myDeltaR = std::sqrt(myDeltaEta*myDeltaEta + myDeltaPhi*myDeltaPhi);
       //if (myDeltaR < deltaR) return false;
+      if (myDeltaR < 0.10) return false;
     }
     return true;
   }

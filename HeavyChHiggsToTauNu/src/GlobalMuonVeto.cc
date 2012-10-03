@@ -316,13 +316,24 @@ namespace HPlus {
       if (myMuonPt > fMuonPtCut && std::fabs(myMuonEta) < fMuonEtaCut)
         fSelectedMuonsBeforeIsolation.push_back(*iMuon);
       
-      // 7) Relative Isolation (around cone of DeltaR = 0.3) < 0.15. 
+      // 7) Relative Isolation
+      /*(around cone of DeltaR = 0.3) < 0.15. 
       float myTrackIso =  (*iMuon)->trackIso(); // isolation cones are dR=0.3 
       float myEcalIso  =  (*iMuon)->ecalIso();  // isolation cones are dR=0.3 
       float myHcalIso  =  (*iMuon)->hcalIso();  // isolation cones are dR=0.3 
       float relIsol = ( myTrackIso + myEcalIso + myHcalIso )/(myMuonPt);
       // std::cout << "relIsol = " << (*iMuon).isolationR03().sumPt << "/" << myMuonPt << " = " << relIsol << std::endl;
       if( relIsol > 0.15 ) continue; 
+      */
+      // Delta beta corrected isolation
+      double myChHadronIso      =  (*iMuon)->chargedHadronIso(); // isolation cones are dR=0.4
+      double myNeutralHadronIso =  (*iMuon)->neutralHadronIso();  // isolation cones are dR=0.4
+      double myPhotonIso        =  (*iMuon)->photonIso();  // isolation cones are dR=0.4
+      double myPUChHadronIso    =  (*iMuon)->puChargedHadronIso();  // isolation cones are dR=0.4
+      double myIsolation = myChHadronIso + std::max(myNeutralHadronIso + myPhotonIso - 0.5 * myPUChHadronIso, 0.0);
+      double relIsol = myIsolation / myMuonPt;
+      
+      if (relIsol < 0.20) continue; // tight = 0.12; loose = 0.20
       bMuonRelIsolationR03Cut = true;
       fSelectedMuonsBeforePtAndEtaCuts.push_back(*iMuon);
 
