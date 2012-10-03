@@ -122,6 +122,16 @@ class ConfigBuilder:
             return [signalAnalysis.createEDFilter(param)]
         return self._build(create, ["signalAnalysis"])
 
+    ## Build configuration for signal analysis job
+    #
+    # \return cms.Process object, should be assigned to a local
+    #         'process' variable in the analysis job configuration file
+    def buildQCDMeasurementFactorised(self):
+        import HiggsAnalysis.HeavyChHiggsToTauNu.QCDMeasurementFactorised as QCDMeasurementFactorised
+        def create(param):
+            return [QCDMeasurementFactorised.createEDFilter(param)]
+        return self._build(create, ["QCDMeasurement"])
+
     ## Accumulate the number of analyzers to a category
     #
     # \param key     Analyzer category name
@@ -202,7 +212,9 @@ class ConfigBuilder:
                     analysisModules.append(mod)
                     analysisNames.append(name+dataEra)
 
-        analysisNamesForSystematics = analysisNames[:]
+        analysisNamesForSystematics = []
+        if not self.doOptimisation:
+            analysisNamesForSystematics = analysisNames[:]
         self._accumulateAnalyzers("Data eras", len(analysisModules))
 
         for module in analysisModules:
@@ -261,8 +273,9 @@ class ConfigBuilder:
         analysisNamesForSystematics.extend(self._additionalTauEmbeddingAnalyses(process, analysisModules, analysisNames))
 
         ## Systematics
-        self._buildJESVariation(process, analysisNamesForSystematics)
-        self._buildPUWeightVariation(process, analysisNamesForSystematics, param)
+        if "QCDMeasurement" not in analysisNames_:
+            self._buildJESVariation(process, analysisNamesForSystematics)
+            self._buildPUWeightVariation(process, analysisNamesForSystematics, param)
 
         # Optional output
         if self.edmOutput:
