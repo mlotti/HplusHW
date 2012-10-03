@@ -75,6 +75,7 @@ namespace HPlus {
     fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),
     fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
+    fTauFakeScaleFactorCounter(eventCounter.addCounter("tau fake scale factor")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
     fTriggerScaleFactorCounter(eventCounter.addCounter("trigger scale factor")),
     fGenuineTauCounter(eventCounter.addCounter("Tau is genuine")),
@@ -383,12 +384,13 @@ namespace HPlus {
     FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
     bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(myTauMatch); // True if the selected tau is a fake
     if(fOnlyGenuineTaus && myFakeTauStatus) return false;
+    increment(fTausExistCounter);
     // Apply scale factor for fake tau
     if (!iEvent.isRealData())
       fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(myTauMatch, tauData.getSelectedTau()->eta()));
     // plot leading track without pt cut
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
-    increment(fTausExistCounter);
+    increment(fTauFakeScaleFactorCounter);
     //if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
     increment(fOneTauCounter);
     // Primary vertex assignment analysis - diagnostics only

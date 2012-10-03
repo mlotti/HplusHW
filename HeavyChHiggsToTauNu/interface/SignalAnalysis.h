@@ -130,6 +130,7 @@ namespace HPlus {
     Count fTriggerCounter;
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
+    Count fTauFakeScaleFactorCounter;
     Count fOneTauCounter;
     Count fTriggerScaleFactorCounter;
     Count fGenuineTauCounter;
