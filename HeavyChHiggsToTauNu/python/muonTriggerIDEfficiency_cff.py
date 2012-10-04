@@ -29,7 +29,7 @@ efficiency_pt41 = cms.untracked.PSet(
             uncertainty = cms.double(0.000522)
         ),
         Run2011A_Mu40_eta2p1 = cms.PSet(
-            firstRun = cms.uint32(173693),
+            firstRun = cms.uint32(173236),
             lastRun = cms.uint32(177452),
             efficiency = cms.double(0.867646),
             uncertainty = cms.double(0.001347)
