@@ -49,6 +49,17 @@ namespace HPlus {
     s << "BtagScaleFactorAbsUncertCounts_" << name;
     hBtagSFAbsUncertaintyCounts = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 1, 0., 1);
 
+    // Embedding muon efficiency
+    s.str("");
+    s << "EmbeddingMuonEfficiency_" << name;
+    hEmbeddingMuonEff = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 200., 0., 2.0);
+    s.str("");
+    s << "EmbeddingMuonEfficiencyAbsUncert_" << name;
+    hEmbeddingMuonEffAbsUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 20000., 0., 2);
+    s.str("");
+    s << "EmbeddingMuonEfficiencyAbsUncertCounts_" << name;
+    hEmbeddingMuonEffAbsUncertaintyCounts = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, s.str().c_str(), s.str().c_str(), 1, 0., 1);
+
   }
 
   ScaleFactorUncertaintyManager::~ScaleFactorUncertaintyManager() {}
@@ -75,4 +86,11 @@ namespace HPlus {
     hBtagSFAbsUncertainty->Fill(btagSFAbsUncertainty, eventWeight / btagSF);
     hBtagSFAbsUncertaintyCounts->Fill(0.0, eventWeight); // weight should include also trg SF
   }
+
+  void ScaleFactorUncertaintyManager::setEmbeddingMuonEfficiencyUncertainty(double eventWeight, double muonEff, double muonEffAbsUncertainty) {
+    hEmbeddingMuonEff->Fill(muonEff);
+    hEmbeddingMuonEffAbsUncertainty->Fill(muonEffAbsUncertainty, eventWeight / muonEff);
+    hEmbeddingMuonEffAbsUncertaintyCounts->Fill(0.0, eventWeight); // weight should include also eff
+  }
+
 }

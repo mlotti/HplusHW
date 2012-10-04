@@ -71,9 +71,11 @@ namespace HPlus {
     fTopRecoName(iConfig.getUntrackedParameter<std::string>("topReconstruction")),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     fAllCounter(eventCounter.addCounter("Offline selection begins")),
+    fEmbeddingMuonEfficiencyCounter(eventCounter.addCounter("Embedding: muon eff weight")),
     fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),
     fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
+    fTauFakeScaleFactorCounter(eventCounter.addCounter("tau fake scale factor")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
     fTriggerScaleFactorCounter(eventCounter.addCounter("trigger scale factor")),
     fGenuineTauCounter(eventCounter.addCounter("Tau is genuine")),
@@ -151,6 +153,7 @@ namespace HPlus {
     fCorrelationAnalysis(eventCounter, fHistoWrapper),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
     fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fHistoWrapper),
+    fEmbeddingMuonEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingMuonEfficiency"), fHistoWrapper),
     fVertexWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeightReader")),
     fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
@@ -339,6 +342,12 @@ namespace HPlus {
 
     increment(fAllCounter);
 
+//------ For embedding, apply the muon ID efficiency at this stage
+    EmbeddingMuonEfficiency::Data embeddingMuonData;
+    if(bTauEmbeddingStatus)
+      embeddingMuonData = fEmbeddingMuonEfficiency.applyEventWeight(iEvent, fEventWeight);
+    increment(fEmbeddingMuonEfficiencyCounter);
+
 //------ Apply trigger and HLT_MET cut or trigger parametrisation
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if (!triggerData.passedEvent()) return false;
@@ -375,12 +384,13 @@ namespace HPlus {
     FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
     bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(myTauMatch); // True if the selected tau is a fake
     if(fOnlyGenuineTaus && myFakeTauStatus) return false;
+    increment(fTausExistCounter);
     // Apply scale factor for fake tau
     if (!iEvent.isRealData())
       fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(myTauMatch, tauData.getSelectedTau()->eta()));
     // plot leading track without pt cut
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
-    increment(fTausExistCounter);
+    increment(fTauFakeScaleFactorCounter);
     //if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
     increment(fOneTauCounter);
     // Primary vertex assignment analysis - diagnostics only
@@ -727,6 +737,11 @@ namespace HPlus {
                                                             fFakeTauIdentifier.getFakeTauScaleFactor(myTauMatch, tauData.getSelectedTau()->eta()),
                                                             fFakeTauIdentifier.getFakeTauSystematics(myTauMatch, tauData.getSelectedTau()->eta()),
                                                             btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+    if(bTauEmbeddingStatus)
+      fSFUncertaintiesAfterSelection.setEmbeddingMuonEfficiencyUncertainty(fEventWeight.getWeight(),
+                                                                           embeddingMuonData.getEventWeight(),
+                                                                           embeddingMuonData.getEventWeightAbsoluteUncertainty());
+
     if (myFakeTauStatus) {
       hEWKFakeTausTransverseMass->Fill(transverseMass);
       hEWKFakeTausTransverseMassVsNjets->Fill(transverseMass, jetData.getHadronicJetCount());

@@ -7,25 +7,25 @@
 import multicrabDatasetsCommon as common
 
 # for generation (skim): ~3 kev ev/job (~5 s, 100 kB/event),
-# for analysis (embedding): 2 hours / job (~5-10 kev/job)
+# for analysis (embedding): 0.5 hour job, 150k events/job, 5k events/min
 
 ## Numbers of jobs for the datasets of interest
 # ~5 kev/job
 njobs = {
-    "SingleMu_Mu_160431-163261_2011A_Nov08":    {"skim":    25, "embedding":  5},
-    "SingleMu_Mu_163270-163869_2011A_Nov08":    {"skim":    70, "embedding":  8},
-    "SingleMu_Mu_165088-166150_2011A_Nov08":    {"skim":    60, "embedding": 15},
-    "SingleMu_Mu_166161-166164_2011A_Nov08":    {"skim":     1, "embedding":  1},
-    "SingleMu_Mu_166346-166346_2011A_Nov08":    {"skim":     1, "embedding":  1},
-    "SingleMu_Mu_166374-167043_2011A_Nov08":    {"skim":   110, "embedding": 22},
-    "SingleMu_Mu_167078-167913_2011A_Nov08":    {"skim":    60, "embedding": 12},
-    "SingleMu_Mu_170722-172619_2011A_Nov08":    {"skim":   120, "embedding": 22},
-    "SingleMu_Mu_172620-173198_2011A_Nov08":    {"skim":   120, "embedding": 22},
-    "SingleMu_Mu_173236-173692_2011A_Nov08":    {"skim":    70, "embedding": 12},
-    "SingleMu_Mu_173693-177452_2011B_Nov19":    {"skim":   300, "embedding": 60},
-    "SingleMu_Mu_177453-178380_2011B_Nov19":    {"skim":   210, "embedding": 50},
-    "SingleMu_Mu_178411-179889_2011B_Nov19":    {"skim":   200, "embedding": 50},
-    "SingleMu_Mu_179942-180371_2011B_Nov19":    {"skim":    35, "embedding":  6},
+    "SingleMu_Mu_160431-163261_2011A_Nov08":    {"skim":   100, "embedding": 1},
+    "SingleMu_Mu_163270-163869_2011A_Nov08":    {"skim":    70, "embedding": 1},
+    "SingleMu_Mu_165088-166150_2011A_Nov08":    {"skim":   100, "embedding": 1},
+    "SingleMu_Mu_166161-166164_2011A_Nov08":    {"skim":     1, "embedding": 1},
+    "SingleMu_Mu_166346-166346_2011A_Nov08":    {"skim":     1, "embedding": 1},
+    "SingleMu_Mu_166374-167043_2011A_Nov08":    {"skim":   110, "embedding": 2},
+    "SingleMu_Mu_167078-167913_2011A_Nov08":    {"skim":    60, "embedding": 1},
+    "SingleMu_Mu_170722-172619_2011A_Nov08":    {"skim":   120, "embedding": 2},
+    "SingleMu_Mu_172620-173198_2011A_Nov08":    {"skim":   120, "embedding": 2},
+    "SingleMu_Mu_173236-173692_2011A_Nov08":    {"skim":    70, "embedding": 1},
+    "SingleMu_Mu_173693-177452_2011B_Nov19":    {"skim":   300, "embedding": 4},
+    "SingleMu_Mu_177453-178380_2011B_Nov19":    {"skim":   210, "embedding": 3},
+    "SingleMu_Mu_178411-179889_2011B_Nov19":    {"skim":   200, "embedding": 3},
+    "SingleMu_Mu_179942-180371_2011B_Nov19":    {"skim":    35, "embedding": 1},
 
     "SingleMu_Mu_160431-163261_May10":     {"skim":   6, "embedding":  1},
     "SingleMu_Mu_163270-163869_May10":     {"skim":  40, "embedding":  4},
@@ -55,8 +55,8 @@ njobs = {
     "TTToHplusBHminusB_M155_Fall11":     {"skim":   6, "embedding":  1},
     "TTToHplusBHminusB_M160_Fall11":     {"skim":   6, "embedding":  1},
 
-    "TTJets_TuneZ2_Fall11":              {"skim": 1990, "embedding": 20}, # embedding: 5 s per event
-    "WJets_TuneZ2_Fall11":               {"skim":  100, "embedding": 70},
+    "TTJets_TuneZ2_Fall11":              {"skim": 2490, "embedding": 20}, # embedding: 5 s per event
+    "WJets_TuneZ2_Fall11":               {"skim":  200, "embedding": 70},
     "W3Jets_TuneZ2_Fall11":              {"skim":  140, "embedding": 42},
     "DYJetsToLL_M50_TuneZ2_Fall11":      {"skim":  230, "embedding": 70},
     "T_t-channel_TuneZ2_Fall11":         {"skim":   40, "embedding":  6},
@@ -156,6 +156,52 @@ def addTo(datasets):
 
     add("embedding", "v44_4_2_muiso0", {
         "TTJets_TuneZ2_Fall11":              "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_muiso0-50da2d6a5b0c9c8a2f96f633ada0c1c6/USER",
+        })
+    add("embedding", "v44_4_2_seed0", {
+            "SingleMu_Mu_160431-163261_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_160431_tauembedding_embedding_v44_4_2_seed0c-a55cb9805ad247805760f23e605c41e5/USER",
+            "SingleMu_Mu_163270-163869_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_163270_tauembedding_embedding_v44_4_2_seed0-a55cb9805ad247805760f23e605c41e5/USER",
+            "SingleMu_Mu_165088-166150_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_165088_tauembedding_embedding_v44_4_2_seed0-a55cb9805ad247805760f23e605c41e5/USER",
+            "SingleMu_Mu_166161-166164_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_tauembedding_embedding_v44_4_2_seed0-a55cb9805ad247805760f23e605c41e5/USER",
+            "SingleMu_Mu_166346-166346_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166346_tauembedding_embedding_v44_4_2_seed0-a55cb9805ad247805760f23e605c41e5/USER",
+            "SingleMu_Mu_166374-167043_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166374_tauembedding_embedding_v44_4_2_seed0-a55cb9805ad247805760f23e605c41e5/USER",
+            "SingleMu_Mu_167078-167913_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_167078_tauembedding_embedding_v44_4_2_seed0-a55cb9805ad247805760f23e605c41e5/USER",
+            "SingleMu_Mu_170722-172619_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_170722_tauembedding_embedding_v44_4_2_seed0-a55cb9805ad247805760f23e605c41e5/USER",
+            "SingleMu_Mu_172620-173198_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_172620_tauembedding_embedding_v44_4_2_seed0-a55cb9805ad247805760f23e605c41e5/USER",
+            "SingleMu_Mu_173236-173692_2011A_Nov08":    "/SingleMu/local-Run2011A_08Nov2011_v1_AOD_173236_tauembedding_embedding_v44_4_2_seed0-a55cb9805ad247805760f23e605c41e5/USER",
+            "SingleMu_Mu_173693-177452_2011B_Nov19":    "/SingleMu/local-Run2011B_19Nov2011_v1_AOD_173693_tauembedding_embedding_v44_4_2_seed0-a55cb9805ad247805760f23e605c41e5/USER",
+            "SingleMu_Mu_177453-178380_2011B_Nov19":    "/SingleMu/local-Run2011B_19Nov2011_v1_AOD_177453_tauembedding_embedding_v44_4_2_seed0-a55cb9805ad247805760f23e605c41e5/USER",
+            "SingleMu_Mu_178411-179889_2011B_Nov19":    "/SingleMu/local-Run2011B_19Nov2011_v1_AOD_178411_tauembedding_embedding_v44_4_2_seed0-a55cb9805ad247805760f23e605c41e5/USER",
+            "SingleMu_Mu_179942-180371_2011B_Nov19":    "/SingleMu/local-Run2011B_19Nov2011_v1_AOD_179942_tauembedding_embedding_v44_4_2_seed0-a55cb9805ad247805760f23e605c41e5/USER",
+    #     "TTToHplusBWB_M80_Fall11":           "",
+    #     "TTToHplusBWB_M90_Fall11":           "",
+    #     "TTToHplusBWB_M100_Fall11":          "",
+    #     "TTToHplusBWB_M120_Fall11":          "",
+    #     "TTToHplusBWB_M140_Fall11":          "",
+    #     "TTToHplusBWB_M150_Fall11":          "",
+    #     "TTToHplusBWB_M155_Fall11":          "",
+    #     "TTToHplusBWB_M160_Fall11":          "",
+    #     "TTToHplusBHminusB_M80_Fall11":      "",
+    #     "TTToHplusBHminusB_M90_Fall11":      "",
+    #     "TTToHplusBHminusB_M100_Fall11":     "",
+    #     "TTToHplusBHminusB_M120_Fall11":     "",
+    #     "TTToHplusBHminusB_M140_Fall11":     "",
+    #     "TTToHplusBHminusB_M150_Fall11":     "",
+    #     "TTToHplusBHminusB_M155_Fall11":     "",
+    #     "TTToHplusBHminusB_M160_Fall11":     "",
+    #     "TTJets_TuneZ2_Fall11":              "",
+    #     "WJets_TuneZ2_Fall11":               "",
+    #     "W3Jets_TuneZ2_Fall11":              "",
+    #     "DYJetsToLL_M50_TuneZ2_Fall11":      "",
+    #     "T_t-channel_TuneZ2_Fall11":         "",
+    #     "Tbar_t-channel_TuneZ2_Fall11":      "",
+    #     "T_tW-channel_TuneZ2_Fall11":        "",
+    #     "Tbar_tW-channel_TuneZ2_Fall11":     "",
+    #     "T_s-channel_TuneZ2_Fall11":         "",
+    #     "Tbar_s-channel_TuneZ2_Fall11":      "",
+    #     "WW_TuneZ2_Fall11":                  "",
+    #     "WZ_TuneZ2_Fall11":                  "",
+    #     "ZZ_TuneZ2_Fall11":                  "",
+    #     "QCD_Pt20_MuEnriched_TuneZ2_Fall11": "",
         })
 
 
