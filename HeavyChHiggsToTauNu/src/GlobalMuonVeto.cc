@@ -333,7 +333,7 @@ namespace HPlus {
       double myIsolation = myChHadronIso + std::max(myNeutralHadronIso + myPhotonIso - 0.5 * myPUChHadronIso, 0.0);
       double relIsol = myIsolation / myMuonPt;
       
-      if (relIsol < 0.20) continue; // tight = 0.12; loose = 0.20
+      if (relIsol > 0.20) continue; // tight = 0.12; loose = 0.20
       bMuonRelIsolationR03Cut = true;
       fSelectedMuonsBeforePtAndEtaCuts.push_back(*iMuon);
 
