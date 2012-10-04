@@ -572,7 +572,7 @@ class ConfigBuilder:
             N += 1
 
             postfix += "CaloMet60"
-            mod = module.clone()
+            mod = mod.clone()
             mod.trigger.caloMetSelection.metEmulationCut = 60.0
             path = cms.Path(process.commonSequence * mod)
             setattr(process, name+postfix, mod)
