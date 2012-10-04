@@ -83,26 +83,47 @@ namespace HPlus {
     double myJetPt = tau->pt();
     double myJetEta = tau->eta();
     fCounterPackager.fill(fIDJetPtCut, myJetPt);
-    hEtaTauCands_nocut->Fill(myJetEta);
-    if(!(myJetPt > fPtCut)) return false;
-    fCounterPackager.incrementSubCount(fIDJetPtCut);
+    if(!passKinematicSelectionPt(tau)) return false;
+
     hEtaTauCands_ptcut->Fill(myJetEta);
     // Jet eta cut
-    fCounterPackager.fill(fIDJetEtaCut, myJetEta);
-    if(!(std::abs(myJetEta) < fEtaCut)) return false;
-    fCounterPackager.incrementSubCount(fIDJetEtaCut);
+    if(!passKinematicSelectionEta(tau)) return false;
+
     // All cuts passed, return true
     return true;
   }
-
+  bool TauIDBase::passKinematicSelectionPt(const edm::Ptr<pat::Tau>& tau) {
+    double myJetPt = tau->pt();
+    if(!(myJetPt > fPtCut)) return false;
+    fCounterPackager.incrementSubCount(fIDJetPtCut);
+    return true;
+  }
+  bool TauIDBase::passKinematicSelectionEta(const edm::Ptr<pat::Tau>& tau) {
+    double myJetEta = tau->eta();
+    fCounterPackager.fill(fIDJetEtaCut, myJetEta);
+    if(!(std::abs(myJetEta) < fEtaCut)) return false;
+    fCounterPackager.incrementSubCount(fIDJetEtaCut);
+    return true;
+  }
+ 
   bool TauIDBase::passTauCandidateEAndMuVetoCuts(const edm::Ptr<pat::Tau> tau) {
+    // Electron veto
+    if(!passTauCandidateEVetoCuts(tau)) return false;
+    // Muon veto
+    if(!passTauCandidateMuVetoCuts(tau)) return false;
+    // All cuts passed, return true
+    return true;
+  }
+  bool TauIDBase::passTauCandidateEVetoCuts(const edm::Ptr<pat::Tau>& tau) {
     // Electron veto
     if (tau->tauID(fAgainstElectronDiscriminator) < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDAgainstElectronCut);
+    return true;
+  }
+  bool TauIDBase::passTauCandidateMuVetoCuts(const edm::Ptr<pat::Tau>& tau) {
     // Muon veto
     if (tau->tauID(fAgainstMuonDiscriminator) < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDAgainstMuonCut);
-    // All cuts passed, return true
     return true;
   }
 

@@ -16,6 +16,8 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 
+#include<functional>
+
 namespace {
   
   bool tauEtGreaterThan(const edm::Ptr<pat::Tau>& a, const edm::Ptr<pat::Tau>& b) {
@@ -113,6 +115,167 @@ namespace {
 
     return aRtau < bRtau;
   }*/
+
+  struct MoreLikelyTauCompare: std::binary_function<edm::Ptr<pat::Tau>, edm::Ptr<pat::Tau>, bool> {
+    MoreLikelyTauCompare(HPlus::TauIDBase *tauID): fTauID(tauID) {}
+
+    bool operator()(const edm::Ptr<pat::Tau>& tauA, const edm::Ptr<pat::Tau>& tauB) {
+      bool result = firstIsMoreLikely(tauA, tauB);
+      // point for printing out the result
+      std::cout << "Is left-one more likely? " << result << std::endl;
+      return result;
+    }
+
+    bool firstIsMoreIsolatedLargerPt(const edm::Ptr<pat::Tau>& tauA, const edm::Ptr<pat::Tau>& tauB) {
+      bool resA = fTauID->passIsolation(tauA);
+      bool resB = fTauID->passIsolation(tauB);
+      std::cout << "  Isolation " << resA << " (" << tauA->tauID("byRawCombinedIsolationDeltaBetaCorr")
+                << ") " << resB << " (" << tauB->tauID("byRawCombinedIsolationDeltaBetaCorr")
+                << ")" << std::endl;
+      if(resA != resB)
+        return resA;
+      if(!resA && !resB)
+        // Both fail isolation, comparison by isolation is ok
+        return tauA->tauID("byRawCombinedIsolationDeltaBetaCorr") < tauB->tauID("byRawCombinedIsolationDeltaBetaCorr");
+
+      // Both pass isolation, compare by pt
+      return tauA->pt() > tauB->pt();
+    }
+
+    bool firstIsMoreLikely(const edm::Ptr<pat::Tau>& tauA, const edm::Ptr<pat::Tau>& tauB) {
+      bool resA;
+      bool resB;
+
+      // DecayModeFinding
+      resA = fTauID->passDecayModeFinding(tauA);
+      resB = fTauID->passDecayModeFinding(tauB);
+      std::cout << std::endl << "DecayModeFinding " << resA << " " << resB << std::endl;
+      if(resA != resB)
+        return resA;
+      if(!resA && !resB)
+        // ??? pick one with larger pt, isolation doesn't really make sense because it requires decay mode internally
+        return tauA->pt() > tauB->pt();
+
+      // pT
+      resA = fTauID->passKinematicSelectionPt(tauA);
+      resB = fTauID->passKinematicSelectionPt(tauB);
+      std::cout << "pT " << resA << " (" << tauA->pt() << ") " << resB << " (" << tauB->pt() << ")" << std::endl;
+      if(resA != resB)
+        return resA;
+      if(!resA && !resB) {
+        //return tauA->pt() > tauB->pt();
+        return firstIsMoreIsolatedLargerPt(tauA, tauB);
+      }
+    
+      // eta
+      resA = fTauID->passKinematicSelectionEta(tauA);
+      resB = fTauID->passKinematicSelectionEta(tauB);
+      std::cout << "eta " << resA << " (" << tauA->eta() << ") " << resB << " (" << tauB->eta() << ")" << std::endl;
+      if(resA != resB)
+        return resA;
+      if(!resA && !resB) {
+        //return std::abs(tauA->eta()) < std::abs(tauB->eta());
+        return firstIsMoreIsolatedLargerPt(tauA, tauB);
+      }
+
+      // leading track
+      resA = fTauID->passLeadingTrackCuts(tauA);
+      resB = fTauID->passLeadingTrackCuts(tauB);
+      std::cout << "LeadingTrack " << resA << " " << resB << std::endl;
+      if(resA != resB)
+        return resA;
+      if(!resA && !resB) {
+        /*
+        resA = tauA->leadPFChargedHadrCand().isNull();
+        resB = tauB->leadPFChargedHadrCand().isNull();
+        std::cout << "LeadingTrack failed, does exist? " << resA << " " << resB << std::endl;
+        if(resA != resB)
+          return resA;
+        if(!resA && !resB) {
+          // ??? pick one with larger pt
+          return tauA->pt() > tauB->pt();
+        }
+        std::cout << "LeadingTrack failed, exists, pT " << tauA->leadPFChargedHadrCand()->pt() << " " << tauB->leadPFChargedHadrCand()->pt() << std::endl;
+        // both have leading track, comparison with leading track pt
+        return tauA->leadPFChargedHadrCand()->pt() > tauB->leadPFChargedHadrCand()->pt();
+        */
+        return firstIsMoreIsolatedLargerPt(tauA, tauB);
+      }
+
+      // ECAL Fiducial
+      resA = fTauID->passECALFiducialCuts(tauA);
+      resB = fTauID->passECALFiducialCuts(tauB);
+      std::cout << "ECAL fiducial cuts " << resA << " " << resB << std::endl;
+      if(resA != resB)
+        return resA;
+      if(!resA && !resB)
+        return firstIsMoreIsolatedLargerPt(tauA, tauB);
+
+      // E veto
+      resA = fTauID->passTauCandidateEVetoCuts(tauA);
+      resB = fTauID->passTauCandidateEVetoCuts(tauB);
+      std::cout << "againstElectron " << resA << " " << resB << std::endl;
+      if(resA != resB)
+        return resA;
+      if(!resA && !resB)
+        return firstIsMoreIsolatedLargerPt(tauA, tauB);
+
+      // Mu veto
+      resA = fTauID->passTauCandidateMuVetoCuts(tauA);
+      resB = fTauID->passTauCandidateMuVetoCuts(tauB);
+      std::cout << "againstMuon " << resA << " " << resB << std::endl;
+      if(resA != resB)
+        return resA;
+      if(!resA && !resB)
+        return firstIsMoreIsolatedLargerPt(tauA, tauB);
+
+      // Dead cells
+      resA = fTauID->passVetoAgainstDeadECALCells(tauA);
+      resB = fTauID->passVetoAgainstDeadECALCells(tauB);
+      std::cout << "ECAL dead cells " << resA << " " << resB << std::endl;
+      if(resA != resB)
+        return resA;
+      if(!resA && !resB)
+        return firstIsMoreIsolatedLargerPt(tauA, tauB);
+
+      // isolation
+      resA = fTauID->passIsolation(tauA);
+      resB = fTauID->passIsolation(tauB);
+      std::cout << "Isolation " << resA << " (" << tauA->tauID("byRawCombinedIsolationDeltaBetaCorr")
+                << ") " << resB << " (" << tauB->tauID("byRawCombinedIsolationDeltaBetaCorr")
+                << ")" << std::endl;
+      if(resA != resB)
+        return resA;
+      if(!resA && !resB)
+        return tauA->tauID("byRawCombinedIsolationDeltaBetaCorr") < tauB->tauID("byRawCombinedIsolationDeltaBetaCorr");
+
+      // nprongs
+      resA = fTauID->passNProngsCut(tauA);
+      resB = fTauID->passNProngsCut(tauB);
+      std::cout << "NProngs " << resA << " " << resB << std::endl;
+      if(resA != resB)
+        return resA;
+      if(!resA && !resB)
+        // ??? pick one with larger pt
+        return tauA->pt() > tauB->pt();
+  
+      // Rtau        
+      resA = fTauID->passRTauCut(tauA);
+      resB = fTauID->passRTauCut(tauB);
+      std::cout << "Rtau " << resA << " (" << fTauID->getRtauValue(tauA)
+                << ") " << resB << " (" << fTauID->getRtauValue(tauB)
+                << ")" << std::endl;
+      if(resA != resB)
+        return resA;
+      if(!resA && !resB)
+        return fTauID->getRtauValue(tauA) > fTauID->getRtauValue(tauB);
+
+      // Still here? Can I do anything more intelligent than compare pT?
+      return tauA->pt() > tauB->pt();
+    }
+
+    HPlus::TauIDBase *fTauID;
+  };
 }
 
 namespace HPlus {
@@ -922,5 +1085,55 @@ namespace HPlus {
         if (!isAtDeadCell) hGenuineTauEtaPhiAfterNProngsAndDeadVeto->Fill(iTau->eta(),iTau->phi());
       }
     }
+  }
+
+
+  const edm::Ptr<pat::Tau> TauSelection::selectMostLikelyTau(const edm::PtrVector<pat::Tau>& taus) {
+    if(taus.empty())
+      throw cms::Exception("Assert") << "TauSelection::selectMostLikelyTau(): empty vector of taus as an input" << std::endl;
+    if(taus.size() == 1)
+      return taus[0];
+
+    // Exploit sorting
+    std::vector<edm::Ptr<pat::Tau> > tmp;
+    std::cout << "Tau list" << std::endl;
+    for(size_t i=0; i<taus.size(); ++i) {
+      std::cout << "  tau " << i << " pt " << taus[i]->pt() << " eta" << taus[i]->eta() << std::endl;
+      tmp.push_back(taus[i]);
+    }
+    std::sort(tmp.begin(), tmp.end(), MoreLikelyTauCompare(fTauID));
+
+    // First element in the sorted vector is the one which is most likely passing the taujet ID
+    return tmp[0];
+
+      /*
+    // Decay mode finding
+    std::vector<edm::Ptr<pat::Tau> > selected;
+    std::vector<edm::Ptr<pat::Tau> > tmp;
+    for(size_t i=0; i<taus.size(); ++i) {
+      if(fTauID->passDecayModeFinding(taus[i]))
+        selected.push_back(taus[i]);
+    }
+    if(selected.empty()) {
+      // None passes decay mode, what should I do?
+      // Pick the one with largest pt?
+      edm::Ptr<pat::Tau> ret = taus[0];
+      for(size_t i=1; i<taus.size(); ++i) {
+        if(taus[i]->pt() > ret->pt())
+          ret = taus[i];
+      }
+      return ret;
+    }
+    if(selected.size() == 1)
+      return selected[0];
+
+    // Still >= 2 taus, continue with kinematic selection
+    
+    // FIXME: order eta, pt?
+    for(size_t i=0; i<selected.size(); ++i) {
+      if(fTauID->passKinematicSelectionPt(selected[i]))
+        tmp.push_back(selected[i]);
+    }
+      */
   }
 }
