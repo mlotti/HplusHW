@@ -310,12 +310,16 @@ namespace HPlus {
     CounterGroup fEWKFakeTausGroup;
     CounterGroup fAllTausCounterGroup;
     CounterGroup fElectronToTausCounterGroup;
+    CounterGroup fElectronFromTauDecayToTausCounterGroup;
     CounterGroup fMuonToTausCounterGroup;
+    CounterGroup fMuonFromTauDecayToTausCounterGroup;
     CounterGroup fGenuineToTausCounterGroup;
     CounterGroup fJetToTausCounterGroup;
     CounterGroup fAllTausAndTauOutsideAcceptanceCounterGroup;
     CounterGroup fElectronToTausAndTauOutsideAcceptanceCounterGroup;
+    CounterGroup fElectronFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup;
     CounterGroup fMuonToTausAndTauOutsideAcceptanceCounterGroup;
+    CounterGroup fMuonFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup;
     CounterGroup fGenuineToTausAndTauOutsideAcceptanceCounterGroup;
     CounterGroup fJetToTausAndTauOutsideAcceptanceCounterGroup;
 
