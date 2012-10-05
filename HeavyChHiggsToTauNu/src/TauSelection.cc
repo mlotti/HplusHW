@@ -121,17 +121,18 @@ namespace {
 
     bool operator()(const edm::Ptr<pat::Tau>& tauA, const edm::Ptr<pat::Tau>& tauB) {
       bool result = firstIsMoreLikely(tauA, tauB);
-      // point for printing out the result
-      std::cout << "Is left-one more likely? " << result << std::endl;
+      //std::cout << "Is left-one more likely? " << result << std::endl;
       return result;
     }
 
     bool firstIsMoreIsolatedLargerPt(const edm::Ptr<pat::Tau>& tauA, const edm::Ptr<pat::Tau>& tauB) {
       bool resA = fTauID->passIsolation(tauA);
       bool resB = fTauID->passIsolation(tauB);
+      /*
       std::cout << "  Isolation " << resA << " (" << tauA->tauID("byRawCombinedIsolationDeltaBetaCorr")
                 << ") " << resB << " (" << tauB->tauID("byRawCombinedIsolationDeltaBetaCorr")
                 << ")" << std::endl;
+      */
       if(resA != resB)
         return resA;
       if(!resA && !resB)
@@ -149,7 +150,7 @@ namespace {
       // DecayModeFinding
       resA = fTauID->passDecayModeFinding(tauA);
       resB = fTauID->passDecayModeFinding(tauB);
-      std::cout << std::endl << "DecayModeFinding " << resA << " " << resB << std::endl;
+      //std::cout << std::endl << "DecayModeFinding " << resA << " " << resB << std::endl;
       if(resA != resB)
         return resA;
       if(!resA && !resB)
@@ -159,7 +160,7 @@ namespace {
       // pT
       resA = fTauID->passKinematicSelectionPt(tauA);
       resB = fTauID->passKinematicSelectionPt(tauB);
-      std::cout << "pT " << resA << " (" << tauA->pt() << ") " << resB << " (" << tauB->pt() << ")" << std::endl;
+      //std::cout << "pT " << resA << " (" << tauA->pt() << ") " << resB << " (" << tauB->pt() << ")" << std::endl;
       if(resA != resB)
         return resA;
       if(!resA && !resB) {
@@ -170,7 +171,7 @@ namespace {
       // eta
       resA = fTauID->passKinematicSelectionEta(tauA);
       resB = fTauID->passKinematicSelectionEta(tauB);
-      std::cout << "eta " << resA << " (" << tauA->eta() << ") " << resB << " (" << tauB->eta() << ")" << std::endl;
+      //std::cout << "eta " << resA << " (" << tauA->eta() << ") " << resB << " (" << tauB->eta() << ")" << std::endl;
       if(resA != resB)
         return resA;
       if(!resA && !resB) {
@@ -181,7 +182,7 @@ namespace {
       // leading track
       resA = fTauID->passLeadingTrackCuts(tauA);
       resB = fTauID->passLeadingTrackCuts(tauB);
-      std::cout << "LeadingTrack " << resA << " " << resB << std::endl;
+      //std::cout << "LeadingTrack " << resA << " " << resB << std::endl;
       if(resA != resB)
         return resA;
       if(!resA && !resB) {
@@ -205,7 +206,7 @@ namespace {
       // ECAL Fiducial
       resA = fTauID->passECALFiducialCuts(tauA);
       resB = fTauID->passECALFiducialCuts(tauB);
-      std::cout << "ECAL fiducial cuts " << resA << " " << resB << std::endl;
+      //std::cout << "ECAL fiducial cuts " << resA << " " << resB << std::endl;
       if(resA != resB)
         return resA;
       if(!resA && !resB)
@@ -214,7 +215,7 @@ namespace {
       // E veto
       resA = fTauID->passTauCandidateEVetoCuts(tauA);
       resB = fTauID->passTauCandidateEVetoCuts(tauB);
-      std::cout << "againstElectron " << resA << " " << resB << std::endl;
+      //std::cout << "againstElectron " << resA << " " << resB << std::endl;
       if(resA != resB)
         return resA;
       if(!resA && !resB)
@@ -223,7 +224,7 @@ namespace {
       // Mu veto
       resA = fTauID->passTauCandidateMuVetoCuts(tauA);
       resB = fTauID->passTauCandidateMuVetoCuts(tauB);
-      std::cout << "againstMuon " << resA << " " << resB << std::endl;
+      //std::cout << "againstMuon " << resA << " " << resB << std::endl;
       if(resA != resB)
         return resA;
       if(!resA && !resB)
@@ -232,7 +233,7 @@ namespace {
       // Dead cells
       resA = fTauID->passVetoAgainstDeadECALCells(tauA);
       resB = fTauID->passVetoAgainstDeadECALCells(tauB);
-      std::cout << "ECAL dead cells " << resA << " " << resB << std::endl;
+      //std::cout << "ECAL dead cells " << resA << " " << resB << std::endl;
       if(resA != resB)
         return resA;
       if(!resA && !resB)
@@ -241,9 +242,11 @@ namespace {
       // isolation
       resA = fTauID->passIsolation(tauA);
       resB = fTauID->passIsolation(tauB);
+      /*
       std::cout << "Isolation " << resA << " (" << tauA->tauID("byRawCombinedIsolationDeltaBetaCorr")
                 << ") " << resB << " (" << tauB->tauID("byRawCombinedIsolationDeltaBetaCorr")
                 << ")" << std::endl;
+      */
       if(resA != resB)
         return resA;
       if(!resA && !resB)
@@ -252,7 +255,7 @@ namespace {
       // nprongs
       resA = fTauID->passNProngsCut(tauA);
       resB = fTauID->passNProngsCut(tauB);
-      std::cout << "NProngs " << resA << " " << resB << std::endl;
+      //std::cout << "NProngs " << resA << " " << resB << std::endl;
       if(resA != resB)
         return resA;
       if(!resA && !resB)
@@ -262,9 +265,11 @@ namespace {
       // Rtau        
       resA = fTauID->passRTauCut(tauA);
       resB = fTauID->passRTauCut(tauB);
+      /*
       std::cout << "Rtau " << resA << " (" << fTauID->getRtauValue(tauA)
                 << ") " << resB << " (" << fTauID->getRtauValue(tauB)
                 << ")" << std::endl;
+      */
       if(resA != resB)
         return resA;
       if(!resA && !resB)
