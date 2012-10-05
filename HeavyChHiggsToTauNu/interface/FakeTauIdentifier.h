@@ -61,6 +61,8 @@ namespace HPlus {
     bool isElectronOrMuonFromTauDecay(MCSelectedTauMatchType type) { return (type == kkElectronFromTauDecayToTau || type == kkElectronToTauAndTauOutsideAcceptance ||
       type == kkMuonFromTauDecayToTau || type == kkMuonFromTauDecayToTauAndTauOutsideAcceptance); }
 
+    bool isEmbeddingGenuineTau(MCSelectedTauMatchType type) { return (!isFakeTau(type) || isElectronOrMuonFromTauDecay(type)); }
+
   private:
     // Scale factors for X->tau fakes
     const double fSFFakeTauBarrelElectron;
