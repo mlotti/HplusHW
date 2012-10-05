@@ -388,7 +388,7 @@ namespace HPlus {
     FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
     bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(myTauMatch); // True if the selected tau is a fake
     // Below "genuine tau" is in the context of embedding (i.e. irrespective of the tau decay)
-    if(fOnlyGenuineTaus && !fFakeTauIdentifier.isEmbeddingGenuineTau()) return false;
+    if(fOnlyGenuineTaus && !fFakeTauIdentifier.isEmbeddingGenuineTau(myTauMatch)) return false;
     increment(fTausExistCounter);
     // Apply scale factor for fake tau
     if (!iEvent.isRealData())
