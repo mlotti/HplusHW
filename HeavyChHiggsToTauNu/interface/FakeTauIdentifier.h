@@ -20,7 +20,7 @@ namespace HPlus {
   class FakeTauIdentifier {
   public:
     enum MCSelectedTauMatchType {
-      kkNoMC,
+      kkNoMC = 0,
       kkElectronToTau,
       kkElectronFromTauDecayToTau,
       kkMuonToTau,
@@ -32,7 +32,8 @@ namespace HPlus {
       kkMuonToTauAndTauOutsideAcceptance,
       kkMuonFromTauDecayToTauAndTauOutsideAcceptance,
       kkTauToTauAndTauOutsideAcceptance,
-      kkJetToTauAndTauOutsideAcceptance
+      kkJetToTauAndTauOutsideAcceptance,
+      kkNumberOfSelectedTauMatchTypes
     };
     enum MCSelectedTauOriginType {
       kkUnknownOrigin,
