@@ -417,6 +417,13 @@ def createTasks(opts, step, version=None):
                 dataset.appendArg("runOnCrab=1")
 #            if dataset.getName() in datasetsData2011_Run2011A_noEPS:
 #                dataset.appendArg("tauEmbeddingCaloMet=caloMetSum")
+        if step == "analysisTau":
+            if "args" in dataset.data:
+                # analysisTau workflow is without trigger!
+                try:
+                    del dataset.data["args"]["triggerMC"]
+                except KeyError:
+                    pass
         if step == "signalAnalysisGenTau":
             dataset.appendArg("doTauEmbeddingLikePreselection=1")
     #    if step == "analysisTau":
