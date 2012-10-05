@@ -1101,9 +1101,9 @@ namespace HPlus {
 
     // Exploit sorting
     std::vector<edm::Ptr<pat::Tau> > tmp;
-    std::cout << "Tau list" << std::endl;
+    //std::cout << "Tau list" << std::endl;
     for(size_t i=0; i<taus.size(); ++i) {
-      std::cout << "  tau " << i << " pt " << taus[i]->pt() << " eta" << taus[i]->eta() << std::endl;
+      //std::cout << "  tau " << i << " pt " << taus[i]->pt() << " eta" << taus[i]->eta() << std::endl;
       tmp.push_back(taus[i]);
     }
     std::sort(tmp.begin(), tmp.end(), MoreLikelyTauCompare(fTauID));
