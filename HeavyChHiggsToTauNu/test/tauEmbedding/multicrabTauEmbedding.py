@@ -304,7 +304,7 @@ def createTasks(opts, step, version=None):
 
     multicrab.extendDatasets(dataInput, datasets)
 
-    if step == "skim":
+    if step in ["skim", "analysisTau"]:
         multicrab.appendLineAll("GRID.maxtarballsize = 30")
     else:   
         multicrab.appendLineAll("GRID.maxtarballsize = 30")
