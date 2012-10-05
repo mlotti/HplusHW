@@ -161,15 +161,15 @@ skimNjobs = {
     "TTJets_TuneZ2_Fall11": 4990, # ~1 hour/200 MB 
     "QCD_Pt20_MuEnriched_TuneZ2_Fall11": 490,
     "DYJetsToLL_M50_TuneZ2_Fall11": 990,
-    "T_t-channel_TuneZ2_Fall11": 490,
-    "Tbar_t-channel_TuneZ2_Fall11": 160,
+    "T_t-channel_TuneZ2_Fall11": 300,
+    "Tbar_t-channel_TuneZ2_Fall11": 100,
     "T_tW-channel_TuneZ2_Fall11": 90,
     "Tbar_tW-channel_TuneZ2_Fall11": 90,
-    "T_s-channel_TuneZ2_Fall11": 50,
-    "Tbar_s-channel_TuneZ2_Fall11": 10,
-    "WW_TuneZ2_Fall11": 200,
-    "WZ_TuneZ2_Fall11": 200,
-    "ZZ_TuneZ2_Fall11": 350,
+    "T_s-channel_TuneZ2_Fall11": 25,
+    "Tbar_s-channel_TuneZ2_Fall11": 5,
+    "WW_TuneZ2_Fall11": 150,
+    "WZ_TuneZ2_Fall11": 150,
+    "ZZ_TuneZ2_Fall11": 200,
     }
 muonAnalysisNjobs = { # goal: 30k events/job # FIXME these need to be updated
     "SingleMu_Mu_160431-163261_2011A_Nov08": 2, # HLT_Mu20_v1
