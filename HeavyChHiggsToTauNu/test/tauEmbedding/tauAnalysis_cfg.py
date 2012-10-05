@@ -197,7 +197,7 @@ for label, module in process.producers_().iteritems():
     if module.type_() == "EventCountProducer":
         eventCounters.append(label)
 prototype = cms.EDProducer("HPlusEventCountProducer",
-    weightSrc = cms.InputTag("pileupWeight"+puWeights[-1])
+    weightSrc = cms.InputTag(puWeightNames[-1])
 )
 for label in eventCounters:
     process.globalReplace(label, prototype.clone())
