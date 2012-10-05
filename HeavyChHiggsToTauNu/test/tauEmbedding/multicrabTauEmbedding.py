@@ -307,7 +307,7 @@ def createTasks(opts, step, version=None):
     if step == "skim":
         multicrab.appendLineAll("GRID.maxtarballsize = 30")
     else:   
-        multicrab.appendLineAll("GRID.maxtarballsize = 20")
+        multicrab.appendLineAll("GRID.maxtarballsize = 30")
         multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
 
 
@@ -408,7 +408,7 @@ def createTasks(opts, step, version=None):
                 if key == "skimConfig":
                     del dataset.data[key]
             dataset.appendArg("tauEmbeddingInput=1")
-            dataset.appendArg("doPat=1")
+#            dataset.appendArg("doPat=1") # not needed after v44_4 embedding
             if dataset.isData():
                 for key in dataset.data.keys():
                     if key == "trigger":
