@@ -497,20 +497,22 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
         raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'Run2011A', 'Run2011B', 'Run2011AB'" % era)
     pset.dataPUdistributionLabel = "pileup"
     # Make procuder for weights and add it to common sequence
+    tmp = pset.clone()
     PUWeightProducer = cms.EDProducer("HPlusVertexWeightProducer",
-                                      vertexSrc = pset.vertexSrc,
-                                      puSummarySrc = pset.puSummarySrc,
-                                      enabled = pset.enabled,
-                                      dataPUdistribution = pset.dataPUdistribution,
-                                      dataPUdistributionLabel = pset.dataPUdistributionLabel,
-                                      mcPUdistribution = pset.mcPUdistribution,
-                                      mcPUdistributionLabel = pset.mcPUdistributionLabel,
-                                      alias = cms.string("PUVertexWeight"+suffix)
+                                      vertexSrc = tmp.vertexSrc,
+                                      puSummarySrc = tmp.puSummarySrc,
+                                      enabled = tmp.enabled,
+                                      dataPUdistribution = tmp.dataPUdistribution,
+                                      dataPUdistributionLabel = tmp.dataPUdistributionLabel,
+                                      mcPUdistribution = tmp.mcPUdistribution,
+                                      mcPUdistributionLabel = tmp.mcPUdistributionLabel,
+                                      alias = cms.string("PUVertexWeight"+era+suffix)
     )
     name = "PUWeightProducer"+era+suffix
     setattr(process, name, PUWeightProducer)
     commonSequence *= PUWeightProducer
     psetReader.PUVertexWeightSrc = name
+    return name
 
 def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, psetReader, suffix):
     if dataVersion.isData():
