@@ -36,11 +36,13 @@ private:
     iEvent.getByLabel(fTauSrc, htaus);
     
     std::auto_ptr<std::vector<pat::Tau> > prod(new std::vector<pat::Tau>());
-    prod->reserve(1);
+    if(!htaus->empty()) {
+      prod->reserve(1);
 
-    edm::PtrVector<pat::Tau> taus = htaus->ptrVector();
-    edm::Ptr<pat::Tau> mostLikelyTau = fOneProngTauSelection.selectMostLikelyTau(taus);
-    prod->push_back(*mostLikelyTau);
+      edm::PtrVector<pat::Tau> taus = htaus->ptrVector();
+      edm::Ptr<pat::Tau> mostLikelyTau = fOneProngTauSelection.selectMostLikelyTau(taus);
+      prod->push_back(*mostLikelyTau);
+    }
 
     iEvent.put(prod);
   }
