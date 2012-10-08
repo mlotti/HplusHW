@@ -151,7 +151,7 @@ if dataVersion.isMC():
 process.preselectionSequence.insert(0, process.commonSequence)
 addAnalysis(process, "tauNtuple", ntuple,
             preSequence=process.preselectionSequence,
-            additionalCounters=additionalCounters,
+            additionalCounters=preselectionCounters,
             signalAnalysisCounters=False)
 process.tauNtupleCounters.printMainCounter = True
 
