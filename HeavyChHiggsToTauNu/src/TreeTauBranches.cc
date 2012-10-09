@@ -128,5 +128,6 @@ namespace HPlus {
     fTausMotherPdgId.clear();
     fTausGrandMotherPdgId.clear();
     fTausDaughterPdgId.clear();
+    fTausGenMatch.clear();
   }
 }
