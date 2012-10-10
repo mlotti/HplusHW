@@ -105,6 +105,7 @@ tauNtuple.caloMet = "tecalomet_p4.Pt() > 60"
 tauNtuple.weight = {
 #    "EPS": "weightPileup_Run2011A",
 #    "Run2011A-EPS": "pileupWeight_Run2011AnoEPS",
+    "": "",
     "Run2011A": "weightPileup_Run2011A",
     "Run2011B": "weightPileup_Run2011B",
     "Run2011AB": "weightPileup_Run2011AB",

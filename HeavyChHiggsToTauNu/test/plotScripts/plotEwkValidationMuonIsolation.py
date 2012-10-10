@@ -33,12 +33,14 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 tauAnalysisEmb = "tauNtuple"
 
 dataEra = "Run2011AB"
+dataEra = ""
 
 mcLuminosity = 5049.069000
 
 def main():
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=tauAnalysisEmb+"Counters")
-    datasets.updateNAllEventsToPUWeighted(era=dataEra)
+    datasets = dataset.getDatasetsFromMulticrabCfg(counters=tauAnalysisEmb+"Counters", weightedCounters=(dataEra!=""))
+    if dataEra != "":
+        datasets.updateNAllEventsToPUWeighted(era=dataEra)
     plots.mergeRenameReorderForDataMC(datasets)
     
     style = tdrstyle.TDRStyle()
@@ -55,10 +57,10 @@ def main():
 
     for name, isolation in isolations:
         ntupleCache = dataset.NtupleCache(tauAnalysisEmb+"/tree", "EmbeddingMuonIsolationSelector",
-                                          selectorArgs=["", isolation],
+                                          selectorArgs=[tauEmbedding.tauNtuple.weight[dataEra], isolation],
                                           cacheFileName="histogramCache-%s.root" % name,
                                           #maxEvents=100,
-                                          process=False,
+                                          #process=False,
                                           )
 
         for datasetName in ["TTJets"]:
@@ -123,7 +125,10 @@ def doCounters(datasets, datasetName, selectionName, ntupleCache):
 
     eventCounter.removeColumns(filter(isNotThis, datasets.getAllDatasetNames()))
 
-    eventCounter.getMainCounter().appendRows(ntupleCache.histogram("counters/weighted/counter"))
+    counters = "counters/counter"
+    if dataEra != "":
+        counters = "counters/weighted/counter"
+    eventCounter.getMainCounter().appendRows(ntupleCache.histogram(counters))
     table = eventCounter.getMainCounterTable()
 
     nTauID = table.getCount(colName=datasetName, rowName="Tau ID").clone()
