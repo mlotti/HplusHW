@@ -261,6 +261,9 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
 
     muonSrc = cms.InputTag(muons.value()),
     muonFunctions = analysisConfig.muonFunctions.clone(),
+    embeddingMuonEfficiency = param.embeddingMuonEfficiency.clone(
+        mode = "efficiency"
+    ),
 
     tauSrc = cms.InputTag(taus.value()),
     tauFunctions = analysisConfig.tauFunctions.clone(),

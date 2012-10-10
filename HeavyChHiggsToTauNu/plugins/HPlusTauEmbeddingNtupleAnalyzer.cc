@@ -18,6 +18,10 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EmbeddingMuonEfficiency.h"
+
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeEventBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeFunctionBranch.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventItem.h"
@@ -51,6 +55,10 @@ private:
   edm::InputTag fGenParticleOriginalSrc;
   edm::InputTag fGenParticleEmbeddedSrc;
 
+  HPlus::EventWeight fEventWeight;
+  HPlus::HistoWrapper fHistoWrapper;
+  HPlus::EmbeddingMuonEfficiency fEmbeddingMuonEfficiency;
+
   HPlus::TreeEventBranches fEventBranches;
   HPlus::TreeVertexBranches fSelectedVertexBranches;
   HPlus::TreeVertexBranches fGoodVertexBranches;
@@ -61,11 +69,16 @@ private:
 
   std::vector<MetItem> fMets;
   std::vector<DoubleItem> fDoubles;
+
+  double fEmbeddingMuonEfficiencyWeight;
 };
 
 HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::ParameterSet& iConfig):
   fGenParticleOriginalSrc(iConfig.getParameter<edm::InputTag>("genParticleOriginalSrc")),
   fGenParticleEmbeddedSrc(iConfig.getParameter<edm::InputTag>("genParticleEmbeddedSrc")),
+  fEventWeight(iConfig),
+  fHistoWrapper(fEventWeight, "Vital"),
+  fEmbeddingMuonEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingMuonEfficiency"), fHistoWrapper),
   fSelectedVertexBranches(iConfig, "selectedPrimaryVertex", "selectedPrimaryVertexSrc"),
   fGoodVertexBranches(iConfig, "goodPrimaryVertex", "goodPrimaryVertexSrc"),
   fTriggerBranches(iConfig),
@@ -103,6 +116,8 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   for(size_t i=0; i<fDoubles.size(); ++i) {
     fTree->Branch(fDoubles[i].name.c_str(), &(fDoubles[i].value));
   }
+
+  fTree->Branch("weight_embeddingMuonEfficiency", &fEmbeddingMuonEfficiencyWeight);
 }
 
 HPlusTauEmbeddingNtupleAnalyzer::~HPlusTauEmbeddingNtupleAnalyzer() {}
@@ -124,6 +139,7 @@ void HPlusTauEmbeddingNtupleAnalyzer::reset() {
   for(size_t i=0; i<fDoubles.size(); ++i) {
     fDoubles[i].value = nan;
   }
+  fEmbeddingMuonEfficiencyWeight = 1.0;
 }
 
 void HPlusTauEmbeddingNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -131,6 +147,9 @@ void HPlusTauEmbeddingNtupleAnalyzer::analyze(const edm::Event& iEvent, const ed
   fSelectedVertexBranches.setValues(iEvent);
   fGoodVertexBranches.setValues(iEvent);
   fTriggerBranches.setValues(iEvent);
+
+  HPlus::EmbeddingMuonEfficiency::Data embeddingMuonData = fEmbeddingMuonEfficiency.applyEventWeight(iEvent, fEventWeight);
+  fEmbeddingMuonEfficiencyWeight = embeddingMuonData.getEventWeight();
 
   edm::Handle<edm::View<reco::GenParticle> > hgenparticlesOriginal;
   edm::Handle<edm::View<reco::GenParticle> > hgenparticlesEmbedded;
