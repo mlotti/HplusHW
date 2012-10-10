@@ -642,6 +642,9 @@ class MulticrabDataset:
             raise Exception("Unable to modify number_of_jobs, lumis_per_job already set!")
         self.data["number_of_jobs"] = int(njobs)
 
+    def getNumberOfJobs(self):
+        return int(self.data["number_of_jobs"])
+
     ## Modify number of jobs with a function.
     # 
     # \param func   Function
@@ -921,6 +924,12 @@ class Multicrab:
             self._createDatasets()
 
         return self.datasetMap[name]
+
+    def getNumberOfDatasets(self):
+        if self.datasets == None:
+            self._createDatasets()
+
+        return len(self.datasets)
 
     ## Apply a function for each MulticrabDataset.
     #

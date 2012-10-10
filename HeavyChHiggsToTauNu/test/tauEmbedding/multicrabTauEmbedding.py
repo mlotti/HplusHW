@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import re
+import math
 from optparse import OptionParser
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
@@ -450,21 +451,51 @@ def createTasks(opts, step, version=None):
         multicrab.forEachDataset(modify)
     
     multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
-    
-    # Create the multicrab task
-    prefix = "multicrab_"+step+dirName
-    
-    taskDir = multicrab.createTasks(configOnly=opts.configOnly, prefix=prefix)
 
+    datasetsOver500Jobs = {}
+    def checkAnyOver500Jobs(dataset):
+        njobs = dataset.getNumberOfJobs()
+        if njobs >= 500:
+            datasetsOver500Jobs[dataset.getName()] = njobs
+    multicrab.forEachDataset(checkAnyOver500Jobs)
+    if len(datasetsOver500Jobs) >= 1 and multicrab.getNumberOfDatasets() != 1:
+        raise Exception("There are datasets with over 500 jobs/dataset (%s) mixed with datasets with less than 500 jobs/dataset. This is not supported at the moment." % (", ".join(datasetsOver500Jobs)))
+
+    # Create the multicrab task
+    taskDirs = []
+
+    prefix = "multicrab_"+step
+    if len(datasetsOver500Jobs) == 0:
+        prefix += dirName
+    
+        taskDir = multicrab.createTasks(configOnly=opts.configOnly, prefix=prefix)
+        taskDirs.append( (taskDir, datasets) )
+    elif len(datasetsOver500Jobs) == 1:
+        for datasetName, njobs in datasetsOver500Jobs.iteritems():
+            dname = datasetName.split("_")[0]
+            nMulticrabTasks = int(math.ceil(njobs/500.0))
+            for i in xrange(nMulticrabTasks):
+                firstJob = i*500+1
+                lastJob = (i+1)*500
+                pfix ="%s_%s_%d-%d%s" % (prefix, dname, firstJob, lastJob, dirName)
+                taskDir = multicrab.createTasks(configOnly=opts.configOnly, prefix=pfix)
+                taskDirs.append( (taskDir, [datasetName]) )
+    else:
+        raise Exception("There are more than one datasets with over 500 jobs/dataset (%s). This is not supported at the moment." % ", ".join(datasetsOver500Jobs))
+        
     # patch CMSSW.sh
     if not opts.configOnly and step in ["skim", "embedding"]:
         import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
         import os
-        os.chdir(taskDir)
-        patch.main(Wrapper(dirs=datasets, input={"skim": "skim",
-                                             "embedding": "embedded"}[step]))
-        os.chdir("..")
+        for td, dsets in taskDirs:
+            os.chdir(td)
+            patch.main(Wrapper(dirs=dsets, input={"skim": "skim",
+                                                  "embedding": "embedded"}[step]))
+            os.chdir("..")
 
+    if len(taskDirs) > 1:
+        print "Created multicrab directories"
+        print "\n".join( [x[0] for x in taskDirs] )
 
 # patch CMSSW.sh
 class Wrapper:
