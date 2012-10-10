@@ -47,7 +47,7 @@ namespace HPlus {
 
     // MC values
     fMCValue = mcParameters.getParameter<double>("efficiency");
-    fMCValue = mcParameters.getParameter<double>("uncertainty");
+    fMCUncertainty = mcParameters.getParameter<double>("uncertainty");
   }
   EmbeddingMuonEfficiency::~EmbeddingMuonEfficiency() {}
 
