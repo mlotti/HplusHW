@@ -25,6 +25,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeTauBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeJetBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeVertexBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeTriggerBranches.h"
 
 #include "TTree.h"
 
@@ -53,6 +54,7 @@ private:
   HPlus::TreeEventBranches fEventBranches;
   HPlus::TreeVertexBranches fSelectedVertexBranches;
   HPlus::TreeVertexBranches fGoodVertexBranches;
+  HPlus::TreeTriggerBranches fTriggerBranches;
   HPlus::TreeMuonBranches fMuonBranches;
   HPlus::TreeTauBranches fTauBranches;
   HPlus::TreeJetBranches fJetBranches;
@@ -66,6 +68,7 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   fGenParticleEmbeddedSrc(iConfig.getParameter<edm::InputTag>("genParticleEmbeddedSrc")),
   fSelectedVertexBranches(iConfig, "selectedPrimaryVertex", "selectedPrimaryVertexSrc"),
   fGoodVertexBranches(iConfig, "goodPrimaryVertex", "goodPrimaryVertexSrc"),
+  fTriggerBranches(iConfig),
   fMuonBranches(iConfig),
   fTauBranches(iConfig),
   fJetBranches(iConfig, false)
@@ -89,6 +92,7 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   fEventBranches.book(fTree);
   fSelectedVertexBranches.book(fTree);
   fGoodVertexBranches.book(fTree);
+  fTriggerBranches.book(fTree);
   fMuonBranches.book(fTree);
   fTauBranches.book(fTree);
   fJetBranches.book(fTree);
@@ -109,6 +113,7 @@ void HPlusTauEmbeddingNtupleAnalyzer::reset() {
   fEventBranches.reset();
   fSelectedVertexBranches.reset();
   fGoodVertexBranches.reset();
+  fTriggerBranches.reset();
   fMuonBranches.reset();
   fTauBranches.reset();
   fJetBranches.reset();
@@ -125,6 +130,7 @@ void HPlusTauEmbeddingNtupleAnalyzer::analyze(const edm::Event& iEvent, const ed
   fEventBranches.setValues(iEvent);
   fSelectedVertexBranches.setValues(iEvent);
   fGoodVertexBranches.setValues(iEvent);
+  fTriggerBranches.setValues(iEvent);
 
   edm::Handle<edm::View<reco::GenParticle> > hgenparticlesOriginal;
   edm::Handle<edm::View<reco::GenParticle> > hgenparticlesEmbedded;
