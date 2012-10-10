@@ -35,14 +35,7 @@ private:
   Branch<bool> fElectronVetoPassed;
   Branch<bool> fHBHENoiseFilterPassed;
 
-  enum IsolationMode {
-    kDisabled,
-    kStandard,
-    kChargedHadrRel10,
-    kChargedHadrRel15,
-    kEmbedding
-  };
-  IsolationMode fIsolationMode;
+  EmbeddingMuonIsolation::Mode fIsolationMode;
 
   TH1 *makePt(const char *name);
   TH1 *makeIso(const char *name);
@@ -109,7 +102,9 @@ private:
 
 MuonAnalysisSelector::MuonAnalysisSelector(const std::string& puWeight, const std::string& isolationMode):
   BaseSelector(),
+  fMuons("Emb"),
   fPuWeightName(puWeight),
+  fIsolationMode(EmbeddingMuonIsolation::stringToMode(isolationMode)),
   cAll(fEventCounter.addCounter("All events")),
   cMuonKinematics(fEventCounter.addCounter("Muon kinematics")),
   cMuonDB(fEventCounter.addCounter("Muon dB")),
@@ -119,14 +114,7 @@ MuonAnalysisSelector::MuonAnalysisSelector(const std::string& puWeight, const st
   cMuonVeto(fEventCounter.addCounter("Veto additional muons")),
   cElectronVeto(fEventCounter.addCounter("Electron veto")),
   cJetSelection(fEventCounter.addCounter("Jet selection"))
-{
-  if     (isolationMode == "disabled")       fIsolationMode = kDisabled;
-  else if(isolationMode == "standard")       fIsolationMode = kStandard;
-  else if(isolationMode == "chargedHadrRel10") fIsolationMode = kChargedHadrRel10;
-  else if(isolationMode == "chargedHadrRel15") fIsolationMode = kChargedHadrRel15;
-  else if(isolationMode == "embedding")      fIsolationMode = kEmbedding;
-  else throw std::runtime_error("isolationMode is '"+isolationMode+"', allowed values are 'disabled', 'standard', 'chargedHadrRel10', 'chargedHadrRel15', 'embedding'");
-}
+{}
 MuonAnalysisSelector::~MuonAnalysisSelector() {}
 
 TH1 *MuonAnalysisSelector::makePt(const char *name) { return makeTH<TH1F>(name, "Muon pt", 40, 0, 400); }
@@ -239,7 +227,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
   cMuonDB.increment();
 
   // Isolation
-  if(fIsolationMode != kDisabled) {
+  if(fIsolationMode != EmbeddingMuonIsolation::kDisabled) {
     for(size_t i=0; i<selectedMuons.size(); ++i) {
       EmbeddingMuonCollection::Muon& muon = selectedMuons[i];
 
@@ -253,7 +241,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
       if(isMuFromW)
         hMuonVertexCount_AfterDB_MuFromW->Fill(fVertexCount.value(), weight);
 
-      if(fIsolationMode == kStandard) {
+      if(fIsolationMode == EmbeddingMuonIsolation::kStandard) {
         hMuonChargedHadronIso_AfterDB->Fill(muon.chargedHadronIso(), weight);
         hMuonPuChargedHadronIso_AfterDB->Fill(muon.puChargedHadronIso(), weight);
         hMuonNeutralHadronIso_AfterDB->Fill(muon.neutralHadronIso(), weight);
@@ -262,7 +250,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
 
         if(!MuonID::standardRelativeIsolationCut(stdIsoVar)) continue;
       }
-      else if(fIsolationMode == kEmbedding) {
+      else if(fIsolationMode == EmbeddingMuonIsolation::kEmbedding) {
 
         hMuonChargedHadronIso_AfterDB->Fill(muon.chargedHadronIsoEmb(), weight);
         hMuonPuChargedHadronIso_AfterDB->Fill(muon.puChargedHadronIsoEmb(), weight);
@@ -272,7 +260,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
 
         if(!MuonID::embeddingIsolationCut(embIsoVar)) continue;
       }
-      else if(fIsolationMode == kChargedHadrRel10) {
+      else if(fIsolationMode == EmbeddingMuonIsolation::kChargedHadrRel10) {
         hMuonChargedHadronIso_AfterDB->Fill(muon.chargedHadronIso(), weight);
         hMuonPuChargedHadronIso_AfterDB->Fill(muon.puChargedHadronIso(), weight);
         hMuonNeutralHadronIso_AfterDB->Fill(muon.neutralHadronIso(), weight);
@@ -281,7 +269,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
 
         if(!(muon.chargedHadronIso()/muon.p4().Pt() < 0.1)) continue;
       }
-      else if(fIsolationMode == kChargedHadrRel15) {
+      else if(fIsolationMode == EmbeddingMuonIsolation::kChargedHadrRel15) {
         hMuonChargedHadronIso_AfterDB->Fill(muon.chargedHadronIso(), weight);
         hMuonPuChargedHadronIso_AfterDB->Fill(muon.puChargedHadronIso(), weight);
         hMuonNeutralHadronIso_AfterDB->Fill(muon.neutralHadronIso(), weight);

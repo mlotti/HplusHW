@@ -26,14 +26,7 @@ private:
   Branch<double> fPuWeight;
   Branch<unsigned> fVertexCount;
 
-  enum IsolationMode {
-    kDisabled,
-    kStandard,
-    kChargedHadrRel10,
-    kChargedHadrRel15,
-    kTauLike
-  };
-  IsolationMode fIsolationMode;
+  EmbeddingMuonIsolation::Mode fIsolationMode;
 
   TH1 *makeEta(const char *name);
   TH1 *makePt(const char *name);
@@ -65,18 +58,13 @@ private:
 
 EmbeddingMuonIsolationSelector::EmbeddingMuonIsolationSelector(const std::string& puWeight, const std::string& isolationMode):
   BaseSelector(),
+  fMuons("Emb"),
   fPuWeightName(puWeight),
+  fIsolationMode(EmbeddingMuonIsolation::stringToMode(isolationMode)),
   cAll(fEventCounter.addCounter("All events")),
   cTauID(fEventCounter.addCounter("Tau ID")),
   cMuonIsolation(fEventCounter.addCounter("Muon isolation"))
-{
-  if     (isolationMode == "disabled")         fIsolationMode = kDisabled;
-  else if(isolationMode == "standard")         fIsolationMode = kStandard;
-  else if(isolationMode == "chargedHadrRel10") fIsolationMode = kChargedHadrRel10;
-  else if(isolationMode == "chargedHadrRel15") fIsolationMode = kChargedHadrRel15;
-  else if(isolationMode == "taulike")        fIsolationMode = kTauLike;
-  else throw std::runtime_error("isolationMode is '"+isolationMode+"', allowed values are 'disabled', 'standard', 'chargedHadrRel10', 'chargedHadrRel15', 'taulike'");
-}
+{}
 
 EmbeddingMuonIsolationSelector::~EmbeddingMuonIsolationSelector() {}
 
@@ -162,10 +150,7 @@ bool EmbeddingMuonIsolationSelector::process(Long64_t entry) {
   std::vector<EmbeddingMuonCollection::Muon> selectedMuons;
   for(size_t i=0; i<fMuons.size(); ++i) {
     EmbeddingMuonCollection::Muon muon = fMuons.get(i);
-    if(fIsolationMode == kStandard  && !MuonID::standardRelativeIsolation(muon)) continue;
-    if(fIsolationMode == kTauLike && !MuonID::embeddingIsolation(muon)) continue;
-    if(fIsolationMode == kChargedHadrRel10 && !(muon.chargedHadronIso()/muon.p4().Pt() < 0.1)) continue;
-    if(fIsolationMode == kChargedHadrRel15 && !(muon.chargedHadronIso()/muon.p4().Pt() < 0.15)) continue;
+    if(!MuonID::isolation(muon, fIsolationMode)) continue;
     selectedMuons.push_back(muon);
   }
   if(selectedMuons.empty()) return true;
