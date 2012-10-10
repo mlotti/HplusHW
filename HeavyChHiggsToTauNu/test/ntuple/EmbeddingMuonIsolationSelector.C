@@ -31,7 +31,7 @@ private:
     kStandard,
     kChargedHadrRel10,
     kChargedHadrRel15,
-    kEmbedding
+    kTauLike
   };
   IsolationMode fIsolationMode;
 
@@ -74,8 +74,8 @@ EmbeddingMuonIsolationSelector::EmbeddingMuonIsolationSelector(const std::string
   else if(isolationMode == "standard")         fIsolationMode = kStandard;
   else if(isolationMode == "chargedHadrRel10") fIsolationMode = kChargedHadrRel10;
   else if(isolationMode == "chargedHadrRel15") fIsolationMode = kChargedHadrRel15;
-  else if(isolationMode == "embedding")        fIsolationMode = kEmbedding;
-  else throw std::runtime_error("isolationMode is '"+isolationMode+"', allowed values are 'disabled', 'standard', 'chargedHadrRel10', 'chargedHadrRel15', 'embedding'");
+  else if(isolationMode == "taulike")        fIsolationMode = kTauLike;
+  else throw std::runtime_error("isolationMode is '"+isolationMode+"', allowed values are 'disabled', 'standard', 'chargedHadrRel10', 'chargedHadrRel15', 'taulike'");
 }
 
 EmbeddingMuonIsolationSelector::~EmbeddingMuonIsolationSelector() {}
@@ -127,6 +127,7 @@ bool EmbeddingMuonIsolationSelector::process(Long64_t entry) {
     weight *= fPuWeight.value();
   }
   fEventCounter.setWeight(weight);
+  //std::cout << weight << std::endl;
 
   cAll.increment();
 
@@ -162,7 +163,7 @@ bool EmbeddingMuonIsolationSelector::process(Long64_t entry) {
   for(size_t i=0; i<fMuons.size(); ++i) {
     EmbeddingMuonCollection::Muon muon = fMuons.get(i);
     if(fIsolationMode == kStandard  && !MuonID::standardRelativeIsolation(muon)) continue;
-    if(fIsolationMode == kEmbedding && !MuonID::embeddingIsolation(muon)) continue;
+    if(fIsolationMode == kTauLike && !MuonID::embeddingIsolation(muon)) continue;
     if(fIsolationMode == kChargedHadrRel10 && !(muon.chargedHadronIso()/muon.p4().Pt() < 0.1)) continue;
     if(fIsolationMode == kChargedHadrRel15 && !(muon.chargedHadronIso()/muon.p4().Pt() < 0.15)) continue;
     selectedMuons.push_back(muon);

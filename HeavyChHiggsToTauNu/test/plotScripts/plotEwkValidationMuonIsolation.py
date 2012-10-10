@@ -48,16 +48,17 @@ def main():
 
     isolations = [
         ("Standard", "standard"),
-        ("Embedding", "embedding"),
+        ("TauLike", "taulike"),
         ("ChargedHadrRel10", "chargedHadrRel10"),
         ("ChargedHadrRel15", "chargedHadrRel15"),
         ]
 
     for name, isolation in isolations:
         ntupleCache = dataset.NtupleCache(tauAnalysisEmb+"/tree", "EmbeddingMuonIsolationSelector",
-                                          selectorArgs=[tauEmbedding.tauNtuple.weight[dataEra], isolation],
-                                          cacheFileName="histogramCache-%s.root" % name
-                                          #process=False,
+                                          selectorArgs=["", isolation],
+                                          cacheFileName="histogramCache-%s.root" % name,
+                                          #maxEvents=100,
+                                          process=False,
                                           )
 
         for datasetName in ["TTJets"]:
@@ -67,37 +68,50 @@ def main():
 def doPlots(datasets, datasetName, selectionName, ntupleCache):
     createPlot = PlotCreator(datasets, datasetName, ntupleCache)
 
-    drawPlot = plots.PlotDrawer(addMCUncertainty=True, log=True, ratio=True, ratioInvert=True, stackMCHistograms=False,
-                                optsLog={"ymin": 1e-1}, opts2={"ymin": 0, "ymax": 2})
+    drawPlot = plots.PlotDrawer(addMCUncertainty=True, log=True, stackMCHistograms=False,
+                                ratio=True, ratioInvert=True,
+                                optsLog={"ymin": 1e-1}, opts2={"ymin": 0.9, "ymax": 1.02})
 
-    opts2def = {"DYJetsToLL": {"ymin":0, "ymax": 1.5}}.get(datasetName, {"ymin": 0.9, "ymax": 1.02})
-    moveLegend = {"DYJetsToLL": {"dx": -0.02}}.get(datasetName, {})
+    def customize(p):
+        p.setRatios([plots._createRatio(p.numeratorRaw, p.denominatorRaw, ytitle="Fraction", isBinomial=True)])
+    def createDrawPlot(histo, fname, xlabel, **kwargs):
+        p = createPlot(histo)
+        drawPlot(p, fname, xlabel, customizeBeforeDraw=customize, **kwargs)
+
+    #opts2def = {"DYJetsToLL": {"ymin":0, "ymax": 1.5}}.get(datasetName, {"ymin": 0.9, "ymax": 1.02})
+    #moveLegend = {"DYJetsToLL": {"dx": -0.02}}.get(datasetName, {})
+    opts2def = {}
+    moveLegend = {}
+
+    if selectionName != "TauLike":
+        opts2def["ymin"] = 0.98
+        opts2def["ymax"] = 1.005
 
     prefix = "muiso_"+selectionName+"_"
     postfix = "_"+datasetName
 
     opts2 = opts2def
-    drawPlot(createPlot("tauPt"),
+    createDrawPlot("tauPt",
              prefix+"TauPt"+postfix, "#tau-jet p_{T} (GeV/c)", ylabel="Events / %.0f GeV/c",
              opts2=opts2, cutLine=40, moveLegend=moveLegend)
 
-    drawPlot(createPlot("tauEta"),
+    createDrawPlot("tauEta",
              prefix+"TauEta"+postfix, "#tau-jet #eta", ylabel="Events / %.1f",
              opts2=opts2, cutLine=[-2.1, 2.1], moveLegend=moveLegend)
 
-    drawPlot(createPlot("tauPhi"),
+    createDrawPlot("tauPhi",
              prefix+"TauPhi"+postfix, "#tau-jet #phi", ylabel="Events / %.1f",
              opts2=opts2, moveLegend=moveLegend)
 
-    drawPlot(createPlot("tauLeadingTrackPt"),
+    createDrawPlot("tauLeadingTrackPt",
              prefix+"TauLeadingTrackPt"+postfix, "#tau-jet leading ch. cand. p_{T} (GeV/c)", ylabel="Events / %.0f GeV/c",
              opts2=opts2, cutLine=20, moveLegend=moveLegend)
 
-    drawPlot(createPlot("tauRtau"),
+    createDrawPlot("tauRtau",
              prefix+"TauRtau"+postfix, "#tau-jet R_{#tau}", ylabel="Events / %.1f",
              opts2=opts2, cutLine=0.7, moveLegend=moveLegend)
 
-    drawPlot(createPlot("vertexCount"),
+    createDrawPlot("vertexCount",
              prefix+"VertexCount"+postfix, "Number of good PV", ylabel="Events / %.0f",
              opts2=opts2, moveLegend=moveLegend)
 
@@ -115,12 +129,12 @@ def doCounters(datasets, datasetName, selectionName, ntupleCache):
     nTauID = table.getCount(colName=datasetName, rowName="Tau ID").clone()
     nMuonIso = table.getCount(colName=datasetName, rowName="Muon isolation").clone()
 
-    nMuonIso.divide(nTauID)
+    eff = dataset.divideBinomial(nMuonIso, nTauID)
 
     out = StringIO.StringIO()
     out.write(table.format())
     out.write("\n")
-    out.write("Muon isolation/Tau ID = %.6f +- %.6f\n" % (nMuonIso.value(), nMuonIso.uncertainty()))
+    out.write("Muon isolation/Tau ID = %.6f + %.6f - %.6f\n" % (eff.value(), eff.uncertaintyHigh(), eff.uncertaintyLow()))
     print "Isolation mode", selectionName
     print out.getvalue()
 
@@ -149,12 +163,18 @@ class PlotCreator:
     def __call__(self, name, rebin=1):
         drh1 = self.datasets.getDataset(self.datasetName).getDatasetRootHisto(self.ntupleCache.histogram(name+"_AfterTauID"))
         drh2 = self.datasets.getDataset(self.datasetName).getDatasetRootHisto(self.ntupleCache.histogram(name+"_AfterMuonIsolation"))
+
+        h1_raw = drh1.getHistogram()
+        h2_raw = drh2.getHistogram()
+        
         drh1.normalizeToLuminosity(mcLuminosity)
         drh2.normalizeToLuminosity(mcLuminosity)
 
         h1 = drh1.getHistogram()
         h2 = drh2.getHistogram()
         if rebin > 1:
+            h1_raw.Rebin(rebin)
+            h2_raw.Rebin(rebin)
             h1.Rebin(rebin)
             h2.Rebin(rebin)
 
@@ -172,6 +192,10 @@ class PlotCreator:
                 "TauIDMuIso": "tau ID + mu iso"
                 })
         p.histoMgr.forEachHisto(styles.Generator(sty))
+
+        p.numeratorRaw = h2_raw
+        p.denominatorRaw = h1_raw
+       
         return p
 
 

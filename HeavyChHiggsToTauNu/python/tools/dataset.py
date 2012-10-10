@@ -475,6 +475,16 @@ class CountAsymmetric:
     ## \var _uncertaintyHigh
     # Upper uncertainty of the count (+)
 
+def divideBinomial(countPassed, countTotal):
+    p = countPassed.value()
+    t = countTotal.value()
+    value = p / t
+    p = int(p)
+    t = int(t)
+    errUp = ROOT.TEfficiency.ClopperPearson(t, p, 0.683, True)
+    errDown = ROOT.TEfficiency.ClopperPearson(t, p, 0.683, False)
+    return CountAsymmetric(value, errUp-value, value-errDown)
+
 ## Transform histogram (TH1) to a list of (name, Count) pairs.
 #
 # The name is taken from the x axis label and the count is Count
