@@ -18,7 +18,7 @@ namespace MuonID {
 }
 
 namespace MuonVeto {
-  template <typename T> bool pt(T& muon) { return muon.p4().Pt() > 15; }
+  template <typename T> bool pt(T& muon) { return muon.p4().Pt() > 10; }
   template <typename T> bool eta(T& muon) { return std::abs(muon.p4().Eta()) < 2.5; }
   template <typename T> bool dB(T& muon) { return std::abs(muon.dB()) < 0.02; }
   template <typename T> bool subdetectorIsolation(T& muon) { return (muon.trackIso() + muon.caloIso())/muon.p4().Pt() <= 0.15; }
