@@ -32,7 +32,7 @@ namespace HPlus {
 
     for(size_t i=0; i<fPaths.size(); ++i) {
       bool accept = false;
-      for(size_t j=0; j<fPaths[i].fPathNames.size(); ++i) {
+      for(size_t j=0; j<fPaths[i].fPathNames.size(); ++j) {
         const pat::TriggerPath *path = htrigger->path(fPaths[i].fPathNames[j]);
         if(path && path->wasAccept()) {
           accept = true;
