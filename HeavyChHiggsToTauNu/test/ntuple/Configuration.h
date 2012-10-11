@@ -43,6 +43,7 @@ namespace MuonID {
     if(mode == EmbeddingMuonIsolation::kTauLike)  return tauLikeIsolation(muon);
     if(mode == EmbeddingMuonIsolation::kChargedHadrRel10) return muon.chargedHadronIso()/muon.p4().Pt() < 0.1;
     if(mode == EmbeddingMuonIsolation::kChargedHadrRel15) return muon.chargedHadronIso()/muon.p4().Pt() < 0.15;
+    return true;
   }
 }
 
