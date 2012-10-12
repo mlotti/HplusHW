@@ -475,6 +475,16 @@ class CountAsymmetric:
     ## \var _uncertaintyHigh
     # Upper uncertainty of the count (+)
 
+def divideBinomial(countPassed, countTotal):
+    p = countPassed.value()
+    t = countTotal.value()
+    value = p / t
+    p = int(p)
+    t = int(t)
+    errUp = ROOT.TEfficiency.ClopperPearson(t, p, 0.683, True)
+    errDown = ROOT.TEfficiency.ClopperPearson(t, p, 0.683, False)
+    return CountAsymmetric(value, errUp-value, value-errDown)
+
 ## Transform histogram (TH1) to a list of (name, Count) pairs.
 #
 # The name is taken from the x axis label and the count is Count
@@ -982,15 +992,17 @@ class DatasetRootHisto(DatasetRootHistoBase):
 
     ## Modify the TH1 with a function
     #
-    # \param function              Function taking the original TH1 and some other DatasetRootHisto object as input, returning a new TH1
-    # \param newDatasetRootHisto   The other DatasetRootHisto object
+    # \param function              Function taking the original TH1, and returning a new TH1. If newDatasetRootHisto is specified, function must take some other DatasetRootHisto object as an input too
+    # \param newDatasetRootHisto   Optional, the other DatasetRootHisto object
     #
-    # Needed for appending rows to counters from TTree
-    def modifyRootHisto(self, function, newDatasetRootHisto):
-        if not isinstance(newDatasetRootHisto, DatasetRootHisto):
-            raise Exception("newDatasetRootHisto must be of the type DatasetRootHisto")
-
-        self.histo = function(self.histo, newDatasetRootHisto.histo)
+    # Needed for appending rows to counters from TTree, and for embedding normalization
+    def modifyRootHisto(self, function, newDatasetRootHisto=None):
+        if newDatasetRootHisto != None:
+            if not isinstance(newDatasetRootHisto, DatasetRootHisto):
+                raise Exception("newDatasetRootHisto must be of the type DatasetRootHisto")
+            self.histo = function(self.histo, newDatasetRootHisto.histo)
+        else:
+            self.histo = function(self.histo)
 
     ## Return normalized clone of the original TH1
     def _normalizedHistogram(self):
@@ -1083,18 +1095,22 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
 
     ## Modify the TH1 with a function
     #
-    # \param function             Function taking the original TH1 and some other DatasetRootHisto object as input, returning a new TH1
-    # \param newDatasetRootHisto  The other DatasetRootHisto object, must be the same type and contain same number of DatasetRootHisto objects
+    # \param function             Function taking the original TH1, and returning a new TH1. If newDatasetRootHisto is specified, function must take some other DatasetRootHisto object as an input too
+    # \param newDatasetRootHisto  Optional, the other DatasetRootHisto object, must be the same type and contain same number of DatasetRootHisto objects
     #
-    # Needed for appending rows to counters from TTree
-    def modifyRootHisto(self, function, newDatasetRootHisto):
-        if not isinstance(newDatasetRootHisto, DatasetRootHistoMergedData):
-            raise Exception("newDatasetRootHisto must be of the type DatasetRootHistoMergedData")
-        if not len(self.histoWrappers) == len(newDatasetRootHisto.histoWrappers):
-            raise Exception("len(self.histoWrappers) != len(newDatasetrootHisto.histoWrappers), %d != %d" % len(self.histoWrappers), len(newDatasetRootHisto.histoWrappers))
+    # Needed for appending rows to counters from TTree, and for embedding normalization
+    def modifyRootHisto(self, function, newDatasetRootHisto=None):
+        if newDatasetRootHisto != None:
+            if not isinstance(newDatasetRootHisto, DatasetRootHistoMergedData):
+                raise Exception("newDatasetRootHisto must be of the type DatasetRootHistoMergedData")
+            if not len(self.histoWrappers) == len(newDatasetRootHisto.histoWrappers):
+                raise Exception("len(self.histoWrappers) != len(newDatasetrootHisto.histoWrappers), %d != %d" % len(self.histoWrappers), len(newDatasetRootHisto.histoWrappers))
             
-        for i, drh in enumerate(self.histoWrappers):
-            drh.modifyRootHisto(function, newDatasetRootHisto.histoWrappers[i])
+            for i, drh in enumerate(self.histoWrappers):
+                drh.modifyRootHisto(function, newDatasetRootHisto.histoWrappers[i])
+        else:
+            for i, drh in enumerate(self.histoWrappers):
+                drh.modifyRootHisto(function)
 
     ## Get list of the bin labels of the first of the merged histogram.
     def getBinLabels(self):
@@ -1168,18 +1184,22 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
 
     ## Modify the TH1 with a function
     #
-    # \param function   Function taking the original TH1 and some other DatasetRootHisto object as input, returning a new TH1
-    # \param newDatasetRootHisto  The other DatasetRootHisto object, must be the same type and contain same number of DatasetRootHisto objects
+    # \param function             Function taking the original TH1, and returning a new TH1. If newDatasetRootHisto is specified, function must take some other DatasetRootHisto object as an input too
+    # \param newDatasetRootHisto  Optional, the other DatasetRootHisto object, must be the same type and contain same number of DatasetRootHisto objects
     #
-    # Needed for appending rows to counters from TTree
-    def modifyRootHisto(self, function, newDatasetRootHisto):
-        if not isinstance(newDatasetRootHisto, DatasetRootHistoMergedMC):
-            raise Exception("newDatasetRootHisto must be of the type DatasetRootHistoMergedMC")
-        if not len(self.histoWrappers) == len(newDatasetRootHisto.histoWrappers):
-            raise Exception("len(self.histoWrappers) != len(newDatasetrootHisto.histoWrappers), %d != %d" % len(self.histoWrappers), len(newDatasetRootHisto.histoWrappers))
+    # Needed for appending rows to counters from TTree, and for embedding normalization
+    def modifyRootHisto(self, function, newDatasetRootHisto=None):
+        if newDatasetRootHisto != None:
+            if not isinstance(newDatasetRootHisto, DatasetRootHistoMergedMC):
+                raise Exception("newDatasetRootHisto must be of the type DatasetRootHistoMergedMC")
+            if not len(self.histoWrappers) == len(newDatasetRootHisto.histoWrappers):
+                raise Exception("len(self.histoWrappers) != len(newDatasetrootHisto.histoWrappers), %d != %d" % len(self.histoWrappers), len(newDatasetRootHisto.histoWrappers))
             
-        for i, drh in enumerate(self.histoWrappers):
-            drh.modifyRootHisto(function, newDatasetRootHisto.histoWrappers[i])
+            for i, drh in enumerate(self.histoWrappers):
+                drh.modifyRootHisto(function, newDatasetRootHisto.histoWrappers[i])
+        else:
+            for i, drh in enumerate(self.histoWrappers):
+                drh.modifyRootHisto(function)
 
     ## Get list of the bin labels of the first of the merged histogram.
     def getBinLabels(self):

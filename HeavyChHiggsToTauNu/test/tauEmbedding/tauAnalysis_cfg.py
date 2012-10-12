@@ -124,6 +124,11 @@ ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
     selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
     goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
 
+    patTriggerSrc = cms.InputTag("patTriggerEvent"),
+    triggerPaths = cms.PSet(
+        MediumIsoPFTau35_Trk20_MET60 = cms.vstring("HLT_MediumIsoPFTau35_Trk20_MET60_v1"),
+    ),
+
     tauSrc = cms.InputTag(param.tauSelection.src.value()), # this is set in addEmbeddingLikePreselection()
     tauFunctions = analysisConfig.tauFunctions.clone(),
 

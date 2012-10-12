@@ -4,6 +4,28 @@
 
 #include<cstdlib>
 #include<cmath>
+#include<string>
+#include<exception>
+
+namespace EmbeddingMuonIsolation {
+  enum Mode {
+    kDisabled,
+    kStandard,
+    kChargedHadrRel10,
+    kChargedHadrRel15,
+    kTauLike
+  };
+
+  inline Mode stringToMode(const std::string& isolationMode) {
+    if     (isolationMode == "disabled")         return kDisabled;
+    else if(isolationMode == "standard")         return kStandard;
+    else if(isolationMode == "chargedHadrRel10") return kChargedHadrRel10;
+    else if(isolationMode == "chargedHadrRel15") return kChargedHadrRel15;
+    else if(isolationMode == "taulike")          return kTauLike;
+    
+    throw std::runtime_error("isolationMode is '"+isolationMode+"', allowed values are 'disabled', 'standard', 'chargedHadrRel10', 'chargedHadrRel15', 'taulike'");
+  }
+}
 
 namespace MuonID {
   template <typename T> bool pt(T& muon) { return muon.p4().Pt() > 40; }
@@ -13,12 +35,20 @@ namespace MuonID {
   template <typename T> bool standardRelativeIsolation(T& muon) { return standardRelativeIsolationCut(muon.standardRelativeIsolation()); }
   bool standardRelativeIsolationCut(double isoVar) { return isoVar < 0.12; }
 
-  template <typename T> bool embeddingIsolation(T& muon) { return embeddingIsolationCut(muon.embeddingIsolation()); }
-  bool embeddingIsolationCut(double isoVar) { return isoVar < 2; }
+  template <typename T> bool tauLikeIsolation(T& muon) { return tauLikeIsolationCut(muon.tauLikeIsolation()); }
+  bool tauLikeIsolationCut(double isoVar) { return isoVar < 2; }
+
+  template <typename T> bool isolation(T& muon, EmbeddingMuonIsolation::Mode mode) {
+    if(mode == EmbeddingMuonIsolation::kStandard) return standardRelativeIsolation(muon);
+    if(mode == EmbeddingMuonIsolation::kTauLike)  return tauLikeIsolation(muon);
+    if(mode == EmbeddingMuonIsolation::kChargedHadrRel10) return muon.chargedHadronIso()/muon.p4().Pt() < 0.1;
+    if(mode == EmbeddingMuonIsolation::kChargedHadrRel15) return muon.chargedHadronIso()/muon.p4().Pt() < 0.15;
+    return true;
+  }
 }
 
 namespace MuonVeto {
-  template <typename T> bool pt(T& muon) { return muon.p4().Pt() > 15; }
+  template <typename T> bool pt(T& muon) { return muon.p4().Pt() > 10; }
   template <typename T> bool eta(T& muon) { return std::abs(muon.p4().Eta()) < 2.5; }
   template <typename T> bool dB(T& muon) { return std::abs(muon.dB()) < 0.02; }
   template <typename T> bool subdetectorIsolation(T& muon) { return (muon.trackIso() + muon.caloIso())/muon.p4().Pt() <= 0.15; }

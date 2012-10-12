@@ -191,12 +191,12 @@ public:
     double standardRelativeIsolation() {
       return (chargedHadronIso() + std::max(0.0, photonIso() + neutralHadronIso() - 0.5*puChargedHadronIso()))/p4().Pt();
     }
-    double embeddingIsolation() {
+    double tauLikeIsolation() {
       return chargedHadronIsoEmb() + std::max(0.0, photonIsoEmb() - 0.5*puChargedHadronIsoEmb());
     }
   };
 
-  EmbeddingMuonCollection();
+  EmbeddingMuonCollection(const std::string& postfix = "_01to04");
   ~EmbeddingMuonCollection();
 
   void setupBranches(TTree *tree, bool isMC);
@@ -213,6 +213,8 @@ public:
   }
 
 private:
+  std::string fPostfix;
+
   BranchObj<std::vector<double> > fChargedHadronIsoEmb;
   BranchObj<std::vector<double> > fPuChargedHadronIsoEmb;
   BranchObj<std::vector<double> > fNeutralHadronIsoEmb;

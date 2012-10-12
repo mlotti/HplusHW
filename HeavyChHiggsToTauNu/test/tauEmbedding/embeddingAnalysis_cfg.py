@@ -227,14 +227,14 @@ process.commonSequence *= process.firstPrimaryVertex
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 # FIXME: hack to apply trigger in MC
-if dataVersion.isMC():
-    additionalCounters.extend(tauEmbeddingCustomisations.addMuonTriggerFix(process, dataVersion, process.commonSequence, options))
+#if dataVersion.isMC():
+#    additionalCounters.extend(tauEmbeddingCustomisations.addMuonTriggerFix(process, dataVersion, process.commonSequence, options))
 param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, options, dataVersion)
 
 #tauEmbeddingCustomisations.PF2PATVersion = PF2PATVersion
 #muons = cms.InputTag(tauEmbeddingCustomisations.addMuonIsolationEmbedding(process, process.commonSequence, muons.value()))
-#additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param))
+additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param, enableIsolation=False))
 #taus = cms.InputTag("patTaus"+PF2PATVersion+"TauEmbeddingMuonMatched")
 #taus = cms.InputTag("patTaus"+PF2PATVersion+"TauEmbeddingMuonMatched")
 taus = cms.InputTag(param.tauSelectionHPSMediumTauBased.src.value())
@@ -245,8 +245,25 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
     selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
     goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
 
+    patTriggerSrc = cms.InputTag("patTriggerEvent"),
+    triggerPaths = cms.PSet(
+        IsoMu12 = cms.vstring("HLT_IsoMu12_v1"),
+        IsoMu17 = cms.vstring("HLT_IsoMu17_v6", "HLT_IsoMu17_v8"),
+        IsoMu24 = cms.vstring("HLT_IsoMu24_v5", "HLT_IsoMu24_v6", "HLT_IsoMu24_v7", "HLT_IsoMu24_v8"),
+        IsoMu30_eta2p1 = cms.vstring("HLT_IsoMu30_eta2p1_v3", "HLT_IsoMu30_eta2p1_v6", "HLT_IsoMu30_eta2p1_v7"),
+    
+        Mu20 = cms.vstring("HLT_Mu20_v1"),
+        Mu24 = cms.vstring("HLT_Mu24_v2"),
+        Mu30 = cms.vstring("HLT_Mu30_v3"),
+        Mu40 = cms.vstring("HLT_Mu40_v1", "HLT_Mu40_v2", "HLT_Mu40_v3", "HLT_Mu40_v5"),
+        Mu40_eta2p1 = cms.vstring("HLT_Mu40_eta2p1_v1", "HLT_Mu40_eta2p1_v4", "HLT_Mu40_eta2p1_v5"),
+    ),
+
     muonSrc = cms.InputTag(muons.value()),
     muonFunctions = analysisConfig.muonFunctions.clone(),
+    embeddingMuonEfficiency = param.embeddingMuonEfficiency.clone(
+        mode = "efficiency"
+    ),
 
     tauSrc = cms.InputTag(taus.value()),
     tauFunctions = analysisConfig.tauFunctions.clone(),
