@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 import PhysicsTools.PatUtils.patPFMETCorrections_cff as patPFMETCorrections
 
-def _doCommon(process, prefix, name, prototype, additionalCounters, direction, postfix):
+def _doCommon(process, prefix, name, prototype, direction, postfix):
     if not postfix in ["", "PFlow"]:
         raise Exception("There are several assumptions of standard PAT, or PF2PAT with PFlow-postfix-only workflow")
 
@@ -15,8 +15,6 @@ def _doCommon(process, prefix, name, prototype, additionalCounters, direction, p
     setattr(process, analysisName, analysis)
     # Configure the event counter
     analysis.eventCounter.printMainCounter = cms.untracked.bool(False)
-    if len(additionalCounters) > 0:
-        analysis.eventCounter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
 
     path = cms.Path(
         process.commonSequence *
@@ -26,24 +24,24 @@ def _doCommon(process, prefix, name, prototype, additionalCounters, direction, p
 
     return analysis
 
-def addJESVariation(process, prefix, name, prototype, additionalCounters, direction, postfix=""):
-    analysis = _doCommon(process, prefix, name, prototype, additionalCounters, direction, postfix)
+def addJESVariation(process, prefix, name, prototype, direction, postfix=""):
+    analysis = _doCommon(process, prefix, name, prototype, direction, postfix)
 
     analysis.jetSelection.src = "shiftedPatJets%sEn%sForCorrMEt" % (postfix, direction)
     analysis.MET.rawSrc = "patPFMetJetEn%s" % direction
     analysis.MET.type1Src = "patType1CorrectedPFMetJetEn%s" % direction
     analysis.MET.type2Src = "patType1p2CorrectedPFMetJetEn%s" % direction
 
-def addJERVariation(process, prefix, name, prototype, additionalCounters, direction, postfix=""):
-    analysis = _doCommon(process, prefix, name, prototype, additionalCounters, direction, postfix)
+def addJERVariation(process, prefix, name, prototype, direction, postfix=""):
+    analysis = _doCommon(process, prefix, name, prototype, direction, postfix)
 
     analysis.jetSelection.src = "smearedPatJets%sRes%s" % (postfix, direction)
     analysis.MET.rawSrc = "patPFMetJetRes%s" % direction
     analysis.MET.type1Src = "patType1CorrectedPFMetJetRes%s" % direction
     analysis.MET.type2Src = "patType1p2CorrectedPFMetJetRes%s" % direction
 
-def addUESVariation(process, prefix, name, prototype, additionalCounters, direction, postfix=""):
-    analysis = _doCommon(process, prefix, name, prototype, additionalCounters, direction, postfix)
+def addUESVariation(process, prefix, name, prototype, direction, postfix=""):
+    analysis = _doCommon(process, prefix, name, prototype, direction, postfix)
 
     analysis.MET.rawSrc = "patPFMetUnclusteredEn%s" % direction
     analysis.MET.type1Src = "patType1CorrectedPFMetUnclusteredEn%s" % direction
@@ -59,7 +57,7 @@ objectVariationToMet = cms.EDProducer("ShiftedParticleMETcorrInputProducer",
     srcOriginal = cms.InputTag("selectedPatTaus"),
     srcShifted = cms.InputTag("selectedPatTausVariated")
 )
-def addTESVariation(process, prefix, name, prototype, additionalCounters, direction, postfix=""):
+def addTESVariation(process, prefix, name, prototype, direction, postfix=""):
     tauVariationName = name+"TauVariation"
     rawMetVariationName = name+"RawMetVariation"
     type1MetVariationName = name+"Type1MetVariation"
@@ -137,8 +135,6 @@ def addTESVariation(process, prefix, name, prototype, additionalCounters, direct
 
     # Configure the event counter
     analysis.eventCounter.printMainCounter = cms.untracked.bool(False)
-    if len(additionalCounters) > 0:
-        analysis.eventCounter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
 
     # Construct the path
     path = cms.Path(

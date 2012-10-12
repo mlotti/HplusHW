@@ -190,6 +190,8 @@ class CounterExtractor(ExtractorBase):
         myResult = None
         if self.isRate() or self.isObservation():
             myResult = myCount.value() * additionalNormalisation
+            if additionalNormalisation != 1.0 and self.isRate():
+                print "      (normalisation applied) rate = %f, rate*normalisation = %f"%(myCount.value(),myResult)
         elif self.isNuisance():
             # protection against zero
             if myCount.value() == 0:
@@ -513,6 +515,9 @@ class ShapeExtractor(ExtractorBase):
                     else:
                         print WarningStyle()+"Warning: Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" shape histo bin %d is negative (%f), it is forced to zero"%(k,h.GetBinContent(k))
                         h.SetBinContent(k, 0.0)
+            # Scale by additional normalisation
+            h.Scale(additionalNormalisation)
+            # Append histogram to output list
             myHistograms.append(h)
         # Make histograms for shape stat
         if self._distribution == "shapeStat":
@@ -590,6 +595,8 @@ class ControlPlotExtractor(ExtractorBase):
             hSource.IsA().Destructor(hSource)
         # Finalise histogram
         myShapeModifier.finaliseShape(dest=h)
+        # Apply additional normalisation
+        h.Scale(additionalNormalisation)
         # Add here substraction of negative bins, if necessary
         # ... no use case currently, therefore no code added
         # Return result

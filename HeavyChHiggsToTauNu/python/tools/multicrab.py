@@ -167,19 +167,21 @@ defaultSeBlacklist = [
     "colorado.edu", # Ultraslow bandwidth, no chance to get even the smaller pattuples through
     "T3_*", # Don't submit to T3's  
     "T2_UK_London_Brunel", # Noticeable fraction of submitted jobs fail due to stageout errors
-    "ucl.ac.be", # Jobs end up in queuing, lot's of file open errors
-#    "iihe.ac.be", # Problematic site with server
+#    "ucl.ac.be", # Jobs end up in queuing, lot's of file open errors
+#    "iihe.ac.be", # Problematic site with server, long queue
     "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout, also jobs can queue long times
     "unl.edu", # Jobs can wait in queues for a looong time
-    "wisc.edu", # Stageout failures,
+#    "wisc.edu", # Stageout failures,
 #    "ingrid.pt", # Stageout failures
     "ucsd.edu", # Stageout failures
     "pi.infn.it", # Stageout failures
     "lnl.infn.it", # Stageout failures
-    "mit.edu", # MIT has some problems?
+#    "mit.edu", # MIT has some problems?
     "sprace.org.br", # Stageout failures
     "knu.ac.kr", # Stageout failures
-    "T2_US_*", # disable US because of low bandwidth
+#    "T2_US_*", # disable US because of low bandwidth
+    "kbfi.ee", # Files are not found
+    "cscs.ch", # Files are not found
     ]
 
 
@@ -371,6 +373,26 @@ def prettyJobnums(jobnums):
         raise Exception("Internal error: stack size is %d, content is %s" % (len(stack), str(stack)), "pretty_jobnums")
 
     return ",".join(ret)
+
+## Transform pretty job number string to list of job numbers
+#
+# \param prettyString   String for pretty job number list (of the form '1,2,3-6,9')
+#
+# \return List of ints for job numbers
+def prettyToJobList(prettyString):
+    commaSeparated = prettyString.split(",")
+    ret = []
+    for item in commaSeparated:
+        if "-" in item:
+            if item.count("-") != 1:
+                raise Exception("Item '%s' has more than 1 occurrances of '-', in string '%s'" % (item, prettyString))
+            (first, last) = item.split("-")
+            ret.extend(range(int(first), int(last)+1))
+        else:
+            ret.append(int(item))
+
+    return ret
+
 
 ## Get output of 'crab -status' of one CRAB task
 #
@@ -619,6 +641,9 @@ class MulticrabDataset:
         if "lumis_per_job" in self.data:
             raise Exception("Unable to modify number_of_jobs, lumis_per_job already set!")
         self.data["number_of_jobs"] = int(njobs)
+
+    def getNumberOfJobs(self):
+        return int(self.data["number_of_jobs"])
 
     ## Modify number of jobs with a function.
     # 
@@ -899,6 +924,12 @@ class Multicrab:
             self._createDatasets()
 
         return self.datasetMap[name]
+
+    def getNumberOfDatasets(self):
+        if self.datasets == None:
+            self._createDatasets()
+
+        return len(self.datasets)
 
     ## Apply a function for each MulticrabDataset.
     #

@@ -41,6 +41,9 @@ namespace HPlus {
     tree->Branch("taus_mother_pdgid", &fTausMotherPdgId);
     tree->Branch("taus_grandmother_pdgid", &fTausGrandMotherPdgId);
     tree->Branch("taus_daughter_pdgid", &fTausDaughterPdgId);
+
+    tree->Branch("taus_genmatch_p4", &fTausGenMatch);
+    //tree->Branch("taus_genmatchvisible_p4", &fTausGenMatchVisible);
   }
 
   void TreeTauBranches::setValues(const edm::Event& iEvent) {
@@ -68,8 +71,11 @@ namespace HPlus {
       int motherPdgId = 0;
       int grandMotherPdgId = 0;
       int daughterPdgId = 0;
+      XYZTLorentzVector matchP4;
+      //XYZTLorentzVector matchP4Visible;
       if(gen) {
         pdgId = gen->pdgId();
+        matchP4 = gen->p4();
         const reco::GenParticle *mother = GenParticleTools::findMother(gen);
         if(mother) {
           motherPdgId = mother->pdgId();
@@ -87,6 +93,7 @@ namespace HPlus {
       fTausMotherPdgId.push_back(motherPdgId);
       fTausGrandMotherPdgId.push_back(grandMotherPdgId);
       fTausDaughterPdgId.push_back(daughterPdgId);
+      fTausGenMatch.push_back(matchP4);
     }
   }
 
@@ -121,5 +128,6 @@ namespace HPlus {
     fTausMotherPdgId.clear();
     fTausGrandMotherPdgId.clear();
     fTausDaughterPdgId.clear();
+    fTausGenMatch.clear();
   }
 }

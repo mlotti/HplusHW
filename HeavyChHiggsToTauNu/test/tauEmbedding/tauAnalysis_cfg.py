@@ -10,7 +10,7 @@ dataVersion = "44XmcS6"
 debug = False
 #debug = True
 
-PF2PATVersion = "PFlow"
+#PF2PATVersion = "PFlow"
 
 ################################################################################
 
@@ -22,8 +22,10 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 process = cms.Process("TauEmbeddingAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5000) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -54,8 +56,9 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 del process.out
 if options.doPat != 0:
     # Disable the tau pT cut
-    process.selectedPatTausPFlow.cut = ""
-    process.selectedPatTausPFlowChs.cut = ""
+    process.selectedPatTausHpsPFTau.cut = ""
+#    process.selectedPatTausPFlow.cut = ""
+#    process.selectedPatTausPFlowChs.cut = ""
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
@@ -78,75 +81,82 @@ process.infoPath = addConfigInfo(process, options, dataVersion)
 
 # Pileup weights
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-param.changeCollectionsToPF2PAT(PF2PATVersion)
+#param.changeCollectionsToPF2PAT(PF2PATVersion)
 puWeights = [
-    ("Run2011A", "Run2011A"),
-    ("Run2011B", "Run2011B"),
-    ("Run2011A+B", "Run2011AB")
+    "Run2011A",
+    "Run2011B",
+    "Run2011AB", 
     ]
-for era, name in puWeights:
-    modname = "pileupWeight"+name
-    setattr(process, modname, cms.EDProducer("HPlusVertexWeightProducer",
-        alias = cms.string(modname),
-    ))
-    param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, era=era)
-    insertPSetContentsTo(param.vertexWeight.clone(), getattr(process, modname))
-    process.commonSequence.insert(0, getattr(process, modname))
+puWeightNames = []
+for era in puWeights:
+    prodName = param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, era=era)
+    puWeightNames.append(prodName)
+    process.commonSequence.remove(getattr(process, prodName))
+    process.commonSequence.insert(0, getattr(process, prodName))
+
 # FIXME: this is only a consequence of the swiss-knive effect...
 process.commonSequence.remove(process.goodPrimaryVertices)
 process.commonSequence.insert(0, process.goodPrimaryVertices)
 
 # Embedding-like preselection
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
-tauEmbeddingCustomisations.PF2PATVersion = PF2PATVersion
+#tauEmbeddingCustomisations.PF2PATVersion = PF2PATVersion
 if options.doPat != 0:
     # To optimise, perform the generator level preselection before running PAT
-    counters = tauEmbeddingCustomisations.addGenuineTauPreselection(process, process.commonSequence, param, pileupWeight="pileupWeight"+puWeights[-1][1])
+    counters = tauEmbeddingCustomisations.addGenuineTauPreselection(process, process.commonSequence, param, pileupWeight=puWeightNames[-1])
     process.commonSequence.remove(process.genuineTauPreselectionSequence)
-    puModule = getattr(process, "pileupWeight"+puWeights[-1][1])
+    puModule = getattr(process, puWeightNames[-1])
     process.commonSequence.replace(puModule, puModule*process.genuineTauPreselectionSequence)
     additionalCounters = counters+additionalCounters
 
-additionalCounters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.commonSequence, param))
+process.preselectionSequence = cms.Sequence()
+preselectionCounters = additionalCounters[:]
+preselectionCounters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.preselectionSequence, param, pileupWeight=puWeightNames[-1]))
+
+# Add type 1 MET
+#import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
+#sequence = MetCorrection.addCorrectedMet(process, param, postfix=PF2PATVersion)
+#process.commonSequence *= sequence
 
 
-
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
 ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
     selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
     goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
-    tauSrc = cms.InputTag(param.tauSelection.src.value()), # this is set in addEmbeddingLikePreselection()
-    tauFunctions = cms.PSet(),
-    jetSrc = cms.InputTag(param.jetSelection.src.value()),
-    jetFunctions = cms.PSet(
-        tche = cms.string("bDiscriminator('trackCountingHighEffBJetTags')"),
+
+    patTriggerSrc = cms.InputTag("patTriggerEvent"),
+    triggerPaths = cms.PSet(
+        MediumIsoPFTau35_Trk20_MET60 = cms.vstring("HLT_MediumIsoPFTau35_Trk20_MET60_v1"),
     ),
+
+    tauSrc = cms.InputTag(param.tauSelection.src.value()), # this is set in addEmbeddingLikePreselection()
+    tauFunctions = analysisConfig.tauFunctions.clone(),
+
+    jetSrc = cms.InputTag(param.jetSelection.src.value()),
+    jetFunctions = analysisConfig.jetFunctions.clone(),
+
     genParticleSrc = cms.InputTag("genParticles"),
     mets = cms.PSet(
-        pfMet_p4 = cms.InputTag("patMETs"+PF2PATVersion),
+#        pfMet_p4 = cms.InputTag("patMETs"+PF2PATVersion),
+        pfMet_p4 = cms.InputTag(param.MET.rawSrc.value()),
+        pfMetType1_p4 = cms.InputTag(param.MET.type1Src.value()), # Note that this MUST be corrected for the selected tau in the subsequent analysis!
+        pfMetType2_p4 = cms.InputTag(param.MET.type2Src.value())
     ),
     doubles = cms.PSet(),
 )
-for era, name in puWeights:
-    setattr(ntuple.doubles, "weightPileup_"+name, cms.InputTag("pileupWeight"+name))
+for era, src in zip(puWeights, puWeightNames):
+    setattr(ntuple.doubles, "weightPileup_"+era, cms.InputTag(src))
 
-tauIds = [
-    "decayModeFinding",
-    "againstMuonLoose", "againstMuonTight",
-    "againstElectronLoose", "againstElectronMedium", "againstElectronTight", "againstElectronMVA",
-    "byVLooseIsolation", "byLooseIsolation", "byMediumIsolation", "byTightIsolation",
-    "byLooseCombinedIsolationDeltaBetaCorr", "byMediumCombinedIsolationDeltaBetaCorr", "byTightCombinedIsolationDeltaBetaCorr",
-    ]
-for name in tauIds:
-    setattr(ntuple.tauFunctions, name, cms.string("tauID('%s')"%name))
 if dataVersion.isMC():
     ntuple.mets.genMetTrue_p4 = cms.InputTag("genMetTrue")
  #   ntuple.mets.genMetCalo_p4 = cms.InputTag("genMetCalo")
 #    ntuple.mets.genMetCaloAndNonPrompt_p4 = cms.InputTag("genMetCaloAndNonPrompt")
 #    ntuple.mets.genMetNuSum_4 = cms.InputTag("genMetNu")
 
+process.preselectionSequence.insert(0, process.commonSequence)
 addAnalysis(process, "tauNtuple", ntuple,
-            preSequence=process.commonSequence,
-            additionalCounters=additionalCounters,
+            preSequence=process.preselectionSequence,
+            additionalCounters=preselectionCounters,
             signalAnalysisCounters=False)
 process.tauNtupleCounters.printMainCounter = True
 
@@ -156,20 +166,35 @@ if addSignalAnalysis:
     import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
     module = signalAnalysis.createEDFilter(param)
     module.Tree.fill = cms.untracked.bool(False)
-    module.eventCounter.printMainCounter = cms.untracked.bool(True)
-
-    # Add type 1 MET
-    import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
-    sequence = MetCorrection.addCorrectedMet(process, module, postfix=PF2PATVersion)
-    process.commonSequence *= sequence
 
     # Counters
     if len(additionalCounters) > 0:
-        module.eventCounter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
+        module.eventCounter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in preselectionCounters])
 
-    setattr(process, "signalAnalysisTauEmbeddingLikePreselection", module)
-    process.signalAnalysisPath = cms.Path(process.commonSequence * module)
+    # Add sequence for generator tau pt>41 selection
+    process.genTau41Sequence = cms.Sequence()
+    genTau41Counters = additionalCounters[:]
+    tauEmbeddingCustomisations.generatorTauPt = 41
+    genTau41Counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.genTau41Sequence, param, pileupWeight=puWeightNames[-1],
+                                                                                    prefix="embeddingLikePreselectionGenTau41"))
 
+    for era, src in zip(puWeights, puWeightNames):
+        mod = module.clone()
+        mod.vertexWeightReader.PUVertexWeightSrc = src
+        if era == puWeights[-1]:
+            mod.eventCounter.printMainCounter = cms.untracked.bool(True)
+
+        # Nominal
+        setattr(process, "signalAnalysisTauEmbeddingLikePreselection"+era, mod)
+        p = cms.Path(process.preselectionSequence * mod)
+        setattr(process, "signalAnalysis"+era+"Path", p)
+
+        # Generator tau 41
+        mod = mod.clone()
+        mod.eventCounter.counters = [cms.InputTag(c) for c in genTau41Counters]
+        setattr(process, "signalAnalysisTauEmbeddingLikePreselectionGenTau41"+era, mod)
+        p = cms.Path(process.commonSequence * process.genTau41Sequence * mod)
+        setattr(process, "signalAnalysisGenTau41"+era+"Path", p)
 
 # Replace all event counters with the weighted one
 eventCounters = []
@@ -177,11 +202,11 @@ for label, module in process.producers_().iteritems():
     if module.type_() == "EventCountProducer":
         eventCounters.append(label)
 prototype = cms.EDProducer("HPlusEventCountProducer",
-    weightSrc = cms.InputTag("pileupWeight"+puWeights[-1][1])
+    weightSrc = cms.InputTag(puWeightNames[-1])
 )
 for label in eventCounters:
     process.globalReplace(label, prototype.clone())
 
-#f = open("configDump.py", "w")
-#f.write(process.dumpPython())
-#f.close()
+f = open("configDumpTauAnalysis.py", "w")
+f.write(process.dumpPython())
+f.close()

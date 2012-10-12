@@ -20,15 +20,20 @@ namespace HPlus {
   class FakeTauIdentifier {
   public:
     enum MCSelectedTauMatchType {
-      kkNoMC,
+      kkNoMC = 0,
       kkElectronToTau,
+      kkElectronFromTauDecayToTau,
       kkMuonToTau,
+      kkMuonFromTauDecayToTau,
       kkTauToTau,
       kkJetToTau,
       kkElectronToTauAndTauOutsideAcceptance,
+      kkElectronFromTauDecayToTauAndTauOutsideAcceptance,
       kkMuonToTauAndTauOutsideAcceptance,
+      kkMuonFromTauDecayToTauAndTauOutsideAcceptance,
       kkTauToTauAndTauOutsideAcceptance,
-      kkJetToTauAndTauOutsideAcceptance
+      kkJetToTauAndTauOutsideAcceptance,
+      kkNumberOfSelectedTauMatchTypes
     };
     enum MCSelectedTauOriginType {
       kkUnknownOrigin,
@@ -48,6 +53,16 @@ namespace HPlus {
 
     double getFakeTauScaleFactor(MCSelectedTauMatchType matchType, double eta);
     double getFakeTauSystematics(MCSelectedTauMatchType matchType, double eta);
+
+    bool isElectronToTau(MCSelectedTauMatchType type) { return (type == kkElectronToTau || type == kkElectronFromTauDecayToTau ||
+      type == kkElectronToTauAndTauOutsideAcceptance || type == kkElectronFromTauDecayToTauAndTauOutsideAcceptance); }
+    bool isMuonToTau(MCSelectedTauMatchType type) { return (type == kkMuonToTau || type == kkMuonFromTauDecayToTau ||
+      type == kkMuonToTauAndTauOutsideAcceptance || type == kkMuonFromTauDecayToTauAndTauOutsideAcceptance); }
+    bool isJetToTau(MCSelectedTauMatchType type) { return (type == kkJetToTau || type == kkJetToTauAndTauOutsideAcceptance); }
+    bool isElectronOrMuonFromTauDecay(MCSelectedTauMatchType type) { return (type == kkElectronFromTauDecayToTau || type == kkElectronToTauAndTauOutsideAcceptance ||
+      type == kkMuonFromTauDecayToTau || type == kkMuonFromTauDecayToTauAndTauOutsideAcceptance); }
+
+    bool isEmbeddingGenuineTau(MCSelectedTauMatchType type) { return (!isFakeTau(type) || isElectronOrMuonFromTauDecay(type)); }
 
   private:
     // Scale factors for X->tau fakes

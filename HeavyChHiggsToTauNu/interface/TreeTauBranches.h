@@ -51,6 +51,8 @@ namespace HPlus {
     std::vector<int> fTausMotherPdgId;
     std::vector<int> fTausGrandMotherPdgId;
     std::vector<int> fTausDaughterPdgId;
+    std::vector<XYZTLorentzVector> fTausGenMatch;
+    //std::vector<XYZTLorentzVector> fTausGenMatchVisible;
   };
 }
 

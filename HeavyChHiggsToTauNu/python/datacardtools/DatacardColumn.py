@@ -117,7 +117,6 @@ class DatacardColumn():
         self._dirPrefix = dirPrefix
         self._shapeHisto = shapeHisto
         self._isPrintable = True
-
         self.checkInputValidity()
 
     ## Returns true if the column is using the observation data samples

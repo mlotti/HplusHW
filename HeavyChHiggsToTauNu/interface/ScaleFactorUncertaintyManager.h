@@ -25,6 +25,8 @@ namespace HPlus {
                                      double fakeTauSF, double fakeTauAbsUncertainty,
                                      double btagSF, double btagSFAbsUncertainty);
 
+    void setEmbeddingMuonEfficiencyUncertainty(double eventWeight, double muonEff, double muonEffAbsUncertainty);
+
   private:
      WrappedTH1* hTriggerSF;
      WrappedTH1* hTriggerSFAbsUncertainty;
@@ -35,6 +37,9 @@ namespace HPlus {
      WrappedTH1* hBtagSF;
      WrappedTH1* hBtagSFAbsUncertainty;
      WrappedTH1* hBtagSFAbsUncertaintyCounts;
+     WrappedTH1* hEmbeddingMuonEff;
+     WrappedTH1* hEmbeddingMuonEffAbsUncertainty;
+     WrappedTH1* hEmbeddingMuonEffAbsUncertaintyCounts;
   };
 }
 

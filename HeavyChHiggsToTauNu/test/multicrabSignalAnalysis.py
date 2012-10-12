@@ -4,19 +4,21 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 
 cfg = "signalAnalysis_cfg.py"
+#cfg = "signalAnalysis2_cfg.py"
 #cfg = "QCDMeasurement_cfg.py"
 multicrab = Multicrab("crab_analysis.cfg", cfg)
 
 # Select the pattuple version to use as an input
 #pattupleVersion = "pattuple_v18"
 #pattupleVersion = "pattuple_v19"
-pattupleVersion = "pattuple_v25c"
+#pattupleVersion = "pattuple_v25c"
+pattupleVersion = "pattuple_v44_4"
 
 
 #era = "EPS"
 #era = "Run2011A"
 #era = "Run2011B"
-era = "Run2011A+B"
+era = "Run2011AB"
 
 # Change this to true if you want to run the PAT on the fly (for
 # datasets where no pattuples are produced, or for testing something
@@ -31,59 +33,12 @@ if runPatOnTheFly:
 # The dataset definitions are in python/tools/multicrabDatasets.py
 
 # Data: single tau + MET
-datasetsEPS_v18 = [
-        "Tau_160431-161176_May10",           # HLT_IsoPFTau35_Trk20_MET45_v1
-        "Tau_161217-163261_May10",           # HLT_IsoPFTau35_Trk20_MET45_v2
-        "Tau_163270-163869_May10",           # HLT_IsoPFTau35_Trk20_MET45_v4
-        "Tau_165088-165633_Prompt",          # HLT_IsoPFTau35_Trk20_MET45_v6
-        "Tau_165970-166164_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v2
-        "Tau_166346-166346_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v3
-        "Tau_166374-167043_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v2
-        "Tau_167078-167913_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v4
+datasetsData = [
+    "Tau_160431-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
+    "Tau_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
+    "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1]
+    "Tau_175860-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
 ]
-datasetsRun2011A_v18 = datasetsEPS_v18 + [
-        "Tau_170722-172619_Aug05",           # HLT_IsoPFTau35_Trk20_MET60_v6
-        "Tau_172620-173198_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v6
-        "Tau_173236-173692_Prompt",          # HLT_MediumIsoPFTau35_Trk20_MET60_v1
-]
-
-datasetsEPS_v19 = [
-       "Tau_160431-163869_May10",           # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4}
-       "Tau_165088-165633_Prompt",          # 2011A HLT_IsoPFTau35_Trk20_MET45_v6
-       "Tau_165970-167913_Prompt",          # 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
-]
-datasetsRun2011A_v19 = datasetsEPS_v19 + [
-       "Tau_170722-172619_Aug05",           # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
-       "Tau_172620-173198_Prompt",          # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
-       "Tau_173236-173692_Prompt",          # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
-]
-datasetsRun2011B_v19 = [
-       "Tau_175860-177452_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v1
-       "Tau_177718-178380_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v1
-       "Tau_178420-179889_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v5
-       "Tau_179959-180252_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v6
-]
-# v25b
-datasetsRun2011A_v25b = [
-       "Tau_160431-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
-       "Tau_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
-       "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
-]
-datasetsRun2011B_v25b = [
-       "Tau_175860-180252_2011B_Nov19",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
-]
-
-# v25c
-datasetsRun2011A_v25c = [
-       "Tau_160431-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
-       "Tau_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
-       "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
-]
-datasetsRun2011B_v25c = [
-       "Tau_175860-180252_2011B_Nov19",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
-]
-
-
 
 datasetsMC = [
         # MC Signal (WH)
@@ -107,12 +62,12 @@ datasetsMC = [
         "TTToHplusBHminusB_M160_Fall11",
 
 	# MC Signal (heavy H+ from process pp->tbH+)
-#        "HplusTB_M180_Fall11",
+        "HplusTB_M180_Fall11",
         "HplusTB_M190_Fall11",
         "HplusTB_M200_Fall11",
         "HplusTB_M220_Fall11",
         "HplusTB_M250_Fall11",
-#        "HplusTB_M300_Fall11",
+        "HplusTB_M300_Fall11",
 
         # MC Background
         "QCD_Pt30to50_TuneZ2_Fall11",
@@ -140,29 +95,8 @@ datasetsMC = [
         ]
 
 datasets = []
-if era == "Run2011A":
-    if "v18" in pattupleVersion:
-        datasets += datasetsRun2011A_v18
-    elif "v19" in pattupleVersion:
-        datasets += datasetsRun2011A_v19
-    elif "v25b" in pattupleVersion:
-        datasets += datasetsRun2011A_v25b
-elif era == "Run2011B":
-    if "v19" in pattupleVersion:
-        datasets += datasetsRun2011B_v19
-    elif "v25b" in pattupleVersion:
-        datasets += datasetsRun2011B_v25b
-elif era == "Run2011A+B":
-    if "v19" in pattupleVersion:
-        datasets += datasetsRun2011A_v19 + datasetsRun2011B_v19
-    elif "v25b" in pattupleVersion:
-        datasets += datasetsRun2011A_v25b + datasetsRun2011B_v25b
-    elif "v25c" in pattupleVersion:
-        datasets += datasetsRun2011A_v25c + datasetsRun2011B_v25c
-
-else:
-    raise Exception("Wrong value for 'era' %s, supported are 'Run2011A', 'Run2011B', 'Run2011A+B'" % era)
-datasets += datasetsMC
+datasets.extend(datasetsData)
+datasets.extend(datasetsMC)
 
 # Add the datasest to the multicrab system
 multicrab.extendDatasets(pattupleVersion, datasets)

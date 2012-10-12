@@ -80,7 +80,7 @@ class MulticrabPathFinder:
         return multicrabdirs
 
     def ewkfind(self,dirs):
-        return self.selectLatest(self.grep(dirs,"mbedding",file="multicrab.cfg"))
+        return self.selectLatest(self.grep(dirs,"mbedded",file="multicrab.cfg"))
         #return self.selectLatest(self.grep(dirs,"mbedding",file="inputInfo.txt"))
 
     def signalfind(self,dirs):
