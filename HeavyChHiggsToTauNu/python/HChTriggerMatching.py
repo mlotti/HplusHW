@@ -8,6 +8,7 @@ _patTauCollectionsDefault = [
     ] # add to the list new sources for patTauCollections, if necessary
 
 tauPathLastFilter = {
+    # 2011
     "HLT_IsoPFTau35_Trk20_MET45_v1": "hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched",
     "HLT_IsoPFTau35_Trk20_MET45_v2": "hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched",
     "HLT_IsoPFTau35_Trk20_MET45_v4": "hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched",
@@ -37,6 +38,35 @@ tauPathLastFilter = {
     "HLT_MediumIsoPFTau35_Trk20_MET70_v1": "hltFilterSingleIsoPFTau35Trk20MET70LeadTrack20IsolationL1HLTMatched",
     "HLT_MediumIsoPFTau35_Trk20_MET70_v5": "hltFilterSingleIsoPFTau35Trk20MET70LeadTrack20IsolationL1HLTMatched",
     "HLT_MediumIsoPFTau35_Trk20_MET70_v6": "hltFilterSingleIsoPFTau35Trk20MET70LeadTrack20IsolationL1HLTMatched",
+
+    # 2012
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_v2":       "hltPFTau35TrackPt20LooseIsoProng2",
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v2": "hltPFTau35TrackPt20LooseIsoProng2",
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET75_v2": "hltPFTau35TrackPt20LooseIsoProng2",
+
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_v3":       "hltPFTau35TrackPt20LooseIsoProng2",
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v3": "hltPFTau35TrackPt20LooseIsoProng2",
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET75_v3": "hltPFTau35TrackPt20LooseIsoProng2",
+
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_v4":       "hltPFTau35TrackPt20LooseIsoProng2",
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v4": "hltPFTau35TrackPt20LooseIsoProng2",
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET75_v4": "hltPFTau35TrackPt20LooseIsoProng2",
+
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_v6":       "hltPFTau35TrackPt20LooseIsoProng2",
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6": "hltPFTau35TrackPt20LooseIsoProng2",
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET75_v6": "hltPFTau35TrackPt20LooseIsoProng2",
+
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_v7":       "hltPFTau35TrackPt20LooseIsoProng2",
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7": "hltPFTau35TrackPt20LooseIsoProng2",
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET75_v7": "hltPFTau35TrackPt20LooseIsoProng2",
+
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_v9":       "hltPFTau35TrackPt20LooseIsoProng2",
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9": "hltPFTau35TrackPt20LooseIsoProng2",
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET75_v9": "hltPFTau35TrackPt20LooseIsoProng2",
+
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_v10":       "hltPFTau35TrackPt20LooseIsoProng2",
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10": "hltPFTau35TrackPt20LooseIsoProng2",
+    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET75_v10": "hltPFTau35TrackPt20LooseIsoProng2",
     }
 
 def addTauTriggerMatching(process, trigger, collections, postfix="", outputCommands=None, pathFilterMap=tauPathLastFilter, throw=True):

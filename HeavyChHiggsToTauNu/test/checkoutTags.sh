@@ -78,6 +78,10 @@ eval $(scram runtime -sh)
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATReleaseNotes52X
 addpkg DataFormats/PatCandidates V06-05-06-02
 addpkg PhysicsTools/PatAlgos     V08-09-42
+# We don't need the code (it's the same as in the release), but a ROOT
+# file for jet smearing needs to be in the developer area at the moment
+# (see )
+addpkg PhysicsTools/PatUtils
 
 # Tau+PAT
 # https://hypernews.cern.ch/HyperNews/CMS/get/tauid/252.html

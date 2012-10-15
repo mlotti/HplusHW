@@ -1445,7 +1445,8 @@ def patJetCorrLevels(dataVersion, L1FastJet=False):
     levels.extend(["L2Relative", "L3Absolute"])
     if dataVersion.isData():
         levels.append("L2L3Residual")
-    levels.extend(["L5Flavor", "L7Parton"])
+# FIXME: these are not availabel at the moment in 53X
+#    levels.extend(["L5Flavor", "L7Parton"])
     return levels
 
 def setPatJetCorrDefaults(module, dataVersion, L1FastJet=False):
