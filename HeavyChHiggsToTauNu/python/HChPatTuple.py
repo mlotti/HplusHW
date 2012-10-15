@@ -2,7 +2,6 @@ import FWCore.ParameterSet.Config as cms
 import copy
 
 from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection, switchJetCollection
-from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
 import PhysicsTools.PatAlgos.tools.tauTools as tauTools
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
@@ -810,9 +809,19 @@ def addStandardPAT(process, dataVersion, doPatTrigger=True, patArgs={}, pvSelect
     out = None
     outdict = process.outputModules_()
     outputCommands = []
+    hasOut = False
     if outdict.has_key(outputModuleName):
         out = outdict[outputModuleName]
         outputCommands = out.outputCommands[:]
+        hasOut = True
+    else:
+        # Hack to not to crash if something in PAT assumes process.out
+        process.out = cms.OutputModule("PoolOutputModule",
+            fileName = cms.untracked.string("dummy.root"),
+            outputCommands = cms.untracked.vstring()
+        )
+        out = process.out
+        
 
     # Out usual event content
     outputCommands.extend([
@@ -921,10 +930,12 @@ def addStandardPAT(process, dataVersion, doPatTrigger=True, patArgs={}, pvSelect
 
 
     # Adjust output commands
-    if out != None:
+    if hasOut:
         print "Finishing addStandardPAT(), outputCommands are:"
         print "  "+"\n  ".join(outputCommands)
         out.outputCommands = outputCommands
+    else:
+        del process.out
 
     ### Construct the sequences
     sequence *= process.patDefaultSequence

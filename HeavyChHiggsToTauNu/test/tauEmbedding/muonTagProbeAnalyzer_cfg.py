@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 import FWCore.ParameterSet.VarParsing as VarParsing
 
 options = VarParsing.VarParsing()
-options.register("trigger", "isHLTMu20",
+options.register("trigger", "isHLTMu40eta2p1",
                  options.multiplicity.singleton, options.varType.string,
                  "Trigger to consider")
 options.register("mc", 0,
@@ -101,6 +101,7 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
 #        pfSumIsoRel = cms.vstring("Probe pfSumIso/pt", "0", "2", ""),
 #        tauTightIc04Iso = cms.vstring("Probe counting iso occupancy", "0", "100", "")
         pfSumIsoRelDeltaBeta = cms.vstring("Probe deltaBeta PF isolation", "0", "100", ""),
+        pfChargedHadronSumIsoRel = cms.vstring("Probe charged hadron PF isolation", "0", "1", ""),
     ),
 
     # defines all the discrete variables of the probes available in the input tree and intended for use in the efficiency calculations
@@ -125,6 +126,7 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
 #        tauIsoVLoose = cms.vstring("Tau Iso VLoose", "dummy[pass=1,fail=0]"),
         pfSumIsoRelDeltaBeta12 = cms.vstring("PF rel iso deltaBeta < 0.12", "dummy[pass=1,fail=0]"),
         pfSumIsoRelDeltaBeta20 = cms.vstring("PF rel iso deltaBeta < 0.2", "dummy[pass=1,fail=0]"),
+        pfChargedHadronSumIsoRel10 = cms.vstring("PF charged hadron rel iso deltaBeta < 0.1", "dummy[pass=1,fail=0]"),
         fullSelection = cms.vstring("Full selection", "dummy[pass=1,fail=0]"),
     ),
     Cuts = cms.PSet(
@@ -180,8 +182,8 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
 #		pt = cms.vdouble(40, 41, 45, 50, 60, 70, 80, 90, 100, 1000),
                 abseta = cms.vdouble(etabins),
 #		abseta = cms.vdouble(0,0.3,0.6,0.9,1.2,1.5,1.8,2.1),
-#                tauTightIc04Iso = cms.vdouble(0, 0.1),
-#                pt = cms.vdouble(0, 20, 40, 45, 50, 60, 70, 80, 90, 100, 1000),
+
+#                pfChargedHadronSumIsoRel = cms.vdouble(0, 0.1) # require that chargedHadronIso()/pt() < 0.1
             ),
             #BinToPDFmap = cms.vstring("gaussPlusLinear")
 #            BinToPDFmap = cms.vstring("gaussPlusQuadratic")
