@@ -697,31 +697,108 @@ class StandardPATBuilder(PATBuilderBase):
 
         # These require the tags in test/pattuple/checkoutTags.sh
 
-        # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Tracking_failure_filter
-        from SandBox.Skims.trackingFailureFilter_cfi import trackingFailureFilter
-        self.process.trackingFailureFilter = trackingFailureFilter.clone(
-            taggingMode = True,
-            JetSource = "selectedPatJets",
-            VertexSource = "goodPrimaryVertices",
-        )
-        self.endSequence *= self.process.trackingFailureFilter
-        self.outputCommands.append("keep *_trackingFailureFilter*_*_*")
-
-        # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#ECAL_dead_cell_filter
-        # https://twiki.cern.ch/twiki/bin/view/CMS/SusyEcalMaskedCellSummary
         if self.dataVersion.isData():
-            self.process.load("JetMETAnalysis.ecalDeadCellTools.RA2TPfilter_cff")
-            self.process.ecalDeadCellTPfilter.taggingMode = True
-            self.process.EcalDeadCellEventFilter.taggingMode = True
+            # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Tracking_failure_filter_updated
+            process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
+            self.process.trackingFailureFilter.VertexSource = "goodPrimaryVertices"
+            self.process.trackingFailureFilter.taggingMode = True
+            self.endSequence *= self.process.trackingFailureFilter
+            self.outputCommands.append("keep *_trackingFailureFilter*_*_*")
+
+            # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#ECAL_dead_cell_filter
+            # https://twiki.cern.ch/twiki/bin/view/CMS/SusyEcalMaskedCellSummary
+            process.load('RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi')
+            self.process.EcalDeadCellTriggerPrimitiveFilter.tpDigiCollection = cms.InputTag("ecalTPSkimNA")
+            self.process.EcalDeadCellTriggerPrimitiveFilter.taggingMode = True
+
+            self.process.load('RecoMET.METFilters.EcalDeadCellBoundaryEnergyFilter_cfi')
+            self.process.EcalDeadCellBoundaryEnergyFilter.taggingMode = cms.bool(False)
+            self.process.EcalDeadCellBoundaryEnergyFilter.cutBoundEnergyDeadCellsEB=cms.untracked.double(10)
+            self.process.EcalDeadCellBoundaryEnergyFilter.cutBoundEnergyDeadCellsEE=cms.untracked.double(10)
+            self.process.EcalDeadCellBoundaryEnergyFilter.cutBoundEnergyGapEB=cms.untracked.double(100)
+            self.process.EcalDeadCellBoundaryEnergyFilter.cutBoundEnergyGapEE=cms.untracked.double(100)
+            self.process.EcalDeadCellBoundaryEnergyFilter.enableGap=cms.untracked.bool(False)
+            self.process.EcalDeadCellBoundaryEnergyFilter.limitDeadCellToChannelStatusEB = cms.vint32(12,14)
+            self.process.EcalDeadCellBoundaryEnergyFilter.limitDeadCellToChannelStatusEE = cms.vint32(12,14)
+            self.process.EcalDeadCellBoundaryEnergyFilter.taggingMode = True
+
             self.endSequence *= (
-                self.process.ecalDeadCellTPfilter *
-                self.process.EcalDeadCellEventFilter
+                self.process.EcalDeadCellTriggerPrimitiveFilter *
+                self.process.EcalDeadCellBoundaryEnergyFilter
             )
             self.outputCommands.extend([
-                    "keep *_ecalDeadCellTPfilter*_*_*",
-                    "keep *_EcalDeadCellEventFilter*_*_*",
+                    "keep *_EcalDeadCellTriggerPrimitiveFilter_*_*",
+                    "keep *_self.process.EcalDeadCellBoundaryEnergyFilter_*_*",
                     ])
-    
+
+            # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#CSC_Beam_Halo_Filter
+            self.process.load("RecoMET.METAnalyzers.CSCHaloFilter_cfi")
+            self.process.CSCTightHaloFilterPath(
+                self.process.CSCTightHaloFilter
+            )
+
+            # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#HCAL_laser_events_updated
+            self.process.load("RecoMET.METFilters.hcalLaserEventFilter_cfi")
+            self.process.hcalLaserEventFilter.taggingMode = True
+            self.endSequence *= self.process.hcalLaserEventFilter
+            self.outputCommands.append("keep *_hcalLaserEventFilter_*_*")
+
+            # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Bad_EE_Supercrystal_filter_added
+            self.process.load("RecoMET.METFilters.eeBadScFilter_cfi")
+            self.process.eeBadScFilter.taggingMode = True
+            self.endSequence *= self.process.eeBadScFilter
+            self.outputCommands.append("*_eeBadScFilter_*_*")
+
+            # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#EB_or_EE_Xtals_with_large_laser
+            self.process.load("RecoMET.METFilters.ecalLaserCorrFilter_cfi")
+            self.process.ecalLaserCorrFilter.taggingMode = True
+            self.endSequence *= self.ecalLaserCorrFilter3
+            self.outputCommands.append("*_ecalLaserCorrFilter_*_*")
+
+            # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Tracking_odd_events_filters
+            # https://twiki.cern.ch/twiki/bin/view/CMS/TrackingPOGFilters#Filters
+            self.process.logErrorTooManyClusters = cms.EDFilter("LogErrorEventFilter",
+                src = cms.InputTag("logErrorHarvester"),
+                maxErrorFractionInLumi = cms.double(1.0), 
+                maxErrorFractionInRun  = cms.double(1.0),
+                maxSavedEventsPerLumiAndError = cms.uint32(100000), 
+                categoriesToWatch = cms.vstring("TooManyClusters"),
+                modulesToIgnore = cms.vstring("SeedGeneratorFromRegionHitsEDProducer:regionalCosmicTrackerSeeds",
+                                              "PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg")
+            )
+            self.logErrorTooManyClustersPath = cms.Path(self.process.logErrorTooManyClusters)
+            self.process.logErrorTooManyTripletsPairs = cms.EDFilter("LogErrorEventFilter",
+                src = cms.InputTag("logErrorHarvester"),
+                maxErrorFractionInLumi = cms.double(1.0), 
+                maxErrorFractionInRun  = cms.double(1.0), 
+                maxSavedEventsPerLumiAndError = cms.uint32(100000), 
+                categoriesToWatch = cms.vstring("TooManyTriplets","TooManyPairs","PixelTripletHLTGenerator"),
+                modulesToIgnore = cms.vstring("SeedGeneratorFromRegionHitsEDProducer:regionalCosmicTrackerSeeds",
+                                              "PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg")
+            )
+            self.process.logErrorTooManyTripletsPairsPath = cms.Path(self.process.logErrorTooManyTripletsPairs)
+            self.process.logErrorTooManySeeds = cms.EDFilter("LogErrorEventFilter",
+                src = cms.InputTag("logErrorHarvester"),
+                maxErrorFractionInLumi = cms.double(1.0),
+                maxErrorFractionInRun  = cms.double(1.0),
+                maxSavedEventsPerLumiAndError = cms.uint32(100000), 
+                categoriesToWatch = cms.vstring("TooManySeeds"),
+            )
+            self.process.logErrorTooManySeedsPath = cms.Path(self.process.logErrorTooManySeeds)
+
+            # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Muons_with_wrong_momenta_PF_only
+            self.process.load('RecoMET.METFilters.inconsistentMuonPFCandidateFilter_cfi')
+            self.process.load('RecoMET.METFilters.greedyMuonPFCandidateFilter_cfi')
+            self.process.inconsistentMuonPFCandidateFilter.taggingMode = True
+            self.process.greedyMuonPFCandidateFilter.taggingMode = True
+            self.endSequence *= (
+                self.process.inconsistentMuonPFCandidateFilter *
+                self.process.greedyMuonPFCandidateFilter
+            )
+            self.outputCommands.extend([
+                    "keep *_inconsistentMuonPFCandidateFilter_*_*",
+                    "keep *_greedyMuonPFCandidateFilter_*_*",
+            ])
 
 def addStandardPAT(process, dataVersion, doPatTrigger=True, patArgs={}, pvSelectionConfig=""):
     print "########################################"
