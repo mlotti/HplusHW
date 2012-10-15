@@ -32,7 +32,7 @@ options = cms.untracked.PSet(
 #process.load("Configuration/StandardSequences/MagneticField_cff")
 from Configuration.StandardSequences.MagneticField_38T_cff import *
 from Configuration.StandardSequences.Services_cff import *
-from Configuration.StandardSequences.GeometryIdeal_cff import *
+from Configuration.Geometry.GeometryIdeal_cff import *
 
 # Calo geometry service model
 from Geometry.CaloEventSetup.CaloGeometry_cfi import *
