@@ -20,6 +20,11 @@ options.register("printPaths",
                  options.multiplicity.singleton,
                  options.varType.int,
                  "Print HLT paths")
+options.register("globalTag",
+                 "",
+                 options.multiplicity.singleton,
+                 options.varType.string,
+                 "Specify GlobalTag")
 options = getOptions(options)
 
 hltProcess = "HLT"
@@ -38,6 +43,9 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(maxEv) )
 process.options = cms.untracked.PSet(
     Rethrow = cms.untracked.vstring("ProductNotFound")
 )
+if len(options.globalTag) > 0:
+    process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+    process.GlobalTag.globaltag = cms.string(options.globalTag)
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(options.inputFiles)
