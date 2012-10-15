@@ -69,12 +69,15 @@ set -e
 # 13.9.2012/M.Kortelainen CMSSW_4_4_4 Updated PAT and tau tags
 # 17.9.2012/M.Kortelainen CMSSW_4_4_4 Cut-based electron ID tag
 # 17.9.2012/S.Lehti       CMSSW_5_3_3 Update for 53X
+# 12.10.2012/M.Kortelainen CMSSW_5_3_5 Updated PAT tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
 
 # PAT
-# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATReleaseNotes44X
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATReleaseNotes52X
+addpkg DataFormats/PatCandidates V06-05-06-02
+addpkg PhysicsTools/PatAlgos     V08-09-42
 
 # Tau+PAT
 # https://hypernews.cern.ch/HyperNews/CMS/get/tauid/252.html
@@ -87,8 +90,10 @@ addpkg CondFormats/EgammaObjects  V00-04-01
 addpkg PhysicsTools/IsolationAlgos # You need to recompile PAT packages which depend on DataFormats/TauReco
 # PAT
 ##### New tau discriminators, electron MVA discriminator
-addpkg PhysicsTools/PatAlgos
-cvs up -r 1.53 PhysicsTools/PatAlgos/python/tools/tauTools.py 
+cvs up -r 1.57 PhysicsTools/PatAlgos/python/tools/tauTools.py
+cvs up -r 1.13 PhysicsTools/PatAlgos/python/producersLayer1/tauProducer_cff.py
+cvs up -r 1.15 PhysicsTools/PatAlgos/python/recoLayer0/tauDiscriminators_cff.py
+cvs up -r 1.5 RecoTauTag/Configuration/python/updateHPSPFTaus_cff.py
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
@@ -100,10 +105,11 @@ cvs co -r V00-04-11 RecoBTag/PerformanceDB
 
 # Type I/II MET
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis#HeadingFive
-#addpkg PhysicsTools/PatUtils      b4_2_X_cvMEtCorr_13Feb2012_JEC11V12 # this appears to only add stuff on top of V03-09-18-02 in 444 release
+# Nothing to add on 535, but let's keep the reference
 
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc
+addpkg RecoLuminosity/LumiDB V04-01-09
 
 # Electron ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/EgammaCutBasedIdentification
