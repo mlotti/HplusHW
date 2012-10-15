@@ -708,7 +708,7 @@ class StandardPATBuilder(PATBuilderBase):
 
         if self.dataVersion.isData():
             # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Tracking_failure_filter_updated
-            process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
+            self.process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
             self.process.trackingFailureFilter.VertexSource = "goodPrimaryVertices"
             self.process.trackingFailureFilter.taggingMode = True
             self.endSequence *= self.process.trackingFailureFilter
@@ -716,7 +716,7 @@ class StandardPATBuilder(PATBuilderBase):
 
             # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#ECAL_dead_cell_filter
             # https://twiki.cern.ch/twiki/bin/view/CMS/SusyEcalMaskedCellSummary
-            process.load('RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi')
+            self.process.load('RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi')
             self.process.EcalDeadCellTriggerPrimitiveFilter.tpDigiCollection = cms.InputTag("ecalTPSkimNA")
             self.process.EcalDeadCellTriggerPrimitiveFilter.taggingMode = True
 
@@ -737,14 +737,12 @@ class StandardPATBuilder(PATBuilderBase):
             )
             self.outputCommands.extend([
                     "keep *_EcalDeadCellTriggerPrimitiveFilter_*_*",
-                    "keep *_self.process.EcalDeadCellBoundaryEnergyFilter_*_*",
+                    "keep *_EcalDeadCellBoundaryEnergyFilter_*_*",
                     ])
 
             # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#CSC_Beam_Halo_Filter
             self.process.load("RecoMET.METAnalyzers.CSCHaloFilter_cfi")
-            self.process.CSCTightHaloFilterPath(
-                self.process.CSCTightHaloFilter
-            )
+            self.process.CSCTightHaloFilterPath = cms.Path(self.process.CSCTightHaloFilter)
 
             # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#HCAL_laser_events_updated
             self.process.load("RecoMET.METFilters.hcalLaserEventFilter_cfi")
@@ -756,13 +754,13 @@ class StandardPATBuilder(PATBuilderBase):
             self.process.load("RecoMET.METFilters.eeBadScFilter_cfi")
             self.process.eeBadScFilter.taggingMode = True
             self.endSequence *= self.process.eeBadScFilter
-            self.outputCommands.append("*_eeBadScFilter_*_*")
+            self.outputCommands.append("keep *_eeBadScFilter_*_*")
 
             # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#EB_or_EE_Xtals_with_large_laser
             self.process.load("RecoMET.METFilters.ecalLaserCorrFilter_cfi")
             self.process.ecalLaserCorrFilter.taggingMode = True
-            self.endSequence *= self.ecalLaserCorrFilter3
-            self.outputCommands.append("*_ecalLaserCorrFilter_*_*")
+            self.endSequence *= self.process.ecalLaserCorrFilter
+            self.outputCommands.append("keep *_ecalLaserCorrFilter_*_*")
 
             # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Tracking_odd_events_filters
             # https://twiki.cern.ch/twiki/bin/view/CMS/TrackingPOGFilters#Filters
