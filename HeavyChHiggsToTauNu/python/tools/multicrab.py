@@ -1074,7 +1074,7 @@ class Multicrab:
     # multicrab.cfg in there, copies and generates the necessary
     # files to the directory and optionally run 'multicrab -create'
     # in the directory.
-    def createTasks(self, configOnly=False, **kwargs, codeRepo='git'):
+    def createTasks(self, configOnly=False, codeRepo='git', **kwargs):
         if not configOnly:
             checkCrabInPath()
         dirname = createTaskDir(**kwargs)
