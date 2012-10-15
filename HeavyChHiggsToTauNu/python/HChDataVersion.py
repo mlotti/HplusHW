@@ -71,6 +71,25 @@ config = {
         "signalTrigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
         "patMadhatter": "file:/mnt/flustre/slehti/Fall11_TTToHplusBWB_M-90_7TeV-pythia6-tauola_B2AD85E1-D520-E111-B5AC-001A928116EA.root",
     },
+    "53Xdata13Jul2012": {"triggerProcess": "HLT", "recoProcess": "RECO",
+        "globalTag": "FT_53_V6_AN2",
+    },
+    "53Xdata06Aug2012": {"triggerProcess": "HLT", "recoProcess": "RECO",
+        "globalTag": "FT_53_V6C_AN2",
+    },
+    "53Xdata24Aug2012": {
+        "triggerProcess": "HLT",
+        "recoProcess": "RECO",
+        "globalTag": "FT_53_V10_AN2",
+#        "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7",
+        "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2012C-24Aug2012-v1/AOD/02698B5A-A0EE-E111-B4FB-0025901D4AF4.root",
+    },
+    "53XdataPromptCv2": {"triggerProcess": "HLT", "recoProcess": "RECO",
+        "globalTag": "GR_P_V41_AN2",
+    },
+    "53XdataPromptDv1": {"triggerProcess": "HLT", "recoProcess": "RECO",
+        "globalTag": "GR_P_V42_AN2",
+    },
     "53XmcS10": {
         "simProcess": "SIM",
         "triggerProcess": "HLT",
@@ -97,6 +116,7 @@ class DataVersion:
         self.recoProcess = conf.get("recoProcess", None)
         self.simProcess = conf.get("simProcess", None)
         self.version = dataVersion
+        self.globalTag = conf["globalTag"]
 
         for f in ["patCastor", "patMadhatter", "analysisCastor", "analysisMadhatter"]:
             if f in conf:
@@ -105,12 +125,10 @@ class DataVersion:
         # Collision data
         if "data" in dataVersion:
             self.is_data = True
-            self.globalTag = "GR_R_44_V15::All"
 
         # MC
         else:
             self.is_data = False
-            self.globalTag = conf.get("globalTag", "START44_V13::All")
                 
             try:
                 self.signalTrigger = conf["signalTrigger"]
