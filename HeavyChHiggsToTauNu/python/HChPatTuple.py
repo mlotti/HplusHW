@@ -2,7 +2,6 @@ import FWCore.ParameterSet.Config as cms
 import copy
 
 from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection, switchJetCollection
-from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
 import PhysicsTools.PatAlgos.tools.tauTools as tauTools
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
