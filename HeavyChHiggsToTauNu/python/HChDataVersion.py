@@ -70,6 +70,14 @@ config = {
         "globalTag": "START44_V13::All",
         "signalTrigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
         "patMadhatter": "file:/mnt/flustre/slehti/Fall11_TTToHplusBWB_M-90_7TeV-pythia6-tauola_B2AD85E1-D520-E111-B5AC-001A928116EA.root",
+    },
+    "53XmcS10": {
+        "simProcess": "SIM",
+        "triggerProcess": "HLT",
+        "recoProcess": "RECO",
+        "globalTag": "START53_V7F::All",
+        "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6",
+        "patMadhatter": "file:/mnt/flustre/mkortela/data/TTToHplusBWB_M-120_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM/E6FBC572-20F5-E111-9CBD-00215E21DC60.root",
     }
 }
 
