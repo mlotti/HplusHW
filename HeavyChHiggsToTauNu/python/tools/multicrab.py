@@ -780,7 +780,7 @@ class MulticrabDataset:
 
         args = ["dataVersion=%s" % self.data["dataVersion"]]
         del dataKeys[dataKeys.index("dataVersion")]
-        for argName in ["trigger", "crossSection", "luminosity"]:
+        for argName in ["trigger", "crossSection", "luminosity","globalTag"]:
             try:
                 args.append("%s=%s" % (argName, self.data[argName]))
                 del dataKeys[dataKeys.index(argName)]
