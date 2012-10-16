@@ -18,6 +18,7 @@ datasets = {
     # Signal WH
     "TTToHplusBWB_M80_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "args": { "triggerMC": "1" },
         "data": {
@@ -44,6 +45,7 @@ datasets = {
     },
     "TTToHplusBWB_M90_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "args": { "triggerMC": "1" },
         "data": {
@@ -70,6 +72,7 @@ datasets = {
     },
     "TTToHplusBWB_M100_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "args": { "triggerMC": "1" },
         "data": {
@@ -96,6 +99,7 @@ datasets = {
     },
     "TTToHplusBWB_M120_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "args": { "triggerMC": "1" },
         "data": {
@@ -122,6 +126,7 @@ datasets = {
     },
     "TTToHplusBWB_M140_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "args": { "triggerMC": "1" },
         "data": {
@@ -148,6 +153,7 @@ datasets = {
     },
     "TTToHplusBWB_M150_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "args": { "triggerMC": "1" },
         "data": {
@@ -174,6 +180,7 @@ datasets = {
     },
     "TTToHplusBWB_M155_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         #"args": { "triggerMC": "1" }, deliberately commented
         "data": {
@@ -200,6 +207,7 @@ datasets = {
     },
     "TTToHplusBWB_M160_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "args": { "triggerMC": "1" },
         "data": {
@@ -227,6 +235,7 @@ datasets = {
     # Signal HH
     "TTToHplusBHminusB_M80_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "args": { "triggerMC": "1" },
         "data": {
@@ -253,6 +262,7 @@ datasets = {
     },
     "TTToHplusBHminusB_M90_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "args": { "triggerMC": "1" },
         "data": {
@@ -279,6 +289,7 @@ datasets = {
     },
     "TTToHplusBHminusB_M100_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "args": { "triggerMC": "1" },
         "data": {
@@ -305,6 +316,7 @@ datasets = {
     },
     "TTToHplusBHminusB_M120_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "args": { "triggerMC": "1" },
         "data": {
@@ -331,6 +343,7 @@ datasets = {
     },
     "TTToHplusBHminusB_M140_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "args": { "triggerMC": "1" },
         "data": {
@@ -357,6 +370,7 @@ datasets = {
     },
     "TTToHplusBHminusB_M150_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "args": { "triggerMC": "1" },
         "data": {
@@ -383,6 +397,7 @@ datasets = {
     },
     "TTToHplusBHminusB_M155_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         #"args": { "triggerMC": "1" }, deliberately commented
         "data": {
@@ -409,6 +424,7 @@ datasets = {
     },
     "TTToHplusBHminusB_M160_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "args": { "triggerMC": "1" },
         "data": {
@@ -437,6 +453,7 @@ datasets = {
     # Signal heavy
     "HplusTB_M180_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165, # FIXME
         "data": {
             "AOD": {
@@ -462,6 +479,7 @@ datasets = {
     },
     "HplusTB_M190_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -487,6 +505,7 @@ datasets = {
     },
     "HplusTB_M200_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -512,6 +531,7 @@ datasets = {
     },
     "HplusTB_M220_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -537,6 +557,7 @@ datasets = {
     },
     "HplusTB_M250_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -562,6 +583,7 @@ datasets = {
     },
     "HplusTB_M300_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -591,6 +613,7 @@ datasets = {
 
     "QCD_Pt30to50_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 5.312e+07,
         "args": { "triggerMC": "1" },
 #        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -618,6 +641,7 @@ datasets = {
     },
     "QCD_Pt50to80_TuneZ2_Fall11": {
         "dataVersion":  "44XmcS6",
+        "energy": 7,
         "crossSection": 6.359e+06,
         "args": { "triggerMC": "1" },
 #        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -645,6 +669,7 @@ datasets = {
     },
     "QCD_Pt80to120_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 7.843e+05,
         "args": { "triggerMC": "1" },
 #        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -672,6 +697,7 @@ datasets = {
     },
     "QCD_Pt120to170_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 1.151e+05,
         "args": { "triggerMC": "1" },
 #        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -699,6 +725,7 @@ datasets = {
     },
     "QCD_Pt170to300_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 2.426e+04,
         "args": { "triggerMC": "1" },
 #        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -726,6 +753,7 @@ datasets = {
     },
     "QCD_Pt300to470_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 1.168e+03,
         "args": { "triggerMC": "1" },
 #        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -753,6 +781,7 @@ datasets = {
     },
     "QCD_Pt20_MuEnriched_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6", 
+        "energy": 7,
         "crossSection": 296600000.*0.0002855,
         "args": { "triggerMC": "1" },
 #        "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -778,6 +807,7 @@ datasets = {
     # Cross sections https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
     "WW_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 43,
         "args": { "triggerMC": "1" },
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -805,6 +835,7 @@ datasets = {
     },
     "WZ_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 18.2,
         "args": { "triggerMC": "1" },
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -832,6 +863,7 @@ datasets = {
     },
     "ZZ_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 5.9,
         "args": { "triggerMC": "1" },
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -864,6 +896,7 @@ datasets = {
     # [2] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSections
     "TTJets_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 165, # [1,2], approx. NNLO
         "args": { "triggerMC": "1" },
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -891,6 +924,7 @@ datasets = {
     },
     "WJets_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 31314, # [2], NNLO
         "args": { "triggerMC": "1" },
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -919,6 +953,7 @@ datasets = {
     },
     "W2Jets_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 1435.0, # taken from PREP
         "args": { "triggerMC": "1" },
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -947,6 +982,7 @@ datasets = {
     },
     "W3Jets_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 304.2, # taken from PREP
         "args": { "triggerMC": "1" },
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -975,6 +1011,7 @@ datasets = {
     },
     "W4Jets_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 172.6, # taken from PREP
         "args": { "triggerMC": "1" },
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -1003,6 +1040,7 @@ datasets = {
     },
     "DYJetsToLL_M50_TuneZ2_Fall11": { # Z+jets
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 3048, # [2], NNLO
         "args": { "triggerMC": "1" },
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -1030,6 +1068,7 @@ datasets = {
     },
     "DYJetsToLL_M10to50_TuneZ2_Fall11": { # Z+jets
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 9611, # Madgraph gives this number
         "args": { "triggerMC": "1" },
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -1053,6 +1092,7 @@ datasets = {
     # https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopSigma
     "T_t-channel_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 41.92,
         "args": { "triggerMC": "1" },
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -1080,6 +1120,7 @@ datasets = {
     },
     "Tbar_t-channel_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 22.65,
         "args": { "triggerMC": "1" },
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -1107,6 +1148,7 @@ datasets = {
     },
     "T_tW-channel_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 7.87,
         "args": { "triggerMC": "1" },
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -1134,6 +1176,7 @@ datasets = {
     },
     "Tbar_tW-channel_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 7.87,
         "args": { "triggerMC": "1" },
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -1161,6 +1204,7 @@ datasets = {
     },
     "T_s-channel_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 3.19,
         "args": { "triggerMC": "1" },
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
@@ -1188,6 +1232,7 @@ datasets = {
     },
     "Tbar_s-channel_TuneZ2_Fall11": {
         "dataVersion": "44XmcS6",
+        "energy": 7,
         "crossSection": 1.44,
         "args": { "triggerMC": "1" },
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],

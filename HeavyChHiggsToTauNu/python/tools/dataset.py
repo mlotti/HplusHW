@@ -1440,6 +1440,9 @@ class Dataset:
     def setName(self, name):
         self.name = name
 
+    def getEnergy(self):
+        return self.info.get("energy", 0)
+
     ## Set cross section of MC dataset (in pb).
     def setCrossSection(self, value):
         if not self.isMC():
@@ -1656,6 +1659,11 @@ class DatasetMerged:
             raise Exception("Can't create a DatasetMerged from 0 datasets")
 
         self.info = {}
+
+        energy = self.datasets[0].getEnergy()
+        for d in self.datasets[1:]:
+            if energy != d.getEnergy():
+                raise Exception("Can't merge datasets with different centre-of-mass energies (%s: %d TeV, %s: %d TeV)" % self.datasets[0].getName(), energy, d.getName(), d.getEnergy())
 
         if self.datasets[0].isMC():
             crossSum = 0.0
@@ -1884,6 +1892,15 @@ class DatasetManager:
         for d in self.datasets:
             copy.append(d.deepCopy())
         return copy
+
+    ## Get a list of centre-of-mass energies of the datasets
+    def getEnergies(self):
+        tmp = {}
+        for d in self.datasets:
+            tmp[d.getEnergy()] = 1
+        energies = tmp.keys()
+        energies.sort()
+        return energies
 
     def hasDataset(self, name):
         return name in self.datasetMap

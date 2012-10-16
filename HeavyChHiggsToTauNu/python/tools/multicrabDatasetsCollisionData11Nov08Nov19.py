@@ -11,6 +11,7 @@ datasets = {
     # Single tau + MET
     "Tau_160431-167913_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"triggerThrow": 0}, # needed for OR of triggers in separate run ranges
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "triggerOR": [
@@ -52,6 +53,7 @@ datasets = {
     # break of range because of trigger eff. boundary
     "Tau_170722-173198_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "trigger": "HLT_IsoPFTau35_Trk20_MET60_v6",
         "runs": (170722, 173198), # This is prompt RECO, so check the run range again when running!
@@ -84,6 +86,7 @@ datasets = {
     # break of range because of trigger eff. boundary
     "Tau_173236-173692_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "trigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
         "runs": (173236, 173692), # This is prompt RECO, so check the run range again when running!
@@ -116,6 +119,7 @@ datasets = {
     # 2011 B
     "Tau_175860-180252_2011B_Nov19": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"triggerThrow": 0}, # needed for OR of triggers in separate run ranges
         #"skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "triggerOR": [
@@ -154,6 +158,7 @@ datasets = {
     # Single tau (control)
     "Tau_Single_165970-167913_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "args": {"triggerThrow": 0}, # needed for OR of triggers in separate run ranges
         "triggerOR": [
@@ -178,6 +183,7 @@ datasets = {
     },
     "Tau_Single_170722-173198_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "trigger": "HLT_IsoPFTau35_Trk20_v6",
         "runs": (170722, 173198), # This is prompt RECO, so check the run range again when running!
@@ -197,6 +203,7 @@ datasets = {
     },
     "Tau_Single_173236-173692_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "trigger": "HLT_MediumIsoPFTau35_Trk20_v1",
         "runs": (173236, 173692), # This is prompt RECO, so check the run range again when running!
@@ -216,6 +223,7 @@ datasets = {
     },
     "Tau_Single_175832-180252_2011B_Nov19": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "skimConfig": ["SkimFourJets_cff", "SkimFourJetsChs_cff"],
         "args": {"triggerThrow": 0}, # needed for OR of triggers in separate run ranges
         "triggerOR": [
@@ -242,6 +250,7 @@ datasets = {
     # Single Mu
     "SingleMu_160431-163261_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu20_v1", "HLT_IsoMu12_v1", # not prescaled
@@ -258,6 +267,7 @@ datasets = {
     }, 
    "SingleMu_163270-163869_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu24_v2", "HLT_IsoMu17_v6", # not prescaled
@@ -274,6 +284,7 @@ datasets = {
     },
     "SingleMu_165088-165633_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu30_v3", "HLT_IsoMu17_v8", # not prescaled
@@ -290,6 +301,7 @@ datasets = {
     },
     "SingleMu_165970-166150_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu30_v3", "HLT_IsoMu24_v5", # not prescaled
@@ -306,6 +318,7 @@ datasets = {
     },
     "SingleMu_166161-166164_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_v1", "HLT_IsoMu24_v5", # not prescaled
@@ -322,6 +335,7 @@ datasets = {
     },
     "SingleMu_166346-166346_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_v2", "HLT_IsoMu24_v6", # not prescaled
@@ -338,6 +352,7 @@ datasets = {
     },
     "SingleMu_166374-166967_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_v1", "HLT_IsoMu24_v5", # not prescaled
@@ -354,6 +369,7 @@ datasets = {
     },
     "SingleMu_167039-167043_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_v1", "HLT_IsoMu24_v5", "HLT_IsoMu20_eta2p1_v1", # not prescaled
@@ -370,6 +386,7 @@ datasets = {
     },
     "SingleMu_167078-167913_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_v3", "HLT_IsoMu24_v7", "HLT_IsoMu20_eta2p1_v1", # not prescaled
@@ -386,6 +403,7 @@ datasets = {
     },
     "SingleMu_170722-172619_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_v5", "HLT_IsoMu24_v8", # not prescaled
@@ -402,6 +420,7 @@ datasets = {
     },
     "SingleMu_172620-173198_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_v5", "HLT_IsoMu24_v8", # not prescaled
@@ -418,6 +437,7 @@ datasets = {
     },
     "SingleMu_173236-173692_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_eta2p1_v1", "HLT_IsoMu30_eta2p1_v3", # not prescaled
@@ -436,6 +456,7 @@ datasets = {
     },
     "SingleMu_175860-176469_2011B_Nov19": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_eta2p1_v1", "HLT_IsoMu30_eta2p1_v3", # not prescaled
@@ -453,6 +474,7 @@ datasets = {
     },
     "SingleMu_176545-177053_2011B_Nov19": { # split because of much data (in the boundary of /cdaq/physics/Run2011/3e33/v2.3/HLT/V2 and /cdaq/physics/Run2011/3e33/v3.0/HLT/V2)
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_eta2p1_v1", "HLT_IsoMu30_eta2p1_v3", # not prescaled
@@ -470,6 +492,7 @@ datasets = {
     },
     "SingleMu_177074-177452_2011B_Nov19": { # split because of much data (in the boundary of /cdaq/physics/Run2011/3e33/v3.1/HLT/V1 and /cdaq/physics/Run2011/3e33/v4.0/HLT/V2)
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_eta2p1_v1", "HLT_IsoMu30_eta2p1_v3", # not prescaled
@@ -487,6 +510,7 @@ datasets = {
     },
     "SingleMu_177718-178380_2011B_Nov19": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_eta2p1_v1", "HLT_IsoMu30_eta2p1_v3", # not prescaled
@@ -504,6 +528,7 @@ datasets = {
     },
     "SingleMu_178420-178866_2011B_Nov19": { # split because of too much data (in the middle of /cdaq/physics/Run2011/5e33/v1.4/HLT/V5, splitting at the boundaries did not make sense)
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_eta2p1_v4", "HLT_IsoMu30_eta2p1_v6", # not prescaled
@@ -521,6 +546,7 @@ datasets = {
     },
     "SingleMu_178871-179889_2011B_Nov19": { # split because of too much data (in the middle of /cdaq/physics/Run2011/5e33/v1.4/HLT/V5, splitting at the boundaries did not make sense)
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_eta2p1_v4", "HLT_IsoMu30_eta2p1_v6", # not prescaled
@@ -538,6 +564,7 @@ datasets = {
     },
     "SingleMu_179959-180252_2011B_Nov19": { # split because of too much data (in the middle of /cdaq/physics/Run2011/5e33/v1.4/HLT/V5, splitting at the boundaries did not make sense)
         "dataVersion": "44Xdata",
+        "energy": 7,
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_eta2p1_v5", "HLT_IsoMu30_eta2p1_v7", # not prescaled
@@ -558,6 +585,7 @@ datasets = {
     # Single Mu for tau embedding skims
     "SingleMu_Mu_160431-163261_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "trigger": "HLT_Mu20_v1",
         "runs": (160431, 163261),
         "data": {
@@ -570,6 +598,7 @@ datasets = {
     }, 
     "SingleMu_Mu_163270-163869_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "trigger": "HLT_Mu24_v2",
         "runs": (163270, 163869),
         "data": {
@@ -583,6 +612,7 @@ datasets = {
 
     "SingleMu_Mu_165088-166150_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "trigger": "HLT_Mu30_v3",
         "runs": (165088, 166150), # This is prompt RECO, so check the run range again when running!
         "data": {
@@ -595,6 +625,7 @@ datasets = {
     },
     "SingleMu_Mu_165103-165103_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "trigger": "HLT_Mu30_v3",
         "runs": (165103, 165103), # This is prompt RECO, so check the run range again when running!
         "data": {
@@ -607,6 +638,7 @@ datasets = {
     },
     "SingleMu_Mu_166161-166164_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "trigger": "HLT_Mu40_v1",
         "runs": (166161, 166164), # This is prompt RECO, so check the run range again when running!
         "data": {
@@ -619,6 +651,7 @@ datasets = {
     },
     "SingleMu_Mu_166346-166346_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "trigger": "HLT_Mu40_v2",
         "runs": (166346, 166346), # This is prompt RECO, so check the run range again when running!
         "data": {
@@ -631,6 +664,7 @@ datasets = {
     },
     "SingleMu_Mu_166374-167043_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "trigger": "HLT_Mu40_v1",
         "runs": (166374, 167043), # This is prompt RECO, so check the run range again when running!
         "data": {
@@ -643,6 +677,7 @@ datasets = {
     },
     "SingleMu_Mu_167078-167913_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "trigger": "HLT_Mu40_v3",
         "runs": (167078, 167913), # This is prompt RECO, so check the run range again when running!
         "data": {
@@ -655,6 +690,7 @@ datasets = {
     },
     "SingleMu_Mu_170722-172619_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "trigger": "HLT_Mu40_v5",
         "runs": (170722, 172619),
         "data": {
@@ -667,6 +703,7 @@ datasets = {
     },
     "SingleMu_Mu_172620-173198_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "trigger": "HLT_Mu40_v5",
         "runs": (172620, 173198), # This is prompt RECO, so check the run range again when running!
         "data": {
@@ -679,6 +716,7 @@ datasets = {
     },
     "SingleMu_Mu_173236-173692_2011A_Nov08": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "trigger": "HLT_Mu40_eta2p1_v1",
         "runs": (173236, 173692), # This is prompt RECO, so check the run range again when running!
         "data": {
@@ -691,6 +729,7 @@ datasets = {
     },
     "SingleMu_Mu_173693-177452_2011B_Nov19": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "trigger": "HLT_Mu40_eta2p1_v1",
         "runs": (173693, 177452), # This is prompt RECO, so check the run range again when running!
         "data": {
@@ -703,6 +742,7 @@ datasets = {
     },
     "SingleMu_Mu_177453-178380_2011B_Nov19": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "trigger": "HLT_Mu40_eta2p1_v1",
         "runs": (177453, 178380), # This is prompt RECO, so check the run range again when running!
         "data": {
@@ -715,6 +755,7 @@ datasets = {
     },
     "SingleMu_Mu_178411-179889_2011B_Nov19": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "trigger": "HLT_Mu40_eta2p1_v4",
         "runs": (178411, 179889), # This is prompt RECO, so check the run range again when running!
         "data": {
@@ -727,6 +768,7 @@ datasets = {
     },
     "SingleMu_Mu_179942-180371_2011B_Nov19": {
         "dataVersion": "44Xdata",
+        "energy": 7,
         "trigger": "HLT_Mu40_eta2p1_v5",
         "runs": (179942, 180371), # This is prompt RECO, so check the run range again when running!
         "data": {
