@@ -16,11 +16,6 @@ defaultStep = "embedding"
 #defaultStep = "muonAnalysis"
 #defaultStep = "caloMetEfficiency"
 
-# Default era of data to use (meaningful only for signalAnalysis and muonAnalysis)
-#defaultEra = "EPS"
-#defaultEra = "Run2011A-EPS"
-defaultEra = "Run2011AB"
-
 # Default embedding version(s) to use
 defaultVersions = [
 # "v13"
@@ -84,7 +79,8 @@ if defaultStep in ["signalAnalysis", "signalAnalysisGenTau"]:
 #    "Mu_146428-147116_Apr21", # HLT_Mu9
 #    "Mu_147196-149294_Apr21", # HLT_Mu15_v1
 #]
-datasetsData2011A = [
+datasetsData2011 = [
+    # Run2011A
     "SingleMu_Mu_160431-163261_2011A_Nov08",  # HLT_Mu20_v1
     "SingleMu_Mu_163270-163869_2011A_Nov08",  # HLT_Mu24_v2
     "SingleMu_Mu_165088-166150_2011A_Nov08", # HLT_Mu30_v3
@@ -95,14 +91,12 @@ datasetsData2011A = [
     "SingleMu_Mu_170722-172619_2011A_Nov08",  # HLT_Mu40_v5
     "SingleMu_Mu_172620-173198_2011A_Nov08", # HLT_Mu40_v5
     "SingleMu_Mu_173236-173692_2011A_Nov08", # HLT_Mu40_eta2p1_v1
-]
-datasetsData2011B = [
+    # Run2011B
     "SingleMu_Mu_173693-177452_2011B_Nov19", # HLT_Mu40_eta2p1_v1
     "SingleMu_Mu_177453-178380_2011B_Nov19", # HLT_Mu40_eta2p1_v1
     "SingleMu_Mu_178411-179889_2011B_Nov19", # HLT_Mu40_eta2p1_v4
     "SingleMu_Mu_179942-180371_2011B_Nov19", # HLT_Mu40_eta2p1_v5
 ]
-datasetsData2011 = datasetsData2011A + datasetsData2011B
 datasetsMCnoQCD = [
     "TTJets_TuneZ2_Fall11",
     "WJets_TuneZ2_Fall11",
@@ -209,8 +203,6 @@ def main():
                       help="Processing step, one of %s (default: %s)" % (", ".join(config.keys()), defaultStep))
     parser.add_option("--version", dest="version", action="append", default=[],
                       help="Data version(s) to use as an input for 'analysis', 'signalAnalysis', or output for 'skim', 'embedding' (default: %s)" % ", ".join(defaultVersions))
-    parser.add_option("--era", dest="era", default=defaultEra,
-                      help="Data era to use for analysis, signalAnalysis, and muonAnalysis steps (default: %s)" % defaultEra)
     parser.add_option("--midfix", dest="midfix", default=dirPrefix,
                       help="String to add in the middle of the multicrab directory name (default: %s)" % dirPrefix)
     parser.add_option("--configOnly", dest="configOnly", action="store_true", default=False,
@@ -251,11 +243,10 @@ def createTasks(opts, step, version=None):
     if step in ["analysis", "analysisTau", "signalAnalysis", "signalAnalysisGenTau", "muonAnalysis", "caloMetEfficiency","EWKMatching"]:
         crabcfg = "../crab_analysis.cfg"
 
-    dirName = opts.midfix
+    dirName = ""
     if step in ["embedding", "analysis", "signalAnalysis", "EWKMatching"]:
         dirName += "_"+version
-    if step in ["analysis", "signalAnalysis", "EWKMatching"]:
-        dirName += "_"+opts.era.replace("+","")
+    dirName += opts.midfix
 
 
     multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
@@ -267,17 +258,7 @@ def createTasks(opts, step, version=None):
         datasets.extend(datasetsMCnoQCD)
     else:
     #    datasets.extend(datasetsData2010)
-        if step in ["analysis", "signalAnalysis","EWKMatching"]:
-            if opts.era == "Run2011A":
-                datasets.extend(datasetsData2011A)
-            if opts.era == "Run2011B":
-                datasets.extend(datasetsData2011B)
-            if opts.era == "Run2011AB":
-                datasets.extend(datasetsData2011)
-            else:
-                raise Exception("Unsupported era %s" % opts.era)
-        else:
-            datasets.extend(datasetsData2011)
+        datasets.extend(datasetsData2011)
         datasets.extend(datasetsMCnoQCD)
         datasets.extend(datasetsMCQCD)
 
@@ -402,7 +383,6 @@ def createTasks(opts, step, version=None):
     # Modification step for analysis steps
     def modifyAnalysis(dataset):
         if dataset.isMC():
-            dataset.appendArg("puWeightEra="+opts.era)
             dataset.appendArg("runOnCrab=1") # Needed for btag scale factor mechanism
         if step in ["signalAnalysis","EWKMatching"]:
             for key in dataset.data.keys():
@@ -432,8 +412,6 @@ def createTasks(opts, step, version=None):
     #            dataset.setNumberOfJobs(100)
     
     def modifyMuonAnalysis(dataset):
-        if dataset.isMC():
-            dataset.appendArg("puWeightEra="+opts.era)
         try:
             dataset.setNumberOfJobs(muonAnalysisNjobs[dataset.getName()])
         except KeyError:
@@ -477,7 +455,7 @@ def createTasks(opts, step, version=None):
             for i in xrange(nMulticrabTasks):
                 firstJob = i*500+1
                 lastJob = (i+1)*500
-                pfix ="%s_%s_%d-%d%s" % (prefix, dname, firstJob, lastJob, dirName)
+                pfix ="%s%s_%s_%d-%d" % (prefix, dirName, dname, firstJob, lastJob)
                 taskDir = multicrab.createTasks(configOnly=opts.configOnly, prefix=pfix)
                 taskDirs.append( (taskDir, [datasetName]) )
     else:
