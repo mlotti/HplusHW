@@ -314,14 +314,16 @@ class Data:
     ## Constructor
     #
     # \param datasetpath     Path of the output DBS-dataset
-    # \param number_of_jobs  Default number of jobs for those who process the output (conflicts with lumis_per_job)
-    # \param lumis_per_job   Default number of lumis per job for those who process the output (conflicts with number_of_jobs)
+    # \param number_of_jobs  Default number of jobs for those who process the output (conflicts with lumis_per_job, events_per_job)
+    # \param lumis_per_job   Default number of lumis per job for those who process the output (conflicts with number_of_jobs, events_per_job)
+    # \param events_per_job  Default number of events per job for those who process the output (conflicts with number_of_jobs, lumis_per_job)
     # \param lumiMask        Default lumi mask for those who process the output
     # \param dbs_url         URL to the DBS reader instance
-    def __init__(self, datasetpath, number_of_jobs=None, lumis_per_job=None, lumiMask=None, dbs_url=None):
+    def __init__(self, datasetpath, number_of_jobs=None, lumis_per_job=None, events_per_job=None, lumiMask=None, dbs_url=None):
         self.datasetpath = datasetpath
         self.number_of_jobs = number_of_jobs
         self.lumis_per_job = lumis_per_job
+        self.events_per_job = events_per_job
         self.lumiMask = lumiMask
         self.dbs_url = dbs_url
 
@@ -342,8 +344,13 @@ class Data:
         return self.datasetpath
 
     def _ensureConsistency(self):
-        if self.number_of_jobs != None and self.lumis_per_job != None:
-            raise Exception("Data may have only either number_of_jobs or lumis_per_job (DBS dataset %s)" % self.datasetpath)
+        n = 0
+        if self.number_of_jobs != None: n += 1
+        if self.lumis_per_job != None: n += 1
+        if self.events_per_job != None: n += 1
+
+        if n > 1:
+            raise Exception("Data may have only one of number_of_jobs, lumis_per_job, events_per_job set (DBS dataset %s)" % self.datasetpath)
 
     ## String representation of Data
     def __str__(self):
@@ -352,9 +359,15 @@ class Data:
         out.write('Data("%s"' % self.datasetpath)
         if self.number_of_jobs != None:
             out.write(",\n"+prefix+"number_of_jobs=%d" % self.number_of_jobs)
+        if self.lumis_per_job != None:
+            out.write(",\n"+prefix+"lumis_per_job=%d" % self.number_of_jobs)
+        if self.events_per_job != None:
+            out.write(",\n"+prefix+"events_per_job=%d" % self.number_of_jobs)
+
         if self.lumiMask != None:
             out.write(", ")
-            if self.number_of_jobs == None:
+            # Formatting if there are no prior elements printed
+            if self.number_of_jobs == None and self.lumis_per_job == None and self.events_per_job == None: 
                 out.write("\n"+prefix)
             out.write('lumiMask="%s"' % self.lumiMask)
         if self.dbs_url != None:
@@ -439,6 +452,11 @@ class Source:
 #
 # When the processing has finished, add \a outputPath, and possibly \a
 # njobsOut.
+#
+# \b Note that if something else thant what is shown here is variable
+# between datasets in your use case, please first consider creating a
+# similar class (by deriving if that helps you) for your purpose
+# INSTEAD of modifying this. Or at least consult Matti.
 class TaskDef:
     ## Constructor
     #

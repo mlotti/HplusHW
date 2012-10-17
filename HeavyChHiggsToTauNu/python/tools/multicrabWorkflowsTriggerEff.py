@@ -59,6 +59,15 @@ def addMetLegSkim_44X(version, datasets, updateDefinitions):
 
         # Construct processing workflow
         wf = constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow="AOD", workflowName="triggerMetLeg_skim_"+version)
+
+        # Example of how to set user_remote_dir for this workflow only
+        # For dataset-specific setting one can e.g.
+        # - modify TaskDef class, or
+        # - create new TaskDef class for the purpose of this workflow, or
+        # - create a dictionary from dataset name to user_remote_dir,
+        #   and pick the one for this dataset from there
+        #wf.addCrabLine("USER.user_remote_dir = /whatever")
+
         dataset.addWorkflow(wf)
 
         # If have skim output, define the workflows which depend on it
