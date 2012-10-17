@@ -580,7 +580,7 @@ class MulticrabDataset:
             raise Exception("'dataVersion' missing for dataset '%s'" % name)
         if not "datasetpath" in self.data:
             raise Exception("'datasetpath' missing for dataset '%s'" % name)
-	if not ("lumis_per_job" in self.data or "number_of_jobs" in self.data or "events_per_job" in self.data):
+	if not (("lumis_per_job" in self.data and "total_number_of_lumis" in self.data) or ("number_of_jobs" in self.data and "total_number_of_jobs" in self.data) or ("events_per_job" in self.data and "total_number_of_events" in self.data)):
             raise Exception("'lumis_per_job' or 'number_of_jobs' missing for dataset '%s'" % name)
         if "lumis_per_job" in self.data and "number_of_jobs" in self.data:
             raise Exception("Only one of 'lumis_per_job' and 'number_of_jobs' is allowed for dataset '%s'" % name)
