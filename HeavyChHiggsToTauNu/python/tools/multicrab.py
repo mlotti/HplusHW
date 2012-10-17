@@ -933,7 +933,7 @@ class Multicrab:
     # multicrab.cfg in there, copies and generates the necessary
     # files to the directory and optionally run 'multicrab -create'
     # in the directory.
-    def createTasks(self, configOnly=False, **kwargs):
+    def createTasks(self, configOnly=False, codeRepo='git', **kwargs):
         if not configOnly:
             checkCrabInPath()
         dirname = createTaskDir(**kwargs)
@@ -941,17 +941,18 @@ class Multicrab:
         self._writeConfig(os.path.join(dirname, "multicrab.cfg"))
 
         # Create code versions
-        version = git.getCommitId()
-        if version != None:
-            f = open(os.path.join(dirname, "codeVersion.txt"), "w")
-            f.write(version+"\n")
-            f.close()
-            f = open(os.path.join(dirname, "codeStatus.txt"), "w")
-            f.write(git.getStatus()+"\n")
-            f.close()
-            f = open(os.path.join(dirname, "codeDiff.txt"), "w")
-            f.write(git.getDiff()+"\n")
-            f.close()
+	if codeRepo == 'git':
+            version = git.getCommitId()
+            if version != None:
+                f = open(os.path.join(dirname, "codeVersion.txt"), "w")
+                f.write(version+"\n")
+                f.close()
+                f = open(os.path.join(dirname, "codeStatus.txt"), "w")
+                f.write(git.getStatus()+"\n")
+                f.close()
+                f = open(os.path.join(dirname, "codeDiff.txt"), "w")
+                f.write(git.getDiff()+"\n")
+                f.close()
 
         files = self.filesToCopy[:]
         for d in self.datasets:
