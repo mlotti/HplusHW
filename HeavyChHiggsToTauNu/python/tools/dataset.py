@@ -468,6 +468,14 @@ class CountAsymmetric:
     def uncertaintyHigh(self):
         return self._uncertaintyHigh
 
+    def multiply(self, count):
+        value = count.value()
+        if count.uncertainty() != 0:
+            raise Exception("Can't multiply CountAsymmetric (%f, %f, %f) with Count (%f, %f) with non-zero uncertainty" % (self._value, self._uncertaintyLow, self._uncertaintyHigh, count.value(), count.uncertainty()))
+        self._value *= value
+        self._uncertaintyLow *= value
+        self._uncertaintyHigh *= value
+
     ## \var _value
     # Value of the count
     ## \var _uncertaintyLow
@@ -483,7 +491,7 @@ def divideBinomial(countPassed, countTotal):
     t = int(t)
     errUp = ROOT.TEfficiency.ClopperPearson(t, p, 0.683, True)
     errDown = ROOT.TEfficiency.ClopperPearson(t, p, 0.683, False)
-    return CountAsymmetric(value, errUp-value, value-errDown)
+    return CountAsymmetric(value, value-errDown, errUp-value)
 
 ## Transform histogram (TH1) to a list of (name, Count) pairs.
 #
@@ -990,6 +998,14 @@ class DatasetRootHisto(DatasetRootHistoBase):
     def getBinLabels(self):
         return [x[0] for x in _histoToCounter(self.histo)]
 
+    def forEach(self, function, datasetRootHisto1=None):
+        if datasetRootHisto1 != None:
+            if not isinstance(datasetRootHisto1, DatasetRootHisto):
+                raise Exception("datasetRootHisto1 must be of the type DatasetRootHisto")
+            return [function(self, datasetRootHisto1)]
+        else:
+            return [function(self)]
+
     ## Modify the TH1 with a function
     #
     # \param function              Function taking the original TH1, and returning a new TH1. If newDatasetRootHisto is specified, function must take some other DatasetRootHisto object as an input too
@@ -1093,6 +1109,22 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
     def isMC(self):
         return False
 
+    def forEach(self, function, datasetRootHisto1=None):
+        ret = []
+        if datasetRootHisto1 != None:
+            if not isinstance(datasetRootHisto1, DatasetRootHistoMergedData):
+                raise Exception("datasetRootHisto1 must be of the type DatasetRootHistoMergedData")
+            if not len(self.histoWrappers) == len(datasetRootHisto1.histoWrappers):
+                raise Exception("len(self.histoWrappers) != len(datasetrootHisto1.histoWrappers), %d != %d" % len(self.histoWrappers), len(datasetRootHisto1.histoWrappers))
+            
+            for i, drh in enumerate(self.histoWrappers):
+                ret.extend(drh.forEach(function, datasetRootHisto1.histoWrappers[i]))
+        else:
+            for drh in self.histoWrappers:
+                ret.extend(drh.forEach(function))
+        return ret
+        
+
     ## Modify the TH1 with a function
     #
     # \param function             Function taking the original TH1, and returning a new TH1. If newDatasetRootHisto is specified, function must take some other DatasetRootHisto object as an input too
@@ -1181,6 +1213,21 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
 
     def isMC(self):
         return True
+
+    def forEach(self, function, datasetRootHisto1=None):
+        ret = []
+        if datasetRootHisto1 != None:
+            if not isinstance(datasetRootHisto1, DatasetRootHistoMergedMC):
+                raise Exception("datasetRootHisto1 must be of the type DatasetRootHistoMergedMC")
+            if not len(self.histoWrappers) == len(datasetRootHisto1.histoWrappers):
+                raise Exception("len(self.histoWrappers) != len(datasetrootHisto1.histoWrappers), %d != %d" % len(self.histoWrappers), len(datasetRootHisto1.histoWrappers))
+            
+            for i, drh in enumerate(self.histoWrappers):
+                ret.extend(drh.forEach(function, datasetRootHisto1.histoWrappers[i]))
+        else:
+            for drh in self.histoWrappers:
+                ret.extend(drh.forEach(function))
+        return ret
 
     ## Modify the TH1 with a function
     #
@@ -2217,17 +2264,19 @@ class NtupleCache:
     # \param selectorArgs   Optional arguments to the selector constructor
     # \param process        Should the ntuple be processed? (if False, results are read from the cache file)
     # \param cacheFileName  Path to the cache file
-    # \param maxEvents     Maximum number of events to process (-1 for all events)
+    # \param maxEvents      Maximum number of events to process (-1 for all events)
+    # \param printStatus    Print processing status information
     #
     # I would like to make \a process redundant, but so far I haven't
     # figured out a bullet-proof method for that.
-    def __init__(self, treeName, selector, selectorArgs=[], process=True, cacheFileName="histogramCache.root", maxEvents=-1):
+    def __init__(self, treeName, selector, selectorArgs=[], process=True, cacheFileName="histogramCache.root", maxEvents=-1, printStatus=True):
         self.treeName = treeName
         self.cacheFileName = cacheFileName
         self.selectorName = selector
         self.selectorArgs = selectorArgs
         self.doProcess = process
         self.maxEvents = maxEvents
+        self.printStatus = printStatus
 
         self.macrosLoaded = False
         self.processedDatasets = {}
@@ -2305,6 +2354,7 @@ class NtupleCache:
             N = self.maxEvents
         selector = ROOT.SelectorImp(N, dataset.isMC(), getattr(ROOT, self.selectorName)(*self.selectorArgs))
         selector.setOutput(directory)
+        selector.setPrintStatus(self.printStatus)
 
         print "Processing dataset", datasetName
         
