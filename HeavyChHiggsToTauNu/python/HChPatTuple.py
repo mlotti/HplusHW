@@ -32,11 +32,11 @@ tauPreSelection = "pt() > 15"
 jetPreSelection = "pt() > 10"
 #jetPreSelection = ""
 
-#muonPreSelection = "pt() > 5"
-muonPreSelection = ""
+muonPreSelection = "pt() > 5"
+#muonPreSelection = ""
 
-#electronPreSelection = "pt() > 5"
-electronPreSelection = ""
+electronPreSelection = "pt() > 5"
+#electronPreSelection = ""
 
 outputModuleName = "out"
 
@@ -1572,13 +1572,13 @@ def addPatTrigger(process, dataVersion, sequence):
     # This is the only way for now to reduce the size of PAT trigger objects
     # And yes, there is a typo in the parameter name
     process.patTrigger.exludeCollections = cms.vstring(
-        "hltAntiKT5*",
-        "hltBLifetime*",
-        "hltBSoft*",
+#        "hltAntiKT5*",
+ #       "hltBLifetime*",
+ #       "hltBSoft*",
         "hltCleanEle*",
         "hltHITIPT*",
         "hltIsolPixelTrack*",
-        "hltJet*",
+#        "hltJet*",
         "hltL1HLTDouble*",
         "hltL1IsoRecoEcal*",
         "hltL1NonIsoRecoEcal*",
@@ -1591,10 +1591,8 @@ def addPatTrigger(process, dataVersion, sequence):
         "hltGetJetsfrom*",
         "hltMuTrackJpsi*",
         # After 53X
-        "hltCaloJet*",
         "hltDeDxFilter*",
         "hltPFHT*",
-        "hltPFJets*",
         "hltMu17B*",
         "hltPFDisplacedJets*",
     )
