@@ -580,7 +580,7 @@ class MulticrabDataset:
             raise Exception("'dataVersion' missing for dataset '%s'" % name)
         if not "datasetpath" in self.data:
             raise Exception("'datasetpath' missing for dataset '%s'" % name)
-        if not ("lumis_per_job" in self.data or "number_of_jobs" in self.data):
+	if not ("lumis_per_job" in self.data or "number_of_jobs" in self.data or "events_per_job" in self.data):
             raise Exception("'lumis_per_job' or 'number_of_jobs' missing for dataset '%s'" % name)
         if "lumis_per_job" in self.data and "number_of_jobs" in self.data:
             raise Exception("Only one of 'lumis_per_job' and 'number_of_jobs' is allowed for dataset '%s'" % name)
@@ -811,7 +811,7 @@ class MulticrabDataset:
         ret += "CMSSW.pycfg_params = %s\n" % ":".join(args)
         del dataKeys[dataKeys.index("datasetpath")]
 
-        for key in ["dbs_url", "lumis_per_job", "number_of_jobs", "lumi_mask"]:
+        for key in ["dbs_url", "total_number_of_lumis","lumis_per_job", "total_number_of_jobs","number_of_jobs", "total_number_of_events", "events_per_job", "lumi_mask"]:
             try:
                 ret += "CMSSW.%s = %s\n" % (key, self.data[key])
                 del dataKeys[dataKeys.index(key)]
@@ -822,6 +822,13 @@ class MulticrabDataset:
                 ret += "GRID.%s = %s\n" % (key, ",".join(self.data[key]))
                 del dataKeys[dataKeys.index(key)]
             except KeyError:
+                pass
+
+	for key in ["storage_element","storage_path","user_remote_dir","publish_data","publish_data_name","dbs_url_for_publication"]:
+	    try:
+		ret += "USER.%s = %s\n" % (key, self.data[key])
+                del dataKeys[dataKeys.index(key)]
+	    except KeyError: 
                 pass
 
         for key in ["use_server"]:
@@ -840,7 +847,6 @@ class MulticrabDataset:
 
         for line in self.lines:
             ret += line + "\n"
-
         return ret
 
 ## Abstraction of the entire multicrab configuration for the configuration generation (intended for users)
@@ -1074,7 +1080,7 @@ class Multicrab:
     # multicrab.cfg in there, copies and generates the necessary
     # files to the directory and optionally run 'multicrab -create'
     # in the directory.
-    def createTasks(self, configOnly=False, **kwargs):
+    def createTasks(self, configOnly=False, codeRepo='git', **kwargs):
         if not configOnly:
             checkCrabInPath()
         dirname = createTaskDir(**kwargs)
@@ -1082,17 +1088,18 @@ class Multicrab:
         self._writeConfig(os.path.join(dirname, "multicrab.cfg"))
 
         # Create code versions
-        version = git.getCommitId()
-        if version != None:
-            f = open(os.path.join(dirname, "codeVersion.txt"), "w")
-            f.write(version+"\n")
-            f.close()
-            f = open(os.path.join(dirname, "codeStatus.txt"), "w")
-            f.write(git.getStatus()+"\n")
-            f.close()
-            f = open(os.path.join(dirname, "codeDiff.txt"), "w")
-            f.write(git.getDiff()+"\n")
-            f.close()
+	if codeRepo == 'git':
+            version = git.getCommitId()
+            if version != None:
+                f = open(os.path.join(dirname, "codeVersion.txt"), "w")
+                f.write(version+"\n")
+                f.close()
+                f = open(os.path.join(dirname, "codeStatus.txt"), "w")
+                f.write(git.getStatus()+"\n")
+                f.close()
+                f = open(os.path.join(dirname, "codeDiff.txt"), "w")
+                f.write(git.getDiff()+"\n")
+                f.close()
 
         files = self.filesToCopy[:]
         for d in self.datasets:
