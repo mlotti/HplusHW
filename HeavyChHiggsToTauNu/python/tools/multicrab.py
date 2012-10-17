@@ -824,13 +824,6 @@ class MulticrabDataset:
             except KeyError:
                 pass
 
-	for key in ["storage_element","storage_path","user_remote_dir","publish_data","publish_data_name","dbs_url_for_publication"]:
-	    try:
-		ret += "USER.%s = %s\n" % (key, self.data[key])
-                del dataKeys[dataKeys.index(key)]
-	    except KeyError: 
-                pass
-
         for key in ["use_server"]:
             try:
                 ret += "CRAB.%s = %s\n" % (key, self.data[key])
@@ -847,6 +840,7 @@ class MulticrabDataset:
 
         for line in self.lines:
             ret += line + "\n"
+
         return ret
 
 ## Abstraction of the entire multicrab configuration for the configuration generation (intended for users)
