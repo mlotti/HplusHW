@@ -8,8 +8,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 # Default processing step
 #defaultStep = "skim"
-defaultStep = "embedding"
-#defaultStep = "analysis"
+#defaultStep = "embedding"
+defaultStep = "analysis"
 #defaultStep = "analysisTau"
 #defaultStep = "signalAnalysis"
 #defaultStep = "signalAnalysisGenTau"
@@ -45,8 +45,12 @@ defaultVersions = [
 #    "v44_4_seed0",
 
 #    "v44_4_2" # skim version
+
 #    "v44_4_2_muiso0"
-    "v44_4_2_seed0"
+#    "v44_4_2_muiso1"
+
+    "v44_4_2_seed0",
+#    "v44_4_2_seed1"
 ]
 skimVersion = "v44_4_2"
 
