@@ -1448,14 +1448,17 @@ class Dataset:
     def _getRootHisto(self, name):
         if self.isMC() and self._dataEra != None and self._doEraReplace:
             name = name.replace(self._analysisBaseName, self._analysisBaseName+self._dataEra, 1) # replace only the first occurrance
-        return self.file.Get(name)
+        return (self.file.Get(name), name)
 
     ## Read counters
     def _readCounters(self):
         self.counterDir = self._unweightedCounterDir
-        d = self._getRootHisto(self.counterDir)
+        (d, realDir) = self._getRootHisto(self.counterDir)
         if d == None:
-            raise Exception("Could not find counter directory %s from file %s" % (self.counterDir, self.file.GetName()))
+            msg = "Could not find counter directory %s from file %s." % (realDir, self.file.GetName())
+            if realDir != self.counterDir:
+                msg += "\nThe requested counter directory was %s, and the path was modified because of dataEra." % self.counterDir
+            raise Exception(msg)
         if d.Get("counter") != None:
             ctr = _histoToCounter(d.Get("counter"))
             self.nAllEventsUnweighted = ctr[0][1].value() # first counter, second element of the tuple
@@ -1469,12 +1472,18 @@ class Dataset:
 
         if self._weightedCounters:
             self.counterDir = self._weightedCounterDir
-            d = self._getRootHisto(self.counterDir)
+            (d, realDir) = self._getRootHisto(self.counterDir)
             if d == None:
-                raise Exception("Could not find counter directory %s from file %s" % (self.counterDir, self.file.GetName()))
+                msg = "Could not find counter directory %s from file %s" % (realDir, self.file.GetName())
+                if realDir != self.counterDir:
+                    msg += "\nThe requested counter directory was %s, and the path was modified because of dataEra." % self.counterDir
+                raise Exception(msg)
             h = d.Get("counter")
             if h == None:
-                raise Exception("No TH1 'counter' in directory '%s' of ROOT file '%s'" % (self.counterDir, self.file.GetName()))
+                msg = "No TH1 'counter' in directory '%s' of ROOT file '%s'" % (realDir, self.file.GetName())
+                if realDir != self.counterDir:
+                    msg += "\nThe requested directory was %s, and it was replaced because of dataEra." % self.counterDir
+                raise Exception(msg)
             ctr = _histoToCounter(h)
             h.Delete()
             self.nAllEventsWeighted = ctr[0][1].value() # first counter, second element of the tuple
@@ -1595,7 +1604,7 @@ class Dataset:
         if hasattr(name, "draw"):
             return True
         pname = name
-        return self._getRootHisto(pname) != None
+        return self._getRootHisto(pname)[0] != None
 
     ## Get the dataset.DatasetRootHisto object for a named histogram.
     # 
@@ -1613,9 +1622,12 @@ class Dataset:
             h = name.draw(self)
         else:
             pname = name
-            h = self._getRootHisto(pname)
+            (h, realName) = self._getRootHisto(pname)
             if h == None:
-                raise Exception("Unable to find histogram '%s' from file '%s'" % (pname, self.file.GetName()))
+                msg = "Unable to find histogram '%s' from file '%s'" % (realName, self.file.GetName())
+                if realName != pname:
+                    msg += "\nThe requested histogram was %s, and the path was modified because of dataEra." % self.counterDir
+                raise Exception(msg)
             name = h.GetName()+"_"+self.name
             h.SetName(name.translate(None, "-+.:;"))
         return DatasetRootHisto(h, self)
@@ -1630,9 +1642,12 @@ class Dataset:
     # 
     # \return List of names in the directory.
     def getDirectoryContent(self, directory, predicate=lambda x: True):
-        d = self._getRootHisto(directory)
+        (d, realDir) = self._getRootHisto(directory)
         if d == None:
-            raise Exception("No object %s in file %s" % (directory, self.file.GetName()))
+            msg = "No object %s in file %s" % (realDir, self.file.GetName())
+            if realDir != d:
+                msg += "\nThe requested directory was %s, and the path was modified because of dataEra." % self.counterDir
+            raise Exception(msg)
         dirlist = d.GetListOfKeys()
 
         # Suppress the warning message of missing dictionary for some iterator
