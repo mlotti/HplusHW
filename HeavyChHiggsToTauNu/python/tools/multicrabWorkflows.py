@@ -11,6 +11,7 @@ import multicrabWorkflowsPattuple
 import multicrabWorkflowsTauEmbedding
 import multicrabWorkflowsMuonTagProbe
 import multicrabWorkflowsTriggerEff
+import multicrabWorkflowsPileupNtuple
 
 energy = 7 
 
@@ -140,6 +141,9 @@ datasets = DatasetSet([
 # /Tau/local-Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_Single_170722-173198_2011A_Nov08-a6c05c7e9a3d44262e26ce7c36099a5c/USER
 # /Tau/local-Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_Single_173236-173692_2011A_Nov08-0b4b37a70df41aa83f6b277cd6180eda/USER
 # /Tau/local-Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_Single_175832-180252_2011B_Nov19-24097e1b77cf020b884a6b4c31bedd64/USER
+
+# Add definition
+multicrabWorkflowsPileupNtuple.addNtuple_44X(datasets)
 
 # Add pattuple definitions
 multicrabWorkflowsPattuple.addPattuple_v25b(datasets)

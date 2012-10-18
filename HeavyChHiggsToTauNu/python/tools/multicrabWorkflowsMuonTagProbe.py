@@ -1,4 +1,4 @@
-## \package multicrabDatasetsTauEmbedding
+## \package multicrabDatasetsMuonTagProbe
 # Functions for muon tag&probe workflow definitions
 
 from multicrabDatasetsTools import Dataset, Workflow, Data, Source, updatePublishName, TaskDef, updateTaskDefinitions
