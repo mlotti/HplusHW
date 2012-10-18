@@ -55,6 +55,7 @@ class ConfigBuilder:
                  doFillTree = False, # Tree filling
                  histogramAmbientLevel = "Debug", # Set level of how many histograms are stored to files options are: 'Vital' (least histograms), 'Informative', 'Debug' (all histograms),
                  applyTriggerScaleFactor = True, # Apply trigger scale factor or not
+                 applyPUReweight = True, # Apply PU weighting or not
                  tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
                  useTriggerMatchedTaus = True,
                  useJERSmearedJets = True,
@@ -83,6 +84,7 @@ class ConfigBuilder:
         self.doFillTree = doFillTree
         self.histogramAmbientLevel = histogramAmbientLevel
         self.applyTriggerScaleFactor = applyTriggerScaleFactor
+        self.applyPUReweight = applyPUReweight
         self.tauSelectionOperatingMode = tauSelectionOperatingMode
         self.useTriggerMatchedTaus = useTriggerMatchedTaus
         self.useJERSmearedJets = useJERSmearedJets
@@ -206,8 +208,10 @@ class ConfigBuilder:
             for module, name in zip(modules, analysisNames_):
                 for dataEra in self.dataEras:
                     mod = module.clone()
-                    param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.triggerEfficiencyScaleFactor)
-                    param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.vertexWeightReader, era=dataEra)
+                    if self.applyTriggerScaleFactor:
+                        param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.triggerEfficiencyScaleFactor)
+                    if self.applyPUReweight:
+                        param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.vertexWeightReader, era=dataEra)
                     print "Added analysis for PU weight era =", dataEra
                     analysisModules.append(mod)
                     analysisNames.append(name+dataEra)
