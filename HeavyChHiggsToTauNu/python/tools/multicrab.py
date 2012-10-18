@@ -152,7 +152,7 @@ import ConfigParser
 import OrderedDict
 
 import multicrabWorkflows
-import multicrabWorkflows
+import multicrabWorkflowsTools
 import certifiedLumi
 import git
 
