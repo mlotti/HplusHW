@@ -12,6 +12,9 @@ set -e
 # Package needed for CSC Beam Halo Filter
 cvs co -r V00-00-08 RecoMET/METAnalyzers
 
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
+cvs co -r V00-02-10 -d CMGTools/External UserCode/CMG/CMGTools/External
+
 
 # https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentification
 #
