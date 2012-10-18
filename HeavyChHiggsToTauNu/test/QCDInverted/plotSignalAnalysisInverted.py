@@ -37,18 +37,17 @@ treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger
 
 #QCDfromData = True
 QCDfromData = False
+
+## for mT distributions 
+deltaPhi180 = False
 deltaPhi160 = False
 deltaPhi130 = False
+topmass = False  ## with top mass cut
 
-btagging = True # for normalisation with btagging
-
-# for histograms
-topmass = False
-deltaPhi180 = False
+# other distributions
 deltaPhiDistribution = False
-
-HiggsMass = False
-HiggsMassPhi140 = True
+HiggsMass = True
+HiggsMassPhi140 = False
 
 lastPtBin150 = False
 lastPtBin120 = True
@@ -56,6 +55,11 @@ lastPtBin120 = True
 mcOnly = False
 #mcOnly = True
 mcOnlyLumi = 5000 # pb
+
+#dataEra = "Run2011A"
+#dataEra = "Run2011B"
+dataEra = "Run2011AB"
+
 
 def usage():
     print "\n"
@@ -73,8 +77,9 @@ def main():
     dirs.append(sys.argv[1])
 
     # Read the datasets
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters)
-    #datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra)
+#    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters)
+#    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra)
 #    datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()
     datasets.updateNAllEventsToPUWeighted()
@@ -113,6 +118,7 @@ def main():
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     datasets.merge("EWK", ["WJets", "DYJetsToLL", "SingleTop", "Diboson","TTJets"], keepSources=True)
     datasets.remove(filter(lambda name: "W2Jets" in name, datasets.getAllDatasetNames()))
+        
     datasets.remove(filter(lambda name: "W3Jets" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "W4Jets" in name, datasets.getAllDatasetNames()))
 
@@ -122,7 +128,7 @@ def main():
     xsect.setHplusCrossSectionsToTop(datasets_lands)
 
     # Set the signal cross sections to a given BR(t->H), BR(h->taunu)
-    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
+    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.01, br_Htaunu=1)
 
     # Set the signal cross sections to a value from MSSM
 #    xsect.setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=200)
@@ -169,9 +175,9 @@ def doPlots(datasets):
     # functions to be formatted, drawn and saved to files
 
 
-    deltaPhi2(plots.DataMCPlot(datasets, analysis+"/deltaPhi"), "DeltaPhiTauMet", rebin=10)
-    deltaPhi2(plots.DataMCPlot(datasets, analysis+"/FakeMETVeto/Closest_DeltaPhi_of_MET_and_selected_jets"), "DeltaPhiJetMet")
-
+#    deltaPhi(plots.DataMCPlot(datasets, analysis+"/deltaPhi"), "DeltaPhiTauMet", rebin=10)
+#    deltaPhi(plots.DataMCPlot(datasets, analysis+"/FakeMETVeto/Closest_DeltaPhi_of_MET_and_selected_jets"), "DeltaPhiJetMet")
+#    deltaPhi2(createPlot("deltaPhi"), "DeltaPhiTauMet", rebin=10, ratio=False, opts={"ymaxfactor": 50}, moveLegend={"dx":-0.21}, textFunction=lambda: addMassBRText(x=0.2, y=0.87), cutLine=[160])
 
     # Set temporarily the signal cross sections to a value from MSSM
 #    xsect.setHplusCrossSections(datasets, tanbeta=20, mu=200)
@@ -202,7 +208,7 @@ def doPlots(datasets):
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdPhi"), "MTInvertedTauIdPhi", rebin=20)
 #    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdMet"), "MTInvertedTauIdMet", rebin=10)  
 
-    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMass"), "transverseMass", rebin=5)
+    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMass"), "transverseMass", rebin=5, ratio = True)
     path = analysis+"/transverseMass"
     transverseMass2(plots.DataMCPlot(datasets, path), "transverseMass", rebin=5)
     if QCDfromData:
@@ -212,23 +218,23 @@ def doPlots(datasets):
 
 
 
-    jetPt(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_pt"), "jetPt", rebin=20)
-    jetEta(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_eta"), "jetEta", rebin=10)
-    jetPhi(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_phi"), "jetPhi", rebin=10)
-    numberOfJets(plots.DataMCPlot(datasets, analysis+"/JetSelection/NumberOfSelectedJets"), "NumberOfJets")
+    jetPt(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_pt"), "jetPt", rebin=20, ratio = True)
+    jetEta(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_eta"), "jetEta", rebin=10, ratio = True)
+    jetPhi(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_phi"), "jetPhi", rebin=10, ratio = True)
+    numberOfJets(plots.DataMCPlot(datasets, analysis+"/JetSelection/NumberOfSelectedJets"), "NumberOfJets", ratio = True)
     jetEMFraction(plots.DataMCPlot(datasets, analysis+"/JetSelection/jetMaxEMFraction"), "jetMaxEMFraction", rebin=10)
     jetEMFraction(plots.DataMCPlot(datasets, analysis+"/JetSelection/jetEMFraction"), "jetEMFraction", rebin=20)
 #    jetEMFraction(plots.DataMCPlot(datasets, analysis+"/JetSelection/chargedJetEMFraction"), "chargedJetEMFraction", rebin=20)
    
-    jetPt(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_pt"), "bjetPt", rebin=2)
-    jetEta(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_eta"), "bjetEta", rebin=2)
-    numberOfJets(plots.DataMCPlot(datasets, analysis+"/Btagging/NumberOfBtaggedJets"), "NumberOfBJets")
+    jetPt(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_pt"), "bjetPt", rebin=5, ratio = True)
+    jetEta(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_eta"), "bjetEta", rebin=5, ratio = True)
+    numberOfJets(plots.DataMCPlot(datasets, analysis+"/Btagging/NumberOfBtaggedJets"), "NumberOfBJets", ratio = True)
     
-    jetPt(plots.DataMCPlot(datasets, analysis+"/GlobalElectronVeto/GlobalElectronPt"), "electronPt")
-    jetEta(plots.DataMCPlot(datasets, analysis+"/GlobalElectronVeto/GlobalElectronEta"), "electronEta")
+    jetPt(plots.DataMCPlot(datasets, analysis+"/GlobalElectronVeto/GlobalElectronPt"), "electronPt", ratio = True)
+    jetEta(plots.DataMCPlot(datasets, analysis+"/GlobalElectronVeto/GlobalElectronEta"), "electronEta", ratio = True)
     
-    jetPt(plots.DataMCPlot(datasets, analysis+"/GlobalMuonVeto/GlobalMuonPt"), "muonPt")
-    jetEta(plots.DataMCPlot(datasets, analysis+"/GlobalMuonVeto/GlobalMuonEta"), "muonEta")
+    jetPt(plots.DataMCPlot(datasets, analysis+"/GlobalMuonVeto/GlobalMuonPt"), "muonPt", ratio = True)
+    jetEta(plots.DataMCPlot(datasets, analysis+"/GlobalMuonVeto/GlobalMuonEta"), "muonEta", ratio = True)
     
     jetPt(plots.DataMCPlot(datasets, analysis+"/ForwardJetVeto/MaxForwJetEt"), "maxForwJetPt")
 
@@ -238,20 +244,24 @@ def doPlots(datasets):
     topMass(plots.DataMCPlot(datasets, analysis+"/TopChiSelection/TopMass"), "topMass_chi")
 
      # Delta phi
-#    deltaPhi(createPlot("TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
+
+    deltaPhi2(plots.DataMCPlot(datasets, analysis+"/deltaPhi"), "DeltaPhiTauMet", rebin=10)
+    deltaPhi2(plots.DataMCPlot(datasets, analysis+"/FakeMETVeto/Closest_DeltaPhi_of_MET_and_selected_jets"), "DeltaPhiJetMet")
+
+#    deltaPhi2(createPlot("TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
 #    deltaPhi2(createPlot("deltaPhi"), "DeltaPhiTauMet", rebin=10, moveLegend={"dx":-0.21}, textFunction=lambda: addMassBRText(x=0.2, y=0.87), cutLine=[160, 130])
-    deltaPhi2(createPlot("FakeMETVeto/Closest_DeltaPhi_of_MET_and_selected_jets"), "DeltaPhiJetMet")
+#    deltaPhi2(createPlot("FakeMETVeto/Closest_DeltaPhi_of_MET_and_selected_jets"), "DeltaPhiJetMet")
     
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/FullHiggsMass/HiggsMass"), "HiggsMass", rebin=1)
   
 #    drawPlot(createPlot("FullHiggsMass/HiggsMass"), "HiggsMass", rebin=2, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400})
     
-    met2(plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets"), "MET_BaseLineTauIdJets", rebin=10)
-    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets"), "MET_InvertedTauIdJets", rebin=10)
-    met2(plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdBtag"), "MET_BaseLineTauIdBtag", rebin=10)
-    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdBtag"), "MET_InvertedTauIdBtag", rebin=10)
-    met2(plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdBtagDphi"), "MET_BaseLineTauIdBtagDphi", rebin=10)
-    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdBtagDphi"), "MET_InvertedTauIdBtagDphi", rebin=10)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets"), "MET_BaseLineTauIdJets", rebin=20, ratio = True)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets"), "MET_InvertedTauIdJets", rebin=20, ratio = True)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdBtag"), "MET_BaseLineTauIdBtag", rebin=20, ratio = True)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdBtag"), "MET_InvertedTauIdBtag", rebin=20, ratio = True)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdBtagDphi"), "MET_BaseLineTauIdBtagDphi", rebin=20, ratio = True)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdBtagDphi"), "MET_InvertedTauIdBtagDphi", rebin=20, ratio = True)
 #    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdAllCuts"), "MET_InvertedTauIdAllCuts", rebin=10)   
 #    met2(plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdAllCuts"), "MET_BaseLineTauIdAllCuts", rebin=10)
 #    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdAllCuts"), "MET_InvertedTauIdAllCuts", rebin=10)    
@@ -272,7 +282,7 @@ def doPlots(datasets):
 #    topPtComparison(datasets) 
 #    vertexComparison(datasets)
 
-#    mtTest(datasets)
+    mtTest(datasets)
     mtComparison(datasets)
     metComparison(datasets)
     
@@ -296,7 +306,7 @@ def doCounters(datasets):
    # Default
 #    cellFormat = counter.TableFormatText()
     # No uncertainties
-    cellFormat = counter.TableFormatText(cellFormat=counter.CellFormatText(valueOnly=True))
+    cellFormat = counter.TableFormatText(cellFormat=counter.CellFormatText(valueOnly=False))
     print mainTable.format(cellFormat)
 
 
@@ -340,6 +350,10 @@ try:
     if lastPtBin120: 
         norm_120 = QCDInvertedNormalization["120"]
 
+
+    print norm_inc
+    print norm_4050,norm_5060,norm_6070,norm_7080,norm_80100,norm_100120,norm_120
+    
 except ImportError:   
     print
     print "    WARNING, QCDInvertedNormalizationFactors.py not found!"
@@ -350,38 +364,110 @@ except ImportError:
 def mtTest(datasets):
     
     ## After standard cut
-    mtData = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/mtTest_metcut")])
-    mtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/mtTest_metcut")])
-    mtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-
-    mtData._setLegendStyles()
-    mtData._setLegendLabels()
-    mtData.histoMgr.setHistoDrawStyleAll("P")
-    mtData.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
-    hmtData = mtData.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/mtTest_metcut")
+    mtTauVeto = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/transverseMassBeforeVeto")])
+    mtLeptonVeto = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/transverseMassAfterVeto")])
+    mtNoMet = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/transverseMassNoMet")])
+    mtNoMetBtag = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/transverseMassNoMetBtag")])
+    mtMet = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet")])
+    mtBtag = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag")])
+    mtDeltaPhi = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi")])
     
-    mtEWK._setLegendStyles()
-    mtEWK._setLegendLabels()
-    mtEWK.histoMgr.setHistoDrawStyleAll("P")
-    mtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
-    hmtEWK = mtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/mtTest_metcut")
+    mtTauVeto.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    mtLeptonVeto.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    mtNoMet.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    mtMet.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    mtBtag.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    mtDeltaPhi.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    
+    mtTauVeto._setLegendStyles()
+    mtTauVeto._setLegendLabels()
+    mtTauVeto.histoMgr.setHistoDrawStyleAll("P")
+    mtTauVeto.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
+    hmtTauVeto = mtTauVeto.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/transverseMassBeforeVeto")
+    
+    mtLeptonVeto._setLegendStyles()
+    mtLeptonVeto._setLegendLabels()
+    mtLeptonVeto.histoMgr.setHistoDrawStyleAll("P")
+    mtLeptonVeto.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
+    hmtLeptonVeto = mtLeptonVeto.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/transverseMassAfterVeto")
+    
+    mtNoMet._setLegendStyles()
+    mtNoMet._setLegendLabels()
+    mtNoMet.histoMgr.setHistoDrawStyleAll("P")
+    mtNoMet.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
+    hmtNoMet = mtNoMet.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/transverseMassNoMet")
+    
+    mtNoMetBtag._setLegendStyles()
+    mtNoMetBtag._setLegendLabels()
+    mtNoMetBtag.histoMgr.setHistoDrawStyleAll("P")
+    mtNoMetBtag.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
+    hmtNoMetBtag = mtNoMetBtag.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/transverseMassNoMetBtag")
+
+    mtMet._setLegendStyles()
+    mtMet._setLegendLabels()
+    mtMet.histoMgr.setHistoDrawStyleAll("P")
+    mtMet.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
+    hmtMet = mtMet.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet")
+
+    mtBtag._setLegendStyles()
+    mtBtag._setLegendLabels()
+    mtBtag.histoMgr.setHistoDrawStyleAll("P")
+    mtBtag.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
+    hmtBtag = mtBtag.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdBtag")
+
+    mtDeltaPhi._setLegendStyles()
+    mtDeltaPhi._setLegendLabels()
+    mtDeltaPhi.histoMgr.setHistoDrawStyleAll("P")
+    mtDeltaPhi.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
+    hmtDeltaPhi = mtDeltaPhi.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdPhi")
+    
     
     canvas30 = ROOT.TCanvas("canvas30","",500,500)
-#    canvas3.SetLogy()
+    canvas30.SetLogy()
 #    hmtData.SetMaximum(120.0)
-    hmtData.SetMarkerColor(2)
-    hmtData.SetMarkerSize(1)
-    hmtData.SetMarkerStyle(22)
-    hmtData.Draw("EP")
+    hmtTauVeto.SetMarkerColor(4)
+    hmtTauVeto.SetMarkerSize(1)
+    hmtTauVeto.SetMarkerStyle(22)
+#    hmtTauVeto.Draw("EP")
      
-    hmtEWK.SetMarkerColor(4)
-    hmtEWK.SetMarkerSize(1)
-    hmtEWK.SetMarkerStyle(24)
-    hmtEWK.SetFillColor(4)
-    hmtEWK.Draw("same")
+    hmtLeptonVeto.SetMarkerColor(6)
+    hmtLeptonVeto.SetMarkerSize(1)
+    hmtLeptonVeto.SetMarkerStyle(24)
+    hmtLeptonVeto.SetFillColor(4)
+#    hmtLeptonVeto.Draw("same")
     
-        
-    tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       2.18 fb^{-1}       CMS Preliminary ")
+    hmtNoMet.SetMarkerColor(6)
+    hmtNoMet.SetMarkerSize(1)
+    hmtNoMet.SetMarkerStyle(22)
+    hmtNoMet.SetFillColor(4)
+    hmtNoMet.Draw("EP")
+
+    hmtNoMetBtag.SetMarkerColor(7)
+    hmtNoMetBtag.SetMarkerSize(1)
+    hmtNoMetBtag.SetMarkerStyle(21)
+    hmtNoMetBtag.SetFillColor(4)
+    hmtNoMetBtag.Draw("same")
+
+    hmtMet.SetMarkerColor(1)
+    hmtMet.SetMarkerSize(1)
+    hmtMet.SetMarkerStyle(23)
+    hmtMet.SetFillColor(4)
+    hmtMet.Draw("same")
+    
+    hmtBtag.SetMarkerColor(4)
+    hmtBtag.SetMarkerSize(1)
+    hmtBtag.SetMarkerStyle(24)
+    hmtBtag.SetFillColor(4)
+    hmtBtag.Draw("same")
+    
+    hmtDeltaPhi.SetMarkerColor(2)
+    hmtDeltaPhi.SetMarkerSize(1)
+    hmtDeltaPhi.SetMarkerStyle(20)
+    hmtDeltaPhi.SetFillColor(4)
+    hmtDeltaPhi.Draw("same")
+            
+                        
+    tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()
@@ -389,37 +475,93 @@ def mtTest(datasets):
     tex5 = ROOT.TLatex(0.5,0.8,"After MET cut")
     tex5.SetNDC()
     tex5.SetTextSize(20)
-    tex5.Draw()
+#    tex5.Draw()
         
-    hmtData.GetYaxis().SetTitle("Events / 10 GeV/c^{2}")
+    hmtTauVeto.GetYaxis().SetTitle("Events / 10 GeV/c^{2}")
+    hmtNoMet.GetYaxis().SetTitle("Events / 10 GeV/c^{2}")
 #    hmt.GetYaxis().SetTitleSize(20.0)
-    hmtData.GetYaxis().SetTitleOffset(1.5)
-    hmtData.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
+    hmtTauVeto.GetYaxis().SetTitleOffset(1.5)
+    hmtTauVeto.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
 
-    tex1 = ROOT.TLatex(0.65,0.7,"Data")
+    tex1 = ROOT.TLatex(0.65,0.7,"#tau veto ")
     tex1.SetNDC()
     tex1.SetTextSize(23)
-    tex1.Draw()    
-    marker1 = ROOT.TMarker(0.6,0.715,hmtData.GetMarkerStyle())
+#    tex1.Draw()    
+    marker1 = ROOT.TMarker(0.6,0.715,hmtTauVeto.GetMarkerStyle())
 #    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
     marker1.SetNDC()
-    marker1.SetMarkerColor(hmtData.GetMarkerColor())
-    marker1.SetMarkerSize(0.9*hmtData.GetMarkerSize())
-    marker1.Draw()
+    marker1.SetMarkerColor(hmtTauVeto.GetMarkerColor())
+    marker1.SetMarkerSize(0.9*hmtTauVeto.GetMarkerSize())
+#    marker1.Draw()
     
-    tex2 = ROOT.TLatex(0.65,0.6,"EWK")
+    tex2 = ROOT.TLatex(0.65,0.6,"lepton veto")
     tex2.SetNDC()
     tex2.SetTextSize(23)
-    tex2.Draw()    
-    marker2 = ROOT.TMarker(0.6,0.615,hmtEWK.GetMarkerStyle())
+#    tex2.Draw()    
+    marker2 = ROOT.TMarker(0.6,0.615,hmtNoMet.GetMarkerStyle())
 #    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
     marker2.SetNDC()
-    marker2.SetMarkerColor(hmtEWK.GetMarkerColor())
-    marker2.SetMarkerSize(0.9*hmtEWK.GetMarkerSize())
-    marker2.Draw()
+    marker2.SetMarkerColor(hmtNoMet.GetMarkerColor())
+    marker2.SetMarkerSize(0.9*hmtNoMet.GetMarkerSize())
+#    marker2.Draw()
+
+    tex3 = ROOT.TLatex(0.63,0.9,"jets, no MET cut")
+    tex3.SetNDC()
+    tex3.SetTextSize(16)
+    tex3.Draw()    
+    marker3 = ROOT.TMarker(0.6,0.91,hmtNoMet.GetMarkerStyle())
+#    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
+    marker3.SetNDC()
+    marker3.SetMarkerColor(hmtNoMet.GetMarkerColor())
+    marker3.SetMarkerSize(0.9*hmtNoMet.GetMarkerSize())
+    marker3.Draw()
     
-    canvas30.Print("mt_metcut.png")
-    canvas30.Print("mt_metcut_btag.C")
+    tex6 = ROOT.TLatex(0.63,0.85,"b tagging, no MET cut")
+    tex6.SetNDC()
+    tex6.SetTextSize(16)
+    tex6.Draw()    
+    marker6 = ROOT.TMarker(0.6,0.86,hmtNoMetBtag.GetMarkerStyle())
+#    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
+    marker6.SetNDC()
+    marker6.SetMarkerColor(hmtNoMetBtag.GetMarkerColor())
+    marker6.SetMarkerSize(0.9*hmtNoMetBtag.GetMarkerSize())
+    marker6.Draw()
+    
+    tex7 = ROOT.TLatex(0.63,0.80,"MET cut")
+    tex7.SetNDC()
+    tex7.SetTextSize(16)
+    tex7.Draw()    
+    marker7 = ROOT.TMarker(0.6,0.81,hmtMet.GetMarkerStyle())
+#    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
+    marker7.SetNDC()
+    marker7.SetMarkerColor(hmtMet.GetMarkerColor())
+    marker7.SetMarkerSize(0.9*hmtMet.GetMarkerSize())
+    marker7.Draw()
+
+    tex8 = ROOT.TLatex(0.63,0.75,"b tagging")
+    tex8.SetNDC()
+    tex8.SetTextSize(16)
+    tex8.Draw()    
+    marker8 = ROOT.TMarker(0.6,0.76,hmtBtag.GetMarkerStyle())
+#    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
+    marker8.SetNDC()
+    marker8.SetMarkerColor(hmtBtag.GetMarkerColor())
+    marker8.SetMarkerSize(0.9*hmtBtag.GetMarkerSize())
+    marker8.Draw()
+    
+    tex9 = ROOT.TLatex(0.63,0.70,"#Delta#Phi cut")
+    tex9.SetNDC()
+    tex9.SetTextSize(15)
+    tex9.Draw()    
+    marker9 = ROOT.TMarker(0.6,0.71,hmtDeltaPhi.GetMarkerStyle())
+#    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
+    marker9.SetNDC()
+    marker9.SetMarkerColor(hmtDeltaPhi.GetMarkerColor())
+    marker9.SetMarkerSize(0.9*hmtDeltaPhi.GetMarkerSize())
+    marker9.Draw()
+    
+    canvas30.Print("mt_test.png")
+    canvas30.Print("mt_test.C")
  
 
 
@@ -443,21 +585,30 @@ def mtComparison(datasets):
         if lastPtBin120: 
             mt120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag120")])
         mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag")])
+        
         mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdBtag")])
         mtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTBaseLineTauIdBtag")])             
 
-  ## With MET > 70 GeV
-                        
-#   mt4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet4050")])
-#   mt5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet5060")])
-#    mt6070 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet6070")])
-#    mt7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet7080")])
-#    mt80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet80100")])
-#    mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet100120")])
-#    mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet120150")])
-#    mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet150")])
-#    mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet")])
+  ## 
+    if (deltaPhi130):                        
+        mt4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet4050")])
+        mt5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet5060")])
+        mt6070 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet6070")])
+        mt7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet7080")])
+        mt80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet80100")])
+        mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet100120")])
+        mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet")])
+        if lastPtBin150: 
+            mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet120150")])
+            mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet150")])
+        if lastPtBin120: 
+            mt120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet120")])
+        mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet")])
+            
+        mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdBtag")])
+        mtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTBaseLineTauIdBtag")])
 
+        
     if (topmass):
         mt4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass4050")])
         mt5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass5060")])
@@ -469,11 +620,10 @@ def mtComparison(datasets):
             mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass120150")])
             mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass150")])
         if lastPtBin120:
-           mt120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass120")])
-
-                
+           mt120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass120")])                
         mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass")])
-
+        mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdBtag")])
+        mtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTBaseLineTauIdBtag")])
 
 ## After deltaPhi < 160 cut
     if (deltaPhi160):
@@ -490,7 +640,7 @@ def mtComparison(datasets):
             mt120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi120")])
         mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi")])
         mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdPhi")])
-
+        mtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTBaseLineTauIdPhi")]) 
 
         ## deltaPhi distribution
     if (deltaPhiDistribution):
@@ -507,7 +657,7 @@ def mtComparison(datasets):
             mt120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted120")])
         mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted")])
         mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdPhi")])
-
+        mtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTBaseLineTauIdPhi")]) 
 
                 ## deltaPhi distribution
     if (HiggsMass):
@@ -523,7 +673,10 @@ def mtComparison(datasets):
         if lastPtBin120: 
             mt120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass120")])
         mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass")])
+        mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdPhi")])
+        mtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTBaseLineTauIdPhi")])
 
+        
     if (HiggsMassPhi140):
         mt4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi4050")])
         mt5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMassPhi5060")])
@@ -552,11 +705,7 @@ def mtComparison(datasets):
     mt4050._setLegendStyles()
     mt4050._setLegendLabels()
     mt4050.histoMgr.setHistoDrawStyleAll("P")
-
     mt4050.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))    
-
-
-
     hmt4050 = mt4050.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi4050")
     hmtSum2 = hmt4050.Clone("mtSum2")
     print "Integral 4050  = ",hmt4050.Integral()
@@ -645,6 +794,8 @@ def mtComparison(datasets):
         hmtSum2.Add(hmt120)
         print "Integral 120  = ",hmt120.Integral()
         hmt120.Scale(norm_120)
+
+        
     mt._setLegendStyles()
     mt._setLegendLabels()
     mt.histoMgr.setHistoDrawStyleAll("P")
@@ -658,12 +809,12 @@ def mtComparison(datasets):
     mtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
     hmtBaseline = mtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
 
-#    mtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-#    mtEWK._setLegendStyles()
-#    mtEWK._setLegendLabels()
-#    mtEWK.histoMgr.setHistoDrawStyleAll("P")
-#    mtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
-#    hmtEWK = mtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
+    mtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    mtEWK._setLegendStyles()
+    mtEWK._setLegendLabels()
+    mtEWK.histoMgr.setHistoDrawStyleAll("P")
+    mtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+    hmtEWK = mtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
         
     hmtSum = hmt4050.Clone("mtSum")
     hmtSum.SetName("mtSum")
@@ -678,6 +829,8 @@ def mtComparison(datasets):
         hmtSum.Add(hmt150)
     if lastPtBin120:
         hmtSum.Add(hmt120)
+
+        
         
     canvas = ROOT.TCanvas("canvas","",500,500)
     canvas.Divide(3,3)
@@ -755,105 +908,215 @@ def mtComparison(datasets):
 
 ###########
 
-    
-    canvas3 = ROOT.TCanvas("canvas3","",500,500)
-#    canvas3.SetLogy()
-    hmt.SetMaximum(120.0)
-    hmt.SetMarkerColor(2)
-    hmt.SetMarkerSize(1)
-    hmt.SetMarkerStyle(21)
-    hmt.Draw("EP")
-    
-    hmtSum.SetMarkerColor(4)
-    hmtSum.SetMarkerSize(1)
-    hmtSum.SetMarkerStyle(20)
-    hmtSum.SetFillColor(4)
-    hmtSum.Draw("same")
-    
-    hmtBaseline.SetMarkerColor(1)
-    hmtBaseline.SetMarkerSize(1)
-    hmtBaseline.SetMarkerStyle(24)
-    hmtBaseline.SetFillColor(1)
-    hmtBaseline.Draw("same")
-#    hmtBaseline_QCD = hmtBaseline.Clone("QCD")
-#    hmtBaseline_QCD.Add(hmtEWK,-1)
-#    hmtBaseline_QCD.Draw("same")
-
-#    hmtEWK.SetMarkerColor(7)
-#    hmtEWK.SetMarkerSize(1)
-#    hmtEWK.SetMarkerStyle(23)
-#    hmtEWK.SetFillColor(7)
-#    hmtEWK.Draw("same")
-    
-    tex1 = ROOT.TLatex(0.65,0.7,"No binning")
-#    tex1 = ROOT.TLatex(0.3,0.4,"No binning")
-    tex1.SetNDC()
-    tex1.SetTextSize(23)
-    tex1.Draw()    
-    marker1 = ROOT.TMarker(0.6,0.715,hmt.GetMarkerStyle())
-#    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
-    marker1.SetNDC()
-    marker1.SetMarkerColor(hmt.GetMarkerColor())
-    marker1.SetMarkerSize(0.9*hmt.GetMarkerSize())
-    marker1.Draw()   
-#    tex2 = ROOT.TLatex(0.3,0.3,"With p_{T}^{#tau jet} bins")
-    tex2 = ROOT.TLatex(0.65,0.6,"With p_{T}^{#tau jet} bins") 
-    tex2.SetNDC()
-    tex2.SetTextSize(23)
-    tex2.Draw()    
-#    marker2 = ROOT.TMarker(0.25,0.32,hmtSum.GetMarkerStyle())
-    marker2 = ROOT.TMarker(0.6,0.615,hmtSum.GetMarkerStyle())
-    marker2.SetNDC()
-    marker2.SetMarkerColor(hmtSum.GetMarkerColor())
-    marker2.SetMarkerSize(0.9*hmtSum.GetMarkerSize())
-    marker2.Draw()
-    
-    tex3 = ROOT.TLatex(0.5,0.85,"With inverted #tau isolation")
-    tex3.SetNDC()
-    tex3.SetTextSize(20)
-    tex3.Draw()
-
-    tex5 = ROOT.TLatex(0.5,0.8,"MET > 70 GeV")
-    tex5.SetNDC()
-    tex5.SetTextSize(20)
-#    tex5.Draw()
-
-    if(deltaPhi160):
-        tex5 = ROOT.TLatex(0.5,0.8,"#Delta#phi(#tau jet, MET) < 160^{o}")
-        tex5.SetNDC()
-        tex5.SetTextSize(20)
-        tex5.Draw()
-    if(deltaPhi130):
-        tex5 = ROOT.TLatex(0.5,0.8,"#Delta#phi(#tau jet, MET) < 130^{o}")
-        tex5.SetNDC()
-        tex5.SetTextSize(20)
-        tex5.Draw()
+## for deltaPhi < 160 and 180 (includes baseline)
+    if deltaPhi160 or deltaPhi180:
+        canvas3 = ROOT.TCanvas("canvas3","",500,500)
+        #    canvas3.SetLogy()
+        #    hmt.SetMaximum(120.0)
         
-    tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       2.18 fb^{-1}       CMS Preliminary ")
-    tex4.SetNDC()
-    tex4.SetTextSize(20)
-    tex4.Draw()
-    
-    hmt.GetYaxis().SetTitle("Events / 10 GeV/c^{2}")
-#    hmt.GetYaxis().SetTitleSize(20.0)
-    hmt.GetYaxis().SetTitleOffset(1.5)
-    hmt.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
-#    canvas3.Print("mtInverted.png")
-#    canvas3.Print("mtInverted.C")    
-#    canvas3.Print("mtInverted_Met70_log.png")
-#    canvas3.Print("mtInverted_Met70_log.C")
-
-    if(deltaPhi180):  
-        canvas3.Print("mtInverted_btag.png")
-        canvas3.Print("mtInverted_btag.C")
-    if(deltaPhi160):
-        canvas3.Print("mtInverted_btag_dphi160.png")
-        canvas3.Print("mtInverted_btag_dphi160.C")
-    if(topmass):
-        canvas3.Print("mtInverted_btag_topmass.png")
-        canvas3.Print("mtInverted_btag_topmass.C")  
+        hmtSum.SetMarkerColor(4)
+        hmtSum.SetMarkerSize(1)
+        hmtSum.SetMarkerStyle(20)
+        hmtSum.SetFillColor(4)
+        hmtSum.Draw("EP")
+        
+        hmt.SetMarkerColor(2)
+        hmt.SetMarkerSize(1)
+        hmt.SetMarkerStyle(21)
+        hmt.Draw("same")
+        
+        #    hmtSum.SetMarkerColor(4)
+        #    hmtSum.SetMarkerSize(1)
+        #    hmtSum.SetMarkerStyle(20)
+        #    hmtSum.SetFillColor(4)
+        #    hmtSum.Draw("same")
+        
+        hmtBaseline.SetMarkerColor(1)
+        hmtBaseline.SetMarkerSize(1)
+        hmtBaseline.SetMarkerStyle(27)
+        hmtBaseline.SetFillColor(1)
+        #    hmtBaseline.Draw("same")
+        hmtBaseline_QCD = hmtBaseline.Clone("QCD")
+        hmtBaseline_QCD.Add(hmtEWK,-1)
+#        hmtBaseline_QCD.Draw("same")
+        
+        #    hmtEWK.SetMarkerColor(7)
+        #    hmtEWK.SetMarkerSize(1)
+        #    hmtEWK.SetMarkerStyle(23)
+        #    hmtEWK.SetFillColor(7)
+        #    hmtEWK.Draw("same")
+        
+        tex1 = ROOT.TLatex(0.65,0.7,"No binning")
+        #    tex1 = ROOT.TLatex(0.3,0.4,"No binning")
+        tex1.SetNDC()
+        tex1.SetTextSize(23)
+        tex1.Draw()    
+        marker1 = ROOT.TMarker(0.6,0.715,hmt.GetMarkerStyle())
+        #    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
+        marker1.SetNDC()
+        marker1.SetMarkerColor(hmt.GetMarkerColor())
+        marker1.SetMarkerSize(0.9*hmt.GetMarkerSize())
+        marker1.Draw()   
+        #    tex2 = ROOT.TLatex(0.3,0.3,"With p_{T}^{#tau jet} bins")
+        tex2 = ROOT.TLatex(0.65,0.6,"With p_{T}^{#tau jet} bins") 
+        tex2.SetNDC()
+        tex2.SetTextSize(23)
+        tex2.Draw()    
+        #    marker2 = ROOT.TMarker(0.25,0.32,hmtSum.GetMarkerStyle())
+        marker2 = ROOT.TMarker(0.6,0.615,hmtSum.GetMarkerStyle())
+        marker2.SetNDC()
+        marker2.SetMarkerColor(hmtSum.GetMarkerColor())
+        marker2.SetMarkerSize(0.9*hmtSum.GetMarkerSize())
+        marker2.Draw()
+        
+        tex3 = ROOT.TLatex(0.5,0.85,"With inverted #tau isolation")
+        tex3.SetNDC()
+        tex3.SetTextSize(20)
+        tex3.Draw()
+        
+        tex5 = ROOT.TLatex(0.5,0.8,"MET > 70 GeV")
+        tex5.SetNDC()
+        tex5.SetTextSize(20)
+        #    tex5.Draw()
+        
+        if(deltaPhi180):
+            tex5 = ROOT.TLatex(0.5,0.8,"#Delta#phi(#tau jet, MET) < 180^{o}")
+            tex5.SetNDC()
+            tex5.SetTextSize(20)
+            tex5.Draw()
+        if(deltaPhi130):
+            tex5 = ROOT.TLatex(0.5,0.8,"#Delta#phi(#tau jet, MET) < 160^{o}")
+            tex5.SetNDC()
+            tex5.SetTextSize(20)
+            tex5.Draw()
+            
+        tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
+        tex4.SetNDC()
+        tex4.SetTextSize(20)
+        tex4.Draw()
+        
+        hmtSum.GetYaxis().SetTitle("Events / 10 GeV/c^{2}")
+        #    hmt.GetYaxis().SetTitleSize(20.0)
+        hmtSum.GetYaxis().SetTitleOffset(1.5)
+        hmtSum.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
+        #    canvas3.Print("mtInverted.png")
+        #    canvas3.Print("mtInverted.C")    
+        #    canvas3.Print("mtInverted_Met70_log.png")
+        #    canvas3.Print("mtInverted_Met70_log.C")
+        
+        if(deltaPhi180):  
+            canvas3.Print("mtInverted_btag.png")
+            canvas3.Print("mtInverted_btag.C")
+        if(deltaPhi160):
+            canvas3.Print("mtInverted_btag_dphi160.png")
+            canvas3.Print("mtInverted_btag_dphi160.C")
  
 
+###########
+## for ofter cuts
+    if deltaPhi130 or topmass or deltaPhiDistribution or HiggsMass:    
+        canvas31 = ROOT.TCanvas("canvas31","",500,500)
+#        canvas31.SetLogy()
+        #    hmt.SetMaximum(120.0)
+        
+        hmtSum.SetMarkerColor(4)
+        hmtSum.SetMarkerSize(1)
+        hmtSum.SetMarkerStyle(20)
+        hmtSum.SetFillColor(4)
+        hmtSum.Draw("EP")
+        
+        hmt.SetMarkerColor(2)
+        hmt.SetMarkerSize(1)
+        hmt.SetMarkerStyle(21)
+        hmt.Draw("same")
+        
+        #    hmtSum.SetMarkerColor(4)
+        #    hmtSum.SetMarkerSize(1)
+        #    hmtSum.SetMarkerStyle(20)
+        #    hmtSum.SetFillColor(4)
+        #    hmtSum.Draw("same")
+        
+        if deltaPhi130 or topmass or HiggsMass:
+            xpos = 0.6
+            xpos2 = 0.5
+        if deltaPhiDistribution:
+            xpos = 0.3
+            xpos2 =0.3
+        tex1 = ROOT.TLatex(xpos+0.05,0.7,"No binning")
+        #    tex1 = ROOT.TLatex(0.3,0.4,"No binning")
+        tex1.SetNDC()
+        tex1.SetTextSize(23)
+        tex1.Draw()    
+        marker1 = ROOT.TMarker(xpos,0.715,hmt.GetMarkerStyle())
+        #    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
+        marker1.SetNDC()
+        marker1.SetMarkerColor(hmt.GetMarkerColor())
+        marker1.SetMarkerSize(0.9*hmt.GetMarkerSize())
+        marker1.Draw()   
+        #    tex2 = ROOT.TLatex(0.3,0.3,"With p_{T}^{#tau jet} bins")
+        tex2 = ROOT.TLatex(xpos+0.05,0.6,"With p_{T}^{#tau jet} bins") 
+        tex2.SetNDC()
+        tex2.SetTextSize(23)
+        tex2.Draw()    
+        #    marker2 = ROOT.TMarker(0.25,0.32,hmtSum.GetMarkerStyle())
+        marker2 = ROOT.TMarker(xpos,0.615,hmtSum.GetMarkerStyle())
+        marker2.SetNDC()
+        marker2.SetMarkerColor(hmtSum.GetMarkerColor())
+        marker2.SetMarkerSize(0.9*hmtSum.GetMarkerSize())
+        marker2.Draw()
+        
+        tex3 = ROOT.TLatex(xpos2,0.85,"With inverted #tau isolation")
+        tex3.SetNDC()
+        tex3.SetTextSize(20)
+        tex3.Draw()
+        
+        tex5 = ROOT.TLatex(0.5,0.8,"MET > 70 GeV")
+        tex5.SetNDC()
+        tex5.SetTextSize(20)
+        #    tex5.Draw()
+        
+        if(topmass):
+            tex5 = ROOT.TLatex(0.5,0.8,"With top mass cut")
+            tex5.SetNDC()
+            tex5.SetTextSize(20)
+            tex5.Draw()
+        if(deltaPhi130):
+            tex5 = ROOT.TLatex(0.5,0.8,"#Delta#phi(#tau jet, MET) < 130^{o}")
+            tex5.SetNDC()
+            tex5.SetTextSize(20)
+            tex5.Draw()
+
+ 
+        tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
+        tex4.SetNDC()
+        tex4.SetTextSize(20)
+        tex4.Draw()
+ 
+        if deltaPhi130 or topmass:
+            
+            hmtSum.GetYaxis().SetTitle("Events / 10 GeV/c^{2}")
+            #    hmt.GetYaxis().SetTitleSize(20.0)
+            hmtSum.GetYaxis().SetTitleOffset(1.5)
+            hmtSum.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
+        if(deltaPhiDistribution):
+            hmtSum.GetXaxis().SetTitle("#Delta#phi(#tau jet, MET) (^{o})")
+            hmtSum.GetYaxis().SetTitle("Events / 10^{o}")
+        #    canvas3.Print("mtInverted.png")
+        #    canvas3.Print("mtInverted.C")    
+        #    canvas3.Print("mtInverted_Met70_log.png")
+        #    canvas3.Print("mtInverted_Met70_log.C")
+        
+        
+        if(deltaPhi130):
+            canvas31.Print("mtInverted_btag_dphi130.png")
+            canvas31.Print("mtInverted_btag_dphi130.C")
+        if(topmass):
+            canvas31.Print("mtInverted_btag_topmass.png")
+            canvas31.Print("mtInverted_btag_topmass.C")  
+        if (deltaPhiDistribution):
+            canvas31.Print("deltaPhiInverted_btag.png")           
+        if (HiggsMass):
+            canvas31.Print("HiggsMass_dphi160.png")     
 
     fName = os.path.join(sys.argv[1],"transverseMassQCDInverted.root")
     fOUT = ROOT.TFile.Open(fName, "RECREATE")
@@ -1484,6 +1747,13 @@ def deltaPhi(h, rebin=40, ratio=False):
 #    h.getPad().SetLogy(True)
     h.setLegend(histograms.createLegend(0.2, 0.6, 0.4, 0.9))
     common(h, xlabel, ylabel)
+
+
+#def deltaPhi2(h, name, **kwargs):
+#    xlabel = "#Delta#phi(#tau jet, E_{T}^{miss})^{#circ}"
+#    ylabel = "Events / %.0f^{#circ}"
+#drawPlot(h, name, xlabel, ylabel=ylabel, **kwargs)
+
     
 def deltaPhi2(h, name, rebin=2):
 #    name = flipName(h.getRootHistoPath())
@@ -1509,7 +1779,7 @@ def deltaPhi2(h, name, rebin=2):
     common(h, xlabel, ylabel)
 
 
-    
+        
     
 def transverseMass(h, rebin=20):
     name = flipName(h.getRootHistoPath())

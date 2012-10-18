@@ -21,11 +21,12 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
 counters = analysis+"/counters"
+dataEra = "Run2011AB"
 
 treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup")
 
 def main():
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra)
     datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()
     
@@ -78,7 +79,7 @@ def plot(datasets):
     mtNoLeptonGoodMetGoodTau = plots.PlotBase([datasets.getDataset("TTJets").getDatasetRootHisto(analysis+"/transverseMassNoLeptonGoodMetGoodTau")])
     mtTopChiSelection = plots.PlotBase([datasets.getDataset("TTJets").getDatasetRootHisto(analysis+"/transverseMassTopChiSelection")])
     mtWMassSelection = plots.PlotBase([datasets.getDataset("TTJets").getDatasetRootHisto(analysis+"/transverseMassWmassCut")])
-
+    mtTauVeto = plots.PlotBase([datasets.getDataset("TTJets").getDatasetRootHisto(analysis+"/transverseMassTauVeto")])
 
     mtLeptonRealSignalTau = plots.PlotBase([datasets.getDataset("TTJets").getDatasetRootHisto(analysis+"/transverseMassLeptonRealSignalTau")])
     mtLeptonFakeSignalTau = plots.PlotBase([datasets.getDataset("TTJets").getDatasetRootHisto(analysis+"/transverseMassLeptonFakeSignalTau")])
@@ -99,6 +100,7 @@ def plot(datasets):
     mtLeptonFakeSignalTau.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mtObservableLeptons.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mtNoObservableLeptons.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    mtTauVeto.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     
     mtMetReso02 = plots.PlotBase([datasets.getDataset("TTJets").getDatasetRootHisto(analysis+"/transverseMassMetReso02")])
     deltaEtMetGenMet = plots.PlotBase([datasets.getDataset("TTJets").getDatasetRootHisto(analysis+"/deltaEtMetGenMet")])
@@ -113,6 +115,12 @@ def plot(datasets):
     mtLeptonRealSignalTau.histoMgr.setHistoDrawStyleAll("P")
     mtLeptonRealSignalTau.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))    
     hmtLeptonRealSignalTau = mtLeptonRealSignalTau.histoMgr.getHisto("TTJets").getRootHisto().Clone(analysis+"/transverseMassLeptonRealSignalTau")
+
+    mtTauVeto._setLegendStyles()
+    mtTauVeto._setLegendLabels()
+    mtTauVeto.histoMgr.setHistoDrawStyleAll("P")
+    mtTauVeto.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))    
+    hmtTauVeto = mtTauVeto.histoMgr.getHisto("TTJets").getRootHisto().Clone(analysis+"/transverseMassTauVeto")
 
     mtLeptonFakeSignalTau._setLegendStyles()
     mtLeptonFakeSignalTau._setLegendLabels()
@@ -499,11 +507,18 @@ def plot(datasets):
     hmt.SetMarkerStyle(24)
     hmt.Draw("EP")
 
-    hmtMetReso02.SetMarkerColor(2)
+    hmtMetReso02.SetMarkerColor(1)
     hmtMetReso02.SetMarkerSize(1)
-    hmtMetReso02.SetMarkerStyle(20)
+    hmtMetReso02.SetMarkerStyle(22)
+
     hmtMetReso02.Draw("same")
     
+    hmtTauVeto.SetMarkerColor(2)
+    hmtTauVeto.SetMarkerSize(1)
+    hmtTauVeto.SetMarkerStyle(20)
+    hmtTauVeto.Draw("same")
+    
+     
  
     hmt.GetYaxis().SetTitle("Events")
     hmt.GetYaxis().SetTitleOffset(2.0)
@@ -533,7 +548,16 @@ def plot(datasets):
     marker1.SetMarkerSize(0.9*hmtMetReso02.GetMarkerSize())
     marker1.Draw()
     
-    
+    tex2 = ROOT.TLatex(0.43,0.75,"#tau-jet veto")
+    tex2.SetNDC()
+    tex2.SetTextSize(20)
+    tex2.Draw()    
+    marker2 = ROOT.TMarker(0.4,0.77,hmtTauVeto.GetMarkerStyle())
+    marker2.SetNDC()
+    marker2.SetMarkerColor(hmtTauVeto.GetMarkerColor())
+    marker2.SetMarkerSize(0.9*hmtTauVeto.GetMarkerSize())
+    marker2.Draw()
+        
  
 
     

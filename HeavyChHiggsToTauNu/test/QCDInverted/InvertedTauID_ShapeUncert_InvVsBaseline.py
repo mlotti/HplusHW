@@ -25,12 +25,24 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 from InvertedTauID import *
 
+#dataEra = "Run2011A"
+#dataEra = "Run2011B"
+dataEra = "Run2011AB"
+
+
 def main():
 
     errorBars = False
+    dirs = []
+    if len(sys.argv) < 2:
+        usage()
+
+    dirs.append(sys.argv[1])
+    
 
     # Create all datasets from a multicrab task
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs, counters=counters, dataEra=dataEra)
+##    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra)
 
     # As we use weighted counters for MC normalisation, we have to
     # update the all event count to a separately defined value because
@@ -72,8 +84,10 @@ def main():
     invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
     invertedQCD.useErrorBars(errorBars)
 
-    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets")
-    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets")  
+#    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets")
+#    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets")
+    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdBveto")
+    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdBveto") 
 
     # Rebin before subtracting
     metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))

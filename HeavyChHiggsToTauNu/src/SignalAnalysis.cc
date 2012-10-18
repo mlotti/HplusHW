@@ -94,6 +94,7 @@ namespace HPlus {
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fBTaggingScaleFactorCounter(eventCounter.addCounter("btagging scale factor")),
     fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhi(Tau,MET) upper limit")),
+    fDeltaPtJetTauCounter(eventCounter.addCounter("DeltaPt(Jet,Tau) < 5")),
     fDeltaPhiLow30Counter(eventCounter.addCounter("DeltaPhi(Tau,MET) > 30")),
     fDeltaPhiLow60Counter(eventCounter.addCounter("DeltaPhi(Tau,MET) > 60")),
     fBjetVetoCounter(eventCounter.addCounter("Veto on second b jet")),
@@ -250,6 +251,7 @@ namespace HPlus {
     htransverseMassObservableLeptons= fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassObservableLeptons", "transverseMassObservableLeptons", 200, 0., 400.);
 
     hTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
+    hTransverseMassDeltaPtCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassDeltaPtCut", "transverseMassDeltaPtCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassPhi30 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassPhi30", "transverseMassPhi30;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassPhi60 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassPhi60", "transverseMassPhi60;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassSecondBveto = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassSecondBveto", "transverseMassSecondBveto;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
@@ -286,9 +288,8 @@ namespace HPlus {
     hAlphaTInvMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);
     hAlphaTVsRtau = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kDebug, *fs, "alphaT(y)-Vs-Rtau(x)", "alphaT-Vs-Rtau",  120, 0.0, 1.2, 500, 0.0, 5.0);
     //    hMet_AfterTauSelection = fHistoWrapper.makeTH<TH1F>(*fs, "met_AfterTauSelection", "met_AfterTauSelection", 100, 0.0, 400.0);
-    hDeltaPtJetTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPtTauJet", "deltaPtTauJet ", 200, -100., 100.);
-    hDeltaRJetTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaRTauJet", "deltaRTauJet ", 120, 0., 6.);
-
+    hDeltaPtJetTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "DeltaPtJetTau", "DeltaPtJetTau", 200, -100., 100.);  
+    hDeltaRJetTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "DeltaRJetTau", "DeltaRJetTau", 100, 0., 2.); 
     //    hMet_BeforeTauSelection = fHistoWrapper.makeTH<TH1F>(*fs, "met_BeforeTauSelection", "met_BeforeTauSelection", 100, 0.0, 400.0);
 
     TFileDirectory mySelectedTauDir = fs->mkdir("SelectedTau");
@@ -586,6 +587,11 @@ namespace HPlus {
     hMet_beforeJetCut->Fill(metData.getSelectedMET()->et());  
     if(metData.passedEvent()) increment(fMetCutBeforeJetCutCounter);
 
+    // temporary met cut !!!!!!!!!!!!!!!!!
+    if(!metData.passedEvent()) return false;
+    increment(fMETCounter);
+
+
     hCtrlNjets->Fill(jetData.getHadronicJetCount());
 
     if (myFakeTauStatus) hCtrlEWKFakeTausNjets->Fill(jetData.getHadronicJetCount());
@@ -692,8 +698,8 @@ namespace HPlus {
     if (transverseMass > 40 && transverseMass < 100)
       hCtrlJetMatrixAfterJetSelection->Fill(jetData.getHadronicJetCount(), nBjets);
     // Now cut on MET
-    if(!metData.passedEvent()) return false;
-    increment(fMETCounter);
+    //    if(!metData.passedEvent()) return false;
+    //    increment(fMETCounter);
     hSelectionFlow->Fill(kSignalOrderMETSelection);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderMETSelection);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderMETSelection);
@@ -719,15 +725,7 @@ namespace HPlus {
 
 
 
-    bool jetTauMatch = false;                                                                                                                                                    
-    for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getSelectedJets().begin(); iJet != jetData.getSelectedJets().end(); ++iJet) {                                                                                                                                                                                                                                                                                                                                                                       
-      double deltaRJetTau = ROOT::Math::VectorUtil::DeltaR((*iJet)->p4()  , tauData.getSelectedTau()->p4());                                                                     
-      hDeltaRJetTau->Fill(deltaRJetTau);
-      if( deltaRJetTau < 0.5) {
-	jetTauMatch = true;                                                                                                                           
-	hDeltaPtJetTau->Fill(tauData.getSelectedTau()->pt()-(*iJet)->pt());   
-      }                                                                                                                          
-    }                                                                                                                                                                                 
+                                          
     //    if (electronTauMatch ) return false;      
 //------ b tagging cut
 
@@ -769,13 +767,30 @@ namespace HPlus {
 
     // plot deltaPhi(jet,met)
     double myMaxDeltaPhiJetMET = 0.0;
+    double minDeltaRTauJet = 9999;
+    edm::Ptr<pat::Jet> closestJetToTau; 
     for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getSelectedJets().begin(); iJet != jetData.getSelectedJets().end(); ++iJet) {
       double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET())) * 57.3;
       hDeltaPhiJetMet->Fill(jetDeltaPhi);
-      if (jetDeltaPhi > myMaxDeltaPhiJetMET)
-        myMaxDeltaPhiJetMET = jetDeltaPhi;
+      if (jetDeltaPhi > myMaxDeltaPhiJetMET) myMaxDeltaPhiJetMET = jetDeltaPhi;
+      double deltaRTauJet = ROOT::Math::VectorUtil::DeltaR(tauData.getSelectedTau()->p4(), (*iJet)->p4());
+      if ( deltaRTauJet < minDeltaRTauJet) {
+	closestJetToTau = *iJet;
+	minDeltaRTauJet = deltaRTauJet;
+      }
+    }
+    double DeltaPtJetTau = 9999;
+    if ( minDeltaRTauJet < 5) {
+      DeltaPtJetTau = closestJetToTau->pt()- tauData.getSelectedTau()->pt();
+      hDeltaPtJetTau->Fill(DeltaPtJetTau);
+      hDeltaRJetTau->Fill(minDeltaRTauJet);
     }
     hMaxDeltaPhiJetMet->Fill(myMaxDeltaPhiJetMET);
+
+    if (jetData.getDeltaPtJetTau() < 10 ) {
+      hTransverseMassDeltaPtCut->Fill(transverseMass);
+      increment(fDeltaPtJetTauCounter);
+    }
 
     // test lower bound of deltaPhi
     if (deltaPhi > 30) {

@@ -188,9 +188,9 @@ class InvertedTauID:
         plot.histoMgr.setHistoDrawStyleAll("EP")
         
         # Create frame with a ratio pad
-        plot.createFrame("comparison"+self.label, opts={"ymin":1e-5, "ymaxfactor": 2},
+        plot.createFrame("comparison"+self.label, opts={"ymin":1e-5, "ymaxfactor": 2, "xmax": 200},
                          createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
-                         )
+                        )
         
         # Set Y axis of the upper pad to logarithmic
         plot.getPad1().SetLogy(True)

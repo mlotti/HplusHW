@@ -214,6 +214,10 @@ namespace HPlus {
     WrappedTH1 *hTransverseMassTopChiSelection;
     WrappedTH1 *hTransverseMassTopBjetSelection;
     WrappedTH1 *hDeltaPhi;
+    WrappedTH1 *hDeltaPhiAfterVeto;
+    WrappedTH1 *hDeltaPhiAfterJets;
+    WrappedTH1 *hDeltaPhiBeforeVeto;
+
     WrappedTH1 *hDeltaPhiJetMet;
     WrappedTH1 *hAlphaT;
     WrappedTH1 *hAlphaTInvMass;

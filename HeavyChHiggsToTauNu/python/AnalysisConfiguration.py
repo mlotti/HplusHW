@@ -55,7 +55,8 @@ class ConfigBuilder:
                  doFillTree = False, # Tree filling
                  histogramAmbientLevel = "Debug", # Set level of how many histograms are stored to files options are: 'Vital' (least histograms), 'Informative', 'Debug' (all histograms),
                  applyTriggerScaleFactor = True, # Apply trigger scale factor or not
-                 tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
+ #                tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
+                 tauSelectionOperatingMode = "tauCandidateSelectionOnly", 
                  useTriggerMatchedTaus = True,
                  useJERSmearedJets = True,
                  useBTagDB = False,

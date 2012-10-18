@@ -118,6 +118,8 @@ namespace HPlus {
     // Histograms
     WrappedTH1 *hMuonPt;
     WrappedTH1 *hMuonEta;
+    WrappedTH1 *hMuonPt_test;
+    WrappedTH1 *hMuonEta_test;
     WrappedTH1 *hMuonPt_identified_eta;
     WrappedTH1 *hMuonEta_identified;
     WrappedTH1 *hMuonPt_matchingMCmuon;

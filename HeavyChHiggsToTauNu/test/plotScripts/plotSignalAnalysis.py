@@ -37,8 +37,8 @@ treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger
 #QCDfromData = True
 QCDfromData = False
 
-#mcOnly = False
-mcOnly = True
+mcOnly = False
+#mcOnly = True
 mcOnlyLumi = 5000 # pb
 
 #dataEra = "Run2011A"
@@ -100,7 +100,7 @@ def main():
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     
     # Remove QCD
-    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
+#    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
     histograms.createLegend.moveDefaults(dx=-0.02)
     histograms.createLegend.moveDefaults(dh=-0.03)
     
@@ -168,8 +168,11 @@ def doPlots(datasets):
     # Tau
     tauPt(createPlot("SelectedTau/SelectedTau_pT_AfterTauID"), "SelectedTau_pT_AfterTauID", rebin=5, ratio=False, opts={"xmax": 300, "ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     tauEta(createPlot("SelectedTau/SelectedTau_eta_AfterTauID"),"SelectedTau_eta_AfterTauID", rebin=5, ratio=False, opts={"ymin": 1, "ymaxfactor": 50, "xmin": -2.5, "xmax": 2.5}, moveLegend={"dy":0.01, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.3, y=0.85))
+ 
 #    tauPhi(createPlot("SelectedTau/SelectedTau_phi_AfterTauID"), "SelectedTau_phi_AfterTauID", rebin=10, opts={"ymin": 1, "ymaxfactor": 40})
-#    tauPhi(createPlot("TauSelection/TauSelection_cleaned_tau_candidates_phi"), "Cleaned_tau_candidates_phi", rebin=10, log=False, opts={"ymin": 100, "ymaxfactor": 1.1})   
+    tauPt(createPlot("TauSelection/TauSelection_all_tau_candidates_pt"), "All_tau_candidates_pt", rebin=1, ratio=True,log=True, opts={"ymin": 10,"ymaxfactor": 1.1})
+    tauEta(createPlot("TauSelection/TauSelection_all_tau_candidates_eta"), "All_tau_candidates_eta", rebin=1,  ratio=True, log=True, opts={"ymaxfactor": 5.0})
+ 
 
 #    rtau(createPlot("SelectedTau/SelectedTau_Rtau_AfterTauID"), "SelectedTau_Rtau_AfterTauID", rebin=10, opts={"ymin": 1e-2, "ymaxfactor": 5, "xmax": 1.1}, moveLegend={"dx": -0.5,"dy": 0.08}, textFunction=lambda: addMassBRText(x=0.31, y=0.22), cutLine=0.7)
     rtau(createPlot("TauSelection/TauID_RtauCut"), "TauID_Rtau", rebin=1, ratio=False, opts={"ymin": 1e-2, "ymaxfactor": 50, "xmax": 1.1}, moveLegend={"dx": -0.5,"dy": 0.02}, textFunction=lambda: addMassBRText(x=0.31, y=0.22), cutLine=0.7)
@@ -210,6 +213,7 @@ def doPlots(datasets):
 
     # Muon veto
     drawPlot(createPlot("GlobalMuonVeto/GlobalMuonPt_identified_eta"), "muonPt", rebin=3, xlabel="p_{T}^{muon} (GeV/c)", ylabel="Identified muons / %.0f GeV/c", ratio=False,  opts={"ymaxfactor": 2,"xmax": 250}, textFunction=lambda: addMassBRText(x=0.35, y=0.9), cutLine=15)
+    drawPlot(createPlot("GlobalMuonVeto/GlobalMuonPt_test"), "muonPt_test", rebin=3, xlabel="p_{T}^{muon} (GeV/c)", ylabel="Identified muons / %.0f GeV/c", ratio=False,  opts={"ymaxfactor": 2,"xmax": 250}, textFunction=lambda: addMassBRText(x=0.35, y=0.9), cutLine=15)
     drawPlot(createPlot("GlobalMuonVeto/GlobalMuonEta_identified"), "muonEta", rebin=3, xlabel="#eta^{muon}", ylabel="Identified muons / %.1f", ratio=False, opts={"xmin": -3,"ymin": 0.1, "xmax": 3, "ymaxfactor": 20}, moveLegend={"dy":0.01, "dx":-0.07, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.30, y=0.87), cutLine=[-2.5, 2.5])
 
     if False:
@@ -228,6 +232,7 @@ def doPlots(datasets):
     drawPlot(createPlot("JetSelection/jet_pt_central"), "centralJetPt", rebin=2, xlabel="p_{T}^{jet} (GeV/c)", ylabel="Jets / %.0f GeV/c", ratio=False, opts={"xmax": 500,"ymin": 0.1,"ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=30)
 #    drawPlot(createPlot("JetSelection/jet_pt"), "jetPt", rebin=2, xlabel="p_{T}^{jet} (GeV/c)", ylabel="Jets / %.0f GeV/c", opts={"xmax": 500}, textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=30)
     drawPlot(createPlot("JetSelection/jet_eta"), "jetEta", rebin=2, xlabel="#eta^{jet}", ylabel="Jets / %.1f", ratio=False, opts={"xmin": -3.5, "xmax": 3.5, "ymaxfactor": 500}, moveLegend={"dy":0.01, "dx":-0.2, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.4, y=0.22), cutLine=[-2.4, 2.4])
+    drawPlot(createPlot("JetSelection/SelectedJets/deltaPtTauJet"), "deltaPtJetTau", rebin=3, log=True, xlabel="p_{T}^{jet}-p_{T}^{#tau jet}(GeV/c)", ylabel="Events / %.1f GeV/c", ratio=False, opts={"ymaxfactor": 2}, moveLegend={"dy":0.01, "dx":-0.5, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.2, y=0.52), cutLine=[-10.0, 10.0])
 #    drawPlot(createPlot("JetSelection/jet_phi"), "jetPhi", rebin=1, xlabel="#phi^{jet}", ylabel="Jets / %.2f", opts={"ymin": 20},textFunction=lambda: addMassBRText(x=0.3, y=0.87))
     drawPlot(createPlot("ControlPlots/Njets"), "NumberOfJets", xlabel="Number of selected jets", ylabel="Events", ratio=False, opts={"xmax": 11,"ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=3)
     
@@ -236,13 +241,13 @@ def doPlots(datasets):
 
         
     # MET
-    drawPlot(createPlot("ControlPlots/MET"), "Met", rebin=4, xlabel="PF E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", ratio=False, opts={"xmin": 0, "xmax": 500}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=60)
+    drawPlot(createPlot("ControlPlots/MET"), "Met", rebin=4, xlabel="PF E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", ratio=True, opts={"xmin": 0, "xmax": 500}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=60)
 #    drawPlot(createPlot("MetWithBtagging"), "MetWithBtagging", rebin=10, xlabel="Raw PF E_{T}^{miss} (GeV)", ratio=True, ylabel="Events / %.0f GeV", opts={"xmin": 20, "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=40)
 #    drawPlot(createPlot("Met_beforeJetCut"), "MetBeforeJets", rebin=10, xlabel="Raw PF E_{T}^{miss} (GeV)", ratio=True, ylabel="Events / %.0f GeV", opts={"xmin": 20, "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
 
 
     # b jets
-    drawPlot(createPlot("Btagging/bjet_pt"), "bjetPt", rebin=3, xlabel="p_{T}^{b-tagged jet} (GeV/c)", ylabel="b-tagged jets / %.0f GeV/c", ratio=False, opts={"ymaxfactor": 2,"xmax": 500}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("Btagging/bjet_pt"), "bjetPt", rebin=4, xlabel="p_{T}^{b-tagged jet} (GeV/c)", ylabel="b-tagged jets / %.0f GeV/c", ratio=False, opts={"ymaxfactor": 2,"xmax": 500}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
     drawPlot(createPlot("Btagging/bjet_eta"), "bjetEta", rebin=2, xlabel="#eta^{b-tagged jet}", ylabel="b-tagged jets / %.1f", ratio=False, opts={"ymaxfactor": 20, "xmin": -2.4, "xmax": 2.59,"ymin": 0.1 }, moveLegend={"dy":0.01, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
     drawPlot(createPlot("ControlPlots/NBjets"), "NumberOfBJets", xlabel="Number of selected b jets", ylabel="Events", opts={"xmax": 7}, ratio=False, textFunction=lambda: addMassBRText(x=0.45, y=0.87), cutLine=1)
 #   
@@ -279,7 +284,7 @@ def doPlots(datasets):
 #    transverseMass2(createPlot("transverseMassFakeMetVeto"), "transverseMassFakeMetVeto", rebin=20)
 
     transverseMass2(createPlot("transverseMass"), "transverseMass", rebin=10, ratio=False,log=False, opts={"xmax": 300,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))
-###    transverseMass2(createPlot("transverseMassNoBtagging"), "transverseMassNoBtagging", rebin=10, ratio=True,log=False, opts={"xmax": 300,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
+    transverseMass2(createPlot("transverseMassDeltaPtCut"), "transverseMassDeltaPtCut", rebin=10, ratio=True,log=False, opts={"xmax": 300,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
 
 #    transverseMass2(createPlot("transverseMassNoBtaggingWithRtau"), "transverseMassNoBtaggingWithRtau", rebin=10, ratio=True,log=False, opts={"xmax": 300,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
 ###    transverseMass2(createPlot("transverseMassAfterDeltaPhi160"), "transverseMassAfterDeltaPhi160", rebin=20, log=False, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
@@ -403,7 +408,7 @@ def doCounters(datasets):
     print eventCounter.getSubCounterTable("VetoTauSelection").format(cellFormat)
     print eventCounter.getSubCounterTable("GlobalMuon ID").format(cellFormat)
     print eventCounter.getSubCounterTable("GlobalMuon Selection").format(cellFormat) 
-    print eventCounter.getSubCounterTable("GlobalElectron ID").format(cellFormat)
+#    print eventCounter.getSubCounterTable("GlobalElectron ID").format(cellFormat)
     print eventCounter.getSubCounterTable("GlobalElectron Selection").format(cellFormat)  
 #    print eventCounter.getSubCounterTable("top").format(cellFormat) 
 

@@ -156,7 +156,8 @@ namespace HPlus {
     hTowersAreaSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_TowersArea", "jet_TowersArea", 100, 0., 10.);
     hJetChargeSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_JECFactor", "jet_JECFactor", 10, -5., 5.);
     hPtDiffToGenJetSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_PtDiffToGenJet", "jet_PtDiffToGenJet", 100, 0., 10.);
-
+    hDeltaPtJetTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, mySelectedJetsDir, "deltaPtTauJet", "deltaPtTauJet ", 200, -100., 100.);
+    hDeltaRJetTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, mySelectedJetsDir, "deltaRTauJet", "deltaRTauJet ", 120, 0., 6.);
     fMinDeltaRToOppositeDirectionOfTau = 999.;
  }
 
@@ -173,7 +174,7 @@ namespace HPlus {
     fEtaSpreadOfSelectedJets = 999;
     fAverageEtaOfSelectedJets = 999;
     fAverageSelectedJetsEtaDistanceToTauEta = 999;
-
+    fDeltaPtJetTau = 999;
     bool passEvent = false;
 
     edm::Handle<edm::View<pat::Jet> > hjets;
@@ -208,7 +209,7 @@ namespace HPlus {
     if (fApplyVetoForDeadECALCells) {
       for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
         // Ignore jets too close to tau
-        if(!(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), (*iter)->p4()) > fMaxDR)) continue;
+	if(!(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), (*iter)->p4()) > fMaxDR)) continue;
         if ((*iter)->pt() < 20.0) continue;
         bool myStatus = fDeadECALCells.ObjectHitsDeadECALCell(*iter, fDeadECALCellsVetoDeltaR);
         if (!myStatus) return Data(this, false);
@@ -221,9 +222,12 @@ namespace HPlus {
       increment(fAllSubCount);
 
       // remove jets too close to tau jet
+      hDeltaRJetTau->Fill(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()));
       bool match = false;
       if(!(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()) > fMaxDR)) {
         match = true;
+	fDeltaPtJetTau = iJet->pt()- (tau)->pt();
+	hDeltaPtJetTau->Fill(iJet->pt()- (tau)->pt());  
       }
       if(match) {
         if (iJet->pt() > fPtCut && (std::abs(iJet->eta()) < fEtaCut)) {
@@ -254,7 +258,7 @@ namespace HPlus {
               hPtDiffToGenJetExcludedJets->Fill(0.);
           }
         }
-        continue;
+	continue;
       }
       increment(fCleanCutSubCount);
       ++cleanPassed;

@@ -1,4 +1,3 @@
-// -*- c++ -*-
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysis_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysis_h
 
@@ -145,6 +144,7 @@ namespace HPlus {
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
     Count fDeltaPhiTauMETCounter;
+    Count fDeltaPtJetTauCounter;
     Count fDeltaPhiLow30Counter;
     Count fDeltaPhiLow60Counter;
     Count fBjetVetoCounter;
@@ -279,6 +279,7 @@ namespace HPlus {
     
     // Transverse mass histograms
     WrappedTH1 *hTransverseMass;
+    WrappedTH1 *hTransverseMassDeltaPtCut;
     WrappedTH1 *hTransverseMassSecondBveto;
     WrappedTH1 *hTransverseMassPhi30;
     WrappedTH1 *hTransverseMassPhi60;
@@ -302,6 +303,8 @@ namespace HPlus {
     WrappedTH2 *hDeltaPhiVsTransverseMass;
     WrappedTH2 *hTransverseMassVsNjets;
     WrappedTH2 *hEWKFakeTausTransverseMassVsNjets;
+    WrappedTH1 *hDeltaPtJetTau;
+    WrappedTH1 *hDeltaRJetTau;
 
 
     // Full mass histograms
@@ -339,8 +342,8 @@ namespace HPlus {
     WrappedTH2 *hSelectionFlowVsVerticesFakeTaus;
 
     // Control plots
-    WrappedTH1* hDeltaPtJetTau;
-    WrappedTH1* hDeltaRJetTau;
+    //    WrappedTH1* hDeltaPtJetTau;
+    //    WrappedTH1* hDeltaRJetTau;
     WrappedTH1* hCtrlIdentifiedElectronPt;
     WrappedTH1* hCtrlIdentifiedMuonPt;
     WrappedTH1* hCtrlNjets;
