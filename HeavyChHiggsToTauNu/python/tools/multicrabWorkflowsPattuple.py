@@ -15,11 +15,17 @@ def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowNa
         outputLumiMask = "Nov08ReReco"
 
     # Setup the Source for pattuple Workflow
-    source = Source(sourceWorkflow, number_of_jobs=taskDef.njobsIn, lumiMask=inputLumiMask)
+    source = Source(sourceWorkflow,
+                    # These are exclusive, but the default values of None and a check in Workflow ensure correctness
+                    number_of_jobs=taskDef.njobsIn, events_per_job=taskDef.neventsPerJobIn, lumis_per_job=taskDef.nlumisPerJobIn,
+                    lumiMask=inputLumiMask)
     # If taskDef contains the DBS-path of the pattuple, setup also the Data for the pattuple
     output = None
     if taskDef.outputPath != None and len(taskDef.outputPath) > 0:
-        output = Data(taskDef.outputPath, number_of_jobs=taskDef.njobsOut, lumiMask=outputLumiMask, dbs_url=common.pattuple_dbs)
+        output = Data(taskDef.outputPath,
+                      # These are exclusive, but the default values of None and a check in Workflow ensure correctness
+                      number_of_jobs=taskDef.njobsOut, events_per_job=taskDef.neventsPerJobOut, lumis_per_job=taskDef.nlumisPerJobOut,
+                      lumiMask=outputLumiMask, dbs_url=common.pattuple_dbs)
 
     # Additional, necessary command line arguments relaring to trigger
     args = {}
@@ -29,6 +35,9 @@ def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowNa
         args["triggerMC"] = 1
 
     wf = Workflow(workflowName, source=source, triggerOR=taskDef.triggerOR, args=args, output=output, **kwargs)
+    if taskDef.crabLines != None:
+        for line in taskDef.crabLines:
+            wf.addCrabLine(line)
     return wf
 
 ## Main function for generating 44X pattuples

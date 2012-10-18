@@ -393,15 +393,19 @@ class Source:
     #
     # \param name            Name of the workflow, whose output is used as a source
     # \param number_of_jobs  If given, overrides the number_of_jobs of the input Data object
+    # \param events_per_job  If given, overrides the events_per_job of the input Data object
     # \param lumis_per_job   If given, overrides the lumis_per_job of the input Data object
     # \param lumiMask        If given, overrides the lumiMask of the input Data object
-    def __init__(self, name, number_of_jobs=None, lumis_per_job=None, lumiMask=None):
+    def __init__(self, name, number_of_jobs=None, events_per_job=None, lumis_per_job=None, lumiMask=None):
         self.name = name
         self.number_of_jobs = number_of_jobs
+        self.events_per_job = events_per_job
         self.lumis_per_job = lumis_per_job
         self.lumiMask = lumiMask
         self.inputData = None
         self.dataset = None
+
+        self._ensureConsistency()
 
     ## Obtain the Data object which this Source points to for a Dataset
     def getData(self):
@@ -422,21 +426,33 @@ class Source:
             raise Exception("Workflow %s used as a source, but it does not have Data specifier in dataset %s" % (self.name, dataset.name))
     
         data = copy.deepcopy(wf.output)
-        for attr in ["number_of_jobs", "lumis_per_job", "lumiMask"]:
+        for attr in ["number_of_jobs", "events_per_job", "lumis_per_job", "lumiMask"]:
             value = getattr(self, attr)
             if value != None:
                 setattr(data, attr, copy.deepcopy(value))
+        data._ensureConsistency()
         return data
-        
+
+    def _ensureConsistency(self):
+        n = 0
+        if self.number_of_jobs != None: n += 1
+        if self.lumis_per_job != None: n += 1
+        if self.events_per_job != None: n += 1
+
+        if n > 1:
+            raise Exception("Source may have only one of number_of_jobs, lumis_per_job, events_per_job set")
 
     ## String representation of Source
     def __str__(self):
+        self._ensureConsistency()
         out = StringIO.StringIO()
         out.write('Source("%s"' % self.name)
         if self.number_of_jobs != None:
             out.write(", number_of_jobs=%d" % self.number_of_jobs)
+        if self.events_per_job != None:
+            out.write(", events_per_job=%d" % self.events_per_job)
         if self.lumis_per_job != None:
-            out.write(", lumis_per_job=%d" % self.number_of_jobs)
+            out.write(", lumis_per_job=%d" % self.lumis_per_job)
         if self.lumiMask != None:
             out.write(', lumiMask="%s"' % self.lumiMask)
         out.write(")")
@@ -453,30 +469,52 @@ class Source:
 # When the processing has finished, add \a outputPath, and possibly \a
 # njobsOut.
 #
-# \b Note that if something else thant what is shown here is variable
-# between datasets in your use case, please first consider creating a
-# similar class (by deriving if that helps you) for your purpose
-# INSTEAD of modifying this. Or at least consult Matti.
+# \b Note that this is only a helper class to easily deliver
+# information to Workflow, Source and Data objects.
 class TaskDef:
     ## Constructor
     #
-    # \param outputPath     DBS-path of the output
-    # \param njobsIn        Overrides the number of jobs for processing
-    # \param njobsOut       Default number of jobs for those who process the output
-    # \param triggerOR      List of strings for trigger OR
-    # \param triggerThrow   Should CMSSW throw exception if some trigger in \a triggerOR does not exist? (default is for true)
-    def __init__(self, outputPath=None, njobsIn=None, njobsOut=None, triggerOR=None, triggerThrow=None):
+    # \param outputPath  DBS-path of the output (this is not in kwargs,
+    #                    because it is handy to give as a first
+    #                    argument without the keyword)
+    # \param kwargs      Keyword arguments, described below (non-specified will get None as default value
+    #
+    # <b>Keyword arguments</b>
+    # \li \a njobsIn           Overrides the number of jobs for processing (conflicts with nevents*, nlumis*)
+    # \li \a njobsOut          Default number of jobs for those who process the output (conflicts with nevents*, nlumis*)
+    # \li \a neventsPerJobIn   Overrides the number of events per job for processing (conflicts with njobs*, nlumis*)
+    # \li \a neventsPerJobOut  Default number of events per job for those who process the output (conflicts with njobs*, nlumis*)
+    # \li \a nlumisPerJobIn    Overrides the number of lumis per job for processing (conflicts with nevents*, njobs*)
+    # \li \a nlumisPerJobOut   Default number of lumis per job for those who process the output (conflicts with nevents*, njobs*)
+    # \li \a triggerOR         List of strings for trigger OR
+    # \li \a triggerThrow      Should CMSSW throw exception if some trigger in \a triggerOR does not exist? (default is for true)
+    # \li \a crabLines         Additional crab configuration lines to add for this task and dataset
+    def __init__(self, outputPath=None, **kwargs):
         self.outputPath = outputPath
-        self.njobsIn = njobsIn
-        self.njobsOut = njobsOut
-        self.triggerOR = triggerOR
-        self.triggerThrow = triggerThrow
+        self.options = ["njobsIn", "njobsOut",
+                        "neventsPerJobIn", "neventsPerJobOut",
+                        "nlumisPerJobIn", "nlumisPerJobOut",
+                        "triggerOR", "triggerThrow",
+                        "crabLines"]
+
+        args = {}
+        args.update(kwargs)
+        for option in self.options:
+            value = None
+            if option in args:
+                value = args[option]
+                del args[option]
+            setattr(self, option, value)
+
+        # Any remaining argument is an error
+        if len(args) >= 1:
+            raise Exception("Incorrect arguments for TaskDef.__init__(): %s" % ", ".join(args.keys()))
 
     ## Update parameters from another TaskDef object
     #
     # Only non-None values are copied from taskDef
     def update(self, taskDef):
-        for a in ["outputPath", "njobsIn", "njobsOut", "triggerOR", "triggerThrow"]:
+        for a in ["outputPath"] + self.options:
             val = getattr(taskDef, a)
             if val != None:
                 setattr(self, a, val)

@@ -6,8 +6,8 @@ from multicrabWorkflowsPattuple import constructProcessingWorkflow_44X
 
 def addMetLegSkim_44X(version, datasets, updateDefinitions):
     mcTrigger = "HLT_MediumIsoPFTau35_Trk20_v1"
-    def TaskDefMC(njobsIn, njobsOut):
-        return TaskDef(njobsIn=njobsIn, njobsOut=njobsOut, triggerOR=[mcTrigger])
+    def TaskDefMC(**kwargs):
+        return TaskDef(triggerOR=[mcTrigger], **kwargs)
 
     # The numbers of jobs are from multicrabDatasetsPattuple, they may have to be adjusted
     defaultDefinitions = {
@@ -48,6 +48,11 @@ def addMetLegSkim_44X(version, datasets, updateDefinitions):
         "Tbar_tW-channel_TuneZ2_Fall11":    TaskDefMC(njobsIn=20, njobsOut=1),
         "T_s-channel_TuneZ2_Fall11":        TaskDefMC(njobsIn=10, njobsOut=1),
         "Tbar_s-channel_TuneZ2_Fall11":     TaskDefMC(njobsIn=10, njobsOut=1),
+
+        # Here is an example how to specity number of events/job
+        # instead of number of jobs, and how to give dataset-specific
+        # arbitrary crab configuration lines
+        #"Tbar_s-channel_TuneZ2_Fall11":     TaskDefMC(neventsPerJobIn=10000, neventsPerJobOut=1000000, crabLines=["USER.user_remote_dir=/foo"]),
         }
 
     # Update the default definitions from the argument
@@ -60,12 +65,7 @@ def addMetLegSkim_44X(version, datasets, updateDefinitions):
         # Construct processing workflow
         wf = constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow="AOD", workflowName="triggerMetLeg_skim_"+version)
 
-        # Example of how to set user_remote_dir for this workflow only
-        # For dataset-specific setting one can e.g.
-        # - modify TaskDef class, or
-        # - create new TaskDef class for the purpose of this workflow, or
-        # - create a dictionary from dataset name to user_remote_dir,
-        #   and pick the one for this dataset from there
+        # Example of how to set user_remote_dir for this workflow only (but for all datasets)
         #wf.addCrabLine("USER.user_remote_dir = /whatever")
 
         dataset.addWorkflow(wf)
