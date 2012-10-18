@@ -75,6 +75,9 @@ class PATBuilder:
             # Selects the first primary vertex, applies the quality cuts to it
             # Applies quality cuts to all vertices too
             HChPrimaryVertex.addPrimaryVertexSelection(process, sequence)
+            if options.tauEmbeddingInput != 0:
+                # for embedding input, do vertex object selection for original event too
+                HChPrimaryVertex.addPrimaryVertexSelection(process, sequence, srcProcess=dataVersion.getRecoProcess(), postfix="Original")
 
             if options.doTauHLTMatchingInAnalysis != 0:
                 raise Exception("doTauLHTMatchingInAnalysis is not supported at the moment")
