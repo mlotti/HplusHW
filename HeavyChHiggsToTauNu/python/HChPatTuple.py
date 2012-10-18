@@ -650,6 +650,7 @@ class StandardPATBuilder(PATBuilderBase):
         # Add "selected"-collections for all jets
         # "All" name "shiftedPatJetsBetaEmbeddedPFlowEnUpForCorrMEt"
         # "Selected" name "shiftedPatJetsPFlowEnUpForCorrMEt"
+        # Create also PU jet ID for each "Selected" collection
         tmp = jets.replace("patJets", "")
         shiftedJetNames = [ # These are the ones produced by runMEtUncertainties
             "shiftedPatJets%sEnUpForCorrMEt" % tmp,
@@ -660,6 +661,7 @@ class StandardPATBuilder(PATBuilderBase):
             ]
         selectedJetNames = []
         for shiftedJet in shiftedJetNames:
+            # Create selectedPatJets
             m = self.process.selectedPatJets.clone(
                 src = shiftedJet
             )
@@ -667,6 +669,12 @@ class StandardPATBuilder(PATBuilderBase):
             setattr(self.process, name, m)
             seq *= m
             selectedJetNames.append(name)
+
+            # Clone PU jet ID
+            puJetIdSequence = patHelpers.cloneProcessingSnippet(self.process, self.process.puJetIdSqeuence, "For"+name)
+            getattr(self.process, "puJetIdFor"+name).jets = name
+            getattr(self.process, "puJetMvaFor"+name).jets = name
+            seq *= puJetIdSequence
 
         if outputModule != "":
             self.outputCommands.extend(getattr(self.process, outputModule).outputCommands)
@@ -685,7 +693,11 @@ class StandardPATBuilder(PATBuilderBase):
                 self.outputCommands.append("drop *_%s_*_%s" % (n, processName))
             # Keep the "selected" collections
             for n in selectedJetNames:
-                self.outputCommands.append("keep *_%s_*_%s" % (n, processName))
+                self.outputCommands.extend([
+                        "keep *_%s_*_%s" % (n, processName),
+                        "keep *_puJetIdFor%s_*_%s" % (n, processName),
+                        "keep *_puJetMvaFor%s_*_%s" % (n, processName),
+                        ])
 
     def _customizeEventCleaning(self):
         self.outputCommands.extend([
