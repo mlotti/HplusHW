@@ -86,12 +86,17 @@ def getOptions(options=None):
                      "",
                      options.multiplicity.singleton,
                      options.varType.string,
-                     "Select specific PU reweighting era (Default: use the one in configuration)")
+                     "DEPRECATED (should be removed soon) Select specific PU reweighting era (Default: use the one in configuration)")
     options.register("hasMCBJetsFilter",
                      0,
                      options.multiplicity.singleton,
                      options.varType.int,
                      "If set to 1, chooses only events that have MC b jets; if set to -1, chooses only events that have no MC b jets")
+    options.register("energy",
+                     0,
+                     options.multiplicity.singleton,
+                     options.varType.int, # Use integer for now, if we later need e.g. 12.5 TeV, let's use string then
+                     "Centre-of-mass energy in TeV")
 
     # Protection in case sys.argv is missing due to various edm tools
     if not hasattr(sys, "argv"):

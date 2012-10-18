@@ -5,8 +5,10 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 def addConfigInfo(process, options, dataVersion):
     process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer",
         dataVersion = cms.untracked.string(dataVersion.version),
-        isData = cms.untracked.bool(dataVersion.isData())
+        isData = cms.untracked.bool(dataVersion.isData()),
+        energy = cms.untracked.uint32(options.energy)
     )
+    print "Dataset centre-of-mass energy has been set to %d TeV" % options.energy
     if options.crossSection >= 0.:
         process.configInfo.crossSection = cms.untracked.double(options.crossSection)
         print "Dataset cross section has been set to %g pb" % options.crossSection
