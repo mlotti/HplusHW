@@ -505,8 +505,14 @@ class StandardPATBuilder(PATBuilderBase):
         # jet pre-selection
         self.process.selectedPatJets.cut = jetPreSelection
 
+        # PU jet ID
+        self.process.load("CMGTools.External.pujetidsequence_cff")
+        self.endSequence *= self.process.puJetIdSqeuence
+
         self.outputCommands.extend([
                 "keep *_selectedPatJets_*_*",
+                "keep *_puJetId_*_*",  # PU jet ID input variables
+                "keep *_puJetMva_*_*", # PU jet ID final MVAs and working point flags
                 #"drop *_selectedPatJets_*_*",
                 #"keep *_selectedPatJetsAK5JPT_*_*",
                 #"keep *_selectedPatJetsAK5PF_*_*",

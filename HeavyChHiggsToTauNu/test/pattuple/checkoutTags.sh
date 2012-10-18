@@ -6,10 +6,14 @@ set -e
 # 21.12.2011 M.Kortelainen CMSSW_4_2_8_patch7 Introduced the file for event filters
 # 19.1.2012 M.Kortelainen CMSSW_4_4_2_patch9 Added tag for GenFilters
 # 17.9.2012 M.Kortelainen CMSSW_4_4_4 Added tag for electron MVA ID
+# 31.1.2013 M.Kortelainen CMSSW_4_4_5 PU jet ID
 
 # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#ECAL_dead_cell_filter
 # https://twiki.cern.ch/twiki/bin/view/CMS/SusyEcalMaskedCellSummary
 cvs co -r Colin_TaggingMode_June30 JetMETAnalysis/ecalDeadCellTools
+
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
+cvs co -r V00-03-01 -d CMGTools/External UserCode/CMG/CMGTools/External
 
 # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Tracking_failure_filter
 cvs co -r TrackingfailTagMode_18Oct11 -d SandBox/Skims UserCode/seema/SandBox/Skims
