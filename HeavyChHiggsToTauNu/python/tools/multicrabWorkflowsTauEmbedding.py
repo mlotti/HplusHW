@@ -3,9 +3,9 @@
 
 import re
 
-from multicrabDatasetsTools import Dataset, Workflow, Data, Source, updatePublishName, TaskDef, updateTaskDefinitions
+from multicrabWorkflowsTools import Dataset, Workflow, Data, Source, updatePublishName, TaskDef, updateTaskDefinitions
 import multicrabDatasetsCommon as common
-from multicrabDatasetsPattuple import constructProcessingWorkflow_44X
+from multicrabWorkflowsPattuple import constructProcessingWorkflow_44X
 
 def getDefaultDefinitions_44X():
     mcTrigger = "HLT_Mu40_eta2p1_v1"

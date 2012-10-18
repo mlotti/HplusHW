@@ -1,8 +1,8 @@
 ## \package multicrabDatasetsTriggerEff
 # Functions for trigger efficiency workflow definitions
 
-from multicrabDatasetsTools import Dataset, Workflow, Data, Source, updatePublishName, TaskDef, updateTaskDefinitions
-from multicrabDatasetsPattuple import constructProcessingWorkflow_44X
+from multicrabWorkflowsTools import Dataset, Workflow, Data, Source, updatePublishName, TaskDef, updateTaskDefinitions
+from multicrabWorkflowsPattuple import constructProcessingWorkflow_44X
 
 def addMetLegSkim_44X(version, datasets, updateDefinitions):
     mcTrigger = "HLT_MediumIsoPFTau35_Trk20_v1"

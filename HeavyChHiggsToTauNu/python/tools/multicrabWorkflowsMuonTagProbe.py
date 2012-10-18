@@ -1,7 +1,7 @@
 ## \package multicrabDatasetsMuonTagProbe
 # Functions for muon tag&probe workflow definitions
 
-from multicrabDatasetsTools import Dataset, Workflow, Data, Source, updatePublishName, TaskDef, updateTaskDefinitions
+from multicrabWorkflowsTools import Dataset, Workflow, Data, Source, updatePublishName, TaskDef, updateTaskDefinitions
 
 
 def addMuonTagProbe_44X(datasets):
