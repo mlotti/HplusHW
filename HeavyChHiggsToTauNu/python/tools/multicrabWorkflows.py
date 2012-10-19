@@ -13,32 +13,49 @@ import multicrabWorkflowsMuonTagProbe
 import multicrabWorkflowsTriggerEff
 import multicrabWorkflowsPileupNtuple
 
-energy = 7 
-
 ## Helper to specify data dataset
 #
-# \param name  Name of the dataset (should contain '%s' in place of the run region)
-# \param runs  Two-tuple for the run region
-# \param aod   String for the DBS-dataset path of AOD
-def DataDataset(name, runs, aod):
-    rr = "%d-%d" % runs
-    return Dataset(name % rr , dataVersion="44Xdata", energy=energy, runs=runs, workflows=[Workflow("AOD", output=Data(datasetpath=aod))])
+# Holds the energy and dataVersion, so that they can be easily changed
+# for 7 and 8 TeV data
+class DataDatasetHelper:
+    def __init__(self):
+        self.energy = 7
+        self.dataVersion = "44Xdata"
+
+    ## Function call syntax
+    # \param name  Name of the dataset (should contain '%s' in place of the run region)
+    # \param runs  Two-tuple for the run region
+    # \param aod   String for the DBS-dataset path of AOD
+    # \param reco  Reco era to append to the otherwise common dataVersion (needed for 53X)
+    def __call__(self, name, runs, aod, reco=""):
+        rr = "%d-%d" % runs
+        return Dataset(name % rr , dataVersion=self.dataVersion+reco, energy=self.energy, runs=runs, workflows=[Workflow("AOD", output=Data(datasetpath=aod))])
+DataDataset = DataDatasetHelper()
 
 ## Helper to specify MC dataset
 #
-# \param name          Name of the dataset
-# \param crossSection  Cross section in pb
-# \param aod           String for the DBS-dataset path of AOD
-def MCDataset(name, crossSection, aod):
-    return Dataset(name, dataVersion="44XmcS6", energy=energy, crossSection=crossSection, workflows=[Workflow("AOD", output=Data(datasetpath=aod))])
+# Holds the energy and dataVersion, so that they can be easily changed
+# for 7 and 8 TeV data
+class MCDatasetHelper:
+    def __init__(self):
+        self.energy = 7
+        self.dataVersion = "44XmcS6"
+
+    ## Function call syntax
+    #
+    # \param name          Name of the dataset
+    # \param crossSection  Cross section in pb
+    # \param aod           String for the DBS-dataset path of AOD
+    def __call__(self, name, crossSection, aod):
+        return Dataset(name, dataVersion=self.dataVersion, energy=self.energy, crossSection=crossSection, workflows=[Workflow("AOD", output=Data(datasetpath=aod))])
+MCDataset = MCDatasetHelper()
 
 ## List of datasets
 #
 # Here only the AOD datasets are specified. The results of our
 # workflows (pattuples etc) are added more below.
-#
-# First 7 TeV data
-energy = 7
+
+#################### 7 TeV data and MC ####################
 datasets = DatasetSet([
     # Tau, Run2011A
     # Need two definitions, first is for pattuples, second is for
