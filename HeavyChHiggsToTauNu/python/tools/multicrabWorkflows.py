@@ -50,15 +50,12 @@ datasets = DatasetSet([
     DataDataset("Tau_%s_2011A_Nov08",      runs=(173236, 173692), aod="/Tau/Run2011A-08Nov2011-v1/AOD"), # break of range because of trigger eff. boundary
     # Tau, Run2011B
     DataDataset("Tau_%s_2011B_Nov19",      runs=(175832, 180252), aod="/Tau/Run2011B-19Nov2011-v1/AOD"),
-
+])
+datasets.extend([
     # SingleMu, Run2011A
     DataDataset("SingleMu_%s_2011A_Nov08", runs=(160431, 163261), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
     DataDataset("SingleMu_%s_2011A_Nov08", runs=(163270, 163869), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
-    # Following piece is duplicated, because before migration to this new
-    # system the run regions for lowest unprescaled Mu and IsoMu triggers differ
     DataDataset("SingleMu_%s_2011A_Nov08", runs=(165088, 166150), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
-    DataDataset("SingleMu_%s_2011A_Nov08", runs=(165088, 165633), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
-    DataDataset("SingleMu_%s_2011A_Nov08", runs=(165970, 166150), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
     #
     DataDataset("SingleMu_%s_2011A_Nov08", runs=(166161, 166164), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
     DataDataset("SingleMu_%s_2011A_Nov08", runs=(166346, 166346), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
@@ -72,8 +69,13 @@ datasets = DatasetSet([
     DataDataset("SingleMu_%s_2011B_Nov19", runs=(177453, 178380), aod="/SingleMu/Run2011B-19Nov2011-v1/AOD"),
     DataDataset("SingleMu_%s_2011B_Nov19", runs=(178411, 179889), aod="/SingleMu/Run2011B-19Nov2011-v1/AOD"),
     DataDataset("SingleMu_%s_2011B_Nov19", runs=(179942, 180371), aod="/SingleMu/Run2011B-19Nov2011-v1/AOD"),
+])
+datasets.splitDataByRuns("SingleMu_165088-166150_2011A_Nov08", [
+        (165088, 165633), # Split this run range into two (and keep original),
+        (165970, 166150), # because IsoMu trigger changes between them
+        ])
 
-
+datasets.extend([
     ## Fall11 MC
     # Signal, tt -> H+W
     MCDataset("TTToHplusBWB_M80_Fall11",   crossSection=165, aod="/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
