@@ -50,6 +50,32 @@ class DatasetSet:
                 raise Exception("Dataset %s is already defined" % dataset.getName())
             self.datasetDict[dataset.getName()] = dataset
 
+    def splitDataByRuns(self, sourceName, listOfRuns):
+        run_re = re.compile("_\d+-\d+_")
+        source = self.getDataset(sourceName)
+        if source.isMC():
+            raise Exception("May not split MC datasets by runs, tried to split %s." % sourceName)
+        if source.runs == None:
+            raise Exception("Dataset %s has no runs specified, unable to split it by runs." % sourceName)
+        datasets = []
+        for firstRun, lastRun in listOfRuns:
+            if firstRun < source.runs[0] or lastRun > source.runs[1]:
+                raise Exception("Trying to split dataset %s with runs (%d, %d) to runs (%d, %d), which is not fully contained by the dataset." % (sourceName, source.runs[0], source.runs[1], firstRun, lastRun))
+            if firstRun == source.runs[0] and lastRun == source.runs[1]:
+                raise Exception("Trying to split dataset %s with runs (%d, %d) to runs (%d, %d), which are the same." % (sourceName, source.runs[0], source.runs[1], firstRun, lastRun))
+
+            dset = Dataset(run_re.sub("_%d-%d_" % (firstRun, lastRun), source.name),
+                           source.dataVersion, source.energy, (firstRun, lastRun), source.crossSection)
+            # In splitting case, source may have workflows with only output, and also it should contain only the dataset path
+            for wf in source.workflows.itervalues():
+                if not wf.hasAtMostOutput():
+                    continue
+                dset.addWorkflow(wf.clone())
+
+            datasets.append(dset)
+
+        self.extend(datasets)
+
     def getDataset(self, name):
         try:
             return self.datasetDict[name]
@@ -235,6 +261,12 @@ class Workflow:
 
     def getName(self):
         return self.name
+
+    def clone(self):
+        return copy.deepcopy(self)
+
+    def hasAtMostOutput(self):
+        return self.source == None and self.args == None and self.trigger == None and self.triggerOR == None and self.skimConfig == None and self.output_file == None and len(self.crabLines) == 0
 
     def _ensureConsistency(self):
         if self.trigger != None and self.triggerOR != None:
