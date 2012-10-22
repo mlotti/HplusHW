@@ -355,7 +355,7 @@ class StandardPATBuilder(PATBuilderBase):
     def __init__(self, *args, **kwargs):
         PATBuilderBase.__init__(self, *args, **kwargs)
 
-    def customize(self):
+    def customize(self, jetPostfixes):
         out = None
         outdict = self.process.outputModules_()
         if outdict.has_key(outputModuleName):
@@ -392,9 +392,9 @@ class StandardPATBuilder(PATBuilderBase):
             self._customizeMuons()
             self._customizeElectrons()
         self._customizePhotons()
-        self._customizeJets()
+        self._customizeJets(jetPostfixes)
         self._customizeTaus()
-        self._customizeMET()
+        self._customizeMET(jetPostfixes)
 
         self._customizeEventCleaning()
 
@@ -476,11 +476,8 @@ class StandardPATBuilder(PATBuilderBase):
                 "keep *_selectedPatPhotons_*_*"
                 ])
 
-    def _customizeJets(self):
-        # Don't embed PFCandidates
-        setPatJetDefaults(self.process.patJets)
-
-        # Switch to AK5PF jets
+    def _customizeJets(self, jetPostfixes):
+        # Switch to AK5PF jets, for standard PAT jets
         setPatJetCorrDefaults(self.process.patJetCorrFactors, self.dataVersion, True)
         switchJetCollection(self.process, cms.InputTag('ak5PFJets'),
                             doJTA        = True,
@@ -491,28 +488,45 @@ class StandardPATBuilder(PATBuilderBase):
                             doJetID      = True
         )
 
+        # Customization similar to all jets (standard PAT, CHS)
+        for postfix in jetPostfixes:
+            self._customizeJetCollection(postfix)
+
+    def _customizeJetCollection(self, postfix):
+        # Don't embed PFCandidates
+        setPatJetDefaults(getattr(self.process, "patJets"+postfix))
+
         # Embed beta and betastar to pat::Jet
-        self.process.patJetsBetaEmbedded = cms.EDProducer("HPlusPATJetViewBetaEmbedder",
-            jetSrc = cms.InputTag("patJets"),
+        setattr(self.process, "patJetsBetaEmbedded"+postfix, cms.EDProducer("HPlusPATJetViewBetaEmbedder",
+            jetSrc = cms.InputTag("patJets"+postfix),
             generalTracksSrc = cms.InputTag("generalTracks"),
             vertexSrc = cms.InputTag("offlinePrimaryVertices"),
             embedPrefix = cms.string("")
-        )
-        self.process.selectedPatJets.src = "patJetsBetaEmbedded"
-        self.process.patDefaultSequence.replace(self.process.selectedPatJets,
-                                                self.process.patJetsBetaEmbedded*self.process.selectedPatJets)
+        ))
+        getattr(self.process, "selectedPatJets"+postfix).src = "patJetsBetaEmbedded"+postfix
+        getattr(self.process, "patDefaultSequence"+postfix).replace(
+            getattr(self.process, "selectedPatJets"+postfix),
+            getattr(self.process, "patJetsBetaEmbedded"+postfix) * getattr(self.process, "selectedPatJets"+postfix))
 
         # jet pre-selection
-        self.process.selectedPatJets.cut = jetPreSelection
+        getattr(self.process, "selectedPatJets"+postfix).cut = jetPreSelection
 
         # PU jet ID
-        self.process.load("CMGTools.External.pujetidsequence_cff")
-        self.endSequence *= self.process.puJetIdSqeuence
+        if not hasattr(self.process, "puJetIdSqeuence"):
+            self.process.load("CMGTools.External.pujetidsequence_cff")
+        if postfix not in ["", "Chs"]:
+            raise Exception("Only empty and 'Chs' postfix are supported")
+        if postfix == "Chs":
+            self.process.puJetIdChs.jets = "selectedPatJetsChs"
+            self.process.puJetMvaChs.jets = "selectedPatJetsChs"
+
+        self.endSequence *= getattr(self.process, "puJetIdSqeuence"+postfix)
+            
 
         self.outputCommands.extend([
-                "keep *_selectedPatJets_*_*",
-                "keep *_puJetId_*_*",  # PU jet ID input variables
-                "keep *_puJetMva_*_*", # PU jet ID final MVAs and working point flags
+                "keep *_selectedPatJets%s_*_*" % postfix,
+                "keep *_puJetId%s_*_*" % postfix,  # PU jet ID input variables
+                "keep *_puJetMva%s_*_*" % postfix, # PU jet ID final MVAs and working point flags
                 #"drop *_selectedPatJets_*_*",
                 #"keep *_selectedPatJetsAK5JPT_*_*",
                 #"keep *_selectedPatJetsAK5PF_*_*",
@@ -584,7 +598,7 @@ class StandardPATBuilder(PATBuilderBase):
                 #"keep *_selectedPatTausHpsTancPFTau_*_*",
                 ])
 
-    def _customizeMET(self):
+    def _customizeMET(self, jetPostfixes):
         # Produce Type I MET correction from all PF jets
         # Note that further correction is needed at the analysis level
         # to remove contribution from jet energy corrections of those
@@ -743,7 +757,7 @@ class StandardPATBuilder(PATBuilderBase):
                     ])
     
 
-def addStandardPAT(process, dataVersion, doPatTrigger=True, patArgs={}, pvSelectionConfig=""):
+def addStandardPAT(process, dataVersion, doPatTrigger=True, doChsJets=True, patArgs={}, pvSelectionConfig=""):
     print "########################################"
     print "#"
     print "# Using standard PAT"
@@ -821,6 +835,23 @@ def addStandardPAT(process, dataVersion, doPatTrigger=True, patArgs={}, pvSelect
 
     # PAT
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
+    jetPostfixes = [""]
+
+    # PF2PAT for CHS jets
+    # Probably the easiest way to get CHS jets is to use PF2PAT and disable muon/electron top projections
+    if doChsJets:
+        jetCorrFactors = patJetCorrLevels(dataVersion, L1FastJet=True)
+        pfTools.usePF2PAT(process, runPF2PAT=True, jetAlgo="AK5", jetCorrections=("AK5PFchs", jetCorrFactors),
+                          runOnMC=dataVersion.isMC(), postfix="Chs")
+        # Apparently have to set this explicitly in order to have pro
+        process.pfPileUpChs.checkClosestZVertex = False
+        # Disable isolated muon/electron top projections before jet clustering
+        process.pfNoMuonChs.enable = False
+        process.pfNoElectronChs.enable = False
+
+        jetPostfixes.append("Chs")
+        process.patDefaultSequence *= process.patPF2PATSequenceChs
+
 
     # Run simple electron ID sequence for once (default is to run it)
     if not "doPatElectronID" in patArgs or patArgs["doPatElectronID"]:
@@ -828,7 +859,7 @@ def addStandardPAT(process, dataVersion, doPatTrigger=True, patArgs={}, pvSelect
 
     # Customize PAT
     patBuilder = StandardPATBuilder(process, dataVersion, **patArgs)
-    patBuilder.customize()
+    patBuilder.customize(jetPostfixes)
     outputCommands.extend(patBuilder.getOutputCommands())
 
     ### Trigger (as the last)
