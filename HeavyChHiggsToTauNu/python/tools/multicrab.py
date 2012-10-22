@@ -5,6 +5,8 @@
 # \li creating (multi)crab tasks (also multicrabDataset package)
 # \li querying the status of crab jobs (via hplusMultiCrabStatus.py)
 #
+# <b>The documentation below is now outdated, update is still to be written.</b>
+#
 # The motivation for having all this trouble with creating the crab
 # tasks is that managing hundreds of datasets/crab tasks (one crab
 # task per dataset with an entry in DBS) with plain multicrab.cfg
@@ -147,6 +149,7 @@
 import os, re
 import subprocess, errno
 import time
+import math
 import shutil
 import ConfigParser
 import OrderedDict
@@ -262,12 +265,18 @@ def checkCrabInPath():
 # \param path     Path to a directory where to create the multicrab
 #                 directory (if None, crete to working directory)
 def createTaskDir(prefix="multicrab", postfix="", path=None):
-    dirname = prefix+"_" + time.strftime("%y%m%d_%H%M%S")
-    if len(postfix) > 0:
-        dirname += "_" + postfix
-    if path != None:
-        dirname = os.path.join(path, dirname)
-    os.makedirs(dirname)
+    while True:
+        dirname = prefix+"_" + time.strftime("%y%m%d_%H%M%S")
+        if len(postfix) > 0:
+            dirname += "_" + postfix
+        if path != None:
+            dirname = os.path.join(path, dirname)
+        if os.path.exists(dirname):
+            time.sleep(1)
+            continue
+
+        os.makedirs(dirname)
+        break
     return dirname
 
 ## Print all multicrab datasets
@@ -706,6 +715,11 @@ class MulticrabDataset:
 
 ## Abstraction of the entire multicrab configuration for the configuration generation (intended for users)
 class Multicrab:
+    # "Enumeration" for task splitting mode for tasks with >= 500 jobs
+    NONE = 1
+    SPLIT = 2
+    SERVER = 3
+
     ## Constructor.
     # 
     # \param crabConfig   String for crab configuration file
@@ -887,8 +901,10 @@ class Multicrab:
 
     ## Generate the multicrab configration as a string.
     # 
+    # \param datasetNames  List of dataset names for which to write the configuration
+    #
     # This method was intended to be called internally.
-    def _getConfig(self):
+    def _getConfig(self, datasetNames):
         if self.datasets == None:
             self._createDatasets()
 
@@ -899,24 +915,25 @@ class Multicrab:
         for line in self.commonLines:
             ret += line + "\n"
 
-        for d in self.datasets:
-            ret += "\n" + d._getConfig()
+        for name in datasetNames:
+            ret += "\n" + self.getDataset(name)._getConfig()
 
         return ret
 
     ## Write the multicrab configuration to a given file name.
     #
-    # \param filename  Write the configuration to this file
+    # \param filename      Write the configuration to this file
+    # \param datasetNames  List of dataset names for which to write the configuration
     # 
     # This method was intended to be called internally.
-    def _writeConfig(self, filename):
+    def _writeConfig(self, filename, datasetNames):
         f = open(filename, "wb")
-        f.write(self._getConfig())
+        f.write(self._getConfig(datasetNames))
         f.close()
 
         directory = os.path.dirname(filename)
-        for d in self.datasets:
-            d._writeGeneratedFiles(directory)
+        for name in datasetNames:
+            self.getDataset(name)._writeGeneratedFiles(directory)
 
         print "Wrote multicrab configuration to %s" % filename
         
@@ -933,12 +950,79 @@ class Multicrab:
     # multicrab.cfg in there, copies and generates the necessary
     # files to the directory and optionally run 'multicrab -create'
     # in the directory.
-    def createTasks(self, configOnly=False, codeRepo='git', **kwargs):
+    def createTasks(self, configOnly=False, codeRepo='git', over500JobsMode=NONE, **kwargs):
+        # If mode is NONE, create tasks for all datasets
+        if over500JobsMode == Multicrab.NONE:
+            return self._createTasks(configOnly, codeRepo, **kwargs)
+
+        datasetsOver500Jobs = OrderedDict.OrderedDict()
+        datasetsUnder500Jobs = OrderedDict.OrderedDict()
+        def checkAnyOver500Jobs(dataset):
+            njobs = dataset.getNumberOfJobs()
+            if njobs > 500:
+                datasetsOver500Jobs[dataset.getName()] = njobs
+            else:
+                datasetsUnder500Jobs[dataset.getName()] = njobs
+        self.forEachDataset(checkAnyOver500Jobs)
+        # If all tasks have < 500 jobs, create all tasks
+        if len(datasetsOver500Jobs) == 0:
+            return self._createTasks(configOnly, codeRepo, **kwargs)
+
+        # If mode is SERVER, set server=1 for tasks with >= 500 jobs
+        if over500JobsMode == Multicrab.SERVER:
+            for dname in datasetsOver500Jobs.iterkeys():
+                self.getDataset(dname).useServer(True)
+            return self._createTasks(configOnly, codeRepo, **kwargs)
+
+        # If mode is SPLIT, first create < 500 job tasks in one
+        # multicrab directory, then for each tasks with >= 500 jobs
+        # create one multicrab directory per 500 jobs
+        if over500JobsMode == Multicrab.SPLIT:
+            ret = self._createTasks(configOnly, codeRepo, datasetNames=datasetsUnder500Jobs.keys(), **kwargs)
+
+            args = {}
+            args.update(kwargs)
+            prefix = kwargs.get("prefix", "multicrab")
+            
+            for datasetName, njobs in datasetsOver500Jobs.iteritems():
+                dname = datasetName.split("_")[0]
+                nMulticrabTasks = int(math.ceil(njobs/500.0))
+                for i in xrange(nMulticrabTasks):
+                    firstJob = i*500+1
+                    lastJob = (i+1)*500
+                    args["prefix"] = "%s_%s_%d-%d" % (prefix, dname, firstJob, lastJob)
+                    ret.extend(self._createTasks(configOnly, codeRepo, datasetNames=[datasetName], **args))
+
+            return ret
+
+        raise Exception("Incorrect value for over500JobsMode: %d" % over500JobsMode)
+                                                    
+
+    ## Create the multicrab task.
+    # 
+    # \param configOnly   If true, generate the configuration only (default: False).
+    # \param codeRepo     If something else than 'git', don't produce codeVersion/Status/Diff files
+    # \param datasetNames If not None, should be list of dataset names for which to create tasks
+    # \param kwargs       Keyword arguments (forwarded to multicrab.createTaskDir, see also below)
+    #
+    # <b>Keyword arguments</b>
+    # \li\a prefix       Prefix of the multicrab task directory (default: 'multicrab')
+    # 
+    # Creates a new directory for the CRAB tasks, generates the
+    # multicrab.cfg in there, copies and generates the necessary
+    # files to the directory and optionally run 'multicrab -create'
+    # in the directory.
+    def _createTasks(self, configOnly=False, codeRepo='git', datasetNames=None, **kwargs):
         if not configOnly:
             checkCrabInPath()
         dirname = createTaskDir(**kwargs)
 
-        self._writeConfig(os.path.join(dirname, "multicrab.cfg"))
+        if datasetNames != None:
+            dsetNames = datasetNames[:]
+        else:
+            dsetNames = [d.getName() for d in self.datasets]
+
+        self._writeConfig(os.path.join(dirname, "multicrab.cfg"), dsetNames)
 
         # Create code versions
 	if codeRepo == 'git':
@@ -955,8 +1039,8 @@ class Multicrab:
                 f.close()
 
         files = self.filesToCopy[:]
-        for d in self.datasets:
-            files.extend(d._getCopyFiles())
+        for name in dsetNames:
+            files.extend(self.getDataset(name)._getCopyFiles())
         
         # Unique list of files
         keys = {}
@@ -983,4 +1067,4 @@ class Multicrab:
 
             os.chdir("..")
 
-        return dirname
+        return [(dirname, dsetNames)]
