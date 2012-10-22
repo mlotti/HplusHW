@@ -33,6 +33,8 @@ def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowNa
         args["triggerThrow"] = 0
     if dataset.isMC() and taskDef.triggerOR != None:
         args["triggerMC"] = 1
+    if taskDef.args != None:
+        args.update(taskDef.args)
 
     wf = Workflow(workflowName, source=source, triggerOR=taskDef.triggerOR, args=args, output=output, **kwargs)
     if taskDef.crabLines != None:
@@ -57,8 +59,8 @@ def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowNa
 # functions would be as short as possible.
 def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
     mcTrigger = "HLT_MediumIsoPFTau35_Trk20_MET60_v1"
-    def TaskDefMC(njobsIn, njobsOut):
-        return TaskDef(njobsIn=njobsIn, njobsOut=njobsOut, triggerOR=[mcTrigger])
+    def TaskDefMC(**kwargs):
+        return TaskDef(triggerOR=[mcTrigger], **kwargs)
 
     # Specifies the default
     # - number of jobs in pattuple processing

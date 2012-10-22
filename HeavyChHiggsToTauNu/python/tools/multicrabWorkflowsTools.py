@@ -521,13 +521,14 @@ class TaskDef:
     # \li \a triggerOR         List of strings for trigger OR
     # \li \a triggerThrow      Should CMSSW throw exception if some trigger in \a triggerOR does not exist? (default is for true)
     # \li \a crabLines         Additional crab configuration lines to add for this task and dataset
+    # \li \a args              Additional command line arguments to add for this task and dataset
     def __init__(self, outputPath=None, **kwargs):
         self.outputPath = outputPath
         self.options = ["njobsIn", "njobsOut",
                         "neventsPerJobIn", "neventsPerJobOut",
                         "nlumisPerJobIn", "nlumisPerJobOut",
                         "triggerOR", "triggerThrow",
-                        "crabLines"]
+                        "crabLines", "args"]
 
         args = {}
         args.update(kwargs)
