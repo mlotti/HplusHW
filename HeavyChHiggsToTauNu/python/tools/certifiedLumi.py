@@ -13,6 +13,14 @@ files = {
     "Aug05ReReco": "Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v3.txt",
     # 44X ReRecos
     "Nov08ReReco": "Cert_160404-180252_7TeV_ReRecoNov08_Collisions11_JSON.txt",
+
+    # 2012
+    "DCSONLY12": "json_DCSONLY_2012.txt",
+    # 53X PromptReco and ReRecos
+    "PromptReco12": "Cert_190456-204567_8TeV_PromptReco_Collisions12_JSON.txt",
+    "12Jul2012ReReco": "Cert_190456-196531_8TeV_13Jul2012ReReco_Collisions12_JSON_v2.txt",
+    "06Aug2012ReReco": "Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12_JSON.txt",
+    "24Aug2012ReReco": "Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12_JSON.txt",
 }
 
 ## Get a JSON file name
