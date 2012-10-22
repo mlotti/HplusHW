@@ -119,7 +119,7 @@ process.out.outputCommands.extend([
         "drop *_reducedHcalRecHits_*_*",
 
         "drop *_trackExtrapolator_*_*",
-        "drop *_standAloneMuons_*_*",
+#        "drop *_standAloneMuons_*_*", # reco::Tracks from standAloneMuons are needed for PF isolation (don't know for other objects)
         "drop *_conversionStepTracks_*_*",
         "drop recoIsoDepositedmValueMap_*_*_*",
         "drop recoCastorJetIDedmValueMap_*_*_*",

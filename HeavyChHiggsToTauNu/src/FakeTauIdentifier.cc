@@ -29,7 +29,7 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     // Create histograms
     TFileDirectory myDir = fs->mkdir("FakeTauIdentifier_"+label);
-    hTauMatchType = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TauMatchType", "TauMatchType", 9, 0, 9);
+    hTauMatchType = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TauMatchType", "TauMatchType", kkNumberOfSelectedTauMatchTypes, 0, kkNumberOfSelectedTauMatchTypes);
     if (hTauMatchType->isActive()) {
       hTauMatchType->GetXaxis()->SetBinLabel(1+kkNoMC, "NoMatch");
       hTauMatchType->GetXaxis()->SetBinLabel(1+kkElectronToTau, "e#rightarrow#tau");
@@ -118,13 +118,34 @@ namespace HPlus {
       }
     }
     if (!foundMCTauOutsideAcceptanceStatus) {
-      if (isMCElectron) myMatchType = kkElectronToTau;
-      else if (isMCMuon) myMatchType = kkMuonToTau;
-      else if (isMCTau) myMatchType = kkTauToTau;
+      if (isMCElectron) {
+        if (isMCTau) {
+          myMatchType = kkElectronFromTauDecayToTau;
+        } else {
+          myMatchType = kkElectronToTau;
+        }
+      } else if (isMCMuon) {
+        if (isMCTau) {
+          myMatchType = kkMuonFromTauDecayToTau;
+        } else {
+          myMatchType = kkMuonToTau;
+        }
+      } else if (isMCTau) myMatchType = kkTauToTau;
       else myMatchType = kkJetToTau;
     } else {
-      if (isMCElectron) myMatchType = kkElectronToTauAndTauOutsideAcceptance;
-      else if (isMCMuon) myMatchType = kkMuonToTauAndTauOutsideAcceptance;
+      if (isMCElectron) {
+        if (isMCTau) {
+          myMatchType = kkElectronFromTauDecayToTauAndTauOutsideAcceptance;
+        } else {
+          myMatchType = kkElectronToTauAndTauOutsideAcceptance;
+        }
+      } else if (isMCMuon) {
+        if (isMCTau) {
+          myMatchType = kkMuonFromTauDecayToTauAndTauOutsideAcceptance;
+        } else {
+          myMatchType = kkMuonToTauAndTauOutsideAcceptance;
+        }
+      }
       else if (isMCTau) myMatchType = kkTauToTauAndTauOutsideAcceptance;
       else myMatchType = kkJetToTauAndTauOutsideAcceptance;
     }
@@ -180,13 +201,15 @@ namespace HPlus {
   }
 
   double FakeTauIdentifier::getFakeTauScaleFactor(FakeTauIdentifier::MCSelectedTauMatchType matchType, double eta) {
-    if (matchType == FakeTauIdentifier::kkElectronToTau || matchType == FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance) {
+    if (matchType == FakeTauIdentifier::kkElectronToTau || matchType == FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance ||
+        matchType == FakeTauIdentifier::kkElectronFromTauDecayToTau || matchType == FakeTauIdentifier::kkElectronFromTauDecayToTauAndTauOutsideAcceptance) {
       if (std::fabs(eta) < 1.5) {
         return fSFFakeTauBarrelElectron;
       } else {
         return fSFFakeTauEndcapElectron;
       }
-    } else if (matchType == FakeTauIdentifier::kkMuonToTau || matchType == FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance) {
+    } else if (matchType == FakeTauIdentifier::kkMuonToTau || matchType == FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance ||
+               matchType == FakeTauIdentifier::kkMuonFromTauDecayToTau || matchType == FakeTauIdentifier::kkMuonFromTauDecayToTauAndTauOutsideAcceptance) {
       if (std::fabs(eta) < 1.5) {
         return fSFFakeTauBarrelMuon;
       } else {
@@ -203,13 +226,15 @@ namespace HPlus {
   }
 
   double FakeTauIdentifier::getFakeTauSystematics(MCSelectedTauMatchType matchType, double eta) {
-    if (matchType == FakeTauIdentifier::kkElectronToTau || matchType == FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance) {
+    if (matchType == FakeTauIdentifier::kkElectronToTau || matchType == FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance ||
+        matchType == FakeTauIdentifier::kkElectronFromTauDecayToTau || matchType == FakeTauIdentifier::kkElectronFromTauDecayToTauAndTauOutsideAcceptance) {
       if (std::fabs(eta) < 1.5) {
         return fSystematicsFakeTauBarrelElectron;
       } else {
         return fSystematicsFakeTauEndcapElectron;
       }
-    } else if (matchType == FakeTauIdentifier::kkMuonToTau || matchType == FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance) {
+    } else if (matchType == FakeTauIdentifier::kkMuonToTau || matchType == FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance ||
+               matchType == FakeTauIdentifier::kkMuonFromTauDecayToTau || matchType == FakeTauIdentifier::kkMuonFromTauDecayToTauAndTauOutsideAcceptance) {
       if (std::fabs(eta) < 1.5) {
         return fSystematicsFakeTauBarrelMuon;
       } else {

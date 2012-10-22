@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import re
+import math
 from optparse import OptionParser
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
@@ -48,28 +49,31 @@ defaultVersions = [
     #"v44_2fix_seed2", # for hybrid event production only
 #    "v44_4_seed0",
 
-#    "v44_4_1" # skim version
-    "v44_4_1_muiso0"
+#    "v44_4_2" # skim version
+#    "v44_4_2_muiso0"
+    "v44_4_2_seed0"
 ]
 
 # Define the processing steps: input dataset, configuration file, output file
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
 #          "skim_copy":      {"input": "tauembedding_skim_v13",         "config": "copy_cfg.py"}, 
-          "embedding":      {"input": "tauembedding_skim_v44_4_1", "config": "embed.py",   "output": "embedded.root"},
+          "embedding":      {"input": "tauembedding_skim_v44_4_2", "config": "embed.py",   "output": "embedded.root"},
           "analysis":       {"input": "tauembedding_embedding_%s",  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau":    {"input": "AOD",                        "config": "tauAnalysis_cfg.py"},
           "signalAnalysis": {"input": "tauembedding_embedding_%s",  "config": "../signalAnalysis_cfg.py"},
           "signalAnalysisGenTau": {"input": "pattuple_v44_4",        "config": "../signalAnalysis_cfg.py"},
           "EWKMatching":    {"input": "tauembedding_embedding_%s",  "config": "../EWKMatching_cfg.py"},
-          "muonAnalysis":   {"input": "tauembedding_skim_v44_4_1",          "config": "muonAnalysisFromSkim_cfg.py"},
-          "caloMetEfficiency": {"input": "tauembedding_skim_v44_4_1",         "config": "caloMetEfficiency_cfg.py"},
+          "muonAnalysis":   {"input": "tauembedding_skim_v44_4_2",          "config": "muonAnalysisFromSkim_cfg.py"},
+          "caloMetEfficiency": {"input": "tauembedding_skim_v44_4_2",         "config": "caloMetEfficiency_cfg.py"},
           }
 
 
 # "Midfix" for multicrab directory name
 dirPrefix = ""
+#dirPrefix = "_vital"
 #dirPrefix += "_Met50"
-#dirPrefix += "_systematics"
+if defaultStep in ["signalAnalysis", "signalAnalysisGenTau"]:
+    dirPrefix += "_systematics"
 
 #dirPrefix += "_test"
 #dirPrefix += "_debug"
@@ -151,22 +155,22 @@ datasetsMCnoQCD = ["TTJets_TuneZ2_Fall11"]
 # Override the default number of jobs
 # Goal: ~5 hour jobs
 skimNjobs = {
-    "WJets_TuneZ2_Fall11": 990, # ~10 hours
+    "WJets_TuneZ2_Fall11": 990, # ~ 1.5 hour/100 MB
     "W2Jets_TuneZ2_Fall11": 490,
     "W3Jets_TuneZ2_Fall11": 490,
     "W4Jets_TuneZ2_Fall11": 490, 
-    "TTJets_TuneZ2_Fall11": 6490,
+    "TTJets_TuneZ2_Fall11": 4990, # ~1 hour/200 MB 
     "QCD_Pt20_MuEnriched_TuneZ2_Fall11": 490,
     "DYJetsToLL_M50_TuneZ2_Fall11": 990,
-    "T_t-channel_TuneZ2_Fall11": 490,
-    "Tbar_t-channel_TuneZ2_Fall11": 160,
+    "T_t-channel_TuneZ2_Fall11": 300,
+    "Tbar_t-channel_TuneZ2_Fall11": 100,
     "T_tW-channel_TuneZ2_Fall11": 90,
     "Tbar_tW-channel_TuneZ2_Fall11": 90,
-    "T_s-channel_TuneZ2_Fall11": 50,
-    "Tbar_s-channel_TuneZ2_Fall11": 10,
-    "WW_TuneZ2_Fall11": 200,
-    "WZ_TuneZ2_Fall11": 200,
-    "ZZ_TuneZ2_Fall11": 350,
+    "T_s-channel_TuneZ2_Fall11": 25,
+    "Tbar_s-channel_TuneZ2_Fall11": 5,
+    "WW_TuneZ2_Fall11": 150,
+    "WZ_TuneZ2_Fall11": 150,
+    "ZZ_TuneZ2_Fall11": 200,
     }
 muonAnalysisNjobs = { # goal: 30k events/job # FIXME these need to be updated
     "SingleMu_Mu_160431-163261_2011A_Nov08": 2, # HLT_Mu20_v1
@@ -301,10 +305,10 @@ def createTasks(opts, step, version=None):
 
     multicrab.extendDatasets(dataInput, datasets)
 
-    if step == "skim":
+    if step in ["skim", "analysisTau"]:
         multicrab.appendLineAll("GRID.maxtarballsize = 30")
     else:   
-        multicrab.appendLineAll("GRID.maxtarballsize = 20")
+        multicrab.appendLineAll("GRID.maxtarballsize = 30")
         multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
 
 
@@ -316,7 +320,8 @@ def createTasks(opts, step, version=None):
     reco_re = re.compile("^(?P<reco>Run[^_]+_[^_]+_v\d+_[^_]+_)")
 
     # Let's do the naming like this until we get some answer from crab people
-    multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
+    if step in ["skim", "embedding"]:
+        multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
 
     # Modification function for skim/embedding steps
     def modify(dataset):
@@ -404,7 +409,7 @@ def createTasks(opts, step, version=None):
                 if key == "skimConfig":
                     del dataset.data[key]
             dataset.appendArg("tauEmbeddingInput=1")
-            dataset.appendArg("doPat=1")
+#            dataset.appendArg("doPat=1") # not needed after v44_4 embedding
             if dataset.isData():
                 for key in dataset.data.keys():
                     if key == "trigger":
@@ -413,6 +418,13 @@ def createTasks(opts, step, version=None):
                 dataset.appendArg("runOnCrab=1")
 #            if dataset.getName() in datasetsData2011_Run2011A_noEPS:
 #                dataset.appendArg("tauEmbeddingCaloMet=caloMetSum")
+        if step == "analysisTau":
+            if "args" in dataset.data:
+                # analysisTau workflow is without trigger!
+                try:
+                    del dataset.data["args"]["triggerMC"]
+                except KeyError:
+                    pass
         if step == "signalAnalysisGenTau":
             dataset.appendArg("doTauEmbeddingLikePreselection=1")
     #    if step == "analysisTau":
@@ -439,21 +451,51 @@ def createTasks(opts, step, version=None):
         multicrab.forEachDataset(modify)
     
     multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
-    
-    # Create the multicrab task
-    prefix = "multicrab_"+step+dirName
-    
-    taskDir = multicrab.createTasks(configOnly=opts.configOnly, prefix=prefix)
 
+    datasetsOver500Jobs = {}
+    def checkAnyOver500Jobs(dataset):
+        njobs = dataset.getNumberOfJobs()
+        if njobs >= 500:
+            datasetsOver500Jobs[dataset.getName()] = njobs
+    multicrab.forEachDataset(checkAnyOver500Jobs)
+    if len(datasetsOver500Jobs) >= 1 and multicrab.getNumberOfDatasets() != 1:
+        raise Exception("There are datasets with over 500 jobs/dataset (%s) mixed with datasets with less than 500 jobs/dataset. This is not supported at the moment." % (", ".join(datasetsOver500Jobs)))
+
+    # Create the multicrab task
+    taskDirs = []
+
+    prefix = "multicrab_"+step
+    if len(datasetsOver500Jobs) == 0:
+        prefix += dirName
+    
+        taskDir = multicrab.createTasks(configOnly=opts.configOnly, prefix=prefix)
+        taskDirs.append( (taskDir, datasets) )
+    elif len(datasetsOver500Jobs) == 1:
+        for datasetName, njobs in datasetsOver500Jobs.iteritems():
+            dname = datasetName.split("_")[0]
+            nMulticrabTasks = int(math.ceil(njobs/500.0))
+            for i in xrange(nMulticrabTasks):
+                firstJob = i*500+1
+                lastJob = (i+1)*500
+                pfix ="%s_%s_%d-%d%s" % (prefix, dname, firstJob, lastJob, dirName)
+                taskDir = multicrab.createTasks(configOnly=opts.configOnly, prefix=pfix)
+                taskDirs.append( (taskDir, [datasetName]) )
+    else:
+        raise Exception("There are more than one datasets with over 500 jobs/dataset (%s). This is not supported at the moment." % ", ".join(datasetsOver500Jobs))
+        
     # patch CMSSW.sh
     if not opts.configOnly and step in ["skim", "embedding"]:
         import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
         import os
-        os.chdir(taskDir)
-        patch.main(Wrapper(dirs=datasets, input={"skim": "skim",
-                                             "embedding": "embedded"}[step]))
-        os.chdir("..")
+        for td, dsets in taskDirs:
+            os.chdir(td)
+            patch.main(Wrapper(dirs=dsets, input={"skim": "skim",
+                                                  "embedding": "embedded"}[step]))
+            os.chdir("..")
 
+    if len(taskDirs) > 1:
+        print "Created multicrab directories"
+        print "\n".join( [x[0] for x in taskDirs] )
 
 # patch CMSSW.sh
 class Wrapper:

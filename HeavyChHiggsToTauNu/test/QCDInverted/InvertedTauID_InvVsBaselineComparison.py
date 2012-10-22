@@ -108,7 +108,9 @@ def main():
     metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     
     metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/"+invertedhisto)
-    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/"+invertedhisto) 
+    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/"+invertedhisto)
+    metInverted_MC = metInver.histoMgr.getHisto("QCD").getRootHisto().Clone(analysis+"/"+invertedhisto)
+    
     metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/"+baselinehisto)
     metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/"+baselinehisto)
 
@@ -124,7 +126,7 @@ def main():
             i += 1
             print histobins
             
-        metBase_data = metBase_data.Rebin(len(histobins)-1,"",array.array("d", histobins))
+#        metBase_data = metBase_data.Rebin(len(histobins)-1,   metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/"+invertedhisto) "",array.array("d", histobins))
         metInverted_data = metInverted_data.Rebin(len(histobins)-1,"",array.array("d", histobins))
         metBase_EWK = metBase_EWK.Rebin(len(histobins)-1,"",array.array("d", histobins))
         metInverted_EWK = metInverted_EWK.Rebin(len(histobins)-1,"",array.array("d", histobins))
@@ -141,8 +143,9 @@ def main():
     invertedQCD.comparison(metInverted_data,metBase_data)
     invertedQCD.setLabel("BaseMinusEWKVsInverted")
     invertedQCD.comparison(metInverted_data,metBase_QCD)
-
-    invertedQCD.cutefficiency(metInverted_data,metBase_QCD)
+    invertedQCD.setLabel("McVsInverted")
+    invertedQCD.comparison(metInverted_data,metInverted_MC)
+    invertedQCD.cutefficiency(metInverted_data,metBase_QCD )
 
 
 if __name__ == "__main__":

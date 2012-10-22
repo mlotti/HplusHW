@@ -40,13 +40,13 @@ QCDfromData = False
 
 ## for mT distributions 
 deltaPhi180 = False
-deltaPhi160 = False
+deltaPhi160 = True
 deltaPhi130 = False
 topmass = False  ## with top mass cut
 
 # other distributions
 deltaPhiDistribution = False
-HiggsMass = True
+HiggsMass = False
 HiggsMassPhi140 = False
 
 lastPtBin150 = False
@@ -1010,7 +1010,58 @@ def mtComparison(datasets):
         if(deltaPhi160):
             canvas3.Print("mtInverted_btag_dphi160.png")
             canvas3.Print("mtInverted_btag_dphi160.C")
+
+            
+ ## for deltaPhi < 160 for mt shape
+    if deltaPhi160:
+        canvas32 = ROOT.TCanvas("canvas32","",500,500)
+        #    canvas3.SetLogy()
+        #    hmt.SetMaximum(120.0)
+        
+        hmtSum.SetMarkerColor(4)
+        hmtSum.SetMarkerSize(1)
+        hmtSum.SetMarkerStyle(20)
+        hmtSum.SetFillColor(4)
+        hmtSum.Draw("EP")
+        
+
+        #    tex2 = ROOT.TLatex(0.3,0.3,"With p_{T}^{#tau jet} bins")
+        tex2 = ROOT.TLatex(0.65,0.6,"With p_{T}^{#tau jet} bins") 
+        tex2.SetNDC()
+        tex2.SetTextSize(23)
+        tex2.Draw()    
+        #    marker2 = ROOT.TMarker(0.25,0.32,hmtSum.GetMarkerStyle())
+        marker2 = ROOT.TMarker(0.6,0.615,hmtSum.GetMarkerStyle())
+        marker2.SetNDC()
+        marker2.SetMarkerColor(hmtSum.GetMarkerColor())
+        marker2.SetMarkerSize(0.9*hmtSum.GetMarkerSize())
+        marker2.Draw()
+        
+        tex3 = ROOT.TLatex(0.5,0.85,"With inverted #tau isolation")
+        tex3.SetNDC()
+        tex3.SetTextSize(20)
+        tex3.Draw()
+    
+            
+        tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
+        tex4.SetNDC()
+        tex4.SetTextSize(20)
+        tex4.Draw()
+        
+        hmtSum.GetYaxis().SetTitle("Events / 10 GeV/c^{2}")
+        #    hmt.GetYaxis().SetTitleSize(20.0)
+        hmtSum.GetYaxis().SetTitleOffset(1.5)
+        hmtSum.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
+        #    canvas3.Print("mtInverted.png")
+        #    canvas3.Print("mtInverted.C")    
+        #    canvas3.Print("mtInverted_Met70_log.png")
+        #    canvas3.Print("mtInverted_Met70_log.C")
+        
+        if(deltaPhi160):
+            canvas32.Print("transverseMass.png")
+            canvas32.Print("transverseMass.C")
  
+
 
 ###########
 ## for ofter cuts

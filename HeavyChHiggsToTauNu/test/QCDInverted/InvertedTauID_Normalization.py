@@ -25,8 +25,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 from InvertedTauID import *
 #dataEra = "Run2011A"
-#dataEra = "Run2011B"
-dataEra = "Run2011AB"
+dataEra = "Run2011B"
+#dataEra = "Run2011AB"
 
 def usage():
     print "\n"

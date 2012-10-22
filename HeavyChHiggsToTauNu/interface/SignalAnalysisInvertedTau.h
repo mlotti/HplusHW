@@ -242,6 +242,16 @@ namespace HPlus {
     WrappedTH1 *hMETBaselineTauIdJets5060;
     WrappedTH1 *hMETBaselineTauIdJets4050;
 
+    WrappedTH1 *hMETBaselineTauId150;
+    WrappedTH1 *hMETBaselineTauId120;
+    WrappedTH1 *hMETBaselineTauId120150;
+    WrappedTH1 *hMETBaselineTauId100120;
+    WrappedTH1 *hMETBaselineTauId80100;
+    WrappedTH1 *hMETBaselineTauId7080;
+    WrappedTH1 *hMETBaselineTauId6070;
+    WrappedTH1 *hMETBaselineTauId5060;
+    WrappedTH1 *hMETBaselineTauId4050;
+
 
     //    WrappedTH1 *hMETBaselineTauIdBtag;
     WrappedTH1 *hMETBaselineTauIdBtag150;
@@ -287,6 +297,16 @@ namespace HPlus {
     WrappedTH1 *hMETInvertedTauIdJets6070;
     WrappedTH1 *hMETInvertedTauIdJets5060;
     WrappedTH1 *hMETInvertedTauIdJets4050;
+
+    WrappedTH1 *hMETInvertedTauId150;
+    WrappedTH1 *hMETInvertedTauId120;
+    WrappedTH1 *hMETInvertedTauId120150;
+    WrappedTH1 *hMETInvertedTauId100120;
+    WrappedTH1 *hMETInvertedTauId80100;
+    WrappedTH1 *hMETInvertedTauId7080;
+    WrappedTH1 *hMETInvertedTauId6070;
+    WrappedTH1 *hMETInvertedTauId5060;
+    WrappedTH1 *hMETInvertedTauId4050;
 
     WrappedTH1 *hMETInvertedTauIdBtag;
     WrappedTH1 *hMETInvertedTauIdBtag150;

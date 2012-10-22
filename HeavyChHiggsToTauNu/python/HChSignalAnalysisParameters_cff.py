@@ -7,12 +7,14 @@ blindAnalysisStatus = cms.untracked.bool(False)
 histogramAmbientLevel = cms.untracked.string("Debug")
 
 singleTauMetTriggerPaths = [
+# 2010
 #    "HLT_SingleLooseIsoTau20",
 #    "HLT_SingleLooseIsoTau20_Trk5",
 #    "HLT_SingleIsoTau20_Trk5",
 #    "HLT_SingleIsoTau20_Trk15_MET20",
 #    "HLT_SingleIsoTau20_Trk15_MET25_v3",
 #    "HLT_SingleIsoTau20_Trk15_MET25_v4",
+# 2011
     "HLT_IsoPFTau35_Trk20_MET45_v1",
     "HLT_IsoPFTau35_Trk20_MET45_v2",
     "HLT_IsoPFTau35_Trk20_MET45_v4",
@@ -22,6 +24,16 @@ singleTauMetTriggerPaths = [
     "HLT_IsoPFTau35_Trk20_MET60_v4",
     "HLT_IsoPFTau35_Trk20_MET60_v6",
     "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
+    "HLT_MediumIsoPFTau35_Trk20_MET60_v5",
+    "HLT_MediumIsoPFTau35_Trk20_MET60_v6",
+# 2012
+#    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v2",
+#    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v3",
+#    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v4",
+#    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6",
+#    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7",
+#    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9",
+#    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10",
 ]
 # WARNING: the trigger path is modified in signalAnalysis_cfg.py depending on
 # the data version
@@ -432,6 +444,10 @@ def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
 triggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
 
+# Muon trigger+ID efficiencies, for embedding normalization
+import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTriggerIDEfficiency
+embeddingMuonEfficiency = muonTriggerIDEfficiency.efficiency
+
 # Look up dynamically the triggers for which the parameters exist
 #import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff
 #for triggerName in filter(lambda n: len(n) > 4 and n[0:4] == "HLT_", dir(trigEff)):
@@ -509,20 +525,22 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
         raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'Run2011A', 'Run2011B', 'Run2011AB'" % era)
     pset.dataPUdistributionLabel = "pileup"
     # Make procuder for weights and add it to common sequence
+    tmp = pset.clone()
     PUWeightProducer = cms.EDProducer("HPlusVertexWeightProducer",
-                                      vertexSrc = pset.vertexSrc,
-                                      puSummarySrc = pset.puSummarySrc,
-                                      enabled = pset.enabled,
-                                      dataPUdistribution = pset.dataPUdistribution,
-                                      dataPUdistributionLabel = pset.dataPUdistributionLabel,
-                                      mcPUdistribution = pset.mcPUdistribution,
-                                      mcPUdistributionLabel = pset.mcPUdistributionLabel,
-                                      alias = cms.string("PUVertexWeight"+suffix)
+                                      vertexSrc = tmp.vertexSrc,
+                                      puSummarySrc = tmp.puSummarySrc,
+                                      enabled = tmp.enabled,
+                                      dataPUdistribution = tmp.dataPUdistribution,
+                                      dataPUdistributionLabel = tmp.dataPUdistributionLabel,
+                                      mcPUdistribution = tmp.mcPUdistribution,
+                                      mcPUdistributionLabel = tmp.mcPUdistributionLabel,
+                                      alias = cms.string("PUVertexWeight"+era+suffix)
     )
     name = "PUWeightProducer"+era+suffix
     setattr(process, name, PUWeightProducer)
     commonSequence *= PUWeightProducer
     psetReader.PUVertexWeightSrc = name
+    return name
 
 def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, psetReader, suffix):
     if dataVersion.isData():

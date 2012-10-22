@@ -90,22 +90,25 @@ def main():
 
     selections = [
         ("Full", "embedding"),
-#        ("FullNoIso", "disabled"),
-#        ("FullStandardIso", "standard")
+        ("FullNoIso", "disabled"),
+        ("FullStandardIso", "standard"),
+        ("FullChargedHadrRelIso10", "chargedHadrRel10"),
+        ("FullChargedHadrRelIso15", "chargedHadrRel15"),
         ]
     for name, isolation in selections:
         ntupleCache = dataset.NtupleCache(analysis+"/tree", "MuonAnalysisSelector",
                                           selectorArgs=[weight, isolation],
                                           cacheFileName="histogramCache-%s.root" % name,
                                           #process=False,
+                                          #maxEvents=1000,
                                           )
 
 
-#        doPlots(datasets, name, ntupleCache)
-#        printCounters(datasets, name, ntupleCache)
+        doPlots(datasets, name, ntupleCache)
+        printCounters(datasets, name, ntupleCache)
 
-        doPlotsWTauMu(datasets, name, "TTJets", ntupleCache)
-        doPlotsWTauMu(datasets, name, "WJets", ntupleCache)
+#        doPlotsWTauMu(datasets, name, "TTJets", ntupleCache)
+#        doPlotsWTauMu(datasets, name, "WJets", ntupleCache)
 
 def doPlots(datasets, selectionName, ntupleCache):
     def createPlot(name, **kwargs):
@@ -128,14 +131,14 @@ def doPlots(datasets, selectionName, ntupleCache):
     drawPlot(createPlot(ntupleCache.histogram("transverseMassUncorrectedMet_AfterJetSelection")),
              prefix+"mt_log", "m_{T}(#mu, E_{T}^{miss}) (GeV/c^{2})", ylabel="Events / %.0f GeV/c^{2}")
 
-    plotEfficiency(datasets,
+    plotEfficiency(datasets, ["Data", "TTJets", "WJets", "QCD_Pt20_MuEnriched"],
                    allPath=ntupleCache.histogram("muonVertexCount_AfterDB"),
                    passedPath=ntupleCache.histogram("muonVertexCount_AfterIsolation"),
                    name=prefix+"muonIsolationEfficiency", xlabel="Number of good vertices", ylabel="Muon selection efficiency",
                    rebinBins=range(0, 25)+[25, 30, 35, 40, 50]
                    )
 
-    plotEfficiency(datasets,
+    plotEfficiency(datasets, ["TTJets", "WJets"],
                    allPath=ntupleCache.histogram("muonVertexCount_AfterDB_MuFromW"),
                    passedPath=ntupleCache.histogram("muonVertexCount_AfterIsolation_MuFromW"),
                    name=prefix+"muonIsolationEfficiency_MuFromW", xlabel="Number of good vertices", ylabel="Muon selection efficiency",
@@ -159,14 +162,13 @@ def doPlots(datasets, selectionName, ntupleCache):
         drawPlot(createPlot(ntupleCache.histogram("selectedMuonStdIso_AfterJetSelection")),
                  prefix+"standardIso_log", "Isolation variable", ylabel="Events / %.1f GeV/c")
 
-def plotEfficiency(datasets, allPath, passedPath, name, xlabel, rebinBins=None, **kwargs):
+def plotEfficiency(datasets, datasetNames, allPath, passedPath, name, xlabel, rebinBins=None, **kwargs):
     if mcOnly:
         return
 
-    dnames = ["Data", "TTJets", "WJets", "QCD_Pt20_MuEnriched"]
     def rebin(h):
         return h.Rebin(len(rebinBins)-1, h.GetName(), array.array("d", rebinBins))
-    for dname in dnames:
+    for dname in datasetNames:
         dset = datasets.getDataset(dname)
         allHisto = dset.getDatasetRootHisto(allPath).getHistogram()
         passedHisto = dset.getDatasetRootHisto(passedPath).getHistogram()
@@ -228,7 +230,7 @@ def doPlotsWTauMu(datasets, name, datasetName, ntupleCache):
     hpureErr.SetMarkerSize(0)
     p.prependPlotObject(hpureErr, "E2")
 
-    p.createFrame(era+"_selectedMuonPt_AFterJetSelection_MuFromW_"+datasetName, createRatio=True, opts={"ymin": 1e-1, "ymaxfactor": 2}, opts2={"ymin": 0.9, "ymax": 1.05}
+    p.createFrame(era+"_"+name+"_selectedMuonPt_AFterJetSelection_MuFromW_"+datasetName, createRatio=True, opts={"ymin": 1e-1, "ymaxfactor": 2}, opts2={"ymin": 0.9, "ymax": 1.05}
                   )
     p.setRatios([plots._createRatio(hpureUn, hallUn, "", isBinomial=True)])
     xmin = p.frame.GetXaxis().GetXmin()

@@ -1688,9 +1688,11 @@ class PlotDrawer:
     # \param ratio               Should the ratio pad be drawn?
     # \param ratioYlabel         The Y axis title for the ratio pad (None for default)
     # \param ratioInvert         Should the ratio be inverted?
+    # \param ratioIsBinomial     Is the ratio binomal (i.e. use Clopper-Pearson?)
     # \param opts                Default frame bounds linear scale (see histograms._boundsArgs())
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
+    # \param customizeBeforeDraw Function to customize the plot before drawing it
     # \param addLuminosityText   Should luminosity text be drawn?
     # \param stackMCHistograms   Should MC histograms be stacked?
     # \param addMCUncertainty    Should MC total (stat) uncertainty be drawn()
@@ -1701,9 +1703,11 @@ class PlotDrawer:
                  ratio=False,
                  ratioYlabel=None,
                  ratioInvert=False,
+                 ratioIsBinomial=False,
                  opts={},
                  optsLog={},
                  opts2={},
+                 customizeBeforeDraw=None,
                  addLuminosityText=False,
                  stackMCHistograms=False,
                  addMCUncertainty=False,
@@ -1714,12 +1718,14 @@ class PlotDrawer:
         self.ratioDefault = ratio
         self.ratioYlabel = ratioYlabel
         self.ratioInvert = ratioInvert
+        self.ratioIsBinomial = ratioIsBinomial
         self.optsDefault = {"ymin": 0, "ymaxfactor": 1.1}
         self.optsDefault.update(opts)
         self.optsLogDefault = {"ymin": 0.01, "ymaxfactor": 2}
         self.optsLogDefault.update(optsLog)
         self.opts2Default = {"ymin": 0.5, "ymax": 1.5}
         self.opts2Default.update(opts2)
+        self.customizeBeforeDraw = customizeBeforeDraw
         self.addLuminosityTextDefault = addLuminosityText
         self.stackMCHistogramsDefault = stackMCHistograms
         self.addMCUncertainty = addMCUncertainty
@@ -1802,6 +1808,7 @@ class PlotDrawer:
     # \li\a ratio        Should ratio pad be drawn? (default given in __init__()/setDefaults())
     # \li\a ratioYlabel  The Y axis title for the ratio pad (None for default)
     # \li\a ratioInvert  Should the ratio be inverted?
+    # \li\a ratioIsBinomial  Is the ratio a binomial?
     def createFrame(self, p, name, **kwargs):
         log = kwargs.get("log", self.logDefault)
 
@@ -1828,6 +1835,8 @@ class PlotDrawer:
             args["createRatio"] = True
         if kwargs.get("ratioInvert", self.ratioInvert):
             args["invertRatio"] = True
+        if kwargs.get("ratioIsBinomial", self.ratioIsBinomial):
+            args["ratioIsBinomial"] = True
 
         # Create frame
         p.createFrame(name, **args)
@@ -1902,6 +1911,7 @@ class PlotDrawer:
     # <b>Keyword arguments</b>
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
+    # \lu\a customieBeforeDraw  Function to customize the plot object before drawing the plopt
     # \li\a cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis (default given in __init__()/setDefaults())
     #
     # In addition of drawing and saving the plot, handles the X and Y
@@ -1914,6 +1924,11 @@ class PlotDrawer:
 
         p.frame.GetXaxis().SetTitle(xlabel)
         p.frame.GetYaxis().SetTitle(ylab)
+
+        customize = kwargs.get("customizeBeforeDraw", self.customizeBeforeDraw)
+        if customize != None:
+            customize(p)
+        
         p.draw()
         cmsText = kwargs.get("cmsText", self.cmsText)
         histograms.addCmsPreliminaryText(text=cmsText)

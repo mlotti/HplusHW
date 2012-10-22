@@ -55,8 +55,7 @@ class ConfigBuilder:
                  doFillTree = False, # Tree filling
                  histogramAmbientLevel = "Debug", # Set level of how many histograms are stored to files options are: 'Vital' (least histograms), 'Informative', 'Debug' (all histograms),
                  applyTriggerScaleFactor = True, # Apply trigger scale factor or not
-                 tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
-#                 tauSelectionOperatingMode = "tauCandidateSelectionOnly", 
+                 tauSelectionOperatingMode = "tauCandidateSelectionOnly",
                  useTriggerMatchedTaus = True,
                  useJERSmearedJets = True,
                  useBTagDB = False,
@@ -118,7 +117,7 @@ class ConfigBuilder:
     # \return cms.Process object, should be assigned to a local
     #         'process' variable in the analysis job configuration file
     def buildSignalAnalysis(self):
-        import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
+        import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysisInvertedTau as signalAnalysis
         def create(param):
             return [signalAnalysis.createEDFilter(param)]
         return self._build(create, ["signalAnalysis"])
@@ -214,9 +213,7 @@ class ConfigBuilder:
                     analysisNames.append(name+dataEra)
 
         analysisNamesForSystematics = []
-        # For optimisation, no systematics
-        # For embedding input, the systematics should be evaluated with the analyzer with Muon eff, Tau trigger eff, CaloMET>60 (this is added to analysisNamesForSystematics later)
-        if not self.doOptimisation and self.options.tauEmbeddingInput == 0:
+        if not self.doOptimisation:
             analysisNamesForSystematics = analysisNames[:]
         self._accumulateAnalyzers("Data eras", len(analysisModules))
 
@@ -564,29 +561,19 @@ class ConfigBuilder:
         retNames = []
         N = 0
         for module, name in zip(analysisModules, analysisNames):
-            postfix = "MEff"
             mod = module.clone()
-            mod.embeddingMuonEfficiency.mode = "efficiency"
-            path = cms.Path(process.commonSequence * mod)
-            setattr(process, name+postfix, mod)
-            setattr(process, name+postfix+"Path", path)
-            N += 1
-
-            postfix += "CaloMet60"
-            mod = mod.clone()
             mod.trigger.caloMetSelection.metEmulationCut = 60.0
             path = cms.Path(process.commonSequence * mod)
-            setattr(process, name+postfix, mod)
-            setattr(process, name+postfix+"Path", path)
+            setattr(process, name+"CaloMet60", mod)
+            setattr(process, name+"CaloMet60Path", path)
             N += 1
 
-            postfix += "TEff"
             mod = mod.clone()
             mod.triggerEfficiencyScaleFactor.mode = "efficiency"
             path = cms.Path(process.commonSequence * mod)
-            setattr(process, name+postfix, mod)
-            setattr(process, name+postfix+"Path", path)
-            retNames.append(name+postfix)
+            setattr(process, name+"CaloMet60TEff", mod)
+            setattr(process, name+"CaloMet60TEffPath", path)
+            retNames.append(name+"CaloMet60TEff")
             N += 1
         self._accumulateAnalyzers("Tau embedding analyses", N)
         return retNames

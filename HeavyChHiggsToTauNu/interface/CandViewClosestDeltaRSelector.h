@@ -15,6 +15,7 @@
 
 #include "DataFormats/Math/interface/deltaR.h"
 
+//#include<iostream>
 
 namespace hplus {
   template <typename T>
@@ -55,6 +56,8 @@ namespace hplus {
 
     std::auto_ptr<CollectionType> ret(new CollectionType());
 
+    // The ordering is important, it is employed in the embedding validation
+    // I.e. the order of selected T objects should match to the order of reference candidates
     for(edm::View<reco::Candidate>::const_iterator iRef = href->begin(); iRef != href->end(); ++iRef) {
       typename edm::View<T>::const_iterator iSel = hcand->end();
       double selDR = maxDR_;
@@ -65,10 +68,17 @@ namespace hplus {
           iSel = iCand;
         }
       }
-      if(iSel != hcand->end())
+      if(iSel != hcand->end()) {
+        /*
+        std::cout << "Reference object " << (iRef-href->begin()) << " pt " << iRef->pt() << " eta " << iRef->eta()
+                  << " selected object " << (iSel-hcand->end()) << " pt " << iSel->pt() << " eta " << iSel->eta()
+                  << std::endl;
+        */
         ret->push_back(*iSel);
+      }
     }
-  
+
+    //std::cout << "Inserting " << ret->size() << " objects" << std::endl;
     iEvent.put(ret);
 
   }

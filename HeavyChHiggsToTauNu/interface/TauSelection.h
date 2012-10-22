@@ -77,6 +77,8 @@ namespace HPlus {
     TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label = "TauSelection");
     ~TauSelection();
 
+    edm::InputTag getSrc() const { return fSrc; }
+
     /// Default tauID
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// tau ID on a given sample of taus
@@ -93,6 +95,9 @@ namespace HPlus {
     const TauSelectionOperationMode getOperationMode() const { return fOperationMode; }
     /// Fill eta-phi histograms of fake taus (Note: do not use in final analysis, because it will fill multiple times counters and histograms)
     void analyseFakeTauComposition(FakeTauIdentifier& fakeTauIdentifier, const edm::Event& iEvent);
+
+    // Select the pat::Tau object which most likely passes the tau candidate selection + ID
+    const edm::Ptr<pat::Tau> selectMostLikelyTau(const edm::PtrVector<pat::Tau>& taus);
 
   private:
     /// Method for doing tau selection

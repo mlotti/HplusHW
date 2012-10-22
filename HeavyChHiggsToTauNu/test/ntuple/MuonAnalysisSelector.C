@@ -24,7 +24,7 @@ public:
 private:
   // Input
   EventInfo fEventInfo;
-  MyMuonCollection fMuons;
+  EmbeddingMuonCollection fMuons;
   JetCollection fJets;
   BranchObj<math::XYZTLorentzVector> fRawMet;
 
@@ -35,12 +35,7 @@ private:
   Branch<bool> fElectronVetoPassed;
   Branch<bool> fHBHENoiseFilterPassed;
 
-  enum IsolationMode {
-    kDisabled,
-    kStandard,
-    kEmbedding
-  };
-  IsolationMode fIsolationMode;
+  EmbeddingMuonIsolation::Mode fIsolationMode;
 
   TH1 *makePt(const char *name);
   TH1 *makeIso(const char *name);
@@ -107,7 +102,9 @@ private:
 
 MuonAnalysisSelector::MuonAnalysisSelector(const std::string& puWeight, const std::string& isolationMode):
   BaseSelector(),
+  fMuons("Emb"),
   fPuWeightName(puWeight),
+  fIsolationMode(EmbeddingMuonIsolation::stringToMode(isolationMode)),
   cAll(fEventCounter.addCounter("All events")),
   cMuonKinematics(fEventCounter.addCounter("Muon kinematics")),
   cMuonDB(fEventCounter.addCounter("Muon dB")),
@@ -117,21 +114,12 @@ MuonAnalysisSelector::MuonAnalysisSelector(const std::string& puWeight, const st
   cMuonVeto(fEventCounter.addCounter("Veto additional muons")),
   cElectronVeto(fEventCounter.addCounter("Electron veto")),
   cJetSelection(fEventCounter.addCounter("Jet selection"))
-{
-  if(isolationMode == "disabled")
-    fIsolationMode = kDisabled;
-  else if(isolationMode == "standard")
-    fIsolationMode = kStandard;
-  else if(isolationMode == "embedding")
-    fIsolationMode = kEmbedding;
-  else
-    throw std::runtime_error("isolationMode is '"+isolationMode+"', allowed values are 'disabled', 'standard', 'embedding'");
-}
+{}
 MuonAnalysisSelector::~MuonAnalysisSelector() {}
 
 TH1 *MuonAnalysisSelector::makePt(const char *name) { return makeTH<TH1F>(name, "Muon pt", 40, 0, 400); }
 TH1 *MuonAnalysisSelector::makeIso(const char *name) { return makeTH<TH1F>(name, "Muon isolation", 50, 0, 5); }
-TH1 *MuonAnalysisSelector::makeVertexCount(const char *name) { return makeTH<TH1F>(name, "Vertex count", 50, 0, 50); }
+TH1 *MuonAnalysisSelector::makeVertexCount(const char *name) { return makeTH<TH1F>(name, "Vertex count", 30, 0, 30); }
 
 void MuonAnalysisSelector::setOutput(TDirectory *dir) {
   if(dir)
@@ -239,7 +227,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
   cMuonDB.increment();
 
   // Isolation
-  if(fIsolationMode != kDisabled) {
+  if(fIsolationMode != EmbeddingMuonIsolation::kDisabled) {
     for(size_t i=0; i<selectedMuons.size(); ++i) {
       EmbeddingMuonCollection::Muon& muon = selectedMuons[i];
 
@@ -253,16 +241,16 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
       if(isMuFromW)
         hMuonVertexCount_AfterDB_MuFromW->Fill(fVertexCount.value(), weight);
 
-      if(fIsolationMode == kStandard) {
+      if(fIsolationMode == EmbeddingMuonIsolation::kStandard) {
         hMuonChargedHadronIso_AfterDB->Fill(muon.chargedHadronIso(), weight);
         hMuonPuChargedHadronIso_AfterDB->Fill(muon.puChargedHadronIso(), weight);
         hMuonNeutralHadronIso_AfterDB->Fill(muon.neutralHadronIso(), weight);
         hMuonPhotonIso_AfterDB->Fill(muon.photonIso(), weight);
         hMuonIso_AfterDB->Fill(stdIsoVar, weight);
 
-        if(!MuonID::standardRelativeIsolation(stdIsoVar)) continue;
+        if(!MuonID::standardRelativeIsolationCut(stdIsoVar)) continue;
       }
-      else if(fIsolationMode == kEmbedding) {
+      else if(fIsolationMode == EmbeddingMuonIsolation::kEmbedding) {
 
         hMuonChargedHadronIso_AfterDB->Fill(muon.chargedHadronIsoEmb(), weight);
         hMuonPuChargedHadronIso_AfterDB->Fill(muon.puChargedHadronIsoEmb(), weight);
@@ -271,6 +259,24 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
         hMuonIso_AfterDB->Fill(embIsoVar, weight);
 
         if(!MuonID::embeddingIsolationCut(embIsoVar)) continue;
+      }
+      else if(fIsolationMode == EmbeddingMuonIsolation::kChargedHadrRel10) {
+        hMuonChargedHadronIso_AfterDB->Fill(muon.chargedHadronIso(), weight);
+        hMuonPuChargedHadronIso_AfterDB->Fill(muon.puChargedHadronIso(), weight);
+        hMuonNeutralHadronIso_AfterDB->Fill(muon.neutralHadronIso(), weight);
+        hMuonPhotonIso_AfterDB->Fill(muon.photonIso(), weight);
+        hMuonIso_AfterDB->Fill(stdIsoVar, weight);
+
+        if(!(muon.chargedHadronIso()/muon.p4().Pt() < 0.1)) continue;
+      }
+      else if(fIsolationMode == EmbeddingMuonIsolation::kChargedHadrRel15) {
+        hMuonChargedHadronIso_AfterDB->Fill(muon.chargedHadronIso(), weight);
+        hMuonPuChargedHadronIso_AfterDB->Fill(muon.puChargedHadronIso(), weight);
+        hMuonNeutralHadronIso_AfterDB->Fill(muon.neutralHadronIso(), weight);
+        hMuonPhotonIso_AfterDB->Fill(muon.photonIso(), weight);
+        hMuonIso_AfterDB->Fill(stdIsoVar, weight);
+
+        if(!(muon.chargedHadronIso()/muon.p4().Pt() < 0.15)) continue;
       }
       hMuonVertexCount_AfterIsolation->Fill(fVertexCount.value(), weight);
       if(isMuFromW)
