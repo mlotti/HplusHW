@@ -162,56 +162,69 @@ MCDataset.dataVersion = "53XdataS10"
 # Tau PD, tau+MET trigger for signal, tau trigger for MET trigger efficiency measurement
 datasets.extend([
     # Run2012A
-    DataDataset("Tau_%s_2012A_Jul13",  reco="13Jul2012", runs=(190456, 190738), aod="/Tau/Run2012A-13Jul2012-v1/AOD"), # 1487727 events, 110 files
-    DataDataset("Tau_%s_2012A_Aug06",  reco="06Aug2012", runs=(190782, 190949), aod="/Tau/Run2012A-recover-06Aug2012-v1/AOD"), # 329106 events, 30 files
-    DataDataset("Tau_%s_2012A_Jul13",  reco="13Jul2012", runs=(191043, 193621), aod="/Tau/Run2012A-13Jul2012-v1/AOD"), # 3818840 events, 261 files
+    DataDataset("Tau_%s_2012A_Jul13",     reco="13Jul2012", runs=(190456, 190738), aod="/Tau/Run2012A-13Jul2012-v1/AOD"), # 1487727 events, 110 files
+    DataDataset("Tau_%s_2012A_Aug06",     reco="06Aug2012", runs=(190782, 190949), aod="/Tau/Run2012A-recover-06Aug2012-v1/AOD"), # 329106 events, 30 files
+    DataDataset("Tau_%s_2012A_Jul13",     reco="13Jul2012", runs=(191043, 193621), aod="/Tau/Run2012A-13Jul2012-v1/AOD"), # 3818840 events, 261 files
     # Run212B
-    DataDataset("Tau_%s_2012B_Jul13",  reco="13Jul2012", runs=(193834, 196531), aod="/Tau/Run2012B-13Jul2012-v1/AOD"), # 25035330 events, 1874 files
+    DataDataset("Tau_%s_2012B_Jul13",     reco="13Jul2012", runs=(193834, 196531), aod="/Tau/Run2012B-13Jul2012-v1/AOD"), # 25035330 events, 1874 files
     # Run212C
-    DataDataset("Tau_%s_2012C_Aug24",  reco="24Aug2012", runs=(198022, 198523), aod="/Tau/Run2012C-24Aug2012-v1/AOD"), # 2212448 events, 190 files
-    DataDataset("Tau_%s_2012C_Prompt", reco="PromptCv2", runs=(198941, 203742), aod="/Tau/Run2012C-PromptReco-v2/AOD"), # 29597169 events, 2865 files
+    DataDataset("Tau_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/Tau/Run2012C-24Aug2012-v1/AOD"), # 2212448 events, 190 files
+    DataDataset("Tau_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 200601), aod="/Tau/Run2012C-PromptReco-v2/AOD"), # 
+    DataDataset("Tau_%s_0T_2012C_Prompt", reco="PromptCv2", runs=(200961, 202504), aod="/Tau/Run2012C-PromptReco-v2/AOD"), # 
+    DataDataset("Tau_%s_2012C_Prompt",    reco="PromptCv2", runs=(202792, 203742), aod="/Tau/Run2012C-PromptReco-v2/AOD"), # 
     # Run2012D
     #DataDataset("Tau_%s_2012D_Prompt", reco="PromptDv1", runs=(203777, 205158), aod="/Tau/Run2012D-PromptReco-v1/AOD"), # ongoing datataking, so far 6458425 events, 691 files
 ])
 # MultiJet PD, QuadJet trigger for signal
 datasets.extend([
     # Run2012A
-    DataDataset("MultiJet_%s_2012A_Jul13",  reco="13Jul2012", runs=(190456, 190738), aod="/MultiJet/Run2012A-13Jul2012-v1/AOD"), # 3947403 events,  308 files
-    DataDataset("MultiJet_%s_2012A_Aug06",  reco="06Aug2012", runs=(190782, 190949), aod="/MultiJet/Run2012A-recover-06Aug2012-v1/AOD"), # 980342 events,  87 files
-    DataDataset("MultiJet_%s_2012A_Jul13",  reco="13Jul2012", runs=(191043, 193621), aod="/Tau/Run2012A-13Jul2012-v1/AOD"), # 9518018 events, 742 files
+    DataDataset("MultiJet_%s_2012A_Jul13",     reco="13Jul2012", runs=(190456, 190738), aod="/MultiJet/Run2012A-13Jul2012-v1/AOD"), # 3947403 events,  308 files
+    DataDataset("MultiJet_%s_2012A_Aug06",     reco="06Aug2012", runs=(190782, 190949), aod="/MultiJet/Run2012A-recover-06Aug2012-v1/AOD"), # 980342 events,  87 files
+    DataDataset("MultiJet_%s_2012A_Jul13",     reco="13Jul2012", runs=(191043, 193621), aod="/Tau/Run2012A-13Jul2012-v1/AOD"), # 9518018 events, 742 files
     # Run212B
-    DataDataset("MultiJet_%s_2012B_Jul13",  reco="13Jul2012", runs=(193834, 196531), aod="/MultiJet/Run2012B-13Jul2012-v1/AOD"), # 18675566 events, 1574 files
+    DataDataset("MultiJet_%s_2012B_Jul13",     reco="13Jul2012", runs=(193834, 196531), aod="/MultiJet/Run2012B-13Jul2012-v1/AOD"), # 18675566 events, 1574 files
     # Run212C
-    DataDataset("MultiJet_%s_2012C_Aug24",  reco="24Aug2012", runs=(198022, 198523), aod="/MultiJet/Run2012C-24Aug2012-v1/AOD"), # 2004842 events, 180 files
-    DataDataset("MultiJet_%s_2012C_Prompt", reco="PromptCv2", runs=(198941, 203742), aod="/MultiJet/Run2012C-PromptReco-v2/AOD"), # 27743543 events, 2833 files
+    DataDataset("MultiJet_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/MultiJet/Run2012C-24Aug2012-v1/AOD"), # 2004842 events, 180 files
+    DataDataset("MultiJet_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 200601), aod="/MultiJet/Run2012C-PromptReco-v2/AOD"), # 
+    DataDataset("MultiJet_%s_0T_2012C_Prompt", reco="PromptCv2", runs=(200961, 202504), aod="/MultiJet/Run2012C-PromptReco-v2/AOD"), # 
+    DataDataset("MultiJet_%s_2012C_Prompt",    reco="PromptCv2", runs=(202792, 203742), aod="/MultiJet/Run2012C-PromptReco-v2/AOD"), # 
     # Run2012D
     #DataDataset("MultiJet_%s_2012D_Prompt", reco="PromptDv1", runs=(203777, 205158), aod="/MultiJet/Run2012D-PromptReco-v1/AOD"), # ongoing datataking, so far 6137697 events, 689 files
 ])
+datasets.splitDataByRuns("MultiJet_193834-196531_2012B_Jul13", [
+        (193834, 194225), # This has both BTagCSV and BTagIP triggers
+        (194270, 196531), # This has only BTagIP trigger
+        ])
+
 # TauPlusX PD, IsoMu+MET, IsoMu+MET+Tau triggers for tau trigger efficiency measurement
 datasets.extend([
     # Run2012A
-    DataDataset("TauPlusX_%s_2012A_Jul13",  reco="13Jul2012", runs=(190456, 190738), aod="/TauPlusX/Run2012A-13Jul2012-v1/AOD"), # 3010186 events, 214 files
-    DataDataset("TauPlusX_%s_2012A_Aug06",  reco="06Aug2012", runs=(190782, 190949), aod="/TauPlusX/Run2012A-recover-06Aug2012-v1/AOD"), # 702399 events, 56 files
-    DataDataset("TauPlusX_%s_2012A_Jul13",  reco="13Jul2012", runs=(191043, 193621), aod="/TauPlusX/Run2012A-13Jul2012-v1/AOD"), # 6247183 events, 443 files
+    DataDataset("TauPlusX_%s_2012A_Jul13",     reco="13Jul2012", runs=(190456, 190738), aod="/TauPlusX/Run2012A-13Jul2012-v1/AOD"), # 3010186 events, 214 files
+    DataDataset("TauPlusX_%s_2012A_Aug06",     reco="06Aug2012", runs=(190782, 190949), aod="/TauPlusX/Run2012A-recover-06Aug2012-v1/AOD"), # 702399 events, 56 files
+    DataDataset("TauPlusX_%s_2012A_Jul13",     reco="13Jul2012", runs=(191043, 193621), aod="/TauPlusX/Run2012A-13Jul2012-v1/AOD"), # 6247183 events, 443 files
     # Run212B
-    DataDataset("TauPlusX_%s_2012B_Jul13",  reco="13Jul2012", runs=(193834, 196531), aod="/TauPlusX/Run2012B-13Jul2012-v1/AOD"), # 39410283 events, 3013 files
+    DataDataset("TauPlusX_%s_2012B_Jul13",     reco="13Jul2012", runs=(193834, 196531), aod="/TauPlusX/Run2012B-13Jul2012-v1/AOD"), # 39410283 events, 3013 files
     # Run212C
-    DataDataset("TauPlusX_%s_2012C_Aug24",  reco="24Aug2012", runs=(198022, 198523), aod="/TauPlusX/Run2012C-24Aug2012-v1/AOD"), # 4067828 events, 313 files
-    DataDataset("TauPlusX_%s_2012C_Prompt", reco="PromptCv2", runs=(198941, 203742), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), # 49082143 events, 4599 files
+    DataDataset("TauPlusX_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/TauPlusX/Run2012C-24Aug2012-v1/AOD"), # 4067828 events, 313 files
+    DataDataset("TauPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 200601), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #
+    DataDataset("TauPlusX_%s_0T_2012C_Prompt", reco="PromptCv2", runs=(200961, 202504), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #
+    DataDataset("TauPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(202792, 203742), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #
     # Run2012D
     #DataDataset("TauPlusX_%s_2012D_Prompt", reco="PromptDv1", runs=(203777, 205158), aod="/TauPlusX/Run2012D-PromptReco-v1/AOD"), # ongoing datataking, so far 11424090 events, 1169 files
 ])
 # SingleMu PD, Mu trigger for embedding, IsoMu trigger for muon efficiency measurement
 datasets.extend([  
     # SingleMu, Run2012A
-    DataDataset("SingleMu_%s_2012A_Jul13",  reco="13Jul2012", runs=(190456, 190738), aod="/SingleMu/Run2012A-13Jul2012-v1/AOD"), # 5326430 events,  165 files
-    DataDataset("SingleMu_%s_2012A_Aug06",  reco="06Aug2012", runs=(190782, 190949), aod="/SingleMu/Run2012A-recover-06Aug2012-v1/AOD"), # 2845333 events, 99 files
-    DataDataset("SingleMu_%s_2012A_Jul13",  reco="13Jul2012", runs=(191043, 193621), aod="/SingleMu/Run2012A-13Jul2012-v1/AOD"), # 13952991 events, 570 files
+    DataDataset("SingleMu_%s_2012A_Jul13",     reco="13Jul2012", runs=(190456, 190738), aod="/SingleMu/Run2012A-13Jul2012-v1/AOD"), # 5326430 events,  165 files
+    DataDataset("SingleMu_%s_2012A_Aug06",     reco="06Aug2012", runs=(190782, 190949), aod="/SingleMu/Run2012A-recover-06Aug2012-v1/AOD"), # 2845333 events, 99 files
+    DataDataset("SingleMu_%s_2012A_Jul13",     reco="13Jul2012", runs=(191043, 193621), aod="/SingleMu/Run2012A-13Jul2012-v1/AOD"), # 13952991 events, 570 files
     # SingleMu, Run212B
-    DataDataset("SingleMu_%s_2012B_Jul13",  reco="13Jul2012", runs=(193834, 196531), aod="/SingleMu/Run2012B-13Jul2012-v1/AOD"), # 59538958 events, 4294 files
+    DataDataset("SingleMu_%s_2012B_Jul13",     reco="13Jul2012", runs=(193834, 196531), aod="/SingleMu/Run2012B-13Jul2012-v1/AOD"), # 59538958 events, 4294 files
     # SingleMu, Run212C
-    DataDataset("SingleMu_%s_2012C_Aug24",  reco="24Aug2012", runs=(198022, 198523), aod="/SingleMu/Run2012C-24Aug2012-v1/AOD"), # 6076746 events, 460 files
-    DataDataset("SingleMu_%s_2012C_Prompt", reco="PromptCv2", runs=(198941, 203742), aod="/SingleMu/Run2012C-PromptReco-v2/AOD"), # 81770645 events, 7450 files
+    DataDataset("SingleMu_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/SingleMu/Run2012C-24Aug2012-v1/AOD"), # 6076746 events, 460 files
+    DataDataset("SingleMu_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 200601), aod="/SingleMu/Run2012C-PromptReco-v2/AOD"), #
+    DataDataset("SingleMu_%s_0T_2012C_Prompt", reco="PromptCv2", runs=(200961, 202504), aod="/SingleMu/Run2012C-PromptReco-v2/AOD"), #
+    DataDataset("SingleMu_%s_2012C_Prompt",    reco="PromptCv2", runs=(202792, 203742), aod="/SingleMu/Run2012C-PromptReco-v2/AOD"), #
     # SingleMu, Run2012D
     #DataDataset("SingleMu_%s_2012D_Prompt", reco="PromptDv1", runs=(203777, 205158), aod="/SingleMu/Run2012D-PromptReco-v1/AOD"), # ongoing datataking, so far 17812155 events, 1749 files
 ])
