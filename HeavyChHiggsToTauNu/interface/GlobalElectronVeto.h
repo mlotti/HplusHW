@@ -93,6 +93,7 @@ namespace HPlus {
     // Histograms
     WrappedTH1 *hElectronPt;
     WrappedTH1 *hElectronEta;
+    WrappedTH1 *hNumberOfSelectedElectrons;
     WrappedTH1 *hElectronPt_identified;
     WrappedTH1 *hElectronEta_identified;
     WrappedTH1 *hElectronPt_matchingMCelectron;

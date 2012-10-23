@@ -285,6 +285,7 @@ def doPlots(datasets):
     mtTest(datasets)
     mtComparison(datasets)
     metComparison(datasets)
+    metRatio(datasets)  
     
 def doCounters(datasets):
     eventCounter = counter.EventCounter(datasets)
@@ -1187,11 +1188,102 @@ def writeTransverseMass(datasets_lands):
 
 
 
-
-
-
-
     
+def metRatio(datasets):    
+    met4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets4050")])
+    met5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets5060")])
+    met6070 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets6070")])
+    met7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets7080")])
+    met80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets80100")])
+    met100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets100120")])
+    if lastPtBin150: 
+        met120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets120150")])
+        met150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets150")])
+    if lastPtBin120: 
+        met120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets120")])
+    met = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets")])
+
+        
+    hmet4050 = met4050.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets4050")
+    hmet5060 = met5060.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets5060")
+    hmet6070 = met6070.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets6070")
+    hmet7080 = met7080.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets7080")
+    hmet80100 = met80100.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets80100")
+    hmet100120 = met100120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets100120")
+    hmet120 = met120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets120")
+    hmet = met.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets")
+    
+    met4050b = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdBveto4050")])
+    met5060b = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdBveto5060")])
+    met6070b = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdBveto6070")])
+    met7080b = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdBveto7080")])
+    met80100b = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdBveto80100")])
+    met100120b = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdBveto100120")])
+    if lastPtBin150: 
+        met120150b = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdBveto120150")])
+        met150b = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdBveto150")])
+    if lastPtBin120: 
+        met120b = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdBveto120")])
+    metb = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdBveto")])
+
+        
+    hmet4050b = met4050b.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBveto4050")
+    hmet5060b = met5060b.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBveto5060")
+    hmet6070b = met6070b.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBveto6070")
+    hmet7080b = met7080b.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBveto7080")
+    hmet80100b = met80100b.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBveto80100")
+    hmet100120b = met100120b.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBveto100120")
+    hmet120b = met120b.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBveto120")
+    hmetb = metb.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBveto")
+    
+    if hmet4050.Integral() > 0:
+        print "jets/bveto, 4050  = ",hmet4050b.Integral()/hmet4050.Integral()
+    if hmet5060.Integral() > 0:
+        print "jets/bveto, 5060  = ",hmet5060b.Integral()/hmet5060.Integral()
+    if hmet6070.Integral() > 0:
+        print "jets/bveto, 6070  = ",hmet6070b.Integral()/hmet6070.Integral()
+    if hmet7080.Integral() > 0:
+        print "jets/bveto, 7080  = ",hmet7080b.Integral()/hmet7080.Integral()
+    if hmet80100.Integral() > 0:
+        print "jets/bveto, 80100  = ",hmet80100b.Integral()/hmet80100.Integral()
+    if hmet100120.Integral() > 0:
+        print "jets/bveto, 100120  = ",hmet100120b.Integral()/hmet100120.Integral()
+    if hmet120.Integral() > 0:
+        print "jets/bveto, 120  = ",hmet120b.Integral()/hmet120.Integral()
+
+ 
+
+def metRatio2(datasets):    
+
+    metJets = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets")])
+    metBveto = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdBveto")])
+    metBtag = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdBtag")])
+    metJets.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    metBveto.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    metBtag.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    
+    hmetJets = metJets.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets")
+    hmetBveto = metBveto.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBveto")
+    hmetBtag = metBtag.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBtag")
+        
+    iBin = 1
+    nBins = hmetJets.GetNbinsX()
+
+    while iBin < nBins:
+        value1 = hmetJets.GetBinContent(iBin)
+        value2 = hmetBveto.GetBinContent(iBin)
+        value3 = hmetBtag.GetBinContent(iBin)
+        
+#        if value1 < 0:
+#            h1.SetBinContent(iBin,0)
+        print "bin  = ",iBin,"Met after jets  ",value1,"Met after b veto  ",value2,"Met after b tag  ",value3
+        if value1 > 0:
+            print "bin  = ",iBin,"Met after jets  ",value2/value1
+        iBin = iBin + 1
+ 
+
+        
+          
 def metComparison(datasets):
     met = plots.PlotBase([
         datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets4050"),
@@ -1203,13 +1295,13 @@ def metComparison(datasets):
         datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets120150"),
         datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets150")
         ])
+    
+
 #    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     met._setLegendStyles()
     met._setLegendLabels()
     met.histoMgr.setHistoDrawStyleAll("P")
-    rtauGen(met, "met_vs_pttau", rebin=10)
-          
-       
+    rtauGen(met, "met_vs_pttau", rebin=10)       
 #def genComparison(datasets):
 #    signal = "TTToHplusBWB_M120"
 #    background = "TTJets_TuneZ2"

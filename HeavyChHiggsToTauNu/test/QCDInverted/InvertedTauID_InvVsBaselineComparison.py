@@ -42,8 +42,8 @@ def main():
         usage()
 
 
-    HISTONAME = "MET_InvertedTauIdJets"
-#    HISTONAME = "MET_InvertedTauIdBveto"
+#    HISTONAME = "MET_InvertedTauIdJets"
+    HISTONAME = "MET_InvertedTauIdBveto"
 #    HISTONAME = "MET_InvertedTauIdBtag"
 #    HISTONAME = "MTInvertedTauIdBtag"
 
@@ -104,8 +104,8 @@ def main():
     metInver = plots.DataMCPlot(datasets, analysis+"/"+invertedhisto)
 
     # Rebin before subtracting
-    metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
-    metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
+    metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
     
     metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/"+invertedhisto)
     metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/"+invertedhisto)

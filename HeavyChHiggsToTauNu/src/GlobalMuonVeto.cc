@@ -65,16 +65,17 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("GlobalMuonVeto");
     
-    hMuonPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonPt", "GlobalMuonPt;isolated muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 80, 0., 400.);
+    hMuonPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonPt", "GlobalMuonPt;isolated muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 200, 0., 400.);
     hMuonEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonEta", "GlobalMuonEta;isolated muon #eta;N_{muons} / 0.1", 60, -3., 3.);
     hMuonEta_identified = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalMuonEta_identified", "GlobalMuonEta;isolated muon #eta;N_{muons} / 0.1", 60, -3., 3.);
-    hMuonPt_identified_eta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalMuonPt_identified_eta", "GlobalMuonPt;isolated muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 81, -5., 400.);
-    hMuonEta_test = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalMuonEta_test", "GlobalMuonEta;isolated muon #eta;N_{muons} / 0.1", 60, -3., 3.);
-    hMuonPt_test = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalMuonPt_test", "GlobalMuonPt;isolated muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 81, -5., 400.);
-    hMuonPt_matchingMCmuon = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPtmatchingMCmuon", "GlobalMuonPtmatchingMCmuon", 400, 0., 400.);
-    hMuonEta_matchingMCmuon = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEtamatchingMCmuon", "GlobalMuonEtamatchingMCmuon", 400, -3., 3.);
-    hMuonPt_matchingMCmuonFromW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPtmatchingMCmuonFromW", "GlobalMuonPtmatchingMCmuonFromW", 400, 0., 400.);
-    hMuonEta_matchingMCmuonFromW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEtamatchingMCmuonFromW", "GlobalMuonEtamatchingMCmuonFromW", 400, -3., 3.);
+    hMuonPt_identified_eta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalMuonPt_identified_eta", "GlobalMuonPt;isolated muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 81, 0., 400.);
+    //    hMuonEta_test = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalMuonEta_test", "GlobalMuonEta;isolated muon #eta;N_{muons} / 0.1", 60, -3., 3.);
+    //    hMuonPt_test = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalMuonPt_test", "GlobalMuonPt;isolated muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 81, -5., 400.);
+    hNumberOfSelectedMuons = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NumberOfSelectedMuons", "NumberOfSelectedMuons", 30, 0., 30.);
+    hMuonPt_matchingMCmuon = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPtmatchingMCmuon", "GlobalMuonPtmatchingMCmuon", 80, 0., 400.);
+    hMuonEta_matchingMCmuon = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEtamatchingMCmuon", "GlobalMuonEtamatchingMCmuon", 60, -3., 3.);
+    hMuonPt_matchingMCmuonFromW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPtmatchingMCmuonFromW", "GlobalMuonPtmatchingMCmuonFromW", 80, 0., 400.);
+    hMuonEta_matchingMCmuonFromW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEtamatchingMCmuonFromW", "GlobalMuonEtamatchingMCmuonFromW", 60, -3., 3.);
     hMuonPt_InnerTrack = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPt_InnerTrack", "GlobalMuonPt_InnerTrack", 100, 0., 400.);
     hMuonEta_InnerTrack = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonEta_InnerTrack", "GlobalMuonEta_InnerTrack", 60, -3., 3.);
     hMuonPt_GlobalTrack = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalMuonPt_GlobalTrack", "GlobalMuonPt_GlobalTrack", 100, 0., 400.);
@@ -342,12 +343,12 @@ namespace HPlus {
 
 
       // test
-      if (testrelIsol < 0.20) {
-	hMuonEta_test->Fill(myMuonEta);
-	if(std::abs(myMuonEta) < fMuonEtaCut) {
-	  hMuonPt_test->Fill(myMuonPt);
-	}
-      }
+      //      if (testrelIsol < 0.20) {
+      //	hMuonEta_test->Fill(myMuonEta);
+      //	if(std::abs(myMuonEta) < fMuonEtaCut) {
+      //	  hMuonPt_test->Fill(myMuonPt);
+      //	}
+      //      }
 
 
 
@@ -465,6 +466,7 @@ namespace HPlus {
     fSelectedMuonPt  = myHighestMuonPt;
     fSelectedMuonPtBeforePtCut  = myHighestMuonPtBeforePtCut;
     fSelectedMuonEta = myHighestMuonEta;
+    hNumberOfSelectedMuons->Fill(fSelectedMuons.size());
     // std::cout << "fSelectedMuonPt = " << fSelectedMuonsPt << ", fSelectedMuonsEta = " << fSelectedMuonsEta << std::endl;   
   }//eof: bool GlobalMuonVeto::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   

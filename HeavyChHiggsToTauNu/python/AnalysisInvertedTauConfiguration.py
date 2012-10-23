@@ -60,9 +60,8 @@ class ConfigBuilder:
                  useJERSmearedJets = True,
                  useBTagDB = False,
                  customizeAnalysis = None,
-
-                 doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
-                 doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
+                 doSystematics = True, # Running of systematic variations is controlled by the global flag (below), or the individual flags
+                 doJESVariation = True, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
                  doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
                  allowTooManyAnalyzers = False, # Allow arbitrary number of analyzers (beware, it might take looong to run and merge)
