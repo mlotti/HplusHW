@@ -605,8 +605,8 @@ namespace HPlus {
     if(metData.passedEvent()) increment(fMetCutBeforeJetCutCounter);
 
     // temporary met cut !!!!!!!!!!!!!!!!!
-    if(!metData.passedEvent()) return false;
-    increment(fMETCounter);
+    //    if(!metData.passedEvent()) return false;
+    //    increment(fMETCounter);
 
 
     hCtrlNjets->Fill(jetData.getHadronicJetCount());
@@ -715,8 +715,8 @@ namespace HPlus {
     if (transverseMass > 40 && transverseMass < 100)
       hCtrlJetMatrixAfterJetSelection->Fill(jetData.getHadronicJetCount(), nBjets);
     // Now cut on MET
-    //    if(!metData.passedEvent()) return false;
-    //    increment(fMETCounter);
+    if(!metData.passedEvent()) return false;
+    increment(fMETCounter);
     hSelectionFlow->Fill(kSignalOrderMETSelection);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderMETSelection);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderMETSelection);
