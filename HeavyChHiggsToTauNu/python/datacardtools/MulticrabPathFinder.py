@@ -95,7 +95,7 @@ class MulticrabPathFinder:
         return self.selectLatest(ret_dirs)
 
     def qcdfactfind(self,dirs):
-        return self.selectLatest(self.grep(dirs,"QCDMeasurement_basic"))
+        return self.selectLatest(self.grep(dirs,"QCDMeasurement"))
 
     def qcdinvfind(self,dirs):
         return self.selectLatest(self.grep(dirs,"signalAnalysisInverted"))

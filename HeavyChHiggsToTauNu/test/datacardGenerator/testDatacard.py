@@ -16,6 +16,8 @@ EmbeddingAnalysis     = "signalAnalysis"
 QCDFactorisedAnalysis = "QCDMeasurement"
 QCDInvertedAnalysis = None # FIXME
 
+dataEra = "Run2011AB"
+
 RootFileName    = "histograms.root"
 
 # Rate counter definitions
