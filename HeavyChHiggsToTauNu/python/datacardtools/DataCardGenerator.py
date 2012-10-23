@@ -147,6 +147,9 @@ class DataCardGenerator:
             return False
         if self._QCDMethod == DatacardQCDMethod.UNKNOWN:
             mymsg += "- missing field 'QCDMeasurementMethod' (string, name of QCD measurement method, options: 'QCD factorised' or 'QCD inverted')\n"
+        if self._config.dataEra == None:
+            mymsg += "- field 'dataEra' is not specified! (example: dataEra = 'Run2011AB'\n"
+            return False
         if self._config.SignalRateCounter == None:
             mymsg += "- missing field 'SignalRateCounter' (string, label of counter to be used for rate)\n"
         if self._config.FakeRateCounter == None:
@@ -215,28 +218,31 @@ class DataCardGenerator:
                 print WarningStyle()+"- Replacing embedding with MC EWK samples from signal analysis"+NormalStyle()
         myQCDPath = ""
         myQCDCounters = ""
+        myQCDBaseName = ""
         if self._QCDMethod == DatacardQCDMethod.FACTORISED:
             myQCDPath = multicrabPaths.getQCDFactorisedPath()
             myQCDCounters = self._config.QCDFactorisedAnalysis+self._optimisationVariation+"/counters"
+            myQCDBaseName = self._config.QCDFactorisedAnalysis
             print "- Using multi-jets (factorised) directory:", myQCDPath
         elif self._QCDMethod == DatacardQCDMethod.INVERTED:
             myQCDPath = multicrabPaths.getQCDinvPath()
             myQCDCounters = self._config.QCDInvertedAnalysis+self._optimisationVariation+"/counters"
+            myQCDBaseName = self._config.QCDInvertedAnalysis
             print "- Using multi-jets (inverted) directory:", myQCDPath
         if not os.path.exists(myQCDPath):
             raise Exception(ErrorStyle()+"Path for QCD measurement ('"+myQCDPath+"') does not exist!"+NormalStyle())
         # Make dataset managers
         self._dsetMgrs = [None] # needed for datasetType==None
         if self._doSignalAnalysis:
-            self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=mySignalPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+self._optimisationVariation+"/counters"))
+            self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=mySignalPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+self._optimisationVariation+"/counters", dataEra=self._config.dataEra))
         else:
             self._dsetMgrs.append(None)
         if self._doEmbeddingAnalysis:
             #self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myEmbeddingPath+"/multicrab.cfg", counters=self._config.SignalAnalysis+self._optimisationVariation+"/counters")) #FIXME
-            self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myEmbeddingPath+"/multicrab.cfg", counters=self._config.EmbeddingAnalysis+"/counters"))
+            self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myEmbeddingPath+"/multicrab.cfg", counters=self._config.EmbeddingAnalysis+"/counters", dataEra=self._config.dataEra))
         else:
             self._dsetMgrs.append(None)
-        self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myQCDPath+"/multicrab.cfg", counters=myQCDCounters))
+        self._dsetMgrs.append(dataset.getDatasetsFromMulticrabCfg(cfgfile=myQCDPath+"/multicrab.cfg", counters=myQCDCounters, dataEra=self._config.dataEra, analysisBaseName=myQCDBaseName))
         # Set normalisation and obtain dataset names and luminosities
         myAllDatasetNames = []
         myLuminosities = []
