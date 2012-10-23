@@ -29,15 +29,19 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     // Create histograms
     TFileDirectory myDir = fs->mkdir("FakeTauIdentifier_"+label);
-    hTauMatchType = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TauMatchType", "TauMatchType", 9, 0, 9);
+    hTauMatchType = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "TauMatchType", "TauMatchType", 13, 0, 13);
     if (hTauMatchType->isActive()) {
       hTauMatchType->GetXaxis()->SetBinLabel(1+kkNoMC, "NoMatch");
       hTauMatchType->GetXaxis()->SetBinLabel(1+kkElectronToTau, "e#rightarrow#tau");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkElectronFromTauDecayToTau, "tau#rightarrowe#rightarrow#tau");
       hTauMatchType->GetXaxis()->SetBinLabel(1+kkMuonToTau, "#mu#rightarrow#tau");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkMuonFromTauDecayToTau, "tau#rightarrow#mu#rightarrow#tau");
       hTauMatchType->GetXaxis()->SetBinLabel(1+kkTauToTau, "genuine #tau");
       hTauMatchType->GetXaxis()->SetBinLabel(1+kkJetToTau, "jet#rightarrow#tau");
       hTauMatchType->GetXaxis()->SetBinLabel(1+kkElectronToTauAndTauOutsideAcceptance, "e#rightarrow#tau, #tau outside");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkElectronFromTauDecayToTauAndTauOutsideAcceptance, "#tau#rightarrowe#rightarrow#tau, #tau outside");
       hTauMatchType->GetXaxis()->SetBinLabel(1+kkMuonToTauAndTauOutsideAcceptance, "#mu#rightarrow#tau, #tau outside");
+      hTauMatchType->GetXaxis()->SetBinLabel(1+kkMuonFromTauDecayToTauAndTauOutsideAcceptance, "#tau#rightarrow#mu#rightarrow#tau, #tau outside");
       hTauMatchType->GetXaxis()->SetBinLabel(1+kkTauToTauAndTauOutsideAcceptance, "genuine #tau, #tau outside");
       hTauMatchType->GetXaxis()->SetBinLabel(1+kkJetToTauAndTauOutsideAcceptance, "jet#rightarrow#tau, #tau outside");
     }

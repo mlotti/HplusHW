@@ -15,6 +15,7 @@ namespace HPlus {
     fLeadTrkPtCut(iConfig.getUntrackedParameter<double>("leadingTrackPtCut")),
     fAgainstElectronDiscriminator(iConfig.getUntrackedParameter<std::string>("againstElectronDiscriminator")),
     fApplyVetoForDeadECALCells(iConfig.getUntrackedParameter<bool>("applyVetoForDeadECALCells")),
+    fDeadECALCellsDeltaR(iConfig.getUntrackedParameter<double>("deadECALCellsDeltaR")),
     fAgainstMuonDiscriminator(iConfig.getUntrackedParameter<std::string>("againstMuonDiscriminator")),
     fProngCount(iConfig.getUntrackedParameter<uint32_t>("nprongs")),
     fIsolationDiscriminator(iConfig.getUntrackedParameter<std::string>("isolationDiscriminator")),
@@ -111,7 +112,7 @@ namespace HPlus {
       fCounterPackager.incrementSubCount(fVetoAgainstDeadECALCells);
       return true;
     }
-    bool myStatus = fDeadECALCells.ObjectHitsDeadECALCell(tau, 0.07);
+    bool myStatus = fDeadECALCells.ObjectHitsDeadECALCell(tau,fDeadECALCellsDeltaR);
     if (myStatus) fCounterPackager.incrementSubCount(fVetoAgainstDeadECALCells);
     return myStatus;
   }
