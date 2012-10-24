@@ -73,6 +73,8 @@ config = {
     },
     "53Xdata13Jul2012": {"triggerProcess": "HLT", "recoProcess": "RECO",
         "globalTag": "FT_53_V6_AN2::All",
+#        "signalTrigger": ["HLT_QuadJet80_v2", "HLT_QuadJet75_55_38_20_BTagIP_VBF_v3", "HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4"],
+#        "patMadhatter": "file:/mnt/flustre/mkortela/data/MultiJet/Run2012A-13Jul2012-v1/AOD/F4740DF9-26D6-E111-9BA6-003048FFD71E.root", # run 191700
     },
     "53Xdata06Aug2012": {"triggerProcess": "HLT", "recoProcess": "RECO",
         "globalTag": "FT_53_V6C_AN2::All",
