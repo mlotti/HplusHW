@@ -42,11 +42,8 @@ del process.TFileService
 ################################################################################
 # In case of data, add trigger
 myTrigger = options.trigger
-
-doTauHLTMatching = options.doTauHLTMatching != 0
-if doTauHLTMatching:
-    if len(myTrigger) == 0:
-        myTrigger = dataVersion.getDefaultSignalTrigger()
+if len(myTrigger) == 0:
+    myTrigger = dataVersion.getDefaultSignalTrigger()
 
 ################################################################################
 # Output module
@@ -70,7 +67,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 
 options.doPat=1
 (process.sPAT, c) = addPatOnTheFly(process, options, dataVersion,
-                                   patArgs={"doTauHLTMatching": doTauHLTMatching,
+                                   patArgs={"doTauHLTMatching": False,
                                             "matchingTauTrigger": myTrigger},
                                    doHBHENoiseFilter=False, # Only save the HBHE result to event, don't filter
                                    calculateEventCleaning=True, # This requires the tags from test/pattuple/checkoutTags.sh

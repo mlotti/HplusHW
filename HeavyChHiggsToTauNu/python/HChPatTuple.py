@@ -109,7 +109,7 @@ class PATBuilder:
             # trigger has been given if Tau-HLT matching is required
             pargs = patArgs.copy()
             pargs["calculateEventCleaning"] = calculateEventCleaning
-            if pargs.get("doTauHLTMatching", True):
+            if pargs.get("doTauHLTMatching", False):
                 if not "matchingTauTrigger" in pargs:
                     if options.trigger == "":
                         raise Exception("Command line argument 'trigger' is missing")
@@ -323,7 +323,7 @@ def removeCounting(process, postfix=""):
 class PATBuilderBase:
     def __init__(self, process, dataVersion,
                  doHChTauDiscriminators=True, doPatTauIsoDeposits=False,
-                 doTauHLTMatching=True, matchingTauTrigger=None,
+                 doTauHLTMatching=False, matchingTauTrigger=None,
                  doMuonHLTMatching=True,
                  doPatElectronMuon=True,
                  doPatElectronID=True,
@@ -600,7 +600,8 @@ class StandardPATBuilder(PATBuilderBase):
     
         # Trigger matching
         if self.doTauHLTMatching:
-            self.endSequence *= HChTriggerMatching.addTauHLTMatching(self.process, self.matchingTauTrigger, collections=["patTausHpsPFTau"], outputCommands=self.outputCommands)
+            print "Tau HLT matching in PATTuple production is disabled. It should be done in the analysis jobs from now on."
+#            self.endSequence *= HChTriggerMatching.addTauHLTMatching(self.process, self.matchingTauTrigger, collections=["patTausHpsPFTau"], outputCommands=self.outputCommands)
 
         self.outputCommands.extend([
                 "drop *_selectedPatTaus_*_*",
