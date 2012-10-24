@@ -31,7 +31,8 @@ namespace HPlus {
     mutable edm::LumiReWeighting fLumiWeights; // the weight() methods are NOT const...
     //mutable edm::Lumi3DReWeighting fLumi3DWeights;
     TH1 *hWeights;
-    bool fEnabled;
+    bool fEnabled,fwEnabled;
+    double myLumiWeights(int&) const;
   };
 }
 

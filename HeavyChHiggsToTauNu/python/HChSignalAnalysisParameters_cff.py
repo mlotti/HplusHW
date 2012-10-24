@@ -397,6 +397,9 @@ vertexWeight = cms.untracked.PSet(
     dataPUdistributionLabel = cms.string("pileup"),
     mcPUdistribution = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramMCFall11.root"),
     mcPUdistributionLabel = cms.string("pileup"),
+    weightDistribution = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_2011AB.root"),
+    weightDistributionLabel = cms.string("weights"),
+    weightDistributionEnable = cms.bool(False),
     enabled = cms.bool(False),
 )
 
@@ -508,6 +511,7 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
 
     if era == "Run2011A" or era == "Run2011B":
         pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData"+era.replace("Run","")+suffix+".root"
+        pset.weightDistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_"+era.replace("Run","")+".root"
     elif era == "Run2011AB":
         pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011"+suffix+".root"
     else:
@@ -523,6 +527,9 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
                                       dataPUdistributionLabel = tmp.dataPUdistributionLabel,
                                       mcPUdistribution = tmp.mcPUdistribution,
                                       mcPUdistributionLabel = tmp.mcPUdistributionLabel,
+                                      weightDistribution = tmp.weightDistribution,
+                                      weightDistributionLabel = tmp.weightDistributionLabel,
+                                      weightDistributionEnable = tmp.weightDistributionEnable,
                                       alias = cms.string("PUVertexWeight"+era+suffix)
     )
     name = "PUWeightProducer"+era+suffix
