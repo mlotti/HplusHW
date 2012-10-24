@@ -32,7 +32,7 @@ namespace HPlus {
     //mutable edm::Lumi3DReWeighting fLumi3DWeights;
     TH1 *hWeights;
     bool fEnabled,fwEnabled;
-    double myLumiWeights(int&) const;
+    double myLumiWeights(float) const;
   };
 }
 

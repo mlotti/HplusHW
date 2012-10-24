@@ -74,9 +74,9 @@ namespace HPlus {
     edm::Handle<std::vector<PileupSummaryInfo> >  hpu;
     iEvent.getByLabel(fPuSummarySrc, hpu);
 
-    int n0 = -1;
-    int nm1 = -1;
-    int np1 = -1;
+    float n0 = -1;
+    float nm1 = -1;
+    float np1 = -1;
     for(std::vector<PileupSummaryInfo>::const_iterator iPV = hpu->begin(); iPV != hpu->end(); ++iPV) {
       if(iPV->getBunchCrossing() == -1)
         nm1 = iPV->getTrueNumInteractions();
@@ -105,7 +105,7 @@ namespace HPlus {
     return getWeightAndSize(iEvent, iSetup).first;
   }
 
-  double VertexWeight::myLumiWeights(int& nvtx) const {
+  double VertexWeight::myLumiWeights(float nvtx) const {
     if(nvtx < 0 || nvtx > hWeights->GetXaxis()->GetXmax()) return 0;
     return hWeights->GetBinContent(hWeights->FindFixBin(nvtx));
   }
