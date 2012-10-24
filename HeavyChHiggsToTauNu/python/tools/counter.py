@@ -213,7 +213,7 @@ class CellFormatBase:
         if (uDown == 0.0 and uUp == 0.0) or uncertaintiesSame:
             return self._formatValuePlusMinus(value, uUpf)
         else:
-            return self._formatValuePlusHighMinusDown(value, uUpf, uDownf)
+            return self._formatValuePlusHighMinusLow(value, uUpf, uDownf)
 
 
     ## \var _valueFormat
@@ -679,7 +679,33 @@ def efficiencyColumnNormalApproximation(name, column):
             rows.append(value)
             rowNames.append(origRownames[irow])
     return CounterColumn(name, rowNames, rows)
-    
+
+## Calculate efficiencies for a column with the Clopper-Pearson method for uncertainties
+#
+# \param name    Name of the new column
+# \param column  counter.CounterColumn object of counts
+#
+# Note that the counts in the column must be unweighted counts
+# (i.e. for MC they should not be normalized or anything)
+def efficiencyColumnClopperPearson(name, column):
+    origRowNames = column.getRowNames()
+    rows = []
+    rowNames = []
+
+    prev = None
+    for irow in xrange(0, column.getNrows()):
+        count = column.getCount(irow)
+        value = None
+        if count != None and prev != None:
+            try:
+                value = dataset.divideBinomial(count, prev)
+            except ZeroDivisionError:
+                pass
+        prev = count
+        if value != None:
+            rows.append(value)
+            rowNames.append(origRownames[irow])
+    return CounterColumn(name, rowNames, rows)
 
 ## Calculate efficiencies for a column with the normal approximation for uncertainties
 #
@@ -694,9 +720,25 @@ def efficiencyColumnNormalApproximation(name, column):
 def efficiencyColumn(name, column, method="normalApproximation"):
     return {
         "normalApproximation": efficiencyColumnNormalApproximation,
-        "errorPropagation": efficiencyColumnErrorPropagation
+        "errorPropagation": efficiencyColumnErrorPropagation,
+        "clopperPearson": efficiencyColumnClopperPearson,
     }[method](name, column)
 
+def efficiencyColumnFromTEfficiency(name, teff, rowNames):
+    rows = []
+    nbins = teff.GetTotalHistogram().GetNbinsX()
+    if nbins != len(rowNames):
+        raise Exception("Got %d bins from TEfficiency, but %d rowNames" % (nbins, len(rowNames)))
+    for i in xrange(0, nbins):
+        bin = i+1
+        rows.append(dataset.CountAsymmetric(teff.GetEfficiency(bin), teff.GetEfficiencyErrorLow(bin), teff.GetEfficiencyErrorUp(bin)))
+    return CounterColumn(name, rowNames, rows)
+
+def efficiencyTableFromTEfficiencies(teffs, columnNames, rowNames):
+    table = CounterTable()
+    for teff, name in zip(teffs, columnNames):
+        table.appendColumn(efficiencyColumnFromTEfficiency(name, teff, rowNames))
+    return table
 
 ## Create a new counter.CounterColumn as the sum of the columns.
 #
@@ -1330,6 +1372,12 @@ class CounterTable:
         self.rowNames = rowNames
         self.columnNames = colNames
 
+    def multiply(self, value, uncertainty=0):
+        count = dataset.Count(value, uncertainty)
+        for irow in xrange(len(self.table)):
+            for icol in xrange(len(self.table[0])):
+                self.table[irow][icol].multiply(count)
+
     ## Get the number of rows
     def getNrows(self):
         return len(self.table)
@@ -1915,6 +1963,10 @@ class SimpleCounter:
                 return self.counter[i]
         raise Exception("No count '%s' in counter '%s'" % (name, self.getName()))
 
+    def constructTEfficiency(self, function):
+        (passed, total) = function(self)
+        return ROOT.TEfficiency(passed, total)
+
     ## \var datasetRootHisto
     # dataset.DatasetRootHisto object containing the dataset.Dataset
     # and ROOT histogram of the counter
@@ -1936,8 +1988,7 @@ class Counter:
 
     ## Loop through datasets calling the given function
     def forEachDataset(self, func):
-        for c in self.counters:
-            func(c)
+        return [func(c) for c in self.counters]
 
     def getColumnNames(self):
         return [c.getName() for c in self.counters]
@@ -2017,6 +2068,9 @@ class Counter:
         for h in self.counters:
             table.appendColumn(h)
         return table
+
+    def constructTEfficiencies(self, function):
+        return self.forEachDataset(lambda x: x.constructTEfficiency(function))
 
     ## \var counters
     # List of counter.SimpleCounter objects, one per dataset

@@ -32,6 +32,7 @@ private:
   std::string dataVersion;
   std::string codeVersion;
   std::string era;
+  unsigned energy;
   double crossSection;
   bool isData;
   bool hasCrossSection;
@@ -42,6 +43,7 @@ HPlusConfigInfoAnalyzer::HPlusConfigInfoAnalyzer(const edm::ParameterSet& pset):
   dataVersion(pset.getUntrackedParameter<std::string>("dataVersion", "")),
   codeVersion(pset.getUntrackedParameter<std::string>("codeVersion", "")),
   era(pset.getUntrackedParameter<std::string>("era", "")),
+  energy(pset.getUntrackedParameter<unsigned>("energy", 0)),
   crossSection(std::numeric_limits<double>::quiet_NaN()),
   isData(false),
   hasCrossSection(false), hasIsData(false)
@@ -67,12 +69,16 @@ void HPlusConfigInfoAnalyzer::analyze(const edm::Event& iEvent, const edm::Event
 void HPlusConfigInfoAnalyzer::endJob() {
   edm::Service<TFileService> fs;
 
-  int nbins = 1+hasCrossSection+hasIsData;
+  int nbins = 2+hasCrossSection+hasIsData;
   TH1F *info = fs->make<TH1F>("configinfo", "configinfo", nbins, 0, nbins);
 
   int bin = 1;
   info->GetXaxis()->SetBinLabel(bin, "control");
   info->AddBinContent(bin, 1);
+  ++bin;
+
+  info->GetXaxis()->SetBinLabel(bin, "energy");
+  info->AddBinContent(bin, energy);
   ++bin;
 
   if(hasCrossSection) {

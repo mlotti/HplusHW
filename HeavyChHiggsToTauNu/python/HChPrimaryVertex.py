@@ -1,20 +1,23 @@
 import FWCore.ParameterSet.Config as cms
 
 
-def addPrimaryVertexSelection(process, sequence):
-    process.firstPrimaryVertex = cms.EDProducer("HPlusFirstVertexSelector",
-        src = cms.InputTag("offlinePrimaryVertices")
+def addPrimaryVertexSelection(process, sequence, srcProcess="", postfix=""):
+    m = cms.EDProducer("HPlusFirstVertexSelector",
+        src = cms.InputTag("offlinePrimaryVertices", "", srcProcess)
     )
-    sequence *= process.firstPrimaryVertex
+    setattr(process, "firstPrimaryVertex"+postfix, m)
+    sequence *= m
 
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi as pv
-    process.selectedPrimaryVertex = pv.goodPrimaryVertices.clone(
-        src = cms.InputTag("firstPrimaryVertex")
+    m = pv.goodPrimaryVertices.clone(
+        src = cms.InputTag("firstPrimaryVertex"+postfix)
     )
-    sequence *= process.selectedPrimaryVertex
+    setattr(process, "selectedPrimaryVertex"+postfix, m)
+    sequence *= m
 
-    process.goodPrimaryVertices = pv.goodPrimaryVertices.clone()
-    sequence *= process.goodPrimaryVertices
+    m = pv.goodPrimaryVertices.clone()
+    setattr(process, "goodPrimaryVertices"+postfix, m)
+    sequence *= m
 
 #    process.selectedPrimaryVertexFilter = cms.EDFilter("VertexCountFilter",
 #                                                       src = cms.InputTag("selectedPrimaryVertex"),

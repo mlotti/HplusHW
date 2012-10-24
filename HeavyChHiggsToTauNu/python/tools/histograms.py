@@ -390,6 +390,12 @@ def sumRootHistos(rootHistos, postfix="_sum"):
         h.Add(a)
     return h
 
+def th1Xmin(th1):
+    return th1.GetXaxis().GetBinLowEdge(th1.GetXaxis().GetFirst())
+
+def th1Xmax(th1):
+    return th1.GetXaxis().GetBinUpEdge(th1.GetXaxis().GetLast())
+
 ## Helper function for lessThan/greaterThan argument handling
 #
 # \param kwargs  Keyword arguments
@@ -633,8 +639,8 @@ class CanvasFrame:
         _boundsArgs(histos, opts)
 
         self.frame = _drawFrame(self.canvas, opts["xmin"], opts["ymin"], opts["xmax"], opts["ymax"], opts.get("nbins", None))
-        self.frame.GetXaxis().SetTitle(histos[0].getRootHisto().GetXaxis().GetTitle())
-        self.frame.GetYaxis().SetTitle(histos[0].getRootHisto().GetYaxis().GetTitle())
+        self.frame.GetXaxis().SetTitle(histos[0].getXtitle())
+        self.frame.GetYaxis().SetTitle(histos[0].getYtitle())
 
     ## \var canvas
     # TCanvas for the canvas
@@ -672,12 +678,11 @@ class CanvasFrameTwo:
             def GetYaxis(self):
                 return self.frame1.GetYaxis()
 
-
             def getXmin(self):
-                return self.frame2.GetXaxis().GetBinLowEdge(self.frame2.GetXaxis().GetFirst())
+                return th1Xmin(self.frame2)
 
             def getXmax(self):
-                return self.frame2.GetXaxis().GetBinUpEdge(self.frame2.GetXaxis().GetLast())
+                return th1Xmax(self.frame2)
 
         ## Wrapper to provide the getXmin/getXmax functions for _boundsArgs function.
         class HistoWrapper:
@@ -688,10 +693,10 @@ class CanvasFrameTwo:
                 return self.histo
 
             def getXmin(self):
-                return self.histo.GetXaxis().GetBinLowEdge(self.histo.GetXaxis().GetFirst())
+                return th1Xmin(self.histo)
 
             def getXmax(self):
-                return self.histo.GetXaxis().GetBinUpEdge(self.histo.GetXaxis().GetLast())
+                return th1Xmax(self.histo)
 
             def getYmin(self):
                 return self.histo.GetMinimum()
@@ -771,8 +776,8 @@ class CanvasFrameTwo:
 
         self.canvas.cd(2)
         self.frame2 = _drawFrame(self.pad2, opts2["xmin"], opts2["ymin"], opts2["xmax"], opts2["ymax"], opts2.get("nbins", None))
-        self.frame2.GetXaxis().SetTitle(histos1[0].getRootHisto().GetXaxis().GetTitle())
-        self.frame2.GetYaxis().SetTitle(histos2[0].getRootHisto().GetYaxis().GetTitle())
+        self.frame2.GetXaxis().SetTitle(histos1[0].getXtitle())
+        self.frame2.GetYaxis().SetTitle(histos2[0].getYtitle())
         self.frame2.GetYaxis().SetTitleOffset(self.frame2.GetYaxis().GetTitleOffset()*yoffsetFactor)
         self.frame2.GetXaxis().SetTitleOffset(self.frame2.GetXaxis().GetTitleOffset()*xoffsetFactor)
         self.frame2.GetYaxis().SetLabelSize(int(self.frame2.GetYaxis().GetLabelSize()*0.8))
@@ -924,11 +929,11 @@ class Histo:
 
     ## Get the minimum value of the X axis
     def getXmin(self):
-        return self.rootHisto.GetXaxis().GetBinLowEdge(self.rootHisto.GetXaxis().GetFirst())
+        return th1Xmin(self.rootHisto)
 
     ## Get the maximum value of the X axis
     def getXmax(self):
-        return self.rootHisto.GetXaxis().GetBinUpEdge(self.rootHisto.GetXaxis().GetLast())
+        return th1Xmax(self.rootHisto)
 
     ## Get the minimum value of the Y axis
     def getYmin(self):
@@ -937,6 +942,14 @@ class Histo:
     ## Get the maximum value of the Y axis
     def getYmax(self):
         return self.rootHisto.GetMaximum()
+
+    ## Get the X axis title
+    def getXtitle(self):
+        return self.rootHisto.GetXaxis().GetTitle()
+
+    ## Get the Y axis title
+    def getYtitle(self):
+        return self.rootHisto.GetYaxis().GetTitle()
 
     ## Get the width of a bin
     #
@@ -1141,6 +1154,57 @@ class HistoGraphWithDataset(HistoGraph):
 
     def getDataset(self):
         return self.dataset
+
+## Represents TEfficiency objects
+class HistoEfficiency(Histo):
+    ## Constructor
+    #
+    # \param rootEfficiency TEfficiency object
+    # \param name         Name of the histogram
+    # \param legendStyle  Style string for TLegend (third parameter for TLegend.AddEntry())
+    # \param drawStyle    Style string for Draw (string parameter for TH1.Draw())
+    def __init__(self, rootEfficiency, name, legendStyle="l", drawStyle="L"):
+        Histo.__init__(self, rootEfficiency, name, legendStyle, drawStyle)
+
+    def _values(self, function):
+        ret = []
+        for bin in xrange(1, self.getRootPassedHisto().GetNbinsX()+1):
+            ret.append(function(self.getRootEfficiency(), bin))
+        return ret
+
+    def getRootEfficiency(self):
+        return self.getRootHisto()
+
+    def getRootPassedHisto(self):
+        return self.rootHisto.GetPassedHistogram()
+
+    def getXmin(self):
+        return th1Xmin(self.getRootPassedHisto())
+
+    def getXmax(self):
+        return th1Xmax(self.getRootPassedHisto())
+
+    def getYmin(self):
+        return min(self._values(lambda eff, bin: eff.GetEfficiency(bin)-eff.GetEfficiencyErrorLow(bin)))
+
+    def getYmax(self):
+        return max(self._values(lambda eff, bin: eff.GetEfficiency(bin)+eff.GetEfficiencyErrorUp(bin)))
+
+    def getYmin(self):
+        return self.getRootPassedHisto().GetMinimum()
+
+    def getYmax(self):
+        return 1.0
+
+    def getXtitle(self):
+        return self.getRootPassedHisto().GetXaxis().GetTitle()
+
+    def getYtitle(self):
+        return "Efficiency"
+
+    def getBinWidth(self, bin):
+        return self.getRootPassedHisto().GetBinWidth(bin)
+
 
 ## Implementation of HistoManager.
 #

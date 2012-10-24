@@ -32,8 +32,7 @@ if len(options.trigger) == 0:
     (trg, inputFiles) = ("HLT_IsoMu30_eta2p1_v7", ["file:/mnt/flustre/mkortela/data/SingleMu/Run2011B-19Nov2011-v1/AOD/E427794E-151B-E111-976B-1CC1DE1CE56C.root"]) # Run 180241
 
     if dataVersion.isMC():
-        #(trg, inputFiles) = ("HLT_IsoMu12_v1", ["/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/DYJetsToLL_M50_TuneZ2_Summer11/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v19b/9436cd413e1f831f4594f528a53faac6/pattuple_1001_2_sEX.root"])
-        raise Exception("No test file for MC at the moment")
+        (trg, inputFiles) = ("HLT_IsoMu30_eta2p1_v3", ["file:/mnt/flustre/mkortela/data/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM/DAE4109C-6E3D-E111-9441-001EC9D81A22.root"])
 
     options.trigger = [trg]
 elif len(options.trigger) > 1:
@@ -356,6 +355,22 @@ process.tagAndProbeSequence = cms.Sequence(
     process.tagProbes
 )
 
+if dataVersion.isMC():
+    process.tagMcMatch = cms.EDProducer("MCTruthDeltaRMatcherNew",
+        src = cms.InputTag("tagMuons"),
+        matched = cms.InputTag("genParticles"),
+        pdgId = cms.vint32(13),
+        distMin = cms.double(0.3),
+    )
+    process.probeMcMatch = cms.EDProducer("MCTruthDeltaRMatcherNew",
+        src = cms.InputTag("probeMuons"),
+        matched = cms.InputTag("genParticles"),
+        pdgId = cms.vint32(13),
+        distMin = cms.double(0.3),
+    )
+    process.tagAndProbeSequence += (process.tagMcMatch + process.probeMcMatch)
+
+
 tauLikeIso = "(userFloat('embeddingStep_pfChargedHadrons') + max(userFloat('embeddingStep_pfPhotons')-0.5*userFloat('embeddingStep_pfPUChargedHadrons'), 0))"
 chargedHadronIso = "chargedHadronIso() / pt()"
 variables = cms.PSet(
@@ -451,6 +466,10 @@ process.tnpTree = cms.EDAnalyzer("TagProbeFitTreeProducer",
     ## MC-related info
 #    isMC = cms.bool(False), ## on MC you can set this to true, add some parameters and get extra info in the tree.
     isMC = cms.bool(dataVersion.isMC()), ## on MC you can set this to true, add some parameters and get extra info in the tree.
+    tagMatches = cms.InputTag("tagMcMatch"),
+    probeMatches = cms.InputTag("probeMcMatch"),
+    motherPdgId = cms.vint32(22, 23),
+    makeMCUnbiasTree = cms.bool(False), # We may have to revisit this, for now it is just disabled for simplicity
 #    eventWeight = cms.InputTag("vertexWeight"),
     eventWeight = cms.InputTag("pileupWeight"),
 )

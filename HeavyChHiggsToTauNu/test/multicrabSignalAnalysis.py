@@ -8,17 +8,9 @@ cfg = "signalAnalysis_cfg.py"
 #cfg = "QCDMeasurement_cfg.py"
 multicrab = Multicrab("crab_analysis.cfg", cfg)
 
-# Select the pattuple version to use as an input
-#pattupleVersion = "pattuple_v18"
-#pattupleVersion = "pattuple_v19"
-#pattupleVersion = "pattuple_v25c"
-pattupleVersion = "pattuple_v44_4"
-
-
-#era = "EPS"
-#era = "Run2011A"
-#era = "Run2011B"
-era = "Run2011AB"
+# Select the workflow (version corresponds to pattuples)
+#workflow = "analysis_v25c"
+workflow = "analysis_v44_4"
 
 # Change this to true if you want to run the PAT on the fly (for
 # datasets where no pattuples are produced, or for testing something
@@ -37,7 +29,7 @@ datasetsData = [
     "Tau_160431-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
     "Tau_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
     "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1]
-    "Tau_175860-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
+    "Tau_175832-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
 ]
 
 datasetsMC = [
@@ -99,18 +91,12 @@ datasets.extend(datasetsData)
 datasets.extend(datasetsMC)
 
 # Add the datasest to the multicrab system
-multicrab.extendDatasets(pattupleVersion, datasets)
+multicrab.extendDatasets(workflow, datasets)
 
 output = ["histograms.root"]
 if "signalAnalysis" in cfg:
     output.append("pickEvents.txt")
 multicrab.addCommonLine("CMSSW.output_file = %s" % ",".join(output))
-
-# Set the era to MC datasets
-def setPuEra(dataset):
-    if dataset.isMC():
-        dataset.appendArg("puWeightEra="+era)
-multicrab.forEachDataset(setPuEra)
 
 # Force all jobs go to jade, in some situations this might speed up
 # the analysis (e.g. when there are O(1000) Alice jobs queueing, all
@@ -133,8 +119,6 @@ if runPatOnTheFly:
 prefix = "multicrab"
 if "QCD" in cfg:
     prefix += "_QCD"
-
-multicrab.appendArgAll("runOnCrab=1")
 
 # Generate configuration only?
 configOnly=True

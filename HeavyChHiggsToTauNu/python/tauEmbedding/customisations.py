@@ -59,6 +59,8 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
     # Use the muons where the original muon is removed in global muon veto
     param.GlobalMuonVeto.MuonCollectionName.setModuleLabel("selectedPatMuonsEmbeddingMuonCleaned")
     param.GlobalElectronVeto.ElectronCollectionName.setProcessName("MUONSKIM")
+    param.GlobalElectronVeto.beamspotSrc.setProcessName(dataVersion.getRecoProcess())
+    param.GlobalElectronVeto.conversionSrc.setProcessName(dataVersion.getRecoProcess())
 
     # Use the taus matched to the original muon in tau selections
     # Notice that only the version corresponding to PF2PATVersion is produced
@@ -499,6 +501,7 @@ def addElectronVeto(process, sequence, param, prefix="muonSelectionElectronVeto"
 
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as electronVetoFilter_cfi
     m1 = electronVetoFilter_cfi.hPlusGlobalElectronVetoFilter.clone()
+    m1.vertexSrc = m1.vertexSrc.value()+"Original"
     m2 = cms.EDProducer("EventCountProducer")
 
     setattr(process, filter, m1)
