@@ -1648,6 +1648,9 @@ def addPatTrigger(process, dataVersion, sequence):
         "hltMu17B*",
         "hltPFDisplacedJets*",
     )
+    # Disable exludeCollections for now
+    # https://hypernews.cern.ch/HyperNews/CMS/get/physTools/2955.html
+    process.patTrigger.exludeCollections = cms.vstring()
 
 
     # Keep StandAlone trigger objects for enabling trigger
