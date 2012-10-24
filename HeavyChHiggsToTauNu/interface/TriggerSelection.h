@@ -57,7 +57,8 @@ namespace HPlus {
       std::string fPath;
 
       // Counters
-      Count fTriggerCount;
+      Count fTriggerPathFoundCount;
+      Count fTriggerPathAcceptedCount;
 
       pat::TriggerObjectRefVector fMets;
       pat::TriggerObjectRefVector fTaus;

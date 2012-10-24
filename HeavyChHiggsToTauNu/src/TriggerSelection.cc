@@ -143,6 +143,7 @@ namespace HPlus {
         std::cout << std::endl;
       }
       */
+
       pat::TriggerObjectRefVector hltMets = trigger->objects(trigger::TriggerMET);
       if(hltMets.size() == 0) {
         fHltMet = pat::TriggerObjectRef();
@@ -153,7 +154,7 @@ namespace HPlus {
         if(hltMets.size() > 1) {
           pat::TriggerObjectRefVector selectedHltMet;
           for(size_t i=0; i<hltMets.size(); ++i) {
-            if(trigger->objectInPath(hltMets[i],  returnPath->getPathName())) {
+            if(trigger->objectInPath(hltMets[i],  returnPath->getPathName(), false)) { // for MET we don't require that the object was used in the last filter
               /*
               std::cout << "HLT MET " << i
                         << " et " << hltMets[i]->et()
@@ -203,7 +204,8 @@ namespace HPlus {
   
   TriggerSelection::TriggerPath::TriggerPath(const std::string& path, EventCounter& eventCounter):
     fPath(path),
-    fTriggerCount(eventCounter.addSubCounter("Trigger paths","Triggered ("+fPath+")"))
+    fTriggerPathFoundCount(eventCounter.addSubCounter("Trigger paths","Path found ("+fPath+")")),
+    fTriggerPathAcceptedCount(eventCounter.addSubCounter("Trigger paths","Path accepted ("+fPath+")"))
   {}
 
   TriggerSelection::TriggerPath::~TriggerPath() {}
@@ -213,8 +215,11 @@ namespace HPlus {
     fMets.clear();
 
     const pat::TriggerPath *path = trigger.path(fPath);
-    if(!path || !path->wasAccept())
-      return false;
+    if(!path) return false;
+    increment(fTriggerPathFoundCount);
+
+    if(!path->wasAccept()) return false;
+    increment(fTriggerPathAcceptedCount);
 
     pat::TriggerFilterRefVector filters = trigger.pathFilters(fPath, false);
     if(filters.size() == 0)
@@ -227,7 +232,59 @@ namespace HPlus {
         fMets.push_back(*iObj);
     }
 
+
+    //std::cout << "============================================================" << std::endl;
+    /*
+    objs = trigger.objectRefs();
+    for(pat::TriggerObjectRefVector::const_iterator iObj = objs.begin(); iObj != objs.end(); ++iObj) {
+      std::cout << "Object " << (iObj-objs.begin()) << " " << (*iObj)->collection() << std::endl;
+    }
+    */
+    /*
+    for(pat::TriggerFilterRefVector::const_iterator iFilter = filters.begin(); iFilter != filters.end(); ++iFilter) {
+      std::cout << "Filter " << (*iFilter)->label() << " object keys ";
+      std::vector<unsigned> objectKeys = (*iFilter)->objectKeys();
+      for(size_t i=0; i<objectKeys.size(); ++i) {
+        std::cout << objectKeys[i] << " ";
+      }
+      std::cout << std::endl;
+
+      pat::TriggerObjectRefVector objs = trigger.filterObjects((*iFilter)->label());
+      for(pat::TriggerObjectRefVector::const_iterator iObj = objs.begin(); iObj != objs.end(); ++iObj) {
+        std::cout << "  object " << (*iObj)->collection() << std::endl;
+      }
+    }
+    std::cout << "------------------------------------------------------------" << std::endl;
+    */
+
     return true;
+
+    // Debugging
+    /*
+    pat::TriggerPathRefVector accepted = trigger.acceptedPaths();
+    for(pat::TriggerPathRefVector::const_iterator iter = accepted.begin(); iter != accepted.end(); ++iter) {
+      pat::TriggerFilterRefVector filters = trigger.pathFilters((*iter)->name(), false);
+      pat::TriggerObjectRefVector objects = trigger.pathObjects((*iter)->name());
+      std::vector<unsigned> filterIndices = (*iter)->filterIndices();
+      std::cout << "*** (*iter)->name() = " << (*iter)->name() << std::endl;
+      std::cout << "    path pointer " << trigger.path((*iter)->name()) << std::endl;
+      std::cout << "    filter indices ";
+      for(size_t i=0; i<filterIndices.size(); ++i) {
+        std::cout << filterIndices[i] << " ";
+      }
+      std::cout << std::endl;
+      std::cout << "    filters (" << filters.size() << ") ";
+      for(pat::TriggerFilterRefVector::const_iterator i2 = filters.begin(); i2 != filters.end(); ++i2) {
+        std::cout << (*i2)->label() << " ";
+      }
+      std::cout << std::endl
+                << "    objects (" << objects.size() << ") ";
+      for(pat::TriggerObjectRefVector::const_iterator i2 = objects.begin(); i2 != objects.end(); ++i2) {
+        std::cout << (*i2)->collection() << " ";
+      }
+      std::cout << std::endl;
+    }
+    */
 
     // Below is legacy code, which might be helpful for debugging
     /*
@@ -266,31 +323,6 @@ namespace HPlus {
     /*
     pat::TriggerPathRefVector accepted = trigger.acceptedPaths();
     for(pat::TriggerPathRefVector::const_iterator iter = accepted.begin(); iter != accepted.end(); ++iter) {
-    */
-      /*
-      pat::TriggerFilterRefVector filters = trigger.pathFilters((*iter)->name(), false);
-      pat::TriggerObjectRefVector objects = trigger.pathObjects((*iter)->name());
-      std::vector<unsigned> filterIndices = (*iter)->filterIndices();
-      std::cout << "*** (*iter)->name() = " << (*iter)->name() << std::endl;
-      std::cout << "    path pointer " << trigger.path((*iter)->name()) << std::endl;
-      std::cout << "    filter indices ";
-      for(size_t i=0; i<filterIndices.size(); ++i) {
-        std::cout << filterIndices[i] << " ";
-      }
-      std::cout << std::endl;
-      std::cout << "    filters (" << filters.size() << ") ";
-      for(pat::TriggerFilterRefVector::const_iterator i2 = filters.begin(); i2 != filters.end(); ++i2) {
-        std::cout << (*i2)->label() << " ";
-      }
-      std::cout << std::endl
-                << "    objects (" << objects.size() << ") ";
-      for(pat::TriggerObjectRefVector::const_iterator i2 = objects.begin(); i2 != objects.end(); ++i2) {
-        std::cout << (*i2)->collection() << " ";
-      }
-      std::cout << std::endl;
-      */
-
-    /*
       if((*iter)->name() == fPath && (*iter)->wasAccept()) {
 	//std::cout << "*** (*iter)->name() = " << (*iter)->name() << std::endl;
         pat::TriggerFilterRefVector filters = trigger.pathFilters(fPath, false);
