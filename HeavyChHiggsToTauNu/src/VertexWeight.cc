@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -17,15 +18,25 @@
 #include "TFile.h"
 
 namespace HPlus {
-  VertexWeight::VertexWeight(const edm::ParameterSet& iConfig):
+  VertexWeight::VertexWeight(const edm::ParameterSet& iConfig, HPlus::HistoWrapper& histoWrapper):
     fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc")),
     fPuSummarySrc(iConfig.getParameter<edm::InputTag>("puSummarySrc")),
     fEnabled(iConfig.getParameter<bool>("enabled")),
     fwEnabled(iConfig.getParameter<bool>("weightDistributionEnable"))
   {
     edm::Service<TFileService> fs;
-    //    hWeights = fs->make<TH1F>("pileupReweightWeights", "Reweighting weight distribution", 100, 0, 10);
-    hWeights = fs->make<TH1F>("pileupReweightWeights", "Reweighting weight distribution", 500, 0, 50);
+    TFileDirectory dir = fs->mkdir("pileupReweight");
+
+    // ATM not possible to change to HistoWrapper, as it is used to
+    // hold the weights if fwEnabled is true
+    hWeights = dir.make<TH1F>("pileupReweightWeights", "Reweighting weight distribution", 500, 0, 50);
+
+    hTrueInteractionsMinus1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, dir,
+                                                        "trueNumberInteractionsBXminus1", "", 500, 0, 50);
+    hTrueInteractions0 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, dir,
+                                                   "trueNumberInteractionsBX0", "", 500, 0, 50);
+    hTrueInteractionsPlus1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, dir,
+                                                       "trueNumberInteractionsBXplus1", "", 500, 0, 50);
 
     if(!fEnabled)
       return;
@@ -87,6 +98,10 @@ namespace HPlus {
     }
     if(n0 < 0)
       throw cms::Exception("Assert") << "VertexWeight: Didn't find the number of interactions for BX 0" << std::endl;;
+
+    hTrueInteractionsMinus1->Fill(nm1);
+    hTrueInteractions0->Fill(n0);
+    hTrueInteractionsPlus1->Fill(np1);
 
     // Obtain weight
     double weight = 0;
