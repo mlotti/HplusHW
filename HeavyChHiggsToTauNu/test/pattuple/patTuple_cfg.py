@@ -167,7 +167,7 @@ if dataVersion.isData() and len(options.trigger) > 1 and options.triggerThrow !=
         setattr(process, "CounterScraping"+name, mc2)
 
         path = cms.Path(
-            process.hltPhysicsDeclared *
+#            process.hltPhysicsDeclared *
             mt * 
             mc1 *
             process.scrapingVeto *
