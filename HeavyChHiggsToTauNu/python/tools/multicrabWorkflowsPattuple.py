@@ -6,14 +6,7 @@ import re
 from multicrabWorkflowsTools import Dataset, Workflow, Data, Source, updatePublishName, TaskDef, updateTaskDefinitions
 import multicrabDatasetsCommon as common
 
-def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowName, **kwargs):
-    # Setup input/default output lumimasks for data
-    inputLumiMask = None
-    outputLumiMask = None
-    if dataset.isData():
-        inputLumiMask = "DCSONLY11"
-        outputLumiMask = "Nov08ReReco"
-
+def _constructProcessingWorkflow_common(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMask, outputLumiMask, **kwargs):
     # Setup the Source for pattuple Workflow
     source = Source(sourceWorkflow,
                     # These are exclusive, but the default values of None and a check in Workflow ensure correctness
@@ -41,6 +34,33 @@ def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowNa
         for line in taskDef.crabLines:
             wf.addCrabLine(line)
     return wf
+
+def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowName, **kwargs):
+    # Setup input/default output lumimasks for data
+    inputLumiMask = None
+    outputLumiMask = None
+    if dataset.isData():
+        inputLumiMask = "DCSONLY11"
+        outputLumiMask = "Nov08ReReco"
+
+    return _constructProcessingWorkflow_common(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMask, outputLumiMask, **kwargs)
+
+def constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow, workflowName, **kwargs):
+    # Setup input/default output lumimasks for data
+    inputLumiMask = None
+    outputLumiMask = None
+    if dataset.isData():
+        inputLumiMask = "DCSONLY12"
+        reco = dataset.getName().split("_")[-1]
+        outputLumiMask = {
+            "Jul13": "13Jul2012ReReco",
+            "Aug06": "06Aug2012ReReco",
+            "Aug24": "24Aug2012ReReco",
+            "Prompt": "PromptReco12"
+            }[reco]
+
+    return _constructProcessingWorkflow_common(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMask, outputLumiMask, **kwargs)
+
 
 ## Main function for generating 44X pattuples
 #
@@ -162,6 +182,262 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
         # If DBS-dataset of the pattuple has been specified, add also analysis Workflow to Dataset
         if wf.output != None:
             dataset.addWorkflow(Workflow("analysis_"+version, source=Source("pattuple_"+version), triggerOR=taskDef.triggerOR, args=wf.args, skimConfig=skim))
+
+
+## Main function for generating 53X pattuples
+#
+# \param version        String for pattuple version
+# \param datasets       List of Dataset objects
+# \param updateDefinitions  Dictionary from Dataset names to TaskDef
+#                       objects. These override the default values
+#                       specified in the body of this function
+#                       (usually the DBS-path of pattuples, but others
+#                       are possible too)
+# \param skim           List of strings for skim configuration files (if given)
+#
+# It is a matter of taste how the responsibilites are divided by the
+# addPattuple_44X() and other addPattuple_v*() functions. Here I tried
+# to catch the commonalities such that the other addPattuple_v*()
+# functions would be as short as possible.
+def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
+    mcTriggerTauMET = "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"
+    mcTriggerQuadJet = "HLT_QuadJet80_v2"
+    mcTriggerQuadJetBTag = "HLT_QuadJet75_55_35_20_BTagIP_VBF_v3"
+    mcTriggerQuadPFJet78BTag = "HLT_QuadPFJet78_61_44_31_BTagCSV_VBF_v1"
+    mcTriggerQuadPFJet82BTag = "HLT_QuadPFJet78_61_44_31_BTagCSV_VBF_v1"
+    mcTriggers = [
+        mcTriggerTauMET,
+        mcTriggerQuadJet,
+        mcTriggerQuadJetBTag,
+        mcTriggerQuadPFJet78BTag,
+        mcTriggerQuadPFJet82BTag,
+        ]
+    def TaskDefMC(**kwargs):
+        return TaskDef(triggerOR=mcTriggers, **kwargs)
+
+    # Trigger selection efficiency for WH signal M120
+    # HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6: 605/6048 = 0.10003
+    # HLT_QuadJet80_v2: 199/6048 = 0.032903
+    # HLT_QuadJet75_55_35_20_BTagIP_VBF_v3: 162/6048 = 0.026786
+    # HLT_QuadJet75_55_38_20_BTagIP_VBF_v3: 141/6048 = 0.023313
+    # HLT_QuadPFJet78_61_44_31_BTagCSV_VBF_v1: 149/6048 = 0.024636
+    # HLT_QuadPFJet82_65_48_35_BTagCSV_VBF_v1: 125/6048 = 0.020668
+    #
+    # HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6 OR
+    # HLT_QuadJet75_55_35_20_BTagIP_VBF_v3 OR
+    # HLT_QuadPFJet78_61_44_31_BTagCSV_VBF_v1 OR
+    # HLT_QuadPFJet82_65_48_35_BTagCSV_VBF_v1: 807/6048 = 0.13343
+
+    # HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6 OR
+    # HLT_QuadJet80_v2 OR
+    # HLT_QuadJet75_55_35_20_BTagIP_VBF_v3 OR
+    # HLT_QuadPFJet78_61_44_31_BTagCSV_VBF_v1 OR
+    # HLT_QuadPFJet82_65_48_35_BTagCSV_VBF_v1: 958/6048 = 0.15840
+
+    # Trigger selection efficiency for Data
+    # Tau Aug24 (HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7): 984/7489 = 0.13139
+    # MultiJet Jul13 HLT_QuadJet80_v2: 453/5000 = 0.090600
+    #                HLT_QuadJet75_55_38_20_BTagIP_VBF_v3: 440/5000 = 0.088000
+    #                HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4: 537/5000 = 0.10740
+    #                OR: 1222/5000 = 0.24440
+
+
+    quadPFJetBTagTriggers = {
+        "MultiJet_190456-190738_2012A_Jul13": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v2"],
+        "MultiJet_190782-190949_2012A_Aug06": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v3"],
+        "MultiJet_191043-193621_2012A_Jul13": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v3",  # 191043-191411
+                                               "HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4"], # 191691-193621
+        "MultiJet_193834-194225_2012B_Jul13": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4"],
+    }
+    quadJetBTagTriggers = {
+        "MultiJet_190456-190738_2012A_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v2"],
+        "MultiJet_190782-190949_2012A_Aug06": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+        "MultiJet_191043-193621_2012A_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+        "MultiJet_193834-194225_2012B_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+        "MultiJet_194270-196531_2012B_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+        "MultiJet_198022-198523_2012C_Aug24": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v4"],
+        "MultiJet_198941-200601_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v4",  # 198941-199608
+                                                "HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"], # 199698-200601
+        #"MultiJet_200961-202504_0T_2012C_Prompt"
+        "MultiJet_202792-203742_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"],
+    }
+    quadJetTriggers = {
+        "MultiJet_190456-190738_2012A_Jul13": ["HLT_QuadJet80_v1"],
+        "MultiJet_190782-190949_2012A_Aug06": ["HLT_QuadJet80_v2"],
+        "MultiJet_191043-193621_2012A_Jul13": ["HLT_QuadJet80_v2"],
+        "MultiJet_193834-194225_2012B_Jul13": ["HLT_QuadJet80_v2"],
+        "MultiJet_194270-196531_2012B_Jul13": ["HLT_QuadJet80_v2",  # 194270-196027
+                                               "HLT_QuadJet80_v3"], # 196046-196531
+        "MultiJet_198022-198523_2012C_Aug24": ["HLT_QuadJet80_v4"],
+        "MultiJet_198941-200601_2012C_Prompt": ["HLT_QuadJet80_v4",  # 198941-199608
+                                                "HLT_QuadJet80_v6"], # 199698-200601
+        #"MultiJet_200961-202504_0T_2012C_Prompt"
+        "MultiJet_202792-203742_2012C_Prompt": ["HLT_QuadJet80_v6"],
+    }
+
+    # Specifies the default
+    # - number of jobs in pattuple processing
+    # - number of jobs for those who read pattuples
+    # - triggers
+    # for all relevant Datasets
+    defaultDefinitions = {
+        # njobsOut is just a guess
+        "Tau_190456-190738_2012A_Jul13":  TaskDef(njobsIn= 150, njobsOut= 10, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v2"]),
+        "Tau_190782-190949_2012A_Aug06":  TaskDef(njobsIn=  30, njobsOut=  2, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v3"]),
+        "Tau_191043-193621_2012A_Jul13":  TaskDef(njobsIn= 400, njobsOut= 20, triggerOR=[
+                                                      "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v3", # 191043-191411
+                                                      "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v4", # 191691-191491 (193621)
+                                                  ], triggerThrow=False),
+
+        "Tau_193834-196531_2012B_Jul13":  TaskDef(njobsIn=2000, njobsOut=100, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"]),
+        "Tau_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 200, njobsOut= 10, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7"]),
+        "Tau_198941-200601_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 75, triggerOR=[
+                                                     "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7",  # 198941-199608
+                                                     "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9",  # 199698-200161
+                                                 ], triggerThrow=False),
+        #"Tau_200961-202504_0T_2012C_Prompt": TaskDef(njobsIn=, njobsOut=, triggerOR=[""]),
+        "Tau_202792-203742_2012C_Prompt": TaskDef(njobsIn= 150, njobsOut= 10, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"]),
+
+        ## MultiJet
+        # njobsOut is just a guess
+        "MultiJet_190456-190738_2012A_Jul13":  TaskDef(njobsIn= 490, njobsOut= 50),
+        "MultiJet_190782-190949_2012A_Aug06":  TaskDef(njobsIn= 120, njobsOut= 12),
+        "MultiJet_191043-193621_2012A_Jul13":  TaskDef(njobsIn=1200, njobsOut=120),
+        "MultiJet_193834-194225_2012B_Jul13":  TaskDef(njobsIn= 600, njobsOut= 60),
+        "MultiJet_194270-196531_2012B_Jul13":  TaskDef(njobsIn=2200, njobsOut=220),
+        "MultiJet_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 250, njobsOut= 25),
+        "MultiJet_198941-200601_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=170),
+        #"MultiJet_200961-202504_0T_2012C_Prompt": TaskDef(njobsIn=, njobsOut=),
+        "MultiJet_202792-203742_2012C_Prompt": TaskDef(njobsIn= 170, njobsOut= 17),
+
+        # MC, triggered with mcTrigger
+        "TTToHplusBWB_M80_Summer12":        TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBWB_M90_Summer12":        TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBWB_M100_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBWB_M120_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBWB_M140_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBWB_M150_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBWB_M155_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBWB_M160_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+
+        "TTToHplusBHminusB_M80_Summer12":        TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBHminusB_M90_Summer12":        TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBHminusB_M100_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBHminusB_M120_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBHminusB_M140_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBHminusB_M150_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBHminusB_M155_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBHminusB_M160_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+
+        "Hplus_taunu_s-channel_M80_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "Hplus_taunu_s-channel_M90_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "Hplus_taunu_s-channel_M100_Summer12":      TaskDefMC(njobsIn=50, njobsOut=2),
+        "Hplus_taunu_s-channel_M120_Summer12":      TaskDefMC(njobsIn=50, njobsOut=2),
+        "Hplus_taunu_s-channel_M140_Summer12":      TaskDefMC(njobsIn=50, njobsOut=2),
+        "Hplus_taunu_s-channel_M150_Summer12":      TaskDefMC(njobsIn=50, njobsOut=2),
+        "Hplus_taunu_s-channel_M155_Summer12":      TaskDefMC(njobsIn=50, njobsOut=2),
+        "Hplus_taunu_s-channel_M160_Summer12":      TaskDefMC(njobsIn=50, njobsOut=2),
+
+        "HplusTB_M180_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "HplusTB_M190_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "HplusTB_M200_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "HplusTB_M220_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "HplusTB_M250_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "HplusTB_M300_Summer12":       TaskDefMC(njobsIn=50, njobsOut=2),
+
+        "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDefMC(njobsIn=20, njobsOut= 1),
+        "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDefMC(njobsIn=20, njobsOut= 1),
+        "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDefMC(njobsIn=20, njobsOut= 1),
+        "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDefMC(njobsIn=40, njobsOut= 1),
+        "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDefMC(njobsIn=80, njobsOut= 4),
+        "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDefMC(njobsIn=80, njobsOut=10),
+                                            
+        "WW_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut=10),
+        "WZ_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut=10),
+        "ZZ_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut=10),
+        "TTJets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=490, njobsOut=50),
+        "WJets_TuneZ2star_v1_Summer12":           TaskDefMC(njobsIn=200, njobsOut=10),
+        "WJets_TuneZ2star_v2_Summer12":           TaskDefMC(njobsIn=490, njobsOut=10),
+        "W1Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=300, njobsOut=20),
+        "W2Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=400, njobsOut=20),
+        "W3Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=490, njobsOut=10),
+        "W4Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=490, njobsOut=12),
+        "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDefMC(njobsIn=350, njobsOut= 2),
+        "T_t-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn= 50, njobsOut= 2),
+        "Tbar_t-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 50, njobsOut= 1),
+        "T_tW-channel_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut= 1),
+        "Tbar_tW-channel_TuneZ2star_Summer12":    TaskDefMC(njobsIn= 20, njobsOut= 1),
+        "T_s-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn= 10, njobsOut= 1),
+        "Tbar_s-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 10, njobsOut= 1),
+        }
+
+    # Set the multijet triggers on data
+    for datasetName, taskDef in defaultDefinitions.iteritems():
+        if datasetName.split("_")[0] != "MultiJet":
+            continue
+
+        triggers = []
+        hasOneRunRange = True
+        for triggerDict in [quadJetTriggers, quadPFJetBTagTriggers, quadJetBTagTriggers]:
+            if datasetName in triggerDict:
+                trg = triggerDict[datasetName]
+                triggers.extend(trg)
+                if len(trg) > 1:
+                    hasManyRunRanges = False
+        taskDef.update(TaskDef(triggerOR=triggers, triggerThrow=hasOneRunRange))
+
+    # Update the default definitions from the argument
+    updateTaskDefinitions(defaultDefinitions, updateDefinitions)
+
+    # Add pattuple Workflow for each dataset
+    for datasetName, taskDef in defaultDefinitions.iteritems():
+        dataset = datasets.getDataset(datasetName)
+
+        # Construct processing workflow
+        wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow="AOD", workflowName="pattuple_"+version, skimConfig=skim)
+
+        # Setup the publish name
+        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), "pattuple_"+version)
+        wf.addCrabLine("USER.publish_data_name = "+name)
+
+        # For MC, split by events, for data, split by lumi
+        if dataset.isMC():
+            wf.addCrabLine("CMSSW.total_number_of_events = -1")
+        else:
+            wf.addCrabLine("CMSSW.total_number_of_lumis = -1")
+
+        # Add the pattuple Workflow to Dataset
+        dataset.addWorkflow(wf)
+        # If DBS-dataset of the pattuple has been specified, add also analysis Workflow to Dataset
+        if wf.output != None:
+            commonArgs = {
+                "source": Source("pattuple_"+version),
+                "args": wf.args,
+                "skimConfig": skim
+                }
+
+            if dataset.isData():
+                # For data, construct one analysis workflow per trigger type
+                pd = datasetName.split("_")[0]
+                if pd == "Tau":
+                    dataset.addWorkflow(Workflow("analysis_taumet_"+version, triggerOR=wf.triggerOR, **commonArgs))
+                elif pd == "MultiJet":
+                    if datasetName in quadJetTriggers:
+                        dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=quadJetTriggers[datasetName], **commonArgs))
+                    if datasetName in quadJetBTagTriggers:
+                        dataset.addWorkflow(Workflow("analysis_quadjetbtag_"+version, triggerOR=quadJetBTagTriggers[datasetName], **commonArgs))
+                    if datasetName in quadPFJetBTagTriggers:
+                        dataset.addWorkflow(Workflow("analysis_quadpfjetbtag_"+version, triggerOR=quadPFJetBTagTriggers[datasetName], **commonArgs))
+                else:
+                    raise Exception("Unsupported PD name %s" % pd)
+            else:
+                # For MC, also construct one analysis workflow per trigger type
+                dataset.addWorkflow(Workflow("analysis_taumet_"+version, triggerOR=[mcTriggerTauMET], **commonArgs))
+                dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=[mcTriggerQuadJet], **commonArgs))
+                dataset.addWorkflow(Workflow("analysis_quadjetbtag_"+version, triggerOR=[mcTriggerQuadJetBTag], **commonArgs))
+                dataset.addWorkflow(Workflow("analysis_quadpfjet78btag_"+version, triggerOR=[mcTriggerQuadPFJet78BTag], **commonArgs))
+                dataset.addWorkflow(Workflow("analysis_quadpfjet82btag_"+version, triggerOR=[mcTriggerQuadPFJet82BTag], **commonArgs))
+
 
 ## Add v25b pattuples
 def addPattuple_v25b(datasets):
@@ -340,7 +616,7 @@ def addPattuple_v44_4(datasets):
     addPattuple_44X("v44_4", datasets, definitions)
 
 # Skeleton
-def addPattuple_vNEXT_SKELETON(datasets):
+def addPattuple_vNEXT_SKELETON_44X(datasets):
     definitions = {
         "Tau_160431-167913_2011A_Nov08":    TaskDef(""),
         "Tau_170722-173198_2011A_Nov08":    TaskDef(""),
@@ -397,3 +673,167 @@ def addPattuple_vNEXT_SKELETON(datasets):
         }
 
     #addPattuple_44X("VERSION", datasets, definitions)
+
+def addPattuple_v53_1(datasets):
+    definitions = {
+        "Tau_190456-190738_2012A_Jul13":    TaskDef(""),
+        "Tau_190782-190949_2012A_Aug06":    TaskDef(""),
+        "Tau_191043-193621_2012A_Jul13":    TaskDef(""),
+        "Tau_193834-196531_2012B_Jul13":    TaskDef(""),
+        "Tau_198022-198523_2012C_Aug24":    TaskDef(""),
+        "Tau_198941-200601_2012C_Prompt":   TaskDef(""),
+        "Tau_202792-203742_2012C_Prompt":   TaskDef(""),
+
+        "MultiJet_190456-190738_2012A_Jul13":    TaskDef(""),
+        "MultiJet_190782-190949_2012A_Aug06":    TaskDef(""),
+        "MultiJet_191043-193621_2012A_Jul13":    TaskDef(""),
+        "MultiJet_193834-194225_2012B_Jul13":    TaskDef(""),
+        "MultiJet_194270-196531_2012B_Jul13":    TaskDef(""),
+        "MultiJet_198022-198523_2012C_Aug24":    TaskDef(""),
+        "MultiJet_198941-200601_2012C_Prompt":   TaskDef(""),
+        "MultiJet_202792-203742_2012C_Prompt":   TaskDef(""),
+
+        "TTToHplusBWB_M80_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M90_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M100_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M120_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M140_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M150_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M155_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M160_Summer12":         TaskDef(""),
+
+        "TTToHplusBHminusB_M80_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M90_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M100_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M120_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M140_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M150_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M155_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M160_Summer12":    TaskDef(""),
+
+        "Hplus_taunu_s-channel_M80_Summer12":          TaskDef(""),
+        "Hplus_taunu_s-channel_M90_Summer12":          TaskDef(""),
+        "Hplus_taunu_s-channel_M100_Summer12":         TaskDef(""),
+        "Hplus_taunu_s-channel_M120_Summer12":         TaskDef(""),
+        "Hplus_taunu_s-channel_M140_Summer12":         TaskDef(""),
+        "Hplus_taunu_s-channel_M150_Summer12":         TaskDef(""),
+        "Hplus_taunu_s-channel_M155_Summer12":         TaskDef(""),
+        "Hplus_taunu_s-channel_M160_Summer12":         TaskDef(""),
+
+        "HplusTB_M180_Summer12":              TaskDef(""),
+        "HplusTB_M190_Summer12":              TaskDef(""),
+        "HplusTB_M200_Summer12":              TaskDef(""),
+        "HplusTB_M220_Summer12":              TaskDef(""),
+        "HplusTB_M250_Summer12":              TaskDef(""),
+        "HplusTB_M300_Summer12":              TaskDef(""),
+
+        "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDef(""),
+        "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDef(""),
+        "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDef(""),
+        "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDef(""),
+        "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDef(""),
+        "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDef(""),
+
+        "WW_TuneZ2star_Summer12":                 TaskDef(""),
+        "WZ_TuneZ2star_Summer12":                 TaskDef(""),
+        "ZZ_TuneZ2star_Summer12":                 TaskDef(""),
+        "TTJets_TuneZ2star_Summer12":             TaskDef(""),
+        "WJets_TuneZ2star_v1_Summer12":           TaskDef(""),
+        "WJets_TuneZ2star_v2_Summer12":           TaskDef(""),
+        "W1Jets_TuneZ2star_Summer12":             TaskDef(""),
+        "W2Jets_TuneZ2star_Summer12":             TaskDef(""),
+        "W3Jets_TuneZ2star_Summer12":             TaskDef(""),
+        "W4Jets_TuneZ2star_Summer12":             TaskDef(""),
+        "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDef(""),
+        "T_t-channel_TuneZ2star_Summer12":        TaskDef(""),
+        "Tbar_t-channel_TuneZ2star_Summer12":     TaskDef(""),
+        "T_tW-channel_TuneZ2star_Summer12":       TaskDef(""),
+        "Tbar_tW-channel_TuneZ2star_Summer12":    TaskDef(""),
+        "T_s-channel_TuneZ2star_Summer12":        TaskDef(""),
+        "Tbar_s-channel_TuneZ2star_Summer12":     TaskDef(""),
+        }
+
+    addPattuple_53X("v53_1", datasets, definitions)
+
+
+# Skeleton
+def addPattuple_vNEXT_SKELETON_53X(datasets):
+    definitions = {
+        "Tau_190456-190738_2012A_Jul13":    TaskDef(""),
+        "Tau_190782-190949_2012A_Aug06":    TaskDef(""),
+        "Tau_191043-193621_2012A_Jul13":    TaskDef(""),
+        "Tau_193834-196531_2012B_Jul13":    TaskDef(""),
+        "Tau_198022-198523_2012C_Aug24":    TaskDef(""),
+        "Tau_198941-200601_2012C_Prompt":   TaskDef(""),
+        "Tau_202792-203742_2012C_Prompt":   TaskDef(""),
+
+        "MultiJet_190456-190738_2012A_Jul13":    TaskDef(""),
+        "MultiJet_190782-190949_2012A_Aug06":    TaskDef(""),
+        "MultiJet_191043-193621_2012A_Jul13":    TaskDef(""),
+        "MultiJet_193834-194225_2012B_Jul13":    TaskDef(""),
+        "MultiJet_194270-196531_2012B_Jul13":    TaskDef(""),
+        "MultiJet_198022-198523_2012C_Aug24":    TaskDef(""),
+        "MultiJet_198941-200601_2012C_Prompt":   TaskDef(""),
+        "MultiJet_202792-203742_2012C_Prompt":   TaskDef(""),
+
+        "TTToHplusBWB_M80_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M90_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M100_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M120_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M140_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M150_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M155_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M160_Summer12":         TaskDef(""),
+
+        "TTToHplusBHminusB_M80_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M90_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M100_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M120_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M140_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M150_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M155_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M160_Summer12":    TaskDef(""),
+
+        "Hplus_taunu_s-channel_M80_Summer12":          TaskDef(""),
+        "Hplus_taunu_s-channel_M90_Summer12":          TaskDef(""),
+        "Hplus_taunu_s-channel_M100_Summer12":         TaskDef(""),
+        "Hplus_taunu_s-channel_M120_Summer12":         TaskDef(""),
+        "Hplus_taunu_s-channel_M140_Summer12":         TaskDef(""),
+        "Hplus_taunu_s-channel_M150_Summer12":         TaskDef(""),
+        "Hplus_taunu_s-channel_M155_Summer12":         TaskDef(""),
+        "Hplus_taunu_s-channel_M160_Summer12":         TaskDef(""),
+
+        "HplusTB_M180_Summer12":              TaskDef(""),
+        "HplusTB_M190_Summer12":              TaskDef(""),
+        "HplusTB_M200_Summer12":              TaskDef(""),
+        "HplusTB_M220_Summer12":              TaskDef(""),
+        "HplusTB_M250_Summer12":              TaskDef(""),
+        "HplusTB_M300_Summer12":              TaskDef(""),
+
+        "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDef(""),
+        "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDef(""),
+        "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDef(""),
+        "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDef(""),
+        "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDef(""),
+        "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDef(""),
+
+        "WW_TuneZ2star_Summer12":                 TaskDef(""),
+        "WZ_TuneZ2star_Summer12":                 TaskDef(""),
+        "ZZ_TuneZ2star_Summer12":                 TaskDef(""),
+        "TTJets_TuneZ2star_Summer12":             TaskDef(""),
+        "WJets_TuneZ2star_v1_Summer12":           TaskDef(""),
+        "WJets_TuneZ2star_v2_Summer12":           TaskDef(""),
+        "W1Jets_TuneZ2star_Summer12":             TaskDef(""),
+        "W2Jets_TuneZ2star_Summer12":             TaskDef(""),
+        "W3Jets_TuneZ2star_Summer12":             TaskDef(""),
+        "W4Jets_TuneZ2star_Summer12":             TaskDef(""),
+        "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDef(""),
+        "T_t-channel_TuneZ2star_Summer12":        TaskDef(""),
+        "Tbar_t-channel_TuneZ2star_Summer12":     TaskDef(""),
+        "T_tW-channel_TuneZ2star_Summer12":       TaskDef(""),
+        "Tbar_tW-channel_TuneZ2star_Summer12":    TaskDef(""),
+        "T_s-channel_TuneZ2star_Summer12":        TaskDef(""),
+        "Tbar_s-channel_TuneZ2star_Summer12":     TaskDef(""),
+        }
+
+    #addPattuple_53X("VERSION", datasets, definitions)

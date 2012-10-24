@@ -158,7 +158,7 @@ datasets.extend([
 DataDataset.energy = 8
 DataDataset.dataVersion = "53Xdata"
 MCDataset.energy = 8
-MCDataset.dataVersion = "53XdataS10"
+MCDataset.dataVersion = "53XmcS10"
 # Tau PD, tau+MET trigger for signal, tau trigger for MET trigger efficiency measurement
 datasets.extend([
     # Run2012A
@@ -169,12 +169,13 @@ datasets.extend([
     DataDataset("Tau_%s_2012B_Jul13",     reco="13Jul2012", runs=(193834, 196531), aod="/Tau/Run2012B-13Jul2012-v1/AOD"), # 25035330 events, 1874 files
     # Run212C
     DataDataset("Tau_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/Tau/Run2012C-24Aug2012-v1/AOD"), # 2212448 events, 190 files
-    DataDataset("Tau_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 200601), aod="/Tau/Run2012C-PromptReco-v2/AOD"), # 
-    DataDataset("Tau_%s_0T_2012C_Prompt", reco="PromptCv2", runs=(200961, 202504), aod="/Tau/Run2012C-PromptReco-v2/AOD"), # 
-    DataDataset("Tau_%s_2012C_Prompt",    reco="PromptCv2", runs=(202792, 203742), aod="/Tau/Run2012C-PromptReco-v2/AOD"), # 
+    DataDataset("Tau_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 200601), aod="/Tau/Run2012C-PromptReco-v2/AOD"), # 14040901 events, 1327 files
+    DataDataset("Tau_%s_0T_2012C_Prompt", reco="PromptCv2", runs=(200961, 202504), aod="/Tau/Run2012C-PromptReco-v2/AOD"), # 14232091 events, 1381 files
+    DataDataset("Tau_%s_2012C_Prompt",    reco="PromptCv2", runs=(202792, 203742), aod="/Tau/Run2012C-PromptReco-v2/AOD"), # 1324177 events, 149 files
     # Run2012D
     #DataDataset("Tau_%s_2012D_Prompt", reco="PromptDv1", runs=(203777, 205158), aod="/Tau/Run2012D-PromptReco-v1/AOD"), # ongoing datataking, so far 6458425 events, 691 files
 ])
+
 # MultiJet PD, QuadJet trigger for signal
 datasets.extend([
     # Run2012A
@@ -185,15 +186,15 @@ datasets.extend([
     DataDataset("MultiJet_%s_2012B_Jul13",     reco="13Jul2012", runs=(193834, 196531), aod="/MultiJet/Run2012B-13Jul2012-v1/AOD"), # 18675566 events, 1574 files
     # Run212C
     DataDataset("MultiJet_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/MultiJet/Run2012C-24Aug2012-v1/AOD"), # 2004842 events, 180 files
-    DataDataset("MultiJet_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 200601), aod="/MultiJet/Run2012C-PromptReco-v2/AOD"), # 
-    DataDataset("MultiJet_%s_0T_2012C_Prompt", reco="PromptCv2", runs=(200961, 202504), aod="/MultiJet/Run2012C-PromptReco-v2/AOD"), # 
-    DataDataset("MultiJet_%s_2012C_Prompt",    reco="PromptCv2", runs=(202792, 203742), aod="/MultiJet/Run2012C-PromptReco-v2/AOD"), # 
+    DataDataset("MultiJet_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 200601), aod="/MultiJet/Run2012C-PromptReco-v2/AOD"), # 13458312 events, 1339 files
+    DataDataset("MultiJet_%s_0T_2012C_Prompt", reco="PromptCv2", runs=(200961, 202504), aod="/MultiJet/Run2012C-PromptReco-v2/AOD"), # 12966632 events, 1334 files
+    DataDataset("MultiJet_%s_2012C_Prompt",    reco="PromptCv2", runs=(202792, 203742), aod="/MultiJet/Run2012C-PromptReco-v2/AOD"), # 1317502 events, 152 files
     # Run2012D
     #DataDataset("MultiJet_%s_2012D_Prompt", reco="PromptDv1", runs=(203777, 205158), aod="/MultiJet/Run2012D-PromptReco-v1/AOD"), # ongoing datataking, so far 6137697 events, 689 files
 ])
 datasets.splitDataByRuns("MultiJet_193834-196531_2012B_Jul13", [
-        (193834, 194225), # This has both BTagCSV and BTagIP triggers
-        (194270, 196531), # This has only BTagIP trigger
+        (193834, 194225), # This has both BTagCSV and BTagIP triggers, 4765979 events, 363 files
+        (194270, 196531), # This has only BTagIP trigger, 17488560 events, 1492 files
         ])
 
 # TauPlusX PD, IsoMu+MET, IsoMu+MET+Tau triggers for tau trigger efficiency measurement
@@ -304,12 +305,12 @@ datasets.extend([
     MCDataset("DYJetsToLL_M50_TuneZ2star_Summer12",     crossSection=3503.71, aod="/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 30 Mevt [3], NNLO
     # SingleTop Powheg
     # Cross sections from [2]
-    MCDataset("T_t-channel_TuneZ2star_Summer12",     crossSection=56.4, aod="/T_t-channel_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
-    MCDataset("Tbar_t-channel_TuneZ2star_Summer12",  crossSection=30.7, aod="/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
-    MCDataset("T_tW-channel_TuneZ2star_Summer12",    crossSection=11.1, aod="/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
-    MCDataset("Tbar_tW-channel_TuneZ2star_Summer12", crossSection=11.1, aod="/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
-    MCDataset("T_s-channel_TuneZ2star_Summer12",     crossSection=3.79, aod="/T_s-channel_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
-    MCDataset("Tbar_s-channel_TuneZ2star_Summer12",  crossSection=1.76, aod="/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
+    MCDataset("T_t-channel_TuneZ2star_Summer12",     crossSection=56.4, aod="/T_t-channel_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 3.8 Mevt
+    MCDataset("Tbar_t-channel_TuneZ2star_Summer12",  crossSection=30.7, aod="/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 1.9 Mevt
+    MCDataset("T_tW-channel_TuneZ2star_Summer12",    crossSection=11.1, aod="/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 500 kevt
+    MCDataset("Tbar_tW-channel_TuneZ2star_Summer12", crossSection=11.1, aod="/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 500 kevt
+    MCDataset("T_s-channel_TuneZ2star_Summer12",     crossSection=3.79, aod="/T_s-channel_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 260 kevt
+    MCDataset("Tbar_s-channel_TuneZ2star_Summer12",  crossSection=1.76, aod="/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 140 kevt
 ])
 
 
@@ -327,6 +328,7 @@ multicrabWorkflowsPileupNtuple.addNtuple_44X(datasets)
 multicrabWorkflowsPattuple.addPattuple_v25b(datasets)
 multicrabWorkflowsPattuple.addPattuple_v25c(datasets)
 multicrabWorkflowsPattuple.addPattuple_v44_4(datasets)
+multicrabWorkflowsPattuple.addPattuple_v53_1(datasets)
 
 # Add embedding definitions
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_4_2(datasets)
