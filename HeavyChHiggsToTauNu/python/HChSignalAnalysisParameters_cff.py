@@ -460,7 +460,12 @@ def setDataTriggerEfficiency(dataVersion, era, pset=triggerEfficiencyScaleFactor
         if dataVersion.isS4():
             pset.mcSelect = "Summer11"
         elif dataVersion.isS6():
-            pset.mcSelect = "Fall11"
+            if era == "Run2011A":
+                pset.mcSelect = "Fall11_PU_2011A"
+            if era == "Run2011B":
+                pset.mcSelect = "Fall11_PU_2011B"
+            if era == "Run2011AB":
+                pset.mcSelect = "Fall11_PU_2011AB"
         elif dataVersion.isHighPU():
 	    pset.mode = "disabled"
         else:
