@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions as HChOptions
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatching
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 import HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation as jesVariation
 from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
@@ -57,7 +58,7 @@ class ConfigBuilder:
                  applyTriggerScaleFactor = True, # Apply trigger scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
-                 useTriggerMatchedTaus = True,
+                 doTriggerMatching = True,
                  useJERSmearedJets = True,
                  useBTagDB = False,
                  customizeAnalysis = None,
@@ -86,7 +87,7 @@ class ConfigBuilder:
         self.applyTriggerScaleFactor = applyTriggerScaleFactor
         self.applyPUReweight = applyPUReweight
         self.tauSelectionOperatingMode = tauSelectionOperatingMode
-        self.useTriggerMatchedTaus = useTriggerMatchedTaus
+        self.doTriggerMatching = doTriggerMatching
         self.useJERSmearedJets = useJERSmearedJets
         self.useBTagDB = useBTagDB
         self.customizeAnalysis = customizeAnalysis
@@ -188,7 +189,7 @@ class ConfigBuilder:
         (process, additionalCounters) = self._buildCommon()
 
         # Import and customize HChSignalAnalysisParameters
-        param = self._buildParam()
+        param = self._buildParam(process)
 
         # Btagging DB
         self._useBTagDB(process, param)
@@ -362,7 +363,7 @@ class ConfigBuilder:
     ## Configure HChSignalAnalysisParameters_cff
     #
     # \return HChSignalAnalysisParameters_cff module object
-    def _buildParam(self):
+    def _buildParam(self, process):
         # Trigger from command line options
         import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
         param.overrideTriggerFromOptions(self.options)
@@ -372,10 +373,8 @@ class ConfigBuilder:
         param.setAllTauSelectionOperatingMode(self.tauSelectionOperatingMode)
 
         # Trigger-matched taus
-        if self.useTriggerMatchedTaus:
-            param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
-        else:
-            param.setAllTauSelectionSrcSelectedPatTaus()
+        if self.doTriggerMatching:
+            HChTriggerMatching.triggerMatchingInAnalysis(process, process.commonSequence, self.options.trigger, param)
 
         # JER-smeared jets
         if self.useJERSmearedJets:

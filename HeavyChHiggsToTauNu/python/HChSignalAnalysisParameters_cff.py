@@ -570,15 +570,16 @@ def forEachTauSelection(function):
 def setAllTauSelectionOperatingMode(mode):
     forEachTauSelection(lambda x: x.operatingMode.setValue(mode))
 
+def setAllTauSelectionSrc(src):
+    tauSelectionHPSTightTauBased.src        = src
+    tauSelectionHPSMediumTauBased.src       = src
+    tauSelectionHPSLooseTauBased.src        = src
+
 def setAllTauSelectionSrcSelectedPatTaus():
-    tauSelectionHPSTightTauBased.src        = "selectedPatTausHpsPFTau"
-    tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTau"
-    tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTau"
+    setAllTauSelectionSrc("selectedPatTausHpsPFTau")
 
 def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
-    tauSelectionHPSTightTauBased.src        = "patTausHpsPFTauTriggerMatched"
-    tauSelectionHPSMediumTauBased.src       = "patTausHpsPFTauTriggerMatched"
-    tauSelectionHPSLooseTauBased.src        = "patTausHpsPFTauTriggerMatched"
+    setAllTauSelectionSrc("patTausHpsPFTauTriggerMatched")
     
 def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, additionalCounters):
     from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis

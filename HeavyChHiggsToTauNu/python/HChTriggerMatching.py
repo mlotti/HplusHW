@@ -225,6 +225,8 @@ def createTauTriggerMatchingInAnalysis(trigger, taus, pathFilterMap=tauPathLastF
         elif throw:
             raise Exception("No filter found for path %s" % path)
 
+    print "Performing trigger matching for taus, tau collection %s, triggers %s" % (taus, ", ".join(trigger))
+
     module = cms.EDProducer("HPlusTauTriggerMatchSelector",
         tauSrc = cms.InputTag(taus),
         patTriggerEventSrc = cms.InputTag("patTriggerEvent"),
@@ -232,3 +234,26 @@ def createTauTriggerMatchingInAnalysis(trigger, taus, pathFilterMap=tauPathLastF
         filterNames = cms.vstring(matched)
     )
     return module
+
+
+def triggerMatchingInAnalysis(process, sequence, triggers, param):
+    tauTriggers = []
+    otherTriggers = []
+    for trg in triggers:
+        if trg in tauPathLastFilter:
+            tauTriggers.append(trg)
+        else:
+            otherTriggers.append(trg)
+    
+    # Consistenty checks
+    if len(otherTriggers) > 0:
+        raise Exception("Requested triggers '%s', for which there is no trigger matching support at the moment." % ", ".join(otherTriggers))
+
+    if len(tauTriggers) > 0:
+        tauSrc = param.tauSelectionHPSTightTauBased.src.value()
+        label = tauSrc.split(":")[0] + "TriggerMatched"
+        module = createTauTriggerMatchingInAnalysis(triggers, tauSrc)
+        sequence += module
+
+        setattr(process, label, module)
+        param.setAllTauSelectionSrc(label)
