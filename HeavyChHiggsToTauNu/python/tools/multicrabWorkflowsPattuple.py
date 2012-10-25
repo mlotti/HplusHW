@@ -703,7 +703,7 @@ def addPattuple_v53_1(datasets):
         "TTToHplusBWB_M160_Summer12":         TaskDef(""),
 
         "TTToHplusBHminusB_M80_Summer12":     TaskDef(""),
-        "TTToHplusBHminusB_M90_Summer12":     TaskDef(""),
+#        "TTToHplusBHminusB_M90_Summer12":     TaskDef(""),
         "TTToHplusBHminusB_M100_Summer12":    TaskDef(""),
         "TTToHplusBHminusB_M120_Summer12":    TaskDef(""),
         "TTToHplusBHminusB_M140_Summer12":    TaskDef(""),

@@ -83,7 +83,7 @@ def addNtuple_53X(datasets):
         "TTToHplusBWB_M160_Summer12":             TaskDef(njobsIn=1),
 
         "TTToHplusBHminusB_M80_Summer12":         TaskDef(njobsIn=1),
-        "TTToHplusBHminusB_M90_Summer12":         TaskDef(njobsIn=1),
+#        "TTToHplusBHminusB_M90_Summer12":         TaskDef(njobsIn=1),
         "TTToHplusBHminusB_M100_Summer12":        TaskDef(njobsIn=1),
         "TTToHplusBHminusB_M120_Summer12":        TaskDef(njobsIn=1),
         "TTToHplusBHminusB_M140_Summer12":        TaskDef(njobsIn=1),
