@@ -47,161 +47,63 @@ import styles
 # used in plots._legendLabels and plots._plotStyles. The mapping is
 # used in the mergeRenameReorderForDataMC() function.
 _physicalToLogical = {
-    "TTToHplusBWB_M90_Winter10":  "TTToHplusBWB_M90", 
-    "TTToHplusBWB_M100_Winter10": "TTToHplusBWB_M100",
-    "TTToHplusBWB_M120_Winter10": "TTToHplusBWB_M120",
-    "TTToHplusBWB_M140_Winter10": "TTToHplusBWB_M140",
-    "TTToHplusBWB_M160_Winter10": "TTToHplusBWB_M160",
-    "TTToHplusBWB_M80_Spring11":  "TTToHplusBWB_M80",
-    "TTToHplusBWB_M90_Spring11":  "TTToHplusBWB_M90",
-    "TTToHplusBWB_M100_Spring11": "TTToHplusBWB_M100",
-    "TTToHplusBWB_M120_Spring11": "TTToHplusBWB_M120",
-    "TTToHplusBWB_M140_Spring11": "TTToHplusBWB_M140",
-    "TTToHplusBWB_M150_Spring11": "TTToHplusBWB_M150",
-    "TTToHplusBWB_M155_Spring11": "TTToHplusBWB_M155",
-    "TTToHplusBWB_M160_Spring11": "TTToHplusBWB_M160",
-    "TTToHplusBWB_M80_Summer11":  "TTToHplusBWB_M80",
-    "TTToHplusBWB_M90_Summer11":  "TTToHplusBWB_M90",
-    "TTToHplusBWB_M100_Summer11": "TTToHplusBWB_M100",
-    "TTToHplusBWB_M120_Summer11": "TTToHplusBWB_M120",
-    "TTToHplusBWB_M140_Summer11": "TTToHplusBWB_M140",
-    "TTToHplusBWB_M150_Summer11": "TTToHplusBWB_M150",
-    "TTToHplusBWB_M155_Summer11": "TTToHplusBWB_M155",
-    "TTToHplusBWB_M160_Summer11": "TTToHplusBWB_M160",
-    "TTToHplusBWB_M80_Fall11":  "TTToHplusBWB_M80",
-    "TTToHplusBWB_M90_Fall11":  "TTToHplusBWB_M90",
-    "TTToHplusBWB_M100_Fall11": "TTToHplusBWB_M100",
-    "TTToHplusBWB_M120_Fall11": "TTToHplusBWB_M120",
-    "TTToHplusBWB_M140_Fall11": "TTToHplusBWB_M140",
-    "TTToHplusBWB_M150_Fall11": "TTToHplusBWB_M150",
-    "TTToHplusBWB_M155_Fall11": "TTToHplusBWB_M155",
-    "TTToHplusBWB_M160_Fall11": "TTToHplusBWB_M160",
-
-    "TTToHplusBHminusB_M80_Spring11": "TTToHplusBHminusB_M80",
-    "TTToHplusBHminusB_M100_Spring11": "TTToHplusBHminusB_M100",
-    "TTToHplusBHminusB_M120_Spring11": "TTToHplusBHminusB_M120",
-    "TTToHplusBHminusB_M140_Spring11": "TTToHplusBHminusB_M140",
-    "TTToHplusBHminusB_M150_Spring11": "TTToHplusBHminusB_M150",
-    "TTToHplusBHminusB_M155_Spring11": "TTToHplusBHminusB_M155",
-    "TTToHplusBHminusB_M160_Spring11": "TTToHplusBHminusB_M160",
-    "TTToHplusBHminusB_M80_Summer11": "TTToHplusBHminusB_M80",
-    "TTToHplusBHminusB_M90_Summer11": "TTToHplusBHminusB_M90",
-    "TTToHplusBHminusB_M100_Summer11": "TTToHplusBHminusB_M100",
-    "TTToHplusBHminusB_M120_Summer11": "TTToHplusBHminusB_M120",
-    "TTToHplusBHminusB_M140_Summer11": "TTToHplusBHminusB_M140",
-    "TTToHplusBHminusB_M150_Summer11": "TTToHplusBHminusB_M150",
-    "TTToHplusBHminusB_M155_Summer11": "TTToHplusBHminusB_M155",
-    "TTToHplusBHminusB_M160_Summer11": "TTToHplusBHminusB_M160",
-    "TTToHplusBHminusB_M80_Fall11": "TTToHplusBHminusB_M80",
-    "TTToHplusBHminusB_M90_Fall11": "TTToHplusBHminusB_M90",
-    "TTToHplusBHminusB_M100_Fall11": "TTToHplusBHminusB_M100",
-    "TTToHplusBHminusB_M120_Fall11": "TTToHplusBHminusB_M120",
-    "TTToHplusBHminusB_M140_Fall11": "TTToHplusBHminusB_M140",
-    "TTToHplusBHminusB_M150_Fall11": "TTToHplusBHminusB_M150",
-    "TTToHplusBHminusB_M155_Fall11": "TTToHplusBHminusB_M155",
-    "TTToHplusBHminusB_M160_Fall11": "TTToHplusBHminusB_M160",
-
-    "HplusTB_M180_Summer11": "HplusTB_M180",
-    "HplusTB_M190_Summer11": "HplusTB_M190",
-    "HplusTB_M200_Summer11": "HplusTB_M200",
-    "HplusTB_M220_Summer11": "HplusTB_M220",
-    "HplusTB_M250_Summer11": "HplusTB_M250",
-    "HplusTB_M300_Summer11": "HplusTB_M300",
-    "HplusTB_M180_Fall11": "HplusTB_M180",
-    "HplusTB_M190_Fall11": "HplusTB_M190",
-    "HplusTB_M200_Fall11": "HplusTB_M200",
-    "HplusTB_M220_Fall11": "HplusTB_M220",
-    "HplusTB_M250_Fall11": "HplusTB_M250",
-    "HplusTB_M300_Fall11": "HplusTB_M300",
-
-    "TTJets_TuneD6T_Winter10": "TTJets",
-    "TTJets_TuneZ2_Winter10": "TTJets",
-    "TTJets_TuneZ2_Spring11": "TTJets",
-    "TTJets_TuneZ2_Summer11": "TTJets",
-    "TTJets_TuneZ2_Fall11": "TTJets",
     "TT_TuneZ2_Summer11": "TT",
-
-    "WJets_TuneD6T_Winter10": "WJets",
-    "WJets_TuneZ2_Winter10": "WJets",
-    "WJets_TuneZ2_Winter10_noPU": "WJets",
-    "WJets_TuneZ2_Spring11": "WJets",
-    "WJets_TuneZ2_Summer11": "WJets",
-    "WJets_TuneZ2_Fall11": "WJets",
 
     "WToTauNu_TuneZ2_Summer11": "WToTauNu",
 
     "W3Jets_TuneZ2_Summer11": "W3Jets",
-
-    "DYJetsToLL_TuneZ2_Winter10":          "DYJetsToLL_M50",
-    "DYJetsToLL_M50_TuneZ2_Winter10":      "DYJetsToLL_M50",
-    "DYJetsToLL_M10to50_TuneD6T_Winter10": "DYJetsToLL_M10to50",
-    "DYJetsToLL_M50_TuneD6T_Winter10":     "DYJetsToLL_M50",
-    "DYJetsToLL_M50_TuneZ2_Spring11":      "DYJetsToLL_M50",
-    "DYJetsToLL_M50_TuneZ2_Summer11":      "DYJetsToLL_M50",
-    "DYJetsToLL_M50_TuneZ2_Fall11":      "DYJetsToLL_M50",
-
-    "TToBLNu_s-channel_TuneZ2_Winter10": "TToBLNu_s-channel",
-    "TToBLNu_t-channel_TuneZ2_Winter10": "TToBLNu_t-channel",
-    "TToBLNu_tW-channel_TuneZ2_Winter10": "TToBLNu_tW-channel",
-    "TToBLNu_s-channel_TuneZ2_Spring11": "TToBLNu_s-channel",
-    "TToBLNu_t-channel_TuneZ2_Spring11": "TToBLNu_t-channel",
-    "TToBLNu_tW-channel_TuneZ2_Spring11": "TToBLNu_tW-channel",
-    "T_t-channel_TuneZ2_Summer11":     "T_t-channel",
-    "Tbar_t-channel_TuneZ2_Summer11":  "Tbar_t-channel",
-    "T_tW-channel_TuneZ2_Summer11":    "T_tW-channel",
-    "Tbar_tW-channel_TuneZ2_Summer11": "Tbar_tW-channel",
-    "T_s-channel_TuneZ2_Summer11":     "T_s-channel",
-    "Tbar_s-channel_TuneZ2_Summer11":  "Tbar_s-channel",
-    "T_t-channel_TuneZ2_Fall11":     "T_t-channel",
-    "Tbar_t-channel_TuneZ2_Fall11":  "Tbar_t-channel",
-    "T_tW-channel_TuneZ2_Fall11":    "T_tW-channel",
-    "Tbar_tW-channel_TuneZ2_Fall11": "Tbar_tW-channel",
-    "T_s-channel_TuneZ2_Fall11":     "T_s-channel",
-    "Tbar_s-channel_TuneZ2_Fall11":  "Tbar_s-channel",
-
-    "QCD_Pt30to50_TuneZ2_Winter10":   "QCD_Pt30to50",
-    "QCD_Pt50to80_TuneZ2_Winter10":   "QCD_Pt50to80",
-    "QCD_Pt80to120_TuneZ2_Winter10":  "QCD_Pt80to120",
-    "QCD_Pt120to170_TuneZ2_Winter10": "QCD_Pt120to170",
-    "QCD_Pt170to300_TuneZ2_Winter10": "QCD_Pt170to300",
-    "QCD_Pt300to470_TuneZ2_Winter10": "QCD_Pt300to470",
-    "QCD_Pt30to50_TuneZ2_Spring11":   "QCD_Pt30to50",
-    "QCD_Pt50to80_TuneZ2_Spring11":   "QCD_Pt50to80",
-    "QCD_Pt80to120_TuneZ2_Spring11":  "QCD_Pt80to120",
-    "QCD_Pt120to170_TuneZ2_Spring11": "QCD_Pt120to170",
-    "QCD_Pt170to300_TuneZ2_Spring11": "QCD_Pt170to300",
-    "QCD_Pt300to470_TuneZ2_Spring11": "QCD_Pt300to470",
-    "QCD_Pt30to50_TuneZ2_Summer11":   "QCD_Pt30to50",
-    "QCD_Pt50to80_TuneZ2_Summer11":   "QCD_Pt50to80",
-    "QCD_Pt80to120_TuneZ2_Summer11":  "QCD_Pt80to120",
-    "QCD_Pt120to170_TuneZ2_Summer11": "QCD_Pt120to170",
-    "QCD_Pt170to300_TuneZ2_Summer11": "QCD_Pt170to300",
-    "QCD_Pt300to470_TuneZ2_Summer11": "QCD_Pt300to470",
-    "QCD_Pt30to50_TuneZ2_Fall11":   "QCD_Pt30to50",
-    "QCD_Pt50to80_TuneZ2_Fall11":   "QCD_Pt50to80",
-    "QCD_Pt80to120_TuneZ2_Fall11":  "QCD_Pt80to120",
-    "QCD_Pt120to170_TuneZ2_Fall11": "QCD_Pt120to170",
-    "QCD_Pt170to300_TuneZ2_Fall11": "QCD_Pt170to300",
-    "QCD_Pt300to470_TuneZ2_Fall11": "QCD_Pt300to470",
-
-    "QCD_Pt20_MuEnriched_TuneZ2_Winter10": "QCD_Pt20_MuEnriched",
-    "QCD_Pt20_MuEnriched_TuneZ2_Spring11": "QCD_Pt20_MuEnriched",
-    "QCD_Pt20_MuEnriched_TuneZ2_Summer11": "QCD_Pt20_MuEnriched",
-    "QCD_Pt20_MuEnriched_TuneZ2_Fall11": "QCD_Pt20_MuEnriched",
-
-    "WW_TuneZ2_Winter10": "WW",
-    "WZ_TuneZ2_Winter10": "WZ",
-    "ZZ_TuneZ2_Winter10": "ZZ",
-    "WW_TuneZ2_Spring11": "WW",
-    "WZ_TuneZ2_Spring11": "WZ",
-    "ZZ_TuneZ2_Spring11": "ZZ",
-    "WW_TuneZ2_Summer11": "WW",
-    "WZ_TuneZ2_Summer11": "WZ",
-    "ZZ_TuneZ2_Summer11": "ZZ",
-    "WW_TuneZ2_Fall11": "WW",
-    "WZ_TuneZ2_Fall11": "WZ",
-    "ZZ_TuneZ2_Fall11": "ZZ",
 }
+for mcEra in ["Summer11", "Fall11"]:
+    _physicalToLogical.update({
+    "TTToHplusBWB_M80_%s"%mcEra:  "TTToHplusBWB_M80",
+    "TTToHplusBWB_M90_%s"%mcEra:  "TTToHplusBWB_M90",
+    "TTToHplusBWB_M100_%s"%mcEra: "TTToHplusBWB_M100",
+    "TTToHplusBWB_M120_%s"%mcEra: "TTToHplusBWB_M120",
+    "TTToHplusBWB_M140_%s"%mcEra: "TTToHplusBWB_M140",
+    "TTToHplusBWB_M150_%s"%mcEra: "TTToHplusBWB_M150",
+    "TTToHplusBWB_M155_%s"%mcEra: "TTToHplusBWB_M155",
+    "TTToHplusBWB_M160_%s"%mcEra: "TTToHplusBWB_M160",
+
+    "TTToHplusBHminusB_M80_%s"%mcEra: "TTToHplusBHminusB_M80",
+    "TTToHplusBHminusB_M90_%s"%mcEra: "TTToHplusBHminusB_M90",
+    "TTToHplusBHminusB_M100_%s"%mcEra: "TTToHplusBHminusB_M100",
+    "TTToHplusBHminusB_M120_%s"%mcEra: "TTToHplusBHminusB_M120",
+    "TTToHplusBHminusB_M140_%s"%mcEra: "TTToHplusBHminusB_M140",
+    "TTToHplusBHminusB_M150_%s"%mcEra: "TTToHplusBHminusB_M150",
+    "TTToHplusBHminusB_M155_%s"%mcEra: "TTToHplusBHminusB_M155",
+    "TTToHplusBHminusB_M160_%s"%mcEra: "TTToHplusBHminusB_M160",
+
+    "HplusTB_M180_%s"%mcEra: "HplusTB_M180",
+    "HplusTB_M190_%s"%mcEra: "HplusTB_M190",
+    "HplusTB_M200_%s"%mcEra: "HplusTB_M200",
+    "HplusTB_M220_%s"%mcEra: "HplusTB_M220",
+    "HplusTB_M250_%s"%mcEra: "HplusTB_M250",
+    "HplusTB_M300_%s"%mcEra: "HplusTB_M300",
+
+    "TTJets_TuneZ2_%s"%mcEra: "TTJets",
+    "WJets_TuneZ2_%s"%mcEra: "WJets",
+    "DYJetsToLL_M50_TuneZ2_%s"%mcEra:      "DYJetsToLL_M50",
+
+    "QCD_Pt30to50_TuneZ2_%s"%mcEra:   "QCD_Pt30to50",
+    "QCD_Pt50to80_TuneZ2_%s"%mcEra:   "QCD_Pt50to80",
+    "QCD_Pt80to120_TuneZ2_%s"%mcEra:  "QCD_Pt80to120",
+    "QCD_Pt120to170_TuneZ2_%s"%mcEra: "QCD_Pt120to170",
+    "QCD_Pt170to300_TuneZ2_%s"%mcEra: "QCD_Pt170to300",
+    "QCD_Pt300to470_TuneZ2_%s"%mcEra: "QCD_Pt300to470",
+
+    "QCD_Pt20_MuEnriched_TuneZ2_%s"%mcEra: "QCD_Pt20_MuEnriched",
+
+    "T_t-channel_TuneZ2_%s"%mcEra:     "T_t-channel",
+    "Tbar_t-channel_TuneZ2_%s"%mcEra:  "Tbar_t-channel",
+    "T_tW-channel_TuneZ2_%s"%mcEra:    "T_tW-channel",
+    "Tbar_tW-channel_TuneZ2_%s"%mcEra: "Tbar_tW-channel",
+    "T_s-channel_TuneZ2_%s"%mcEra:     "T_s-channel",
+    "Tbar_s-channel_TuneZ2_%s"%mcEra:  "Tbar_s-channel",
+
+    "WW_TuneZ2_%s"%mcEra: "WW",
+    "WZ_TuneZ2_%s"%mcEra: "WZ",
+    "ZZ_TuneZ2_%s"%mcEra: "ZZ",
+    })
 
 ## Map the datasets to be merged to the name of the merged dataset.
 _signalMerge = [
@@ -740,6 +642,8 @@ def _createHisto(rootObject, **kwargs):
         return histograms.Histo(rootObject, rootObject.GetName(), **kwargs)
     elif isinstance(rootObject, ROOT.TGraph):
         return histograms.HistoGraph(rootObject, rootObject.GetName(), **kwargs)
+    elif isinstance(rootObject, ROOT.TEfficiency):
+        return histograms.HistoEfficiency(rootObject, rootObject.GetName(), **kwargs)
     elif not isinstance(rootObject, histograms.Histo):
         raise Exception("rootObject is not TH1, TGraph, nor histograms.Histo, it is %s" % type(rootObject).__name__)
 
@@ -770,19 +674,19 @@ class PlotBase:
 
                 self.histoMgr = histograms.HistoManager(datasetRootHistos = datasetRootHistos)
             else:
-                histoList = datasetRootHistos
-                if isinstance(datasetRootHistos[0], ROOT.TH1):
-                    for i, h in enumerate(datasetRootHistos[1:]):
-                        if not isinstance(h, ROOT.TH1):
-                            raise Exception("Input types can't be a mixture of ROOT.TH1 and something, datasetRootHistos[%d] is %s" % (i, type(h).__name__))
-                    histoList = [histograms.Histo(th1, th1.GetName()) for th1 in datasetRootHistos]
-                elif isinstance(datasetRootHistos[0], ROOT.TGraph):
-                    for i, h in enumerate(datasetRootHistos[1:]):
-                        if not isinstance(h, ROOT.TGraph):
-                            raise Exception("Input types can't be a mixture of ROOT.TGraph and someting, datasetRootHistos[%d] is %s" % (i, type(h).__name__))
-                        if len(h.GetName()) == 0:
-                            raise Exception("For TGraph input, the graph name must be set with TGraph.SetName() (name for datasetRootHistos[%d] is empty)" % i)
-                    histoList = [histograms.HistoGraph(gr, gr.GetName()) for gr in datasetRootHistos]
+                histoList = [_createHisto(h) for h in datasetRootHistos]
+                # if isinstance(datasetRootHistos[0], ROOT.TH1):
+                #     for i, h in enumerate(datasetRootHistos[1:]):
+                #         if not isinstance(h, ROOT.TH1):
+                #             raise Exception("Input types can't be a mixture of ROOT.TH1 and something, datasetRootHistos[%d] is %s" % (i, type(h).__name__))
+                #     histoList = [histograms.Histo(th1, th1.GetName()) for th1 in datasetRootHistos]
+                # elif isinstance(datasetRootHistos[0], ROOT.TGraph) or isinstance(datasetRootHistos[0], ROOT.TEfficiency):
+                #     for i, h in enumerate(datasetRootHistos[1:]):
+                #         if not isinstance(h, ROOT.TGraph) and not isinstance(h, ROOT.TEfficiency):
+                #             raise Exception("Input types can't be a mixture of ROOT.TGraph/ROOT.TEfficiency and someting, datasetRootHistos[%d] is %s" % (i, type(h).__name__))
+                #         if len(h.GetName()) == 0:
+                #             raise Exception("For TGraph/TEfficiency input, the graph name must be set with TGraph.SetName() (name for datasetRootHistos[%d] is empty)" % i)
+                #     histoList = [histograms.HistoGraph(gr, gr.GetName()) for gr in datasetRootHistos]
 
                 self.histoMgr = histograms.HistoManager()
                 for histo in histoList:
@@ -1688,9 +1592,11 @@ class PlotDrawer:
     # \param ratio               Should the ratio pad be drawn?
     # \param ratioYlabel         The Y axis title for the ratio pad (None for default)
     # \param ratioInvert         Should the ratio be inverted?
+    # \param ratioIsBinomial     Is the ratio binomal (i.e. use Clopper-Pearson?)
     # \param opts                Default frame bounds linear scale (see histograms._boundsArgs())
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
+    # \param customizeBeforeDraw Function to customize the plot before drawing it
     # \param addLuminosityText   Should luminosity text be drawn?
     # \param stackMCHistograms   Should MC histograms be stacked?
     # \param addMCUncertainty    Should MC total (stat) uncertainty be drawn()
@@ -1701,9 +1607,11 @@ class PlotDrawer:
                  ratio=False,
                  ratioYlabel=None,
                  ratioInvert=False,
+                 ratioIsBinomial=False,
                  opts={},
                  optsLog={},
                  opts2={},
+                 customizeBeforeDraw=None,
                  addLuminosityText=False,
                  stackMCHistograms=False,
                  addMCUncertainty=False,
@@ -1714,12 +1622,14 @@ class PlotDrawer:
         self.ratioDefault = ratio
         self.ratioYlabel = ratioYlabel
         self.ratioInvert = ratioInvert
+        self.ratioIsBinomial = ratioIsBinomial
         self.optsDefault = {"ymin": 0, "ymaxfactor": 1.1}
         self.optsDefault.update(opts)
         self.optsLogDefault = {"ymin": 0.01, "ymaxfactor": 2}
         self.optsLogDefault.update(optsLog)
         self.opts2Default = {"ymin": 0.5, "ymax": 1.5}
         self.opts2Default.update(opts2)
+        self.customizeBeforeDraw = customizeBeforeDraw
         self.addLuminosityTextDefault = addLuminosityText
         self.stackMCHistogramsDefault = stackMCHistograms
         self.addMCUncertainty = addMCUncertainty
@@ -1802,6 +1712,7 @@ class PlotDrawer:
     # \li\a ratio        Should ratio pad be drawn? (default given in __init__()/setDefaults())
     # \li\a ratioYlabel  The Y axis title for the ratio pad (None for default)
     # \li\a ratioInvert  Should the ratio be inverted?
+    # \li\a ratioIsBinomial  Is the ratio a binomial?
     def createFrame(self, p, name, **kwargs):
         log = kwargs.get("log", self.logDefault)
 
@@ -1828,6 +1739,8 @@ class PlotDrawer:
             args["createRatio"] = True
         if kwargs.get("ratioInvert", self.ratioInvert):
             args["invertRatio"] = True
+        if kwargs.get("ratioIsBinomial", self.ratioIsBinomial):
+            args["ratioIsBinomial"] = True
 
         # Create frame
         p.createFrame(name, **args)
@@ -1902,6 +1815,7 @@ class PlotDrawer:
     # <b>Keyword arguments</b>
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
+    # \lu\a customieBeforeDraw  Function to customize the plot object before drawing the plopt
     # \li\a cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis (default given in __init__()/setDefaults())
     #
     # In addition of drawing and saving the plot, handles the X and Y
@@ -1914,6 +1828,11 @@ class PlotDrawer:
 
         p.frame.GetXaxis().SetTitle(xlabel)
         p.frame.GetYaxis().SetTitle(ylab)
+
+        customize = kwargs.get("customizeBeforeDraw", self.customizeBeforeDraw)
+        if customize != None:
+            customize(p)
+        
         p.draw()
         cmsText = kwargs.get("cmsText", self.cmsText)
         histograms.addCmsPreliminaryText(text=cmsText)

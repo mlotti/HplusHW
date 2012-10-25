@@ -37,6 +37,7 @@ def createEDFilter(param):
         vertexWeight = param.vertexWeight.clone(),
         vertexWeightReader = param.vertexWeightReader.clone(),
         GenParticleAnalysis = param.GenParticleAnalysis.clone(),
+        embeddingMuonEfficiency = param.embeddingMuonEfficiency.clone(),
         Tree = param.tree.clone(),
         eventCounter = param.eventCounter.clone(),
         tauEmbeddingStatus = cms.untracked.bool(False)

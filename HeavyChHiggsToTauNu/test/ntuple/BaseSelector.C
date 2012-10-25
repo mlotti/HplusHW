@@ -88,6 +88,7 @@ public:
   ClassDef(SelectorImp,0);
 
   void setOutput(TDirectory *dir);
+  void setPrintStatus(bool status);
 
 private:
   void printStatus();
@@ -103,6 +104,7 @@ private:
   Long64_t fPrintStep;
   double fPrintLastTime;
   int fPrintAdaptCount;
+  bool fPrintStatus;
 };
 
 ClassImp(SelectorImp)
@@ -110,7 +112,7 @@ ClassImp(SelectorImp)
 SelectorImp::SelectorImp(Long64_t entries, bool isMC, BaseSelector *selector):
   fEntries(entries), fProcessed(0),
   fChain(0), fSelector(selector),
-  fPrintStep(20000), fPrintLastTime(0), fPrintAdaptCount(0)
+  fPrintStep(20000), fPrintLastTime(0), fPrintAdaptCount(0), fPrintStatus(true)
 {
   selector->setMCStatus(isMC);
 }
@@ -213,7 +215,13 @@ void SelectorImp::setOutput(TDirectory *dir) {
   fSelector->setOutputExt(dir);
 }
 
+void SelectorImp::setPrintStatus(bool status) {
+  fPrintStatus = status;
+}
+
 void SelectorImp::printStatus() {
+  if(!fPrintStatus) return;
+
   if (fProcessed % fPrintStep == 0) {
     double myFraction = static_cast<double>(fProcessed) / static_cast<double>(fEntries);
     std::cout << "\rProcessing ... ";

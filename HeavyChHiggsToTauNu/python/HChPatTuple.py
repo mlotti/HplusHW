@@ -2,7 +2,6 @@ import FWCore.ParameterSet.Config as cms
 import copy
 
 from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection, switchJetCollection
-from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
 import PhysicsTools.PatAlgos.tools.tauTools as tauTools
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
@@ -76,6 +75,9 @@ class PATBuilder:
             # Selects the first primary vertex, applies the quality cuts to it
             # Applies quality cuts to all vertices too
             HChPrimaryVertex.addPrimaryVertexSelection(process, sequence)
+            if options.tauEmbeddingInput != 0:
+                # for embedding input, do vertex object selection for original event too
+                HChPrimaryVertex.addPrimaryVertexSelection(process, sequence, srcProcess=dataVersion.getRecoProcess(), postfix="Original")
 
             if options.doTauHLTMatchingInAnalysis != 0:
                 raise Exception("doTauLHTMatchingInAnalysis is not supported at the moment")
@@ -377,13 +379,13 @@ class StandardPATBuilder(PATBuilderBase):
         # Add PF isolation for electrons and muons
         if self.doPatElectronMuon:
             pfTools.usePFIso(self.process)
-        # Apparently for data the sequences are such that the PFIso
-        # sequences do not end up in patDefaultSequence
-        if self.dataVersion.isData():
-            self.process.patDefaultSequence.insert(0,
-                                                   self.process.pfParticleSelectionSequence +
-                                                   self.process.eleIsoSequence +
-                                                   self.process.muIsoSequence)
+            # Apparently for data the sequences are such that the PFIso
+            # sequences do not end up in patDefaultSequence
+            if self.dataVersion.isData():
+                self.process.patDefaultSequence.insert(0,
+                                                       self.process.pfParticleSelectionSequence +
+                                                       self.process.eleIsoSequence +
+                                                       self.process.muIsoSequence)
 
         # Customize physics objects
         if self.doPatElectronMuon:
@@ -733,9 +735,19 @@ def addStandardPAT(process, dataVersion, doPatTrigger=True, patArgs={}, pvSelect
     out = None
     outdict = process.outputModules_()
     outputCommands = []
+    hasOut = False
     if outdict.has_key(outputModuleName):
         out = outdict[outputModuleName]
         outputCommands = out.outputCommands[:]
+        hasOut = True
+    else:
+        # Hack to not to crash if something in PAT assumes process.out
+        process.out = cms.OutputModule("PoolOutputModule",
+            fileName = cms.untracked.string("dummy.root"),
+            outputCommands = cms.untracked.vstring()
+        )
+        out = process.out
+        
 
     # Out usual event content
     outputCommands.extend([
@@ -844,10 +856,12 @@ def addStandardPAT(process, dataVersion, doPatTrigger=True, patArgs={}, pvSelect
 
 
     # Adjust output commands
-    if out != None:
+    if hasOut:
         print "Finishing addStandardPAT(), outputCommands are:"
         print "  "+"\n  ".join(outputCommands)
         out.outputCommands = outputCommands
+    else:
+        del process.out
 
     ### Construct the sequences
     sequence *= process.patDefaultSequence

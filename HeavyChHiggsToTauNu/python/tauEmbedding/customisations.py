@@ -7,11 +7,13 @@ PF2PATVersion = "" # empty for standard PAT
 #PF2PATVersion = "PFlow"
 #PF2PATVersion = "PFlowChs"
 
+skimProcessName = "MUONSKIM"
+
 def getAllPatMuons():
     if PF2PATVersion == "":
-        return "selectedPatMuons::MUONSKIM"
+        return "selectedPatMuons::"+skimProcessName
     else:
-        return "selectedPatMuons"+PF2PATVersion+"All::MUONSKIM" # We have to pick the ones of the original event
+        return "selectedPatMuons"+PF2PATVersion+"All::"+skimProcessName # We have to pick the ones of the original event
 tauEmbeddingMuons = "tauEmbeddingMuons"
 
 def getAllPatTaus():
@@ -25,6 +27,10 @@ jetSelection += "&& numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99"
 jetSelection += "&& neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFraction < 0.99"
 jetSelection += "&& chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0"
 jetSelection += "&& userFloat('Beta') > 0.2"
+
+generatorTauPt = 40
+generatorTauPt = 41
+generatorTauSelection = "abs(pdgId()) == 15 && pt() > %d && abs(eta()) < 2.1 && abs(mother().pdgId()) != 15"
 
 def customiseParamForTauEmbedding(param, options, dataVersion):
     # Change the triggers to muon
@@ -44,6 +50,9 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
 
     param.trigger.selectionType = "disabled"
     param.triggerEfficiencyScaleFactor.mode = "disabled"
+    # For data, we have "select" all run periods for tau+MET trigger efficiency
+    if dataVersion.isData():
+        param.triggerEfficiencyScaleFactor.dataSelect = param.triggerEfficiencyScaleFactor.dataParameters.parameterNames_()
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets"+PF2PATVersion) # these are really AK5PF
@@ -51,7 +60,9 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
 
     # Use the muons where the original muon is removed in global muon veto
     param.GlobalMuonVeto.MuonCollectionName.setModuleLabel("selectedPatMuonsEmbeddingMuonCleaned")
-    param.GlobalElectronVeto.ElectronCollectionName.setProcessName("MUONSKIM")
+    param.GlobalElectronVeto.ElectronCollectionName.setProcessName(skimProcessName)
+    param.GlobalElectronVeto.beamspotSrc.setProcessName(dataVersion.getRecoProcess())
+    param.GlobalElectronVeto.conversionSrc.setProcessName(dataVersion.getRecoProcess())
 
     # Use the taus matched to the original muon in tau selections
     # Notice that only the version corresponding to PF2PATVersion is produced
@@ -364,7 +375,7 @@ def constructMuonIsolationOnTheFly(inputMuons, embedPrefix="ontheflyiso_"):
     )
     return module
 
-def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix="muonFinalSelection"):
+def addFinalMuonSelection(process, sequence, param, enableIsolation=True, tightenMuonPt=True, prefix="muonFinalSelection"):
     counters = []
 
     cname = prefix+"AllEvents"
@@ -397,11 +408,37 @@ def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix
 #        counters.extend(addMuonRelativeIsolation(process, sequence, prefix=prefix+"Isolation", cut=0.1))
         import muonAnalysis
         counters.extend(addMuonIsolation(process, sequence, prefix+"Isolation", isoExpr))
+    if tightenMuonPt:
+        counters.extend(addMuonPt(process, sequence, prefix+"MuonPtTighten"))
     counters.extend(addMuonVeto(process, sequence, param, prefix+"MuonVeto"))
     counters.extend(addElectronVeto(process, sequence, param, prefix+"ElectronVeto"))
     counters.extend(addMuonJetSelection(process, sequence, prefix+"JetSelection"))
 
     return counters
+
+def addMuonPt(process, sequence, prefix):
+    selector = prefix+"Muons"
+    filter = prefix+"Filter"
+    counter = prefix
+
+    global tauEmbeddingMuons
+    m1 = cms.EDFilter("PATMuonSelector",
+        src = cms.InputTag(tauEmbeddingMuons),
+        cut = cms.string("pt() > 41"),
+    )
+    m2 = cms.EDFilter("CandViewCountFilter",
+        src = cms.InputTag(selector),
+        minNumber = cms.uint32(1),
+    )
+    m3 = cms.EDProducer("EventCountProducer")
+    tauEmbeddingMuons = selector
+
+    setattr(process, selector, m1)
+    setattr(process, filter, m2)
+    setattr(process, counter, m3)
+    sequence *= (m1 * m2 * m3)
+
+    return [counter]
 
 def addMuonRelativeIsolation(process, sequence, prefix="muonSelectionIsolation", cut=0.1):
     return addMuonIsolation(process, sequence, prefix, "(isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt() < %f" % cut)
@@ -427,6 +464,7 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
             )
         )
     )
+    m1.src.setProcessName(skimProcessName)
     m2 = cms.EDFilter("CandViewCountFilter",
         src = cms.InputTag(selector),
         minNumber = cms.uint32(3)
@@ -466,6 +504,7 @@ def addElectronVeto(process, sequence, param, prefix="muonSelectionElectronVeto"
 
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as electronVetoFilter_cfi
     m1 = electronVetoFilter_cfi.hPlusGlobalElectronVetoFilter.clone()
+    m1.vertexSrc = m1.vertexSrc.value()+"Original"
     m2 = cms.EDProducer("EventCountProducer")
 
     setattr(process, filter, m1)
@@ -520,7 +559,7 @@ def addMuonTauIsolation(process, postfix="", discriminator="byTightIsolation"):
 
     muons = cms.EDProducer("HPlusTauIsolationPATMuonRefSelector",
         candSrc = cms.InputTag(tauEmbeddingMuons),
-        tauSrc = cms.InputTag("patTausHpsPFTau", "", "MUONSKIM"),
+        tauSrc = cms.InputTag("patTausHpsPFTau", "", skimProcessName),
         isolationDiscriminator = cms.string(discriminator),
         againstMuonDiscriminator = cms.string("againstMuonLoose"),
         deltaR = cms.double(0.15),
@@ -755,7 +794,7 @@ def addGeneratorTauFilter(process, sequence, filterInaccessible=False, prefix="g
     if filterInaccessible:
         genTausAccessible =  cms.EDFilter("GenParticleSelector",
             src = cms.InputTag("genParticles"),
-            cut = cms.string("abs(pdgId()) == 15 && pt() > 40 && abs(eta()) < 2.1")
+            cut = cms.string(generatorTauSelection % generatorTauPt)
         )
         name = prefix+"Accessible"
         setattr(process, genTausAccessible, name)
@@ -807,7 +846,7 @@ def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPresel
     # Generator taus (if you modify this, remember to modify similar in below)
     genTaus = cms.EDFilter("GenParticleSelector",
         src = cms.InputTag("genParticles"),
-        cut = cms.string("abs(pdgId()) == 15 && pt() > 40 && abs(eta()) < 2.1")
+        cut = cms.string(generatorTauSelection % generatorTauPt)
     )
     genTausName = prefix+"GenTau"
     setattr(process, genTausName, genTaus)
@@ -872,7 +911,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     # Generator taus (if you modify this, remember to modify similar in above)
     genTaus = cms.EDFilter("GenParticleSelector",
         src = cms.InputTag("genParticles"),
-        cut = cms.string("abs(pdgId()) == 15 && pt() > 40 && abs(eta()) < 2.1")
+        cut = cms.string(generatorTauSelection % generatorTauPt)
     )
     genTausName = prefix+"GenTau"
     setattr(process, genTausName, genTaus)
@@ -888,26 +927,38 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     counters.append(prefix+"GenTauCount")
 
     # Select first generator tau for the jet cleaning and tau selection
-    genTauFirst = cms.EDProducer("HPlusFirstCandidateSelector",
-        src = cms.InputTag(genTausName)
-    )
-    genTauFirstName = prefix+"First"
-    setattr(process, genTauFirstName, genTauFirst)
+    # genTauFirst = cms.EDProducer("HPlusFirstCandidateSelector",
+    #     src = cms.InputTag(genTausName)
+    # )
+    # genTauFirstName = prefix+"First"
+    # setattr(process, genTauFirstName, genTauFirst)
 
     # Tau selection
-    genTauReco = cms.EDProducer("HPlusPATTauCandViewDeltaRSelector",
-        src = cms.InputTag("selectedPatTaus"+PF2PATVersion), # not trigger matched
-        refSrc = cms.InputTag(genTauFirstName),
-        deltaR = cms.double(0.5),
+    genTauReco = cms.EDProducer("HPlusPATTauCandViewClosestDeltaRSelector",
+#        src = cms.InputTag("selectedPatTaus"+PF2PATVersion), # not trigger matched
+        src = cms.InputTag("selectedPatTausHpsPFTau"),
+        refSrc = cms.InputTag(genTausName),
+        maxDeltaR = cms.double(0.5),
     )
+#     if PF2PATVersion != "":
+#         raise Exception("I don't support PF2PAT at the moment")
     if not disableTrigger:
         genTauReco.src = param.tauSelection.src.value()
-    genTauRecoName = prefix+"Reco"
+    genTauRecoName = prefix+"TauMCMatched"
     setattr(process, genTauRecoName, genTauReco)
     param.tauSelection.src = genTauRecoName
 
+    # Select the tau candidate which is most likely going to pass the identification
+    genTauSelected = cms.EDProducer("HPlusPATTauMostLikelyIdentifiedSelector",
+        eventCounter = param.eventCounter.clone(),
+        tauSelection = param.tauSelection.clone()
+    )
+    genTauSelectedName = prefix+"TauSelected"
+    setattr(process, genTauSelectedName, genTauSelected)
+    param.tauSelection.src = genTauSelectedName
+
     genTauCleanPSet = cms.PSet(
-        src                 = cms.InputTag(genTauFirstName),
+        src                 = cms.InputTag(genTauSelectedName),
         algorithm           = cms.string("byDeltaR"),
         preselection        = cms.string(""),
         deltaR              = cms.double(0.5),
@@ -978,7 +1029,9 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     genTauSequence *= (
         allCount *
         pvFilter * pvFilterCount *
-        genTaus * genTausFilter * genTausCount * genTauFirst * genTauReco *
+        genTaus * genTausFilter * genTausCount * 
+        #genTauFirst * 
+        genTauReco * genTauSelected *
         cleanedElectrons * cleanedMuons *
         eveto * evetoCount *
         muveto * muvetoCount *

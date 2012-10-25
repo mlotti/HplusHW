@@ -468,12 +468,30 @@ class CountAsymmetric:
     def uncertaintyHigh(self):
         return self._uncertaintyHigh
 
+    def multiply(self, count):
+        value = count.value()
+        if count.uncertainty() != 0:
+            raise Exception("Can't multiply CountAsymmetric (%f, %f, %f) with Count (%f, %f) with non-zero uncertainty" % (self._value, self._uncertaintyLow, self._uncertaintyHigh, count.value(), count.uncertainty()))
+        self._value *= value
+        self._uncertaintyLow *= value
+        self._uncertaintyHigh *= value
+
     ## \var _value
     # Value of the count
     ## \var _uncertaintyLow
     # Lower uncertainty of the count (-)
     ## \var _uncertaintyHigh
     # Upper uncertainty of the count (+)
+
+def divideBinomial(countPassed, countTotal):
+    p = countPassed.value()
+    t = countTotal.value()
+    value = p / t
+    p = int(p)
+    t = int(t)
+    errUp = ROOT.TEfficiency.ClopperPearson(t, p, 0.683, True)
+    errDown = ROOT.TEfficiency.ClopperPearson(t, p, 0.683, False)
+    return CountAsymmetric(value, value-errDown, errUp-value)
 
 ## Transform histogram (TH1) to a list of (name, Count) pairs.
 #
@@ -980,17 +998,27 @@ class DatasetRootHisto(DatasetRootHistoBase):
     def getBinLabels(self):
         return [x[0] for x in _histoToCounter(self.histo)]
 
+    def forEach(self, function, datasetRootHisto1=None):
+        if datasetRootHisto1 != None:
+            if not isinstance(datasetRootHisto1, DatasetRootHisto):
+                raise Exception("datasetRootHisto1 must be of the type DatasetRootHisto")
+            return [function(self, datasetRootHisto1)]
+        else:
+            return [function(self)]
+
     ## Modify the TH1 with a function
     #
-    # \param function              Function taking the original TH1 and some other DatasetRootHisto object as input, returning a new TH1
-    # \param newDatasetRootHisto   The other DatasetRootHisto object
+    # \param function              Function taking the original TH1, and returning a new TH1. If newDatasetRootHisto is specified, function must take some other DatasetRootHisto object as an input too
+    # \param newDatasetRootHisto   Optional, the other DatasetRootHisto object
     #
-    # Needed for appending rows to counters from TTree
-    def modifyRootHisto(self, function, newDatasetRootHisto):
-        if not isinstance(newDatasetRootHisto, DatasetRootHisto):
-            raise Exception("newDatasetRootHisto must be of the type DatasetRootHisto")
-
-        self.histo = function(self.histo, newDatasetRootHisto.histo)
+    # Needed for appending rows to counters from TTree, and for embedding normalization
+    def modifyRootHisto(self, function, newDatasetRootHisto=None):
+        if newDatasetRootHisto != None:
+            if not isinstance(newDatasetRootHisto, DatasetRootHisto):
+                raise Exception("newDatasetRootHisto must be of the type DatasetRootHisto")
+            self.histo = function(self.histo, newDatasetRootHisto.histo)
+        else:
+            self.histo = function(self.histo)
 
     ## Return normalized clone of the original TH1
     def _normalizedHistogram(self):
@@ -1081,20 +1109,40 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
     def isMC(self):
         return False
 
+    def forEach(self, function, datasetRootHisto1=None):
+        ret = []
+        if datasetRootHisto1 != None:
+            if not isinstance(datasetRootHisto1, DatasetRootHistoMergedData):
+                raise Exception("datasetRootHisto1 must be of the type DatasetRootHistoMergedData")
+            if not len(self.histoWrappers) == len(datasetRootHisto1.histoWrappers):
+                raise Exception("len(self.histoWrappers) != len(datasetrootHisto1.histoWrappers), %d != %d" % len(self.histoWrappers), len(datasetRootHisto1.histoWrappers))
+            
+            for i, drh in enumerate(self.histoWrappers):
+                ret.extend(drh.forEach(function, datasetRootHisto1.histoWrappers[i]))
+        else:
+            for drh in self.histoWrappers:
+                ret.extend(drh.forEach(function))
+        return ret
+        
+
     ## Modify the TH1 with a function
     #
-    # \param function             Function taking the original TH1 and some other DatasetRootHisto object as input, returning a new TH1
-    # \param newDatasetRootHisto  The other DatasetRootHisto object, must be the same type and contain same number of DatasetRootHisto objects
+    # \param function             Function taking the original TH1, and returning a new TH1. If newDatasetRootHisto is specified, function must take some other DatasetRootHisto object as an input too
+    # \param newDatasetRootHisto  Optional, the other DatasetRootHisto object, must be the same type and contain same number of DatasetRootHisto objects
     #
-    # Needed for appending rows to counters from TTree
-    def modifyRootHisto(self, function, newDatasetRootHisto):
-        if not isinstance(newDatasetRootHisto, DatasetRootHistoMergedData):
-            raise Exception("newDatasetRootHisto must be of the type DatasetRootHistoMergedData")
-        if not len(self.histoWrappers) == len(newDatasetRootHisto.histoWrappers):
-            raise Exception("len(self.histoWrappers) != len(newDatasetrootHisto.histoWrappers), %d != %d" % len(self.histoWrappers), len(newDatasetRootHisto.histoWrappers))
+    # Needed for appending rows to counters from TTree, and for embedding normalization
+    def modifyRootHisto(self, function, newDatasetRootHisto=None):
+        if newDatasetRootHisto != None:
+            if not isinstance(newDatasetRootHisto, DatasetRootHistoMergedData):
+                raise Exception("newDatasetRootHisto must be of the type DatasetRootHistoMergedData")
+            if not len(self.histoWrappers) == len(newDatasetRootHisto.histoWrappers):
+                raise Exception("len(self.histoWrappers) != len(newDatasetrootHisto.histoWrappers), %d != %d" % len(self.histoWrappers), len(newDatasetRootHisto.histoWrappers))
             
-        for i, drh in enumerate(self.histoWrappers):
-            drh.modifyRootHisto(function, newDatasetRootHisto.histoWrappers[i])
+            for i, drh in enumerate(self.histoWrappers):
+                drh.modifyRootHisto(function, newDatasetRootHisto.histoWrappers[i])
+        else:
+            for i, drh in enumerate(self.histoWrappers):
+                drh.modifyRootHisto(function)
 
     ## Get list of the bin labels of the first of the merged histogram.
     def getBinLabels(self):
@@ -1166,20 +1214,39 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
     def isMC(self):
         return True
 
+    def forEach(self, function, datasetRootHisto1=None):
+        ret = []
+        if datasetRootHisto1 != None:
+            if not isinstance(datasetRootHisto1, DatasetRootHistoMergedMC):
+                raise Exception("datasetRootHisto1 must be of the type DatasetRootHistoMergedMC")
+            if not len(self.histoWrappers) == len(datasetRootHisto1.histoWrappers):
+                raise Exception("len(self.histoWrappers) != len(datasetrootHisto1.histoWrappers), %d != %d" % len(self.histoWrappers), len(datasetRootHisto1.histoWrappers))
+            
+            for i, drh in enumerate(self.histoWrappers):
+                ret.extend(drh.forEach(function, datasetRootHisto1.histoWrappers[i]))
+        else:
+            for drh in self.histoWrappers:
+                ret.extend(drh.forEach(function))
+        return ret
+
     ## Modify the TH1 with a function
     #
-    # \param function   Function taking the original TH1 and some other DatasetRootHisto object as input, returning a new TH1
-    # \param newDatasetRootHisto  The other DatasetRootHisto object, must be the same type and contain same number of DatasetRootHisto objects
+    # \param function             Function taking the original TH1, and returning a new TH1. If newDatasetRootHisto is specified, function must take some other DatasetRootHisto object as an input too
+    # \param newDatasetRootHisto  Optional, the other DatasetRootHisto object, must be the same type and contain same number of DatasetRootHisto objects
     #
-    # Needed for appending rows to counters from TTree
-    def modifyRootHisto(self, function, newDatasetRootHisto):
-        if not isinstance(newDatasetRootHisto, DatasetRootHistoMergedMC):
-            raise Exception("newDatasetRootHisto must be of the type DatasetRootHistoMergedMC")
-        if not len(self.histoWrappers) == len(newDatasetRootHisto.histoWrappers):
-            raise Exception("len(self.histoWrappers) != len(newDatasetrootHisto.histoWrappers), %d != %d" % len(self.histoWrappers), len(newDatasetRootHisto.histoWrappers))
+    # Needed for appending rows to counters from TTree, and for embedding normalization
+    def modifyRootHisto(self, function, newDatasetRootHisto=None):
+        if newDatasetRootHisto != None:
+            if not isinstance(newDatasetRootHisto, DatasetRootHistoMergedMC):
+                raise Exception("newDatasetRootHisto must be of the type DatasetRootHistoMergedMC")
+            if not len(self.histoWrappers) == len(newDatasetRootHisto.histoWrappers):
+                raise Exception("len(self.histoWrappers) != len(newDatasetrootHisto.histoWrappers), %d != %d" % len(self.histoWrappers), len(newDatasetRootHisto.histoWrappers))
             
-        for i, drh in enumerate(self.histoWrappers):
-            drh.modifyRootHisto(function, newDatasetRootHisto.histoWrappers[i])
+            for i, drh in enumerate(self.histoWrappers):
+                drh.modifyRootHisto(function, newDatasetRootHisto.histoWrappers[i])
+        else:
+            for i, drh in enumerate(self.histoWrappers):
+                drh.modifyRootHisto(function)
 
     ## Get list of the bin labels of the first of the merged histogram.
     def getBinLabels(self):
@@ -1381,14 +1448,17 @@ class Dataset:
     def _getRootHisto(self, name):
         if self.isMC() and self._dataEra != None and self._doEraReplace:
             name = name.replace(self._analysisBaseName, self._analysisBaseName+self._dataEra, 1) # replace only the first occurrance
-        return self.file.Get(name)
+        return (self.file.Get(name), name)
 
     ## Read counters
     def _readCounters(self):
         self.counterDir = self._unweightedCounterDir
-        d = self._getRootHisto(self.counterDir)
+        (d, realDir) = self._getRootHisto(self.counterDir)
         if d == None:
-            raise Exception("Could not find counter directory %s from file %s" % (self.counterDir, self.file.GetName()))
+            msg = "Could not find counter directory %s from file %s." % (realDir, self.file.GetName())
+            if realDir != self.counterDir:
+                msg += "\nThe requested counter directory was %s, and the path was modified because of dataEra." % self.counterDir
+            raise Exception(msg)
         if d.Get("counter") != None:
             ctr = _histoToCounter(d.Get("counter"))
             self.nAllEventsUnweighted = ctr[0][1].value() # first counter, second element of the tuple
@@ -1402,12 +1472,18 @@ class Dataset:
 
         if self._weightedCounters:
             self.counterDir = self._weightedCounterDir
-            d = self._getRootHisto(self.counterDir)
+            (d, realDir) = self._getRootHisto(self.counterDir)
             if d == None:
-                raise Exception("Could not find counter directory %s from file %s" % (self.counterDir, self.file.GetName()))
+                msg = "Could not find counter directory %s from file %s" % (realDir, self.file.GetName())
+                if realDir != self.counterDir:
+                    msg += "\nThe requested counter directory was %s, and the path was modified because of dataEra." % self.counterDir
+                raise Exception(msg)
             h = d.Get("counter")
             if h == None:
-                raise Exception("No TH1 'counter' in directory '%s' of ROOT file '%s'" % (self.counterDir, self.file.GetName()))
+                msg = "No TH1 'counter' in directory '%s' of ROOT file '%s'" % (realDir, self.file.GetName())
+                if realDir != self.counterDir:
+                    msg += "\nThe requested directory was %s, and it was replaced because of dataEra." % self.counterDir
+                raise Exception(msg)
             ctr = _histoToCounter(h)
             h.Delete()
             self.nAllEventsWeighted = ctr[0][1].value() # first counter, second element of the tuple
@@ -1419,6 +1495,9 @@ class Dataset:
 
     def setName(self, name):
         self.name = name
+
+    def getEnergy(self):
+        return self.info.get("energy", 0)
 
     ## Set cross section of MC dataset (in pb).
     def setCrossSection(self, value):
@@ -1525,7 +1604,7 @@ class Dataset:
         if hasattr(name, "draw"):
             return True
         pname = name
-        return self._getRootHisto(pname) != None
+        return self._getRootHisto(pname)[0] != None
 
     ## Get the dataset.DatasetRootHisto object for a named histogram.
     # 
@@ -1543,9 +1622,12 @@ class Dataset:
             h = name.draw(self)
         else:
             pname = name
-            h = self._getRootHisto(pname)
+            (h, realName) = self._getRootHisto(pname)
             if h == None:
-                raise Exception("Unable to find histogram '%s' from file '%s'" % (pname, self.file.GetName()))
+                msg = "Unable to find histogram '%s' from file '%s'" % (realName, self.file.GetName())
+                if realName != pname:
+                    msg += "\nThe requested histogram was %s, and the path was modified because of dataEra." % self.counterDir
+                raise Exception(msg)
             name = h.GetName()+"_"+self.name
             h.SetName(name.translate(None, "-+.:;"))
         return DatasetRootHisto(h, self)
@@ -1560,9 +1642,12 @@ class Dataset:
     # 
     # \return List of names in the directory.
     def getDirectoryContent(self, directory, predicate=lambda x: True):
-        d = self._getRootHisto(directory)
+        (d, realDir) = self._getRootHisto(directory)
         if d == None:
-            raise Exception("No object %s in file %s" % (directory, self.file.GetName()))
+            msg = "No object %s in file %s" % (realDir, self.file.GetName())
+            if realDir != d:
+                msg += "\nThe requested directory was %s, and the path was modified because of dataEra." % self.counterDir
+            raise Exception(msg)
         dirlist = d.GetListOfKeys()
 
         # Suppress the warning message of missing dictionary for some iterator
@@ -1636,6 +1721,11 @@ class DatasetMerged:
             raise Exception("Can't create a DatasetMerged from 0 datasets")
 
         self.info = {}
+
+        energy = self.datasets[0].getEnergy()
+        for d in self.datasets[1:]:
+            if energy != d.getEnergy():
+                raise Exception("Can't merge datasets with different centre-of-mass energies (%s: %d TeV, %s: %d TeV)" % self.datasets[0].getName(), energy, d.getName(), d.getEnergy())
 
         if self.datasets[0].isMC():
             crossSum = 0.0
@@ -1864,6 +1954,15 @@ class DatasetManager:
         for d in self.datasets:
             copy.append(d.deepCopy())
         return copy
+
+    ## Get a list of centre-of-mass energies of the datasets
+    def getEnergies(self):
+        tmp = {}
+        for d in self.datasets:
+            tmp[d.getEnergy()] = 1
+        energies = tmp.keys()
+        energies.sort()
+        return energies
 
     def hasDataset(self, name):
         return name in self.datasetMap
@@ -2180,17 +2279,19 @@ class NtupleCache:
     # \param selectorArgs   Optional arguments to the selector constructor
     # \param process        Should the ntuple be processed? (if False, results are read from the cache file)
     # \param cacheFileName  Path to the cache file
-    # \param maxEvents     Maximum number of events to process (-1 for all events)
+    # \param maxEvents      Maximum number of events to process (-1 for all events)
+    # \param printStatus    Print processing status information
     #
     # I would like to make \a process redundant, but so far I haven't
     # figured out a bullet-proof method for that.
-    def __init__(self, treeName, selector, selectorArgs=[], process=True, cacheFileName="histogramCache.root", maxEvents=-1):
+    def __init__(self, treeName, selector, selectorArgs=[], process=True, cacheFileName="histogramCache.root", maxEvents=-1, printStatus=True):
         self.treeName = treeName
         self.cacheFileName = cacheFileName
         self.selectorName = selector
         self.selectorArgs = selectorArgs
         self.doProcess = process
         self.maxEvents = maxEvents
+        self.printStatus = printStatus
 
         self.macrosLoaded = False
         self.processedDatasets = {}
@@ -2268,6 +2369,7 @@ class NtupleCache:
             N = self.maxEvents
         selector = ROOT.SelectorImp(N, dataset.isMC(), getattr(ROOT, self.selectorName)(*self.selectorArgs))
         selector.setOutput(directory)
+        selector.setPrintStatus(self.printStatus)
 
         print "Processing dataset", datasetName
         

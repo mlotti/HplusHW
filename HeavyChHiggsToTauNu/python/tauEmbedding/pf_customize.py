@@ -365,6 +365,8 @@ def addPAT(process, options, dataVersion):
     options.doPat = 1
     options.tauEmbeddingInput = 1
 
+    #process.options.wantSummary = cms.untracked.bool(True)
+
     # Hacks to get PAT to work in a process with RECO
     process.recoPFJets.remove(process.kt6PFJets)
 

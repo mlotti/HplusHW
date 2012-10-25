@@ -1,6 +1,7 @@
 ## \package tauEmbedding
 # Tau embedding (EWK+ttbar tau background measurement) related plotting utilities
 
+import re
 import math
 import array
 
@@ -104,6 +105,7 @@ tauNtuple.caloMet = "tecalomet_p4.Pt() > 60"
 tauNtuple.weight = {
 #    "EPS": "weightPileup_Run2011A",
 #    "Run2011A-EPS": "pileupWeight_Run2011AnoEPS",
+    "": "",
     "Run2011A": "weightPileup_Run2011A",
     "Run2011B": "weightPileup_Run2011B",
     "Run2011AB": "weightPileup_Run2011AB",
@@ -182,7 +184,7 @@ def scaleNormalization(obj):
         return
 
     #scaleMCfromWmunu(obj) # data/MC trigger correction
-    scaleMuTriggerIdEff(obj)
+#    scaleMuTriggerIdEff(obj)
     scaleWmuFraction(obj)
 
 ## Apply muon trigger and ID efficiency normalization
@@ -196,22 +198,53 @@ def scaleMuTriggerIdEff(obj):
     #data = 0.891379
     #mc = 0.931707
     # 1fb in 42X
-    data = None
-    if era == "EPS":
-        data = 0.884462
-    elif era == "Run2011A-EPS":
-        data = 0.879
-    elif era == "Run2011A":
-        data = 0.881705 
-    elif era == "Run2011AB":
-        print "WARNING: using Run2011A mu trigger+ID efficiency. This should be updated!"
-        data = 0.881705
-    else:
-        raise Exception("No mu trigger+ID efficiency available for era %s" % era)
-    mc = 0.919829
+    # data = None
+    # if era == "EPS":
+    #     data = 0.884462
+    # elif era == "Run2011A-EPS":
+    #     data = 0.879
+    # elif era == "Run2011A":
+    #     data = 0.881705 
+    # elif era == "Run2011AB":
+    #     print "WARNING: using Run2011A mu trigger+ID efficiency. This should be updated!"
+    #     data = 0.881705
+    # else:
+    #     raise Exception("No mu trigger+ID efficiency available for era %s" % era)
+    # mc = 0.919829
 
-    scaleHistosCounters(obj, scaleDataHisto, "scaleData", 1/data)
-    scaleHistosCounters(obj, scaleMCHisto, "scaleMC", 1/mc)
+    # From Sami for 44X, muon pT > 41
+    # 20120902-160154
+    scaleMap = {
+        # HLT_Mu20
+        "160431-163261": 0.882968,
+        # HLT_Mu24
+        "163270-163869": 0.891375,
+        # HLT_Mu30
+        "165088-166150": 0.904915,
+        # HLT_Mu40
+        "166161-166164": 0.877395,
+        "166346-166346": 0.877395,
+        "166374-167043": 0.877395,
+        "167078-167913": 0.877395,
+        "170722-172619": 0.877395,
+        "172620-173198": 0.877395,
+        # HLT_Mu40_eta2p1 A
+        "173236-173692": 0.867646,
+        "173693-177452": 0.867646,
+        # HLT_Mu40_eta2p1 B
+        "177453-178380": 0.957712,
+        "178411-179889": 0.957712,
+        "179942-180371": 0.957712,
+        # MC
+        "MC": 0.888241,
+        }
+
+    # Transform to inverse
+    for key in scaleMap.keys():
+        scaleMap[key] = 1/scaleMap[key]
+
+    scaleHistosCounters(obj, scaleDataHisto, None, scaleMap)
+    scaleHistosCounters(obj, scaleMCHisto, None, scaleMap)
 
 ## Apply W->tau->mu normalization
 #
@@ -219,7 +252,7 @@ def scaleMuTriggerIdEff(obj):
 def scaleWmuFraction(obj):
     Wtaumu = 0.038479
 
-    scaleHistosCounters(obj, scaleHisto, "scale", 1-Wtaumu)
+    scaleHistosCounters(obj, scaleHisto, None, 1-Wtaumu)
 
 ## Helper function to scale histos or counters
 #
@@ -229,9 +262,11 @@ def scaleWmuFraction(obj):
 # \param scale        Multiplication factor
 def scaleHistosCounters(obj, plotFunc, counterFunc, scale):
     if isinstance(obj, plots.PlotBase):
-        scaleHistos(obj, plotFunc, scale)
+        scalePlot(obj, plotFunc, scale)
     elif isinstance(obj, counter.EventCounter):
         scaleCounters(obj, counterFunc, scale)
+    elif isinstance(obj, dataset.DatasetRootHistoBase):
+        scaleDatasetRootHisto(obj, plotFunc, scale)
     else:
         plotFunc(obj, scale)
 
@@ -240,7 +275,7 @@ def scaleHistosCounters(obj, plotFunc, counterFunc, scale):
 # \param plot       plots.PlotBase object
 # \param function   Function to apply
 # \param scale      Multiplication factor
-def scaleHistos(plot, function, scale):
+def scalePlot(plot, function, scale):
     plot.histoMgr.forEachHisto(lambda histo: function(histo, scale))
 
 ## Helper function to scale counter.EventCounter
@@ -250,6 +285,26 @@ def scaleHistos(plot, function, scale):
 # \param scale         Multiplication factor
 def scaleCounters(eventCounter, methodName, scale):
     getattr(eventCounter, methodName)(scale)
+
+## Helper function to scale dataset.DatasetRootHisto
+#
+# \param drh       dataset.DatasetRootHisto object
+# \param function  Function to apply
+# \param scaleMap     ??? FIXME
+def scaleDatasetRootHisto(drh, function, scaleMap):
+    if not isinstance(scaleMap, dict):
+        drh.modifyRootHisto(lambda histo: function(histo, scaleMap))
+        return
+
+    if drh.isMC():
+        drh.modifyRootHisto(lambda histo: function(histo, scaleMap["MC"]))
+    else:
+        runrange_re = re.compile("_(?P<range>(\d+)-(\d+))_")
+        m = runrange_re.search(drh.getDataset().getName())
+        if not m:
+            raise Exception("Data dataset %s does not have run range in its name?" % drh.getDataset().getName())
+        drh.modifyRootHisto(lambda histo: function(histo, scaleMap[m.group("range")]))
+
 
 ## Helper function to scale only MC histograms.Histo objects
 #
@@ -272,8 +327,12 @@ def scaleDataHisto(histo, scale):
 # \param histo   histograms.Histo object
 # \param scale   Multiplication factor
 def scaleHisto(histo, scale):
-    th1 = histo.getRootHisto()
+    if isinstance(histo, histograms.Histo):
+        th1 = histo.getRootHisto()
+    else:
+        th1 = histo
     th1.Scale(scale)
+    return th1
 
 
 ## Calculate square sum of TH1 bins
@@ -471,9 +530,8 @@ class DatasetsMany:
                     h.normalizeByCrossSection()
                 if self.normalizeMCByLuminosity:
                     h.normalizeToLuminosity(self.lumi)
-            h = histograms.HistoWithDataset(ds, h.getHistogram(), "dummy") # only needed for scaleNormalization()
             scaleNormalization(h)
-            h = h.getRootHisto()
+            h = h.getHistogram()
             h.SetName("Trial %d"%(i+1))
             histos.append(h)
 

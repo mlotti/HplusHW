@@ -25,7 +25,7 @@ def main(opts, args):
         # Create the tar archive
         tar = tarfile.open("task.tar.gz", mode="w:gz")
         files = []
-        for f in ["CMSSW_*.std*", "crab_fjr_*.xml", "Submission_*"]:
+        for f in ["CMSSW_*.std*", "crab_fjr_*.xml", "Submission_*", "Watchdog_*.log*"]:
             files.extend(glob.glob(os.path.join("res", f)))
         
         files.extend(["job", "log", "share"])

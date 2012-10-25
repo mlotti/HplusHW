@@ -8,6 +8,7 @@ import os
 import re
 from optparse import OptionParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTools as multicrabWorkflowsTools
 
 order_done = ["Retrieved", "Done"]
 order_run = ["Running", "Scheduled", "Ready", "Submitted", "Created"]
@@ -40,6 +41,10 @@ def main(opts):
     stats = {}
     allJobs = 0
 
+    if opts.byHost:
+        global status_format
+        status_format = status_format.replace("18s", "40s")
+
     for task in taskDirs:
         if not os.path.exists(task):
             if opts.showMissing:
@@ -54,9 +59,13 @@ def main(opts):
             hosts = {}
             for job in item:
                 if job.host != None:
-                    hosts[job.host] = 1
+                    multicrabWorkflowsTools._addToDictList(hosts, job.host, job)
+            if opts.byHost:
+                for host, joblist in hosts.iteritems():
+                    jobSummaries[key+" "+host] = JobSummary(joblist, [host])
+            else:
+                jobSummaries[key] = JobSummary(item, hosts)
             l = len(item)
-            jobSummaries[key] = JobSummary(item, hosts)
             njobs += l
             allJobs += l
             if key in stats:
@@ -100,7 +109,7 @@ def main(opts):
             pretty = multicrab.prettyJobnums([x[0] for x in failed])
             resubmitJobs[task] = pretty
             for jobId, jobCode in failed:
-                multicrab._addToDictList(failedJobs, jobCode, "%s/res/CMSSW_%d.stdout" % (task, jobId))
+                multicrabWorkflowsTools._addToDictList(failedJobs, jobCode, "%s/res/CMSSW_%d.stdout" % (task, jobId))
     
     print "----------------------------------------"
     print "Summary for %d task(s), total %d job(s):" % (len(taskDirs), allJobs)
@@ -159,6 +168,8 @@ if __name__ == "__main__":
                       help="Show job numbers for each status type")
     parser.add_option("-l", "--long", dest="long", action="store_true", default=False,
                       help="Shorthand for '--showJobs --showHosts")
+    parser.add_option("--byHost", dest="byHost", action="store_true", default=False,
+                      help="With --showHosts/-l, categorize jobs by host also")
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
 

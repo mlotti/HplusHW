@@ -213,7 +213,9 @@ class ConfigBuilder:
                     analysisNames.append(name+dataEra)
 
         analysisNamesForSystematics = []
-        if not self.doOptimisation:
+        # For optimisation, no systematics
+        # For embedding input, the systematics should be evaluated with the analyzer with Muon eff, Tau trigger eff, CaloMET>60 (this is added to analysisNamesForSystematics later)
+        if not self.doOptimisation and self.options.tauEmbeddingInput == 0:
             analysisNamesForSystematics = analysisNames[:]
         self._accumulateAnalyzers("Data eras", len(analysisModules))
 
@@ -561,19 +563,29 @@ class ConfigBuilder:
         retNames = []
         N = 0
         for module, name in zip(analysisModules, analysisNames):
+            postfix = "MEff"
             mod = module.clone()
-            mod.trigger.caloMetSelection.metEmulationCut = 60.0
+            mod.embeddingMuonEfficiency.mode = "efficiency"
             path = cms.Path(process.commonSequence * mod)
-            setattr(process, name+"CaloMet60", mod)
-            setattr(process, name+"CaloMet60Path", path)
+            setattr(process, name+postfix, mod)
+            setattr(process, name+postfix+"Path", path)
             N += 1
 
+            postfix += "CaloMet60"
+            mod = mod.clone()
+            mod.trigger.caloMetSelection.metEmulationCut = 60.0
+            path = cms.Path(process.commonSequence * mod)
+            setattr(process, name+postfix, mod)
+            setattr(process, name+postfix+"Path", path)
+            N += 1
+
+            postfix += "TEff"
             mod = mod.clone()
             mod.triggerEfficiencyScaleFactor.mode = "efficiency"
             path = cms.Path(process.commonSequence * mod)
-            setattr(process, name+"CaloMet60TEff", mod)
-            setattr(process, name+"CaloMet60TEffPath", path)
-            retNames.append(name+"CaloMet60TEff")
+            setattr(process, name+postfix, mod)
+            setattr(process, name+postfix+"Path", path)
+            retNames.append(name+postfix)
             N += 1
         self._accumulateAnalyzers("Tau embedding analyses", N)
         return retNames

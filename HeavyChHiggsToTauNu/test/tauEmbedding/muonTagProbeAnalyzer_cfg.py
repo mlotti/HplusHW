@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 import FWCore.ParameterSet.VarParsing as VarParsing
 
 options = VarParsing.VarParsing()
-options.register("trigger", "isHLTMu20",
+options.register("trigger", "isHLTMu40eta2p1",
                  options.multiplicity.singleton, options.varType.string,
                  "Trigger to consider")
 options.register("mc", 0,
@@ -25,14 +25,21 @@ trigger = options.trigger
 
 print trigger
 
+ptbins  = [40, 1000]
+etabins = [0, 2.1]
+#etabins = [0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2]
+
 def result(task):
     return "%s/res/histograms-%s.root" % (task, task)
 
 (input, output) = (None, None)
 if options.mc:
-    input = result("DYJetsToLL_M50_TuneZ2_Summer11")
-    output = "DY_Mu20"
-    trigger = "isHLTMu20"
+    input = result("DYJetsToLL_M50_TuneZ2_Fall11")
+    output = "DY_Mu40eta2p1"
+    trigger = "isHLTMu40eta2p1"
+#    input = result("DYJetsToLL_M50_TuneZ2_Summer11")
+#    output = "DY_Mu20"
+#    trigger = "isHLTMu20"
 else:
     (input, output) = {
 	"isHLTMu20": ([result("SingleMu_160431-163261_2011A_Nov08")], "Run2011A_Mu20"),
@@ -94,6 +101,7 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
 #        pfSumIsoRel = cms.vstring("Probe pfSumIso/pt", "0", "2", ""),
 #        tauTightIc04Iso = cms.vstring("Probe counting iso occupancy", "0", "100", "")
         pfSumIsoRelDeltaBeta = cms.vstring("Probe deltaBeta PF isolation", "0", "100", ""),
+        pfChargedHadronSumIsoRel = cms.vstring("Probe charged hadron PF isolation", "0", "1", ""),
     ),
 
     # defines all the discrete variables of the probes available in the input tree and intended for use in the efficiency calculations
@@ -118,6 +126,7 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
 #        tauIsoVLoose = cms.vstring("Tau Iso VLoose", "dummy[pass=1,fail=0]"),
         pfSumIsoRelDeltaBeta12 = cms.vstring("PF rel iso deltaBeta < 0.12", "dummy[pass=1,fail=0]"),
         pfSumIsoRelDeltaBeta20 = cms.vstring("PF rel iso deltaBeta < 0.2", "dummy[pass=1,fail=0]"),
+        pfChargedHadronSumIsoRel10 = cms.vstring("PF charged hadron rel iso deltaBeta < 0.1", "dummy[pass=1,fail=0]"),
         fullSelection = cms.vstring("Full selection", "dummy[pass=1,fail=0]"),
     ),
     Cuts = cms.PSet(
@@ -168,10 +177,13 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
             ),
             UnbinnedVariables = cms.vstring("mass"),
             BinnedVariables = cms.PSet(
-                pt = cms.vdouble(40, 1000),
-                abseta = cms.vdouble(0, 2.1),
-#                tauTightIc04Iso = cms.vdouble(0, 0.1),
-#                pt = cms.vdouble(0, 20, 40, 45, 50, 60, 70, 80, 90, 100, 1000),
+                pt = cms.vdouble(ptbins),
+#		pt = cms.vdouble(41, 1000),
+#		pt = cms.vdouble(40, 41, 45, 50, 60, 70, 80, 90, 100, 1000),
+                abseta = cms.vdouble(etabins),
+#		abseta = cms.vdouble(0,0.3,0.6,0.9,1.2,1.5,1.8,2.1),
+
+#                pfChargedHadronSumIsoRel = cms.vdouble(0, 0.1) # require that chargedHadronIso()/pt() < 0.1
             ),
             #BinToPDFmap = cms.vstring("gaussPlusLinear")
 #            BinToPDFmap = cms.vstring("gaussPlusQuadratic")
@@ -221,8 +233,9 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
                 hitQuality = cms.vstring("pass"), 
 #                tauTightIc04Iso = cms.vdouble(0, 0.1),
                 dB = cms.vstring("pass"),
-                pt = cms.vdouble(40, 1000),
-                abseta = cms.vdouble(0, 2.1),
+                pt = cms.vdouble(ptbins),
+                abseta = cms.vdouble(etabins),
+#		abseta = cms.vdouble(0,0.3,0.6,0.9,1.2,1.5,1.8,2.1),
 #                pt = cms.vdouble(40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 55, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 500, 600, 700, 800, 1000)
             ),
             #BinToPDFmap = cms.vstring("gaussPlusLinear")
@@ -238,8 +251,10 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
             ),
             UnbinnedVariables = cms.vstring("mass"),
             BinnedVariables = cms.PSet(
-                pt = cms.vdouble(40, 1000),
-                abseta = cms.vdouble(0, 2.1),
+                pt = cms.vdouble(ptbins),
+#		pt = cms.vdouble(41, 1000),
+                abseta = cms.vdouble(etabins),
+#		abseta = cms.vdouble(0,0.3,0.6,0.9,1.2,1.5,1.8,2.1),
 #                tauTightIc04Iso = cms.vdouble(0, 0.1),
             ),
             #BinToPDFmap = cms.vstring("gaussPlusLinear")
@@ -304,7 +319,9 @@ if adjustBins:
     #etabins = [x*0.21 for x in range(0, 11)] # 0.21 stepping [0, 2.1]
     #ptbins = [40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 52, 54, 56, 58, 60, 65, 70, 80, 90, 100]
     #etabins = [x*0.1 for x in range(0, 23)] # 0.1 stepping [0, 2.2]
-    etabins = [0, 2.2]
+    #etabins = [0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2]
+    #etabins = [0, 2.2]
+    etabins = etabins
     #ptBinsLow = [30, 34, 38, 39, 40, 41, 42, 44, 48, 50]
     #ptBinsMiddle = [54, 58, 62, 66, 70, 80, 90, 100]
     #ptBinsHigh = [150, 200, 400, 600, 1000]
@@ -320,7 +337,8 @@ if adjustBins:
 #        ptBinsHigh += [125, 150, 200, 250, 300, 400, 500, 600, 800, 1000]
 #    if "isHLTMu40" in trigger:
 #        ptBinsLow = [30, 35, 39, 40, 41, 42, 45, 50]
-    ptbins = ptBinsLow + ptBinsMiddle + ptBinsHigh
+#    ptbins = ptBinsLow + ptBinsMiddle + ptBinsHigh
+    ptbins = ptbins
     print "pT bins", ptbins
     print "eta bins", etabins
     

@@ -20,7 +20,7 @@ namespace HPlus {
   class FakeTauIdentifier {
   public:
     enum MCSelectedTauMatchType {
-      kkNoMC,
+      kkNoMC = 0,
       kkElectronToTau,
       kkElectronFromTauDecayToTau,
       kkMuonToTau,
@@ -32,7 +32,8 @@ namespace HPlus {
       kkMuonToTauAndTauOutsideAcceptance,
       kkMuonFromTauDecayToTauAndTauOutsideAcceptance,
       kkTauToTauAndTauOutsideAcceptance,
-      kkJetToTauAndTauOutsideAcceptance
+      kkJetToTauAndTauOutsideAcceptance,
+      kkNumberOfSelectedTauMatchTypes
     };
     enum MCSelectedTauOriginType {
       kkUnknownOrigin,
@@ -60,6 +61,8 @@ namespace HPlus {
     bool isJetToTau(MCSelectedTauMatchType type) { return (type == kkJetToTau || type == kkJetToTauAndTauOutsideAcceptance); }
     bool isElectronOrMuonFromTauDecay(MCSelectedTauMatchType type) { return (type == kkElectronFromTauDecayToTau || type == kkElectronToTauAndTauOutsideAcceptance ||
       type == kkMuonFromTauDecayToTau || type == kkMuonFromTauDecayToTauAndTauOutsideAcceptance); }
+
+    bool isEmbeddingGenuineTau(MCSelectedTauMatchType type) { return (!isFakeTau(type) || isElectronOrMuonFromTauDecay(type)); }
 
   private:
     // Scale factors for X->tau fakes

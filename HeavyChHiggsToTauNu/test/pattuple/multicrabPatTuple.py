@@ -106,47 +106,14 @@ datasets = [
 
 
 
-
-
-multicrab.extendDatasets("AOD", datasets)
+workflow = "pattuple_v44_4"
+multicrab.extendDatasets(workflow, datasets)
 
 # local_stage_out doesn't work due to denied permission because we're
 # writing to /store/group/local ...
 #multicrab.appendLineAll("USER.local_stage_out=1")
 
 multicrab.appendLineAll("GRID.maxtarballsize = 15")
-multicrab.appendArgAll("runOnCrab=1")
-
-reco_re = re.compile("^(?P<reco>Run[^_]+_[^_]+_v\d+_[^_]+_)")
-run_re = re.compile("^(?P<pd>[^_]+?)_((?P<trig>[^_]+?)_)?(?P<frun>\d+)-(?P<lrun>\d+)_")
-
-def addOutputName(dataset):
-    path = dataset.getDatasetPath().split("/")
-    name = path[2].replace("-", "_")
-    name += "_"+path[3]
-    name += "_pattuple_v26"
-
-    # Add the begin run in the dataset name to the publish name in
-    # order to distinguish pattuple datasets from the same PD
-    if dataset.isData():
-        m = run_re.search(dataset.getName())
-        frun = m.group("frun")
-        trig = ""
-        if m.group("trig"):
-            trig = m.group("trig")+"_"
-
-        m = reco_re.search(name)
-        name = reco_re.sub(m.group("reco")+trig+frun+"_", name)
-
-    dataset.appendLine("USER.publish_data_name = "+name)
-multicrab.forEachDataset(addOutputName)
-
-def addSplitMode(dataset):
-    if dataset.isMC():
-        dataset.appendLine("CMSSW.total_number_of_events = -1")
-    else:
-        dataset.appendLine("CMSSW.total_number_of_lumis = -1")
-multicrab.forEachDataset(addSplitMode)
 
 def addCopyConfig(dataset):
     dataset.appendLine("USER.additional_input_files = copy_cfg.py")

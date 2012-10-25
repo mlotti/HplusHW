@@ -10,6 +10,8 @@ from optparse import OptionParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
 re_histo = None
+re_se = re.compile("newPfn =\s*(?P<url>\S+)")
+replace_madhatter = ("srm://madhatter.csc.fi:8443/srm/managerv2?SFN=", "root://madhatter.csc.fi:1094")
 
 def getHistogramFile(stdoutFile):
     multicrab.assertJobSucceeded(stdoutFile)
@@ -21,6 +23,22 @@ def getHistogramFile(stdoutFile):
             histoFile = m.group("file")
             continue
     f.close()
+    return histoFile
+
+def getHistogramFileSE(stdoutFile):
+    multicrab.assertJobSucceeded(stdoutFile)
+    histoFile = None
+    f = open(stdoutFile)
+    for line in f:
+        m = re_se.search(line)
+        if m:
+            histoFile = m.group("url")
+            break
+    f.close()
+    if histoFile != None:
+        if not replace_madhatter[0] in histoFile:
+            raise Exception("Other output SE's than madhatter are not supported at the moment (encountered PFN %s)"%histoFile)
+        histoFile = histoFile.replace(replace_madhatter[0], replace_madhatter[1])
     return histoFile
 
 def main(opts, args):
@@ -37,14 +55,21 @@ def main(opts, args):
         files = []
         for f in stdoutFiles:
             try:
-                histoFile = getHistogramFile(f)
-                if histoFile != None:
-                    files.append(os.path.join(os.path.dirname(f), histoFile))
+                if opts.filesInSE:
+                    histoFile = getHistogramFileSE(f)
+                    if histoFile != None:
+                        files.append(histoFile)
+                    else:
+                        print "Task %s, skipping job %s: input root file not found" % (d, f)
                 else:
-                    print "Skipping task %s, job %s: input root file not found" % (d, f)
+                    histoFile = getHistogramFile(f)
+                    if histoFile != None:
+                        files.append(os.path.join(os.path.dirname(f), histoFile))
+                    else:
+                        print "Task %s, skipping job %s: input root file not found" % (d, f)
             except multicrab.ExitCodeException, e:
-                print "Skipping task %s, job %s: %s" % (d, f, str(e))
-            
+                print "Task %s, skipping job %s: %s" % (d, f, str(e))
+
         if len(files) == 0:
             print "Task %s, skipping, no files to merge" % d
             continue
@@ -63,6 +88,12 @@ def main(opts, args):
         if os.path.exists(mergeName):
             shutil.move(mergeName, mergeName+".backup")
 
+        cmd = ["hadd"]
+        if opts.filesInSE:
+            cmd.append("-T") # don't merge TTrees via xrootd
+        cmd.append(mergeName)
+        cmd.extend(files)
+
         p = subprocess.Popen(["hadd", mergeName]+files, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         output = p.communicate()[0]
         ret = p.returncode
@@ -70,6 +101,11 @@ def main(opts, args):
             print output
             print "Merging failed with exit code %d" % ret
             return 1
+
+        # FIXME: add here reading of first xrootd file, finding all TTrees, and writing the TList to mergeName file
+        if opts.filesInSE:
+            raise Exception("--filesInSE feature is not fully implemented")
+        
         mergedFiles.append((mergeName, files))
 
     deleteMessage = ""
@@ -95,6 +131,8 @@ if __name__ == "__main__":
                       help="Pattern for merged output root files (use '%s' for crab directory name) (default: 'histograms-%s.root')")
     parser.add_option("--delete", dest="delete", default=False, action="store_true",
                       help="Delete the source files to save disk space (default is to keep the files)")
+    parser.add_option("--filesInSE", dest="filesInSE", default=False, action="store_true",
+                      help="The ROOT files to be merged are in an SE, merge the files from there. File locations are read from CMSSW_*.stdout files. NOTE: TTrees are not merged (it is assumed that due to TTrees the files are so big that they have to be stored in SE), but are replaced with TList of strings of the PFN's of the files via xrootd protocol.")
     
     (opts, args) = parser.parse_args()
 
