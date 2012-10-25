@@ -251,14 +251,14 @@ datasets.extend([
     MCDataset("TTToHplusBWB_M160_Summer12",  crossSection=225.2, aod="/TTToHplusBWB_M-160_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
     # Signal, tt -> H+H-, 200 kevt/sample
     # Cross sections from [1]
-    MCDataset("TTToHplusBHminusB_M80_Summer12",   crossSection=225.2, aod="/TTToHplusBHMinusB_M-80_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
-    MCDataset("TTToHplusBHminusB_M90_Summer12",   crossSection=225.2, aod="/TTToHplusBHMinusB_M-90_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
-    MCDataset("TTToHplusBHminusB_M100_Summer12",  crossSection=225.2, aod="/TTToHplusBHMinusB_M-100_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
-    MCDataset("TTToHplusBHminusB_M120_Summer12",  crossSection=225.2, aod="/TTToHplusBHMinusB_M-120_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
-    MCDataset("TTToHplusBHminusB_M140_Summer12",  crossSection=225.2, aod="/TTToHplusBHMinusB_M-140_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
-    MCDataset("TTToHplusBHminusB_M150_Summer12",  crossSection=225.2, aod="/TTToHplusBHMinusB_M-150_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
-    MCDataset("TTToHplusBHminusB_M155_Summer12",  crossSection=225.2, aod="/TTToHplusBHMinusB_M-155_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
-    MCDataset("TTToHplusBHminusB_M160_Summer12",  crossSection=225.2, aod="/TTToHplusBHMinusB_M-160_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
+    MCDataset("TTToHplusBHminusB_M80_Summer12",   crossSection=225.2, aod="/TTToHplusBHminusB_M-80_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
+    MCDataset("TTToHplusBHminusB_M90_Summer12",   crossSection=225.2, aod="/TTToHplusBHminusB_M-90_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
+    MCDataset("TTToHplusBHminusB_M100_Summer12",  crossSection=225.2, aod="/TTToHplusBHminusB_M-100_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
+    MCDataset("TTToHplusBHminusB_M120_Summer12",  crossSection=225.2, aod="/TTToHplusBHminusB_M-120_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
+    MCDataset("TTToHplusBHminusB_M140_Summer12",  crossSection=225.2, aod="/TTToHplusBHminusB_M-140_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
+    MCDataset("TTToHplusBHminusB_M150_Summer12",  crossSection=225.2, aod="/TTToHplusBHminusB_M-150_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
+    MCDataset("TTToHplusBHminusB_M155_Summer12",  crossSection=225.2, aod="/TTToHplusBHminusB_M-155_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
+    MCDataset("TTToHplusBHminusB_M160_Summer12",  crossSection=225.2, aod="/TTToHplusBHminusB_M-160_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
     # Signal t -> H+, s-channel, 250-300 kevt/sample
     # Cross sections from [2]
     MCDataset("Hplus_taunu_s-channel_M80_Summer12",   crossSection=3.79+1.76, aod="/Hplus_taunu_s-channel_M-80_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
