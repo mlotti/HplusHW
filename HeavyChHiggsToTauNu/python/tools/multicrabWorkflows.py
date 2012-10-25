@@ -323,6 +323,7 @@ datasets.extend([
 
 # Add definition
 multicrabWorkflowsPileupNtuple.addNtuple_44X(datasets)
+multicrabWorkflowsPileupNtuple.addNtuple_53X(datasets)
 
 # Add pattuple definitions
 multicrabWorkflowsPattuple.addPattuple_v25b(datasets)

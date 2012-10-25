@@ -5,10 +5,16 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # interactions per event. This is needed to obtain the PU-reweighted
 # number of all events for each MC dataset.
 
+# 44X:
 # Runs in ~10 s / 5k events
 # Output size ~25 kB / 5k events
 
-dataVersion = "44XmcS6"
+# 53X:
+# Runs in ~30 s / 6k events
+# Output size ~37 kB / 6k events
+
+#dataVersion = "44XmcS6"
+dataVersion = "53XmcS10"
 
 # Just to be compatible with our multicrab system, which assumes that
 # the job configuration file reads the command line arguments
