@@ -951,6 +951,9 @@ class Multicrab:
     # files to the directory and optionally run 'multicrab -create'
     # in the directory.
     def createTasks(self, configOnly=False, codeRepo='git', over500JobsMode=NONE, **kwargs):
+        if self.datasets == None:
+            self._createDatasets()
+
         # If mode is NONE, create tasks for all datasets
         if over500JobsMode == Multicrab.NONE:
             return self._createTasks(configOnly, codeRepo, **kwargs)
