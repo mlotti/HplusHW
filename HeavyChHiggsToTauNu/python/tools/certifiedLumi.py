@@ -18,7 +18,7 @@ files = {
     "DCSONLY12": "json_DCSONLY_2012.txt",
     # 53X PromptReco and ReRecos
     "PromptReco12": "Cert_190456-204567_8TeV_PromptReco_Collisions12_JSON.txt",
-    "12Jul2012ReReco": "Cert_190456-196531_8TeV_13Jul2012ReReco_Collisions12_JSON_v2.txt",
+    "13Jul2012ReReco": "Cert_190456-196531_8TeV_13Jul2012ReReco_Collisions12_JSON_v2.txt",
     "06Aug2012ReReco": "Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12_JSON.txt",
     "24Aug2012ReReco": "Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12_JSON.txt",
 }
