@@ -70,6 +70,7 @@ set -e
 # 17.9.2012/M.Kortelainen CMSSW_4_4_4 Cut-based electron ID tag
 # 17.9.2012/S.Lehti       CMSSW_5_3_3 Update for 53X
 # 12.10.2012/M.Kortelainen CMSSW_5_3_5 Updated PAT tags
+# 25.10.2012/M.Kortelainen CMSSW_5_3_5 Update for running runMEtUncertainties() multiple times
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -81,7 +82,11 @@ addpkg PhysicsTools/PatAlgos     V08-09-42
 # We don't need the code (it's the same as in the release), but a ROOT
 # file for jet smearing needs to be in the developer area at the moment
 # (see )
-addpkg PhysicsTools/PatUtils
+addpkg PhysicsTools/PatUtils V03-09-27
+# Needed for running runMEtUncertainties() multiple times, no tag yet
+cvs up -r 1.24 PhysicsTools/PatUtils/python/tools/metUncertaintyTools.py
+cvs up -r 1.19.8.1 PhysicsTools/PatAlgos/python/tools/helpers.py
+rm PhysicsTools/PatUtils/plugins/MinPatMETProducer.cc
 
 # Tau+PAT
 # https://hypernews.cern.ch/HyperNews/CMS/get/tauid/252.html

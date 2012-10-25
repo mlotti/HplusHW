@@ -615,7 +615,6 @@ class StandardPATBuilder(PATBuilderBase):
         # to remove contribution from jet energy corrections of those
         # jets which correspond isolated e/mu/tau
 
-        jets = self.process.selectedPatJets.src.value()
         seq = self.process.patDefaultSequence
 
         self.outputCommands.extend([
@@ -625,16 +624,21 @@ class StandardPATBuilder(PATBuilderBase):
 
         if self.dataVersion.isData():
             self.process.load("PhysicsTools.PatUtils.patPFMETCorrections_cff")
-            self.process.selectedPatJetsForMETtype1p2Corr.src = jets
-            self.process.selectedPatJetsForMETtype2Corr.src = jets
-            self.process.patPFMet.addGenMET = False
+            for postfix in jetPostfixes:
+                jets = getattr(self.process, "selectedPatJets"+postfix).src.value()
 
-            seq *= self.process.producePatPFMETCorrections
-            self.outputCommands.extend([
-                    "keep *_patPFMet_*_*",
-                    "keep *_patType1CorrectedPFMet_*_*",
-                    "keep *_patType1p2CorrectedPFMet_*_*",
-                    ])
+                if postfix != "":
+                    patHelpers.cloneProcessingSnippet(process, process.producePatPFMETCorrections, postfix)
+                getattr(self.process, "selectedPatJetsForMETtype1p2Corr"+postfix).src = jets
+                getattr(self.process, "selectedPatJetsForMETtype2Corr"+postfix).src = jets
+                getattr(self.process, "patPFMet"+postfix).addGenMET = False
+
+                seq *= getattr(self.process, "producePatPFMETCorrections"+postfix)
+                self.outputCommands.extend([
+                        "keep *_patPFMet%s_*_*" % postfix,
+                        "keep *_patType1CorrectedPFMet%s_*_*" % postfix,
+                        "keep *_patType1p2CorrectedPFMet%s_*_*" % postfix,
+                        ])
             return
 
         # Following is for MC only
@@ -650,73 +654,78 @@ class StandardPATBuilder(PATBuilderBase):
             # set to proper values after a call to this method.
             getattr(self.process, outputModule).outputCommands = []
 
-        # Smear the jet energies by JER data/MC difference for MC only
-        metUncertaintyTools.runMEtUncertainties(self.process,
-                                                electronCollection="",
-                                                photonCollection="",
-                                                muonCollection="",
-                                                tauCollection="",
-                                                jetCollection=jets,
-                                                doSmearJets=self.dataVersion.isMC(),
-                                                outputModule=outputModule
-                                                )
+        for postfix in jetPostfixes:
+            jets = getattr(self.process, "selectedPatJets"+postfix).src.value()
 
-        # The function call above adds metUncertaintySequence to
-        # patDefaultSequence. We have to add it to patDefaultSequence PFlow manually
-        seq *= self.process.metUncertaintySequence
+            # Smear the jet energies by JER data/MC difference for MC only
+            metUncertaintyTools.runMEtUncertainties(self.process,
+                                                    electronCollection="",
+                                                    photonCollection="",
+                                                    muonCollection="",
+                                                    tauCollection="",
+                                                    jetCollection=jets,
+                                                    doSmearJets=self.dataVersion.isMC(),
+                                                    outputModule=outputModule,
+                                                    postfix=postfix,
+                                                    )
 
-        # Add "selected"-collections for all jets
-        # "All" name "shiftedPatJetsBetaEmbeddedPFlowEnUpForCorrMEt"
-        # "Selected" name "shiftedPatJetsPFlowEnUpForCorrMEt"
-        # Create also PU jet ID for each "Selected" collection
-        tmp = jets.replace("patJets", "")
-        shiftedJetNames = [ # These are the ones produced by runMEtUncertainties
-            "shiftedPatJets%sEnUpForCorrMEt" % tmp,
-            "shiftedPatJets%sEnDownForCorrMEt" % tmp,
-            "smearedPatJets%s" % tmp,
-            "smearedPatJets%sResUp" % tmp,
-            "smearedPatJets%sResDown" % tmp,
-            ]
-        selectedJetNames = []
-        for shiftedJet in shiftedJetNames:
-            # Create selectedPatJets
-            m = self.process.selectedPatJets.clone(
-                src = shiftedJet
-            )
-            name = shiftedJet.replace(tmp, "")
-            setattr(self.process, name, m)
-            seq *= m
-            selectedJetNames.append(name)
+            # Add "selected"-collections for all jets
+            # "All" name "shiftedPatJetsBetaEmbeddedPFlowEnUpForCorrMEt"
+            # "Selected" name "shiftedPatJetsPFlowEnUpForCorrMEt"
+            # Create also PU jet ID for each "Selected" collection
+            tmp = jets.replace("patJets", "")
+            shiftedJetNames = [ # These are the ones produced by runMEtUncertainties
+                "shiftedPatJets%sEnUpForCorrMEt%s" % (tmp, postfix),
+                "shiftedPatJets%sEnDownForCorrMEt%s" % (tmp, postfix),
+                "smearedPatJets%s%s" % (tmp, postfix),
+                "smearedPatJets%sResUp%s" % (tmp, postfix),
+                "smearedPatJets%sResDown%s" % (tmp, postfix),
+                ]
+            selectedJetNames = []
 
-            # Clone PU jet ID
-            puJetIdSequence = patHelpers.cloneProcessingSnippet(self.process, self.process.puJetIdSqeuence, "For"+name)
-            getattr(self.process, "puJetIdFor"+name).jets = name
-            getattr(self.process, "puJetMvaFor"+name).jets = name
-            seq *= puJetIdSequence
+            for shiftedJet in shiftedJetNames:
+                # Create selectedPatJets
+                m = self.process.selectedPatJets.clone(
+                    src = shiftedJet
+                )
+                name = shiftedJet.replace(tmp, postfix)
+                setattr(self.process, name, m)
+                seq *= m
+                selectedJetNames.append(name)
+    
+                # Clone PU jet ID
+                if not hasattr(self.process, "puJetIdSqeuence%sFor%s" % (postfix, name)):
+                    puJetIdSequence = patHelpers.cloneProcessingSnippet(self.process, getattr(self.process, "puJetIdSqeuence"+postfix), "For"+name)
+                    seq *= puJetIdSequence
+                if postfix not in ["", "Chs"]:
+                    raise Exception("Jet postfix other than empty or 'Chs' not supported, got %s" % postfix)
 
-        if outputModule != "":
-            self.outputCommands.extend(getattr(self.process, outputModule).outputCommands)
-            self.process.out.outputCommands = []
-
-
-            processName = self.process.name_()
-            # Drop "all" shifted/smeared jet collections in favor of
-            # the "selected" collections. We don't need the
-            # "ForRawMEt" energy variations.
-            self.outputCommands.extend([
-                    "drop *_shiftedPatJetsBetaEmbeddedEnUpForRawMEt_*_%s" % processName,
-                    "drop *_shiftedPatJetsBetaEmbeddedEnDownForRawMEt_*_%s" % processName
-                    ])
-            for n in shiftedJetNames:
-                self.outputCommands.append("drop *_%s_*_%s" % (n, processName))
-            # Keep the "selected" collections
-            for n in selectedJetNames:
+                getattr(self.process, "puJetId%sFor%s" % (postfix, name)).jets = name
+                getattr(self.process, "puJetMva%sFor%s" % (postfix, name)).jets = name
+    
+            if outputModule != "":
+                self.outputCommands.extend(getattr(self.process, outputModule).outputCommands)
+                self.process.out.outputCommands = []
+    
+    
+                processName = self.process.name_()
+                # Drop "all" shifted/smeared jet collections in favor of
+                # the "selected" collections. We don't need the
+                # "ForRawMEt" energy variations.
                 self.outputCommands.extend([
-                        "keep *_%s_*_%s" % (n, processName),
-                        "keep *_puJetIdFor%s_*_%s" % (n, processName),
-                        "keep *_puJetMvaFor%s_*_%s" % (n, processName),
+                        "drop *_shiftedPatJetsBetaEmbedded%sEnUpForRawMEt_*_%s" % (postfix, processName),
+                        "drop *_shiftedPatJetsBetaEmbedded%sEnDownForRawMEt_*_%s" % (postfix, processName)
                         ])
-
+                for n in shiftedJetNames:
+                    self.outputCommands.append("drop *_%s_*_%s" % (n, processName))
+                # Keep the "selected" collections
+                for n in selectedJetNames:
+                    self.outputCommands.extend([
+                            "keep *_%s_*_%s" % (n, processName),
+                            "keep *_puJetId%sFor%s_*_%s" % (postfix, n, processName),
+                            "keep *_puJetMva%sFor%s_*_%s" % (postfix, n, processName),
+                            ])
+    
     def _customizeEventCleaning(self):
         self.outputCommands.extend([
                 "keep recoBeamHaloSummary_*_*_*", # keep beam halo summaries
