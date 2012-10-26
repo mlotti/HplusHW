@@ -125,7 +125,7 @@ datasets_53X = [
 #multicrab.extendDatasets("pileupNtuple_44X", datasets_44X)
 multicrab.extendDatasets("pileupNtuple_53X", datasets_53X)
 
-multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
+multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist_noStageout)
 
 # Generate configuration only?
 configOnly=True
