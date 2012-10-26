@@ -677,7 +677,7 @@ class StandardPATBuilder(PATBuilderBase):
                 m = self.process.selectedPatJets.clone(
                     src = shiftedJet
                 )
-                name = shiftedJet.replace(tmp, postfix)
+                name = shiftedJet.replace(tmp, "")
                 setattr(self.process, name, m)
                 seq *= m
                 selectedJetNames.append(name)
@@ -702,8 +702,8 @@ class StandardPATBuilder(PATBuilderBase):
                 # the "selected" collections. We don't need the
                 # "ForRawMEt" energy variations.
                 self.outputCommands.extend([
-                        "drop *_shiftedPatJetsBetaEmbedded%sEnUpForRawMEt_*_%s" % (postfix, processName),
-                        "drop *_shiftedPatJetsBetaEmbedded%sEnDownForRawMEt_*_%s" % (postfix, processName)
+                        "drop *_shiftedPatJetsBetaEmbedded%sEnUpForRawMEt%s_*_%s" % (postfix, postfix, processName),
+                        "drop *_shiftedPatJetsBetaEmbedded%sEnDownForRawMEt%s_*_%s" % (postfix, postfix, processName)
                         ])
                 for n in shiftedJetNames:
                     self.outputCommands.append("drop *_%s_*_%s" % (n, processName))
