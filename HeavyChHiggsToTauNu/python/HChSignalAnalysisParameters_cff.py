@@ -685,8 +685,15 @@ def changeJetCollection(**kwargs):
 
 def setJERSmearedJets(dataVersion):
     if dataVersion.isMC():
-        print "Using JER-smeared jets"
-        changeJetCollection(moduleLabel="smearedPatJets")
+        if jetSelection.src.value() == "selectedPatJets":
+            print "Using JER-smeared jets"
+            changeJetCollection(moduleLabel="smearedPatJets")
+        elif jetSelection.src.value() == "selectedPatJetsChs":
+            print "Using JER-smeared CHS jets"
+            changeJetCollection(moduleLabel="smearedPatJetsChs")
+        else:
+            raise Exception("Unsupported value for jet src %s, expected 'selectedPatJets' or 'selectedPatJetsChs'" % jetSelection.src.value())
+            
 
 def changeCollectionsToPF2PAT(dataVersion, postfix="PFlow", useGSFElectrons=True):
     # Taus

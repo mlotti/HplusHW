@@ -60,6 +60,7 @@ class ConfigBuilder:
                  tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
                 # tauSelectionOperatingMode = "tauCandidateSelectionOnly",   
                  useTriggerMatchedTaus = True,
+                 useCHSJets = False,
                  useJERSmearedJets = True,
                  useBTagDB = False,
                  customizeAnalysis = None,
@@ -90,6 +91,7 @@ class ConfigBuilder:
         self.applyPUReweight = applyPUReweight
         self.tauSelectionOperatingMode = tauSelectionOperatingMode
         self.useTriggerMatchedTaus = useTriggerMatchedTaus
+        self.useCHSJets = useCHSJets
         self.useJERSmearedJets = useJERSmearedJets
         self.useBTagDB = useBTagDB
         self.customizeAnalysis = customizeAnalysis
@@ -421,6 +423,11 @@ class ConfigBuilder:
         else:
             param.setAllTauSelectionSrcSelectedPatTaus()
 
+        # CHS jets
+        if self.useCHSJets:
+            print "Using CHS jets"
+            param.changeJetCollection(moduleLabel="selectedPatJetsChs")
+
         # JER-smeared jets
         if self.useJERSmearedJets:
             param.setJERSmearedJets(self.dataVersion)
@@ -672,22 +679,26 @@ class ConfigBuilder:
         module.Tree.fill = False        
         module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
 
+        postfix = ""
+        if module.jetSelection.src.value()[-3:] == "Chs":
+            postfix = "Chs"
+
         jesVariation.addTESVariation(process, name, "TESPlus",  module, "Up")
         jesVariation.addTESVariation(process, name, "TESMinus", module, "Down")
         N = 2
 
         if doJetUnclusteredVariation:
             # Do all variations beyond TES
-            jesVariation.addJESVariation(process, name, "JESPlus",  module, "Up")
-            jesVariation.addJESVariation(process, name, "JESMinus", module, "Down")
+            jesVariation.addJESVariation(process, name, "JESPlus",  module, "Up", postfix)
+            jesVariation.addJESVariation(process, name, "JESMinus", module, "Down", postfix)
             N += 2
     
-            jesVariation.addJERVariation(process, name, "JERPlus",  module, "Up")
-            jesVariation.addJERVariation(process, name, "JERMinus", module, "Down")
+            jesVariation.addJERVariation(process, name, "JERPlus",  module, "Up", postfix)
+            jesVariation.addJERVariation(process, name, "JERMinus", module, "Down", postfix)
             N += 2
     
-            jesVariation.addUESVariation(process, name, "METPlus",  module, "Up")
-            jesVariation.addUESVariation(process, name, "METMinus", module, "Down")
+            jesVariation.addUESVariation(process, name, "METPlus",  module, "Up", postfix)
+            jesVariation.addUESVariation(process, name, "METMinus", module, "Down", postfix)
             N += 2
 
         self._accumulateAnalyzers("JES variation", N)
@@ -697,6 +708,8 @@ class ConfigBuilder:
     # \param process                      cms.Process object
     # \param analysisNamesForSystematics  Names of the analysis modules for which the PU weight variation should be done
     def _buildPUWeightVariation(self, process, analysisNamesForSystematics, param):
+        if not self.applyPUReweight:
+            return
         if not (self.doPUWeightVariation or self.doSystematics):
             return
 
