@@ -6,7 +6,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 multicrab = Multicrab("crab_pat.cfg", lumiMaskDir="..")
 
-datasets = [
+datasets_44X = [
 ########
 #
 # 44X
@@ -105,8 +105,90 @@ datasets = [
 ]
 
 
+datasets_53X = [
+    "Tau_190456-190738_2012A_Jul13",
+#    "Tau_190782-190949_2012A_Aug06",
+#    "Tau_191043-193621_2012A_Jul13",
+#    "Tau_193834-196531_2012B_Jul13",
+#    "Tau_198022-198523_2012C_Aug24",
+#    "Tau_198941-200601_2012C_Prompt",
+#    "Tau_202792-203742_2012C_Prompt",
+#
+    "MultiJet_190456-190738_2012A_Jul13",
+#    "MultiJet_190782-190949_2012A_Aug06",
+#    "MultiJet_191043-193621_2012A_Jul13",
+#    "MultiJet_193834-194225_2012B_Jul13",
+#    "MultiJet_194270-196531_2012B_Jul13",
+#    "MultiJet_198022-198523_2012C_Aug24",
+#    "MultiJet_198941-200601_2012C_Prompt",
+#    "MultiJet_202792-203742_2012C_Prompt",
+#
+#    "TTToHplusBWB_M80_Summer12",
+#    "TTToHplusBWB_M90_Summer12",
+#    "TTToHplusBWB_M100_Summer12",
+#    "TTToHplusBWB_M120_Summer12",
+#    "TTToHplusBWB_M140_Summer12",
+#    "TTToHplusBWB_M150_Summer12",
+#    "TTToHplusBWB_M155_Summer12",
+#    "TTToHplusBWB_M160_Summer12",
+#
+#    "TTToHplusBHminusB_M80_Summer12",
+#    "TTToHplusBHminusB_M90_Summer12",
+#    "TTToHplusBHminusB_M100_Summer12",
+#    "TTToHplusBHminusB_M120_Summer12",
+#    "TTToHplusBHminusB_M140_Summer12",
+#    "TTToHplusBHminusB_M150_Summer12",
+#    "TTToHplusBHminusB_M155_Summer12",
+#    "TTToHplusBHminusB_M160_Summer12",
+#
+#    "Hplus_taunu_s-channel_M80_Summer12",
+#    "Hplus_taunu_s-channel_M90_Summer12",
+#    "Hplus_taunu_s-channel_M100_Summer12",
+#    "Hplus_taunu_s-channel_M120_Summer12",
+#    "Hplus_taunu_s-channel_M140_Summer12",
+#    "Hplus_taunu_s-channel_M150_Summer12",
+#    "Hplus_taunu_s-channel_M155_Summer12",
+#    "Hplus_taunu_s-channel_M160_Summer12",
+#
+#    "HplusTB_M180_Summer12",
+#    "HplusTB_M190_Summer12",
+#    "HplusTB_M200_Summer12",
+#    "HplusTB_M220_Summer12",
+#    "HplusTB_M250_Summer12",
+#    "HplusTB_M300_Summer12",
+#
+#    "QCD_Pt30to50_TuneZ2star_Summer12",
+#    "QCD_Pt50to80_TuneZ2star_Summer12",
+#    "QCD_Pt80to120_TuneZ2star_Summer12",
+#    "QCD_Pt120to170_TuneZ2star_Summer12",
+#    "QCD_Pt170to300_TuneZ2star_Summer12",
+#    "QCD_Pt300to470_TuneZ2star_Summer12",
+#
+#    "WW_TuneZ2star_Summer12",
+#    "WZ_TuneZ2star_Summer12",
+#    "ZZ_TuneZ2star_Summer12",
+    "TTJets_TuneZ2star_Summer12",
+    "WJets_TuneZ2star_v1_Summer12",
+    "WJets_TuneZ2star_v2_Summer12",
+    "W1Jets_TuneZ2star_Summer12",
+    "W2Jets_TuneZ2star_Summer12",
+    "W3Jets_TuneZ2star_Summer12",
+    "W4Jets_TuneZ2star_Summer12",
+#    "DYJetsToLL_M50_TuneZ2star_Summer12",
+#    "T_t-channel_TuneZ2star_Summer12",
+#    "Tbar_t-channel_TuneZ2star_Summer12",
+#    "T_tW-channel_TuneZ2star_Summer12",
+#    "Tbar_tW-channel_TuneZ2star_Summer12",
+#    "T_s-channel_TuneZ2star_Summer12",
+#    "Tbar_s-channel_TuneZ2star_Summer12",
+]
 
-workflow = "pattuple_v44_4"
+#workflow = "pattuple_v44_4"
+#datasets = datasets_44X
+
+workflow = "pattuple_v53_1_test1"
+datasets = datasets_53X
+
 multicrab.extendDatasets(workflow, datasets)
 
 # local_stage_out doesn't work due to denied permission because we're
@@ -115,20 +197,11 @@ multicrab.extendDatasets(workflow, datasets)
 
 multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
-def addCopyConfig(dataset):
-    dataset.appendLine("USER.additional_input_files = copy_cfg.py")
-    dataset.appendCopyFile("../copy_cfg.py")
-multicrab.forEachDataset(addCopyConfig)
+#def addCopyConfig(dataset):
+#    dataset.appendLine("USER.additional_input_files = copy_cfg.py")
+#    dataset.appendCopyFile("../copy_cfg.py")
+#multicrab.forEachDataset(addCopyConfig)
 
-# For collision data stageout from US doesn't seem to be a problem
-#allowUS = ["TT", "TTJets", "TTToHplusBWB_M90", "TTToHplusBWB_M100", "TTToHplusBWB_M120", "TTToHplusBWB_M140", "TTToHplusBWB_M160"]
-#def blacklistUS(dataset):
-#    if dataset.isMC() and not dataset.getName() in allowUS:
-#        dataset.extendBlackWhiteList("se_black_list", ["T2_US"])
-#multicrab.forEachDataset(blacklistUS)
-
-# Many failures with 60307 and 70500 from T2_UK_London_Brunel for
-# pattuple_v6_1 while the similar jobs stageout fine in other T2s
 multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
 
 prefix = "multicrab"
@@ -142,13 +215,13 @@ taskDir = multicrab.createTasks(prefix=prefix, configOnly=configOnly)
 #
 # Running CMSSW again in each job just to copy the file seems to
 # somehow "linearize" the file, and the subsequent file access is fast
-class Wrapper:
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
+# class Wrapper:
+#     def __init__(self, **kwargs):
+#         self.__dict__.update(kwargs)
 
-if not configOnly:
-    import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
-    import os
-    os.chdir(taskDir)
-    patch.main(Wrapper(dirs=datasets, input="pattuple"))
-    os.chdir("..")
+# if not configOnly:
+#     import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
+#     import os
+#     os.chdir(taskDir)
+#     patch.main(Wrapper(dirs=datasets, input="pattuple"))
+#     os.chdir("..")

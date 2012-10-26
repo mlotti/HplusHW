@@ -329,6 +329,8 @@ multicrabWorkflowsPileupNtuple.addNtuple_53X(datasets)
 multicrabWorkflowsPattuple.addPattuple_v25b(datasets)
 multicrabWorkflowsPattuple.addPattuple_v25c(datasets)
 multicrabWorkflowsPattuple.addPattuple_v44_4(datasets)
+
+multicrabWorkflowsPattuple.addPattuple_v53_1_test1(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_1(datasets)
 
 # Add embedding definitions
