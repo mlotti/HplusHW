@@ -151,6 +151,7 @@ import subprocess, errno
 import time
 import math
 import shutil
+import select
 import ConfigParser
 import OrderedDict
 
@@ -416,11 +417,29 @@ def crabStatusOutput(task, printCrab):
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     if printCrab:
         output = ""
-        while p.poll() == None:
-            line = p.stdout.readline()
-            if line:
-                print line.strip("\n")
-                output += line
+        # The process may finish between p.poll() and p.stdout.readline()
+        # http://stackoverflow.com/questions/10756383/timeout-on-subprocess-readline-in-python
+        # Try first just using select for polling if p.stdout has anything
+        # If that doesn't work out, add the timeout (currently in comments)
+        poll_obj = select.poll()
+        poll_obj.register(p.stdout, select.POLLIN)
+        #last_print_time = time.time()
+        #timeout = 600 # 10 min timeout initially, -status can take long
+        while p.poll() == None:# and (time.time() - last_print_time) < timeout:
+            poll_result = poll_obj.poll(0)
+            if poll_result:
+                line = p.stdout.readline()
+                if line:
+                    print line.strip("\n")
+                    output += line
+#                    if "Log file is" in line:
+#                        # The last line in the output starts with this, shorten the timeout to 10 s
+#                        timeout = 10
+#                        print "Last line encountered, shortening timeout to 10 s"
+#                last_print_time = time.time()
+            else:
+                time.sleep(1)
+#        print "Out of poll loop, return code", p.returncode
         if p.returncode != 0:
             raise Exception("Command '%s' failed with exit code %d" % (" ".join(command), p.returncode))
     else:
