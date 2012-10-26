@@ -71,6 +71,7 @@ namespace HPlus {
     const double fLeadTrkPtCut;
     const std::string fAgainstElectronDiscriminator;
     const bool fApplyVetoForDeadECALCells;
+    const double fDeadECALCellsDeltaR;
     const std::string fAgainstMuonDiscriminator;
     const size_t fProngCount;
     const std::string fIsolationDiscriminator;

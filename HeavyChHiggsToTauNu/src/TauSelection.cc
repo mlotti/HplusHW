@@ -1032,7 +1032,6 @@ namespace HPlus {
     // Get taus
     edm::Handle<edm::View<pat::Tau> > htaus;
     iEvent.getByLabel(fSrc, htaus);
-
     for(edm::PtrVector<pat::Tau>::const_iterator iter = htaus->ptrVector().begin(); iter != htaus->ptrVector().end(); ++iter) {
       const edm::Ptr<pat::Tau> iTau = *iter;
       FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fakeTauIdentifier.matchTauToMC(iEvent, *iTau);

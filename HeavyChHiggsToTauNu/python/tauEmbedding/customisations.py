@@ -7,11 +7,13 @@ PF2PATVersion = "" # empty for standard PAT
 #PF2PATVersion = "PFlow"
 #PF2PATVersion = "PFlowChs"
 
+skimProcessName = "MUONSKIM"
+
 def getAllPatMuons():
     if PF2PATVersion == "":
-        return "selectedPatMuons::MUONSKIM"
+        return "selectedPatMuons::"+skimProcessName
     else:
-        return "selectedPatMuons"+PF2PATVersion+"All::MUONSKIM" # We have to pick the ones of the original event
+        return "selectedPatMuons"+PF2PATVersion+"All::"+skimProcessName # We have to pick the ones of the original event
 tauEmbeddingMuons = "tauEmbeddingMuons"
 
 def getAllPatTaus():
@@ -58,7 +60,7 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
 
     # Use the muons where the original muon is removed in global muon veto
     param.GlobalMuonVeto.MuonCollectionName.setModuleLabel("selectedPatMuonsEmbeddingMuonCleaned")
-    param.GlobalElectronVeto.ElectronCollectionName.setProcessName("MUONSKIM")
+    param.GlobalElectronVeto.ElectronCollectionName.setProcessName(skimProcessName)
     param.GlobalElectronVeto.beamspotSrc.setProcessName(dataVersion.getRecoProcess())
     param.GlobalElectronVeto.conversionSrc.setProcessName(dataVersion.getRecoProcess())
 
@@ -462,6 +464,7 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
             )
         )
     )
+    m1.src.setProcessName(skimProcessName)
     m2 = cms.EDFilter("CandViewCountFilter",
         src = cms.InputTag(selector),
         minNumber = cms.uint32(3)
@@ -556,7 +559,7 @@ def addMuonTauIsolation(process, postfix="", discriminator="byTightIsolation"):
 
     muons = cms.EDProducer("HPlusTauIsolationPATMuonRefSelector",
         candSrc = cms.InputTag(tauEmbeddingMuons),
-        tauSrc = cms.InputTag("patTausHpsPFTau", "", "MUONSKIM"),
+        tauSrc = cms.InputTag("patTausHpsPFTau", "", skimProcessName),
         isolationDiscriminator = cms.string(discriminator),
         againstMuonDiscriminator = cms.string("againstMuonLoose"),
         deltaR = cms.double(0.15),

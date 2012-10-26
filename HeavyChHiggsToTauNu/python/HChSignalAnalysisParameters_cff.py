@@ -69,6 +69,7 @@ tauSelectionBase = cms.untracked.PSet(
     againstElectronDiscriminator = cms.untracked.string("againstElectronMVA"), # discriminator against electrons
     againstMuonDiscriminator = cms.untracked.string("againstMuonTight"), # discriminator for against muons
     applyVetoForDeadECALCells = cms.untracked.bool(False), # set to true to exclude taus that are pointing to a dead ECAL cell
+    deadECALCellsDeltaR = cms.untracked.double(0.01), # min allowed DeltaR to a dead ECAL cell
     isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr"), # discriminator for isolation
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1.0), # cut point for continuous isolation discriminator, applied only if it is non-zero
     rtauCut = cms.untracked.double(0.7), # rtau > value
@@ -397,6 +398,9 @@ vertexWeight = cms.untracked.PSet(
     dataPUdistributionLabel = cms.string("pileup"),
     mcPUdistribution = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramMCFall11.root"),
     mcPUdistributionLabel = cms.string("pileup"),
+    weightDistribution = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_2011AB.root"),
+    weightDistributionLabel = cms.string("weights"),
+    weightDistributionEnable = cms.bool(False),
     enabled = cms.bool(False),
 )
 
@@ -460,7 +464,12 @@ def setDataTriggerEfficiency(dataVersion, era, pset=triggerEfficiencyScaleFactor
         if dataVersion.isS4():
             pset.mcSelect = "Summer11"
         elif dataVersion.isS6():
-            pset.mcSelect = "Fall11"
+            if era == "Run2011A":
+                pset.mcSelect = "Fall11_PU_2011A"
+            if era == "Run2011B":
+                pset.mcSelect = "Fall11_PU_2011B"
+            if era == "Run2011AB":
+                pset.mcSelect = "Fall11_PU_2011AB"
         elif dataVersion.isHighPU():
 	    pset.mode = "disabled"
         else:
@@ -503,6 +512,7 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
 
     if era == "Run2011A" or era == "Run2011B":
         pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData"+era.replace("Run","")+suffix+".root"
+        pset.weightDistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_"+era.replace("Run","")+".root"
     elif era == "Run2011AB":
         pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011"+suffix+".root"
     else:
@@ -518,6 +528,9 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
                                       dataPUdistributionLabel = tmp.dataPUdistributionLabel,
                                       mcPUdistribution = tmp.mcPUdistribution,
                                       mcPUdistributionLabel = tmp.mcPUdistributionLabel,
+                                      weightDistribution = tmp.weightDistribution,
+                                      weightDistributionLabel = tmp.weightDistributionLabel,
+                                      weightDistributionEnable = tmp.weightDistributionEnable,
                                       alias = cms.string("PUVertexWeight"+era+suffix)
     )
     name = "PUWeightProducer"+era+suffix
