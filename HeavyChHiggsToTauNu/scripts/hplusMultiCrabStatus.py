@@ -55,7 +55,7 @@ def main(opts):
                 print "%s: Task directory missing" % task
             continue
         
-        jobs = multicrab.crabStatusToJobs(task)
+        jobs = multicrab.crabStatusToJobs(task, opts.printCrab)
 
         jobSummaries = {}
         njobs = 0
@@ -190,6 +190,8 @@ if __name__ == "__main__":
                       help="Save the output to a file, specified by --saveFile") 
     parser.add_option("--saveFile", dest="saveFile", default="status.txt",
                       help="File where the output is saved with --save (default: 'status.txt')")
+    parser.add_option("--printCrab", dest="printCrab", action="store_true", default=False,
+                      help="Print CRAB output")
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
 

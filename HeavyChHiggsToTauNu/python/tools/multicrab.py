@@ -406,15 +406,27 @@ def prettyToJobList(prettyString):
 
 ## Get output of 'crab -status' of one CRAB task
 #
-# \param task   CRAB task directory name
+# \param task      CRAB task directory name
+# \param printCrab Print CRAB output
 #
 # \return Output (stdout+stderr) as a string
-def crabStatusOutput(task):
+def crabStatusOutput(task, printCrab):
     command = ["crab", "-status", "-c", task]
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    output = p.communicate()[0]
-    if p.returncode != 0:
-        raise Exception("Command '%s' failed with exit code %d, output:\n%s" % (" ".join(command), p.returncode, output))
+    if printCrab:
+        output = ""
+        while p.poll() == None:
+            line = p.stdout.readline()
+            if line:
+                print line.strip("\n")
+                output += line
+        if p.returncode != 0:
+            raise Exception("Command '%s' failed with exit code %d" % (" ".join(command), p.returncode))
+    else:
+        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output = p.communicate()[0]
+        if p.returncode != 0:
+            raise Exception("Command '%s' failed with exit code %d, output:\n%s" % (" ".join(command), p.returncode, output))
     return output
 
 ## Transform 'crab -status' output to list of multicrab.CrabJob objects
@@ -442,10 +454,11 @@ def _intIfNotNone(n):
 ## Run 'crab -status' and create multicrab.CrabJob objects
 #
 # \param task  CRAB task directory
+# \param printCrab Print CRAB output
 #
 # \return List of multicrab.CrabJob objects
-def crabStatusToJobs(task):
-    output = crabStatusOutput(task)
+def crabStatusToJobs(task, printCrab):
+    output = crabStatusOutput(task, printCrab)
     return crabOutputToJobs(task, output)
 
 ## Class for containing the information of finished CRAB job
