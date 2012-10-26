@@ -147,8 +147,14 @@ namespace HPlus {
     // Find the hadronic jet corresponding to the selected tau
     double minDR = fTauJetMatchingCone;
     edm::Ptr<pat::Jet> selectedJet;
+    //std::cout << std::endl;
     for(size_t i=0; i<allJets.size(); ++i) {
       double dr = reco::deltaR(*selectedTau, *(allJets[i]));
+      /*
+      std::cout << "Tau   pt " << selectedTau->pt() << " eta " << selectedTau->eta() << " phi " << selectedTau->phi() << std::endl
+                << "  jet pt " << allJets[i]->pt()  << " eta " << allJets[i]->eta()  << " phi " << allJets[i]->phi() 
+                << " DR " << dr << std::endl;
+      */
       if(dr < minDR) {
         minDR = dr;
         selectedJet = allJets[i];
