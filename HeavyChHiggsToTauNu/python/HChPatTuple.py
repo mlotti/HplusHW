@@ -628,7 +628,7 @@ class StandardPATBuilder(PATBuilderBase):
                 jets = getattr(self.process, "selectedPatJets"+postfix).src.value()
 
                 if postfix != "":
-                    patHelpers.cloneProcessingSnippet(process, process.producePatPFMETCorrections, postfix)
+                    patHelpers.cloneProcessingSnippet(self.process, self.process.producePatPFMETCorrections, postfix)
                 getattr(self.process, "selectedPatJetsForMETtype1p2Corr"+postfix).src = jets
                 getattr(self.process, "selectedPatJetsForMETtype2Corr"+postfix).src = jets
                 getattr(self.process, "patPFMet"+postfix).addGenMET = False
