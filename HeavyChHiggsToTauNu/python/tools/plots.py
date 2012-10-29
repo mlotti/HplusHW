@@ -41,6 +41,15 @@ import dataset
 import histograms
 import styles
 
+## These MC datasets must be added together before any
+## merging/renaming. They are split to two datasets just for more
+## statistics. The mapping is used in the
+## mergeRenameReorderForDataMC() function.
+_physicalMcAdd = {
+    "WJets_TuneZ2star_v1_Summer12": "WJets_TuneZ2star_Summer12",
+    "WJets_TuneZ2star_v2_Summer12": "WJets_TuneZ2star_Summer12",
+}
+
 ## Map the physical dataset names to logical names
 #
 # Map the physical dataset names (in multicrab.cfg) to logical names
@@ -79,30 +88,36 @@ for mcEra in ["Summer11", "Fall11"]:
     "HplusTB_M220_%s"%mcEra: "HplusTB_M220",
     "HplusTB_M250_%s"%mcEra: "HplusTB_M250",
     "HplusTB_M300_%s"%mcEra: "HplusTB_M300",
+    })
+for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
+    _physicalToLogical.update({
+    "TTJets_%s"%mcEra: "TTJets",
+    "WJets_%s"%mcEra: "WJets",
+    "W1Jets_%s"%mcEra: "W1Jets",
+    "W2Jets_%s"%mcEra: "W2Jets",
+    "W3Jets_%s"%mcEra: "W3Jets",
+    "W4Jets_%s"%mcEra: "W4Jets",
+    "DYJetsToLL_M50_%s"%mcEra:      "DYJetsToLL_M50",
 
-    "TTJets_TuneZ2_%s"%mcEra: "TTJets",
-    "WJets_TuneZ2_%s"%mcEra: "WJets",
-    "DYJetsToLL_M50_TuneZ2_%s"%mcEra:      "DYJetsToLL_M50",
+    "QCD_Pt30to50_%s"%mcEra:   "QCD_Pt30to50",
+    "QCD_Pt50to80_%s"%mcEra:   "QCD_Pt50to80",
+    "QCD_Pt80to120_%s"%mcEra:  "QCD_Pt80to120",
+    "QCD_Pt120to170_%s"%mcEra: "QCD_Pt120to170",
+    "QCD_Pt170to300_%s"%mcEra: "QCD_Pt170to300",
+    "QCD_Pt300to470_%s"%mcEra: "QCD_Pt300to470",
 
-    "QCD_Pt30to50_TuneZ2_%s"%mcEra:   "QCD_Pt30to50",
-    "QCD_Pt50to80_TuneZ2_%s"%mcEra:   "QCD_Pt50to80",
-    "QCD_Pt80to120_TuneZ2_%s"%mcEra:  "QCD_Pt80to120",
-    "QCD_Pt120to170_TuneZ2_%s"%mcEra: "QCD_Pt120to170",
-    "QCD_Pt170to300_TuneZ2_%s"%mcEra: "QCD_Pt170to300",
-    "QCD_Pt300to470_TuneZ2_%s"%mcEra: "QCD_Pt300to470",
+    "QCD_Pt20_MuEnriched_%s"%mcEra: "QCD_Pt20_MuEnriched",
 
-    "QCD_Pt20_MuEnriched_TuneZ2_%s"%mcEra: "QCD_Pt20_MuEnriched",
+    "T_t-channel_%s"%mcEra:     "T_t-channel",
+    "Tbar_t-channel_%s"%mcEra:  "Tbar_t-channel",
+    "T_tW-channel_%s"%mcEra:    "T_tW-channel",
+    "Tbar_tW-channel_%s"%mcEra: "Tbar_tW-channel",
+    "T_s-channel_%s"%mcEra:     "T_s-channel",
+    "Tbar_s-channel_%s"%mcEra:  "Tbar_s-channel",
 
-    "T_t-channel_TuneZ2_%s"%mcEra:     "T_t-channel",
-    "Tbar_t-channel_TuneZ2_%s"%mcEra:  "Tbar_t-channel",
-    "T_tW-channel_TuneZ2_%s"%mcEra:    "T_tW-channel",
-    "Tbar_tW-channel_TuneZ2_%s"%mcEra: "Tbar_tW-channel",
-    "T_s-channel_TuneZ2_%s"%mcEra:     "T_s-channel",
-    "Tbar_s-channel_TuneZ2_%s"%mcEra:  "Tbar_s-channel",
-
-    "WW_TuneZ2_%s"%mcEra: "WW",
-    "WZ_TuneZ2_%s"%mcEra: "WZ",
-    "ZZ_TuneZ2_%s"%mcEra: "ZZ",
+    "WW_%s"%mcEra: "WW",
+    "WZ_%s"%mcEra: "WZ",
+    "ZZ_%s"%mcEra: "ZZ",
     })
 
 ## Map the datasets to be merged to the name of the merged dataset.
@@ -179,7 +194,10 @@ _datasetOrder = [
     "QCDdata",
     "QCD_Pt20_MuEnriched",
     "WJets",
+    "W1Jets",
+    "W2Jets",
     "W3Jets",
+    "W4Jets",
     "WToTauNu",
     "TTJets",
     "TT",
@@ -231,7 +249,10 @@ _legendLabels = {
 
     "WJets":                 "W+jets",
     "WToTauNu":              "W#to#tau#nu",
+    "W1Jets":                "W+1 jets",
+    "W2Jets":                "W+2 jets",
     "W3Jets":                "W+3 jets",
+    "W4Jets":                "W+4 jets",
 
     "QCD_Pt30to50":          "QCD, 30 < #hat{p}_{T} < 50",
     "QCD_Pt50to80":          "QCD, 50 < #hat{p}_{T} < 80",
@@ -424,6 +445,7 @@ def UpdatePlotStyleFill(styleMap, namesToFilled):
 # the same order they were originally.
 def mergeRenameReorderForDataMC(datasetMgr, keepSourcesMC=False):
     datasetMgr.mergeData()
+    datasetMgr.mergeMany(_physicalMcAdd, addition=True)
     datasetMgr.renameMany(_physicalToLogical, silent=True)
 
     datasetMgr.mergeMany(_datasetMerge, keepSources=keepSourcesMC)

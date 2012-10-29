@@ -1332,6 +1332,159 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
     # String representing the current normalization scheme
 
 
+## Wrapper for a added TH1 histograms from MC and the corresponding Datasets.
+#
+# Here "Adding" is like merging, but for datasets which have the same
+# cross section, and are split to two datasets just for increased
+# statistics. Use case is inclusive W+jets in Summer12, which is split
+# into two datasets.
+# 
+# See also the documentation of DatasetRootHisto class.
+class DatasetRootHistoAddedMC(DatasetRootHistoBase):
+    ## Constructor.
+    # 
+    # \param histoWrappers   List of dataset.DatasetRootHisto objects to merge
+    # \param addedDataset   The corresponding dataset.DatasetMerged object
+    # 
+    # The constructor checks that all histoWrappers are MC, and are
+    # not yet normalized.
+    def __init__(self, histoWrappers, addedDataset):
+        DatasetRootHistoBase.__init__(self, mergedDataset)
+        self.histoWrappers = histoWrappers
+        self.normalization = "none"
+        for h in self.histoWrappers:
+            if not h.isMC():
+                raise Exception("Histograms to be added must come from MC")
+            if h.normalization != "none":
+                raise Exception("Histograms to be added must not be normalized at this stage")
+            if h.multiplication != None:
+                raise Exception("Histograms to be added must not be multiplied at this stage")
+
+    def isData(self):
+        return False
+
+    def isMC(self):
+        return True
+
+    def forEach(self, function, datasetRootHisto1=None):
+        ret = []
+        if datasetRootHisto1 != None:
+            if not isinstance(datasetRootHisto1, DatasetRootHistoAddedMC):
+                raise Exception("datasetRootHisto1 must be of the type DatasetRootHistoAddedMC")
+            if not len(self.histoWrappers) == len(datasetRootHisto1.histoWrappers):
+                raise Exception("len(self.histoWrappers) != len(datasetrootHisto1.histoWrappers), %d != %d" % len(self.histoWrappers), len(datasetRootHisto1.histoWrappers))
+            
+            for i, drh in enumerate(self.histoWrappers):
+                ret.extend(drh.forEach(function, datasetRootHisto1.histoWrappers[i]))
+        else:
+            for drh in self.histoWrappers:
+                ret.extend(drh.forEach(function))
+        return ret
+
+    ## Modify the TH1 with a function
+    #
+    # \param function             Function taking the original TH1, and returning a new TH1. If newDatasetRootHisto is specified, function must take some other DatasetRootHisto object as an input too
+    # \param newDatasetRootHisto  Optional, the other DatasetRootHisto object, must be the same type and contain same number of DatasetRootHisto objects
+    #
+    # Needed for appending rows to counters from TTree, and for embedding normalization
+    def modifyRootHisto(self, function, newDatasetRootHisto=None):
+        if newDatasetRootHisto != None:
+            if not isinstance(newDatasetRootHisto, DatasetRootHistoAddedMC):
+                raise Exception("newDatasetRootHisto must be of the type DatasetRootHistoAddedMC")
+            if not len(self.histoWrappers) == len(newDatasetRootHisto.histoWrappers):
+                raise Exception("len(self.histoWrappers) != len(newDatasetrootHisto.histoWrappers), %d != %d" % len(self.histoWrappers), len(newDatasetRootHisto.histoWrappers))
+            
+            for i, drh in enumerate(self.histoWrappers):
+                drh.modifyRootHisto(function, newDatasetRootHisto.histoWrappers[i])
+        else:
+            for i, drh in enumerate(self.histoWrappers):
+                drh.modifyRootHisto(function)
+
+    ## Get list of the bin labels of the first of the merged histogram.
+    def getBinLabels(self):
+        return self.histoWrappers[0].getBinLabels()
+
+    ## Set the current normalization scheme to 'to one'.
+    # 
+    # The histogram is normalized to unit area.
+    # 
+    # Sets the normalization of the underlying
+    # dataset.DatasetRootHisto objects to 'by cross section' in order
+    # to be able to sum them. The normalization 'to one' is then done
+    # for the summed histogram.
+    def normalizeToOne(self):
+        self.normalization = "toOne"
+
+    ## Set the current normalization scheme to 'by cross section'.
+    # 
+    # The histogram is normalized to the cross section of the
+    # corresponding dataset.
+    # 
+    # Sets the normalization of the underlying
+    # dataset.DatasetRootHisto objects to 'by cross section'. Then
+    # they can be summed directly, and the summed histogram is
+    # automatically correctly normalized to the total cross section of
+    # the merged dataset.Dataset objects.
+    def normalizeByCrossSection(self):
+        self.normalization = "byCrossSection"
+
+    ## Set the current normalization scheme to 'to luminosity'.
+    # 
+    # \param lumi   Integrated luminosity in pb^-1 to normalize to
+    # 
+    # The histogram is normalized first normalized to the cross
+    # section of the corresponding dataset, and then to a given
+    # luminosity.
+    # 
+    # Sets the normalization of the underlying
+    # dataset.DatasetRootHisto objects to 'to luminosity'. Then they
+    # can be summed directly, and the summed histogram is
+    # automatically correctly normalized to the given integrated
+    # luminosity. """
+    def normalizeToLuminosity(self, lumi):
+        self.normalization = "toLuminosity"
+        self.luminosity = lumi
+
+    ## Merge the histograms and apply the current normalization.
+    # 
+    # The returned histogram is a clone, so client code can do
+    # anything it wishes with it.
+    # 
+    # The merged MC histograms must be normalized in some way,
+    # otherwise they can not be summed (or they can be, but the
+    # contents of the summed histogram doesn't make any sense as it
+    # is just the sum of the MC events of the separate datasets
+    # which in general have different cross sections).
+    def _normalizedHistogram(self):
+        hsum = self.histoWrappers[0].getHistogram() # we get a clone
+        for h in self.histoWrappers[1:]:
+            histo = h.getHistogram()
+            if histo.GetNbinsX() != hsum.GetNbinsX():
+                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.GetName(), self.histoWrappers[0].getDataset().getName(), h.getDataset().getName(), hsum.GetNbinsX(), histo.GetNbinsX()))
+
+            hsum.Add(histo)
+            histo.Delete()
+
+        if self.normalization == "none":
+            return hsum
+        elif self.normalization == "toOne":
+            return _normalizeToOne(hsum)
+
+        # We have to noramlize to cross section in any case
+        hsum = _normalizeToFactor(h, self.dataset.getNormFactor()) # FIXME: normalization factor?
+        if self.normalization == "byCrossSection":
+            return hsum
+        elif self.normalization == "toLuminosity":
+            return _normalizeToFactor(h, self.luminosity)
+        else:
+            raise Exception("Internal error, got normalization %s" % self.normalization)
+
+    ## \var histoWrappers
+    # List of underlying dataset.DatasetRootHisto objects
+    ## \var normalization
+    # String representing the current normalization scheme
+
+
 ## Dataset class for histogram access from one ROOT file.
 # 
 # The default values for cross section/luminosity are read from
@@ -1848,6 +2001,58 @@ class DatasetMerged:
     ## \var info
     # Dictionary containing total cross section (MC) or integrated luminosity (data)
 
+## Dataset class for histogram access for a dataset added from Dataset objects.
+# 
+# The added datasets are required to be MC
+class DatasetAddedMC(DatasetMerged):
+    ## Constructor.
+    # 
+    # \param name      Name of the merged dataset
+    # \param datasets  List of dataset.Dataset objects to add
+    #
+    # The cross section of the added datasets must be the same
+    def __init__(self, name, datasets):
+        self.name = name
+        #self.stacked = stacked
+        self.datasets = datasets
+        if len(datasets) == 0:
+            raise Exception("Can't create a DatasetAddedMC from 0 datasets")
+
+        self.info = {}
+
+        energy = self.datasets[0].getEnergy()
+        for d in self.datasets[1:]:
+            if energy != d.getEnergy():
+                raise Exception("Can't merge datasets with different centre-of-mass energies (%s: %d TeV, %s: %d TeV)" % self.datasets[0].getName(), energy, d.getName(), d.getEnergy())
+
+        crossSection = self.datasets[0].getCrossSection()
+        for d in self.datasets:
+            if not d.isMC():
+                raise Exception("Datasets must be MC, got %s which is data" % d.getName())
+            xs2 = d.getCrossSection()
+            if math.abs((xs2-crossSection)/crossSection) > 1e-6:
+                raise Exception("Datasets must have the same cross section, got %f from %s and %f from %s" % (crossSection, self.dataests[0].getName(), xs2, d.getName()))
+
+        self.info["crossSection"] = crossSection
+
+    ## Make a deep copy of a DatasetMerged object.
+    #
+    # Nothing is shared between the returned copy and this object.
+    #
+    # \see dataset.Dataset.deepCopy()
+    def deepCopy(self):
+        dm = DatasetAddedMC(self.name, [d.deepCopy() for d in self.datasets])
+        dm.info.update(self.info)
+        return dm
+
+    ## Get the DatasetRootHistoMergedMC/DatasetRootHistoMergedData object for a named histogram.
+    #
+    # \param name   Path of the histogram in the ROOT file
+    def getDatasetRootHisto(self, name):
+        wrappers = [d.getDatasetRootHisto(name) for d in self.datasets]
+        return DatasetRootHistoAddedMC(wrappers, self)
+
+
 ## Collection of Dataset objects which are managed together.
 # 
 # Holds both an ordered list of Dataset objects, and a name->object
@@ -2123,11 +2328,12 @@ class DatasetManager:
     #                     objects in the list of datasets. Otherwise
     #                     they are removed, as they are now contained
     #                     in the dataset.DatasetMerged object
+    # \param addition     Creates DatasetAddedMC instead of DatasetMerged
     #
     # If nameList translates to only one dataset.Dataset, the
     # dataset.Daataset object is renamed (i.e. dataset.DatasetMerged
     # object is not created)
-    def merge(self, newName, nameList, keepSources=False):
+    def merge(self, newName, nameList, keepSources=False, addition=False):
         (selected, notSelected, firstIndex) = _mergeStackHelper(self.datasets, nameList, "merge")
         if len(selected) == 0:
             print >> sys.stderr, "Dataset merge: no datasets '" +", ".join(nameList) + "' found, not doing anything"
@@ -2139,7 +2345,12 @@ class DatasetManager:
 
         if not keepSources:
             self.datasets = notSelected
-        self.datasets.insert(firstIndex, DatasetMerged(newName, selected))
+        if addition:
+            newDataset = DatasetAddedMC(newName, selected)
+        else:
+            newDataset = DatasetMerged(newName, selected)
+
+        self.datasets.insert(firstIndex, newDataset)
         self._populateMap()
 
     ## Load integrated luminosities from a JSON file.
