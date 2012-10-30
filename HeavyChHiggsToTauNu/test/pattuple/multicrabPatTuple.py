@@ -195,7 +195,7 @@ multicrab.extendDatasets(workflow, datasets)
 # writing to /store/group/local ...
 #multicrab.appendLineAll("USER.local_stage_out=1")
 
-multicrab.appendLineAll("GRID.maxtarballsize = 15")
+multicrab.appendLineAll("GRID.maxtarballsize = 35")
 
 #def addCopyConfig(dataset):
 #    dataset.appendLine("USER.additional_input_files = copy_cfg.py")
