@@ -7,9 +7,9 @@ dataVersion="53XmcS10"
 
 dataEras = [
     "Run2012ABC", # This is the one for pickEvents, and for counter printout in CMSSW job
-    "Run2012A",
-    "Run2012B",
-    "Run2012C",
+#    "Run2012A",
+#    "Run2012B",
+#    "Run2012C",
 ]
 
 # Note: Keep number of variations below 200 to keep file sizes reasonable
