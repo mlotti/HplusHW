@@ -29,8 +29,13 @@ void printDaughters(const reco::Candidate& p);
 
 
 namespace HPlus {
+  GenParticleAnalysis::Data::Data(): fAnalysis (0) {}
   GenParticleAnalysis::Data::Data(const GenParticleAnalysis *analysis): fAnalysis(analysis) {}
   GenParticleAnalysis::Data::~Data() {}
+  void GenParticleAnalysis::Data::check() const {
+    if(!fAnalysis)
+      throw cms::Exception("Assert") << "GenParticleAnalysis::Data: This Data object was constructed with the default constructor, not with EmbeddingMuonEfficiency::applyEventWeight(). There is something wrong in your code." << std::endl;
+  }
 
   GenParticleAnalysis::GenParticleAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),

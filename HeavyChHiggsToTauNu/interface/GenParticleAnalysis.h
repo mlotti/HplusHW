@@ -24,11 +24,15 @@ namespace HPlus {
   public:
     class Data {
     public:
-      
+
+      Data();
       Data(const GenParticleAnalysis *analysis);
       ~Data();
 
+      void check() const;
+
       const edm::Ptr<reco::GenMET>& getGenMET() const {
+	check();
         return fAnalysis->fGenMet;
       }
     private:

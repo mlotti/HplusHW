@@ -366,8 +366,9 @@ namespace HPlus {
     hVerticesTriggeredAfterWeight->Fill(nVertices);
 
 //------ GenParticle analysis (must be done here when we effectively trigger all MC)
+    GenParticleAnalysis::Data genData;
     if (!iEvent.isRealData()) {
-      GenParticleAnalysis::Data genData = fGenparticleAnalysis.analyze(iEvent, iSetup);
+      genData = fGenparticleAnalysis.analyze(iEvent, iSetup);
       fTree.setGenMET(genData.getGenMET());
     }
 
