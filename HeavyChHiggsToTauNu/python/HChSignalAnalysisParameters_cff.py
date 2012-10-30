@@ -52,6 +52,11 @@ trigger = cms.untracked.PSet(
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEmulationEfficiency_cfi import *
 
+metFilters = cms.untracked.PSet(
+    HBHENoiseFilterSrc = cms.untracked.InputTag("HBHENoiseFilterResultProducer", "HBHENoiseFilterResult"),
+    HBHENoiseFilterEnabled = cms.untracked.bool(True),
+)
+
 primaryVertexSelection = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPrimaryVertex"),
     enabled = cms.untracked.bool(True)

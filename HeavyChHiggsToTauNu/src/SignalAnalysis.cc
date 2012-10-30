@@ -71,6 +71,7 @@ namespace HPlus {
     fTopRecoName(iConfig.getUntrackedParameter<std::string>("topReconstruction")),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     fAllCounter(eventCounter.addCounter("Offline selection begins")),
+    fMETFiltersCounter(eventCounter.addCounter("MET filters")),
     fEmbeddingMuonEfficiencyCounter(eventCounter.addCounter("Embedding: muon eff weight")),
     fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),
     fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
@@ -158,6 +159,7 @@ namespace HPlus {
     fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fTauEmbeddingMuonIsolationQuantifier(eventCounter, fHistoWrapper),
+    fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     // Scale factor uncertainties
     fSFUncertaintiesAfterSelection(fHistoWrapper, "AfterSelection"),
@@ -345,6 +347,13 @@ namespace HPlus {
     fTree.setNvertices(nVertices);
 
     increment(fAllCounter);
+
+//------ MET (noise) filters for data (reject events with instrumental fake MET)
+    if(iEvent.isRealData()) {
+      if(!fMETFilters.passedEvent(iEvent, iSetup)) return false;
+    }
+    increment(fMETFiltersCounter);
+    
 
 //------ For embedding, apply the muon ID efficiency at this stage
     EmbeddingMuonEfficiency::Data embeddingMuonData;

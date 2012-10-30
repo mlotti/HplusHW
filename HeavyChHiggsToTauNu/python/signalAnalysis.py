@@ -40,5 +40,6 @@ def createEDFilter(param):
         embeddingMuonEfficiency = param.embeddingMuonEfficiency.clone(),
         Tree = param.tree.clone(),
         eventCounter = param.eventCounter.clone(),
-        tauEmbeddingStatus = cms.untracked.bool(False)
+        tauEmbeddingStatus = cms.untracked.bool(False),
+        metFilters = param.metFilters.clone(),
     )

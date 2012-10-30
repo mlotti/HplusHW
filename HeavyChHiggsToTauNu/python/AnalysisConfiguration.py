@@ -445,6 +445,8 @@ class ConfigBuilder:
         print "Trigger scale factor mode:", module.triggerEfficiencyScaleFactor.mode.value()
         print "Trigger scale factor data:", module.triggerEfficiencyScaleFactor.dataSelect.value()
         print "Trigger scale factor MC:", module.triggerEfficiencyScaleFactor.mcSelect.value()
+        if hasattr(module, "metFilters"):
+            print "MET filters", module.metFilters
         print "VertexWeight data distribution:",module.vertexWeight.dataPUdistribution.value()
         print "VertexWeight mc distribution:",module.vertexWeight.mcPUdistribution.value()
         print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", module.trigger.hltMetCut.value()

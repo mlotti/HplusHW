@@ -34,6 +34,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexAssignmentAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingMuonIsolationQuantifier.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METFilters.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
@@ -126,6 +127,7 @@ namespace HPlus {
     //    const double ftransverseMassCut;
 
     Count fAllCounter;
+    Count fMETFiltersCounter;
     Count fEmbeddingMuonEfficiencyCounter;
     Count fTriggerCounter;
     Count fPrimaryVertexCounter;
@@ -206,6 +208,7 @@ namespace HPlus {
     VertexAssignmentAnalysis fVertexAssignmentAnalysis;
     FakeTauIdentifier fFakeTauIdentifier;
     TauEmbeddingMuonIsolationQuantifier fTauEmbeddingMuonIsolationQuantifier;
+    METFilters fMETFilters;
 
     SignalAnalysisTree fTree;
 
