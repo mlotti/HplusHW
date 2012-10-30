@@ -568,6 +568,9 @@ def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, pset
                                       dataPUdistributionLabel = pset.dataPUdistributionLabel,
                                       mcPUdistribution = pset.mcPUdistribution,
                                       mcPUdistributionLabel = pset.mcPUdistributionLabel,
+                                      weightDistribution = pset.weightDistribution,
+                                      weightDistributionLabel = pset.weightDistributionLabel,
+                                      weightDistributionEnable = pset.weightDistributionEnable,
                                       alias = cms.string("PUVertexWeight"+suffix)
     )
     name = psetReader.PUVertexWeightSrc.value()+suffix
