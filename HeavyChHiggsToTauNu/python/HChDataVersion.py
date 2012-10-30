@@ -99,6 +99,7 @@ config = {
         "globalTag": "START53_V7F::All",
         "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/TTToHplusBWB_M-120_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM/E6FBC572-20F5-E111-9CBD-00215E21DC60.root",
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_5_3_X/TTToHplusBWB_M120_Summer12/TTToHplusBWB_M-120_8TeV-pythia6-tauola/Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_test1/cad8d1056ca20d363262a3efa1d97a74/pattuple_9_1_sH1.root"
     }
 }
 
