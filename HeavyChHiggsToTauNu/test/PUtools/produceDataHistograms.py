@@ -23,24 +23,56 @@ outputFileName = "PileupHistogramData"
 
 jsonPath = ".."
 runsJson = [
-#    ("2012A", 190456, 190738, certifiedLumi.files["13Jul2012ReReco"]),
-#    ("2012A", 190782, 190949, certifiedLumi.files["06Aug2012ReReco"]),
-#    ("2012A", 191043, 193621, certifiedLumi.files["13Jul2012ReReco"]),
-    ("2012B", 193834, 196531, certifiedLumi.files["13Jul2012ReReco"]),
-    ("2012C", 198022, 198523, certifiedLumi.files["24Aug2012ReReco"]),
-    ("2012C", 198941, 200601, certifiedLumi.files["PromptReco12"]),
-    ("2012C", 202792, 203742, certifiedLumi.files["PromptReco12"]),
+    (["2012A"], 190456, 190738, certifiedLumi.files["13Jul2012ReReco"]),
+    (["2012A"], 190782, 190949, certifiedLumi.files["06Aug2012ReReco"]),
+    (["2012A"], 191043, 193621, certifiedLumi.files["13Jul2012ReReco"]),
+    (["2012B"], 193834, 196531, certifiedLumi.files["13Jul2012ReReco"]),
+    (["2012C"], 198022, 198523, certifiedLumi.files["24Aug2012ReReco"]),
+    (["2012C"], 198941, 200601, certifiedLumi.files["PromptReco12"]),
+    (["2012C"], 202792, 203742, certifiedLumi.files["PromptReco12"]),
     ]
+for tpl in runsJson:
+    tpl[0].append("2012ABC")
 eraPUJson = {
     "2012A": "pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt",
     "2012B": "pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt",
     "2012C": "pileup_JSON_DCSONLY_190389-204506_corr.txt",
+
+    "2012AB": "pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt",
+    "2012ABC": "pileup_JSON_DCSONLY_190389-200041_pixelcorr_upto196531_190389-204506_corr.txt",
 }
 
+processEras = [
+#    "2012A",
+#    "2012B",
+#    "2012C",
+    "2012ABC",
+]
+
+
 def main():
+    if not os.path.exists(eraPUJson["2012ABC"]):
+        print "Creating PU json", eraPUJson["2012ABC"]
+        cmd = ["filterJSON.py", "--max", "196531", "--output", "tmp1.txt", eraPUJson["2012A"]]
+        ret = subprocess.call(cmd)
+        if ret != 0:
+            raise Exception("Command '%s' failed with exit code %d" % (" ".join(cmd), ret))
+
+        cmd = ["filterJSON.py", "--min", "198022", "--output", "tmp2.txt", eraPUJson["2012C"]]
+        ret = subprocess.call(cmd)
+        if ret != 0:
+            raise Exception("Command '%s' failed with exit code %d" % (" ".join(cmd), ret))
+
+        cmd = ["mergeJSON.py", "--output", eraPUJson["2012ABC"], "tmp1.txt", "tmp2.txt"]
+        ret = subprocess.call(cmd)
+        if ret != 0:
+            raise Exception("Command '%s' failed with exit code %d" % (" ".join(cmd), ret))
+        os.remove("tmp1.txt")
+        os.remove("tmp2.txt")
+
     print "Filtering run/lumi JSON files according to eras and our run ranges"
     eraJsons = {}
-    for era, firstRun, lastRun, jsonfile in runsJson:
+    for eras, firstRun, lastRun, jsonfile in runsJson:
         filteredJson = jsonfile.replace(".txt", "_%d-%d.txt" % (firstRun, lastRun))
         cmd = ["filterJSON.py", "--min", str(firstRun), "--max", str(lastRun),
                "--output", filteredJson,
@@ -48,7 +80,8 @@ def main():
         ret = subprocess.call(cmd)
         if ret != 0:
             raise Exception("Command '%s' failed with exit code %d" % (" ".join(cmd), ret))
-        multicrabWorkflowsTools._addToDictList(eraJsons, era, filteredJson)
+        for era in eras:
+            multicrabWorkflowsTools._addToDictList(eraJsons, era, filteredJson)
 
     print "Merging run/lumi JSON files according to era"
     eraFinalJsons = {}
@@ -62,12 +95,13 @@ def main():
 
     print "Running pileupCalc.py"
     outputFiles = []
-    for era, jsonFile in eraFinalJsons.iteritems():
+    for era in processEras:
+        jsonFile = eraFinalJsons[era]
         print "Processing era", era
         for scenario, xsecValue in [
             ("", minBiasXsec),
-            ("Up", int(minBiasXsec*1.05)),
-            ("Down", int(minBiasXsec*0.95)),
+            ("up", int(minBiasXsec*1.05)),
+            ("down", int(minBiasXsec*0.95)),
             ]:
 
             print "  Processing systematics scenario", {"": "Nominal"}.get(scenario, scenario)
