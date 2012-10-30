@@ -2,13 +2,14 @@ import FWCore.ParameterSet.Config as cms
 
 # Select the version of the data (needed only for interactice running,
 # overridden automatically from multicrab
-dataVersion="44XmcS6"     # Fall11 MC
-#dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
+dataVersion="53XmcS10"
+#dataVersion="53Xdata24Aug2012" # Now we have multiple dataVersions for data too, see HChDataVersion for them
 
 dataEras = [
-    "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job
-    "Run2011A",
-    "Run2011B",
+    "Run2012ABC", # This is the one for pickEvents, and for counter printout in CMSSW job
+    "Run2012A",
+    "Run2012B",
+    "Run2012C",
 ]
 
 # Note: Keep number of variations below 200 to keep file sizes reasonable

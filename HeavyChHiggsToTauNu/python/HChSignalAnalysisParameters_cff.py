@@ -500,6 +500,10 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
         # Fall11
         pset.mcPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramMCFall11.root"
         pset.mcPUdistributionLabel = "pileup"
+    elif dataVersion.isS10:
+        # Summer12 53X
+        pset.mcPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramMCSummer12_S10.root"
+        pset.mcPUdistributionLabel = "pileup"
     elif dataVersion.isHighPU():
 	# High PU - disable vertex reweighting
         pset.enabled = False
@@ -510,13 +514,14 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
     pset.enabled = True
     psetReader.enabled = True
 
-    if era == "Run2011A" or era == "Run2011B":
+    if era in ["Run2011A", "Run2011B", "Run2012A", "Run2012B", "Run2012C", "Run2012ABC"]:
         pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData"+era.replace("Run","")+suffix+".root"
-        pset.weightDistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_"+era.replace("Run","")+".root"
+        if "Run2011" in era:
+            pset.weightDistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_"+era.replace("Run","")+".root"
     elif era == "Run2011AB":
         pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011"+suffix+".root"
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'Run2011A', 'Run2011B', 'Run2011AB'" % era)
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'Run2011A', 'Run2011B', 'Run2011AB', 'Run2012A', 'Run2012B', 'Run2012C', 'Run2012ABC' " % era)
     pset.dataPUdistributionLabel = "pileup"
     # Make procuder for weights and add it to common sequence
     tmp = pset.clone()
@@ -545,6 +550,10 @@ def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, pset
     if dataVersion.isS6():
         # Fall11
         pset.mcPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramMCFall11.root"
+        pset.mcPUdistributionLabel = "pileup"
+    elif dataVersion.isS10():
+        # Summer12 53X
+        pset.mcPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramMCSummer12_S10.root"
         pset.mcPUdistributionLabel = "pileup"
     elif dataVersion.isHighPU():
 	# High PU - disable vertex reweighting

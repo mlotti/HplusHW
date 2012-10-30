@@ -150,6 +150,9 @@ class DataVersion:
     def isS6(self):
         return self.isMC() and "S6" in self.version
 
+    def isS10(self):
+        return self.isMC() and "S10" in self.version
+
     def isHighPU(self):
         return self.isMC() and "highPU" in self.version
 
