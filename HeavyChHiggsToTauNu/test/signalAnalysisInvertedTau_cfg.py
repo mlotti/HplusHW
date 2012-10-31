@@ -35,7 +35,7 @@ def customize(signalAnalysis):
     # Apply beta cut for jets to reject PU jets
     signalAnalysis.jetSelection.betaCut = 0.2 # Disable by setting to 0.0; if you want to enable, set to 0.2
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisInvertedTauConfiguration import ConfigBuilder
+from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=1000, # default is -1
                         customizeAnalysis=customize,
@@ -45,7 +45,7 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         #doOptimisation=True, optimisationScheme=myOptimisation
                         )
 
-process = builder.buildSignalAnalysis()
+process = builder.buildSignalAnalysisInvertedTau()
 
 
 #f = open("configDump.py", "w")

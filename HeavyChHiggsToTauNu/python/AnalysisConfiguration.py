@@ -56,7 +56,6 @@ class ConfigBuilder:
                  histogramAmbientLevel = "Debug", # Set level of how many histograms are stored to files options are: 'Vital' (least histograms), 'Informative', 'Debug' (all histograms),
                  applyTriggerScaleFactor = True, # Apply trigger scale factor or not
                  tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
-#                 tauSelectionOperatingMode = "tauCandidateSelectionOnly", 
                  useTriggerMatchedTaus = True,
                  useJERSmearedJets = True,
                  useBTagDB = False,
@@ -121,6 +120,20 @@ class ConfigBuilder:
         import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
         def create(param):
             return [signalAnalysis.createEDFilter(param)]
+        return self._build(create, ["signalAnalysis"])
+
+    ## Build configuration for signal analysis inverted tau job
+    #
+    # \return cms.Process object, should be assigned to a local
+    #         'process' variable in the analysis job configuration file
+    def buildSignalAnalysisInvertedTau(self):
+        import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysisInvertedTau as signalAnalysisInvertedTau
+
+        # Enforce tau candidate selection
+        self.tauSelectionOperatingMode = "tauCandidateSelectionOnly"
+        
+        def create(param):
+            return [signalAnalysisInvertedTau.createEDFilter(param)]
         return self._build(create, ["signalAnalysis"])
 
     ## Build configuration for signal analysis job
