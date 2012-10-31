@@ -144,6 +144,8 @@ namespace HPlus {
       }
       */
 
+      if(fMetCut < 0) return passEvent;
+
       pat::TriggerObjectRefVector hltMets = trigger->objects(trigger::TriggerMET);
       if(hltMets.size() == 0) {
         fHltMet = pat::TriggerObjectRef();

@@ -238,16 +238,25 @@ def createTauTriggerMatchingInAnalysis(trigger, taus, pathFilterMap=tauPathLastF
 
 def triggerMatchingInAnalysis(process, sequence, triggers, param):
     tauTriggers = []
+    quadJetTriggers = []
     otherTriggers = []
     for trg in triggers:
         if trg in tauPathLastFilter:
             tauTriggers.append(trg)
+        if "QuadJet" in trg or "QuadPFJet" in trg:
+            quadJetTriggers.append(trg)
         else:
             otherTriggers.append(trg)
     
     # Consistenty checks
     if len(otherTriggers) > 0:
         raise Exception("Requested triggers '%s', for which there is no trigger matching support at the moment." % ", ".join(otherTriggers))
+
+    if len(tauTriggers) > 0 and len(quadJetTriggers) > 0:
+        raise Exception("You should give only one type of triggers, got %d tau triggers and %d QuadJet triggers" % (len(tauTriggers), len(quadJetTriggers)))
+
+    if len(quadJetTriggers) > 0:
+        print "Got QuadJet triggers, for which there is no trigger matching implemented yet!"
 
     if len(tauTriggers) > 0:
         tauSrc = param.tauSelectionHPSTightTauBased.src.value()
