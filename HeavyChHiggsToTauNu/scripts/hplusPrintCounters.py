@@ -78,7 +78,7 @@ def main(opts):
     return 0
 
 if __name__ == "__main__":
-    parser = OptionParser(usage="Usage: %prog [options]")
+    parser = OptionParser(usage="Usage: %prog [options] [crab task dirs]\n\nCRAB task directories can be given either as the last arguments, or with -d.")
     multicrab.addOptions(parser)
     dataset.addOptions(parser)
     parser.add_option("--weighted", dest="weighted", default=False, action="store_true",
@@ -102,5 +102,6 @@ if __name__ == "__main__":
     parser.add_option("--mergeData", dest="mergeData", action="store_true", default=False,
                       help="Merge all data datasets")
     (opts, args) = parser.parse_args()
+    opts.dirs.extend(args)
 
     sys.exit(main(opts))
