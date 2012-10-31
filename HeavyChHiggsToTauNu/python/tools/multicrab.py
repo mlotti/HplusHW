@@ -425,20 +425,28 @@ def crabStatusOutput(task, printCrab):
         poll_obj.register(p.stdout, select.POLLIN)
         #last_print_time = time.time()
         #timeout = 600 # 10 min timeout initially, -status can take long
-        while p.poll() == None:# and (time.time() - last_print_time) < timeout:
-            poll_result = poll_obj.poll(0)
-            if poll_result:
-                line = p.stdout.readline()
-                if line:
-                    print line.strip("\n")
-                    output += line
+#        while p.poll() == None:# and (time.time() - last_print_time) < timeout:
 #                    if "Log file is" in line:
 #                        # The last line in the output starts with this, shorten the timeout to 10 s
 #                        timeout = 10
 #                        print "Last line encountered, shortening timeout to 10 s"
 #                last_print_time = time.time()
-            else:
+
+        while True:
+            exit_result = p.poll()
+            while True:
+                poll_result = poll_obj.poll(0)
+                if poll_result:
+                    line = p.stdout.readline()
+                    if line:
+                        print line.strip("\n")
+                        output += line
+                    else:
+                        break
+            if exit_result is None:
                 time.sleep(1)
+            else:
+                break
 #        print "Out of poll loop, return code", p.returncode
         if p.returncode != 0:
             raise Exception("Command '%s' failed with exit code %d" % (" ".join(command), p.returncode))
