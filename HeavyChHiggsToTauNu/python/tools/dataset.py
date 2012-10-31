@@ -1393,6 +1393,8 @@ class Dataset:
             raise Exception("configInfo directory is missing from file %s" % fname)
 
         self.info = _rescaleInfo(_histoToDict(self.file.Get("configInfo").Get("configinfo")))
+        if "energy" in self.info:
+            self.info["energy"] = int(round(self.info["energy"]))
 
         dataVersion = configInfo.Get("dataVersion")
         if dataVersion == None:
@@ -1725,7 +1727,7 @@ class DatasetMerged:
         energy = self.datasets[0].getEnergy()
         for d in self.datasets[1:]:
             if energy != d.getEnergy():
-                raise Exception("Can't merge datasets with different centre-of-mass energies (%s: %d TeV, %s: %d TeV)" % self.datasets[0].getName(), energy, d.getName(), d.getEnergy())
+                raise Exception("Can't merge datasets with different centre-of-mass energies (%s: %d TeV, %s: %d TeV)" % (self.datasets[0].getName(), energy, d.getName(), d.getEnergy()))
 
         if self.datasets[0].isMC():
             crossSum = 0.0
@@ -1762,6 +1764,9 @@ class DatasetMerged:
 
     def setName(self, name):
         self.name = name
+
+    def getEnergy(self):
+        return self.datasets[0].getEnergy()
 
     def setCrossSection(self, value):
         if self.isData():
