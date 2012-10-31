@@ -50,7 +50,7 @@ datasets_44X = [
         # Signal MC (WH)
 #        "TTToHplusBWB_M80_Fall11",
 #        "TTToHplusBWB_M90_Fall11",
-        "TTToHplusBWB_M100_Fall11",
+#        "TTToHplusBWB_M100_Fall11",
 #        "TTToHplusBWB_M120_Fall11",
 #        "TTToHplusBWB_M140_Fall11",
 #        "TTToHplusBWB_M150_Fall11",
@@ -59,7 +59,7 @@ datasets_44X = [
         # Signal MC (HH)
 #        "TTToHplusBHminusB_M80_Fall11",
 #        "TTToHplusBHminusB_M90_Fall11",
-        "TTToHplusBHminusB_M100_Fall11",
+#        "TTToHplusBHminusB_M100_Fall11",
 #        "TTToHplusBHminusB_M120_Fall11",
 #        "TTToHplusBHminusB_M140_Fall11",
 #        "TTToHplusBHminusB_M150_Fall11",
@@ -106,7 +106,7 @@ datasets_44X = [
 
 
 datasets_53X = [
-    "Tau_190456-190738_2012A_Jul13",
+#    "Tau_190456-190738_2012A_Jul13",
 #    "Tau_190782-190949_2012A_Aug06",
 #    "Tau_191043-193621_2012A_Jul13",
 #    "Tau_193834-196531_2012B_Jul13",
@@ -114,7 +114,7 @@ datasets_53X = [
 #    "Tau_198941-200601_2012C_Prompt",
 #    "Tau_202792-203742_2012C_Prompt",
 #
-    "MultiJet_190456-190738_2012A_Jul13",
+#    "MultiJet_190456-190738_2012A_Jul13",
 #    "MultiJet_190782-190949_2012A_Aug06",
 #    "MultiJet_191043-193621_2012A_Jul13",
 #    "MultiJet_193834-194225_2012B_Jul13",
@@ -167,13 +167,13 @@ datasets_53X = [
 #    "WW_TuneZ2star_Summer12",
 #    "WZ_TuneZ2star_Summer12",
 #    "ZZ_TuneZ2star_Summer12",
-    "TTJets_TuneZ2star_Summer12",
-    "WJets_TuneZ2star_v1_Summer12",
-    "WJets_TuneZ2star_v2_Summer12",
-    "W1Jets_TuneZ2star_Summer12",
-    "W2Jets_TuneZ2star_Summer12",
-    "W3Jets_TuneZ2star_Summer12",
-    "W4Jets_TuneZ2star_Summer12",
+#    "TTJets_TuneZ2star_Summer12",
+#    "WJets_TuneZ2star_v1_Summer12",
+#    "WJets_TuneZ2star_v2_Summer12",
+#    "W1Jets_TuneZ2star_Summer12",
+#    "W2Jets_TuneZ2star_Summer12",
+#    "W3Jets_TuneZ2star_Summer12",
+#    "W4Jets_TuneZ2star_Summer12",
 #    "DYJetsToLL_M50_TuneZ2star_Summer12",
 #    "T_t-channel_TuneZ2star_Summer12",
 #    "Tbar_t-channel_TuneZ2star_Summer12",
@@ -186,7 +186,7 @@ datasets_53X = [
 #workflow = "pattuple_v44_4"
 #datasets = datasets_44X
 
-workflow = "pattuple_v53_1_test1"
+workflow = "pattuple_v53_1"
 datasets = datasets_53X
 
 multicrab.extendDatasets(workflow, datasets)
