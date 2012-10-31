@@ -29,7 +29,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters"
+counters = analysis+"/counters"
 
 def Linear(x,par):
     return par[0]*x[0] + par[1]
@@ -165,8 +165,10 @@ class InvertedTauID:
             iBin = iBin + 1
 
 	if norm > 0:
-	    h1.GetYaxis().SetTitle("Arbitrary units")
-
+#	    h1.GetYaxis().SetTitle("Arbitrary units")
+            h1.GetYaxis().SetTitle("Events / 5 GeV")
+            h1.GetXaxis().SetTitle("MET (GeV)")
+            
         plot = plots.ComparisonPlot(
             histograms.Histo(h1, "Inv"),
             histograms.Histo(h2, "Base"),
@@ -188,9 +190,9 @@ class InvertedTauID:
         plot.histoMgr.setHistoDrawStyleAll("EP")
         
         # Create frame with a ratio pad
-        plot.createFrame("comparison"+self.label, opts={"ymin":1e-5, "ymaxfactor": 2},
+        plot.createFrame("comparison"+self.label, opts={"ymin":1e-5, "ymaxfactor": 2, "xmax": 200},
                          createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
-                         )
+                        )
         
         # Set Y axis of the upper pad to logarithmic
         plot.getPad1().SetLogy(True)
@@ -297,7 +299,7 @@ class InvertedTauID:
         plot.histoMgr.setHistoDrawStyleAll("EP")
 
         # Create frame with a ratio pad
-        plot.createFrame("cuteff"+self.label, opts={"ymin":1e-5, "ymaxfactor": 2},
+        plot.createFrame("cuteff"+self.label, opts={"ymin":1e-5, "ymaxfactor": 2, "xmax": 200},
                          createRatio=True, opts2={"ymin": 0, "ymax": 2}, # bounds of the ratio plot
                          )
 
@@ -335,7 +337,7 @@ class InvertedTauID:
         plot2.histoMgr.forHisto("ShapeUncertainty", st1)
         plot2.histoMgr.setHistoDrawStyleAll("EP")
 #        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-1, "ymax": 1})
-	plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-0.1, "ymax": 1.1})
+        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-0.1, "ymax": 1.1, "xmax": 200})
 
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
@@ -365,6 +367,7 @@ class InvertedTauID:
 	hError.Fit(theFit,"LRN")
 	print "Error MET > 40",theFit.Eval(40)
 	print "Error MET > 50",theFit.Eval(50)
+       	print "Error MET > 60",theFit.Eval(60) 
 	print "Error MET > 70",theFit.Eval(70)
 
 	plot2.histoMgr.appendHisto(histograms.Histo(theFit,"Fit"))

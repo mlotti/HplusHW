@@ -2,8 +2,8 @@ import FWCore.ParameterSet.Config as cms
 
 # Select the version of the data (needed only for interactice running,
 # overridden automatically from multicrab
-dataVersion="44XmcS6"     # Fall11 MC
-#dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
+#dataVersion="44XmcS6"     # Fall11 MC
+dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
 
 dataEras = [
     "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job

@@ -25,10 +25,20 @@ namespace HPlus {
     Count fAllEventCounter;
     Count fHBHENoiseFilterCounter;
     Count fAllPassedCounter;
-
     edm::InputTag fHBHENoiseFilterSrc;
-
     bool fHBHENoiseFilterEnabled;
+
+    Count fHBHENoiseFilterMETWGCounter;
+    edm::InputTag fHBHENoiseFilterMETWGSrc;
+    bool fHBHENoiseFilterMETWGEnabled;
+
+    Count ftrackingFailureFilterCounter;
+    edm::InputTag ftrackingFailureFilterSrc;
+    bool ftrackingFailureFilterEnabled;
+
+    Count fEcalDeadCellEventFilterCounter;
+    edm::InputTag fEcalDeadCellEventFilterSrc;
+    bool fEcalDeadCellEventFilterEnabled;
   };
 }
 

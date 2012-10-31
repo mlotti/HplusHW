@@ -37,5 +37,9 @@ def createEDFilter(param):
         vertexWeightReader = param.vertexWeightReader.clone(),
         GenParticleAnalysis = param.GenParticleAnalysis,
         Tree = param.tree.clone(),
-        eventCounter = param.eventCounter.clone()
+        eventCounter = param.eventCounter.clone(),
+        oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus","HadronicTauOneAndThreeProng"),
+        tauEmbeddingStatus = cms.untracked.bool(False),
+        metFilters = param.metFilters.clone(),
+
     )

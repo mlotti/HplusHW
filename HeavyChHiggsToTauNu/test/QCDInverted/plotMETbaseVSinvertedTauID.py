@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 
 ###########################################################################
@@ -10,7 +11,10 @@
 ###########################################################################
 
 import ROOT
-ROOT.gROOT.SetBatch(True)
+#ROOT.gROOT.SetBatch(True)
+from ROOT import *
+import math
+import sys
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
@@ -19,20 +23,37 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
+from InvertedTauID import *
+
+#dataEra = "Run2011A"
+#dataEra = "Run2011B"
+dataEra = "Run2011AB"
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters"
+counters = analysis+"/counters"
 
-def main():
+def main(argv):
     interactive = True
     interactive = False
+    #    HISTONAME = "TauIdJets"
+#    HISTONAME = "TauIdBtag"
+    HISTONAME = "TauIdBveto"
+    
+    dirs = []
+    if len(sys.argv) < 2:
+	usage()
+
+    dirs.append(sys.argv[1])
+
+    
 
     # Disable batch mode here to have the interactivity (see also the line with 'raw_input') below
     if interactive:
         ROOT.gROOT.SetBatch(False)
 
     # Create all datasets from a multicrab task
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+#    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra)
 
     # As we use weighted counters for MC normalisation, we have to
     # update the all event count to a separately defined value because
@@ -188,4 +209,4 @@ def distComparison(datasets):
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

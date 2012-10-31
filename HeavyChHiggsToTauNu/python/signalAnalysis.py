@@ -31,6 +31,7 @@ def createEDFilter(param):
         topChiSelection = param.topChiSelection.clone(),
         topWithBSelection = param.topWithBSelection.clone(),
         topWithWSelection = param.topWithWSelection.clone(),
+        topWithMHSelection = param.topWithMHSelection.clone(),                        
         forwardJetVeto = param.forwardJetVeto.clone(),
         transverseMassCut = param.transverseMassCut,
         EvtTopology = param.EvtTopology.clone(),
@@ -40,6 +41,7 @@ def createEDFilter(param):
         embeddingMuonEfficiency = param.embeddingMuonEfficiency.clone(),
         Tree = param.tree.clone(),
         eventCounter = param.eventCounter.clone(),
+        oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus","HadronicTauOneAndThreeProng"),
         tauEmbeddingStatus = cms.untracked.bool(False),
         metFilters = param.metFilters.clone(),
     )
