@@ -678,17 +678,17 @@ def addPattuple_v53_1_test1(datasets):
     definitions = {
         "Tau_190456-190738_2012A_Jul13":          TaskDef("/Tau/local-Run2012A_13Jul2012_v1_AOD_pattuple_v53_1_190456_190738_test1-00fb6a0648e9082988536b8287ce18fd/USER", njobsOut=1),
 
-        "MultiJet_190456-190738_2012A_Jul13":     TaskDef("MultiJet_190456-190738_2012A_Jul13", njobsOut=2),
+        "MultiJet_190456-190738_2012A_Jul13":     TaskDef("/MultiJet/local-Run2012A_13Jul2012_v1_AOD_pattuple_v53_1_190456_190738_test1-8d229f863f3fc8a5a50f8b702ec0e1b3/USER", njobsOut=1),
 
-        "TTToHplusBWB_M120_Summer12":             TaskDef("/TTToHplusBWB_M-120_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_test1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=50),
+        "TTToHplusBWB_M120_Summer12":             TaskDef("/TTToHplusBWB_M-120_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_test1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=50, njobsOut=1),
 
-        "TTJets_TuneZ2star_Summer12":             TaskDef("/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_test1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=490, njobsOut=2),
+        "TTJets_TuneZ2star_Summer12":             TaskDef("/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_test1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=490, njobsOut=1),
         "WJets_TuneZ2star_v1_Summer12":           TaskDef("/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_test1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=200, njobsOut=1),
-        "WJets_TuneZ2star_v2_Summer12":           TaskDef("/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_pattuple_v53_1_test1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=490, njobsOut=2),
-        "W1Jets_TuneZ2star_Summer12":             TaskDef("/W1JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_test1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=300, njobsOut=2),
-        "W2Jets_TuneZ2star_Summer12":             TaskDef("/W2JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_test1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsOut=2),
+        "WJets_TuneZ2star_v2_Summer12":           TaskDef("/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_pattuple_v53_1_test1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=490, njobsOut=1),
+        "W1Jets_TuneZ2star_Summer12":             TaskDef("/W1JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_test1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=300, njobsOut=1),
+        "W2Jets_TuneZ2star_Summer12":             TaskDef("/W2JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_test1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsOut=1),
         "W3Jets_TuneZ2star_Summer12":             TaskDef("/W3JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_test1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsOut=1),
-        "W4Jets_TuneZ2star_Summer12":             TaskDef("/W4JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_test1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=490, njobsOut=2),
+        "W4Jets_TuneZ2star_Summer12":             TaskDef("/W4JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_test1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=490, njobsOut=1),
         }
 
     addPattuple_53X("v53_1_test1", datasets, definitions)
