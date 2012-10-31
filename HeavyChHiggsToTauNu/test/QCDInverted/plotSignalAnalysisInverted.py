@@ -173,6 +173,8 @@ def doPlots(datasets):
             return plots.DataMCPlot(datasets, analysis+"/"+name, **kwargs)
 
    
+
+   
  
 
 ####################
@@ -466,6 +468,12 @@ def mtTest(datasets):
     
     hmtDeltaPhi.SetMarkerColor(2)
     hmtDeltaPhi.SetMarkerSize(1)
+    hmtDeltaPhi.SetMarkerStyle(20)
+    hmtDeltaPhi.SetFillColor(4)
+    hmtDeltaPhi.Draw("same")
+            
+                        
+    tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
     hmtDeltaPhi.SetMarkerStyle(20)
     hmtDeltaPhi.SetFillColor(4)
     hmtDeltaPhi.Draw("same")
@@ -1147,6 +1155,8 @@ def mtComparison(datasets):
         tex4.SetTextSize(20)
         tex4.Draw()
  
+        if deltaPhi130 or topmass:
+            
         if deltaPhi130 or topmass:
             
             hmtSum.GetYaxis().SetTitle("Events / 10 GeV/c^{2}")

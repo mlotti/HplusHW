@@ -118,7 +118,7 @@ namespace HPlus {
 
     //    const double ftransverseMassCut;
     const double fDeltaPhiCutValue;
-
+    const double fDeltaPhiCutValue;
     const bool bBlindAnalysisStatus;
     Count fAllCounter;
     Count fMETFiltersCounter;

@@ -567,6 +567,7 @@ namespace HPlus {
  
     if (tauData.getSelectedTaus().size())
       myBestTauCandidate.push_back(tauData.getSelectedTau());
+                
    
     // tauID cuts applied to inverted taus    
     // nprongs
@@ -773,10 +774,23 @@ namespace HPlus {
     //    if(!selectedTausDoNotPassIsolation()) return false;
   
     if (tauData.selectedTauPassesDiscriminator(myTauIsolation, 0.5)) return false;    
+
+     
+   
+ 
     // veto was successfull
     increment(fTauVetoAfterTauIDCounter);
-
-
+    
+    if ( tauData.getSelectedTau()->pt() > 150  ) hMETInvertedTauId150->Fill(metData.getSelectedMET()->et());
+    if ( tauData.getSelectedTau()->pt() > 120  ) hMETInvertedTauId120->Fill(metData.getSelectedMET()->et());
+    if ( tauData.getSelectedTau()->pt() > 120 && tauData.getSelectedTau()->pt() < 150 ) hMETInvertedTauId120150->Fill(metData.getSelectedMET()->et());
+    if ( tauData.getSelectedTau()->pt() > 100 && tauData.getSelectedTau()->pt() < 120 ) hMETInvertedTauId100120->Fill(metData.getSelectedMET()->et());
+    if ( tauData.getSelectedTau()->pt() > 80 && tauData.getSelectedTau()->pt() < 100 ) hMETInvertedTauId80100->Fill(metData.getSelectedMET()->et());
+    if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hMETInvertedTauId7080->Fill(metData.getSelectedMET()->et());     
+    if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMETInvertedTauId6070->Fill(metData.getSelectedMET()->et());
+    if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMETInvertedTauId5060->Fill(metData.getSelectedMET()->et()); 
+    if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMETInvertedTauId4050->Fill(metData.getSelectedMET()->et());
+						
     
     hMETInvertedTauId->Fill(metData.getSelectedMET()->et());  
     if ( tauData.getSelectedTau()->pt() > 150  ) hMETInvertedTauId150->Fill(metData.getSelectedMET()->et());

@@ -74,12 +74,14 @@ tauSelectionBase = cms.untracked.PSet(
     operatingMode = cms.untracked.string("standard"), # Standard tau ID (Tau candidate selection + tau ID applied)
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     selection = cms.untracked.string(""),
+#    ptCut = cms.untracked.double(50), # jet pt > value for heavy charged Higgs
     ptCut = cms.untracked.double(41), # jet pt > value
     etaCut = cms.untracked.double(2.1), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
     againstElectronDiscriminator = cms.untracked.string("againstElectronMVA"), # discriminator against electrons
     againstMuonDiscriminator = cms.untracked.string("againstMuonTight"), # discriminator for against muons
     applyVetoForDeadECALCells = cms.untracked.bool(False), # set to true to exclude taus that are pointing to a dead ECAL cell
+    deadECALCellsDeltaR = cms.untracked.double(0.01), # min allowed DeltaR to a dead ECAL cell
     isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr"), # discriminator for isolation
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1.0), # cut point for continuous isolation discriminator, applied only if it is non-zero
     rtauCut = cms.untracked.double(0.7), # rtau > value
@@ -120,7 +122,7 @@ tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
 vetoTauBase = tauSelectionHPSVeryLooseTauBased.clone(
     src = "selectedPatTausHpsPFTau",
 #    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
-    ptCut = cms.untracked.double(15), # jet pt > value
+    ptCut = cms.untracked.double(20), # jet pt > value
     etaCut = cms.untracked.double(2.4), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(5.0), # ldg. track > value
 #    leadingObjectPtCut = cms.untracked.double(5.0), # ldg. track > value
@@ -207,7 +209,9 @@ jetSelectionBase = cms.untracked.PSet(
     jetIdMinChargedMultiplicity = cms.untracked.uint32(0),
     jetIdMaxChargedEMEnergyFraction = cms.untracked.double(0.99),
     # Pileup cleaning
+
     betaCut = cms.untracked.double(0.2), # default 0.2
+
     betaCutSource = cms.untracked.string("Beta"), # tag name in user floats
     betaCutDirection = cms.untracked.string("GT"), # direction of beta cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
     # Veto event if jet hits dead ECAL cell
@@ -239,7 +243,8 @@ MET = cms.untracked.PSet(
     tcSrc = cms.untracked.InputTag("patMETsTC"),
     select = cms.untracked.string("type1"), # raw, type1, type2
     METCut = cms.untracked.double(60.0),
-
+#    METCut = cms.untracked.double(80.0), # MET cut for heavy charged Higgs
+    
     # For type I/II correction
     tauJetMatchingCone = cms.untracked.double(0.5),
     jetType1Threshold = cms.untracked.double(10),
@@ -253,9 +258,10 @@ bTagging = cms.untracked.PSet(
 #    discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
     discriminator = cms.untracked.string("combinedSecondaryVertexBJetTags"),
 #    discriminator = cms.untracked.string("jetProbabilityBJetTags"),   
-    leadingDiscriminatorCut = cms.untracked.double(0.898), # used for best bjet candidates (best discriminator)
+    leadingDiscriminatorCut = cms.untracked.double(0.898), # used for best bjet candidates (best discriminator
     subleadingDiscriminatorCut = cms.untracked.double(0.898), # used for other bjet candidates
     ptCut = cms.untracked.double(20.0),
+#    ptCut = cms.untracked.double(30.0), # for heavy charged Higgs
     etaCut = cms.untracked.double(2.4),
     jetNumber = cms.untracked.uint32(1),
     jetNumberCutDirection = cms.untracked.string("GEQ"), # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
@@ -265,7 +271,8 @@ bTagging = cms.untracked.PSet(
 )
 
 
-deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
+#deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
+deltaPhiTauMET = cms.untracked.double(170.0) # less than this value in degrees, for heavy charged Higgs
 topReconstruction = cms.untracked.string("None") # Options: None
 
 transverseMassCut = cms.untracked.double(100) # Not used
@@ -342,6 +349,8 @@ GenParticleAnalysis = cms.untracked.PSet(
   oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"),
   threeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauThreeProng"),
 )
+
+
 topSelection = cms.untracked.PSet(
   TopMassLow = cms.untracked.double(100.0),
   TopMassHigh = cms.untracked.double(300.0),
@@ -373,6 +382,14 @@ topWithBSelection = cms.untracked.PSet(
 )
 
 topWithWSelection = cms.untracked.PSet(
+    TopMassLow = cms.untracked.double(120.0),
+    TopMassHigh = cms.untracked.double(300.0),
+    Chi2Cut = cms.untracked.double(5.0),
+    src = cms.untracked.InputTag("genParticles"),
+    enabled = cms.untracked.bool(False)
+)
+
+topWithMHSelection = cms.untracked.PSet(
     TopMassLow = cms.untracked.double(120.0),
     TopMassHigh = cms.untracked.double(300.0),
     Chi2Cut = cms.untracked.double(5.0),

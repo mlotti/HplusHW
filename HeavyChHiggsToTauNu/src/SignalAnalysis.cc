@@ -454,7 +454,6 @@ namespace HPlus {
 
 //------ GenParticle analysis (must be done here when we effectively trigger all MC)
     GenParticleAnalysis::Data genData;
-    if (!iEvent.isRealData()) {
       genData = fGenparticleAnalysis.analyze(iEvent, iSetup);
       fTree.setGenMET(genData.getGenMET());
     }

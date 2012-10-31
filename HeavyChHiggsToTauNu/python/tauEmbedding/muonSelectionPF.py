@@ -22,7 +22,7 @@ def getTightMuonsDefinition(postfix=""):
     #    "&& (isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt() < 0.05",
         )
     )
-    return tightMuons
+#    return tightMuons
 
 def addMuonSelectionForEmbedding(process, postfix=""):
     muonSelectionAllEvents = cms.EDProducer("EventCountProducer")

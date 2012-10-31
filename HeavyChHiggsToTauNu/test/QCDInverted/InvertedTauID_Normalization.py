@@ -36,8 +36,8 @@ def usage():
 
 def main(argv):
 
-    HISTONAME = "TauIdJets"
-#    HISTONAME = "TauIdBtag"
+#    HISTONAME = "TauIdJets"
+    HISTONAME = "TauIdBtag"
 #    HISTONAME = "TauIdBveto"
     
     dirs = []
