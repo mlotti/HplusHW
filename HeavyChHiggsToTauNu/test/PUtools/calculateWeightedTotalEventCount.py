@@ -8,17 +8,26 @@ import os
 from optparse import OptionParser
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 
+# We don't need (or actaually can not create) full dataset.Dataset object
+class DatasetWrapper:
+    def __init__(self, name, rootFile, baseDirectory):
+        self.name = name
+        self.rootFile = rootFile
+        self.baseDirectory = baseDirectory
 
-def getEventWeight(hmc, hdata, nvtx):
-    # Get bin index
-    mybin = hmc.GetXaxis().FindBin(nvtx)
-    mydatabin = hdata.GetXaxis().FindBin(nvtx)
-    if mybin != mydatabin:
-        print "Error: data and mc pileup histograms have different binning!"
-        sys.exit()
-    # Calculate data/MC
-    return hdata.GetBinContent(mybin) / hmc.GetBinContent(mybin)
+    def getRootFile(self):
+        return self.rootFile
+
+    def getName(self):
+        return self.name
+
+    def getBaseDirectory(self):
+        return self.baseDirectory
+
+    def isMC(self):
+        return True
 
 def main(opts):
     # open PU histograms
@@ -47,6 +56,19 @@ def main(opts):
     hdatadown = hdatadownoriginal.Clone("hdatadown")
     hdatadown.Scale(1.0 / hdatadown.Integral())
 
+    hweight = hdata.Clone()
+    hweight.Divide(hmc)
+
+    hweightUp = hdataup.Clone()
+    hweightUp.Divide(hmc)
+
+    hweightDown = hdatadown.Clone()
+    hweightDown.Divide(hmc)
+
+    ntupleCache = dataset.NtupleCache("pileupNtuple/tree", "PileupWeightSelector",
+                                      selectorArgs=[hweight, hweightUp, hweightDown],
+                                      )
+
     # loop over datasets
     myoutput = ""
     for multicrabDir in opts.multicrabdir:
@@ -56,39 +78,30 @@ def main(opts):
             rootFile = ROOT.TFile.Open(os.path.join(crabDir, "res", "histograms-%s.root"%taskName))
             if rootFile.IsZombie():
                 sys.exit()
-            # Get tree
+
+            # Get tree for non-weighted number of events
             mytree = rootFile.Get("pileupNtuple/tree")
             if mytree == 0:
-                sys.exit()
+                raise Exception("Did not find 'pileupNtuple/tree' from %s" % rootFile.GetName())
             nevents = mytree.GetEntries()
-            print "Processing", taskName, "nevents =",nevents,"..."
-            # Set branch adress in tree
-            myleaf = mytree.GetLeaf("TrueNumInteractions")
-            if myleaf == 0:
-                sys.exit()
-            # Loop over tree
-            nevt = 0.0
-            nevtup = 0.0
-            nevtdown = 0.0
-            for i in range(1,nevents+1):
-                if i % 200 == 0:
-                    mybar = "\r["
-                    for j in range(0, int(float(i) / float(nevents) * 40.0)):
-                        mybar += "."
-                    for j in range(int(float(i) / float(nevents) * 40.0),40):
-                        mybar += " "
-                    sys.stdout.write(mybar+"]")
-                mytree.GetEntry(i)
-                nevt += getEventWeight(hmc, hdata, myleaf.GetValue())
-                nevtup += getEventWeight(hmc, hdataup, myleaf.GetValue())
-                nevtdown += getEventWeight(hmc, hdatadown, myleaf.GetValue())
-                #print nevt, nevtup, nevtdown
+
+            # Create Dataset wrapper
+            dset = DatasetWrapper(taskName, rootFile, multicrabDir)
+
+            # Process tree
+            ntupleCache.process(dset)
+
+            # Get results
+            nevt = ntupleCache.getRootHisto(dset, "events").GetBinContent(1)
+            nevtup = ntupleCache.getRootHisto(dset, "eventsUp").GetBinContent(1)
+            nevtdown = ntupleCache.getRootHisto(dset, "eventsDown").GetBinContent(1)
+
             rootFile.Close()
-            sys.stdout.write(" Done\n")
             # Write output line
             myline = "        "+'"'+taskName+'"'+": WeightedAllEvents(unweighted=%d, "%nevents+"weighted=%f, "%nevt+"up=%f, "%nevtup+"down=%f),\n"%nevtdown
             #print "\n"+myline
             myoutput += myline
+
     myresult = "_weightedAllEvents = {\n"
     myresult += "    "+'"'+"myera"+'"'+": {\n"
     myresult += myoutput
