@@ -14,6 +14,16 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 # lumiCalc.py usage taken from
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/LumiCalc
 
+def usePixelLumiCalc(taskName):
+    for era in ["2011A", "2011B", "2012A", "2012B"]:
+        if era in taskName:
+            return True
+    # No pixel lumi available after ICHEP12 yet
+    for era in ["2012C", "2012D"]:
+        if era in taskName:
+            return False
+    raise Exception("No known era in task name %s" % taskName)
+
 def isMCTask(taskdir):
     path = os.path.join(taskdir, "share", "crab.cfg")
     if not os.path.exists(path):
@@ -95,14 +105,22 @@ def main(opts, args):
     
     data = {}
     for task, jsonfile in files:
+        lumicalc = opts.lumicalc
+
+        if lumicalc == "defaultLumiCalc":
+            if usePixelLumiCalc(task):
+                lumicalc = "pixelLumiCalc"
+            else:
+                lumicalc = "lumiCalc2"
+
         #print
         #print "================================================================================"
         #print "Dataset %s:" % d
-        if opts.lumicalc == "lumiCalc1":
+        if lumicalc == "lumiCalc1":
             cmd = ["lumiCalc.py", "-i", jsonfile, "--with-correction", "--nowarning", "overview", "-b", "stable"]
-        if opts.lumicalc == "lumiCalc2":
+        if lumicalc == "lumiCalc2":
             cmd = ["lumiCalc2.py", "-i", jsonfile, "--nowarning", "overview", "-b", "stable"]
-        if opts.lumicalc == "pixelLumiCalc":
+        if lumicalc == "pixelLumiCalc":
             cmd = ["pixelLumiCalc.py", "-i", jsonfile, "--nowarning", "overview"]
         #cmd = ["lumiCalc.py", "-c", "frontier://LumiCalc/CMS_LUMI_PROD", "-r", "132440", "--nowarning", "overview"]
         #ret = subprocess.call(cmd)
@@ -173,15 +191,19 @@ if __name__ == "__main__":
     parser.add_option("--verbose", dest="verbose", action="store_true", default=False,
                       help="Print outputs of the commands which are executed")
     parser.add_option("--lumiCalc1", dest="lumicalc", action="store_const", const="lumiCalc1",
-                      help="Use lumiCalc.py instead of lumiCalc2.py (default is to use pixelLumiCalc.py")
+                      help="Use lumiCalc.py instead of lumiCalc2.py")
     parser.add_option("--lumiCalc2", dest="lumicalc", action="store_const", const="lumiCalc2",
                       help="Use lumiCalc2.py (default is to use pixelLumiCalc.py)")
     parser.add_option("--pixelLumiCalc", dest="lumicalc", action="store_const", const="pixelLumiCalc",
-                      help="Use pixelLumiCalc.py instead of lumiCalc2.py (default)")
+                      help="Use pixelLumiCalc.py instead of lumiCalc2.py")
+    parser.add_option("--defaultLumiCalc", dest="lumicalc", action="store_const", const="defaultLumiCalc",
+                      help="Use default mixture of pixelLumiCalc (Run2011AB, Run2012AB) and lumiCalc2 (Run2012CD) (default)")
     
     (opts, args) = parser.parse_args()
     if opts.lumicalc == None:
-        opts.lumicalc = "pixelLumiCalc"
+        opts.lumicalc = "defaultLumiCalc"
     print "Calculating luminosity with %s" % opts.lumicalc
+    if opts.lumicalc == "defaultLumiCalc":
+        print "   mixture of pixelLumiCalc (for Run2011AB, Run2012AB) and lumiCacl2 (Run212CD)"
 
     sys.exit(main(opts, args))
