@@ -79,12 +79,17 @@ def main(opts, args):
 
         print "Task %s, merging %d file(s)" % (d, len(files))
 
+        # If testing, end this iteration here
+        if opts.test:
+            continue
+
         mergeName = os.path.join(d, "res", opts.output % d)
         #cmd = "mergeTFileServiceHistograms -o %s -i %s" % ("histograms-"+d+".root", " ".join(files))
         #print files
         #ret = subprocess.call(["mergeTFileServiceHistograms",
         #                       "-o", mergeName,
         #                       "-i"]+files)
+           
         if os.path.exists(mergeName):
             shutil.move(mergeName, mergeName+".backup")
 
@@ -108,6 +113,10 @@ def main(opts, args):
         
         mergedFiles.append((mergeName, files))
 
+    # If testing, finish here
+    if opts.test:
+        return 0
+
     deleteMessage = ""
     if opts.delete:
         deleteMessage = " (source files deleted)"
@@ -129,6 +138,8 @@ if __name__ == "__main__":
                       help="Regex for input root files (note: remember to escape * and ? !) (default: 'histograms_.*?\.root')")
     parser.add_option("-o", dest="output", type="string", default="histograms-%s.root",
                       help="Pattern for merged output root files (use '%s' for crab directory name) (default: 'histograms-%s.root')")
+    parser.add_option("--test", dest="test", default=False, action="store_true",
+                      help="Just test, do not do any merging or deleting (might be useful for checking what would happen)")
     parser.add_option("--delete", dest="delete", default=False, action="store_true",
                       help="Delete the source files to save disk space (default is to keep the files)")
     parser.add_option("--filesInSE", dest="filesInSE", default=False, action="store_true",
