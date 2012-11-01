@@ -14,6 +14,7 @@ import hashlib
 import ROOT
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
 ## "Enumeration" of pile-up weight type
 class PileupWeightType:
@@ -2301,7 +2302,7 @@ class NtupleCache:
         self.macrosLoaded = False
         self.processedDatasets = {}
 
-        base = os.path.join(os.environ["CMSSW_BASE"], "src", "HiggsAnalysis", "HeavyChHiggsToTauNu", "test", "ntuple")
+        base = os.path.join(aux.higgsAnalysisPath(), "HeavyChHiggsToTauNu", "test", "ntuple")
         self.macros = [
             os.path.join(base, "BaseSelector.C"),
             os.path.join(base, "Branches.C"),
