@@ -29,4 +29,4 @@ else
 endif
 
 setenv PATH ${PATH}:${PWD}/../../HeavyChHiggsToTauNu/scripts
-setenv CMSSW_BASE ${PWD}/../../../..
+setenv HIGGSANALYSIS_BASE ${PWD}/../..

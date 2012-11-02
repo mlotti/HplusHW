@@ -24,6 +24,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 
 DATAPATH = "/home/slehti/public/Trigger/TriggerEfficiency/data"
@@ -155,7 +156,7 @@ def main():
 
     histograms.createLegend.moveDefaults(dh=-0.18)
 
-    macroPath = os.path.join(os.environ["CMSSW_BASE"], "src/HiggsAnalysis/TriggerEfficiency/test/pileupWeight.C+")
+    macroPath = os.path.join(aux.higgsAnalysisPath(), "TriggerEfficiency/test/pileupWeight.C+")
     macroPath = macroPath.replace("../src/","")
     ROOT.gROOT.LoadMacro(macroPath)
 
