@@ -45,6 +45,7 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         )
 
 process = builder.buildSignalAnalysis()
+#process = builder.buildSignalAnalysisInvertedTau()
 
 if builder.options.tauEmbeddingInput != 0:
     if builder.dataVersion.isMC():
