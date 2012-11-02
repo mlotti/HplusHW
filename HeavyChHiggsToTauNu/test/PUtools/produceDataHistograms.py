@@ -4,6 +4,7 @@
 # as instructed in https://twiki.cern.ch/twiki/bin/view/CMS/PileupJSONFileforData
 
 import os
+import json
 import subprocess
 
 import ROOT
@@ -32,43 +33,53 @@ runsJson = [
     (["2012C"], 202792, 203742, certifiedLumi.files["PromptReco12"]),
     ]
 for tpl in runsJson:
-    tpl[0].append("2012ABC")
+    if tpl[0][0] in ["2012A", "2012B"]:
+        tpl[0].append("2012AB")
+        tpl[0].append("2012ABC")
+    elif tpl[0][0] in ["2012C"]:
+        tpl[0].append("2012ABC")
 eraPUJson = {
     "2012A": "pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt",
     "2012B": "pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt",
     "2012C": "pileup_JSON_DCSONLY_190389-204506_corr.txt",
 
     "2012AB": "pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt",
-    "2012ABC": "pileup_JSON_DCSONLY_190389-200041_pixelcorr_upto196531_190389-204506_corr.txt",
+    "2012ABC": "pileup_JSON_DCSONLY_190389-200041_pixelcorr_upto196531_190389-204506_corr_from198022.txt",
 }
 
 processEras = [
-#    "2012A",
-#    "2012B",
-#    "2012C",
+    "2012A",
+    "2012B",
+    "2012C",
+    "2012AB",
     "2012ABC",
 ]
-
 
 def main():
     if not os.path.exists(eraPUJson["2012ABC"]):
         print "Creating PU json", eraPUJson["2012ABC"]
-        cmd = ["filterJSON.py", "--max", "196531", "--output", "tmp1.txt", eraPUJson["2012A"]]
-        ret = subprocess.call(cmd)
-        if ret != 0:
-            raise Exception("Command '%s' failed with exit code %d" % (" ".join(cmd), ret))
 
-        cmd = ["filterJSON.py", "--min", "198022", "--output", "tmp2.txt", eraPUJson["2012C"]]
-        ret = subprocess.call(cmd)
-        if ret != 0:
-            raise Exception("Command '%s' failed with exit code %d" % (" ".join(cmd), ret))
+        f = open(eraPUJson["2012A"])
+        pixelPU = json.load(f)
+        f.close()
 
-        cmd = ["mergeJSON.py", "--output", eraPUJson["2012ABC"], "tmp1.txt", "tmp2.txt"]
-        ret = subprocess.call(cmd)
-        if ret != 0:
-            raise Exception("Command '%s' failed with exit code %d" % (" ".join(cmd), ret))
-        os.remove("tmp1.txt")
-        os.remove("tmp2.txt")
+        f = open(eraPUJson["2012C"])
+        hfPU = json.load(f)
+        f.close()
+
+        for run in pixelPU.keys():
+            if int(run) > 196531:
+                del pixelPU[run]
+
+        for run in hfPU.keys():
+            if int(run) < 198022:
+                del hfPU[run]
+
+        pixelPU.update(hfPU)
+
+        f = open(eraPUJson["2012ABC"], "w")
+        json.dump(pixelPU, f, sort_keys=True)
+        f.close()
 
     print "Filtering run/lumi JSON files according to eras and our run ranges"
     eraJsons = {}
