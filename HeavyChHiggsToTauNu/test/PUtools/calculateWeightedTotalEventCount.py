@@ -109,7 +109,7 @@ def main(opts):
     myresult += "}\n\n"
     print ""
     print myresult
-    print "Copy the above fragment to python/tools/dataset.py and replace 'myera' with appropriate label, e.g. 2011A\n"
+    print "Copy the above fragment to python/tools/pileupReweightedAllEvents.py and replace 'myera' with appropriate label, e.g. 2011A\n"
     print "Result was obtained with PU histograms:"
     print "  data:",opts.dataPU
     print "  dataup:",opts.dataPU.replace(".root","up.root")
