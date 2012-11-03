@@ -10,18 +10,19 @@
 
 namespace HPlus {
 
-  CorrelationAnalysis::CorrelationAnalysis(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HistoWrapper& histoWrapper) {
-    init(histoWrapper);
+  CorrelationAnalysis::CorrelationAnalysis(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string HistoName) {
+    init(histoWrapper, HistoName);
   }
-  CorrelationAnalysis::CorrelationAnalysis(HPlus::EventCounter& eventCounter, HistoWrapper& histoWrapper) {
-    init(histoWrapper);
+  CorrelationAnalysis::CorrelationAnalysis(HPlus::EventCounter& eventCounter, HistoWrapper& histoWrapper,std::string HistoName) {
+    init(histoWrapper, HistoName);
   }
 
   CorrelationAnalysis::~CorrelationAnalysis() {}
 
-  void CorrelationAnalysis::init(HistoWrapper& histoWrapper){
+  void CorrelationAnalysis::init(HistoWrapper& histoWrapper, std::string HistoName){
     edm::Service<TFileService> fs;
-    TFileDirectory myDir = fs->mkdir("BCorrelationAnalysis");
+    //    TFileDirectory myDir = fs->mkdir("BCorrelationAnalysis");
+    TFileDirectory myDir = fs->mkdir(HistoName);
     hPtB1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_pt", "bjet1_pt", 100, 0., 200.);
     hPtB2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_pt", "bjet2_pt", 100, 0., 200.);
     hEtaB1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_eta", "bjet1_eta", 60, -3., 3.);
@@ -30,7 +31,7 @@ namespace HPlus {
     hDeltaR_tauB2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaR_tauB2", "DeltaR_tauB2", 100, 0., 5.);
   }
 
-  void CorrelationAnalysis::analyze(const edm::PtrVector<reco::Candidate>& input1,const edm::PtrVector<reco::Candidate>& input2){
+  void CorrelationAnalysis::analyze(const edm::PtrVector<reco::Candidate>& input1,const edm::PtrVector<reco::Candidate>& input2, std::string HistoName){
 
     double DeltaR_tauB1 = -999;
     double DeltaR_tauB2 = -999;

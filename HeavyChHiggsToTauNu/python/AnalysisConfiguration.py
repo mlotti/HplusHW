@@ -134,7 +134,7 @@ class ConfigBuilder:
         
         def create(param):
             return [signalAnalysisInvertedTau.createEDFilter(param)]
-        return self._build(create, ["signalAnalysis"])
+        return self._build(create, ["signalAnalysisInvertedTau"])
 
     ## Build configuration for signal analysis job
     #

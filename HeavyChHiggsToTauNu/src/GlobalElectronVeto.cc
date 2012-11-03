@@ -15,6 +15,8 @@
 
 #include <string>
 
+std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
+
 namespace HPlus {
   GlobalElectronVeto::Data::Data(const GlobalElectronVeto *globalElectronVeto, bool passedEvent):
     fGlobalElectronVeto(globalElectronVeto), fPassedEvent(passedEvent) {}
@@ -43,22 +45,22 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("GlobalElectronVeto");
 
-    hElectronPt  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronPt", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 80, 0.0, 400.0);
-    hElectronEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronEta", "GlobalElectronEta;isolated electron #eta;N_{electrons} / 0.1", 60, -3.0, 3.0);
-    hElectronEta_identified = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalElectronEta_identified", "GlobalElectronEta_identified;isolated electron #eta;N_{electrons} / 0.1", 60, -3.0, 3.0);
-    hElectronPt_identified  = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalElectronPt_identified", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 400, 0, 400.0);
+    hElectronPt  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronPt", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 160, 0.0, 400.0);
+    hElectronEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronEta", "GlobalElectronEta;isolated electron #eta;N_{electrons} / 0.1", 90, -3.0, 3.0);
+    hElectronEta_identified = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalElectronEta_identified", "GlobalElectronEta_identified;isolated electron #eta;N_{electrons} / 0.1", 90, -3.0, 3.0);
+    hElectronPt_identified  = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalElectronPt_identified", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 160, 0, 400.0);
     hNumberOfSelectedElectrons = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NumberOfSelectedElectrons", "NumberOfSelectedElectrons", 30, 0., 30.);
-    hElectronPt_matchingMCelectron  = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_matchingMCelectron", "GlobalElectronPt_matchingMCelectron", 80, 0.0, 400.0);
+    hElectronPt_matchingMCelectron  = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_matchingMCelectron", "GlobalElectronPt_matchingMCelectron", 160, 0.0, 400.0);
     hElectronEta_matchingMCelectron = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronEta_matchingMCelectron", "GlobalElectronEta_matchingMCelectron", 90, -3.0, 3.0);
-    hElectronPt_matchingMCelectronFromW  = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_matchingMCelectronFromW", "GlobalElectronPt_matchingMCelectronFromW", 80, 0.0, 400.0);
-    hElectronEta_matchingMCelectronFromW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronEta_matchingMCelectronFromW", "GlobalElectronEta_matchingMCelectronFromW", 80, -3.0, 3.0);
-    hElectronPt_gsfTrack  = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_gsfTrack", "GlobalElectronPt_gsfTrack", 80, 0.0, 400.0);
-    hElectronEta_gsfTrack = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronEta_gsfTrack", "GlobalElectronEta_gsfTrack", 60, -3.0, 3.0);
+    hElectronPt_matchingMCelectronFromW  = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_matchingMCelectronFromW", "GlobalElectronPt_matchingMCelectronFromW", 160, 0.0, 400.0);
+    hElectronEta_matchingMCelectronFromW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronEta_matchingMCelectronFromW", "GlobalElectronEta_matchingMCelectronFromW", 90, -3.0, 3.0);
+    hElectronPt_gsfTrack  = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_gsfTrack", "GlobalElectronPt_gsfTrack", 160, 0.0, 400.0);
+    hElectronEta_gsfTrack = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronEta_gsfTrack", "GlobalElectronEta_gsfTrack", 90, -3.0, 3.0);
     hElectronEta_superCluster = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronEta_superCluster", "GlobalElectronEta_superCluster", 60, -3.0, 3.0);
-    hElectronPt_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 100, 0.0, 200.0);
-    hElectronEta_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_AfterSelection", "GlobalElectronEta_AfterSelection", 60, -3.0, 3.0);
-    hElectronPt_gsfTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsfTrack_AfterSelection", 100, 0.0, 200.0);
-    hElectronEta_gsfTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsTrack_AfterSelection", 60, -3.0, 3.0);
+    hElectronPt_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 160, 0.0, 400.0);
+    hElectronEta_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_AfterSelection", "GlobalElectronEta_AfterSelection", 90, -3.0, 3.0);
+    hElectronPt_gsfTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsfTrack_AfterSelection", 160, 0.0, 400.0);
+    hElectronEta_gsfTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsTrack_AfterSelection", 90, -3.0, 3.0);
     hElectronImpactParameter = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "ElectronImpactParameter", "ElectronImpactParameter", 100, 0.0, 0.1);
 
     hElectronEtaPhiForSelectedElectrons = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir,
@@ -123,8 +125,7 @@ namespace HPlus {
     bool bPassedElecID = false;
     bool bElecPtCut = false;
     bool bElecEtaCut = false;
-    bool bElecMatchingMCelectron = false;
-    bool bElecMatchingMCelectronFromW = false;
+
     bool bElectronSelected = false;
 
     // Loop over all Electrons
@@ -201,6 +202,9 @@ namespace HPlus {
       hElectronPt_gsfTrack_AfterSelection->Fill(myGsfTrackRef->pt());
       hElectronEta_gsfTrack_AfterSelection->Fill(myGsfTrackRef->eta());
       hElectronEtaPhiForSelectedElectrons->Fill((*iElectron)->eta(), (*iElectron)->phi());
+
+      bool bElecMatchingMCelectron = false;
+      bool bElecMatchingMCelectronFromW = false;
       // Selection purity from MC
       if(!iEvent.isRealData()) {
         for (size_t i=0; i < genParticles->size(); ++i){  
@@ -209,24 +213,28 @@ namespace HPlus {
           int status = p.status();
           double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() , electron.p4() );
           if ( deltaR > 0.05 || status != 1) continue;
-          bElecMatchingMCelectron = true;
-          hElectronPt_matchingMCelectron->Fill(myGsfTrackRef->pt());
-          hElectronEta_matchingMCelectron->Fill(myGsfTrackRef->eta());
           int id = p.pdgId();
           if ( std::abs(id) == 11 ) {
-            int numberOfTauMothers = p.numberOfMothers(); 
-            for (int im=0; im < numberOfTauMothers; ++im){  
-              const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
-              if ( !dparticle) continue;
-              int idmother = dparticle->pdgId();
-              if ( std::abs(idmother) == 24 ) {
-                bElecMatchingMCelectronFromW = true;
-                hElectronPt_matchingMCelectronFromW->Fill(myGsfTrackRef->pt());
-                hElectronEta_matchingMCelectronFromW->Fill(myGsfTrackRef->eta());
-              }
-            }
+	    bElecMatchingMCelectron = true;
+
+	    std::vector<const reco::GenParticle*> mothers = getMothers(p);
+	    for(size_t d=0; d<mothers.size(); ++d) {
+	      const reco::GenParticle dparticle = *mothers[d];
+	      int idmother = dparticle.pdgId();
+              if ( abs(idmother) == 24 ) {
+		bElecMatchingMCelectronFromW = true;
+	      }
+	    }
           }
         }
+	if ( bElecMatchingMCelectron ) {
+	  hElectronPt_matchingMCelectron->Fill(myGsfTrackRef->pt());
+	  hElectronEta_matchingMCelectron->Fill(myGsfTrackRef->eta());
+	  if ( bElecMatchingMCelectronFromW ) {
+	    hElectronPt_matchingMCelectronFromW->Fill(myGsfTrackRef->pt());
+	    hElectronEta_matchingMCelectronFromW->Fill(myGsfTrackRef->eta());
+	  }
+	}	
       }
     }//eof: for(pat::ElectronCollection::const_iterator iElectron = myElectronHandle->begin(); iElectron != myElectronHandle->end(); ++iElectron) {
     if(bElecPresent) {
@@ -242,12 +250,14 @@ namespace HPlus {
               if(bElecEtaCut) {
                 increment(fElecSelectionSubCountEtaCut);
                 increment(fElecSelectionSubCountSelected);
+		/*
 		if(bElecMatchingMCelectron) {
 		  increment(fElecSelectionSubCountMatchingMCelectron);
 		  if(bElecMatchingMCelectronFromW) {
 		    increment(fElecSelectionSubCountMatchingMCelectronFromW);
 		  }
 		}
+		*/
 	      }
             }
           }

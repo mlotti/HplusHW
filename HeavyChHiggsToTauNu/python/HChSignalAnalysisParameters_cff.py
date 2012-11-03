@@ -56,9 +56,9 @@ metFilters = cms.untracked.PSet(
     HBHENoiseFilterSrc = cms.untracked.InputTag("HBHENoiseFilterResultProducer", "HBHENoiseFilterResult"),
     HBHENoiseFilterEnabled = cms.untracked.bool(False),
     HBHENoiseFilterMETWGSrc = cms.untracked.InputTag("HBHENoiseFilterResultProducerMETWG", "HBHENoiseFilterResult"),
-    HBHENoiseFilterMETWGEnabled = cms.untracked.bool(False),
+    HBHENoiseFilterMETWGEnabled = cms.untracked.bool(True),
     trackingFailureFilterSrc = cms.untracked.InputTag("trackingFailureFilter"),
-    trackingFailureFilterEnabled = cms.untracked.bool(True),
+    trackingFailureFilterEnabled = cms.untracked.bool(False),
     EcalDeadCellEventFilterSrc = cms.untracked.InputTag("EcalDeadCellEventFilter"),
     EcalDeadCellEventFilterEnabled = cms.untracked.bool(False), 
 )
@@ -272,7 +272,8 @@ bTagging = cms.untracked.PSet(
 
 
 #deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
-deltaPhiTauMET = cms.untracked.double(170.0) # less than this value in degrees, for heavy charged Higgs
+deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees, for heavy charged Higgs
+
 topReconstruction = cms.untracked.string("None") # Options: None
 
 transverseMassCut = cms.untracked.double(100) # Not used

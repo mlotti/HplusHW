@@ -120,7 +120,7 @@ namespace HPlus {
     //    ftransverseMassCut(iConfig.getUntrackedParameter<edm::ParameterSet>("transverseMassCut")),
     fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, fHistoWrapper),
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, fHistoWrapper),
-    fCorrelationAnalysis(eventCounter, fHistoWrapper),
+    fCorrelationAnalysis(eventCounter, fHistoWrapper, "HistoName"),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
     fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fHistoWrapper),
     //    fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
@@ -658,7 +658,7 @@ namespace HPlus {
 	   
 	      if(btagData.passedEvent()) {
 		increment(fBaselineBtagCounter);
-		if ( deltaPhi < 160) {
+		if ( deltaPhi < fDeltaPhiCutValue) {
 		  increment(fBaselineDphi160Counter);
 		  //		  fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
 
@@ -1020,14 +1020,16 @@ namespace HPlus {
     if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hDeltaPhiInverted5060->Fill(deltaPhi); 
     if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hDeltaPhiInverted4050->Fill(deltaPhi); 
 
+    fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets(), "BCorrelationAnalysis");
 
-
+    //   double deltaRtauBjet = reco::deltaR(*(tauData.getSelectedTau()), *(btagData.getSelectedJets().begin()));
    //    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
     hDeltaPhi->Fill(deltaPhi);
     if ( deltaPhi > 150 ) {
        hSelectedTauEtaBackToBack->Fill(tauData.getSelectedTau()->eta()); 
        hSelectedTauPhiBackToBack->Fill(tauData.getSelectedTau()->phi());
-       hPtTauVsMetBackToBack->Fill(tauData.getSelectedTau()->pt(),metData.getSelectedMET()->et());                 
+       hPtTauVsMetBackToBack->Fill(tauData.getSelectedTau()->pt(),metData.getSelectedMET()->et()); 
+       //       fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets(), "BCorrelationAnalysisDeltaPhi");                
     }
 
     if ( deltaPhi < 150 && deltaPhi > 30 ) {                                                                                                                                                                    
@@ -1237,7 +1239,7 @@ namespace HPlus {
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderFakeMETVeto, tauData);
 
     // Correlation analysis
-    fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
+    //    fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
     // Alpha T
     //if(!evtTopologyData.passedEvent()) return false;
     //    EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
