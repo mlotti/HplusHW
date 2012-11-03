@@ -383,7 +383,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
                 trg = triggerDict[datasetName]
                 triggers.extend(trg)
                 if len(trg) > 1:
-                    hasManyRunRanges = False
+                    hasOneRunRange = False
         taskDef.update(TaskDef(triggerOR=triggers, triggerThrow=hasOneRunRange))
 
     # Update the default definitions from the argument
