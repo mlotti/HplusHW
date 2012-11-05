@@ -280,63 +280,71 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
     # - number of jobs for those who read pattuples
     # - triggers
     # for all relevant Datasets
+    #
+    # Goal is to have ~200 MB output/job for pattuples
+    # - This works quite well over Atlantic
+    # - Also smaller outputs are somewhat problematic, because then
+    #   there is potential to reduce the number of jobs
+    #   * -getotput and -publish steps take longer with large number of jobs
+    #
+    # Goal is to have ~150kevents/job for analysis phase
     defaultDefinitions = {
         # njobsOut is just a guess
-        "Tau_190456-190738_2012A_Jul13":  TaskDef(njobsIn= 150, njobsOut= 10, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v2"]),
-        "Tau_190782-190949_2012A_Aug06":  TaskDef(njobsIn=  30, njobsOut=  2, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v3"]),
-        "Tau_191043-193621_2012A_Jul13":  TaskDef(njobsIn= 400, njobsOut= 20, triggerOR=[
+        "Tau_190456-190738_2012A_Jul13":  TaskDef(njobsIn=  35, njobsOut=  1, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v2"]),
+        "Tau_190782-190949_2012A_Aug06":  TaskDef(njobsIn=  10, njobsOut=  1, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v3"]),
+        "Tau_191043-193621_2012A_Jul13":  TaskDef(njobsIn= 150, njobsOut=  3, triggerOR=[
                                                       "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v3", # 191043-191411
                                                       "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v4", # 191691-191491 (193621)
                                                   ], triggerThrow=False),
 
-        "Tau_193834-196531_2012B_Jul13":  TaskDef(njobsIn=2000, njobsOut=100, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"]),
-        "Tau_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 200, njobsOut= 10, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7"]),
-        "Tau_198941-200601_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 75, triggerOR=[
+        "Tau_193834-196531_2012B_Jul13":  TaskDef(njobsIn=2000, njobsOut= 20, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"]),
+        "Tau_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 200, njobsOut=  2, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7"]),
+        "Tau_198941-200601_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 12, triggerOR=[
                                                      "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7",  # 198941-199608
                                                      "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9",  # 199698-200161
                                                  ], triggerThrow=False),
         #"Tau_200961-202504_0T_2012C_Prompt": TaskDef(njobsIn=, njobsOut=, triggerOR=[""]),
-        "Tau_202792-203742_2012C_Prompt": TaskDef(njobsIn= 150, njobsOut= 10, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"]),
+        "Tau_202792-203742_2012C_Prompt": TaskDef(njobsIn= 150, njobsOut=  2, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"]),
 
         ## MultiJet
         # njobsOut is just a guess
-        "MultiJet_190456-190738_2012A_Jul13":  TaskDef(njobsIn= 490, njobsOut= 50),
-        "MultiJet_190782-190949_2012A_Aug06":  TaskDef(njobsIn= 120, njobsOut= 12),
+        "MultiJet_190456-190738_2012A_Jul13":  TaskDef(njobsIn= 490, njobsOut= 4),
+        "MultiJet_190782-190949_2012A_Aug06":  TaskDef(njobsIn= 120, njobsOut= 2),
         "MultiJet_191043-193621_2012A_Jul13":  TaskDef(njobsIn=1200, njobsOut=120),
-        "MultiJet_193834-194225_2012B_Jul13":  TaskDef(njobsIn= 600, njobsOut= 60),
+        "MultiJet_193834-194225_2012B_Jul13":  TaskDef(njobsIn= 600, njobsOut= 6),
         "MultiJet_194270-196531_2012B_Jul13":  TaskDef(njobsIn=2200, njobsOut=220),
-        "MultiJet_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 250, njobsOut= 25),
+        "MultiJet_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 250, njobsOut= 5),
         "MultiJet_198941-200601_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=170),
         #"MultiJet_200961-202504_0T_2012C_Prompt": TaskDef(njobsIn=, njobsOut=),
-        "MultiJet_202792-203742_2012C_Prompt": TaskDef(njobsIn= 170, njobsOut= 17),
+        "MultiJet_202792-203742_2012C_Prompt": TaskDef(njobsIn= 170, njobsOut= 3),
 
         # MC, triggered with mcTrigger
-        "TTToHplusBWB_M80_Summer12":        TaskDefMC(njobsIn=40, njobsOut=2),
-        "TTToHplusBWB_M90_Summer12":        TaskDefMC(njobsIn=40, njobsOut=2),
-        "TTToHplusBWB_M100_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "TTToHplusBWB_M120_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "TTToHplusBWB_M140_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "TTToHplusBWB_M150_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "TTToHplusBWB_M155_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "TTToHplusBWB_M160_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
+        "TTToHplusBWB_M80_Summer12":        TaskDefMC(njobsIn=25, njobsOut=1),
+        "TTToHplusBWB_M90_Summer12":        TaskDefMC(njobsIn=25, njobsOut=1),
+        "TTToHplusBWB_M100_Summer12":       TaskDefMC(njobsIn=25, njobsOut=1),
+        "TTToHplusBWB_M120_Summer12":       TaskDefMC(njobsIn=25, njobsOut=1),
+        "TTToHplusBWB_M140_Summer12":       TaskDefMC(njobsIn=25, njobsOut=1),
+        "TTToHplusBWB_M150_Summer12":       TaskDefMC(njobsIn=25, njobsOut=1),
+        "TTToHplusBWB_M155_Summer12":       TaskDefMC(njobsIn=25, njobsOut=1),
+        "TTToHplusBWB_M160_Summer12":       TaskDefMC(njobsIn=25, njobsOut=1),
 
-        "TTToHplusBHminusB_M80_Summer12":        TaskDefMC(njobsIn=40, njobsOut=2),
-        "TTToHplusBHminusB_M90_Summer12":        TaskDefMC(njobsIn=40, njobsOut=2),
-        "TTToHplusBHminusB_M100_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "TTToHplusBHminusB_M120_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "TTToHplusBHminusB_M140_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "TTToHplusBHminusB_M150_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "TTToHplusBHminusB_M155_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "TTToHplusBHminusB_M160_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
+        "TTToHplusBHminusB_M80_Summer12":        TaskDefMC(njobsIn=20, njobsOut=1),
+        "TTToHplusBHminusB_M90_Summer12":        TaskDefMC(njobsIn=20, njobsOut=1),
+        "TTToHplusBHminusB_M100_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
+        "TTToHplusBHminusB_M120_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
+        "TTToHplusBHminusB_M140_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
+        "TTToHplusBHminusB_M150_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
+        "TTToHplusBHminusB_M155_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
+        "TTToHplusBHminusB_M160_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
 
-        "Hplus_taunu_s-channel_M80_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "Hplus_taunu_s-channel_M90_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "Hplus_taunu_s-channel_M100_Summer12":      TaskDefMC(njobsIn=40, njobsOut=2),
-        "Hplus_taunu_s-channel_M120_Summer12":      TaskDefMC(njobsIn=40, njobsOut=2),
-        "Hplus_taunu_s-channel_M140_Summer12":      TaskDefMC(njobsIn=40, njobsOut=2),
-        "Hplus_taunu_s-channel_M150_Summer12":      TaskDefMC(njobsIn=40, njobsOut=2),
-        "Hplus_taunu_s-channel_M155_Summer12":      TaskDefMC(njobsIn=40, njobsOut=2),
-        "Hplus_taunu_s-channel_M160_Summer12":      TaskDefMC(njobsIn=40, njobsOut=2),
+        "Hplus_taunu_s-channel_M80_Summer12":       TaskDefMC(njobsIn=10, njobsOut=1),
+        "Hplus_taunu_s-channel_M90_Summer12":       TaskDefMC(njobsIn=10, njobsOut=1),
+        "Hplus_taunu_s-channel_M100_Summer12":      TaskDefMC(njobsIn=10, njobsOut=1),
+        "Hplus_taunu_s-channel_M120_Summer12":      TaskDefMC(njobsIn=10, njobsOut=1),
+        "Hplus_taunu_s-channel_M140_Summer12":      TaskDefMC(njobsIn=10, njobsOut=1),
+        "Hplus_taunu_s-channel_M150_Summer12":      TaskDefMC(njobsIn=10, njobsOut=1),
+        "Hplus_taunu_s-channel_M155_Summer12":      TaskDefMC(njobsIn=10, njobsOut=1),
+        "Hplus_taunu_s-channel_M160_Summer12":      TaskDefMC(njobsIn=10, njobsOut=1),
 
         "HplusTB_M180_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
         "HplusTB_M190_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
@@ -345,12 +353,12 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
         "HplusTB_M250_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
         "HplusTB_M300_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
 
-        "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDefMC(njobsIn=20, njobsOut= 1),
-        "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDefMC(njobsIn=20, njobsOut= 1),
-        "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDefMC(njobsIn=20, njobsOut= 1),
-        "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDefMC(njobsIn=40, njobsOut= 1),
-        "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDefMC(njobsIn=80, njobsOut= 4),
-        "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDefMC(njobsIn=80, njobsOut=10),
+        "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=1),
+        "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=1),
+        "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDefMC(njobsIn= 20, njobsOut=1),
+        "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 40, njobsOut=1),
+        "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 80, njobsOut=2),
+        "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDefMC(njobsIn=250, njobsOut=5),
                                             
         "WW_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut=10),
         "WZ_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut=10),
