@@ -415,14 +415,13 @@ def prettyToJobList(prettyString):
 def crabStatusOutput(task, printCrab):
     command = ["crab", "-status", "-c", task]
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    if printCrab:
-        output = ""
-        # The process may finish between p.poll() and p.stdout.readline()
-        # http://stackoverflow.com/questions/10756383/timeout-on-subprocess-readline-in-python
-        # Try first just using select for polling if p.stdout has anything
-        # If that doesn't work out, add the timeout (currently in comments)
-        poll_obj = select.poll()
-        poll_obj.register(p.stdout, select.POLLIN)
+    output = ""
+    # The process may finish between p.poll() and p.stdout.readline()
+    # http://stackoverflow.com/questions/10756383/timeout-on-subprocess-readline-in-python
+    # Try first just using select for polling if p.stdout has anything
+    # If that doesn't work out, add the timeout (currently in comments)
+    poll_obj = select.poll()
+    poll_obj.register(p.stdout, select.POLLIN)
         #last_print_time = time.time()
         #timeout = 600 # 10 min timeout initially, -status can take long
 #        while p.poll() == None:# and (time.time() - last_print_time) < timeout:
@@ -432,28 +431,29 @@ def crabStatusOutput(task, printCrab):
 #                        print "Last line encountered, shortening timeout to 10 s"
 #                last_print_time = time.time()
 
+    while True:
+        exit_result = p.poll()
         while True:
-            exit_result = p.poll()
-            while True:
-                poll_result = poll_obj.poll(0)
-                if poll_result:
-                    line = p.stdout.readline()
-                    if line:
+            poll_result = poll_obj.poll(0) # poll timeout is 0 ms
+            if poll_result:
+                line = p.stdout.readline()
+                if line:
+                    if printCrab:
                         print line.strip("\n")
-                        output += line
-                    else:
-                        break
-            if exit_result is None:
-                time.sleep(1)
-            else:
+                    output += line
+                else:
+                    break
+            else: # if nothing to read, continue to check if the process has finished
                 break
-#        print "Out of poll loop, return code", p.returncode
-        if p.returncode != 0:
+        if exit_result is None:
+            time.sleep(1)
+        else:
+            break
+#    print "Out of poll loop, return code", p.returncode
+    if p.returncode != 0:
+        if printCrab:
             raise Exception("Command '%s' failed with exit code %d" % (" ".join(command), p.returncode))
-    else:
-        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        output = p.communicate()[0]
-        if p.returncode != 0:
+        else:
             raise Exception("Command '%s' failed with exit code %d, output:\n%s" % (" ".join(command), p.returncode, output))
     return output
 
