@@ -875,7 +875,7 @@ class PlotBase:
             if self.energies != None:
                 s = ", ".join(self.energies)
                 s += " TeV"
-        histograms.addEnergyText(x, y)
+        histograms.addEnergyText(x, y, s)
 
     ## Save the plot to file(s)
     #
