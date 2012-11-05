@@ -84,14 +84,33 @@ def getDatasetsFromMulticrabCfg(**kwargs):
         datasetMgr._setBaseDirectory(dirname)
 
     if dataEra != None:
+        def isNotInEra(eras, name):
+            if isinstance(eras, basestring):
+                eras = [eras]
+            for e in eras:
+                if e in name:
+                    return False
+            return True
+            
+
         if dataEra == "Run2011A":
-            datasetMgr.remove(filter(lambda name: not "2011A_" in name, datasetMgr.getDataDatasetNames()))
+            datasetMgr.remove(filter(lambda name: isNotInEra("_2011A_", name), datasetMgr.getDataDatasetNames()))
         elif dataEra == "Run2011B":
-            datasetMgr.remove(filter(lambda name: not "2011B_" in name, datasetMgr.getDataDatasetNames()))
+            datasetMgr.remove(filter(lambda name: isNotInEra("_2011B_", name), datasetMgr.getDataDatasetNames()))
         elif dataEra == "Run2011AB":
-            pass
+            datasetMgr.remove(filter(lambda name: isNotInEra(["_2011A_", "_2011B_"], name), datasetMgr.getDataDatasetNames()))
+        elif dataEra == "Run2012A":
+            datasetMgr.remove(filter(lambda name: isNotInEra("_2012A_", name), datasetMgr.getDataDatasetNames()))
+        elif dataEra == "Run2012B":
+            datasetMgr.remove(filter(lambda name: isNotInEra("_2012B_", name), datasetMgr.getDataDatasetNames()))
+        elif dataEra == "Run2012C":
+            datasetMgr.remove(filter(lambda name: isNotInEra("_2012C_", name), datasetMgr.getDataDatasetNames()))
+        elif dataEra == "Run2012AB":
+            datasetMgr.remove(filter(lambda name: isNotInEra(["_2012A_", "_2012B_"], name), datasetMgr.getDataDatasetNames()))
+        elif dataEra == "Run2012ABC":
+            datasetMgr.remove(filter(lambda name: isNotInEra(["_2012A_", "_2012B_", "_2012C_"], name), datasetMgr.getDataDatasetNames()))
         else:
-            raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB" % dataEra)
+            raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB, Run2012A, Run2012B, Run2012C, Run2012AB, Run2012ABC" % dataEra)
 
     return datasetMgr
 
