@@ -1171,7 +1171,7 @@ class DatasetRootHistoAddedMC(DatasetRootHistoBase):
     # The constructor checks that all histoWrappers are MC, and are
     # not yet normalized.
     def __init__(self, histoWrappers, addedDataset):
-        DatasetRootHistoBase.__init__(self, mergedDataset)
+        DatasetRootHistoBase.__init__(self, addedDataset)
         self.histoWrappers = histoWrappers
         self.normalization = "none"
         for h in self.histoWrappers:
@@ -1293,11 +1293,12 @@ class DatasetRootHistoAddedMC(DatasetRootHistoBase):
             return _normalizeToOne(hsum)
 
         # We have to noramlize to cross section in any case
-        hsum = _normalizeToFactor(h, self.dataset.getNormFactor()) # FIXME: normalization factor?
+        print self.dataset.getNormFactor()
+        hsum = _normalizeToFactor(hsum, self.dataset.getNormFactor()) # FIXME: normalization factor?
         if self.normalization == "byCrossSection":
             return hsum
         elif self.normalization == "toLuminosity":
-            return _normalizeToFactor(h, self.luminosity)
+            return _normalizeToFactor(hsum, self.luminosity)
         else:
             raise Exception("Internal error, got normalization %s" % self.normalization)
 
@@ -1551,6 +1552,8 @@ class Dataset:
             pass
 
     def getNAllEvents(self):
+        if not hasattr(self, "nAllEvents"):
+            raise Exception("Number of all events is not set for dataset %s! The counter directory was not given, and setNallEvents() was not called." % self.name)
         return self.nAllEvents
 
     ## Get the cross section normalization factor.
@@ -1559,12 +1562,11 @@ class Dataset:
     # events), so by multiplying the number of MC events with the
     # factor one gets the corresponding cross section.
     def getNormFactor(self):
-        if not hasattr(self, "nAllEvents"):
-            raise Exception("Number of all events is not set for dataset %s! The counter directory was not given, and setNallEvents() was not called." % self.name)
-        if self.nAllEvents == 0:
+        nAllEvents = self.getNAllEvents()
+        if nAllEvents == 0:
             raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateAllEventsToPUWeighted() has not been called." % self.name)
 
-        return self.getCrossSection() / self.nAllEvents
+        return self.getCrossSection() / nAllEvents
 
     ## Check if a ROOT histogram exists in this dataset
     #
@@ -1852,7 +1854,7 @@ class DatasetAddedMC(DatasetMerged):
             if not d.isMC():
                 raise Exception("Datasets must be MC, got %s which is data" % d.getName())
             xs2 = d.getCrossSection()
-            if math.abs((xs2-crossSection)/crossSection) > 1e-6:
+            if abs((xs2-crossSection)/crossSection) > 1e-6:
                 raise Exception("Datasets must have the same cross section, got %f from %s and %f from %s" % (crossSection, self.dataests[0].getName(), xs2, d.getName()))
 
         self.info["crossSection"] = crossSection
@@ -1874,6 +1876,20 @@ class DatasetAddedMC(DatasetMerged):
         wrappers = [d.getDatasetRootHisto(name) for d in self.datasets]
         return DatasetRootHistoAddedMC(wrappers, self)
 
+
+    ## Get the cross section normalization factor.
+    #
+    # The normalization factor is defined as crossSection/N(all
+    # events), so by multiplying the number of MC events with the
+    # factor one gets the corresponding cross section.
+    #
+    # Implementation is close to dataset.Dataset.getNormFactor()
+    def getNormFactor(self):
+        nAllEvents = sum([d.getNAllEvents() for d in self.datasets])
+        if nAllEvents == 0:
+            raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateAllEventsToPUWeighted() has not been called." % self.name)
+
+        return self.getCrossSection() / nAllEvents
 
 ## Collection of Dataset objects which are managed together.
 # 
