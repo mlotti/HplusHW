@@ -1370,7 +1370,7 @@ class Dataset:
 
         self.info = _rescaleInfo(_histoToDict(self.file.Get("configInfo").Get("configinfo")))
         if "energy" in self.info:
-            self.info["energy"] = int(round(self.info["energy"]))
+            self.info["energy"] = str(int(round(self.info["energy"])))
 
         dataVersion = configInfo.Get("dataVersion")
         if dataVersion == None:
@@ -1474,8 +1474,9 @@ class Dataset:
     def setName(self, name):
         self.name = name
 
+    ## Get the centre-of-mass energy (in TeV) as string
     def getEnergy(self):
-        return self.info.get("energy", 0)
+        return self.info.get("energy", "0")
 
     ## Set cross section of MC dataset (in pb).
     def setCrossSection(self, value):
