@@ -520,7 +520,7 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
     pset.enabled = True
     psetReader.enabled = True
 
-    if era in ["Run2011A", "Run2011B", "Run2012A", "Run2012B", "Run2012C", "Run2012ABC"]:
+    if era in ["Run2011A", "Run2011B", "Run2012A", "Run2012B", "Run2012C", "Run2012AB", "Run2012ABC"]:
         pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData"+era.replace("Run","")+suffix+".root"
         if "Run2011" in era:
             pset.weightDistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_"+era.replace("Run","")+".root"
