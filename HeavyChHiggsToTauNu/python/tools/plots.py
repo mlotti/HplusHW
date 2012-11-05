@@ -62,7 +62,7 @@ _physicalToLogical = {
 
     "W3Jets_TuneZ2_Summer11": "W3Jets",
 }
-for mcEra in ["Summer11", "Fall11"]:
+for mcEra in ["Summer11", "Fall11", "Summer12"]:
     _physicalToLogical.update({
     "TTToHplusBWB_M80_%s"%mcEra:  "TTToHplusBWB_M80",
     "TTToHplusBWB_M90_%s"%mcEra:  "TTToHplusBWB_M90",
@@ -148,6 +148,12 @@ _datasetMerge = {
     "Tbar_tW-channel": "SingleTop",
     "T_s-channel":     "SingleTop",
     "Tbar_s-channel":  "SingleTop",
+
+    "WJets": "WJets",
+    "W1Jets": "WJets",
+    "W2Jets": "WJets",
+    "W3Jets": "WJets",
+    "W4Jets": "WJets",
 
     "DYJetsToLL_M10to50": "DYJetsToLL",
     "DYJetsToLL_M50": "DYJetsToLL",
