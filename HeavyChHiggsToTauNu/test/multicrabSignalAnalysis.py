@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflows as multicrabWorkflows
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 
@@ -18,6 +19,10 @@ workflow = "analysis_taumet_v53_1_test1"
 mc_pfjettrigger = "78"
 #mc_pfjettrigger = "82"
 
+
+# Do W+jets weighting?
+doWJetsWeighting = False
+#doWJetsWeighting = True
 
 # Change this to true if you want to run the PAT on the fly (for
 # datasets where no pattuples are produced, or for testing something
@@ -166,15 +171,32 @@ datasetsMC_2012 = [
     "W2Jets_TuneZ2star_Summer12",
     "W3Jets_TuneZ2star_Summer12",
     "W4Jets_TuneZ2star_Summer12",
-#    "DYJetsToLL_M50_TuneZ2star_Summer12",
-#    "T_t-channel_TuneZ2star_Summer12",
-#    "Tbar_t-channel_TuneZ2star_Summer12",
-#    "T_tW-channel_TuneZ2star_Summer12",
-#    "Tbar_tW-channel_TuneZ2star_Summer12",
-#    "T_s-channel_TuneZ2star_Summer12",
-#    "Tbar_s-channel_TuneZ2star_Summer12",
+    "DYJetsToLL_M50_TuneZ2star_Summer12",
+    "T_t-channel_TuneZ2star_Summer12",
+    "Tbar_t-channel_TuneZ2star_Summer12",
+    "T_tW-channel_TuneZ2star_Summer12",
+    "Tbar_tW-channel_TuneZ2star_Summer12",
+    "T_s-channel_TuneZ2star_Summer12",
+    "Tbar_s-channel_TuneZ2star_Summer12",
 ]
 
+def mcWorkflow():
+    if "quadpfjetbtag" in workflow:
+        return workflow.replace("quadpfjetbtag", "quadpfjet%sbtag" % mc_pfjettrigger)
+    return workflow
+
+# Disable W+jets weighting if requested
+if not doWJetsWeighting:
+    for name in [
+        "WJets_TuneZ2star_v1_Summer12",
+        "WJets_TuneZ2star_v2_Summer12",
+        "W1Jets_TuneZ2star_Summer12",
+        "W2Jets_TuneZ2star_Summer12",
+        "W3Jets_TuneZ2star_Summer12",
+        "W4Jets_TuneZ2star_Summer12",
+        ]:
+
+        multicrabWorkflows.datasets.getDataset(name).getWorkflow(mcWorkflow()).removeArg("wjetsWeighting")
 
 # Add the datasest to the multicrab system
 if "v44" in workflow:
@@ -198,7 +220,7 @@ elif "v53" in workflow:
 
     multicrab.extendDatasets(workflow, datasets)
     if "quadpfjetbtag" in workflow:
-        wf_mc = workflow.replace("quadpfjetbtag", "quadpfjet%sbtag" % mc_pfjettrigger)
+        wf_mc = mcWorkflow()
         multicrab.extendDatasets(wf_mc, datasetsMC_2012)
 
 output = ["histograms.root"]
