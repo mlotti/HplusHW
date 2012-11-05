@@ -434,7 +434,7 @@ def crabStatusOutput(task, printCrab):
     while True:
         exit_result = p.poll()
         while True:
-            poll_result = poll_obj.poll(0)
+            poll_result = poll_obj.poll(0) # poll timeout is 0 ms
             if poll_result:
                 line = p.stdout.readline()
                 if line:
@@ -443,6 +443,8 @@ def crabStatusOutput(task, printCrab):
                     output += line
                 else:
                     break
+            else: # if nothing to read, continue to check if the process has finished
+                break
         if exit_result is None:
             time.sleep(1)
         else:
