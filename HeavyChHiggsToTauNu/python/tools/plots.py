@@ -851,6 +851,32 @@ class PlotBase:
         else:
             self.histoMgr.addLuminosityText(x, y)
 
+    ## Set the energy
+    #
+    # \param energy   String of energy (or list of strings of energies), in TeV
+    def setEnergy(self, energy):
+        if isinstance(energy, basestring):
+            self.energies = [energy]
+        else:
+            self.energies = energy
+
+    ## Add text for centre-of-mass energy
+    #
+    # \param x   X coordinate (in NDC, None for the default value)
+    # \param y   Y coordinate (in NDC, None for the default value)
+    #
+    # Takes luminosity from self.energies member set by
+    # setEnergyText() method if it exists. Otherwise the default
+    # specified in histograms is used. If setEnergy() has been called
+    # with None, no energy text is added.
+    def addEnergyText(self, x=None, y=None):
+        s = None
+        if hasattr(self, "energies"):
+            if self.energies != None:
+                s = ", ".join(self.energies)
+                s += " TeV"
+        histograms.addEnergyText(x, y)
+
     ## Save the plot to file(s)
     #
     # \param formats   Save to these formats (if not given, the values
@@ -1083,6 +1109,8 @@ class PlotSameBase(PlotBase):
         self.datasetMgr = datasetMgr
         self.rootHistoPath = name
         self.normalizeToOne = normalizeToOne
+
+        self.setEnergy(self.datasetMgr.getEnergies())
 
     ## Get the path of the histograms in the ROOT files
     def getRootHistoPath(self):
@@ -1836,7 +1864,7 @@ class PlotDrawer:
         p.draw()
         cmsText = kwargs.get("cmsText", self.cmsText)
         histograms.addCmsPreliminaryText(text=cmsText)
-        histograms.addEnergyText()
+        p.addEnergyText()
         if kwargs.get("addLuminosityText", self.addLuminosityTextDefault):
             p.addLuminosityText()
         p.save()
