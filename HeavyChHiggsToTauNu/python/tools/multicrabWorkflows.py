@@ -297,11 +297,15 @@ datasets.extend([
     # has been fixed in Massive B in DECAY samples
     MCDataset("TTJets_TuneZ2star_Summer12",             crossSection=225.2, aod="/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 6.9 Mevt; v2 has currently ~1 Mevt [1]
     MCDataset("WJets_TuneZ2star_v1_Summer12",           crossSection=36257.2, aod="/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 18.4 Mevt [3], NNLO
-    MCDataset("WJets_TuneZ2star_v2_Summer12",           crossSection=36257.2, aod="/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM"), # 57.7 Mevt [3], NNLO
-    MCDataset("W1Jets_TuneZ2star_Summer12",             crossSection=None, aod="/W1JetsToLNu_TuneZ2Star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 23 Mevt
-    MCDataset("W2Jets_TuneZ2star_Summer12",             crossSection=None, aod="/W2JetsToLNu_TuneZ2Star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 34 Mevt
-    MCDataset("W3Jets_TuneZ2star_Summer12",             crossSection=None, aod="/W3JetsToLNu_TuneZ2Star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 15.5 Mevt
-    MCDataset("W4Jets_TuneZ2star_Summer12",             crossSection=None, aod="/W4JetsToLNu_TuneZ2Star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 13.4 Mevt
+    MCDataset("WJets_TuneZ2star_v2_Summer12",           crossSection=36257.2, aod="/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM"), # 57.7
+    # Mevt [3], NNLO Use the W+jets inclusive cross section for all
+    # W+Njets, with the assumption that they are weighted (see
+    # src/WJetsWeight.cc) And if they are not, the cross section can
+    # always be set in the plot scripts by the user.
+    MCDataset("W1Jets_TuneZ2star_Summer12",             crossSection=36257.2, aod="/W1JetsToLNu_TuneZ2Star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 23 Mevt
+    MCDataset("W2Jets_TuneZ2star_Summer12",             crossSection=36257.2, aod="/W2JetsToLNu_TuneZ2Star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 34 Mevt
+    MCDataset("W3Jets_TuneZ2star_Summer12",             crossSection=36257.2, aod="/W3JetsToLNu_TuneZ2Star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 15.5 Mevt
+    MCDataset("W4Jets_TuneZ2star_Summer12",             crossSection=36257.2, aod="/W4JetsToLNu_TuneZ2Star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 13.4 Mevt
     MCDataset("DYJetsToLL_M50_TuneZ2star_Summer12",     crossSection=3503.71, aod="/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 30 Mevt [3], NNLO
     # SingleTop Powheg
     # Cross sections from [2]
