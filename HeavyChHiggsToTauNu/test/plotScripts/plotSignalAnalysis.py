@@ -637,7 +637,7 @@ def common(h, xlabel, ylabel, addLuminosityText=True, textFunction=None):
     h.frame.GetYaxis().SetTitle(ylabel)
     h.draw()
     histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    h.addEnergyText()
     if addLuminosityText:
         h.addLuminosityText()
     if textFunction != None:
