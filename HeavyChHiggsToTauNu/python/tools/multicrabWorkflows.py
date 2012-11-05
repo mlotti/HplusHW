@@ -181,7 +181,7 @@ datasets.extend([
     # Run2012A
     DataDataset("MultiJet_%s_2012A_Jul13",     reco="13Jul2012", runs=(190456, 190738), aod="/MultiJet/Run2012A-13Jul2012-v1/AOD"), # 3947403 events,  308 files
     DataDataset("MultiJet_%s_2012A_Aug06",     reco="06Aug2012", runs=(190782, 190949), aod="/MultiJet/Run2012A-recover-06Aug2012-v1/AOD"), # 980342 events,  87 files
-    DataDataset("MultiJet_%s_2012A_Jul13",     reco="13Jul2012", runs=(191043, 193621), aod="/Tau/Run2012A-13Jul2012-v1/AOD"), # 9518018 events, 742 files
+    DataDataset("MultiJet_%s_2012A_Jul13",     reco="13Jul2012", runs=(191043, 193621), aod="/MultiJet/Run2012A-13Jul2012-v1/AOD"), # 9518018 events, 742 files
     # Run212B
     DataDataset("MultiJet_%s_2012B_Jul13",     reco="13Jul2012", runs=(193834, 196531), aod="/MultiJet/Run2012B-13Jul2012-v1/AOD"), # 18675566 events, 1574 files
     # Run212C
