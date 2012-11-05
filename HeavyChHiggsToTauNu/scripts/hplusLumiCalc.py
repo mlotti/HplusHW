@@ -24,6 +24,7 @@ def usePixelLumiCalc(taskName):
             return False
     raise Exception("No known era in task name %s" % taskName)
 
+dataVersion_re = re.compile("dataVersion=(?P<dataVersion>[^: ]+)")
 def isMCTask(taskdir):
     path = os.path.join(taskdir, "share", "crab.cfg")
     if not os.path.exists(path):
@@ -31,14 +32,18 @@ def isMCTask(taskdir):
         return True
 
     f = open(path)
-    mc = False
+    isData = False
     for line in f:
         if "pycfg_params" in line:
-            if "crossSection" in line:
-                mc = True
+            m = dataVersion_re.search(line)
+            if not m:
+                print "Unable to find dataVersion, assuming task %s is MC" % taskdir
+                return True
+            if "data" in m.group("dataVersion"):
+                isData = True
             break
     f.close()
-    return mc
+    return not isData
 
 def isEmpty(taskdir):
     path = os.path.join(taskdir, "res")
