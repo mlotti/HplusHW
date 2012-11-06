@@ -695,7 +695,7 @@ def vertexCount(h, prefix="", postfix="", ratio=True):
         h.setLegend(histograms.createLegend())
         h.draw()
         histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
+        h.addEnergyText()
         #    histograms.addLuminosityText(x=None, y=None, lumi=191.)
         h.histoMgr.addLuminosityText()
         if h.normalizeToOne:
