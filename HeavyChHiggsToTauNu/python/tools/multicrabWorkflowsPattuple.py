@@ -309,16 +309,16 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
 
         ## MultiJet
         # njobsOut is just a guess
-        "MultiJet_190456-190738_2012A_Jul13":  TaskDef(njobsIn= 490, njobsOut=  4),
-        "MultiJet_190782-190949_2012A_Aug06":  TaskDef(njobsIn= 120, njobsOut=  2),
-        "MultiJet_191043-193621_2012A_Jul13":  TaskDef(njobsIn=1200, njobsOut=120),
-        "MultiJet_193834-194225_2012B_Jul13":  TaskDef(njobsIn= 600, njobsOut=  6),
-        "MultiJet_194270-196531_2012B_Jul13":  TaskDef(njobsIn=2200, njobsOut=220),
-        "MultiJet_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 250, njobsOut=  5),
+        "MultiJet_190456-190738_2012A_Jul13":  TaskDef(njobsIn= 490, njobsOut= 4),
+        "MultiJet_190782-190949_2012A_Aug06":  TaskDef(njobsIn= 120, njobsOut= 2),
+        "MultiJet_191043-193621_2012A_Jul13":  TaskDef(njobsIn=1200, njobsOut=20),
+        "MultiJet_193834-194225_2012B_Jul13":  TaskDef(njobsIn= 600, njobsOut= 6),
+        "MultiJet_194270-196531_2012B_Jul13":  TaskDef(njobsIn=2200, njobsOut=40),
+        "MultiJet_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 250, njobsOut= 5),
         # FIXME: the following three could be combined in the subsequent pattuple processings
-        "MultiJet_198941-200601_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=170),
-        "MultiJet_200961-202504_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=170),
-        "MultiJet_202792-203742_2012C_Prompt": TaskDef(njobsIn= 170, njobsOut=  3),
+        "MultiJet_198941-200601_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=35),
+        "MultiJet_200961-202504_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=35),
+        "MultiJet_202792-203742_2012C_Prompt": TaskDef(njobsIn= 170, njobsOut= 3),
 
         # MC, triggered with mcTrigger
         "TTToHplusBWB_M80_Summer12":        TaskDefMC(njobsIn=25, njobsOut=1),
@@ -716,7 +716,7 @@ def addPattuple_v53_1(datasets):
 
         "MultiJet_190456-190738_2012A_Jul13":     TaskDef("/MultiJet/local-Run2012A_13Jul2012_v1_AOD_190456_190738_pattuple_v53_1-8d229f863f3fc8a5a50f8b702ec0e1b3/USER"), # 466504 events, Mean 77.8 MB, min 4.3 MB, max 165.5 MB
         "MultiJet_190782-190949_2012A_Aug06":     TaskDef("/MultiJet/local-Run2012A_recover_06Aug2012_v1_AOD_190782_190949_pattuple_v53_1-fdd3c1f4d60921e4522b1cd7c85b5f38/USER"), # 313212 events, Mean 176.9 MB, min 23.1 MB, max 245.6 MB
-        "MultiJet_191043-193621_2012A_Jul13":     TaskDef(""),
+        "MultiJet_191043-193621_2012A_Jul13":     TaskDef("/MultiJet/local-Run2012A_13Jul2012_v1_AOD_191043_193621_pattuple_v53_1c-e7b040c48519314dbf67cfc22f9c91f7/USER"), # 2954598 events, Mean 144.6 MB, min 1.6 MB, max 309.0 MB
         "MultiJet_193834-194225_2012B_Jul13":     TaskDef("/MultiJet/local-Run2012B_13Jul2012_v1_AOD_193834_194225_pattuple_v53_1-7cb2cf938b8a39c78ce811004f4e1701/USER"), # 830720 events, Mean 115.3 MB, min 19.4 MB, max 189.1 MB
         "MultiJet_194270-196531_2012B_Jul13":     TaskDef("/MultiJet/local-Run2012B_13Jul2012_v1_AOD_194270_196531_pattuple_v53_1b-13eab0232030eb0def83f54eafd8085d/USER"), # 5766837 events, Mean 156.7 MB, min 19.7 MB, max 283.0 MB
         "MultiJet_198022-198523_2012C_Aug24":     TaskDef("/MultiJet/local-Run2012C_24Aug2012_v1_AOD_198022_198523_pattuple_v53_1-88f58a18bc4cc32ca93270fe01187879/USER"), # 715141 events, Mean 159.7 MB, min 67.0 MB, max 285.3 MB
