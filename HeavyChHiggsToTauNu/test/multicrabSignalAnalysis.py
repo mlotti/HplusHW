@@ -22,7 +22,7 @@ mc_pfjettrigger = "78"
 
 # Do W+jets weighting?
 doWJetsWeighting = False
-#doWJetsWeighting = True
+doWJetsWeighting = True
 
 # Change this to true if you want to run the PAT on the fly (for
 # datasets where no pattuples are produced, or for testing something
