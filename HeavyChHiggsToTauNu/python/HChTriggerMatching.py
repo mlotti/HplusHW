@@ -243,7 +243,7 @@ def triggerMatchingInAnalysis(process, sequence, triggers, param):
     for trg in triggers:
         if trg in tauPathLastFilter:
             tauTriggers.append(trg)
-        if "QuadJet" in trg or "QuadPFJet" in trg:
+        elif "QuadJet" in trg or "QuadPFJet" in trg:
             quadJetTriggers.append(trg)
         else:
             otherTriggers.append(trg)
