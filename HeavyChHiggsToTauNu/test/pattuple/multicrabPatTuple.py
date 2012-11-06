@@ -11,6 +11,7 @@ datasets_Tau = [
     "Tau_193834-196531_2012B_Jul13",
     "Tau_198022-198523_2012C_Aug24",
     "Tau_198941-200601_2012C_Prompt",
+    "Tau_200961-202504_2012C_Prompt",
     "Tau_202792-203742_2012C_Prompt",
 ]
 
@@ -22,6 +23,7 @@ datasets_MultiJet = [
     "MultiJet_194270-196531_2012B_Jul13",
     "MultiJet_198022-198523_2012C_Aug24",
     "MultiJet_198941-200601_2012C_Prompt",
+    "MultiJet_200961-202504_2012C_Prompt",
     "MultiJet_202792-203742_2012C_Prompt",
 ]
 

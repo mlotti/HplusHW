@@ -258,7 +258,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
         "MultiJet_198022-198523_2012C_Aug24": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v4"],
         "MultiJet_198941-200601_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v4",  # 198941-199608
                                                 "HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"], # 199698-200601
-        #"MultiJet_200961-202504_0T_2012C_Prompt"
+        "MultiJet_200961-202504_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"],
         "MultiJet_202792-203742_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"],
     }
     quadJetTriggers = {
@@ -271,7 +271,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
         "MultiJet_198022-198523_2012C_Aug24": ["HLT_QuadJet80_v4"],
         "MultiJet_198941-200601_2012C_Prompt": ["HLT_QuadJet80_v4",  # 198941-199608
                                                 "HLT_QuadJet80_v6"], # 199698-200601
-        #"MultiJet_200961-202504_0T_2012C_Prompt"
+        "MultiJet_200961-202504_2012C_Prompt": ["HLT_QuadJet80_v6"],
         "MultiJet_202792-203742_2012C_Prompt": ["HLT_QuadJet80_v6"],
     }
 
@@ -299,23 +299,25 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
 
         "Tau_193834-196531_2012B_Jul13":  TaskDef(njobsIn=2000, njobsOut= 20, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"]),
         "Tau_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 200, njobsOut=  2, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7"]),
+        # FIXME: the following three could be combined in the subsequent pattuple processings
         "Tau_198941-200601_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 10, triggerOR=[
                                                      "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7",  # 198941-199608
                                                      "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9",  # 199698-200161
                                                  ], triggerThrow=False),
-        #"Tau_200961-202504_0T_2012C_Prompt": TaskDef(njobsIn=, njobsOut=, triggerOR=[""]),
+        "Tau_200961-202504_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 12, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9"]),
         "Tau_202792-203742_2012C_Prompt": TaskDef(njobsIn= 150, njobsOut=  1, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"]),
 
         ## MultiJet
         # njobsOut is just a guess
         "MultiJet_190456-190738_2012A_Jul13":  TaskDef(njobsIn= 490, njobsOut= 4),
         "MultiJet_190782-190949_2012A_Aug06":  TaskDef(njobsIn= 120, njobsOut= 2),
-        "MultiJet_191043-193621_2012A_Jul13":  TaskDef(njobsIn=1200, njobsOut=120),
+        "MultiJet_191043-193621_2012A_Jul13":  TaskDef(njobsIn=1200, njobsOut=20),
         "MultiJet_193834-194225_2012B_Jul13":  TaskDef(njobsIn= 600, njobsOut= 6),
-        "MultiJet_194270-196531_2012B_Jul13":  TaskDef(njobsIn=2200, njobsOut=220),
+        "MultiJet_194270-196531_2012B_Jul13":  TaskDef(njobsIn=2200, njobsOut=40),
         "MultiJet_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 250, njobsOut= 5),
-        "MultiJet_198941-200601_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=170),
-        #"MultiJet_200961-202504_0T_2012C_Prompt": TaskDef(njobsIn=, njobsOut=),
+        # FIXME: the following three could be combined in the subsequent pattuple processings
+        "MultiJet_198941-200601_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=35),
+        "MultiJet_200961-202504_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=35),
         "MultiJet_202792-203742_2012C_Prompt": TaskDef(njobsIn= 170, njobsOut= 3),
 
         # MC, triggered with mcTrigger
@@ -709,15 +711,17 @@ def addPattuple_v53_1(datasets):
         "Tau_193834-196531_2012B_Jul13":          TaskDef("/Tau/local-Run2012B_13Jul2012_v1_AOD_193834_196531_pattuple_v53_1-382e6b84ca489c093c178cfb50ba5dbe/USER"), # 2822552 events, 71.0 MB, min 30.0 MB, max 200.5 MB
         "Tau_198022-198523_2012C_Aug24":          TaskDef("/Tau/local-Run2012C_24Aug2012_v1_AOD_198022_198523_pattuple_v53_1-03816abcf2df69d2a2f275b0cfc9c090/USER"), # 258977 events, 65.6 MB, min 33.8 MB, max 145.2 MB
         "Tau_198941-200601_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_198941_200601_pattuple_v53_1-cdc21ac5d95fea9b64545e44f8ba4b15/USER"), # 1705781 events, 60.2 MB, min 12.2 MB, max 143.2 MB
+        "Tau_200961-202504_2012C_Prompt":         TaskDef(""),
         "Tau_202792-203742_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_202792_203742_pattuple_v53_1-a6a087b1796a2a131884baa5c492e72f/USER"), # 175227 events, 64.9 MB, min 20.3 MB, max 161.9 MB
 
         "MultiJet_190456-190738_2012A_Jul13":     TaskDef("/MultiJet/local-Run2012A_13Jul2012_v1_AOD_190456_190738_pattuple_v53_1-8d229f863f3fc8a5a50f8b702ec0e1b3/USER"), # 466504 events, Mean 77.8 MB, min 4.3 MB, max 165.5 MB
         "MultiJet_190782-190949_2012A_Aug06":     TaskDef("/MultiJet/local-Run2012A_recover_06Aug2012_v1_AOD_190782_190949_pattuple_v53_1-fdd3c1f4d60921e4522b1cd7c85b5f38/USER"), # 313212 events, Mean 176.9 MB, min 23.1 MB, max 245.6 MB
-        "MultiJet_191043-193621_2012A_Jul13":     TaskDef(""),
+        "MultiJet_191043-193621_2012A_Jul13":     TaskDef("/MultiJet/local-Run2012A_13Jul2012_v1_AOD_191043_193621_pattuple_v53_1c-e7b040c48519314dbf67cfc22f9c91f7/USER"), # 2954598 events, Mean 144.6 MB, min 1.6 MB, max 309.0 MB
         "MultiJet_193834-194225_2012B_Jul13":     TaskDef("/MultiJet/local-Run2012B_13Jul2012_v1_AOD_193834_194225_pattuple_v53_1-7cb2cf938b8a39c78ce811004f4e1701/USER"), # 830720 events, Mean 115.3 MB, min 19.4 MB, max 189.1 MB
-        "MultiJet_194270-196531_2012B_Jul13":     TaskDef(""),
+        "MultiJet_194270-196531_2012B_Jul13":     TaskDef("/MultiJet/local-Run2012B_13Jul2012_v1_AOD_194270_196531_pattuple_v53_1b-13eab0232030eb0def83f54eafd8085d/USER"), # 5766837 events, Mean 156.7 MB, min 19.7 MB, max 283.0 MB
         "MultiJet_198022-198523_2012C_Aug24":     TaskDef("/MultiJet/local-Run2012C_24Aug2012_v1_AOD_198022_198523_pattuple_v53_1-88f58a18bc4cc32ca93270fe01187879/USER"), # 715141 events, Mean 159.7 MB, min 67.0 MB, max 285.3 MB
-        "MultiJet_198941-200601_2012C_Prompt":    TaskDef(""),
+        "MultiJet_198941-200601_2012C_Prompt":    TaskDef("/MultiJet/local-Run2012C_PromptReco_v2_AOD_198941_200601_pattuple_v53_1b-8bbd8eb7290730a495ba05939e654f51/USER"), # 4715708 events, Mean 152.5 MB, min 1.5 MB, max 291.0 MB
+        "MultiJet_200961-202504_2012C_Prompt":    TaskDef(""),
         "MultiJet_202792-203742_2012C_Prompt":    TaskDef("/MultiJet/local-Run2012C_PromptReco_v2_AOD_202792_203742_pattuple_v53_1-87325f0f572c545baf7123d89881d242/USER"), # 433952 events, Mean 149.4 MB, min 43.7 MB, max 265.8 MB
 
         # 27900-37203 events, max 
@@ -725,7 +729,7 @@ def addPattuple_v53_1(datasets):
         "TTToHplusBWB_M90_Summer12":              TaskDef("/TTToHplusBWB_M-90_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),  # Mean 85.3 MB, min 35.2 MB, max 93.6 MB
         "TTToHplusBWB_M100_Summer12":             TaskDef("/TTToHplusBWB_M-100_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40), # Mean 74.6 MB, min 1.6 MB, max 81.0 MB
         "TTToHplusBWB_M120_Summer12":             TaskDef("/TTToHplusBWB_M-120_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40), # Mean 84.0 MB, min 3.0 MB, max 91.1 MB
-        "TTToHplusBWB_M140_Summer12":             TaskDef(""),
+        "TTToHplusBWB_M140_Summer12":             TaskDef("/TTToHplusBWB_M-140_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40), # Mean 86.7 MB, min 42.5 MB, max 93.5 MB
         "TTToHplusBWB_M150_Summer12":             TaskDef("/TTToHplusBWB_M-150_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40), # Mean 86.3 MB, min 46.7 MB, max 96.2 MB
         "TTToHplusBWB_M155_Summer12":             TaskDef("/TTToHplusBWB_M-155_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40), # Mean 89.7 MB, min 29.9 MB, max 100.3 MB
         "TTToHplusBWB_M160_Summer12":             TaskDef("/TTToHplusBWB_M-160_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40), # Mean 91.1 MB, min 12.2 MB, max 101.4 MB
@@ -734,7 +738,7 @@ def addPattuple_v53_1(datasets):
         "TTToHplusBHminusB_M80_Summer12":         TaskDef("/TTToHplusBHminusB_M-80_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),  # Mean 78.1 MB, min 74.8 MB, max 83.1 MB
 #        "TTToHplusBHminusB_M90_Summer12":         TaskDef(""),
         "TTToHplusBHminusB_M100_Summer12":        TaskDef("/TTToHplusBHminusB_M-100_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40), # Mean 78.3 MB, min 72.4 MB, max 84.2 MB
-        "TTToHplusBHminusB_M120_Summer12":        TaskDef(""),
+        "TTToHplusBHminusB_M120_Summer12":        TaskDef("/TTToHplusBHminusB_M-120_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40), # Mean 78.5 MB, min 13.0 MB, max 85.6 MB
         "TTToHplusBHminusB_M140_Summer12":        TaskDef("/TTToHplusBHminusB_M-140_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40), # Mean 82.8 MB, min 78.8 MB, max 87.2 M
         "TTToHplusBHminusB_M150_Summer12":        TaskDef("/TTToHplusBHminusB_M-150_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40), # Mean 82.8 MB, min 23.4 MB, max 89.4 MB
         "TTToHplusBHminusB_M155_Summer12":        TaskDef("/TTToHplusBHminusB_M-155_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40), # Mean 86.4 MB, min 79.7 MB, max 91.6 MB
@@ -776,7 +780,7 @@ def addPattuple_v53_1(datasets):
         "W3Jets_TuneZ2star_Summer12":             TaskDef("/W3JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 616480 events, Mean 114.8 MB, min 6.9 MB, max 125.0 MB
         "W4Jets_TuneZ2star_Summer12":             TaskDef("/W4JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 1002056 events, Mean 178.0 MB, min 76.2 MB, max 194.2 MB
         "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDef("/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 180247 events, Mean 52.3 MB, min 8.6 MB, max 59.7 MB
-        "T_t-channel_TuneZ2star_Summer12":        TaskDef("/T_t-channel_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 209442 (NOT FINISHED), Mean 395.0 MB, min 161.4 MB, max 414.6 MB
+        "T_t-channel_TuneZ2star_Summer12":        TaskDef("/T_t-channel_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 222877, Mean 395.6 MB, min 161.4 MB, max 414.6 MB
         "Tbar_t-channel_TuneZ2star_Summer12":     TaskDef("/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 27667, Mean 191.4 MB, min 1.6 MB, max 206.7 MB
         "T_tW-channel_TuneZ2star_Summer12":       TaskDef("/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 61356 events, Mean 285.5 MB, min 2.8 MB, max 311.0 MB
         "Tbar_tW-channel_TuneZ2star_Summer12":    TaskDef("/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 60272 events, Mean 268.7 MB, min 12.9 MB, max 303.4 MB
@@ -796,6 +800,7 @@ def addPattuple_vNEXT_SKELETON_53X(datasets):
         "Tau_193834-196531_2012B_Jul13":          TaskDef(""),
         "Tau_198022-198523_2012C_Aug24":          TaskDef(""),
         "Tau_198941-200601_2012C_Prompt":         TaskDef(""),
+        "Tau_200961-202504_2012C_Prompt":         TaskDef(""),
         "Tau_202792-203742_2012C_Prompt":         TaskDef(""),
 
         "MultiJet_190456-190738_2012A_Jul13":     TaskDef(""),
@@ -805,6 +810,7 @@ def addPattuple_vNEXT_SKELETON_53X(datasets):
         "MultiJet_194270-196531_2012B_Jul13":     TaskDef(""),
         "MultiJet_198022-198523_2012C_Aug24":     TaskDef(""),
         "MultiJet_198941-200601_2012C_Prompt":    TaskDef(""),
+        "MultiJet_200961-202504_2012C_Prompt":    TaskDef(""),
         "MultiJet_202792-203742_2012C_Prompt":    TaskDef(""),
 
         "TTToHplusBWB_M80_Summer12":              TaskDef(""),
