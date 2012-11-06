@@ -12,10 +12,18 @@ multicrab = Multicrab("crab_analysis.cfg", cfg)
 # Select the workflow (version corresponds to pattuples)
 #workflow = "analysis_v44_4"
 
-workflow = "analysis_taumet_v53_1_test1"
-#workflow = "analysis_quadjet_v53_1_test1"
-#workflow = "analysis_quadjetbtag_v53_1_test1"
-#workflow = "analysis_quadpfjetbtag_v53_1_test1"
+# Tau+MET trigger
+workflow = "analysis_taumet_v53_1"
+
+# QuadJet80 tritgger
+#workflow = "analysis_quadjet_v53_1"
+
+# QuadJet75_55_38_20_BTagIP_VBF trigger
+#workflow = "analysis_quadjetbtag_v53_1"
+
+# QuadPFJet75_55_38_20_BTagCSV_VBF trigger for data
+# QuadPFJetXX_61_44_31_BTagCSV_VBF trigger for MC, XX specified below with mc_pfjettrigger variable
+#workflow = "analysis_quadpfjetbtag_v53_1"
 mc_pfjettrigger = "78"
 #mc_pfjettrigger = "82"
 
@@ -100,12 +108,12 @@ datasetsMC_2011 = [
 
 datasetsData_Tau_2012 = [
     "Tau_190456-190738_2012A_Jul13",
-#    "Tau_190782-190949_2012A_Aug06",
-#    "Tau_191043-193621_2012A_Jul13",
-#    "Tau_193834-196531_2012B_Jul13",
-#    "Tau_198022-198523_2012C_Aug24",
-#    "Tau_198941-200601_2012C_Prompt",
-#    "Tau_202792-203742_2012C_Prompt",
+    "Tau_190782-190949_2012A_Aug06",
+    "Tau_191043-193621_2012A_Jul13",
+    "Tau_193834-196531_2012B_Jul13",
+    "Tau_198022-198523_2012C_Aug24",
+    "Tau_198941-200601_2012C_Prompt",
+    "Tau_202792-203742_2012C_Prompt",
 ]
 
 datasetsData_MultiJet_2012 = [
@@ -120,50 +128,50 @@ datasetsData_MultiJet_2012 = [
 ]
 
 datasetsMC_2012 = [
-#    "TTToHplusBWB_M80_Summer12",
-#    "TTToHplusBWB_M90_Summer12",
-#    "TTToHplusBWB_M100_Summer12",
+    "TTToHplusBWB_M80_Summer12",
+    "TTToHplusBWB_M90_Summer12",
+    "TTToHplusBWB_M100_Summer12",
     "TTToHplusBWB_M120_Summer12",
 #    "TTToHplusBWB_M140_Summer12",
-#    "TTToHplusBWB_M150_Summer12",
-#    "TTToHplusBWB_M155_Summer12",
-#    "TTToHplusBWB_M160_Summer12",
-#
-#    "TTToHplusBHminusB_M80_Summer12",
+    "TTToHplusBWB_M150_Summer12",
+    "TTToHplusBWB_M155_Summer12",
+    "TTToHplusBWB_M160_Summer12",
+
+    "TTToHplusBHminusB_M80_Summer12",
 #    "TTToHplusBHminusB_M90_Summer12",
-#    "TTToHplusBHminusB_M100_Summer12",
+    "TTToHplusBHminusB_M100_Summer12",
 #    "TTToHplusBHminusB_M120_Summer12",
-#    "TTToHplusBHminusB_M140_Summer12",
-#    "TTToHplusBHminusB_M150_Summer12",
-#    "TTToHplusBHminusB_M155_Summer12",
-#    "TTToHplusBHminusB_M160_Summer12",
-#
-#    "Hplus_taunu_s-channel_M80_Summer12",
-#    "Hplus_taunu_s-channel_M90_Summer12",
-#    "Hplus_taunu_s-channel_M100_Summer12",
-#    "Hplus_taunu_s-channel_M120_Summer12",
-#    "Hplus_taunu_s-channel_M140_Summer12",
-#    "Hplus_taunu_s-channel_M150_Summer12",
-#    "Hplus_taunu_s-channel_M155_Summer12",
-#    "Hplus_taunu_s-channel_M160_Summer12",
-#
-#    "HplusTB_M180_Summer12",
-#    "HplusTB_M190_Summer12",
-#    "HplusTB_M200_Summer12",
-#    "HplusTB_M220_Summer12",
-#    "HplusTB_M250_Summer12",
-#    "HplusTB_M300_Summer12",
-#
-#    "QCD_Pt30to50_TuneZ2star_Summer12",
-#    "QCD_Pt50to80_TuneZ2star_Summer12",
-#    "QCD_Pt80to120_TuneZ2star_Summer12",
-#    "QCD_Pt120to170_TuneZ2star_Summer12",
-#    "QCD_Pt170to300_TuneZ2star_Summer12",
-#    "QCD_Pt300to470_TuneZ2star_Summer12",
-#
-#    "WW_TuneZ2star_Summer12",
-#    "WZ_TuneZ2star_Summer12",
-#    "ZZ_TuneZ2star_Summer12",
+    "TTToHplusBHminusB_M140_Summer12",
+    "TTToHplusBHminusB_M150_Summer12",
+    "TTToHplusBHminusB_M155_Summer12",
+    "TTToHplusBHminusB_M160_Summer12",
+
+    "Hplus_taunu_s-channel_M80_Summer12",
+    "Hplus_taunu_s-channel_M90_Summer12",
+    "Hplus_taunu_s-channel_M100_Summer12",
+    "Hplus_taunu_s-channel_M120_Summer12",
+    "Hplus_taunu_s-channel_M140_Summer12",
+    "Hplus_taunu_s-channel_M150_Summer12",
+    "Hplus_taunu_s-channel_M155_Summer12",
+    "Hplus_taunu_s-channel_M160_Summer12",
+
+    "HplusTB_M180_Summer12",
+    "HplusTB_M190_Summer12",
+    "HplusTB_M200_Summer12",
+    "HplusTB_M220_Summer12",
+    "HplusTB_M250_Summer12",
+    "HplusTB_M300_Summer12",
+
+    "QCD_Pt30to50_TuneZ2star_Summer12",
+    "QCD_Pt50to80_TuneZ2star_Summer12",
+    "QCD_Pt80to120_TuneZ2star_Summer12",
+    "QCD_Pt120to170_TuneZ2star_Summer12",
+    "QCD_Pt170to300_TuneZ2star_Summer12",
+    "QCD_Pt300to470_TuneZ2star_Summer12",
+
+    "WW_TuneZ2star_Summer12",
+    "WZ_TuneZ2star_Summer12",
+    "ZZ_TuneZ2star_Summer12",
     "TTJets_TuneZ2star_Summer12",
     "WJets_TuneZ2star_v1_Summer12",
     "WJets_TuneZ2star_v2_Summer12",

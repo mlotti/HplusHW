@@ -61,7 +61,13 @@ _wjetsNumberOfEvents = {
                                     jet1=2314140,
                                     jet2=851120,
                                     jet3=317130,
-                                    jet4=218488)
+                                    jet4=218488),
+    "pattuple_v53_1": NEvents(inclusive_v1=18393090,
+                              inclusive_v2=56094032,
+                              jet1=23141596,
+                              jet2=34044920,
+                              jet3=15539503,
+                              jet4=13382803),
 }
 
 
