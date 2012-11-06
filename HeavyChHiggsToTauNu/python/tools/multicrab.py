@@ -176,7 +176,7 @@ defaultSeBlacklist_stageout = [
     "colorado.edu", # Ultraslow bandwidth, no chance to get even the smaller pattuples through, added 2011-06-16
     "T3_*", # Don't submit to T3's, added 2011-10-24
     "T2_UK_London_Brunel", # Noticeable fraction of submitted jobs fail due to stageout errors, added 2011-09-02
-    "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout, also jobs can queue long times, added 2011-09-02
+#    "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout, also jobs can queue long times, added 2011-09-02, commented 2012-11-06 (long queues still apply, but remoteGlidein helps)
 #    "wisc.edu", # Stageout failures, added 2011-10-24, commented 2012-09-28 
 #    "ingrid.pt", # Stageout failures, added 2011-10-26, commented 2011-12-02
     "ucsd.edu", # Stageout failures, added 2011-10-26 
