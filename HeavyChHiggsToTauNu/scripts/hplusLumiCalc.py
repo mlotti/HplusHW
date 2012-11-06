@@ -211,6 +211,6 @@ if __name__ == "__main__":
         opts.lumicalc = "defaultLumiCalc"
     print "Calculating luminosity with %s" % opts.lumicalc
     if opts.lumicalc == "defaultLumiCalc":
-        print "   mixture of pixelLumiCalc (for Run2011AB, Run2012AB) and lumiCacl2 (Run212CD)"
+        print "   mixture of pixelLumiCalc (for Run2011AB, Run2012AB) and lumiCalc2 (Run212CD)"
 
     sys.exit(main(opts, args))
