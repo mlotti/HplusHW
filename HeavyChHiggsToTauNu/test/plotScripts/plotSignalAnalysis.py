@@ -696,7 +696,7 @@ def vertexCount(h, prefix="", postfix="", ratio=True):
         h.setLegend(histograms.createLegend())
         h.draw()
         histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
+        h.addEnergyText()
         #    histograms.addLuminosityText(x=None, y=None, lumi=191.)
         h.histoMgr.addLuminosityText()
         if h.normalizeToOne:
@@ -818,7 +818,7 @@ def selectionFlow(h, name, rebin=1, ratio=False):
     h.setLegend(histograms.createLegend())
     h.draw()
     histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    h.addEnergyText()
     h.addLuminosityText()
     addMassBRText(x=0.4, y=0.87)
     h.save()    
@@ -850,7 +850,7 @@ def tauCandPt(h, step="", rebin=2):
     ROOT.gPad.SetLogy(True)
     h.draw()
     histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    h.addEnergyText()
     #h.addLuminosityText()
     h.save()
     
@@ -883,7 +883,7 @@ def tauCandEta(h, step="", rebin=5):
     ROOT.gPad.SetLogy(True)
     h.draw()
     histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    h.addEnergyText()
     #h.addLuminosityText()
     h.save()
 
@@ -914,7 +914,7 @@ def tauCandPhi(h, step="", rebin=5):
     ROOT.gPad.SetLogy(True)
     h.draw()
     histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    h.addEnergyText()
     #h.addLuminosityText()
     h.save()
     
