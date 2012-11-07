@@ -43,7 +43,13 @@ mcOnlyLumi = 5000 # pb
 
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
-dataEra = "Run2011AB"
+#dataEra = "Run2011AB"
+
+#dataEra = "Run2012A"
+#dataEra = "Run2012B"
+#dataEra = "Run2012C"
+#dataEra = "Run2012AB"
+dataEra = "Run2012ABC"
 
 # main function
 def main():
@@ -93,6 +99,7 @@ def main():
     
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "Hplus_taunu_s-channel" in name, datasets.getAllDatasetNames()))
     
     # Remove QCD
 #    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
