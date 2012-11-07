@@ -35,7 +35,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 
 #analysisEmb = "signalAnalysis"
 #analysisSig = "signalAnalysis"
-analysisEmb = "signalAnalysisCaloMet60TEff"
+analysisEmb = "signalAnalysisMEffCaloMet60TEff"
 analysisSig = "signalAnalysisGenuineTau"
 
 ############################################################
