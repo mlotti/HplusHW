@@ -756,7 +756,7 @@ void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, doubl
   leg->SetFillStyle(4000);
   TLegendEntry* entry = leg->AddEntry(hData, "Data", "P");
   s.str("");
-  s << "with H^{#pm}#rightarrow#tau^{#pm}#nu";
+  s << "with ^{}H^{#pm}#rightarrow^{}#tau^{#pm}#nu";
   entry = leg->AddEntry(hSignal, s.str().c_str(), "L");
   entry = leg->AddEntry(hQCD, "multijets (from data)", "F");
   entry = leg->AddEntry(hEWK, "EWK+t#bar{t} #tau (from data)", "F");
@@ -795,7 +795,7 @@ void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, doubl
   // For SelectionFlow plot, comment/uncomment manually :(
   //tex->DrawLatex(0.87, -0.41, "Step");
 
-  tex = new TLatex(0.28,0.865,"m_{H^{+}} = 120 GeV/c^{2}");
+  tex = new TLatex(0.28,0.865,"m_{H^{+}} = 120 GeV/^{}c^{2}");
   if(bPaperStatus)
     tex = new TLatex(0.28,0.865,"m_{H^{+}} = 120 GeV");
   tex->SetNDC();
@@ -803,7 +803,7 @@ void Manager::makePlot(double xmin, double xmax, double ymin, double ymax, doubl
   tex->SetTextSize(20);
   tex->SetLineWidth(2);
   tex->Draw();
-  tex = new TLatex(0.28,0.805,"#it{B}(t#rightarrowH^{+}b)=0.05");
+  tex = new TLatex(0.28,0.805,"#it{B}(t#rightarrow^{}H^{+}b)=0.05");
   tex->SetNDC();
   tex->SetTextFont(63);
   tex->SetTextSize(20);
@@ -1033,10 +1033,11 @@ int main() {
   myElectronPt->makePlot(0, 250, 5e-3, 1e3, 0.5, "Identified isolated electron p_{T}, GeV/c", "Events / 2 GeV/c", myBr, myMassPoint);
   myMuonPt->makePlot(0, 250, 5e-3, 1e3, 0.5, "Identified isolated muon p_{T}, GeV/c", "Events / 2 GeV/c", myBr, myMassPoint);
   */
-  myMet->makePlot(0, 449, 2e-2, 5e2, 0.7, "Uncorrected PF E_{T}^{miss} (GeV)", "Events / 25 GeV", myBr, myMassPoint);
+  myMet->makePlot(0, 449, 2e-2, 5e2, 0.7, "Uncorrected PF ^{}E_{T}^{miss} (GeV)", "Events / 25 GeV", myBr, myMassPoint);
   myNjets->makePlot(3, 7.9, 5e-3, 5e3, 0.7, "Number of selected jets", "Events", myBr, myMassPoint, true, false);
   myNBjets->makePlot(0, 4.9, 2e-1, 1.1e3, 0.5, "Number of selected b jets", "Events", myBr, myMassPoint);
-  myDeltaPhi->makePlot(0, 180, 2e-1, 2e2, 1.8, "#Delta#phi(#tau jet, E_{T}^{miss}) (^{o})", "Events / 20^{o}", myBr, myMassPoint);
+  //myDeltaPhi->makePlot(0, 180, 2e-1, 2e2, 1.8, "#Delta#phi(#tau jet, E_{T}^{miss}) (^{o})", "Events / 20^{o}", myBr, myMassPoint);
+  myDeltaPhi->makePlot(0, 180, 2e-1, 2e2, 1.8, "#Delta#phi(^{}#tau_{h}, ^{}E_{T}^{miss}) (^{o})", "Events / ^{}20^{o}", myBr, myMassPoint);
 
   // Make selection flow plot
   int nbins = 5;
@@ -1047,12 +1048,12 @@ int main() {
   hSelectionFlowFrame->GetXaxis()->SetBinLabel(1, "#geq3j"); //"N_{jets}");
   hSelectionFlowFrame->GetXaxis()->SetBinLabel(2, "E_{T}^{miss}>50");
   hSelectionFlowFrame->GetXaxis()->SetBinLabel(3, "b tag");//"N_{b jets}");
-  hSelectionFlowFrame->GetXaxis()->SetBinLabel(4, "#Delta#phi<160^{o}");
+  hSelectionFlowFrame->GetXaxis()->SetBinLabel(4, "#Delta#phi<^{}160^{o}");
   hSelectionFlowFrame->GetXaxis()->SetLabelSize(22);
   hSelectionFlowFrame->GetXaxis()->SetLabelOffset(0.01);
   hSelectionFlowFrame->SetXTitle("Selection step");
   if (nbins >= 5)
-    hSelectionFlowFrame->GetXaxis()->SetBinLabel(5, "#Delta#phi<130^{o}");
+    hSelectionFlowFrame->GetXaxis()->SetBinLabel(5, "#Delta#phi<^{}130^{o}");
   TH1* hSelectionFlowQCD = dynamic_cast<TH1*>(hSelectionFlowFrame->Clone("SelectionFlowQCD"));
   TH1* hSelectionFlowEWK = dynamic_cast<TH1*>(hSelectionFlowFrame->Clone("SelectionFlowEWK"));
   TH1* hSelectionFlowFakes = dynamic_cast<TH1*>(hSelectionFlowFrame->Clone("SelectionFlowFakes"));
