@@ -1410,6 +1410,7 @@ class Dataset:
     ## Get the dataset.DatasetRootHisto object for a named histogram.
     # 
     # \param name   Path of the histogram in the ROOT file
+    # \param modify Function to modify the histogram (use case is e.g. obtaining a slice of TH2 as TH1)
     #
     # \return dataset.DatasetRootHisto object containing the (unnormalized) TH1 and this Dataset
     # 
@@ -1417,19 +1418,21 @@ class Dataset:
     # draw() method), the draw() method is called by giving the TFile
     # and the dataset name as parameters. The draw() method is
     # expected to return a TH1 which is then returned.
-    def getDatasetRootHisto(self, name):
+    def getDatasetRootHisto(self, name, modify=None):
         h = None
         if hasattr(name, "draw"):
             h = name.draw(self)
         else:
             pname = name
             (h, realName) = self._getRootHisto(pname)
-            if h == None:
+            if h is None:
                 msg = "Unable to find histogram '%s' from file '%s'" % (realName, self.file.GetName())
                 if realName != pname:
                     msg += "\nThe requested histogram was %s, and the path was modified because of dataEra." % self.counterDir
                 raise Exception(msg)
             name = h.GetName()+"_"+self.name
+            if modify is not None:
+                h = modify(h)
             h.SetName(name.translate(None, "-+.:;"))
         return DatasetRootHisto(h, self)
 
@@ -1620,8 +1623,11 @@ class DatasetMerged:
     ## Get the DatasetRootHistoMergedMC/DatasetRootHistoMergedData object for a named histogram.
     #
     # \param name   Path of the histogram in the ROOT file
-    def getDatasetRootHisto(self, name):
-        wrappers = [d.getDatasetRootHisto(name) for d in self.datasets]
+    # \param kwargs Keyword arguments, forwarder to get
+    #               getDatasetRootHisto() of the contained
+    #               Dataset objects
+    def getDatasetRootHisto(self, name, **kwargs):
+        wrappers = [d.getDatasetRootHisto(name, **kwargs) for d in self.datasets]
         if self.isMC():
             return DatasetRootHistoMergedMC(wrappers, self)
         else:
@@ -1777,10 +1783,13 @@ class DatasetManager:
     ## Get a list of dataset.DatasetRootHisto objects for a given name.
     # 
     # \param histoName   Path to the histogram in each ROOT file.
+    # \param kwargs      Keyword arguments, forwarder to get
+    #                    getDatasetRootHisto() of the contained
+    #                    Dataset objects
     #
     # \see dataset.Dataset.getDatasetRootHisto()
-    def getDatasetRootHistos(self, histoName):
-        return [d.getDatasetRootHisto(histoName) for d in self.datasets]
+    def getDatasetRootHistos(self, histoName, **kwargs):
+        return [d.getDatasetRootHisto(histoName, **kwargs) for d in self.datasets]
 
     ## Get a list of all dataset.Dataset objects.
     def getAllDatasets(self):
