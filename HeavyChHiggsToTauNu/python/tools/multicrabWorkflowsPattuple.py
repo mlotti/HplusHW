@@ -711,7 +711,7 @@ def addPattuple_v53_1(datasets):
         "Tau_193834-196531_2012B_Jul13":          TaskDef("/Tau/local-Run2012B_13Jul2012_v1_AOD_193834_196531_pattuple_v53_1-382e6b84ca489c093c178cfb50ba5dbe/USER"), # 2822552 events, 71.0 MB, min 30.0 MB, max 200.5 MB
         "Tau_198022-198523_2012C_Aug24":          TaskDef("/Tau/local-Run2012C_24Aug2012_v1_AOD_198022_198523_pattuple_v53_1-03816abcf2df69d2a2f275b0cfc9c090/USER"), # 258977 events, 65.6 MB, min 33.8 MB, max 145.2 MB
         "Tau_198941-200601_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_198941_200601_pattuple_v53_1-cdc21ac5d95fea9b64545e44f8ba4b15/USER"), # 1705781 events, 60.2 MB, min 12.2 MB, max 143.2 MB
-        "Tau_200961-202504_2012C_Prompt":         TaskDef(""),
+        "Tau_200961-202504_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_200961_202504_pattuple_v53_1-97851bbbf7291004b296c48e58143d74/USER"), # 1792819 events, Mean 67.8 MB, min 4.1 MB, max 292.2 MB
         "Tau_202792-203742_2012C_Prompt":         TaskDef("/Tau/local-Run2012C_PromptReco_v2_AOD_202792_203742_pattuple_v53_1-a6a087b1796a2a131884baa5c492e72f/USER"), # 175227 events, 64.9 MB, min 20.3 MB, max 161.9 MB
 
         "MultiJet_190456-190738_2012A_Jul13":     TaskDef("/MultiJet/local-Run2012A_13Jul2012_v1_AOD_190456_190738_pattuple_v53_1-8d229f863f3fc8a5a50f8b702ec0e1b3/USER"), # 466504 events, Mean 77.8 MB, min 4.3 MB, max 165.5 MB
