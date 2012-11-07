@@ -40,6 +40,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilde
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=1000, # default is -1
                         customizeAnalysis=customize,
+                        #applyTriggerScaleFactor=False,
+                        #doTriggerMatching=False,
                         #useCHSJets=True,
                         #doAgainstElectronScan=True,
                         #doSystematics=True,
@@ -49,6 +51,11 @@ builder = ConfigBuilder(dataVersion, dataEras,
 
 process = builder.buildSignalAnalysis()
 #process = builder.buildQCDMeasurementInverted()
+
+# An example how to use a non-default file(s)
+#process.source.fileNames = [
+#    "store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_5_3_X/TTJets_TuneZ2star_Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1/cad8d1056ca20d363262a3efa1d97a74/pattuple_570_1_k4M.root"
+#]
 
 if builder.options.tauEmbeddingInput != 0:
     if builder.dataVersion.isMC():
