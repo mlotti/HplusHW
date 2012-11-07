@@ -206,7 +206,6 @@ if __name__ == "__main__":
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
     
-    (opts, args) = parser.parse_args()
     if opts.lumicalc == None:
         opts.lumicalc = "defaultLumiCalc"
     print "Calculating luminosity with %s" % opts.lumicalc
