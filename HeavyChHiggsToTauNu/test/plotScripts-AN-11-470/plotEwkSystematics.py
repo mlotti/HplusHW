@@ -47,6 +47,11 @@ bTaggingCut = "passedBTagging"
 deltaPhi160Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 160)"
 deltaPhi130Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 130)"
 
+#taujet = "#tau jet"
+#taujetH = "#tau-jet"
+taujet = "#tau_{h}"
+taujetH = "#tau_{h}"
+
 def main():
     dirEmbs = ["."] + [os.path.join("..", d) for d in tauEmbedding.dirEmbs[1:]]
     dirSig = "../"+tauEmbedding.dirSig
@@ -84,9 +89,9 @@ def main():
         ("Plus", plusJES),
         ("Minus", minusJES)
         ]
-    doPlot(datasetsEmb, jesAnalyses, "transverseMass", "mt_variated_btagging", "Without #Delta#phi(#tau jet, E_{T}^{miss}) selection")
-    doPlot(datasetsEmb, jesAnalyses, "transverseMassAfterDeltaPhi160", "mt_variated_deltaPhi160", "#Delta#phi(#tau jet, E_{T}^{miss}) < 160^{o}")
-    doPlot(datasetsEmb, jesAnalyses, "transverseMassAfterDeltaPhi130", "mt_variated_deltaPhi130", "#Delta#phi(#tau jet, E_{T}^{miss}) < 130^{o}")
+    doPlot(datasetsEmb, jesAnalyses, "transverseMass", "mt_variated_btagging", "Without #Delta#phi(^{}%s, ^{}E_{T}^{miss}) selection" % taujet)
+    doPlot(datasetsEmb, jesAnalyses, "transverseMassAfterDeltaPhi160", "mt_variated_deltaPhi160", "#Delta#phi(^{}%s, ^{}E_{T}^{miss}) < ^{}160^{o}" % taujet)
+    doPlot(datasetsEmb, jesAnalyses, "transverseMassAfterDeltaPhi130", "mt_variated_deltaPhi130", "#Delta#phi(^{}%s, ^{}E_{T}^{miss}) < ^{}130^{o}" % taujet)
 
     for step in [
         "btagging",
@@ -99,8 +104,8 @@ def main():
 
 def doPlot(datasetsEmb, analyses, path, name, text):
     histos = []
-    legends = {"Plus": "#tau-jet energy scale varied by +3 %",
-               "Minus": "#tau-jet energy scale varied by -3 %"}
+    legends = {"Plus": taujetH+" energy scale varied by +3 %",
+               "Minus": taujetH+" energy scale varied by -3 %"}
 
     for aname, analysis in analyses:
         (rootHisto, tmp) = datasetsEmb.getHistogram("Data", analysis+"/"+path)
@@ -119,7 +124,7 @@ def doPlot(datasetsEmb, analyses, path, name, text):
     p.setLuminosity(datasetsEmb.getLuminosity())
     p.appendPlotObject(histograms.PlotText(0.45, 0.55, text, size=20))
 
-    plots.drawPlot(p, name, "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", ylabel="Events / %d GeV/c^{2}",
+    plots.drawPlot(p, name, "m_{T}(^{}%s, ^{}E_{T}^{miss}) (GeV/^{}c^{2})"%taujet, ylabel="Events / %d GeV/^{}c^{2}",
                    rebin=20, ratio=True, opts={"ymax": 35, "xmax": 300}, opts2={"ymax": 2}, addLuminosityText=True)
 
 def doCounters(datasetsEmbResidual, jesAnalyses, step):
