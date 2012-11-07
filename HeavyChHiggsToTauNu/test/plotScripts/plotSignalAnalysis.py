@@ -143,6 +143,21 @@ def doPlots(datasets):
         else:
             return plots.DataMCPlot(datasets, analysis+"/"+name, **kwargs)
 
+    def pickSliceX(th2, ybinName):
+        th1 = ROOT.TH1D(th2.GetName(), th2.GetTitle(), th2.GetNbinsX(), histograms.th1Xmin(th2), histograms.th1Xmax(th2))
+        th1.Sumw2()
+        ybin = None
+        for bin in xrange(1, th2.GetNbinsY()+1):
+            if th2.GetYaxis().GetBinLabel(bin) == ybinName:
+                ybin = bin
+                break
+        if ybin is None:
+            raise Exception("Did not find y bin label %s from histogram %s" % (ybinName, th2.GetName()))
+        for xbin in xrange(0, th2.GetNbinsX()+2): # include under/overflow bins
+            th1.SetBinContent(xbin, th2.GetBinContent(xbin, ybin))
+            th1.SetBinError(xbin, th2.GetBinError(xbin, ybin))
+        return th1
+
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
 
@@ -151,6 +166,7 @@ def doPlots(datasets):
 #    vertexCount(createPlot("verticesAfterWeight", normalizeToOne=True), postfix="AfterWeight")
 #    vertexCount(createPlot("Vertices/verticesTriggeredBeforeWeight", normalizeToOne=True), postfix="BeforeWeightTriggered")
 #    vertexCount(createPlot("Vertices/verticesTriggeredAfterWeight", normalizeToOne=True), postfix="AfterWeightTriggered")
+#    vertexCount(createPlot("SignalSelectionFlowVsVertices", normalizeToOne=True, datasetRootHistoArgs={"modify": lambda th2: pickSliceX(th2, "#tau ID")}), postfix="AfterTauIDScaleFactors")
 #    vertexCount(createPlot("verticesTriggeredBeforeWeight", normalizeToOne=False), postfix="BeforeWeightTriggeredNorm")
 #    vertexCount(createPlot("verticesTriggeredAfterWeight", normalizeToOne=False), postfix="AfterWeightTriggeredNorm")
 #    met2(createPlot("MET"), "met1", rebin=50)
@@ -666,11 +682,11 @@ def vertexCount(h, prefix="", postfix="", ratio=True):
 
         h.addMCUncertainty()
 
-        opts = {}
-        opts_log = {"ymin": 1e-10, "ymaxfactor": 10, "xmax": 30}
+        opts = {"xmax": 40}
+        opts_log = {"ymin": 1e-10, "ymaxfactor": 10, "xmax": 40}
         opts_log.update(opts)
 
-        opts2 = {"ymin": 0.5, "ymax": 3}
+        opts2 = {"ymin": 0, "ymax": 3}
         opts2_log = opts2
         #opts2_log = {"ymin": 5e-2, "ymax": 5e2}
         
