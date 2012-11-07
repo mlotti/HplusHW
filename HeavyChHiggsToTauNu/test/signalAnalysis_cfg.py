@@ -48,6 +48,7 @@ builder = ConfigBuilder(dataVersion, dataEras,
                         )
 
 process = builder.buildSignalAnalysis()
+#process = builder.buildQCDMeasurementInverted()
 
 if builder.options.tauEmbeddingInput != 0:
     if builder.dataVersion.isMC():

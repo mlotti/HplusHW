@@ -965,6 +965,10 @@ class PlotDrawerTauEmbeddingEmbeddedNormal(PlotDrawerTauEmbedding):
         if kwargs.get("ratio", self.ratioDefault):
             p.getFrame2().GetYaxis().SetTitle("Ratio")
             # Very, very ugly hack
+
+            for r in p.ratios:
+                r.getRootHisto().SetLineStyle(1)
+
             if p.histoMgr.hasHisto("EmbeddedData"):
                 if p.ratios[1].getName() != "Embedded":
                     raise Exception("Assumption that [1] is from embedded MC failed")

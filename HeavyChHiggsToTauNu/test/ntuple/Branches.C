@@ -58,8 +58,38 @@ void EmbeddingMuonCollection::setupBranches(TTree *tree, bool isMC) {
 }
 
 
+//////////////////// ElectronCollection ////////////////////
+ElectronCollection::Electron::Electron(ElectronCollection *mc, size_t i):
+  fCollection(mc), fIndex(i)
+{}
+ElectronCollection::Electron::~Electron() {}
+
+ElectronCollection::ElectronCollection(const std::string prefix):
+  fPrefix(prefix)
+{}
+ElectronCollection::~ElectronCollection() {}
+
+void ElectronCollection::setupBranches(TTree *tree, bool isMC) {
+  fP4.setupBranch(tree, (fPrefix+"_p4").c_str());
+
+  fHasGsfTrack.setupBranch(tree, (fPrefix+"_hasGsfTrack").c_str());
+  fHasSuperCluster.setupBranch(tree, (fPrefix+"_hasSuperCluster").c_str());
+  fCutBasedIdVeto.setupBranch(tree, (fPrefix+"_cutBasedIdVeto").c_str());
+  fCutBasedIdLoose.setupBranch(tree, (fPrefix+"_cutBasedIdLoose").c_str());
+  fCutBasedIdMedium.setupBranch(tree, (fPrefix+"_cutBasedIdMedium").c_str());
+  fCutBasedIdTight.setupBranch(tree, (fPrefix+"_cutBasedIdTight").c_str());
+
+  fSuperClusterEta.setupBranch(tree, (fPrefix+"_f_superClusterEta").c_str());
+
+  if(isMC) {
+    fPdgId.setupBranch(tree, (fPrefix+"_pdgid").c_str());
+    fMotherPdgId.setupBranch(tree, (fPrefix+"_mother_pdgid").c_str());
+    fGrandMotherPdgId.setupBranch(tree, (fPrefix+"_grandmother_pdgid").c_str());
+  }
+}
+
 //////////////////// JetCollection ////////////////////
-JetCollection::Jet::Jet(JetCollection *mc, size_t i):
+JetCollection::Jet::Jet(JetCollection *mc, size_t i): 
   fCollection(mc), fIndex(i)
 {}
 JetCollection::Jet::~Jet() {}
@@ -71,6 +101,27 @@ JetCollection::~JetCollection() {}
 
 void JetCollection::setupBranches(TTree *tree) {
   fP4.setupBranch(tree, (fPrefix+"_p4").c_str());
+  fNumberOfDaughters.setupBranch(tree, (fPrefix+"_numberOfDaughters").c_str());
+  fLooseId.setupBranch(tree, (fPrefix+"_looseId").c_str());
+  fTightId.setupBranch(tree, (fPrefix+"_tightId").c_str());
+}
+
+//////////////////// JetDetailsCollection ////////////////////
+JetDetailsCollection::Jet::Jet(JetDetailsCollection *jdc, size_t i): JetCollection::Jet(jdc, i) {}
+JetDetailsCollection::Jet::~Jet() {}
+JetDetailsCollection::JetDetailsCollection(const std::string prefix): JetCollection(prefix) {}
+JetDetailsCollection::~JetDetailsCollection() {}
+void JetDetailsCollection::setupBranches(TTree *tree) {
+  fChm.setupBranch(tree, (fPrefix+"_chm").c_str());
+  fNhm.setupBranch(tree, (fPrefix+"_nhm").c_str());
+  fElm.setupBranch(tree, (fPrefix+"_elm").c_str());
+  fPhm.setupBranch(tree, (fPrefix+"_phm").c_str());
+  fMum.setupBranch(tree, (fPrefix+"_mum").c_str());
+  fChf.setupBranch(tree, (fPrefix+"_chf").c_str());
+  fNhf.setupBranch(tree, (fPrefix+"_nhf").c_str());
+  fElf.setupBranch(tree, (fPrefix+"_elf").c_str());
+  fPhf.setupBranch(tree, (fPrefix+"_phf").c_str());
+  fMuf.setupBranch(tree, (fPrefix+"_muf").c_str());
 }
 
 //////////////////// TauCollection ////////////////////

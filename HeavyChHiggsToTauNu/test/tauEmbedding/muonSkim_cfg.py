@@ -36,7 +36,7 @@ process.source = cms.Source('PoolSource',
 trigger = options.trigger
 # Default trigger (for MC)
 if len(trigger) == 0:
-    trigger = "HLT_Mu40_eta2p1_v1" # Fall1; other HLT_Mu20_v8, HLT_Mu40_v6 or HLT_Mu40_eta2p1_v1
+    trigger = "HLT_Mu40_eta2p1_v1" # Fall11; other HLT_Mu20_v8, HLT_Mu40_v6 or HLT_Mu40_eta2p1_v1
     options.trigger = trigger
 print "trigger:", trigger
 

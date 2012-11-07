@@ -26,6 +26,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeFunctionBranch.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventItem.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeMuonBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeElectronBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeTauBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeJetBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeVertexBranches.h"
@@ -51,6 +52,7 @@ private:
 
   typedef HPlus::EventItem<XYZTLorentzVector> MetItem;
   typedef HPlus::EventItem<double> DoubleItem;
+  typedef HPlus::EventItem<bool> BoolItem;
 
   edm::InputTag fGenParticleOriginalSrc;
   edm::InputTag fGenParticleEmbeddedSrc;
@@ -64,11 +66,13 @@ private:
   HPlus::TreeVertexBranches fGoodVertexBranches;
   HPlus::TreeTriggerBranches fTriggerBranches;
   HPlus::TreeMuonBranches fMuonBranches;
+  //HPlus::TreeElectronBranches fElectronBranches;
   HPlus::TreeTauBranches fTauBranches;
-  HPlus::TreeJetBranches fJetBranches;
+  //HPlus::TreeJetBranches fJetBranches;
 
   std::vector<MetItem> fMets;
   std::vector<DoubleItem> fDoubles;
+  std::vector<BoolItem> fBools;
 
   double fEmbeddingMuonEfficiencyWeight;
 };
@@ -83,8 +87,9 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   fGoodVertexBranches(iConfig, "goodPrimaryVertex", "goodPrimaryVertexSrc"),
   fTriggerBranches(iConfig),
   fMuonBranches(iConfig),
-  fTauBranches(iConfig),
-  fJetBranches(iConfig, false)
+  //fElectronBranches(iConfig, fSelectedVertexBranches.getInputTag()),
+  fTauBranches(iConfig)
+  //fJetBranches(iConfig, true)
 {
 
   edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("mets");
@@ -99,6 +104,12 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
     fDoubles.push_back(DoubleItem(names[i], pset.getParameter<edm::InputTag>(names[i])));
   }
 
+  pset = iConfig.getParameter<edm::ParameterSet>("bools");
+  names = pset.getParameterNames();
+  for(size_t i=0; i<names.size(); ++i) {
+    fBools.push_back(BoolItem(names[i], pset.getParameter<edm::InputTag>(names[i])));
+  }
+
   edm::Service<TFileService> fs;
   fTree = fs->make<TTree>("tree", "Tree");
 
@@ -107,14 +118,18 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   fGoodVertexBranches.book(fTree);
   fTriggerBranches.book(fTree);
   fMuonBranches.book(fTree);
+  //fElectronBranches.book(fTree);
   fTauBranches.book(fTree);
-  fJetBranches.book(fTree);
+  //fJetBranches.book(fTree);
 
   for(size_t i=0; i<fMets.size(); ++i) {
     fTree->Branch(fMets[i].name.c_str(), &(fMets[i].value));
   }
   for(size_t i=0; i<fDoubles.size(); ++i) {
     fTree->Branch(fDoubles[i].name.c_str(), &(fDoubles[i].value));
+  }
+  for(size_t i=0; i<fBools.size(); ++i) {
+    fTree->Branch(fBools[i].name.c_str(), &(fBools[i].value));
   }
 
   fTree->Branch("weight_embeddingMuonEfficiency", &fEmbeddingMuonEfficiencyWeight);
@@ -130,14 +145,18 @@ void HPlusTauEmbeddingNtupleAnalyzer::reset() {
   fGoodVertexBranches.reset();
   fTriggerBranches.reset();
   fMuonBranches.reset();
+  //fElectronBranches.reset();
   fTauBranches.reset();
-  fJetBranches.reset();
+  //fJetBranches.reset();
 
   for(size_t i=0; i<fMets.size(); ++i) {
     fMets[i].value.SetXYZT(nan, nan, nan, nan);
   }
   for(size_t i=0; i<fDoubles.size(); ++i) {
     fDoubles[i].value = nan;
+  }
+  for(size_t i=0; i<fBools.size(); ++i) {
+    fBools[i].value = false;
   }
   fEmbeddingMuonEfficiencyWeight = 1.0;
 }
@@ -160,13 +179,15 @@ void HPlusTauEmbeddingNtupleAnalyzer::analyze(const edm::Event& iEvent, const ed
   // Muons
   if(iEvent.isRealData()) {
     fMuonBranches.setValues(iEvent);
+    //fElectronBranches.setValues(iEvent);
   }
   else {
     fMuonBranches.setValues(iEvent, *hgenparticlesOriginal);
+    //fElectronBranches.setValues(iEvent, *hgenparticlesOriginal);
   }
   fTauBranches.setValues(iEvent, *hgenparticlesEmbedded);
 
-  fJetBranches.setValues(iEvent);
+  //fJetBranches.setValues(iEvent);
 
   for(size_t i=0; i<fMets.size(); ++i) {
     edm::Handle<edm::View<reco::MET> > hmet;
@@ -177,6 +198,11 @@ void HPlusTauEmbeddingNtupleAnalyzer::analyze(const edm::Event& iEvent, const ed
     edm::Handle<double> hnum;
     iEvent.getByLabel(fDoubles[i].src, hnum);
     fDoubles[i].value = *hnum;
+  }
+  for(size_t i=0; i<fBools.size(); ++i) {
+    edm::Handle<bool> hnum;
+    iEvent.getByLabel(fBools[i].src, hnum);
+    fBools[i].value = *hnum;
   }
 
   fTree->Fill();

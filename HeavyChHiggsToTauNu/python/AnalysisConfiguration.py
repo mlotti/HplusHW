@@ -146,6 +146,13 @@ class ConfigBuilder:
             return [QCDMeasurementFactorised.createEDFilter(param)]
         return self._build(create, ["QCDMeasurement"])
 
+    def buildQCDMeasurementInverted(self):
+        import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as  signalAnalysis
+        import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysisInvertedTau as signalAnalysisInvertedTau
+        def create(param):
+            return [signalAnalysis.createEDFilter(param),signalAnalysisInvertedTau.createEDFilter(param)]
+        return self._build(create, ["signalAnalysis","signalAnalysisInvertedTau"])
+
     ## Accumulate the number of analyzers to a category
     #
     # \param key     Analyzer category name

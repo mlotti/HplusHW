@@ -8,7 +8,7 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 dataVersion = "44XmcS6"
 #dataVersion = "44Xdata"
 
-PF2PATVersion = "PFlow"
+#PF2PATVersion = "PFlow"
 
 ################################################################################
 
@@ -82,7 +82,7 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
 # Pileup weights
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-param.changeCollectionsToPF2PAT(PF2PATVersion)
+#param.changeCollectionsToPF2PAT(PF2PATVersion)
 puWeights = [
     ("Run2011A", "Run2011A"),
     ("Run2011B", "Run2011B"),
@@ -108,7 +108,7 @@ process.commonSequence.insert(0, process.goodPrimaryVertices)
     
 # Add the muon selection counters, as this is done after the skim
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as MuonSelection
-additionalCounters.extend(MuonSelection.getMuonSelectionCountersForEmbedding(PF2PATVersion))
+additionalCounters.extend(MuonSelection.getMuonSelectionCountersForEmbedding(dataVersion))
 
 # Add configuration information to histograms.root
 process.infoPath = addConfigInfo(process, options, dataVersion)
@@ -122,17 +122,10 @@ process.infoPath = addConfigInfo(process, options, dataVersion)
 
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
-customisations.PF2PATVersion = PF2PATVersion
+#customisations.PF2PATVersion = PF2PATVersion
 
-# FIXME: hack to apply trigger in MC
-if dataVersion.isMC():
-    additionalCounters.extend(customisations.addMuonTriggerFix(process, dataVersion, process.commonSequence, options))
-# FIXME: hack to apply HBHENoiseFilter result in data
-if dataVersion.isData():
-    import HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection as dataSelection
-    dataSelection.addHBHENoiseFilterResultProducer(process, process.commonSequence)
-
-muons = "selectedPatMuons"+PF2PATVersion+"All"
+muons = "selectedPatMuons"
+#muons = "selectedPatMuons"+PF2PATVersion+"All"
 #muons = "selectedPatMuons"+PF2PATVersion
 #muons = "tightMuons"+PF2PATVersion
 #muons = customisations.addMuonIsolationEmbedding(process, process.commonSequence, muons)
@@ -175,7 +168,9 @@ process.commonSequence *= (
 additionalCounters.append("preselectedMuons40Count")
 
 process.preselectedJets = cms.EDFilter("PATJetSelector",
-    src = cms.InputTag("goodJets"+PF2PATVersion),
+#    src = cms.InputTag("goodJets"+PF2PATVersion),
+#    src = cms.InputTag("goodJets"),
+    src = cms.InputTag("selectedPatJets"),
     cut = cms.string(customisations.jetSelection)
 )
 process.preselectedJetsFilter = cms.EDFilter("CandViewCountFilter",
@@ -195,9 +190,16 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysis
 ntuple = cms.EDAnalyzer("HPlusMuonNtupleAnalyzer",
     patTriggerEvent = cms.InputTag("patTriggerEvent"),
     genParticleSrc = cms.InputTag("genParticles"),
-    vertexSrc = cms.InputTag("goodPrimaryVertices"),
+    selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
+    goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
     muonSrc = cms.InputTag("preselectedMuons"),
     muonFunctions = analysisConfig.muonFunctions.clone(),
+
+#    electronSrc = cms.InputTag("selectedPatElectrons"),
+#    electronConversionSrc = cms.InputTag("allConversions"),
+#    beamspotSrc = cms.InputTag("offlineBeamSpot"),
+#    electronRhoSrc =  cms.InputTag("kt6PFJetsForEleIso", "rho"),
+#    electronFunctions = analysisConfig.electronFunctions.clone(),
 
     jetSrc = cms.InputTag("preselectedJets"),
     jetFunctions = analysisConfig.jetFunctions.clone(),
