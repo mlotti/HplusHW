@@ -24,6 +24,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeFunctionBranch.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventItem.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeMuonBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeElectronBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeJetBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeVertexBranches.h"
 
@@ -53,8 +54,10 @@ private:
   edm::InputTag fGenParticleSrc;
 
   HPlus::TreeEventBranches fEventBranches;
-  HPlus::TreeVertexBranches fVertexBranches;
+  HPlus::TreeVertexBranches fSelectedVertexBranches;
+  HPlus::TreeVertexBranches fGoodVertexBranches;
   HPlus::TreeMuonBranches fMuonBranches;
+  //HPlus::TreeElectronBranches fElectronBranches;
   std::vector<double> fMuonJetMinDR;
 
   HPlus::TreeJetBranches fJetBranches;
@@ -67,8 +70,10 @@ private:
 HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfig):
   fPatTriggerSrc(iConfig.getParameter<edm::InputTag>("patTriggerEvent")),
   fGenParticleSrc(iConfig.getParameter<edm::InputTag>("genParticleSrc")),
-  fVertexBranches(iConfig),
+  fSelectedVertexBranches(iConfig, "selectedPrimaryVertex", "selectedPrimaryVertexSrc"),
+  fGoodVertexBranches(iConfig, "goodPrimaryVertex", "goodPrimaryVertexSrc"),
   fMuonBranches(iConfig),
+  //fElectronBranches(iConfig, fSelectedVertexBranches.getInputTag()),
   fJetBranches(iConfig, false)
 {
 
@@ -94,8 +99,10 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
   fTree = fs->make<TTree>("tree", "Tree");
 
   fEventBranches.book(fTree);
-  fVertexBranches.book(fTree);
+  fSelectedVertexBranches.book(fTree);
+  fGoodVertexBranches.book(fTree);
   fMuonBranches.book(fTree);
+  //fElectronBranches.book(fTree);
   fTree->Branch("muons_jetMinDR", &fMuonJetMinDR);
 
   fJetBranches.book(fTree);
@@ -117,8 +124,10 @@ void HPlusMuonNtupleAnalyzer::reset() {
   double nan = std::numeric_limits<double>::quiet_NaN();
  
   fEventBranches.reset();
-  fVertexBranches.reset();
+  fSelectedVertexBranches.reset();
+  fGoodVertexBranches.reset();
   fMuonBranches.reset();
+  //fElectronBranches.reset();
   fMuonJetMinDR.clear();
   fJetBranches.reset();
 
@@ -135,6 +144,8 @@ void HPlusMuonNtupleAnalyzer::reset() {
 
 void HPlusMuonNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   fEventBranches.setValues(iEvent);
+  fSelectedVertexBranches.setValues(iEvent);
+  fGoodVertexBranches.setValues(iEvent);
 
   edm::Handle<pat::TriggerEvent> htrigger;
   iEvent.getByLabel(fPatTriggerSrc, htrigger);
@@ -143,13 +154,15 @@ void HPlusMuonNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::Event
   if(!iEvent.isRealData())
     iEvent.getByLabel(fGenParticleSrc, hgenparticles);
 
-  fVertexBranches.setValues(iEvent);
-
   // Muons
-  if(iEvent.isRealData())
+  if(iEvent.isRealData()) {
     fMuonBranches.setValues(iEvent);
-  else
+    //fElectronBranches.setValues(iEvent);
+  }
+  else {
     fMuonBranches.setValues(iEvent, *hgenparticles);
+    //fElectronBranches.setValues(iEvent, *hgenparticles);
+  }
 
   fJetBranches.setValues(iEvent);
 
