@@ -1128,12 +1128,14 @@ class PlotRatioBase:
 class PlotSameBase(PlotBase):
     ## Construct from DatasetManager and a histogram path
     #
-    # \param datasetMgr      DatasetManager for datasets
-    # \param name            Path of the histogram in the ROOT files
-    # \param normalizeToOne  Should the histograms be normalized to unit area?
-    # \param kwargs          Keyword arguments, forwarded to PlotBase.__init__()
-    def __init__(self, datasetMgr, name, normalizeToOne=False, **kwargs):
-        PlotBase.__init__(self, datasetMgr.getDatasetRootHistos(name), **kwargs)
+    # \param datasetMgr            DatasetManager for datasets
+    # \param name                  Path of the histogram in the ROOT files
+    # \param normalizeToOne        Should the histograms be normalized to unit area?
+    # \param datasetRootHistoArgs  Dictionary for keyword arguments to
+    #                              dataset.DatasetManager.getDatasetRootHistos() method
+    # \param kwargs                Keyword arguments, forwarded to PlotBase.__init__()
+    def __init__(self, datasetMgr, name, normalizeToOne=False, datasetRootHistoArgs={}, **kwargs):
+        PlotBase.__init__(self, datasetMgr.getDatasetRootHistos(name, **datasetRootHistoArgs), **kwargs)
         self.datasetMgr = datasetMgr
         self.rootHistoPath = name
         self.normalizeToOne = normalizeToOne
