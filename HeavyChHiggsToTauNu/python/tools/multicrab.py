@@ -151,6 +151,7 @@ import subprocess, errno
 import time
 import math
 import shutil
+import select
 import ConfigParser
 import OrderedDict
 
@@ -159,35 +160,36 @@ import multicrabWorkflowsTools
 import certifiedLumi
 import git
 
-## Default Storage Element (SE) black list
-defaultSeBlacklist = [
-    # blacklist before v13
-    #"T2_UK_London_Brunel", # I don't anymore remember why this is here
-    #"T2_BE_IIHE", # All jobs failed with stageout timeout
-    #"T2_IN_TIFR", # All jobs failed file open errors
-    #"T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout
-
-    # blacklist after v13
-    "colorado.edu", # Ultraslow bandwidth, no chance to get even the smaller pattuples through
-    "T3_*", # Don't submit to T3's  
-    "T2_UK_London_Brunel", # Noticeable fraction of submitted jobs fail due to stageout errors
-#    "ucl.ac.be", # Jobs end up in queuing, lot's of file open errors
-#    "iihe.ac.be", # Problematic site with server, long queue
-    "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout, also jobs can queue long times
-    "unl.edu", # Jobs can wait in queues for a looong time
-#    "wisc.edu", # Stageout failures,
-#    "ingrid.pt", # Stageout failures
-    "ucsd.edu", # Stageout failures
-    "pi.infn.it", # Stageout failures
-    "lnl.infn.it", # Stageout failures
-#    "mit.edu", # MIT has some problems?
-    "sprace.org.br", # Stageout failures
-    "knu.ac.kr", # Stageout failures
-#    "T2_US_*", # disable US because of low bandwidth
-    "kbfi.ee", # Files are not found
-    "cscs.ch", # Files are not found
+## Default Storage Element (SE) black list for non-stageout jobs
+defaultSeBlacklist_noStageout = [
+#    "ucl.ac.be", # Jobs end up in queuing, lot's of file open errors, added 2011-09-02, commented 2012-09-28
+#    "iihe.ac.be", # Problematic site with server, long queue, added, 2011-09-26, commented 2012-09-28
+#    "unl.edu", # Jobs can wait in queues for a looong time, added 2011-10-24, commented 2012-10-26
+#    "mit.edu", # MIT has some problems? added 2011-12-02, commented 2012-09-28
+    "kbfi.ee", # Files are not found, added 2012-09-28
+    "cscs.ch", # Files are not found, added 2012-09-28
+    "roma1.infn.it", # Jobs don't finish, added 2012-10-26
     ]
 
+## Default Storage Element (SE) black list for stageout jobs
+defaultSeBlacklist_stageout = [
+    "colorado.edu", # Ultraslow bandwidth, no chance to get even the smaller pattuples through, added 2011-06-16
+    "T3_*", # Don't submit to T3's, added 2011-10-24
+    "T2_UK_London_Brunel", # Noticeable fraction of submitted jobs fail due to stageout errors, added 2011-09-02
+#    "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout, also jobs can queue long times, added 2011-09-02, commented 2012-11-06 (long queues still apply, but remoteGlidein helps)
+#    "wisc.edu", # Stageout failures, added 2011-10-24, commented 2012-09-28 
+#    "ingrid.pt", # Stageout failures, added 2011-10-26, commented 2011-12-02
+    "ucsd.edu", # Stageout failures, added 2011-10-26 
+    "pi.infn.it", # Stageout failures, added 2011-10-26
+    "lnl.infn.it", # Stageout failures, added 2011-12-02
+#    "mit.edu", # MIT has some problems? added 2011-12-02, commented 2012-09-28
+    "sprace.org.br", # Stageout failures. added 2011-12-02
+    "knu.ac.kr", # Stageout failures, added 2011-12-02
+#    "T2_US_*", # disable US because of low bandwidth, added 2012-04-04, commented 2012-09-28
+    ]
+
+## Default Storage Element (SE) black list for backward compatibility
+defaultSeBlacklist = defaultSeBlacklist_noStageout + defaultSeBlacklist_stageout
 
 ## Returns the list of CRAB task directories from a MultiCRAB configuration.
 # 
@@ -406,15 +408,53 @@ def prettyToJobList(prettyString):
 
 ## Get output of 'crab -status' of one CRAB task
 #
-# \param task   CRAB task directory name
+# \param task      CRAB task directory name
+# \param printCrab Print CRAB output
 #
 # \return Output (stdout+stderr) as a string
-def crabStatusOutput(task):
+def crabStatusOutput(task, printCrab):
     command = ["crab", "-status", "-c", task]
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    output = p.communicate()[0]
+    output = ""
+    # The process may finish between p.poll() and p.stdout.readline()
+    # http://stackoverflow.com/questions/10756383/timeout-on-subprocess-readline-in-python
+    # Try first just using select for polling if p.stdout has anything
+    # If that doesn't work out, add the timeout (currently in comments)
+    poll_obj = select.poll()
+    poll_obj.register(p.stdout, select.POLLIN)
+        #last_print_time = time.time()
+        #timeout = 600 # 10 min timeout initially, -status can take long
+#        while p.poll() == None:# and (time.time() - last_print_time) < timeout:
+#                    if "Log file is" in line:
+#                        # The last line in the output starts with this, shorten the timeout to 10 s
+#                        timeout = 10
+#                        print "Last line encountered, shortening timeout to 10 s"
+#                last_print_time = time.time()
+
+    while True:
+        exit_result = p.poll()
+        while True:
+            poll_result = poll_obj.poll(0) # poll timeout is 0 ms
+            if poll_result:
+                line = p.stdout.readline()
+                if line:
+                    if printCrab:
+                        print line.strip("\n")
+                    output += line
+                else:
+                    break
+            else: # if nothing to read, continue to check if the process has finished
+                break
+        if exit_result is None:
+            time.sleep(1)
+        else:
+            break
+#    print "Out of poll loop, return code", p.returncode
     if p.returncode != 0:
-        raise Exception("Command '%s' failed with exit code %d, output:\n%s" % (" ".join(command), p.returncode, output))
+        if printCrab:
+            raise Exception("Command '%s' failed with exit code %d" % (" ".join(command), p.returncode))
+        else:
+            raise Exception("Command '%s' failed with exit code %d, output:\n%s" % (" ".join(command), p.returncode, output))
     return output
 
 ## Transform 'crab -status' output to list of multicrab.CrabJob objects
@@ -442,10 +482,11 @@ def _intIfNotNone(n):
 ## Run 'crab -status' and create multicrab.CrabJob objects
 #
 # \param task  CRAB task directory
+# \param printCrab Print CRAB output
 #
 # \return List of multicrab.CrabJob objects
-def crabStatusToJobs(task):
-    output = crabStatusOutput(task)
+def crabStatusToJobs(task, printCrab):
+    output = crabStatusOutput(task, printCrab)
     return crabOutputToJobs(task, output)
 
 ## Class for containing the information of finished CRAB job
@@ -951,6 +992,9 @@ class Multicrab:
     # files to the directory and optionally run 'multicrab -create'
     # in the directory.
     def createTasks(self, configOnly=False, codeRepo='git', over500JobsMode=NONE, **kwargs):
+        if self.datasets == None:
+            self._createDatasets()
+
         # If mode is NONE, create tasks for all datasets
         if over500JobsMode == Multicrab.NONE:
             return self._createTasks(configOnly, codeRepo, **kwargs)

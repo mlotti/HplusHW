@@ -6,6 +6,14 @@ import hashlib
 import imp
 import re
 
+def higgsAnalysisPath():
+    if "HIGGSANALYSIS_BASE" in os.environ:
+        return os.environ["HIGGSANALYSIS_BASE"]
+    elif "CMSSW_BASE" in os.environ:
+        return os.path.join(os.environ["CMSSW_BASE"], "src", "HiggsAnalysis")
+    else:
+        raise Exception("No $HIGGSANALYSIS_BASE nor $CMSSW_BASE environet variable. For standalone environment use setupStandalone.(c)sh, for CMSSW environment use cmsenv")
+
 def execute(cmd):
     f = os.popen(cmd)
     ret=[]

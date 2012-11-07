@@ -38,7 +38,7 @@ def main(opts):
             print "%s: Task directory missing" % task
             continue
 
-        jobs = multicrab.crabStatusToJobs(task)
+        jobs = multicrab.crabStatusToJobs(task, printCrab=False)
         if not resubmitMode: # normal submission
             if not "Created" in jobs:
                 print "%s: no 'Created' jobs to submit" % task

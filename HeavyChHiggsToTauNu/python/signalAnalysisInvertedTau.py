@@ -8,7 +8,7 @@ import FWCore.ParameterSet.Config as cms
 def createEDFilter(param):
     return cms.EDFilter("HPlusSignalAnalysisInvertedTauFilter",
         blindAnalysisStatus = param.blindAnalysisStatus,
-        histogramAmbientLevel = param.histogramAmbientLevel,
+	histogramAmbientLevel = param.histogramAmbientLevel,
         trigger = param.trigger.clone(),
         triggerEfficiencyScaleFactor = param.triggerEfficiencyScaleFactor.clone(),
         primaryVertexSelection = param.primaryVertexSelection.clone(),
@@ -25,13 +25,12 @@ def createEDFilter(param):
         fakeMETVeto = param.fakeMETVeto.clone(),
         jetTauInvMass = param.jetTauInvMass.clone(),
         deltaPhiTauMET = param.deltaPhiTauMET,
-        topReconstruction = param.topReconstruction,
+	topReconstruction = param.topReconstruction,
         topSelection = param.topSelection.clone(),
-        bjetSelection = param.bjetSelection.clone(),
-        topChiSelection = param.topChiSelection.clone(),
+        bjetSelection = param.bjetSelection.clone(),                                      
+        topChiSelection = param.topChiSelection.clone(),                                  
         topWithBSelection = param.topWithBSelection.clone(),
         topWithWSelection = param.topWithWSelection.clone(),
-        topWithMHSelection = param.topWithMHSelection.clone(),
         forwardJetVeto = param.forwardJetVeto.clone(),
         transverseMassCut = param.transverseMassCut,
         EvtTopology = param.EvtTopology.clone(),
@@ -43,5 +42,4 @@ def createEDFilter(param):
         oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus","HadronicTauOneAndThreeProng"),
         tauEmbeddingStatus = cms.untracked.bool(False),
         metFilters = param.metFilters.clone(),
-
     )

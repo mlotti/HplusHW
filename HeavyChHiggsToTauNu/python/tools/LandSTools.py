@@ -27,6 +27,7 @@ from optparse import OptionParser
 
 import multicrab
 import git
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
 ## The LandS CVS tag to be used
 LandS_tag = "t3-06-05" # Given by Mingshui 15.8.2012 at 11:56 EEST
@@ -1476,12 +1477,7 @@ class LandSInstaller:
         
     ## Get the path to the LandS directory
     def findDir(self):
-        try:
-            cmsswBase = os.environ["CMSSW_BASE"]
-        except KeyError:
-            raise Exception("Did you 'cmsenv'? I can't find $CMSSW_BASE environment variable")
-        
-        brlimitBase = os.path.join(cmsswBase, "src", "HiggsAnalysis", "HeavyChHiggsToTauNu", "test", "brlimit")
+        brlimitBase = os.path.join(aux.higgsAnalysisPath(), "HeavyChHiggsToTauNu", "test", "brlimit")
         landsDir = "LandS_"+self.tag
         landsDirAbs = os.path.join(brlimitBase, landsDir)
         if not os.path.exists(landsDirAbs):

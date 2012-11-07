@@ -24,7 +24,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithMHSelection.h"
+//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithMHSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
@@ -237,7 +237,7 @@ namespace HPlus {
     TopChiSelection fTopChiSelection;
     TopWithBSelection fTopWithBSelection;
     TopWithWSelection fTopWithWSelection;
-    TopWithMHSelection fTopWithMHSelection;
+    //    TopWithMHSelection fTopWithMHSelection;
     BjetSelection fBjetSelection;
     //    BjetWithPtSelection fBjetWithPtSelection;
     FullHiggsMassCalculator fFullHiggsMassCalculator;

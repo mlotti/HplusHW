@@ -265,11 +265,17 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
         mode = "efficiency"
     ),
 
+#    electronSrc = cms.InputTag("selectedPatElectrons"),
+#    electronConversionSrc = cms.InputTag("allConversions"),
+#    beamspotSrc = cms.InputTag("offlineBeamSpot"),
+#    electronRhoSrc =  cms.InputTag("kt6PFJetsForEleIso", "rho"),
+#    electronFunctions = analysisConfig.electronFunctions.clone(),
+
     tauSrc = cms.InputTag(taus.value()),
     tauFunctions = analysisConfig.tauFunctions.clone(),
 
-    jetSrc = cms.InputTag("selectedPatJets"),
-    jetFunctions = analysisConfig.jetFunctions.clone(),
+#    jetSrc = cms.InputTag("selectedPatJets"),
+#    jetFunctions = analysisConfig.jetFunctions.clone(),
 
     genParticleOriginalSrc = cms.InputTag("genParticles", "", "HLT"),
     genParticleEmbeddedSrc = cms.InputTag("genParticles"),
@@ -279,6 +285,7 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
 #        pfMetOriginalNoMuon_p4 = cms.InputTag("pfMETOriginalNoMuon"), # FIXME: broken ATM
     ),
     doubles = cms.PSet(),
+    bools = cms.PSet()
 )
 
 

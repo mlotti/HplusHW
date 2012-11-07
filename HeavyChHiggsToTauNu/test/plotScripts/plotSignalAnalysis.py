@@ -154,16 +154,34 @@ def doPlots(datasets):
         else:
             return plots.DataMCPlot(datasets, analysis+"/"+name, **kwargs)
 
+    def pickSliceX(th2, ybinName):
+        th1 = ROOT.TH1D(th2.GetName(), th2.GetTitle(), th2.GetNbinsX(), histograms.th1Xmin(th2), histograms.th1Xmax(th2))
+        th1.Sumw2()
+        ybin = None
+        for bin in xrange(1, th2.GetNbinsY()+1):
+            if th2.GetYaxis().GetBinLabel(bin) == ybinName:
+                ybin = bin
+                break
+        if ybin is None:
+            raise Exception("Did not find y bin label %s from histogram %s" % (ybinName, th2.GetName()))
+        for xbin in xrange(0, th2.GetNbinsX()+2): # include under/overflow bins
+            th1.SetBinContent(xbin, th2.GetBinContent(xbin, ybin))
+            th1.SetBinError(xbin, th2.GetBinError(xbin, ybin))
+        return th1
+
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
     
     # Primary vertices
-#    vertexCount(createPlot("Vertices/verticesBeforeWeight", normalizeToOne=True), postfix="BeforeWeight")
-#    vertexCount(createPlot("Vertices/verticesAfterWeight", normalizeToOne=True), postfix="AfterWeight")
-    vertexCount(createPlot("Vertices/verticesTriggeredBeforeWeight", normalizeToOne=False), postfix="BeforeWeightTriggered")
-    vertexCount(createPlot("Vertices/verticesTriggeredAfterWeight", normalizeToOne=False), postfix="AfterWeightTriggered")
-#    vertexCount(createPlot("Verteces/verticesTriggeredBeforeWeight", normalizeToOne=False), postfix="BeforeWeightTriggeredNorm")
-#    vertexCount(createPlot("Verteces/verticesTriggeredAfterWeight", normalizeToOne=False), postfix="AfterWeightTriggeredNorm")
+
+#    vertexCount(createPlot("verticesBeforeWeight", normalizeToOne=True), postfix="BeforeWeight")
+#    vertexCount(createPlot("verticesAfterWeight", normalizeToOne=True), postfix="AfterWeight")
+#    vertexCount(createPlot("Vertices/verticesTriggeredBeforeWeight", normalizeToOne=True), postfix="BeforeWeightTriggered")
+#    vertexCount(createPlot("Vertices/verticesTriggeredAfterWeight", normalizeToOne=True), postfix="AfterWeightTriggered")
+#    vertexCount(createPlot("SignalSelectionFlowVsVertices", normalizeToOne=True, datasetRootHistoArgs={"modify": lambda th2: pickSliceX(th2, "#tau ID")}), postfix="AfterTauIDScaleFactors")
+#    vertexCount(createPlot("verticesTriggeredBeforeWeight", normalizeToOne=False), postfix="BeforeWeightTriggeredNorm")
+#    vertexCount(createPlot("verticesTriggeredAfterWeight", normalizeToOne=False), postfix="AfterWeightTriggeredNorm")
+
 #    met2(createPlot("MET"), "met1", rebin=50)
   
     # Tau
@@ -803,7 +821,7 @@ def common(h, xlabel, ylabel, addLuminosityText=True, textFunction=None):
     h.frame.GetYaxis().SetTitle(ylabel)
     h.draw()
     histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    h.addEnergyText()
     if addLuminosityText:
         h.addLuminosityText()
     if textFunction != None:
@@ -832,11 +850,12 @@ def vertexCount(h, prefix="", postfix="", ratio=True):
 
         h.addMCUncertainty()
 
-        opts = {}
-        opts_log = {"ymin": 1e-9, "ymaxfactor": 200, "xmax": 40}
+
+        opts = {"xmax": 40}
+        opts_log = {"ymin": 1e-10, "ymaxfactor": 10, "xmax": 40}
         opts_log.update(opts)
 
-        opts2 = {"ymin": 0.5, "ymax": 3}
+        opts2 = {"ymin": 0, "ymax": 3}
         opts2_log = opts2
         #opts2_log = {"ymin": 5e-2, "ymax": 5e2}
         
@@ -846,7 +865,7 @@ def vertexCount(h, prefix="", postfix="", ratio=True):
         h.setLegend(histograms.createLegend())
         h.draw()
         histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
+        h.addEnergyText()
         #    histograms.addLuminosityText(x=None, y=None, lumi=191.)
         if h.normalizeToOne:
             histograms.addText(0.35, 0.9, "Normalized to unit area", 17)
@@ -862,7 +881,7 @@ def vertexCount(h, prefix="", postfix="", ratio=True):
         h.setLegend(histograms.createLegend())
         h.draw()
         histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
+        h.addEnergyText()
         #    histograms.addLuminosityText(x=None, y=None, lumi=191.)
         if h.normalizeToOne:
             histograms.addText(0.35, 0.9, "Normalized to unit area", 17)
@@ -987,7 +1006,7 @@ def selectionFlow(h, name, rebin=1, ratio=False):
     h.setLegend(histograms.createLegend())
     h.draw()
     histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    h.addEnergyText()
     h.addLuminosityText()
     addMassBRText(x=0.4, y=0.87)
     h.save()
@@ -1061,7 +1080,7 @@ def tauCandPt(h, step="", rebin=2):
     ROOT.gPad.SetLogy(True)
     h.draw()
     histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    h.addEnergyText()
     #h.addLuminosityText()
     h.save()
     
@@ -1094,7 +1113,7 @@ def tauCandEta(h, step="", rebin=5):
     ROOT.gPad.SetLogy(True)
     h.draw()
     histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    h.addEnergyText()
     #h.addLuminosityText()
     h.save()
 
@@ -1125,7 +1144,7 @@ def tauCandPhi(h, step="", rebin=5):
     ROOT.gPad.SetLogy(True)
     h.draw()
     histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    h.addEnergyText()
     #h.addLuminosityText()
     h.save()
     
