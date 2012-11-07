@@ -118,13 +118,13 @@ datasetsData_Tau_2012 = [
 
 datasetsData_MultiJet_2012 = [
     "MultiJet_190456-190738_2012A_Jul13",
-#    "MultiJet_190782-190949_2012A_Aug06",
-#    "MultiJet_191043-193621_2012A_Jul13",
-#    "MultiJet_193834-194225_2012B_Jul13",
-#    "MultiJet_194270-196531_2012B_Jul13",
-#    "MultiJet_198022-198523_2012C_Aug24",
-#    "MultiJet_198941-200601_2012C_Prompt",
-#    "MultiJet_202792-203742_2012C_Prompt",
+    "MultiJet_190782-190949_2012A_Aug06",
+    "MultiJet_191043-193621_2012A_Jul13",
+    "MultiJet_193834-194225_2012B_Jul13",
+    "MultiJet_194270-196531_2012B_Jul13",
+    "MultiJet_198022-198523_2012C_Aug24",
+    "MultiJet_198941-200601_2012C_Prompt",
+    "MultiJet_202792-203742_2012C_Prompt",
 ]
 
 datasetsMC_2012 = [
@@ -132,7 +132,7 @@ datasetsMC_2012 = [
     "TTToHplusBWB_M90_Summer12",
     "TTToHplusBWB_M100_Summer12",
     "TTToHplusBWB_M120_Summer12",
-#    "TTToHplusBWB_M140_Summer12",
+    "TTToHplusBWB_M140_Summer12",
     "TTToHplusBWB_M150_Summer12",
     "TTToHplusBWB_M155_Summer12",
     "TTToHplusBWB_M160_Summer12",
@@ -140,7 +140,7 @@ datasetsMC_2012 = [
     "TTToHplusBHminusB_M80_Summer12",
 #    "TTToHplusBHminusB_M90_Summer12",
     "TTToHplusBHminusB_M100_Summer12",
-#    "TTToHplusBHminusB_M120_Summer12",
+    "TTToHplusBHminusB_M120_Summer12",
     "TTToHplusBHminusB_M140_Summer12",
     "TTToHplusBHminusB_M150_Summer12",
     "TTToHplusBHminusB_M155_Summer12",
