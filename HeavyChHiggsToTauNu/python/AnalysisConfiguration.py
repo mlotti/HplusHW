@@ -105,6 +105,12 @@ class ConfigBuilder:
 
         self.inputWorkflow = inputWorkflow
 
+        if self.applyTriggerScaleFactor:
+            for trg in self.options.trigger:
+                if not "IsoPFTau" in trg:
+                    print "applyTriggerScaleFactor=True and got non-tau trigger, setting applyTriggerScaleFactor=False"
+                    self.applyTriggerScaleFactor = False
+
         if self.doMETResolution and self.doOptimisation:
             raise Exception("doMETResolution and doOptimisation conflict")
 

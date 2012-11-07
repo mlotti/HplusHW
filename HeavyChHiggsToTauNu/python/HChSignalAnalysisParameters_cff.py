@@ -476,10 +476,12 @@ def setDataTriggerEfficiency(dataVersion, era, pset=triggerEfficiencyScaleFactor
                 pset.mcSelect = "Fall11_PU_2011B"
             if era == "Run2011AB":
                 pset.mcSelect = "Fall11_PU_2011AB"
+        elif dataVersion.isS10():
+            pset.mcSelect = "Summer12_PU_"+era.replace("Run", "")
         elif dataVersion.isHighPU():
 	    pset.mode = "disabled"
         else:
-            raise Exception("MC trigger efficencies are available only for Summer11 and Fall11")
+            raise Exception("MC trigger efficencies are available only for Summer11, Fall11 and Summer12")
     if era == "EPS":
         pset.dataSelect = ["runs_160404_167913"]
     elif era == "Run2011A":
@@ -490,8 +492,18 @@ def setDataTriggerEfficiency(dataVersion, era, pset=triggerEfficiencyScaleFactor
         pset.dataSelect = ["runs_175832_180252"]
     elif era == "Run2011AB":
         pset.dataSelect = ["runs_160404_167913", "runs_170722_173198", "runs_173236_173692", "runs_175832_180252"]
+    elif era == "Run2012A":
+        pset.dataSelect = ["runs_190456_193621"]
+    elif era == "Run2012B":
+        pset.dataSelect = ["runs_193834_196531"]
+    elif era == "Run2012C":
+        pset.dataSelect = ["runs_198022_202585"]
+    elif era == "Run2012AB":
+        pset.dataSelect = ["runs_190456_196531"]
+    elif era == "Run2012ABC":
+        pset.dataSelect = ["runs_190456_202585"]
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011AB'")
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011AB', 'Run2012A', 'Run2012B', 'Run2012C', 'Run2012AB', 'Run2012ABC'")
 
 
 # Weighting by instantaneous luminosity, and the number of true
