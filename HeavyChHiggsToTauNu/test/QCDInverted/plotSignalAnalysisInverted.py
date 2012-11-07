@@ -78,7 +78,7 @@ def main():
     dirs.append(sys.argv[1])
 
     # Read the datasets
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra)
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
 #    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters)
 #    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra)
 #    datasets.updateNAllEventsToPUWeighted()
@@ -728,6 +728,7 @@ def mtComparison(datasets):
     hmt4050 = mt4050.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi4050")
     hmtSum2 = hmt4050.Clone("mtSum2")
     print "Integral 4050  = ",hmt4050.Integral()
+    print "Integral error 4050  = ",hmt4050.IntegralError()   
 #    if (btagging):
 #        hmt4050.Scale(0.00926618859472)   # btag
     hmt4050.Scale(norm_4050) 
@@ -924,6 +925,24 @@ def mtComparison(datasets):
         canvas2.Print("HiggsMassSum.png")
     if (HiggsMassPhi140):
         canvas2.Print("HiggsMassSumPhi140.png")
+        
+############
+    canvas25 = ROOT.TCanvas("canvas25","",500,500)
+    hmtBaseline.SetMarkerColor(1)
+    hmtBaseline.SetMarkerSize(1)
+    hmtBaseline.SetMarkerStyle(27)
+    hmtBaseline.SetFillColor(1)
+#    hmtBaseline.Draw()
+    hmtBaseline_QCD = hmtBaseline.Clone("QCD")
+    hmtBaseline_QCD.Add(hmtEWK,-1)
+    hmtBaseline_QCD.SetMarkerColor(2)
+    hmtBaseline_QCD.SetMarkerSize(1)
+    hmtBaseline_QCD.SetMarkerStyle(20)
+    hmtBaseline_QCD.Draw()
+    hmtBaseline.GetYaxis().SetTitle("Events")
+    hmtBaseline.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
+    if (deltaPhi160):
+        canvas25.Print("mtBaseline.png")
 
 ###########
 
@@ -952,14 +971,18 @@ def mtComparison(datasets):
         
         hmtBaseline.SetMarkerColor(1)
         hmtBaseline.SetMarkerSize(1)
-        hmtBaseline.SetMarkerStyle(27)
+        hmtBaseline.SetMarkerStyle(22)
         hmtBaseline.SetFillColor(1)
 #        hmtBaseline.Draw("same")
         hmtBaseline_QCD = hmtBaseline.Clone("QCD")
         hmtBaseline_QCD.Add(hmtEWK,-1)
+        hmtBaseline_QCD.SetMarkerColor(1)
+        hmtBaseline_QCD.SetMarkerSize(1)
+        hmtBaseline_QCD.SetMarkerStyle(22)
+        hmtBaseline_QCD.SetFillColor(1)
         hmtBaseline_QCD.Draw("same")
         
-        #    hmtEWK.SetMarkerColor(7)
+        #hmtEWK.SetMarkerColor(7)
         #    hmtEWK.SetMarkerSize(1)
         #    hmtEWK.SetMarkerStyle(23)
         #    hmtEWK.SetFillColor(7)
@@ -968,18 +991,19 @@ def mtComparison(datasets):
         tex1 = ROOT.TLatex(0.65,0.7,"No binning")
         #    tex1 = ROOT.TLatex(0.3,0.4,"No binning")
         tex1.SetNDC()
-        tex1.SetTextSize(23)
+        tex1.SetTextSize(20)
         tex1.Draw()    
         marker1 = ROOT.TMarker(0.6,0.715,hmt.GetMarkerStyle())
         #    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
         marker1.SetNDC()
         marker1.SetMarkerColor(hmt.GetMarkerColor())
         marker1.SetMarkerSize(0.9*hmt.GetMarkerSize())
-        marker1.Draw()   
+        marker1.Draw()
+        
         #    tex2 = ROOT.TLatex(0.3,0.3,"With p_{T}^{#tau jet} bins")
         tex2 = ROOT.TLatex(0.65,0.6,"With p_{T}^{#tau jet} bins") 
         tex2.SetNDC()
-        tex2.SetTextSize(23)
+        tex2.SetTextSize(20)
         tex2.Draw()    
         #    marker2 = ROOT.TMarker(0.25,0.32,hmtSum.GetMarkerStyle())
         marker2 = ROOT.TMarker(0.6,0.615,hmtSum.GetMarkerStyle())
@@ -987,6 +1011,17 @@ def mtComparison(datasets):
         marker2.SetMarkerColor(hmtSum.GetMarkerColor())
         marker2.SetMarkerSize(0.9*hmtSum.GetMarkerSize())
         marker2.Draw()
+        
+        tex9 = ROOT.TLatex(0.65,0.5,"Baseline-EWK") 
+        tex9.SetNDC()
+        tex9.SetTextSize(20)
+        tex9.Draw()    
+        #    marker2 = ROOT.TMarker(0.25,0.32,hmtBaseline_QCD.GetMarkerStyle())
+        marker9 = ROOT.TMarker(0.6,0.515,hmtBaseline_QCD.GetMarkerStyle())
+        marker9.SetNDC()
+        marker9.SetMarkerColor(hmtSum.GetMarkerColor())
+        marker9.SetMarkerSize(0.9*hmtBaseline_QCD.GetMarkerSize())
+        marker9.Draw()
         
         tex3 = ROOT.TLatex(0.5,0.85,"With inverted #tau isolation")
         tex3.SetNDC()

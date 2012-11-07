@@ -188,11 +188,17 @@ namespace HPlus {
     Count fTauIsElectronFromHplusCounter;
     Count fTauIsMuonFromHplusCounter;
     Count fTauIsQuarkFromWCounter;
+    Count fTauIsQuarkFromZCounter;
     Count fTauIsElectronFromWCounter;
+    Count fTauIsElectronFromZCounter;
     Count fTauIsMuonFromWCounter;
     Count fTauIsHadronFromWTauCounter;
     Count fTauIsElectronFromWTauCounter;
     Count fTauIsMuonFromWTauCounter;
+    Count fTauIsMuonFromZCounter;
+    Count fTauIsHadronFromZTauCounter;
+    Count fTauIsElectronFromZTauCounter;
+    Count fTauIsMuonFromZTauCounter;
     Count fTauIsElectronFromBottomCounter;
     Count fTauIsMuonFromBottomCounter;
     Count fTauIsHadronFromBottomCounter;
@@ -268,6 +274,7 @@ namespace HPlus {
     WrappedTH1 *hVerticesTriggeredAfterWeight;
 
     // MCAnalysis histograms
+    WrappedTH1 *hgenWmass;
     WrappedTH1 *hGenMET;
     WrappedTH1 *hdeltaPhiMetGenMet;
     WrappedTH1 *hdeltaEtMetGenMet;

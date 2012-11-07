@@ -42,10 +42,10 @@ def main():
         usage()
 
 
-#    HISTONAME = "MET_InvertedTauIdJets"
+    HISTONAME = "MET_InvertedTauIdJets"
 #    HISTONAME = "MET_InvertedTauIdBveto"
 #    HISTONAME = "MET_InvertedTauIdBtag"
-    HISTONAME = "MTInvertedTauIdJet"
+#    HISTONAME = "MTInvertedTauIdJet"
 #    HISTONAME = "MTInvertedTauIdPhi"
 
     invertedhisto = HISTONAME
@@ -59,7 +59,7 @@ def main():
     
     # Create all datasets from a multicrab task
     #datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra )
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau" )
 
     # As we use weighted counters for MC normalisation, we have to
     # As we use weighted counters for MC normalisation, we have to

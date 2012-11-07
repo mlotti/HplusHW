@@ -702,18 +702,18 @@ namespace HPlus {
 		if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMTBaselineTauIdBtag4050->Fill(transverseMass);
 
 		if ( deltaPhi < 160) {
-		  /*
-		  hMTBaselineTauIdJetPhi->Fill(transverseMass);   
-		  if ( tauData.getSelectedTau()->pt() > 150  ) hMTBaselineTauIdJetPhi150->Fill(transverseMass);
-		  if ( tauData.getSelectedTau()->pt() > 120  ) hMTBaselineTauIdJetPhi120->Fill(transverseMass); 
-		  if ( tauData.getSelectedTau()->pt() > 120 && tauData.getSelectedTau()->pt() < 150 ) hMTBaselineTauIdJetPhi120150->Fill(transverseMass); 
-		  if ( tauData.getSelectedTau()->pt() > 100 && tauData.getSelectedTau()->pt() < 120 ) hMTBaselineTauIdJetPhi100120->Fill(transverseMass); 
-		  if ( tauData.getSelectedTau()->pt() > 80 && tauData.getSelectedTau()->pt() < 100 ) hMTBaselineTauIdJetPhi80100->Fill(transverseMass); 
-		  if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hMTBaselineTauIdJetPhi7080->Fill(transverseMass); 
-		  if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMTBaselineTauIdJetPhi6070->Fill(transverseMass); 
-		  if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMTBaselineTauIdJetPhi5060->Fill(transverseMass); 
-		  if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMTBaselineTauIdJetPhi4050->Fill(transverseMass);
-		  */
+		  
+		  hMTBaselineTauIdPhi->Fill(transverseMass);   
+		  if ( tauData.getSelectedTau()->pt() > 150  ) hMTBaselineTauIdPhi150->Fill(transverseMass);
+		  if ( tauData.getSelectedTau()->pt() > 120  ) hMTBaselineTauIdPhi120->Fill(transverseMass); 
+		  if ( tauData.getSelectedTau()->pt() > 120 && tauData.getSelectedTau()->pt() < 150 ) hMTBaselineTauIdPhi120150->Fill(transverseMass); 
+		  if ( tauData.getSelectedTau()->pt() > 100 && tauData.getSelectedTau()->pt() < 120 ) hMTBaselineTauIdPhi100120->Fill(transverseMass); 
+		  if ( tauData.getSelectedTau()->pt() > 80 && tauData.getSelectedTau()->pt() < 100 ) hMTBaselineTauIdPhi80100->Fill(transverseMass); 
+		  if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hMTBaselineTauIdPhi7080->Fill(transverseMass); 
+		  if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMTBaselineTauIdPhi6070->Fill(transverseMass); 
+		  if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMTBaselineTauIdPhi5060->Fill(transverseMass); 
+		  if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMTBaselineTauIdPhi4050->Fill(transverseMass);
+		  
 
 		}
 		
@@ -779,17 +779,7 @@ namespace HPlus {
    
  
     // veto was successfull
-    increment(fTauVetoAfterTauIDCounter);
-    
-    if ( tauData.getSelectedTau()->pt() > 150  ) hMETInvertedTauId150->Fill(metData.getSelectedMET()->et());
-    if ( tauData.getSelectedTau()->pt() > 120  ) hMETInvertedTauId120->Fill(metData.getSelectedMET()->et());
-    if ( tauData.getSelectedTau()->pt() > 120 && tauData.getSelectedTau()->pt() < 150 ) hMETInvertedTauId120150->Fill(metData.getSelectedMET()->et());
-    if ( tauData.getSelectedTau()->pt() > 100 && tauData.getSelectedTau()->pt() < 120 ) hMETInvertedTauId100120->Fill(metData.getSelectedMET()->et());
-    if ( tauData.getSelectedTau()->pt() > 80 && tauData.getSelectedTau()->pt() < 100 ) hMETInvertedTauId80100->Fill(metData.getSelectedMET()->et());
-    if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hMETInvertedTauId7080->Fill(metData.getSelectedMET()->et());     
-    if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMETInvertedTauId6070->Fill(metData.getSelectedMET()->et());
-    if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMETInvertedTauId5060->Fill(metData.getSelectedMET()->et()); 
-    if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMETInvertedTauId4050->Fill(metData.getSelectedMET()->et());
+    increment(fTauVetoAfterTauIDCounter); 
 						
     
     hMETInvertedTauId->Fill(metData.getSelectedMET()->et());  
@@ -912,7 +902,7 @@ namespace HPlus {
       if ( tauData.getSelectedTau()->pt() > 120 && tauData.getSelectedTau()->pt() < 150 ) hMETInvertedTauIdBtag120150->Fill(metData.getSelectedMET()->et());
       if ( tauData.getSelectedTau()->pt() > 100 && tauData.getSelectedTau()->pt() < 120 ) hMETInvertedTauIdBtag100120->Fill(metData.getSelectedMET()->et());
       if ( tauData.getSelectedTau()->pt() > 80 && tauData.getSelectedTau()->pt() < 100 ) hMETInvertedTauIdBtag80100->Fill(metData.getSelectedMET()->et());
-      if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hMETInvertedTauIdBtag7080->Fill(metData.getSelectedMET()->et());     	
+      if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hMETInvertedTauIdBtag7080->Fill(metData.getSelectedMET()->et());    	
       if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMETInvertedTauIdBtag6070->Fill(metData.getSelectedMET()->et());
       if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMETInvertedTauIdBtag5060->Fill(metData.getSelectedMET()->et()); 
       if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMETInvertedTauIdBtag4050->Fill(metData.getSelectedMET()->et());																		
@@ -1104,7 +1094,7 @@ namespace HPlus {
     if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hHiggsMass4050->Fill(HiggsMass); 
 
 
-    if (deltaPhi <  140 ) {
+    if (deltaPhi <  130 ) {
       //      increment(fDeltaPhiTauMET140Counter);
 
       // Inv mass mass with binning  
@@ -1353,4 +1343,4 @@ namespace HPlus {
       getCounterGroupByTauMatch(tauMatch)->incrementTopSelectionCounter();
     }
   }
-}
+ }

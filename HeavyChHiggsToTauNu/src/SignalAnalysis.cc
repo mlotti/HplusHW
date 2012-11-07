@@ -144,6 +144,12 @@ namespace HPlus {
     fTauIsHadronFromWTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->tau->hadrons")),
     fTauIsElectronFromWTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->tau->e")),
     fTauIsMuonFromWTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->tau->mu")),
+    fTauIsQuarkFromZCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->qq")),
+    fTauIsElectronFromZCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->e")),
+    fTauIsMuonFromZCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->mu")),
+    fTauIsHadronFromZTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->tau->hadrons")),
+    fTauIsElectronFromZTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->tau->e")),
+    fTauIsMuonFromZTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->tau->mu")),
     fTauIsElectronFromBottomCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from top->bottom->e")),
     fTauIsMuonFromBottomCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from top->bottom->mu")),
     fTauIsHadronFromBottomCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from top->bottom->hadron")),
@@ -247,7 +253,8 @@ namespace HPlus {
 
     hGenMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "genMET", "genMET", 200, 0., 400.);
     hdeltaPhiMetGenMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiMetGenMet", "deltaPhiMetGenMet", 180, 0., 180.); 
-    hdeltaEtMetGenMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaEtMetGenMet", "deltaEtMetGenMet", 200, -1., 1.); 
+    hdeltaEtMetGenMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaEtMetGenMet", "deltaEtMetGenMet", 200, -1., 1.);
+    hgenWmass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "genWmass", "genWmass", 200, 0.,400.); 
     htransverseMassMuonNotInTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassMuonNotInTau", "transverseMassMuonNotInTau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     htransverseMassElectronNotInTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassElectronNotInTau", "transverseMassElectronNotInTau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     htransverseMassTauNotInTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassTauNotInTau", "transverseMassTauNotInTau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
@@ -1149,7 +1156,8 @@ namespace HPlus {
 	      for(size_t d=0; d< tauMothers.size(); ++d) {
 		const reco::GenParticle dparticle = *tauMothers[d];
 		if( abs(dparticle.pdgId()) == 24 ) increment(fTauNotInTauFromWCounter);
-		if( abs(dparticle.pdgId()) == 24 ) std::cout << " W mass " << dparticle.mass() << std::endl;
+		//		if( abs(dparticle.pdgId()) == 24 ) std::cout << " W mass " << dparticle.mass() << std::endl;
+		if( abs(dparticle.pdgId()) == 24 ) hgenWmass->Fill(dparticle.mass());
 		if( abs(dparticle.pdgId()) == 5 ) increment(fTauNotInTauFromBottomCounter);
 		if( abs(dparticle.pdgId()) == 37 ) increment(fTauNotInTauFromHplusCounter); 	
 	      }
@@ -1256,6 +1264,7 @@ namespace HPlus {
     std::vector<const reco::GenParticle*> mothers = getMothers(parton);
     int motherId=9999;      
     bool wInMothers = false;
+    bool zInMothers = false;
     bool topInMothers = false;
     bool bottomInMothers = false;
     bool tauInMothers = false;
@@ -1265,6 +1274,7 @@ namespace HPlus {
       const reco::GenParticle dparticle = *mothers[d];
       motherId = dparticle.pdgId();
       if( abs(motherId) == 24 ) wInMothers = true; 
+      if( abs(motherId) == 23 ) zInMothers = true; 
       if( abs(motherId) == 6 ) topInMothers = true;
       if( abs(motherId) == 5 ) bottomInMothers = true;
       if( abs(motherId) == 15 ) tauInMothers = true;
@@ -1277,12 +1287,16 @@ namespace HPlus {
     bool FromHplusTau = false;
     bool FromWTau = false;
     bool FromW = false;
+    bool FromZTau = false;
+    bool FromZ = false;
     
-    if (bottomInMothers && !wInMothers  ) FromBottom = true;
-    if (!bottomInMothers && !wInMothers && !hplusInMothers ) FromJet = true;
+    if (bottomInMothers && !wInMothers && !zInMothers  ) FromBottom = true;
+    if (!bottomInMothers && !wInMothers && !hplusInMothers && !zInMothers ) FromJet = true;
     if (hplusInMothers && tauInMothers ) FromHplusTau = true;
     if (wInMothers && tauInMothers ) FromWTau = true;
+    if (zInMothers && tauInMothers ) FromZTau = true;
     if (wInMothers && !tauInMothers ) FromW = true;
+    if (zInMothers && !tauInMothers ) FromZ = true;
 
     if (FromBottom && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromBottomCounter);
     if (FromBottom && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromBottomCounter);
@@ -1305,6 +1319,14 @@ namespace HPlus {
     if (FromWTau && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromWTauCounter);
     if (FromWTau && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromWTauCounter);
     if (FromWTau && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11 ) increment(fTauIsHadronFromWTauCounter);
+
+    if (FromZ && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromZCounter);
+    if (FromZ && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromZCounter);
+    if (FromZ && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11 ) increment(fTauIsQuarkFromZCounter);
+
+    if (FromZTau && std::abs(parton.pdgId()) == 11 ) increment(fTauIsElectronFromZTauCounter);
+    if (FromZTau && std::abs(parton.pdgId()) == 13 ) increment(fTauIsMuonFromZTauCounter);
+    if (FromZTau && std::abs(parton.pdgId()) != 13 && std::abs(parton.pdgId()) != 11 ) increment(fTauIsHadronFromZTauCounter);
 
     //      if (wInMothers && std::abs(parton.pdgId()) == 15 ) tauFromW = true; 
 
