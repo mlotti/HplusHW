@@ -52,6 +52,8 @@ namespace MuonVeto {
   template <typename T> bool eta(T& muon) { return std::abs(muon.p4().Eta()) < 2.5; }
   template <typename T> bool dB(T& muon) { return std::abs(muon.dB()) < 0.02; }
   template <typename T> bool subdetectorIsolation(T& muon) { return (muon.trackIso() + muon.caloIso())/muon.p4().Pt() <= 0.15; }
+  template <typename T> bool pfIsolation(T& muon) { return muon.standardRelativeIsolation() <= 0.2; }
+  template <typename T> bool isolation(T& muon) { return pfIsolation(muon); }
 }
 
 namespace TauID {
@@ -79,6 +81,13 @@ namespace TauID {
   template <typename T> bool isolation(T& tau) { return tau.mediumCombinedIsolationDeltaBetaCorr() > 0.5; }
   template <typename T> bool oneProng(T& tau) { return tau.signalPFChargedHadrCandsCount() == 1; }
   template <typename T> bool rtau(T& tau) { return tau.rtau() > 0.7; }
+}
+
+namespace JetSelection {
+  template <typename T> bool pt(T& jet) { return jet.p4().Pt() > 30; }
+  template <typename T> bool eta(T& jet) { return std::abs(jet.p4().eta()) < 2.4; }
+  template <typename T> bool jetID(T& jet) { return looseID(jet); }
+  template <typename T> bool looseID(T& jet) { return jet.looseID(); }
 }
 
 #endif

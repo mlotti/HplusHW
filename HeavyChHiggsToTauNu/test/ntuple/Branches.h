@@ -222,6 +222,86 @@ private:
 };
 
 
+// Electrons
+class ElectronCollection {
+public:
+  class Electron {
+  public:
+    Electron(ElectronCollection *mc, size_t i);
+    ~Electron();
+
+    size_t index() const { return fIndex; }
+
+    const math::XYZTLorentzVector& p4() { return fCollection->fP4.value()[fIndex]; }
+
+    bool hasGsfTrack() { return fCollection->fHasGsfTrack.value()[fIndex]; }
+    bool hasSuperCluster() { return fCollection->fHasSuperCluster.value()[fIndex]; }
+    bool cutBasedIdVeto() { return fCollection->fCutBasedIdVeto.value()[fIndex]; }
+    bool cutBasedIdLoose() { return fCollection->fCutBasedIdLoose.value()[fIndex]; }
+    bool cutBasedIdMedium() { return fCollection->fCutBasedIdMedium.value()[fIndex]; }
+    bool cutBasedIdTight() { return fCollection->fCutBasedIdTight.value()[fIndex]; }
+
+    double superClusterEta() { return fCollection->fSuperClusterEta.value()[fIndex]; }
+
+    int pdgId() { return fCollection->fPdgId.value()[fIndex]; }
+    int motherPdgId() { return fCollection->fMotherPdgId.value()[fIndex]; }
+    int grandMotherPdgId() { return fCollection->fGrandMotherPdgId.value()[fIndex]; }
+
+  protected:
+    ElectronCollection *fCollection;
+    size_t fIndex;
+  };
+
+
+  ElectronCollection(const std::string prefix = "electrons");
+  ~ElectronCollection();
+
+  void setupBranches(TTree *tree, bool isMC);
+  void setEntry(Long64_t entry) {
+    fP4.setEntry(entry);
+
+    fHasGsfTrack.setEntry(entry);
+    fHasSuperCluster.setEntry(entry);
+    fCutBasedIdVeto.setEntry(entry);
+    fCutBasedIdLoose.setEntry(entry);
+    fCutBasedIdMedium.setEntry(entry);
+    fCutBasedIdTight.setEntry(entry);
+
+    fSuperClusterEta.setEntry(entry);
+
+    fPdgId.setEntry(entry);
+    fMotherPdgId.setEntry(entry);
+    fGrandMotherPdgId.setEntry(entry);
+  }
+
+  size_t size() {
+    return fP4.value().size();
+  }
+  Electron get(size_t i) {
+    return Electron(this, i);
+  }
+
+
+protected:
+  std::string fPrefix;
+
+private:
+  BranchObj<std::vector<math::XYZTLorentzVector> > fP4;
+  BranchObj<std::vector<bool> > fHasGsfTrack;
+  BranchObj<std::vector<bool> > fHasSuperCluster;
+  BranchObj<std::vector<bool> > fCutBasedIdVeto;
+  BranchObj<std::vector<bool> > fCutBasedIdLoose;
+  BranchObj<std::vector<bool> > fCutBasedIdMedium;
+  BranchObj<std::vector<bool> > fCutBasedIdTight;
+
+  BranchObj<std::vector<double> > fSuperClusterEta;
+
+  BranchObj<std::vector<int> > fPdgId;
+  BranchObj<std::vector<int> > fMotherPdgId;
+  BranchObj<std::vector<int> > fGrandMotherPdgId;
+};
+
+
 // Jets
 class JetCollection {
 public:
@@ -232,6 +312,11 @@ public:
 
     size_t index() const { return fIndex; }
     const math::XYZTLorentzVector& p4() { return fCollection->fP4.value()[fIndex]; }
+
+    bool looseID() { return fCollection->fLooseId.value()[fIndex]; }
+    bool tightID() { return fCollection->fTightId.value()[fIndex]; }
+
+    unsigned numberOfDaughters() { return fCollection->fNumberOfDaughters.value()[fIndex]; }
 
   protected:
     JetCollection *fCollection;
@@ -244,6 +329,9 @@ public:
   void setupBranches(TTree *tree);
   void setEntry(Long64_t entry) {
     fP4.setEntry(entry);
+    fNumberOfDaughters.setEntry(entry);
+    fLooseId.setEntry(entry);
+    fTightId.setEntry(entry);
   }
 
   size_t size() {
@@ -259,7 +347,66 @@ protected:
 
 private:
   BranchObj<std::vector<math::XYZTLorentzVector> > fP4;
+  BranchObj<std::vector<unsigned> > fNumberOfDaughters;
+  BranchObj<std::vector<bool> > fLooseId;
+  BranchObj<std::vector<bool> > fTightId;
 };
+
+class JetDetailsCollection: public JetCollection {
+public:
+  class Jet: public JetCollection::Jet {
+  public:
+    Jet(JetDetailsCollection *jdc, size_t i);
+    ~Jet();
+
+    int chargedHadronMultiplicity() { return static_cast<JetDetailsCollection *>(fCollection)->fChm.value()[fIndex]; }
+    int neutralHadronMultiplicity() { return static_cast<JetDetailsCollection *>(fCollection)->fNhm.value()[fIndex]; }
+    int electronMultiplicity() { return static_cast<JetDetailsCollection *>(fCollection)->fElm.value()[fIndex]; }
+    int photonMultiplicity() { return static_cast<JetDetailsCollection *>(fCollection)->fPhm.value()[fIndex]; }
+    int muonMultiplicity() { return static_cast<JetDetailsCollection *>(fCollection)->fMum.value()[fIndex]; }
+
+    double chargedHadronFraction() { return static_cast<JetDetailsCollection *>(fCollection)->fChf.value()[fIndex]; }
+    double neutralHadronFraction() { return static_cast<JetDetailsCollection *>(fCollection)->fNhf.value()[fIndex]; }
+    double electronFraction() { return static_cast<JetDetailsCollection *>(fCollection)->fElf.value()[fIndex]; }
+    double photonFraction() { return static_cast<JetDetailsCollection *>(fCollection)->fPhf.value()[fIndex]; }
+    double muonFraction() { return static_cast<JetDetailsCollection *>(fCollection)->fMuf.value()[fIndex]; }
+  };
+
+  JetDetailsCollection(const std::string prefix = "jets");
+  ~JetDetailsCollection();
+
+  void setupBranches(TTree *tree);
+  void setEntry(Long64_t entry) {
+    JetCollection::setEntry(entry);
+
+    fChm.setEntry(entry);
+    fNhm.setEntry(entry);
+    fElm.setEntry(entry);
+    fPhm.setEntry(entry);
+    fMum.setEntry(entry);
+    fChf.setEntry(entry);
+    fNhf.setEntry(entry);
+    fElf.setEntry(entry);
+    fPhf.setEntry(entry);
+    fMuf.setEntry(entry);
+  }
+  Jet get(size_t i) {
+    return Jet(this, i);
+  }
+
+private:
+  BranchObj<std::vector<int> > fChm;
+  BranchObj<std::vector<int> > fNhm;
+  BranchObj<std::vector<int> > fElm;
+  BranchObj<std::vector<int> > fPhm;
+  BranchObj<std::vector<int> > fMum;
+  BranchObj<std::vector<double> > fChf;
+  BranchObj<std::vector<double> > fNhf;
+  BranchObj<std::vector<double> > fElf;
+  BranchObj<std::vector<double> > fPhf;
+  BranchObj<std::vector<double> > fMuf;
+};
+
 
 // Taus
 class TauCollection {

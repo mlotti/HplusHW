@@ -42,6 +42,7 @@ namespace HPlus {
       tree->Branch("jets_phm", &fJetsPhm);
       tree->Branch("jets_mum", &fJetsMum);
     }
+    tree->Branch("jets_numberOfDaughters", &fJetsNumberOfDaughters);
     tree->Branch("jets_flavour", &fJetsFlavour);
     tree->Branch("jets_genPartonPdgId", &fJetsGenPartonPdgId);
     tree->Branch("jets_jecToRaw", &fJetsJec);
@@ -101,6 +102,8 @@ namespace HPlus {
         fJetsMum.push_back(jet.muonMultiplicity());
       }
 
+      fJetsNumberOfDaughters.push_back(jet.numberOfDaughters());
+
       fJetsJec.push_back(jet.jecFactor(0));
 
 
@@ -134,6 +137,7 @@ namespace HPlus {
       fJetsPhm.clear();
       fJetsMum.clear();
     }
+    fJetsNumberOfDaughters.clear();
     fJetsFlavour.clear();
     fJetsGenPartonPdgId.clear();
 

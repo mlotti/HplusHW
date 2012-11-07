@@ -29,6 +29,10 @@ muonFunctions = cms.PSet(
 #     tauTightIc04Iso = cms.string("userInt('byTightIc04ChargedOccupancy')+userInt('by%TightIc04GammaOccupancy')"),
 )
 
+electronFunctions = cms.PSet(
+    superClusterEta = cms.string("? superCluster().isNonnull() ? superCluster().eta() : -1e20")
+)
+
 jetFunctions = cms.PSet(
     # btag
     tche = cms.string("bDiscriminator('trackCountingHighEffBJetTags')"),
