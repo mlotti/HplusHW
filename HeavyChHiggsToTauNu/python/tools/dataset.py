@@ -1197,11 +1197,7 @@ class Dataset:
 
         self.info = _rescaleInfo(_histoToDict(self.file.Get("configInfo").Get("configinfo")))
         if "energy" in self.info:
-
-            self.info["energy"] = int(round(self.info["energy"]))
-#=======
-#            self.info["energy"] = str(int(round(self.info["energy"])))
-#>>>>>>> sami2/2011
+            self.info["energy"] = str(int(round(self.info["energy"])))
 
         dataVersion = configInfo.Get("dataVersion")
         if dataVersion == None:
