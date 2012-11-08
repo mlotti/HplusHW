@@ -721,7 +721,7 @@ def addPattuple_v53_1(datasets):
         "MultiJet_194270-196531_2012B_Jul13":     TaskDef("/MultiJet/local-Run2012B_13Jul2012_v1_AOD_194270_196531_pattuple_v53_1b-13eab0232030eb0def83f54eafd8085d/USER"), # 5766837 events, Mean 156.7 MB, min 19.7 MB, max 283.0 MB
         "MultiJet_198022-198523_2012C_Aug24":     TaskDef("/MultiJet/local-Run2012C_24Aug2012_v1_AOD_198022_198523_pattuple_v53_1-88f58a18bc4cc32ca93270fe01187879/USER"), # 715141 events, Mean 159.7 MB, min 67.0 MB, max 285.3 MB
         "MultiJet_198941-200601_2012C_Prompt":    TaskDef("/MultiJet/local-Run2012C_PromptReco_v2_AOD_198941_200601_pattuple_v53_1b-8bbd8eb7290730a495ba05939e654f51/USER"), # 4715708 events, Mean 152.5 MB, min 1.5 MB, max 291.0 MB
-        "MultiJet_200961-202504_2012C_Prompt":    TaskDef(""),
+        "MultiJet_200961-202504_2012C_Prompt":    TaskDef("/MultiJet/local-Run2012C_PromptReco_v2_AOD_200961_202504_pattuple_v53_1-87325f0f572c545baf7123d89881d242/USER"), # 4365595 events, Mean 156.3 MB, min 1.7 MB, max 299.6 MB
         "MultiJet_202792-203742_2012C_Prompt":    TaskDef("/MultiJet/local-Run2012C_PromptReco_v2_AOD_202792_203742_pattuple_v53_1-87325f0f572c545baf7123d89881d242/USER"), # 433952 events, Mean 149.4 MB, min 43.7 MB, max 265.8 MB
 
         # 27900-37203 events, max 
