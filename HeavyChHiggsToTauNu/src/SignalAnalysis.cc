@@ -139,13 +139,13 @@ namespace HPlus {
     fTauIsElectronFromHplusCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from H+ ->tau->electron")),
     fTauIsMuonFromHplusCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from H+ ->tau->muon")),
     fTauIsQuarkFromWCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->qq")),
+    fTauIsQuarkFromZCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->qq")),
     fTauIsElectronFromWCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->e")),
+    fTauIsElectronFromZCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->e")),
     fTauIsMuonFromWCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->mu")),
     fTauIsHadronFromWTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->tau->hadrons")),
     fTauIsElectronFromWTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->tau->e")),
     fTauIsMuonFromWTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->tau->mu")),
-    fTauIsQuarkFromZCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->qq")),
-    fTauIsElectronFromZCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->e")),
     fTauIsMuonFromZCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->mu")),
     fTauIsHadronFromZTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->tau->hadrons")),
     fTauIsElectronFromZTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->tau->e")),
@@ -889,8 +889,8 @@ namespace HPlus {
       double topmass = TopChiSelectionData.getTopMass();
       double wmass = TopChiSelectionData.getWMass();
       increment(fTopChiSelectionCounter);
-      double ptBjetInTop = TopChiSelectionData.getSelectedBjet()->pt();
-      double etaBjetInTop = TopChiSelectionData.getSelectedBjet()->eta();
+      //double ptBjetInTop = TopChiSelectionData.getSelectedBjet()->pt();
+      //double etaBjetInTop = TopChiSelectionData.getSelectedBjet()->eta();
       //      double deltaRBjetTau = ROOT::Math::VectorUtil::DeltaR(TopChiSelectionData.getSelectedBjet()->p4(), tauData.getSelectedTau()->p4());
       //      std::cout << "B jet in Top mass:  myMinDeltaR " << deltaRBjetTau   << " pt " << ptBjetInTop  << " eta  " << etaBjetInTop << std::endl;
 
@@ -1110,13 +1110,13 @@ namespace HPlus {
 
 
     edm::Handle <std::vector<LorentzVector> > oneProngTaus;
-    iEvent.getByLabel(fOneProngTauSrc, oneProngTaus);
+    iEvent.getByLabel(fOneProngTauSrc, oneProngTaus); // FIXME: fOneProngTauSrc is not initialized!
 
     edm::Handle <std::vector<LorentzVector> > oneAndThreeProngTaus;
     iEvent.getByLabel(fOneAndThreeProngTauSrc,oneAndThreeProngTaus);
 
     edm::Handle <std::vector<LorentzVector> > threeProngTaus;
-    iEvent.getByLabel(fThreeProngTauSrc, threeProngTaus);
+    iEvent.getByLabel(fThreeProngTauSrc, threeProngTaus); // FIXME: fThreeProngTauSrc is not initialized!
 
     bool myTauFoundStatus = false;
     bool myLeptonVetoStatus = false;
