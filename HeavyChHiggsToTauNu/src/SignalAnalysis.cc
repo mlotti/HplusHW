@@ -619,9 +619,11 @@ namespace HPlus {
 //------ Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
 
+    /* temporary place
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
     hMet_beforeJetCut->Fill(metData.getSelectedMET()->et());  
     if(metData.passedEvent()) increment(fMetCutBeforeJetCutCounter);
+    */
 
     // temporary met cut !!!!!!!!!!!!!!!!!
     //    if(!metData.passedEvent()) return false;
@@ -718,12 +720,12 @@ namespace HPlus {
 
 
 //------ MET cut
-//    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
     hMet->Fill(metData.getSelectedMET()->et()); 
 
-    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    //BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     //    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
-    if(btagData.passedEvent()) hMetWithBtagging->Fill(metData.getSelectedMET()->et(),fEventWeight.getWeight()); 
+    //if(btagData.passedEvent()) hMetWithBtagging->Fill(metData.getSelectedMET()->et(),fEventWeight.getWeight()); 
 
     hCtrlMET->Fill(metData.getSelectedMET()->et());
     if (myFakeTauStatus) hCtrlEWKFakeTausMET->Fill(metData.getSelectedMET()->et());
@@ -766,7 +768,7 @@ namespace HPlus {
 //------ b tagging cut
 
 //    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
-//    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     hCtrlNbjets->Fill(btagData.getBJetCount());
     if (myFakeTauStatus) hCtrlEWKFakeTausNbjets->Fill(btagData.getBJetCount());
     if(!btagData.passedEvent()) return false;
