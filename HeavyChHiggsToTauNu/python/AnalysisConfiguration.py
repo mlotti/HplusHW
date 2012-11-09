@@ -127,14 +127,24 @@ class ConfigBuilder:
     # \return cms.Process object, should be assigned to a local
     #         'process' variable in the analysis job configuration file
     def buildSignalAnalysisInvertedTau(self):
+        import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
         import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysisInvertedTau as signalAnalysisInvertedTau
 
-        # Enforce tau candidate selection
+        print "Ignoring given tauSelectionOperatingMode, using 'standard' for signalAnalysis and 'tauCandidateSelectionOnly' for signalAnalysisInvertedTau"
+
         self.tauSelectionOperatingMode = "tauCandidateSelectionOnly"
         
         def create(param):
-            return [signalAnalysisInvertedTau.createEDFilter(param)]
-        return self._build(create, ["signalAnalysisInvertedTau"])
+            sa = signalAnalysis.createEDFilter(param)
+            sait = signalAnalysisInvertedTau.createEDFilter(param)
+
+            # Enforce standard selection for normal analysis
+            sa.tauSelection.operatingMode = "standard"
+            # Enforce tau candidate selection for invertedTau analysis
+            sait.tauSelection.operatingMode = "tauCandidateSelectionOnly"
+
+            return [sa, sait]
+        return self._build(create, ["signalAnalysis", "signalAnalysisInvertedTau"])
 
     ## Build configuration for signal analysis job
     #
@@ -145,13 +155,6 @@ class ConfigBuilder:
         def create(param):
             return [QCDMeasurementFactorised.createEDFilter(param)]
         return self._build(create, ["QCDMeasurement"])
-
-    def buildQCDMeasurementInverted(self):
-        import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as  signalAnalysis
-        import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysisInvertedTau as signalAnalysisInvertedTau
-        def create(param):
-            return [signalAnalysis.createEDFilter(param),signalAnalysisInvertedTau.createEDFilter(param)]
-        return self._build(create, ["signalAnalysis","signalAnalysisInvertedTau"])
 
     ## Accumulate the number of analyzers to a category
     #
