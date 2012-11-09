@@ -30,7 +30,6 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MathFunctions.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 typedef math::XYZTLorentzVector LorentzVector;

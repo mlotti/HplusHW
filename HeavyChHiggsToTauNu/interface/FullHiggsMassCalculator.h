@@ -3,8 +3,6 @@
 #define HiggsAnalysis_HeavyChHiggsToTauNu_FullHiggsMassCalculator_h
 
 #include "FWCore/Utilities/interface/InputTag.h"
-#include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
-//#include "PhysicsTools/Utilities/interface/Lumi3DReWeighting.h" // no longer needed for Fall11
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"

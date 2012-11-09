@@ -6,17 +6,16 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 
 namespace edm {
+  class Event;
+  class EventSetup;
   class ParameterSet;
 }
 
 namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
-
-  class TopChiSelection;
 
   class TopChiSelection {
   public:

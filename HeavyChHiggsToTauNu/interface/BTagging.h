@@ -6,17 +6,17 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DirectionalCut.h"
 
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTaggingScaleFactorFromDB.h"
-
 namespace edm {
+  class Event;
+  class EventSetup;
   class ParameterSet;
 }
 
+class BTaggingScaleFactorFromDB;
+
 namespace HPlus {
-  class JetSelection;
   class HistoWrapper;
   class WrappedTH1;
 
