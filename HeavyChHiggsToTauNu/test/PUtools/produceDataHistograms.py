@@ -29,8 +29,7 @@ runsJson = [
     (["2012A"], 191043, 193621, certifiedLumi.files["13Jul2012ReReco"]),
     (["2012B"], 193834, 196531, certifiedLumi.files["13Jul2012ReReco"]),
     (["2012C"], 198022, 198523, certifiedLumi.files["24Aug2012ReReco"]),
-    (["2012C"], 198941, 200601, certifiedLumi.files["PromptReco12"]),
-    (["2012C"], 202792, 203742, certifiedLumi.files["PromptReco12"]),
+    (["2012C"], 198941, 203742, certifiedLumi.files["PromptReco12"]),
     ]
 for tpl in runsJson:
     if tpl[0][0] in ["2012A", "2012B"]:
