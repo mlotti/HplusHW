@@ -34,24 +34,24 @@ namespace HPlus {
     return false;
   }
 
-  WrappedTH1::WrappedTH1(HistoWrapper& histoWrapper, TH1* histo, bool isActive)
+  WrappedTH1::WrappedTH1(HistoWrapper& histoWrapper, TH1* histo, HistoWrapper::HistoLevel level)
   : fHistoWrapper(histoWrapper),
   h(histo),
-  bIsActive(isActive) { }
+  fLevel(level) { }
 
   WrappedTH1::~WrappedTH1() { }
 
-  WrappedTH2::WrappedTH2(HistoWrapper& histoWrapper, TH2* histo, bool isActive)
+  WrappedTH2::WrappedTH2(HistoWrapper& histoWrapper, TH2* histo, HistoWrapper::HistoLevel level)
   : fHistoWrapper(histoWrapper),
   h(histo),
-  bIsActive(isActive) { }
+  fLevel(level) { }
 
   WrappedTH2::~WrappedTH2() { }
 
-  WrappedTH3::WrappedTH3(HistoWrapper& histoWrapper, TH3* histo, bool isActive)
+  WrappedTH3::WrappedTH3(HistoWrapper& histoWrapper, TH3* histo, HistoWrapper::HistoLevel level)
   : fHistoWrapper(histoWrapper),
   h(histo),
-  bIsActive(isActive) { }
+  fLevel(level) { }
 
   WrappedTH3::~WrappedTH3() { }
 
