@@ -60,14 +60,13 @@ namespace HPlus {
     ~JetSelection();
 
     // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate
-    //    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus);
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau, int nVertices = 1);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau, int nVertices = 1);
 
-    //    Data  analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau);
-    //    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau);
-    //    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus);
-
   private:
+    EventCounter& fEventCounter;
+    HistoWrapper& fHistoWrapper;
+
     // Input parameters
     edm::InputTag fSrc;
     const double fPtCut;
