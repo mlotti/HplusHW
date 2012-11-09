@@ -7,9 +7,6 @@
 #include "DataFormats/PatCandidates/interface/TriggerObject.h"
 // 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerMETEmulation.h"
 
 #include <string>

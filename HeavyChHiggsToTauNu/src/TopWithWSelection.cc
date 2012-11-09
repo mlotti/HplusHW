@@ -1,5 +1,4 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 #include "FWCore/Framework/interface/Event.h"
