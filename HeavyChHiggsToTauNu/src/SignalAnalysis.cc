@@ -553,6 +553,7 @@ namespace HPlus {
     if (!vetoTauData.passedEvent()) increment(fVetoTauCounter);
 
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! temporary place !!!!!!!!!!!!!!!!!!
+    /*
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
 
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
@@ -561,6 +562,7 @@ namespace HPlus {
     if (!iEvent.isRealData()) {
       doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData, metData, genData);
     }
+    */
 
 //------ Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
@@ -615,9 +617,9 @@ namespace HPlus {
 
 
 //------ Hadronic jet selection
-//    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
 
-//    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
     hMet_beforeJetCut->Fill(metData.getSelectedMET()->et());  
     if(metData.passedEvent()) increment(fMetCutBeforeJetCutCounter);
 
