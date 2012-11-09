@@ -485,7 +485,7 @@ namespace HPlus {
     // plot leading track without pt cut
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
     increment(fTauFakeScaleFactorCounter);
-    if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
+    //if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
     increment(fOneTauCounter);
     // Primary vertex assignment analysis - diagnostics only
     fVertexAssignmentAnalysis.analyze(iEvent.isRealData(), pvData.getSelectedVertex(), tauData.getSelectedTau(), myTauMatch);
