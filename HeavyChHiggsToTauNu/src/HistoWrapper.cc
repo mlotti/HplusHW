@@ -34,22 +34,22 @@ namespace HPlus {
     return false;
   }
 
-  WrappedTH1::WrappedTH1(EventWeight& eventWeight, TH1* histo, bool isActive)
-  : fEventWeight(eventWeight),
+  WrappedTH1::WrappedTH1(HistoWrapper& histoWrapper, TH1* histo, bool isActive)
+  : fHistoWrapper(histoWrapper),
   h(histo),
   bIsActive(isActive) { }
 
   WrappedTH1::~WrappedTH1() { }
 
-  WrappedTH2::WrappedTH2(EventWeight& eventWeight, TH2* histo, bool isActive)
-  : fEventWeight(eventWeight),
+  WrappedTH2::WrappedTH2(HistoWrapper& histoWrapper, TH2* histo, bool isActive)
+  : fHistoWrapper(histoWrapper),
   h(histo),
   bIsActive(isActive) { }
 
   WrappedTH2::~WrappedTH2() { }
 
-  WrappedTH3::WrappedTH3(EventWeight& eventWeight, TH3* histo, bool isActive)
-  : fEventWeight(eventWeight),
+  WrappedTH3::WrappedTH3(HistoWrapper& histoWrapper, TH3* histo, bool isActive)
+  : fHistoWrapper(histoWrapper),
   h(histo),
   bIsActive(isActive) { }
 

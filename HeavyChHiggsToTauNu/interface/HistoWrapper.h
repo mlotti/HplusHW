@@ -69,7 +69,7 @@ namespace HPlus {
   /// Wrapper class for TH1 object
   class WrappedTH1 {
   public:
-    WrappedTH1(EventWeight& eventWeight, TH1* histo, bool isActive);
+    WrappedTH1(HistoWrapper& histoWrapper, TH1* histo, bool isActive);
     ~WrappedTH1();
 
     /// Returns true if the histogram exists
@@ -79,12 +79,12 @@ namespace HPlus {
     /// Returns the x axis of the histogram for bin label modification
     TAxis* GetXaxis() { return h->GetXaxis(); }
     /// Fills histogram (if it exists) with event weight
-    template<typename Arg1> void Fill(const Arg1& a1) { if (bIsActive) h->Fill(a1, fEventWeight.getWeight()); }
+    template<typename Arg1> void Fill(const Arg1& a1) { if (bIsActive) h->Fill(a1, fHistoWrapper.getWeight()); }
     /// Fills histogram (if it exists) with custom event weight
     template<typename Arg1, typename Arg2> void Fill(const Arg1& a1, const Arg2& a2) { if (bIsActive) h->Fill(a1, a2); }
 
   private:
-    EventWeight& fEventWeight;
+    HistoWrapper& fHistoWrapper;
     TH1* h;
     bool bIsActive;
   };
@@ -92,7 +92,7 @@ namespace HPlus {
   /// Wrapper class for TH2 object
   class WrappedTH2 {
   public:
-    WrappedTH2(EventWeight& eventWeight, TH2* histo, bool isActive);
+    WrappedTH2(HistoWrapper& histoWrapper, TH2* histo, bool isActive);
     ~WrappedTH2();
 
     /// Returns true if the histogram exists
@@ -102,12 +102,12 @@ namespace HPlus {
     /// Returns the x axis of the histogram for bin label modification
     TAxis* GetXaxis() { return h->GetXaxis(); }
     /// Fills histogram (if it exists) with event weight
-    template<typename Arg1, typename Arg2> void Fill(const Arg1& a1, const Arg2& a2) { if (bIsActive) h->Fill(a1, a2, fEventWeight.getWeight()); }
+    template<typename Arg1, typename Arg2> void Fill(const Arg1& a1, const Arg2& a2) { if (bIsActive) h->Fill(a1, a2, fHistoWrapper.getWeight()); }
     /// Fills histogram (if it exists) with custom event weight
     template<typename Arg1, typename Arg2, typename Arg3> void Fill(const Arg1& a1, const Arg2& a2, const Arg3& a3) { if (bIsActive) h->Fill(a1, a2, a3); }
 
   private:
-    EventWeight& fEventWeight;
+    HistoWrapper& fHistoWrapper;
     TH2* h;
     bool bIsActive;
   };
@@ -115,7 +115,7 @@ namespace HPlus {
   /// Wrapper class for TH3 object
   class WrappedTH3 {
   public:
-    WrappedTH3(EventWeight& eventWeight, TH3* histo, bool isActive);
+    WrappedTH3(HistoWrapper& histoWrapper, TH3* histo, bool isActive);
     ~WrappedTH3();
 
     /// Returns true if the histogram exists
@@ -125,12 +125,12 @@ namespace HPlus {
     /// Returns the x axis of the histogram for bin label modification
     TAxis* GetXaxis() { return h->GetXaxis(); }
     /// Fills histogram (if it exists) with event weight
-    template<typename Arg1, typename Arg2> void Fill(const Arg1& a1, const Arg2& a2) { if (bIsActive) h->Fill(a1, a2, fEventWeight.getWeight()); }
+    template<typename Arg1, typename Arg2> void Fill(const Arg1& a1, const Arg2& a2) { if (bIsActive) h->Fill(a1, a2, fHistoWrapper.getWeight()); }
     /// Fills histogram (if it exists) with custom event weight
     template<typename Arg1, typename Arg2, typename Arg3> void Fill(const Arg1& a1, const Arg2& a2, const Arg3& a3) { if (bIsActive) h->Fill(a1, a2, a3); }
 
   private:
-    EventWeight& fEventWeight;
+    HistoWrapper& fHistoWrapper;
     TH3* h;
     bool bIsActive;
   };
@@ -149,11 +149,11 @@ namespace HPlus {
       // it should be done at the level of code which is calling this command
       T* histo = fd.make<T>(a1, a2, a3, a4, a5);
       histo->Sumw2();
-      fAllTH1Histos.push_back(new WrappedTH1(fEventWeight, histo, true));
+      fAllTH1Histos.push_back(new WrappedTH1(*this, histo, true));
     } else {
       // Histogram is suppressed
       TH1* histo = 0;
-      fAllTH1Histos.push_back(new WrappedTH1(fEventWeight, histo, false));
+      fAllTH1Histos.push_back(new WrappedTH1(*this, histo, false));
     }
     return fAllTH1Histos.at(fAllTH1Histos.size()-1);
   }
@@ -165,11 +165,11 @@ namespace HPlus {
     if (level <= fAmbientLevel) {
       T* histo = fd.make<T>(a1, a2, a3, a4, a5, a6, a7, a8);
       histo->Sumw2();
-      fAllTH2Histos.push_back(new WrappedTH2(fEventWeight, histo, true));
+      fAllTH2Histos.push_back(new WrappedTH2(*this, histo, true));
     } else {
       // Histogram is suppressed
       TH2* histo = 0;
-      fAllTH2Histos.push_back(new WrappedTH2(fEventWeight, histo, false));
+      fAllTH2Histos.push_back(new WrappedTH2(*this, histo, false));
     }
     return fAllTH2Histos.at(fAllTH2Histos.size()-1);
   }
@@ -183,11 +183,11 @@ namespace HPlus {
     if (level <= fAmbientLevel) {
       T* histo = fd.make<T>(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
       histo->Sumw2();
-      fAllTH3Histos.push_back(new WrappedTH3(fEventWeight, histo, true));
+      fAllTH3Histos.push_back(new WrappedTH3(*this, histo, true));
     } else {
       // Histogram is suppressed
       TH3* histo = 0;
-      fAllTH3Histos.push_back(new WrappedTH3(fEventWeight, histo, false));
+      fAllTH3Histos.push_back(new WrappedTH3(*this, histo, false));
     }
     return fAllTH3Histos.at(fAllTH3Histos.size()-1);
   }
