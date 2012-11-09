@@ -40,7 +40,8 @@ namespace HPlus {
   EventCounter::EventCounter(const edm::ParameterSet& iConfig):
     label(iConfig.getParameter<std::string>("@module_label")),
     eventWeightPointer(&defaultWeight),
-    finalized(false)
+    finalized(false),
+    fIsEnabled(true)
   {
     allCounters_.push_back(Counter("counter")); // ensure main counter has always index 0
 
@@ -87,6 +88,9 @@ namespace HPlus {
   }
 
   void EventCounter::incrementCount(size_t counterIndex, size_t countIndex, int value) {
+    if(!fIsEnabled)
+      return;
+
     Counter& counter = allCounters_.at(counterIndex);
     counter.values.at(countIndex) += value;
     double dval = value * (*eventWeightPointer);

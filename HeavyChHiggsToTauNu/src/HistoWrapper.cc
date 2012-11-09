@@ -1,9 +1,11 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 namespace HPlus {
-  
-  HistoWrapper::HistoWrapper(EventWeight& eventWeight, std::string level)
-  : fEventWeight(eventWeight) { 
+
+  HistoWrapper::HistoWrapper(EventWeight& eventWeight, std::string level):
+    fEventWeight(eventWeight),
+    fIsEnabled(true)
+  { 
     // Find level from string
     if (level == "Vital") {
       fAmbientLevel = kVital;

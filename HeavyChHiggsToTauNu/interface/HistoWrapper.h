@@ -3,6 +3,7 @@
 #define HiggsAnalysis_HeavyChHiggsToTauNu_HistoWrapper_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TemporaryDisabler.h"
 #include "CommonTools/Utils/interface/TFileDirectory.h"
 
 #include "TH1.h"
@@ -26,6 +27,8 @@ namespace HPlus {
       kInformative,
       kDebug
     };
+
+    typedef HPlus::TemporaryDisabler<HistoWrapper> TemporaryDisabler;
 
     HistoWrapper(EventWeight& eventWeight, std::string level);
     ~HistoWrapper();
@@ -52,8 +55,12 @@ namespace HPlus {
     double getWeight() const { return fEventWeight.getWeight(); }
 
     bool isActive(HistoLevel level) const {
-      return level <= fAmbientLevel;
+      return fIsEnabled && (level <= fAmbientLevel);
     }
+
+    void enable(bool enabled) { fIsEnabled = enabled; }
+    bool getEnableStatus() const { return fIsEnabled; }
+    TemporaryDisabler disableTemporarily() { return TemporaryDisabler(*this, false); }
 
   private:
     /// Method for checking if a directory exists
@@ -68,6 +75,8 @@ namespace HPlus {
     std::vector<WrappedTH1*> fAllTH1Histos;
     std::vector<WrappedTH2*> fAllTH2Histos;
     std::vector<WrappedTH3*> fAllTH3Histos;
+
+    bool fIsEnabled;
   };
 
   /// Wrapper class for TH1 object
