@@ -29,8 +29,7 @@ namespace HPlus {
   JetSelection::Data::~Data() {}
   
   JetSelection::JetSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
-    fEventCounter(eventCounter),
-    fHistoWrapper(histoWrapper),
+    BaseSelection(eventCounter, histoWrapper),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
@@ -166,6 +165,7 @@ namespace HPlus {
   JetSelection::~JetSelection() {}
 
   JetSelection::Data JetSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr< reco::Candidate >& tau, int nVertices) {
+    ensureSilentAnalyzeAllowed(iEvent);
 
     // Disable histogram filling until the return call
 
@@ -173,10 +173,15 @@ namespace HPlus {
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
 
-    return analyze(iEvent, iSetup, tau, nVertices);
+    return privateAnalyze(iEvent, iSetup, tau, nVertices);
   }
 
   JetSelection::Data JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr< reco::Candidate >& tau, int nVertices) {
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup, tau, nVertices);
+  }
+
+  JetSelection::Data JetSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr< reco::Candidate >& tau, int nVertices) {
     // Reset variables
     iNHadronicJets = -1;
     iNHadronicJetsInFwdDir = -1;
