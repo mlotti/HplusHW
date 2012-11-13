@@ -82,6 +82,8 @@ def addNtuple_53X(datasets):
         "TTToHplusBWB_M155_Summer12":             TaskDef(njobsIn=1),
         "TTToHplusBWB_M160_Summer12":             TaskDef(njobsIn=1),
 
+        "TTToHplusBWB_M120_ext_Summer12":         TaskDef(njobsIn=1),
+
         "TTToHplusBHminusB_M80_Summer12":         TaskDef(njobsIn=1),
 #        "TTToHplusBHminusB_M90_Summer12":         TaskDef(njobsIn=1),
         "TTToHplusBHminusB_M100_Summer12":        TaskDef(njobsIn=1),
@@ -90,6 +92,17 @@ def addNtuple_53X(datasets):
         "TTToHplusBHminusB_M150_Summer12":        TaskDef(njobsIn=1),
         "TTToHplusBHminusB_M155_Summer12":        TaskDef(njobsIn=1),
         "TTToHplusBHminusB_M160_Summer12":        TaskDef(njobsIn=1),
+
+        "TTToHplusBHminusB_M80_ext_Summer12":     TaskDef(njobsIn=1),
+        "TTToHplusBHminusB_M100_ext_Summer12":    TaskDef(njobsIn=1),
+        "TTToHplusBHminusB_M160_ext_Summer12":    TaskDef(njobsIn=1),
+
+        "Hplus_taunu_t-channel_M80_Summer12":     TaskDef(njobsIn=1),
+        "Hplus_taunu_t-channel_M90_Summer12":     TaskDef(njobsIn=1),
+        "Hplus_taunu_t-channel_M100_Summer12":    TaskDef(njobsIn=1),
+        "Hplus_taunu_t-channel_M140_Summer12":    TaskDef(njobsIn=1),
+        "Hplus_taunu_t-channel_M150_Summer12":    TaskDef(njobsIn=1),
+        "Hplus_taunu_t-channel_M160_Summer12":    TaskDef(njobsIn=1),
 
         "Hplus_taunu_s-channel_M80_Summer12":     TaskDef(njobsIn=1),
         "Hplus_taunu_s-channel_M90_Summer12":     TaskDef(njobsIn=1),
@@ -112,7 +125,10 @@ def addNtuple_53X(datasets):
         "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDef(njobsIn=6),
         "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDef(njobsIn=6),
         "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDef(njobsIn=6),
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12":  TaskDef(njobsIn=20),
         "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDef(njobsIn=6),
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDef(njobsIn=4),
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDef(njobsIn=20),
         "QCD_Pt20_MuEnriched_TuneZ2star_Summer12":TaskDef(njobsIn=22),
         
         "WW_TuneZ2star_Summer12":                 TaskDef(njobsIn=10),
@@ -126,6 +142,7 @@ def addNtuple_53X(datasets):
         "W3Jets_TuneZ2star_Summer12":             TaskDef(njobsIn=16),
         "W4Jets_TuneZ2star_Summer12":             TaskDef(njobsIn=15),
         "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDef(njobsIn=30),
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDef(njobsIn=38),
         "T_t-channel_TuneZ2star_Summer12":        TaskDef(njobsIn=4),
         "Tbar_t-channel_TuneZ2star_Summer12":     TaskDef(njobsIn=2),
         "T_tW-channel_TuneZ2star_Summer12":       TaskDef(njobsIn=1),
