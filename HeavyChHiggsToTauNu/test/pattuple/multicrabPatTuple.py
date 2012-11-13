@@ -37,6 +37,8 @@ datasets_Signal = [
     "TTToHplusBWB_M155_Summer12",
     "TTToHplusBWB_M160_Summer12",
 
+    "TTToHplusBWB_M120_ext_Summer12",
+
     "TTToHplusBHminusB_M80_Summer12",
 #    "TTToHplusBHminusB_M90_Summer12",
     "TTToHplusBHminusB_M100_Summer12",
@@ -45,6 +47,17 @@ datasets_Signal = [
     "TTToHplusBHminusB_M150_Summer12",
     "TTToHplusBHminusB_M155_Summer12",
     "TTToHplusBHminusB_M160_Summer12",
+
+    "TTToHplusBHminusB_M80_ext_Summer12",
+    "TTToHplusBHminusB_M100_ext_Summer12",
+    "TTToHplusBHminusB_M160_ext_Summer12",
+
+    "Hplus_taunu_t-channel_M80_Summer12",
+    "Hplus_taunu_t-channel_M90_Summer12",
+    "Hplus_taunu_t-channel_M100_Summer12",
+    "Hplus_taunu_t-channel_M140_Summer12",
+    "Hplus_taunu_t-channel_M150_Summer12",
+    "Hplus_taunu_t-channel_M160_Summer12",
 
     "Hplus_taunu_s-channel_M80_Summer12",
     "Hplus_taunu_s-channel_M90_Summer12",
@@ -69,7 +82,10 @@ datasets_QCD = [
     "QCD_Pt80to120_TuneZ2star_Summer12",
     "QCD_Pt120to170_TuneZ2star_Summer12",
     "QCD_Pt170to300_TuneZ2star_Summer12",
+    "QCD_Pt170to300_TuneZ2star_v2_Summer12",
     "QCD_Pt300to470_TuneZ2star_Summer12",
+    "QCD_Pt300to470_TuneZ2star_v2_Summer12",
+    "QCD_Pt300to470_TuneZ2star_v3_Summer12",
 ]
 
 datasets_VV =[
@@ -87,6 +103,7 @@ datasets_TT_EWK = [
     "W3Jets_TuneZ2star_Summer12",
     "W4Jets_TuneZ2star_Summer12",
     "DYJetsToLL_M50_TuneZ2star_Summer12",
+    "DYJetsToLL_M10to50_TuneZ2star_Summer12"
 ]
 
 datasets_SingleTop = [

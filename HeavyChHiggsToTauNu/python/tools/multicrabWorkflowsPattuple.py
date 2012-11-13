@@ -330,6 +330,8 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
         "TTToHplusBWB_M155_Summer12":       TaskDefMC(njobsIn=25, njobsOut=1),
         "TTToHplusBWB_M160_Summer12":       TaskDefMC(njobsIn=25, njobsOut=1),
 
+        "TTToHplusBWB_M120_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
+
         "TTToHplusBHminusB_M80_Summer12":        TaskDefMC(njobsIn=20, njobsOut=1),
         "TTToHplusBHminusB_M90_Summer12":        TaskDefMC(njobsIn=20, njobsOut=1),
         "TTToHplusBHminusB_M100_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
@@ -338,6 +340,17 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
         "TTToHplusBHminusB_M150_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
         "TTToHplusBHminusB_M155_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
         "TTToHplusBHminusB_M160_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
+
+        "TTToHplusBHminusB_M80_ext_Summer12":    TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
+        "TTToHplusBHminusB_M100_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
+        "TTToHplusBHminusB_M160_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
+
+        "Hplus_taunu_t-channel_M80_Summer12":    TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_t-channel_M90_Summer12":    TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_t-channel_M100_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_t-channel_M140_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_t-channel_M150_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_t-channel_M160_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
 
         "Hplus_taunu_s-channel_M80_Summer12":       TaskDefMC(njobsIn=10, njobsOut=1),
         "Hplus_taunu_s-channel_M90_Summer12":       TaskDefMC(njobsIn=10, njobsOut=1),
@@ -360,7 +373,10 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
         "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDefMC(njobsIn= 20, njobsOut=1),
         "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 40, njobsOut=1),
         "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 80, njobsOut=2),
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12":  TaskDefMC(njobsIn=300, njobsOut=2), # FIXME out
         "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDefMC(njobsIn=250, njobsOut=5),
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDefMC(njobsIn=150, njobsOut=5), # FIXME out
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDefMC(njobsIn=850, njobsOut=5), # FIXME out
                                             
         "WW_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut=10),
         "WZ_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut=10),
@@ -373,6 +389,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
         "W3Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=490, njobsOut=10),
         "W4Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=550, njobsOut=12),
         "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDefMC(njobsIn=350, njobsOut= 2),
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDefMC(njobsIn=400, njobsOut= 2), # FIXME out
         "T_t-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn= 50, njobsOut= 2),
         "Tbar_t-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 50, njobsOut= 1),
         "T_tW-channel_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut= 1),
@@ -734,6 +751,8 @@ def addPattuple_v53_1(datasets):
         "TTToHplusBWB_M155_Summer12":             TaskDef("/TTToHplusBWB_M-155_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40), # Mean 89.7 MB, min 29.9 MB, max 100.3 MB
         "TTToHplusBWB_M160_Summer12":             TaskDef("/TTToHplusBWB_M-160_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40), # Mean 91.1 MB, min 12.2 MB, max 101.4 MB
 
+        "TTToHplusBWB_M120_ext_Summer12":         TaskDef(""),
+
         # 29908-40068 events
         "TTToHplusBHminusB_M80_Summer12":         TaskDef("/TTToHplusBHminusB_M-80_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),  # Mean 78.1 MB, min 74.8 MB, max 83.1 MB
 #        "TTToHplusBHminusB_M90_Summer12":         TaskDef(""),
@@ -743,6 +762,17 @@ def addPattuple_v53_1(datasets):
         "TTToHplusBHminusB_M150_Summer12":        TaskDef("/TTToHplusBHminusB_M-150_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40), # Mean 82.8 MB, min 23.4 MB, max 89.4 MB
         "TTToHplusBHminusB_M155_Summer12":        TaskDef("/TTToHplusBHminusB_M-155_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40), # Mean 86.4 MB, min 79.7 MB, max 91.6 MB
         "TTToHplusBHminusB_M160_Summer12":        TaskDef("/TTToHplusBHminusB_M-160_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40), # Mean 88.0 MB, min 83.2 MB, max 93.5 MB
+
+        "TTToHplusBHminusB_M80_ext_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M100_ext_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M160_ext_Summer12":    TaskDef(""),
+
+        "Hplus_taunu_t-channel_M80_Summer12":     TaskDef(""),
+        "Hplus_taunu_t-channel_M90_Summer12":     TaskDef(""),
+        "Hplus_taunu_t-channel_M100_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M140_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M150_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M160_Summer12":    TaskDef(""),
 
         # 10275-17098 events
         "Hplus_taunu_s-channel_M80_Summer12":     TaskDef("/Hplus_taunu_s-channel_M-80_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),  # Mean 28.6 MB, min 1.6 MB, max 33.9 MB
@@ -767,7 +797,10 @@ def addPattuple_v53_1(datasets):
         "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDef("/QCD_Pt-80to120_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v3_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 21951 events, Mean 104.5 MB, min 32.8 MB, max 115.7 MB
         "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDef("/QCD_Pt-120to170_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v3_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 75972 events, Mean 178.4 MB, min 105.1 MB, max 190.5 MB
         "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDef("/QCD_Pt-170to300_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 232796 events, Mean 280.1 MB, min 15.0 MB, max 298.4 MB
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12":  TaskDef(""),
         "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDef("/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_pattuple_v53_1b-cad8d1056ca20d363262a3efa1d97a74/USER"), # 616204 events, Mean 258.3 MB, min 85.4 MB, max 272.3 MB
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDef(""),
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDef(""),
 
         "WW_TuneZ2star_Summer12":                 TaskDef("/WW_TuneZ2star_8TeV_pythia6_tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 288671 events, Mean 161.0 MB, min 5.9 MB, max 171.0 MB
         "WZ_TuneZ2star_Summer12":                 TaskDef("/WZ_TuneZ2star_8TeV_pythia6_tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 256016 events, Mean 146.5 MB, min 11.6 MB, max 157.1 MB
@@ -780,6 +813,7 @@ def addPattuple_v53_1(datasets):
         "W3Jets_TuneZ2star_Summer12":             TaskDef("/W3JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 616480 events, Mean 114.8 MB, min 6.9 MB, max 125.0 MB
         "W4Jets_TuneZ2star_Summer12":             TaskDef("/W4JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 1002056 events, Mean 178.0 MB, min 76.2 MB, max 194.2 MB
         "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDef("/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 180247 events, Mean 52.3 MB, min 8.6 MB, max 59.7 MB
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDef(""),
         "T_t-channel_TuneZ2star_Summer12":        TaskDef("/T_t-channel_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 222877, Mean 395.6 MB, min 161.4 MB, max 414.6 MB
         "Tbar_t-channel_TuneZ2star_Summer12":     TaskDef("/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 27667, Mean 191.4 MB, min 1.6 MB, max 206.7 MB
         "T_tW-channel_TuneZ2star_Summer12":       TaskDef("/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 61356 events, Mean 285.5 MB, min 2.8 MB, max 311.0 MB
@@ -822,6 +856,8 @@ def addPattuple_vNEXT_SKELETON_53X(datasets):
         "TTToHplusBWB_M155_Summer12":             TaskDef(""),
         "TTToHplusBWB_M160_Summer12":             TaskDef(""),
 
+        "TTToHplusBWB_M120_ext_Summer12":         TaskDef(""),
+
         "TTToHplusBHminusB_M80_Summer12":         TaskDef(""),
         "TTToHplusBHminusB_M90_Summer12":         TaskDef(""),
         "TTToHplusBHminusB_M100_Summer12":        TaskDef(""),
@@ -830,6 +866,17 @@ def addPattuple_vNEXT_SKELETON_53X(datasets):
         "TTToHplusBHminusB_M150_Summer12":        TaskDef(""),
         "TTToHplusBHminusB_M155_Summer12":        TaskDef(""),
         "TTToHplusBHminusB_M160_Summer12":        TaskDef(""),
+
+        "TTToHplusBHminusB_M80_ext_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M100_ext_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M160_ext_Summer12":    TaskDef(""),
+
+        "Hplus_taunu_t-channel_M80_Summer12":     TaskDef(""),
+        "Hplus_taunu_t-channel_M90_Summer12":     TaskDef(""),
+        "Hplus_taunu_t-channel_M100_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M140_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M150_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M160_Summer12":    TaskDef(""),
 
         "Hplus_taunu_s-channel_M80_Summer12":     TaskDef(""),
         "Hplus_taunu_s-channel_M90_Summer12":     TaskDef(""),
@@ -852,7 +899,10 @@ def addPattuple_vNEXT_SKELETON_53X(datasets):
         "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDef(""),
         "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDef(""),
         "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDef(""),
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12":  TaskDef(""),
         "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDef(""),
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDef(""),
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDef(""),
 
         "WW_TuneZ2star_Summer12":                 TaskDef(""),
         "WZ_TuneZ2star_Summer12":                 TaskDef(""),
@@ -865,6 +915,7 @@ def addPattuple_vNEXT_SKELETON_53X(datasets):
         "W3Jets_TuneZ2star_Summer12":             TaskDef(""),
         "W4Jets_TuneZ2star_Summer12":             TaskDef(""),
         "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDef(""),
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDef(""),
         "T_t-channel_TuneZ2star_Summer12":        TaskDef(""),
         "Tbar_t-channel_TuneZ2star_Summer12":     TaskDef(""),
         "T_tW-channel_TuneZ2star_Summer12":       TaskDef(""),
