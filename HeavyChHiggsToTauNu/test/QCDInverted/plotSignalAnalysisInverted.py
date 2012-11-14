@@ -728,7 +728,7 @@ def mtComparison(datasets):
     hmt4050 = mt4050.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi4050")
     hmtSum2 = hmt4050.Clone("mtSum2")
     print "Integral 4050  = ",hmt4050.Integral()
-    print "Integral error 4050  = ",hmt4050.IntegralError()   
+     
 #    if (btagging):
 #        hmt4050.Scale(0.00926618859472)   # btag
     hmt4050.Scale(norm_4050) 
