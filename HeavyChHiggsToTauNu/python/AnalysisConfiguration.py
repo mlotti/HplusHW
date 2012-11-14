@@ -258,7 +258,8 @@ class ConfigBuilder:
             process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(self.dataVersion.getTriggerProcess())
             process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
             process.commonSequence *= process.hplusPrescaleWeightProducer
-            process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
+            for module in analysisModules:
+                module.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
         # Allow customization AFTER all settings have been applied, and BEFORE the printout
         if self.customizeAnalysis != None:
