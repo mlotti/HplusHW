@@ -137,7 +137,10 @@ ntuple = cms.EDAnalyzer("HPlusTauNtupleAnalyzer",
     jetSrc = cms.InputTag(param.jetSelection.src.value()),
     jetFunctions = analysisConfig.jetFunctions.clone(),
 
-    genParticleSrc = cms.InputTag("genParticles"),
+# GenParticles are used only for tau MC matching
+# Better use the same collection as in preselection
+#    genParticleSrc = cms.InputTag("genParticles"),
+    genParticleSrc = cms.InputTag("embeddingLikePreselectionGenTau"),
     mets = cms.PSet(
 #        pfMet_p4 = cms.InputTag("patMETs"+PF2PATVersion),
         pfMet_p4 = cms.InputTag(param.MET.rawSrc.value()),
