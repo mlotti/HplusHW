@@ -919,6 +919,16 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     setattr(process, genTausName, genTaus)
     genTauSequence *= genTaus
 
+    if selectOnlyFirstGenTau:
+        # Select first generator tau for the jet cleaning and tau selection
+         genTauFirst = cms.EDProducer("HPlusFirstCandidateSelector",
+             src = cms.InputTag(genTausName)
+         )
+         genTauFirstName = prefix+"First"
+         setattr(process, genTauFirstName, genTauFirst)
+         genTauSequence *= genTauFirst
+         genTausName = genTauFirstName
+
     genTausFilter = cms.EDFilter("CandViewCountFilter",
         src = cms.InputTag(genTausName),
         minNumber = cms.uint32(1),
@@ -930,16 +940,6 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     setattr(process, prefix+"GenTauCount", genTausCount)
     genTauSequence *= genTausCount
     counters.append(prefix+"GenTauCount")
-
-    if selectOnlyFirstGenTau:
-        # Select first generator tau for the jet cleaning and tau selection
-         genTauFirst = cms.EDProducer("HPlusFirstCandidateSelector",
-             src = cms.InputTag(genTausName)
-         )
-         genTauFirstName = prefix+"First"
-         setattr(process, genTauFirstName, genTauFirst)
-         genTauSequence *= genTauFirst
-         genTausName = genTauFirstName
 
     # Tau selection
     genTauReco = cms.EDProducer("HPlusPATTauCandViewClosestDeltaRSelector",

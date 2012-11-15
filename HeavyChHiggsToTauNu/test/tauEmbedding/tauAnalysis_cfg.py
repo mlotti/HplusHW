@@ -111,7 +111,9 @@ if options.doPat != 0:
 
 process.preselectionSequence = cms.Sequence()
 preselectionCounters = additionalCounters[:]
-preselectionCounters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.preselectionSequence, param, pileupWeight=puWeightNames[-1]))
+preselectionCounters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.preselectionSequence, param, pileupWeight=puWeightNames[-1],
+#                                                                                    selectOnlyFirstGenTau=True,
+                                                                                    ))
 
 # Add type 1 MET
 #import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
