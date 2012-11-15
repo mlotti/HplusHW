@@ -79,7 +79,7 @@ namespace hplus {
       }
     }
 
-    std::cout << "Inserting " << ret->size() << " objects" << std::endl;
+    //std::cout << "Inserting " << ret->size() << " objects" << std::endl;
     iEvent.put(ret);
 
   }
