@@ -57,7 +57,7 @@ skimVersion = "v44_4_2"
 config = {"skim":                 {"workflow": "tauembedding_skim_"+skimVersion,         "config": "muonSkim_cfg.py"},
           "embedding":            {"workflow": "tauembedding_embedding_%s",              "config": "embed.py"},
           "analysis":             {"workflow": "tauembedding_analysis_%s",               "config": "embeddingAnalysis_cfg.py"},
-          "analysisTau":          {"workflow": "AOD is the input, wf missing?",          "config": "tauAnalysis_cfg.py"},
+          "analysisTau":          {"workflow": "embeddingAodAnalysis_44X",               "config": "tauAnalysis_cfg.py"},
           "signalAnalysis":       {"workflow": "tauembedding_analysis_%s",               "config": "../signalAnalysis_cfg.py"},
           "signalAnalysisGenTau": {"workflow": "analysis_v44_4",                         "config": "../signalAnalysis_cfg.py"},
           "EWKMatching":          {"workflow": "tauembedding_analysis_%s",               "config": "../EWKMatching_cfg.py"},
@@ -237,7 +237,10 @@ def createTasks(opts, step, version=None):
     if step == "signalAnalysisGenTau":
         multicrab.appendArgAll("doTauEmbeddingLikePreselection=1")
 
-    multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
+    if step in ["skim"]:
+        multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
+    else:
+        multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist_noStageout)
 
     # Create multicrab task(s)
     prefix = "multicrab_"+step+dirName
