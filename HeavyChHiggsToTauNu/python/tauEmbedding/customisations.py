@@ -870,7 +870,7 @@ def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPresel
 
     return counters
 
-def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLikePreselection", disableTrigger=True, pileupWeight=None):
+def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLikePreselection", disableTrigger=True, pileupWeight=None, selectOnlyFirstGenTau=False):
     counters = []
 
     genTauSequence = cms.Sequence()
@@ -931,13 +931,15 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     genTauSequence *= genTausCount
     counters.append(prefix+"GenTauCount")
 
-    # Select first generator tau for the jet cleaning and tau selection
-    # genTauFirst = cms.EDProducer("HPlusFirstCandidateSelector",
-    #     src = cms.InputTag(genTausName)
-    # )
-    # genTauFirstName = prefix+"First"
-    # setattr(process, genTauFirstName, genTauFirst)
-    # genTauSequence *= genTauFirst
+    if selectOnlyFirstGenTau:
+        # Select first generator tau for the jet cleaning and tau selection
+         genTauFirst = cms.EDProducer("HPlusFirstCandidateSelector",
+             src = cms.InputTag(genTausName)
+         )
+         genTauFirstName = prefix+"First"
+         setattr(process, genTauFirstName, genTauFirst)
+         genTauSequence *= genTauFirst
+         genTausName = genTauFirstName
 
     # Tau selection
     genTauReco = cms.EDProducer("HPlusPATTauCandViewClosestDeltaRSelector",
@@ -955,18 +957,19 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     genTauSequence *= genTauReco
     param.tauSelection.src = genTauRecoName
 
-    # Select the tau candidate which is most likely going to pass the identification
-    genTauSelected = cms.EDProducer("HPlusPATTauMostLikelyIdentifiedSelector",
-        eventCounter = param.eventCounter.clone(),
-        tauSelection = param.tauSelection.clone()
-    )
-    genTauSelectedName = prefix+"TauSelected"
-    setattr(process, genTauSelectedName, genTauSelected)
-    genTauSequence *= genTauSelected
-    param.tauSelection.src = genTauSelectedName
-
+    if not selectOnlyFirstGenTau:
+        # Select the tau candidate which is most likely going to pass the identification
+        genTauSelected = cms.EDProducer("HPlusPATTauMostLikelyIdentifiedSelector",
+            eventCounter = param.eventCounter.clone(),
+            tauSelection = param.tauSelection.clone()
+        )
+        genTauSelectedName = prefix+"TauSelected"
+        setattr(process, genTauSelectedName, genTauSelected)
+        genTauSequence *= genTauSelected
+        param.tauSelection.src = genTauSelectedName
+    
     genTauCleanPSet = cms.PSet(
-        src                 = cms.InputTag(genTauSelectedName),
+        src                 = cms.InputTag(param.tauSelection.src.value()),
         algorithm           = cms.string("byDeltaR"),
         preselection        = cms.string(""),
         deltaR              = cms.double(0.5),
