@@ -29,7 +29,7 @@ jetSelection += "&& chargedHadronEnergyFraction() > 0 && chargedMultiplicity() >
 jetSelection += "&& userFloat('Beta') > 0.2"
 
 generatorTauPt = 40
-generatorTauPt = 41
+#generatorTauPt = 41
 generatorTauSelection = "abs(pdgId()) == 15 && pt() > %d && abs(eta()) < 2.1 && abs(mother().pdgId()) != 15"
 
 def customiseParamForTauEmbedding(param, options, dataVersion):
@@ -895,6 +895,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
 
     allCount = counterPrototype.clone()
     setattr(process, prefix+"AllCount", allCount)
+    genTauSequence *= allCount
     counters.append(prefix+"AllCount")
 
     # Primary vertex
@@ -906,6 +907,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     pvFilterCount = counterPrototype.clone()
     setattr(process, prefix+"PrimaryVertex", pvFilter)
     setattr(process, prefix+"PrimaryVertexCount", pvFilterCount)
+    genTauSequence *= (pvFilter * pvFilterCount)
     counters.append(prefix+"PrimaryVertexCount")
 
     # Generator taus (if you modify this, remember to modify similar in above)
@@ -915,15 +917,18 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     )
     genTausName = prefix+"GenTau"
     setattr(process, genTausName, genTaus)
+    genTauSequence *= genTaus
 
     genTausFilter = cms.EDFilter("CandViewCountFilter",
         src = cms.InputTag(genTausName),
         minNumber = cms.uint32(1),
     )
     setattr(process, prefix+"GenTauFilter", genTausFilter)
+    genTauSequence *= genTausFilter
 
     genTausCount = counterPrototype.clone()
     setattr(process, prefix+"GenTauCount", genTausCount)
+    genTauSequence *= genTausCount
     counters.append(prefix+"GenTauCount")
 
     # Select first generator tau for the jet cleaning and tau selection
@@ -932,6 +937,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     # )
     # genTauFirstName = prefix+"First"
     # setattr(process, genTauFirstName, genTauFirst)
+    # genTauSequence *= genTauFirst
 
     # Tau selection
     genTauReco = cms.EDProducer("HPlusPATTauCandViewClosestDeltaRSelector",
@@ -946,6 +952,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
         genTauReco.src = param.tauSelection.src.value()
     genTauRecoName = prefix+"TauMCMatched"
     setattr(process, genTauRecoName, genTauReco)
+    genTauSequence *= genTauReco
     param.tauSelection.src = genTauRecoName
 
     # Select the tau candidate which is most likely going to pass the identification
@@ -955,6 +962,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     )
     genTauSelectedName = prefix+"TauSelected"
     setattr(process, genTauSelectedName, genTauSelected)
+    genTauSequence *= genTauSelected
     param.tauSelection.src = genTauSelectedName
 
     genTauCleanPSet = cms.PSet(
@@ -990,6 +998,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     cleanedMuonsName = prefix+"CleanedMuons"
     param.GlobalMuonVeto.MuonCollectionName = cleanedMuonsName
     setattr(process, cleanedMuonsName, cleanedMuons)
+    genTauSequence *= (cleanedElectrons * cleanedMuons)
 
     # Electron and muon veto
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as ElectronVeto
@@ -1003,6 +1012,10 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     setattr(process, prefix+"MuonVeto", muveto)
     setattr(process, prefix+"MuonVetoCount", muvetoCount)
     counters.extend([prefix+"ElectronVetoCount", prefix+"MuonVetoCount"])
+    genTauSequence *= (
+        eveto * evetoCount *
+        muveto * muvetoCount
+    )
 
     # 3 jets
     from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
@@ -1027,14 +1040,6 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     counters.append(cleanedJetsName+"Count")
 
     genTauSequence *= (
-        allCount *
-        pvFilter * pvFilterCount *
-        genTaus * genTausFilter * genTausCount * 
-        #genTauFirst * 
-        genTauReco * genTauSelected *
-        cleanedElectrons * cleanedMuons *
-        eveto * evetoCount *
-        muveto * muvetoCount *
         cleanedJets * cleanedJetsFilter * cleanedJetsCount 
     )
     setattr(process, prefix+"Sequence", genTauSequence)
