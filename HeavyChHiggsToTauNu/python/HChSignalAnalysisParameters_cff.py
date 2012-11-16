@@ -244,15 +244,20 @@ bTagging = cms.untracked.PSet(
 #    discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
     discriminator = cms.untracked.string("combinedSecondaryVertexBJetTags"),
 #    discriminator = cms.untracked.string("jetProbabilityBJetTags"),   
-    leadingDiscriminatorCut = cms.untracked.double(0.898), # used for best bjet candidates (best discriminator)
-    subleadingDiscriminatorCut = cms.untracked.double(0.898), # used for other bjet candidates
+    leadingDiscriminatorCut = cms.untracked.double(0.679), # used for best bjet candidates (best discriminator)
+    subleadingDiscriminatorCut = cms.untracked.double(0.679), # used for other bjet candidates
     ptCut = cms.untracked.double(20.0),
     etaCut = cms.untracked.double(2.4),
     jetNumber = cms.untracked.uint32(1),
     jetNumberCutDirection = cms.untracked.string("GEQ"), # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
-    UseBTagDB      = cms.untracked.bool(False),
-    BTagDBAlgo     = cms.untracked.string("TCHEL"), #FIXME TCHEL
-    BTagUserDBAlgo = cms.untracked.string("BTAGTCHEL_hplusBtagDB_TTJets") #FIXME
+    UseBTagDB      = cms.untracked.bool(True),
+    LabelTag       = cms.untracked.string("MUJETSWPBTAGCSVM"),#### for MU+JETS btag SF
+   # LabelTag       = cms.untracked.string("MISTAGCSVM"),######### for MU+JETS Mistag SF
+   # LabelTag       = cms.untracked.string("TTBARDISCRIMBTAGCSV"),########## for TTBar efficiency
+   # LabelTag       = cms.untracked.string("TTBARWPBTAGCSVM"),######### for TTBAr btag SF
+    
+    BTagDBAlgo     = cms.untracked.string("CSVM"), #FIXME TCHEL
+    BTagUserDBAlgo = cms.untracked.string("BTAGCSVM_hplusBtagDB_TTJets") #FIXME
 )
 
 
