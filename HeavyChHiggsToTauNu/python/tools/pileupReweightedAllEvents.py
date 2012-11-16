@@ -280,6 +280,10 @@ _weightedAllEvents = {
         "Hplus_taunu_s-channel_M150_Summer12": WeightedAllEvents(unweighted=292369, weighted=292865.177155, up=292816.209021, down=292905.802260),
         "Hplus_taunu_s-channel_M155_Summer12": WeightedAllEvents(unweighted=269476, weighted=269722.457910, up=269675.116759, down=269747.649890),
         "Hplus_taunu_s-channel_M160_Summer12": WeightedAllEvents(unweighted=300000, weighted=299675.183803, up=299860.272313, down=299476.159592),
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12": WeightedAllEvents(unweighted=19970232, weighted=19970317.764816, up=19969214.284685, down=19971788.978534),
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12": WeightedAllEvents(unweighted=3488200, weighted=3486512.414576, up=3487107.603103, down=3485856.023696),
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12": WeightedAllEvents(unweighted=19894000, weighted=19893739.729457, up=19893060.194524, down=19894864.667174),
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": WeightedAllEvents(unweighted=35480374, weighted=35480751.037672, up=35481430.274763, down=35479944.227379),
     },
     "Run2012B": {
         "TTToHplusBWB_M80_Summer12": WeightedAllEvents(unweighted=190276, weighted=190477.510012, up=190322.921793, down=190692.377546),
@@ -335,6 +339,10 @@ _weightedAllEvents = {
         "Hplus_taunu_s-channel_M150_Summer12": WeightedAllEvents(unweighted=292369, weighted=292808.610593, up=292620.407595, down=293032.300678),
         "Hplus_taunu_s-channel_M155_Summer12": WeightedAllEvents(unweighted=269476, weighted=269507.939775, up=269543.104875, down=269439.313600),
         "Hplus_taunu_s-channel_M160_Summer12": WeightedAllEvents(unweighted=300000, weighted=300034.365788, up=300065.581553, down=299929.446403),
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12": WeightedAllEvents(unweighted=19970232, weighted=19969758.834448, up=19969347.806091, down=19970331.544656),
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12": WeightedAllEvents(unweighted=3488200, weighted=3486866.948029, up=3487087.615964, down=3486799.981190),
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12": WeightedAllEvents(unweighted=19894000, weighted=19895428.571390, up=19895065.893528, down=19895572.862147),
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": WeightedAllEvents(unweighted=35480374, weighted=35481233.947784, up=35480550.550909, down=35481578.966556),
     },
     "Run2012C": {
         "TTToHplusBWB_M80_Summer12": WeightedAllEvents(unweighted=190276, weighted=190527.380295, up=190353.723184, down=190738.797207),
@@ -390,6 +398,10 @@ _weightedAllEvents = {
         "Hplus_taunu_s-channel_M150_Summer12": WeightedAllEvents(unweighted=292369, weighted=292846.818332, up=292726.358111, down=292965.208935),
         "Hplus_taunu_s-channel_M155_Summer12": WeightedAllEvents(unweighted=269476, weighted=269538.991375, up=269530.363468, down=269550.487886),
         "Hplus_taunu_s-channel_M160_Summer12": WeightedAllEvents(unweighted=300000, weighted=299975.808292, up=300095.233301, down=299800.913028),
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12": WeightedAllEvents(unweighted=19970232, weighted=19969814.260005, up=19969228.888082, down=19970656.817804),
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12": WeightedAllEvents(unweighted=3488200, weighted=3487234.884717, up=3487559.843597, down=3486876.505416),
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12": WeightedAllEvents(unweighted=19894000, weighted=19894926.799725, up=19894462.104056, down=19895459.426518),
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": WeightedAllEvents(unweighted=35480374, weighted=35480381.347296, up=35480026.113777, down=35480751.027015),
     },
     "Run2012AB": {
         "TTToHplusBWB_M80_Summer12": WeightedAllEvents(unweighted=190276, weighted=190502.626813, up=190340.432155, down=190720.720387),
@@ -445,6 +457,10 @@ _weightedAllEvents = {
         "Hplus_taunu_s-channel_M150_Summer12": WeightedAllEvents(unweighted=292369, weighted=292817.934491, up=292652.681654, down=293011.449873),
         "Hplus_taunu_s-channel_M155_Summer12": WeightedAllEvents(unweighted=269476, weighted=269543.298920, up=269564.864468, down=269490.136844),
         "Hplus_taunu_s-channel_M160_Summer12": WeightedAllEvents(unweighted=300000, weighted=299975.161620, up=300031.740316, down=299854.730884),
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12": WeightedAllEvents(unweighted=19970232, weighted=19969850.963114, up=19969325.797957, down=19970571.774684),
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12": WeightedAllEvents(unweighted=3488200, weighted=3486808.510089, up=3487090.910456, down=3486644.388151),
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12": WeightedAllEvents(unweighted=19894000, weighted=19895150.198484, up=19894735.293314, down=19895456.130353),
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": WeightedAllEvents(unweighted=35480374, weighted=35481154.348057, up=35480695.555737, down=35481309.512118),
     },
     "Run2012ABC": {
         "TTToHplusBWB_M80_Summer12": WeightedAllEvents(unweighted=190276, weighted=190512.360646, up=190345.658598, down=190727.828751),
@@ -500,6 +516,10 @@ _weightedAllEvents = {
         "Hplus_taunu_s-channel_M150_Summer12": WeightedAllEvents(unweighted=292369, weighted=292829.292509, up=292681.653512, down=292993.266508),
         "Hplus_taunu_s-channel_M155_Summer12": WeightedAllEvents(unweighted=269476, weighted=269541.605060, up=269551.297610, down=269513.868737),
         "Hplus_taunu_s-channel_M160_Summer12": WeightedAllEvents(unweighted=300000, weighted=299975.415912, up=300056.707718, down=299833.568041),
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12": WeightedAllEvents(unweighted=19970232, weighted=19969830.287084, up=19969271.206340, down=19970619.681616),
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12": WeightedAllEvents(unweighted=3488200, weighted=3487048.697617, up=3487355.072256, down=3486775.145621),
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12": WeightedAllEvents(unweighted=19894000, weighted=19895024.352112, up=19894581.399088, down=19895457.987181),
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": WeightedAllEvents(unweighted=35480374, weighted=35480718.897223, up=35480318.442970, down=35480994.902122),
     },
 
 }
