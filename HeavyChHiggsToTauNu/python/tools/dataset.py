@@ -2338,7 +2338,7 @@ class SelectorArgs:
         return copy.deepcopy(self)
 
     def update(self, selectorArgs):
-        for a in self.options:
+        for a, dv in self.optionsDefaultValues:
             val = getattr(selectorArgs, a)
             if val is not None:
                 setattr(self, a, val)
