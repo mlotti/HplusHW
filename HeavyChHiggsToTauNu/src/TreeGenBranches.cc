@@ -61,6 +61,7 @@ namespace HPlus {
     fNumberBquarks = 0;
     fNumberWTaus = 0;
     fNumberZTaus = 0;
+    fNumberHTaus = 0;
     fNumberXTaus = 0;
   }
 }
