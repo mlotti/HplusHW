@@ -1241,6 +1241,9 @@ class Dataset:
     def deepCopy(self):
         d = Dataset(self.name, self.file.GetName(), self._unweightedCounterDir, self._weightedCounters, self._analysisBaseName, self._dataEra, self._doEraReplace)
         d.info.update(self.info)
+        for attr in ["counterDir", "nAllEventsUnweighted", "nAllEventsWeighted", "nAllEvents"]:
+            setattr(d, attr, getattr(self, attr))
+
         return d
 
     ## Get ROOT histogram (or actually any object from the analysis directory)
