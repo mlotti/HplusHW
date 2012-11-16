@@ -60,7 +60,9 @@ class MuonAnalysisSelectorArgs(dataset.SelectorArgs):
     def __init__(self, **kwargs):
         dataset.SelectorArgs.__init__(self,
                                       [("puWeight", ""),
-                                       ("isolationMode", "standard")],
+                                       ("isolationMode", "standard"),
+                                       ("bquarkMode", "disabled")
+                                       ],
                                       **kwargs)
 
 class Selections:

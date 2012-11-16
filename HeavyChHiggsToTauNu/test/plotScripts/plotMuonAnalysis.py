@@ -38,11 +38,67 @@ weight = {
 #weight = ""
 
 mcOnly = True
-#mcOnly = False
+mcOnly = False
 mcLuminosity = 5049.069000
 
 mergeMC = True
 #mergeMC = False
+
+def splitWJets(datasets):
+    wjetsName = "WJets_TuneZ2_Fall11"
+
+    wjets = datasets.getDataset(wjetsName).deepCopy()
+    wjets.setName(wjetsName+"_B")
+    datasets.append(wjets)
+    datasets.rename(wjetsName, wjetsName+"_NoB")
+
+    plots._physicalToLogical.update({
+            wjetsName+"_NoB": "WJets_NoB",
+            wjetsName+"_B": "WJets_B",
+            })
+
+    wjetsIndex = plots._datasetOrder.index("WJets")
+    plots._datasetOrder.insert(wjetsIndex+1, "WJets_NoB")
+    plots._datasetOrder.insert(wjetsIndex+2, "WJets_B")
+    plots._legendLabels.update({
+            "WJets_NoB": "W+jets (no b)",
+            "WJets_B":   "W+b+jets",
+            })
+    wStyle = plots._plotStyles["WJets"]
+    w2Style = wStyle.clone()
+    w2Style.color = ROOT.kOrange+7
+    plots._plotStyles.update({
+            "WJets_NoB": wStyle,
+            "WJets_B": w2Style
+            })
+
+def splitDYJets(datasets):
+    dyjetsName = "DYJetsToLL_M50_TuneZ2_Fall11"
+
+    dyjets = datasets.getDataset(dyjetsName).deepCopy()
+    dyjets.setName(dyjetsName+"_B")
+    datasets.append(dyjets)
+    datasets.rename(dyjetsName, dyjetsName+"_NoB")
+
+    plots._physicalToLogical.update({
+            dyjetsName+"_NoB": "DYJetsToLL_NoB",
+            dyjetsName+"_B": "DYJetsToLL_B",
+            })
+
+    wjetsIndex = plots._datasetOrder.index("DYJetsToLL")
+    plots._datasetOrder.insert(wjetsIndex+1, "DYJetsToLL_NoB")
+    plots._datasetOrder.insert(wjetsIndex+2, "DYJetsToLL_B")
+    plots._legendLabels.update({
+            "DYJetsToLL_NoB": "Z/#gamma*+jets (no b)",
+            "DYJetsToLL_B":   "Z/#gamma*+b+jets",
+            })
+    dyStyle = plots._plotStyles["DYJetsToLL"]
+    dy2Style = dyStyle.clone()
+    dy2Style.color = ROOT.kTeal-8
+    plots._plotStyles.update({
+            "DYJetsToLL_NoB": dyStyle,
+            "DYJetsToLL_B": dy2Style
+            })
 
 def main():
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, weightedCounters=len(weight)>0)
@@ -79,10 +135,13 @@ def main():
 
     #datasetsMC = datasets.deepCopy()
     #datasetsMC.remove(datasets.getDataDatasetNames())
-    
+
+    splitWJets(datasets)
+    splitDYJets(datasets)
+
     if mergeMC:
         plots.mergeRenameReorderForDataMC(datasets)
-    
+
     styleGenerator = styles.generator(fill=True)
 
     style = tdrstyle.TDRStyle()
@@ -107,6 +166,12 @@ def main():
                                           #process=False,
                                           maxEvents=10000,
                                           )
+        ntupleCache.setDatasetSelectorArgs({
+                "WJets_NoB": tauEmbedding.MuonAnalysisSelectorArgs(bquarkMode="breject"),
+                "WJets_B": tauEmbedding.MuonAnalysisSelectorArgs(bquarkMode="baccept"),
+                "DYJetsToLL_NoB": tauEmbedding.MuonAnalysisSelectorArgs(bquarkMode="breject"),
+                "DYJetsToLL_B": tauEmbedding.MuonAnalysisSelectorArgs(bquarkMode="baccept"),
+                })
 
 
         doPlots(datasets, name, ntupleCache)

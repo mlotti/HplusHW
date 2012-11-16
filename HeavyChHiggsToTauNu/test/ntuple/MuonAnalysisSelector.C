@@ -10,11 +10,27 @@
 #include<stdexcept>
 #include<cstdlib>
 
+namespace BQuark {
+  enum Mode {
+    kDisabled,
+    kBReject,
+    kBAccept
+  };
+
+  inline Mode stringToMode(const std::string& bquarkMode) {
+    if     (bquarkMode == "disabled")         return kDisabled;
+    else if(bquarkMode == "breject")          return kBReject;
+    else if(bquarkMode == "baccept")          return kBAccept;
+
+    throw std::runtime_error("bquarkMode is '"+bquarkMode+"', allowed values are 'disabled', 'breject', 'baccept'");
+   
+  }
+}
 
 // MuonAnalysisSelector
 class MuonAnalysisSelector: public BaseSelector {
 public:
-  MuonAnalysisSelector(const std::string& puWeight = "", const std::string& isolationMode="standard");
+  MuonAnalysisSelector(const std::string& puWeight = "", const std::string& isolationMode="standard", const std::string& bquarkMode="disabled");
   ~MuonAnalysisSelector();
 
   void setOutput(TDirectory *dir);
@@ -33,11 +49,13 @@ private:
   Branch<double> fPuWeight;
   Branch<unsigned> fSelectedVertexCount;
   Branch<unsigned> fVertexCount;
+  Branch<unsigned> fGenNumberBQuarks;
 
   Branch<bool> fElectronVetoPassed;
   Branch<bool> fHBHENoiseFilterPassed;
 
   EmbeddingMuonIsolation::Mode fIsolationMode;
+  BQuark::Mode fBQuarkMode;
 
   TH1 *makePt(const char *name);
   TH1 *makeIso(const char *name);
@@ -46,6 +64,7 @@ private:
   // Output
   // Counts
   EventCounter::Count cAll;
+  EventCounter::Count cBQuark;
   EventCounter::Count cMuonKinematics;
   EventCounter::Count cMuonDB;
   EventCounter::Count cMuonIsolation;
@@ -102,11 +121,13 @@ private:
   TH1 *hVertexCount_AfterJetSelection;
 };
 
-MuonAnalysisSelector::MuonAnalysisSelector(const std::string& puWeight, const std::string& isolationMode):
+MuonAnalysisSelector::MuonAnalysisSelector(const std::string& puWeight, const std::string& isolationMode, const std::string& bquarkMode):
   BaseSelector(),
   fPuWeightName(puWeight),
   fIsolationMode(EmbeddingMuonIsolation::stringToMode(isolationMode)),
+  fBQuarkMode(BQuark::stringToMode(bquarkMode)),
   cAll(fEventCounter.addCounter("All events")),
+  cBQuark(fEventCounter.addCounter("B-quark MC filter")),
   cMuonKinematics(fEventCounter.addCounter("Muon kinematics")),
   cMuonDB(fEventCounter.addCounter("Muon dB")),
   cMuonIsolation(fEventCounter.addCounter("Muon isolation")),
@@ -181,6 +202,9 @@ void MuonAnalysisSelector::setupBranches(TTree *tree) {
   fSelectedVertexCount.setupBranch(tree, "selectedPrimaryVertex_count");
   fVertexCount.setupBranch(tree, "goodPrimaryVertex_count");
   //fVertexCount.setupBranch(tree, "vertex_count");
+  if(isMC())
+    fGenNumberBQuarks.setupBranch(tree, "gen_number_BQuarks");
+
   fElectronVetoPassed.setupBranch(tree, "ElectronVetoPassed");
   if(isData())
     fHBHENoiseFilterPassed.setupBranch(tree, "HBHENoiseFilter");
@@ -194,6 +218,7 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
   fJets.setEntry(entry);
   fPuWeight.setEntry(entry);
   fVertexCount.setEntry(entry);
+  fGenNumberBQuarks.setEntry(entry);
   fElectronVetoPassed.setEntry(entry);
   fHBHENoiseFilterPassed.setEntry(entry);
   fRawMet.setEntry(entry);
@@ -205,6 +230,15 @@ bool MuonAnalysisSelector::process(Long64_t entry) {
   fEventCounter.setWeight(weight);
 
   cAll.increment();
+
+  if(isMC() && fBQuarkMode != BQuark::kDisabled) {
+    if(fBQuarkMode == BQuark::kBAccept && fGenNumberBQuarks.value() == 0)
+      return true;
+
+    if(fBQuarkMode == BQuark::kBReject && fGenNumberBQuarks.value() < 0)
+      return true;
+  }
+  cBQuark.increment();
 
   size_t nmuons = fMuons.size();
   std::vector<EmbeddingMuonCollection::Muon> selectedMuons;
