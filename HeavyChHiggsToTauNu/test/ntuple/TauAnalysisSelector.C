@@ -2,8 +2,10 @@
 #include "Branches.h"
 #include "Configuration.h"
 
+#include "TFile.h"
 #include "TDirectory.h"
 #include "TH1F.h"
+#include "TEfficiency.h"
 #include "Math/VectorUtil.h"
 
 #include<stdexcept>
@@ -11,7 +13,8 @@
 // TauAnalysisSelector
 class TauAnalysisSelector: public BaseSelector {
 public:
-  TauAnalysisSelector(const std::string& puWeight = "", bool isEmbedded=false);
+  TauAnalysisSelector(const std::string& puWeight = "", bool isEmbedded=false,
+                      const std::string& embeddingWTauMuFile="", const std::string& embeddingWTauMuPath="");
   ~TauAnalysisSelector();
 
   void setOutput(TDirectory *dir);
@@ -22,14 +25,18 @@ private:
   // Input
   EventInfo fEventInfo;
   EmbeddingMuonCollection fMuons;
+  //ElectronCollection fElectrons;
+  JetCollection fJets;
   TauCollection fTaus;
 
   std::string fPuWeightName;
   Branch<double> fPuWeight;
-  Branch<int> fSelectedVertexCount;
-  Branch<int> fVertexCount;
+  Branch<unsigned> fSelectedVertexCount;
+  Branch<unsigned> fVertexCount;
+  //Branch<bool> fElectronVetoPassed;
 
   const bool fIsEmbedded;
+  TH1 *fEmbeddingWTauMuWeights;
 
   TH1 *makeEta(const char *name);
   TH1 *makePt(const char *name);
@@ -39,7 +46,10 @@ private:
   // Output
   // Counts
   EventCounter::Count cAll;
+  //EventCounter::Count cElectronVeto;
   EventCounter::Count cOnlyWMu;
+  EventCounter::Count cWTauMuWeight;
+  EventCounter::Count cJetSelection;
   EventCounter::Count cPrimaryVertex;
   EventCounter::Count cAllTauCandidates;
   EventCounter::Count cPrePtCut;
@@ -82,12 +92,18 @@ private:
   TH1 *hVertexCount_AfterRtau;
 };
 
-TauAnalysisSelector::TauAnalysisSelector(const std::string& puWeight, bool isEmbedded):
+TauAnalysisSelector::TauAnalysisSelector(const std::string& puWeight, bool isEmbedded,
+                                         const std::string& embeddingWTauMuFile, const std::string& embeddingWTauMuPath):
   BaseSelector(),
+  //fMuons("Emb"),
   fPuWeightName(puWeight),
   fIsEmbedded(isEmbedded),
+  fEmbeddingWTauMuWeights(0),
   cAll(fEventCounter.addCounter("All events")),
+  //cElectronVeto(fEventCounter.addCounter("Electron veto")),
   cOnlyWMu(fEventCounter.addCounter("Only W->mu")),
+  cWTauMuWeight(fEventCounter.addCounter("W->tau->mu weighting")),
+  cJetSelection(fEventCounter.addCounter("Jet selection")),
   cPrimaryVertex(fEventCounter.addCounter("Primary vertex")),
   cAllTauCandidates(fEventCounter.addCounter(">= 1 tau candidate")),
   cPrePtCut(fEventCounter.addCounter("Pre Pt cut")),
@@ -102,7 +118,21 @@ TauAnalysisSelector::TauAnalysisSelector(const std::string& puWeight, bool isEmb
   cIsolation(fEventCounter.addCounter("Isolation")),
   cOneProng(fEventCounter.addCounter("One prong")),
   cRtau(fEventCounter.addCounter("Rtau"))
-{}
+{
+  if(isEmbedded && !embeddingWTauMuFile.empty()) {
+    TFile *file = TFile::Open(embeddingWTauMuFile.c_str());
+    TEfficiency *eff = dynamic_cast<TEfficiency *>(file->Get(embeddingWTauMuPath.c_str()));
+    TAxis *xaxis = eff->GetPassedHistogram()->GetXaxis();
+    fEmbeddingWTauMuWeights = new TH1F("weights", "weights", xaxis->GetNbins(), xaxis->GetBinLowEdge(xaxis->GetFirst()), xaxis->GetBinUpEdge(xaxis->GetLast()));
+    fEmbeddingWTauMuWeights->SetDirectory(0);
+    for(int bin=1; bin <= xaxis->GetNbins(); ++bin) {
+      fEmbeddingWTauMuWeights->SetBinContent(bin, eff->GetEfficiency(bin));
+      std::cout << "Bin " << bin << " low edge " << fEmbeddingWTauMuWeights->GetXaxis()->GetBinLowEdge(bin) << " value " << fEmbeddingWTauMuWeights->GetBinContent(bin) << std::endl;
+    }
+    fEmbeddingWTauMuWeights->SetBinContent(xaxis->GetNbins()+1, fEmbeddingWTauMuWeights->GetBinContent(xaxis->GetNbins()));
+    file->Close();
+  }
+}
 
 TauAnalysisSelector::~TauAnalysisSelector() {}
 
@@ -143,22 +173,37 @@ void TauAnalysisSelector::setOutput(TDirectory *dir) {
 
 void TauAnalysisSelector::setupBranches(TTree *tree) {
   fEventInfo.setupBranches(tree);
-  if(fIsEmbedded)
+  if(fIsEmbedded) {
     fMuons.setupBranches(tree, isMC());
-  fTaus.setupBranches(tree);
+    //fElectrons.setupBranches(tree, isMC());
+    fJets.setupBranches(tree);
+  }
+  fTaus.setupBranches(tree, isMC() && !fIsEmbedded);
   if(!fPuWeightName.empty())
     fPuWeight.setupBranch(tree, fPuWeightName.c_str());
-  fSelectedVertexCount.setupBranch(tree, "selectedPrimaryVertices_n");
-  fVertexCount.setupBranch(tree, "goodPrimaryVertices_n");
+  if(fIsEmbedded) { // stupid mistake in the tauAnalysis...
+    fSelectedVertexCount.setupBranch(tree, "selectedPrimaryVertex_count");
+    fVertexCount.setupBranch(tree, "goodPrimaryVertex_count");
+  }
+  else {
+    fSelectedVertexCount.setupBranch(tree, "selectedPrimaryVertices_n");
+    fVertexCount.setupBranch(tree, "goodPrimaryVertices_n");
+  }
+
+  //fElectronVetoPassed.setupBranch(tree, "ElectronVetoPassed");
 }
 
 bool TauAnalysisSelector::process(Long64_t entry) {
   fEventInfo.setEntry(entry);
   fMuons.setEntry(entry);
+  //fElectrons.setEntry(entry);
+  fJets.setEntry(entry);
   fTaus.setEntry(entry);
   fPuWeight.setEntry(entry);
   fSelectedVertexCount.setEntry(entry);
   fVertexCount.setEntry(entry);
+
+  //fElectronVetoPassed.setEntry(entry);
 
   double weight = 1.0;
   if(!fPuWeightName.empty()) {
@@ -168,17 +213,83 @@ bool TauAnalysisSelector::process(Long64_t entry) {
 
   cAll.increment();
 
+  /*
+  std::cout << "FOO Event " << fEventInfo.event() << ":" << fEventInfo.lumi() << ":" << fEventInfo.run()
+            << " electronVeto passed? " << fElectronVetoPassed.value()
+            << std::endl;
+
+  if( (fEventInfo.event() == 10069461 && fEventInfo.lumi() == 33572) ||
+      (fEventInfo.event() == 10086951 && fEventInfo.lumi() == 33630) ||
+      (fEventInfo.event() == 101065527 && fEventInfo.lumi() == 336953) ||
+      (fEventInfo.event() == 101450418 && fEventInfo.lumi() == 338236) ||
+      (fEventInfo.event() == 101460111 && fEventInfo.lumi() == 338268) ) {
+    std::cout << "BAR Event " << fEventInfo.event() << ":" << fEventInfo.lumi() << ":" << fEventInfo.run()
+              << " electronVeto passed? " << fElectronVetoPassed.value()
+              << " Nelectrons " << fElectrons.size()
+              << std::endl;
+    for(size_t i=0; i<fElectrons.size(); ++i) {
+      ElectronCollection::Electron electron = fElectrons.get(i);
+      std::cout << "  Electron " << i
+                << " pt " << electron.p4().Pt()
+                << " eta " << electron.p4().Eta()
+                << " hasGsfTrack " << electron.hasGsfTrack()
+                << " hasSuperCluster " << electron.hasSuperCluster()
+                << " supercluster eta " << electron.superClusterEta()
+                << " passIdVeto " << electron.cutBasedIdVeto()
+                << std::endl;
+    }
+  }
+
+  if(!fElectronVetoPassed.value()) return false;
+  cElectronVeto.increment();
+  */
+
   bool originalMuonIsWMu = false;
+  EmbeddingMuonCollection::Muon embeddingMuon;
   if(fIsEmbedded) {
     if(fMuons.size() != 1)
       throw std::runtime_error("Embedding muon collection size is not 1");
-    EmbeddingMuonCollection::Muon muon = fMuons.get(0);
-    originalMuonIsWMu = std::abs(muon.pdgId()) == 13 && std::abs(muon.motherPdgId()) == 24;
+    embeddingMuon = fMuons.get(0);
+    if(embeddingMuon.p4().Pt() < 40) return true;
+    //std::cout << "Muon pt " << muon.p4().Pt() << std::endl;
+
+    originalMuonIsWMu = std::abs(embeddingMuon.pdgId()) == 13 && std::abs(embeddingMuon.motherPdgId()) == 24;
     //if(!originalMuonIsWMu) return true;
   }
 
   cOnlyWMu.increment();
 
+  // Per-event correction for W->tau->mu
+  if(fIsEmbedded && fEmbeddingWTauMuWeights) {
+    embeddingMuon.ensureValidity();
+    int bin = fEmbeddingWTauMuWeights->FindBin(embeddingMuon.p4().Pt());
+    //std::cout << embeddingMuon.p4().Pt() << " " << bin << std::endl;
+    weight *= fEmbeddingWTauMuWeights->GetBinContent(bin);
+    fEventCounter.setWeight(weight);
+  }
+  cWTauMuWeight.increment();
+
+  // Jet selection
+  /*
+  size_t njets = fJets.size();
+  size_t nselectedjets = 0;
+  for(size_t i=0; i<njets; ++i) {
+    JetCollection::Jet jet = fJets.get(i);
+
+    // Clean selected muon from jet collection
+    bool matches = false;
+    double DR = ROOT::Math::VectorUtil::DeltaR(fMuons.get(0).p4(), jet.p4());
+    if(DR < 0.1) {
+      matches = true;
+    }
+    if(matches) continue;
+
+    // Count jets
+    ++nselectedjets;
+  }
+  if(nselectedjets < 3) return true;
+  */
+  cJetSelection.increment();
 
   if(fSelectedVertexCount.value() <= 0) return true;
   cPrimaryVertex.increment();
@@ -193,8 +304,10 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   for(size_t i=0; i<fTaus.size(); ++i) {
     TauCollection::Tau tau = fTaus.get(i);
     if(tau.p4().Pt() < 10) continue;
-    if(!TauID::isolation(tau)) continue;
+    //if(!TauID::isolation(tau)) continue;
+    //if(isMC() && !fIsEmbedded && tau.genMatchP4().Pt() <= 41) continue; // temporary hack
     selectedTaus.push_back(tau);
+    if(!fIsEmbedded) break; // select only the first gen tau
   }
   if(selectedTaus.empty()) return true;
   cPrePtCut.increment();
