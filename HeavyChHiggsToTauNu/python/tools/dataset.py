@@ -2092,7 +2092,10 @@ class NtupleCache:
     #
     # \param treeName       Path to the TTree inside a ROOT file
     # \param selector       Name of the selector class, should also correspond a .C file in \a test/ntuple
-    # \param selectorArgs   Optional arguments to the selector constructor
+    # \param selectorArgs   Optional arguments to the selector
+    #                       constructor, can be a list of arguments,
+    #                       or a function returning a list of
+    #                       arguments
     # \param process        Should the ntuple be processed? (if False, results are read from the cache file)
     # \param cacheFileName  Path to the cache file
     # \param maxEvents      Maximum number of events to process (-1 for all events)
@@ -2109,6 +2112,8 @@ class NtupleCache:
         self.maxEvents = maxEvents
         self.printStatus = printStatus
 
+        self.datasetSelectorArgs = {}
+
         self.macrosLoaded = False
         self.processedDatasets = {}
 
@@ -2124,9 +2129,12 @@ class NtupleCache:
     ## Compile and load the macros
     def _loadMacros(self):
         for m in self.macros:
-            ret = ROOT.gROOT.LoadMacro(m+"+")
+            ret = ROOT.gROOT.LoadMacro(m+"+g")
             if ret != 0:
                 raise Exception("Failed to load "+m)
+
+    def setDatasetSelectorArgs(self, dictionary):
+        self.datasetSelectorArgs.update(dictionary)
 
     # def _isMacroNewerThanCacheFile(self):
     #     latestMacroTime = max([os.path.getmtime(m) for m in self.macros])
@@ -2162,8 +2170,6 @@ class NtupleCache:
         if self.cacheFile == None:
             self.cacheFile = ROOT.TFile.Open(self.cacheFileName, "RECREATE")
             self.cacheFile.cd()
-            argsNamed = ROOT.TNamed("selectorArgs", str(self.selectorArgs))
-            argsNamed.Write()
 
         directory = self.cacheFile.Get(pathDigest)
         if directory == None:
@@ -2172,7 +2178,23 @@ class NtupleCache:
             tmp = ROOT.TNamed("originalPath", dataset.getBaseDirectory())
             tmp.Write()
 
+        # Create selector args
+        selectorArgs = []
+        if isinstance(self.selectorArgs, list):
+            selectorArgs = self.selectorArgs[:]
+            if dataset.getName() in self.datasetSelectorArgs:
+                selectorArgs.extend(self.datasetSelectorArgs[dataset.getName()])
+        else:
+            # assume we have an object making a keyword->positional mapping
+            sa = self.selectorArgs.clone()
+            if dataset.getName() in self.datasetSelectorArgs:
+                sa.update(self.datasetSelectorArgs[dataset.getName()])
+            selectorArgs = sa.createArgs()
+
         directory = directory.mkdir(datasetName)
+        argsNamed = ROOT.TNamed("selectorArgs", str(selectorArgs))
+        argsNamed.Write()
+
 
         tree = rootFile.Get(self.treeName)
         if not tree:
@@ -2183,7 +2205,7 @@ class NtupleCache:
         if self.maxEvents >= 0 and N > self.maxEvents:
             useMaxEvents = True
             N = self.maxEvents
-        selector = ROOT.SelectorImp(N, dataset.isMC(), getattr(ROOT, self.selectorName)(*self.selectorArgs))
+        selector = ROOT.SelectorImp(N, dataset.isMC(), getattr(ROOT, self.selectorName)(*selectorArgs))
         selector.setOutput(directory)
         selector.setPrintStatus(self.printStatus)
 
@@ -2202,7 +2224,7 @@ class NtupleCache:
     def getRootHisto(self, dataset, histoName):
         if self.cacheFile == None:
             if not os.path.exists(self.cacheFileName):
-                raise Exception("Assert: for some reason the cache file %s does not exist yet..." % self.cacheFileName)
+                raise Exception("Assert: for some reason the cache file %s does not exist yet. Did you set 'process=True' in the constructor of NtupleCache?" % self.cacheFileName)
             self.cacheFile = ROOT.TFile.Open(self.cacheFileName)
 
         rootFile = dataset.getRootFile()
@@ -2217,3 +2239,39 @@ class NtupleCache:
     # \param histoName   Histogram name to obtain
     def histogram(self, histoName):
         return NtupleCacheDrawer(self, histoName)
+
+
+class SelectorArgs:
+    def __init__(self, optionsDefaultValues, **kwargs):
+        self.optionsDefaultValues = optionsDefaultValues
+
+        args = {}
+        args.update(kwargs)
+        for option, defaultValue in self.optionsDefaultValues:
+            value = None
+            if option in args:
+                value = args[option]
+                del args[option]
+            setattr(self, option, value)
+
+        # Any remaining argument is an error
+        if len(args) >= 1:
+            raise Exception("Incorrect arguments for SelectorArgs.__init__(): %s" % ", ".join(args.keys()))
+
+    def clone(self):
+        return copy.deepcopy(self)
+
+    def update(self, selectorArgs):
+        for a in self.options:
+            val = getattr(selectorArgs, a)
+            if val is not None:
+                setattr(self, a, val)
+
+    def createArgs(self):
+        args = []
+        for option, defaultValue in self.optionsDefaultValues:
+            value = getattr(self, option)
+            if value is None:
+                value = defaultValue
+            args.append(value)
+        return args
