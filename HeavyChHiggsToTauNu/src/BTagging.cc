@@ -225,7 +225,8 @@ namespace HPlus {
     fLeadingDiscrCut(iConfig.getUntrackedParameter<double>("leadingDiscriminatorCut")),
     fSubLeadingDiscrCut(iConfig.getUntrackedParameter<double>("subleadingDiscriminatorCut")),
     fNumberOfBJets(iConfig.getUntrackedParameter<uint32_t>("jetNumber"),iConfig.getUntrackedParameter<std::string>("jetNumberCutDirection")),
-    FactorsFromDB(iConfig.getUntrackedParameter<bool>("UseBTagDB",false)),
+    FactorsFromDB(iConfig.getUntrackedParameter<bool>("UseBTagDB",true)),
+    payloadName(iConfig.getUntrackedParameter<std::string>("LabelTag")),
     fTaggedCount(eventCounter.addSubCounter("b-tagging main","b-tagging")),
     fAllSubCount(eventCounter.addSubCounter("b-tagging", "all jets")),
     fTaggedSubCount(eventCounter.addSubCounter("b-tagging", "tagged")),
@@ -241,6 +242,11 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("Btagging");
+    hSFBCSVM = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "hSFBCSVM", "hSFBCSVM", 100, 0.9, 1);
+    hSFBCSVM_eta = histoWrapper.makeTH<TH2F>(HistoWrapper::kDebug, myDir, "hSFBCSVM", "hSFBCSVM", 100, 0.9, 1, 10, -2.5,2.5);
+    hSFBCSVM_pt = histoWrapper.makeTH<TH2F>(HistoWrapper::kDebug, myDir, "hSFBCSVM", "hSFBCSVM", 100, 0.9, 1,200,0,200);
+    //hEffBCSVM_eta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "hEffBCSVM_eta", "hEffBCSVM_eta", 100, -5., 5.);
+    //hEffBCSVM_eta_pt = histoWrapper.makeTH<TH2F>(HistoWrapper::kDebug, myDir, "hEffBCSVM_eta_pt", "hEffBCSVM_eta_pt", 100, -5., 5.,80, 0., 400. );
     hDiscr = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
     hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "bjet_pt", "bjet_pt", 80, 0., 400.);
     hDiscrB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
@@ -378,6 +384,35 @@ namespace HPlus {
       edm::Ptr<pat::Jet> iJet = *iter;
 
       increment(fAllSubCount);
+      if(FactorsFromDB){
+        edm::ESHandle<BtagPerformance> perfH;
+        iSetup.get<BTagPerformanceRecord>().get(payloadName, perfH);
+        const BtagPerformance & perf = *(perfH.product());
+	//const PerformancePayloadFromBinnedTFormula * perfPayload = static_cast<const PerformancePayloadFromBinnedTFormula *>(&perf.payload());
+        BinningPointByMap eta;
+        BinningPointByMap Et;
+        eta.insert(BinningVariables::JetEta,iJet->eta());
+        eta.insert(BinningVariables::JetEt,iJet->pt());
+        //Et.insert(BinningVariables::JetEt,iJet->pt());
+        //Et.insert(BinningVariables::Discriminator, 0.244);
+       
+	//BinningPointByMap measurePoint;
+        //measurePoint.insert(BinningVariables::JetEt,iJet->pt());
+        //measurePoint.insert(BinningVariables::JetEta,iJet->eta());
+
+	//  std::cout <<" Discriminant is "<<perf.workingPoint().discriminantName()<<std::endl;
+	//std::cout<<"eta= "<<iJet->eta()<<"pt= "<<iJet->pt()<<std::endl;
+	//perfPayload->printFormula(PerformanceResult::BTAGBEFF,measurePoint);
+	std::cout<<"getFormula = "<<perf.getResult(PerformanceResult::BTAGBEFFCORR,eta)<<std::endl;
+	//std::cout<<"BTag B Eff eta = "<<perf.getResult(PerformanceResult::BTAGBEFF,eta)<<std::endl;
+	//std::cout<<"BTag B Eff pt = "<<perf.getResult(PerformanceResult::BTAGBEFF,Et)<<std::endl;
+        //hEffBCSVM_eta->Fill(perf.getResult(PerformanceResult::BTAGBEFFCORR,eta));
+
+	hSFBCSVM->Fill(perf.getResult(PerformanceResult::BTAGBEFFCORR,eta));
+	//hSFBCSVM_eta->Fill(perf.getResult(PerformanceResult::BTAGBEFFCORR,eta), iJet()->eta());
+	//hSFBCSVM_pt->Fill(perf.getResult(PerformanceResult::BTAGBEFFCORR,Et), iJet->pt());
+        //hEffBCSVM_eta_pt->Fill(perf.getResult(PerformanceResult::BTAGBEFF,Et), perf.getResult(PerformanceResult::BTAGBEFF,eta),1.0);
+      }else{
 
       if (!iEvent.isRealData()) {
 	edm::Handle <reco::GenParticleCollection> genParticles;
@@ -477,7 +512,7 @@ namespace HPlus {
       if( bmatchedJet )   increment(fTaggedTaggedRealBJetsSubCount);
 
     } // end of jet loop
-
+}
     // Calculate scale factor for MC events
     if (!iEvent.isRealData())
       calculateScaleFactor(jets, fSelectedJets);
