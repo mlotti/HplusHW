@@ -30,7 +30,7 @@ def addEmbeddingAodAnalysis_44X(datasets):
     for datasetName, taskDef in njobs.iteritems():
         dataset = datasets.getDataset(datasetName)
         source = Source("AOD", number_of_jobs=taskDef.njobsIn)
-        wf = Workflow("embeddingAodAnalysis_44X", source=source)
+        wf = Workflow("embeddingAodAnalysis_44X", source=source, output_file="histograms.root")
         dataset.addWorkflow(wf)
 
 def getDefaultDefinitions_44X():
