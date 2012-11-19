@@ -142,6 +142,20 @@ class ConfigBuilder:
             return [signalAnalysis.createEDFilter(param)]
         return self._build(create, ["signalAnalysis"])
 
+    ## Build configuration for signal analysis inverted tau job
+    #
+    # \return cms.Process object, should be assigned to a local
+    #         'process' variable in the analysis job configuration file
+    def buildSignalAnalysisInvertedTau(self):
+        import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysisInvertedTau as signalAnalysisInvertedTau
+
+        # Enforce tau candidate selection
+        self.tauSelectionOperatingMode = "tauCandidateSelectionOnly"
+        
+        def create(param):
+            return [signalAnalysisInvertedTau.createEDFilter(param)]
+        return self._build(create, ["signalAnalysisInvertedTau"])
+
     ## Build configuration for signal analysis job
     #
     # \return cms.Process object, should be assigned to a local
@@ -151,13 +165,6 @@ class ConfigBuilder:
         def create(param):
             return [QCDMeasurementFactorised.createEDFilter(param)]
         return self._build(create, ["QCDMeasurement"])
-
-    def buildQCDMeasurementInverted(self):
-        import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as  signalAnalysis
-        import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysisInvertedTau as signalAnalysisInvertedTau
-        def create(param):
-            return [signalAnalysis.createEDFilter(param),signalAnalysisInvertedTau.createEDFilter(param)]
-        return self._build(create, ["signalAnalysis","signalAnalysisInvertedTau"])
 
     ## Accumulate the number of analyzers to a category
     #
@@ -496,6 +503,8 @@ class ConfigBuilder:
         print "Trigger scale factor mode:", module.triggerEfficiencyScaleFactor.mode.value()
         print "Trigger scale factor data:", module.triggerEfficiencyScaleFactor.dataSelect.value()
         print "Trigger scale factor MC:", module.triggerEfficiencyScaleFactor.mcSelect.value()
+        if hasattr(module, "metFilters"):
+            print "MET filters", module.metFilters
         print "VertexWeight data distribution:",module.vertexWeight.dataPUdistribution.value()
         print "VertexWeight mc distribution:",module.vertexWeight.mcPUdistribution.value()
         print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", module.trigger.hltMetCut.value()

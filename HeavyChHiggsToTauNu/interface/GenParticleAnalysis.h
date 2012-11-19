@@ -24,11 +24,15 @@ namespace HPlus {
   public:
     class Data {
     public:
-      
+
+      Data();
       Data(const GenParticleAnalysis *analysis);
       ~Data();
 
+      void check() const;
+
       const edm::Ptr<reco::GenMET>& getGenMET() const {
+	check();
         return fAnalysis->fGenMet;
       }
     private:
@@ -98,6 +102,10 @@ namespace HPlus {
     WrappedTH1 *hBquarkNotFromTopEta;
     WrappedTH1 *hBquarkFromTopPt;
     WrappedTH1 *hBquarkNotFromTopPt;
+    WrappedTH1 *hBquarkFromTopEtaPtCut;
+    WrappedTH1 *hBquarkNotFromTopEtaPtCut;
+    WrappedTH1 *hBquarkFromTopPtEtaCut;
+    WrappedTH1 *hBquarkNotFromTopPtEtaCut;
     WrappedTH1 *hBquarkFromTopDeltaRTau;
     WrappedTH1 *hBquarkNotFromTopDeltaRTau;
     WrappedTH1 *hGenBquarkFromHiggsSideEta;

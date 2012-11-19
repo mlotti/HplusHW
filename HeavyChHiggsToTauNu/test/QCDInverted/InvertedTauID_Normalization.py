@@ -24,6 +24,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 from InvertedTauID import *
+#dataEra = "Run2011A"
+#dataEra = "Run2011B"
+dataEra = "Run2011AB"
 
 def usage():
     print "\n"
@@ -33,9 +36,10 @@ def usage():
 
 def main(argv):
 
-    HISTONAME = "TauIdJets"
+#    HISTONAME = "TauIdJets"
 #    HISTONAME = "TauIdBtag"
-
+    HISTONAME = "TauIdBveto"
+    
     dirs = []
     if len(sys.argv) < 2:
 	usage()
@@ -46,9 +50,10 @@ def main(argv):
 
     
     # Create all datasets from a multicrab task
-    # datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters)
-
+    # datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
+#    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra)
+   
     # As we use weighted counters for MC normalisation, we have to
     # update the all event count to a separately defined value because
     # the analysis job uses skimmed pattuple as an input
@@ -91,7 +96,8 @@ def main(argv):
 
 
 #    bins = ["inclusive"]
-    bins = ["4050","5060","6070","7080","80100","100120","120150","150"]
+#    bins = ["4050","5060","6070","7080","80100","100120","120150","150"]
+    bins = ["4050","5060","6070","7080","80100","100120","120"]
 #    bins = ["4050"]
             
 

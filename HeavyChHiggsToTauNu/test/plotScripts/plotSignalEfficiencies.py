@@ -36,7 +36,7 @@ analysis = "signalAnalysis"
 # main function
 def main():
     # Read the datasets
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=analysis+"Counters")
+    datasets = dataset.getDatasetsFromMulticrabCfg(counters=analysis+"/counters")
     datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()
 
@@ -63,7 +63,7 @@ def main():
     signalDatasets = [
         "TTToHplusBWB_M80",
         "TTToHplusBWB_M90",
-        "TTToHplusBWB_M100",
+#        "TTToHplusBWB_M100",
         "TTToHplusBWB_M120",
         "TTToHplusBWB_M140",
         "TTToHplusBWB_M150",
@@ -85,7 +85,8 @@ def main():
         "btagging scale factor"
         ]
 
-    xvalues = [80, 90, 100, 120, 140, 150, 155, 160]
+#    xvalues = [80, 90, 100, 120, 140, 150, 155, 160]
+    xvalues = [80, 90, 120, 140, 150, 155, 160]
     xerrs = [0]*len(xvalues)
     yvalues = {}
     yerrs = {}
@@ -97,7 +98,7 @@ def main():
 
         # Get the counts (returned objects are of type dataset.Count,
         # and have both value and uncertainty
-        allCount = column.getCount(column.getRowNames().index("All events"))
+        allCount = column.getCount(column.getRowNames().index("Offline selection begins"))
 
         for cut in cuts:
             cutCount = column.getCount(column.getRowNames().index(cut))

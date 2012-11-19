@@ -50,7 +50,7 @@ namespace HPlus {
       const double getEtaSpreadOfSelectedJets() const { return fJetSelection->fEtaSpreadOfSelectedJets; }
       const double getAverageEtaOfSelectedJets() const { return fJetSelection->fAverageEtaOfSelectedJets; }
       const double getAverageSelectedJetsEtaDistanceToTauEta() const { return fJetSelection->fAverageSelectedJetsEtaDistanceToTauEta; }
-
+      const double getDeltaPtJetTau() const { return fJetSelection->fDeltaPtJetTau; }
     private:
       const JetSelection *fJetSelection;
       const bool fPassedEvent;
@@ -194,6 +194,8 @@ namespace HPlus {
     WrappedTH1 *hTowersAreaSelectedJets;
     WrappedTH1 *hJetChargeSelectedJets;
     WrappedTH1 *hPtDiffToGenJetSelectedJets;
+    WrappedTH1 *hDeltaPtJetTau;
+    WrappedTH1 *hDeltaRJetTau;
 
     // All jets
     edm::PtrVector<pat::Jet> fAllJets;
@@ -211,6 +213,7 @@ namespace HPlus {
     double fEtaSpreadOfSelectedJets;
     double fAverageEtaOfSelectedJets;
     double fAverageSelectedJetsEtaDistanceToTauEta;
+    double fDeltaPtJetTau;
   };
 }
 

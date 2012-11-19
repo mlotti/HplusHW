@@ -20,16 +20,16 @@ namespace HPlus {
 
   class CorrelationAnalysis {
   public:
-    CorrelationAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
-    CorrelationAnalysis(EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    CorrelationAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper , std::string HistoName);
+    CorrelationAnalysis(EventCounter& eventCounter, HistoWrapper& histoWrapper , std::string HistoName);
     //CorrelationAnalysis();
     ~CorrelationAnalysis();
 
     // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate
-    void analyze(const edm::PtrVector<reco::Candidate>&,const edm::PtrVector<reco::Candidate>&);
+    void analyze(const edm::PtrVector<reco::Candidate>&,const edm::PtrVector<reco::Candidate>& , std::string HistoName);
 
   private:
-    void init(HistoWrapper& histoWrapper);
+    void init(HistoWrapper& histoWrapper, std::string HistoName);
 
     // Histograms
     WrappedTH1 *hPtB1;
