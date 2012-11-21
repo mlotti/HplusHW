@@ -389,7 +389,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
         "W3Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=490, njobsOut=10),
         "W4Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=550, njobsOut=12),
         "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDefMC(njobsIn=350, njobsOut= 2),
-        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDefMC(njobsIn=400, njobsOut= 2), # FIXME out
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDefMC(njobsIn= 40, njobsOut= 1),
         "T_t-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn= 50, njobsOut= 2),
         "Tbar_t-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 50, njobsOut= 1),
         "T_tW-channel_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut= 1),
@@ -813,7 +813,7 @@ def addPattuple_v53_1(datasets):
         "W3Jets_TuneZ2star_Summer12":             TaskDef("/W3JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 616480 events, Mean 114.8 MB, min 6.9 MB, max 125.0 MB
         "W4Jets_TuneZ2star_Summer12":             TaskDef("/W4JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 1002056 events, Mean 178.0 MB, min 76.2 MB, max 194.2 MB
         "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDef("/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 180247 events, Mean 52.3 MB, min 8.6 MB, max 59.7 MB
-        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDef(""),
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDef("/DYJetsToLL_M-10To50_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1b-cad8d1056ca20d363262a3efa1d97a74/USER"), # 4476 events, Mean 21.3 MB, min 1.7 MB, max 29.6 MB
         "T_t-channel_TuneZ2star_Summer12":        TaskDef("/T_t-channel_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 222877, Mean 395.6 MB, min 161.4 MB, max 414.6 MB
         "Tbar_t-channel_TuneZ2star_Summer12":     TaskDef("/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 27667, Mean 191.4 MB, min 1.6 MB, max 206.7 MB
         "T_tW-channel_TuneZ2star_Summer12":       TaskDef("/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 61356 events, Mean 285.5 MB, min 2.8 MB, max 311.0 MB
