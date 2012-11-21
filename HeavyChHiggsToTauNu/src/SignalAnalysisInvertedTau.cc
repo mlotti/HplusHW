@@ -629,8 +629,6 @@ namespace HPlus {
     hSelectionFlow->Fill(kSignalOrderTauID);
 
    
-
-
     //    std::string myTauIsolation = "byTightIsolation";
     std::string myTauIsolation = "byMediumCombinedIsolationDeltaBetaCorr";
 

@@ -45,7 +45,7 @@ QCDfromData = False
 
 ## for mT distributions 
 deltaPhi180 = False
-deltaPhi160 = False
+deltaPhi160 = True
 deltaPhi130 = False
 topmass = False  ## with top mass cut
 
@@ -53,7 +53,7 @@ btagFactorisation = False  # works with deltaPhi180=True
 
 # other distributions
 deltaPhiDistribution = False
-numberOfBjets = True
+numberOfBjets = False
 HiggsMass = False
 HiggsMassPhi140 = False
 
@@ -125,11 +125,21 @@ def main():
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     datasets.merge("EWK", ["WJets", "DYJetsToLL", "SingleTop", "Diboson","TTJets"], keepSources=True)
-
+  # Remove signals other than M120                                                                                                                                                                                                    
+    datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "W2Jets" in name, datasets.getAllDatasetNames()))
-        
     datasets.remove(filter(lambda name: "W3Jets" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "W4Jets" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "QCD_Pt20_MuEnriched" in name, datasets.getAllDatasetNames()))
+
+    datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "Hplus_taunu_s-channel" in name, datasets.getAllDatasetNames()))
+
+  # Remove QCD                                                                                                                                                                                                                          
+#    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))                
+
 
     datasets_lands = datasets.deepCopy()
 
@@ -303,6 +313,8 @@ def doPlots(datasets):
 
     mtTest(datasets)
     mtBtagTest(datasets)
+    ptTauTest(datasets)
+    MetTest(datasets)
     BtagEfficiencies(datasets) 
     mtComparison(datasets)
     metComparison(datasets)
@@ -414,7 +426,7 @@ except ImportError:
     print "    WARNING, QCDInvertedNormalizationFactors.py not found!"
     print "    Run script InvertedTauID_Normalization.py to generate QCDInvertedNormalizationFactors.py"
     print
-    sys.exit()
+#    sys.exit()
     
 def mtTest(datasets):
     
@@ -699,8 +711,181 @@ def mtBtagTest(datasets):
     canvas40.Print("btagTest_mt.png")
     canvas40.Print("btagTest_mt.C") 
 
-        
-###########################################
+######### pttau test        
+#
+def ptTauTest(datasets):
+    
+    ## After standard cut
+
+    ptQCD = plots.PlotBase([datasets.getDataset("QCD").getDatasetRootHisto(analysis+"/SelectedTau_pT_AfterTauID")])
+    ptEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/SelectedTau_pT_AfterTauID")])
+    ptQCD.histoMgr.normalizeToOne()
+    ptEWK.histoMgr.normalizeToOne()
+#    ptQCD.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+#    ptEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    
+    ptQCD._setLegendStyles()
+    ptQCD._setLegendLabels()
+    ptQCD.histoMgr.setHistoDrawStyleAll("P")
+    ptQCD.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    hptQCD = ptQCD.histoMgr.getHisto("QCD").getRootHisto().Clone(analysis+"/SelectedTau_pT_AfterTauID")
+
+    ptEWK._setLegendStyles()
+    ptEWK._setLegendLabels()
+    ptEWK.histoMgr.setHistoDrawStyleAll("P")
+    ptEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    hptEWK = ptEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/SelectedTau_pT_AfterTauID")
+
+       
+    canvas60 = ROOT.TCanvas("canvas60","",500,500)
+    canvas60.SetLogy()
+#    hptQCD.SetMaximum(0.2)
+    hptQCD.SetMarkerColor(2)
+    hptQCD.SetMarkerSize(1)
+    hptQCD.SetMarkerStyle(23)
+    hptQCD.SetFillColor(2)
+    hptQCD.Draw()
+    
+    hptEWK.SetMarkerColor(4)
+    hptEWK.SetMarkerSize(1)
+    hptEWK.SetMarkerStyle(24)
+    hptEWK.SetFillColor(4)
+    hptEWK.Draw("same")
+    
+    hptQCD.GetYaxis().SetTitle("Arbitrary normalisation")
+    hptQCD.GetYaxis().SetTitleOffset(1.5)
+    hptQCD.GetXaxis().SetTitle("p_{T}^{#tau jet} (GeV/c)")
+    
+    tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
+    tex4.SetNDC()
+    tex4.SetTextSize(20)
+    tex4.Draw()
+    
+    tex3 = ROOT.TLatex(0.5,0.85,"Inverted #tau isolation")
+    tex3.SetNDC()
+    tex3.SetTextSize(22)
+    tex3.Draw()
+    
+    tex5 = ROOT.TLatex(0.5,0.75,"After #tau identification")
+    tex5.SetNDC()
+    tex5.SetTextSize(20)
+    tex5.Draw()
+    
+    tex7 = ROOT.TLatex(0.28,0.4,"QCD")
+    tex7.SetNDC()
+    tex7.SetTextSize(25)
+    tex7.Draw()    
+    marker7 = ROOT.TMarker(0.25,0.41,hptQCD.GetMarkerStyle())
+#    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
+    marker7.SetNDC()
+    marker7.SetMarkerColor(hptQCD.GetMarkerColor())
+    marker7.SetMarkerSize(0.99*hptQCD.GetMarkerSize())
+    marker7.Draw()
+
+    tex8 = ROOT.TLatex(0.28,0.3,"EWK")
+    tex8.SetNDC()
+    tex8.SetTextSize(25)
+    tex8.Draw()    
+    marker8 = ROOT.TMarker(0.25,0.31,hptEWK.GetMarkerStyle())
+#    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
+    marker8.SetNDC()
+    marker8.SetMarkerColor(hptEWK.GetMarkerColor())
+    marker8.SetMarkerSize(0.9*hptEWK.GetMarkerSize())
+    marker8.Draw()
+    
+
+    canvas60.Print("ptTau_QCDEWK.png")
+    canvas60.Print("ptTau_QCDEWK.C") 
+
+######### pttau test        
+#
+def MetTest(datasets):
+    
+    ## After standard cut
+
+#    ptQCD = plots.PlotBase([datasets.getDataset("QCD").getDatasetRootHisto(analysis+"/MET_InvertedTauId")])
+#    ptEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MET_InvertedTauId")])
+    ptQCD = plots.PlotBase([datasets.getDataset("QCD").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets")])
+    ptEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets")])
+    ptQCD.histoMgr.normalizeToOne()
+    ptEWK.histoMgr.normalizeToOne()
+#    ptQCD.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+#    ptEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    
+    ptQCD._setLegendStyles()
+    ptQCD._setLegendLabels()
+    ptQCD.histoMgr.setHistoDrawStyleAll("P")
+    ptQCD.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    hptQCD = ptQCD.histoMgr.getHisto("QCD").getRootHisto().Clone(analysis+"/MET_InvertedTauId")
+
+    ptEWK._setLegendStyles()
+    ptEWK._setLegendLabels()
+    ptEWK.histoMgr.setHistoDrawStyleAll("P")
+    ptEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    hptEWK = ptEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_InvertedTauId")
+
+       
+    canvas69 = ROOT.TCanvas("canvas69","",500,500)
+    canvas69.SetLogy()
+#    hptQCD.SetMaximum(0.2)
+    hptQCD.SetMarkerColor(2)
+    hptQCD.SetMarkerSize(1)
+    hptQCD.SetMarkerStyle(23)
+    hptQCD.SetFillColor(2)
+    hptQCD.Draw()
+    
+    hptEWK.SetMarkerColor(4)
+    hptEWK.SetMarkerSize(1)
+    hptEWK.SetMarkerStyle(24)
+    hptEWK.SetFillColor(4)
+    hptEWK.Draw("same")
+    
+    hptQCD.GetYaxis().SetTitle("Arbitrary normalisation")
+    hptQCD.GetYaxis().SetTitleOffset(1.5)
+    hptQCD.GetXaxis().SetTitle("MET (GeV)")
+    
+    tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
+    tex4.SetNDC()
+    tex4.SetTextSize(20)
+    tex4.Draw()
+    
+    tex3 = ROOT.TLatex(0.5,0.85,"Inverted #tau isolation")
+    tex3.SetNDC()
+    tex3.SetTextSize(22)
+    tex3.Draw()
+    
+    tex5 = ROOT.TLatex(0.25,0.2,"After #tau identification and jet cut")
+    tex5.SetNDC()
+    tex5.SetTextSize(20)
+    tex5.Draw()
+    
+    tex7 = ROOT.TLatex(0.28,0.4,"QCD")
+    tex7.SetNDC()
+    tex7.SetTextSize(25)
+    tex7.Draw()    
+    marker7 = ROOT.TMarker(0.25,0.41,hptQCD.GetMarkerStyle())
+#    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
+    marker7.SetNDC()
+    marker7.SetMarkerColor(hptQCD.GetMarkerColor())
+    marker7.SetMarkerSize(0.99*hptQCD.GetMarkerSize())
+    marker7.Draw()
+
+    tex8 = ROOT.TLatex(0.28,0.3,"EWK")
+    tex8.SetNDC()
+    tex8.SetTextSize(25)
+    tex8.Draw()    
+    marker8 = ROOT.TMarker(0.25,0.31,hptEWK.GetMarkerStyle())
+#    marker1 = ROOT.TMarker(0.25,0.415,hmt.GetMarkerStyle())
+    marker8.SetNDC()
+    marker8.SetMarkerColor(hptEWK.GetMarkerColor())
+    marker8.SetMarkerSize(0.9*hptEWK.GetMarkerSize())
+    marker8.Draw()
+    
+
+    canvas69.Print("Met_QCDEWK.png")
+    canvas69.Print("Met_QCDEWK.C") 
+
+##########################################
     ### Normalised mt and dphi distribution
 def mtComparison(datasets):
     
@@ -1002,7 +1187,7 @@ def mtComparison(datasets):
     hmt = mt.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi")
     hmt.Scale(norm_inc)
     
-    if False: 
+    if True: 
         mtBaseline._setLegendStyles()
         mtBaseline._setLegendLabels()
         mtBaseline.histoMgr.setHistoDrawStyleAll("P")
@@ -1134,7 +1319,8 @@ def mtComparison(datasets):
     if deltaPhi160 or deltaPhi180:
         canvas3 = ROOT.TCanvas("canvas3","",500,500)
         #    canvas3.SetLogy()
-        #    hmt.SetMaximum(120.0)
+        hmtSum.SetMaximum(100.0)
+        hmtSum.SetMinimum(-10.0)
         
         hmtSum.SetMarkerColor(4)
         hmtSum.SetMarkerSize(1)
@@ -1308,13 +1494,19 @@ def mtComparison(datasets):
         canvas31 = ROOT.TCanvas("canvas31","",500,500)
         if (numberOfBjets):
             canvas31.SetLogy()
+            frame31 = histograms._drawFrame(canvas31, xmin=0, xmax=6, ymin=1, ymax=1e3)
+            frame31.Draw()
+            
         #    hmt.SetMaximum(120.0)
         
         hmtSum.SetMarkerColor(4)
         hmtSum.SetMarkerSize(1)
         hmtSum.SetMarkerStyle(20)
         hmtSum.SetFillColor(4)
-        hmtSum.Draw("EP")
+        if numberOfBjets:
+            hmtSum.Draw("EP same")
+        else:
+            hmtSum.Draw("EP")
         
         hmt.SetMarkerColor(2)
         hmt.SetMarkerSize(1)
@@ -2150,8 +2342,7 @@ def purityBtag(datasets):
     
     print "Purity after MET+b tagging:"  
    
-
-        
+       
     p4050 = 0
     p5060 = 0
     p6070 = 0
