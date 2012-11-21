@@ -441,7 +441,7 @@ vertexWeight = cms.untracked.PSet(
     dataPUdistributionLabel = cms.string("pileup"),
     mcPUdistribution = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramMCFall11.root"),
     mcPUdistributionLabel = cms.string("pileup"),
-    weightDistribution = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_2011AB.root"),
+    weightDistribution = cms.string("WEIGHT_FILE_DOES_NOT_EXIST"), # Passed to edm::FileInPath in the code
     weightDistributionLabel = cms.string("weights"),
     weightDistributionEnable = cms.bool(False),
     enabled = cms.bool(False),
@@ -575,6 +575,7 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
             pset.weightDistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_"+era.replace("Run","")+".root"
     elif era == "Run2011AB":
         pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011"+suffix+".root"
+        pset.weightDistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_2011AB.root"
     else:
         raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'Run2011A', 'Run2011B', 'Run2011AB', 'Run2012A', 'Run2012B', 'Run2012C', 'Run2012ABC' " % era)
     pset.dataPUdistributionLabel = "pileup"
