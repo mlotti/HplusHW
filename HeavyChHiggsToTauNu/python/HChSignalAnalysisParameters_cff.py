@@ -443,7 +443,7 @@ vertexWeight = cms.untracked.PSet(
     mcPUdistributionLabel = cms.string("pileup"),
     weightDistribution = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_2011AB.root"),
     weightDistributionLabel = cms.string("weights"),
-    weightDistributionEnable = cms.bool(True),
+    weightDistributionEnable = cms.bool(False),
     enabled = cms.bool(False),
 )
 
