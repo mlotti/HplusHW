@@ -37,7 +37,14 @@ datasets_Signal = [
     "TTToHplusBWB_M155_Summer12",
     "TTToHplusBWB_M160_Summer12",
 
+    "TTToHplusBWB_M80_ext_Summer12",
+    "TTToHplusBWB_M90_ext_Summer12",
+    "TTToHplusBWB_M100_ext_Summer12",
     "TTToHplusBWB_M120_ext_Summer12",
+#    "TTToHplusBWB_M140_ext_Summer12",
+    "TTToHplusBWB_M150_ext_Summer12",
+    "TTToHplusBWB_M155_ext_Summer12",
+    "TTToHplusBWB_M160_ext_Summer12",
 
     "TTToHplusBHminusB_M80_Summer12",
 #    "TTToHplusBHminusB_M90_Summer12",
@@ -49,15 +56,31 @@ datasets_Signal = [
     "TTToHplusBHminusB_M160_Summer12",
 
     "TTToHplusBHminusB_M80_ext_Summer12",
+#    "TTToHplusBHminusB_M90_ext_Summer12",
     "TTToHplusBHminusB_M100_ext_Summer12",
+    "TTToHplusBHminusB_M120_ext_Summer12",
+    "TTToHplusBHminusB_M140_ext_Summer12",
+    "TTToHplusBHminusB_M150_ext_Summer12",
+    "TTToHplusBHminusB_M155_ext_Summer12",
     "TTToHplusBHminusB_M160_ext_Summer12",
 
     "Hplus_taunu_t-channel_M80_Summer12",
     "Hplus_taunu_t-channel_M90_Summer12",
     "Hplus_taunu_t-channel_M100_Summer12",
+    "Hplus_taunu_t-channel_M120_Summer12",
     "Hplus_taunu_t-channel_M140_Summer12",
     "Hplus_taunu_t-channel_M150_Summer12",
+    "Hplus_taunu_t-channel_M155_Summer12",
     "Hplus_taunu_t-channel_M160_Summer12",
+
+    "Hplus_taunu_tW-channel_M80_Summer12",
+    "Hplus_taunu_tW-channel_M90_Summer12",
+    "Hplus_taunu_tW-channel_M100_Summer12",
+    "Hplus_taunu_tW-channel_M120_Summer12",
+    "Hplus_taunu_tW-channel_M140_Summer12",
+    "Hplus_taunu_tW-channel_M150_Summer12",
+    "Hplus_taunu_tW-channel_M155_Summer12",
+    "Hplus_taunu_tW-channel_M160_Summer12",
 
     "Hplus_taunu_s-channel_M80_Summer12",
     "Hplus_taunu_s-channel_M90_Summer12",
@@ -74,6 +97,16 @@ datasets_Signal = [
     "HplusTB_M220_Summer12",
     "HplusTB_M250_Summer12",
     "HplusTB_M300_Summer12",
+    "HplusTB_M400_Summer12",
+#    "HplusTB_M500_Summer12",
+    "HplusTB_M600_Summer12",
+
+    "HplusTB_M180_ext_Summer12",
+    "HplusTB_M190_ext_Summer12",
+    "HplusTB_M200_ext_Summer12",
+    "HplusTB_M220_ext_Summer12",
+#    "HplusTB_M250_ext_Summer12",
+    "HplusTB_M300_ext_Summer12",
 ]
 
 datasets_QCD = [
