@@ -179,8 +179,8 @@ defaultSeBlacklist_stageout = [
 #    "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout, also jobs can queue long times, added 2011-09-02, commented 2012-11-06 (long queues still apply, but remoteGlidein helps)
 #    "wisc.edu", # Stageout failures, added 2011-10-24, commented 2012-09-28 
 #    "ingrid.pt", # Stageout failures, added 2011-10-26, commented 2011-12-02
-    "ucsd.edu", # Stageout failures, added 2011-10-26 
-    "pi.infn.it", # Stageout failures, added 2011-10-26
+#    "ucsd.edu", # Stageout failures, added 2011-10-26, commented 2012-11-19
+#    "pi.infn.it", # Stageout failures, added 2011-10-26, commented 2012-11-19
     "lnl.infn.it", # Stageout failures, added 2011-12-02
 #    "mit.edu", # MIT has some problems? added 2011-12-02, commented 2012-09-28
     "sprace.org.br", # Stageout failures. added 2011-12-02
