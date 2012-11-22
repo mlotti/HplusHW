@@ -104,6 +104,10 @@ def main():
     f = open(os.path.join(taskDir, "codeDiff.txt"), "w")
     f.write(git.getDiff()+"\n")
     f.close()
+    # A bit of a kludgy way to indicate for datacard generator that this directory is from embedding
+    f = open(os.path.join(taskDir, "multicrab.cfg"), "w")
+    f.write("embedded\n")
+    f.close()
     f = open(os.path.join(taskDir, "inputInfo.txt"), "w")
     f.write("Embedded directories:\n%s\n\n" % "\n".join(dirEmbs))
     f.write("\nEmbedded analysis: %s\n" % analysisEmb)
