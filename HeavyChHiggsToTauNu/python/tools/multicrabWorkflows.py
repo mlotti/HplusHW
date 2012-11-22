@@ -271,7 +271,7 @@ datasets.extend([
     MCDataset("TTToHplusBWB_M90_ext_Summer12",  crossSection=225.2, aod="/TTToHplusBWB_M-90_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     MCDataset("TTToHplusBWB_M100_ext_Summer12",  crossSection=225.2, aod="/TTToHplusBWB_M-100_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     MCDataset("TTToHplusBWB_M120_ext_Summer12",  crossSection=225.2, aod="/TTToHplusBWB_M-120_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
-#    MCDataset("TTToHplusBWB_M140_ext_Summer12",  crossSection=225.2, aod=""),
+    MCDataset("TTToHplusBWB_M140_ext_Summer12",  crossSection=225.2, aod="/TTToHplusBWB_M-140_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     MCDataset("TTToHplusBWB_M150_ext_Summer12",  crossSection=225.2, aod="/TTToHplusBWB_M-150_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     MCDataset("TTToHplusBWB_M155_ext_Summer12",  crossSection=225.2, aod="/TTToHplusBWB_M-155_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     MCDataset("TTToHplusBWB_M160_ext_Summer12",  crossSection=225.2, aod="/TTToHplusBWB_M-160_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
@@ -333,7 +333,7 @@ datasets.extend([
     MCDataset("HplusTB_M300_Summer12",   crossSection=None, aod="/HplusTB_M-300_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"),
     # 1 Mevt/sample
     MCDataset("HplusTB_M400_Summer12",   crossSection=None, aod="/HplusTB_M-400_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
-#    MCDataset("HplusTB_M500_Summer12",   crossSection=None, aod=""),
+    MCDataset("HplusTB_M500_Summer12",   crossSection=None, aod="/HplusTB_M-500_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     MCDataset("HplusTB_M600_Summer12",   crossSection=None, aod="/HplusTB_M-600_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     # (Probably) extension, 1 Mevt/sample
     MCDataset("HplusTB_M180_ext_Summer12",   crossSection=None, aod="/HplusTB_M-180_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),

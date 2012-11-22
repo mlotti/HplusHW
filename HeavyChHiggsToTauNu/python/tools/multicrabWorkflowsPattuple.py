@@ -856,7 +856,7 @@ def addPattuple_v53_1_1(datasets):
         "TTToHplusBWB_M90_ext_Summer12":          TaskDef(""),
         "TTToHplusBWB_M100_ext_Summer12":         TaskDef(""),
         "TTToHplusBWB_M120_ext_Summer12":         TaskDef(""),
-#        "TTToHplusBWB_M140_ext_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M140_ext_Summer12":         TaskDef(""),
         "TTToHplusBWB_M150_ext_Summer12":         TaskDef(""),
         "TTToHplusBWB_M155_ext_Summer12":         TaskDef(""),
         "TTToHplusBWB_M160_ext_Summer12":         TaskDef(""),
@@ -889,7 +889,7 @@ def addPattuple_v53_1_1(datasets):
         "Hplus_taunu_tW-channel_M160_Summer12":   TaskDef(""),
 
         "HplusTB_M400_Summer12":                  TaskDef(""),
-#        "HplusTB_M500_Summer12":                  TaskDef(""),
+        "HplusTB_M500_Summer12":                  TaskDef(""),
         "HplusTB_M600_Summer12":                  TaskDef(""),
 
         "HplusTB_M180_ext_Summer12":              TaskDef(""),

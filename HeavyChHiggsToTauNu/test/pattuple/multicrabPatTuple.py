@@ -41,7 +41,7 @@ datasets_Signal = [
     "TTToHplusBWB_M90_ext_Summer12",
     "TTToHplusBWB_M100_ext_Summer12",
     "TTToHplusBWB_M120_ext_Summer12",
-#    "TTToHplusBWB_M140_ext_Summer12",
+    "TTToHplusBWB_M140_ext_Summer12",
     "TTToHplusBWB_M150_ext_Summer12",
     "TTToHplusBWB_M155_ext_Summer12",
     "TTToHplusBWB_M160_ext_Summer12",
@@ -98,7 +98,7 @@ datasets_Signal = [
     "HplusTB_M250_Summer12",
     "HplusTB_M300_Summer12",
     "HplusTB_M400_Summer12",
-#    "HplusTB_M500_Summer12",
+    "HplusTB_M500_Summer12",
     "HplusTB_M600_Summer12",
 
     "HplusTB_M180_ext_Summer12",
