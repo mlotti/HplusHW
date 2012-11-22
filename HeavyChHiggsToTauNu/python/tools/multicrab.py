@@ -413,8 +413,15 @@ def prettyToJobList(prettyString):
 #
 # \return Output (stdout+stderr) as a string
 def crabStatusOutput(task, printCrab):
+    if False: # debugging
+        out = open("crabOutput-%s.txt" % time.strftime("%y%m%d_%H%M%S"), "w")
+    else:
+        out = None
+
     command = ["crab", "-status", "-c", task]
-    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    #p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) # doesn't solve
+    #p = subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=100*1024) # doesn't solve
+    p = subprocess.Popen(command, stdout=subprocess.PIPE)
     output = ""
     # The process may finish between p.poll() and p.stdout.readline()
     # http://stackoverflow.com/questions/10756383/timeout-on-subprocess-readline-in-python
@@ -440,6 +447,8 @@ def crabStatusOutput(task, printCrab):
                 if line:
                     if printCrab:
                         print line.strip("\n")
+                    if out is not None:
+                        out.write(line)
                     output += line
                 else:
                     break
@@ -449,6 +458,9 @@ def crabStatusOutput(task, printCrab):
             time.sleep(1)
         else:
             break
+
+    if out is not None:
+        out.close()
 #    print "Out of poll loop, return code", p.returncode
     if p.returncode != 0:
         if printCrab:
