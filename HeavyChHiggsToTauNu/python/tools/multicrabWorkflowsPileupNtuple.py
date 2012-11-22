@@ -84,7 +84,7 @@ def addNtuple_53X(datasets):
 
         "TTToHplusBWB_M80_ext_Summer12":          TaskDef(njobsIn=1),
         "TTToHplusBWB_M90_ext_Summer12":          TaskDef(njobsIn=1),
-        "TTToHplusBWB_M10_ext_Summer12":          TaskDef(njobsIn=1),
+        "TTToHplusBWB_M100_ext_Summer12":          TaskDef(njobsIn=1),
         "TTToHplusBWB_M120_ext_Summer12":         TaskDef(njobsIn=1),
         "TTToHplusBWB_M140_ext_Summer12":         TaskDef(njobsIn=1),
         "TTToHplusBWB_M150_ext_Summer12":         TaskDef(njobsIn=1),
@@ -106,7 +106,7 @@ def addNtuple_53X(datasets):
         "TTToHplusBHminusB_M120_ext_Summer12":    TaskDef(njobsIn=1),
         "TTToHplusBHminusB_M140_ext_Summer12":    TaskDef(njobsIn=1),
         "TTToHplusBHminusB_M150_ext_Summer12":    TaskDef(njobsIn=1),
-        "TTToHplusBHminusB_M166_ext_Summer12":    TaskDef(njobsIn=1),
+        "TTToHplusBHminusB_M155_ext_Summer12":    TaskDef(njobsIn=1),
         "TTToHplusBHminusB_M160_ext_Summer12":    TaskDef(njobsIn=1),
 
         "Hplus_taunu_t-channel_M80_Summer12":     TaskDef(njobsIn=1),
