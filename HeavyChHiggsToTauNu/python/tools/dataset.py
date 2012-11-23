@@ -106,6 +106,7 @@ def getDatasetsFromMulticrabCfg(**kwargs):
                 continue
             tmp.append(task)
         taskDirs = tmp
+        del _args["excludeTasks"]
     if "includeOnlyTasks" in kwargs:
         include = getRe(kwargs["includeOnlyTasks"])
         tmp = []
@@ -118,6 +119,7 @@ def getDatasetsFromMulticrabCfg(**kwargs):
             if found:
                 tmp.append(task)
         taskDirs = tmp
+        del _args["includeOnlyTasks"]
 
     dataEra = kwargs.get("dataEra", None)
 
