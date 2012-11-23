@@ -33,7 +33,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 #import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import execute
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import execute,addConfigInfo
 
 analysis = "signalAnalysisInvertedTau"
 
@@ -89,7 +89,15 @@ def main():
     print "QCDInverted multicrab directory",dirQCDInv
     print 
 
+    fINname = os.path.join(dirQCDInv,"histogramsForLands.root")
+    if not os.path.exists(fINname):
+        print "File histogramsForLands.root not found under",dirQCDInv
+        print "Did you run plotSignalAnalysisInverted.py?"
+        print "Exiting.."
+        sys.exit()
+                                        
     taskDir = multicrab.createTaskDir("QCDInverted")
+    print "Created",taskDir
 
     f = open(os.path.join(taskDir, "codeVersion.txt"), "w")
     f.write(git.getCommitId()+"\n")
@@ -121,30 +129,33 @@ def main():
 
     directory = os.path.join(taskDir, "Data", "res")
     os.makedirs(directory)
+    
     fOUT = ROOT.TFile.Open(os.path.join(directory, "histograms-Data.root"), "RECREATE")
-    fOUT.mkdir(analysis)
-    fINname = os.path.join(dirQCDInv,"histogramsForLands.root")
-    if not os.path.exists(fINname):
-        print "File histogramsForLands.root not found under",dirQCDInv
-        print "Did you run plotSignalAnalysisInverted.py?"
-        print "Exiting.."
-        sys.exit()
+    anadir = fOUT.mkdir(analysis)
     fIN = ROOT.TFile.Open(fINname,"R")
     histograms = fIN.GetListOfKeys()
-    fOUT.cd()
-    fOUT.cd(analysis)
+    anadir.cd()
+#    fOUT.cd()
+#    fOUT.cd(analysis)
     integral = 0
     for h in histograms:
         histo = fIN.Get(h.GetName())
         integral = histo.Integral(0, histo.GetNbinsX()+1)
         histo.Write()
     fIN.Close()
-    fOUT.mkdir("counters")
-    fOUT.cd("counters")
+
+#    anadir.cd()
+    counterdir = anadir.mkdir("counters")
+    anadir.cd("counters")
     counter = ROOT.TH1D("counter","counter",1,0,1)
     counter.SetBinContent(1,integral)
     counter.GetXaxis().SetBinLabel(1,"integral")
     counter.Write()
+    weighteddir = counterdir.mkdir("weighted")
+    weighteddir.cd()
+    counter.Write()
+    addConfigInfo(fOUT, datasetsQCDInv.getDataset("Data"))
+    
     fOUT.Close()
                           
 if __name__ == "__main__":
