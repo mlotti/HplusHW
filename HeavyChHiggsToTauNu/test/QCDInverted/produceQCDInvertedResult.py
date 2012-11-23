@@ -123,7 +123,13 @@ def main():
     os.makedirs(directory)
     fOUT = ROOT.TFile.Open(os.path.join(directory, "histograms-Data.root"), "RECREATE")
     fOUT.mkdir(analysis)
-    fIN = ROOT.TFile.Open(os.path.join(dirQCDInv,"histogramsForLands.root"),"R")
+    fINname = os.path.join(dirQCDInv,"histogramsForLands.root")
+    if not os.path.exists(fINname):
+        print "File histogramsForLands.root not found under",dirQCDInv
+        print "Did you run plotSignalAnalysisInverted.py?"
+        print "Exiting.."
+        sys.exit()
+    fIN = ROOT.TFile.Open(fINname,"R")
     histograms = fIN.GetListOfKeys()
     fOUT.cd()
     fOUT.cd(analysis)
