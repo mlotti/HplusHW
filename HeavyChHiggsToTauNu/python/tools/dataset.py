@@ -119,9 +119,6 @@ def getDatasetsFromMulticrabCfg(**kwargs):
                 tmp.append(task)
         taskDirs = tmp
 
-    print taskDirs
-    raise Exception("foo")
-
     dataEra = kwargs.get("dataEra", None)
 
     datasetMgr = getDatasetsFromCrabDirs(taskDirs, **_args)
