@@ -6,6 +6,7 @@ import hashlib
 import imp
 import re
 import ROOT
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 
 def higgsAnalysisPath():
     if "HIGGSANALYSIS_BASE" in os.environ:
