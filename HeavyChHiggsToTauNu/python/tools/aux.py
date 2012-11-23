@@ -5,6 +5,7 @@ import os
 import hashlib
 import imp
 import re
+import ROOT
 
 def higgsAnalysisPath():
     if "HIGGSANALYSIS_BASE" in os.environ:
