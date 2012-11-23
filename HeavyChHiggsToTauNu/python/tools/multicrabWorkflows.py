@@ -403,6 +403,7 @@ multicrabWorkflowsPattuple.addPattuple_v44_4(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_1_test1(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_1(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_1_1(datasets)
+multicrabWorkflowsPattuple.addPattuple_v53_1_2(datasets)
 
 # Add embedding definitions
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_4_2(datasets)

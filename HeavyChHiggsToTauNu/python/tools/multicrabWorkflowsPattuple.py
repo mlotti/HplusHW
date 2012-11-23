@@ -851,7 +851,19 @@ def addPattuple_v53_1_1(datasets):
         # For testing only
         "TTToHplusBWB_M120_Summer12":             TaskDef("/TTToHplusBWB_M-120_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_1-e5b7e051b5f262d92a2dca949f12e05a/USER"), # 32322 events, Mean 128.5 MB, min 2.7 MB, max 141.8 MB
         }
-    definitionsOnlyInV53_1_1 = {
+    definitions = {}
+    definitions.update(definitionsAlsoInV53_1)
+
+    addPattuple_53X("v53_1_1", datasets, definitions)
+
+
+def addPattuple_v53_1_2(datasets):
+    # Same as v53_1, but with CMSSW_5_3_7
+    definitionsAlsoInV53_1 = {
+        # For testing only
+        "TTToHplusBWB_M120_Summer12":             TaskDef(""),
+        }
+    definitionsOnlyInV53_1_2 = {
         "TTToHplusBWB_M80_ext_Summer12":          TaskDef(""),
         "TTToHplusBWB_M90_ext_Summer12":          TaskDef(""),
         "TTToHplusBWB_M100_ext_Summer12":         TaskDef(""),
@@ -901,9 +913,9 @@ def addPattuple_v53_1_1(datasets):
         }
     definitions = {}
     definitions.update(definitionsAlsoInV53_1)
-    definitions.update(definitionsOnlyInV53_1_1)
+    definitions.update(definitionsOnlyInV53_1_2)
 
-    addPattuple_53X("v53_1_1", datasets, definitions)
+    addPattuple_53X("v53_1_2", datasets, definitions)
 
         
 

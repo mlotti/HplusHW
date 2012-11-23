@@ -148,7 +148,7 @@ datasets_SingleTop = [
     "Tbar_s-channel_TuneZ2star_Summer12",
 ]
 
-workflow = "pattuple_v53_1_1"
+workflow = "pattuple_v53_1_2"
 
 tasks = [
     ("Tau", datasets_Tau),
