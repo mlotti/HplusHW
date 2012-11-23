@@ -849,7 +849,7 @@ def addPattuple_v53_1_1(datasets):
     # Same as v53_1, but with CMSSW_5_3_6_patch1
     definitionsAlsoInV53_1 = {
         # For testing only
-        "TTToHplusBWB_M120_Summer12":             TaskDef(""),
+        "TTToHplusBWB_M120_Summer12":             TaskDef("/TTToHplusBWB_M-120_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_1-e5b7e051b5f262d92a2dca949f12e05a/USER"), # 32322 events, Mean 128.5 MB, min 2.7 MB, max 141.8 MB
         }
     definitionsOnlyInV53_1_1 = {
         "TTToHplusBWB_M80_ext_Summer12":          TaskDef(""),
