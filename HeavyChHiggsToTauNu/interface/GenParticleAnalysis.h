@@ -2,6 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_GenParticleAnalysis_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_GenParticleAnalysis_h
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
+
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
@@ -20,7 +22,7 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
   
-  class   GenParticleAnalysis {
+  class GenParticleAnalysis: public BaseSelection {
   public:
     class Data {
     public:
@@ -42,12 +44,17 @@ namespace HPlus {
     GenParticleAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~GenParticleAnalysis();
 
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event&, const edm::EventSetup&);
     Data analyze(const edm::Event&, const edm::EventSetup&);
+
     // edm::PtrVector<const reco::Candidate*> doQCDmAnalysis(const edm::Event&, const edm::EventSetup&); //doesn't work
     std::vector<const reco::Candidate*> doQCDmAnalysis(const edm::Event&, const edm::EventSetup&); // works
     // double doQCDmAnalysis(const edm::Event&, const edm::EventSetup&); // works
 
   private:
+    Data privateAnalyze(const edm::Event&, const edm::EventSetup&);
+
     void init(HistoWrapper& histoWrapper);
     /*
     std::vector<const reco::GenParticle*> getImmediateMothers(const reco::Candidate&);

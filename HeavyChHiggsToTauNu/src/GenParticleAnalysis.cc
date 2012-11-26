@@ -38,6 +38,7 @@ namespace HPlus {
   }
 
   GenParticleAnalysis::GenParticleAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
+    BaseSelection(eventCounter, histoWrapper),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fMetSrc(iConfig.getUntrackedParameter<edm::InputTag>("metSrc")),
     fOneProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneProngTauSrc")),
@@ -104,9 +105,23 @@ namespace HPlus {
     hWPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genWPhi", "genWPhi", 64, -3.2, 3.2);    
   }
 
+  GenParticleAnalysis::Data GenParticleAnalysis::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup);
+  }
+
   GenParticleAnalysis::Data GenParticleAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup);
+  }
 
-
+  GenParticleAnalysis::Data GenParticleAnalysis::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
     if (iEvent.isRealData()) return 0;
 
     edm::Handle <reco::GenParticleCollection> genParticles;

@@ -167,9 +167,8 @@ namespace HPlus {
   JetSelection::Data JetSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr< reco::Candidate >& tau, int nVertices) {
     ensureSilentAnalyzeAllowed(iEvent);
 
-    // Disable histogram filling until the return call
-
-    // The destructor of HistoWrapper::TemporaryDisabler will return
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
 

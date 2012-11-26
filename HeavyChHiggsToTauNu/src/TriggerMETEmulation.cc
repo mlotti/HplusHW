@@ -14,6 +14,7 @@ namespace HPlus {
   TriggerMETEmulation::Data::~Data() {}
 
   TriggerMETEmulation::TriggerMETEmulation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
+    BaseSelection(eventCounter, histoWrapper),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     fmetEmulationCutCount(eventCounter.addSubCounter("Trigger MET emulation","Trigger met emulation cut"))
@@ -25,7 +26,24 @@ namespace HPlus {
 
   TriggerMETEmulation::~TriggerMETEmulation() {}
 
+
+  TriggerMETEmulation::Data TriggerMETEmulation::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup);
+  }
+
   TriggerMETEmulation::Data TriggerMETEmulation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup);
+  }
+
+  TriggerMETEmulation::Data TriggerMETEmulation::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     bool passEvent = false;
 
     edm::Handle<edm::View<reco::MET> > hmet;

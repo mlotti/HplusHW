@@ -29,6 +29,7 @@ namespace HPlus {
   TopWithWSelection::Data::~Data() {}
 
   TopWithWSelection::TopWithWSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
+    BaseSelection(eventCounter, histoWrapper),
     fTopMassLow(iConfig.getUntrackedParameter<double>("TopMassLow")),
     fTopMassHigh(iConfig.getUntrackedParameter<double>("TopMassHigh")),
     fChi2Cut(iConfig.getUntrackedParameter<double>("Chi2Cut")),
@@ -59,9 +60,23 @@ namespace HPlus {
 
   TopWithWSelection::~TopWithWSelection() {}
 
+  TopWithWSelection::Data TopWithWSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup, jets, iJetb);
+  }
+
   TopWithWSelection::Data TopWithWSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup, jets, iJetb);
+  }
 
-
+  TopWithWSelection::Data TopWithWSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
     // Reset variables
     topMass = -1;
     double nan = std::numeric_limits<double>::quiet_NaN();

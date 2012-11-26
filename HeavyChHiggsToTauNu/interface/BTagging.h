@@ -2,6 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_BTagging_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_BTagging_h
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
+
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -20,7 +22,7 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
 
-  class BTagging {
+  class BTagging: public BaseSelection {
     class BTaggingScaleFactor {
     public:
       BTaggingScaleFactor();
@@ -95,6 +97,7 @@ namespace HPlus {
     ~BTagging();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
 
     int analyzeOnlyBJetCount(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
     double analyzeOnlyBJetScaleFactor(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets) {
@@ -104,6 +107,8 @@ namespace HPlus {
     const std::string getDiscriminator() const { return fDiscriminator; }
 
   private:
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
+    
     void calculateScaleFactor(const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
 
     // Input parameters

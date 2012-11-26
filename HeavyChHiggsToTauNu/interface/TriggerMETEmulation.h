@@ -6,6 +6,7 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/METReco/interface/MET.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 
 namespace edm {
@@ -19,7 +20,7 @@ namespace HPlus {
   class WrappedTH1;
   class WrappedTH2;
 
-  class TriggerMETEmulation {
+  class TriggerMETEmulation: public BaseSelection {
   public:
     /**
      * Class to encapsulate the access to the data members of
@@ -40,10 +41,12 @@ namespace HPlus {
       const TriggerMETEmulation *fTriggerMETEmulation;
       const bool fPassedEvent;
     };
-    
+
     TriggerMETEmulation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~TriggerMETEmulation();
 
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
     const edm::Ptr<reco::MET> getSelectedMET() const {
@@ -51,6 +54,7 @@ namespace HPlus {
     }
 
   private:
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     // Input parameters
     edm::InputTag fSrc;
     const double fmetEmulationCut;

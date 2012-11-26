@@ -131,15 +131,14 @@ namespace HPlus {
     Count fBaselineMetCounter;
     Count fBaselineBtagCounter;
     Count fBaselineDeltaPhiTauMETCounter;
-    Count fHiggsMassCutCounter;
     Count fBaselineDphi160Counter;
     Count fBaselineDphi130Counter;
     Count fBaselineTopChiSelectionCounter;
     Count fOneTauCounter;
     Count fTriggerScaleFactorCounter;
-    Count fTauVetoAfterTauIDCounter;
     Count fNprongsAfterTauIDCounter;
     Count fRtauAfterTauIDCounter;
+    Count fTauVetoAfterTauIDCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fNJetsCounter;
@@ -151,6 +150,7 @@ namespace HPlus {
     Count fDeltaPhiTauMETCounter;
     //    Count fDeltaPhiTauMET140Counter;
     Count fdeltaPhiTauMET10Counter;
+    Count fHiggsMassCutCounter;
     Count fdeltaPhiTauMET160Counter;
     Count fdeltaPhiTauMET130Counter;
     Count fFakeMETVetoCounter;
@@ -182,9 +182,9 @@ namespace HPlus {
     JetTauInvMass fJetTauInvMass;
     TopSelection fTopSelection;
     BjetSelection fBjetSelection;
-    FullHiggsMassCalculator fFullHiggsMassCalculator;
     TopChiSelection fTopChiSelection;
     TopWithBSelection fTopWithBSelection;
+    FullHiggsMassCalculator fFullHiggsMassCalculator;
     GenParticleAnalysis fGenparticleAnalysis;
     ForwardJetVeto fForwardJetVeto;
     CorrelationAnalysis fCorrelationAnalysis;

@@ -15,6 +15,7 @@
 
 namespace HPlus {
   VertexAssignmentAnalysis::VertexAssignmentAnalysis(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
+    BaseSelection(eventCounter, histoWrapper),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), histoWrapper, "VertexAssignment"),
     fAllEventsWithGenuineTaus(eventCounter.addSubCounter("VtxAssignment","genuine tau/all events")),
     fGenuineTausWithCorrectPV(eventCounter.addSubCounter("VtxAssignment","genuine tau/passed events")),
@@ -43,7 +44,23 @@ namespace HPlus {
 
   VertexAssignmentAnalysis::~VertexAssignmentAnalysis() {}
 
-  void VertexAssignmentAnalysis::analyze(bool isData, edm::Ptr<reco::Vertex> vtx, edm::Ptr<pat::Tau> tau, FakeTauIdentifier::MCSelectedTauMatchType mcmatch) {
+  void VertexAssignmentAnalysis::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, bool isData, edm::Ptr<reco::Vertex> vtx, edm::Ptr<pat::Tau> tau, FakeTauIdentifier::MCSelectedTauMatchType mcmatch) {
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup, isData, vtx, tau, mcmatch);
+  }
+
+  void VertexAssignmentAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, bool isData, edm::Ptr<reco::Vertex> vtx, edm::Ptr<pat::Tau> tau, FakeTauIdentifier::MCSelectedTauMatchType mcmatch) {
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup, isData, vtx, tau, mcmatch);
+  }
+
+  void VertexAssignmentAnalysis::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, bool isData, edm::Ptr<reco::Vertex> vtx, edm::Ptr<pat::Tau> tau, FakeTauIdentifier::MCSelectedTauMatchType mcmatch) {
     // Analysis is only possible for MC events
     if (isData) return;
     // Fill counters and histograms for all events

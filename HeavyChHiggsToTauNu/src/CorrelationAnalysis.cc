@@ -10,10 +10,12 @@
 
 namespace HPlus {
 
-  CorrelationAnalysis::CorrelationAnalysis(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string HistoName) {
+  CorrelationAnalysis::CorrelationAnalysis(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string HistoName):
+  BaseSelection(eventCounter, histoWrapper) {
     init(histoWrapper, HistoName);
   }
-  CorrelationAnalysis::CorrelationAnalysis(HPlus::EventCounter& eventCounter, HistoWrapper& histoWrapper,std::string HistoName) {
+  CorrelationAnalysis::CorrelationAnalysis(HPlus::EventCounter& eventCounter, HistoWrapper& histoWrapper,std::string HistoName):
+  BaseSelection(eventCounter, histoWrapper) {
     init(histoWrapper, HistoName);
   }
 
@@ -31,8 +33,23 @@ namespace HPlus {
     hDeltaR_tauB2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaR_tauB2", "DeltaR_tauB2", 100, 0., 5.);
   }
 
-  void CorrelationAnalysis::analyze(const edm::PtrVector<reco::Candidate>& input1,const edm::PtrVector<reco::Candidate>& input2, std::string HistoName){
+  void CorrelationAnalysis::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& input1,const edm::PtrVector<reco::Candidate>& input2, std::string HistoName){
+    ensureSilentAnalyzeAllowed(iEvent);
 
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup, input1, input2, HistoName);
+  }
+
+  void CorrelationAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& input1,const edm::PtrVector<reco::Candidate>& input2, std::string HistoName){
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup, input1, input2, HistoName);
+  }
+
+  void CorrelationAnalysis::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& input1,const edm::PtrVector<reco::Candidate>& input2, std::string HistoName){
     double DeltaR_tauB1 = -999;
     double DeltaR_tauB2 = -999;
     int ntaus = 0;
