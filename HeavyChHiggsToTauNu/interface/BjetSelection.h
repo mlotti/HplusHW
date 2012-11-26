@@ -12,7 +12,6 @@
 #include "DataFormats/METReco/interface/GenMET.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 
 
 namespace edm {
