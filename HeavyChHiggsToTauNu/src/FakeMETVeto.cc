@@ -10,10 +10,12 @@
 
 namespace HPlus {
   FakeMETVeto::Data::Data(const FakeMETVeto *fakeMETVeto, bool passedEvent):
-    fFakeMETVeto(fakeMETVeto), fPassedEvent(passedEvent) {}
+    fFakeMETVeto(fakeMETVeto),
+    fPassedEvent(passedEvent) {}
   FakeMETVeto::Data::~Data() {}
   
   FakeMETVeto::FakeMETVeto(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
+    BaseSelection(eventCounter, histoWrapper),
     fMinDeltaPhi(iConfig.getUntrackedParameter<double>("minDeltaPhi")) {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("FakeMETVeto");
@@ -29,7 +31,23 @@ namespace HPlus {
 
   FakeMETVeto::~FakeMETVeto() {}
 
+  FakeMETVeto::Data FakeMETVeto::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau , const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met) {
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup, tau, jets, met);
+  }
+
   FakeMETVeto::Data FakeMETVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau , const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met) {
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup, tau, jets, met);
+  }
+
+  FakeMETVeto::Data FakeMETVeto::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau , const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met) {
     bool passEvent = false;
 
     // Loop over selected taus

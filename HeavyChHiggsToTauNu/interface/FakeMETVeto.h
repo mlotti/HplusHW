@@ -5,6 +5,7 @@
 
 #include "FWCore/Utilities/interface/InputTag.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 
 #include "DataFormats/Common/interface/Ptr.h"
@@ -24,7 +25,7 @@ namespace HPlus {
   /**
    * Class for checking the smallest DeltaPhi of the MET and the selected jets and 
    */
-  class FakeMETVeto {
+  class FakeMETVeto: public BaseSelection {
   public:
     /**
      * Class to encapsulate the access to the data members of
@@ -46,13 +47,17 @@ namespace HPlus {
       const FakeMETVeto *fFakeMETVeto;
       const bool fPassedEvent;
     };
-    
+
     FakeMETVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~FakeMETVeto();
 
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup,  const edm::Ptr<reco::Candidate>& tau , const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup,  const edm::Ptr<reco::Candidate>& tau , const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met);
 
   private:
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup,  const edm::Ptr<reco::Candidate>& tau , const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met);
+
     // Input parameters
     const double fMinDeltaPhi;
 

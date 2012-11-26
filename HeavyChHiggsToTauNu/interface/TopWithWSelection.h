@@ -2,6 +2,7 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_TopWithWSelection_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_TopWithWSelection_h
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -16,7 +17,7 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
 
-  class TopWithWSelection {
+  class TopWithWSelection: public BaseSelection {
   public:
     typedef math::XYZTLorentzVector XYZTLorentzVector;
     /**
@@ -44,9 +45,12 @@ namespace HPlus {
     TopWithWSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~TopWithWSelection();
 
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> bjet);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> bjet);
 
   private:
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> bjet);
     void init();
     /*
     std::vector<const reco::GenParticle*> getImmediateMothers(const reco::Candidate&);

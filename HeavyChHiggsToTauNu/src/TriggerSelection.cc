@@ -19,6 +19,7 @@ namespace HPlus {
   TriggerSelection::Data::~Data() {}
   
   TriggerSelection::TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
+    BaseSelection(eventCounter, histoWrapper),
     fTriggerSrc(iConfig.getUntrackedParameter<edm::InputTag>("triggerSrc")),
     fPatSrc(iConfig.getUntrackedParameter<edm::InputTag>("patSrc")),
     fMetCut(iConfig.getUntrackedParameter<double>("hltMetCut")),
@@ -66,7 +67,23 @@ namespace HPlus {
     for(std::vector<TriggerPath* >::const_iterator i = triggerPaths.begin(); i != triggerPaths.end(); ++i) delete *i;
   }
 
+  TriggerSelection::Data TriggerSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup);
+  }
+
   TriggerSelection::Data TriggerSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup);
+  }
+
+  TriggerSelection::Data TriggerSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     bool passEvent = true;
     TriggerPath* returnPath = NULL;
     increment(fTriggerAllCount);

@@ -2,6 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_VertexSelection_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_VertexSelection_h
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
+
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
@@ -16,7 +18,7 @@ namespace HPlus {
   class EventCounter;
   class HistoWrapper;
 
-  class VertexSelection {
+  class VertexSelection: public BaseSelection {
   public:
     class Data {
     public:
@@ -34,6 +36,8 @@ namespace HPlus {
     VertexSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~VertexSelection();
 
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
     const edm::InputTag getSrc() const {
@@ -41,6 +45,8 @@ namespace HPlus {
     }
 
   private:
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    
     edm::InputTag fSrc;
     bool fEnabled;
 

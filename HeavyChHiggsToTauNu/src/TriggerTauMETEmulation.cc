@@ -21,7 +21,8 @@ namespace HPlus {
     fTriggerTauMETEmulation(TriggerTauMETEmulation), fPassedEvent(passedEvent) {}
   TriggerTauMETEmulation::Data::~Data() {}
 
-  TriggerTauMETEmulation::TriggerTauMETEmulation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper) {
+  TriggerTauMETEmulation::TriggerTauMETEmulation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
+    BaseSelection(eventCounter, histoWrapper) {
         l1Emulation     = new L1Emulation(iConfig);
         hltTauEmulation = new HLTTauEmulation(iConfig);
         hltMETEmulation = new HLTMETEmulation(iConfig);
@@ -42,7 +43,24 @@ namespace HPlus {
 	delete hltMETEmulation;
   }
 
+
+  TriggerTauMETEmulation::Data TriggerTauMETEmulation::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup);
+  }
+
   TriggerTauMETEmulation::Data TriggerTauMETEmulation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup);
+  }
+
+  TriggerTauMETEmulation::Data TriggerTauMETEmulation::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
 	// L1
         l1Emulation->setParameters(1,20,30);//n,ptTau,ptCen

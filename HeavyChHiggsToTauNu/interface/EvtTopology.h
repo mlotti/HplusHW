@@ -24,6 +24,7 @@
 #include <iostream>
 #include <vector>
 // CMSSW libraries
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -43,7 +44,7 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
 
-  class EvtTopology {
+  class EvtTopology: public BaseSelection {
   public:
     typedef struct {
       float fAlphaT;
@@ -78,10 +79,13 @@ namespace HPlus {
     EvtTopology(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~EvtTopology();
 
-    Data analyze( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
     // Data InvMassVetoOnJets( const edm::PtrVector<pat::Jet>& jets); obsolete
 
   private:
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
     // Input parameters
     // std::string fDiscriminator;
     // double fDiscrCut;
