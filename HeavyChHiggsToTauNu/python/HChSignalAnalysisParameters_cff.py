@@ -53,6 +53,17 @@ trigger = cms.untracked.PSet(
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEmulationEfficiency_cfi import *
 
+metFilters = cms.untracked.PSet(
+    HBHENoiseFilterSrc = cms.untracked.InputTag("HBHENoiseFilterResultProducer", "HBHENoiseFilterResult"),
+    HBHENoiseFilterEnabled = cms.untracked.bool(False),
+    HBHENoiseFilterMETWGSrc = cms.untracked.InputTag("HBHENoiseFilterResultProducerMETWG", "HBHENoiseFilterResult"),
+    HBHENoiseFilterMETWGEnabled = cms.untracked.bool(False),
+    trackingFailureFilterSrc = cms.untracked.InputTag("trackingFailureFilter"),
+    trackingFailureFilterEnabled = cms.untracked.bool(False),
+    EcalDeadCellEventFilterSrc = cms.untracked.InputTag("EcalDeadCellEventFilter"),
+    EcalDeadCellEventFilterEnabled = cms.untracked.bool(False), 
+)
+
 primaryVertexSelection = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPrimaryVertex"),
     enabled = cms.untracked.bool(True)
@@ -64,6 +75,7 @@ tauSelectionBase = cms.untracked.PSet(
     operatingMode = cms.untracked.string("standard"), # Standard tau ID (Tau candidate selection + tau ID applied)
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     selection = cms.untracked.string(""),
+#    ptCut = cms.untracked.double(50), # jet pt > value for heavy charged Higgs
     ptCut = cms.untracked.double(41), # jet pt > value
     etaCut = cms.untracked.double(2.1), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
@@ -111,7 +123,7 @@ tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
 vetoTauBase = tauSelectionHPSVeryLooseTauBased.clone(
     src = "selectedPatTausHpsPFTau",
 #    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
-    ptCut = cms.untracked.double(15), # jet pt > value
+    ptCut = cms.untracked.double(20), # jet pt > value
     etaCut = cms.untracked.double(2.4), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(5.0), # ldg. track > value
 #    leadingObjectPtCut = cms.untracked.double(5.0), # ldg. track > value
@@ -198,7 +210,9 @@ jetSelectionBase = cms.untracked.PSet(
     jetIdMinChargedMultiplicity = cms.untracked.uint32(0),
     jetIdMaxChargedEMEnergyFraction = cms.untracked.double(0.99),
     # Pileup cleaning
+
     betaCut = cms.untracked.double(0.2), # default 0.2
+
     betaCutSource = cms.untracked.string("Beta"), # tag name in user floats
     betaCutDirection = cms.untracked.string("GT"), # direction of beta cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
     # Veto event if jet hits dead ECAL cell
@@ -230,7 +244,8 @@ MET = cms.untracked.PSet(
     tcSrc = cms.untracked.InputTag("patMETsTC"),
     select = cms.untracked.string("type1"), # raw, type1, type2
     METCut = cms.untracked.double(60.0),
-
+#    METCut = cms.untracked.double(80.0), # MET cut for heavy charged Higgs
+    
     # For type I/II correction
     tauJetMatchingCone = cms.untracked.double(0.5),
     jetType1Threshold = cms.untracked.double(10),
@@ -244,13 +259,14 @@ bTagging = cms.untracked.PSet(
 #    discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
     discriminator = cms.untracked.string("combinedSecondaryVertexBJetTags"),
 #    discriminator = cms.untracked.string("jetProbabilityBJetTags"),   
-    leadingDiscriminatorCut = cms.untracked.double(0.679), # used for best bjet candidates (best discriminator)
-    subleadingDiscriminatorCut = cms.untracked.double(0.679), # used for other bjet candidates
+    leadingDiscriminatorCut = cms.untracked.double(0.898), # used for best bjet candidates (best discriminator
+    subleadingDiscriminatorCut = cms.untracked.double(0.898), # used for other bjet candidates
     ptCut = cms.untracked.double(20.0),
+#    ptCut = cms.untracked.double(30.0), # for heavy charged Higgs
     etaCut = cms.untracked.double(2.4),
     jetNumber = cms.untracked.uint32(1),
     jetNumberCutDirection = cms.untracked.string("GEQ"), # direction of jet number cut direction, options: NEQ, EQ, GT, GEQ, LT, LEQ
-    UseBTagDB      = cms.untracked.bool(True),
+    UseBTagDB      = cms.untracked.bool(False),
     LabelTag       = cms.untracked.string("MUJETSWPBTAGCSVM"),#### for MU+JETS btag SF
    # LabelTag       = cms.untracked.string("MISTAGCSVM"),######### for MU+JETS Mistag SF
    # LabelTag       = cms.untracked.string("TTBARDISCRIMBTAGCSV"),########## for TTBar efficiency
@@ -261,7 +277,9 @@ bTagging = cms.untracked.PSet(
 )
 
 
-deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
+#deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
+deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees, for heavy charged Higgs
+
 topReconstruction = cms.untracked.string("None") # Options: None
 
 transverseMassCut = cms.untracked.double(100) # Not used
@@ -338,6 +356,8 @@ GenParticleAnalysis = cms.untracked.PSet(
   oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"),
   threeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauThreeProng"),
 )
+
+
 topSelection = cms.untracked.PSet(
   TopMassLow = cms.untracked.double(100.0),
   TopMassHigh = cms.untracked.double(300.0),
@@ -376,6 +396,23 @@ topWithWSelection = cms.untracked.PSet(
     enabled = cms.untracked.bool(False)
 )
 
+topWithMHSelection = cms.untracked.PSet(
+    TopMassLow = cms.untracked.double(120.0),
+    TopMassHigh = cms.untracked.double(300.0),
+    Chi2Cut = cms.untracked.double(5.0),
+    src = cms.untracked.InputTag("genParticles"),
+    enabled = cms.untracked.bool(False)
+)
+
+
+topWithMHSelection = cms.untracked.PSet(
+        TopMassLow = cms.untracked.double(120.0),
+        TopMassHigh = cms.untracked.double(300.0),
+        Chi2Cut = cms.untracked.double(5.0),
+        src = cms.untracked.InputTag("genParticles"),
+        enabled = cms.untracked.bool(False)
+)
+
 tree = cms.untracked.PSet(
     fill = cms.untracked.bool(True),
     fillJetEnergyFractions = cms.untracked.bool(True),
@@ -409,7 +446,7 @@ vertexWeight = cms.untracked.PSet(
     dataPUdistributionLabel = cms.string("pileup"),
     mcPUdistribution = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramMCFall11.root"),
     mcPUdistributionLabel = cms.string("pileup"),
-    weightDistribution = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_2011AB.root"),
+    weightDistribution = cms.string("WEIGHT_FILE_DOES_NOT_EXIST"), # Passed to edm::FileInPath in the code
     weightDistributionLabel = cms.string("weights"),
     weightDistributionEnable = cms.bool(False),
     enabled = cms.bool(False),
@@ -543,6 +580,7 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
             pset.weightDistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_"+era.replace("Run","")+".root"
     elif era == "Run2011AB":
         pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011"+suffix+".root"
+        pset.weightDistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_2011AB.root"
     else:
         raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'Run2011A', 'Run2011B', 'Run2011AB', 'Run2012A', 'Run2012B', 'Run2012C', 'Run2012ABC' " % era)
     pset.dataPUdistributionLabel = "pileup"

@@ -42,7 +42,10 @@ namespace HPlus {
       return;
 
     if(fwEnabled){
-        edm::FileInPath myWeightPUdistribution = iConfig.getParameter<edm::FileInPath>("weightDistribution");
+      // Use edm::FileInPath to find the file, must do like this in
+      // case fwEnabled is false and the file does not intentionally exist
+      std::string filePath = iConfig.getParameter<std::string>("weightDistribution");
+      edm::FileInPath myWeightPUdistribution = edm::FileInPath(filePath);
         std::string myWeightPUdistributionLabel = iConfig.getParameter<std::string>("weightDistributionLabel");
 
 	TFile* fIN = TFile::Open(myWeightPUdistribution.fullPath().c_str(),"r");

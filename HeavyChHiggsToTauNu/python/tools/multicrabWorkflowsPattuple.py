@@ -317,7 +317,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
         "MultiJet_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 250, njobsOut= 5),
         # FIXME: the following three could be combined in the subsequent pattuple processings
         "MultiJet_198941-200601_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=35),
-        "MultiJet_200961-202504_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=35),
+        "MultiJet_200961-202504_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=30),
         "MultiJet_202792-203742_2012C_Prompt": TaskDef(njobsIn= 170, njobsOut= 3),
 
         # MC, triggered with mcTrigger

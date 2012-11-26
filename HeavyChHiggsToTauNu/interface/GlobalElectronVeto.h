@@ -53,7 +53,7 @@ namespace HPlus {
       const float getSelectedElectronPtBeforePtCut() const { return fGlobalElectronVeto->fSelectedElectronPtBeforePtCut; }
 
       const edm::PtrVector<pat::Electron>& getSelectedElectrons() { return fGlobalElectronVeto->fSelectedElectrons; }
-
+      const edm::PtrVector<pat::Electron>& getSelectedLooseElectrons() { return fGlobalElectronVeto->fSelectedLooseElectrons; }
     private:
       const GlobalElectronVeto *fGlobalElectronVeto;
       const bool fPassedEvent;
@@ -93,6 +93,7 @@ namespace HPlus {
     // Histograms
     WrappedTH1 *hElectronPt;
     WrappedTH1 *hElectronEta;
+    WrappedTH1 *hNumberOfSelectedElectrons;
     WrappedTH1 *hElectronPt_identified;
     WrappedTH1 *hElectronEta_identified;
     WrappedTH1 *hElectronPt_matchingMCelectron;
@@ -121,6 +122,7 @@ namespace HPlus {
 
     // Selected electrons
     edm::PtrVector<pat::Electron> fSelectedElectrons;
+    edm::PtrVector<pat::Electron> fSelectedLooseElectrons;
   };
 }
 
