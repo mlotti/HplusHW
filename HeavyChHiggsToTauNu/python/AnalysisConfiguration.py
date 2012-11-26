@@ -121,7 +121,7 @@ class ConfigBuilder:
                 raise Exception("There are no WJets weights for embedding yet")
 
         if self.doOptimisation:
-            self.doSystematics = True            # Make sure that systematics are run
+            #self.doSystematics = True            # Make sure that systematics are run
             self.doFillTree = False              # Make sure that tree filling is disabled or root file size explodes
             self.histogramAmbientLevel = "Vital" # Set histogram level to least histograms to reduce output file sizes
 
