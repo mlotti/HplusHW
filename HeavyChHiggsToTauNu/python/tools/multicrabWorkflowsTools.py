@@ -339,6 +339,31 @@ class Workflow:
 
         return args
 
+## Makes an alias for a workflow name
+#
+# e.g. real processing is pattuplev53_1_1, but you want it to show up
+# as pattuplev53_1 too.
+class WorkflowAlias:
+    ## Constructor
+    #
+    # \param aliasName        Name of the alias
+    # \param originalWorkflow Workflow object of the original workflow
+    def __init__(self, aliasName, originalWorkflow):
+        self.aliasName = aliasName
+        self.originalWorkflow = originalWorkflow
+
+    def getName(self):
+        return self.aliasName
+
+    def clone(self):
+        obj = self.originalWorkflow.clone()
+        obj.name = self.aliasName
+        return obj
+
+    ## Forward all other methods to the originalWorkflow object
+    def __getattr__(self, attr):
+        return getattr(self.originalWorkflow, attr)
+
 ## Helper to write to out if variable is not none
 def _addIfNotNone(out, format, variable):
     if variable != None:
