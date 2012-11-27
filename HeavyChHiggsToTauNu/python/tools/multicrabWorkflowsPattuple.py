@@ -3,7 +3,7 @@
 
 import re
 
-from multicrabWorkflowsTools import Dataset, Workflow, Data, Source, updatePublishName, TaskDef, updateTaskDefinitions
+from multicrabWorkflowsTools import Dataset, Workflow, WorkflowAlias, Data, Source, updatePublishName, TaskDef, updateTaskDefinitions
 import multicrabDatasetsCommon as common
 
 def _constructProcessingWorkflow_common(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMask, outputLumiMask, **kwargs):
@@ -330,6 +330,15 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
         "TTToHplusBWB_M155_Summer12":       TaskDefMC(njobsIn=25, njobsOut=1),
         "TTToHplusBWB_M160_Summer12":       TaskDefMC(njobsIn=25, njobsOut=1),
 
+        "TTToHplusBWB_M80_ext_Summer12":    TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
+        "TTToHplusBWB_M90_ext_Summer12":    TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
+        "TTToHplusBWB_M100_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
+        "TTToHplusBWB_M120_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
+        "TTToHplusBWB_M140_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
+        "TTToHplusBWB_M150_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
+        "TTToHplusBWB_M155_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
+        "TTToHplusBWB_M160_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
+
         "TTToHplusBHminusB_M80_Summer12":        TaskDefMC(njobsIn=20, njobsOut=1),
         "TTToHplusBHminusB_M90_Summer12":        TaskDefMC(njobsIn=20, njobsOut=1),
         "TTToHplusBHminusB_M100_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
@@ -338,6 +347,33 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
         "TTToHplusBHminusB_M150_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
         "TTToHplusBHminusB_M155_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
         "TTToHplusBHminusB_M160_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
+
+        "TTToHplusBHminusB_M80_ext_Summer12":    TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
+        "TTToHplusBHminusB_M90_ext_Summer12":    TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
+        "TTToHplusBHminusB_M100_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
+        "TTToHplusBHminusB_M120_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
+        "TTToHplusBHminusB_M140_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
+        "TTToHplusBHminusB_M150_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
+        "TTToHplusBHminusB_M155_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
+        "TTToHplusBHminusB_M160_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
+
+        "Hplus_taunu_t-channel_M80_Summer12":    TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_t-channel_M90_Summer12":    TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_t-channel_M100_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_t-channel_M120_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_t-channel_M140_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_t-channel_M150_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_t-channel_M155_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_t-channel_M160_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+
+        "Hplus_taunu_tW-channel_M80_Summer12":    TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_tW-channel_M90_Summer12":    TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_tW-channel_M100_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_tW-channel_M120_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_tW-channel_M140_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_tW-channel_M150_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_tW-channel_M155_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_tW-channel_M160_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
 
         "Hplus_taunu_s-channel_M80_Summer12":       TaskDefMC(njobsIn=10, njobsOut=1),
         "Hplus_taunu_s-channel_M90_Summer12":       TaskDefMC(njobsIn=10, njobsOut=1),
@@ -354,13 +390,26 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
         "HplusTB_M220_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
         "HplusTB_M250_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
         "HplusTB_M300_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
+        "HplusTB_M400_Summer12":       TaskDefMC(njobsIn=200, njobsOut=2), # FIXME out
+        "HplusTB_M500_Summer12":       TaskDefMC(njobsIn=200, njobsOut=2), # FIXME out
+        "HplusTB_M600_Summer12":       TaskDefMC(njobsIn=200, njobsOut=2), # FIXME out
+
+        "HplusTB_M180_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=2), # FIXME out
+        "HplusTB_M190_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=2), # FIXME out
+        "HplusTB_M200_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=2), # FIXME out
+        "HplusTB_M220_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=2), # FIXME out
+        "HplusTB_M250_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=2), # FIXME out
+        "HplusTB_M300_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=2), # FIXME out
 
         "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=1),
         "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=1),
         "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDefMC(njobsIn= 20, njobsOut=1),
         "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 40, njobsOut=1),
         "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 80, njobsOut=2),
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12":  TaskDefMC(njobsIn=300, njobsOut=6),
         "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDefMC(njobsIn=250, njobsOut=4),
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDefMC(njobsIn=150, njobsOut=3),
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDefMC(njobsIn=850, njobsOut=14),
                                             
         "WW_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut= 8),
         "WZ_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut= 8),
@@ -373,6 +422,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
         "W3Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=490, njobsOut=20, args={"wjetsWeighting": 1, "wjetBin": 3}),
         "W4Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=550, njobsOut=30, args={"wjetsWeighting": 1, "wjetBin": 4}),
         "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDefMC(njobsIn=350, njobsOut= 6),
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDefMC(njobsIn= 40, njobsOut= 1),
         "T_t-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn= 50, njobsOut= 2),
         "Tbar_t-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 50, njobsOut= 1),
         "T_tW-channel_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut= 2),
@@ -767,7 +817,10 @@ def addPattuple_v53_1(datasets):
         "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDef("/QCD_Pt-80to120_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v3_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 21951 events, Mean 104.5 MB, min 32.8 MB, max 115.7 MB
         "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDef("/QCD_Pt-120to170_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v3_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 75972 events, Mean 178.4 MB, min 105.1 MB, max 190.5 MB
         "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDef("/QCD_Pt-170to300_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 232796 events, Mean 280.1 MB, min 15.0 MB, max 298.4 MB
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12":  TaskDef("/QCD_Pt-170to300_TuneZ2star_8TeV_pythia6_v2/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 797355 events, Mean 258.6 MB, min 27.0 MB, max 276.6 MB
         "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDef("/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_pattuple_v53_1b-cad8d1056ca20d363262a3efa1d97a74/USER"), # 616204 events, Mean 258.3 MB, min 85.4 MB, max 272.3 MB
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDef("/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6_v2/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 359260 events, Mean 250.5 MB, min 58.2 MB, max 265.4 MB
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDef("/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6_v3/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 2045846 events, Mean 252.4 MB, min 19.4 MB, max 269.9 MB
 
         "WW_TuneZ2star_Summer12":                 TaskDef("/WW_TuneZ2star_8TeV_pythia6_tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 288671 events, Mean 161.0 MB, min 5.9 MB, max 171.0 MB
         "WZ_TuneZ2star_Summer12":                 TaskDef("/WZ_TuneZ2star_8TeV_pythia6_tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 256016 events, Mean 146.5 MB, min 11.6 MB, max 157.1 MB
@@ -780,6 +833,7 @@ def addPattuple_v53_1(datasets):
         "W3Jets_TuneZ2star_Summer12":             TaskDef("/W3JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 616480 events, Mean 114.8 MB, min 6.9 MB, max 125.0 MB
         "W4Jets_TuneZ2star_Summer12":             TaskDef("/W4JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 1002056 events, Mean 178.0 MB, min 76.2 MB, max 194.2 MB
         "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDef("/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 180247 events, Mean 52.3 MB, min 8.6 MB, max 59.7 MB
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDef("/DYJetsToLL_M-10To50_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1b-cad8d1056ca20d363262a3efa1d97a74/USER"), # 4476 events, Mean 21.3 MB, min 1.7 MB, max 29.6 MB
         "T_t-channel_TuneZ2star_Summer12":        TaskDef("/T_t-channel_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 222877, Mean 395.6 MB, min 161.4 MB, max 414.6 MB
         "Tbar_t-channel_TuneZ2star_Summer12":     TaskDef("/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 27667, Mean 191.4 MB, min 1.6 MB, max 206.7 MB
         "T_tW-channel_TuneZ2star_Summer12":       TaskDef("/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 61356 events, Mean 285.5 MB, min 2.8 MB, max 311.0 MB
@@ -790,6 +844,86 @@ def addPattuple_v53_1(datasets):
 
     addPattuple_53X("v53_1", datasets, definitions)
 
+
+def addPattuple_v53_1_1(datasets):
+    # Same as v53_1, but with CMSSW_5_3_6_patch1
+    definitionsAlsoInV53_1 = {
+        # For testing only
+        "TTToHplusBWB_M120_Summer12":             TaskDef("/TTToHplusBWB_M-120_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_1-e5b7e051b5f262d92a2dca949f12e05a/USER"), # 32322 events, Mean 128.5 MB, min 2.7 MB, max 141.8 MB
+        }
+    definitions = {}
+    definitions.update(definitionsAlsoInV53_1)
+
+    addPattuple_53X("v53_1_1", datasets, definitions)
+
+
+def addPattuple_v53_1_2(datasets):
+    # Same as v53_1, but with CMSSW_5_3_7
+    definitionsAlsoInV53_1 = {
+        # For testing only
+        "TTToHplusBWB_M120_Summer12":             TaskDef("/TTToHplusBWB_M-120_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_2-e5b7e051b5f262d92a2dca949f12e05a/USER"), # 32322 events, Mean 128.5 MB, min 2.7 MB, max 141.8 MB
+        }
+    definitionsOnlyInV53_1_2 = {
+        "TTToHplusBWB_M80_ext_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M90_ext_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M100_ext_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M120_ext_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M140_ext_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M150_ext_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M155_ext_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M160_ext_Summer12":         TaskDef(""),
+
+        "TTToHplusBHminusB_M80_ext_Summer12":     TaskDef(""),
+#        "TTToHplusBHminusB_M90_ext_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M100_ext_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M120_ext_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M140_ext_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M150_ext_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M155_ext_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M160_ext_Summer12":    TaskDef(""),
+
+        "Hplus_taunu_t-channel_M80_Summer12":     TaskDef(""),
+        "Hplus_taunu_t-channel_M90_Summer12":     TaskDef(""),
+        "Hplus_taunu_t-channel_M100_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M120_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M140_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M150_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M155_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M160_Summer12":    TaskDef(""),
+
+        "Hplus_taunu_tW-channel_M80_Summer12":    TaskDef(""),
+        "Hplus_taunu_tW-channel_M90_Summer12":    TaskDef(""),
+        "Hplus_taunu_tW-channel_M100_Summer12":   TaskDef(""),
+        "Hplus_taunu_tW-channel_M120_Summer12":   TaskDef(""),
+        "Hplus_taunu_tW-channel_M140_Summer12":   TaskDef(""),
+        "Hplus_taunu_tW-channel_M150_Summer12":   TaskDef(""),
+        "Hplus_taunu_tW-channel_M155_Summer12":   TaskDef(""),
+        "Hplus_taunu_tW-channel_M160_Summer12":   TaskDef(""),
+
+        "HplusTB_M400_Summer12":                  TaskDef(""),
+        "HplusTB_M500_Summer12":                  TaskDef(""),
+        "HplusTB_M600_Summer12":                  TaskDef(""),
+
+        "HplusTB_M180_ext_Summer12":              TaskDef(""),
+        "HplusTB_M190_ext_Summer12":              TaskDef(""),
+        "HplusTB_M200_ext_Summer12":              TaskDef(""),
+        "HplusTB_M220_ext_Summer12":              TaskDef(""),
+#        "HplusTB_M250_ext_Summer12":              TaskDef(""),
+        "HplusTB_M300_ext_Summer12":              TaskDef(""),
+        }
+    definitions = {}
+    definitions.update(definitionsAlsoInV53_1)
+    definitions.update(definitionsOnlyInV53_1_2)
+
+    addPattuple_53X("v53_1_2", datasets, definitions)
+
+    # Make an alias for the analysis workflow
+    for datasetName in definitionsOnlyInV53_1_2.keys():
+        dataset = datasets.getDataset(datasetName)
+        if dataset.hasWorkflow("analysis_v53_1_2"):
+            analysisWf = dataset.getWorkflow("analysis_v53_1_2")
+            dataset.addWorkflow(WorkflowAlias("analysis_v53_1", analysisWf))
+        
 
 # Skeleton
 def addPattuple_vNEXT_SKELETON_53X(datasets):
@@ -822,6 +956,15 @@ def addPattuple_vNEXT_SKELETON_53X(datasets):
         "TTToHplusBWB_M155_Summer12":             TaskDef(""),
         "TTToHplusBWB_M160_Summer12":             TaskDef(""),
 
+        "TTToHplusBWB_M80_ext_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M90_ext_Summer12":          TaskDef(""),
+        "TTToHplusBWB_M100_ext_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M120_ext_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M140_ext_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M150_ext_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M155_ext_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M160_ext_Summer12":         TaskDef(""),
+
         "TTToHplusBHminusB_M80_Summer12":         TaskDef(""),
         "TTToHplusBHminusB_M90_Summer12":         TaskDef(""),
         "TTToHplusBHminusB_M100_Summer12":        TaskDef(""),
@@ -830,6 +973,33 @@ def addPattuple_vNEXT_SKELETON_53X(datasets):
         "TTToHplusBHminusB_M150_Summer12":        TaskDef(""),
         "TTToHplusBHminusB_M155_Summer12":        TaskDef(""),
         "TTToHplusBHminusB_M160_Summer12":        TaskDef(""),
+
+        "TTToHplusBHminusB_M80_ext_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M90_ext_Summer12":     TaskDef(""),
+        "TTToHplusBHminusB_M100_ext_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M120_ext_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M140_ext_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M150_ext_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M155_ext_Summer12":    TaskDef(""),
+        "TTToHplusBHminusB_M160_ext_Summer12":    TaskDef(""),
+
+        "Hplus_taunu_t-channel_M80_Summer12":     TaskDef(""),
+        "Hplus_taunu_t-channel_M90_Summer12":     TaskDef(""),
+        "Hplus_taunu_t-channel_M100_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M120_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M140_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M150_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M155_Summer12":    TaskDef(""),
+        "Hplus_taunu_t-channel_M160_Summer12":    TaskDef(""),
+
+        "Hplus_taunu_tW-channel_M80_Summer12":    TaskDef(""),
+        "Hplus_taunu_tW-channel_M90_Summer12":    TaskDef(""),
+        "Hplus_taunu_tW-channel_M100_Summer12":   TaskDef(""),
+        "Hplus_taunu_tW-channel_M120_Summer12":   TaskDef(""),
+        "Hplus_taunu_tW-channel_M140_Summer12":   TaskDef(""),
+        "Hplus_taunu_tW-channel_M150_Summer12":   TaskDef(""),
+        "Hplus_taunu_tW-channel_M155_Summer12":   TaskDef(""),
+        "Hplus_taunu_tW-channel_M160_Summer12":   TaskDef(""),
 
         "Hplus_taunu_s-channel_M80_Summer12":     TaskDef(""),
         "Hplus_taunu_s-channel_M90_Summer12":     TaskDef(""),
@@ -846,13 +1016,26 @@ def addPattuple_vNEXT_SKELETON_53X(datasets):
         "HplusTB_M220_Summer12":                  TaskDef(""),
         "HplusTB_M250_Summer12":                  TaskDef(""),
         "HplusTB_M300_Summer12":                  TaskDef(""),
+        "HplusTB_M400_Summer12":                  TaskDef(""),
+        "HplusTB_M500_Summer12":                  TaskDef(""),
+        "HplusTB_M600_Summer12":                  TaskDef(""),
+
+        "HplusTB_M180_ext_Summer12":              TaskDef(""),
+        "HplusTB_M190_ext_Summer12":              TaskDef(""),
+        "HplusTB_M200_ext_Summer12":              TaskDef(""),
+        "HplusTB_M220_ext_Summer12":              TaskDef(""),
+        "HplusTB_M250_ext_Summer12":              TaskDef(""),
+        "HplusTB_M300_ext_Summer12":              TaskDef(""),
 
         "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDef(""),
         "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDef(""),
         "QCD_Pt80to120_TuneZ2star_Summer12":      TaskDef(""),
         "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDef(""),
         "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDef(""),
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12":  TaskDef(""),
         "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDef(""),
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDef(""),
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDef(""),
 
         "WW_TuneZ2star_Summer12":                 TaskDef(""),
         "WZ_TuneZ2star_Summer12":                 TaskDef(""),
@@ -865,6 +1048,7 @@ def addPattuple_vNEXT_SKELETON_53X(datasets):
         "W3Jets_TuneZ2star_Summer12":             TaskDef(""),
         "W4Jets_TuneZ2star_Summer12":             TaskDef(""),
         "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDef(""),
+        "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDef(""),
         "T_t-channel_TuneZ2star_Summer12":        TaskDef(""),
         "Tbar_t-channel_TuneZ2star_Summer12":     TaskDef(""),
         "T_tW-channel_TuneZ2star_Summer12":       TaskDef(""),
