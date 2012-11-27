@@ -3,7 +3,7 @@
 
 import re
 
-from multicrabWorkflowsTools import Dataset, Workflow, Data, Source, updatePublishName, TaskDef, updateTaskDefinitions
+from multicrabWorkflowsTools import Dataset, Workflow, WorkflowAlias, Data, Source, updatePublishName, TaskDef, updateTaskDefinitions
 import multicrabDatasetsCommon as common
 
 def _constructProcessingWorkflow_common(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMask, outputLumiMask, **kwargs):
@@ -917,6 +917,12 @@ def addPattuple_v53_1_2(datasets):
 
     addPattuple_53X("v53_1_2", datasets, definitions)
 
+    # Make an alias for the analysis workflow
+    for datasetName in definitionsOnlyInV53_1_2.keys():
+        dataset = datasets.getDataset(datasetName)
+        if dataset.hasWorkflow("analysis_v53_1_2"):
+            analysisWf = dataset.getWorkflow("analysis_v53_1_2")
+            dataset.addWorkflow(WorkflowAlias("analysis_v53_1", analysisWf))
         
 
 # Skeleton
