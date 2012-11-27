@@ -62,7 +62,7 @@ class ConfigBuilder:
                  doTriggerMatching = True,
                  useCHSJets = False,
                  useJERSmearedJets = True,
-                 useBTagDB = True,
+                 useBTagDB = False,
                  customizeAnalysis = None,
 
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
