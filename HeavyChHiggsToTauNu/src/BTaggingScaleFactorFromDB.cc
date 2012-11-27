@@ -28,6 +28,7 @@ double BTaggingScaleFactorFromDB::Data::mistagScaleFactorError(){return mistagSF
 
 
 BTaggingScaleFactorFromDB::BTaggingScaleFactorFromDB(const edm::ParameterSet& iConfig):
+  payloadName(iConfig.getUntrackedParameter<std::string>("LabelTag")),
   algoName(iConfig.getUntrackedParameter<std::string>("BTagDBAlgo")),
   userAlgoName(iConfig.getUntrackedParameter<std::string>("BTagUserDBAlgo"))
 {}
@@ -37,11 +38,12 @@ BTaggingScaleFactorFromDB::~BTaggingScaleFactorFromDB(){}
 void BTaggingScaleFactorFromDB::setup(const edm::EventSetup& iSetup){
         
         // btag
-        iSetup.get<BTagPerformanceRecord>().get("BTAG" + algoName,bHandle);
-	iSetup.get<BTagPerformanceRecord>().get(userAlgoName,userHandle);
+        iSetup.get<BTagPerformanceRecord>().get(payloadName, bHandle);  
+        //iSetup.get<BTagPerformanceRecord>().get("BTAG" + algoName,bHandle);
+	iSetup.get<BTagPerformanceRecord>().get("MUJETSWPBTAGCSVM",userHandle);
         
         // mistag
-        iSetup.get<BTagPerformanceRecord>().get("MISTAG" + algoName,misHandle);
+        //iSetup.get<BTagPerformanceRecord>().get("MISTAG" + algoName,misHandle);
 }
 BTaggingScaleFactorFromDB::Data BTaggingScaleFactorFromDB::getScaleFactors(double pt,double eta){
 
