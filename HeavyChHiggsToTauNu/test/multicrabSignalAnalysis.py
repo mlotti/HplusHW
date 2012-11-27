@@ -169,7 +169,10 @@ datasetsMC_2012 = [
     "QCD_Pt80to120_TuneZ2star_Summer12",
     "QCD_Pt120to170_TuneZ2star_Summer12",
     "QCD_Pt170to300_TuneZ2star_Summer12",
+    "QCD_Pt170to300_TuneZ2star_v2_Summer12",
     "QCD_Pt300to470_TuneZ2star_Summer12",
+    "QCD_Pt300to470_TuneZ2star_v2_Summer12",
+    "QCD_Pt300to470_TuneZ2star_v3_Summer12",
 
     "WW_TuneZ2star_Summer12",
     "WZ_TuneZ2star_Summer12",
@@ -182,6 +185,7 @@ datasetsMC_2012 = [
     "W3Jets_TuneZ2star_Summer12",
     "W4Jets_TuneZ2star_Summer12",
     "DYJetsToLL_M50_TuneZ2star_Summer12",
+#    "DYJetsToLL_M10to50_TuneZ2star_Summer12",
     "T_t-channel_TuneZ2star_Summer12",
     "Tbar_t-channel_TuneZ2star_Summer12",
     "T_tW-channel_TuneZ2star_Summer12",
