@@ -37,8 +37,8 @@ treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger
 #QCDfromData = True
 QCDfromData = False
 
-#mcOnly = False
-mcOnly = True
+mcOnly = False
+#mcOnly = True
 mcOnlyLumi = 5000 # pb
 
 #dataEra = "Run2011A"
@@ -100,7 +100,7 @@ def main():
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     
     # Remove QCD
-    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
+#    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
     histograms.createLegend.moveDefaults(dx=-0.02)
     histograms.createLegend.moveDefaults(dh=-0.03)
     
@@ -418,7 +418,7 @@ def doCounters(datasets):
     # Default
 #    cellFormat = counter.TableFormatText()
     # No uncertainties
-    cellFormat = counter.TableFormatText(cellFormat=counter.CellFormatText(valueOnly=False))
+    cellFormat = counter.TableFormatText(cellFormat=counter.CellFormatText(valueOnly=True))
     print mainTable.format(cellFormat)
 
 

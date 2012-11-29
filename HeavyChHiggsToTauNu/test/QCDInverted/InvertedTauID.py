@@ -674,11 +674,13 @@ class InvertedTauID:
         print "QCD+EWK fit parameters",fitPars
 	nBaseQCD = par[0]
 	self.QCDfraction = par[1]
+        self.QCDfractionError = theFit.GetParError(1) 
 	if len(self.label) > 0:
 	    print "Bin ",self.label
         print "Integral     ", nBaseQCD
 	print "QCD fraction ",self.QCDfraction
-
+	print "QCD fraction error ",theFit.GetParError(1)
+        
         return theFit
 
     def fitBaselineData(self,histoInv,histoBase):
@@ -841,8 +843,10 @@ class InvertedTauID:
 	nQCDbaseline = self.nBaseQCD
 	nQCDinverted = self.nInvQCD
 	QCDfractionInBaseLineEvents = self.QCDfraction
+        QCDfractionInBaseLineEventsError = self.QCDfractionError
 	normalizationForInvertedEvents = nQCDbaseline*QCDfractionInBaseLineEvents/nQCDinverted
-
+        ratio = nQCDbaseline/nQCDinverted
+	normalizationForInvertedEventsError = sqrt(ratio*(1+ratio/nQCDinverted))*QCDfractionInBaseLineEvents +QCDfractionInBaseLineEventsError*ratio        
 	self.normFactors.append(normalizationForInvertedEvents)
 	self.labels.append(self.label)
 
@@ -853,6 +857,7 @@ class InvertedTauID:
         print "    Number of inverted QCD events       ",nQCDinverted 
 	print "\n"
 	print "Normalization for inverted QCD events   ",normalizationForInvertedEvents
+ 	print "Normalization for inverted QCD events error   ",normalizationForInvertedEventsError                                                  
 	print "\n"
 	return normalizationForInvertedEvents
 
