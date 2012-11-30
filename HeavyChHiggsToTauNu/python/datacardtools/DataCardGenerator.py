@@ -550,7 +550,7 @@ class DataCardGenerator:
                     self._extractors.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
             elif n.function == "QCDInverted":
                 if self._QCDMethod == DatacardQCDMethod.INVERTED:
-                    print "fixme: add QCD inverted"
+                    ####print "fixme: add QCD inverted"
                     # FIXME temp code
                     self._extractors.append(ConstantExtractor(exid = n.id, constantValue = 0.0, distribution = n.distr, description = n.label, mode = myMode))
                 else:
