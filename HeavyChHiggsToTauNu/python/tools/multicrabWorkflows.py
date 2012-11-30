@@ -417,7 +417,7 @@ multicrabWorkflowsTauEmbedding.addEmbeddingEmbedding_v44_4_2(datasets)
 multicrabWorkflowsMuonTagProbe.addMuonTagProbe_44X(datasets)
 
 # Add trigger efficiency definitions
-multicrabWorkflowsTriggerEff.addMetLegSkim_vXXX(datasets)
+#multicrabWorkflowsTriggerEff.addMetLegSkim_vXXX(datasets)
 
 def printAllDatasets():
     for d in datasets.getDatasetList():

@@ -4,6 +4,8 @@
 from multicrabWorkflowsTools import Dataset, Workflow, Data, Source, updatePublishName, TaskDef, updateTaskDefinitions
 from multicrabWorkflowsPattuple import constructProcessingWorkflow_44X
 
+import multicrabDatasetsCommon as common
+
 def addMetLegSkim_44X(version, datasets, updateDefinitions):
     mcTrigger = "HLT_MediumIsoPFTau35_Trk20_v1"
     def TaskDefMC(**kwargs):
@@ -72,6 +74,7 @@ def addMetLegSkim_44X(version, datasets, updateDefinitions):
 
         # If have skim output, define the workflows which depend on it
         if wf.output != None:
+	    wf.output.dbs_url = common.tteff_dbs
             dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, source=Source("triggerMetLeg_skim_"+version),
                                          triggerOR=taskDef.triggerOR, args=wf.args, output_file="histograms.root"))
 

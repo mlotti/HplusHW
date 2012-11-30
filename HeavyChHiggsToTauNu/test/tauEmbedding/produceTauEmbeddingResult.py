@@ -33,6 +33,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import addConfigInfo
+
 #analysisEmb = "signalAnalysis"
 #analysisSig = "signalAnalysis"
 analysisEmb = "signalAnalysisMEffCaloMet60TEff"
@@ -206,7 +208,7 @@ def operateDataset(taskDir, datasetsEmb, datasetsSig, datasetName):
 
     of.Close()
 
-
+"""
 def addConfigInfo(of, dataset):
     d = of.mkdir("configInfo")
     d.cd()
@@ -245,6 +247,7 @@ def addConfigInfo(of, dataset):
     codeVersion.Delete()
 
     of.cd()
+"""
 
 class RootHistoAdder:
     def __init__(self, datasetsEmb, datasetName):
