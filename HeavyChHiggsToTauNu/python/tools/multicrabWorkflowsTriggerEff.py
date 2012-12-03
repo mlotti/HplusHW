@@ -81,8 +81,9 @@ def addMetLegSkim_44X(version, datasets, updateDefinitions):
                                          triggerOR=taskDef.triggerOR, args=wf.args, output_file="tteffanalysis-metleg.root"))
 
 
-def addMetLegSkim_vXXX(datasets):
+def addMetLegSkim_cmssw44X_v1(datasets):
     definitions = {
+
         "Tau_165970-167913_2011A_Nov08":    TaskDef(""),
         "Tau_170722-173198_2011A_Nov08":    TaskDef(""),
         "Tau_173236-173692_2011A_Nov08":    TaskDef(""),
@@ -113,4 +114,4 @@ def addMetLegSkim_vXXX(datasets):
         "Tbar_s-channel_TuneZ2_Fall11":     TaskDef(""),
         }
 
-    addMetLegSkim_44X("vXXX", datasets, definitions)
+    addMetLegSkim_44X("cmssw44X_v1", datasets, definitions)
