@@ -3,11 +3,12 @@
 import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
+
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflows as multicrabWorkflows
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTriggerEff as multicrabWorkflowsTriggerEff
-multicrabWorkflowsTriggerEff.addMetLegSkim_cmssw44X_v1(datasets)
+multicrabWorkflowsTriggerEff.addMetLegSkim_cmssw44X_v1(multicrabWorkflows.datasets)
 
-
-multicrab = Multicrab("crab_pat.cfg", lumiMaskDir="..")
+multicrab = Multicrab("../../HeavyChHiggsToTauNu/test/pattuple/crab_pat.cfg", "../../HeavyChHiggsToTauNu/test/pattuple/patTuple_cfg.py", lumiMaskDir="../../HeavyChHiggsToTauNu/test")
 
 datasets = [
 ########
@@ -18,15 +19,10 @@ datasets = [
 
         # Data 2011
         # tau+met trigger
-#       "Tau_160431-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
-#       "Tau_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
-#       "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
-#       "Tau_175860-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
-        # single tau trigger
-        "Tau_165970-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
-        "Tau_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
-        "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
-        "Tau_175832-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
+       "Tau_165970-167913_2011A_Nov08",     # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
+       "Tau_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
+       "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
+       "Tau_175832-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
 
         # single mu
 #       "SingleMu_160431-163261_2011A_Nov08",     # 2011A
@@ -92,7 +88,7 @@ datasets = [
         "WW_TuneZ2_Fall11",
         "WZ_TuneZ2_Fall11",
         "ZZ_TuneZ2_Fall11",
-        "QCD_Pt20_MuEnriched_TuneZ2_Fall11",
+#        "QCD_Pt20_MuEnriched_TuneZ2_Fall11",
         "QCD_Pt30to50_TuneZ2_Fall11",
         "QCD_Pt50to80_TuneZ2_Fall11",
         "QCD_Pt80to120_TuneZ2_Fall11",
@@ -109,51 +105,18 @@ datasets = [
 
 
 
-
-
-multicrab.extendDatasets("AOD", datasets)
+workflow = "triggerMetLeg_skim_cmssw44X_v1"
+multicrab.extendDatasets(workflow, datasets)
 
 # local_stage_out doesn't work due to denied permission because we're
 # writing to /store/group/local ...
 #multicrab.appendLineAll("USER.local_stage_out=1")
 
 multicrab.appendLineAll("GRID.maxtarballsize = 20")
-multicrab.appendArgAll("runOnCrab=1")
-
-reco_re = re.compile("^(?P<reco>Run[^_]+_[^_]+_v\d+_[^_]+_)")
-run_re = re.compile("^(?P<pd>[^_]+?)_((?P<trig>[^_]+?)_)?(?P<frun>\d+)-(?P<lrun>\d+)_")
-
-def addOutputName(dataset):
-    path = dataset.getDatasetPath().split("/")
-    name = path[2].replace("-", "_")
-    name += "_"+path[3]
-    name += "_pattuple_v26"
-
-    # Add the begin run in the dataset name to the publish name in
-    # order to distinguish pattuple datasets from the same PD
-    if dataset.isData():
-        m = run_re.search(dataset.getName())
-        frun = m.group("frun")
-        trig = ""
-        if m.group("trig"):
-            trig = m.group("trig")+"_"
-
-        m = reco_re.search(name)
-        name = reco_re.sub(m.group("reco")+trig+frun+"_", name)
-
-    dataset.appendLine("USER.publish_data_name = "+name)
-multicrab.forEachDataset(addOutputName)
-
-def addSplitMode(dataset):
-    if dataset.isMC():
-        dataset.appendLine("CMSSW.total_number_of_events = -1")
-    else:
-        dataset.appendLine("CMSSW.total_number_of_lumis = -1")
-multicrab.forEachDataset(addSplitMode)
 
 def addCopyConfig(dataset):
     dataset.appendLine("USER.additional_input_files = copy_cfg.py")
-    dataset.appendCopyFile("../copy_cfg.py")
+    dataset.appendCopyFile("../../HeavyChHiggsToTauNu/test/copy_cfg.py")
 multicrab.forEachDataset(addCopyConfig)
 
 # For collision data stageout from US doesn't seem to be a problem
