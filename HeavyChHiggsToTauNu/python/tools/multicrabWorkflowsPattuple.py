@@ -7,6 +7,13 @@ from multicrabWorkflowsTools import Dataset, Workflow, WorkflowAlias, Data, Sour
 import multicrabDatasetsCommon as common
 
 def _constructProcessingWorkflow_common(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMask, outputLumiMask, **kwargs):
+    # Setup input/default output lumimasks for data
+    inputLumiMask = None
+    outputLumiMask = None
+    if dataset.isData():
+        inputLumiMask = inputLumiMaskData
+        outputLumiMask = outputLumiMaskData
+
     # Setup the Source for pattuple Workflow
     source = Source(sourceWorkflow,
                     # These are exclusive, but the default values of None and a check in Workflow ensure correctness
@@ -35,29 +42,31 @@ def _constructProcessingWorkflow_common(dataset, taskDef, sourceWorkflow, workfl
             wf.addCrabLine(line)
     return wf
 
-def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowName, **kwargs):
+def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMaskData="DCSONLY11", outputLumiMaskData="Nov08ReReco", "**kwargs):
     # Setup input/default output lumimasks for data
     inputLumiMask = None
     outputLumiMask = None
     if dataset.isData():
-        inputLumiMask = "DCSONLY11"
-        outputLumiMask = "Nov08ReReco"
+        inputLumiMask = inputLumiMaskData
+        outputLumiMask = outputLumiMaskData
 
     return _constructProcessingWorkflow_common(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMask, outputLumiMask, **kwargs)
 
-def constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow, workflowName, **kwargs):
+def constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMaskData="DCSONLY12", outputLumiMaskData=None, **kwargs):
     # Setup input/default output lumimasks for data
     inputLumiMask = None
     outputLumiMask = None
     if dataset.isData():
-        inputLumiMask = "DCSONLY12"
-        reco = dataset.getName().split("_")[-1]
-        outputLumiMask = {
-            "Jul13": "13Jul2012ReReco",
-            "Aug06": "06Aug2012ReReco",
-            "Aug24": "24Aug2012ReReco",
-            "Prompt": "PromptReco12"
-            }[reco]
+        inputLumiMask = inputLumiMaskData
+        outputLumiMask = outputLumiMaskData
+        if outputLumiMask is None:
+            reco = dataset.getName().split("_")[-1]
+            outputLumiMask = {
+                "Jul13": "13Jul2012ReReco",
+                "Aug06": "06Aug2012ReReco",
+                "Aug24": "24Aug2012ReReco",
+                "Prompt": "PromptReco12"
+                }[reco]
 
     return _constructProcessingWorkflow_common(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMask, outputLumiMask, **kwargs)
 
