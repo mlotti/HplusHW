@@ -6,13 +6,13 @@ import re
 from multicrabWorkflowsTools import Dataset, Workflow, Data, Source, updatePublishName, TaskDef, updateTaskDefinitions
 import multicrabDatasetsCommon as common
 
-def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowName, **kwargs):
+def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMaskData="DCSONLY11", outputLumiMaskData="Nov08ReReco", **kwargs):
     # Setup input/default output lumimasks for data
     inputLumiMask = None
     outputLumiMask = None
     if dataset.isData():
-        inputLumiMask = "DCSONLY11"
-        outputLumiMask = "Nov08ReReco"
+        inputLumiMask = inputLumiMaskData
+        outputLumiMask = outputLumiMaskData
 
     # Setup the Source for pattuple Workflow
     source = Source(sourceWorkflow,

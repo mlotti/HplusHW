@@ -57,15 +57,17 @@ def addMetLegSkim_44X(version, datasets, updateDefinitions):
         #"Tbar_s-channel_TuneZ2_Fall11":     TaskDefMC(neventsPerJobIn=10000, neventsPerJobOut=1000000, crabLines=["USER.user_remote_dir=/foo"]),
         }
 
+    workflowName = "triggerMetLeg_skim_"+version
+
     # Update the default definitions from the argument
-    updateTaskDefinitions(defaultDefinitions, updateDefinitions)
+    updateTaskDefinitions(defaultDefinitions, updateDefinitions, workflowName)
 
     # Add Workflow for each dataset
     for datasetName, taskDef in defaultDefinitions.iteritems():
         dataset = datasets.getDataset(datasetName)
 
         # Construct processing workflow
-        wf = constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow="AOD", workflowName="triggerMetLeg_skim_"+version)
+        wf = constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow="AOD", workflowName=workflowName, inputLumiMaskData="Nov08ReReco", outputLumiMaskData=None)
 
         # Example of how to set user_remote_dir for this workflow only (but for all datasets)
         #wf.addCrabLine("USER.user_remote_dir = /whatever")
@@ -75,8 +77,8 @@ def addMetLegSkim_44X(version, datasets, updateDefinitions):
         # If have skim output, define the workflows which depend on it
         if wf.output != None:
 	    wf.output.dbs_url = common.tteff_dbs
-            dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, source=Source("triggerMetLeg_skim_"+version),
-                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="histograms.root"))
+            dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, source=Source(workflowName),
+                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="tteffanalysis-metleg.root"))
 
 
 def addMetLegSkim_vXXX(datasets):
