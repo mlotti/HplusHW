@@ -15,6 +15,7 @@
 import os
 import array
 import re
+from math import sqrt
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -24,39 +25,58 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 
 DATAPATH = "/home/slehti/public/Trigger/TriggerEfficiency/data"
 
-
+from PythonWriter import PythonWriter
+"""
 class PythonWriter:
     class Parameters:
-        def __init__(self, label,runrange,lumi,eff):
+        def __init__(self, name, label,runrange,lumi,eff):
+            self.name     = name
             self.label    = label
             self.runrange = runrange
             self.lumi     = lumi
             self.eff      = eff
+        def Print(self):
+            print "check Parameters",self.name,self.label,self.runrange,self.lumi
 
     def __init__(self):
         self.ranges = []
         self.mcs    = []
-        self.selection = ""
+        self.namedSelection = []
+        self.bins   = []
 
-    def addParameters(self,path,label,runrange,lumi,eff):
-        self.ranges.append(self.Parameters(label,runrange,lumi,eff))
-        self.dumpParameters(path,label,runrange,lumi,eff)
-
-    def addMCParameters(self,label,eff):
+    def addParameters(self,name,path,label,runrange,lumi,eff):
+        print "check addParameters",name,path,label,runrange,lumi 
         labelFound = False
-        for mc in self.mcs:
-            if mc.label == label:
+        for r in self.ranges:
+            if r.name == name and r.label == label and r.runrange == runrange:
                 labelFound = True
         if not labelFound:
-            self.mcs.append(self.Parameters(label,"","",eff))
+            self.ranges.append(self.Parameters(name,label,runrange,lumi,eff))
+            self.dumpParameters(path,label,runrange,lumi,eff)
+        print "check self.ranges size",len(self.ranges)
+        for r in self.ranges:
+            r.Print()
+
+    def addMCParameters(self,name,label,eff):
+        #print "check addMCParameters",name,label
+        labelFound = False
+        for mc in self.mcs:
+            if mc.label == label and mc.name == name:
+                labelFound = True
+        if not labelFound:
+            self.mcs.append(self.Parameters(name,label,"","",eff))
 
     def SaveOfflineSelection(self,selection):
-        self.selection = selection
+        found = False
+        for n in self.namedSelection:
+            if n == selection:
+                found = True
+        if not found:
+            self.namedSelection.append(selection)
 
     def dumpParameters(self,path,label,runrange,lumi,eff):
 
@@ -69,6 +89,9 @@ class PythonWriter:
         fOUT = open(fName,"w")
         self.timeStamp(fOUT)
 
+        for r in self.ranges:
+            self.findBins(r.eff)
+
         fOUT.write("import FWCore.ParameterSet.Config as cms\n\n")
 
         fOUT.write("def triggerBin(pt, efficiency, uncertainty):\n")
@@ -78,38 +101,47 @@ class PythonWriter:
         fOUT.write("        uncertainty = cms.double(uncertainty)\n")
         fOUT.write("    )\n\n")
 
-        fOUT.write("tauLegEfficiency = cms.untracked.PSet(\n")
+        print "check self.namedSelection",self.namedSelection
 
-        fOUT.write("    # The selected triggers for the efficiency. If one trigger is\n")
-        fOUT.write("    # given, the parametrization of it is used as it is (i.e.\n")
-        fOUT.write("    # luminosity below is ignored). If multiple triggers are given,\n")
-        fOUT.write("    # their parametrizations are used weighted by the luminosities\n")
-        fOUT.write("    # given below.\n")
-        fOUT.write("    # selectTriggers = cms.VPSet(\n")
-        fOUT.write("    #     cms.PSet(\n")
-        fOUT.write("    #         trigger = cms.string(\"HLT_IsoPFTau35_Trk20_EPS\"),\n")
-        fOUT.write("    #         luminosity = cms.double(0)\n")
-        fOUT.write("    #     ),\n")
-        fOUT.write("    # ),\n")
-        fOUT.write("    # The parameters of the trigger efficiency parametrizations,\n")
-        fOUT.write("    # looked dynamically from TriggerEfficiency_cff.py\n\n")
+        for ns in self.namedSelection:
+            name      = ns[0]
+            selection = ns[1]
 
-        fOUT.write("    # Offline selection: "+self.selection+"\n\n")
+            fOUT.write("\ntauLegEfficiency_"+name+" = cms.untracked.PSet(\n")
 
-        fOUT.write("    dataParameters = cms.PSet(\n")
-        for r in self.ranges:
-            self.writeParameters(fOUT,r.label,r.runrange,r.lumi,r.eff)
-        fOUT.write("    ),\n")
+            fOUT.write("    # The selected triggers for the efficiency. If one trigger is\n")
+            fOUT.write("    # given, the parametrization of it is used as it is (i.e.\n")
+            fOUT.write("    # luminosity below is ignored). If multiple triggers are given,\n")
+            fOUT.write("    # their parametrizations are used weighted by the luminosities\n")
+            fOUT.write("    # given below.\n")
+            fOUT.write("    # selectTriggers = cms.VPSet(\n")
+            fOUT.write("    #     cms.PSet(\n")
+            fOUT.write("    #         trigger = cms.string(\"HLT_IsoPFTau35_Trk20_EPS\"),\n")
+            fOUT.write("    #         luminosity = cms.double(0)\n")
+            fOUT.write("    #     ),\n")
+            fOUT.write("    # ),\n")
+            fOUT.write("    # The parameters of the trigger efficiency parametrizations,\n")
+            fOUT.write("    # looked dynamically from TriggerEfficiency_cff.py\n\n")
 
-        fOUT.write("    mcParameters = cms.PSet(\n")
-        for mc in self.mcs:
-            self.writeMCParameters(fOUT,mc.label,mc.eff)
-        fOUT.write("    ),\n")
+            fOUT.write("    # Offline selection: "+selection+"\n\n")
 
-        fOUT.write("    dataSelect = cms.vstring(),\n")
-        fOUT.write("    mcSelect = cms.string(\""+self.mcs[0].label+"\"),\n")
-        fOUT.write("    mode = cms.untracked.string(\"disabled\") # dataEfficiency, scaleFactor, disabled\n")
-        fOUT.write(")\n")
+            fOUT.write("    dataParameters = cms.PSet(\n")
+            for r in self.ranges:
+                if r.name == name:
+                    self.writeParameters(fOUT,r.label,r.runrange,r.lumi,r.eff)
+            fOUT.write("    ),\n")
+
+            fOUT.write("    mcParameters = cms.PSet(\n")
+            for mc in self.mcs:
+                #print "check write mc",mc.name,name
+                if mc.name == name:
+                    self.writeMCParameters(fOUT,mc.label,mc.eff)
+            fOUT.write("    ),\n")
+
+            fOUT.write("    dataSelect = cms.vstring(),\n")
+            fOUT.write("    mcSelect = cms.string(\""+self.mcs[0].label+"\"),\n")
+            fOUT.write("    mode = cms.untracked.string(\"disabled\") # dataEfficiency, scaleFactor, disabled\n")
+            fOUT.write(")\n")
 
     def writeParameters(self,fOUT,label,runrange,lumi,eff):
         runrange_re = re.compile("(?P<firstRun>(\d+))-(?P<lastRun>(\d+))")
@@ -127,13 +159,14 @@ class PythonWriter:
         fOUT.write("        ),\n")
 
     def writeMCParameters(self,fOUT,label,eff):
-        fOUT.write("        "+label+"= cms.PSet(\n")
+        fOUT.write("        "+label+" = cms.PSet(\n")
         self.writeBins(fOUT,label,eff,ihisto=1)
         fOUT.write("        ),\n")
 
     def writeBins(self,fOUT,label,eff,ihisto=0):
         fOUT.write("            bins = cms.VPSet(\n")
-        for i in range(eff.histoMgr.getHistos()[ihisto].getRootHisto().GetN()):
+        nbins = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetN()
+        for i in range(nbins):
             binLowEdge = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetX()[i]
             binLowEdge-= eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorX(i)
             efficiency = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetY()[i]
@@ -141,13 +174,74 @@ class PythonWriter:
 #            efficiency = eff.ratios[0].getRootGraph().GetY()[i]
 #            error = max(eff.ratios[0].getRootGraph().GetErrorYhigh(i),eff.ratios[0].getRootGraph().GetErrorYlow(i))
             fOUT.write("                triggerBin("+str(binLowEdge)+", "+str(efficiency)+", "+str(error)+"),\n")
+        #print "check writeBins",nbins,len(self.bins)
+        if nbins < len(self.bins):
+            for i in range(nbins,len(self.bins)):
+                #print self.bins[i],efficiency,error
+                fOUT.write("                triggerBin("+str(self.bins[i])+", "+str(efficiency)+", "+str(error)+"), # duplicated bin\n")
         fOUT.write("            ),\n")
+
+    def findBins(self,eff):
+        nbins = eff.histoMgr.getHistos()[0].getRootHisto().GetN()
+        for i in range(nbins):
+            binLowEdge = eff.histoMgr.getHistos()[0].getRootHisto().GetX()[i]
+            binLowEdge-= eff.histoMgr.getHistos()[0].getRootHisto().GetErrorX(i)
+            if binLowEdge not in self.bins:
+                self.bins.append(binLowEdge)
 
     def timeStamp(self,fOUT):
         import datetime
         time = datetime.datetime.now().ctime()
         fOUT.write("# Generated on "+time+"\n")
         fOUT.write("# by HiggsAnalysis/TriggerEfficiency/test/plotTauEfficiency.py\n\n")
+
+    def sysError(self):
+        ihisto = 0
+        ranges = self.removeDuplicateRunRanges(self.ranges)
+        lumiSum = 0
+        effSum = []
+        for i in range(ranges[0].eff.histoMgr.getHistos()[ihisto].getRootHisto().GetN()):
+            effSum.append(0)
+
+        for r in ranges:
+            lumiSum += r.lumi
+            print "RunRange",r.runrange
+            print "    Lumi",r.lumi
+            eff = r.eff
+            for i in range(eff.histoMgr.getHistos()[ihisto].getRootHisto().GetN()):
+                binLowEdge = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetX()[i]
+                binLowEdge-= eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorX(i)
+                efficiency = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetY()[i]
+                error      = max(eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYhigh(i),eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYlow(i))
+                effSum[i]+= r.lumi*r.lumi*error*error
+                print "    ",binLowEdge,efficiency,error
+
+        print
+        print "Summed lumi",lumiSum
+        print "Summed uncertainty"
+        for i in range(len(effSum)):
+            binLowEdge = ranges[0].eff.histoMgr.getHistos()[ihisto].getRootHisto().GetX()[i]
+            binLowEdge-= ranges[0].eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorX(i)
+            print "    ",binLowEdge,sqrt(effSum[i])/lumiSum
+
+    def removeDuplicateRunRanges(self,ranges):
+        returnRanges = []
+        runMin = 999999999
+        runMax = 0
+        runrange_re = re.compile("(?P<firstRun>(\d+))-(?P<lastRun>(\d+))")
+        for r in ranges:
+            match = runrange_re.search(r.runrange)
+            if match:
+                firstRun = match.group("firstRun")
+                lastRun = match.group("lastRun")
+                if not(firstRun < runMax and firstRun > runMin) and not(lastRun > runMin and lastRun < runMax):
+                    if firstRun < runMin:
+                        runMin = firstRun
+                    if lastRun > runMax:
+                        runMax = lastRun
+                    returnRanges.append(r)
+        return returnRanges
+"""
 
 pythonWriter = PythonWriter()
 
@@ -156,38 +250,129 @@ def main():
 
     histograms.createLegend.moveDefaults(dh=-0.18)
 
-    macroPath = os.path.join(aux.higgsAnalysisPath(), "TriggerEfficiency/test/pileupWeight.C+")
-    macroPath = macroPath.replace("../src/","")
-    ROOT.gROOT.LoadMacro(macroPath)
+    puWeights = []
+    puWeights.append("pileupWeight_2011AB.C")
+    puWeights.append("pileupWeight_2011A.C")
+    puWeights.append("pileupWeight_2011B.C")
+    puWeights.append("pileupWeight_2011A_RR1.C")
+    puWeights.append("pileupWeight_2011A_RR2.C")
+    puWeights.append("pileupWeight_2011A_RR3.C")
+    puWeights.append("pileupWeight_Unweighted.C")
+
+    puWeightPath = "src/HiggsAnalysis/TriggerEfficiency/test"
+
+#    macroPath = os.path.join(os.environ["CMSSW_BASE"], puWeightPath, puWeights[0]+"+")
+#    macroPath = os.path.join(os.environ["CMSSW_BASE"], "src/HiggsAnalysis/TriggerEfficiency/test/pileupWeight2011AB.C+")
+#    macroPath = os.path.join(os.environ["CMSSW_BASE"], "src/HiggsAnalysis/TriggerEfficiency/test/pileupWeight_test.C+")
+#    macroPath = macroPath.replace("../src/","")
+#    ROOT.gROOT.LoadMacro(macroPath)
 
     highPurity = True
 
-    doPlots(1,highPurity=highPurity)
-    doPlots(2,highPurity=highPurity)
-    doPlots(3,highPurity=highPurity)
-    doPlots(4,highPurity=highPurity)
-    #doPlots(5,highPurity=highPurity)
-    doPlots(6,highPurity=highPurity) #2011A
-    doPlots(7,highPurity=highPurity) #2011A+B
+    ### Offline selection definition (H+)
+    offlineSelectionHPlusBase = "PFTauPt > 20 && abs(PFTauEta) < 2.1"
+    offlineSelectionHPlusBase += "&& 1/PFTauInvPt > 20"
+    offlineSelectionHPlusBase += "&& PFTauProng == 1"
+    offlineSelectionHPlusBase += "&& againstMuonTight > 0.5"
+    offlineSelectionHPlusBase += "&& MuonTauInvMass < 80"
+
+    offlineSelectionMediumMedium = offlineSelectionHPlusBase
+    offlineSelectionMediumMedium+= "&& againstElectronMedium > 0.5"
+    offlineSelectionMediumMedium+= "&& byMediumCombinedIsolationDeltaBetaCorr > 0.5"
+
+    offlineSelectionMediumMVA = offlineSelectionHPlusBase
+    offlineSelectionMediumMVA+= "&& againstElectronMVA > 0.5"
+    offlineSelectionMediumMVA+= "&& byMediumCombinedIsolationDeltaBetaCorr > 0.5"
+
+    offlineSelectionLooseMedium = offlineSelectionHPlusBase
+    offlineSelectionLooseMedium+= "&& againstElectronMedium > 0.5"
+    offlineSelectionLooseMedium+= "&& byLooseCombinedIsolationDeltaBetaCorr > 0.5"
+
+    offlineSelectionLooseMVA = offlineSelectionHPlusBase
+    offlineSelectionLooseMVA+= "&& againstElectronMVA > 0.5"
+    offlineSelectionLooseMVA+= "&& byLooseCombinedIsolationDeltaBetaCorr > 0.5"
+
+    #### 2011 W(taunu)H(bb) analysis Segala, Zenz, Narain                                                                                          
+    offlineSelectionWtaunuHbb = "PFTauPt > 20 && abs(PFTauEta) < 2.1"
+    offlineSelectionWtaunuHbb += "&& 1/PFTauInvPt > 20"
+    offlineSelectionWtaunuHbb += "&& againstElectronLoose > 0.5 && againstMuonTight > 0.5"
+    offlineSelectionWtaunuHbb += "&& decayModeFinding > 0.5"
+    offlineSelectionWtaunuHbb += "&& byLooseCombinedIsolationDeltaBetaCorr > 0.5"
+
+    #### 
+    offlineSelections = []
+    offlineSelections.append(namedselection("byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium",offlineSelectionMediumMedium))
+    offlineSelections.append(namedselection("byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA",offlineSelectionMediumMVA))
+    offlineSelections.append(namedselection("byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA",offlineSelectionLooseMVA))
+    offlineSelections.append(namedselection("byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium",offlineSelectionLooseMedium))
+#    offlineSelections.append(namedselection("WtaunuHbb",offlineSelectionWtaunuHbb))
+
+    pu_re = re.compile("pileupWeight_(?P<scenario>(\S+))\.C")
+    for puWeight in puWeights:
+        pyScenario = pu_re.search(puWeight)
+        match = pu_re.search(puWeight)
+        if match:
+            pyScenario = match.group("scenario")
+
+            if pyScenario != "Unweighted":
+                ROOT.gROOT.Clear()
+                ROOT.gROOT.Reset()
+                macroPath = os.path.join(os.environ["CMSSW_BASE"], puWeightPath, puWeight+"+")
+                macroPath = macroPath.replace("../src/","")
+                macroPath = macroPath.replace("HiggsAnalysis/TriggerEfficiency/test/../../../","")
+
+                ROOT.gROOT.LoadMacro(macroPath)
+
+            for selection in offlineSelections:
+
+                pythonWriter.SaveOfflineSelection(selection)
+
+                doPlots(1,highPurity=highPurity,selection=selection,pyScenario=pyScenario)
+                doPlots(2,highPurity=highPurity,selection=selection,pyScenario=pyScenario)
+                doPlots(3,highPurity=highPurity,selection=selection,pyScenario=pyScenario)
+                doPlots(4,highPurity=highPurity,selection=selection,pyScenario=pyScenario) #2011B
+#    doPlots(5,highPurity=highPurity)
+#    doPlots(6,highPurity=highPurity) #2011A
+#    doPlots(7,highPurity=highPurity) #2011A+B
 
     pythonWriter.write("tauLegTriggerEfficiency_cff.py")
+    pythonWriter.sysError()
 
-def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
+def namedselection(name,selection):
+    namedSelection = []
+    namedSelection.append(name)
+    namedSelection.append(selection)
+    return namedSelection
+
+def doPlots(runrange, selection, dataVsMc=True, highPurity=True, dataMcSameTrigger=False, pyScenario="Unweighted"):
+
     ### Offline selection definition
+    selectionName    = selection[0]
+    offlineSelection = selection[1]
+    """
     offlineSelection = "PFTauPt > 20 && abs(PFTauEta) < 2.1"
     offlineSelection += "&& 1/PFTauInvPt > 20"
     offlineSelection += "&& PFTauProng == 1"
-    offlineSelection += "&& againstElectronMedium > 0.5 && againstMuonTight > 0.5"
-#    offlineSelection += "&& againstElectronMVA > 0.5 && againstMuonTight > 0.5"
+#    offlineSelection += "&& againstElectronMedium > 0.5 && againstMuonTight > 0.5"
+    offlineSelection += "&& againstElectronMVA > 0.5 && againstMuonTight > 0.5"
 #    offlineSelection += "&& byTightIsolation > 0.5"
 #    offlineSelection += "&& byVLooseCombinedIsolationDeltaBetaCorr > 0.5"
 #    offlineSelection += "&& byLooseCombinedIsolationDeltaBetaCorr > 0.5"
     offlineSelection += "&& byMediumCombinedIsolationDeltaBetaCorr > 0.5"
     offlineSelection += "&& MuonTauInvMass < 80"
-
-    pythonWriter.SaveOfflineSelection(offlineSelection)
+    
+    #### 2011 W(taunu)H(bb) analysis Segala, Zenz, Narain                                                         
+    offlineSelection = "PFTauPt > 20 && abs(PFTauEta) < 2.1"
+    offlineSelection += "&& 1/PFTauInvPt > 20"
+    offlineSelection += "&& againstElectronLoose > 0.5 && againstMuonTight > 0.5"
+    offlineSelection += "&& decayModeFinding > 0.5"
+    offlineSelection += "&& byLooseCombinedIsolationDeltaBetaCorr > 0.5"
+    """
+####    pythonWriter.SaveOfflineSelection(selection)
 
     offlineTauPt40 = "PFTauPt > 40"
+
+####    offlineTauPt40 = "PFTauPt > 41 && PFTauPt < 50"
 
     if runrange == 1: # May10+Prompt-v4 (160431-167913)
         lumi = 1197
@@ -203,7 +388,7 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
         lumi = 870.119
         label = "L1_Jet52_Central + HLT_IsoPFTau35_Trk20_MET60 (Run2011A)"
         runs = "run >= 170722 && run <= 173198"
-        runsText = "170826-173198"
+        runsText = "170722-173198"
         offlineTriggerData = "HLT_IsoMu17_v13 && MuonPt > 17"# runs 17022-172619, PRESCALED
     elif runrange == 3: # Prompt-v6 (173236-173692)
         lumi = 265.715
@@ -219,10 +404,11 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
 #### Merged runrange5 with runrange4 to approximate runrange5 efficiency with runrange4 efficiency.
 #### The error should be small. Reason: too low statistics for an efficiency estimate for runrange5.
 #### 20.6.2012/S.Lehti
-        runs = "run >= 175860 && run <= 180252"
-        runsText = "175860-180252"
+        runs = "run >= 175832 && run <= 180252"
+        runsText = "175832-180252"
 #        offlineTriggerData = "HLT_IsoMu20_v9 && MuonPt > 20"
-        offlineTriggerData = "HLT_IsoMu15_L1ETM20_v3 && MuonPt > 15"
+####        offlineTriggerData = "(HLT_IsoMu15_L1ETM20_v3 || HLT_IsoMu15_L1ETM20_v4 || HLT_IsoMu15_v14 || HLT_IsoMu15_v17 || HLT_IsoMu15_v18) && MuonPt > 15"
+        offlineTriggerData = "(HLT_IsoMu15_L1ETM20_v3 || HLT_IsoMu15_L1ETM20_v4) && MuonPt > 15"
     elif runrange == 5: # Run2011B-Tau-PromptSkim-v1 (179959-180252) 
         lumi = 2762
         label = ""
@@ -346,7 +532,7 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
         files2 = getFilesData(runrange, False)
         legend1 = "Data high purity"
         legend2 = "Data low purity"
-    print "check files",files1,files2
+    #print "check files",files1,files2
     ### Prepare for plotting
     plotDir = ""
     if dataVsMc:
@@ -370,12 +556,16 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
               150
               ]
     etabins = [-2.1, -1.05, 0, 1.05, 2.1]
+    vtxbins = [0,5,10,15,20]
 
     prefix = "Data2011_"
 
     mcWeight = None
-####    if dataVsMc:
-####        mcWeight = "pileupWeightEPS(MCNPU)"
+    if dataVsMc and pyScenario != "Unweighted":
+        mcWeight = "pileupWeight_"+pyScenario+"(MCNPU)"
+    print
+    print "MC weight",pyScenario
+    print
 
     # Distributions
     ROOT.gStyle.SetErrorX(0.5)
@@ -393,6 +583,8 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
 
     # Efficiencies
     hnumpt = ROOT.TH1F("hnumpt", "hnumpt", len(ptbins)-1, array.array("d", ptbins))
+    hnumvtx = ROOT.TH1F("hnumvtx", "hnumvtx", len(vtxbins)-1, array.array("d", vtxbins))
+
     #hnumpt.Sumw2()
     optspt = {"xmin": 0}
     xlabel = "#tau-jet p_{T} (GeV/c)"
@@ -485,6 +677,13 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
         num1   = And(offlineSelection,"(((((HLT_IsoMu17_v5 || HLT_IsoMu17_v6 || HLT_IsoMu17_v8) && MuonPt > 17)|| ((HLT_IsoMu17_v9 || HLT_IsoMu17_v11) && MuonPt > 17)) && run >= 160404 && run <= 167913 && ((L1TauVeto==0 && L1IsolationRegions_2GeV>=7 && L1JetEt>52) || (!(L1TauVeto==0 && L1IsolationRegions_2GeV>=7) && L1JetEt > 68)) && hasMatchedL1Jet&&hasMatchedL2Jet == 1 && L2JetEt > 35&&l25Et > 35 && foundTracksInJet && l25Pt > 20&&primaryVertexIsValid && l25TrkIsoPtMax < 1.0 && l25EcalIsoEtMax < 1.5) || ((HLT_IsoMu17_v13 && MuonPt > 17) && run >= 170722 && run <= 173198 && hasMatchedL1Jet&&hasMatchedL2Jet == 1 && L2JetEt > 35&&l25Et > 35 && foundTracksInJet && l25Pt > 20&&primaryVertexIsValid && l25TrkIsoPtMax < 1.0 && l25EcalIsoEtMax < 1.5) || ((HLT_IsoMu20_v9 && MuonPt > 20) && run >= 173236 && run <= 173692 && L1JetEt > 52 && hasMatchedL1Jet&&hasMatchedL2Jet == 1 && L2JetEt > 35&&l25Et > 35 && foundTracksInJet && l25Pt > 20&&primaryVertexIsValid && l25TrkIsoPtMax < 1.0) )")
         num2   = And(offlineSelection,"HLT_IsoMu17_v14 && MuonPt > 17&&L1JetEt > 52 && hasMatchedL1Jet&&hasMatchedL2Jet == 1 && L2JetEt > 35&&l25Et > 35 && foundTracksInJet && l25Pt > 20&&primaryVertexIsValid && l25TrkIsoPtMax < 1.0")
 
+#    if runrange == 7:
+#        denom1 = And(offlineSelection,"((HLT_IsoMu15_L1ETM20_v3 && MuonPt > 15) && run >= 175860 && run <= 180252)")
+#        denom2 = And(offlineSelection,"(HLT_IsoMu17_v14 && MuonPt > 17)")
+#        num1   = And(offlineSelection,"( (HLT_IsoMu15_L1ETM20_v3 && MuonPt > 15) && run >= 175860 && run <= 180252&&#L1JetEt > 52 && hasMatchedL1Jet&&hasMatchedL2Jet == 1 && L2JetEt > 35&&l25Et > 35 && foundTracksInJet && l25Pt > 20&#&primaryVertexIsValid && l25TrkIsoPtMax < 1.0)")
+#        num2   = And(offlineSelection,"HLT_IsoMu17_v14 && MuonPt > 17&&L1JetEt > 52 && hasMatchedL1Jet&&hasMatchedL2#Jet == 1 && L2JetEt > 35&&l25Et > 35 && foundTracksInJet && l25Pt > 20&&primaryVertexIsValid && l25TrkIsoPtMax < 1.0#")
+
+
     if runrange == 7:
         denom1 = And(offlineSelection,"(( (((HLT_IsoMu17_v5 || HLT_IsoMu17_v6 || HLT_IsoMu17_v8) && MuonPt > 17)|| ((HLT_IsoMu17_v9 || HLT_IsoMu17_v11) && MuonPt > 17)) && run >= 160404 && run <= 167913 ) || ((HLT_IsoMu17_v13 && MuonPt > 17) && run >= 170722 && run <= 173198) || ((HLT_IsoMu20_v9 && MuonPt > 20) && run >= 173236 && run <= 173692) || ((HLT_IsoMu15_L1ETM20_v3 && MuonPt > 15) && run >= 175860 && run <= 180252)) ")
         denom2 = And(offlineSelection,"(HLT_IsoMu17_v14 && MuonPt > 17)")
@@ -494,16 +693,36 @@ def doPlots(runrange, dataVsMc=True, highPurity=True, dataMcSameTrigger=False):
 
     efficiency = plotter.plotEfficiency(prefix+"Tau3_L1HLT_PFTauPt", "PFTauPt>>hnumpt", num1, denom1, num2, denom2, mcWeight, opts=optspt, xlabel=xlabel, ylabel="Level-1 + HLT tau efficiency", fit=True, fitMin=20., fitMax=150., drawText=True, printResults=True)
 
-    denom1 = And(denom1, offlineTauPt40)
-    denom2 = And(denom2, offlineTauPt40)
-    num1 = And(num1, offlineTauPt40)
-    num2 = And(num2, offlineTauPt40)
-    plotter.plotEfficiency(prefix+"Tau4_L1HLT_PFTauEta", "PFTauEta>>heta(4, -2.1, 2.1)", num1, denom1, num2, denom2, mcWeight, xlabel="#tau-jet #eta")
-    plotter.plotEfficiency(prefix+"Tau4_L1HLT_PFTauPhi", "PFTauPhi>>heta(4, -3.1416, 3.1416)", num1, denom1, num2, denom2, mcWeight, xlabel="#tau-jet #phi")
+    denom1pt = And(denom1, offlineTauPt40)
+    denom2pt = And(denom2, offlineTauPt40)
+    num1pt = And(num1, offlineTauPt40)
+    num2pt = And(num2, offlineTauPt40)
+    plotter.plotEfficiency(prefix+"Tau4_L1HLT_PFTauEta", "PFTauEta>>heta(4, -2.1, 2.1)", num1pt, denom1pt, num2pt, denom2pt, mcWeight, xlabel="#tau-jet #eta")
+    plotter.plotEfficiency(prefix+"Tau4_L1HLT_PFTauPhi", "PFTauPhi>>heta(4, -3.1416, 3.1416)", num1pt, denom1pt, num2pt, denom2pt, mcWeight, xlabel="#tau-jet #phi")
+    plotter.plotEfficiency(prefix+"Tau4_L1HLT_NVtx", "numGoodOfflinePV>>hnumvtx", num1pt, denom1pt, num2pt, denom2pt, mcWeight, opts=optspt, xlabel="Number of good vertices", ylabel="Level-1 + HLT tau efficiency", fit=False, drawText=True, printResults=False)    
 
+    print "\nPlotDir",plotDir
+    """
+    for i in range(len(vtxbins)-1):
+        binlow = vtxbins[i]
+        binhigh = vtxbins[i+1]
+        vtxSelection = "numGoodOfflinePV > %s"%binlow
+        vtxSelection+= " && numGoodOfflinePV <= %s"%binhigh
+
+        label = "vtx"+str(binlow)+"-"+str(binhigh)
+        denom1vtx = And(denom1, vtxSelection)
+        denom2vtx = And(denom2, vtxSelection)
+        num1vtx = And(num1, vtxSelection)
+        num2vtx = And(num2, vtxSelection)
+
+        plotter.plotEfficiency(prefix+"Tau3_L1HLT_PFTauPt_"+label, "PFTauPt>>hnumpt", num1vtx, denom1vtx, num2vtx, denom2vtx, mcWeight, opts=optspt, xlabel=xlabel, ylabel="Level-1 + HLT tau efficiency", fit=False, fitMin=20., fitMax=150., drawText=True, printResults=False)
+
+        print "Plotting vtx range",vtxSelection
+
+    """
     #dumpParameters(plotDir,label,runsText,lumi,efficiency)
-    pythonWriter.addParameters(plotDir,label,runsText,lumi,efficiency)
-    pythonWriter.addMCParameters("Fall11",efficiency)
+    pythonWriter.addParameters(selectionName,plotDir,label,runsText,lumi,efficiency)
+    pythonWriter.addMCParameters(selectionName,"Fall11_PU_"+pyScenario,efficiency)
 
 
 def getFilesData(runrange, highPurity):
@@ -511,14 +730,14 @@ def getFilesData(runrange, highPurity):
     if highPurity:
         tmp = "-highpurity"
     if runrange < 3:
-        return [os.path.join(DATAPATH,"tteffAnalysis_SingleMuRun2011A_Tau_08Nov2011_v6_RAW_RECO_TTEffSkim_v444_V00_10_01_v2/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root")]
+        return [os.path.join(DATAPATH,"tteffAnalysis_SingleMuRun2011A_Tau_08Nov2011_v6_RAW_RECO_TTEffSkim_v444_V00_10_12_v1/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root")]
     if runrange == 3:
-        return [os.path.join(DATAPATH,"tteffAnalysis_SingleMuRun2011A_Tau_08Nov2011_v6_RAW_RECO_TTEffSkim_v444_V00_10_01_v2/tteffAnalysis-hltpftau-hpspftau"+tmp+".root")]
+        return [os.path.join(DATAPATH,"tteffAnalysis_SingleMuRun2011A_Tau_08Nov2011_v6_RAW_RECO_TTEffSkim_v444_V00_10_12_v1/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root")]
     if runrange == 4:
 #        return [os.path.join(DATAPATH,"tteffAnalysis_SingleMuRun2011B_Tau_PromptSkim_v1_v444_V00_10_01_v2/tteffAnalysis-hltpftau-hpspftau"+tmp+".root")]
-        return [os.path.join(DATAPATH,"tteffAnalysis_MET_Run2011B_v1_RAW_v444_V00_10_01_v3/tteffAnalysis-hltpftau-hpspftau"+tmp+".root")]
+        return [os.path.join(DATAPATH,"tteffAnalysis_MET_Run2011B_v1_RAW_v444_V00_10_12_v1/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root")]
     if runrange > 4:
-        return [os.path.join(DATAPATH,"tteffAnalysis_SingleMuRun2011A_Tau_08Nov2011_v6_RAW_RECO_TTEffSkim_v444_V00_10_01_v2/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root"),os.path.join(DATAPATH,"tteffAnalysis_MET_Run2011B_v1_RAW_v444_V00_10_01_v3/tteffAnalysis-hltpftau-hpspftau"+tmp+".root")]
+        return [os.path.join(DATAPATH,"tteffAnalysis_SingleMuRun2011A_Tau_08Nov2011_v6_RAW_RECO_TTEffSkim_v444_V00_10_12_v1/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root"),os.path.join(DATAPATH,"tteffAnalysis_MET_Run2011B_v1_RAW_v444_V00_10_12_v1/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root")]
     return [
         # 160431_167913
         ["files/tteffAnalysis_SingleMu_Run2011A_Tau_May10ReReco_v1_v428_1_V00_09_07/tteffAnalysis-hltpftautight-hpspftau"+tmp+".root",
@@ -688,6 +907,8 @@ class Plotter:
                 histograms.addText(x, y, "HLT: %s" % self.hltTriggerName1, size); y -= dy
 
         if printResults:
+            ratioweighted = 0
+            weight = 0
             ratio = p.ratios[0]
             print
             for bin in xrange(1, n1.GetNbinsX()+1):
@@ -696,6 +917,11 @@ class Plotter:
                 print "   1: efficiency %.7f +- %.7f" % (eff1.GetY()[i], max(eff1.GetErrorYhigh(i), eff1.GetErrorYlow(i))), "Entries num",n1.GetBinContent(bin),"denom",d1.GetBinContent(bin)
                 print "   2: efficiency %.7f +- %.7f" % (eff2.GetY()[i], max(eff2.GetErrorYhigh(i), eff2.GetErrorYlow(i))), "Entries num",n2.GetBinContent(bin),"denom",d2.GetBinContent(bin)
                 print "   ratio:        %.7f +- %.7f" % (ratio.getRootGraph().GetY()[i], max(ratio.getRootGraph().GetErrorYhigh(i), ratio.getRootGraph().GetErrorYlow(i)))
+                if n1.GetBinLowEdge(bin) >= 40:
+                    weight += n1.GetBinContent(bin)
+                    ratioweighted += n1.GetBinContent(bin)*max(eff1.GetErrorYhigh(i), eff1.GetErrorYlow(i))
+            print
+            print "Weighted uncert PFTau > 40:", ratioweighted/weight
             print
 
         p.getFrame2().GetYaxis().SetTitle("Ratio")

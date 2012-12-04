@@ -10,6 +10,12 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DirectionalCut.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTaggingScaleFactorFromDB.h"
+#include "RecoBTag/Records/interface/BTagPerformanceRecord.h"
+#include "CondFormats/PhysicsToolsObjects/interface/BinningPointByMap.h"
+#include "CondFormats/PhysicsToolsObjects/interface/PerformancePayloadFromBinnedTFormula.h"
+#include "RecoBTag/PerformanceDB/interface/BtagPerformance.h"
+
 namespace edm {
   class Event;
   class EventSetup;
@@ -21,6 +27,7 @@ class BTaggingScaleFactorFromDB;
 namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
+  class WrappedTH2;
 
   class BTagging: public BaseSelection {
     class BTaggingScaleFactor {
@@ -118,6 +125,7 @@ namespace HPlus {
     const double fPtCut;
     const double fEtaCut;
     const std::string fDiscriminator;
+    std::string payloadName;
     const double fLeadingDiscrCut;
     const double fSubLeadingDiscrCut;
     DirectionalCut fNumberOfBJets;
@@ -144,6 +152,11 @@ namespace HPlus {
     Count fTaggedTwoTaggedJets;
 
     // Histograms
+    WrappedTH1 *hSFBCSVM;
+    WrappedTH2 *hSFBCSVM_pt;
+    WrappedTH2 *hSFBCSVM_eta;
+    //WrappedTH1 *hEffBCSVM_eta;
+    //WrappedTH2 *hEffBCSVM_eta_pt;
     WrappedTH1 *hDiscr;
     WrappedTH1 *hPt;
     WrappedTH1 *hEta;
@@ -178,7 +191,7 @@ namespace HPlus {
     double fScaleFactor;
     double fScaleFactorAbsoluteUncertainty;
     double fScaleFactorRelativeUncertainty;
-  };
+   };
 }
 
 #endif

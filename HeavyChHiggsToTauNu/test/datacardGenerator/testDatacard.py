@@ -1,6 +1,6 @@
 DataCardName    = 'myDummyTestName'
 #Path            = '/home/wendland/data/v25b/freeze_forPREAPP'
-Path            = '/home/wendland/data/v25b/v11'
+Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 #MassPoints      = [80,90,100,120,140,150,155,160]
 #MassPoints      = [80,90,100,120,140,150,155,160]
 #MassPoints      = [80,120,160]
@@ -14,7 +14,7 @@ EmbeddingAnalysis     = "signalAnalysis"
 #EmbeddingAnalysis     = "signalAnalysisCaloMet60TEff"
 #EmbeddingAnalysis     = "signalAnalysisCaloMet60"
 QCDFactorisedAnalysis = "QCDMeasurement"
-QCDInvertedAnalysis = None # FIXME
+QCDInvertedAnalysis = "signalAnalysisInvertedTau"
 
 dataEra = "Run2011AB"
 
@@ -28,9 +28,9 @@ FakeRateCounter = "EWKfaketaus:SelectedEvents"
 OptionMassShape = "TransverseMass"
 #OptionMassShape = "FullMass"
 OptionReplaceEmbeddingByMC = False
-OptionIncludeSystematics = True # Set to true if the JES and PU uncertainties were produced
+OptionIncludeSystematics = False # Set to true if the JES and PU uncertainties were produced
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = True
+OptionDoControlPlots = False
 
 # Options for reports and article
 OptionBr = 0.01  # Br(t->bH+)
@@ -244,11 +244,11 @@ DataGroups.append(DataGroup(
     landsProcess = 3,
     validMassPoints = MassPoints,
     datasetType  = "QCD inverted",
-    datasetDefinitions   = "^Tau\S+",
+    datasetDefinitions   = "Data",
     shapeHisto   = "mtSum",
     dirPrefix   = QCDInvertedAnalysis,
-    rateCounter  = "deltaPhiTauMET160 limit",
-    additionalNormalisation = 0.0066,
+    rateCounter  = "integral",
+#    additionalNormalisation = 1.0,
     nuisances    = ["41","42","43","44"] # FIXME: add shape stat, i.e. 40x
 ))
 
@@ -528,13 +528,6 @@ if OptionIncludeSystematics:
         histograms    = [SignalShapeHisto,
                         SignalShapeHisto]
     ))
-    Nuisances.append(Nuisance(
-        id            = "48",
-        label         = "Temporary TES for EWKtau",
-        distr         = "lnN",
-        function      = "Constant",
-        value         = 0.066,
-    ))
 else:
     Nuisances.append(Nuisance(
         id            = "45",
@@ -559,6 +552,14 @@ else:
         function      = "Constant",
         value         = 0.01,
     ))
+
+Nuisances.append(Nuisance(
+    id            = "48",
+    label         = "Temporary TES for EWKtau",
+    distr         = "lnN",
+    function      = "Constant",
+    value         = 0.020,
+))
 
 Nuisances.append(Nuisance(
     id            = "09",

@@ -42,7 +42,7 @@ class BTaggingScaleFactorFromDB {
 	Data getScaleFactors(double,double);
 
     private:
-	std::string algoName, userAlgoName;
+	std::string algoName, userAlgoName, payloadName;
 
 	edm::ESHandle<BtagPerformance> bHandle;
 	edm::ESHandle<BtagPerformance> misHandle;

@@ -48,6 +48,13 @@ import styles
 _physicalMcAdd = {
     "WJets_TuneZ2star_v1_Summer12": "WJets_TuneZ2star_Summer12",
     "WJets_TuneZ2star_v2_Summer12": "WJets_TuneZ2star_Summer12",
+
+    "QCD_Pt170to300_TuneZ2star_Summer12":    "QCD_Pt170to300_TuneZ2star_Summer12",
+    "QCD_Pt170to300_TuneZ2star_v2_Summer12": "QCD_Pt170to300_TuneZ2star_Summer12",
+
+    "QCD_Pt300to470_TuneZ2star_Summer12":    "QCD_Pt300to470_TuneZ2star_Summer12",
+    "QCD_Pt300to470_TuneZ2star_v2_Summer12": "QCD_Pt300to470_TuneZ2star_Summer12",
+    "QCD_Pt300to470_TuneZ2star_v3_Summer12": "QCD_Pt300to470_TuneZ2star_Summer12",
 }
 
 ## Map the physical dataset names to logical names
@@ -98,6 +105,7 @@ for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
     "W3Jets_%s"%mcEra: "W3Jets",
     "W4Jets_%s"%mcEra: "W4Jets",
     "DYJetsToLL_M50_%s"%mcEra:      "DYJetsToLL_M50",
+    "DYJetsToLL_M10to50_%s"%mcEra:  "DYJetsToLL_M10to50",
 
     "QCD_Pt30to50_%s"%mcEra:   "QCD_Pt30to50",
     "QCD_Pt50to80_%s"%mcEra:   "QCD_Pt50to80",

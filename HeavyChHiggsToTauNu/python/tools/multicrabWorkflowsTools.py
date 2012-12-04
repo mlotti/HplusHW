@@ -78,9 +78,10 @@ class DatasetSet:
 
     def getDataset(self, name):
         try:
+#	    print "check getDataset",name,self.datasetDict
             return self.datasetDict[name]
         except KeyError:
-            raise Exception("Invalid dataset name '%s'" % name)
+            raise Exception("Invalid dataset name '%s' (see HiggsAnalysis/HeavyChHiggsToTauNu/python/tools/multicrabWorkflows.py for definitions of all datasets)" % name)
 
     def getDatasetList(self):
         return self.datasetList
@@ -339,6 +340,31 @@ class Workflow:
 
         return args
 
+## Makes an alias for a workflow name
+#
+# e.g. real processing is pattuplev53_1_1, but you want it to show up
+# as pattuplev53_1 too.
+class WorkflowAlias:
+    ## Constructor
+    #
+    # \param aliasName        Name of the alias
+    # \param originalWorkflow Workflow object of the original workflow
+    def __init__(self, aliasName, originalWorkflow):
+        self.aliasName = aliasName
+        self.originalWorkflow = originalWorkflow
+
+    def getName(self):
+        return self.aliasName
+
+    def clone(self):
+        obj = self.originalWorkflow.clone()
+        obj.name = self.aliasName
+        return obj
+
+    ## Forward all other methods to the originalWorkflow object
+    def __getattr__(self, attr):
+        return getattr(self.originalWorkflow, attr)
+
 ## Helper to write to out if variable is not none
 def _addIfNotNone(out, format, variable):
     if variable != None:
@@ -559,16 +585,26 @@ class TaskDef:
 #
 # \param oldDefinitions   Dictionary from dataset names to TaskDef objects
 # \param newDefinitions   Dictionary from dataset names to TaskDef objects
+# \param workflowName     Name of the current workflow (for error message only)
 #
 # Updates the TaskDefs in \a oldDefinitions with the ones in \a
 # newDefinitions with the same dataset name. Removes TaskDefs from \a
 # oldDefinitions for those datasets which do not have an entry in \a
 # newDefinitions.
-def updateTaskDefinitions(oldDefinitions, newDefinitions):
+def updateTaskDefinitions(oldDefinitions, newDefinitions, workflowName=""):
+    newDefinitions_copy = {}
+    newDefinitions_copy.update(newDefinitions)
     names = oldDefinitions.keys()
     for name in names:
         if name in newDefinitions:
             oldDefinitions[name].update(newDefinitions[name])
+            del newDefinitions_copy[name]
         else:
             del oldDefinitions[name]
+
+    if len(newDefinitions_copy) > 0:
+        keys = newDefinitions_copy.keys()
+        keys.sort()
+        raise Exception("No existing task definitions for workflow %s and datasets %s" % (workflowName, ", ".join(keys)))
+
     return oldDefinitions
