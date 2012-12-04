@@ -391,6 +391,39 @@ namespace HPlus {
     WrappedTH1 *hMTInvertedTauIdJet5060;
     WrappedTH1 *hMTInvertedTauIdJet4050;
 
+    WrappedTH1 *hNBInvertedTauIdJet;
+    WrappedTH1 *hNBInvertedTauIdJet150;
+    WrappedTH1 *hNBInvertedTauIdJet120;
+    WrappedTH1 *hNBInvertedTauIdJet120150;
+    WrappedTH1 *hNBInvertedTauIdJet100120;
+    WrappedTH1 *hNBInvertedTauIdJet80100;
+    WrappedTH1 *hNBInvertedTauIdJet7080;
+    WrappedTH1 *hNBInvertedTauIdJet6070;
+    WrappedTH1 *hNBInvertedTauIdJet5060;
+    WrappedTH1 *hNBInvertedTauIdJet4050;
+
+    WrappedTH1 *hNBInvertedTauIdJetDphi;
+    WrappedTH1 *hNBInvertedTauIdJetDphi150;
+    WrappedTH1 *hNBInvertedTauIdJetDphi120;
+    WrappedTH1 *hNBInvertedTauIdJetDphi120150;
+    WrappedTH1 *hNBInvertedTauIdJetDphi100120;
+    WrappedTH1 *hNBInvertedTauIdJetDphi80100;
+    WrappedTH1 *hNBInvertedTauIdJetDphi7080;
+    WrappedTH1 *hNBInvertedTauIdJetDphi6070;
+    WrappedTH1 *hNBInvertedTauIdJetDphi5060;
+    WrappedTH1 *hNBInvertedTauIdJetDphi4050;
+
+    WrappedTH1 *hMTInvertedTauIdJetDphi;
+    WrappedTH1 *hMTInvertedTauIdJetDphi150;
+    WrappedTH1 *hMTInvertedTauIdJetDphi120;
+    WrappedTH1 *hMTInvertedTauIdJetDphi120150;
+    WrappedTH1 *hMTInvertedTauIdJetDphi100120;
+    WrappedTH1 *hMTInvertedTauIdJetDphi80100;
+    WrappedTH1 *hMTInvertedTauIdJetDphi7080;
+    WrappedTH1 *hMTInvertedTauIdJetDphi6070;
+    WrappedTH1 *hMTInvertedTauIdJetDphi5060;
+    WrappedTH1 *hMTInvertedTauIdJetDphi4050;
+
     WrappedTH1 *hMTInvertedTauIdBtag;
     WrappedTH1 *hMTInvertedTauIdBtag150;
     WrappedTH1 *hMTInvertedTauIdBtag120;
@@ -434,6 +467,17 @@ namespace HPlus {
     WrappedTH1 *hDeltaPhiInverted6070;
     WrappedTH1 *hDeltaPhiInverted5060;
     WrappedTH1 *hDeltaPhiInverted4050;
+
+    WrappedTH1 *hDeltaPhiInvertedNoB;
+    WrappedTH1 *hDeltaPhiInvertedNoB150;
+    WrappedTH1 *hDeltaPhiInvertedNoB120;
+    WrappedTH1 *hDeltaPhiInvertedNoB120150;
+    WrappedTH1 *hDeltaPhiInvertedNoB100120;
+    WrappedTH1 *hDeltaPhiInvertedNoB80100;
+    WrappedTH1 *hDeltaPhiInvertedNoB7080;
+    WrappedTH1 *hDeltaPhiInvertedNoB6070;
+    WrappedTH1 *hDeltaPhiInvertedNoB5060;
+    WrappedTH1 *hDeltaPhiInvertedNoB4050;
 
     WrappedTH1 *hTopMass;
     WrappedTH1 *hTopMass150;

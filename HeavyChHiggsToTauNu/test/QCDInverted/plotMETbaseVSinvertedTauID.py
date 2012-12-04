@@ -53,8 +53,9 @@ def main(argv):
 
     # Create all datasets from a multicrab task
 #    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra)
-
+#    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra)
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra, analysisbaseName = "signalAnalysisInvertedTau")
+  
     # As we use weighted counters for MC normalisation, we have to
     # update the all event count to a separately defined value because
     # the analysis job uses skimmed pattuple as an input

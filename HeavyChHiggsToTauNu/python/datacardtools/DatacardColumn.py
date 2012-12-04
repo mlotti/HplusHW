@@ -170,8 +170,8 @@ class DatacardColumn():
             # rate handled as spedial case, extra datasetMgrColumn are required for EWK MC
             if len(self._datasetMgrColumnForQCDMCEWK) == 0:
                 myMsg += "No datasets defined for MC EWK in data group for QCD factorised!\n"
-        elif self._datasetType == MulticrabDirectoryDataType.QCDINVERTED:
-            myMsg += "FIXME: QCD inverted not implemented yet\n" # FIXME
+####        elif self._datasetType == MulticrabDirectoryDataType.QCDINVERTED:
+####            myMsg += "FIXME: QCD inverted not implemented yet\n" # FIXME
         if not self.typeIsEmptyColum() and not self.typeIsObservation():
             if len(self._nuisanceIds) == 0:
                 myMsg += "Missing or empty field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
