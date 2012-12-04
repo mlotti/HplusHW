@@ -42,7 +42,7 @@ def _constructProcessingWorkflow_common(dataset, taskDef, sourceWorkflow, workfl
             wf.addCrabLine(line)
     return wf
 
-def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMaskData="DCSONLY11", outputLumiMaskData="Nov08ReReco", "**kwargs):
+def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMaskData="DCSONLY11", outputLumiMaskData="Nov08ReReco", **kwargs):
     # Setup input/default output lumimasks for data
     inputLumiMask = None
     outputLumiMask = None
