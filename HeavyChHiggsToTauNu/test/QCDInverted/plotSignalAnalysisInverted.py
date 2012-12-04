@@ -45,7 +45,7 @@ QCDfromData = False
 
 ## for mT distributions 
 deltaPhi180 = False
-deltaPhi160 = True
+deltaPhi160 = False
 deltaPhi130 = False
 topmass = False  ## with top mass cut
 
@@ -53,7 +53,7 @@ btagFactorisation = False  # works with deltaPhi180=True
 
 # other distributions
 deltaPhiDistribution = False
-numberOfBjets = False
+numberOfBjets = True
 HiggsMass = False
 HiggsMassPhi140 = False
 
@@ -1001,7 +1001,7 @@ def mtComparison(datasets):
     hmt = mt.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi")
     hmt.Scale(norm_inc)
     
-    if True: 
+    if False: 
         mtBaseline._setLegendStyles()
         mtBaseline._setLegendLabels()
         mtBaseline.histoMgr.setHistoDrawStyleAll("P")
@@ -1212,6 +1212,11 @@ def mtComparison(datasets):
         tex3.SetTextSize(20)
 #        tex3.Draw()
         
+        tex3 = ROOT.TLatex(0.6,0.6,"2011 data")
+        tex3.SetNDC()
+        tex3.SetTextSize(20)
+        tex3.Draw()
+        
         tex5 = ROOT.TLatex(0.5,0.8,"MET > 70 GeV")
         tex5.SetNDC()
         tex5.SetTextSize(20)
@@ -1311,14 +1316,19 @@ def mtComparison(datasets):
         canvas31 = ROOT.TCanvas("canvas31","",500,500)
         if (numberOfBjets):
             canvas31.SetLogy()
-        #    hmt.SetMaximum(120.0)
-        
+            frame31 = histograms._drawFrame(canvas31, xmin=0, xmax=6, ymin=1, ymax=1e3)
+	    frame31.Draw()
+
+
         hmtSum.SetMarkerColor(4)
         hmtSum.SetMarkerSize(1)
-        hmtSum.SetMarkerStyle(20)
-        hmtSum.SetFillColor(4)
-        hmtSum.Draw("EP")
-        
+	hmtSum.SetMarkerStyle(20)
+	hmtSum.SetFillColor(4)
+	if numberOfBjets:
+            hmtSum.Draw("EP same")
+        else:
+            hmtSum.Draw("EP")
+
         hmt.SetMarkerColor(2)
         hmt.SetMarkerSize(1)
         hmt.SetMarkerStyle(21)
@@ -1347,7 +1357,7 @@ def mtComparison(datasets):
         marker1.SetMarkerColor(hmt.GetMarkerColor())
         marker1.SetMarkerSize(0.9*hmt.GetMarkerSize())
 #        marker1.Draw()   
-        #    tex2 = ROOT.TLatex(0.3,0.3,"With p_{T}^{#tau jet} bins")
+        tex2 = ROOT.TLatex(0.3,0.3,"With p_{T}^{#tau jet} bins")
         tex2 = ROOT.TLatex(xpos+0.05,0.6," ") 
         tex2.SetNDC()
         tex2.SetTextSize(23)
@@ -1363,6 +1373,11 @@ def mtComparison(datasets):
         tex3.SetNDC()
         tex3.SetTextSize(20)
         tex3.Draw()
+        
+        tex6 = ROOT.TLatex(xpos,0.6,"2011 data")
+        tex6.SetNDC()
+        tex6.SetTextSize(20)
+        tex6.Draw()
         
         tex5 = ROOT.TLatex(0.5,0.8,"MET > 70 GeV")
         tex5.SetNDC()
@@ -1420,7 +1435,8 @@ def mtComparison(datasets):
             canvas31.Print("mtInverted_btag_topmass.png")
             canvas31.Print("mtInverted_btag_topmass.C")  
         if (deltaPhiDistribution):
-            canvas31.Print("deltaPhiInverted_btag.png")           
+            canvas31.Print("deltaPhiInverted_btag.png")
+            canvas31.Print("deltaPhiInverted_btag.C")       
         if (HiggsMass):
             canvas31.Print("HiggsMass_dphi160.png")     
 
