@@ -270,6 +270,9 @@ def testShapeHistogram():
     sys.exit()
 
 if __name__ == "__main__":
+    print ErrorStyle()+"Error: This git branch contains old version of datacard generator. Use 2012 branch instead!"+NormalStyle()+"\n"
+    sys.exit()
+
     parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
     parser.add_option("-h", "--help", dest="helpStatus", action="store_true", default=False, help="Show this help message and exit")
     parser.add_option("-x", "--datacard", dest="datacard", action="store", help="Name (incl. path) of the datacard to be used as an input")
