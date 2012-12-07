@@ -27,6 +27,7 @@
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithMHSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeightReader.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EmbeddingMuonEfficiency.h"
@@ -135,6 +136,7 @@ namespace HPlus {
 
 
     Count fAllCounter;
+    Count fWJetsWeightCounter;
     Count fMETFiltersCounter;
     Count fEmbeddingMuonEfficiencyCounter;
     Count fTriggerCounter;
@@ -253,6 +255,7 @@ namespace HPlus {
     TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
     EmbeddingMuonEfficiency fEmbeddingMuonEfficiency;
     VertexWeightReader fVertexWeightReader;
+    WeightReader fWJetsWeightReader;
     VertexAssignmentAnalysis fVertexAssignmentAnalysis;
     FakeTauIdentifier fFakeTauIdentifier;
     METFilters fMETFilters;

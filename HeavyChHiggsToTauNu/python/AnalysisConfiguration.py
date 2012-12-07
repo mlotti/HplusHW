@@ -3,6 +3,7 @@ import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions as HChOptions
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 import HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation as jesVariation
+import HiggsAnalysis.HeavyChHiggsToTauNu.WJetsWeight as wjetsWeight
 from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
 
 tooManyAnalyzersLimit = 100
@@ -66,6 +67,7 @@ class ConfigBuilder:
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
                  doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
                  allowTooManyAnalyzers = False, # Allow arbitrary number of analyzers (beware, it might take looong to run and merge)
+                 inputWorkflow = "pattuple_v53_1_test1", # Name of the workflow, whose output is used as an input, needed for WJets weighting
                  ):
         self.options, self.dataVersion = HChOptions.getOptionsDataVersion(dataVersion)
         self.dataEras = dataEras
@@ -96,9 +98,16 @@ class ConfigBuilder:
         self.optimisationScheme = optimisationScheme
         self.allowTooManyAnalyzers = allowTooManyAnalyzers
 
+        self.inputWorkflow = inputWorkflow
+
         if self.doMETResolution and self.doOptimisation:
             raise Exception("doMETResolution and doOptimisation conflict")
-            
+
+        if self.options.wjetsWeighting != 0:
+            if not self.dataVersion.isMC():
+                raise Exception("Command line option 'wjetsWeighting' works only with MC")
+            if self.options.tauEmbeddingInput != 0:
+                raise Exception("There are no WJets weights for embedding yet")
 
         if self.doOptimisation:
             #self.doSystematics = True            # Make sure that systematics are run
@@ -217,11 +226,30 @@ class ConfigBuilder:
             # For MC, produce the PU-reweighted analyses
             analysisModules = []
             analysisNames = []
-            for module, name in zip(modules, analysisNames_):
-                for dataEra in self.dataEras:
+
+            # No PU reweighting, it is sufficient to do calculate WJets weights only one
+            if self.options.wjetsWeighting != 0 and not self.applyPUReweight:
+                process.wjetsWeight = wjetsWeight.getWJetsWeight(self.dataVersion, self.inputWorkflow, None)
+                process.commonSequence *= process.wjetsWeight
+                for module in modules:
+                    module.wjetsWeightReader.weightSrc = "wjetsWeight"
+                    module.wjetsWeightReader.enabled = True
+
+            for dataEra in self.dataEras:
+                # With PU reweighting, must produce one per data era
+                if self.options.wjetsWeighting != 0 and self.applyPUReweight:
+                    weightMod = wjetsWeight.getWJetsWeight(self.dataVersion, self.inputWorkflow, dataEra)
+                    setattr(process, "wjetsWeight"+dataEra, weightMod)
+                    process.commonSequence *= weightMod
+
+                for module, name in zip(modules, analysisNames_):
                     mod = module.clone()
                     param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.triggerEfficiencyScaleFactor)
                     param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.vertexWeightReader, era=dataEra)
+                        if self.options.wjetsWeighting != 0:
+                            mod.wjetsWeightReader.weightSrc = "wjetsWeight"+dataEra
+                            mod.wjetsWeightReader.enabled = True
+
                     print "Added analysis for PU weight era =", dataEra
                     analysisModules.append(mod)
                     analysisNames.append(name+dataEra)
@@ -680,10 +708,23 @@ class ConfigBuilder:
     # \param name      Name of the module to be used as a prototype
     # \param param     HChSignalAnalysisParameters_cff module object
     def _addPUWeightVariation(self, process, name, param):
+        # Assume that the wjetsWeightReader.weightSrc is "wjetsWeight"+dataEra
+        def addWJetsWeight(mod, suffix):
+            dataEra = mod.wjetsWeightReader.weightSrc.value().replace("wjetsWeight", "")
+            weightName = "wjetsWeight"+dataEra+suffix
+            if not hasattr(process, weightName):
+                weightMod = wjetsWeight.getWJetsWeight(self.dataVersion, self.inputWorkflow, dataEra, suffix)
+                setattr(process, weightName, weightMod)
+                process.commonSequence *= weightMod
+            mod.wjetsWeightReader.weightSrc = weightName
+
         # Up variation
         module = getattr(process, name).clone()
         module.Tree.fill = False
         module.eventCounter.printMainCounter = cms.untracked.bool(False)
+
+        if self.options.wjetsWeighting != 0:
+            addWJetsWeight(module, "up")
 
         param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, suffix="up")
         path = cms.Path(process.commonSequence * module)
@@ -694,6 +735,9 @@ class ConfigBuilder:
         module = getattr(process, name).clone()
         module.Tree.fill = False
         module.eventCounter.printMainCounter = cms.untracked.bool(False)
+
+        if self.options.wjetsWeighting != 0:
+            addWJetsWeight(module, "down")
 
         param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, suffix="down")
         path = cms.Path(process.commonSequence * module)

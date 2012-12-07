@@ -122,10 +122,10 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
         "WZ_TuneZ2_Fall11":                 TaskDefMC(njobsIn=50, njobsOut=3),   # expected output max. 185 MB/file
         "ZZ_TuneZ2_Fall11":                 TaskDefMC(njobsIn=50, njobsOut=3),   # expected output max. 185 MB/file
         "TTJets_TuneZ2_Fall11":             TaskDefMC(njobsIn=490, njobsOut=50), # file size 15214; 3938 files, expected output max. 266 MB/file, obs 60 MB / file
-        "WJets_TuneZ2_Fall11":              TaskDefMC(njobsIn=490, njobsOut=10), # file size 16000 GB, 4500 files, expected output max. 37 MB/file 
-        "W2Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=300, njobsOut=20), # expected output max. 38 MB/file, obs 38 MB / file
-        "W3Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=120, njobsOut=10), # expected output max. 56 MB/file, obs 20-22 MB / file
-        "W4Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=200, njobsOut=12), # expected output max. 144 MB/file, obs 20-22 MB / file
+        "WJets_TuneZ2_Fall11":              TaskDefMC(njobsIn=490, njobsOut=10, args={"wjetsWeighting": 1}), # file size 16000 GB, 4500 files, expected output max. 37 MB/file 
+        "W2Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=300, njobsOut=20, args={"wjetsWeighting": 1}), # expected output max. 38 MB/file, obs 38 MB / file
+        "W3Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=120, njobsOut=10, args={"wjetsWeighting": 1}), # expected output max. 56 MB/file, obs 20-22 MB / file
+        "W4Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=200, njobsOut=12, args={"wjetsWeighting": 1}), # expected output max. 144 MB/file, obs 20-22 MB / file
         "DYJetsToLL_M50_TuneZ2_Fall11":     TaskDefMC(njobsIn=350, njobsOut=2),  # file size 6945 GB, 1964 files, expected output max. 46 MB/file, obs 40 MB / file
         "DYJetsToLL_M10to50_TuneZ2_Fall11": TaskDefMC(njobsIn=300, njobsOut=1),  # file size 5900 GB, 1420 files, expected output max. 47 MB/file, obs 21 MB / file
         "T_t-channel_TuneZ2_Fall11":        TaskDefMC(njobsIn=50, njobsOut=2),   # 866 GB, 395 files, expected output max. 47 MB/file, obs 15-20 MB / file

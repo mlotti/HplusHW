@@ -427,6 +427,11 @@ eventCounter = cms.untracked.PSet(
     counters = cms.untracked.VInputTag()
 )
 
+wjetsWeightReader = cms.untracked.PSet(
+    weightSrc = cms.InputTag("wjetsWeight"),
+    enabled = cms.bool(False),
+)
+
 vertexWeight = cms.untracked.PSet(
     vertexSrc = cms.InputTag("goodPrimaryVertices"),
 #    vertexSrc = cms.InputTag("goodPrimaryVertices10"),
