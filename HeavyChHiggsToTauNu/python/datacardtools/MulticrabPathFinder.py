@@ -38,6 +38,9 @@ class MulticrabPathFinder:
     def getQCDInvertedPaths(self):
         return self.getSignalPath(),self.getEWKPath(),self.getQCDinvPath()
 
+    def getQCDInvertedPath(self):
+        return self.getQCDinvPath()
+    
     def getSignalPath(self):
         return self._signal_path
 

@@ -306,6 +306,40 @@ namespace HPlus {
     hMTInvertedTauIdJet5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet5060", "MTInvertedTauIdJet5060", 400, 0., 400.);
     hMTInvertedTauIdJet4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJet4050", "MTInvertedTauIdJet4050", 400, 0., 400.);
 
+    // before b tagging for factorised b tagging
+    hMTInvertedTauIdJetDphi = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJetDphi", "MTInvertedTauIdJetDphi", 400, 0., 400.);
+    hMTInvertedTauIdJetDphi150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJetDphi150", "MTInvertedTauIdJet150Dphi", 400, 0., 400.);
+    hMTInvertedTauIdJetDphi120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJetDphi120", "MTInvertedTauIdJet120Dphi", 400, 0., 400.);
+    hMTInvertedTauIdJetDphi120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJetDphi120150", "MTInvertedTauIdJet120150Dphi", 400, 0., 400.);
+    hMTInvertedTauIdJetDphi100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJetDphi100120", "MTInvertedTauIdJet100120Dphi", 400, 0., 400.);
+    hMTInvertedTauIdJetDphi80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJetDphi80100", "MTInvertedTauIdJet80100Dphi", 400, 0., 400.);
+    hMTInvertedTauIdJetDphi7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJetDphi7080", "MTInvertedTauIdJet7080Dphi", 400, 0., 400.);
+    hMTInvertedTauIdJetDphi6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJetDphi6070", "MTInvertedTauIdJet6070Dphi", 400, 0., 400.);
+    hMTInvertedTauIdJetDphi5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJetDphi5060", "MTInvertedTauIdJet5060Dphi", 400, 0., 400.);
+    hMTInvertedTauIdJetDphi4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdJetDphi4050", "MTInvertedTauIdJet4050Dphi", 400, 0., 400.);
+
+    hNBInvertedTauIdJetDphi = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJetDphi", "NBInvertedTauIdJetDphi", 20, 0., 20.);
+    hNBInvertedTauIdJetDphi150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJetDphi150", "NBInvertedTauIdJet150Dphi", 20, 0., 20.);
+    hNBInvertedTauIdJetDphi120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJetDphi120", "NBInvertedTauIdJet120Dphi", 20, 0., 20.);
+    hNBInvertedTauIdJetDphi120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJetDphi120150", "NBInvertedTauIdJet120150Dphi", 20, 0., 20.);
+    hNBInvertedTauIdJetDphi100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJetDphi100120", "NBInvertedTauIdJet100120Dphi", 20, 0., 20.);
+    hNBInvertedTauIdJetDphi80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJetDphi80100", "NBInvertedTauIdJet80100Dphi", 20, 0., 20.);
+    hNBInvertedTauIdJetDphi7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJetDphi7080", "NBInvertedTauIdJet7080Dphi", 20, 0., 20.);
+    hNBInvertedTauIdJetDphi6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJetDphi6070", "NBInvertedTauIdJet6070Dphi", 20, 0., 20.);
+    hNBInvertedTauIdJetDphi5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJetDphi5060", "NBInvertedTauIdJet5060Dphi", 20, 0., 20.);
+    hNBInvertedTauIdJetDphi4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJetDphi4050", "NBInvertedTauIdJet4050Dphi", 20, 0., 20.);
+
+    hNBInvertedTauIdJet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJet", "NBInvertedTauIdJet", 20, 0., 20.);
+    hNBInvertedTauIdJet150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJet150", "NBInvertedTauIdJet150", 20, 0., 20.);
+    hNBInvertedTauIdJet120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJet120", "NBInvertedTauIdJet120", 20, 0., 20.);
+    hNBInvertedTauIdJet120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJet120150", "NBInvertedTauIdJet120150", 20, 0., 20.);
+    hNBInvertedTauIdJet100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJet100120", "NBInvertedTauIdJet100120", 20, 0., 20.);
+    hNBInvertedTauIdJet80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJet80100", "NBInvertedTauIdJet80100", 20, 0., 20.);
+    hNBInvertedTauIdJet7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJet7080", "NBInvertedTauIdJet7080", 20, 0., 20.);
+    hNBInvertedTauIdJet6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJet6070", "NBInvertedTauIdJet6070", 20, 0., 20.);
+    hNBInvertedTauIdJet5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJet5060", "NBInvertedTauIdJet5060", 20, 0., 20.);
+    hNBInvertedTauIdJet4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJet4050", "NBInvertedTauIdJet4050", 20, 0., 20.);
+
     hMTInvertedTauIdBtag = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag", "MTInvertedTauIdBtag", 400, 0., 400.);
     hMTInvertedTauIdBtag150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag150", "MTInvertedTauIdBtag150", 400, 0., 400.);
     hMTInvertedTauIdBtag120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag120", "MTInvertedTauIdBtag120", 400, 0., 400.);
@@ -327,7 +361,7 @@ namespace HPlus {
     hMTInvertedTauIdMet6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet6070", "MTInvertedTauIdMet6070", 400, 0., 400.);
     hMTInvertedTauIdMet5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet5060", "MTInvertedTauIdMet5060", 400, 0., 400.);
     hMTInvertedTauIdMet4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdMet4050", "MTInvertedTauIdMet4050", 400, 0., 400.);
-
+// after b tagging 
     hMTInvertedTauIdJetPhi = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi", "MTInvertedTauIdPhi", 400, 0., 400.);
     hMTInvertedTauIdJetPhi150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi150", "MTInvertedTauIdPhi150", 400, 0., 400.);
     hMTInvertedTauIdJetPhi120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdPhi120", "MTInvertedTauIdPhi120", 400, 0., 400.);
@@ -386,7 +420,7 @@ namespace HPlus {
 
     //    hMTBaselineTauIdJet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MT_BaseLineTauIdJets", "MT_BaseLineTauIdJets;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
 
-    hMETInvertedTauId = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdJets", "MET_InvertedTauIdJets;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETInvertedTauId = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauId", "MET_InvertedTauId;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     hMETInvertedTauId150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauId150", "MET_InvertedTauId150", 400, 0.0, 400.0);
     hMETInvertedTauId120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauId120", "MET_InvertedTauId120", 400, 0.0, 400.0);
     hMETInvertedTauId120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauId120150", "MET_InvertedTauId120150", 400, 0.0, 400.0);
@@ -433,20 +467,24 @@ namespace HPlus {
     hDeltaPhiInverted = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInverted", "deltaPhi;#Delta#phi(tau,MET);N_{events} / 10 degrees", 360, 0., 180.);
     hDeltaPhiInverted150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInverted150", "deltaPhi;#Delta#phi(tau,MET) 150", 360, 0., 180.);
     hDeltaPhiInverted120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInverted120", "deltaPhi;#Delta#phi(tau,MET) 120", 360, 0., 180.);
-
     hDeltaPhiInverted120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInverted120150", "deltaPhi;#Delta#phi(tau,MET) 120150", 360, 0., 180.);
-
     hDeltaPhiInverted100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInverted100120", "deltaPhi;#Delta#phi(tau,MET) 100120", 360, 0., 180.);
-
     hDeltaPhiInverted80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInverted80100", "deltaPhi;#Delta#phi(tau,MET) 80100", 360, 0., 180.);
-
     hDeltaPhiInverted7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInverted7080", "deltaPhi;#Delta#phi(tau,MET) 7080", 360, 0., 180.);
-
     hDeltaPhiInverted6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInverted6070", "deltaPhi;#Delta#phi(tau,MET) 6070", 360, 0., 180.);
-
     hDeltaPhiInverted5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInverted5060", "deltaPhi;#Delta#phi(tau,MET) 5060", 360, 0., 180.);
-
     hDeltaPhiInverted4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInverted4050", "deltaPhi;#Delta#phi(tau,MET) 4050", 360, 0., 180.);
+
+    hDeltaPhiInvertedNoB = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInvertedNoB", "deltaPhiNoB;#Delta#phi(tau,MET)", 360, 0., 180.);
+    hDeltaPhiInvertedNoB150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInvertedNoB150", "deltaPhiNoB;#Delta#phi(tau,MET) 150", 360, 0., 180.);
+    hDeltaPhiInvertedNoB120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInvertedNoB120", "deltaPhiNoB;#Delta#phi(tau,MET) 120", 360, 0., 180.);
+    hDeltaPhiInvertedNoB120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInvertedNoB120150", "deltaPhiNoB;#Delta#phi(tau,MET) 120150", 360, 0., 180.);
+    hDeltaPhiInvertedNoB100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInvertedNoB100120", "deltaPhiNoB;#Delta#phi(tau,MET) 100120", 360, 0., 180.);
+    hDeltaPhiInvertedNoB80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInvertedNoB80100", "deltaPhiNoB;#Delta#phi(tau,MET) 80100", 360, 0., 180.);
+    hDeltaPhiInvertedNoB7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInvertedNoB7080", "deltaPhiNoB;#Delta#phi(tau,MET) 7080", 360, 0., 180.);
+    hDeltaPhiInvertedNoB6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInvertedNoB6070", "deltaPhiNoB;#Delta#phi(tau,MET) 6070", 360, 0., 180.);
+    hDeltaPhiInvertedNoB5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInvertedNoB5060", "deltaPhiNoB;#Delta#phi(tau,MET) 5060", 360, 0., 180.);
+    hDeltaPhiInvertedNoB4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiInvertedNoB4050", "deltaPhiNoB;#Delta#phi(tau,MET) 4050", 360, 0., 180.);
     
    
     hMETInvertedTauIdBtagDphi = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_InvertedTauIdBtagDphi", "MET_InvertedTauIdBtagDphi;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
@@ -661,17 +699,11 @@ namespace HPlus {
 		if ( deltaPhi < fDeltaPhiCutValue) {
 		  increment(fBaselineDphi160Counter);
 		  //		  fFullHiggsMassCalculator.analyze(iEvent, iSetup, tauData, btagData, metData);
-
 		if ( deltaPhi < 130) increment(fBaselineDphi130Counter);
-		//		  hMETBaselineTauIdBtagDphi->Fill(metData.getSelectedMET()->et()); 
-		//		  if (TopChiSelectionData.passedEvent() ) {
-		//		    increment(fBaselineTopChiSelectionCounter);    
-		    //		    hTransverseMassTopChiSelection->Fill(transverseMass);  
-		//		  }  	      
 		}
 	      }
 	    }
-	    //	    if(metData.passedEvent()) hMTBaselineTauIdJet->Fill(transverseMass); 
+	   
 	 
 	    if(btagData.passedEvent()) {
 	      hMETBaselineTauIdBtag->Fill(metData.getSelectedMET()->et()); 
@@ -868,9 +900,6 @@ namespace HPlus {
       iEvent.put(saveJets, "selectedJets");
     }
    
-  // b tagging, no event cut
-    //   BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
-
 
 // plots for inverted isolation
 
@@ -885,13 +914,6 @@ namespace HPlus {
     if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMETInvertedTauIdJets6070->Fill(metData.getSelectedMET()->et());
     if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMETInvertedTauIdJets5060->Fill(metData.getSelectedMET()->et()); 
     if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMETInvertedTauIdJets4050->Fill(metData.getSelectedMET()->et());																		
-
-
- // Get MET object 
-    //    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
-    //double Met = metData.getSelectedMET()->et();
-    //    std::cout << " weight before  = " << fEventWeight.getWeight() << " met " << Met <<  std::endl;
-    //    hMETBeforeTauId->Fill(metData.getSelectedMET()->et());  
 															      
 
     if(btagData.passedEvent()) {
@@ -925,13 +947,6 @@ namespace HPlus {
       if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMETInvertedTauIdBveto4050->Fill(metData.getSelectedMET()->et());																		
     }
   
-
-    //    fTree.setFillWeight(fEventWeight.getWeight());
-    //    fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor());
-    //    fTree.setTop(TopSelectionData.getTopP4());
-    //    fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET(),
-    //               evtTopologyData.alphaT().fAlphaT, fakeMETData.closestDeltaPhi() );
-
  
     if(metData.passedEvent()) hDeltaPhiAfterJets->Fill(deltaPhi);   
       
@@ -957,6 +972,19 @@ namespace HPlus {
       hMTInvertedTauIdJetWithRtau->Fill(transverseMass); 
       increment(fRtauAfterMETCounter); 
     } 
+
+  // Nbjets for inverted tau before b tagging
+    hNBInvertedTauIdJet->Fill(btagData.getSelectedJets().size()); 
+    if ( tauData.getSelectedTau()->pt() > 150  ) hNBInvertedTauIdJet150->Fill(btagData.getSelectedJets().size()); 
+    if ( tauData.getSelectedTau()->pt() > 120  ) hNBInvertedTauIdJet120->Fill(btagData.getSelectedJets().size()); 
+    if ( tauData.getSelectedTau()->pt() > 120 && tauData.getSelectedTau()->pt() < 150 ) hNBInvertedTauIdJet120150->Fill(btagData.getSelectedJets().size()); 
+    if ( tauData.getSelectedTau()->pt() > 100 && tauData.getSelectedTau()->pt() < 120 ) hNBInvertedTauIdJet100120->Fill(btagData.getSelectedJets().size()); 
+    if ( tauData.getSelectedTau()->pt() > 80 && tauData.getSelectedTau()->pt() < 100 ) hNBInvertedTauIdJet80100->Fill(btagData.getSelectedJets().size()); 
+    if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hNBInvertedTauIdJet7080->Fill(btagData.getSelectedJets().size()); 
+    if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hNBInvertedTauIdJet6070->Fill(btagData.getSelectedJets().size()); 
+    if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hNBInvertedTauIdJet5060->Fill(btagData.getSelectedJets().size()); 
+    if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hNBInvertedTauIdJet4050->Fill(btagData.getSelectedJets().size()); 
+
    // mt for inverted tau before b tagging
     hMTInvertedTauIdJet->Fill(transverseMass); 
     if ( tauData.getSelectedTau()->pt() > 150  ) hMTInvertedTauIdJet150->Fill(transverseMass); 
@@ -967,9 +995,43 @@ namespace HPlus {
     if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hMTInvertedTauIdJet7080->Fill(transverseMass); 
     if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMTInvertedTauIdJet6070->Fill(transverseMass); 
     if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMTInvertedTauIdJet5060->Fill(transverseMass); 
-    if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMTInvertedTauIdJet4050->Fill(transverseMass); 
-
+    if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMTInvertedTauIdJet4050->Fill(transverseMass);
  
+    hDeltaPhiInvertedNoB->Fill(deltaPhi);  
+    if ( tauData.getSelectedTau()->pt() > 150  ) hDeltaPhiInvertedNoB150->Fill(deltaPhi); 
+    if ( tauData.getSelectedTau()->pt() > 120  ) hDeltaPhiInvertedNoB120->Fill(deltaPhi); 
+    if ( tauData.getSelectedTau()->pt() > 120 && tauData.getSelectedTau()->pt() < 150 ) hDeltaPhiInvertedNoB120150->Fill(deltaPhi); 
+    if ( tauData.getSelectedTau()->pt() > 100 && tauData.getSelectedTau()->pt() < 120 ) hDeltaPhiInvertedNoB100120->Fill(deltaPhi); 
+    if ( tauData.getSelectedTau()->pt() > 80 && tauData.getSelectedTau()->pt() < 100 ) hDeltaPhiInvertedNoB80100->Fill(deltaPhi); 
+    if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hDeltaPhiInvertedNoB7080->Fill(deltaPhi); 
+    if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hDeltaPhiInvertedNoB6070->Fill(deltaPhi); 
+    if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hDeltaPhiInvertedNoB5060->Fill(deltaPhi); 
+    if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hDeltaPhiInvertedNoB4050->Fill(deltaPhi); 
+
+    if (deltaPhi < fDeltaPhiCutValue) {
+      hMTInvertedTauIdJetDphi->Fill(transverseMass); 
+      if ( tauData.getSelectedTau()->pt() > 150  ) hMTInvertedTauIdJetDphi150->Fill(transverseMass); 
+      if ( tauData.getSelectedTau()->pt() > 120  ) hMTInvertedTauIdJetDphi120->Fill(transverseMass); 
+      if ( tauData.getSelectedTau()->pt() > 120 && tauData.getSelectedTau()->pt() < 150 ) hMTInvertedTauIdJetDphi120150->Fill(transverseMass); 
+      if ( tauData.getSelectedTau()->pt() > 100 && tauData.getSelectedTau()->pt() < 120 ) hMTInvertedTauIdJetDphi100120->Fill(transverseMass); 
+      if ( tauData.getSelectedTau()->pt() > 80 && tauData.getSelectedTau()->pt() < 100 ) hMTInvertedTauIdJetDphi80100->Fill(transverseMass); 
+      if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hMTInvertedTauIdJetDphi7080->Fill(transverseMass); 
+      if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hMTInvertedTauIdJetDphi6070->Fill(transverseMass); 
+      if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hMTInvertedTauIdJetDphi5060->Fill(transverseMass); 
+      if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hMTInvertedTauIdJetDphi4050->Fill(transverseMass); 
+
+      hNBInvertedTauIdJetDphi->Fill(btagData.getSelectedJets().size()); 
+      if ( tauData.getSelectedTau()->pt() > 150  ) hNBInvertedTauIdJetDphi150->Fill(btagData.getSelectedJets().size()); 
+      if ( tauData.getSelectedTau()->pt() > 120  ) hNBInvertedTauIdJetDphi120->Fill(btagData.getSelectedJets().size()); 
+      if ( tauData.getSelectedTau()->pt() > 120 && tauData.getSelectedTau()->pt() < 150 ) hNBInvertedTauIdJetDphi120150->Fill(btagData.getSelectedJets().size()); 
+      if ( tauData.getSelectedTau()->pt() > 100 && tauData.getSelectedTau()->pt() < 120 ) hNBInvertedTauIdJetDphi100120->Fill(btagData.getSelectedJets().size()); 
+      if ( tauData.getSelectedTau()->pt() > 80 && tauData.getSelectedTau()->pt() < 100 ) hNBInvertedTauIdJetDphi80100->Fill(btagData.getSelectedJets().size()); 
+      if ( tauData.getSelectedTau()->pt() > 70 && tauData.getSelectedTau()->pt() < 80 ) hNBInvertedTauIdJetDphi7080->Fill(btagData.getSelectedJets().size()); 
+      if ( tauData.getSelectedTau()->pt() > 60 && tauData.getSelectedTau()->pt() < 70 ) hNBInvertedTauIdJetDphi6070->Fill(btagData.getSelectedJets().size()); 
+      if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hNBInvertedTauIdJetDphi5060->Fill(btagData.getSelectedJets().size()); 
+      if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hNBInvertedTauIdJetDphi4050->Fill(btagData.getSelectedJets().size());
+    }
+
 
     // b tagging cut
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderBTagSelection, tauData, btagData.passedEvent(),btagData.getMaxDiscriminatorValue());
@@ -1010,10 +1072,8 @@ namespace HPlus {
     if ( tauData.getSelectedTau()->pt() > 50 && tauData.getSelectedTau()->pt() < 60 ) hDeltaPhiInverted5060->Fill(deltaPhi); 
     if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hDeltaPhiInverted4050->Fill(deltaPhi); 
 
-    fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets(), "BCorrelationAnalysis");
+    //    fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets(), "BCorrelationAnalysis");
 
-    //   double deltaRtauBjet = reco::deltaR(*(tauData.getSelectedTau()), *(btagData.getSelectedJets().begin()));
-   //    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
     hDeltaPhi->Fill(deltaPhi);
     if ( deltaPhi > 150 ) {
        hSelectedTauEtaBackToBack->Fill(tauData.getSelectedTau()->eta()); 
@@ -1095,9 +1155,7 @@ namespace HPlus {
 
 
     if (deltaPhi <  130 ) {
-      //      increment(fDeltaPhiTauMET140Counter);
-
-      // Inv mass mass with binning  
+      
       hHiggsMassPhi->Fill(HiggsMass);   
       if ( tauData.getSelectedTau()->pt() > 150  ) hHiggsMassPhi150->Fill(HiggsMass);
       if ( tauData.getSelectedTau()->pt() > 120  ) hHiggsMassPhi120->Fill(HiggsMass);  
@@ -1110,10 +1168,6 @@ namespace HPlus {
       if ( tauData.getSelectedTau()->pt() > 40 && tauData.getSelectedTau()->pt() < 50 ) hHiggsMassPhi4050->Fill(HiggsMass); 
 
  
-
-
-    // for inverted tau with MET>70 cut   
- //    if (metData.getSelectedMET()->et() > 70) {
       hMTInvertedTauIdMet->Fill(transverseMass); 
       if ( tauData.getSelectedTau()->pt() > 150  ) hMTInvertedTauIdJet150->Fill(transverseMass);
       if ( tauData.getSelectedTau()->pt() > 120  ) hMTInvertedTauIdJet120->Fill(transverseMass); 
@@ -1167,8 +1221,7 @@ namespace HPlus {
 
    
     if (TopChiSelectionData.passedEvent() ) {
-         increment(fTopChiSelectionCounter);
-      //      hSelectionFlow->Fill(kSignalOrderTopSelection);      
+         increment(fTopChiSelectionCounter);     
 	 hTransverseMassTopChiSelection->Fill(transverseMass);     
     } 
 
@@ -1184,12 +1237,9 @@ namespace HPlus {
     }
 
 
-    //    return false;
-
    // top mass with possible event cuts
     if (TopSelectionData.passedEvent() ) {
-      increment(fTopSelectionCounter);
-      //      hSelectionFlow->Fill(kSignalOrderTopSelection);      
+      increment(fTopSelectionCounter);      
       hTransverseMassWithTopCut->Fill(transverseMass);
       if(transverseMass > 80 ) increment(ftransverseMassCut100TopCounter);   
     } 
@@ -1197,46 +1247,22 @@ namespace HPlus {
 
     if (fakeMETData.passedEvent() ) {
       increment(fFakeMETVetoCounter);
-      //      hTransverseMass->Fill(transverseMass);
-      //     if ( deltaPhiJetMet*57.3 < 135) {
-	//	increment(fdeltaPhiTauMET160FakeMetCounter);
 	hTransverseMassFakeMET->Fill(transverseMass);  
-      //      } 
     }
-    //hSelectionFlow->Fill(kSignalOrderFakeMETVeto);
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderFakeMETVeto, tauData);
-
-
-
 
     if(transverseMass > 60 ) increment(ftransverseMassCut80NoRtauCounter);
     if(transverseMass > 80 ) increment(ftransverseMassCut100NoRtauCounter);
 
  
-
     if(transverseMass < 60 ) return false;
     increment(ftransverseMassCut80Counter);
 
     if(transverseMass < 80 ) return false;
     increment(ftransverseMassCut100Counter);
 
-    
-    // Fake MET veto a.k.a. further QCD suppression
-    //    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
-    //    if (!fakeMETData.passedEvent()) return true;
-    //    increment(fFakeMETVetoCounter);
-    //hSelectionFlow->Fill(kSignalOrderFakeMETVeto);
-    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderFakeMETVeto, tauData);
 
-    // Correlation analysis
-    //    fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
-    // Alpha T
-    //if(!evtTopologyData.passedEvent()) return false;
-    //    EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
-    //    hAlphaT->Fill(sAlphaT.fAlphaT); // FIXME: move this histogramming to evt topology
-
-
-   
+    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderFakeMETVeto, tauData);   
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderTopSelection, tauData);
 
  

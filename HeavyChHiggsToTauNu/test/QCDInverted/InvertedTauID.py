@@ -29,6 +29,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysisInvertedTau"
+#analysis = "signalAnalysis"
 counters = analysis+"/counters"
 
 def Linear(x,par):
@@ -390,10 +391,10 @@ class InvertedTauID:
         print histo.GetName(),"Integral",histo.Integral(0,histo.GetNbinsX(),"width")
         histograms.addText(0.4,0.7,"Integral = %s ev"% integralValue)
 
-        match = re.search("aseline",histo.GetName())
+        match = re.search("/\S+aseline",histo.GetName())
         if match:
             self.nBaseQCD = integralValue
-        match = re.search("nverted",histo.GetName())
+        match = re.search("/\S+nverted",histo.GetName())
         if match:
             self.nInvQCD = integralValue
             

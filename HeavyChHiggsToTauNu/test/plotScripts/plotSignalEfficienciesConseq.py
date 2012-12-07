@@ -176,7 +176,8 @@ def doCounters(datasets):
     gtrig.SetMarkerStyle(20)
     gtrig.SetMarkerSize(2)
     gtrig.SetLineStyle(1)  ## 8
-    gtrig.SetLineWidth(4) 
+    gtrig.SetLineWidth(4)
+    
     gtau = createErrors("taus == 1")
     gtau.SetLineColor(2)
     gtau.SetMarkerColor(2)
