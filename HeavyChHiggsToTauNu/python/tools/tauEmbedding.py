@@ -60,7 +60,7 @@ dirEmbs_120131 = [
 # This variable is used to select from possibly multiple sets of embedding directories
 dirEmbs = dirEmbs_120131
 ## Signal analysis multicrab directory for normal MC
-dirSig = "../multicrab_compareEmbedding_Run2011A_120118_122555" # for 120118, 120126, 120131
+dirSig = "multicrab_compareEmbedding_Run2011A_120118_122555" # for 120118, 120126, 120131
 
 
 ## Tau analysis multicrab directories for embedding trials
@@ -897,15 +897,19 @@ class PlotDrawerTauEmbeddingEmbeddedNormal(PlotDrawerTauEmbedding):
 
         self.tauEmbeddingNormalization(p, **kwargs)
 
+        print ROOT.gStyle.GetHatchesLineWidth()
+
         sigErr = p.histoMgr.getHisto("Normal").getRootHisto().Clone("Normal_err")
         sigErr.SetFillColor(ROOT.kRed-7)
         sigErr.SetMarkerSize(0)
-        sigErr.SetFillStyle(3005)
+#        sigErr.SetFillStyle(3005)
+        sigErr.SetFillStyle(3545)
         p.prependPlotObject(sigErr, "E2")
         if p.histoMgr.hasHisto("Embedded"):
             embErr = p.histoMgr.getHisto("Embedded").getRootHisto().Clone("Embedded_err")
             embErr.SetFillColor(ROOT.kBlue-7)
-            embErr.SetFillStyle(3004)
+#            embErr.SetFillStyle(3004)
+            embErr.SetFillStyle(3554)
             embErr.SetMarkerSize(0)
             p.prependPlotObject(embErr, "E2")
 
@@ -931,13 +935,15 @@ class PlotDrawerTauEmbeddingEmbeddedNormal(PlotDrawerTauEmbedding):
                 p.ratios[1].setDrawStyle("PE2")
                 rh = p.ratios[1].getRootHisto()
                 rh.SetFillColor(ROOT.kBlue-7)
-                rh.SetFillStyle(3004)
+#                rh.SetFillStyle(3004)
+                rh.SetFillStyle(3554)
 
         self.setLegend(p, **kwargs)
         # Add the legend box for stat uncertainty band
         tmp = sigErr.Clone("tmp")
         tmp.SetFillColor(ROOT.kBlack)
-        tmp.SetFillStyle(3013)
+#        tmp.SetFillStyle(3013)
+        tmp.SetFillStyle(3444)
         tmp.SetLineColor(ROOT.kWhite)
         if not p.histoMgr.hasHisto("Embedded"):
             tmp.SetFillStyle(sigErr.GetFillStyle())

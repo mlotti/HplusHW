@@ -64,6 +64,8 @@ def main():
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
+    ROOT.gStyle.SetHatchesLineWidth(2)
+
     histograms.cmsTextMode = histograms.CMSMode.SIMULATION
     histograms.cmsText[histograms.CMSMode.SIMULATION] = "Simulation"
     #histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
@@ -75,9 +77,9 @@ def main():
 
     def dop(name):
         doPlots(datasetsEmb, datasetsSig, name)
-        tbl = doCounters(datasetsEmb, datasetsSig, name)
-        for icol in xrange(tbl.getNcolumns()):
-            table.appendColumn(tbl.getColumn(icol))
+#        tbl = doCounters(datasetsEmb, datasetsSig, name)
+#        for icol in xrange(tbl.getNcolumns()):
+#            table.appendColumn(tbl.getColumn(icol))
 
     dop("TTJets")
     dop("WJets")
@@ -93,7 +95,7 @@ def main():
 drawPlotCommon = tauEmbedding.PlotDrawerTauEmbeddingEmbeddedNormal(ylabel="Events / %.0f GeV/c", stackMCHistograms=False, log=True, addMCUncertainty=True, ratio=True, addLuminosityText=True)
 
 def createStyles():
-    st = [styles.StyleCompound(styles=[s, styles.StyleLine(lineWidth=4)]) for s in styles.getStyles()]
+    st = [styles.StyleCompound(styles=[s, styles.StyleLine(lineWidth=5)]) for s in styles.getStyles()]
     st[0] = styles.StyleCompound(styles=[st[0], styles.StyleLine(lineStyle=2)])
     return st
 

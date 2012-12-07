@@ -40,7 +40,7 @@ analysisSig = "signalAnalysisGenuineTau" # require that the selected tau is genu
 
 counters = "Counters/weighted"
 
-plotStyles = styles.styles[0:2]
+plotStyles = [styles.StyleCompound([s, styles.StyleLine(lineWidth=4)]) for s in styles.styles[0:2]]
 plotStyles[0] = styles.StyleCompound([plotStyles[0], styles.StyleMarker(markerStyle=21, markerSize=1.2)])
 
 #taujet = "#tau jet"
@@ -79,6 +79,8 @@ def main():
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
+    ROOT.gStyle.SetHatchesLineWidth(2)
+
     histograms.cmsTextMode = histograms.CMSMode.NONE
     ROOT.gStyle.SetEndErrorSize(5)
     histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.49, x2=0.9)

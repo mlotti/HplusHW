@@ -1627,7 +1627,7 @@ class PlotDrawer:
         self.ylabelDefault = ylabel
         self.logDefault = log
         self.ratioDefault = ratio
-        self.ratioYlabel = ratioYlabel
+        self.ratioYlabelDefault = ratioYlabel
         self.optsDefault = {"ymin": 0, "ymaxfactor": 1.1}
         self.optsDefault.update(opts)
         self.optsLogDefault = {"ymin": 0.01, "ymaxfactor": 2}
@@ -1737,7 +1737,7 @@ class PlotDrawer:
             p.getPad().SetLogy(log)
 
         # Override ratio ytitle
-        ratioYlabel = kwargs.get("ratioYlabel", self.ratioYlabel)
+        ratioYlabel = kwargs.get("ratioYlabel", self.ratioYlabelDefault)
         if ratio and ratioYlabel != None:
             p.getFrame2().GetYaxis().SetTitle(ratioYlabel)
 
