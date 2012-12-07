@@ -2,6 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_EventCounter_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_EventCounter_h
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TemporaryDisabler.h"
+
 #include <boost/utility.hpp>
 #include <utility>
 #include <vector>
@@ -36,6 +38,7 @@ namespace HPlus {
       std::vector<double> weightsSquared;
     };
   public:
+    typedef HPlus::TemporaryDisabler<EventCounter> TemporaryDisabler;
 
     EventCounter(const edm::ParameterSet& iConfig);
     ~EventCounter();
@@ -49,6 +52,10 @@ namespace HPlus {
     void endLuminosityBlock(const edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup);
     void endJob();
 
+    void enable(bool enabled) { fIsEnabled = enabled; }
+    bool getEnableStatus() const { return fIsEnabled; }
+    TemporaryDisabler disableTemporarily() { return TemporaryDisabler(*this, false); }
+
   private:
     size_t findOrInsertCounter(const std::string& name);
 
@@ -60,6 +67,7 @@ namespace HPlus {
     mutable bool finalized;
     bool printMainCounter;
     bool printSubCounters;
+    bool fIsEnabled;
   };
 
   class Count {

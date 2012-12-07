@@ -16,6 +16,7 @@ namespace HPlus {
   NonIsolatedElectronVeto::Data::~Data() {}
   
   NonIsolatedElectronVeto::NonIsolatedElectronVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
+    BaseSelection(eventCounter, histoWrapper),
     fElecCollectionName(iConfig.getUntrackedParameter<edm::InputTag>("ElectronCollectionName")),
     fElecSelection(iConfig.getUntrackedParameter<std::string>("ElectronSelection")),
     fElecPtCut(iConfig.getUntrackedParameter<double>("ElectronPtCut")),
@@ -101,7 +102,23 @@ namespace HPlus {
 
   NonIsolatedElectronVeto::~NonIsolatedElectronVeto() {}
 
+  NonIsolatedElectronVeto::Data NonIsolatedElectronVeto::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup);
+  }
+
   NonIsolatedElectronVeto::Data NonIsolatedElectronVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup);
+  }
+
+  NonIsolatedElectronVeto::Data NonIsolatedElectronVeto::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Reset data variables
     fSelectedElectronPt = -1.0;
     fSelectedElectronEta = -999.99;

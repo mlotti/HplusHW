@@ -9,14 +9,11 @@ from datetime import date, time, datetime
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 
-analysis = "signalAnalysis"
-counters = analysis+"Counters"
-
 debugstatus = False
 
 
-def getDatasetNames(multiCrabDir):
-    datasets = dataset.getDatasetsFromMulticrabDirs([multiCrabDir],counters=counters)
+def getDatasetNames(multiCrabDir,counterDir):
+    datasets = dataset.getDatasetsFromMulticrabDirs([multiCrabDir],counters=counterDir)
     return datasets.getAllDatasetNames()
 
 def validateDatasetExistence(dataset1names,dataset2names):
@@ -274,7 +271,7 @@ def setCanvasDefinitions(canvas):
     myplotpad.SetTopMargin(0.065)
     myplotpad.SetBottomMargin(0.0)
 
-def validateHistograms(mydir,dataset1,dataset2):
+def validateHistograms(mydir,histoDir,dataset1,dataset2):
     mysubdir = mydir+"/"+dataset1.getName()
     if not os.path.exists(mysubdir):
         os.mkdir(mysubdir)
@@ -289,137 +286,137 @@ def validateHistograms(mydir,dataset1,dataset2):
     # entry syntax: histogram_name_with_path, bin_width, linear/log
     histolist = [
         ["Primary vertices", [
-            ["signalAnalysis/Vertices/verticesBeforeWeight", 1, "log"],
-            ["signalAnalysis/Vertices/verticesAfterWeight", 1, "log"],
-            ["signalAnalysis/Vertices/verticesTriggeredBeforeWeight", 1, "log"],
-            ["signalAnalysis/Vertices/verticesTriggeredAfterWeight", 1, "log"],
+            [histoDir+"/Vertices/verticesBeforeWeight", 1, "log"],
+            [histoDir+"/Vertices/verticesAfterWeight", 1, "log"],
+            [histoDir+"/Vertices/verticesTriggeredBeforeWeight", 1, "log"],
+            [histoDir+"/Vertices/verticesTriggeredAfterWeight", 1, "log"],
         ]],
         ["Trigger matched tau collection", [
-            ["signalAnalysis/tauID/N_TriggerMatchedTaus", 1, "log"],
-            ["signalAnalysis/tauID/N_TriggerMatchedSeparateTaus", 1, "log"],
-            ["signalAnalysis/tauID/HPSDecayMode", 1, "log"],
-            ["signalAnalysis/tauID/TauSelection_all_tau_candidates_N", 1, "log"],
-            ["signalAnalysis/tauID/TauSelection_all_tau_candidates_pt", 5, "log"],
-            ["signalAnalysis/tauID/TauSelection_all_tau_candidates_eta", 0.1, "log"],
-            ["signalAnalysis/tauID/TauSelection_all_tau_candidates_phi", 3.14159265 / 36, "log"],
-            ["signalAnalysis/tauID/TauSelection_all_tau_candidates_MC_purity", 1, "log"]
+            [histoDir+"/TauSelection/N_TriggerMatchedTaus", 1, "log"],
+            [histoDir+"/TauSelection/N_TriggerMatchedSeparateTaus", 1, "log"],
+            [histoDir+"/TauSelection/HPSDecayMode", 1, "log"],
+            [histoDir+"/TauSelection/TauSelection_all_tau_candidates_N", 1, "log"],
+            [histoDir+"/TauSelection/TauSelection_all_tau_candidates_pt", 5, "log"],
+            [histoDir+"/TauSelection/TauSelection_all_tau_candidates_eta", 0.1, "log"],
+            [histoDir+"/TauSelection/TauSelection_all_tau_candidates_phi", 3.14159265 / 36, "log"],
+            [histoDir+"/TauSelection/TauSelection_all_tau_candidates_MC_purity", 1, "log"]
         ]],
         ["Tau candidate selection", [
-            ["signalAnalysis/tauID/TauCand_JetPt", 5, "log"],
-            ["signalAnalysis/tauID/TauCand_JetEta", 0.1, "log"],
-            ["signalAnalysis/tauID/TauCand_LdgTrackPtCut", 5, "log"],
-            ["signalAnalysis/tauID/TauCand_EMFractionCut", 0.05, "log"],
-            ["signalAnalysis/tauID/TauSelection_cleaned_tau_candidates_N", 1, "log"],
-            ["signalAnalysis/tauID/TauSelection_cleaned_tau_candidates_pt", 5, "log"],
-            ["signalAnalysis/tauID/TauSelection_cleaned_tau_candidates_eta", 0.1, "log"],
-            ["signalAnalysis/tauID/TauSelection_cleaned_tau_candidates_phi", 3.14159265 / 36, "log"],
-            ["signalAnalysis/tauID/TauSelection_cleaned_tau_candidates_MC_purity", 1, "log"]
+            [histoDir+"/TauSelection/TauCand_JetPt", 5, "log"],
+            [histoDir+"/TauSelection/TauCand_JetEta", 0.1, "log"],
+            [histoDir+"/TauSelection/TauCand_LdgTrackPtCut", 5, "log"],
+            #[histoDir+"/TauSelection/TauCand_EMFractionCut", 0.05, "log"],
+            [histoDir+"/TauSelection/TauSelection_cleaned_tau_candidates_N", 1, "log"],
+            [histoDir+"/TauSelection/TauSelection_cleaned_tau_candidates_pt", 5, "log"],
+            [histoDir+"/TauSelection/TauSelection_cleaned_tau_candidates_eta", 0.1, "log"],
+            [histoDir+"/TauSelection/TauSelection_cleaned_tau_candidates_phi", 3.14159265 / 36, "log"],
+            [histoDir+"/TauSelection/TauSelection_cleaned_tau_candidates_MC_purity", 1, "log"]
         ]],
         ["Tau ID", [
-            ["signalAnalysis/tauID/IsolationPFChargedHadrCandsPtSum", 1, "log"],
-            ["signalAnalysis/tauID/IsolationPFGammaCandEtSum", 1, "log"],
-            ["signalAnalysis/tauID/TauID_OneProngNumberCut", 1, "log"],
-            ["signalAnalysis/tauID/TauID_ChargeCut", 1, "log"],
-            ["signalAnalysis/tauID/TauID_RtauCut", 0.05, "log"],
-            ["signalAnalysis/tauID/TauSelection_selected_taus_N", 1, "log"],
-            ["signalAnalysis/tauID/TauSelection_selected_taus_pt", 5, "log"],
-            ["signalAnalysis/tauID/TauSelection_selected_taus_eta", 0.1, "log"],
-            ["signalAnalysis/tauID/TauSelection_selected_taus_phi", 3.14159265 / 36, "log"],
-            ["signalAnalysis/tauID/TauSelection_selected_taus_MC_purity", 1, "log"],
-            ["signalAnalysis/FakeTauIdentifier/TauMatchType", 1, "log"],
-            ["signalAnalysis/FakeTauIdentifier/TauOrigin", 1, "log"],
-            ["signalAnalysis/FakeTauIdentifier/MuOrigin", 1, "log"],
-            ["signalAnalysis/FakeTauIdentifier/ElectronOrigin", 1, "log"],
+            [histoDir+"/TauSelection/IsolationPFChargedHadrCandsPtSum", 1, "log"],
+            [histoDir+"/TauSelection/IsolationPFGammaCandEtSum", 1, "log"],
+            [histoDir+"/TauSelection/TauID_NProngsCut", 1, "log"],
+            #[histoDir+"/TauSelection/TauID_ChargeCut", 1, "log"],
+            [histoDir+"/TauSelection/TauID_RtauCut", 0.05, "log"],
+            [histoDir+"/TauSelection/TauSelection_selected_taus_N", 1, "log"],
+            [histoDir+"/TauSelection/TauSelection_selected_taus_pt", 5, "log"],
+            [histoDir+"/TauSelection/TauSelection_selected_taus_eta", 0.1, "log"],
+            [histoDir+"/TauSelection/TauSelection_selected_taus_phi", 3.14159265 / 36, "log"],
+            [histoDir+"/TauSelection/TauSelection_selected_taus_MC_purity", 1, "log"],
+            [histoDir+"/FakeTauIdentifier_TauID/TauMatchType", 1, "log"],
+            [histoDir+"/FakeTauIdentifier_TauID/TauOrigin", 1, "log"],
+            [histoDir+"/FakeTauIdentifier_TauID/MuOrigin", 1, "log"],
+            [histoDir+"/FakeTauIdentifier_TauID/ElectronOrigin", 1, "log"],
         ]],
         ["Tau after tau ID", [
-            ["signalAnalysis/SelectedTau/SelectedTau_pT_AfterTauID", 5, "log"],
-            ["signalAnalysis/SelectedTau/SelectedTau_eta_AfterTauID", 0.1, "log"],
-            ["signalAnalysis/SelectedTau/SelectedTau_phi_AfterTauID", 3.14159265 / 36, "log"],
-            ["signalAnalysis/SelectedTau/SelectedTau_Rtau_AfterTauID", 0.05, "log"],
+            [histoDir+"/SelectedTau/SelectedTau_pT_AfterTauID", 5, "log"],
+            [histoDir+"/SelectedTau/SelectedTau_eta_AfterTauID", 0.1, "log"],
+            [histoDir+"/SelectedTau/SelectedTau_phi_AfterTauID", 3.14159265 / 36, "log"],
+            [histoDir+"/SelectedTau/SelectedTau_Rtau_AfterTauID", 0.05, "log"],
         ]],
         ["Tau after all cuts", [
-            ["signalAnalysis/SelectedTau/SelectedTau_pT_AfterCuts", 10, "log"],
-            ["signalAnalysis/SelectedTau/SelectedTau_eta_AfterCuts", 0.2, "log"],
-            ["signalAnalysis/SelectedTau/SelectedTau_Rtau_AfterCuts", 0.05, "log"],
-            ["signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_pT_AfterCuts", 10, "log"],
-            ["signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_eta_AfterCuts", 0.2, "log"],
+            [histoDir+"/SelectedTau/SelectedTau_pT_AfterCuts", 10, "log"],
+            [histoDir+"/SelectedTau/SelectedTau_eta_AfterCuts", 0.2, "log"],
+            [histoDir+"/SelectedTau/SelectedTau_Rtau_AfterCuts", 0.05, "log"],
+            [histoDir+"/SelectedTau/EWKFakeTaus_SelectedTau_pT_AfterCuts", 10, "log"],
+            [histoDir+"/SelectedTau/EWKFakeTaus_SelectedTau_eta_AfterCuts", 0.2, "log"],
         ]],
         ["Electrons", [
-            ["signalAnalysis/GlobalElectronVeto/GlobalElectronPt", 5, "log"],
-            ["signalAnalysis/GlobalElectronVeto/GlobalElectronEta", 0.1, "log"]
+            [histoDir+"/GlobalElectronVeto/GlobalElectronPt", 5, "log"],
+            [histoDir+"/GlobalElectronVeto/GlobalElectronEta", 0.1, "log"]
         ]],
         ["Muons", [
-            ["signalAnalysis/GlobalMuonVeto/GlobalMuonPt", 5, "log"],
-            ["signalAnalysis/GlobalMuonVeto/GlobalMuonEta", 0.1, "log"]
+            [histoDir+"/GlobalMuonVeto/GlobalMuonPt", 5, "log"],
+            [histoDir+"/GlobalMuonVeto/GlobalMuonEta", 0.1, "log"]
         ]],
         ["All jets", [
-            ["signalAnalysis/JetSelection/jet_pt", 10, "log"],
-            ["signalAnalysis/JetSelection/jet_pt_central", 5, "log"],
-            ["signalAnalysis/JetSelection/jet_eta", 0.2, "log"],
-            ["signalAnalysis/JetSelection/jet_phi", 3.14159265 / 36, "log"],
-            ["signalAnalysis/JetSelection/jetEMFraction", 0.05, "log"],
-            ["signalAnalysis/JetSelection/firstJet_pt", 10, "log"],
-            ["signalAnalysis/JetSelection/firstJet_eta", 0.2, "log"],
-            ["signalAnalysis/JetSelection/firstJet_phi", 3.14159265 / 36, "log"],
-            ["signalAnalysis/JetSelection/secondJet_pt", 10, "log"],
-            ["signalAnalysis/JetSelection/secondJet_eta", 0.2, "log"],
-            ["signalAnalysis/JetSelection/secondJet_phi", 3.14159265 / 36, "log"],
-            ["signalAnalysis/JetSelection/thirdJet_pt", 10, "log"],
-            ["signalAnalysis/JetSelection/thirdJet_eta", 0.2, "log"],
-            ["signalAnalysis/JetSelection/thirdJet_phi", 3.14159265 / 36, "log"],
+            [histoDir+"/JetSelection/jet_pt", 10, "log"],
+            [histoDir+"/JetSelection/jet_pt_central", 5, "log"],
+            [histoDir+"/JetSelection/jet_eta", 0.2, "log"],
+            [histoDir+"/JetSelection/jet_phi", 3.14159265 / 36, "log"],
+            [histoDir+"/JetSelection/jetEMFraction", 0.05, "log"],
+            [histoDir+"/JetSelection/firstJet_pt", 10, "log"],
+            [histoDir+"/JetSelection/firstJet_eta", 0.2, "log"],
+            [histoDir+"/JetSelection/firstJet_phi", 3.14159265 / 36, "log"],
+            [histoDir+"/JetSelection/secondJet_pt", 10, "log"],
+            [histoDir+"/JetSelection/secondJet_eta", 0.2, "log"],
+            [histoDir+"/JetSelection/secondJet_phi", 3.14159265 / 36, "log"],
+            [histoDir+"/JetSelection/thirdJet_pt", 10, "log"],
+            [histoDir+"/JetSelection/thirdJet_eta", 0.2, "log"],
+            [histoDir+"/JetSelection/thirdJet_phi", 3.14159265 / 36, "log"],
         ]],
         ["Selected jets", [
-            ["signalAnalysis/JetSelection/NumberOfSelectedJets", 10, "log"],
-            ["signalAnalysis/JetSelection/SelectedJets/jet_pt", 5, "log"],
-            ["signalAnalysis/JetSelection/SelectedJets/jet_eta", 0.2, "log"],
-            ["signalAnalysis/JetSelection/SelectedJets/jet_phi", 3.14159265 / 36, "log"],
-            ["signalAnalysis/JetSelection/SelectedJets/jet_NeutralEmEnergyFraction", 0.05, "log"],
-            ["signalAnalysis/JetSelection/SelectedJets/jet_NeutralHadronFraction", 0.05, "log"],
-            ["signalAnalysis/JetSelection/SelectedJets/jet_NeutralHadronMultiplicity", 1, "log"],
-            ["signalAnalysis/JetSelection/SelectedJets/jet_PhotonEnergyFraction", 0.05, "log"],
-            ["signalAnalysis/JetSelection/SelectedJets/jet_PhotonMultiplicity", 1, "log"],
-            ["signalAnalysis/JetSelection/SelectedJets/jet_ChargedHadronEnergyFraction", 0.05, "log"],
-            ["signalAnalysis/JetSelection/SelectedJets/jet_ChargedMultiplicity", 1, "log"],
-            ["signalAnalysis/JetSelection/SelectedJets/jet_PartonFlavour", 1, "log"],
+            [histoDir+"/JetSelection/NumberOfSelectedJets", 10, "log"],
+            [histoDir+"/JetSelection/SelectedJets/jet_pt", 5, "log"],
+            [histoDir+"/JetSelection/SelectedJets/jet_eta", 0.2, "log"],
+            [histoDir+"/JetSelection/SelectedJets/jet_phi", 3.14159265 / 36, "log"],
+            [histoDir+"/JetSelection/SelectedJets/jet_NeutralEmEnergyFraction", 0.05, "log"],
+            [histoDir+"/JetSelection/SelectedJets/jet_NeutralHadronFraction", 0.05, "log"],
+            [histoDir+"/JetSelection/SelectedJets/jet_NeutralHadronMultiplicity", 1, "log"],
+            [histoDir+"/JetSelection/SelectedJets/jet_PhotonEnergyFraction", 0.05, "log"],
+            [histoDir+"/JetSelection/SelectedJets/jet_PhotonMultiplicity", 1, "log"],
+            [histoDir+"/JetSelection/SelectedJets/jet_ChargedHadronEnergyFraction", 0.05, "log"],
+            [histoDir+"/JetSelection/SelectedJets/jet_ChargedMultiplicity", 1, "log"],
+            [histoDir+"/JetSelection/SelectedJets/jet_PartonFlavour", 1, "log"],
         ]],
         ["Excluded jets, i.e. jets with DeltaR(jet, tau) < 0.5", [
-            ["signalAnalysis/JetSelection/ExcludedJets/jet_pt", 10, "log"],
-            ["signalAnalysis/JetSelection/ExcludedJets/jet_eta", 0.2, "log"],
-            ["signalAnalysis/JetSelection/ExcludedJets/jet_phi", 3.14159265 / 36, "log"],
-            ["signalAnalysis/JetSelection/ExcludedJets/jet_NeutralEmEnergyFraction", 0.05, "log"],
-            ["signalAnalysis/JetSelection/ExcludedJets/jet_NeutralHadronFraction", 0.05, "log"],
-            ["signalAnalysis/JetSelection/ExcludedJets/jet_NeutralHadronMultiplicity", 1, "log"],
-            ["signalAnalysis/JetSelection/ExcludedJets/jet_PhotonEnergyFraction", 0.05, "log"],
-            ["signalAnalysis/JetSelection/ExcludedJets/jet_PhotonMultiplicity", 1, "log"],
-            ["signalAnalysis/JetSelection/ExcludedJets/jet_ChargedHadronEnergyFraction", 0.05, "log"],
-            ["signalAnalysis/JetSelection/ExcludedJets/jet_ChargedMultiplicity", 1, "log"],
-            ["signalAnalysis/JetSelection/ExcludedJets/jet_PartonFlavour", 1, "log"],
+            [histoDir+"/JetSelection/ExcludedJets/jet_pt", 10, "log"],
+            [histoDir+"/JetSelection/ExcludedJets/jet_eta", 0.2, "log"],
+            [histoDir+"/JetSelection/ExcludedJets/jet_phi", 3.14159265 / 36, "log"],
+            [histoDir+"/JetSelection/ExcludedJets/jet_NeutralEmEnergyFraction", 0.05, "log"],
+            [histoDir+"/JetSelection/ExcludedJets/jet_NeutralHadronFraction", 0.05, "log"],
+            [histoDir+"/JetSelection/ExcludedJets/jet_NeutralHadronMultiplicity", 1, "log"],
+            [histoDir+"/JetSelection/ExcludedJets/jet_PhotonEnergyFraction", 0.05, "log"],
+            [histoDir+"/JetSelection/ExcludedJets/jet_PhotonMultiplicity", 1, "log"],
+            [histoDir+"/JetSelection/ExcludedJets/jet_ChargedHadronEnergyFraction", 0.05, "log"],
+            [histoDir+"/JetSelection/ExcludedJets/jet_ChargedMultiplicity", 1, "log"],
+            [histoDir+"/JetSelection/ExcludedJets/jet_PartonFlavour", 1, "log"],
         ]],
         ["MET", [
-            ["signalAnalysis/MET/met", 20, "log"],
-            ["signalAnalysis/MET/metSignif", 5, "log"],
-            ["signalAnalysis/MET/metSumEt", 20, "log"],
+            [histoDir+"/MET/met", 20, "log"],
+            [histoDir+"/MET/metSignif", 5, "log"],
+            [histoDir+"/MET/metSumEt", 20, "log"],
         ]],
         ["b-jet tagging", [
-            ["signalAnalysis/Btagging/NumberOfBtaggedJets", 1, "log"],
-            ["signalAnalysis/Btagging/jet_bdiscriminator", 0.1, "log"],
-            ["signalAnalysis/Btagging/bjet_pt", 10, "log"],
-            ["signalAnalysis/Btagging/bjet_eta", 0.2, "log"],
-            ["signalAnalysis/Btagging/bjet1_pt", 20, "log"],
-            ["signalAnalysis/Btagging/bjet1_eta", 0.2, "log"],
-            ["signalAnalysis/Btagging/bjet2_pt", 20, "log"],
-            ["signalAnalysis/Btagging/bjet2_eta", 0.2, "log"],
-            ["signalAnalysis/Btagging/MCMatchForPassedJets", 1, "log"],
+            [histoDir+"/Btagging/NumberOfBtaggedJets", 1, "log"],
+            [histoDir+"/Btagging/jet_bdiscriminator", 0.1, "log"],
+            [histoDir+"/Btagging/bjet_pt", 10, "log"],
+            [histoDir+"/Btagging/bjet_eta", 0.2, "log"],
+            [histoDir+"/Btagging/bjet1_pt", 20, "log"],
+            [histoDir+"/Btagging/bjet1_eta", 0.2, "log"],
+            [histoDir+"/Btagging/bjet2_pt", 20, "log"],
+            [histoDir+"/Btagging/bjet2_eta", 0.2, "log"],
+            [histoDir+"/Btagging/MCMatchForPassedJets", 1, "log"],
         ]],
         ["Transverse mass", [
-            ["signalAnalysis/deltaPhi", 10, "linear"],
-            ["signalAnalysis/transverseMass", 20, "linear"],
-            ["signalAnalysis/transverseMassAfterDeltaPhi160", 20, "linear"],
-            ["signalAnalysis/transverseMassAfterDeltaPhi130", 20, "linear"],
+            [histoDir+"/deltaPhi", 10, "linear"],
+            [histoDir+"/transverseMass", 20, "linear"],
+            #[histoDir+"/transverseMassAfterDeltaPhi160", 20, "linear"],
+            #[histoDir+"/transverseMassAfterDeltaPhi130", 20, "linear"],
         ]]
     ]
     if debugstatus:
-        histolist = [["Primary vertices", [["signalAnalysis/Vertices/verticesBeforeWeight", 1, "log"],["signalAnalysis/tauID/N_TriggerMatchedTaus", 1, "log"]]]]
+        histolist = [["Primary vertices", [[histoDir+"/Vertices/verticesBeforeWeight", 1, "log"],[histoDir+"/TauSelection/N_TriggerMatchedTaus", 1, "log"]]]]
 
     mycolumns = 2
     myscale = 200.0 / float(mycolumns)
@@ -580,14 +577,15 @@ def makehtml(mydir, myoutput):
     myfile.close()
 
 def main(argv):
-    if not len(sys.argv) == 3:
+    if not len(sys.argv) == 4:
         print "\n"
-        print "### Usage:   EventCounterValidation.py <ref multi-crab path> <new multi-crab path>\n"
+        print "### Usage:   EventCounterValidation.py <ref multi-crab path> <new multi-crab path> era\n"
         print "\n"
         sys.exit()
 
     referenceData = sys.argv[1]
     validateData  = sys.argv[2]
+    era           = sys.argv[3]
 
     mytimestamp = datetime.now().strftime("%d%m%y_%H%M%S")
     if debugstatus:
@@ -598,11 +596,19 @@ def main(argv):
 
     myoutput = ""
 
+    histoDir = "signalAnalysis"+era
+    counterDir = histoDir+"/counters"
+
     print "Running script EventCounterValidation.py on"
     print
     print "          reference datasets = ",referenceData
     print "          validated datasets = ",validateData
     print
+    print "          era = ",era
+    print "          counter dir = ",counterDir
+    print
+
+
 
     ROOT.gROOT.SetBatch() # no flashing canvases
 
@@ -611,10 +617,11 @@ def main(argv):
          myoutput += " "+arg
     myoutput += "<br><br>\n"
     myoutput += "<b>Reference multicrab directory:</b> "+referenceData+"<br>\n"
-    myoutput += "<b>New multicrab directory to be validated:</b> "+validateData+"<br>\n<hr><br>\n"
+    myoutput += "<b>New multicrab directory to be validated:</b> "+validateData+"<br><br>\n"
+    myoutput += "<b>Era: "+era+"</b><br>\n<hr><br>\n"
 
-    refDatasetNames = getDatasetNames(referenceData)
-    valDatasetNames = getDatasetNames(validateData)
+    refDatasetNames = getDatasetNames(referenceData,counterDir)
+    valDatasetNames = getDatasetNames(validateData,counterDir)
 
     datasetNames = validateDatasetExistence(refDatasetNames,valDatasetNames)
     myoutput += "<h3><a name=maintop>List of datasets analysed:</a></h3><br>\n"
@@ -625,11 +632,11 @@ def main(argv):
         print "\n\n"
         print datasetname
         myoutput += "<h2><a name=dataset_"+datasetname+">Dataset: "+datasetname+"</a></h2><br>\n"
-        refDatasets = dataset.getDatasetsFromCrabDirs([referenceData+"/"+datasetname],counters=counters)
-        valDatasets = dataset.getDatasetsFromCrabDirs([validateData+"/"+datasetname],counters=counters)
+        refDatasets = dataset.getDatasetsFromCrabDirs([referenceData+"/"+datasetname],counters=counterDir)
+        valDatasets = dataset.getDatasetsFromCrabDirs([validateData+"/"+datasetname],counters=counterDir)
 
         myoutput += validateCounters(refDatasets,valDatasets)
-        myoutput += validateHistograms(mydir,refDatasets.getDataset(datasetname),valDatasets.getDataset(datasetname))
+        myoutput += validateHistograms(mydir,histoDir,refDatasets.getDataset(datasetname),valDatasets.getDataset(datasetname))
         myoutput += "<hr><br>\n"
 
     print "\nResults saved into directory:",mydir

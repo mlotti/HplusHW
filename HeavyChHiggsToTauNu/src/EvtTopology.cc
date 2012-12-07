@@ -174,6 +174,7 @@ namespace HPlus {
   EvtTopology::Data::~Data() {}
 
   EvtTopology::EvtTopology(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
+    BaseSelection(eventCounter, histoWrapper),
     // fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
     // fDiscrCut(iConfig.getUntrackedParameter<double>("discriminatorCut")),
     fAlphaTCut(iConfig.getUntrackedParameter<double>("alphaT")),
@@ -193,8 +194,23 @@ namespace HPlus {
 
   EvtTopology::~EvtTopology() {}
 
-  EvtTopology::Data EvtTopology::analyze( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
+  EvtTopology::Data EvtTopology::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
+    ensureSilentAnalyzeAllowed(iEvent);
 
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup, tau, jets);
+  }
+
+  EvtTopology::Data EvtTopology::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup, tau, jets);
+  }
+
+  EvtTopology::Data EvtTopology::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /// Description                                                                                                
   /// Calculates the AlphaT variable, defined as an N-object system where the set of objects is 1 tau-jet and N-1

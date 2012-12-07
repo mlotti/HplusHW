@@ -2,6 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_BjetSelection_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_BjetSelection_h
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
+
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
@@ -10,7 +12,6 @@
 #include "DataFormats/METReco/interface/GenMET.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 
 
 namespace edm {
@@ -23,7 +24,7 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
 
-  class BjetSelection {
+  class BjetSelection: public BaseSelection {
   public:
     typedef math::XYZTLorentzVector XYZTLorentzVector;
     /**
@@ -52,11 +53,11 @@ namespace HPlus {
     BjetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~BjetSelection();
 
-
-   
-    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, const edm::Ptr<reco::Candidate>& tau , const edm::Ptr<reco::MET>& met);   
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, const edm::Ptr<reco::Candidate>& tau , const edm::Ptr<reco::MET>& met);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, const edm::Ptr<reco::Candidate>& tau , const edm::Ptr<reco::MET>& met);
 
   private:
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, const edm::Ptr<reco::Candidate>& tau , const edm::Ptr<reco::MET>& met);
     void init();
     /*
     std::vector<const reco::GenParticle*> getImmediateMothers(const reco::Candidate&);
@@ -116,7 +117,7 @@ namespace HPlus {
     // Variables
     edm::Ptr<pat::Jet> BjetTauSide;
     edm::Ptr<pat::Jet> BjetTopSide;
-   
+
   };
 }
 

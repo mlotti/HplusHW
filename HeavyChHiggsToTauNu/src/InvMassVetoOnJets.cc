@@ -23,6 +23,7 @@ namespace HPlus {
   InvMassVetoOnJets::Data::~Data() {}
 
   InvMassVetoOnJets::InvMassVetoOnJets(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
+    BaseSelection(eventCounter, histoWrapper),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fSetTrueToUseModule(iConfig.getUntrackedParameter<bool>("setTrueToUseModule")),
@@ -53,9 +54,24 @@ namespace HPlus {
 
   InvMassVetoOnJets::~InvMassVetoOnJets() {}
 
-  //  InvMassVetoOnJets::Data InvMassVetoOnJets::analyze( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
-  InvMassVetoOnJets::Data InvMassVetoOnJets::analyze( const edm::PtrVector<pat::Jet>& jets ){
-    
+  InvMassVetoOnJets::Data InvMassVetoOnJets::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets) {
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup, jets);
+  }
+
+  InvMassVetoOnJets::Data InvMassVetoOnJets::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets) {
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup, jets);
+  }
+
+  InvMassVetoOnJets::Data InvMassVetoOnJets::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets) {
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// Description                                                                                                
     /// Uses the jet-collection to reconstruct all the possible di-jet combinations.The motivation behind the creation

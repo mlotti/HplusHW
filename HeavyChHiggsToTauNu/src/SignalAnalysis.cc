@@ -41,8 +41,8 @@ namespace HPlus {
     fDeltaPhiCounter(eventCounter.addCounter("EWKfaketaus:deltaphi")),
     fFakeMETVetoCounter(eventCounter.addCounter("EWKfaketaus:fake MET veto")),
     fTopSelectionCounter(eventCounter.addCounter("EWKfaketaus:Top Selection cut")),
-    fTopWithMHSelectionCounter(eventCounter.addCounter("EWKfaketaus:Top Higgs mass Selection cut")),
     fTopChiSelectionCounter(eventCounter.addCounter("EWKfaketaus:Top Chi Selection cut")),
+    fTopWithMHSelectionCounter(eventCounter.addCounter("EWKfaketaus:Top Higgs mass Selection cut")),
     //    fTopChiSelectionNarrowCounter(eventCounter.addCounter("EWKfaketaus:Top Chi Selection small window")),
     fTopWithBSelectionCounter(eventCounter.addCounter("EWKfaketaus:Top with B Selection cut")),
     fTopWithWSelectionCounter(eventCounter.addCounter("EWKfaketaus:Top with W Selection cut")),
@@ -112,7 +112,6 @@ namespace HPlus {
     fTransverseMass120CutCounter(eventCounter.addCounter("TransverseMass120Cut")),
     fTransverseMass100CutPhiLow30Counter(eventCounter.addCounter("TransverseMass100CutPhiLow30")),
     fTransverseMass100CutPhiLow60Counter(eventCounter.addCounter("TransverseMass100CutPhiLow60")),
-    fTopWithMHSelectionCounter(eventCounter.addCounter("Top after Inv Mass selection")),
     fTauVetoAfterDeltaPhiCounter(eventCounter.addCounter("TauVeto after DeltaPhi cut")),
     fRealTauAfterDeltaPhiCounter(eventCounter.addCounter("Real tau after deltaPhi cut")),
     fRealTauAfterDeltaPhiTauVetoCounter(eventCounter.addCounter("Real tau after deltaPhi+tauveto cut")),
@@ -140,13 +139,13 @@ namespace HPlus {
     fTauIsElectronFromHplusCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from H+ ->tau->electron")),
     fTauIsMuonFromHplusCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from H+ ->tau->muon")),
     fTauIsQuarkFromWCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->qq")),
+    fTauIsQuarkFromZCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->qq")),
     fTauIsElectronFromWCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->e")),
+    fTauIsElectronFromZCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->e")),
     fTauIsMuonFromWCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->mu")),
     fTauIsHadronFromWTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->tau->hadrons")),
     fTauIsElectronFromWTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->tau->e")),
     fTauIsMuonFromWTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from W->tau->mu")),
-    fTauIsQuarkFromZCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->qq")),
-    fTauIsElectronFromZCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->e")),
     fTauIsMuonFromZCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->mu")),
     fTauIsHadronFromZTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->tau->hadrons")),
     fTauIsElectronFromZTauCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from Z->tau->e")),
@@ -159,6 +158,7 @@ namespace HPlus {
     fTauIsHadronFromJetCounter(eventCounter.addSubCounter("MCinfo for selected events", "Tau from jet->hadron")),
 
     fTopSelectionCounter(eventCounter.addSubCounter("top", "Top selection")),
+    fTopWithMHSelectionCounter(eventCounter.addCounter("Top after Inv Mass selection")),
     fTopChiSelectionCounter(eventCounter.addSubCounter("top", "Top ChiSelection 120-300")),
     fTopChiSelection250Counter(eventCounter.addSubCounter("top", "Top ChiSelection 120-250")),
     fTopChiSelection220Counter(eventCounter.addSubCounter("top", "Top ChiSelection 120-220")),
@@ -504,7 +504,7 @@ namespace HPlus {
     //if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
     increment(fOneTauCounter);
     // Primary vertex assignment analysis - diagnostics only
-    fVertexAssignmentAnalysis.analyze(iEvent.isRealData(), pvData.getSelectedVertex(), tauData.getSelectedTau(), myTauMatch);
+    fVertexAssignmentAnalysis.analyze(iEvent, iSetup, iEvent.isRealData(), pvData.getSelectedVertex(), tauData.getSelectedTau(), myTauMatch);
     // For data, set the current run number (needed for tau embedding
     // input, doesn't harm for normal data except by wasting small
     // amount of time)
@@ -682,7 +682,7 @@ namespace HPlus {
       TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     
       // Calculate alphaT
-      EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTau()), jetData.getSelectedJets());   
+      EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJets());   
       
       FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJets(), metData.getSelectedMET());
 
@@ -899,8 +899,8 @@ namespace HPlus {
       double topmass = TopChiSelectionData.getTopMass();
       double wmass = TopChiSelectionData.getWMass();
       increment(fTopChiSelectionCounter);
-      double ptBjetInTop = TopChiSelectionData.getSelectedBjet()->pt();
-      double etaBjetInTop = TopChiSelectionData.getSelectedBjet()->eta();
+      //double ptBjetInTop = TopChiSelectionData.getSelectedBjet()->pt();
+      //double etaBjetInTop = TopChiSelectionData.getSelectedBjet()->eta();
       //      double deltaRBjetTau = ROOT::Math::VectorUtil::DeltaR(TopChiSelectionData.getSelectedBjet()->p4(), tauData.getSelectedTau()->p4());
       //      std::cout << "B jet in Top mass:  myMinDeltaR " << deltaRBjetTau   << " pt " << ptBjetInTop  << " eta  " << etaBjetInTop << std::endl;
 
@@ -1017,7 +1017,7 @@ namespace HPlus {
 <<<<<<< HEAD
 
     // Calculate alphaT
-    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTau()), jetData.getSelectedJets());   
+    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJets());   
 
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJets(), metData.getSelectedMET());
 
@@ -1085,9 +1085,9 @@ namespace HPlus {
     hDeltaPhiVsTransverseMass->Fill(fakeMETData.closestDeltaPhi(),transverseMass); 
 
     // Calculate alphaT
-    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTau()), jetData.getSelectedJets());   
+    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJets());   
     // Correlation analysis
-    fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets(),"BCorrelationAnalysis");
+    fCorrelationAnalysis.analyze(iEvent, iSetup, tauData.getSelectedTaus(), btagData.getSelectedJets(),"BCorrelationAnalysis");
     // Alpha T
     //if(!evtTopologyData.passedEvent()) return false;
     hAlphaT->Fill(evtTopologyData.alphaT().fAlphaT); // FIXME: move this histogramming to evt topology
@@ -1120,13 +1120,13 @@ namespace HPlus {
 
 
     edm::Handle <std::vector<LorentzVector> > oneProngTaus;
-    iEvent.getByLabel(fOneProngTauSrc, oneProngTaus);
+    iEvent.getByLabel(fOneProngTauSrc, oneProngTaus); // FIXME: fOneProngTauSrc is not initialized!
 
     edm::Handle <std::vector<LorentzVector> > oneAndThreeProngTaus;
     iEvent.getByLabel(fOneAndThreeProngTauSrc,oneAndThreeProngTaus);
 
     edm::Handle <std::vector<LorentzVector> > threeProngTaus;
-    iEvent.getByLabel(fThreeProngTauSrc, threeProngTaus);
+    iEvent.getByLabel(fThreeProngTauSrc, threeProngTaus); // FIXME: fThreeProngTauSrc is not initialized!
 
     bool myTauFoundStatus = false;
     bool myLeptonVetoStatus = false;

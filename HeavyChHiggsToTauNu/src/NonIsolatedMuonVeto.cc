@@ -20,6 +20,7 @@ namespace HPlus {
   NonIsolatedMuonVeto::Data::~Data() {}
 
   NonIsolatedMuonVeto::NonIsolatedMuonVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
+    BaseSelection(eventCounter, histoWrapper),
     fMuonCollectionName(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollectionName")),
     fMuonSelection(iConfig.getUntrackedParameter<std::string>("MuonSelection")),
     fMuonPtCut(iConfig.getUntrackedParameter<double>("MuonPtCut")),
@@ -109,7 +110,23 @@ namespace HPlus {
 
   NonIsolatedMuonVeto::~NonIsolatedMuonVeto() {}
 
+  NonIsolatedMuonVeto::Data NonIsolatedMuonVeto::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup, primaryVertex);
+  }
+
   NonIsolatedMuonVeto::Data NonIsolatedMuonVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup, primaryVertex);
+  }
+
+  NonIsolatedMuonVeto::Data NonIsolatedMuonVeto::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
     // Reset data variables
     fSelectedMuonPt = -1.0;
     fSelectedMuonEta = -999.99;
