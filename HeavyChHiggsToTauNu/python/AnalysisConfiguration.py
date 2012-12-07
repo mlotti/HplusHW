@@ -67,7 +67,7 @@ class ConfigBuilder:
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
                  doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
                  allowTooManyAnalyzers = False, # Allow arbitrary number of analyzers (beware, it might take looong to run and merge)
-                 inputWorkflow = "pattuple_v53_1_test1", # Name of the workflow, whose output is used as an input, needed for WJets weighting
+                 inputWorkflow = "pattuple_v44_4", # Name of the workflow, whose output is used as an input, needed for WJets weighting
                  ):
         self.options, self.dataVersion = HChOptions.getOptionsDataVersion(dataVersion)
         self.dataEras = dataEras
@@ -246,9 +246,9 @@ class ConfigBuilder:
                     mod = module.clone()
                     param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.triggerEfficiencyScaleFactor)
                     param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.vertexWeightReader, era=dataEra)
-                        if self.options.wjetsWeighting != 0:
-                            mod.wjetsWeightReader.weightSrc = "wjetsWeight"+dataEra
-                            mod.wjetsWeightReader.enabled = True
+                    if self.options.wjetsWeighting != 0:
+                        mod.wjetsWeightReader.weightSrc = "wjetsWeight"+dataEra
+                        mod.wjetsWeightReader.enabled = True
 
                     print "Added analysis for PU weight era =", dataEra
                     analysisModules.append(mod)

@@ -73,7 +73,7 @@ HPlusWJetsWeightProducer::HPlusWJetsWeightProducer(const edm::ParameterSet& iCon
 
   fJetBins.reserve(4);
   char tmp[10] = "";
-  for(int jetBin=1; jetBin <= 4; ++jetBin) {
+  for(int jetBin=2; jetBin <= 4; ++jetBin) {
     snprintf(tmp, 10, "jetBin%d", jetBin);
     edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>(tmp);
     fJetBins.push_back(JetBin(iConfig.getParameter<double>("inclusiveCrossSection"),
@@ -100,12 +100,12 @@ void HPlusWJetsWeightProducer::produce(edm::Event& iEvent, const edm::EventSetup
     // 8 -> 3 partons
     // 9 -> 4 partons
     int nup = hlhe->hepeup().NUP;
-    if(nup <= 5) {
+    if(nup <= 6) {
       weight = 1.0;
     }
-    else if(nup > 5 && nup <= 9) {
+    else if(nup > 6 && nup <= 9) {
       int njet = nup-5;
-      weight = fJetBins[njet-1].getWeight();
+      weight = fJetBins[njet-2].getWeight();
     }
     else
       throw cms::Exception("Assert") << "Encountered event with NUP " << nup << std::endl;
