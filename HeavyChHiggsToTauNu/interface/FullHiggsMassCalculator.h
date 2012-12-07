@@ -4,6 +4,8 @@
 
 #include "FWCore/Utilities/interface/InputTag.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
+
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
@@ -22,7 +24,7 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
 
-  class FullHiggsMassCalculator {
+  class FullHiggsMassCalculator: public BaseSelection {
   public:
     class Data {
     public:
@@ -39,16 +41,18 @@ namespace HPlus {
       const bool fPassedEvent;
     };
 
-
     FullHiggsMassCalculator(EventCounter& eventCounter, HistoWrapper& histoWrapper);
-
     ~FullHiggsMassCalculator();
 
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData);
-    //    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData, const TopChiSelection::Data TopChiSelectionData );
+
     void myBJet();
 
   private:
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData);
+
     bool doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet);
     void doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool myMatchStaus=false, bool doHistogramming = true);
 

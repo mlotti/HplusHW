@@ -6,6 +6,7 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -29,7 +30,7 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
   
-  class NonIsolatedElectronVeto {
+  class NonIsolatedElectronVeto: public BaseSelection {
   public:
     /**
      * Class to encapsulate the access to the data members of
@@ -59,11 +60,14 @@ namespace HPlus {
     NonIsolatedElectronVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~NonIsolatedElectronVeto();
 
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup); // Official Electron ID
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup); // Official Electron ID
     Data analyzeCustomElecID(const edm::Event& iEvent, const edm::EventSetup& iSetup); // Requires General Tracks
    
   private:
-
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup); // Official Electron ID
+    
     bool ElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup); // Official Electron ID
     bool CustomElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup); // Requires General Tracks
 

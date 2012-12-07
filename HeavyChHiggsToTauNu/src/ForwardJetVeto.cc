@@ -12,8 +12,9 @@ namespace HPlus {
   ForwardJetVeto::Data::Data(const ForwardJetVeto *forwardJetVeto, bool passedEvent):
     fForwardJetVeto(forwardJetVeto), fPassedEvent(passedEvent) {}
   ForwardJetVeto::Data::~Data() {}
-  
+
   ForwardJetVeto::ForwardJetVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
+    BaseSelection(eventCounter, histoWrapper),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fForwJetEtaCut(iConfig.getUntrackedParameter<double>("ForwJetEtaCut")),
     fForwJetEtCut(iConfig.getUntrackedParameter<double>("ForwJetEtCut")),
@@ -37,14 +38,30 @@ namespace HPlus {
 
   ForwardJetVeto::~ForwardJetVeto() {}
 
+  ForwardJetVeto::Data ForwardJetVeto::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::MET>& met) {
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup, met);
+  }
+
   ForwardJetVeto::Data ForwardJetVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::MET>& met) {
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup, met);
+  }
+
+  ForwardJetVeto::Data ForwardJetVeto::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::MET>& met) {
     bool passEvent = false;
-   
+
     edm::Handle<edm::View<pat::Jet> > hjets;
     iEvent.getByLabel(fSrc, hjets);
 
     const edm::PtrVector<pat::Jet>& jets(hjets->ptrVector());
-    
+
     // Loop over jets
     double maxEt = 0.;
     double EtSumForward = 0.;

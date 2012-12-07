@@ -25,6 +25,7 @@
 #include <iostream>
 #include <vector>
 // CMSSW libraries
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -46,13 +47,11 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
 
-  class InvMassVetoOnJets {
+  class InvMassVetoOnJets: public BaseSelection {
   public:
 
     /**
-     * Class to encapsulate the access to the data members of
-     * TauSelection. If you want to add a new accessor, add it here
-     * and keep all the data of TauSelection private.
+     * Class to encapsulate the access to the data members.
      */
     class Data {
     public:
@@ -64,7 +63,7 @@ namespace HPlus {
 
       bool passedEvent() const { return fPassedEvent; }
       // const InvMassVetoOnJets::AlphaStruc alphaT() const { return fInvMassVetoOnJets->sAlpha; }
-    
+
     private:
       const InvMassVetoOnJets *fInvMassVetoOnJets;
       const bool fPassedEvent;
@@ -73,10 +72,13 @@ namespace HPlus {
     InvMassVetoOnJets(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~InvMassVetoOnJets();
 
-    // Data analyze( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
-    Data analyze( const edm::PtrVector<pat::Jet>& jets );
-    
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
+
   private:
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
+
     const double fPtCut;
     const double fEtaCut;
     const bool fSetTrueToUseModule;

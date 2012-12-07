@@ -84,9 +84,9 @@ namespace HPlus {
       Count fTopSelectionCounter;
       Count fTopChiSelectionCounter;
       //      Count fTopChiSelectionNarrowCounter;
+      Count fTopWithMHSelectionCounter;
       Count fTopWithBSelectionCounter;
       Count fTopWithWSelectionCounter;
-      Count fTopWithMHSelectionCounter;
       Count fSelectedEventsCounter;
     };
   enum SignalSelectionOrder {
@@ -212,8 +212,8 @@ namespace HPlus {
     Count fTauIsHadronFromJetCounter;
 
     Count fTopSelectionCounter;
-    Count fTopChiSelectionCounter;
     Count fTopWithMHSelectionCounter;
+    Count fTopChiSelectionCounter;
     Count fTopChiSelection250Counter;
     Count fTopChiSelection220Counter;
     Count fTopWithBSelectionCounter;
