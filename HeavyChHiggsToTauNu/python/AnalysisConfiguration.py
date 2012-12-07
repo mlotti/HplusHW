@@ -229,7 +229,7 @@ class ConfigBuilder:
 
             # No PU reweighting, it is sufficient to do calculate WJets weights only one
             if self.options.wjetsWeighting != 0 and not self.applyPUReweight:
-                process.wjetsWeight = wjetsWeight.getWJetsWeight(self.dataVersion, self.inputWorkflow, None)
+                process.wjetsWeight = wjetsWeight.getWJetsWeight(self.dataVersion, self.options, self.inputWorkflow, None)
                 process.commonSequence *= process.wjetsWeight
                 for module in modules:
                     module.wjetsWeightReader.weightSrc = "wjetsWeight"
@@ -238,7 +238,7 @@ class ConfigBuilder:
             for dataEra in self.dataEras:
                 # With PU reweighting, must produce one per data era
                 if self.options.wjetsWeighting != 0 and self.applyPUReweight:
-                    weightMod = wjetsWeight.getWJetsWeight(self.dataVersion, self.inputWorkflow, dataEra)
+                    weightMod = wjetsWeight.getWJetsWeight(self.dataVersion, self.options, self.inputWorkflow, dataEra)
                     setattr(process, "wjetsWeight"+dataEra, weightMod)
                     process.commonSequence *= weightMod
 
@@ -713,7 +713,7 @@ class ConfigBuilder:
             dataEra = mod.wjetsWeightReader.weightSrc.value().replace("wjetsWeight", "")
             weightName = "wjetsWeight"+dataEra+suffix
             if not hasattr(process, weightName):
-                weightMod = wjetsWeight.getWJetsWeight(self.dataVersion, self.inputWorkflow, dataEra, suffix)
+                weightMod = wjetsWeight.getWJetsWeight(self.dataVersion, self.options, self.inputWorkflow, dataEra, suffix)
                 setattr(process, weightName, weightMod)
                 process.commonSequence *= weightMod
             mod.wjetsWeightReader.weightSrc = weightName

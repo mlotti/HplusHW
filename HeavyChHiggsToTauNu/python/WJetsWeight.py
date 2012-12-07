@@ -55,6 +55,7 @@ class NEvents:
             lheSrc = cms.InputTag("source", "", "LHE"),
             alias = cms.string("wjetsWeight"),
             enabled = cms.bool(True),
+            sampleJetBin = cms.int32(-1),
             inclusiveCrossSection = cms.double(30400.0),
             jetBin1 = cms.PSet(
                 exclusiveCrossSection = cms.double(5400.0),
@@ -108,16 +109,18 @@ _wjetsNumberOfEvents = {
 }
 
 
-def getWJetsWeight(dataVersion, inputWorkflow, era, suffix=""):
+def getWJetsWeight(dataVersion, options, inputWorkflow, era, suffix=""):
     weightType = {"": pileupReweightedAllEvents.PileupWeightType.NOMINAL,
                   "up": pileupReweightedAllEvents.PileupWeightType.UP,
                   "down": pileupReweightedAllEvents.PileupWeightType.DOWN
                   }[suffix]
 
     if dataVersion.is44X():
-        return _wjetsNumberOfEvents[inputWorkflow].construct7TeV(era, weightType)
-    if dataVersion.is53X():
-        return _wjetsNumberOfEvents[inputWorkflow].construct8TeV(era, weightType)
+        pset = _wjetsNumberOfEvents[inputWorkflow].construct7TeV(era, weightType)
+    elif dataVersion.is53X():
+        pset = _wjetsNumberOfEvents[inputWorkflow].construct8TeV(era, weightType)
     else:
         raise Exception("WJets weights are available only for 44X and 53X")
+    pset.sampleJetBin = options.wjetBin
+    return pset
 

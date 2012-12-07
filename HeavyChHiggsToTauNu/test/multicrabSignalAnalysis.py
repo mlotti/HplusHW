@@ -9,8 +9,11 @@ cfg = "signalAnalysis_cfg.py"
 multicrab = Multicrab("crab_analysis.cfg", cfg)
 
 # Select the workflow (version corresponds to pattuples)
-#workflow = "analysis_v25c"
 workflow = "analysis_v44_4"
+
+# Do W+jets weighting?
+doWJetsWeighting = False
+#doWJetsWeighting = True
 
 # Change this to true if you want to run the PAT on the fly (for
 # datasets where no pattuples are produced, or for testing something

@@ -19,42 +19,53 @@ private:
   struct JetBin {
     JetBin(double ixs, double ievt, double exs, double eevt):
       fExclusiveInclusiveCrossSectionRatio(exs / ixs),
-      fInclusiveNumberOfEvents(ievt), fExclusiveNumberOfEvents(eevt) {}
+      fInclusiveNumberOfEvents(ievt), fExclusiveNumberOfEvents(eevt), fSampleNumberOfEvents(0) {}
+
+    void setSampleNumberOfEvents(double num) { fSampleNumberOfEvents = num; }
 
     double getWeight() {
       /*
        * Calculate weight for jet bin i as
        *
-       *          f_i * N_inc        sigma_NNLO
+       *          f_i * N_j         sigma_NNLO
        * w_i = ----------------- (* ---------- )
-       *       N_inc * f_i + N_i       N_inc
+       *       N_inc * f_i + N_i        N_j
        *
        * where
        * inc    denotes the inclusive sample
        * f_i    = sigma_LO(i) / sigma_LO(inc) (LO cross sections from PREP)
        * N_inc  Number of all processed MC events in the inclusive sample
        * N_i    Number of all processed MC events in the jet bin i sample
+       # N_j    Number of all processed MC events in sample j (= inclusive, 1jet, 2jet, 3jet, 4jet)
        *
        * The number of processed MC events should be PU-reweighted
+       *
+       * N_j is needed, because the plotting code takes sigma/N_j as
+       * the normalization factor for sample j, and Matti feels
+       * uncomfortable of adding more glue code in there (especially
+       * since the weight calculation is in our code).
        *
        * sigma_NNLO  The NNLO cross section
        *
        * In this code, the first part of the weight is calculated. The
        * plotting system then takes automatically care of the second
        * part.
+       *
        */
 
       double f_i = fExclusiveInclusiveCrossSectionRatio;
       double N_inc = fInclusiveNumberOfEvents;
       double N_i = fExclusiveNumberOfEvents;
+      double N_j = fSampleNumberOfEvents;
 
-      double weight = (f_i * N_inc) / (N_inc * f_i + N_i);
+      double weight = (f_i * N_j) / (N_inc * f_i + N_i);
       return weight;
     }
 
     double fExclusiveInclusiveCrossSectionRatio;
-    unsigned fInclusiveNumberOfEvents;
-    unsigned fExclusiveNumberOfEvents;
+    double fInclusiveNumberOfEvents;
+    double fExclusiveNumberOfEvents;
+    double fSampleNumberOfEvents;
   };
 
 
@@ -81,6 +92,22 @@ HPlusWJetsWeightProducer::HPlusWJetsWeightProducer(const edm::ParameterSet& iCon
                               pset.getParameter<double>("exclusiveCrossSection"),
                               pset.getParameter<double>("exclusiveNevents")));
   }
+
+  int sampleJetBin = iConfig.getParameter<int>("sampleJetBin");
+  double sampleNumberOfEvents = -1;
+  if(sampleJetBin <= 0) {
+    sampleNumberOfEvents = iConfig.getParameter<double>("inclusiveNevents");
+  }
+  if(sampleJetBin > 0) {
+    if(sampleJetBin > 4) {
+      throw cms::Exception("Configuration") << "sampleJetBin must be <= 4, got " << sampleJetBin << std::endl;
+    }
+    sampleNumberOfEvents = fJetBins[sampleJetBin-1].fExclusiveNumberOfEvents;
+  }
+  for(size_t jetBin=0; jetBin < fJetBins.size(); ++jetBin) {
+    fJetBins[jetBin].setSampleNumberOfEvents(sampleNumberOfEvents);
+  }
+
 
   produces<double>().setBranchAlias(fAlias);
 }
