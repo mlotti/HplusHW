@@ -7,13 +7,6 @@ from multicrabWorkflowsTools import Dataset, Workflow, WorkflowAlias, Data, Sour
 import multicrabDatasetsCommon as common
 
 def _constructProcessingWorkflow_common(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMask, outputLumiMask, **kwargs):
-    # Setup input/default output lumimasks for data
-    inputLumiMask = None
-    outputLumiMask = None
-    if dataset.isData():
-        inputLumiMask = inputLumiMaskData
-        outputLumiMask = outputLumiMaskData
-
     # Setup the Source for pattuple Workflow
     source = Source(sourceWorkflow,
                     # These are exclusive, but the default values of None and a check in Workflow ensure correctness
