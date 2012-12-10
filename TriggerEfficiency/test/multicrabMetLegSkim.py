@@ -102,7 +102,8 @@ datasets = [
 #         "TTToHplusBWB_M160_Fall11_HighPU",
 #         "TTJets_TuneZ2_Fall11_HighPU",
 ]
-
+#datasets = ["Tau_165970-167913_2011A_Nov08"]
+           
 
 
 workflow = "triggerMetLeg_skim_cmssw44X_v1"
@@ -112,7 +113,7 @@ multicrab.extendDatasets(workflow, datasets)
 # writing to /store/group/local ...
 #multicrab.appendLineAll("USER.local_stage_out=1")
 
-multicrab.appendLineAll("GRID.maxtarballsize = 20")
+multicrab.appendLineAll("GRID.maxtarballsize = 30")
 
 def addCopyConfig(dataset):
     dataset.appendLine("USER.additional_input_files = copy_cfg.py")
@@ -141,13 +142,13 @@ taskDir = multicrab.createTasks(prefix=prefix, configOnly=configOnly)
 #
 # Running CMSSW again in each job just to copy the file seems to
 # somehow "linearize" the file, and the subsequent file access is fast
-class Wrapper:
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
-
-if not configOnly:
-    import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
-    import os
-    os.chdir(taskDir)
-    patch.main(Wrapper(dirs=datasets, input="pattuple"))
-    os.chdir("..")
+#class Wrapper:
+#    def __init__(self, **kwargs):
+#        self.__dict__.update(kwargs)
+#
+#if not configOnly:
+#    import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
+#    import os
+#    os.chdir(taskDir)
+#    patch.main(Wrapper(dirs=datasets, input="pattuple"))
+#    os.chdir("..")
