@@ -257,7 +257,8 @@ class DataCardGenerator:
                 myAllDatasetNames.append(self._dsetMgrs[i].getAllDatasetNames())
                 # Obtain luminosity
                 myLuminosity = 0.0
-                for d in self._dsetMgrs[i].getDataDatasets():
+                myDataDatasets = self._dsetMgrs[i].getDataDatasets()
+                for d in myDataDatasets:
                     myLuminosity += d.getLuminosity()
                 myLuminosities.append(myLuminosity)
                 # Print info
