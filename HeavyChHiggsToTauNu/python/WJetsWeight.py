@@ -95,12 +95,12 @@ class NEvents:
 
 # Non-pu-reweighted events
 _wjetsNumberOfEvents = {
-    "pattuple_v44_4": NEvents(inclusive_v1=0,
+    "pattuple_v44_4": NEvents(inclusive_v1=81345384,
                               inclusive_v2=None,
                               jet1=None,
-                              jet2=0,
-                              jet3=0,
-                              jet4=0),
+                              jet2=25400546,
+                              jet3=6533053,
+                              jet4=12608390),
     "pattuple_v53_1_test1": NEvents(inclusive_v1=2504608,
                                     inclusive_v2=3458492,
                                     jet1=2314140,
