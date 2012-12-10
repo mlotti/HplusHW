@@ -136,13 +136,14 @@ datasets.extend([
     # [1] https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
     # [2] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSections
     MCDataset("TTJets_TuneZ2_Fall11",             crossSection=165, aod="/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # [1,2], approx. NNLO
+    # Cross section [2], NNLO
     # W+Njets, with the assumption that they are weighted (see
     # src/WJetsWeight.cc) And if they are not, the cross section can
     # always be set in the plot scripts by the user.
-    MCDataset("WJets_TuneZ2_Fall11",              crossSection=31314, aod="/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # [2], NNLO
-    MCDataset("W2Jets_TuneZ2_Fall11",             crossSection=31314, aod="/W2Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # taken from PREP
-    MCDataset("W3Jets_TuneZ2_Fall11",             crossSection=31314, aod="/W3Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # taken from PREP
-    MCDataset("W4Jets_TuneZ2_Fall11",             crossSection=31314, aod="/W4Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # taken from PREP
+    MCDataset("WJets_TuneZ2_Fall11",              crossSection=31314, aod="/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
+    MCDataset("W2Jets_TuneZ2_Fall11",             crossSection=31314, aod="/W2Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
+    MCDataset("W3Jets_TuneZ2_Fall11",             crossSection=31314, aod="/W3Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
+    MCDataset("W4Jets_TuneZ2_Fall11",             crossSection=31314, aod="/W4Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
     MCDataset("DYJetsToLL_M50_TuneZ2_Fall11",     crossSection=3048, aod="/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # [2], NNLO
     MCDataset("DYJetsToLL_M10to50_TuneZ2_Fall11", crossSection=9611, aod="/DYJetsToLL_M-10To50_TuneZ2_7TeV-madgraph/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # taken from PREP
     # SingleTop Powheg
