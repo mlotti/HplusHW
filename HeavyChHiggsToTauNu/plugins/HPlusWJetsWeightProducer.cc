@@ -6,6 +6,7 @@
 
 #include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 
+#include<map>
 #include<cstdio>
 
 class HPlusWJetsWeightProducer: public edm::EDProducer {
@@ -23,7 +24,7 @@ private:
 
     void setSampleNumberOfEvents(double num) { fSampleNumberOfEvents = num; }
 
-    double getWeight() {
+    double getWeight() const {
       /*
        * Calculate weight for jet bin i as
        *
@@ -69,7 +70,9 @@ private:
   };
 
 
-  std::vector<JetBin> fJetBins;
+  // Use map to allow dropping any of the jet bins from the weighting
+  typedef std::map<int, JetBin> JetBinCollection;
+  JetBinCollection fJetBins;
 
   edm::InputTag fSrc;
   std::string fAlias;
@@ -82,32 +85,31 @@ HPlusWJetsWeightProducer::HPlusWJetsWeightProducer(const edm::ParameterSet& iCon
   fEnabled(iConfig.getParameter<bool>("enabled"))
 {
 
-  fJetBins.reserve(4);
   char tmp[10] = "";
   for(int jetBin=1; jetBin <= 4; ++jetBin) {
     snprintf(tmp, 10, "jetBin%d", jetBin);
-    edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>(tmp);
-    fJetBins.push_back(JetBin(iConfig.getParameter<double>("inclusiveCrossSection"),
-                              iConfig.getParameter<double>("inclusiveNevents"),
-                              pset.getParameter<double>("exclusiveCrossSection"),
-                              pset.getParameter<double>("exclusiveNevents")));
+    if(iConfig.exists(tmp)) {
+      edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>(tmp);
+      fJetBins.insert(std::make_pair(jetBin, JetBin(iConfig.getParameter<double>("inclusiveCrossSection"),
+                                                    iConfig.getParameter<double>("inclusiveNevents"),
+                                                    pset.getParameter<double>("exclusiveCrossSection"),
+                                                    pset.getParameter<double>("exclusiveNevents"))));
+    }
   }
 
   int sampleJetBin = iConfig.getParameter<int>("sampleJetBin");
-  double sampleNumberOfEvents = -1;
-  if(sampleJetBin <= 0) {
-    sampleNumberOfEvents = iConfig.getParameter<double>("inclusiveNevents");
-  }
+  double sampleNumberOfEvents = iConfig.getParameter<double>("inclusiveNevents");;
   if(sampleJetBin > 0) {
     if(sampleJetBin > 4) {
       throw cms::Exception("Configuration") << "sampleJetBin must be <= 4, got " << sampleJetBin << std::endl;
     }
-    sampleNumberOfEvents = fJetBins[sampleJetBin-1].fExclusiveNumberOfEvents;
+    JetBinCollection::const_iterator found = fJetBins.find(sampleJetBin);
+    if(found != fJetBins.end())
+      sampleNumberOfEvents = found->second.fExclusiveNumberOfEvents;
   }
-  for(size_t jetBin=0; jetBin < fJetBins.size(); ++jetBin) {
-    fJetBins[jetBin].setSampleNumberOfEvents(sampleNumberOfEvents);
+  for(JetBinCollection::iterator iBin=fJetBins.begin(); iBin != fJetBins.end(); ++iBin) {
+    iBin->second.setSampleNumberOfEvents(sampleNumberOfEvents);
   }
-
 
   produces<double>().setBranchAlias(fAlias);
 }
@@ -132,7 +134,13 @@ void HPlusWJetsWeightProducer::produce(edm::Event& iEvent, const edm::EventSetup
     }
     else if(nup > 5 && nup <= 9) {
       int njet = nup-5;
-      weight = fJetBins[njet-1].getWeight();
+      JetBinCollection::const_iterator found = fJetBins.find(njet);
+      if(found != fJetBins.end()) {
+        weight = found->second.getWeight();
+      }
+      else {
+        weight = 1.0;
+      }
     }
     else
       throw cms::Exception("Assert") << "Encountered event with NUP " << nup << std::endl;
