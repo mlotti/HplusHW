@@ -260,6 +260,9 @@ class Workflow:
     def addArg(self, argName, argValue):
         self.args[argName] = argValue
 
+    def removeArg(self, argName):
+        del self.args[argName]
+
     def getName(self):
         return self.name
 

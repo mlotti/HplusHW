@@ -17,6 +17,7 @@ class NEvents:
             lheSrc = cms.InputTag("source", "", "LHE"),
             alias = cms.string("wjetsWeight"),
             enabled = cms.bool(True),
+            sampleJetBin = cms.int32(-1),
             inclusiveCrossSection = cms.double(27770.0),
             jetBin2 = cms.PSet(
                 exclusiveCrossSection = cms.double(1435.0),

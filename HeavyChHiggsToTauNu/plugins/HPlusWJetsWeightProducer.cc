@@ -99,10 +99,13 @@ HPlusWJetsWeightProducer::HPlusWJetsWeightProducer(const edm::ParameterSet& iCon
     sampleNumberOfEvents = iConfig.getParameter<double>("inclusiveNevents");
   }
   if(sampleJetBin > 0) {
+    if(sampleJetBin < 2) {
+      throw cms::Exception("Configuration") << "sampleJetBin must be >= 2, got " << sampleJetBin << std::endl;
+    }
     if(sampleJetBin > 4) {
       throw cms::Exception("Configuration") << "sampleJetBin must be <= 4, got " << sampleJetBin << std::endl;
     }
-    sampleNumberOfEvents = fJetBins[sampleJetBin-1].fExclusiveNumberOfEvents;
+    sampleNumberOfEvents = fJetBins[sampleJetBin-2].fExclusiveNumberOfEvents;
   }
   for(size_t jetBin=0; jetBin < fJetBins.size(); ++jetBin) {
     fJetBins[jetBin].setSampleNumberOfEvents(sampleNumberOfEvents);
