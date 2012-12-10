@@ -250,9 +250,9 @@ class ConfigBuilder:
                         param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.triggerEfficiencyScaleFactor)
                     if self.applyPUReweight:
                         param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.vertexWeightReader, era=dataEra)
-                    if self.options.wjetsWeighting != 0:
-                        mod.wjetsWeightReader.weightSrc = "wjetsWeight"+dataEra
-                        mod.wjetsWeightReader.enabled = True
+                        if self.options.wjetsWeighting != 0:
+                            mod.wjetsWeightReader.weightSrc = "wjetsWeight"+dataEra
+                            mod.wjetsWeightReader.enabled = True
 
                     print "Added analysis for PU weight era =", dataEra
                     analysisModules.append(mod)
