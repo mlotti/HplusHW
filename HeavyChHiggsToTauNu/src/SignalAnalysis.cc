@@ -245,6 +245,7 @@ namespace HPlus {
     
     // Vertex histograms
     TFileDirectory myVertexDir = fs->mkdir("Vertices");
+    
     hVerticesBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesBeforeWeight", "Number of vertices without weighting", 40, 0, 40);
     hVerticesAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesAfterWeight", "Number of vertices with weighting", 40, 0, 40);
     hVerticesTriggeredBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesTriggeredBeforeWeight", "Number of vertices without weighting", 40, 0, 40);
@@ -254,7 +255,7 @@ namespace HPlus {
     hGenMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "genMET", "genMET", 200, 0., 400.);
     hdeltaPhiMetGenMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiMetGenMet", "deltaPhiMetGenMet", 180, 0., 180.); 
     hdeltaEtMetGenMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaEtMetGenMet", "deltaEtMetGenMet", 200, -1., 1.);
-    hgenWmass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "genWmass", "genWmass", 200, 0.,400.); 
+    hgenWmass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "genWmass", "genWmass", 200, 0.,600.); 
     htransverseMassMuonNotInTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassMuonNotInTau", "transverseMassMuonNotInTau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     htransverseMassElectronNotInTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassElectronNotInTau", "transverseMassElectronNotInTau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     htransverseMassTauNotInTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassTauNotInTau", "transverseMassTauNotInTau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
@@ -563,12 +564,13 @@ namespace HPlus {
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
 
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
-    hMet_beforeJetCut->Fill(metData.getSelectedMET()->et());  
+    hMet_beforeJetCut->Fill(metData.getSelectedMET()->et());
+    
 //------ Experimental cuts, counters, and histograms
     if (!iEvent.isRealData()) {
       doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData, metData, genData);
     }
-    */
+    */   
 
 //------ Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
@@ -727,8 +729,14 @@ namespace HPlus {
 
 //------ MET cut
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
-    hMet->Fill(metData.getSelectedMET()->et()); 
-
+    hMet->Fill(metData.getSelectedMET()->et());
+ 
+//------ Experimental cuts, counters, and histograms
+/*
+    if (!iEvent.isRealData()) {
+      doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData, metData, genData);
+    }
+*/
     //BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     //    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     //if(btagData.passedEvent()) hMetWithBtagging->Fill(metData.getSelectedMET()->et(),fEventWeight.getWeight()); 
@@ -810,10 +818,16 @@ namespace HPlus {
     fillEWKFakeTausCounters(myTauMatch, kSignalOrderDeltaPhiSelection, tauData);
 
 
+
+
+    if (!iEvent.isRealData()) {
+      doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData, metData, genData);
+    }
+
+
     ///////////////////////////////////////////// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
-    increment(fOneTauCounter);
+    if(tauData.getSelectedTaus().size() == 1)  increment(fOneTauCounter);
 
 
 
@@ -1158,6 +1172,10 @@ namespace HPlus {
     double minDeltaR = 99999;
     for (size_t i=0; i < genParticles->size(); ++i) {
       const reco::Candidate & p = (*genParticles)[i];
+
+      if( abs(p.pdgId()) == 24 )  hgenWmass->Fill(p.mass()); 
+
+
       //      if (p.pt() > 5 && p.pdgId()!= std::abs(p.pdgId()) ) {
       if (p.pt() > 5 ) {
         if (reco::deltaR(p, tauData.getSelectedTau()->leadPFChargedHadrCand()->p4()) < 0.3) {
@@ -1180,7 +1198,7 @@ namespace HPlus {
 		const reco::GenParticle dparticle = *tauMothers[d];
 		if( abs(dparticle.pdgId()) == 24 ) increment(fTauNotInTauFromWCounter);
 		//		if( abs(dparticle.pdgId()) == 24 ) std::cout << " W mass " << dparticle.mass() << std::endl;
-		if( abs(dparticle.pdgId()) == 24 ) hgenWmass->Fill(dparticle.mass());
+		//		if( abs(dparticle.pdgId()) == 24 ) hgenWmass->Fill(dparticle.mass());
 		if( abs(dparticle.pdgId()) == 5 ) increment(fTauNotInTauFromBottomCounter);
 		if( abs(dparticle.pdgId()) == 37 ) increment(fTauNotInTauFromHplusCounter); 	
 	      }
@@ -1258,7 +1276,7 @@ namespace HPlus {
       if (!myTauFoundStatus ) htransverseMassLeptonFakeSignalTau->Fill(transverseMass); 
     }
 
-    if (!otherTauFound && !electronFound && !muonFound ) {
+    if (myTauFoundStatus && (!otherTauFound && !electronFound && !muonFound) ) {
       //      increment(fTauNotInTauCounter);
       htransverseMassNoLeptonNotInTau->Fill(transverseMass);
     }

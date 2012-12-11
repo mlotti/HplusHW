@@ -45,7 +45,7 @@ QCDfromData = False
 
 ## for mT distributions 
 deltaPhi180 = False
-deltaPhi160 = False
+deltaPhi160 = True
 deltaPhi130 = False
 topmass = False  ## with top mass cut
 
@@ -53,7 +53,7 @@ btagFactorisation = False  # works with deltaPhi180=True
 
 # other distributions
 deltaPhiDistribution = False
-numberOfBjets = True
+numberOfBjets = False
 HiggsMass = False
 HiggsMassPhi140 = False
 
@@ -191,7 +191,7 @@ def doPlots(datasets):
 #    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.2, br_Htaunu=1)
 #    xsect.setHplusCrossSectionsToBR(datasets_tm, br_tH=0.2, br_Htaunu=1)
 #    datasets_tm.merge("TTToHplus_M120", ["TTToHplusBWB_M120", "TTToHplusBHminusB_M120"])
-
+    selectionFlow(createPlot("SignalSelectionFlow"), "SignalSelectionFlow", rebin=1, ratio=False)
 
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet4050"), "MTInvertedTauIdJet4050", rebin=20)
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet5060"), "MTInvertedTauIdJet5060", rebin=20)
@@ -523,7 +523,7 @@ def mtTest(datasets):
     hmtDeltaPhi.Draw("same")
 
                         
-    tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
+    tex4 = ROOT.TLatex(0.2,0.95,"8 TeV       12.2 fb^{-1}       CMS Preliminary ")
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()
@@ -662,7 +662,7 @@ def mtBtagTest(datasets):
     hmtMet.GetYaxis().SetTitleOffset(1.5)
     hmtMet.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
     
-    tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
+    tex4 = ROOT.TLatex(0.2,0.95,"8 TeV       12.2 fb^{-1}       CMS Preliminary ")
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()
@@ -1001,7 +1001,7 @@ def mtComparison(datasets):
     hmt = mt.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi")
     hmt.Scale(norm_inc)
     
-    if False: 
+    if True: 
         mtBaseline._setLegendStyles()
         mtBaseline._setLegendLabels()
         mtBaseline.histoMgr.setHistoDrawStyleAll("P")
@@ -1134,7 +1134,7 @@ def mtComparison(datasets):
         canvas3 = ROOT.TCanvas("canvas3","",500,500)
         #    canvas3.SetLogy()
         
-        hmtSum.SetMaximum(17.0)
+        hmtSum.SetMaximum(50.0)
         
         hmtSum.SetMarkerColor(4)
         hmtSum.SetMarkerSize(1)
@@ -1212,28 +1212,23 @@ def mtComparison(datasets):
         tex3.SetTextSize(20)
 #        tex3.Draw()
         
-        tex3 = ROOT.TLatex(0.6,0.6,"2011 data")
+        tex3 = ROOT.TLatex(0.6,0.6,"2012 data")
         tex3.SetNDC()
         tex3.SetTextSize(20)
         tex3.Draw()
-        
-        tex5 = ROOT.TLatex(0.5,0.8,"MET > 70 GeV")
-        tex5.SetNDC()
-        tex5.SetTextSize(20)
-        #    tex5.Draw()
         
         if(deltaPhi180):
             tex5 = ROOT.TLatex(0.55,0.7,"No #Delta#phi(#tau jet, MET) cut")
             tex5.SetNDC()
             tex5.SetTextSize(18)
             tex5.Draw()
-        if(deltaPhi130):
-            tex5 = ROOT.TLatex(0.5,0.8,"#Delta#phi(#tau jet, MET) < 160^{o}")
+        if(deltaPhi160):
+            tex5 = ROOT.TLatex(0.55,0.7,"#Delta#phi(#tau jet, MET) < 160^{o}")
             tex5.SetNDC()
-            tex5.SetTextSize(20)
+            tex5.SetTextSize(18)
             tex5.Draw()
             
-        tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
+        tex4 = ROOT.TLatex(0.2,0.95,"8 TeV       12.2 fb^{-1}       CMS Preliminary ")
         tex4.SetNDC()
         tex4.SetTextSize(20)
         tex4.Draw()
@@ -1287,7 +1282,7 @@ def mtComparison(datasets):
         tex3.Draw()
     
             
-        tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
+        tex4 = ROOT.TLatex(0.2,0.95,"8 TeV       12.2 fb^{-1}       CMS Preliminary ")
         tex4.SetNDC()
         tex4.SetTextSize(20)
         tex4.Draw()
@@ -1316,19 +1311,20 @@ def mtComparison(datasets):
         canvas31 = ROOT.TCanvas("canvas31","",500,500)
         if (numberOfBjets):
             canvas31.SetLogy()
-            frame31 = histograms._drawFrame(canvas31, xmin=0, xmax=6, ymin=1, ymax=1e3)
-	    frame31.Draw()
-
-
+            frame31 = histograms._drawFrame(canvas31, xmin=0, xmax=6, ymin=1, ymax=1e4)
+            frame31.Draw()
+        
+        hmt.SetMaximum(120.0)
+        
         hmtSum.SetMarkerColor(4)
         hmtSum.SetMarkerSize(1)
-	hmtSum.SetMarkerStyle(20)
-	hmtSum.SetFillColor(4)
+        hmtSum.SetMarkerStyle(20)
+        hmtSum.SetFillColor(4)
 	if numberOfBjets:
             hmtSum.Draw("EP same")
         else:
             hmtSum.Draw("EP")
-
+        
         hmt.SetMarkerColor(2)
         hmt.SetMarkerSize(1)
         hmt.SetMarkerStyle(21)
@@ -1357,7 +1353,7 @@ def mtComparison(datasets):
         marker1.SetMarkerColor(hmt.GetMarkerColor())
         marker1.SetMarkerSize(0.9*hmt.GetMarkerSize())
 #        marker1.Draw()   
-        tex2 = ROOT.TLatex(0.3,0.3,"With p_{T}^{#tau jet} bins")
+        #    tex2 = ROOT.TLatex(0.3,0.3,"With p_{T}^{#tau jet} bins")
         tex2 = ROOT.TLatex(xpos+0.05,0.6," ") 
         tex2.SetNDC()
         tex2.SetTextSize(23)
@@ -1368,16 +1364,16 @@ def mtComparison(datasets):
         marker2.SetMarkerColor(hmtSum.GetMarkerColor())
         marker2.SetMarkerSize(0.9*hmtSum.GetMarkerSize())
 #        marker2.Draw()
-        
+
+        tex6 = ROOT.TLatex(xpos,0.7,"2012 data")
+        tex6.SetNDC()
+        tex6.SetTextSize(20)
+        tex6.Draw()
+               
         tex3 = ROOT.TLatex(xpos2,0.88,"Inverted #tau isolation")
         tex3.SetNDC()
         tex3.SetTextSize(20)
         tex3.Draw()
-        
-        tex6 = ROOT.TLatex(xpos,0.6,"2011 data")
-        tex6.SetNDC()
-        tex6.SetTextSize(20)
-        tex6.Draw()
         
         tex5 = ROOT.TLatex(0.5,0.8,"MET > 70 GeV")
         tex5.SetNDC()
@@ -1401,7 +1397,7 @@ def mtComparison(datasets):
             tex5.SetTextSize(20)
             tex5.Draw()
  
-        tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
+        tex4 = ROOT.TLatex(0.2,0.95,"8 TeV       12.2 fb^{-1}       CMS Preliminary ")
         tex4.SetNDC()
         tex4.SetTextSize(20)
         tex4.Draw()
@@ -1436,7 +1432,7 @@ def mtComparison(datasets):
             canvas31.Print("mtInverted_btag_topmass.C")  
         if (deltaPhiDistribution):
             canvas31.Print("deltaPhiInverted_btag.png")
-            canvas31.Print("deltaPhiInverted_btag.C")       
+            canvas31.Print("deltaPhiInverted_btag.C")    
         if (HiggsMass):
             canvas31.Print("HiggsMass_dphi160.png")     
 
@@ -1702,7 +1698,7 @@ def BtagEfficiencies(datasets):
 ### Re-draw graph and update canvas and gPad
     graph.Draw("AP")
     
-    tex4 = ROOT.TLatex(0.2,0.955,"7 TeV              5.05 fb^{-1}             CMS preliminary")
+    tex4 = ROOT.TLatex(0.2,0.955,"8 TeV              12.2 fb^{-1}             CMS preliminary")
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()
@@ -1890,11 +1886,11 @@ def purityJets(datasets):
     graph.GetXaxis().SetTitle("p_{T}^{#tau jet} [GeV/c]")
 ### Re-draw graph and update canvas and gPad
     graph.Draw("AP")
-    tex4 = ROOT.TLatex(0.2,0.955,"7 TeV              5.05 fb^{-1}             CMS preliminary")
+    tex4 = ROOT.TLatex(0.2,0.955,"8 TeV              12.2 fb^{-1}             CMS preliminary")
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()
-    tex4 = ROOT.TLatex(0.2,0.955,"7 TeV              5.05 fb^{-1}             CMS preliminary")
+    tex4 = ROOT.TLatex(0.2,0.955,"8 TeV              12.2 fb^{-1}             CMS preliminary")
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()
@@ -2067,7 +2063,7 @@ def purityBveto(datasets):
 ### Re-draw graph and update canvas and gPad
     graph.Draw("AP")
 
-    tex4 = ROOT.TLatex(0.2,0.955,"7 TeV              5.05 fb^{-1}             CMS preliminary")
+    tex4 = ROOT.TLatex(0.2,0.955,"8 TeV              12.2 fb^{-1}             CMS preliminary")
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()
@@ -2242,7 +2238,7 @@ def purityBtag(datasets):
     graph.GetXaxis().SetTitle("p_{T}^{#tau jet} [GeV/c]")
 ### Re-draw graph and update canvas and gPad
     graph.Draw("AP")
-    tex4 = ROOT.TLatex(0.2,0.955,"7 TeV              5.05 fb^{-1}             CMS preliminary")
+    tex4 = ROOT.TLatex(0.2,0.955,"8 TeV              12.2 fb^{-1}             CMS preliminary")
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()
@@ -2394,7 +2390,7 @@ def purityDeltaPhi(datasets):
     graph.GetXaxis().SetTitle("p_{T}^{#tau jet} [GeV/c]")
 ### Re-draw graph and update canvas and gPad
     graph.Draw("AP")
-    tex4 = ROOT.TLatex(0.2,0.955,"7 TeV              5.05 fb^{-1}             CMS preliminary")
+    tex4 = ROOT.TLatex(0.2,0.955,"8 TeV              12.2 fb^{-1}             CMS preliminary")
     tex4.SetNDC()
     tex4.SetTextSize(20)
     tex4.Draw()

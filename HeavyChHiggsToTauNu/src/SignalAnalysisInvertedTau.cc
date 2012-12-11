@@ -84,6 +84,7 @@ namespace HPlus {
     fRtauAfterMETCounter(eventCounter.addCounter("Rtau after MET cut")),
     fBjetVetoCounter(eventCounter.addCounter("Veto on hard b jets")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
+    fBTaggingScaleFactorInvertedCounter(eventCounter.addCounter("btagging scale factor inverted")),
     fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhi(Tau,MET) upper limit")),
     fdeltaPhiTauMET10Counter(eventCounter.addCounter("deltaPhiTauMET lower limit")),
     //    fDeltaPhiTauMET140Counter(eventCounter.addCounter("DeltaPhi(Tau,MET) upper limit 140")),
@@ -203,7 +204,13 @@ namespace HPlus {
   
     hMetAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "Met_AfterCuts", "Met_AfterCuts", 500, 0.0, 500.0);
     hMETBeforeTauId = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "Met_BeforeTauId", "Met_BeforeTauId", 500, 0.0, 500.0);
-;
+
+
+    hNBBaselineTauIdJet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBBaselineTauIdJet", "NBBaselineTauIdJet", 20, 0., 20.);
+    hNJetBaselineTauIdMet= fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetBaselineTauIdJetMet", "NJetBaselineTauIdJetMett", 20, 0., 20.);
+    hNJetBaselineTauId = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetBaselineTauIdJet", "NJetBaselineTauIdJet", 20, 0., 20.);
+    hDeltaPhiBaseline = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiBaseline", "deltaPhi;#Delta#phi(tau,MET);N_{events} / 10 degrees", 360, 0., 180.);
+
 
     hMETBaselineTauId = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauId", "MET_BaseLineTauId", 400, 0.0, 400.0);
     hMETBaselineTauId120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MET_BaseLineTauId120", "MET_BaseLineTauId120", 400, 0.0, 400.0);
@@ -339,6 +346,28 @@ namespace HPlus {
     hNBInvertedTauIdJet6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJet6070", "NBInvertedTauIdJet6070", 20, 0., 20.);
     hNBInvertedTauIdJet5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJet5060", "NBInvertedTauIdJet5060", 20, 0., 20.);
     hNBInvertedTauIdJet4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NBInvertedTauIdJet4050", "NBInvertedTauIdJet4050", 20, 0., 20.);
+
+    hNJetInvertedTauId = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJet", "NJetInvertedTauIdJet", 20, 0., 20.);
+    hNJetInvertedTauId150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJet150", "NJetInvertedTauIdJet150", 20, 0., 20.);
+    hNJetInvertedTauId120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJet120", "NJetInvertedTauIdJet120", 20, 0., 20.);
+    hNJetInvertedTauId120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJet120150", "NJetInvertedTauIdJet120150", 20, 0., 20.);
+    hNJetInvertedTauId100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJet100120", "NJetInvertedTauIdJet100120", 20, 0., 20.);
+    hNJetInvertedTauId80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJet80100", "NJetInvertedTauIdJet80100", 20, 0., 20.);
+    hNJetInvertedTauId7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJet7080", "NJetInvertedTauIdJet7080", 20, 0., 20.);
+    hNJetInvertedTauId6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJet6070", "NJetInvertedTauIdJet6070", 20, 0., 20.);
+    hNJetInvertedTauId5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJet5060", "NJetInvertedTauIdJet5060", 20, 0., 20.);
+    hNJetInvertedTauId4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJet4050", "NJetInvertedTauIdJet4050", 20, 0., 20.);
+
+    hNJetInvertedTauIdMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJetMet", "NJetInvertedTauIdJetMet", 20, 0., 20.);
+    hNJetInvertedTauIdMet150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJetMet150", "NJetInvertedTauIdJetMet150", 20, 0., 20.);
+    hNJetInvertedTauIdMet120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJetMet120", "NJetInvertedTauIdJetMet120", 20, 0., 20.);
+    hNJetInvertedTauIdMet120150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJetMet120150", "NJetInvertedTauIdJetMet120150", 20, 0., 20.);
+    hNJetInvertedTauIdMet100120 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJetMet100120", "NJetInvertedTauIdJetMet100120", 20, 0., 20.);
+    hNJetInvertedTauIdMet80100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJetMet80100", "NJetInvertedTauIdJetMet80100", 20, 0., 20.);
+    hNJetInvertedTauIdMet7080 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJetMet7080", "NJetInvertedTauIdJetMet7080", 20, 0., 20.);
+    hNJetInvertedTauIdMet6070 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJetMet6070", "NJetInvertedTauIdJetMet6070", 20, 0., 20.);
+    hNJetInvertedTauIdMet5060 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJetMet5060", "NJetInvertedTauIdJetMet5060", 20, 0., 20.);
+    hNJetInvertedTauIdMet4050 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NJetInvertedTauIdJetMet4050", "NJetInvertedTauIdJet4Met050", 20, 0., 20.);
 
     hMTInvertedTauIdBtag = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag", "MTInvertedTauIdBtag", 400, 0., 400.);
     hMTInvertedTauIdBtag150 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "MTInvertedTauIdBtag150", "MTInvertedTauIdBtag150", 400, 0., 400.);
@@ -492,20 +521,24 @@ namespace HPlus {
     hSelectedTauPhiMetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_phi_AfterMetCut", "SelectedTau_eta_AfterMetCut;#tau #eta;N_{events} / 0.087", 360, -3.1415926, 3.1415926);
     hSelectedTauRtauMetCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SelectedTau_Rtau_AfterMetCut", "SelectedTau_Rtau_AfterMetCut;R_{#tau};N_{events} / 0.1", 360, 0., 1.2);
 
-    hSelectionFlow = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "SignalSelectionFlow", "SignalSelectionFlow;;N_{events}", 7, 0, 7);
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTrigger,"Trigger");
-    //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderVertexSelection,"Vertex");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTauID,"#tau ID");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderElectronVeto,"Isol. e veto");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderMuonVeto,"Isol. #mu veto");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderMETSelection,"MET");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderJetSelection,"#geq 3 jets");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderBTagSelection,"#geq 1 b jet");
-    //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderFakeMETVeto,"Further QCD rej.");
-    //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTopSelection,"Top mass");
 
-;
-    
+   // Selection flow histogram
+    hSelectionFlow = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "QCD_SelectionFlow", "QCD_SelectionFlow;;N_{events}", 12, 0, 12);
+   
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTrigger,"Trigger");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderVertexSelection,"Vertex");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTauCandidateSelection,"#tau cand.");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderElectronVeto,"Isol. e veto");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMuonVeto,"Isol. #mu veto");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderJetSelection,"N_{jets}");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTauID,"tauID");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMET,"MET");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderBTag,"N_{b jets}");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderDeltaPhiTauMET,"#Delta#phi(#tau,MET)");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMaxDeltaPhiJetMET,"#Delta#phi(jet,MET)");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTopSelection,"top reco");
+
+   
     hNonQCDTypeIISelectedTauEtAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NonQCDTypeII_SelectedTau_pT_AfterCuts", "SelectedTau_pT_AfterCuts;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 40, 0.0, 400.0);
     hNonQCDTypeIISelectedTauEtaAfterCuts = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "NonQCDTypeII_SelectedTau_eta_AfterCuts", "SelectedTau_eta_AfterCuts;#tau #eta;N_{events} / 0.1", 30, -3.0, 3.0);
 
@@ -547,7 +580,7 @@ namespace HPlus {
     hVerticesAfterWeight->Fill(nVertices);
     fTree.setNvertices(nVertices);
     increment(fAllCounter);
-
+    hSelectionFlow->Fill(kQCDOrderVertexSelection);
     /*
 //------ For combining W+Jets inclusive and exclusive samples, do an event weighting here
     if(!iEvent.isRealData()) {
@@ -568,7 +601,8 @@ namespace HPlus {
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if (!triggerData.passedEvent()) return false;
     increment(fTriggerCounter);
-    hSelectionFlow->Fill(kSignalOrderTrigger);
+    hSelectionFlow->Fill(kQCDOrderTrigger);
+  
     if(triggerData.hasTriggerPath()) // protection if TriggerSelection is disabled
       fTree.setHltTaus(triggerData.getTriggerTaus());
 
@@ -595,10 +629,13 @@ namespace HPlus {
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup); 
     //    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return false; // Require at least one tau
+
     increment(fTauCandidateCounter);
 
     // tauID cuts applied to inverted and baseline taus    
     // nprongs
+    hSelectionFlow->Fill(kQCDOrderTauCandidateSelection);
+
 
     edm::PtrVector<pat::Tau> myOneProngTaus;
     edm::PtrVector<pat::Tau> myOneProngRtauPassedTaus;    
@@ -703,34 +740,41 @@ namespace HPlus {
       
       selectedTau = *(myOneProngRtauPassedIsolatedTaus.begin());
       increment(fBaselineTauIDCounter);
-      
+      //      hSelectionFlow->Fill(kSignalOrderTauID);
+    
+      //      if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderTauID);    
+
       if (electronVetoData.passedEvent()) {
 	increment(fBaselineEvetoCounter); 
 	
 	if (muonVetoData.passedEvent()) {
 	  increment(fBaselineMuvetoCounter);
 	  
-	  /*
-	    hMETBaselineTauId->Fill(metData.getSelectedMET()->et());  
-	    if ( selectedTau->pt() > 150  ) hMETBaselineTauId150->Fill(metData.getSelectedMET()->et());
-	    if ( selectedTau->pt() > 120  ) hMETBaselineTauId120->Fill(metData.getSelectedMET()->et());
-	    if ( selectedTau->pt() > 120 && selectedTau->pt() < 150 ) hMETBaselineTauId120150->Fill(metData.getSelectedMET()->et());
-	    if ( selectedTau->pt() > 100 && selectedTau->pt() < 120 ) hMETBaselineTauId100120->Fill(metData.getSelectedMET()->et());
-	    if ( selectedTau->pt() > 80 && selectedTau->pt() < 100  ) hMETBaselineTauId80100->Fill(metData.getSelectedMET()->et());
-	    if ( selectedTau->pt() > 70 && selectedTau->pt() < 80 ) hMETBaselineTauId7080->Fill(metData.getSelectedMET()->et());
-	    if ( selectedTau->pt() > 60 && selectedTau->pt() < 70 ) hMETBaselineTauId6070->Fill(metData.getSelectedMET()->et());
-	    if ( selectedTau->pt() > 50 && selectedTau->pt() < 60 ) hMETBaselineTauId5060->Fill(metData.getSelectedMET()->et());
-	    if ( selectedTau->pt() > 40 && selectedTau->pt() < 50 ) hMETBaselineTauId4050->Fill(metData.getSelectedMET()->et());
-	  */	  
+	 
 
 	  JetSelection::Data jetDataBase = fJetSelection.analyze(iEvent, iSetup,  selectedTau,  nVertices); 
+	  METSelection::Data metDataBase = fMETSelection.analyze(iEvent, iSetup, selectedTau, jetDataBase.getAllJets());
+
+	  hNJetBaselineTauId->Fill(jetDataBase.getSelectedJets().size());  
+	  if(metDataBase.passedEvent()) hNJetBaselineTauIdMet->Fill(jetDataBase.getSelectedJets().size()); 
+
+	  hMETBaselineTauId->Fill(metDataBase.getSelectedMET()->et());  
+	  if ( selectedTau->pt() > 150  ) hMETBaselineTauId150->Fill(metDataBase.getSelectedMET()->et());
+	  if ( selectedTau->pt() > 120  ) hMETBaselineTauId120->Fill(metDataBase.getSelectedMET()->et());
+	  if ( selectedTau->pt() > 120 && selectedTau->pt() < 150 ) hMETBaselineTauId120150->Fill(metDataBase.getSelectedMET()->et());
+	  if ( selectedTau->pt() > 100 && selectedTau->pt() < 120 ) hMETBaselineTauId100120->Fill(metDataBase.getSelectedMET()->et());
+	  if ( selectedTau->pt() > 80 && selectedTau->pt() < 100  ) hMETBaselineTauId80100->Fill(metDataBase.getSelectedMET()->et());
+	  if ( selectedTau->pt() > 70 && selectedTau->pt() < 80 ) hMETBaselineTauId7080->Fill(metDataBase.getSelectedMET()->et());
+	  if ( selectedTau->pt() > 60 && selectedTau->pt() < 70 ) hMETBaselineTauId6070->Fill(metDataBase.getSelectedMET()->et());
+	  if ( selectedTau->pt() > 50 && selectedTau->pt() < 60 ) hMETBaselineTauId5060->Fill(metDataBase.getSelectedMET()->et());
+	  if ( selectedTau->pt() > 40 && selectedTau->pt() < 50 ) hMETBaselineTauId4050->Fill(metDataBase.getSelectedMET()->et());
+	  	  
+
 	  if(jetDataBase.passedEvent()) {
 	    increment(fBaselineJetsCounter);
 
-	    METSelection::Data metDataBase = fMETSelection.analyze(iEvent, iSetup, selectedTau, jetDataBase.getAllJets());
-	    //double Met = metDataBase.getSelectedMET()->et();
-	    //    std::cout << " weight before  = " << fEventWeight.getWeight() << " met " << Met <<  std::endl;
-	    //     hMETBeforeTauId->Fill(metDataBase.getSelectedMET()->et());
+	    //	    METSelection::Data metDataBase = fMETSelection.analyze(iEvent, iSetup, selectedTau, jetDataBase.getAllJets());
+
 	    
 	    // Met with after jets
 	    hMETBaselineTauIdJets->Fill(metDataBase.getSelectedMET()->et());  
@@ -746,6 +790,8 @@ namespace HPlus {
 	    
 	    
 	    BTagging::Data btagDataBase = fBTagging.analyze(iEvent, iSetup, jetDataBase.getSelectedJetsPt20());
+
+	    hNBBaselineTauIdJet->Fill(btagDataBase.getSelectedJets().size());
 	    
 	    if(btagDataBase.passedEvent()) {
 	      // Met with b tagging	
@@ -817,7 +863,8 @@ namespace HPlus {
 		if ( selectedTau->pt() > 50 && selectedTau->pt() < 60 ) hMTBaselineTauIdBtag5060->Fill(transverseMass); 
 		if ( selectedTau->pt() > 40 && selectedTau->pt() < 50 ) hMTBaselineTauIdBtag4050->Fill(transverseMass);
 		
-		
+		hDeltaPhiBaseline->Fill(deltaPhi);
+ 		
 		if ( deltaPhi < fDeltaPhiCutValue) {
 		  increment(fBaselineDphi160Counter);
 		  increment(fOneTauCounter);
@@ -870,7 +917,8 @@ namespace HPlus {
       
     //    if (tauData.selectedTauPassesDiscriminator(myTauIsolation, 0.5)) return false;    
     
-    
+    //    hSelectionFlow->Fill(kQCDOrderTauCandidateSelection);
+    hSelectionFlow->Fill(kQCDOrderTauID);    
     // veto was successfull
     increment(fTauVetoAfterTauIDCounter); 
         
@@ -884,18 +932,7 @@ namespace HPlus {
    
  
   
-    hMETInvertedTauId->Fill(metDataInverted.getSelectedMET()->et());  
-    if ( selectedInvertedTau->pt() > 150  ) hMETInvertedTauId150->Fill(metDataInverted.getSelectedMET()->et());
-    if ( selectedInvertedTau->pt() > 120  ) hMETInvertedTauId120->Fill(metDataInverted.getSelectedMET()->et());
-    if ( selectedInvertedTau->pt() > 120 && selectedInvertedTau->pt() < 150 ) hMETInvertedTauId120150->Fill(metDataInverted.getSelectedMET()->et());
-    if ( selectedInvertedTau->pt() > 100 && selectedInvertedTau->pt() < 120 ) hMETInvertedTauId100120->Fill(metDataInverted.getSelectedMET()->et());
-    if ( selectedInvertedTau->pt() > 80 && selectedInvertedTau->pt() < 100 ) hMETInvertedTauId80100->Fill(metDataInverted.getSelectedMET()->et());
-    if ( selectedInvertedTau->pt() > 70 && selectedInvertedTau->pt() < 80 ) hMETInvertedTauId7080->Fill(metDataInverted.getSelectedMET()->et());     
-    if ( selectedInvertedTau->pt() > 60 && selectedInvertedTau->pt() < 70 ) hMETInvertedTauId6070->Fill(metDataInverted.getSelectedMET()->et());
-    if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hMETInvertedTauId5060->Fill(metDataInverted.getSelectedMET()->et()); 
-    if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hMETInvertedTauId4050->Fill(metDataInverted.getSelectedMET()->et());
-						
-   
+  
     hSelectionFlow->Fill(kSignalOrderTauID);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Tau> > saveTaus(new std::vector<pat::Tau>());
@@ -923,7 +960,7 @@ namespace HPlus {
     //    GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return false;
     increment(fElectronVetoCounter);
-    hSelectionFlow->Fill(kSignalOrderElectronVeto);
+    hSelectionFlow->Fill(kQCDOrderElectronVeto);  
     //    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderElectronVeto, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Electron> > saveElectrons(new std::vector<pat::Electron>());
@@ -935,7 +972,8 @@ namespace HPlus {
     //    GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!muonVetoData.passedEvent()) return false;
     increment(fMuonVetoCounter);
-    hSelectionFlow->Fill(kSignalOrderMuonVeto);
+    hSelectionFlow->Fill(kQCDOrderMuonVeto);
+    
     if(metDataInverted.passedEvent()) hTransverseMassAfterVeto->Fill(transverseMass);
     //    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderMuonVeto, tauData);
     if(fProduce) {
@@ -947,13 +985,48 @@ namespace HPlus {
       iEvent.put(saveMuons, "selectedVetoMuons");
     }
 
-     
+    hMETInvertedTauId->Fill(metDataInverted.getSelectedMET()->et());  
+    if ( selectedInvertedTau->pt() > 150  ) hMETInvertedTauId150->Fill(metDataInverted.getSelectedMET()->et());
+    if ( selectedInvertedTau->pt() > 120  ) hMETInvertedTauId120->Fill(metDataInverted.getSelectedMET()->et());
+    if ( selectedInvertedTau->pt() > 120 && selectedInvertedTau->pt() < 150 ) hMETInvertedTauId120150->Fill(metDataInverted.getSelectedMET()->et());
+    if ( selectedInvertedTau->pt() > 100 && selectedInvertedTau->pt() < 120 ) hMETInvertedTauId100120->Fill(metDataInverted.getSelectedMET()->et());
+    if ( selectedInvertedTau->pt() > 80 && selectedInvertedTau->pt() < 100 ) hMETInvertedTauId80100->Fill(metDataInverted.getSelectedMET()->et());
+    if ( selectedInvertedTau->pt() > 70 && selectedInvertedTau->pt() < 80 ) hMETInvertedTauId7080->Fill(metDataInverted.getSelectedMET()->et());     
+    if ( selectedInvertedTau->pt() > 60 && selectedInvertedTau->pt() < 70 ) hMETInvertedTauId6070->Fill(metDataInverted.getSelectedMET()->et());
+    if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hMETInvertedTauId5060->Fill(metDataInverted.getSelectedMET()->et()); 
+    if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hMETInvertedTauId4050->Fill(metDataInverted.getSelectedMET()->et());
+						
+        
+    hNJetInvertedTauId->Fill(jetDataInverted.getSelectedJets().size());  
+    if ( selectedInvertedTau->pt() > 150  ) hNJetInvertedTauId150->Fill(jetDataInverted.getSelectedJets().size());
+    if ( selectedInvertedTau->pt() > 120  ) hNJetInvertedTauId120->Fill(jetDataInverted.getSelectedJets().size());
+    if ( selectedInvertedTau->pt() > 120 && selectedInvertedTau->pt() < 150 ) hNJetInvertedTauId120150->Fill(jetDataInverted.getSelectedJets().size());
+    if ( selectedInvertedTau->pt() > 100 && selectedInvertedTau->pt() < 120 ) hNJetInvertedTauId100120->Fill(jetDataInverted.getSelectedJets().size());
+    if ( selectedInvertedTau->pt() > 80 && selectedInvertedTau->pt() < 100 ) hNJetInvertedTauId80100->Fill(jetDataInverted.getSelectedJets().size());
+    if ( selectedInvertedTau->pt() > 70 && selectedInvertedTau->pt() < 80 ) hNJetInvertedTauId7080->Fill(jetDataInverted.getSelectedJets().size());     
+    if ( selectedInvertedTau->pt() > 60 && selectedInvertedTau->pt() < 70 ) hNJetInvertedTauId6070->Fill(jetDataInverted.getSelectedJets().size());
+    if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hNJetInvertedTauId5060->Fill(jetDataInverted.getSelectedJets().size()); 
+    if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hNJetInvertedTauId4050->Fill(jetDataInverted.getSelectedJets().size());
+
+    if(metDataInverted.passedEvent()) {
+      hNJetInvertedTauIdMet->Fill(jetDataInverted.getSelectedJets().size());  
+      if ( selectedInvertedTau->pt() > 150  ) hNJetInvertedTauIdMet150->Fill(jetDataInverted.getSelectedJets().size());
+      if ( selectedInvertedTau->pt() > 120  ) hNJetInvertedTauIdMet120->Fill(jetDataInverted.getSelectedJets().size());
+      if ( selectedInvertedTau->pt() > 120 && selectedInvertedTau->pt() < 150 ) hNJetInvertedTauIdMet120150->Fill(jetDataInverted.getSelectedJets().size());
+      if ( selectedInvertedTau->pt() > 100 && selectedInvertedTau->pt() < 120 ) hNJetInvertedTauIdMet100120->Fill(jetDataInverted.getSelectedJets().size());
+      if ( selectedInvertedTau->pt() > 80 && selectedInvertedTau->pt() < 100 ) hNJetInvertedTauIdMet80100->Fill(jetDataInverted.getSelectedJets().size());
+      if ( selectedInvertedTau->pt() > 70 && selectedInvertedTau->pt() < 80 ) hNJetInvertedTauIdMet7080->Fill(jetDataInverted.getSelectedJets().size());     
+      if ( selectedInvertedTau->pt() > 60 && selectedInvertedTau->pt() < 70 ) hNJetInvertedTauIdMet6070->Fill(jetDataInverted.getSelectedJets().size());
+      if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hNJetInvertedTauIdMet5060->Fill(jetDataInverted.getSelectedJets().size()); 
+      if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hNJetInvertedTauIdMet4050->Fill(jetDataInverted.getSelectedJets().size());
+    }
+
 
     // Hadronic jet selection
     //    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup,  tauData.getSelectedTau()); 
     if(!jetDataInverted.passedEvent()) return false;
     increment(fNJetsCounter);
-    hSelectionFlow->Fill(kSignalOrderJetSelection);
+    hSelectionFlow->Fill(kQCDOrderJetSelection);
     //    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderJetSelection, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Jet> > saveJets(new std::vector<pat::Jet>());
@@ -1021,8 +1094,7 @@ namespace HPlus {
     hMETBeforeMETCut->Fill(metDataInverted.getSelectedMET()->et());
     if(!metDataInverted.passedEvent()) return false;
     increment(fMETCounter);
-    hSelectionFlow->Fill(kSignalOrderMETSelection);
-
+    hSelectionFlow->Fill(kQCDOrderMET);
     hSelectedTauEtMetCut->Fill(selectedInvertedTau->pt());
     hSelectedTauEtaMetCut->Fill(selectedInvertedTau->eta());
     hSelectedTauPhiMetCut->Fill(selectedInvertedTau->phi());  
@@ -1092,11 +1164,17 @@ namespace HPlus {
     // b tagging cut
     //    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderBTagSelection, tauData, btagDataInverted.passedEvent(),btagData.getMaxDiscriminatorValue());
     if(!btagDataInverted.passedEvent()) return false;
-    // Apply scale factor as weight to event
-    //    fEventWeight.multiplyWeight(btagDataInverted.getScaleFactor());
+    // Apply scale factor as weight to event 
     increment(fBTaggingCounter);
+    if (!iEvent.isRealData()) {
+      btagDataInverted.fillScaleFactorHistograms(); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
+      fEventWeight.multiplyWeight(btagDataInverted.getScaleFactor());
+    }   
+    increment(fBTaggingScaleFactorInvertedCounter);
+		
 
-    hSelectionFlow->Fill(kSignalOrderBTagSelection);
+    hSelectionFlow->Fill(kQCDOrderBTag);
+   
     hMet_AfterBTagging->Fill(metDataInverted.getSelectedMET()->et());
 
     if(fProduce) {
@@ -1152,7 +1230,7 @@ namespace HPlus {
  
     if (deltaPhi > fDeltaPhiCutValue) return false;    
     increment(fDeltaPhiTauMETCounter);
-   
+    hSelectionFlow->Fill(kQCDOrderDeltaPhiTauMET);   
     hTransverseMass->Fill(transverseMass); 
 
     hMTInvertedTauIdJetPhi->Fill(transverseMass); 

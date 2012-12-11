@@ -42,6 +42,8 @@ namespace edm {
   class EDFilter;
 }
 
+
+
 class TTree;
 
 namespace HPlus {
@@ -76,18 +78,32 @@ namespace HPlus {
       Count fTopChiSelectionCounter;
       Count fTopWithBSelectionCounter;
     };
-  enum SignalSelectionOrder {
-    kSignalOrderTrigger,
-    //kSignalOrderVertexSelection,
-    kSignalOrderTauID,
-    kSignalOrderMETSelection,
-    kSignalOrderElectronVeto,
-    kSignalOrderMuonVeto,
-    kSignalOrderJetSelection,
-    kSignalOrderBTagSelection,
-    kSignalOrderFakeMETVeto,
-    kSignalOrderTopSelection
-  };
+    enum SignalSelectionOrder {
+      kSignalOrderTrigger,
+      //kSignalOrderVertexSelection,
+      kSignalOrderTauID,
+      kSignalOrderMETSelection,
+      kSignalOrderElectronVeto,
+      kSignalOrderMuonVeto,
+      kSignalOrderJetSelection,
+      kSignalOrderBTagSelection,
+      kSignalOrderFakeMETVeto,
+      kSignalOrderTopSelection
+    };
+    enum QCDSelectionOrder {
+      kQCDOrderVertexSelection,
+      kQCDOrderTrigger,
+      kQCDOrderTauCandidateSelection,
+      kQCDOrderTauID,
+      kQCDOrderElectronVeto,
+      kQCDOrderMuonVeto,
+      kQCDOrderJetSelection,
+      kQCDOrderMET,
+      kQCDOrderBTag,
+      kQCDOrderDeltaPhiTauMET,
+      kQCDOrderMaxDeltaPhiJetMET,
+      kQCDOrderTopSelection
+    };
   enum MCSelectedTauMatchType {
     kkElectronToTau,
     kkMuonToTau,
@@ -156,6 +172,7 @@ namespace HPlus {
     Count fRtauAfterMETCounter;
     Count fBjetVetoCounter;
     Count fBTaggingCounter;
+    Count fBTaggingScaleFactorInvertedCounter;    
     Count fDeltaPhiTauMETCounter;
     //    Count fDeltaPhiTauMET140Counter;
     Count fdeltaPhiTauMET10Counter;
@@ -250,6 +267,11 @@ namespace HPlus {
     WrappedTH1 *hMETBaselineTauIdJets6070;
     WrappedTH1 *hMETBaselineTauIdJets5060;
     WrappedTH1 *hMETBaselineTauIdJets4050;
+
+    WrappedTH1 *hNBBaselineTauIdJet;    
+    WrappedTH1 *hNJetBaselineTauId;
+    WrappedTH1 *hDeltaPhiBaseline;
+    WrappedTH1 *hNJetBaselineTauIdMet;
 
     WrappedTH1 *hMETBaselineTauId150;
     WrappedTH1 *hMETBaselineTauId120;
@@ -406,6 +428,28 @@ namespace HPlus {
     WrappedTH1 *hNBInvertedTauIdJet6070;
     WrappedTH1 *hNBInvertedTauIdJet5060;
     WrappedTH1 *hNBInvertedTauIdJet4050;
+
+    WrappedTH1 *hNJetInvertedTauIdMet;
+    WrappedTH1 *hNJetInvertedTauIdMet150;
+    WrappedTH1 *hNJetInvertedTauIdMet120;
+    WrappedTH1 *hNJetInvertedTauIdMet120150;
+    WrappedTH1 *hNJetInvertedTauIdMet100120;
+    WrappedTH1 *hNJetInvertedTauIdMet80100;
+    WrappedTH1 *hNJetInvertedTauIdMet7080;
+    WrappedTH1 *hNJetInvertedTauIdMet6070;
+    WrappedTH1 *hNJetInvertedTauIdMet5060;
+    WrappedTH1 *hNJetInvertedTauIdMet4050;
+
+    WrappedTH1 *hNJetInvertedTauId;
+    WrappedTH1 *hNJetInvertedTauId150;
+    WrappedTH1 *hNJetInvertedTauId120;
+    WrappedTH1 *hNJetInvertedTauId120150;
+    WrappedTH1 *hNJetInvertedTauId100120;
+    WrappedTH1 *hNJetInvertedTauId80100;
+    WrappedTH1 *hNJetInvertedTauId7080;
+    WrappedTH1 *hNJetInvertedTauId6070;
+    WrappedTH1 *hNJetInvertedTauId5060;
+    WrappedTH1 *hNJetInvertedTauId4050;
 
     WrappedTH1 *hNBInvertedTauIdJetDphi;
     WrappedTH1 *hNBInvertedTauIdJetDphi150;
