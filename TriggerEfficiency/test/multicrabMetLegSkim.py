@@ -179,6 +179,7 @@ for midfix, datasets in tasks:
     # writing to /store/group/local ...
     #multicrab.appendLineAll("USER.local_stage_out=1")
 
+    multicrab.appendLineAll("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/TriggerMETLeg/CMSSW_5_3_X")
     multicrab.appendLineAll("GRID.maxtarballsize = 35")
 
     #def addCopyConfig(dataset):
