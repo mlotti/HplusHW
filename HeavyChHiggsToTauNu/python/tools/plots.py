@@ -82,6 +82,10 @@ for mcEra in ["Summer11", "Fall11"]:
 
     "TTJets_TuneZ2_%s"%mcEra: "TTJets",
     "WJets_TuneZ2_%s"%mcEra: "WJets",
+    "W1Jets_TuneZ2_%s"%mcEra: "W1Jets",
+    "W2Jets_TuneZ2_%s"%mcEra: "W2Jets",
+    "W3Jets_TuneZ2_%s"%mcEra: "W3Jets",
+    "W4Jets_TuneZ2_%s"%mcEra: "W4Jets",
     "DYJetsToLL_M50_TuneZ2_%s"%mcEra:      "DYJetsToLL_M50",
 
     "QCD_Pt30to50_TuneZ2_%s"%mcEra:   "QCD_Pt30to50",
@@ -133,6 +137,12 @@ _datasetMerge = {
     "Tbar_tW-channel": "SingleTop",
     "T_s-channel":     "SingleTop",
     "Tbar_s-channel":  "SingleTop",
+
+    "WJets": "WJets",
+    "W1Jets": "WJets",
+    "W2Jets": "WJets",
+    "W3Jets": "WJets",
+    "W4Jets": "WJets",
 
     "DYJetsToLL_M10to50": "DYJetsToLL",
     "DYJetsToLL_M50": "DYJetsToLL",
