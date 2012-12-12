@@ -113,6 +113,7 @@ multicrab.extendDatasets(workflow, datasets)
 # writing to /store/group/local ...
 #multicrab.appendLineAll("USER.local_stage_out=1")
 
+multicrab.appendLineAll("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/TriggerMETLeg/CMSSW_4_4_X")
 multicrab.appendLineAll("GRID.maxtarballsize = 30")
 
 def addCopyConfig(dataset):
