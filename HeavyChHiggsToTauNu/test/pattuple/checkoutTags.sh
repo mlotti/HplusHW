@@ -15,6 +15,10 @@ cvs co -r V00-00-08 RecoMET/METAnalyzers
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
 cvs co -r V00-02-10 -d CMGTools/External UserCode/CMG/CMGTools/External
 
+# Tracking filters
+# https://twiki.cern.ch/twiki/bin/view/CMS/TrackingPOGFilters
+cvs co -r V01-00-11-01 DPGAnalysis/Skims
+
 
 # https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentification
 #
