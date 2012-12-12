@@ -72,14 +72,17 @@ set -e
 # 12.10.2012/M.Kortelainen CMSSW_5_3_5 Updated PAT tags
 # 25.10.2012/M.Kortelainen CMSSW_5_3_5 Updated for running runMEtUncertainties() multiple times
 # 26.10.2012/M.Kortelainen CMSSW_5_3_5 Updated metUncertaintyTools
+# 12.12.2012/M.Kortelainen CMSSW_5_3_7 Updated tau/PAT tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
 
 # PAT
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATReleaseNotes52X
-addpkg DataFormats/PatCandidates V06-05-06-02
-addpkg PhysicsTools/PatAlgos     V08-09-42
+addpkg DataFormats/PatCandidates V06-05-06-03
+addpkg PhysicsTools/PatAlgos     V08-09-50
+addpkg DataFormats/StdDictionaries V00-02-14
+addpkg FWCore/GuiBrowsers V00-00-70
 # We don't need the code (it's the same as in the release), but a ROOT
 # file for jet smearing needs to be in the developer area at the moment
 # (see )
@@ -89,21 +92,23 @@ cvs up -r 1.25 PhysicsTools/PatUtils/python/tools/metUncertaintyTools.py
 cvs up -r 1.19.8.1 PhysicsTools/PatAlgos/python/tools/helpers.py
 rm PhysicsTools/PatUtils/plugins/MinPatMETProducer.cc
 
+# Latest EGM isolation definition (whatever that is)
+addpkg RecoParticleFlow/PFProducer V15-02-06
+
 # Tau+PAT
 # https://hypernews.cern.ch/HyperNews/CMS/get/tauid/252.html
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePFTauID#2012_CMSSW_4_X_X_Recipe
 #
 # Tau
-addpkg RecoTauTag/RecoTau         V01-04-17 #equivalent to 04-14
-addpkg RecoTauTag/Configuration   V01-04-03
+addpkg RecoTauTag/RecoTau         V01-04-20
+addpkg RecoTauTag/Configuration   V01-04-08
 addpkg CondFormats/EgammaObjects  V00-04-01
-addpkg PhysicsTools/IsolationAlgos # You need to recompile PAT packages which depend on DataFormats/TauReco
 # PAT
 ##### New tau discriminators, electron MVA discriminator
-cvs up -r 1.57 PhysicsTools/PatAlgos/python/tools/tauTools.py
-cvs up -r 1.13 PhysicsTools/PatAlgos/python/producersLayer1/tauProducer_cff.py
-cvs up -r 1.15 PhysicsTools/PatAlgos/python/recoLayer0/tauDiscriminators_cff.py
-cvs up -r 1.5 RecoTauTag/Configuration/python/updateHPSPFTaus_cff.py
+#cvs up -r 1.57 PhysicsTools/PatAlgos/python/tools/tauTools.py
+#cvs up -r 1.13 PhysicsTools/PatAlgos/python/producersLayer1/tauProducer_cff.py
+#cvs up -r 1.15 PhysicsTools/PatAlgos/python/recoLayer0/tauDiscriminators_cff.py
+#cvs up -r 1.5 RecoTauTag/Configuration/python/updateHPSPFTaus_cff.py
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
@@ -136,6 +141,10 @@ addpkg RecoLuminosity/LumiDB V04-01-09
 cvs co -r V00-00-16 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
 cvs up -r CutBasedId_V00-00-05 EGamma/EGammaAnalysisTools/src/EGammaCutBasedEleId.cc
 cvs up -r CutBasedId_V00-00-05 EGamma/EGammaAnalysisTools/interface/EGammaCutBasedEleId.h
+# This gives the updated EA isolation from recommendation of
+# https://hypernews.cern.ch/HyperNews/CMS/get/higgs/1032.html
+cvs up -r V00-00-31 EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h
+
 # EGammaCutBasedEleId.cc includes ElectronEffectiveArea.h, but the
 # version is the same in both tags
 #
