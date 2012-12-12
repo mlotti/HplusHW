@@ -288,6 +288,10 @@ class DataCardGenerator:
                 raise Exception(ErrorStyle()+"Error: signal and embedding luminosities differ more than 1 %!"+NormalStyle())
         if myLuminosities[3] != myLuminosities[1] and self._doSignalAnalysis:
             raise Exception(ErrorStyle()+"Error: signal and QCD luminosities are not the same!"+NormalStyle())
+        # Merge divided datasets into one
+        for i in range(1,len(self._dsetMgrs)):
+            if self._dsetMgrs[i] != None:
+                self._dsetMgrs[i].mergeMany(plots._physicalMcAdd, addition=True)
         # Make merges for columns (a unique merge for each data group; used to access counters and histograms)
         for dg in self._config.DataGroups:
             # Make sure that only one QCD method is included
@@ -314,7 +318,6 @@ class DataCardGenerator:
                             print "  "+n
                     myMergedName = "dset_"+dg.label.replace(" ","_")
                     if self._dsetMgrs[myDsetMgr] != None:
-                        self._dsetMgrs[myDsetMgr].mergeMany(plots._physicalMcAdd, addition=True)
                         self._dsetMgrs[myDsetMgr].merge(myMergedName, myFoundNames)
                     # find datasets and make merged set for QCD MC EWK
                     if dg.datasetType == "QCD factorised":
@@ -325,7 +328,6 @@ class DataCardGenerator:
                             for n in myFoundNames:
                                 print "  "+n
                         myMergedNameForQCDMCEWK = "dset_"+dg.label.replace(" ","_")+"_MCEWK"
-                        self._dsetMgrs[myDsetMgr].mergeMany(plots._physicalMcAdd, addition=True)
                         self._dsetMgrs[myDsetMgr].merge(myMergedNameForQCDMCEWK, myFoundNames)
                 # Construct dataset column object
                 myColumn = None

@@ -107,7 +107,7 @@ def main(opts):
             mySelectedVariations.append("")
         else:
             if opts.variationId != None:
-                if i in opts.VariationId:
+                if i in opts.variationId:
                     print HighlightStyle()+"--> %d: %s"%(i,myModules[i])+NormalStyle()
                     mySelectedVariations.append(myModules[i])
                 else:
@@ -116,6 +116,7 @@ def main(opts):
                 print HighlightStyle()+"--> %d: %s"%(i,myModules[i])+NormalStyle()
                 mySelectedVariations.append(myModules[i])
     if opts.listVariations == True:
+        print "Printed list of eras and variations, now exiting. To generate datacards, remove '-l' parameter from command line."
         sys.exit()
     # Check that the command line options for eras and variations make sense
     if opts.eraId != None:
@@ -124,7 +125,8 @@ def main(opts):
                 raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" you asked for era '%s' which is not available in all of the multicrab directories!"%(era))
     if opts.variationId != None:
         for variation in opts.variationId:
-            if not variation in myVariations:
+            if variation < 0 or variation >= len(myModules):
+                print variation, myModules
                 raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" you asked for variation '%s' which is not available in all of the multicrab directories!"%(variation))
     # Summarise the consequences of the user choises
     myDatacardCount = len(mySelectedEras)*len(mySelectedVariations)*len(myQCDMethods)
