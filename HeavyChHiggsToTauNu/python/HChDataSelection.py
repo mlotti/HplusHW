@@ -53,13 +53,8 @@ def addHBHENoiseFilterResultProducer(process, sequence):
     # https://hypernews.cern.ch/HyperNews/CMS/get/hcal-noise/93.html
     # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#HBHE_Noise_Filter
     process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
-    process.HBHENoiseFilterResultProducerMETWG = process.HBHENoiseFilterResultProducer.clone()
-    process.HBHENoiseFilterResultProducer.minNumIsolatedNoiseChannels = 9999
-    process.HBHENoiseFilterResultProducer.minIsolatedNoiseSumE = 9999
-    process.HBHENoiseFilterResultProducer.minIsolatedNoiseSumEt = 9999
     sequence *= (
-        process.HBHENoiseFilterResultProducer *
-        process.HBHENoiseFilterResultProducerMETWG
+        process.HBHENoiseFilterResultProducer
     )
     
 
