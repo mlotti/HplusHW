@@ -135,16 +135,20 @@ def main():
     fIN = ROOT.TFile.Open(fINname,"R")
     histograms = fIN.GetListOfKeys()
     anadir.cd()
-#    fOUT.cd()
-#    fOUT.cd(analysis)
+    controlPlotDir = anadir.mkdir("ControlPlots")
+
     integral = 0
     for h in histograms:
         histo = fIN.Get(h.GetName())
         integral = histo.Integral(0, histo.GetNbinsX()+1)
-        histo.Write()
+        if h.GetName() == "mtSum":
+            histo.Write()
+        else:
+            anadir.cd("ControlPlots")
+            histo.Write()
+            anadir.cd()
     fIN.Close()
 
-#    anadir.cd()
     counterdir = anadir.mkdir("counters")
     anadir.cd("counters")
     counter = ROOT.TH1D("counter","counter",1,0,1)
