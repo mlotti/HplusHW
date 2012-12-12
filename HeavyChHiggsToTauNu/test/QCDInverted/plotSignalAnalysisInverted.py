@@ -191,7 +191,7 @@ def doPlots(datasets):
 #    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.2, br_Htaunu=1)
 #    xsect.setHplusCrossSectionsToBR(datasets_tm, br_tH=0.2, br_Htaunu=1)
 #    datasets_tm.merge("TTToHplus_M120", ["TTToHplusBWB_M120", "TTToHplusBHminusB_M120"])
-    selectionFlow(createPlot("SignalSelectionFlow"), "SignalSelectionFlow", rebin=1, ratio=False)
+#    selectionFlow(createPlot("SignalSelectionFlow"), "SignalSelectionFlow", rebin=1, ratio=False)
 
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet4050"), "MTInvertedTauIdJet4050", rebin=20)
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet5060"), "MTInvertedTauIdJet5060", rebin=20)
@@ -1296,7 +1296,7 @@ def mtComparison(datasets):
         #    canvas3.Print("mtInverted_Met70_log.png")
         #    canvas3.Print("mtInverted_Met70_log.C")
         
-        if(deltaPhi160):
+        if False:
             canvas32.Print("transverseMass.png")
             canvas32.Print("transverseMass.C")
             fOUT = ROOT.TFile.Open("histogramsForLands.root","RECREATE")

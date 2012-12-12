@@ -31,7 +31,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METFilters.h"
-//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 
 
 
@@ -139,7 +139,7 @@ namespace HPlus {
     const bool bBlindAnalysisStatus;
     const double fDeltaPhiCutValue;
     Count fAllCounter;
-    //    Count fWJetsWeightCounter;
+    Count fWJetsWeightCounter;
 
     Count fMETFiltersCounter;
     Count fTriggerCounter;
@@ -161,9 +161,11 @@ namespace HPlus {
     Count fBaselineDphi160Counter;
     Count fOneTauCounter;  
     Count fBaselineDphi130Counter;
-    Count fBaselineTopChiSelectionCounter; 
+    Count fBaselineTopChiSelectionCounter;
+
+  
     Count fTauVetoAfterTauIDCounter;
- 
+
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fNJetsCounter;
@@ -208,9 +210,9 @@ namespace HPlus {
     JetTauInvMass fJetTauInvMass;
     TopSelection fTopSelection;
     BjetSelection fBjetSelection;
-    FullHiggsMassCalculator fFullHiggsMassCalculator;
     TopChiSelection fTopChiSelection;
     TopWithBSelection fTopWithBSelection;
+    FullHiggsMassCalculator fFullHiggsMassCalculator;
     GenParticleAnalysis fGenparticleAnalysis;
     ForwardJetVeto fForwardJetVeto;
     CorrelationAnalysis fCorrelationAnalysis;
@@ -219,7 +221,7 @@ namespace HPlus {
 
     VertexWeightReader fVertexWeightReader;
     METFilters fMETFilters;
-    //    WeightReader fWJetsWeightReader;
+    WeightReader fWJetsWeightReader;
     FakeTauIdentifier fFakeTauIdentifier;
     SignalAnalysisTree fTree;
   

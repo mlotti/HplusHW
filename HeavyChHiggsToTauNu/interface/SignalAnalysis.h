@@ -27,6 +27,7 @@
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithMHSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeightReader.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EmbeddingMuonEfficiency.h"
@@ -84,9 +85,9 @@ namespace HPlus {
       Count fTopSelectionCounter;
       Count fTopChiSelectionCounter;
       //      Count fTopChiSelectionNarrowCounter;
+      Count fTopWithMHSelectionCounter;
       Count fTopWithBSelectionCounter;
       Count fTopWithWSelectionCounter;
-      Count fTopWithMHSelectionCounter;
       Count fSelectedEventsCounter;
     };
   enum SignalSelectionOrder {
@@ -129,7 +130,13 @@ namespace HPlus {
     const std::string fTopRecoName; // Name of selected top reconstruction algorithm
     //    const double ftransverseMassCut;
 
+    edm::InputTag fOneProngTauSrc;
+    edm::InputTag fOneAndThreeProngTauSrc;
+    edm::InputTag fThreeProngTauSrc;
+
+
     Count fAllCounter;
+    Count fWJetsWeightCounter;
     Count fMETFiltersCounter;
     Count fEmbeddingMuonEfficiencyCounter;
     Count fTriggerCounter;
@@ -140,8 +147,8 @@ namespace HPlus {
     Count fTriggerScaleFactorCounter;
     Count fGenuineTauCounter;
     Count fVetoTauCounter;
-    Count fElectronMatchingTauCounter;
     Count fElectronVetoCounter;
+    Count fElectronMatchingTauCounter;
     Count fMuonVetoCounter;
     Count fMetCutBeforeJetCutCounter;
     Count fNJetsCounter;
@@ -207,8 +214,8 @@ namespace HPlus {
     Count fTauIsHadronFromJetCounter;
 
     Count fTopSelectionCounter;
-    Count fTopChiSelectionCounter;
     Count fTopWithMHSelectionCounter;
+    Count fTopChiSelectionCounter;
     Count fTopChiSelection250Counter;
     Count fTopChiSelection220Counter;
     Count fTopWithBSelectionCounter;
@@ -248,10 +255,11 @@ namespace HPlus {
     TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
     EmbeddingMuonEfficiency fEmbeddingMuonEfficiency;
     VertexWeightReader fVertexWeightReader;
+    WeightReader fWJetsWeightReader;
     VertexAssignmentAnalysis fVertexAssignmentAnalysis;
     FakeTauIdentifier fFakeTauIdentifier;
-    TauEmbeddingMuonIsolationQuantifier fTauEmbeddingMuonIsolationQuantifier;
     METFilters fMETFilters;
+    TauEmbeddingMuonIsolationQuantifier fTauEmbeddingMuonIsolationQuantifier;
 
     SignalAnalysisTree fTree;
 
@@ -259,10 +267,6 @@ namespace HPlus {
     ScaleFactorUncertaintyManager fSFUncertaintiesAfterSelection;
     ScaleFactorUncertaintyManager fEWKFakeTausSFUncertaintiesAfterSelection;
 
-
-    edm::InputTag fOneProngTauSrc;
-    edm::InputTag fOneAndThreeProngTauSrc;
-    edm::InputTag fThreeProngTauSrc;
 
 
     // Histograms

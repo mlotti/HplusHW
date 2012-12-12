@@ -6,6 +6,7 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIDBase.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
@@ -21,7 +22,7 @@ namespace HPlus {
   class WrappedTH1;
   class WrappedTH2;
 
-  class TauSelection {
+  class TauSelection: public BaseSelection {
   public:
     /**
      * Class to encapsulate the access to the data members of
@@ -80,27 +81,30 @@ namespace HPlus {
 
     edm::InputTag getSrc() const { return fSrc; }
 
+    /// Default tauID, no filling of histograms or counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// Default tauID
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    /// tau ID on a given sample of taus, no filling of histograms or counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
     /// tau ID on a given sample of taus
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
     /// Trigger tau selection - find best unique tau candidate
     // Data analyzeTriggerTau(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-    /// tau ID on cleaned tau candidates
-    Data analyzeTauIDWithoutRtauOnSelectedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> tauCandidate);
-    /// tau ID on selected tau candidates - to be applied after analyzeTauIDWithoutRtauOnSelectedTauCandidates
-    //Data analyzeTauIDWithRtauOnSelectedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// Method for setting selected tau (from factorization)
     Data setSelectedTau(edm::Ptr<pat::Tau>& tau, bool passedEvent);
     /// Method for getting operating mode (needed for tau specific weight maps)
     const TauSelectionOperationMode getOperationMode() const { return fOperationMode; }
     /// Fill eta-phi histograms of fake taus (Note: do not use in final analysis, because it will fill multiple times counters and histograms)
     void analyseFakeTauComposition(FakeTauIdentifier& fakeTauIdentifier, const edm::Event& iEvent);
-
-    // Select the pat::Tau object which most likely passes the tau candidate selection + ID
+    /// Select the pat::Tau object which most likely passes the tau candidate selection + ID
     const edm::Ptr<pat::Tau> selectMostLikelyTau(const edm::PtrVector<pat::Tau>& taus);
 
   private:
+    /// Default tauID called from analyze or silentAnalyze
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    /// Default tauID called from analyze or silentAnalyze
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
     /// Method for doing tau selection
     bool doTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
     /// Method for handling the result of tauID factorization

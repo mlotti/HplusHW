@@ -136,10 +136,14 @@ datasets.extend([
     # [1] https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
     # [2] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSections
     MCDataset("TTJets_TuneZ2_Fall11",             crossSection=165, aod="/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # [1,2], approx. NNLO
-    MCDataset("WJets_TuneZ2_Fall11",              crossSection=31314, aod="/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # [2], NNLO
-    MCDataset("W2Jets_TuneZ2_Fall11",             crossSection=1435.0, aod="/W2Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # taken from PREP
-    MCDataset("W3Jets_TuneZ2_Fall11",             crossSection=304.2, aod="/W3Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # taken from PREP
-    MCDataset("W4Jets_TuneZ2_Fall11",             crossSection=172.6, aod="/W4Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # taken from PREP
+    # Cross section [2], NNLO
+    # W+Njets, with the assumption that they are weighted (see
+    # src/WJetsWeight.cc) And if they are not, the cross section can
+    # always be set in the plot scripts by the user.
+    MCDataset("WJets_TuneZ2_Fall11",              crossSection=31314, aod="/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
+    MCDataset("W2Jets_TuneZ2_Fall11",             crossSection=31314, aod="/W2Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
+    MCDataset("W3Jets_TuneZ2_Fall11",             crossSection=31314, aod="/W3Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
+    MCDataset("W4Jets_TuneZ2_Fall11",             crossSection=31314, aod="/W4Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
     MCDataset("DYJetsToLL_M50_TuneZ2_Fall11",     crossSection=3048, aod="/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # [2], NNLO
     MCDataset("DYJetsToLL_M10to50_TuneZ2_Fall11", crossSection=9611, aod="/DYJetsToLL_M-10To50_TuneZ2_7TeV-madgraph/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # taken from PREP
     # SingleTop Powheg
@@ -154,19 +158,10 @@ datasets.extend([
     MCDataset("Tbar_s-channel_TuneZ2_Fall11",  crossSection=1.44, aod="/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
 ])
 
-# /QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Fall11_START44_V9B_v1_AODSIM-pattuple_v25b_nojetskim_QCD_Pt20_MuEnriched_TuneZ2_Fall11-f102f48f945c7d8b633b6cfb2ce7b4c8/USER
-# /DYJetsToLL_M-10To50_TuneZ2_7TeV-madgraph/local-Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_DYJetsToLL_M10to50_TuneZ2_Fall11-a776c511e9ef937d92535c43d40d7d9b/USER
-# /Tau/local-Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_Single_165970-167913_2011A_Nov08-e9140fd17e7e1e1046a08ea867b6ea3b/USER
-# /Tau/local-Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_Single_170722-173198_2011A_Nov08-a6c05c7e9a3d44262e26ce7c36099a5c/USER
-# /Tau/local-Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_Single_173236-173692_2011A_Nov08-0b4b37a70df41aa83f6b277cd6180eda/USER
-# /Tau/local-Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3_test2_Tau_Single_175832-180252_2011B_Nov19-24097e1b77cf020b884a6b4c31bedd64/USER
-
 # Add definition
 multicrabWorkflowsPileupNtuple.addNtuple_44X(datasets)
 
 # Add pattuple definitions
-multicrabWorkflowsPattuple.addPattuple_v25b(datasets)
-multicrabWorkflowsPattuple.addPattuple_v25c(datasets)
 multicrabWorkflowsPattuple.addPattuple_v44_4(datasets)
 
 # Add embedding definitions

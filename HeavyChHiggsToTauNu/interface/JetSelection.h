@@ -2,6 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_JetSelection_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_JetSelection_h
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
+
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
@@ -22,7 +24,7 @@ namespace HPlus {
   class WrappedTH1;
   class WrappedTH2;
 
-  class JetSelection {
+  class JetSelection: public BaseSelection {
   public:
       /**
      * Class to encapsulate the access to the data members of
@@ -57,17 +59,16 @@ namespace HPlus {
     };
 
     JetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
-    ~JetSelection();
+    virtual ~JetSelection();
 
     // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate
-    //    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus);
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau, int nVertices = 1);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau, int nVertices = 1);
 
-    //    Data  analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau);
-    //    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau);
-    //    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus);
-
   private:
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau, int nVertices);
+
     // Input parameters
     edm::InputTag fSrc;
     const double fPtCut;

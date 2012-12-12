@@ -3,13 +3,10 @@
 #define HiggsAnalysis_HeavyChHiggsToTauNu_TriggerSelection_h
 
 #include "FWCore/Utilities/interface/InputTag.h"
-
 #include "DataFormats/PatCandidates/interface/TriggerObject.h"
-// 
+
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerMETEmulation.h"
 
 #include <string>
@@ -32,7 +29,7 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
 
-  class TriggerSelection {
+  class TriggerSelection: public BaseSelection {
   enum TriggerSelectionType {
     kTriggerSelectionByTriggerBit,
     kTriggerSelectionDisabled
@@ -101,9 +98,12 @@ namespace HPlus {
     TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~TriggerSelection();
 
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     
   private:
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     bool passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath);
 
   private:

@@ -6,6 +6,7 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/METReco/interface/MET.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 
 #include "DataFormats/Math/interface/LorentzVector.h"
@@ -24,7 +25,7 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
 
-  class TriggerTauMETEmulation {
+  class TriggerTauMETEmulation: public BaseSelection {
   public:
     /**
      * Class to encapsulate the access to the data members of
@@ -51,9 +52,13 @@ namespace HPlus {
 
     typedef math::XYZTLorentzVector LorentzVector;
 
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    
     L1Emulation* l1Emulation;
     HLTTauEmulation* hltTauEmulation;
     HLTMETEmulation* hltMETEmulation;

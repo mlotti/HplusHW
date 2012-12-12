@@ -15,6 +15,7 @@ namespace HPlus {
   METSelection::Data::~Data() {}
 
   METSelection::METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label):
+    BaseSelection(eventCounter, histoWrapper),
     fRawSrc(iConfig.getUntrackedParameter<edm::InputTag>("rawSrc")),
     fType1Src(iConfig.getUntrackedParameter<edm::InputTag>("type1Src")),
     fType2Src(iConfig.getUntrackedParameter<edm::InputTag>("type2Src")),
@@ -51,7 +52,23 @@ namespace HPlus {
 
   METSelection::~METSelection() {}
 
+  METSelection::Data METSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup, selectedTau, allJets);
+  }
+
   METSelection::Data METSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup, selectedTau, allJets);
+  }
+
+  METSelection::Data METSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets) {
     bool passEvent = false;
     edm::Handle<edm::View<reco::MET> > hrawmet;
     iEvent.getByLabel(fRawSrc, hrawmet);

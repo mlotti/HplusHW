@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflows as multicrabWorkflows
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
-
 
 cfg = "signalAnalysis_cfg.py"
 #cfg = "signalAnalysis2_cfg.py"
@@ -9,8 +9,11 @@ cfg = "signalAnalysis_cfg.py"
 multicrab = Multicrab("crab_analysis.cfg", cfg)
 
 # Select the workflow (version corresponds to pattuples)
-#workflow = "analysis_v25c"
 workflow = "analysis_v44_4"
+
+# Do W+jets weighting?
+doWJetsWeighting = False
+doWJetsWeighting = True
 
 # Change this to true if you want to run the PAT on the fly (for
 # datasets where no pattuples are produced, or for testing something
@@ -89,6 +92,18 @@ datasetsMC = [
 datasets = []
 datasets.extend(datasetsData)
 datasets.extend(datasetsMC)
+
+
+# Disable W+jets weighting if requested
+if not doWJetsWeighting:
+    for name in [
+        "WJets_TuneZ2_Fall11",
+        "W2Jets_TuneZ2_Fall11",
+        "W3Jets_TuneZ2_Fall11",
+        "W4Jets_TuneZ2_Fall11",
+        ]:
+
+        multicrabWorkflows.datasets.getDataset(name).getWorkflow(workflow).removeArg("wjetsWeighting")
 
 # Add the datasest to the multicrab system
 multicrab.extendDatasets(workflow, datasets)
