@@ -181,6 +181,7 @@ namespace HPlus {
 
       // 1) Apply Electron ID (choose low efficiency => High Purity)
 
+      // IMPORTANT NOTE: This function ASSUMES DR<0.3 cone for isolation
       bPassedElecID = EgammaCutBasedEleId::PassWP(fElectronIdEnumerator, **iElectron, hConversion, *hBeamspot, hVertex,
                                                   (*iElectron)->chargedHadronIso(), (*iElectron)->photonIso(), (*iElectron)->neutralHadronIso(),
                                                   *hRho);
