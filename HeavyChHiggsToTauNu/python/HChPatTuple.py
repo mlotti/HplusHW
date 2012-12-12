@@ -790,10 +790,14 @@ class StandardPATBuilder(PATBuilderBase):
             self.process.CSCTightHaloFilterPath = cms.Path(self.process.CSCTightHaloFilter)
 
             # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#HCAL_laser_events_updated
+            # Keep still the old
             self.process.load("RecoMET.METFilters.hcalLaserEventFilter_cfi")
             self.process.hcalLaserEventFilter.taggingMode = True
             self.endSequence *= self.process.hcalLaserEventFilter
             self.outputCommands.append("keep *_hcalLaserEventFilter_*_*")
+            # New (November 2012)
+            self.process.load("EventFilter.HcalRawToDigi.hcallasereventfilter2012_cfi")
+            self.process.hcallasereventfilter2012Path = cms.Path(self.process.hcallasereventfilter2012)
 
             # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Bad_EE_Supercrystal_filter_added
             self.process.load("RecoMET.METFilters.eeBadScFilter_cfi")
