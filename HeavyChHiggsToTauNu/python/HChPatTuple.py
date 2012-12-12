@@ -552,12 +552,9 @@ class StandardPATBuilder(PATBuilderBase):
         self.process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
         self.beginSequence *= self.process.PFTau
 
-        # Switch PAT taus to HPS
-        tauTools.addTauCollection(self.process, cms.InputTag('hpsPFTauProducer'),
-                                  algoLabel = "hps",
-                                  typeLabel = "PFTau")
-        patTaus = self.process.patTausHpsPFTau
-        selectedPatTaus = self.process.selectedPatTausHpsPFTau
+        # PAT taus are now HPS by default
+        patTaus = self.process.patTaus
+        selectedPatTaus = self.process.selectedPatTaus
 
         # Set objects to embedded to pat::Tau
         setPatTauDefaults(patTaus, self.includePFCands)
@@ -604,8 +601,9 @@ class StandardPATBuilder(PATBuilderBase):
 #            self.endSequence *= HChTriggerMatching.addTauHLTMatching(self.process, self.matchingTauTrigger, collections=["patTausHpsPFTau"], outputCommands=self.outputCommands)
 
         self.outputCommands.extend([
-                "drop *_selectedPatTaus_*_*",
-                "keep *_selectedPatTausHpsPFTau_*_*",
+                "keep *_selectedPatTaus_*_*",
+#                "drop *_selectedPatTaus_*_*",
+#                "keep *_selectedPatTausHpsPFTau_*_*",
                 #"keep *_selectedPatTausHpsTancPFTau_*_*",
                 ])
 

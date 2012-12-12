@@ -93,35 +93,35 @@ tauSelectionBase = cms.untracked.PSet(
 # Only HPS should be used (ignore TCTau, plain PF, TaNC, and Combined HPS+TaNC)
 
 tauSelectionHPSTightTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsPFTau",
+    src = "selectedPatTaus",
     selection = "HPSTauBased",
     isolationDiscriminator = "byTightCombinedIsolationDeltaBetaCorr",
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
 tauSelectionHPSMediumTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsPFTau",
+    src = "selectedPatTaus",
     selection = "HPSTauBased",
     isolationDiscriminator = "byMediumCombinedIsolationDeltaBetaCorr",
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
 tauSelectionHPSLooseTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsPFTau",
+    src = "selectedPatTaus",
     selection = "HPSTauBased",
     isolationDiscriminator = "byLooseCombinedIsolationDeltaBetaCorr",
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
 tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsPFTau",
+    src = "selectedPatTaus",
     selection = "HPSTauBased",
     isolationDiscriminator = "byVLooseCombinedIsolationDeltaBetaCorr",
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
 vetoTauBase = tauSelectionHPSVeryLooseTauBased.clone(
-    src = "selectedPatTausHpsPFTau",
+    src = "selectedPatTaus",
 #    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     ptCut = cms.untracked.double(20), # jet pt > value
     etaCut = cms.untracked.double(2.4), # jet |eta| < value
@@ -662,10 +662,10 @@ def setAllTauSelectionSrc(src):
     tauSelectionHPSLooseTauBased.src        = src
 
 def setAllTauSelectionSrcSelectedPatTaus():
-    setAllTauSelectionSrc("selectedPatTausHpsPFTau")
+    setAllTauSelectionSrc("selectedPatTaus")
 
 def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
-    setAllTauSelectionSrc("patTausHpsPFTauTriggerMatched")
+    setAllTauSelectionSrc("patTausTriggerMatched")
     
 def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, additionalCounters):
     from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
