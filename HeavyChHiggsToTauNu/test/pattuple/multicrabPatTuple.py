@@ -10,9 +10,8 @@ datasets_Tau = [
     "Tau_191043-193621_2012A_Jul13",
     "Tau_193834-196531_2012B_Jul13",
     "Tau_198022-198523_2012C_Aug24",
-    "Tau_198941-200601_2012C_Prompt",
-    "Tau_200961-202504_2012C_Prompt",
-    "Tau_202792-203742_2012C_Prompt",
+    "Tau_198941-203742_2012C_Prompt",
+    "Tau_203777-208407_2012D_Prompt",
 ]
 
 datasets_MultiJet = [
@@ -22,9 +21,8 @@ datasets_MultiJet = [
     "MultiJet_193834-194225_2012B_Jul13",
     "MultiJet_194270-196531_2012B_Jul13",
     "MultiJet_198022-198523_2012C_Aug24",
-    "MultiJet_198941-200601_2012C_Prompt",
-    "MultiJet_200961-202504_2012C_Prompt",
-    "MultiJet_202792-203742_2012C_Prompt",
+    "MultiJet_198941-203742_2012C_Prompt",
+    "MultiJet_203777-208407_2012D_Prompt",
 ]
 
 datasets_Signal = [
@@ -105,7 +103,7 @@ datasets_Signal = [
     "HplusTB_M190_ext_Summer12",
     "HplusTB_M200_ext_Summer12",
     "HplusTB_M220_ext_Summer12",
-#    "HplusTB_M250_ext_Summer12",
+    "HplusTB_M250_ext_Summer12",
     "HplusTB_M300_ext_Summer12",
 ]
 
@@ -148,7 +146,7 @@ datasets_SingleTop = [
     "Tbar_s-channel_TuneZ2star_Summer12",
 ]
 
-workflow = "pattuple_v53_1_2"
+workflow = "pattuple_v53_2"
 
 tasks = [
     ("Tau", datasets_Tau),
