@@ -346,10 +346,8 @@ def mtComparison(datasets):
     mt4050._setLegendStyles()
     mt4050._setLegendLabels()
     mt4050.histoMgr.setHistoDrawStyleAll("P")
-    if (numberOfBjets):
-        mt4050.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
-    else:
-        mt4050.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+ 
+    mt4050.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
     hmt4050 = mt4050.histoMgr.getHisto("Data").getRootHisto().Clone()
     hmtSum2 = hmt4050.Clone("mtSum2")
     print "Integral 4050  = ",hmt4050.Integral()
@@ -359,10 +357,7 @@ def mtComparison(datasets):
     mt5060._setLegendStyles()
     mt5060._setLegendLabels()
     mt5060.histoMgr.setHistoDrawStyleAll("P")
-    if (numberOfBjets):
-        mt5060.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
-    else:
-        mt5060.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    mt5060.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
     hmt5060 = mt5060.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi5060")
     hmtSum2.Add(hmt5060)
     print "Integral 5060  = ",hmt5060.Integral()
@@ -372,10 +367,7 @@ def mtComparison(datasets):
     mt6070._setLegendStyles()
     mt6070._setLegendLabels()
     mt6070.histoMgr.setHistoDrawStyleAll("P")
-    if (numberOfBjets):
-        mt6070.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
-    else:
-        mt6070.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))    
+    mt6070.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))    
     hmt6070 = mt6070.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi6070")
     hmtSum2.Add(hmt6070)
     print "Integral 6070  = ",hmt6070.Integral()
@@ -385,10 +377,7 @@ def mtComparison(datasets):
     mt7080._setLegendStyles()
     mt7080._setLegendLabels()
     mt7080.histoMgr.setHistoDrawStyleAll("P")
-    if (numberOfBjets):
-        mt7080.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
-    else:
-        mt7080.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20)) 
+    mt7080.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2)) 
     hmt7080 = mt7080.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi7080")
     hmtSum2.Add(hmt7080)
     print "Integral 7080  = ",hmt7080.Integral()
@@ -398,10 +387,7 @@ def mtComparison(datasets):
     mt80100._setLegendStyles()
     mt80100._setLegendLabels()
     mt80100.histoMgr.setHistoDrawStyleAll("P")
-    if (numberOfBjets):
-        mt80100.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
-    else:
-        mt80100.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20)) 
+    mt80100.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2)) 
     hmt80100 = mt80100.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi80100")
     hmtSum2.Add(hmt80100)
     print "Integral 80100  = ",hmt80100.Integral()
@@ -411,10 +397,7 @@ def mtComparison(datasets):
     mt100120._setLegendStyles()
     mt100120._setLegendLabels()
     mt100120.histoMgr.setHistoDrawStyleAll("P")
-    if (numberOfBjets):
-        mt100120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
-    else:
-        mt100120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))     
+    mt100120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))     
     hmt100120 = mt100120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi100120")
     hmtSum2.Add(hmt100120)
     print "Integral 100120  = ",hmt100120.Integral()    
@@ -425,10 +408,7 @@ def mtComparison(datasets):
         mt120150._setLegendStyles()
         mt120150._setLegendLabels()
         mt120150.histoMgr.setHistoDrawStyleAll("P")
-        if (numberOfBjets):
-            mt120150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
-        else:
-            mt120150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))      
+        mt120150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))      
         hmt120150 = mt120150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi120150")
         hmtSum2.Add(hmt120150)
         print "Integral 120150  = ",hmt120150.Integral()
@@ -438,10 +418,7 @@ def mtComparison(datasets):
         mt150._setLegendStyles()
         mt150._setLegendLabels()
         mt150.histoMgr.setHistoDrawStyleAll("P")
-        if (numberOfBjets):
-            mt150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
-        else:
-            mt150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+        mt150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))  
         hmt150 = mt150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi150")
         hmtSum2.Add(hmt150)
         print "Integral 150  = ",hmt150.Integral()
@@ -451,10 +428,7 @@ def mtComparison(datasets):
         mt120._setLegendStyles()
         mt120._setLegendLabels()
         mt120.histoMgr.setHistoDrawStyleAll("P")
-        if (numberOfBjets):
-            mt120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
-        else:
-            mt120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+        mt120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))  
         hmt120 = mt120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi120")
         hmtSum2.Add(hmt120)
         print "Integral 120  = ",hmt120.Integral()
@@ -464,10 +438,7 @@ def mtComparison(datasets):
     mt._setLegendStyles()
     mt._setLegendLabels()
     mt.histoMgr.setHistoDrawStyleAll("P")
-    if (numberOfBjets):
-        mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
-    else:
-        mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+    mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))  
     hmt = mt.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi")
     hmt.Scale(norm_inc)
 
@@ -475,14 +446,14 @@ def mtComparison(datasets):
     mtBaseline._setLegendStyles()
     mtBaseline._setLegendLabels()
     mtBaseline.histoMgr.setHistoDrawStyleAll("P")
-    mtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+    mtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))  
     hmtBaseline = mtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
     
     mtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mtEWK._setLegendStyles()
     mtEWK._setLegendLabels()
     mtEWK.histoMgr.setHistoDrawStyleAll("P")
-    mtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+    mtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))  
     hmtEWK = mtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
     
 
@@ -490,7 +461,7 @@ def mtComparison(datasets):
  ####################################   
  
     hmtSum = hmt4050.Clone("mtSum")
-    hmtSum.SetName("mtSum")
+    hmtSum.SetName("transverseMass")
     hmtSum.SetTitle("Inverted tau ID")
     hmtSum.Add(hmt5060)
     hmtSum.Add(hmt6070)
@@ -588,7 +559,7 @@ def mtComparison(datasets):
     mmt4050._setLegendStyles()
     mmt4050._setLegendLabels()
     mmt4050.histoMgr.setHistoDrawStyleAll("P")    
-    mmt4050.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    mmt4050.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))
     hmmt4050 = mmt4050.histoMgr.getHisto("Data").getRootHisto().Clone()
     hmmt4050.Scale(norm_4050) 
 
@@ -596,7 +567,7 @@ def mtComparison(datasets):
     mmt5060._setLegendStyles()
     mmt5060._setLegendLabels()
     mmt5060.histoMgr.setHistoDrawStyleAll("P")
-    mmt5060.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    mmt5060.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))
     hmmt5060 = mmt5060.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi5060")
     hmmt5060.Scale(norm_5060) 
 
@@ -605,7 +576,7 @@ def mtComparison(datasets):
     mmt6070._setLegendLabels()
     mmt6070.histoMgr.setHistoDrawStyleAll("P")
 
-    mmt6070.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))    
+    mmt6070.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))    
     hmmt6070 = mmt6070.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi6070")
     hmmt6070.Scale(norm_6070) 
 
@@ -613,7 +584,7 @@ def mtComparison(datasets):
     mmt7080._setLegendStyles()
     mmt7080._setLegendLabels()
     mmt7080.histoMgr.setHistoDrawStyleAll("P")
-    mmt7080.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20)) 
+    mmt7080.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4)) 
     hmmt7080 = mmt7080.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi7080")
     hmmt7080.Scale(norm_7080) 
 
@@ -621,7 +592,7 @@ def mtComparison(datasets):
     mmt80100._setLegendStyles()
     mmt80100._setLegendLabels()
     mmt80100.histoMgr.setHistoDrawStyleAll("P")
-    mmt80100.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20)) 
+    mmt80100.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4)) 
     hmmt80100 = mmt80100.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi80100")
     hmmt80100.Scale(norm_80100) 
 
@@ -629,7 +600,7 @@ def mtComparison(datasets):
     mmt100120._setLegendStyles()
     mmt100120._setLegendLabels()
     mmt100120.histoMgr.setHistoDrawStyleAll("P")
-    mmt100120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))     
+    mmt100120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))     
     hmmt100120 = mmt100120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi100120")   
     hmmt100120.Scale(norm_100120) 
 
@@ -638,7 +609,7 @@ def mtComparison(datasets):
         mmt120150._setLegendStyles()
         mmt120150._setLegendLabels()
         mmt120150.histoMgr.setHistoDrawStyleAll("P")
-        mmt120150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))      
+        mmt120150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))      
         hmmt120150 = mmt120150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi120150")
         hmmt120150.Scale(norm_120150) 
         
@@ -646,7 +617,7 @@ def mtComparison(datasets):
         mmt150._setLegendStyles()
         mmt150._setLegendLabels()
         mmt150.histoMgr.setHistoDrawStyleAll("P")
-        mmt150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+        mmt150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))  
         hmmt150 = mmt150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi150")
         hmmt150.Scale(norm_150)
         
@@ -655,7 +626,7 @@ def mtComparison(datasets):
         mmt120._setLegendLabels()
         mmt120.histoMgr.setHistoDrawStyleAll("P")
 
-        mmt120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+        mmt120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))  
         hmmt120 = mmt120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi120")
         hmmt120.Scale(norm_120)
 
@@ -664,14 +635,14 @@ def mtComparison(datasets):
     mmtBaseline._setLegendStyles()
     mmtBaseline._setLegendLabels()
     mmtBaseline.histoMgr.setHistoDrawStyleAll("P")
-    mmtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+    mmtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))  
     hmmtBaseline = mmtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
     
     mmtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mmtEWK._setLegendStyles()
     mmtEWK._setLegendLabels()
     mmtEWK.histoMgr.setHistoDrawStyleAll("P")
-    mmtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+    mmtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))  
     hmmtEWK = mmtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
     
 
@@ -759,7 +730,7 @@ def mtComparison(datasets):
     fmt4050._setLegendStyles()
     fmt4050._setLegendLabels()
     fmt4050.histoMgr.setHistoDrawStyleAll("P")    
-    fmt4050.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    fmt4050.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
     hfmt4050 = fmt4050.histoMgr.getHisto("Data").getRootHisto().Clone()
     hfmt4050.Scale(norm_4050) 
 
@@ -767,7 +738,7 @@ def mtComparison(datasets):
     fmt5060._setLegendStyles()
     fmt5060._setLegendLabels()
     fmt5060.histoMgr.setHistoDrawStyleAll("P")
-    fmt5060.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    fmt5060.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
     hfmt5060 = fmt5060.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi5060")
     hfmt5060.Scale(norm_5060) 
 
@@ -776,7 +747,7 @@ def mtComparison(datasets):
     fmt6070._setLegendLabels()
     fmt6070.histoMgr.setHistoDrawStyleAll("P")
 
-    fmt6070.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))    
+    fmt6070.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))    
     hfmt6070 = fmt6070.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi6070")
     hfmt6070.Scale(norm_6070) 
 
@@ -784,7 +755,7 @@ def mtComparison(datasets):
     fmt7080._setLegendStyles()
     fmt7080._setLegendLabels()
     fmt7080.histoMgr.setHistoDrawStyleAll("P")
-    fmt7080.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20)) 
+    fmt7080.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2)) 
     hfmt7080 = fmt7080.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi7080")
     hfmt7080.Scale(norm_7080) 
 
@@ -793,7 +764,7 @@ def mtComparison(datasets):
     fmt80100._setLegendLabels()
     fmt80100.histoMgr.setHistoDrawStyleAll("P")
 
-    fmt80100.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20)) 
+    fmt80100.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2)) 
     hfmt80100 = fmt80100.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi80100")
     hfmt80100.Scale(norm_80100) 
 
@@ -802,7 +773,7 @@ def mtComparison(datasets):
     fmt100120._setLegendLabels()
     fmt100120.histoMgr.setHistoDrawStyleAll("P")
 
-    fmt100120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))     
+    fmt100120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))     
     hfmt100120 = fmt100120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi100120")   
     hfmt100120.Scale(norm_100120) 
 
@@ -811,7 +782,7 @@ def mtComparison(datasets):
         fmt120150._setLegendStyles()
         fmt120150._setLegendLabels()
         fmt120150.histoMgr.setHistoDrawStyleAll("P")
-        fmt120150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))      
+        fmt120150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))      
         hfmt120150 = fmt120150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi120150")
         hfmt120150.Scale(norm_120150) 
         
@@ -819,7 +790,7 @@ def mtComparison(datasets):
         fmt150._setLegendStyles()
         fmt150._setLegendLabels()
         fmt150.histoMgr.setHistoDrawStyleAll("P")
-        fmt150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+        fmt150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))  
         hfmt150 = fmt150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi150")
         hfmt150.Scale(norm_150)
         
@@ -828,21 +799,21 @@ def mtComparison(datasets):
         fmt120._setLegendLabels()
         fmt120.histoMgr.setHistoDrawStyleAll("P")
 
-        fmt120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+        fmt120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))  
         hfmt120 = fmt120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi120")
         hfmt120.Scale(norm_120)
         
     fmtBaseline._setLegendStyles()
     fmtBaseline._setLegendLabels()
     fmtBaseline.histoMgr.setHistoDrawStyleAll("P")
-    fmtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+    fmtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))  
     hfmtBaseline = fmtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
     
     fmtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     fmtEWK._setLegendStyles()
     fmtEWK._setLegendLabels()
     fmtEWK.histoMgr.setHistoDrawStyleAll("P")
-    fmtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+    fmtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))  
     hfmtEWK = fmtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
     
         
@@ -926,7 +897,7 @@ def mtComparison(datasets):
     hmt4050._setLegendStyles()
     hmt4050._setLegendLabels()
     hmt4050.histoMgr.setHistoDrawStyleAll("P")    
-    hmt4050.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    hmt4050.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))
     hhmt4050 = hmt4050.histoMgr.getHisto("Data").getRootHisto().Clone()
     hhmt4050.Scale(norm_4050) 
 
@@ -934,7 +905,7 @@ def mtComparison(datasets):
     hmt5060._setLegendStyles()
     hmt5060._setLegendLabels()
     hmt5060.histoMgr.setHistoDrawStyleAll("P")
-    hmt5060.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    hmt5060.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))
     hhmt5060 = hmt5060.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi5060")
     hhmt5060.Scale(norm_5060) 
 
@@ -943,7 +914,7 @@ def mtComparison(datasets):
     hmt6070._setLegendLabels()
     hmt6070.histoMgr.setHistoDrawStyleAll("P")
 
-    hmt6070.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))    
+    hmt6070.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))    
     hhmt6070 = hmt6070.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi6070")
     hhmt6070.Scale(norm_6070) 
 
@@ -951,7 +922,7 @@ def mtComparison(datasets):
     hmt7080._setLegendStyles()
     hmt7080._setLegendLabels()
     hmt7080.histoMgr.setHistoDrawStyleAll("P")
-    hmt7080.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20)) 
+    hmt7080.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4)) 
     hhmt7080 = hmt7080.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi7080")
     hhmt7080.Scale(norm_7080) 
 
@@ -960,7 +931,7 @@ def mtComparison(datasets):
     hmt80100._setLegendLabels()
     hmt80100.histoMgr.setHistoDrawStyleAll("P")
 
-    hmt80100.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20)) 
+    hmt80100.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4)) 
     hhmt80100 = hmt80100.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi80100")
     hhmt80100.Scale(norm_80100) 
 
@@ -969,7 +940,7 @@ def mtComparison(datasets):
     hmt100120._setLegendLabels()
     fmt100120.histoMgr.setHistoDrawStyleAll("P")
 
-    hmt100120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))     
+    hmt100120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))     
     hhmt100120 = hmt100120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi100120")   
     hhmt100120.Scale(norm_100120) 
 
@@ -978,7 +949,7 @@ def mtComparison(datasets):
         hmt120150._setLegendStyles()
         hmt120150._setLegendLabels()
         hmt120150.histoMgr.setHistoDrawStyleAll("P")
-        hmt120150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))      
+        hmt120150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))      
         hhmt120150 = hmt120150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi120150")
         hhmt120150.Scale(norm_120150) 
         
@@ -986,7 +957,7 @@ def mtComparison(datasets):
         hmt150._setLegendStyles()
         hmt150._setLegendLabels()
         hmt150.histoMgr.setHistoDrawStyleAll("P")
-        hmt150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+        hmt150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))  
         hhmt150 = hmt150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi150")
         hhmt150.Scale(norm_150)
         
@@ -995,7 +966,7 @@ def mtComparison(datasets):
         hmt120._setLegendLabels()
         hmt120.histoMgr.setHistoDrawStyleAll("P")
 
-        hmt120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
+        hmt120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))  
         hhmt120 = hmt120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi120")
         hhmt120.Scale(norm_120)
         
@@ -1163,7 +1134,7 @@ def mtComparison(datasets):
        
     canvas33 = ROOT.TCanvas("canvas33","",500,500)
     canvas33.SetLogy()
-    frame33 = histograms._drawFrame(canvas33, xmin=0, xmax=6, ymin=1, ymax=1e3)
+    frame33 = histograms._drawFrame(canvas33, xmin=0, xmax=6, ymin=0.01, ymax=1e4)
     frame33.Draw()
                
     NBjets.SetMarkerColor(4)
@@ -1215,14 +1186,367 @@ def mtComparison(datasets):
     canvas33.Print("NBjets.png")
     canvas33.Print("NBjets.C")
 
-### selection flow
-    selectionFlow = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/SignalSelectionFlow")])
-    selectionFlow._setLegendStyles()
-    selectionFlow._setLegendLabels()
-    selectionFlow.histoMgr.setHistoDrawStyleAll("P")    
-    selectionFlow.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
-    hselectionFlow = selectionFlow.histoMgr.getHisto("Data").getRootHisto().Clone()
-#    hselectionFlow.Scale(norm_inc) 
+
+
+################## N jets
+    
+    j4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJet4050")])
+    j5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJet5060")])
+    j6070 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJet6070")])
+    j7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJet7080")])
+    j80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJet80100")])
+    j100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJet100120")])
+    if lastPtBin150: 
+        j120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJet120150")])
+        j150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJet150")])
+    if lastPtBin120: 
+        j120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJet120")])
+    j = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJet")])
+    jBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetBaselineTauIdJet")])
+    jEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/NJetBaselineTauIdJet")])
+ 
+       
+    j4050._setLegendStyles()
+    j4050._setLegendLabels()
+    j4050.histoMgr.setHistoDrawStyleAll("P")    
+    j4050.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
+    hj4050 = j4050.histoMgr.getHisto("Data").getRootHisto().Clone()
+    hj4050.Scale(norm_4050) 
+
+    
+    j5060._setLegendStyles()
+    j5060._setLegendLabels()
+    j5060.histoMgr.setHistoDrawStyleAll("P")
+    j5060.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
+    hj5060 = j5060.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NJetInvertedTauIdJet5060")
+    hj5060.Scale(norm_5060) 
+
+
+    j6070._setLegendStyles()
+    j6070._setLegendLabels()
+    j6070.histoMgr.setHistoDrawStyleAll("P")
+    j6070.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))    
+    hj6070 = j6070.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NJetInvertedTauIdJet6070")
+    hj6070.Scale(norm_6070) 
+
+    
+    j7080._setLegendStyles()
+    j7080._setLegendLabels()
+    j7080.histoMgr.setHistoDrawStyleAll("P")
+    j7080.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1)) 
+    hj7080 = j7080.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NJetInvertedTauIdJet7080")
+    hj7080.Scale(norm_7080) 
+
+    
+    j80100._setLegendStyles()
+    j80100._setLegendLabels()
+    j80100.histoMgr.setHistoDrawStyleAll("P")
+
+    j80100.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1)) 
+    hj80100 = j80100.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NJetInvertedTauIdJet80100")
+    hj80100.Scale(norm_80100) 
+
+    
+    j100120._setLegendStyles()
+    j100120._setLegendLabels()
+    j100120.histoMgr.setHistoDrawStyleAll("P")
+
+    j100120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))     
+    hj100120 = j100120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NJetInvertedTauIdJet100120")   
+    hj100120.Scale(norm_100120) 
+
+
+    if lastPtBin150:    
+        j120150._setLegendStyles()
+        j120150._setLegendLabels()
+        j120150.histoMgr.setHistoDrawStyleAll("P")
+        j120150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))      
+        hj120150 = j120150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NJetInvertedTauIdJet120150")
+        hj120150.Scale(norm_120150) 
+        
+        
+        j150._setLegendStyles()
+        j150._setLegendLabels()
+        j150.histoMgr.setHistoDrawStyleAll("P")
+        j150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
+        hj150 = j150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NJetInvertedTauIdJet150")
+        hj150.Scale(norm_150)
+        
+    if lastPtBin120:
+        j120._setLegendStyles()
+        j120._setLegendLabels()
+        j120.histoMgr.setHistoDrawStyleAll("P")
+
+        j120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
+        hj120 = j120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NJetInvertedTauIdJet120")
+        hj120.Scale(norm_120)
+
+
+    jBaseline._setLegendStyles()
+    jBaseline._setLegendLabels()
+    jBaseline.histoMgr.setHistoDrawStyleAll("P")
+    jBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
+    hjBaseline = jBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NBBaselineTauIdJet")
+    
+    jEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    jEWK._setLegendStyles()
+    jEWK._setLegendLabels()
+    jEWK.histoMgr.setHistoDrawStyleAll("P")
+    jEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
+    hjEWK =  jEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/NBBaselineTauIdJet")
+    
+
+        
+    Njets = hj4050.Clone("hj4050")
+    Njets.SetName("Njets")
+    Njets.SetTitle("Inverted tau ID")
+    Njets.Add(hj5060)
+    Njets.Add(hj6070)
+    Njets.Add(hj7080)
+    Njets.Add(hj80100)
+    Njets.Add(hj100120)
+    if lastPtBin150:
+        Njets.Add(hj120150)
+        Njets.Add(hj150)
+    if lastPtBin120:
+        Njets.Add(hj120)        
+    print "Njets Integral  = ",Njets.Integral()
+
+       
+    canvas34 = ROOT.TCanvas("canvas34","",500,500)
+    canvas34.SetLogy()
+    frame34 = histograms._drawFrame(canvas33, xmin=0, xmax=10, ymin=1, ymax=1e5)
+    frame34.Draw()
+               
+    Njets.SetMarkerColor(4)
+    Njets.SetMarkerSize(1)
+    Njets.SetMarkerStyle(20)
+    Njets.SetFillColor(4)
+    Njets.Draw("EP same")
+
+    Njets_QCD = hjBaseline.Clone("QCD")
+    Njets_QCD.Add(hjEWK,-1)
+    Njets_QCD.SetMarkerColor(2)
+    Njets_QCD.SetMarkerSize(1)
+    Njets_QCD.SetMarkerStyle(21)
+    Njets_QCD.Draw("same")
+    
+    tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
+    tex4.SetNDC()
+    tex4.SetTextSize(20)
+    tex4.Draw()
+    tex2 = ROOT.TLatex(0.55,0.85,"Inverted #tau isolation")
+    tex2.SetNDC()
+    tex2.SetTextSize(20)
+    tex2.Draw()    
+    marker2 = ROOT.TMarker(0.5,0.865,Njets.GetMarkerStyle())
+    marker2.SetNDC()
+    marker2.SetMarkerColor(Njets.GetMarkerColor())
+    marker2.SetMarkerSize(0.9*Njets.GetMarkerSize())
+    marker2.Draw()
+    
+    tex9 = ROOT.TLatex(0.55,0.78,"Baseline: Data-EWK") 
+    tex9.SetNDC()
+    tex9.SetTextSize(20)
+    tex9.Draw()
+    marker9 = ROOT.TMarker(0.5,0.795,Njets_QCD.GetMarkerStyle())
+    marker9.SetNDC()
+    marker9.SetMarkerColor(Njets_QCD.GetMarkerColor())
+    marker9.SetMarkerSize(0.9*Njets_QCD.GetMarkerSize())
+    
+    marker9.Draw()
+            
+             
+    tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
+    tex4.SetNDC()
+    tex4.SetTextSize(20)
+    tex4.Draw()
+    
+    
+    Njets.GetXaxis().SetTitle("N_{jets}")
+    Njets.GetYaxis().SetTitle("Events  ")
+    canvas34.Print("Njets.png")
+    canvas34.Print("Njets.C")
+
+################## N jets after MET
+    
+    jm4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJetMet4050")])
+    jm5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJetMet5060")])
+    jm6070 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJetMet6070")])
+    jm7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJetMet7080")])
+    jm80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJetMet80100")])
+    jm100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJetMet100120")])
+    if lastPtBin150: 
+        jm120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJetMet120150")])
+        jm150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJetMet150")])
+    if lastPtBin120: 
+        jm120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJetMet120")])
+    jm = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJetMet")])
+    jmBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetBaselineTauIdJetMet")])
+    jmEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/NJetBaselineTauIdJetMet")])
+ 
+       
+    jm4050._setLegendStyles()
+    jm4050._setLegendLabels()
+    jm4050.histoMgr.setHistoDrawStyleAll("P")    
+    jm4050.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
+    hjm4050 = jm4050.histoMgr.getHisto("Data").getRootHisto().Clone()
+    hjm4050.Scale(norm_4050) 
+
+    
+    jm5060._setLegendStyles()
+    jm5060._setLegendLabels()
+    jm5060.histoMgr.setHistoDrawStyleAll("P")
+    jm5060.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
+    hjm5060 = jm5060.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NJetInvertedTauIdJetMet5060")
+    hjm5060.Scale(norm_5060) 
+
+
+    jm6070._setLegendStyles()
+    jm6070._setLegendLabels()
+    jm6070.histoMgr.setHistoDrawStyleAll("P")
+    jm6070.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))    
+    hjm6070 = jm6070.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NJetInvertedTauIdJetMet6070")
+    hjm6070.Scale(norm_6070) 
+
+    
+    jm7080._setLegendStyles()
+    jm7080._setLegendLabels()
+    jm7080.histoMgr.setHistoDrawStyleAll("P")
+    jm7080.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1)) 
+    hjm7080 = jm7080.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NJetInvertedTauIdJetMet7080")
+    hjm7080.Scale(norm_7080) 
+
+    
+    jm80100._setLegendStyles()
+    jm80100._setLegendLabels()
+    jm80100.histoMgr.setHistoDrawStyleAll("P")
+
+    jm80100.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1)) 
+    hjm80100 = jm80100.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NJetInvertedTauIdJetMet80100")
+    hjm80100.Scale(norm_80100) 
+
+    
+    jm100120._setLegendStyles()
+    jm100120._setLegendLabels()
+    jm100120.histoMgr.setHistoDrawStyleAll("P")
+
+    jm100120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))     
+    hjm100120 = jm100120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NJetInvertedTauIdJetMet100120")   
+    hjm100120.Scale(norm_100120) 
+
+
+    if lastPtBin150:    
+        jm120150._setLegendStyles()
+        jm120150._setLegendLabels()
+        jm120150.histoMgr.setHistoDrawStyleAll("P")
+        jm120150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))      
+        hjm120150 = jm120150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NJetInvertedTauIdJetMet120150")
+        hjm120150.Scale(norm_120150) 
+        
+        
+        jm150._setLegendStyles()
+        jm150._setLegendLabels()
+        jm150.histoMgr.setHistoDrawStyleAll("P")
+        jm150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
+        hjm150 = jm150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NJetInvertedTauIdJetMet150")
+        hjm150.Scale(norm_150)
+        
+    if lastPtBin120:
+        jm120._setLegendStyles()
+        jm120._setLegendLabels()
+        jm120.histoMgr.setHistoDrawStyleAll("P")
+
+        jm120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
+        hjm120 = jm120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NJetInvertedTauIdJetMet120")
+        hjm120.Scale(norm_120)
+
+
+    jmBaseline._setLegendStyles()
+    jmBaseline._setLegendLabels()
+    jmBaseline.histoMgr.setHistoDrawStyleAll("P")
+    jmBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
+    hjmBaseline = jmBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NBBaselineTauIdJet")
+    
+    jmEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    jmEWK._setLegendStyles()
+    jmEWK._setLegendLabels()
+    jmEWK.histoMgr.setHistoDrawStyleAll("P")
+    jmEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
+    hjmEWK =  jmEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/NBBaselineTauIdJet")
+    
+
+        
+    NjetsAfterMET = hjm4050.Clone("bhmtSum")
+    NjetsAfterMET.SetName("NjetsAfterMET")
+    NjetsAfterMET.SetTitle("Inverted tau ID")
+    NjetsAfterMET.Add(hjm5060)
+    NjetsAfterMET.Add(hjm6070)
+    NjetsAfterMET.Add(hjm7080)
+    NjetsAfterMET.Add(hjm80100)
+    NjetsAfterMET.Add(hjm100120)
+    if lastPtBin150:
+        NjetsAfterMET.Add(hjm120150)
+        NjetsAfterMET.Add(hjm150)
+    if lastPtBin120:
+        NjetsAfterMET.Add(hjm120)        
+    print "NjetsAfterMET Integral  = ",NjetsAfterMET.Integral()
+
+       
+    canvas35 = ROOT.TCanvas("canvas35","",500,500)
+    canvas35.SetLogy()
+    frame35 = histograms._drawFrame(canvas33, xmin=0, xmax=10, ymin=1, ymax=1e4)
+    frame35.Draw()
+               
+    NjetsAfterMET.SetMarkerColor(4)
+    NjetsAfterMET.SetMarkerSize(1)
+    NjetsAfterMET.SetMarkerStyle(20)
+    NjetsAfterMET.SetFillColor(4)
+    NjetsAfterMET.Draw("EP same")
+
+    NjetsAfterMET_QCD = hjmBaseline.Clone("QCD")
+    NjetsAfterMET_QCD.Add(hjmEWK,-1)
+    NjetsAfterMET_QCD.SetMarkerColor(2)
+    NjetsAfterMET_QCD.SetMarkerSize(1)
+    NjetsAfterMET_QCD.SetMarkerStyle(21)
+    NjetsAfterMET_QCD.Draw("same")
+    
+    tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
+    tex4.SetNDC()
+    tex4.SetTextSize(20)
+    tex4.Draw()
+    tex2 = ROOT.TLatex(0.55,0.85,"Inverted #tau isolation")
+    tex2.SetNDC()
+    tex2.SetTextSize(20)
+    tex2.Draw()    
+    marker2 = ROOT.TMarker(0.5,0.865,NjetsAfterMET.GetMarkerStyle())
+    marker2.SetNDC()
+    marker2.SetMarkerColor(NjetsAfterMET.GetMarkerColor())
+    marker2.SetMarkerSize(0.9*NjetsAfterMET.GetMarkerSize())
+    marker2.Draw()
+    
+    tex9 = ROOT.TLatex(0.55,0.78,"Baseline: Data-EWK") 
+    tex9.SetNDC()
+    tex9.SetTextSize(20)
+    tex9.Draw()
+    marker9 = ROOT.TMarker(0.5,0.795,NjetsAfterMET_QCD.GetMarkerStyle())
+    marker9.SetNDC()
+    marker9.SetMarkerColor(NjetsAfterMET_QCD.GetMarkerColor())
+    marker9.SetMarkerSize(0.9*NjetsAfterMET_QCD.GetMarkerSize())
+    
+    marker9.Draw()
+            
+             
+    tex4 = ROOT.TLatex(0.2,0.95,"7 TeV       5.05 fb^{-1}       CMS Preliminary ")
+    tex4.SetNDC()
+    tex4.SetTextSize(20)
+    tex4.Draw()
+    
+    
+    NjetsAfterMET.GetXaxis().SetTitle("N_{jets}")
+    NjetsAfterMET.GetYaxis().SetTitle("Events  ")
+    canvas35.Print("NjetsAfterMET.png")
+    canvas35.Print("NjetsAfterMET.C")
     
 ##########################################################################            
     fOUT = ROOT.TFile.Open("histogramsForLands.root","RECREATE")
@@ -1231,8 +1555,9 @@ def mtComparison(datasets):
     DeltaPhi.Write()
     FullMass.Write()
     NBjets.Write()
+    Njets.Write()
+    NjetsAfterMET.Write()
     met.Write()
-    hselectionFlow.Write()
     fOUT.Close()
 
 
