@@ -344,7 +344,7 @@ datasets.extend([
     MCDataset("HplusTB_M190_ext_Summer12",   crossSection=None, aod="/HplusTB_M-190_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     MCDataset("HplusTB_M200_ext_Summer12",   crossSection=None, aod="/HplusTB_M-200_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     MCDataset("HplusTB_M220_ext_Summer12",   crossSection=None, aod="/HplusTB_M-220_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
-#    MCDataset("HplusTB_M250_ext_Summer12",   crossSection=None, aod=""),
+    MCDataset("HplusTB_M250_ext_Summer12",   crossSection=None, aod="/HplusTB_M-250_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     MCDataset("HplusTB_M300_ext_Summer12",   crossSection=None, aod="/HplusTB_M-300_8TeV_ext-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM"),
     # QCD backgrounds, 6 Mevt/sample
     # Cross sections from [0]
