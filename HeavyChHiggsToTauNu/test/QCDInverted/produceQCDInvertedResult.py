@@ -36,6 +36,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import execute,addConfigInfo
 
 analysis = "signalAnalysisInvertedTau"
+dataEra = "Run2011AB"
 
 ############################################################
 #
@@ -117,7 +118,9 @@ def main():
     f.write("CMSSW.pset = signalAnalysisInvertedTau_cfg.py\n")
     f.close()
 
-    datasetsQCDInv = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirQCDInv+"/multicrab.cfg", counters=analysis+"/counters", includeOnlyTasks="Tau_")
+        
+   
+    datasetsQCDInv = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirQCDInv+"/multicrab.cfg", dataEra=dataEra, counters=analysis+"/counters", includeOnlyTasks="Tau_")
     datasetsQCDInv.loadLuminosities()
     datasetsQCDInv.mergeData()
         

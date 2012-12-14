@@ -16,7 +16,7 @@ def createEDFilter(param):
         GlobalMuonVeto = param.GlobalMuonVeto.clone(),
 #    GlobalMuonVeto = param.NonIsolatedMuonVeto.clone(),
     # Change default tau algorithm here as needed
-        tauSelection = param.tauSelectionHPSMediumTauBased.clone(),
+        tauSelection = param.tauSelectionHPSTightTauBased.clone(),
         fakeTauSFandSystematics = param.fakeTauSFandSystematics.clone(),
         vetoTauSelection = param.vetoTauSelection.clone(),
         jetSelection = param.jetSelection.clone(),
