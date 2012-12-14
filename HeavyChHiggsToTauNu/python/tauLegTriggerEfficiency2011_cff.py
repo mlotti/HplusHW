@@ -618,3 +618,57 @@ tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium = c
     mcSelect = cms.string("Fall11_PU_2011AB"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
+
+
+# Generated on Fri Dec 14 15:09:47 2012
+# by HiggsAnalysis/TriggerEfficiency/test/PythonWriter.py
+
+tauLegEfficiency_HIG11019_byTightIsolation_againstElectronMedium = cms.untracked.PSet(
+    # The selected triggers for the efficiency. If one trigger is
+    # given, the parametrization of it is used as it is (i.e.
+    # luminosity below is ignored). If multiple triggers are given,
+    # their parametrizations are used weighted by the luminosities
+    # given below.
+    # selectTriggers = cms.VPSet(
+    #     cms.PSet(
+    #         trigger = cms.string("HLT_IsoPFTau35_Trk20_EPS"),
+    #         luminosity = cms.double(0)
+    #     ),
+    # ),
+    # The parameters of the trigger efficiency parametrizations,
+    # looked dynamically from TriggerEfficiency_cff.py
+
+    # Offline selection: PFTauPt > 20 && abs(PFTauEta) < 2.1&& 1/PFTauInvPt > 20&& PFTauProng == 1&& againstMuonTight > 0.5&& MuonTauInvMass < 80&& againstElectronMedium > 0.5&& byTightIsolation
+
+    dataParameters = cms.PSet(
+        # Dummy
+        runs_160404_173692 = cms.PSet(
+            firstRun = cms.uint32(160404),
+            lastRun = cms.uint32(173692),
+            luminosity = cms.double(2332.834), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.00840336134454, 0.00411804802463),
+                triggerBin(30.0, 0.130708661417, 0.0147758793254),
+                triggerBin(40.0, 0.534759358289, 0.0392360547133),
+                triggerBin(50.0, 0.851851851852, 0.101731447858),
+                triggerBin(60.0, 0.909090909091, 0.10754400896),
+                triggerBin(80.0, 0.8, 0.205453750763),
+            ),
+        ),
+    ),
+    mcParameters = cms.PSet(
+        Fall11_PU_2011A = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0284237726098, 0.00265336632312),
+                triggerBin(30.0, 0.208799048751, 0.00645687976437),
+                triggerBin(40.0, 0.61118251928, 0.0127487312099),
+                triggerBin(50.0, 0.897832817337, 0.0197409075766),
+                triggerBin(60.0, 0.935483870968, 0.0302785222487),
+                triggerBin(80.0, 1.0, 0.0461088219835),
+            ),
+        ),
+    ),
+    dataSelect = cms.vstring(),
+    mcSelect = cms.string("Fall11_PU_2011A"),
+    mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
+)
