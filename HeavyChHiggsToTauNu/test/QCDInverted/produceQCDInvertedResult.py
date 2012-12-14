@@ -36,6 +36,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import execute,addConfigInfo
 
 analysis = "signalAnalysisInvertedTau"
+massPlot = "transverseMass"
 
 ############################################################
 #
@@ -141,7 +142,7 @@ def main():
     for h in histograms:
         histo = fIN.Get(h.GetName())
         integral = histo.Integral(0, histo.GetNbinsX()+1)
-        if h.GetName() == "mtSum":
+        if h.GetName() == massPlot:
             histo.Write()
         else:
             anadir.cd("ControlPlots")
