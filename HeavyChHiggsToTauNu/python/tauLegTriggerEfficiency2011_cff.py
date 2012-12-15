@@ -641,6 +641,47 @@ tauLegEfficiency_HIG11019_byTightIsolation_againstElectronMedium = cms.untracked
     # Offline selection: PFTauPt > 20 && abs(PFTauEta) < 2.1&& 1/PFTauInvPt > 20&& PFTauProng == 1&& againstMuonTight > 0.5&& MuonTauInvMass < 80&& againstElectronMedium > 0.5&& byTightIsolation
 
     dataParameters = cms.PSet(
+        # L1_SingleTauJet52 OR L1_SingleJet68 + HLT_IsoPFTau35_Trk20_MET45 (Run2011A)             
+        runs_160404_167913 = cms.PSet(
+            firstRun = cms.uint32(160404),
+            lastRun = cms.uint32(167913),
+            luminosity = cms.double(1197), # 1/pb                                                 
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0121028744327, 0.00591448641849),
+                triggerBin(30.0, 0.120649651972, 0.0177887502724),
+                triggerBin(40.0, 0.523076923077, 0.0476461275869),
+                triggerBin(50.0, 0.875, 0.141688278764),
+                triggerBin(60.0, 0.833333333333, 0.179009937646),
+                triggerBin(80.0, 1.0, 0.231260479746),
+            ),
+        ),
+        # L1_Jet52_Central + HLT_IsoPFTau35_Trk20_MET60 (Run2011A)                                
+        runs_170722_173198 = cms.PSet(
+            firstRun = cms.uint32(170722),
+            lastRun = cms.uint32(173198),
+            luminosity = cms.double(870.119), # 1/pb                                              
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0, 0.00840949412431),
+                triggerBin(30.0, 0.15625, 0.0341454601593),
+                triggerBin(40.0, 0.558139534884, 0.0877457601959),
+                triggerBin(50.0, 0.75, 0.239566802733),
+                triggerBin(60.0, 1.0, 0.26422943474),
+                triggerBin(80.0, 0.333333333333, 0.414534706285),
+            ),
+        ),
+        # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011A)                         
+        runs_173236_173692 = cms.PSet(
+            firstRun = cms.uint32(173236),
+            lastRun = cms.uint32(173692),
+            luminosity = cms.double(265.715), # 1/pb                                             
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0, 0.0249041202257),
+                triggerBin(30.0, 0.136363636364, 0.0725604176231),
+                triggerBin(40.0, 0.5, 0.161982400205),
+                triggerBin(50.0, 1.0, 0.458641675296),
+                triggerBin(60.0, 1.0, 0.36887757085),
+            ),
+        ),
         # Dummy
         runs_160404_173692 = cms.PSet(
             firstRun = cms.uint32(160404),
@@ -657,6 +698,36 @@ tauLegEfficiency_HIG11019_byTightIsolation_againstElectronMedium = cms.untracked
         ),
     ),
     mcParameters = cms.PSet(
+        Fall11_PU_2011A_RR1 = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0295683027794, 0.00257436085358),
+                triggerBin(30.0, 0.21243748641, 0.00620341657711),
+                triggerBin(40.0, 0.609181871689, 0.0121941985103),
+                triggerBin(50.0, 0.901408450704, 0.0184601766587),
+                triggerBin(60.0, 0.942446043165, 0.027159470536),
+                triggerBin(80.0, 1.0, 0.0461088219835),
+            ),
+        ),
+        Fall11_PU_2011A_RR2 = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0272373540856, 0.00269155026795),
+                triggerBin(30.0, 0.205160637491, 0.00662475769456),
+                triggerBin(40.0, 0.611225188227, 0.0131692805333),
+                triggerBin(50.0, 0.893687707641, 0.0208513955068),
+                triggerBin(60.0, 0.930434782609, 0.032517962587),
+                triggerBin(80.0, 1.0, 0.0461088219835),
+            ),
+        ),
+        Fall11_PU_2011A_RR3 = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 0.0247566063978, 0.00287170998078),
+                triggerBin(30.0, 0.198767334361, 0.00725380626745),
+                triggerBin(40.0, 0.624691358025, 0.0144025029502),
+                triggerBin(50.0, 0.880478087649, 0.0241151722443),
+                triggerBin(60.0, 0.931034482759, 0.0389211715295),
+                triggerBin(80.0, 1.0, 0.047293062182),
+            ),
+        ),
         Fall11_PU_2011A = cms.PSet(
             bins = cms.VPSet(
                 triggerBin(20.0, 0.0284237726098, 0.00265336632312),
