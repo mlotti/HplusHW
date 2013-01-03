@@ -54,12 +54,16 @@ def constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow, workflowNa
         outputLumiMask = outputLumiMaskData
         if outputLumiMask is None:
             reco = dataset.getName().split("_")[-1]
-            outputLumiMask = {
-                "Jul13": "13Jul2012ReReco",
-                "Aug06": "06Aug2012ReReco",
-                "Aug24": "24Aug2012ReReco",
-                "Prompt": "PromptReco12"
-                }[reco]
+            try:
+                outputLumiMask = {
+                    "Jul13": "13Jul2012ReReco",
+                    "Aug06": "06Aug2012ReReco",
+                    "Aug24": "24Aug2012ReReco",
+                    "Dec11": "11Dec2012ReReco",
+                    "Prompt": "PromptReco12"
+                    }[reco]
+            except KeyError:
+                raise Exception("No output lumi mask defined for reco '%s' (dataset %s). Define one in python/tools/certifiedLumi.py, and add a 'link' to a dictionary in here" % (reco, dataset.getName()))
 
     return _constructProcessingWorkflow_common(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMask, outputLumiMask, **kwargs)
 
