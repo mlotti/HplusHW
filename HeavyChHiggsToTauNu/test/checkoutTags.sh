@@ -73,6 +73,7 @@ set -e
 # 25.10.2012/M.Kortelainen CMSSW_5_3_5 Updated for running runMEtUncertainties() multiple times
 # 26.10.2012/M.Kortelainen CMSSW_5_3_5 Updated metUncertaintyTools
 # 12.12.2012/M.Kortelainen CMSSW_5_3_7 Updated tau/PAT tags
+# 3.1.2013/M.Kortelainen CMSSW_5_3_7 Updated tau tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -100,15 +101,12 @@ addpkg RecoParticleFlow/PFProducer V15-02-06
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePFTauID#2012_CMSSW_4_X_X_Recipe
 #
 # Tau
-addpkg RecoTauTag/RecoTau         V01-04-20
-addpkg RecoTauTag/Configuration   V01-04-08
-addpkg CondFormats/EgammaObjects  V00-04-01
+addpkg RecoTauTag/RecoTau         V01-04-23
+addpkg RecoTauTag/Configuration   V01-04-10
+addpkg CondFormats/EgammaObjects  V00-04-00
 # PAT
-##### New tau discriminators, electron MVA discriminator
-#cvs up -r 1.57 PhysicsTools/PatAlgos/python/tools/tauTools.py
-#cvs up -r 1.13 PhysicsTools/PatAlgos/python/producersLayer1/tauProducer_cff.py
-#cvs up -r 1.15 PhysicsTools/PatAlgos/python/recoLayer0/tauDiscriminators_cff.py
-#cvs up -r 1.5 RecoTauTag/Configuration/python/updateHPSPFTaus_cff.py
+cvs up -r 1.31.6.4 PhysicsTools/PatAlgos/python/producersLayer1/tauProducer_cfi.py
+cvs up -r 1.52.10.4 PhysicsTools/PatAlgos/python/tools/tauTools.py
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
