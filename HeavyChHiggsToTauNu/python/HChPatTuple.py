@@ -620,23 +620,37 @@ class StandardPATBuilder(PATBuilderBase):
                 "keep *_genMetTrue_*_*", # keep generator level MET
                 ])
 
+        self.process.load("PhysicsTools.PatUtils.patPFMETCorrections_cff")
+        # For Type 0 MET hack, include the producers in the sequence,
+        # but not to the default corrected-MET producers
+        self.process.producePatPFMETCorrections.replace(self.process.patPFJetMETtype2Corr,
+                                                        (self.process.patPFJetMETtype2Corr+self.process.type0PFMEtCorrection+self.process.patPFMETtype0Corr))
+
+
         if self.dataVersion.isData():
-            self.process.load("PhysicsTools.PatUtils.patPFMETCorrections_cff")
             for postfix in jetPostfixes:
                 jets = getattr(self.process, "selectedPatJets"+postfix).src.value()
 
-                if postfix != "":
-                    patHelpers.cloneProcessingSnippet(self.process, self.process.producePatPFMETCorrections, postfix)
-                getattr(self.process, "selectedPatJetsForMETtype1p2Corr"+postfix).src = jets
-                getattr(self.process, "selectedPatJetsForMETtype2Corr"+postfix).src = jets
-                getattr(self.process, "patPFMet"+postfix).addGenMET = False
+                for pfix in [postfix, postfix+"Type0"]:
+                    if pfix != "":
+                        patHelpers.cloneProcessingSnippet(self.process, self.process.producePatPFMETCorrections, pfix)
+                    getattr(self.process, "selectedPatJetsForMETtype1p2Corr"+pfix).src = jets
+                    getattr(self.process, "selectedPatJetsForMETtype2Corr"+pfix).src = jets
+                    getattr(self.process, "patPFMet"+pfix).addGenMET = False
+                    if "Type0" in pfix:
+                        getattr(self.process, "patType1CorrectedPFMet"+pfix).srcType1Corrections.append(cms.InputTag('patPFMETtype0Corr'+pfix))
+                        getattr(self.process, "patType1p2CorrectedPFMet"+pfix).srcType1Corrections.append(cms.InputTag('patPFMETtype0Corr'+pfix))
 
-                seq *= getattr(self.process, "producePatPFMETCorrections"+postfix)
-                self.outputCommands.extend([
-                        "keep *_patPFMet%s_*_*" % postfix,
-                        "keep *_patType1CorrectedPFMet%s_*_*" % postfix,
-                        "keep *_patType1p2CorrectedPFMet%s_*_*" % postfix,
-                        ])
+                    seq *= getattr(self.process, "producePatPFMETCorrections"+pfix)
+
+                    # Type 0 correction is included only in Type1 and
+                    # Type1p2 MET objects
+                    if not "Type0" in pfix:
+                        self.outputCommands.append("keep *_patPFMet%s_*_*" % pfix)
+                    self.outputCommands.extend([
+                            "keep *_patType1CorrectedPFMet%s_*_*" % pfix,
+                            "keep *_patType1p2CorrectedPFMet%s_*_*" % pfix,
+                            ])
             return
 
         # Following is for MC only
@@ -666,6 +680,28 @@ class StandardPATBuilder(PATBuilderBase):
                                                     outputModule=outputModule,
                                                     postfix=postfix,
                                                     )
+            # Another version of MET+variations with Type 0 correction
+            metUncertaintyTools.runMEtUncertainties(self.process,
+                                                    electronCollection="",
+                                                    photonCollection="",
+                                                    muonCollection="",
+                                                    tauCollection="",
+                                                    jetCollection=jets,
+                                                    doSmearJets=self.dataVersion.isMC(),
+                                                    doApplyType0corr=True,
+                                                    outputModule=outputModule,
+                                                    postfix=postfix+"Type0",
+                                                    )
+
+            processName = self.process.name_()
+            # Drop jet collections with "Type0" in their name, their
+            # just duplicates of the usual jets. Also drop uncorrected
+            # "Type0", since Type 0 corrections are included only in
+            # Type1 and Type1p2 MET objects
+            self.process.out.outputCommands.extend([
+                    "drop patJets_*%sType0_*_%s" % (postfix, processName),
+                    "drop *_patPFMet%sType0_*_%s" % (postfix, processName),
+                    ])
 
             # Add "selected"-collections for all jets
             # "All" name "shiftedPatJetsBetaEmbeddedPFlowEnUpForCorrMEt"
@@ -704,9 +740,8 @@ class StandardPATBuilder(PATBuilderBase):
             if outputModule != "":
                 self.outputCommands.extend(getattr(self.process, outputModule).outputCommands)
                 self.process.out.outputCommands = []
-    
-    
-                processName = self.process.name_()
+
+   
                 # Drop "all" shifted/smeared jet collections in favor of
                 # the "selected" collections. We don't need the
                 # "ForRawMEt" energy variations.
