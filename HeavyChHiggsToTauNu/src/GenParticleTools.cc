@@ -15,6 +15,27 @@ namespace HPlus {
       return 0;
     }                                                                               
 
+    const reco::GenParticle *rewindChainDown(const reco::GenParticle *particle) {
+      const reco::GenParticle *tmp = particle;
+      int pdgId = particle->pdgId();
+      bool daughterIsSame = true;
+      while(daughterIsSame) {
+        daughterIsSame = false;
+        size_t n = tmp->numberOfDaughters();
+        std::cout << "Daughters " << n << std::endl;
+        for(size_t i=0; i<n; ++i) {
+          std::cout << "  daughter " << i << std::endl;
+          std::cout << "    pdgId " << tmp->daughter(i)->pdgId() << std::endl;
+          if(tmp->daughter(i)->pdgId() == pdgId) {
+            tmp = dynamic_cast<const reco::GenParticle *>(tmp->daughter(i));
+            daughterIsSame = true;
+            break;
+          }
+        }
+      }
+      return tmp;
+    }                                                                               
+
     const reco::GenParticle *findMother(const reco::GenParticle *particle) {
       const reco::GenParticle *tmp = particle;
       int pdgId = particle->pdgId();
@@ -28,6 +49,16 @@ namespace HPlus {
       return 0;
     }
 
+    const reco::GenParticle *hasMother(const reco::GenParticle *particle, unsigned pdgId) {
+      const reco::GenParticle *tmp = particle;
+      while(const reco::GenParticle *mother = dynamic_cast<const reco::GenParticle *>(tmp->mother())) {
+        if(static_cast<unsigned>(std::abs(mother->pdgId())) == pdgId)
+          return mother;
+        tmp = mother;
+      }
+      return 0;
+    }
+
     const reco::GenParticle *findMaxNonNeutrinoDaughter(const reco::GenParticle *particle) {
       const reco::GenParticle *daughter = 0;
       int did = 0;
@@ -37,6 +68,8 @@ namespace HPlus {
         int id = particle->daughter(i)->pdgId();
         int ida = std::abs(id);
         if(ida == 12 || ida == 14 || ida == 16)
+          continue;
+        if(id == particle->pdgId())
           continue;
         if(ida > std::abs(did)) {
           did = id;
