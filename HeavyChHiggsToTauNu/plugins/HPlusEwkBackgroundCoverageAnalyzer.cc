@@ -122,10 +122,10 @@ namespace {
       // Lepton veto
       for(size_t i=0; i<fIdentifiedElectrons.size(); ++i) {
         if(fLeptonVetoIdentified == kLeptonNone) {
-          if(reco::deltaR(*fIdentifiedElectrons[i], *w1daughter) < fMatchDR)
+          if(w1daughter->pt() > 10 && reco::deltaR(*fIdentifiedElectrons[i], *w1daughter) < fMatchDR)
             fLeptonVetoIdentified = kLeptonTau1;
-          else if(reco::deltaR(*fIdentifiedElectrons[i], *w2daughter1) < fMatchDR ||
-                  (w2daughter2 && reco::deltaR(*fIdentifiedElectrons[i], *w2daughter2) < fMatchDR))
+          else if((w2daughter1->pt() > 10 && reco::deltaR(*fIdentifiedElectrons[i], *w2daughter1) < fMatchDR) ||
+                  (w2daughter2 && w2daughter2->pt() > 10 && reco::deltaR(*fIdentifiedElectrons[i], *w2daughter2) < fMatchDR))
             fLeptonVetoIdentified = kLeptonObj2;
         }
         // Non-W1-daughter and non-W2-daughter object identified in lepton veto
@@ -134,16 +134,20 @@ namespace {
       }
       for(size_t i=0; i<fIdentifiedMuons.size(); ++i) {
         if(fLeptonVetoIdentified == kLeptonNone) {
-          if(reco::deltaR(*fIdentifiedMuons[i], *w1daughter) < fMatchDR)
+          if(w1daughter->pt() > 10 && reco::deltaR(*fIdentifiedMuons[i], *w1daughter) < fMatchDR)
             fLeptonVetoIdentified = kLeptonTau1;
-          else if(reco::deltaR(*fIdentifiedMuons[i], *w2daughter1) < fMatchDR ||
-                  (w2daughter2 && reco::deltaR(*fIdentifiedMuons[i], *w2daughter2) < fMatchDR))
+          else if((w2daughter1->pt() > 10 && reco::deltaR(*fIdentifiedMuons[i], *w2daughter1) < fMatchDR) ||
+                  (w2daughter2 && w2daughter2->pt() > 10 && reco::deltaR(*fIdentifiedMuons[i], *w2daughter2) < fMatchDR))
             fLeptonVetoIdentified = kLeptonObj2;
         }
         // Non-W1-daughter and non-W2-daughter object identified in lepton veto
         if(fLeptonVetoIdentified == kLeptonNone)
           fLeptonVetoIdentified = kLeptonOther;
       }
+      /*
+      if(fLeptonVetoIdentified >= kLeptonOther)
+        std::cout << "LeptonVeto >= kLeptonOther: " << fLeptonVetoIdentified << " >= " << kLeptonOther << std::endl;
+      */
     }
 
 
@@ -232,8 +236,8 @@ class HPlusEwkBackgroundCoverageAnalyzer: public edm::EDAnalyzer {
       fTauElectronCounter(eventCounter.addSubCounter("Classification"+postfix, "tau1 + electron2")),
       fTauMuonCounter(eventCounter.addSubCounter("Classification"+postfix, "tau1 + muon2 (not embedding-identified)")),
       fTauMuonEmbCounter(eventCounter.addSubCounter("Classification"+postfix, "tau1 + muon2 (embedding-identified)")),
-      fTauTauNotInAcceptanceCounter(eventCounter.addSubCounter("Classification"+postfix, "tau1 + tau2 (not in acceptance)")),
       fTauQuarkCounter(eventCounter.addSubCounter("Classification"+postfix, "tau1 + quark2")),
+      fTauTauNotInAcceptanceCounter(eventCounter.addSubCounter("Classification"+postfix, "tau1 + tau2 (not in acceptance)")),
       fTauTauHCounter(eventCounter.addSubCounter("Classification"+postfix, "tau1 + tau_h2")),
       fTauTauECounter(eventCounter.addSubCounter("Classification"+postfix, "tau1 + tau_e2")),
       fTauTauMuNonEmbCounter(eventCounter.addSubCounter("Classification"+postfix, "tau1 + tau_mu2 (not embedding-identified)")),
@@ -242,15 +246,16 @@ class HPlusEwkBackgroundCoverageAnalyzer: public edm::EDAnalyzer {
     {}
 
     void bookHistos(TFileService& fs) {
-      hTauElectron    = createHisto(fs, "tau1_electron2_"+fHistoPostfix,     "e_{2}");
-      hTauQuark       = createHisto(fs, "tau1_quark2_"+fHistoPostfix,        "q_{2}");
-      hTauMuNonEmb    = createHisto(fs, "tau1_muon2_nonEmb_"+fHistoPostfix,  "#mu_{2}");
-      hTauMuEmb       = createHisto(fs, "tau1_muon2_Emb_"+fHistoPostfix,     "#mu_{2}");
+      hTauElectron           = createHisto(fs, "tau1_electron2_"+fHistoPostfix,            "e_{2}");
+      hTauQuark              = createHisto(fs, "tau1_quark2_"+fHistoPostfix,               "q_{2}");
+      hTauMuNonEmb           = createHisto(fs, "tau1_muon2_nonEmb_"+fHistoPostfix,         "#mu_{2}");
+      hTauMuEmb              = createHisto(fs, "tau1_muon2_Emb_"+fHistoPostfix,            "#mu_{2}");
 
-      hTauTauH        = createHisto(fs, "tau1_tauh2_"+fHistoPostfix,         "#tau_{h,2}");
-      hTauTauE        = createHisto(fs, "tau1_taue2_"+fHistoPostfix,         "#tau_{e,2}");
-      hTauTauMuEmb    = createHisto(fs, "tau1_taumu2_nonEmb_"+fHistoPostfix, "#tau_{#mu,2}");
-      hTauTauMuNonEmb = createHisto(fs, "tau1_taumu2_Emb_"+fHistoPostfix,    "#tau_{#mu,2}");
+      hTauTauNotInAcceptance = createHisto(fs, "tau1_tau2_notInAcceptance_"+fHistoPostfix, "#tau_{2}");
+      hTauTauH               = createHisto(fs, "tau1_tauh2_"+fHistoPostfix,                "#tau_{h,2}");
+      hTauTauE               = createHisto(fs, "tau1_taue2_"+fHistoPostfix,                "#tau_{e,2}");
+      hTauTauMuNonEmb        = createHisto(fs, "tau1_taumu2_nonEmb_"+fHistoPostfix,        "#tau_{#mu,2}");
+      hTauTauMuEmb           = createHisto(fs, "tau1_taumu2_Emb_"+fHistoPostfix,           "#tau_{#mu,2}");
     }
 
     void fill(Obj2Type obj2Type, TauIDPassed tauIDPassed, LeptonVetoPassed leptonVetoIdentified) {
@@ -259,6 +264,7 @@ class HPlusEwkBackgroundCoverageAnalyzer: public edm::EDAnalyzer {
       case kObj2Electron:
         theHisto = hTauElectron;
         increment(fTauElectronCounter);
+        //std::cout << "TauIDPassed bin " << tauIDPassed+1 << " leptonVeto bin " << leptonVetoIdentified+1 << std::endl;
         break;
       case kObj2MuonEmb:
         theHisto = hTauMuEmb;
@@ -269,6 +275,7 @@ class HPlusEwkBackgroundCoverageAnalyzer: public edm::EDAnalyzer {
         increment(fTauMuonCounter);
         break;
       case kObj2TauNotInAcceptance:
+        theHisto = hTauTauNotInAcceptance;
         increment(fTauTauNotInAcceptanceCounter);
         break;
       case kObj2Quark:
@@ -296,15 +303,15 @@ class HPlusEwkBackgroundCoverageAnalyzer: public edm::EDAnalyzer {
       }
 
       if(theHisto)
-        theHisto->Fill(tauIDPassed+1, leptonVetoIdentified+1);
+        theHisto->Fill(tauIDPassed+0.5, leptonVetoIdentified+0.5);
 
     }
 
     HPlus::Count fTauElectronCounter;
     HPlus::Count fTauMuonCounter;
     HPlus::Count fTauMuonEmbCounter;
-    HPlus::Count fTauTauNotInAcceptanceCounter;
     HPlus::Count fTauQuarkCounter;
+    HPlus::Count fTauTauNotInAcceptanceCounter;
 
     HPlus::Count fTauTauHCounter;
     HPlus::Count fTauTauECounter;
@@ -318,6 +325,7 @@ class HPlusEwkBackgroundCoverageAnalyzer: public edm::EDAnalyzer {
     TH2 *hTauMuNonEmb;
     TH2 *hTauMuEmb;
     
+    TH2 *hTauTauNotInAcceptance;
     TH2 *hTauTauH;
     TH2 *hTauTauE;
     TH2 *hTauTauMuNonEmb;
@@ -357,7 +365,6 @@ HPlusEwkBackgroundCoverageAnalyzer::HPlusEwkBackgroundCoverageAnalyzer(const edm
   fResultAfterAllSelections(eventCounter, "AfterAllSelections")
 {
   eventCounter.setWeightPointer(fEventWeight.getWeightPtr());
-
 
   edm::Service<TFileService> fs;
   // Save the module configuration to the output ROOT file as a TNamed object
