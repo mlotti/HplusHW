@@ -39,15 +39,17 @@ namespace HPlus {
   size_t TreeMuonBranches::setValues(const edm::Event& iEvent) {
     edm::Handle<edm::View<pat::Muon> > hmuons;
     iEvent.getByLabel(fMuonSrc, hmuons);
-    setValues(*hmuons);
+    setValues(hmuons->ptrVector());
 
     return hmuons->size();
   }
 
+  
+
   size_t TreeMuonBranches::setValues(const edm::Event& iEvent, const edm::View<reco::GenParticle>& genParticles) {
     edm::Handle<edm::View<pat::Muon> > hmuons;
     iEvent.getByLabel(fMuonSrc, hmuons);
-    setValues(*hmuons);
+    setValues(hmuons->ptrVector());
 
     for(size_t i=0; i<hmuons->size(); ++i) {
       const pat::Muon& muon = hmuons->at(i);
@@ -75,9 +77,9 @@ namespace HPlus {
     return hmuons->size();
   }
 
-  void TreeMuonBranches::setValues(const edm::View<pat::Muon>& muons) {
+  void TreeMuonBranches::setValues(const edm::PtrVector<pat::Muon>& muons) {
     for(size_t i=0; i<muons.size(); ++i) {
-      fMuons.push_back(muons[i].p4());
+      fMuons.push_back(muons[i]->p4());
     }
 
     for(size_t i=0; i<fMuonsFunctions.size(); ++i) {
