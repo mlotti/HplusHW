@@ -27,9 +27,12 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleTools.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeEventBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeMuonBranches.h"
 
 #include "TNamed.h"
 #include "TH2F.h"
+#include "TTree.h"
 
 namespace {
   enum TauIDPassed {
@@ -158,6 +161,7 @@ namespace {
     const edm::PtrVector<pat::Muon>& fEmbeddingIdentifiedMuons;
 
     const double fMatchDR;
+
     TauIDPassed fTauIDPassed;
     LeptonVetoPassed fLeptonVetoIdentified;
   };
@@ -334,6 +338,33 @@ class HPlusEwkBackgroundCoverageAnalyzer: public edm::EDAnalyzer {
 
   Result fResult;
   Result fResultAfterAllSelections;
+
+  void reset();
+
+  class TreeFiller {
+  public:
+    explicit TreeFiller(HPlusEwkBackgroundCoverageAnalyzer *analyzer): fAnalyzer(analyzer) {}
+    ~TreeFiller() {
+      fAnalyzer->fTree->Fill();
+      fAnalyzer->reset();
+    }
+  private:
+    HPlusEwkBackgroundCoverageAnalyzer *fAnalyzer;
+  };
+
+  TTree *fTree;
+  HPlus::TreeEventBranches fEventBranches;
+  HPlus::TreeMuonBranches fMuon2Branches;
+
+  int bTauIDStatus;
+  int bLeptonVetoStatus;
+  int bObj2Type;
+  
+  bool bPassTauID;
+  bool bPassJetSelection;
+  bool bPassMET;
+  bool bPassBTag;
+  bool bPassDeltaPhi;
 };
 
 HPlusEwkBackgroundCoverageAnalyzer::HPlusEwkBackgroundCoverageAnalyzer(const edm::ParameterSet& iConfig):
@@ -362,7 +393,8 @@ HPlusEwkBackgroundCoverageAnalyzer::HPlusEwkBackgroundCoverageAnalyzer(const edm
   fBTaggingCounter(eventCounter.addCounter("btagging")),
   fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhi(Tau MET) upper limit")),
   fResult(eventCounter, "Before"),
-  fResultAfterAllSelections(eventCounter, "AfterAllSelections")
+  fResultAfterAllSelections(eventCounter, "AfterAllSelections"),
+  fMuon2Branches(iConfig, "muon2")
 {
   eventCounter.setWeightPointer(fEventWeight.getWeightPtr());
 
@@ -372,9 +404,38 @@ HPlusEwkBackgroundCoverageAnalyzer::HPlusEwkBackgroundCoverageAnalyzer(const edm
 
   fResult.bookHistos(*fs);
   fResultAfterAllSelections.bookHistos(*fs);
+
+  fTree = fs->make<TTree>("tree", "tree");
+  fEventBranches.book(fTree);
+  fMuon2Branches.book(fTree);
+  fTree->Branch("TauIDStatus", &bTauIDStatus);
+  fTree->Branch("LeptonVetoStatus", &bLeptonVetoStatus);
+  fTree->Branch("Obj2Type", &bObj2Type);
+  fTree->Branch("passTauID", &bPassTauID);
+  fTree->Branch("passJetSelection", &bPassJetSelection);
+  fTree->Branch("passMET", &bPassMET);
+  fTree->Branch("passBTag", &bPassBTag);
+  fTree->Branch("passDeltaPhi", &bPassDeltaPhi);
+
+  reset();
 }
 
 HPlusEwkBackgroundCoverageAnalyzer::~HPlusEwkBackgroundCoverageAnalyzer() {}
+void HPlusEwkBackgroundCoverageAnalyzer::reset() {
+  fEventBranches.reset();
+  fMuon2Branches.reset();
+
+  bTauIDStatus = kTauNone;
+  bLeptonVetoStatus = kLeptonNone;
+  bObj2Type = kObj2None;
+
+  bPassTauID = false;
+  bPassJetSelection = false;
+  bPassMET = false;
+  bPassBTag = false;
+  bPassDeltaPhi = false;
+}
+
 void HPlusEwkBackgroundCoverageAnalyzer::beginJob() {}
 
 void HPlusEwkBackgroundCoverageAnalyzer::endLuminosityBlock(const edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
@@ -575,32 +636,57 @@ void HPlusEwkBackgroundCoverageAnalyzer::analyze(const edm::Event& iEvent, const
 
   fResult.fill(obj2Type, mcMatcher.getTauIDStatus(), mcMatcher.getLeptonVetoStatus());
 
+  // Fill the tree branches
+  fEventBranches.setValues(iEvent);
+  bTauIDStatus = mcMatcher.getTauIDStatus();
+  bLeptonVetoStatus = mcMatcher.getLeptonVetoStatus();
+  bObj2Type = obj2Type;
+
+  // Find the muon2 object, insert to tree
+  const edm::PtrVector<pat::Muon> selectedMuonsNoIsolation = muonVetoData.getSelectedMuonsBeforeIsolation();
+  edm::PtrVector<pat::Muon> muon2;
+  for(size_t i=0; i<selectedMuonsNoIsolation.size(); ++i) {
+    if(reco::deltaR(*selectedMuonsNoIsolation[i], *W2daughter1) < mcMatcher.getMatchDR()) {
+      muon2.push_back(selectedMuonsNoIsolation[i]);
+      break;
+    }
+  }
+  fMuon2Branches.setValues(muon2);
+
+  // Use RAII to call the TTree::Fill() and reset()
+  TreeFiller treeFiller(this);
+
   // Remaining selections
 
   // Consider only events where some object has passed tau ID
   if(!tauData.passedEvent()) return;
   increment(fTauIDCounter);
+  bPassTauID = true;
 
   // Hadronic jet selection
   int nVertices = 0; // dummy value
   HPlus::JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
   if(!jetData.passedEvent()) return;
   increment(fJetSelectionCounter);
+  bPassJetSelection = true;
 
   // MET
   HPlus::METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
   if(!metData.passedEvent()) return;
   increment(fMETCounter);
+  bPassMET = true;
 
   // B tagging
   HPlus::BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
   if(!btagData.passedEvent()) return;
   increment(fBTaggingCounter);
+  bPassBTag = true;
 
   // Delta phi(tau, MET)
   double deltaPhi = HPlus::DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
   if (deltaPhi > fDeltaPhiCutValue) return;
   increment(fDeltaPhiTauMETCounter);
+  bPassDeltaPhi = true;
 
   fResultAfterAllSelections.fill(obj2Type, mcMatcher.getTauIDStatus(), mcMatcher.getLeptonVetoStatus());
   

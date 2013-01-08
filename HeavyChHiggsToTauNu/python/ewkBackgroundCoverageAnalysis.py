@@ -19,6 +19,17 @@ def createEDAnalyze(param):
         tauPtCut = cms.untracked.double(41.0),
         tauEtaCut = cms.untracked.double(2.1),
 
+        # for tree
+        muonSrc = cms.InputTag("dummy"),
+        muonFunctions = cms.PSet(
+            dB = cms.string("dB()"),
+
+            chargedHadronIso = cms.string("chargedHadronIso()"),
+            neutralHadronIso = cms.string("neutralHadronIso()"),
+            photonIso = cms.string("photonIso()"),
+            puChargedHadronIso = cms.string("puChargedHadronIso()"),
+        ),
+
         # Options below are not really used, they're just needed to
         # use the same configuration code
         triggerEfficiencyScaleFactor = param.triggerEfficiencyScaleFactor.clone(),
