@@ -24,6 +24,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleTools.h"
 
@@ -33,6 +34,8 @@
 #include "TNamed.h"
 #include "TH2F.h"
 #include "TTree.h"
+
+#include<limits>
 
 namespace {
   enum TauIDPassed {
@@ -355,6 +358,7 @@ class HPlusEwkBackgroundCoverageAnalyzer: public edm::EDAnalyzer {
   TTree *fTree;
   HPlus::TreeEventBranches fEventBranches;
   HPlus::TreeMuonBranches fMuon2Branches;
+  double bTauMETTransverseMass;
 
   int bTauIDStatus;
   int bLeptonVetoStatus;
@@ -408,6 +412,7 @@ HPlusEwkBackgroundCoverageAnalyzer::HPlusEwkBackgroundCoverageAnalyzer(const edm
   fTree = fs->make<TTree>("tree", "tree");
   fEventBranches.book(fTree);
   fMuon2Branches.book(fTree);
+  fTree->Branch("TauMETTransverseMass", &bTauMETTransverseMass);
   fTree->Branch("TauIDStatus", &bTauIDStatus);
   fTree->Branch("LeptonVetoStatus", &bLeptonVetoStatus);
   fTree->Branch("Obj2Type", &bObj2Type);
@@ -424,6 +429,8 @@ HPlusEwkBackgroundCoverageAnalyzer::~HPlusEwkBackgroundCoverageAnalyzer() {}
 void HPlusEwkBackgroundCoverageAnalyzer::reset() {
   fEventBranches.reset();
   fMuon2Branches.reset();
+
+  bTauMETTransverseMass = std::numeric_limits<double>::quiet_NaN();
 
   bTauIDStatus = kTauNone;
   bLeptonVetoStatus = kLeptonNone;
@@ -663,15 +670,18 @@ void HPlusEwkBackgroundCoverageAnalyzer::analyze(const edm::Event& iEvent, const
   increment(fTauIDCounter);
   bPassTauID = true;
 
-  // Hadronic jet selection
+  // Get MET here, reconstruct transverse mass
   int nVertices = 0; // dummy value
   HPlus::JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
+  HPlus::METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
+  bTauMETTransverseMass = HPlus::TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
+
+  // Hadronic jet selection
   if(!jetData.passedEvent()) return;
   increment(fJetSelectionCounter);
   bPassJetSelection = true;
 
   // MET
-  HPlus::METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
   if(!metData.passedEvent()) return;
   increment(fMETCounter);
   bPassMET = true;
