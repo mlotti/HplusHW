@@ -74,14 +74,15 @@ set -e
 # 26.10.2012/M.Kortelainen CMSSW_5_3_5 Updated metUncertaintyTools
 # 12.12.2012/M.Kortelainen CMSSW_5_3_7 Updated tau/PAT tags
 # 3.1.2013/M.Kortelainen CMSSW_5_3_7 Updated tau tags
+# 9.1.2013/M.Kortelainen CMSSW_5_3_7_patch4 Updated PAT tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
 
 # PAT
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATReleaseNotes52X
-addpkg DataFormats/PatCandidates V06-05-06-03
-addpkg PhysicsTools/PatAlgos     V08-09-50
+addpkg DataFormats/PatCandidates V06-05-06-05
+addpkg PhysicsTools/PatAlgos     V08-09-51
 addpkg DataFormats/StdDictionaries V00-02-14
 addpkg FWCore/GuiBrowsers V00-00-70
 # We don't need the code (it's the same as in the release), but a ROOT
@@ -104,9 +105,6 @@ addpkg RecoParticleFlow/PFProducer V15-02-06
 addpkg RecoTauTag/RecoTau         V01-04-23
 addpkg RecoTauTag/Configuration   V01-04-10
 addpkg CondFormats/EgammaObjects  V00-04-00
-# PAT
-cvs up -r 1.31.6.4 PhysicsTools/PatAlgos/python/producersLayer1/tauProducer_cfi.py
-cvs up -r 1.52.10.4 PhysicsTools/PatAlgos/python/tools/tauTools.py
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
