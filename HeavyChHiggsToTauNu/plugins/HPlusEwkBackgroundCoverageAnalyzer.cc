@@ -340,6 +340,9 @@ class HPlusEwkBackgroundCoverageAnalyzer: public edm::EDAnalyzer {
   };
 
   Result fResult;
+  Result fResultAfterJetSelection;
+  Result fResultAfterMET;
+  Result fResultAfterBTag;
   Result fResultAfterAllSelections;
 
   void reset();
@@ -397,6 +400,9 @@ HPlusEwkBackgroundCoverageAnalyzer::HPlusEwkBackgroundCoverageAnalyzer(const edm
   fBTaggingCounter(eventCounter.addCounter("btagging")),
   fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhi(Tau MET) upper limit")),
   fResult(eventCounter, "Before"),
+  fResultAfterJetSelection(eventCounter, "AfterJetSelection"),
+  fResultAfterMET(eventCounter, "AfterMET"),
+  fResultAfterBTag(eventCounter, "AfterBTag"),
   fResultAfterAllSelections(eventCounter, "AfterAllSelections"),
   fMuon2Branches(iConfig, "muon2")
 {
@@ -407,6 +413,9 @@ HPlusEwkBackgroundCoverageAnalyzer::HPlusEwkBackgroundCoverageAnalyzer(const edm
   fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
 
   fResult.bookHistos(*fs);
+  fResultAfterJetSelection.bookHistos(*fs);
+  fResultAfterMET.bookHistos(*fs);
+  fResultAfterBTag.bookHistos(*fs);
   fResultAfterAllSelections.bookHistos(*fs);
 
   fTree = fs->make<TTree>("tree", "tree");
@@ -680,17 +689,20 @@ void HPlusEwkBackgroundCoverageAnalyzer::analyze(const edm::Event& iEvent, const
   if(!jetData.passedEvent()) return;
   increment(fJetSelectionCounter);
   bPassJetSelection = true;
+  fResultAfterJetSelection.fill(obj2Type, mcMatcher.getTauIDStatus(), mcMatcher.getLeptonVetoStatus());
 
   // MET
   if(!metData.passedEvent()) return;
   increment(fMETCounter);
   bPassMET = true;
+  fResultAfterMET.fill(obj2Type, mcMatcher.getTauIDStatus(), mcMatcher.getLeptonVetoStatus());
 
   // B tagging
   HPlus::BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
   if(!btagData.passedEvent()) return;
   increment(fBTaggingCounter);
   bPassBTag = true;
+  fResultAfterBTag.fill(obj2Type, mcMatcher.getTauIDStatus(), mcMatcher.getLeptonVetoStatus());
 
   // Delta phi(tau, MET)
   double deltaPhi = HPlus::DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
