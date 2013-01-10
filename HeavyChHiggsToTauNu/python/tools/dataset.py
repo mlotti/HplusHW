@@ -1336,9 +1336,8 @@ class DatasetRootHistoAddedMC(DatasetRootHistoBase):
         elif self.normalization == "toOne":
             return _normalizeToOne(hsum)
 
-        # We have to noramlize to cross section in any case
-        print self.dataset.getNormFactor()
-        hsum = _normalizeToFactor(hsum, self.dataset.getNormFactor()) # FIXME: normalization factor?
+        # We have to normalize to cross section in any case
+        hsum = _normalizeToFactor(hsum, self.dataset.getNormFactor())
         if self.normalization == "byCrossSection":
             return hsum
         elif self.normalization == "toLuminosity":
