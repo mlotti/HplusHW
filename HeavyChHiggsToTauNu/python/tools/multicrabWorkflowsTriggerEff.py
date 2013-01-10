@@ -32,6 +32,7 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
                                                  ], triggerThrow=False),                                                                                               
         "Tau_200961-202504_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 12, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v9"]),
         "Tau_202792-203742_2012C_Prompt": TaskDef(njobsIn= 150, njobsOut=  1, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v10"]),
+	"Tau_203777-208686_2012D_Prompt": TaskDef(njobsIn=3600, njobsOut= 360, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_v10"]),
                                                                                                                                                                        
         "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=1),                                                                                  
         "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 20, njobsOut=1),                                                                                  
@@ -121,6 +122,7 @@ def addMetLegSkim_53X_v1(datasets):
         "Tau_198941-200601_2012C_Prompt":         TaskDef(""),                               
         "Tau_200961-202504_2012C_Prompt":         TaskDef(""),                               
         "Tau_202792-203742_2012C_Prompt":         TaskDef(""),
+	"Tau_203777-208686_2012D_Prompt":	  TaskDef(""),
 
         "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDef(""),                               
         "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDef(""),                               
