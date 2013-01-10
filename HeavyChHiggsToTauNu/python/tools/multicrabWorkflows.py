@@ -176,7 +176,7 @@ datasets.extend([
     DataDataset("Tau_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/Tau/Run2012C-PromptReco-v2/AOD"), # 29597169 events, 2865 files
     DataDataset("Tau_%s_2012C_Dec11",     reco="11Dec2012", runs=(201191, 201191), aod="/Tau/Run2012C-EcalRecover_11Dec2012-v1/AOD"), # 579104 events, 59 files
     # Run2012D
-    DataDataset("Tau_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208407), aod="/Tau/Run2012D-PromptReco-v1/AOD"), # 34164175 events, 3593 files
+    DataDataset("Tau_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/Tau/Run2012D-PromptReco-v1/AOD"), # 34164175 events, 3593 files
 ])
 # Splitting here because when Matti first processed these for v53_1
 # pattuples, he hought that the 200961-202504 would be completely
@@ -201,7 +201,7 @@ datasets.extend([
     DataDataset("MultiJet_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/MultiJet/Run2012C-24Aug2012-v1/AOD"), # 2004842 events, 180 files
     DataDataset("MultiJet_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/MultiJet/Run2012C-PromptReco-v2/AOD"), # 27743543 events, 2833 files
     # Run2012D
-    DataDataset("MultiJet_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208407), aod="/MultiJet/Run2012D-PromptReco-v1/AOD"), # 31810929 events, 3481 files
+    DataDataset("MultiJet_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/MultiJet/Run2012D-PromptReco-v1/AOD"), # 31810929 events, 3481 files
 ])
 datasets.splitDataByRuns("MultiJet_193834-196531_2012B_Jul13", [
         (193834, 194225), # This has both BTagCSV and BTagIP triggers, 4765979 events, 363 files
@@ -234,7 +234,7 @@ datasets.extend([
     DataDataset("TauPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(202792, 203742), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #
     DataDataset("TauPlusX_%s_2012C_Dec11",     reco="11Dec2012", runs=(201191, 201191), aod="/TauPlusX/Run2012C-EcalRecover_11Dec2012-v1/AOD"), # 962881 events, 94 files
     # Run2012D
-    DataDataset("TauPlusX_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208407), aod="/TauPlusX/Run2012D-PromptReco-v1/AOD"), # 59840242 events, 6068 files
+    DataDataset("TauPlusX_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/TauPlusX/Run2012D-PromptReco-v1/AOD"), # 59840242 events, 6068 files
 ])
 # SingleMu PD, Mu trigger for embedding, IsoMu trigger for muon efficiency measurement
 datasets.extend([  
@@ -249,7 +249,7 @@ datasets.extend([
     DataDataset("SingleMu_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/SingleMu/Run2012C-PromptReco-v2/AOD"), # 81770645 events, 7450 files
     DataDataset("SingleMu_%s_2012C_Dec11",     reco="11Dec2012", runs=(201191, 201191), aod="/SingleMu/Run2012C-EcalRecover_11Dec2012-v1/AOD"), # 1619573 events, 145 files
     # SingleMu, Run2012D
-    DataDataset("SingleMu_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208407), aod="/SingleMu/Run2012D-PromptReco-v1/AOD"), # 90255013 events, 8886 files
+    DataDataset("SingleMu_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/SingleMu/Run2012D-PromptReco-v1/AOD"), # 90255013 events, 8886 files
 ])
 
 

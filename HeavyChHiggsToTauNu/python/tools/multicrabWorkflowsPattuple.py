@@ -270,8 +270,8 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
         # Below is a combination of the three above ones
         "MultiJet_198941-203742_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v4",  # 198941-199608
                                                 "HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"], # 199698-203002
-        "MultiJet_203777-208407_2012D_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v6",  # 203777-205238
-                                                "HLT_QuadJet75_55_38_20_BTagIP_VBF_v7"]  # 205303-208407
+        "MultiJet_203777-208686_2012D_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v6",  # 203777-205238
+                                                "HLT_QuadJet75_55_38_20_BTagIP_VBF_v7"]  # 205303-208686
     }
     quadJetTriggers = {
         "MultiJet_190456-190738_2012A_Jul13": ["HLT_QuadJet80_v1"],
@@ -289,7 +289,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
         # Below is a combination of the three above ones
         "MultiJet_198941-200601_2012C_Prompt": ["HLT_QuadJet80_v4",  # 198941-199608
                                                 "HLT_QuadJet80_v6"], # 199698-203002
-        "MultiJet_203777-208407_2012D_Prompt": ["HLT_QuadJet80_v6"],
+        "MultiJet_203777-208686_2012D_Prompt": ["HLT_QuadJet80_v6"],
     }
 
     # Specifies the default
@@ -330,7 +330,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
                                                      "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10", # 202970-203742
                                                  ], triggerThrow=False),
         "Tau_201191-201191_2012C_Dec11": TaskDef(njobsIn=   60, njobsOut=  1, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"]),
-        "Tau_203777-208407_2012D_Prompt": TaskDef(njobsIn=4000, njobsOut= 40, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10",]), # FIXME: set njobsOut
+        "Tau_203777-208686_2012D_Prompt": TaskDef(njobsIn=4000, njobsOut= 40, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10",]), # FIXME: set njobsOut
 
         ## MultiJet
         # njobsOut is just a guess
@@ -346,7 +346,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
         "MultiJet_202792-203742_2012C_Prompt": TaskDef(njobsIn= 170, njobsOut= 3),
         # Below is the combination of the above three
         "MultiJet_198941-203742_2012C_Prompt": TaskDef(njobsIn=3000, njobsOut=80), # FIXME: set njobsOut
-        "MultiJet_203777-208407_2012D_Prompt": TaskDef(njobsIn=4000, njobsOut=40), # FIXME: set njobsOut
+        "MultiJet_203777-208686_2012D_Prompt": TaskDef(njobsIn=4000, njobsOut=40), # FIXME: set njobsOut
 
         # MC, triggered with mcTrigger
         "TTToHplusBWB_M80_Summer12":        TaskDefMC(njobsIn=25, njobsOut=1),
@@ -915,7 +915,7 @@ def addPattuple_v53_2(datasets):
         "Tau_198022-198523_2012C_Aug24":          TaskDef(""),
         "Tau_198941-203742_2012C_Prompt":         TaskDef(""),
         "Tau_201191-201191_2012C_Dec11":          TaskDef(""),
-        "Tau_203777-208407_2012D_Prompt":         TaskDef(""),
+        "Tau_203777-208686_2012D_Prompt":         TaskDef(""),
 
         "MultiJet_190456-190738_2012A_Jul13":     TaskDef(""),
         "MultiJet_190782-190949_2012A_Aug06":     TaskDef(""),
@@ -924,7 +924,7 @@ def addPattuple_v53_2(datasets):
         "MultiJet_194270-196531_2012B_Jul13":     TaskDef(""),
         "MultiJet_198022-198523_2012C_Aug24":     TaskDef(""),
         "MultiJet_198941-203742_2012C_Prompt":    TaskDef(""),
-        "MultiJet_203777-208407_2012D_Prompt":    TaskDef(""),
+        "MultiJet_203777-208686_2012D_Prompt":    TaskDef(""),
 
         "TTToHplusBWB_M80_Summer12":              TaskDef(""),
         "TTToHplusBWB_M90_Summer12":              TaskDef(""),
@@ -1048,7 +1048,7 @@ def addPattuple_vNEXT_SKELETON_53X(datasets):
         "Tau_198022-198523_2012C_Aug24":          TaskDef(""),
         "Tau_198941-203742_2012C_Prompt":         TaskDef(""),
         "Tau_201191-201191_2012C_Dec11":          TaskDef(""),
-        "Tau_203777-208407_2012D_Prompt":         TaskDef(""),
+        "Tau_203777-208686_2012D_Prompt":         TaskDef(""),
 
         "MultiJet_190456-190738_2012A_Jul13":     TaskDef(""),
         "MultiJet_190782-190949_2012A_Aug06":     TaskDef(""),
@@ -1057,7 +1057,7 @@ def addPattuple_vNEXT_SKELETON_53X(datasets):
         "MultiJet_194270-196531_2012B_Jul13":     TaskDef(""),
         "MultiJet_198022-198523_2012C_Aug24":     TaskDef(""),
         "MultiJet_198941-203742_2012C_Prompt":    TaskDef(""),
-        "MultiJet_203777-208407_2012D_Prompt":    TaskDef(""),
+        "MultiJet_203777-208686_2012D_Prompt":    TaskDef(""),
 
         "TTToHplusBWB_M80_Summer12":              TaskDef(""),
         "TTToHplusBWB_M90_Summer12":              TaskDef(""),
