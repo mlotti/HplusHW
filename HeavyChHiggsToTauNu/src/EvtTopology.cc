@@ -211,14 +211,110 @@ namespace HPlus {
   }
 
   EvtTopology::Data EvtTopology::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  /// Description                                                                                                
-  /// Calculates the AlphaT variable, defined as an N-object system where the set of objects is 1 tau-jet and N-1
-  /// jets. This definition reproduces the kinematics of a di-jet system by constructing two pseudo-jets, which balance
-  /// one another in Ht. The two pseudo-jets are formed from the combination of the N objects that minimizes the
-  /// DeltaHt = |Ht_pseudoJet1 - Ht_pseudoJet2| of the pseudo-jets.                                             
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Sphericity, Aplanarity, Planarity
+    /// Need all particles in event to calculate kinematic variables. Use all tracks (ch. particles) instead.
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // **** The code below requires the Tracks Collection! ****
+    /*    
+    // Create and attach handle to All Tracks collection
+    edm::Handle<reco::TrackCollection> myTracksHandle;
+    iEvent.getByLabel("generalTracks", myTracksHandle);
     
+    TMatrixDSym MomentumTensor(3);
+    // Loop over all tracks
+    // if(myTracksHandle->size()==0) float sphericity = 0;
+    for(reco::TrackCollection::const_iterator iTrack = myTracksHandle->begin(); iTrack != myTracksHandle->end(); ++iTrack) {
+      std::vector<double> momentum(3);
+      momentum[0] = iTrack->px();
+      momentum[1] = iTrack->py();
+      momentum[2] = iTrack->pz();
+      for (unsigned int i=0; i < 3; i++){
+	for (unsigned int j=0; j <= 1; j++){
+	  MomentumTensor[i][j] += momentum[i]*momentum[j];
+	}
+      }
+    }//eof: tracks loop
+    
+    MomentumTensor*=1/(MomentumTensor[0][0]+MomentumTensor[1][1]+MomentumTensor[2][2]);
+    // Find the EigenValues Q1 + Q2 + Q3 = 1  0 <= Q1 <= Q2 <= Q3
+    TMatrixDSymEigen eigen(MomentumTensor);
+    TVectorD eigenvals = eigen.GetEigenValues();
+    vector<float> eigenvalues(3);
+    eigenvalues[0] = eigenvals[0];
+    eigenvalues[1] = eigenvals[1];
+    eigenvalues[2] = eigenvals[2];
+    sort(eigenvalues.begin(), eigenvalues.end());
+
+    // Compute Sphericity: S = 3/2*(Q1+Q2) 
+    sKinematics.fSphericity = (1.5*(1-eigenvalues[2]));
+    // Compute Aplanarity: A = 3/2*(Q1) 
+    sKinematics.fAplanarity = (1.5*eigenvalues[0]);
+    // Compute Planarity: P = Q1/Q2
+    sKinematics.fPlanarity = (eigenvalues[0]/eigenvalues[1]);
+    std::cout << "Sphericity = " << sKinematics.fSphericity << std::endl;
+    std::cout << "Aplanarity = " << sKinematics.fAplanarity << std::endl;
+    std::cout << "Planarity = " << sKinematics.fPlanarity << std::endl;
+    */
+    // **** The code above requires the Tracks Collection! ****
+
+    // Attempt to remedy absence of tracks by using all jets in the event    
+    TMatrixDSym MomentumTensor(3);
+    /// Loop over all selected jets
+    for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {    
+      edm::Ptr<pat::Jet> iJet = *iter;
+      std::vector<double> momentum(3);
+      momentum[0] = iJet->px();
+      momentum[1] = iJet->py();
+      momentum[2] = iJet->pz();
+      for (unsigned int i=0; i < 3; i++){
+	for (unsigned int j=0; j <= 1; j++){
+	  MomentumTensor[i][j] += momentum[i]*momentum[j];
+	}
+      }
+    }//eof: tracks loop
+    
+    // Don't forget about the tau-jet as well
+    std::vector<double> tauMomentum(3);
+    tauMomentum[0] = tau.px();
+    tauMomentum[1] = tau.py();
+    tauMomentum[2] = tau.pz();
+      for (unsigned int i=0; i < 3; i++){
+	for (unsigned int j=0; j <= 1; j++){
+	  MomentumTensor[i][j] += tauMomentum[i]*tauMomentum[j];
+	}
+      }
+      
+    // Perform calculations
+    MomentumTensor*=1/(MomentumTensor[0][0]+MomentumTensor[1][1]+MomentumTensor[2][2]);
+    // Find the EigenValues Q1 + Q2 + Q3 = 1  0 <= Q1 <= Q2 <= Q3
+    TMatrixDSymEigen eigen(MomentumTensor);
+    TVectorD eigenvals = eigen.GetEigenValues();
+    vector<float> eigenvalues(3);
+    eigenvalues[0] = eigenvals[0];
+    eigenvalues[1] = eigenvals[1];
+    eigenvalues[2] = eigenvals[2];
+    sort(eigenvalues.begin(), eigenvalues.end());
+
+    // Compute Sphericity: S = 3/2*(Q1+Q2) 
+    sKinematics.fSphericity = (1.5*(1-eigenvalues[2]));
+    // Compute Aplanarity: A = 3/2*(Q1) 
+    sKinematics.fAplanarity = (1.5*eigenvalues[0]);
+    // Compute Planarity: P = Q1/Q2
+    sKinematics.fPlanarity = (eigenvalues[0]/eigenvalues[1]);
+    std::cout << "Sphericity = " << sKinematics.fSphericity << std::endl;
+    std::cout << "Aplanarity = " << sKinematics.fAplanarity << std::endl;
+    std::cout << "Planarity = " << sKinematics.fPlanarity << std::endl;
+
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// AlphaT:
+    /// Calculates the AlphaT variable, defined as an N-object system where the set of objects is 1 tau-jet and N-1
+    /// jets. This definition reproduces the kinematics of a di-jet system by constructing two pseudo-jets, which balance
+    /// one another in Ht. The two pseudo-jets are formed from the combination of the N objects that minimizes the
+    /// DeltaHt = |Ht_pseudoJet1 - Ht_pseudoJet2| of the pseudo-jets.                                             
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// Declaration of variables 
     std::vector<float> vEt, vPx, vPy, vPz;
     std::vector<bool> vPseudo_jet1;

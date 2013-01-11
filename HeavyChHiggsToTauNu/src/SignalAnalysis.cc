@@ -701,6 +701,11 @@ namespace HPlus {
       fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
       fTree.setTop(TopSelectionData.getTopP4());
       fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
+      // Sphericity, Aplanarity, Planarity
+      fTree.setSphericity(evtTopologyData.Kinematics().fSphericity);
+      fTree.setAplanarity(evtTopologyData.Kinematics().fAplanarity);
+      fTree.setPlanarity(evtTopologyData.Kinematics().fPlanarity);
+
       fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
       fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets());
       return true;

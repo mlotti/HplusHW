@@ -1,6 +1,6 @@
 //#######################################################################
 // -*- C++ -*-
-//       File Name:  EvtTopology.h
+//       Filesph Name:  EvtTopology.h
 // Original Author:  Alexandros Attikis
 //         Created:  Mon 4 Oct 2010
 //     Description:  Designed to calculate Evt Topology related variables                   
@@ -30,6 +30,13 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MathFunctions.h"
+// Sphericity, Aplanarity, Planarity
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackExtra.h"
+#include "TVector3.h"
+#include "TLorentzVector.h"
+#include "TMatrixDSym.h"
+#include "TMatrixDSymEigen.h"
 
 namespace reco {
   class Candidate;
@@ -53,6 +60,11 @@ namespace HPlus {
       float fMHt;
       vector<float> vDiJetMassesNoTau;
     } AlphaStruc;
+    typedef struct {
+      float fSphericity;
+      float fAplanarity;
+      float fPlanarity;
+    } KinStruc;
 
     /**
      * Class to encapsulate the access to the data members of
@@ -69,6 +81,7 @@ namespace HPlus {
 
       bool passedEvent() const { return fPassedEvent; }
       const EvtTopology::AlphaStruc alphaT() const { return fEvtTopology->sAlpha; }
+      const EvtTopology::KinStruc Kinematics() const { return fEvtTopology->sKinematics; }
     
     private:
       const EvtTopology *fEvtTopology;
@@ -105,6 +118,7 @@ namespace HPlus {
     
     // Other variables
     AlphaStruc sAlpha;
+    KinStruc sKinematics;
     MathFunctions oMath;
   };
 }

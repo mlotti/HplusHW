@@ -116,6 +116,9 @@ namespace HPlus {
     fTree->Branch("topreco_p4", &fTop);
 
     fTree->Branch("alphaT", &fAlphaT);
+    fTree->Branch("sphericity", &fSphericity);
+    fTree->Branch("aplanarity", &fAplanarity);
+    fTree->Branch("planarity", &fPlanarity);
 
     fTree->Branch("deltaPhi", &fDeltaPhi);
     fTree->Branch("passedBTagging", &fPassedBTagging);
@@ -209,9 +212,11 @@ namespace HPlus {
     if(!fDoFill)
       return;
     // std::cout << "fill: 1" << std::endl;  
-    if(taus.size() != 1)
-      throw cms::Exception("LogicError") << "Expected tau collection size to be 1, was " << taus.size() << " at " << __FILE__ << ":" << __LINE__ << std::endl;
-
+    // if(taus.size() != 1)
+    // throw cms::Exception("LogicError") << "Expected tau collection size to be 1, was " << taus.size() << " at " << __FILE__ << ":" << __LINE__ << std::endl;
+    if(taus.size() < 1)
+      throw cms::Exception("LogicError") << "Expected tau collection size to be at least 1, was " << taus.size() << " at " << __FILE__ << ":" << __LINE__ << std::endl;
+      
     // General event information
     fEventBranches.setValues(iEvent);
 
@@ -682,6 +687,10 @@ namespace HPlus {
     fTop.SetXYZT(nan, nan, nan, nan);
 
     fAlphaT = nan;
+    fSphericity = nan;
+    fAplanarity = nan;
+    fPlanarity = nan;
+
     fDeltaPhi = nan;
 
     fPassedBTagging = false;
