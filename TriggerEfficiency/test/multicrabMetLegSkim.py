@@ -5,7 +5,6 @@ import re
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflows as multicrabWorkflows
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTriggerEff as multicrabWorkflowsTriggerEff
-#multicrabWorkflowsTriggerEff.addMetLegSkim_53X_v1(multicrabWorkflows.datasets)
 
 datasets_Tau = [
     "Tau_190456-190738_2012A_Jul13",
@@ -16,6 +15,7 @@ datasets_Tau = [
     "Tau_198941-200601_2012C_Prompt",
     "Tau_200961-202504_2012C_Prompt",
     "Tau_202792-203742_2012C_Prompt",
+    "Tau_203777-208686_2012D_Prompt",
 ]
 
 datasets_MultiJet = [
