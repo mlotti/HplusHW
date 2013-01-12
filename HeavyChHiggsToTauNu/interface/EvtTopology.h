@@ -64,6 +64,7 @@ namespace HPlus {
       float fSphericity;
       float fAplanarity;
       float fPlanarity;
+      float fCircularity;
     } KinStruc;
 
     /**

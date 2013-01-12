@@ -681,7 +681,7 @@ namespace HPlus {
   
       TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     
-      // Calculate alphaT
+      // Calculate event topology variables (alphaT, sphericity, aplanarity etc..)
       EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJets());   
       
       FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJets(), metData.getSelectedMET());
@@ -705,6 +705,7 @@ namespace HPlus {
       fTree.setSphericity(evtTopologyData.Kinematics().fSphericity);
       fTree.setAplanarity(evtTopologyData.Kinematics().fAplanarity);
       fTree.setPlanarity(evtTopologyData.Kinematics().fPlanarity);
+      fTree.setCircularity(evtTopologyData.Kinematics().fCircularity);
 
       fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
       fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets());

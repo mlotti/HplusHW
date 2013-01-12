@@ -119,6 +119,7 @@ namespace HPlus {
     fTree->Branch("sphericity", &fSphericity);
     fTree->Branch("aplanarity", &fAplanarity);
     fTree->Branch("planarity", &fPlanarity);
+    fTree->Branch("circularity", &fCircularity);
 
     fTree->Branch("deltaPhi", &fDeltaPhi);
     fTree->Branch("passedBTagging", &fPassedBTagging);
@@ -690,6 +691,7 @@ namespace HPlus {
     fSphericity = nan;
     fAplanarity = nan;
     fPlanarity = nan;
+    fCircularity = nan;
 
     fDeltaPhi = nan;
 
