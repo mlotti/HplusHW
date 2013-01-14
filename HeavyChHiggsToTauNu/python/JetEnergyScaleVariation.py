@@ -92,6 +92,7 @@ def addTESVariation(process, prefix, name, prototype, direction, postfix=""):
     # For tau variation for type I MET, we need the selected tau only
     m = cms.EDFilter("HPlusTauSelectorFilter",
         tauSelection = prototype.tauSelection.clone(),
+        vertexSrc = prototype.primaryVertexSelection.src,
         filter = cms.bool(False),
         eventCounter = cms.untracked.PSet(counters=cms.untracked.VInputTag())
     )

@@ -228,7 +228,7 @@ def addMetLegSkim_44X(version, datasets, updateDefinitions):
         if wf.output != None:
 	    wf.output.dbs_url = common.tteff_dbs
             dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, source=Source(workflowName),
-                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="tteffanalysis-metleg.root"))
+                                         triggerOR=taskDef.triggerOR, args=wf.args, output_file="tteffAnalysis-metleg.root"))
 
 
 def addMetLegSkim_cmssw44X_v1(datasets):

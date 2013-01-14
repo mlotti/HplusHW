@@ -484,7 +484,7 @@ namespace HPlus {
 //------ TauID
     // Store weight of event
     // TauID
-    TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
+    TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
 
     fTauSelection.analyseFakeTauComposition(fFakeTauIdentifier,iEvent);
 
@@ -561,7 +561,7 @@ namespace HPlus {
     }
     */  
 //------ Veto against second tau in event
-    VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauData.getSelectedTau());
+    VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), pvData.getSelectedVertex()->z());
     //    if (vetoTauData.passedEvent()) return false; // tau veto
     //    if (!vetoTauData.passedEvent()) return false; // select events with add. taus
     //    if (vetoTauData.getSelectedVetoTaus().size() > 0 ) return false;
@@ -681,7 +681,7 @@ namespace HPlus {
   
       TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     
-      // Calculate alphaT
+      // Calculate event topology variables (alphaT, sphericity, aplanarity etc..)
       EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJets());   
       
       FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJets(), metData.getSelectedMET());
@@ -701,6 +701,12 @@ namespace HPlus {
       fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
       fTree.setTop(TopSelectionData.getTopP4());
       fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
+      // Sphericity, Aplanarity, Planarity
+      fTree.setSphericity(evtTopologyData.Kinematics().fSphericity);
+      fTree.setAplanarity(evtTopologyData.Kinematics().fAplanarity);
+      fTree.setPlanarity(evtTopologyData.Kinematics().fPlanarity);
+      fTree.setCircularity(evtTopologyData.Kinematics().fCircularity);
+
       fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
       fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets());
       return true;
