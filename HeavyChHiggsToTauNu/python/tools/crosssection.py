@@ -46,44 +46,58 @@ class CrossSectionList:
 # [4] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSections
 # [5] https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopMC2011
 # [6] https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopSigma
+# [7] https://twiki.cern.ch/twiki/bin/view/CMS/HiggsToTauTauWorkingHCP2012#53X_MC_Samples
+# [8] https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopSigma8TeV (other useful page https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopMC2012)
+# [9] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV
 
 backgroundCrossSections = CrossSectionList(
     CrossSection("QCD_Pt30to50", {
             "7": 5.312e+07, # [2]
+            "8": 6.6285328e7, # [1]
             }),
     CrossSection("QCD_Pt50to80", {
             "7": 6.359e+06, # [2]
+            "8": 8148778.0, # [1]
             }),
     CrossSection("QCD_Pt80to120", {
             "7": 7.843e+05, # [2]
+            "8": 1033680.0, # [1]
             }),
     CrossSection("QCD_Pt120to170", {
             "7": 1.151e+05, # [2]
+            "8": 156293.3, # [1]
             }),
     CrossSection("QCD_Pt170to300", {
             "7": 2.426e+04, # [2]
+            "8": 34138.15, # [1]
             }),
     CrossSection("QCD_Pt300to470", {
             "7": 1.168e+03, # [2]
+            "8": 1759.549, # [1]
             }),
     CrossSection("QCD_Pt20_MuEnriched", {
-            "7": 296600000.*0.0002855 # [2]
+            "7": 296600000.*0.0002855, # [2]
+            "8": 3.64e8*3.7e-4, # [1]
             }),
     CrossSection("WW", {
             "7": 43.0, # [3]
+            "8": 54.838, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
             }),
     CrossSection("WZ", {
             "7": 18.2, # [3]
+            "8": 33.21, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
             }),
     CrossSection("ZZ", {
             "7": 5.9, # [3]
+            "8": 17.654, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation, this is slightly questionmark, since the computed value is for m(ll) > 12
             }),
     CrossSection("TTJets", {
             "7": 165.0, # [3,4], approx. NNLO
-            "8": 225.2,
+            "8": 225.2, # [7]
             }),
     CrossSection("WJets", {
             "7": 31314.0, # [2], NNLO
+            "8": 36257.2, # [9], NNLO
             }),
     # PREP (LO) cross sections, for W+NJets weighting
     CrossSection("PREP_WJets", {
@@ -108,27 +122,35 @@ backgroundCrossSections = CrossSectionList(
     # end W+Njets 
     CrossSection("DYJetsToLL_M50", {
             "7": 3048.0, # [4], NNLO
+            "8": 3503.71, # [9], NNLO
             }),
     CrossSection("DYJetsToLL_M10to50", {
             "7": 9611.0, # [1]
+            "8": 11050.0, # [1]
             }),
     CrossSection("T_t-channel", {
             "7": 41.92, # [5,6]
+            "8": 56.4, # [8]
             }),
     CrossSection("Tbar_t-channel", {
             "7": 22.65, # [5,6]
+            "8": 30.7, # [8]
             }),
     CrossSection("T_tW-channel", {
             "7": 7.87, # [5,6]
+            "8": 11.1, # [8]
             }),
     CrossSection("Tbar_tW-channel", {
             "7": 7.87, # [5,6]
+            "8": 11.1, # [8]
             }),
     CrossSection("T_s-channel", {
             "7": 3.19, # [5,6]
+            "8": 3.79, # [8]
             }),
     CrossSection("Tbar_s-channel", {
             "7": 1.44, # [5,6]
+            "8": 1.76, # [8]
             }),
 )
 
