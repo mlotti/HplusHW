@@ -1508,6 +1508,7 @@ def addPatTrigger(process, dataVersion, sequence):
         "hltGetJetsfrom*",
         "hltMuTrackJpsi*",
     )
+    process.patTrigger.exludeCollections = cms.vstring()
 
 
     # Keep StandAlone trigger objects for enabling trigger

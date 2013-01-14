@@ -97,6 +97,17 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.int, # Use integer for now, if we later need e.g. 12.5 TeV, let's use string then
                      "Centre-of-mass energy in TeV")
+    options.register("wjetsWeighting",
+                     0,
+                     options.multiplicity.singleton,
+                     options.varType.int,
+                     "Set to 1 WJets inclusive+exclusive weighting should be enabled")
+    options.register("wjetBin",
+                     -1,
+                     options.multiplicity.singleton,
+                     options.varType.int,
+                     "W+Jets jet bin (-1=inclusive, 1=1, jne), only relevant if wjetsWeighting != 0")
+    
 
     # Protection in case sys.argv is missing due to various edm tools
     if not hasattr(sys, "argv"):
