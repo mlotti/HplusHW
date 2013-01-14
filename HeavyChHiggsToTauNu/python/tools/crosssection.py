@@ -84,6 +84,27 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("WJets", {
             "7": 31314.0, # [2], NNLO
             }),
+    # PREP (LO) cross sections, for W+NJets weighting
+    CrossSection("PREP_WJets", {
+            "7": 27770.0,
+            "8": 30400.0,
+            }),
+    CrossSection("PREP_W1Jets", {
+            "8": 5400.0,
+            }),
+    CrossSection("PREP_W2Jets", {
+            "7": 1435.0,
+            "8": 1750.0,
+            }),
+    CrossSection("PREP_W3Jets", {
+            "7": 304.2,
+            "8": 519.0,
+            }),
+    CrossSection("PREP_W4Jets", {
+            "7": 172.6,
+            "8": 214.0,
+            }),
+    # end W+Njets 
     CrossSection("DYJetsToLL_M50", {
             "7": 3048.0, # [4], NNLO
             }),
