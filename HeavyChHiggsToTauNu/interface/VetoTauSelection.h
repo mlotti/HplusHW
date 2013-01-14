@@ -43,12 +43,12 @@ namespace HPlus {
     ~VetoTauSelection();
 
     // Use silentAnalyze if you do not want to fill histograms or increment counters
-    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau);
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau, double vertexZ);
     /// Analyses the compatibility of the tau and the primary vertex
-    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau, double vertexZ);
 
   private:
-    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau);
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau, double vertexZ);
     // Parameters set in config file
     edm::InputTag fSrc;
     edm::InputTag fOneProngTauSrc;
