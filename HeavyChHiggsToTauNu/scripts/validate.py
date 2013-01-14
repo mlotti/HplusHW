@@ -9,13 +9,6 @@ from datetime import date, time, datetime
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 
-<<<<<<< HEAD
-debugstatus = False
-
-
-def getDatasetNames(multiCrabDir,counterDir):
-    datasets = dataset.getDatasetsFromMulticrabDirs([multiCrabDir],counters=counterDir)
-=======
 analysis = "signalAnalysis"
 era = "Run2011A"
 #counters = analysis+"Counters"
@@ -33,7 +26,6 @@ def getDatasetNames(multiCrabDir,counters,era,legacy=False):
         #datasets.updateNAllEventsToPUWeighted()
     #datasets.loadLuminosities(fname="dummy")
     #datasets.printInfo()
->>>>>>> 0e55bdf... technical: updated validation script to handle 42x data and to add also list of subcounters
     return datasets.getAllDatasetNames()
 
 def validateDatasetExistence(dataset1names,dataset2names):
@@ -342,43 +334,6 @@ def validateHistograms(mydir,histoDir,dataset1,dataset2):
             [histoDir+"/Vertices/verticesTriggeredAfterWeight", 1, "log"],
         ]],
         ["Trigger matched tau collection", [
-<<<<<<< HEAD
-            [histoDir+"/TauSelection/N_TriggerMatchedTaus", 1, "log"],
-            [histoDir+"/TauSelection/N_TriggerMatchedSeparateTaus", 1, "log"],
-            [histoDir+"/TauSelection/HPSDecayMode", 1, "log"],
-            [histoDir+"/TauSelection/TauSelection_all_tau_candidates_N", 1, "log"],
-            [histoDir+"/TauSelection/TauSelection_all_tau_candidates_pt", 5, "log"],
-            [histoDir+"/TauSelection/TauSelection_all_tau_candidates_eta", 0.1, "log"],
-            [histoDir+"/TauSelection/TauSelection_all_tau_candidates_phi", 3.14159265 / 36, "log"],
-            [histoDir+"/TauSelection/TauSelection_all_tau_candidates_MC_purity", 1, "log"]
-        ]],
-        ["Tau candidate selection", [
-            [histoDir+"/TauSelection/TauCand_JetPt", 5, "log"],
-            [histoDir+"/TauSelection/TauCand_JetEta", 0.1, "log"],
-            [histoDir+"/TauSelection/TauCand_LdgTrackPtCut", 5, "log"],
-            #[histoDir+"/TauSelection/TauCand_EMFractionCut", 0.05, "log"],
-            [histoDir+"/TauSelection/TauSelection_cleaned_tau_candidates_N", 1, "log"],
-            [histoDir+"/TauSelection/TauSelection_cleaned_tau_candidates_pt", 5, "log"],
-            [histoDir+"/TauSelection/TauSelection_cleaned_tau_candidates_eta", 0.1, "log"],
-            [histoDir+"/TauSelection/TauSelection_cleaned_tau_candidates_phi", 3.14159265 / 36, "log"],
-            [histoDir+"/TauSelection/TauSelection_cleaned_tau_candidates_MC_purity", 1, "log"]
-        ]],
-        ["Tau ID", [
-            [histoDir+"/TauSelection/IsolationPFChargedHadrCandsPtSum", 1, "log"],
-            [histoDir+"/TauSelection/IsolationPFGammaCandEtSum", 1, "log"],
-            [histoDir+"/TauSelection/TauID_NProngsCut", 1, "log"],
-            #[histoDir+"/TauSelection/TauID_ChargeCut", 1, "log"],
-            [histoDir+"/TauSelection/TauID_RtauCut", 0.05, "log"],
-            [histoDir+"/TauSelection/TauSelection_selected_taus_N", 1, "log"],
-            [histoDir+"/TauSelection/TauSelection_selected_taus_pt", 5, "log"],
-            [histoDir+"/TauSelection/TauSelection_selected_taus_eta", 0.1, "log"],
-            [histoDir+"/TauSelection/TauSelection_selected_taus_phi", 3.14159265 / 36, "log"],
-            [histoDir+"/TauSelection/TauSelection_selected_taus_MC_purity", 1, "log"],
-            [histoDir+"/FakeTauIdentifier_TauID/TauMatchType", 1, "log"],
-            [histoDir+"/FakeTauIdentifier_TauID/TauOrigin", 1, "log"],
-            [histoDir+"/FakeTauIdentifier_TauID/MuOrigin", 1, "log"],
-            [histoDir+"/FakeTauIdentifier_TauID/ElectronOrigin", 1, "log"],
-=======
             [["signalAnalysis/tauID/N_TriggerMatchedTaus","signalAnalysis/TauSelection/N_TriggerMatchedTaus"], 1, "log"],
             [["signalAnalysis/tauID/N_TriggerMatchedSeparateTaus","signalAnalysis/TauSelection/N_TriggerMatchedSeparateTaus"], 1, "log"],
             [["signalAnalysis/tauID/HPSDecayMode","signalAnalysis/TauSelection/HPSDecayMode"], 1, "log"],
@@ -414,7 +369,6 @@ def validateHistograms(mydir,histoDir,dataset1,dataset2):
             [["signalAnalysis/FakeTauIdentifier/TauOrigin","signalAnalysis/FakeTauIdentifier_TauID/TauOrigin"], 1, "log"],
             [["signalAnalysis/FakeTauIdentifier/MuOrigin","signalAnalysis/FakeTauIdentifier_TauID/MuOrigin"], 1, "log"],
             [["signalAnalysis/FakeTauIdentifier/ElectronOrigin","signalAnalysis/FakeTauIdentifier_TauID/ElectronOrigin"], 1, "log"],
->>>>>>> 0e55bdf... technical: updated validation script to handle 42x data and to add also list of subcounters
         ]],
         ["Tau after tau ID", [
             [histoDir+"/SelectedTau/SelectedTau_pT_AfterTauID", 5, "log"],
@@ -423,19 +377,11 @@ def validateHistograms(mydir,histoDir,dataset1,dataset2):
             [histoDir+"/SelectedTau/SelectedTau_Rtau_AfterTauID", 0.05, "log"],
         ]],
         ["Tau after all cuts", [
-<<<<<<< HEAD
-            [histoDir+"/SelectedTau/SelectedTau_pT_AfterCuts", 10, "log"],
-            [histoDir+"/SelectedTau/SelectedTau_eta_AfterCuts", 0.2, "log"],
-            [histoDir+"/SelectedTau/SelectedTau_Rtau_AfterCuts", 0.05, "log"],
-            [histoDir+"/SelectedTau/EWKFakeTaus_SelectedTau_pT_AfterCuts", 10, "log"],
-            [histoDir+"/SelectedTau/EWKFakeTaus_SelectedTau_eta_AfterCuts", 0.2, "log"],
-=======
             ["signalAnalysis/SelectedTau/SelectedTau_pT_AfterCuts", 10, "log"],
             ["signalAnalysis/SelectedTau/SelectedTau_eta_AfterCuts", 0.2, "log"],
             ["signalAnalysis/SelectedTau/SelectedTau_Rtau_AfterCuts", 0.05, "log"],
             [["signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_pT_AfterCuts","signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_pT_AfterCuts"], 10, "log"],
             [["signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_eta_AfterCuts","signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_eta_AfterCuts"], 0.2, "log"],
->>>>>>> 0e55bdf... technical: updated validation script to handle 42x data and to add also list of subcounters
         ]],
         ["Electrons", [
             [histoDir+"/GlobalElectronVeto/GlobalElectronPt", 5, "log"],
@@ -505,16 +451,9 @@ def validateHistograms(mydir,histoDir,dataset1,dataset2):
             [histoDir+"/Btagging/MCMatchForPassedJets", 1, "log"],
         ]],
         ["Transverse mass", [
-<<<<<<< HEAD
-            [histoDir+"/deltaPhi", 10, "linear"],
-            [histoDir+"/transverseMass", 20, "linear"],
-            #[histoDir+"/transverseMassAfterDeltaPhi160", 20, "linear"],
-            #[histoDir+"/transverseMassAfterDeltaPhi130", 20, "linear"],
-=======
             ["signalAnalysis/deltaPhi", 10, "linear"],
             [["signalAnalysis/transverseMass","signalAnalysis/transverseMassAfterDeltaPhi160"], 20, "linear"],
             [["signalAnalysis/NonQCDTypeIITransverseMassAfterDeltaPhi160","signalAnalysis/EWKFakeTausTransverseMass"], 20, "linear"],
->>>>>>> 0e55bdf... technical: updated validation script to handle 42x data and to add also list of subcounters
         ]]
     ]
     if debugstatus:
@@ -739,6 +678,11 @@ def main(argv):
     era = "Run2011A"
     #newCounters = "signalAnalysisData2011A/counters"
 
+    oldCounters = "signalAnalysisCounters"
+    newCounters = "signalAnalysis/counters"
+    era = "Run2011A"
+    #newCounters = "signalAnalysisData2011A/counters"
+
     mytimestamp = datetime.now().strftime("%d%m%y_%H%M%S")
     if debugstatus:
         mytimestamp = "debug"
@@ -772,13 +716,8 @@ def main(argv):
     myoutput += "<b>New multicrab directory to be validated:</b> "+validateData+"<br><br>\n"
     myoutput += "<b>Era: "+era+"</b><br>\n<hr><br>\n"
 
-<<<<<<< HEAD
-    refDatasetNames = getDatasetNames(referenceData,counterDir)
-    valDatasetNames = getDatasetNames(validateData,counterDir)
-=======
     refDatasetNames = getDatasetNames(referenceData,counters=oldCounters,era=era,legacy=True)
     valDatasetNames = getDatasetNames(validateData,counters=newCounters,era=era)
->>>>>>> 0e55bdf... technical: updated validation script to handle 42x data and to add also list of subcounters
 
     datasetNames = validateDatasetExistence(refDatasetNames,valDatasetNames)
     myoutput += "<h3><a name=maintop>List of datasets analysed:</a></h3><br>\n"
@@ -789,13 +728,8 @@ def main(argv):
         print "\n\n"
         print datasetname
         myoutput += "<h2><a name=dataset_"+datasetname+">Dataset: "+datasetname+"</a></h2><br>\n"
-<<<<<<< HEAD
-        refDatasets = dataset.getDatasetsFromCrabDirs([referenceData+"/"+datasetname],counters=counterDir)
-        valDatasets = dataset.getDatasetsFromCrabDirs([validateData+"/"+datasetname],counters=counterDir)
-=======
         refDatasets = dataset.getDatasetsFromCrabDirs([referenceData+"/"+datasetname],counters=oldCounters)
         valDatasets = dataset.getDatasetsFromCrabDirs([validateData+"/"+datasetname],counters=newCounters,dataEra=era)
->>>>>>> 0e55bdf... technical: updated validation script to handle 42x data and to add also list of subcounters
 
         myoutput += validateCounters(refDatasets,valDatasets)
         myoutput += validateHistograms(mydir,histoDir,refDatasets.getDataset(datasetname),valDatasets.getDataset(datasetname))
