@@ -99,6 +99,12 @@ namespace HPlus {
 
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
+    bool CalcAlphaT(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
+    vector<float> CalcMomentumTensorEigenValues(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
+    void CalcSphericity(vector<float> eigenvalues);
+    void CalcAplanarity(vector<float> eigenvalues);
+    void CalcPlanarity(vector<float> eigenvalues);
+    void CalcCircularity(const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
     // Input parameters
     // std::string fDiscriminator;
     // double fDiscrCut;
