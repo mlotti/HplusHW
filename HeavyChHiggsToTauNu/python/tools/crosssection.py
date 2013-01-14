@@ -289,7 +289,8 @@ def setHplusCrossSections(datasets, tanbeta=20, mu=defaultMu, toTop=False):
 # \param mu        Mu parameter
 # \param energy    sqrt(s) in TeV as string
 def printHplusCrossSections(tanbetas=[10, 20, 30, 40], mu=defaultMu, energy="7"):
-    print "ttbar cross section %.1f pb for %s TeV" % (ttCrossSection[energy], energy)
+    ttCrossSection = backgroundCrossSections.crossSection("TTJets", energy)
+    print "ttbar cross section %.1f pb" % ttCrossSection
     print "mu %.1f" % mu
     print
     for tanbeta in [10, 20, 30, 40]:
