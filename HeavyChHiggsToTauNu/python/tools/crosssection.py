@@ -142,9 +142,14 @@ def setBackgroundCrossSections(datasets, doWNJetsWeighting=True):
             for wnJets in ["W1Jets", "W2Jets", "W3Jets", "W4Jets"]:
                 if wnJets in dset.getName():
                     inclusiveCrossSection = backgroundCrossSections.crossSection("WJets", dset.getEnergy())
-                    inclusiveLO = backgroundCrossSections.crossSection("PREP_WJets", dset.getEnergy())
-                    wnJetsLO = backgroundCrossSections.crossSection("PREP_"+wnJets, dset.getEnergy())
-                    value = inclusiveCrossSection * wnJetsLO/inclusieveLO
+                    if doWNJetsWeighting:
+                        # W+Njets, with the assumption that they are weighted (see
+                        # src/WJetsWeight.cc)
+                        value = inclusiveCrossSection
+                    else:
+                        inclusiveLO = backgroundCrossSections.crossSection("PREP_WJets", dset.getEnergy())
+                        wnJetsLO = backgroundCrossSections.crossSection("PREP_"+wnJets, dset.getEnergy())
+                        value = inclusiveCrossSection * wnJetsLO/inclusiveLO
                     break
 
         if value is not None:
