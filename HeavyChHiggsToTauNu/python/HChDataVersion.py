@@ -161,6 +161,12 @@ class DataVersion:
     def is53X(self):
         return "53X" in self.version
 
+    def is44X(self):
+        return "44X" in self.version
+
+    def is53X(self):
+        return "53X" in self.version
+
     def getTriggerProcess(self):
         return self.trigger
 

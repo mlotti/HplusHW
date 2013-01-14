@@ -28,7 +28,7 @@ def main(opts):
     counters = opts.counterdir
     if opts.weighted:
         counters += "/weighted"
-        datasets.updateNAllEventsToPUWeighted()
+        datasets.updateNAllEventsToPUWeighted(era=opts.dataEra)
     eventCounter = counter.EventCounter(datasets, counters=counters)
     
 
@@ -102,6 +102,8 @@ if __name__ == "__main__":
                       help="Don't print statistical errors")
     parser.add_option("--mergeData", dest="mergeData", action="store_true", default=False,
                       help="Merge all data datasets")
+    parser.add_option("--dataEra", dest="dataEra", default=None, type="string",
+                      help="Data era")
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
 

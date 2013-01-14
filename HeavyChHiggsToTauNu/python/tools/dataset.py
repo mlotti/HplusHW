@@ -1336,9 +1336,8 @@ class DatasetRootHistoAddedMC(DatasetRootHistoBase):
         elif self.normalization == "toOne":
             return _normalizeToOne(hsum)
 
-        # We have to noramlize to cross section in any case
-        print self.dataset.getNormFactor()
-        hsum = _normalizeToFactor(hsum, self.dataset.getNormFactor()) # FIXME: normalization factor?
+        # We have to normalize to cross section in any case
+        hsum = _normalizeToFactor(hsum, self.dataset.getNormFactor())
         if self.normalization == "byCrossSection":
             return hsum
         elif self.normalization == "toLuminosity":
@@ -1636,17 +1635,19 @@ class Dataset:
     # draw() method), the draw() method is called by giving the TFile
     # and the dataset name as parameters. The draw() method is
     # expected to return a TH1 which is then returned.
-    def getDatasetRootHisto(self, name, modify=None):
+    def getDatasetRootHisto(self, name, modify=None, quietException=False):
         h = None
         if hasattr(name, "draw"):
             h = name.draw(self)
         else:
             pname = name
             (h, realName) = self._getRootHisto(pname)
-            if h is None:
+            if h == None:
                 msg = "Unable to find histogram '%s' from file '%s'" % (realName, self.file.GetName())
                 if realName != pname:
                     msg += "\nThe requested histogram was %s, and the path was modified because of dataEra." % self.counterDir
+                if quietException:
+                    return msg # Return the error message to let the calling code to give additional debugging details
                 raise Exception(msg)
             name = h.GetName()+"_"+self.name
             if modify is not None:
@@ -1846,12 +1847,17 @@ class DatasetMerged:
     #               Dataset objects
     def getDatasetRootHisto(self, name, **kwargs):
         wrappers = [d.getDatasetRootHisto(name, **kwargs) for d in self.datasets]
+        # Catch returned error messages
+        if wrappers != None:
+            for w in wrappers:
+                if isinstance(w,str):
+                    return w
+        # No errors, continue as usual
         if self.isMC():
             return DatasetRootHistoMergedMC(wrappers, self)
         else:
             return DatasetRootHistoMergedData(wrappers, self)
 
-        
     ## Get the directory content of a given directory in the ROOT file.
     # 
     # \param directory   Path of the directory in the ROOT file

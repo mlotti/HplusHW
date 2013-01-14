@@ -11,6 +11,45 @@ class NEvents:
         self.jet3 = jet3
         self.jet4 = jet4
 
+    def construct7TeV(self, era, weightType):
+        # The cross sections should the ones given by madgraph (LO, from PREP)
+        pset = cms.EDProducer("HPlusWJetsWeightProducer",
+            lheSrc = cms.InputTag("source", "", "LHE"),
+            alias = cms.string("wjetsWeight"),
+            enabled = cms.bool(True),
+            sampleJetBin = cms.int32(-1),
+            inclusiveCrossSection = cms.double(27770.0),
+            jetBin2 = cms.PSet(
+                exclusiveCrossSection = cms.double(1435.0),
+            ),
+            jetBin3 = cms.PSet(
+                exclusiveCrossSection = cms.double(304.2),
+            ),
+            jetBin4 = cms.PSet(
+                exclusiveCrossSection = cms.double(172.6),
+            ),
+        )
+
+        # Assume that if no era is given, on PU reweighting is done
+        if era == None or len(era) == 0:
+            pset.inclusiveNevents = cms.double(self.inclusive_v1)
+            for jetBin in [2, 3, 4]:
+                getattr(pset, "jetBin%d"%jetBin).exclusiveNevents = cms.double(getattr(self, "jet%d"%jetBin))
+
+            return pset
+
+
+        def weightedAllEvents(datasetName, unweighted):
+            return pileupReweightedAllEvents.getWeightedAllEvents(datasetName, era).getWeighted(unweighted, weightType)
+
+        pset.inclusiveNevents = cms.double(
+            weightedAllEvents("WJets_TuneZ2_Fall11", self.inclusive_v1)
+        )
+        for jetBin in [2, 3, 4]:
+            getattr(pset, "jetBin%d"%jetBin).exclusiveNevents = cms.double(weightedAllEvents("W%dJets_TuneZ2_Fall11"%jetBin, getattr(self, "jet%d"%jetBin)))
+
+        return pset
+
     def construct8TeV(self, era, weightType):
         # The cross sections should the ones given by madgraph (LO, from PREP)
         pset = cms.EDProducer("HPlusWJetsWeightProducer",
@@ -56,6 +95,12 @@ class NEvents:
 
 # Non-pu-reweighted events
 _wjetsNumberOfEvents = {
+    "pattuple_v44_4": NEvents(inclusive_v1=81345384,
+                              inclusive_v2=None,
+                              jet1=None,
+                              jet2=25400546,
+                              jet3=6533053,
+                              jet4=12608390),
     "pattuple_v53_1_test1": NEvents(inclusive_v1=2504608,
                                     inclusive_v2=3458492,
                                     jet1=2314140,
@@ -77,9 +122,12 @@ def getWJetsWeight(dataVersion, options, inputWorkflow, era, suffix=""):
                   "down": pileupReweightedAllEvents.PileupWeightType.DOWN
                   }[suffix]
 
-    if not dataVersion.is53X():
-        raise Exception("WJets weights are available only for 53X")
-
-    pset = _wjetsNumberOfEvents[inputWorkflow].construct8TeV(era, weightType)
+    if dataVersion.is44X():
+        pset = _wjetsNumberOfEvents[inputWorkflow].construct7TeV(era, weightType)
+    elif dataVersion.is53X():
+        pset = _wjetsNumberOfEvents[inputWorkflow].construct8TeV(era, weightType)
+    else:
+        raise Exception("WJets weights are available only for 44X and 53X")
     pset.sampleJetBin = options.wjetBin
     return pset
+

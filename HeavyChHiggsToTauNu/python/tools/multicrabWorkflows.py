@@ -136,10 +136,14 @@ datasets.extend([
     # [1] https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
     # [2] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSections
     MCDataset("TTJets_TuneZ2_Fall11",             crossSection=165, aod="/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # [1,2], approx. NNLO
-    MCDataset("WJets_TuneZ2_Fall11",              crossSection=31314, aod="/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # [2], NNLO
-    MCDataset("W2Jets_TuneZ2_Fall11",             crossSection=1435.0, aod="/W2Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # taken from PREP
-    MCDataset("W3Jets_TuneZ2_Fall11",             crossSection=304.2, aod="/W3Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # taken from PREP
-    MCDataset("W4Jets_TuneZ2_Fall11",             crossSection=172.6, aod="/W4Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # taken from PREP
+    # Cross section [2], NNLO
+    # W+Njets, with the assumption that they are weighted (see
+    # src/WJetsWeight.cc) And if they are not, the cross section can
+    # always be set in the plot scripts by the user.
+    MCDataset("WJets_TuneZ2_Fall11",              crossSection=31314, aod="/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
+    MCDataset("W2Jets_TuneZ2_Fall11",             crossSection=31314, aod="/W2Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
+    MCDataset("W3Jets_TuneZ2_Fall11",             crossSection=31314, aod="/W3Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
+    MCDataset("W4Jets_TuneZ2_Fall11",             crossSection=31314, aod="/W4Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
     MCDataset("DYJetsToLL_M50_TuneZ2_Fall11",     crossSection=3048, aod="/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # [2], NNLO
     MCDataset("DYJetsToLL_M10to50_TuneZ2_Fall11", crossSection=9611, aod="/DYJetsToLL_M-10To50_TuneZ2_7TeV-madgraph/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # taken from PREP
     # SingleTop Powheg
@@ -171,7 +175,7 @@ datasets.extend([
     DataDataset("Tau_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/Tau/Run2012C-24Aug2012-v1/AOD"), # 2212448 events, 190 files
     DataDataset("Tau_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/Tau/Run2012C-PromptReco-v2/AOD"), # 29597169 events, 2865 files
     # Run2012D
-    #DataDataset("Tau_%s_2012D_Prompt", reco="PromptDv1", runs=(203777, 205158), aod="/Tau/Run2012D-PromptReco-v1/AOD"), # ongoing datataking, so far 6458425 events, 691 files
+    DataDataset("Tau_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/Tau/Run2012D-PromptReco-v1/AOD"), # 34164175 events, 3593 files
 ])
 # Splitting here because when Matti first processed these for v53_1
 # pattuples, he hought that the 200961-202504 would be completely
@@ -196,7 +200,7 @@ datasets.extend([
     DataDataset("MultiJet_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/MultiJet/Run2012C-24Aug2012-v1/AOD"), # 2004842 events, 180 files
     DataDataset("MultiJet_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/MultiJet/Run2012C-PromptReco-v2/AOD"), # 27743543 events, 2833 files
     # Run2012D
-    #DataDataset("MultiJet_%s_2012D_Prompt", reco="PromptDv1", runs=(203777, 205158), aod="/MultiJet/Run2012D-PromptReco-v1/AOD"), # ongoing datataking, so far 6137697 events, 689 files
+    DataDataset("MultiJet_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/MultiJet/Run2012D-PromptReco-v1/AOD"), # 31810929 events, 3481 files
 ])
 datasets.splitDataByRuns("MultiJet_193834-196531_2012B_Jul13", [
         (193834, 194225), # This has both BTagCSV and BTagIP triggers, 4765979 events, 363 files
@@ -228,7 +232,7 @@ datasets.extend([
     DataDataset("TauPlusX_%s_0T_2012C_Prompt", reco="PromptCv2", runs=(200961, 202504), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #
     DataDataset("TauPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(202792, 203742), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #
     # Run2012D
-    #DataDataset("TauPlusX_%s_2012D_Prompt", reco="PromptDv1", runs=(203777, 205158), aod="/TauPlusX/Run2012D-PromptReco-v1/AOD"), # ongoing datataking, so far 11424090 events, 1169 files
+    DataDataset("TauPlusX_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/TauPlusX/Run2012D-PromptReco-v1/AOD"), # 59840242 events, 6068 files
 ])
 # SingleMu PD, Mu trigger for embedding, IsoMu trigger for muon efficiency measurement
 datasets.extend([  
@@ -242,7 +246,7 @@ datasets.extend([
     DataDataset("SingleMu_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/SingleMu/Run2012C-24Aug2012-v1/AOD"), # 6076746 events, 460 files
     DataDataset("SingleMu_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/SingleMu/Run2012C-PromptReco-v2/AOD"), # 81770645 events, 7450 files
     # SingleMu, Run2012D
-    #DataDataset("SingleMu_%s_2012D_Prompt", reco="PromptDv1", runs=(203777, 205158), aod="/SingleMu/Run2012D-PromptReco-v1/AOD"), # ongoing datataking, so far 17812155 events, 1749 files
+    DataDataset("SingleMu_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/SingleMu/Run2012D-PromptReco-v1/AOD"), # 90255013 events, 8886 files
 ])
 
 
@@ -415,7 +419,7 @@ multicrabWorkflowsTauEmbedding.addEmbeddingEmbedding_v44_4_2(datasets)
 multicrabWorkflowsMuonTagProbe.addMuonTagProbe_44X(datasets)
 
 # Add trigger efficiency definitions
-#multicrabWorkflowsTriggerEff.addMetLegSkim_vXXX(datasets)
+multicrabWorkflowsTriggerEff.addMetLegSkim_53X_v1(datasets)
 
 def printAllDatasets():
     for d in datasets.getDatasetList():
