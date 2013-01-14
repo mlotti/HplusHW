@@ -29,9 +29,9 @@ def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowNa
 
     # Additional, necessary command line arguments relaring to trigger
     args = {}
-    if len(taskDef.triggerOR) > 1 and taskDef.triggerThrow != None and taskDef.triggerThrow == False:
+    if taskDef.triggerOR is not None and len(taskDef.triggerOR) > 1 and taskDef.triggerThrow != None and taskDef.triggerThrow == False:
         args["triggerThrow"] = 0
-    if dataset.isMC() and taskDef.triggerOR != None:
+    if dataset.isMC() and taskDef.triggerOR is not None and len(taskDef.triggerOR) > 0:
         args["triggerMC"] = 1
     if taskDef.args != None:
         args.update(taskDef.args)
@@ -60,7 +60,10 @@ def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowNa
 def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
     mcTrigger = "HLT_MediumIsoPFTau35_Trk20_MET60_v1"
     def TaskDefMC(**kwargs):
-        return TaskDef(triggerOR=[mcTrigger], **kwargs)
+        if "triggerOR" in kwargs:
+            return TaskDef(**kwargs)
+        else:
+            return TaskDef(triggerOR=[mcTrigger], **kwargs)
 
     # Specifies the default
     # - number of jobs in pattuple processing
@@ -92,7 +95,7 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
         "TTToHplusBWB_M120_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
         "TTToHplusBWB_M140_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
         "TTToHplusBWB_M150_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "TTToHplusBWB_M155_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBWB_M155_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2, triggerOR=None),
         "TTToHplusBWB_M160_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
 
         "TTToHplusBHminusB_M80_Fall11":        TaskDefMC(njobsIn=50, njobsOut=2),
@@ -101,15 +104,16 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
         "TTToHplusBHminusB_M120_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
         "TTToHplusBHminusB_M140_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
         "TTToHplusBHminusB_M150_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "TTToHplusBHminusB_M155_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBHminusB_M155_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2, triggerOR=None),
         "TTToHplusBHminusB_M160_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
 
-        "HplusTB_M180_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "HplusTB_M190_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "HplusTB_M200_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "HplusTB_M220_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "HplusTB_M250_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "HplusTB_M300_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
+        # Heavy H+ non-triggered
+        "HplusTB_M180_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2, triggerOR=None),
+        "HplusTB_M190_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2, triggerOR=None),
+        "HplusTB_M200_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2, triggerOR=None),
+        "HplusTB_M220_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2, triggerOR=None),
+        "HplusTB_M250_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2, triggerOR=None),
+        "HplusTB_M300_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2, triggerOR=None),
 
         "QCD_Pt30to50_TuneZ2_Fall11":       TaskDefMC(njobsIn=10, njobsOut=1),
         "QCD_Pt50to80_TuneZ2_Fall11":       TaskDefMC(njobsIn=10, njobsOut=1),
