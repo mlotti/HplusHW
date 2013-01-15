@@ -683,6 +683,11 @@ def main(argv):
     era = "Run2011A"
     #newCounters = "signalAnalysisData2011A/counters"
 
+    oldCounters = "signalAnalysisCounters"
+    newCounters = "signalAnalysis/counters"
+    era = "Run2011A"
+    #newCounters = "signalAnalysisData2011A/counters"
+
     mytimestamp = datetime.now().strftime("%d%m%y_%H%M%S")
     if debugstatus:
         mytimestamp = "debug"
