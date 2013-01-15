@@ -311,7 +311,7 @@ namespace HPlus {
 
 //------ Tau candidate selection
     // Do tau candidate selection
-    TauSelection::Data tauCandidateData = fTauSelection.analyze(iEvent, iSetup);
+    TauSelection::Data tauCandidateData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
     if (!tauCandidateData.passedEvent()) return false;
     // Obtain MC matching - for EWK without genuine taus
     FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauCandidateData.getSelectedTau()));
@@ -345,7 +345,7 @@ namespace HPlus {
     }*/
 
 //------ Veto against second tau in event
-    VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau());
+    VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau(), pvData.getSelectedVertex()->z());
     //    if (vetoTauData.passedEvent()) return false;
     if (!vetoTauData.passedEvent()) increment(fVetoTauCounter);
     // Note: no return statement should be added here

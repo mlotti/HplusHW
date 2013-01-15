@@ -484,7 +484,7 @@ namespace HPlus {
 //------ TauID
     // Store weight of event
     // TauID
-    TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
+    TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
 
     fTauSelection.analyseFakeTauComposition(fFakeTauIdentifier,iEvent);
 
@@ -561,7 +561,7 @@ namespace HPlus {
     }
     */  
 //------ Veto against second tau in event
-    VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauData.getSelectedTau());
+    VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), pvData.getSelectedVertex()->z());
     //    if (vetoTauData.passedEvent()) return false; // tau veto
     //    if (!vetoTauData.passedEvent()) return false; // select events with add. taus
     //    if (vetoTauData.getSelectedVetoTaus().size() > 0 ) return false;

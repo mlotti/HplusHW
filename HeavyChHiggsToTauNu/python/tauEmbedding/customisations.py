@@ -951,7 +951,8 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     # Select the tau candidate which is most likely going to pass the identification
     genTauSelected = cms.EDProducer("HPlusPATTauMostLikelyIdentifiedSelector",
         eventCounter = param.eventCounter.clone(),
-        tauSelection = param.tauSelection.clone()
+        tauSelection = param.tauSelection.clone(),
+        vertexSrc = param.primaryVertexSelection.src,
     )
     genTauSelectedName = prefix+"TauSelected"
     setattr(process, genTauSelectedName, genTauSelected)

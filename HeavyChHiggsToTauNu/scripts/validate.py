@@ -10,13 +10,22 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters"
+era = "Run2011A"
+#counters = analysis+"Counters"
 
 debugstatus = False
 
 
-def getDatasetNames(multiCrabDir):
-    datasets = dataset.getDatasetsFromMulticrabDirs([multiCrabDir],counters=counters)
+def getDatasetNames(multiCrabDir,counters,era,legacy=False):
+    datasets = None
+    if not legacy:
+        datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=multiCrabDir+"/multicrab.cfg",dataEra=era,counters=counters)
+        datasets.updateNAllEventsToPUWeighted()
+    else:
+        datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=multiCrabDir+"/multicrab.cfg",counters=counters)
+        #datasets.updateNAllEventsToPUWeighted()
+    #datasets.loadLuminosities(fname="dummy")
+    #datasets.printInfo()
     return datasets.getAllDatasetNames()
 
 def validateDatasetExistence(dataset1names,dataset2names):
@@ -48,11 +57,13 @@ def validateNames(names1,names2):
     return names
 
 def findValue(row,counter):
+    if counter == None:
+        return -1
     for i in xrange(counter.getNrows()):
         if row == counter.rowNames[i]:
             return int(counter.getCount(i,0).value())
-    print "Counter value not found, exiting.."
-    sys.exit()
+    #print "Counter value not found"
+    return -1
 
 def format(row,value1,value2):
     fString = "    "
@@ -85,9 +96,15 @@ def report(oldrow,row,counter1,counter2):
     value2 = findValue(row,counter2)
     myoutput = "<tr>\n"
     myoutput += "<td><b>"+row+"</b></td>"
-    myoutput += "<td align=center>"+str(value2)+"</td>"
-    myoutput += "<td align=center>"+str(value1)+"</td>"
-    if value1 == value2:
+    if value2 >= 0:
+        myoutput += "<td align=center>"+str(value2)+"</td>"
+    else:
+        myoutput += "<td align=center>-</td>"
+    if value1 >= 0:
+        myoutput += "<td align=center>"+str(value1)+"</td>"
+    else:
+        myoutput += "<td align=center>-</td>"
+    if value1 == value2 and value1 > 0:
         myoutput += "<td></td>"
         print format(row,value2,value1)
     else:
@@ -118,7 +135,7 @@ def report(oldrow,row,counter1,counter2):
     myoutput += "</tr>\n"
     return myoutput
 
-def validateCounterValues(rownames,counter1,counter2):
+def validateCounterValues(counter1,counter2):
     # Make table in output
     myoutput = "<table>\n"
     myoutput += "<tr><td><b>Counter</b></td>"
@@ -126,6 +143,10 @@ def validateCounterValues(rownames,counter1,counter2):
     myoutput += "<td><b>New eff.</b></td><td><b>Ref. eff.</b></td><td><b>New/Ref.</b></td>"
     myoutput += "</tr>\n"
     oldrow = ""
+    if counter1 == None:
+        rownames = counter2.getRowNames()
+    else:
+        rownames = counter1.getRowNames()
     for row in rownames:
         myoutput += report(oldrow, row,counter1,counter2)
         oldrow = row
@@ -133,21 +154,39 @@ def validateCounterValues(rownames,counter1,counter2):
     return myoutput
 
 def validateCounters(dataset1,dataset2):
+    print "Reporting main counters:"
     eventCounter1 = counter.EventCounter(dataset1)
     counter1 = eventCounter1.getMainCounter().getTable()
-    rownames1 = counter1.getRowNames()
+    #rownames1 = counter1.getRowNames()
 
     eventCounter2 = counter.EventCounter(dataset2)
     counter2 = eventCounter2.getMainCounter().getTable()
-    rownames2 = counter2.getRowNames()
-
-    rownames = validateNames(rownames1,rownames2)
-
-    myoutput = validateCounterValues(rownames,counter1,counter2)
+    #rownames2 = counter2.getRowNames()
+    # table of main counters
+    #rownames = validateNames(rownames1,rownames2)
+    myoutput = validateCounterValues(counter1,counter2)
+    # table of subcounters
+    subcounternames1 = eventCounter1.getSubCounterNames()
+    subcounternames2 = eventCounter2.getSubCounterNames()
+    for item in subcounternames1:
+        print "Reporting subcounter:",item
+        myoutput += "<br>\n<b>Subcounter: "+item+"</b><br>\n<br>\n"
+        counter1 = eventCounter1.getSubCounterTable(item)
+        if item in subcounternames2:
+            counter2 = eventCounter2.getSubCounterTable(item)
+            myoutput += validateCounterValues(counter1,counter2)
+        else:
+            myoutput += validateCounterValues(counter1,None)
+    for item in subcounternames2:
+        print "Reporting subcounter:",item
+        if not item in subcounternames1:
+            myoutput += "Subcounter: "+item+"<br>\n"
+            counter2 = eventCounter2.getSubCounterTable(item)
+            myoutput += validateCounterValues(None,counter2)
     return myoutput
 
-def getHistogram(dataset, histoname, isRef):
-    roothisto = dataset.getDatasetRootHisto(histoname[0])
+def getHistogram(dataset, histoname, name, isRef):
+    roothisto = dataset.getDatasetRootHisto(name)
     #roothisto.normalizeToOne()
     hnew = roothisto.getHistogram()
     # Rebin
@@ -226,12 +265,12 @@ def setframeextrema(myframe, h1, h2, logstatus):
 def analysehistodiff(canvas,h1,h2):
     canvas.GetPad(1).SetFrameFillColor(4000)
     canvas.GetPad(2).SetFrameFillColor(4000)
+    diff = 0.0
     if not h1.GetNbinsX() == h2.GetNbinsX():
         canvas.GetPad(1).SetFillColor(ROOT.kOrange)
         canvas.GetPad(2).SetFillColor(ROOT.kOrange)
     else:
         # same number of bins in histograms
-        diff = 0.0
         zerocount = 0
         for i in range(1, h1.GetNbinsX()):
             if h1.GetBinContent(i) > 0:
@@ -295,41 +334,41 @@ def validateHistograms(mydir,dataset1,dataset2):
             ["signalAnalysis/Vertices/verticesTriggeredAfterWeight", 1, "log"],
         ]],
         ["Trigger matched tau collection", [
-            ["signalAnalysis/tauID/N_TriggerMatchedTaus", 1, "log"],
-            ["signalAnalysis/tauID/N_TriggerMatchedSeparateTaus", 1, "log"],
-            ["signalAnalysis/tauID/HPSDecayMode", 1, "log"],
-            ["signalAnalysis/tauID/TauSelection_all_tau_candidates_N", 1, "log"],
-            ["signalAnalysis/tauID/TauSelection_all_tau_candidates_pt", 5, "log"],
-            ["signalAnalysis/tauID/TauSelection_all_tau_candidates_eta", 0.1, "log"],
-            ["signalAnalysis/tauID/TauSelection_all_tau_candidates_phi", 3.14159265 / 36, "log"],
-            ["signalAnalysis/tauID/TauSelection_all_tau_candidates_MC_purity", 1, "log"]
+            [["signalAnalysis/tauID/N_TriggerMatchedTaus","signalAnalysis/TauSelection/N_TriggerMatchedTaus"], 1, "log"],
+            [["signalAnalysis/tauID/N_TriggerMatchedSeparateTaus","signalAnalysis/TauSelection/N_TriggerMatchedSeparateTaus"], 1, "log"],
+            [["signalAnalysis/tauID/HPSDecayMode","signalAnalysis/TauSelection/HPSDecayMode"], 1, "log"],
+            [["signalAnalysis/tauID/TauSelection_all_tau_candidates_N","signalAnalysis/TauSelection/TauSelection_all_tau_candidates_N"], 1, "log"],
+            [["signalAnalysis/tauID/TauSelection_all_tau_candidates_pt","signalAnalysis/TauSelection/TauSelection_all_tau_candidates_pt"], 5, "log"],
+            [["signalAnalysis/tauID/TauSelection_all_tau_candidates_eta","signalAnalysis/TauSelection/TauSelection_all_tau_candidates_eta"], 0.1, "log"],
+            [["signalAnalysis/tauID/TauSelection_all_tau_candidates_phi","signalAnalysis/TauSelection/TauSelection_all_tau_candidates_phi"], 3.14159265 / 36, "log"],
+            [["signalAnalysis/tauID/TauSelection_all_tau_candidates_MC_purity","signalAnalysis/TauSelection/TauSelection_all_tau_candidates_MC_purity"], 1, "log"]
         ]],
         ["Tau candidate selection", [
-            ["signalAnalysis/tauID/TauCand_JetPt", 5, "log"],
-            ["signalAnalysis/tauID/TauCand_JetEta", 0.1, "log"],
-            ["signalAnalysis/tauID/TauCand_LdgTrackPtCut", 5, "log"],
-            ["signalAnalysis/tauID/TauCand_EMFractionCut", 0.05, "log"],
-            ["signalAnalysis/tauID/TauSelection_cleaned_tau_candidates_N", 1, "log"],
-            ["signalAnalysis/tauID/TauSelection_cleaned_tau_candidates_pt", 5, "log"],
-            ["signalAnalysis/tauID/TauSelection_cleaned_tau_candidates_eta", 0.1, "log"],
-            ["signalAnalysis/tauID/TauSelection_cleaned_tau_candidates_phi", 3.14159265 / 36, "log"],
-            ["signalAnalysis/tauID/TauSelection_cleaned_tau_candidates_MC_purity", 1, "log"]
+            [["signalAnalysis/tauID/TauCand_JetPt","signalAnalysis/TauSelection/TauCand_JetPt"], 5, "log"],
+            [["signalAnalysis/tauID/TauCand_JetEta","signalAnalysis/TauSelection/TauCand_JetEta"], 0.1, "log"],
+            [["signalAnalysis/tauID/TauCand_LdgTrackPtCut","signalAnalysis/TauSelection/TauCand_LdgTrackPtCut"], 5, "log"],
+            [["signalAnalysis/tauID/TauCand_EMFractionCut","signalAnalysis/TauSelection/TauCand_EMFractionCut"], 0.05, "log"],
+            [["signalAnalysis/tauID/TauSelection_cleaned_tau_candidates_N","signalAnalysis/TauSelection/TauSelection_cleaned_tau_candidates_N"], 1, "log"],
+            [["signalAnalysis/tauID/TauSelection_cleaned_tau_candidates_pt","signalAnalysis/TauSelection/TauSelection_cleaned_tau_candidates_pt"], 5, "log"],
+            [["signalAnalysis/tauID/TauSelection_cleaned_tau_candidates_eta","signalAnalysis/TauSelection/TauSelection_cleaned_tau_candidates_eta"], 0.1, "log"],
+            [["signalAnalysis/tauID/TauSelection_cleaned_tau_candidates_phi","signalAnalysis/TauSelection/TauSelection_cleaned_tau_candidates_phi"], 3.14159265 / 36, "log"],
+            [["signalAnalysis/tauID/TauSelection_cleaned_tau_candidates_MC_purity","signalAnalysis/TauSelection/TauSelection_cleaned_tau_candidates_MC_purity"], 1, "log"]
         ]],
         ["Tau ID", [
-            ["signalAnalysis/tauID/IsolationPFChargedHadrCandsPtSum", 1, "log"],
-            ["signalAnalysis/tauID/IsolationPFGammaCandEtSum", 1, "log"],
-            ["signalAnalysis/tauID/TauID_OneProngNumberCut", 1, "log"],
-            ["signalAnalysis/tauID/TauID_ChargeCut", 1, "log"],
-            ["signalAnalysis/tauID/TauID_RtauCut", 0.05, "log"],
-            ["signalAnalysis/tauID/TauSelection_selected_taus_N", 1, "log"],
-            ["signalAnalysis/tauID/TauSelection_selected_taus_pt", 5, "log"],
-            ["signalAnalysis/tauID/TauSelection_selected_taus_eta", 0.1, "log"],
-            ["signalAnalysis/tauID/TauSelection_selected_taus_phi", 3.14159265 / 36, "log"],
-            ["signalAnalysis/tauID/TauSelection_selected_taus_MC_purity", 1, "log"],
-            ["signalAnalysis/FakeTauIdentifier/TauMatchType", 1, "log"],
-            ["signalAnalysis/FakeTauIdentifier/TauOrigin", 1, "log"],
-            ["signalAnalysis/FakeTauIdentifier/MuOrigin", 1, "log"],
-            ["signalAnalysis/FakeTauIdentifier/ElectronOrigin", 1, "log"],
+            [["signalAnalysis/tauID/IsolationPFChargedHadrCandsPtSum","signalAnalysis/TauSelection/IsolationPFChargedHadrCandsPtSum"], 1, "log"],
+            [["signalAnalysis/tauID/IsolationPFGammaCandEtSum","signalAnalysis/TauSelection/IsolationPFGammaCandEtSum"], 1, "log"],
+            [["signalAnalysis/tauID/TauID_OneProngNumberCut","signalAnalysis/TauSelection/TauID_OneProngNumberCut"], 1, "log"],
+            [["signalAnalysis/tauID/TauID_ChargeCut","signalAnalysis/TauSelection/TauID_ChargeCut"], 1, "log"],
+            [["signalAnalysis/tauID/TauID_RtauCut","signalAnalysis/TauSelection/TauID_RtauCut"], 0.05, "log"],
+            [["signalAnalysis/tauID/TauSelection_selected_taus_N","signalAnalysis/TauSelection/TauSelection_selected_taus_N"], 1, "log"],
+            [["signalAnalysis/tauID/TauSelection_selected_taus_pt","signalAnalysis/TauSelection/TauSelection_selected_taus_pt"], 5, "log"],
+            [["signalAnalysis/tauID/TauSelection_selected_taus_eta","signalAnalysis/TauSelection/TauSelection_selected_taus_eta"], 0.1, "log"],
+            [["signalAnalysis/tauID/TauSelection_selected_taus_phi","signalAnalysis/TauSelection/TauSelection_selected_taus_phi"], 3.14159265 / 36, "log"],
+            [["signalAnalysis/tauID/TauSelection_selected_taus_MC_purity","signalAnalysis/TauSelection/TauSelection_selected_taus_MC_purity"], 1, "log"],
+            [["signalAnalysis/FakeTauIdentifier/TauMatchType","signalAnalysis/FakeTauIdentifier_TauID/TauMatchType"], 1, "log"],
+            [["signalAnalysis/FakeTauIdentifier/TauOrigin","signalAnalysis/FakeTauIdentifier_TauID/TauOrigin"], 1, "log"],
+            [["signalAnalysis/FakeTauIdentifier/MuOrigin","signalAnalysis/FakeTauIdentifier_TauID/MuOrigin"], 1, "log"],
+            [["signalAnalysis/FakeTauIdentifier/ElectronOrigin","signalAnalysis/FakeTauIdentifier_TauID/ElectronOrigin"], 1, "log"],
         ]],
         ["Tau after tau ID", [
             ["signalAnalysis/SelectedTau/SelectedTau_pT_AfterTauID", 5, "log"],
@@ -341,8 +380,8 @@ def validateHistograms(mydir,dataset1,dataset2):
             ["signalAnalysis/SelectedTau/SelectedTau_pT_AfterCuts", 10, "log"],
             ["signalAnalysis/SelectedTau/SelectedTau_eta_AfterCuts", 0.2, "log"],
             ["signalAnalysis/SelectedTau/SelectedTau_Rtau_AfterCuts", 0.05, "log"],
-            ["signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_pT_AfterCuts", 10, "log"],
-            ["signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_eta_AfterCuts", 0.2, "log"],
+            [["signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_pT_AfterCuts","signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_pT_AfterCuts"], 10, "log"],
+            [["signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_eta_AfterCuts","signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_eta_AfterCuts"], 0.2, "log"],
         ]],
         ["Electrons", [
             ["signalAnalysis/GlobalElectronVeto/GlobalElectronPt", 5, "log"],
@@ -413,9 +452,8 @@ def validateHistograms(mydir,dataset1,dataset2):
         ]],
         ["Transverse mass", [
             ["signalAnalysis/deltaPhi", 10, "linear"],
-            ["signalAnalysis/transverseMass", 20, "linear"],
-            ["signalAnalysis/transverseMassAfterDeltaPhi160", 20, "linear"],
-            ["signalAnalysis/transverseMassAfterDeltaPhi130", 20, "linear"],
+            [["signalAnalysis/transverseMass","signalAnalysis/transverseMassAfterDeltaPhi160"], 20, "linear"],
+            [["signalAnalysis/NonQCDTypeIITransverseMassAfterDeltaPhi160","signalAnalysis/EWKFakeTausTransverseMass"], 20, "linear"],
         ]]
     ]
     if debugstatus:
@@ -445,15 +483,52 @@ def validateHistograms(mydir,dataset1,dataset2):
                 myoutput += "<tr>\n"
             mycount = mycount + 1
             myoutput += "<td>"
-            if dataset1.hasRootHisto(histoname[0]) and dataset2.hasRootHisto(histoname[0]):
+            # Failsafe for legacy histogram names
+            hname1 = None
+            hname2 = None
+            if isinstance(histoname[0],list):
+                for aname in histoname[0]:
+                    if dataset1.hasRootHisto(aname):
+                        hname1 = aname
+                    if dataset2.hasRootHisto(aname):
+                        hname2 = aname
+            else:
+                if dataset1.hasRootHisto(histoname[0]):
+                    hname1 = histoname[0]
+                if dataset2.hasRootHisto(histoname[0]):
+                    hname2 = histoname[0]
+            # Check that histograms are found and make comparison plot
+            if hname1 != None and hname2 != None:
                 # construct output name
-                myname = histoname[0].replace("/", "_")
+                myname = hname1.replace("/", "_")
                 # Obtain histograms and make canvas
-                h1 = getHistogram(dataset1, histoname, True)
+                h1 = getHistogram(dataset1, histoname, hname1, True)
                 #expandOverflowBins(h1)
-                h2 = getHistogram(dataset2, histoname, False)
+                h2 = getHistogram(dataset2, histoname, hname2, False)
                 #expandOverflowBins(h2)
-                canvas = ROOT.TCanvas(histoname[0],histoname[0],600,500)
+                # Make sure that binning is compatible
+                #print "binning:",h1.GetNbinsX(),h1.GetXaxis().GetXmin(),h1.GetXaxis().GetXmax()," / ",h2.GetNbinsX(),h2.GetXaxis().GetXmin(),h2.GetXaxis().GetXmax()
+                #if h1.GetXaxis().GetXmax() > h2.GetXaxis().GetXmax():
+                    #nbins = (h1.GetXaxis().GetXmax()-h1.GetXaxis().GetXmin()) / h2.GetXaxis().GetBinWidth(1)
+                    #h2.GetXaxis().Set(int(nbins),h1.GetXaxis().GetXmin(),h1.GetXaxis().GetXmax())
+                    #print "- range changed:",h1.GetNbinsX(),h1.GetXaxis().GetXmin(),h1.GetXaxis().GetXmax()," / ",h2.GetNbinsX(),h2.GetXaxis().GetXmin(),h2.GetXaxis().GetXmax()
+                #if h1.GetNbinsX() != h2.GetNbinsX():
+                    #if h1.GetNbinsX() > h2.GetNbinsX():
+                        #mystatus = False
+                        #i = 1
+                        #while not mystatus and i < 10:
+                            #if h1.GetNbinsX() * i % h2.GetNbinsX() == 0:
+                                #h1.Rebin(floor(float(h1.GetNbinsX()) / float(h2.GetNbinsX())))
+                                #h2.Rebin(i)
+                                #print "rebin:",h1.GetNbinsX(),h1.GetXaxis().GetXmin(),h1.GetXaxis().GetXmax()," / ",h2.GetNbinsX(),h2.GetXaxis().GetXmin(),h2.GetXaxis().GetXmax()
+                                #mystatus = True
+                            #i += 1
+                    #else:
+                        #if h2.GetNbinsX() % h1.GetNbinsX() == 0:
+                            #h2.Rebin(h2.GetNbinsX() / h1.GetNbinsX())
+
+                # Create canvas
+                canvas = ROOT.TCanvas(hname1,hname1,600,500)
                 canvas.cd()
                 setCanvasDefinitions(canvas)
                 # Make frame and set its extrema
@@ -542,16 +617,24 @@ def validateHistograms(mydir,dataset1,dataset2):
                 myoutput += "<br><img"
                 #myoutput += " width=%f%%" % myscale
                 #myoutput += " height=%f%%" % myscale
-                myoutput += " src="+mydir+"/"+myname+".png alt="+histoname[0]+"><br>"
+                myoutput += " src="+mydir+"/"+myname+".png alt="+hname1+"><br>"
             else:
                 # cannot create figure because one or both histograms are not available
-                if not dataset1.hasRootHisto(histoname[0]):
+                if hname1 == None:
                     print "  Warning: Did not find histogram",histoname[0],"in",dataset1.getName()
                     myoutput += "<text color=e00000>Not found for reference!</text><br>"
-                if not dataset2.hasRootHisto(histoname[0]):
+                if hname2 == None:
                     print "  Warning: Did not find histogram",histoname[0],"in",dataset2.getName()
                     myoutput += "<text color=e00000>Not found for new dataset!</text><br>"
-            myoutput += "\n<br>src = "+histoname[0]
+            hnamestr = None
+            if isinstance(histoname[0],list):
+                hnamestr = "["
+                for aname in histoname[0]:
+                    hnamestr += aname+" "
+                hnamestr += "]"
+            else:
+                hnamestr = histoname[0]
+            myoutput += "\n<br>src = "+hnamestr
             myoutput += "<br>bin width = "+str(histoname[1])
             myoutput += "<br>Difference = %1.3f\n" % mydifference
             # close cell (and if necessary also row) in table
@@ -589,6 +672,11 @@ def main(argv):
     referenceData = sys.argv[1]
     validateData  = sys.argv[2]
 
+    oldCounters = "signalAnalysisCounters"
+    newCounters = "signalAnalysis/counters"
+    era = "Run2011A"
+    #newCounters = "signalAnalysisData2011A/counters"
+
     mytimestamp = datetime.now().strftime("%d%m%y_%H%M%S")
     if debugstatus:
         mytimestamp = "debug"
@@ -613,8 +701,8 @@ def main(argv):
     myoutput += "<b>Reference multicrab directory:</b> "+referenceData+"<br>\n"
     myoutput += "<b>New multicrab directory to be validated:</b> "+validateData+"<br>\n<hr><br>\n"
 
-    refDatasetNames = getDatasetNames(referenceData)
-    valDatasetNames = getDatasetNames(validateData)
+    refDatasetNames = getDatasetNames(referenceData,counters=oldCounters,era=era,legacy=True)
+    valDatasetNames = getDatasetNames(validateData,counters=newCounters,era=era)
 
     datasetNames = validateDatasetExistence(refDatasetNames,valDatasetNames)
     myoutput += "<h3><a name=maintop>List of datasets analysed:</a></h3><br>\n"
@@ -625,8 +713,8 @@ def main(argv):
         print "\n\n"
         print datasetname
         myoutput += "<h2><a name=dataset_"+datasetname+">Dataset: "+datasetname+"</a></h2><br>\n"
-        refDatasets = dataset.getDatasetsFromCrabDirs([referenceData+"/"+datasetname],counters=counters)
-        valDatasets = dataset.getDatasetsFromCrabDirs([validateData+"/"+datasetname],counters=counters)
+        refDatasets = dataset.getDatasetsFromCrabDirs([referenceData+"/"+datasetname],counters=oldCounters)
+        valDatasets = dataset.getDatasetsFromCrabDirs([validateData+"/"+datasetname],counters=newCounters,dataEra=era)
 
         myoutput += validateCounters(refDatasets,valDatasets)
         myoutput += validateHistograms(mydir,refDatasets.getDataset(datasetname),valDatasets.getDataset(datasetname))
