@@ -100,7 +100,7 @@ class Dataset:
     #
     # \param name         Name of the crab-dataset
     # \param dataVersion  Data version string
-    # \param energy       Centre-of-mass energy (integer, in TeV)
+    # \param energy       Centre-of-mass energy (string, in TeV)
     # \param runs         For data, two-tuple of the run range
     # \param crossSection For MC, the dataset cross section in pb
     # \param workflows    List of Workflow objects
@@ -153,7 +153,7 @@ class Dataset:
     def __str__(self):
         out = StringIO.StringIO()
 
-        out.write('Dataset("%s", dataVersion="%s", energy=%d' % (self.name, self.dataVersion, self.energy))
+        out.write('Dataset("%s", dataVersion="%s", energy=%s' % (self.name, self.dataVersion, self.energy))
         if self.runs != None:
             out.write(", runs=%s" % str(self.runs))
         if self.crossSection != None:
@@ -209,7 +209,7 @@ class Dataset:
 
         args = [
             "dataVersion=%s" % self.dataVersion,
-            "energy=%d" % self.energy,
+            "energy=%s" % self.energy,
             ]
         
         if self.crossSection != None:

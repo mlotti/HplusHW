@@ -1,15 +1,191 @@
 ## \package crosssection
-# Signal cross sections
+# Background and signal cross sections
 #
 # All cross sections are in pb
 
-import BRdataInterface as br
+########################################
+# Background cross section table
 
-## ttbar cross section
-ttCrossSection = {
-    "7": 165.0,
-    "8": 225.2,
-}
+## Cross section of a single process (physical dataset)
+class CrossSection:
+    ## Constructor
+    #
+    # \parma name              Name of the process
+    # \param energyDictionary  Dictionary of energy -> cross section (energy as string in TeV, cross section as float in pb)
+    def __init__(self, name, energyDictionary):
+        self.name = name
+        for key, value in energyDictionary.iteritems():
+            setattr(self, key, value)
+
+    ## Get cross section
+    #
+    # \param energy  Energy as string in TeV
+    def get(self, energy):
+        try:
+            return getattr(self, energy)
+        except AttributeError:
+            raise Exception("No cross section set for process %s for energy %s" % (self.name, energy))
+
+## List of CrossSection objects
+class CrossSectionList:
+    def __init__(self, *args):
+        self.crossSections = {}
+        for a in args:
+            self.crossSections[a.name] = a
+
+    def crossSection(self, name, energy):
+        for key, obj in self.crossSections.iteritems():
+            if name[:len(key)] == key:
+                return obj.get(energy)
+        return None
+
+# Cross sections from
+# [1] PREP
+# [2] https://twiki.cern.ch/twiki/bin/view/CMS/ReProcessingSummer2011
+# [3] from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
+# [4] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSections
+# [5] https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopMC2011
+# [6] https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopSigma
+# [7] https://twiki.cern.ch/twiki/bin/view/CMS/HiggsToTauTauWorkingHCP2012#53X_MC_Samples
+# [8] https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopSigma8TeV (other useful page https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopMC2012)
+# [9] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV
+
+backgroundCrossSections = CrossSectionList(
+    CrossSection("QCD_Pt30to50", {
+            "7": 5.312e+07, # [2]
+            "8": 6.6285328e7, # [1]
+            }),
+    CrossSection("QCD_Pt50to80", {
+            "7": 6.359e+06, # [2]
+            "8": 8148778.0, # [1]
+            }),
+    CrossSection("QCD_Pt80to120", {
+            "7": 7.843e+05, # [2]
+            "8": 1033680.0, # [1]
+            }),
+    CrossSection("QCD_Pt120to170", {
+            "7": 1.151e+05, # [2]
+            "8": 156293.3, # [1]
+            }),
+    CrossSection("QCD_Pt170to300", {
+            "7": 2.426e+04, # [2]
+            "8": 34138.15, # [1]
+            }),
+    CrossSection("QCD_Pt300to470", {
+            "7": 1.168e+03, # [2]
+            "8": 1759.549, # [1]
+            }),
+    CrossSection("QCD_Pt20_MuEnriched", {
+            "7": 296600000.*0.0002855, # [2]
+            "8": 3.64e8*3.7e-4, # [1]
+            }),
+    CrossSection("WW", {
+            "7": 43.0, # [3]
+            "8": 54.838, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
+            }),
+    CrossSection("WZ", {
+            "7": 18.2, # [3]
+            "8": 33.21, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
+            }),
+    CrossSection("ZZ", {
+            "7": 5.9, # [3]
+            "8": 17.654, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation, this is slightly questionmark, since the computed value is for m(ll) > 12
+            }),
+    CrossSection("TTJets", {
+            "7": 165.0, # [3,4], approx. NNLO
+            "8": 225.2, # [7]
+            }),
+    CrossSection("WJets", {
+            "7": 31314.0, # [2], NNLO
+            "8": 36257.2, # [9], NNLO
+            }),
+    # PREP (LO) cross sections, for W+NJets weighting
+    CrossSection("PREP_WJets", {
+            "7": 27770.0,
+            "8": 30400.0,
+            }),
+    CrossSection("PREP_W1Jets", {
+            "8": 5400.0,
+            }),
+    CrossSection("PREP_W2Jets", {
+            "7": 1435.0,
+            "8": 1750.0,
+            }),
+    CrossSection("PREP_W3Jets", {
+            "7": 304.2,
+            "8": 519.0,
+            }),
+    CrossSection("PREP_W4Jets", {
+            "7": 172.6,
+            "8": 214.0,
+            }),
+    # end W+Njets 
+    CrossSection("DYJetsToLL_M50", {
+            "7": 3048.0, # [4], NNLO
+            "8": 3503.71, # [9], NNLO
+            }),
+    CrossSection("DYJetsToLL_M10to50", {
+            "7": 9611.0, # [1]
+            "8": 11050.0, # [1]
+            }),
+    CrossSection("T_t-channel", {
+            "7": 41.92, # [5,6]
+            "8": 56.4, # [8]
+            }),
+    CrossSection("Tbar_t-channel", {
+            "7": 22.65, # [5,6]
+            "8": 30.7, # [8]
+            }),
+    CrossSection("T_tW-channel", {
+            "7": 7.87, # [5,6]
+            "8": 11.1, # [8]
+            }),
+    CrossSection("Tbar_tW-channel", {
+            "7": 7.87, # [5,6]
+            "8": 11.1, # [8]
+            }),
+    CrossSection("T_s-channel", {
+            "7": 3.19, # [5,6]
+            "8": 3.79, # [8]
+            }),
+    CrossSection("Tbar_s-channel", {
+            "7": 1.44, # [5,6]
+            "8": 1.76, # [8]
+            }),
+)
+
+## Set background process cross sections
+#
+# \param datasets            dataset.DatasetManager object
+# \param doWNJetsWeighting   Set W+Njets cross sections according to the weighting scheme
+def setBackgroundCrossSections(datasets, doWNJetsWeighting=True):
+    for dset in datasets.getMCDatasets():
+        value = backgroundCrossSections.crossSection(dset.getName(), dset.getEnergy())
+        if value is None:
+            for wnJets in ["W1Jets", "W2Jets", "W3Jets", "W4Jets"]:
+                if wnJets in dset.getName():
+                    inclusiveCrossSection = backgroundCrossSections.crossSection("WJets", dset.getEnergy())
+                    if doWNJetsWeighting:
+                        # W+Njets, with the assumption that they are weighted (see
+                        # src/WJetsWeight.cc)
+                        value = inclusiveCrossSection
+                    else:
+                        inclusiveLO = backgroundCrossSections.crossSection("PREP_WJets", dset.getEnergy())
+                        wnJetsLO = backgroundCrossSections.crossSection("PREP_"+wnJets, dset.getEnergy())
+                        value = inclusiveCrossSection * wnJetsLO/inclusiveLO
+                    break
+
+        if value is not None:
+            dset.setCrossSection(value)
+            print "Setting %s cross section to %f pb" % (dset.getName(), value)
+#        else:
+#            print "Warning: no cross section for dataset %s with energy %s TeV (see python/tools/crosssection.py)" % (dset.getName(), dset.getEnergy())
+
+
+########################################
+# Signal cross section table
+
+import BRdataInterface as br
 
 ## Default value of MSSM mu parameter
 defaultMu = 200
@@ -57,7 +233,8 @@ def whTauNuCrossSectionMSSM(mass, tanbeta, mu, energy):
 # \param br_Htaunu  BR(H+ -> tau nu)
 # \param energy     sqrt(s) in TeV as string
 def whTauNuCrossSection(br_tH, br_Htaunu, energy):
-    return 2 * ttCrossSection[energy] * br_tH * (1-br_tH) * br_Htaunu
+    ttCrossSection = backgroundCrossSections.crossSection("TTJets", energy)
+    return 2 * ttCrossSection * br_tH * (1-br_tH) * br_Htaunu
 
 
 ## HH, H->tau nu MSSM cross section
@@ -77,7 +254,8 @@ def hhTauNuCrossSectionMSSM(mass, tanbeta, mu, energy):
 # \param br_Htaunu  BR(H+ -> tau nu)
 # \param energy     sqrt(s) in TeV as string
 def hhTauNuCrossSection(br_tH, br_Htaunu, energy):
-    return ttCrossSection[energy] * br_tH*br_tH * br_Htaunu*br_Htaunu
+    ttCrossSection = backgroundCrossSections.crossSection("TTJets", energy)
+    return ttCrossSection * br_tH*br_tH * br_Htaunu*br_Htaunu
 
 
 def _setHplusCrossSectionsHelper(massList, datasets, function):
@@ -97,7 +275,7 @@ def _setHplusCrossSections(datasets, whFunction, hhFunction):
 #
 # \param datasets  dataset.DatasetManager object
 def setHplusCrossSectionsToTop(datasets):
-    function = lambda mass, energy: ttCrossSection[energy]
+    function = lambda mass, energy: backgroundCrossSections.crossSection("TTJets", energy)
     _setHplusCrossSections(datasets, function, function)
 
 ## Set signal dataset cross sections to MSSM cross section
@@ -133,7 +311,8 @@ def setHplusCrossSections(datasets, tanbeta=20, mu=defaultMu, toTop=False):
 # \param mu        Mu parameter
 # \param energy    sqrt(s) in TeV as string
 def printHplusCrossSections(tanbetas=[10, 20, 30, 40], mu=defaultMu, energy="7"):
-    print "ttbar cross section %.1f pb for %s TeV" % (ttCrossSection[energy], energy)
+    ttCrossSection = backgroundCrossSections.crossSection("TTJets", energy)
+    print "ttbar cross section %.1f pb" % ttCrossSection
     print "mu %.1f" % mu
     print
     for tanbeta in [10, 20, 30, 40]:
