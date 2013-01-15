@@ -85,7 +85,7 @@ namespace HPlus {
 
   VetoTauSelection::~VetoTauSelection() {}
 
-  VetoTauSelection::Data VetoTauSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau) {
+  VetoTauSelection::Data VetoTauSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau, double vertexZ) {
     ensureSilentAnalyzeAllowed(iEvent);
 
     // Disable histogram filling and counter incrementinguntil the return call
@@ -93,15 +93,15 @@ namespace HPlus {
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
 
-    return privateAnalyze(iEvent, iSetup, selectedTau);
+    return privateAnalyze(iEvent, iSetup, selectedTau, vertexZ);
   }
 
-  VetoTauSelection::Data VetoTauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau) {
+  VetoTauSelection::Data VetoTauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau, double vertexZ) {
     ensureAnalyzeAllowed(iEvent);
-    return privateAnalyze(iEvent, iSetup, selectedTau);
+    return privateAnalyze(iEvent, iSetup, selectedTau, vertexZ);
   }
 
-  VetoTauSelection::Data VetoTauSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau) {
+  VetoTauSelection::Data VetoTauSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau, double vertexZ) {
     increment(fAllEventsCounter);
 
 
@@ -221,7 +221,7 @@ namespace HPlus {
         hCandidateTauNumber->Fill(3);
     }
     // Do tau selection on the veto tau candidates
-    TauSelection::Data myTauData = fTauSelection.analyze(iEvent, iSetup, myVetoTauCandidates);
+    TauSelection::Data myTauData = fTauSelection.analyze(iEvent, iSetup, myVetoTauCandidates, vertexZ);
     //    std::cout << " myVetoTauCandidates   " << myVetoTauCandidates.size() << std::endl;
     if (myTauData.passedEvent())
       increment(fVetoTausSelectedCounter);

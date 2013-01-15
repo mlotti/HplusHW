@@ -117,7 +117,7 @@ namespace {
   }*/
 
   struct MoreLikelyTauCompare: std::binary_function<edm::Ptr<pat::Tau>, edm::Ptr<pat::Tau>, bool> {
-    MoreLikelyTauCompare(HPlus::TauIDBase *tauID): fTauID(tauID) {}
+    MoreLikelyTauCompare(HPlus::TauIDBase *tauID, double vertexZ): fTauID(tauID), fVertexZ(vertexZ) {}
 
     bool operator()(const edm::Ptr<pat::Tau>& tauA, const edm::Ptr<pat::Tau>& tauB) {
       bool result = firstIsMoreLikely(tauA, tauB);
@@ -157,6 +157,14 @@ namespace {
         // ??? pick one with larger pt, isolation doesn't really make sense because it requires decay mode internally
         return tauA->pt() > tauB->pt();
 
+      // VertexZ cut
+      resA = fTauID->passVertexZCut(tauA,fVertexZ);
+      resB = fTauID->passVertexZCut(tauB,fVertexZ);
+      if(resA != resB)
+        return resA;
+      if(!resA && !resB)
+        return firstIsMoreIsolatedLargerPt(tauA, tauB);
+
       // pT
       resA = fTauID->passKinematicSelectionPt(tauA);
       resB = fTauID->passKinematicSelectionPt(tauB);
@@ -167,7 +175,7 @@ namespace {
         //return tauA->pt() > tauB->pt();
         return firstIsMoreIsolatedLargerPt(tauA, tauB);
       }
-    
+
       // eta
       resA = fTauID->passKinematicSelectionEta(tauA);
       resB = fTauID->passKinematicSelectionEta(tauB);
@@ -280,6 +288,7 @@ namespace {
     }
 
     HPlus::TauIDBase *fTauID;
+    double fVertexZ;
   };
 }
 
@@ -584,7 +593,7 @@ namespace HPlus {
     if (fTauID) delete fTauID;
   }
 
-  TauSelection::Data TauSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  TauSelection::Data TauSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, double vertexZ) {
     ensureSilentAnalyzeAllowed(iEvent);
 
     // Disable histogram filling and counter incrementinguntil the return call
@@ -592,15 +601,15 @@ namespace HPlus {
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
 
-    return privateAnalyze(iEvent, iSetup);
+    return privateAnalyze(iEvent, iSetup, vertexZ);
   }
 
-  TauSelection::Data TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  TauSelection::Data TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, double vertexZ) {
     ensureAnalyzeAllowed(iEvent);
-    return privateAnalyze(iEvent, iSetup);
+    return privateAnalyze(iEvent, iSetup, vertexZ);
   }
 
-  TauSelection::Data TauSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  TauSelection::Data TauSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, double vertexZ) {
     bool passEvent = false;
     // Obtain tau collection from src specified in config
     edm::Handle<edm::View<pat::Tau> > htaus;
@@ -634,16 +643,16 @@ namespace HPlus {
         if (myTauFoundStatus && !myLeptonVetoStatus)
           myFilteredTaus.push_back(*it);
       } // end of tau loop
-      passEvent = doTauSelection(iEvent,iSetup,myFilteredTaus);
+      passEvent = doTauSelection(iEvent,iSetup,myFilteredTaus,vertexZ);
       return Data(this, passEvent);
     }
 
     // Do selection
-    passEvent = doTauSelection(iEvent,iSetup,htaus->ptrVector());
+    passEvent = doTauSelection(iEvent,iSetup,htaus->ptrVector(),vertexZ);
     return Data(this, passEvent);
   }
 
-  TauSelection::Data TauSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus) {
+  TauSelection::Data TauSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ) {
     ensureSilentAnalyzeAllowed(iEvent);
 
     // Disable histogram filling and counter incrementinguntil the return call
@@ -651,18 +660,18 @@ namespace HPlus {
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
 
-    return privateAnalyze(iEvent, iSetup, taus);
+    return privateAnalyze(iEvent, iSetup, taus, vertexZ);
   }
 
-  TauSelection::Data TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus) {
+  TauSelection::Data TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ) {
     ensureAnalyzeAllowed(iEvent);
-    return privateAnalyze(iEvent, iSetup, taus);
+    return privateAnalyze(iEvent, iSetup, taus, vertexZ);
   }
 
-  TauSelection::Data TauSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus) {
+  TauSelection::Data TauSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ) {
     bool passEvent = false;
     // Do selection
-    passEvent = doTauSelection(iEvent,iSetup,taus);
+    passEvent = doTauSelection(iEvent,iSetup,taus, vertexZ);
     return Data(this, passEvent);
   }
 
@@ -732,7 +741,7 @@ namespace HPlus {
     return Data(this, true);
   }*/
 
-  bool TauSelection::doTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
+  bool TauSelection::doTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ){
     // Document operation mode
     fillOperationModeHistogram();
 
@@ -769,6 +778,7 @@ namespace HPlus {
       // Tau candidate selections
       fTauID->incrementAllCandidates();
       if (!fTauID->passDecayModeFinding(iTau)) continue;
+      if (!fTauID->passVertexZCut(iTau, vertexZ)) continue;
       if (!fTauID->passKinematicSelection(iTau)) continue;
       if (!fTauID->passLeadingTrackCuts(iTau)) continue;
       if (!fTauID->passECALFiducialCuts(iTau)) continue;
@@ -1125,7 +1135,7 @@ namespace HPlus {
   }
 
 
-  const edm::Ptr<pat::Tau> TauSelection::selectMostLikelyTau(const edm::PtrVector<pat::Tau>& taus) {
+  const edm::Ptr<pat::Tau> TauSelection::selectMostLikelyTau(const edm::PtrVector<pat::Tau>& taus, double vertexZ) {
     if(taus.empty())
       throw cms::Exception("Assert") << "TauSelection::selectMostLikelyTau(): empty vector of taus as an input" << std::endl;
     if(taus.size() == 1)
@@ -1138,7 +1148,7 @@ namespace HPlus {
       //std::cout << "  tau " << i << " pt " << taus[i]->pt() << " eta" << taus[i]->eta() << std::endl;
       tmp.push_back(taus[i]);
     }
-    std::sort(tmp.begin(), tmp.end(), MoreLikelyTauCompare(fTauID));
+    std::sort(tmp.begin(), tmp.end(), MoreLikelyTauCompare(fTauID, vertexZ));
 
     // First element in the sorted vector is the one which is most likely passing the taujet ID
     return tmp[0];

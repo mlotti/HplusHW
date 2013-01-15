@@ -40,6 +40,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilde
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=1000, # default is -1
                         tauSelectionOperatingMode="tauCandidateSelectionOnly",
+                        customizeAnalysis=customize,
                         #doAgainstElectronScan=True,
                         #doSystematics=True,
                         histogramAmbientLevel = "Informative", # Vital

@@ -290,7 +290,6 @@ namespace HPlus {
     }
     */
 
-
     //std::cout << "============================================================" << std::endl;
     /*
     objs = trigger.objectRefs();
