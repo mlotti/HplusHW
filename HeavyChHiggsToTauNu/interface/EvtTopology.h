@@ -61,6 +61,9 @@ namespace HPlus {
       vector<float> vDiJetMassesNoTau;
     } AlphaStruc;
     typedef struct {
+      float fQOne;
+      float fQTwo;
+      float fQThree;
       float fSphericity;
       float fAplanarity;
       float fPlanarity;

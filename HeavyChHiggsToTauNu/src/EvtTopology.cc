@@ -419,6 +419,10 @@ namespace HPlus {
     /// Sanity check on eigenvalues: Q1 + Q2 + Q3 = 1
     const float normCheck = eigenvalues[0] + eigenvalues[1] + eigenvalues[2];
     // std::cout << "Q1 + Q2 + Q3 = " << eigenvalues[0] << " + " << eigenvalues[1] << " + " << eigenvalues[2] << " = " << normCheck << std::endl;
+    sKinematics.fQOne   = eigenvalues[0];
+    sKinematics.fQTwo   = eigenvalues[1];
+    sKinematics.fQThree = eigenvalues[2];
+
     // if( normCheck != 1){
     //   throw cms::Exception("LogicError") << "Expected sum of normalised momentum tensor eigenvalues to be one (Q1+Q2+Q3=1), was " << normCheck << " at " << __FILE__ << ":" << __LINE__ << std::endl;
     // }
@@ -433,6 +437,7 @@ namespace HPlus {
     /// Sphericity (S) = 3/2*(Q1+Q2)    0 <= S <= 1
     /// S = 1 for spherical, S= 3/4 for planar, S= 0 for linear events
     float sphericity = (1.5*(eigenvalues[0]+eigenvalues[1]));
+    //std::cout << "S = " << sphericity << ", Q1 = " << eigenvalues[0] << ", Q2 = " << eigenvalues[1] << ", Q3 = " << eigenvalues[2] << std::endl;
     if ( !(sphericity <= 1.0 && sphericity >=0) ){
       throw cms::Exception("LogicError") << "Expected sphericity to be in range  0 <= S <=1, was " << sphericity << " at " << __FILE__ << ":" << __LINE__ << std::endl;
     }
