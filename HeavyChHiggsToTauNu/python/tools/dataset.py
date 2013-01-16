@@ -1516,6 +1516,12 @@ class Dataset:
     def setName(self, name):
         self.name = name
 
+    ## Set the centre-of-mass energy (in TeV) as string
+    def setEnergy(self, energy):
+        if not isinstance(energy, basestring):
+            raise Exception("The energy must be set as string")
+        self.info["energy"] = energy
+
     ## Get the centre-of-mass energy (in TeV) as string
     def getEnergy(self):
         return self.info.get("energy", "0")
@@ -1784,6 +1790,10 @@ class DatasetMerged:
 
     def setName(self, name):
         self.name = name
+
+    def setEnergy(self, energy):
+        for d in self.datasets:
+            d.setEnergy(energy)
 
     def getEnergy(self):
         return self.datasets[0].getEnergy()
@@ -2056,6 +2066,11 @@ class DatasetManager:
         for d in self.datasets:
             copy.append(d.deepCopy())
         return copy
+
+    ## Set the centre-of-mass energy for all datasets
+    def setEnergy(self, energy):
+        for d in self.datasets:
+            d.setEnergy(energy)
 
     ## Get a list of centre-of-mass energies of the datasets
     def getEnergies(self):
