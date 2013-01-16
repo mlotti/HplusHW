@@ -567,7 +567,6 @@ namespace HPlus {
     //    if (vetoTauData.getSelectedVetoTaus().size() > 0 ) return false;
     //    increment(fVetoTauCounter);
     if (!vetoTauData.passedEvent()) increment(fVetoTauCounter);
-
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! temporary place !!!!!!!!!!!!!!!!!!
     /*
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
