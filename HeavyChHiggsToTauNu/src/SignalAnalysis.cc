@@ -702,6 +702,7 @@ namespace HPlus {
       fTree.setTop(TopSelectionData.getTopP4());
       fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
       // Sphericity, Aplanarity, Planarity
+      fTree.setMomentumTensorEigenvalues(evtTopologyData.Kinematics().fQOne, evtTopologyData.Kinematics().fQTwo, evtTopologyData.Kinematics().fQThree);
       fTree.setSphericity(evtTopologyData.Kinematics().fSphericity);
       fTree.setAplanarity(evtTopologyData.Kinematics().fAplanarity);
       fTree.setPlanarity(evtTopologyData.Kinematics().fPlanarity);

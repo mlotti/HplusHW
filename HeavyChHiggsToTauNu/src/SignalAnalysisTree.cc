@@ -116,6 +116,9 @@ namespace HPlus {
     fTree->Branch("topreco_p4", &fTop);
 
     fTree->Branch("alphaT", &fAlphaT);
+    fTree->Branch("QOne", &fQOne);
+    fTree->Branch("QTwo", &fQTwo);
+    fTree->Branch("QThree", &fQThree);
     fTree->Branch("sphericity", &fSphericity);
     fTree->Branch("aplanarity", &fAplanarity);
     fTree->Branch("planarity", &fPlanarity);
@@ -688,6 +691,9 @@ namespace HPlus {
     fTop.SetXYZT(nan, nan, nan, nan);
 
     fAlphaT = nan;
+    fQOne = nan;
+    fQTwo = nan;
+    fQThree = nan;
     fSphericity = nan;
     fAplanarity = nan;
     fPlanarity = nan;
