@@ -199,6 +199,12 @@ if len(options.skimConfig) > 0:
 # Output module in EndPath
 process.outpath = cms.EndPath(process.out)
 
+if len(options.customizeConfig) > 0:
+    print "Customizing with configurations ", ", ".join(options.customizeConfig)
+    for config in options.customizeConfig:
+        module = __import__("HiggsAnalysis.HeavyChHiggsToTauNu."+config, fromlist=[config])
+        module.customize(process)
+
 #f = open("configDump.py", "w")
 #f.write(process.dumpPython())
 #f.close()
