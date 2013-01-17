@@ -570,10 +570,9 @@ class TreeDraw:
             else:
                 selection = self.weight
 
-        rootFile = dataset.getRootFile()
-        tree = rootFile.Get(self.tree)
+        (tree, treeName) = dataset._getRootHisto(self.tree)
         if tree == None:
-            raise Exception("No TTree '%s' in file %s" % (self.tree, rootFile.GetName()))
+            raise Exception("No TTree '%s' in file %s" % (treeNAme, dataset.getRootFile().GetName()))
 
         if self.varexp == "":
             nentries = tree.GetEntries(selection)
@@ -600,7 +599,7 @@ class TreeDraw:
         option = opt+"goff"
         nentries = tree.Draw(varexp, selection, option)
         if nentries < 0:
-            raise Exception("Error when calling TTree.Draw with\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (self.tree, varexp, selection, option))
+            raise Exception("Error when calling TTree.Draw with\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (treeNAme, varexp, selection, option))
         h = tree.GetHistogram()
         if h != None:
             h = h.Clone(h.GetName()+"_cloned")
@@ -1345,6 +1344,12 @@ class Dataset:
     def setName(self, name):
         self.name = name
 
+    ## Set the centre-of-mass energy (in TeV) as string
+    def setEnergy(self, energy):
+        if not isinstance(energy, basestring):
+            raise Exception("The energy must be set as string")
+        self.info["energy"] = energy
+
     ## Get the centre-of-mass energy (in TeV) as string
     def getEnergy(self):
         return self.info.get("energy", "0")
@@ -1611,6 +1616,10 @@ class DatasetMerged:
     def setName(self, name):
         self.name = name
 
+    def setEnergy(self, energy):
+        for d in self.datasets:
+            d.setEnergy(energy)
+
     def getEnergy(self):
         return self.datasets[0].getEnergy()
 
@@ -1808,6 +1817,11 @@ class DatasetManager:
         for d in self.datasets:
             copy.append(d.deepCopy())
         return copy
+
+    ## Set the centre-of-mass energy for all datasets
+    def setEnergy(self, energy):
+        for d in self.datasets:
+            d.setEnergy(energy)
 
     ## Get a list of centre-of-mass energies of the datasets
     def getEnergies(self):

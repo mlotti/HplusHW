@@ -4,6 +4,7 @@
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
@@ -30,6 +31,7 @@ class HPlusVetoTauPtrSelectorFilter: public edm::EDFilter {
   HPlus::VetoTauSelection fVetoTauSelection;
   edm::InputTag fTauSrc;
   bool fFilter;
+  edm::InputTag fVertexSrc;
   bool fThrow;
 
   // Let's use reco::Candidate as the output type, as the required
@@ -47,7 +49,8 @@ HPlusVetoTauPtrSelectorFilter::HPlusVetoTauPtrSelectorFilter(const edm::Paramete
                     iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"),
                     eventCounter, histoWrapper),
   fTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
-  fFilter(iConfig.getParameter<bool>("filter"))
+  fFilter(iConfig.getParameter<bool>("filter")),
+  fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc"))
 {
   produces<Product>();
   produces<bool>();
@@ -62,6 +65,11 @@ bool HPlusVetoTauPtrSelectorFilter::endLuminosityBlock(edm::LuminosityBlock& iBl
 }
 
 bool HPlusVetoTauPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  edm::Handle<edm::View<reco::Vertex> > hvert;
+  iEvent.getByLabel(fVertexSrc, hvert);
+  if(hvert->empty())
+    throw cms::Exception("LogicError") << "Vertex collection " << fVertexSrc.encode() << " is empty!" << std::endl;
+
   // Obtain selected tau in event
   edm::Handle<edm::View<reco::Candidate> > hcand;
   iEvent.getByLabel(fTauSrc, hcand);
@@ -75,7 +83,7 @@ bool HPlusVetoTauPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventS
   } else {
     // Do veto tau selection
     std::auto_ptr<Product> ret(new Product());
-    HPlus::VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, hcand->ptrAt(0));
+    HPlus::VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, hcand->ptrAt(0), hvert->ptrAt(0)->z());
     passed = vetoTauData.passedEvent();
     if (passed) {
       ret->push_back(vetoTauData.getSelectedVetoTaus()[0]);

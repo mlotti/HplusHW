@@ -660,7 +660,7 @@ namespace HPlus {
 
   
     // TauID
-    TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup); 
+    TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
     //    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return false; // Require at least one tau
 

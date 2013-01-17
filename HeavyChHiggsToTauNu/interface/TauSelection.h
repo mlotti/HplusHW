@@ -82,13 +82,13 @@ namespace HPlus {
     edm::InputTag getSrc() const { return fSrc; }
 
     /// Default tauID, no filling of histograms or counters
-    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, double vertexZ);
     /// Default tauID
-    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, double vertexZ);
     /// tau ID on a given sample of taus, no filling of histograms or counters
-    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ);
     /// tau ID on a given sample of taus
-    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ);
     /// Trigger tau selection - find best unique tau candidate
     // Data analyzeTriggerTau(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// Method for setting selected tau (from factorization)
@@ -98,15 +98,15 @@ namespace HPlus {
     /// Fill eta-phi histograms of fake taus (Note: do not use in final analysis, because it will fill multiple times counters and histograms)
     void analyseFakeTauComposition(FakeTauIdentifier& fakeTauIdentifier, const edm::Event& iEvent);
     /// Select the pat::Tau object which most likely passes the tau candidate selection + ID
-    const edm::Ptr<pat::Tau> selectMostLikelyTau(const edm::PtrVector<pat::Tau>& taus);
+    const edm::Ptr<pat::Tau> selectMostLikelyTau(const edm::PtrVector<pat::Tau>& taus, double vertexZ);
 
   private:
     /// Default tauID called from analyze or silentAnalyze
-    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, double vertexZ);
     /// Default tauID called from analyze or silentAnalyze
-    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ);
     /// Method for doing tau selection
-    bool doTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    bool doTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ);
     /// Method for handling the result of tauID factorization
     bool doFactorizationLookup();
     // Internal histogramming routines
