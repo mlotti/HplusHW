@@ -495,7 +495,7 @@ class ShapeExtractor(ExtractorBase):
             h = myShapeModifier.createEmptyShapeHistogram(myLabels[i])
             # Obtain source histogram
             myHistoName = datasetColumn.getDirPrefix()+self._histoDirs[i]+"/"+self._histograms[i]
-            #print "group",datasetColumn.getLabel(),"id",self._exid,"histo",myHistoName
+            print "group",datasetColumn.getLabel(),"id",self._exid,"histo",myHistoName
             myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
             if myDatasetRootHisto.isMC():
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
@@ -583,6 +583,7 @@ class ControlPlotExtractor(ExtractorBase):
         myShapeModifier = ShapeHistoModifier(self._histoSpecs)
         h = myShapeModifier.createEmptyShapeHistogram(myLabel)
         for i in range (0, len(self._histoDirs)):
+            print "Extractor ",self._histoDirs[i],self._histoNames[i]
             # Obtain histogram from dataset
             myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(datasetColumn.getDirPrefix()+"/"+self._histoDirs[i]+"/"+self._histoNames[i])
             if myDatasetRootHisto.isMC():

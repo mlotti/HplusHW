@@ -111,7 +111,7 @@ class InvertedTauID:
 	self.label = ""
 	self.labels = []
 	self.normFactors = []
-
+	self.normFactorsEWK = []
 	self.lumi = 0
 
 	self.errorBars = False
@@ -347,9 +347,9 @@ class InvertedTauID:
 
 	rangeMin = hError.GetXaxis().GetXmin()
         rangeMax = hError.GetXaxis().GetXmax()
-#	rangeMax = 80
+	rangeMax = 70
 #	rangeMax = 120
-	rangeMax = 380
+#	rangeMax = 380
         
         numberOfParameters = 2
 
@@ -844,10 +844,12 @@ class InvertedTauID:
 	nQCDinverted = self.nInvQCD
 	QCDfractionInBaseLineEvents = self.QCDfraction
         QCDfractionInBaseLineEventsError = self.QCDfractionError
-	normalizationForInvertedEvents = nQCDbaseline*QCDfractionInBaseLineEvents/nQCDinverted
+	self.normalizationForInvertedEvents = nQCDbaseline*QCDfractionInBaseLineEvents/nQCDinverted
+        self.normalizationForInvertedEWKEvents = nQCDbaseline*(1-QCDfractionInBaseLineEvents)/nQCDinverted
         ratio = nQCDbaseline/nQCDinverted
 	normalizationForInvertedEventsError = sqrt(ratio*(1+ratio/nQCDinverted))*QCDfractionInBaseLineEvents +QCDfractionInBaseLineEventsError*ratio        
-	self.normFactors.append(normalizationForInvertedEvents)
+	self.normFactors.append(self.normalizationForInvertedEvents)
+        self.normFactorsEWK.append(self.normalizationForInvertedEWKEvents)
 	self.labels.append(self.label)
 
 	print "\n"
@@ -856,10 +858,11 @@ class InvertedTauID:
 	print "    QCD fraction in baseline QCD events ",QCDfractionInBaseLineEvents
         print "    Number of inverted QCD events       ",nQCDinverted 
 	print "\n"
-	print "Normalization for inverted QCD events   ",normalizationForInvertedEvents
+	print "Normalization for inverted QCD events   ",self.normalizationForInvertedEvents
+        print "Normalization for inverted EWK events   ",self.normalizationForInvertedEWKEvents
  	print "Normalization for inverted QCD events error   ",normalizationForInvertedEventsError                                                  
 	print "\n"
-	return normalizationForInvertedEvents
+	return self.normalizationForInvertedEvents
 
     def Summary(self):
 	if len(self.normFactors) == 0:
@@ -873,7 +876,15 @@ class InvertedTauID:
 		label = label  + " "
 	    print "    Label",label,", normalization",self.normFactors[i]
 	    i = i + 1
-
+            
+        print "EWK normalization factors for each bin"
+        i = 0
+	while i < len(self.normFactorsEWK):
+	    label = self.labels[i]
+	    while len(label) < 10:
+		label = label  + " "
+	    print "    Label",label,", normalization EWK",self.normFactorsEWK[i]
+	    i = i + 1
         print "\nNow run plotSignalAnalysisInverted.py with these normalization factors.\n"
 
 
@@ -894,7 +905,16 @@ class InvertedTauID:
 	    line += "\n"
             fOUT.write(line)
             i = i + 1
-
+        i = 0
+        while i < len(self.normFactorsEWK):
+	    line = "    \"" + self.labels[i] + "EWK\": " + str(self.normFactorsEWK[i])
+	    if i < len(self.normFactorsEWK) - 1:
+		line += ","
+	    line += "\n"
+            fOUT.write(line)
+            i = i + 1
+#        fOUT.write("    \"QCDInvertedNormalizationEWK\":"+str(self.normalizationForInvertedEWKEvents)+"\n")
+#        fOUT.write("    \"QCDInvertedNormalization\":"+str(self.normalizationForInvertedEvents)+"\n")
 	fOUT.write("}\n")
 	fOUT.close()
 	print "Normalization factors written in file",filename

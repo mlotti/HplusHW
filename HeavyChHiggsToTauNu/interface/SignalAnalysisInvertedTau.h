@@ -140,7 +140,7 @@ namespace HPlus {
     const double fDeltaPhiCutValue;
     Count fAllCounter;
     Count fWJetsWeightCounter;
-
+    Count fVertexFilterCounter;
     Count fMETFiltersCounter;
     Count fTriggerCounter;
     Count fPrimaryVertexCounter;
@@ -373,6 +373,17 @@ namespace HPlus {
     WrappedTH1 *hMTBaselineTauIdBtag5060;
     WrappedTH1 *hMTBaselineTauIdBtag4050;
 
+    WrappedTH1 *hMTBaselineTauIdBveto;
+    WrappedTH1 *hMTBaselineTauIdBveto150;
+    WrappedTH1 *hMTBaselineTauIdBveto120;
+    WrappedTH1 *hMTBaselineTauIdBveto120150;
+    WrappedTH1 *hMTBaselineTauIdBveto100120;
+    WrappedTH1 *hMTBaselineTauIdBveto80100;
+    WrappedTH1 *hMTBaselineTauIdBveto7080;
+    WrappedTH1 *hMTBaselineTauIdBveto6070;
+    WrappedTH1 *hMTBaselineTauIdBveto5060;
+    WrappedTH1 *hMTBaselineTauIdBveto4050;
+
     WrappedTH1 *hMTBaselineTauIdJet150;
     WrappedTH1 *hMTBaselineTauIdJet120;
     WrappedTH1 *hMTBaselineTauIdJet120150;
@@ -419,6 +430,17 @@ namespace HPlus {
     WrappedTH1 *hMTInvertedTauIdJet6070;
     WrappedTH1 *hMTInvertedTauIdJet5060;
     WrappedTH1 *hMTInvertedTauIdJet4050;
+
+    WrappedTH1 *hMTInvertedTauIdBveto;
+    WrappedTH1 *hMTInvertedTauIdBveto150;
+    WrappedTH1 *hMTInvertedTauIdBveto120;
+    WrappedTH1 *hMTInvertedTauIdBveto120150;
+    WrappedTH1 *hMTInvertedTauIdBveto100120;
+    WrappedTH1 *hMTInvertedTauIdBveto80100;
+    WrappedTH1 *hMTInvertedTauIdBveto7080;
+    WrappedTH1 *hMTInvertedTauIdBveto6070;
+    WrappedTH1 *hMTInvertedTauIdBveto5060;
+    WrappedTH1 *hMTInvertedTauIdBveto4050;
 
     WrappedTH1 *hNBInvertedTauIdJet;
     WrappedTH1 *hNBInvertedTauIdJet150;
