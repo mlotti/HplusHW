@@ -64,6 +64,8 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
         "Tbar_s-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 10, njobsOut= 1),                                                                                 
         }
 
+    workflowName = "triggerMetLeg_skim_"+version
+
     # Update the default definitions from the argument                                                                                                                 
     updateTaskDefinitions(defaultDefinitions, updateDefinitions)                                                                                                       
                                                                                                                                                                        
@@ -72,8 +74,8 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
         dataset = datasets.getDataset(datasetName)                                                                                                                     
                                                                                                                                                                        
         # Construct processing workflow                                                                                                                                
-        wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow="AOD", workflowName="analysis_metleg_"+version, skimConfig=skim)                                
-                                                                                                                                                                       
+        wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow="AOD", workflowName=workflowName, skimConfig=skim)
+
         # Setup the publish name                                                                                                                                       
         name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), "analysis_metleg_"+version)                                                  
         wf.addCrabLine("USER.publish_data_name = "+name)                                                                                                               
@@ -89,7 +91,7 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
         # If DBS-dataset of the pattuple has been specified, add also analysis Workflow to Dataset                                                                     
         if wf.output != None:                                                                                                                                          
             commonArgs = {                                                                                                                                             
-                "source": Source("analysis_metleg_"+version),                                                                                                                 
+                "source": Source(workflowName),                                                                                                                 
                 "args": wf.args,                                                                                                                                       
                 "skimConfig": skim                                                                                                                                     
                 }
@@ -98,7 +100,7 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
                 # For data, construct one analysis workflow per trigger type                                                                                           
                 pd = datasetName.split("_")[0]                                                                                                                         
                 if pd == "Tau":                                                                                                                                        
-                    dataset.addWorkflow(Workflow("analysis_metleg_"+version, triggerOR=wf.triggerOR, **commonArgs))                                                    
+                    dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, triggerOR=wf.triggerOR, **commonArgs))                                                    
                 elif pd == "MultiJet":                                                                                                                                 
                     if datasetName in quadJetTriggers:                                                                                                                 
                         dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=quadJetTriggers[datasetName], **commonArgs))                               
@@ -110,7 +112,7 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
                     raise Exception("Unsupported PD name %s" % pd)                                                                                                     
             else:                                                                                                                                                      
                 # For MC, also construct one analysis workflow per trigger type                                                                                        
-                dataset.addWorkflow(Workflow("analysis_metleg_"+version, triggerOR=[mcTriggerMETLeg], **commonArgs))
+                dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, triggerOR=[mcTriggerMETLeg], **commonArgs))
 
 def addMetLegSkim_53X_v1(datasets):
     definitions = {                                                                          
@@ -206,8 +208,6 @@ def addMetLegSkim_44X(version, datasets, updateDefinitions):
         # arbitrary crab configuration lines
         #"Tbar_s-channel_TuneZ2_Fall11":     TaskDefMC(neventsPerJobIn=10000, neventsPerJobOut=1000000, crabLines=["USER.user_remote_dir=/foo"]),
         }
-
-    workflowName = "triggerMetLeg_skim_"+version
 
     # Update the default definitions from the argument
     updateTaskDefinitions(defaultDefinitions, updateDefinitions, workflowName)
