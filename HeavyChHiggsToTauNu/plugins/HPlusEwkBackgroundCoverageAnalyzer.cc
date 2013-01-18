@@ -92,10 +92,24 @@ namespace {
 
     void match(const reco::GenParticle *w1daughter, const reco::GenParticle *w2daughter1, const reco::GenParticle *w2daughter2=0) {
       // TauID
+
+      math::XYZTLorentzVector w1daughter_p4 = w1daughter->p4();
+      math::XYZTLorentzVector w2daughter1_p4 = w2daughter1->p4();
+      math::XYZTLorentzVector w2daughter2_p4;
+      if(w2daughter2)
+        w2daughter2_p4 = w2daughter2->p4();
+
+      // Use visible tau for taus
+      if(std::abs(w1daughter->pdgId()) == 15)
+        w1daughter_p4 = HPlus::GenParticleTools::calculateVisibleTau(w1daughter);
+      if(std::abs(w2daughter1->pdgId()) == 15)
+        w2daughter1_p4 = HPlus::GenParticleTools::calculateVisibleTau(w2daughter1);
+      if(w2daughter2 && std::abs(w2daughter2->pdgId()) == 15) // although this should never happen, w2daughter2 is used only for W->qq'
+        w2daughter2_p4 = HPlus::GenParticleTools::calculateVisibleTau(w2daughter2);
       
       // First try W1daughter
       for(size_t i=0; i<fSelectedTaus.size(); ++i) {
-        if(reco::deltaR(*fSelectedTaus[i], *w1daughter) < fMatchDR) {
+        if(reco::deltaR(*fSelectedTaus[i], w1daughter_p4) < fMatchDR) {
           fTauIDPassed = kTauTau1;
           break;
         }
@@ -103,7 +117,7 @@ namespace {
       if(fTauIDPassed == kTauTau1) {
         if(fSelectedTaus.size() > 1) {
           // The 0th element of fSelectedTaus is *the* selected tau
-          if(reco::deltaR(*fSelectedTaus[0], *w1daughter) < fMatchDR)
+          if(reco::deltaR(*fSelectedTaus[0], w1daughter_p4) < fMatchDR)
             fTauIDPassed = kTauTau1OtherCorrect;
           else
             fTauIDPassed = kTauTau1OtherWrong;
@@ -112,8 +126,8 @@ namespace {
       else {
         // If W1daughter not matched, try W2daughter
         for(size_t i=0; i<fSelectedTaus.size(); ++i) {
-          if(reco::deltaR(*fSelectedTaus[i], *w2daughter1) < fMatchDR ||
-             (w2daughter2 && reco::deltaR(*fSelectedTaus[i], *w2daughter2) < fMatchDR)) {
+          if(reco::deltaR(*fSelectedTaus[i], w2daughter1_p4) < fMatchDR ||
+             (w2daughter2 && reco::deltaR(*fSelectedTaus[i], w2daughter2_p4) < fMatchDR)) {
             fTauIDPassed = kTauObj2;
             break;
           }
@@ -128,10 +142,10 @@ namespace {
       // Lepton veto
       for(size_t i=0; i<fIdentifiedElectrons.size(); ++i) {
         if(fLeptonVetoIdentified == kLeptonNone) {
-          if(w1daughter->pt() > 10 && reco::deltaR(*fIdentifiedElectrons[i], *w1daughter) < fMatchDR)
+          if(w1daughter->pt() > 10 && reco::deltaR(*fIdentifiedElectrons[i], w1daughter_p4) < fMatchDR)
             fLeptonVetoIdentified = kLeptonTau1;
-          else if((w2daughter1->pt() > 10 && reco::deltaR(*fIdentifiedElectrons[i], *w2daughter1) < fMatchDR) ||
-                  (w2daughter2 && w2daughter2->pt() > 10 && reco::deltaR(*fIdentifiedElectrons[i], *w2daughter2) < fMatchDR))
+          else if((w2daughter1->pt() > 10 && reco::deltaR(*fIdentifiedElectrons[i], w2daughter1_p4) < fMatchDR) ||
+                  (w2daughter2 && w2daughter2->pt() > 10 && reco::deltaR(*fIdentifiedElectrons[i], w2daughter2_p4) < fMatchDR))
             fLeptonVetoIdentified = kLeptonObj2;
         }
         // Non-W1-daughter and non-W2-daughter object identified in lepton veto
@@ -140,10 +154,10 @@ namespace {
       }
       for(size_t i=0; i<fIdentifiedMuons.size(); ++i) {
         if(fLeptonVetoIdentified == kLeptonNone) {
-          if(w1daughter->pt() > 10 && reco::deltaR(*fIdentifiedMuons[i], *w1daughter) < fMatchDR)
+          if(w1daughter->pt() > 10 && reco::deltaR(*fIdentifiedMuons[i], w1daughter_p4) < fMatchDR)
             fLeptonVetoIdentified = kLeptonTau1;
-          else if((w2daughter1->pt() > 10 && reco::deltaR(*fIdentifiedMuons[i], *w2daughter1) < fMatchDR) ||
-                  (w2daughter2 && w2daughter2->pt() > 10 && reco::deltaR(*fIdentifiedMuons[i], *w2daughter2) < fMatchDR))
+          else if((w2daughter1->pt() > 10 && reco::deltaR(*fIdentifiedMuons[i], w2daughter1_p4) < fMatchDR) ||
+                  (w2daughter2 && w2daughter2->pt() > 10 && reco::deltaR(*fIdentifiedMuons[i], w2daughter2_p4) < fMatchDR))
             fLeptonVetoIdentified = kLeptonObj2;
         }
         // Non-W1-daughter and non-W2-daughter object identified in lepton veto
@@ -626,6 +640,13 @@ void HPlusEwkBackgroundCoverageAnalyzer::analyze(const edm::Event& iEvent, const
     }
   }
   else if(W1decaysTau && W2decaysTau) {
+    // Switch tau1 and tau2 for a cross check
+    /*
+    const reco::GenParticle *tmp = W1daughter;
+    W1daughter = W2daughter1;
+    W2daughter1 = tmp;
+    */
+
     const reco::GenParticle *tauDaughter = HPlus::GenParticleTools::findTauDaughter(W2daughter1);
     unsigned tauDaughterId = std::abs(tauDaughter->pdgId());
     if(tauDaughterId == 11) { // W2 -> tau -> electron
@@ -668,6 +689,40 @@ void HPlusEwkBackgroundCoverageAnalyzer::analyze(const edm::Event& iEvent, const
     }
   }
   fMuon2Branches.setValues(muon2);
+  /*
+  if(obj2Type == kObj2MuonEmb && muon2.empty()) {
+    std::cout << "Embedding muons" << std::endl;
+    for(size_t i=0; i<embeddingIdentifiedMuons.size(); ++i) {
+      const pat::Muon& muon = *embeddingIdentifiedMuons[i];
+      std::cout << " i " << i
+                << " pt " << muon.pt()
+                << " eta " << muon.eta()
+                << " full iso " << ((muon.chargedHadronIso() + std::max(muon.neutralHadronIso()+muon.photonIso()-0.5*muon.puChargedHadronIso(), 0.0))/muon.pt())
+                << " charged iso " << (muon.chargedHadronIso()/muon.pt())
+                << std::endl;
+    }
+    std::cout << "Veto muons" << std::endl;
+    for(size_t i=0; i<identifiedMuons.size(); ++i) {
+      const pat::Muon& muon = *identifiedMuons[i];
+      std::cout << " i " << i
+                << " pt " << muon.pt()
+                << " eta " << muon.eta()
+                << " full iso " << ((muon.chargedHadronIso() + std::max(muon.neutralHadronIso()+muon.photonIso()-0.5*muon.puChargedHadronIso(), 0.0))/muon.pt())
+                << " charged iso " << (muon.chargedHadronIso()/muon.pt())
+                << std::endl;
+    }
+    std::cout << "Veto muons excluding isolation" << std::endl;
+    for(size_t i=0; i<selectedMuonsNoIsolation.size(); ++i) {
+      const pat::Muon& muon = *selectedMuonsNoIsolation[i];
+      std::cout << " i " << i
+                << " pt " << muon.pt()
+                << " eta " << muon.eta()
+                << " full iso " << ((muon.chargedHadronIso() + std::max(muon.neutralHadronIso()+muon.photonIso()-0.5*muon.puChargedHadronIso(), 0.0))/muon.pt())
+                << " charged iso " << (muon.chargedHadronIso()/muon.pt())
+                << std::endl;
+    }
+  }
+  */
 
   // Use RAII to call the TTree::Fill() and reset()
   TreeFiller treeFiller(this);
