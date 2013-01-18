@@ -45,6 +45,23 @@ def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowNa
 
     return _constructProcessingWorkflow_common(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMask, outputLumiMask, **kwargs)
 
+## Construct processing workflow task for a dataset 53X release
+#
+# \param dataset            multicrabWorkflowsTools.Dataset object
+# \param taskDef            multicrabWorkflowsTools.TaskDef object, contains the task definition
+# \param sourceWorkflow     String for source workflow name (i.e. input workflow)
+# \param workflowName       String for the name of this workflow
+# \param inputLumiMaskData  LumiMask name to be used when processing
+#                           the input (allowed values are in
+#                           certifiedLumi)
+# \param outputLumiMaskData LumiMask name to be used by default by
+#                           tasks processing the output of this
+#                           workflow as an input. If None, value is
+#                           deduced from the last part of the dataset
+#                           name (e.g. _Jul13). To disable the
+#                           outputLumiMask, give
+#                           multicrabWorkflowTools.Disable object.
+# \param kwargs             Keyword arguments, forwarded to _constructProcessingWorkflow_common()
 def constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMaskData="DCSONLY12", outputLumiMaskData=None, **kwargs):
     # Setup input/default output lumimasks for data
     inputLumiMask = None
