@@ -396,6 +396,12 @@ def th1Xmin(th1):
 def th1Xmax(th1):
     return th1.GetXaxis().GetBinUpEdge(th1.GetXaxis().GetLast())
 
+def th2Ymin(th2):
+    return th2.GetYaxis().GetBinLowEdge(th2.GetYaxis().GetFirst())
+
+def th2Ymax(th2):
+    return th2.GetYaxis().GetBinUpEdge(th2.GetYaxis().GetLast())
+
 ## Helper function for lessThan/greaterThan argument handling
 #
 # \param kwargs  Keyword arguments
@@ -937,11 +943,17 @@ class Histo:
 
     ## Get the minimum value of the Y axis
     def getYmin(self):
-        return self.rootHisto.GetMinimum()
+        if isinstance(self.rootHisto, ROOT.TH2):
+            return th2Ymin(self.rootHisto)
+        else:
+            return self.rootHisto.GetMinimum()
 
     ## Get the maximum value of the Y axis
     def getYmax(self):
-        return self.rootHisto.GetMaximum()
+        if isinstance(self.rootHisto, ROOT.TH2):
+            return th2Ymax(self.rootHisto)
+        else:
+            return self.rootHisto.GetMaximum()
 
     ## Get the X axis title
     def getXtitle(self):
