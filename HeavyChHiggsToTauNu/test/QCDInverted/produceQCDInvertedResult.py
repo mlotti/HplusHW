@@ -38,6 +38,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import execute,addConfigInfo
 analysis = "signalAnalysisInvertedTau"
 massPlot = "transverseMass"
 
+
 ############################################################
 #
 # !!!!  IMPORTANT NOTE  !!!!
@@ -118,6 +119,8 @@ def main():
     f.write("CMSSW.pset = signalAnalysisInvertedTau_cfg.py\n")
     f.close()
 
+        
+   
     datasetsQCDInv = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirQCDInv+"/multicrab.cfg", counters=analysis+"/counters", includeOnlyTasks="Tau_")
     datasetsQCDInv.loadLuminosities()
     datasetsQCDInv.mergeData()

@@ -19,6 +19,14 @@ def _addToDictList(d, name, item):
     else:
         d[name] = [item]
 
+## Helper class to get an object for Disable "constant"
+class _Constant:
+    def __init__(self, value):
+        self.value = value
+
+## Constant for marking values to be disabled
+Disable = _Constant(1)
+
 _reco_name_re = re.compile("^(?P<reco>Run[^_]+(_[^_]+)+_v\d+_[^_]+_)")
 def updatePublishName(dataset, sourcePath, workflowName):
     path = sourcePath.split("/")
@@ -457,6 +465,9 @@ class Source:
     # \param events_per_job  If given, overrides the events_per_job of the input Data object
     # \param lumis_per_job   If given, overrides the lumis_per_job of the input Data object
     # \param lumiMask        If given, overrides the lumiMask of the input Data object
+    #
+    # If any of the four overrides is Disable, overrides the input
+    # Data object value with None
     def __init__(self, name, number_of_jobs=None, events_per_job=None, lumis_per_job=None, lumiMask=None):
         self.name = name
         self.number_of_jobs = number_of_jobs
@@ -489,7 +500,9 @@ class Source:
         data = copy.deepcopy(wf.output)
         for attr in ["number_of_jobs", "events_per_job", "lumis_per_job", "lumiMask"]:
             value = getattr(self, attr)
-            if value != None:
+            if value is Disable:
+                setattr(data, attr, None)
+            elif value is not None:
                 setattr(data, attr, copy.deepcopy(value))
         data._ensureConsistency()
         return data
@@ -503,19 +516,24 @@ class Source:
         if n > 1:
             raise Exception("Source may have only one of number_of_jobs, lumis_per_job, events_per_job set")
 
+    def _writeHelp(self, out, attr, form):
+        value = getattr(self, attr)
+        if value is not None:
+            out.write(", %s=" % attr)
+            if value is Disable:
+                out.write("Disable")
+            else:
+                out.write(form % value)
+
     ## String representation of Source
     def __str__(self):
         self._ensureConsistency()
         out = StringIO.StringIO()
         out.write('Source("%s"' % self.name)
-        if self.number_of_jobs != None:
-            out.write(", number_of_jobs=%d" % self.number_of_jobs)
-        if self.events_per_job != None:
-            out.write(", events_per_job=%d" % self.events_per_job)
-        if self.lumis_per_job != None:
-            out.write(", lumis_per_job=%d" % self.lumis_per_job)
-        if self.lumiMask != None:
-            out.write(', lumiMask="%s"' % self.lumiMask)
+        self._writeHelp(out, "number_of_jobs", "%d")
+        self._writeHelp(out, "events_per_job", "%d")
+        self._writeHelp(out, "lumis_per_job", "%d")
+        self._writeHelp(out, "lumiMask", '"%s"')
         out.write(")")
 
         ret = out.getvalue()
@@ -574,11 +592,16 @@ class TaskDef:
 
     ## Update parameters from another TaskDef object
     #
-    # Only non-None values are copied from taskDef
+    # \param tasDef  Another  TaskDef object
+    #
+    # Only non-None values are copied from taskDef. If any value is
+    # Disable in taskDef, that value is set to None
     def update(self, taskDef):
         for a in ["outputPath"] + self.options:
             val = getattr(taskDef, a)
-            if val != None:
+            if val is Disable:
+                setattr(self, a, None)
+            elif val is not None:
                 setattr(self, a, val)
 
 ## Update task definition dictionary from another dictionary

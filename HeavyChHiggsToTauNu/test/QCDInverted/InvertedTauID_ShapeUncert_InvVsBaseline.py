@@ -41,7 +41,7 @@ def main():
     
 
     # Create all datasets from a multicrab task
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs, counters=counters, dataEra=dataEra)
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs, counters=counters, dataEra=dataEra,  analysisBaseName="signalAnalysisInvertedTau")
 ##    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra)
 
     # As we use weighted counters for MC normalisation, we have to
