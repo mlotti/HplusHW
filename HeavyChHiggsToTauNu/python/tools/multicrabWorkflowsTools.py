@@ -378,6 +378,13 @@ def _addIfNotNone(out, format, variable):
     if variable != None:
         out.write(format % variable)
 
+## Helper to translate Disable to None
+def _NoneIfDisable(obj):
+    if obj is Disable:
+        return None
+    else:
+        return obj
+
 ## Class representing an output of a workflow
 class Data:
     ## Constructor
@@ -388,13 +395,15 @@ class Data:
     # \param events_per_job  Default number of events per job for those who process the output (conflicts with number_of_jobs, lumis_per_job)
     # \param lumiMask        Default lumi mask for those who process the output
     # \param dbs_url         URL to the DBS reader instance
+    #
+    # If any is Disable, it is interpreted as None
     def __init__(self, datasetpath, number_of_jobs=None, lumis_per_job=None, events_per_job=None, lumiMask=None, dbs_url=None):
         self.datasetpath = datasetpath
-        self.number_of_jobs = number_of_jobs
-        self.lumis_per_job = lumis_per_job
-        self.events_per_job = events_per_job
-        self.lumiMask = lumiMask
-        self.dbs_url = dbs_url
+        self.number_of_jobs = _NoneIfDisable(number_of_jobs)
+        self.lumis_per_job = _NoneIfDisable(lumis_per_job)
+        self.events_per_job = _NoneIfDisable(events_per_job)
+        self.lumiMask = _NoneIfDisable(lumiMask)
+        self.dbs_url = _NoneIfDisable(dbs_url)
 
         self._ensureConsistency()
 
@@ -592,16 +601,13 @@ class TaskDef:
 
     ## Update parameters from another TaskDef object
     #
-    # \param tasDef  Another  TaskDef object
+    # \param taskDef  Another  TaskDef object
     #
-    # Only non-None values are copied from taskDef. If any value is
-    # Disable in taskDef, that value is set to None
+    # Only non-None values are copied from taskDef.
     def update(self, taskDef):
         for a in ["outputPath"] + self.options:
             val = getattr(taskDef, a)
-            if val is Disable:
-                setattr(self, a, None)
-            elif val is not None:
+            if val is not None:
                 setattr(self, a, val)
 
 ## Update task definition dictionary from another dictionary
