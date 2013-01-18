@@ -49,6 +49,8 @@ namespace HPlus {
     const reco::GenParticle *findMaxNonNeutrinoDaughter(const reco::GenParticle *particle);
 
     const reco::GenParticle *findTauDaughter(const reco::GenParticle *tau);
+
+    const math::XYZTLorentzVector calculateVisibleTau(const reco::GenParticle *tau);
   }
 }
 

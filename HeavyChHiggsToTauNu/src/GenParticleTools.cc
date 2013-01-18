@@ -22,10 +22,10 @@ namespace HPlus {
       while(daughterIsSame) {
         daughterIsSame = false;
         size_t n = tmp->numberOfDaughters();
-        std::cout << "Daughters " << n << std::endl;
+        //std::cout << "Daughters " << n << std::endl;
         for(size_t i=0; i<n; ++i) {
-          std::cout << "  daughter " << i << std::endl;
-          std::cout << "    pdgId " << tmp->daughter(i)->pdgId() << std::endl;
+          //std::cout << "  daughter " << i << std::endl;
+          //std::cout << "    pdgId " << tmp->daughter(i)->pdgId() << std::endl;
           if(tmp->daughter(i)->pdgId() == pdgId) {
             tmp = dynamic_cast<const reco::GenParticle *>(tmp->daughter(i));
             daughterIsSame = true;
@@ -115,6 +115,25 @@ namespace HPlus {
         daughter = findTauDaughter(daughter);
 
       return daughter;
+    }
+
+    const math::XYZTLorentzVector calculateVisibleTau(const reco::GenParticle *tau) {
+      if(std::abs(tau->pdgId()) != 15)
+        throw cms::Exception("LogicError") << "GenParticleTools::calculateVisibleTau() requires a reco::GenParticle with abs(pdgId) == 15, got " << tau->pdgId() << std::endl;
+
+      tau = rewindChainDown(tau);
+      math::XYZTLorentzVector result;
+      size_t nDaughters = tau->numberOfDaughters();
+      for(size_t i=0; i<nDaughters; ++i) {
+        int ida = std::abs(tau->daughter(i)->pdgId());
+        // ignore neutrinos
+        if(ida == 12 || ida == 14 || ida == 16)
+          continue;
+
+        result += tau->daughter(i)->p4();
+      }
+    
+      return result;
     }
 
   }
