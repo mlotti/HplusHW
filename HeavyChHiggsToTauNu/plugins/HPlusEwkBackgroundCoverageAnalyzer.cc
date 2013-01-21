@@ -8,6 +8,7 @@
 
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
 
 #include "DataFormats/Math/interface/deltaR.h"
 
@@ -226,6 +227,7 @@ class HPlusEwkBackgroundCoverageAnalyzer: public edm::EDAnalyzer {
 
   edm::InputTag fGenParticleSrc;
   edm::InputTag fEmbeddingMuonSrc;
+  edm::InputTag fVertexSrc;
 
   const double fTauPtCut;
   const double fTauEtaCut;
@@ -380,6 +382,8 @@ class HPlusEwkBackgroundCoverageAnalyzer: public edm::EDAnalyzer {
   int bTauIDStatus;
   int bLeptonVetoStatus;
   int bObj2Type;
+
+  unsigned bNvertex;
   
   bool bPassTauID;
   bool bPassJetSelection;
@@ -393,6 +397,7 @@ HPlusEwkBackgroundCoverageAnalyzer::HPlusEwkBackgroundCoverageAnalyzer(const edm
   fHistoWrapper(fEventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
   fGenParticleSrc(iConfig.getUntrackedParameter<edm::InputTag>("genParticleSrc")),
   fEmbeddingMuonSrc(iConfig.getUntrackedParameter<edm::InputTag>("embeddingMuonSrc")),
+  fVertexSrc(iConfig.getUntrackedParameter<edm::InputTag>("vertexSrc")),
   fTauPtCut(iConfig.getUntrackedParameter<double>("tauPtCut")),
   fTauEtaCut(iConfig.getUntrackedParameter<double>("tauEtaCut")),
   fDeltaPhiCutValue(iConfig.getUntrackedParameter<double>("deltaPhiTauMET")),
@@ -444,6 +449,7 @@ HPlusEwkBackgroundCoverageAnalyzer::HPlusEwkBackgroundCoverageAnalyzer(const edm
   fTree->Branch("passMET", &bPassMET);
   fTree->Branch("passBTag", &bPassBTag);
   fTree->Branch("passDeltaPhi", &bPassDeltaPhi);
+  fTree->Branch("numberOfVertices", &bNvertex);
 
   reset();
 }
@@ -486,6 +492,10 @@ void HPlusEwkBackgroundCoverageAnalyzer::analyze(const edm::Event& iEvent, const
   HPlus::VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
   if(!pvData.passedEvent()) return;
   increment(fPrimaryVertexCounter);
+
+  edm::Handle<edm::View<reco::Vertex> > hvert;
+  iEvent.getByLabel(fVertexSrc, hvert);
+  bNvertex = hvert->size();
 
 //------ TauID
   HPlus::TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);

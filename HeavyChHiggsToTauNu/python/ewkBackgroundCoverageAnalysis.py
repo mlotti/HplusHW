@@ -17,6 +17,7 @@ def createEDAnalyze(param):
         genParticleSrc = cms.untracked.InputTag("genParticles"),
 #        embeddingMuonSrc = cms.untracked.InputTag(param.GlobalMuonVeto.MuonCollectionName.value()),
         embeddingMuonSrc = cms.untracked.InputTag("tauEmbeddingMuons"), # it is the responsibility of _cfg.py to make sure "tauEmbeddingMuons" exists
+        vertexSrc = cms.untracked.InputTag("offlinePrimaryVertices"),
         tauPtCut = cms.untracked.double(41.0),
         tauEtaCut = cms.untracked.double(2.1),
 
