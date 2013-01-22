@@ -1695,7 +1695,7 @@ class PlotDrawer:
     # work. These methods pick the arguments they are interested of.
     # For further documentation, please look the individual methods
     def __call__(self, p, name, xlabel, **kwargs):
-        self.rebin(p, **kwargs)
+        self.rebin(p, name, **kwargs)
         self.stackMCHistograms(p, **kwargs)
         self.createFrame(p, name, **kwargs)
         self.setLegend(p, **kwargs)
@@ -1706,23 +1706,60 @@ class PlotDrawer:
     ## Rebin all histograms in the plot
     #
     # \param p       plots.PlotBase (or deriving) object
+    # \param name    Plot file name (for error message)
     # \param kwargs  Keyword arguments (see below)
     #
     # <b>Keyword arguments</b>
-    # \li\a  rebin  If given and large than 1, rebin all histograms in the plot
-    def rebin(self, p, **kwargs):
-        reb = kwargs.get("rebin", 1)
-        if isinstance(reb, list):
-            if len(reb) < 2:
-                raise Exception("If 'rebin' is a list, it must have at least two elements")
-            n = len(reb)-1
-            def tmp(h):
-                h = h.getRootHisto()
-                return h.Rebin(n, h.GetName(), array.array("d", reb))
-            p.histoMgr.forEachHisto(tmp)
-        else:
-            if reb > 1:
-                p.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(reb))
+    # \li\a rebin          If given and large than 1, rebin all histograms in
+    #                      the plot. If list, pass it as a double array to
+    #                      TH1::Rebin()
+    # \li\a rebinToWidthX  If given, rebin all histograms to this width of X bins.
+    #
+    # \b Note: Only one of the arguments above can be given.
+    #
+    # \b Note: Almost no error checking is done, except what is done in ROOT.
+    def rebin(self, p, name, **kwargs):
+        if "rebin" in kwargs and "rebinToWidthX" in kwargs:
+            raise Exception("Only one of 'rebin' and 'rebinToWidthX' may be given as an argument")
+
+        rebinFunction = None
+        if "rebin" in kwargs:
+            reb = kwargs["rebin"]
+            if isinstance(reb, list):
+                if len(reb) < 2:
+                    raise Exception("If 'rebin' is a list, it must have at least two elements")
+                n = len(reb)-1
+                def rebinList(h):
+                    th1 = h.getRootHisto()
+                    rebinned = th1.Rebin(n, th1.GetName(), array.array("d", reb))
+                    h.setRootHisto(rebinned)
+                rebinFunction = rebinList
+            elif reb > 1:
+                rebinFunction = lambda h: h.getRootHisto().Rebin(reb)
+        elif "rebinToWidthX" in kwargs:
+            rebinWidth = kwargs["rebinToWidthX"]
+
+            # In general (also if the original histogram has variable
+            # bin widths) explicitly specifying the bin low edges is
+            # the only way which works
+            def rebinToWidth(h):
+                th1 = h.getRootHisto()
+                xmin = histograms.th1Xmin(th1)
+                xmax = histograms.th1Xmax(th1)
+                nbins = (xmax-xmin)/rebinWidth
+                # Check that the number of bins is integer
+                if abs(int(nbins) - nbins) > 1e-10:
+                    print "Warning: Trying to rebin histogram '%s' of plot '%s' for bin width %g, the X axis minimum is %g, maximum %g => number of bins would be %g, which is not integer" % (h.getName(), name, rebinWidth, xmin, xmax, nbins)
+                    return
+
+                nbins = int(nbins)
+                binLowEdgeList = [xmin + (xmax-xmin)/nbins*i for i in range(0, nbins+1)]
+                rebinned = th1.Rebin(nbins, th1.GetName(), array.array("d", binLowEdgeList))
+                h.setRootHisto(rebinned)
+            rebinFunction = rebinToWidth
+
+        if rebinFunction is not None:
+            p.histoMgr.forEachHisto(rebinFunction)
 
     ## Stack MC histograms
     #
