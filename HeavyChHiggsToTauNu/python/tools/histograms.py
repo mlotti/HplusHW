@@ -832,6 +832,10 @@ class Histo:
     def getRootHisto(self):
         return self.rootHisto
 
+    ## (Re)set the ROOT histogram object (TH1)
+    def setRootHisto(self, rootHisto):
+        self.rootHisto = rootHisto
+
     ## Get the histogram name
     def getName(self):
         return self.name
@@ -1044,6 +1048,9 @@ class HistoStacked(Histo):
 
         self.setIsDataMC(self.histos[0].isData(), self.histos[0].isMC())
 
+    def setRootHisto(self, rootHisto):
+        raise NotImplementedError("HistoStacked.setRootHisto() would be ill-defined")
+
     ## Get the list of original TH1 histograms.
     def getAllRootHistos(self):
         return [x.getRootHisto() for x in self.histos]
@@ -1101,6 +1108,9 @@ class HistoGraph(Histo):
 
     def getRootGraph(self):
         return self.getRootHisto()
+
+    def setRootGraph(self, rootGraph):
+        self.setRootHisto(rootGraph)
 
     def _values(self, values, func):
         return [func(values[i], i) for i in xrange(0, self.getRootGraph().GetN())]
@@ -1174,6 +1184,9 @@ class HistoEfficiency(Histo):
 
     def getRootEfficiency(self):
         return self.getRootHisto()
+
+    def setRootEfficiency(self, rootEfficiency):
+        self.setRootEfficiency(rootEfficiency)
 
     def getRootPassedHisto(self):
         return self.rootHisto.GetPassedHistogram()
