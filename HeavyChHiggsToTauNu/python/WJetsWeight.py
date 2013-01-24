@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.pileupReweightedAllEvents as pileupReweightedAllEvents
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 class NEvents:
     def __init__(self, inclusive_v1, inclusive_v2, jet1, jet2, jet3, jet4):
@@ -18,15 +19,15 @@ class NEvents:
             alias = cms.string("wjetsWeight"),
             enabled = cms.bool(True),
             sampleJetBin = cms.int32(-1),
-            inclusiveCrossSection = cms.double(27770.0),
+            inclusiveCrossSection = cms.double(xsect.backgroundCrossSections.crossSection("PREP_WJets", "7")),
             jetBin2 = cms.PSet(
-                exclusiveCrossSection = cms.double(1435.0),
+                exclusiveCrossSection = cms.double(xsect.backgroundCrossSections.crossSection("PREP_W2Jets", "7")),
             ),
             jetBin3 = cms.PSet(
-                exclusiveCrossSection = cms.double(304.2),
+                exclusiveCrossSection = cms.double(xsect.backgroundCrossSections.crossSection("PREP_W3Jets", "7")),
             ),
             jetBin4 = cms.PSet(
-                exclusiveCrossSection = cms.double(172.6),
+                exclusiveCrossSection = cms.double(xsect.backgroundCrossSections.crossSection("PREP_W4Jets", "7")),
             ),
         )
 
@@ -57,18 +58,18 @@ class NEvents:
             alias = cms.string("wjetsWeight"),
             enabled = cms.bool(True),
             sampleJetBin = cms.int32(-1),
-            inclusiveCrossSection = cms.double(30400.0),
+            inclusiveCrossSection = cms.double(xsect.backgroundCrossSections.crossSection("PREP_WJets", "8")),
             jetBin1 = cms.PSet(
-                exclusiveCrossSection = cms.double(5400.0),
+                exclusiveCrossSection = cms.double(xsect.backgroundCrossSections.crossSection("PREP_W1Jets", "8")),
             ),
             jetBin2 = cms.PSet(
-                exclusiveCrossSection = cms.double(1750.0),
+                exclusiveCrossSection = cms.double(xsect.backgroundCrossSections.crossSection("PREP_W2Jets", "8")),
             ),
             jetBin3 = cms.PSet(
-                exclusiveCrossSection = cms.double(519.0),
+                exclusiveCrossSection = cms.double(xsect.backgroundCrossSections.crossSection("PREP_W3Jets", "8")),
             ),
             jetBin4 = cms.PSet(
-                exclusiveCrossSection = cms.double(214.0),
+                exclusiveCrossSection = cms.double(xsect.backgroundCrossSections.crossSection("PREP_W4Jets", "8")),
             ),
         )
 

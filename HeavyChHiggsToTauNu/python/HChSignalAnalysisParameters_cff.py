@@ -273,7 +273,8 @@ bTagging = cms.untracked.PSet(
     BTagUserDBAlgo = cms.untracked.string("BTAGTCHEL_hplusBtagDB_TTJets") #FIXME
 )
 
-
+oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng")
+ 
 #deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
 deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees, for heavy charged Higgs
 
