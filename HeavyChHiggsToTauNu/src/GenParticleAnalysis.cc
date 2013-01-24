@@ -99,6 +99,9 @@ namespace HPlus {
 
     hTopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genTopPt", "genTopPt", 300, 0., 600);
     hTopPt_wrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genTopPt_wrongB", "genTopPt_wrongB", 300, 0., 600);
+    hTopToChHiggsMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genTopToChHiggsMass", "genTopToChHiggsMass", 300, 0., 600);
+    hTopToWBosonMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genTopToWBosonMass", "genTopToWBosonMass", 300, 0., 600);
+    hTopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genTopPt", "genTopPt", 300, 0., 600);
     hGenMET = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genMET", "genMET", 40, 0., 400);
     hWPt  = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genWPt", "genWPt", 120, 0., 600);
     hWEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genWEta", "genWEta", 100, -5., 5.);    
@@ -518,8 +521,6 @@ namespace HPlus {
         }
       }
     }
-    
-        
         
     // loop over all genParticles, search tops that decay to u and d and calculate pt
     // also calculate the "wrong" pt, by picking the b quark that does not come from the t
@@ -567,6 +568,52 @@ namespace HPlus {
       if(decaysHadronically) {
         hTopPt->Fill(sqrt(px*px+py*py));
         hTopPt_wrongB->Fill(sqrt(px_wrong*px_wrong+py_wrong*py_wrong));
+      }
+    }
+
+    // Loop over all gen particles, find tops that decay via t -> Wb and t -> Hb
+    // and add their masses to different histograms
+    for (size_t i=0; i < genParticles->size(); ++i){
+      const reco::Candidate & p = (*genParticles)[i];
+      int id = p.pdgId();
+      if ( abs(id) != 6 || hasImmediateMother(p,id)) continue;
+      std::vector<const reco::GenParticle*> daughters = getImmediateDaughters(p);
+      int daughterId=9999;
+      double px = 0, py = 0, pz = 0, E = 0;
+      bool decaysToChHiggs = false;
+      bool decaysToWBoson = false;
+      for(size_t d=0; d<daughters.size(); ++d) {
+        const reco::GenParticle dparticle = *daughters[d];
+        daughterId = dparticle.pdgId();
+	// If top decays to W boson (and b quark):
+        if( abs(daughterId) == 24 ) {
+          px += dparticle.px();
+          py += dparticle.py();
+	  pz += dparticle.pz();
+	  E  += dparticle.energy();
+	  decaysToWBoson = true;
+        }
+	// If top decays to charged Higgs boson (and b quark):
+        if( abs(daughterId) == 37 ) {
+          px += dparticle.px();
+          py += dparticle.py();
+	  pz += dparticle.pz();
+	  E  += dparticle.energy();
+	  decaysToChHiggs = true;
+        }
+	// In either case (t -> Wb || t -> Hb), add four momentum of b quark
+        if( abs(daughterId) == 5 ) {
+          px += dparticle.px();
+          py += dparticle.py();
+	  pz += dparticle.pz();
+	  E  += dparticle.energy();
+        }
+      }
+      if(decaysToWBoson) {
+        hTopToWBosonMass->Fill(sqrt(E*E - px*px - py*py - pz*pz));
+      }
+      if(decaysToChHiggs) {
+        hTopToChHiggsMass->Fill(sqrt(E*E - px*px - py*py - pz*pz));
       }
     }
 
