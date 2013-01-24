@@ -222,6 +222,7 @@ namespace HPlus {
     fMuonToTausCounterGroup(eventCounter, "mu->tau"),
     fMuonFromTauDecayToTausCounterGroup(eventCounter, "tau_mu->tau"),
     fGenuineToTausCounterGroup(eventCounter, "tau->tau"),
+    fGenuineOneProngToTausCounterGroup(eventCounter, "1-prong tau->tau"),
     fJetToTausCounterGroup(eventCounter, "jet->tau"),
     fAllTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "All with tau outside acceptance"),
     fElectronToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "e->tau with tau outside acceptance"),
@@ -229,6 +230,7 @@ namespace HPlus {
     fMuonToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "mu->tau with tau outside acceptance"),
     fMuonFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "tau_mu->tau with tau outside acceptance"),
     fGenuineToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "tau->tau with tau outside acceptance"),
+    fGenuineOneProngToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "1-prong tau->tau with tau outside acceptance"),
     fJetToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "jet->tau with tau outside acceptance"),
     fModuleLabel(iConfig.getParameter<std::string>("@module_label")),
     fProduce(iConfig.getUntrackedParameter<bool>("produceCollections", false)),
@@ -1386,12 +1388,14 @@ namespace HPlus {
     else if (tauMatch == FakeTauIdentifier::kkMuonToTau) return &fMuonToTausCounterGroup;
     else if (tauMatch == FakeTauIdentifier::kkMuonFromTauDecayToTau) return &fMuonFromTauDecayToTausCounterGroup;
     else if (tauMatch == FakeTauIdentifier::kkTauToTau) return &fGenuineToTausCounterGroup;
+    else if (tauMatch == FakeTauIdentifier::kkOneProngTauToTau) return &fGenuineToTausCounterGroup; // Handle separation in filling
     else if (tauMatch == FakeTauIdentifier::kkJetToTau) return &fJetToTausCounterGroup;
     else if (tauMatch == FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance) return &fElectronToTausAndTauOutsideAcceptanceCounterGroup;
     else if (tauMatch == FakeTauIdentifier::kkElectronFromTauDecayToTauAndTauOutsideAcceptance) return &fElectronFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup;
     else if (tauMatch == FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance) return &fMuonToTausAndTauOutsideAcceptanceCounterGroup;
     else if (tauMatch == FakeTauIdentifier::kkMuonFromTauDecayToTauAndTauOutsideAcceptance) return &fMuonFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup;
     else if (tauMatch == FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance) return &fGenuineToTausAndTauOutsideAcceptanceCounterGroup;
+    else if (tauMatch == FakeTauIdentifier::kkOneProngTauToTauAndTauOutsideAcceptance) return &fGenuineToTausAndTauOutsideAcceptanceCounterGroup; // Handle separation in filling
     else if (tauMatch == FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance) return &fJetToTausAndTauOutsideAcceptanceCounterGroup;
     return 0;
   }
@@ -1426,9 +1430,6 @@ namespace HPlus {
         hEWKFakeTausSelectedTauEtaAfterCuts->Fill(tauData.getSelectedTau()->eta());
       }
       getCounterGroupByTauMatch(tauMatch)->incrementBTaggingCounter();
-/*    } else if (selection == kSignalOrderDeltaPhiSelection) {
-      if (myFakeTauStatus) fEWKFakeTausGroup.incrementDeltaPhiCounter();
-      getCounterGroupByTauMatch(tauMatch)->incrementDeltaPhiCounter();*/
     } else if (selection == kSignalOrderDeltaPhiSelection) {
       if (myFakeTauStatus) fEWKFakeTausGroup.incrementDeltaPhiCounter();
       getCounterGroupByTauMatch(tauMatch)->incrementDeltaPhiCounter();
@@ -1441,6 +1442,34 @@ namespace HPlus {
     } else if (selection == kSignalOrderSelectedEvents) {
       if (myFakeTauStatus) fEWKFakeTausGroup.incrementSelectedEventsCounter();
       getCounterGroupByTauMatch(tauMatch)->incrementSelectedEventsCounter();
+    }
+    // Check status for genuine one prong taus
+    if (fFakeTauIdentifier.isGenuineOneProngTau(tauMatch)) {
+      SignalAnalysis::CounterGroup* myGroup = &fGenuineOneProngToTausCounterGroup;
+      if (tauMatch == FakeTauIdentifier::kkOneProngTauToTauAndTauOutsideAcceptance) {
+        myGroup = &fGenuineOneProngToTausAndTauOutsideAcceptanceCounterGroup;
+      }
+      if (selection == kSignalOrderTauID) {
+        myGroup->incrementOneTauCounter();
+      } else if (selection == kSignalOrderMETSelection) {
+        myGroup->incrementMETCounter();
+      } else if (selection == kSignalOrderElectronVeto) {
+        myGroup->incrementElectronVetoCounter();
+      } else if (selection == kSignalOrderMuonVeto) {
+        myGroup->incrementMuonVetoCounter();
+      } else if (selection == kSignalOrderJetSelection) {
+        myGroup->incrementNJetsCounter();
+      } else if (selection == kSignalOrderBTagSelection) {
+        myGroup->incrementBTaggingCounter();
+      } else if (selection == kSignalOrderDeltaPhiSelection) {
+        myGroup->incrementDeltaPhiCounter();
+      } else if (selection == kSignalOrderFakeMETVeto) {
+        myGroup->incrementFakeMETVetoCounter();
+      } else if (selection == kSignalOrderTopSelection) {
+        myGroup->incrementTopSelectionCounter();
+      } else if (selection == kSignalOrderSelectedEvents) {
+        myGroup->incrementSelectedEventsCounter();
+      }
     }
   }
 }

@@ -2,6 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_FakeTauIdentifier_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_FakeTauIdentifier_h
 
+#include "FWCore/Utilities/interface/InputTag.h"
+
 #include <string>
 
 namespace edm {
@@ -26,12 +28,14 @@ namespace HPlus {
       kkMuonToTau,
       kkMuonFromTauDecayToTau,
       kkTauToTau,
+      kkOneProngTauToTau,
       kkJetToTau,
       kkElectronToTauAndTauOutsideAcceptance,
       kkElectronFromTauDecayToTauAndTauOutsideAcceptance,
       kkMuonToTauAndTauOutsideAcceptance,
       kkMuonFromTauDecayToTauAndTauOutsideAcceptance,
       kkTauToTauAndTauOutsideAcceptance,
+      kkOneProngTauToTauAndTauOutsideAcceptance,
       kkJetToTauAndTauOutsideAcceptance,
       kkNumberOfSelectedTauMatchTypes
     };
@@ -50,7 +54,9 @@ namespace HPlus {
 
     MCSelectedTauMatchType matchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau);
     bool isFakeTau(MCSelectedTauMatchType type) { return !(type == kkTauToTau || type == kkTauToTauAndTauOutsideAcceptance); }
-
+    bool isGenuineTau(MCSelectedTauMatchType type) { return (type == kkTauToTau || type == kkTauToTauAndTauOutsideAcceptance); }
+    bool isGenuineOneProngTau(MCSelectedTauMatchType type) { return (type == kkOneProngTauToTau || type == kkOneProngTauToTauAndTauOutsideAcceptance); }
+    
     double getFakeTauScaleFactor(MCSelectedTauMatchType matchType, double eta);
     double getFakeTauSystematics(MCSelectedTauMatchType matchType, double eta);
 
@@ -65,6 +71,9 @@ namespace HPlus {
     bool isEmbeddingGenuineTau(MCSelectedTauMatchType type) { return (!isFakeTau(type) || isElectronOrMuonFromTauDecay(type)); }
 
   private:
+    edm::InputTag fVisibleMCTauSrc;
+    edm::InputTag fVisibleMCTauOneProngSrc;
+    const double fMatchingConditionDeltaR;
     // Scale factors for X->tau fakes
     const double fSFFakeTauBarrelElectron;
     const double fSFFakeTauEndcapElectron;
