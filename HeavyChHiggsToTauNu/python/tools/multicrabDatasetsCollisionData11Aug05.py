@@ -60,6 +60,11 @@ datasets = {
             "pattuple_v18": {
                 "fallback": "pattuple_v18_1"
             },
+            "pattuple_v18_3": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_05Aug2011_v1_AOD_170722_pattuple_v18_3-79f359e64890a90caf2b7abf9c65a694/USER",
+                "number_of_jobs": 1,
+            },
         }
     },
 
