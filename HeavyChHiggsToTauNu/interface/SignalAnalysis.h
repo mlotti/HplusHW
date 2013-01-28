@@ -76,8 +76,8 @@ namespace HPlus {
       Count fOneTauCounter;
       Count fElectronVetoCounter;
       Count fMuonVetoCounter;
-      Count fMETCounter;
       Count fNJetsCounter;
+      Count fMETCounter;
       //      Count fRtauAfterMetCounter;
       Count fBTaggingCounter;
       Count fDeltaPhiCounter;
@@ -297,8 +297,6 @@ namespace HPlus {
     
     // Transverse mass histograms
     WrappedTH1 *hTransverseMass;
-    WrappedTH1 *htransverseMassRealTau;
-    WrappedTH1 *htransverseMassFakeTau;
     WrappedTH1 *hTransverseMassDeltaPtCut;
     WrappedTH1 *hTransverseMassSecondBveto;
     WrappedTH1 *hTransverseMassPhi30;
@@ -367,7 +365,6 @@ namespace HPlus {
     WrappedTH1* hCtrlIdentifiedElectronPt;
     WrappedTH1* hCtrlIdentifiedMuonPt;
     WrappedTH1* hCtrlNjets;
-    WrappedTH1* hCtrlDeltaPhi;
     WrappedTH1* hCtrlNjetsAfterMET;
     WrappedTH1* hCtrlSelectedTauPtAfterStandardSelections;
     WrappedTH1* hCtrlSelectedTauEtaAfterStandardSelections;
@@ -400,7 +397,7 @@ namespace HPlus {
     WrappedTH1* hCtrlEWKFakeTausNjetsAfterStandardSelections;
     WrappedTH1* hCtrlEWKFakeTausMET;
     WrappedTH1* hCtrlEWKFakeTausNbjets;
-    WrappedTH1* hCtrlEWKFakeTausDeltaPhi;
+
     WrappedTH2* hCtrlJetMatrixAfterJetSelection;
     WrappedTH2* hCtrlJetMatrixAfterMET;
     WrappedTH2* hCtrlJetMatrixAfterMET100;

@@ -63,7 +63,7 @@ namespace HPlus {
       hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromZ, "from Z");
       hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromHplus, "from H+");
       hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromWTau, "from W#rightarrow#tau");
-      hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromZTauTau, "from Z#rightarrow#tautau");
+      hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromZTauTau, "from Z#rightarrow#tau#tau");
       hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromHplusTau, "from H+#rightarrow#tau");
     }
     hMuOrigin = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "MuOrigin", "MuOrigin", 7, 0, 7);
@@ -111,16 +111,18 @@ namespace HPlus {
     edm::Handle <std::vector<LorentzVector> > myMCVisibleTaus;
     iEvent.getByLabel(fVisibleMCTauSrc, myMCVisibleTaus);
     // Check matching to MC visible taus
+    double tmpPt = 0;
     for (std::vector<LorentzVector>::const_iterator it = myMCVisibleTaus->begin(); it != myMCVisibleTaus->end(); ++it) {
       if (reco::deltaR((*it), tau.p4()) < fMatchingConditionDeltaR) {
         // Match found
         isHadronicTau = true;
+        tmpPt = (*it).pt();
       }
       // Check if a MC tau is outside acceptance
       if ((*it).pt() < 41 || abs((*it).eta()) > 2.1)
         foundMCTauOutsideAcceptanceStatus = true;
     }
-    // Check matching to visible MC taus
+    // Check matching to visible MC 1-prong taus
     edm::Handle <std::vector<LorentzVector> > myMCVisibleOneProngTaus;
     iEvent.getByLabel(fVisibleMCTauOneProngSrc, myMCVisibleOneProngTaus);
     // Check matching to MC visible taus
@@ -138,7 +140,7 @@ namespace HPlus {
       const reco::Candidate & p = (*genParticles)[i];
       if (std::abs(p.pdgId()) == 11 || std::abs(p.pdgId()) == 13) {
         // Check match with tau
-        if (reco::deltaR(p, tau.p4()) < fMatchingConditionDeltaR) {
+        if (reco::deltaR(p.p4(), tau.p4()) < fMatchingConditionDeltaR) {
           if (p.pt() > 10.) {
             //std::cout << "  match found, pid=" << p.pdgId() << " eta=" << std::abs(p.eta()) << " pt=" << p.pt() << std::endl;
             if (std::abs(p.pdgId()) == 11) {
@@ -149,6 +151,49 @@ namespace HPlus {
               myMuIndex = i;
             }
           }
+        }
+      }
+    }
+    // Find MC tau lepton index corresponding to the MC visible tau
+    if (isHadronicTau) {
+      //std::cout << "start" << std::endl;
+      for (size_t i=0; i < genParticles->size(); ++i) {
+        const reco::Candidate & p = (*genParticles)[i];
+        if (std::abs(p.pdgId()) == 15) {
+          // Ignore tau that is radiating before decay
+          bool myVetoStatus = false;
+          for (size_t im=0; im < p.numberOfDaughters(); ++im){
+            if (std::abs(p.daughter(im)->pdgId()) == 15) myVetoStatus = true;
+          }
+          if (myVetoStatus) continue;
+          // Tau lepton found
+          LorentzVector myVisibleTau;
+          // Subtract neutrino momenta from tau lepton momentum
+          for (size_t j=0; j < genParticles->size(); ++j) {
+            // Consider only stable particles
+            if ((*genParticles)[j].status() != 1) continue;
+            // Skip neutrinos
+            int myId = std::abs((*genParticles)[j].pdgId());
+            if (myId == 12 || myId == 14 || myId == 16) continue;
+            // Check if particles mother is the tau lepton on row i
+            const reco::Candidate* ppmother = (*genParticles)[j].mother();
+            bool myBelongsToTauStatus = false;
+            while (ppmother) {
+              if (ppmother->p4() == p.p4() && ppmother->pdgId() == p.pdgId()) {
+                myBelongsToTauStatus = true;
+              }
+              // move to next
+              ppmother = ppmother->mother();
+            }
+            if (myBelongsToTauStatus) {
+              //std::cout << "   add " << (*genParticles)[j].pdgId() << " status=" << (*genParticles)[j].status() << std::endl;
+              myVisibleTau += (*genParticles)[j].p4();
+            }
+          }
+          if (reco::deltaR(myVisibleTau, tau.p4()) < fMatchingConditionDeltaR) {
+            myTauIndex = i;
+          }
+          //std::cout <<" is tau, idx=" << myTauIndex << ", pt=" << tau.pt() << " vs. " << myVisibleTau.pt() << " vs. " << " vs. " << tmpPt << std::endl;
         }
       }
     }
@@ -165,7 +210,6 @@ namespace HPlus {
         // move to next
         p = p->mother();
       }
-
     }
     // Set result
     if (!foundMCTauOutsideAcceptanceStatus) {
@@ -219,8 +263,9 @@ namespace HPlus {
         myIndex = myElectronIndex;
       else if (isMCMuon)
         myIndex = myMuIndex;
-      else if (isHadronicTau)
+      else if (isHadronicTau) {
         myIndex = myTauIndex;
+      }
       bool myWStatus = false;
       bool myZStatus = false;
       bool myHPlusStatus = false;
@@ -238,6 +283,7 @@ namespace HPlus {
           myHPlusStatus = true;
         // move to next
         p = p->mother();
+        //if (isMCElectron and p) std::cout << "e: mother = " << p->pdgId() << std::endl;
       }
       if (!myTauStatus) {
         if (myWStatus) myOriginType = kkFromW;
@@ -251,6 +297,8 @@ namespace HPlus {
     }
     // Fill histograms
     hTauMatchType->Fill(myMatchType);
+    if (myMatchType == kkOneProngTauToTau) hTauMatchType->Fill(kkTauToTau);
+    if (myMatchType == kkOneProngTauToTauAndTauOutsideAcceptance) hTauMatchType->Fill(kkTauToTauAndTauOutsideAcceptance);
     if (isMCElectron)
       hElectronOrigin->Fill(myOriginType);
     else if (isMCMuon)
