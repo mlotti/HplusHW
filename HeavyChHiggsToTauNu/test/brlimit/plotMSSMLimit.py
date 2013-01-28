@@ -211,7 +211,8 @@ def doPlot(name, graphs, limits, xlabel):
 
 #    histograms.addCmsPreliminaryText()
     histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=limits.getLuminosity())
+#    histograms.addLuminosityText(x=None, y=None, lumi=limits.getLuminosity())
+    histograms.addLuminosityText(x=None, y=None, lumi="2.3-4.9")
 
     size = 20
     x = 0.2
@@ -226,8 +227,8 @@ def doPlot(name, graphs, limits, xlabel):
     ROOT.LHCHIGGS_LABEL(0.97,0.72,1)
     histograms.addText(x, 0.55, "FeynHiggs 2.9.4", size=size)
     histograms.addText(x, 0.48, "Derived from", size=size)
-    histograms.addText(x, 0.43, "CMS HIG-11-019", size=size)
-    histograms.addText(x, 0.38, "JHEP07(2012)143", size=size)
+    histograms.addText(x, 0.43, "CMS HIG-12-052", size=size)
+#    histograms.addText(x, 0.38, "JHEP07(2012)143", size=size)
                 
     plot.save()
 
