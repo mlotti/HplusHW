@@ -26,6 +26,11 @@ datasets = {
                 "luminosity": 370.826000,
                 "number_of_jobs": 1,
             },
+            "pattuple_v18_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_05Aug2011_v1_AOD_170722_pattuple_v18_2b-b181b3cffb39e031e0e03a7bce397555/USER",
+                "number_of_jobs": 2,
+            },
         }
     },
 
