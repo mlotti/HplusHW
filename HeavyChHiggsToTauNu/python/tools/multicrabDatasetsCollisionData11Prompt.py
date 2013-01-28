@@ -93,7 +93,7 @@ datasets = {
             "pattuple_v18_3": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_165088_pattuple_v18_3-c526c428db879237cf12e2158f0bb631/USER",
-                "number_of_obs": 4,
+                "number_of_jobs": 4,
                 "args": {"doTauHLTMatchingInAnalysis": "1"},
             },
         }
