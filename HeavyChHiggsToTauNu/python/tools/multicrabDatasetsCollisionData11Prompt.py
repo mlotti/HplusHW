@@ -93,7 +93,8 @@ datasets = {
             "pattuple_v18_3": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_165088_pattuple_v18_3-c526c428db879237cf12e2158f0bb631/USER",
-                "number_of_jobs": 4,
+                "number_of_jobs": 8,
+                "args": {"doTauHLTMatchingInAnalysis": "1"},
             },
         }
     },
@@ -141,7 +142,8 @@ datasets = {
             "pattuple_v18_3": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_165970_pattuple_v18_3-ad95384c3aa8564ec4dfbc9559175fef/USER",
-                "number_of_jobs": 2,
+                "number_of_jobs": 4,
+                "args": {"doTauHLTMatchingInAnalysis": "1"},
             },
         }
     },
@@ -176,7 +178,8 @@ datasets = {
             "pattuple_v18_3": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_166346_pattuple_v18_3-752897f1cbb6aeda9f61e3fb940db6b5/USER",
-                "number_of_jobs": 2,
+                "number_of_jobs": 4,
+                "args": {"doTauHLTMatchingInAnalysis": "1"},
             },
         }
     },
@@ -211,7 +214,8 @@ datasets = {
             "pattuple_v18_3": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_166374_pattuple_v18_3-ad95384c3aa8564ec4dfbc9559175fef/USER",
-                "number_of_jobs": 4,
+                "number_of_jobs": 8,
+                "args": {"doTauHLTMatchingInAnalysis": "1"},
             },
         }
     },
@@ -266,7 +270,8 @@ datasets = {
             "pattuple_v18_3": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_167078_pattuple_v18_3-9eb271d1fb7cb2dea5c98f611e8ff904/USER",
-                "number_of_jobs": 2,
+                "number_of_jobs": 4,
+                "args": {"doTauHLTMatchingInAnalysis": "1"},
             },
         }
     },
@@ -295,7 +300,8 @@ datasets = {
             "pattuple_v18_3": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v6_AOD_172620_pattuple_v18_3-79f359e64890a90caf2b7abf9c65a694/USER",
-                "number_of_jobs": 2,
+                "number_of_jobs": 4,
+                "args": {"doTauHLTMatchingInAnalysis": "1"},
             },
         }
     },
@@ -314,7 +320,8 @@ datasets = {
             "pattuple_v18_3": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v6_AOD_173236_pattuple_v18_3-3b2fecf88d7c8a5a9b068c5a0b894efc/USER",
-                "number_of_jobs": 2,
+                "number_of_jobs": 4,
+                "args": {"doTauHLTMatchingInAnalysis": "1"},
             },
             "pattuple_v18_2": {
                 "dbs_url": common.pattuple_dbs,
