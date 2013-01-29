@@ -53,6 +53,7 @@ namespace HPlus {
     ~FakeTauIdentifier();
 
     MCSelectedTauMatchType matchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau);
+    MCSelectedTauMatchType silentMatchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau);
     bool isFakeTau(MCSelectedTauMatchType type) { return !(type == kkTauToTau || type == kkTauToTauAndTauOutsideAcceptance); }
     bool isGenuineTau(MCSelectedTauMatchType type) { return (type == kkTauToTau || type == kkTauToTauAndTauOutsideAcceptance); }
     bool isGenuineOneProngTau(MCSelectedTauMatchType type) { return (type == kkOneProngTauToTau || type == kkOneProngTauToTauAndTauOutsideAcceptance); }
@@ -71,6 +72,8 @@ namespace HPlus {
     bool isEmbeddingGenuineTau(MCSelectedTauMatchType type) { return (!isFakeTau(type) || isElectronOrMuonFromTauDecay(type)); }
 
   private:
+    MCSelectedTauMatchType privateMatchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau, bool silentMode);
+    
     edm::InputTag fVisibleMCTauSrc;
     edm::InputTag fVisibleMCTauOneProngSrc;
     const double fMatchingConditionDeltaR;

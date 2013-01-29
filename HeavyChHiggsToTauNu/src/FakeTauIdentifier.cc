@@ -93,6 +93,14 @@ namespace HPlus {
   }
   
   FakeTauIdentifier::MCSelectedTauMatchType FakeTauIdentifier::matchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau) {
+    return privateMatchTauToMC(iEvent, tau, false);
+  }
+  
+  FakeTauIdentifier::MCSelectedTauMatchType FakeTauIdentifier::silentMatchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau) {
+    return privateMatchTauToMC(iEvent, tau, true);
+  }
+  
+  FakeTauIdentifier::MCSelectedTauMatchType FakeTauIdentifier::privateMatchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau, bool silentMode) {
     // Return if event is real data
     FakeTauIdentifier::MCSelectedTauMatchType myMatchType = kkNoMC;
     if (iEvent.isRealData()) return kkNoMC;
@@ -295,16 +303,18 @@ namespace HPlus {
         else if (myHPlusStatus) myOriginType = kkFromHplusTau; 
       }
     }
-    // Fill histograms
-    hTauMatchType->Fill(myMatchType);
-    if (myMatchType == kkOneProngTauToTau) hTauMatchType->Fill(kkTauToTau);
-    if (myMatchType == kkOneProngTauToTauAndTauOutsideAcceptance) hTauMatchType->Fill(kkTauToTauAndTauOutsideAcceptance);
-    if (isMCElectron)
-      hElectronOrigin->Fill(myOriginType);
-    else if (isMCMuon)
-      hMuOrigin->Fill(myOriginType);
-    else if (isHadronicTau)
-      hTauOrigin->Fill(myOriginType);
+    if (!silentMode) {
+      // Fill histograms
+      hTauMatchType->Fill(myMatchType);
+      if (myMatchType == kkOneProngTauToTau) hTauMatchType->Fill(kkTauToTau);
+      if (myMatchType == kkOneProngTauToTauAndTauOutsideAcceptance) hTauMatchType->Fill(kkTauToTauAndTauOutsideAcceptance);
+      if (isMCElectron)
+        hElectronOrigin->Fill(myOriginType);
+      else if (isMCMuon)
+        hMuOrigin->Fill(myOriginType);
+      else if (isHadronicTau)
+        hTauOrigin->Fill(myOriginType);
+    }
     // Return result
     return myMatchType;
   }
