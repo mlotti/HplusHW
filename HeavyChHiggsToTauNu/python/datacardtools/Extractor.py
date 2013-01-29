@@ -505,7 +505,7 @@ class ShapeExtractor(ExtractorBase):
             h = myShapeModifier.createEmptyShapeHistogram(myLabels[i])
             # Obtain source histogram
             myHistoName = datasetColumn.getDirPrefix()+self._histoDirs[i]+"/"+self._histograms[i]
-            #print "group",datasetColumn.getLabel(),"id",self._exid,"histo",myHistoName
+            print "group",datasetColumn.getLabel(),"id",self._exid,"histo",myHistoName
             myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName, quietException=True)
             if isinstance(myDatasetRootHisto,str):
                 raise Exception (ErrorStyle()+"Error in extracting shape histogram:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid,myDatasetRootHisto))
@@ -595,6 +595,7 @@ class ControlPlotExtractor(ExtractorBase):
         myShapeModifier = ShapeHistoModifier(self._histoSpecs)
         h = myShapeModifier.createEmptyShapeHistogram(myLabel)
         for i in range (0, len(self._histoDirs)):
+            print "Extractor ",self._histoDirs[i],self._histoNames[i]
             # Obtain histogram from dataset
             myHistoname = datasetColumn.getDirPrefix()+"/"+self._histoDirs[i]+"/"+self._histoNames[i]
             myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoname, quietException=True)

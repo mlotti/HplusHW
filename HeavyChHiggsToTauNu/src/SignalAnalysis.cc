@@ -1,4 +1,5 @@
 
+
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
@@ -75,6 +76,7 @@ namespace HPlus {
     fDeltaPhiCutValue(iConfig.getUntrackedParameter<double>("deltaPhiTauMET")),
     fTopRecoName(iConfig.getUntrackedParameter<std::string>("topReconstruction")),
     fOneAndThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneAndThreeProngTauSrc")),
+    fOneProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneProngTauSrc")),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     fAllCounter(eventCounter.addCounter("Offline selection begins")),
     fWJetsWeightCounter(eventCounter.addCounter("WJets inc+exl weight")),
@@ -247,6 +249,7 @@ namespace HPlus {
     
     // Vertex histograms
     TFileDirectory myVertexDir = fs->mkdir("Vertices");
+    
     hVerticesBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesBeforeWeight", "Number of vertices without weighting", 40, 0, 40);
     hVerticesAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesAfterWeight", "Number of vertices with weighting", 40, 0, 40);
     hVerticesTriggeredBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesTriggeredBeforeWeight", "Number of vertices without weighting", 40, 0, 40);
@@ -256,7 +259,10 @@ namespace HPlus {
     hGenMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "genMET", "genMET", 200, 0., 400.);
     hdeltaPhiMetGenMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiMetGenMet", "deltaPhiMetGenMet", 180, 0., 180.); 
     hdeltaEtMetGenMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaEtMetGenMet", "deltaEtMetGenMet", 200, -1., 1.);
-    hgenWmass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "genWmass", "genWmass", 200, 0.,400.); 
+    hgenWmass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "genWmass", "genWmass", 200, 0.,600.); 
+    htransverseMassRealTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassRealTau", "transverseMassRealTau", 200, 0., 400.);
+    htransverseMassFakeTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassFakeTau", "transverseMassFakeTau", 200, 0., 400.);
+
     htransverseMassMuonNotInTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassMuonNotInTau", "transverseMassMuonNotInTau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     htransverseMassElectronNotInTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassElectronNotInTau", "transverseMassElectronNotInTau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     htransverseMassTauNotInTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassTauNotInTau", "transverseMassTauNotInTau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
@@ -371,6 +377,7 @@ namespace HPlus {
     hCtrlIdentifiedMuonPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "IdentifiedMuonPt_AfterStandardSelections", "IdentifiedMuonPt_AfterStandardSelections;Identified muon p_{T}, GeV/c;N_{events} / 1 GeV", 20, 0., 20.);
     hCtrlNjetsAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "Njets_AfterStandardSelections", "Njets_AfterStandardSelections;Number of selected jets;N_{events}", 7, 3., 10.);
     hCtrlMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "MET", "MET;MET, GeV;N_{events} / 10 GeV", 100, 0., 500.);
+    hCtrlDeltaPhi = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "deltaPhi", "deltaPhi", 180, 0., 180.);
     hCtrlNbjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlDir, "NBjets", "NBjets;Number of identified b-jets;N_{events}", 10, 0., 10.);
     // Control histograms for EWKFakeTaus
     TFileDirectory myCtrlEWKFakeTausDir = fs->mkdir("ControlPlotsEWKFakeTaus");
@@ -391,7 +398,7 @@ namespace HPlus {
     hCtrlEWKFakeTausNjetsAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "Njets_AfterStandardSelections", "Njets_AfterStandardSelections;Number of selected jets;N_{events}", 7, 3., 10.);
     hCtrlEWKFakeTausMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "MET", "MET;MET, GeV;N_{events} / 10 GeV", 100, 0., 500.);
     hCtrlEWKFakeTausNbjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "NBjets", "NBjets;Number of identified b-jets;N_{events}", 10, 0., 10.);
-
+    hCtrlEWKFakeTausDeltaPhi = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "deltaPhi", "deltaPhi", 180, 0., 180.);
     hCtrlJetMatrixAfterJetSelection = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myCtrlDir, "JetMatrixAfterJetSelection", "JetMatrixAfterJetSelection;Number of selected jets;Number of selected b jets", 7, 3., 10.,7, 0., 7.);
     hCtrlJetMatrixAfterMET = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myCtrlDir, "JetMatrixAfterMET", "JetMatrixAfterMET;Number of selected jets;Number of selected b jets", 7, 3., 10.,7, 0., 7.);
     hCtrlJetMatrixAfterMET100 = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myCtrlDir, "JetMatrixAfterMET100", "JetMatrixAfterMET100;Number of selected jets;Number of selected b jets", 7, 3., 10.,7, 0., 7.);
@@ -502,7 +509,7 @@ namespace HPlus {
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
     increment(fTauFakeScaleFactorCounter);
     //if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
-    increment(fOneTauCounter);
+    /////////////////////////////////////////////    increment(fOneTauCounter);
     // Primary vertex assignment analysis - diagnostics only
     fVertexAssignmentAnalysis.analyze(iEvent, iSetup, iEvent.isRealData(), pvData.getSelectedVertex(), tauData.getSelectedTau(), myTauMatch);
     // For data, set the current run number (needed for tau embedding
@@ -572,12 +579,13 @@ namespace HPlus {
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
 
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
-    hMet_beforeJetCut->Fill(metData.getSelectedMET()->et());  
+    hMet_beforeJetCut->Fill(metData.getSelectedMET()->et());
+    
 //------ Experimental cuts, counters, and histograms
     if (!iEvent.isRealData()) {
       doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData, metData, genData);
     }
-    */
+    */   
 
 //------ Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
@@ -741,10 +749,23 @@ namespace HPlus {
 
 
 
+
 //------ MET cut
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
-    hMet->Fill(metData.getSelectedMET()->et()); 
+    hMet->Fill(metData.getSelectedMET()->et());
 
+
+    //    if (!iEvent.isRealData()) {
+    //  doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData, metData, genData);
+    //}
+
+ 
+//------ Experimental cuts, counters, and histograms
+/*
+    if (!iEvent.isRealData()) {
+      doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData, metData, genData);
+    }
+*/
     //BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     //    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     //if(btagData.passedEvent()) hMetWithBtagging->Fill(metData.getSelectedMET()->et(),fEventWeight.getWeight()); 
@@ -818,12 +839,32 @@ namespace HPlus {
 
     hDeltaPhi->Fill(deltaPhi);
     if (myFakeTauStatus) hEWKFakeTausDeltaPhi->Fill(deltaPhi);
+    if (myFakeTauStatus) hCtrlEWKFakeTausDeltaPhi->Fill(deltaPhi);
+    hCtrlDeltaPhi->Fill(deltaPhi);
     if (deltaPhi > fDeltaPhiCutValue) return false;
     increment(fDeltaPhiTauMETCounter);
     hSelectionFlow->Fill(kSignalOrderDeltaPhiSelection);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderDeltaPhiSelection);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderDeltaPhiSelection);
     fillEWKFakeTausCounters(myTauMatch, kSignalOrderDeltaPhiSelection, tauData);
+
+
+
+
+    if (!iEvent.isRealData()) {
+          doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData, metData, genData);
+    }
+
+
+    ///////////////////////////////////////////// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    if(tauData.getSelectedTaus().size() == 1)  increment(fOneTauCounter);
+
+
+
+
+
+
 
     // plot deltaPhi(jet,met)
     double myMaxDeltaPhiJetMET = 0.0;
@@ -1131,8 +1172,8 @@ namespace HPlus {
     edm::Handle <std::vector<LorentzVector> > oneAndThreeProngTaus;
     iEvent.getByLabel(fOneAndThreeProngTauSrc,oneAndThreeProngTaus);
 
-    edm::Handle <std::vector<LorentzVector> > threeProngTaus;
-    iEvent.getByLabel(fThreeProngTauSrc, threeProngTaus); // FIXME: fThreeProngTauSrc is not initialized!
+    //    edm::Handle <std::vector<LorentzVector> > threeProngTaus;
+    //iEvent.getByLabel(fThreeProngTauSrc, threeProngTaus); // FIXME: fThreeProngTauSrc is not initialized!
 
     bool myTauFoundStatus = false;
     bool myLeptonVetoStatus = false;
@@ -1143,6 +1184,7 @@ namespace HPlus {
     bool observableElectronFound = false;
     bool observableMuonFound = false;
 
+
     hGenMET->Fill(genData.getGenMET()->pt());
     double deltaPhiMetGenMet = DeltaPhi::reconstruct(*(genData.getGenMET()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
     hdeltaPhiMetGenMet->Fill(deltaPhiMetGenMet);
@@ -1151,6 +1193,11 @@ namespace HPlus {
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
     if ((fabs(genData.getGenMET()->pt() - metData.getSelectedMET()->pt())/genData.getGenMET()->pt()) > 0.2) {
       htransverseMassMetReso02->Fill(transverseMass);
+    }
+    for( LorentzVectorCollection::const_iterator tau = oneProngTaus->begin();tau!=oneProngTaus->end();++tau) {
+      double deltaR = ROOT::Math::VectorUtil::DeltaR(tauData.getSelectedTau()->p4(), *tau);
+      if ( deltaR > 0.2)   htransverseMassFakeTau->Fill(transverseMass);
+      if ( deltaR < 0.2)   htransverseMassRealTau->Fill(transverseMass);
     }
 
     
@@ -1162,6 +1209,10 @@ namespace HPlus {
     double minDeltaR = 99999;
     for (size_t i=0; i < genParticles->size(); ++i) {
       const reco::Candidate & p = (*genParticles)[i];
+
+      if( abs(p.pdgId()) == 24 )  hgenWmass->Fill(p.mass()); 
+
+
       //      if (p.pt() > 5 && p.pdgId()!= std::abs(p.pdgId()) ) {
       if (p.pt() > 5 ) {
         if (reco::deltaR(p, tauData.getSelectedTau()->leadPFChargedHadrCand()->p4()) < 0.3) {
@@ -1172,7 +1223,7 @@ namespace HPlus {
 	  // non-signal taus
           if (std::abs(p.pdgId()) == 15 && !hasImmediateMother(p,15) && !hasImmediateMother(p,-15) ) {
 	    // hadronic taus
-	    for( LorentzVectorCollection::const_iterator tau = oneAndThreeProngTaus->begin();tau!=oneAndThreeProngTaus->end();++tau) {
+	    for( LorentzVectorCollection::const_iterator tau = oneProngTaus->begin();tau!=oneProngTaus->end();++tau) {
 	      double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() ,*tau );
 	      if ( deltaR > 0.3) continue;
 	      // if (hasImmediateDaughter(p,11) || !hasImmediateDaughter(p,-13) ) continue;	
@@ -1184,7 +1235,7 @@ namespace HPlus {
 		const reco::GenParticle dparticle = *tauMothers[d];
 		if( abs(dparticle.pdgId()) == 24 ) increment(fTauNotInTauFromWCounter);
 		//		if( abs(dparticle.pdgId()) == 24 ) std::cout << " W mass " << dparticle.mass() << std::endl;
-		if( abs(dparticle.pdgId()) == 24 ) hgenWmass->Fill(dparticle.mass());
+		//		if( abs(dparticle.pdgId()) == 24 ) hgenWmass->Fill(dparticle.mass());
 		if( abs(dparticle.pdgId()) == 5 ) increment(fTauNotInTauFromBottomCounter);
 		if( abs(dparticle.pdgId()) == 37 ) increment(fTauNotInTauFromHplusCounter); 	
 	      }
@@ -1262,7 +1313,7 @@ namespace HPlus {
       if (!myTauFoundStatus ) htransverseMassLeptonFakeSignalTau->Fill(transverseMass); 
     }
 
-    if (!otherTauFound && !electronFound && !muonFound ) {
+    if (myTauFoundStatus && (!otherTauFound && !electronFound && !muonFound) ) {
       //      increment(fTauNotInTauCounter);
       htransverseMassNoLeptonNotInTau->Fill(transverseMass);
     }

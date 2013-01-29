@@ -40,7 +40,7 @@ def customize(signalAnalysis):
     signalAnalysis.jetSelection.betaCut = 0.2 # Disable by setting to 0.0; if you want to enable, set to 0.2
 #    signalAnalysis.tauSelection.ptCut = 80.0 #
 #    signalAnalysis.MET.METCut = 100.0 
-
+        
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=-1, # default is -1

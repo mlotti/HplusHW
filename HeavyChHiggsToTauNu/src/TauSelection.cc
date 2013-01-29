@@ -306,6 +306,7 @@ namespace HPlus {
     return fTauSelection->fSelectedTaus; // never reached
   }
 
+
   const edm::Ptr<pat::Tau> TauSelection::Data::getSelectedTau() const {
     if (!fPassedEvent) return fTauSelection->fSelectedTauCandidates[0]; // No tau was selected, return zero pointer
     if (fTauSelection->fOperationMode == TauSelection::kTauCandidateSelectionOnly)

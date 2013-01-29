@@ -59,6 +59,7 @@ class ConfigBuilder:
                  applyTriggerScaleFactor = True, # Apply trigger scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
+                # tauSelectionOperatingMode = "tauCandidateSelectionOnly",   
                  doTriggerMatching = True,
                  useCHSJets = False,
                  useJERSmearedJets = True,
