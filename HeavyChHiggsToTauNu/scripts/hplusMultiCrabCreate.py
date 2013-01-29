@@ -62,6 +62,9 @@ def main(opts):
     for f in flist:
         shutil.copy(f, dirname)
 
+    if opts.codeVersion:
+        multicrab.writeGitVersion(dirname)
+
     print "Copied %s to %s" % (", ".join(flist), dirname)
     if not opts.create:
         print
@@ -99,7 +102,9 @@ if __name__ == "__main__":
                       help="Prefix for the multicrab task directory (default: 'multicrab')")
     parser.add_option("--noCreate", dest="create", default=True, action="store_false",
                       help="Don't run 'multicrab -create'")
-
+    parser.add_option("--noCodeVersion", dest="codeVersion", default=True, action="store_false",
+                      help="Don't run git for saving code version information")
+    
     (opts, args) = parser.parse_args()
 
     sys.exit(main(opts))
