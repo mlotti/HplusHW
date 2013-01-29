@@ -175,6 +175,7 @@ multicrabWorkflowsPileupNtuple.addNtuple_44X(datasets)
 
 # Add pattuple definitions
 multicrabWorkflowsPattuple.addPattuple_v44_4(datasets)
+multicrabWorkflowsPattuple.addPattuple_v44_4_1(datasets)
 
 # Add embedding definitions
 multicrabWorkflowsTauEmbedding.addEmbeddingSkim_v44_4_2(datasets)
