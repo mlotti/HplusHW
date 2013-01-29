@@ -1,0 +1,109 @@
+#! /usr/bin/env python
+
+# -----------------------------------------------------------------------------------
+# What this script does:
+#   Produce tau fake rate curves as function of fake tau pT for selected datasets
+# -----------------------------------------------------------------------------------
+
+import sys
+import ROOT
+ROOT.gROOT.SetBatch(True)
+
+import os
+from optparse import OptionParser
+
+#import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
+
+def myfitfunc(x, par):
+    return par[0]
+
+def getHistogram(rootfile,histoname):
+    h = rootfile.Get(histoname)
+    if h == None:
+        raise Exception ("Error: histogram '%s' not found!"%histoname)
+    return h;
+
+def produceEfficiencyCurve(rootfile, histoPath, histoNamePrefix, label):
+    hBefore = getHistogram(rootfile, "%s/%sBefore"%(histoPath, histoNamePrefix))
+    hBefore.Rebin(2)
+    hAfter = getHistogram(rootfile, "%s/%sAfter"%(histoPath, histoNamePrefix))
+    hAfter.Rebin(2)
+    # Produce fake rate
+    hEff = ROOT.TGraphAsymmErrors(hAfter, hBefore)
+    return [hEff, label, hAfter.Integral(), hBefore.Integral()]
+
+def main(opts):
+    tdrstyle.TDRStyle()
+    # loop over datasets
+    histoPath = "signalAnalysis%s/TauDebug/"%opts.era[0]
+    for mydir in opts.dirs:
+        histos = []
+        rootFile = ROOT.TFile.Open(os.path.join(mydir, "res", "histograms-%s.root"%mydir))
+        if rootFile == None:
+            raise Exception ("Error: File 'histograms-%s.root' not found!"%mydir)
+        # Get histograms
+        histos.append(produceEfficiencyCurve(rootFile, histoPath, "TauFakeRatePtb", "b#rightarrow#tau"))
+        histos.append(produceEfficiencyCurve(rootFile, histoPath, "TauFakeRatePtc", "c#rightarrow#tau"))
+        histos.append(produceEfficiencyCurve(rootFile, histoPath, "TauFakeRatePtuds", "uds#rightarrow#tau"))
+        histos.append(produceEfficiencyCurve(rootFile, histoPath, "TauFakeRatePtg", "g#rightarrow#tau"))
+        #histos.append(produceEfficiencyCurve(rootFile, histoPath, "TauFakeRatePte", "e#rightarrow#tau"))
+        #histos.append(produceEfficiencyCurve(rootFile, histoPath, "TauFakeRatePtmu", "#mu#rightarrow#tau"))
+        # We have the histograms and names, lets make the plot
+        c = ROOT.TCanvas()
+        c.SetLogy()
+        hFrame = ROOT.TH1F("frame","frame",2,40,200)
+        hFrame.SetMinimum(1.0e-5)
+        hFrame.SetMaximum(1.0)
+        hFrame.Draw()
+        hFrame.SetXTitle("#tau p_{T}, GeV/c")
+        hFrame.SetYTitle("Fake rate")
+        for i in range(0,len(histos)):
+            histos[i][0].SetLineColor(i+1)
+            histos[i][0].SetMarkerColor(i+1)
+            histos[i][0].SetMarkerSize(0.6)
+            histos[i][0].SetMarkerStyle(i+18)
+            histos[i][0].Draw("E SAME")
+        leg = ROOT.TLegend(0.2, 0.2, 0.4, 0.4, "", "brNDC")
+        leg.SetBorderSize(0)
+        leg.SetTextFont(63)
+        leg.SetTextSize(18)
+        leg.SetLineColor(1)
+        leg.SetLineStyle(1)
+        leg.SetLineWidth(1)
+        leg.SetFillColor(0)
+        for i in range(0,len(histos)):
+            leg.AddEntry(histos[i][0], histos[i][1], "lv")
+        leg.Draw()
+        c.Print("tauFakeRate_%s.png"%mydir)
+        #c.Print("tauFakeRate_%s.C"%mydir)
+        #c.Print("tauFakeRate_%s.eps"%mydir)
+        # Let's output some stats
+        myTotalAfter = 0.0
+        for i in range(0,len(histos)):
+            myTotalAfter += histos[i][2]
+        for i in range(0,len(histos)):
+            print "%s: Nafter = %f (%f %% of all), avg fake rate = %f"%(histos[i][1],histos[i][2],histos[i][2]/myTotalAfter,histos[i][2]/histos[i][3])
+
+if __name__ == "__main__":
+    parser = OptionParser(usage="Usage: %prog [options]")
+    parser.add_option("-d", dest="dirs", action="append", help="name of sample directory inside multicrab dir (multiple directories can be specified with multiple -d arguments)")
+    parser.add_option("-v", dest="variation", action="append", help="name of variation")
+    parser.add_option("-e", dest="era", action="append", help="name of era")
+    (opts, args) = parser.parse_args()
+
+    # Check that proper arguments were given
+    mystatus = True
+    if opts.dirs == None:
+        print "Missing source for sample directories!\n"
+        mystatus = False
+    if opts.era == None:
+        print "Missing specification for era!\n"
+        mystatus = False
+    if not mystatus:
+        parser.print_help()
+        sys.exit()
+
+    # Arguments are ok, proceed to run
+    main(opts)
+
