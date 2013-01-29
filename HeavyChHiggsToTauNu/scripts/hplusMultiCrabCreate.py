@@ -53,8 +53,6 @@ def main(opts):
         print "Did not find CMSSW python configuration file"
         return 1
 
-    # Check crab environment
-    multicrab.checkCrabInPath()
     dirname = multicrab.createTaskDir(prefix=opts.prefix)
 
     shutil.copy(mc_conf_file, os.path.join(dirname, "multicrab.cfg"))
@@ -65,6 +63,16 @@ def main(opts):
         shutil.copy(f, dirname)
 
     print "Copied %s to %s" % (", ".join(flist), dirname)
+    if not opts.create:
+        print
+        print "Now (since you explicitly asked with --noCreate), you have to create the crab tasks yourself, e.g."
+        print "cd %s; multicrab -create" % dirname
+        print "Then you can submit them e.g. by multicrab -submit"
+        return 0
+
+    # Check crab environment
+    multicrab.checkCrabInPath()
+
     print "Creating multicrab task"
     print
     print "############################################################"
@@ -89,6 +97,8 @@ if __name__ == "__main__":
                       help="Multicrab configuration file (default: 'multicrab.cfg')")
     parser.add_option("--prefix", "-p", dest="prefix", type="string", default="multicrab",
                       help="Prefix for the multicrab task directory (default: 'multicrab')")
+    parser.add_option("--noCreate", dest="create", default=True, action="store_false",
+                      help="Don't run 'multicrab -create'")
 
     (opts, args) = parser.parse_args()
 
