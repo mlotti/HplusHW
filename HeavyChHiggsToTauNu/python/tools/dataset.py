@@ -1456,6 +1456,7 @@ class Dataset:
     def deepCopy(self):
         d = Dataset(self.name, self.file.GetName(), self._unweightedCounterDir, self._weightedCounters, self._analysisBaseName, self._dataEra, self._doEraReplace)
         d.info.update(self.info)
+        d.nAllEvents = self.nAllEvents
         return d
 
     ## Get ROOT histogram (or actually any object from the analysis directory)
@@ -1613,7 +1614,7 @@ class Dataset:
     def getNormFactor(self):
         nAllEvents = self.getNAllEvents()
         if nAllEvents == 0:
-            raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateAllEventsToPUWeighted() has not been called." % self.name)
+            raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateNAllEventsToPUWeighted() has not been called." % self.name)
 
         return self.getCrossSection() / nAllEvents
 

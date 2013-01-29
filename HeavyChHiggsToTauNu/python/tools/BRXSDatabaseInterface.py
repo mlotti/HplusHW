@@ -274,7 +274,118 @@ class BRXSDatabaseInterface:
         retGraph.SetLineWidth(1)
         retGraph.SetLineStyle(3)
         return retGraph
-    
+
+    def mhLimit(self,xVariableName,selection,mhMeasurement):
+        lower_y0,lower_x0 = self.getLimits("tanb",xVariableName,selection+"&&tanb>10",self.lowerLimit(mhMeasurement))
+        upper_y0,upper_x0 = self.getLimits("tanb",xVariableName,selection+"&&tanb>10",self.upperLimit(mhMeasurement))
+
+        lower_x,lower_y = self.getLimits(xVariableName,"tanb",selection,self.lowerLimit(mhMeasurement))
+        upper_x,upper_y = self.getLimits(xVariableName,"tanb",selection,self.upperLimit(mhMeasurement))
+
+        x = []
+        y = []
+        for i in range(0,len(lower_x0)):
+            j = len(lower_x0) -1 -i
+            x.append(lower_x0[j])
+            y.append(lower_y0[j])
+        
+        for i in range(0,len(lower_x)):
+            if lower_x[i] > lower_x0[0]:
+                x.append(lower_x[i])
+                y.append(lower_y[i])
+
+        for i in range(0,len(upper_x)):
+            j = len(upper_x) -1 -i
+            if upper_x[j] > upper_x0[0]:
+                x.append(upper_x[j])
+                y.append(upper_y[j])
+        for i in range(0,len(upper_x0)):
+            x.append(upper_x0[i])
+            y.append(upper_y0[i])
+
+        if len(x) == 0:
+            return None
+        #for i in range(0,len(x)):
+        #    print "m,tanb",x[i],y[i]
+        
+        retGraph = ROOT.TGraph(len(x),array('d',x,),array('d',y))
+        retGraph.SetName("mhLimit")
+        retGraph.SetLineWidth(1)
+        retGraph.SetLineStyle(7)
+        retGraph.SetFillColor(ROOT.TColor.GetColor("#ffffcc"))
+        return retGraph
+
+    def getLimits(self,xVariableName,yVariableName,selection,limit):
+
+        xvalues = self.getValues(xVariableName,selection)
+
+        limits_x = []
+        limits_y = []
+
+        for x in xvalues:
+            theSelection = selection+"&&"+self.floatSelection(xVariableName+"==%s"%x)
+            ymin = self.getMinimum("mh",theSelection)
+            if limit < ymin:
+                continue
+            ymax = self.getMaximum("mh",theSelection)
+            if limit > ymax:
+                continue
+            mh_vals  = self.getValues("mh",theSelection,-1,sort=False)
+            y_vals = self.getValues(yVariableName,theSelection,-1,sort=False)
+
+            ys,mh = self.sort(y_vals,mh_vals)
+
+            y = 0
+            for i in range(len(mh)):
+                if self.isEqual(mh[i],limit,0.00001):
+                    y = ys[i]
+                    break
+                if i > 0 and mh[i] > limit:
+                    y = self.linearFunction(limit,mh[i-1],ys[i-1],mh[i],ys[i])
+                    break
+
+            limits_x.append(x)
+            limits_y.append(y)
+            #print "check limit,x,y",limit,x,y
+        return limits_x,limits_y
+
+    def sort(self,x0,y0):
+        # sorting by x
+        x = x0
+        y = y0
+        for i in range(0,len(x)-1):
+            for j in range(i+1,len(x)):
+                if x[i] > x[j]:
+                    x = self.swap(x,i,j)
+                    y = self.swap(y,i,j)
+        return x,y
+
+    def swap(self,x,i,j):
+        tmp = x[i]
+        x[i] = x[j]
+        x[j] = tmp
+        return x
+        
+    def lowerLimit(self,mhMeasurement):
+        value,error = self.getmh(mhMeasurement)
+        return value - error
+
+    def upperLimit(self,mhMeasurement):
+        value,error = self.getmh(mhMeasurement)
+        return value + error
+
+    def getmh(self,mhMeasurement):
+        value  =-1
+        error1 = 0
+        error2 = 0
+        mh_re = re.compile("(?P<value>\S+)\+-(?P<error1>\S+)\+-(?P<error2>\S+)")
+        match = mh_re.search(mhMeasurement)
+        if match:
+            value  = float(match.group("value"))
+            error1 = float(match.group("error1"))
+            error2 = float(match.group("error2"))
+        return value,error1+error2 # errors to be added linearly
+                                                                                                                            
     def clean(self,graph):
         graph = graph.Clone()
 
@@ -351,7 +462,7 @@ class BRXSDatabaseInterface:
             return (abs((double1 - double2)/double2) < epsilon)
         return True
     
-    def getValues(self,variable,selection,roundValues=0):
+    def getValues(self,variable,selection,roundValues=0,sort=True):
         if not self.selection == "" and not selection == "":
             selection = self.selection+"&&"+selection
         values = []
@@ -364,9 +475,11 @@ class BRXSDatabaseInterface:
                 value = round(value,roundValues)
             if not value in values:
                 values.append(value)
-        return sorted(values)
+        if sort:
+            return sorted(values)
+        return values
         """
-        values = []
+        Values = []
         nev = self.tree.GetEntries()
         for i in range(nev):
             self.tree.GetEvent(i)
@@ -427,7 +540,7 @@ class BRXSDatabaseInterface:
 
         y1 = self.getMinimumTanb(yvariable,selection+"&&"+xvariable+"==%s"%x1)
         y2 = self.getMinimumTanb(yvariable,selection+"&&"+xvariable+"==%s"%x2)
-
+#        print "check getMinTanbInterpolation",x1,y1,x2,y2
         return self.linearFunction(xvalue,x1,y1,x2,y2)
 
     def linearFunction(self,x,x1,y1,x2,y2):
@@ -586,6 +699,8 @@ def test():
 #	db.Print()
 	db.setSelection("mu==200&&Xt==2000&&m2==200")
 
+        db.mhLimit("mHp","mu==200&&Xt==2000&&m2==200","125.9+-0.6+-0.2")
+        """
         x = array('d',[100.0,110,120.0,140.0,150.0,155.0,160.0,160.0,155.0,150.0,140.0,120.0,100.0])
         y = array('d',[7.4,7.4,5.93285611233,4.08070975404,2.74869717846,1.0,1.0,1.0,1.0,1.0,1.7449304635,2.63037522267,3.28961963754])
         graph1 = ROOT.TGraph(len(x),x,y)
@@ -599,6 +714,7 @@ def test():
 #        print "merged"
 #        for i in range(0,graph.GetN()):
 #            print i,graph.GetX()[i],graph.GetY()[i]
+        """
         """
 	print "Float selection",db.selection,db.floatSelection(db.selection)
         print "Min tanb",db.getMinimumTanb("BR_tHpb","mHp==150")
