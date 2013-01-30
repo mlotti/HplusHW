@@ -42,6 +42,8 @@ namespace HPlus {
       ~Data();
       /// Returns true, if the selected tau has passed all selections
       bool passedEvent() const { return fPassedEvent; }
+      /// Returns list of all tau candidates prior to any cuts
+      const edm::PtrVector<pat::Tau>& getAllTauObjects() const { return fTauSelection->fAllTauCandidates; }
       /// Returns list of selected taus (i.e. taus after tau candidate selection or after full tau ID); Note: list can be empty if no tau was selected
       const edm::PtrVector<pat::Tau>& getSelectedTaus() const;
       /// Returns selected tau in the event (i.e. tau after tau candidate selection or after full tau ID); Note: list can be empty if no tau was selected
@@ -209,6 +211,7 @@ namespace HPlus {
     WrappedTH2 *hGenuineTauEtaPhiAfterNProngsAndDeadVeto;
 
     // Selected tau
+    edm::PtrVector<pat::Tau> fAllTauCandidates;
     edm::PtrVector<pat::Tau> fSelectedTauCandidates;
     edm::PtrVector<pat::Tau> fSelectedTaus;
   
