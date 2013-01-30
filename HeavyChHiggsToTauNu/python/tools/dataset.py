@@ -1525,6 +1525,9 @@ class Dataset:
     ## Get the path of the multicrab directory where this dataset originates
     def getBaseDirectory(self):
         return self.basedir
+
+    def formatDatasetTree(self, indent):
+        return '%sDataset("%s", "%s", ...),\n' % (indent, self.getName(), self.file.GetName())
         
     ## \var name
     # Name of the dataset
@@ -1704,6 +1707,13 @@ class DatasetMerged:
             if content != d.getDirectoryContent(directory, predicate):
                 raise Exception("Error: merged datasets have different contents in directory '%s'" % directory)
         return content
+
+    def formatDatasetTree(self, indent):
+        ret = '%sDatasetMerged("%s", [\n' % (indent, self.getName())
+        for dataset in self.datasets:
+            ret += dataset.formatDatasetTree(indent+"  ")
+        ret += "%s]),\n" % indent
+        return ret
 
     ## \var name
     # Name of the merged dataset
@@ -2107,6 +2117,16 @@ class DatasetManager:
     ## Print dataset information.
     def printInfo(self):
         print self.formatInfo()
+
+    def formatDatasetTree(self):
+        ret = "DatasetManager.datasets = [\n"
+        for dataset in self.datasets:
+            ret += dataset.formatDatasetTree(indent="  ")
+        ret += "]"
+        return ret
+
+    def printDatasetTree(self):
+        print self.formatDatasetTree()
 
     ## \var datasets
     # List of dataset.Dataset (or dataset.DatasetMerged) objects to manage
