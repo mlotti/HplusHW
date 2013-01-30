@@ -62,16 +62,16 @@ namespace HPlus {
     if (tau->signalPFChargedHadrCands().size() == 1) {
       if (tau->decayMode() == reco::PFTauDecayMode::tauDecay1ChargedPion0PiZero)
         hRtauOneProngZeroPiZero->Fill(myRtauValue);
-      if (tau->decayMode() == reco::PFTauDecayMode::tauDecay1ChargedPion1PiZero)
+      else if (tau->decayMode() == reco::PFTauDecayMode::tauDecay1ChargedPion1PiZero)
         hRtauOneProngOnePiZero->Fill(myRtauValue);
-      if (tau->decayMode() == reco::PFTauDecayMode::tauDecay1ChargedPion2PiZero)
+      else if (tau->decayMode() == reco::PFTauDecayMode::tauDecay1ChargedPion2PiZero)
         hRtauOneProngTwoPiZero->Fill(myRtauValue);
       else 
         hRtauOneProngOther->Fill(myRtauValue);
     } else if (tau->signalPFChargedHadrCands().size() == 3) {
       if (tau->decayMode() == reco::PFTauDecayMode::tauDecay3ChargedPion0PiZero)
         hRtauThreeProngZeroPiZero->Fill(myRtauValue);
-      if (tau->decayMode() == reco::PFTauDecayMode::tauDecay3ChargedPion1PiZero)
+      else if (tau->decayMode() == reco::PFTauDecayMode::tauDecay3ChargedPion1PiZero)
         hRtauThreeProngOnePiZero->Fill(myRtauValue);
       else 
         hRtauThreeProngOther->Fill(myRtauValue);
