@@ -290,12 +290,14 @@ namespace HPlus {
     WrappedTH1 *hTauVsJetDeltaRLightFlavor;
 
     WrappedTH1 *hTauVsJetTauPtbBefore;
+    WrappedTH1 *hTauVsJetTauPtbleptonicBefore;
     WrappedTH1 *hTauVsJetTauPtcBefore;
     WrappedTH1 *hTauVsJetTauPtudsBefore;
     WrappedTH1 *hTauVsJetTauPtgBefore;
     WrappedTH1 *hTauVsJetTauPteBefore;
     WrappedTH1 *hTauVsJetTauPtmuBefore;
     WrappedTH1 *hTauVsJetTauPtbAfter;
+    WrappedTH1 *hTauVsJetTauPtbleptonicAfter;
     WrappedTH1 *hTauVsJetTauPtcAfter;
     WrappedTH1 *hTauVsJetTauPtudsAfter;
     WrappedTH1 *hTauVsJetTauPtgAfter;
