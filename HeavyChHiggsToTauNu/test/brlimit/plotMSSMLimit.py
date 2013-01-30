@@ -94,6 +94,7 @@ def main():
 #        graphs[key] = db.graphToSharpTanbExclusion(graphs[key],xVariable,selection)
 
     graphs["mintanb"] = db.minimumTanbGraph("mHp",selection)
+    graphs["Allowed"] = db.mhLimit("mHp",selection,"125.9+-0.6+-0.2")
     
     doPlot("limitsTanb_mh", graphs, limits, limit.mHplus())
 
@@ -175,17 +176,15 @@ def doPlot(name, graphs, limits, xlabel):
     excluded.SetLineWidth(0)
     excluded.SetLineColor(ROOT.kWhite)
 
-    from MhExclusion import MhExclusion
-    mhlimit = MhExclusion("benchmark_002.out")
-    allowedByMh = ROOT.TGraph(mhlimit.getAllowedRegion("125.9+-0.6+-0.2"))
-    
+
     plot = plots.PlotBase([
             histograms.HistoGraph(graphs["obs"], "Observed", drawStyle="PL", legendStyle="lp"),
             histograms.HistoGraph(graphs["obs_th_plus"], "ObservedPlus", drawStyle="L", legendStyle="l"),
             histograms.HistoGraph(graphs["obs_th_minus"], "ObservedMinus", drawStyle="L"),
             histograms.HistoGraph(excluded, "Excluded", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(graphs["exp"], "Expected", drawStyle="L"),
-            histograms.HistoGraph(allowedByMh, "Allowed", drawStyle="F", legendStyle="f"),
+            histograms.HistoGraph(graphs["Allowed"], "m_{h} = 125.9#pm0.8 GeV", drawStyle="F", legendStyle="f"),
+            histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
             histograms.HistoGraph(graphs["mintanb"], "MinTanb", drawStyle="L"),
             histograms.HistoGraph(graphs["exp1"], "Expected1", drawStyle="F", legendStyle="fl"),
             histograms.HistoGraph(graphs["exp2"], "Expected2", drawStyle="F", legendStyle="fl"),
@@ -196,6 +195,7 @@ def doPlot(name, graphs, limits, xlabel):
             "ObservedMinus": None,
             "Expected": None,
             "MinTanb": None,
+            "AllowedCopy": None,
             "Expected1": "Expected median #pm 1#sigma",
             "Expected2": "Expected median #pm 2#sigma"
             })
@@ -211,7 +211,8 @@ def doPlot(name, graphs, limits, xlabel):
 
 #    histograms.addCmsPreliminaryText()
     histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=limits.getLuminosity())
+#    histograms.addLuminosityText(x=None, y=None, lumi=limits.getLuminosity())
+    histograms.addLuminosityText(x=None, y=None, lumi="2.3-4.9")
 
     size = 20
     x = 0.2
@@ -226,8 +227,8 @@ def doPlot(name, graphs, limits, xlabel):
     ROOT.LHCHIGGS_LABEL(0.97,0.72,1)
     histograms.addText(x, 0.55, "FeynHiggs 2.9.4", size=size)
     histograms.addText(x, 0.48, "Derived from", size=size)
-    histograms.addText(x, 0.43, "CMS HIG-11-019", size=size)
-    histograms.addText(x, 0.38, "JHEP07(2012)143", size=size)
+    histograms.addText(x, 0.43, "CMS HIG-12-052", size=size)
+#    histograms.addText(x, 0.38, "JHEP07(2012)143", size=size)
                 
     plot.save()
 

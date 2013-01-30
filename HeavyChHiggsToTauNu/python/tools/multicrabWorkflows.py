@@ -408,6 +408,7 @@ multicrabWorkflowsPileupNtuple.addNtuple_53X(datasets)
 
 # Add pattuple definitions
 multicrabWorkflowsPattuple.addPattuple_v44_4(datasets)
+multicrabWorkflowsPattuple.addPattuple_v44_4_1(datasets)
 
 multicrabWorkflowsPattuple.addPattuple_v53_1_test1(datasets)
 multicrabWorkflowsPattuple.addPattuple_v53_1(datasets)
