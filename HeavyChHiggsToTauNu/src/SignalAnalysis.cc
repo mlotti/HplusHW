@@ -265,18 +265,20 @@ namespace HPlus {
     hTauVsJetDeltaPtLightFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauVsJetDeltaPtuds", "uds: #Deltap_{T}(#tau,jet), GeV/c", 200, -500, 500);
     hTauVsJetDeltaRLightFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauVsJetDeltaRuds", "uds: #DeltaR(#tau,jet), GeV/c", 100, 0, .5);
 
-    hTauVsJetTauPtbBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtbBefore", "b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtcBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtcBefore", "c#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtudsBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtudsBefore", "uds#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtgBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtgBefore", "g#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPteBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePteBefore", "e#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtmuBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtmuBefore", "#mu#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtbAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtbAfter", "b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtcAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtcAfter", "c#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtudsAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtudsAfter", "uds#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtgAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtgAfter", "g#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPteAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePteAfter", "e#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtmuAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtmuAfter", "#mu#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtbBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtbBefore", "TauFakeRatePtbBefore;b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtbleptonicBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtbleptonicBefore", "TauFakeRatePtbleptonicBefore;leptonic b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtcBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtcBefore", "TauFakeRatePtcBefore;c#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtudsBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtudsBefore", "TauFakeRatePtudsBefore;uds#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtgBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtgBefore", "TauFakeRatePtgBefore;g#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPteBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePteBefore", "TauFakeRatePteBefore;e#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtmuBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtmuBefore", "TauFakeRatePtmuBefore;#mu#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtbAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtbAfter", "TauFakeRatePtbAfter;b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtbleptonicAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtbleptonicAfter", "TauFakeRatePtbleptonicAfter;leptonic b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtcAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtcAfter", "TauFakeRatePtcAfter;c#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtudsAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtudsAfter", "TauFakeRatePtudsAfter;uds#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtgAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtgAfter", "TauFakeRatePtgAfter;g#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPteAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePteAfter", "TauFakeRatePteAfter;e#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtmuAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtmuAfter", "TauFakeRatePtmuAfter;#mu#rightarrow#tau, #tau p_{T}", 100, 0, 500);
 
     // MET histograms
     hGenMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "genMET", "genMET", 200, 0., 400.);
@@ -433,7 +435,7 @@ namespace HPlus {
       producer->produces<std::vector<pat::Tau> >("selectedVetoTaus");
       producer->produces<std::vector<pat::Jet> >("selectedJets");
       producer->produces<std::vector<pat::Jet> >("selectedBJets");
-      producer->produces<std::vector<pat::Electron> >("selectedVetoElectrons");
+      producer->produces<std::vector<pat::Electron> >("selectedVetoElectronsBeforePtAndEtaCuts");
       producer->produces<std::vector<pat::Muon> >("selectedVetoMuonsBeforeIsolationAndPtAndEtaCuts");
       producer->produces<std::vector<pat::Muon> >("selectedVetoMuonsBeforePtAndEtaCuts");
     }
@@ -626,8 +628,8 @@ namespace HPlus {
     fillEWKFakeTausCounters(myTauMatch, kSignalOrderElectronVeto, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Electron> > saveElectrons(new std::vector<pat::Electron>());
-      copyPtrToVector(electronVetoData.getSelectedElectrons(), *saveElectrons);
-      iEvent.put(saveElectrons, "selectedVetoElectrons");
+      copyPtrToVector(electronVetoData.getSelectedElectronsBeforePtAndEtaCuts(), *saveElectrons);
+      iEvent.put(saveElectrons, "selectedVetoElectronsBeforePtAndEtaCuts");
     }
     /*    
     bool electronTauMatch = false;
@@ -1562,7 +1564,13 @@ namespace HPlus {
       if (!fFakeTauIdentifier.isFakeTau(myTauMatch)) continue;
       // Fill jet flavors
       int myFlavor = std::abs(jetData.getAllJets()[mySelectedIndex]->partonFlavour());
-      if (myFlavor >= 1 && myFlavor <= 3)
+      if (fFakeTauIdentifier.isElectronToTau(myTauMatch)) {
+        hTauVsJetTauPteBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+        if (myFlavor == 5) hTauVsJetTauPtbleptonicBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+      } else if (fFakeTauIdentifier.isMuonToTau(myTauMatch)) {
+        hTauVsJetTauPtmuBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+        if (myFlavor == 5) hTauVsJetTauPtbleptonicBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+      } else if (myFlavor >= 1 && myFlavor <= 3)
         hTauVsJetTauPtudsBefore->Fill(tauData.getAllTauObjects()[i]->pt());
       else if (myFlavor == 4)
         hTauVsJetTauPtcBefore->Fill(tauData.getAllTauObjects()[i]->pt());
@@ -1570,10 +1578,6 @@ namespace HPlus {
         hTauVsJetTauPtbBefore->Fill(tauData.getAllTauObjects()[i]->pt());
       else if (myFlavor == 21)
         hTauVsJetTauPtgBefore->Fill(tauData.getAllTauObjects()[i]->pt());
-      if (fFakeTauIdentifier.isElectronToTau(myTauMatch))
-        hTauVsJetTauPteBefore->Fill(tauData.getAllTauObjects()[i]->pt());
-      else if (fFakeTauIdentifier.isMuonToTau(myTauMatch))
-        hTauVsJetTauPtmuBefore->Fill(tauData.getAllTauObjects()[i]->pt());
     }
     // Require tau ID
     if(!tauData.passedEvent()) return; // Require at least one tau
@@ -1596,7 +1600,13 @@ namespace HPlus {
       if (!fFakeTauIdentifier.isFakeTau(myTauMatch)) continue;
       // Fill jet flavors
       int myFlavor = std::abs(jetData.getAllJets()[mySelectedIndex]->partonFlavour());
-      if (myFlavor >= 1 && myFlavor <= 3)
+      if (fFakeTauIdentifier.isElectronToTau(myTauMatch)) {
+        hTauVsJetTauPteAfter->Fill(tauData.getSelectedTaus()[i]->pt());
+        if (myFlavor == 5) hTauVsJetTauPtbleptonicAfter->Fill(tauData.getAllTauObjects()[i]->pt());
+      } else if (fFakeTauIdentifier.isMuonToTau(myTauMatch)) {
+        hTauVsJetTauPtmuAfter->Fill(tauData.getSelectedTaus()[i]->pt());
+        if (myFlavor == 5) hTauVsJetTauPtbleptonicAfter->Fill(tauData.getAllTauObjects()[i]->pt());
+      } else if (myFlavor >= 1 && myFlavor <= 3)
         hTauVsJetTauPtudsAfter->Fill(tauData.getSelectedTaus()[i]->pt());
       else if (myFlavor == 4)
         hTauVsJetTauPtcAfter->Fill(tauData.getSelectedTaus()[i]->pt());
@@ -1604,10 +1614,6 @@ namespace HPlus {
         hTauVsJetTauPtbAfter->Fill(tauData.getSelectedTaus()[i]->pt());
       else if (myFlavor == 21)
         hTauVsJetTauPtgAfter->Fill(tauData.getSelectedTaus()[i]->pt());
-      if (fFakeTauIdentifier.isElectronToTau(myTauMatch))
-        hTauVsJetTauPteAfter->Fill(tauData.getSelectedTaus()[i]->pt());
-      else if (fFakeTauIdentifier.isMuonToTau(myTauMatch))
-        hTauVsJetTauPtmuAfter->Fill(tauData.getSelectedTaus()[i]->pt());
     }
   }
   

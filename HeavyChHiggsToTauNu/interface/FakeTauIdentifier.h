@@ -54,8 +54,8 @@ namespace HPlus {
 
     MCSelectedTauMatchType matchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau);
     MCSelectedTauMatchType silentMatchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau);
-    bool isFakeTau(MCSelectedTauMatchType type) { return !(type == kkTauToTau || type == kkTauToTauAndTauOutsideAcceptance); }
-    bool isGenuineTau(MCSelectedTauMatchType type) { return (type == kkTauToTau || type == kkTauToTauAndTauOutsideAcceptance); }
+    bool isFakeTau(MCSelectedTauMatchType type) { return !isGenuineTau(type); }
+    bool isGenuineTau(MCSelectedTauMatchType type) { return (type == kkTauToTau || type == kkTauToTauAndTauOutsideAcceptance || isGenuineOneProngTau(type)); }
     bool isGenuineOneProngTau(MCSelectedTauMatchType type) { return (type == kkOneProngTauToTau || type == kkOneProngTauToTauAndTauOutsideAcceptance); }
     
     double getFakeTauScaleFactor(MCSelectedTauMatchType matchType, double eta);

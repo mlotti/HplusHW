@@ -87,6 +87,7 @@ namespace HPlus {
 
     // Histograms
     WrappedTH1 *hMet;
+    WrappedTH1 *hMetPhi;
     WrappedTH1 *hMetSignif;
     WrappedTH1 *hMetSumEt;
     WrappedTH1 *hMetDivSumEt;
