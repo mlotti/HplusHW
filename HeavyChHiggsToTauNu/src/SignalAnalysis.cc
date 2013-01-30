@@ -414,7 +414,7 @@ namespace HPlus {
       producer->produces<std::vector<pat::Tau> >("selectedVetoTaus");
       producer->produces<std::vector<pat::Jet> >("selectedJets");
       producer->produces<std::vector<pat::Jet> >("selectedBJets");
-      producer->produces<std::vector<pat::Electron> >("selectedVetoElectrons");
+      producer->produces<std::vector<pat::Electron> >("selectedVetoElectronsBeforePtAndEtaCuts");
       producer->produces<std::vector<pat::Muon> >("selectedVetoMuonsBeforeIsolationAndPtAndEtaCuts");
       producer->produces<std::vector<pat::Muon> >("selectedVetoMuonsBeforePtAndEtaCuts");
     }
@@ -602,8 +602,8 @@ namespace HPlus {
     fillEWKFakeTausCounters(myTauMatch, kSignalOrderElectronVeto, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Electron> > saveElectrons(new std::vector<pat::Electron>());
-      copyPtrToVector(electronVetoData.getSelectedElectrons(), *saveElectrons);
-      iEvent.put(saveElectrons, "selectedVetoElectrons");
+      copyPtrToVector(electronVetoData.getSelectedElectronsBeforePtAndEtaCuts(), *saveElectrons);
+      iEvent.put(saveElectrons, "selectedVetoElectronsBeforePtAndEtaCuts");
     }
     /*    
     bool electronTauMatch = false;
