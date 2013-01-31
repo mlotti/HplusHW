@@ -238,6 +238,20 @@ datasets.splitDataByRuns("MultiJet_198941-203742_2012C_Prompt", [
         (202792, 203742), # 1317502 events, 152 files
         ])
 
+# BJetPlusX PD, QuadJet trigger for signal
+datasets.extend([
+    # Run212B
+    DataDataset("BJetPlusX_%s_2012B_Jul13",     reco="13Jul2012", runs=(193834, 196531), aod="/BJetPlusX/Run2012B-13Jul2012-v1/AOD"), # 27868808 events, 2215 files
+    # Run212C
+    DataDataset("BJetPlusX_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/BJetPlusX/Run2012C-24Aug2012-v2/AOD"), # 2650602 events, 276 files
+    DataDataset("BJetPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/BJetPlusX/Run2012C-PromptReco-v2/AOD"), # 33847953 events, 3420 files
+    # Run2012D
+    DataDataset("BJetPlusX_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/BJetPlusX/Run2012D-PromptReco-v1/AOD"), # 40966073 events, 4467 files
+])
+datasets.splitDataByRuns("BJetPlusX_193834-196531_2012B_Jul13", [
+        (193834, 194225), # This has both BTagCSV and BTagIP triggers, 4540690 events, 322 files
+        (194270, 196531), # This has only BTagIP trigger, 24497173 events, 1987 files
+        ])
 
 # TauPlusX PD, IsoMu+MET, IsoMu+MET+Tau triggers for tau trigger efficiency measurement
 datasets.extend([
