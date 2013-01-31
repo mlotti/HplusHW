@@ -404,7 +404,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         "TTToHplusBWB_M160_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
 
         "TTToHplusBHminusB_M80_Summer12":        TaskDefMC(njobsIn=20, njobsOut=1),
-#        "TTToHplusBHminusB_M90_Summer12":        TaskDefMC(njobsIn=20, njobsOut=1),
+#        "TTToHplusBHminusB_M90_Summer12":        TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
         "TTToHplusBHminusB_M100_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
         "TTToHplusBHminusB_M120_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
         "TTToHplusBHminusB_M140_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
@@ -413,7 +413,6 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         "TTToHplusBHminusB_M160_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
 
         "TTToHplusBHminusB_M80_ext_Summer12":    TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
-#        "TTToHplusBHminusB_M90_ext_Summer12":    TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
         "TTToHplusBHminusB_M100_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
         "TTToHplusBHminusB_M120_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
         "TTToHplusBHminusB_M140_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
@@ -1048,7 +1047,6 @@ def addPattuple_v53_2(datasets):
         "TTToHplusBHminusB_M160_Summer12":        TaskDef(""),
 
         "TTToHplusBHminusB_M80_ext_Summer12":     TaskDef(""),
-#        "TTToHplusBHminusB_M90_ext_Summer12":     TaskDef(""),
         "TTToHplusBHminusB_M100_ext_Summer12":    TaskDef(""),
         "TTToHplusBHminusB_M120_ext_Summer12":    TaskDef(""),
         "TTToHplusBHminusB_M140_ext_Summer12":    TaskDef(""),
@@ -1188,7 +1186,6 @@ def addPattuple_vNEXT_SKELETON_53X(datasets):
         "TTToHplusBHminusB_M160_Summer12":        TaskDef(""),
 
         "TTToHplusBHminusB_M80_ext_Summer12":     TaskDef(""),
-        "TTToHplusBHminusB_M90_ext_Summer12":     TaskDef(""),
         "TTToHplusBHminusB_M100_ext_Summer12":    TaskDef(""),
         "TTToHplusBHminusB_M120_ext_Summer12":    TaskDef(""),
         "TTToHplusBHminusB_M140_ext_Summer12":    TaskDef(""),
