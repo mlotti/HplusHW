@@ -275,20 +275,20 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
             "MultiJet_190782-190949_2012A_Aug06": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v3"],
             "MultiJet_191043-193621_2012A_Jul13": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v3",  # 191043-191411
                                                    "HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4"], # 191691-193621
-            "MultiJet_193834-194225_2012B_Jul13": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4"],
+            "BJetPlusX_193834-194225_2012B_Jul13": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4"],
         }
     if quadJetBTagTriggers is None:
         quadJetBTagTriggers = {
             "MultiJet_190456-190738_2012A_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v2"],
             "MultiJet_190782-190949_2012A_Aug06": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
             "MultiJet_191043-193621_2012A_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
-            "MultiJet_193834-194225_2012B_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
-            "MultiJet_194270-196531_2012B_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
-            "MultiJet_198022-198523_2012C_Aug24": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v4"],
-            "MultiJet_198941-200601_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v4",  # 198941-199608
-                                                    "HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"], # 199698-200601
-            "MultiJet_200961-202504_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"],
-            "MultiJet_202792-203742_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"],
+            "BJetPlusX_193834-194225_2012B_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+            "BJetPlusX_194270-196531_2012B_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+            "BJetPlusX_198022-198523_2012C_Aug24": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v4"],
+            "BJetPlusX_198941-200601_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v4",  # 198941-199608
+                                                     "HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"], # 199698-200601
+            "BJetPlusX_200961-202504_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"],
+            "BJetPlusX_202792-203742_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"],
         }
     if quadJetTriggers is None:
         quadJetTriggers = {
@@ -349,6 +349,16 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         "MultiJet_198941-200601_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=35),
         "MultiJet_200961-202504_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=30),
         "MultiJet_202792-203742_2012C_Prompt": TaskDef(njobsIn= 170, njobsOut= 3),
+
+        ## BJetsPlusX
+        # njobsOut is just a guess
+        "BJetPlusX_193834-194225_2012B_Jul13":  TaskDef(njobsIn= 600, njobsOut= 6), # FIXME: njobsIn
+        "BJetPlusX_194270-196531_2012B_Jul13":  TaskDef(njobsIn=2200, njobsOut=40), # FIXME: njobsIn
+        "BJetPlusX_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 250, njobsOut= 5), # FIXME: njobsIn
+        # FIXME: the following three could be combined in the subsequent pattuple processings
+        "BJetPlusX_198941-200601_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=35), # FIXME: njobsIn
+        "BJetPlusX_200961-202504_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=30), # FIXME: njobsIn
+        "BJetPlusX_202792-203742_2012C_Prompt": TaskDef(njobsIn= 170, njobsOut= 3), # FIXME: njobsIn
 
         # MC, triggered with mcTrigger
         "TTToHplusBWB_M80_Summer12":        TaskDefMC(njobsIn=25, njobsOut=1),
@@ -463,7 +473,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
 
     # Set the multijet triggers on data
     for datasetName, taskDef in defaultDefinitions.iteritems():
-        if datasetName.split("_")[0] != "MultiJet":
+        if datasetName.split("_")[0] not in ["MultiJet", "BJetPlusX"]:
             continue
 
         triggers = []
@@ -511,7 +521,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
                 pd = datasetName.split("_")[0]
                 if pd == "Tau":
                     dataset.addWorkflow(Workflow("analysis_taumet_"+version, triggerOR=wf.triggerOR, **commonArgs))
-                elif pd == "MultiJet":
+                elif pd in ["MultiJet", "BJetPlusX"]:
                     if datasetName in quadJetTriggers:
                         dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=quadJetTriggers[datasetName], **commonArgs))
                     if datasetName in quadJetBTagTriggers:
