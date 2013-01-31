@@ -246,6 +246,7 @@ datasets.extend([
     # Run212C
     DataDataset("BJetPlusX_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/BJetPlusX/Run2012C-24Aug2012-v2/AOD"), # 2650602 events, 276 files
     DataDataset("BJetPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/BJetPlusX/Run2012C-PromptReco-v2/AOD"), # 33847953 events, 3420 files
+    DataDataset("BJetPlusX_%s_2012C_Dec11",     reco="11Dec2012", runs=(201191, 201191), aod="/BJetPlusX/Run2012C-EcalRecover_11Dec2012-v1/AOD"), # 668183 eventsm, 76 files
     # Run2012D
     DataDataset("BJetPlusX_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/BJetPlusX/Run2012D-PromptReco-v1/AOD"), # 40966073 events, 4467 files
 ])
