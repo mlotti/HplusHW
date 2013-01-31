@@ -1971,6 +1971,13 @@ class DatasetAddedMC(DatasetMerged):
 
         return self.getCrossSection() / nAllEvents
 
+    def formatDatasetTree(self, indent):
+        ret = '%sDatasetAddedMC("%s", [\n' % (indent, self.getName())
+        for dataset in self.datasets:
+            ret += dataset.formatDatasetTree(indent+"  ")
+        ret += "%s]),\n" % indent
+        return ret
+
 ## Collection of Dataset objects which are managed together.
 # 
 # Holds both an ordered list of Dataset objects, and a name->object
