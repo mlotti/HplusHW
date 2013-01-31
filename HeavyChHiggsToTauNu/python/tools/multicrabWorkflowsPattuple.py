@@ -226,7 +226,7 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
 # to catch the commonalities such that the other addPattuple_v*()
 # functions would be as short as possible.
 def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
-                    quadPFJetBTagTriggers=None, quadJetBTagTriggers=None, quadJetTriggers=None):
+                    tauTriggers=None, quadPFJetBTagTriggers=None, quadJetBTagTriggers=None, quadJetTriggers=None):
     mcTriggerTauMET = "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"
     mcTriggerQuadJet = "HLT_QuadJet80_v2"
     mcTriggerQuadJetBTag = "HLT_QuadJet75_55_35_20_BTagIP_VBF_v3"
@@ -267,6 +267,20 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
     #                HLT_QuadJet75_55_38_20_BTagIP_VBF_v3: 440/5000 = 0.088000
     #                HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4: 537/5000 = 0.10740
     #                OR: 1222/5000 = 0.24440
+
+    if tauTriggers is None:
+        tauTriggers = {
+            "Tau_190456-190738_2012A_Jul13": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v2"],
+            "Tau_190782-190949_2012A_Aug06": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v3"],
+            "Tau_191043-193621_2012A_Jul13": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v3", # 191043-191411
+                                              "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v4"], # 191691-191491 (193621)
+            "Tau_193834-196531_2012B_Jul13": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"],
+            "Tau_198022-198523_2012C_Aug24": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7"],
+            "Tau_198941-200601_2012C_Prompt": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7",  # 198941-199608
+                                               "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9"],  # 199698-200161
+            "Tau_200961-202504_2012C_Prompt": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9"],
+            "Tau_202792-203742_2012C_Prompt": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"]
+        }
 
 
     if quadPFJetBTagTriggers is None:
@@ -320,22 +334,15 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
     # Goal is to have ~150kevents/job for analysis phase
     defaultDefinitions = {
         # njobsOut is just a guess
-        "Tau_190456-190738_2012A_Jul13":  TaskDef(njobsIn=  35, njobsOut=  1, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v2"]),
-        "Tau_190782-190949_2012A_Aug06":  TaskDef(njobsIn=  10, njobsOut=  1, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v3"]),
-        "Tau_191043-193621_2012A_Jul13":  TaskDef(njobsIn= 150, njobsOut=  3, triggerOR=[
-                                                      "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v3", # 191043-191411
-                                                      "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v4", # 191691-191491 (193621)
-                                                  ], triggerThrow=False),
-
-        "Tau_193834-196531_2012B_Jul13":  TaskDef(njobsIn=2000, njobsOut= 20, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"]),
-        "Tau_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 200, njobsOut=  2, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7"]),
+        "Tau_190456-190738_2012A_Jul13":  TaskDef(njobsIn=  35, njobsOut=  1),
+        "Tau_190782-190949_2012A_Aug06":  TaskDef(njobsIn=  10, njobsOut=  1),
+        "Tau_191043-193621_2012A_Jul13":  TaskDef(njobsIn= 150, njobsOut=  3),
+        "Tau_193834-196531_2012B_Jul13":  TaskDef(njobsIn=2000, njobsOut= 20),
+        "Tau_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 200, njobsOut=  2),
         # FIXME: the following three could be combined in the subsequent pattuple processings
-        "Tau_198941-200601_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 10, triggerOR=[
-                                                     "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7",  # 198941-199608
-                                                     "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9",  # 199698-200161
-                                                 ], triggerThrow=False),
-        "Tau_200961-202504_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 12, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9"]),
-        "Tau_202792-203742_2012C_Prompt": TaskDef(njobsIn= 150, njobsOut=  1, triggerOR=["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"]),
+        "Tau_198941-200601_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 10),
+        "Tau_200961-202504_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 12),
+        "Tau_202792-203742_2012C_Prompt": TaskDef(njobsIn= 150, njobsOut=  1),
 
         ## MultiJet
         # njobsOut is just a guess
@@ -473,18 +480,16 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
 
     # Set the multijet triggers on data
     for datasetName, taskDef in defaultDefinitions.iteritems():
-        if datasetName.split("_")[0] not in ["MultiJet", "BJetPlusX"]:
-            continue
-
         triggers = []
         hasOneRunRange = True
-        for triggerDict in [quadJetTriggers, quadPFJetBTagTriggers, quadJetBTagTriggers]:
+        for triggerDict in [tauTriggers, quadJetTriggers, quadPFJetBTagTriggers, quadJetBTagTriggers]:
             if datasetName in triggerDict:
                 trg = triggerDict[datasetName]
                 triggers.extend(trg)
                 if len(trg) > 1:
                     hasOneRunRange = False
-        taskDef.update(TaskDef(triggerOR=triggers, triggerThrow=hasOneRunRange))
+        if len(triggers) > 0:
+            taskDef.update(TaskDef(triggerOR=triggers, triggerThrow=hasOneRunRange))
 
     # Update the default definitions from the argument
     updateTaskDefinitions(defaultDefinitions, updateDefinitions)
@@ -518,18 +523,22 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
 
             if dataset.isData():
                 # For data, construct one analysis workflow per trigger type
-                pd = datasetName.split("_")[0]
-                if pd == "Tau":
-                    dataset.addWorkflow(Workflow("analysis_taumet_"+version, triggerOR=wf.triggerOR, **commonArgs))
-                elif pd in ["MultiJet", "BJetPlusX"]:
-                    if datasetName in quadJetTriggers:
-                        dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=quadJetTriggers[datasetName], **commonArgs))
-                    if datasetName in quadJetBTagTriggers:
-                        dataset.addWorkflow(Workflow("analysis_quadjetbtag_"+version, triggerOR=quadJetBTagTriggers[datasetName], **commonArgs))
-                    if datasetName in quadPFJetBTagTriggers:
-                        dataset.addWorkflow(Workflow("analysis_quadpfjetbtag_"+version, triggerOR=quadPFJetBTagTriggers[datasetName], **commonArgs))
-                else:
-                    raise Exception("Unsupported PD name %s" % pd)
+                found = False
+                if datasetName in tauTriggers:
+                    found = True
+                    dataset.addWorkflow(Workflow("analysis_taumet_"+version, triggerOR=tauTriggers[datasetName], **commonArgs))
+                if datasetName in quadJetTriggers:
+                    found = True
+                    dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=quadJetTriggers[datasetName], **commonArgs))
+                if datasetName in quadJetBTagTriggers:
+                    found = True
+                    dataset.addWorkflow(Workflow("analysis_quadjetbtag_"+version, triggerOR=quadJetBTagTriggers[datasetName], **commonArgs))
+                if datasetName in quadPFJetBTagTriggers:
+                    found = True
+                    dataset.addWorkflow(Workflow("analysis_quadpfjetbtag_"+version, triggerOR=quadPFJetBTagTriggers[datasetName], **commonArgs))
+
+                if not found:
+                    raise Exception("No trigger specified for dataset %s" % datasetName)
             else:
                 # For MC, also construct one analysis workflow per trigger type
                 dataset.addWorkflow(Workflow("analysis_taumet_"+version, triggerOR=[mcTriggerTauMET], **commonArgs))
