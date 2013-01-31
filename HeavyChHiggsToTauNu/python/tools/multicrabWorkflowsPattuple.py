@@ -885,7 +885,43 @@ def addPattuple_v53_1(datasets):
         "Tbar_s-channel_TuneZ2star_Summer12":     TaskDef("/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), # 5345 events, Mean 52.0 MB, min 1.6 MB, max 59.9 MB
         }
 
-    addPattuple_53X("v53_1", datasets, definitions)
+    quadPFJetBTagTriggers = {
+        "MultiJet_190456-190738_2012A_Jul13": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v2"],
+        "MultiJet_190782-190949_2012A_Aug06": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v3"],
+        "MultiJet_191043-193621_2012A_Jul13": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v3",  # 191043-191411
+                                               "HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4"], # 191691-193621
+        "MultiJet_193834-194225_2012B_Jul13": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4"],
+    }
+    quadJetBTagTriggers = {
+        "MultiJet_190456-190738_2012A_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v2"],
+        "MultiJet_190782-190949_2012A_Aug06": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+        "MultiJet_191043-193621_2012A_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+        "MultiJet_193834-194225_2012B_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+        "MultiJet_194270-196531_2012B_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+        "MultiJet_198022-198523_2012C_Aug24": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v4"],
+        "MultiJet_198941-200601_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v4",  # 198941-199608
+                                                "HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"], # 199698-200601
+        "MultiJet_200961-202504_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"],
+        "MultiJet_202792-203742_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"],
+    }
+    quadJetTriggers = {
+        "MultiJet_190456-190738_2012A_Jul13": ["HLT_QuadJet80_v1"],
+        "MultiJet_190782-190949_2012A_Aug06": ["HLT_QuadJet80_v2"],
+        "MultiJet_191043-193621_2012A_Jul13": ["HLT_QuadJet80_v2"],
+        "MultiJet_193834-194225_2012B_Jul13": ["HLT_QuadJet80_v2"],
+        "MultiJet_194270-196531_2012B_Jul13": ["HLT_QuadJet80_v2",  # 194270-196027
+                                               "HLT_QuadJet80_v3"], # 196046-196531
+        "MultiJet_198022-198523_2012C_Aug24": ["HLT_QuadJet80_v4"],
+        "MultiJet_198941-200601_2012C_Prompt": ["HLT_QuadJet80_v4",  # 198941-199608
+                                                "HLT_QuadJet80_v6"], # 199698-200601
+        "MultiJet_200961-202504_2012C_Prompt": ["HLT_QuadJet80_v6"],
+        "MultiJet_202792-203742_2012C_Prompt": ["HLT_QuadJet80_v6"],
+    }
+
+    addPattuple_53X("v53_1", datasets, definitions,
+                    quadPFJetBTagTriggers=quadPFJetBTagTriggers,
+                    quadJetBTagTriggers=quadJetBTagTriggers,
+                    quadJetTriggers=quadJetTriggers)
 
 
 def addPattuple_v53_1_1(datasets):
