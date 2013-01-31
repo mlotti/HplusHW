@@ -186,22 +186,27 @@ def addEnergyText(x=None, y=None, s=None):
 # \param unit  Unit of the integrated luminosity value (should be fb^-1)
 def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
     (x, y) = textDefaults.getValues("lumi", x, y)
-    lumiInFb = lumi/1000.
-    log = math.log10(lumiInFb)
-    ndigis = int(log)
-    format = "%.0f" # ndigis >= 1, 10 <= lumiInFb
-    if ndigis == 0: 
-        if log >= 0: # 1 <= lumiInFb < 10
-            format = "%.1f"
-        else: # 0.1 < lumiInFb < 1
-            format = "%.2f"
-    elif ndigis <= -1:
-        format = ".%df" % (abs(ndigis)+1)
-        format = "%"+format
-    format += " %s"
-    format = "L="+format
+    lumiStr = "L="
+    if isinstance(lumi, basestring):
+        lumiStr += lumi
+    else:
+        lumiInFb = lumi/1000.
+        log = math.log10(lumiInFb)
+        ndigis = int(log)
+        format = "%.0f" # ndigis >= 1, 10 <= lumiInFb
+        if ndigis == 0: 
+            if log >= 0: # 1 <= lumiInFb < 10
+                format = "%.1f"
+            else: # 0.1 < lumiInFb < 1
+                format = "%.2f"
+        elif ndigis <= -1:
+            format = ".%df" % (abs(ndigis)+1)
+            format = "%"+format
+        lumiStr += format % (lumi/1000)
 
-    addText(x, y, format % (lumi/1000., unit), textDefaults.getSize("lumi"), bold=False)
+    lumiStr += " "+unit
+    
+    addText(x, y, lumiStr, textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
 #    l.DrawLatex(x, y, "L=%.0f %s" % (lumi, unit))
 
@@ -832,6 +837,10 @@ class Histo:
     def getRootHisto(self):
         return self.rootHisto
 
+    ## (Re)set the ROOT histogram object (TH1)
+    def setRootHisto(self, rootHisto):
+        self.rootHisto = rootHisto
+
     ## Get the histogram name
     def getName(self):
         return self.name
@@ -1044,6 +1053,9 @@ class HistoStacked(Histo):
 
         self.setIsDataMC(self.histos[0].isData(), self.histos[0].isMC())
 
+    def setRootHisto(self, rootHisto):
+        raise NotImplementedError("HistoStacked.setRootHisto() would be ill-defined")
+
     ## Get the list of original TH1 histograms.
     def getAllRootHistos(self):
         return [x.getRootHisto() for x in self.histos]
@@ -1101,6 +1113,9 @@ class HistoGraph(Histo):
 
     def getRootGraph(self):
         return self.getRootHisto()
+
+    def setRootGraph(self, rootGraph):
+        self.setRootHisto(rootGraph)
 
     def _values(self, values, func):
         return [func(values[i], i) for i in xrange(0, self.getRootGraph().GetN())]
@@ -1174,6 +1189,9 @@ class HistoEfficiency(Histo):
 
     def getRootEfficiency(self):
         return self.getRootHisto()
+
+    def setRootEfficiency(self, rootEfficiency):
+        self.setRootEfficiency(rootEfficiency)
 
     def getRootPassedHisto(self):
         return self.rootHisto.GetPassedHistogram()

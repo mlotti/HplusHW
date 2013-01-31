@@ -10,6 +10,7 @@
 namespace HPlus {
   TauIDBase::TauIDBase(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper, const std::string& baseLabel, TFileDirectory& myDir):
     fMyDir(myDir),
+    fVertexZCut(0.2), // Tolerance for abs(vertexZ - tau IPz) in cm
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fLeadTrkPtCut(iConfig.getUntrackedParameter<double>("leadingTrackPtCut")),
@@ -51,6 +52,8 @@ namespace HPlus {
     WrappedTH1* myZeroHisto = 0;
     fIDAllTauCandidates = fCounterPackager.addSubCounter(baseLabel, "AllTauCandidates", myZeroHisto);
     fIDDecayModeFinding = fCounterPackager.addSubCounter(baseLabel, "DecayModeFinding", myZeroHisto);
+    fIDVertexZCut = fCounterPackager.addSubCounter(baseLabel, "VertexZCut",
+      histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, fMyDir, "TauCand_VertexZCut", "tau IPz vs vertexZ;#tau IP_{z} - vertex_{Z} / cm;N_{jets} / 0.1 cm", 100, -5.0, 5.0));
     fIDJetPtCut = fCounterPackager.addSubCounter(baseLabel, "TauJetPt",
       histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, fMyDir, "TauCand_JetPt", "TauJetPt;#tau jet p_{T}, GeV/c;N_{jets} / 5 GeV/c", 80, 0., 400.));
     fIDJetEtaCut = fCounterPackager.addSubCounter(baseLabel, "TauJetEta",
@@ -77,6 +80,15 @@ namespace HPlus {
 
   void TauIDBase::incrementAllCandidates() {
     fCounterPackager.incrementSubCount(fIDAllTauCandidates);
+  }
+
+  bool TauIDBase::passVertexZCut(const edm::Ptr<pat::Tau> tau, double vertexZ) {
+    // Distance between tau IPz and vertex Z in cm
+    double myDelta = tau->vz() - vertexZ;
+    fCounterPackager.fill(fIDVertexZCut, myDelta);
+    if (!(std::abs(myDelta) < fVertexZCut)) return false;
+    fCounterPackager.incrementSubCount(fIDVertexZCut);
+    return true;
   }
 
   bool TauIDBase::passKinematicSelection(const edm::Ptr<pat::Tau> tau) {

@@ -72,6 +72,15 @@ namespace HPlus {
     void setNonIsoLeptons(edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
 
     void setAlphaT(double alphaT) { fAlphaT = alphaT; }
+    void setMomentumTensorEigenvalues(double QOne, double QTwo, double QThree) { 
+      fQOne   = QOne; 
+      fQTwo   = QTwo; 
+      fQThree = QThree; 
+    }
+    void setSphericity(double sphericity) { fSphericity = sphericity; }
+    void setAplanarity(double aplanarity) { fAplanarity = aplanarity; }
+    void setPlanarity(double planarity) { fPlanarity = planarity; }
+    void setCircularity(double circularity) { fCircularity = circularity; }
     void setDeltaPhi(double deltaPhi) { fDeltaPhi = deltaPhi; }
 
     void fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
@@ -216,6 +225,13 @@ namespace HPlus {
     XYZTLorentzVector fTop;
 
     double fAlphaT;
+    double fQOne;
+    double fQTwo;
+    double fQThree;
+    double fSphericity;
+    double fAplanarity;
+    double fPlanarity;
+    double fCircularity;
 
     double fDeltaPhi;
 

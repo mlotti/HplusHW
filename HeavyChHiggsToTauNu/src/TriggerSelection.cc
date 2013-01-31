@@ -164,7 +164,16 @@ namespace HPlus {
       if(fMetCut < 0) return passEvent;
 
       pat::TriggerObjectRefVector hltMets = trigger->objects(trigger::TriggerMET);
+      /*
+      for(size_t i=0; i<hltMets.size(); ++i) {
+        std::cout << "HLT MET " << i
+                  << " et " << hltMets[i]->et()
+                  << " collection " << hltMets[i]->collection()
+                  << std::endl;
+      }
+      */
       if(hltMets.size() == 0) {
+        //std::cout << "HLT MET size is 0!" << std::endl;
         fHltMet = pat::TriggerObjectRef();
         if(fMetCut >= 0)
           passEvent = false;
@@ -184,6 +193,16 @@ namespace HPlus {
               break;
             }
           }
+          ///// HACK HACK HACK
+          if(selectedHltMet.size() == 0) {
+            for(size_t i=0; i<hltMets.size(); ++i) {
+              if(hltMets[i]->collection() == "hltMet::HLT") {
+                selectedHltMet.push_back(hltMets[i]);
+                break;
+              }
+            }
+          }
+          ////// end of hack
           if(selectedHltMet.size() == 0) {
             if(fThrowIfNoMet) {
               std::stringstream ss;
@@ -251,6 +270,25 @@ namespace HPlus {
         fMets.push_back(*iObj);
     }
 
+    /*
+    objs = trigger.objectRefs();
+    for(pat::TriggerObjectRefVector::const_iterator iObj = objs.begin(); iObj != objs.end(); ++iObj) {
+      std::cout << "Object " << (iObj-objs.begin()) << " " << (*iObj)->collection() << std::endl;
+    }
+    for(pat::TriggerFilterRefVector::const_iterator iFilter = filters.begin(); iFilter != filters.end(); ++iFilter) {
+      std::cout << "Filter " << (*iFilter)->label() << " object keys ";
+      std::vector<unsigned> objectKeys = (*iFilter)->objectKeys();
+      for(size_t i=0; i<objectKeys.size(); ++i) {
+        std::cout << objectKeys[i] << " ";
+      }
+      std::cout << std::endl;
+
+      pat::TriggerObjectRefVector objs = trigger.filterObjects((*iFilter)->label());
+      for(pat::TriggerObjectRefVector::const_iterator iObj = objs.begin(); iObj != objs.end(); ++iObj) {
+        std::cout << "  object " << (*iObj)->collection() << std::endl;
+      }
+    }
+    */
 
     //std::cout << "============================================================" << std::endl;
     /*

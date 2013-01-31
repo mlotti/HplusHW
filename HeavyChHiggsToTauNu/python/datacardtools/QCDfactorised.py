@@ -25,8 +25,12 @@ class QCDEventCount():
         self._histoname = histoName
         self._assumedMCEWKSystUncertainty = assumedMCEWKSystUncertainty
         # Obtain histograms
-        datasetRootHistoData = dsetMgr.getDataset(dsetMgrDataColumn).getDatasetRootHisto(histoPrefix+"/"+histoName)
-        datasetRootHistoMCEWK = dsetMgr.getDataset(dsetMgrMCEWKColumn).getDatasetRootHisto(histoPrefix+"/"+histoName)
+        datasetRootHistoData = dsetMgr.getDataset(dsetMgrDataColumn).getDatasetRootHisto(histoPrefix+"/"+histoName, quietException=True)
+        if isinstance(datasetRootHistoData,str):
+            raise Exception (ErrorStyle()+"Error in QCDfactorised/QCDEventCount:"+NormalStyle()+" cannot find histogram for data!\n  Message = %s!"%(datasetRootHistoData))
+        datasetRootHistoMCEWK = dsetMgr.getDataset(dsetMgrMCEWKColumn).getDatasetRootHisto(histoPrefix+"/"+histoName, quietException=True)
+        if isinstance(datasetRootHistoMCEWK,str):
+            raise Exception (ErrorStyle()+"Error in QCDfactorised/QCDEventCount:"+NormalStyle()+" cannot find histogram for MC EWK!\n  Message = %s!"%(datasetRootHistoMCEWK))
         datasetRootHistoMCEWK.normalizeToLuminosity(luminosity)
         self._hData = datasetRootHistoData.getHistogram()
         self._hMC = datasetRootHistoMCEWK.getHistogram()
@@ -1337,7 +1341,7 @@ class QCDfactorisedColumn(DatacardColumn):
         h = myShapeModifier.createEmptyShapeHistogram("dummy")
         myBins = self._METCorrectionDetails["bins"]
         # Loop over bins
-        print "***"
+        #print "***"
         for i in range(0,myBins[0]):
             for j in range(0,myBins[1]):
                 for k in range(0,myBins[2]):
@@ -1357,11 +1361,11 @@ class QCDfactorisedColumn(DatacardColumn):
                     myCorrectedCount = 0.0
                     myCorrectedUncertainty = 0.0
                     for l in range(1,h.GetNbinsX()+1):
-                        print "%f, %f"%( h.GetBinContent(l), myCorrections[l-1])
+                        #print "%f, %f"%( h.GetBinContent(l), myCorrections[l-1])
                         myCorrectedCount += h.GetBinContent(l)*myCorrections[l-1]
                         myCorrectedUncertainty += pow(h.GetBinContent(l)*myCorrectionUncertainty[l-1],2)
                     myCorrectedUncertainty = sqrt(myCorrectedUncertainty)
-                    print "*** MET correction %d: nominal = %f, corrected = %f +- %f"%(i,myNominalCount,myCorrectedCount,myCorrectedUncertainty)
+                    #print "*** MET correction %d: nominal = %f, corrected = %f +- %f"%(i,myNominalCount,myCorrectedCount,myCorrectedUncertainty)
                     self._METCorrectionFactorsForTauPtBins.append(myCorrectedCount)
                     self._METCorrectionFactorUncertaintyForTauPtBins.append(myCorrectedUncertainty)
                     hMtData.IsA().Destructor(hMtData)
@@ -1551,7 +1555,9 @@ class QCDfactorisedColumn(DatacardColumn):
 
     ## Extracts a shape histogram for a given bin
     def _extractShapeHistogram(self, dsetMgr, datasetMgrColumn, histoName, luminosity):
-        dsetRootHistoMtData = dsetMgr.getDataset(datasetMgrColumn).getDatasetRootHisto(histoName)
+        dsetRootHistoMtData = dsetMgr.getDataset(datasetMgrColumn).getDatasetRootHisto(histoName, quietException=True)
+        if isinstance(dsetRootHistoMtData,str):
+            raise Exception (ErrorStyle()+"Error in QCDfactorised/extracting shape:"+NormalStyle()+" cannot find histogram!\n  Message = %s!"%(dsetRootHistoMtData))
         if dsetRootHistoMtData.isMC():
             dsetRootHistoMtData.normalizeToLuminosity(luminosity)
         h = dsetRootHistoMtData.getHistogram()

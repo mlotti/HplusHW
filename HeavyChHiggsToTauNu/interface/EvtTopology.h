@@ -1,6 +1,6 @@
 //#######################################################################
 // -*- C++ -*-
-//       File Name:  EvtTopology.h
+//       Filesph Name:  EvtTopology.h
 // Original Author:  Alexandros Attikis
 //         Created:  Mon 4 Oct 2010
 //     Description:  Designed to calculate Evt Topology related variables                   
@@ -30,6 +30,13 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MathFunctions.h"
+// Sphericity, Aplanarity, Planarity
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackExtra.h"
+#include "TVector3.h"
+#include "TLorentzVector.h"
+#include "TMatrixDSym.h"
+#include "TMatrixDSymEigen.h"
 
 namespace reco {
   class Candidate;
@@ -53,6 +60,15 @@ namespace HPlus {
       float fMHt;
       vector<float> vDiJetMassesNoTau;
     } AlphaStruc;
+    typedef struct {
+      float fQOne;
+      float fQTwo;
+      float fQThree;
+      float fSphericity;
+      float fAplanarity;
+      float fPlanarity;
+      float fCircularity;
+    } KinStruc;
 
     /**
      * Class to encapsulate the access to the data members of
@@ -69,6 +85,7 @@ namespace HPlus {
 
       bool passedEvent() const { return fPassedEvent; }
       const EvtTopology::AlphaStruc alphaT() const { return fEvtTopology->sAlpha; }
+      const EvtTopology::KinStruc Kinematics() const { return fEvtTopology->sKinematics; }
     
     private:
       const EvtTopology *fEvtTopology;
@@ -85,6 +102,12 @@ namespace HPlus {
 
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
+    bool CalcAlphaT(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
+    vector<float> CalcMomentumTensorEigenValues(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
+    void CalcSphericity(vector<float> eigenvalues);
+    void CalcAplanarity(vector<float> eigenvalues);
+    void CalcPlanarity(vector<float> eigenvalues);
+    void CalcCircularity(const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
     // Input parameters
     // std::string fDiscriminator;
     // double fDiscrCut;
@@ -105,6 +128,7 @@ namespace HPlus {
     
     // Other variables
     AlphaStruc sAlpha;
+    KinStruc sKinematics;
     MathFunctions oMath;
   };
 }

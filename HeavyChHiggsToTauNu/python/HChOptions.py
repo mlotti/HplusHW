@@ -60,6 +60,11 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.string,
                      "Configuration fragment for a primary vertex selection (default is to use offlinePrimaryVertices as it is")
+    options.register("customizeConfig",
+                     [],
+                     options.multiplicity.list,
+                     options.varType.string,
+                     "Configuration fragment for a generic customization")
     options.register("tauEmbeddingInput",
                      0,
                      options.multiplicity.singleton,

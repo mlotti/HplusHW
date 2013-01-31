@@ -36,10 +36,12 @@ def createEDFilter(param):
         EvtTopology = param.EvtTopology.clone(),
         vertexWeight = param.vertexWeight.clone(),
         vertexWeightReader = param.vertexWeightReader.clone(),
+        wjetsWeightReader = param.wjetsWeightReader.clone(),
         GenParticleAnalysis = param.GenParticleAnalysis.clone(),
         Tree = param.tree.clone(),
         eventCounter = param.eventCounter.clone(),
         tauEmbeddingStatus = cms.untracked.bool(False),
+        metFilters = param.metFilters.clone(),
         factorisationTauPtBinLowEdges = cms.untracked.vdouble(50., 60., 70., 80., 100., 120., 150.),
         factorisationTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5), # probably need to constrain to -1.5, 1.5, i.e. endcap-, barrel, endcap+
         factorisationNVerticesBinLowEdges = cms.untracked.vint32(10),

@@ -157,6 +157,9 @@ tauSelection = tauSelectionHPSMediumTauBased
 # The fake tau SF and systematics numbers apply for 2011 data
 # Source: https://twiki.cern.ch/twiki/bin/view/CMS/TauIDRecommendation
 fakeTauSFandSystematicsBase = cms.untracked.PSet(
+    visibleMCTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"), # All MC visible taus
+    visibleMCTauOneProngSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"), # MC visible 1-prong taus
+    matchingConditionDeltaR = cms.untracked.double(0.1), # Matching cone size
     scalefactorFakeTauBarrelElectron = cms.untracked.double(1.0),
     scalefactorFakeTauEndcapElectron = cms.untracked.double(1.0),
     scalefactorFakeTauBarrelMuon = cms.untracked.double(1.0),
@@ -276,7 +279,8 @@ bTagging = cms.untracked.PSet(
     BTagUserDBAlgo = cms.untracked.string("BTAGCSVM_hplusBtagDB_TTJets") #FIXME
 )
 
-
+oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng")
+ 
 #deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
 deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees, for heavy charged Higgs
 

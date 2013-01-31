@@ -35,8 +35,8 @@ namespace HPlus {
     fOneTauCounter(eventCounter.addCounter("EWKfaketaus:taus == 1")),
     fElectronVetoCounter(eventCounter.addCounter("EWKfaketaus:electron veto")),
     fMuonVetoCounter(eventCounter.addCounter("EWKfaketaus:muon veto")),
-    fMETCounter(eventCounter.addCounter("EWKfaketaus:MET")),
     fNJetsCounter(eventCounter.addCounter("EWKfaketaus:njets")),
+    fMETCounter(eventCounter.addCounter("EWKfaketaus:MET")),
     fBTaggingCounter(eventCounter.addCounter("EWKfaketaus:btagging")),
     fDeltaPhiCounter(eventCounter.addCounter("EWKfaketaus:deltaphi")),
     fFakeMETVetoCounter(eventCounter.addCounter("EWKfaketaus:fake MET veto")),
@@ -51,8 +51,8 @@ namespace HPlus {
     fOneTauCounter(eventCounter.addSubCounter(prefix,":taus == 1")),
     fElectronVetoCounter(eventCounter.addSubCounter(prefix,":electron veto")),
     fMuonVetoCounter(eventCounter.addSubCounter(prefix,":muon veto")),
-    fMETCounter(eventCounter.addSubCounter(prefix,":MET")),
     fNJetsCounter(eventCounter.addSubCounter(prefix,":njets")),
+    fMETCounter(eventCounter.addSubCounter(prefix,":MET")),
     fBTaggingCounter(eventCounter.addSubCounter(prefix,":btagging")),
     fDeltaPhiCounter(eventCounter.addSubCounter(prefix,":deltaphi")),
     //    fHiggsMassCutCounter(eventCounter.addSubCounter(prefix,"HiggsMassCut")),
@@ -222,6 +222,7 @@ namespace HPlus {
     fMuonToTausCounterGroup(eventCounter, "mu->tau"),
     fMuonFromTauDecayToTausCounterGroup(eventCounter, "tau_mu->tau"),
     fGenuineToTausCounterGroup(eventCounter, "tau->tau"),
+    fGenuineOneProngToTausCounterGroup(eventCounter, "1-prong tau->tau"),
     fJetToTausCounterGroup(eventCounter, "jet->tau"),
     fAllTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "All with tau outside acceptance"),
     fElectronToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "e->tau with tau outside acceptance"),
@@ -229,6 +230,7 @@ namespace HPlus {
     fMuonToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "mu->tau with tau outside acceptance"),
     fMuonFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "tau_mu->tau with tau outside acceptance"),
     fGenuineToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "tau->tau with tau outside acceptance"),
+    fGenuineOneProngToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "1-prong tau->tau with tau outside acceptance"),
     fJetToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "jet->tau with tau outside acceptance"),
     fModuleLabel(iConfig.getParameter<std::string>("@module_label")),
     fProduce(iConfig.getUntrackedParameter<bool>("produceCollections", false)),
@@ -252,7 +254,33 @@ namespace HPlus {
     hVerticesTriggeredBeforeWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesTriggeredBeforeWeight", "Number of vertices without weighting", 40, 0, 40);
     hVerticesTriggeredAfterWeight = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myVertexDir, "verticesTriggeredAfterWeight", "Number of vertices with weighting", 40, 0, 40);
     //    hmetAfterTrigger = fHistoWrapper.makeTH<TH1F>(*fs, "metAfterTrigger", "metAfterTrigger", 50, 0., 200.);
+    
+    // Match PF jet to taus
+    TFileDirectory myTauDebugDir = fs->mkdir("TauDebug");
+    hTauVsJetDeltaPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauVsJetDeltaPt", "#Deltap_{T}(#tau,jet), GeV/c", 200, -500, 500);
+    hTauVsJetDeltaR = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauVsJetDeltaR", "#DeltaR(#tau,jet), GeV/c", 100, 0, .5);
+    hTauVsJetMCFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauVsJetMCFlavor", "MC flavor of jet matching to tau", 30, 0, 30);
+    hTauVsJetDeltaPtHeavyFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauVsJetDeltaPtcb", "cb: #Deltap_{T}(#tau,jet), GeV/c", 200, -500, 500);
+    hTauVsJetDeltaRHeavyFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauVsJetDeltaRcb", "cb: #DeltaR(#tau,jet), GeV/c", 100, 0, .5);
+    hTauVsJetDeltaPtLightFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauVsJetDeltaPtuds", "uds: #Deltap_{T}(#tau,jet), GeV/c", 200, -500, 500);
+    hTauVsJetDeltaRLightFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauVsJetDeltaRuds", "uds: #DeltaR(#tau,jet), GeV/c", 100, 0, .5);
 
+    hTauVsJetTauPtbBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtbBefore", "TauFakeRatePtbBefore;b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtbleptonicBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtbleptonicBefore", "TauFakeRatePtbleptonicBefore;leptonic b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtcBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtcBefore", "TauFakeRatePtcBefore;c#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtudsBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtudsBefore", "TauFakeRatePtudsBefore;uds#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtgBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtgBefore", "TauFakeRatePtgBefore;g#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPteBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePteBefore", "TauFakeRatePteBefore;e#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtmuBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtmuBefore", "TauFakeRatePtmuBefore;#mu#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtbAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtbAfter", "TauFakeRatePtbAfter;b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtbleptonicAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtbleptonicAfter", "TauFakeRatePtbleptonicAfter;leptonic b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtcAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtcAfter", "TauFakeRatePtcAfter;c#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtudsAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtudsAfter", "TauFakeRatePtudsAfter;uds#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtgAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtgAfter", "TauFakeRatePtgAfter;g#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPteAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePteAfter", "TauFakeRatePteAfter;e#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtmuAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtmuAfter", "TauFakeRatePtmuAfter;#mu#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+
+    // MET histograms
     hGenMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "genMET", "genMET", 200, 0., 400.);
     hdeltaPhiMetGenMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiMetGenMet", "deltaPhiMetGenMet", 180, 0., 180.); 
     hdeltaEtMetGenMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaEtMetGenMet", "deltaEtMetGenMet", 200, -1., 1.);
@@ -407,7 +435,7 @@ namespace HPlus {
       producer->produces<std::vector<pat::Tau> >("selectedVetoTaus");
       producer->produces<std::vector<pat::Jet> >("selectedJets");
       producer->produces<std::vector<pat::Jet> >("selectedBJets");
-      producer->produces<std::vector<pat::Electron> >("selectedVetoElectrons");
+      producer->produces<std::vector<pat::Electron> >("selectedVetoElectronsBeforePtAndEtaCuts");
       producer->produces<std::vector<pat::Muon> >("selectedVetoMuonsBeforeIsolationAndPtAndEtaCuts");
       producer->produces<std::vector<pat::Muon> >("selectedVetoMuonsBeforePtAndEtaCuts");
     }
@@ -440,6 +468,9 @@ namespace HPlus {
       fEventWeight.multiplyWeight(wjetsWeight);
     }
     increment(fWJetsWeightCounter);
+
+//------ Apply filter (if chosen) to select tail events
+    //if (!selectTailEvents(iEvent, iSetup)) return false;
 
 
 //------ MET (noise) filters for data (reject events with instrumental fake MET)
@@ -482,9 +513,11 @@ namespace HPlus {
 
 
 //------ TauID
-    // Store weight of event
+    // Analyse tau fake rate on parton level
+    if (!iEvent.isRealData()) analyseTauFakeRateByParton(iEvent, iSetup, pvData);
+
     // TauID
-    TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
+    TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
 
     fTauSelection.analyseFakeTauComposition(fFakeTauIdentifier,iEvent);
 
@@ -561,7 +594,7 @@ namespace HPlus {
     }
     */  
 //------ Veto against second tau in event
-    VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauData.getSelectedTau());
+    VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), pvData.getSelectedVertex()->z());
     //    if (vetoTauData.passedEvent()) return false; // tau veto
     //    if (!vetoTauData.passedEvent()) return false; // select events with add. taus
     //    if (vetoTauData.getSelectedVetoTaus().size() > 0 ) return false;
@@ -595,8 +628,8 @@ namespace HPlus {
     fillEWKFakeTausCounters(myTauMatch, kSignalOrderElectronVeto, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Electron> > saveElectrons(new std::vector<pat::Electron>());
-      copyPtrToVector(electronVetoData.getSelectedElectrons(), *saveElectrons);
-      iEvent.put(saveElectrons, "selectedVetoElectrons");
+      copyPtrToVector(electronVetoData.getSelectedElectronsBeforePtAndEtaCuts(), *saveElectrons);
+      iEvent.put(saveElectrons, "selectedVetoElectronsBeforePtAndEtaCuts");
     }
     /*    
     bool electronTauMatch = false;
@@ -645,7 +678,8 @@ namespace HPlus {
     //    if(!metData.passedEvent()) return false;
     //    increment(fMETCounter);
 
-
+    analyseJetMatchingToTau(tauData, jetData);
+    //std::cout << "tau match is " << myTauMatch << " e=" << fFakeTauIdentifier.isElectronToTau(myTauMatch) << " mu=" << fFakeTauIdentifier.isMuonToTau(myTauMatch) << " jet=" << fFakeTauIdentifier.isJetToTau(myTauMatch) << std::endl;
     hCtrlNjets->Fill(jetData.getHadronicJetCount());
 
     if (myFakeTauStatus) hCtrlEWKFakeTausNjets->Fill(jetData.getHadronicJetCount());
@@ -681,7 +715,7 @@ namespace HPlus {
   
       TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     
-      // Calculate alphaT
+      // Calculate event topology variables (alphaT, sphericity, aplanarity etc..)
       EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJets());   
       
       FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJets(), metData.getSelectedMET());
@@ -701,6 +735,12 @@ namespace HPlus {
       fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
       fTree.setTop(TopSelectionData.getTopP4());
       fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
+      // Sphericity, Aplanarity, Planarity
+      fTree.setSphericity(evtTopologyData.Kinematics().fSphericity);
+      fTree.setAplanarity(evtTopologyData.Kinematics().fAplanarity);
+      fTree.setPlanarity(evtTopologyData.Kinematics().fPlanarity);
+      fTree.setCircularity(evtTopologyData.Kinematics().fCircularity);
+
       fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
       fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets());
       return true;
@@ -1380,12 +1420,14 @@ namespace HPlus {
     else if (tauMatch == FakeTauIdentifier::kkMuonToTau) return &fMuonToTausCounterGroup;
     else if (tauMatch == FakeTauIdentifier::kkMuonFromTauDecayToTau) return &fMuonFromTauDecayToTausCounterGroup;
     else if (tauMatch == FakeTauIdentifier::kkTauToTau) return &fGenuineToTausCounterGroup;
+    else if (tauMatch == FakeTauIdentifier::kkOneProngTauToTau) return &fGenuineToTausCounterGroup; // Handle separation in filling
     else if (tauMatch == FakeTauIdentifier::kkJetToTau) return &fJetToTausCounterGroup;
     else if (tauMatch == FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance) return &fElectronToTausAndTauOutsideAcceptanceCounterGroup;
     else if (tauMatch == FakeTauIdentifier::kkElectronFromTauDecayToTauAndTauOutsideAcceptance) return &fElectronFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup;
     else if (tauMatch == FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance) return &fMuonToTausAndTauOutsideAcceptanceCounterGroup;
     else if (tauMatch == FakeTauIdentifier::kkMuonFromTauDecayToTauAndTauOutsideAcceptance) return &fMuonFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup;
     else if (tauMatch == FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance) return &fGenuineToTausAndTauOutsideAcceptanceCounterGroup;
+    else if (tauMatch == FakeTauIdentifier::kkOneProngTauToTauAndTauOutsideAcceptance) return &fGenuineToTausAndTauOutsideAcceptanceCounterGroup; // Handle separation in filling
     else if (tauMatch == FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance) return &fJetToTausAndTauOutsideAcceptanceCounterGroup;
     return 0;
   }
@@ -1397,21 +1439,22 @@ namespace HPlus {
     // Define event as type II if no genuine tau was identified as the selected tau
     bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(tauMatch); // FIXME: think here if the tau_e -> tau  and tau_mu -> tau should be excluded
     // Fill main and subcounter for the selection
+    SignalAnalysis::CounterGroup* myCounterGroup = getCounterGroupByTauMatch(tauMatch);
     if (selection == kSignalOrderTauID) {
       if (myFakeTauStatus) fEWKFakeTausGroup.incrementOneTauCounter();
-      getCounterGroupByTauMatch(tauMatch)->incrementOneTauCounter();
+      myCounterGroup->incrementOneTauCounter();
     } else if (selection == kSignalOrderMETSelection) {
       if (myFakeTauStatus) fEWKFakeTausGroup.incrementMETCounter();
-      getCounterGroupByTauMatch(tauMatch)->incrementMETCounter();
+      myCounterGroup->incrementMETCounter();
     } else if (selection == kSignalOrderElectronVeto) {
       if (myFakeTauStatus) fEWKFakeTausGroup.incrementElectronVetoCounter();
-      getCounterGroupByTauMatch(tauMatch)->incrementElectronVetoCounter();
+      myCounterGroup->incrementElectronVetoCounter();
     } else if (selection == kSignalOrderMuonVeto) {
       if (myFakeTauStatus) fEWKFakeTausGroup.incrementMuonVetoCounter();
-      getCounterGroupByTauMatch(tauMatch)->incrementMuonVetoCounter();
+      myCounterGroup->incrementMuonVetoCounter();
     } else if (selection == kSignalOrderJetSelection) {
       if (myFakeTauStatus) fEWKFakeTausGroup.incrementNJetsCounter();
-      getCounterGroupByTauMatch(tauMatch)->incrementNJetsCounter();
+      myCounterGroup->incrementNJetsCounter();
     } else if (selection == kSignalOrderBTagSelection) {
       if (myFakeTauStatus) {
         fEWKFakeTausGroup.incrementBTaggingCounter();
@@ -1419,22 +1462,175 @@ namespace HPlus {
         hEWKFakeTausSelectedTauEtAfterCuts->Fill(tauData.getSelectedTau()->pt());
         hEWKFakeTausSelectedTauEtaAfterCuts->Fill(tauData.getSelectedTau()->eta());
       }
-      getCounterGroupByTauMatch(tauMatch)->incrementBTaggingCounter();
-/*    } else if (selection == kSignalOrderDeltaPhiSelection) {
-      if (myFakeTauStatus) fEWKFakeTausGroup.incrementDeltaPhiCounter();
-      getCounterGroupByTauMatch(tauMatch)->incrementDeltaPhiCounter();*/
+      myCounterGroup->incrementBTaggingCounter();
     } else if (selection == kSignalOrderDeltaPhiSelection) {
       if (myFakeTauStatus) fEWKFakeTausGroup.incrementDeltaPhiCounter();
-      getCounterGroupByTauMatch(tauMatch)->incrementDeltaPhiCounter();
+      myCounterGroup->incrementDeltaPhiCounter();
     } else if (selection == kSignalOrderFakeMETVeto) {
       if (myFakeTauStatus) fEWKFakeTausGroup.incrementFakeMETVetoCounter();
-      getCounterGroupByTauMatch(tauMatch)->incrementFakeMETVetoCounter();
+      myCounterGroup->incrementFakeMETVetoCounter();
     } else if (selection == kSignalOrderTopSelection) {
       if (myFakeTauStatus) fEWKFakeTausGroup.incrementTopSelectionCounter();
-      getCounterGroupByTauMatch(tauMatch)->incrementTopSelectionCounter();
+      myCounterGroup->incrementTopSelectionCounter();
     } else if (selection == kSignalOrderSelectedEvents) {
       if (myFakeTauStatus) fEWKFakeTausGroup.incrementSelectedEventsCounter();
-      getCounterGroupByTauMatch(tauMatch)->incrementSelectedEventsCounter();
+      myCounterGroup->incrementSelectedEventsCounter();
+    }
+    // Check status for genuine one prong taus
+    if (fFakeTauIdentifier.isGenuineOneProngTau(tauMatch)) {
+      SignalAnalysis::CounterGroup* mySpecialGroup = &fGenuineOneProngToTausCounterGroup;
+      if (tauMatch == FakeTauIdentifier::kkOneProngTauToTauAndTauOutsideAcceptance) {
+        mySpecialGroup = &fGenuineOneProngToTausAndTauOutsideAcceptanceCounterGroup;
+      }
+      if (selection == kSignalOrderTauID) {
+        mySpecialGroup->incrementOneTauCounter();
+      } else if (selection == kSignalOrderMETSelection) {
+        mySpecialGroup->incrementMETCounter();
+      } else if (selection == kSignalOrderElectronVeto) {
+        mySpecialGroup->incrementElectronVetoCounter();
+      } else if (selection == kSignalOrderMuonVeto) {
+        mySpecialGroup->incrementMuonVetoCounter();
+      } else if (selection == kSignalOrderJetSelection) {
+        mySpecialGroup->incrementNJetsCounter();
+      } else if (selection == kSignalOrderBTagSelection) {
+        mySpecialGroup->incrementBTaggingCounter();
+      } else if (selection == kSignalOrderDeltaPhiSelection) {
+        mySpecialGroup->incrementDeltaPhiCounter();
+      } else if (selection == kSignalOrderFakeMETVeto) {
+        mySpecialGroup->incrementFakeMETVetoCounter();
+      } else if (selection == kSignalOrderTopSelection) {
+        mySpecialGroup->incrementTopSelectionCounter();
+      } else if (selection == kSignalOrderSelectedEvents) {
+        mySpecialGroup->incrementSelectedEventsCounter();
+      }
     }
   }
+  
+  void SignalAnalysis::analyseJetMatchingToTau(const TauSelection::Data& tauData, const JetSelection::Data& jetData) {
+    //if (!tauData.getSelectedTau()->pfJetRef().isNonnull()) return;
+
+    double myMinDeltaR = 99.;
+    size_t mySelectedIndex = 0;
+    for (size_t i = 0; i < jetData.getAllJets().size(); ++i) {
+      if (!(jetData.getAllJets()[i]->pt() > 20. && std::abs(jetData.getAllJets()[i]->eta()) < 2.5)) continue;
+      double myDeltaR = reco::deltaR(tauData.getSelectedTau()->p4(),jetData.getAllJets()[i]->p4());
+      if (myDeltaR < myMinDeltaR) {
+        myMinDeltaR = myDeltaR;
+        mySelectedIndex = i;
+      }
+    }
+
+    double myDeltaPt = 9999;
+    int myFlavor = 0;
+    hTauVsJetDeltaR->Fill(myMinDeltaR);
+    if (myMinDeltaR < 0.1) {
+      myDeltaPt = tauData.getSelectedTau()->pt() - jetData.getAllJets()[mySelectedIndex]->pt();
+      myFlavor = std::abs(jetData.getAllJets()[mySelectedIndex]->partonFlavour());
+      hTauVsJetDeltaPt->Fill(myDeltaPt);
+      hTauVsJetMCFlavor->Fill(myFlavor);
+      if (myFlavor >= 4 && myFlavor <= 5) {
+        hTauVsJetDeltaPtHeavyFlavor->Fill(myDeltaPt);
+        hTauVsJetDeltaRHeavyFlavor->Fill(myMinDeltaR);
+      } else if (myFlavor >= 1 && myFlavor <= 3) {
+        hTauVsJetDeltaPtLightFlavor->Fill(myDeltaPt);
+        hTauVsJetDeltaRLightFlavor->Fill(myMinDeltaR);
+      }
+    }
+    //std::cout << "tau vs jet: tau pt = " << tauData.getSelectedTau()->pt() << " ref pt = " << tauData.getSelectedTau()->p4Jet().pt()  << std::endl;
+    //std::cout << "    closest jet pt = " << jetData.getAllJets()[mySelectedIndex]->pt() << " DR=" << myMinDeltaR << " flavor=" << jetData.getAllJets()[mySelectedIndex]->partonFlavour()<< std::endl;
+  }
+
+  void SignalAnalysis::analyseTauFakeRateByParton(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData) {
+    // Obtain tau data and jet data
+    TauSelection::Data tauData = fTauSelection.silentAnalyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
+    if (tauData.getAllTauObjects().size() == 0) return;
+    JetSelection::Data jetData = fJetSelection.silentAnalyze(iEvent, iSetup, tauData.getAllTauObjects()[0], 0);
+    // Fill before histograms for all tau candidates
+    for (size_t i = 0; i < tauData.getAllTauObjects().size(); ++i) {
+      // Match tau to jet
+      double myMinDeltaR = 99.;
+      size_t mySelectedIndex = 0;
+      for (size_t j = 0; j < jetData.getAllJets().size(); ++j) {
+        if (!(jetData.getAllJets()[j]->pt() > 20. && std::abs(jetData.getAllJets()[j]->eta()) < 2.5)) continue;
+        double myDeltaR = reco::deltaR(tauData.getAllTauObjects()[i]->p4(),jetData.getAllJets()[j]->p4());
+        if (myDeltaR < myMinDeltaR) {
+          myMinDeltaR = myDeltaR;
+          mySelectedIndex = j;
+        }
+      }
+      if (!(myMinDeltaR < 0.1)) continue;
+      // Skip genuine taus
+      FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.silentMatchTauToMC(iEvent, *(tauData.getAllTauObjects()[i]));
+      if (!fFakeTauIdentifier.isFakeTau(myTauMatch)) continue;
+      // Fill jet flavors
+      int myFlavor = std::abs(jetData.getAllJets()[mySelectedIndex]->partonFlavour());
+      if (fFakeTauIdentifier.isElectronToTau(myTauMatch)) {
+        hTauVsJetTauPteBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+        if (myFlavor == 5) hTauVsJetTauPtbleptonicBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+      } else if (fFakeTauIdentifier.isMuonToTau(myTauMatch)) {
+        hTauVsJetTauPtmuBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+        if (myFlavor == 5) hTauVsJetTauPtbleptonicBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+      } else if (myFlavor >= 1 && myFlavor <= 3)
+        hTauVsJetTauPtudsBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+      else if (myFlavor == 4)
+        hTauVsJetTauPtcBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+      else if (myFlavor == 5)
+        hTauVsJetTauPtbBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+      else if (myFlavor == 21)
+        hTauVsJetTauPtgBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+    }
+    // Require tau ID
+    if(!tauData.passedEvent()) return; // Require at least one tau
+    // Fill after histograms for selected taus
+    for (size_t i = 0; i < tauData.getSelectedTaus().size(); ++i) {
+      // Match tau to jet
+      double myMinDeltaR = 99.;
+      size_t mySelectedIndex = 0;
+      for (size_t j = 0; j < jetData.getAllJets().size(); ++j) {
+        if (!(jetData.getAllJets()[j]->pt() > 20. && std::abs(jetData.getAllJets()[j]->eta()) < 2.5)) continue;
+        double myDeltaR = reco::deltaR(tauData.getSelectedTaus()[i]->p4(),jetData.getAllJets()[j]->p4());
+        if (myDeltaR < myMinDeltaR) {
+          myMinDeltaR = myDeltaR;
+          mySelectedIndex = j;
+        }
+      }
+      if (!(myMinDeltaR < 0.1)) continue;
+      // Skip genuine taus
+      FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.silentMatchTauToMC(iEvent, *(tauData.getSelectedTaus()[i]));
+      if (!fFakeTauIdentifier.isFakeTau(myTauMatch)) continue;
+      // Fill jet flavors
+      int myFlavor = std::abs(jetData.getAllJets()[mySelectedIndex]->partonFlavour());
+      if (fFakeTauIdentifier.isElectronToTau(myTauMatch)) {
+        hTauVsJetTauPteAfter->Fill(tauData.getSelectedTaus()[i]->pt());
+        if (myFlavor == 5) hTauVsJetTauPtbleptonicAfter->Fill(tauData.getAllTauObjects()[i]->pt());
+      } else if (fFakeTauIdentifier.isMuonToTau(myTauMatch)) {
+        hTauVsJetTauPtmuAfter->Fill(tauData.getSelectedTaus()[i]->pt());
+        if (myFlavor == 5) hTauVsJetTauPtbleptonicAfter->Fill(tauData.getAllTauObjects()[i]->pt());
+      } else if (myFlavor >= 1 && myFlavor <= 3)
+        hTauVsJetTauPtudsAfter->Fill(tauData.getSelectedTaus()[i]->pt());
+      else if (myFlavor == 4)
+        hTauVsJetTauPtcAfter->Fill(tauData.getSelectedTaus()[i]->pt());
+      else if (myFlavor == 5)
+        hTauVsJetTauPtbAfter->Fill(tauData.getSelectedTaus()[i]->pt());
+      else if (myFlavor == 21)
+        hTauVsJetTauPtgAfter->Fill(tauData.getSelectedTaus()[i]->pt());
+    }
+  }
+  
+  bool SignalAnalysis::selectTailEvents(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    VertexSelection::Data pvData = fPrimaryVertexSelection.silentAnalyze(iEvent, iSetup);
+    if (!pvData.passedEvent()) return false;
+    TauSelection::Data tauData = fTauSelection.silentAnalyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
+    if (!tauData.passedEvent()) return false; // Require at least one tau
+    JetSelection::Data jetData = fJetSelection.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), 0);
+    if (jetData.getHadronicJetCount() == 0) return false;
+    METSelection::Data metData = fMETSelection.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
+    if (!(metData.getSelectedMET()->et() > 30)) return false;
+    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
+    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
+    if (deltaPhi < 90) return false;
+    if (transverseMass < 80) return false;
+    return true;
+  }
+
 }

@@ -103,6 +103,7 @@ namespace HPlus {
     fSelectedElectronPtBeforePtCut = -1.0;
     fSelectedElectronEta = -999.99;
     fSelectedElectrons.clear();
+    fSelectedElectronsBeforePtAndEtaCuts.clear();
     fSelectedLooseElectrons.clear();
 
     return Data(this, ElectronSelection(iEvent,iSetup));
@@ -187,8 +188,7 @@ namespace HPlus {
                                                   *hRho);
       //std::cout << "Electron " << (iElectron-electrons.begin()) << "/" << electrons.size() << ": pass veto: " << bVeto << std::endl;
       if(!bPassedElecID) continue;
-
-      //      fSelectedElectrons.push_back(*iElectron);
+      fSelectedElectronsBeforePtAndEtaCuts.push_back(*iElectron);
 
       hElectronEta_identified->Fill(myElectronEta);
 

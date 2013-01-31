@@ -589,10 +589,9 @@ class TreeDraw:
             else:
                 selection = self.weight
 
-        rootFile = dataset.getRootFile()
-        tree = rootFile.Get(self.tree)
+        (tree, treeName) = dataset._getRootHisto(self.tree)
         if tree == None:
-            raise Exception("No TTree '%s' in file %s" % (self.tree, rootFile.GetName()))
+            raise Exception("No TTree '%s' in file %s" % (treeNAme, dataset.getRootFile().GetName()))
 
         if self.varexp == "":
             nentries = tree.GetEntries(selection)
@@ -619,7 +618,7 @@ class TreeDraw:
         option = opt+"goff"
         nentries = tree.Draw(varexp, selection, option)
         if nentries < 0:
-            raise Exception("Error when calling TTree.Draw with\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (self.tree, varexp, selection, option))
+            raise Exception("Error when calling TTree.Draw with\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (treeNAme, varexp, selection, option))
         h = tree.GetHistogram()
         if h != None:
             h = h.Clone(h.GetName()+"_cloned")
@@ -1457,6 +1456,7 @@ class Dataset:
     def deepCopy(self):
         d = Dataset(self.name, self.file.GetName(), self._unweightedCounterDir, self._weightedCounters, self._analysisBaseName, self._dataEra, self._doEraReplace)
         d.info.update(self.info)
+        d.nAllEvents = self.nAllEvents
         return d
 
     ## Get ROOT histogram (or actually any object from the analysis directory)
@@ -1516,6 +1516,12 @@ class Dataset:
 
     def setName(self, name):
         self.name = name
+
+    ## Set the centre-of-mass energy (in TeV) as string
+    def setEnergy(self, energy):
+        if not isinstance(energy, basestring):
+            raise Exception("The energy must be set as string")
+        self.info["energy"] = energy
 
     ## Get the centre-of-mass energy (in TeV) as string
     def getEnergy(self):
@@ -1608,7 +1614,7 @@ class Dataset:
     def getNormFactor(self):
         nAllEvents = self.getNAllEvents()
         if nAllEvents == 0:
-            raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateAllEventsToPUWeighted() has not been called." % self.name)
+            raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateNAllEventsToPUWeighted() has not been called." % self.name)
 
         return self.getCrossSection() / nAllEvents
 
@@ -1635,17 +1641,19 @@ class Dataset:
     # draw() method), the draw() method is called by giving the TFile
     # and the dataset name as parameters. The draw() method is
     # expected to return a TH1 which is then returned.
-    def getDatasetRootHisto(self, name, modify=None):
+    def getDatasetRootHisto(self, name, modify=None, quietException=False):
         h = None
         if hasattr(name, "draw"):
             h = name.draw(self)
         else:
             pname = name
             (h, realName) = self._getRootHisto(pname)
-            if h is None:
+            if h == None:
                 msg = "Unable to find histogram '%s' from file '%s'" % (realName, self.file.GetName())
                 if realName != pname:
                     msg += "\nThe requested histogram was %s, and the path was modified because of dataEra." % self.counterDir
+                if quietException:
+                    return msg # Return the error message to let the calling code to give additional debugging details
                 raise Exception(msg)
             name = h.GetName()+"_"+self.name
             if modify is not None:
@@ -1692,6 +1700,9 @@ class Dataset:
     ## Get the path of the multicrab directory where this dataset originates
     def getBaseDirectory(self):
         return self.basedir
+
+    def formatDatasetTree(self, indent):
+        return '%sDataset("%s", "%s", ...),\n' % (indent, self.getName(), self.file.GetName())
         
     ## \var name
     # Name of the dataset
@@ -1784,6 +1795,10 @@ class DatasetMerged:
     def setName(self, name):
         self.name = name
 
+    def setEnergy(self, energy):
+        for d in self.datasets:
+            d.setEnergy(energy)
+
     def getEnergy(self):
         return self.datasets[0].getEnergy()
 
@@ -1845,12 +1860,17 @@ class DatasetMerged:
     #               Dataset objects
     def getDatasetRootHisto(self, name, **kwargs):
         wrappers = [d.getDatasetRootHisto(name, **kwargs) for d in self.datasets]
+        # Catch returned error messages
+        if wrappers != None:
+            for w in wrappers:
+                if isinstance(w,str):
+                    return w
+        # No errors, continue as usual
         if self.isMC():
             return DatasetRootHistoMergedMC(wrappers, self)
         else:
             return DatasetRootHistoMergedData(wrappers, self)
 
-        
     ## Get the directory content of a given directory in the ROOT file.
     # 
     # \param directory   Path of the directory in the ROOT file
@@ -1867,6 +1887,13 @@ class DatasetMerged:
             if content != d.getDirectoryContent(directory, predicate):
                 raise Exception("Error: merged datasets have different contents in directory '%s'" % directory)
         return content
+
+    def formatDatasetTree(self, indent):
+        ret = '%sDatasetMerged("%s", [\n' % (indent, self.getName())
+        for dataset in self.datasets:
+            ret += dataset.formatDatasetTree(indent+"  ")
+        ret += "%s]),\n" % indent
+        return ret
 
     ## \var name
     # Name of the merged dataset
@@ -1943,6 +1970,13 @@ class DatasetAddedMC(DatasetMerged):
             raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateAllEventsToPUWeighted() has not been called." % self.name)
 
         return self.getCrossSection() / nAllEvents
+
+    def formatDatasetTree(self, indent):
+        ret = '%sDatasetAddedMC("%s", [\n' % (indent, self.getName())
+        for dataset in self.datasets:
+            ret += dataset.formatDatasetTree(indent+"  ")
+        ret += "%s]),\n" % indent
+        return ret
 
 ## Collection of Dataset objects which are managed together.
 # 
@@ -2050,6 +2084,11 @@ class DatasetManager:
         for d in self.datasets:
             copy.append(d.deepCopy())
         return copy
+
+    ## Set the centre-of-mass energy for all datasets
+    def setEnergy(self, energy):
+        for d in self.datasets:
+            d.setEnergy(energy)
 
     ## Get a list of centre-of-mass energies of the datasets
     def getEnergies(self):
@@ -2340,6 +2379,16 @@ class DatasetManager:
     ## Print dataset information.
     def printInfo(self):
         print self.formatInfo()
+
+    def formatDatasetTree(self):
+        ret = "DatasetManager.datasets = [\n"
+        for dataset in self.datasets:
+            ret += dataset.formatDatasetTree(indent="  ")
+        ret += "]"
+        return ret
+
+    def printDatasetTree(self):
+        print self.formatDatasetTree()
 
     ## \var datasets
     # List of dataset.Dataset (or dataset.DatasetMerged) objects to manage

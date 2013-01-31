@@ -4,5 +4,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 hPlusTauPtrSelectorFilter = cms.EDFilter("HPlusTauPtrSelectorFilter",
 	tauSelection = param.tauSelection.clone(),
         filter = cms.bool(True),
-        eventCounter = param.eventCounter.clone()
+        eventCounter = param.eventCounter.clone(),
+        vertexSrc = param.primaryVertexSelection.src,
 )

@@ -18,7 +18,10 @@ namespace HPlus {
     fNVerticesBinLowEdges(iConfig.getUntrackedParameter<std::vector<int> >("factorisationNVerticesBinLowEdges")),
     fTransverseMassRange(iConfig.getUntrackedParameter<std::vector<double> >("factorisationTransverseMassRange")),
     fFullMassRange(iConfig.getUntrackedParameter<std::vector<double> >("factorisationFullMassRange")),
+    fAllCounter(eventCounter.addCounter("Offline selection begins")),
     fVertexReweighting(eventCounter.addCounter("Vertex reweighting")),
+    fWJetsWeightCounter(eventCounter.addCounter("WJets inc+exl weight")),
+    fMETFiltersCounter(eventCounter.addCounter("MET filters")),
     fTriggerCounter(eventCounter.addCounter("Trigger_and_HLT_MET")),
     fPrimaryVertexCounter(eventCounter.addCounter("PrimaryVertex")),
     fTausExistCounter(eventCounter.addCounter("TauCandSelection")),
@@ -41,6 +44,7 @@ namespace HPlus {
     fCoincidenceAfterBjetsCounter(eventCounter.addCounter("coincidence after Btag")),
     fCoincidenceAfterDeltaPhiCounter(eventCounter.addCounter("coincidence after Delta phi")),
     fCoincidenceAfterSelectionCounter(eventCounter.addCounter("coincidence after full selection")),
+    fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, fHistoWrapper),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, fHistoWrapper),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, fHistoWrapper),
@@ -67,6 +71,7 @@ namespace HPlus {
     fVertexWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeightReader")),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauCandidates"),
     fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fHistoWrapper),
+    fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader")),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     fSFUncertaintyAfterStandardSelections(fHistoWrapper, "AfterStandardSelections")
     // fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
@@ -267,7 +272,7 @@ namespace HPlus {
 //------ Read the prescale for the event and set the event weight as the prescale
     fEventWeight.updatePrescale(iEvent);
     fTree.setPrescaleWeight(fEventWeight.getWeight());
-
+    increment(fAllCounter);
 
 //------ Vertex weight
     double myWeightBeforeVertexReweighting = fEventWeight.getWeight();
@@ -283,6 +288,20 @@ namespace HPlus {
     fTree.setNvertices(nVertices);
     hSelectionFlow->Fill(kQCDOrderVertexSelection);
     increment(fVertexReweighting);
+
+//------ For combining W+Jets inclusive and exclusive samples, do an event weighting here
+    if(!iEvent.isRealData()) {
+      const double wjetsWeight = fWJetsWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(wjetsWeight);
+    }
+    increment(fWJetsWeightCounter);
+
+//------ MET (noise) filters for data (reject events with instrumental fake MET)
+    if(iEvent.isRealData()) {
+      if(!fMETFilters.passedEvent(iEvent, iSetup)) return false;
+    }
+    increment(fMETFiltersCounter);
+
 //------ Apply trigger and HLT_MET cut or trigger parametrisation
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if (!triggerData.passedEvent()) return false;
@@ -311,7 +330,7 @@ namespace HPlus {
 
 //------ Tau candidate selection
     // Do tau candidate selection
-    TauSelection::Data tauCandidateData = fTauSelection.analyze(iEvent, iSetup);
+    TauSelection::Data tauCandidateData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
     if (!tauCandidateData.passedEvent()) return false;
     // Obtain MC matching - for EWK without genuine taus
     FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauCandidateData.getSelectedTau()));
@@ -345,7 +364,7 @@ namespace HPlus {
     }*/
 
 //------ Veto against second tau in event
-    VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau());
+    VetoTauSelection::Data vetoTauData = fVetoTauSelection.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau(), pvData.getSelectedVertex()->z());
     //    if (vetoTauData.passedEvent()) return false;
     if (!vetoTauData.passedEvent()) increment(fVetoTauCounter);
     // Note: no return statement should be added here

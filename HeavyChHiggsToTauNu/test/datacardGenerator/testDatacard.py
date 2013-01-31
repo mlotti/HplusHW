@@ -1,6 +1,6 @@
 DataCardName    = 'myDummyTestName'
-#Path            = '/home/wendland/data/v25b/freeze_forPREAPP'
-Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
+Path            = '/home/wendland/data/HIG-12-037/2012test'
+#Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 #MassPoints      = [80,90,100,120,140,150,155,160]
 #MassPoints      = [80,90,100,120,140,150,155,160]
 #MassPoints      = [80,120,160]
@@ -16,8 +16,6 @@ EmbeddingAnalysis     = "signalAnalysis"
 QCDFactorisedAnalysis = "QCDMeasurement"
 QCDInvertedAnalysis = "signalAnalysisInvertedTau"
 
-dataEra = "Run2011AB"
-
 RootFileName    = "histograms.root"
 
 # Rate counter definitions
@@ -27,7 +25,7 @@ FakeRateCounter = "EWKfaketaus:SelectedEvents"
 # Options
 OptionMassShape = "TransverseMass"
 #OptionMassShape = "FullMass"
-OptionReplaceEmbeddingByMC = False
+OptionReplaceEmbeddingByMC = True
 OptionIncludeSystematics = False # Set to true if the JES and PU uncertainties were produced
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
 OptionDoControlPlots = False

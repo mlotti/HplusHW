@@ -4,6 +4,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METFilters.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VetoTauSelection.h"
@@ -35,6 +36,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeightReader.h" // PU re-weight
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
@@ -103,7 +105,10 @@ namespace HPlus {
     std::vector<double> fFullMassRangeBinLowEdges;
 
     // Counters - order is important
+    Count fAllCounter;
     Count fVertexReweighting;
+    Count fWJetsWeightCounter;
+    Count fMETFiltersCounter;
     Count fTriggerCounter;
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
@@ -128,6 +133,7 @@ namespace HPlus {
     // Counters for propagating result into signal region from reversed rtau control region
 
     // The order here defines the order the subcounters are printed at the program termination
+    METFilters fMETFilters;
     TriggerSelection fTriggerSelection;
     VertexSelection fPrimaryVertexSelection;
     TauSelection fTauSelection;
@@ -156,6 +162,7 @@ namespace HPlus {
     VertexWeightReader fVertexWeightReader;
     FakeTauIdentifier fFakeTauIdentifier;
     TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
+    WeightReader fWJetsWeightReader;
 
     SignalAnalysisTree fTree;
     ScaleFactorUncertaintyManager fSFUncertaintyAfterStandardSelections;

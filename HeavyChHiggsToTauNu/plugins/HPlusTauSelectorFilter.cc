@@ -5,6 +5,9 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
 
+#include "DataFormats/VertexReco/interface/Vertex.h"
+//#include "DataFormats/VertexReco/interface/VertexFwd.h"
+
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
@@ -32,7 +35,8 @@ class HPlusTauSelectorFilterT: public edm::EDFilter {
     eventWeight(iConfig),
     histoWrapper(eventWeight, "Debug"),
     fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, histoWrapper),
-    fFilter(iConfig.getParameter<bool>("filter"))
+    fFilter(iConfig.getParameter<bool>("filter")),
+    fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc"))
   {
     produces<Product>();
     produces<bool>();
@@ -42,8 +46,13 @@ class HPlusTauSelectorFilterT: public edm::EDFilter {
 
  private:
   virtual bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    edm::Handle<edm::View<reco::Vertex> > hvert;
+    iEvent.getByLabel(fVertexSrc, hvert);
+    if(hvert->empty())
+      throw cms::Exception("LogicError") << "Vertex collection " << fVertexSrc.encode() << " is empty!" << std::endl;
+
     std::auto_ptr<Product> ret(new Product());
-    HPlus::TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
+    HPlus::TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup, hvert->ptrAt(0)->z());
     bool passed = tauData.passedEvent();
     if(passed) {
       pushBack(*ret, tauData.getSelectedTau());
@@ -69,6 +78,7 @@ class HPlusTauSelectorFilterT: public edm::EDFilter {
   HPlus::HistoWrapper histoWrapper;
   HPlus::TauSelection fOneProngTauSelection;
   bool fFilter;
+  edm::InputTag fVertexSrc;
 };
 
 
