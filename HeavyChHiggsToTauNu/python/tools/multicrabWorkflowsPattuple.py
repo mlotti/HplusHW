@@ -225,7 +225,8 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
 # addPattuple_44X() and other addPattuple_v*() functions. Here I tried
 # to catch the commonalities such that the other addPattuple_v*()
 # functions would be as short as possible.
-def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
+def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
+                    quadPFJetBTagTriggers=None, quadJetBTagTriggers=None, quadJetTriggers=None):
     mcTriggerTauMET = "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"
     mcTriggerQuadJet = "HLT_QuadJet80_v2"
     mcTriggerQuadJetBTag = "HLT_QuadJet75_55_35_20_BTagIP_VBF_v3"
@@ -268,38 +269,41 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None):
     #                OR: 1222/5000 = 0.24440
 
 
-    quadPFJetBTagTriggers = {
-        "MultiJet_190456-190738_2012A_Jul13": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v2"],
-        "MultiJet_190782-190949_2012A_Aug06": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v3"],
-        "MultiJet_191043-193621_2012A_Jul13": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v3",  # 191043-191411
-                                               "HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4"], # 191691-193621
-        "MultiJet_193834-194225_2012B_Jul13": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4"],
-    }
-    quadJetBTagTriggers = {
-        "MultiJet_190456-190738_2012A_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v2"],
-        "MultiJet_190782-190949_2012A_Aug06": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
-        "MultiJet_191043-193621_2012A_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
-        "MultiJet_193834-194225_2012B_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
-        "MultiJet_194270-196531_2012B_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
-        "MultiJet_198022-198523_2012C_Aug24": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v4"],
-        "MultiJet_198941-200601_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v4",  # 198941-199608
-                                                "HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"], # 199698-200601
-        "MultiJet_200961-202504_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"],
-        "MultiJet_202792-203742_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"],
-    }
-    quadJetTriggers = {
-        "MultiJet_190456-190738_2012A_Jul13": ["HLT_QuadJet80_v1"],
-        "MultiJet_190782-190949_2012A_Aug06": ["HLT_QuadJet80_v2"],
-        "MultiJet_191043-193621_2012A_Jul13": ["HLT_QuadJet80_v2"],
-        "MultiJet_193834-194225_2012B_Jul13": ["HLT_QuadJet80_v2"],
-        "MultiJet_194270-196531_2012B_Jul13": ["HLT_QuadJet80_v2",  # 194270-196027
-                                               "HLT_QuadJet80_v3"], # 196046-196531
-        "MultiJet_198022-198523_2012C_Aug24": ["HLT_QuadJet80_v4"],
-        "MultiJet_198941-200601_2012C_Prompt": ["HLT_QuadJet80_v4",  # 198941-199608
-                                                "HLT_QuadJet80_v6"], # 199698-200601
-        "MultiJet_200961-202504_2012C_Prompt": ["HLT_QuadJet80_v6"],
-        "MultiJet_202792-203742_2012C_Prompt": ["HLT_QuadJet80_v6"],
-    }
+    if quadPFJetBTagTriggers is None:
+        quadPFJetBTagTriggers = {
+            "MultiJet_190456-190738_2012A_Jul13": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v2"],
+            "MultiJet_190782-190949_2012A_Aug06": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v3"],
+            "MultiJet_191043-193621_2012A_Jul13": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v3",  # 191043-191411
+                                                   "HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4"], # 191691-193621
+            "MultiJet_193834-194225_2012B_Jul13": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4"],
+        }
+    if quadJetBTagTriggers is None:
+        quadJetBTagTriggers = {
+            "MultiJet_190456-190738_2012A_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v2"],
+            "MultiJet_190782-190949_2012A_Aug06": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+            "MultiJet_191043-193621_2012A_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+            "MultiJet_193834-194225_2012B_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+            "MultiJet_194270-196531_2012B_Jul13": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+            "MultiJet_198022-198523_2012C_Aug24": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v4"],
+            "MultiJet_198941-200601_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v4",  # 198941-199608
+                                                    "HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"], # 199698-200601
+            "MultiJet_200961-202504_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"],
+            "MultiJet_202792-203742_2012C_Prompt": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v6"],
+        }
+    if quadJetTriggers is None:
+        quadJetTriggers = {
+            "MultiJet_190456-190738_2012A_Jul13": ["HLT_QuadJet80_v1"],
+            "MultiJet_190782-190949_2012A_Aug06": ["HLT_QuadJet80_v2"],
+            "MultiJet_191043-193621_2012A_Jul13": ["HLT_QuadJet80_v2"],
+            "MultiJet_193834-194225_2012B_Jul13": ["HLT_QuadJet80_v2"],
+            "MultiJet_194270-196531_2012B_Jul13": ["HLT_QuadJet80_v2",  # 194270-196027
+                                                   "HLT_QuadJet80_v3"], # 196046-196531
+            "MultiJet_198022-198523_2012C_Aug24": ["HLT_QuadJet80_v4"],
+            "MultiJet_198941-200601_2012C_Prompt": ["HLT_QuadJet80_v4",  # 198941-199608
+                                                    "HLT_QuadJet80_v6"], # 199698-200601
+            "MultiJet_200961-202504_2012C_Prompt": ["HLT_QuadJet80_v6"],
+            "MultiJet_202792-203742_2012C_Prompt": ["HLT_QuadJet80_v6"],
+        }
 
     # Specifies the default
     # - number of jobs in pattuple processing
