@@ -26,6 +26,15 @@ datasets_MultiJet = [
     "MultiJet_203777-208407_2012D_Prompt",
 ]
 
+datasets_BJetPlusX = [
+    "BJetPlusX_193834-194225_2012B_Jul13",
+    "BJetPlusX_194270-196531_2012B_Jul13",
+    "BJetPlusX_198022-198523_2012C_Aug24",
+    "BJetPlusX_198941-203742_2012C_Prompt",
+    "BJetPlusX_201191-201191_2012C_Dec11",
+    "BJetPlusX_203777-208686_2012D_Prompt",
+]
+
 datasets_Signal = [
     "TTToHplusBWB_M80_Summer12",
     "TTToHplusBWB_M90_Summer12",
@@ -152,6 +161,7 @@ workflow = "pattuple_v53_2"
 tasks = [
     ("Tau", datasets_Tau),
     ("MultiJet", datasets_MultiJet),
+    ("BJetPlusX", datasets_BJetPlusX),
     ("Signal", datasets_Signal),
     ("QCD_VV_SingleTop", datasets_QCD+datasets_VV+datasets_SingleTop),
     ("TT_EWK", datasets_TT_EWK),
