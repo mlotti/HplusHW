@@ -13,7 +13,7 @@ set -e
 cvs co -r Colin_TaggingMode_June30 JetMETAnalysis/ecalDeadCellTools
 
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
-cvs co -r V00-03-01 -d CMGTools/External UserCode/CMG/CMGTools/External
+cvs co -r V00-02-10 -d CMGTools/External UserCode/CMG/CMGTools/External
 
 # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Tracking_failure_filter
 cvs co -r TrackingfailTagMode_18Oct11 -d SandBox/Skims UserCode/seema/SandBox/Skims

@@ -68,7 +68,7 @@ set -e
 # 28.3.2012/S.Lehti       CMSSW_4_4_4 Moved master to 444/ 444 tags
 # 13.9.2012/M.Kortelainen CMSSW_4_4_4 Updated PAT and tau tags
 # 17.9.2012/M.Kortelainen CMSSW_4_4_4 Cut-based electron ID tag
-
+# 31.1.2013/M.Kortelainen CMSSW_4_4_5 Updated PAT, tau, and lumi tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -83,18 +83,19 @@ eval $(scram runtime -sh)
 # Tau
 addpkg DataFormats/TauReco        CMSSW_5_2_4 # yes, this is correct
 addpkg RecoTauTag/TauTagTools     CMSSW_5_2_4
-addpkg RecoTauTag/RecoTau         V01-04-17 #equivalent to 04-14
-addpkg RecoTauTag/Configuration   V01-04-03
-addpkg CondFormats/EgammaObjects  V00-04-01
+addpkg RecoTauTag/RecoTau         V01-04-23-4XX-00 # HCP + new discriminants
+addpkg RecoTauTag/Configuration   V01-04-10-4XX 
+addpkg CondFormats/EgammaObjects  V00-04-00
+
 addpkg PhysicsTools/IsolationAlgos # You need to recompile PAT packages which depend on DataFormats/TauReco
 # PAT
-addpkg DataFormats/PatCandidates  V06-05-01
-addpkg PhysicsTools/PatAlgos      V08-07-47
+addpkg DataFormats/PatCandidates V06-04-38
+addpkg PhysicsTools/PatAlgos     V08-07-51
 addpkg PhysicsTools/PatUtils      V03-09-18-03
 addpkg CommonTools/ParticleFlow   V00-03-05-10
 addpkg FWCore/GuiBrowsers         V00-00-60
 ##### New tau discriminators, electron MVA discriminator
-cvs up -r 1.53 PhysicsTools/PatAlgos/python/tools/tauTools.py
+cvs up -r 1.52.10.4 PhysicsTools/PatAlgos/python/tools/tauTools.py
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 ####addpkg RecoJets/Configuration     V02-04-17
@@ -113,7 +114,7 @@ addpkg DataFormats/METReco        V03-03-07
 
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc
-addpkg RecoLuminosity/LumiDB      V03-04-02
+addpkg RecoLuminosity/LumiDB      V04-01-09
 
 # Electron ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/EgammaCutBasedIdentification
