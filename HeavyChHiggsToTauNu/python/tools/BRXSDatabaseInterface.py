@@ -5,6 +5,8 @@ import re
 from array import array
 
 import ROOT
+ROOT.gROOT.SetBatch(True)
+ROOT.gErrorIgnoreLevel = ROOT.kError
 
 class BRXSDatabaseInterface:
     def __init__(self,rootfile):
@@ -94,14 +96,17 @@ class BRXSDatabaseInterface:
     def graphToTanBeta(self,graph,xVariableName,selection,highTanbRegion=True,limitBRtoMin=True):
         # Don't modify the original
         graph = graph.Clone()
-        
+        if highTanbRegion:
+            print "GraphToTanBeta high tanb region",xVariableName,graph.GetName()
+        else:
+            print "GraphToTanBeta low tanb region",xVariableName,graph.GetName()
         for i in xrange(0, graph.GetN()):
             xval = graph.GetX()[i]
             yselection = xVariableName+"=="+str(xval)+"&&"+selection
             yval = graph.GetY()[i]
             ylimit = self.getTanbFromLightHpBR(yval,yselection,highTanbRegion)
             graph.SetPoint(i, xval, ylimit)
-
+            #print "    ",i, xval, yval, ylimit 
         graph.Sort()
 
         if limitBRtoMin:
@@ -171,6 +176,7 @@ class BRXSDatabaseInterface:
         pointsAtTanb1 = []
         pointBelowTanb1 = 0
         for i in xrange(0, graph.GetN()):
+#            print "check x,y",graph.GetX()[i],graph.GetY()[i]
             yval = graph.GetY()[i]
             if yval < 1:
                 pointBelowTanb1+=1
@@ -186,6 +192,7 @@ class BRXSDatabaseInterface:
             xmin = graph.GetX()[0]
             xmax = graph.GetX()[graph.GetN()-1]
             firstUnExcludedPoint = pointsAtTanb1[len(pointsAtTanb1)-1]+1
+#            print "check firstUnExcludedPoint",firstUnExcludedPoint
             if firstUnExcludedPoint < graph.GetN():
                 xmax = graph.GetX()[firstUnExcludedPoint]
 
@@ -193,7 +200,7 @@ class BRXSDatabaseInterface:
             y1 = graph.GetY()[firstUnExcludedPoint]
             x2 = graph.GetX()[firstUnExcludedPoint+1]
             y2 = graph.GetY()[firstUnExcludedPoint+1]
-
+#            print "check x1,y1,x2,y2",x1,y1,x2,y2
             graph = graph.Clone()
             for i,val in enumerate(pointsAtTanb1):
                 graph.RemovePoint(len(pointsAtTanb1)-1 - i)
@@ -250,7 +257,7 @@ class BRXSDatabaseInterface:
                 if self.isbetween(xmin,graphX[i-1],graphX[i]):
                     graphX.insert(i,xmin)
                     graphY.insert(i,ymin)
-
+#        print "check ret",graphX,graphY
         retGraph = ROOT.TGraph(len(graphX),array('d',graphX),array('d',graphY))
         retGraph.SetFillColor(graph.GetFillColor())
         retGraph.SetLineWidth(graph.GetLineWidth())
@@ -312,7 +319,8 @@ class BRXSDatabaseInterface:
         retGraph.SetName("mhLimit")
         retGraph.SetLineWidth(1)
         retGraph.SetLineStyle(7)
-        retGraph.SetFillColor(ROOT.TColor.GetColor("#ffffcc"))
+#        retGraph.SetFillColor(ROOT.TColor.GetColor("#ffffcc"))
+        retGraph.SetFillColor(ROOT.TColor.GetColor("#ffccff"))
         return retGraph
 
     def getLimits(self,xVariableName,yVariableName,selection,limit):
@@ -378,12 +386,14 @@ class BRXSDatabaseInterface:
         value  =-1
         error1 = 0
         error2 = 0
-        mh_re = re.compile("(?P<value>\S+)\+-(?P<error1>\S+)\+-(?P<error2>\S+)")
+#        mh_re = re.compile("(?P<value>\S+)\+-(?P<error1>\S+)\+-(?P<error2>\S+)")
+        mh_re = re.compile("(?P<value>\S+)\+-(?P<error1>\S+)")
         match = mh_re.search(mhMeasurement)
         if match:
             value  = float(match.group("value"))
             error1 = float(match.group("error1"))
-            error2 = float(match.group("error2"))
+#            error2 = float(match.group("error2"))
+        print "mh value,error",value,error1+error2
         return value,error1+error2 # errors to be added linearly
                                                                                                                             
     def clean(self,graph):
@@ -493,8 +503,9 @@ class BRXSDatabaseInterface:
         """
     def getMinimum(self,variable,selection):
         min = 9999.
+#        print "check getMinimum",variable,selection,self.getValues(variable,selection,roundValues=-1)
         for v in self.getValues(variable,selection,roundValues=-1):
-            if v < min:
+            if v < min and v > 0:
                 min = v
         return min
 
@@ -505,7 +516,7 @@ class BRXSDatabaseInterface:
         tanbs = self.getValues("tanb",selection,roundValues=1)
         for tgb in tanbs:
             value = self.get("tanb",variable,selection+"&&tanb==%s"%tgb)
-            if value < min:
+            if value < min and value > 0:
                 min = value
                 tanb = tgb
         return tanb
@@ -529,6 +540,7 @@ class BRXSDatabaseInterface:
                                                                                         
     def getMaximum(self,variable,selection):
         max = -9999.
+#        print "check getMaximum",len(self.getValues(variable,selection,roundValues=-1)),variable,selection,self.getValues(variable,selection,roundValues=-1)
         for v in self.getValues(variable,selection,roundValues=-1):
             if v > max:
                 max = v
@@ -551,27 +563,40 @@ class BRXSDatabaseInterface:
         return a*x + b
 
     
-    def Print(self):
-	result_re = re.compile(self.program+"_results")
+    def Print(self,variable="",selection=""):
+        if variable == "":
+            #print branch names
+            result_re = re.compile(self.program+"_results")
 
-	keys = self.fIN.GetListOfKeys()
-	obj = keys.First()
-	while obj:
-	    print "  ",obj.GetName()
-	    match = result_re.search(obj.GetName())
-	    if match:
-		tree = self.fIN.Get(match.group(0))
-		for branch in tree.GetListOfBranches():
-                    print "    ",branch.GetName()
-	    obj = keys.After(obj)
-	print
-
-
+            keys = self.fIN.GetListOfKeys()
+            obj = keys.First()
+            while obj:
+                print "  ",obj.GetName()
+                match = result_re.search(obj.GetName())
+                if match:
+                    tree = self.fIN.Get(match.group(0))
+                    for branch in tree.GetListOfBranches():
+                        print "    ",branch.GetName()
+                obj = keys.After(obj)
+            print
+        else:
+            #print stored variable values
+            print "Variable  ",variable
+            print "Selection ",selection
+            tanbs = self.getValues("tanb",selection,roundValues=-1)
+            print "tanb      ",variable
+            for tanb in tanbs:
+                sele = self.floatSelection(selection+"&&tanb==%s"%tanb)
+                value = self.getValues(variable,sele,roundValues=-1)
+                tanbstr = str(tanb)
+                while len(tanbstr) < 10:
+                    tanbstr += " "
+                print tanbstr,value[0]
 
     def lowerPoint(self,variable,variableRef,selection):
 
 	values = self.getValues(variable,selection,roundValues=-1)
-
+#        print "      check lowerpoint",variable,variableRef,selection,values
         returnValue = 0
         for v in values:
             if v == variableRef:
@@ -584,7 +609,7 @@ class BRXSDatabaseInterface:
     def higherPoint(self,variable,variableRef,selection):
 
         values = self.getValues(variable,selection,roundValues=-1)
-
+#        print "      check higherPoint",variable,variableRef,selection,values
         returnValue = 0
         if variableRef < values[0]:
             return 0
@@ -619,12 +644,37 @@ class BRXSDatabaseInterface:
 	return value
 
     def linearBRInterpolation(self,variable,target,min,max,selection):
+#        print "check linearBRInterpolation",variable,target,min,max,selection
+#        print "      self.getMinimum(variable,selection)",self.getMinimum(variable,selection)
+#        print "      self.getMaximum(variable,selection)",self.getMaximum(variable,selection)
+#        print "tanbs",len(self.getValues("tanb",selection,roundValues=-1)),self.getValues("tanb",selection,roundValues=-1)
+#        print variable,len(self.getValues(variable,selection,roundValues=-1))
+        if min >= max:
+            newMin = 999
+            newMax = 0
+            tanbs = self.getValues("tanb",selection,roundValues=-1)
+            values = self.getValues(variable,selection,roundValues=-1)
+            for i in range(0,len(tanbs)-1):
+#                if tanb < 10:
+#                    continue
+#                value = self.getOLD(variable,selection+"&&tanb=="+str(tanb))
+                print "tanb,value",tanbs[i],values[i],min,max
+                if values[i] < target:
+                    newMin = tanbs[i]
+                else:
+                    newMax = tanbs[i]
+                    break
+            min = newMin
+            max = newMax
+
         if target < self.getMinimum(variable,selection):
             print "Warning,",variable,"target",target,"< minimum possible value",self.getMinimum(variable,selection),selection
             return 1
         if target > self.getMaximum(variable,selection):
             print "Warning,",variable,"target",target,"> maximum possible value",self.getMaximum(variable,selection),selection
-            return 1
+            if max < 10:
+                return -1
+            return 100
         if max <= self.getMinimumTanb(variable,selection) and target > self.getMaximum(variable,selection+"&&tanb<%s"%self.getMinimumTanb(variable,selection)):
             print "Warning,",variable,"target",target,"> maximum possible value (at tanb<",self.getMinimumTanb(variable,selection),")",self.getMaximum(variable,selection+"&&tanb<%s"%self.getMinimumTanb(variable,selection)),selection
             return -1
@@ -633,7 +683,7 @@ class BRXSDatabaseInterface:
         y1 = self.interpolate(variable,x1,selection)
         x2 = float(max)
         y2 = self.interpolate(variable,x2,selection)
-
+#        print "    check linInt x1,y1,x2,y2",x1,y1,x2,y2
         if x1 < 1 and x2 < 1:
             return 1
         #low tanb region br increases as tanb decreases. To prevent patological oscillation which never converges
@@ -642,9 +692,10 @@ class BRXSDatabaseInterface:
         b = float(x1*y2 - y1*x2)/(x1-x2)
         a = float(y1-b)/x1
         x = (target - b)/a
-
+#        print "    check x",x
         newx1 = self.lowerPoint("tanb",x,selection)
         newx2 = self.higherPoint("tanb",x,selection)
+#        print "    check newx1,newx2 a",newx1,newx2
         if x > self.getMaximum("tanb",selection):
             newx1 = x2
             newx2 = self.getMaximum("tanb",selection) - 1
@@ -653,7 +704,12 @@ class BRXSDatabaseInterface:
             newx1 = self.getMinimum("tanb",selection)
             newx2 = newx1 + 0.1
 
-        if int(10*newx1) == int(10*x1) and int(10*newx2) == int(10*x2):
+        if x < 1:
+#            print "    x < 1"
+            return 1
+#        print "    check newx1,newx2 b",newx1,newx2
+#        if int(10*newx1) == int(10*x1) and int(10*newx2) == int(10*x2):
+        if self.isEqual(newx1,x1) and self.isEqual(newx2,x2):
             return x
         else:
             return self.linearBRInterpolation(variable,target,newx1,newx2,selection)
@@ -665,7 +721,7 @@ class BRXSDatabaseInterface:
         if highTanbRegion:
             tanbmin = 10
             tanbmax = 20
-        return self.linearBRInterpolation(self.BRvariable,targetBR,tanbmin,tanbmax,selection)
+        return self.linearBRInterpolation(self.BRvariable,targetBR,tanbmin,tanbmax,self.floatSelection(selection))
             
     def getCutValue(self,variable,selection):
 	var_re = re.compile(variable+"==(?P<value>(\d+))")
@@ -684,7 +740,7 @@ def usage():
     sys.exit()
 
 def test():
-    print "BRXSDatabase test"
+    print "BRXSDatabase test program"
 
     if len(sys.argv) == 1:
 	usage()
@@ -697,9 +753,13 @@ def test():
 
 	db = BRXSDatabaseInterface(match.group(0))
 #	db.Print()
+        db.Print(variable="BR_tHpb*BR_Hp_taunu",selection="mHp==155&&mu==200&&Xt==2000&&m2==200")
+#        db.Print(variable="BR_Hp_taunu",selection="mHp==155&&mu==200&&Xt==2000&&m2==200")
+        """
 	db.setSelection("mu==200&&Xt==2000&&m2==200")
 
         db.mhLimit("mHp","mu==200&&Xt==2000&&m2==200","125.9+-0.6+-0.2")
+        """
         """
         x = array('d',[100.0,110,120.0,140.0,150.0,155.0,160.0,160.0,155.0,150.0,140.0,120.0,100.0])
         y = array('d',[7.4,7.4,5.93285611233,4.08070975404,2.74869717846,1.0,1.0,1.0,1.0,1.0,1.7449304635,2.63037522267,3.28961963754])
