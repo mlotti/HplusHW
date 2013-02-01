@@ -62,7 +62,11 @@ class ConfigBuilder:
                  useTriggerMatchedTaus = True,
                  useJERSmearedJets = True,
                  useBTagDB = False,
-                 customizeAnalysis = None,
+                 customizeLightAnalysis = None,
+                 customizeHeavyAnalysis = None,
+
+                 doLightAnalysis = True,
+                 doHeavyAnalysis = False,
 
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
@@ -93,7 +97,13 @@ class ConfigBuilder:
         self.useTriggerMatchedTaus = useTriggerMatchedTaus
         self.useJERSmearedJets = useJERSmearedJets
         self.useBTagDB = useBTagDB
-        self.customizeAnalysis = customizeAnalysis
+        self.customizeLightAnalysis = customizeLightAnalysis
+        self.customizeHeavyAnalysis = customizeHeavyAnalysis
+
+        self.doLightAnalysis = doLightAnalysis
+        self.doHeavyAnalysis = doHeavyAnalysis
+        if not self.doLightAnalysis and not self.doHeavyAnalysis:
+            raise Exception("At least one of doLightAnalysis and doHeavyAnalysis must be set to True (otherwise nothing is done)")
 
         self.doSystematics = doSystematics
         self.doJESVariation = doJESVariation
@@ -235,14 +245,19 @@ class ConfigBuilder:
 
         # Create analysis module(s)
         modules = createAnalysesFunction(param)
+        analysisLightModules = []
+        analysisLightNames = []
+        analysisHeavyModules = []
+        analysisHeavyNames = []
         if self.dataVersion.isData():
-            analysisModules = modules
-            analysisNames = analysisNames_[:]
+            if self.doLightAnalysis:
+                analysisLightModules = modules
+                analysisLightNames = analysisNames_[:]
+            if self.doHeavyAnalysis:
+                analysisHeavyModules = [param.cloneForHeavyAnalysis(mod) for mod in modules]
+                analysisHeavyNames = [n+"Heavy" for n in analysisNames_]
         else:
             # For MC, produce the PU-reweighted analyses
-            analysisModules = []
-            analysisNames = []
-
             # No PU reweighting, it is sufficient to do calculate WJets weights only one
             if self.options.wjetsWeighting != 0 and not self.applyPUReweight:
                 process.wjetsWeight = wjetsWeight.getWJetsWeight(self.dataVersion, self.options, self.inputWorkflow, None)
@@ -268,9 +283,17 @@ class ConfigBuilder:
                             mod.wjetsWeightReader.weightSrc = "wjetsWeight"+dataEra
                             mod.wjetsWeightReader.enabled = True
 
+                    if self.doLightAnalysis:
+                        analysisLightModules.append(mod)
+                        analysisLightNames.append(name+dataEra)
+                    if self.doHeavyAnalysis:
+                        analysisLightModules.append(param.cloneForHeavyAnalysis(mod))
+                        analysisLightNames.append(name+"Heavy"+dataEra)
+
                     print "Added analysis for PU weight era =", dataEra
-                    analysisModules.append(mod)
-                    analysisNames.append(name+dataEra)
+
+        analysisModules = analysisLightModules+analysisHeavyModules
+        analysisNames = analysisLightNames+analysisHeavyNames
 
         analysisNamesForSystematics = []
         # For optimisation, no systematics
@@ -285,8 +308,12 @@ class ConfigBuilder:
             module.tauEmbeddingStatus = (self.options.tauEmbeddingInput != 0)
             if len(additionalCounters) > 0:
                 module.eventCounter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
-        analysisModules[0].eventCounter.printMainCounter = cms.untracked.bool(True)
-        #analysisModules[0].eventCounter.printSubCounters = cms.untracked.bool(True)
+        if len(analysisLightModules) > 0:
+            analysisLightModules[0].eventCounter.printMainCounter = cms.untracked.bool(True)
+            #analysisLightModules[0].eventCounter.printSubCounters = cms.untracked.bool(True)
+        if len(analysisHeavyModules) > 0:
+            analysisHeavyModules[0].eventCounter.printMainCounter = cms.untracked.bool(True)
+            #analysisHeavyModules[0].eventCounter.printSubCounters = cms.untracked.bool(True)
 
         # Prescale fetching done automatically for data
         if self.dataVersion.isData() and self.options.tauEmbeddingInput == 0 and self.doPrescalesForData:
@@ -298,9 +325,12 @@ class ConfigBuilder:
                 module.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
         # Allow customization AFTER all settings have been applied, and BEFORE the printout
-        if self.customizeAnalysis != None:
-            for module in analysisModules:
-                self.customizeAnalysis(module)
+        if self.customizeLightAnalysis is not None:
+            for module in analysisLightModules:
+                self.customizeLightAnalysis(module)
+        if self.customizeHeavyAnalysis is not None:
+            for module in analysisHeavyModules:
+                self.customizeHeavyAnalysis(module)
         
         # Print output
         self._printModule(analysisModules[0])

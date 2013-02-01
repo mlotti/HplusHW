@@ -456,6 +456,13 @@ vertexWeightReader = cms.untracked.PSet(
     enabled = cms.bool(False)
 )
 
+# Default parameters for heavy H+ analysis
+def cloneForHeavyAnalysis(lightModule):
+    heavyModule = lightModule.clone()
+    # Insert here all parameter updates heavy H+ needs on top of the light H+ analysis
+    # 'lightModule' is essentially process.signalAnalysis (or equivalent)
+    return heavyModule
+
 # Set trigger efficiency / scale factor depending on tau selection params
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as TriggerEfficiency
 def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
