@@ -263,7 +263,7 @@ namespace HPlus {
     VertexAssignmentAnalysis fVertexAssignmentAnalysis;
     FakeTauIdentifier fFakeTauIdentifier;
     METFilters fMETFilters;
-    METPhiOscillationCorrection = fMETPhiOscillationCorrection;
+    METPhiOscillationCorrection fMETPhiOscillationCorrection;
     TauEmbeddingMuonIsolationQuantifier fTauEmbeddingMuonIsolationQuantifier;
 
     SignalAnalysisTree fTree;

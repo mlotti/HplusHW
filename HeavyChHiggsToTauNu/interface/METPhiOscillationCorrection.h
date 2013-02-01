@@ -2,6 +2,7 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_METPhiOscillationCorrection_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_METPhiOscillationCorrection_h
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 
@@ -14,8 +15,7 @@ namespace edm {
 namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
-  class VertexSelection;
-  class METSelection;
+  class WrappedTH2;
 
   /**
    * Class to contain plots to be repeated at different steps of analysis
@@ -46,11 +46,11 @@ namespace HPlus {
     ~METPhiOscillationCorrection();
 
     // Use silentAnalyze if you do not want to fill histograms or increment counters
-    void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const METSelection::Data& metData);
-    void silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const METSelection::Data& metData);
+    METPhiOscillationCorrection::Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const METSelection::Data& metData);
+    METPhiOscillationCorrection::Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const METSelection::Data& metData);
 
   private:
-    void privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const METSelection::Data& metData);
+    METPhiOscillationCorrection::Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const METSelection::Data& metData);
     // Input parameters
 
     // Counters

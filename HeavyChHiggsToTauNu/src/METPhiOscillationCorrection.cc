@@ -42,10 +42,10 @@ namespace HPlus {
     // Initialize
     double myCorrectionFactor = 1.0;
     // Fill histograms for determining correction factors
-    hNVerticesVsMetX->Fill(nVertices, metData.getSelectedMET->x());
-    hNVerticesVsMetY->Fill(nVertices, metData.getSelectedMET->y());
-    
+    hNVerticesVsMetX->Fill(nVertices, metData.getSelectedMET()->px());
+    hNVerticesVsMetY->Fill(nVertices, metData.getSelectedMET()->py());
+
     // Return result
-    return Data(this, myCorrectionFactor)
+    return Data(this, myCorrectionFactor);
   }
 }
