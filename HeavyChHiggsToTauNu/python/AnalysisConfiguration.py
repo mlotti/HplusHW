@@ -69,6 +69,7 @@ class ConfigBuilder:
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
                  doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
                  allowTooManyAnalyzers = False, # Allow arbitrary number of analyzers (beware, it might take looong to run and merge)
+                 printAnalyzerNames = False,
                  inputWorkflow = "pattuple_v44_4", # Name of the workflow, whose output is used as an input, needed for WJets weighting
                  ):
         self.options, self.dataVersion = HChOptions.getOptionsDataVersion(dataVersion)
@@ -100,6 +101,7 @@ class ConfigBuilder:
         self.doOptimisation = doOptimisation
         self.optimisationScheme = optimisationScheme
         self.allowTooManyAnalyzers = allowTooManyAnalyzers
+        self.printAnalyzerNames = printAnalyzerNames
 
         self.inputWorkflow = inputWorkflow
 
@@ -161,12 +163,12 @@ class ConfigBuilder:
     ## Accumulate the number of analyzers to a category
     #
     # \param key     Analyzer category name
-    # \param number  Number (of analyzers) to add to the cateogyr
-    def _accumulateAnalyzers(self, key, number):
+    # \param names   List of analyzer names to add to the category
+    def _accumulateAnalyzers(self, key, names):
         if not key in self.numberOfAnalyzers:
             self.analyzerCategories.append(key)
 
-        self.numberOfAnalyzers[key] = self.numberOfAnalyzers.get(key, 0) + number
+        self.numberOfAnalyzers[key] = self.numberOfAnalyzers.get(key, []) + names
 
     ## Checks that the number of analyzers is sensible
     #
@@ -177,12 +179,23 @@ class ConfigBuilder:
         fmt = "  %%-%ds: %%d" % width
         s = 0
         for cat in self.analyzerCategories:
-            n = self.numberOfAnalyzers[cat]
+            n = len(self.numberOfAnalyzers[cat])
             s += n
             print fmt % (cat, n)
         print "  "+("-" * (width+4))
         print fmt % ("Total", s)
         print
+
+        if self.printAnalyzerNames:
+            print "Analyzer module names:"
+            names = []
+            for x in self.numberOfAnalyzers.itervalues():
+                names.extend(x)
+            names.sort()
+            for name in names:
+                print "  %s" % name
+            print
+
 
         if s > tooManyAnalyzersLimit:
             if self.allowTooManyAnalyzers:
@@ -264,7 +277,7 @@ class ConfigBuilder:
         # For embedding input, the systematics should be evaluated with the analyzer with Muon eff, Tau trigger eff, CaloMET>60 (this is added to analysisNamesForSystematics later)
         if not self.doOptimisation and self.options.tauEmbeddingInput == 0:
             analysisNamesForSystematics = analysisNames[:]
-        self._accumulateAnalyzers("Data eras", len(analysisModules))
+        self._accumulateAnalyzers("Data eras", analysisNames)
 
         for module in analysisModules:
             module.Tree.fill = self.doFillTree
@@ -310,7 +323,7 @@ class ConfigBuilder:
         else:
             for module, name in zip(analysisModules, analysisNames):
                 names = self.optimisationScheme.generateVariations(process, additionalCounters, process.commonSequence, module, name)
-                self._accumulateAnalyzers("Optimisation", len(names))
+                self._accumulateAnalyzers("Optimisation", names)
                 analysisNamesForSystematics.extend(names)
 
         # Against electron scan
@@ -527,7 +540,7 @@ class ConfigBuilder:
             "againstElectronTight",
             "againstElectronMVA"
             ]
-        N = 0
+        names = []
         for module, name in zip(analysisModules, analysisNames):
             for eleDisc in electronDiscriminators:
                 mod = module.clone()
@@ -535,10 +548,10 @@ class ConfigBuilder:
                 mod.tauSelection.againstElectronDiscriminator = eleDisc
                 modName = name+eleDisc[0].upper()+eleDisc[1:]
                 setattr(process, modName, mod)
+                names.append(modName)
                 path = cms.Path(process.commonSequence * mod)
                 setattr(process, modName+"Path", path)
-                N += 1
-        self._accumulateAnalyzers("AgainstElectron scan", N)
+        self._accumulateAnalyzers("AgainstElectron scan", names)
  
     ## Build "tau embedding"-like preselection for normal MC
     #
@@ -555,16 +568,17 @@ class ConfigBuilder:
         if self.options.tauEmbeddingInput != 0:
             raise Exception("tauEmbegginInput clashes with doTauEmbeddingLikePreselection")
         
+        allNames = []
         def add(name, sequence, module, counters):
             module.eventCounter.counters = [cms.InputTag(c) for c in counters]
             setattr(process, name+"Sequence", sequence)
             setattr(process, name, module)
+            allNames.append(name)
             path = cms.Path(sequence * module)
             setattr(process, name+"Path", path)
 
         retNames = []
 
-        N = 0
         for module, name in zip(analysisModules, analysisNames):
             # Preselection similar to tau embedding selection (genuine tau+3 jets+lepton vetoes), no tau+MET trigger required
             seq = cms.Sequence(process.commonSequence)
@@ -572,7 +586,6 @@ class ConfigBuilder:
             counters = additionalCounters[:]
             counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, seq, mod, prefix=name+"EmbeddingLikePreselection"))
             add(name+"TauEmbeddingLikePreselection", seq, mod, counters)
-            N += 1
 
             # Preselection similar to tau embedding selection (genuine tau+3 jets+lepton vetoes), tau+MET trigger required
             seq = cms.Sequence(process.commonSequence)
@@ -580,7 +593,6 @@ class ConfigBuilder:
             counters = additionalCounters[:]
             counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, seq, mod, prefix=name+"EmbeddingLikeTriggeredPreselection", disableTrigger=False))
             add(name+"TauEmbeddingLikeTriggeredPreselection", seq, mod, counters)
-            N += 1
             
             # Genuine tau preselection
             seq = cms.Sequence(process.commonSequence)
@@ -588,7 +600,6 @@ class ConfigBuilder:
             counters = additionalCounters[:]
             counters.extend(tauEmbeddingCustomisations.addGenuineTauPreselection(process, seq, mod, prefix=name+"GenuineTauPreselection"))
             add(name+"GenuineTauPreselection", seq, mod, counters)
-            N += 1
 
             # Require genuine tau after tau ID in analysis
             mod = module.clone()
@@ -597,8 +608,7 @@ class ConfigBuilder:
             path = cms.Path(process.commonSequence * mod)
             setattr(process, name+"GenuineTauPath", path)
             retNames.append(name+"GenuineTau")
-            N += 1
-        self._accumulateAnalyzers("Tau embedding -like preselection", N)
+        self._accumulateAnalyzers("Tau embedding -like preselection", allNames)
         return retNames
 
     ## Build additional analyses for tau embedding input
@@ -610,8 +620,8 @@ class ConfigBuilder:
         if self.options.tauEmbeddingInput == 0:
             return []
 
+        allNames = []
         retNames = []
-        N = 0
         for module, name in zip(analysisModules, analysisNames):
             postfix = "MEff"
             mod = module.clone()
@@ -619,7 +629,7 @@ class ConfigBuilder:
             path = cms.Path(process.commonSequence * mod)
             setattr(process, name+postfix, mod)
             setattr(process, name+postfix+"Path", path)
-            N += 1
+            allNames.append(name+postfix)
 
             postfix += "CaloMet60"
             mod = mod.clone()
@@ -627,7 +637,7 @@ class ConfigBuilder:
             path = cms.Path(process.commonSequence * mod)
             setattr(process, name+postfix, mod)
             setattr(process, name+postfix+"Path", path)
-            N += 1
+            allNames.append(name+postfix)
 
             postfix += "TEff"
             mod = mod.clone()
@@ -635,9 +645,9 @@ class ConfigBuilder:
             path = cms.Path(process.commonSequence * mod)
             setattr(process, name+postfix, mod)
             setattr(process, name+postfix+"Path", path)
+            allNames.append(name+postfix)
             retNames.append(name+postfix)
-            N += 1
-        self._accumulateAnalyzers("Tau embedding analyses", N)
+        self._accumulateAnalyzers("Tau embedding analyses", allNames)
         return retNames
 
     ## Build JES variation
@@ -672,25 +682,22 @@ class ConfigBuilder:
         module.Tree.fill = False        
         module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
 
-        jesVariation.addTESVariation(process, name, "TESPlus",  module, "Up")
-        jesVariation.addTESVariation(process, name, "TESMinus", module, "Down")
-        N = 2
+        names = []
+        names.append(jesVariation.addTESVariation(process, name, "TESPlus",  module, "Up"))
+        names.append(jesVariation.addTESVariation(process, name, "TESMinus", module, "Down"))
 
         if doJetUnclusteredVariation:
             # Do all variations beyond TES
-            jesVariation.addJESVariation(process, name, "JESPlus",  module, "Up")
-            jesVariation.addJESVariation(process, name, "JESMinus", module, "Down")
-            N += 2
+            names.append(jesVariation.addJESVariation(process, name, "JESPlus",  module, "Up"))
+            names.append(jesVariation.addJESVariation(process, name, "JESMinus", module, "Down"))
     
-            jesVariation.addJERVariation(process, name, "JERPlus",  module, "Up")
-            jesVariation.addJERVariation(process, name, "JERMinus", module, "Down")
-            N += 2
+            names.append(jesVariation.addJERVariation(process, name, "JERPlus",  module, "Up"))
+            names.append(jesVariation.addJERVariation(process, name, "JERMinus", module, "Down"))
     
-            jesVariation.addUESVariation(process, name, "METPlus",  module, "Up")
-            jesVariation.addUESVariation(process, name, "METMinus", module, "Down")
-            N += 2
+            names.append(jesVariation.addUESVariation(process, name, "METPlus",  module, "Up"))
+            names.append(jesVariation.addUESVariation(process, name, "METMinus", module, "Down"))
 
-        self._accumulateAnalyzers("JES variation", N)
+        self._accumulateAnalyzers("JES variation", names)
 
     ## Build PU weight variation
     #
@@ -723,6 +730,8 @@ class ConfigBuilder:
                 process.commonSequence *= weightMod
             mod.wjetsWeightReader.weightSrc = weightName
 
+        names = []
+
         # Up variation
         module = getattr(process, name).clone()
         module.Tree.fill = False
@@ -735,6 +744,7 @@ class ConfigBuilder:
         path = cms.Path(process.commonSequence * module)
         setattr(process, name+"PUWeightPlus", module)
         setattr(process, name+"PUWeightPlusPath", path)
+        names.append(name+"PUWeightPlus")
 
         # Down variation
         module = getattr(process, name).clone()
@@ -748,5 +758,6 @@ class ConfigBuilder:
         path = cms.Path(process.commonSequence * module)
         setattr(process, name+"PUWeightMinus", module)
         setattr(process, name+"PUWeightMinusPath", path)
+        names.append(name+"PUWeightMinus")
 
-        self._accumulateAnalyzers("PU weight variation", 2)
+        self._accumulateAnalyzers("PU weight variation", names)
