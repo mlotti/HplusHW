@@ -320,7 +320,8 @@ class BRXSDatabaseInterface:
         retGraph.SetLineWidth(1)
         retGraph.SetLineStyle(7)
 #        retGraph.SetFillColor(ROOT.TColor.GetColor("#ffffcc"))
-        retGraph.SetFillColor(ROOT.TColor.GetColor("#ffccff"))
+        retGraph.SetFillColor(7)
+        retGraph.SetFillStyle(3008)
         return retGraph
 
     def getLimits(self,xVariableName,yVariableName,selection,limit):
