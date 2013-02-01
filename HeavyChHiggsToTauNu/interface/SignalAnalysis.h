@@ -37,6 +37,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingMuonIsolationQuantifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METFilters.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METPhiOscillationCorrection.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
@@ -262,6 +263,7 @@ namespace HPlus {
     VertexAssignmentAnalysis fVertexAssignmentAnalysis;
     FakeTauIdentifier fFakeTauIdentifier;
     METFilters fMETFilters;
+    METPhiOscillationCorrection = fMETPhiOscillationCorrection;
     TauEmbeddingMuonIsolationQuantifier fTauEmbeddingMuonIsolationQuantifier;
 
     SignalAnalysisTree fTree;

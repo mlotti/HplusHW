@@ -209,6 +209,7 @@ namespace HPlus {
     fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
+    fMETPhiOscillationCorrection(iConfig, eventCounter, fHistoWrapper),
     fTauEmbeddingMuonIsolationQuantifier(eventCounter, fHistoWrapper),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     // Scale factor uncertainties
@@ -777,7 +778,8 @@ namespace HPlus {
 
 //------ MET cut
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
-    hMet->Fill(metData.getSelectedMET()->et()); 
+    hMet->Fill(metData.getSelectedMET()->et());
+    fMETPhiOscillationCorrection.analyze(iEvent, iSetup, nVertices, metData);
 
     //BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     //    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
