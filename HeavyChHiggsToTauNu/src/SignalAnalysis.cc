@@ -734,8 +734,8 @@ namespace HPlus {
       fTree.setFillWeight(fEventWeight.getWeight());
       fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
       fTree.setTop(TopSelectionData.getTopP4());
+      // Sphericity, Aplanarity, Planarity, alphaT
       fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
-      // Sphericity, Aplanarity, Planarity
       fTree.setSphericity(evtTopologyData.Kinematics().fSphericity);
       fTree.setAplanarity(evtTopologyData.Kinematics().fAplanarity);
       fTree.setPlanarity(evtTopologyData.Kinematics().fPlanarity);

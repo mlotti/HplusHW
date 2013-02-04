@@ -286,7 +286,11 @@ EvtTopology = cms.untracked.PSet(
     #discriminator = cms.untracked.string("test"),
     #discriminatorCut = cms.untracked.double(0.0),
     #alphaT = cms.untracked.double(-5.00)
-    alphaT = cms.untracked.double(-5.0)
+    alphaT = cms.untracked.double(-5.0),
+    sphericity = cms.untracked.double(-5.0),
+    aplanarity = cms.untracked.double(-5.0),
+    planarity = cms.untracked.double(-5.0),
+    circularity = cms.untracked.double(-5.0)
 )
 
 GlobalElectronVeto = cms.untracked.PSet(
