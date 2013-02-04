@@ -12,8 +12,8 @@
 
 
 namespace HPlus {
-  VertexSelection::Data::Data(const VertexSelection *vertexSelection, bool passedEvent):
-    fVertexSelection(vertexSelection), fPassedEvent(passedEvent) {}
+  VertexSelection::Data::Data():
+    fPassedEvent(false) {}
   VertexSelection::Data::~Data() {}
 
   VertexSelection::VertexSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HistoWrapper& histoWrapper):
@@ -41,19 +41,23 @@ namespace HPlus {
   }
 
   VertexSelection::Data VertexSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    // Reset variables
-    fSelectedVertex = edm::Ptr<reco::Vertex>();
+    Data output;
 
-    if(!fEnabled)
-      return Data(this, true);
+    if(!fEnabled) {
+      output.fPassedEvent = true;
+      return output;
+    }
 
     edm::Handle<edm::View<reco::Vertex> > hvertex;
     iEvent.getByLabel(fSrc, hvertex);
 
-    if(hvertex->empty())
-      return Data(this, false);
+    if(hvertex->empty()) {
+      output.fPassedEvent = false;
+      return output;
+    }
 
-    fSelectedVertex = hvertex->ptrAt(0);
-    return Data(this, true);
+    output.fSelectedVertex = hvertex->ptrAt(0);
+    output.fPassedEvent = true;
+    return output;
   }
 }

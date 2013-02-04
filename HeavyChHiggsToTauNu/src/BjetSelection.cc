@@ -24,8 +24,8 @@ void printDaughters(const reco::Candidate& p);
 
 
 namespace HPlus {
-  BjetSelection::Data::Data(const BjetSelection *bjetSelection, bool passedEvent):
-    fBjetSelection(bjetSelection), fPassedEvent(passedEvent) {}
+  BjetSelection::Data::Data():
+    fPassedEvent(false) {}
   BjetSelection::Data::~Data() {}
 
   BjetSelection::BjetSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
@@ -95,6 +95,8 @@ namespace HPlus {
   }
 
   BjetSelection::Data BjetSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, const edm::Ptr<reco::Candidate>& tau , const edm::Ptr<reco::MET>& met ) {
+    Data output;
+
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel(fSrc, genParticles);
 
@@ -107,8 +109,6 @@ namespace HPlus {
     edm::Handle <std::vector<LorentzVector> > oneAndThreeProngTaus;
     iEvent.getByLabel(fOneAndThreeProngTauSrc,oneAndThreeProngTaus);	  
 
-    bool passEvent = false;
-      
 //    double nan = std::numeric_limits<double>::quiet_NaN();
 
     bool bjetTopSideFound = false;
@@ -118,20 +118,20 @@ namespace HPlus {
     double deltaRMin = 999999;
     double pTmax = 0;
     edm::Ptr<pat::Jet> BjetMaxPt;
-    int nonbjets;      
-   
+    int nonbjets;
+
     // max pt b jet and b jet most far from tau jet
     for(edm::PtrVector<pat::Jet>::const_iterator iterb = bjets.begin(); iterb != bjets.end(); ++iterb) {
       edm::Ptr<pat::Jet> iJetb = *iterb;
 
-      nonbjets = 0;    
+      nonbjets = 0;
       // search non-b-jets
       for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter ) {
 	edm::Ptr<pat::Jet> iJet = *iter;
 	double deltaR = ROOT::Math::VectorUtil::DeltaR(iJetb->p4(), iJet->p4());
 	if ( deltaR > 0.4 ) nonbjets++;
       }
-      
+
 
       if (iJetb->pt() > pTmax ) {
 	pTmax = iJetb->pt();
@@ -143,14 +143,14 @@ namespace HPlus {
       if ( deltaRtau > deltaRMax) {
 	deltaRMax = deltaRtau;	
 	bjetTopSideFound = true;
-	BjetTopSide = iJetb;
+	output.BjetTopSide = iJetb;
       }
     }
 
 
-    if( !bjetTopSideFound  ) return Data(this, passEvent);
-    hPtBjetTopSide->Fill(BjetTopSide->pt());
-    hEtaBjetTopSide->Fill(BjetTopSide->eta());
+    if( !bjetTopSideFound  ) return output;
+    hPtBjetTopSide->Fill(output.BjetTopSide->pt());
+    hEtaBjetTopSide->Fill(output.BjetTopSide->eta());
     hDeltaMaxTauB->Fill(deltaRMax); 
     hPtBjetMax->Fill(BjetMaxPt->pt());  
     hEtaBjetMax->Fill(BjetMaxPt->eta());  
@@ -171,8 +171,8 @@ namespace HPlus {
       }
     }
     if( !bjetTopSideFound  ) return Data(this, passEvent);
-    hPtBjetTopSide->Fill(BjetTopSide->pt());
-    hEtaBjetTopSide->Fill(BjetTopSide->eta());
+    hPtBjetTopSide->Fill(output.BjetTopSide->pt());
+    hEtaBjetTopSide->Fill(output.BjetTopSide->eta());
     hDeltaMaxTauB->Fill(deltaRMax); 
     */
 
@@ -181,25 +181,21 @@ namespace HPlus {
     // b jet closest to tau jet from remaining jets   
     for(edm::PtrVector<pat::Jet>::const_iterator iterb = bjets.begin(); iterb != bjets.end(); ++iterb) {
       edm::Ptr<pat::Jet> iJetb = *iterb;
-      double deltaRBTopSide = ROOT::Math::VectorUtil::DeltaR(BjetTopSide->p4(), iJetb->p4());
+      double deltaRBTopSide = ROOT::Math::VectorUtil::DeltaR(output.BjetTopSide->p4(), iJetb->p4());
       if ( deltaRBTopSide < 0.4) continue;
       double deltaRtau = ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJetb->p4());
       if ( deltaRtau < deltaRMin) {
 	deltaRMin = deltaRtau;	 
 	bjetTauSideFound = true;
-	BjetTauSide = iJetb;
+	output.BjetTauSide = iJetb;
       }
     }
 
     if( bjetTauSideFound  ) {
       hDeltaMinTauB->Fill(deltaRMin); 
-      hPtBjetTauSide->Fill(BjetTauSide->pt());
-      hEtaBjetTauSide->Fill(BjetTauSide->eta());
+      hPtBjetTauSide->Fill(output.BjetTauSide->pt());
+      hEtaBjetTauSide->Fill(output.BjetTauSide->eta());
     }
-
-   
-
-   
 
     // matched event
 
@@ -392,7 +388,7 @@ namespace HPlus {
 		hDeltaRtauBtauSide->Fill(deltaRtaub);      
 	      }
 	      // test with b jet from tau side
-	      double deltaR = ROOT::Math::VectorUtil::DeltaR(BjetTauSide->p4(),p.p4() );
+	      double deltaR = ROOT::Math::VectorUtil::DeltaR(output.BjetTauSide->p4(),p.p4() );
 	      if ( deltaR < 0.4) bjetHiggsSide = true;
 	      idbjetHiggsSide = id;
 	    }
@@ -400,8 +396,8 @@ namespace HPlus {
 	} 
 	if(bjetHiggsSide) {
 	  hDeltaMinTauBTrue->Fill(deltaRMin);      
-	  hPtBjetTauSideTrue->Fill(BjetTauSide->pt());
-	  hEtaBjetTauSideTrue->Fill(BjetTauSide->eta());
+	  hPtBjetTauSideTrue->Fill(output.BjetTauSide->pt());
+	  hEtaBjetTauSideTrue->Fill(output.BjetTauSide->eta());
 	}
       }
       
@@ -420,15 +416,15 @@ namespace HPlus {
 	      //	      hBquarkFromTopSideEta->Fill(bEta);
 	      //	      hBquarkFromTopSidePt->Fill(bPt);
 	      // test with b jet from tau side
-	      double deltaR = ROOT::Math::VectorUtil::DeltaR(BjetTopSide->p4(),p.p4() ); 
+	      double deltaR = ROOT::Math::VectorUtil::DeltaR(output.BjetTopSide->p4(),p.p4() ); 
 	      if ( deltaR < 0.4) bjetTopSide = true;
 	    }
 	  }
 	}
 	if(  bjetTopSide ) {
 	  hDeltaMaxTopBTrue->Fill(deltaRMax);     
-	  hPtBjetTopSideTrue->Fill(BjetTopSide->pt());
-	  hEtaBjetTopSideTrue->Fill(BjetTopSide->eta());
+	  hPtBjetTopSideTrue->Fill(output.BjetTopSide->pt());
+	  hEtaBjetTopSideTrue->Fill(output.BjetTopSide->eta());
 	}
       } 
 
@@ -493,9 +489,9 @@ namespace HPlus {
 
 
   
-    passEvent = true; 
-    if( !bjetTopSideFound) passEvent = false;   
-    return Data(this, passEvent);
+    output.fPassedEvent = true;
+    if( !bjetTopSideFound) output.fPassedEvent = false;
+    return Data();
   }
   
 }

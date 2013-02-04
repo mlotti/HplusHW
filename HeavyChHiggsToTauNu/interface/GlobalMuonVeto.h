@@ -37,27 +37,40 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const GlobalMuonVeto *globalMuonVeto, bool passedEvent);
+      Data();
       ~Data();
 
-      bool passedEvent() const { return fPassedEvent; }
-      const float getSelectedMuonPt() const { return fGlobalMuonVeto->fSelectedMuonPt; }
-      const float getSelectedMuonEta() const { return fGlobalMuonVeto->fSelectedMuonEta; }
-
-      const float getSelectedMuonPtBeforePtCut() const { return fGlobalMuonVeto->fSelectedMuonPtBeforePtCut; }
+      const bool passedEvent() const { return fPassedEvent; }
+      const float getSelectedMuonPt() const { return fSelectedMuonPt; }
+      const float getSelectedMuonEta() const { return fSelectedMuonEta; }
+      const float getSelectedMuonPtBeforePtCut() const { return fSelectedMuonPtBeforePtCut; }
 
       /// Muon collection after all selections - size should be zero if veto condition is passed
-      const edm::PtrVector<pat::Muon>& getSelectedMuons() { return fGlobalMuonVeto->fSelectedMuons; }
+      const edm::PtrVector<pat::Muon>& getSelectedMuons() { return fSelectedMuons; }
       /// Muon collection after all selections except pt and eta cuts
-      const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforePtAndEtaCuts() { return fGlobalMuonVeto->fSelectedMuonsBeforePtAndEtaCuts; }
+      const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforePtAndEtaCuts() { return fSelectedMuonsBeforePtAndEtaCuts; }
       /// Muon collection after all selections except isolation and pt and eta cuts
-      const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforeIsolationAndPtAndEtaCuts() { return fGlobalMuonVeto->fSelectedMuonsBeforeIsolationAndPtAndEtaCuts; }
+      const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforeIsolationAndPtAndEtaCuts() { return fSelectedMuonsBeforeIsolationAndPtAndEtaCuts; }
       /// Muon collection after all selections except isolation
-      const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforeIsolation() { return fGlobalMuonVeto->fSelectedMuonsBeforeIsolation; }
+      const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforeIsolation() { return fSelectedMuonsBeforeIsolation; }
+
+      friend class GlobalMuonVeto;
 
     private:
-      const GlobalMuonVeto *fGlobalMuonVeto;
-      const bool fPassedEvent;
+      bool fPassedEvent;
+      // pt and eta of muon with highest pt passing the selections
+      float fSelectedMuonPt;
+      float fSelectedMuonEta;
+      float fSelectedMuonPtBeforePtCut;
+      /// Muon collection after all selections
+      edm::PtrVector<pat::Muon> fSelectedMuons;
+      /// Muon collection after all selections except pt and eta cuts
+      edm::PtrVector<pat::Muon> fSelectedMuonsBeforePtAndEtaCuts;
+      /// Muon collection after all selections except isolation and pt and eta cuts
+      edm::PtrVector<pat::Muon> fSelectedMuonsBeforeIsolationAndPtAndEtaCuts;
+      /// Muon collection after all selections except isolation
+      edm::PtrVector<pat::Muon> fSelectedMuonsBeforeIsolation;
+
     };
 
     GlobalMuonVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -75,7 +88,7 @@ namespace HPlus {
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
     Data privateAnalyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
 
-    void MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
+    void MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex, GlobalMuonVeto::Data& output);
 
     // Input parameters
     edm::InputTag fMuonCollectionName;
@@ -148,10 +161,6 @@ namespace HPlus {
     WrappedTH1 *hMuonEta_GlobalTrack_AfterSelection;
     WrappedTH1 *hMuonImpactParameter;
     WrappedTH1 *hMuonZdiff;
-    // pt and eta of muon with highest pt passing the selections
-    float fSelectedMuonPt;
-    float fSelectedMuonEta;
-    float fSelectedMuonPtBeforePtCut;
 
     // booleans
     bool bMuonPresent;
@@ -171,14 +180,6 @@ namespace HPlus {
     bool bMuonMatchingMCmuon;
     bool bMuonMatchingMCmuonFromW;
 
-    /// Muon collection after all selections
-    edm::PtrVector<pat::Muon> fSelectedMuons;
-    /// Muon collection after all selections except pt and eta cuts
-    edm::PtrVector<pat::Muon> fSelectedMuonsBeforePtAndEtaCuts;
-    /// Muon collection after all selections except isolation and pt and eta cuts
-    edm::PtrVector<pat::Muon> fSelectedMuonsBeforeIsolationAndPtAndEtaCuts;
-    /// Muon collection after all selections except isolation
-    edm::PtrVector<pat::Muon> fSelectedMuonsBeforeIsolation;
   };
 }
 

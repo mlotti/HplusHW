@@ -7,6 +7,7 @@
 #include "DataFormats/PatCandidates/interface/Tau.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIDBase.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
@@ -33,22 +34,28 @@ namespace HPlus {
      *       In that case, the first in the list is the selected tau
      *       in the event (the most isolated).
      */
+    enum TauSelectionOperationMode {
+      kNormalTauID, // Tau candidate selection + tau ID selections
+      kTauCandidateSelectionOnly // Only tau candidate selection is applied
+    };
+
     class Data {
     public:
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const TauSelection *tauSelection, bool passedEvent);
+      Data(TauIDBase* pointerToTauID, const TauSelection::TauSelectionOperationMode& operationMode, HistoWrapper* histoWrapper, EventCounter* eventCounter);
       ~Data();
       /// Returns true, if the selected tau has passed all selections
       bool passedEvent() const { return fPassedEvent; }
       /// Returns list of all tau candidates prior to any cuts
-      const edm::PtrVector<pat::Tau>& getAllTauObjects() const { return fTauSelection->fAllTauCandidates; }
+      const edm::PtrVector<pat::Tau>& getAllTauObjects() const { return fAllTauCandidates; }
+      /// Returns list of selected tau candidatess (i.e. taus after tau candidate selection, no isolation or rtau applied); Note: list can be empty if no tau was selected
+      const edm::PtrVector<pat::Tau>& getSelectedTausBeforeIsolation() const { return fSelectedTauCandidates; }
       /// Returns list of selected taus (i.e. taus after tau candidate selection or after full tau ID); Note: list can be empty if no tau was selected
       const edm::PtrVector<pat::Tau>& getSelectedTaus() const;
       /// Returns selected tau in the event (i.e. tau after tau candidate selection or after full tau ID); Note: list can be empty if no tau was selected
-   
-     const edm::Ptr<pat::Tau> getSelectedTau() const;
+      const edm::Ptr<pat::Tau> getSelectedTau() const;
       /// Returns the number of prongs of the selected tau
       const size_t getNProngsOfSelectedTau() const;
       /// Returns the number of prongs of the selected tau
@@ -67,15 +74,21 @@ namespace HPlus {
       const bool selectedTauPassesNProngsAndRtauButNotIsolation() const;
       /// Returns true if the selected tau passes a specified discriminator
       const bool selectedTauPassesDiscriminator(std::string discr, double cutPoint) const;
-      
-    private:
-      const TauSelection *fTauSelection;
-      bool fPassedEvent; // non-const because need to be set from TauSelectionFactorized via setSelectedTau(...)
-    };
 
-    enum TauSelectionOperationMode {
-      kNormalTauID, // Tau candidate selection + tau ID selections
-      kTauCandidateSelectionOnly // Only tau candidate selection is applied
+      friend class TauSelection;
+
+    private:
+      bool fPassedEvent; // non-const because need to be set from TauSelectionFactorized via setSelectedTau(...)
+      // Selected tau
+      edm::PtrVector<pat::Tau> fAllTauCandidates;
+      edm::PtrVector<pat::Tau> fSelectedTauCandidates;
+      edm::PtrVector<pat::Tau> fSelectedTaus;
+      /// Pointer to TauID object (not owner)
+      TauIDBase* fPointerToTauID;
+      /// Copy of operation mode of tau selection
+      const TauSelection::TauSelectionOperationMode fCopyOfOperationMode;
+      HistoWrapper* fHistoWrapper; // Needed for disabling histogramming temporarily when accessing TauID object; pointer needed because of copy constructor
+      EventCounter* fEventCounter; // Needed for disabling counter incrementation temporarily when accessing TauID object; pointer needed because of copy constructor
     };
 
     TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label = "TauSelection");
@@ -108,7 +121,7 @@ namespace HPlus {
     /// Default tauID called from analyze or silentAnalyze
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ);
     /// Method for doing tau selection
-    bool doTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ);
+    void doTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ, TauSelection::Data& output);
     /// Method for handling the result of tauID factorization
     bool doFactorizationLookup();
     // Internal histogramming routines
@@ -210,11 +223,6 @@ namespace HPlus {
     WrappedTH2 *hGenuineTauEtaPhiAfterNProngs;
     WrappedTH2 *hGenuineTauEtaPhiAfterNProngsAndDeadVeto;
 
-    // Selected tau
-    edm::PtrVector<pat::Tau> fAllTauCandidates;
-    edm::PtrVector<pat::Tau> fSelectedTauCandidates;
-    edm::PtrVector<pat::Tau> fSelectedTaus;
-  
   };
 }
 

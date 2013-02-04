@@ -22,15 +22,17 @@ namespace HPlus {
   public:
     class Data {
     public:
-      Data(const VertexSelection *vertexSelection, bool passedEvent);
+      Data();
       ~Data();
 
-      bool passedEvent() const { return fPassedEvent; }
-      const edm::Ptr<reco::Vertex>& getSelectedVertex() const { return fVertexSelection->fSelectedVertex; }
+      const bool passedEvent() const { return fPassedEvent; }
+      const edm::Ptr<reco::Vertex>& getSelectedVertex() const { return fSelectedVertex; }
+
+      friend class VertexSelection;
 
     private:
-      const VertexSelection *fVertexSelection;
-      const bool fPassedEvent;
+      bool fPassedEvent;
+      edm::Ptr<reco::Vertex> fSelectedVertex;
     };
 
     VertexSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -49,8 +51,6 @@ namespace HPlus {
     
     edm::InputTag fSrc;
     bool fEnabled;
-
-    edm::Ptr<reco::Vertex> fSelectedVertex;
   };
 }
 

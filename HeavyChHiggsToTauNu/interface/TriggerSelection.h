@@ -70,29 +70,22 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const TriggerSelection *triggerSelection, const TriggerPath *triggerPath, bool passedEvent);
+      Data();
       ~Data();
 
-      bool passedEvent() const { return fPassedEvent; }
-
-      pat::TriggerObjectRef getHltMetObject() const {
-        return fTriggerSelection->fHltMet;
-      }
-
-      bool hasTriggerPath() const {
-        return fTriggerPath;
-      }
-
-      size_t getTriggerTauSize() const {
-        return fTriggerPath->getTauObjects().size();
-      }
-
+      const bool passedEvent() const { return fPassedEvent; }
+      const pat::TriggerObjectRef getHltMetObject() const { return fHltMet; }
+      const bool hasTriggerPath() const { return fTriggerPath; }
+      const size_t getTriggerTauSize() const { return fTriggerPath->getTauObjects().size(); }
       const pat::TriggerObjectRefVector& getTriggerTaus() const { return fTriggerPath->getTauObjects(); }
 
+      friend class TriggerSelection;
+
     private:
-      const TriggerSelection *fTriggerSelection;
-      const TriggerPath *fTriggerPath;
-      const bool fPassedEvent;
+      TriggerPath *fTriggerPath;
+      bool fPassedEvent;
+      // Analysis results
+      pat::TriggerObjectRef fHltMet;
     };
 
     TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -104,7 +97,7 @@ namespace HPlus {
     
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-    bool passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath);
+    bool passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath, TriggerSelection::Data& output);
 
   private:
     std::vector<TriggerPath* > triggerPaths;
@@ -133,8 +126,6 @@ namespace HPlus {
     WrappedTH1 *hTriggerParametrisationWeight;
     WrappedTH1 *hControlSelectionType;
 
-    // Analysis results
-    pat::TriggerObjectRef fHltMet;
 
     bool fThrowIfNoMet;
   };

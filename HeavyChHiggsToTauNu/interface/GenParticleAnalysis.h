@@ -26,19 +26,22 @@ namespace HPlus {
   public:
     class Data {
     public:
-
       Data();
-      Data(const GenParticleAnalysis *analysis);
+      Data(bool dummy);
       ~Data();
 
       void check() const;
 
       const edm::Ptr<reco::GenMET>& getGenMET() const {
 	check();
-        return fAnalysis->fGenMet;
+        return fGenMet;
       }
+
+      friend class GenParticleAnalysis;
+
     private:
-      const GenParticleAnalysis *fAnalysis;
+      bool fEmptyConstructorUsed;
+      edm::Ptr<reco::GenMET> fGenMet;
     };
 
     GenParticleAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -128,7 +131,6 @@ namespace HPlus {
     WrappedTH1 *hWEta;
     WrappedTH1 *hWPhi;
 
-    edm::Ptr<reco::GenMET> fGenMet;
   };
 }
 

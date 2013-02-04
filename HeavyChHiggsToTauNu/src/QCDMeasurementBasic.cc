@@ -533,7 +533,8 @@ namespace HPlus {
       }
     }
     // ABCD test
-    if (metData.getSelectedMET()->et() < metData.getCutValue()) {
+    // FIXME
+/*    if (metData.getSelectedMET()->et() < metData.getCutValue()) {
       if (tauCandidateData.selectedTauPassesNProngs() && tauCandidateData.selectedTauPassesRtau()) {
         if (tauCandidateData.selectedTauPassesNProngsAndRtauButNotIsolation()) {
           // Basic point for ABCD
@@ -546,7 +547,7 @@ namespace HPlus {
           hABCDMtShapesAfterTauLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(transverseMass);
         }
       }
-    }
+    }*/
 
 // ----- MET, btag, deltaPhi(tau,MET), top reco leg
     // MET cut

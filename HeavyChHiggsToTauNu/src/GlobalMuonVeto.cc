@@ -17,8 +17,11 @@
 std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
 
 namespace HPlus {
-  GlobalMuonVeto::Data::Data(const GlobalMuonVeto *globalMuonVeto, bool passedEvent):
-    fGlobalMuonVeto(globalMuonVeto), fPassedEvent(passedEvent) {}
+  GlobalMuonVeto::Data::Data():
+    fPassedEvent(false),
+    fSelectedMuonPt(0.),
+    fSelectedMuonEta(0.),
+    fSelectedMuonPtBeforePtCut(0.) {}
   GlobalMuonVeto::Data::~Data() {}
 
   GlobalMuonVeto::GlobalMuonVeto(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
@@ -134,11 +137,13 @@ namespace HPlus {
   }
 
   GlobalMuonVeto::Data GlobalMuonVeto::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
+    Data output;
     // Do analysis
-    MuonSelection(iEvent,iSetup, primaryVertex);
-    if (fSelectedMuons.size())
+    MuonSelection(iEvent,iSetup, primaryVertex, output);
+    output.fPassedEvent = output.fSelectedMuons.size() == 0;
+    if (output.fPassedEvent)
       increment(fGlobalMuonVetoCounter);
-    return Data(this, fSelectedMuons.size() == 0);
+    return output;
   }
 
   GlobalMuonVeto::Data GlobalMuonVeto::silentAnalyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
@@ -158,24 +163,17 @@ namespace HPlus {
   }
 
   GlobalMuonVeto::Data GlobalMuonVeto::privateAnalyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
+    Data output;
     // Do analysis
-    MuonSelection(iEvent,iSetup, primaryVertex);
-    if (fSelectedMuonsBeforeIsolation.size())
+    MuonSelection(iEvent, iSetup, primaryVertex, output);
+    output.fPassedEvent = output.fSelectedMuonsBeforeIsolation.size() == 0;
+    if (output.fPassedEvent)
       increment(fGlobalMuonVetoCounter);
-    return Data(this, fSelectedMuonsBeforeIsolation.size() == 0);
+    return output;
   }
 
 
-  void GlobalMuonVeto::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex){
-    // Reset data variables
-    fSelectedMuonPt = -1.0;
-    fSelectedMuonPtBeforePtCut = -1.0;
-    fSelectedMuonEta = -999.99;
-    fSelectedMuons.clear();
-    fSelectedMuonsBeforePtAndEtaCuts.clear();
-    fSelectedMuonsBeforeIsolationAndPtAndEtaCuts.clear();
-    fSelectedMuonsBeforeIsolation.clear();
-    
+  void GlobalMuonVeto::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex, GlobalMuonVeto::Data& output){
     // the Collection is currently NOT available in the PatTuples but it will be soon (next pattuple production)
     /* FIX ME
    // Create and attach handle to (Offline) Primary Vertices Collection
@@ -245,14 +243,13 @@ namespace HPlus {
     bool bMuonRelIsolationR03Cut = false;
     bool bMuonGoodPVCut = false;
 
-    
     // Loop over all Muons
     for(edm::PtrVector<pat::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
 
       // Keep track of the muons analyzed
       bMuonPresent = true;
       increment(fMuonIDSubCountAllMuonCandidates);
-      
+
       // Keep track of the MuonID's. Just for my information. 
       // 28/10/2010 - pat::Muon::muonID() used instead of pat::Muon::isGood(). The latter is there only for backward compatibility.
       if( (*iMuon)->muonID("All") ) increment(fMuonIDSubCountAll);
@@ -347,11 +344,11 @@ namespace HPlus {
         if(std::abs(myInnerTrackRef->dz(primaryVertex->position())) < 1.0) continue; // This is the z-impact parameter w.r.t to selected primary vertex
         bMuonGoodPVCut = true;
       }
-      fSelectedMuonsBeforeIsolationAndPtAndEtaCuts.push_back(*iMuon);
+      output.fSelectedMuonsBeforeIsolationAndPtAndEtaCuts.push_back(*iMuon);
       
       // Store muons before isolation, but passing pt and eta cuts
       if (myMuonPt > fMuonPtCut && std::fabs(myMuonEta) < fMuonEtaCut)
-        fSelectedMuonsBeforeIsolation.push_back(*iMuon);
+        output.fSelectedMuonsBeforeIsolation.push_back(*iMuon);
       
       // 7) Relative Isolation
       /*(around cone of DeltaR = 0.3) < 0.15. 
@@ -375,23 +372,23 @@ namespace HPlus {
 
 
       bMuonRelIsolationR03Cut = true;
-      fSelectedMuonsBeforePtAndEtaCuts.push_back(*iMuon);
+      output.fSelectedMuonsBeforePtAndEtaCuts.push_back(*iMuon);
 
       hMuonEta_identified->Fill(myMuonEta);
 
-      if(std::abs(myMuonEta) < fMuonEtaCut) {
-        myHighestMuonPtBeforePtCut = std::max(myHighestMuonPtBeforePtCut, myMuonPt);
-        hMuonPt_identified_eta->Fill(myMuonPt);
-      }
-
-      // 8) Apply Pt and Eta cut requirements
-      if (myMuonPt < fMuonPtCut) continue;
-      bMuonPtCut = true;
+      // 8) Apply eta cut
       if (std::abs(myMuonEta) >= fMuonEtaCut) continue;
       bMuonEtaCut = true;
-      fSelectedMuons.push_back(*iMuon);
+      myHighestMuonPtBeforePtCut = std::max(myHighestMuonPtBeforePtCut, myMuonPt);
+      hMuonPt_identified_eta->Fill(myMuonPt);
 
-      
+      // 8) Apply Pt and Eta cut requirements
+
+      if (myMuonPt < fMuonPtCut) continue;
+      bMuonPtCut = true;
+      output.fSelectedMuons.push_back(*iMuon);
+
+
       // If Muon survives all cuts (1->8) then it is considered an isolated Muon. Now find the max Muon Pt of such isolated muons.
       if (myMuonPt > myHighestMuonPt) {
 	myHighestMuonPt  = myMuonPt;
@@ -497,10 +494,10 @@ namespace HPlus {
       }
     }
     // Store the highest Muon Pt and Eta
-    fSelectedMuonPt  = myHighestMuonPt;
-    fSelectedMuonPtBeforePtCut  = myHighestMuonPtBeforePtCut;
-    fSelectedMuonEta = myHighestMuonEta;
-    hNumberOfSelectedMuons->Fill(fSelectedMuons.size());
+    output.fSelectedMuonPt  = myHighestMuonPt;
+    output.fSelectedMuonPtBeforePtCut = myHighestMuonPtBeforePtCut;
+    output.fSelectedMuonEta = myHighestMuonEta;
+    hNumberOfSelectedMuons->Fill(output.fSelectedMuons.size());
     // std::cout << "fSelectedMuonPt = " << fSelectedMuonsPt << ", fSelectedMuonsEta = " << fSelectedMuonsEta << std::endl;   
   }//eof: bool GlobalMuonVeto::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   

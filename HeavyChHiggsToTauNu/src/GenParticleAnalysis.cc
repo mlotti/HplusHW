@@ -29,11 +29,14 @@ void printDaughters(const reco::Candidate& p);
 
 
 namespace HPlus {
-  GenParticleAnalysis::Data::Data(): fAnalysis (0) {}
-  GenParticleAnalysis::Data::Data(const GenParticleAnalysis *analysis): fAnalysis(analysis) {}
+  GenParticleAnalysis::Data::Data():
+    fEmptyConstructorUsed(true) {}
+  GenParticleAnalysis::Data::Data(bool dummy):
+    fEmptyConstructorUsed(false) {}
+
   GenParticleAnalysis::Data::~Data() {}
   void GenParticleAnalysis::Data::check() const {
-    if(!fAnalysis)
+    if(fEmptyConstructorUsed)
       throw cms::Exception("Assert") << "GenParticleAnalysis::Data: This Data object was constructed with the default constructor, not with EmbeddingMuonEfficiency::applyEventWeight(). There is something wrong in your code." << std::endl;
   }
 
@@ -122,7 +125,9 @@ namespace HPlus {
   }
 
   GenParticleAnalysis::Data GenParticleAnalysis::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
-    if (iEvent.isRealData()) return 0;
+    Data output(true);
+    
+    if (iEvent.isRealData()) return output;
 
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel(fSrc, genParticles);
@@ -142,9 +147,9 @@ namespace HPlus {
 
     edm::Handle<edm::View<reco::GenMET> > hmet;
     iEvent.getByLabel(fMetSrc, hmet);
-    fGenMet = hmet->ptrAt(0);
+    output.fGenMet = hmet->ptrAt(0);
 
-    hGenMET->Fill(fGenMet->et());
+    hGenMET->Fill(output.fGenMet->et());
 
 
     // loop over all genParticles
@@ -570,7 +575,7 @@ namespace HPlus {
       }
     }
 
-    return Data(this);
+    return output;
   }
    //eof: void GenParticleAnalysis::analyze()
 

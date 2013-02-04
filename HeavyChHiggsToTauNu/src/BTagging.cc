@@ -25,16 +25,31 @@ void printDaughters(const reco::Candidate& p);
 
 
 namespace HPlus {
-  BTagging::Data::Data(const BTagging *bTagging, bool passedEvent):
-    fBTagging(bTagging), fPassedEvent(passedEvent) {}
+  BTagging::Data::Data():
+    fPassedEvent(false),
+    iNBtags(-1),
+    fMaxDiscriminatorValue(-1.0),
+    fScaleFactor(1.0),
+    fScaleFactorAbsoluteUncertainty(0.0),
+    fScaleFactorRelativeUncertainty(0.0),
+    hPointerToScaleFactor(0),
+    hPointerToBTagAbsoluteUncertainty(0),
+    hPointerToBTagRelativeUncertainty(0)
+    { }
   BTagging::Data::~Data() {}
 
   const bool BTagging::Data::hasGenuineBJets() const {
-    for (edm::PtrVector<pat::Jet>::const_iterator iter = fBTagging->fSelectedJets.begin(); iter != fBTagging->fSelectedJets.end(); ++iter) {
+    for (edm::PtrVector<pat::Jet>::const_iterator iter = fSelectedJets.begin(); iter != fSelectedJets.end(); ++iter) {
       int myFlavor = std::abs((*iter)->partonFlavour());
       if (myFlavor == 5) return true;
     }
     return false;
+  }
+
+  void BTagging::Data::fillScaleFactorHistograms() {
+    hPointerToScaleFactor->Fill(fScaleFactor);
+    hPointerToBTagAbsoluteUncertainty->Fill(fScaleFactorAbsoluteUncertainty);
+    hPointerToBTagRelativeUncertainty->Fill(fScaleFactorRelativeUncertainty);
   }
 
   BTagging::BTaggingScaleFactor::BTaggingScaleFactor() {
@@ -237,9 +252,8 @@ namespace HPlus {
     fTaggedTaggedRealBJetsSubCount(eventCounter.addSubCounter("b-tagging", "Btagged real b jets")),
     fTaggedNoTaggedJet(eventCounter.addSubCounter("b-tagging", "no b-tagged jet")),
     fTaggedOneTaggedJet(eventCounter.addSubCounter("b-tagging", "one b-tagged jet")),
-    fTaggedTwoTaggedJets(eventCounter.addSubCounter("b-tagging", "two b-tagged jets")),
+    fTaggedTwoTaggedJets(eventCounter.addSubCounter("b-tagging", "two b-tagged jets"))
     //    fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta  cut")),
-    fMaxDiscriminatorValue(0)
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("Btagging");
@@ -266,8 +280,6 @@ namespace HPlus {
     hEta2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_eta", "bjet2_pt", 100, -5., 5.);
     hNumberOfBtaggedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfBtaggedJets", "NumberOfBtaggedJets", 10, 0., 10.);
     hNumberOfBtaggedJetsIncludingSubLeading = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfBtaggedJetsIncludingSubLeading", "NumberOfBtaggedJetsIncludingSubLeading", 10, 0., 10.);
-    
-    hScaleFactor = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "scaleFactor", "scaleFactor;b-tag/mistag scale factor;N_{events}/0.05", 100, 0., 5.);
     hMCMatchForPassedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "MCMatchForPassedJets", "MCMatchForPassedJets;;N_{jets}", 3, 0., 3.);
     if (hMCMatchForPassedJets->isActive()) {
       hMCMatchForPassedJets->GetXaxis()->SetBinLabel(1, "b jet");
@@ -275,6 +287,8 @@ namespace HPlus {
       hMCMatchForPassedJets->GetXaxis()->SetBinLabel(3, "no match");
     }
 
+    // Scale factor histograms (needed for evaluating syst. uncertainty of btagging in datacard generator)
+    hScaleFactor = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "scaleFactor", "scaleFactor;b-tag/mistag scale factor;N_{events}/0.05", 100, 0., 5.);
     hBTagRelativeUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "BTagRelativeUncertainty", "BTagRelativeUncertainty;Relative Uncertainty;N_{events}", 3000, 0., 3.);
     hBTagAbsoluteUncertainty = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "BTagAbsoluteUncertainty", "BTagAbsoluteUncertainty;Absolute Uncertainty;N_{events}", 3000, 0., 3.);
 
@@ -371,19 +385,14 @@ namespace HPlus {
   }
 
   BTagging::Data BTagging::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets) {
-    // Reset variables
-    iNBtags = -1;
-    fMaxDiscriminatorValue = 0.;
-    fScaleFactor = 1.0;
-    fScaleFactorAbsoluteUncertainty = 0.0;
-    fScaleFactorRelativeUncertainty = 0.0;
-    bool passEvent = false;
-
-    fSelectedJets.clear();
-    fSelectedJets.reserve(jets.size());
-    fSelectedSubLeadingJets.clear();
-    fSelectedSubLeadingJets.reserve(jets.size());
-
+    // Initialise output data object
+    Data output;
+    output.hPointerToScaleFactor = hScaleFactor;
+    output.hPointerToBTagAbsoluteUncertainty = hBTagAbsoluteUncertainty;
+    output.hPointerToBTagRelativeUncertainty = hBTagRelativeUncertainty;
+    output.fSelectedJets.reserve(jets.size());
+    output.fSelectedSubLeadingJets.reserve(jets.size());
+    // Initialise internal variables
     bool bmatchedJet = false;
     bool qmatchedJet = false;
     bool bMatch = false;
@@ -477,9 +486,9 @@ namespace HPlus {
       // discriminator cut
       hDiscr->Fill(discr);
       if (discr > fLeadingDiscrCut) {
-        fSelectedJets.push_back(iJet);
+        output.fSelectedJets.push_back(iJet);
       } else if (discr > fSubLeadingDiscrCut){
-        fSelectedSubLeadingJets.push_back(iJet);
+        output.fSelectedSubLeadingJets.push_back(iJet);
       } else {
         continue;
       }
@@ -488,8 +497,8 @@ namespace HPlus {
       hPt->Fill(iJet->pt());
       hEta->Fill(iJet->eta());
 
-      if (discr > fMaxDiscriminatorValue)
-        fMaxDiscriminatorValue = discr;
+      if (discr > output.fMaxDiscriminatorValue)
+        output.fMaxDiscriminatorValue = discr;
 
       //++passed;
       if( bmatchedJet )   increment(fTaggedTaggedRealBJetsSubCount);
@@ -498,21 +507,21 @@ namespace HPlus {
 
     // Calculate scale factor for MC events
     if (!iEvent.isRealData())
-      calculateScaleFactor(jets, fSelectedJets);
+      calculateScaleFactor(jets, output);
 
     // Fill histograms
-    hNumberOfBtaggedJets->Fill(fSelectedJets.size());
-    hNumberOfBtaggedJetsIncludingSubLeading->Fill(fSelectedJets.size()+fSelectedSubLeadingJets.size());
-    iNBtags = fSelectedJets.size();
+    hNumberOfBtaggedJets->Fill(output.fSelectedJets.size());
+    hNumberOfBtaggedJetsIncludingSubLeading->Fill(output.fSelectedJets.size()+output.fSelectedSubLeadingJets.size());
+    output.iNBtags = output.fSelectedJets.size();
 
     ////////////////////////////////
-    if(fSelectedJets.size() > 0) {
-      hPt1->Fill(fSelectedJets[0]->pt());
-      hEta1->Fill(fSelectedJets[0]->eta());
+    if(output.fSelectedJets.size() > 0) {
+      hPt1->Fill(output.fSelectedJets[0]->pt());
+      hEta1->Fill(output.fSelectedJets[0]->eta());
     }
-    if(fSelectedJets.size() > 1) {
-      hPt2->Fill(fSelectedJets[1]->pt());
-      hEta2->Fill(fSelectedJets[1]->eta());
+    if(output.fSelectedJets.size() > 1) {
+      hPt2->Fill(output.fSelectedJets[1]->pt());
+      hEta2->Fill(output.fSelectedJets[1]->eta());
     }
        // plot deltaPhi(bjet,tau jet)
     //      double deltaPhi = -999;    
@@ -520,49 +529,18 @@ namespace HPlus {
       //	  deltaPhi = DeltaPhi::reconstruct(*(iJet), *(met));
       //	  hDeltaPhiJetMet->Fill(deltaPhi*57.3);
       //      }
-    if(fSelectedJets.size() == 0)   increment(fTaggedNoTaggedJet);
-    else if(fSelectedJets.size() == 1)   increment(fTaggedOneTaggedJet);
-    else if(fSelectedJets.size() == 2)   increment(fTaggedTwoTaggedJets);
+    if(output.fSelectedJets.size() == 0)   increment(fTaggedNoTaggedJet);
+    else if(output.fSelectedJets.size() == 1)   increment(fTaggedOneTaggedJet);
+    else if(output.fSelectedJets.size() == 2)   increment(fTaggedTwoTaggedJets);
 
-    passEvent = fNumberOfBJets.passedCut(fSelectedJets.size());
-    if (passEvent)
+    output.fPassedEvent= fNumberOfBJets.passedCut(output.fSelectedJets.size());
+    if (output.fPassedEvent)
       increment(fTaggedCount);
 
-    return Data(this, passEvent);
+    return output;
   }
 
-  int BTagging::analyzeOnlyBJetCount(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets) {
-    fScaleFactor = 1.0;
-    edm::PtrVector<pat::Jet> mySelectedLeadingBjets;
-    edm::PtrVector<pat::Jet> mySelectedSubLeadingBjets;
-    // Calculate
-    for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
-      edm::Ptr<pat::Jet> iJet = *iter;
-      float discr = iJet->bDiscriminator(fDiscriminator);
-      // pt cut
-      if(iJet->pt() < fPtCut ) continue;
-      // eta cut
-      if(fabs(iJet->eta()) > fEtaCut ) continue;
-      // discriminator cut
-      if (discr > fLeadingDiscrCut) {
-        mySelectedLeadingBjets.push_back(iJet);
-      } else if (discr > fSubLeadingDiscrCut){
-        mySelectedSubLeadingBjets.push_back(iJet);
-      } else {
-        continue;
-      }
-      if (discr > fMaxDiscriminatorValue)
-        fMaxDiscriminatorValue = discr;
-    } // end of jet loop
-
-    // Calculate scale factor for MC events
-    if (!iEvent.isRealData())
-      calculateScaleFactor(jets, mySelectedLeadingBjets);
-
-    return mySelectedLeadingBjets.size();
-  }
-
-  void BTagging::calculateScaleFactor(const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
+  void BTagging::calculateScaleFactor(const edm::PtrVector<pat::Jet>& jets, BTagging::Data& btagData) {
     // Count number of b jets and light jets
 ////    int nBJetsPassed = 0;
 ////    std::vector<double> fBJetsPassedPt;
@@ -580,7 +558,7 @@ namespace HPlus {
     for (edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
       bool myJetTaggedStatus = false;
-      for (edm::PtrVector<pat::Jet>::const_iterator iBjet = bjets.begin(); iBjet != bjets.end(); ++iBjet) {
+      for (edm::PtrVector<pat::Jet>::const_iterator iBjet = btagData.fSelectedJets.begin(); iBjet != btagData.fSelectedJets.end(); ++iBjet) {
 	if (iJet == *iBjet) myJetTaggedStatus = true;
       }
       if (myJetTaggedStatus) continue; // no double counting
@@ -593,7 +571,7 @@ namespace HPlus {
       }
     }
     // Loop over b-tagged jets
-    for (edm::PtrVector<pat::Jet>::const_iterator iter = bjets.begin(); iter != bjets.end(); ++iter) {
+    for (edm::PtrVector<pat::Jet>::const_iterator iter = btagData.fSelectedJets.begin(); iter != btagData.fSelectedJets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
       // analyze jet flavor
       int myFlavor = std::abs(iJet->partonFlavour());
@@ -620,9 +598,9 @@ namespace HPlus {
       mySFuncert += 0.21*0.21;
     }
 
-    fScaleFactor = mySF;
-    fScaleFactorAbsoluteUncertainty = TMath::Sqrt(mySFuncert);
-    fScaleFactorRelativeUncertainty = fScaleFactorAbsoluteUncertainty / mySF;
+    btagData.fScaleFactor = mySF;
+    btagData.fScaleFactorAbsoluteUncertainty = TMath::Sqrt(mySFuncert);
+    btagData.fScaleFactorRelativeUncertainty = btagData.fScaleFactorAbsoluteUncertainty / mySF;
     // FIXME end of dirty hack
 
     /* this is the old code
@@ -638,12 +616,6 @@ namespace HPlus {
     std::cout << " scalefactor= " << fScaleFactor << ", rel.syst.=" << fBTaggingScaleFactor.getRelativeUncertainty(nBJetsPassed, nLightJetsPassed, fBJetsFailedPt, fLightJetsFailedPt) << std::endl;*/
 
     //std::cout << "bjets=" << nBJets << ", light jets=" << nLightJets << ", scale factor=" << fScaleFactor << std::endl;
-  }
-
-  void BTagging::Data::fillScaleFactorHistograms() {
-    fBTagging->hScaleFactor->Fill(fBTagging->fScaleFactor);
-    fBTagging->hBTagAbsoluteUncertainty->Fill(fBTagging->fScaleFactorAbsoluteUncertainty);
-    fBTagging->hBTagRelativeUncertainty->Fill(fBTagging->fScaleFactorRelativeUncertainty);
   }
 
 }

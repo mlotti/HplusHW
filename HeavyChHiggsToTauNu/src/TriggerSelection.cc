@@ -14,8 +14,9 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 namespace HPlus {
-  TriggerSelection::Data::Data(const TriggerSelection *triggerSelection, const TriggerPath *triggerPath, bool passedEvent):
-    fTriggerSelection(triggerSelection), fTriggerPath(triggerPath), fPassedEvent(passedEvent) {}
+  TriggerSelection::Data::Data():
+    fTriggerPath(0),
+    fPassedEvent(false) {}
   TriggerSelection::Data::~Data() {}
   
   TriggerSelection::TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
@@ -84,35 +85,39 @@ namespace HPlus {
   }
 
   TriggerSelection::Data TriggerSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    bool passEvent = true;
+    Data output;
     TriggerPath* returnPath = NULL;
     increment(fTriggerAllCount);
 
     hControlSelectionType->Fill(fTriggerSelectionType);
     if (fTriggerSelectionType == kTriggerSelectionByTriggerBit) {
-      passEvent = passedTriggerBit(iEvent, iSetup, returnPath);
+      output.fPassedEvent = passedTriggerBit(iEvent, iSetup, returnPath, output);
     }
+    output.fTriggerPath = returnPath;
 
     // Possible caloMET cut should not be controlled by "disabled" bit
-    if(fTriggerSelectionType == kTriggerSelectionDisabled)
-      passEvent = true;
-    
-    // Calo MET cut; needed for non QCD1, disabled for others
-    if(passEvent) {
-      increment(fTriggerBitCount);
-      TriggerMETEmulation::Data ret = fTriggerCaloMet.analyze(iEvent, iSetup);
-      passEvent = ret.passedEvent();
+    if(fTriggerSelectionType == kTriggerSelectionDisabled) {
+      output.fPassedEvent = true;
     }
 
-    if(passEvent) {
+    // Calo MET cut; needed for non QCD1, disabled for others
+    if(output.fPassedEvent) {
+      increment(fTriggerBitCount);
+      TriggerMETEmulation::Data ret = fTriggerCaloMet.analyze(iEvent, iSetup);
+      output.fPassedEvent = ret.passedEvent();
+    }
+
+    if(output.fPassedEvent) {
       increment(fTriggerCaloMetCount);
     }
-    
-    if(passEvent) increment(fTriggerCount);
-    return Data(this, returnPath, passEvent);
+
+    if(output.fPassedEvent) 
+      increment(fTriggerCount);
+
+    return output;
   }
   
-  bool TriggerSelection::passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath) {
+  bool TriggerSelection::passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath, TriggerSelection::Data& output) {
     bool passEvent = false;
     /*
     edm::Handle<edm::TriggerResults> htrigger;
@@ -171,7 +176,7 @@ namespace HPlus {
       */
       if(hltMets.size() == 0) {
         //std::cout << "HLT MET size is 0!" << std::endl;
-        fHltMet = pat::TriggerObjectRef();
+        output.fHltMet = pat::TriggerObjectRef();
         if(fMetCut >= 0)
           passEvent = false;
       }
@@ -219,16 +224,16 @@ namespace HPlus {
         }
         
         increment(fTriggerHltMetExistsCount);
-        fHltMet = hltMets[0];
-        hHltMetBeforeTrigger->Fill(fHltMet->et());
+        output.fHltMet = hltMets[0];
+        hHltMetBeforeTrigger->Fill(output.fHltMet->et());
         if (passEvent)
-          hHltMetAfterTrigger->Fill(fHltMet->et());
+          hHltMetAfterTrigger->Fill(output.fHltMet->et());
 
         // Cut on HLT MET
-        if(fHltMet->et() <= fMetCut) {
+        if(output.fHltMet->et() <= fMetCut) {
           passEvent = false;
         } else if (passEvent) {
-          hHltMetSelected->Fill(fHltMet->et());
+          hHltMetSelected->Fill(output.fHltMet->et());
         }
         if(passEvent)
           increment(fTriggerHltMetPassedCount);

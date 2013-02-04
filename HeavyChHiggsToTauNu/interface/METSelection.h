@@ -33,23 +33,30 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const METSelection *metSelection, bool passedEvent);
+      Data();
       ~Data();
 
-      bool passedEvent() const { return fPassedEvent; }
-      const edm::Ptr<reco::MET> getSelectedMET() const { return fMETSelection->fSelectedMET; }
-      const edm::Ptr<reco::MET> getRawMET() const { return fMETSelection->fRawMET; }
-      const edm::Ptr<reco::MET> getType1MET() const { return fMETSelection->fType1MET; }
-      const edm::Ptr<reco::MET> getType2MET() const { return fMETSelection->fType2MET; }
+      const bool passedEvent() const { return fPassedEvent; }
+      const edm::Ptr<reco::MET> getSelectedMET() const { return fSelectedMET; }
+      const edm::Ptr<reco::MET> getRawMET() const { return fRawMET; }
+      const edm::Ptr<reco::MET> getType1MET() const { return fType1MET; }
+      const edm::Ptr<reco::MET> getType2MET() const { return fType2MET; }
 
-      const edm::Ptr<reco::MET> getCaloMET() const { return fMETSelection->fCaloMET; }
-      const edm::Ptr<reco::MET> getTcMET() const { return fMETSelection->fTcMET; }
+      const edm::Ptr<reco::MET> getCaloMET() const { return fCaloMET; }
+      const edm::Ptr<reco::MET> getTcMET() const { return fTcMET; }
 
-      const double getCutValue() const { return fMETSelection->fMetCut; }
+      friend class METSelection;
 
     private:
-      const METSelection *fMETSelection;
-      const bool fPassedEvent;
+      bool fPassedEvent;
+      // MET objects
+      edm::Ptr<reco::MET> fSelectedMET;
+      edm::Ptr<reco::MET> fRawMET;
+      edm::Ptr<reco::MET> fType1MET;
+      edm::Ptr<reco::MET> fType2MET;
+      edm::Ptr<reco::MET> fCaloMET;
+      edm::Ptr<reco::MET> fTcMET;
+
     };
     
     METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label);
@@ -93,13 +100,6 @@ namespace HPlus {
     WrappedTH1 *hMetDivSumEt;
     WrappedTH1 *hMetDivSqrSumEt;
 
-    // MET objects
-    edm::Ptr<reco::MET> fSelectedMET;
-    edm::Ptr<reco::MET> fRawMET;
-    edm::Ptr<reco::MET> fType1MET;
-    edm::Ptr<reco::MET> fType2MET;
-    edm::Ptr<reco::MET> fCaloMET;
-    edm::Ptr<reco::MET> fTcMET;
 
     // For type I/II correction
     std::vector<reco::MET> fType1METCorrected;

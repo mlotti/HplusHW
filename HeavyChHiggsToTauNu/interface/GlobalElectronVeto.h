@@ -44,20 +44,29 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const GlobalElectronVeto *globalElectronVeto, bool passedEvent);
+      Data();
       ~Data();
 
-      bool passedEvent() const { return fPassedEvent; }
-      const float getSelectedElectronPt() const { return fGlobalElectronVeto->fSelectedElectronPt; }
-      const float getSelectedElectronEta() const { return fGlobalElectronVeto->fSelectedElectronEta; }
-      const float getSelectedElectronPtBeforePtCut() const { return fGlobalElectronVeto->fSelectedElectronPtBeforePtCut; }
+      const bool passedEvent() const { return fPassedEvent; }
+      const float getSelectedElectronPt() const { return fSelectedElectronPt; }
+      const float getSelectedElectronEta() const { return fSelectedElectronEta; }
+      const float getSelectedElectronPtBeforePtCut() const { return fSelectedElectronPtBeforePtCut; }
+      const edm::PtrVector<pat::Electron>& getSelectedElectrons() { return fSelectedElectrons; }
+      const edm::PtrVector<pat::Electron>& getSelectedElectronsBeforePtAndEtaCuts() { return fSelectedElectronsBeforePtAndEtaCuts; }
 
-      const edm::PtrVector<pat::Electron>& getSelectedElectrons() { return fGlobalElectronVeto->fSelectedElectrons; }
-      const edm::PtrVector<pat::Electron>& getSelectedElectronsBeforePtAndEtaCuts() { return fGlobalElectronVeto->fSelectedElectronsBeforePtAndEtaCuts; }
-      const edm::PtrVector<pat::Electron>& getSelectedLooseElectrons() { return fGlobalElectronVeto->fSelectedLooseElectrons; }
+      friend class GlobalElectronVeto;
+
     private:
-      const GlobalElectronVeto *fGlobalElectronVeto;
-      const bool fPassedEvent;
+      bool fPassedEvent;
+      // pt and eta of highest pt electron passing the selection
+      float fSelectedElectronPt;
+      float fSelectedElectronEta;
+      float fSelectedElectronPtBeforePtCut;
+
+      // Selected electrons
+      edm::PtrVector<pat::Electron> fSelectedElectrons;
+      edm::PtrVector<pat::Electron> fSelectedElectronsBeforePtAndEtaCuts;
+
     };
 
     GlobalElectronVeto(const edm::ParameterSet& iConfig, const edm::InputTag& vertexSrc, EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -69,7 +78,6 @@ namespace HPlus {
 
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-    bool ElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
     // Input parameters
     edm::InputTag fElecCollectionName;
@@ -87,8 +95,8 @@ namespace HPlus {
     Count fElecSelectionSubCountElectronHasGsfTrkOrTrk;
     Count fElecSelectionSubCountFiducialVolumeCut;
     Count fElecSelectionSubCountId;
-    Count fElecSelectionSubCountPtCut;
     Count fElecSelectionSubCountEtaCut;
+    Count fElecSelectionSubCountPtCut;
     Count fElecSelectionSubCountSelected;
     Count fElecSelectionSubCountMatchingMCelectron;
     Count fElecSelectionSubCountMatchingMCelectronFromW;
@@ -115,18 +123,9 @@ namespace HPlus {
     WrappedTH2 *hElectronEtaPhiForSelectedElectrons;
     WrappedTH2 *hMCElectronEtaPhiForPassedEvents;
 
-    // pt and eta of highest pt electron passing the selection
-    float fSelectedElectronPt;
-    float fSelectedElectronEta;
-    float fSelectedElectronPtBeforePtCut;
-
     // for Electron-ID Selection
     EgammaCutBasedEleId::WorkingPoint fElectronIdEnumerator;
 
-    // Selected electrons
-    edm::PtrVector<pat::Electron> fSelectedElectrons;
-    edm::PtrVector<pat::Electron> fSelectedElectronsBeforePtAndEtaCuts;
-    edm::PtrVector<pat::Electron> fSelectedLooseElectrons;
   };
 }
 

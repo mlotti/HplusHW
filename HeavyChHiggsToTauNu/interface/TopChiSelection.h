@@ -31,18 +31,24 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const TopChiSelection *TopChiSelection, bool passedEvent);
+      Data();
       ~Data();
 
-      bool passedEvent() const { return fPassedEvent; }
-      const double getTopMass() const { return fTopChiSelection->topMass; }
-      const double getWMass() const { return fTopChiSelection->wMass; }
-      const XYZTLorentzVector& getTopP4() const { return fTopChiSelection->top; }
-      const edm::Ptr<pat::Jet>& getSelectedBjet() const { return fTopChiSelection->bjetInTop; }
+      const bool passedEvent() const { return fPassedEvent; }
+      const double getTopMass() const { return top.M(); }
+      const double getWMass() const { return W.M(); }
+      const XYZTLorentzVector& getTopP4() const { return top; }
+      const XYZTLorentzVector& getWP4() const { return W; }
+      const edm::Ptr<pat::Jet>& getSelectedBjet() const { return bjetInTop; }
+
+      friend class TopChiSelection;
 
     private:
-      const TopChiSelection *fTopChiSelection;
-      const bool fPassedEvent;
+      bool fPassedEvent;
+      // Variables
+      XYZTLorentzVector top;
+      XYZTLorentzVector W;
+      edm::Ptr<pat::Jet> bjetInTop;
     };
     
     TopChiSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -98,13 +104,6 @@ namespace HPlus {
     WrappedTH1 *htopMassMatchWrongB;
     WrappedTH1 *hWMassMatchWrongB;
 
-  
-    // Variables
-    double topMass;
-    double wMass;
-    XYZTLorentzVector top;
-    XYZTLorentzVector W;
-    edm::Ptr<pat::Jet> bjetInTop;
   };
 }
 

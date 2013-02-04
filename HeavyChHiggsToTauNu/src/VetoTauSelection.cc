@@ -33,8 +33,8 @@ void printDaughters(const reco::Candidate& p);
 
 
 namespace HPlus {
-  VetoTauSelection::Data::Data(const VetoTauSelection *vetoTauSelection, bool passedEvent) :
-  fVetoTauSelection(vetoTauSelection), fPassedEvent(passedEvent) { }
+  VetoTauSelection::Data::Data() :
+  fPassedEvent(false) { }
 
   VetoTauSelection::Data::~Data() { }
   
@@ -102,8 +102,9 @@ namespace HPlus {
   }
 
   VetoTauSelection::Data VetoTauSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau, double vertexZ) {
-    increment(fAllEventsCounter);
+    Data output;
 
+    increment(fAllEventsCounter);
 
     // Obtain tau collection as the veto tau candidates and take out selected tauSelection
     edm::Handle<edm::View<pat::Tau> > myTaus;
@@ -235,7 +236,7 @@ namespace HPlus {
     for (edm::PtrVector<pat::Tau>::iterator it = myTauData.getSelectedTaus().begin(); it != myTauData.getSelectedTaus().end(); ++it) {
       // Store to result vector
 
-      fSelectedVetoTaus.push_back(*it);
+      output.fSelectedVetoTaus.push_back(*it);
       // Count how many selected veto taus are genuine taus
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
       if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
@@ -265,7 +266,7 @@ namespace HPlus {
       myVetoTauMomentum += mySelectedTauMomentum;
       double myDitauMass = myVetoTauMomentum.M();
       // Check if ditau mass is compatible with Z mass
-      if (myDitauMass <  1000 ) 	{
+      if (myDitauMass <  1000 ) {
 	myVetoStatus = true;
 	numberOfTaus++;
       }
@@ -288,6 +289,7 @@ namespace HPlus {
       increment(fEventsCompatibleWithZMassCounter);
     else
       increment(fSelectedEventsCounter);
-    return Data(this, myVetoStatus);
+    output.fPassedEvent = !myVetoStatus;
+    return output;
   }
 }

@@ -7,8 +7,8 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 namespace HPlus {
-  METPhiOscillationCorrection::Data::Data(const METPhiOscillationCorrection *correctionObject, double correctionFactor):
-    fMETPhiOscillationCorrection(correctionObject), fCorrectionFactor(correctionFactor) {}
+  METPhiOscillationCorrection::Data::Data():
+    fCorrectionFactor(1.0) {}
   METPhiOscillationCorrection::Data::~Data() {}
 
   METPhiOscillationCorrection::METPhiOscillationCorrection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
@@ -39,13 +39,13 @@ namespace HPlus {
   }
 
   METPhiOscillationCorrection::Data METPhiOscillationCorrection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices, const METSelection::Data& metData) {
-    // Initialize
-    double myCorrectionFactor = 1.0;
+    Data output;
+
     // Fill histograms for determining correction factors
     hNVerticesVsMetX->Fill(nVertices, metData.getSelectedMET()->px());
     hNVerticesVsMetY->Fill(nVertices, metData.getSelectedMET()->py());
 
     // Return result
-    return Data(this, myCorrectionFactor);
+    return output;
   }
 }

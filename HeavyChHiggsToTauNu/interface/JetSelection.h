@@ -36,26 +36,44 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const JetSelection *jetSelection, bool passedEvent);
+      Data();
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
-      const edm::PtrVector<pat::Jet>& getAllJets() const { return fJetSelection->fAllJets; }
-      const edm::PtrVector<pat::Jet>& getSelectedJets() const { return fJetSelection->fSelectedJets; }
-      const edm::PtrVector<pat::Jet>& getSelectedJetsPt20() const { return fJetSelection->fSelectedJetsPt20; }
-      bool testPassStatus(size_t value) const { return fJetSelection->fNumberOfJets.passedCut(value); }
-      const int getHadronicJetCount() const { return fJetSelection->iNHadronicJets; }
-      const int getHadronicJetCountInFwdDir() const { return fJetSelection->iNHadronicJetsInFwdDir; }
-      const bool eventHasJetWithEMFraction07() const { return fJetSelection->bEMFraction07Veto; }
-      const bool eventHasJetWithEMFraction08() const { return fJetSelection->bEMFraction08Veto; }
-      const double getMinEtaOfSelectedJetToGap() const { return fJetSelection->fMinEtaOfSelectedJetToGap; }
-      const double getEtaSpreadOfSelectedJets() const { return fJetSelection->fEtaSpreadOfSelectedJets; }
-      const double getAverageEtaOfSelectedJets() const { return fJetSelection->fAverageEtaOfSelectedJets; }
-      const double getAverageSelectedJetsEtaDistanceToTauEta() const { return fJetSelection->fAverageSelectedJetsEtaDistanceToTauEta; }
-      const double getDeltaPtJetTau() const { return fJetSelection->fDeltaPtJetTau; }
+      const edm::PtrVector<pat::Jet>& getAllJets() const { return fAllJets; }
+      const edm::PtrVector<pat::Jet>& getSelectedJets() const { return fSelectedJets; }
+      const edm::PtrVector<pat::Jet>& getSelectedJetsPt20() const { return fSelectedJetsPt20; }
+      const int getHadronicJetCount() const { return iNHadronicJets; }
+      const int getHadronicJetCountInFwdDir() const { return iNHadronicJetsInFwdDir; }
+      const bool eventHasJetWithEMFraction07() const { return bEMFraction07Veto; }
+      const bool eventHasJetWithEMFraction08() const { return bEMFraction08Veto; }
+      const double getMinEtaOfSelectedJetToGap() const { return fMinEtaOfSelectedJetToGap; }
+      const double getEtaSpreadOfSelectedJets() const { return fEtaSpreadOfSelectedJets; }
+      const double getAverageEtaOfSelectedJets() const { return fAverageEtaOfSelectedJets; }
+      const double getAverageSelectedJetsEtaDistanceToTauEta() const { return fAverageSelectedJetsEtaDistanceToTauEta; }
+      const double getDeltaPtJetTau() const { return fDeltaPtJetTau; }
+
+      friend class JetSelection;
+
     private:
-      const JetSelection *fJetSelection;
-      const bool fPassedEvent;
+      bool fPassedEvent;
+      // All jets
+      edm::PtrVector<pat::Jet> fAllJets;
+      // Selected jets
+      edm::PtrVector<pat::Jet> fSelectedJets;
+      edm::PtrVector<pat::Jet> fSelectedJetsPt20;
+      // Not Selected jets
+      edm::PtrVector<pat::Jet> fNotSelectedJets;
+      int iNHadronicJets;
+      int iNHadronicJetsInFwdDir;
+      float fMinDeltaRToOppositeDirectionOfTau;
+      bool bEMFraction08Veto;
+      bool bEMFraction07Veto;
+      double fMinEtaOfSelectedJetToGap;
+      double fEtaSpreadOfSelectedJets;
+      double fAverageEtaOfSelectedJets;
+      double fAverageSelectedJetsEtaDistanceToTauEta;
+      double fDeltaPtJetTau;
     };
 
     JetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -198,23 +216,6 @@ namespace HPlus {
     WrappedTH1 *hDeltaPtJetTau;
     WrappedTH1 *hDeltaRJetTau;
 
-    // All jets
-    edm::PtrVector<pat::Jet> fAllJets;
-    // Selected jets
-    edm::PtrVector<pat::Jet> fSelectedJets;
-    edm::PtrVector<pat::Jet> fSelectedJetsPt20;
-    // Not Selected jets
-    edm::PtrVector<pat::Jet> fNotSelectedJets;
-    int iNHadronicJets;
-    int iNHadronicJetsInFwdDir;
-    bool bEMFraction08Veto;
-    bool bEMFraction07Veto;
-    float fMinDeltaRToOppositeDirectionOfTau;
-    double fMinEtaOfSelectedJetToGap;
-    double fEtaSpreadOfSelectedJets;
-    double fAverageEtaOfSelectedJets;
-    double fAverageSelectedJetsEtaDistanceToTauEta;
-    double fDeltaPtJetTau;
   };
 }
 

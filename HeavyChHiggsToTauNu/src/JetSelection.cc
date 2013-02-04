@@ -24,10 +24,20 @@ namespace {
 }
 
 namespace HPlus {
-  JetSelection::Data::Data(const JetSelection *jetSelection, bool passedEvent):
-    fJetSelection(jetSelection), fPassedEvent(passedEvent) {}
+  JetSelection::Data::Data():
+    fPassedEvent(false),
+    iNHadronicJets(-1),
+    iNHadronicJetsInFwdDir(-1),
+    fMinDeltaRToOppositeDirectionOfTau(999.),
+    bEMFraction08Veto(false),
+    bEMFraction07Veto(false),
+    fMinEtaOfSelectedJetToGap(999),
+    fEtaSpreadOfSelectedJets(999),
+    fAverageEtaOfSelectedJets(999),
+    fAverageSelectedJetsEtaDistanceToTauEta(999),
+    fDeltaPtJetTau(999) {}
   JetSelection::Data::~Data() {}
-  
+
   JetSelection::JetSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
     BaseSelection(eventCounter, histoWrapper),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
@@ -159,7 +169,6 @@ namespace HPlus {
     hPtDiffToGenJetSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_PtDiffToGenJet", "jet_PtDiffToGenJet", 100, 0., 10.);
     hDeltaPtJetTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, mySelectedJetsDir, "deltaPtTauJet", "deltaPtTauJet ", 200, -100., 100.);
     hDeltaRJetTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, mySelectedJetsDir, "deltaRTauJet", "deltaRTauJet ", 120, 0., 6.);
-    fMinDeltaRToOppositeDirectionOfTau = 999.;
  }
 
   JetSelection::~JetSelection() {}
@@ -181,29 +190,13 @@ namespace HPlus {
   }
 
   JetSelection::Data JetSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr< reco::Candidate >& tau, int nVertices) {
-    // Reset variables
-    iNHadronicJets = -1;
-    iNHadronicJetsInFwdDir = -1;
-    fMinDeltaRToOppositeDirectionOfTau = 999.;
-    bEMFraction08Veto = false;
-    bEMFraction07Veto = false;
-    fMinEtaOfSelectedJetToGap = 999;
-    fEtaSpreadOfSelectedJets = 999;
-    fAverageEtaOfSelectedJets = 999;
-    fAverageSelectedJetsEtaDistanceToTauEta = 999;
-    fDeltaPtJetTau = 999;
-    bool passEvent = false;
+    Data output;
 
     edm::Handle<edm::View<pat::Jet> > hjets;
     iEvent.getByLabel(fSrc, hjets);
 
     const edm::PtrVector<pat::Jet>& jets(hjets->ptrVector());
-    fAllJets = hjets->ptrVector();
-
-    fSelectedJets.clear();
-    fSelectedJetsPt20.clear();
-    fNotSelectedJets.clear();
-    fNotSelectedJets.reserve(jets.size());
+    output.fAllJets = hjets->ptrVector();
 
     size_t cleanPassed = 0;
     size_t jetIdPassed = 0;
@@ -229,7 +222,10 @@ namespace HPlus {
 	if(!(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), (*iter)->p4()) > fMaxDR)) continue;
         if ((*iter)->pt() < 20.0) continue;
         bool myStatus = fDeadECALCells.ObjectHitsDeadECALCell(*iter, fDeadECALCellsVetoDeltaR);
-        if (!myStatus) return Data(this, false);
+        if (!myStatus) {
+          output.fPassedEvent = false;
+          return output;
+        }
       }
     }
     increment(fDeadECALCellVetoCount);
@@ -243,7 +239,7 @@ namespace HPlus {
       bool match = false;
       if(!(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()) > fMaxDR)) {
         match = true;
-	fDeltaPtJetTau = iJet->pt()- (tau)->pt();
+	output.fDeltaPtJetTau = iJet->pt()- (tau)->pt();
 	hDeltaPtJetTau->Fill(iJet->pt()- (tau)->pt());  
       }
       if(match) {
@@ -372,8 +368,8 @@ namespace HPlus {
 
       // eta cut
       if(!(std::abs(iJet->eta()) < fEtaCut)){
-	fNotSelectedJets.push_back(*iter);
-	continue;
+        output.fNotSelectedJets.push_back(*iter);
+        continue;
       }
       increment(fEtaCutSubCount);
       ++etaCutPassed;
@@ -382,7 +378,7 @@ namespace HPlus {
 
       // pt cut
       if (iJet->pt() > 20.0)
-        fSelectedJetsPt20.push_back(iJet);
+        output.fSelectedJetsPt20.push_back(iJet);
 
       if(!(iJet->pt() > fPtCut)) continue;
       increment(fPtCutSubCount);
@@ -419,26 +415,25 @@ namespace HPlus {
       math::XYZTLorentzVectorD myReversedTau = -tau->p4();
       //     math::XYZTLorentzVectorD myReversedTau = -tau.p4();
       double myDeltaR = ROOT::Math::VectorUtil::DeltaR(myReversedTau, iJet->p4());
-      if (myDeltaR < fMinDeltaRToOppositeDirectionOfTau)
-	fMinDeltaRToOppositeDirectionOfTau = myDeltaR;
+      if (myDeltaR < output.fMinDeltaRToOppositeDirectionOfTau)
+        output.fMinDeltaRToOppositeDirectionOfTau = myDeltaR;
 
       tmpSelectedJets.push_back(iJet);
     }
 
     // Sort the selected jets in the (corrected) pt
     std::sort(tmpSelectedJets.begin(), tmpSelectedJets.end(), ptGreaterThan);
-    fSelectedJets.reserve(tmpSelectedJets.size());
     for(size_t i=0; i<tmpSelectedJets.size(); ++i)
-      fSelectedJets.push_back(tmpSelectedJets[i]);
+      output.fSelectedJets.push_back(tmpSelectedJets[i]);
 
-    hNumberOfSelectedJets->Fill(fSelectedJets.size());
-    if (fSelectedJets.size() > 2 ) hjetMaxEMFraction->Fill(maxEMfraction);
-    iNHadronicJets = fSelectedJets.size();
-    iNHadronicJetsInFwdDir = fNotSelectedJets.size();
+    hNumberOfSelectedJets->Fill(output.fSelectedJets.size());
+    if (output.fSelectedJets.size() > 2 ) hjetMaxEMFraction->Fill(maxEMfraction);
+    output.iNHadronicJets = output.fSelectedJets.size();
+    output.iNHadronicJetsInFwdDir = output.fNotSelectedJets.size();
 
-    passEvent = fNumberOfJets.passedCut(fSelectedJets.size());
+    output.fPassedEvent = fNumberOfJets.passedCut(output.fSelectedJets.size());
 
-    if (fNumberOfJets.passedCut(fSelectedJets.size()+killedByBetaCut)) {
+    if (fNumberOfJets.passedCut(output.fSelectedJets.size()+killedByBetaCut)) {
       increment(fEventKilledByBetaCutCount);
     }
 
@@ -464,50 +459,50 @@ namespace HPlus {
     if (fNumberOfJets.passedCut(etaCutPassed))
       increment(fEtaCutCount);
 
-    if (passEvent && maxEMfraction >= 0.8 ) {
+    if (output.fPassedEvent && maxEMfraction >= 0.8 ) {
       increment(fEMfraction08CutCount);
-      bEMFraction08Veto = true;
+      output.bEMFraction08Veto = true;
     }
 
-    if (passEvent && maxEMfraction < 0.7 ) {
+    if (output.fPassedEvent && maxEMfraction < 0.7 ) {
       increment(fEMfraction07CutCount);
-      bEMFraction07Veto = true;
+      output.bEMFraction07Veto = true;
     }
 
 
     // Plot pt, eta, and phi of jets if jet selection has been passed
-    if (passEvent && fSelectedJets.size() >= 3) {
-      hFirstJetPt->Fill(fSelectedJets[0]->pt());
-      hFirstJetEta->Fill(fSelectedJets[0]->eta());
-      hFirstJetPhi->Fill(fSelectedJets[0]->phi());
-      hSecondJetPt->Fill(fSelectedJets[1]->pt());
-      hSecondJetEta->Fill(fSelectedJets[1]->eta());
-      hSecondJetPhi->Fill(fSelectedJets[1]->phi());
-      hThirdJetPt->Fill(fSelectedJets[2]->pt());
-      hThirdJetEta->Fill(fSelectedJets[2]->eta());
-      hThirdJetPhi->Fill(fSelectedJets[2]->phi());
-      if (fSelectedJets.size() >= 4) {
-        hFourthJetPt->Fill(fSelectedJets[3]->pt());
-        hFourthJetEta->Fill(fSelectedJets[3]->eta());
-        hFourthJetPhi->Fill(fSelectedJets[3]->phi());
+    if (output.fPassedEvent && output.fSelectedJets.size() >= 3) {
+      hFirstJetPt->Fill(output.fSelectedJets[0]->pt());
+      hFirstJetEta->Fill(output.fSelectedJets[0]->eta());
+      hFirstJetPhi->Fill(output.fSelectedJets[0]->phi());
+      hSecondJetPt->Fill(output.fSelectedJets[1]->pt());
+      hSecondJetEta->Fill(output.fSelectedJets[1]->eta());
+      hSecondJetPhi->Fill(output.fSelectedJets[1]->phi());
+      hThirdJetPt->Fill(output.fSelectedJets[2]->pt());
+      hThirdJetEta->Fill(output.fSelectedJets[2]->eta());
+      hThirdJetPhi->Fill(output.fSelectedJets[2]->phi());
+      if (output.fSelectedJets.size() >= 4) {
+        hFourthJetPt->Fill(output.fSelectedJets[3]->pt());
+        hFourthJetEta->Fill(output.fSelectedJets[3]->eta());
+        hFourthJetPhi->Fill(output.fSelectedJets[3]->phi());
       }
     }
-    hMinDeltaRToOppositeDirectionOfTau->Fill(fMinDeltaRToOppositeDirectionOfTau);
+    hMinDeltaRToOppositeDirectionOfTau->Fill(output.fMinDeltaRToOppositeDirectionOfTau);
 
     // Calculate minimum distance in eta of a selected jet and the gap between barrel and endcap
     double myMinEta = 999.0;
-    for(edm::PtrVector<pat::Jet>::const_iterator iter = fSelectedJets.begin(); iter != fSelectedJets.end(); ++iter) {
+    for(edm::PtrVector<pat::Jet>::const_iterator iter = output.fSelectedJets.begin(); iter != output.fSelectedJets.end(); ++iter) {
       double myValue = std::abs(std::abs((*iter)->eta()) - 1.5);
       if (myValue < myMinEta)
         myMinEta = myValue;
     }
-    fMinEtaOfSelectedJetToGap = myMinEta;
-    hMinEtaOfSelectedJetToGap->Fill(fMinEtaOfSelectedJetToGap);
+    output.fMinEtaOfSelectedJetToGap = myMinEta;
+    hMinEtaOfSelectedJetToGap->Fill(output.fMinEtaOfSelectedJetToGap);
     // Calculate the eta range over which the selected jets are spanned; and the average eta of the jets
     myMinEta = 999.0;
     double myMaxEta = -999.0;
     TVector3 myMegaJet(0., 0., 0.);
-    for(edm::PtrVector<pat::Jet>::const_iterator iter = fSelectedJets.begin(); iter != fSelectedJets.end(); ++iter) {
+    for(edm::PtrVector<pat::Jet>::const_iterator iter = output.fSelectedJets.begin(); iter != output.fSelectedJets.end(); ++iter) {
       if ((*iter)->eta() > myMaxEta)
         myMaxEta = (*iter)->eta();
       if ((*iter)->eta() < myMinEta)
@@ -515,13 +510,14 @@ namespace HPlus {
       TVector3 myJet((*iter)->px(), (*iter)->py(), (*iter)->pz());
       myMegaJet += myJet;
     }
-    fEtaSpreadOfSelectedJets = myMaxEta - myMinEta;
+    output.fEtaSpreadOfSelectedJets = myMaxEta - myMinEta;
     if (myMegaJet.Z() > 0.0) {
-      fAverageEtaOfSelectedJets = myMegaJet.Eta();
-      fAverageSelectedJetsEtaDistanceToTauEta = std::abs(myMegaJet.Eta() - tau->eta());
+      output.fAverageEtaOfSelectedJets = myMegaJet.Eta();
+      output.fAverageSelectedJetsEtaDistanceToTauEta = std::abs(myMegaJet.Eta() - tau->eta());
     }
 
     // Everything has been done now return
-    return Data(this, passEvent);
+    
+    return output;
   }
 }
