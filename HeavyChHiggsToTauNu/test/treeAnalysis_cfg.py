@@ -46,7 +46,7 @@ def customize(treeAnalysis):
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=-1, # default is -1
-                        customizeAnalysis=customize,
+                        customizeLightAnalysis=customize,
                         doFillTree = True, #False (crashes if True)
                         tauSelectionOperatingMode="tauCandidateSelectionOnly",
                         #doAgainstElectronScan=True,
