@@ -314,10 +314,10 @@ namespace HPlus {
     TauSelection::Data tauCandidateData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
     if (!tauCandidateData.passedEvent()) return false;
     // Obtain MC matching - for EWK without genuine taus
-    FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauCandidateData.getSelectedTau()));
+    FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauCandidateData.getSelectedTau()));
     // Apply scale factor for fake tau
     if (!iEvent.isRealData())
-      fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(myTauMatch, tauCandidateData.getSelectedTau()->eta()));
+      fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauCandidateData.getSelectedTau()->eta()));
     // note: do not require here that only one tau has been found; instead take first item from mySelectedTau as the tau in the event
     increment(fTausExistCounter);
     // Apply trigger scale factor here, because it depends only on tau
@@ -694,9 +694,9 @@ namespace HPlus {
     // Uncertainties after standard selections // FIXME: is this needed?
     fSFUncertaintyAfterStandardSelections.setScaleFactorUncertainties(fEventWeight.getWeight(),
                                                                       triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
-                                                                      fFakeTauIdentifier.isFakeTau(myTauMatch),
-                                                                      fFakeTauIdentifier.getFakeTauScaleFactor(myTauMatch, tauCandidateData.getSelectedTau()->eta()),
-                                                                      fFakeTauIdentifier.getFakeTauSystematics(myTauMatch, tauCandidateData.getSelectedTau()->eta()),
+                                                                      fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()),
+                                                                      fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauCandidateData.getSelectedTau()->eta()),
+                                                                      fFakeTauIdentifier.getFakeTauSystematics(tauMatchData.getTauMatchType(), tauCandidateData.getSelectedTau()->eta()),
                                                                       btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
 
     if (tauCandidateData.selectedTauPassesNProngsAndRtauButNotIsolation()) {

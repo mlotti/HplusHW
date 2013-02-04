@@ -210,14 +210,14 @@ namespace HPlus {
     
      
      
-      FakeTauIdentifier::MCSelectedTauMatchType myMatch = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
-      if (myMatch == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
+      FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
+      if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
         hCandidateTauNumber->Fill(0.);
-      else if (myMatch == FakeTauIdentifier::kkElectronToTau || FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkElectronToTau || FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance)
         hCandidateTauNumber->Fill(1);
-      else if (myMatch == FakeTauIdentifier::kkMuonToTau || FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkMuonToTau || FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance)
         hCandidateTauNumber->Fill(2);
-      else if (myMatch == FakeTauIdentifier::kkJetToTau || FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkJetToTau || FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance)
         hCandidateTauNumber->Fill(3);
     }
     // Do tau selection on the veto tau candidates
@@ -237,17 +237,17 @@ namespace HPlus {
 
       fSelectedVetoTaus.push_back(*it);
       // Count how many selected veto taus are genuine taus
-      FakeTauIdentifier::MCSelectedTauMatchType myMatch = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
-      if (myMatch == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
+      FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
+      if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
         hSelectedTauNumber->Fill(0.);
-      else if (myMatch == FakeTauIdentifier::kkElectronToTau || FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkElectronToTau || FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance)
         hSelectedTauNumber->Fill(1);
-      else if (myMatch == FakeTauIdentifier::kkMuonToTau || FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkMuonToTau || FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance)
         hSelectedTauNumber->Fill(2);
-      else if (myMatch == FakeTauIdentifier::kkJetToTau || FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkJetToTau || FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance)
         hSelectedTauNumber->Fill(3);
 
-      bool isGenuineTau = !(fFakeTauIdentifier.isFakeTau(myMatch));
+      bool isGenuineTau = !(fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()));
       if (isGenuineTau) {
         // Genuine tau
         hSelectedGenuineTauByPt->Fill((*it)->pt());
