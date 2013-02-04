@@ -766,6 +766,8 @@ namespace HPlus {
     fillOperationModeHistogram();
 
     // Initialize
+    fAllTauCandidates.clear();
+    fAllTauCandidates.reserve(taus.size());
     fSelectedTaus.clear();
     fSelectedTaus.reserve(taus.size());
     fSelectedTauCandidates.clear();
@@ -797,6 +799,7 @@ namespace HPlus {
       // Tau candidate selections
       fTauID->incrementAllCandidates();
       if (!fTauID->passDecayModeFinding(iTau)) continue;
+      fAllTauCandidates.push_back(iTau);
       if (!fTauID->passVertexZCut(iTau, vertexZ)) continue;
       if (!fTauID->passKinematicSelection(iTau)) continue;
       if (!fTauID->passLeadingTrackCuts(iTau)) continue;

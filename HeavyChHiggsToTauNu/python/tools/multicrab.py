@@ -281,6 +281,22 @@ def createTaskDir(prefix="multicrab", postfix="", path=None):
         break
     return dirname
 
+## Write git version information to a directory
+#
+# \param dirname  Path to multicrab directory
+def writeGitVersion(dirname):
+    version = git.getCommitId()
+    if version != None:
+        f = open(os.path.join(dirname, "codeVersion.txt"), "w")
+        f.write(version+"\n")
+        f.close()
+        f = open(os.path.join(dirname, "codeStatus.txt"), "w")
+        f.write(git.getStatus()+"\n")
+        f.close()
+        f = open(os.path.join(dirname, "codeDiff.txt"), "w")
+        f.write(git.getDiff()+"\n")
+        f.close()
+
 ## Print all multicrab datasets
 #
 # \param details   Forwarded to multicrabWorkflows.printAllDatasets()
@@ -1070,17 +1086,7 @@ class Multicrab:
 
         # Create code versions
 	if codeRepo == 'git':
-            version = git.getCommitId()
-            if version != None:
-                f = open(os.path.join(dirname, "codeVersion.txt"), "w")
-                f.write(version+"\n")
-                f.close()
-                f = open(os.path.join(dirname, "codeStatus.txt"), "w")
-                f.write(git.getStatus()+"\n")
-                f.close()
-                f = open(os.path.join(dirname, "codeDiff.txt"), "w")
-                f.write(git.getDiff()+"\n")
-                f.close()
+            writeGitVersion(dirname)
 
         files = self.filesToCopy[:]
         for name in dsetNames:
