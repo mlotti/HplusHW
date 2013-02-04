@@ -904,6 +904,8 @@ class Histo:
         if self.legendLabel == None:
             return
 
+        h = self.rootHisto
+
         # Hack to get the black border to the legend, only if the legend style is fill
         if "f" == self.legendStyle.lower():
             h = self.rootHisto.Clone(self.rootHisto.GetName()+"_forLegend")
@@ -913,13 +915,12 @@ class Histo:
             if self.rootHisto.GetLineColor() == self.rootHisto.GetFillColor():
                 h.SetLineColor(ROOT.kBlack)
 
-            legend.AddEntry(h, self.legendLabel, self.legendStyle)
             self.rootHistoForLegend = h # keep the reference in order to avoid segfault
-        else:
-            labels = self.legendLabel.split("\n")
-            legend.AddEntry(self.rootHisto, labels[0], self.legendStyle)
-            for lab in labels[1:]:
-                legend.AddEntry(None, lab, "")
+
+        labels = self.legendLabel.split("\n")
+        legend.AddEntry(h, labels[0], self.legendStyle)
+        for lab in labels[1:]:
+            legend.AddEntry(None, lab, "")
 
     ## Call a function with self as an argument.
     #
