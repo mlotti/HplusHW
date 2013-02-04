@@ -77,6 +77,12 @@ config = {
         "globalTag": "FT_53_V6_AN3::All",
 #        "signalTrigger": ["HLT_QuadJet80_v2", "HLT_QuadJet75_55_38_20_BTagIP_VBF_v3", "HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4"],
 #        "patMadhatter": "file:/mnt/flustre/mkortela/data/MultiJet/Run2012A-13Jul2012-v1/AOD/F4740DF9-26D6-E111-9BA6-003048FFD71E.root", # run 191700
+#        "signalTrigger": ["HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+#        "patMadhatter": "file:/mnt/flustre/mkortela/data/BJetPlusX/Run2012B-13Jul2012-v1/AOD/FAD4AE2E-C8D4-E111-8B06-003048FFD728.root", # run 194424
+#        "signalTrigger": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4", "HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+#        "patMadhatter": "file:/mnt/flustre/mkortela/data/BJetPlusX/Run2012B-13Jul2012-v1/AOD/56624F47-77D3-E111-A63A-003048FFD760.root", # run 194050
+#        "signalTrigger": ["HLT_QuadPFJet75_55_38_20_BTagCSV_VBF_v4", "HLT_QuadJet75_55_38_20_BTagIP_VBF_v3"],
+#        "patMadhatter": "file:/mnt/flustre/mkortela/data/BJetPlusX/Run2012B-13Jul2012-v1/AOD/ACDDA8FD-E0D3-E111-B696-00304867924E.root", # run 194108-194224
     },
     "53Xdata06Aug2012": {"triggerProcess": "HLT", "recoProcess": "RECO",
         "globalTag": "FT_53_V6C_AN3::All",
