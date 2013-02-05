@@ -15,7 +15,7 @@
 
 namespace HPlus {
   TriggerSelection::Data::Data():
-    fTriggerPath(0),
+    fHasTriggerPath(false),
     fPassedEvent(false) {}
   TriggerSelection::Data::~Data() {}
   
@@ -93,7 +93,10 @@ namespace HPlus {
     if (fTriggerSelectionType == kTriggerSelectionByTriggerBit) {
       output.fPassedEvent = passedTriggerBit(iEvent, iSetup, returnPath, output);
     }
-    output.fTriggerPath = returnPath;
+    if(returnPath) {
+      output.fHasTriggerPath = true;
+      output.fHltTaus = returnPath->getTauObjects();
+    }
 
     // Possible caloMET cut should not be controlled by "disabled" bit
     if(fTriggerSelectionType == kTriggerSelectionDisabled) {

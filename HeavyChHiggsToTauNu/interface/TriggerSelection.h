@@ -75,17 +75,19 @@ namespace HPlus {
 
       const bool passedEvent() const { return fPassedEvent; }
       const pat::TriggerObjectRef getHltMetObject() const { return fHltMet; }
-      const bool hasTriggerPath() const { return fTriggerPath; }
-      const size_t getTriggerTauSize() const { return fTriggerPath->getTauObjects().size(); }
-      const pat::TriggerObjectRefVector& getTriggerTaus() const { return fTriggerPath->getTauObjects(); }
+      const bool hasTriggerPath() const { return fHasTriggerPath; }
+      const size_t getTriggerTauSize() const { return fHltTaus.size(); }
+      const pat::TriggerObjectRefVector& getTriggerTaus() const { return fHltTaus; }
 
       friend class TriggerSelection;
 
     private:
-      TriggerPath *fTriggerPath;
-      bool fPassedEvent;
       // Analysis results
       pat::TriggerObjectRef fHltMet;
+      pat::TriggerObjectRefVector fHltTaus;
+
+      bool fHasTriggerPath;
+      bool fPassedEvent;
     };
 
     TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
