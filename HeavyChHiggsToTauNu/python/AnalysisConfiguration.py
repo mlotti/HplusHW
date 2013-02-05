@@ -300,7 +300,6 @@ class ConfigBuilder:
         # For embedding input, the systematics should be evaluated with the analyzer with Muon eff, Tau trigger eff, CaloMET>60 (this is added to analysisNamesForSystematics later)
         if not self.doOptimisation and self.options.tauEmbeddingInput == 0:
             analysisNamesForSystematics = analysisNames[:]
-        self._accumulateAnalyzers("Data eras", analysisNames)
 
         for module in analysisModules:
             module.Tree.fill = self.doFillTree
@@ -345,6 +344,8 @@ class ConfigBuilder:
             # PickEvens only for the first analysis path
             p = getattr(process, analysisNames[0]+"Path")
             p *= process.PickEvents
+
+            self._accumulateAnalyzers("Data eras", analysisNames)
 
             if self.doMETResolution:
                 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.METResolutionAnalysis_cfi")
