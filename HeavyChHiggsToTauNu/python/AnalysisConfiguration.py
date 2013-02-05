@@ -252,7 +252,7 @@ class ConfigBuilder:
         if self.dataVersion.isData():
             if self.doLightAnalysis:
                 analysisLightModules = modules
-                analysisHeavyNames = [n+"Light" for n in analysisNames_]
+                analysisLightNames = [n+"Light" for n in analysisNames_]
             if self.doHeavyAnalysis:
                 analysisHeavyModules = [param.cloneForHeavyAnalysis(mod) for mod in modules]
                 analysisHeavyNames = [n+"Heavy" for n in analysisNames_]
