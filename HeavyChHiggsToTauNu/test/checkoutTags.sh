@@ -69,6 +69,7 @@ set -e
 # 13.9.2012/M.Kortelainen CMSSW_4_4_4 Updated PAT and tau tags
 # 17.9.2012/M.Kortelainen CMSSW_4_4_4 Cut-based electron ID tag
 # 31.1.2013/M.Kortelainen CMSSW_4_4_5 Updated PAT, tau, and lumi tags
+# 5.2.2013/M.Kortelainen CMSSW_4_4_5 Backported runMEtUncertainties, technical fix to pat::Jet
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -116,6 +117,8 @@ addpkg DataFormats/METReco        V03-03-07
 patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/PhysicsTools_PatUtils_metUncertaintyTools_b4_2_X_cvMEtCorr_13Feb2012_JEC11V12.patch
 cvs up -j 1.19 -j 1.20 PhysicsTools/PatAlgos/python/tools/helpers.py
 
+# Backport technical change in pat::Jet to reduce space
+cvs up -j 1.83 -j 1.84 DataFormats/PatCandidates/src/classes_def.xml
 
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc
