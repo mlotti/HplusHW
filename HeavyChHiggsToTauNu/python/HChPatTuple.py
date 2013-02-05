@@ -859,6 +859,13 @@ def addStandardPAT(process, dataVersion, doPatTrigger=True, doChsJets=True, patA
         process.pfNoElectronChs.enable = False
         # Disable jet-tau disambiguation (we do it ourselves in the analysis)
         process.pfNoTauChs.enable = False
+        # Just remove tau from PFBRECO (former PF2PAT) sequence
+        # because of some problems, we don't use it anyway
+        process.PFBRECOChs.remove(process.pfTauSequenceChs)
+        for name in ["patPFTauIsolationChs", "tauMatchChs", "tauGenJetsChs", "tauGenJetsSelectorAllHadronsChs",
+                     "tauGenJetMatchChs", "patShrinkingConePFTauDiscriminationChs", "patTausChs", "selectedPatTausChs", "countPatTausChs"]:
+            process.patDefaultSequenceChs.remove(getattr(process, name))
+        
 
         jetPostfixes.append("Chs")
         process.patDefaultSequence *= process.patPF2PATSequenceChs

@@ -91,7 +91,7 @@ addpkg PhysicsTools/IsolationAlgos # You need to recompile PAT packages which de
 # PAT
 addpkg DataFormats/PatCandidates V06-04-38
 addpkg PhysicsTools/PatAlgos     V08-07-51
-addpkg PhysicsTools/PatUtils      V03-09-18-03
+#addpkg PhysicsTools/PatUtils      V03-09-18-03 # checkout patUtils below
 addpkg CommonTools/ParticleFlow   V00-03-05-10
 addpkg FWCore/GuiBrowsers         V00-00-60
 ##### New tau discriminators, electron MVA discriminator
@@ -111,6 +111,11 @@ cvs co -r V00-04-11 RecoBTag/PerformanceDB
 addpkg JetMETCorrections/Type1MET V04-05-08
 addpkg PhysicsTools/PatUtils      b4_2_X_cvMEtCorr_13Feb2012_JEC11V12 # this appears to only add stuff on top of V03-09-18-02 in 444 release
 addpkg DataFormats/METReco        V03-03-07
+
+##### back-port of post-fixedrunMEtUncertainties()
+patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/PhysicsTools_PatUtils_metUncertaintyTools_b4_2_X_cvMEtCorr_13Feb2012_JEC11V12.patch
+cvs up -j 1.19 -j 1.20 PhysicsTools/PatAlgos/python/tools/helpers.py
+
 
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc
