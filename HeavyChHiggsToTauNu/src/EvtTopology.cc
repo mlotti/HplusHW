@@ -177,12 +177,24 @@ namespace HPlus {
     // fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
     // fDiscrCut(iConfig.getUntrackedParameter<double>("discriminatorCut")),
     fAlphaTCut(iConfig.getUntrackedParameter<double>("alphaT")),
+    fSphericityCut(iConfig.getUntrackedParameter<double>("sphericity")),
+    fAplanarityCut(iConfig.getUntrackedParameter<double>("aplanarity")),
+    fPlanarityCut(iConfig.getUntrackedParameter<double>("planarity")),
+    fCircularityCut(iConfig.getUntrackedParameter<double>("circularity")),
     fEvtTopologyCount(eventCounter.addSubCounter("EvtTopology main","EvtTopology cut")),
-    fAlphaTCutCount(eventCounter.addSubCounter("EvtTopology", "alphaT"))
+    fAlphaTCutCount(eventCounter.addSubCounter("EvtTopology", "alphaT")),
+    fSphericityCutCount(eventCounter.addSubCounter("EvtTopology", "sphericity")),
+    fAplanarityCutCount(eventCounter.addSubCounter("EvtTopology", "aplanarity")),
+    fPlanarityCutCount(eventCounter.addSubCounter("EvtTopology", "planarity")),
+    fCircularityCutCount(eventCounter.addSubCounter("EvtTopology", "circularity"))
   {
     edm::Service<TFileService> fs;
-    TFileDirectory myDir = fs->mkdir("EvtTopologyAlphaT");
+    TFileDirectory myDir = fs->mkdir("EvtTopology");
     hAlphaT = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "alphaT", "alphaT", 50, 0.0, 5.0);
+    hSphericity = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "sphericity", "sphericity", 20, 0.0, 1.0);
+    hAplanarity = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "aplanarity", "aplanarity", 10, 0.0, 0.5);
+    hPlanarity = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "aplanarity", "aplanarity", 10, 0.0, 0.5);
+    hCircularity = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "aplanarity", "aplanarity", 20, 0.0, 1.0);
   }
 
   EvtTopology::~EvtTopology() {}
@@ -204,20 +216,26 @@ namespace HPlus {
   }
 
   EvtTopology::Data EvtTopology::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
-
-    /// Calculate AlphaT variable
-    bool bPassedAlphaT = CalcAlphaT(iEvent, iSetup, tau, jets);
     
-    // Calcuate standard event-shape-variables (e.g sphericity, aplanarity, planarity)
+    /// Calcuate standard event-shape-variables (e.g sphericity, aplanarity, planarity, alphaT)
     vector<float> EigenValues = CalcMomentumTensorEigenValues(iEvent, iSetup, tau, jets);
-    CalcSphericity(EigenValues);
-    CalcAplanarity(EigenValues);
-    CalcPlanarity(EigenValues);
-    CalcCircularity(tau, jets);
-    
+    bool bPassedSphericity = CalcSphericity(EigenValues);
+    bool bPassedAplanarity = CalcAplanarity(EigenValues);
+    bool bPassedPlanarity = CalcPlanarity(EigenValues);
+    bool bPassedCircularity = CalcCircularity(tau, jets);
+    bool bPassedAlphaT = CalcAlphaT(iEvent, iSetup, tau, jets);
+
+    /// Determine if event has passed the Event-Topology cuts
+    bool bPassedCuts = false;
+    bPassedCuts = bPassedSphericity * bPassedAplanarity * bPassedPlanarity * bPassedCircularity * bPassedAlphaT;
+
+    if(bPassedCuts){
+      increment(fEvtTopologyCount);
+    }
+
     // std::cout << "AlphaT = " << sAlpha.fAlphaT << "; Sphericity = " << sKinematics.fSphericity << "; Aplanarity = " << sKinematics.fAplanarity << "; Planarity = " << sKinematics.fPlanarity << "; Circularity = " << sKinematics.fCircularity << std::endl;
     
-    return Data(this, bPassedAlphaT);
+    return Data(this, bPassedCuts);
 
   }
    
@@ -327,11 +345,7 @@ namespace HPlus {
       bPassedCut = true;
       increment(fAlphaTCutCount);
     }
-      
-    if(bPassedCut){
-      increment(fEvtTopologyCount);
-    }
-    
+          
     /// Fill Histos
     hAlphaT->Fill(sAlpha.fAlphaT);
 
@@ -431,11 +445,13 @@ namespace HPlus {
   
   }
 
-  void EvtTopology::CalcSphericity(vector<float> eigenvalues){
+  bool EvtTopology::CalcSphericity(vector<float> eigenvalues){
 
     /// Computation of variables: 0 <= Q1 <= Q2 <= Q3 are the eigenvalues of the normalised-to-1 MomentumTensor
     /// Sphericity (S) = 3/2*(Q1+Q2)    0 <= S <= 1
     /// S = 1 for spherical, S= 3/4 for planar, S= 0 for linear events
+
+    bool bPassedCut = false;
     float sphericity = (1.5*(eigenvalues[0]+eigenvalues[1]));
     //std::cout << "S = " << sphericity << ", Q1 = " << eigenvalues[0] << ", Q2 = " << eigenvalues[1] << ", Q3 = " << eigenvalues[2] << std::endl;
     if ( !(sphericity <= 1.0 && sphericity >=0) ){
@@ -443,42 +459,76 @@ namespace HPlus {
     }
     /// NOTE: sphericity is collinear unsafe (e.g. pi0 -> gamma gamma: use pi0 or decay products changes result)      
     sKinematics.fSphericity = sphericity;
-    return;
+
+    /// Check whether cut is passed
+    if( sKinematics.fSphericity > fSphericityCut){
+      bPassedCut = true;
+      increment(fSphericityCutCount);
+    }
+          
+    /// Fill Histos
+    hSphericity->Fill(sKinematics.fSphericity);
+
+    return bPassedCut;
   }
   
-  void EvtTopology::CalcAplanarity(vector<float> eigenvalues){
+  bool EvtTopology::CalcAplanarity(vector<float> eigenvalues){
     
     /// Aplanarity (A) = 3/2*(Q1)    0 <= A <= 0.5    
     /// A = 0.5 for spherical, A=0 for planar/linear events
+
+    bool bPassedCut = false;
     float aplanarity = (1.5*eigenvalues[0]);
     if ( !(aplanarity <= 0.5 && aplanarity >=0) ){
       throw cms::Exception("LogicError") << "Expected aplanarity to be in range  0 <= A <=0.5, was " << aplanarity << " at " << __FILE__ << ":" << __LINE__ << std::endl;
     }
     sKinematics.fAplanarity = aplanarity;
-    return;
+
+    /// Check whether cut is passed
+    if( sKinematics.fAplanarity > fAplanarityCut){
+      bPassedCut = true;
+      increment(fAplanarityCutCount);
+    }
+          
+    /// Fill Histos
+    hAplanarity->Fill(sKinematics.fAplanarity);
+
+    return bPassedCut;
   }
   
-  void EvtTopology::CalcPlanarity(vector<float> eigenvalues){
+  bool EvtTopology::CalcPlanarity(vector<float> eigenvalues){
 
     /// CMSSW definition for Planarity:
     /// Planarity (P) = Q1/Q2     ? <= P <= ?
     // float planarity = (eigenvalues[0]/eigenvalues[1]);
-    
     /// TextBook definition for Planarity:
     /// Planarity (P) = 3/2*(S-2A) = Q2-Q1     0 <= P <= 0.5
+
+    bool bPassedCut = false;
     float planarity = (eigenvalues[1]-eigenvalues[0]);
     if ( !(planarity <= 0.5 && planarity >=0) ){
       throw cms::Exception("LogicError") << "Expected planarity to be in range  0 <= P <=0.5, was " << planarity << " at " << __FILE__ << ":" << __LINE__ << std::endl;
     }
     sKinematics.fPlanarity = planarity;
-    return;
+
+    /// Check whether cut is passed
+    if( sKinematics.fPlanarity > fPlanarityCut){
+      bPassedCut = true;
+      increment(fPlanarityCutCount);
+    }
+          
+    /// Fill Histos
+    hPlanarity->Fill(sKinematics.fPlanarity);
+
+    return bPassedCut;
   }
   
   
-  void EvtTopology::CalcCircularity(const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets){
+  bool EvtTopology::CalcCircularity(const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets){
 
     /// Circularity (C) = 2*min(Q1,Q2)/(Q1+Q2)  0 <= C <= 1
     /// C = 1 for spherical, C = 0 for linear events
+    bool bPassedCut = false;
     float circularity = -1, phi=0.0, area = 0.0;
     const int nSteps = 1000;
     const float deltaPhi=2*TMath::Pi()/nSteps;
@@ -514,7 +564,17 @@ namespace HPlus {
       throw cms::Exception("LogicError") << "Expected circularity to be in range  0 <= C <=1.0, was " << circularity << " at " << __FILE__ << ":" << __LINE__ << std::endl;
     }
     sKinematics.fCircularity = circularity;
-    return;    
+
+    /// Check whether cut is passed
+    if( sKinematics.fCircularity > fCircularityCut){
+      bPassedCut = true;
+      increment(fCircularityCutCount);
+    }
+          
+    /// Fill Histos
+    hCircularity->Fill(sKinematics.fCircularity);
+
+    return bPassedCut;
   }
 
 
