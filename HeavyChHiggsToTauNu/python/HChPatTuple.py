@@ -32,6 +32,12 @@ tauPreSelection = "pt() > 15"
 jetPreSelection = "pt() > 10"
 #jetPreSelection = ""
 
+muonPreSelection = "pt() > 5"
+#muonPreSelection = ""
+
+electronPreSelection = "pt() > 5"
+#electronPreSelection = ""
+
 outputModuleName = "out"
 
 class PATBuilder:
@@ -410,6 +416,8 @@ class StandardPATBuilder(PATBuilderBase):
         # Default lepton options
         setPatLeptonDefaults(self.process.patMuons, self.includePFCands)
         
+        self.process.selectedPatMuons.cut = muonPreSelection
+
         # Add isolation variables for embedding
         self.process.muonIsolationEmbeddingSequence = cms.Sequence()
         muons = tauEmbeddingCustomisations.addMuonIsolationEmbedding(self.process, self.process.muonIsolationEmbeddingSequence, "patMuons")
@@ -443,6 +451,8 @@ class StandardPATBuilder(PATBuilderBase):
 
     def _customizeElectrons(self):
         setPatLeptonDefaults(self.process.patElectrons, self.includePFCands)
+
+        self.process.selectedPatElectrons.cut = electronPreSelection
 
         # Switch isolation cone to DR<0.3 (POG recommendation) from
         # the DR<0.4 (PAT default) for the isolation values. We can
