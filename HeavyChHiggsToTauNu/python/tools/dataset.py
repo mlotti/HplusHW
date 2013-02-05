@@ -123,7 +123,8 @@ def getDatasetsFromMulticrabCfg(**kwargs):
 
     dataEra = kwargs.get("dataEra", None)
 
-    datasetMgr = getDatasetsFromCrabDirs(taskDirs, **_args)
+    datasetMgr = getDatasetsFromCrabDirs(taskDirs, **_args) # Tassa tapahtuu virhe!!!
+
     if len(dirname) > 0:
         datasetMgr._setBaseDirectory(dirname)
 

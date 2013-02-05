@@ -4,6 +4,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 
+// #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventClassification.h"
+
 #include "TLorentzVector.h"
 
 #include "FWCore/Framework/interface/EDFilter.h"
@@ -208,6 +210,7 @@ namespace HPlus {
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader")),
     fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
+    //STEFAN    fEventClassification()
     fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
     fTauEmbeddingMuonIsolationQuantifier(eventCounter, fHistoWrapper),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
@@ -480,11 +483,17 @@ namespace HPlus {
     increment(fPrimaryVertexCounter);
     //hSelectionFlow->Fill(kSignalOrderVertexSelection);
 
+//------ Event classification according to whether tau, b-jet, and neutrino coming from top->H+ decay were identified correctly
+    TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
+    if(!tauData.passedEvent()) return false; // Require at least one tau
+    std::cout << "Tau found!" << std::endl;
+    checkIfGenuineTau(iEvent, tauData.getSelectedTau());
+    //checkIfGenuineTau(iEvent, *(tauData.getSelectedTau()));
 
 //------ TauID
     // Store weight of event
     // TauID
-    TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
+    //TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
 
     fTauSelection.analyseFakeTauComposition(fFakeTauIdentifier,iEvent);
 

@@ -62,7 +62,7 @@ if builder.options.tauEmbeddingInput != 0:
         "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_5_2_D2c.root"
     ]
     
-
+process.maxEvents.input = 500
 
 
 
@@ -91,7 +91,7 @@ if builder.options.tauEmbeddingInput != 0:
 #         #         "file:/mnt/flustre/mkortela/data/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/pattuple_7_1_ozc.root"
 #         #         ]
 
-    #process.maxEvents.input = 10
+
 
 
 #f = open("configDump.py", "w")
