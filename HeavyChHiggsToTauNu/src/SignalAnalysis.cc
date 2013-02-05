@@ -744,12 +744,12 @@ namespace HPlus {
       fTree.setMomentumTensorEigenvalues(evtTopologyData.Kinematics().fQOne, evtTopologyData.Kinematics().fQTwo, evtTopologyData.Kinematics().fQThree);
 
       fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
-      fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets());
+      fTree.fill(iEvent, tauData.getSelectedTau(), jetData.getSelectedJets());
       return true;
     }
 
 //------ Fill control plots for selected taus after standard selections
-    hCtrlSelectedTauRtauAfterStandardSelections->Fill(tauData.getRtauOfSelectedTau());
+    hCtrlSelectedTauRtauAfterStandardSelections->Fill(tauData.getSelectedTauRtauValue());
     hCtrlSelectedTauLeadingTrkPtAfterStandardSelections->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
     hCtrlSelectedTauPtAfterStandardSelections->Fill(tauData.getSelectedTau()->pt());
     hCtrlSelectedTauEtaAfterStandardSelections->Fill(tauData.getSelectedTau()->eta());
@@ -762,7 +762,7 @@ namespace HPlus {
     hCtrlNjetsAfterStandardSelections->Fill(jetData.getHadronicJetCount());
 
     if (myFakeTauStatus) {
-      hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections->Fill(tauData.getRtauOfSelectedTau());
+      hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections->Fill(tauData.getSelectedTauRtauValue());
       hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
       hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections->Fill(tauData.getSelectedTau()->pt());
       hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections->Fill(tauData.getSelectedTau()->eta());
@@ -835,7 +835,7 @@ namespace HPlus {
 
     // Apply scale factor as weight to event
     if (!iEvent.isRealData()) {
-      btagData.fillScaleFactorHistograms(); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
+      fBTagging.fillScaleFactorHistograms(btagData); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
       fEventWeight.multiplyWeight(btagData.getScaleFactor());
     }
    
@@ -1143,7 +1143,7 @@ namespace HPlus {
     //std::cout << "run=" << iEvent.id().run() << " lumiblock=" << iEvent.id().luminosityBlock() << " event=" << iEvent.id().event() << ", mT=" << transverseMass << std::endl;
 
 //------- Control plots
-    hSelectedTauRtauAfterCuts->Fill(tauData.getRtauOfSelectedTau());
+    hSelectedTauRtauAfterCuts->Fill(tauData.getSelectedTauRtauValue());
     hSelectedTauEtAfterCuts->Fill(tauData.getSelectedTau()->pt());
     hSelectedTauEtaAfterCuts->Fill(tauData.getSelectedTau()->eta());
     hMetAfterCuts->Fill(metData.getSelectedMET()->et());

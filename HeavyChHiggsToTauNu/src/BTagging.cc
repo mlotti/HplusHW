@@ -28,13 +28,10 @@ namespace HPlus {
   BTagging::Data::Data():
     fPassedEvent(false),
     iNBtags(-1),
-    fMaxDiscriminatorValue(-1.0),
+    fMaxDiscriminatorValue(-999.0),
     fScaleFactor(1.0),
     fScaleFactorAbsoluteUncertainty(0.0),
-    fScaleFactorRelativeUncertainty(0.0),
-    hPointerToScaleFactor(0),
-    hPointerToBTagAbsoluteUncertainty(0),
-    hPointerToBTagRelativeUncertainty(0)
+    fScaleFactorRelativeUncertainty(0.0)
     { }
   BTagging::Data::~Data() {}
 
@@ -44,12 +41,6 @@ namespace HPlus {
       if (myFlavor == 5) return true;
     }
     return false;
-  }
-
-  void BTagging::Data::fillScaleFactorHistograms() {
-    hPointerToScaleFactor->Fill(fScaleFactor);
-    hPointerToBTagAbsoluteUncertainty->Fill(fScaleFactorAbsoluteUncertainty);
-    hPointerToBTagRelativeUncertainty->Fill(fScaleFactorRelativeUncertainty);
   }
 
   BTagging::BTaggingScaleFactor::BTaggingScaleFactor() {
@@ -387,9 +378,6 @@ namespace HPlus {
   BTagging::Data BTagging::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets) {
     // Initialise output data object
     Data output;
-    output.hPointerToScaleFactor = hScaleFactor;
-    output.hPointerToBTagAbsoluteUncertainty = hBTagAbsoluteUncertainty;
-    output.hPointerToBTagRelativeUncertainty = hBTagRelativeUncertainty;
     output.fSelectedJets.reserve(jets.size());
     output.fSelectedSubLeadingJets.reserve(jets.size());
     // Initialise internal variables
@@ -616,6 +604,12 @@ namespace HPlus {
     std::cout << " scalefactor= " << fScaleFactor << ", rel.syst.=" << fBTaggingScaleFactor.getRelativeUncertainty(nBJetsPassed, nLightJetsPassed, fBJetsFailedPt, fLightJetsFailedPt) << std::endl;*/
 
     //std::cout << "bjets=" << nBJets << ", light jets=" << nLightJets << ", scale factor=" << fScaleFactor << std::endl;
+  }
+
+  void BTagging::fillScaleFactorHistograms(BTagging::Data& input) {
+    hScaleFactor->Fill(input.getScaleFactor());
+    hBTagAbsoluteUncertainty->Fill(input.getScaleFactorAbsoluteUncertainty());
+    hBTagRelativeUncertainty->Fill(input.getScaleFactorRelativeUncertainty());
   }
 
 }

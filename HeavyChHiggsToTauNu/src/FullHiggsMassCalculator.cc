@@ -119,8 +119,8 @@ namespace HPlus {
     doCalculate(myTauVector, myBJetVector, myMETVector, output, myMatchStatus);
 
     // Return data object
-    //output.fPassedEvent = ... 
-    return FullHiggsMassCalculator::Data();
+    output.fPassedEvent = true; // for now, later implement possibility to cut
+    return output;
   }
 
 

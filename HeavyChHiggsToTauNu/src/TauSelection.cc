@@ -16,10 +16,13 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 
+#include "DataFormats/Math/interface/LorentzVector.h"
+typedef math::XYZTLorentzVector LorentzVector;
+
 #include<functional>
 
 namespace {
-  
+    
   bool tauEtGreaterThan(const edm::Ptr<pat::Tau>& a, const edm::Ptr<pat::Tau>& b) {
     return (a->pt() > b->pt());
   }
@@ -294,117 +297,42 @@ namespace {
 
 namespace HPlus {
   // TauSelection::Data methods ------------------------------------------------
-  TauSelection::Data::Data(TauIDBase* pointerToTauID, const TauSelection::TauSelectionOperationMode& operationMode, HistoWrapper* histoWrapper, EventCounter* eventCounter):
+  TauSelection::Data::Data():
     fPassedEvent(false),
-    fPointerToTauID(pointerToTauID),
-    fCopyOfOperationMode(operationMode),
-    fHistoWrapper(histoWrapper),
-    fEventCounter(eventCounter) {}
+    bSelectedTauPassesIsolation(false),
+    bSelectedTauPassesNProngs(false),
+    bSelectedTauPassesRtau(false),
+    bSelectedTausDoNotPassIsolation(false),
+    fSelectedTauNProngsValue(-1),
+    fSelectedTauRtauValue(-1) {}
   TauSelection::Data::~Data() {}
 
-  const edm::PtrVector<pat::Tau>& TauSelection::Data::getSelectedTaus() const {
-    if (fCopyOfOperationMode == TauSelection::kTauCandidateSelectionOnly)
-      return fSelectedTauCandidates;
-    else if (fCopyOfOperationMode == TauSelection::kNormalTauID)
-      return fSelectedTaus;
-    return fSelectedTaus; // never reached
-  }
-
   const edm::Ptr<pat::Tau> TauSelection::Data::getSelectedTau() const {
-    if (!fPassedEvent) return fSelectedTauCandidates[0]; // No tau was selected, return zero pointer
-    if (fCopyOfOperationMode == TauSelection::kTauCandidateSelectionOnly)
-      return fSelectedTauCandidates[0];
-    else if (fCopyOfOperationMode == TauSelection::kNormalTauID)
-      return fSelectedTaus[0];
-    return fSelectedTauCandidates[0]; // never reached
+    if (!fPassedEvent)
+      throw cms::Exception("Assert") << "TauSelection::Data::getSelectedTau() was called even though TauSelection::Data::passedEvent() is false. Please add to your code requirement that passedEvent is true before asking for getSelectedTau!";
+    return fSelectedTau;
   }
 
-  const size_t TauSelection::Data::getNProngsOfSelectedTau() const {
-    if (!fPassedEvent) return 0;
-    return fPointerToTauID->getNProngs(getSelectedTau());
-  }
-
-  const double TauSelection::Data::getRtauOfSelectedTau() const {
-    if (!fPassedEvent) return 0;
-    return fPointerToTauID->getRtauValue(getSelectedTau());
-  }
-
-  const bool TauSelection::Data::selectedTauPassesIsolation() const {
-    // Disable histogram filling and counter incrementing temporarily (until end of this method)
-    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper->disableTemporarily();
-    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter->disableTemporarily();
-
-    if (!fPassedEvent) return false;
-    return fPointerToTauID->passIsolation(getSelectedTau());
-  }
-
-  const bool TauSelection::Data::selectedTauPassesNProngs() const {
-    // Disable histogram filling and counter incrementing temporarily (until end of this method)
-    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper->disableTemporarily();
-    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter->disableTemporarily();
-
-    if (!fPassedEvent) return false;
-    return fPointerToTauID->passNProngsCut(getSelectedTau());
-  }
-
-  const bool TauSelection::Data::selectedTauPassesRtau() const {
-    // Disable histogram filling and counter incrementing temporarily (until end of this method)
-    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper->disableTemporarily();
-    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter->disableTemporarily();
-
-    if (!fPassedEvent) return false;
-    return fPointerToTauID->passRTauCut(getSelectedTau());
-  }
-  
-  const bool TauSelection::Data::selectedTausDoNotPassIsolation() const {
-    // Disable histogram filling and counter incrementing temporarily (until end of this method)
-    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper->disableTemporarily();
-    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter->disableTemporarily();
-
-    //    if (!fPassedEvent) return false;
-    for (edm::PtrVector<pat::Tau>::const_iterator iter = getSelectedTaus().begin(); iter != getSelectedTaus().end(); ++iter) {
-      //      std::cout << "passIsolation" << fPointerToTauID->passIsolation(*iter) << std::endl;
-      if (fPointerToTauID->passIsolation(*iter)) return false;
-    }
-    return true;
-  }
-
-  const bool TauSelection::Data::selectedTauPassesNProngsAndRtauButNotIsolation() const {
-    // Disable histogram filling and counter incrementing temporarily (until end of this method)
-    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper->disableTemporarily();
-    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter->disableTemporarily();
-    if (selectedTauPassesNProngs() && selectedTauPassesRtau()) {
-      return (!fPointerToTauID->passIsolation(getSelectedTau()));
-    }
-    return false;
-  }
-
-  const bool TauSelection::Data::selectedTauPassesDiscriminator(std::string discr, double cutPoint) const {
-    if (!fPassedEvent) return false;
-    return (getSelectedTau()->tauID(discr) > cutPoint);
-  }
-  
   // TauSelection methods ------------------------------------------------
   TauSelection::TauSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper, std::string label):
     BaseSelection(eventCounter, histoWrapper),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
-    fSelection(iConfig.getUntrackedParameter<std::string>("selection")),
     fAnalyseFakeTauComposition(iConfig.getUntrackedParameter<bool>("analyseFakeTauComposition")),
     fTauID(0),
-    fOperationMode(kNormalTauID),
-    fTauFound(eventCounter.addSubCounter(label,"Tau found"))
+    fOperationMode(kNormalTauID)
   {
+    const std::string mySelection = iConfig.getUntrackedParameter<std::string>("selection");
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir(label);
     
     // Create tauID algorithm handler
-    //if(fSelection == "PFTauTaNCBased")
+    //if(mySelection == "PFTauTaNCBased")
     //  fTauID = new TauIDPFTaNC(iConfig, eventCounter, histoWrapper, "TaNC", myDir);
-    if(fSelection == "HPSTauBased")
+    if(mySelection == "HPSTauBased")
       fTauID = new TauIDPFHPS(iConfig, eventCounter, histoWrapper, label+"_HPS", myDir);
-    //else if(fSelection == "CombinedHPSTaNCTauBased")
+    //else if(mySelection == "CombinedHPSTaNCTauBased")
     //  fTauID = new TauIDPFCombinedHPSTaNC(iConfig, eventCounter, histoWrapper, "HPS+TaNC", myDir);
-    else throw cms::Exception("Configuration") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: HPSTauBased (you chose '" << fSelection << "')" << std::endl;
+    else throw cms::Exception("Configuration") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: HPSTauBased (you chose '" << mySelection << "')" << std::endl;
     
     // Define tau selection operation mode
     std::string myOperatingModeSelection = iConfig.getUntrackedParameter<std::string>("operatingMode");
@@ -429,14 +357,21 @@ namespace HPlus {
     int myTauJetNumberBins = 20;
     float myTauJetNumberMin = 0.;
     float myTauJetNumberMax = 20.; 
+    // Decay mode finding
+    hDecayModeTauCandidates = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
+      "TauSelection_all_tau_candidates_DecayModeFinding", "DecayModeFinding;DecayMode;N_{jets}", 30, 0, 30);
+    hDecayModeSelectedTauCandidates = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
+      "cleaned_all_tau_candidates_DecayModeFinding", "DecayModeFinding;DecayMode;N_{jets}", 30, 0, 30);
+    hDecayModeSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
+      "selected_tau_DecayModeFinding", "DecayModeFinding;DecayMode;N_{jets}", 30, 0, 30);
     // Pt
     hPtTauCandidates = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_all_tau_candidates_pt",
-      "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
+      "tau_candidates_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
       myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
     hPtSelectedTauCandidates = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_cleaned_tau_candidates_pt",
-      "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
+      "cleaned_tau_candidates_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
       myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
     hPtSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir,
       "TauSelection_selected_taus_pt",
@@ -560,8 +495,6 @@ namespace HPlus {
     hTightGammaSumPtAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightGammaSumPtAfterIsolation", "TightGammaSumPtAfterIsolation;TightGammaSumPt;N_{tau candidates}", 200, 0., 100.);
     hTightGammaOccupancyAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightGammaOccupancyAfterIsolation", "TightGammaOccupancyAfterIsolation;TightGammaOccupancy;N_{tau candidates}", 100, 0., 100.); 
 
-    hHPSDecayMode = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HPSDecayMode", "HPSDecayMode;HPSDecayMode;N_{tau candidates}",100,0,100);
-
     if (fAnalyseFakeTauComposition) {
       std::string myFakeLabel = label+"_fakeAnalysis";
       TFileDirectory myFakeDir = fs->mkdir(myFakeLabel);
@@ -633,7 +566,7 @@ namespace HPlus {
   }
 
   TauSelection::Data TauSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, double vertexZ) {
-    Data output(fTauID, fOperationMode, getHistoWrapperPointer(), getEventCounterPointer());
+    Data output;
     // Obtain tau collection from src specified in config
     edm::Handle<edm::View<pat::Tau> > htaus;
     iEvent.getByLabel(fSrc, htaus);
@@ -666,12 +599,12 @@ namespace HPlus {
         if (myTauFoundStatus && !myLeptonVetoStatus)
           myFilteredTaus.push_back(*it);
       } // end of tau loop
-      doTauSelection(iEvent,iSetup,myFilteredTaus,vertexZ, output);
+      doTauSelection(iEvent, iSetup, myFilteredTaus, vertexZ, output);
       return output;
     }
 
     // Do selection
-    doTauSelection(iEvent,iSetup,htaus->ptrVector(),vertexZ, output);
+    doTauSelection(iEvent, iSetup, htaus->ptrVector(), vertexZ, output);
     return output;
   }
 
@@ -692,7 +625,7 @@ namespace HPlus {
   }
 
   TauSelection::Data TauSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ) {
-    Data output(fTauID, fOperationMode, getHistoWrapperPointer(), getEventCounterPointer());
+    Data output;
     // Do selection
     doTauSelection(iEvent,iSetup,taus, vertexZ, output);
     return output;
@@ -713,7 +646,6 @@ namespace HPlus {
 
     // Require at least one tau in the trigger matched collection
     if (!taus.size()) return Data(this, false);
-    increment(fTauFound);
 
     edm::PtrVector<pat::Tau> myBestTau;
     // Tau candidate selection
@@ -764,38 +696,33 @@ namespace HPlus {
     return Data(this, true);
   }*/
 
-  void TauSelection::doTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ, TauSelection::Data& output){
+  void TauSelection::doTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ, TauSelection::Data& output) {
+    doTauCandidateSelection(iEvent, iSetup, taus, vertexZ, output);
+    doTauIdentification(iEvent, iSetup, output);
+    finalizeSelection(output);
+  }
+
+  void TauSelection::doTauCandidateSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ, TauSelection::Data& output){
     // Document operation mode
     fillOperationModeHistogram();
 
-    // Initialize
+    // Initialize (needed for counters)
     fTauID->reset();
 
     // Analyze the separation of the trigger matched taus
-    if (taus.size() > 0) {
-      int mySeparateCounter = 0;
-      edm::Ptr<pat::Tau> myTau = taus[0];
-      for (int i = 1; i < (int)taus.size(); ++i) {
-        double myDeltaR = reco::deltaR(*myTau, *(taus[i]));
-        if (myDeltaR>0.5) ++mySeparateCounter;
-      }
-      if (mySeparateCounter)
-        hNTriggerMatchedSeparateTaus->Fill(taus.size());
-    }
-    hNTriggerMatchedTaus->Fill(taus.size());
+    analyzeSeparationOfTriggerMatchedTaus(taus);
 
     // Need std:vector in order to be able to use std::sort
     std::vector<edm::Ptr<pat::Tau> > tmpSelectedTauCandidates;
-    std::vector<edm::Ptr<pat::Tau> > tmpSelectedTaus;
 
-    // Loop over the taus
+    // Loop over the taus (default = all trigger matched taus)
+    // Taus that pass these cuts are called selected tau candidates
     for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
       const edm::Ptr<pat::Tau> iTau = *iter;
-      fillHistogramsForTauCandidates(iTau, iEvent);
-
       // Tau candidate selections
       fTauID->incrementAllCandidates();
       if (!fTauID->passDecayModeFinding(iTau)) continue;
+      fillHistogramsForTauCandidates(iTau, iEvent); // Makes sense to look at pT and eta only after decay mode finding
       output.fAllTauCandidates.push_back(iTau);
       if (!fTauID->passVertexZCut(iTau, vertexZ)) continue;
       if (!fTauID->passKinematicSelection(iTau)) continue;
@@ -805,164 +732,189 @@ namespace HPlus {
       if (!fTauID->passVetoAgainstDeadECALCells(iTau)) continue;
       fillHistogramsForSelectedTauCandidates(iTau, iEvent);
       tmpSelectedTauCandidates.push_back(iTau);
+    }
+    // Sort list of selected tau candidates such that most probable tau object is the first
+    // Sort taus in an order of tau ET
+    std::sort(tmpSelectedTauCandidates.begin(), tmpSelectedTauCandidates.end(), tauEtGreaterThan); // sort by Et
 
-      // Tau ID selections
-      if (fOperationMode == kNormalTauID) {
-        // Standard tau ID (necessary for the tau selection logic) 
-        hIsolationPFChargedHadrCandsPtSum->Fill(iTau->isolationPFChargedHadrCandsPtSum());
-        hIsolationPFGammaCandsEtSum->Fill(iTau->isolationPFGammaCandsEtSum());
+    // For the duration of sorting, Disable histogram filling and counter incrementing until the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
 
-        hHPSDecayMode->Fill(iTau->decayMode());
-
-
-        hTightChargedMaxPtBeforeIsolation->Fill(iTau->userFloat("byTightChargedMaxPt"));
-        hTightChargedSumPtBeforeIsolation->Fill(iTau->userFloat("byTightChargedSumPt"));
-        hTightChargedOccupancyBeforeIsolation->Fill((float)iTau->userInt("byTightChargedOccupancy"));
-        hTightGammaMaxPtBeforeIsolation->Fill(iTau->userFloat("byTightGammaMaxPt"));
-        hTightGammaSumPtBeforeIsolation->Fill(iTau->userFloat("byTightGammaSumPt"));
-        hTightGammaOccupancyBeforeIsolation->Fill((float)iTau->userInt("byTightGammaOccupancy"));
-        if (!fTauID->passIsolation(iTau)) continue;
-        hTightChargedMaxPtAfterIsolation->Fill(iTau->userFloat("byTightChargedMaxPt"));
-        hTightChargedSumPtAfterIsolation->Fill(iTau->userFloat("byTightChargedSumPt"));
-        hTightChargedOccupancyAfterIsolation->Fill((float)iTau->userInt("byTightChargedOccupancy"));
-        hTightGammaMaxPtAfterIsolation->Fill(iTau->userFloat("byTightGammaMaxPt"));
-        hTightGammaSumPtAfterIsolation->Fill(iTau->userFloat("byTightGammaSumPt"));
-        hTightGammaOccupancyAfterIsolation->Fill((float)iTau->userInt("byTightGammaOccupancy"));
-
-        if (!fTauID->passNProngsCut(iTau)) continue;
-        if (!fTauID->passRTauCut(iTau)) continue;
+    // Sort tau candidates into order of likeliness of passing the full tau ID (a bit complicated)
+    // 1) Check if more than 1 tau candidate passes isolation cut
+    std::vector<edm::Ptr<pat::Tau> > tmpIsolationPassed;
+    std::vector<edm::Ptr<pat::Tau> > tmpNprongPassed;
+    std::vector<edm::Ptr<pat::Tau> > tmpRtauPassed;
+    for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+      if (fTauID->passIsolation(tmpSelectedTauCandidates[i]))
+        tmpIsolationPassed.push_back(tmpSelectedTauCandidates[i]);
+    }
+    if (tmpIsolationPassed.size() == 0) {
+      // none pass, just take the most isolated one
+      std::sort(tmpSelectedTauCandidates.begin(), tmpSelectedTauCandidates.end(), isolationLessThan);
+    } else if (tmpIsolationPassed.size() == 1) {
+      // Put the found one to the top of the list
+      output.fSelectedTauCandidates.push_back(tmpIsolationPassed[0]);
+      for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+        if (!fTauID->passIsolation(tmpSelectedTauCandidates[i]))
+          output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
       }
+    } else {
+      // 2) Multiple taus have passed isolation, lets see how many pass also the nprongs cut
+      std::sort(tmpIsolationPassed.begin(), tmpIsolationPassed.end(), isolationLessThan);
+      for(size_t i=0; i<tmpIsolationPassed.size(); ++i) {
+        if (fTauID->passNProngsCut(tmpIsolationPassed[i]))
+          tmpNprongPassed.push_back(tmpIsolationPassed[i]);
+      }
+      if (tmpNprongPassed.size() == 0) {
+        // none pass, take the most isolated one
+        for(size_t i=0; i<tmpIsolationPassed.size(); ++i) {
+          output.fSelectedTauCandidates.push_back(tmpIsolationPassed[i]);
+        }
+        for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+          bool match = false;
+          for(size_t j=0; j<tmpIsolationPassed.size(); ++j) {
+            if (tmpSelectedTauCandidates[i] == tmpIsolationPassed[j])
+              match = true;
+          }
+          if (!match) output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+        }
+      } else if (tmpNprongPassed.size() == 1) {
+        // Put the passed one to the top of the list
+        output.fSelectedTauCandidates.push_back(tmpNprongPassed[0]);
+        for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+          if (tmpSelectedTauCandidates[i] != tmpNprongPassed[0])
+            output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+        }
+      } else {
+        // 3) Multiple taus have passed nprongs, lets see how many pass also the rtau cut
+        for(size_t i=0; i<tmpNprongPassed.size(); ++i) {
+          if (fTauID->passRTauCut(tmpNprongPassed[i]))
+            tmpRtauPassed.push_back(tmpNprongPassed[i]);
+        }
+        if (tmpRtauPassed.size() == 0) {
+          // none pass, just take the most isolated one
+          std::sort(tmpNprongPassed.begin(), tmpNprongPassed.end(), isolationLessThan);
+          for(size_t i=0; i<tmpNprongPassed.size(); ++i) {
+            output.fSelectedTauCandidates.push_back(tmpNprongPassed[i]);
+          }
+          for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+            bool match = false;
+            for(size_t j=0; j<tmpNprongPassed.size(); ++j) {
+              if (tmpSelectedTauCandidates[i] == tmpNprongPassed[j])
+                match = true;
+            }
+            if (!match) output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+          }
+        } else if (tmpRtauPassed.size() == 1) {
+          // Put the one that passed both nprongs and rtau to the top of the list
+          output.fSelectedTauCandidates.push_back(tmpRtauPassed[0]);
+          for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+            if (tmpSelectedTauCandidates[i] != tmpRtauPassed[0])
+              output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+          }
+        } else {
+          // 4) Multiple taus have passed nprongs, rtau, and isolation; take most energetic one
+          std::sort(tmpRtauPassed.begin(), tmpRtauPassed.end(), tauEtGreaterThan);
+          for(size_t i=0; i<tmpRtauPassed.size(); ++i) {
+            output.fSelectedTauCandidates.push_back(tmpRtauPassed[i]);
+          }
+        }
+      }
+    }
+
+    // Set first tau as selected tau for tauCandidateSelection only
+    if (fOperationMode == kTauCandidateSelectionOnly) {
+      if (output.fSelectedTauCandidates.size()) {
+        output.fPassedEvent= true;
+        output.fSelectedTau = output.fSelectedTauCandidates[0];
+      } else {
+        output.fPassedEvent= false;
+      }
+    }
+  }
+
+  void TauSelection::doTauIdentification(const edm::Event& iEvent, const edm::EventSetup& iSetup, TauSelection::Data& output) {
+    if (!output.fSelectedTauCandidates.size() || fOperationMode == kTauCandidateSelectionOnly) return;
+
+    // Need std::vector in order to be able to use std::sort
+    std::vector<edm::Ptr<pat::Tau> > tmpSelectedTaus;
+
+    // Loop over tau candidates
+    for(edm::PtrVector<pat::Tau>::const_iterator iter = output.fSelectedTauCandidates.begin(); iter != output.fSelectedTauCandidates.end(); ++iter) {
+      const edm::Ptr<pat::Tau> iTau = *iter;
+      // Apply isolation and fill information histograms
+      hIsolationPFChargedHadrCandsPtSum->Fill(iTau->isolationPFChargedHadrCandsPtSum());
+      hIsolationPFGammaCandsEtSum->Fill(iTau->isolationPFGammaCandsEtSum());
+      hTightChargedMaxPtBeforeIsolation->Fill(iTau->userFloat("byTightChargedMaxPt"));
+      hTightChargedSumPtBeforeIsolation->Fill(iTau->userFloat("byTightChargedSumPt"));
+      hTightChargedOccupancyBeforeIsolation->Fill((float)iTau->userInt("byTightChargedOccupancy"));
+      hTightGammaMaxPtBeforeIsolation->Fill(iTau->userFloat("byTightGammaMaxPt"));
+      hTightGammaSumPtBeforeIsolation->Fill(iTau->userFloat("byTightGammaSumPt"));
+      hTightGammaOccupancyBeforeIsolation->Fill((float)iTau->userInt("byTightGammaOccupancy"));
+      if (!fTauID->passIsolation(iTau)) continue;
+      hTightChargedMaxPtAfterIsolation->Fill(iTau->userFloat("byTightChargedMaxPt"));
+      hTightChargedSumPtAfterIsolation->Fill(iTau->userFloat("byTightChargedSumPt"));
+      hTightChargedOccupancyAfterIsolation->Fill((float)iTau->userInt("byTightChargedOccupancy"));
+      hTightGammaMaxPtAfterIsolation->Fill(iTau->userFloat("byTightGammaMaxPt"));
+      hTightGammaSumPtAfterIsolation->Fill(iTau->userFloat("byTightGammaSumPt"));
+      hTightGammaOccupancyAfterIsolation->Fill((float)iTau->userInt("byTightGammaOccupancy"));
+      // Apply Nprongs cut
+      if (!fTauID->passNProngsCut(iTau)) continue;
+      // Apply Rtau cut
+      if (!fTauID->passRTauCut(iTau)) continue;
 
       // All cuts have been passed, save tau
       fillHistogramsForSelectedTaus(iTau, iEvent);
       tmpSelectedTaus.push_back(iTau);
     }
-    // Sort taus in an order of tau ET
-    std::sort(tmpSelectedTauCandidates.begin(), tmpSelectedTauCandidates.end(), tauEtGreaterThan); // sort by Et
 
-    if (fOperationMode == kTauCandidateSelectionOnly) {
-      // Disable histogram filling and counter incrementinguntil the return call
-      // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
-      HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
-      EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
-
-      // Sort tau candidates into order of likeliness of passing the full tau ID (a bit complicated)
-      // 1) Check if more than 1 tau candidate passes isolation cut
-      std::vector<edm::Ptr<pat::Tau> > tmpIsolationPassed;
-      std::vector<edm::Ptr<pat::Tau> > tmpNprongPassed;
-      std::vector<edm::Ptr<pat::Tau> > tmpRtauPassed;
-      for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
-        if (fTauID->passIsolation(tmpSelectedTauCandidates[i]))
-          tmpIsolationPassed.push_back(tmpSelectedTauCandidates[i]);
-      }
-      if (tmpIsolationPassed.size() == 0) {
-        // none pass, just take the most isolated one
-        std::sort(tmpSelectedTauCandidates.begin(), tmpSelectedTauCandidates.end(), isolationLessThan);
-      } else if (tmpIsolationPassed.size() == 1) {
-        // Put the found one to the top of the list
-        output.fSelectedTauCandidates.push_back(tmpIsolationPassed[0]);
-        for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
-          if (!fTauID->passIsolation(tmpSelectedTauCandidates[i]))
-            output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
-        }
-      } else {
-        // 2) Multiple taus have passed isolation, lets see how many pass also the nprongs cut
-        std::sort(tmpIsolationPassed.begin(), tmpIsolationPassed.end(), isolationLessThan);
-        for(size_t i=0; i<tmpIsolationPassed.size(); ++i) {
-          if (fTauID->passNProngsCut(tmpIsolationPassed[i]))
-            tmpNprongPassed.push_back(tmpIsolationPassed[i]);
-        }
-        if (tmpNprongPassed.size() == 0) {
-          // none pass, take the most isolated one
-          for(size_t i=0; i<tmpIsolationPassed.size(); ++i) {
-            output.fSelectedTauCandidates.push_back(tmpIsolationPassed[i]);
-          }
-          for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
-            bool match = false;
-            for(size_t j=0; j<tmpIsolationPassed.size(); ++j) {
-              if (tmpSelectedTauCandidates[i] == tmpIsolationPassed[j])
-                match = true;
-            }
-            if (!match) output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
-          }
-        } else if (tmpNprongPassed.size() == 1) {
-          // Put the passed one to the top of the list
-          output.fSelectedTauCandidates.push_back(tmpNprongPassed[0]);
-          for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
-            if (tmpSelectedTauCandidates[i] != tmpNprongPassed[0])
-              output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
-          }
-        } else {
-          // 3) Multiple taus have passed nprongs, lets see how many pass also the rtau cut
-          for(size_t i=0; i<tmpNprongPassed.size(); ++i) {
-            if (fTauID->passRTauCut(tmpNprongPassed[i]))
-              tmpRtauPassed.push_back(tmpNprongPassed[i]);
-          }
-          if (tmpRtauPassed.size() == 0) {
-            // none pass, just take the most isolated one
-            std::sort(tmpNprongPassed.begin(), tmpNprongPassed.end(), isolationLessThan);
-            for(size_t i=0; i<tmpNprongPassed.size(); ++i) {
-              output.fSelectedTauCandidates.push_back(tmpNprongPassed[i]);
-            }
-            for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
-              bool match = false;
-              for(size_t j=0; j<tmpNprongPassed.size(); ++j) {
-                if (tmpSelectedTauCandidates[i] == tmpNprongPassed[j])
-                  match = true;
-              }
-              if (!match) output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
-            }
-          } else if (tmpRtauPassed.size() == 1) {
-            // Put the one that passed both nprongs and rtau to the top of the list
-            output.fSelectedTauCandidates.push_back(tmpRtauPassed[0]);
-            for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
-              if (tmpSelectedTauCandidates[i] != tmpRtauPassed[0])
-                output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
-            }
-          } else {
-            // 4) Multiple taus have passed nprongs, rtau, and isolation; take most energetic one
-            std::sort(tmpRtauPassed.begin(), tmpRtauPassed.end(), tauEtGreaterThan);
-            for(size_t i=0; i<tmpRtauPassed.size(); ++i) {
-              output.fSelectedTauCandidates.push_back(tmpRtauPassed[i]);
-            }
-          }
-        }
-      }
-    } // end of sorting for tau candidate selection only
-
-    if (output.fSelectedTauCandidates.size() == 0) {
-      for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i)
-        output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
-    }
-    // Sort selected taus (i.e. passed full tau ID) by Et
+    // Sort list by tau pT if multiple taus were found
     std::sort(tmpSelectedTaus.begin(), tmpSelectedTaus.end(), tauEtGreaterThan);
     for(size_t i=0; i<tmpSelectedTaus.size(); ++i)
       output.fSelectedTaus.push_back(tmpSelectedTaus[i]);
 
+    // Set first tau as selected tau for tauCandidateSelection only
+    if (output.fSelectedTaus.size()) {
+      output.fPassedEvent = true;
+      output.fSelectedTau = output.fSelectedTaus[0];
+    } else {
+      output.fPassedEvent = false;
+    }
+  }
+
+  void TauSelection::finalizeSelection(TauSelection::Data& output) {
     // Handle counters
     fTauID->updatePassedCounters();
-    // Fill number of taus histograms
-    hNumberOfTauCandidates->Fill(static_cast<float>(taus.size()));
+    // Fill number of taus histograms (per event)
+    hNumberOfTauCandidates->Fill(static_cast<float>(output.fAllTauCandidates.size()));
     hNumberOfSelectedTauCandidates->Fill(static_cast<float>(output.fSelectedTauCandidates.size()));
     if (fOperationMode != kTauCandidateSelectionOnly) {
       hNumberOfSelectedTaus->Fill(static_cast<float>(output.fSelectedTaus.size()));
     }
-
-    // Handle result of tau candidate selection only
-    if (fOperationMode == kTauCandidateSelectionOnly) {
-      if (output.fSelectedTauCandidates.size()) {
-        increment(fTauFound);
-        output.fPassedEvent = true;
-      } else
-        output.fPassedEvent = false;
-    } else if (fOperationMode == kNormalTauID) {
-      // Handle result of standard tau ID 
-      if (output.fSelectedTaus.size()) {
-	//	std::cout << " result true  " << std::endl;
-        increment(fTauFound);
-        output.fPassedEvent = true;
-      } else
-        output.fPassedEvent = false;
+    if (output.passedEvent()) {
+      // Set booleans in Data object, Disable histogram filling and counter incrementing until the return call
+      // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+      HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+      EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+      // Isolation status
+      output.bSelectedTauPassesIsolation = fTauID->passIsolation(output.fSelectedTau);
+      // Nprongs status
+      output.bSelectedTauPassesNProngs = fTauID->passNProngsCut(output.fSelectedTau);
+      // Rtau status
+      output.bSelectedTauPassesRtau = fTauID->passRTauCut(output.fSelectedTau);
+      // Selected taus do not pass isolation
+      bool myHasPassedIsolationStatus = false;
+      for(edm::PtrVector<pat::Tau>::const_iterator iter = output.fSelectedTauCandidates.begin(); iter != output.fSelectedTauCandidates.end(); ++iter) {
+        myHasPassedIsolationStatus = myHasPassedIsolationStatus && fTauID->passIsolation(*iter);
+      }
+      output.bSelectedTausDoNotPassIsolation = !myHasPassedIsolationStatus;
+      // Nprongs value
+      output.fSelectedTauNProngsValue = fTauID->getNProngs(output.fSelectedTau);
+      // Rtau value
+      output.fSelectedTauRtauValue = fTauID->getRtauValue(output.fSelectedTau);
     }
   }
 
@@ -978,6 +930,7 @@ namespace HPlus {
     double myTauPt = tau->pt();
     double myTauEta = tau->eta();
     double myTauPhi = tau->phi();
+    hDecayModeTauCandidates->Fill(tau->decayMode());
     hPtTauCandidates->Fill(myTauPt);
     hEtaTauCandidates->Fill(myTauEta);
     hPhiTauCandidates->Fill(myTauPhi);
@@ -997,6 +950,7 @@ namespace HPlus {
     double myTauPt = tau->pt();
     double myTauEta = tau->eta();
     double myTauPhi = tau->phi();
+    hDecayModeSelectedTauCandidates->Fill(tau->decayMode());
     hPtSelectedTauCandidates->Fill(myTauPt);
     hEtaSelectedTauCandidates->Fill(myTauEta);
     hPhiSelectedTauCandidates->Fill(myTauPhi);
@@ -1012,6 +966,7 @@ namespace HPlus {
     double myTauPt = tau->pt();
     double myTauEta = tau->eta();
     double myTauPhi = tau->phi();
+    hDecayModeSelectedTaus->Fill(tau->decayMode());
     hPtSelectedTaus->Fill(myTauPt);
     hEtaSelectedTaus->Fill(myTauEta);
 
@@ -1025,23 +980,57 @@ namespace HPlus {
   }
 
   TauSelection::Data TauSelection::setSelectedTau(edm::Ptr<pat::Tau>& tau, bool passEvent) {
-    Data output(fTauID, fOperationMode, getHistoWrapperPointer(), getEventCounterPointer());
+    Data output;
+    output.fPassedEvent = passEvent;
     //fSelectedTaus.clear();
     //fSelectedTaus.reserve(1);
-    if (tau.isNonnull())
+    if (tau.isNonnull()) {
       output.fSelectedTaus.push_back(tau);
-    output.fPassedEvent = passEvent;
+      output.fSelectedTau = tau;
+      finalizeSelection(output);
+    }
     return output;
   }
 
   void TauSelection::ObtainMCPurity(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent, WrappedTH1* histogram) {
+    // FIXME: This is essentially duplicate code w.r.t. FakeTauIdentifier
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
-    for (size_t i=0; i < genParticles->size(); ++i) {  
+    for (size_t i=0; i < genParticles->size(); ++i) {
       const reco::Candidate & p = (*genParticles)[i];
       if (std::abs(p.pdgId()) == 15) {
+        // Ignore tau that is radiating before decay
+        bool myVetoStatus = false;
+        for (size_t im=0; im < p.numberOfDaughters(); ++im){
+          if (std::abs(p.daughter(im)->pdgId()) == 15) myVetoStatus = true;
+        }
+        if (myVetoStatus) continue;
+        // Tau lepton found, let's find the stable daughters and sum up their four momentum
+        LorentzVector myVisibleTau;
+        // Subtract neutrino momenta from tau lepton momentum
+        for (size_t j=0; j < genParticles->size(); ++j) {
+          // Consider only stable particles
+          if ((*genParticles)[j].status() != 1) continue;
+          // Skip neutrinos
+          int myId = std::abs((*genParticles)[j].pdgId());
+          if (myId == 12 || myId == 14 || myId == 16) continue;
+          // Check if particles mother is the tau lepton on row i
+          const reco::Candidate* ppmother = (*genParticles)[j].mother();
+          bool myBelongsToTauStatus = false;
+          while (ppmother) {
+            if (ppmother->p4() == p.p4() && ppmother->pdgId() == p.pdgId()) {
+              myBelongsToTauStatus = true;
+            }
+            // move to next
+            ppmother = ppmother->mother();
+          }
+          if (myBelongsToTauStatus) {
+            //std::cout << "   add " << (*genParticles)[j].pdgId() << " status=" << (*genParticles)[j].status() << std::endl;
+            myVisibleTau += (*genParticles)[j].p4();
+          }
+        }
         // Check match with tau
-        if (reco::deltaR(p, tau->p4()) < 0.1) {
+        if (reco::deltaR(myVisibleTau, tau->p4()) < 0.1) {
           // Check mother of tau
           int numberOfTauMothers = p.numberOfMothers(); 
           for (int im=0; im < numberOfTauMothers; ++im){  
@@ -1086,6 +1075,21 @@ namespace HPlus {
     else
       bestTau.push_back(myBestTau);
   }*/
+
+  void TauSelection::analyzeSeparationOfTriggerMatchedTaus(const edm::PtrVector<pat::Tau>& taus) {
+    if (taus.size() > 0) {
+      int mySeparateCounter = 0;
+      edm::Ptr<pat::Tau> myTau = taus[0];
+      for (int i = 1; i < (int)taus.size(); ++i) {
+        double myDeltaR = reco::deltaR(*myTau, *(taus[i]));
+        if (myDeltaR>0.5) ++mySeparateCounter;
+      }
+      if (mySeparateCounter)
+        hNTriggerMatchedSeparateTaus->Fill(taus.size());
+    }
+    hNTriggerMatchedTaus->Fill(taus.size());
+  }
+
 
   void TauSelection::analyseFakeTauComposition(FakeTauIdentifier& fakeTauIdentifier, const edm::Event& iEvent) {
     if (!fAnalyseFakeTauComposition) return;
@@ -1208,4 +1212,49 @@ namespace HPlus {
     }
       */
   }
+
+  // Horror getters - these should never be used in analysis for other purposes than testing / debugging !!!
+  // If you use these for analysis, you forget about the sorting in the case of multiple taus -> physics results will not be accurate
+  const bool TauSelection::getPassesIsolationStatusOfTauObject(const edm::Ptr<pat::Tau>& tau, std::string isolationString) const {
+    // Disable histogram filling and counter incrementing until the return call
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+    return tau->tauID(isolationString) > 0.5;
+  }
+
+  const double TauSelection::getIsolationValueOfTauObject(const edm::Ptr<pat::Tau>& tau, std::string isolationString) const {
+    // Disable histogram filling and counter incrementing until the return call
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+    return tau->tauID(isolationString);
+  }
+
+  const bool TauSelection::getPassesNProngsStatusOfTauObject(const edm::Ptr<pat::Tau>& tau) const {
+    // Disable histogram filling and counter incrementing until the return call
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+    return fTauID->passNProngsCut(tau);
+  }
+
+  const bool TauSelection::getPassesRtauStatusOfTauObject(const edm::Ptr<pat::Tau>& tau) const {
+    // Disable histogram filling and counter incrementing until the return call
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+    return fTauID->passRTauCut(tau);
+  }
+
+  const int TauSelection::getNProngsOfTauObject(const edm::Ptr<pat::Tau>& tau) const {
+    // Disable histogram filling and counter incrementing until the return call
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+    return fTauID->getNProngs(tau);
+  }
+
+  const double TauSelection::getRtauOfTauObject(const edm::Ptr<pat::Tau>& tau) const {
+    // Disable histogram filling and counter incrementing until the return call
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+    return fTauID->getRtauValue(tau);
+  }
+
 }

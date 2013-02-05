@@ -8,16 +8,16 @@
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 
+#include <limits>
+#include <cmath>
+
 namespace HPlus {
-  EmbeddingMuonEfficiency::Data::Data() :
-    fEmptyConstructorUsed(true) { }
-  EmbeddingMuonEfficiency::Data::Data(bool dummy):
-    fEmptyConstructorUsed(false),
-    fWeight(1.0),
+  EmbeddingMuonEfficiency::Data::Data():
+    fWeight(std::numeric_limits<double>::quiet_NaN()),
     fWeightAbsUnc(1.0) {}
   EmbeddingMuonEfficiency::Data::~Data() {}
   void EmbeddingMuonEfficiency::Data::check() const {
-    if(fEmptyConstructorUsed)
+    if(isnan(fWeight))
       throw cms::Exception("Assert") << "EmbeddingMuonEfficiency::Data: This Data object was constructed with the default constructor, not with EmbeddingMuonEfficiency::applyEventWeight(). There is something wrong in your code." << std::endl;
   }
 
@@ -55,10 +55,10 @@ namespace HPlus {
   EmbeddingMuonEfficiency::~EmbeddingMuonEfficiency() {}
 
   EmbeddingMuonEfficiency::Data EmbeddingMuonEfficiency::applyEventWeight(const edm::Event& iEvent, EventWeight& eventWeight) {
-    Data output(true);
+    Data output;
     
     if(fMode == kDisabled)
-      return Data();
+      return output;
 
     /* Not needed yet
     // Obtain original muon

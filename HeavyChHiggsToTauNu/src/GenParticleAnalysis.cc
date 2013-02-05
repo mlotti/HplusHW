@@ -29,14 +29,11 @@ void printDaughters(const reco::Candidate& p);
 
 
 namespace HPlus {
-  GenParticleAnalysis::Data::Data():
-    fEmptyConstructorUsed(true) {}
-  GenParticleAnalysis::Data::Data(bool dummy):
-    fEmptyConstructorUsed(false) {}
+  GenParticleAnalysis::Data::Data() {}
 
   GenParticleAnalysis::Data::~Data() {}
   void GenParticleAnalysis::Data::check() const {
-    if(fEmptyConstructorUsed)
+    if(fGenMet.isNull())
       throw cms::Exception("Assert") << "GenParticleAnalysis::Data: This Data object was constructed with the default constructor, not with EmbeddingMuonEfficiency::applyEventWeight(). There is something wrong in your code." << std::endl;
   }
 
@@ -125,7 +122,7 @@ namespace HPlus {
   }
 
   GenParticleAnalysis::Data GenParticleAnalysis::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
-    Data output(true);
+    Data output;
     
     if (iEvent.isRealData()) return output;
 

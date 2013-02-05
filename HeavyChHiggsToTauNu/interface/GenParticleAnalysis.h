@@ -27,7 +27,6 @@ namespace HPlus {
     class Data {
     public:
       Data();
-      Data(bool dummy);
       ~Data();
 
       void check() const;
@@ -40,7 +39,6 @@ namespace HPlus {
       friend class GenParticleAnalysis;
 
     private:
-      bool fEmptyConstructorUsed;
       edm::Ptr<reco::GenMET> fGenMet;
     };
 

@@ -86,6 +86,6 @@ namespace HPlus {
     // Make cut
     output.fPassedEvent = !(output.fClosestDeltaPhi < fMinDeltaPhi);
 
-    return Data();
+    return output;
   }
 }

@@ -44,36 +44,34 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(TauIDBase* pointerToTauID, const TauSelection::TauSelectionOperationMode& operationMode, HistoWrapper* histoWrapper, EventCounter* eventCounter);
+      Data();
       ~Data();
       /// Returns true, if the selected tau has passed all selections
       bool passedEvent() const { return fPassedEvent; }
       /// Returns list of all tau candidates prior to any cuts
       const edm::PtrVector<pat::Tau>& getAllTauObjects() const { return fAllTauCandidates; }
-      /// Returns list of selected tau candidatess (i.e. taus after tau candidate selection, no isolation or rtau applied); Note: list can be empty if no tau was selected
+      /// Returns list of selected tau candidates (i.e. taus after tau candidate selection, no isolation or rtau applied); Note: list can be empty if no tau was selected
       const edm::PtrVector<pat::Tau>& getSelectedTausBeforeIsolation() const { return fSelectedTauCandidates; }
       /// Returns list of selected taus (i.e. taus after tau candidate selection or after full tau ID); Note: list can be empty if no tau was selected
-      const edm::PtrVector<pat::Tau>& getSelectedTaus() const;
+      const edm::PtrVector<pat::Tau>& getSelectedTaus() const { return fSelectedTaus; }
       /// Returns selected tau in the event (i.e. tau after tau candidate selection or after full tau ID); Note: list can be empty if no tau was selected
       const edm::Ptr<pat::Tau> getSelectedTau() const;
-      /// Returns the number of prongs of the selected tau
-      const size_t getNProngsOfSelectedTau() const;
-      /// Returns the number of prongs of the selected tau
-      const double getRtauOfSelectedTau() const;
       /// Returns true if the selected tau passes the isolation criteria
-      const bool selectedTauPassesIsolation() const;
+      const bool selectedTauPassesIsolation() const { return bSelectedTauPassesIsolation; }
       /// Returns true if the selected tau passes the nprongs cut
-      const bool selectedTauPassesNProngs() const;
+      const bool selectedTauPassesNProngs() const { return bSelectedTauPassesNProngs; }
       /// Returns true if the selected tau passes the rtau cut
-      const bool selectedTauPassesRtau() const;
+      const bool selectedTauPassesRtau() const { return bSelectedTauPassesRtau; }
       /// Returns true if the selected tau passes the isolation, Nprongs, and the Rtau cuts
       const bool selectedTauPassesFullTauID() const { return selectedTauPassesIsolation() && selectedTauPassesNProngs() && selectedTauPassesRtau(); }
       /// Returns true if no candidates pass isolation
-      const bool selectedTausDoNotPassIsolation() const;
+      const bool selectedTausDoNotPassIsolation() const { return bSelectedTausDoNotPassIsolation; }
       /// Returns true if the selected tau passes NProngs and Rtau but not isolation
-      const bool selectedTauPassesNProngsAndRtauButNotIsolation() const;
-      /// Returns true if the selected tau passes a specified discriminator
-      const bool selectedTauPassesDiscriminator(std::string discr, double cutPoint) const;
+      const bool selectedTauPassesNProngsAndRtauButNotIsolation() const { return !selectedTauPassesIsolation() && selectedTauPassesNProngs() && selectedTauPassesRtau(); }
+      /// Returns the Nprongs value of the selected tau
+      const int getSelectedTauNProngsValue() const { return fSelectedTauNProngsValue; }
+      /// Returns the Rtau value of the selected tau
+      const double getSelectedTauRtauValue() const { return fSelectedTauRtauValue; }
 
       friend class TauSelection;
 
@@ -83,12 +81,13 @@ namespace HPlus {
       edm::PtrVector<pat::Tau> fAllTauCandidates;
       edm::PtrVector<pat::Tau> fSelectedTauCandidates;
       edm::PtrVector<pat::Tau> fSelectedTaus;
-      /// Pointer to TauID object (not owner)
-      TauIDBase* fPointerToTauID;
-      /// Copy of operation mode of tau selection
-      const TauSelection::TauSelectionOperationMode fCopyOfOperationMode;
-      HistoWrapper* fHistoWrapper; // Needed for disabling histogramming temporarily when accessing TauID object; pointer needed because of copy constructor
-      EventCounter* fEventCounter; // Needed for disabling counter incrementation temporarily when accessing TauID object; pointer needed because of copy constructor
+      edm::Ptr<pat::Tau> fSelectedTau;
+      bool bSelectedTauPassesIsolation;
+      bool bSelectedTauPassesNProngs;
+      bool bSelectedTauPassesRtau;
+      bool bSelectedTausDoNotPassIsolation;
+      int fSelectedTauNProngsValue;
+      double fSelectedTauRtauValue;
     };
 
     TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label = "TauSelection");
@@ -115,31 +114,57 @@ namespace HPlus {
     /// Select the pat::Tau object which most likely passes the tau candidate selection + ID
     const edm::Ptr<pat::Tau> selectMostLikelyTau(const edm::PtrVector<pat::Tau>& taus, double vertexZ);
 
+    // Horror getters - these should never be used in analysis for other purposes than testing / debugging !!!
+    // If you use these for analysis, you forget about the sorting in the case of multiple taus -> physics results will not be accurate
+    /// Use only for testing/debugging !!!
+    const bool getPassesIsolationStatusOfTauObject(const edm::Ptr<pat::Tau>& tau, std::string isolationString) const;
+    /// Use only for testing/debugging !!!
+    const double getIsolationValueOfTauObject(const edm::Ptr<pat::Tau>& tau, std::string isolationString) const;
+    /// Use only for testing/debugging !!!
+    const bool getPassesNProngsStatusOfTauObject(const edm::Ptr<pat::Tau>& tau) const;
+    /// Use only for testing/debugging !!!
+    const bool getPassesRtauStatusOfTauObject(const edm::Ptr<pat::Tau>& tau) const;
+    /// Use only for testing/debugging !!!
+    const int getNProngsOfTauObject(const edm::Ptr<pat::Tau>& tau) const;
+    /// Use only for testing/debugging !!!
+    const double getRtauOfTauObject(const edm::Ptr<pat::Tau>& tau) const;
+    // End of horror getters
+
   private:
     /// Default tauID called from analyze or silentAnalyze
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, double vertexZ);
     /// Default tauID called from analyze or silentAnalyze
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ);
-    /// Method for doing tau selection
+    /// Method for doing tau selection chain
     void doTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ, TauSelection::Data& output);
-    /// Method for handling the result of tauID factorization
-    bool doFactorizationLookup();
+    /// Method for doing tau candidate selection, to be called from doTauSelection
+    void doTauCandidateSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus, double vertexZ, TauSelection::Data& output);
+    /// Method for doing tau ID selection, to be called from doTauSelection
+    void doTauIdentification(const edm::Event& iEvent, const edm::EventSetup& iSetup, TauSelection::Data& output);
+    /// Method for finalizing tau ID selection, to be called from doTauSelection
+    void finalizeSelection(TauSelection::Data& output);
+    
     // Internal histogramming routines
     /// Fills the histogram that describes the mode in which the tau selection was run
     void fillOperationModeHistogram();
-
+    /// Analyzes the angular separation of trigger matched taus
+    void analyzeSeparationOfTriggerMatchedTaus(const edm::PtrVector<pat::Tau>& taus);
+    /// Fills information histograms for all tau candidates
     void fillHistogramsForTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
+    /// Fills information histograms for cleaned tau candidates
     void fillHistogramsForSelectedTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
+    /// Fills information histograms for selected taus
     void fillHistogramsForSelectedTaus(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
+    /// Analyzes the MC purity of the considered tau objects
     void ObtainMCPurity(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent, WrappedTH1* histogram);
     //void findBestTau(edm::PtrVector<pat::Tau>& bestTau, edm::PtrVector<pat::Tau>& taus);
 
   private:
     // Input parameters
+    /// Tau source
     edm::InputTag fSrc;
-    const std::string fSelection;
+    /// Option for analysing fake tau composition
     const bool fAnalyseFakeTauComposition;
-
     /// TauID object
     TauIDBase* fTauID;
     /// Operation mode of tau selection
@@ -147,11 +172,11 @@ namespace HPlus {
 
     /// Factorization table objects
 
-    // Counters
-    Count fTauFound;
-
     // Histograms
     WrappedTH1 *hTauIdOperatingMode;
+    WrappedTH1 *hDecayModeTauCandidates;
+    WrappedTH1 *hDecayModeSelectedTauCandidates;
+    WrappedTH1 *hDecayModeSelectedTaus;
     WrappedTH1 *hPtTauCandidates; // Tau candidates == all taus in the pat::Tau collection
     WrappedTH1 *hPtSelectedTauCandidates; // Cleaned tau candidates == taus after jet et, jet eta, ldg pt, e/mu veto 
     WrappedTH1 *hPtSelectedTaus; // Selected taus == after all tauID cuts
@@ -191,7 +216,6 @@ namespace HPlus {
     WrappedTH1 *hTightGammaMaxPtAfterIsolation;
     WrappedTH1 *hTightGammaSumPtAfterIsolation;
     WrappedTH1 *hTightGammaOccupancyAfterIsolation;
-    WrappedTH1 *hHPSDecayMode;
 
     WrappedTH1 *hVLooseIsoNcands;
     WrappedTH1 *hLooseIsoNcands;

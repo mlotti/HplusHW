@@ -25,7 +25,6 @@ namespace HPlus {
     class Data {
     public:
       Data();
-      Data(bool dummy);
       ~Data();
 
       void check() const;
@@ -42,7 +41,6 @@ namespace HPlus {
       friend class EmbeddingMuonEfficiency;
 
     private:
-      bool fEmptyConstructorUsed;
       double fWeight;
       double fWeightAbsUnc;
     };

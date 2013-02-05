@@ -491,7 +491,7 @@ namespace HPlus {
   
     output.fPassedEvent = true;
     if( !bjetTopSideFound) output.fPassedEvent = false;
-    return Data();
+    return output;
   }
   
 }

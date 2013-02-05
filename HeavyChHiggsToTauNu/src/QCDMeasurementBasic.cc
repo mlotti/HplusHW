@@ -419,9 +419,7 @@ namespace HPlus {
       //fTree.setTop(TopSelectionData.getTopP4());
       //fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
       //fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
-      edm::PtrVector<pat::Tau> mySelectedTaus;
-      mySelectedTaus.push_back(tauCandidateData.getSelectedTau());
-      fTree.fill(iEvent, mySelectedTaus, jetData.getSelectedJets());
+      fTree.fill(iEvent, tauCandidateData.getSelectedTau(), jetData.getSelectedJets());
       return true;
     }
 
@@ -582,7 +580,7 @@ namespace HPlus {
     increment(fBTaggingCounter);
     // Apply scale factor as weight to event
     if (!iEvent.isRealData()) {
-      btagData.fillScaleFactorHistograms(); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
+      fBTagging.fillScaleFactorHistograms(btagData); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
       fEventWeight.multiplyWeight(btagData.getScaleFactor());
     }
     increment(fBTaggingScaleFactorCounter);

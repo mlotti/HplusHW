@@ -189,7 +189,7 @@ namespace HPlus {
     increment(fBTaggingCounter);
     // Apply scale factor as weight to event
     if (!iEvent.isRealData()) {
-      btagData.fillScaleFactorHistograms(); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
+      fBTagging.fillScaleFactorHistograms(btagData); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
       fEventWeight.multiplyWeight(btagData.getScaleFactor());
     }
     increment(fBTaggingScaleFactorCounter);

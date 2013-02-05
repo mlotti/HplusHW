@@ -58,14 +58,16 @@ namespace HPlus {
       edm::Ptr<reco::MET> fTcMET;
 
     };
-    
+
     METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string label);
     ~METSelection();
 
     // Use silentAnalyze if you do not want to fill histograms or increment counters
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
-    
+
+    const double getCutValue() const { return fMetCut; }
+
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& selectedTau, const edm::PtrVector<pat::Jet>& allJets);
 
@@ -82,9 +84,9 @@ namespace HPlus {
     Select fSelect;
 
     // For type I/II correction
-    double fMetCut;
-    double fTauJetMatchingCone;
-    double fJetType1Threshold;
+    const double fMetCut;
+    const double fTauJetMatchingCone;
+    const double fJetType1Threshold;
     std::string fJetOffsetCorrLabel;
     //double fType2ScaleFactor;
 

@@ -86,7 +86,6 @@ namespace HPlus {
       const double getScaleFactorAbsoluteUncertainty() const { return fScaleFactorAbsoluteUncertainty; }
       const double getScaleFactorRelativeUncertainty() const { return fScaleFactorRelativeUncertainty; }
       const bool hasGenuineBJets() const;
-      void fillScaleFactorHistograms();
 
       friend class BTagging;
 
@@ -100,9 +99,6 @@ namespace HPlus {
       double fScaleFactor;
       double fScaleFactorAbsoluteUncertainty;
       double fScaleFactorRelativeUncertainty;
-      WrappedTH1 *hPointerToScaleFactor; // (pointer to object in friend class, not owner)
-      WrappedTH1 *hPointerToBTagAbsoluteUncertainty; // (pointer to object in friend class, not owner)
-      WrappedTH1 *hPointerToBTagRelativeUncertainty; // (pointer to object in friend class, not owner)
     };
 
     BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -111,11 +107,13 @@ namespace HPlus {
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
 
+    void fillScaleFactorHistograms(BTagging::Data& input);
+
     const std::string getDiscriminator() const { return fDiscriminator; }
 
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
-    
+
     void calculateScaleFactor(const edm::PtrVector<pat::Jet>& jets, BTagging::Data& btagData);
 
     // Input parameters

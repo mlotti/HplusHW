@@ -105,6 +105,6 @@ namespace HPlus {
   
     if( EtSumRatio > fEtSumRatioCut ) output.fPassedEvent = false;
 
-    return Data();
+    return output;
   }
 }
