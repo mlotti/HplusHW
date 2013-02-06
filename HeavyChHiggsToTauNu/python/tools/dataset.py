@@ -2148,11 +2148,83 @@ class DatasetPrecursor:
     def isMC(self):
         return not self.isData()
 
+_analysisNameSkipList = ["Plus", "Minus", "configInfo", "PUWeightProducer"]
+_analysisSearchModes = ["Light", "Heavy"]
+_dataDataEra_re = re.compile("_(?P<era>201\d\S)_")
+
 ## Class for listing contents of multicrab dirs, dataset ROOT files, and creating DatasetManager
 class DatasetManagerCreator:
     def __init__(self, rootFileList, **kwargs):
         self._precursors = [DatasetPrecursor(name, filename) for name, filename in rootFileList]
         self._baseDirectory = kwargs.get("baseDirectory", "")
+
+        for d in self._precursors:
+            if d.isMC():
+                self._readMCAnalysisContent(d)
+                break
+
+        dataEras = {}
+        for d in self._precursors:
+            if d.isData():
+                m = _dataDataEra_re.search(d.getName())
+                if m:
+                    dataEras[m.group("era")] = 1
+
+        self._dataDataEras = dataEras.keys()
+        self._dataDataEras.sort()                
+
+    def _readMCAnalysisContent(self, precursor):
+        contents = aux.listDirectoryContent(precursor.getFile(), lambda key: key.IsFolder())
+
+        def skipItem(name):
+            for skip in _analysisNameSkipList:
+                if skip in name:
+                    return False
+            return True
+        contents = filter(skipItem, contents)
+        if len(contents) == 0:
+            raise Exception("No analysis TDirectories found")
+
+        analyses = {}
+        searchModes = {}
+        dataEras = {}
+        optimizationModes = {}
+
+        for d in contents:
+            directoryName = d
+
+            # Look for optimization mode
+            start = directoryName.find("Opt")
+            if start >= 0:
+                optimizationModes[directoryName[start:]] = 1
+                directoryName = directoryName[:start]
+
+            # Look for data era
+            start = directoryName.find("Run")
+            if start >= 0:
+                dataEras[directoryName[start:]] = 1
+                directoryName = directoryName[:start]
+            
+            # Look for search mode
+            for sm in _analysisSearchModes:
+                start = directoryName.find(sm)
+                if start >= 0:
+                    searchModes[sm] = 1
+                    directoryName = directoryName[:start]
+                    break
+
+            # Whatever is left in directoryName, is our analysis name
+            analyses[directoryName] = 1
+
+        self._analyses =  analyses.keys()
+        self._searchModes = searchModes.keys()
+        self._mcDataEras = dataEras.keys()
+        self._optimizationModes = optimizationModes.keys()
+
+        self._analyses.sort()
+        self._searchModes.sort()
+        self._mcDataEras.sort()
+        self._optimizationModes.sort()
 
     def createDatasetManager(self, **kwargs):
         manager = DatasetManager()
@@ -2179,6 +2251,25 @@ class DatasetManagerCreator:
             manager._setBaseDirectory(self._baseDirectory)
 
         return manager
+
+    def getDatasetNames(self):
+        return [d.getName() for d in self._precursors]
+
+    def getAnalyses(self):
+        return self._analyses
+
+    def getSearchModes(self):
+        return self._searchModes
+
+    def getMCDataEras(self):
+        return self._mcDataEras
+
+    def getDataDataEras(self):
+        return self._dataDataEras
+
+    def getOptimizationModes(self):
+        return self._optimizationModes
+
 
 ## Helper class to plug NtupleCache to the existing framework
 #
