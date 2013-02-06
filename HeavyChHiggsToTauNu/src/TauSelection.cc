@@ -435,30 +435,33 @@ namespace HPlus {
     // MC purity
     hMCPurityOfTauCandidates = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_all_tau_candidates_MC_purity",
-      "tau_candidates_MC_purity;;N_{jets}", 4, 0., 4.);
+      "tau_candidates_MC_purity;;N_{jets}", 5, 0., 5.);
     if (hMCPurityOfTauCandidates->isActive()) {
       hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(1, "#tau from H#pm");
       hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(2, "#tau from W#pm");
-      hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(3, "Other #tau source");
-      hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(4, "No MC #tau match");
+      hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(3, "#tau from Z");
+      hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(4, "Other #tau source");
+      hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(5, "No MC #tau match");
     }
     hMCPurityOfSelectedTauCandidates = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_cleaned_tau_candidates_MC_purity",
-      "cleaned_tau_candidates_MC_purity;;N_{jets}", 4, 0., 4.);
+      "cleaned_tau_candidates_MC_purity;;N_{jets}", 5, 0., 5.);
     if (hMCPurityOfSelectedTauCandidates->isActive()) {
       hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(1, "#tau from H#pm");
       hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(2, "#tau from W#pm");
-      hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(3, "Other #tau source");
-      hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(4, "No MC #tau match");
+      hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(3, "#tau from Z");
+      hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(4, "Other #tau source");
+      hMCPurityOfSelectedTauCandidates->GetXaxis()->SetBinLabel(5, "No MC #tau match");
     }
     hMCPurityOfSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir,
       "TauSelection_selected_taus_MC_purity",
-      "selected_tau_MC_purity;;N_{jets}", 4, 0., 4.);
+      "selected_tau_MC_purity;;N_{jets}", 5, 0., 5.);
     if (hMCPurityOfSelectedTaus->isActive()) {
       hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(1, "#tau from H#pm");
       hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(2, "#tau from W#pm");
-      hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(3, "Other #tau source");
-      hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(4, "No MC #tau match");
+      hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(3, "#tau from Z");
+      hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(4, "Other #tau source");
+      hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(5, "No MC #tau match");
     }
 
     // Isolation variables
@@ -754,6 +757,9 @@ namespace HPlus {
     if (tmpIsolationPassed.size() == 0) {
       // none pass, just take the most isolated one
       std::sort(tmpSelectedTauCandidates.begin(), tmpSelectedTauCandidates.end(), isolationLessThan);
+      for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+        output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+      }
     } else if (tmpIsolationPassed.size() == 1) {
       // Put the found one to the top of the list
       output.fSelectedTauCandidates.push_back(tmpIsolationPassed[0]);
@@ -824,7 +830,10 @@ namespace HPlus {
         }
       }
     }
-
+    // Check that sorting was ok
+    if (output.fSelectedTauCandidates.size() != tmpSelectedTauCandidates.size()) {
+      throw cms::Exception("LogicError") << "TauSelection::doTauCandidateSelection(): sorting of selected tau candidates is buggy!";
+    }
     // Set first tau as selected tau for tauCandidateSelection only
     if (fOperationMode == kTauCandidateSelectionOnly) {
       if (output.fSelectedTauCandidates.size()) {
@@ -875,6 +884,11 @@ namespace HPlus {
     std::sort(tmpSelectedTaus.begin(), tmpSelectedTaus.end(), tauEtGreaterThan);
     for(size_t i=0; i<tmpSelectedTaus.size(); ++i)
       output.fSelectedTaus.push_back(tmpSelectedTaus[i]);
+
+    // Check that sorting was ok
+    if (output.fSelectedTaus.size() != tmpSelectedTaus.size()) {
+      throw cms::Exception("LogicError") << "TauSelection::doTauIdentification(): sorting of selected taus is buggy!";
+    }
 
     // Set first tau as selected tau for tauCandidateSelection only
     if (output.fSelectedTaus.size()) {
@@ -1032,25 +1046,28 @@ namespace HPlus {
         // Check match with tau
         if (reco::deltaR(myVisibleTau, tau->p4()) < 0.1) {
           // Check mother of tau
-          int numberOfTauMothers = p.numberOfMothers(); 
-          for (int im=0; im < numberOfTauMothers; ++im){  
-            const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
-            if (!dparticle) continue;
-            int idmother = std::abs(dparticle->pdgId());
+          const reco::Candidate* pmother = p.mother();
+          while (pmother) {
+            int idmother = std::abs(pmother->pdgId());
+            //std::cout << "mother="<< idmother<< std::endl;
             if (idmother == 37) { // H+
               histogram->Fill(0.);
               return;
-            }
-            if (idmother == 24) { // W+
+            } else if (idmother == 24) { // W+
               histogram->Fill(1.);
               return;
+            } else if (idmother == 23) { // Z
+              histogram->Fill(2.);
+              return;
             }
+            pmother = pmother->mother();
           }
-          histogram->Fill(2.); // Other source of tau (B decays)
+          histogram->Fill(3.); // Other source of tau (B decays)
+          return;
         }
       }
     }
-    histogram->Fill(3.); // No MC match found
+    histogram->Fill(4.); // No MC match found
   }
 
 /*  void TauSelection::findBestTau(edm::PtrVector<pat::Tau>& bestTau, edm::PtrVector<pat::Tau>& taus) {

@@ -1047,7 +1047,7 @@ namespace HPlus {
     }
 
    // transverse mass and inv mass with tau veto
-    if (!vetoTauData.passedEvent()) {
+    if (vetoTauData.passedEvent()) {
       increment(fTauVetoAfterDeltaPhiCounter);
       hTransverseMassTauVeto->Fill(transverseMass);
       //      hHiggsMassTauVeto->Fill(HiggsMass); 
