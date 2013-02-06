@@ -1178,7 +1178,7 @@ class Dataset:
     ## Constructor.
     # 
     # \param name              Name of the dataset (can be anything)
-    # \param fname             Path to the ROOT file of the dataset
+    # \param tfile             ROOT.TFile object for the dataset
     # \param analysisName      Base part of the analysis directory name
     # \param searchMode        String for search mode
     # \param dataEra           String for data era
@@ -1211,16 +1211,15 @@ class Dataset:
     # The final directory name is
     # data: analysisName+searchMode+optimizationMode
     # MC:   analysisName+searchMode+dataEra+optimizationMode
-    def __init__(self, name, fname, analysisName, searchMode=None, dataEra=None, optimizationMode=None, weightedCounters=True, counterDir="counters"):
+    def __init__(self, name, tfile, analysisName, searchMode=None, dataEra=None, optimizationMode=None, weightedCounters=True, counterDir="counters"):
         self.name = name
-        self._setBaseDirectory(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(fname)))))
-        self.file = ROOT.TFile.Open(fname)
-        if self.file == None:
-            raise Exception("Unable to open ROOT file '%s'"%fname)
+        self.file = tfile
+        # Now this is really an uhly hack
+        self._setBaseDirectory(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(self.file.GetName())))))
 
         configInfo = self.file.Get("configInfo")
         if configInfo == None:
-            raise Exception("configInfo directory is missing from file %s" % fname)
+            raise Exception("configInfo directory is missing from file %s" % self.file.GetName())
 
         self.info = _rescaleInfo(_histoToDict(self.file.Get("configInfo").Get("configinfo")))
         if "energy" in self.info:
@@ -1267,14 +1266,15 @@ class Dataset:
 
     ## Clone the Dataset object
     # 
-    # Nothing is shared between the returned copy and this object.
+    # Nothing is shared between the returned copy and this object,
+    # except the ROOT file object
     #
     # Use case is creative dataset manipulations, e.g. copying ttbar
     # to another name and scaling the cross section by the BR(t->H+)
     # while also keeping the original ttbar with the original SM cross
     # section.
     def deepCopy(self):
-        d = Dataset(self.name, self.file.GetName(), self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._weightedCounters, self._unweightedCounterDir)
+        d = Dataset(self.name, self.file, self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._weightedCounters, self._unweightedCounterDir)
         d.info.update(self.info)
         d.nAllEvents = self.nAllEvents
         return d
@@ -2128,31 +2128,57 @@ class DatasetManager:
     # Directory (absolute/relative to current working directory) where
     # the luminosity JSON file is located (see loadLuminosities())
 
+class DatasetPrecursor:
+    def __init__(self, name, filename):
+        self._name = name
+        self._filename = filename
+
+        self._rootFile = ROOT.TFile.Open(self._filename)
+        # Below is important to use '==' instead of 'is' to check for
+        # null file
+        if self._rootFile == None:
+            raise Exception("Unable to open ROOT file '%s' for dataset '%s'" % (self._filename, self._name))
+
+        dataVersion = self._rootFile.Get("configInfo/dataVersion")
+        if dataVersion == None:
+            raise Exception("Unable to find 'configInfo/dataVersion' from ROOT file '%s'" % self._filename)
+
+        self._isData = "data" in dataVersion
+
+    def getName(self):
+        return self._name
+
+    def getFile(self):
+        return self._rootFile
+
+    def isData(self):
+        return self._isData
+
+    def isMC(self):
+        return not self.isData()
+
 ## Class for listing contents of multicrab dirs, dataset ROOT files, and creating DatasetManager
 class DatasetManagerCreator:
     def __init__(self, rootFileList, **kwargs):
-        self._rootFileList = rootFileList
+        self._precursors = [DatasetPrecursor(name, filename) for name, filename in rootFileList]
         self._baseDirectory = kwargs.get("baseDirectory", "")
-        self._dataEra = kwargs.get("dataEra", None)
-
-    def setBaseDirectory(self, baseDirectory):
-        self._baseDirectory = baseDirectory
 
     def createDatasetManager(self, **kwargs):
         manager = DatasetManager()
-        for name, filename in self._rootFileList:
-            dset = Dataset(name, filename, **kwargs)
+        for precursor in self._precursors:
+            dset = Dataset(precursor.getName(), precursor.getFile(), **kwargs)
             manager.append(dset)
 
         if len(self._baseDirectory) > 0:
             manager._setBaseDirectory(self._baseDirectory)
 
-        if self._dataEra is not None:
-            if self._dataEra == "Run2011A":
+        if "dataEra" in kwargs:
+            dataEra = kwargs["dataEra"]
+            if dataEra == "Run2011A":
                 manager.remove(filter(lambda name: not "2011A_" in name, manager.getDataDatasetNames()))
-            elif self._dataEra == "Run2011B":
+            elif dataEra == "Run2011B":
                 manager.remove(filter(lambda name: not "2011B_" in name, manager.getDataDatasetNames()))
-            elif self._dataEra == "Run2011AB":
+            elif dataEra == "Run2011AB":
                 pass
             else:
                 raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB" % dataEra)
