@@ -201,25 +201,13 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
 # \param rootFileList  List of (name, filename) pairs (both should be strings).
 #                     'name' is taken as the dataset name, and 'filename' as
 #                      the path to the ROOT file.
-# \param kwargs        Keyword arguments (see below) 
-# 
-# <b>Keyword arguments</b>
-# \li \a counters      String for a directory name inside the ROOT files for the event counter histograms (default: 'signalAnalysis/counters').
-# \li Rest are forwarded to dataset.Dataset.__init__()
+# \param kwargs        Keyword arguments, forwarder to dataset.Dataset.__init__()
 #
 # \return DatasetManager object
 def getDatasetsFromRootFiles(rootFileList, **kwargs):
-    counters = kwargs.get("counters", _optionDefaults["counterdir"])
-    # Pass the rest of the keyword arguments, except 'counters', to Dataset constructor
-    _args = copy.copy(kwargs)
-    try:
-        del _args["counters"]
-    except KeyError:
-        pass
-
     datasets = DatasetManager()
     for name, f in rootFileList:
-        dset = Dataset(name, f, counters, **_args)
+        dset = Dataset(name, f, **kwargs)
         datasets.append(dset)
     return datasets
 
@@ -227,7 +215,6 @@ def getDatasetsFromRootFiles(rootFileList, **kwargs):
 _optionDefaults = {
     "input": "histograms-*.root",
     "counterdir": "signalAnalysis/counters",
-    "analysisBaseName": "signalAnalysis",
 }
 
 ## Add common dataset options to OptionParser object.
@@ -1195,8 +1182,13 @@ class Dataset:
     # 
     # \param name              Name of the dataset (can be anything)
     # \param fname             Path to the ROOT file of the dataset
+    # \param analysisName      Base part of the analysis directory name
+    # \param searchMode        String for search mode
+    # \param dataEra           String for data era
+    # \param optimizationMode  String for optimization mode (optional)
+    # \param weightedCounters  If True, pick the counters from the 'weighted' subdirectory
     # \param counterDir        Name of the directory in the ROOT file for
-    #                          event counter histograms. If None is given, it
+    #                          event counter histograms. If None is given,
     #                          is assumed that the dataset has no counters.
     #                          This also means that the histograms from this
     #                          dataset can not be normalized unless the
@@ -1207,10 +1199,6 @@ class Dataset:
     #                          directory. The weighted counters are taken
     #                          into account with \a useWeightedCounters
     #                          argument
-    # \param weightedCounters  If True, pick the counters from the 'weighted' subdirectory
-    # \param analysisBaseName  Base part of the analysis directory name (None for default, specified in _optionDefaults, only applicable for MC)
-    # \param dataEra           String for data era (None for not to do the replacement, only applicable for MC)
-    # \param doEraReplace      Boolean flag to indicate if the era replacement should really be done
     # 
     # Opens the ROOT file, reads 'configInfo/configInfo' histogram
     # (if it exists), and reads the main event counter
@@ -1221,13 +1209,12 @@ class Dataset:
     # workflow such that for MC we run analyzers for all data eras.
     # This means that the TDirectory names will be different for data
     # and MC, such that in MC the era name is appended to the
-    # directory name. In order to easily pick the data eras from plot
-    # scripts, Dataset supports simple replacement scheme in the
-    # TDirectory names for all histogram accesses (so this deals with
-    # histograms for both plots and counters). The information must be
-    # given in the constructor, because the counters are read in the
-    # construction time.
-    def __init__(self, name, fname, counterDir, weightedCounters=True, analysisBaseName=None, dataEra=None, doEraReplace=True):
+    # directory name. 
+    #
+    # The final directory name is
+    # data: analysisName+searchMode+optimizationMode
+    # MC:   analysisName+searchMode+dataEra+optimizationMode
+    def __init__(self, name, fname, analysisName, searchMode=None, dataEra=None, optimizationMode=None, weightedCounters=True, counterDir="counters"):
         self.name = name
         self._setBaseDirectory(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(fname)))))
         self.file = ROOT.TFile.Open(fname)
@@ -1249,16 +1236,24 @@ class Dataset:
 
         self._isData = "data" in self.dataVersion
         self._weightedCounters = weightedCounters
-        if analysisBaseName == None:
-            self._analysisBaseName = _optionDefaults["analysisBaseName"]
-        else:
-            self._analysisBaseName = analysisBaseName
-        self._dataEra = dataEra
-        self._doEraReplace = doEraReplace
-        if counterDir != None:
-            self._unweightedCounterDir = counterDir
-            self._weightedCounterDir = counterDir+"/weighted"
 
+        self._analysisName = analysisName
+        self._searchMode = searchMode
+        self._dataEra = dataEra
+        self._optimizationMode = optimizationMode
+
+        self._analysisDirectoryName = self._analysisName
+        if self._searchMode is not None:
+            self._analysisDirectoryName += self._searchMode
+        if self.isMC() and self._dataEra is not None:
+            self._analysisDirectoryName += self._dataEra
+        if self._optimizationMode is not None:
+            self._analysisDirectoryName += self._optimizationMode
+        self._analysisDirectoryName += "/"
+
+        self._unweightedCounterDir = counterDir
+        if counterDir is not None:
+            self._weightedCounterDir = counterDir + "/weighted"
             self._readCounters()
 
     ## Close the file
@@ -1282,22 +1277,31 @@ class Dataset:
     # while also keeping the original ttbar with the original SM cross
     # section.
     def deepCopy(self):
-        d = Dataset(self.name, self.file.GetName(), self._unweightedCounterDir, self._weightedCounters, self._analysisBaseName, self._dataEra, self._doEraReplace)
+        d = Dataset(self.name, self.file.GetName(), self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._weightedCounters, self._unweightedCounterDir)
         d.info.update(self.info)
         d.nAllEvents = self.nAllEvents
         return d
 
     ## Get ROOT histogram (or actually any object from the analysis directory)
     #
-    # \param name   Full path to the ROOT object within the ROOT file
+    # \param name    Path of the ROOT object relative to the analysis
+    #                root directory
     #
-    # If dataset is MC, and the data era has been set, replaces the
-    # analysis base name part in \a name with one containing the data
-    # era.
+    # If name starts with slash ('/'), it is interpreted as a absolute
+    # path within the ROOT file.
     def _getRootHisto(self, name):
-        if self.isMC() and self._dataEra != None and self._doEraReplace:
-            name = name.replace(self._analysisBaseName, self._analysisBaseName+self._dataEra, 1) # replace only the first occurrance
-        return (self.file.Get(name), name)
+        if name[0] == '/':
+            realName = name[1:]
+        else:
+            realName = self._analysisDirectoryName + name
+
+        h = self.file.Get(realName)
+        # below it is important to use '==' instead of 'is',
+        # because null TObject == None, but is not None
+        if h == None:
+            raise Exception("Unable to find histogram '%s' (requested '%s') from file '%s'" % (realName, name, self.file.GetName()))
+
+        return (h, realName)
 
     ## Read counters
     def _readCounters(self):
@@ -1305,8 +1309,6 @@ class Dataset:
         (d, realDir) = self._getRootHisto(self.counterDir)
         if d == None:
             msg = "Could not find counter directory %s from file %s." % (realDir, self.file.GetName())
-            if realDir != self.counterDir:
-                msg += "\nThe requested counter directory was %s, and the path was modified because of dataEra." % self.counterDir
             raise Exception(msg)
         if d.Get("counter") != None:
             ctr = _histoToCounter(d.Get("counter"))
@@ -1324,14 +1326,10 @@ class Dataset:
             (d, realDir) = self._getRootHisto(self.counterDir)
             if d == None:
                 msg = "Could not find counter directory %s from file %s" % (realDir, self.file.GetName())
-                if realDir != self.counterDir:
-                    msg += "\nThe requested counter directory was %s, and the path was modified because of dataEra." % self.counterDir
                 raise Exception(msg)
             h = d.Get("counter")
             if h == None:
                 msg = "No TH1 'counter' in directory '%s' of ROOT file '%s'" % (realDir, self.file.GetName())
-                if realDir != self.counterDir:
-                    msg += "\nThe requested directory was %s, and it was replaced because of dataEra." % self.counterDir
                 raise Exception(msg)
             ctr = _histoToCounter(h)
             h.Delete()
@@ -1475,11 +1473,6 @@ class Dataset:
         else:
             pname = name
             (h, realName) = self._getRootHisto(pname)
-            if h is None:
-                msg = "Unable to find histogram '%s' from file '%s'" % (realName, self.file.GetName())
-                if realName != pname:
-                    msg += "\nThe requested histogram was %s, and the path was modified because of dataEra." % self.counterDir
-                raise Exception(msg)
             name = h.GetName()+"_"+self.name
             if modify is not None:
                 h = modify(h)
