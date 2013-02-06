@@ -2143,7 +2143,7 @@ class DatasetPrecursor:
         if dataVersion == None:
             raise Exception("Unable to find 'configInfo/dataVersion' from ROOT file '%s'" % self._filename)
 
-        self._isData = "data" in dataVersion
+        self._isData = "data" in dataVersion.GetTitle()
 
     def getName(self):
         return self._name
@@ -2165,24 +2165,28 @@ class DatasetManagerCreator:
 
     def createDatasetManager(self, **kwargs):
         manager = DatasetManager()
+
+        dataEra = kwargs.get("dataEra", None)
         for precursor in self._precursors:
+            if dataEra is not None and precursor.isData():
+                if dataEra == "Run2011A":
+                    if not "2011A_" in precursor.getName():
+                        continue
+                elif dataEra == "Run2011B":
+                    if not "2011B_" in precursor.getName():
+                        continue
+                elif dataEra == "Run2011AB":
+                    pass
+                else:
+                    raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB" % dataEra)
+                print precursor.getName()
+
             dset = Dataset(precursor.getName(), precursor.getFile(), **kwargs)
             manager.append(dset)
 
         if len(self._baseDirectory) > 0:
             manager._setBaseDirectory(self._baseDirectory)
 
-        if "dataEra" in kwargs:
-            dataEra = kwargs["dataEra"]
-            if dataEra == "Run2011A":
-                manager.remove(filter(lambda name: not "2011A_" in name, manager.getDataDatasetNames()))
-            elif dataEra == "Run2011B":
-                manager.remove(filter(lambda name: not "2011B_" in name, manager.getDataDatasetNames()))
-            elif dataEra == "Run2011AB":
-                pass
-            else:
-                raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB" % dataEra)
-    
         return manager
 
 ## Helper class to plug NtupleCache to the existing framework
