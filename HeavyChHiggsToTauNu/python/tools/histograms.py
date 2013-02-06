@@ -396,6 +396,12 @@ def th1Xmin(th1):
 def th1Xmax(th1):
     return th1.GetXaxis().GetBinUpEdge(th1.GetXaxis().GetLast())
 
+def th2Ymin(th2):
+    return th2.GetYaxis().GetBinLowEdge(th2.GetYaxis().GetFirst())
+
+def th2Ymax(th2):
+    return th2.GetYaxis().GetBinUpEdge(th2.GetYaxis().GetLast())
+
 ## Helper function for lessThan/greaterThan argument handling
 #
 # \param kwargs  Keyword arguments
@@ -566,23 +572,36 @@ def _boundsArgs(histos, kwargs):
 # \param xmax  Maximum X axis value
 # \param ymax  Maximum Y axis value
 # \param nbins Number of x axis bins
+# \param nbinsx Number of x axis bins
+# \param nbinsy Number of y axis bins
 #
 # If nbins is None, TPad.DrawFrame is used. Otherwise a custom TH1 is
 # created for the frame with nbins bins in x axis.
 #
 # Use case: selection flow histogram (or whatever having custom x axis
 # lables).
-def _drawFrame(pad, xmin, ymin, xmax, ymax, nbins=None):
-    if nbins == None:
+def _drawFrame(pad, xmin, ymin, xmax, ymax, nbins=None, nbinsx=None, nbinsy=None):
+    if nbins is not None and nbinsx is not None:
+        raise Exception("Both 'nbins' and 'nbinsx' should not be set, please use the latter only")
+    if nbins is None:
+        nbins = nbinsx
+
+    if nbinsx is None and nbinsy is None:
         return pad.DrawFrame(xmin, ymin, xmax, ymax)
     else:
         pad.cd()
         # From TPad.cc
         frame = pad.FindObject("hframe")
-        if frame != None:
-            frame.Delete()
+        if frame is not None:
+#            frame.Delete()
             frame = None
-        frame = ROOT.TH1F("hframe", "hframe", nbins, xmin, xmax)
+        if nbinsx is not None and nbinsy is None:
+            frame = ROOT.TH1F("hframe", "hframe", nbinsx, xmin, xmax)
+        elif nbinsx is None and nbinsy is not None:
+            frame = ROOT.TH2F("hframe", "hframe", 100,xmin,xmax, nbinsy,ymin,ymax)
+        else: # neither is None
+            frame = ROOT.TH2F("hframe", "hframe", nbinsx,xmin,xmax, nbinsy,ymin,ymax)
+
         frame.SetBit(ROOT.TH1.kNoStats)
         frame.SetBit(ROOT.kCanDelete)
         frame.SetMinimum(ymin)
@@ -638,7 +657,7 @@ class CanvasFrame:
 
         _boundsArgs(histos, opts)
 
-        self.frame = _drawFrame(self.canvas, opts["xmin"], opts["ymin"], opts["xmax"], opts["ymax"], opts.get("nbins", None))
+        self.frame = _drawFrame(self.canvas, opts["xmin"], opts["ymin"], opts["xmax"], opts["ymax"], opts.get("nbins", None), opts.get("nbinsx", None), opts.get("nbinsy", None))
         self.frame.GetXaxis().SetTitle(histos[0].getXtitle())
         self.frame.GetYaxis().SetTitle(histos[0].getYtitle())
 
@@ -668,8 +687,10 @@ class CanvasFrameTwo:
         # The GetXaxis() is forwarded to the frame of the lower pad,
         # and the GetYaxis() is forwared to the frame of the upper pad.
         class FrameWrapper:
-            def __init__(self, frame1, frame2):
+            def __init__(self, pad1, frame1, pad2, frame2):
+                self.pad1 = pad1
                 self.frame1 = frame1
+                self.pad2 = pad2
                 self.frame2 = frame2
 
             def GetXaxis(self):
@@ -683,6 +704,13 @@ class CanvasFrameTwo:
 
             def getXmax(self):
                 return th1Xmax(self.frame2)
+
+            def Draw(self, *args):
+                self.pad1.cd()
+                self.frame1.Draw(*args)
+                self.pad2.cd()
+                self.frame2.Draw(*args)
+                self.pad1.cd()
 
         ## Wrapper to provide the getXmin/getXmax functions for _boundsArgs function.
         class HistoWrapper:
@@ -736,7 +764,8 @@ class CanvasFrameTwo:
         opts2["xmin"] = opts1["xmin"]
         opts2["xmax"] = opts1["xmax"]
         opts2["nbins"] = opts1.get("nbins", None)
-        _boundsArgs([HistoWrapper(h) for h in histos2], opts2)
+#        _boundsArgs([HistoWrapper(h) for h in histos2], opts2)
+        _boundsArgs(histos2, opts2) # HistoWrapper not needed anymore? Ratio is Histo
 
         # Create the canvas, divide it to two
         self.canvas = ROOT.TCanvas(name, name, ROOT.gStyle.GetCanvasDefW(), int(ROOT.gStyle.GetCanvasDefH()*canvasFactor))
@@ -783,7 +812,7 @@ class CanvasFrameTwo:
         self.frame2.GetYaxis().SetLabelSize(int(self.frame2.GetYaxis().GetLabelSize()*0.8))
 
         self.canvas.cd(1)
-        self.frame = FrameWrapper(self.frame1, self.frame2)
+        self.frame = FrameWrapper(self.pad1, self.frame1, self.pad2, self.frame2)
         self.pad = self.pad1
 
     ## \var frame1
@@ -937,11 +966,17 @@ class Histo:
 
     ## Get the minimum value of the Y axis
     def getYmin(self):
-        return self.rootHisto.GetMinimum()
+        if isinstance(self.rootHisto, ROOT.TH2):
+            return th2Ymin(self.rootHisto)
+        else:
+            return self.rootHisto.GetMinimum()
 
     ## Get the maximum value of the Y axis
     def getYmax(self):
-        return self.rootHisto.GetMaximum()
+        if isinstance(self.rootHisto, ROOT.TH2):
+            return th2Ymax(self.rootHisto)
+        else:
+            return self.rootHisto.GetMaximum()
 
     ## Get the X axis title
     def getXtitle(self):

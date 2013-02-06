@@ -52,13 +52,21 @@ def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
 # \param kwargs   Keyword arguments (see below) 
 #
 # <b>Keyword arguments</b>
-# \li \a opts       Optional OptionParser object. Should have options added with addOptions() and multicrab.addOptions().
-# \li \a cfgfile    Path to the multicrab.cfg file (for default, see multicrab.getTaskDirectories())
-# \li \a dataEra    Optional data era string. If given, keeps data
-#                   datasets only from this era, and sets the
-#                   TDirectory path replacement scheme for MC
-#                   datasets. Forwarded to getDatasetsFromCrabDirs()
-#                   and eventually to dataset.Dataset.__init__()
+# \li \a opts              Optional OptionParser object. Should have options added with addOptions() and multicrab.addOptions().
+# \li \a cfgfile           Path to the multicrab.cfg file (for default, see multicrab.getTaskDirectories())
+# \li \a excludeTasks      String, or list of strings, to specify regexps.
+#                          If a dataset name matches to any of the
+#                          regexps, Dataset object is not constructed for
+#                          that. Conflicts with \a includeOnlyTasks
+# \li \a includeOnlyTasks  String, or list of strings, to specify
+#                          regexps. Only datasets whose name matches
+#                          to any of the regexps are kept. Conflicts
+#                          with \a excludeTasks.
+# \li \a dataEra           Optional data era string. If given, keeps data
+#                          datasets only from this era, and sets the
+#                          TDirectory path replacement scheme for MC
+#                          datasets. Forwarded to getDatasetsFromCrabDirs()
+#                          and eventually to dataset.Dataset.__init__()
 # \li Rest are forwarded to getDatasetsFromCrabDirs()
 #
 # \return DatasetManager object
@@ -76,6 +84,42 @@ def getDatasetsFromMulticrabCfg(**kwargs):
         del _args["cfgfile"]
     else:
         taskDirs = multicrab.getTaskDirectories(opts)
+
+    if "excludeTasks" in kwargs and "includeOnlyTasks" in kwargs:
+        raise Exception("Only one of 'excludeTasks' or 'includeOnlyTasks' is allowed for getDatasetsFromMulticrabCfg")
+
+    def getRe(arg):
+        if isinstance(arg, basestring):
+            arg = [arg]
+        return [re.compile(a) for a in arg]
+    
+    if "excludeTasks" in kwargs:
+        exclude = getRe(kwargs["excludeTasks"])
+        tmp = []
+        for task in taskDirs:
+            found = False
+            for e_re in exclude:
+                if e_re.search(task):
+                    found = True
+                    break
+            if found:
+                continue
+            tmp.append(task)
+        taskDirs = tmp
+        del _args["excludeTasks"]
+    if "includeOnlyTasks" in kwargs:
+        include = getRe(kwargs["includeOnlyTasks"])
+        tmp = []
+        for task in taskDirs:
+            found = False
+            for i_re in include:
+                if i_re.search(task):
+                    found = True
+                    break
+            if found:
+                tmp.append(task)
+        taskDirs = tmp
+        del _args["includeOnlyTasks"]
 
     dataEra = kwargs.get("dataEra", None)
 

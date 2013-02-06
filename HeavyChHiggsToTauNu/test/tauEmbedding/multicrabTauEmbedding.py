@@ -63,6 +63,7 @@ config = {"skim":                 {"workflow": "tauembedding_skim_"+skimVersion,
           "EWKMatching":          {"workflow": "tauembedding_analysis_%s",               "config": "../EWKMatching_cfg.py"},
           "muonAnalysis":         {"workflow": "tauembedding_skimAnalysis_"+skimVersion, "config": "muonAnalysisFromSkim_cfg.py"},
           "caloMetEfficiency":    {"workflow": "tauembedding_skimAnalysis_"+skimVersion, "config": "caloMetEfficiency_cfg.py"},
+          "ewkBackgroundCoverageAnalysis":{"workflow": "analysis_v44_4",                         "config": "ewkBackgroundCoverageAnalysis_cfg.py"},
           }
 
 
@@ -100,10 +101,12 @@ datasetsData2011 = [
     "SingleMu_178411-179889_2011B_Nov19", # HLT_Mu40_eta2p1_v4
     "SingleMu_179942-180371_2011B_Nov19", # HLT_Mu40_eta2p1_v5
 ]
-datasetsMCnoQCD = [
-#    "TTJets_TuneZ2_Fall11",
-#    "WJets_TuneZ2_Fall11",
-#    "DYJetsToLL_M50_TuneZ2_Fall11",
+datasetsMCTTWJets = [
+    "TTJets_TuneZ2_Fall11",
+]
+datasetsMCnoQCD = datasetsMCTTWJets + [
+    "WJets_TuneZ2_Fall11",
+    "DYJetsToLL_M50_TuneZ2_Fall11",
     #"W2Jets_TuneZ2_Fall11",
     #"W3Jets_TuneZ2_Fall11",
     #"W4Jets_TuneZ2_Fall11",
@@ -167,7 +170,7 @@ def main():
         versions = defaultVersions
 
     tmp = "Processing step %s" % step
-    if step in ["skim", "embedding", "analysis", "signalAnalysis","EWKMatching"]:
+    if step in ["skim", "embedding", "analysis", "signalAnalysis","EWKMatching", "ewkBackgroundCoverageAnalysis"]:
         inputOutput = "input"
         if step in ["skim", "embedding"]:
             inputOutput = "output"
@@ -193,7 +196,7 @@ def main():
 def createTasks(opts, step, version=None):
     # Pick crab.cfg
     crabcfg = "crab.cfg"
-    if step in ["analysis", "analysisTau", "signalAnalysis", "signalAnalysisGenTau", "muonAnalysis", "caloMetEfficiency","EWKMatching"]:
+    if step in ["analysis", "analysisTau", "signalAnalysis", "signalAnalysisGenTau", "muonAnalysis", "caloMetEfficiency","EWKMatching", "ewkBackgroundCoverageAnalysis"]:
         crabcfg = "../crab_analysis.cfg"
 
     # Setup directory naming
@@ -210,6 +213,8 @@ def createTasks(opts, step, version=None):
     datasets = []
     if step in ["analysisTau", "signalAnalysisGenTau"]:
         datasets.extend(datasetsMCnoQCD)
+    elif step in ["ewkBackgroundCoverageAnalysis"]:
+        datasets.extend(datasetsMCTTWJets)
     else:
     #    datasets.extend(datasetsData2010)
         datasets.extend(datasetsData2011)
@@ -226,8 +231,10 @@ def createTasks(opts, step, version=None):
     multicrab.extendDatasets(workflow, datasets)
 
     multicrab.appendLineAll("GRID.maxtarballsize = 30")
-    if not step in ["skim", "analysisTau"]:
-        multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
+#    if not step in ["skim", "analysisTau"]:
+#        multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
+    if step in ["ewkBackgroundCoverageAnalysis"]:
+        multicrab.addCommonLine("CMSSW.output_file = histograms.root")
 
     # Let's do the naming like this until we get some answer from crab people
     if step in ["skim", "embedding"]:
