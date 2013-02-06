@@ -2,7 +2,6 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_CommonPlots_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_CommonPlots_h
 
-
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
@@ -13,8 +12,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
-
-//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
 
 #include <string>
 #include <vector>
@@ -38,16 +35,16 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep(HistoWrapper& histoWrapper, std::string label, bool enterSelectionFlowPlot, std::string selectionFlowPlotLabel);
     ~CommonPlotsFilledAtEveryStep();
     /// Fills histograms; supply pointer to data object from analyse() call, if it exists
-    void fill(int nVertices,
-              VertexSelection::Data* vertexData = 0,
-              TauSelection::Data* tauData = 0,
-              GlobalElectronVeto::Data* electronData = 0);
-    ///
+    void fill();
+    /// Returns status of wheather the item will be used for creating the selection flow plot
     const bool enterSelectionFlowPlotStatus() const { return fEnterSelectionFlowPlot; }
+    /// 
+    const std::string getSelectionFlowPlotLabel() const { return fSelectionFlowPlotLabel; }
     /// Cache data objects, to be called from CommonPlots::initialize()
-    void cacheDataObjects(VertexSelection::Data* vertexData,
-                          TauSelection::Data* tauData,
-                          GlobalElectronVeto::Data* electronData);
+    void cacheDataObjects(int nVertices,
+                          const VertexSelection::Data* vertexData,
+                          const TauSelection::Data* tauData,
+                          const GlobalElectronVeto::Data* electronData);
 
   private:
     /// Status indicating wheather the data objects have been cached
@@ -57,9 +54,10 @@ namespace HPlus {
     std::string fSelectionFlowPlotLabel;
 
     /// Cached data objects from silent analyze
-    VertexSelection::Data* fVertexData;
-    TauSelection::Data* fTauData;
-    GlobalElectronVeto::Data* fElectronData;
+    int fNVertices;
+    const VertexSelection::Data* fVertexData;
+    const TauSelection::Data* fTauData;
+    const GlobalElectronVeto::Data* fElectronData;
 
     /// Histograms to be plotted after every step
     WrappedTH1* hNVertices;
@@ -82,7 +80,7 @@ namespace HPlus {
   /**
    * Class to contain plots common to all analyses (signalAnalysis, QCD, ...)
    */
-  class CommonPlots: public BaseSelection {
+  class CommonPlots {
   public:
     CommonPlots(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~CommonPlots();
@@ -90,12 +88,13 @@ namespace HPlus {
     /// Initialize data objects
     void initialize(const edm::Event& iEvent,
                     const edm::EventSetup& iSetup,
+                    int nVertices,
                     VertexSelection& vertexSelection,
                     TauSelection& tauSelection,
                     GlobalElectronVeto& eVeto); // FIXME add more data objects
 
     /// create object containing histograms to be filled after all (or almost all) selection steps
-    CommonPlotsFilledAtEveryStep* createCommonPlotsFilledAtEveryStep(HistoWrapper& histoWrapper, std::string label, bool enterSelectionFlowPlot = false, std::string selectionFlowPlotLabel = "");
+    CommonPlotsFilledAtEveryStep* createCommonPlotsFilledAtEveryStep(std::string label, bool enterSelectionFlowPlot = false, std::string selectionFlowPlotLabel = "");
 
     /// unique filling methods (to be called before return statement)
     void fillControlPlots(const TriggerSelection::Data& data);
@@ -110,7 +109,12 @@ namespace HPlus {
   private:
     /// Status indicating wheather the data objects have been cached
     bool bDataObjectsCached;
+    /// Event counter object
+    EventCounter& fEventCounter;
+    /// HistoWrapper object
+    HistoWrapper& fHistoWrapper;
     /// Cached data objects from silent analyze
+    int fNVertices;
     VertexSelection::Data fVertexData;
     TauSelection::Data fTauData;
     GlobalElectronVeto::Data fElectronData;

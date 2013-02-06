@@ -27,29 +27,20 @@ namespace HPlus {
 
   CommonPlotsFilledAtEveryStep::~CommonPlotsFilledAtEveryStep() {}
 
-  void CommonPlotsFilledAtEveryStep::fill(int nVertices,
-                                          VertexSelection::Data* vertexData,
-                                          TauSelection::Data* tauData,
-                                          GlobalElectronVeto::Data* electronData) {
+  void CommonPlotsFilledAtEveryStep::fill() {
      // Safety check
      if (!fDataObjectsCached)
        throw cms::Exception("Assert") << "CommonPlotsFilledAtEveryStep: data objects have not been cached! (did you forget to call CommonPlotsFilledAtEveryStep::cacheDataObjects from CommonPlots::initialize?)";
-    // Select which data object to use
-    VertexSelection::Data* myVertexData = fVertexData;
-    if (vertexData) myVertexData = vertexData;
-    TauSelection::Data* myTauData = fTauData;
-    if (tauData) myTauData = tauData;
-    GlobalElectronVeto::Data* myElectronData = fElectronData;
-    if (electronData) myElectronData = electronData;
-    // Do filling with selected data objects
-    hNVertices->Fill(nVertices);
-    if (!myVertexData->passedEvent()) return; // Plots do not make sense if no PV has been found
+    hNVertices->Fill(fNVertices);
+    if (!fVertexData->passedEvent()) return; // Plots do not make sense if no PV has been found
     
   }
 
-  void CommonPlotsFilledAtEveryStep::cacheDataObjects(VertexSelection::Data* vertexData,
-                                                      TauSelection::Data* tauData,
-                                                      GlobalElectronVeto::Data* electronData) {
+  void CommonPlotsFilledAtEveryStep::cacheDataObjects(int nVertices,
+                                                      const VertexSelection::Data* vertexData,
+                                                      const TauSelection::Data* tauData,
+                                                      const GlobalElectronVeto::Data* electronData) {
+    fNVertices = nVertices;
     fVertexData = vertexData;
     fTauData = tauData;
     fElectronData = electronData;
@@ -59,8 +50,9 @@ namespace HPlus {
   // ====================================================================================================
 
   CommonPlots::CommonPlots(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper) :
-    BaseSelection(eventCounter, histoWrapper),
-    bDataObjectsCached(false) {
+    bDataObjectsCached(false),
+    fEventCounter(eventCounter),
+    fHistoWrapper(histoWrapper) {
     // Create histograms
     
   }
@@ -73,6 +65,7 @@ namespace HPlus {
 
   void CommonPlots::initialize(const edm::Event& iEvent,
                                const edm::EventSetup& iSetup,
+                               int nVertices,
                                VertexSelection& vertexSelection,
                                TauSelection& tauSelection,
                                GlobalElectronVeto& eVeto) {
@@ -90,15 +83,16 @@ namespace HPlus {
     if (!hEveryStepHistograms.size())
       throw cms::Exception("Assert") << "CommonPlots::initialize() was called before creating CommonPlots::createCommonPlotsFilledAtEveryStep()!" << endl<<  "  make first all CommonPlots::createCommonPlotsFilledAtEveryStep() and then call CommonPlots::initialize()";
     for (std::vector<CommonPlotsFilledAtEveryStep*>::iterator it = hEveryStepHistograms.begin(); it != hEveryStepHistograms.end(); ++it) {
-      (*it)->cacheDataObjects(&fVertexData,
+      (*it)->cacheDataObjects(fNVertices,
+                              &fVertexData,
                               &fTauData,
                               &fElectronData);
     }
   }
 
-  CommonPlotsFilledAtEveryStep* CommonPlots::createCommonPlotsFilledAtEveryStep(HistoWrapper& histoWrapper, std::string label, bool enterSelectionFlowPlot, std::string selectionFlowPlotLabel) {
+  CommonPlotsFilledAtEveryStep* CommonPlots::createCommonPlotsFilledAtEveryStep(std::string label, bool enterSelectionFlowPlot, std::string selectionFlowPlotLabel) {
     // Create and return object, but sneakily save the pointer for later use
-    CommonPlotsFilledAtEveryStep* myObject = new CommonPlotsFilledAtEveryStep(histoWrapper, label, enterSelectionFlowPlot, selectionFlowPlotLabel);
+    CommonPlotsFilledAtEveryStep* myObject = new CommonPlotsFilledAtEveryStep(fHistoWrapper, label, enterSelectionFlowPlot, selectionFlowPlotLabel);
     hEveryStepHistograms.push_back(myObject);
     return myObject;
   }
