@@ -1481,33 +1481,24 @@ class Dataset:
     # \param directory   Path of the directory in the ROOT file
     # \param predicate   Append the directory name to the return list only if
     #                    predicate returns true for the name. Predicate
-    #                    should be a function taking a string as an
+    #                    should be a function taking an object in the directory as an
     #                    argument and returning a boolean.
     # 
     # \return List of names in the directory.
-    def getDirectoryContent(self, directory, predicate=lambda x: True):
+    def getDirectoryContent(self, directory, predicate=None):
         (d, realDir) = self._getRootHisto(directory)
         if d == None:
             msg = "No object %s in file %s" % (realDir, self.file.GetName())
             if realDir != d:
                 msg += "\nThe requested directory was %s, and the path was modified because of dataEra." % self.counterDir
             raise Exception(msg)
-        dirlist = d.GetListOfKeys()
 
-        # Suppress the warning message of missing dictionary for some iterator
-        backup = ROOT.gErrorIgnoreLevel
-        ROOT.gErrorIgnoreLevel = ROOT.kError
-        diriter = dirlist.MakeIterator()
-        ROOT.gErrorIgnoreLevel = backup
+        # wrap the predicate
+        wrapped = None
+        if predicate is not None:
+            wrapped = lambda key: predicate(key.ReadObj())
 
-        key = diriter.Next()
-
-        ret = []
-        while key:
-            if predicate(key.ReadObj()):
-                ret.append(key.GetName())
-            key = diriter.Next()
-        return ret
+        return aux.listDirectoryContent(d, wrapped)
 
     def _setBaseDirectory(self,base):
         self.basedir = base
