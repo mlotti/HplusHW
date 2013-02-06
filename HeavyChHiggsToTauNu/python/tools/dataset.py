@@ -75,13 +75,22 @@ def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
 # in the DatasetManager object.
 def getDatasetsFromMulticrabCfg(**kwargs):
     _args = copy.copy(kwargs)
+    for argName in ["cfgfile", "excludeTasks", "includeOnlyTasks"]:
+        try:
+            del _args[argName]
+        except KeyError:
+            pass
+
+    managerCreator = readFromMulticrabCfg(**kwargs)
+    return managerCreator.createDatasetManager(**_args)
+
+def readFromMulticrabCfg(**kwargs):
     opts = kwargs.get("opts", None)
     taskDirs = []
     dirname = ""
     if "cfgfile" in kwargs:
         taskDirs = multicrab.getTaskDirectories(opts, kwargs["cfgfile"])
         dirname = os.path.dirname(kwargs["cfgfile"])
-        del _args["cfgfile"]
     else:
         taskDirs = multicrab.getTaskDirectories(opts)
 
@@ -106,7 +115,6 @@ def getDatasetsFromMulticrabCfg(**kwargs):
                 continue
             tmp.append(task)
         taskDirs = tmp
-        del _args["excludeTasks"]
     if "includeOnlyTasks" in kwargs:
         include = getRe(kwargs["includeOnlyTasks"])
         tmp = []
@@ -119,25 +127,9 @@ def getDatasetsFromMulticrabCfg(**kwargs):
             if found:
                 tmp.append(task)
         taskDirs = tmp
-        del _args["includeOnlyTasks"]
 
-    dataEra = kwargs.get("dataEra", None)
-
-    datasetMgr = getDatasetsFromCrabDirs(taskDirs, **_args)
-    if len(dirname) > 0:
-        datasetMgr._setBaseDirectory(dirname)
-
-    if dataEra != None:
-        if dataEra == "Run2011A":
-            datasetMgr.remove(filter(lambda name: not "2011A_" in name, datasetMgr.getDataDatasetNames()))
-        elif dataEra == "Run2011B":
-            datasetMgr.remove(filter(lambda name: not "2011B_" in name, datasetMgr.getDataDatasetNames()))
-        elif dataEra == "Run2011AB":
-            pass
-        else:
-            raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB" % dataEra)
-
-    return datasetMgr
+    managerCreator = readFromCrabDirs(taskDirs, baseDirectory=dirname, **kwargs)
+    return managerCreator
 
 ## Construct DatasetManager from a list of CRAB task directory names.
 # 
@@ -157,18 +149,23 @@ def getDatasetsFromMulticrabCfg(**kwargs):
 # 'Foo' will be the dataset name)
 def getDatasetsFromCrabDirs(taskdirs, **kwargs):
     _args = copy.copy(kwargs)
+    for argname in "opts", "namePostfix":
+        try:
+            del _args[argName]
+        except KeyError:
+            pass
+    
+    managerCreator = readFromCrabDirs(taskdirs, **kwargs)
+    return managerCreator.createDatasetManager(**_args)
+
+def readFromCrabDirs(taskdirs, **kwargs):
     inputFile = None
     if "opts" in kwargs:
         opts = kwargs["opts"]
-        del _args["opts"]
         inputFile = opts.input
     else:
         inputFile = _optionDefaults["input"]
     postfix = kwargs.get("namePostfix", "")
-    try:
-        del _args["namePostfix"]
-    except KeyError:
-        pass
 
     dlist = []
     noFiles = False
@@ -194,7 +191,7 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
     if len(dlist) == 0:
         raise Exception("No datasets from CRAB task directories %s" % ", ".join(taskdirs))
 
-    return getDatasetsFromRootFiles(dlist, **_args)
+    return readFromRootFiles(dlist, **kwargs)
 
 ## Construct DatasetManager from a list of CRAB task directory names.
 # 
@@ -205,11 +202,11 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
 #
 # \return DatasetManager object
 def getDatasetsFromRootFiles(rootFileList, **kwargs):
-    datasets = DatasetManager()
-    for name, f in rootFileList:
-        dset = Dataset(name, f, **kwargs)
-        datasets.append(dset)
-    return datasets
+    managerCreator = readFromRootFiles(rootFileList)
+    return managerCreator.createDatasetManager(**kwargs)
+
+def readFromRootFiles(rootFileList, **kwargs):
+    return DatasetManagerCreator(rootFileList, **kwargs)
 
 ## Default command line options
 _optionDefaults = {
@@ -2130,6 +2127,37 @@ class DatasetManager:
     ## \var basedir
     # Directory (absolute/relative to current working directory) where
     # the luminosity JSON file is located (see loadLuminosities())
+
+## Class for listing contents of multicrab dirs, dataset ROOT files, and creating DatasetManager
+class DatasetManagerCreator:
+    def __init__(self, rootFileList, **kwargs):
+        self._rootFileList = rootFileList
+        self._baseDirectory = kwargs.get("baseDirectory", "")
+        self._dataEra = kwargs.get("dataEra", None)
+
+    def setBaseDirectory(self, baseDirectory):
+        self._baseDirectory = baseDirectory
+
+    def createDatasetManager(self, **kwargs):
+        manager = DatasetManager()
+        for name, filename in self._rootFileList:
+            dset = Dataset(name, filename, **kwargs)
+            manager.append(dset)
+
+        if len(self._baseDirectory) > 0:
+            manager._setBaseDirectory(self._baseDirectory)
+
+        if self._dataEra is not None:
+            if self._dataEra == "Run2011A":
+                manager.remove(filter(lambda name: not "2011A_" in name, manager.getDataDatasetNames()))
+            elif self._dataEra == "Run2011B":
+                manager.remove(filter(lambda name: not "2011B_" in name, manager.getDataDatasetNames()))
+            elif self._dataEra == "Run2011AB":
+                pass
+            else:
+                raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB" % dataEra)
+    
+        return manager
 
 ## Helper class to plug NtupleCache to the existing framework
 #
