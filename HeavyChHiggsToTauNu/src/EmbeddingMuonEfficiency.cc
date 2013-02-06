@@ -57,8 +57,10 @@ namespace HPlus {
   EmbeddingMuonEfficiency::Data EmbeddingMuonEfficiency::applyEventWeight(const edm::Event& iEvent, EventWeight& eventWeight) {
     Data output;
     
-    if(fMode == kDisabled)
+    if(fMode == kDisabled) {
+      output.fWeight = 1.0;
       return output;
+    }
 
     /* Not needed yet
     // Obtain original muon
