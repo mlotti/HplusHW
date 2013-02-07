@@ -174,6 +174,7 @@ namespace HPlus {
 
     // Histograms
     WrappedTH1 *hTauIdOperatingMode;
+    WrappedTH1 *hTauIdCandidateSelectionSortCategory;
     WrappedTH1 *hDecayModeTauCandidates;
     WrappedTH1 *hDecayModeSelectedTauCandidates;
     WrappedTH1 *hDecayModeSelectedTaus;

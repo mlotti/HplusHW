@@ -477,6 +477,20 @@ namespace HPlus {
       hTauIdOperatingMode->GetXaxis()->SetBinLabel(2, "Normal tau ID");
       hTauIdOperatingMode->GetXaxis()->SetBinLabel(3, "tauCandidateSelectionOnly");
     }
+    // Sorting category in tau candidate selection
+    hTauIdCandidateSelectionSortCategory = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "CandidateSelectionSortCategory", "CandidateSelectionSortCategory;;N_{events}", 10, 0., 10.);
+    if (hTauIdCandidateSelectionSortCategory->isActive()) {
+      hTauIdCandidateSelectionSortCategory->GetXaxis()->SetBinLabel(1, "Beginning");
+      hTauIdCandidateSelectionSortCategory->GetXaxis()->SetBinLabel(2, "None pass isol.");
+      hTauIdCandidateSelectionSortCategory->GetXaxis()->SetBinLabel(3, "1 pass isol.");
+      hTauIdCandidateSelectionSortCategory->GetXaxis()->SetBinLabel(4, "multi-pass isol.");
+      hTauIdCandidateSelectionSortCategory->GetXaxis()->SetBinLabel(5, "None pass Npr");
+      hTauIdCandidateSelectionSortCategory->GetXaxis()->SetBinLabel(6, "1 pass Npr");
+      hTauIdCandidateSelectionSortCategory->GetXaxis()->SetBinLabel(7, "multi-pass Npr");
+      hTauIdCandidateSelectionSortCategory->GetXaxis()->SetBinLabel(8, "None pass Rtau");
+      hTauIdCandidateSelectionSortCategory->GetXaxis()->SetBinLabel(9, "1 pass Rtau");
+      hTauIdCandidateSelectionSortCategory->GetXaxis()->SetBinLabel(10, "multi-pass Rtau");
+    }
 
     hNTriggerMatchedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "N_TriggerMatchedTaus", "NTriggerMatchedTaus;N(trigger matched taus);N_{events}", 10, 0., 10.);
     hNTriggerMatchedSeparateTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "N_TriggerMatchedSeparateTaus", "NTriggerMatchedSeparateTaus;N(trigger matched separate taus);N_{events}", 10, 0., 10.);
@@ -736,103 +750,116 @@ namespace HPlus {
       fillHistogramsForSelectedTauCandidates(iTau, iEvent);
       tmpSelectedTauCandidates.push_back(iTau);
     }
-    // Sort list of selected tau candidates such that most probable tau object is the first
-    // Sort taus in an order of tau ET
-    std::sort(tmpSelectedTauCandidates.begin(), tmpSelectedTauCandidates.end(), tauEtGreaterThan); // sort by Et
+    float mySortCategory = 0.; // For tracking errors and exceptions
+    if (true) { // if sentence to limit histogram disabling to sorting only
+      // Sort list of selected tau candidates such that most probable tau object is the first
+      // Sort taus in an order of tau ET
+      std::sort(tmpSelectedTauCandidates.begin(), tmpSelectedTauCandidates.end(), tauEtGreaterThan); // sort by Et
 
-    // For the duration of sorting, Disable histogram filling and counter incrementing until the return call
-    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
-    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
-    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+      // For the duration of sorting, Disable histogram filling and counter incrementing until the return call
+      // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+      HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+      EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
 
-    // Sort tau candidates into order of likeliness of passing the full tau ID (a bit complicated)
-    // 1) Check if more than 1 tau candidate passes isolation cut
-    std::vector<edm::Ptr<pat::Tau> > tmpIsolationPassed;
-    std::vector<edm::Ptr<pat::Tau> > tmpNprongPassed;
-    std::vector<edm::Ptr<pat::Tau> > tmpRtauPassed;
-    for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
-      if (fTauID->passIsolation(tmpSelectedTauCandidates[i]))
-        tmpIsolationPassed.push_back(tmpSelectedTauCandidates[i]);
-    }
-    if (tmpIsolationPassed.size() == 0) {
-      // none pass, just take the most isolated one
-      std::sort(tmpSelectedTauCandidates.begin(), tmpSelectedTauCandidates.end(), isolationLessThan);
+      // Sort tau candidates into order of likeliness of passing the full tau ID (a bit complicated)
+      // 1) Check if more than 1 tau candidate passes isolation cut
+      std::vector<edm::Ptr<pat::Tau> > tmpIsolationPassed;
+      std::vector<edm::Ptr<pat::Tau> > tmpNprongPassed;
+      std::vector<edm::Ptr<pat::Tau> > tmpRtauPassed;
       for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
-        output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+        if (fTauID->passIsolation(tmpSelectedTauCandidates[i]))
+          tmpIsolationPassed.push_back(tmpSelectedTauCandidates[i]);
       }
-    } else if (tmpIsolationPassed.size() == 1) {
-      // Put the found one to the top of the list
-      output.fSelectedTauCandidates.push_back(tmpIsolationPassed[0]);
-      for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
-        if (!fTauID->passIsolation(tmpSelectedTauCandidates[i]))
+      if (tmpIsolationPassed.size() == 0) {
+        // none pass, just take the most isolated one
+        mySortCategory = 1.;
+        std::sort(tmpSelectedTauCandidates.begin(), tmpSelectedTauCandidates.end(), isolationLessThan);
+        for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
           output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
-      }
-    } else {
-      // 2) Multiple taus have passed isolation, lets see how many pass also the nprongs cut
-      std::sort(tmpIsolationPassed.begin(), tmpIsolationPassed.end(), isolationLessThan);
-      for(size_t i=0; i<tmpIsolationPassed.size(); ++i) {
-        if (fTauID->passNProngsCut(tmpIsolationPassed[i]))
-          tmpNprongPassed.push_back(tmpIsolationPassed[i]);
-      }
-      if (tmpNprongPassed.size() == 0) {
-        // none pass, take the most isolated one
-        for(size_t i=0; i<tmpIsolationPassed.size(); ++i) {
-          output.fSelectedTauCandidates.push_back(tmpIsolationPassed[i]);
         }
+      } else if (tmpIsolationPassed.size() == 1) {
+        // Put the found one to the top of the list
+        mySortCategory = 2.;
+        output.fSelectedTauCandidates.push_back(tmpIsolationPassed[0]);
         for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
-          bool match = false;
-          for(size_t j=0; j<tmpIsolationPassed.size(); ++j) {
-            if (tmpSelectedTauCandidates[i] == tmpIsolationPassed[j])
-              match = true;
-          }
-          if (!match) output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
-        }
-      } else if (tmpNprongPassed.size() == 1) {
-        // Put the passed one to the top of the list
-        output.fSelectedTauCandidates.push_back(tmpNprongPassed[0]);
-        for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
-          if (tmpSelectedTauCandidates[i] != tmpNprongPassed[0])
+          if (!fTauID->passIsolation(tmpSelectedTauCandidates[i]))
             output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
         }
       } else {
-        // 3) Multiple taus have passed nprongs, lets see how many pass also the rtau cut
-        for(size_t i=0; i<tmpNprongPassed.size(); ++i) {
-          if (fTauID->passRTauCut(tmpNprongPassed[i]))
-            tmpRtauPassed.push_back(tmpNprongPassed[i]);
+        // 2) Multiple taus have passed isolation, lets see how many pass also the nprongs cut
+        mySortCategory = 3.;
+        std::sort(tmpIsolationPassed.begin(), tmpIsolationPassed.end(), isolationLessThan);
+        for(size_t i=0; i<tmpIsolationPassed.size(); ++i) {
+          if (fTauID->passNProngsCut(tmpIsolationPassed[i]))
+            tmpNprongPassed.push_back(tmpIsolationPassed[i]);
         }
-        if (tmpRtauPassed.size() == 0) {
-          // none pass, just take the most isolated one
-          std::sort(tmpNprongPassed.begin(), tmpNprongPassed.end(), isolationLessThan);
-          for(size_t i=0; i<tmpNprongPassed.size(); ++i) {
-            output.fSelectedTauCandidates.push_back(tmpNprongPassed[i]);
+        if (tmpNprongPassed.size() == 0) {
+          // none pass, take the most isolated one
+          mySortCategory = 4.;
+          for(size_t i=0; i<tmpIsolationPassed.size(); ++i) {
+            output.fSelectedTauCandidates.push_back(tmpIsolationPassed[i]);
           }
           for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
             bool match = false;
-            for(size_t j=0; j<tmpNprongPassed.size(); ++j) {
-              if (tmpSelectedTauCandidates[i] == tmpNprongPassed[j])
+            for(size_t j=0; j<tmpIsolationPassed.size(); ++j) {
+              if (tmpSelectedTauCandidates[i] == tmpIsolationPassed[j])
                 match = true;
             }
             if (!match) output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
           }
-        } else if (tmpRtauPassed.size() == 1) {
-          // Put the one that passed both nprongs and rtau to the top of the list
-          output.fSelectedTauCandidates.push_back(tmpRtauPassed[0]);
+        } else if (tmpNprongPassed.size() == 1) {
+          // Put the passed one to the top of the list
+          mySortCategory = 5.;
+          output.fSelectedTauCandidates.push_back(tmpNprongPassed[0]);
           for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
-            if (tmpSelectedTauCandidates[i] != tmpRtauPassed[0])
+            if (tmpSelectedTauCandidates[i] != tmpNprongPassed[0])
               output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
           }
         } else {
-          // 4) Multiple taus have passed nprongs, rtau, and isolation; take most energetic one
-          std::sort(tmpRtauPassed.begin(), tmpRtauPassed.end(), tauEtGreaterThan);
-          for(size_t i=0; i<tmpRtauPassed.size(); ++i) {
-            output.fSelectedTauCandidates.push_back(tmpRtauPassed[i]);
+          // 3) Multiple taus have passed nprongs, lets see how many pass also the rtau cut
+          mySortCategory = 6.;
+          for(size_t i=0; i<tmpNprongPassed.size(); ++i) {
+            if (fTauID->passRTauCut(tmpNprongPassed[i]))
+              tmpRtauPassed.push_back(tmpNprongPassed[i]);
+          }
+          if (tmpRtauPassed.size() == 0) {
+            // none pass, just take the most isolated one
+            mySortCategory = 7.;
+            std::sort(tmpNprongPassed.begin(), tmpNprongPassed.end(), isolationLessThan);
+            for(size_t i=0; i<tmpNprongPassed.size(); ++i) {
+              output.fSelectedTauCandidates.push_back(tmpNprongPassed[i]);
+            }
+            for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+              bool match = false;
+              for(size_t j=0; j<tmpNprongPassed.size(); ++j) {
+                if (tmpSelectedTauCandidates[i] == tmpNprongPassed[j])
+                  match = true;
+              }
+              if (!match) output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+            }
+          } else if (tmpRtauPassed.size() == 1) {
+            mySortCategory = 8.;
+            // Put the one that passed both nprongs and rtau to the top of the list
+            output.fSelectedTauCandidates.push_back(tmpRtauPassed[0]);
+            for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+              if (tmpSelectedTauCandidates[i] != tmpRtauPassed[0])
+                output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+            }
+          } else {
+            // 4) Multiple taus have passed nprongs, rtau, and isolation; take most energetic one
+            mySortCategory = 9.;
+            std::sort(tmpRtauPassed.begin(), tmpRtauPassed.end(), tauEtGreaterThan);
+            for(size_t i=0; i<tmpRtauPassed.size(); ++i) {
+              output.fSelectedTauCandidates.push_back(tmpRtauPassed[i]);
+            }
           }
         }
       }
     }
+    hTauIdCandidateSelectionSortCategory->Fill(mySortCategory);
     // Check that sorting was ok
     if (output.fSelectedTauCandidates.size() != tmpSelectedTauCandidates.size()) {
-      throw cms::Exception("LogicError") << "TauSelection::doTauCandidateSelection(): sorting of selected tau candidates is buggy!";
+      throw cms::Exception("LogicError") << "TauSelection::doTauCandidateSelection(): sorting of selected tau candidates is buggy (sort category=" << mySortCategory << "!";
     }
     // Set first tau as selected tau for tauCandidateSelection only
     if (fOperationMode == kTauCandidateSelectionOnly) {
@@ -1007,6 +1034,7 @@ namespace HPlus {
   }
 
   void TauSelection::ObtainMCPurity(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent, WrappedTH1* histogram) {
+    if (iEvent.isRealData()) return;
     // FIXME: This is essentially duplicate code w.r.t. FakeTauIdentifier
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
