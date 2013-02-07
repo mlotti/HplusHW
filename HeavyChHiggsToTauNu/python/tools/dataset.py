@@ -173,7 +173,6 @@ def readFromCrabDirs(taskdirs, **kwargs):
         files = glob.glob(os.path.join(d, "res", inputFile))
         if len(files) > 1:
             raise Exception("Only one file should match the input (%d matched) for task %s" % (len(files), d))
-            return 1
         elif len(files) == 0:
             print >> sys.stderr, "Ignoring dataset %s: no files matched to '%s' in task directory %s" % (d, inputFile, os.path.join(d, "res"))
             noFiles = True
