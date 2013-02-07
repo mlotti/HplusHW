@@ -17,7 +17,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
 #------------------------------Configure---------------------------------#
 #dirs = ["/afs/cern.ch/user/s/strichte/HeavyChHiggsToTauNu/test/multicrab_130125_153632"]
-dirs = ["/afs/cern.ch/user/s/strichte/HeavyChHiggsToTauNu/test/multicrab_130129_125309"]
+#dirs = ["/afs/cern.ch/user/s/strichte/HeavyChHiggsToTauNu/test/multicrab_130129_125309"]
+dirs = ["/afs/cern.ch/user/s/strichte/HeavyChHiggsToTauNu/test/multicrab_130205_103013"]
 
 analysis = "signalAnalysis"
 counters = analysis+"/counters"
@@ -82,7 +83,7 @@ else:
 
 # TTJets
 drh_reco = datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMass")
-drh_gen = datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/GenParticleAnalysis/HpMass")
+drh_gen = datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genFullHiggsMass")
 
 drh_reco.normalizeToLuminosity(mcOnlyLumi)
 drh_gen.normalizeToLuminosity(mcOnlyLumi)

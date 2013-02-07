@@ -1,12 +1,12 @@
 {
 //=========Macro generated from canvas: Full_Higgs_mass/
-//=========  (Tue Feb  5 09:36:38 2013) by ROOT version5.27/06b
+//=========  (Tue Feb  5 14:07:20 2013) by ROOT version5.27/06b
    TCanvas *Full_Higgs_mass = new TCanvas("Full_Higgs_mass", "",0,0,600,600);
    gStyle->SetOptFit(1);
    gStyle->SetOptStat(0);
    gStyle->SetOptTitle(0);
    Full_Higgs_mass->SetHighLightColor(2);
-   Full_Higgs_mass->Range(-101.2658,-33714.59,531.6456,225628.4);
+   Full_Higgs_mass->Range(-121.519,-15558.91,637.9747,104125);
    Full_Higgs_mass->SetFillColor(0);
    Full_Higgs_mass->SetBorderMode(0);
    Full_Higgs_mass->SetBorderSize(2);
@@ -21,9 +21,9 @@
    Full_Higgs_mass->SetFrameFillStyle(0);
    Full_Higgs_mass->SetFrameBorderMode(0);
    
-   TH1F *hframe__1 = new TH1F("hframe__1","",1000,0,500);
+   TH1F *hframe__1 = new TH1F("hframe__1","",1000,0,600);
    hframe__1->SetMinimum(0);
-   hframe__1->SetMaximum(212661.3);
+   hframe__1->SetMaximum(98140.81);
    hframe__1->SetDirectory(0);
    hframe__1->SetStats(0);
    hframe__1->SetLineStyle(0);
@@ -48,10 +48,12 @@
    hframe__1->GetZaxis()->SetTitleFont(43);
    hframe__1->Draw(" ");
    
-   TH1F *Gen__2 = new TH1F("Gen__2","HpMass",100,100,200);
-   Gen__2->SetBinContent(21,193328.4);
-   Gen__2->SetBinError(21,987.4719);
-   Gen__2->SetEntries(50991);
+   TH1F *Gen__2 = new TH1F("Gen__2","genFullHiggsMass",300,0,600);
+   Gen__2->SetBinContent(60,86868);
+   Gen__2->SetBinContent(61,89218.92);
+   Gen__2->SetBinError(60,662.1369);
+   Gen__2->SetBinError(61,671.4462);
+   Gen__2->SetEntries(46378);
    Gen__2->SetDirectory(0);
 
    Int_t ci;   // for color index setting
@@ -249,9 +251,9 @@
    entry->SetMarkerSize(1);
    leg->Draw();
    
-   TH1F *hframe__4 = new TH1F("hframe__4","",1000,0,500);
+   TH1F *hframe__4 = new TH1F("hframe__4","",1000,0,600);
    hframe__4->SetMinimum(0);
-   hframe__4->SetMaximum(212661.3);
+   hframe__4->SetMaximum(98140.81);
    hframe__4->SetDirectory(0);
    hframe__4->SetStats(0);
    hframe__4->SetLineStyle(0);

@@ -39,37 +39,40 @@ namespace HPlus {
 //   // Create folder to hold histograms
 //   TFileDirectory myDir = fs->mkdir("EventClassification");
 
+
+// tau decay produces neutrino; use visibleTau (1-prong)
   void checkIfGenuineTau(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau) {
-//     int identifiedGenuineTauCount = 0;
-//     int unidentifiedGenuineTauCount = 0;
-//     int fakeTauInEventWithGenuineTauCount = 0;
-
-//     edm::Handle <reco::GenParticleCollection> genParticles;
-//     iEvent.getByLabel("genParticles", genParticles);
-//     //std::cout << "matchfinding:" << std::endl;
-//     for (size_t i=0; i < genParticles->size(); ++i) {
-//       const reco::Candidate & p = (*genParticles)[i];
-//       // If a GEN tau is found...
-//       if (std::abs(p.pdgId()) == 15) {
-// 	// ... check if there is a RECO tau within deltaR < 0.1
-// 	if (tau.isNonnull() && reco::deltaR(p, *tau) < 0.1) {
-// 	  std::cout << "Hooooraaaaayyyy!" << std::endl;
-// 	  identifiedGenuineTauCount++;
-//  	}
-// 	// ... or if there is no reconstructed tau (i.e. tau is null pointer)
-// 	else if (tau.isNull()) {
-// 	  unidentifiedGenuineTauCount++;
-// 	}
-// 	// ... else the tau was faked
-// 	else if (tau.isNonnull()) {
-// 	  fakeTauInEventWithGenuineTauCount++;
-// 	}
-//       }
-//     }
-
-//     std::cout << "identified genuine taus:              " << identifiedGenuineTauCount << std::endl;
-//     std::cout << "unidentified genuine taus:            " << unidentifiedGenuineTauCount << std::endl;
-//     std::cout << "fake taus in event with genuine taus: " << fakeTauInEventWithGenuineTauCount << std::endl;
+    // These counts are for test purposes only. They will not be able to do what their name suggests, because
+    // this method is called separately for each event (reference iEvent)
+    int identifiedGenuineTauCount = 0;
+    int unidentifiedGenuineTauCount = 0;
+    int fakeTauInEventWithGenuineTauCount = 0;
+    
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    //std::cout << "matchfinding:" << std::endl;
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      // If a GEN tau is found...
+      if (std::abs(p.pdgId()) == 15) {
+	// ... check if there is a RECO tau within deltaR < 0.1
+	if (tau.isNonnull() && reco::deltaR(p, *tau) < 0.1) {
+	  std::cout << "RECO tau corresponds to GEN tau!" << std::endl;
+	  identifiedGenuineTauCount++;
+ 	}
+	// ... or if there is no reconstructed tau (i.e. tau is null pointer)
+	else if (tau.isNull()) {
+	  unidentifiedGenuineTauCount++;
+	}
+	// ... else the tau was faked
+	else if (tau.isNonnull()) {
+	  fakeTauInEventWithGenuineTauCount++;
+	}
+      }
+    }
+    //   std::cout << "identified genuine taus:              " << identifiedGenuineTauCount << std::endl;
+    //   std::cout << "unidentified genuine taus:            " << unidentifiedGenuineTauCount << std::endl;
+    //   std::cout << "fake taus in event with genuine taus: " << fakeTauInEventWithGenuineTauCount << std::endl;
   }
 
 //   // Alternative way:

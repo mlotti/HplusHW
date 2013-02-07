@@ -24,7 +24,7 @@ myOptimisation = HPlusOptimisationScheme()
 #myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
 #myOptimisation.addJetEtVariation([20.0, 30.0])
 #myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
-myOptimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
+#myOptimisation.addMETSelectionVariation([60.0, 70.0, 80.0, 90.,100.0])
 #myOptimisation.addBJetLeadingDiscriminatorVariation([0.898, 0.679])
 #myOptimisation.addBJetSubLeadingDiscriminatorVariation([0.679, 0.244])
 #myOptimisation.addBJetEtVariation([])
@@ -54,15 +54,21 @@ process = builder.buildSignalAnalysis()
 # Doesn't work:
 # prefix_TTToHplusBWB_M-120 = "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/"
 
-if builder.options.tauEmbeddingInput != 0: 
-    process.source.fileNames = [
+#if builder.options.tauEmbeddingInput != 0:
+process.source.fileNames = [
+        "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_5_2_D2c.root",
         "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_4_2_90j.root",
-            "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_2_2_i1O.root",
-        "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_3_2_f6k.root",
-        "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_5_2_D2c.root"
-    ]
+        "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_2_2_i1O.root",
+        "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_3_2_f6k.root"
+        ]
+#     process.source.fileNames = [
+#         "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_4_2_90j.root",
+#             "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_2_2_i1O.root",
+#         "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_3_2_f6k.root",
+#         "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_5_2_D2c.root"
+#     ]
     
-process.maxEvents.input = 500
+# process.maxEvents.input = 500
 
 
 

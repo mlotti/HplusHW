@@ -485,10 +485,10 @@ namespace HPlus {
 
 //------ Event classification according to whether tau, b-jet, and neutrino coming from top->H+ decay were identified correctly
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
-    if(!tauData.passedEvent()) return false; // Require at least one tau
-    std::cout << "Tau found!" << std::endl;
-    checkIfGenuineTau(iEvent, tauData.getSelectedTau());
-    //checkIfGenuineTau(iEvent, *(tauData.getSelectedTau()));
+//     if(!tauData.passedEvent()) return false; // Require at least one tau
+//     std::cout << "Tau found!" << std::endl;
+//     checkIfGenuineTau(iEvent, tauData.getSelectedTau());
+//     //checkIfGenuineTau(iEvent, *(tauData.getSelectedTau()));
 
 //------ TauID
     // Store weight of event

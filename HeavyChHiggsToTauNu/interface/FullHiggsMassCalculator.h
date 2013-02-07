@@ -10,6 +10,11 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
+
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
+
 #include "TVector3.h"
 
 namespace edm {
@@ -55,6 +60,7 @@ namespace HPlus {
 
     bool doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet);
     void doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool myMatchStaus=false, bool doHistogramming = true);
+    void calculateTrueHiggsMass(const edm::Event& iEvent);
 
   private:
 
@@ -100,6 +106,7 @@ namespace HPlus {
     WrappedTH1* hNeutrinoZSolution;
     WrappedTH1* hNeutrinoPtSolution;
     WrappedTH1* hNeutrinoPtDifference;
+    WrappedTH1* hTrueHiggsMass;
  
     edm::Ptr<pat::Jet> BjetHiggsSide;
 
