@@ -3,7 +3,7 @@
 
 import re
 
-from multicrabWorkflowsTools import Dataset, Workflow, Data, Source, updatePublishName, TaskDef, updateTaskDefinitions
+from multicrabWorkflowsTools import Dataset, Workflow, Data, Source, updatePublishName, TaskDef, updateTaskDefinitions, Disable
 import multicrabDatasetsCommon as common
 
 def constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow, workflowName, inputLumiMaskData="DCSONLY11", outputLumiMaskData="Nov08ReReco", **kwargs):
@@ -226,6 +226,16 @@ def addPattuple_v44_4(datasets):
         "Tbar_s-channel_TuneZ2_Fall11":     TaskDef("/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
     }
     addPattuple_44X("v44_4", datasets, definitions)
+
+## Add v44_4_1 pattuple production workflows
+#
+# These are without trigger
+def addPattuple_v44_4_1(datasets):
+    definitions = {
+        "TTToHplusBWB_M120_Fall11":         TaskDef("/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4_1-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[]),
+        "QCD_Pt170to300_TuneZ2_Fall11":     TaskDef("/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4_1-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[], njobsIn=600),
+        }
+    addPattuple_44X("v44_4_1", datasets, definitions)
 
 # Skeleton
 def addPattuple_vNEXT_SKELETON(datasets):

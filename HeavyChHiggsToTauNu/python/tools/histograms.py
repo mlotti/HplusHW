@@ -186,22 +186,27 @@ def addEnergyText(x=None, y=None, s=None):
 # \param unit  Unit of the integrated luminosity value (should be fb^-1)
 def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
     (x, y) = textDefaults.getValues("lumi", x, y)
-    lumiInFb = lumi/1000.
-    log = math.log10(lumiInFb)
-    ndigis = int(log)
-    format = "%.0f" # ndigis >= 1, 10 <= lumiInFb
-    if ndigis == 0: 
-        if log >= 0: # 1 <= lumiInFb < 10
-            format = "%.1f"
-        else: # 0.1 < lumiInFb < 1
-            format = "%.2f"
-    elif ndigis <= -1:
-        format = ".%df" % (abs(ndigis)+1)
-        format = "%"+format
-    format += " %s"
-    format = "L="+format
+    lumiStr = "L="
+    if isinstance(lumi, basestring):
+        lumiStr += lumi
+    else:
+        lumiInFb = lumi/1000.
+        log = math.log10(lumiInFb)
+        ndigis = int(log)
+        format = "%.0f" # ndigis >= 1, 10 <= lumiInFb
+        if ndigis == 0: 
+            if log >= 0: # 1 <= lumiInFb < 10
+                format = "%.1f"
+            else: # 0.1 < lumiInFb < 1
+                format = "%.2f"
+        elif ndigis <= -1:
+            format = ".%df" % (abs(ndigis)+1)
+            format = "%"+format
+        lumiStr += format % (lumi/1000)
 
-    addText(x, y, format % (lumi/1000., unit), textDefaults.getSize("lumi"), bold=False)
+    lumiStr += " "+unit
+    
+    addText(x, y, lumiStr, textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
 #    l.DrawLatex(x, y, "L=%.0f %s" % (lumi, unit))
 
@@ -396,6 +401,12 @@ def th1Xmin(th1):
 def th1Xmax(th1):
     return th1.GetXaxis().GetBinUpEdge(th1.GetXaxis().GetLast())
 
+def th2Ymin(th2):
+    return th2.GetYaxis().GetBinLowEdge(th2.GetYaxis().GetFirst())
+
+def th2Ymax(th2):
+    return th2.GetYaxis().GetBinUpEdge(th2.GetYaxis().GetLast())
+
 ## Helper function for lessThan/greaterThan argument handling
 #
 # \param kwargs  Keyword arguments
@@ -566,23 +577,36 @@ def _boundsArgs(histos, kwargs):
 # \param xmax  Maximum X axis value
 # \param ymax  Maximum Y axis value
 # \param nbins Number of x axis bins
+# \param nbinsx Number of x axis bins
+# \param nbinsy Number of y axis bins
 #
 # If nbins is None, TPad.DrawFrame is used. Otherwise a custom TH1 is
 # created for the frame with nbins bins in x axis.
 #
 # Use case: selection flow histogram (or whatever having custom x axis
 # lables).
-def _drawFrame(pad, xmin, ymin, xmax, ymax, nbins=None):
-    if nbins == None:
+def _drawFrame(pad, xmin, ymin, xmax, ymax, nbins=None, nbinsx=None, nbinsy=None):
+    if nbins is not None and nbinsx is not None:
+        raise Exception("Both 'nbins' and 'nbinsx' should not be set, please use the latter only")
+    if nbins is None:
+        nbins = nbinsx
+
+    if nbinsx is None and nbinsy is None:
         return pad.DrawFrame(xmin, ymin, xmax, ymax)
     else:
         pad.cd()
         # From TPad.cc
         frame = pad.FindObject("hframe")
-        if frame != None:
-            frame.Delete()
+        if frame is not None:
+#            frame.Delete()
             frame = None
-        frame = ROOT.TH1F("hframe", "hframe", nbins, xmin, xmax)
+        if nbinsx is not None and nbinsy is None:
+            frame = ROOT.TH1F("hframe", "hframe", nbinsx, xmin, xmax)
+        elif nbinsx is None and nbinsy is not None:
+            frame = ROOT.TH2F("hframe", "hframe", 100,xmin,xmax, nbinsy,ymin,ymax)
+        else: # neither is None
+            frame = ROOT.TH2F("hframe", "hframe", nbinsx,xmin,xmax, nbinsy,ymin,ymax)
+
         frame.SetBit(ROOT.TH1.kNoStats)
         frame.SetBit(ROOT.kCanDelete)
         frame.SetMinimum(ymin)
@@ -638,7 +662,7 @@ class CanvasFrame:
 
         _boundsArgs(histos, opts)
 
-        self.frame = _drawFrame(self.canvas, opts["xmin"], opts["ymin"], opts["xmax"], opts["ymax"], opts.get("nbins", None))
+        self.frame = _drawFrame(self.canvas, opts["xmin"], opts["ymin"], opts["xmax"], opts["ymax"], opts.get("nbins", None), opts.get("nbinsx", None), opts.get("nbinsy", None))
         self.frame.GetXaxis().SetTitle(histos[0].getXtitle())
         self.frame.GetYaxis().SetTitle(histos[0].getYtitle())
 
@@ -668,8 +692,10 @@ class CanvasFrameTwo:
         # The GetXaxis() is forwarded to the frame of the lower pad,
         # and the GetYaxis() is forwared to the frame of the upper pad.
         class FrameWrapper:
-            def __init__(self, frame1, frame2):
+            def __init__(self, pad1, frame1, pad2, frame2):
+                self.pad1 = pad1
                 self.frame1 = frame1
+                self.pad2 = pad2
                 self.frame2 = frame2
 
             def GetXaxis(self):
@@ -683,6 +709,13 @@ class CanvasFrameTwo:
 
             def getXmax(self):
                 return th1Xmax(self.frame2)
+
+            def Draw(self, *args):
+                self.pad1.cd()
+                self.frame1.Draw(*args)
+                self.pad2.cd()
+                self.frame2.Draw(*args)
+                self.pad1.cd()
 
         ## Wrapper to provide the getXmin/getXmax functions for _boundsArgs function.
         class HistoWrapper:
@@ -736,7 +769,8 @@ class CanvasFrameTwo:
         opts2["xmin"] = opts1["xmin"]
         opts2["xmax"] = opts1["xmax"]
         opts2["nbins"] = opts1.get("nbins", None)
-        _boundsArgs([HistoWrapper(h) for h in histos2], opts2)
+#        _boundsArgs([HistoWrapper(h) for h in histos2], opts2)
+        _boundsArgs(histos2, opts2) # HistoWrapper not needed anymore? Ratio is Histo
 
         # Create the canvas, divide it to two
         self.canvas = ROOT.TCanvas(name, name, ROOT.gStyle.GetCanvasDefW(), int(ROOT.gStyle.GetCanvasDefH()*canvasFactor))
@@ -783,7 +817,7 @@ class CanvasFrameTwo:
         self.frame2.GetYaxis().SetLabelSize(int(self.frame2.GetYaxis().GetLabelSize()*0.8))
 
         self.canvas.cd(1)
-        self.frame = FrameWrapper(self.frame1, self.frame2)
+        self.frame = FrameWrapper(self.pad1, self.frame1, self.pad2, self.frame2)
         self.pad = self.pad1
 
     ## \var frame1
@@ -831,6 +865,10 @@ class Histo:
     ## Get the ROOT histogram object (TH1)
     def getRootHisto(self):
         return self.rootHisto
+
+    ## (Re)set the ROOT histogram object (TH1)
+    def setRootHisto(self, rootHisto):
+        self.rootHisto = rootHisto
 
     ## Get the histogram name
     def getName(self):
@@ -895,6 +933,8 @@ class Histo:
         if self.legendLabel == None:
             return
 
+        h = self.rootHisto
+
         # Hack to get the black border to the legend, only if the legend style is fill
         if "f" == self.legendStyle.lower():
             h = self.rootHisto.Clone(self.rootHisto.GetName()+"_forLegend")
@@ -904,13 +944,12 @@ class Histo:
             if self.rootHisto.GetLineColor() == self.rootHisto.GetFillColor():
                 h.SetLineColor(ROOT.kBlack)
 
-            legend.AddEntry(h, self.legendLabel, self.legendStyle)
             self.rootHistoForLegend = h # keep the reference in order to avoid segfault
-        else:
-            labels = self.legendLabel.split("\n")
-            legend.AddEntry(self.rootHisto, labels[0], self.legendStyle)
-            for lab in labels[1:]:
-                legend.AddEntry(None, lab, "")
+
+        labels = self.legendLabel.split("\n")
+        legend.AddEntry(h, labels[0], self.legendStyle)
+        for lab in labels[1:]:
+            legend.AddEntry(None, lab, "")
 
     ## Call a function with self as an argument.
     #
@@ -937,11 +976,17 @@ class Histo:
 
     ## Get the minimum value of the Y axis
     def getYmin(self):
-        return self.rootHisto.GetMinimum()
+        if isinstance(self.rootHisto, ROOT.TH2):
+            return th2Ymin(self.rootHisto)
+        else:
+            return self.rootHisto.GetMinimum()
 
     ## Get the maximum value of the Y axis
     def getYmax(self):
-        return self.rootHisto.GetMaximum()
+        if isinstance(self.rootHisto, ROOT.TH2):
+            return th2Ymax(self.rootHisto)
+        else:
+            return self.rootHisto.GetMaximum()
 
     ## Get the X axis title
     def getXtitle(self):
@@ -1044,6 +1089,9 @@ class HistoStacked(Histo):
 
         self.setIsDataMC(self.histos[0].isData(), self.histos[0].isMC())
 
+    def setRootHisto(self, rootHisto):
+        raise NotImplementedError("HistoStacked.setRootHisto() would be ill-defined")
+
     ## Get the list of original TH1 histograms.
     def getAllRootHistos(self):
         return [x.getRootHisto() for x in self.histos]
@@ -1101,6 +1149,9 @@ class HistoGraph(Histo):
 
     def getRootGraph(self):
         return self.getRootHisto()
+
+    def setRootGraph(self, rootGraph):
+        self.setRootHisto(rootGraph)
 
     def _values(self, values, func):
         return [func(values[i], i) for i in xrange(0, self.getRootGraph().GetN())]
@@ -1174,6 +1225,9 @@ class HistoEfficiency(Histo):
 
     def getRootEfficiency(self):
         return self.getRootHisto()
+
+    def setRootEfficiency(self, rootEfficiency):
+        self.setRootEfficiency(rootEfficiency)
 
     def getRootPassedHisto(self):
         return self.rootHisto.GetPassedHistogram()

@@ -26,6 +26,8 @@ import subprocess
 from optparse import OptionParser
 
 import multicrab
+import multicrabWorkflows
+import multicrabWorkflowsTools
 import git
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
@@ -320,14 +322,14 @@ class MultiCrabLandS:
                 if not os.path.isfile(fname):
                     raise Exception("Datacard file '%s' does not exist!" % fname)
 
-                multicrab._addToDictList(self.datacards, mass, fname)
+                multicrabWorkflowsTools._addToDictList(self.datacards, mass, fname)
 
             for rf in rootfilePatterns:
                 fname = os.path.join(self.datacardDirectory, rf % mass)
                 if not os.path.isfile(fname):
                     raise Exception("ROOT file (for shapes) '%s' does not exist!" % fname)
 
-                multicrab._addToDictList(self.rootfiles, mass, fname)
+                multicrabWorkflowsTools._addToDictList(self.rootfiles, mass, fname)
 
     ## Create the multicrab task directory
     #

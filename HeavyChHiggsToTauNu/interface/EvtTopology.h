@@ -104,21 +104,33 @@ namespace HPlus {
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
     bool CalcAlphaT(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
     vector<float> CalcMomentumTensorEigenValues(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
-    void CalcSphericity(vector<float> eigenvalues);
-    void CalcAplanarity(vector<float> eigenvalues);
-    void CalcPlanarity(vector<float> eigenvalues);
-    void CalcCircularity(const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
+    bool CalcSphericity(vector<float> eigenvalues);
+    bool CalcAplanarity(vector<float> eigenvalues);
+    bool CalcPlanarity(vector<float> eigenvalues);
+    bool CalcCircularity(const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
     // Input parameters
     // std::string fDiscriminator;
     // double fDiscrCut;
     const double fAlphaTCut;
+    const double fSphericityCut;
+    const double fAplanarityCut;
+    const double fPlanarityCut;
+    const double fCircularityCut;
 
     // Counters
     Count fEvtTopologyCount;
     Count fAlphaTCutCount;
+    Count fSphericityCutCount;
+    Count fAplanarityCutCount;
+    Count fPlanarityCutCount;
+    Count fCircularityCutCount;
 
     // Histograms
     WrappedTH1 *hAlphaT;
+    WrappedTH1 *hSphericity;
+    WrappedTH1 *hAplanarity;
+    WrappedTH1 *hPlanarity;
+    WrappedTH1 *hCircularity;
     /*
       WrappedTH1 *hDiJetInvMass;
       WrappedTH1 *hDiJetInvMassCutFail;

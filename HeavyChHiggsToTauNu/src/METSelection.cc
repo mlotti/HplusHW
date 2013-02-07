@@ -42,8 +42,9 @@ namespace HPlus {
     }
     else
       throw cms::Exception("Configuration") << "Invalid value for select '" << select << "', valid values are raw, type1, type2" << std::endl;
-    
+
     hMet = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "met", "met", 80, 0., 400.);
+    hMetPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "metPhi", "met #phi", 72, -3.14159265, 3.14159265);
     hMetSignif = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "metSignif", "metSignif", 100, 0., 50.);
     hMetSumEt  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "metSumEt", "metSumEt", 30, 0., 1500.);
     hMetDivSumEt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hMetDivSumEt", "hMetDivSumEt", 50, 0., 1.);
@@ -130,6 +131,7 @@ namespace HPlus {
       throw cms::Exception("LogicError") << "This should never happen at " << __FILE__ << ":" << __LINE__ << std::endl;
 
     hMet->Fill(met->et());
+    hMetPhi->Fill(met->phi());
     hMetSignif->Fill(met->significance());
     hMetSumEt->Fill(met->sumEt());
     double sumEt = met->sumEt();

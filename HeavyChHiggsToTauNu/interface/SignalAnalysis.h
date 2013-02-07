@@ -77,8 +77,8 @@ namespace HPlus {
       Count fOneTauCounter;
       Count fElectronVetoCounter;
       Count fMuonVetoCounter;
-      Count fMETCounter;
       Count fNJetsCounter;
+      Count fMETCounter;
       //      Count fRtauAfterMetCounter;
       Count fBTaggingCounter;
       Count fDeltaPhiCounter;
@@ -120,6 +120,9 @@ namespace HPlus {
     CounterGroup* getCounterGroupByTauMatch(FakeTauIdentifier::MCSelectedTauMatchType tauMatch);
     void fillEWKFakeTausCounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData);
     void doMCAnalysisOfSelectedEvents(edm::Event& iEvent, const TauSelection::Data& tauData, const VetoTauSelection::Data& vetoTauData, const METSelection::Data& metData, const GenParticleAnalysis::Data& genData);
+    void analyseJetMatchingToTau(const TauSelection::Data& tauData, const JetSelection::Data& jetData);
+    void analyseTauFakeRateByParton(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData);
+    bool selectTailEvents(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisProducer
@@ -278,6 +281,30 @@ namespace HPlus {
     WrappedTH1 *hVerticesTriggeredBeforeWeight;
     WrappedTH1 *hVerticesTriggeredAfterWeight;
 
+    // tau investating histograms
+    WrappedTH1 *hTauVsJetDeltaPt;
+    WrappedTH1 *hTauVsJetDeltaR;
+    WrappedTH1 *hTauVsJetMCFlavor;
+    WrappedTH1 *hTauVsJetDeltaPtHeavyFlavor;
+    WrappedTH1 *hTauVsJetDeltaRHeavyFlavor;
+    WrappedTH1 *hTauVsJetDeltaPtLightFlavor;
+    WrappedTH1 *hTauVsJetDeltaRLightFlavor;
+
+    WrappedTH1 *hTauVsJetTauPtbBefore;
+    WrappedTH1 *hTauVsJetTauPtbleptonicBefore;
+    WrappedTH1 *hTauVsJetTauPtcBefore;
+    WrappedTH1 *hTauVsJetTauPtudsBefore;
+    WrappedTH1 *hTauVsJetTauPtgBefore;
+    WrappedTH1 *hTauVsJetTauPteBefore;
+    WrappedTH1 *hTauVsJetTauPtmuBefore;
+    WrappedTH1 *hTauVsJetTauPtbAfter;
+    WrappedTH1 *hTauVsJetTauPtbleptonicAfter;
+    WrappedTH1 *hTauVsJetTauPtcAfter;
+    WrappedTH1 *hTauVsJetTauPtudsAfter;
+    WrappedTH1 *hTauVsJetTauPtgAfter;
+    WrappedTH1 *hTauVsJetTauPteAfter;
+    WrappedTH1 *hTauVsJetTauPtmuAfter;
+
     // MCAnalysis histograms
     WrappedTH1 *hgenWmass;
     WrappedTH1 *hGenMET;
@@ -411,6 +438,7 @@ namespace HPlus {
     CounterGroup fMuonToTausCounterGroup;
     CounterGroup fMuonFromTauDecayToTausCounterGroup;
     CounterGroup fGenuineToTausCounterGroup;
+    CounterGroup fGenuineOneProngToTausCounterGroup;
     CounterGroup fJetToTausCounterGroup;
     CounterGroup fAllTausAndTauOutsideAcceptanceCounterGroup;
     CounterGroup fElectronToTausAndTauOutsideAcceptanceCounterGroup;
@@ -418,6 +446,7 @@ namespace HPlus {
     CounterGroup fMuonToTausAndTauOutsideAcceptanceCounterGroup;
     CounterGroup fMuonFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup;
     CounterGroup fGenuineToTausAndTauOutsideAcceptanceCounterGroup;
+    CounterGroup fGenuineOneProngToTausAndTauOutsideAcceptanceCounterGroup;
     CounterGroup fJetToTausAndTauOutsideAcceptanceCounterGroup;
 
     WrappedTH1 *hEMFractionAll;

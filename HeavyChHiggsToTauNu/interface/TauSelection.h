@@ -42,10 +42,13 @@ namespace HPlus {
       ~Data();
       /// Returns true, if the selected tau has passed all selections
       bool passedEvent() const { return fPassedEvent; }
+      /// Returns list of all tau candidates prior to any cuts
+      const edm::PtrVector<pat::Tau>& getAllTauObjects() const { return fTauSelection->fAllTauCandidates; }
       /// Returns list of selected taus (i.e. taus after tau candidate selection or after full tau ID); Note: list can be empty if no tau was selected
       const edm::PtrVector<pat::Tau>& getSelectedTaus() const;
       /// Returns selected tau in the event (i.e. tau after tau candidate selection or after full tau ID); Note: list can be empty if no tau was selected
-      const edm::Ptr<pat::Tau> getSelectedTau() const;
+   
+     const edm::Ptr<pat::Tau> getSelectedTau() const;
       /// Returns the number of prongs of the selected tau
       const size_t getNProngsOfSelectedTau() const;
       /// Returns the number of prongs of the selected tau
@@ -194,6 +197,7 @@ namespace HPlus {
     WrappedTH2 *hFakeJetEtaPhiAfterAgainstElectron;
     WrappedTH2 *hFakeJetEtaPhiAfterAgainstElectronAndDeadVeto;
     WrappedTH2 *hFakeJetEtaPhiAfterIsolation;
+
     WrappedTH2 *hFakeJetEtaPhiAfterIsolationAndDeadVeto;
     WrappedTH2 *hFakeJetEtaPhiAfterNProngs;
     WrappedTH2 *hFakeJetEtaPhiAfterNProngsAndDeadVeto;
@@ -207,8 +211,10 @@ namespace HPlus {
     WrappedTH2 *hGenuineTauEtaPhiAfterNProngsAndDeadVeto;
 
     // Selected tau
+    edm::PtrVector<pat::Tau> fAllTauCandidates;
     edm::PtrVector<pat::Tau> fSelectedTauCandidates;
     edm::PtrVector<pat::Tau> fSelectedTaus;
+  
   };
 }
 

@@ -9,6 +9,9 @@
 #
 # Authors: Ritva Kinnunen, Matti Kortelainen
 #
+# Adapted from original for signal analysis debugging and validation
+# by Lauri Wendland
+#
 ######################################################################
 
 import ROOT
@@ -24,7 +27,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configuration
 analysis = "signalAnalysis"
-#analysis = "signalAnalysisOptTaupt40byMediumCombinedIsolationDeltaBetaCorrRtau07JetGEQ3Et30BetaGT02Met100BjetGEQ1Et20discr09and02Dphi160ToprecoNone"
+#analysis = "signalOptimisation"TauID_Rtau.png
 #analysis = "signalAnalysisJESMinus03eta02METMinus10"
 #analysis = "EWKFakeTauAnalysisJESMinus03eta02METMinus10"
 #analysis = "signalOptimisation/QCDAnalysisVariation_tauPt40_rtau0_btag2_METcut60_FakeMETCut0"
@@ -37,14 +40,17 @@ treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger
 #QCDfromData = True
 QCDfromData = False
 
-#mcOnly = False
-mcOnly = True
-mcOnlyLumi = 5046.19 # pb
+removeQCD = False
 
-#dataEra = "Run2011A"
+optionBr = 0.01
+
+mcOnly = False
+#mcOnly = True
+mcOnlyLumi = 5000 # pb
+
+dataEra = "Run2011A"
 #dataEra = "Run2011B"
-dataEra = "Run2011AB"
-
+#dataEra = "Run2011AB"
 
 # main function
 def main():
@@ -74,7 +80,7 @@ def main():
 #    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110804_104313/multicrab.cfg", counters=counters)
 
 #    datasetsSignal.selectAndReorder(["HplusTB_M200_Summer11"])
- #    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110622_112321/multicrab.cfg", counters=counters)
+#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110622_112321/multicrab.cfg", counters=counters)
     #datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/Signal_v11f_scaledb_424/multicrab.cfg", counters=counters)
 
     #datasetsSignal.selectAndReorder(["TTToHplusBWB_M120_Summer11", "TTToHplusBHminusB_M120_Summer11"])
@@ -82,23 +88,13 @@ def main():
     #                           "TTToHplusBHminusB_M120_Summer11": "TTToHplusBHminusB_M120_Spring11"})
     #datasets.extend(datasetsSignal)
 
-
-## Cross sections from Fig. 127 (Handbook of LHC cross sections II): 320,200,116 fb for mH+=200,250,300 tanbeta=30
-## From MCatNLO: 306, 179.6, 109.0 fb    
-## BR from FeynHiggs: 0.704, 0.348, 0.244 for mH+=200,250,300 tanbeta=30
-    datasets.getDataset("HplusTB_M180_Fall11").setCrossSection(0.363)
-    datasets.getDataset("HplusTB_M190_Fall11").setCrossSection(0.2666)
-    datasets.getDataset("HplusTB_M200_Fall11").setCrossSection(0.1915)
-    datasets.getDataset("HplusTB_M250_Fall11").setCrossSection(0.051)
-    datasets.getDataset("HplusTB_M300_Fall11").setCrossSection(0.0213)
-
     plots.mergeRenameReorderForDataMC(datasets)
 
     if mcOnly:
         print "Int.Lumi (manually set)",mcOnlyLumi
     else:
         print "Int.Lumi",datasets.getDataset("Data").getLuminosity()
-    print "norm=",datasets.getDataset("HplusTB_M200").getNormFactor()
+    print "norm=",datasets.getDataset("TTToHplusBWB_M120").getNormFactor()
 
     # Remove signals other than M120
 #    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
@@ -107,11 +103,12 @@ def main():
     datasets.remove(filter(lambda name: "W4Jets" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "QCD_Pt20_MuEnriched" in name, datasets.getAllDatasetNames()))
     
-    datasets.remove(filter(lambda name: "HplusTB" in name and not "M200" in name, datasets.getAllDatasetNames()))
-    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     
     # Remove QCD
-    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
+    if removeQCD:
+        datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
     histograms.createLegend.moveDefaults(dx=-0.02)
     histograms.createLegend.moveDefaults(dh=-0.03)
     
@@ -121,14 +118,14 @@ def main():
     xsect.setHplusCrossSectionsToTop(datasets_lands)
 
     # Set the signal cross sections to a given BR(t->H), BR(h->taunu)
-    xsect.setHplusCrossSectionsToBR(datasets, br_tH=1.0, br_Htaunu=1.0)
-
+    xsect.setHplusCrossSectionsToBR(datasets, br_tH=optionBr, br_Htaunu=1)
 
     # Set the signal cross sections to a value from MSSM
 #    xsect.setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=200)
 
-#    plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section
-
+    plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section
+    
+########    datasets.merge("EWK", ["WJets", "DYJetsToLL", "SingleTop", "Diboson","TTJets"], keepSources=True)
 
     # Replace signal dataset with EWK+signal
     if False:
@@ -165,26 +162,180 @@ def doPlots(datasets):
         else:
             return plots.DataMCPlot(datasets, analysis+"/"+name, **kwargs)
 
+    def pickSliceX(th2, ybinName):
+        th1 = ROOT.TH1D(th2.GetName(), th2.GetTitle(), th2.GetNbinsX(), histograms.th1Xmin(th2), histograms.th1Xmax(th2))
+        th1.Sumw2()
+        ybin = None
+        for bin in xrange(1, th2.GetNbinsY()+1):
+            if th2.GetYaxis().GetBinLabel(bin) == ybinName:
+                ybin = bin
+                break
+        if ybin is None:
+            raise Exception("Did not find y bin label %s from histogram %s" % (ybinName, th2.GetName()))
+        for xbin in xrange(0, th2.GetNbinsX()+2): # include under/overflow bins
+            th1.SetBinContent(xbin, th2.GetBinContent(xbin, ybin))
+            th1.SetBinError(xbin, th2.GetBinError(xbin, ybin))
+        return th1
+
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
-
+    myDir = "Vertices"
+    drawPlot(createPlot(myDir+"/verticesBeforeWeight"), "verticesBeforeWeight", xlabel="N_{vertices}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/verticesAfterWeight"), "verticesAfterWeight", xlabel="N_{vertices}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/verticesTriggeredBeforeWeight"), "verticesTriggeredBeforeWeight", xlabel="N_{vertices}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/verticesTriggeredAfterWeight"), "verticesTriggeredAfterWeight", xlabel="N_{vertices}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    myDir = "TauSelection"
+    drawPlot(createPlot(myDir+"/N_TriggerMatchedTaus"), "tauID0_N_TriggerMatchedTaus", xlabel="N_{trg. matched taus}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/N_TriggerMatchedSeparateTaus"), "tauID0_N_TriggerMatchedSeparateTaus", xlabel="N_{trg. matched separate taus}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/HPSDecayMode"), "tauID0_HPSDecayMode", xlabel="HPS Decay Mode", ylabel="N_{events}", log=True, ratio=True, opts={"xmax": 15}, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauSelection_all_tau_candidates_N"), "tauID1_TauSelection_all_tau_candidates_N", xlabel="N_{tau candidates}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauSelection_all_tau_candidates_pt"), "tauID1_TauSelection_all_tau_candidates_pt", xlabel="p_{T} of all tau candidates, GeV/c", ylabel="N_{events}", rebinToWidthX=10, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauSelection_all_tau_candidates_eta"), "tauID1_TauSelection_all_tau_candidates_eta", xlabel="#eta of all tau candiates", ylabel="N_{events}", rebinToWidthX=0.1, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauSelection_all_tau_candidates_phi"), "tauID1_TauSelection_all_tau_candidates_phi", xlabel="#phi of all tau candidates", ylabel="N_{events}",  rebinToWidthX=0.087266, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauSelection_all_tau_candidates_MC_purity"), "tauID1_TauSelection_all_tau_candidates_MC_purity", xlabel="MC purity of all tau candidates", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauCand_JetPt"), "tauID2_TauCand_JetPt", xlabel="p_{T} of tau candidates, GeV/c", ylabel="N_{events}", rebinToWidthX=10, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauCand_JetEta"), "tauID2_TauCand_JetEta", xlabel="#eta of tau candidates", ylabel="N_{events}", rebinToWidthX=0.1, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauCand_LdgTrackPtCut"), "tauID2_TauCand_LdgTrackPtCut", xlabel="p_{T}^{ldg.ch.particle} of tau candidates, GeV/c", ylabel="N_{events}", rebinToWidthX=10, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    #drawPlot(createPlot(myDir+"/TauCand_EMFractionCut"), "tauID2_TauCand_EMFractionCut", xlabel="EM energy fraction of tau candidates", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauSelection_cleaned_tau_candidates_N"), "tauID3_TauSelection_cleaned_tau_candidates_N", xlabel="N_{cleaned tau candidates}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauSelection_cleaned_tau_candidates_pt"), "tauID3_TauSelection_cleaned_tau_candidates_pt", xlabel="p_{T} of cleaned tau candidates, GeV/c", ylabel="N_{events}", rebinToWidthX=10, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauSelection_cleaned_tau_candidates_eta"), "tauID3_TauSelection_cleaned_tau_candidates_eta", xlabel="#eta of cleaned tau candidates", ylabel="N_{events}", rebinToWidthX=0.1, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauSelection_cleaned_tau_candidates_phi"), "tauID3_TauSelection_cleaned_tau_candidates_phi", xlabel="#phi of cleaned tau candidates", ylabel="N_{events}", rebinToWidthX=0.087266, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauSelection_cleaned_tau_candidates_MC_purity"), "tauID3_TauSelection_cleaned_tau_candidates_MC_purity", xlabel="MC purity of cleaned tau candidates", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/IsolationPFChargedHadrCandsPtSum"), "tauID4_IsolationPFChargedHadrCandsPtSum", xlabel="#sum p_{T} of PF ch. hadr. candidates, GeV/c", ylabel="N_{events}", log=True, ratio=True, opts={"xmax": 40}, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/IsolationPFGammaCandEtSum"), "tauID4_IsolationPFGammaCandEtSum", xlabel="#sum p_{T} of PF gamma candidates, GeV/c", ylabel="N_{events}", log=True, ratio=True, opts={"xmax": 40}, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauID_NProngsCut"), "tauID4_TauID_NProngsCut", xlabel="N_{prongs}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    #drawPlot(createPlot(myDir+"/TauID_ChargeCut"), "tauID4_TauID_ChargeCut", xlabel="Q_{tau}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauID_RtauCut"), "tauID4_TauID_RtauCut", xlabel="R_{#tau}", ylabel="N_{events}", rebinToWidthX=0.1, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauSelection_selected_taus_N"), "tauID5_TauSelection_selected_taus_N", xlabel="N_{selected taus}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauSelection_selected_taus_pt"), "tauID5_TauSelection_selected_taus_pt", xlabel="p_{T} of selected taus", ylabel="N_{events}", rebinToWidthX=10, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauSelection_selected_taus_eta"), "tauID5_TauSelection_selected_taus_eta", xlabel="#eta of selected taus", ylabel="N_{events}", rebinToWidthX=0.1, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauSelection_selected_taus_phi"), "tauID5_TauSelection_selected_taus_phi", xlabel="#phi of selected taus", ylabel="N_{events}", rebinToWidthX=.087266, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauSelection_selected_taus_MC_purity"), "tauID5_TauSelection_selected_taus_MC_purity", xlabel="MC purity of selected taus", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    myDir = "FakeTauIdentifier_TauID"
+    drawPlot(createPlot(myDir+"/TauMatchType"), "TauID6_SelectedTau_Fakes_TauMatchType", xlabel="MC #tau decay", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/TauOrigin"), "TauID6_SelectedTau_Fakes_TauOrigin", xlabel="MC #tau origin", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/MuOrigin"), "TauID6_SelectedTau_Fakes_MuOrigin", xlabel="MC #mu origin", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/ElectronOrigin"), "TauID6_SelectedTau_Fakes_ElectronOrigin", xlabel="MC e origin", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    myDir = "SelectedTau"
+    drawPlot(createPlot(myDir+"/SelectedTau_pT_AfterTauID"), "tauID7_SelectedTau_SelectedTau_pT_AfterTauID", xlabel="p_{T} of selected taus, GeV/c", ylabel="N_{events}", rebinToWidthX=10, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/SelectedTau_eta_AfterTauID"), "tauID7_SelectedTau_SelectedTau_eta_AfterTauID", xlabel="#eta of selected taus", ylabel="N_{events}", rebinToWidthX=0.1, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/SelectedTau_phi_AfterTauID"), "tauID7_SelectedTau_SelectedTau_pT_phi_AfterTauID", xlabel="#phi of selected taus", ylabel="N_{events}", rebinToWidthX=.087266, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/SelectedTau_Rtau_AfterTauID"), "tauID7_SelectedTau_SelectedTau_Rtau_AfterTauID", xlabel="R_{#tau} of selected taus", ylabel="N_{events}", rebinToWidthX=0.1, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/SelectedTau_pT_AfterCuts"), "tauID8_SelectedTau_SelectedTau_pT_AfterTauID", xlabel="p_{T} of tau after selections, GeV/c", ylabel="N_{events}", rebinToWidthX=10, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/SelectedTau_eta_AfterCuts"), "tauID8_SelectedTau_SelectedTau_eta_AfterTauID", xlabel="#eta of tau after selections", ylabel="N_{events}", rebinToWidthX=0.1, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/SelectedTau_Rtau_AfterCuts"), "tauID8_SelectedTau_SelectedTau_Rtau_AfterTauID", xlabel="R_{#tau} of tau after selections", ylabel="N_{events}", rebinToWidthX=0.1, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    myDir = "GlobalElectronVeto"
+    drawPlot(createPlot(myDir+"/GlobalElectronPt"), "ElectronCandPt", xlabel="p_{T} of electron candidates, GeV/c", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/GlobalElectronEta"), "ElectronCandEta", xlabel="#eta of electron candidates", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/NumberOfSelectedElectrons"), "ElectronSelectedN", xlabel="Number of selected electrons", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/GlobalElectronPt_identified"), "ElectronSelectedPt", xlabel="p_{T} of selected electrons, GeV/c", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/GlobalElectronEta_identified"), "ElectronSelectedEta", xlabel="#eta of selected electrons", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    myDir = "GlobalMuonVeto"
+    drawPlot(createPlot(myDir+"/GlobalMuonPt"), "MuonCandPt", xlabel="p_{T} of #mu candidates, GeV/c", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/GlobalMuonEta"), "MuonCandEta", xlabel="#eta of #mu candidates", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/MuonImpactParameter"), "MuonIPz", xlabel="IP_{z} of #mu candidates, cm", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/NumberOfSelectedMuons"), "MuonSelectedN", xlabel="Number of selected #mus", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/GlobalMuonPt_identified_eta"), "MuonSelectedPt", xlabel="p_{T} of selected #mu's, GeV/c", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/GlobalMuonEta_identified"), "MuonSelectedEta", xlabel="#eta of selected #mu's", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    myDir = "JetSelection"
+    drawPlot(createPlot(myDir+"/jet_pt"), "JetCands_pt", xlabel="p_{T} of jet candidates, GeV/c", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_pt_central"), "JetCands_pt_central", xlabel="p_{T} of central jet candidates, GeV/c", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_eta"), "JetCands_eta", xlabel="#eta of jet candidates", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_phi"), "JetCands_phi", xlabel="#phi of jet candidates", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/firstJet_pt"), "JetSelected_1jet_pt", xlabel="p_{T} of first jet, GeV/c", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/firstJet_eta"), "JetSelected_1jet_eta", xlabel="#eta of first jet", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/firstJet_phi"), "JetSelected_1jet_phi", xlabel="#phi of first jet", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/secondJet_pt"), "JetSelected_2jet_pt", xlabel="p_{T} of second jet, GeV/c", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/secondJet_eta"), "JetSelected_2jet_eta", xlabel="#eta of second jet", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/secondJet_phi"), "JetSelected_2jet_phi", xlabel="#phi of second jet", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/thirdJet_pt"), "JetSelected_3jet_pt", xlabel="p_{T} of third jet, GeV/c", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/thirdJet_eta"), "JetSelected_3jet_eta", xlabel="#eta of third jet", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/thirdJet_phi"), "JetSelected_3jet_phi", xlabel="#phi of third jet", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/NumberOfSelectedJets"), "JetSelected_N", xlabel="N_{selected jets}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    myDir = "JetSelection/SelectedJets"
+    drawPlot(createPlot(myDir+"/jet_pt"), "JetAccepted_pt", xlabel="p_{T} of accepted jets, GeV/c", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_eta"), "JetAccepted_eta", xlabel="#eta of accepted jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_phi"), "JetAccepted_phi", xlabel="#phi of accepted jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_NeutralEmEnergyFraction"), "JetAccepted_NeutralEmEnergyFraction", xlabel="NeutralEmEnergyFraction of accepted jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_NeutralHadronFraction"), "JetAccepted_NeutralHadronFraction", xlabel="NeutralHadronFraction of accepted jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_PhotonEnergyFraction"), "JetAccepted_PhotonEnergyFraction", xlabel="PhotonEnergyFraction of accepted jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_ChargedHadronEnergyFraction"), "JetAccepted_ChargedEnergyFraction", xlabel="ChargedEnergyFraction of accepted jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_NeutralHadronMultiplicity"), "JetAccepted_NeutralHadronMultiplicity", xlabel="NeutralHadronMultiplicity of accepted jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_PhotonMultiplicity"), "JetAccepted_PhotonMultiplicity", xlabel="PhotonMultiplicity of accepted jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_ChargedMultiplicity"), "JetAccepted_ChargedMultiplicity", xlabel="ChargedMultiplicity of accepted jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_PartonFlavour"), "JetAccepted_PartonFlavour", xlabel="PartonFlavour of accepted jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    myDir = "JetSelection/ExcludedJets"
+    drawPlot(createPlot(myDir+"/jet_pt"), "JetRejected_pt", xlabel="p_{T} of rejected jets, GeV/c", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_eta"), "JetRejected_eta", xlabel="#eta of rejected jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_phi"), "JetRejected_phi", xlabel="#phi of rejected jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_NeutralEmEnergyFraction"), "JetRejected_NeutralEmEnergyFraction", xlabel="NeutralEmEnergyFraction of rejected jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_NeutralHadronFraction"), "JetRejected_NeutralHadronFraction", xlabel="NeutralHadronFraction of rejected jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_PhotonEnergyFraction"), "JetRejected_PhotonEnergyFraction", xlabel="PhotonEnergyFraction of rejected jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_ChargedHadronEnergyFraction"), "JetRejected_ChargedEnergyFraction", xlabel="ChargedEnergyFraction of rejected jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_NeutralHadronMultiplicity"), "JetRejected_NeutralHadronMultiplicity", xlabel="NeutralHadronMultiplicity of rejected jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_PhotonMultiplicity"), "JetRejected_PhotonMultiplicity", xlabel="PhotonMultiplicity of rejected jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_ChargedMultiplicity"), "JetRejected_ChargedMultiplicity", xlabel="ChargedMultiplicity of rejected jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_PartonFlavour"), "JetRejected_PartonFlavour", xlabel="PartonFlavour of rejected jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    myDir = "MET"
+    drawPlot(createPlot(myDir+"/met"), "MET_MET", xlabel="MET, GeV", ylabel="N_{events}", rebin=4, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/metSignif"), "MET_significance", xlabel="MET significance", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/metSumEt"), "MET_SumET", xlabel="MET #sum E_{T}, GeV", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    myDir = "Btagging"
+    drawPlot(createPlot(myDir+"/NumberOfBtaggedJets"), "Btag_N", xlabel="N_{selected b jets}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/jet_bdiscriminator"), "Btag_discriminator", xlabel="b-taggind discriminator", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/RealBjet_discrim"), "Btag_discriminator_genuine_bjets", xlabel="b-tagging discriminator for genuine b jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/bjet_pt"), "Btag_pt", xlabel="p_{T} of selected b jets, GeV/c", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/bjet_eta"), "Btag_eta", xlabel="#eta of selected b jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/bjet1_pt"), "Btag_2pt", xlabel="p_{T} of first b jets, GeV/c", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/bjet1_eta"), "Btag_2eta", xlabel="#eta of first b jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/bjet2_pt"), "Btag_2pt", xlabel="p_{T} of second b jets, GeV/c", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/bjet2_eta"), "Btag_2eta", xlabel="#eta of second b jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/MCMatchForPassedJets"), "Btag_MCMatchForPassedJets", xlabel="MCMatchForPassedJets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    # main directory
+    drawPlot(createPlot("deltaPhi"), "DeltaPhi_tauMET", xlabel="#Delta#phi(#tau jet, MET), ^{o}", ylabel="N_{events}", rebin=20, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot("transverseMass"), "Mass_Transverse", xlabel="Transverse mass, GeV/c^{2}", ylabel="N_{events}", rebin=4, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot("EWKFakeTausTransverseMass"), "Mass_Transverse_EWKFakeTaus", xlabel="Transverse mass EWK fake taus, GeV/c^{2}", ylabel="N_{events}", rebin=4, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot("fullMass"), "Mass_Invariant", xlabel="Invariant mass, GeV/c^{2}", ylabel="N_{events}", rebin=4, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot("EWKFakeTausFullMass"), "Mass_Invariant_EWKFakeTaus", xlabel="Invariant mass EWK fake taus, GeV/c^{2}", ylabel="N_{events}", rebin=4, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot("alphaT"), "AlphaT", xlabel="#alpha_{T}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot("deltaPhiJetMet"), "DeltaPhi_minJetMET", xlabel="min #Delta#phi(jet, MET), ^{o}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot("maxDeltaPhiJetMet"), "DeltaPhi_maxJetMET", xlabel="max #Delta#phi(#tau jet, MET), ^{o}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot("SignalSelectionFlow"), "SelectionFlow", xlabel="Step", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot("SignalSelectionFlowVsVertices"), "SelectionFlow_vsVertices", xlabel="N_{vertices}", ylabel="Step", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot("SignalSelectionFlowVsVerticesFakeTaus"), "SelectionFlow_vsVerticesFakeTaus", xlabel="N_{vertices}", ylabel="Step", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    return
+#        [["signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_pT_AfterCuts","signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_pT_AfterCuts"], 10, "log"],
+#        [["signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_eta_AfterCuts","signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_eta_AfterCuts"], 0.2, "log"],
+    drawPlot(createPlot(myDir+"/"), "", xlabel="", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+   
     # Primary vertices
-#    vertexCount(createPlot("Vertices/verticesBeforeWeight", normalizeToOne=True), postfix="BeforeWeight")
-#    vertexCount(createPlot("Vertices/verticesAfterWeight", normalizeToOne=True), postfix="AfterWeight")
+
+#    vertexCount(createPlot("verticesBeforeWeight", normalizeToOne=True), postfix="BeforeWeight")
+#    vertexCount(createPlot("verticesAfterWeight", normalizeToOne=True), postfix="AfterWeight")
 #    vertexCount(createPlot("Vertices/verticesTriggeredBeforeWeight", normalizeToOne=True), postfix="BeforeWeightTriggered")
-    vertexCount(createPlot("Vertices/verticesTriggeredAfterWeight", normalizeToOne=True),ratio=True, postfix="AfterWeightTriggered")
-#    vertexCount(createPlot("Vertices/verticesTriggeredBeforeWeight", normalizeToOne=False), postfix="BeforeWeightTriggeredNorm")
-    vertexCount(createPlot("Vertices/verticesTriggeredAfterWeight", normalizeToOne=False),ratio=True,postfix="AfterWeightTriggeredNorm")
+#    vertexCount(createPlot("Vertices/verticesTriggeredAfterWeight", normalizeToOne=True), postfix="AfterWeightTriggered")
+#    vertexCount(createPlot("SignalSelectionFlowVsVertices", normalizeToOne=True, datasetRootHistoArgs={"modify": lambda th2: pickSliceX(th2, "#tau ID")}), postfix="AfterTauIDScaleFactors")
+#    vertexCount(createPlot("verticesTriggeredBeforeWeight", normalizeToOne=False), postfix="BeforeWeightTriggeredNorm")
+#    vertexCount(createPlot("verticesTriggeredAfterWeight", normalizeToOne=False), postfix="AfterWeightTriggeredNorm")
+
 #    met2(createPlot("MET"), "met1", rebin=50)
   
     # Tau
-##    tauPt(createPlot("SelectedTau/SelectedTau_pT_AfterTauID"), "SelectedTau_pT_AfterTauID", rebin=5, ratio=False, opts={"xmax": 300, "ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
-##    tauEta(createPlot("SelectedTau/SelectedTau_eta_AfterTauID"),"SelectedTau_eta_AfterTauID", rebin=5, ratio=False, opts={"ymin": 0.1, "ymaxfactor": 50, "xmin": -2.5, "xmax": 2.5}, moveLegend={"dy":0.01, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.3, y=0.85))
-##    tauPhi(createPlot("SelectedTau/SelectedTau_phi_AfterTauID"), "SelectedTau_phi_AfterTauID", rebin=10, opts={"ymin": 1, "ymaxfactor": 40})
-#    tauPhi(createPlot("TauSelection/TauSelection_cleaned_tau_candidates_phi"), "Cleaned_tau_candidates_phi", rebin=10, log=False, opts={"ymin": 100, "ymaxfactor": 1.1})   
-
+    tauPt(createPlot("SelectedTau/SelectedTau_pT_AfterTauID"), "SelectedTau_pT_AfterTauID", rebin=5, ratio=False, opts={"xmax": 300, "ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    tauEta(createPlot("SelectedTau/SelectedTau_eta_AfterTauID"),"SelectedTau_eta_AfterTauID", rebin=5, ratio=False, opts={"ymin": 1, "ymaxfactor": 50, "xmin": -2.5, "xmax": 2.5}, moveLegend={"dy":0.01, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.3, y=0.85))
+ 
+#    tauPhi(createPlot("SelectedTau/SelectedTau_phi_AfterTauID"), "SelectedTau_phi_AfterTauID", rebin=10, opts={"ymin": 1, "ymaxfactor": 40})
+    tauPt(createPlot("TauSelection/TauSelection_all_tau_candidates_pt"), "All_tau_candidates_pt", rebin=1, ratio=True,log=True, opts={"ymin": 10,"ymaxfactor": 1.1})
+    tauEta(createPlot("TauSelection/TauSelection_all_tau_candidates_eta"), "All_tau_candidates_eta", rebin=1,  ratio=True, log=True, opts={"ymaxfactor": 5.0})
+    
+    drawPlot(createPlot("TauSelection/TauSelection_selected_taus_MC_purity"), "SelectedTausMCpurity",log=False,  xlabel="origin", ylabel="#tau jets", ratio=False, opts={"ymin": 10, "xmax": 6}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("TauSelection/TauSelection_all_tau_candidates_N"), "AllTauCandidates", log=False, xlabel="", ylabel="#tau candidates", ratio=False, opts={"xmax": 8}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("TauSelection/TauSelection_cleaned_tau_candidates_N"), "CleanedTauCandidates",  log=False, xlabel="", ylabel="#tau candidates", ratio=False, opts={ "xmax": 8}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("TauSelection/TauSelection_selected_taus_N"), "SelectedTaus", xlabel="", log=True,  ylabel="#tau jets", ratio=False, opts={ "xmax": 8}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+        
 #    rtau(createPlot("SelectedTau/SelectedTau_Rtau_AfterTauID"), "SelectedTau_Rtau_AfterTauID", rebin=10, opts={"ymin": 1e-2, "ymaxfactor": 5, "xmax": 1.1}, moveLegend={"dx": -0.5,"dy": 0.08}, textFunction=lambda: addMassBRText(x=0.31, y=0.22), cutLine=0.7)
-##    rtau(createPlot("TauSelection/TauID_RtauCut"), "TauID_Rtau", rebin=1, ratio=False, opts={"ymin": 1e-2, "ymaxfactor": 50, "xmax": 1.1}, moveLegend={"dx": -0.5,"dy": 0.02}, textFunction=lambda: addMassBRText(x=0.31, y=0.22), cutLine=0.7)
+    rtau(createPlot("TauSelection/TauID_RtauCut"), "TauID_Rtau", rebin=1, ratio=False, opts={"ymin": 1e-2, "ymaxfactor": 50, "xmax": 1.1}, moveLegend={"dx": -0.5,"dy": 0.02}, textFunction=lambda: addMassBRText(x=0.31, y=0.22), cutLine=0.7)
      
 #    rtau(createPlot("tauID/TauID_RtauCut"), "TauID_Rtau", rebin=2, opts={"ymin": 1e-2, "ymaxfactor": 15, "xmax": 1.1}, moveLegend={"dx": -0.5,"dy": 0.02}, textFunction=lambda: addMassBRText(x=0.31, y=0.22), cutLine=0.7)
     
@@ -220,9 +371,12 @@ def doPlots(datasets):
     drawPlot(createPlot("GlobalElectronVeto/GlobalElectronPt_identified"), "electronPt", rebin=3, xlabel="p_{T}^{electron} (GeV/c)", ylabel="Identified electrons / %.0f GeV/c", ratio=False,  opts={"xmax": 250,"xmin": 0, "ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=15)
     drawPlot(createPlot("GlobalElectronVeto/GlobalElectronEta_identified"), "electronEta", rebin=3, xlabel="#eta^{electron}", ylabel="Identified electrons / %.1f", ratio=False, opts={"xmin": -3,"ymin": 0.1, "xmax": 3, "ymaxfactor": 10}, moveLegend={"dy":0.01, "dx":-0.07, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=[-2.5, 2.5])
 
+    drawPlot(createPlot("GlobalElectronVeto/NumberOfSelectedElectrons"), "NumberOfSelectedElectrons", xlabel="Number of selected electrons", ylabel="Events", ratio=False, opts={"xmax": 6,"ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=1)
+    
     # Muon veto
-    drawPlot(createPlot("GlobalMuonVeto/GlobalMuonPt_identified_eta"), "muonPt", rebin=3, xlabel="p_{T}^{muon} (GeV/c)", ylabel="Identified muons / %.0f GeV/c", ratio=False,  opts={"ymaxfactor": 2,"xmax": 250}, textFunction=lambda: addMassBRText(x=0.35, y=0.9), cutLine=15)
+    drawPlot(createPlot("GlobalMuonVeto/GlobalMuonPt_identified_eta"), "muonPt", rebin=3, xlabel="p_{T}^{muon} (GeV/c)", ylabel="Identified muons / %.0f GeV/c", ratio=False, log=False, opts={"ymaxfactor": 2,"xmax": 250,"xmin": 0}, textFunction=lambda: addMassBRText(x=0.35, y=0.9), cutLine=15)
     drawPlot(createPlot("GlobalMuonVeto/GlobalMuonEta_identified"), "muonEta", rebin=3, xlabel="#eta^{muon}", ylabel="Identified muons / %.1f", ratio=False, opts={"xmin": -3,"ymin": 0.1, "xmax": 3, "ymaxfactor": 20}, moveLegend={"dy":0.01, "dx":-0.07, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.30, y=0.87), cutLine=[-2.5, 2.5])
+    drawPlot(createPlot("GlobalMuonVeto/NumberOfSelectedMuons"), "NumberOfSelectedMuons", xlabel="Number of selected muons", ylabel="Events", ratio=False, opts={"xmax": 6,"ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=1)
 
     if False:
         # tau veto
@@ -237,9 +391,10 @@ def doPlots(datasets):
 
         
     # Jet selection
-##    drawPlot(createPlot("JetSelection/jet_pt_central"), "centralJetPt", rebin=2, xlabel="p_{T}^{jet} (GeV/c)", ylabel="Jets / %.0f GeV/c", ratio=False, opts={"xmax": 500,"ymin": 0.1,"ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=30)
+    drawPlot(createPlot("JetSelection/jet_pt_central"), "centralJetPt", rebin=2, xlabel="p_{T}^{jet} (GeV/c)", ylabel="Jets / %.0f GeV/c", ratio=False, opts={"xmax": 500,"ymin": 0.1,"ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=30)
 #    drawPlot(createPlot("JetSelection/jet_pt"), "jetPt", rebin=2, xlabel="p_{T}^{jet} (GeV/c)", ylabel="Jets / %.0f GeV/c", opts={"xmax": 500}, textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=30)
     drawPlot(createPlot("JetSelection/jet_eta"), "jetEta", rebin=2, xlabel="#eta^{jet}", ylabel="Jets / %.1f", ratio=False, opts={"xmin": -3.5, "xmax": 3.5, "ymaxfactor": 500}, moveLegend={"dy":0.01, "dx":-0.2, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.4, y=0.22), cutLine=[-2.4, 2.4])
+##    drawPlot(createPlot("JetSelection/SelectedJets/deltaPtTauJet"), "deltaPtJetTau", rebin=3, log=True, xlabel="p_{T}^{jet}-p_{T}^{#tau jet}(GeV/c)", ylabel="Events / %.1f GeV/c", ratio=False, opts={"ymaxfactor": 2}, moveLegend={"dy":0.01, "dx":-0.5, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.2, y=0.52), cutLine=[-10.0, 10.0])
 #    drawPlot(createPlot("JetSelection/jet_phi"), "jetPhi", rebin=1, xlabel="#phi^{jet}", ylabel="Jets / %.2f", opts={"ymin": 20},textFunction=lambda: addMassBRText(x=0.3, y=0.87))
     drawPlot(createPlot("ControlPlots/Njets"), "NumberOfJets", xlabel="Number of selected jets", ylabel="Events", ratio=False, opts={"xmax": 11,"ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=3)
     
@@ -248,35 +403,36 @@ def doPlots(datasets):
 
         
     # MET
-    drawPlot(createPlot("ControlPlots/MET"), "Met", rebin=4, xlabel="PF E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", ratio=False, opts={"xmin": 0, "xmax": 500}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=60)
+    drawPlot(createPlot("Met"), "Met", rebin=10, xlabel="Raw PF E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", opts={"xmin": 20, "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=40)
+#    drawPlot(createPlot("ControlPlots/MET"), "Met", rebin=4, xlabel="PF E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", ratio=True, opts={"xmin": 0, "xmax": 500}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=60)
 #    drawPlot(createPlot("MetWithBtagging"), "MetWithBtagging", rebin=10, xlabel="Raw PF E_{T}^{miss} (GeV)", ratio=True, ylabel="Events / %.0f GeV", opts={"xmin": 20, "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=40)
 #    drawPlot(createPlot("Met_beforeJetCut"), "MetBeforeJets", rebin=10, xlabel="Raw PF E_{T}^{miss} (GeV)", ratio=True, ylabel="Events / %.0f GeV", opts={"xmin": 20, "xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
 
 
     # b jets
-    drawPlot(createPlot("Btagging/bjet_pt"), "bjetPt", rebin=3, xlabel="p_{T}^{b-tagged jet} (GeV/c)", ylabel="b-tagged jets / %.0f GeV/c", ratio=False, opts={"ymaxfactor": 2,"xmax": 500}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+    drawPlot(createPlot("Btagging/bjet_pt"), "bjetPt", rebin=4, xlabel="p_{T}^{b-tagged jet} (GeV/c)", ylabel="b-tagged jets / %.0f GeV/c", ratio=False, opts={"ymaxfactor": 2,"xmax": 500}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
     drawPlot(createPlot("Btagging/bjet_eta"), "bjetEta", rebin=2, xlabel="#eta^{b-tagged jet}", ylabel="b-tagged jets / %.1f", ratio=False, opts={"ymaxfactor": 20, "xmin": -2.4, "xmax": 2.59,"ymin": 0.1 }, moveLegend={"dy":0.01, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
     drawPlot(createPlot("ControlPlots/NBjets"), "NumberOfBJets", xlabel="Number of selected b jets", ylabel="Events", opts={"xmax": 7}, ratio=False, textFunction=lambda: addMassBRText(x=0.45, y=0.87), cutLine=1)
 #   
 
-    if True:
+    if False:
         # top mass 
-        drawPlot(createPlot("TopChiSelection/TopMass"), "TopMassWithChi", rebin=1, log=False, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=300)
+        drawPlot(createPlot("TopChiSelection/TopMass"), "TopMassWithChi", rebin=2, log=False, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=300)
         
-        drawPlot(createPlot("TopChiSelection/WMass"), "WMassWithChi", rebin=2, log=False, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 200}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=50)
+        drawPlot(createPlot("TopChiSelection/WMass"), "WMassWithChi", rebin=2, log=False, xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=50)
         
         drawPlot(createPlot("TopWithBSelection/TopMass"), "TopMassWithBsel", rebin=2, log=False,xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=250)
-        drawPlot(createPlot("TopWithBSelection/WMass"), "WMassWithBsel", rebin=2, log=False,xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 200}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
+        drawPlot(createPlot("TopWithBSelection/WMass"), "WMassWithBsel", rebin=20, log=False,xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
         
         drawPlot(createPlot("TopWithMHSelection/TopMass"), "TopMassWithMHSel", rebin=2, log=False,xlabel="m_{top} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
 
-
+    drawPlot(createPlot("genWmass"), "genWmass", rebin=5, log=True,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"xmax": 400,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
 
     drawPlot(createPlot("FullHiggsMass/HiggsMass"), "HiggsMass", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=True, opts={"xmax": 400,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
-#    drawPlot(createPlot("FullHiggsMass/HiggsMassReal"), "HiggsMassReal", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"xmax": 400,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))  
-#    drawPlot(createPlot("FullHiggsMass/HiggsMassImaginary"), "HiggsMassImaginary", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"xmax": 400,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
-#    drawPlot(createPlot("FullHiggsMass/SolutionMinPzDifference"), "SolutionMinPzDifference", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
-#    drawPlot(createPlot("FullHiggsMass/SolutionMaxPzDifference"), "SolutionMaxPzDifference", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
+    drawPlot(createPlot("FullHiggsMass/HiggsMassReal"), "HiggsMassReal", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"xmax": 400,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))  
+    drawPlot(createPlot("FullHiggsMass/HiggsMassImaginary"), "HiggsMassImaginary", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"xmax": 400,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
+    drawPlot(createPlot("FullHiggsMass/SolutionMinPzDifference"), "SolutionMinPzDifference", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
+    drawPlot(createPlot("FullHiggsMass/SolutionMaxPzDifference"), "SolutionMaxPzDifference", rebin=5, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
       
 #    drawPlot(createPlot("FullHiggsMass/HiggsMassTauBmatch"), "HiggsMassTauBmatch", rebin=2, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
 #    drawPlot(createPlot("FullHiggsMass/HiggsMassTauBMETmatch"), "HiggsMassTauBMETmatch", rebin=2, log=False,xlabel="m_{Higgs} (GeV/c^{2})", ylabel="Events / %.0f GeV", opts={"xmax": 400}, textFunction=lambda: addMassBRText(x=0.4, y=0.87))    
@@ -290,13 +446,8 @@ def doPlots(datasets):
 #    transverseMass2(createPlot("transverseMassAfterDeltaPhi130"), "transverseMassAfterDeltaPhi130", rebin=20)
 #    transverseMass2(createPlot("transverseMassFakeMetVeto"), "transverseMassFakeMetVeto", rebin=20)
 
-    transverseMass2(createPlot("transverseMass"), "transverseMass", rebin=10, ratio=False,log=False, opts={"xmax": 300,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))
-    transverseMass2(createPlot("transverseMassPhi30"), "transverseMassPhi30", rebin=10, ratio=False,log=False, opts={"xmax": 300,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))
-    transverseMass2(createPlot("transverseMassPhi60"), "transverseMassPhi60", rebin=10, ratio=False,log=False, opts={"xmax": 300,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87)) 
-#    transverseMass2(createPlot("transverseMassSecondBveto"), "transverseMassSecondBveto", rebin=10, ratio=False,log=False, opts={"xmax": 300,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))
-    transverseMass2(createPlot("transverseMassMet80"), "transverseMassMet80", rebin=10, ratio=False,log=False, opts={"xmax": 300,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))
-    transverseMass2(createPlot("transverseMassMet100"), "transverseMassMet100", rebin=10, ratio=False,log=False, opts={"xmax": 300,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))
-    transverseMass2(createPlot("transverseMassNoBtagging"), "transverseMassNoBtagging", rebin=10, ratio=True,log=False, opts={"xmax": 300,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
+    transverseMass2(createPlot("transverseMass"), "transverseMass", rebin=10, ratio=False,log=False, opts={"xmax": 400,"ymaxfactor": 1.1}, textFunction=lambda: addMassBRText(x=0.35, y=0.87))
+##    transverseMass2(createPlot("transverseMassDeltaPtCut"), "transverseMassDeltaPtCut", rebin=10, ratio=True,log=False, opts={"xmax": 300,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
 
 #    transverseMass2(createPlot("transverseMassNoBtaggingWithRtau"), "transverseMassNoBtaggingWithRtau", rebin=10, ratio=True,log=False, opts={"xmax": 300,"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
 ###    transverseMass2(createPlot("transverseMassAfterDeltaPhi160"), "transverseMassAfterDeltaPhi160", rebin=20, log=False, textFunction=lambda: addMassBRText(x=0.4, y=0.87))
@@ -314,7 +465,6 @@ def doPlots(datasets):
 #    deltaPhi(createPlot("TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
     deltaPhi2(createPlot("deltaPhi"), "DeltaPhiTauMet", rebin=10, ratio=False, opts={"ymaxfactor": 50}, moveLegend={"dx":-0.21}, textFunction=lambda: addMassBRText(x=0.2, y=0.87), cutLine=[160])
 #    deltaPhi2(createPlot("deltaPhiNoBtagging"), "DeltaPhiTauMetNoBtagging", rebin=10, ratio=True, opts={"ymaxfactor": 100}, moveLegend={"dx":-0.21}, textFunction=lambda: addMassBRText(x=0.2, y=0.87), cutLine=[160, 130])
-    deltaPhi2(createPlot("deltaPhiJetMet"), "DeltaPhiJetMet", rebin=5, ratio=False, opts={"ymaxfactor": 20}, moveLegend={"dx":-0.21}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
 #    deltaPhi2(createPlot("FakeMETVeto/Closest_DeltaPhi_of_MET_and_selected_jets"), "DeltaPhiJetMet", rebin=2, opts={"ymaxfactor": 20}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
 
 
@@ -372,7 +522,7 @@ def doPlots(datasets):
 #    zMassComparison(datasets)
 #    genQuarkComparison(datasets)
 #    topMassComparison(datasets)
-##    bQuarkComparison(datasets)   
+    
 #    topMassPurity(datasets) 
 #    vertexComparison(datasets)
 #    mtComparison(datasets)
@@ -413,7 +563,6 @@ def doCounters(datasets):
 #    print eventCounter.getSubCounterTable("GlobalMuon_ID").format()
 
 #    print eventCounter.getSubCounterTable("tauIDTauSelection").format()
-    print eventCounter.getSubCounterTable("MCinfo for selected events").format(cellFormat)
     print eventCounter.getSubCounterTable("TauIDPassedEvt::TauSelection_HPS").format(cellFormat)
     print eventCounter.getSubCounterTable("TauIDPassedJets::TauSelection_HPS").format(cellFormat)
     print eventCounter.getSubCounterTable("b-tagging").format(cellFormat)
@@ -421,8 +570,9 @@ def doCounters(datasets):
     print eventCounter.getSubCounterTable("Jet main").format(cellFormat)    
     print eventCounter.getSubCounterTable("VetoTauSelection").format(cellFormat)
     print eventCounter.getSubCounterTable("GlobalMuon ID").format(cellFormat)
-    print eventCounter.getSubCounterTable("GlobalMuon Selection").format(cellFormat) 
-    print eventCounter.getSubCounterTable("GlobalElectron ID").format(cellFormat)
+    print eventCounter.getSubCounterTable("GlobalMuon Selection").format(cellFormat)
+    print eventCounter.getSubCounterTable("MCinfo for selected events").format(cellFormat) 
+#    print eventCounter.getSubCounterTable("GlobalElectron ID").format(cellFormat)
     print eventCounter.getSubCounterTable("GlobalElectron Selection").format(cellFormat)  
 #    print eventCounter.getSubCounterTable("top").format(cellFormat) 
 
@@ -437,33 +587,6 @@ def vertexComparison(datasets):
     rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/verticesBeforeWeight"),
                                  datasets.getDataset(background).getDatasetRootHisto(analysis+"/verticesAfterWeight")),
             "vertices_H120")
-
-
-
-def bQuarkComparison(datasets):
-    if mcOnly:
-        return
-
-    mt = plots.PlotBase([
-        datasets.getDataset("HplusTB_M200").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genBquark_FromTop_Eta"),
-        datasets.getDataset("HplusTB_M200").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genBquark_NotFromTop_Eta"),
-        ])
-    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-    mt._setLegendStyles()
-    mt._setLegendLabels()
-    st1 = styles.StyleCompound([styles.styles[2]])
-    st2 = styles.StyleCompound([styles.styles[1]])
-    st3 = styles.StyleCompound([styles.styles[0]])
-    st1.append(styles.StyleLine(lineWidth=3))
-    st2.append(styles.StyleLine(lineStyle=2, lineWidth=3))
-    st3.append(styles.StyleLine(lineStyle=3, lineWidth=3))
-    mt.histoMgr.forHisto(datasets.getDataset("HplusTB_M200").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genBquark_FromTop_Eta"), st1)
-    mt.histoMgr.forHisto(datasets.getDataset("HplusTB_M200").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genBquark_NotFromTop_Eta"), st2)
-    mt.histoMgr.setHistoDrawStyleAll("P")
-    rtauGen(mt, "bQuarkComparison_H200", rebin=5, defaultStyles=False)
-
-
-    
 
 def mtComparison(datasets):
     mt = plots.PlotBase([
@@ -775,11 +898,11 @@ def flipName(name):
     return tmp[-1] + "_" + tmp[-2]
 
 # Common drawing function
-def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, addMCUncertainty=True, ratio=False, opts={}, opts2={}, moveLegend={}, textFunction=None, cutLine=None, cutBox=None):
+def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, rebinToWidthX=1, log=True, addMCUncertainty=True, ratio=False, opts={}, opts2={}, moveLegend={}, textFunction=None, cutLine=None, cutBox=None):
     if cutLine != None and cutBox != None:
         raise Exception("Both cutLine and cutBox were given, only either one can exist")
 
-    if rebin > 1:
+    if rebin or rebinToWidthX > 1:
         h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     ylab = ylabel
     if "%" in ylabel:
@@ -835,7 +958,7 @@ def common(h, xlabel, ylabel, addLuminosityText=True, textFunction=None):
     h.frame.GetYaxis().SetTitle(ylabel)
     h.draw()
     histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    h.addEnergyText()
     if addLuminosityText:
         h.addLuminosityText()
     if textFunction != None:
@@ -864,11 +987,12 @@ def vertexCount(h, prefix="", postfix="", ratio=True):
 
         h.addMCUncertainty()
 
-        opts = {}
-        opts_log = {"ymin": 1e-9, "ymaxfactor": 200, "xmax": 40}
+
+        opts = {"xmax": 40}
+        opts_log = {"ymin": 1e-10, "ymaxfactor": 10, "xmax": 40}
         opts_log.update(opts)
 
-        opts2 = {"ymin": 0.5, "ymax": 3}
+        opts2 = {"ymin": 0, "ymax": 3}
         opts2_log = opts2
         #opts2_log = {"ymin": 5e-2, "ymax": 5e2}
         
@@ -878,7 +1002,7 @@ def vertexCount(h, prefix="", postfix="", ratio=True):
         h.setLegend(histograms.createLegend())
         h.draw()
         histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
+        h.addEnergyText()
         #    histograms.addLuminosityText(x=None, y=None, lumi=191.)
         if h.normalizeToOne:
             histograms.addText(0.35, 0.9, "Normalized to unit area", 17)
@@ -894,7 +1018,7 @@ def vertexCount(h, prefix="", postfix="", ratio=True):
         h.setLegend(histograms.createLegend())
         h.draw()
         histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
+        h.addEnergyText()
         #    histograms.addLuminosityText(x=None, y=None, lumi=191.)
         if h.normalizeToOne:
             histograms.addText(0.35, 0.9, "Normalized to unit area", 17)
@@ -1019,7 +1143,7 @@ def selectionFlow(h, name, rebin=1, ratio=False):
     h.setLegend(histograms.createLegend())
     h.draw()
     histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    h.addEnergyText()
     h.addLuminosityText()
     addMassBRText(x=0.4, y=0.87)
     h.save()
@@ -1093,7 +1217,7 @@ def tauCandPt(h, step="", rebin=2):
     ROOT.gPad.SetLogy(True)
     h.draw()
     histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    h.addEnergyText()
     #h.addLuminosityText()
     h.save()
     
@@ -1126,7 +1250,7 @@ def tauCandEta(h, step="", rebin=5):
     ROOT.gPad.SetLogy(True)
     h.draw()
     histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    h.addEnergyText()
     #h.addLuminosityText()
     h.save()
 
@@ -1157,7 +1281,7 @@ def tauCandPhi(h, step="", rebin=5):
     ROOT.gPad.SetLogy(True)
     h.draw()
     histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    h.addEnergyText()
     #h.addLuminosityText()
     h.save()
     
@@ -1575,8 +1699,8 @@ def ptTop(h, name, rebin=10, ratio=False):
 
 class AddMassBRText:
     def __init__(self):
-        self.mass = 200
-        self.br = 0.03
+        self.mass = 120
+        self.br = 0.01
         self.size = 20
         self.separation = 0.04
 
@@ -1591,7 +1715,7 @@ class AddMassBRText:
         br = "BR(t #rightarrow bH^{#pm})=%.2f" % self.br
 
         histograms.addText(x, y, mass, size=self.size)
-#        histograms.addText(x, y-self.separation, br, size=self.size)
+        histograms.addText(x, y-self.separation, br, size=self.size)
 
 addMassBRText = AddMassBRText()
     
