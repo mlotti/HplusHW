@@ -1176,6 +1176,10 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
     # String representing the current normalization scheme
 
 
+class AnalysisNotFoundException(Exception):
+    def __init__(self, message):
+        Exception.__init__(self, message)
+
 ## Dataset class for histogram access from one ROOT file.
 # 
 # The default values for cross section/luminosity are read from
@@ -1259,6 +1263,10 @@ class Dataset:
             self._analysisDirectoryName += self._dataEra
         if self._optimizationMode is not None:
             self._analysisDirectoryName += self._optimizationMode
+
+        # Check that analysis directory exists
+        if self.file.Get(self._analysisDirectoryName) == None:
+            raise AnalysisNotFoundException("Analysis directory '%s' does not exist in file '%s'" % (self._analysisDirectoryName, self.file.GetName()))
         self._analysisDirectoryName += "/"
 
         self._unweightedCounterDir = counterDir
@@ -2241,11 +2249,21 @@ class DatasetManagerCreator:
         self._optimizationModes.sort()
 
     def createDatasetManager(self, **kwargs):
-        manager = DatasetManager()
-
         _args = {}
         _args.update(kwargs)
 
+
+        # First check that if some of these is not given, if there is
+        # exactly one it available, use that.
+        for arg, attr in [("analysisName", "_analyses"),
+                          ("searchMode", "_searchModes"),
+                          ("dataEra", "_mcDataEras"),
+                          ("optimizationMode", "_optimizationModes")]:
+            lst = getattr(self, attr)
+            if arg not in _args and len(lst) == 1:
+                _args[arg] = lst[0]
+
+        # Then override from command line options
         opts = kwargs.get("opts", None)
         if opts is not None:
             for arg in ["analysisName", "searchMode", "dataEra", "optimizationMode", "counterDir"]:
@@ -2254,15 +2272,17 @@ class DatasetManagerCreator:
                     _args[arg] = o
         del _args["opts"]
 
+        # Print the configuration
         parameters = []
         for name in ["analysisName", "searchMode", "dataEra", "optimizationMode"]:
             if name in _args:
                 value = _args[name]
                 parameters.append("%s='%s'" % (name, value))
-
         print "Creating DatasetManager with", ", ".join(parameters)
 
+        # Crate manager and datasets
         dataEra = _args.get("dataEra", None)
+        manager = DatasetManager()
         for precursor in self._precursors:
             if dataEra is not None and precursor.isData():
                 if dataEra == "Run2011A":
@@ -2276,7 +2296,26 @@ class DatasetManagerCreator:
                 else:
                     raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB" % dataEra)
 
-            dset = Dataset(precursor.getName(), precursor.getFile(), **_args)
+            try:
+                dset = Dataset(precursor.getName(), precursor.getFile(), **_args)
+            except AnalysisNotFoundException, e:
+                msg = str(e)+"\n"
+                helpFound = False
+                for arg, attr in [("analysisName", "_analyses"),
+                                  ("searchMode", "_searchModes"),
+                                  ("dataEra", "_mcDataEras"),
+                                  ("optimizationMode", "_optimizationModes")]:
+                    lst = getattr(self, attr)
+                    if arg not in _args and len(lst) > 1:
+                        msg += "You did not specify %s, while ROOT file contains %s\n" % (arg, ", ".join(lst))
+                        helpFound = True
+                    if arg in _args and len(lst) == 0:
+                        msg += "You specified %s, while ROOT file apparently has none of them\n" % arg
+                        helpFound = True
+                if not helpFound:
+                    raise e
+                raise Exception(msg)
+
             manager.append(dset)
 
         if len(self._baseDirectory) > 0:
