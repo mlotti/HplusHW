@@ -205,7 +205,12 @@ def getDatasetsFromRootFiles(rootFileList, **kwargs):
     return managerCreator.createDatasetManager(**kwargs)
 
 def readFromRootFiles(rootFileList, **kwargs):
-    return DatasetManagerCreator(rootFileList, **kwargs)
+    creator = DatasetManagerCreator(rootFileList, **kwargs)
+    if "opts" in kwargs and kwargs["opts"].listAnalyses:
+        creator.printAnalyses()
+        sys.exit(0)
+    return creator
+        
 
 ## Default command line options
 _optionDefaults = {
@@ -216,13 +221,23 @@ _optionDefaults = {
 ## Add common dataset options to OptionParser object.
 #
 # \param parser   OptionParser object
-def addOptions(parser):
+def addOptions(parser, analysisName=None, searchMode=None, dataEra=None, optimizationMode=None):
     parser.add_option("-i", dest="input", type="string", default=_optionDefaults["input"],
                       help="Pattern for input root files (note: remember to escape * and ? !) (default: '%s')" % _optionDefaults["input"])
     parser.add_option("-f", dest="files", type="string", action="append", default=[],
                       help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
-    parser.add_option("--counterDir", "-c", dest="counterdir", type="string", default=_optionDefaults["counterdir"],
-                      help="TDirectory name containing the counters (default: %s" % _optionDefaults["counterdir"])
+    parser.add_option("--analysisName", dest="analysisName", type="string", default=analysisName,
+                      help="Override default analysisName (%s, plot script specific)" % analysisName)
+    parser.add_option("--searchMode", dest="searchMode", type="string", default=searchMode,
+                      help="Override default searchMode (%s, plot script specific)" % searchMode)
+    parser.add_option("--dataEra", dest="dataEra", type="string", default=dataEra,
+                      help="Override default dataEra (%s, plot script specific)" % dataEra)
+    parser.add_option("--optimizationMode", dest="optimizationMode", type="string", default=optimizationMode,
+                      help="Override default optimizationMode (%s, plot script specific)" % optimizationMode)
+    parser.add_option("--list", dest="listAnalyses", action="store_true", default=False,
+                      help="List available analysis name information, and quit.")
+    parser.add_option("--counterDir", "-c", dest="counterDir", type="string", default=None,
+                      help="TDirectory name containing the counters, relative to the analysis directory (default: analysisDirectory+'/counters')")
 
 
 ## Represents counter count value with uncertainty.
@@ -2228,7 +2243,18 @@ class DatasetManagerCreator:
     def createDatasetManager(self, **kwargs):
         manager = DatasetManager()
 
-        dataEra = kwargs.get("dataEra", None)
+        _args = {}
+        _args.update(kwargs)
+
+        opts = kwargs.get("opts", None)
+        if opts is not None:
+            for arg in "analysisName", "searchMode", "dataEra", "optimizationMode", "counterDir":
+                o = getattr(opts, arg)
+                if o is not None:
+                    _args[arg] = o
+        del _args["opts"]
+
+        dataEra = _args.get("dataEra", None)
         for precursor in self._precursors:
             if dataEra is not None and precursor.isData():
                 if dataEra == "Run2011A":
@@ -2241,9 +2267,8 @@ class DatasetManagerCreator:
                     pass
                 else:
                     raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB" % dataEra)
-                print precursor.getName()
 
-            dset = Dataset(precursor.getName(), precursor.getFile(), **kwargs)
+            dset = Dataset(precursor.getName(), precursor.getFile(), **_args)
             manager.append(dset)
 
         if len(self._baseDirectory) > 0:
@@ -2268,6 +2293,44 @@ class DatasetManagerCreator:
 
     def getOptimizationModes(self):
         return self._optimizationModes
+
+    def printAnalyses(self):
+        print "Analyses (analysisName):"
+        for a in self._analyses:
+            print "  "+a
+        print
+
+        if len(self._searchModes) == 0:
+            print "No search modes"
+        else:
+            print "Search modes (searchMode):"
+            for s in self._searchModes:
+                print "  "+s
+        print
+        
+        if len(self._mcDataEras) == 0:
+            print "No data eras in MC"
+        else:
+            print "Data eras (in MC) (dataEra):"
+            for d in self._mcDataEras:
+                print "  "+d
+        print
+
+        if len(self._dataDataEras) == 0:
+            print "No data eras in data"
+        else:
+            print "Data eras (in data, the letters can be combined in almost any way) (dataEra):"
+            for d in self._dataDataEras:
+                print "  "+d
+        print
+
+        if len(self._optimizationModes) == 0:
+            print "No optimization modes"
+        else:
+            print "Optimization modes (optimizationMode):"
+            for o in self._optimizationModes:
+                print "  "+o
+        print
 
 
 ## Helper class to plug NtupleCache to the existing framework
