@@ -151,7 +151,7 @@ namespace HPlus {
     doCalculate(myTauVector, myBJetVector, myMETVector, myMatchStatus);
 
     // 4) calculate real mass of charged Higgs boson from MC truth
-    calculateTrueHiggsMass(iEvent);
+    // calculateTrueHiggsMass(iEvent);
 
 
     // Return data object
@@ -483,6 +483,7 @@ namespace HPlus {
 
     return true;
   }
+}
 
   // NOTE: simple EVENT CLASSIFICATION could be done here:
   // Pass the calculated Higgs mass to this method. It will determine the GenParticle content
@@ -495,72 +496,71 @@ namespace HPlus {
   //
   // Later also require the b quark to be correctly identified!
   //
-  void FullHiggsMassCalculator::calculateTrueHiggsMass(const edm::Event& iEvent) {
-    // TODO: add support for doHistogramming boolean variable
-    edm::Handle <reco::GenParticleCollection> genParticles;
-    iEvent.getByLabel("genParticles", genParticles);
+//   void FullHiggsMassCalculator::calculateTrueHiggsMass(const edm::Event& iEvent) {
+//     // TODO: add support for doHistogramming boolean variable
+//     edm::Handle <reco::GenParticleCollection> genParticles;
+//     iEvent.getByLabel("genParticles", genParticles);
 
-    for (size_t i=0; i < genParticles->size(); ++i){
-      const reco::Candidate & p = (*genParticles)[i];
-      int id = p.pdgId();
-      bool chHiggsFound = false;
-      // If charged Higgs
-      if ( abs(id) != 37 || hasImmediateMother(p,id)) continue;
-      higgsBosonFound = true;
-      std::vector<const reco::GenParticle*> daughters = getImmediateDaughters(p);
-      int daughterId=9999;
-      double px = 0, py = 0, pz = 0, E = 0;
-      bool tauCorrect = false;
-      bool neutrinoCorrect = false;
-      for(size_t d=0; d<daughters.size(); ++d) {
-        const reco::GenParticle dparticle = *daughters[d];
-        daughterId = dparticle.pdgId();
-        // If tau among immediate daughters //TODO: check if it is the right tau!
-        if( abs(daughterId) == 15 ) {
-          px += dparticle.px();
-          py += dparticle.py();
-          pz += dparticle.pz();
-          E  += dparticle.energy();
-	  std::cout << "Tau found." << std::endl;
-          tauCorrect = true;
-        }
-        // If tau neutrino among immediate daughters //TODO: check if it is the right neutrino!
-	// All neutrinos added up to MET, all neutrinos with Hplus (non-immediate) mother (the ones that contribute to H mass)
-        if( abs(daughterId) == 16 ) {
-          px += dparticle.px();
-          py += dparticle.py();
-          pz += dparticle.pz();
-          E  += dparticle.energy();
-          neutrinoCorrect = true;
-        }
-        // If both tau and tau neutrino found among immediate daughters, calculate mass and put in histogram
-        if(tauFound && neutrinoFound) {
-	  hTrueHiggsMass->Fill(sqrt(E*E - px*px - py*py - pz*pz));
-	  std::cout << "True full Higgs mass put in histogram." << std::endl;
-        }
-        else {
-	  std::cout << "There was no charged Higgs boson decaying to tauNu in this event!" << std::endl;
-        }
-      }
-    }
-    // After GenParticle loop, fill histograms according to how the boolean variables were set.
-    if ( ! chHiggsFound ) {
-      // fill hHiggsMassNoActualHiggs
-      // no GEN level information histogram to fill, since there was no GEN Higgs.
-    }
-    else {
-      if ( tauCorrect && neutrinoCorrect ) {
-	// fill hHiggsMassCorrect
-      }
-      else if ( ! tauCorrect && ! neutrinoCorrect ) {
-	// fill hHiggsMassMisidentifiedTauAndNu
-      }
-      else if ( ! tauCorrect ) {
-	// fill hHiggsMassMisidentifiedTau
-      }
-      else if ( ! neutrinoCorrect ) {
-	// fill hHiggsMassMisidentifiedNu
-      }
-    }
-  }
-}
+//     for (size_t i=0; i < genParticles->size(); ++i){
+//       const reco::Candidate & p = (*genParticles)[i];
+//       int id = p.pdgId();
+//       bool chHiggsFound = false;
+//       // If charged Higgs
+//       if ( abs(id) != 37 || hasImmediateMother(p,id)) continue;
+//       higgsBosonFound = true;
+//       std::vector<const reco::GenParticle*> daughters = getImmediateDaughters(p);
+//       int daughterId=9999;
+//       double px = 0, py = 0, pz = 0, E = 0;
+//       bool tauCorrect = false;
+//       bool neutrinoCorrect = false;
+//       for(size_t d=0; d<daughters.size(); ++d) {
+//         const reco::GenParticle dparticle = *daughters[d];
+//         daughterId = dparticle.pdgId();
+//         // If tau among immediate daughters //TODO: check if it is the right tau!
+//         if( abs(daughterId) == 15 ) {
+//           px += dparticle.px();
+//           py += dparticle.py();
+//           pz += dparticle.pz();
+//           E  += dparticle.energy();
+// 	  std::cout << "Tau found." << std::endl;
+//           tauCorrect = true;
+//         }
+//         // If tau neutrino among immediate daughters //TODO: check if it is the right neutrino!
+// 	// All neutrinos added up to MET, all neutrinos with Hplus (non-immediate) mother (the ones that contribute to H mass)
+//         if( abs(daughterId) == 16 ) {
+//           px += dparticle.px();
+//           py += dparticle.py();
+//           pz += dparticle.pz();
+//           E  += dparticle.energy();
+//           neutrinoCorrect = true;
+//         }
+//         // If both tau and tau neutrino found among immediate daughters, calculate mass and put in histogram
+//         if(tauFound && neutrinoFound) {
+// 	  hTrueHiggsMass->Fill(sqrt(E*E - px*px - py*py - pz*pz));
+// 	  std::cout << "True full Higgs mass put in histogram." << std::endl;
+//         }
+//         else {
+// 	  std::cout << "There was no charged Higgs boson decaying to tauNu in this event!" << std::endl;
+//         }
+//       }
+//     }
+//     // After GenParticle loop, fill histograms according to how the boolean variables were set.
+//     if ( ! chHiggsFound ) {
+//       // fill hHiggsMassNoActualHiggs
+//       // no GEN level information histogram to fill, since there was no GEN Higgs.
+//     }
+//     else {
+//       if ( tauCorrect && neutrinoCorrect ) {
+// 	// fill hHiggsMassCorrect
+//       }
+//       else if ( ! tauCorrect && ! neutrinoCorrect ) {
+// 	// fill hHiggsMassMisidentifiedTauAndNu
+//       }
+//       else if ( ! tauCorrect ) {
+// 	// fill hHiggsMassMisidentifiedTau
+//       }
+//       else if ( ! neutrinoCorrect ) {
+// 	// fill hHiggsMassMisidentifiedNu
+//       }
+//     }
+// }
