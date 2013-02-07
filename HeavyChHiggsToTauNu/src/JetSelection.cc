@@ -10,10 +10,10 @@
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/Math/interface/deltaPhi.h"
 
 #include "Math/GenVector/VectorUtil.h"
 #include <cmath>
-#include "TVector3.h"
 
 #include<algorithm>
 
@@ -35,8 +35,21 @@ namespace HPlus {
     fEtaSpreadOfSelectedJets(999),
     fAverageEtaOfSelectedJets(999),
     fAverageSelectedJetsEtaDistanceToTauEta(999),
-    fDeltaPtJetTau(999) {}
+    fDeltaPtJetTau(999),
+    fDeltaPhiMHTJet1(-1),
+    fDeltaPhiMHTJet2(-1),
+    fDeltaPhiMHTJet3(-1),
+    fDeltaPhiMHTJet4(-1),
+    fDeltaPhiMHTTau(-1),
+    fReferenceJetToTauDeltaPt(999),
+    fReferenceJetToTauPtRatio(999) {}
   JetSelection::Data::~Data() {}
+  
+  const int JetSelection::Data::getReferenceJetToTauPartonFlavour() const {
+    if (fReferenceJetToTau.isNull())
+      return -999;
+    return std::abs(fReferenceJetToTau->partonFlavour());
+  }
 
   JetSelection::JetSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
     BaseSelection(eventCounter, histoWrapper),
@@ -169,6 +182,23 @@ namespace HPlus {
     hPtDiffToGenJetSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, mySelectedJetsDir, "jet_PtDiffToGenJet", "jet_PtDiffToGenJet", 100, 0., 10.);
     hDeltaPtJetTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, mySelectedJetsDir, "deltaPtTauJet", "deltaPtTauJet ", 200, -100., 100.);
     hDeltaRJetTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, mySelectedJetsDir, "deltaRTauJet", "deltaRTauJet ", 120, 0., 6.);
+
+    // MHT related
+    TFileDirectory myMHTDir = myDir.mkdir("MHT");
+    hMHT = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMHTDir, "MHT", "MHT;MHT, GeV;N_{events}", 100, 0., 500.);
+    hMHTphi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMHTDir, "MHTphi", "MHTphi;MHT #phi;N_{events}", 72, -3.14159265, -3.14159265);
+    hDeltaPhiMHTJet1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMHTDir, "DeltaPhiMHTJet1", "DeltaPhiMHTJet1;#Delta#phi(MHT,jet1), ^{o};N_{events}", 36, 0., 180.);
+    hDeltaPhiMHTJet2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMHTDir, "DeltaPhiMHTJet2", "DeltaPhiMHTJet2;#Delta#phi(MHT,jet2), ^{o};N_{events}", 36, 0., 180.);
+    hDeltaPhiMHTJet3 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMHTDir, "DeltaPhiMHTJet3", "DeltaPhiMHTJet3;#Delta#phi(MHT,jet3), ^{o};N_{events}", 36, 0., 180.);
+    hDeltaPhiMHTJet4 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMHTDir, "DeltaPhiMHTJet4", "DeltaPhiMHTJet4;#Delta#phi(MHT,jet4), ^{o};N_{events}", 36, 0., 180.);
+    hDeltaPhiMHTTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myMHTDir, "DeltaPhiMHTTau", "DeltaPhiMHTTau;#Delta#phi(MHT,tau), ^{o};N_{events}", 36, 0., 180.);
+
+    // Reference tau related
+    TFileDirectory myRefDir = myDir.mkdir("ReferenceJetToTau");
+    hReferenceJetToTauPartonFlavour = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myRefDir, "ReferenceJetToTauPartonFlavour", "ReferenceJetToTauPartonFlavour;ReferenceJetToTauPartonFlavour;N_{events}", 30, 0., 30.);
+    hReferenceJetToTauDeltaPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myRefDir, "ReferenceJetToTauDeltaPt", "ReferenceJetToTauDeltaPt;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
+    hReferenceJetToTauPtRatio = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myRefDir, "ReferenceJetToTauPtRatio", "ReferenceJetToTauPtRatio;#tau p_{T} / ref.jet p_{T}, GeV/c;N_{events}", 120, 0., 1.2);
+
  }
 
   JetSelection::~JetSelection() {}
@@ -196,7 +226,6 @@ namespace HPlus {
     iEvent.getByLabel(fSrc, hjets);
 
     const edm::PtrVector<pat::Jet>& jets(hjets->ptrVector());
-    output.fAllJets = hjets->ptrVector();
 
     size_t cleanPassed = 0;
     size_t jetIdPassed = 0;
@@ -210,10 +239,6 @@ namespace HPlus {
     std::vector<edm::Ptr<pat::Jet> > tmpSelectedJets;
     tmpSelectedJets.reserve(jets.size());
 
-    edm::Handle <reco::GenParticleCollection> genParticles;
-    if (!iEvent.isRealData()) {
-      iEvent.getByLabel("genParticles", genParticles);
-    }
     increment(fAllCount);
     // Check if any of the jets hits a dead ECAL cell
     if (fApplyVetoForDeadECALCells) {
@@ -232,49 +257,8 @@ namespace HPlus {
 
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
+      output.fAllJets.push_back(iJet);
       increment(fAllSubCount);
-
-      // remove jets too close to tau jet
-      hDeltaRJetTau->Fill(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()));
-      bool match = false;
-      if(!(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()) > fMaxDR)) {
-        match = true;
-	output.fDeltaPtJetTau = iJet->pt()- (tau)->pt();
-	hDeltaPtJetTau->Fill(iJet->pt()- (tau)->pt());  
-      }
-      if(match) {
-        if (iJet->pt() > fPtCut && (std::abs(iJet->eta()) < fEtaCut)) {
-          // Fill histograms for excluded jets
-          hPtExcludedJets->Fill(iJet->pt());
-          hEtaExcludedJets->Fill(iJet->eta());
-          hPhiExcludedJets->Fill(iJet->phi());
-          hNeutralEmEnergyFractionExcludedJets->Fill(iJet->neutralEmEnergyFraction());
-          hNeutralMultiplicityExcludedJets->Fill(iJet->neutralMultiplicity());
-          hNeutralHadronEnergyFractionExcludedJets->Fill(iJet->neutralHadronEnergyFraction());
-          hNeutralHadronMultiplicityExcludedJets->Fill(iJet->neutralHadronMultiplicity());
-          hPhotonEnergyFractionExcludedJets->Fill(iJet->photonEnergyFraction());
-          hPhotonMultiplicityExcludedJets->Fill(iJet->photonMultiplicity());
-          hMuonEnergyFractionExcludedJets->Fill(iJet->muonEnergyFraction());
-          hMuonMultiplicityExcludedJets->Fill(iJet->muonMultiplicity());
-          hChargedHadronEnergyFractionExcludedJets->Fill(iJet->chargedHadronEnergyFraction());
-          hChargedEmEnergyFractionExcludedJets->Fill(iJet->chargedEmEnergyFraction());
-          hChargedMultiplicityExcludedJets->Fill(iJet->chargedMultiplicity());
-          //hJECFactorExcludedJets->Fill(iJet->jecFactor());
-          //hN60ExcludedJets->Fill(iJet->n60());
-          //hTowersAreaExcludedJets->Fill(iJet->towersArea());
-          hJetChargeExcludedJets->Fill(iJet->jetCharge());
-          if (!iEvent.isRealData()) {
-            hPartonFlavourExcludedJets->Fill(iJet->partonFlavour());
-            if (iJet->genJet())
-              hPtDiffToGenJetExcludedJets->Fill(iJet->pt() / iJet->genJet()->pt());
-            else
-              hPtDiffToGenJetExcludedJets->Fill(0.);
-          }
-        }
-	continue;
-      }
-      increment(fCleanCutSubCount);
-      ++cleanPassed;
 
       // jetID cuts 
       // This is loose jet ID. Even though the EM fraction can be
@@ -313,48 +297,7 @@ namespace HPlus {
       increment(fEMfractionCutSubCount);
 
       // against PU cut (beta or betaStar)
-      double myBeta = iJet->userFloat("Beta");
-      //double myBetaMax = iJet->userFloat("BetaMax");
-      double myBetaStar = iJet->userFloat("BetaStar");
-      double myMeanDR = iJet->userFloat("DRMean");
-
-      //bool myIsPVJetStatusByLdgTrack = (iJet->userInt("LdgTrackBelongsToSelectedPV") == 1);
-      // Do MC matching of jet to a quark or gluon
-      //double minDeltaR = 99999;
-      bool myIsPVJetStatusByMCMatching = false;
-      if (!iEvent.isRealData()) {
-        for (size_t i=0; i < genParticles->size(); ++i) {
-          const reco::Candidate & p = (*genParticles)[i];
-          if ((std::abs(p.pdgId()) >= 1 && std::abs(p.pdgId()) <= 5) || std::abs(p.pdgId()) == 21) {
-            // Particle is a quark (not a top quark) or a gluon
-            if (p.pt() > 15) {
-              // Quark or gluon momentum is at least 15 GeV
-              if (reco::deltaR(p, *iJet) < 0.3) {
-                myIsPVJetStatusByMCMatching = true;
-              }
-            }
-          }
-        }
-      }
-      // Fill histograms after eta and pt cuts
-      if (std::abs(iJet->eta()) < fEtaCut && iJet->pt() > fPtCut) {
-        if (myIsPVJetStatusByMCMatching) {
-          hBetaGenuine->Fill(myBeta);
-          hBetaStarGenuine->Fill(myBetaStar);
-          hMeanDRgenuine->Fill(myMeanDR);
-          hBetaVsPUgenuine->Fill(myBeta, nVertices);
-          hBetaStarVsPUgenuine->Fill(myBetaStar, nVertices);
-          hMeanDRVsPUgenuine->Fill(myMeanDR, nVertices);
-        } else {
-          hBetaFake->Fill(myBeta);
-          hBetaStarFake->Fill(myBetaStar);
-          hMeanDRfake->Fill(myMeanDR);
-          hBetaVsPUfake->Fill(myBeta, nVertices);
-          hBetaStarVsPUfake->Fill(myBetaStar, nVertices);
-          hMeanDRVsPUfake->Fill(myMeanDR, nVertices);
-        }
-      }
-      if (!fBetaCut.passedCut(iJet->userFloat(fBetaSrc))) {
+      if (!passBetaCut(iJet, iEvent, nVertices)) {
         // Count how many jets, that otherwise would have been selected, are killed by beta cut
         if (std::abs(iJet->eta()) < fEtaCut && iJet->pt() > fPtCut)
           ++killedByBetaCut;
@@ -366,6 +309,25 @@ namespace HPlus {
       hEta->Fill(iJet->eta());
       hPhi->Fill(iJet->phi());
 
+      // Jet identification and beta cuts done, store jet to list of all jets
+      output.fAllIdentifiedJets.push_back(iJet);
+
+      // remove jets too close to tau jet
+      hDeltaRJetTau->Fill(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()));
+      bool match = false;
+      if(!(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()) > fMaxDR)) {
+        match = true;
+        output.fDeltaPtJetTau = iJet->pt()- (tau)->pt();
+        hDeltaPtJetTau->Fill(iJet->pt()- (tau)->pt());
+      }
+      if(match) {
+        if (iJet->pt() > fPtCut && (std::abs(iJet->eta()) < fEtaCut)) {
+          plotExcludedJetHistograms(iJet, iEvent.isRealData());
+        }
+        continue;
+      }
+      increment(fCleanCutSubCount);
+      ++cleanPassed;
       // eta cut
       if(!(std::abs(iJet->eta()) < fEtaCut)){
         output.fNotSelectedJets.push_back(*iter);
@@ -385,31 +347,7 @@ namespace HPlus {
       ++ptCutPassed;
 
       // Fill histograms for selected jets
-      hPtSelectedJets->Fill(iJet->pt());
-      hEtaSelectedJets->Fill(iJet->eta());
-      hPhiSelectedJets->Fill(iJet->phi());
-      hNeutralEmEnergyFractionSelectedJets->Fill(iJet->neutralEmEnergyFraction());
-      hNeutralMultiplicitySelectedJets->Fill(iJet->neutralMultiplicity());
-      hNeutralHadronEnergyFractionSelectedJets->Fill(iJet->neutralHadronEnergyFraction());
-      hNeutralHadronMultiplicitySelectedJets->Fill(iJet->neutralHadronMultiplicity());
-      hPhotonEnergyFractionSelectedJets->Fill(iJet->photonEnergyFraction());
-      hPhotonMultiplicitySelectedJets->Fill(iJet->photonMultiplicity());
-      hMuonEnergyFractionSelectedJets->Fill(iJet->muonEnergyFraction());
-      hMuonMultiplicitySelectedJets->Fill(iJet->muonMultiplicity());
-      hChargedHadronEnergyFractionSelectedJets->Fill(iJet->chargedHadronEnergyFraction());
-      hChargedEmEnergyFractionSelectedJets->Fill(iJet->chargedEmEnergyFraction());
-      hChargedMultiplicitySelectedJets->Fill(iJet->chargedMultiplicity());
-      //hJECFactorSelectedJets->Fill(iJet->jecFactor());
-      //hN60SelectedJets->Fill(iJet->n60());
-      //hTowersAreaSelectedJets->Fill(iJet->towersArea());
-      hJetChargeSelectedJets->Fill(iJet->jetCharge());
-      if (!iEvent.isRealData()) {
-	hPartonFlavourSelectedJets->Fill(iJet->partonFlavour());
-	if (iJet->genJet())
-	  hPtDiffToGenJetSelectedJets->Fill(iJet->pt() / iJet->genJet()->pt());
-	else
-	  hPtDiffToGenJetSelectedJets->Fill(0.);
-      }
+      plotSelectedJetHistograms(iJet, iEvent.isRealData());
 
       // Min DeltaR reversed to tau
       math::XYZTLorentzVectorD myReversedTau = -tau->p4();
@@ -501,23 +439,182 @@ namespace HPlus {
     // Calculate the eta range over which the selected jets are spanned; and the average eta of the jets
     myMinEta = 999.0;
     double myMaxEta = -999.0;
-    TVector3 myMegaJet(0., 0., 0.);
+    LorentzVector myMegaJet;
     for(edm::PtrVector<pat::Jet>::const_iterator iter = output.fSelectedJets.begin(); iter != output.fSelectedJets.end(); ++iter) {
       if ((*iter)->eta() > myMaxEta)
         myMaxEta = (*iter)->eta();
       if ((*iter)->eta() < myMinEta)
         myMinEta = (*iter)->eta();
-      TVector3 myJet((*iter)->px(), (*iter)->py(), (*iter)->pz());
-      myMegaJet += myJet;
+      myMegaJet += (*iter)->p4();
     }
     output.fEtaSpreadOfSelectedJets = myMaxEta - myMinEta;
-    if (myMegaJet.Z() > 0.0) {
-      output.fAverageEtaOfSelectedJets = myMegaJet.Eta();
-      output.fAverageSelectedJetsEtaDistanceToTauEta = std::abs(myMegaJet.Eta() - tau->eta());
+    if (myMegaJet.pz() > 0.0) {
+      output.fAverageEtaOfSelectedJets = myMegaJet.eta();
+      output.fAverageSelectedJetsEtaDistanceToTauEta = std::abs(myMegaJet.eta() - tau->eta());
     }
 
+    // Analyze reference jet of selected tau
+    obtainReferenceJetToTau(output.fAllJets, tau, output);
+
+    // Calculate MHT on jets
+    calculateMHT(output, tau);
+
     // Everything has been done now return
-    
     return output;
   }
+
+  bool JetSelection::passBetaCut(const edm::Ptr<pat::Jet>& jet, const edm::Event& iEvent, int nVertices) {
+    double myBeta = jet->userFloat("Beta");
+    //double myBetaMax = jet->userFloat("BetaMax");
+    double myBetaStar = jet->userFloat("BetaStar");
+    double myMeanDR = jet->userFloat("DRMean");
+
+    //bool myIsPVJetStatusByLdgTrack = (jet->userInt("LdgTrackBelongsToSelectedPV") == 1);
+    // Do MC matching of jet to a quark or gluon
+    //double minDeltaR = 99999;
+    bool myIsPVJetStatusByMCMatching = false;
+    if (!iEvent.isRealData()) {
+      edm::Handle <reco::GenParticleCollection> genParticles;
+      iEvent.getByLabel("genParticles", genParticles);
+      for (size_t i=0; i < genParticles->size(); ++i) {
+        const reco::Candidate & p = (*genParticles)[i];
+        if ((std::abs(p.pdgId()) >= 1 && std::abs(p.pdgId()) <= 5) || std::abs(p.pdgId()) == 21) {
+          // Particle is a quark (not a top quark) or a gluon
+          if (p.pt() > 15) {
+            // Quark or gluon momentum is at least 15 GeV
+            if (reco::deltaR(p, *jet) < 0.3) {
+              myIsPVJetStatusByMCMatching = true;
+            }
+          }
+        }
+      }
+    }
+    // Fill histograms after eta and pt cuts
+    if (std::abs(jet->eta()) < fEtaCut && jet->pt() > fPtCut) {
+      if (myIsPVJetStatusByMCMatching) {
+        hBetaGenuine->Fill(myBeta);
+        hBetaStarGenuine->Fill(myBetaStar);
+        hMeanDRgenuine->Fill(myMeanDR);
+        hBetaVsPUgenuine->Fill(myBeta, nVertices);
+        hBetaStarVsPUgenuine->Fill(myBetaStar, nVertices);
+        hMeanDRVsPUgenuine->Fill(myMeanDR, nVertices);
+      } else {
+        hBetaFake->Fill(myBeta);
+        hBetaStarFake->Fill(myBetaStar);
+        hMeanDRfake->Fill(myMeanDR);
+        hBetaVsPUfake->Fill(myBeta, nVertices);
+        hBetaStarVsPUfake->Fill(myBetaStar, nVertices);
+        hMeanDRVsPUfake->Fill(myMeanDR, nVertices);
+      }
+    }
+    return fBetaCut.passedCut(jet->userFloat(fBetaSrc));
+  }
+
+  void JetSelection::obtainReferenceJetToTau(const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::Candidate>& tau, JetSelection::Data& output) {
+    double myMinDeltaR = 999.;
+    for (edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
+      double myDeltaR = reco::deltaR(*tau, **iter);
+      if (myDeltaR < myMinDeltaR) {
+        myMinDeltaR = myDeltaR;
+        if (myDeltaR < 0.1) {
+          output.fReferenceJetToTau = *iter;
+        }
+      }
+    }
+    if (output.fReferenceJetToTau.isNonnull()) {
+      hReferenceJetToTauPartonFlavour->Fill(output.getReferenceJetToTauPartonFlavour());
+      output.fReferenceJetToTauDeltaPt = tau->pt() - output.fReferenceJetToTau->pt();
+      hReferenceJetToTauDeltaPt->Fill(output.fReferenceJetToTauDeltaPt);
+      output.fReferenceJetToTauPtRatio = tau->pt() / output.fReferenceJetToTau->pt();
+      hReferenceJetToTauPtRatio->Fill(output.fReferenceJetToTauPtRatio);
+    }
+  }
+
+  void JetSelection::calculateMHT(JetSelection::Data& output, const edm::Ptr<reco::Candidate>& tau) {
+    output.fMHT.SetXYZT(0., 0., 0., 0.);
+    for (edm::PtrVector<pat::Jet>::const_iterator iter = output.fAllIdentifiedJets.begin(); iter != output.fAllIdentifiedJets.end(); ++iter) {
+      if ((*iter)->pt() > fPtCut && (std::abs((*iter)->eta()) < fEtaCut)) {
+        output.fMHT -= (*iter)->p4();
+      }
+    }
+    hMHT->Fill(output.fMHT.pt());
+    hMHTphi->Fill(output.fMHT.phi());
+    // Calculate angles between MHT and the jets
+    for (size_t i = 0; i < output.fSelectedJets.size(); ++i) {
+      double myDeltaPhi = reco::deltaPhi(output.fMHT, *(output.fSelectedJets[i])) * 57.3;
+      if (i == 0) {
+        output.fDeltaPhiMHTJet1 = myDeltaPhi;
+        hDeltaPhiMHTJet1->Fill(myDeltaPhi);
+      } else if (i == 1) {
+        output.fDeltaPhiMHTJet2 = myDeltaPhi;
+        hDeltaPhiMHTJet2->Fill(myDeltaPhi);
+      } else if (i == 2) {
+        output.fDeltaPhiMHTJet3 = myDeltaPhi;
+        hDeltaPhiMHTJet3->Fill(myDeltaPhi);
+      } else if (i == 3) {
+        output.fDeltaPhiMHTJet4 = myDeltaPhi;
+        hDeltaPhiMHTJet4->Fill(myDeltaPhi);
+      }
+    }
+    output.fDeltaPhiMHTTau = reco::deltaPhi(output.fMHT, *tau) * 57.3;
+    hDeltaPhiMHTTau->Fill(output.fDeltaPhiMHTTau);
+  }
+
+  void JetSelection::plotSelectedJetHistograms(const edm::Ptr<pat::Jet>& jet, const bool isRealData) {
+    hPtSelectedJets->Fill(jet->pt());
+    hEtaSelectedJets->Fill(jet->eta());
+    hPhiSelectedJets->Fill(jet->phi());
+    hNeutralEmEnergyFractionSelectedJets->Fill(jet->neutralEmEnergyFraction());
+    hNeutralMultiplicitySelectedJets->Fill(jet->neutralMultiplicity());
+    hNeutralHadronEnergyFractionSelectedJets->Fill(jet->neutralHadronEnergyFraction());
+    hNeutralHadronMultiplicitySelectedJets->Fill(jet->neutralHadronMultiplicity());
+    hPhotonEnergyFractionSelectedJets->Fill(jet->photonEnergyFraction());
+    hPhotonMultiplicitySelectedJets->Fill(jet->photonMultiplicity());
+    hMuonEnergyFractionSelectedJets->Fill(jet->muonEnergyFraction());
+    hMuonMultiplicitySelectedJets->Fill(jet->muonMultiplicity());
+    hChargedHadronEnergyFractionSelectedJets->Fill(jet->chargedHadronEnergyFraction());
+    hChargedEmEnergyFractionSelectedJets->Fill(jet->chargedEmEnergyFraction());
+    hChargedMultiplicitySelectedJets->Fill(jet->chargedMultiplicity());
+    //hJECFactorSelectedJets->Fill(jet->jecFactor());
+    //hN60SelectedJets->Fill(jet->n60());
+    //hTowersAreaSelectedJets->Fill(jet->towersArea());
+    hJetChargeSelectedJets->Fill(jet->jetCharge());
+    if (!isRealData) {
+      hPartonFlavourSelectedJets->Fill(jet->partonFlavour());
+      if (jet->genJet())
+        hPtDiffToGenJetSelectedJets->Fill(jet->pt() / jet->genJet()->pt());
+      else
+        hPtDiffToGenJetSelectedJets->Fill(0.);
+    }
+  }
+
+  void JetSelection::plotExcludedJetHistograms(const edm::Ptr<pat::Jet>& jet, const bool isRealData) {
+    // Fill histograms for excluded jets
+    hPtExcludedJets->Fill(jet->pt());
+    hEtaExcludedJets->Fill(jet->eta());
+    hPhiExcludedJets->Fill(jet->phi());
+    hNeutralEmEnergyFractionExcludedJets->Fill(jet->neutralEmEnergyFraction());
+    hNeutralMultiplicityExcludedJets->Fill(jet->neutralMultiplicity());
+    hNeutralHadronEnergyFractionExcludedJets->Fill(jet->neutralHadronEnergyFraction());
+    hNeutralHadronMultiplicityExcludedJets->Fill(jet->neutralHadronMultiplicity());
+    hPhotonEnergyFractionExcludedJets->Fill(jet->photonEnergyFraction());
+    hPhotonMultiplicityExcludedJets->Fill(jet->photonMultiplicity());
+    hMuonEnergyFractionExcludedJets->Fill(jet->muonEnergyFraction());
+    hMuonMultiplicityExcludedJets->Fill(jet->muonMultiplicity());
+    hChargedHadronEnergyFractionExcludedJets->Fill(jet->chargedHadronEnergyFraction());
+    hChargedEmEnergyFractionExcludedJets->Fill(jet->chargedEmEnergyFraction());
+    hChargedMultiplicityExcludedJets->Fill(jet->chargedMultiplicity());
+    //hJECFactorExcludedJets->Fill(jet->jecFactor());
+    //hN60ExcludedJets->Fill(jet->n60());
+    //hTowersAreaExcludedJets->Fill(jet->towersArea());
+    hJetChargeExcludedJets->Fill(jet->jetCharge());
+    if (!isRealData) {
+      hPartonFlavourExcludedJets->Fill(jet->partonFlavour());
+      if (jet->genJet())
+        hPtDiffToGenJetExcludedJets->Fill(jet->pt() / jet->genJet()->pt());
+      else
+        hPtDiffToGenJetExcludedJets->Fill(0.);
+    }
+  }
+
 }
