@@ -2248,11 +2248,19 @@ class DatasetManagerCreator:
 
         opts = kwargs.get("opts", None)
         if opts is not None:
-            for arg in "analysisName", "searchMode", "dataEra", "optimizationMode", "counterDir":
+            for arg in ["analysisName", "searchMode", "dataEra", "optimizationMode", "counterDir"]:
                 o = getattr(opts, arg)
                 if o is not None:
                     _args[arg] = o
         del _args["opts"]
+
+        parameters = []
+        for name in ["analysisName", "searchMode", "dataEra", "optimizationMode"]:
+            if name in _args:
+                value = _args[name]
+                parameters.append("%s='%s'" % (name, value))
+
+        print "Creating DatasetManager with", ", ".join(parameters)
 
         dataEra = _args.get("dataEra", None)
         for precursor in self._precursors:
