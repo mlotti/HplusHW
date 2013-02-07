@@ -51,28 +51,17 @@ def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
 #
 # \param kwargs   Keyword arguments (see below) 
 #
-# <b>Keyword arguments</b>
-# \li \a opts              Optional OptionParser object. Should have options added with addOptions() and multicrab.addOptions().
-# \li \a cfgfile           Path to the multicrab.cfg file (for default, see multicrab.getTaskDirectories())
-# \li \a excludeTasks      String, or list of strings, to specify regexps.
-#                          If a dataset name matches to any of the
-#                          regexps, Dataset object is not constructed for
-#                          that. Conflicts with \a includeOnlyTasks
-# \li \a includeOnlyTasks  String, or list of strings, to specify
-#                          regexps. Only datasets whose name matches
-#                          to any of the regexps are kept. Conflicts
-#                          with \a excludeTasks.
-# \li \a dataEra           Optional data era string. If given, keeps data
-#                          datasets only from this era, and sets the
-#                          TDirectory path replacement scheme for MC
-#                          datasets. Forwarded to getDatasetsFromCrabDirs()
-#                          and eventually to dataset.Dataset.__init__()
-# \li Rest are forwarded to getDatasetsFromCrabDirs()
+# All keyword arguments are forwarded to readFromMulticrabCfg.
+#
+# All keyword arguments <b>except</b> the ones below are forwarded to
+# DatasetManagerCreator.createDatasetManager()
+# \li \a cfgfile
+# \li \a excludeTasks
+# \li \a includeOnlyTasks
 #
 # \return DatasetManager object
 # 
-# The section names in multicrab.cfg are taken as the dataset names
-# in the DatasetManager object.
+# \see dataset.readFromMulticrabCfg
 def getDatasetsFromMulticrabCfg(**kwargs):
     _args = copy.copy(kwargs)
     for argName in ["cfgfile", "excludeTasks", "includeOnlyTasks"]:
@@ -84,6 +73,27 @@ def getDatasetsFromMulticrabCfg(**kwargs):
     managerCreator = readFromMulticrabCfg(**kwargs)
     return managerCreator.createDatasetManager(**_args)
 
+## Construct DatasetManagerConstructor from a multicrab.cfg.
+#
+# \param kwargs   Keyword arguments (see below) 
+#
+# <b>Keyword arguments</b>
+# \li \a opts              Optional OptionParser object. Should have options added with addOptions() and multicrab.addOptions().
+# \li \a cfgfile           Path to the multicrab.cfg file (for default, see multicrab.getTaskDirectories())
+# \li \a excludeTasks      String, or list of strings, to specify regexps.
+#                          If a dataset name matches to any of the
+#                          regexps, Dataset object is not constructed for
+#                          that. Conflicts with \a includeOnlyTasks
+# \li \a includeOnlyTasks  String, or list of strings, to specify
+#                          regexps. Only datasets whose name matches
+#                          to any of the regexps are kept. Conflicts
+#                          with \a excludeTasks.
+# \li Rest are forwarded to readFromCrabDirs()
+#
+# \return DatasetManagerCreator object
+# 
+# The section names in multicrab.cfg are taken as the dataset names
+# in the DatasetManager object.
 def readFromMulticrabCfg(**kwargs):
     opts = kwargs.get("opts", None)
     taskDirs = []
@@ -134,19 +144,17 @@ def readFromMulticrabCfg(**kwargs):
 ## Construct DatasetManager from a list of CRAB task directory names.
 # 
 # \param taskdirs     List of strings for the CRAB task directories (relative
-#                     to the working directory)
-# \param kwargs       Keyword arguments (see below) 
-# 
-# <b>Keyword arguments</b>
-# \li \a opts         Optional OptionParser object. Should have options added with addOptions().
-# \li \a namePostfix  Postfix for the dataset names (default: '')
-# \li Rest are forwarded to getDatasetsFromRootFiles()
+#                     to the working directory), forwarded to readFromCrabDirs()
+# \param kwargs       Keyword arguments (see below)
 #
-# \return DatasetManager object
-# 
-# The basename of the task directories are taken as the dataset
-# names in the DatasetManager object (e.g. for directory '../Foo',
-# 'Foo' will be the dataset name)
+# All keyword arguments are forwarded to readFromCrabDirs().
+#
+# All keyword arguments <b>except</b> the ones below are forwarded to
+# DatasetManagerCreator.createDatasetManager()
+# \li \a opts
+# \li \a namePostfix
+#
+# \see readFromCrabDirs()
 def getDatasetsFromCrabDirs(taskdirs, **kwargs):
     _args = copy.copy(kwargs)
     for argname in "opts", "namePostfix":
@@ -158,6 +166,22 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
     managerCreator = readFromCrabDirs(taskdirs, **kwargs)
     return managerCreator.createDatasetManager(**_args)
 
+
+## Construct DatasetManagerCreator from a list of CRAB task directory names.
+# 
+# \param taskdirs     List of strings for the CRAB task directories (relative
+#                     to the working directory)
+# \param kwargs       Keyword arguments (see below) 
+# 
+# <b>Keyword arguments</b>, all are also forwarded to readFromRootFiles()
+# \li \a opts         Optional OptionParser object. Should have options added with addOptions().
+# \li \a namePostfix  Postfix for the dataset names (default: '')
+#
+# \return DatasetManagerCreator object
+# 
+# The basename of the task directories are taken as the dataset names
+# in the DatasetManagerCreator object (e.g. for directory '../Foo',
+# 'Foo' will be the dataset name)
 def readFromCrabDirs(taskdirs, **kwargs):
     inputFile = None
     if "opts" in kwargs:
@@ -204,6 +228,21 @@ def getDatasetsFromRootFiles(rootFileList, **kwargs):
     managerCreator = readFromRootFiles(rootFileList)
     return managerCreator.createDatasetManager(**kwargs)
 
+## Construct DatasetManagerCreator from a list of CRAB task directory names.
+# 
+# \param rootFileList  List of (name, filename) pairs (both should be strings).
+#                     'name' is taken as the dataset name, and 'filename' as
+#                      the path to the ROOT file. Forwarded to DatasetManagerCreator.__init__()
+# \param kwargs        Keyword arguments (see below), all forwarded to DatasetManagerCreator.__init__()
+#
+# <b>Keyword arguments</b>
+# \li \a opts          Optional OptionParser object. Should have options added with addOptions().
+#
+# \return DatasetManagerCreator object
+#
+# If \a opts exists, and the \a opts.listAnalyses is set to True, list
+# all available analyses (with DatasetManagerCreator.printAnalyses()),
+# and exit.
 def readFromRootFiles(rootFileList, **kwargs):
     creator = DatasetManagerCreator(rootFileList, **kwargs)
     if "opts" in kwargs and kwargs["opts"].listAnalyses:
@@ -215,7 +254,6 @@ def readFromRootFiles(rootFileList, **kwargs):
 ## Default command line options
 _optionDefaults = {
     "input": "histograms-*.root",
-    "counterdir": "signalAnalysis/counters",
 }
 
 ## Add common dataset options to OptionParser object.
@@ -2141,6 +2179,9 @@ class DatasetManager:
     # Directory (absolute/relative to current working directory) where
     # the luminosity JSON file is located (see loadLuminosities())
 
+## Precursor dataset, helper class for DatasetManagerCreator
+#
+# This holds the name, ROOT file, and data/MC status of a dataset.
 class DatasetPrecursor:
     def __init__(self, name, filename):
         self._name = name
@@ -2175,7 +2216,24 @@ _analysisSearchModes = ["Light", "Heavy"]
 _dataDataEra_re = re.compile("_(?P<era>201\d\S)_")
 
 ## Class for listing contents of multicrab dirs, dataset ROOT files, and creating DatasetManager
+#
+# The mai is to first create an object of this class to represent a
+# multicrab directory, and then create one or many DatasetManagers,
+# which then correspond to a single analysis directory within the ROOT
+# files.
 class DatasetManagerCreator:
+    ## Constructor
+    #
+    # \param rootFileList  List of (name, filename) pairs (both should be strings).
+    #                     'name' is taken as the dataset name, and 'filename' as
+    #                      the path to the ROOT file.
+    # \param kwargs        Keyword arguments (see below)
+    #
+    # <b>Keyword arguments</b>
+    # \li \a baseDirectory    Base directory of the datasets (delivered later to DatasetManager._setBaseDirectory())
+    #
+    # Creates DatasetPrecursor objects for each ROOT file, reads the
+    # contents of first MC file to get list of available analyses.
     def __init__(self, rootFileList, **kwargs):
         self._precursors = [DatasetPrecursor(name, filename) for name, filename in rootFileList]
         self._baseDirectory = kwargs.get("baseDirectory", "")
@@ -2248,6 +2306,22 @@ class DatasetManagerCreator:
         self._mcDataEras.sort()
         self._optimizationModes.sort()
 
+    ## Create DatasetManager
+    #
+    # \param kwargs   Keyword arguments (see below)
+    #
+    # <b>Keyword arguments</b>
+    # \li \a analysisName      Base part of the analysis directory name
+    # \li \a searchMode        String for search mode
+    # \li \a dataEra           String for data era
+    # \li \a optimizationMode  String for optimization mode (optional)
+    # \li \a opts              Optional OptionParser object. Should have options added with addOptions().
+    #
+    # The values of \a analysisName, \a searchMode, \a dataEra, and \a
+    # optimizationMode are overridden from \ə opts, if they are set
+    # (i.e. are non-None). Also, if any of these is not specified
+    # either explicitly or via \a opts, the value is inferred from the
+    # contents, if there exists only one of it.
     def createDatasetManager(self, **kwargs):
         _args = {}
         _args.update(kwargs)
