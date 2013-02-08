@@ -98,10 +98,13 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("JetSelection");
 
-    hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_pt", "jet_pt", 120, 0., 600.);
-    hPtCentral = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_pt_central", "jet_pt_central", 120, 0., 600.);
-    hEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_eta", "jet_eta", 100, -5., 5.);
-    hPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_phi", "jet_phi", 72, -3.1415926, 3.1415926);
+    hPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_pt", "identified jet_pt", 120, 0., 600.);
+    hPtCentral = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jet_pt_central", "identified jet_pt_central", 120, 0., 600.);
+    hEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_eta", "identified jet_eta", 100, -5., 5.);
+    hPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_phi", "identified jet_phi", 72, -3.1415926, 3.1415926);
+    hPtIncludingTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_pt_including_tau", "jet_pt_including_tau", 120, 0., 600.);
+    hEtaIncludingTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_eta_including_tau", "jet_eta_including_tau", 100, -5., 5.);
+    hPhiIncludingTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jet_phi_including_tau", "jet_phi_including_tau", 72, -3.1415926, 3.1415926);
     hNumberOfSelectedJets = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 30, 0., 30.);
     hjetEMFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jetEMFraction", "jetEMFraction", 100, 0., 1.0);
     hjetChargedEMFraction = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "chargedJetEMFraction", "chargedJetEMFraction", 100, 0., 1.0);
@@ -307,9 +310,9 @@ namespace HPlus {
       }
       increment(fBetaCutSubCount);
       ++betaCutPassed;
-      hPt->Fill(iJet->pt());
-      hEta->Fill(iJet->eta());
-      hPhi->Fill(iJet->phi());
+      hPtIncludingTau->Fill(iJet->pt());
+      hEtaIncludingTau->Fill(iJet->eta());
+      hPhiIncludingTau->Fill(iJet->phi());
 
       // Jet identification and beta cuts done, store jet to list of all jets
       output.fAllIdentifiedJets.push_back(iJet);
@@ -330,6 +333,10 @@ namespace HPlus {
       }
       increment(fCleanCutSubCount);
       ++cleanPassed;
+      hPt->Fill(iJet->pt());
+      hEta->Fill(iJet->eta());
+      hPhi->Fill(iJet->phi());
+
       // eta cut
       if(!(std::abs(iJet->eta()) < fEtaCut)){
         output.fNotSelectedJets.push_back(*iter);

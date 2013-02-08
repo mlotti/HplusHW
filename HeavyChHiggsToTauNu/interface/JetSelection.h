@@ -175,6 +175,9 @@ namespace HPlus {
     Count fJetToTauReferenceJetNotIdentifiedCount;
 
     // Histograms
+    WrappedTH1 *hPtIncludingTau;
+    WrappedTH1 *hEtaIncludingTau;
+    WrappedTH1 *hPhiIncludingTau;
     WrappedTH1 *hPt;
     WrappedTH1 *hPtCentral;
     WrappedTH1 *hEta;
