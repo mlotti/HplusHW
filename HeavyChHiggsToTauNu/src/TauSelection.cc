@@ -781,10 +781,10 @@ namespace HPlus {
         // Put the found one to the top of the list
         mySortCategory = 2.;
         output.fSelectedTauCandidates.push_back(tmpIsolationPassed[0]);
-        for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
-          if (!fTauID->passIsolation(tmpSelectedTauCandidates[i]))
-            output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
-        }
+//         for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+//           if (!fTauID->passIsolation(tmpSelectedTauCandidates[i]))
+//             output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+//         }
       } else {
         // 2) Multiple taus have passed isolation, lets see how many pass also the nprongs cut
         mySortCategory = 3.;
@@ -799,22 +799,22 @@ namespace HPlus {
           for(size_t i=0; i<tmpIsolationPassed.size(); ++i) {
             output.fSelectedTauCandidates.push_back(tmpIsolationPassed[i]);
           }
-          for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
-            bool match = false;
-            for(size_t j=0; j<tmpIsolationPassed.size(); ++j) {
-              if (tmpSelectedTauCandidates[i] == tmpIsolationPassed[j])
-                match = true;
-            }
-            if (!match) output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
-          }
+//           for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+//             bool match = false;
+//             for(size_t j=0; j<tmpIsolationPassed.size(); ++j) {
+//               if (tmpSelectedTauCandidates[i] == tmpIsolationPassed[j])
+//                 match = true;
+//             }
+//             if (!match) output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+//           }
         } else if (tmpNprongPassed.size() == 1) {
           // Put the passed one to the top of the list
           mySortCategory = 5.;
           output.fSelectedTauCandidates.push_back(tmpNprongPassed[0]);
-          for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
-            if (tmpSelectedTauCandidates[i] != tmpNprongPassed[0])
-              output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
-          }
+//           for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+//             if (tmpSelectedTauCandidates[i] != tmpNprongPassed[0])
+//               output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+//           }
         } else {
           // 3) Multiple taus have passed nprongs, lets see how many pass also the rtau cut
           mySortCategory = 6.;
@@ -829,22 +829,22 @@ namespace HPlus {
             for(size_t i=0; i<tmpNprongPassed.size(); ++i) {
               output.fSelectedTauCandidates.push_back(tmpNprongPassed[i]);
             }
-            for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
-              bool match = false;
-              for(size_t j=0; j<tmpNprongPassed.size(); ++j) {
-                if (tmpSelectedTauCandidates[i] == tmpNprongPassed[j])
-                  match = true;
-              }
-              if (!match) output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
-            }
+//             for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+//               bool match = false;
+//               for(size_t j=0; j<tmpNprongPassed.size(); ++j) {
+//                 if (tmpSelectedTauCandidates[i] == tmpNprongPassed[j])
+//                   match = true;
+//               }
+//               if (!match) output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+//            }
           } else if (tmpRtauPassed.size() == 1) {
             mySortCategory = 8.;
             // Put the one that passed both nprongs and rtau to the top of the list
             output.fSelectedTauCandidates.push_back(tmpRtauPassed[0]);
-            for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
-              if (tmpSelectedTauCandidates[i] != tmpRtauPassed[0])
-                output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
-            }
+//             for(size_t i=0; i<tmpSelectedTauCandidates.size(); ++i) {
+//               if (tmpSelectedTauCandidates[i] != tmpRtauPassed[0])
+//                 output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+//             }
           } else {
             // 4) Multiple taus have passed nprongs, rtau, and isolation; take most energetic one
             mySortCategory = 9.;
@@ -856,10 +856,26 @@ namespace HPlus {
         }
       }
     }
+    // Now at least one tau should be at the top of the selected tau candidates list; fill the rest
+    size_t mySelectedSize = output.fSelectedTauCandidates.size();
+    if (!mySelectedSize && tmpSelectedTauCandidates.size() > 0) {
+      throw cms::Exception("LogicError") << "TauSelection::doTauCandidateSelection(): sorting did not select any tau candidate (sort category=" << mySortCategory << ")!";
+    }
+    for (size_t i = 0; i < tmpSelectedTauCandidates.size(); ++i) {
+      bool myVetoStatus = false;
+      for (size_t j = 0; j < mySelectedSize; ++j) {
+        if (tmpSelectedTauCandidates[i] == output.fSelectedTauCandidates[j])
+          myVetoStatus = true;
+      }
+      if (!myVetoStatus)
+        output.fSelectedTauCandidates.push_back(tmpSelectedTauCandidates[i]);
+    }
+
+
     hTauIdCandidateSelectionSortCategory->Fill(mySortCategory);
     // Check that sorting was ok
     if (output.fSelectedTauCandidates.size() != tmpSelectedTauCandidates.size()) {
-      throw cms::Exception("LogicError") << "TauSelection::doTauCandidateSelection(): sorting of selected tau candidates is buggy (sort category=" << mySortCategory << "!";
+      throw cms::Exception("LogicError") << "TauSelection::doTauCandidateSelection(): sorting of selected tau candidates lost tau objects (sort category=" << mySortCategory << ")!";
     }
     // Set first tau as selected tau for tauCandidateSelection only
     if (fOperationMode == kTauCandidateSelectionOnly) {
