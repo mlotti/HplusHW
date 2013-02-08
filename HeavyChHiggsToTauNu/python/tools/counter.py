@@ -214,11 +214,11 @@ class CellFormatBase:
 
         if self._valueOnly or not hasUncertainty:
             ret += self._formatValue(value)
-
-        if (uDown == 0.0 and uUp == 0.0) or uncertaintiesSame:
-            ret += self._formatValuePlusMinus(value, uUpf)
         else:
-            ret += self._formatValuePlusHighMinusLow(value, uUpf, uDownf)
+            if (uDown == 0.0 and uUp == 0.0) or uncertaintiesSame:
+                ret += self._formatValuePlusMinus(value, uUpf)
+            else:
+                ret += self._formatValuePlusHighMinusLow(value, uUpf, uDownf)
 
         ret += self._endCell
         return ret
