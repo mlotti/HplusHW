@@ -26,7 +26,7 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const JetTauInvMass *jetTauInvMass, bool passedEvent);
+      Data();
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
@@ -34,9 +34,10 @@ namespace HPlus {
       //      const edm::PtrVector<pat::Jet>& getSelectedTaus() const { return fJetTauInvMass->fSelectedTaus; }
       //      const int getBJetCount() const { return fBTagging->iNBtags; }
 
+      friend class JetTauInvMass;
+
     private:
-      const JetTauInvMass *fJetTauInvMass;
-      const bool fPassedEvent;
+      bool fPassedEvent;
     };
 
     JetTauInvMass(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);

@@ -32,14 +32,15 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const METPhiOscillationCorrection* correctionObject, double correctionFactor);
+      Data();
       ~Data();
 
       const double getCorrectionFactor() const { return fCorrectionFactor; }
 
+      friend class METPhiOscillationCorrection;
+
     private:
-      const METPhiOscillationCorrection* fMETPhiOscillationCorrection;
-      const double fCorrectionFactor;
+      double fCorrectionFactor;
     };
 
     METPhiOscillationCorrection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);

@@ -152,7 +152,7 @@ namespace HPlus {
     Count fGenuineTauCounter;
     Count fVetoTauCounter;
     Count fElectronVetoCounter;
-    Count fElectronMatchingTauCounter;
+    //Count fElectronMatchingTauCounter;
     Count fMuonVetoCounter;
     Count fMetCutBeforeJetCutCounter;
     Count fNJetsCounter;

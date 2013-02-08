@@ -893,7 +893,7 @@ namespace HPlus {
 		
 		// Apply scale factor as weight to event 
 		if (!iEvent.isRealData()) {
-		  btagDataBase.fillScaleFactorHistograms(); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
+		  fBTagging.fillScaleFactorHistograms(btagDataBase); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
 		  fEventWeight.multiplyWeight(btagDataBase.getScaleFactor());
 		}   
 		increment(fBTaggingScaleFactorCounter);
@@ -1234,7 +1234,7 @@ namespace HPlus {
     // Apply scale factor as weight to event 
     increment(fBTaggingCounter);
     if (!iEvent.isRealData()) {
-      btagDataInverted.fillScaleFactorHistograms(); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
+      fBTagging.fillScaleFactorHistograms(btagDataInverted); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
       fEventWeight.multiplyWeight(btagDataInverted.getScaleFactor());
     }   
     increment(fBTaggingScaleFactorInvertedCounter);

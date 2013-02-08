@@ -26,21 +26,26 @@ namespace HPlus {
   public:
     class Data {
     public:
-      Data(const TriggerEfficiencyScaleFactor *tesf);
+      Data();
       ~Data();
 
-      double getEventWeight() const {
-        return fTesf->fWeight;
+      const double getEventWeight() const {
+        return fWeight;
       }
-      double getEventWeightAbsoluteUncertainty() const {
-        return fTesf->fWeightAbsUnc;
+      const double getEventWeightAbsoluteUncertainty() const {
+        return fWeightAbsUnc;
       }
-      double getEventWeightRelativeUncertainty() const {
-        return fTesf->fWeightRelUnc;
+      const double getEventWeightRelativeUncertainty() const {
+        return fWeightRelUnc;
       }
 
+      friend class TriggerEfficiencyScaleFactor;
+
     private:
-      const TriggerEfficiencyScaleFactor *fTesf;
+      double fWeight;
+      double fWeightAbsUnc;
+      double fWeightRelUnc;
+
     };
 
     TriggerEfficiencyScaleFactor(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper);
@@ -108,9 +113,6 @@ namespace HPlus {
     WrappedTH1 *hScaleFactorAbsoluteUncertainty;
 
     Mode fMode;
-    double fWeight;
-    double fWeightAbsUnc;
-    double fWeightRelUnc;
   };
 }
 

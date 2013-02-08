@@ -23,7 +23,10 @@ namespace {
 }
 
 namespace HPlus {
-  TriggerEfficiencyScaleFactor::Data::Data(const TriggerEfficiencyScaleFactor *tesf): fTesf(tesf) {}
+  TriggerEfficiencyScaleFactor::Data::Data():
+    fWeight(1.0),
+    fWeightAbsUnc(0.0),
+    fWeightRelUnc(0.0) {}
   TriggerEfficiencyScaleFactor::Data::~Data() {}
   
   TriggerEfficiencyScaleFactor::TriggerEfficiencyScaleFactor(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper):
@@ -267,23 +270,22 @@ namespace HPlus {
   }
 
   TriggerEfficiencyScaleFactor::Data TriggerEfficiencyScaleFactor::applyEventWeight(const pat::Tau& tau, bool isData, EventWeight& eventWeight) {
-    fWeight = 1.0;
-    fWeightAbsUnc = 0.0;
-    fWeightRelUnc = 0.0;
-    if(fMode == kScaleFactor) {
-      fWeight = scaleFactor(tau);
-      fWeightAbsUnc = scaleFactorAbsoluteUncertainty(tau);
-      fWeightRelUnc = scaleFactorRelativeUncertainty(tau);
+    Data output;
 
-      hScaleFactor->Fill(fWeight);
+    if(fMode == kScaleFactor) {
+      output.fWeight = scaleFactor(tau);
+      output.fWeightAbsUnc = scaleFactorAbsoluteUncertainty(tau);
+      output.fWeightRelUnc = scaleFactorRelativeUncertainty(tau);
+
+      hScaleFactor->Fill(output.fWeight);
     }
     else if(fMode == kEfficiency) {
       if(isData) {
         if(!fCurrentRunData)
           throw cms::Exception("LogicError") << "TriggerEfficiencyScaleFactor: With efficiency mode and data input, must call setRun() before applyEventWeight()" << std::endl;
-        fWeight = dataEfficiency(tau);
-        fWeightAbsUnc = dataEfficiencyAbsoluteUncertainty(tau);
-        fWeightRelUnc = dataEfficiencyRelativeUncertainty(tau);
+        output.fWeight = dataEfficiency(tau);
+        output.fWeightAbsUnc = dataEfficiencyAbsoluteUncertainty(tau);
+        output.fWeightRelUnc = dataEfficiencyRelativeUncertainty(tau);
       }
       else {
         // Efficiency mode is needed only for embedding, and in there
@@ -291,17 +293,17 @@ namespace HPlus {
         // makes more sense than the efficiency of MC, because the
         // comparison will always be with respect to the efficiency of
         // data.
-        fWeight = dataAverageEfficiency(tau);
-        fWeightAbsUnc = dataAverageEfficiencyAbsoluteUncertainty(tau);
-        fWeightRelUnc = dataAverageEfficiencyRelativeUncertainty(tau);
+        output.fWeight = dataAverageEfficiency(tau);
+        output.fWeightAbsUnc = dataAverageEfficiencyAbsoluteUncertainty(tau);
+        output.fWeightRelUnc = dataAverageEfficiencyRelativeUncertainty(tau);
         /*
-        fWeight = mcEfficiency(tau);
-        fWeightAbsUnc = mcEfficiencyAbsoluteUncertainty(tau);
-        fWeightRelUnc = mcEfficiencyRelativeUncertainty(tau);
+        output.fWeight = mcEfficiency(tau);
+        output.fWeightAbsUnc = mcEfficiencyAbsoluteUncertainty(tau);
+        output.fWeightRelUnc = mcEfficiencyRelativeUncertainty(tau);
         */
       }
     }
-    eventWeight.multiplyWeight(fWeight);
-    return Data(this);
+    eventWeight.multiplyWeight(output.fWeight);
+    return output;
   }
 }

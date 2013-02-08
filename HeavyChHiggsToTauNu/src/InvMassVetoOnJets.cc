@@ -18,8 +18,8 @@
 
 
 namespace HPlus {
-  InvMassVetoOnJets::Data::Data(const InvMassVetoOnJets *invMassVetoOnJets, bool passedEvent):
-    fInvMassVetoOnJets(invMassVetoOnJets), fPassedEvent(passedEvent) {}
+  InvMassVetoOnJets::Data::Data():
+    fPassedEvent(false) {}
   InvMassVetoOnJets::Data::~Data() {}
 
   InvMassVetoOnJets::InvMassVetoOnJets(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
@@ -71,7 +71,6 @@ namespace HPlus {
   }
 
   InvMassVetoOnJets::Data InvMassVetoOnJets::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets) {
-
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// Description                                                                                                
     /// Uses the jet-collection to reconstruct all the possible di-jet combinations.The motivation behind the creation
@@ -87,10 +86,11 @@ namespace HPlus {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /// A direct and easy way to switch on/off the class from qcdMeasurementMethod2Part1_cfg.py file without the need to compile the code.
-    // if(!fSetTrueToUseModule) return Data(this, true);
+    Data output;
+    // if(!fSetTrueToUseModule) return output;
+
 
     /// Declaration of variables    
-    bool bPassedEvent = false;
     bool bInvMassWithinWWindow = false;
     bool bInvMassWithinTopWindow = false;
 
@@ -112,16 +112,24 @@ namespace HPlus {
     
 
     /// Return true if there are less than 2 jets since no calculation is possible (for safety)
-    if(jets.size()<2) return Data(this, true);
+    if(jets.size()<2) {
+      output.fPassedEvent = true;
+      return output;
+    }
     /// If there are less than 3 jets only perform DiJet calculation
     else if(jets.size()==2){
       edm::PtrVector<pat::Jet>::const_iterator jet1 = jets.begin();
       edm::PtrVector<pat::Jet>::const_iterator jet2 = jets.begin()+1;
 
       /// Check pT and Eta
-      if(! ( (*jet1)->pt() > fPtCut) || !( (*jet2)->pt() > fPtCut) )  return Data(this, true);
-      if( !(std::abs( (*jet1)->eta() ) < fEtaCut) || !(std::abs( (*jet2)->eta() ) < fEtaCut) ) return Data(this, true);
-	    
+      if(! ( (*jet1)->pt() > fPtCut) || !( (*jet2)->pt() > fPtCut) ) {
+        output.fPassedEvent = true;
+        return output;
+      }
+      if( !(std::abs( (*jet1)->eta() ) < fEtaCut) || !(std::abs( (*jet2)->eta() ) < fEtaCut) ) {
+        output.fPassedEvent = true;
+        return output;
+      }
       /// InvMass calculation
       const LorentzVector myWCandidate ( (*jet1)->p4()+(*jet2)->p4() );
       double DiJetInvMass = myWCandidate.M();
@@ -234,15 +242,17 @@ namespace HPlus {
     }// njets >3 
 
     /// Make decision on event. If Di/Tri-Jet combination within W OR Top mass are found return false. Else true
-    if( (bInvMassWithinWWindow) || (bInvMassWithinTopWindow) ) bPassedEvent = false;
-    else bPassedEvent = true;
-
+    if( (bInvMassWithinWWindow) || (bInvMassWithinTopWindow) ) 
+      output.fPassedEvent = false;
+    else
+      output.fPassedEvent = true;
     // std::cout << "*** bPassedEvent = " << bPassedEvent << ", bInvMassWithinWWindow = " << bInvMassWithinWWindow << ", bInvMassWithinTopWindow = " << bInvMassWithinTopWindow << std::endl;
 
     /// Run module but always return true (i.e. passed requirement no matter what)
-    if(!fSetTrueToUseModule) bPassedEvent = true;
-    
-    return Data(this, bPassedEvent);
+    if(!fSetTrueToUseModule) 
+      output.fPassedEvent = true;
+
+    return output;
 
   }//eof:  InvMassVetoOnJets::Data InvMassVetoOnJets::InvMassVetoOnJets( const edm::PtrVector<pat::Jet>& jets ){
 

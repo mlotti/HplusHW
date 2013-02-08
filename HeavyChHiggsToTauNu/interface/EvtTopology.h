@@ -80,16 +80,23 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const EvtTopology *evtTopology, bool passedEvent);
+      Data();
       ~Data();
 
-      bool passedEvent() const { return fPassedEvent; }
-      const EvtTopology::AlphaStruc alphaT() const { return fEvtTopology->sAlpha; }
-      const EvtTopology::KinStruc Kinematics() const { return fEvtTopology->sKinematics; }
-    
+      const bool passedEvent() const { return fPassedEvent; }
+      const double getSphericity() const { return sKinematics.fSphericity; }
+      const double getPlanarity() const { return sKinematics.fPlanarity; }
+      const double getAplanarity() const { return sKinematics.fAplanarity; }
+      const double getCircularity() const { return sKinematics.fCircularity; }
+      const EvtTopology::AlphaStruc alphaT() const { return sAlpha; }
+      const EvtTopology::KinStruc Kinematics() const { return sKinematics; }
+
+      friend class EvtTopology;
+
     private:
-      const EvtTopology *fEvtTopology;
-      const bool fPassedEvent;
+      bool fPassedEvent;
+      EvtTopology::AlphaStruc sAlpha;
+      EvtTopology::KinStruc sKinematics;
     };
 
     EvtTopology(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -102,12 +109,12 @@ namespace HPlus {
 
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
-    bool CalcAlphaT(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
-    vector<float> CalcMomentumTensorEigenValues(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
-    bool CalcSphericity(vector<float> eigenvalues);
-    bool CalcAplanarity(vector<float> eigenvalues);
-    bool CalcPlanarity(vector<float> eigenvalues);
-    bool CalcCircularity(const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
+    bool CalcAlphaT(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output);
+    vector<float> CalcMomentumTensorEigenValues(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output);
+    bool CalcSphericity(vector<float> eigenvalues, EvtTopology::Data& output);
+    bool CalcAplanarity(vector<float> eigenvalues, EvtTopology::Data& output);
+    bool CalcPlanarity(vector<float> eigenvalues, EvtTopology::Data& output);
+    bool CalcCircularity(const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output);
     // Input parameters
     // std::string fDiscriminator;
     // double fDiscrCut;
@@ -139,8 +146,6 @@ namespace HPlus {
     */
     
     // Other variables
-    AlphaStruc sAlpha;
-    KinStruc sKinematics;
     MathFunctions oMath;
   };
 }

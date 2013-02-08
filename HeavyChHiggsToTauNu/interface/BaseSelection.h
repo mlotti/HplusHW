@@ -31,6 +31,8 @@ namespace HPlus {
 
     EventCounter& getEventCounter() const { return fEventCounter; }
     HistoWrapper& getHistoWrapper() const { return fHistoWrapper; }
+    EventCounter* getEventCounterPointer() const { return &fEventCounter; }
+    HistoWrapper* getHistoWrapperPointer() const { return &fHistoWrapper; }
     
   protected:
     EventCounter& fEventCounter;

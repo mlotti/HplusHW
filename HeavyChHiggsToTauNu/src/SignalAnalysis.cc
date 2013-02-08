@@ -89,7 +89,7 @@ namespace HPlus {
     fGenuineTauCounter(eventCounter.addCounter("Tau is genuine")),
     fVetoTauCounter(eventCounter.addCounter("tau veto")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
-    fElectronMatchingTauCounter(eventCounter.addCounter("Loose electron matching tau")),
+    //fElectronMatchingTauCounter(eventCounter.addCounter("Loose electron matching tau")),
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
     fMetCutBeforeJetCutCounter(eventCounter.addCounter("MET cut Before Jets")),
     fNJetsCounter(eventCounter.addCounter("njets")),
@@ -600,7 +600,7 @@ namespace HPlus {
     //    if (!vetoTauData.passedEvent()) return false; // select events with add. taus
     //    if (vetoTauData.getSelectedVetoTaus().size() > 0 ) return false;
     //    increment(fVetoTauCounter);
-    if (!vetoTauData.passedEvent()) increment(fVetoTauCounter);
+    if (vetoTauData.passedEvent()) increment(fVetoTauCounter);
 
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! temporary place !!!!!!!!!!!!!!!!!!
     /*
@@ -642,7 +642,7 @@ namespace HPlus {
     }
     if (electronTauMatch ) return false;
     */
-    if (electronVetoData.getSelectedLooseElectrons().size() > 0 ) increment(fElectronMatchingTauCounter);
+    //if (electronVetoData.getSelectedLooseElectrons().size() > 0 ) increment(fElectronMatchingTauCounter);
     
  
 
@@ -744,12 +744,12 @@ namespace HPlus {
       fTree.setMomentumTensorEigenvalues(evtTopologyData.Kinematics().fQOne, evtTopologyData.Kinematics().fQTwo, evtTopologyData.Kinematics().fQThree);
 
       fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
-      fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets());
+      fTree.fill(iEvent, tauData.getSelectedTau(), jetData.getSelectedJets());
       return true;
     }
 
 //------ Fill control plots for selected taus after standard selections
-    hCtrlSelectedTauRtauAfterStandardSelections->Fill(tauData.getRtauOfSelectedTau());
+    hCtrlSelectedTauRtauAfterStandardSelections->Fill(tauData.getSelectedTauRtauValue());
     hCtrlSelectedTauLeadingTrkPtAfterStandardSelections->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
     hCtrlSelectedTauPtAfterStandardSelections->Fill(tauData.getSelectedTau()->pt());
     hCtrlSelectedTauEtaAfterStandardSelections->Fill(tauData.getSelectedTau()->eta());
@@ -762,7 +762,7 @@ namespace HPlus {
     hCtrlNjetsAfterStandardSelections->Fill(jetData.getHadronicJetCount());
 
     if (myFakeTauStatus) {
-      hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections->Fill(tauData.getRtauOfSelectedTau());
+      hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections->Fill(tauData.getSelectedTauRtauValue());
       hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
       hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections->Fill(tauData.getSelectedTau()->pt());
       hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections->Fill(tauData.getSelectedTau()->eta());
@@ -791,9 +791,9 @@ namespace HPlus {
     // Obtain delta phi and transverse mass here, but do not yet cut on them
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()));
-    int nBjets = fBTagging.analyzeOnlyBJetCount(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    BTagging::Data btagData = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     if (transverseMass > 40 && transverseMass < 100)
-      hCtrlJetMatrixAfterJetSelection->Fill(jetData.getHadronicJetCount(), nBjets);
+      hCtrlJetMatrixAfterJetSelection->Fill(jetData.getHadronicJetCount(), btagData.getBJetCount());
     // Now cut on MET
     if(!metData.passedEvent()) return false;
     increment(fMETCounter);
@@ -812,9 +812,9 @@ namespace HPlus {
 
     // Plot jet matrix
     if (transverseMass > 40 && transverseMass < 100) {
-      hCtrlJetMatrixAfterMET->Fill(jetData.getHadronicJetCount(), nBjets);
+      hCtrlJetMatrixAfterMET->Fill(jetData.getHadronicJetCount(), btagData.getBJetCount());
       if (metData.getSelectedMET()->et() > 100.0)
-        hCtrlJetMatrixAfterMET100->Fill(jetData.getHadronicJetCount(), nBjets);
+        hCtrlJetMatrixAfterMET100->Fill(jetData.getHadronicJetCount(), btagData.getBJetCount());
 
     }
     hCtrlNjetsAfterMET->Fill(jetData.getHadronicJetCount());
@@ -827,7 +827,7 @@ namespace HPlus {
 //------ b tagging cut
 
 //    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
-    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     hCtrlNbjets->Fill(btagData.getBJetCount());
     if (myFakeTauStatus) hCtrlEWKFakeTausNbjets->Fill(btagData.getBJetCount());
     if(!btagData.passedEvent()) return false;
@@ -835,7 +835,7 @@ namespace HPlus {
 
     // Apply scale factor as weight to event
     if (!iEvent.isRealData()) {
-      btagData.fillScaleFactorHistograms(); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
+      fBTagging.fillScaleFactorHistograms(btagData); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
       fEventWeight.multiplyWeight(btagData.getScaleFactor());
     }
    
@@ -1047,7 +1047,7 @@ namespace HPlus {
     }
 
    // transverse mass and inv mass with tau veto
-    if (!vetoTauData.passedEvent()) {
+    if (vetoTauData.passedEvent()) {
       increment(fTauVetoAfterDeltaPhiCounter);
       hTransverseMassTauVeto->Fill(transverseMass);
       //      hHiggsMassTauVeto->Fill(HiggsMass); 
@@ -1143,7 +1143,7 @@ namespace HPlus {
     //std::cout << "run=" << iEvent.id().run() << " lumiblock=" << iEvent.id().luminosityBlock() << " event=" << iEvent.id().event() << ", mT=" << transverseMass << std::endl;
 
 //------- Control plots
-    hSelectedTauRtauAfterCuts->Fill(tauData.getRtauOfSelectedTau());
+    hSelectedTauRtauAfterCuts->Fill(tauData.getSelectedTauRtauValue());
     hSelectedTauEtAfterCuts->Fill(tauData.getSelectedTau()->pt());
     hSelectedTauEtaAfterCuts->Fill(tauData.getSelectedTau()->eta());
     hMetAfterCuts->Fill(metData.getSelectedMET()->et());

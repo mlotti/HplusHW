@@ -143,8 +143,9 @@ namespace HPlus {
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, myTau, jetData.getAllJets());
     hCtrlMET->Fill(metData.getSelectedMET()->et());
     // Obtain delta phi and transverse mass here, but do not yet cut on them
-    int nBjets = fBTagging.analyzeOnlyBJetCount(iEvent, iSetup, jetData.getSelectedJetsPt20());
-    double myBWeight = fBTagging.analyzeOnlyBJetScaleFactor(iEvent,iSetup,jetData.getSelectedJetsPt20())*fEventWeight.getWeight();
+    BTagging::Data btagData = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    int nBjets = btagData.getBJetCount();
+    double myBWeight = btagData.getScaleFactor();
     double deltaPhi = DeltaPhi::reconstruct(*myTau, *(metData.getSelectedMET())) * 57.3; // converted to degrees
     double transverseMass = TransverseMass::reconstruct(*myTau, *(metData.getSelectedMET()));
     if (transverseMass > 40 && transverseMass < 100) {
@@ -182,13 +183,13 @@ namespace HPlus {
         hWjetsNormalisationAfterMET->Fill(0);
     }
 //------ b tagging cut
-    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
+    btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJetsPt20());
     hCtrlNbjets->Fill(btagData.getBJetCount());
     if(!btagData.passedEvent()) return false;
     increment(fBTaggingCounter);
     // Apply scale factor as weight to event
     if (!iEvent.isRealData()) {
-      btagData.fillScaleFactorHistograms(); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
+      fBTagging.fillScaleFactorHistograms(btagData); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
       fEventWeight.multiplyWeight(btagData.getScaleFactor());
     }
     increment(fBTaggingScaleFactorCounter);
