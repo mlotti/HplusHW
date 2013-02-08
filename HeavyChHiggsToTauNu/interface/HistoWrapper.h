@@ -23,6 +23,7 @@ namespace HPlus {
   class HistoWrapper {
   public:
     enum HistoLevel {
+      kSystematics,
       kVital,
       kInformative,
       kDebug
