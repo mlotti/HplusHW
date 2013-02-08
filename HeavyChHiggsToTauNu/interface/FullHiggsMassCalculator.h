@@ -59,8 +59,9 @@ namespace HPlus {
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData);
 
     bool doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet);
-    void doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool myMatchStaus=false, bool doHistogramming = true);
-    void calculateTrueHiggsMass(const edm::Event& iEvent);
+    double doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool myMatchStaus=false, bool doHistogramming = true);
+    void calculateTrueHiggsMass(const edm::Event& iEvent, double recoHiggsMass);
+    //void calculateTrueHiggsMass(const edm::Event& iEvent);
 
   private:
 

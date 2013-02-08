@@ -18,7 +18,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 #------------------------------Configure---------------------------------#
 #dirs = ["/afs/cern.ch/user/s/strichte/HeavyChHiggsToTauNu/test/multicrab_130125_153632"]
 #dirs = ["/afs/cern.ch/user/s/strichte/HeavyChHiggsToTauNu/test/multicrab_130129_125309"]
-dirs = ["/afs/cern.ch/user/s/strichte/HeavyChHiggsToTauNu/test/multicrab_130205_103013"]
+dirs = ["/afs/cern.ch/user/s/strichte/HeavyChHiggsToTauNu/test/multicrab_130207_162543"]
 
 analysis = "signalAnalysis"
 counters = analysis+"/counters"
@@ -76,14 +76,15 @@ plots.mergeRenameReorderForDataMC(datasets)
 
 
 # Create the plot, the latter argument is the path to the histogram in the ROOT files
-if mcOnly:
-    h = plots.MCPlot(datasets, analysis+"/FullHiggsMass/HiggsMass", normalizeToLumi=mcOnlyLumi)
-else:    
-    h = plots.DataMCPlot(datasets, analysis+"/FullHiggsMass/HiggsMass")
+# if mcOnly:
+#     h = plots.MCPlot(datasets, analysis+"/FullHiggsMass/HiggsMass", normalizeToLumi=mcOnlyLumi)
+# else:    
+#     h = plots.DataMCPlot(datasets, analysis+"/FullHiggsMass/HiggsMass")
 
 # TTJets
 drh_reco = datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMass")
-drh_gen = datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genFullHiggsMass")
+drh_gen = datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/FullHiggsMass/TrueHiggsMass")
+#drh_gen = datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genFullHiggsMass")
 
 drh_reco.normalizeToLuminosity(mcOnlyLumi)
 drh_gen.normalizeToLuminosity(mcOnlyLumi)

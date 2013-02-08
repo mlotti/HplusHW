@@ -55,18 +55,20 @@ process = builder.buildSignalAnalysis()
 # prefix_TTToHplusBWB_M-120 = "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/"
 
 #if builder.options.tauEmbeddingInput != 0:
+    # process.source.fileNames = [
+    #         "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_5_2_D2c.root",
+    #         "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_4_2_90j.root",
+    #         "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_2_2_i1O.root",
+    #         "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_3_2_f6k.root"
+    #         ]
+
 process.source.fileNames = [
-        "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_5_2_D2c.root",
-        "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_4_2_90j.root",
-        "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_2_2_i1O.root",
-        "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_3_2_f6k.root"
-        ]
-#     process.source.fileNames = [
+        "root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_5_2_D2c.root",
 #         "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_4_2_90j.root",
 #             "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_2_2_i1O.root",
 #         "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_3_2_f6k.root",
 #         "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_5_2_D2c.root"
-#     ]
+    ]
     
 # process.maxEvents.input = 500
 

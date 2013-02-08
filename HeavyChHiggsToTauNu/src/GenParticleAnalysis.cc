@@ -620,7 +620,7 @@ namespace HPlus {
 
     // Loop over all gen particles, find charged Higgs bosons decaying to tau+nu and put their full mass
     // in a histogram (i.e. norm of four-momentum)
-    for (size_t i=0; i < genParticles->size(); ++i){
+    for (size_t i=0; i < genParticles->size(); ++i) {
       const reco::Candidate & p = (*genParticles)[i];
       int id = p.pdgId();
       // If charged Higgs
@@ -639,7 +639,7 @@ namespace HPlus {
           py += dparticle.py();
 	  pz += dparticle.pz();
 	  E  += dparticle.energy();
-	  std::cout << "Tau found." << std::endl;
+	  //	  std::cout << "Tau found." << std::endl;
 	  tauFound = true;
         }
 	// If tau neutrino among immediate daughters
@@ -650,17 +650,16 @@ namespace HPlus {
 	  E  += dparticle.energy();
 	  neutrinoFound = true;
         }
-	// If both tau and tau neutrino found among immediate daughters, add mass to histogram
-	if(tauFound && neutrinoFound) {
-	  hFullHiggsMass->Fill(sqrt(E*E - px*px - py*py - pz*pz));
-	  std::cout << "Mass put in histogram" << std::endl;
-	}
-	else {
-	  std::cout << "Charged Higgs boson NOT decaying to tauNu found" << std::endl;
-	}
+      } // end of loop over daughters of charged Higgs
+      // If both tau and tau neutrino found among immediate daughters, add mass to histogram
+      if( tauFound && neutrinoFound) {
+	hFullHiggsMass->Fill(sqrt(E*E - px*px - py*py - pz*pz));
+	//	  std::cout << "Mass put in histogram" << std::endl;
       }
-    }
-    
+      else {
+	//	  std::cout << "Charged Higgs boson NOT decaying to tauNu found" << std::endl;
+      }
+    }    
 
     return Data(this);
   }
