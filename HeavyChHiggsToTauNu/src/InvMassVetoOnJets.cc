@@ -41,15 +41,15 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("InvMassVetoOnJets");
     // Histograms
-    hDiJetInvMass           = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "DiJetInvMass", "DiJetInvMass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
-    hDiJetInvMassCutFail    = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "DiJetInvMassCutFail", "DiJetInvMassCutFail;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
-    hDiJetInvMassCutPass    = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "DiJetInvMassCutPass", "DiJetInvMassCutPass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
-    hTriJetInvMass          = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TriJetInvMass", "TriJetInvMass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
-    hTriJetInvMassCutFail   = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TriJetInvMassCutFail", "TriJetInvMassCutFail;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
-    hTriJetInvMassCutPass   = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TriJetInvMassCutPass", "TriJetInvMassCutPass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
-    hInvMass                = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "InvMass", "InvMass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
-    hInvMassCutFail         = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "InvMassCutFail", "InvMassCutFail;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
-    hInvMassCutPass         = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "InvMassCutPass", "InvMassCutPass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hDiJetInvMass           = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DiJetInvMass", "DiJetInvMass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hDiJetInvMassCutFail    = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DiJetInvMassCutFail", "DiJetInvMassCutFail;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hDiJetInvMassCutPass    = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DiJetInvMassCutPass", "DiJetInvMassCutPass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hTriJetInvMass          = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TriJetInvMass", "TriJetInvMass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hTriJetInvMassCutFail   = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TriJetInvMassCutFail", "TriJetInvMassCutFail;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hTriJetInvMassCutPass   = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TriJetInvMassCutPass", "TriJetInvMassCutPass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hInvMass                = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "InvMass", "InvMass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hInvMassCutFail         = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "InvMassCutFail", "InvMassCutFail;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hInvMassCutPass         = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "InvMassCutPass", "InvMassCutPass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
   }
 
   InvMassVetoOnJets::~InvMassVetoOnJets() {}

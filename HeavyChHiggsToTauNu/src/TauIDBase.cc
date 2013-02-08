@@ -41,10 +41,10 @@ namespace HPlus {
     fBaseLabel = mySuffix.str();
     
     // Histograms
-    hEtaTauCands_nocut = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, fMyDir,
+    hEtaTauCands_nocut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, fMyDir,
       "hEtaTauCands_nocuts",
       "hEtaTauCands_nocuts;#tau #eta;N_{jets} / 0.1",60, -3., 3.);
-    hEtaTauCands_ptcut = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, fMyDir,
+    hEtaTauCands_ptcut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, fMyDir,
       "hEtaTauCands_ptcut",
       "hEtaTauCands_ptcut;#tau #eta;N_{jets} / 0.1",60, -3., 3.);
     
@@ -74,7 +74,7 @@ namespace HPlus {
     fIDRTauCut = fCounterPackager.addSubCounter(baseLabel, "TauRtauCut",
       histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, fMyDir, "TauID_RtauCut", "TauRtauCut;R_{#tau}=p^{ldg.track}/E^{vis.#tau jet};N_{jets} / 0.02", 60, 0., 1.2));
     // Histograms
-    hRtauVsEta = histoWrapper.makeTH<TH2F>(HistoWrapper::kDebug, fMyDir, "TauID_RtauDetail_RtauVsEta", "RtauVsEta;R_{#tau};#tau eta", 60, 0.0, 1.2, 60, -3., 3.);
+    hRtauVsEta = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, fMyDir, "TauID_RtauDetail_RtauVsEta", "RtauVsEta;R_{#tau};#tau eta", 60, 0.0, 1.2, 60, -3., 3.);
   }
 
   TauIDBase::~TauIDBase() { }

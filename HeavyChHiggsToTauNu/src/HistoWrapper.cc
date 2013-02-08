@@ -14,7 +14,7 @@ namespace HPlus {
     } else if (level == "Informative") {
       fAmbientLevel = kInformative;
     } else if (level == "Debug") {
-      fAmbientLevel = kDebug;
+      fAmbientLevel = kInformative;
     } else {
       throw cms::Exception("Configuration") << "HistoWrapper: Error in ambient histogram level! Valid options are: 'Systematics', 'Vital', 'Informative', 'Debug' (you specified: '" << level << "'";
     }
