@@ -172,6 +172,7 @@ namespace HPlus {
     Count fBetaCutSubCount;
     Count fEtaCutSubCount;
     Count fPtCutSubCount;
+    Count fJetToTauReferenceJetNotIdentifiedCount;
 
     // Histograms
     WrappedTH1 *hPt;
@@ -267,6 +268,7 @@ namespace HPlus {
     WrappedTH1 *hDeltaPhiMHTTau;
 
     // Reference tau related
+    WrappedTH1 *hReferenceJetToTauMatchingDeltaR;
     WrappedTH1 *hReferenceJetToTauPartonFlavour;
     WrappedTH1 *hReferenceJetToTauDeltaPt;
     WrappedTH1 *hReferenceJetToTauPtRatio;

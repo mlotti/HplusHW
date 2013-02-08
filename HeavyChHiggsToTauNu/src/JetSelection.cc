@@ -92,7 +92,8 @@ namespace HPlus {
     fEMfractionCutSubCount(eventCounter.addSubCounter("Jet selection", "EMfraction")),
     fBetaCutSubCount(eventCounter.addSubCounter("Jet selection", "Beta cut")),
     fEtaCutSubCount(eventCounter.addSubCounter("Jet selection", "eta cut")),
-    fPtCutSubCount(eventCounter.addSubCounter("Jet selection", "pt cut"))
+    fPtCutSubCount(eventCounter.addSubCounter("Jet selection", "pt cut")),
+    fJetToTauReferenceJetNotIdentifiedCount(eventCounter.addSubCounter("Jet selection", "jet->tau ref.jet not identified"))
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("JetSelection");
@@ -195,9 +196,10 @@ namespace HPlus {
 
     // Reference tau related
     TFileDirectory myRefDir = myDir.mkdir("ReferenceJetToTau");
-    hReferenceJetToTauPartonFlavour = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myRefDir, "ReferenceJetToTauPartonFlavour", "ReferenceJetToTauPartonFlavour;ReferenceJetToTauPartonFlavour;N_{events}", 30, 0., 30.);
-    hReferenceJetToTauDeltaPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myRefDir, "ReferenceJetToTauDeltaPt", "ReferenceJetToTauDeltaPt;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
-    hReferenceJetToTauPtRatio = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myRefDir, "ReferenceJetToTauPtRatio", "ReferenceJetToTauPtRatio;#tau p_{T} / ref.jet p_{T}, GeV/c;N_{events}", 120, 0., 1.2);
+    hReferenceJetToTauMatchingDeltaR = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myRefDir, "MatchingDeltaR", "MatchingDeltaR;Matching #DeltaR;N_{events}", 30, 0., 1.);
+    hReferenceJetToTauPartonFlavour = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myRefDir, "PartonFlavour", "ReferenceJetToTauPartonFlavour;ReferenceJetToTauPartonFlavour;N_{events}", 30, 0., 30.);
+    hReferenceJetToTauDeltaPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myRefDir, "DeltaPt", "ReferenceJetToTauDeltaPt;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
+    hReferenceJetToTauPtRatio = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myRefDir, "PtRatio", "ReferenceJetToTauPtRatio;#tau p_{T} / ref.jet p_{T}, GeV/c;N_{events}", 120, 0., 1.2);
 
  }
 
@@ -521,12 +523,15 @@ namespace HPlus {
         }
       }
     }
+    hReferenceJetToTauMatchingDeltaR->Fill(myMinDeltaR);
     if (output.fReferenceJetToTau.isNonnull()) {
       hReferenceJetToTauPartonFlavour->Fill(output.getReferenceJetToTauPartonFlavour());
       output.fReferenceJetToTauDeltaPt = tau->pt() - output.fReferenceJetToTau->pt();
       hReferenceJetToTauDeltaPt->Fill(output.fReferenceJetToTauDeltaPt);
       output.fReferenceJetToTauPtRatio = tau->pt() / output.fReferenceJetToTau->pt();
       hReferenceJetToTauPtRatio->Fill(output.fReferenceJetToTauPtRatio);
+    } else {
+      increment(fJetToTauReferenceJetNotIdentifiedCount);
     }
   }
 
