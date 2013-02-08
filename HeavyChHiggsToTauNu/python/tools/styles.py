@@ -41,6 +41,9 @@ class Style(StyleBase):
         h.SetMarkerSize(1.2)
 	h.SetFillColor(0)
 
+    def clone(self):
+        return Style(self.marker, self.color)
+
 ## Compound style
 #
 # Applies are contained styles

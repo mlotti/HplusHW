@@ -524,21 +524,21 @@ namespace HPlus {
 
     if(!tauData.passedEvent()) return false; // Require at least one tau
     // Obtain MC matching - for EWK without genuine taus
-    FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
-    bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(myTauMatch); // True if the selected tau is a fake
+    FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauData.getSelectedTau()));
+    bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()); // True if the selected tau is a fake
     // Below "genuine tau" is in the context of embedding (i.e. irrespective of the tau decay)
-    if(fOnlyGenuineTaus && !fFakeTauIdentifier.isEmbeddingGenuineTau(myTauMatch)) return false;
+    if(fOnlyGenuineTaus && !fFakeTauIdentifier.isEmbeddingGenuineTau(tauMatchData.getTauMatchType())) return false;
     increment(fTausExistCounter);
     // Apply scale factor for fake tau
     if (!iEvent.isRealData())
-      fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(myTauMatch, tauData.getSelectedTau()->eta()));
+      fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()));
     // plot leading track without pt cut
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
     increment(fTauFakeScaleFactorCounter);
     //if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
     increment(fOneTauCounter);
     // Primary vertex assignment analysis - diagnostics only
-    fVertexAssignmentAnalysis.analyze(iEvent, iSetup, iEvent.isRealData(), pvData.getSelectedVertex(), tauData.getSelectedTau(), myTauMatch);
+    fVertexAssignmentAnalysis.analyze(iEvent, iSetup, iEvent.isRealData(), pvData.getSelectedVertex(), tauData.getSelectedTau(), tauMatchData.getTauMatchType());
     // For data, set the current run number (needed for tau embedding
     // input, doesn't harm for normal data except by wasting small
     // amount of time)
@@ -569,8 +569,8 @@ namespace HPlus {
     hSelectedTauPhi->Fill(tauData.getSelectedTau()->phi());
 
     fAllTausCounterGroup.incrementOneTauCounter();
-    fillEWKFakeTausCounters(myTauMatch, kSignalOrderTauID, tauData);
-    if (myTauMatch == FakeTauIdentifier::kkElectronToTau)
+    fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), kSignalOrderTauID, tauData);
+    if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkElectronToTau)
       hEMFractionElectrons->Fill(tauData.getSelectedTau()->emFraction());
     hEMFractionAll->Fill(tauData.getSelectedTau()->emFraction());
 
@@ -626,7 +626,7 @@ namespace HPlus {
     hSelectionFlow->Fill(kSignalOrderElectronVeto);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderElectronVeto);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderElectronVeto);
-    fillEWKFakeTausCounters(myTauMatch, kSignalOrderElectronVeto, tauData);
+    fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), kSignalOrderElectronVeto, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Electron> > saveElectrons(new std::vector<pat::Electron>());
       copyPtrToVector(electronVetoData.getSelectedElectronsBeforePtAndEtaCuts(), *saveElectrons);
@@ -655,7 +655,7 @@ namespace HPlus {
     hSelectionFlow->Fill(kSignalOrderMuonVeto);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderMuonVeto);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderMuonVeto);
-    fillEWKFakeTausCounters(myTauMatch, kSignalOrderMuonVeto, tauData);
+    fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), kSignalOrderMuonVeto, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Muon> > saveMuons(new std::vector<pat::Muon>());
       copyPtrToVector(muonVetoData.getSelectedMuonsBeforeIsolationAndPtAndEtaCuts(), *saveMuons);
@@ -680,7 +680,7 @@ namespace HPlus {
     //    increment(fMETCounter);
 
     analyseJetMatchingToTau(tauData, jetData);
-    //std::cout << "tau match is " << myTauMatch << " e=" << fFakeTauIdentifier.isElectronToTau(myTauMatch) << " mu=" << fFakeTauIdentifier.isMuonToTau(myTauMatch) << " jet=" << fFakeTauIdentifier.isJetToTau(myTauMatch) << std::endl;
+    //std::cout << "tau match is " << tauMatchData.getTauMatchType() << " e=" << fFakeTauIdentifier.isElectronToTau(tauMatchData.getTauMatchType()) << " mu=" << fFakeTauIdentifier.isMuonToTau(tauMatchData.getTauMatchType()) << " jet=" << fFakeTauIdentifier.isJetToTau(tauMatchData.getTauMatchType()) << std::endl;
     hCtrlNjets->Fill(jetData.getHadronicJetCount());
 
     if (myFakeTauStatus) hCtrlEWKFakeTausNjets->Fill(jetData.getHadronicJetCount());
@@ -690,7 +690,7 @@ namespace HPlus {
     hSelectionFlow->Fill(kSignalOrderJetSelection);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderJetSelection);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderJetSelection);
-    fillEWKFakeTausCounters(myTauMatch, kSignalOrderJetSelection, tauData);
+    fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), kSignalOrderJetSelection, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Jet> > saveJets(new std::vector<pat::Jet>());
       copyPtrToVector(jetData.getSelectedJets(), *saveJets);
@@ -735,12 +735,13 @@ namespace HPlus {
       fTree.setFillWeight(fEventWeight.getWeight());
       fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
       fTree.setTop(TopSelectionData.getTopP4());
+      // Sphericity, Aplanarity, Planarity, alphaT
       fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
-      // Sphericity, Aplanarity, Planarity
       fTree.setSphericity(evtTopologyData.Kinematics().fSphericity);
       fTree.setAplanarity(evtTopologyData.Kinematics().fAplanarity);
       fTree.setPlanarity(evtTopologyData.Kinematics().fPlanarity);
       fTree.setCircularity(evtTopologyData.Kinematics().fCircularity);
+      fTree.setMomentumTensorEigenvalues(evtTopologyData.Kinematics().fQOne, evtTopologyData.Kinematics().fQTwo, evtTopologyData.Kinematics().fQThree);
 
       fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
       fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets());
@@ -799,7 +800,7 @@ namespace HPlus {
     hSelectionFlow->Fill(kSignalOrderMETSelection);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderMETSelection);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderMETSelection);
-    fillEWKFakeTausCounters(myTauMatch, kSignalOrderMETSelection, tauData);
+    fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), kSignalOrderMETSelection, tauData);
 
 
 	  //    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET()) );
@@ -842,7 +843,7 @@ namespace HPlus {
     hSelectionFlow->Fill(kSignalOrderBTagSelection);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderBTagSelection);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderBTagSelection);
-    fillEWKFakeTausCounters(myTauMatch, kSignalOrderBTagSelection, tauData);
+    fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), kSignalOrderBTagSelection, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Jet> > saveBJets(new std::vector<pat::Jet>());
       copyPtrToVector(btagData.getSelectedJets(), *saveBJets);
@@ -859,7 +860,7 @@ namespace HPlus {
     hSelectionFlow->Fill(kSignalOrderDeltaPhiSelection);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderDeltaPhiSelection);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderDeltaPhiSelection);
-    fillEWKFakeTausCounters(myTauMatch, kSignalOrderDeltaPhiSelection, tauData);
+    fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), kSignalOrderDeltaPhiSelection, tauData);
 
     // plot deltaPhi(jet,met)
     double myMaxDeltaPhiJetMET = 0.0;
@@ -1001,15 +1002,15 @@ namespace HPlus {
 //------ Transverse mass and control plots
     increment(fSelectedEventsCounter);
     if (btagData.hasGenuineBJets()) increment(fSelectedEventsCounterWithGenuineBjets);
-    fillEWKFakeTausCounters(myTauMatch, kSignalOrderSelectedEvents, tauData);
+    fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), kSignalOrderSelectedEvents, tauData);
     hTransverseMass->Fill(transverseMass);
     hTransverseMassVsNjets->Fill(transverseMass, jetData.getHadronicJetCount());
     fSFUncertaintiesAfterSelection.setScaleFactorUncertainties(myFakeTauStatus,
                                                             fEventWeight.getWeight(),
                                                             triggerWeight.getEventWeight(),
                                                             triggerWeight.getEventWeightAbsoluteUncertainty(),
-                                                            fFakeTauIdentifier.getFakeTauScaleFactor(myTauMatch, tauData.getSelectedTau()->eta()),
-                                                            fFakeTauIdentifier.getFakeTauSystematics(myTauMatch, tauData.getSelectedTau()->eta()),
+                                                            fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()),
+                                                            fFakeTauIdentifier.getFakeTauSystematics(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()),
                                                             btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
     if(bTauEmbeddingStatus)
       fSFUncertaintiesAfterSelection.setEmbeddingMuonEfficiencyUncertainty(fEventWeight.getWeight(),
@@ -1023,8 +1024,8 @@ namespace HPlus {
                                                                             fEventWeight.getWeight(),
                                                                             triggerWeight.getEventWeight(),
                                                                             triggerWeight.getEventWeightAbsoluteUncertainty(),
-                                                                            fFakeTauIdentifier.getFakeTauScaleFactor(myTauMatch, tauData.getSelectedTau()->eta()),
-                                                                            fFakeTauIdentifier.getFakeTauSystematics(myTauMatch, tauData.getSelectedTau()->eta()),
+                                                                            fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()),
+                                                                            fFakeTauIdentifier.getFakeTauSystematics(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()),
                                                                             btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
     }
 
@@ -1562,14 +1563,14 @@ namespace HPlus {
       }
       if (!(myMinDeltaR < 0.1)) continue;
       // Skip genuine taus
-      FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.silentMatchTauToMC(iEvent, *(tauData.getAllTauObjects()[i]));
-      if (!fFakeTauIdentifier.isFakeTau(myTauMatch)) continue;
+      FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.silentMatchTauToMC(iEvent, *(tauData.getAllTauObjects()[i]));
+      if (!fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType())) continue;
       // Fill jet flavors
       int myFlavor = std::abs(jetData.getAllJets()[mySelectedIndex]->partonFlavour());
-      if (fFakeTauIdentifier.isElectronToTau(myTauMatch)) {
+      if (fFakeTauIdentifier.isElectronToTau(tauMatchData.getTauMatchType())) {
         hTauVsJetTauPteBefore->Fill(tauData.getAllTauObjects()[i]->pt());
         if (myFlavor == 5) hTauVsJetTauPtbleptonicBefore->Fill(tauData.getAllTauObjects()[i]->pt());
-      } else if (fFakeTauIdentifier.isMuonToTau(myTauMatch)) {
+      } else if (fFakeTauIdentifier.isMuonToTau(tauMatchData.getTauMatchType())) {
         hTauVsJetTauPtmuBefore->Fill(tauData.getAllTauObjects()[i]->pt());
         if (myFlavor == 5) hTauVsJetTauPtbleptonicBefore->Fill(tauData.getAllTauObjects()[i]->pt());
       } else if (myFlavor >= 1 && myFlavor <= 3)
@@ -1598,14 +1599,14 @@ namespace HPlus {
       }
       if (!(myMinDeltaR < 0.1)) continue;
       // Skip genuine taus
-      FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.silentMatchTauToMC(iEvent, *(tauData.getSelectedTaus()[i]));
-      if (!fFakeTauIdentifier.isFakeTau(myTauMatch)) continue;
+      FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.silentMatchTauToMC(iEvent, *(tauData.getSelectedTaus()[i]));
+      if (!fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType())) continue;
       // Fill jet flavors
       int myFlavor = std::abs(jetData.getAllJets()[mySelectedIndex]->partonFlavour());
-      if (fFakeTauIdentifier.isElectronToTau(myTauMatch)) {
+      if (fFakeTauIdentifier.isElectronToTau(tauMatchData.getTauMatchType())) {
         hTauVsJetTauPteAfter->Fill(tauData.getSelectedTaus()[i]->pt());
         if (myFlavor == 5) hTauVsJetTauPtbleptonicAfter->Fill(tauData.getAllTauObjects()[i]->pt());
-      } else if (fFakeTauIdentifier.isMuonToTau(myTauMatch)) {
+      } else if (fFakeTauIdentifier.isMuonToTau(tauMatchData.getTauMatchType())) {
         hTauVsJetTauPtmuAfter->Fill(tauData.getSelectedTaus()[i]->pt());
         if (myFlavor == 5) hTauVsJetTauPtbleptonicAfter->Fill(tauData.getAllTauObjects()[i]->pt());
       } else if (myFlavor >= 1 && myFlavor <= 3)
