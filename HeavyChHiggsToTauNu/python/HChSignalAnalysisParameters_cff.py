@@ -207,7 +207,7 @@ jetSelectionBase = cms.untracked.PSet(
     # Jet ID cuts
     jetIdMaxNeutralHadronEnergyFraction = cms.untracked.double(0.99),
     jetIdMaxNeutralEMEnergyFraction = cms.untracked.double(0.99),
-    jetIdMinNumberOfDaughters = cms.untracked.uint32(2),
+    jetIdMinNumberOfDaughters = cms.untracked.uint32(1),
     jetIdMinChargedHadronEnergyFraction = cms.untracked.double(0.0),
     jetIdMinChargedMultiplicity = cms.untracked.uint32(0),
     jetIdMaxChargedEMEnergyFraction = cms.untracked.double(0.99),
