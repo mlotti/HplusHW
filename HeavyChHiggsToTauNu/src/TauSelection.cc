@@ -465,10 +465,10 @@ namespace HPlus {
     }
 
     // Isolation variables
-    hVLooseIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauSelection_all_tau_candidates_VLooseIsoNCands", "Number of isolation candidates in VLoose", 100, 0, 100);
-    hLooseIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauSelection_all_tau_candidates_LooseIsoNCands", "Number of isolation candidates in Loose", 100, 0, 100);
-    hMediumIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauSelection_all_tau_candidates_MediumIsoNCands", "Number of isolation candidates in Medium", 100, 0, 100);
-    hTightIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauSelection_all_tau_candidates_TightIsoNCands", "Number of isolation candidates in Tight", 100, 0, 100);
+    hVLooseIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauSelection_all_tau_candidates_VLooseIsoNCands", "Number of isolation candidates in VLoose", 100, 0, 100);
+    hLooseIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauSelection_all_tau_candidates_LooseIsoNCands", "Number of isolation candidates in Loose", 100, 0, 100);
+    hMediumIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauSelection_all_tau_candidates_MediumIsoNCands", "Number of isolation candidates in Medium", 100, 0, 100);
+    hTightIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauSelection_all_tau_candidates_TightIsoNCands", "Number of isolation candidates in Tight", 100, 0, 100);
 
     // Operating mode of tau ID -- for quick validating that tau selection is doing what is expected 
     hTauIdOperatingMode = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "tauSelection_operating_mode", "tau_operating_mode;;N_{events}", 3, 0., 3.);
@@ -492,25 +492,25 @@ namespace HPlus {
       hTauIdCandidateSelectionSortCategory->GetXaxis()->SetBinLabel(10, "multi-pass Rtau");
     }
 
-    hNTriggerMatchedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "N_TriggerMatchedTaus", "NTriggerMatchedTaus;N(trigger matched taus);N_{events}", 10, 0., 10.);
-    hNTriggerMatchedSeparateTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "N_TriggerMatchedSeparateTaus", "NTriggerMatchedSeparateTaus;N(trigger matched separate taus);N_{events}", 10, 0., 10.);
+    hNTriggerMatchedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "N_TriggerMatchedTaus", "NTriggerMatchedTaus;N(trigger matched taus);N_{events}", 10, 0., 10.);
+    hNTriggerMatchedSeparateTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "N_TriggerMatchedSeparateTaus", "NTriggerMatchedSeparateTaus;N(trigger matched separate taus);N_{events}", 10, 0., 10.);
 
-    hIsolationPFChargedHadrCandsPtSum = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "IsolationPFChargedHadrCandsPtSum", "IsolationPFChargedHadrCandsPtSum;IsolationPFChargedHadrCandsPtSum;N_{tau candidates}", 200, 0., 100.);
-    hIsolationPFGammaCandsEtSum = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "IsolationPFGammaCandEtSum", "IsolationPFGammaCandEtSum;IsolationPFGammaCandEtSum;N_{tau candidates}", 200, 0., 100.);
+    hIsolationPFChargedHadrCandsPtSum = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "IsolationPFChargedHadrCandsPtSum", "IsolationPFChargedHadrCandsPtSum;IsolationPFChargedHadrCandsPtSum;N_{tau candidates}", 200, 0., 100.);
+    hIsolationPFGammaCandsEtSum = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "IsolationPFGammaCandEtSum", "IsolationPFGammaCandEtSum;IsolationPFGammaCandEtSum;N_{tau candidates}", 200, 0., 100.);
 
-    hTightChargedMaxPtBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightChargedMaxPtBeforeIsolation", "TightChargedMaxPtBeforeIsolation;TightChargedMaxPt;N_{tau candidates}", 200, 0., 100.);
-    hTightChargedSumPtBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightChargedSumPtBeforeIsolation", "TightChargedSumPtBeforeIsolation;TightChargedSumPt;N_{tau candidates}", 200, 0., 100.);
-    hTightChargedOccupancyBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightChargedOccupancyBeforeIsolation", "TightChargedOccupancyBeforeIsolation;TightChargedOccupancy;N_{tau candidates}", 100, 0., 100.);
-    hTightGammaMaxPtBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightGammaMaxPtBeforeIsolation", "TightGammaMaxPtBeforeIsolation;TightGammaMaxPt;N_{tau candidates}", 200, 0., 100.);
-    hTightGammaSumPtBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightGammaSumPtBeforeIsolation", "TightGammaSumPtBeforeIsolation;TightGammaSumPt;N_{tau candidates}", 200, 0., 100.);
-    hTightGammaOccupancyBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightGammaOccupancyBeforeIsolation", "TightGammaOccupancyBeforeIsolation;TightGammaOccupancy;N_{tau candidates}", 100, 0., 100.); 
+    hTightChargedMaxPtBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightChargedMaxPtBeforeIsolation", "TightChargedMaxPtBeforeIsolation;TightChargedMaxPt;N_{tau candidates}", 200, 0., 100.);
+    hTightChargedSumPtBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightChargedSumPtBeforeIsolation", "TightChargedSumPtBeforeIsolation;TightChargedSumPt;N_{tau candidates}", 200, 0., 100.);
+    hTightChargedOccupancyBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightChargedOccupancyBeforeIsolation", "TightChargedOccupancyBeforeIsolation;TightChargedOccupancy;N_{tau candidates}", 100, 0., 100.);
+    hTightGammaMaxPtBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightGammaMaxPtBeforeIsolation", "TightGammaMaxPtBeforeIsolation;TightGammaMaxPt;N_{tau candidates}", 200, 0., 100.);
+    hTightGammaSumPtBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightGammaSumPtBeforeIsolation", "TightGammaSumPtBeforeIsolation;TightGammaSumPt;N_{tau candidates}", 200, 0., 100.);
+    hTightGammaOccupancyBeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightGammaOccupancyBeforeIsolation", "TightGammaOccupancyBeforeIsolation;TightGammaOccupancy;N_{tau candidates}", 100, 0., 100.); 
 
-    hTightChargedMaxPtAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightChargedMaxPtAfterIsolation", "TightChargedMaxPtAfterIsolation;TightChargedMaxPt;N_{tau candidates}", 200, 0., 100.);
-    hTightChargedSumPtAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightChargedSumPtAfterIsolation", "TightChargedSumPtAfterIsolation;TightChargedSumPt;N_{tau candidates}", 200, 0., 100.);
-    hTightChargedOccupancyAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightChargedOccupancyAfterIsolation", "TightChargedOccupancyAfterIsolation;TightChargedOccupancy;N_{tau candidates}", 100, 0., 100.);
-    hTightGammaMaxPtAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightGammaMaxPtAfterIsolation", "TightGammaMaxPtAfterIsolation;TightGammaMaxPt;N_{tau candidates}", 200, 0., 100.);
-    hTightGammaSumPtAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightGammaSumPtAfterIsolation", "TightGammaSumPtAfterIsolation;TightGammaSumPt;N_{tau candidates}", 200, 0., 100.);
-    hTightGammaOccupancyAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TightGammaOccupancyAfterIsolation", "TightGammaOccupancyAfterIsolation;TightGammaOccupancy;N_{tau candidates}", 100, 0., 100.); 
+    hTightChargedMaxPtAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightChargedMaxPtAfterIsolation", "TightChargedMaxPtAfterIsolation;TightChargedMaxPt;N_{tau candidates}", 200, 0., 100.);
+    hTightChargedSumPtAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightChargedSumPtAfterIsolation", "TightChargedSumPtAfterIsolation;TightChargedSumPt;N_{tau candidates}", 200, 0., 100.);
+    hTightChargedOccupancyAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightChargedOccupancyAfterIsolation", "TightChargedOccupancyAfterIsolation;TightChargedOccupancy;N_{tau candidates}", 100, 0., 100.);
+    hTightGammaMaxPtAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightGammaMaxPtAfterIsolation", "TightGammaMaxPtAfterIsolation;TightGammaMaxPt;N_{tau candidates}", 200, 0., 100.);
+    hTightGammaSumPtAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightGammaSumPtAfterIsolation", "TightGammaSumPtAfterIsolation;TightGammaSumPt;N_{tau candidates}", 200, 0., 100.);
+    hTightGammaOccupancyAfterIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightGammaOccupancyAfterIsolation", "TightGammaOccupancyAfterIsolation;TightGammaOccupancy;N_{tau candidates}", 100, 0., 100.); 
 
     if (fAnalyseFakeTauComposition) {
       std::string myFakeLabel = label+"_fakeAnalysis";

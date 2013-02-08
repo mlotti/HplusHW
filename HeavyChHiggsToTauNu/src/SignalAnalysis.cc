@@ -258,28 +258,28 @@ namespace HPlus {
     
     // Match PF jet to taus
     TFileDirectory myTauDebugDir = fs->mkdir("TauDebug");
-    hTauVsJetDeltaPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauVsJetDeltaPt", "#Deltap_{T}(#tau,jet), GeV/c", 200, -500, 500);
-    hTauVsJetDeltaR = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauVsJetDeltaR", "#DeltaR(#tau,jet), GeV/c", 100, 0, .5);
-    hTauVsJetMCFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauVsJetMCFlavor", "MC flavor of jet matching to tau", 30, 0, 30);
-    hTauVsJetDeltaPtHeavyFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauVsJetDeltaPtcb", "cb: #Deltap_{T}(#tau,jet), GeV/c", 200, -500, 500);
-    hTauVsJetDeltaRHeavyFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauVsJetDeltaRcb", "cb: #DeltaR(#tau,jet), GeV/c", 100, 0, .5);
-    hTauVsJetDeltaPtLightFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauVsJetDeltaPtuds", "uds: #Deltap_{T}(#tau,jet), GeV/c", 200, -500, 500);
-    hTauVsJetDeltaRLightFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauVsJetDeltaRuds", "uds: #DeltaR(#tau,jet), GeV/c", 100, 0, .5);
+    hTauVsJetDeltaPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetDeltaPt", "#Deltap_{T}(#tau,jet), GeV/c", 200, -500, 500);
+    hTauVsJetDeltaR = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetDeltaR", "#DeltaR(#tau,jet), GeV/c", 100, 0, .5);
+    hTauVsJetMCFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetMCFlavor", "MC flavor of jet matching to tau", 30, 0, 30);
+    hTauVsJetDeltaPtHeavyFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetDeltaPtcb", "cb: #Deltap_{T}(#tau,jet), GeV/c", 200, -500, 500);
+    hTauVsJetDeltaRHeavyFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetDeltaRcb", "cb: #DeltaR(#tau,jet), GeV/c", 100, 0, .5);
+    hTauVsJetDeltaPtLightFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetDeltaPtuds", "uds: #Deltap_{T}(#tau,jet), GeV/c", 200, -500, 500);
+    hTauVsJetDeltaRLightFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetDeltaRuds", "uds: #DeltaR(#tau,jet), GeV/c", 100, 0, .5);
 
-    hTauVsJetTauPtbBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtbBefore", "TauFakeRatePtbBefore;b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtbleptonicBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtbleptonicBefore", "TauFakeRatePtbleptonicBefore;leptonic b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtcBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtcBefore", "TauFakeRatePtcBefore;c#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtudsBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtudsBefore", "TauFakeRatePtudsBefore;uds#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtgBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtgBefore", "TauFakeRatePtgBefore;g#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPteBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePteBefore", "TauFakeRatePteBefore;e#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtmuBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtmuBefore", "TauFakeRatePtmuBefore;#mu#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtbAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtbAfter", "TauFakeRatePtbAfter;b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtbleptonicAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtbleptonicAfter", "TauFakeRatePtbleptonicAfter;leptonic b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtcAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtcAfter", "TauFakeRatePtcAfter;c#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtudsAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtudsAfter", "TauFakeRatePtudsAfter;uds#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtgAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtgAfter", "TauFakeRatePtgAfter;g#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPteAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePteAfter", "TauFakeRatePteAfter;e#rightarrow#tau, #tau p_{T}", 100, 0, 500);
-    hTauVsJetTauPtmuAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myTauDebugDir, "TauFakeRatePtmuAfter", "TauFakeRatePtmuAfter;#mu#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtbBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauFakeRatePtbBefore", "TauFakeRatePtbBefore;b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtbleptonicBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauFakeRatePtbleptonicBefore", "TauFakeRatePtbleptonicBefore;leptonic b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtcBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauFakeRatePtcBefore", "TauFakeRatePtcBefore;c#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtudsBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauFakeRatePtudsBefore", "TauFakeRatePtudsBefore;uds#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtgBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauFakeRatePtgBefore", "TauFakeRatePtgBefore;g#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPteBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauFakeRatePteBefore", "TauFakeRatePteBefore;e#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtmuBefore = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauFakeRatePtmuBefore", "TauFakeRatePtmuBefore;#mu#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtbAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauFakeRatePtbAfter", "TauFakeRatePtbAfter;b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtbleptonicAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauFakeRatePtbleptonicAfter", "TauFakeRatePtbleptonicAfter;leptonic b#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtcAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauFakeRatePtcAfter", "TauFakeRatePtcAfter;c#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtudsAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauFakeRatePtudsAfter", "TauFakeRatePtudsAfter;uds#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtgAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauFakeRatePtgAfter", "TauFakeRatePtgAfter;g#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPteAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauFakeRatePteAfter", "TauFakeRatePteAfter;e#rightarrow#tau, #tau p_{T}", 100, 0, 500);
+    hTauVsJetTauPtmuAfter = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauFakeRatePtmuAfter", "TauFakeRatePtmuAfter;#mu#rightarrow#tau, #tau p_{T}", 100, 0, 500);
 
     // MET histograms
     hGenMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "genMET", "genMET", 200, 0., 400.);
@@ -334,8 +334,8 @@ namespace HPlus {
     hDeltaPhiJetMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "deltaPhiJetMet", "deltaPhiJetMet", 180, 0., 180.);
     hMaxDeltaPhiJetMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "maxDeltaPhiJetMet", "maxDeltaPhiJetMet", 180, 0., 180.);
     hAlphaT = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "alphaT", "alphaT", 100, 0.0, 5.0);
-    hAlphaTInvMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);
-    hAlphaTVsRtau = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kDebug, *fs, "alphaT(y)-Vs-Rtau(x)", "alphaT-Vs-Rtau",  120, 0.0, 1.2, 500, 0.0, 5.0);
+    hAlphaTInvMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);
+    hAlphaTVsRtau = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, *fs, "alphaT(y)-Vs-Rtau(x)", "alphaT-Vs-Rtau",  120, 0.0, 1.2, 500, 0.0, 5.0);
     //    hMet_AfterTauSelection = fHistoWrapper.makeTH<TH1F>(*fs, "met_AfterTauSelection", "met_AfterTauSelection", 100, 0.0, 400.0);
     hDeltaPtJetTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "DeltaPtJetTau", "DeltaPtJetTau", 200, -100., 100.);  
     hDeltaRJetTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "DeltaRJetTau", "DeltaRJetTau", 100, 0., 2.); 
@@ -379,8 +379,8 @@ namespace HPlus {
       hSelectionFlowVsVerticesFakeTaus->getHisto()->GetYaxis()->SetBinLabel(i+1, hSelectionFlow->getHisto()->GetXaxis()->GetBinLabel(i+1));
     }
 
-    hEMFractionAll = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "EWKFakeTaus_FakeTau_EMFraction_All", "FakeTau_EMFraction_All", 22, 0., 1.1);
-    hEMFractionElectrons = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "EWKFakeTaus_FakeTau_EMFraction_Electrons", "FakeTau_EMFraction_Electrons", 22, 0., 1.1);
+    hEMFractionAll = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "EWKFakeTaus_FakeTau_EMFraction_All", "FakeTau_EMFraction_All", 22, 0., 1.1);
+    hEMFractionElectrons = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "EWKFakeTaus_FakeTau_EMFraction_Electrons", "FakeTau_EMFraction_Electrons", 22, 0., 1.1);
 
     // Control histograms
     TFileDirectory myCtrlDir = fs->mkdir("ControlPlots");
