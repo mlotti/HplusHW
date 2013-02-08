@@ -18,10 +18,13 @@
 std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
 
 namespace HPlus {
-  GlobalElectronVeto::Data::Data(const GlobalElectronVeto *globalElectronVeto, bool passedEvent):
-    fGlobalElectronVeto(globalElectronVeto), fPassedEvent(passedEvent) {}
+  GlobalElectronVeto::Data::Data():
+    fPassedEvent(false),
+    fSelectedElectronPt(0.),
+    fSelectedElectronEta(0.),
+    fSelectedElectronPtBeforePtCut(0.) { }
   GlobalElectronVeto::Data::~Data() {}
-  
+
   GlobalElectronVeto::GlobalElectronVeto(const edm::ParameterSet& iConfig, const edm::InputTag& vertexSrc, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
     BaseSelection(eventCounter, histoWrapper),
     fElecCollectionName(iConfig.getUntrackedParameter<edm::InputTag>("ElectronCollectionName")),
@@ -37,8 +40,8 @@ namespace HPlus {
     fElecSelectionSubCountElectronHasGsfTrkOrTrk(eventCounter.addSubCounter("GlobalElectron Selection", "Electron has gsfTrack or track")),
     fElecSelectionSubCountFiducialVolumeCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron fiducial volume")),
     fElecSelectionSubCountId(eventCounter.addSubCounter("GlobalElectron Selection", "Electron ID")),
-    fElecSelectionSubCountPtCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Pt " )),
     fElecSelectionSubCountEtaCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Eta")),
+    fElecSelectionSubCountPtCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Pt " )),
     fElecSelectionSubCountSelected(eventCounter.addSubCounter("GlobalElectron Selection", "Electron selected")),
     fElecSelectionSubCountMatchingMCelectron(eventCounter.addSubCounter("GlobalElectron Selection","Electron matching MC electron")),
     fElecSelectionSubCountMatchingMCelectronFromW(eventCounter.addSubCounter("GlobalElectron Selection","Electron matching MC electron From W"))
@@ -98,26 +101,18 @@ namespace HPlus {
   }
 
   GlobalElectronVeto::Data GlobalElectronVeto::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    // Reset data variables
-    fSelectedElectronPt = -1.0;
-    fSelectedElectronPtBeforePtCut = -1.0;
-    fSelectedElectronEta = -999.99;
-    fSelectedElectrons.clear();
-    fSelectedElectronsBeforePtAndEtaCuts.clear();
-    fSelectedLooseElectrons.clear();
+    Data output;
 
-    return Data(this, ElectronSelection(iEvent,iSetup));
-  }
-
-  bool GlobalElectronVeto::ElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
-    // Create and attach handle to Electron Collection
     edm::Handle<edm::View<pat::Electron> > myElectronHandle;
     iEvent.getByLabel(fElecCollectionName, myElectronHandle);
     edm::PtrVector<pat::Electron> electrons = myElectronHandle->ptrVector();
 
     increment(fElecSelectionSubCountAllEvents);
     // In the case where the Electron Collection handle is empty...
-    if ( !myElectronHandle->size() ) return true;
+    if ( !myElectronHandle->size() ) {
+      output.fPassedEvent = true;
+      return output;
+    }
 
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles); // FIXME: bad habbit to hard-code InputTags
@@ -187,7 +182,7 @@ namespace HPlus {
                                                   *hRho);
       //std::cout << "Electron " << (iElectron-electrons.begin()) << "/" << electrons.size() << ": pass veto: " << bVeto << std::endl;
       if(!bPassedElecID) continue;
-      fSelectedElectronsBeforePtAndEtaCuts.push_back(*iElectron);
+      output.fSelectedElectronsBeforePtAndEtaCuts.push_back(*iElectron);
 
       hElectronEta_identified->Fill(myElectronEta);
 
@@ -196,16 +191,17 @@ namespace HPlus {
       hElectronPt_identified->Fill(myElectronPt);
       }
 
-      // 2) Apply Pt cut requirement
+      // 2) Apply Eta cut requirement
+      if (std::abs(myElectronEta) >= fElecEtaCut) continue;
+      bElecEtaCut = true;
+      if (myElectronPt > output.fSelectedElectronPtBeforePtCut)
+        output.fSelectedElectronPtBeforePtCut = myElectronPt;
+
+      // 3) Apply Pt cut requirement
       if (myElectronPt < fElecPtCut) continue;
       bElecPtCut = true;
 
-
-      // 3) Apply Eta cut requirement      
-      if (std::abs(myElectronEta) >= fElecEtaCut) continue;
-      bElecEtaCut = true;
-
-      fSelectedElectrons.push_back(*iElectron);
+      output.fSelectedElectrons.push_back(*iElectron);
 
       // If Electron survives all cuts (1->3) then it is considered an isolated Electron. Now find the max Electron Pt.
       if (myElectronPt > myHighestElecPt) {
@@ -262,10 +258,10 @@ namespace HPlus {
           increment(fElecSelectionSubCountFiducialVolumeCut);
           if(bPassedElecID) {
             increment(fElecSelectionSubCountId);
-            if(bElecPtCut) {
-              increment(fElecSelectionSubCountPtCut);
-              if(bElecEtaCut) {
-                increment(fElecSelectionSubCountEtaCut);
+            if(bElecEtaCut) {
+              increment(fElecSelectionSubCountEtaCut);
+              if(bElecPtCut) {
+                increment(fElecSelectionSubCountPtCut);
                 increment(fElecSelectionSubCountSelected);
 		/*
 		if(bElecMatchingMCelectron) {
@@ -283,18 +279,19 @@ namespace HPlus {
     }
     
 
-    hNumberOfSelectedElectrons->Fill(fSelectedElectrons.size());
+    hNumberOfSelectedElectrons->Fill(output.fSelectedElectrons.size());
 
     // Now store the highest Electron Pt and Eta
-    fSelectedElectronPt = myHighestElecPt;
-    fSelectedElectronEta = myHighestElecEta;
+    output.fSelectedElectronPt = myHighestElecPt;
+    output.fSelectedElectronEta = myHighestElecEta;
 
     // If a Global Electron (passing all selection criteria) is found, do not increment counter. Return false.
-    if(bElectronSelected)
-      return false;
-    // Otherwise increment counter and return true.
-
-    else {
+    if(bElectronSelected) {
+      output.fPassedEvent = false;
+      return output;
+    } else {
+      // Otherwise increment counter and return true.
+      output.fPassedEvent = true;
       if(!iEvent.isRealData()) {
         for (size_t i=0; i < genParticles->size(); ++i) {
           const reco::Candidate & p = (*genParticles)[i];
@@ -307,7 +304,7 @@ namespace HPlus {
       }
     }
 
-    return true;
-  }//eof: bool GlobalElectronVeto::ElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+    return output;
+  }
 
-}//eof: namespace HPlus {
+}

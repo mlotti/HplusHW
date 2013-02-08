@@ -733,15 +733,15 @@ namespace HPlus {
       increment(fTausExistCounter);
   
 	
-      FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, (**iTau));
-      //	FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, (**iTau));
-      //      bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(myTauMatch); // True if the selected tau is a fake
+      FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, (**iTau));
+      //	FakeTauIdentifier::MCSelectedTauMatchType tauMatchData.getTauMatchType() = fFakeTauIdentifier.matchTauToMC(iEvent, (**iTau));
+      //      bool myFakeTauStatus = fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()); // True if the selected tau is a fake
       // Below "genuine tau" is in the context of embedding (i.e. irrespective of the tau decay)
-      if((fOnlyGenuineTaus && !fFakeTauIdentifier.isEmbeddingGenuineTau(myTauMatch))) continue;
+      if((fOnlyGenuineTaus && !fFakeTauIdentifier.isEmbeddingGenuineTau(tauMatchData.getTauMatchType()))) continue;
 	
       // Apply scale factor for fake tau
       if (!iEvent.isRealData())
-	fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(myTauMatch, (*iTau)->eta()));
+	fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), (*iTau)->eta()));
       // plot leading track without pt cut
       increment(fTauFakeScaleFactorCounter);
 
@@ -893,7 +893,7 @@ namespace HPlus {
 		
 		// Apply scale factor as weight to event 
 		if (!iEvent.isRealData()) {
-		  btagDataBase.fillScaleFactorHistograms(); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
+		  fBTagging.fillScaleFactorHistograms(btagDataBase); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
 		  fEventWeight.multiplyWeight(btagDataBase.getScaleFactor());
 		}   
 		increment(fBTaggingScaleFactorCounter);
@@ -1234,7 +1234,7 @@ namespace HPlus {
     // Apply scale factor as weight to event 
     increment(fBTaggingCounter);
     if (!iEvent.isRealData()) {
-      btagDataInverted.fillScaleFactorHistograms(); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
+      fBTagging.fillScaleFactorHistograms(btagDataInverted); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
       fEventWeight.multiplyWeight(btagDataInverted.getScaleFactor());
     }   
     increment(fBTaggingScaleFactorInvertedCounter);

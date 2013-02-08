@@ -8,19 +8,22 @@
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 
+#include <limits>
+#include <cmath>
+
 namespace HPlus {
-  EmbeddingMuonEfficiency::Data::Data(): fEme(0) {}
-  EmbeddingMuonEfficiency::Data::Data(const EmbeddingMuonEfficiency *eme): fEme(eme) {}
+  EmbeddingMuonEfficiency::Data::Data():
+    fWeight(std::numeric_limits<double>::quiet_NaN()),
+    fWeightAbsUnc(1.0) {}
   EmbeddingMuonEfficiency::Data::~Data() {}
   void EmbeddingMuonEfficiency::Data::check() const {
-    if(!fEme)
+    if(isnan(fWeight))
       throw cms::Exception("Assert") << "EmbeddingMuonEfficiency::Data: This Data object was constructed with the default constructor, not with EmbeddingMuonEfficiency::applyEventWeight(). There is something wrong in your code." << std::endl;
   }
 
   EmbeddingMuonEfficiency::EmbeddingMuonEfficiency(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper)
     //fMuonSrc(iConfig.getParameter<edm::InputTag>("muonSrc"))
   {
-
     std::string mode = iConfig.getParameter<std::string>("mode");
     if     (mode == "efficiency") fMode = kEfficiency;
     else if(mode == "disabled")   fMode = kDisabled;
@@ -52,11 +55,12 @@ namespace HPlus {
   EmbeddingMuonEfficiency::~EmbeddingMuonEfficiency() {}
 
   EmbeddingMuonEfficiency::Data EmbeddingMuonEfficiency::applyEventWeight(const edm::Event& iEvent, EventWeight& eventWeight) {
-    fWeight = 1.0;
-    fWeightAbsUnc = 1.0;
-
-    if(fMode == kDisabled)
-      return Data(this);
+    Data output;
+    
+    if(fMode == kDisabled) {
+      output.fWeight = 1.0;
+      return output;
+    }
 
     /* Not needed yet
     // Obtain original muon
@@ -85,19 +89,19 @@ namespace HPlus {
       if(!found)
         throw cms::Exception("Assert") << "EmbeddingMuonEfficiency: encountered run " << run << " which is not included in the configuration" << std::endl;
 
-      fWeight = fDataValues[foundIndex].value;
-      fWeightAbsUnc = fDataValues[foundIndex].uncertainty;
+      output.fWeight = fDataValues[foundIndex].value;
+      output.fWeightAbsUnc = fDataValues[foundIndex].uncertainty;
     }
     else {
-      fWeight = fMCValue;
-      fWeightAbsUnc = fMCUncertainty;
+      output.fWeight = fMCValue;
+      output.fWeightAbsUnc = fMCUncertainty;
     }
 
     // Weight is actually the inverse of the efficiency
-    fWeightAbsUnc = fWeightAbsUnc / (fWeight*fWeight);
-    fWeight = 1.0/fWeight;
+    output.fWeightAbsUnc = output.fWeightAbsUnc / (output.fWeight*output.fWeight);
+    output.fWeight = 1.0/output.fWeight;
 
-    eventWeight.multiplyWeight(fWeight);
-    return Data(this);
+    eventWeight.multiplyWeight(output.fWeight);
+    return output;
   }
 }

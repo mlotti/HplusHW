@@ -27,8 +27,8 @@ void printDaughters(const reco::Candidate& p);
 
 
 namespace HPlus {
-  TopChiSelection::Data::Data(const TopChiSelection *topChiSelection, bool passedEvent):
-    fTopChiSelection(topChiSelection), fPassedEvent(passedEvent) {}
+  TopChiSelection::Data::Data():
+    fPassedEvent(false) {}
   TopChiSelection::Data::~Data() {}
 
   TopChiSelection::TopChiSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
@@ -42,7 +42,6 @@ namespace HPlus {
     edm::Service<TFileService> fs;
 
     TFileDirectory myDir = fs->mkdir("TopChiSelection");
-    
     hPtTop = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "PtTop", "PtTop", 80, 0., 400.);
     hPtTopChiCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "PtTopChiCut", "PtTopChiCut", 80, 0., 400.);
     hjjbMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "jjbMass", "jjbMass", 80, 0., 400.);
@@ -80,15 +79,9 @@ namespace HPlus {
   }
 
   TopChiSelection::Data TopChiSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
+    Data output;
+
     // Reset variables
-    topMass = -1;
-    double nan = std::numeric_limits<double>::quiet_NaN();
-    top.SetXYZT(nan, nan, nan, nan);
-    W.SetXYZT(nan, nan, nan, nan);
-
-    bool passEvent = false;
-    size_t passed = 0;
-
     double chi2Min = 999999;
     double nominalTop = 172.9;
     double nominalW = 80.4;
@@ -117,7 +110,6 @@ namespace HPlus {
 	  XYZTLorentzVector candTop = iJet1->p4() + iJet2->p4() + iJetb->p4();
           XYZTLorentzVector candW = iJet1->p4() + iJet2->p4();
 
-        
 	  hjjbMass->Fill(candTop.M());
 	  double chi2 = ((candTop.M() - nominalTop)/sigmaTop)*((candTop.M() - nominalTop)/sigmaTop) + ((candW.M() - nominalW)/sigmaW)*((candW.M() - nominalW)/sigmaW); 
 
@@ -126,29 +118,25 @@ namespace HPlus {
 	    Jet1 = iJet1;
 	    Jet2 = iJet2;
 	    Jetb = iJetb;  
-	    bjetInTop  = iJetb;             
-            top = candTop;
-	    W = candW;
+	    output.bjetInTop  = iJetb;
+            output.top = candTop;
+	    output.W = candW;
 	    topmassfound = true;
  	  }
 	}
       }
     }
   
-    hPtTop->Fill(top.Pt());
-    htopMass->Fill(top.M());
-    hWMass->Fill(W.M());
+    hPtTop->Fill(output.top.Pt());
+    htopMass->Fill(output.getTopMass());
+    hWMass->Fill(output.getWMass());
     hChi2Min->Fill(sqrt(chi2Min));
     if ( sqrt(chi2Min) < fChi2Cut) {
-      htopMassChiCut->Fill(top.M());
-      hWMassChiCut->Fill(W.M());
-      hPtTopChiCut->Fill(top.Pt());
-      topMass = top.M();
-      wMass = W.M();
+      htopMassChiCut->Fill(output.getTopMass());
+      hWMassChiCut->Fill(output.getWMass());
+      hPtTopChiCut->Fill(output.top.Pt());
     }
 
-
-    
     // search correct combinations
     //    if (!iEvent.isRealData() && chi2Min < fChi2Cut ) {
     if (!iEvent.isRealData() && topmassfound ) {
@@ -210,29 +198,30 @@ namespace HPlus {
       
 
        if ( bMatchTopSide && Jet1Match && Jet2Match) {
-	 htopMassMatch->Fill(top.M());
-	 hWMassMatch->Fill(W.M()); 
+	 htopMassMatch->Fill(output.getTopMass());
+	 hWMassMatch->Fill(output.getWMass()); 
        }
        if ( bMatchHiggsSide && Jet1Match && Jet2Match) {
-	 htopMassMatchWrongB->Fill(top.M());
-	 hWMassMatchWrongB->Fill(W.M()); 
+	 htopMassMatchWrongB->Fill(output.getTopMass());
+	 hWMassMatchWrongB->Fill(output.getWMass()); 
        }
        if ( bMatchTopSide ) {
-	 htopMassBMatch->Fill(top.M());
-	 hWMassBMatch->Fill(W.M()); 
+	 htopMassBMatch->Fill(output.getTopMass());
+	 hWMassBMatch->Fill(output.getWMass()); 
        }
        if ( Jet1Match && Jet2Match ) {
-	 htopMassQMatch->Fill(top.M());
-	 hWMassQMatch->Fill(W.M()); 
+	 htopMassQMatch->Fill(output.getTopMass());
+	 hWMassQMatch->Fill(output.getWMass()); 
        }
     }
 
-    
-    passEvent = true;
-    if( topMass < fTopMassLow || topMass > fTopMassHigh ) passEvent = false;
-    increment(fTopChiMassCount);
-    
-    return Data(this, passEvent);
+    if( output.getTopMass() < fTopMassLow || output.getTopMass() > fTopMassHigh ) {
+      output.fPassedEvent = false;
+    } else {
+      output.fPassedEvent = true;
+      increment(fTopChiMassCount);
+    }
+    return output;
   }
 
 

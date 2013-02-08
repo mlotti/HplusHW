@@ -23,8 +23,8 @@ void printDaughters(const reco::Candidate& p);
 
 
 namespace HPlus {
-  TopSelection::Data::Data(const TopSelection *topSelection, bool passedEvent):
-    fTopSelection(topSelection), fPassedEvent(passedEvent) {}
+  TopSelection::Data::Data():
+    fPassedEvent(false) {}
   TopSelection::Data::~Data() {}
 
   TopSelection::TopSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
@@ -77,16 +77,11 @@ namespace HPlus {
   }
 
   TopSelection::Data TopSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
+    Data output;
+
     // Reset variables
-    topMass = -1;
-    double nan = std::numeric_limits<double>::quiet_NaN();
-    top.SetXYZT(nan, nan, nan, nan);
-    W.SetXYZT(nan, nan, nan, nan);
-
-    bool passEvent = false;
-
     double ptmax = 0;
-   
+
     edm::Ptr<pat::Jet> Jet1;
     edm::Ptr<pat::Jet> Jet2;
     edm::Ptr<pat::Jet> Jetb;
@@ -116,21 +111,17 @@ namespace HPlus {
 	    Jet2 = iJet2;
 	    Jetb = iJetb;
 	    ptmax = candTop.Pt();
-            topMass = candTop.M();
-            top = candTop;
-	    W = candW; 
+            output.top = candTop;
+	    output.W = candW;
 	  }
 	}
       }
     }
 
     hPtmax->Fill(ptmax);
-    htopMass->Fill(topMass);
-    hWMass->Fill(W.M());
+    htopMass->Fill(output.getTopMass());
+    hWMass->Fill(output.getWMass());
 
-
-
-   
     // search correct combinations
     if (!iEvent.isRealData()  && ptmax > 0 ) {
 
@@ -195,38 +186,33 @@ namespace HPlus {
       
 
        if ( bMatchTopSide && Jet1Match && Jet2Match) {
-	 htopMassMatch->Fill(top.M());
-	 hWMassMatch->Fill(W.M()); 
+	 htopMassMatch->Fill(output.getTopMass());
+	 hWMassMatch->Fill(output.getWMass()); 
 	 hPtmaxMatch->Fill(ptmax);
        }
        if ( bMatchHiggsSide && Jet1Match && Jet2Match) {
-	 htopMassMatchWrongB->Fill(top.M());
-	 hWMassMatchWrongB->Fill(W.M()); 
+	 htopMassMatchWrongB->Fill(output.getTopMass());
+	 hWMassMatchWrongB->Fill(output.getWMass()); 
 	 hPtmaxMatchWrongB->Fill(ptmax);
        }
        if ( bMatchTopSide ) {
-	 htopMassBMatch->Fill(top.M());
-	 hWMassBMatch->Fill(W.M()); 
+	 htopMassBMatch->Fill(output.getTopMass());
+	 hWMassBMatch->Fill(output.getWMass()); 
 	 hPtmaxBMatch->Fill(ptmax);
        }
        if ( Jet1Match && Jet2Match ) {
-	 htopMassQMatch->Fill(top.M());
-	 hWMassQMatch->Fill(W.M());
+	 htopMassQMatch->Fill(output.getTopMass());
+	 hWMassQMatch->Fill(output.getWMass());
 	 hPtmaxQMatch->Fill(ptmax); 
        }
     }
 
-
-    passEvent = true;
-    if(topMass < fTopMassLow || topMass > fTopMassHigh ) passEvent = false;
-    increment(fTopMassCount);
-    
-    return Data(this, passEvent);
+    if(output.getTopMass() < fTopMassLow || output.getTopMass() > fTopMassHigh ) {
+      output.fPassedEvent = false;
+    } else {
+      output.fPassedEvent = true;
+      increment(fTopMassCount);
+    }
+    return output;
   }
-    
-    
 }
-   
-
-
- 

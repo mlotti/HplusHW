@@ -9,9 +9,12 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 namespace HPlus {
-  FakeMETVeto::Data::Data(const FakeMETVeto *fakeMETVeto, bool passedEvent):
-    fFakeMETVeto(fakeMETVeto),
-    fPassedEvent(passedEvent) {}
+  FakeMETVeto::Data::Data():
+    fPassedEvent(false),
+    fClosestDeltaPhi(999),
+    fClosestDeltaPhiToJets(999),
+    fClosestDeltaPhiToTaus(999) { }
+
   FakeMETVeto::Data::~Data() {}
   
   FakeMETVeto::FakeMETVeto(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
@@ -48,45 +51,41 @@ namespace HPlus {
   }
 
   FakeMETVeto::Data FakeMETVeto::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau , const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met) {
-    bool passEvent = false;
+    Data output;
 
     // Loop over selected taus
-    fClosestDeltaPhiToTaus = 999.;
     //    for(edm::PtrVector<reco::Candidate>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
-    double fClosestDeltaPhiToTaus  = reco::deltaPhi(*met, *tau ) * 180./3.14159;
-      //      if ( fabs(myDeltaPhi) < fClosestDeltaPhiToTaus)
-      //        fClosestDeltaPhiToTaus = fabs(myDeltaPhi);
+    output.fClosestDeltaPhiToTaus  = reco::deltaPhi(*met, *tau ) * 180./3.14159;
+      //      if ( fabs(myDeltaPhi) < output.fClosestDeltaPhiToTaus)
+      //        output.fClosestDeltaPhiToTaus = fabs(myDeltaPhi);
    
-    hClosestDeltaPhiToTaus->Fill(fClosestDeltaPhiToTaus);
-    hClosestDeltaPhiToTausZoom->Fill(fClosestDeltaPhiToTaus);
+    hClosestDeltaPhiToTaus->Fill(output.fClosestDeltaPhiToTaus);
+    hClosestDeltaPhiToTausZoom->Fill(output.fClosestDeltaPhiToTaus);
     
     // Loop over selected jets
-    fClosestDeltaPhiToJets = 999.;
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       double myDeltaPhi = reco::deltaPhi(*met, **iter) * 180./3.14159;
-      if ( fabs(myDeltaPhi) < fClosestDeltaPhiToJets)
-        fClosestDeltaPhiToJets = fabs(myDeltaPhi);
+      if ( fabs(myDeltaPhi) < output.fClosestDeltaPhiToJets)
+        output.fClosestDeltaPhiToJets = fabs(myDeltaPhi);
     }
-    hClosestDeltaPhiToJets->Fill(fClosestDeltaPhiToJets);
-    hClosestDeltaPhiToJetsZoom->Fill(fClosestDeltaPhiToJets);
+    hClosestDeltaPhiToJets->Fill(output.fClosestDeltaPhiToJets);
+    hClosestDeltaPhiToJetsZoom->Fill(output.fClosestDeltaPhiToJets);
 
     // Combine results - for now take just DeltaPhi(MET,jet) into account 
-    //if (fClosestDeltaPhiToJets < fClosestDeltaPhiToTaus) {
-    fClosestDeltaPhi = fClosestDeltaPhiToJets; 
+    //if (output.fClosestDeltaPhiToJets < output.fClosestDeltaPhiToTaus) {
+    output.fClosestDeltaPhi = output.fClosestDeltaPhiToJets;
     //} else {
-    //  fClosestDeltaPhi = fClosestDeltaPhiToTaus;
+    //  output.fClosestDeltaPhi = output.fClosestDeltaPhiToTaus;
     //}
 
     // New: Don't combine results. Take deltaPhi(MET, jets)
-    fClosestDeltaPhi = fClosestDeltaPhiToJets;
-    hClosestDeltaPhi->Fill(fClosestDeltaPhi);
-    hClosestDeltaPhiZoom->Fill(fClosestDeltaPhi);
+    output.fClosestDeltaPhi = output.fClosestDeltaPhiToJets;
+    hClosestDeltaPhi->Fill(output.fClosestDeltaPhi);
+    hClosestDeltaPhiZoom->Fill(output.fClosestDeltaPhi);
 
     // Make cut
-    passEvent = true; 
-    if (fClosestDeltaPhi < fMinDeltaPhi)
-      passEvent = false;
+    output.fPassedEvent = !(output.fClosestDeltaPhi < fMinDeltaPhi);
 
-    return Data(this, passEvent);
+    return output;
   }
 }

@@ -51,7 +51,8 @@ namespace HPlus {
     // Initialize counter objects for tau candidate selection
     WrappedTH1* myZeroHisto = 0;
     fIDAllTauCandidates = fCounterPackager.addSubCounter(baseLabel, "AllTauCandidates", myZeroHisto);
-    fIDDecayModeFinding = fCounterPackager.addSubCounter(baseLabel, "DecayModeFinding", myZeroHisto);
+    fIDDecayModeFinding = fCounterPackager.addSubCounter(baseLabel,"DecayModeFinding",
+      histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, fMyDir, "TauCand_DecayModeFinding", "DecayModeFinding;DecayMode;N_{jets}", 30, 0, 30));
     fIDVertexZCut = fCounterPackager.addSubCounter(baseLabel, "VertexZCut",
       histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, fMyDir, "TauCand_VertexZCut", "tau IPz vs vertexZ;#tau IP_{z} - vertex_{Z} / cm;N_{jets} / 0.1 cm", 100, -5.0, 5.0));
     fIDJetPtCut = fCounterPackager.addSubCounter(baseLabel, "TauJetPt",

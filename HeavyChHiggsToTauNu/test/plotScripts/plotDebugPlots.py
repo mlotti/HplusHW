@@ -279,6 +279,7 @@ def doPlots(datasets):
     drawPlot(createPlot(myDir+"/jet_PartonFlavour"), "JetRejected_PartonFlavour", xlabel="PartonFlavour of rejected jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     myDir = "MET"
     drawPlot(createPlot(myDir+"/met"), "MET_MET", xlabel="MET, GeV", ylabel="N_{events}", rebin=4, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/metPhi"), "MET_Phi", xlabel="MET #phi", ylabel="N_{events}", rebin=5, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     drawPlot(createPlot(myDir+"/metSignif"), "MET_significance", xlabel="MET significance", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     drawPlot(createPlot(myDir+"/metSumEt"), "MET_SumET", xlabel="MET #sum E_{T}, GeV", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     myDir = "Btagging"
@@ -294,8 +295,8 @@ def doPlots(datasets):
     drawPlot(createPlot(myDir+"/MCMatchForPassedJets"), "Btag_MCMatchForPassedJets", xlabel="MCMatchForPassedJets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     # main directory
     drawPlot(createPlot("deltaPhi"), "DeltaPhi_tauMET", xlabel="#Delta#phi(#tau jet, MET), ^{o}", ylabel="N_{events}", rebin=20, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
-    drawPlot(createPlot("transverseMass"), "Mass_Transverse", xlabel="Transverse mass, GeV/c^{2}", ylabel="N_{events}", rebin=4, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
-    drawPlot(createPlot("EWKFakeTausTransverseMass"), "Mass_Transverse_EWKFakeTaus", xlabel="Transverse mass EWK fake taus, GeV/c^{2}", ylabel="N_{events}", rebin=4, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot("transverseMass"), "Mass_Transverse", xlabel="Transverse mass, GeV/c^{2}", ylabel="N_{events}", rebin=10, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot("EWKFakeTausTransverseMass"), "Mass_Transverse_EWKFakeTaus", xlabel="Transverse mass EWK fake taus, GeV/c^{2}", ylabel="N_{events}", rebin=10, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     drawPlot(createPlot("fullMass"), "Mass_Invariant", xlabel="Invariant mass, GeV/c^{2}", ylabel="N_{events}", rebin=4, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     drawPlot(createPlot("EWKFakeTausFullMass"), "Mass_Invariant_EWKFakeTaus", xlabel="Invariant mass EWK fake taus, GeV/c^{2}", ylabel="N_{events}", rebin=4, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     drawPlot(createPlot("alphaT"), "AlphaT", xlabel="#alpha_{T}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))

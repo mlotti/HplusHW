@@ -24,8 +24,8 @@ void printDaughters(const reco::Candidate& p);
 
 
 namespace HPlus {
-  TopWithWSelection::Data::Data(const TopWithWSelection *topWithWSelection, bool passedEvent):
-    fTopWithWSelection(topWithWSelection), fPassedEvent(passedEvent) {}
+  TopWithWSelection::Data::Data():
+    fPassedEvent(false) {}
   TopWithWSelection::Data::~Data() {}
 
   TopWithWSelection::TopWithWSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
@@ -77,13 +77,7 @@ namespace HPlus {
   }
 
   TopWithWSelection::Data TopWithWSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
-    // Reset variables
-    topMass = -1;
-    double nan = std::numeric_limits<double>::quiet_NaN();
-    top.SetXYZT(nan, nan, nan, nan);
-    W.SetXYZT(nan, nan, nan, nan);
-
-    bool passEvent = false;
+    Data output;
 
     bool wmassfound = false;
     bool topmassfound = false;
@@ -108,7 +102,6 @@ namespace HPlus {
 	
 	XYZTLorentzVector candW = iJet1->p4() + iJet2->p4();
 	
-        
 	hjjMass->Fill(candW.M());
 	double chi2 = ((candW.M() - nominalW)/sigmaW)*((candW.M() - nominalW)/sigmaW); 
 	
@@ -117,29 +110,24 @@ namespace HPlus {
 	  Jet1 = iJet1;
 	  Jet2 = iJet2;        
 	  wmassfound = true;  
-	  W = candW;          
+	  output.W = candW;          
 	}
       }
     }
 
     if ( wmassfound ) {
-      XYZTLorentzVector top = Jet1->p4() + Jet2->p4() + iJetb->p4(); 
-      hWMass->Fill(W.M());
+      output.top = Jet1->p4() + Jet2->p4() + iJetb->p4(); 
+      hWMass->Fill(output.getWMass());
       hChi2Min->Fill(sqrt(chi2Min));
-      topMass = top.M();
-      wMass = W.M();
-      hPtTop->Fill(top.Pt());
-      htopMass->Fill(top.M());
+      hPtTop->Fill(output.top.Pt());
+      htopMass->Fill(output.getTopMass());
       if ( sqrt(chi2Min) < fChi2Cut) {
 	topmassfound = true;
-	htopMassChiCut->Fill(top.M());
-	hWMassChiCut->Fill(W.M());
-	hPtTopChiCut->Fill(top.Pt());
+	htopMassChiCut->Fill(output.getTopMass());
+	hWMassChiCut->Fill(output.getWMass());
+	hPtTopChiCut->Fill(output.top.Pt());
       }
     }
-   
-     
-
 
     // search correct combinations
     //    if (!iEvent.isRealData() && chi2Min < fChi2Cut ) {
@@ -180,7 +168,6 @@ namespace HPlus {
 	}
       } 
       
-      
       for (size_t i=0; i < genParticles->size(); ++i){
 	const reco::Candidate & p = (*genParticles)[i];
 	int id = p.pdgId();
@@ -200,31 +187,30 @@ namespace HPlus {
 	}
       }
 
-      
-
        if ( bMatchTopSide && Jet1Match && Jet2Match) {
-	 htopMassMatch->Fill(top.M());
-	 hWMassMatch->Fill(W.M()); 
+	 htopMassMatch->Fill(output.getTopMass());
+	 hWMassMatch->Fill(output.getWMass()); 
        }
        if ( bMatchHiggsSide && Jet1Match && Jet2Match) {
-	 htopMassMatchWrongB->Fill(top.M());
-	 hWMassMatchWrongB->Fill(W.M()); 
+	 htopMassMatchWrongB->Fill(output.getTopMass());
+	 hWMassMatchWrongB->Fill(output.getWMass()); 
        }
        if ( bMatchTopSide ) {
-	 htopMassBMatch->Fill(top.M());
-	 hWMassBMatch->Fill(W.M()); 
+	 htopMassBMatch->Fill(output.getTopMass());
+	 hWMassBMatch->Fill(output.getWMass()); 
        }
        if ( Jet1Match && Jet2Match ) {
-	 htopMassQMatch->Fill(top.M());
-	 hWMassQMatch->Fill(W.M()); 
+	 htopMassQMatch->Fill(output.getTopMass());
+	 hWMassQMatch->Fill(output.getWMass()); 
        }
     }
 
-    
-    passEvent = true;
-    if( topMass < fTopMassLow || topMass > fTopMassHigh ) passEvent = false;
-    increment(fTopWithWMassCount);
-    
-    return Data(this, passEvent);
-  }    
+    if( output.getTopMass() < fTopMassLow || output.getTopMass() > fTopMassHigh ) {
+      output.fPassedEvent = false;
+    } else {
+      output.fPassedEvent = true;
+      increment(fTopWithWMassCount);
+    }
+    return output;
+  }
 }
