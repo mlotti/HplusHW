@@ -18,12 +18,13 @@ namespace HPlus {
     fSelectionFlowPlotLabel(selectionFlowPlotLabel) {
     // Create directory for histogram
     edm::Service<TFileService> fs;
-    edm::Service<TFileService> fs;
     std::stringstream myStream;
     myStream << "CommonPlotsAtEveryStep_" << label;
     TFileDirectory myDir = fs->mkdir(myStream.str().c_str());
     // Create histograms
-    hNVertices = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "nVertices", "Number of vertices;N_{vertices};N_{events}", 60, 0, 60);
+    hNVertices = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "nVertices", "Number of vertices;N_{vertices};N_{events}", 60, 0, 60);
+    hTransverseMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events}", 80, 0., 400.);
+
   }
 
   CommonPlotsFilledAtEveryStep::~CommonPlotsFilledAtEveryStep() {}
@@ -89,6 +90,13 @@ namespace HPlus {
     hDphiTauMetVsDphiJet3MHT = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalDir, "hDphiTauMetVsDphiJet3MHT", "hDphiTauMetVsDphiJet3MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{3},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
     hDphiTauMetVsDphiJet4MHT = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalDir, "hDphiTauMetVsDphiJet4MHT", "hDphiTauMetVsDphiJet4MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{4},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
     hDphiTauMetVsDphiTauMHT = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalDir, "hDphiTauMetVsDphiTauMHT", "hDphiTauMetVsDphiTauMHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(#tau,MHT), ^{o}", 36, 0, 180, 36, 0, 180);
+    // final for fake taus
+    TFileDirectory myFinalFakeDir = myCommonBaseDir.mkdir("FakeTaus_Final");
+    hDphiTauMetVsDphiJet1MHTFakeTaus = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalFakeDir, "hDphiTauMetVsDphiJet1MHT", "hDphiTauMetVsDphiJet1MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{1},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
+    hDphiTauMetVsDphiJet2MHTFakeTaus = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalFakeDir, "hDphiTauMetVsDphiJet2MHT", "hDphiTauMetVsDphiJet2MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{2},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
+    hDphiTauMetVsDphiJet3MHTFakeTaus = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalFakeDir, "hDphiTauMetVsDphiJet3MHT", "hDphiTauMetVsDphiJet3MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{3},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
+    hDphiTauMetVsDphiJet4MHTFakeTaus = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalFakeDir, "hDphiTauMetVsDphiJet4MHT", "hDphiTauMetVsDphiJet4MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{4},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
+    hDphiTauMetVsDphiTauMHTFakeTaus = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalFakeDir, "hDphiTauMetVsDphiTauMHT", "hDphiTauMetVsDphiTauMHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(#tau,MHT), ^{o}", 36, 0, 180, 36, 0, 180);
 
   }
 
@@ -204,5 +212,15 @@ namespace HPlus {
     hDphiTauMetVsDphiJet3MHT->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet3());
     hDphiTauMetVsDphiJet4MHT->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet4());
     hDphiTauMetVsDphiTauMHT->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTTau());
+  }
+
+  void CommonPlots::fillFinalPlotsForFakeTaus() {
+    double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
+
+    hDphiTauMetVsDphiJet1MHTFakeTaus->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet1());
+    hDphiTauMetVsDphiJet2MHTFakeTaus->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet2());
+    hDphiTauMetVsDphiJet3MHTFakeTaus->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet3());
+    hDphiTauMetVsDphiJet4MHTFakeTaus->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet4());
+    hDphiTauMetVsDphiTauMHTFakeTaus->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTTau());
   }
 }

@@ -128,6 +128,7 @@ namespace HPlus {
     void fillControlPlots(const TopChiSelection::Data& data);
     void fillControlPlots(const EvtTopology::Data& data);
     void fillFinalPlots();
+    void fillFinalPlotsForFakeTaus();
 
   private:
     void createHistograms();
@@ -169,6 +170,12 @@ namespace HPlus {
     WrappedTH2* hDphiTauMetVsDphiJet3MHT;
     WrappedTH2* hDphiTauMetVsDphiJet4MHT;
     WrappedTH2* hDphiTauMetVsDphiTauMHT;
+
+    WrappedTH2* hDphiTauMetVsDphiJet1MHTFakeTaus;
+    WrappedTH2* hDphiTauMetVsDphiJet2MHTFakeTaus;
+    WrappedTH2* hDphiTauMetVsDphiJet3MHTFakeTaus;
+    WrappedTH2* hDphiTauMetVsDphiJet4MHTFakeTaus;
+    WrappedTH2* hDphiTauMetVsDphiTauMHTFakeTaus;
 
     // histograms to be filled at every step
     std::vector<CommonPlotsFilledAtEveryStep*> hEveryStepHistograms; // Owner of objects
