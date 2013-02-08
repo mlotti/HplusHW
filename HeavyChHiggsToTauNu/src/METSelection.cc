@@ -94,10 +94,10 @@ namespace HPlus {
     if(hrawmet.isValid())
       output.fRawMET = hrawmet->ptrAt(0);
     if(htype1met.isValid() && fType1Src.label() != "") {
-      fType1METCorrected.clear();
+      output.fType1METCorrected.clear();
       output.fType1MET = htype1met->ptrAt(0);
-      fType1METCorrected.push_back(undoJetCorrectionForSelectedTau(output.fType1MET, selectedTau, allJets, kType1));
-      output.fType1MET = edm::Ptr<reco::MET>(&fType1METCorrected, 0);
+      output.fType1METCorrected.push_back(undoJetCorrectionForSelectedTau(output.fType1MET, selectedTau, allJets, kType1));
+      output.fType1MET = edm::Ptr<reco::MET>(&output.fType1METCorrected, 0);
     }
     /*
     if(htype2met.isValid()) {

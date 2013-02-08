@@ -41,9 +41,9 @@ namespace HPlus {
       const edm::Ptr<reco::MET> getRawMET() const { return fRawMET; }
       const edm::Ptr<reco::MET> getType1MET() const { return fType1MET; }
       const edm::Ptr<reco::MET> getType2MET() const { return fType2MET; }
-
       const edm::Ptr<reco::MET> getCaloMET() const { return fCaloMET; }
       const edm::Ptr<reco::MET> getTcMET() const { return fTcMET; }
+      const  std::vector<reco::MET> getType1METCorrected() const { return fType1METCorrected; }
 
       friend class METSelection;
 
@@ -56,6 +56,9 @@ namespace HPlus {
       edm::Ptr<reco::MET> fType2MET;
       edm::Ptr<reco::MET> fCaloMET;
       edm::Ptr<reco::MET> fTcMET;
+      // For type I/II correction
+      std::vector<reco::MET> fType1METCorrected;
+      //std::vector<reco::MET> fType2METCorrected;
 
     };
 
@@ -102,10 +105,6 @@ namespace HPlus {
     WrappedTH1 *hMetDivSumEt;
     WrappedTH1 *hMetDivSqrSumEt;
 
-
-    // For type I/II correction
-    std::vector<reco::MET> fType1METCorrected;
-    //std::vector<reco::MET> fType2METCorrected;
   };
 }
 
