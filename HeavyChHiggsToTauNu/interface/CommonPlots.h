@@ -11,6 +11,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 
 #include <string>
@@ -44,7 +45,13 @@ namespace HPlus {
     void cacheDataObjects(int nVertices,
                           const VertexSelection::Data* vertexData,
                           const TauSelection::Data* tauData,
-                          const GlobalElectronVeto::Data* electronData);
+                          const GlobalElectronVeto::Data* electronData,
+                          const GlobalMuonVeto::Data* muonData,
+                          const JetSelection::Data* jetData,
+                          const METSelection::Data* metData,
+                          const BTagging::Data* bJetData,
+                          const TopChiSelection::Data* topData,
+                          const EvtTopology::Data* evtTopology);
 
   private:
     /// Status indicating wheather the data objects have been cached
@@ -58,6 +65,12 @@ namespace HPlus {
     const VertexSelection::Data* fVertexData;
     const TauSelection::Data* fTauData;
     const GlobalElectronVeto::Data* fElectronData;
+    const GlobalMuonVeto::Data* fMuonData;
+    const JetSelection::Data* fJetData;
+    const METSelection::Data* fMETData;
+    const BTagging::Data* fBJetData;
+    const TopChiSelection::Data* fTopData;
+    const EvtTopology::Data* fEvtTopology;
 
     /// Histograms to be plotted after every step
     WrappedTH1* hNVertices;
@@ -91,7 +104,13 @@ namespace HPlus {
                     int nVertices,
                     VertexSelection& vertexSelection,
                     TauSelection& tauSelection,
-                    GlobalElectronVeto& eVeto); // FIXME add more data objects
+                    GlobalElectronVeto& eVeto,
+                    GlobalMuonVeto& muonVeto,
+                    JetSelection& jetSelection,
+                    METSelection& metSelection,
+                    BTagging& bJetSelection,
+                    TopChiSelection& topChiSelection,
+                    EvtTopology& evtTopology);
 
     /// create object containing histograms to be filled after all (or almost all) selection steps
     CommonPlotsFilledAtEveryStep* createCommonPlotsFilledAtEveryStep(std::string label, bool enterSelectionFlowPlot = false, std::string selectionFlowPlotLabel = "");
@@ -101,10 +120,13 @@ namespace HPlus {
     void fillControlPlots(const VertexSelection::Data& data);
     void fillControlPlots(const TauSelection::Data& data);
     void fillControlPlots(const GlobalElectronVeto::Data& data);
-    /*void fillControlPlots(const GlobalMuonVeto::Data& data);
+    void fillControlPlots(const GlobalMuonVeto::Data& data);
     void fillControlPlots(const JetSelection::Data& data);
     void fillControlPlots(const METSelection::Data& data);
-    void fillControlPlots(const BTagging::Data& data);*/
+    void fillControlPlots(const BTagging::Data& data);
+    void fillControlPlots(const TopChiSelection::Data& data);
+    void fillControlPlots(const EvtTopology::Data& data);
+    void fillFinalPlots();
 
   private:
     /// Status indicating wheather the data objects have been cached
@@ -118,7 +140,12 @@ namespace HPlus {
     VertexSelection::Data fVertexData;
     TauSelection::Data fTauData;
     GlobalElectronVeto::Data fElectronData;
-    // FIXME add more ...
+    GlobalMuonVeto::Data fMuonData;
+    JetSelection::Data fJetData;
+    METSelection::Data fMETData;
+    BTagging::Data fBJetData;
+    TopChiSelection::Data fTopData;
+    EvtTopology::Data fEvtTopology;
 
     // Input parameters
 

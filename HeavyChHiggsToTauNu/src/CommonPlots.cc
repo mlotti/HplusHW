@@ -39,11 +39,23 @@ namespace HPlus {
   void CommonPlotsFilledAtEveryStep::cacheDataObjects(int nVertices,
                                                       const VertexSelection::Data* vertexData,
                                                       const TauSelection::Data* tauData,
-                                                      const GlobalElectronVeto::Data* electronData) {
+                                                      const GlobalElectronVeto::Data* electronData,
+                                                      const GlobalMuonVeto::Data* muonData,
+                                                      const JetSelection::Data* jetData,
+                                                      const METSelection::Data* metData,
+                                                      const BTagging::Data* bJetData,
+                                                      const TopChiSelection::Data* topData,
+                                                      const EvtTopology::Data* evtTopology) {
     fNVertices = nVertices;
     fVertexData = vertexData;
     fTauData = tauData;
     fElectronData = electronData;
+    fMuonData = muonData;
+    fJetData = jetData;
+    fMETData = metData;
+    fBJetData = bJetData;
+    fTopData = topData;
+    fEvtTopology = evtTopology;
     fDataObjectsCached = true;
   }
 
@@ -68,16 +80,29 @@ namespace HPlus {
                                int nVertices,
                                VertexSelection& vertexSelection,
                                TauSelection& tauSelection,
-                               GlobalElectronVeto& eVeto) {
+                               GlobalElectronVeto& eVeto,
+                               GlobalMuonVeto& muonVeto,
+                               JetSelection& jetSelection,
+                               METSelection& metSelection,
+                               BTagging& bJetSelection,
+                               TopChiSelection& topChiSelection,
+                               EvtTopology& evtTopology) {
     // Obtain data objects only, if they have not yet been cached
     if (bDataObjectsCached) return;
     bDataObjectsCached = true;
-
+    fNVertices = nVertices;
     // Obtain data objects
     fVertexData = vertexSelection.silentAnalyze(iEvent, iSetup);
     if (!fVertexData.passedEvent()) return; // Plots do not make sense if no PV has been found
     fTauData = tauSelection.silentAnalyze(iEvent, iSetup, fVertexData.getSelectedVertex()->z());
+    if (!fTauData.passedEvent()) return; // Need to require one tau in the event
     fElectronData = eVeto.silentAnalyze(iEvent, iSetup);
+    fMuonData = muonVeto.silentAnalyze(iEvent, iSetup, fVertexData.getSelectedVertex());
+    fJetData = jetSelection.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fNVertices);
+    fMETData = metSelection.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fJetData.getAllJets());
+    fBJetData = bJetSelection.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets());
+    fTopData = topChiSelection.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets(), fBJetData.getSelectedJets());
+    fEvtTopology = evtTopology.silentAnalyze(iEvent, iSetup, *(fTauData.getSelectedTau()), fJetData.getAllIdentifiedJets());
 
     // Pass pointer to cached data objects to CommonPlotsFilledAtEveryStep
     if (!hEveryStepHistograms.size())
@@ -86,7 +111,13 @@ namespace HPlus {
       (*it)->cacheDataObjects(fNVertices,
                               &fVertexData,
                               &fTauData,
-                              &fElectronData);
+                              &fElectronData,
+                              &fMuonData,
+                              &fJetData,
+                              &fMETData,
+                              &fBJetData,
+                              &fTopData,
+                              &fEvtTopology);
     }
   }
 
@@ -113,5 +144,31 @@ namespace HPlus {
     
   }
 
+  void CommonPlots::fillControlPlots(const GlobalMuonVeto::Data& data) {
+    
+  }
 
+  void CommonPlots::fillControlPlots(const JetSelection::Data& data) {
+    
+  }
+
+  void CommonPlots::fillControlPlots(const METSelection::Data& data) {
+    
+  }
+
+  void CommonPlots::fillControlPlots(const BTagging::Data& data) {
+    
+  }
+
+  void CommonPlots::fillControlPlots(const TopChiSelection::Data& data) {
+    
+  }
+
+   void CommonPlots::fillControlPlots(const EvtTopology::Data& data) {
+    
+  }
+
+  void CommonPlots::fillFinalPlots() {
+    
+  }
 }
