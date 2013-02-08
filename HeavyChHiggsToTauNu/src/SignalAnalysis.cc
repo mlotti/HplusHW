@@ -906,7 +906,7 @@ namespace HPlus {
     if (myFakeTauStatus) hCtrlEWKFakeTausNbjets->Fill(btagData.getBJetCount());
     if(!btagData.passedEvent()) return false;
     fCommonPlotsAfterBTagging->fill();
-    if (myFakeTauStatus) fCommonPlotsAfterBTagging->fill();
+    if (myFakeTauStatus) fCommonPlotsAfterBTaggingFakeTaus->fill();
     increment(fBTaggingCounter);
 
     // Apply scale factor as weight to event
@@ -1116,7 +1116,7 @@ namespace HPlus {
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderSelectedEvents);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderSelectedEvents);
     fCommonPlotsSelected->fill();
-    if (myFakeTauStatus) fCommonPlotsSelected->fill();
+    if (myFakeTauStatus) fCommonPlotsSelectedFakeTaus->fill();
     fCommonPlots.fillFinalPlots();
     if (myFakeTauStatus) fCommonPlots.fillFinalPlotsForFakeTaus();
 
