@@ -18,8 +18,9 @@ namespace HPlus {
     fSelectionFlowPlotLabel(selectionFlowPlotLabel) {
     // Create directory for histogram
     edm::Service<TFileService> fs;
+    edm::Service<TFileService> fs;
     std::stringstream myStream;
-    myStream << "CommonPlots_" << label;
+    myStream << "CommonPlotsAtEveryStep_" << label;
     TFileDirectory myDir = fs->mkdir(myStream.str().c_str());
     // Create histograms
     hNVertices = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "nVertices", "Number of vertices;N_{vertices};N_{events}", 60, 0, 60);
@@ -29,8 +30,8 @@ namespace HPlus {
 
   void CommonPlotsFilledAtEveryStep::fill() {
      // Safety check
-     if (!fDataObjectsCached)
-       throw cms::Exception("Assert") << "CommonPlotsFilledAtEveryStep: data objects have not been cached! (did you forget to call CommonPlotsFilledAtEveryStep::cacheDataObjects from CommonPlots::initialize?)";
+     //if (!fDataObjectsCached)
+     //  throw cms::Exception("Assert") << "CommonPlotsFilledAtEveryStep: data objects have not been cached! (did you forget to call CommonPlotsFilledAtEveryStep::cacheDataObjects from CommonPlots::initialize?)";
     hNVertices->Fill(fNVertices);
     if (!fVertexData->passedEvent()) return; // Plots do not make sense if no PV has been found
     
@@ -56,7 +57,7 @@ namespace HPlus {
     fBJetData = bJetData;
     fTopData = topData;
     fEvtTopology = evtTopology;
-    fDataObjectsCached = true;
+    //fDataObjectsCached = true;
   }
 
   // ====================================================================================================
@@ -65,8 +66,30 @@ namespace HPlus {
     bDataObjectsCached(false),
     fEventCounter(eventCounter),
     fHistoWrapper(histoWrapper) {
+      createHistograms();
+  }
+
+    CommonPlots::CommonPlots(EventCounter& eventCounter, HistoWrapper& histoWrapper) :
+    bDataObjectsCached(false),
+    fEventCounter(eventCounter),
+    fHistoWrapper(histoWrapper) {
+      createHistograms();
+  }
+
+  void CommonPlots::createHistograms() {
+    edm::Service<TFileService> fs;
+    TFileDirectory myCommonBaseDir = fs->mkdir("CommonPlots");
+
     // Create histograms
-    
+
+    // final
+    TFileDirectory myFinalDir = myCommonBaseDir.mkdir("Final");
+    hDphiTauMetVsDphiJet1MHT = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalDir, "hDphiTauMetVsDphiJet1MHT", "hDphiTauMetVsDphiJet1MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{1},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
+    hDphiTauMetVsDphiJet2MHT = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalDir, "hDphiTauMetVsDphiJet2MHT", "hDphiTauMetVsDphiJet2MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{2},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
+    hDphiTauMetVsDphiJet3MHT = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalDir, "hDphiTauMetVsDphiJet3MHT", "hDphiTauMetVsDphiJet3MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{3},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
+    hDphiTauMetVsDphiJet4MHT = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalDir, "hDphiTauMetVsDphiJet4MHT", "hDphiTauMetVsDphiJet4MHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(jet_{4},MHT), ^{o}", 36, 0, 180, 36, 0, 180);
+    hDphiTauMetVsDphiTauMHT = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myFinalDir, "hDphiTauMetVsDphiTauMHT", "hDphiTauMetVsDphiTauMHT;#Delta#phi(#tau,MET), ^{o};#Delta#phi(#tau,MHT), ^{o}", 36, 0, 180, 36, 0, 180);
+
   }
 
   CommonPlots::~CommonPlots() {
@@ -88,8 +111,8 @@ namespace HPlus {
                                TopChiSelection& topChiSelection,
                                EvtTopology& evtTopology) {
     // Obtain data objects only, if they have not yet been cached
-    if (bDataObjectsCached) return;
-    bDataObjectsCached = true;
+    //if (bDataObjectsCached) return;
+    //bDataObjectsCached = true;
     fNVertices = nVertices;
     // Obtain data objects
     fVertexData = vertexSelection.silentAnalyze(iEvent, iSetup);
@@ -133,22 +156,27 @@ namespace HPlus {
   }
 
   void CommonPlots::fillControlPlots(const VertexSelection::Data& data) {
+    //fVertexData = data;
     
   }
 
   void CommonPlots::fillControlPlots(const TauSelection::Data& data) {
+    //fTauData = data;
     
   }
 
   void CommonPlots::fillControlPlots(const GlobalElectronVeto::Data& data) {
+    //fElectronData = data;
     
   }
 
   void CommonPlots::fillControlPlots(const GlobalMuonVeto::Data& data) {
+    //fMuonData = data;
     
   }
 
   void CommonPlots::fillControlPlots(const JetSelection::Data& data) {
+    //fJetData = data;
     
   }
 
@@ -169,6 +197,12 @@ namespace HPlus {
   }
 
   void CommonPlots::fillFinalPlots() {
-    
+    double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
+
+    hDphiTauMetVsDphiJet1MHT->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet1());
+    hDphiTauMetVsDphiJet2MHT->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet2());
+    hDphiTauMetVsDphiJet3MHT->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet3());
+    hDphiTauMetVsDphiJet4MHT->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTJet4());
+    hDphiTauMetVsDphiTauMHT->Fill(myDeltaPhiTauMET, fJetData.getDeltaPhiMHTTau());
   }
 }

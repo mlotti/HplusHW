@@ -95,10 +95,11 @@ namespace HPlus {
    */
   class CommonPlots {
   public:
+    CommonPlots(EventCounter& eventCounter, HistoWrapper& histoWrapper);
     CommonPlots(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~CommonPlots();
 
-    /// Initialize data objects
+    /// Initialize data objects; call for every event
     void initialize(const edm::Event& iEvent,
                     const edm::EventSetup& iSetup,
                     int nVertices,
@@ -129,6 +130,8 @@ namespace HPlus {
     void fillFinalPlots();
 
   private:
+    void createHistograms();
+
     /// Status indicating wheather the data objects have been cached
     bool bDataObjectsCached;
     /// Event counter object
@@ -160,8 +163,13 @@ namespace HPlus {
     
     // muon veto
     
-    
-    
+    // final
+    WrappedTH2* hDphiTauMetVsDphiJet1MHT;
+    WrappedTH2* hDphiTauMetVsDphiJet2MHT;
+    WrappedTH2* hDphiTauMetVsDphiJet3MHT;
+    WrappedTH2* hDphiTauMetVsDphiJet4MHT;
+    WrappedTH2* hDphiTauMetVsDphiTauMHT;
+
     // histograms to be filled at every step
     std::vector<CommonPlotsFilledAtEveryStep*> hEveryStepHistograms; // Owner of objects
   };
