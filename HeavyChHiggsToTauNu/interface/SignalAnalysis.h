@@ -36,6 +36,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexAssignmentAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingMuonIsolationQuantifier.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CommonPlots.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METFilters.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METPhiOscillationCorrection.h"
 
@@ -282,7 +283,7 @@ namespace HPlus {
     WrappedTH1 *hVerticesTriggeredBeforeWeight;
     WrappedTH1 *hVerticesTriggeredAfterWeight;
 
-    // tau investating histograms
+    // tau investating histograms -- temporary
     WrappedTH1 *hTauVsJetDeltaPt;
     WrappedTH1 *hTauVsJetDeltaR;
     WrappedTH1 *hTauVsJetMCFlavor;
@@ -305,6 +306,22 @@ namespace HPlus {
     WrappedTH1 *hTauVsJetTauPtgAfter;
     WrappedTH1 *hTauVsJetTauPteAfter;
     WrappedTH1 *hTauVsJetTauPtmuAfter;
+    
+    WrappedTH1 *hTauVsJetTauPtbByJetPtBefore;
+    WrappedTH1 *hTauVsJetTauPtbleptonicByJetPtBefore;
+    WrappedTH1 *hTauVsJetTauPtcByJetPtBefore;
+    WrappedTH1 *hTauVsJetTauPtudsByJetPtBefore;
+    WrappedTH1 *hTauVsJetTauPtgByJetPtBefore;
+    WrappedTH1 *hTauVsJetTauPteByJetPtBefore;
+    WrappedTH1 *hTauVsJetTauPtmuByJetPtBefore;
+    WrappedTH1 *hTauVsJetTauPtbByJetPtAfter;
+    WrappedTH1 *hTauVsJetTauPtbleptonicByJetPtAfter;
+    WrappedTH1 *hTauVsJetTauPtcByJetPtAfter;
+    WrappedTH1 *hTauVsJetTauPtudsByJetPtAfter;
+    WrappedTH1 *hTauVsJetTauPtgByJetPtAfter;
+    WrappedTH1 *hTauVsJetTauPteByJetPtAfter;
+    WrappedTH1 *hTauVsJetTauPtmuByJetPtAfter;
+
 
     // MCAnalysis histograms
     WrappedTH1 *hgenWmass;
@@ -457,6 +474,37 @@ namespace HPlus {
 
     bool fProduce;
     bool fOnlyGenuineTaus; 
+    
+    
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode0;
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode1;
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode2;
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode0NoNeutralHadrons;
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode1NoNeutralHadrons;
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode2NoNeutralHadrons;
+
+    // Common plots
+    CommonPlots fCommonPlots;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTrigger;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterVertexSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeight;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVeto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMuonVeto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMET;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTagging;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelected;
+
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelectionFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeightFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVetoFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMuonVetoFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelectionFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTaggingFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFakeTaus;
+
   };
 }
 
