@@ -285,7 +285,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
             "Tau_202792-203742_2012C_Prompt": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"],
             "Tau_198941-203742_2012C_Prompt": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7",  # 198941-199608
                                                "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9",  # 199698-202504
-                                               "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"], # 202970-203742
+                                               "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"], # 202970-203742 # FIXME: make this piece separate for Tau, it has the fix for high-pt taus
             "Tau_201191-201191_2012C_Dec11": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"],
             "Tau_203777-208686_2012D_Prompt": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"],
         }
