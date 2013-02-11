@@ -55,6 +55,7 @@ def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
 #
 # All keyword arguments <b>except</b> the ones below are forwarded to
 # DatasetManagerCreator.createDatasetManager()
+# \li \a directory
 # \li \a cfgfile
 # \li \a excludeTasks
 # \li \a includeOnlyTasks
@@ -64,7 +65,7 @@ def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
 # \see dataset.readFromMulticrabCfg
 def getDatasetsFromMulticrabCfg(**kwargs):
     _args = copy.copy(kwargs)
-    for argName in ["cfgfile", "excludeTasks", "includeOnlyTasks"]:
+    for argName in ["directory", "cfgfile", "excludeTasks", "includeOnlyTasks"]:
         try:
             del _args[argName]
         except KeyError:
@@ -79,6 +80,7 @@ def getDatasetsFromMulticrabCfg(**kwargs):
 #
 # <b>Keyword arguments</b>
 # \li \a opts              Optional OptionParser object. Should have options added with addOptions() and multicrab.addOptions().
+# \li \a directory         Directory where to look for \a cfgfile.
 # \li \a cfgfile           Path to the multicrab.cfg file (for default, see multicrab.getTaskDirectories())
 # \li \a excludeTasks      String, or list of strings, to specify regexps.
 #                          If a dataset name matches to any of the
@@ -98,9 +100,15 @@ def readFromMulticrabCfg(**kwargs):
     opts = kwargs.get("opts", None)
     taskDirs = []
     dirname = ""
-    if "cfgfile" in kwargs:
-        taskDirs = multicrab.getTaskDirectories(opts, kwargs["cfgfile"])
-        dirname = os.path.dirname(kwargs["cfgfile"])
+    if "directory" in kwargs or "cfgfile" in kwargs:
+        _args = {}
+        if "directory" in kwargs:
+            dirname = kwargs["directory"]
+            _args["directory"] = dirname
+        if "cfgfile" in kwargs:
+            _args["filename"] = kwargs["cfgfile"]
+            dirname = os.path.dirname(os.path.join(dirname, kwargs["cfgfile"]))
+        taskDirs = multicrab.getTaskDirectories(opts, **_args)
     else:
         taskDirs = multicrab.getTaskDirectories(opts)
 
