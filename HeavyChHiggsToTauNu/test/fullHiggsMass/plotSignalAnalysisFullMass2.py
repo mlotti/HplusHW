@@ -2,7 +2,8 @@
 
 ###########################################################################
 #
-# Author: Stefan Richter
+# Author: Stefan Richter (based on examples by others and written with the
+#         help of others!)
 #
 ###########################################################################
 
@@ -69,6 +70,7 @@ plots.mergeRenameReorderForDataMC(datasets)
 
 # This can be used to merge datasets:
 #datasets.merge("TTJetsPlusWJets", ["TTJets", "WJets"], keepSources=True)
+datasets.merge("TTToHplusBWB_M120_plus_TTJets", ["TTToHplusBWB_M120", "TTJets"], keepSources=True)
 
 # Override the data luminosity (should not be used except for testing)
 #datasets.getDataset("Data").setLuminosity(35)
@@ -82,8 +84,10 @@ plots.mergeRenameReorderForDataMC(datasets)
 #     h = plots.DataMCPlot(datasets, analysis+"/FullHiggsMass/HiggsMass")
 
 # TTJets
-drh_reco = datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMass")
-drh_gen = datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/FullHiggsMass/TrueHiggsMass")
+drh_reco = datasets.getDataset("TTToHplusBWB_M120_plus_TTJets").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMass")
+drh_gen = datasets.getDataset("TTToHplusBWB_M120_plus_TTJets").getDatasetRootHisto(analysis+"/FullHiggsMass/TrueHiggsMass")
+#drh_reco = datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMass")
+#drh_gen = datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/FullHiggsMass/TrueHiggsMass")
 #drh_gen = datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genFullHiggsMass")
 
 drh_reco.normalizeToLuminosity(mcOnlyLumi)

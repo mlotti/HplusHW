@@ -53,6 +53,11 @@ namespace HPlus {
     TFileDirectory myDir = fs->mkdir("FullHiggsMass");
     hHiggsMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMass", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
     hTrueHiggsMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TrueHiggsMass", "True Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+hHiggsMassNoActualHiggs = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "HiggsMassNoActualHiggs", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+hHiggsMassCorrectId = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "HiggsMassCorrectId", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+hHiggsMassIncorrectId = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "HiggsMassIncorrectId", "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
+
+
     hHiggsMassDPz100 = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMassDPz100", "Higgs massDPz100;m_{H^{+}} (GeV)", 100, 0, 500);
     hHiggsMass_TauBmatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMassTauBmatch", "Higgs massTauBmatch;m_{H^{+}} (GeV)", 100, 0, 500);
     hHiggsMass_TauBMETmatch = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "HiggsMassTauBMETmatch", "Higgs massTauBMETmatch;m_{H^{+}} (GeV)", 100, 0, 500);
@@ -141,10 +146,15 @@ namespace HPlus {
 
     // 3) calculate
     double myRecoHiggsMass = -99999999.0;
+    std::cout << "Calling doCalculate for event " << "bla" << std::endl;
     myRecoHiggsMass = doCalculate(myTauVector, myBJetVector, myMETVector, myMatchStatus);
 
     // 4) calculate real mass of charged Higgs boson from MC truth
-    calculateTrueHiggsMass(iEvent, myRecoHiggsMass);
+    if (!iEvent.isRealData())
+      calculateTrueHiggsMass(iEvent, myRecoHiggsMass, tauData.getSelectedTau(), myBJet);
+
+    // Print some whitespace for better readability of debug print statements
+    std::cout << std::endl;
 
     // Return data object
     return FullHiggsMassCalculator::Data(this, myPassedStatus);
@@ -337,42 +347,37 @@ namespace HPlus {
 
 
 
-
+  // BUG? myHiggsLine will always be the line of the last H+ in the event. What if there are several?
+  //
+  // What this function does exactly:
+  // It finds the line of the last H+ in the list of GenParticles
+  // It finds the top which this H+ comes from (this is what knowledge of the line is needed for)
   bool FullHiggsMassCalculator::doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
-    // Find last Hplus line
+    // Find the line of the last H+ in the event.
     size_t myHiggsLine = 0;
     for (size_t i=0; i < genParticles->size(); ++i) {
       const reco::Candidate & p = (*genParticles)[i];
-      if (TMath::Abs(p.pdgId()) == 37)
-        myHiggsLine = i;
+      if (TMath::Abs(p.pdgId()) == 37) myHiggsLine = i; // BUG? See above.
     }
-
-    //std::cout << "FullMass: Higgs line " << myHiggsLine << std::endl;
-
     if (!myHiggsLine) return false;
-    // Find top, from which Higgs comes from
+    std::cout << "FullMass: Higgs line " << myHiggsLine << std::endl;
+
+    // Find top which H+ comes from.
     reco::Candidate* myHiggsSideTop = const_cast<reco::Candidate*>(genParticles->at(myHiggsLine).mother());
     bool myStatus = true;
     while (myStatus) {
-
-//      if (!myHiggsSideTop) myStatus = false;
-      if (!myHiggsSideTop)
-        return false;
-
-
+      //if (!myHiggsSideTop) myStatus = false;
+      if (!myHiggsSideTop) return false;
       //std::cout << "FullMass: Higgs side mother = " << myHiggsSideTop->pdgId() << std::endl;
-
       if (TMath::Abs(myHiggsSideTop->pdgId()) == 6) myStatus = false;
-      if (myStatus)
-        myHiggsSideTop = const_cast<reco::Candidate*>(myHiggsSideTop->mother());
+      if (myStatus) myHiggsSideTop = const_cast<reco::Candidate*>(myHiggsSideTop->mother());
     }
-    if (!myHiggsSideTop)
-      return false;
+    if (!myHiggsSideTop) return false;
+    std::cout << "FullMass: Higgs side top selected!" << std::endl;
 
-    //std::cout << "FullMass: Higgs side top selected " << std::endl;
-    // Look at Higgs side top daughters to find b jet
+    // Look at H+ side top daughters to find b-jet.
     reco::Candidate* myHiggsSideBJet = 0;
     for (size_t i=0; i < genParticles->size(); ++i) {
       const reco::Candidate & p = (*genParticles)[i];
@@ -382,10 +387,9 @@ namespace HPlus {
         while (myStatus) {
           if (!myBMother) {
             myStatus = false;
-          } else {
-
-            //std::cout << "FullMass: B quark mother = " << myBMother->pdgId() << std::endl;
-
+          }
+	  else {
+            std::cout << "FullMass: B quark mother = " << myBMother->pdgId() << std::endl;
             if (TMath::Abs(myBMother->pdgId()) == 6) {
               myStatus = false;
               double myDeltaR = ROOT::Math::VectorUtil::DeltaR(myBMother->p4(), myHiggsSideTop->p4());
@@ -401,11 +405,10 @@ namespace HPlus {
       }
     }
     if (!myHiggsSideBJet) return false;
-
-    //std::cout << "FullMass: Higgs side bjet found, pt=" << myHiggsSideBJet->pt() << ", eta=" << myHiggsSideBJet->eta() << std::endl;
+    std::cout << "FullMass: Higgs side bjet found, pt=" << myHiggsSideBJet->pt() << ", eta=" << myHiggsSideBJet->eta() << std::endl;
 
     // Look if tau decays into one prong (hadronic)
-    reco::Candidate* myTauFromHiggs = 0;
+    reco::Candidate* myTauFromHiggs = 0; //TODO: is this a good way to initialize a pointer???
     TVector3 myNeutrinoes(0.0, 0.0, 0.0);
     TVector3 myVisibleTau(0.0, 0.0, 0.0);
     bool myLeptonicTauDecayStatus = false;
@@ -413,6 +416,8 @@ namespace HPlus {
     for (size_t i=0; i < genParticles->size(); ++i) {
       const reco::Candidate & p = (*genParticles)[i];
       int myId = TMath::Abs(p.pdgId());
+      // pdgId >= 11 && <= 16: SM lepton
+      // pdgId == 211: charged pion
       if ((myId >= 11 && myId <= 16) || myId==211) {
         // Check if tau is coming from H+
         myStatus = true;
@@ -422,7 +427,7 @@ namespace HPlus {
             myStatus = false;
           } else {
             int myMotherId = TMath::Abs(myMother->pdgId());
-            //std::cout << "FullMass: H+ decay products mother = " << myMother->pdgId() << " line=" << i << std::endl;
+            std::cout << "FullMass: H+ decay products mother = " << myMother->pdgId() << " line=" << i << std::endl;
             if (myMotherId == 16) {
               myStatus = false; // reject tau neutrinoes on documentation lines from H+ -> tau nu
             } else if ((myMotherId >= 1 && myMotherId <= 6) || myMotherId == 21) {
@@ -433,7 +438,7 @@ namespace HPlus {
               if (myId == 15) {
                 myTauFromHiggs = const_cast<reco::Candidate*>(&p);
 
-                //std::cout << "FullMass: tau found" << std::endl;
+                std::cout << "FullMass: tau found" << std::endl;
 
               } else if (myId == 11 || myId == 13) {
                 myLeptonicTauDecayStatus = true;
@@ -464,14 +469,16 @@ namespace HPlus {
     mcBjetHiggsSide.SetXYZ(myHiggsSideBJet->p4().px(),myHiggsSideBJet->p4().py(),myHiggsSideBJet->p4().pz());
 
     //    std::cout << "FullMass: tau pt=" << myVisibleTau.Perp() << " prongs=" << myChargedCount << " leptonicDecay=" << myLeptonicTauDecayStatus << ", neutrino pt=" << myNeutrinoes.Perp() << std::endl;
+    
     // Make MC matching of bjet
+    std::cout << "FullMass: Start matching (deltaR)" << std::endl;
     double myDeltaRBJet = ROOT::Math::VectorUtil::DeltaR(bjet->p4(), myHiggsSideBJet->p4());
-
-    //    std::cout << "FullMass: bjet deltaR = " << myDeltaRBJet << std::endl;
+    std::cout << "FullMass: bjet deltaR = " << myDeltaRBJet << std::endl;
     if (myDeltaRBJet > 0.4) return false;
+    
     // Make MC matching of tau jet
     double myDeltaRTau = ROOT::Math::VectorUtil::DeltaR(tau->p4(), myTauFromHiggs->p4());
-    //    std::cout << "FullMass: tau deltaR = " << myDeltaRTau << std::endl;
+    std::cout << "FullMass: tau deltaR = " << myDeltaRTau << std::endl;
     if (myDeltaRTau > 0.4) return false;
 
     // Calculate result
@@ -497,13 +504,16 @@ namespace HPlus {
   NOTE 2: This code is called for each event, even if no full Higgs mass was reconstructed. FIX this to improve efficiency!
   
   */
-  void FullHiggsMassCalculator::calculateTrueHiggsMass(const edm::Event& iEvent, double recoHiggsMass) {
+  void FullHiggsMassCalculator::calculateTrueHiggsMass(const edm::Event& iEvent, double recoHiggsMass, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet) {
     // NOTE! As it is written now, this method has a BUG!!! If there is more than one charged Higgs in the event,
     // it will histogram all their masses even if only one was found in the reconstruction. (Thus leading to an incorrect
     // number of entries in the histograms.
     // This bug will be fixed once I include the requirement that the decay product of every Higgs have been identified correctly.
 
     std::cout << "The previously reconstructed charged Higgs mass was " << recoHiggsMass << std::endl;
+
+    bool identificationCorrect = doMCMatching(iEvent, tau, bjet);
+    std::cout << "Method doMCMatching returned " << identificationCorrect << std::endl;
 
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
@@ -558,19 +568,29 @@ namespace HPlus {
       else {
 	std::cout << "There was no charged Higgs boson decaying to tauNu in this event!" << std::endl;
       }
-      
     }
 
     // After GenParticle loop (NOTE: should not be after GenParticle loop but inside it, since it is possible that there were
     // several charged Higgs bosons in one and the same event -> FIX!), fill histograms according to how the boolean variables
     // were set.
     if ( ! chHiggsFound ) {
-      // fill hHiggsMassNoActualHiggs
-      // no GEN level information histogram to fill, since there was no GEN Higgs.
+      hHiggsMassNoActualHiggs->Fill(recoHiggsMass);
+      std::cout << "No GEN level information histogram to fill, since there was no GEN Higgs." << std::endl;
     }
     else {
+      // THE CURRENT HISTOGRAM FILLING CRITERIA
+      if ( identificationCorrect ) {
+	hHiggsMassCorrectId->Fill(recoHiggsMass);
+      }
+      else {
+	hHiggsMassIncorrectId->Fill(recoHiggsMass);
+      }
+
+
+      // THE OLD HISTOGRAM FILLING CRITERIA
       if ( tauCorrect && neutrinoCorrect ) {
-	// fill hHiggsMassCorrect
+	// fill hHiggsMassCorrectId
+	//hHiggsMassCorrectId->Fill(recoHiggsMass);
       }
       else if ( ! tauCorrect && ! neutrinoCorrect ) {
 	// fill hHiggsMassMisidentifiedTauAndNu
