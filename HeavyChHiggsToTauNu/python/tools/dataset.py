@@ -2238,10 +2238,18 @@ class DatasetManagerCreator:
         self._precursors = [DatasetPrecursor(name, filename) for name, filename in rootFileList]
         self._baseDirectory = kwargs.get("baseDirectory", "")
 
+        mcRead = False
         for d in self._precursors:
             if d.isMC():
-                self._readMCAnalysisContent(d)
+                self._readAnalysisContent(d)
+                mcRead = True
                 break
+
+        if not mcRead:
+            for d in self._precursors:
+                if d.isData():
+                    self._readAnalysisContent(d)
+                    break
 
         dataEras = {}
         for d in self._precursors:
@@ -2253,7 +2261,7 @@ class DatasetManagerCreator:
         self._dataDataEras = dataEras.keys()
         self._dataDataEras.sort()                
 
-    def _readMCAnalysisContent(self, precursor):
+    def _readAnalysisContent(self, precursor):
         contents = aux.listDirectoryContent(precursor.getFile(), lambda key: key.IsFolder())
 
         def skipItem(name):
@@ -2280,10 +2288,11 @@ class DatasetManagerCreator:
                 directoryName = directoryName[:start]
 
             # Look for data era
-            start = directoryName.find("Run")
-            if start >= 0:
-                dataEras[directoryName[start:]] = 1
-                directoryName = directoryName[:start]
+            if precursor.isMC():
+                start = directoryName.find("Run")
+                if start >= 0:
+                    dataEras[directoryName[start:]] = 1
+                    directoryName = directoryName[:start]
             
             # Look for search mode
             for sm in _analysisSearchModes:
@@ -2318,7 +2327,7 @@ class DatasetManagerCreator:
     # \li \a opts              Optional OptionParser object. Should have options added with addOptions().
     #
     # The values of \a analysisName, \a searchMode, \a dataEra, and \a
-    # optimizationMode are overridden from \ə opts, if they are set
+    # optimizationMode are overridden from \a opts, if they are set
     # (i.e. are non-None). Also, if any of these is not specified
     # either explicitly or via \a opts, the value is inferred from the
     # contents, if there exists only one of it.
