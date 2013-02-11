@@ -208,7 +208,7 @@ jetSelectionBase = cms.untracked.PSet(
     # Jet ID cuts
     jetIdMaxNeutralHadronEnergyFraction = cms.untracked.double(0.99),
     jetIdMaxNeutralEMEnergyFraction = cms.untracked.double(0.99),
-    jetIdMinNumberOfDaughters = cms.untracked.uint32(2),
+    jetIdMinNumberOfDaughters = cms.untracked.uint32(1),
     jetIdMinChargedHadronEnergyFraction = cms.untracked.double(0.0),
     jetIdMinChargedMultiplicity = cms.untracked.uint32(0),
     jetIdMaxChargedEMEnergyFraction = cms.untracked.double(0.99),
@@ -292,7 +292,11 @@ EvtTopology = cms.untracked.PSet(
     #discriminator = cms.untracked.string("test"),
     #discriminatorCut = cms.untracked.double(0.0),
     #alphaT = cms.untracked.double(-5.00)
-    alphaT = cms.untracked.double(-5.0)
+    alphaT = cms.untracked.double(-5.0),
+    sphericity = cms.untracked.double(-5.0),
+    aplanarity = cms.untracked.double(-5.0),
+    planarity = cms.untracked.double(-5.0),
+    circularity = cms.untracked.double(-5.0)
 )
 
 GlobalElectronVeto = cms.untracked.PSet(

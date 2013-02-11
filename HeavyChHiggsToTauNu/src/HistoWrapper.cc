@@ -7,14 +7,16 @@ namespace HPlus {
     fIsEnabled(true)
   { 
     // Find level from string
-    if (level == "Vital") {
+    if (level == "Systematics") {
+      fAmbientLevel = kSystematics;
+    } else if (level == "Vital") {
       fAmbientLevel = kVital;
     } else if (level == "Informative") {
       fAmbientLevel = kInformative;
     } else if (level == "Debug") {
-      fAmbientLevel = kDebug;
+      fAmbientLevel = kInformative;
     } else {
-      throw cms::Exception("Configuration") << "HistoWrapper: Error in ambient histogram level! Valid options are: 'Vital', 'Informative', 'Debug' (you specified: '" << level << "'";
+      throw cms::Exception("Configuration") << "HistoWrapper: Error in ambient histogram level! Valid options are: 'Systematics', 'Vital', 'Informative', 'Debug' (you specified: '" << level << "'";
     }
   }
   HistoWrapper::~HistoWrapper() {

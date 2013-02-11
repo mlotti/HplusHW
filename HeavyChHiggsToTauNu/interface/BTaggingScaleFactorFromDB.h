@@ -14,39 +14,41 @@
 
 class BTaggingScaleFactorFromDB {
 
-    public:
-	class Data {
-	    public:
-		Data(double,double,double,double,double,double,double,double);
+public:
+  class Data {
+  public:
+    Data();
+    ~Data();
 
-                double btagEfficiency();
-                double btagEfficiencyError();
-                double mistagEfficiency();
-                double mistagEfficiencyError();
-	
-		double btagScaleFactor();
-		double btagScaleFactorError();
-		double mistagScaleFactor();	
-		double mistagScaleFactorError();
-	
-	    private:
-		double btagEff_,btagErr_,mistagEff_,mistagErr_;
-		double btagSF_,bSFerr_,mistagSF_,mistagSFerr_;
-	};
+    const double btagEfficiency() const { return btagEff_; }
+    const double btagEfficiencyError() const { return btagErr_; }
+    const double mistagEfficiency() const { return mistagEff_; }
+    const double mistagEfficiencyError() const { return mistagErr_; }
 
-    public:
-	BTaggingScaleFactorFromDB(const edm::ParameterSet&);
-	~BTaggingScaleFactorFromDB();
+    const double btagScaleFactor() const { return btagSF_; }
+    const double btagScaleFactorError() const { return bSFerr_; }
+    const double mistagScaleFactor() const { return mistagSF_; }
+    const double mistagScaleFactorError() const { return mistagSFerr_; }
 
-	void setup(const edm::EventSetup&);
-	Data getScaleFactors(double,double);
+    friend class BTaggingScaleFactorFromDB;
 
-    private:
-	std::string algoName, userAlgoName, payloadName;
+  private:
+    double btagEff_,btagErr_,mistagEff_,mistagErr_;
+    double btagSF_,bSFerr_,mistagSF_,mistagSFerr_;
+  };
 
-	edm::ESHandle<BtagPerformance> bHandle;
-	edm::ESHandle<BtagPerformance> misHandle;
-	edm::ESHandle<BtagPerformance> userHandle;
+  BTaggingScaleFactorFromDB(const edm::ParameterSet&);
+  ~BTaggingScaleFactorFromDB();
+
+  void setup(const edm::EventSetup&);
+  Data getScaleFactors(double,double);
+
+private:
+  std::string algoName, userAlgoName, payloadName;
+
+  edm::ESHandle<BtagPerformance> bHandle;
+  edm::ESHandle<BtagPerformance> misHandle;
+  edm::ESHandle<BtagPerformance> userHandle;
 };
 
 #endif

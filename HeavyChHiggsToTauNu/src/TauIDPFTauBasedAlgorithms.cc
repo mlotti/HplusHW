@@ -12,6 +12,7 @@ namespace HPlus {
   TauIDPFHPS::~TauIDPFHPS() { }
 
   bool TauIDPFHPS::passDecayModeFinding(const edm::Ptr<pat::Tau>& tau) {
+    fCounterPackager.fill(fIDDecayModeFinding, tau->decayMode());
     if(tau->tauID("decayModeFinding") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDDecayModeFinding);
     return true;

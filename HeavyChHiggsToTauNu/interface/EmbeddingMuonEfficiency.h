@@ -25,21 +25,24 @@ namespace HPlus {
     class Data {
     public:
       Data();
-      Data(const EmbeddingMuonEfficiency *eme);
       ~Data();
 
       void check() const;
 
       double getEventWeight() const {
         check();
-        return fEme->fWeight;
+        return fWeight;
       }
       double getEventWeightAbsoluteUncertainty() const {
         check();
-        return fEme->fWeightAbsUnc;
+        return fWeightAbsUnc;
       }
+
+      friend class EmbeddingMuonEfficiency;
+
     private:
-      const EmbeddingMuonEfficiency *fEme;
+      double fWeight;
+      double fWeightAbsUnc;
     };
 
     EmbeddingMuonEfficiency(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper);
@@ -49,20 +52,16 @@ namespace HPlus {
 
   private:
     // edm::InputTag fMuonSrc;
-
-    struct EffValue {
-      unsigned firstRun;
-      unsigned lastRun;
-      double value;
-      double uncertainty;
-    };
-    std::vector<EffValue> fDataValues;
-    double fMCValue;
-    double fMCUncertainty;    
-
-    Mode fMode;
-    double fWeight;
-    double fWeightAbsUnc;
+      struct EffValue {
+        unsigned firstRun;
+        unsigned lastRun;
+        double value;
+        double uncertainty;
+      };
+      std::vector<EffValue> fDataValues;
+      double fMCValue;
+      double fMCUncertainty;
+      Mode fMode;
   };
 }
 

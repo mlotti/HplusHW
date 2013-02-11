@@ -48,7 +48,7 @@ namespace HPlus {
     void setPileupWeight(double w)   { fPileupWeight = w; }
     void setTriggerWeight(double w, double au)  { fTriggerWeight = w; fTriggerWeightAbsUnc = au; }
     void setFillWeight(double w)  { fFillWeight = w; }
-    void enableNonIsoLeptons(bool enableNonIsoLeptons)  { fillNonIsoLeptonVars = enableNonIsoLeptons; }
+    void enableNonIsoLeptons(bool enableNonIsoLeptons)  { fFillNonIsoLeptonVars = enableNonIsoLeptons; }
     void setNvertices(unsigned int n) { fNVertices = n; }
     void setBTagging(bool passed, double scaleFactor, double scaleFactorUnc) {
       fPassedBTagging = passed;
@@ -83,7 +83,7 @@ namespace HPlus {
     void setCircularity(double circularity) { fCircularity = circularity; }
     void setDeltaPhi(double deltaPhi) { fDeltaPhi = deltaPhi; }
 
-    void fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
+    void fill(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau,
               const edm::PtrVector<pat::Jet>& jets);
 
   private:
@@ -100,6 +100,7 @@ namespace HPlus {
     const bool fDoFill;
     const bool fTauEmbeddingInput;
     const bool fFillJetEnergyFractions;
+    bool fFillNonIsoLeptonVars;
 
     edm::InputTag fGenParticleSource;
     edm::InputTag fTauEmbeddingGenParticleOriginalSource;
@@ -109,7 +110,6 @@ namespace HPlus {
 
     TTree *fTree;
 
-    bool fillNonIsoLeptonVars;
     TreeEventBranches fEventBranches;
 
     double fPrescaleWeight;

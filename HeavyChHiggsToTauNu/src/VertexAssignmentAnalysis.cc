@@ -24,22 +24,22 @@ namespace HPlus {
     // Initialise histograms
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("PVAssignment");
-    hGenuineTauAllEventsByTauZ = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GenuineTauAllEventsByTauZ", "GenuineTauAllEventsByTauZ;PV z associated to #tau, mm;Events / 1 mm", 100, -50, 50);
-    hGenuineTauPassedEventsByTauZ = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GenuineTauPassedEventsByTauZ", "GenuineTauPassedEventsByTauZ;PV z associated to #tau, mm;Events / 1 mm", 100, -50, 50);
-    hGenuineTauAllEventsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GenuineTauAllEventsByPt", "GenuineTauAllEventsByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hGenuineTauPassedEventsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GenuineTauPassedEventsByPt", "GenuineTauPassedEventsByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hGenuineTauAllEventsByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GenuineTauAllEventsByEta", "GenuineTauAllEventsByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
-    hGenuineTauPassedEventsByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GenuineTauPassedEventsByEta", "GenuineTauPassedEventsByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
-    hGenuineTauAllEventsByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GenuineTauAllEventsByPhi", "GenuineTauAllEventsByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
-    hGenuineTauPassedEventsByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "GenuineTauPassedEventsByPhi", "GenuineTauPassedEventsByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
-    hFakeTauAllEventsByTauZ = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "FakeTauAllEventsByTauZ", "FakeTauAllEventsByTauZ;PV z associated to #tau, mm;Events / 1 mm", 100, -50, 50);
-    hFakeTauPassedEventsByTauZ = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "FakeTauAllEventsByTauZ", "FakeTauAllEventsByTauZ;PV z associated to #tau, mm;Events / 1 mm", 100, -50, 50);
-    hFakeTauAllEventsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "FakeTauPassedEventsByPt", "FakeTauPassedEventsByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hFakeTauPassedEventsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "FakeTauPassedEventsByPt", "FakeTauPassedEventsByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hFakeTauAllEventsByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "FakeTauAllEventsByEta", "FakeTauAllEventsByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
-    hFakeTauPassedEventsByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "FakeTauPassedEventsByEta", "FakeTauPassedEventsByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
-    hFakeTauAllEventsByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "FakeTauAllEventsByPhi", "FakeTauAllEventsByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
-    hFakeTauPassedEventsByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "FakeTauPassedEventsByPhi", "FakeTauPassedEventsByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
+    hGenuineTauAllEventsByTauZ = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GenuineTauAllEventsByTauZ", "GenuineTauAllEventsByTauZ;PV z associated to #tau, mm;Events / 1 mm", 100, -50, 50);
+    hGenuineTauPassedEventsByTauZ = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GenuineTauPassedEventsByTauZ", "GenuineTauPassedEventsByTauZ;PV z associated to #tau, mm;Events / 1 mm", 100, -50, 50);
+    hGenuineTauAllEventsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GenuineTauAllEventsByPt", "GenuineTauAllEventsByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hGenuineTauPassedEventsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GenuineTauPassedEventsByPt", "GenuineTauPassedEventsByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hGenuineTauAllEventsByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GenuineTauAllEventsByEta", "GenuineTauAllEventsByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
+    hGenuineTauPassedEventsByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GenuineTauPassedEventsByEta", "GenuineTauPassedEventsByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
+    hGenuineTauAllEventsByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GenuineTauAllEventsByPhi", "GenuineTauAllEventsByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
+    hGenuineTauPassedEventsByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GenuineTauPassedEventsByPhi", "GenuineTauPassedEventsByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
+    hFakeTauAllEventsByTauZ = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "FakeTauAllEventsByTauZ", "FakeTauAllEventsByTauZ;PV z associated to #tau, mm;Events / 1 mm", 100, -50, 50);
+    hFakeTauPassedEventsByTauZ = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "FakeTauAllEventsByTauZ", "FakeTauAllEventsByTauZ;PV z associated to #tau, mm;Events / 1 mm", 100, -50, 50);
+    hFakeTauAllEventsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "FakeTauPassedEventsByPt", "FakeTauPassedEventsByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hFakeTauPassedEventsByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "FakeTauPassedEventsByPt", "FakeTauPassedEventsByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hFakeTauAllEventsByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "FakeTauAllEventsByEta", "FakeTauAllEventsByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
+    hFakeTauPassedEventsByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "FakeTauPassedEventsByEta", "FakeTauPassedEventsByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
+    hFakeTauAllEventsByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "FakeTauAllEventsByPhi", "FakeTauAllEventsByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
+    hFakeTauPassedEventsByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "FakeTauPassedEventsByPhi", "FakeTauPassedEventsByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
   }
 
   VertexAssignmentAnalysis::~VertexAssignmentAnalysis() {}

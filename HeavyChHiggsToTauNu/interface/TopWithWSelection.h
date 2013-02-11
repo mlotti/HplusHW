@@ -31,18 +31,24 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const TopWithWSelection *TopWithWSelection, bool passedEvent);
+      Data();
       ~Data();
 
-      bool passedEvent() const { return fPassedEvent; }
-      const double getTopMass() const { return fTopWithWSelection->topMass; }
-      const XYZTLorentzVector& getTopP4() const { return fTopWithWSelection->top; }
+      const bool passedEvent() const { return fPassedEvent; }
+      const double getTopMass() const { return top.M(); }
+      const XYZTLorentzVector& getTopP4() const { return top; }
+      const double getWMass() const { return W.M(); }
+      const XYZTLorentzVector& getWP4() const { return W; }
+
+      friend class TopWithWSelection;
 
     private:
-      const TopWithWSelection *fTopWithWSelection;
-      const bool fPassedEvent;
+      bool fPassedEvent;
+      // Variables
+      XYZTLorentzVector top;
+      XYZTLorentzVector W;
     };
-    
+
     TopWithWSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~TopWithWSelection();
 
@@ -95,12 +101,6 @@ namespace HPlus {
     WrappedTH1 *hWMassQMatch;
     WrappedTH1 *htopMassMatchWrongB;
     WrappedTH1 *hWMassMatchWrongB;    
-  
-    // Variables
-    double topMass;
-    double wMass;
-    XYZTLorentzVector top;
-    XYZTLorentzVector W;
   };
 }
 

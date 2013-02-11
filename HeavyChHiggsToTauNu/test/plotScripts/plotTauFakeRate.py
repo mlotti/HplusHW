@@ -64,7 +64,7 @@ def main(opts):
             histos[i][0].SetMarkerSize(0.6)
             histos[i][0].SetMarkerStyle(i+18)
             histos[i][0].Draw("E SAME")
-        leg = ROOT.TLegend(0.2, 0.2, 0.4, 0.4, "", "brNDC")
+        leg = ROOT.TLegend(0.7, 0.7, 0.9, 0.9, "", "brNDC")
         leg.SetBorderSize(0)
         leg.SetTextFont(63)
         leg.SetTextSize(18)
