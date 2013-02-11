@@ -46,6 +46,7 @@ def addNtuple_44X(datasets):
         "ZZ_TuneZ2_Fall11":                  TaskDef(njobsIn=4),
         "TTJets_TuneZ2_Fall11":              TaskDef(njobsIn=60),
         "WJets_TuneZ2_Fall11":               TaskDef(njobsIn=80),
+        "W1Jets_TuneZ2_Fall11":              TaskDef(njobsIn=75),
         "W2Jets_TuneZ2_Fall11":              TaskDef(njobsIn=25),
         "W3Jets_TuneZ2_Fall11":              TaskDef(njobsIn=8),
         "W4Jets_TuneZ2_Fall11":              TaskDef(njobsIn=13),

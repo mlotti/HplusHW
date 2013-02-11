@@ -20,6 +20,9 @@ class NEvents:
             enabled = cms.bool(True),
             sampleJetBin = cms.int32(-1),
             inclusiveCrossSection = cms.double(xsect.backgroundCrossSections.crossSection("PREP_WJets", "7")),
+            jetBin1 = cms.PSet(
+                exclusiveCrossSection = cms.double(xsect.backgroundCrossSections.crossSection("PREP_W1Jets", "7")),
+            ),
             jetBin2 = cms.PSet(
                 exclusiveCrossSection = cms.double(xsect.backgroundCrossSections.crossSection("PREP_W2Jets", "7")),
             ),

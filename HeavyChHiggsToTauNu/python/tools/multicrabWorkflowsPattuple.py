@@ -126,6 +126,7 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
         "ZZ_TuneZ2_Fall11":                 TaskDefMC(njobsIn=50, njobsOut=3),   # expected output max. 185 MB/file
         "TTJets_TuneZ2_Fall11":             TaskDefMC(njobsIn=490, njobsOut=50), # file size 15214; 3938 files, expected output max. 266 MB/file, obs 60 MB / file
         "WJets_TuneZ2_Fall11":              TaskDefMC(njobsIn=490, njobsOut=10, args={"wjetsWeighting": 1, "wjetBin": -1}), # file size 16000 GB, 4500 files, expected output max. 37 MB/file 
+        "W1Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=300, njobsOut=20, args={"wjetsWeighting": 1, "wjetBin": 1}), # 
         "W2Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=300, njobsOut=20, args={"wjetsWeighting": 1, "wjetBin": 2}), # expected output max. 38 MB/file, obs 38 MB / file
         "W3Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=120, njobsOut=10, args={"wjetsWeighting": 1, "wjetBin": 3}), # expected output max. 56 MB/file, obs 20-22 MB / file
         "W4Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=200, njobsOut=12, args={"wjetsWeighting": 1, "wjetBin": 4}), # expected output max. 144 MB/file, obs 20-22 MB / file
@@ -282,6 +283,7 @@ def addPattuple_vNEXT_SKELETON(datasets):
         "ZZ_TuneZ2_Fall11":                 TaskDef(""),
         "TTJets_TuneZ2_Fall11":             TaskDef(""),
         "WJets_TuneZ2_Fall11":              TaskDef(""),
+        "W1Jets_TuneZ2_Fall11":             TaskDef(""),
         "W2Jets_TuneZ2_Fall11":             TaskDef(""),
         "W3Jets_TuneZ2_Fall11":             TaskDef(""),
         "W4Jets_TuneZ2_Fall11":             TaskDef(""),
