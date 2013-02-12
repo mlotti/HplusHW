@@ -131,7 +131,7 @@ namespace HPlus {
     void fillFinalPlots();
     void fillFinalPlotsForFakeTaus();
 
-  private:
+  protected:
     void createHistograms();
     /// Status indicating wheather the data objects have been cached
     bool bDataObjectsCached;
