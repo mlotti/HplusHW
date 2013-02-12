@@ -41,7 +41,7 @@ def producePlot(h, axisLabel, title, maxbins):
     # Obtain canvas
     c = ROOT.TCanvas()
     # Do fit
-    fit = ROOT.TF1("fit",myfitfunc,0,30,2)
+    fit = ROOT.TF1("fit",myfitfunc,0,20,2)
     fit.SetParNames ("Slope","Offset")
     fit.SetLineWidth(2)
 
@@ -95,18 +95,26 @@ def main(opts):
   
     tdrstyle.TDRStyle()
     # loop over datasets
-    histoPath = "signalAnalysis%s/METPhiOscillationCorrection/"%opts.era[0]
+    
     for mydir in opts.dirs:
+        histoPath = "signalAnalysis%s"%opts.era[0]
+        if "Tau_" in mydir:
+            histoPath = "signalAnalysis"
         histos = []
         rootFile = ROOT.TFile.Open(os.path.join(mydir, "res", "histograms-%s.root"%mydir))
         if rootFile == None:
             raise Exception ("Error: File 'histograms-%s.root' not found!"%mydir)
-        hX = produceCurve(rootFile, histoPath,  "NverticesVsMETX")
-        #hY = produceCurve(rootFile, histoPath,  "NverticesVsMETY")
+        hX = produceCurve(rootFile, histoPath, "METPhiOscillationCorrection/NverticesVsMETX")
+        hY = produceCurve(rootFile, histoPath, "METPhiOscillationCorrection/NverticesVsMETY")
+        hTauX = produceCurve(rootFile, histoPath, "CommonPlots/Taus/TauPhiOscillationX")
+        hTauY = produceCurve(rootFile, histoPath, "CommonPlots/Taus/TauPhiOscillationY")
         
         # We have the histograms and names, lets make the plot
         producePlot(hX, "Average MET_{x}, GeV", "METX_%s"%mydir, maxbins)
-        #producePlot(hY, "Average MET_{y}, GeV", "METY_%s"%mydir, maxbins)
+        producePlot(hY, "Average MET_{y}, GeV", "METY_%s"%mydir, maxbins)
+
+        producePlot(hTauX, "Average #tau p_{x}, GeV", "TauX_%s"%mydir, maxbins)
+        producePlot(hTauY, "Average #tau p_{y}, GeV", "TauY_%s"%mydir, maxbins)
 
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
