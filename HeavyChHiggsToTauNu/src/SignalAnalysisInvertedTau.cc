@@ -1029,8 +1029,8 @@ namespace HPlus {
     //    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderMuonVeto, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Muon> > saveMuons(new std::vector<pat::Muon>());
-      copyPtrToVector(muonVetoData.getSelectedMuonsBeforeIsolation(), *saveMuons);
-      iEvent.put(saveMuons, "selectedVetoMuonsBeforeIsolation");
+      copyPtrToVector(muonVetoData.getSelectedMuonsBeforePtAndEtaCuts(), *saveMuons);
+      iEvent.put(saveMuons, "selectedVetoMuonsBeforePtAndEtaCuts");
       saveMuons.reset(new std::vector<pat::Muon>());
       copyPtrToVector(muonVetoData.getSelectedMuons(), *saveMuons);
       iEvent.put(saveMuons, "selectedVetoMuons");

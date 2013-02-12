@@ -31,91 +31,52 @@ namespace HPlus {
     fMuonPtCut(iConfig.getUntrackedParameter<double>("MuonPtCut")),
     fMuonEtaCut(iConfig.getUntrackedParameter<double>("MuonEtaCut")),
     fMuonApplyIpz(iConfig.getUntrackedParameter<bool>("MuonApplyIpz")),
-    fMuonSelectionCounter(eventCounter.addSubCounter("GlobalMuon Selection","MuonSelection")),
-    fMuonSelectionSubCountMuonPresent(eventCounter.addSubCounter("GlobalMuon Selection","Muon present")),
-    fMuonSelectionSubCountMuonHasGlobalOrInnerTrk(eventCounter.addSubCounter("GlobalMuon Selection","Muon has Global OR Inner Trk")),
-    fMuonSelectionSubCountPtCut(eventCounter.addSubCounter("GlobalMuon Selection","Muon Pt")),
-    fMuonSelectionSubCountEtaCut(eventCounter.addSubCounter("GlobalMuon Selection","Muon Eta")),
-    fMuonSelectionSubCountMuonGlobalMuonOrTrkerMuon(eventCounter.addSubCounter("GlobalMuon Selection","Global OR Tracker Muon")),
-    fMuonSelectionSubCountMuonSelection(eventCounter.addSubCounter("GlobalMuon Selection","Muon Selection")),
-    fMuonSelectionSubCountNTrkerHitsCut(eventCounter.addSubCounter("GlobalMuon Selection","Muon NTrkerHits")),
-    fMuonSelectionSubCountNPixelHitsCut(eventCounter.addSubCounter("GlobalMuon Selection","Muon NPixelHits")),
-    fMuonSelectionSubCountNMuonlHitsCut(eventCounter.addSubCounter("GlobalMuon Selection","Muon NMuonlHits")),
-    fMuonSelectionSubCountGlobalTrkChiSqCut(eventCounter.addSubCounter("GlobalMuon Selection","Muon GlobalTrkChiSq")),
-    fMuonSelectionSubCountImpactParCut(eventCounter.addSubCounter("GlobalMuon Selection","Muon ImpactPar")),
-    fMuonSelectionSubCountRelIsolationR03Cut(eventCounter.addSubCounter("GlobalMuon Selection","Muon RelIsolationR03")),
-    fMuonSelectionSubCountGoodPVCut(eventCounter.addSubCounter("GlobalMuon Selection","Muon GoodPV")),
-    fMuonSelectionSubCountMatchingMCmuon(eventCounter.addSubCounter("GlobalMuon Selection","Muon matching MC Muon")),
-    fMuonSelectionSubCountMatchingMCmuonFromW(eventCounter.addSubCounter("GlobalMuon Selection","Muon matching MC Muon From W")),
-    fMuonIDSubCountAllMuonCandidates(eventCounter.addSubCounter("GlobalMuon ID","All Muon Candidates")),
-    fMuonIDSubCountAll(eventCounter.addSubCounter("GlobalMuon ID","All")),
-    fMuonIDSubCountAllGlobalMuons(eventCounter.addSubCounter("GlobalMuon ID","AllGlobalMuons")),
-    fMuonIDSubCountAllStandAloneMuons(eventCounter.addSubCounter("GlobalMuon ID","AllStandAloneMuons")),
-    fMuonIDSubCountAllTrackerMuons(eventCounter.addSubCounter("GlobalMuon ID","AllTrackerMuons")),
-    fMuonIDSubCountTrackerMuonArbitrated(eventCounter.addSubCounter("GlobalMuon ID","TrackerMuonArbitrated")),
-    fMuonIDSubCountAllArbitrated(eventCounter.addSubCounter("GlobalMuon ID","AllArbitrated")),
-    fMuonIDSubCountGlobalMuonPromptTight(eventCounter.addSubCounter("GlobalMuon ID","GlobalMuonPromptTight")),
-    fMuonIDSubCountTMLastStationLoose(eventCounter.addSubCounter("GlobalMuon ID","TMLastStationLoose")),
-    fMuonIDSubCountTMLastStationTight(eventCounter.addSubCounter("GlobalMuon ID","TMLastStationTight")),
-    fMuonIDSubCountTMOneStationLoose(eventCounter.addSubCounter("GlobalMuon ID","TMOneStationLoose")),
-    fMuonIDSubCountTMLastStationOptimizedLowPtLoose(eventCounter.addSubCounter("GlobalMuon ID","TMLastStationOptimizedLowPtLoose")),
-    fMuonIDSubCountTMLastStationOptimizedLowPtTight(eventCounter.addSubCounter("GlobalMuon ID","TMLastStationOptimizedLowPtTight")),
-    fMuonIDSubCountGMTkChiCompatibility(eventCounter.addSubCounter("GlobalMuon ID","GMTkChiCompatibility")),
-    fMuonIDSubCountGMTkKinkTight(eventCounter.addSubCounter("GlobalMuon ID","GMTkKinkTight")),
-    fMuonIDSubCountTMLastStationAngLoose(eventCounter.addSubCounter("GlobalMuon ID","TMLastStationAngLoose")),
-    fMuonIDSubCountTMLastStationAngTight(eventCounter.addSubCounter("GlobalMuon ID","TMLastStationAngTight")),
-    fMuonIDSubCountTMLastStationOptimizedBarrelLowPtLoose(eventCounter.addSubCounter("GlobalMuon ID","TMLastStationOptimizedBarrelLowPtLoose")),
-    fMuonIDSubCountTMLastStationOptimizedBarrelLowPtTight(eventCounter.addSubCounter("GlobalMuon ID","TMLastStationOptimizedBarrelLowPtTight")),
-    fMuonIDSubCountOther(eventCounter.addSubCounter("GlobalMuon ID","Other"))
+    fMuonSelectionSubCountMuonPresent(eventCounter.addSubCounter("MuonSelection","Muon present")),
+    fMuonSelectionSubCountMuonHasGlobalOrInnerTrk(eventCounter.addSubCounter("MuonSelection","Muon has Global OR Inner Trk")),
+    fMuonSelectionSubCountMuonGlobalMuonOrTrkerMuon(eventCounter.addSubCounter("MuonSelection","Global OR Tracker Muon")),
+    fMuonSelectionSubCountMuonSelection(eventCounter.addSubCounter("MuonSelection","Muon Selection")),
+    fMuonSelectionSubCountNTrkerHitsCut(eventCounter.addSubCounter("MuonSelection","Muon NTrkerHits")),
+    fMuonSelectionSubCountNPixelHitsCut(eventCounter.addSubCounter("MuonSelection","Muon NPixelHits")),
+    fMuonSelectionSubCountNMuonlHitsCut(eventCounter.addSubCounter("MuonSelection","Muon NMuonlHits")),
+    fMuonSelectionSubCountGlobalTrkChiSqCut(eventCounter.addSubCounter("MuonSelection","Muon GlobalTrkChiSq")),
+    fMuonSelectionSubCountImpactParCut(eventCounter.addSubCounter("MuonSelection","Muon ImpactPar")),
+    fMuonSelectionSubCountGoodPVCut(eventCounter.addSubCounter("MuonSelection","Muon GoodPV")),
+    fMuonSelectionSubCountRelIsolationCut(eventCounter.addSubCounter("MuonSelection","Muon RelIsolation")),
+    fMuonSelectionSubCountEtaCut(eventCounter.addSubCounter("MuonSelection","Muon Eta")),
+    fMuonSelectionSubCountPtCut(eventCounter.addSubCounter("MuonSelection","Muon Pt")),
+    fMuonSelectionSubCountMatchingMCmuon(eventCounter.addSubCounter("MuonSelection","Muon matching MC Muon")),
+    fMuonSelectionSubCountMatchingMCmuonFromW(eventCounter.addSubCounter("MuonSelection","Muon matching MC Muon From W")),
+    fMuonSelectionCounter(eventCounter.addSubCounter("MuonSelection","MuonSelection"))
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("MuonSelection");
     
-    hMuonPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonPt", "GlobalMuonPt;isolated muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 200, 0., 400.);
-    hMuonEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonEta", "GlobalMuonEta;isolated muon #eta;N_{muons} / 0.1", 60, -3., 3.);
-    hMuonEta_identified = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalMuonEta_identified", "GlobalMuonEta;isolated muon #eta;N_{muons} / 0.1", 60, -3., 3.);
-    hMuonPt_identified_eta = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalMuonPt_identified_eta", "GlobalMuonPt;isolated muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 81, 0., 400.);
-    //    hMuonEta_test = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalMuonEta_test", "GlobalMuonEta;isolated muon #eta;N_{muons} / 0.1", 60, -3., 3.);
-    //    hMuonPt_test = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalMuonPt_test", "GlobalMuonPt;isolated muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 81, -5., 400.);
-    hNumberOfSelectedMuons = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NumberOfSelectedMuons", "NumberOfSelectedMuons", 30, 0., 30.);
-    hMuonPt_matchingMCmuon = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonPtmatchingMCmuon", "GlobalMuonPtmatchingMCmuon", 200, 0., 400.);
-    hMuonEta_matchingMCmuon = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonEtamatchingMCmuon", "GlobalMuonEtamatchingMCmuon", 60, -3., 3.);
-    hMuonPt_matchingMCmuonFromW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonPtmatchingMCmuonFromW", "GlobalMuonPtmatchingMCmuonFromW", 200, 0., 400.);
-    hMuonEta_matchingMCmuonFromW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonEtamatchingMCmuonFromW", "GlobalMuonEtamatchingMCmuonFromW", 60, -3., 3.);
-    hMuonPt_InnerTrack = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonPt_InnerTrack", "GlobalMuonPt_InnerTrack", 200, 0., 400.);
-    hMuonEta_InnerTrack = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonEta_InnerTrack", "GlobalMuonEta_InnerTrack", 60, -3., 3.);
-    hMuonPt_GlobalTrack = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonPt_GlobalTrack", "GlobalMuonPt_GlobalTrack", 200, 0., 400.);
-    hMuonEta_GlobalTrack = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonEta_GlobalTrack", "GlobalMuonEta_GlobalTrack", 60, -3., 3.);
-    hMuonPt_AfterSelection  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonPt_AfterSelection", "GlobalMuonPt_AfterSelection", 200, 0., 400.);
-    hMuonEta_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonEta_AfterSelection", "GlobalMuonEta_AfterSelection", 60, -3., 3.);
-    //    hMuonPt_InnerTrack_AfterSelection  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonPt_InnerTrack_AfterSelection", "GlobalMuonPt_InnerTrack_AfterSelection", 100, 0., 400.);
-    //    hMuonEta_InnerTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonEta_InnerTrack_AfterSelection", "GlobalMuonEta_InnerTrack_AfterSelection", 60, -3., 3.);
-    hMuonPt_GlobalTrack_AfterSelection  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonPt_GlobalTrack_AfterSelection", "GlobalMuonPt_GlobalTrack_AfterSelection", 100, 0., 400.);
-    hMuonEta_GlobalTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonEta_GlobalTrack_AfterSelection", "GlobalMuonEta_GlobalTrack_AfterSelection", 60, -3., 3.);
-    hMuonImpactParameter = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonImpactParameter", "MuonImpactParameter", 100, 0., 0.1);
-    hMuonZdiff = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonZdiff", "MuonZdiff", 100, 0., 10.);
- 
-    // Check here that the muon selection is reasonable
-    if(fMuonSelection != "All" &&
-       fMuonSelection != "AllGlobalMuons" &&
-       fMuonSelection != "AllStandAloneMuons" && 
-       fMuonSelection != "AllTrackerMuons" && 
-       fMuonSelection != "TrackerMuonArbitrated" && 
-       fMuonSelection != "AllArbitrated" && 
-       fMuonSelection != "GlobalMuonPromptTight" && 
-       fMuonSelection != "TMLastStationLoose" && 
-       fMuonSelection != "TMLastStationTight" && 
-       fMuonSelection != "TMOneStationLoose" && 
-       fMuonSelection != "TMLastStationOptimizedLowPtLoose" && 
-       fMuonSelection != "TMLastStationOptimizedLowPtTight" && 
-       fMuonSelection != "GMTkChiCompatibility" && 
-       fMuonSelection != "GMTkKinkTight" && 
-       fMuonSelection != "TMLastStationAngLoose" && 
-       fMuonSelection != "TMLastStationAngTight" && 
-       fMuonSelection != "TMLastStationOptimizedBarrelLowPtLoose" && 
-       fMuonSelection != "TMLastStationOptimizedBarrelLowPtTight") { 
-      throw cms::Exception("Error") << "The MuonSelection \"" << fMuonSelection << "\" used as input in the python config file is invalid! Please choose one of the following valid options:\n All, AllGlobalMuons, AllStandAloneMuons, AllTrackerMuons, TrackerMuonArbitrated, AllArbitrated, GlobalMuonPromptTight, TMLastStationLoose, TMLastStationTight, TMOneStationLoose, TMLastStationOptimizedLowPtLoose, TMLastStationOptimizedLowPtTight, GMTkChiCompatibility, GMTkKinkTight, TMLastStationAngLoose, TMLastStationAngTight, TMLastStationOptimizedBarrelLowPtLoose, TMLastStationOptimizedBarrelLowPtTight.\n" << std::endl;
-    }
+    hTightMuonEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightMuonEta", "TightMuonEta;Tight muon #eta;N_{muons} / 0.1", 60, -3., 3.);
+    hTightMuonPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TightMuonPt", "TightMuonPt;Tight muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 80, 0., 400.);
+    hLooseMuonEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "LooseMuonEta", "LooseMuonEta;Loose muon #eta;N_{muons} / 0.1", 60, -3., 3.);
+    hLooseMuonPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "LooseMuonPt", "LooseMuonPt;Loose muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 80, 0., 400.);
+    hNumberOfTightMuons = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NumberOfTightMuons", "NumberOfTightMuons", 30, 0., 30.);
+    hNumberOfLooseMuons = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NumberOfLooseMuons", "NumberOfLooseMuons", 30, 0., 30.);
+    hMuonPt_matchingMCmuon = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonPtmatchingMCmuon", "MuonPtmatchingMCmuon", 80, 0., 400.);
+    hMuonEta_matchingMCmuon = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonEtamatchingMCmuon", "MuonEtamatchingMCmuon", 60, -3., 3.);
+    hMuonPt_matchingMCmuonFromW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonPtmatchingMCmuonFromW", "MuonPtmatchingMCmuonFromW", 80, 0., 400.);
+    hMuonEta_matchingMCmuonFromW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonEtamatchingMCmuonFromW", "MuonEtamatchingMCmuonFromW", 60, -3., 3.);
+    hMuonPt_BeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonPt_BeforeIsolation", "MuonPt_BeforeIsolation;muon p_{T} before isol., GeV/c;N_{muons} / 5 GeV/c", 80, 0., 400.);
+    hMuonEta_BeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonEta_BeforeIsolation", "MuonEta_BeforeIsolation;muon #eta before isol.;N_{muons} / 0.1", 60, -3., 3.);
+    hMuonPt_InnerTrack_BeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonPt_InnerTrack_BeforeIsolation", "MuonPt_InnerTrack_BeforeIsolation", 80, 0., 400.);
+    hMuonEta_InnerTrack_BeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonEta_InnerTrack_BeforeIsolation", "MuonEta_InnerTrack_BeforeIsolation", 60, -3., 3.);
+    hMuonPt_GlobalTrack_BeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonPt_GlobalTrack_BeforeIsolation", "MuonPt_GlobalTrack_BeforeIsolation", 80, 0., 400.);
+    hMuonEta_GlobalTrack_BeforeIsolation = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonEta_GlobalTrack_BeforeIsolation", "MuonEta_GlobalTrack_BeforeIsolation", 60, -3., 3.);
+    hMuonPt_AfterSelection  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonPt_AfterSelection", "MuonPt_AfterSelection", 80, 0., 400.);
+    hMuonEta_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonEta_AfterSelection", "MuonEta_AfterSelection", 60, -3., 3.);
+    //    hMuonPt_InnerTrack_AfterSelection  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonPt_InnerTrack_AfterSelection", "MuonPt_InnerTrack_AfterSelection", 100, 0., 400.);
+    //    hMuonEta_InnerTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonEta_InnerTrack_AfterSelection", "MuonEta_InnerTrack_AfterSelection", 60, -3., 3.);
+    hMuonPt_GlobalTrack_AfterSelection  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonPt_GlobalTrack_AfterSelection", "MuonPt_GlobalTrack_AfterSelection", 100, 0., 400.);
+    hMuonEta_GlobalTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonEta_GlobalTrack_AfterSelection", "MuonEta_GlobalTrack_AfterSelection", 60, -3., 3.);
+    hMuonTransverseImpactParameter = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonTransverseImpactParameter", "MuonTransverseImpactParameter;#mu IP_{T} / mm", 100, 0., 2);
+    hMuonDeltaIPz = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonDeltaIPz", "MuonDeltaIPz;|IP_{z}-PV_{z}| / cm;N_{muons}", 100, 0., 10.);
+    hMuonRelIsol = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonRelIsol", "MuonRelIsol;#mu Rel.Isol. #Delta#beta;N_{muons}", 100, 0., 1.);
+    
   }
 
   MuonSelection::~MuonSelection() {}
@@ -140,86 +101,17 @@ namespace HPlus {
     Data output;
     // Do analysis
     doMuonSelection(iEvent,iSetup, primaryVertex, output);
-    output.fPassedEvent = output.fSelectedMuons.size() == 0;
+    output.fPassedEvent = output.getSelectedMuons().size() == 0;
     if (output.fPassedEvent)
       increment(fMuonSelectionCounter);
     return output;
   }
-
-  MuonSelection::Data MuonSelection::silentAnalyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
-    ensureSilentAnalyzeAllowed(iEvent);
-
-    // Disable histogram filling and counter incrementinguntil the return call
-    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
-    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
-    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
-
-    return privateAnalyzeWithoutIsolation(iEvent, iSetup, primaryVertex);
-  }
-
-  MuonSelection::Data MuonSelection::analyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
-    ensureAnalyzeAllowed(iEvent);
-    return privateAnalyzeWithoutIsolation(iEvent, iSetup, primaryVertex);
-  }
-
-  MuonSelection::Data MuonSelection::privateAnalyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
-    Data output;
-    // Do analysis
-    doMuonSelection(iEvent, iSetup, primaryVertex, output);
-    output.fPassedEvent = output.fSelectedMuonsBeforeIsolation.size() == 0;
-    if (output.fPassedEvent)
-      increment(fMuonSelectionCounter);
-    return output;
-  }
-
 
   void MuonSelection::doMuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex, MuonSelection::Data& output){
-    // the Collection is currently NOT available in the PatTuples but it will be soon (next pattuple production)
-    /* FIX ME
-   // Create and attach handle to (Offline) Primary Vertices Collection
-    edm::Handle<std::vector<reco::Vertex> > primaryVerticesHandle;
-    //    edm::Handle<reco::VertexCollection> primaryVerticesHandle;
-    iEvent.getByLabel("offlinePrimaryVertices", primaryVerticesHandle);
-    // Create an XYZ position to store the Primary Vertex
-    math::XYZPoint PVPosition;
-
-    // Loop over all PV's. PV's are stored with decending Event Pt (PV candidate with highest associated Evt Trk Pt is stored first)
-    for(unsigned int iPV = 0; iPV < primaryVerticesHandle->size(); ++iPV) {
-      // Get PV candidate
-      reco::Vertex myPV = primaryVerticesHandle->at(iPV);
-      // Apply some quality to the PV candidate: a) PV is not fake, b) has more than 4 normalised degrees of freedom, 
-      // c) has a z position less than 15 cm, and d) distance in the XY plane less than 2 cm.
-      if( !(myPV.isFake()) && (myPV.ndof()) > 4  && ( abs( myPV.z() < 15) ) && (myPV.position().Rho() < 2) ){
-	PVPosition = primaryVerticesHandle->at(0).position();
-	break; //once a good PV is found exit loop.
-      }
-      else{
-	PVPosition.SetX(-999.99);
-	PVPosition.SetY(-999.99);
-	PVPosition.SetZ(-999.99);
-      }
-    } 
-    FIX ME */
-
-    /* FIX ME
-    // Get beam spot
-    edm::Handle<reco::BeamSpot> BeamSpotHandle;
-    iEvent.getByLabel(beamSpotCollection, BeamSpotHandle);
-    const reco::BeamSpot *myBeamSpot = BeamSpotHandle.product();
-    const math::XYZPoint myBeamSpotPosition = myBeamSpot->position();
-    impactParameter = fabs( (*iMuon)->innerTrack()->dxy(myBeamSpotPosition) );
-    impactParameter = fabs( (*iElectron)->gsfTrack()->dxy(myBeamSpotPosition) );
-    FIX ME */ 
-
-
     // Create and attach handle to Muon Collection
     edm::Handle<edm::View<pat::Muon> > myMuonHandle;
     iEvent.getByLabel(fMuonCollectionName, myMuonHandle);    
     edm::PtrVector<pat::Muon> muons = myMuonHandle->ptrVector();
-    // In the case where the handle is empty...
-    if ( !myMuonHandle->size() ){
-      // std::cout << "Muon handle for '" << fMuonCollectionName << " is empty!" << std::endl;
-    }
 
     edm::Handle <edm::View<reco::GenParticle> > genParticles;
     iEvent.getByLabel("genParticles", genParticles);
@@ -231,8 +123,6 @@ namespace HPlus {
     // 
     bool bMuonPresent = false;
     bool bMuonHasGlobalOrInnerTrk = false;
-    bool bMuonPtCut = false;
-    bool bMuonEtaCut = false;
     bool bMuonGlobalMuonOrTrkerMuon = false;
     bool bMuonSelection = false;
     bool bMuonNTrkerHitsCut = false;
@@ -240,53 +130,24 @@ namespace HPlus {
     bool bMuonNMuonlHitsCut = false;
     bool bMuonGlobalTrkChiSqCut = false;
     bool bMuonImpactParCut = false;
-    bool bMuonRelIsolationR03Cut = false;
+    bool bMuonRelIsolationCut = false;
     bool bMuonGoodPVCut = false;
+    bool bMuonEtaCut = false;
+    bool bMuonPtCut = false;
+    bool bMuonMatchingMCmuon = false;
+    bool bMuonMatchingMCmuonFromW = false;
 
     // Loop over all Muons
     for(edm::PtrVector<pat::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
-
       // Keep track of the muons analyzed
       bMuonPresent = true;
-      increment(fMuonIDSubCountAllMuonCandidates);
-
-      // Keep track of the MuonID's. Just for my information. 
-      // 28/10/2010 - pat::Muon::muonID() used instead of pat::Muon::isGood(). The latter is there only for backward compatibility.
-      if( (*iMuon)->muonID("All") ) increment(fMuonIDSubCountAll);
-      if( (*iMuon)->muonID("AllGlobalMuons") ) increment(fMuonIDSubCountAllGlobalMuons);
-      if( (*iMuon)->muonID("AllStandAloneMuons") ) increment(fMuonIDSubCountAllStandAloneMuons);
-      if( (*iMuon)->muonID("AllTrackerMuons") ) increment(fMuonIDSubCountAllTrackerMuons);  
-      if( (*iMuon)->muonID("TrackerMuonArbitrated") ) increment(fMuonIDSubCountTrackerMuonArbitrated);
-      if( (*iMuon)->muonID("AllArbitrated") ) increment(fMuonIDSubCountAllArbitrated);
-      if( (*iMuon)->muonID("GlobalMuonPromptTight")  ) increment(fMuonIDSubCountGlobalMuonPromptTight);  
-      if( (*iMuon)->muonID("TMLastStationLoose") ) increment(fMuonIDSubCountTMLastStationLoose); 
-      if( (*iMuon)->muonID("TMLastStationTight") ) increment(fMuonIDSubCountTMLastStationTight); 
-      if( (*iMuon)->muonID("TMOneStationLoose") ) increment(fMuonIDSubCountTMOneStationLoose);   
-      if( (*iMuon)->muonID("TMLastStationOptimizedLowPtLoose") ) increment(fMuonIDSubCountTMLastStationOptimizedLowPtLoose);  
-      if( (*iMuon)->muonID("TMLastStationOptimizedLowPtTight") ) increment(fMuonIDSubCountTMLastStationOptimizedLowPtTight);
-      if( (*iMuon)->muonID("GMTkChiCompatibility") ) increment(fMuonIDSubCountGMTkChiCompatibility);  
-      if( (*iMuon)->muonID("GMTkKinkTight") ) increment(fMuonIDSubCountGMTkKinkTight); 
-      if( (*iMuon)->muonID("TMLastStationAngLoose") ) increment(fMuonIDSubCountTMLastStationAngLoose); 
-      if( (*iMuon)->muonID("TMLastStationAngTight") ) increment(fMuonIDSubCountTMLastStationAngTight); 
-      if( (*iMuon)->muonID("TMLastStationOptimizedBarrelLowPtLoose") ) increment(fMuonIDSubCountTMLastStationOptimizedBarrelLowPtLoose);
-      if( (*iMuon)->muonID("TMLastStationOptimizedBarrelLowPtTight") ) increment(fMuonIDSubCountTMLastStationOptimizedBarrelLowPtTight);
-      else{
-	increment(fMuonIDSubCountOther);
-      }
 
       // Obtain reference to a Muon track
       reco::TrackRef myGlobalTrackRef = (*iMuon)->globalTrack();
       reco::TrackRef myInnerTrackRef = (*iMuon)->innerTrack(); // inner tracks give best resolution for muons with Pt up to 200 GeV/c
 
       // Check that track was found.
-      if ( myInnerTrackRef.isNull() || myGlobalTrackRef.isNull() ){
-	// std::cout << "myInnerTrackRef.isNull()" << std::endl;
-	// std::cout << "(*iMuon).isStandAloneMuon() = " << (*iMuon).isStandAloneMuon() << std::endl;
-	// std::cout << "(*iMuon).isGlobalMuon() = " << (*iMuon).isGlobalMuon() << std::endl;
-	// std::cout << "(*iMuon).isTrackerMuon() = " << (*iMuon).isTrackerMuon() << std::endl;
-	// std::cout << "(*iMuon).isCaloMuon() = " << (*iMuon).isCaloMuon() << std::endl;
-	continue; 
-      }
+      if ( myInnerTrackRef.isNull() || myGlobalTrackRef.isNull() ) continue;
       bMuonHasGlobalOrInnerTrk = true;
       
       // Muon Variables (Pt, Eta etc..)
@@ -299,22 +160,16 @@ namespace HPlus {
       // Note: It is possible for a Global Muon to have zero muon hits. This happens because once the inner and outter tracks used to create
       // global fit to the muon track that covers all of the detector, hits that are incompatible to the new trajectory are removed 
       // (i.e. de-associated from the muon). This is the so called "outlier rejection". 
-      // Note: For the Num
-
-      // Fill histos with all-Muons Pt and Eta (no requirements on muons)
-      hMuonPt->Fill(myMuonPt);
-      hMuonEta->Fill(myMuonEta);
-      hMuonPt_InnerTrack->Fill(myInnerTrackRef->pt());
-      hMuonEta_InnerTrack->Fill(myInnerTrackRef->eta());
-      hMuonPt_GlobalTrack->Fill(myGlobalTrackRef->pt());
-      hMuonEta_GlobalTrack->Fill(myGlobalTrackRef->eta());
 
       // 1) Demand that the Muon is both a "GlobalMuon" And a "TrackerMuon"
       if( (!(*iMuon)->isGlobalMuon()) || (!(*iMuon)->isTrackerMuon()) ) continue;
       bMuonGlobalMuonOrTrkerMuon = true;
 
       // 2) Demand that the selected Muon Identification as defined in the python cfg is satisfied
-      if( !((*iMuon)->muonID( fMuonSelection )) ) continue;
+      // disabled because it is not in the list in the approved objects page
+      //if( !((*iMuon)->muonID( fMuonSelection )) ) continue;
+      // from 4_4_0 onwards available check for PF muon
+      if (!(*iMuon)->isPFMuon()) continue;
       bMuonSelection = true;
       
       // 3) NHits cuts (Trk, Pixel, Muon). There has to be at LEAST greater than 10 track hits.
@@ -323,6 +178,10 @@ namespace HPlus {
 
       if ( myInnerTrackNPixelHits < 1) continue;
       bMuonNPixelHitsCut = true;
+      
+      // Suppress punch through and decay of muons in flight
+      if (!(myGlobalTrackRef->hitPattern().numberOfValidMuonHits() > 0)) continue;
+      
       // std::cout << "myGlobalTrackNMuonHits = " << myGlobalTrackNMuonHits << std::endl;
       if(myMatchedSegments < 2) continue;
       bMuonNMuonlHitsCut = true;
@@ -331,24 +190,30 @@ namespace HPlus {
       if( (*iMuon)->normChi2() > 10) continue; 
       bMuonGlobalTrkChiSqCut = true;
 
-      // 5) Impact Paremeter (d0) wrt beam spot < 0.02cm (applied to track from the inner tracker)
+      // 5) Transverse impact paremeter (d0) wrt beam spot < 0.2 mm (applied to track from the inner tracker)
       double muonIp = std::abs((*iMuon)->dB());
-      hMuonImpactParameter->Fill(muonIp);
-      if (muonIp >= 0.02) continue; // This is the transverse IP w.r.t to beamline.
+      hMuonTransverseImpactParameter->Fill(muonIp);
+      if (muonIp >= 0.2) continue; // This is the transverse IP w.r.t to beamline.
       bMuonImpactParCut = true;
 
-      // 6) Check that muon has good PV (i.e diff between muon track at its vertex and the PV along the Z position < 1cm)
-      if(fMuonApplyIpz) {
-        if(primaryVertex.get() == 0)
-          throw cms::Exception("LogicError") << "MuonApplyIpz is true, but got null primary vertex" << std::endl;
-        if(std::abs(myInnerTrackRef->dz(primaryVertex->position())) < 1.0) continue; // This is the z-impact parameter w.r.t to selected primary vertex
-        bMuonGoodPVCut = true;
-      }
-      output.fSelectedMuonsBeforeIsolationAndPtAndEtaCuts.push_back(*iMuon);
-      
-      // Store muons before isolation, but passing pt and eta cuts
-      if (myMuonPt > fMuonPtCut && std::fabs(myMuonEta) < fMuonEtaCut)
-        output.fSelectedMuonsBeforeIsolation.push_back(*iMuon);
+      // 6) Check that muon IPz is compatible with PVz
+      // FIXME: IPz cut should be added in 2012 data, should we apply it also for 2011?
+      //if(fMuonApplyIpz) {
+      if (primaryVertex.isNull())
+        throw cms::Exception("LogicError") << "MuonApplyIpz is true, but got null primary vertex" << std::endl;
+      double myDeltaIPz = std::fabs(myInnerTrackRef->dz(primaryVertex->position()));
+      hMuonDeltaIPz->Fill(myDeltaIPz);
+      if (myDeltaIPz > 0.5) continue; // This is the z-impact parameter w.r.t to selected primary vertex
+      bMuonGoodPVCut = true;
+      //}
+
+      // Fill histos with all-Muons Pt and Eta (no requirements on muons)
+      hMuonPt_BeforeIsolation->Fill(myMuonPt);
+      hMuonEta_BeforeIsolation->Fill(myMuonEta);
+      hMuonPt_InnerTrack_BeforeIsolation->Fill(myInnerTrackRef->pt());
+      hMuonEta_InnerTrack_BeforeIsolation->Fill(myInnerTrackRef->eta());
+      hMuonPt_GlobalTrack_BeforeIsolation->Fill(myGlobalTrackRef->pt());
+      hMuonEta_GlobalTrack_BeforeIsolation->Fill(myGlobalTrackRef->eta());
       
       // 7) Relative Isolation
       /*(around cone of DeltaR = 0.3) < 0.15. 
@@ -366,27 +231,35 @@ namespace HPlus {
       double myPUChHadronIso    =  (*iMuon)->puChargedHadronIso();  // isolation cones are dR=0.4
       double myIsolation = myChHadronIso + std::max(myNeutralHadronIso + myPhotonIso - 0.5 * myPUChHadronIso, 0.0);
       double relIsol = myIsolation / myMuonPt;
+      hMuonRelIsol->Fill(relIsol);
 
-
-      if (relIsol > 0.20) continue; // tight = 0.12; loose = 0.20
-
-
-      bMuonRelIsolationR03Cut = true;
+      // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#Basline_muon_selections_for_2011
+      if (relIsol < 0.12) {
+        hTightMuonEta->Fill(myMuonEta);
+        if (std::abs(myMuonEta) < fMuonEtaCut)
+          hTightMuonPt->Fill(myMuonPt);
+      }
+      if (relIsol > 0.20) {
+        output.fSelectedNonIsolatedMuons.push_back(*iMuon);
+        continue;
+      }
+      bMuonRelIsolationCut = true;
       output.fSelectedMuonsBeforePtAndEtaCuts.push_back(*iMuon);
 
-      hMuonEta_identified->Fill(myMuonEta);
-
       // 8) Apply eta cut
+      hLooseMuonEta->Fill(myMuonEta);
       if (std::abs(myMuonEta) >= fMuonEtaCut) continue;
       bMuonEtaCut = true;
+      
+      // 9) Apply pT cut 
       myHighestMuonPtBeforePtCut = std::max(myHighestMuonPtBeforePtCut, myMuonPt);
-      hMuonPt_identified_eta->Fill(myMuonPt);
-
-      // 8) Apply Pt and Eta cut requirements
+      hLooseMuonPt->Fill(myMuonPt);
 
       if (myMuonPt < fMuonPtCut) continue;
       bMuonPtCut = true;
-      output.fSelectedMuons.push_back(*iMuon);
+      output.fSelectedMuonsLoose.push_back(*iMuon);
+      if (relIsol < 0.12)
+        output.fSelectedMuonsTight.push_back(*iMuon);
 
 
       // If Muon survives all cuts (1->8) then it is considered an isolated Muon. Now find the max Muon Pt of such isolated muons.
@@ -403,32 +276,28 @@ namespace HPlus {
       //      hMuonEta_InnerTrack_AfterSelection->Fill(myMuonEta);
       hMuonPt_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->pt());
       hMuonEta_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->eta());
-     
-      bool bMuonMatchingMCmuon = false;
-      bool bMuonMatchingMCmuonFromW = false;
+    
 
       // Selection purity from MC
       if(!iEvent.isRealData()) {
-        for (size_t i=0; i < genParticles->size(); ++i){  
+        for (size_t i=0; i < genParticles->size(); ++i){
           const reco::Candidate & p = (*genParticles)[i];
+          if (p.status() != 1) continue;
+          if (abs(p.pdgId()) != 13) continue;
           const reco::Candidate & muon = (**iMuon);
-          int status = p.status();
           double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() , muon.p4() );
-          if ( deltaR > 0.05 || status != 1) continue;
-          int id = p.pdgId();
-	  //	  std::cout << "matching part id " << id << std::endl;
-          if ( abs(id) == 13 ) {
-	    bMuonMatchingMCmuon = true;
+          if (deltaR > 0.05) continue;
+	  //	  std::cout `<< "matching part id " << id << std::endl;
+          
+          bMuonMatchingMCmuon = true;
 
-	    std::vector<const reco::GenParticle*> mothers = getMothers(p);  
-	    for(size_t d=0; d<mothers.size(); ++d) {
-	      const reco::GenParticle dparticle = *mothers[d];
-	      int idmother = dparticle.pdgId();
-              if ( abs(idmother) == 24 ) {
-                bMuonMatchingMCmuonFromW = true;
-	      }
-	    }
-
+          std::vector<const reco::GenParticle*> mothers = getMothers(p);  
+          for(size_t d=0; d<mothers.size(); ++d) {
+            const reco::GenParticle dparticle = *mothers[d];
+            int idmother = dparticle.pdgId();
+            if ( abs(idmother) == 24 ) {
+              bMuonMatchingMCmuonFromW = true;
+            }
           }
 	}
 
@@ -437,7 +306,7 @@ namespace HPlus {
 	  hMuonEta_matchingMCmuon->Fill(myMuonEta);
 	  if ( bMuonMatchingMCmuonFromW  ){
 	    hMuonPt_matchingMCmuonFromW->Fill(myMuonPt);
-	    hMuonEta_matchingMCmuonFromW->Fill(myMuonEta);	    
+	    hMuonEta_matchingMCmuonFromW->Fill(myMuonEta);
 	  }
 	}
       }
@@ -445,59 +314,28 @@ namespace HPlus {
     //eof: for(pat::MuonCollection::const_iterator iMuon = myMuonHandle->begin(); iMuon != myMuonHandle->end(); ++iMuon) {
     // Fill histos after Selection
 
-    // Order of if-sentences was corrected 27.10.2011 / LAW
-    if(bMuonPresent) { // 0.1
-      increment(fMuonSelectionSubCountMuonPresent);
-      if(bMuonHasGlobalOrInnerTrk) { // 0.2
-        increment(fMuonSelectionSubCountMuonHasGlobalOrInnerTrk);
-        if(bMuonGlobalMuonOrTrkerMuon) { // 1
-          increment(fMuonSelectionSubCountMuonGlobalMuonOrTrkerMuon); 
-          if(bMuonSelection) { // 2
-            increment(fMuonSelectionSubCountMuonSelection);
-            if(bMuonNTrkerHitsCut) { // 3.1
-              increment(fMuonSelectionSubCountNTrkerHitsCut);
-              if(bMuonNPixelHitsCut) { // 3.2
-                increment(fMuonSelectionSubCountNPixelHitsCut);
-                if(bMuonNMuonlHitsCut) { // 3.3
-                  increment(fMuonSelectionSubCountNMuonlHitsCut);
-                  if(bMuonGlobalTrkChiSqCut) { // 4
-                    increment(fMuonSelectionSubCountGlobalTrkChiSqCut);
-                    if(bMuonImpactParCut) { // 5
-                      increment(fMuonSelectionSubCountImpactParCut);
-                      if(bMuonGoodPVCut || !fMuonApplyIpz) { // 6
-                        increment(fMuonSelectionSubCountGoodPVCut);
-                        if(bMuonRelIsolationR03Cut) { // 7
-                          increment(fMuonSelectionSubCountRelIsolationR03Cut);
-                          if(bMuonPtCut) { // 8.1
-                            increment(fMuonSelectionSubCountPtCut);
-                            if(bMuonEtaCut) { // 8.2
-                              increment(fMuonSelectionSubCountEtaCut);
-			      /*
-                              if(bMuonMatchingMCmuon) { // 9
-                                increment(fMuonSelectionSubCountMatchingMCmuon);
-                                if(bMuonMatchingMCmuonFromW) { // 10
-                                  increment(fMuonSelectionSubCountMatchingMCmuonFromW);
-                                }
-                              }
-			      */
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+    if(bMuonPresent) increment(fMuonSelectionSubCountMuonPresent);
+    if(bMuonHasGlobalOrInnerTrk) increment(fMuonSelectionSubCountMuonHasGlobalOrInnerTrk);
+    if(bMuonGlobalMuonOrTrkerMuon) increment(fMuonSelectionSubCountMuonGlobalMuonOrTrkerMuon); 
+    if(bMuonSelection) increment(fMuonSelectionSubCountMuonSelection);
+    if(bMuonNTrkerHitsCut) increment(fMuonSelectionSubCountNTrkerHitsCut);
+    if(bMuonNPixelHitsCut) increment(fMuonSelectionSubCountNPixelHitsCut);
+    if(bMuonNMuonlHitsCut) increment(fMuonSelectionSubCountNMuonlHitsCut);
+    if(bMuonGlobalTrkChiSqCut) increment(fMuonSelectionSubCountGlobalTrkChiSqCut);
+    if(bMuonImpactParCut) increment(fMuonSelectionSubCountImpactParCut);
+    if(bMuonGoodPVCut) increment(fMuonSelectionSubCountGoodPVCut);
+    if(bMuonRelIsolationCut) increment(fMuonSelectionSubCountRelIsolationCut);
+    if(bMuonPtCut) increment(fMuonSelectionSubCountPtCut);
+    if(bMuonEtaCut) increment(fMuonSelectionSubCountEtaCut);
+    if(bMuonMatchingMCmuon) increment(fMuonSelectionSubCountMatchingMCmuon);
+    if(bMuonMatchingMCmuonFromW) increment(fMuonSelectionSubCountMatchingMCmuonFromW);
+
     // Store the highest Muon Pt and Eta
     output.fSelectedMuonPt  = myHighestMuonPt;
     output.fSelectedMuonPtBeforePtCut = myHighestMuonPtBeforePtCut;
     output.fSelectedMuonEta = myHighestMuonEta;
-    hNumberOfSelectedMuons->Fill(output.fSelectedMuons.size());
+    hNumberOfTightMuons->Fill(output.fSelectedMuonsTight.size());
+    hNumberOfLooseMuons->Fill(output.fSelectedMuonsLoose.size());
     // std::cout << "fSelectedMuonPt = " << fSelectedMuonsPt << ", fSelectedMuonsEta = " << fSelectedMuonsEta << std::endl;   
   }//eof: bool MuonSelection::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   

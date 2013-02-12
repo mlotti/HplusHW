@@ -39,20 +39,26 @@ namespace HPlus {
       // Here the object pointed-to must live longer than this object.
       Data();
       ~Data();
-
+      // Getters for veto on isolated muons
       const bool passedEvent() const { return fPassedEvent; }
+      const bool passedMuonVeto() const { return fPassedEvent; }
       const float getSelectedMuonPt() const { return fSelectedMuonPt; }
       const float getSelectedMuonEta() const { return fSelectedMuonEta; }
       const float getSelectedMuonPtBeforePtCut() const { return fSelectedMuonPtBeforePtCut; }
+      // Getters for finding isolated muons
+      const bool foundTightMuon() const { return (fSelectedMuonsTight.size() > 0); }
+      const bool foundLooseMuon() const { return (fSelectedMuonsLoose.size() > 0); }
 
       /// Muon collection after all selections - size should be zero if veto condition is passed
-      const edm::PtrVector<pat::Muon>& getSelectedMuons() { return fSelectedMuons; }
+      const edm::PtrVector<pat::Muon>& getSelectedMuons() const { return fSelectedMuonsLoose; }
+      /// Muon collection after all selections - loose isolation
+      const edm::PtrVector<pat::Muon>& getSelectedLooseMuons() const { return fSelectedMuonsLoose; }
+      /// Muon collection after all selections - loose isolation
+      const edm::PtrVector<pat::Muon>& getSelectedTightMuons() const { return fSelectedMuonsTight; }
+      /// Muon collection after all selections - anti-isolated (relIsol > 0.2)
+      const edm::PtrVector<pat::Muon>& getNonIsolatedMuons() const { return fSelectedNonIsolatedMuons; }
       /// Muon collection after all selections except pt and eta cuts
       const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforePtAndEtaCuts() { return fSelectedMuonsBeforePtAndEtaCuts; }
-      /// Muon collection after all selections except isolation and pt and eta cuts
-      const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforeIsolationAndPtAndEtaCuts() { return fSelectedMuonsBeforeIsolationAndPtAndEtaCuts; }
-      /// Muon collection after all selections except isolation
-      const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforeIsolation() { return fSelectedMuonsBeforeIsolation; }
 
       friend class MuonSelection;
 
@@ -63,13 +69,10 @@ namespace HPlus {
       float fSelectedMuonEta;
       float fSelectedMuonPtBeforePtCut;
       /// Muon collection after all selections
-      edm::PtrVector<pat::Muon> fSelectedMuons;
-      /// Muon collection after all selections except pt and eta cuts
+      edm::PtrVector<pat::Muon> fSelectedMuonsTight;
+      edm::PtrVector<pat::Muon> fSelectedMuonsLoose;
+      edm::PtrVector<pat::Muon> fSelectedNonIsolatedMuons;
       edm::PtrVector<pat::Muon> fSelectedMuonsBeforePtAndEtaCuts;
-      /// Muon collection after all selections except isolation and pt and eta cuts
-      edm::PtrVector<pat::Muon> fSelectedMuonsBeforeIsolationAndPtAndEtaCuts;
-      /// Muon collection after all selections except isolation
-      edm::PtrVector<pat::Muon> fSelectedMuonsBeforeIsolation;
 
     };
 
@@ -79,14 +82,11 @@ namespace HPlus {
     // Use silentAnalyze if you do not want to fill histograms or increment counters
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
-    Data silentAnalyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
-    Data analyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
 
     void debug(void);
 
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
-    Data privateAnalyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
 
     void doMuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex, MuonSelection::Data& output);
 
@@ -97,13 +97,9 @@ namespace HPlus {
     const double fMuonEtaCut;
     const bool fMuonApplyIpz;
     
-    /// Counter
-    Count fMuonSelectionCounter;
     /// Sub-Counter to Counter
     Count fMuonSelectionSubCountMuonPresent;
     Count fMuonSelectionSubCountMuonHasGlobalOrInnerTrk;
-    Count fMuonSelectionSubCountPtCut;
-    Count fMuonSelectionSubCountEtaCut;
     Count fMuonSelectionSubCountMuonGlobalMuonOrTrkerMuon;
     Count fMuonSelectionSubCountMuonSelection;
     Count fMuonSelectionSubCountNTrkerHitsCut;
@@ -111,75 +107,42 @@ namespace HPlus {
     Count fMuonSelectionSubCountNMuonlHitsCut;
     Count fMuonSelectionSubCountGlobalTrkChiSqCut;
     Count fMuonSelectionSubCountImpactParCut;
-    Count fMuonSelectionSubCountRelIsolationR03Cut;
     Count fMuonSelectionSubCountGoodPVCut;
+    Count fMuonSelectionSubCountRelIsolationCut;
+    Count fMuonSelectionSubCountEtaCut;
+    Count fMuonSelectionSubCountPtCut;
     Count fMuonSelectionSubCountMatchingMCmuon;
     Count fMuonSelectionSubCountMatchingMCmuonFromW;
-    /// Sub-Counter (MuonID) - just for my information
-    Count fMuonIDSubCountAllMuonCandidates;
-    Count fMuonIDSubCountAll;
-    Count fMuonIDSubCountAllGlobalMuons;
-    Count fMuonIDSubCountAllStandAloneMuons;
-    Count fMuonIDSubCountAllTrackerMuons;
-    Count fMuonIDSubCountTrackerMuonArbitrated;
-    Count fMuonIDSubCountAllArbitrated;
-    Count fMuonIDSubCountGlobalMuonPromptTight;
-    Count fMuonIDSubCountTMLastStationLoose;
-    Count fMuonIDSubCountTMLastStationTight;
-    Count fMuonIDSubCountTMOneStationLoose;
-    Count fMuonIDSubCountTMLastStationOptimizedLowPtLoose;
-    Count fMuonIDSubCountTMLastStationOptimizedLowPtTight;
-    Count fMuonIDSubCountGMTkChiCompatibility;
-    Count fMuonIDSubCountGMTkKinkTight;
-    Count fMuonIDSubCountTMLastStationAngLoose;
-    Count fMuonIDSubCountTMLastStationAngTight;
-    Count fMuonIDSubCountTMLastStationOptimizedBarrelLowPtLoose;
-    Count fMuonIDSubCountTMLastStationOptimizedBarrelLowPtTight;
-    Count fMuonIDSubCountOther;
+    Count fMuonSelectionCounter;
 
     // Histograms
-    WrappedTH1 *hMuonPt;
-    WrappedTH1 *hMuonEta;
     //    WrappedTH1 *hMuonPt_test;
     //    WrappedTH1 *hMuonEta_test;
-    WrappedTH1 *hMuonPt_identified_eta;
-    WrappedTH1 *hMuonEta_identified;
-    WrappedTH1 *hNumberOfSelectedMuons;
+    WrappedTH1 *hTightMuonPt;
+    WrappedTH1 *hTightMuonEta;
+    WrappedTH1 *hLooseMuonPt;
+    WrappedTH1 *hLooseMuonEta;
+    WrappedTH1 *hNumberOfTightMuons;
+    WrappedTH1 *hNumberOfLooseMuons;
     WrappedTH1 *hMuonPt_matchingMCmuon;
     WrappedTH1 *hMuonEta_matchingMCmuon;
     WrappedTH1 *hMuonPt_matchingMCmuonFromW;
     WrappedTH1 *hMuonEta_matchingMCmuonFromW;
-    WrappedTH1 *hMuonPt_InnerTrack;
-    WrappedTH1 *hMuonEta_InnerTrack;
-    WrappedTH1 *hMuonPt_GlobalTrack;
-    WrappedTH1 *hMuonEta_GlobalTrack;
+    WrappedTH1 *hMuonPt_BeforeIsolation;
+    WrappedTH1 *hMuonEta_BeforeIsolation;
+    WrappedTH1 *hMuonPt_InnerTrack_BeforeIsolation;
+    WrappedTH1 *hMuonEta_InnerTrack_BeforeIsolation;
+    WrappedTH1 *hMuonPt_GlobalTrack_BeforeIsolation;
+    WrappedTH1 *hMuonEta_GlobalTrack_BeforeIsolation;
     WrappedTH1 *hMuonPt_AfterSelection;
     WrappedTH1 *hMuonEta_AfterSelection;
     WrappedTH1 *hMuonPt_InnerTrack_AfterSelection;
     WrappedTH1 *hMuonEta_InnerTrack_AfterSelection;
     WrappedTH1 *hMuonPt_GlobalTrack_AfterSelection;
     WrappedTH1 *hMuonEta_GlobalTrack_AfterSelection;
-    WrappedTH1 *hMuonImpactParameter;
-    WrappedTH1 *hMuonZdiff;
-
-    // booleans
-    bool bMuonPresent;
-    bool bDecision;
-    bool bMuonHasGlobalOrInnerTrk;
-    bool bMuonPtCut;
-    bool bMuonEtaCut;
-    bool bMuonGlobalMuonOrTrkerMuon;
-    bool bMuonSelection;
-    bool bMuonNTrkerHitsCut;
-    bool bMuonNPixelHitsCut;
-    bool bMuonNMuonlHitsCut;
-    bool bMuonGlobalTrkChiSqCut;
-    bool bMuonImpactParCut;
-    bool bMuonRelIsolationR03Cut;
-    bool bMuonGoodPVCut;
-    bool bMuonMatchingMCmuon;
-    bool bMuonMatchingMCmuonFromW;
-
+    WrappedTH1 *hMuonTransverseImpactParameter;
+    WrappedTH1 *hMuonDeltaIPz;
+    WrappedTH1 *hMuonRelIsol;
   };
 }
 

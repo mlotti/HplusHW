@@ -716,9 +716,6 @@ namespace HPlus {
     fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), kSignalOrderMuonVeto, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Muon> > saveMuons(new std::vector<pat::Muon>());
-      copyPtrToVector(muonVetoData.getSelectedMuonsBeforeIsolationAndPtAndEtaCuts(), *saveMuons);
-      iEvent.put(saveMuons, "selectedVetoMuonsBeforeIsolationAndPtAndEtaCuts");
-      saveMuons.reset(new std::vector<pat::Muon>());
       copyPtrToVector(muonVetoData.getSelectedMuonsBeforePtAndEtaCuts(), *saveMuons);
       iEvent.put(saveMuons, "selectedVetoMuonsBeforePtAndEtaCuts");
     }
