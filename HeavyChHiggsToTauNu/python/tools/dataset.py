@@ -1685,7 +1685,7 @@ class Dataset:
     # draw() method), the draw() method is called by giving the TFile
     # and the dataset name as parameters. The draw() method is
     # expected to return a TH1 which is then returned.
-    def getDatasetRootHisto(self, name, modify=None, quietException=False):
+    def getDatasetRootHisto(self, name, modify=None):
         h = None
         if hasattr(name, "draw"):
             h = name.draw(self)
