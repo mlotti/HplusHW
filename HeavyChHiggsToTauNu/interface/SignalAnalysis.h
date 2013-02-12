@@ -287,6 +287,8 @@ namespace HPlus {
     WrappedTH1 *hTauVsJetDeltaPt;
     WrappedTH1 *hTauVsJetDeltaR;
     WrappedTH1 *hTauVsJetMCFlavor;
+    WrappedTH1 *hTauVsJetDeltaPtGenuineTaus;
+    WrappedTH1 *hTauVsJetDeltaPtElectrons;
     WrappedTH1 *hTauVsJetDeltaPtHeavyFlavor;
     WrappedTH1 *hTauVsJetDeltaRHeavyFlavor;
     WrappedTH1 *hTauVsJetDeltaPtLightFlavor;

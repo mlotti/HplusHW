@@ -281,6 +281,8 @@ namespace HPlus {
     hTauVsJetDeltaPt = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetDeltaPt", "#Deltap_{T}(#tau,jet), GeV/c", 200, -500, 500);
     hTauVsJetDeltaR = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetDeltaR", "#DeltaR(#tau,jet), GeV/c", 100, 0, .5);
     hTauVsJetMCFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetMCFlavor", "MC flavor of jet matching to tau", 30, 0, 30);
+    hTauVsJetDeltaPtGenuineTaus = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetDeltaPttaus", "genuine #tau's: #Deltap_{T}(#tau,jet), GeV/c", 200, -500, 500);
+    hTauVsJetDeltaPtElectrons = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetDeltaPtelectrons", "electrons: #Deltap_{T}(#tau,jet), GeV/c", 200, -500, 500);
     hTauVsJetDeltaPtHeavyFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetDeltaPtcb", "cb: #Deltap_{T}(#tau,jet), GeV/c", 200, -500, 500);
     hTauVsJetDeltaRHeavyFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetDeltaRcb", "cb: #DeltaR(#tau,jet), GeV/c", 100, 0, .5);
     hTauVsJetDeltaPtLightFlavor = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myTauDebugDir, "TauVsJetDeltaPtuds", "uds: #Deltap_{T}(#tau,jet), GeV/c", 200, -500, 500);
@@ -463,12 +465,12 @@ namespace HPlus {
 
     fTree.init(*fs);
     
-    hReferenceJetToTauDeltaPtDecayMode0 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "DeltaPtDecayMode0", "ReferenceJetToTauDeltaPtDecayMode0;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
-    hReferenceJetToTauDeltaPtDecayMode1 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "DeltaPtDecayMode1", "ReferenceJetToTauDeltaPtDecayMode1;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
-    hReferenceJetToTauDeltaPtDecayMode2 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "DeltaPtDecayMode2", "ReferenceJetToTauDeltaPtDecayMode2;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
-    hReferenceJetToTauDeltaPtDecayMode0NoNeutralHadrons = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "DeltaPtDecayMode0NoNeutralHadrons", "ReferenceJetToTauDeltaPtDecayMode0NoNeutralHadrons;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
-    hReferenceJetToTauDeltaPtDecayMode1NoNeutralHadrons = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "DeltaPtDecayMode1NoNeutralHadrons", "ReferenceJetToTauDeltaPtDecayMode1NoNeutralHadrons;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
-    hReferenceJetToTauDeltaPtDecayMode2NoNeutralHadrons = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, *fs, "DeltaPtDecayMode2NoNeutralHadrons", "ReferenceJetToTauDeltaPtDecayMode2NoNeutralHadrons;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
+    hReferenceJetToTauDeltaPtDecayMode0 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "DeltaPtDecayMode0", "ReferenceJetToTauDeltaPtDecayMode0;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
+    hReferenceJetToTauDeltaPtDecayMode1 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "DeltaPtDecayMode1", "ReferenceJetToTauDeltaPtDecayMode1;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
+    hReferenceJetToTauDeltaPtDecayMode2 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "DeltaPtDecayMode2", "ReferenceJetToTauDeltaPtDecayMode2;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
+    hReferenceJetToTauDeltaPtDecayMode0NoNeutralHadrons = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "DeltaPtDecayMode0NoNeutralHadrons", "ReferenceJetToTauDeltaPtDecayMode0NoNeutralHadrons;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
+    hReferenceJetToTauDeltaPtDecayMode1NoNeutralHadrons = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "DeltaPtDecayMode1NoNeutralHadrons", "ReferenceJetToTauDeltaPtDecayMode1NoNeutralHadrons;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
+    hReferenceJetToTauDeltaPtDecayMode2NoNeutralHadrons = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "DeltaPtDecayMode2NoNeutralHadrons", "ReferenceJetToTauDeltaPtDecayMode2NoNeutralHadrons;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
 
   }
 
@@ -583,6 +585,7 @@ namespace HPlus {
       fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()));
     fCommonPlotsAfterTauWeight->fill();
     if (myFakeTauStatus) fCommonPlotsAfterTauWeightFakeTaus->fill();
+    fCommonPlots.fillControlPlots(tauData);
     // plot leading track without pt cut
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
     increment(fTauFakeScaleFactorCounter);
@@ -724,7 +727,7 @@ namespace HPlus {
 //------ Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
 
-    if (jetData.getReferenceJetToTau().isNonnull()) {
+    if (jetData.getReferenceJetToTau().isNonnull() && myFakeTauStatus) {
       double myDeltaPtWithoutNeutralHadrons = tauData.getSelectedTau()->pt() - jetData.getReferenceJetToTau()->pt() * (1.0-jetData.getReferenceJetToTau()->neutralHadronEnergyFraction());
       if (tauData.getSelectedTau()->decayMode() == 0) {
         hReferenceJetToTauDeltaPtDecayMode0->Fill(jetData.getReferenceJetToTauDeltaPt());
@@ -750,6 +753,14 @@ namespace HPlus {
     //    increment(fMETCounter);
 
     analyseJetMatchingToTau(tauData, jetData);
+    if (jetData.getReferenceJetToTau().isNonnull()) {
+      if (!myFakeTauStatus) {
+        hTauVsJetDeltaPtGenuineTaus->Fill(jetData.getReferenceJetToTauDeltaPt());
+      } else if (fFakeTauIdentifier.isElectronToTau(tauMatchData.getTauMatchType())) {
+        hTauVsJetDeltaPtElectrons->Fill(jetData.getReferenceJetToTauDeltaPt());
+      }
+    }
+    
     //std::cout << "tau match is " << tauMatchData.getTauMatchType() << " e=" << fFakeTauIdentifier.isElectronToTau(tauMatchData.getTauMatchType()) << " mu=" << fFakeTauIdentifier.isMuonToTau(tauMatchData.getTauMatchType()) << " jet=" << fFakeTauIdentifier.isJetToTau(tauMatchData.getTauMatchType()) << std::endl;
     hCtrlNjets->Fill(jetData.getHadronicJetCount());
 
@@ -1648,30 +1659,30 @@ namespace HPlus {
       int myFlavor = std::abs(jetData.getAllJets()[mySelectedIndex]->partonFlavour());
       if (fFakeTauIdentifier.isElectronToTau(tauMatchData.getTauMatchType())) {
         hTauVsJetTauPteBefore->Fill(tauData.getAllTauObjects()[i]->pt());
-        hTauVsJetTauPteByJetPtBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+        hTauVsJetTauPteByJetPtBefore->Fill(jetData.getAllJets()[mySelectedIndex]->pt());
         if (myFlavor == 5) {
           hTauVsJetTauPtbleptonicBefore->Fill(tauData.getAllTauObjects()[i]->pt());
-          hTauVsJetTauPtbleptonicByJetPtBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+          hTauVsJetTauPtbleptonicByJetPtBefore->Fill(jetData.getAllJets()[mySelectedIndex]->pt());
         }
       } else if (fFakeTauIdentifier.isMuonToTau(tauMatchData.getTauMatchType())) {
         hTauVsJetTauPtmuBefore->Fill(tauData.getAllTauObjects()[i]->pt());
-        hTauVsJetTauPtmuByJetPtBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+        hTauVsJetTauPtmuByJetPtBefore->Fill(jetData.getAllJets()[mySelectedIndex]->pt());
         if (myFlavor == 5) {
           hTauVsJetTauPtbleptonicBefore->Fill(tauData.getAllTauObjects()[i]->pt());
-          hTauVsJetTauPtbleptonicByJetPtBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+          hTauVsJetTauPtbleptonicByJetPtBefore->Fill(jetData.getAllJets()[mySelectedIndex]->pt());
         }
       } else if (myFlavor >= 1 && myFlavor <= 3) {
         hTauVsJetTauPtudsBefore->Fill(tauData.getAllTauObjects()[i]->pt());
-        hTauVsJetTauPtudsByJetPtBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+        hTauVsJetTauPtudsByJetPtBefore->Fill(jetData.getAllJets()[mySelectedIndex]->pt());
       } else if (myFlavor == 4) {
         hTauVsJetTauPtcBefore->Fill(tauData.getAllTauObjects()[i]->pt());
-        hTauVsJetTauPtcByJetPtBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+        hTauVsJetTauPtcByJetPtBefore->Fill(jetData.getAllJets()[mySelectedIndex]->pt());
       } else if (myFlavor == 5) {
         hTauVsJetTauPtbBefore->Fill(tauData.getAllTauObjects()[i]->pt());
-        hTauVsJetTauPtbByJetPtBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+        hTauVsJetTauPtbByJetPtBefore->Fill(jetData.getAllJets()[mySelectedIndex]->pt());
       } else if (myFlavor == 21) {
         hTauVsJetTauPtgBefore->Fill(tauData.getAllTauObjects()[i]->pt());
-        hTauVsJetTauPtgByJetPtBefore->Fill(tauData.getAllTauObjects()[i]->pt());
+        hTauVsJetTauPtgByJetPtBefore->Fill(jetData.getAllJets()[mySelectedIndex]->pt());
       }
     }
     // Require tau ID
@@ -1697,30 +1708,30 @@ namespace HPlus {
       int myFlavor = std::abs(jetData.getAllJets()[mySelectedIndex]->partonFlavour());
       if (fFakeTauIdentifier.isElectronToTau(tauMatchData.getTauMatchType())) {
         hTauVsJetTauPteAfter->Fill(tauData.getSelectedTaus()[i]->pt());
-        hTauVsJetTauPteByJetPtAfter->Fill(tauData.getSelectedTaus()[i]->pt());
+        hTauVsJetTauPteByJetPtAfter->Fill(jetData.getAllJets()[mySelectedIndex]->pt());
         if (myFlavor == 5) {
           hTauVsJetTauPtbleptonicAfter->Fill(tauData.getAllTauObjects()[i]->pt());
-          hTauVsJetTauPtbleptonicByJetPtAfter->Fill(tauData.getAllTauObjects()[i]->pt());
+          hTauVsJetTauPtbleptonicByJetPtAfter->Fill(jetData.getAllJets()[mySelectedIndex]->pt());
         }
       } else if (fFakeTauIdentifier.isMuonToTau(tauMatchData.getTauMatchType())) {
         hTauVsJetTauPtmuAfter->Fill(tauData.getSelectedTaus()[i]->pt());
-        hTauVsJetTauPtmuByJetPtAfter->Fill(tauData.getSelectedTaus()[i]->pt());
+        hTauVsJetTauPtmuByJetPtAfter->Fill(jetData.getAllJets()[mySelectedIndex]->pt());
         if (myFlavor == 5) {
           hTauVsJetTauPtbleptonicAfter->Fill(tauData.getAllTauObjects()[i]->pt());
-          hTauVsJetTauPtbleptonicByJetPtAfter->Fill(tauData.getAllTauObjects()[i]->pt());
+          hTauVsJetTauPtbleptonicByJetPtAfter->Fill(jetData.getAllJets()[mySelectedIndex]->pt());
         }
       } else if (myFlavor >= 1 && myFlavor <= 3) {
         hTauVsJetTauPtudsAfter->Fill(tauData.getSelectedTaus()[i]->pt());
-        hTauVsJetTauPtudsByJetPtAfter->Fill(tauData.getSelectedTaus()[i]->pt());
+        hTauVsJetTauPtudsByJetPtAfter->Fill(jetData.getAllJets()[mySelectedIndex]->pt());
       } else if (myFlavor == 4) {
         hTauVsJetTauPtcAfter->Fill(tauData.getSelectedTaus()[i]->pt());
-        hTauVsJetTauPtcByJetPtAfter->Fill(tauData.getSelectedTaus()[i]->pt());
+        hTauVsJetTauPtcByJetPtAfter->Fill(jetData.getAllJets()[mySelectedIndex]->pt());
       } else if (myFlavor == 5) {
         hTauVsJetTauPtbAfter->Fill(tauData.getSelectedTaus()[i]->pt());
-        hTauVsJetTauPtbByJetPtAfter->Fill(tauData.getSelectedTaus()[i]->pt());
+        hTauVsJetTauPtbByJetPtAfter->Fill(jetData.getAllJets()[mySelectedIndex]->pt());
       } else if (myFlavor == 21) {
         hTauVsJetTauPtgAfter->Fill(tauData.getSelectedTaus()[i]->pt());
-        hTauVsJetTauPtgByJetPtAfter->Fill(tauData.getSelectedTaus()[i]->pt());
+        hTauVsJetTauPtgByJetPtAfter->Fill(jetData.getAllJets()[mySelectedIndex]->pt());
       }
     }
   }
