@@ -18,6 +18,20 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.pileupReweightedAllEvents as pileupReweightedAllEvents
 
 
+# era name -> list of era parts in data dataset names
+_dataEras = {
+    "Run2011A": ["_2011A_"],
+    "Run2011B": ["_2011B_"],
+    "Run2011AB": ["_2011A_", "_2011B_"],
+    "Run2012A": ["_2012A_"],
+    "Run2012B": ["_2012B_"],
+    "Run2012C": ["_2012C_"],
+    "Run2012D": ["_2012D_"],
+    "Run2012AB": ["_2012A_", "_2012B_"],
+    "Run2012ABC": ["_2012A_", "_2012B_", "_2012C_"],
+    "Run2012ABCD": ["_2012A_", "_2012B_", "_2012C_", "_2012D_"],
+}
+
 ## Construct DatasetManager from a list of MultiCRAB directory names.
 # 
 # \param multiDirs   List of strings or pairs of strings of the MultiCRAB
@@ -2626,24 +2640,14 @@ class DatasetManagerCreator:
                         return True
                 return False
 
-            if dataEra == "Run2011A":
-                precursors = filter(lambda p: isInEra("_2011A_", p), precursors)
-            elif dataEra == "Run2011B":
-                precursors = filter(lambda p: isInEra("_2011B_", p), precursors)
-            elif dataEra == "Run2011AB":
-                precursors = filter(lambda p: isInEra(["_2011A_", "_2011B_"], p), precursors)
-            elif dataEra == "Run2012A":
-                precursors = filter(lambda p: isInEra("_2012A_", p), precursors)
-            elif dataEra == "Run2012B":
-                precursors = filter(lambda p: isInEra("_2012B_", p), precursors)
-            elif dataEra == "Run2012C":
-                precursors = filter(lambda p: isInEra("_2012C_", p), precursors)
-            elif dataEra == "Run2012AB":
-                precursors = filter(lambda p: isInEra(["_2012A_", "_2012B_"], p), precursors)
-            elif dataEra == "Run2012ABC":
-                precursors = filter(lambda p: isInEra(["_2012A_", "_2012B_", "_2012C_"], p), precursors)
-            else:
-                raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB, Run2012A, Run2012B, Run2012C, Run2012AB, Run2012ABC" % dataEra)
+            try:
+                lst = _dataEras[dataEra]
+            except KeyError:
+                eras = _dataEras.keys()
+                eras.sort()
+                raise Exception("Unknown data era '%s', known are %s" % (dataEra, ", ".join(eras)))
+
+            precursors = filter(lambda p: isInEra(lst, p), precursors)
 
         manager = DatasetManager()
         for precursor in precursors:
