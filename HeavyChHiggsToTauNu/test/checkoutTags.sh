@@ -75,6 +75,7 @@ set -e
 # 12.12.2012/M.Kortelainen CMSSW_5_3_7 Updated tau/PAT tags
 # 3.1.2013/M.Kortelainen CMSSW_5_3_7 Updated tau tags
 # 9.1.2013/M.Kortelainen CMSSW_5_3_7_patch4 Updated PAT tags
+# 12.2.2013/M.Kortelainen CMSSW_5_3_7_patch6 Backported technical change in pat::Jet
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -93,6 +94,8 @@ addpkg PhysicsTools/PatUtils V03-09-27
 cvs up -r 1.25 PhysicsTools/PatUtils/python/tools/metUncertaintyTools.py
 cvs up -r 1.19.8.1 PhysicsTools/PatAlgos/python/tools/helpers.py
 rm PhysicsTools/PatUtils/plugins/MinPatMETProducer.cc
+# Backport technical change in pat::Jet to reduce space
+cvs up -j 1.83 -j 1.84 DataFormats/PatCandidates/src/classes_def.xml
 
 # Latest EGM isolation definition (whatever that is)
 addpkg RecoParticleFlow/PFProducer V15-02-06
