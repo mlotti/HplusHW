@@ -14,6 +14,9 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+
 #include <string>
 #include <vector>
 
@@ -33,7 +36,7 @@ namespace HPlus {
    */
   class CommonPlotsFilledAtEveryStep {
   public:
-    CommonPlotsFilledAtEveryStep(HistoWrapper& histoWrapper, std::string label, bool enterSelectionFlowPlot, std::string selectionFlowPlotLabel);
+    CommonPlotsFilledAtEveryStep(HistoWrapper& histoWrapper, TFileDirectory& dir, std::string label, bool enterSelectionFlowPlot, std::string selectionFlowPlotLabel);
     ~CommonPlotsFilledAtEveryStep();
     /// Fills histograms; supply pointer to data object from analyse() call, if it exists
     void fill();
@@ -50,8 +53,7 @@ namespace HPlus {
                           const JetSelection::Data* jetData,
                           const METSelection::Data* metData,
                           const BTagging::Data* bJetData,
-                          const TopChiSelection::Data* topData,
-                          const EvtTopology::Data* evtTopology);
+                          const TopChiSelection::Data* topData);
 
   private:
     /// Status indicating wheather the data objects have been cached
@@ -70,7 +72,6 @@ namespace HPlus {
     const METSelection::Data* fMETData;
     const BTagging::Data* fBJetData;
     const TopChiSelection::Data* fTopData;
-    const EvtTopology::Data* fEvtTopology;
 
     /// Histograms to be plotted after every step
     WrappedTH1* hNVertices;
@@ -132,13 +133,16 @@ namespace HPlus {
 
   private:
     void createHistograms();
-
     /// Status indicating wheather the data objects have been cached
     bool bDataObjectsCached;
     /// Event counter object
     EventCounter& fEventCounter;
     /// HistoWrapper object
     HistoWrapper& fHistoWrapper;
+    /// Base directory in root file for every step histograms
+    edm::Service<TFileService> fs;
+    TFileDirectory fCommonBaseDirectory;
+    TFileDirectory fEveryStepDirectory;
     /// Cached data objects from silent analyze
     int fNVertices;
     VertexSelection::Data fVertexData;
@@ -159,6 +163,8 @@ namespace HPlus {
     // vertex
     
     // tau selection
+    WrappedTH2* hTauPhiOscillationX;
+    WrappedTH2* hTauPhiOscillationY;
     
     // electron veto
     
