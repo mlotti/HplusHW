@@ -199,10 +199,12 @@ defaultSeBlacklist = defaultSeBlacklist_noStageout + defaultSeBlacklist_stageout
 #                  optional, to override the default behaviour of reading
 #                  the configuration file.
 # \param filename  Path to the multicrab.cfg file (default: 'multicrab.cfg')
+# \param directory Path to \a filename, allows specifying only the
+#                  directory of the default \a filename (default: '')
 # 
 # The order of the task names is the same as they are in the
 # configuration file.
-def getTaskDirectories(opts, filename="multicrab.cfg"):
+def getTaskDirectories(opts, filename="multicrab.cfg", directory=""):
     if hasattr(opts, "dirs") and len(opts.dirs) > 0:
         ret = []
         for d in opts.dirs:
@@ -212,14 +214,15 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
                 ret.append(d)
         return ret
     else:
-        if not os.path.exists(filename):
-            raise Exception("Multicrab configuration file '%s' does not exist" % filename)
+        fname = os.path.join(directory, filename)
+        if not os.path.exists(fname):
+            raise Exception("Multicrab configuration file '%s' does not exist" % fname)
 
-        directory = os.path.dirname(filename)
+        dirname = os.path.dirname(fname)
 
         mc_ignore = ["MULTICRAB", "COMMON"]
         mc_parser = ConfigParser.ConfigParser(dict_type=OrderedDict.OrderedDict)
-        mc_parser.read(filename)
+        mc_parser.read(fname)
 
         sections = mc_parser.sections()
 
@@ -239,7 +242,7 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
         if opts != None and opts.filter != "":
             fi = filt
 
-        return filter(fi, [os.path.join(directory, sec) for sec in sections])
+        return filter(fi, [os.path.join(dirname, sec) for sec in sections])
 
 ## Add common MultiCRAB options to OptionParser object.
 #

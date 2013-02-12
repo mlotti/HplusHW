@@ -37,7 +37,7 @@ else:
 yMinRatio = 0
 yMaxRatio = 2
 mcOnlyLumi = 2.3*1000 #(pb)
-multicrabPath = ["/Volumes/disk/attikis/HIG-12-037/TreeAnalysis_v44_4_130113_105229/"]
+multicrabPath = "/Volumes/disk/attikis/HIG-12-037/TreeAnalysis_v44_4_130113_105229/"
 
 ######################################################################
 ### Per-event cuts: HIG-12-037 #HIG-11-019)
@@ -92,7 +92,7 @@ def main():
 
     ### Get the ROOT files for all datasets, merge datasets and reorder them
     print "*** Obtaining ROOT files from:\n    %s" % (multicrabPath)
-    datasets = dataset.getDatasetsFromMulticrabDirs(multicrabPath, dataEra="Run2011A")
+    datasets = dataset.getDatasetsFromMulticrabCfg(directory=multicrabPath, dataEra="Run2011A")
 
     printPSet(bPrintPSet, folderName="signalAnalysisRun2011A")
 
@@ -196,7 +196,7 @@ def doPlots(datasets, histoDict, MyCuts, SaveExtension):
     else:
         EvtWeight = "weightPileup*weightTrigger*weightPrescale"
     print "*** Drawing tree with event weight:\n    %s" % (EvtWeight)
-    treeDraw = dataset.TreeDraw("signalAnalysis/tree", weight=EvtWeight)
+    treeDraw = dataset.TreeDraw("tree", weight=EvtWeight)
     MyTreeDraw = treeDraw.clone(selection=MyCuts)
     
     ### Loop over all hName and expressions in the dictionary "histoDict"

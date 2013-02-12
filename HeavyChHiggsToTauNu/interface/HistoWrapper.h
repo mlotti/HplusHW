@@ -23,10 +23,11 @@ namespace HPlus {
   class HistoWrapper {
   public:
     enum HistoLevel {
-      kSystematics,
+      kSystematics = 0,
       kVital,
       kInformative,
-      kDebug
+      kDebug,
+      kNumberOfLevels
     };
 
     typedef HPlus::TemporaryDisabler<HistoWrapper> TemporaryDisabler;
@@ -63,6 +64,8 @@ namespace HPlus {
     bool getEnableStatus() const { return fIsEnabled; }
     TemporaryDisabler disableTemporarily() { return TemporaryDisabler(*this, false); }
 
+    void printHistoStatistics() const;
+
   private:
     /// Method for checking if a directory exists
     bool checkIfDirExists(TDirectory* d, std::string name) const;
@@ -72,6 +75,7 @@ namespace HPlus {
     EventWeight& fEventWeight;
     /// Level of what histograms are saved to the root file
     HistoLevel fAmbientLevel;
+    int fHistoLevelStats[kNumberOfLevels];
 
     std::vector<WrappedTH1*> fAllTH1Histos;
     std::vector<WrappedTH2*> fAllTH2Histos;
@@ -165,6 +169,7 @@ namespace HPlus {
       histo = fd.make<T>(a1, a2, a3, a4, a5);
       histo->Sumw2();
     }
+    fHistoLevelStats[level]++;
     fAllTH1Histos.push_back(new WrappedTH1(*this, histo, level));
     return fAllTH1Histos.at(fAllTH1Histos.size()-1);
   }
@@ -178,6 +183,7 @@ namespace HPlus {
       histo = fd.make<T>(a1, a2, a3, a4, a5, a6, a7, a8);
       histo->Sumw2();
     }
+    fHistoLevelStats[level]++;
     fAllTH2Histos.push_back(new WrappedTH2(*this, histo, level));
     return fAllTH2Histos.at(fAllTH2Histos.size()-1);
   }
@@ -193,6 +199,7 @@ namespace HPlus {
       histo = fd.make<T>(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
       histo->Sumw2();
     }
+    fHistoLevelStats[level]++;
     fAllTH3Histos.push_back(new WrappedTH3(*this, histo, level));
     return fAllTH3Histos.at(fAllTH3Histos.size()-1);
   }

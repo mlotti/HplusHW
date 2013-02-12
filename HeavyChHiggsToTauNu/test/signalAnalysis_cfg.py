@@ -44,7 +44,9 @@ def customize(signalAnalysis):
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=-1, # default is -1
-                        customizeAnalysis=customize,
+                        customizeLightAnalysis=customize,
+                        #doHeavyAnalysis=True,
+                        #customizeHeavyAnalysis=customize,
                         #applyTriggerScaleFactor=False,
                         #doTriggerMatching=False,
                         #useCHSJets=True,
