@@ -31,8 +31,8 @@ class HPlusTauSelectorFilterT: public edm::EDFilter {
  public:
 
   explicit HPlusTauSelectorFilterT(const edm::ParameterSet& iConfig):
-    eventCounter(iConfig),
     eventWeight(iConfig),
+    eventCounter(iConfig, eventWeight),
     histoWrapper(eventWeight, "Debug"),
     fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, histoWrapper),
     fFilter(iConfig.getParameter<bool>("filter")),
@@ -40,7 +40,6 @@ class HPlusTauSelectorFilterT: public edm::EDFilter {
   {
     produces<Product>();
     produces<bool>();
-    eventCounter.setWeightPointer(eventWeight.getWeightPtr());
   }
   ~HPlusTauSelectorFilterT() {}
 
@@ -73,8 +72,8 @@ class HPlusTauSelectorFilterT: public edm::EDFilter {
     eventCounter.endJob();
   }
 
-  HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
+  HPlus::EventCounter eventCounter;
   HPlus::HistoWrapper histoWrapper;
   HPlus::TauSelection fOneProngTauSelection;
   bool fFilter;

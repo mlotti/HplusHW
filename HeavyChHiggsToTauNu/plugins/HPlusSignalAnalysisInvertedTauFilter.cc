@@ -19,15 +19,14 @@ class HPlusSignalAnalysisInvertedTauFilter: public edm::EDFilter {
 
   virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
-  HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
+  HPlus::EventCounter eventCounter;
   HPlus::SignalAnalysisInvertedTau analysis;
 };
 
 HPlusSignalAnalysisInvertedTauFilter::HPlusSignalAnalysisInvertedTauFilter(const edm::ParameterSet& pset):
-  eventCounter(pset), eventWeight(pset), analysis(pset, eventCounter, eventWeight)
+  eventWeight(pset), eventCounter(pset, eventWeight), analysis(pset, eventCounter, eventWeight)
 {
-  eventCounter.setWeightPointer(eventWeight.getWeightPtr());
   analysis.produces(this);
 }
 HPlusSignalAnalysisInvertedTauFilter::~HPlusSignalAnalysisInvertedTauFilter() {}

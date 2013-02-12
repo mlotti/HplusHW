@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 #include "FWCore/Framework/interface/LuminosityBlock.h"
 #include "FWCore/Utilities/interface/Exception.h"
@@ -15,10 +16,6 @@
 #include<algorithm>
 #include<functional>
 #include<memory>
-
-namespace {
-  static const double defaultWeight = 1.0;
-}
 
 namespace HPlus {
   EventCounter::Counter::Counter(const std::string& n): name(n) {}
@@ -37,9 +34,9 @@ namespace HPlus {
     return index;
   }
 
-  EventCounter::EventCounter(const edm::ParameterSet& iConfig):
+  EventCounter::EventCounter(const edm::ParameterSet& iConfig, const EventWeight& eventWeight):
+    fEventWeight(eventWeight),
     label(iConfig.getParameter<std::string>("@module_label")),
-    eventWeightPointer(&defaultWeight),
     fIsEnabled(true)
   {
     allCounters_.push_back(Counter("counter")); // ensure main counter has always index 0
@@ -86,7 +83,7 @@ namespace HPlus {
 
     Counter& counter = allCounters_.at(counterIndex);
     counter.values.at(countIndex) += value;
-    double dval = value * (*eventWeightPointer);
+    double dval = value * fEventWeight.getWeight();
     counter.weights.at(countIndex) += dval;
     counter.weightsSquared.at(countIndex) += dval*dval;
   }

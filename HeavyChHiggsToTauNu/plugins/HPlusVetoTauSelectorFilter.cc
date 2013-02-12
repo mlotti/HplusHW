@@ -25,8 +25,8 @@ class HPlusVetoTauPtrSelectorFilter: public edm::EDFilter {
 
   virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
-  HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
+  HPlus::EventCounter eventCounter;
   HPlus::HistoWrapper histoWrapper;
   HPlus::VetoTauSelection fVetoTauSelection;
   edm::InputTag fTauSrc;
@@ -42,8 +42,8 @@ class HPlusVetoTauPtrSelectorFilter: public edm::EDFilter {
 };
 
 HPlusVetoTauPtrSelectorFilter::HPlusVetoTauPtrSelectorFilter(const edm::ParameterSet& iConfig):
-  eventCounter(iConfig),
   eventWeight(iConfig),
+  eventCounter(iConfig, eventWeight),
   histoWrapper(eventWeight, "Debug"),
   fVetoTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("vetoTauSelection"),
                     iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"),
@@ -54,7 +54,6 @@ HPlusVetoTauPtrSelectorFilter::HPlusVetoTauPtrSelectorFilter(const edm::Paramete
 {
   produces<Product>();
   produces<bool>();
-  eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
 HPlusVetoTauPtrSelectorFilter::~HPlusVetoTauPtrSelectorFilter() {}
 void HPlusVetoTauPtrSelectorFilter::beginJob() {}

@@ -20,6 +20,7 @@ namespace edm {
 class TFileDirectory;
 
 namespace HPlus {
+  class EventWeight;
   class Count;
 
   // Prevent copying
@@ -40,14 +41,13 @@ namespace HPlus {
   public:
     typedef HPlus::TemporaryDisabler<EventCounter> TemporaryDisabler;
 
-    EventCounter(const edm::ParameterSet& iConfig);
+    EventCounter(const edm::ParameterSet& iConfig, const EventWeight& eventWeight);
     ~EventCounter();
 
     Count addCounter(const std::string& name);
     Count addSubCounter(const std::string& base, const std::string& name);
 
     void incrementCount(size_t counterIndex, size_t countIndex, int value);
-    void setWeightPointer(const double* ptr) { eventWeightPointer = ptr; }
 
     void endLuminosityBlock(const edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup);
     void endJob();
@@ -62,8 +62,8 @@ namespace HPlus {
     std::vector<edm::InputTag> inputCountTags_;
     std::vector<Counter> allCounters_; // main counter is always at index 0
 
+    const EventWeight& fEventWeight;
     std::string label;
-    const double* eventWeightPointer;
     bool printMainCounter;
     bool printSubCounters;
     bool fIsEnabled;

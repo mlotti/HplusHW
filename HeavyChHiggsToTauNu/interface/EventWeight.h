@@ -27,8 +27,6 @@ namespace HPlus {
     void multiplyWeight(double w) { fWeight *= w; }
     /// Getter for weight
     double getWeight() const { return fWeight; }
-    /// Getter for weight adress
-    const double* getWeightPtr() const { return &fWeight; }
 
    private:
     edm::InputTag fPrescaleSrc;
