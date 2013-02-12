@@ -2617,6 +2617,8 @@ class DatasetManagerCreator:
         precursors = self._precursors[:]
         if dataEra is not None:
             def isInEra(eras, precursor):
+                if precursor.isMC():
+                    return True
                 if isinstance(eras, basestring):
                     eras = [eras]
                 for e in eras:
@@ -2627,36 +2629,24 @@ class DatasetManagerCreator:
             if dataEra == "Run2011A":
                 precursors = filter(lambda p: isInEra("_2011A_", p), precursors)
             elif dataEra == "Run2011B":
-                precursors = filter(lambda p: isInEra("_2011B_", name), precursors)
+                precursors = filter(lambda p: isInEra("_2011B_", p), precursors)
             elif dataEra == "Run2011AB":
-                precursors = filter(lambda p: isInEra(["_2011A_", "_2011B_"], name), precursors)
+                precursors = filter(lambda p: isInEra(["_2011A_", "_2011B_"], p), precursors)
             elif dataEra == "Run2012A":
-                precursors = filter(lambda p: isInEra("_2012A_", name), precursors)
+                precursors = filter(lambda p: isInEra("_2012A_", p), precursors)
             elif dataEra == "Run2012B":
-                precursors = filter(lambda p: isInEra("_2012B_", name), precursors)
+                precursors = filter(lambda p: isInEra("_2012B_", p), precursors)
             elif dataEra == "Run2012C":
-                precursors = filter(lambda p: isInEra("_2012C_", name), precursors)
+                precursors = filter(lambda p: isInEra("_2012C_", p), precursors)
             elif dataEra == "Run2012AB":
-                precursors = filter(lambda p: isInEra(["_2012A_", "_2012B_"], name), precursors)
+                precursors = filter(lambda p: isInEra(["_2012A_", "_2012B_"], p), precursors)
             elif dataEra == "Run2012ABC":
-                precursors = filter(lambda p: isInEra(["_2012A_", "_2012B_", "_2012C_"], name), precursors)
+                precursors = filter(lambda p: isInEra(["_2012A_", "_2012B_", "_2012C_"], p), precursors)
             else:
                 raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB, Run2012A, Run2012B, Run2012C, Run2012AB, Run2012ABC" % dataEra)
 
         manager = DatasetManager()
         for precursor in precursors:
-            if dataEra is not None and precursor.isData():
-                if dataEra == "Run2011A":
-                    if not "2011A_" in precursor.getName():
-                        continue
-                elif dataEra == "Run2011B":
-                    if not "2011B_" in precursor.getName():
-                        continue
-                elif dataEra == "Run2011AB":
-                    pass
-                else:
-                    raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB" % dataEra)
-
             try:
                 dset = Dataset(precursor.getName(), precursor.getFile(), **_args)
             except AnalysisNotFoundException, e:
