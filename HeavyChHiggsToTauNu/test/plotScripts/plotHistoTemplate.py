@@ -19,16 +19,15 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configurations
 analysis = "signalAnalysis"
-counters = analysis+"/counters"
-treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger*weightPrescale")
+treeDraw = dataset.TreeDraw("tree", weight="weightPileup*weightTrigger*weightPrescale")
 dataEra = "Run2011A" #dataEra = "Run2011B" #dataEra = "Run2011AB"
 
 # main function
 def main():
 
     # Read the datasets
-    #datasets = dataset.getDatasetsFromMulticrabDirs(["/home/attikis/scratch0/CMSSW_4_4_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/TreeAnalysis_v44_4_130113_105229/"], dataEra="Run2011A")
-    datasets = dataset.getDatasetsFromMulticrabDirs(["/Volumes/disk/attikis/HIG-12-037/TreeAnalysis_v44_4_130113_105229/"], dataEra="Run2011A")
+    #datasets = dataset.getDatasetsFromMulticrabDirs(directory="/home/attikis/scratch0/CMSSW_4_4_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/TreeAnalysis_v44_4_130113_105229/", dataEra="Run2011A")
+    datasets = dataset.getDatasetsFromMulticrabCfg(directory="/Volumes/disk/attikis/HIG-12-037/TreeAnalysis_v44_4_130113_105229/", analysisName=analysis, dataEra="Run2011A")
 
     datasets.loadLuminosities()
     datasets.updateNAllEventsToPUWeighted()    
@@ -70,7 +69,7 @@ def main():
 # Define plots to draw
 def doPlots(datasets):
     def createPlot(name, **kwargs):
-        return plots.DataMCPlot(datasets, analysis+"/"+name, **kwargs)
+        return plots.DataMCPlot(datasets, name, **kwargs)
     
     drawPlot(createPlot("Btagging/NumberOfBtaggedJets"), "NumberOfBJets", xlabel="Number of selected b jets", ylabel="Events", opts={"xmax": 6}, textFunction=lambda: addMassBRText(x=0.45, y=0.87), cutLine=1)
     pasJuly = "met_p4.Et() > 70 && Max$(jets_btag) > 1.7"
