@@ -1224,12 +1224,12 @@ def addPattuple_v53_2(datasets):
 
         "TTToHplusBWB_M80_ext_Summer12":          TaskDef(""),
         "TTToHplusBWB_M90_ext_Summer12":          TaskDef(""),
-        "TTToHplusBWB_M100_ext_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M100_ext_Summer12":         TaskDef("", triggerOR=[], njobsIn=700), # non-triggered because of trigger studies
         "TTToHplusBWB_M120_ext_Summer12":         TaskDef(""),
         "TTToHplusBWB_M140_ext_Summer12":         TaskDef(""),
         "TTToHplusBWB_M150_ext_Summer12":         TaskDef(""),
         "TTToHplusBWB_M155_ext_Summer12":         TaskDef(""),
-        "TTToHplusBWB_M160_ext_Summer12":         TaskDef(""),
+        "TTToHplusBWB_M160_ext_Summer12":         TaskDef("", triggerOR=[], njobsIn=700), # non-triggered because of trigger studies
 
         "TTToHplusBHminusB_M80_Summer12":         TaskDef(""),
         "TTToHplusBHminusB_M90_Summer12":         TaskDef(""),
@@ -1281,13 +1281,13 @@ def addPattuple_v53_2(datasets):
         "HplusTB_M220_Summer12":                  TaskDef(""),
         "HplusTB_M250_Summer12":                  TaskDef(""),
         "HplusTB_M300_Summer12":                  TaskDef(""),
-        "HplusTB_M400_Summer12":                  TaskDef(""),
+        "HplusTB_M400_Summer12":                  TaskDef("", triggerOR=[], njobsIn=700), # non-triggered because of trigger studies
         "HplusTB_M500_Summer12":                  TaskDef(""),
         "HplusTB_M600_Summer12":                  TaskDef(""),
 
         "HplusTB_M180_ext_Summer12":              TaskDef(""),
         "HplusTB_M190_ext_Summer12":              TaskDef(""),
-        "HplusTB_M200_ext_Summer12":              TaskDef(""),
+        "HplusTB_M200_ext_Summer12":              TaskDef("", triggerOR=[], njobsIn=700), # non-triggered because of trigger studies
         "HplusTB_M220_ext_Summer12":              TaskDef(""),
         "HplusTB_M250_ext_Summer12":              TaskDef(""),
         "HplusTB_M300_ext_Summer12":              TaskDef(""),
