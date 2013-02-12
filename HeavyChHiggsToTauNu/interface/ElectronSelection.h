@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_GlobalElectronVeto_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_GlobalElectronVeto_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_ElectronSelection_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_ElectronSelection_h
 
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
@@ -32,7 +32,7 @@ namespace HPlus {
   class WrappedTH1;
   class WrappedTH2;
 
-  class GlobalElectronVeto: public BaseSelection {
+  class ElectronSelection: public BaseSelection {
   public:
     /**
      * Class to encapsulate the access to the data members of
@@ -54,7 +54,7 @@ namespace HPlus {
       const edm::PtrVector<pat::Electron>& getSelectedElectrons() { return fSelectedElectrons; }
       const edm::PtrVector<pat::Electron>& getSelectedElectronsBeforePtAndEtaCuts() { return fSelectedElectronsBeforePtAndEtaCuts; }
 
-      friend class GlobalElectronVeto;
+      friend class ElectronSelection;
 
     private:
       bool fPassedEvent;
@@ -69,8 +69,8 @@ namespace HPlus {
 
     };
 
-    GlobalElectronVeto(const edm::ParameterSet& iConfig, const edm::InputTag& vertexSrc, EventCounter& eventCounter, HistoWrapper& histoWrapper);
-    ~GlobalElectronVeto();
+    ElectronSelection(const edm::ParameterSet& iConfig, const edm::InputTag& vertexSrc, EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    ~ElectronSelection();
 
     // Use silentAnalyze if you do not want to fill histograms or increment counters
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);

@@ -1,4 +1,4 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
@@ -17,21 +17,21 @@
 std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
 
 namespace HPlus {
-  GlobalMuonVeto::Data::Data():
+  MuonSelection::Data::Data():
     fPassedEvent(false),
     fSelectedMuonPt(0.),
     fSelectedMuonEta(0.),
     fSelectedMuonPtBeforePtCut(0.) {}
-  GlobalMuonVeto::Data::~Data() {}
+  MuonSelection::Data::~Data() {}
 
-  GlobalMuonVeto::GlobalMuonVeto(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
+  MuonSelection::MuonSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
     BaseSelection(eventCounter, histoWrapper),
     fMuonCollectionName(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollectionName")),
     fMuonSelection(iConfig.getUntrackedParameter<std::string>("MuonSelection")),
     fMuonPtCut(iConfig.getUntrackedParameter<double>("MuonPtCut")),
     fMuonEtaCut(iConfig.getUntrackedParameter<double>("MuonEtaCut")),
     fMuonApplyIpz(iConfig.getUntrackedParameter<bool>("MuonApplyIpz")),
-    fGlobalMuonVetoCounter(eventCounter.addSubCounter("GlobalMuon Selection","GlobalMuonVeto")),
+    fMuonSelectionCounter(eventCounter.addSubCounter("GlobalMuon Selection","MuonSelection")),
     fMuonSelectionSubCountMuonPresent(eventCounter.addSubCounter("GlobalMuon Selection","Muon present")),
     fMuonSelectionSubCountMuonHasGlobalOrInnerTrk(eventCounter.addSubCounter("GlobalMuon Selection","Muon has Global OR Inner Trk")),
     fMuonSelectionSubCountPtCut(eventCounter.addSubCounter("GlobalMuon Selection","Muon Pt")),
@@ -69,7 +69,7 @@ namespace HPlus {
     fMuonIDSubCountOther(eventCounter.addSubCounter("GlobalMuon ID","Other"))
   {
     edm::Service<TFileService> fs;
-    TFileDirectory myDir = fs->mkdir("GlobalMuonVeto");
+    TFileDirectory myDir = fs->mkdir("MuonSelection");
     
     hMuonPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonPt", "GlobalMuonPt;isolated muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 200, 0., 400.);
     hMuonEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalMuonEta", "GlobalMuonEta;isolated muon #eta;N_{muons} / 0.1", 60, -3., 3.);
@@ -118,9 +118,9 @@ namespace HPlus {
     }
   }
 
-  GlobalMuonVeto::~GlobalMuonVeto() {}
+  MuonSelection::~MuonSelection() {}
 
-  GlobalMuonVeto::Data GlobalMuonVeto::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
+  MuonSelection::Data MuonSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
     ensureSilentAnalyzeAllowed(iEvent);
 
     // Disable histogram filling and counter incrementinguntil the return call
@@ -131,22 +131,22 @@ namespace HPlus {
     return privateAnalyze(iEvent, iSetup, primaryVertex);
   }
 
-  GlobalMuonVeto::Data GlobalMuonVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
+  MuonSelection::Data MuonSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
     ensureAnalyzeAllowed(iEvent);
     return privateAnalyze(iEvent, iSetup, primaryVertex);
   }
 
-  GlobalMuonVeto::Data GlobalMuonVeto::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
+  MuonSelection::Data MuonSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
     Data output;
     // Do analysis
-    MuonSelection(iEvent,iSetup, primaryVertex, output);
+    doMuonSelection(iEvent,iSetup, primaryVertex, output);
     output.fPassedEvent = output.fSelectedMuons.size() == 0;
     if (output.fPassedEvent)
-      increment(fGlobalMuonVetoCounter);
+      increment(fMuonSelectionCounter);
     return output;
   }
 
-  GlobalMuonVeto::Data GlobalMuonVeto::silentAnalyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
+  MuonSelection::Data MuonSelection::silentAnalyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
     ensureSilentAnalyzeAllowed(iEvent);
 
     // Disable histogram filling and counter incrementinguntil the return call
@@ -157,23 +157,23 @@ namespace HPlus {
     return privateAnalyzeWithoutIsolation(iEvent, iSetup, primaryVertex);
   }
 
-  GlobalMuonVeto::Data GlobalMuonVeto::analyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
+  MuonSelection::Data MuonSelection::analyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
     ensureAnalyzeAllowed(iEvent);
     return privateAnalyzeWithoutIsolation(iEvent, iSetup, primaryVertex);
   }
 
-  GlobalMuonVeto::Data GlobalMuonVeto::privateAnalyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
+  MuonSelection::Data MuonSelection::privateAnalyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
     Data output;
     // Do analysis
-    MuonSelection(iEvent, iSetup, primaryVertex, output);
+    doMuonSelection(iEvent, iSetup, primaryVertex, output);
     output.fPassedEvent = output.fSelectedMuonsBeforeIsolation.size() == 0;
     if (output.fPassedEvent)
-      increment(fGlobalMuonVetoCounter);
+      increment(fMuonSelectionCounter);
     return output;
   }
 
 
-  void GlobalMuonVeto::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex, GlobalMuonVeto::Data& output){
+  void MuonSelection::doMuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex, MuonSelection::Data& output){
     // the Collection is currently NOT available in the PatTuples but it will be soon (next pattuple production)
     /* FIX ME
    // Create and attach handle to (Offline) Primary Vertices Collection
@@ -499,6 +499,6 @@ namespace HPlus {
     output.fSelectedMuonEta = myHighestMuonEta;
     hNumberOfSelectedMuons->Fill(output.fSelectedMuons.size());
     // std::cout << "fSelectedMuonPt = " << fSelectedMuonsPt << ", fSelectedMuonsEta = " << fSelectedMuonsEta << std::endl;   
-  }//eof: bool GlobalMuonVeto::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+  }//eof: bool MuonSelection::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   
 }//eof: namespace HPlus {

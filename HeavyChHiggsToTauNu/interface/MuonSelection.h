@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_GlobalMuonVeto_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_GlobalMuonVeto_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_MuonSelection_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_MuonSelection_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
 
@@ -25,7 +25,7 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
 
-  class GlobalMuonVeto: public BaseSelection {
+  class MuonSelection: public BaseSelection {
   public:
     /**
      * Class to encapsulate the access to the data members of
@@ -54,7 +54,7 @@ namespace HPlus {
       /// Muon collection after all selections except isolation
       const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforeIsolation() { return fSelectedMuonsBeforeIsolation; }
 
-      friend class GlobalMuonVeto;
+      friend class MuonSelection;
 
     private:
       bool fPassedEvent;
@@ -73,8 +73,8 @@ namespace HPlus {
 
     };
 
-    GlobalMuonVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
-    ~GlobalMuonVeto();
+    MuonSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
+    ~MuonSelection();
 
     // Use silentAnalyze if you do not want to fill histograms or increment counters
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
@@ -88,7 +88,7 @@ namespace HPlus {
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
     Data privateAnalyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
 
-    void MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex, GlobalMuonVeto::Data& output);
+    void doMuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex, MuonSelection::Data& output);
 
     // Input parameters
     edm::InputTag fMuonCollectionName;
@@ -98,7 +98,7 @@ namespace HPlus {
     const bool fMuonApplyIpz;
     
     /// Counter
-    Count fGlobalMuonVetoCounter;
+    Count fMuonSelectionCounter;
     /// Sub-Counter to Counter
     Count fMuonSelectionSubCountMuonPresent;
     Count fMuonSelectionSubCountMuonHasGlobalOrInnerTrk;

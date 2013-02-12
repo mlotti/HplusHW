@@ -1,4 +1,4 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -18,14 +18,14 @@
 std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
 
 namespace HPlus {
-  GlobalElectronVeto::Data::Data():
+  ElectronSelection::Data::Data():
     fPassedEvent(false),
     fSelectedElectronPt(0.),
     fSelectedElectronEta(0.),
     fSelectedElectronPtBeforePtCut(0.) { }
-  GlobalElectronVeto::Data::~Data() {}
+  ElectronSelection::Data::~Data() {}
 
-  GlobalElectronVeto::GlobalElectronVeto(const edm::ParameterSet& iConfig, const edm::InputTag& vertexSrc, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
+  ElectronSelection::ElectronSelection(const edm::ParameterSet& iConfig, const edm::InputTag& vertexSrc, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
     BaseSelection(eventCounter, histoWrapper),
     fElecCollectionName(iConfig.getUntrackedParameter<edm::InputTag>("ElectronCollectionName")),
     fVertexSrc(vertexSrc),
@@ -47,7 +47,7 @@ namespace HPlus {
     fElecSelectionSubCountMatchingMCelectronFromW(eventCounter.addSubCounter("GlobalElectron Selection","Electron matching MC electron From W"))
   {
     edm::Service<TFileService> fs;
-    TFileDirectory myDir = fs->mkdir("GlobalElectronVeto");
+    TFileDirectory myDir = fs->mkdir("ElectronSelection");
 
     hElectronPt  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronPt", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 160, 0.0, 400.0);
     hElectronEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronEta", "GlobalElectronEta;isolated electron #eta;N_{electrons} / 0.1", 90, -3.0, 3.0);
@@ -82,9 +82,9 @@ namespace HPlus {
     }
   }
 
-  GlobalElectronVeto::~GlobalElectronVeto() {}
+  ElectronSelection::~ElectronSelection() {}
 
-  GlobalElectronVeto::Data GlobalElectronVeto::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  ElectronSelection::Data ElectronSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     ensureSilentAnalyzeAllowed(iEvent);
 
     // Disable histogram filling and counter incrementinguntil the return call
@@ -95,12 +95,12 @@ namespace HPlus {
     return privateAnalyze(iEvent, iSetup);
   }
 
-  GlobalElectronVeto::Data GlobalElectronVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  ElectronSelection::Data ElectronSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     ensureAnalyzeAllowed(iEvent);
     return privateAnalyze(iEvent, iSetup);
   }
 
-  GlobalElectronVeto::Data GlobalElectronVeto::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  ElectronSelection::Data ElectronSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     Data output;
 
     edm::Handle<edm::View<pat::Electron> > myElectronHandle;

@@ -293,7 +293,7 @@ EvtTopology = cms.untracked.PSet(
     circularity = cms.untracked.double(-5.0)
 )
 
-GlobalElectronVeto = cms.untracked.PSet(
+ElectronSelection = cms.untracked.PSet(
     ElectronCollectionName = cms.untracked.InputTag("selectedPatElectrons"),
     conversionSrc = cms.untracked.InputTag("allConversions"),
     beamspotSrc = cms.untracked.InputTag("offlineBeamSpot"),
@@ -310,7 +310,7 @@ NonIsolatedElectronVeto = cms.untracked.PSet(
     ElectronEtaCut = cms.untracked.double(2.5)
 )
 
-GlobalMuonVeto = cms.untracked.PSet(
+MuonSelection = cms.untracked.PSet(
     MuonCollectionName = cms.untracked.InputTag("selectedPatMuons"),
     MuonSelection = cms.untracked.string("GlobalMuonPromptTight"),
     MuonPtCut = cms.untracked.double(10.0),

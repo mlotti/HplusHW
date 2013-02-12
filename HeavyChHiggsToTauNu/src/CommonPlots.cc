@@ -33,8 +33,8 @@ namespace HPlus {
   void CommonPlotsFilledAtEveryStep::cacheDataObjects(int nVertices,
                                                       const VertexSelection::Data* vertexData,
                                                       const TauSelection::Data* tauData,
-                                                      const GlobalElectronVeto::Data* electronData,
-                                                      const GlobalMuonVeto::Data* muonData,
+                                                      const ElectronSelection::Data* electronData,
+                                                      const MuonSelection::Data* muonData,
                                                       const JetSelection::Data* jetData,
                                                       const METSelection::Data* metData,
                                                       const BTagging::Data* bJetData,
@@ -106,8 +106,8 @@ namespace HPlus {
                                int nVertices,
                                VertexSelection& vertexSelection,
                                TauSelection& tauSelection,
-                               GlobalElectronVeto& eVeto,
-                               GlobalMuonVeto& muonVeto,
+                               ElectronSelection& eVeto,
+                               MuonSelection& muonVeto,
                                JetSelection& jetSelection,
                                METSelection& metSelection,
                                BTagging& bJetSelection,
@@ -172,12 +172,12 @@ namespace HPlus {
     hTauPhiOscillationY->Fill(fNVertices, data.getSelectedTau()->py());
   }
 
-  void CommonPlots::fillControlPlots(const GlobalElectronVeto::Data& data) {
+  void CommonPlots::fillControlPlots(const ElectronSelection::Data& data) {
     //fElectronData = data;
     
   }
 
-  void CommonPlots::fillControlPlots(const GlobalMuonVeto::Data& data) {
+  void CommonPlots::fillControlPlots(const MuonSelection::Data& data) {
     //fMuonData = data;
     
   }

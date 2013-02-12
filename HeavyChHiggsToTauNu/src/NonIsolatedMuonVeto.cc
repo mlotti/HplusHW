@@ -326,7 +326,7 @@
 //       float myHcalIso  =  (*iMuon)->hcalIso();  // isolation cones are dR=0.3 
 //       float relIsol = ( myTrackIso + myEcalIso + myHcalIso )/(myMuonPt);
 //       // std::cout << "relIsol = " << (*iMuon).isolationR03().sumPt << "/" << myMuonPt << " = " << relIsol << std::endl;
-//       if( relIsol < 0.15 ) continue;  // this is the reverse cut used in GlobalMuonVeto: if( relIsol > 0.15 ) continue
+//       if( relIsol < 0.15 ) continue;  // this is the reverse cut used in MuonSelection: if( relIsol > 0.15 ) continue
 //       bMuonRelIsolationR03Cut = true; 
 // 
 //       fSelectedMuons.push_back(*iMuon);

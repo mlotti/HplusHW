@@ -12,8 +12,8 @@ def createEDFilter(param):
         trigger = param.trigger.clone(),
         triggerEfficiencyScaleFactor = param.triggerEfficiencyScaleFactor.clone(),
         primaryVertexSelection = param.primaryVertexSelection.clone(),
-        GlobalElectronVeto = param.GlobalElectronVeto.clone(),
-        GlobalMuonVeto = param.GlobalMuonVeto.clone(),
+        ElectronSelection = param.ElectronSelection.clone(),
+        MuonSelection = param.MuonSelection.clone(),
 #    GlobalMuonVeto = param.NonIsolatedMuonVeto.clone(),
     # Change default tau algorithm here as needed
         tauSelection = param.tauSelectionHPSMediumTauBased.clone(),

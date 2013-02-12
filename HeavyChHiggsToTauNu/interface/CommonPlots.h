@@ -6,8 +6,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VetoTauSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
@@ -48,8 +48,8 @@ namespace HPlus {
     void cacheDataObjects(int nVertices,
                           const VertexSelection::Data* vertexData,
                           const TauSelection::Data* tauData,
-                          const GlobalElectronVeto::Data* electronData,
-                          const GlobalMuonVeto::Data* muonData,
+                          const ElectronSelection::Data* electronData,
+                          const MuonSelection::Data* muonData,
                           const JetSelection::Data* jetData,
                           const METSelection::Data* metData,
                           const BTagging::Data* bJetData,
@@ -66,8 +66,8 @@ namespace HPlus {
     int fNVertices;
     const VertexSelection::Data* fVertexData;
     const TauSelection::Data* fTauData;
-    const GlobalElectronVeto::Data* fElectronData;
-    const GlobalMuonVeto::Data* fMuonData;
+    const ElectronSelection::Data* fElectronData;
+    const MuonSelection::Data* fMuonData;
     const JetSelection::Data* fJetData;
     const METSelection::Data* fMETData;
     const BTagging::Data* fBJetData;
@@ -106,8 +106,8 @@ namespace HPlus {
                     int nVertices,
                     VertexSelection& vertexSelection,
                     TauSelection& tauSelection,
-                    GlobalElectronVeto& eVeto,
-                    GlobalMuonVeto& muonVeto,
+                    ElectronSelection& eVeto,
+                    MuonSelection& muonVeto,
                     JetSelection& jetSelection,
                     METSelection& metSelection,
                     BTagging& bJetSelection,
@@ -121,8 +121,8 @@ namespace HPlus {
     void fillControlPlots(const TriggerSelection::Data& data);
     void fillControlPlots(const VertexSelection::Data& data);
     void fillControlPlots(const TauSelection::Data& data);
-    void fillControlPlots(const GlobalElectronVeto::Data& data);
-    void fillControlPlots(const GlobalMuonVeto::Data& data);
+    void fillControlPlots(const ElectronSelection::Data& data);
+    void fillControlPlots(const MuonSelection::Data& data);
     void fillControlPlots(const JetSelection::Data& data);
     void fillControlPlots(const METSelection::Data& data);
     void fillControlPlots(const BTagging::Data& data);
@@ -147,8 +147,8 @@ namespace HPlus {
     int fNVertices;
     VertexSelection::Data fVertexData;
     TauSelection::Data fTauData;
-    GlobalElectronVeto::Data fElectronData;
-    GlobalMuonVeto::Data fMuonData;
+    ElectronSelection::Data fElectronData;
+    MuonSelection::Data fMuonData;
     JetSelection::Data fJetData;
     METSelection::Data fMETData;
     BTagging::Data fBJetData;
