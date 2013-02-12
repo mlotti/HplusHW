@@ -40,7 +40,6 @@ namespace HPlus {
   EventCounter::EventCounter(const edm::ParameterSet& iConfig):
     label(iConfig.getParameter<std::string>("@module_label")),
     eventWeightPointer(&defaultWeight),
-    finalized(false),
     fIsEnabled(true)
   {
     allCounters_.push_back(Counter("counter")); // ensure main counter has always index 0
@@ -58,9 +57,6 @@ namespace HPlus {
   EventCounter::~EventCounter() {}
 
   Count EventCounter::addCounter(const std::string& name) {
-    if(finalized)
-      throw cms::Exception("LogicError") << "Tried to add counter '" << name << "', but EventCounter::produces has already been called!" << std::endl;
-
     size_t counterIndex = findOrInsertCounter("counter");
     if(allCounters_[counterIndex].contains(name))
       throw cms::Exception("LogicError") << "Tried to add count '" << name << "' to main counter, but it already exists!" << std::endl;
@@ -71,9 +67,6 @@ namespace HPlus {
   }
 
   Count EventCounter::addSubCounter(const std::string& base, const std::string& name) {
-    if(finalized)
-      throw cms::Exception("LogicError") << "Tried to add subcounter '" << name << "' under '" << base << "', but EventCounter::produces has already been called!" << std::endl;
-
     if(base == "counter")
       throw cms::Exception("LogicError") << "Tried to add subcounter '" << name << "' under '" << base << "', but 'counter' is a reserved main counter name";
 

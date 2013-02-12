@@ -64,7 +64,6 @@ namespace HPlus {
 
     std::string label;
     const double* eventWeightPointer;
-    mutable bool finalized;
     bool printMainCounter;
     bool printSubCounters;
     bool fIsEnabled;
