@@ -209,7 +209,12 @@ datasets.splitDataByRuns("Tau_198941-203742_2012C_Prompt", [
         (200961, 202504), # 14232091 events, 1381 files  <--- This one has periods with 0T field
         (202792, 203742), # 1324177 events, 149 files
         ])
-
+# Splitting here because the last part of Run2012C has the fix for
+# high-pt taus
+datasets.splitDataByRuns("Tau_198941-203742_2012C_Prompt", [
+        (198941, 202504), # 28272992 events, 2716 files
+        (202972, 203742), # 1271834 events, 136 files
+])
 # MultiJet PD, QuadJet trigger for signal
 datasets.extend([
     # Run2012A

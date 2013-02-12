@@ -283,10 +283,10 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
                                                "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9"],  # 199698-200161
             "Tau_200961-202504_2012C_Prompt": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9"],
             "Tau_202792-203742_2012C_Prompt": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"],
-            "Tau_198941-203742_2012C_Prompt": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7",  # 198941-199608
-                                               "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9",  # 199698-202504
-                                               "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"], # 202970-203742 # FIXME: make this piece separate for Tau, it has the fix for high-pt taus
-            "Tau_201191-201191_2012C_Dec11": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"],
+            "Tau_198941-202504_2012C_Prompt": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7",  # 198941-199608
+                                               "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9"], # 199698-202504
+            "Tau_201191-201191_2012C_Dec11": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9"],
+            "Tau_202972-203742_2012C_Prompt": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"],
             "Tau_203777-208686_2012D_Prompt": ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"],
         }
 
@@ -357,8 +357,9 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         "Tau_198941-200601_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 10),
         "Tau_200961-202504_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 12),
         "Tau_202792-203742_2012C_Prompt": TaskDef(njobsIn= 150, njobsOut=  1),
-        # Below is the combination of the above three
-        "Tau_198941-203742_2012C_Prompt": TaskDef(njobsIn=3000, njobsOut= 25),# FIXME: set njobsOut
+        # Below is the combination of the above two, plus the third one with modified first run
+        "Tau_198941-202504_2012C_Prompt": TaskDef(njobsIn=3000, njobsOut= 25),# FIXME: set njobsOut
+        "Tau_202972-203742_2012C_Prompt": TaskDef(njobsIn= 150, njobsOut=  1),
         "Tau_201191-201191_2012C_Dec11":  TaskDef(njobsIn=  60, njobsOut=  1),
         "Tau_203777-208686_2012D_Prompt": TaskDef(njobsIn=4000, njobsOut= 40), # FIXME: set njobsOut
 
@@ -1002,8 +1003,9 @@ def addPattuple_v53_2(datasets):
         "Tau_191043-193621_2012A_Jul13":          TaskDef(""),
         "Tau_193834-196531_2012B_Jul13":          TaskDef(""),
         "Tau_198022-198523_2012C_Aug24":          TaskDef(""),
-        "Tau_198941-203742_2012C_Prompt":         TaskDef(""),
+        "Tau_198941-202504_2012C_Prompt":         TaskDef(""),
         "Tau_201191-201191_2012C_Dec11":          TaskDef(""),
+        "Tau_202972-203742_2012C_Prompt":         TaskDef(""),
         "Tau_203777-208686_2012D_Prompt":         TaskDef(""),
 
         "MultiJet_190456-190738_2012A_Jul13":     TaskDef(""),
@@ -1141,8 +1143,9 @@ def addPattuple_vNEXT_SKELETON_53X(datasets):
         "Tau_191043-193621_2012A_Jul13":          TaskDef(""),
         "Tau_193834-196531_2012B_Jul13":          TaskDef(""),
         "Tau_198022-198523_2012C_Aug24":          TaskDef(""),
-        "Tau_198941-203742_2012C_Prompt":         TaskDef(""),
+        "Tau_198941-202504_2012C_Prompt":         TaskDef(""),
         "Tau_201191-201191_2012C_Dec11":          TaskDef(""),
+        "Tau_202972-203742_2012C_Prompt":         TaskDef(""),
         "Tau_203777-208686_2012D_Prompt":         TaskDef(""),
 
         "MultiJet_190456-190738_2012A_Jul13":     TaskDef(""),
