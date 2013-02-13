@@ -4,6 +4,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDMeasurementBasic.h"
 
 class HPlusQCDMeasurementBasicFilter : public edm::EDFilter {
@@ -21,11 +22,15 @@ class HPlusQCDMeasurementBasicFilter : public edm::EDFilter {
 
   HPlus::EventWeight eventWeight;
   HPlus::EventCounter eventCounter;
+  HPlus::HistoWrapper histoWrapper;
   HPlus::QCDMeasurementBasic analysis;
 };
 
 HPlusQCDMeasurementBasicFilter::HPlusQCDMeasurementBasicFilter(const edm::ParameterSet& pset):
-  eventWeight(pset), eventCounter(pset, eventWeight), analysis(pset, eventCounter, eventWeight)
+  eventWeight(pset),
+  histoWrapper(eventWeight, pset.getUntrackedParameter<std::string>("histogramAmbientLevel")),
+  eventCounter(pset, eventWeight, histoWrapper),
+  analysis(pset, eventCounter, eventWeight, histoWrapper)
 {
 }
 HPlusQCDMeasurementBasicFilter::~HPlusQCDMeasurementBasicFilter() {}

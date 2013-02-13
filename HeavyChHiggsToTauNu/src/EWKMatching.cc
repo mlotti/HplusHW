@@ -11,9 +11,9 @@
 #include "TNamed.h"
 
 namespace HPlus {
-  EWKMatching::EWKMatching(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  EWKMatching::EWKMatching(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, HistoWrapper& histoWrapper):
     fEventWeight(eventWeight),
-    fHistoWrapper(fEventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
+    fHistoWrapper(fHistoWrapper),
     fDeltaPhiCutValue(iConfig.getUntrackedParameter<double>("deltaPhiTauMET")),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     fAllCounter(eventCounter.addCounter("Offline selection begins")),

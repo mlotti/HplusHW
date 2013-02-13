@@ -20,12 +20,16 @@ class HPlusSignalAnalysisInvertedTauFilter: public edm::EDFilter {
   virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventWeight eventWeight;
+  HPlus::HistoWrapper histoWrapper;
   HPlus::EventCounter eventCounter;
   HPlus::SignalAnalysisInvertedTau analysis;
 };
 
 HPlusSignalAnalysisInvertedTauFilter::HPlusSignalAnalysisInvertedTauFilter(const edm::ParameterSet& pset):
-  eventWeight(pset), eventCounter(pset, eventWeight), analysis(pset, eventCounter, eventWeight)
+  eventWeight(pset),
+  histoWrapper(eventWeight, pset.getUntrackedParameter<std::string>("histogramAmbientLevel")),
+  eventCounter(pset, eventWeight, histoWrapper),
+  analysis(pset, eventCounter, eventWeight, histoWrapper)
 {
   analysis.produces(this);
 }

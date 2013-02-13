@@ -35,7 +35,7 @@ namespace edm {
 namespace HPlus {
   class EWKMatching {
   public:
-    explicit EWKMatching(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    explicit EWKMatching(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, HistoWrapper& histoWrapper);
     ~EWKMatching();
 
     void produces(edm::EDFilter *producer) const;
@@ -45,7 +45,7 @@ namespace HPlus {
 
   private:
     EventWeight& fEventWeight;
-    HistoWrapper fHistoWrapper;
+    HistoWrapper& fHistoWrapper;
     const double fDeltaPhiCutValue;
 
     Count fAllCounter;

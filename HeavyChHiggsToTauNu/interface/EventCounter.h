@@ -21,6 +21,7 @@ class TFileDirectory;
 
 namespace HPlus {
   class EventWeight;
+  class HistoWrapper;
   class Count;
 
   // Prevent copying
@@ -41,7 +42,7 @@ namespace HPlus {
   public:
     typedef HPlus::TemporaryDisabler<EventCounter> TemporaryDisabler;
 
-    EventCounter(const edm::ParameterSet& iConfig, const EventWeight& eventWeight);
+    EventCounter(const edm::ParameterSet& iConfig, const EventWeight& eventWeight, HistoWrapper& histoWrapper);
     ~EventCounter();
 
     Count addCounter(const std::string& name);
@@ -63,6 +64,7 @@ namespace HPlus {
     std::vector<Counter> allCounters_; // main counter is always at index 0
 
     const EventWeight& fEventWeight;
+    HistoWrapper& fHistoWrapper;
     std::string label;
     bool printMainCounter;
     bool printSubCounters;

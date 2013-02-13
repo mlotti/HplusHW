@@ -68,7 +68,7 @@ namespace HPlus {
   };
 
   public:
-    explicit QCDMeasurementBasic(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::EventWeight& eventWeight);
+    explicit QCDMeasurementBasic(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::EventWeight& eventWeight, HPlus::HistoWrapper& histoWrapper);
     ~QCDMeasurementBasic();
 
     // Interface towards the EDProducer
@@ -90,7 +90,7 @@ namespace HPlus {
 
     // We need a reference in order to use the same object (and not a copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;
-    HistoWrapper fHistoWrapper;
+    HistoWrapper& fHistoWrapper;
     const double fDeltaPhiCutValue;
     const std::string fTopRecoName; // Name of selected top reconstruction algorithm
 

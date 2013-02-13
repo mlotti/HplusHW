@@ -8,9 +8,9 @@
 #include <iomanip>
 
 namespace HPlus {
-  QCDMeasurementBasic::QCDMeasurementBasic(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  QCDMeasurementBasic::QCDMeasurementBasic(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, HistoWrapper& histoWrapper):
     fEventWeight(eventWeight),
-    fHistoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
+    fHistoWrapper(histoWrapper),
     fDeltaPhiCutValue(iConfig.getUntrackedParameter<double>("deltaPhiTauMET")),
     fTopRecoName(iConfig.getUntrackedParameter<std::string>("topReconstruction")),
     fTauPtBinLowEdges(iConfig.getUntrackedParameter<std::vector<double> >("factorisationTauPtBinLowEdges")),

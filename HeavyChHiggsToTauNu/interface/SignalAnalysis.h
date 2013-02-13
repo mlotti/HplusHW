@@ -108,7 +108,7 @@ namespace HPlus {
     kSignalOrderSelectedEvents
   };
   public:
-    explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+  explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, HistoWrapper& histoWrapper);
     ~SignalAnalysis();
 
     void produces(edm::EDFilter *producer) const;

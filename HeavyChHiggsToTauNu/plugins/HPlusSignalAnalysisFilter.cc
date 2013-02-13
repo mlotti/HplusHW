@@ -4,6 +4,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysis.h"
 
 class HPlusSignalAnalysisFilter: public edm::EDFilter {
@@ -20,12 +21,16 @@ class HPlusSignalAnalysisFilter: public edm::EDFilter {
   virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventWeight eventWeight;
+  HPlus::HistoWrapper histoWrapper;
   HPlus::EventCounter eventCounter;
   HPlus::SignalAnalysis analysis;
 };
 
 HPlusSignalAnalysisFilter::HPlusSignalAnalysisFilter(const edm::ParameterSet& pset):
-  eventWeight(pset), eventCounter(pset, eventWeight), analysis(pset, eventCounter, eventWeight)
+  eventWeight(pset),
+  histoWrapper(eventWeight, pset.getUntrackedParameter<std::string>("histogramAmbientLevel")),
+  eventCounter(pset, eventWeight, histoWrapper),
+  analysis(pset, eventCounter, eventWeight, histoWrapper)
 {
   analysis.produces(this);
 }

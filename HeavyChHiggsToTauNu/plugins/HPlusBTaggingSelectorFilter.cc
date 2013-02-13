@@ -25,8 +25,8 @@ class HPlusBTaggingPtrSelectorFilter: public edm::EDFilter {
   virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventWeight eventWeight;
-  HPlus::EventCounter eventCounter;
   HPlus::HistoWrapper histoWrapper;
+  HPlus::EventCounter eventCounter;
   HPlus::BTagging fBTagging;
   edm::InputTag fJetSrc;
   bool fFilter;
@@ -41,8 +41,8 @@ class HPlusBTaggingPtrSelectorFilter: public edm::EDFilter {
 
 HPlusBTaggingPtrSelectorFilter::HPlusBTaggingPtrSelectorFilter(const edm::ParameterSet& iConfig):
   eventWeight(iConfig),
-  eventCounter(iConfig, eventWeight),
   histoWrapper(eventWeight, "Debug"),
+  eventCounter(iConfig, eventWeight, histoWrapper),
   fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("btagging"), eventCounter, histoWrapper),
   fJetSrc(iConfig.getParameter<edm::InputTag>("jetSrc")),
   fFilter(iConfig.getParameter<bool>("filter")),

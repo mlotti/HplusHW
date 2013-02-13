@@ -116,7 +116,7 @@ namespace HPlus {
     kkJetToTauAndTauOutsideAcceptance
   };
   public:
-    explicit SignalAnalysisInvertedTau(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    explicit SignalAnalysisInvertedTau(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, HistoWrapper& histoWrapper);
     ~SignalAnalysisInvertedTau();
 
     void produces(edm::EDFilter *producer) const;
@@ -132,7 +132,7 @@ namespace HPlus {
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisInvertedTauProducer
     EventWeight& fEventWeight;
-    HistoWrapper fHistoWrapper;
+    HistoWrapper& fHistoWrapper;
 
 
     //    const double ftransverseMassCut;
