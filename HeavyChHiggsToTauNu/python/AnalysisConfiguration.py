@@ -324,7 +324,8 @@ class ConfigBuilder:
             process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
             process.commonSequence *= process.hplusPrescaleWeightProducer
             for module in analysisModules:
-                module.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
+                module.prescaleWeightReader.weightSrc = "hplusPrescaleWeightProducer"
+                module.prescaleWeightReader.enabled = True
 
         # Allow customization AFTER all settings have been applied, and BEFORE the printout
         if self.customizeLightAnalysis is not None:

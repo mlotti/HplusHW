@@ -133,6 +133,7 @@ namespace HPlus {
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
     fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fHistoWrapper),
     //    fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
+    fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fVertexWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeightReader")),
     fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WjetsWeight"),
@@ -589,8 +590,12 @@ namespace HPlus {
 
 
   bool SignalAnalysisInvertedTau::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    fEventWeight.updatePrescale(iEvent); // set prescale
-    fTree.setPrescaleWeight(fEventWeight.getWeight());
+    fEventWeight.beginEvent();
+
+    // set prescale
+    const double prescaleWeight = fPrescaleWeightReader.getWeight(iEvent, iSetup);
+    fEventWeight.multiplyWeight(prescaleWeight);
+    fTree.setPrescaleWeight(prescaleWeight);
 
  
 

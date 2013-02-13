@@ -35,6 +35,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeightReader.h" // PU re-weight
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
@@ -153,6 +154,7 @@ namespace HPlus {
     EvtTopology fEvtTopology;
 
     FullHiggsMassCalculator fFullHiggsMassCalculator;
+    WeightReader fPrescaleWeightReader;
     VertexWeightReader fVertexWeightReader;
     FakeTauIdentifier fFakeTauIdentifier;
     TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;

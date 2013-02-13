@@ -435,6 +435,11 @@ eventCounter = cms.untracked.PSet(
     counters = cms.untracked.VInputTag()
 )
 
+prescaleWeightReader = cms.untracked.PSet(
+    weightSrc = cms.InputTag("hplusPrescaleWeightProducer"),
+    enabled = cms.bool(False),
+)
+
 wjetsWeightReader = cms.untracked.PSet(
     weightSrc = cms.InputTag("wjetsWeight"),
     enabled = cms.bool(False),

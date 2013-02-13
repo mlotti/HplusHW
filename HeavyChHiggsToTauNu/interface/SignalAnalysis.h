@@ -258,6 +258,7 @@ namespace HPlus {
     EvtTopology fEvtTopology;
     TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
     EmbeddingMuonEfficiency fEmbeddingMuonEfficiency;
+    WeightReader fPrescaleWeightReader;
     VertexWeightReader fVertexWeightReader;
     WeightReader fWJetsWeightReader;
     VertexAssignmentAnalysis fVertexAssignmentAnalysis;

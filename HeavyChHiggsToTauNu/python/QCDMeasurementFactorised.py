@@ -34,6 +34,7 @@ def createEDFilter(param):
         forwardJetVeto = param.forwardJetVeto.clone(),
         transverseMassCut = param.transverseMassCut,
         EvtTopology = param.EvtTopology.clone(),
+        prescaleWeightReader = param.prescaleWeightReader.clone(),
         vertexWeight = param.vertexWeight.clone(),
         vertexWeightReader = param.vertexWeightReader.clone(),
         GenParticleAnalysis = param.GenParticleAnalysis.clone(),

@@ -204,6 +204,7 @@ namespace HPlus {
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
     fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fHistoWrapper),
     fEmbeddingMuonEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingMuonEfficiency"), fHistoWrapper),
+    fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fVertexWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeightReader")),
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WJetsWeight"),
     fVertexAssignmentAnalysis(iConfig, eventCounter, fHistoWrapper),
@@ -446,11 +447,15 @@ namespace HPlus {
   }
 
   bool SignalAnalysis::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    fEventWeight.beginEvent();
+
     if (bTauEmbeddingStatus)
       fTauEmbeddingMuonIsolationQuantifier.analyzeAfterTrigger(iEvent, iSetup);
 
-    fEventWeight.updatePrescale(iEvent); // set prescale
-    fTree.setPrescaleWeight(fEventWeight.getWeight());
+    // set prescale
+    const double prescaleWeight = fPrescaleWeightReader.getWeight(iEvent, iSetup);
+    fEventWeight.multiplyWeight(prescaleWeight);
+    fTree.setPrescaleWeight(prescaleWeight);
 
 //------ Vertex weight
     double myWeightBeforeVertexReweighting = fEventWeight.getWeight();

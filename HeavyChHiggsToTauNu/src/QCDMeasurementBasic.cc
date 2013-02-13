@@ -64,6 +64,7 @@ namespace HPlus {
     fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
     fFullHiggsMassCalculator(eventCounter, fHistoWrapper),
+    fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fVertexWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeightReader")),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauCandidates"),
     fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fHistoWrapper),
@@ -265,8 +266,10 @@ namespace HPlus {
 
   bool QCDMeasurementBasic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 //------ Read the prescale for the event and set the event weight as the prescale
-    fEventWeight.updatePrescale(iEvent);
-    fTree.setPrescaleWeight(fEventWeight.getWeight());
+    fEventWeight.beginEvent();
+    const double prescaleWeight = fPrescaleWeightReader.getWeight(iEvent, iSetup);
+    fEventWeight.multiplyWeight(prescaleWeight);
+    fTree.setPrescaleWeight(prescaleWeight);
 
 
 //------ Vertex weight

@@ -36,6 +36,7 @@ namespace HPlus {
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, fHistoWrapper, "MET"),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, fHistoWrapper),
 //    fFullHiggsMassCalculator(eventCounter, fHistoWrapper),
+    fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fVertexWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeightReader"))
   {
     edm::Service<TFileService> fs;
@@ -76,7 +77,8 @@ namespace HPlus {
   }
 
   bool EWKMatching::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    fEventWeight.updatePrescale(iEvent); // set prescale
+    fEventWeight.beginEvent();
+    fEventWeight.multiplyWeight(fPrescaleWeightReader.getWeight(iEvent, iSetup));
 
 //------ Vertex weight
     double myWeightBeforeVertexReweighting = fEventWeight.getWeight();

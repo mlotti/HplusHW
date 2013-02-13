@@ -231,6 +231,7 @@ process.signalAnalysis = cms.EDFilter("HPlusEWKMatchingFilter",
     MET = param.MET.clone(),
     bTagging = param.bTagging.clone(),
     deltaPhiTauMET = param.deltaPhiTauMET,
+    prescaleWeightReader = param.prescaleWeightReader.clone(),
     vertexWeight = param.vertexWeight.clone(),
     vertexWeightReader = param.vertexWeightReader.clone(),
     eventCounter = param.eventCounter.clone(),
@@ -287,7 +288,8 @@ if dataVersion.isData() and options.tauEmbeddingInput == 0 and doPrescalesForDat
     process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
     process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
     process.commonSequence *= process.hplusPrescaleWeightProducer
-    process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
+    process.signalAnalysis.prescaleWeightReader.weightSrc = "hplusPrescaleWeightProducer"
+    process.signalAnalysis.prescaleWeightReader.enabled = True
 
 # Print output
 #print "\nAnalysis is blind:", process.signalAnalysis.blindAnalysisStatus, "\n"
