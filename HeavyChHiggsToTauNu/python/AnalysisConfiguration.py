@@ -55,6 +55,8 @@ class ConfigBuilder:
                  doPrescalesForData = False, # Keep / Ignore prescaling for data (suppresses greatly error messages in datasets with or-function of triggers)
                  doFillTree = False, # Tree filling
                  histogramAmbientLevel = "Debug", # Set level of how many histograms are stored to files options are: 'Vital' (least histograms), 'Informative', 'Debug' (all histograms),
+                 histogramAmbientLevelOptimization = "Vital",
+                 histogramAmbientLevelSystematics = "Systematics",
                  applyTriggerScaleFactor = True, # Apply trigger scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
@@ -91,6 +93,7 @@ class ConfigBuilder:
         self.doPrescalesForData = doPrescalesForData
         self.doFillTree = doFillTree
         self.histogramAmbientLevel = histogramAmbientLevel
+        self.histogramAmbientLevelSystematics = histogramAmbientLevelSystematics
         self.applyTriggerScaleFactor = applyTriggerScaleFactor
         self.applyPUReweight = applyPUReweight
         self.tauSelectionOperatingMode = tauSelectionOperatingMode
@@ -127,7 +130,7 @@ class ConfigBuilder:
         if self.doOptimisation:
             #self.doSystematics = True            # Make sure that systematics are run
             self.doFillTree = False              # Make sure that tree filling is disabled or root file size explodes
-            self.histogramAmbientLevel = "Vital" # Set histogram level to least histograms to reduce output file sizes
+            self.histogramAmbientLevel = histogramAmbientLevelOptimization # Set histogram level to least histograms to reduce output file sizes
 
         if self.doBTagTree:
             self.tauSelectionOperatingMode = 'tauCandidateSelectionOnly'
@@ -712,6 +715,7 @@ class ConfigBuilder:
         module = module.clone()
         module.Tree.fill = False        
         module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
+        module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
 
         names = []
         names.append(jesVariation.addTESVariation(process, name, "TESPlus",  module, "Up"))
@@ -767,6 +771,7 @@ class ConfigBuilder:
         module = getattr(process, name).clone()
         module.Tree.fill = False
         module.eventCounter.printMainCounter = cms.untracked.bool(False)
+        module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
 
         if self.options.wjetsWeighting != 0:
             addWJetsWeight(module, "up")
@@ -781,6 +786,7 @@ class ConfigBuilder:
         module = getattr(process, name).clone()
         module.Tree.fill = False
         module.eventCounter.printMainCounter = cms.untracked.bool(False)
+        module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
 
         if self.options.wjetsWeighting != 0:
             addWJetsWeight(module, "down")
