@@ -32,7 +32,7 @@ namespace HPlus {
 
     typedef HPlus::TemporaryDisabler<HistoWrapper> TemporaryDisabler;
 
-    HistoWrapper(EventWeight& eventWeight, std::string level);
+    HistoWrapper(const EventWeight& eventWeight, std::string level);
     ~HistoWrapper();
 
     /// Wraps the making of histogram; histogram is created only if the ambient level is low enough
@@ -72,7 +72,7 @@ namespace HPlus {
 
   private:
     /// EventWeight object
-    EventWeight& fEventWeight;
+    const EventWeight& fEventWeight;
     /// Level of what histograms are saved to the root file
     HistoLevel fAmbientLevel;
     int fHistoLevelStats[kNumberOfLevels];
