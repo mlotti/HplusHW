@@ -64,7 +64,8 @@ metFilters = cms.untracked.PSet(
 )
 
 primaryVertexSelection = cms.untracked.PSet(
-    src = cms.untracked.InputTag("selectedPrimaryVertex"),
+    selectedSrc = cms.untracked.InputTag("selectedPrimaryVertex"),
+    allSrc = cms.untracked.InputTag("offlinePrimaryVertices"),
     enabled = cms.untracked.bool(True)
 )
 
@@ -440,6 +441,11 @@ eventCounter = cms.untracked.PSet(
     counters = cms.untracked.VInputTag()
 )
 
+prescaleWeightReader = cms.untracked.PSet(
+    weightSrc = cms.InputTag("hplusPrescaleWeightProducer"),
+    enabled = cms.bool(False),
+)
+
 wjetsWeightReader = cms.untracked.PSet(
     weightSrc = cms.InputTag("wjetsWeight"),
     enabled = cms.bool(False),
@@ -459,10 +465,9 @@ vertexWeight = cms.untracked.PSet(
     enabled = cms.bool(False),
 )
 
-vertexWeightReader = cms.untracked.PSet(
-    PUVertexWeightSrc = cms.InputTag("PUVertexWeightNominal"),
-    vertexSrc = vertexWeight.vertexSrc,
-    enabled = cms.bool(False)
+pileupWeightReader = cms.untracked.PSet(
+    weightSrc = cms.InputTag("PUVertexWeightNominal"),
+    enabled = cms.bool(False),
 )
 
 # Default parameters for heavy H+ analysis
@@ -555,7 +560,7 @@ def setDataTriggerEfficiency(dataVersion, era, pset=triggerEfficiencyScaleFactor
 # See test/PUtools for tools to generate distributions and links to twiki
 # 
 
-def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, psetReader=vertexWeightReader, era="Run2011A", suffix=""):
+def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, psetReader=pileupWeightReader, era="Run2011A", suffix="", histogramAmbientLevel="Informative"):
     if dataVersion.isData():
         return
     if dataVersion.isS6():
@@ -586,6 +591,7 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
                                       vertexSrc = tmp.vertexSrc,
                                       puSummarySrc = tmp.puSummarySrc,
                                       enabled = tmp.enabled,
+                                      histogramAmbientLevel = cms.untracked.string(histogramAmbientLevel),
                                       dataPUdistribution = tmp.dataPUdistribution,
                                       dataPUdistributionLabel = tmp.dataPUdistributionLabel,
                                       mcPUdistribution = tmp.mcPUdistribution,
@@ -598,10 +604,10 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
     name = "PUWeightProducer"+era+suffix
     setattr(process, name, PUWeightProducer)
     commonSequence *= PUWeightProducer
-    psetReader.PUVertexWeightSrc = name
+    psetReader.weightSrc = name
     return name
 
-def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, psetReader, suffix):
+def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, psetReader, suffix, histogramAmbientLevel="Informative"):
     if dataVersion.isData():
         return
     if dataVersion.isS6():
@@ -626,6 +632,7 @@ def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, pset
                                       vertexSrc = pset.vertexSrc,
                                       puSummarySrc = pset.puSummarySrc,
                                       enabled = pset.enabled,
+                                      histogramAmbientLevel = cms.untracked.string(histogramAmbientLevel),
                                       dataPUdistribution = pset.dataPUdistribution,
                                       dataPUdistributionLabel = pset.dataPUdistributionLabel,
                                       mcPUdistribution = pset.mcPUdistribution,
@@ -635,10 +642,10 @@ def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, pset
                                       weightDistributionEnable = pset.weightDistributionEnable,
                                       alias = cms.string("PUVertexWeight"+suffix)
     )
-    name = psetReader.PUVertexWeightSrc.value()+suffix
+    name = psetReader.weightSrc.value()+suffix
     setattr(process, name, PUWeightProducer)
     commonSequence *= PUWeightProducer
-    psetReader.PUVertexWeightSrc = name
+    psetReader.weightSrc = name
 
 # Tau selection
 def forEachTauSelection(function):

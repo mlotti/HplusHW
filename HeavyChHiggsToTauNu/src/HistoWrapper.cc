@@ -13,7 +13,7 @@ namespace {
 
 namespace HPlus {
 
-  HistoWrapper::HistoWrapper(EventWeight& eventWeight, std::string level):
+  HistoWrapper::HistoWrapper(const EventWeight& eventWeight, std::string level):
     fEventWeight(eventWeight),
     fIsEnabled(true)
   { 
