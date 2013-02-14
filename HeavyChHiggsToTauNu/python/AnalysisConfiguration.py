@@ -719,8 +719,8 @@ class ConfigBuilder:
         module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
 
         names = []
-        names.append(jesVariation.addTESVariation(process, name, "TESPlus",  module, "Up"))
-        names.append(jesVariation.addTESVariation(process, name, "TESMinus", module, "Down"))
+        names.append(jesVariation.addTESVariation(process, name, "TESPlus",  module, "Up", histogramAmbientLevel=self.histogramAmbientLevelSystematics))
+        names.append(jesVariation.addTESVariation(process, name, "TESMinus", module, "Down", histogramAmbientLevel=self.histogramAmbientLevelSystematics))
 
         if doJetUnclusteredVariation:
             # Do all variations beyond TES

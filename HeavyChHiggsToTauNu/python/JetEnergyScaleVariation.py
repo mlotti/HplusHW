@@ -63,7 +63,7 @@ objectVariationToMet = cms.EDProducer("ShiftedParticleMETcorrInputProducer",
     srcOriginal = cms.InputTag("selectedPatTaus"),
     srcShifted = cms.InputTag("selectedPatTausVariated")
 )
-def addTESVariation(process, prefix, name, prototype, direction, postfix=""):
+def addTESVariation(process, prefix, name, prototype, direction, postfix="", histogramAmbientLevel="Systematics"):
     tauVariationName = name+"TauVariation"
     rawMetVariationName = name+"RawMetVariation"
     type1MetVariationName = name+"Type1MetVariation"
@@ -100,6 +100,7 @@ def addTESVariation(process, prefix, name, prototype, direction, postfix=""):
         tauSelection = prototype.tauSelection.clone(),
         vertexSrc = prototype.primaryVertexSelection.src.value(),
         filter = False,
+        histogramAmbientLevel = histogramAmbientLevel
     )
     selectedTauName = add(name+"SelectedTauForVariation", m)
     m = tauVariation.clone(
