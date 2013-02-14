@@ -72,6 +72,7 @@ namespace HPlus {
     void setNonIsoLeptons(edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
 
     void setAlphaT(double alphaT) { fAlphaT = alphaT; }
+    void setTauIsFake(bool tauIsFake) { bTauIsFake = tauIsFake; }
     void setMomentumTensorEigenvalues(double QOne, double QTwo, double QThree) { 
       fQOne   = QOne; 
       fQTwo   = QTwo; 
@@ -232,6 +233,7 @@ namespace HPlus {
     double fAplanarity;
     double fPlanarity;
     double fCircularity;
+    bool bTauIsFake;
 
     double fDeltaPhi;
 

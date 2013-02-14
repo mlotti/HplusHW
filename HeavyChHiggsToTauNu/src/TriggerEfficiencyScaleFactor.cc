@@ -149,16 +149,18 @@ namespace HPlus {
     char buf[NBUF];
     WrappedTH1 *hsf = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, dir, "ScaleFactor", "Scale factor;Tau p_{T} bin;Scale factor", fPtBinLowEdges.size()+1, 0, fPtBinLowEdges.size()+1);
     WrappedTH1 *hsfu = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, dir, "ScaleFactorUncertainty", "Scale factor;Tau p_{T} bin;Scale factor uncertainty", fPtBinLowEdges.size()+1, 0, fPtBinLowEdges.size()+1);
-    hsf->getHisto()->SetBinContent(1, 1); hsf->GetXaxis()->SetBinLabel(1, "control");
-    hsfu->getHisto()->SetBinContent(1, 1); hsf->GetXaxis()->SetBinLabel(1, "control");
-    for(size_t i=0; i<fPtBinLowEdges.size(); ++i) {
-      size_t bin = i+2;
-      snprintf(buf, NBUF, "%.0f", fPtBinLowEdges[i]);
+    if(hsf->getHisto()) {
+      hsf->getHisto()->SetBinContent(1, 1); hsf->GetXaxis()->SetBinLabel(1, "control");
+      hsfu->getHisto()->SetBinContent(1, 1); hsf->GetXaxis()->SetBinLabel(1, "control");
+      for(size_t i=0; i<fPtBinLowEdges.size(); ++i) {
+        size_t bin = i+2;
+        snprintf(buf, NBUF, "%.0f", fPtBinLowEdges[i]);
 
-      hsf->getHisto()->SetBinContent(bin, scaleFactor(i));
-      hsfu->getHisto()->SetBinContent(bin, scaleFactorAbsoluteUncertainty(i));
-      hsf->GetXaxis()->SetBinLabel(bin, buf);
-      hsfu->GetXaxis()->SetBinLabel(bin, buf);
+        hsf->getHisto()->SetBinContent(bin, scaleFactor(i));
+        hsfu->getHisto()->SetBinContent(bin, scaleFactorAbsoluteUncertainty(i));
+        hsf->GetXaxis()->SetBinLabel(bin, buf);
+        hsfu->GetXaxis()->SetBinLabel(bin, buf);
+      }
     }
   }
   TriggerEfficiencyScaleFactor::~TriggerEfficiencyScaleFactor() {}

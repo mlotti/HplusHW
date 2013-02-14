@@ -22,7 +22,7 @@ private:
 
 HPlusVertexWeightProducer::HPlusVertexWeightProducer(const edm::ParameterSet& iConfig):
   eventWeight(iConfig),
-  histoWrapper(eventWeight, "Informative"),
+  histoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
   fVertexWeight(iConfig, histoWrapper),
   fAlias(iConfig.getParameter<std::string>("alias"))
 {

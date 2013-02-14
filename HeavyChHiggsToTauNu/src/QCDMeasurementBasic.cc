@@ -8,9 +8,9 @@
 #include <iomanip>
 
 namespace HPlus {
-  QCDMeasurementBasic::QCDMeasurementBasic(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  QCDMeasurementBasic::QCDMeasurementBasic(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, HistoWrapper& histoWrapper):
     fEventWeight(eventWeight),
-    fHistoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
+    fHistoWrapper(histoWrapper),
     fDeltaPhiCutValue(iConfig.getUntrackedParameter<double>("deltaPhiTauMET")),
     fTopRecoName(iConfig.getUntrackedParameter<std::string>("topReconstruction")),
     fTauPtBinLowEdges(iConfig.getUntrackedParameter<std::vector<double> >("factorisationTauPtBinLowEdges")),
@@ -51,7 +51,7 @@ namespace HPlus {
     fVetoTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("vetoTauSelection"),
                       iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"),
                       eventCounter, fHistoWrapper),
-    fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), fPrimaryVertexSelection.getSrc(), eventCounter, fHistoWrapper),
+    fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), fPrimaryVertexSelection.getSelectedSrc(), eventCounter, fHistoWrapper),
     //fNonIsolatedElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("NonIsolatedElectronVeto"), eventCounter, fHistoWrapper),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, fHistoWrapper),
     //fNonIsolatedMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("NonIsolatedMuonVeto"), eventCounter, fHistoWrapper),
@@ -68,7 +68,8 @@ namespace HPlus {
     fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
     fFullHiggsMassCalculator(eventCounter, fHistoWrapper),
-    fVertexWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeightReader")),
+    fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
+    fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauCandidates"),
     fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fHistoWrapper),
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader")),
@@ -270,20 +271,24 @@ namespace HPlus {
 
   bool QCDMeasurementBasic::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 //------ Read the prescale for the event and set the event weight as the prescale
-    fEventWeight.updatePrescale(iEvent);
-    fTree.setPrescaleWeight(fEventWeight.getWeight());
+    fEventWeight.beginEvent();
+    const double prescaleWeight = fPrescaleWeightReader.getWeight(iEvent, iSetup);
+    fEventWeight.multiplyWeight(prescaleWeight);
+    fTree.setPrescaleWeight(prescaleWeight);
     increment(fAllCounter);
 
 //------ Vertex weight
-    double myWeightBeforeVertexReweighting = fEventWeight.getWeight();
+    double myWeightBeforePileupReweighting = fEventWeight.getWeight();
     if(!iEvent.isRealData()) {
-      const double myVertexWeight = fVertexWeightReader.getWeight(iEvent, iSetup);
-      fEventWeight.multiplyWeight(myVertexWeight);
-      fTree.setPileupWeight(myVertexWeight);
+      const double myPileupWeight = fPileupWeightReader.getWeight(iEvent, iSetup);
+      fEventWeight.multiplyWeight(myPileupWeight);
+      fTree.setPileupWeight(myPileupWeight);
     }
-    int nVertices = fVertexWeightReader.getNumberOfVertices(iEvent, iSetup);
+
+    VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
+    size_t nVertices = pvData.getNumberOfAllVertices();
     int myNVerticesBinIndex = getNVerticesBinIndex(nVertices);
-    hVerticesBeforeWeight->Fill(nVertices, myWeightBeforeVertexReweighting);
+    hVerticesBeforeWeight->Fill(nVertices, myWeightBeforePileupReweighting);
     hVerticesAfterWeight->Fill(nVertices);
     fTree.setNvertices(nVertices);
     hSelectionFlow->Fill(kQCDOrderVertexSelection);
@@ -310,7 +315,7 @@ namespace HPlus {
     if(triggerData.hasTriggerPath()) // protection if TriggerSelection is disabled
       fTree.setHltTaus(triggerData.getTriggerTaus());
 
-    hVerticesTriggeredBeforeWeight->Fill(nVertices, myWeightBeforeVertexReweighting);
+    hVerticesTriggeredBeforeWeight->Fill(nVertices, myWeightBeforePileupReweighting);
     hVerticesTriggeredAfterWeight->Fill(nVertices);
 
 
@@ -322,7 +327,6 @@ namespace HPlus {
 
 
 //------ Primary vertex selection
-    VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
     if (!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
     //hSelectionFlow->Fill(kQCDOrderVertexSelection);

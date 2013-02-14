@@ -32,7 +32,7 @@ namespace HPlus {
 
     typedef HPlus::TemporaryDisabler<HistoWrapper> TemporaryDisabler;
 
-    HistoWrapper(EventWeight& eventWeight, std::string level);
+    HistoWrapper(const EventWeight& eventWeight, std::string level);
     ~HistoWrapper();
 
     /// Wraps the making of histogram; histogram is created only if the ambient level is low enough
@@ -72,7 +72,7 @@ namespace HPlus {
 
   private:
     /// EventWeight object
-    EventWeight& fEventWeight;
+    const EventWeight& fEventWeight;
     /// Level of what histograms are saved to the root file
     HistoLevel fAmbientLevel;
     int fHistoLevelStats[kNumberOfLevels];
@@ -100,6 +100,9 @@ namespace HPlus {
     template<typename Arg1> void Fill(const Arg1& a1) { if (isActive()) h->Fill(a1, fHistoWrapper.getWeight()); }
     /// Fills histogram (if it exists) with custom event weight
     template<typename Arg1, typename Arg2> void Fill(const Arg1& a1, const Arg2& a2) { if (isActive()) h->Fill(a1, a2); }
+
+    template<typename Arg1, typename Arg2> void SetBinContent(const Arg1& a1, const Arg2& a2) { if(isActive()) h->SetBinContent(a1, a2); }
+    template<typename Arg1, typename Arg2> void SetBinError(const Arg1& a1, const Arg2& a2) { if(isActive()) h->SetBinError(a1, a2); }
 
   private:
     HistoWrapper& fHistoWrapper;

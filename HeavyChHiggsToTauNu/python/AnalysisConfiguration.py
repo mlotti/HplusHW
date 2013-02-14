@@ -56,6 +56,8 @@ class ConfigBuilder:
                  doPrescalesForData = False, # Keep / Ignore prescaling for data (suppresses greatly error messages in datasets with or-function of triggers)
                  doFillTree = False, # Tree filling
                  histogramAmbientLevel = "Debug", # Set level of how many histograms are stored to files options are: 'Vital' (least histograms), 'Informative', 'Debug' (all histograms),
+                 histogramAmbientLevelOptimization = "Vital",
+                 histogramAmbientLevelSystematics = "Systematics",
                  applyTriggerScaleFactor = True, # Apply trigger scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
@@ -93,6 +95,7 @@ class ConfigBuilder:
         self.doPrescalesForData = doPrescalesForData
         self.doFillTree = doFillTree
         self.histogramAmbientLevel = histogramAmbientLevel
+        self.histogramAmbientLevelSystematics = histogramAmbientLevelSystematics
         self.applyTriggerScaleFactor = applyTriggerScaleFactor
         self.applyPUReweight = applyPUReweight
         self.tauSelectionOperatingMode = tauSelectionOperatingMode
@@ -136,7 +139,7 @@ class ConfigBuilder:
         if self.doOptimisation:
             #self.doSystematics = True            # Make sure that systematics are run
             self.doFillTree = False              # Make sure that tree filling is disabled or root file size explodes
-            self.histogramAmbientLevel = "Vital" # Set histogram level to least histograms to reduce output file sizes
+            self.histogramAmbientLevel = histogramAmbientLevelOptimization # Set histogram level to least histograms to reduce output file sizes
 
         if self.doBTagTree:
             self.tauSelectionOperatingMode = 'tauCandidateSelectionOnly'
@@ -287,7 +290,7 @@ class ConfigBuilder:
                     if self.applyTriggerScaleFactor:
                         param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.triggerEfficiencyScaleFactor)
                     if self.applyPUReweight:
-                        param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.vertexWeightReader, era=dataEra)
+                        param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.pileupWeightReader, era=dataEra)
                         if self.options.wjetsWeighting != 0:
                             mod.wjetsWeightReader.weightSrc = "wjetsWeight"+dataEra
                             mod.wjetsWeightReader.enabled = True
@@ -331,7 +334,8 @@ class ConfigBuilder:
             process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
             process.commonSequence *= process.hplusPrescaleWeightProducer
             for module in analysisModules:
-                module.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
+                module.prescaleWeightReader.weightSrc = "hplusPrescaleWeightProducer"
+                module.prescaleWeightReader.enabled = True
 
         # Allow customization AFTER all settings have been applied, and BEFORE the printout
         if self.customizeLightAnalysis is not None:
@@ -730,14 +734,15 @@ class ConfigBuilder:
         module = module.clone()
         module.Tree.fill = False        
         module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
+        module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
 
         postfix = ""
         if module.jetSelection.src.value()[-3:] == "Chs":
             postfix = "Chs"
 
         names = []
-        names.append(jesVariation.addTESVariation(process, name, "TESPlus",  module, "Up"))
-        names.append(jesVariation.addTESVariation(process, name, "TESMinus", module, "Down"))
+        names.append(jesVariation.addTESVariation(process, name, "TESPlus",  module, "Up", histogramAmbientLevel=self.histogramAmbientLevelSystematics))
+        names.append(jesVariation.addTESVariation(process, name, "TESMinus", module, "Down", histogramAmbientLevel=self.histogramAmbientLevelSystematics))
 
         if doJetUnclusteredVariation:
             # Do all variations beyond TES
@@ -791,11 +796,12 @@ class ConfigBuilder:
         module = getattr(process, name).clone()
         module.Tree.fill = False
         module.eventCounter.printMainCounter = cms.untracked.bool(False)
+        module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
 
         if self.options.wjetsWeighting != 0:
             addWJetsWeight(module, "up")
 
-        param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, suffix="up")
+        param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, suffix="up")
         path = cms.Path(process.commonSequence * module)
         setattr(process, name+"PUWeightPlus", module)
         setattr(process, name+"PUWeightPlusPath", path)
@@ -805,11 +811,12 @@ class ConfigBuilder:
         module = getattr(process, name).clone()
         module.Tree.fill = False
         module.eventCounter.printMainCounter = cms.untracked.bool(False)
+        module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
 
         if self.options.wjetsWeighting != 0:
             addWJetsWeight(module, "down")
 
-        param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, suffix="down")
+        param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, suffix="down")
         path = cms.Path(process.commonSequence * module)
         setattr(process, name+"PUWeightMinus", module)
         setattr(process, name+"PUWeightMinusPath", path)

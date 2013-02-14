@@ -522,12 +522,13 @@ class MuonAnalysis:
         del m.checkOverlaps.jets
 
         from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import GlobalMuonVeto
+        import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalMuonVetoFilter_cfi as muonVeto
         am = self.analysis.addAnalysisModule(name,
             selector = m,
-            filter = cms.EDFilter("HPlusGlobalMuonVetoFilter",
-                vertexSrc = cms.InputTag("firstPrimaryVertex"),
+            filter = muonVeto.hPlusGlobalMuonVetoFilter.clone(
+                vertexSrc = "firstPrimaryVertex",
                 GlobalMuonVeto=GlobalMuonVeto.clone(),
-                filter = cms.bool(True)                  
+                filter = True
             ),
             counter=True)
         am.setFilterSrcToSelector(lambda f: f.GlobalMuonVeto.MuonCollectionName)
@@ -538,10 +539,11 @@ class MuonAnalysis:
     def electronVetoSignalAnalysis(self):
         name = "ElectronVeto"
         from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import GlobalElectronVeto
+        import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as electronVeto
         self.analysis.addAnalysisModule(name,
-            filter = cms.EDFilter("HPlusGlobalElectronVetoFilter",
+            filter = electronVeto.hPlusGlobalElectronVetoFilter.clone(
                 GlobalElectronVeto=GlobalElectronVeto.clone(),
-                filter = cms.bool(True)                  
+                filter = True
             ),
             counter=True)
         self.cloneAnalyzers(name)

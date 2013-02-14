@@ -24,7 +24,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
@@ -116,7 +115,7 @@ namespace HPlus {
     kkJetToTauAndTauOutsideAcceptance
   };
   public:
-    explicit SignalAnalysisInvertedTau(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    explicit SignalAnalysisInvertedTau(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, HistoWrapper& histoWrapper);
     ~SignalAnalysisInvertedTau();
 
     void produces(edm::EDFilter *producer) const;
@@ -132,7 +131,7 @@ namespace HPlus {
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisInvertedTauProducer
     EventWeight& fEventWeight;
-    HistoWrapper fHistoWrapper;
+    HistoWrapper& fHistoWrapper;
 
 
     //    const double ftransverseMassCut;
@@ -219,7 +218,8 @@ namespace HPlus {
     EvtTopology fEvtTopology;
     TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
 
-    VertexWeightReader fVertexWeightReader;
+    WeightReader fPrescaleWeightReader;
+    WeightReader fPileupWeightReader;
     METFilters fMETFilters;
     WeightReader fWJetsWeightReader;
     FakeTauIdentifier fFakeTauIdentifier;

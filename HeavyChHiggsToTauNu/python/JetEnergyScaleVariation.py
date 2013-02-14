@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 import PhysicsTools.PatUtils.patPFMETCorrections_cff as patPFMETCorrections
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauFilter_cfi as TauFilter
 
 def _doCommon(process, prefix, name, prototype, direction, postfix):
     if not postfix in ["", "Chs"]:
@@ -62,7 +63,7 @@ objectVariationToMet = cms.EDProducer("ShiftedParticleMETcorrInputProducer",
     srcOriginal = cms.InputTag("selectedPatTaus"),
     srcShifted = cms.InputTag("selectedPatTausVariated")
 )
-def addTESVariation(process, prefix, name, prototype, direction, postfix=""):
+def addTESVariation(process, prefix, name, prototype, direction, postfix="", histogramAmbientLevel="Systematics"):
     tauVariationName = name+"TauVariation"
     rawMetVariationName = name+"RawMetVariation"
     type1MetVariationName = name+"Type1MetVariation"
@@ -95,11 +96,11 @@ def addTESVariation(process, prefix, name, prototype, direction, postfix=""):
     add(tauVariationName, tauv)
 
     # For tau variation for type I MET, we need the selected tau only
-    m = cms.EDFilter("HPlusTauSelectorFilter",
+    m = TauFilter.hPlusTauSelectorFilter.clone(
         tauSelection = prototype.tauSelection.clone(),
-        vertexSrc = prototype.primaryVertexSelection.src,
-        filter = cms.bool(False),
-        eventCounter = cms.untracked.PSet(counters=cms.untracked.VInputTag())
+        vertexSrc = prototype.primaryVertexSelection.selectedSrc.value(),
+        filter = False,
+        histogramAmbientLevel = histogramAmbientLevel
     )
     selectedTauName = add(name+"SelectedTauForVariation", m)
     m = tauVariation.clone(

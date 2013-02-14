@@ -243,11 +243,11 @@ def readFromCrabDirs(taskdirs, **kwargs):
 # \param rootFileList  List of (name, filename) pairs (both should be strings).
 #                     'name' is taken as the dataset name, and 'filename' as
 #                      the path to the ROOT file.
-# \param kwargs        Keyword arguments, forwarder to dataset.Dataset.__init__()
+# \param kwargs        Keyword arguments, forwarded to readFromRootFiles() and dataset.Dataset.__init__()
 #
 # \return DatasetManager object
 def getDatasetsFromRootFiles(rootFileList, **kwargs):
-    managerCreator = readFromRootFiles(rootFileList)
+    managerCreator = readFromRootFiles(rootFileList, **kwargs)
     return managerCreator.createDatasetManager(**kwargs)
 
 ## Construct DatasetManagerCreator from a list of CRAB task directory names.
