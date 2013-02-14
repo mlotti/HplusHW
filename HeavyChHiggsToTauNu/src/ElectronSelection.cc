@@ -314,7 +314,7 @@ namespace HPlus {
         // Plot eta-phi map of MC electrons above pT threshold if event passed electron veto
         if (output.passedElectronVeto())
           hMCElectronEtaPhiForPassedEvents->Fill(p.eta(), p.phi());
-        if (std::fabs(p.eta()) < fElecEtaCut) continue;
+        if (std::fabs(p.eta()) > fElecEtaCut) continue;
         // Check if there are MC electrons in the acceptance coming from b or c quarks
         const reco::Candidate* pmother = p.mother();
         while (pmother) {

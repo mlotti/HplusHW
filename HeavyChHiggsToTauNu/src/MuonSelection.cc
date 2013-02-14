@@ -365,7 +365,7 @@ namespace HPlus {
         // Plot eta-phi map of MC muons above pT threshold if event passed muon veto
         if (output.passedMuonVeto())
           hMCMuonEtaPhiForPassedEvents->Fill(p.eta(), p.phi());
-        if (std::fabs(p.eta()) < fMuonEtaCut) continue;
+        if (std::fabs(p.eta()) > fMuonEtaCut) continue;
         // Check if there are MC muons in the acceptance coming from b or c quarks
         const reco::Candidate* pmother = p.mother();
         while (pmother) {
