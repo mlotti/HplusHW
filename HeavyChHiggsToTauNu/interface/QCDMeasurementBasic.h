@@ -105,7 +105,7 @@ namespace HPlus {
     // Counters - order is important
     Count fAllCounter;
     Count fVertexReweighting;
-    Count fWJEtsWeightCounter;
+    Count fWJetsWeightCounter;
     Count fTriggerCounter;
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
