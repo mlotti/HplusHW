@@ -5,6 +5,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VetoTauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
@@ -13,6 +14,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
+
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NormalisationAnalysis.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -48,6 +51,7 @@ namespace HPlus {
     void cacheDataObjects(int nVertices,
                           const VertexSelection::Data* vertexData,
                           const TauSelection::Data* tauData,
+                          const FakeTauIdentifier::Data* fakeTauData,
                           const ElectronSelection::Data* electronData,
                           const MuonSelection::Data* muonData,
                           const JetSelection::Data* jetData,
@@ -66,6 +70,7 @@ namespace HPlus {
     int fNVertices;
     const VertexSelection::Data* fVertexData;
     const TauSelection::Data* fTauData;
+    const FakeTauIdentifier::Data* fFakeTauData;
     const ElectronSelection::Data* fElectronData;
     const MuonSelection::Data* fMuonData;
     const JetSelection::Data* fJetData;
@@ -106,6 +111,7 @@ namespace HPlus {
                     int nVertices,
                     VertexSelection& vertexSelection,
                     TauSelection& tauSelection,
+                    FakeTauIdentifier& fakeTauIdentifier,
                     ElectronSelection& eVeto,
                     MuonSelection& muonVeto,
                     JetSelection& jetSelection,
@@ -120,7 +126,7 @@ namespace HPlus {
     /// unique filling methods (to be called before return statement)
     void fillControlPlots(const TriggerSelection::Data& data);
     void fillControlPlots(const VertexSelection::Data& data);
-    void fillControlPlots(const TauSelection::Data& data);
+    void fillControlPlots(const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData);
     void fillControlPlots(const ElectronSelection::Data& data);
     void fillControlPlots(const MuonSelection::Data& data);
     void fillControlPlots(const JetSelection::Data& data);
@@ -132,6 +138,8 @@ namespace HPlus {
     void fillFinalPlotsForFakeTaus();
 
   protected:
+    
+    /// Creates histograms
     void createHistograms();
     /// Status indicating wheather the data objects have been cached
     bool bDataObjectsCached;
@@ -143,10 +151,13 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory fCommonBaseDirectory;
     TFileDirectory fEveryStepDirectory;
+    /// Normalisation analysis object
+    NormalisationAnalysis fNormalisationAnalysis;
     /// Cached data objects from silent analyze
     int fNVertices;
     VertexSelection::Data fVertexData;
     TauSelection::Data fTauData;
+    FakeTauIdentifier::Data fFakeTauData;
     ElectronSelection::Data fElectronData;
     MuonSelection::Data fMuonData;
     JetSelection::Data fJetData;

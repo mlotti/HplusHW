@@ -508,7 +508,7 @@ namespace HPlus {
     fTree.setNvertices(nVertices);
 
     increment(fAllCounter);
-    fCommonPlots.initialize(iEvent, iSetup, nVertices, fPrimaryVertexSelection, fTauSelection, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology);
+    fCommonPlots.initialize(iEvent, iSetup, nVertices, fPrimaryVertexSelection, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology);
 
 //------ For combining W+Jets inclusive and exclusive samples, do an event weighting here
     if(!iEvent.isRealData()) {
@@ -585,7 +585,7 @@ namespace HPlus {
       fEventWeight.multiplyWeight(fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()));
     fCommonPlotsAfterTauWeight->fill();
     if (myFakeTauStatus) fCommonPlotsAfterTauWeightFakeTaus->fill();
-    fCommonPlots.fillControlPlots(tauData);
+    fCommonPlots.fillControlPlots(tauData, tauMatchData);
     // plot leading track without pt cut
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTau()->leadPFChargedHadrCand()->pt());
     increment(fTauFakeScaleFactorCounter);
@@ -737,7 +737,6 @@ namespace HPlus {
         hReferenceJetToTauDeltaPtDecayMode2NoNeutralHadrons->Fill(myDeltaPtWithoutNeutralHadrons);
       }
     }
-    
     
     /* temporary place
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());

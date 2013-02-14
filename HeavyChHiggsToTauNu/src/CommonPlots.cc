@@ -33,6 +33,7 @@ namespace HPlus {
   void CommonPlotsFilledAtEveryStep::cacheDataObjects(int nVertices,
                                                       const VertexSelection::Data* vertexData,
                                                       const TauSelection::Data* tauData,
+                                                      const FakeTauIdentifier::Data* fakeTauData,
                                                       const ElectronSelection::Data* electronData,
                                                       const MuonSelection::Data* muonData,
                                                       const JetSelection::Data* jetData,
@@ -42,6 +43,7 @@ namespace HPlus {
     fNVertices = nVertices;
     fVertexData = vertexData;
     fTauData = tauData;
+    fFakeTauData = fakeTauData;
     fElectronData = electronData;
     fMuonData = muonData;
     fJetData = jetData;
@@ -58,7 +60,8 @@ namespace HPlus {
     fEventCounter(eventCounter),
     fHistoWrapper(histoWrapper),
     fCommonBaseDirectory(fs->mkdir("CommonPlots")),
-    fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")) {
+    fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
+    fNormalisationAnalysis(eventCounter, histoWrapper) {
       createHistograms();
   }
 
@@ -67,7 +70,8 @@ namespace HPlus {
     fEventCounter(eventCounter),
     fHistoWrapper(histoWrapper),
     fCommonBaseDirectory(fs->mkdir("CommonPlots")),
-    fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")) {
+    fEveryStepDirectory(fCommonBaseDirectory.mkdir("AtEveryStep")),
+    fNormalisationAnalysis(eventCounter, histoWrapper) {
       createHistograms();
   }
 
@@ -106,6 +110,7 @@ namespace HPlus {
                                int nVertices,
                                VertexSelection& vertexSelection,
                                TauSelection& tauSelection,
+                               FakeTauIdentifier& fakeTauIdentifier,
                                ElectronSelection& eVeto,
                                MuonSelection& muonVeto,
                                JetSelection& jetSelection,
@@ -122,7 +127,7 @@ namespace HPlus {
     if (!fVertexData.passedEvent()) {
       // Plots do not make sense if no PV has been found
       for (std::vector<CommonPlotsFilledAtEveryStep*>::iterator it = hEveryStepHistograms.begin(); it != hEveryStepHistograms.end(); ++it) {
-        (*it)->cacheDataObjects(fNVertices, 0, 0, 0, 0, 0, 0, 0, 0);
+        (*it)->cacheDataObjects(fNVertices, 0, 0, 0, 0, 0, 0, 0, 0, 0);
       }
       return;
     }
@@ -131,10 +136,11 @@ namespace HPlus {
     if (!fTauData.passedEvent()) {
       // Plots do not make sense if no PV has been found
       for (std::vector<CommonPlotsFilledAtEveryStep*>::iterator it = hEveryStepHistograms.begin(); it != hEveryStepHistograms.end(); ++it) {
-        (*it)->cacheDataObjects(fNVertices, &fVertexData, 0, 0, 0, 0, 0, 0, 0);
+        (*it)->cacheDataObjects(fNVertices, &fVertexData, 0, 0, 0, 0, 0, 0, 0, 0);
       }
       return;
     }
+    fFakeTauData = fakeTauIdentifier.silentMatchTauToMC(iEvent, *(fTauData.getSelectedTau()));
     fElectronData = eVeto.silentAnalyze(iEvent, iSetup);
     fMuonData = muonVeto.silentAnalyze(iEvent, iSetup, fVertexData.getSelectedVertex());
     fJetData = jetSelection.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fNVertices);
@@ -146,7 +152,7 @@ namespace HPlus {
     if (!hEveryStepHistograms.size())
       throw cms::Exception("Assert") << "CommonPlots::initialize() was called before creating CommonPlots::createCommonPlotsFilledAtEveryStep()!" << endl<<  "  make first all CommonPlots::createCommonPlotsFilledAtEveryStep() and then call CommonPlots::initialize()";
     for (std::vector<CommonPlotsFilledAtEveryStep*>::iterator it = hEveryStepHistograms.begin(); it != hEveryStepHistograms.end(); ++it) {
-      (*it)->cacheDataObjects(fNVertices, &fVertexData, &fTauData, &fElectronData, &fMuonData, &fJetData, &fMETData, &fBJetData, &fTopData);
+      (*it)->cacheDataObjects(fNVertices, &fVertexData, &fTauData, &fFakeTauData, &fElectronData, &fMuonData, &fJetData, &fMETData, &fBJetData, &fTopData);
     }
   }
 
@@ -166,10 +172,13 @@ namespace HPlus {
     
   }
 
-  void CommonPlots::fillControlPlots(const TauSelection::Data& data) {
+  void CommonPlots::fillControlPlots(const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData) {
     //fTauData = data;
-    hTauPhiOscillationX->Fill(fNVertices, data.getSelectedTau()->px());
-    hTauPhiOscillationY->Fill(fNVertices, data.getSelectedTau()->py());
+    hTauPhiOscillationX->Fill(fNVertices, tauData.getSelectedTau()->px());
+    hTauPhiOscillationY->Fill(fNVertices, tauData.getSelectedTau()->py());
+    
+    // e->tau normalisation
+    fNormalisationAnalysis.analyseEToTauFakes(fVertexData, tauData, fakeTauData, fElectronData);
   }
 
   void CommonPlots::fillControlPlots(const ElectronSelection::Data& data) {
