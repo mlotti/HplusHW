@@ -19,7 +19,10 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 #------------------------------Configure---------------------------------#
 #dirs = ["/afs/cern.ch/user/s/strichte/HeavyChHiggsToTauNu/test/multicrab_130125_153632"]
 #dirs = ["/afs/cern.ch/user/s/strichte/HeavyChHiggsToTauNu/test/multicrab_130129_125309"]
-dirs = ["/afs/cern.ch/user/s/strichte/HeavyChHiggsToTauNu/test/multicrab_130207_162543"]
+#dirs = ["/afs/cern.ch/user/s/strichte/HeavyChHiggsToTauNu/test/multicrab_130207_162543"]
+dirs = ["/afs/cern.ch/user/s/strichte/HeavyChHiggsToTauNu/test/multicrab_130211_173259"]
+#dirs = ["/afs/cern.ch/user/s/strichte/HeavyChHiggsToTauNu/test/multicrab_130212_150404"] # medium (Delta R < 0.1
+#dirs = ["/afs/cern.ch/user/s/strichte/HeavyChHiggsToTauNu/test/multicrab_130213_080847"]
 
 analysis = "signalAnalysis"
 counters = analysis+"/counters"
@@ -84,22 +87,27 @@ datasets.merge("TTToHplusBWB_M120_plus_TTJets", ["TTToHplusBWB_M120", "TTJets"],
 #     h = plots.DataMCPlot(datasets, analysis+"/FullHiggsMass/HiggsMass")
 
 # TTJets
-drh_reco = datasets.getDataset("TTToHplusBWB_M120_plus_TTJets").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMass")
-drh_gen = datasets.getDataset("TTToHplusBWB_M120_plus_TTJets").getDatasetRootHisto(analysis+"/FullHiggsMass/TrueHiggsMass")
+#drh_reco = datasets.getDataset("TTToHplusBWB_M120_plus_TTJets").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMass")
+#drh_gen = datasets.getDataset("TTToHplusBWB_M120_plus_TTJets").getDatasetRootHisto(analysis+"/FullHiggsMass/TrueHiggsMass")
+drh_correctId = datasets.getDataset("TTToHplusBWB_M120_plus_TTJets").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMassCorrectId")
+drh_incorrectId = datasets.getDataset("TTToHplusBWB_M120_plus_TTJets").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMassIncorrectId")
+
 #drh_reco = datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMass")
 #drh_gen = datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/FullHiggsMass/TrueHiggsMass")
 #drh_gen = datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genFullHiggsMass")
 
-drh_reco.normalizeToLuminosity(mcOnlyLumi)
-drh_gen.normalizeToLuminosity(mcOnlyLumi)
+drh_correctId.normalizeToLuminosity(mcOnlyLumi)
+drh_incorrectId.normalizeToLuminosity(mcOnlyLumi)
 
-h_reco = drh_reco.getHistogram() # returns TH1
-h_gen = drh_gen.getHistogram()
+h_correctId = drh_correctId.getHistogram() # returns TH1
+h_incorrectId = drh_incorrectId.getHistogram()
 
-h_reco.SetName("Reco")
-h_gen.SetName("Gen")
+#h_reco.SetName("Reco")
+#h_gen.SetName("Gen")
+h_correctId.SetName("#splitline{ID good}{#Delta R < 0.4}")
+h_incorrectId.SetName("#splitline{ID bad}{#Delta R > 0.4}")
 
-h = plots.ComparisonPlot(h_reco, h_gen)
+h = plots.ComparisonPlot(h_correctId, h_incorrectId) # QUESTION: how does rebinning work in a comparison plot? 
 h.histoMgr.forEachHisto(styles.generator())
 
 # Stack MC histograms

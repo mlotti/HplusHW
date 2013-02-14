@@ -18,20 +18,8 @@ PURPOSE.
 Classify simulated events with a reconstructed b, tau, and MET seeming to come from a Hplus decay
 according to whether these objects were identified correctly or not by comparing to the MC truth.
 
-IMPLEMENTATION OUTLINE.
-
-
-This code is called from SignalAnalysis.cc
+This code is called from FullHiggsMassCalculator.cc
 */
-
-
-/*
-Next steps:
-*Loop over events, doing nothing (note: the event loop itself sits somewhere else, but I can refer to the events being looped over)
-*Find gen taus and check if there's a reco tau nearby
-Find reco taus that do not correspond to any gen taus
-*/
-
 
 namespace HPlus {
 
