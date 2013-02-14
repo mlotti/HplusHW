@@ -6,6 +6,103 @@ from multicrabWorkflowsPattuple import constructProcessingWorkflow_53X
 
 import multicrabDatasetsCommon as common
 
+def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
+    mcTriggerTauLeg = "HLT_IsoMu15_eta2p1_L1ETM20_v5"
+    mcTriggers = [mcTriggerTauLeg]
+
+    def TaskDefMC(**kwargs):
+        return TaskDef(triggerOR=mcTriggers, **kwargs)
+
+    defaultDefinitions = {
+        "TauPlusX_190456-190738_2012A_Jul13":  TaskDef(njobsIn=  35, njobsOut=  1, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v3"]),                
+        "TauPlusX_190782-190949_2012A_Aug06":  TaskDef(njobsIn=  10, njobsOut=  1, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v4"]),                
+        "TauPlusX_191043-193621_2012A_Jul13":  TaskDef(njobsIn= 150, njobsOut=  3, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v4"]),                
+        "TauPlusX_193834-196531_2012B_Jul13":  TaskDef(njobsIn=2000, njobsOut= 20, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v5"]),                
+        "TauPlusX_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 200, njobsOut=  2, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6"]),                
+        "TauPlusX_198941-203742_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 10, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6"]),                
+        "TauPlusX_203777-208686_2012D_Prompt": TaskDef(njobsIn=3600, njobsOut= 360, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v7"]),
+
+        "DYToTauTau_M20_powheg_v1_TuneZ2star_Summer12":         TaskDefMC(njobsIn= 40, njobsOut= 10),                                                   
+        "DYToTauTau_M20_powheg_v2_TuneZ2star_Summer12":         TaskDefMC(njobsIn= 2000, njobsOut= 200),                                                
+        "DYToTauTau_M_100to200_TuneZ2Star_pythia6_tauola_Summer12": TaskDefMC(njobsIn= 5, njobsOut= 1),                                             
+        "DYToTauTau_M_200to400_TuneZ2Star_pythia6_tauola_Summer12": TaskDefMC(njobsIn= 5, njobsOut= 1),                                             
+        "DYToTauTau_M_400to800_TuneZ2Star_pythia6_tauola_Summer12": TaskDefMC(njobsIn= 5, njobsOut= 1),                                             
+        "DYToTauTau_M_800_TuneZ2Star_pythia6_tauola_Summer12":      TaskDefMC(njobsIn= 5, njobsOut= 1),
+    }
+
+    workflowName = "triggerTauLeg_skim_"+version
+
+    # Update the default definitions from the argument
+    updateTaskDefinitions(defaultDefinitions, updateDefinitions)
+
+    # Add pattuple Workflow for each dataset
+    for datasetName, taskDef in defaultDefinitions.iteritems():
+        dataset = datasets.getDataset(datasetName)
+
+        # Construct processing workflow
+        wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow="AOD", workflowName=workflowName, skimConfig=skim)
+                                                                                                                                                                 
+        # Setup the publish name
+        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), "analysis_tauleg_"+version)
+        wf.addCrabLine("USER.publish_data_name = "+name)
+
+        # For MC, split by events, for data, split by lumi
+        if dataset.isMC():
+            wf.addCrabLine("CMSSW.total_number_of_events = -1")
+        else:
+            wf.addCrabLine("CMSSW.total_number_of_lumis = -1")
+
+        # Add the pattuple Workflow to Dataset
+        dataset.addWorkflow(wf)
+        # If DBS-dataset of the pattuple has been specified, add also analysis Workflow to Dataset
+        if wf.output != None:
+            commonArgs = {
+                "source": Source(workflowName),
+                "args": wf.args,
+                "skimConfig": skim
+                }
+
+            if dataset.isData():
+                # For data, construct one analysis workflow per trigger type
+                pd = datasetName.split("_")[0]
+                if pd == "Tau" or pd == "TauPlusX":
+                    dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, triggerOR=wf.triggerOR, **commonArgs))
+                elif pd == "MultiJet":
+                    if datasetName in quadJetTriggers:
+                        dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=quadJetTriggers[datasetName], **commonArgs))
+                    if datasetName in quadJetBTagTriggers:
+                        dataset.addWorkflow(Workflow("analysis_quadjetbtag_"+version, triggerOR=quadJetBTagTriggers[datasetName], **commonArgs))
+                    if datasetName in quadPFJetBTagTriggers:
+                        dataset.addWorkflow(Workflow("analysis_quadpfjetbtag_"+version, triggerOR=quadPFJetBTagTriggers[datasetName], **commonArgs))
+                else:
+                    raise Exception("Unsupported PD name %s" % pd)
+            else:
+                # For MC, also construct one analysis workflow per trigger type
+                dataset.addWorkflow(Workflow("analysis_tauleg"+version, triggerOR=[mcTriggerTauLeg], **commonArgs))
+
+
+def addTauLegSkim_53X_v1(datasets):
+    definitions = {
+        "TauPlusX_190456-190738_2012A_Jul13":  TaskDef(""),
+        "TauPlusX_190782-190949_2012A_Aug06":  TaskDef(""),
+        "TauPlusX_191043-193621_2012A_Jul13":  TaskDef(""),
+        "TauPlusX_193834-196531_2012B_Jul13":  TaskDef(""),
+        "TauPlusX_198022-198523_2012C_Aug24":  TaskDef(""),
+        "TauPlusX_198941-203742_2012C_Prompt": TaskDef(""),
+        "TauPlusX_203777-208686_2012D_Prompt": TaskDef(""),
+        
+        "DYToTauTau_M20_powheg_v1_TuneZ2star_Summer12":             TaskDef(""),
+        "DYToTauTau_M20_powheg_v2_TuneZ2star_Summer12":             TaskDef(""),
+        "DYToTauTau_M_100to200_TuneZ2Star_pythia6_tauola_Summer12": TaskDef(""),
+        "DYToTauTau_M_200to400_TuneZ2Star_pythia6_tauola_Summer12": TaskDef(""),
+        "DYToTauTau_M_400to800_TuneZ2Star_pythia6_tauola_Summer12": TaskDef(""),
+        "DYToTauTau_M_800_TuneZ2Star_pythia6_tauola_Summer12":      TaskDef(""),
+        }
+        
+    addTauLegSkim_53X("v53_v1", datasets, definitions)
+
+
+
 def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
     mcTriggerMETLeg = "HLT_LooseIsoPFTau35_Trk20_Prong1_v6"
     mcTriggers = [
