@@ -103,7 +103,9 @@ namespace HPlus {
     std::vector<double> fFullMassRangeBinLowEdges;
 
     // Counters - order is important
+    Count fAllCounter;
     Count fVertexReweighting;
+    Count fWJEtsWeightCounter;
     Count fTriggerCounter;
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
@@ -157,6 +159,7 @@ namespace HPlus {
     WeightReader fPileupWeightReader;
     FakeTauIdentifier fFakeTauIdentifier;
     TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
+    WeightReader fWJetsWeightReader;
 
     SignalAnalysisTree fTree;
     ScaleFactorUncertaintyManager fSFUncertaintyAfterStandardSelections;
