@@ -298,7 +298,9 @@ ElectronSelection = cms.untracked.PSet(
     conversionSrc = cms.untracked.InputTag("allConversions"),
     beamspotSrc = cms.untracked.InputTag("offlineBeamSpot"),
     rhoSrc = cms.untracked.InputTag("kt6PFJetsForEleIso", "rho"),
-    ElectronSelection = cms.untracked.string("VETO"), # was simpleEleId95relIso
+    ElectronSelectionVeto = cms.untracked.string("VETO"),
+    ElectronSelectionTight = cms.untracked.string("TIGHT"),
+    ElectronSelectionMedium = cms.untracked.string("MEDIUM"),
     ElectronPtCut = cms.untracked.double(15.0),
     ElectronEtaCut = cms.untracked.double(2.5)
 )
@@ -312,20 +314,11 @@ NonIsolatedElectronVeto = cms.untracked.PSet(
 
 MuonSelection = cms.untracked.PSet(
     MuonCollectionName = cms.untracked.InputTag("selectedPatMuons"),
-    MuonSelection = cms.untracked.string("GlobalMuonPromptTight"),
+    MuonSelection = cms.untracked.string("GlobalMuonPromptTight"), # does not affect end result
     MuonPtCut = cms.untracked.double(10.0),
     MuonEtaCut = cms.untracked.double(2.5),  
-    MuonApplyIpz = cms.untracked.bool(False) # Apply IP-z cut
+    MuonApplyIpz = cms.untracked.bool(True) # Apply IP-z cut,  # does not affect end result
 )
-
-NonIsolatedMuonVeto = cms.untracked.PSet(
-    MuonCollectionName = cms.untracked.InputTag("selectedPatMuons"),
-    MuonSelection = cms.untracked.string("AllGlobalMuons"),
-    MuonPtCut = cms.untracked.double(5.0),
-    MuonEtaCut = cms.untracked.double(2.5),  
-    MuonApplyIpz = cms.untracked.bool(False) # Apply IP-z cut
-)
-
 
 InvMassVetoOnJets = cms.untracked.PSet(
     ptCut = cms.untracked.double(30),

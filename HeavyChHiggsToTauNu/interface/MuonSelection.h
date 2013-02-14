@@ -24,6 +24,7 @@ namespace edm {
 namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
+  class WrappedTH2;
 
   class MuonSelection: public BaseSelection {
   public:
@@ -40,14 +41,18 @@ namespace HPlus {
       Data();
       ~Data();
       // Getters for veto on isolated muons
-      const bool passedEvent() const { return fPassedEvent; }
-      const bool passedMuonVeto() const { return fPassedEvent; }
+      const bool passedEvent() const { return passedMuonVeto(); }
+      const bool passedMuonVeto() const { return (fSelectedMuonsLoose.size() == 0); }
       const float getSelectedMuonPt() const { return fSelectedMuonPt; }
       const float getSelectedMuonEta() const { return fSelectedMuonEta; }
       const float getSelectedMuonPtBeforePtCut() const { return fSelectedMuonPtBeforePtCut; }
       // Getters for finding isolated muons
       const bool foundTightMuon() const { return (fSelectedMuonsTight.size() > 0); }
       const bool foundLooseMuon() const { return (fSelectedMuonsLoose.size() > 0); }
+      // Getters for MC info about non-isolated muons for events that passed veto
+      const bool eventContainsMuonFromCJet() const { return fHasMuonFromCjetStatus; }
+      const bool eventContainsMuonFromBJet() const { return fHasMuonFromBjetStatus; }
+      const bool eventContainsMuonFromCorBJet() const { return eventContainsMuonFromCJet() || eventContainsMuonFromBJet(); }
 
       /// Muon collection after all selections - size should be zero if veto condition is passed
       const edm::PtrVector<pat::Muon>& getSelectedMuons() const { return fSelectedMuonsLoose; }
@@ -63,11 +68,13 @@ namespace HPlus {
       friend class MuonSelection;
 
     private:
-      bool fPassedEvent;
       // pt and eta of muon with highest pt passing the selections
       float fSelectedMuonPt;
       float fSelectedMuonEta;
       float fSelectedMuonPtBeforePtCut;
+      /// MC info about non-isolated muons
+      bool fHasMuonFromCjetStatus;
+      bool fHasMuonFromBjetStatus;
       /// Muon collection after all selections
       edm::PtrVector<pat::Muon> fSelectedMuonsTight;
       edm::PtrVector<pat::Muon> fSelectedMuonsLoose;
@@ -97,11 +104,12 @@ namespace HPlus {
     const double fMuonEtaCut;
     const bool fMuonApplyIpz;
     
-    /// Sub-Counter to Counter
+    /// Sub-Counters
+    Count fMuonSelectionSubCountAllEvents;
     Count fMuonSelectionSubCountMuonPresent;
     Count fMuonSelectionSubCountMuonHasGlobalOrInnerTrk;
     Count fMuonSelectionSubCountMuonGlobalMuonOrTrkerMuon;
-    Count fMuonSelectionSubCountMuonSelection;
+    Count fMuonSelectionSubCountPFMuonSelection;
     Count fMuonSelectionSubCountNTrkerHitsCut;
     Count fMuonSelectionSubCountNPixelHitsCut;
     Count fMuonSelectionSubCountNMuonlHitsCut;
@@ -111,9 +119,13 @@ namespace HPlus {
     Count fMuonSelectionSubCountRelIsolationCut;
     Count fMuonSelectionSubCountEtaCut;
     Count fMuonSelectionSubCountPtCut;
+    Count fMuonSelectionSubCountVetoMuonFound;
     Count fMuonSelectionSubCountMatchingMCmuon;
     Count fMuonSelectionSubCountMatchingMCmuonFromW;
-    Count fMuonSelectionCounter;
+    Count fMuonSelectionSubCountTightMuonFound;
+    Count fMuonSelectionSubCountMuonVetoPassed;
+    Count fMuonSelectionSubCountPassedVetoAndMuonFromCjet;
+    Count fMuonSelectionSubCountPassedVetoAndMuonFromBjet;
 
     // Histograms
     //    WrappedTH1 *hMuonPt_test;
@@ -143,6 +155,9 @@ namespace HPlus {
     WrappedTH1 *hMuonTransverseImpactParameter;
     WrappedTH1 *hMuonDeltaIPz;
     WrappedTH1 *hMuonRelIsol;
+    WrappedTH2 *hMCMuonEtaPhiForPassedEvents;
+    WrappedTH2 *hMuonEtaPhiForSelectedMuons;
+
   };
 }
 

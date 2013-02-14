@@ -18,7 +18,6 @@ std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
 
 namespace HPlus {
   MuonSelection::Data::Data():
-    fPassedEvent(false),
     fSelectedMuonPt(0.),
     fSelectedMuonEta(0.),
     fSelectedMuonPtBeforePtCut(0.) {}
@@ -31,10 +30,11 @@ namespace HPlus {
     fMuonPtCut(iConfig.getUntrackedParameter<double>("MuonPtCut")),
     fMuonEtaCut(iConfig.getUntrackedParameter<double>("MuonEtaCut")),
     fMuonApplyIpz(iConfig.getUntrackedParameter<bool>("MuonApplyIpz")),
+    fMuonSelectionSubCountAllEvents(eventCounter.addSubCounter("MuonSelection","AllEvent")),
     fMuonSelectionSubCountMuonPresent(eventCounter.addSubCounter("MuonSelection","Muon present")),
     fMuonSelectionSubCountMuonHasGlobalOrInnerTrk(eventCounter.addSubCounter("MuonSelection","Muon has Global OR Inner Trk")),
     fMuonSelectionSubCountMuonGlobalMuonOrTrkerMuon(eventCounter.addSubCounter("MuonSelection","Global OR Tracker Muon")),
-    fMuonSelectionSubCountMuonSelection(eventCounter.addSubCounter("MuonSelection","Muon Selection")),
+    fMuonSelectionSubCountPFMuonSelection(eventCounter.addSubCounter("MuonSelection","PF muon passed")),
     fMuonSelectionSubCountNTrkerHitsCut(eventCounter.addSubCounter("MuonSelection","Muon NTrkerHits")),
     fMuonSelectionSubCountNPixelHitsCut(eventCounter.addSubCounter("MuonSelection","Muon NPixelHits")),
     fMuonSelectionSubCountNMuonlHitsCut(eventCounter.addSubCounter("MuonSelection","Muon NMuonlHits")),
@@ -44,9 +44,14 @@ namespace HPlus {
     fMuonSelectionSubCountRelIsolationCut(eventCounter.addSubCounter("MuonSelection","Muon RelIsolation")),
     fMuonSelectionSubCountEtaCut(eventCounter.addSubCounter("MuonSelection","Muon Eta")),
     fMuonSelectionSubCountPtCut(eventCounter.addSubCounter("MuonSelection","Muon Pt")),
+    fMuonSelectionSubCountVetoMuonFound(eventCounter.addSubCounter("MuonSelection","Veto muon found")),
     fMuonSelectionSubCountMatchingMCmuon(eventCounter.addSubCounter("MuonSelection","Muon matching MC Muon")),
     fMuonSelectionSubCountMatchingMCmuonFromW(eventCounter.addSubCounter("MuonSelection","Muon matching MC Muon From W")),
-    fMuonSelectionCounter(eventCounter.addSubCounter("MuonSelection","MuonSelection"))
+    fMuonSelectionSubCountTightMuonFound(eventCounter.addSubCounter("MuonSelection","Tight muon found")),
+    fMuonSelectionSubCountMuonVetoPassed(eventCounter.addSubCounter("MuonSelection","Muon veto passed")),
+    fMuonSelectionSubCountPassedVetoAndMuonFromCjet(eventCounter.addSubCounter("MuonSelection", "Muon veto passed and mu in c jet")),
+    fMuonSelectionSubCountPassedVetoAndMuonFromBjet(eventCounter.addSubCounter("MuonSelection", "Muon veto passed and mu in b jet"))
+
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("MuonSelection");
@@ -75,8 +80,15 @@ namespace HPlus {
     hMuonEta_GlobalTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonEta_GlobalTrack_AfterSelection", "MuonEta_GlobalTrack_AfterSelection", 60, -3., 3.);
     hMuonTransverseImpactParameter = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonTransverseImpactParameter", "MuonTransverseImpactParameter;#mu IP_{T} / mm", 100, 0., 2);
     hMuonDeltaIPz = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonDeltaIPz", "MuonDeltaIPz;|IP_{z}-PV_{z}| / cm;N_{muons}", 100, 0., 10.);
-    hMuonRelIsol = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonRelIsol", "MuonRelIsol;#mu Rel.Isol. #Delta#beta;N_{muons}", 100, 0., 1.);
-    
+    hMuonRelIsol = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MuonRelIsol", "MuonRelIsol;#mu Rel.Isol. #Delta#beta;N_{muons}", 120, 0., 1.2);
+
+    hMuonEtaPhiForSelectedMuons = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir,
+        "MuonEtaPhiForSelectedMuons", "MuonEtaPhiForSelectedMuons;#mu #eta; #mu #phi",
+        60, -3.0, 3.0, 72, -3.14159265, 3.14159265);
+    hMCMuonEtaPhiForPassedEvents = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir,
+        "MCMuonEtaPhiForPassedEvents", "MCMuonEtaPhiForPassedEvents;MC #mu #eta; MC #mu #phi",
+        60, -3.0, 3.0, 72, -3.14159265, 3.14159265);
+
   }
 
   MuonSelection::~MuonSelection() {}
@@ -101,9 +113,6 @@ namespace HPlus {
     Data output;
     // Do analysis
     doMuonSelection(iEvent,iSetup, primaryVertex, output);
-    output.fPassedEvent = output.getSelectedMuons().size() == 0;
-    if (output.fPassedEvent)
-      increment(fMuonSelectionCounter);
     return output;
   }
 
@@ -112,6 +121,7 @@ namespace HPlus {
     edm::Handle<edm::View<pat::Muon> > myMuonHandle;
     iEvent.getByLabel(fMuonCollectionName, myMuonHandle);    
     edm::PtrVector<pat::Muon> muons = myMuonHandle->ptrVector();
+    increment(fMuonSelectionSubCountAllEvents);
 
     edm::Handle <edm::View<reco::GenParticle> > genParticles;
     iEvent.getByLabel("genParticles", genParticles);
@@ -120,7 +130,7 @@ namespace HPlus {
     float myHighestMuonPt = -1.0;
     float myHighestMuonPtBeforePtCut = -1.0;
     float myHighestMuonEta = -999.99;
-    // 
+    //
     bool bMuonPresent = false;
     bool bMuonHasGlobalOrInnerTrk = false;
     bool bMuonGlobalMuonOrTrkerMuon = false;
@@ -137,6 +147,16 @@ namespace HPlus {
     bool bMuonMatchingMCmuon = false;
     bool bMuonMatchingMCmuonFromW = false;
 
+    // Cache MC muons to speed up code (only one loop over gen particles)
+    std::vector<const reco::GenParticle*> myMCMuons;
+    if(!iEvent.isRealData()) {
+      for (size_t i=0; i < genParticles->size(); ++i){  
+        if ((*genParticles)[i].status() != 1) continue;
+        if (std::abs((*genParticles)[i].pdgId()) != 13) continue;
+        myMCMuons.push_back(&((*genParticles)[i]));
+      }
+    }
+
     // Loop over all Muons
     for(edm::PtrVector<pat::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
       // Keep track of the muons analyzed
@@ -149,7 +169,7 @@ namespace HPlus {
       // Check that track was found.
       if ( myInnerTrackRef.isNull() || myGlobalTrackRef.isNull() ) continue;
       bMuonHasGlobalOrInnerTrk = true;
-      
+
       // Muon Variables (Pt, Eta etc..)
       float myMuonPt  = (*iMuon)->pt();
       float myMuonEta = (*iMuon)->eta();
@@ -171,17 +191,17 @@ namespace HPlus {
       // from 4_4_0 onwards available check for PF muon
       if (!(*iMuon)->isPFMuon()) continue;
       bMuonSelection = true;
-      
-      // 3) NHits cuts (Trk, Pixel, Muon). There has to be at LEAST greater than 10 track hits.
-      if ( myInnerTrackNTrkHits <= 10) continue;
+
+      // 3) NHits cuts (Trk, Pixel, Muon)
+      if (!(myGlobalTrackRef->hitPattern().trackerLayersWithMeasurement() > 8)) continue;
       bMuonNTrkerHitsCut = true;
 
       if ( myInnerTrackNPixelHits < 1) continue;
       bMuonNPixelHitsCut = true;
-      
+
       // Suppress punch through and decay of muons in flight
       if (!(myGlobalTrackRef->hitPattern().numberOfValidMuonHits() > 0)) continue;
-      
+
       // std::cout << "myGlobalTrackNMuonHits = " << myGlobalTrackNMuonHits << std::endl;
       if(myMatchedSegments < 2) continue;
       bMuonNMuonlHitsCut = true;
@@ -197,14 +217,14 @@ namespace HPlus {
       bMuonImpactParCut = true;
 
       // 6) Check that muon IPz is compatible with PVz
-      // FIXME: IPz cut should be added in 2012 data, should we apply it also for 2011?
+      // remove for 2011, but enable for 2012
       //if(fMuonApplyIpz) {
-      if (primaryVertex.isNull())
-        throw cms::Exception("LogicError") << "MuonApplyIpz is true, but got null primary vertex" << std::endl;
+      //if (primaryVertex.isNull())
+      //  throw cms::Exception("LogicError") << "MuonApplyIpz is true, but got null primary vertex" << std::endl;
       double myDeltaIPz = std::fabs(myInnerTrackRef->dz(primaryVertex->position()));
       hMuonDeltaIPz->Fill(myDeltaIPz);
-      if (myDeltaIPz > 0.5) continue; // This is the z-impact parameter w.r.t to selected primary vertex
-      bMuonGoodPVCut = true;
+      //if (myDeltaIPz > 0.5) continue; // This is the z-impact parameter w.r.t to selected primary vertex
+      //bMuonGoodPVCut = true;
       //}
 
       // Fill histos with all-Muons Pt and Eta (no requirements on muons)
@@ -214,7 +234,7 @@ namespace HPlus {
       hMuonEta_InnerTrack_BeforeIsolation->Fill(myInnerTrackRef->eta());
       hMuonPt_GlobalTrack_BeforeIsolation->Fill(myGlobalTrackRef->pt());
       hMuonEta_GlobalTrack_BeforeIsolation->Fill(myGlobalTrackRef->eta());
-      
+
       // 7) Relative Isolation
       /*(around cone of DeltaR = 0.3) < 0.15. 
       float myTrackIso =  (*iMuon)->trackIso(); // isolation cones are dR=0.3 
@@ -250,7 +270,7 @@ namespace HPlus {
       hLooseMuonEta->Fill(myMuonEta);
       if (std::abs(myMuonEta) >= fMuonEtaCut) continue;
       bMuonEtaCut = true;
-      
+
       // 9) Apply pT cut 
       myHighestMuonPtBeforePtCut = std::max(myHighestMuonPtBeforePtCut, myMuonPt);
       hLooseMuonPt->Fill(myMuonPt);
@@ -268,7 +288,7 @@ namespace HPlus {
 	myHighestMuonEta = myMuonEta;
 	// std::cout << "myHighestMuonPt = " << myHighestMuonPt << ", myHighestMuonEta = " << myHighestMuonEta << std::endl;
       } //eof: if (myMuonPt > myHighestMuonPt) {
-      
+
       // Fill histos after Selection
       hMuonPt_AfterSelection->Fill(myMuonPt);
       hMuonEta_AfterSelection->Fill(myMuonEta);
@@ -276,19 +296,16 @@ namespace HPlus {
       //      hMuonEta_InnerTrack_AfterSelection->Fill(myMuonEta);
       hMuonPt_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->pt());
       hMuonEta_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->eta());
-    
+      hMuonEtaPhiForSelectedMuons->Fill((*iMuon)->eta(), (*iMuon)->phi());
 
       // Selection purity from MC
       if(!iEvent.isRealData()) {
-        for (size_t i=0; i < genParticles->size(); ++i){
-          const reco::Candidate & p = (*genParticles)[i];
-          if (p.status() != 1) continue;
-          if (abs(p.pdgId()) != 13) continue;
+        for (size_t i=0; i < myMCMuons.size(); ++i){
+          const reco::Candidate & p = *(myMCMuons[i]);
           const reco::Candidate & muon = (**iMuon);
           double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() , muon.p4() );
           if (deltaR > 0.05) continue;
 	  //	  std::cout `<< "matching part id " << id << std::endl;
-          
           bMuonMatchingMCmuon = true;
 
           std::vector<const reco::GenParticle*> mothers = getMothers(p);  
@@ -317,7 +334,7 @@ namespace HPlus {
     if(bMuonPresent) increment(fMuonSelectionSubCountMuonPresent);
     if(bMuonHasGlobalOrInnerTrk) increment(fMuonSelectionSubCountMuonHasGlobalOrInnerTrk);
     if(bMuonGlobalMuonOrTrkerMuon) increment(fMuonSelectionSubCountMuonGlobalMuonOrTrkerMuon); 
-    if(bMuonSelection) increment(fMuonSelectionSubCountMuonSelection);
+    if(bMuonSelection) increment(fMuonSelectionSubCountPFMuonSelection);
     if(bMuonNTrkerHitsCut) increment(fMuonSelectionSubCountNTrkerHitsCut);
     if(bMuonNPixelHitsCut) increment(fMuonSelectionSubCountNPixelHitsCut);
     if(bMuonNMuonlHitsCut) increment(fMuonSelectionSubCountNMuonlHitsCut);
@@ -327,8 +344,11 @@ namespace HPlus {
     if(bMuonRelIsolationCut) increment(fMuonSelectionSubCountRelIsolationCut);
     if(bMuonPtCut) increment(fMuonSelectionSubCountPtCut);
     if(bMuonEtaCut) increment(fMuonSelectionSubCountEtaCut);
+    if (!output.passedMuonVeto()) increment(fMuonSelectionSubCountVetoMuonFound);
     if(bMuonMatchingMCmuon) increment(fMuonSelectionSubCountMatchingMCmuon);
     if(bMuonMatchingMCmuonFromW) increment(fMuonSelectionSubCountMatchingMCmuonFromW);
+    if (output.foundTightMuon()) increment(fMuonSelectionSubCountTightMuonFound);
+    if (output.passedMuonVeto()) increment(fMuonSelectionSubCountMuonVetoPassed);
 
     // Store the highest Muon Pt and Eta
     output.fSelectedMuonPt  = myHighestMuonPt;
@@ -336,7 +356,35 @@ namespace HPlus {
     output.fSelectedMuonEta = myHighestMuonEta;
     hNumberOfTightMuons->Fill(output.fSelectedMuonsTight.size());
     hNumberOfLooseMuons->Fill(output.fSelectedMuonsLoose.size());
-    // std::cout << "fSelectedMuonPt = " << fSelectedMuonsPt << ", fSelectedMuonsEta = " << fSelectedMuonsEta << std::endl;   
-  }//eof: bool MuonSelection::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
-  
-}//eof: namespace HPlus {
+
+    // Look further at MC muons
+    if(!iEvent.isRealData()) {
+      for (size_t i=0; i < myMCMuons.size(); ++i) {
+        const reco::Candidate & p = (*genParticles)[i];
+        if (p.pt() < fMuonPtCut) continue;
+        // Plot eta-phi map of MC muons above pT threshold if event passed muon veto
+        if (output.passedMuonVeto())
+          hMCMuonEtaPhiForPassedEvents->Fill(p.eta(), p.phi());
+        if (std::fabs(p.eta()) < fMuonEtaCut) continue;
+        // Check if there are MC muons in the acceptance coming from b or c quarks
+        const reco::Candidate* pmother = p.mother();
+        while (pmother) {
+          if (std::abs(pmother->pdgId()) == 4)
+            output.fHasMuonFromBjetStatus = true;
+          else if (std::abs(pmother->pdgId()) == 5)
+            output.fHasMuonFromCjetStatus = true;
+          // move to next
+          pmother = pmother->mother();
+        }
+      }
+    }
+
+    if (output.passedMuonVeto()) {
+      if (output.eventContainsMuonFromCJet())
+        increment(fMuonSelectionSubCountPassedVetoAndMuonFromCjet);
+      if (output.eventContainsMuonFromBJet())
+        increment(fMuonSelectionSubCountPassedVetoAndMuonFromBjet);
+    }
+
+  }
+}
