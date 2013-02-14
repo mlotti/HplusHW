@@ -1,4 +1,4 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
@@ -23,13 +23,13 @@ namespace {
 }
 
 namespace HPlus {
-  TriggerEfficiencyScaleFactor::Data::Data():
+  TauTriggerEfficiencyScaleFactor::Data::Data():
     fWeight(1.0),
     fWeightAbsUnc(0.0),
     fWeightRelUnc(0.0) {}
-  TriggerEfficiencyScaleFactor::Data::~Data() {}
+  TauTriggerEfficiencyScaleFactor::Data::~Data() {}
   
-  TriggerEfficiencyScaleFactor::TriggerEfficiencyScaleFactor(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper):
+  TauTriggerEfficiencyScaleFactor::TauTriggerEfficiencyScaleFactor(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper):
     fCurrentRunData(0) {
 
     std::string mode = iConfig.getUntrackedParameter<std::string>("mode");
@@ -40,7 +40,7 @@ namespace HPlus {
     else if(mode == "disabled")
       fMode = kDisabled;
     else
-      throw cms::Exception("Configuration") << "TriggerEfficiencyScaleFactor: Unsupported value for parameter 'mode' " << mode << ", should be 'efficiency', 'scaleFactor', or 'disabled'" << std::endl;
+      throw cms::Exception("Configuration") << "TauTriggerEfficiencyScaleFactor: Unsupported value for parameter 'mode' " << mode << ", should be 'efficiency', 'scaleFactor', or 'disabled'" << std::endl;
 
     if(fMode == kDisabled)
       return;
@@ -52,7 +52,7 @@ namespace HPlus {
     std::string mcSelect = iConfig.getParameter<std::string>("mcSelect");
 
     if(dataSelects.empty()) {
-      throw cms::Exception("Configuration") << "TriggerEfficiencyScaleFactor: Must select at least one data run period in dataSelect" << std::endl;
+      throw cms::Exception("Configuration") << "TauTriggerEfficiencyScaleFactor: Must select at least one data run period in dataSelect" << std::endl;
     }
 
     // Get MC efficiencies for the given MC era
@@ -61,7 +61,7 @@ namespace HPlus {
     for(size_t i=0; i<mcBins.size(); ++i) {
       double bin = mcBins[i].getParameter<double>("pt");
       if(!fPtBinLowEdges.empty() && bin <= fPtBinLowEdges.back())
-        throw cms::Exception("Configuration") << "TriggerEfficiencyScaleFactor:  Bins must be in an ascending order of lowEdges (new "
+        throw cms::Exception("Configuration") << "TauTriggerEfficiencyScaleFactor:  Bins must be in an ascending order of lowEdges (new "
                                               << bin << " previous " << fPtBinLowEdges.back() << ")"
                                               << " in mcParameters." << mcSelect
                                               << std::endl;
@@ -80,7 +80,7 @@ namespace HPlus {
 
       std::vector<edm::ParameterSet> dataBins = pset.getParameter<std::vector<edm::ParameterSet> >("bins");
       if(dataBins.size() != fPtBinLowEdges.size())
-        throw cms::Exception("Configuration") << "TriggerEfficiencyScaleFactor: dataParameters." << *iSelect << " must have same number of bins as mcParameters." << *iSelect << ", now data has " << dataBins.size() << " while mc has " << fPtBinLowEdges.size() << std::endl;
+        throw cms::Exception("Configuration") << "TauTriggerEfficiencyScaleFactor: dataParameters." << *iSelect << " must have same number of bins as mcParameters." << *iSelect << ", now data has " << dataBins.size() << " while mc has " << fPtBinLowEdges.size() << std::endl;
 
       DataValue dv;
       dv.firstRun = pset.getParameter<unsigned>("firstRun");
@@ -92,7 +92,7 @@ namespace HPlus {
         double bin = dataBins[i].getParameter<double>("pt");
 
         if(!doubleEqual(bin, fPtBinLowEdges[i]))
-          throw cms::Exception("Configuration") << "TriggerEfficiencyScaleFactor: Bin " << i << " in dataParameters." << *iSelect << " must have same low edge as mcParameters" << *iSelect << ", now data hs " << bin << " while mc has " << fPtBinLowEdges[i] << std::endl;
+          throw cms::Exception("Configuration") << "TauTriggerEfficiencyScaleFactor: Bin " << i << " in dataParameters." << *iSelect << " must have same low edge as mcParameters" << *iSelect << ", now data hs " << bin << " while mc has " << fPtBinLowEdges[i] << std::endl;
 
         dv.values.push_back(dataBins[i].getParameter<double>("efficiency"));
         dv.uncertainties.push_back(dataBins[i].getParameter<double>("uncertainty"));
@@ -163,22 +163,22 @@ namespace HPlus {
       }
     }
   }
-  TriggerEfficiencyScaleFactor::~TriggerEfficiencyScaleFactor() {}
+  TauTriggerEfficiencyScaleFactor::~TauTriggerEfficiencyScaleFactor() {}
 
-  size_t TriggerEfficiencyScaleFactor::index(const pat::Tau& tau) const {
+  size_t TauTriggerEfficiencyScaleFactor::index(const pat::Tau& tau) const {
     return index(tau.pt());
   }
-  size_t TriggerEfficiencyScaleFactor::index(double pt) const {
+  size_t TauTriggerEfficiencyScaleFactor::index(double pt) const {
     // find the first bin for which fPtBinLowEdges[bin] >= pt
     std::vector<double>::const_iterator found = std::lower_bound(fPtBinLowEdges.begin(), fPtBinLowEdges.end(), pt);
     if(found == fPtBinLowEdges.begin())
-      throw cms::Exception("LogicError") << "TriggerEfficiencyScaleFactor: Got tau pt " << pt << " which is less than the first bin in the given efficiencies " << fPtBinLowEdges.front();
+      throw cms::Exception("LogicError") << "TauTriggerEfficiencyScaleFactor: Got tau pt " << pt << " which is less than the first bin in the given efficiencies " << fPtBinLowEdges.front();
     // pick the previous bin
     --found;
     return found-fPtBinLowEdges.begin();
   }
 
-  void TriggerEfficiencyScaleFactor::setRun(unsigned run) {
+  void TauTriggerEfficiencyScaleFactor::setRun(unsigned run) {
     if(fMode == kDisabled)
       return;
 
@@ -196,82 +196,82 @@ namespace HPlus {
       ss << fDataValues[i].firstRun << "-" << fDataValues[i].lastRun << " ";
     }
 
-    throw cms::Exception("LogicError") << "TriggerEfficiencyScaleFactor: No data efficiency definitions found for run " << run << ", specified run regions are " << ss.str() << std::endl;
+    throw cms::Exception("LogicError") << "TauTriggerEfficiencyScaleFactor: No data efficiency definitions found for run " << run << ", specified run regions are " << ss.str() << std::endl;
   }
 
-  double TriggerEfficiencyScaleFactor::dataEfficiency(const pat::Tau& tau) const {
+  double TauTriggerEfficiencyScaleFactor::dataEfficiency(const pat::Tau& tau) const {
     return dataEfficiency(index(tau));
   }
-  double TriggerEfficiencyScaleFactor::dataEfficiency(size_t i) const {
-    if(!fCurrentRunData) throw cms::Exception("Assert") << "TriggerEfficiencyScaleFactor: Must call TriggerEfficiencyScaleFactor::setRun() before dataEfficiency()" << std::endl;
+  double TauTriggerEfficiencyScaleFactor::dataEfficiency(size_t i) const {
+    if(!fCurrentRunData) throw cms::Exception("Assert") << "TauTriggerEfficiencyScaleFactor: Must call TriggerEfficiencyScaleFactor::setRun() before dataEfficiency()" << std::endl;
     return fCurrentRunData->values[i];
   }
-  double TriggerEfficiencyScaleFactor::dataEfficiencyRelativeUncertainty(const pat::Tau& tau) const {
-    if(!fCurrentRunData) throw cms::Exception("Assert") << "TriggerEfficiencyScaleFactor: Must call TriggerEfficiencyScaleFactor::setRun() before dataEfficiencyRelativeUncertainty()" << std::endl;
+  double TauTriggerEfficiencyScaleFactor::dataEfficiencyRelativeUncertainty(const pat::Tau& tau) const {
+    if(!fCurrentRunData) throw cms::Exception("Assert") << "TauTriggerEfficiencyScaleFactor: Must call TriggerEfficiencyScaleFactor::setRun() before dataEfficiencyRelativeUncertainty()" << std::endl;
     size_t i = index(tau);
     return fCurrentRunData->uncertainties[i] / fCurrentRunData->values[i];
   }
-  double TriggerEfficiencyScaleFactor::dataEfficiencyAbsoluteUncertainty(const pat::Tau& tau) const {
+  double TauTriggerEfficiencyScaleFactor::dataEfficiencyAbsoluteUncertainty(const pat::Tau& tau) const {
     return dataEfficiencyAbsoluteUncertainty(index(tau.pt()));
   }
-  double TriggerEfficiencyScaleFactor::dataEfficiencyAbsoluteUncertainty(size_t i) const {
-    if(!fCurrentRunData) throw cms::Exception("Assert") << "TriggerEfficiencyScaleFactor: Must call TriggerEfficiencyScaleFactor::setRun() before dataEfficiencyAbsoluteUncertainty()" << std::endl;
+  double TauTriggerEfficiencyScaleFactor::dataEfficiencyAbsoluteUncertainty(size_t i) const {
+    if(!fCurrentRunData) throw cms::Exception("Assert") << "TauTriggerEfficiencyScaleFactor: Must call TriggerEfficiencyScaleFactor::setRun() before dataEfficiencyAbsoluteUncertainty()" << std::endl;
     return fCurrentRunData->uncertainties[i];
   }
 
-  double TriggerEfficiencyScaleFactor::dataAverageEfficiency(const pat::Tau& tau) const {
+  double TauTriggerEfficiencyScaleFactor::dataAverageEfficiency(const pat::Tau& tau) const {
     return dataAverageEfficiency(index(tau));
   }
-  double TriggerEfficiencyScaleFactor::dataAverageEfficiency(size_t i) const {
+  double TauTriggerEfficiencyScaleFactor::dataAverageEfficiency(size_t i) const {
     return fEffDataAverageValues[i];
   }
-  double TriggerEfficiencyScaleFactor::dataAverageEfficiencyRelativeUncertainty(const pat::Tau& tau) const {
+  double TauTriggerEfficiencyScaleFactor::dataAverageEfficiencyRelativeUncertainty(const pat::Tau& tau) const {
     size_t i = index(tau);
     return fEffDataAverageUncertainties[i] / fEffDataAverageValues[i];
   }
-  double TriggerEfficiencyScaleFactor::dataAverageEfficiencyAbsoluteUncertainty(const pat::Tau& tau) const {
+  double TauTriggerEfficiencyScaleFactor::dataAverageEfficiencyAbsoluteUncertainty(const pat::Tau& tau) const {
     return dataAverageEfficiencyAbsoluteUncertainty(index(tau.pt()));
   }
-  double TriggerEfficiencyScaleFactor::dataAverageEfficiencyAbsoluteUncertainty(size_t i) const {
+  double TauTriggerEfficiencyScaleFactor::dataAverageEfficiencyAbsoluteUncertainty(size_t i) const {
     return fEffDataAverageUncertainties[i];
   }
 
 
-  double TriggerEfficiencyScaleFactor::mcEfficiency(const pat::Tau& tau) const {
+  double TauTriggerEfficiencyScaleFactor::mcEfficiency(const pat::Tau& tau) const {
     return mcEfficiency(index(tau));
   }
-  double TriggerEfficiencyScaleFactor::mcEfficiency(size_t i) const {
+  double TauTriggerEfficiencyScaleFactor::mcEfficiency(size_t i) const {
     return fEffMCValues[i];
   }
-  double TriggerEfficiencyScaleFactor::mcEfficiencyRelativeUncertainty(const pat::Tau& tau) const {
+  double TauTriggerEfficiencyScaleFactor::mcEfficiencyRelativeUncertainty(const pat::Tau& tau) const {
     size_t i = index(tau);
     return fEffMCUncertainties[i] / fEffMCValues[i];
   }
-  double TriggerEfficiencyScaleFactor::mcEfficiencyAbsoluteUncertainty(const pat::Tau& tau) const {
+  double TauTriggerEfficiencyScaleFactor::mcEfficiencyAbsoluteUncertainty(const pat::Tau& tau) const {
     return mcEfficiencyAbsoluteUncertainty(index(tau.pt()));
   }
-  double TriggerEfficiencyScaleFactor::mcEfficiencyAbsoluteUncertainty(size_t i) const {
+  double TauTriggerEfficiencyScaleFactor::mcEfficiencyAbsoluteUncertainty(size_t i) const {
     return fEffMCUncertainties[i];
   }
 
-  double TriggerEfficiencyScaleFactor::scaleFactor(const pat::Tau& tau) const {
+  double TauTriggerEfficiencyScaleFactor::scaleFactor(const pat::Tau& tau) const {
     return scaleFactor(index(tau));
   }
-  double TriggerEfficiencyScaleFactor::scaleFactor(size_t i) const {
+  double TauTriggerEfficiencyScaleFactor::scaleFactor(size_t i) const {
     return fScaleValues[i];
   }
-  double TriggerEfficiencyScaleFactor::scaleFactorRelativeUncertainty(const pat::Tau& tau) const {
+  double TauTriggerEfficiencyScaleFactor::scaleFactorRelativeUncertainty(const pat::Tau& tau) const {
     size_t i = index(tau);
     return fScaleUncertainties[i] / fScaleValues[i];
   }
-  double TriggerEfficiencyScaleFactor::scaleFactorAbsoluteUncertainty(const pat::Tau& tau) const {
+  double TauTriggerEfficiencyScaleFactor::scaleFactorAbsoluteUncertainty(const pat::Tau& tau) const {
     return scaleFactorAbsoluteUncertainty(index(tau));
   }
-  double TriggerEfficiencyScaleFactor::scaleFactorAbsoluteUncertainty(size_t i) const {
+  double TauTriggerEfficiencyScaleFactor::scaleFactorAbsoluteUncertainty(size_t i) const {
     return fScaleUncertainties[i];
   }
 
-  TriggerEfficiencyScaleFactor::Data TriggerEfficiencyScaleFactor::applyEventWeight(const pat::Tau& tau, bool isData, EventWeight& eventWeight) {
+  TauTriggerEfficiencyScaleFactor::Data TauTriggerEfficiencyScaleFactor::applyEventWeight(const pat::Tau& tau, bool isData, EventWeight& eventWeight) {
     Data output;
 
     if(fMode == kScaleFactor) {
@@ -284,7 +284,7 @@ namespace HPlus {
     else if(fMode == kEfficiency) {
       if(isData) {
         if(!fCurrentRunData)
-          throw cms::Exception("LogicError") << "TriggerEfficiencyScaleFactor: With efficiency mode and data input, must call setRun() before applyEventWeight()" << std::endl;
+          throw cms::Exception("LogicError") << "TauTriggerEfficiencyScaleFactor: With efficiency mode and data input, must call setRun() before applyEventWeight()" << std::endl;
         output.fWeight = dataEfficiency(tau);
         output.fWeightAbsUnc = dataEfficiencyAbsoluteUncertainty(tau);
         output.fWeightRelUnc = dataEfficiencyRelativeUncertainty(tau);

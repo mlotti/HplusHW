@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_TriggerEfficiencyScaleFactor_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_TriggerEfficiencyScaleFactor_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_TauTriggerEfficiencyScaleFactor_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_TauTriggerEfficiencyScaleFactor_h
 
 #include<vector>
 
@@ -16,7 +16,7 @@ namespace HPlus {
   class WrappedTH1;
   class EventWeight;
 
-  class TriggerEfficiencyScaleFactor {
+  class TauTriggerEfficiencyScaleFactor {
     enum Mode {
       kEfficiency,
       kScaleFactor,
@@ -39,7 +39,7 @@ namespace HPlus {
         return fWeightRelUnc;
       }
 
-      friend class TriggerEfficiencyScaleFactor;
+      friend class TauTriggerEfficiencyScaleFactor;
 
     private:
       double fWeight;
@@ -48,8 +48,8 @@ namespace HPlus {
 
     };
 
-    TriggerEfficiencyScaleFactor(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper);
-    ~TriggerEfficiencyScaleFactor();
+    TauTriggerEfficiencyScaleFactor(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper);
+    ~TauTriggerEfficiencyScaleFactor();
 
     void setRun(unsigned run);
 
