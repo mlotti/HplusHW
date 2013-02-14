@@ -2,7 +2,7 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_TauTriggerEfficiencyScaleFactor_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_TauTriggerEfficiencyScaleFactor_h
 
-#include<vector>
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BinnedEfficiencyScaleFactor.h"
 
 namespace edm {
   class ParameterSet;
@@ -17,41 +17,13 @@ namespace HPlus {
   class EventWeight;
 
   class TauTriggerEfficiencyScaleFactor {
-    enum Mode {
-      kEfficiency,
-      kScaleFactor,
-      kDisabled
-    };
-
   public:
-    class Data {
-    public:
-      Data();
-      ~Data();
-
-      const double getEventWeight() const {
-        return fWeight;
-      }
-      const double getEventWeightAbsoluteUncertainty() const {
-        return fWeightAbsUnc;
-      }
-      const double getEventWeightRelativeUncertainty() const {
-        return fWeightRelUnc;
-      }
-
-      friend class TauTriggerEfficiencyScaleFactor;
-
-    private:
-      double fWeight;
-      double fWeightAbsUnc;
-      double fWeightRelUnc;
-
-    };
+    typedef BinnedEfficiencyScaleFactor::Data Data;
 
     TauTriggerEfficiencyScaleFactor(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper);
     ~TauTriggerEfficiencyScaleFactor();
 
-    void setRun(unsigned run);
+    void setRun(unsigned run) { fBinned.setRun(run); }
 
     double dataEfficiency(const pat::Tau& tau) const;
     double dataEfficiencyRelativeUncertainty(const pat::Tau& tau) const;
@@ -72,47 +44,11 @@ namespace HPlus {
     Data applyEventWeight(const pat::Tau& tau, bool isData, HPlus::EventWeight& eventWeight);
 
   private:
-    struct DataValue {
-      unsigned firstRun;
-      unsigned lastRun;
-      double luminosity;
-      std::vector<double> values;
-      std::vector<double> uncertainties;
-    };
-
-    size_t index(const pat::Tau& tau) const;
-    size_t index(double pt) const;
-
-    double dataEfficiency(size_t i) const;
-    double dataEfficiencyAbsoluteUncertainty(size_t i) const;
-
-    double dataAverageEfficiency(size_t i) const;
-    double dataAverageEfficiencyAbsoluteUncertainty(size_t i) const;
-
-    double mcEfficiency(size_t i) const;
-    double mcEfficiencyAbsoluteUncertainty(size_t i) const;
-
-    double scaleFactor(size_t i) const;
-    double scaleFactorAbsoluteUncertainty(size_t i) const;
-
-    std::vector<double> fPtBinLowEdges;
-    std::vector<DataValue> fDataValues;
-
-    std::vector<double> fEffDataAverageValues;
-    std::vector<double> fEffDataAverageUncertainties;
-    std::vector<double> fEffMCValues;
-    std::vector<double> fEffMCUncertainties;
-
-    std::vector<double> fScaleValues;
-    std::vector<double> fScaleUncertainties;
-
-    const DataValue *fCurrentRunData;
+    BinnedEfficiencyScaleFactor fBinned;
 
     WrappedTH1 *hScaleFactor;
     WrappedTH1 *hScaleFactorRelativeUncertainty;
     WrappedTH1 *hScaleFactorAbsoluteUncertainty;
-
-    Mode fMode;
   };
 }
 
