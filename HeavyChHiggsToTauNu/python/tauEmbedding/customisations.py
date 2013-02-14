@@ -953,6 +953,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
         eventCounter = param.eventCounter.clone(),
         tauSelection = param.tauSelection.clone(),
         vertexSrc = param.primaryVertexSelection.src,
+        histogramAmbientLevel = cms.untracked.string("Debug"),
     )
     genTauSelectedName = prefix+"TauSelected"
     setattr(process, genTauSelectedName, genTauSelected)

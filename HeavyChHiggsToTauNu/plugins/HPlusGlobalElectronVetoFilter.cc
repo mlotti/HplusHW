@@ -37,7 +37,7 @@ class HPlusGlobalElectronVetoFilter: public edm::EDFilter {
 HPlusGlobalElectronVetoFilter::HPlusGlobalElectronVetoFilter(const edm::ParameterSet& iConfig):
   fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc")),
   eventWeight(iConfig),
-  histoWrapper(eventWeight, "Debug"),
+  histoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
   eventCounter(iConfig, eventWeight, histoWrapper),
   fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), fVertexSrc, eventCounter, histoWrapper),
   fFilter(iConfig.getParameter<bool>("filter"))

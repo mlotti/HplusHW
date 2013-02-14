@@ -4,6 +4,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 hPlusGlobalElectronVetoFilter = cms.EDFilter("HPlusGlobalElectronVetoFilter",
 	GlobalElectronVeto = param.GlobalElectronVeto,
         vertexSrc = cms.InputTag(param.primaryVertexSelection.src.value()),
+        histogramAmbientLevel = cms.untracked.string("Debug"),
         filter = cms.bool(True),
         eventCounter = param.eventCounter.clone(),
 )

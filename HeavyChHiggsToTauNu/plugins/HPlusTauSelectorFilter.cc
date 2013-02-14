@@ -32,7 +32,7 @@ class HPlusTauSelectorFilterT: public edm::EDFilter {
 
   explicit HPlusTauSelectorFilterT(const edm::ParameterSet& iConfig):
     eventWeight(iConfig),
-    histoWrapper(eventWeight, "Debug"),
+    histoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
     eventCounter(iConfig, eventWeight, histoWrapper),
     fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, histoWrapper),
     fFilter(iConfig.getParameter<bool>("filter")),

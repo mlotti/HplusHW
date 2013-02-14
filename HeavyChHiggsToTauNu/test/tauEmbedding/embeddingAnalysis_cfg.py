@@ -242,6 +242,7 @@ taus = cms.InputTag(param.tauSelectionHPSMediumTauBased.src.value())
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
 ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
+    histogramAmbientLevel = cms.untracked.string("Vital"),
     selectedPrimaryVertexSrc = cms.InputTag("selectedPrimaryVertex"),
     goodPrimaryVertexSrc = cms.InputTag("goodPrimaryVertices"),
 

@@ -21,7 +21,7 @@ class HPlusPATTauMostLikelyIdentifiedSelector: public edm::EDProducer {
 public:
   HPlusPATTauMostLikelyIdentifiedSelector(const edm::ParameterSet& iConfig):
     eventWeight(iConfig),
-    histoWrapper(eventWeight, "Debug"),
+    histoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
     eventCounter(iConfig, eventWeight, histoWrapper),
     fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, histoWrapper),
     fTauSrc(fOneProngTauSelection.getSrc()),

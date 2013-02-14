@@ -555,7 +555,7 @@ def setDataTriggerEfficiency(dataVersion, era, pset=triggerEfficiencyScaleFactor
 # See test/PUtools for tools to generate distributions and links to twiki
 # 
 
-def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, psetReader=vertexWeightReader, era="Run2011A", suffix=""):
+def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, psetReader=vertexWeightReader, era="Run2011A", suffix="", histogramAmbientLevel="Informative"):
     if dataVersion.isData():
         return
     if dataVersion.isS6():
@@ -586,6 +586,7 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
                                       vertexSrc = tmp.vertexSrc,
                                       puSummarySrc = tmp.puSummarySrc,
                                       enabled = tmp.enabled,
+                                      histogramAmbientLevel = cms.untracked.string(histogramAmbientLevel),
                                       dataPUdistribution = tmp.dataPUdistribution,
                                       dataPUdistributionLabel = tmp.dataPUdistributionLabel,
                                       mcPUdistribution = tmp.mcPUdistribution,
@@ -601,7 +602,7 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
     psetReader.PUVertexWeightSrc = name
     return name
 
-def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, psetReader, suffix):
+def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, psetReader, suffix, histogramAmbientLevel="Informative"):
     if dataVersion.isData():
         return
     if dataVersion.isS6():
@@ -626,6 +627,7 @@ def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, pset
                                       vertexSrc = pset.vertexSrc,
                                       puSummarySrc = pset.puSummarySrc,
                                       enabled = pset.enabled,
+                                      histogramAmbientLevel = cms.untracked.string(histogramAmbientLevel),
                                       dataPUdistribution = pset.dataPUdistribution,
                                       dataPUdistributionLabel = pset.dataPUdistributionLabel,
                                       mcPUdistribution = pset.mcPUdistribution,

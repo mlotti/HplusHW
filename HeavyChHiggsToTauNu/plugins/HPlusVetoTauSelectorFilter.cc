@@ -43,7 +43,7 @@ class HPlusVetoTauPtrSelectorFilter: public edm::EDFilter {
 
 HPlusVetoTauPtrSelectorFilter::HPlusVetoTauPtrSelectorFilter(const edm::ParameterSet& iConfig):
   eventWeight(iConfig),
-  histoWrapper(eventWeight, "Debug"),
+  histoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
   eventCounter(iConfig, eventWeight, histoWrapper),
   fVetoTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("vetoTauSelection"),
                     iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"),

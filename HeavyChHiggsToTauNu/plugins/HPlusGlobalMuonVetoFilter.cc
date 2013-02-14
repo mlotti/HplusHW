@@ -35,7 +35,7 @@ class HPlusGlobalMuonVetoFilter: public edm::EDFilter {
 
 HPlusGlobalMuonVetoFilter::HPlusGlobalMuonVetoFilter(const edm::ParameterSet& iConfig):
   eventWeight(iConfig),
-  histoWrapper(eventWeight, "Debug"),
+  histoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
   eventCounter(iConfig, eventWeight, histoWrapper),
   fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, histoWrapper),
   fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc")),
