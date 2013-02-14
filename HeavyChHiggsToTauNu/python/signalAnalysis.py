@@ -37,7 +37,7 @@ def createEDFilter(param):
         EvtTopology = param.EvtTopology.clone(),
         prescaleWeightReader = param.prescaleWeightReader.clone(),
         vertexWeight = param.vertexWeight.clone(),
-        vertexWeightReader = param.vertexWeightReader.clone(),
+        pileupWeightReader = param.pileupWeightReader.clone(),
         wjetsWeightReader = param.wjetsWeightReader.clone(),
         GenParticleAnalysis = param.GenParticleAnalysis.clone(),
         embeddingMuonEfficiency = param.embeddingMuonEfficiency.clone(),

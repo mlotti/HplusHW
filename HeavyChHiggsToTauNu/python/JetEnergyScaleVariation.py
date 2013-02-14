@@ -98,7 +98,7 @@ def addTESVariation(process, prefix, name, prototype, direction, postfix="", his
     # For tau variation for type I MET, we need the selected tau only
     m = TauFilter.hPlusTauSelectorFilter.clone(
         tauSelection = prototype.tauSelection.clone(),
-        vertexSrc = prototype.primaryVertexSelection.src.value(),
+        vertexSrc = prototype.primaryVertexSelection.selectedSrc.value(),
         filter = False,
         histogramAmbientLevel = histogramAmbientLevel
     )

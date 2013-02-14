@@ -141,7 +141,7 @@ if applyTriggerScaleFactor and dataVersion.isMC():
 # Set the data scenario for vertex/pileup weighting
 if len(options.puWeightEra) > 0:
     puweight = options.puWeightEra
-param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, pset=param.vertexWeight, psetReader=param.vertexWeightReader, era=puweight) # Reweight by true PU distribution
+param.setPileupWeight(dataVersion, process=process, commonSequence=process.commonSequence, pset=param.vertexWeight, psetReader=param.pileupWeightReader, era=puweight) # Reweight by true PU distribution
 param.setDataTriggerEfficiency(dataVersion, era=puweight)
 print "PU weight era =",puweight
 
@@ -175,7 +175,7 @@ process.QCDMeasurement = cms.EDFilter("HPlusQCDMeasurementBasicFilter",
     forwardJetVeto = param.forwardJetVeto.clone(),
     EvtTopology = param.EvtTopology.clone(),
     vertexWeight = param.vertexWeight.clone(),
-    vertexWeightReader = param.vertexWeightReader.clone(),
+    pileupWeightReader = param.pileupWeightReader.clone(),
     GenParticleAnalysis = param.GenParticleAnalysis.clone(),
     Tree = param.tree.clone(),
     eventCounter = param.eventCounter.clone(),
@@ -303,14 +303,14 @@ def addPUWeightVariation(name):
     return
     module = getattr(process, name).clone()
     module.Tree.fill = False
-    param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, era=puweight, suffix="up")
+    param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, era=puweight, suffix="up")
     addAnalysis(process, name+"PUWeightPlus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
     # Down variation
     module = module.clone()
-    param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, era=puweight, suffix="down")
+    param.setPileupWeight(dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, era=puweight, suffix="down")
     addAnalysis(process, name+"PUWeightMinus", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,

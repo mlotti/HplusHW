@@ -281,7 +281,7 @@ class ConfigBuilder:
                     if self.applyTriggerScaleFactor:
                         param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.triggerEfficiencyScaleFactor)
                     if self.applyPUReweight:
-                        param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.vertexWeightReader, era=dataEra)
+                        param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.pileupWeightReader, era=dataEra)
                         if self.options.wjetsWeighting != 0:
                             mod.wjetsWeightReader.weightSrc = "wjetsWeight"+dataEra
                             mod.wjetsWeightReader.enabled = True
@@ -777,7 +777,7 @@ class ConfigBuilder:
         if self.options.wjetsWeighting != 0:
             addWJetsWeight(module, "up")
 
-        param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, suffix="up")
+        param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, suffix="up")
         path = cms.Path(process.commonSequence * module)
         setattr(process, name+"PUWeightPlus", module)
         setattr(process, name+"PUWeightPlusPath", path)
@@ -792,7 +792,7 @@ class ConfigBuilder:
         if self.options.wjetsWeighting != 0:
             addWJetsWeight(module, "down")
 
-        param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, suffix="down")
+        param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, suffix="down")
         path = cms.Path(process.commonSequence * module)
         setattr(process, name+"PUWeightMinus", module)
         setattr(process, name+"PUWeightMinusPath", path)

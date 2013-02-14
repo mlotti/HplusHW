@@ -6,7 +6,7 @@ hPlusTauPtrSelectorFilter = cms.EDFilter("HPlusTauPtrSelectorFilter",
         histogramAmbientLevel = cms.untracked.string("Debug"),
         filter = cms.bool(True),
         eventCounter = param.eventCounter.clone(),
-        vertexSrc = cms.InputTag(param.primaryVertexSelection.src.value()),
+        vertexSrc = cms.InputTag(param.primaryVertexSelection.selectedSrc.value()),
 )
 
 hPlusTauSelectorFilter = cms.EDFilter("HPlusTauSelectorFilter",
@@ -14,5 +14,5 @@ hPlusTauSelectorFilter = cms.EDFilter("HPlusTauSelectorFilter",
         histogramAmbientLevel = cms.untracked.string("Debug"),
         filter = cms.bool(True),
         eventCounter = param.eventCounter.clone(),
-        vertexSrc = cms.InputTag(param.primaryVertexSelection.src.value()),
+        vertexSrc = cms.InputTag(param.primaryVertexSelection.selectedSrc.value()),
 )

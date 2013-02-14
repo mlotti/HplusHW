@@ -952,7 +952,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     genTauSelected = cms.EDProducer("HPlusPATTauMostLikelyIdentifiedSelector",
         eventCounter = param.eventCounter.clone(),
         tauSelection = param.tauSelection.clone(),
-        vertexSrc = param.primaryVertexSelection.src,
+        vertexSrc = param.primaryVertexSelection.selectedSrc,
         histogramAmbientLevel = cms.untracked.string("Debug"),
     )
     genTauSelectedName = prefix+"TauSelected"

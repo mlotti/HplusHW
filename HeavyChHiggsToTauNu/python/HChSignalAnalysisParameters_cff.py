@@ -460,10 +460,9 @@ vertexWeight = cms.untracked.PSet(
     enabled = cms.bool(False),
 )
 
-vertexWeightReader = cms.untracked.PSet(
-    PUVertexWeightSrc = cms.InputTag("PUVertexWeightNominal"),
-    vertexSrc = vertexWeight.vertexSrc,
-    enabled = cms.bool(False)
+pileupWeightReader = cms.untracked.PSet(
+    weightSrc = cms.InputTag("PUVertexWeightNominal"),
+    enabled = cms.bool(False),
 )
 
 # Default parameters for heavy H+ analysis
@@ -556,7 +555,7 @@ def setDataTriggerEfficiency(dataVersion, era, pset=triggerEfficiencyScaleFactor
 # See test/PUtools for tools to generate distributions and links to twiki
 # 
 
-def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, psetReader=vertexWeightReader, era="Run2011A", suffix="", histogramAmbientLevel="Informative"):
+def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, psetReader=pileupWeightReader, era="Run2011A", suffix="", histogramAmbientLevel="Informative"):
     if dataVersion.isData():
         return
     if dataVersion.isS6():
@@ -600,7 +599,7 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
     name = "PUWeightProducer"+era+suffix
     setattr(process, name, PUWeightProducer)
     commonSequence *= PUWeightProducer
-    psetReader.PUVertexWeightSrc = name
+    psetReader.weightSrc = name
     return name
 
 def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, psetReader, suffix, histogramAmbientLevel="Informative"):
@@ -638,10 +637,10 @@ def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, pset
                                       weightDistributionEnable = pset.weightDistributionEnable,
                                       alias = cms.string("PUVertexWeight"+suffix)
     )
-    name = psetReader.PUVertexWeightSrc.value()+suffix
+    name = psetReader.weightSrc.value()+suffix
     setattr(process, name, PUWeightProducer)
     commonSequence *= PUWeightProducer
-    psetReader.PUVertexWeightSrc = name
+    psetReader.weightSrc = name
 
 # Tau selection
 def forEachTauSelection(function):
