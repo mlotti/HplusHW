@@ -128,6 +128,26 @@ backgroundCrossSections = CrossSectionList(
             "7": 9611.0, # [1]
             "8": 11050.0, # [1]
             }),
+    CrossSection("DYToTauTau_M_20_", {
+            "7": 4998, # [4], NNLO
+            "8": 5745.25, # [9], NNLO
+            }),
+    CrossSection("DYToTauTau_M_100to200", {
+            "7": 0, # []
+            "8": 34.92, # [1]
+            }),
+    CrossSection("DYToTauTau_M_200to400", {
+            "7": 0, # []      
+            "8": 1.181, # [1]
+            }),
+    CrossSection("DYToTauTau_M_400to800", {
+            "7": 0, # []      
+            "8": 0.08699, # [1]
+            }),
+    CrossSection("DYToTauTau_M_800", {
+            "7": 0, # []      
+            "8": 0.004527, # [1]
+            }),
     CrossSection("T_t-channel", {
             "7": 41.92, # [5,6]
             "8": 56.4, # [8]
