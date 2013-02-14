@@ -418,10 +418,15 @@ topWithMHSelection = cms.untracked.PSet(
 tree = cms.untracked.PSet(
     fill = cms.untracked.bool(True),
     fillJetEnergyFractions = cms.untracked.bool(True),
+    fillNonIsoLeptonVars = cms.untracked.bool(False),
     tauIDs = cms.untracked.vstring(
-        "byTightIsolation",
-        "byMediumIsolation",
-        "byLooseIsolation",
+        "byTightCombinedIsolationDeltaBetaCorr",
+        "byMediumCombinedIsolationDeltaBetaCorr",
+        "byLooseCombinedIsolationDeltaBetaCorr",
+        #"byTightIsolation",
+        #"byMediumIsolation",
+        #"byLooseIsolation",
+        "againstElectronMVA",
         "againstElectronLoose",
         "againstElectronMedium",
         "againstElectronTight",
