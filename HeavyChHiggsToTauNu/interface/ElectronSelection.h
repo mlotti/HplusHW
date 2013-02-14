@@ -17,8 +17,8 @@
 #include <MagneticField/Engine/interface/MagneticField.h>
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackExtra.h"
-#include "DataFormats/PatCandidates/interface/Muon.h"
-#include "DataFormats/MuonReco/interface/MuonSelectors.h" 
+//#include "DataFormats/PatCandidates/interface/Muon.h"
+//#include "DataFormats/MuonReco/interface/MuonSelectors.h" 
 #include "EGamma/EGammaAnalysisTools/interface/EGammaCutBasedEleId.h"
 
 namespace edm {
@@ -47,24 +47,37 @@ namespace HPlus {
       Data();
       ~Data();
 
-      const bool passedEvent() const { return fPassedEvent; }
+      const bool passedEvent() const { return passedElectronVeto(); }
+      const bool passedElectronVeto() const { return (fSelectedElectronsVeto.size() == 0); }
       const float getSelectedElectronPt() const { return fSelectedElectronPt; }
       const float getSelectedElectronEta() const { return fSelectedElectronEta; }
       const float getSelectedElectronPtBeforePtCut() const { return fSelectedElectronPtBeforePtCut; }
-      const edm::PtrVector<pat::Electron>& getSelectedElectrons() { return fSelectedElectrons; }
-      const edm::PtrVector<pat::Electron>& getSelectedElectronsBeforePtAndEtaCuts() { return fSelectedElectronsBeforePtAndEtaCuts; }
+      const bool foundTightElectron() const { return (fSelectedElectronsTight.size() > 0); }
+      const bool foundMediumElectron() const { return (fSelectedElectronsMedium.size() > 0); }
+      const bool eventContainsElectronFromCJet() const { return fHasElectronFromCjetStatus; }
+      const bool eventContainsElectronFromBJet() const { return fHasElectronFromBjetStatus; }
+      const bool eventContainsElectronFromCorBJet() const { return eventContainsElectronFromCJet() || eventContainsElectronFromBJet(); }
+      const edm::PtrVector<pat::Electron>& getSelectedElectrons() const { return fSelectedElectronsVeto; }
+      const edm::PtrVector<pat::Electron>& getSelectedElectronsVeto() const { return fSelectedElectronsVeto; }
+      const edm::PtrVector<pat::Electron>& getSelectedElectronsMedium() const { return fSelectedElectronsMedium; }
+      const edm::PtrVector<pat::Electron>& getSelectedElectronsTight() const { return fSelectedElectronsTight; }
+      const edm::PtrVector<pat::Electron>& getSelectedElectronsBeforePtAndEtaCuts() const { return fSelectedElectronsBeforePtAndEtaCuts; }
 
       friend class ElectronSelection;
 
     private:
-      bool fPassedEvent;
-      // pt and eta of highest pt electron passing the selection
+      /// pt and eta of highest pt electron passing the selection
       float fSelectedElectronPt;
       float fSelectedElectronEta;
       float fSelectedElectronPtBeforePtCut;
-
-      // Selected electrons
-      edm::PtrVector<pat::Electron> fSelectedElectrons;
+      /// MC info about non-isolated electrons
+      bool fHasElectronFromCjetStatus;
+      bool fHasElectronFromBjetStatus;
+      /// Electron collections after all selections
+      edm::PtrVector<pat::Electron> fSelectedElectronsVeto;
+      edm::PtrVector<pat::Electron> fSelectedElectronsTight;
+      edm::PtrVector<pat::Electron> fSelectedElectronsMedium;
+      //edm::PtrVector<pat::Electron> fSelectedNonIsolatedElectrons;
       edm::PtrVector<pat::Electron> fSelectedElectronsBeforePtAndEtaCuts;
 
     };
@@ -79,13 +92,17 @@ namespace HPlus {
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
+    EgammaCutBasedEleId::WorkingPoint translateWorkingPoint(const std::string& wp);
+    
     // Input parameters
     edm::InputTag fElecCollectionName;
     edm::InputTag fVertexSrc;
     edm::InputTag fConversionSrc;
     edm::InputTag fBeamspotSrc;
     edm::InputTag fRhoSrc;
-    const std::string fElecSelection;
+    const std::string fElecSelectionVeto;
+    const std::string fElecSelectionMedium;
+    const std::string fElecSelectionTight;
     const double fElecPtCut;
     const double fElecEtaCut;
     
@@ -97,35 +114,49 @@ namespace HPlus {
     Count fElecSelectionSubCountId;
     Count fElecSelectionSubCountEtaCut;
     Count fElecSelectionSubCountPtCut;
-    Count fElecSelectionSubCountSelected;
+    Count fElecSelectionSubCountSelectedVeto;
     Count fElecSelectionSubCountMatchingMCelectron;
     Count fElecSelectionSubCountMatchingMCelectronFromW;
+    Count fElecSelectionSubCountSelectedMedium;
+    Count fElecSelectionSubCountSelectedTight;
+    Count fElecSelectionSubCountPassedVeto;
+    Count fElecSelectionSubCountPassedVetoAndElectronFromCjet;
+    Count fElecSelectionSubCountPassedVetoAndElectronFromBjet;
 
     // Histograms
-    WrappedTH1 *hElectronPt;
-    WrappedTH1 *hElectronEta;
-    WrappedTH1 *hNumberOfSelectedElectrons;
-    WrappedTH1 *hElectronPt_identified;
-    WrappedTH1 *hElectronEta_identified;
+    // all candidates
+    WrappedTH1 *hElectronPt_all;
+    WrappedTH1 *hElectronEta_all;
+    WrappedTH1 *hElectronPt_gsfTrack_all;
+    WrappedTH1 *hElectronEta_gsfTrack_all;
+    WrappedTH1 *hElectronEta_superCluster;
+    // Selected electrons for veto
+    WrappedTH1 *hNumberOfVetoElectrons;
+    WrappedTH1 *hElectronPt_veto;
+    WrappedTH1 *hElectronEta_veto;
     WrappedTH1 *hElectronPt_matchingMCelectron;
     WrappedTH1 *hElectronEta_matchingMCelectron;
     WrappedTH1 *hElectronPt_matchingMCelectronFromW;
     WrappedTH1 *hElectronEta_matchingMCelectronFromW;
-    WrappedTH1 *hElectronPt_gsfTrack;
-    WrappedTH1 *hElectronEta_gsfTrack;
     WrappedTH1 *hElectronPt_AfterSelection;
     WrappedTH1 *hElectronEta_AfterSelection;
     WrappedTH1 *hElectronPt_gsfTrack_AfterSelection;
     WrappedTH1 *hElectronEta_gsfTrack_AfterSelection;
-    WrappedTH1 *hElectronImpactParameter;
-    WrappedTH1 *hElectronEta_superCluster;
-
     WrappedTH2 *hElectronEtaPhiForSelectedElectrons;
     WrappedTH2 *hMCElectronEtaPhiForPassedEvents;
-
+    // Selected electrons for medium
+    WrappedTH1 *hNumberOfMediumElectrons;
+    WrappedTH1 *hElectronPt_medium;
+    WrappedTH1 *hElectronEta_medium;    
+    // Selected electrons for tight
+    WrappedTH1 *hNumberOfTightElectrons;
+    WrappedTH1 *hElectronPt_tight;
+    WrappedTH1 *hElectronEta_tight;
+    
     // for Electron-ID Selection
-    EgammaCutBasedEleId::WorkingPoint fElectronIdEnumerator;
-
+    EgammaCutBasedEleId::WorkingPoint fElectronIdEnumeratorVeto;
+    EgammaCutBasedEleId::WorkingPoint fElectronIdEnumeratorMedium;
+    EgammaCutBasedEleId::WorkingPoint fElectronIdEnumeratorTight;
   };
 }
 

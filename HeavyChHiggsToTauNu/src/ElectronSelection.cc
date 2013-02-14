@@ -19,10 +19,11 @@ std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
 
 namespace HPlus {
   ElectronSelection::Data::Data():
-    fPassedEvent(false),
     fSelectedElectronPt(0.),
     fSelectedElectronEta(0.),
-    fSelectedElectronPtBeforePtCut(0.) { }
+    fSelectedElectronPtBeforePtCut(-1.),
+    fHasElectronFromCjetStatus(false),
+    fHasElectronFromBjetStatus(false) { }
   ElectronSelection::Data::~Data() {}
 
   ElectronSelection::ElectronSelection(const edm::ParameterSet& iConfig, const edm::InputTag& vertexSrc, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
@@ -32,54 +33,67 @@ namespace HPlus {
     fConversionSrc(iConfig.getUntrackedParameter<edm::InputTag>("conversionSrc")),
     fBeamspotSrc(iConfig.getUntrackedParameter<edm::InputTag>("beamspotSrc")),
     fRhoSrc(iConfig.getUntrackedParameter<edm::InputTag>("rhoSrc")),
-    fElecSelection(iConfig.getUntrackedParameter<std::string>("ElectronSelection")),
+    fElecSelectionVeto(iConfig.getUntrackedParameter<std::string>("ElectronSelectionVeto")),
+    fElecSelectionMedium(iConfig.getUntrackedParameter<std::string>("ElectronSelectionMedium")),
+    fElecSelectionTight(iConfig.getUntrackedParameter<std::string>("ElectronSelectionTight")),
     fElecPtCut(iConfig.getUntrackedParameter<double>("ElectronPtCut")),
     fElecEtaCut(iConfig.getUntrackedParameter<double>("ElectronEtaCut")),
-    fElecSelectionSubCountAllEvents(eventCounter.addSubCounter("GlobalElectron Selection", "All events")),
-    fElecSelectionSubCountElectronPresent(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Present")),
-    fElecSelectionSubCountElectronHasGsfTrkOrTrk(eventCounter.addSubCounter("GlobalElectron Selection", "Electron has gsfTrack or track")),
-    fElecSelectionSubCountFiducialVolumeCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron fiducial volume")),
-    fElecSelectionSubCountId(eventCounter.addSubCounter("GlobalElectron Selection", "Electron ID")),
-    fElecSelectionSubCountEtaCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Eta")),
-    fElecSelectionSubCountPtCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Pt " )),
-    fElecSelectionSubCountSelected(eventCounter.addSubCounter("GlobalElectron Selection", "Electron selected")),
-    fElecSelectionSubCountMatchingMCelectron(eventCounter.addSubCounter("GlobalElectron Selection","Electron matching MC electron")),
-    fElecSelectionSubCountMatchingMCelectronFromW(eventCounter.addSubCounter("GlobalElectron Selection","Electron matching MC electron From W"))
+    fElecSelectionSubCountAllEvents(eventCounter.addSubCounter("ElectronSelection", "All events")),
+    fElecSelectionSubCountElectronPresent(eventCounter.addSubCounter("ElectronSelection", "Electron Present")),
+    fElecSelectionSubCountElectronHasGsfTrkOrTrk(eventCounter.addSubCounter("ElectronSelection", "Electron has gsfTrack or track")),
+    fElecSelectionSubCountFiducialVolumeCut(eventCounter.addSubCounter("ElectronSelection", "Electron fiducial volume")),
+    fElecSelectionSubCountId(eventCounter.addSubCounter("ElectronSelection", "Electron ID")),
+    fElecSelectionSubCountEtaCut(eventCounter.addSubCounter("ElectronSelection", "Electron Eta")),
+    fElecSelectionSubCountPtCut(eventCounter.addSubCounter("ElectronSelection", "Electron Pt")),
+    fElecSelectionSubCountSelectedVeto(eventCounter.addSubCounter("ElectronSelection", "Veto electron selected")),
+    fElecSelectionSubCountMatchingMCelectron(eventCounter.addSubCounter("ElectronSelection","Electron matching MC electron")),
+    fElecSelectionSubCountMatchingMCelectronFromW(eventCounter.addSubCounter("ElectronSelection","Electron matching MC electron From W")),
+    fElecSelectionSubCountSelectedMedium(eventCounter.addSubCounter("ElectronSelection", "Medium electron selected")),
+    fElecSelectionSubCountSelectedTight(eventCounter.addSubCounter("ElectronSelection", "Tight electron selected")),
+    fElecSelectionSubCountPassedVeto(eventCounter.addSubCounter("ElectronSelection", "Electron veto passed")),
+    fElecSelectionSubCountPassedVetoAndElectronFromCjet(eventCounter.addSubCounter("ElectronSelection", "Electron veto passed and e in c jet")),
+    fElecSelectionSubCountPassedVetoAndElectronFromBjet(eventCounter.addSubCounter("ElectronSelection", "Electron veto passed and e in b jet"))
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("ElectronSelection");
 
-    hElectronPt  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronPt", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 160, 0.0, 400.0);
-    hElectronEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronEta", "GlobalElectronEta;isolated electron #eta;N_{electrons} / 0.1", 90, -3.0, 3.0);
-    hElectronEta_identified = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalElectronEta_identified", "GlobalElectronEta_identified;isolated electron #eta;N_{electrons} / 0.1", 90, -3.0, 3.0);
-    hElectronPt_identified  = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "GlobalElectronPt_identified", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 160, 0, 400.0);
-    hNumberOfSelectedElectrons = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NumberOfSelectedElectrons", "NumberOfSelectedElectrons", 30, 0., 30.);
-    hElectronPt_matchingMCelectron  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronPt_matchingMCelectron", "GlobalElectronPt_matchingMCelectron", 160, 0.0, 400.0);
-    hElectronEta_matchingMCelectron = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronEta_matchingMCelectron", "GlobalElectronEta_matchingMCelectron", 90, -3.0, 3.0);
-    hElectronPt_matchingMCelectronFromW  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronPt_matchingMCelectronFromW", "GlobalElectronPt_matchingMCelectronFromW", 160, 0.0, 400.0);
-    hElectronEta_matchingMCelectronFromW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronEta_matchingMCelectronFromW", "GlobalElectronEta_matchingMCelectronFromW", 90, -3.0, 3.0);
-    hElectronPt_gsfTrack  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronPt_gsfTrack", "GlobalElectronPt_gsfTrack", 160, 0.0, 400.0);
-    hElectronEta_gsfTrack = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronEta_gsfTrack", "GlobalElectronEta_gsfTrack", 90, -3.0, 3.0);
-    hElectronEta_superCluster = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronEta_superCluster", "GlobalElectronEta_superCluster", 60, -3.0, 3.0);
-    hElectronPt_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 160, 0.0, 400.0);
-    hElectronEta_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronPt_AfterSelection", "GlobalElectronEta_AfterSelection", 90, -3.0, 3.0);
-    hElectronPt_gsfTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsfTrack_AfterSelection", 160, 0.0, 400.0);
-    hElectronEta_gsfTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsTrack_AfterSelection", 90, -3.0, 3.0);
-    hElectronImpactParameter = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronImpactParameter", "ElectronImpactParameter", 100, 0.0, 0.1);
+    hElectronPt_all  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronPt_all", "ElectronPt_all;electron candidates p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 80, 0.0, 400.0);
+    hElectronEta_all = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronEta_all", "ElectronEta_all;electron candiates #eta;N_{electrons} / 0.1", 60, -3.0, 3.0);
+    hElectronPt_gsfTrack_all = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronPt_gsfTrack", "ElectronPt_gsfTrack;electron candidates p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 80, 0.0, 400.0);
+    hElectronEta_gsfTrack_all = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronEta_gsfTrack", "ElectronEta_gsfTrack;electron candidates #eta;N_{electrons}", 60, -3.0, 3.0);
+    hElectronEta_superCluster = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronEta_superCluster", "ElectronEta_superCluster", 60, -3.0, 3.0);
+    hElectronEta_veto = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronEta_veto", "ElectronEta_veto;veto electron #eta;N_{electrons} / 0.1", 60, -3.0, 3.0);
+    hElectronPt_veto = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronPt_veto", "ElectronPt_veto;veto electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 80, 0, 400.0);
+    hNumberOfVetoElectrons = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NumberOfVetoElectrons", "NumberOfVetoElectrons;N_{veto electrons};N_{electrons}", 30, 0., 30.);
+    hElectronPt_matchingMCelectron  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronPt_matchingMCelectron", "ElectronPt_matchingMCelectron", 80, 0.0, 400.0);
+    hElectronEta_matchingMCelectron = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronEta_matchingMCelectron", "ElectronEta_matchingMCelectron", 60, -3.0, 3.0);
+    hElectronPt_matchingMCelectronFromW  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronPt_matchingMCelectronFromW", "ElectronPt_matchingMCelectronFromW", 80, 0.0, 400.0);
+    hElectronEta_matchingMCelectronFromW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronEta_matchingMCelectronFromW", "ElectronEta_matchingMCelectronFromW", 60, -3.0, 3.0);
+    
+    hElectronPt_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronPt_AfterSelection", "ElectronPt_AfterSelection", 80, 0.0, 400.0);
+    hElectronEta_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronPt_AfterSelection", "ElectronEta_AfterSelection", 60, -3.0, 3.0);
+    hElectronPt_gsfTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronPt_gsfTrack_AfterSelection", "ElectronPt_gsfTrack_AfterSelection", 80, 0.0, 400.0);
+    hElectronEta_gsfTrack_AfterSelection = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronPt_gsfTrack_AfterSelection", "ElectronPt_gsTrack_AfterSelection", 60, -3.0, 3.0);
 
     hElectronEtaPhiForSelectedElectrons = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir,
-        "ElectronEtaPhiForSelectedElectrons", "ElectronEtaPhiForSelectedElectrons;electron #eta; electronu #phi",
+        "ElectronEtaPhiForSelectedElectrons", "ElectronEtaPhiForSelectedElectrons;electron #eta; electron #phi",
         60, -3.0, 3.0, 72, -3.14159265, 3.14159265);
     hMCElectronEtaPhiForPassedEvents = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir,
-        "MCElectronEtaPhiForPassedEvents", "MCElectronEtaPhiForPassedEvents;MC electron #eta; MC electronu #phi",
+        "MCElectronEtaPhiForPassedEvents", "MCElectronEtaPhiForPassedEvents;MC electron #eta; MC electron #phi",
         60, -3.0, 3.0, 72, -3.14159265, 3.14159265);
 
+    hElectronEta_medium = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronEta_medium", "ElectronEta_medium;medium electron #eta;N_{electrons} / 0.1", 60, -3.0, 3.0);
+    hElectronPt_medium = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronPt_medium", "ElectronPt_medium;medium electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 80, 0, 400.0);
+    hNumberOfMediumElectrons = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NumberOfMediumElectrons", "NumberOfMediumElectrons;N_{medium electrons};N_{electrons}", 30, 0., 30.);
+
+    hElectronEta_tight = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronEta_tight", "ElectronEta_tight;tight electron #eta;N_{electrons} / 0.1", 60, -3.0, 3.0);
+    hElectronPt_tight = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "ElectronPt_tight", "ElectronPt_tight;tight electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 80, 0, 400.0);
+    hNumberOfTightElectrons = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NumberOfTightElectrons", "NumberOfTightElectrons;N_{tight electrons};N_{electrons}", 30, 0., 30.);
+
     // Check Whether official eID will be applied
-    if (fElecSelection == "VETO") fElectronIdEnumerator = EgammaCutBasedEleId::VETO;
-    else{
-      throw cms::Exception("Error") << "The ElectronSelection \"" << fElecSelection << "\" used as input in the python config file is invalid!\nPlease choose one of the following valid options:" << std::endl
-				    << "'VETO'" << std::endl;
-    }
+    fElectronIdEnumeratorVeto = translateWorkingPoint(fElecSelectionVeto);
+    fElectronIdEnumeratorMedium = translateWorkingPoint(fElecSelectionMedium);
+    fElectronIdEnumeratorTight = translateWorkingPoint(fElecSelectionTight);
   }
 
   ElectronSelection::~ElectronSelection() {}
@@ -108,11 +122,6 @@ namespace HPlus {
     edm::PtrVector<pat::Electron> electrons = myElectronHandle->ptrVector();
 
     increment(fElecSelectionSubCountAllEvents);
-    // In the case where the Electron Collection handle is empty...
-    if ( !myElectronHandle->size() ) {
-      output.fPassedEvent = true;
-      return output;
-    }
 
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles); // FIXME: bad habbit to hard-code InputTags
@@ -129,7 +138,6 @@ namespace HPlus {
 
     // Reset/initialise variables
     float myHighestElecPt = -1.0;
-    float myHighestElecPtBeforePtCut = -1.0;
     float myHighestElecEta = -999.99;
     // 
     bool bElecPresent = false;
@@ -138,8 +146,19 @@ namespace HPlus {
     bool bPassedElecID = false;
     bool bElecPtCut = false;
     bool bElecEtaCut = false;
-
     bool bElectronSelected = false;
+    bool bElecMatchingMCelectron = false;
+    bool bElecMatchingMCelectronFromW = false;
+
+    // Cache MC electrons to speed up code (only one loop over gen particles)
+    std::vector<const reco::GenParticle*> myMCElectrons;
+    if(!iEvent.isRealData()) {
+      for (size_t i=0; i < genParticles->size(); ++i){  
+        if ((*genParticles)[i].status() != 1) continue;
+        if (std::abs((*genParticles)[i].pdgId()) != 11) continue;
+        myMCElectrons.push_back(&((*genParticles)[i]));
+      }
+    }
 
     // Loop over all Electrons
     for(edm::PtrVector<pat::Electron>::const_iterator iElectron = electrons.begin(); iElectron != electrons.end(); ++iElectron) {
@@ -157,12 +176,6 @@ namespace HPlus {
       float myElectronEta = (*iElectron)->eta();
       // float myElectronPhi = (*iElectron)->phi();
 
-      // Fill histos with all-Electrons Pt and Eta
-      hElectronPt->Fill(myElectronPt);
-      hElectronEta->Fill(myElectronEta);
-      hElectronPt_gsfTrack->Fill(myGsfTrackRef->pt());
-      hElectronEta_gsfTrack->Fill(myGsfTrackRef->eta());
-
       // Apply electron fiducial volume cut
       // Obtain reference to the superCluster
       reco::SuperClusterRef mySuperClusterRef = (*iElectron)->superCluster();
@@ -172,36 +185,65 @@ namespace HPlus {
 
       hElectronEta_superCluster->Fill(mySuperClusterRef->eta());
 
-      if ( fabs(mySuperClusterRef->eta()) > 1.4442 && fabs(mySuperClusterRef->eta()) < 1.566) continue;
+      if ( std::fabs(mySuperClusterRef->eta()) > 1.4442 && std::fabs(mySuperClusterRef->eta()) < 1.566) continue;
       bElecFiducialVolumeCut = true;
 
-      // 1) Apply Electron ID (choose low efficiency => High Purity)
+      // Fill histos with all-Electrons Pt and Eta
+      hElectronPt_all->Fill(myElectronPt);
+      hElectronEta_all->Fill(myElectronEta);
+      hElectronPt_gsfTrack_all->Fill(myGsfTrackRef->pt());
+      hElectronEta_gsfTrack_all->Fill(myGsfTrackRef->eta());
 
-      bPassedElecID = EgammaCutBasedEleId::PassWP(fElectronIdEnumerator, **iElectron, hConversion, *hBeamspot, hVertex,
-                                                  (*iElectron)->chargedHadronIso(), (*iElectron)->photonIso(), (*iElectron)->neutralHadronIso(),
-                                                  *hRho);
-      //std::cout << "Electron " << (iElectron-electrons.begin()) << "/" << electrons.size() << ": pass veto: " << bVeto << std::endl;
-      if(!bPassedElecID) continue;
-      output.fSelectedElectronsBeforePtAndEtaCuts.push_back(*iElectron);
-
-      hElectronEta_identified->Fill(myElectronEta);
-
-      if(std::abs(myElectronEta) < fElecEtaCut) {
-        myHighestElecPtBeforePtCut = std::max(myHighestElecPtBeforePtCut, myElectronPt);
-      hElectronPt_identified->Fill(myElectronPt);
+      // 1) Apply Electron ID
+      
+      bool myVetoIdStatus = EgammaCutBasedEleId::PassWP(fElectronIdEnumeratorVeto, **iElectron, hConversion, *hBeamspot, hVertex,
+                                                        (*iElectron)->chargedHadronIso(), (*iElectron)->photonIso(), (*iElectron)->neutralHadronIso(),
+                                                        *hRho);
+      bool myMediumIdStatus = EgammaCutBasedEleId::PassWP(fElectronIdEnumeratorMedium, **iElectron, hConversion, *hBeamspot, hVertex,
+                                                          (*iElectron)->chargedHadronIso(), (*iElectron)->photonIso(), (*iElectron)->neutralHadronIso(),
+                                                          *hRho);
+      bool myTightIdStatus = EgammaCutBasedEleId::PassWP(fElectronIdEnumeratorTight, **iElectron, hConversion, *hBeamspot, hVertex,
+                                                         (*iElectron)->chargedHadronIso(), (*iElectron)->photonIso(), (*iElectron)->neutralHadronIso(),
+                                                         *hRho);
+      bool myEtaStatus = std::fabs(myElectronEta) < fElecEtaCut;
+      bool myPtStatus = myElectronPt > fElecPtCut;
+      
+      // Look at tight electrons
+      if (myTightIdStatus) {
+        hElectronEta_tight->Fill(myElectronEta);
+        if (myEtaStatus) {
+          hElectronPt_tight->Fill(myElectronPt);
+          if (myPtStatus) {
+            output.fSelectedElectronsTight.push_back(*iElectron);
+          }
+        }
       }
+      // Look at medium electrons
+      if (myMediumIdStatus) {
+        hElectronEta_medium->Fill(myElectronEta);
+        if (myEtaStatus) {
+          hElectronPt_medium->Fill(myElectronPt);
+          if (myPtStatus) {
+            output.fSelectedElectronsMedium.push_back(*iElectron);
+          }
+        }
+      }
+      
+      if (!myVetoIdStatus) continue;
+      bPassedElecID = true;
+      output.fSelectedElectronsBeforePtAndEtaCuts.push_back(*iElectron);
+      hElectronEta_veto->Fill(myElectronEta);
 
       // 2) Apply Eta cut requirement
       if (std::abs(myElectronEta) >= fElecEtaCut) continue;
       bElecEtaCut = true;
-      if (myElectronPt > output.fSelectedElectronPtBeforePtCut)
-        output.fSelectedElectronPtBeforePtCut = myElectronPt;
+      output.fSelectedElectronPtBeforePtCut = std::max(output.fSelectedElectronPtBeforePtCut, myElectronPt);
+      hElectronPt_veto->Fill(myElectronPt);
 
       // 3) Apply Pt cut requirement
       if (myElectronPt < fElecPtCut) continue;
       bElecPtCut = true;
-
-      output.fSelectedElectrons.push_back(*iElectron);
+      output.fSelectedElectronsVeto.push_back(*iElectron);
 
       // If Electron survives all cuts (1->3) then it is considered an isolated Electron. Now find the max Electron Pt.
       if (myElectronPt > myHighestElecPt) {
@@ -210,34 +252,28 @@ namespace HPlus {
       }
       bElectronSelected = true;
       // Fill histos after Selection
-      hElectronPt_AfterSelection->Fill(myGsfTrackRef->pt());
-      hElectronEta_AfterSelection->Fill(myGsfTrackRef->eta());
+      hElectronPt_AfterSelection->Fill(myElectronPt);
+      hElectronEta_AfterSelection->Fill(myElectronEta);
       hElectronPt_gsfTrack_AfterSelection->Fill(myGsfTrackRef->pt());
       hElectronEta_gsfTrack_AfterSelection->Fill(myGsfTrackRef->eta());
       hElectronEtaPhiForSelectedElectrons->Fill((*iElectron)->eta(), (*iElectron)->phi());
 
-      bool bElecMatchingMCelectron = false;
-      bool bElecMatchingMCelectronFromW = false;
       // Selection purity from MC
       if(!iEvent.isRealData()) {
-        for (size_t i=0; i < genParticles->size(); ++i){  
-          const reco::Candidate & p = (*genParticles)[i];
+        for (size_t i=0; i < myMCElectrons.size(); ++i) {
+          const reco::Candidate & p = *(myMCElectrons[i]);
           const reco::Candidate & electron = (**iElectron);
-          int status = p.status();
           double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() , electron.p4() );
-          if ( deltaR > 0.05 || status != 1) continue;
-          int id = p.pdgId();
-          if ( std::abs(id) == 11 ) {
-	    bElecMatchingMCelectron = true;
+          if ( deltaR > 0.05) continue;
+          bElecMatchingMCelectron = true;
 
-	    std::vector<const reco::GenParticle*> mothers = getMothers(p);
-	    for(size_t d=0; d<mothers.size(); ++d) {
-	      const reco::GenParticle dparticle = *mothers[d];
-	      int idmother = dparticle.pdgId();
-              if ( abs(idmother) == 24 ) {
-		bElecMatchingMCelectronFromW = true;
-	      }
-	    }
+          std::vector<const reco::GenParticle*> mothers = getMothers(p);
+          for(size_t d=0; d<mothers.size(); ++d) {
+            const reco::GenParticle dparticle = *mothers[d];
+            int idmother = dparticle.pdgId();
+            if ( abs(idmother) == 24 ) {
+              bElecMatchingMCelectronFromW = true;
+            }
           }
         }
 	if ( bElecMatchingMCelectron ) {
@@ -250,61 +286,70 @@ namespace HPlus {
 	}	
       }
     }//eof: for(pat::ElectronCollection::const_iterator iElectron = myElectronHandle->begin(); iElectron != myElectronHandle->end(); ++iElectron) {
-    if(bElecPresent) {
-      increment(fElecSelectionSubCountElectronPresent);
-      if(bElecHasGsfTrkOrTrk) { 
-        increment(fElecSelectionSubCountElectronHasGsfTrkOrTrk);
-        if(bElecFiducialVolumeCut) {
-          increment(fElecSelectionSubCountFiducialVolumeCut);
-          if(bPassedElecID) {
-            increment(fElecSelectionSubCountId);
-            if(bElecEtaCut) {
-              increment(fElecSelectionSubCountEtaCut);
-              if(bElecPtCut) {
-                increment(fElecSelectionSubCountPtCut);
-                increment(fElecSelectionSubCountSelected);
-		/*
-		if(bElecMatchingMCelectron) {
-		  increment(fElecSelectionSubCountMatchingMCelectron);
-		  if(bElecMatchingMCelectronFromW) {
-		    increment(fElecSelectionSubCountMatchingMCelectronFromW);
-		  }
-		}
-		*/
-	      }
-            }
-          }
-        }
-      }
-    }
-    
+    if(bElecPresent) increment(fElecSelectionSubCountElectronPresent);
+    if(bElecHasGsfTrkOrTrk) increment(fElecSelectionSubCountElectronHasGsfTrkOrTrk);
+    if(bElecFiducialVolumeCut) increment(fElecSelectionSubCountFiducialVolumeCut);
+    if(bPassedElecID) increment(fElecSelectionSubCountId);
+    if(bElecEtaCut) increment(fElecSelectionSubCountEtaCut);
+    if(bElecPtCut) increment(fElecSelectionSubCountPtCut);
+    if(output.fSelectedElectronsVeto.size()) increment(fElecSelectionSubCountSelectedVeto);
+    if(bElecMatchingMCelectron) increment(fElecSelectionSubCountMatchingMCelectron);
+    if(bElecMatchingMCelectronFromW) increment(fElecSelectionSubCountMatchingMCelectronFromW);
+    if(output.fSelectedElectronsMedium.size()) increment(fElecSelectionSubCountSelectedMedium);
+    if(output.fSelectedElectronsTight.size()) increment(fElecSelectionSubCountSelectedTight);
 
-    hNumberOfSelectedElectrons->Fill(output.fSelectedElectrons.size());
+    hNumberOfVetoElectrons->Fill(output.fSelectedElectronsVeto.size());
+    hNumberOfMediumElectrons->Fill(output.fSelectedElectronsMedium.size());
+    hNumberOfTightElectrons->Fill(output.fSelectedElectronsTight.size());
 
     // Now store the highest Electron Pt and Eta
     output.fSelectedElectronPt = myHighestElecPt;
     output.fSelectedElectronEta = myHighestElecEta;
 
-    // If a Global Electron (passing all selection criteria) is found, do not increment counter. Return false.
-    if(bElectronSelected) {
-      output.fPassedEvent = false;
-      return output;
-    } else {
-      // Otherwise increment counter and return true.
-      output.fPassedEvent = true;
-      if(!iEvent.isRealData()) {
-        for (size_t i=0; i < genParticles->size(); ++i) {
-          const reco::Candidate & p = (*genParticles)[i];
-          if (p.status() != 1) continue;
-          if (std::abs(p.pdgId()) != 11) continue;
-          if (p.pt() < fElecPtCut) continue;
-          // Plot eta-phi map of MC electrons above pT threshold
+    // Look further at MC electrons
+    if(!iEvent.isRealData()) {
+      for (size_t i=0; i < myMCElectrons.size(); ++i) {
+        const reco::Candidate & p = (*genParticles)[i];
+        if (p.pt() < fElecPtCut) continue;
+        // Plot eta-phi map of MC electrons above pT threshold if event passed electron veto
+        if (output.passedElectronVeto())
           hMCElectronEtaPhiForPassedEvents->Fill(p.eta(), p.phi());
+        if (std::fabs(p.eta()) < fElecEtaCut) continue;
+        // Check if there are MC electrons in the acceptance coming from b or c quarks
+        const reco::Candidate* pmother = p.mother();
+        while (pmother) {
+          if (std::abs(pmother->pdgId()) == 4)
+            output.fHasElectronFromBjetStatus = true;
+          else if (std::abs(pmother->pdgId()) == 5)
+            output.fHasElectronFromCjetStatus = true;
+          // move to next
+          pmother = pmother->mother();
         }
       }
+    }
+
+    if (output.passedElectronVeto()) {
+      increment(fElecSelectionSubCountPassedVeto);
+      if (output.eventContainsElectronFromCJet())
+        increment(fElecSelectionSubCountPassedVetoAndElectronFromCjet);
+      if (output.eventContainsElectronFromBJet())
+        increment(fElecSelectionSubCountPassedVetoAndElectronFromBjet);
     }
 
     return output;
   }
 
+  EgammaCutBasedEleId::WorkingPoint ElectronSelection::translateWorkingPoint(const std::string& wp) {
+    if (wp == "VETO")
+      return EgammaCutBasedEleId::VETO;
+    else if (wp == "TIGHT")
+      return EgammaCutBasedEleId::TIGHT;
+    else if (wp == "MEDIUM")
+      return EgammaCutBasedEleId::MEDIUM;
+    else if (wp == "LOOSE")
+      return EgammaCutBasedEleId::LOOSE;
+    else
+      throw cms::Exception("Error") << "The ElectronSelection \"" << wp << "\" used as input in the python config file is invalid!\nPlease choose one of the following valid options:" << std::endl
+                                    << "'VETO', 'LOOSE', 'MEDIUM', 'TIGHT'" << std::endl;
+  }
 }
