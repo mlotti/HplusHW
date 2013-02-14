@@ -83,6 +83,10 @@ namespace HPlus {
     void setPlanarity(double planarity) { fPlanarity = planarity; }
     void setCircularity(double circularity) { fCircularity = circularity; }
     void setDeltaPhi(double deltaPhi) { fDeltaPhi = deltaPhi; }
+    void setAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets){
+      for(size_t i=0; i<allIdentifiedJets.size(); ++i) {
+	fAllIdentifiedJets.push_back(allIdentifiedJets[i]->p4());}
+      }
 
     void fill(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau,
               const edm::PtrVector<pat::Jet>& jets);
@@ -137,6 +141,7 @@ namespace HPlus {
     int fTauDaughterPdgId;
 
     std::vector<XYZTLorentzVector> fJets;
+    std::vector<XYZTLorentzVector> fAllIdentifiedJets;
     std::vector<double> fJetsBtags;
     std::vector<double> fJetsChf;
     std::vector<double> fJetsNhf;

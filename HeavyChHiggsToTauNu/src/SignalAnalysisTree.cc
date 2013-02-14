@@ -85,6 +85,7 @@ namespace HPlus {
     fTree->Branch("tau_daughter_pdgid", &fTauDaughterPdgId);
      
     fTree->Branch("jets_p4", &fJets);
+    fTree->Branch("allIdentifiedJets_p4", &fAllIdentifiedJets);
     fTree->Branch("jets_btag", &fJetsBtags);
     if(fFillJetEnergyFractions) {
       fTree->Branch("jets_chf", &fJetsChf); // charged hadron
@@ -659,6 +660,7 @@ namespace HPlus {
     fTauDaughterPdgId = 0;
 
     fJets.clear();
+    fAllIdentifiedJets.clear();
     fJetsBtags.clear();
     fJetsFlavour.clear();
 
