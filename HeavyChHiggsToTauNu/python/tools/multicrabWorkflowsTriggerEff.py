@@ -22,12 +22,12 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
         "TauPlusX_198941-203742_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 10, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v6"]),                
         "TauPlusX_203777-208686_2012D_Prompt": TaskDef(njobsIn=3600, njobsOut= 360, triggerOR=["HLT_IsoMu15_eta2p1_L1ETM20_v7"]),
 
-        "DYToTauTau_M20_powheg_v1_TuneZ2star_Summer12":         TaskDefMC(njobsIn= 40, njobsOut= 10),                                                   
-        "DYToTauTau_M20_powheg_v2_TuneZ2star_Summer12":         TaskDefMC(njobsIn= 2000, njobsOut= 200),                                                
-        "DYToTauTau_M_100to200_TuneZ2Star_pythia6_tauola_Summer12": TaskDefMC(njobsIn= 5, njobsOut= 1),                                             
-        "DYToTauTau_M_200to400_TuneZ2Star_pythia6_tauola_Summer12": TaskDefMC(njobsIn= 5, njobsOut= 1),                                             
-        "DYToTauTau_M_400to800_TuneZ2Star_pythia6_tauola_Summer12": TaskDefMC(njobsIn= 5, njobsOut= 1),                                             
-        "DYToTauTau_M_800_TuneZ2Star_pythia6_tauola_Summer12":      TaskDefMC(njobsIn= 5, njobsOut= 1),
+        "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12":    TaskDefMC(njobsIn= 40, njobsOut= 10),                                                   
+        "DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12": TaskDefMC(njobsIn= 2000, njobsOut= 200),                                                
+        "DYToTauTau_M_100to200_TuneZ2Star_pythia6_tauola_Summer12":  TaskDefMC(njobsIn= 5, njobsOut= 1),                                             
+        "DYToTauTau_M_200to400_TuneZ2Star_pythia6_tauola_Summer12":  TaskDefMC(njobsIn= 5, njobsOut= 1),                                             
+        "DYToTauTau_M_400to800_TuneZ2Star_pythia6_tauola_Summer12":  TaskDefMC(njobsIn= 5, njobsOut= 1),                                             
+        "DYToTauTau_M_800_TuneZ2Star_pythia6_tauola_Summer12":       TaskDefMC(njobsIn= 5, njobsOut= 1),
     }
 
     workflowName = "triggerTauLeg_skim_"+version
@@ -92,12 +92,12 @@ def addTauLegSkim_53X_v1(datasets):
         "TauPlusX_198941-203742_2012C_Prompt": TaskDef(""),
         "TauPlusX_203777-208686_2012D_Prompt": TaskDef(""),
         
-        "DYToTauTau_M20_powheg_v1_TuneZ2star_Summer12":             TaskDef(""),
-        "DYToTauTau_M20_powheg_v2_TuneZ2star_Summer12":             TaskDef(""),
-        "DYToTauTau_M_100to200_TuneZ2Star_pythia6_tauola_Summer12": TaskDef(""),
-        "DYToTauTau_M_200to400_TuneZ2Star_pythia6_tauola_Summer12": TaskDef(""),
-        "DYToTauTau_M_400to800_TuneZ2Star_pythia6_tauola_Summer12": TaskDef(""),
-        "DYToTauTau_M_800_TuneZ2Star_pythia6_tauola_Summer12":      TaskDef(""),
+        "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12":    TaskDef(""),
+        "DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12": TaskDef(""),
+        "DYToTauTau_M_100to200_TuneZ2Star_pythia6_tauola_Summer12":  TaskDef(""),
+        "DYToTauTau_M_200to400_TuneZ2Star_pythia6_tauola_Summer12":  TaskDef(""),
+        "DYToTauTau_M_400to800_TuneZ2Star_pythia6_tauola_Summer12":  TaskDef(""),
+        "DYToTauTau_M_800_TuneZ2Star_pythia6_tauola_Summer12":       TaskDef(""),
         }
         
     addTauLegSkim_53X("v53_v1", datasets, definitions)
