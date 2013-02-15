@@ -16,17 +16,22 @@ def getDefaultDefinitions_44X():
         "SingleMu_160431-163261_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu20_v1"]),
         "SingleMu_163270-163869_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu24_v2"]),
         "SingleMu_165088-166150_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu30_v3"]),
+
         "SingleMu_166161-166164_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v1"]),
         "SingleMu_166346-166346_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v2"]),
         "SingleMu_166374-167043_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v1"]),
         "SingleMu_167078-167913_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v3"]),
         "SingleMu_170722-172619_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v5"]),
         "SingleMu_172620-173198_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v5"]),
+        "SingleMu_166161-173198_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_v1", "HLT_Mu40_v2", "HLT_Mu40_v3", "HLT_Mu40_v5"]),
+
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v1"]),
+
         "SingleMu_173693-177452_2011B_Nov19": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v1"]),
         "SingleMu_177453-178380_2011B_Nov19": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v1"]),
         "SingleMu_178411-179889_2011B_Nov19": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v4"]),
         "SingleMu_179942-180371_2011B_Nov19": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v5"]),
+        "SingleMu_173693-180371_2011B_Nov19": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v1", "HLT_Mu40_eta2p1_v4", "HLT_Mu40_eta2p1_v5"]),
 
         # MC, triggered with mcTrigger
         "WJets_TuneZ2_Fall11":               TaskDefMC(),
@@ -61,17 +66,22 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
         "SingleMu_160431-163261_2011A_Nov08": TaskDef(njobsIn=120, njobsOut= 2),
         "SingleMu_163270-163869_2011A_Nov08": TaskDef(njobsIn=140, njobsOut= 3),
         "SingleMu_165088-166150_2011A_Nov08": TaskDef(njobsIn=490, njobsOut= 4),
+
         "SingleMu_166161-166164_2011A_Nov08": TaskDef(njobsIn=  2, njobsOut= 1),
         "SingleMu_166346-166346_2011A_Nov08": TaskDef(njobsIn=  2, njobsOut= 1),
         "SingleMu_166374-167043_2011A_Nov08": TaskDef(njobsIn=300, njobsOut= 6),
         "SingleMu_167078-167913_2011A_Nov08": TaskDef(njobsIn=230, njobsOut= 3),
         "SingleMu_170722-172619_2011A_Nov08": TaskDef(njobsIn=200, njobsOut= 6),
         "SingleMu_172620-173198_2011A_Nov08": TaskDef(njobsIn=230, njobsOut= 6),
+        "SingleMu_166161-173198_2011A_Nov08": TaskDef(njobsIn=1000, njobsOut= 25),
+
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(njobsIn=120, njobsOut= 4),
+
         "SingleMu_173693-177452_2011B_Nov19": TaskDef(njobsIn=480, njobsOut=16),
         "SingleMu_177453-178380_2011B_Nov19": TaskDef(njobsIn=300, njobsOut=11),
         "SingleMu_178411-179889_2011B_Nov19": TaskDef(njobsIn=300, njobsOut=11),
         "SingleMu_179942-180371_2011B_Nov19": TaskDef(njobsIn= 60, njobsOut= 2),
+        "SingleMu_173693-180371_2011B_Nov19": TaskDef(njobsIn=1200, njobsOut=40),
 
         # MC, triggered with mcTrigger
         "WJets_TuneZ2_Fall11":               TaskDef(njobsIn= 990, njobsOut=12), # ~ 1.5 hour/100 MB
@@ -336,21 +346,15 @@ def addEmbeddingEmbedding_v44_4_2(datasets):
 
 
 def addEmbeddingSkim_v44_5(datasets):
+    # Expecting 33 % file size increase w.r.t. v44_2 (237.7/186.5=27%
+    # for event size, 107/102=5% for number of events)
     definitions = {
         "SingleMu_160431-163261_2011A_Nov08": TaskDef(""),
         "SingleMu_163270-163869_2011A_Nov08": TaskDef(""),
         "SingleMu_165088-166150_2011A_Nov08": TaskDef(""),
-        "SingleMu_166161-166164_2011A_Nov08": TaskDef(""),
-        "SingleMu_166346-166346_2011A_Nov08": TaskDef(""),
-        "SingleMu_166374-167043_2011A_Nov08": TaskDef(""),
-        "SingleMu_167078-167913_2011A_Nov08": TaskDef(""),
-        "SingleMu_170722-172619_2011A_Nov08": TaskDef(""),
-        "SingleMu_172620-173198_2011A_Nov08": TaskDef(""),
+        "SingleMu_166161-173198_2011A_Nov08": TaskDef(""),
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(""),
-        "SingleMu_173693-177452_2011B_Nov19": TaskDef(""),
-        "SingleMu_177453-178380_2011B_Nov19": TaskDef(""),
-        "SingleMu_178411-179889_2011B_Nov19": TaskDef(""),
-        "SingleMu_179942-180371_2011B_Nov19": TaskDef(""),
+        "SingleMu_173693-180371_2011B_Nov19": TaskDef(""),
         "TTJets_TuneZ2_Fall11":               TaskDef(""),
         "WJets_TuneZ2_Fall11":                TaskDef(""),
         "W1Jets_TuneZ2_Fall11":               TaskDef(""),
@@ -376,17 +380,9 @@ def addEmbedding_SKELETON(datasets):
         "SingleMu_160431-163261_2011A_Nov08": TaskDef(""),
         "SingleMu_163270-163869_2011A_Nov08": TaskDef(""),
         "SingleMu_165088-166150_2011A_Nov08": TaskDef(""),
-        "SingleMu_166161-166164_2011A_Nov08": TaskDef(""),
-        "SingleMu_166346-166346_2011A_Nov08": TaskDef(""),
-        "SingleMu_166374-167043_2011A_Nov08": TaskDef(""),
-        "SingleMu_167078-167913_2011A_Nov08": TaskDef(""),
-        "SingleMu_170722-172619_2011A_Nov08": TaskDef(""),
-        "SingleMu_172620-173198_2011A_Nov08": TaskDef(""),
+        "SingleMu_166161-173198_2011A_Nov08": TaskDef(""),
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(""),
-        "SingleMu_173693-177452_2011B_Nov19": TaskDef(""),
-        "SingleMu_177453-178380_2011B_Nov19": TaskDef(""),
-        "SingleMu_178411-179889_2011B_Nov19": TaskDef(""),
-        "SingleMu_179942-180371_2011B_Nov19": TaskDef(""),
+        "SingleMu_173693-180371_2011B_Nov19": TaskDef(""),
         "TTJets_TuneZ2_Fall11":               TaskDef(""),
         "WJets_TuneZ2_Fall11":                TaskDef(""),
         "W1Jets_TuneZ2_Fall11":               TaskDef(""),
