@@ -173,7 +173,7 @@ namespace HPlus {
       // Muon Variables (Pt, Eta etc..)
       float myMuonPt  = (*iMuon)->pt();
       float myMuonEta = (*iMuon)->eta();
-      int myInnerTrackNTrkHits   = myInnerTrackRef->hitPattern().numberOfValidTrackerHits();
+      //int myInnerTrackNTrkHits   = myInnerTrackRef->hitPattern().numberOfValidTrackerHits();
       int myInnerTrackNPixelHits = myInnerTrackRef->hitPattern().numberOfValidPixelHits();
       //int myGlobalTrackNMuonHits  = myGlobalTrackRef->hitPattern().numberOfValidMuonHits(); 
       int myMatchedSegments = (*iMuon)->numberOfMatches();
