@@ -724,7 +724,7 @@ namespace HPlus {
 //------ Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTau(), nVertices);
 
-    if (jetData.getReferenceJetToTau().isNonnull() && myFakeTauStatus) {
+    if (jetData.getReferenceJetToTau().isNonnull() && tauMatchData.isJetToTau()) {
       double myDeltaPtWithoutNeutralHadrons = tauData.getSelectedTau()->pt() - jetData.getReferenceJetToTau()->pt() * (1.0-jetData.getReferenceJetToTau()->neutralHadronEnergyFraction());
       if (tauData.getSelectedTau()->decayMode() == 0) {
         hReferenceJetToTauDeltaPtDecayMode0->Fill(jetData.getReferenceJetToTauDeltaPt());
