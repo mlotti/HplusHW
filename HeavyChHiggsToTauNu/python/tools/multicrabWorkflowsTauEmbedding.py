@@ -30,9 +30,10 @@ def getDefaultDefinitions_44X():
 
         # MC, triggered with mcTrigger
         "WJets_TuneZ2_Fall11":               TaskDefMC(),
-#        "W2Jets_TuneZ2_Fall11":              TaskDefMC(),
-#        "W3Jets_TuneZ2_Fall11":              TaskDefMC(),
-#        "W4Jets_TuneZ2_Fall11":              TaskDefMC(),
+        "W1Jets_TuneZ2_Fall11":              TaskDefMC(),
+        "W2Jets_TuneZ2_Fall11":              TaskDefMC(),
+        "W3Jets_TuneZ2_Fall11":              TaskDefMC(),
+        "W4Jets_TuneZ2_Fall11":              TaskDefMC(),
         "TTJets_TuneZ2_Fall11":              TaskDefMC(),
         "DYJetsToLL_M50_TuneZ2_Fall11":      TaskDefMC(),
         "T_t-channel_TuneZ2_Fall11":         TaskDefMC(),
@@ -74,9 +75,10 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
 
         # MC, triggered with mcTrigger
         "WJets_TuneZ2_Fall11":               TaskDef(njobsIn= 990, njobsOut=12), # ~ 1.5 hour/100 MB
-#        "W2Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 490, njobsOut=20),
-#        "W3Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 490, njobsOut=),
-#        "W4Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 490, njobsOut=12),
+        "W1Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 490, njobsOut=20),
+        "W2Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 490, njobsOut=20),
+        "W3Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 490, njobsOut=20),
+        "W4Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 490, njobsOut=12),
         "TTJets_TuneZ2_Fall11":              TaskDef(njobsIn=4990, njobsOut=50), # ~1 hour/200 MB
         "DYJetsToLL_M50_TuneZ2_Fall11":      TaskDef(njobsIn= 990, njobsOut=10),
         "T_t-channel_TuneZ2_Fall11":         TaskDef(njobsIn= 300, njobsOut= 2),
@@ -90,16 +92,19 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
         "ZZ_TuneZ2_Fall11":                  TaskDef(njobsIn= 200, njobsOut= 4),
         "QCD_Pt20_MuEnriched_TuneZ2_Fall11": TaskDef(njobsIn= 490, njobsOut= 3),
         }
+
+    workflowName = "tauembedding_skim_"+version
+
     # Update the default definitions from the argument
-    updateTaskDefinitions(defaultDefinitions, njobs)
-    updateTaskDefinitions(defaultDefinitions, updateDefinitions)
+    updateTaskDefinitions(defaultDefinitions, njobs, workflowName)
+    updateTaskDefinitions(defaultDefinitions, updateDefinitions, workflowName)
 
     # Add skim Workflow for each dataset
     for datasetName, taskDef in defaultDefinitions.iteritems():
         dataset = datasets.getDataset(datasetName)
 
         # Construct processing workflow
-        wf = constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow="AOD", workflowName="tauembedding_skim_"+version)
+        wf = constructProcessingWorkflow_44X(dataset, taskDef, sourceWorkflow="AOD", workflowName=workflowName)
 
         # CRAB configuration lines
         if dataset.isData():
@@ -112,7 +117,10 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
             wf.addCrabLine("CMSSW.total_number_of_events = -1")
 
         # Setup the publish name
-        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), "embedding_skim_"+version)
+        if "v44_4" in version:
+            name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName.replace("tau", ""))
+        else:
+            name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName)
         wf.addCrabLine("USER.publish_data_name = "+name)
 
         # Add the skim Workflow to Dataset
@@ -300,6 +308,42 @@ def addEmbeddingEmbedding_v44_4_2(datasets):
         })
 
 
+def addEmbeddingSkim_v44_5(datasets):
+    definitions = {
+        "SingleMu_160431-163261_2011A_Nov08": TaskDef(""),
+        "SingleMu_163270-163869_2011A_Nov08": TaskDef(""),
+        "SingleMu_165088-166150_2011A_Nov08": TaskDef(""),
+        "SingleMu_166161-166164_2011A_Nov08": TaskDef(""),
+        "SingleMu_166346-166346_2011A_Nov08": TaskDef(""),
+        "SingleMu_166374-167043_2011A_Nov08": TaskDef(""),
+        "SingleMu_167078-167913_2011A_Nov08": TaskDef(""),
+        "SingleMu_170722-172619_2011A_Nov08": TaskDef(""),
+        "SingleMu_172620-173198_2011A_Nov08": TaskDef(""),
+        "SingleMu_173236-173692_2011A_Nov08": TaskDef(""),
+        "SingleMu_173693-177452_2011B_Nov19": TaskDef(""),
+        "SingleMu_177453-178380_2011B_Nov19": TaskDef(""),
+        "SingleMu_178411-179889_2011B_Nov19": TaskDef(""),
+        "SingleMu_179942-180371_2011B_Nov19": TaskDef(""),
+        "TTJets_TuneZ2_Fall11":               TaskDef(""),
+        "WJets_TuneZ2_Fall11":                TaskDef(""),
+        "W1Jets_TuneZ2_Fall11":               TaskDef(""),
+        "W2Jets_TuneZ2_Fall11":               TaskDef(""),
+        "W3Jets_TuneZ2_Fall11":               TaskDef(""),
+        "W4Jets_TuneZ2_Fall11":               TaskDef(""),
+        "DYJetsToLL_M50_TuneZ2_Fall11":       TaskDef(""),
+        "T_t-channel_TuneZ2_Fall11":          TaskDef(""),
+        "Tbar_t-channel_TuneZ2_Fall11":       TaskDef(""),
+        "T_tW-channel_TuneZ2_Fall11":         TaskDef(""),
+        "Tbar_tW-channel_TuneZ2_Fall11":      TaskDef(""),
+        "T_s-channel_TuneZ2_Fall11":          TaskDef(""),
+        "Tbar_s-channel_TuneZ2_Fall11":       TaskDef(""),
+        "WW_TuneZ2_Fall11":                   TaskDef(""),
+        "WZ_TuneZ2_Fall11":                   TaskDef(""),
+        "ZZ_TuneZ2_Fall11":                   TaskDef(""),
+        "QCD_Pt20_MuEnriched_TuneZ2_Fall11":  TaskDef(""),
+        }
+    addEmbeddingSkim_44X("v44_5", datasets, definitions)
+
 def addEmbedding_SKELETON(datasets):
     definitions = {
         "SingleMu_160431-163261_2011A_Nov08": TaskDef(""),
@@ -318,6 +362,10 @@ def addEmbedding_SKELETON(datasets):
         "SingleMu_179942-180371_2011B_Nov19": TaskDef(""),
         "TTJets_TuneZ2_Fall11":               TaskDef(""),
         "WJets_TuneZ2_Fall11":                TaskDef(""),
+        "W1Jets_TuneZ2_Fall11":               TaskDef(""),
+        "W2Jets_TuneZ2_Fall11":               TaskDef(""),
+        "W3Jets_TuneZ2_Fall11":               TaskDef(""),
+        "W4Jets_TuneZ2_Fall11":               TaskDef(""),
         "DYJetsToLL_M50_TuneZ2_Fall11":       TaskDef(""),
         "T_t-channel_TuneZ2_Fall11":          TaskDef(""),
         "Tbar_t-channel_TuneZ2_Fall11":       TaskDef(""),
