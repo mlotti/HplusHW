@@ -189,7 +189,7 @@ fakeTauSFandSystematicsAgainstElectronMVA = fakeTauSFandSystematicsBase.clone(
 )
 
 fakeTauSFandSystematics = None
-if tauSelection.againstElectronDiscriminator.value() == "againstElectronMedim":
+if tauSelection.againstElectronDiscriminator.value() == "againstElectronMedium":
     fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMedium
 elif tauSelection.againstElectronDiscriminator.value() == "againstElectronMVA":
     fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMVA
@@ -306,19 +306,10 @@ ElectronSelection = cms.untracked.PSet(
     ElectronEtaCut = cms.untracked.double(2.5)
 )
 
-NonIsolatedElectronVeto = cms.untracked.PSet(
-    ElectronCollectionName = cms.untracked.InputTag("selectedPatElectrons"),
-    ElectronSelection = cms.untracked.string("simpleEleId60relIso"),
-    ElectronPtCut = cms.untracked.double(10.0),
-    ElectronEtaCut = cms.untracked.double(2.5)
-)
-
 MuonSelection = cms.untracked.PSet(
     MuonCollectionName = cms.untracked.InputTag("selectedPatMuons"),
-    MuonSelection = cms.untracked.string("GlobalMuonPromptTight"), # does not affect end result
     MuonPtCut = cms.untracked.double(10.0),
-    MuonEtaCut = cms.untracked.double(2.5),  
-    MuonApplyIpz = cms.untracked.bool(True) # Apply IP-z cut,  # does not affect end result
+    MuonEtaCut = cms.untracked.double(2.5),
 )
 
 InvMassVetoOnJets = cms.untracked.PSet(
