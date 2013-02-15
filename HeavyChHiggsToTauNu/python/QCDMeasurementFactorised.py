@@ -10,7 +10,7 @@ def createEDFilter(param):
         blindAnalysisStatus = param.blindAnalysisStatus,
         histogramAmbientLevel = param.histogramAmbientLevel,
         trigger = param.trigger.clone(),
-        triggerEfficiencyScaleFactor = param.triggerEfficiencyScaleFactor.clone(),
+        tauTriggerEfficiencyScaleFactor = param.tayTriggerEfficiencyScaleFactor.clone(),
         primaryVertexSelection = param.primaryVertexSelection.clone(),
         GlobalElectronVeto = param.GlobalElectronVeto.clone(),
         GlobalMuonVeto = param.GlobalMuonVeto.clone(),

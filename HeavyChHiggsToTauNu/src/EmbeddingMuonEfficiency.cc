@@ -36,7 +36,7 @@ namespace HPlus {
     edm::ParameterSet dataParameters = iConfig.getParameter<edm::ParameterSet>("dataParameters");
     edm::ParameterSet mcParameters = iConfig.getParameter<edm::ParameterSet>("mcParameters");
 
-    // Data Pset names are not relevant, just to have the same syntax as with TriggerEfficiencyScaleFactor
+    // Data Pset names are not relevant, just to have the same syntax as with TauTriggerEfficiencyScaleFactor
     std::vector<std::string> dataNames = dataParameters.getParameterNames();
     for(std::vector<std::string>::const_iterator iName = dataNames.begin(); iName != dataNames.end(); ++iName) {
       edm::ParameterSet pset = dataParameters.getParameter<edm::ParameterSet>(*iName);
