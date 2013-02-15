@@ -99,10 +99,8 @@ namespace HPlus {
 
     // Input parameters
     edm::InputTag fMuonCollectionName;
-    const std::string fMuonSelection;
     const double fMuonPtCut;
     const double fMuonEtaCut;
-    const bool fMuonApplyIpz;
     
     /// Sub-Counters
     Count fMuonSelectionSubCountAllEvents;

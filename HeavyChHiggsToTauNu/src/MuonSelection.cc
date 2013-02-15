@@ -26,10 +26,8 @@ namespace HPlus {
   MuonSelection::MuonSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
     BaseSelection(eventCounter, histoWrapper),
     fMuonCollectionName(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollectionName")),
-    fMuonSelection(iConfig.getUntrackedParameter<std::string>("MuonSelection")),
     fMuonPtCut(iConfig.getUntrackedParameter<double>("MuonPtCut")),
     fMuonEtaCut(iConfig.getUntrackedParameter<double>("MuonEtaCut")),
-    fMuonApplyIpz(iConfig.getUntrackedParameter<bool>("MuonApplyIpz")),
     fMuonSelectionSubCountAllEvents(eventCounter.addSubCounter("MuonSelection","AllEvent")),
     fMuonSelectionSubCountMuonPresent(eventCounter.addSubCounter("MuonSelection","Muon present")),
     fMuonSelectionSubCountMuonHasGlobalOrInnerTrk(eventCounter.addSubCounter("MuonSelection","Muon has Global OR Inner Trk")),
