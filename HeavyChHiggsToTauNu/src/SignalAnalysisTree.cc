@@ -125,6 +125,7 @@ namespace HPlus {
     fTree->Branch("planarity", &fPlanarity);
     fTree->Branch("circularity", &fCircularity);
     fTree->Branch("TauIsFake", &bTauIsFake);
+    fTree->Branch("MHT_p4", &fMHT);
     fTree->Branch("MHT_SelJets_p4", &fMHTSelJets);
     fTree->Branch("MHT_AllJets_p4", &fMHTAllJets);
 
@@ -710,6 +711,7 @@ namespace HPlus {
     fJetsTightId.clear();
 
     fRawMet.SetXYZT(nan, nan, nan, nan);
+    fMHT.SetXYZT(nan, nan, nan, nan);
     fMHTSelJets.SetXYZT(nan, nan, nan, nan);
     fMHTAllJets.SetXYZT(nan, nan, nan, nan);
     fRawMetSumEt = nan;
