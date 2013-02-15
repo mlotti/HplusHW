@@ -437,7 +437,10 @@ namespace HPlus {
 
     /// Sanity check on eigenvalues: 0 <= Q1 <= Q2 <= Q3
     if(!(eigenvalues[0] >= 0 && eigenvalues[1] >= eigenvalues[0] && eigenvalues[2] >= eigenvalues[1])){
-      throw cms::Exception("LogicError") << "Failure of requirement that eigenvalues are ordered as 0 <= Q1 <= Q2 <= Q3 at " << __FILE__ << ":" << __LINE__ << std::endl;
+      eigenvalues[0] = -1;
+      eigenvalues[1] = -1;
+      eigenvalues[2] = -1;
+      //throw cms::Exception("LogicError") << "Failure of requirement that eigenvalues are ordered as 0 <= Q1 <= Q2 <= Q3 at " << __FILE__ << ":" << __LINE__ << std::endl;
     }
     
     /// Sanity check on eigenvalues: Q1 + Q2 + Q3 = 1
@@ -461,6 +464,8 @@ namespace HPlus {
     /// Sphericity (S) = 3/2*(Q1+Q2)    0 <= S <= 1
     /// S = 1 for spherical, S= 3/4 for planar, S= 0 for linear events
 
+    if (output.sKinematics.fQOne < 0) return false;
+    
     bool bPassedCut = false;
     float sphericity = (1.5*(eigenvalues[0]+eigenvalues[1]));
     //std::cout << "S = " << sphericity << ", Q1 = " << eigenvalues[0] << ", Q2 = " << eigenvalues[1] << ", Q3 = " << eigenvalues[2] << std::endl;
@@ -486,6 +491,8 @@ namespace HPlus {
     
     /// Aplanarity (A) = 3/2*(Q1)    0 <= A <= 0.5    
     /// A = 0.5 for spherical, A=0 for planar/linear events
+
+    if (output.sKinematics.fQOne < 0) return false;
 
     bool bPassedCut = false;
     float aplanarity = (1.5*eigenvalues[0]);
@@ -514,6 +521,8 @@ namespace HPlus {
     /// TextBook definition for Planarity:
     /// Planarity (P) = 3/2*(S-2A) = Q2-Q1     0 <= P <= 0.5
 
+    if (output.sKinematics.fQOne < 0) return false;
+    
     bool bPassedCut = false;
     float planarity = (eigenvalues[1]-eigenvalues[0]);
     if ( !(planarity <= 0.5 && planarity >=0) ){
@@ -538,6 +547,9 @@ namespace HPlus {
 
     /// Circularity (C) = 2*min(Q1,Q2)/(Q1+Q2)  0 <= C <= 1
     /// C = 1 for spherical, C = 0 for linear events
+    
+    if (output.sKinematics.fQOne < 0) return false;
+    
     bool bPassedCut = false;
     float circularity = -1, phi=0.0, area = 0.0;
     const int nSteps = 1000;

@@ -5,14 +5,20 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VetoTauSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
+
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NormalisationAnalysis.h"
+
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include <string>
 #include <vector>
@@ -33,7 +39,7 @@ namespace HPlus {
    */
   class CommonPlotsFilledAtEveryStep {
   public:
-    CommonPlotsFilledAtEveryStep(HistoWrapper& histoWrapper, std::string label, bool enterSelectionFlowPlot, std::string selectionFlowPlotLabel);
+    CommonPlotsFilledAtEveryStep(HistoWrapper& histoWrapper, TFileDirectory& dir, std::string label, bool enterSelectionFlowPlot, std::string selectionFlowPlotLabel);
     ~CommonPlotsFilledAtEveryStep();
     /// Fills histograms; supply pointer to data object from analyse() call, if it exists
     void fill();
@@ -42,16 +48,15 @@ namespace HPlus {
     /// 
     const std::string getSelectionFlowPlotLabel() const { return fSelectionFlowPlotLabel; }
     /// Cache data objects, to be called from CommonPlots::initialize()
-    void cacheDataObjects(int nVertices,
-                          const VertexSelection::Data* vertexData,
+    void cacheDataObjects(const VertexSelection::Data* vertexData,
                           const TauSelection::Data* tauData,
-                          const GlobalElectronVeto::Data* electronData,
-                          const GlobalMuonVeto::Data* muonData,
+                          const FakeTauIdentifier::Data* fakeTauData,
+                          const ElectronSelection::Data* electronData,
+                          const MuonSelection::Data* muonData,
                           const JetSelection::Data* jetData,
                           const METSelection::Data* metData,
                           const BTagging::Data* bJetData,
-                          const TopChiSelection::Data* topData,
-                          const EvtTopology::Data* evtTopology);
+                          const TopChiSelection::Data* topData);
 
   private:
     /// Status indicating wheather the data objects have been cached
@@ -61,19 +66,19 @@ namespace HPlus {
     std::string fSelectionFlowPlotLabel;
 
     /// Cached data objects from silent analyze
-    int fNVertices;
     const VertexSelection::Data* fVertexData;
     const TauSelection::Data* fTauData;
-    const GlobalElectronVeto::Data* fElectronData;
-    const GlobalMuonVeto::Data* fMuonData;
+    const FakeTauIdentifier::Data* fFakeTauData;
+    const ElectronSelection::Data* fElectronData;
+    const MuonSelection::Data* fMuonData;
     const JetSelection::Data* fJetData;
     const METSelection::Data* fMETData;
     const BTagging::Data* fBJetData;
     const TopChiSelection::Data* fTopData;
-    const EvtTopology::Data* fEvtTopology;
 
     /// Histograms to be plotted after every step
     WrappedTH1* hNVertices;
+    WrappedTH1* hFakeTauStatus;
     WrappedTH1* hTauPt;
     WrappedTH1* hTauEta;
     WrappedTH1* hTauPhi;
@@ -102,11 +107,11 @@ namespace HPlus {
     /// Initialize data objects; call for every event
     void initialize(const edm::Event& iEvent,
                     const edm::EventSetup& iSetup,
-                    int nVertices,
-                    VertexSelection& vertexSelection,
+                    VertexSelection::Data& vertexData,
                     TauSelection& tauSelection,
-                    GlobalElectronVeto& eVeto,
-                    GlobalMuonVeto& muonVeto,
+                    FakeTauIdentifier& fakeTauIdentifier,
+                    ElectronSelection& eVeto,
+                    MuonSelection& muonVeto,
                     JetSelection& jetSelection,
                     METSelection& metSelection,
                     BTagging& bJetSelection,
@@ -119,9 +124,9 @@ namespace HPlus {
     /// unique filling methods (to be called before return statement)
     void fillControlPlots(const TriggerSelection::Data& data);
     void fillControlPlots(const VertexSelection::Data& data);
-    void fillControlPlots(const TauSelection::Data& data);
-    void fillControlPlots(const GlobalElectronVeto::Data& data);
-    void fillControlPlots(const GlobalMuonVeto::Data& data);
+    void fillControlPlots(const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData);
+    void fillControlPlots(const ElectronSelection::Data& data);
+    void fillControlPlots(const MuonSelection::Data& data);
     void fillControlPlots(const JetSelection::Data& data);
     void fillControlPlots(const METSelection::Data& data);
     void fillControlPlots(const BTagging::Data& data);
@@ -130,21 +135,28 @@ namespace HPlus {
     void fillFinalPlots();
     void fillFinalPlotsForFakeTaus();
 
-  private:
+  protected:
+    
+    /// Creates histograms
     void createHistograms();
-
     /// Status indicating wheather the data objects have been cached
     bool bDataObjectsCached;
     /// Event counter object
     EventCounter& fEventCounter;
     /// HistoWrapper object
     HistoWrapper& fHistoWrapper;
+    /// Base directory in root file for every step histograms
+    edm::Service<TFileService> fs;
+    TFileDirectory fCommonBaseDirectory;
+    TFileDirectory fEveryStepDirectory;
+    /// Normalisation analysis object
+    NormalisationAnalysis fNormalisationAnalysis;
     /// Cached data objects from silent analyze
-    int fNVertices;
     VertexSelection::Data fVertexData;
     TauSelection::Data fTauData;
-    GlobalElectronVeto::Data fElectronData;
-    GlobalMuonVeto::Data fMuonData;
+    FakeTauIdentifier::Data fFakeTauData;
+    ElectronSelection::Data fElectronData;
+    MuonSelection::Data fMuonData;
     JetSelection::Data fJetData;
     METSelection::Data fMETData;
     BTagging::Data fBJetData;
@@ -159,6 +171,8 @@ namespace HPlus {
     // vertex
     
     // tau selection
+    WrappedTH2* hTauPhiOscillationX;
+    WrappedTH2* hTauPhiOscillationY;
     
     // electron veto
     

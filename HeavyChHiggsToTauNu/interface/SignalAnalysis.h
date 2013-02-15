@@ -10,8 +10,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NonIsolatedElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CorrelationAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
@@ -235,8 +235,8 @@ namespace HPlus {
 
     TriggerSelection fTriggerSelection;
     VertexSelection fPrimaryVertexSelection;
-    GlobalElectronVeto fGlobalElectronVeto;
-    GlobalMuonVeto fGlobalMuonVeto;
+    ElectronSelection fElectronSelection;
+    MuonSelection fMuonSelection;
     TauSelection fTauSelection;
     VetoTauSelection fVetoTauSelection;
     JetSelection fJetSelection;
@@ -287,6 +287,8 @@ namespace HPlus {
     WrappedTH1 *hTauVsJetDeltaPt;
     WrappedTH1 *hTauVsJetDeltaR;
     WrappedTH1 *hTauVsJetMCFlavor;
+    WrappedTH1 *hTauVsJetDeltaPtGenuineTaus;
+    WrappedTH1 *hTauVsJetDeltaPtElectrons;
     WrappedTH1 *hTauVsJetDeltaPtHeavyFlavor;
     WrappedTH1 *hTauVsJetDeltaRHeavyFlavor;
     WrappedTH1 *hTauVsJetDeltaPtLightFlavor;

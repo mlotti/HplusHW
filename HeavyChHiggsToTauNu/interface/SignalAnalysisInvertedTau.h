@@ -10,9 +10,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NonIsolatedElectronVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CorrelationAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetTauInvMass.h"
@@ -197,9 +196,8 @@ namespace HPlus {
 
     TriggerSelection fTriggerSelection;
     VertexSelection fPrimaryVertexSelection;
-    GlobalElectronVeto fGlobalElectronVeto;
-    //    NonIsolatedElectronVeto fNonIsolatedElectronVeto;
-    GlobalMuonVeto fGlobalMuonVeto;
+    ElectronSelection fElectronSelection;
+    MuonSelection fMuonSelection;
     //    TauSelection fOneProngTauSelection;
     TauSelection fTauSelection;
     JetSelection fJetSelection;
