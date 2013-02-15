@@ -125,8 +125,8 @@ namespace HPlus {
     fTree->Branch("planarity", &fPlanarity);
     fTree->Branch("circularity", &fCircularity);
     fTree->Branch("TauIsFake", &bTauIsFake);
-    fTree->Branch("MHT_SelJets_p4", &fMHTvectorSelJets);
-    fTree->Branch("MHT_AllJets_p4", &fMHTvectorAllJets);
+    fTree->Branch("MHT_SelJets_p4", &fMHTSelJets);
+    fTree->Branch("MHT_AllJets_p4", &fMHTAllJets);
 
     fTree->Branch("deltaPhi", &fDeltaPhi);
     fTree->Branch("passedBTagging", &fPassedBTagging);
@@ -215,6 +215,29 @@ namespace HPlus {
     // std::cout << "setHltTaus: 2" << std::endl;  
   }
  
+
+  void SignalAnalysisTree::setAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets){
+    for(size_t i=0; i<allIdentifiedJets.size(); ++i) {
+      fAllIdentifiedJets.push_back(allIdentifiedJets[i]->p4());}
+  }
+  
+
+  void SignalAnalysisTree::setMHTAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets){
+    fMHTAllJets.SetXYZT(0., 0., 0., 0.);
+    for (edm::PtrVector<pat::Jet>::const_iterator iter = allIdentifiedJets.begin(); iter != allIdentifiedJets.end(); ++iter) {
+      fMHTAllJets -= (*iter)->p4();
+    }
+  }
+  
+
+  void SignalAnalysisTree::setMHTSelJets(const edm::PtrVector<pat::Jet>& jets){
+    fMHTSelJets.SetXYZT(0., 0., 0., 0.);
+    for (edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
+      fMHTSelJets -= (*iter)->p4();
+    }
+  }
+
+
   void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau,
                                 const edm::PtrVector<pat::Jet>& jets) {
     if(!fDoFill)
@@ -663,8 +686,6 @@ namespace HPlus {
 
     fJets.clear();
     fAllIdentifiedJets.clear();
-    fMHTvectorSelJets.clear();
-    fMHTvectorAllJets.clear();
     fJetsBtags.clear();
     fJetsFlavour.clear();
 
@@ -689,6 +710,8 @@ namespace HPlus {
     fJetsTightId.clear();
 
     fRawMet.SetXYZT(nan, nan, nan, nan);
+    fMHTSelJets.SetXYZT(nan, nan, nan, nan);
+    fMHTAllJets.SetXYZT(nan, nan, nan, nan);
     fRawMetSumEt = nan;
     fRawMetSignificance = nan;
 
