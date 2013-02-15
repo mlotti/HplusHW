@@ -228,7 +228,11 @@ namespace HPlus {
           }
         }
       }
-      
+      // Look at electrons that did not pass the loosest isolation
+      if (!myVetoIdStatus && !myMediumIdStatus && !myTightIdStatus) {
+        output.fSelectedNonIsolatedElectrons.push_back(*iElectron);
+      }
+
       if (!myVetoIdStatus) continue;
       bPassedElecID = true;
       output.fSelectedElectronsBeforePtAndEtaCuts.push_back(*iElectron);

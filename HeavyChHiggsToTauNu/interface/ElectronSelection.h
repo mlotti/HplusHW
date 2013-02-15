@@ -61,6 +61,7 @@ namespace HPlus {
       const edm::PtrVector<pat::Electron>& getSelectedElectronsVeto() const { return fSelectedElectronsVeto; }
       const edm::PtrVector<pat::Electron>& getSelectedElectronsMedium() const { return fSelectedElectronsMedium; }
       const edm::PtrVector<pat::Electron>& getSelectedElectronsTight() const { return fSelectedElectronsTight; }
+      const edm::PtrVector<pat::Electron>& getNonIsolatedElectrons() const { return fSelectedNonIsolatedElectrons; }
       const edm::PtrVector<pat::Electron>& getSelectedElectronsBeforePtAndEtaCuts() const { return fSelectedElectronsBeforePtAndEtaCuts; }
 
       friend class ElectronSelection;
@@ -77,7 +78,7 @@ namespace HPlus {
       edm::PtrVector<pat::Electron> fSelectedElectronsVeto;
       edm::PtrVector<pat::Electron> fSelectedElectronsTight;
       edm::PtrVector<pat::Electron> fSelectedElectronsMedium;
-      //edm::PtrVector<pat::Electron> fSelectedNonIsolatedElectrons;
+      edm::PtrVector<pat::Electron> fSelectedNonIsolatedElectrons;
       edm::PtrVector<pat::Electron> fSelectedElectronsBeforePtAndEtaCuts;
 
     };
