@@ -95,9 +95,10 @@ def makeDeltaPtPlot(histos, label, fileprefix, mydir):
         histos[i][0].SetMarkerColor(i+1)
         histos[i][0].SetMarkerSize(0.6)
         histos[i][0].SetMarkerStyle(i+18)
-        histos[i][0].Scale(1.0/histos[i][0].Integral())
+        if histos[i][0].Integral() > 0:
+            histos[i][0].Scale(1.0/histos[i][0].Integral())
         histos[i][0].Draw("E SAME")
-    leg = ROOT.TLegend(0.7, 0.7, 0.9, 0.9, "", "brNDC")
+    leg = ROOT.TLegend(0.2, 0.7, 0.5, 0.9, "", "brNDC")
     leg.SetBorderSize(0)
     leg.SetTextFont(63)
     leg.SetTextSize(18)
@@ -141,6 +142,19 @@ def main(opts):
         histosDeltaPt.append([getHistogram(rootFile, "%s/TauVsJetDeltaPtcb"%histoPath), "cb#rightarrow#tau", -1, -1]);
         histosDeltaPt.append([getHistogram(rootFile, "%s/TauVsJetDeltaPtuds"%histoPath), "uds#rightarrow#tau", -1, -1]);
         makeDeltaPtPlot(histosDeltaPt, "#tau p_{T} - ref.jet p_{T} , GeV/c", "tauRefJetDeltaPt", mydir)
+        hDeltaPtMode0 = []
+        myPath = "signalAnalysis%s/"%opts.era[0]
+        hDeltaPtMode0.append([getHistogram(rootFile, "%s/DeltaPtDecayMode0"%myPath), "tau pT - jet pT", -1, -1]);
+        hDeltaPtMode0.append([getHistogram(rootFile, "%s/DeltaPtDecayMode0NoNeutralHadrons"%myPath), "tau pT - jet pT*(1-neutralHadronEnergyFraction)", -1, -1]);
+        makeDeltaPtPlot(hDeltaPtMode0, "e/jet#rightarrow#tau decay mode 0: #Delta p_{T}, GeV/c", "tauRefJetDeltaPtDecayMode0", mydir)
+        hDeltaPtMode1 = []
+        hDeltaPtMode1.append([getHistogram(rootFile, "%s/DeltaPtDecayMode1"%myPath), "tau pT - jet pT", -1, -1]);
+        hDeltaPtMode1.append([getHistogram(rootFile, "%s/DeltaPtDecayMode1NoNeutralHadrons"%myPath), "tau pT - jet pT*(1-neutralHadronEnergyFraction)", -1, -1]);
+        makeDeltaPtPlot(hDeltaPtMode1, "e/jet#rightarrow#tau decay mode 1: #Delta p_{T}, GeV/c", "tauRefJetDeltaPtDecayMode1", mydir)
+        hDeltaPtMode2 = []
+        hDeltaPtMode2.append([getHistogram(rootFile, "%s/DeltaPtDecayMode2"%myPath), "tau pT - jet pT", -1, -1]);
+        hDeltaPtMode2.append([getHistogram(rootFile, "%s/DeltaPtDecayMode2NoNeutralHadrons"%myPath), "tau pT - jet pT*(1-neutralHadronEnergyFraction)", -1, -1]);
+        makeDeltaPtPlot(hDeltaPtMode2, "e/jet#rightarrow#tau decay mode 2: #Delta p_{T}, GeV/c", "tauRefJetDeltaPtDecayMode2", mydir)
         rootFile.Close()
 
 if __name__ == "__main__":
