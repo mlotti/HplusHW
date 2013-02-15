@@ -85,6 +85,7 @@ namespace HPlus {
     fTree->Branch("tau_daughter_pdgid", &fTauDaughterPdgId);
      
     fTree->Branch("jets_p4", &fJets);
+    fTree->Branch("allIdentifiedJets_p4", &fAllIdentifiedJets);
     fTree->Branch("jets_btag", &fJetsBtags);
     if(fFillJetEnergyFractions) {
       fTree->Branch("jets_chf", &fJetsChf); // charged hadron
@@ -124,6 +125,8 @@ namespace HPlus {
     fTree->Branch("planarity", &fPlanarity);
     fTree->Branch("circularity", &fCircularity);
     fTree->Branch("TauIsFake", &bTauIsFake);
+    fTree->Branch("MHT_SelJets_p4", &fMHTvectorSelJets);
+    fTree->Branch("MHT_AllJets_p4", &fMHTvectorAllJets);
 
     fTree->Branch("deltaPhi", &fDeltaPhi);
     fTree->Branch("passedBTagging", &fPassedBTagging);
@@ -659,6 +662,9 @@ namespace HPlus {
     fTauDaughterPdgId = 0;
 
     fJets.clear();
+    fAllIdentifiedJets.clear();
+    fMHTvectorSelJets.clear();
+    fMHTvectorAllJets.clear();
     fJetsBtags.clear();
     fJetsFlavour.clear();
 

@@ -753,6 +753,9 @@ namespace HPlus {
       fTree.setCircularity(evtTopologyData.Kinematics().fCircularity);
       fTree.setMomentumTensorEigenvalues(evtTopologyData.Kinematics().fQOne, evtTopologyData.Kinematics().fQTwo, evtTopologyData.Kinematics().fQThree);
 
+      fTree.setAllJets(jetData.getAllIdentifiedJets());
+      fTree.setMHTvectorSelJets(jetData.getSelectedJets());
+      fTree.setMHTvectorAllJets(jetData.getAllIdentifiedJets());
       fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
       fTree.fill(iEvent, tauData.getSelectedTau(), jetData.getSelectedJets());
       return true;
