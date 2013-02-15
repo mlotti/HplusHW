@@ -80,6 +80,7 @@ namespace HPlus {
 
     /// Histograms to be plotted after every step
     WrappedTH1* hNVertices;
+    WrappedTH1* hFakeTauStatus;
     WrappedTH1* hTauPt;
     WrappedTH1* hTauEta;
     WrappedTH1* hTauPhi;

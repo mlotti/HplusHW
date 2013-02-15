@@ -45,7 +45,10 @@ namespace HPlus {
     void analyseEToTauFakes(const VertexSelection::Data& vertexData,
                             const TauSelection::Data& tauData,
                             const FakeTauIdentifier::Data& fakeTauData,
-                            const ElectronSelection::Data& electronData);
+                            const ElectronSelection::Data& electronData,
+                            const MuonSelection::Data& muondata,
+                            const JetSelection::Data& jetData,
+                            const METSelection::Data& metData);
 
   protected:
     /// Creates histograms

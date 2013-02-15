@@ -30,14 +30,14 @@ namespace HPlus {
     // Create histograms
     // e -> tau fakes
     TFileDirectory myEtoTauDir = myBaseDir.mkdir("eToTau");
-    hEtoTauZmassAll = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_mZ_all", "etotau_mZ_all;m_{ee} / GeV/c^{2};N_{events}", 100, 0, 500);
-    hEtoTauZmassDecayMode0 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_mZ_decayMode0", "etotau_mZ_decayMode0;m_{ee} / GeV/c^{2};N_{events}", 100, 0, 500);
-    hEtoTauZmassDecayMode1 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_mZ_decayMode1", "etotau_mZ_decayMode1;m_{ee} / GeV/c^{2};N_{events}", 100, 0, 500);
-    hEtoTauZmassDecayMode2 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_mZ_decayMode2", "etotau_mZ_decayMode2;m_{ee} / GeV/c^{2};N_{events}", 100, 0, 500);
-    hEtoTauTauPtAll = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_taupT_all", "etotau_tauPt_all;#tau p_{T} / GeV/c;N_{events}", 100, 0, 500);
-    hEtoTauTauPtDecayMode0 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_taupT_decayMode0", "etotau_tauPt_decayMode0;#tau p_{T} / GeV/c;N_{events}", 100, 0, 500);
-    hEtoTauTauPtDecayMode1 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_taupT_decayMode1", "etotau_tauPt_decayMode1;#tau p_{T} / GeV/c;N_{events}", 100, 0, 500);
-    hEtoTauTauPtDecayMode2 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_taupT_decayMode2", "etotau_tauPt_decayMode2;#tau p_{T} / GeV/c;N_{events}", 100, 0, 500);
+    hEtoTauZmassAll = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_mZ_all", "etotau_mZ_all;m_{ee} / GeV/c^{2};N_{events}", 50, 0, 250);
+    hEtoTauZmassDecayMode0 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_mZ_decayMode0", "etotau_mZ_decayMode0;m_{ee} / GeV/c^{2};N_{events}", 50, 0, 250);
+    hEtoTauZmassDecayMode1 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_mZ_decayMode1", "etotau_mZ_decayMode1;m_{ee} / GeV/c^{2};N_{events}", 50, 0, 250);
+    hEtoTauZmassDecayMode2 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_mZ_decayMode2", "etotau_mZ_decayMode2;m_{ee} / GeV/c^{2};N_{events}", 50, 0, 250);
+    hEtoTauTauPtAll = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_taupT_all", "etotau_tauPt_all;#tau p_{T} / GeV/c;N_{events}", 50, 0, 250);
+    hEtoTauTauPtDecayMode0 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_taupT_decayMode0", "etotau_tauPt_decayMode0;#tau p_{T} / GeV/c;N_{events}", 50, 0, 250);
+    hEtoTauTauPtDecayMode1 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_taupT_decayMode1", "etotau_tauPt_decayMode1;#tau p_{T} / GeV/c;N_{events}", 50, 0, 250);
+    hEtoTauTauPtDecayMode2 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myEtoTauDir, "etotau_taupT_decayMode2", "etotau_tauPt_decayMode2;#tau p_{T} / GeV/c;N_{events}", 50, 0, 250);
   }
 
   NormalisationAnalysis::~NormalisationAnalysis() {}
@@ -45,7 +45,23 @@ namespace HPlus {
   void NormalisationAnalysis::analyseEToTauFakes(const VertexSelection::Data& vertexData,
                                                  const TauSelection::Data& tauData,
                                                  const FakeTauIdentifier::Data& fakeTauData,
-                                                 const ElectronSelection::Data& electronData) {
+                                                 const ElectronSelection::Data& electronData,
+                                                 const MuonSelection::Data& muondata,
+                                                 const JetSelection::Data& jetData,
+                                                 const METSelection::Data& metData) {
+
+        // TODO: change selection as follows:
+    // Strategy A: use Z->ee and tag and probe
+    // 1) trg, PV
+    // 2) 1 electron
+    // 3) mu veto
+    // 4) Njets <= 2 or 3
+    // 5) if necessary MET < 40 or 50
+    // 6) apply tau ID with no Rtau
+    // 7) calculate m(ee) (Z->tau_h tau_e gives peak at 
+    
+    // Strategy B: take ttbar or Wjets events, look at electrons that overlap with taus and see how often they pass tau ID
+
     // Make sure vertex has been found
     if (!vertexData.passedEvent()) return;
     // Make sure tau has been found
@@ -62,7 +78,8 @@ namespace HPlus {
       }
     }
     if (myElectronCount != 1) return;
-    // TODO: if purity is not sufficient, then consider adding b jet veto
+    
+    
     // Calculate Z mass
     LorentzVector myZCandidate;
     myZCandidate += tauData.getSelectedTau()->p4();
@@ -78,7 +95,7 @@ namespace HPlus {
       hEtoTauZmassDecayMode2->Fill(myZCandidateMass);
     }
     // Select events with Z mass
-    if (!(myZCandidateMass > 70 && myZCandidateMass < 100)) return;
+    if (!(myZCandidateMass > 80 && myZCandidateMass < 100)) return;
     double myTauPt = tauData.getSelectedTau()->pt();
     hEtoTauTauPtAll->Fill(myTauPt);
     if (tauData.getSelectedTau()->decayMode() == 0) {

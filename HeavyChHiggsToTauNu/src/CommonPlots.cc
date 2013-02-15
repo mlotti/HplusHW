@@ -15,6 +15,21 @@ namespace HPlus {
     TFileDirectory myDir = dir.mkdir(label.c_str());
     // Create histograms
     hNVertices = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "nVertices", "Number of vertices;N_{vertices};N_{events}", 60, 0, 60);
+    hFakeTauStatus = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "tau_fakeStatus", "tau_fakeStatus;N_{events}", 11, 0, 11);
+    if (hFakeTauStatus->isActive()) {
+      // items labeled 'main count' sum up to Nevents (useful if you want to know the fractions)
+      hFakeTauStatus->GetXaxis()->SetBinLabel(1, "All events"); // control to give Nevents
+      hFakeTauStatus->GetXaxis()->SetBinLabel(2, "1-prong #tau"); // main count
+      hFakeTauStatus->GetXaxis()->SetBinLabel(3, "3-prong #tau"); // main count
+      hFakeTauStatus->GetXaxis()->SetBinLabel(4, "e#rightarrow#tau"); // main count
+      hFakeTauStatus->GetXaxis()->SetBinLabel(5, "#mu#rightarrow#tau"); // main count
+      hFakeTauStatus->GetXaxis()->SetBinLabel(6, "jet#rightarrow#tau"); // main count
+      hFakeTauStatus->GetXaxis()->SetBinLabel(7, "uds#rightarrow#tau"); // subcount
+      hFakeTauStatus->GetXaxis()->SetBinLabel(8, "cb#rightarrow#tau"); // subcount
+      hFakeTauStatus->GetXaxis()->SetBinLabel(9, "g#rightarrow#tau"); // subcount
+      hFakeTauStatus->GetXaxis()->SetBinLabel(10, "#tau#rightarrowe#rightarrow#tau"); // subcount
+      hFakeTauStatus->GetXaxis()->SetBinLabel(11, "#tau#rightarrow#mu#rightarrow#tau"); // subcount
+    }
     hTransverseMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events}", 80, 0., 400.);
 
   }
@@ -26,8 +41,39 @@ namespace HPlus {
      //if (!fDataObjectsCached)
      //  throw cms::Exception("Assert") << "CommonPlotsFilledAtEveryStep: data objects have not been cached! (did you forget to call CommonPlotsFilledAtEveryStep::cacheDataObjects from CommonPlots::initialize?)";
     hNVertices->Fill(fNVertices);
+    if (!fVertexData) return;
     if (!fVertexData->passedEvent()) return; // Plots do not make sense if no PV has been found
-    
+
+    if (!fTauData) return;
+    // Fill fake tau breakdown
+    hFakeTauStatus->Fill(0); // control for Nevents
+    if (fFakeTauData->isGenuineOneProngTau())
+      hFakeTauStatus->Fill(1);
+    else if (!fFakeTauData->isGenuineOneProngTau() && fFakeTauData->isGenuineTau())
+      hFakeTauStatus->Fill(2);
+    else if (fFakeTauData->isElectronToTau()) {
+      hFakeTauStatus->Fill(3);
+      if (fFakeTauData->isEmbeddingGenuineTau())
+        hFakeTauStatus->Fill(9);
+    } else if (fFakeTauData->isMuonToTau()) {
+      hFakeTauStatus->Fill(4);
+      if (fFakeTauData->isEmbeddingGenuineTau())
+        hFakeTauStatus->Fill(10);
+    } else if (fFakeTauData->isJetToTau()) {
+      hFakeTauStatus->Fill(5);
+      if (fJetData->getReferenceJetToTau().isNonnull()) {
+        if (fJetData->getReferenceJetToTauPartonFlavour() >= 1 && fJetData->getReferenceJetToTauPartonFlavour() <= 3)
+          hFakeTauStatus->Fill(6);
+        else if (fJetData->getReferenceJetToTauPartonFlavour() >= 4 && fJetData->getReferenceJetToTauPartonFlavour() <= 5)
+          hFakeTauStatus->Fill(7);
+        if (fJetData->getReferenceJetToTauPartonFlavour() == 21)
+          hFakeTauStatus->Fill(8);
+      }
+    }
+    if (fJetData->getAllJets().size() == 0) return; // Safety for MET selection data to exist
+    // transverse mass
+    double myMT = TransverseMass::reconstruct(*(fTauData->getSelectedTau()), *(fMETData->getSelectedMET()) );
+    hTransverseMass->Fill(myMT);
   }
 
   void CommonPlotsFilledAtEveryStep::cacheDataObjects(int nVertices,
@@ -178,7 +224,7 @@ namespace HPlus {
     hTauPhiOscillationY->Fill(fNVertices, tauData.getSelectedTau()->py());
     
     // e->tau normalisation
-    fNormalisationAnalysis.analyseEToTauFakes(fVertexData, tauData, fakeTauData, fElectronData);
+    fNormalisationAnalysis.analyseEToTauFakes(fVertexData, tauData, fakeTauData, fElectronData, fMuonData, fJetData, fMETData);
   }
 
   void CommonPlots::fillControlPlots(const ElectronSelection::Data& data) {
