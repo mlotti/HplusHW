@@ -25,6 +25,7 @@ namespace HPlus {
 
   MuonSelection::MuonSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
     BaseSelection(eventCounter, histoWrapper),
+    fGenParticleSrc(iConfig.getUntrackedParameter<edm::InputTag>("genParticleSrc")),
     fMuonCollectionName(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollectionName")),
     fMuonPtCut(iConfig.getUntrackedParameter<double>("MuonPtCut")),
     fMuonEtaCut(iConfig.getUntrackedParameter<double>("MuonEtaCut")),
@@ -122,7 +123,7 @@ namespace HPlus {
     increment(fMuonSelectionSubCountAllEvents);
 
     edm::Handle <edm::View<reco::GenParticle> > genParticles;
-    iEvent.getByLabel("genParticles", genParticles);
+    iEvent.getByLabel(fGenParticleSrc, genParticles);
 
     // Reset/initialise variables
     float myHighestMuonPt = -1.0;

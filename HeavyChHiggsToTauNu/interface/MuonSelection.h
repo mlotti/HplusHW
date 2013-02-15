@@ -98,7 +98,8 @@ namespace HPlus {
     void doMuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex, MuonSelection::Data& output);
 
     // Input parameters
-    edm::InputTag fMuonCollectionName;
+    const edm::InputTag fGenParticleSrc;
+    const edm::InputTag fMuonCollectionName;
     const double fMuonPtCut;
     const double fMuonEtaCut;
     

@@ -28,6 +28,7 @@ namespace HPlus {
 
   ElectronSelection::ElectronSelection(const edm::ParameterSet& iConfig, const edm::InputTag& vertexSrc, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
     BaseSelection(eventCounter, histoWrapper),
+    fGenParticleSrc(iConfig.getUntrackedParameter<edm::InputTag>("genParticleSrc")),
     fElecCollectionName(iConfig.getUntrackedParameter<edm::InputTag>("ElectronCollectionName")),
     fVertexSrc(vertexSrc),
     fConversionSrc(iConfig.getUntrackedParameter<edm::InputTag>("conversionSrc")),
@@ -124,7 +125,7 @@ namespace HPlus {
     increment(fElecSelectionSubCountAllEvents);
 
     edm::Handle <reco::GenParticleCollection> genParticles;
-    iEvent.getByLabel("genParticles", genParticles); // FIXME: bad habbit to hard-code InputTags
+    iEvent.getByLabel(fGenParticleSrc, genParticles);
 
     // Get Conversions, Vertices, BeamSpot, and Rho
     edm::Handle<reco::ConversionCollection> hConversion;

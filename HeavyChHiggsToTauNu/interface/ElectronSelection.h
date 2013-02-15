@@ -96,11 +96,12 @@ namespace HPlus {
     EgammaCutBasedEleId::WorkingPoint translateWorkingPoint(const std::string& wp);
     
     // Input parameters
-    edm::InputTag fElecCollectionName;
-    edm::InputTag fVertexSrc;
-    edm::InputTag fConversionSrc;
-    edm::InputTag fBeamspotSrc;
-    edm::InputTag fRhoSrc;
+    const edm::InputTag fGenParticleSrc;
+    const edm::InputTag fElecCollectionName;
+    const edm::InputTag fVertexSrc;
+    const edm::InputTag fConversionSrc;
+    const edm::InputTag fBeamspotSrc;
+    const edm::InputTag fRhoSrc;
     const std::string fElecSelectionVeto;
     const std::string fElecSelectionMedium;
     const std::string fElecSelectionTight;

@@ -295,6 +295,7 @@ EvtTopology = cms.untracked.PSet(
 )
 
 ElectronSelection = cms.untracked.PSet(
+    genParticleSrc = cms.untracked.InputTag("genParticles"),
     ElectronCollectionName = cms.untracked.InputTag("selectedPatElectrons"),
     conversionSrc = cms.untracked.InputTag("allConversions"),
     beamspotSrc = cms.untracked.InputTag("offlineBeamSpot"),
@@ -307,6 +308,7 @@ ElectronSelection = cms.untracked.PSet(
 )
 
 MuonSelection = cms.untracked.PSet(
+    genParticleSrc = cms.untracked.InputTag("genParticles"),
     MuonCollectionName = cms.untracked.InputTag("selectedPatMuons"),
     MuonPtCut = cms.untracked.double(10.0),
     MuonEtaCut = cms.untracked.double(2.5),
