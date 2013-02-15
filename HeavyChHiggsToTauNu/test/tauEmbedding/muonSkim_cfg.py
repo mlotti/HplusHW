@@ -146,20 +146,22 @@ process.path = cms.Path(
     process.muonSelectionSequence
 )
 
-# JER, JES variations
-if dataVersion.isMC():
-    jetSelectionModules = [process.goodJets, process.goodJetFilter, process.muonSelectionJets]
-    for m in jetSelectionModules:
-        process.muonSelectionSequence.remove(m)
-        process.path *= m
-    jetCollections = [
-        ("Smeared", "smearedPatJets"),
-        ("ResDown", "smearedPatJetsResDown"),
-        ("ResUp",   "smearedPatJetsResUp"),
-        ("EnDown",  "shiftedPatJetsEnDownForCorrMEt"),
-        ("EnUp",    "shiftedPatJetsEnUpForCorrMEt"),
-        ]
-    for postfix, src in jetCollections:
+# CHS jets + JER, JES variations
+jetSelectionModules = [process.goodJets, process.goodJetFilter, process.muonSelectionJets]
+for m in jetSelectionModules:
+    process.muonSelectionSequence.remove(m)
+    process.path *= m
+
+jetCollections = [
+    ("Smeared", "smearedPatJets"),
+    ("ResDown", "smearedPatJetsResDown"),
+    ("ResUp",   "smearedPatJetsResUp"),
+    ("EnDown",  "shiftedPatJetsEnDownForCorrMEt"),
+    ("EnUp",    "shiftedPatJetsEnUpForCorrMEt"),
+    ]
+for jetPostfix in ["", "Chs"]:
+    for collPostfix, src in jetCollections:
+        postfix = collPostfix+jetPostfix
         path = cms.Path(
             process.commonSequence *
             process.muonSelectionSequence
@@ -169,7 +171,7 @@ if dataVersion.isMC():
         process.out.SelectEvents.SelectEvents.append(name)
     
         m = process.goodJets.clone(
-            src = src
+            src = src+jetPostfix
         )
         name = "goodJets"+postfix
         setattr(process, name, m)
