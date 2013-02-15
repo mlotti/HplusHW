@@ -125,6 +125,8 @@ namespace HPlus {
     fTree->Branch("planarity", &fPlanarity);
     fTree->Branch("circularity", &fCircularity);
     fTree->Branch("TauIsFake", &bTauIsFake);
+    fTree->Branch("MHT_SelJets_p4", &fMHTvectorSelJets);
+    fTree->Branch("MHT_AllJets_p4", &fMHTvectorAllJets);
 
     fTree->Branch("deltaPhi", &fDeltaPhi);
     fTree->Branch("passedBTagging", &fPassedBTagging);
@@ -661,6 +663,8 @@ namespace HPlus {
 
     fJets.clear();
     fAllIdentifiedJets.clear();
+    fMHTvectorSelJets.clear();
+    fMHTvectorAllJets.clear();
     fJetsBtags.clear();
     fJetsFlavour.clear();
 
