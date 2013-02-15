@@ -38,12 +38,11 @@ HPlusGlobalElectronVetoFilter::HPlusGlobalElectronVetoFilter(const edm::Paramete
   fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc")),
   eventCounter(iConfig),
   eventWeight(iConfig),
-  histoWrapper(eventWeight, "Debug"),
+  histoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
   fElectronSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("ElectronSelection"), fVertexSrc, eventCounter, histoWrapper),
   fFilter(iConfig.getParameter<bool>("filter"))
 {
   produces<bool>();
-  eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
 HPlusGlobalElectronVetoFilter::~HPlusGlobalElectronVetoFilter() {}
 void HPlusGlobalElectronVetoFilter::beginJob() {}

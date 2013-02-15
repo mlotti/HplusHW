@@ -30,8 +30,6 @@ analysis = "signalAnalysis"
 #analysis = "signalOptimisation/QCDAnalysisVariation_tauPt40_rtau0_btag2_METcut60_FakeMETCut0"
 #analysis = "signalAnalysisTauSelectionHPSTightTauBased2"
 #analysis = "signalAnalysisBtaggingTest2"
-counters = analysis+"/counters"
-##counters = analysis+"Counters"
 
 
 treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger*weightPrescale")
@@ -43,6 +41,9 @@ mcOnly = False
 #mcOnly = True
 mcOnlyLumi = 5000 # pb
 
+searchMode = "Light"
+#searchMode = "Heavy"
+
 dataEra = "Run2011A"
 #dataEra = "Run2011B"
 #dataEra = "Run2011AB"
@@ -50,7 +51,7 @@ dataEra = "Run2011A"
 # main function
 def main():
     # Read the datasets
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra)
+    datasets = dataset.getDatasetsFromMulticrabCfg(analysisName=analysis, searchMode=searchMode, dataEra=dataEra)
 
     if mcOnly:
         datasets.remove(datasets.getDataDatasetNames())
@@ -64,18 +65,18 @@ def main():
     # Take QCD from data
     datasetsQCD = None
     if QCDfromData:
-        datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysisJune/CMSSW_4_4_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_120705_162351/multicrab.cfg", counters=counters)
+        datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysisJune/CMSSW_4_4_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_120705_162351/multicrab.cfg")
         datasetsQCD.loadLuminosities()
         datasetsQCD.mergeData()
         datasetsQCD.remove(datasetsQCD.getMCDatasetNames())
         datasetsQCD.rename("Data", "QCD")
     
 #Rtau =0
-#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110804_104313/multicrab.cfg", counters=counters)
+#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110804_104313/multicrab.cfg")
 
 #    datasetsSignal.selectAndReorder(["HplusTB_M200_Summer11"])
-#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110622_112321/multicrab.cfg", counters=counters)
-    #datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/Signal_v11f_scaledb_424/multicrab.cfg", counters=counters)
+#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110622_112321/multicrab.cfg")
+    #datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/Signal_v11f_scaledb_424/multicrab.cfg")
 
     #datasetsSignal.selectAndReorder(["TTToHplusBWB_M120_Summer11", "TTToHplusBHminusB_M120_Summer11"])
     #datasetsSignal.renameMany({"TTToHplusBWB_M120_Summer11" :"TTToHplusBWB_M120_Spring11",
@@ -151,9 +152,9 @@ def doPlots(datasets):
             args.update(kwargs)
             if not ("normalizeToOne" in args and args["normalizeToOne"]):
                 args["normalizeToLumi"] = mcOnlyLumi
-            return plots.MCPlot(datasets, analysis+"/"+name, **args)
+            return plots.MCPlot(datasets, name, **args)
         else:
-            return plots.DataMCPlot(datasets, analysis+"/"+name, **kwargs)
+            return plots.DataMCPlot(datasets, name, **kwargs)
 
     def pickSliceX(th2, ybinName):
         th1 = ROOT.TH1D(th2.GetName(), th2.GetTitle(), th2.GetNbinsX(), histograms.th1Xmin(th2), histograms.th1Xmax(th2))
@@ -343,12 +344,12 @@ def doPlots(datasets):
 #    datasets.getDataset("TTToHplusBWB_M120").setCrossSection(0.2*165)
 
 
-#    path = analysis+"/transverseMassWithRtauFakeMet"
+#    path = "transverseMassWithRtauFakeMet"
 #    transverseMass2(plots.DataMCPlot(datasets, path), "transverseMassWithRtauFakeMet", rebin=20)
 #    plot = replaceQCDfromData(plots.DataMCPlot(datasets, path), datasetsQCD, path)
 #    transverseMass2(plot, "transverseMassWithRtauFakeMetQCDFromData", rebin=20)
     
-#    path = analysis+"/transverseMassDeltaPhiUpperCut"
+#    path = "transverseMassDeltaPhiUpperCut"
 #    transverseMass2(plots.DataMCPlot(datasets, path), "transverseMassDeltaPhiUpperCut", rebin=20)
 #    plot = replaceQCDfromData(plots.DataMCPlot(datasets, path), datasetsQCD, path)
 #    transverseMass2(plot, "transverseMassDeltaPhiUpperCutQCDFromData", rebin=20)
@@ -451,24 +452,24 @@ def doCounters(datasets):
 def vertexComparison(datasets):
     signal = "TTToHplusBWB_M120"
     background = "TTToHplusBWB_M120"
-    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/verticesBeforeWeight"),
-                                 datasets.getDataset(background).getDatasetRootHisto(analysis+"/verticesAfterWeight")),
+    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto("verticesBeforeWeight"),
+                                 datasets.getDataset(background).getDatasetRootHisto("verticesAfterWeight")),
             "vertices_H120")
 
 def mtComparison(datasets):
     mt = plots.PlotBase([
-#        datasets.getDataset("TTToHplusBWB_M150").getDatasetRootHisto(analysis+"/transverseMass"),
-#        datasets.getDataset("TTToHplusBWB_M90").getDatasetRootHisto(analysis+"/transverseMass"),
-#        datasets.getDataset("TTToHplusBWB_M100").getDatasetRootHisto(analysis+"/transverseMass"),
-        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/transverseMass"),
-        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/transverseMassTauVeto"),
-#        datasets.getDataset("TTToHplusBWB_M140").getDatasetRootHisto(analysis+"/transverseMass"),
-#        datasets.getDataset("TTToHplusBWB_M150").getDatasetRootHisto(analysis+"/transverseMass"),
-#        datasets.getDataset("TTToHplusBWB_M155").getDatasetRootHisto(analysis+"/transverseMass"),
-#        datasets.getDataset("TTToHplusBWB_M160").getDatasetRootHisto(analysis+"/transverseMass"),
+#        datasets.getDataset("TTToHplusBWB_M150").getDatasetRootHisto("transverseMass"),
+#        datasets.getDataset("TTToHplusBWB_M90").getDatasetRootHisto("transverseMass"),
+#        datasets.getDataset("TTToHplusBWB_M100").getDatasetRootHisto("transverseMass"),
+        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto("transverseMass"),
+        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto("transverseMassTauVeto"),
+#        datasets.getDataset("TTToHplusBWB_M140").getDatasetRootHisto("transverseMass"),
+#        datasets.getDataset("TTToHplusBWB_M150").getDatasetRootHisto("transverseMass"),
+#        datasets.getDataset("TTToHplusBWB_M155").getDatasetRootHisto("transverseMass"),
+#        datasets.getDataset("TTToHplusBWB_M160").getDatasetRootHisto("transverseMass"),
         ############ 
-        datasets.getDataset("QCD").getDatasetRootHisto(analysis+"/transverseMassNoBtagging"),
-        datasets.getDataset("QCD").getDatasetRootHisto(analysis+"/transverseMassNoBtaggingWithRtau"),        
+        datasets.getDataset("QCD").getDatasetRootHisto("transverseMassNoBtagging"),
+        datasets.getDataset("QCD").getDatasetRootHisto("transverseMassNoBtaggingWithRtau"),        
         ])
     
     #   plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section MUST BE OFF
@@ -493,8 +494,8 @@ def mtComparison(datasets):
     
 def MetComparison(datasets):
     mt = plots.PlotBase([
-        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/Met"),
-        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MetWithBtagging")
+        datasets.getDataset("Data").getDatasetRootHisto("Met"),
+        datasets.getDataset("Data").getDatasetRootHisto("MetWithBtagging")
         ])
     mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mt.histoMgr.normalizeToOne()
@@ -524,9 +525,9 @@ def BetaComparison(datasets):
         return
 
     mt = plots.PlotBase([
-        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/JetSelection/betaGenuine"),
-        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/JetSelection/betaPU"),
-        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/JetSelection/betaPU")
+        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto("JetSelection/betaGenuine"),
+        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto("JetSelection/betaPU"),
+        datasets.getDataset("Data").getDatasetRootHisto("JetSelection/betaPU")
         ])
     mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mt._setLegendStyles()
@@ -539,18 +540,18 @@ def BetaComparison(datasets):
     st3.append(styles.StyleLine(lineStyle=3, lineWidth=3))
 #    mt.histoMgr.forHisto("betaGenuine", st1)
 #    mt.histoMgr.forHisto("betaPU", st2)
-    mt.histoMgr.forHisto(datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/JetSelection/betaGenuine"), st1)
-    mt.histoMgr.forHisto(datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/JetSelection/betaPU"), st2)
-    mt.histoMgr.forHisto(datasets.getDataset("Data").getDatasetRootHisto(analysis+"/JetSelection/betaPU"), st3) 
+    mt.histoMgr.forHisto(datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto("JetSelection/betaGenuine"), st1)
+    mt.histoMgr.forHisto(datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto("JetSelection/betaPU"), st2)
+    mt.histoMgr.forHisto(datasets.getDataset("Data").getDatasetRootHisto("JetSelection/betaPU"), st3) 
     mt.histoMgr.setHistoDrawStyleAll("P")
     rtauGen(mt, "BetaComparison_H120", rebin=5, defaultStyles=False)
 
     
 def HiggsMassComparison(datasets):
     mt = plots.PlotBase([
-        datasets.getDataset("TTToHplusBWB_M80").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMass"),
-        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMass"),
-        datasets.getDataset("TTToHplusBWB_M160").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMass")
+        datasets.getDataset("TTToHplusBWB_M80").getDatasetRootHisto("FullHiggsMass/HiggsMass"),
+        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto("FullHiggsMass/HiggsMass"),
+        datasets.getDataset("TTToHplusBWB_M160").getDatasetRootHisto("FullHiggsMass/HiggsMass")
         ])
     mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mt._setLegendStyles()
@@ -570,9 +571,9 @@ def HiggsMassComparison(datasets):
 
 def InvMassComparison(datasets):
     mt = plots.PlotBase([
-        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMass"),
-        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMassTauBmatch"),
-        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/FullHiggsMass/HiggsMassTauBMETmatch")
+        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto("FullHiggsMass/HiggsMass"),
+        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto("FullHiggsMass/HiggsMassTauBmatch"),
+        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto("FullHiggsMass/HiggsMassTauBMETmatch")
         ])
     mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mt._setLegendStyles()
@@ -592,10 +593,10 @@ def InvMassComparison(datasets):
     
 def rtauComparison(datasets):
     mt = plots.PlotBase([
-        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/tauID/TauID_Rtau_DecayModeOneProng_ZeroPiZero"),
-        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/tauID/TauID_Rtau_DecayModeOneProng_OnePiZero"),
-        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/tauID/TauID_Rtau_DecayModeOneProng_TwoPiZero"),
-        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto(analysis+"/tauID/TauID_Rtau_DecayModeOneProng_Other")])
+        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto("tauID/TauID_Rtau_DecayModeOneProng_ZeroPiZero"),
+        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto("tauID/TauID_Rtau_DecayModeOneProng_OnePiZero"),
+        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto("tauID/TauID_Rtau_DecayModeOneProng_TwoPiZero"),
+        datasets.getDataset("TTToHplusBWB_M120").getDatasetRootHisto("tauID/TauID_Rtau_DecayModeOneProng_Other")])
     mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mt._setLegendStyles()
     mt._setLegendLabels()
@@ -615,14 +616,14 @@ def rtauComparison(datasets):
 
 def topMassComparison(datasets):
     def createHisto(path, name):
-        drh = datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+path)
+        drh = datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(path)
         drh.setName(name)
         return drh
     
     top = plots.PlotBase([
-        createHisto("/TopSelection/TopMass", "Max(p_{T}^{jjb}) method"),
-        createHisto("/TopChiSelection/TopMass", "Min(#chi^{2}) method"),
-        createHisto("/TopWithBSelection/TopMass", "Min(#chi^{2}) with b-jet sel.")]) 
+        createHisto("TopSelection/TopMass", "Max(p_{T}^{jjb}) method"),
+        createHisto("TopChiSelection/TopMass", "Min(#chi^{2}) method"),
+        createHisto("TopWithBSelection/TopMass", "Min(#chi^{2}) with b-jet sel.")]) 
     top.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     top._setLegendStyles()
     top._setLegendLabels()
@@ -641,14 +642,14 @@ def topMassComparison(datasets):
 
 def topMassPurity(datasets):
     def createHisto(path, name):
-        drh = datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+path)
+        drh = datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(path)
         drh.setName(name)
         return drh
     
     top = plots.PlotBase([
-        createHisto("/TopChiSelection/TopMass", "All combinations"),
-        createHisto("/TopChiSelection/TopMass_fullMatch", "Matched jets"),
-        createHisto("/TopChiSelection/TopMass_bMatch", "Matched b jet")]) 
+        createHisto("TopChiSelection/TopMass", "All combinations"),
+        createHisto("TopChiSelection/TopMass_fullMatch", "Matched jets"),
+        createHisto("TopChiSelection/TopMass_bMatch", "Matched b jet")]) 
     top.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     top._setLegendStyles()
     top._setLegendLabels()
@@ -668,13 +669,13 @@ def topMassPurity(datasets):
     
 def genQuarkComparison(datasets):
     def createHisto(path, name):
-        drh = datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+path)
+        drh = datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(path)
         drh.setName(name)
         return drh
     
     quark = plots.PlotBase([
-        createHisto("/BjetSelection/PtBquarkFromTopSide", "b quark from top side"),
-        createHisto("/BjetSelection/PtQquarkFromTopSide", "q quark from top"),]) 
+        createHisto("BjetSelection/PtBquarkFromTopSide", "b quark from top side"),
+        createHisto("BjetSelection/PtQquarkFromTopSide", "q quark from top"),]) 
     quark.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     quark._setLegendStyles()
     quark._setLegendLabels()
@@ -692,8 +693,8 @@ def genQuarkComparison(datasets):
     
 ##############def genComparison(datasets):
 #    rtau = plots.PlotBase([
-#        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genRtau1ProngHp"),
-#        datasets.getDataset("TTJets").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genRtau1ProngW")
+#        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto("GenParticleAnalysis/genRtau1ProngHp"),
+#        datasets.getDataset("TTJets").getDatasetRootHisto("GenParticleAnalysis/genRtau1ProngW")
 #        ])
 #    rtau.histoMgr.normalizeToOne()
 #    rtau.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
@@ -702,8 +703,8 @@ def genQuarkComparison(datasets):
 #    st1 = styles.getDataStyle().clone()
 #    st2 = st1.clone()
 #    st2.append(styles.StyleLine(lineColor=ROOT.kRed))
-#    rtau.histoMgr.forHisto(datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genRtau1ProngHp"), st1)
-#    rtau.histoMgr.forHisto(datasets.getDataset("TTJets").getDatasetRootHisto(analysis+"/GenParticleAnalysis/genRtau1ProngW"), st2)
+#    rtau.histoMgr.forHisto(datasets.getDataset("TTToHplus_M120").getDatasetRootHisto("GenParticleAnalysis/genRtau1ProngHp"), st1)
+#    rtau.histoMgr.forHisto(datasets.getDataset("TTJets").getDatasetRootHisto("GenParticleAnalysis/genRtau1ProngW"), st2)
     
 #    rtau.histoMgr.setHistoDrawStyleAll("P")
 ################    rtauGen(rtau, "RtauGenerated", rebin=1)
@@ -713,25 +714,25 @@ def genQuarkComparison(datasets):
 #def genComparison(datasets):
 #    signal = "TTToHplusBWB_M120"
 #    background = "TTJets_TuneZ2"
-#    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/genRtau1ProngHp"),
-#                                 datasets.getDataset(bagkground).getDatasetRootHisto(analysis+"/genRtau1ProngW")),
+#    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto("genRtau1ProngHp"),
+#                                 datasets.getDataset(bagkground).getDatasetRootHisto("genRtau1ProngW")),
 #          "RtauGen_Hp_vs_tt")
 
     
 #def zMassComparison(datasets):
 #    signal = "TTToHplusBWB_M120"
 #    background = "DYJetsToLL"
-#    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/TauJetMass"),
-#                                 datasets.getDataset(background).getDatasetRootHisto(analysis+"/TauJetMass")),
+#    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto("/TauJetMass"),
+#                                 datasets.getDataset(background).getDatasetRootHisto("/TauJetMass")),
 #            "TauJetMass_Hp_vs_Zll")
     
 
 #def topPtComparison(datasets):
 #    signal = "TTToHplusBWB_M120"
 #    background = "TTToHplusBWB_M120"
-#    rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/TopSelection/Pt_jjb"),
-#                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/TopSelection/Pt_jjbmax"),
-#                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/TopSelection/Pt_top")]),
+#    rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto("TopSelection/Pt_jjb"),
+#                            datasets.getDataset(background).getDatasetRootHisto("TopSelection/Pt_jjbmax"),
+#                            datasets.getDataset(background).getDatasetRootHisto("TopSelection/Pt_top")]),
 #             "topPt_all_vs_real")
 
 def scaleMC(histo, scale):

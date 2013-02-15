@@ -96,3 +96,22 @@ def addConfigInfo(of, dataset):
     codeVersion.Delete()
 
     of.cd()
+
+
+def listDirectoryContent(tdirectory, predicate=None):
+    dirlist = tdirectory.GetListOfKeys()
+
+    # Suppress the warning message of missing dictionary for some iterator
+    backup = ROOT.gErrorIgnoreLevel
+    ROOT.gErrorIgnoreLevel = ROOT.kError
+    diriter = dirlist.MakeIterator()
+    ROOT.gErrorIgnoreLevel = backup
+
+    key = diriter.Next()
+
+    ret = []
+    while key:
+        if predicate is not None and predicate(key):
+            ret.append(key.GetName())
+        key = diriter.Next()
+    return ret

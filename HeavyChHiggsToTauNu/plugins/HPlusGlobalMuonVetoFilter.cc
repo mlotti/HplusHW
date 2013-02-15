@@ -25,24 +25,23 @@ class HPlusGlobalMuonVetoFilter: public edm::EDFilter {
 
   virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
-  HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
   HPlus::HistoWrapper histoWrapper;
+  HPlus::EventCounter eventCounter;
   HPlus::MuonSelection fMuonSelection;
   edm::InputTag fVertexSrc;
   bool fFilter;
 };
 
 HPlusGlobalMuonVetoFilter::HPlusGlobalMuonVetoFilter(const edm::ParameterSet& iConfig):
-  eventCounter(iConfig),
   eventWeight(iConfig),
-  histoWrapper(eventWeight, "Debug"),
+  histoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
+  eventCounter(iConfig, eventWeight, histoWrapper),
   fMuonSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MuonSelection"), eventCounter, histoWrapper),
   fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc")),
   fFilter(iConfig.getParameter<bool>("filter"))
 {
   produces<bool>();
-  eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
 HPlusGlobalMuonVetoFilter::~HPlusGlobalMuonVetoFilter() {}
 void HPlusGlobalMuonVetoFilter::beginJob() {}

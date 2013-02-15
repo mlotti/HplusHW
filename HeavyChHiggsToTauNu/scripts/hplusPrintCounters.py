@@ -7,6 +7,7 @@ from optparse import OptionParser
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
@@ -15,9 +16,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 def main(opts):
     datasets = None
     if len(opts.files) > 0:
-        datasets = dataset.getDatasetsFromRootFiles( [(x,x) for x in opts.files], counters=opts.counterdir, weightedCounters=opts.weighted)
+        datasets = dataset.getDatasetsFromRootFiles( [(x,x) for x in opts.files], opts=opts, weightedCounters=opts.weighted)
     else:
-        datasets = dataset.getDatasetsFromMulticrabCfg(opts=opts, counters=opts.counterdir, weightedCounters=opts.weighted)
+        datasets = dataset.getDatasetsFromMulticrabCfg(opts=opts, weightedCounters=opts.weighted)
 
     if os.path.exists(opts.lumifile):
         datasets.loadLuminosities(opts.lumifile)
@@ -25,11 +26,12 @@ def main(opts):
     if opts.mergeData:
         datasets.mergeData()
 
-    counters = opts.counterdir
+#    counters = opts.counterDir
     if opts.weighted:
-        counters += "/weighted"
+#        counters += "/weighted"
         datasets.updateNAllEventsToPUWeighted(era=opts.dataEra)
-    eventCounter = counter.EventCounter(datasets, counters=counters)
+#    eventCounter = counter.EventCounter(datasets, counters=counters)
+    eventCounter = counter.EventCounter(datasets)
     
 
     print "============================================================"
@@ -81,7 +83,7 @@ def main(opts):
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options] [crab task dirs]\n\nCRAB task directories can be given either as the last arguments, or with -d.")
     multicrab.addOptions(parser)
-    dataset.addOptions(parser)
+    dataset.addOptions(parser, analysisName="signalAnalysis")
     parser.add_option("--weighted", dest="weighted", default=False, action="store_true",
                       help="Use weighted counters (i.e. adds '/weighted' to the counter directory path)")
     parser.add_option("--mode", "-m", dest="mode", type="string", default="events",
@@ -102,8 +104,6 @@ if __name__ == "__main__":
                       help="Don't print statistical errors")
     parser.add_option("--mergeData", dest="mergeData", action="store_true", default=False,
                       help="Merge all data datasets")
-    parser.add_option("--dataEra", dest="dataEra", default=None, type="string",
-                      help="Data era")
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
 

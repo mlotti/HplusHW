@@ -47,14 +47,14 @@ TestCuts = CircularityAntiCut
 # Declarations
 ######################################################################
 EvtWeight = "weightPileup*weightTrigger*weightPrescale"
-treeDraw = dataset.TreeDraw("signalAnalysis/tree", weight=EvtWeight)
+treeDraw = dataset.TreeDraw("tree", weight=EvtWeight)
 
 ######################################################################
 # Define the main function here:
 def main():
     
     # Get the ROOT files for all datasets, merge datasets and reorder them
-    datasets = dataset.getDatasetsFromMulticrabDirs(["/Volumes/disk/attikis/HIG-12-037/TreeAnalysis_v44_4_130113_105229/"], dataEra="Run2011A")
+    datasets = dataset.getDatasetsFromMulticrabCfg(directory="/Volumes/disk/attikis/HIG-12-037/TreeAnalysis_v44_4_130113_105229/", dataEra="Run2011A")
     datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()    
     plots.mergeRenameReorderForDataMC(datasets)

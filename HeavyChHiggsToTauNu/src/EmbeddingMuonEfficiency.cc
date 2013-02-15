@@ -2,6 +2,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
+#include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/Common/interface/Handle.h"
@@ -35,7 +36,7 @@ namespace HPlus {
     edm::ParameterSet dataParameters = iConfig.getParameter<edm::ParameterSet>("dataParameters");
     edm::ParameterSet mcParameters = iConfig.getParameter<edm::ParameterSet>("mcParameters");
 
-    // Data Pset names are not relevant, just to have the same syntax as with TriggerEfficiencyScaleFactor
+    // Data Pset names are not relevant, just to have the same syntax as with TauTriggerEfficiencyScaleFactor
     std::vector<std::string> dataNames = dataParameters.getParameterNames();
     for(std::vector<std::string>::const_iterator iName = dataNames.begin(); iName != dataNames.end(); ++iName) {
       edm::ParameterSet pset = dataParameters.getParameter<edm::ParameterSet>(*iName);
