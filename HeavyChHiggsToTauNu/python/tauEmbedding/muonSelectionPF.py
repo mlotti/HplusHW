@@ -15,10 +15,10 @@ def getTightMuonsDefinition(postfix=""):
         "isGlobalMuon() && isTrackerMuon()"
         "&& pt() > 35 && abs(eta()) < 2.1"
         "&& muonID('GlobalMuonPromptTight')"
-        "&& innerTrack().numberOfValidHits() > 10"
-        "&& innerTrack().hitPattern().pixelLayersWithMeasurement() >= 1"
-        "&& numberOfMatches() > 1"
-        "&& abs(dB()) < 0.02"
+#        "&& innerTrack().numberOfValidHits() > 10"
+#        "&& innerTrack().hitPattern().pixelLayersWithMeasurement() >= 1"
+#        "&& numberOfMatches() > 1"
+#        "&& abs(dB()) < 0.02"
     #    "&& (isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt() < 0.05",
         )
     )
