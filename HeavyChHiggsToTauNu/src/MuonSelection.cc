@@ -175,13 +175,13 @@ namespace HPlus {
       //int myInnerTrackNTrkHits   = myInnerTrackRef->hitPattern().numberOfValidTrackerHits();
       int myInnerTrackNPixelHits = myInnerTrackRef->hitPattern().numberOfValidPixelHits();
       //int myGlobalTrackNMuonHits  = myGlobalTrackRef->hitPattern().numberOfValidMuonHits(); 
-      int myMatchedSegments = (*iMuon)->numberOfMatches();
+      int myMatchedSegments = (*iMuon)->numberOfMatchedStations();
       // Note: It is possible for a Global Muon to have zero muon hits. This happens because once the inner and outter tracks used to create
       // global fit to the muon track that covers all of the detector, hits that are incompatible to the new trajectory are removed 
       // (i.e. de-associated from the muon). This is the so called "outlier rejection". 
 
       // 1) Demand that the Muon is both a "GlobalMuon" And a "TrackerMuon"
-      if( (!(*iMuon)->isGlobalMuon()) || (!(*iMuon)->isTrackerMuon()) ) continue;
+      if (!((*iMuon)->isGlobalMuon())) continue;
       bMuonGlobalMuonOrTrkerMuon = true;
 
       // 2) Demand that the selected Muon Identification as defined in the python cfg is satisfied
@@ -192,7 +192,7 @@ namespace HPlus {
       bMuonSelection = true;
 
       // 3) NHits cuts (Trk, Pixel, Muon)
-      if (!(myGlobalTrackRef->hitPattern().trackerLayersWithMeasurement() > 8)) continue;
+      if (!(myGlobalTrackRef->hitPattern().trackerLayersWithMeasurement() > 5)) continue; // 8 in 2011, 5 in 2012
       bMuonNTrkerHitsCut = true;
 
       if ( myInnerTrackNPixelHits < 1) continue;
@@ -209,7 +209,7 @@ namespace HPlus {
       if( (*iMuon)->normChi2() > 10) continue; 
       bMuonGlobalTrkChiSqCut = true;
 
-      // 5) Transverse impact paremeter (d0) wrt beam spot < 0.2 mm (applied to track from the inner tracker)
+      // 5) Transverse impact paremeter (d0) wrt beam spot < 0.2 cm (applied to track from the inner tracker)
       double muonIp = std::abs((*iMuon)->dB());
       hMuonTransverseImpactParameter->Fill(muonIp);
       if (muonIp >= 0.2) continue; // This is the transverse IP w.r.t to beamline.
@@ -218,12 +218,12 @@ namespace HPlus {
       // 6) Check that muon IPz is compatible with PVz
       // remove for 2011, but enable for 2012
       //if(fMuonApplyIpz) {
-      //if (primaryVertex.isNull())
-      //  throw cms::Exception("LogicError") << "MuonApplyIpz is true, but got null primary vertex" << std::endl;
-      double myDeltaIPz = std::fabs(myInnerTrackRef->dz(primaryVertex->position()));
+      if (primaryVertex.isNull())
+        throw cms::Exception("LogicError") << "MuonApplyIpz is true, but got null primary vertex" << std::endl;
+      double myDeltaIPz = std::fabs((*iMuon)->muonBestTrack()->dz(primaryVertex->position()));
       hMuonDeltaIPz->Fill(myDeltaIPz);
-      //if (myDeltaIPz > 0.5) continue; // This is the z-impact parameter w.r.t to selected primary vertex
-      //bMuonGoodPVCut = true;
+      if (myDeltaIPz > 0.5) continue; // This is the z-impact parameter w.r.t to selected primary vertex
+      bMuonGoodPVCut = true;
       //}
 
       // Fill histos with all-Muons Pt and Eta (no requirements on muons)
