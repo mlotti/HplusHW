@@ -27,18 +27,18 @@ class HPlusGlobalElectronVetoFilter: public edm::EDFilter {
   virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   edm::InputTag fVertexSrc;
-  HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
   HPlus::HistoWrapper histoWrapper;
+  HPlus::EventCounter eventCounter;
   HPlus::ElectronSelection fElectronSelection;
   bool fFilter;
 };
 
 HPlusGlobalElectronVetoFilter::HPlusGlobalElectronVetoFilter(const edm::ParameterSet& iConfig):
   fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc")),
-  eventCounter(iConfig),
   eventWeight(iConfig),
   histoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
+  eventCounter(iConfig, eventWeight, histoWrapper),
   fElectronSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("ElectronSelection"), fVertexSrc, eventCounter, histoWrapper),
   fFilter(iConfig.getParameter<bool>("filter"))
 {
