@@ -167,10 +167,11 @@ namespace HPlus {
     //bDataObjectsCached = true;
     // Obtain data objects
     fVertexData = vertexData;
+    if (!vertexData.passedEvent()) return; // Require valid vertex
     fTauData = tauSelection.silentAnalyze(iEvent, iSetup, fVertexData.getSelectedVertex()->z());
     // Need to require one tau in the event
     if (!fTauData.passedEvent()) {
-      // Plots do not make sense if no PV has been found
+      // Plots do not make sense if no tau has been found
       for (std::vector<CommonPlotsFilledAtEveryStep*>::iterator it = hEveryStepHistograms.begin(); it != hEveryStepHistograms.end(); ++it) {
         (*it)->cacheDataObjects(&fVertexData, 0, 0, 0, 0, 0, 0, 0, 0);
       }
