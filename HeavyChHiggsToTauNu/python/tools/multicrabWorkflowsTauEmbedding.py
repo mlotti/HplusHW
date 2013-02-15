@@ -31,7 +31,7 @@ def getDefaultDefinitions_44X():
         "SingleMu_177453-178380_2011B_Nov19": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v1"]),
         "SingleMu_178411-179889_2011B_Nov19": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v4"]),
         "SingleMu_179942-180371_2011B_Nov19": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v5"]),
-        "SingleMu_173693-180371_2011B_Nov19": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v1", "HLT_Mu40_eta2p1_v4", "HLT_Mu40_eta2p1_v5"]),
+        "SingleMu_175832-180252_2011B_Nov19": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v1", "HLT_Mu40_eta2p1_v4", "HLT_Mu40_eta2p1_v5"]),
 
         # MC, triggered with mcTrigger
         "WJets_TuneZ2_Fall11":               TaskDefMC(),
@@ -81,7 +81,7 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
         "SingleMu_177453-178380_2011B_Nov19": TaskDef(njobsIn=300, njobsOut=11),
         "SingleMu_178411-179889_2011B_Nov19": TaskDef(njobsIn=300, njobsOut=11),
         "SingleMu_179942-180371_2011B_Nov19": TaskDef(njobsIn= 60, njobsOut= 2),
-        "SingleMu_173693-180371_2011B_Nov19": TaskDef(njobsIn=1200, njobsOut=40),
+        "SingleMu_175832-180252_2011B_Nov19": TaskDef(njobsIn=1200, njobsOut=40),
 
         # MC, triggered with mcTrigger
         "WJets_TuneZ2_Fall11":               TaskDef(njobsIn= 990, njobsOut=12), # ~ 1.5 hour/100 MB
@@ -354,7 +354,7 @@ def addEmbeddingSkim_v44_5(datasets):
         "SingleMu_165088-166150_2011A_Nov08": TaskDef(""),
         "SingleMu_166161-173198_2011A_Nov08": TaskDef(""),
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(""),
-        "SingleMu_173693-180371_2011B_Nov19": TaskDef(""),
+        "SingleMu_175832-180252_2011B_Nov19": TaskDef(""),
         "TTJets_TuneZ2_Fall11":               TaskDef(""),
         "WJets_TuneZ2_Fall11":                TaskDef(""),
         "W1Jets_TuneZ2_Fall11":               TaskDef(""),
@@ -382,7 +382,7 @@ def addEmbedding_SKELETON(datasets):
         "SingleMu_165088-166150_2011A_Nov08": TaskDef(""),
         "SingleMu_166161-173198_2011A_Nov08": TaskDef(""),
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(""),
-        "SingleMu_173693-180371_2011B_Nov19": TaskDef(""),
+        "SingleMu_175832-180252_2011B_Nov19": TaskDef(""),
         "TTJets_TuneZ2_Fall11":               TaskDef(""),
         "WJets_TuneZ2_Fall11":                TaskDef(""),
         "W1Jets_TuneZ2_Fall11":               TaskDef(""),

@@ -94,20 +94,21 @@ datasets.extend([
     # SingleMu, Run2011A
     DataDataset("SingleMu_%s_2011A_Nov08", runs=(160431, 173692), aod="/SingleMu/Run2011A-08Nov2011-v1/AOD"),
     # SingleMu, Run2011B
-    DataDataset("SingleMu_%s_2011B_Nov19", runs=(173693, 180371), aod="/SingleMu/Run2011B-19Nov2011-v1/AOD"),
+    DataDataset("SingleMu_%s_2011B_Nov19", runs=(173693, 180371), aod="/SingleMu/Run2011B-19Nov2011-v1/AOD"), # for backward compatibility only
+    DataDataset("SingleMu_%s_2011B_Nov19", runs=(175832, 180252), aod="/SingleMu/Run2011B-19Nov2011-v1/AOD"), # 50367238 events, 3431 files
 ])
 # Split for backward compatibility, also for Mu-trigger thresholds
 datasets.splitDataByRuns("SingleMu_160431-173692_2011A_Nov08", [
-        (160431, 163261),
-        (163270, 163869),
-        (165088, 166150),
+        (160431, 163261), # 38372194 events, 1415 files
+        (163270, 163869), # 27672323 events, 1062 files
+        (165088, 166150), # 30978754 events, 1202 files
         (166161, 166164),       
         (166346, 166346),
         (166374, 167043),
         (167078, 167913),
         (170722, 172619),
         (172620, 173198),
-        (173236, 173692),
+        (173236, 173692), # 14714495 events, 660 files
         ])
 datasets.splitDataByRuns("SingleMu_173693-180371_2011B_Nov19", [
         (173693, 177452),
@@ -117,7 +118,7 @@ datasets.splitDataByRuns("SingleMu_173693-180371_2011B_Nov19", [
         ])
 # Split for Mu-trigger thresholds
 datasets.splitDataByRuns("SingleMu_160431-173692_2011A_Nov08", [
-        (166161, 173198),
+        (166161, 173198), # 76283557 events, 3067 files
         ])
 datasets.splitDataByRuns("SingleMu_165088-166150_2011A_Nov08", [
         (165088, 165633), # Split this run range into two (and keep original),
