@@ -279,7 +279,7 @@ class ConfigBuilder:
                 for module, name in zip(modules, analysisNames_):
                     mod = module.clone()
                     if self.applyTriggerScaleFactor:
-                        param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.triggerEfficiencyScaleFactor)
+                        param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.tauTriggerEfficiencyScaleFactor)
                     if self.applyPUReweight:
                         param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.pileupWeightReader, era=dataEra)
                         if self.options.wjetsWeighting != 0:
@@ -475,7 +475,7 @@ class ConfigBuilder:
 
         # Trigger with scale factors (at the moment hard coded)
         if self.applyTriggerScaleFactor and self.dataVersion.isMC():
-            param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
+            param.tauTriggerEfficiencyScaleFactor.mode = "scaleFactor"
 
         if self.doBTagTree:
             param.tree.fillNonIsoLeptonVars = True
@@ -538,9 +538,9 @@ class ConfigBuilder:
         #print "\nAnalysis is blind:", module.blindAnalysisStatus, "\n"
         print "Histogram level:", module.histogramAmbientLevel.value()
         print "Trigger:", module.trigger
-        print "Trigger scale factor mode:", module.triggerEfficiencyScaleFactor.mode.value()
-        print "Trigger scale factor data:", module.triggerEfficiencyScaleFactor.dataSelect.value()
-        print "Trigger scale factor MC:", module.triggerEfficiencyScaleFactor.mcSelect.value()
+        print "Trigger scale factor mode:", module.tauTriggerEfficiencyScaleFactor.mode.value()
+        print "Trigger scale factor data:", module.tauTriggerEfficiencyScaleFactor.dataSelect.value()
+        print "Trigger scale factor MC:", module.tauTriggerEfficiencyScaleFactor.mcSelect.value()
         if hasattr(module, "metFilters"):
             print "MET filters", module.metFilters
         print "VertexWeight data distribution:",module.vertexWeight.dataPUdistribution.value()
@@ -676,7 +676,7 @@ class ConfigBuilder:
 
             postfix += "TEff"
             mod = mod.clone()
-            mod.triggerEfficiencyScaleFactor.mode = "efficiency"
+            mod.tauTriggerEfficiencyScaleFactor.mode = "efficiency"
             path = cms.Path(process.commonSequence * mod)
             setattr(process, name+postfix, mod)
             setattr(process, name+postfix+"Path", path)

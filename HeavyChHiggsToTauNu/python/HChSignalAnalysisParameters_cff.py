@@ -492,7 +492,7 @@ def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
     raise Exception("Trigger efficencies/scale factors are only available for:\n  tau isolation: 'byVLooseCombinedIsolationDeltaBetaCorr', 'byLooseCombinedIsolationDeltaBetaCorr', 'byMediumCombinedIsolationDeltaBetaCorr'\n  against electron discr.: 'againstElectronMedium', 'againstElectronMVA' (MVA not available for VLoose isol.)")
 
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
-triggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
+tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
 
 # Muon trigger+ID efficiencies, for embedding normalization
 import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTriggerIDEfficiency
@@ -521,7 +521,7 @@ def _getTriggerVertexArgs(kwargs):
         vargs["pset"] = module.vertexWeight
     return (effargs, vargs)
 
-def setDataTriggerEfficiency(dataVersion, era, pset=triggerEfficiencyScaleFactor):
+def setDataTriggerEfficiency(dataVersion, era, pset=tauTriggerEfficiencyScaleFactor):
     if dataVersion.isMC():
         if dataVersion.isS4():
             pset.mcSelect = "Summer11"
