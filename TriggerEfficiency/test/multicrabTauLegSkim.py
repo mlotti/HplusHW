@@ -153,19 +153,12 @@ datasets_TT_EWK = [
 ]
 
 datasets_DY = [
-    "DYToTauTau_M20_powheg_v1_TuneZ2star_Summer12",
-    "DYToTauTau_M20_powheg_v2_TuneZ2star_Summer12",
+    "DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12",
+    "DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12",
     "DYToTauTau_M_100to200_TuneZ2Star_pythia6_tauola_Summer12",
     "DYToTauTau_M_200to400_TuneZ2Star_pythia6_tauola_Summer12",
     "DYToTauTau_M_400to800_TuneZ2Star_pythia6_tauola_Summer12",
     "DYToTauTau_M_800_TuneZ2Star_pythia6_tauola_Summer12",
-
-    "DYToTauTau_M_20_CT10_TuneZ2star_8TeV_powheg_tauola",
-    "DYToTauTau_M_20_CT10_TuneZ2star_v2_8TeV_powheg_tauola",
-    "DYToTauTau_M_100to200_TuneZ2Star_8TeV_pythia6_tauola",
-    "DYToTauTau_M_200to400_TuneZ2Star_8TeV_pythia6_tauola",
-    "DYToTauTau_M_400to800_TuneZ2Star_8TeV_pythia6_tauola",
-    "DYToTauTau_M_800_TuneZ2Star_8TeV_pythia6_tauola",
 ]
 
 datasets_SingleTop = [
