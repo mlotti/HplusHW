@@ -9,8 +9,8 @@ from multicrabWorkflowsPattuple import constructProcessingWorkflow_44X
 
 def getDefaultDefinitions_44X():
     mcTrigger = "HLT_Mu40_eta2p1_v1"
-    def TaskDefMC():
-        return TaskDef(triggerOR=[mcTrigger])
+    def TaskDefMC(**kwargs):
+        return TaskDef(triggerOR=[mcTrigger], **kwargs)
 
     return {
         "SingleMu_160431-163261_2011A_Nov08": TaskDef(triggerOR=["HLT_Mu20_v1"]),
@@ -34,11 +34,11 @@ def getDefaultDefinitions_44X():
         "SingleMu_175832-180252_2011B_Nov19": TaskDef(triggerOR=["HLT_Mu40_eta2p1_v1", "HLT_Mu40_eta2p1_v4", "HLT_Mu40_eta2p1_v5"]),
 
         # MC, triggered with mcTrigger
-        "WJets_TuneZ2_Fall11":               TaskDefMC(),
-        "W1Jets_TuneZ2_Fall11":              TaskDefMC(),
-        "W2Jets_TuneZ2_Fall11":              TaskDefMC(),
-        "W3Jets_TuneZ2_Fall11":              TaskDefMC(),
-        "W4Jets_TuneZ2_Fall11":              TaskDefMC(),
+        "WJets_TuneZ2_Fall11":               TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": -1}),
+        "W1Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 1}),
+        "W2Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 2}),
+        "W3Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 3}),
+        "W4Jets_TuneZ2_Fall11":              TaskDefMC(args={"wjetsWeighting": 1, "wjetBin": 4}),
         "TTJets_TuneZ2_Fall11":              TaskDefMC(),
         "DYJetsToLL_M50_TuneZ2_Fall11":      TaskDefMC(),
         "T_t-channel_TuneZ2_Fall11":         TaskDefMC(),
@@ -64,7 +64,7 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
     # Goal for skimAnalysis jobs is 30k events/job
     njobs = {
         "SingleMu_160431-163261_2011A_Nov08": TaskDef(njobsIn=120, njobsOut= 2),
-        "SingleMu_163270-163869_2011A_Nov08": TaskDef(njobsIn=140, njobsOut= 3),
+        "SingleMu_163270-163869_2011A_Nov08": TaskDef(njobsIn=250, njobsOut= 3),
         "SingleMu_165088-166150_2011A_Nov08": TaskDef(njobsIn=490, njobsOut= 4),
 
         "SingleMu_166161-166164_2011A_Nov08": TaskDef(njobsIn=  2, njobsOut= 1),
@@ -73,34 +73,34 @@ def addEmbeddingSkim_44X(version, datasets, updateDefinitions):
         "SingleMu_167078-167913_2011A_Nov08": TaskDef(njobsIn=230, njobsOut= 3),
         "SingleMu_170722-172619_2011A_Nov08": TaskDef(njobsIn=200, njobsOut= 6),
         "SingleMu_172620-173198_2011A_Nov08": TaskDef(njobsIn=230, njobsOut= 6),
-        "SingleMu_166161-173198_2011A_Nov08": TaskDef(njobsIn=1000, njobsOut= 25),
+        "SingleMu_166161-173198_2011A_Nov08": TaskDef(njobsIn=1200, njobsOut= 25),
 
-        "SingleMu_173236-173692_2011A_Nov08": TaskDef(njobsIn=120, njobsOut= 4),
+        "SingleMu_173236-173692_2011A_Nov08": TaskDef(njobsIn=200, njobsOut= 4),
 
         "SingleMu_173693-177452_2011B_Nov19": TaskDef(njobsIn=480, njobsOut=16),
         "SingleMu_177453-178380_2011B_Nov19": TaskDef(njobsIn=300, njobsOut=11),
         "SingleMu_178411-179889_2011B_Nov19": TaskDef(njobsIn=300, njobsOut=11),
         "SingleMu_179942-180371_2011B_Nov19": TaskDef(njobsIn= 60, njobsOut= 2),
-        "SingleMu_175832-180252_2011B_Nov19": TaskDef(njobsIn=1200, njobsOut=40),
+        "SingleMu_175832-180252_2011B_Nov19": TaskDef(njobsIn=3000, njobsOut=40),
 
         # MC, triggered with mcTrigger
-        "WJets_TuneZ2_Fall11":               TaskDef(njobsIn= 990, njobsOut=12), # ~ 1.5 hour/100 MB
-        "W1Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 490, njobsOut=20),
-        "W2Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 490, njobsOut=20),
-        "W3Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 490, njobsOut=20),
-        "W4Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 490, njobsOut=12),
-        "TTJets_TuneZ2_Fall11":              TaskDef(njobsIn=4990, njobsOut=50), # ~1 hour/200 MB
-        "DYJetsToLL_M50_TuneZ2_Fall11":      TaskDef(njobsIn= 990, njobsOut=10),
-        "T_t-channel_TuneZ2_Fall11":         TaskDef(njobsIn= 300, njobsOut= 2),
-        "Tbar_t-channel_TuneZ2_Fall11":      TaskDef(njobsIn= 100, njobsOut= 2),
-        "T_tW-channel_TuneZ2_Fall11":        TaskDef(njobsIn=  90, njobsOut= 2),
-        "Tbar_tW-channel_TuneZ2_Fall11":     TaskDef(njobsIn=  90, njobsOut= 1),
-        "T_s-channel_TuneZ2_Fall11":         TaskDef(njobsIn=  25, njobsOut= 1),
-        "Tbar_s-channel_TuneZ2_Fall11":      TaskDef(njobsIn=   5, njobsOut= 1),
-        "WW_TuneZ2_Fall11":                  TaskDef(njobsIn= 150, njobsOut= 4),
-        "WZ_TuneZ2_Fall11":                  TaskDef(njobsIn= 150, njobsOut= 4),
+        "TTJets_TuneZ2_Fall11":              TaskDef(njobsIn=4990, njobsOut=50),
+        "WJets_TuneZ2_Fall11":               TaskDef(njobsIn= 700, njobsOut=12),
+        "W1Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 500, njobsOut=20),
+        "W2Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 500, njobsOut=20),
+        "W3Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 500, njobsOut=20),
+        "W4Jets_TuneZ2_Fall11":              TaskDef(njobsIn= 500, njobsOut=12),
+        "DYJetsToLL_M50_TuneZ2_Fall11":      TaskDef(njobsIn=1700, njobsOut=10),
+        "T_t-channel_TuneZ2_Fall11":         TaskDef(njobsIn= 150, njobsOut= 2),
+        "Tbar_t-channel_TuneZ2_Fall11":      TaskDef(njobsIn=  70, njobsOut= 2),
+        "T_tW-channel_TuneZ2_Fall11":        TaskDef(njobsIn= 100, njobsOut= 2),
+        "Tbar_tW-channel_TuneZ2_Fall11":     TaskDef(njobsIn= 100, njobsOut= 1),
+        "T_s-channel_TuneZ2_Fall11":         TaskDef(njobsIn=  15, njobsOut= 1),
+        "Tbar_s-channel_TuneZ2_Fall11":      TaskDef(njobsIn=  10, njobsOut= 1),
+        "WW_TuneZ2_Fall11":                  TaskDef(njobsIn= 200, njobsOut= 4),
+        "WZ_TuneZ2_Fall11":                  TaskDef(njobsIn= 200, njobsOut= 4),
         "ZZ_TuneZ2_Fall11":                  TaskDef(njobsIn= 200, njobsOut= 4),
-        "QCD_Pt20_MuEnriched_TuneZ2_Fall11": TaskDef(njobsIn= 490, njobsOut= 3),
+        "QCD_Pt20_MuEnriched_TuneZ2_Fall11": TaskDef(njobsIn= 200, njobsOut= 3),
         }
 
     workflowName = "tauembedding_skim_"+version
@@ -217,7 +217,7 @@ def addEmbeddingSkim_v44_4_2(datasets):
         # 113 files, min 86 MB, max, 111 MB
         "SingleMu_160431-163261_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_160431_tauembedding_skim_v44_4_2-d9eec32ec495d473673489f496724114/USER"),
         # 125 files, min 69 MB, max 235 MB
-        "SingleMu_163270-163869_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_163270_tauembedding_skim_v44_4_2-f2f022e2f1824ce67ef0c386cf58329f/USER"),
+        "SingleMu_163270-163869_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_163270_tauembedding_skim_v44_4_2-f2f022e2f1824ce67ef0c386cf58329f/USER", njobsIn=140),
         # 373 files, min 3.5 MB, max 134 MB
         "SingleMu_165088-166150_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_165088_tauembedding_skim_v44_4_2-70b45374fbabe2248133e36a2cbe01e2/USER"),
         # 2 files, min 9.8 MB, max 138 MB
@@ -233,7 +233,7 @@ def addEmbeddingSkim_v44_4_2(datasets):
         # 203 files, min 44 MB, max 217 MB
         "SingleMu_172620-173198_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_172620_tauembedding_skim_v44_4_2-859a149425fa4c077a5b33666a7b993a/USER"),
         # 108 files, min 25 MB, max 246 MB
-        "SingleMu_173236-173692_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_173236_tauembedding_skim_v44_4_2-e4bb75f1eb1d67eb9cca9dc53de3dd14/USER"),
+        "SingleMu_173236-173692_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_173236_tauembedding_skim_v44_4_2-e4bb75f1eb1d67eb9cca9dc53de3dd14/USER", njobsIn=120),
         # 417 files, min 18 MB, max 405 MB
         "SingleMu_173693-177452_2011B_Nov19": TaskDef("/SingleMu/local-Run2011B_19Nov2011_v1_AOD_173693_tauembedding_skim_v44_4_2-e4bb75f1eb1d67eb9cca9dc53de3dd14/USER"),
         # 263 files, min 21 MB, max 449 MB
@@ -245,29 +245,29 @@ def addEmbeddingSkim_v44_4_2(datasets):
         # 4961 files, min 3.3 MB, max 232 MB
         "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER"),
         # 998 files, min 19 MB, max 104 MB
-        "WJets_TuneZ2_Fall11":                TaskDef("/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER"),
+        "WJets_TuneZ2_Fall11":                TaskDef("/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=990),
         # 989 files, min 74 MB, max 252 MB
-        "DYJetsToLL_M50_TuneZ2_Fall11":       TaskDef("/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER"),
+        "DYJetsToLL_M50_TuneZ2_Fall11":       TaskDef("/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=990),
         # 492 files, min 9.8 MB, max 45 MB
-        "T_t-channel_TuneZ2_Fall11":          TaskDef("/T_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER"),
+        "T_t-channel_TuneZ2_Fall11":          TaskDef("/T_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=300),
         # 162 files, min 6.1 MB, max 63 MB
-        "Tbar_t-channel_TuneZ2_Fall11":       TaskDef("/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER"),
+        "Tbar_t-channel_TuneZ2_Fall11":       TaskDef("/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=70),
         # 91 files, min 5.1 MB, max 156 MB
-        "T_tW-channel_TuneZ2_Fall11":         TaskDef("/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER"),
+        "T_tW-channel_TuneZ2_Fall11":         TaskDef("/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=90),
         # 92 files, min 11 MB, max 149 MB
-        "Tbar_tW-channel_TuneZ2_Fall11":      TaskDef("/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER"),
+        "Tbar_tW-channel_TuneZ2_Fall11":      TaskDef("/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=90),
         # 51 files, min 4.9 MB, max 40 MB
-        "T_s-channel_TuneZ2_Fall11":          TaskDef("/T_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER"),
+        "T_s-channel_TuneZ2_Fall11":          TaskDef("/T_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=25),
         # 12 files, min 20 MB, max 83 MB
-        "Tbar_s-channel_TuneZ2_Fall11":       TaskDef("/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER"),
+        "Tbar_s-channel_TuneZ2_Fall11":       TaskDef("/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=5),
         # 201 files, min 3.9 MB, max 136 MB
-        "WW_TuneZ2_Fall11":                   TaskDef("/WW_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER"),
+        "WW_TuneZ2_Fall11":                   TaskDef("/WW_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=150),
         # 201 files, min 26 MB, max 122 MB
-        "WZ_TuneZ2_Fall11":                   TaskDef("/WZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER"),
+        "WZ_TuneZ2_Fall11":                   TaskDef("/WZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=150),
         # 352 files, min 19 MB, max 77 MB
         "ZZ_TuneZ2_Fall11":                   TaskDef("/ZZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER"),
         # 493 files, min 14 MB, max 54 MB
-        "QCD_Pt20_MuEnriched_TuneZ2_Fall11":  TaskDef("/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER"),
+        "QCD_Pt20_MuEnriched_TuneZ2_Fall11":  TaskDef("/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=490),
         }
     addEmbeddingSkim_44X("v44_4_2", datasets, definitions)
 
