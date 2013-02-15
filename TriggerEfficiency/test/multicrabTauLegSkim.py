@@ -6,6 +6,16 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflows as multicrabWorkflows
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTriggerEff as multicrabWorkflowsTriggerEff
 
+datasets_TauPlusX = [
+    "TauPlusX_190456-190738_2012A_Jul13",
+    "TauPlusX_190782-190949_2012A_Aug06",
+    "TauPlusX_191043-193621_2012A_Jul13",
+    "TauPlusX_193834-196531_2012B_Jul13",
+    "TauPlusX_198022-198523_2012C_Aug24",
+    "TauPlusX_198941-203742_2012C_Prompt",
+    "TauPlusX_203777-208686_2012D_Prompt",
+]
+
 datasets_Tau = [
     "Tau_190456-190738_2012A_Jul13",
     "Tau_190782-190949_2012A_Aug06",
@@ -142,6 +152,22 @@ datasets_TT_EWK = [
     "DYJetsToLL_M10to50_TuneZ2star_Summer12"
 ]
 
+datasets_DY = [
+    "DYToTauTau_M20_powheg_v1_TuneZ2star_Summer12",
+    "DYToTauTau_M20_powheg_v2_TuneZ2star_Summer12",
+    "DYToTauTau_M_100to200_TuneZ2Star_pythia6_tauola_Summer12",
+    "DYToTauTau_M_200to400_TuneZ2Star_pythia6_tauola_Summer12",
+    "DYToTauTau_M_400to800_TuneZ2Star_pythia6_tauola_Summer12",
+    "DYToTauTau_M_800_TuneZ2Star_pythia6_tauola_Summer12",
+
+    "DYToTauTau_M_20_CT10_TuneZ2star_8TeV_powheg_tauola",
+    "DYToTauTau_M_20_CT10_TuneZ2star_v2_8TeV_powheg_tauola",
+    "DYToTauTau_M_100to200_TuneZ2Star_8TeV_pythia6_tauola",
+    "DYToTauTau_M_200to400_TuneZ2Star_8TeV_pythia6_tauola",
+    "DYToTauTau_M_400to800_TuneZ2Star_8TeV_pythia6_tauola",
+    "DYToTauTau_M_800_TuneZ2Star_8TeV_pythia6_tauola",
+]
+
 datasets_SingleTop = [
     "T_t-channel_TuneZ2star_Summer12",
     "Tbar_t-channel_TuneZ2star_Summer12",
@@ -151,11 +177,12 @@ datasets_SingleTop = [
     "Tbar_s-channel_TuneZ2star_Summer12",
 ]
 
-#workflow = "analysis_metleg_v53_v1"
-workflow = "triggerMetLeg_skim_v53_v1"
+#workflow = "analysis_tauleg_v53_v1"
+workflow = "triggerTauLeg_skim_v53_v1"
 
 tasks = [
-     ("MetLeg", datasets_Tau+datasets_QCD+datasets_VV+datasets_SingleTop+datasets_TT_EWK),
+     ("TauLeg", datasets_TauPlusX+datasets_DY),
+#    ("MetLeg", datasets_Tau+datasets_QCD+datasets_VV+datasets_SingleTop+datasets_TT_EWK),
 #    ("Tau", datasets_Tau),
 #    ("MultiJet", datasets_MultiJet),
 #    ("Signal", datasets_Signal),
@@ -180,7 +207,7 @@ for midfix, datasets in tasks:
     # writing to /store/group/local ...
     #multicrab.appendLineAll("USER.local_stage_out=1")
 
-    multicrab.appendLineAll("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/TriggerMETLeg/CMSSW_5_3_X")
+    multicrab.appendLineAll("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/TriggerTauLeg/CMSSW_5_3_X")
     multicrab.appendLineAll("GRID.maxtarballsize = 35")
 
     #def addCopyConfig(dataset):

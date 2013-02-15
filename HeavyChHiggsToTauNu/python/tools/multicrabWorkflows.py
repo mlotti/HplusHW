@@ -238,6 +238,20 @@ datasets.splitDataByRuns("MultiJet_198941-203742_2012C_Prompt", [
         (202792, 203742), # 1317502 events, 152 files
         ])
 
+# BJetPlusX PD, QuadJet trigger for signal
+datasets.extend([
+    # Run212B
+    DataDataset("BJetPlusX_%s_2012B_Jul13",     reco="13Jul2012", runs=(193834, 196531), aod="/BJetPlusX/Run2012B-13Jul2012-v1/AOD"), # 27868808 events, 2215 files
+    # Run212C
+    DataDataset("BJetPlusX_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/BJetPlusX/Run2012C-24Aug2012-v2/AOD"), # 2650602 events, 276 files
+    DataDataset("BJetPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/BJetPlusX/Run2012C-PromptReco-v2/AOD"), # 33847953 events, 3420 files
+    # Run2012D
+    DataDataset("BJetPlusX_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/BJetPlusX/Run2012D-PromptReco-v1/AOD"), # 40966073 events, 4467 files
+])
+datasets.splitDataByRuns("BJetPlusX_193834-196531_2012B_Jul13", [
+        (193834, 194225), # This has both BTagCSV and BTagIP triggers, 4540690 events, 322 files
+        (194270, 196531), # This has only BTagIP trigger, 24497173 events, 1987 files
+        ])
 
 # TauPlusX PD, IsoMu+MET, IsoMu+MET+Tau triggers for tau trigger efficiency measurement
 datasets.extend([
@@ -249,9 +263,7 @@ datasets.extend([
     DataDataset("TauPlusX_%s_2012B_Jul13",     reco="13Jul2012", runs=(193834, 196531), aod="/TauPlusX/Run2012B-13Jul2012-v1/AOD"), # 39410283 events, 3013 files
     # Run212C
     DataDataset("TauPlusX_%s_2012C_Aug24",     reco="24Aug2012", runs=(198022, 198523), aod="/TauPlusX/Run2012C-24Aug2012-v1/AOD"), # 4067828 events, 313 files
-    DataDataset("TauPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 200601), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #
-    DataDataset("TauPlusX_%s_0T_2012C_Prompt", reco="PromptCv2", runs=(200961, 202504), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #
-    DataDataset("TauPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(202792, 203742), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #
+    DataDataset("TauPlusX_%s_2012C_Prompt",    reco="PromptCv2", runs=(198941, 203742), aod="/TauPlusX/Run2012C-PromptReco-v2/AOD"), #
     # Run2012D
     DataDataset("TauPlusX_%s_2012D_Prompt",    reco="PromptDv1", runs=(203777, 208686), aod="/TauPlusX/Run2012D-PromptReco-v1/AOD"), # 59840242 events, 6068 files
 ])
@@ -385,6 +397,13 @@ datasets.extend([
     MCDataset("W4Jets_TuneZ2star_Summer12",             aod="/W4JetsToLNu_TuneZ2Star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 13.4 Mevt
     MCDataset("DYJetsToLL_M50_TuneZ2star_Summer12",     aod="/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 30 Mevt
     MCDataset("DYJetsToLL_M10to50_TuneZ2star_Summer12", aod="/DYJetsToLL_M-10To50_TuneZ2Star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 38 Mevt
+    # DY for trigger tau efficiency measurement
+    MCDataset("DYToTauTau_M_20_CT10_TuneZ2star_powheg_tauola_Summer12", aod="/DYToTauTau_M-20_CT10_TuneZ2star_8TeV-powheg-tauola-pythia6/Summer12_DR53X-PU_S8_START53_V7A-v1/AODSIM"), # 3.3 Mevt
+    MCDataset("DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12", aod="/DYToTauTau_M-20_CT10_TuneZ2star_v2_8TeV-powheg-tauola-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM"), # 48.8 Mevt
+    MCDataset("DYToTauTau_M_100to200_TuneZ2Star_pythia6_tauola_Summer12", aod="/DYToTauTau_M-100to200_TuneZ2Star_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 200kevt
+    MCDataset("DYToTauTau_M_200to400_TuneZ2Star_pythia6_tauola_Summer12", aod="/DYToTauTau_M-200to400_TuneZ2Star_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 100kevt
+    MCDataset("DYToTauTau_M_400to800_TuneZ2Star_pythia6_tauola_Summer12", aod="/DYToTauTau_M-400to800_TuneZ2Star_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 100kevt
+    MCDataset("DYToTauTau_M_800_TuneZ2Star_pythia6_tauola_Summer12", aod="/DYToTauTau_M-800_TuneZ2Star_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 100kevt
     # SingleTop Powheg
     MCDataset("T_t-channel_TuneZ2star_Summer12",     aod="/T_t-channel_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 3.8 Mevt
     MCDataset("Tbar_t-channel_TuneZ2star_Summer12",  aod="/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM"), # 1.9 Mevt

@@ -24,9 +24,9 @@ class HPlusJetPtrSelectorFilter: public edm::EDFilter {
 
   virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
-  HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
   HPlus::HistoWrapper histoWrapper;
+  HPlus::EventCounter eventCounter;
   HPlus::JetSelection fJetSelection;
   edm::InputTag fTauSrc;
   bool fFilter;
@@ -40,9 +40,9 @@ class HPlusJetPtrSelectorFilter: public edm::EDFilter {
 };
 
 HPlusJetPtrSelectorFilter::HPlusJetPtrSelectorFilter(const edm::ParameterSet& iConfig):
-  eventCounter(iConfig),
   eventWeight(iConfig),
-  histoWrapper(eventWeight, "Debug"),
+  histoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
+  eventCounter(iConfig, eventWeight, histoWrapper),
   fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, histoWrapper),
   fTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
   fFilter(iConfig.getParameter<bool>("filter")),
@@ -50,7 +50,6 @@ HPlusJetPtrSelectorFilter::HPlusJetPtrSelectorFilter(const edm::ParameterSet& iC
 {
   produces<Product>();
   produces<bool>();
-  eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
 HPlusJetPtrSelectorFilter::~HPlusJetPtrSelectorFilter() {}
 void HPlusJetPtrSelectorFilter::beginJob() {}

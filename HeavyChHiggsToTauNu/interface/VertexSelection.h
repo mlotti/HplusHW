@@ -27,12 +27,14 @@ namespace HPlus {
 
       const bool passedEvent() const { return fPassedEvent; }
       const edm::Ptr<reco::Vertex>& getSelectedVertex() const { return fSelectedVertex; }
+      size_t getNumberOfAllVertices() const { return fNumberOfAllVertices; }
 
       friend class VertexSelection;
 
     private:
       bool fPassedEvent;
       edm::Ptr<reco::Vertex> fSelectedVertex;
+      size_t fNumberOfAllVertices;
     };
 
     VertexSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -42,14 +44,18 @@ namespace HPlus {
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
-    const edm::InputTag getSrc() const {
-      return fSrc;
+    const edm::InputTag getSelectedSrc() const {
+      return fSelectedSrc;
+    }
+    const edm::InputTag getAllSrc() const {
+      return fAllSrc;
     }
 
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     
-    edm::InputTag fSrc;
+    edm::InputTag fSelectedSrc;
+    edm::InputTag fAllSrc;
     bool fEnabled;
   };
 }

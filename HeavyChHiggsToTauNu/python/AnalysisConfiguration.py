@@ -56,6 +56,8 @@ class ConfigBuilder:
                  doPrescalesForData = False, # Keep / Ignore prescaling for data (suppresses greatly error messages in datasets with or-function of triggers)
                  doFillTree = False, # Tree filling
                  histogramAmbientLevel = "Debug", # Set level of how many histograms are stored to files options are: 'Vital' (least histograms), 'Informative', 'Debug' (all histograms),
+                 histogramAmbientLevelOptimization = "Vital",
+                 histogramAmbientLevelSystematics = "Systematics",
                  applyTriggerScaleFactor = True, # Apply trigger scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
@@ -64,13 +66,18 @@ class ConfigBuilder:
                  useCHSJets = False,
                  useJERSmearedJets = True,
                  useBTagDB = False,
-                 customizeAnalysis = None,
+                 customizeLightAnalysis = None,
+                 customizeHeavyAnalysis = None,
+
+                 doLightAnalysis = True,
+                 doHeavyAnalysis = False,
 
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
                  doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
                  allowTooManyAnalyzers = False, # Allow arbitrary number of analyzers (beware, it might take looong to run and merge)
+                 printAnalyzerNames = False,
                  inputWorkflow = "pattuple_v53_1", # Name of the workflow, whose output is used as an input, needed for WJets weighting
                  ):
         self.options, self.dataVersion = HChOptions.getOptionsDataVersion(dataVersion)
@@ -88,6 +95,7 @@ class ConfigBuilder:
         self.doPrescalesForData = doPrescalesForData
         self.doFillTree = doFillTree
         self.histogramAmbientLevel = histogramAmbientLevel
+        self.histogramAmbientLevelSystematics = histogramAmbientLevelSystematics
         self.applyTriggerScaleFactor = applyTriggerScaleFactor
         self.applyPUReweight = applyPUReweight
         self.tauSelectionOperatingMode = tauSelectionOperatingMode
@@ -95,7 +103,13 @@ class ConfigBuilder:
         self.useCHSJets = useCHSJets
         self.useJERSmearedJets = useJERSmearedJets
         self.useBTagDB = useBTagDB
-        self.customizeAnalysis = customizeAnalysis
+        self.customizeLightAnalysis = customizeLightAnalysis
+        self.customizeHeavyAnalysis = customizeHeavyAnalysis
+
+        self.doLightAnalysis = doLightAnalysis
+        self.doHeavyAnalysis = doHeavyAnalysis
+        if not self.doLightAnalysis and not self.doHeavyAnalysis:
+            raise Exception("At least one of doLightAnalysis and doHeavyAnalysis must be set to True (otherwise nothing is done)")
 
         self.doSystematics = doSystematics
         self.doJESVariation = doJESVariation
@@ -103,6 +117,7 @@ class ConfigBuilder:
         self.doOptimisation = doOptimisation
         self.optimisationScheme = optimisationScheme
         self.allowTooManyAnalyzers = allowTooManyAnalyzers
+        self.printAnalyzerNames = printAnalyzerNames
 
         self.inputWorkflow = inputWorkflow
 
@@ -124,7 +139,7 @@ class ConfigBuilder:
         if self.doOptimisation:
             #self.doSystematics = True            # Make sure that systematics are run
             self.doFillTree = False              # Make sure that tree filling is disabled or root file size explodes
-            self.histogramAmbientLevel = "Vital" # Set histogram level to least histograms to reduce output file sizes
+            self.histogramAmbientLevel = histogramAmbientLevelOptimization # Set histogram level to least histograms to reduce output file sizes
 
         if self.doBTagTree:
             self.tauSelectionOperatingMode = 'tauCandidateSelectionOnly'
@@ -170,12 +185,12 @@ class ConfigBuilder:
     ## Accumulate the number of analyzers to a category
     #
     # \param key     Analyzer category name
-    # \param number  Number (of analyzers) to add to the cateogyr
-    def _accumulateAnalyzers(self, key, number):
+    # \param names   List of analyzer names to add to the category
+    def _accumulateAnalyzers(self, key, names):
         if not key in self.numberOfAnalyzers:
             self.analyzerCategories.append(key)
 
-        self.numberOfAnalyzers[key] = self.numberOfAnalyzers.get(key, 0) + number
+        self.numberOfAnalyzers[key] = self.numberOfAnalyzers.get(key, []) + names
 
     ## Checks that the number of analyzers is sensible
     #
@@ -186,12 +201,23 @@ class ConfigBuilder:
         fmt = "  %%-%ds: %%d" % width
         s = 0
         for cat in self.analyzerCategories:
-            n = self.numberOfAnalyzers[cat]
+            n = len(self.numberOfAnalyzers[cat])
             s += n
             print fmt % (cat, n)
         print "  "+("-" * (width+4))
         print fmt % ("Total", s)
         print
+
+        if self.printAnalyzerNames:
+            print "Analyzer module names:"
+            names = []
+            for x in self.numberOfAnalyzers.itervalues():
+                names.extend(x)
+            names.sort()
+            for name in names:
+                print "  %s" % name
+            print
+
 
         if s > tooManyAnalyzersLimit:
             if self.allowTooManyAnalyzers:
@@ -231,14 +257,19 @@ class ConfigBuilder:
 
         # Create analysis module(s)
         modules = createAnalysesFunction(param)
+        analysisLightModules = []
+        analysisLightNames = []
+        analysisHeavyModules = []
+        analysisHeavyNames = []
         if self.dataVersion.isData():
-            analysisModules = modules
-            analysisNames = analysisNames_[:]
+            if self.doLightAnalysis:
+                analysisLightModules = modules
+                analysisLightNames = [n+"Light" for n in analysisNames_]
+            if self.doHeavyAnalysis:
+                analysisHeavyModules = [param.cloneForHeavyAnalysis(mod) for mod in modules]
+                analysisHeavyNames = [n+"Heavy" for n in analysisNames_]
         else:
             # For MC, produce the PU-reweighted analyses
-            analysisModules = []
-            analysisNames = []
-
             # No PU reweighting, it is sufficient to do calculate WJets weights only one
             if self.options.wjetsWeighting != 0 and not self.applyPUReweight:
                 process.wjetsWeight = wjetsWeight.getWJetsWeight(self.dataVersion, self.options, self.inputWorkflow, None)
@@ -257,16 +288,24 @@ class ConfigBuilder:
                 for module, name in zip(modules, analysisNames_):
                     mod = module.clone()
                     if self.applyTriggerScaleFactor:
-                        param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.triggerEfficiencyScaleFactor)
+                        param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.tauTriggerEfficiencyScaleFactor)
                     if self.applyPUReweight:
-                        param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.vertexWeightReader, era=dataEra)
+                        param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.pileupWeightReader, era=dataEra)
                         if self.options.wjetsWeighting != 0:
                             mod.wjetsWeightReader.weightSrc = "wjetsWeight"+dataEra
                             mod.wjetsWeightReader.enabled = True
 
+                    if self.doLightAnalysis:
+                        analysisLightModules.append(mod)
+                        analysisLightNames.append(name+"Light"+dataEra)
+                    if self.doHeavyAnalysis:
+                        analysisLightModules.append(param.cloneForHeavyAnalysis(mod))
+                        analysisLightNames.append(name+"Heavy"+dataEra)
+
                     print "Added analysis for PU weight era =", dataEra
-                    analysisModules.append(mod)
-                    analysisNames.append(name+dataEra)
+
+        analysisModules = analysisLightModules+analysisHeavyModules
+        analysisNames = analysisLightNames+analysisHeavyNames
 
 
         analysisNamesForSystematics = []
@@ -274,7 +313,6 @@ class ConfigBuilder:
         # For embedding input, the systematics should be evaluated with the analyzer with Muon eff, Tau trigger eff, CaloMET>60 (this is added to analysisNamesForSystematics later)
         if not self.doOptimisation and self.options.tauEmbeddingInput == 0:
             analysisNamesForSystematics = analysisNames[:]
-        self._accumulateAnalyzers("Data eras", len(analysisModules))
 
         for module in analysisModules:
             module.Tree.fill = self.doFillTree
@@ -282,8 +320,12 @@ class ConfigBuilder:
             module.tauEmbeddingStatus = (self.options.tauEmbeddingInput != 0)
             if len(additionalCounters) > 0:
                 module.eventCounter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
-        analysisModules[0].eventCounter.printMainCounter = cms.untracked.bool(True)
-        #analysisModules[0].eventCounter.printSubCounters = cms.untracked.bool(True)
+        if len(analysisLightModules) > 0:
+            analysisLightModules[0].eventCounter.printMainCounter = cms.untracked.bool(True)
+            #analysisLightModules[0].eventCounter.printSubCounters = cms.untracked.bool(True)
+        if len(analysisHeavyModules) > 0:
+            analysisHeavyModules[0].eventCounter.printMainCounter = cms.untracked.bool(True)
+            #analysisHeavyModules[0].eventCounter.printSubCounters = cms.untracked.bool(True)
 
         # Prescale fetching done automatically for data
         if self.dataVersion.isData() and self.options.tauEmbeddingInput == 0 and self.doPrescalesForData:
@@ -292,12 +334,16 @@ class ConfigBuilder:
             process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
             process.commonSequence *= process.hplusPrescaleWeightProducer
             for module in analysisModules:
-                module.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
+                module.prescaleWeightReader.weightSrc = "hplusPrescaleWeightProducer"
+                module.prescaleWeightReader.enabled = True
 
         # Allow customization AFTER all settings have been applied, and BEFORE the printout
-        if self.customizeAnalysis != None:
-            for module in analysisModules:
-                self.customizeAnalysis(module)
+        if self.customizeLightAnalysis is not None:
+            for module in analysisLightModules:
+                self.customizeLightAnalysis(module)
+        if self.customizeHeavyAnalysis is not None:
+            for module in analysisHeavyModules:
+                self.customizeHeavyAnalysis(module)
         
         # Print output
         self._printModule(analysisModules[0])
@@ -313,6 +359,8 @@ class ConfigBuilder:
             p = getattr(process, analysisNames[0]+"Path")
             p *= process.PickEvents
 
+            self._accumulateAnalyzers("Data eras", analysisNames)
+
             if self.doMETResolution:
                 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.METResolutionAnalysis_cfi")
                 p *= process.metResolutionAnalysis
@@ -320,7 +368,7 @@ class ConfigBuilder:
         else:
             for module, name in zip(analysisModules, analysisNames):
                 names = self.optimisationScheme.generateVariations(process, additionalCounters, process.commonSequence, module, name)
-                self._accumulateAnalyzers("Optimisation", len(names))
+                self._accumulateAnalyzers("Optimisation", names)
                 analysisNamesForSystematics.extend(names)
 
         # Against electron scan
@@ -440,7 +488,7 @@ class ConfigBuilder:
 
         # Trigger with scale factors (at the moment hard coded)
         if self.applyTriggerScaleFactor and self.dataVersion.isMC():
-            param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
+            param.tauTriggerEfficiencyScaleFactor.mode = "scaleFactor"
 
         if self.doBTagTree:
             param.tree.fillNonIsoLeptonVars = True
@@ -508,9 +556,9 @@ class ConfigBuilder:
         #print "\nAnalysis is blind:", module.blindAnalysisStatus, "\n"
         print "Histogram level:", module.histogramAmbientLevel.value()
         print "Trigger:", module.trigger
-        print "Trigger scale factor mode:", module.triggerEfficiencyScaleFactor.mode.value()
-        print "Trigger scale factor data:", module.triggerEfficiencyScaleFactor.dataSelect.value()
-        print "Trigger scale factor MC:", module.triggerEfficiencyScaleFactor.mcSelect.value()
+        print "Trigger scale factor mode:", module.tauTriggerEfficiencyScaleFactor.mode.value()
+        print "Trigger scale factor data:", module.tauTriggerEfficiencyScaleFactor.dataSelect.value()
+        print "Trigger scale factor MC:", module.tauTriggerEfficiencyScaleFactor.mcSelect.value()
         if hasattr(module, "metFilters"):
             print "MET filters", module.metFilters
         print "VertexWeight data distribution:",module.vertexWeight.dataPUdistribution.value()
@@ -545,7 +593,7 @@ class ConfigBuilder:
             "againstElectronTight",
             "againstElectronMVA"
             ]
-        N = 0
+        names = []
         for module, name in zip(analysisModules, analysisNames):
             for eleDisc in electronDiscriminators:
                 mod = module.clone()
@@ -553,10 +601,10 @@ class ConfigBuilder:
                 mod.tauSelection.againstElectronDiscriminator = eleDisc
                 modName = name+eleDisc[0].upper()+eleDisc[1:]
                 setattr(process, modName, mod)
+                names.append(modName)
                 path = cms.Path(process.commonSequence * mod)
                 setattr(process, modName+"Path", path)
-                N += 1
-        self._accumulateAnalyzers("AgainstElectron scan", N)
+        self._accumulateAnalyzers("AgainstElectron scan", names)
  
     ## Build "tau embedding"-like preselection for normal MC
     #
@@ -573,16 +621,17 @@ class ConfigBuilder:
         if self.options.tauEmbeddingInput != 0:
             raise Exception("tauEmbegginInput clashes with doTauEmbeddingLikePreselection")
         
+        allNames = []
         def add(name, sequence, module, counters):
             module.eventCounter.counters = [cms.InputTag(c) for c in counters]
             setattr(process, name+"Sequence", sequence)
             setattr(process, name, module)
+            allNames.append(name)
             path = cms.Path(sequence * module)
             setattr(process, name+"Path", path)
 
         retNames = []
 
-        N = 0
         for module, name in zip(analysisModules, analysisNames):
             # Preselection similar to tau embedding selection (genuine tau+3 jets+lepton vetoes), no tau+MET trigger required
             seq = cms.Sequence(process.commonSequence)
@@ -590,7 +639,6 @@ class ConfigBuilder:
             counters = additionalCounters[:]
             counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, seq, mod, prefix=name+"EmbeddingLikePreselection"))
             add(name+"TauEmbeddingLikePreselection", seq, mod, counters)
-            N += 1
 
             # Preselection similar to tau embedding selection (genuine tau+3 jets+lepton vetoes), tau+MET trigger required
             seq = cms.Sequence(process.commonSequence)
@@ -598,7 +646,6 @@ class ConfigBuilder:
             counters = additionalCounters[:]
             counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, seq, mod, prefix=name+"EmbeddingLikeTriggeredPreselection", disableTrigger=False))
             add(name+"TauEmbeddingLikeTriggeredPreselection", seq, mod, counters)
-            N += 1
             
             # Genuine tau preselection
             seq = cms.Sequence(process.commonSequence)
@@ -606,7 +653,6 @@ class ConfigBuilder:
             counters = additionalCounters[:]
             counters.extend(tauEmbeddingCustomisations.addGenuineTauPreselection(process, seq, mod, prefix=name+"GenuineTauPreselection"))
             add(name+"GenuineTauPreselection", seq, mod, counters)
-            N += 1
 
             # Require genuine tau after tau ID in analysis
             mod = module.clone()
@@ -615,8 +661,7 @@ class ConfigBuilder:
             path = cms.Path(process.commonSequence * mod)
             setattr(process, name+"GenuineTauPath", path)
             retNames.append(name+"GenuineTau")
-            N += 1
-        self._accumulateAnalyzers("Tau embedding -like preselection", N)
+        self._accumulateAnalyzers("Tau embedding -like preselection", allNames)
         return retNames
 
     ## Build additional analyses for tau embedding input
@@ -628,8 +673,8 @@ class ConfigBuilder:
         if self.options.tauEmbeddingInput == 0:
             return []
 
+        allNames = []
         retNames = []
-        N = 0
         for module, name in zip(analysisModules, analysisNames):
             postfix = "MEff"
             mod = module.clone()
@@ -637,7 +682,7 @@ class ConfigBuilder:
             path = cms.Path(process.commonSequence * mod)
             setattr(process, name+postfix, mod)
             setattr(process, name+postfix+"Path", path)
-            N += 1
+            allNames.append(name+postfix)
 
             postfix += "CaloMet60"
             mod = mod.clone()
@@ -645,17 +690,17 @@ class ConfigBuilder:
             path = cms.Path(process.commonSequence * mod)
             setattr(process, name+postfix, mod)
             setattr(process, name+postfix+"Path", path)
-            N += 1
+            allNames.append(name+postfix)
 
             postfix += "TEff"
             mod = mod.clone()
-            mod.triggerEfficiencyScaleFactor.mode = "efficiency"
+            mod.tauTriggerEfficiencyScaleFactor.mode = "efficiency"
             path = cms.Path(process.commonSequence * mod)
             setattr(process, name+postfix, mod)
             setattr(process, name+postfix+"Path", path)
+            allNames.append(name+postfix)
             retNames.append(name+postfix)
-            N += 1
-        self._accumulateAnalyzers("Tau embedding analyses", N)
+        self._accumulateAnalyzers("Tau embedding analyses", allNames)
         return retNames
 
     ## Build JES variation
@@ -689,30 +734,28 @@ class ConfigBuilder:
         module = module.clone()
         module.Tree.fill = False        
         module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
+        module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
 
         postfix = ""
         if module.jetSelection.src.value()[-3:] == "Chs":
             postfix = "Chs"
 
-        jesVariation.addTESVariation(process, name, "TESPlus",  module, "Up")
-        jesVariation.addTESVariation(process, name, "TESMinus", module, "Down")
-        N = 2
+        names = []
+        names.append(jesVariation.addTESVariation(process, name, "TESPlus",  module, "Up", histogramAmbientLevel=self.histogramAmbientLevelSystematics))
+        names.append(jesVariation.addTESVariation(process, name, "TESMinus", module, "Down", histogramAmbientLevel=self.histogramAmbientLevelSystematics))
 
         if doJetUnclusteredVariation:
             # Do all variations beyond TES
-            jesVariation.addJESVariation(process, name, "JESPlus",  module, "Up", postfix)
-            jesVariation.addJESVariation(process, name, "JESMinus", module, "Down", postfix)
-            N += 2
+            names.append(jesVariation.addJESVariation(process, name, "JESPlus",  module, "Up", postfix))
+            names.append(jesVariation.addJESVariation(process, name, "JESMinus", module, "Down", postfix))
     
-            jesVariation.addJERVariation(process, name, "JERPlus",  module, "Up", postfix)
-            jesVariation.addJERVariation(process, name, "JERMinus", module, "Down", postfix)
-            N += 2
+            names.append(jesVariation.addJERVariation(process, name, "JERPlus",  module, "Up", postfix))
+            names.append(jesVariation.addJERVariation(process, name, "JERMinus", module, "Down", postfix))
     
-            jesVariation.addUESVariation(process, name, "METPlus",  module, "Up", postfix)
-            jesVariation.addUESVariation(process, name, "METMinus", module, "Down", postfix)
-            N += 2
+            names.append(jesVariation.addUESVariation(process, name, "METPlus",  module, "Up", postfix))
+            names.append(jesVariation.addUESVariation(process, name, "METMinus", module, "Down", postfix))
 
-        self._accumulateAnalyzers("JES variation", N)
+        self._accumulateAnalyzers("JES variation", names)
 
     ## Build PU weight variation
     #
@@ -747,30 +790,36 @@ class ConfigBuilder:
                 process.commonSequence *= weightMod
             mod.wjetsWeightReader.weightSrc = weightName
 
+        names = []
+
         # Up variation
         module = getattr(process, name).clone()
         module.Tree.fill = False
         module.eventCounter.printMainCounter = cms.untracked.bool(False)
+        module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
 
         if self.options.wjetsWeighting != 0:
             addWJetsWeight(module, "up")
 
-        param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, suffix="up")
+        param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, suffix="up")
         path = cms.Path(process.commonSequence * module)
         setattr(process, name+"PUWeightPlus", module)
         setattr(process, name+"PUWeightPlusPath", path)
+        names.append(name+"PUWeightPlus")
 
         # Down variation
         module = getattr(process, name).clone()
         module.Tree.fill = False
         module.eventCounter.printMainCounter = cms.untracked.bool(False)
+        module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
 
         if self.options.wjetsWeighting != 0:
             addWJetsWeight(module, "down")
 
-        param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.vertexWeightReader, suffix="down")
+        param.setPileupWeightForVariation(self.dataVersion, process, process.commonSequence, pset=module.vertexWeight, psetReader=module.pileupWeightReader, suffix="down")
         path = cms.Path(process.commonSequence * module)
         setattr(process, name+"PUWeightMinus", module)
         setattr(process, name+"PUWeightMinusPath", path)
+        names.append(name+"PUWeightMinus")
 
-        self._accumulateAnalyzers("PU weight variation", 2)
+        self._accumulateAnalyzers("PU weight variation", names)
