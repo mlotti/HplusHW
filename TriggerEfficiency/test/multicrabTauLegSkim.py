@@ -177,7 +177,8 @@ datasets_SingleTop = [
     "Tbar_s-channel_TuneZ2star_Summer12",
 ]
 
-workflow = "analysis_tauleg_v53_v1"
+#workflow = "analysis_tauleg_v53_v1"
+workflow = "triggerTauLeg_skim_v53_v1"
 
 tasks = [
      ("TauLeg", datasets_TauPlusX+datasets_DY),

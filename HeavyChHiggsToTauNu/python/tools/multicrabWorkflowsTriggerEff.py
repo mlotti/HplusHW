@@ -43,7 +43,8 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
         wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow="AOD", workflowName=workflowName, skimConfig=skim)
                                                                                                                                                                  
         # Setup the publish name
-        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), "analysis_tauleg_"+version)
+#        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), "analysis_tauleg_"+version)
+	name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName)
         wf.addCrabLine("USER.publish_data_name = "+name)
 
         # For MC, split by events, for data, split by lumi
@@ -66,7 +67,7 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
                 # For data, construct one analysis workflow per trigger type
                 pd = datasetName.split("_")[0]
                 if pd == "Tau" or pd == "TauPlusX":
-                    dataset.addWorkflow(Workflow("triggerMetLeg_analysis_"+version, triggerOR=wf.triggerOR, **commonArgs))
+                    dataset.addWorkflow(Workflow("triggerTauLeg_analysis_"+version, triggerOR=wf.triggerOR, **commonArgs))
                 elif pd == "MultiJet":
                     if datasetName in quadJetTriggers:
                         dataset.addWorkflow(Workflow("analysis_quadjet_"+version, triggerOR=quadJetTriggers[datasetName], **commonArgs))
@@ -78,7 +79,7 @@ def addTauLegSkim_53X(version, datasets, updateDefinitions, skim=None):
                     raise Exception("Unsupported PD name %s" % pd)
             else:
                 # For MC, also construct one analysis workflow per trigger type
-                dataset.addWorkflow(Workflow("analysis_tauleg"+version, triggerOR=[mcTriggerTauLeg], **commonArgs))
+                dataset.addWorkflow(Workflow("triggerTauLeg_analysis_"+version, triggerOR=[mcTriggerTauLeg], **commonArgs))
 
 
 def addTauLegSkim_53X_v1(datasets):
@@ -174,7 +175,7 @@ def addMetLegSkim_53X(version, datasets, updateDefinitions, skim=None):
         wf = constructProcessingWorkflow_53X(dataset, taskDef, sourceWorkflow="AOD", workflowName=workflowName, skimConfig=skim)
 
         # Setup the publish name                                                                                                                                       
-        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), "analysis_metleg_"+version)                                                  
+        name = updatePublishName(dataset, wf.source.getDataForDataset(dataset).getDatasetPath(), workflowName)
         wf.addCrabLine("USER.publish_data_name = "+name)                                                                                                               
                                                                                                                                                                        
         # For MC, split by events, for data, split by lumi                                                                                                             
