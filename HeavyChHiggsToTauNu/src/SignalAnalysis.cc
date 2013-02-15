@@ -518,7 +518,7 @@ namespace HPlus {
     fTree.setNvertices(nVertices);
 
     increment(fAllCounter);
-    fCommonPlots.initialize(iEvent, iSetup, nVertices, fPrimaryVertexSelection, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology);
+    fCommonPlots.initialize(iEvent, iSetup, pvData, fTauSelection, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETSelection, fBTagging, fTopChiSelection, fEvtTopology);
 
 //------ For combining W+Jets inclusive and exclusive samples, do an event weighting here
     if(!iEvent.isRealData()) {

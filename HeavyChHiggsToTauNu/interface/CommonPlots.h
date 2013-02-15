@@ -48,8 +48,7 @@ namespace HPlus {
     /// 
     const std::string getSelectionFlowPlotLabel() const { return fSelectionFlowPlotLabel; }
     /// Cache data objects, to be called from CommonPlots::initialize()
-    void cacheDataObjects(int nVertices,
-                          const VertexSelection::Data* vertexData,
+    void cacheDataObjects(const VertexSelection::Data* vertexData,
                           const TauSelection::Data* tauData,
                           const FakeTauIdentifier::Data* fakeTauData,
                           const ElectronSelection::Data* electronData,
@@ -67,7 +66,6 @@ namespace HPlus {
     std::string fSelectionFlowPlotLabel;
 
     /// Cached data objects from silent analyze
-    int fNVertices;
     const VertexSelection::Data* fVertexData;
     const TauSelection::Data* fTauData;
     const FakeTauIdentifier::Data* fFakeTauData;
@@ -109,8 +107,7 @@ namespace HPlus {
     /// Initialize data objects; call for every event
     void initialize(const edm::Event& iEvent,
                     const edm::EventSetup& iSetup,
-                    int nVertices,
-                    VertexSelection& vertexSelection,
+                    VertexSelection::Data& vertexData,
                     TauSelection& tauSelection,
                     FakeTauIdentifier& fakeTauIdentifier,
                     ElectronSelection& eVeto,
@@ -155,7 +152,6 @@ namespace HPlus {
     /// Normalisation analysis object
     NormalisationAnalysis fNormalisationAnalysis;
     /// Cached data objects from silent analyze
-    int fNVertices;
     VertexSelection::Data fVertexData;
     TauSelection::Data fTauData;
     FakeTauIdentifier::Data fFakeTauData;

@@ -40,7 +40,8 @@ namespace HPlus {
      // Safety check
      //if (!fDataObjectsCached)
      //  throw cms::Exception("Assert") << "CommonPlotsFilledAtEveryStep: data objects have not been cached! (did you forget to call CommonPlotsFilledAtEveryStep::cacheDataObjects from CommonPlots::initialize?)";
-    hNVertices->Fill(fNVertices);
+    size_t nVertices = fVertexData->getNumberOfAllVertices();
+    hNVertices->Fill(nVertices);
     if (!fVertexData) return;
     if (!fVertexData->passedEvent()) return; // Plots do not make sense if no PV has been found
 
@@ -76,8 +77,7 @@ namespace HPlus {
     hTransverseMass->Fill(myMT);
   }
 
-  void CommonPlotsFilledAtEveryStep::cacheDataObjects(int nVertices,
-                                                      const VertexSelection::Data* vertexData,
+  void CommonPlotsFilledAtEveryStep::cacheDataObjects(const VertexSelection::Data* vertexData,
                                                       const TauSelection::Data* tauData,
                                                       const FakeTauIdentifier::Data* fakeTauData,
                                                       const ElectronSelection::Data* electronData,
@@ -86,7 +86,6 @@ namespace HPlus {
                                                       const METSelection::Data* metData,
                                                       const BTagging::Data* bJetData,
                                                       const TopChiSelection::Data* topData) {
-    fNVertices = nVertices;
     fVertexData = vertexData;
     fTauData = tauData;
     fFakeTauData = fakeTauData;
@@ -153,8 +152,7 @@ namespace HPlus {
 
   void CommonPlots::initialize(const edm::Event& iEvent,
                                const edm::EventSetup& iSetup,
-                               int nVertices,
-                               VertexSelection& vertexSelection,
+                               VertexSelection::Data& vertexData,
                                TauSelection& tauSelection,
                                FakeTauIdentifier& fakeTauIdentifier,
                                ElectronSelection& eVeto,
@@ -167,29 +165,21 @@ namespace HPlus {
     // Obtain data objects only, if they have not yet been cached
     //if (bDataObjectsCached) return;
     //bDataObjectsCached = true;
-    fNVertices = nVertices;
     // Obtain data objects
-    fVertexData = vertexSelection.silentAnalyze(iEvent, iSetup);
-    if (!fVertexData.passedEvent()) {
-      // Plots do not make sense if no PV has been found
-      for (std::vector<CommonPlotsFilledAtEveryStep*>::iterator it = hEveryStepHistograms.begin(); it != hEveryStepHistograms.end(); ++it) {
-        (*it)->cacheDataObjects(fNVertices, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-      }
-      return;
-    }
+    fVertexData = vertexData;
     fTauData = tauSelection.silentAnalyze(iEvent, iSetup, fVertexData.getSelectedVertex()->z());
     // Need to require one tau in the event
     if (!fTauData.passedEvent()) {
       // Plots do not make sense if no PV has been found
       for (std::vector<CommonPlotsFilledAtEveryStep*>::iterator it = hEveryStepHistograms.begin(); it != hEveryStepHistograms.end(); ++it) {
-        (*it)->cacheDataObjects(fNVertices, &fVertexData, 0, 0, 0, 0, 0, 0, 0, 0);
+        (*it)->cacheDataObjects(&fVertexData, 0, 0, 0, 0, 0, 0, 0, 0);
       }
       return;
     }
     fFakeTauData = fakeTauIdentifier.silentMatchTauToMC(iEvent, *(fTauData.getSelectedTau()));
     fElectronData = eVeto.silentAnalyze(iEvent, iSetup);
     fMuonData = muonVeto.silentAnalyze(iEvent, iSetup, fVertexData.getSelectedVertex());
-    fJetData = jetSelection.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fNVertices);
+    fJetData = jetSelection.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fVertexData.getNumberOfAllVertices());
     fMETData = metSelection.silentAnalyze(iEvent, iSetup, fTauData.getSelectedTau(), fJetData.getAllJets());
     fBJetData = bJetSelection.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets());
     fTopData = topChiSelection.silentAnalyze(iEvent, iSetup, fJetData.getSelectedJets(), fBJetData.getSelectedJets());
@@ -198,7 +188,7 @@ namespace HPlus {
     if (!hEveryStepHistograms.size())
       throw cms::Exception("Assert") << "CommonPlots::initialize() was called before creating CommonPlots::createCommonPlotsFilledAtEveryStep()!" << endl<<  "  make first all CommonPlots::createCommonPlotsFilledAtEveryStep() and then call CommonPlots::initialize()";
     for (std::vector<CommonPlotsFilledAtEveryStep*>::iterator it = hEveryStepHistograms.begin(); it != hEveryStepHistograms.end(); ++it) {
-      (*it)->cacheDataObjects(fNVertices, &fVertexData, &fTauData, &fFakeTauData, &fElectronData, &fMuonData, &fJetData, &fMETData, &fBJetData, &fTopData);
+      (*it)->cacheDataObjects(&fVertexData, &fTauData, &fFakeTauData, &fElectronData, &fMuonData, &fJetData, &fMETData, &fBJetData, &fTopData);
     }
   }
 
@@ -220,8 +210,8 @@ namespace HPlus {
 
   void CommonPlots::fillControlPlots(const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData) {
     //fTauData = data;
-    hTauPhiOscillationX->Fill(fNVertices, tauData.getSelectedTau()->px());
-    hTauPhiOscillationY->Fill(fNVertices, tauData.getSelectedTau()->py());
+    hTauPhiOscillationX->Fill(fVertexData.getNumberOfAllVertices(), tauData.getSelectedTau()->px());
+    hTauPhiOscillationY->Fill(fVertexData.getNumberOfAllVertices(), tauData.getSelectedTau()->py());
     
     // e->tau normalisation
     fNormalisationAnalysis.analyseEToTauFakes(fVertexData, tauData, fakeTauData, fElectronData, fMuonData, fJetData, fMETData);
