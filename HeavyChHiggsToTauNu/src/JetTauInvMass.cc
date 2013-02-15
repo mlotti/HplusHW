@@ -11,8 +11,8 @@
 #include "Math/GenVector/VectorUtil.h"
 
 namespace HPlus {
-  JetTauInvMass::Data::Data(const JetTauInvMass *jetTauInvMass, bool passedEvent):
-    fJetTauInvMass(jetTauInvMass), fPassedEvent(passedEvent) {}
+  JetTauInvMass::Data::Data():
+    fPassedEvent(false) {}
   JetTauInvMass::Data::~Data() {}
   
   JetTauInvMass::JetTauInvMass(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper):
@@ -45,9 +45,8 @@ namespace HPlus {
   }
 
   JetTauInvMass::Data JetTauInvMass::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus, const edm::PtrVector<reco::Candidate>& jets) {
+    Data output;
     // Reset variables
-    bool passEvent = false;
-  
     double minMass = 99999;
     //size_t cleanPassed = 0;
     double closestMass = -999;
@@ -80,10 +79,12 @@ namespace HPlus {
       }
     }
     hClosestMass->Fill(closestMass);
-    passEvent = true;
-    if(minMass < fMassResolution) passEvent = false;
-    increment(fInvMassCutCount);
-
-    return Data(this, passEvent);
+    if(minMass < fMassResolution) {
+      output.fPassedEvent = false;
+    } else {
+      output.fPassedEvent = true;
+      increment(fInvMassCutCount);
+    }
+    return output;
   }
 }

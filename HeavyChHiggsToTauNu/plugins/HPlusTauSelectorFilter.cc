@@ -31,16 +31,15 @@ class HPlusTauSelectorFilterT: public edm::EDFilter {
  public:
 
   explicit HPlusTauSelectorFilterT(const edm::ParameterSet& iConfig):
-    eventCounter(iConfig),
     eventWeight(iConfig),
-    histoWrapper(eventWeight, "Debug"),
+    histoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
+    eventCounter(iConfig, eventWeight, histoWrapper),
     fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, histoWrapper),
     fFilter(iConfig.getParameter<bool>("filter")),
     fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc"))
   {
     produces<Product>();
     produces<bool>();
-    eventCounter.setWeightPointer(eventWeight.getWeightPtr());
   }
   ~HPlusTauSelectorFilterT() {}
 
@@ -73,9 +72,9 @@ class HPlusTauSelectorFilterT: public edm::EDFilter {
     eventCounter.endJob();
   }
 
-  HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
   HPlus::HistoWrapper histoWrapper;
+  HPlus::EventCounter eventCounter;
   HPlus::TauSelection fOneProngTauSelection;
   bool fFilter;
   edm::InputTag fVertexSrc;

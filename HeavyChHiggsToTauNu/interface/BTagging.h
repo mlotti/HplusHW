@@ -74,23 +74,31 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const BTagging *bTagging, bool passedEvent);
+      Data();
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
-      const edm::PtrVector<pat::Jet>& getSelectedJets() const { return fBTagging->fSelectedJets; }
-      const edm::PtrVector<pat::Jet>& getSelectedSubLeadingJets() const { return fBTagging->fSelectedSubLeadingJets; }
-      const int getBJetCount() const { return fBTagging->iNBtags; }
-      const double getMaxDiscriminatorValue() const { return fBTagging->fMaxDiscriminatorValue; }
-      const double getScaleFactor() const { return fBTagging->fScaleFactor; }
-      const double getScaleFactorAbsoluteUncertainty() const { return fBTagging->fScaleFactorAbsoluteUncertainty; }
-      const double getScaleFactorRelativeUncertainty() const { return fBTagging->fScaleFactorRelativeUncertainty; }
+      const edm::PtrVector<pat::Jet>& getSelectedJets() const { return fSelectedJets; }
+      const edm::PtrVector<pat::Jet>& getSelectedSubLeadingJets() const { return fSelectedSubLeadingJets; }
+      const int getBJetCount() const { return iNBtags; }
+      const double getMaxDiscriminatorValue() const { return fMaxDiscriminatorValue; }
+      const double getScaleFactor() const { return fScaleFactor; }
+      const double getScaleFactorAbsoluteUncertainty() const { return fScaleFactorAbsoluteUncertainty; }
+      const double getScaleFactorRelativeUncertainty() const { return fScaleFactorRelativeUncertainty; }
       const bool hasGenuineBJets() const;
-      void fillScaleFactorHistograms();
+
+      friend class BTagging;
 
     private:
-      const BTagging *fBTagging;
-      const bool fPassedEvent;
+      bool fPassedEvent;
+      // Selected jets
+      edm::PtrVector<pat::Jet> fSelectedJets;
+      edm::PtrVector<pat::Jet> fSelectedSubLeadingJets;
+      int iNBtags;
+      double fMaxDiscriminatorValue;
+      double fScaleFactor;
+      double fScaleFactorAbsoluteUncertainty;
+      double fScaleFactorRelativeUncertainty;
     };
 
     BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -99,17 +107,14 @@ namespace HPlus {
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
 
-    int analyzeOnlyBJetCount(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
-    double analyzeOnlyBJetScaleFactor(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets) {
-      analyzeOnlyBJetCount(iEvent,iSetup,jets); return fScaleFactor;
-    }
+    void fillScaleFactorHistograms(BTagging::Data& input);
 
     const std::string getDiscriminator() const { return fDiscriminator; }
 
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
-    
-    void calculateScaleFactor(const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
+
+    void calculateScaleFactor(const edm::PtrVector<pat::Jet>& jets, BTagging::Data& btagData);
 
     // Input parameters
     edm::InputTag fSrc;
@@ -127,8 +132,6 @@ namespace HPlus {
 
     // Lookup tables for scale factors
     BTaggingScaleFactor fBTaggingScaleFactor;
-    WrappedTH1* hBTagAbsoluteUncertainty;
-    WrappedTH1* hBTagRelativeUncertainty;
 
     // Counters
     Count fTaggedCount;
@@ -167,17 +170,12 @@ namespace HPlus {
     WrappedTH1 *hEta2;
     WrappedTH1 *hNumberOfBtaggedJets;
     WrappedTH1 *hNumberOfBtaggedJetsIncludingSubLeading;
-    WrappedTH1 *hScaleFactor;
     WrappedTH1 *hMCMatchForPassedJets;
     WrappedTH1 *hControlBTagUncertaintyMode;
-    // Selected jets
-    edm::PtrVector<pat::Jet> fSelectedJets;
-    edm::PtrVector<pat::Jet> fSelectedSubLeadingJets;
-    int iNBtags;
-    double fMaxDiscriminatorValue;
-    double fScaleFactor;
-    double fScaleFactorAbsoluteUncertainty;
-    double fScaleFactorRelativeUncertainty;
+    // Scale factor histograms (needed for evaluating syst. uncertainty of btagging in datacard generator)
+    WrappedTH1 *hScaleFactor;
+    WrappedTH1 *hBTagAbsoluteUncertainty;
+    WrappedTH1 *hBTagRelativeUncertainty;
   };
 }
 

@@ -33,8 +33,8 @@ void printDaughters(const reco::Candidate& p);
 
 
 namespace HPlus {
-  VetoTauSelection::Data::Data(const VetoTauSelection *vetoTauSelection, bool passedEvent) :
-  fVetoTauSelection(vetoTauSelection), fPassedEvent(passedEvent) { }
+  VetoTauSelection::Data::Data() :
+  fPassedEvent(false) { }
 
   VetoTauSelection::Data::~Data() { }
   
@@ -70,16 +70,16 @@ namespace HPlus {
       for (int i = 1; i <= hCandidateTauNumber->getHisto()->GetNbinsX(); ++i)
         hSelectedTauNumber->GetXaxis()->SetBinLabel(i, hCandidateTauNumber->GetXaxis()->GetBinLabel(i));
     }
-    hTauCandFromWPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauCandFromWPt", "TauCandFromWPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hTauCandAllPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauCandAllPt", "TauCandAllPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hSelectedGenuineTauByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauByPt", "SelectedGenuineTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hSelectedGenuineTauByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauByEta", "SelectedGenuineTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
-    hSelectedGenuineTauByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauByPhi", "SelectedGenuineTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
-    hSelectedFakeTauByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauByPt", "SelectedFakeTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hSelectedFakeTauByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauByEta", "SelectedFakeTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
-    hSelectedFakeTauByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauByPhi", "SelectedFakeTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
-    hSelectedGenuineTauDiTauMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauDitauMass", "SelectedGenuineTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
-    hSelectedFakeTauDiTauMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauDitauMass", "SelectedFakeTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
+    hTauCandFromWPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauCandFromWPt", "TauCandFromWPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hTauCandAllPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauCandAllPt", "TauCandAllPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hSelectedGenuineTauByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedGenuineTauByPt", "SelectedGenuineTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hSelectedGenuineTauByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedGenuineTauByEta", "SelectedGenuineTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
+    hSelectedGenuineTauByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedGenuineTauByPhi", "SelectedGenuineTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
+    hSelectedFakeTauByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedFakeTauByPt", "SelectedFakeTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hSelectedFakeTauByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedFakeTauByEta", "SelectedFakeTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
+    hSelectedFakeTauByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedFakeTauByPhi", "SelectedFakeTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
+    hSelectedGenuineTauDiTauMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedGenuineTauDitauMass", "SelectedGenuineTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
+    hSelectedFakeTauDiTauMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedFakeTauDitauMass", "SelectedFakeTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
     hSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "SelectedTausPerEvent", "SelectedTausPerEvent", 10, 0, 10);
   }
 
@@ -102,8 +102,9 @@ namespace HPlus {
   }
 
   VetoTauSelection::Data VetoTauSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau, double vertexZ) {
-    increment(fAllEventsCounter);
+    Data output;
 
+    increment(fAllEventsCounter);
 
     // Obtain tau collection as the veto tau candidates and take out selected tauSelection
     edm::Handle<edm::View<pat::Tau> > myTaus;
@@ -210,14 +211,14 @@ namespace HPlus {
     
      
      
-      FakeTauIdentifier::MCSelectedTauMatchType myMatch = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
-      if (myMatch == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
+      FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
+      if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
         hCandidateTauNumber->Fill(0.);
-      else if (myMatch == FakeTauIdentifier::kkElectronToTau || FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkElectronToTau || FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance)
         hCandidateTauNumber->Fill(1);
-      else if (myMatch == FakeTauIdentifier::kkMuonToTau || FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkMuonToTau || FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance)
         hCandidateTauNumber->Fill(2);
-      else if (myMatch == FakeTauIdentifier::kkJetToTau || FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkJetToTau || FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance)
         hCandidateTauNumber->Fill(3);
     }
     // Do tau selection on the veto tau candidates
@@ -235,19 +236,19 @@ namespace HPlus {
     for (edm::PtrVector<pat::Tau>::iterator it = myTauData.getSelectedTaus().begin(); it != myTauData.getSelectedTaus().end(); ++it) {
       // Store to result vector
 
-      fSelectedVetoTaus.push_back(*it);
+      output.fSelectedVetoTaus.push_back(*it);
       // Count how many selected veto taus are genuine taus
-      FakeTauIdentifier::MCSelectedTauMatchType myMatch = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
-      if (myMatch == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
+      FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
+      if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
         hSelectedTauNumber->Fill(0.);
-      else if (myMatch == FakeTauIdentifier::kkElectronToTau || FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkElectronToTau || FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance)
         hSelectedTauNumber->Fill(1);
-      else if (myMatch == FakeTauIdentifier::kkMuonToTau || FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkMuonToTau || FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance)
         hSelectedTauNumber->Fill(2);
-      else if (myMatch == FakeTauIdentifier::kkJetToTau || FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.getTauMatchType() == FakeTauIdentifier::kkJetToTau || FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance)
         hSelectedTauNumber->Fill(3);
 
-      bool isGenuineTau = !(fFakeTauIdentifier.isFakeTau(myMatch));
+      bool isGenuineTau = !(fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()));
       if (isGenuineTau) {
         // Genuine tau
         hSelectedGenuineTauByPt->Fill((*it)->pt());
@@ -265,7 +266,7 @@ namespace HPlus {
       myVetoTauMomentum += mySelectedTauMomentum;
       double myDitauMass = myVetoTauMomentum.M();
       // Check if ditau mass is compatible with Z mass
-      if (myDitauMass <  1000 ) 	{
+      if (myDitauMass <  1000 ) {
 	myVetoStatus = true;
 	numberOfTaus++;
       }
@@ -288,6 +289,7 @@ namespace HPlus {
       increment(fEventsCompatibleWithZMassCounter);
     else
       increment(fSelectedEventsCounter);
-    return Data(this, myVetoStatus);
+    output.fPassedEvent = !myVetoStatus;
+    return output;
   }
 }

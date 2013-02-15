@@ -14,6 +14,8 @@
 typedef math::XYZTLorentzVector LorentzVector;
 
 namespace HPlus {
+  FakeTauIdentifier::Data::Data(): fTauMatchType(kkNoMC), fTauOriginType(kkUnknownOrigin), fTauMatchGenParticle(0) {}
+  FakeTauIdentifier::Data::~Data() {}
   
   FakeTauIdentifier::FakeTauIdentifier(const edm::ParameterSet& iConfig, HPlus::HistoWrapper& histoWrapper, std::string label):
     fVisibleMCTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("visibleMCTauSrc")),
@@ -92,18 +94,19 @@ namespace HPlus {
     
   }
   
-  FakeTauIdentifier::MCSelectedTauMatchType FakeTauIdentifier::matchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau) {
+  FakeTauIdentifier::Data FakeTauIdentifier::matchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau) {
     return privateMatchTauToMC(iEvent, tau, false);
   }
   
-  FakeTauIdentifier::MCSelectedTauMatchType FakeTauIdentifier::silentMatchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau) {
+  FakeTauIdentifier::Data FakeTauIdentifier::silentMatchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau) {
     return privateMatchTauToMC(iEvent, tau, true);
   }
   
-  FakeTauIdentifier::MCSelectedTauMatchType FakeTauIdentifier::privateMatchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau, bool silentMode) {
+  FakeTauIdentifier::Data FakeTauIdentifier::privateMatchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau, bool silentMode) {
+    Data output;
+
     // Return if event is real data
-    FakeTauIdentifier::MCSelectedTauMatchType myMatchType = kkNoMC;
-    if (iEvent.isRealData()) return kkNoMC;
+    if (iEvent.isRealData()) return output;
 
     bool foundMCTauOutsideAcceptanceStatus = false;
     bool isHadronicTau = false;
@@ -223,49 +226,48 @@ namespace HPlus {
     if (!foundMCTauOutsideAcceptanceStatus) {
       if (isMCElectron) {
         if (isLeptonicTauDecay) {
-          myMatchType = kkElectronFromTauDecayToTau;
+          output.fTauMatchType = kkElectronFromTauDecayToTau;
         } else {
-          myMatchType = kkElectronToTau;
+          output.fTauMatchType = kkElectronToTau;
         }
       } else if (isMCMuon) {
         if (isLeptonicTauDecay) {
-          myMatchType = kkMuonFromTauDecayToTau;
+          output.fTauMatchType = kkMuonFromTauDecayToTau;
         } else {
-          myMatchType = kkMuonToTau;
+          output.fTauMatchType = kkMuonToTau;
         }
       } else if (isHadronicTau) {
-        myMatchType = kkTauToTau;
+        output.fTauMatchType = kkTauToTau;
         if (isOneProngMCTau) {
-          myMatchType = kkOneProngTauToTau;
+          output.fTauMatchType = kkOneProngTauToTau;
         }
       } else {
-        myMatchType = kkJetToTau;
+        output.fTauMatchType = kkJetToTau;
       }
     } else {
       if (isMCElectron) {
         if (isLeptonicTauDecay) {
-          myMatchType = kkElectronFromTauDecayToTauAndTauOutsideAcceptance;
+          output.fTauMatchType = kkElectronFromTauDecayToTauAndTauOutsideAcceptance;
         } else {
-          myMatchType = kkElectronToTauAndTauOutsideAcceptance;
+          output.fTauMatchType = kkElectronToTauAndTauOutsideAcceptance;
         }
       } else if (isMCMuon) {
         if (isLeptonicTauDecay) {
-          myMatchType = kkMuonFromTauDecayToTauAndTauOutsideAcceptance;
+          output.fTauMatchType = kkMuonFromTauDecayToTauAndTauOutsideAcceptance;
         } else {
-          myMatchType = kkMuonToTauAndTauOutsideAcceptance;
+          output.fTauMatchType = kkMuonToTauAndTauOutsideAcceptance;
         }
       } else if (isHadronicTau) {
-        myMatchType = kkTauToTauAndTauOutsideAcceptance;
+        output.fTauMatchType = kkTauToTauAndTauOutsideAcceptance;
         if (isOneProngMCTau) {
-          myMatchType = kkOneProngTauToTauAndTauOutsideAcceptance;
+          output.fTauMatchType = kkOneProngTauToTauAndTauOutsideAcceptance;
         }
       } else {
-        myMatchType = kkJetToTauAndTauOutsideAcceptance;
+        output.fTauMatchType = kkJetToTauAndTauOutsideAcceptance;
       }
     }
     // Look at ancestor information
-    MCSelectedTauOriginType myOriginType = kkUnknownOrigin;
-    if (myMatchType != kkJetToTau) {
+    if (output.fTauMatchType != kkJetToTau) {
       size_t myIndex = 0;
       if (isMCElectron)
         myIndex = myElectronIndex;
@@ -279,7 +281,8 @@ namespace HPlus {
       bool myHPlusStatus = false;
       bool myTauStatus = false;
       //reco::Candidate* p = const_cast<reco::Candidate*>((*genParticles)[myIndex].mother());
-      const reco::Candidate* p = (*genParticles)[myIndex].mother();
+      output.fTauMatchGenParticle = &((*genParticles)[myIndex]);
+      const reco::Candidate* p = output.fTauMatchGenParticle->mother();
       while (p) {
         if (std::abs(p->pdgId()) == 15)
           myTauStatus = true;
@@ -294,29 +297,29 @@ namespace HPlus {
         //if (isMCElectron and p) std::cout << "e: mother = " << p->pdgId() << std::endl;
       }
       if (!myTauStatus) {
-        if (myWStatus) myOriginType = kkFromW;
-        else if (myZStatus) myOriginType = kkFromZ;
-        else if (myHPlusStatus) myOriginType = kkFromHplus;
+        if (myWStatus) output.fTauOriginType = kkFromW;
+        else if (myZStatus) output.fTauOriginType = kkFromZ;
+        else if (myHPlusStatus) output.fTauOriginType = kkFromHplus;
       } else {
-        if (myWStatus) myOriginType = kkFromWTau;
-        else if (myZStatus) myOriginType = kkFromZTauTau;
-        else if (myHPlusStatus) myOriginType = kkFromHplusTau; 
+        if (myWStatus) output.fTauOriginType = kkFromWTau;
+        else if (myZStatus) output.fTauOriginType = kkFromZTauTau;
+        else if (myHPlusStatus) output.fTauOriginType = kkFromHplusTau; 
       }
     }
     if (!silentMode) {
       // Fill histograms
-      hTauMatchType->Fill(myMatchType);
-      if (myMatchType == kkOneProngTauToTau) hTauMatchType->Fill(kkTauToTau);
-      if (myMatchType == kkOneProngTauToTauAndTauOutsideAcceptance) hTauMatchType->Fill(kkTauToTauAndTauOutsideAcceptance);
+      hTauMatchType->Fill(output.fTauMatchType);
+      if (output.fTauMatchType == kkOneProngTauToTau) hTauMatchType->Fill(kkTauToTau);
+      if (output.fTauMatchType == kkOneProngTauToTauAndTauOutsideAcceptance) hTauMatchType->Fill(kkTauToTauAndTauOutsideAcceptance);
       if (isMCElectron)
-        hElectronOrigin->Fill(myOriginType);
+        hElectronOrigin->Fill(output.fTauOriginType);
       else if (isMCMuon)
-        hMuOrigin->Fill(myOriginType);
+        hMuOrigin->Fill(output.fTauOriginType);
       else if (isHadronicTau)
-        hTauOrigin->Fill(myOriginType);
+        hTauOrigin->Fill(output.fTauOriginType);
     }
     // Return result
-    return myMatchType;
+    return output;
   }
 
   double FakeTauIdentifier::getFakeTauScaleFactor(FakeTauIdentifier::MCSelectedTauMatchType matchType, double eta) {

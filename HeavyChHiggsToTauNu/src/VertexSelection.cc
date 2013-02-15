@@ -12,13 +12,14 @@
 
 
 namespace HPlus {
-  VertexSelection::Data::Data(const VertexSelection *vertexSelection, bool passedEvent):
-    fVertexSelection(vertexSelection), fPassedEvent(passedEvent) {}
+  VertexSelection::Data::Data():
+    fPassedEvent(false), fNumberOfAllVertices(0) {}
   VertexSelection::Data::~Data() {}
 
   VertexSelection::VertexSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HistoWrapper& histoWrapper):
     BaseSelection(eventCounter, histoWrapper),
-    fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
+    fSelectedSrc(iConfig.getUntrackedParameter<edm::InputTag>("selectedSrc")),
+    fAllSrc(iConfig.getUntrackedParameter<edm::InputTag>("allSrc")),
     fEnabled(iConfig.getUntrackedParameter<bool>("enabled"))
   {}
 
@@ -41,19 +42,27 @@ namespace HPlus {
   }
 
   VertexSelection::Data VertexSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    // Reset variables
-    fSelectedVertex = edm::Ptr<reco::Vertex>();
+    Data output;
 
-    if(!fEnabled)
-      return Data(this, true);
+    edm::Handle<edm::View<reco::Vertex> > hvertexall;
+    iEvent.getByLabel(fAllSrc, hvertexall);
+    output.fNumberOfAllVertices = hvertexall->size();
+
+    if(!fEnabled) {
+      output.fPassedEvent = true;
+      return output;
+    }
 
     edm::Handle<edm::View<reco::Vertex> > hvertex;
-    iEvent.getByLabel(fSrc, hvertex);
+    iEvent.getByLabel(fSelectedSrc, hvertex);
 
-    if(hvertex->empty())
-      return Data(this, false);
+    if(hvertex->empty()) {
+      output.fPassedEvent = false;
+      return output;
+    }
 
-    fSelectedVertex = hvertex->ptrAt(0);
-    return Data(this, true);
+    output.fSelectedVertex = hvertex->ptrAt(0);
+    output.fPassedEvent = true;
+    return output;
   }
 }

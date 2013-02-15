@@ -3,7 +3,7 @@
 import sys
 import os
 import ROOT
-
+from optparse import OptionParser
 from datetime import date, time, datetime
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
@@ -662,19 +662,13 @@ def makehtml(mydir, myoutput):
     myfile.write(myhtmlfooter)
     myfile.close()
 
-def main(argv):
-    if not len(sys.argv) == 3:
-        print "\n"
-        print "### Usage:   EventCounterValidation.py <ref multi-crab path> <new multi-crab path>\n"
-        print "\n"
-        sys.exit()
+def main(opts,era,analysisType=None):
 
-    referenceData = sys.argv[1]
-    validateData  = sys.argv[2]
+    referenceData = opts.reference
+    validateData  = opts.test
 
     oldCounters = "signalAnalysisCounters"
     newCounters = "signalAnalysis/counters"
-    era = "Run2011A"
     #newCounters = "signalAnalysisData2011A/counters"
 
     mytimestamp = datetime.now().strftime("%d%m%y_%H%M%S")
@@ -689,20 +683,36 @@ def main(argv):
     print "Running script EventCounterValidation.py on"
     print
     print "          reference datasets = ",referenceData
-    print "          validated datasets = ",validateData
+    print "    datasets to be validated = ",validateData
     print
 
     ROOT.gROOT.SetBatch() # no flashing canvases
 
-    myoutput += "<b>Shell command that was run:</b>"
-    for arg in argv:
-         myoutput += " "+arg
+    #myoutput += "<b>Shell command that was run:</b>"
     myoutput += "<br><br>\n"
     myoutput += "<b>Reference multicrab directory:</b> "+referenceData+"<br>\n"
     myoutput += "<b>New multicrab directory to be validated:</b> "+validateData+"<br>\n<hr><br>\n"
 
-    refDatasetNames = getDatasetNames(referenceData,counters=oldCounters,era=era,legacy=True)
-    valDatasetNames = getDatasetNames(validateData,counters=newCounters,era=era)
+    tmpRefDatasetNames = []
+    if opts.oldreference:
+        tmpRefDatasetNames = getDatasetNames(referenceData,counters=oldCounters,era=era,legacy=True)
+    else:
+        tmpRefDatasetNames = getDatasetNames(referenceData,counters=newCounters,era=era,legacy=False)
+    tmpValDatasetNames = getDatasetNames(validateData,counters=newCounters,era=era)
+
+    # Find matching names
+    refDatasetNames = []
+    valDatasetNames = []
+    if opts.dirs == None:
+        print "Warning: you are producing plots for %d datasets! Pick with -d those you like if you want less"%len(tmpRefDatasetNames)
+        refDatasetNames = tmpRefDatasetNames
+        valDatasetNames = tmpValDatasetNames
+    else:
+        for name in opts.dirs:
+            if name in tmpRefDatasetNames:
+                refDatasetNames.append(name)
+            if name in tmpValDatasetNames:
+                valDatasetNames.append(name)
 
     datasetNames = validateDatasetExistence(refDatasetNames,valDatasetNames)
     myoutput += "<h3><a name=maintop>List of datasets analysed:</a></h3><br>\n"
@@ -713,7 +723,11 @@ def main(argv):
         print "\n\n"
         print datasetname
         myoutput += "<h2><a name=dataset_"+datasetname+">Dataset: "+datasetname+"</a></h2><br>\n"
-        refDatasets = dataset.getDatasetsFromCrabDirs([referenceData+"/"+datasetname],counters=oldCounters)
+        refDatasets = []
+        if opts.oldreference:
+            refDatasets = dataset.getDatasetsFromCrabDirs([referenceData+"/"+datasetname],counters=oldCounters)
+        else:
+            refDatasets = dataset.getDatasetsFromCrabDirs([referenceData+"/"+datasetname],counters=newCounters,dataEra=era)
         valDatasets = dataset.getDatasetsFromCrabDirs([validateData+"/"+datasetname],counters=newCounters,dataEra=era)
 
         myoutput += validateCounters(refDatasets,valDatasets)
@@ -724,6 +738,38 @@ def main(argv):
     print "To view html version, use link "+mydir+"/index.html"
     makehtml(mydir,myoutput)
 
-main(sys.argv[1:])
+if __name__ == "__main__":
+
+    parser = OptionParser(usage="Usage: %prog [options]")
+    parser.add_option("--ref", dest="reference", action="store", help="reference multicrab directory")
+    parser.add_option("--oldref", dest="oldreference", action="store_true", help="use this flag if the reference is using signalAnalysisCounters")
+    parser.add_option("--test", dest="test", action="store", help="multicrab directory to be tested/validated")
+    parser.add_option("-d", dest="dirs", action="append", help="name of sample directory inside multicrab dir (multiple directories can be specified with multiple -d arguments)")
+    parser.add_option("-v", dest="variation", action="append", help="name of variation")
+    parser.add_option("-e", dest="era", action="append", help="name of era")
+    parser.add_option("-t", dest="type", action="append", help="name of analysis type")
+    (opts, args) = parser.parse_args()
+
+    # Check that proper arguments were given
+    mystatus = True
+    if opts.reference == None:
+        print "Missing reference multicrab directory!\n"
+        mystatus = False
+    if opts.test == None:
+        print "Missing multicrab directory for testing/validation!\n"
+        mystatus = False
+    if opts.dirs == None:
+        print "Missing source for sample directories!\n"
+        mystatus = False
+    if opts.era == None:
+        print "Missing specification for era!\n"
+        mystatus = False
+    if not mystatus:
+        parser.print_help()
+        sys.exit()
+
+    # Arguments are ok, proceed to run
+    for e in opts.era:
+        main(opts,e)
 
 

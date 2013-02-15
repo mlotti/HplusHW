@@ -37,19 +37,24 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const BjetSelection *bjetSelection, bool passedEvent);
+      Data();
       ~Data();
 
-      const edm::Ptr<pat::Jet>& getBjetTauSide() const { return fBjetSelection->BjetTauSide; }
-      const edm::Ptr<pat::Jet>& getBjetTopSide() const { return fBjetSelection->BjetTopSide; }
+      const edm::Ptr<pat::Jet>& getBjetTauSide() const { return BjetTauSide; }
+      const edm::Ptr<pat::Jet>& getBjetTopSide() const { return BjetTopSide; }
 
-      bool passedEvent() const { return fPassedEvent; }
+      const bool passedEvent() const { return fPassedEvent; }
+
+      friend class BjetSelection;
 
     private:
-      const BjetSelection *fBjetSelection;
-      const bool fPassedEvent;
+      // Variables
+      bool fPassedEvent;
+      edm::Ptr<pat::Jet> BjetTauSide;
+      edm::Ptr<pat::Jet> BjetTopSide;
+
     };
-    
+
     BjetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~BjetSelection();
 
@@ -113,10 +118,6 @@ namespace HPlus {
     WrappedTH1 *hPtTopTop;
     WrappedTH1 *hPtTopHiggs;
     WrappedTH1 *hPtW;
-
-    // Variables
-    edm::Ptr<pat::Jet> BjetTauSide;
-    edm::Ptr<pat::Jet> BjetTopSide;
 
   };
 }
