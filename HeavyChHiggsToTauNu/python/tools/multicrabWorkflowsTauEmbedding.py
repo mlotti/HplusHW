@@ -229,14 +229,17 @@ def addEmbeddingSkim_v44_4_2(datasets):
 def addEmbeddingEmbedding_v44_4_2(datasets):
     skimVersion = "tauembedding_skim_v44_4_2"
 
-    addEmbeddingEmbedding_44X(skimVersion, "v44_4_2_muiso0", datasets, {
+    def addEmbedding(version, definitions):
+        addEmbeddingEmbedding_44X(skimVersion, version, datasets, definitions)
+
+    addEmbedding("v44_4_2_muiso0", {
         "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_muiso0-50da2d6a5b0c9c8a2f96f633ada0c1c6/USER"),
         })
-    addEmbeddingEmbedding_44X(skimVersion, "v44_4_2_muiso1", datasets, {
+    addEmbedding("v44_4_2_muiso1", {
         "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_muiso1-50da2d6a5b0c9c8a2f96f633ada0c1c6/USER"),
         })
 
-    addEmbeddingEmbedding_44X(skimVersion, "v44_4_2_seed0", datasets, {
+    addEmbedding("v44_4_2_seed0", {
         "SingleMu_160431-163261_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_160431_tauembedding_embedding_v44_4_2_seed0c-a55cb9805ad247805760f23e605c41e5/USER"),
         "SingleMu_163270-163869_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_163270_tauembedding_embedding_v44_4_2_seed0-a55cb9805ad247805760f23e605c41e5/USER"),
         "SingleMu_165088-166150_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_165088_tauembedding_embedding_v44_4_2_seed0-a55cb9805ad247805760f23e605c41e5/USER"),
@@ -266,7 +269,7 @@ def addEmbeddingEmbedding_v44_4_2(datasets):
         "QCD_Pt20_MuEnriched_TuneZ2_Fall11":  TaskDef("/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_seed0-2dedf078d8faded30b2dddce6fe8cdec/USER"),
         })
     
-    addEmbeddingEmbedding_44X(skimVersion, "v44_4_2_seed1", datasets, {
+    addEmbedding("v44_4_2_seed1", {
         "SingleMu_160431-163261_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_160431_tauembedding_embedding_v44_4_2_seed1-a55cb9805ad247805760f23e605c41e5/USER"),
         "SingleMu_163270-163869_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_163270_tauembedding_embedding_v44_4_2_seed1-a55cb9805ad247805760f23e605c41e5/USER"),
         "SingleMu_165088-166150_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_165088_tauembedding_embedding_v44_4_2_seed1-a55cb9805ad247805760f23e605c41e5/USER"),
