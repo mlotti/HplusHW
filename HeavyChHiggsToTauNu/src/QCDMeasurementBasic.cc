@@ -28,8 +28,8 @@ namespace HPlus {
     fControlPlotsMultipleTausCounter(eventCounter.addCounter("Rejected in ctrl plots (multiple taus)")),
     fTriggerScaleFactorCounter(eventCounter.addCounter("Trg scale factor")),
     fVetoTauCounter(eventCounter.addCounter("VetoTauSelection")),
-    fElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
-    fMuonVetoCounter(eventCounter.addCounter("GlobalMuonVeto")),
+    fElectronVetoCounter(eventCounter.addCounter("ElectronSelection")),
+    fMuonVetoCounter(eventCounter.addCounter("MuonSelection")),
     //fNonIsolatedElectronVetoCounter(eventCounter.addCounter("NonIsolatedElectronVeto")),
     //fNonIsolatedMuonVetoCounter(eventCounter.addCounter("NonIsolatedMuonVeto")),
     fNJetsCounter(eventCounter.addCounter("JetSelection")),
@@ -51,9 +51,9 @@ namespace HPlus {
     fVetoTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("vetoTauSelection"),
                       iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"),
                       eventCounter, fHistoWrapper),
-    fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), fPrimaryVertexSelection.getSelectedSrc(), eventCounter, fHistoWrapper),
+    fElectronSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("ElectronSelection"), fPrimaryVertexSelection.getSelectedSrc(), eventCounter, fHistoWrapper),
     //fNonIsolatedElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("NonIsolatedElectronVeto"), eventCounter, fHistoWrapper),
-    fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, fHistoWrapper),
+    fMuonSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MuonSelection"), eventCounter, fHistoWrapper),
     //fNonIsolatedMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("NonIsolatedMuonVeto"), eventCounter, fHistoWrapper),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, fHistoWrapper),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, fHistoWrapper, "MET"),
@@ -375,7 +375,7 @@ namespace HPlus {
 
 
 //------ Global electron veto
-    GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
+    ElectronSelection::Data electronVetoData = fElectronSelection.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return false;
     increment(fElectronVetoCounter);
     hSelectionFlow->Fill(kQCDOrderElectronVeto);
@@ -386,7 +386,7 @@ namespace HPlus {
 
 
 //------ Global muon veto
-    GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
+    MuonSelection::Data muonVetoData = fMuonSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!muonVetoData.passedEvent()) return false;
     increment(fMuonVetoCounter);
     hSelectionFlow->Fill(kQCDOrderMuonVeto);

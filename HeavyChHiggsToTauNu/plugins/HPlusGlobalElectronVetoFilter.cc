@@ -11,7 +11,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
 
 class HPlusGlobalElectronVetoFilter: public edm::EDFilter {
  public:
@@ -30,7 +30,7 @@ class HPlusGlobalElectronVetoFilter: public edm::EDFilter {
   HPlus::EventWeight eventWeight;
   HPlus::HistoWrapper histoWrapper;
   HPlus::EventCounter eventCounter;
-  HPlus::GlobalElectronVeto fGlobalElectronVeto;
+  HPlus::ElectronSelection fElectronSelection;
   bool fFilter;
 };
 
@@ -39,7 +39,7 @@ HPlusGlobalElectronVetoFilter::HPlusGlobalElectronVetoFilter(const edm::Paramete
   eventWeight(iConfig),
   histoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
   eventCounter(iConfig, eventWeight, histoWrapper),
-  fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), fVertexSrc, eventCounter, histoWrapper),
+  fElectronSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("ElectronSelection"), fVertexSrc, eventCounter, histoWrapper),
   fFilter(iConfig.getParameter<bool>("filter"))
 {
   produces<bool>();
@@ -53,7 +53,7 @@ bool HPlusGlobalElectronVetoFilter::endLuminosityBlock(edm::LuminosityBlock& iBl
 }
 
 bool HPlusGlobalElectronVetoFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  HPlus::GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
+  HPlus::ElectronSelection::Data electronVetoData = fElectronSelection.analyze(iEvent, iSetup);
   bool passed = electronVetoData.passedEvent();
   std::auto_ptr<bool> p(new bool(passed));
   iEvent.put(p);
