@@ -554,8 +554,8 @@ class ConfigBuilder:
         print "TauSelection operating mode:", module.tauSelection.operatingMode.value()
         print "VetoTauSelection src:", module.vetoTauSelection.tauSelection.src.value()
         print "Beta cut: ", module.jetSelection.betaCutSource.value(), module.jetSelection.betaCutDirection.value(), module.jetSelection.betaCut.value()
-        print "electrons: ", module.GlobalElectronVeto
-        print "muons: ", module.GlobalMuonVeto
+        print "electrons: ", module.ElectronSelection
+        print "muons: ", module.MuonSelection
         print "jets: ", module.jetSelection
 
 

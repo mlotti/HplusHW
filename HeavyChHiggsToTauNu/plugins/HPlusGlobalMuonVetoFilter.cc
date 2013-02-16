@@ -10,7 +10,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
 
 class HPlusGlobalMuonVetoFilter: public edm::EDFilter {
  public:
@@ -28,7 +28,7 @@ class HPlusGlobalMuonVetoFilter: public edm::EDFilter {
   HPlus::EventWeight eventWeight;
   HPlus::HistoWrapper histoWrapper;
   HPlus::EventCounter eventCounter;
-  HPlus::GlobalMuonVeto fGlobalMuonVeto;
+  HPlus::MuonSelection fMuonSelection;
   edm::InputTag fVertexSrc;
   bool fFilter;
 };
@@ -37,7 +37,7 @@ HPlusGlobalMuonVetoFilter::HPlusGlobalMuonVetoFilter(const edm::ParameterSet& iC
   eventWeight(iConfig),
   histoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
   eventCounter(iConfig, eventWeight, histoWrapper),
-  fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, histoWrapper),
+  fMuonSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MuonSelection"), eventCounter, histoWrapper),
   fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc")),
   fFilter(iConfig.getParameter<bool>("filter"))
 {
@@ -59,7 +59,7 @@ bool HPlusGlobalMuonVetoFilter::filter(edm::Event& iEvent, const edm::EventSetup
     throw cms::Exception("LogicError") << "Vertex collection " << fVertexSrc.encode() << " is empty!" << std::endl;
 
   // Global muon veto
-  HPlus::GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, hvert->ptrAt(0));
+  HPlus::MuonSelection::Data muonVetoData = fMuonSelection.analyze(iEvent, iSetup, hvert->ptrAt(0));
   bool passed = muonVetoData.passedEvent();
   std::auto_ptr<bool> p(new bool(passed));
   iEvent.put(p);

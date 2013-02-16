@@ -51,8 +51,8 @@ namespace HPlus {
 
   void SelectedEventsAnalyzer::fill(edm::PtrVector<pat::Tau>& selectedTau,
 				    const TauSelection::Data& tauData,
-				    const GlobalElectronVeto::Data& eVetoData,
-				    const GlobalMuonVeto::Data& muVetoData,
+				    const ElectronSelection::Data& eVetoData,
+				    const MuonSelection::Data& muVetoData,
 				    const JetSelection::Data& jetData,
 				    const BTagging::Data& btagData,
 				    const METSelection::Data& METData,

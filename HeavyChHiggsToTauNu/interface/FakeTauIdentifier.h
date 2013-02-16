@@ -55,9 +55,22 @@ namespace HPlus {
       Data();
       ~Data();
 
-      MCSelectedTauMatchType getTauMatchType() const { return fTauMatchType; }
-      MCSelectedTauOriginType getTauOriginType() const { return fTauOriginType; }
+      const MCSelectedTauMatchType getTauMatchType() const { return fTauMatchType; }
+      const MCSelectedTauOriginType getTauOriginType() const { return fTauOriginType; }
       const reco::GenParticle *getTauMatchGenParticle() const { return fTauMatchGenParticle; }
+      const bool isFakeTau() const { return FakeTauIdentifier::isFakeTau(fTauMatchType); }
+      const bool isGenuineTau() const { return FakeTauIdentifier::isGenuineTau(fTauMatchType); }
+      const bool isGenuineOneProngTau() const { return FakeTauIdentifier::isGenuineOneProngTau(fTauMatchType); }
+
+      //const double getFakeTauScaleFactor(double eta) const;
+      //const double getFakeTauSystematics(double eta) const;
+
+      const bool isElectronToTau() const { return FakeTauIdentifier::isElectronToTau(fTauMatchType); }
+      const bool isMuonToTau() const { return FakeTauIdentifier::isMuonToTau(fTauMatchType); }
+      const bool isJetToTau() const { return FakeTauIdentifier::isJetToTau(fTauMatchType); }
+      const bool isElectronOrMuonFromTauDecay() const { return FakeTauIdentifier::isElectronOrMuonFromTauDecay(fTauMatchType); }
+
+      const bool isEmbeddingGenuineTau() const { return FakeTauIdentifier::isEmbeddingGenuineTau(fTauMatchType); }
 
       friend class FakeTauIdentifier;
 
@@ -72,22 +85,22 @@ namespace HPlus {
 
     Data matchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau);
     Data silentMatchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau);
-    bool isFakeTau(MCSelectedTauMatchType type) { return !isGenuineTau(type); }
-    bool isGenuineTau(MCSelectedTauMatchType type) { return (type == kkTauToTau || type == kkTauToTauAndTauOutsideAcceptance || isGenuineOneProngTau(type)); }
-    bool isGenuineOneProngTau(MCSelectedTauMatchType type) { return (type == kkOneProngTauToTau || type == kkOneProngTauToTauAndTauOutsideAcceptance); }
-    
+    static const bool isFakeTau(MCSelectedTauMatchType type) { return !isGenuineTau(type); }
+    static const bool isGenuineTau(MCSelectedTauMatchType type) { return (type == kkTauToTau || type == kkTauToTauAndTauOutsideAcceptance || isGenuineOneProngTau(type)); }
+    static const bool isGenuineOneProngTau(MCSelectedTauMatchType type) { return (type == kkOneProngTauToTau || type == kkOneProngTauToTauAndTauOutsideAcceptance); }
+
     double getFakeTauScaleFactor(MCSelectedTauMatchType matchType, double eta);
     double getFakeTauSystematics(MCSelectedTauMatchType matchType, double eta);
 
-    bool isElectronToTau(MCSelectedTauMatchType type) { return (type == kkElectronToTau || type == kkElectronFromTauDecayToTau ||
+    static const bool isElectronToTau(MCSelectedTauMatchType type) { return (type == kkElectronToTau || type == kkElectronFromTauDecayToTau ||
       type == kkElectronToTauAndTauOutsideAcceptance || type == kkElectronFromTauDecayToTauAndTauOutsideAcceptance); }
-    bool isMuonToTau(MCSelectedTauMatchType type) { return (type == kkMuonToTau || type == kkMuonFromTauDecayToTau ||
+    static const bool isMuonToTau(MCSelectedTauMatchType type) { return (type == kkMuonToTau || type == kkMuonFromTauDecayToTau ||
       type == kkMuonToTauAndTauOutsideAcceptance || type == kkMuonFromTauDecayToTauAndTauOutsideAcceptance); }
-    bool isJetToTau(MCSelectedTauMatchType type) { return (type == kkJetToTau || type == kkJetToTauAndTauOutsideAcceptance); }
-    bool isElectronOrMuonFromTauDecay(MCSelectedTauMatchType type) { return (type == kkElectronFromTauDecayToTau || type == kkElectronToTauAndTauOutsideAcceptance ||
+    static const bool isJetToTau(MCSelectedTauMatchType type) { return (type == kkJetToTau || type == kkJetToTauAndTauOutsideAcceptance); }
+    static const bool isElectronOrMuonFromTauDecay(MCSelectedTauMatchType type) { return (type == kkElectronFromTauDecayToTau || type == kkElectronToTauAndTauOutsideAcceptance ||
       type == kkMuonFromTauDecayToTau || type == kkMuonFromTauDecayToTauAndTauOutsideAcceptance); }
 
-    bool isEmbeddingGenuineTau(MCSelectedTauMatchType type) { return (!isFakeTau(type) || isElectronOrMuonFromTauDecay(type)); }
+    static const bool isEmbeddingGenuineTau(MCSelectedTauMatchType type) { return (!isFakeTau(type) || isElectronOrMuonFromTauDecay(type)); }
 
   private:
     Data privateMatchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau, bool silentMode);
