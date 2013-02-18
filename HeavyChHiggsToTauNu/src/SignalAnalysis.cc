@@ -960,37 +960,6 @@ namespace HPlus {
       iEvent.put(saveBJets, "selectedBJets");
     }
    
-
-    /// test !!!!!!!!!!!!!
-
-    int ijet = 0;
-    double deltaPhiMetJet1 = -999;
-    double deltaPhiMetJet2 = -999;
-    double deltaPhiMetJet3 = -999;
-    for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getSelectedJets().begin(); iJet != jetData.getSelectedJets().end(); ++iJet) {
-      double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET())) * 57.3;
-      ijet++;
-      if (ijet == 1) deltaPhiMetJet1 = jetDeltaPhi;
-      if (ijet == 2) deltaPhiMetJet2 = jetDeltaPhi;
-      if (ijet == 3) deltaPhiMetJet3 = jetDeltaPhi;
-    }
-
-    
-    hDeltaPhiMHTTauVsDeltaPhiMHTJet1->Fill(jetData.getDeltaPhiMHTTau(),jetData.getDeltaPhiMHTJet1());
-    hDeltaPhiMHTTauVsDeltaPhiMHTJet2->Fill(jetData.getDeltaPhiMHTTau(),jetData.getDeltaPhiMHTJet2());
-    hDeltaPhiMHTTauVsDeltaPhiMHTJet3->Fill(jetData.getDeltaPhiMHTTau(),jetData.getDeltaPhiMHTJet3());
-    /*
-    hDeltaPhiVsDeltaPhiMHTJet1->Fill(deltaPhi,jetData.getDeltaPhiMHTJet1());
-
-    hDeltaPhiMHTJet1->Fill(jetData.getDeltaPhiMHTJet1());
-    */
-
-    hDeltaPhiVsDeltaPhiMHTJet1->Fill(deltaPhi,deltaPhiMetJet1);
-
-    hDeltaPhiMHTJet1->Fill(deltaPhiMetJet1);
-
-
-
 //------ Delta phi(tau,MET) cut
 
     hDeltaPhi->Fill(deltaPhi);
@@ -1001,35 +970,7 @@ namespace HPlus {
     }
 
 
-
-    // 2 dim. deltaPhi cut
-    /// test !!!!!!!!!!!!!!!!!
-    // if ( deltaPhi > 120 && jetData.getDeltaPhiMHTJet1() < 60 ) return false;
-    if ( deltaPhi > 120 && deltaPhiMetJet1 < 60 ) return false;   
-    increment(fDeltaPhiVSDeltaPhiMHTJet1CutCounter);
-    // test !!!!!!!!
-    //    hDeltaPhiVsDeltaPhiMHTJet2->Fill(deltaPhi,jetData.getDeltaPhiMHTJet2());
-    //    hDeltaPhiVsDeltaPhiMHTJet3->Fill(deltaPhi,jetData.getDeltaPhiMHTJet3());
-    hDeltaPhiVsDeltaPhiMHTJet2->Fill(deltaPhi,deltaPhiMetJet2);
-    //    hDeltaPhiVsDeltaPhiMHTJet3->Fill(deltaPhi,deltaPhiMetJet3);
-
-
-    //    if ( deltaPhi > 150 && jetData.getDeltaPhiMHTJet2() < 30 ) return false;   
-    if ( deltaPhi > 120 && deltaPhiMetJet2 < 60 ) return false;   
-    increment(fDeltaPhiVSDeltaPhiMHTJet2CutCounter);
-    hDeltaPhiVsDeltaPhiMHTJet3->Fill(deltaPhi,deltaPhiMetJet3); 
-
-    //    if ( deltaPhi > 150 && jetData.getDeltaPhiMHTJet3() < 30 ) return false; 
-    if ( deltaPhi > 120 && deltaPhiMetJet3 < 60 ) return false;     
-    increment(fDeltaPhiVSDeltaPhiMHTJet3CutCounter);
-
-
-    hSelectionFlow->Fill(kSignalOrderDeltaPhiSelection);
-    hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderDeltaPhiSelection);
-    if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderDeltaPhiSelection);
-    fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), kSignalOrderDeltaPhiSelection, tauData);
-
-    // plot deltaPhi(jet,met)
+   // plot min(deltaPhi(jet,met))
     double myMaxDeltaPhiJetMET = 0.0;
     double minDeltaRTauJet = 9999;
     edm::Ptr<pat::Jet> closestJetToTau; 
@@ -1055,7 +996,6 @@ namespace HPlus {
       hTransverseMassDeltaPtCut->Fill(transverseMass);
       increment(fDeltaPtJetTauCounter);
     }
-
     // test lower bound of deltaPhi
     if (deltaPhi > 30) {
       increment(fDeltaPhiLow30Counter);
@@ -1068,6 +1008,65 @@ namespace HPlus {
       if (transverseMass  > 100 )  increment(fTransverseMass100CutPhiLow60Counter);
       hTransverseMassPhi60->Fill(transverseMass);
     }
+
+
+    // deltaPhi(jet,MET) cuts
+
+    int ijet = 0;
+    double deltaPhiMetJet1 = -999;
+    double deltaPhiMetJet2 = -999;
+    double deltaPhiMetJet3 = -999;
+    for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getSelectedJets().begin(); iJet != jetData.getSelectedJets().end(); ++iJet) {
+      double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET())) * 57.3;
+      ijet++;
+      if (ijet == 1) deltaPhiMetJet1 = jetDeltaPhi;
+      if (ijet == 2) deltaPhiMetJet2 = jetDeltaPhi;
+      if (ijet == 3) deltaPhiMetJet3 = jetDeltaPhi;
+    }
+
+    
+    hDeltaPhiMHTTauVsDeltaPhiMHTJet1->Fill(jetData.getDeltaPhiMHTTau(),jetData.getDeltaPhiMHTJet1());
+    hDeltaPhiMHTTauVsDeltaPhiMHTJet2->Fill(jetData.getDeltaPhiMHTTau(),jetData.getDeltaPhiMHTJet2());
+    hDeltaPhiMHTTauVsDeltaPhiMHTJet3->Fill(jetData.getDeltaPhiMHTTau(),jetData.getDeltaPhiMHTJet3());
+    
+    hDeltaPhiVsDeltaPhiMHTJet1->Fill(deltaPhi,jetData.getDeltaPhiMHTJet1());
+    hDeltaPhiMHTJet1->Fill(jetData.getDeltaPhiMHTJet1());
+   
+    /*
+    hDeltaPhiVsDeltaPhiMHTJet1->Fill(deltaPhi,deltaPhiMetJet1);
+    hDeltaPhiMHTJet1->Fill(deltaPhiMetJet1);
+    */
+
+
+    // 2 dim. deltaPhi cuts
+   
+    if ( deltaPhi > 120 && jetData.getDeltaPhiMHTJet1() < 60 ) return false;
+    //    if ( deltaPhi > 120 && deltaPhiMetJet1 < 60 ) return false;   
+    increment(fDeltaPhiVSDeltaPhiMHTJet1CutCounter);
+   
+    hDeltaPhiVsDeltaPhiMHTJet2->Fill(deltaPhi,jetData.getDeltaPhiMHTJet2());
+    //    hDeltaPhiVsDeltaPhiMHTJet2->Fill(deltaPhi,deltaPhiMetJet2);
+  
+
+
+    if ( deltaPhi > 120 && jetData.getDeltaPhiMHTJet2() < 60 ) return false;   
+    //    if ( deltaPhi > 120 && deltaPhiMetJet2 < 60 ) return false;   
+    increment(fDeltaPhiVSDeltaPhiMHTJet2CutCounter);
+    //    hDeltaPhiVsDeltaPhiMHTJet3->Fill(deltaPhi,deltaPhiMetJet3); 
+    hDeltaPhiVsDeltaPhiMHTJet3->Fill(deltaPhi,jetData.getDeltaPhiMHTJet3());
+
+    if ( deltaPhi > 120 && jetData.getDeltaPhiMHTJet3() < 60 ) return false; 
+    //    if ( deltaPhi > 120 && deltaPhiMetJet3 < 60 ) return false;     
+    increment(fDeltaPhiVSDeltaPhiMHTJet3CutCounter);
+
+
+    hSelectionFlow->Fill(kSignalOrderDeltaPhiSelection);
+    hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderDeltaPhiSelection);
+    if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderDeltaPhiSelection);
+    fillEWKFakeTausCounters(tauMatchData.getTauMatchType(), kSignalOrderDeltaPhiSelection, tauData);
+
+
+
 
     // test second b jet veto
     if( btagData.getSelectedJets().size() < 2) {
