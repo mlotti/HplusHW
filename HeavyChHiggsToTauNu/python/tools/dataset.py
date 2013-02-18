@@ -48,17 +48,14 @@ def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
     if "namePostfix" in kwargs:
         raise Exception("'namePostfix' keyword argument not allowed")
 
-    nameList = []
+    datasets = DatasetManager()
     for d in multiDirs:
         if isinstance(d, str):
-            nameList.append( (os.path.join(d, "multicrab.cfg"), "") )
+            dset = getDatasetsFromMulticrabCfg(directory=d, **kwargs)
         else:
-            nameList.append( (os.path.join(d[0], "multicrab.cfg"), d[1]) )
-
-    datasets = DatasetManager()
-    for cfg, postfix in nameList:
-        d = getDatasetsFromMulticrabCfg(cfgfile=cfg, namePostfix=postfix, **kwargs)
+            dset = getDatasetsFromMulticrabCfg(directory=d[0], namePostfix=d[1], **kwargs)
         datasets.extend(d)
+
     return datasets
 
 ## Construct DatasetManager from a multicrab.cfg.
@@ -73,13 +70,14 @@ def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
 # \li \a cfgfile
 # \li \a excludeTasks
 # \li \a includeOnlyTasks
+# \li \a namePostfix
 #
 # \return DatasetManager object
 # 
 # \see dataset.readFromMulticrabCfg
 def getDatasetsFromMulticrabCfg(**kwargs):
     _args = copy.copy(kwargs)
-    for argName in ["directory", "cfgfile", "excludeTasks", "includeOnlyTasks"]:
+    for argName in ["directory", "cfgfile", "excludeTasks", "includeOnlyTasks", "namePostfix"]:
         try:
             del _args[argName]
         except KeyError:
@@ -173,13 +171,12 @@ def readFromMulticrabCfg(**kwargs):
 #
 # All keyword arguments <b>except</b> the ones below are forwarded to
 # DatasetManagerCreator.createDatasetManager()
-# \li \a opts
 # \li \a namePostfix
 #
 # \see readFromCrabDirs()
 def getDatasetsFromCrabDirs(taskdirs, **kwargs):
     _args = copy.copy(kwargs)
-    for argname in "opts", "namePostfix":
+    for argname in ["namePostfix"]:
         try:
             del _args[argName]
         except KeyError:
@@ -2616,7 +2613,7 @@ class DatasetManagerCreator:
                 o = getattr(opts, arg)
                 if o is not None:
                     _args[arg] = o
-        del _args["opts"]
+            del _args["opts"]
 
         # Print the configuration
         parameters = []
