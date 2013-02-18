@@ -167,7 +167,7 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
         if wf.output != None:
             dataset.addWorkflow(Workflow("analysis_"+version, source=Source("pattuple_"+version), triggerOR=taskDef.triggerOR, args=wf.args, skimConfig=skim))
 
-## Add v44_4 pattuple production workflows, no output yet
+## Add v44_4 pattuple production workflows
 #
 # For some reason, some of the signal samples were not triggered in
 # pattuple jobs
@@ -237,6 +237,66 @@ def addPattuple_v44_4_1(datasets):
         "QCD_Pt170to300_TuneZ2_Fall11":     TaskDef("/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4_1-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[], njobsIn=600),
         }
     addPattuple_44X("v44_4_1", datasets, definitions)
+
+## Add v44_5 pattuple production workflows
+def addPattuple_v44_5(datasets):
+    definitions = {
+        "Tau_160431-167913_2011A_Nov08":    TaskDef(""),
+        "Tau_170722-173198_2011A_Nov08":    TaskDef(""),
+        "Tau_173236-173692_2011A_Nov08":    TaskDef(""),
+        "Tau_175832-180252_2011B_Nov19":    TaskDef(""),
+
+        "TTToHplusBWB_M80_Fall11":          TaskDef(""),
+        "TTToHplusBWB_M90_Fall11":          TaskDef(""),
+        "TTToHplusBWB_M100_Fall11":         TaskDef(""),
+        "TTToHplusBWB_M120_Fall11":         TaskDef(""),
+        "TTToHplusBWB_M140_Fall11":         TaskDef(""),
+        "TTToHplusBWB_M150_Fall11":         TaskDef(""),
+        "TTToHplusBWB_M155_Fall11":         TaskDef(""),
+        "TTToHplusBWB_M160_Fall11":         TaskDef(""),
+
+        "TTToHplusBHminusB_M80_Fall11":     TaskDef(""),
+        "TTToHplusBHminusB_M90_Fall11":     TaskDef(""),
+        "TTToHplusBHminusB_M100_Fall11":    TaskDef(""),
+        "TTToHplusBHminusB_M120_Fall11":    TaskDef(""),
+        "TTToHplusBHminusB_M140_Fall11":    TaskDef(""),
+        "TTToHplusBHminusB_M150_Fall11":    TaskDef(""),
+        "TTToHplusBHminusB_M155_Fall11":    TaskDef(""),
+        "TTToHplusBHminusB_M160_Fall11":    TaskDef(""),
+
+        "HplusTB_M180_Fall11":              TaskDef(""),
+        "HplusTB_M190_Fall11":              TaskDef(""),
+        "HplusTB_M200_Fall11":              TaskDef(""),
+        "HplusTB_M220_Fall11":              TaskDef(""),
+        "HplusTB_M250_Fall11":              TaskDef(""),
+        "HplusTB_M300_Fall11":              TaskDef(""),
+
+        "QCD_Pt30to50_TuneZ2_Fall11":       TaskDef(""),
+        "QCD_Pt50to80_TuneZ2_Fall11":       TaskDef(""),
+        "QCD_Pt80to120_TuneZ2_Fall11":      TaskDef(""),
+        "QCD_Pt120to170_TuneZ2_Fall11":     TaskDef(""),
+        "QCD_Pt170to300_TuneZ2_Fall11":     TaskDef(""),
+        "QCD_Pt300to470_TuneZ2_Fall11":     TaskDef(""),
+
+        "WW_TuneZ2_Fall11":                 TaskDef(""),
+        "WZ_TuneZ2_Fall11":                 TaskDef(""),
+        "ZZ_TuneZ2_Fall11":                 TaskDef(""),
+        "TTJets_TuneZ2_Fall11":             TaskDef(""),
+        "WJets_TuneZ2_Fall11":              TaskDef(""),
+        "W1Jets_TuneZ2_Fall11":             TaskDef(""),
+        "W2Jets_TuneZ2_Fall11":             TaskDef(""),
+        "W3Jets_TuneZ2_Fall11":             TaskDef(""),
+        "W4Jets_TuneZ2_Fall11":             TaskDef(""),
+        "DYJetsToLL_M50_TuneZ2_Fall11":     TaskDef(""),
+        "T_t-channel_TuneZ2_Fall11":        TaskDef(""),
+        "Tbar_t-channel_TuneZ2_Fall11":     TaskDef(""),
+        "T_tW-channel_TuneZ2_Fall11":       TaskDef(""),
+        "Tbar_tW-channel_TuneZ2_Fall11":    TaskDef(""),
+        "T_s-channel_TuneZ2_Fall11":        TaskDef(""),
+        "Tbar_s-channel_TuneZ2_Fall11":     TaskDef(""),
+        }
+
+    addPattuple_44X("v44_5", datasets, definitions)
 
 # Skeleton
 def addPattuple_vNEXT_SKELETON(datasets):
