@@ -7,6 +7,8 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
+
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/METReco/interface/GenMET.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
@@ -31,9 +33,18 @@ namespace HPlus {
 
   size_t getFirstHiggsLine(const edm::Event& iEvent);
   size_t getLastHiggsLine(const edm::Event& iEvent);
-  reco::Candidate* getHiggsSideTop(const edm::Event& iEvent);
-  reco::Candidate* getHiggsSideBJet(const edm::Event& iEvent);
-
+  reco::Candidate* getGenHiggsSideTop(const edm::Event& iEvent);
+  reco::Candidate* getGenHiggsSideBJet(const edm::Event& iEvent);
+  reco::Candidate* getGenTauFromHiggs(const edm::Event& iEvent);
+  //  double getDeltaRGenVisibleTauRecoVisibleTau();
+  // int pdgIdOfParticleReconstructedAsTau();
+  // bool tauDecaysHadronicallyToOneProng();
+  // reco::Candidate* getTauMother ?
+  // size_t getTauMotherId ?
+  // double getDeltaR(particle 1, particle 2);
+  // double getMETDeltaPhi();
+  // double getMETDeltaMagnitude();
+  // double getMETDeltaR();
 
   void checkIfGenuineTau(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau);
   // Alternative way

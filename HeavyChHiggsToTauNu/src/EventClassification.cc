@@ -1,6 +1,15 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventClassification.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
+
+#include "FWCore/Utilities/interface/InputTag.h"
+#include "DataFormats/Common/interface/Ptr.h"
+#include "DataFormats/METReco/interface/GenMET.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
+
+
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -19,6 +28,10 @@
 /*
 About this code
 ***************
+IMPORTANT NOTE.
+This code only works as it is expected/supposed to for events with at most 1 (one) charged Higgs boson.
+It will have bugs in several places if used for events with 2+ charged Higgs bosons.
+
 PURPOSE.
 Classify simulated events with a reconstructed b, tau, and MET seeming to come from a Hplus decay
 according to whether these objects were identified correctly or not by comparing to the MC truth.
@@ -26,38 +39,30 @@ according to whether these objects were identified correctly or not by comparing
 This code is called from FullHiggsMassCalculator.cc
 */
 
+std::vector<const reco::GenParticle*> getImmediateMothers(const reco::Candidate&);
+std::vector<const reco::GenParticle*> getMothers(const reco::Candidate& p);
+bool hasImmediateMother(const reco::Candidate& p, int id);
+bool hasMother(const reco::Candidate& p, int id);
+void printImmediateMothers(const reco::Candidate& p);
+void printMothers(const reco::Candidate& p);
+std::vector<const reco::GenParticle*> getImmediateDaughters(const reco::Candidate& p);
+std::vector<const reco::GenParticle*> getDaughters(const reco::Candidate& p);
+bool hasImmediateDaughter(const reco::Candidate& p, int id);
+bool hasDaughter(const reco::Candidate& p, int id);
+void printImmediateDaughters(const reco::Candidate& p);
+void printDaughters(const reco::Candidate& p);
+
 namespace HPlus {
 
 //   edm::Service<TFileService> fs;
 //   // Create folder to hold histograms
 //   TFileDirectory myDir = fs->mkdir("EventClassification");
 
-//------------------------> PUBLIC MEMBER FUNCTIONS <-------------------------
-
-
 
 
 //------------------------> PRIVATE MEMBER FUNCTIONS <------------------------
 
-  size_t getFirstHiggsLine(const edm::Event& iEvent) {
-    edm::Handle <reco::GenParticleCollection> genParticles;
-    iEvent.getByLabel("genParticles", genParticles);
-    // Find the line of the last H+ in the event.
-    size_t myHiggsLine = 0;
-    //int myHiggsLine = 0;
-    for (size_t i=0; i < genParticles->size(); ++i) {
-      const reco::Candidate & p = (*genParticles)[i];
-      if (TMath::Abs(p.pdgId()) == 37) {
-	myHiggsLine = i;
-	break;
-      }
-    }
-    if (!myHiggsLine) return -1;
-    return myHiggsLine;
-    std::cout << "EventClassification: First Higgs line is " << myHiggsLine << std::endl;
-  }
-
-  size_t getLastHiggsLine(const edm::Event& iEvent) {
+  size_t getHiggsLine(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
     // Find the line of the last H+ in the event.
@@ -67,19 +72,19 @@ namespace HPlus {
       const reco::Candidate & p = (*genParticles)[i];
       if (TMath::Abs(p.pdgId()) == 37) myHiggsLine = i;
     }
-    if (!myHiggsLine) return -1;
+    if (!myHiggsLine) return 0;
     return myHiggsLine;
-    std::cout << "EventClassification: Last Higgs line is " << myHiggsLine << std::endl;
+    std::cout << "EventClassification: The (last!) Higgs line is " << myHiggsLine << std::endl;
   }
 
-  // IMPORTANT: AS IT IS, THIS FUNCTION GETS THE MOTHER OF THE SECOND HIGGS IN THE EVENT. IF THERE ARE TWO,
-  // THE FUNCTION WILL NOT WORK AS EXPECTED.
+//------------------------> PUBLIC MEMBER FUNCTIONS <-------------------------
+
   // Improvement: return HiggsSideTopLine instead of pointer to reco::Candidate
-  reco::Candidate* getHiggsSideTop(const edm::Event& iEvent) {
+  reco::Candidate* getGenHiggsSideTop(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
     // Get Higgs line.
-    size_t myHiggsLine = getLastHiggsLine(iEvent);
+    size_t myHiggsLine = getHiggsLine(iEvent);
     // Get Higgs' mother (she must be a million years old...).
     reco::Candidate* myHiggsSideTop = const_cast<reco::Candidate*>(genParticles->at(myHiggsLine).mother());
     bool myStatus = true;
@@ -94,12 +99,12 @@ namespace HPlus {
     std::cout << "EventClassification: First Higgs side top selected!" << std::endl;
   }
 
-  reco::Candidate* getHiggsSideBJet(const edm::Event& iEvent) {
+  reco::Candidate* getGenHiggsSideBJet(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
     // Look at Higgs side top daughters to find b-jet.    
     reco::Candidate* myHiggsSideBJet = 0;
-    reco::Candidate* myHiggsSideTop = getHiggsSideTop(iEvent);
+    reco::Candidate* myHiggsSideTop = getGenHiggsSideTop(iEvent);
     if (!myHiggsSideTop) return NULL;
     for (size_t i=0; i < genParticles->size(); ++i) {
       const reco::Candidate & p = (*genParticles)[i];
@@ -130,9 +135,62 @@ namespace HPlus {
     std::cout << "FullMass: Higgs side bjet found, pt=" << myHiggsSideBJet->pt() << ", eta=" << myHiggsSideBJet->eta() << std::endl;
   }
 
+  reco::Candidate* getGenTauFromHiggs(const edm::Event& iEvent) {
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    reco::Candidate* myTauFromHiggs = 0;
+    size_t myHiggsLine = getHiggsLine(iEvent);
+    if (myHiggsLine == 0) return NULL;       // CHECK IF THIS IS CORRECT!!! WHAT VALUES CAN mHiggsLine GET IF A HIGGS IS FOUND?
+    // Grab charged Higgs and get its daughters
+    const reco::Candidate& chargedHiggs = (*genParticles)[myHiggsLine];    
+    std::vector<const reco::GenParticle*> daughters = getImmediateDaughters(chargedHiggs);
+    int daughterId = 9999999;
+    //double px = 0, py = 0, pz = 0, E = 0;
+    //bool tauFound = false;
+    //bool neutrinoFound = false;
+    // Loop over daughters and find tau
+    for(size_t d=0; d<daughters.size(); ++d) {
+      //const reco::GenParticle daughterParticle = *daughters[d];
+      const reco::Candidate& daughterParticle = *daughters[d];
+      daughterId = daughterParticle.pdgId();
+      // If tau among immediate daughters
+      if (abs(daughterId) == 15) {
+	//myTauFromHiggs = const_cast<reco::Candidate*>(&daughterParticle);
+	myTauFromHiggs = const_cast<reco::Candidate*>(&daughterParticle); // IS THIS DONE CORRECTLY???
+	// TODO!
+	return myTauFromHiggs;
+      }
+    }
+    return NULL;
+  }
+
+
+
+
+
+
+
 
 
 //------------------------> OLD MEMBER FUNCTIONS <----------------------------
+
+//   size_t getFirstHiggsLine(const edm::Event& iEvent) {
+//     edm::Handle <reco::GenParticleCollection> genParticles;
+//     iEvent.getByLabel("genParticles", genParticles);
+//     // Find the line of the last H+ in the event.
+//     size_t myHiggsLine = 0;
+//     //int myHiggsLine = 0;
+//     for (size_t i=0; i < genParticles->size(); ++i) {
+//       const reco::Candidate & p = (*genParticles)[i];
+//       if (TMath::Abs(p.pdgId()) == 37) {
+// 	myHiggsLine = i;
+// 	break;
+//       }
+//     }
+//     if (!myHiggsLine) return -1;
+//     return myHiggsLine;
+//     std::cout << "EventClassification: First Higgs line is " << myHiggsLine << std::endl;
+//   }
 
 // tau decay produces neutrino; use visibleTau (1-prong)
   void checkIfGenuineTau(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau) {

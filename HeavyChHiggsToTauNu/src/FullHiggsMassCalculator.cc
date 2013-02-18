@@ -406,7 +406,7 @@ hHiggsMassIncorrectId = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "
     std::cout << "FullMass: Higgs side bjet found, pt=" << myHiggsSideBJet->pt() << ", eta=" << myHiggsSideBJet->eta() << std::endl;
 
     // Look if tau decays into one prong (hadronic)
-    reco::Candidate* myTauFromHiggs = 0; //TODO: is this a good way to initialize a pointer???
+    reco::Candidate* myTauFromHiggs = 0;
     TVector3 myNeutrinoes(0.0, 0.0, 0.0);
     TVector3 myVisibleTau(0.0, 0.0, 0.0);
     bool myLeptonicTauDecayStatus = false;
