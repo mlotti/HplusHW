@@ -54,7 +54,7 @@ def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
             dset = getDatasetsFromMulticrabCfg(directory=d, **kwargs)
         else:
             dset = getDatasetsFromMulticrabCfg(directory=d[0], namePostfix=d[1], **kwargs)
-        datasets.extend(d)
+        datasets.extend(dset)
 
     return datasets
 
