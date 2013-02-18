@@ -284,6 +284,35 @@ def createTaskDir(prefix="multicrab", postfix="", path=None):
         break
     return dirname
 
+def crabCfgTemplate(scheduler="arc", return_data=None, copy_data=None):
+    if return_data is None and copy_data is None:
+        raise Exception("You must give either return_data or copy_data, you gave neither")
+    if return_data is not None and copy_data is not None:
+        raise Exception("You must give either return_data or copy_data, you gave both")
+    if copy_data is not None:
+        return_data = not copy_data
+    if return_data:
+        r = 1
+        c = 0
+    else:
+        r = 0
+        c = 1
+
+    lines = [
+        "[CRAB]",
+        "jobtype = cmssw",
+        "scheduler = %s" % scheduler,
+        "",
+        "[USER]",
+        "return_data = %d" % r,
+        "copy_data = %d" % c,
+        "",
+        "[GRID]",
+        "virtual_organization = cms"
+        ]
+
+    return "\n".join(lines)
+
 ## Write git version information to a directory
 #
 # \param dirname  Path to multicrab directory
@@ -787,15 +816,18 @@ class Multicrab:
     #                     of crabConfig
     # \param lumiMaskDir  The directory for lumi mask (aka JSON) files, can
     #                     be absolute or relative path
+    # \param crabConfigTemplate  String containing the crab.cfg. Either this ir crabConfig must be given
     # 
     # Parses the crabConfig file for CMSSW.pset and CMSSW.lumi_mask.
     # Ensures that the CMSSW configuration file exists.
-    def __init__(self, crabConfig, pyConfig=None, lumiMaskDir=""):
-        if not os.path.exists(crabConfig):
-            raise Exception("CRAB configuration file '%s' doesn't exist!" % crabConfig)
+    def __init__(self, crabConfig=None, pyConfig=None, lumiMaskDir="", crabConfigTemplate=None):
+        if crabConfig is None and crabConfigTemplate is None:
+            raise Exception("You must specify either crabConfig or crabConfigTemplate, you gave neither")
+        if crabConfig is not None and crabConfigTemplate is not None:
+            raise Exception("You must specify either crabConfig or crabConfigTemplate, you gave both")
 
-        self.crabConfig = os.path.basename(crabConfig)
-        self.filesToCopy = [crabConfig]
+        self.generatedFiles = []
+        self.filesToCopy = []
 
         self.commonLines = []
         self.lumiMaskDir = lumiMaskDir
@@ -805,18 +837,30 @@ class Multicrab:
         self.datasets = None
 
         # Read crab.cfg for lumi_mask and optionally pset
-        crab_parser = ConfigParser.ConfigParser()
-        crab_parser.read(crabConfig)
+        if crabConfig is not None:
+            if not os.path.exists(crabConfig):
+                raise Exception("CRAB configuration file '%s' doesn't exist!" % crabConfig)
 
-        optlist = ["lumi_mask"]
-        if pyConfig == None:
-            optlist.append("pset")
-        for opt in optlist:
-            try:
-                self.filesToCopy.append(crab_parser.get("CMSSW", opt))
-            except ConfigParser.NoOptionError:
-                pass
+            self.crabConfig = os.path.basename(crabConfig)
+            self.filesToCopy.append(crabConfig)            
 
+            crab_parser = ConfigParser.ConfigParser()
+            crab_parser.read(crabConfig)
+
+            optlist = ["lumi_mask"]
+            if pyConfig is None:
+                optlist.append("pset")
+            for opt in optlist:
+                try:
+                    self.filesToCopy.append(crab_parser.get("CMSSW", opt))
+                except ConfigParser.NoOptionError:
+                    pass
+                except ConfigParser.NoSectionError:
+                    pass
+        else:
+            self.crabConfig = "crab.cfg"
+            self.generatedFiles.append( ("crab.cfg", crabConfigTemplate) )
+    
         # If pyConfig is given, use it
         if pyConfig != None:
             if not os.path.exists(pyConfig):
@@ -980,6 +1024,17 @@ class Multicrab:
 
         return ret
 
+    ## Write generated files to a directory.
+    #
+    # \param directory   Directory where to write the generated files
+    #
+    # This method was intended to be called internally.
+    def _writeGeneratedFiles(self, directory):
+        for fname, content in self.generatedFiles:
+            f = open(os.path.join(directory, fname), "wb")
+            f.write(content)
+            f.close()
+
     ## Write the multicrab configuration to a given file name.
     #
     # \param filename      Write the configuration to this file
@@ -992,11 +1047,12 @@ class Multicrab:
         f.close()
 
         directory = os.path.dirname(filename)
+        self._writeGeneratedFiles(directory)
+
         for name in datasetNames:
             self.getDataset(name)._writeGeneratedFiles(directory)
 
         print "Wrote multicrab configuration to %s" % filename
-        
 
     ## Create the multicrab task.
     # 
