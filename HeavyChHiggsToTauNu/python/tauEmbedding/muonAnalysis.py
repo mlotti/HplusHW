@@ -521,28 +521,28 @@ class MuonAnalysis:
         )
         del m.checkOverlaps.jets
 
-        from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import GlobalMuonVeto
+        from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import MuonSelection
         import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalMuonVetoFilter_cfi as muonVeto
         am = self.analysis.addAnalysisModule(name,
             selector = m,
             filter = muonVeto.hPlusGlobalMuonVetoFilter.clone(
                 vertexSrc = "firstPrimaryVertex",
-                GlobalMuonVeto=GlobalMuonVeto.clone(),
+                MuonSelection=MuonSelection.clone(),
                 filter = True
             ),
             counter=True)
-        am.setFilterSrcToSelector(lambda f: f.GlobalMuonVeto.MuonCollectionName)
+        am.setFilterSrcToSelector(lambda f: f.MuonSelection.MuonCollectionName)
         self.cloneAnalyzers(name)
 #        self.multipAnalyzer.cleanedMuons = self.multipAnalyzer.selMuons.clone(src = am.selectorName)
         return name
 
     def electronVetoSignalAnalysis(self):
         name = "ElectronVeto"
-        from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import GlobalElectronVeto
+        from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import ElectronSelection
         import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as electronVeto
         self.analysis.addAnalysisModule(name,
             filter = electronVeto.hPlusGlobalElectronVetoFilter.clone(
-                GlobalElectronVeto=GlobalElectronVeto.clone(),
+                ElectronSelection=ElectronSelection.clone(),
                 filter = True
             ),
             counter=True)

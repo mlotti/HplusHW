@@ -83,6 +83,10 @@ namespace HPlus {
     void setPlanarity(double planarity) { fPlanarity = planarity; }
     void setCircularity(double circularity) { fCircularity = circularity; }
     void setDeltaPhi(double deltaPhi) { fDeltaPhi = deltaPhi; }
+    void setAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets);
+    void setMHT(const XYZTLorentzVector& MHT) { fMHT = MHT; }
+    void setMHTAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets);
+    void setMHTSelJets(const edm::PtrVector<pat::Jet>& jets);
 
     void fill(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau,
               const edm::PtrVector<pat::Jet>& jets);
@@ -137,6 +141,7 @@ namespace HPlus {
     int fTauDaughterPdgId;
 
     std::vector<XYZTLorentzVector> fJets;
+    std::vector<XYZTLorentzVector> fAllIdentifiedJets;
     std::vector<double> fJetsBtags;
     std::vector<double> fJetsChf;
     std::vector<double> fJetsNhf;
@@ -216,6 +221,9 @@ namespace HPlus {
     
     // MET is really 2-vector, but let's just use this for consistency
     XYZTLorentzVector fRawMet;
+    XYZTLorentzVector fMHT;
+    XYZTLorentzVector fMHTSelJets;
+    XYZTLorentzVector fMHTAllJets;
     double fRawMetSumEt;
     double fRawMetSignificance;
     XYZTLorentzVector fType1Met;

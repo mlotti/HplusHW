@@ -233,15 +233,14 @@ def doPlots(datasets):
 #    tauCandPhi(createPlot("TauSelection_all_tau_candidates_phi"), step="begin" )
 
     # Electron veto
-    drawPlot(createPlot("GlobalElectronVeto/GlobalElectronPt_identified"), "electronPt", rebin=6, xlabel="p_{T}^{electron} (GeV/c)", ylabel="Identified electrons / %.0f GeV/c", ratio=False,  opts={"xmax": 250,"xmin": 0, "ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=15)
-    drawPlot(createPlot("GlobalElectronVeto/GlobalElectronEta_identified"), "electronEta", rebin=5, xlabel="#eta^{electron}", ylabel="Identified electrons / %.1f", ratio=False, opts={"xmin": -3,"ymin": 0.1, "xmax": 3, "ymaxfactor": 10}, moveLegend={"dy":0.01, "dx":-0.07, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=[-2.5, 2.5])
-
-    drawPlot(createPlot("GlobalElectronVeto/NumberOfSelectedElectrons"), "NumberOfSelectedElectrons", xlabel="Number of selected electrons", ylabel="Events", ratio=False, opts={"xmax": 6,"ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=1)
+    drawPlot(createPlot("ElectronSelection/ElectronPt_veto"), "electronPt", rebin=3, xlabel="p_{T}^{electron} (GeV/c)", ylabel="Identified electrons / %.0f GeV/c", ratio=False,  opts={"xmax": 250,"xmin": 0, "ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=15)
+    drawPlot(createPlot("ElectronSelection/ElectronEta_veto"), "electronEta", rebin=3, xlabel="#eta^{electron}", ylabel="Identified electrons / %.1f", ratio=False, opts={"xmin": -3,"ymin": 0.1, "xmax": 3, "ymaxfactor": 10}, moveLegend={"dy":0.01, "dx":-0.07, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.3, y=0.87), cutLine=[-2.5, 2.5])
+    drawPlot(createPlot("ElectronSelection/NumberOfVetoElectrons"), "NumberOfVetoElectrons", xlabel="Number of selected veto electrons", ylabel="Events", ratio=False, opts={"xmax": 6,"ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=1)
     
     # Muon veto
-    drawPlot(createPlot("GlobalMuonVeto/GlobalMuonPt_identified_eta"), "muonPt", rebin=3, xlabel="p_{T}^{muon} (GeV/c)", ylabel="Identified muons / %.0f GeV/c", ratio=False, log=True, opts={"ymaxfactor": 2,"xmax": 250,"xmin": 0}, textFunction=lambda: addMassBRText(x=0.35, y=0.9), cutLine=15)
-    drawPlot(createPlot("GlobalMuonVeto/GlobalMuonEta_identified"), "muonEta", rebin=3, xlabel="#eta^{muon}", ylabel="Identified muons / %.1f", ratio=False, opts={"xmin": -3,"ymin": 0.1, "xmax": 3, "ymaxfactor": 20}, moveLegend={"dy":0.01, "dx":-0.07, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.30, y=0.87), cutLine=[-2.5, 2.5])
-    drawPlot(createPlot("GlobalMuonVeto/NumberOfSelectedMuons"), "NumberOfSelectedMuons", xlabel="Number of selected muons", ylabel="Events", ratio=False, opts={"xmax": 6,"ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=1)
+    drawPlot(createPlot("MuonSelection/LooseMuonPt"), "muonPt", rebin=2, xlabel="p_{T}^{muon} (GeV/c)", ylabel="Identified muons / %.0f GeV/c", ratio=False, log=True, opts={"ymaxfactor": 2,"xmax": 250,"xmin": 0}, textFunction=lambda: addMassBRText(x=0.35, y=0.9), cutLine=15)
+    drawPlot(createPlot("MuonSelection/LooseMuonEta"), "muonEta", rebin=2, xlabel="#eta^{muon}", ylabel="Identified muons / %.1f", ratio=False, opts={"xmin": -3,"ymin": 0.1, "xmax": 3, "ymaxfactor": 20}, moveLegend={"dy":0.01, "dx":-0.07, "dh":-0.06}, textFunction=lambda: addMassBRText(x=0.30, y=0.87), cutLine=[-2.5, 2.5])
+    drawPlot(createPlot("MuonSelection/NumberOfLooseMuons"), "NumberOfSelectedMuons", xlabel="Number of selected muons", ylabel="Events", ratio=False, opts={"xmax": 6,"ymaxfactor": 2}, textFunction=lambda: addMassBRText(x=0.4, y=0.87), cutLine=1)
 
     if False:
         # tau veto
@@ -440,11 +439,9 @@ def doCounters(datasets):
     print eventCounter.getSubCounterTable("Jet selection").format(cellFormat)
     print eventCounter.getSubCounterTable("Jet main").format(cellFormat)    
     print eventCounter.getSubCounterTable("VetoTauSelection").format(cellFormat)
-    print eventCounter.getSubCounterTable("GlobalMuon ID").format(cellFormat)
-    print eventCounter.getSubCounterTable("GlobalMuon Selection").format(cellFormat)
+    print eventCounter.getSubCounterTable("MuonSelection").format(cellFormat)
     print eventCounter.getSubCounterTable("MCinfo for selected events").format(cellFormat) 
-#    print eventCounter.getSubCounterTable("GlobalElectron ID").format(cellFormat)
-    print eventCounter.getSubCounterTable("GlobalElectron Selection").format(cellFormat)  
+    print eventCounter.getSubCounterTable("ElectronSelection").format(cellFormat)  
 #    print eventCounter.getSubCounterTable("top").format(cellFormat) 
 
     
