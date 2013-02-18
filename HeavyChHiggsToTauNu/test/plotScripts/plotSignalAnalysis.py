@@ -44,7 +44,7 @@ mcOnlyLumi = 5000 # pb
 searchMode = "Light"
 #searchMode = "Heavy"
 
-dataEra = "Run2011A"
+#dataEra = "Run2011A"
 #dataEra = "Run2011B"
 #dataEra = "Run2011AB"
 

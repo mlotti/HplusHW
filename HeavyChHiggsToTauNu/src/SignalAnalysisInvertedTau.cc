@@ -987,12 +987,29 @@ namespace HPlus {
 	      double deltaPhiBaseline = DeltaPhi::reconstruct(*(selectedTau), *(metDataBase.getSelectedMET())) * 57.3; // converted to degrees 
 	      FakeMETVeto::Data fakeMETDataBase = fFakeMETVeto.analyze(iEvent, iSetup, selectedTau, jetDataBase.getSelectedJets(), metDataBase.getSelectedMET()); 
  
-	      // New cut !!!!!!!!!!!
+	      
 	      // deltaPhi cut as a function of deltaPhiJetMet
 	      double deltaPhiTauMetCut = 130;
 	      double deltaPhiJetMetCut = 30; 
 	      double deltaPhiCutValue2Dim = 180 - (deltaPhiJetMetCut - fakeMETDataBase.closestDeltaPhi())*(180 - deltaPhiTauMetCut) / deltaPhiJetMetCut;
 	      //    std::cout << "  new cut value " << cutValue << " deltaPhi " << deltaPhi <<   " closestDeltaPhi  " << fakeMETData.closestDeltaPhi() << std::endl;
+
+	      
+	      // deltaPhiJetMet	      
+	      int ijet = 0;
+	      double deltaPhiMetJet1 = -999;
+	      double deltaPhiMetJet2 = -999;
+	      double deltaPhiMetJet3 = -999;
+	      for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetDataBase.getSelectedJets().begin(); iJet != jetDataBase.getSelectedJets().end(); ++iJet) {
+		double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metDataBase.getSelectedMET())) * 57.3;
+		ijet++;
+		if (ijet == 1) deltaPhiMetJet1 = jetDeltaPhi;
+		if (ijet == 2) deltaPhiMetJet2 = jetDeltaPhi;
+		if (ijet == 3) deltaPhiMetJet3 = jetDeltaPhi;
+	      }
+
+
+
 
 //------ Delta phi(tau,MET) cut
 	      
@@ -1073,7 +1090,7 @@ namespace HPlus {
 		if ( deltaPhiBaseline < 120 || jetDataBase.getDeltaPhiMHTJet1() > 60 ) {
 		  increment(fBaselineDeltaPhiMHTJet1CutCounter); 
 
-		  if( deltaPhiBaseline <  150 || jetDataBase.getDeltaPhiMHTJet2() > 30 ) {
+		  if( (deltaPhiBaseline <  120 || jetDataBase.getDeltaPhiMHTJet2() > 60) && (deltaPhiBaseline <  120 || jetDataBase.getDeltaPhiMHTJet3() > 60)) {
 		    increment(fBaselineDeltaPhiVSDeltaPhiMHTJet1CutCounter); 
 		    
 		    
@@ -1152,12 +1169,29 @@ namespace HPlus {
     double transverseMass = TransverseMass::reconstruct(*(selectedInvertedTau), *(metDataInverted.getSelectedMET()) );
     FakeMETVeto::Data fakeMETDataInverted = fFakeMETVeto.analyze(iEvent, iSetup, selectedInvertedTau, jetDataInverted.getSelectedJets(), metDataInverted.getSelectedMET());   
  
-    // New cut !!!!!!!!!!!
+   
     // deltaPhi cut as a function of deltaPhiJetMet
     double deltaPhiTauMetCut = 130;
     double deltaPhiJetMetCut = 30; 
     double deltaPhiCutValue2Dim = 180 - (deltaPhiJetMetCut - fakeMETDataInverted.closestDeltaPhi())*(180 - deltaPhiTauMetCut) / deltaPhiJetMetCut;
     //    std::cout << "  new cut value " << cutValue << " deltaPhi " << deltaPhi <<   " closestDeltaPhi  " << fakeMETData.closestDeltaPhi() << std::endl;  
+
+
+    // deltaPhiMetJet
+
+    int ijet = 0;
+    double deltaPhiMetJet1 = -999;
+    double deltaPhiMetJet2 = -999;
+    double deltaPhiMetJet3 = -999;
+    for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetDataInverted.getSelectedJets().begin(); iJet != jetDataInverted.getSelectedJets().end(); ++iJet) {
+      double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metDataInverted.getSelectedMET())) * 57.3;
+      ijet++;
+      if (ijet == 1) deltaPhiMetJet1 = jetDeltaPhi;
+      if (ijet == 2) deltaPhiMetJet2 = jetDeltaPhi;
+      if (ijet == 3) deltaPhiMetJet3 = jetDeltaPhi;
+    }
+
+
   
     hSelectionFlow->Fill(kSignalOrderTauID);
     if(fProduce) {
@@ -1367,7 +1401,7 @@ namespace HPlus {
 
     //   if (deltaPhi < fDeltaPhiCutValue) {
     //    if (deltaPhi < deltaPhiCutValue2Dim) {
-    if ( deltaPhi < 120 || jetDataInverted.getDeltaPhiMHTJet1() < 60 ) {
+    if ( (deltaPhi < 120 || jetDataInverted.getDeltaPhiMHTJet1() < 60) && ( deltaPhi < 120 || jetDataInverted.getDeltaPhiMHTJet2() < 60)&& ( deltaPhi < 120 || jetDataInverted.getDeltaPhiMHTJet3() < 60) ) {
       /*
 // moved to deltaPhi
       hMTInvertedTauIdJetDphi->Fill(transverseMass); 
@@ -1399,8 +1433,7 @@ namespace HPlus {
   // mt for inverted tau with b veto
     if( btagDataInverted.getSelectedJets().size() < 1) { 
       increment(fBvetoCounter); 
-      // moved to phi!!!!!!!!!!!!
-      /*
+  
       hMTInvertedTauIdBveto->Fill(transverseMass);
       if ( selectedInvertedTau->pt() > 150  ) hMTInvertedTauIdBveto150->Fill(transverseMass); 
       if ( selectedInvertedTau->pt() > 120  ) hMTInvertedTauIdBveto120->Fill(transverseMass); 
@@ -1411,10 +1444,11 @@ namespace HPlus {
       if ( selectedInvertedTau->pt() > 60 && selectedInvertedTau->pt() < 70 ) hMTInvertedTauIdBveto6070->Fill(transverseMass); 
       if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hMTInvertedTauIdBveto5060->Fill(transverseMass); 
       if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hMTInvertedTauIdBveto4050->Fill(transverseMass);
-      */
+    
 
       //      if (deltaPhi < fDeltaPhiCutValue) {
-      if (deltaPhi < deltaPhiCutValue2Dim) {
+      //      if (deltaPhi < deltaPhiCutValue2Dim) {
+      if ( (deltaPhi < 120 || jetDataInverted.getDeltaPhiMHTJet1() < 60) && ( deltaPhi < 120 || jetDataInverted.getDeltaPhiMHTJet2() < 60)&& ( deltaPhi < 120 || jetDataInverted.getDeltaPhiMHTJet3() < 60) ) {
 	increment(fBvetoDeltaPhiCounter); 
 	hMTInvertedTauIdBvetoDphi->Fill(transverseMass);
 	if ( selectedInvertedTau->pt() > 150  ) hMTInvertedTauIdBvetoDphi150->Fill(transverseMass); 
@@ -1480,27 +1514,7 @@ namespace HPlus {
 
 
 
-
-  /// test !!!!!!!!!!!!!
-
-    int ijet = 0;
-    double deltaPhiMetJet1 = -999;
-    double deltaPhiMetJet2 = -999;
-    double deltaPhiMetJet3 = -999;
-    for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetDataInverted.getSelectedJets().begin(); iJet != jetDataInverted.getSelectedJets().end(); ++iJet) {
-      double jetDeltaPhi = DeltaPhi::reconstruct(**iJet, *(metDataInverted.getSelectedMET())) * 57.3;
-      ijet++;
-      if (ijet == 1) deltaPhiMetJet1 = jetDeltaPhi;
-      if (ijet == 2) deltaPhiMetJet2 = jetDeltaPhi;
-      if (ijet == 3) deltaPhiMetJet3 = jetDeltaPhi;
-    }
-
-
-
-
-    //fCorrelationAnalysis.analyze(iEvent, iSetup, tauData.getSelectedTaus(), btagData.getSelectedJets(), "BCorrelationAnalysis");
-
-    //    FakeMETVeto::Data fakeMETDataInverted = fFakeMETVeto.analyze(iEvent, iSetup, selectedInvertedTau, jetDataInverted.getSelectedJets(), metDataInverted.getSelectedMET());
+  
     hDeltaPhiTauVSJetInverted->Fill(deltaPhi, fakeMETDataInverted.closestDeltaPhi());   
     if ( selectedInvertedTau->pt() > 120  ) hDeltaPhiTauVSJetInverted120->Fill(deltaPhi,fakeMETDataInverted.closestDeltaPhi());  
     if ( selectedInvertedTau->pt() > 100 && selectedInvertedTau->pt() < 120 ) hDeltaPhiTauVSJetInverted100120->Fill(deltaPhi,fakeMETDataInverted.closestDeltaPhi()); 
@@ -1510,7 +1524,7 @@ namespace HPlus {
     if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hDeltaPhiTauVSJetInverted5060->Fill(deltaPhi,fakeMETDataInverted.closestDeltaPhi()); 
     if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hDeltaPhiTauVSJetInverted4050->Fill(deltaPhi,fakeMETDataInverted.closestDeltaPhi()); 
 
-    /*
+   
     hDeltaPhiVsDeltaPhiMHTJet1Inverted->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet1());
     if ( selectedInvertedTau->pt() > 120  ) hDeltaPhiVsDeltaPhiMHTJet1Inverted->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet1());
     if ( selectedInvertedTau->pt() > 100 && selectedInvertedTau->pt() < 120 ) hDeltaPhiVsDeltaPhiMHTJet1Inverted100120->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet1());
@@ -1519,12 +1533,16 @@ namespace HPlus {
     if ( selectedInvertedTau->pt() > 60 && selectedInvertedTau->pt() < 70 ) hDeltaPhiVsDeltaPhiMHTJet1Inverted6070->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet1());
     if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hDeltaPhiVsDeltaPhiMHTJet1Inverted5060->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet1());
     if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hDeltaPhiVsDeltaPhiMHTJet1Inverted4050->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet1());
-    */
-    // test !!!!!!!!!!
+    
+
+    /*
+    
     hDeltaPhiVsDeltaPhiMHTJet1Inverted->Fill(deltaPhi,deltaPhiMetJet1);
     if ( selectedInvertedTau->pt() > 120  ) hDeltaPhiVsDeltaPhiMHTJet1Inverted->Fill(deltaPhi,deltaPhiMetJet1);
     if ( selectedInvertedTau->pt() > 100 && selectedInvertedTau->pt() < 120 ) hDeltaPhiVsDeltaPhiMHTJet1Inverted100120->Fill(deltaPhi,deltaPhiMetJet1);
-    if ( selectedInvertedTau->pt() > 80 && selectedInvertedTau->pt() < 100 ) hDeltaPhiVsDeltaPhiMHTJet1Inverted80100->Fill(deltaPhi,deltaPhiMetJet1);
+    if ( selectedInvertedTau->pt() > 80 &&      if( !(deltaPhi > 100 &&  deltaPhiMetJet1  < 80) ) {
+       if( !(deltaPhi > 150 &&  deltaPhiMetJet2  < 30) ) {
+	 if( !(deltaPhi > 150 &&  deltaPhiMetJet3  < 30) ) {selectedInvertedTau->pt() < 100 ) hDeltaPhiVsDeltaPhiMHTJet1Inverted80100->Fill(deltaPhi,deltaPhiMetJet1);
     if ( selectedInvertedTau->pt() > 70 && selectedInvertedTau->pt() < 80 ) hDeltaPhiVsDeltaPhiMHTJet1Inverted7080->Fill(deltaPhi,deltaPhiMetJet1);
     if ( selectedInvertedTau->pt() > 60 && selectedInvertedTau->pt() < 70 ) hDeltaPhiVsDeltaPhiMHTJet1Inverted6070->Fill(deltaPhi,deltaPhiMetJet1);
     if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hDeltaPhiVsDeltaPhiMHTJet1Inverted5060->Fill(deltaPhi,deltaPhiMetJet1);
@@ -1538,25 +1556,9 @@ namespace HPlus {
     if ( selectedInvertedTau->pt() > 60 && selectedInvertedTau->pt() < 70 ) hDeltaPhiMHTJet1Inverted6070->Fill(deltaPhiMetJet1);
     if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hDeltaPhiMHTJet1Inverted5060->Fill(deltaPhiMetJet1);
     if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hDeltaPhiMHTJet1Inverted4050->Fill(deltaPhiMetJet1);
-    /*
-    hDeltaPhiVsDeltaPhiMHTJet2Inverted->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet2());
-    if ( selectedInvertedTau->pt() > 120  ) hDeltaPhiVsDeltaPhiMHTJet2Inverted->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet2());
-    if ( selectedInvertedTau->pt() > 100 && selectedInvertedTau->pt() < 120 ) hDeltaPhiVsDeltaPhiMHTJet2Inverted100120->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet2());
-    if ( selectedInvertedTau->pt() > 80 && selectedInvertedTau->pt() < 100 ) hDeltaPhiVsDeltaPhiMHTJet2Inverted80100->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet2());
-    if ( selectedInvertedTau->pt() > 70 && selectedInvertedTau->pt() < 80 ) hDeltaPhiVsDeltaPhiMHTJet2Inverted7080->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet2());
-    if ( selectedInvertedTau->pt() > 60 && selectedInvertedTau->pt() < 70 ) hDeltaPhiVsDeltaPhiMHTJet2Inverted6070->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet2());
-    if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hDeltaPhiVsDeltaPhiMHTJet2Inverted5060->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet2());
-    if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hDeltaPhiVsDeltaPhiMHTJet2Inverted4050->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet2());
+    */
 
-    hDeltaPhiVsDeltaPhiMHTJet3Inverted->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet3());
-    if ( selectedInvertedTau->pt() > 120  ) hDeltaPhiVsDeltaPhiMHTJet3Inverted->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet3());
-    if ( selectedInvertedTau->pt() > 100 && selectedInvertedTau->pt() < 120 ) hDeltaPhiVsDeltaPhiMHTJet3Inverted100120->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet3());
-    if ( selectedInvertedTau->pt() > 80 && selectedInvertedTau->pt() < 100 ) hDeltaPhiVsDeltaPhiMHTJet3Inverted80100->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet3());
-    if ( selectedInvertedTau->pt() > 70 && selectedInvertedTau->pt() < 80 ) hDeltaPhiVsDeltaPhiMHTJet3Inverted7080->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet3());
-    if ( selectedInvertedTau->pt() > 60 && selectedInvertedTau->pt() < 70 ) hDeltaPhiVsDeltaPhiMHTJet3Inverted6070->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet3());
-    if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hDeltaPhiVsDeltaPhiMHTJet3Inverted5060->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet3());
-    if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hDeltaPhiVsDeltaPhiMHTJet3Inverted4050->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet3());
-
+   
    
 
     hDeltaPhiMHTJet1Inverted->Fill(jetDataInverted.getDeltaPhiMHTJet1());
@@ -1567,7 +1569,6 @@ namespace HPlus {
     if ( selectedInvertedTau->pt() > 60 && selectedInvertedTau->pt() < 70 ) hDeltaPhiMHTJet1Inverted6070->Fill(jetDataInverted.getDeltaPhiMHTJet1());
     if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hDeltaPhiMHTJet1Inverted5060->Fill(jetDataInverted.getDeltaPhiMHTJet1());
     if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hDeltaPhiMHTJet1Inverted4050->Fill(jetDataInverted.getDeltaPhiMHTJet1());
-*/
 
 
     hDeltaPhiMHTTauVsDeltaPhiMHTJet1Inverted->Fill(jetDataInverted.getDeltaPhiMHTTau(),jetDataInverted.getDeltaPhiMHTJet1());
@@ -1610,29 +1611,11 @@ namespace HPlus {
        
        increment(fDeltaPhiTauMETCounter);
      }
-     // test deltaPhi(jet,Met) !!!!!!!!!!!!!!!!!!!!!
-     //     if( (deltaPhi < 120 || deltaPhiMetJet1  > 60) && (deltaPhi < 150 || deltaPhiMetJet2  > 30) && (deltaPhi < 150 || deltaPhiMetJet3  > 30) ) {
-     if( !(deltaPhi > 100 &&  deltaPhiMetJet1  < 80) ) {
-       if( !(deltaPhi > 150 &&  deltaPhiMetJet2  < 30) ) {
-	 if( !(deltaPhi > 150 &&  deltaPhiMetJet3  < 30) ) {
-	   increment(fDeltaPhiVSDeltaPhiMetJetCutCounter);
-	   hMTInvertedTauIdBveto->Fill(transverseMass);
-	   if ( selectedInvertedTau->pt() > 150  ) hMTInvertedTauIdBveto150->Fill(transverseMass); 
-	   if ( selectedInvertedTau->pt() > 120  ) hMTInvertedTauIdBveto120->Fill(transverseMass); 
-	   if ( selectedInvertedTau->pt() > 120 && selectedInvertedTau->pt() < 150 ) hMTInvertedTauIdBveto120150->Fill(transverseMass); 
-	   if ( selectedInvertedTau->pt() > 100 && selectedInvertedTau->pt() < 120 ) hMTInvertedTauIdBveto100120->Fill(transverseMass); 
-	   if ( selectedInvertedTau->pt() > 80 && selectedInvertedTau->pt() < 100 ) hMTInvertedTauIdBveto80100->Fill(transverseMass); 
-	   if ( selectedInvertedTau->pt() > 70 && selectedInvertedTau->pt() < 80 ) hMTInvertedTauIdBveto7080->Fill(transverseMass); 
-	   if ( selectedInvertedTau->pt() > 60 && selectedInvertedTau->pt() < 70 ) hMTInvertedTauIdBveto6070->Fill(transverseMass); 
-	   if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hMTInvertedTauIdBveto5060->Fill(transverseMass); 
-	   if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hMTInvertedTauIdBveto4050->Fill(transverseMass);
-	 }
-       }
-     }
-     
+
+    
      // cut in  DeltaPhiMHTJet1 
-     //     if ( deltaPhi > 120 &&  jetDataInverted.getDeltaPhiMHTJet1() < 60 ) return false;
-     if ( deltaPhi > 120 &&  deltaPhiMetJet1  < 60 ) return false;
+     if ( deltaPhi > 120 &&  jetDataInverted.getDeltaPhiMHTJet1() < 60 ) return false;
+     //if ( deltaPhi > 120 &&  deltaPhiMetJet1  < 60 ) return false;
      increment(fDeltaPhiVSDeltaPhiMHTJet1CutCounter);
      hMTInvertedTauIdMet->Fill(transverseMass); 
      if ( selectedInvertedTau->pt() > 150  ) hMTInvertedTauIdJet150->Fill(transverseMass);
@@ -1645,7 +1628,7 @@ namespace HPlus {
      if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hMTInvertedTauIdMet5060->Fill(transverseMass); 
      if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hMTInvertedTauIdMet4050->Fill(transverseMass);     
      
-
+     /*
      //test !!!!!!!!!!!!!!!     
      hDeltaPhiVsDeltaPhiMHTJet2Inverted->Fill(deltaPhi,deltaPhiMetJet2);
      if ( selectedInvertedTau->pt() > 120  ) hDeltaPhiVsDeltaPhiMHTJet2Inverted->Fill(deltaPhi,deltaPhiMetJet2);
@@ -1656,9 +1639,9 @@ namespace HPlus {
      if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hDeltaPhiVsDeltaPhiMHTJet2Inverted5060->Fill(deltaPhi,deltaPhiMetJet2);
      if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hDeltaPhiVsDeltaPhiMHTJet2Inverted4050->Fill(deltaPhi,deltaPhiMetJet2);
      
- 
+     */ 
      
-     /*     
+             
      hDeltaPhiVsDeltaPhiMHTJet2Inverted->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet2());
      if ( selectedInvertedTau->pt() > 120  ) hDeltaPhiVsDeltaPhiMHTJet2Inverted->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet2());
      if ( selectedInvertedTau->pt() > 100 && selectedInvertedTau->pt() < 120 ) hDeltaPhiVsDeltaPhiMHTJet2Inverted100120->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet2());
@@ -1668,6 +1651,14 @@ namespace HPlus {
      if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hDeltaPhiVsDeltaPhiMHTJet2Inverted5060->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet2());
      if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hDeltaPhiVsDeltaPhiMHTJet2Inverted4050->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet2());
      
+  
+         
+     
+     // add cut in  DeltaPhiMHTJet2     
+    if( deltaPhi > 120 && jetDataInverted.getDeltaPhiMHTJet2() < 60 ) return false; 
+    //    if( deltaPhi > 120 && deltaPhiMetJet2  < 60 ) return false;   
+     increment(fDeltaPhiVSDeltaPhiMHTJet2CutCounter);
+
      hDeltaPhiVsDeltaPhiMHTJet3Inverted->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet3());
      if ( selectedInvertedTau->pt() > 120  ) hDeltaPhiVsDeltaPhiMHTJet3Inverted->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet3());
      if ( selectedInvertedTau->pt() > 100 && selectedInvertedTau->pt() < 120 ) hDeltaPhiVsDeltaPhiMHTJet3Inverted100120->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet3());
@@ -1676,16 +1667,7 @@ namespace HPlus {
      if ( selectedInvertedTau->pt() > 60 && selectedInvertedTau->pt() < 70 ) hDeltaPhiVsDeltaPhiMHTJet3Inverted6070->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet3());
      if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hDeltaPhiVsDeltaPhiMHTJet3Inverted5060->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet3());
      if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hDeltaPhiVsDeltaPhiMHTJet3Inverted4050->Fill(deltaPhi,jetDataInverted.getDeltaPhiMHTJet3());
-     */     
-
-
-
-     
-     // add cut in  DeltaPhiMHTJet2     
-     //     if( deltaPhi > 150 && jetDataInverted.getDeltaPhiMHTJet2() < 30 ) return false; 
-    if( deltaPhi > 120 && deltaPhiMetJet2  < 60 ) return false;   
-     increment(fDeltaPhiVSDeltaPhiMHTJet2CutCounter);
-
+     /*
      hDeltaPhiVsDeltaPhiMHTJet3Inverted->Fill(deltaPhi,deltaPhiMetJet3);
      if ( selectedInvertedTau->pt() > 120  ) hDeltaPhiVsDeltaPhiMHTJet3Inverted->Fill(deltaPhi,deltaPhiMetJet3);
      if ( selectedInvertedTau->pt() > 100 && selectedInvertedTau->pt() < 120 ) hDeltaPhiVsDeltaPhiMHTJet3Inverted100120->Fill(deltaPhi,deltaPhiMetJet3);
@@ -1694,7 +1676,7 @@ namespace HPlus {
      if ( selectedInvertedTau->pt() > 60 && selectedInvertedTau->pt() < 70 ) hDeltaPhiVsDeltaPhiMHTJet3Inverted6070->Fill(deltaPhi,deltaPhiMetJet3);
      if ( selectedInvertedTau->pt() > 50 && selectedInvertedTau->pt() < 60 ) hDeltaPhiVsDeltaPhiMHTJet3Inverted5060->Fill(deltaPhi,deltaPhiMetJet3);
      if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hDeltaPhiVsDeltaPhiMHTJet3Inverted4050->Fill(deltaPhi,deltaPhiMetJet3);     
-     
+     */     
      //    if (deltaPhi > fDeltaPhiCutValue) return false;
      //    if (deltaPhi > deltaPhiCutValue2Dim) return false;
      
@@ -1720,8 +1702,8 @@ namespace HPlus {
     if ( selectedInvertedTau->pt() > 40 && selectedInvertedTau->pt() < 50 ) hMTInvertedTauIdJetPhi4050->Fill(transverseMass); 
  
 
-  //    if( deltaPhi > 150 && jetDataInverted.getDeltaPhiMHTJet3() < 30 ) return false; 
-     if( deltaPhi > 120 && deltaPhiMetJet3  < 60 ) return false;  
+      if( deltaPhi > 120 && jetDataInverted.getDeltaPhiMHTJet3() < 60 ) return false; 
+      //     if( deltaPhi > 120 && deltaPhiMetJet3  < 60 ) return false;  
     increment(fDeltaPhiVSDeltaPhiMHTJet3CutCounter);
     // Moved !!!
     hMTInvertedTauIdTopMass->Fill(transverseMass);
