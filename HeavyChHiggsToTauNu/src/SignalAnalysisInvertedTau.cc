@@ -1674,10 +1674,6 @@ namespace HPlus {
 
 
 
-
-
-
-
      
      // add cut in  DeltaPhiMHTJet2     
      //     if( deltaPhi > 150 && jetDataInverted.getDeltaPhiMHTJet2() < 30 ) return false; 
