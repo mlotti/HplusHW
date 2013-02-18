@@ -3,8 +3,11 @@
 import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabDatasetsCommon as common
 
-multicrab = Multicrab("crab_pat.cfg", lumiMaskDir="..")
+multicrab = Multicrab(crabConfigTemplate=crabCfgTemplate(scheduler="remoteGlidein", copy_data=True),
+                      pyConfig="patTuple_cfg.py",
+                      lumiMaskDir="..")
 
 datasets = [
 ########
@@ -114,7 +117,12 @@ multicrab.extendDatasets(workflow, datasets)
 # writing to /store/group/local ...
 #multicrab.appendLineAll("USER.local_stage_out=1")
 
-multicrab.appendLineAll("GRID.maxtarballsize = 15")
+multicrab.addCommonLine("USER.storage_element = madhatter.csc.fi")
+multicrab.addCommonLine("USER.storage_path = /srm/managerv2?SFN=/pnfs/csc.fi/data/cms")
+multicrab.addCommonLine("USER.user_remote_dir = /store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X")
+multicrab.addCommonLine("USER.publish_data=1")
+multicrab.addCommonLine("USER.dbs_url_for_publication = %s" % common.pattuple_dbs_writer)
+multicrab.addCommonLine("GRID.maxtarballsize = 30")
 
 def addCopyConfig(dataset):
     dataset.appendLine("USER.additional_input_files = copy_cfg.py")
@@ -133,7 +141,8 @@ multicrab.forEachDataset(addCopyConfig)
 multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
 
 prefix = "multicrab"
-configOnly = False # Create task configuration only?
+configOnly = True
+#configOnly = False # Create task configuration only?
 # Leave configOnly as false and specify site whitelist on command line when submitting the jobs
 
 # Create multicrab task configuration and run 'multicrab -create'
