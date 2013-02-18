@@ -11,7 +11,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
 
 class HPlusGlobalElectronVetoFilter: public edm::EDFilter {
  public:
@@ -27,23 +27,22 @@ class HPlusGlobalElectronVetoFilter: public edm::EDFilter {
   virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   edm::InputTag fVertexSrc;
-  HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
   HPlus::HistoWrapper histoWrapper;
-  HPlus::GlobalElectronVeto fGlobalElectronVeto;
+  HPlus::EventCounter eventCounter;
+  HPlus::ElectronSelection fElectronSelection;
   bool fFilter;
 };
 
 HPlusGlobalElectronVetoFilter::HPlusGlobalElectronVetoFilter(const edm::ParameterSet& iConfig):
   fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc")),
-  eventCounter(iConfig),
   eventWeight(iConfig),
-  histoWrapper(eventWeight, "Debug"),
-  fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), fVertexSrc, eventCounter, histoWrapper),
+  histoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
+  eventCounter(iConfig, eventWeight, histoWrapper),
+  fElectronSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("ElectronSelection"), fVertexSrc, eventCounter, histoWrapper),
   fFilter(iConfig.getParameter<bool>("filter"))
 {
   produces<bool>();
-  eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
 HPlusGlobalElectronVetoFilter::~HPlusGlobalElectronVetoFilter() {}
 void HPlusGlobalElectronVetoFilter::beginJob() {}
@@ -54,7 +53,7 @@ bool HPlusGlobalElectronVetoFilter::endLuminosityBlock(edm::LuminosityBlock& iBl
 }
 
 bool HPlusGlobalElectronVetoFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  HPlus::GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
+  HPlus::ElectronSelection::Data electronVetoData = fElectronSelection.analyze(iEvent, iSetup);
   bool passed = electronVetoData.passedEvent();
   std::auto_ptr<bool> p(new bool(passed));
   iEvent.put(p);

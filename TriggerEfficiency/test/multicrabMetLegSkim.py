@@ -151,7 +151,8 @@ datasets_SingleTop = [
     "Tbar_s-channel_TuneZ2star_Summer12",
 ]
 
-workflow = "analysis_metleg_v53_v1"
+#workflow = "analysis_metleg_v53_v1"
+workflow = "triggerMetLeg_skim_v53_v1"
 
 tasks = [
      ("MetLeg", datasets_Tau+datasets_QCD+datasets_VV+datasets_SingleTop+datasets_TT_EWK),

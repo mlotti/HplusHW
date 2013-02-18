@@ -25,12 +25,14 @@ class QCDEventCount():
         self._histoname = histoName
         self._assumedMCEWKSystUncertainty = assumedMCEWKSystUncertainty
         # Obtain histograms
-        datasetRootHistoData = dsetMgr.getDataset(dsetMgrDataColumn).getDatasetRootHisto(histoPrefix+"/"+histoName, quietException=True)
-        if isinstance(datasetRootHistoData,str):
-            raise Exception (ErrorStyle()+"Error in QCDfactorised/QCDEventCount:"+NormalStyle()+" cannot find histogram for data!\n  Message = %s!"%(datasetRootHistoData))
-        datasetRootHistoMCEWK = dsetMgr.getDataset(dsetMgrMCEWKColumn).getDatasetRootHisto(histoPrefix+"/"+histoName, quietException=True)
-        if isinstance(datasetRootHistoMCEWK,str):
-            raise Exception (ErrorStyle()+"Error in QCDfactorised/QCDEventCount:"+NormalStyle()+" cannot find histogram for MC EWK!\n  Message = %s!"%(datasetRootHistoMCEWK))
+        try:
+            datasetRootHistoData = dsetMgr.getDataset(dsetMgrDataColumn).getDatasetRootHisto(histoPrefix+"/"+histoName)
+        except Exception, e:
+            raise Exception (ErrorStyle()+"Error in QCDfactorised/QCDEventCount:"+NormalStyle()+" cannot find histogram for data!\n  Message = %s!"%(str(e)))
+        try:
+            datasetRootHistoMCEWK = dsetMgr.getDataset(dsetMgrMCEWKColumn).getDatasetRootHisto(histoPrefix+"/"+histoName)
+        except Exception, e:
+            raise Exception (ErrorStyle()+"Error in QCDfactorised/QCDEventCount:"+NormalStyle()+" cannot find histogram for MC EWK!\n  Message = %s!"%(str(e)))
         datasetRootHistoMCEWK.normalizeToLuminosity(luminosity)
         self._hData = datasetRootHistoData.getHistogram()
         self._hMC = datasetRootHistoMCEWK.getHistogram()
@@ -1555,9 +1557,10 @@ class QCDfactorisedColumn(DatacardColumn):
 
     ## Extracts a shape histogram for a given bin
     def _extractShapeHistogram(self, dsetMgr, datasetMgrColumn, histoName, luminosity):
-        dsetRootHistoMtData = dsetMgr.getDataset(datasetMgrColumn).getDatasetRootHisto(histoName, quietException=True)
-        if isinstance(dsetRootHistoMtData,str):
-            raise Exception (ErrorStyle()+"Error in QCDfactorised/extracting shape:"+NormalStyle()+" cannot find histogram!\n  Message = %s!"%(dsetRootHistoMtData))
+        try:
+            dsetRootHistoMtData = dsetMgr.getDataset(datasetMgrColumn).getDatasetRootHisto(histoName)
+        except Exception, e:
+            raise Exception (ErrorStyle()+"Error in QCDfactorised/extracting shape:"+NormalStyle()+" cannot find histogram!\n  Message = %s!"%(str(e)))
         if dsetRootHistoMtData.isMC():
             dsetRootHistoMtData.normalizeToLuminosity(luminosity)
         h = dsetRootHistoMtData.getHistogram()

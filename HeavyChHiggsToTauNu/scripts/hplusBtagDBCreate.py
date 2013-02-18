@@ -11,9 +11,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters/weighted"
 
-treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup")
+treeDraw = dataset.TreeDraw("tree", weight="weightPileup")
 
 class BTagDBCreator :
     def __init__(self,algo):
@@ -21,10 +20,7 @@ class BTagDBCreator :
 
     def setMultiCrabDir(self, name):
 
-        dirs = []
-        dirs.append(name)
-                
-        datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters)
+        datasets = dataset.getDatasetsFromMulticrabCfg(directory=name, analysisName=analysis)
 	datasets.loadLuminosities()
 
 	plots.mergeRenameReorderForDataMC(datasets)
