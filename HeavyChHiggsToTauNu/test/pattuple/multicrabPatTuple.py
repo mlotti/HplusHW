@@ -110,7 +110,7 @@ datasets = [
 
 
 
-workflow = "pattuple_v44_4"
+workflow = "pattuple_v44_5"
 multicrab.extendDatasets(workflow, datasets)
 
 # local_stage_out doesn't work due to denied permission because we're
