@@ -160,6 +160,9 @@ namespace HPlus {
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
     Count fDeltaPhiTauMETCounter;
+    Count fDeltaPhiVSDeltaPhiMHTJet1CutCounter;
+    Count fDeltaPhiVSDeltaPhiMHTJet2CutCounter;
+    Count fDeltaPhiVSDeltaPhiMHTJet3CutCounter;
     Count fDeltaPtJetTauCounter;
     Count fDeltaPhiLow30Counter;
     Count fDeltaPhiLow60Counter;
@@ -307,6 +310,13 @@ namespace HPlus {
     WrappedTH1 *hTauVsJetTauPtmuAfter;
 
     // MCAnalysis histograms
+    WrappedTH2 *hDeltaPhiMHTTauVsDeltaPhiMHTJet1;
+    WrappedTH2 *hDeltaPhiMHTTauVsDeltaPhiMHTJet2;
+    WrappedTH2 *hDeltaPhiMHTTauVsDeltaPhiMHTJet3;
+    WrappedTH2 *hDeltaPhiVsDeltaPhiMHTJet1;
+    WrappedTH2 *hDeltaPhiVsDeltaPhiMHTJet2;
+    WrappedTH2 *hDeltaPhiVsDeltaPhiMHTJet3;
+    WrappedTH1 *hDeltaPhiMHTJet1;
     WrappedTH1 *hgenWmass;
     WrappedTH1 *hGenMET;
     WrappedTH1 *hdeltaPhiMetGenMet;
