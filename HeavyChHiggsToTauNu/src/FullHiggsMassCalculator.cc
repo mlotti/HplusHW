@@ -160,19 +160,16 @@ hHiggsMassIncorrectId = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "
     return FullHiggsMassCalculator::Data(this, myPassedStatus);
   }
 
-  // I have changed this function from void return type to double return type. It now returns the same value it puts in the
-  // histogram hHiggsMass. This mass value is passed to the function calculateTrueHiggsMass as an argument.
-  // I'm certain that this could be implemented in a better way, so consider this as a temporary solution to be replaced as soon
-  // as I figure out a better way to handle event classification and GEN/RECO comparison. For now I want fast results.
   double FullHiggsMassCalculator::doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool myMatchStatus,  bool doHistogramming) {
     //void FullHiggsMassCalculator::doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool myMatchStatus,  bool doHistogramming) {
-    // Initialise
+    // Initialize // PARTICLE MASSES SHOULD NOT BE HARD CODED HERE LIKE THIS. FIX!
     double fTopMassSolution = -1.0;
     double fNeutrinoZSolution = -1.0;
     double fNeutrinoPtSolution = -1.0;
     double fHiggsMassSolution2 = -1.0;
     const double myTauMass = 1.778;
-    const double myTopMass = 173.4;
+    //const double myTopMass = 173.4;
+    const double myTopMass = 172.5; // use the same as in the generator!!!
     const double myBQuarkMass = 4.19;
     TVector3 myTauPlusBVector = tau + bjet;
     double SolutionMax = -1;
@@ -392,6 +389,7 @@ hHiggsMassIncorrectId = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "
             std::cout << "FullMass: B quark mother = " << myBMother->pdgId() << std::endl;
             if (TMath::Abs(myBMother->pdgId()) == 6) {
               myStatus = false;
+	      // Below is where we check if the b jet comes from the Higgs side top.
               double myDeltaR = ROOT::Math::VectorUtil::DeltaR(myBMother->p4(), myHiggsSideTop->p4());
               if (myDeltaR < 0.01) {
                 myHiggsSideBJet = const_cast<reco::Candidate*>(&p);

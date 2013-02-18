@@ -514,16 +514,16 @@ namespace HPlus {
     increment(fPrimaryVertexCounter);
     //hSelectionFlow->Fill(kSignalOrderVertexSelection);
 
+//------ TauID
+    // Analyse tau fake rate on parton level
+    if (!iEvent.isRealData()) analyseTauFakeRateByParton(iEvent, iSetup, pvData);
+
 //------ Event classification according to whether tau, b-jet, and neutrino coming from top->H+ decay were identified correctly
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
 //     if(!tauData.passedEvent()) return false; // Require at least one tau
 //     std::cout << "Tau found!" << std::endl;
 //     checkIfGenuineTau(iEvent, tauData.getSelectedTau());
 //     //checkIfGenuineTau(iEvent, *(tauData.getSelectedTau()));
-
-//------ TauID
-    // Analyse tau fake rate on parton level
-    if (!iEvent.isRealData()) analyseTauFakeRateByParton(iEvent, iSetup, pvData);
 
     // TauID
     //TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());

@@ -6,6 +6,11 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/Math/interface/deltaR.h"
+#include "Math/GenVector/VectorUtil.h"
+#include "TLorentzVector.h"
+#include "TVector3.h"
+#include "TMath.h"
+
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -27,6 +32,107 @@ namespace HPlus {
 //   // Create folder to hold histograms
 //   TFileDirectory myDir = fs->mkdir("EventClassification");
 
+//------------------------> PUBLIC MEMBER FUNCTIONS <-------------------------
+
+
+
+
+//------------------------> PRIVATE MEMBER FUNCTIONS <------------------------
+
+  size_t getFirstHiggsLine(const edm::Event& iEvent) {
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    // Find the line of the last H+ in the event.
+    size_t myHiggsLine = 0;
+    //int myHiggsLine = 0;
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      if (TMath::Abs(p.pdgId()) == 37) {
+	myHiggsLine = i;
+	break;
+      }
+    }
+    if (!myHiggsLine) return -1;
+    return myHiggsLine;
+    std::cout << "EventClassification: First Higgs line is " << myHiggsLine << std::endl;
+  }
+
+  size_t getLastHiggsLine(const edm::Event& iEvent) {
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    // Find the line of the last H+ in the event.
+    //size_t myHiggsLine = 0;
+    size_t myHiggsLine = 0;
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      if (TMath::Abs(p.pdgId()) == 37) myHiggsLine = i;
+    }
+    if (!myHiggsLine) return -1;
+    return myHiggsLine;
+    std::cout << "EventClassification: Last Higgs line is " << myHiggsLine << std::endl;
+  }
+
+  // IMPORTANT: AS IT IS, THIS FUNCTION GETS THE MOTHER OF THE SECOND HIGGS IN THE EVENT. IF THERE ARE TWO,
+  // THE FUNCTION WILL NOT WORK AS EXPECTED.
+  // Improvement: return HiggsSideTopLine instead of pointer to reco::Candidate
+  reco::Candidate* getHiggsSideTop(const edm::Event& iEvent) {
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    // Get Higgs line.
+    size_t myHiggsLine = getLastHiggsLine(iEvent);
+    // Get Higgs' mother (she must be a million years old...).
+    reco::Candidate* myHiggsSideTop = const_cast<reco::Candidate*>(genParticles->at(myHiggsLine).mother());
+    bool myStatus = true;
+    while (myStatus) {
+      if (!myHiggsSideTop) return NULL;
+      //std::cout << "FullMass: Higgs side mother = " << myHiggsSideTop->pdgId() << std::endl;
+      if (TMath::Abs(myHiggsSideTop->pdgId()) == 6) myStatus = false;
+      if (myStatus) myHiggsSideTop = const_cast<reco::Candidate*>(myHiggsSideTop->mother());
+    }
+    if (!myHiggsSideTop) return NULL;
+    return myHiggsSideTop;
+    std::cout << "EventClassification: First Higgs side top selected!" << std::endl;
+  }
+
+  reco::Candidate* getHiggsSideBJet(const edm::Event& iEvent) {
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    // Look at Higgs side top daughters to find b-jet.    
+    reco::Candidate* myHiggsSideBJet = 0;
+    reco::Candidate* myHiggsSideTop = getHiggsSideTop(iEvent);
+    if (!myHiggsSideTop) return NULL;
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      if (TMath::Abs(p.pdgId()) == 5) {
+	reco::Candidate* myBMother = const_cast<reco::Candidate*>(p.mother());
+        bool myStatus = true;
+        while (myStatus) {
+          if (!myBMother)  myStatus = false;
+          else {
+	    std::cout << "EventClassification: B quark mother = " << myBMother->pdgId() << std::endl;
+            if (TMath::Abs(myBMother->pdgId()) == 6) {
+              myStatus = false;
+              // Below is where we check if the b jet comes from the Higgs side top.   
+	      double myDeltaR = ROOT::Math::VectorUtil::DeltaR(myBMother->p4(), myHiggsSideTop->p4());
+              if (myDeltaR < 0.01) {
+                myHiggsSideBJet = const_cast<reco::Candidate*>(&p);
+                i = genParticles->size(); // to end the enclosing for loop
+              }
+            }
+            if (myStatus)
+              myBMother = const_cast<reco::Candidate*>(myBMother->mother());
+          }
+        }
+      }
+    }
+    if (!myHiggsSideBJet) return NULL;
+    return myHiggsSideBJet;
+    std::cout << "FullMass: Higgs side bjet found, pt=" << myHiggsSideBJet->pt() << ", eta=" << myHiggsSideBJet->eta() << std::endl;
+  }
+
+
+
+//------------------------> OLD MEMBER FUNCTIONS <----------------------------
 
 // tau decay produces neutrino; use visibleTau (1-prong)
   void checkIfGenuineTau(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau) {

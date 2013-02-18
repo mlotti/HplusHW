@@ -28,6 +28,13 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
 
+
+  size_t getFirstHiggsLine(const edm::Event& iEvent);
+  size_t getLastHiggsLine(const edm::Event& iEvent);
+  reco::Candidate* getHiggsSideTop(const edm::Event& iEvent);
+  reco::Candidate* getHiggsSideBJet(const edm::Event& iEvent);
+
+
   void checkIfGenuineTau(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau);
   // Alternative way
   //void checkIfGenuineTau(const edm::Event& iEvent, const reco::Candidate&tau);
