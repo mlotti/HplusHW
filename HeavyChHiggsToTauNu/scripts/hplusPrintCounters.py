@@ -83,7 +83,7 @@ def main(opts):
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options] [crab task dirs]\n\nCRAB task directories can be given either as the last arguments, or with -d.")
     multicrab.addOptions(parser)
-    dataset.addOptions(parser, analysisName="signalAnalysis")
+    dataset.addOptions(parser)
     parser.add_option("--weighted", dest="weighted", default=False, action="store_true",
                       help="Use weighted counters (i.e. adds '/weighted' to the counter directory path)")
     parser.add_option("--mode", "-m", dest="mode", type="string", default="events",
