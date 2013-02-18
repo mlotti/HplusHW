@@ -1637,6 +1637,7 @@ class PlotDrawer:
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
     # \param customizeBeforeDraw Function to customize the plot before drawing it
+    # \param customizeBeforeSave Function to customize the plot before saving it
     # \param addLuminosityText   Should luminosity text be drawn?
     # \param stackMCHistograms   Should MC histograms be stacked?
     # \param addMCUncertainty    Should MC total (stat) uncertainty be drawn()
@@ -1652,6 +1653,7 @@ class PlotDrawer:
                  optsLog={},
                  opts2={},
                  customizeBeforeDraw=None,
+                 customizeBeforeSave=None,
                  addLuminosityText=False,
                  stackMCHistograms=False,
                  addMCUncertainty=False,
@@ -1669,7 +1671,8 @@ class PlotDrawer:
         self.optsLogDefault.update(optsLog)
         self.opts2Default = {"ymin": 0.5, "ymax": 1.5}
         self.opts2Default.update(opts2)
-        self.customizeBeforeDraw = customizeBeforeDraw
+        self.customizeBeforeDrawDefault = customizeBeforeDraw
+        self.customizeBeforeSaveDefault = customizeBeforeSave
         self.addLuminosityTextDefault = addLuminosityText
         self.stackMCHistogramsDefault = stackMCHistograms
         self.addMCUncertainty = addMCUncertainty
@@ -1892,7 +1895,8 @@ class PlotDrawer:
     # <b>Keyword arguments</b>
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
-    # \lu\a customieBeforeDraw  Function to customize the plot object before drawing the plopt
+    # \lu\a customizeBeforeDraw Function to customize the plot object before drawing the plot
+    # \lu\a customizeBeforeSave Function to customize the plot object before saving the plot
     # \li\a cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis (default given in __init__()/setDefaults())
     #
     # In addition of drawing and saving the plot, handles the X and Y
@@ -1906,7 +1910,7 @@ class PlotDrawer:
         p.frame.GetXaxis().SetTitle(xlabel)
         p.frame.GetYaxis().SetTitle(ylab)
 
-        customize = kwargs.get("customizeBeforeDraw", self.customizeBeforeDraw)
+        customize = kwargs.get("customizeBeforeDraw", self.customizeBeforeDrawDefault)
         if customize != None:
             customize(p)
         
@@ -1916,6 +1920,11 @@ class PlotDrawer:
         p.addEnergyText()
         if kwargs.get("addLuminosityText", self.addLuminosityTextDefault):
             p.addLuminosityText()
+
+        customize2 = kwargs.get("customizeBeforeSave", self.customizeBeforeSaveDefault)
+        if customize2 is not None:
+            customize2(p)
+
         p.save()
 
 
