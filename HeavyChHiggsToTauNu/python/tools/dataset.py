@@ -34,17 +34,14 @@ def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
     if "namePostfix" in kwargs:
         raise Exception("'namePostfix' keyword argument not allowed")
 
-    nameList = []
+    datasets = DatasetManager()
     for d in multiDirs:
         if isinstance(d, str):
-            nameList.append( (os.path.join(d, "multicrab.cfg"), "") )
+            dset = getDatasetsFromMulticrabCfg(directory=d, **kwargs)
         else:
-            nameList.append( (os.path.join(d[0], "multicrab.cfg"), d[1]) )
-
-    datasets = DatasetManager()
-    for cfg, postfix in nameList:
-        d = getDatasetsFromMulticrabCfg(cfgfile=cfg, namePostfix=postfix, **kwargs)
+            dset = getDatasetsFromMulticrabCfg(directory=d[0], namePostfix=d[1], **kwargs)
         datasets.extend(d)
+
     return datasets
 
 ## Construct DatasetManager from a multicrab.cfg.
