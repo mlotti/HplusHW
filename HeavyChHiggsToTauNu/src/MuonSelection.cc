@@ -175,21 +175,21 @@ namespace HPlus {
       //int myInnerTrackNTrkHits   = myInnerTrackRef->hitPattern().numberOfValidTrackerHits();
       int myInnerTrackNPixelHits = myInnerTrackRef->hitPattern().numberOfValidPixelHits();
       //int myGlobalTrackNMuonHits  = myGlobalTrackRef->hitPattern().numberOfValidMuonHits(); 
-      int myMatchedSegments = (*iMuon)->numberOfMatches();
+      //int myMatchedSegments = (*iMuon)->numberOfMatches();
       // Note: It is possible for a Global Muon to have zero muon hits. This happens because once the inner and outter tracks used to create
       // global fit to the muon track that covers all of the detector, hits that are incompatible to the new trajectory are removed 
       // (i.e. de-associated from the muon). This is the so called "outlier rejection". 
 
       // 1) Demand that the Muon is both a "GlobalMuon" And a "TrackerMuon"
-      if( (!(*iMuon)->isGlobalMuon()) || (!(*iMuon)->isTrackerMuon()) ) continue;
+      if( (!(*iMuon)->isGlobalMuon()) ) continue;
       bMuonGlobalMuonOrTrkerMuon = true;
 
       // 2) Demand that the selected Muon Identification as defined in the python cfg is satisfied
       // disabled because it is not in the list in the approved objects page
       //if( !((*iMuon)->muonID( fMuonSelection )) ) continue;
       // from 4_4_0 onwards available check for PF muon
-      if (!(*iMuon)->isPFMuon()) continue;
-      bMuonSelection = true;
+      //if (!(*iMuon)->isPFMuon()) continue;
+      //bMuonSelection = true;
 
       // 3) NHits cuts (Trk, Pixel, Muon)
       if (!(myGlobalTrackRef->hitPattern().trackerLayersWithMeasurement() > 8)) continue;
@@ -202,7 +202,7 @@ namespace HPlus {
       if (!(myGlobalTrackRef->hitPattern().numberOfValidMuonHits() > 0)) continue;
 
       // std::cout << "myGlobalTrackNMuonHits = " << myGlobalTrackNMuonHits << std::endl;
-      if(myMatchedSegments < 2) continue;
+      if (!((*iMuon)->numberOfMatchedStations() > 1)) continue;
       bMuonNMuonlHitsCut = true;
 
       // 4) Global Track Chi Square / ndof must be less than 10
