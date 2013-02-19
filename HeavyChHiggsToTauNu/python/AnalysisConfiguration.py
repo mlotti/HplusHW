@@ -58,7 +58,8 @@ class ConfigBuilder:
                  histogramAmbientLevel = "Debug", # Set level of how many histograms are stored to files options are: 'Vital' (least histograms), 'Informative', 'Debug' (all histograms),
                  histogramAmbientLevelOptimization = "Vital",
                  histogramAmbientLevelSystematics = "Systematics",
-                 applyTriggerScaleFactor = True, # Apply trigger scale factor or not
+                 applyTauTriggerScaleFactor = True, # Apply tau trigger scale factor or not
+                 applyMETTriggerScaleFactor = False, # Apply MET trigger scale factor or not
                  applyPUReweight = True, # Apply PU weighting or not
                  tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
                 # tauSelectionOperatingMode = "tauCandidateSelectionOnly",   
@@ -96,7 +97,8 @@ class ConfigBuilder:
         self.doFillTree = doFillTree
         self.histogramAmbientLevel = histogramAmbientLevel
         self.histogramAmbientLevelSystematics = histogramAmbientLevelSystematics
-        self.applyTriggerScaleFactor = applyTriggerScaleFactor
+        self.applyTauTriggerScaleFactor = applyTauTriggerScaleFactor
+        self.applyMETTriggerScaleFactor = applyMETTriggerScaleFactor
         self.applyPUReweight = applyPUReweight
         self.tauSelectionOperatingMode = tauSelectionOperatingMode
         self.doTriggerMatching = doTriggerMatching
@@ -287,7 +289,7 @@ class ConfigBuilder:
 
                 for module, name in zip(modules, analysisNames_):
                     mod = module.clone()
-                    if self.applyTriggerScaleFactor:
+                    if self.applyTauTriggerScaleFactor:
                         param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.tauTriggerEfficiencyScaleFactor)
                     if self.applyPUReweight:
                         param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.pileupWeightReader, era=dataEra)
@@ -487,8 +489,11 @@ class ConfigBuilder:
             param.setJERSmearedJets(self.dataVersion)
 
         # Trigger with scale factors (at the moment hard coded)
-        if self.applyTriggerScaleFactor and self.dataVersion.isMC():
-            param.tauTriggerEfficiencyScaleFactor.mode = "scaleFactor"
+        if self.dataVersion.isMC():
+            if self.applyTauTriggerScaleFactor:
+                param.tauTriggerEfficiencyScaleFactor.mode = "scaleFactor"
+            if self.applyMETTriggerScaleFactor:
+                param.metTriggerEfficiencyScaleFactor.mode = "scaleFactor"
 
         if self.doBTagTree:
             param.tree.fillNonIsoLeptonVars = True
@@ -556,9 +561,12 @@ class ConfigBuilder:
         #print "\nAnalysis is blind:", module.blindAnalysisStatus, "\n"
         print "Histogram level:", module.histogramAmbientLevel.value()
         print "Trigger:", module.trigger
-        print "Trigger scale factor mode:", module.tauTriggerEfficiencyScaleFactor.mode.value()
-        print "Trigger scale factor data:", module.tauTriggerEfficiencyScaleFactor.dataSelect.value()
-        print "Trigger scale factor MC:", module.tauTriggerEfficiencyScaleFactor.mcSelect.value()
+        print "Tau trigger scale factor mode:", module.tauTriggerEfficiencyScaleFactor.mode.value()
+        print "Tau trigger scale factor data:", module.tauTriggerEfficiencyScaleFactor.dataSelect.value()
+        print "Tau trigger scale factor MC:", module.tauTriggerEfficiencyScaleFactor.mcSelect.value()
+        print "MET trigger scale factor mode:", module.metTriggerEfficiencyScaleFactor.mode.value()
+        print "MET trigger scale factor data:", module.metTriggerEfficiencyScaleFactor.dataSelect.value()
+        print "MET trigger scale factor MC:", module.metTriggerEfficiencyScaleFactor.mcSelect.value()
         if hasattr(module, "metFilters"):
             print "MET filters", module.metFilters
         print "VertexWeight data distribution:",module.vertexWeight.dataPUdistribution.value()
