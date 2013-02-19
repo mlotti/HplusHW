@@ -282,34 +282,77 @@ class BRXSDatabaseInterface:
         retGraph.SetLineStyle(3)
         return retGraph
 
-    def mhLimit(self,xVariableName,selection,mhMeasurement):
-        lower_y0,lower_x0 = self.getLimits("tanb",xVariableName,selection+"&&tanb>10",self.lowerLimit(mhMeasurement))
-        upper_y0,upper_x0 = self.getLimits("tanb",xVariableName,selection+"&&tanb>10",self.upperLimit(mhMeasurement))
-
-        lower_x,lower_y = self.getLimits(xVariableName,"tanb",selection,self.lowerLimit(mhMeasurement))
-        upper_x,upper_y = self.getLimits(xVariableName,"tanb",selection,self.upperLimit(mhMeasurement))
+    def mhLimit(self,higgs,xVariableName,selection,mhMeasurement):
 
         x = []
         y = []
+
+        mHpStart = 200
+        upper_x00 = []
+        upper_y00 = []
+        if higgs == "mh":
+            lower_x00,lower_y00 = self.getLimitsLT(higgs,xVariableName,"tanb",selection+"&&tanb>=30&&"+xVariableName+">=%s"%mHpStart,self.lowerLimit(mhMeasurement))
+            upper_x00,upper_y00 = self.getLimitsLT(higgs,xVariableName,"tanb",selection+"&&tanb>=30&&"+xVariableName+">=%s"%mHpStart,self.upperLimit(mhMeasurement))
+
+            for i in range(0,len(lower_x00)):
+                j = len(lower_x00) -1 -i
+                x.append(lower_x00[j])
+                y.append(lower_y00[j])
+
+        tanbStart = 10
+        if higgs == "mH":
+            tanbStart = 1
+        lower_y0,lower_x0 = self.getLimits(higgs,"tanb",xVariableName,selection+"&&tanb>=%s"%tanbStart,self.lowerLimit(mhMeasurement))
+        upper_y0,upper_x0 = self.getLimits(higgs,"tanb",xVariableName,selection+"&&tanb>=%s"%tanbStart,self.upperLimit(mhMeasurement))
+
         for i in range(0,len(lower_x0)):
             j = len(lower_x0) -1 -i
-            x.append(lower_x0[j])
-            y.append(lower_y0[j])
-        
-        for i in range(0,len(lower_x)):
-            if lower_x[i] > lower_x0[0]:
-                x.append(lower_x[i])
-                y.append(lower_y[i])
+            if lower_y0[j] < 30:
+                x.append(lower_x0[j])
+                y.append(lower_y0[j])
+            else:
+                if lower_x0[j] <= mHpStart:
+                    x.append(lower_x0[j])
+                    y.append(lower_y0[j])
+            #print "x,y(lower)",lower_x0[j],lower_y0[j]
 
-        for i in range(0,len(upper_x)):
-            j = len(upper_x) -1 -i
-            if upper_x[j] > upper_x0[0]:
-                x.append(upper_x[j])
-                y.append(upper_y[j])
+#        for i in range(0,len(upper_x0)):
+#            x.append(upper_x0[i])
+#            y.append(upper_y0[i])
+#            print "x,y(upper)",upper_x0[i],upper_y0[i]
+
+        if higgs == "mh":
+            lower_x,lower_y = self.getLimits(higgs,xVariableName,"tanb",selection,self.lowerLimit(mhMeasurement))
+            upper_x,upper_y = self.getLimits(higgs,xVariableName,"tanb",selection,self.upperLimit(mhMeasurement))
+
+            for i in range(0,len(lower_x)):
+                if lower_x[i] > lower_x0[0]:
+                    x.append(lower_x[i])
+                    y.append(lower_y[i])
+                    #print "x,y(lower)",lower_x[i],lower_y[i]
+
+            for i in range(0,len(upper_x)):
+                j = len(upper_x) -1 -i
+                if upper_x[j] > upper_x0[0]:
+                    x.append(upper_x[j])
+                    y.append(upper_y[j])
+                    #print "x,y(upper)",upper_x[j],upper_y[j]
+
         for i in range(0,len(upper_x0)):
-            x.append(upper_x0[i])
-            y.append(upper_y0[i])
+            if len(upper_x00) == 0:
+                x.append(upper_x0[i])
+                y.append(upper_y0[i])
+            else:
+                if upper_x0[i] <= mHpStart or upper_y0[i] < 30:
+                    x.append(upper_x0[i])
+                    y.append(upper_y0[i])
+                    #print "x,y(upper)",upper_x0[i],upper_y0[i]
 
+        if higgs == "mh":
+            for i in range(0,len(upper_x00)):
+                x.append(upper_x00[i])
+                y.append(upper_y00[i])
+                                                
         if len(x) == 0:
             return None
         #for i in range(0,len(x)):
@@ -324,7 +367,7 @@ class BRXSDatabaseInterface:
         retGraph.SetFillStyle(3008)
         return retGraph
 
-    def getLimits(self,xVariableName,yVariableName,selection,limit):
+    def getLimitsLT(self,higgs,xVariableName,yVariableName,selection,limit):
 
         xvalues = self.getValues(xVariableName,selection)
 
@@ -333,13 +376,53 @@ class BRXSDatabaseInterface:
 
         for x in xvalues:
             theSelection = selection+"&&"+self.floatSelection(xVariableName+"==%s"%x)
-            ymin = self.getMinimum("mh",theSelection)
+            ymin = self.getMinimum(higgs,theSelection)
             if limit < ymin:
                 continue
-            ymax = self.getMaximum("mh",theSelection)
+            ymax = self.getMaximum(higgs,theSelection)
             if limit > ymax:
                 continue
-            mh_vals  = self.getValues("mh",theSelection,-1,sort=False)
+            mh_vals  = self.getValues(higgs,theSelection,-1,sort=False)
+            y_vals = self.getValues(yVariableName,theSelection,-1,sort=False)
+
+            ys,mh = self.sort(y_vals,mh_vals)
+            #print "check ys,mh",x,ys,mh
+
+            y = 0
+            for i in range(len(mh)):
+                if self.isEqual(mh[i],limit,0.00001):
+                    y = ys[i]
+                    break
+                if i > 0 and mh[i] < limit:
+                    y = self.linearFunction(limit,mh[i-1],ys[i-1],mh[i],ys[i])
+                    break
+
+            limits_x.append(x)
+            limits_y.append(y)
+
+        return limits_x,limits_y
+            
+    def getLimits(self,higgs,xVariableName,yVariableName,selection,limit):
+
+#        higgs = "mh"
+#        higgs = "mH"
+
+        xvalues = self.getValues(xVariableName,selection)
+
+        limits_x = []
+        limits_y = []
+
+        for x in xvalues:
+            theSelection = selection+"&&"+self.floatSelection(xVariableName+"==%s"%x)
+            ymin = self.getMinimum(higgs,theSelection)
+            #print "check ymin",ymin,higgs,theSelection
+            if limit < ymin:
+                continue
+            ymax = self.getMaximum(higgs,theSelection)
+            #print "check ymax",ymax,higgs,theSelection
+            if limit > ymax:
+                continue
+            mh_vals  = self.getValues(higgs,theSelection,-1,sort=False)
             y_vals = self.getValues(yVariableName,theSelection,-1,sort=False)
 
             ys,mh = self.sort(y_vals,mh_vals)
@@ -356,6 +439,7 @@ class BRXSDatabaseInterface:
             limits_x.append(x)
             limits_y.append(y)
             #print "check limit,x,y",limit,x,y
+        #print "OUT",limits_x,limits_y
         return limits_x,limits_y
 
     def sort(self,x0,y0):
@@ -394,7 +478,7 @@ class BRXSDatabaseInterface:
             value  = float(match.group("value"))
             error1 = float(match.group("error1"))
 #            error2 = float(match.group("error2"))
-        print "mh value,error",value,error1+error2
+        #print "mh value,error",value,error1+error2
         return value,error1+error2 # errors to be added linearly
                                                                                                                             
     def clean(self,graph):
@@ -428,6 +512,7 @@ class BRXSDatabaseInterface:
         retGraph = ROOT.TGraph(len(xs),array('d',xs),array('d',ys))
         return retGraph
         """
+        #print "check getGraph",xVariable,yVariable,selection
         graph = ROOT.TGraph()
         self.tree.Draw(yVariable+":"+xVariable,self.floatSelection(selection))
         graph = ROOT.gPad.GetPrimitive("Graph")
@@ -474,12 +559,15 @@ class BRXSDatabaseInterface:
         return True
     
     def getValues(self,variable,selection,roundValues=0,sort=True):
+        #print "check",variable,selection
         if not self.selection == "" and not selection == "":
             selection = self.selection+"&&"+selection
         values = []
-        graph = self.getGraph("tanb",variable,selection)
+####        graph = self.getGraph("tanb",variable,self.floatSelection(selection))
         if variable == "tanb":
             graph = self.getGraph("mHp",variable,selection)
+        else:
+            graph = self.getGraph("tanb",variable,self.floatSelection(selection))
         for i in range(0,graph.GetN()):
             value = graph.GetY()[i]
             if roundValues >= 0:

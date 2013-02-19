@@ -61,8 +61,10 @@ namespace HPlus {
 
     fTree->Branch("weightPrescale", &fPrescaleWeight);
     fTree->Branch("weightPileup", &fPileupWeight);
-    fTree->Branch("weightTrigger", &fTriggerWeight);
-    fTree->Branch("weightTriggerAbsUnc", &fTriggerWeightAbsUnc);
+    fTree->Branch("weightTauTrigger", &fTauTriggerWeight);
+    fTree->Branch("weightTauTriggerAbsUnc", &fTauTriggerWeightAbsUnc);
+    fTree->Branch("weightMETTrigger", &fMETTriggerWeight);
+    fTree->Branch("weightMETTriggerAbsUnc", &fMETTriggerWeightAbsUnc);
     fTree->Branch("weightBTagging", &fBTaggingWeight);
     fTree->Branch("weightBTaggingAbsUnc", &fBTaggingWeightAbsUnc);
     fTree->Branch("weightAtFill", &fFillWeight);
@@ -663,8 +665,10 @@ namespace HPlus {
 
     fPrescaleWeight = 1.0;
     fPileupWeight = 1.0;
-    fTriggerWeight = 1.0;
-    fTriggerWeightAbsUnc = nan;
+    fTauTriggerWeight = 1.0;
+    fTauTriggerWeightAbsUnc = nan;
+    fMETTriggerWeight = 1.0;
+    fMETTriggerWeightAbsUnc = nan;
     fBTaggingWeight = 1.0;
     fBTaggingWeightAbsUnc = nan;
     fFillWeight = 1.0;
