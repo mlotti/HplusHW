@@ -633,9 +633,10 @@ class TreeDraw:
         option = opt+"goff"
         nentries = tree.Draw(varexp, selection, option)
         if nentries < 0:
-            raise Exception("Error when calling TTree.Draw with\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (treeNAme, varexp, selection, option))
+            raise Exception("Error when calling TTree.Draw with the following parameters for dataset %s, nentries=%d\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (dataset.getName(), nentries, treeName, varexp, selection, option))
         h = tree.GetHistogram()
         if h == None: # need '==' to compare null TH1
+            print >>sys.stderr, "WARNING: TTree.Draw with the following parameters returned null histogram for dataset %s (%d entries)\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (dataset.getName(), nentries, treeName, varexp, selection, option)
             return None
 
         h.SetName(dataset.getName()+"_"+h.GetName())
