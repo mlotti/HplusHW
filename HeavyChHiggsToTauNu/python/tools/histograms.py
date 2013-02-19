@@ -396,15 +396,23 @@ def sumRootHistos(rootHistos, postfix="_sum"):
     return h
 
 def th1Xmin(th1):
+    if th1 is None:
+        return None
     return th1.GetXaxis().GetBinLowEdge(th1.GetXaxis().GetFirst())
 
 def th1Xmax(th1):
+    if th1 is None:
+        return None
     return th1.GetXaxis().GetBinUpEdge(th1.GetXaxis().GetLast())
 
 def th2Ymin(th2):
+    if th2 is None:
+        return None
     return th2.GetYaxis().GetBinLowEdge(th2.GetYaxis().GetFirst())
 
 def th2Ymax(th2):
+    if th2 is None:
+        return None
     return th2.GetYaxis().GetBinUpEdge(th2.GetYaxis().GetLast())
 
 ## Helper function for lessThan/greaterThan argument handling
@@ -932,6 +940,9 @@ class Histo:
     def addToLegend(self, legend):
         if self.legendLabel == None:
             return
+        if self.rootHisto is None:
+            print >>sys.stderr, "WARNING: Trying to add Histo %s to the legend, but rootHisto is None" % self.getName()
+            return
 
         h = self.rootHisto
 
@@ -964,6 +975,9 @@ class Histo:
     #
     # \param opt  Drawing options (in addition to the draw style)
     def draw(self, opt):
+        if self.rootHisto is None:
+            print >>sys.stderr, "WARNING: Trying to draw Histo %s, but rootHisto is None" % self.getName()
+            return
         self.rootHisto.Draw(self.drawStyle+" "+opt)
 
     ## Get the minimum value of the X axis
@@ -983,6 +997,8 @@ class Histo:
 
     ## Get the maximum value of the Y axis
     def getYmax(self):
+        if self.rootHisto is None:
+            return None
         if isinstance(self.rootHisto, ROOT.TH2):
             return th2Ymax(self.rootHisto)
         else:
@@ -990,16 +1006,22 @@ class Histo:
 
     ## Get the X axis title
     def getXtitle(self):
+        if self.rootHisto is None:
+            return None
         return self.rootHisto.GetXaxis().GetTitle()
 
     ## Get the Y axis title
     def getYtitle(self):
+        if self.rootHisto is None:
+            return None
         return self.rootHisto.GetYaxis().GetTitle()
 
     ## Get the width of a bin
     #
     # \param bin  Bin number
     def getBinWidth(self, bin):
+        if self.rootHisto is None:
+            return None
         return self.rootHisto.GetBinWidth(bin)
 
     ## \var rootHisto
@@ -1053,9 +1075,13 @@ class HistoTotalUncertainty(Histo):
         rootHistos = []
         for h in histos:
             if hasattr(h, "getSumRootHisto"):
-                rootHistos.append(h.getSumRootHisto())
+                ret = h.getSumRootHisto()
             else:
-                rootHistos.append(h.getRootHisto())
+                ret = h.getRootHisto()
+            if ret is not None:
+                rootHistos.append(ret)
+        if len(rootHistos) == 0:
+            raise Exception("Got 0 histograms, or all input histograms are None")
 
         tmp = rootHistos[0].Clone()
         tmp.SetDirectory(0)
@@ -1082,7 +1108,9 @@ class HistoStacked(Histo):
         Histo.__init__(self, ROOT.THStack(name+"stackHist", name+"stackHist"), name, None, "HIST")
         self.histos = histos
 
-        rootHistos = [d.getRootHisto() for d in self.histos]
+        rootHistos = filter(lambda h: h is not None, [d.getRootHisto() for d in self.histos])
+        if len(rootHistos) == 0:
+            raise Exception("Got 0 histograms, or all input histograms are None")
         rootHistos.reverse()
         for h in rootHistos:
             self.rootHisto.Add(h)
@@ -1123,13 +1151,17 @@ class HistoStacked(Histo):
             h.call(function)
 
     def getXmin(self):
-        return min([h.getXmin() for h in self.histos])
+        return min(filter(lambda x: x is not None, [h.getXmin() for h in self.histos]))
 
     def getXmax(self):
-        return max([h.getXmax() for h in self.histos])
+        return max(filter(lambda x: x is not None, [h.getXmax() for h in self.histos]))
 
     def getBinWidth(self, bin):
-        return self.histos[0].getBinWidth(bin)
+        for h in self.histos:
+            w = h.getBinWidth(bin)
+            if w is not None:
+                return w
+        return None
 
     ## \var histos
     # List of histograms.Histo objects which are stacked
