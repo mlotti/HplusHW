@@ -1663,8 +1663,8 @@ class PlotDrawer:
         self.logDefault = log
         self.ratioDefault = ratio
         self.ratioYlabelDefault = ratioYlabel
-        self.ratioInvert = ratioInvert
-        self.ratioIsBinomial = ratioIsBinomial
+        self.ratioInvertDefault = ratioInvert
+        self.ratioIsBinomialDefault = ratioIsBinomial
         self.optsDefault = {"ymin": 0, "ymaxfactor": 1.1}
         self.optsDefault.update(opts)
         self.optsLogDefault = {"ymin": 0.01, "ymaxfactor": 2}
@@ -1675,8 +1675,8 @@ class PlotDrawer:
         self.customizeBeforeSaveDefault = customizeBeforeSave
         self.addLuminosityTextDefault = addLuminosityText
         self.stackMCHistogramsDefault = stackMCHistograms
-        self.addMCUncertainty = addMCUncertainty
-        self.cmsText = cmsText
+        self.addMCUncertaintyDefault = addMCUncertainty
+        self.cmsTextDefault = cmsText
 
     ## Modify the defaults
     #
@@ -1776,7 +1776,7 @@ class PlotDrawer:
         stack = kwargs.get("stackMCHistograms", self.stackMCHistogramsDefault)
         if stack:
             p.stackMCHistograms()
-            if kwargs.get("addMCUncertainty", self.addMCUncertainty):
+            if kwargs.get("addMCUncertainty", self.addMCUncertaintyDefault):
                 p.addMCUncertainty()
 
     ## Stack MC histograms
@@ -1817,9 +1817,9 @@ class PlotDrawer:
         ratio = kwargs.get("ratio", self.ratioDefault)
         if ratio:
             args["createRatio"] = True
-        if kwargs.get("ratioInvert", self.ratioInvert):
+        if kwargs.get("ratioInvert", self.ratioInvertDefault):
             args["invertRatio"] = True
-        if kwargs.get("ratioIsBinomial", self.ratioIsBinomial):
+        if kwargs.get("ratioIsBinomial", self.ratioIsBinomialDefault):
             args["ratioIsBinomial"] = True
 
         # Create frame
@@ -1915,7 +1915,7 @@ class PlotDrawer:
             customize(p)
         
         p.draw()
-        cmsText = kwargs.get("cmsText", self.cmsText)
+        cmsText = kwargs.get("cmsText", self.cmsTextDefault)
         histograms.addCmsPreliminaryText(text=cmsText)
         p.addEnergyText()
         if kwargs.get("addLuminosityText", self.addLuminosityTextDefault):
