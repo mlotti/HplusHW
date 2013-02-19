@@ -459,6 +459,47 @@ def mergeWHandHH(datasetMgr):
         if signalWH in names and signalHH in names:
             datasetMgr.merge(target, [signalWH, signalHH])
 
+
+def replaceLightHplusWithSignalPlusBackground(datasetMgr, backgroundsWithoutTT=None):
+    if backgroundsWithoutTT is None:
+        backgroundsWithoutTT=["WJets", "DYJetsToLL", "SingleTop", "Diboson", "QCD"]
+
+    signalDatasetNames = filter(lambda name: "TTToHplus_M" in name, datasetMgr.getAllDatasetNames())
+    if len(signalDatasetNames) == 0:
+        raise Exception("Did not find any light H+ signal dataset (containing 'TTToHplus_M' string), maybe something is wrong in your datasets? List of available datasets: %s" % ", ".join(datasetMgr.getAllDatasetNames()))
+
+    def extractBR(dset):
+        try:
+            tmp = dset.getProperty("BRtH")
+        except KeyError:
+            raise Exception("Did not find propery 'BRtH' from signal datasets %s, did you run crosssection.setHplusCrossSectionsTo*() function?" % dset.getName())
+        return (tmp, dset.getName())
+
+    BRtH = None
+    for name in signalDatasetNames:
+        d = datasetMgr.getDataset(name)
+        lst = d.forEach(extractBR)
+        for br, rawname in lst:
+            if BRtH is None:
+                BRtH = br
+            else:
+                if abs(br-BRtH)/max(abs(br), abs(BRtH)) > 0.001:
+                    raise Exception("There are signal datasets with different BR(t->H+), got %f in %s, was before %f" % (br, rawname, BRtH))
+
+    ttjets2 = datasetMgr.getDataset("TTJets").deepCopy()
+    ttjets2.setName("TTJetsScaledByBR")
+    scaledXsect = (1-BRtH)*(1-BRtH) * ttjets2.getCrossSection()
+    ttjets2.setCrossSection(scaledXsect)
+    print "Setting TTJetsScaledByBR cross section to %f pb (scaled with BR(t->H+)=%f" % (scaledXsect, BRtH)
+
+    datasetMgr.append(ttjets2)
+    datasetMgr.merge("BkgNoTT", backgroundsWithoutTT, keepSources=True)
+    for name in signalDatasetNames:
+        isLast = (name == signalDatasetNames[-1])
+        datasetMgr.merge(name, [name, "BkgNoTT","TTJetsScaledByBR"], keepSources=not isLast)
+        _legendLabels[name] = "with H^{+}#rightarrow#tau^{+}#nu"
+
+
 def replaceQCDFromData(datasetMgr, datasetQCDdata):
     names = datasetMgr.getAllDatasetNames()
     index = names.index("QCD")
