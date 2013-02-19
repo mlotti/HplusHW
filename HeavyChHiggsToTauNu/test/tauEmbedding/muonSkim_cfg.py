@@ -4,14 +4,14 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 import FWCore.ParameterSet.VarParsing as VarParsing
 
 dataVersion = "44XmcS6"
-#dataVersion = "42Xdata"g
+#dataVersion = "42Xdata"
 
 options = getOptions()
 if options.dataVersion != "":
     dataVersion = options.dataVersion
-# ALWAYS run PAT, and trigger also MC
+# ALWAYS run PAT
 options.doPat=1
-options.triggerMC = 1
+#options.triggerMC = 1
 
 print "Assuming data is ", dataVersion
 dataVersion = DataVersion(dataVersion) # convert string to object
@@ -48,7 +48,8 @@ del process.TFileService
 # Output module
 process.out = cms.OutputModule("PoolOutputModule",
     SelectEvents = cms.untracked.PSet(
-        SelectEvents = cms.vstring("path")
+        SelectEvents = cms.vstring(),
+#        SelectEvents = cms.vstring("path")
 #        SelectEvents = cms.vstring("PFlowMuonsPath", "PFlowChsMuonsPath")
     ),
     fileName = cms.untracked.string('skim.root'),
@@ -140,26 +141,38 @@ process.out.outputCommands.extend([
 ])
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF as muonSelection
+# Preselection to not run PAT if no reco::Muon with high-enough pt is
+# found (especially when running non-triggered)
+process.muonPreSelectionSequence = muonSelection.addMuonPreSelectionForEmbedding(process)
+process.eventPreSelection *= process.muonPreSelectionSequence
+additionalCounters.extend(muonSelection.getMuonPreSelectionCountersForEmbedding())
+
+# Real muon selection
 process.muonSelectionSequence = muonSelection.addMuonSelectionForEmbedding(process)
-process.path = cms.Path(
-    process.commonSequence *
-    process.muonSelectionSequence
-)
+#process.path = cms.Path(
+#    process.commonSequence *
+#    process.muonSelectionSequence
+#)
 
 # CHS jets + JER, JES variations
 jetSelectionModules = [process.goodJets, process.goodJetFilter, process.muonSelectionJets]
 for m in jetSelectionModules:
     process.muonSelectionSequence.remove(m)
-    process.path *= m
+#    process.path *= m
 
 jetCollections = [
+    ("",        "selectedPatJets"),
+]
+if dataVersion.isMC():
+    jetCollections.extend([
     ("Smeared", "smearedPatJets"),
     ("ResDown", "smearedPatJetsResDown"),
     ("ResUp",   "smearedPatJetsResUp"),
     ("EnDown",  "shiftedPatJetsEnDownForCorrMEt"),
     ("EnUp",    "shiftedPatJetsEnUpForCorrMEt"),
-    ]
-for jetPostfix in ["", "Chs"]:
+    ])
+jetPostfixes = ["", "Chs"]
+for jetPostfix in jetPostfixes:
     for collPostfix, src in jetCollections:
         postfix = collPostfix+jetPostfix
         path = cms.Path(
@@ -188,6 +201,7 @@ for jetPostfix in ["", "Chs"]:
         name = "muonSelectionJets"+postfix
         setattr(process, name, m)
         path *= m
+additionalCounters.extend(muonSelection.getMuonSelectionCountersForEmbedding(dataVersion, jetPostfixes))
 
 
 # For PF2PAT
@@ -206,8 +220,14 @@ process.endPath = cms.EndPath(
     process.out
 )
 
-#process.counters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-#    printMainCounter = cms.untracked.bool(True),
-#    printAvailableCounters = cms.untracked.bool(True),
-#)
-#process.path *= process.counters
+if options.runOnCrab == 0:
+    process.counters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
+        printMainCounter = cms.untracked.bool(True),
+#        printAvailableCounters = cms.untracked.bool(True),
+        counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
+    )
+    process.endPath *= process.counters
+
+#f = open("configDumpSkim.py", "w")
+#f.write(process.dumpPython())
+#f.close()
