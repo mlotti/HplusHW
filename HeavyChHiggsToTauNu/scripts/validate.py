@@ -3,7 +3,7 @@
 import sys
 import os
 import ROOT
-
+from optparse import OptionParser
 from datetime import date, time, datetime
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
@@ -313,7 +313,7 @@ def setCanvasDefinitions(canvas):
     myplotpad.SetTopMargin(0.065)
     myplotpad.SetBottomMargin(0.0)
 
-def validateHistograms(mydir,histoDir,dataset1,dataset2):
+def validateHistograms(mydir,dataset1,dataset2):
     mysubdir = mydir+"/"+dataset1.getName()
     if not os.path.exists(mysubdir):
         os.mkdir(mysubdir)
@@ -328,10 +328,10 @@ def validateHistograms(mydir,histoDir,dataset1,dataset2):
     # entry syntax: histogram_name_with_path, bin_width, linear/log
     histolist = [
         ["Primary vertices", [
-            [histoDir+"/Vertices/verticesBeforeWeight", 1, "log"],
-            [histoDir+"/Vertices/verticesAfterWeight", 1, "log"],
-            [histoDir+"/Vertices/verticesTriggeredBeforeWeight", 1, "log"],
-            [histoDir+"/Vertices/verticesTriggeredAfterWeight", 1, "log"],
+            ["signalAnalysis/Vertices/verticesBeforeWeight", 1, "log"],
+            ["signalAnalysis/Vertices/verticesAfterWeight", 1, "log"],
+            ["signalAnalysis/Vertices/verticesTriggeredBeforeWeight", 1, "log"],
+            ["signalAnalysis/Vertices/verticesTriggeredAfterWeight", 1, "log"],
         ]],
         ["Trigger matched tau collection", [
             [["signalAnalysis/tauID/N_TriggerMatchedTaus","signalAnalysis/TauSelection/N_TriggerMatchedTaus"], 1, "log"],
@@ -371,10 +371,10 @@ def validateHistograms(mydir,histoDir,dataset1,dataset2):
             [["signalAnalysis/FakeTauIdentifier/ElectronOrigin","signalAnalysis/FakeTauIdentifier_TauID/ElectronOrigin"], 1, "log"],
         ]],
         ["Tau after tau ID", [
-            [histoDir+"/SelectedTau/SelectedTau_pT_AfterTauID", 5, "log"],
-            [histoDir+"/SelectedTau/SelectedTau_eta_AfterTauID", 0.1, "log"],
-            [histoDir+"/SelectedTau/SelectedTau_phi_AfterTauID", 3.14159265 / 36, "log"],
-            [histoDir+"/SelectedTau/SelectedTau_Rtau_AfterTauID", 0.05, "log"],
+            ["signalAnalysis/SelectedTau/SelectedTau_pT_AfterTauID", 5, "log"],
+            ["signalAnalysis/SelectedTau/SelectedTau_eta_AfterTauID", 0.1, "log"],
+            ["signalAnalysis/SelectedTau/SelectedTau_phi_AfterTauID", 3.14159265 / 36, "log"],
+            ["signalAnalysis/SelectedTau/SelectedTau_Rtau_AfterTauID", 0.05, "log"],
         ]],
         ["Tau after all cuts", [
             ["signalAnalysis/SelectedTau/SelectedTau_pT_AfterCuts", 10, "log"],
@@ -384,71 +384,71 @@ def validateHistograms(mydir,histoDir,dataset1,dataset2):
             [["signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_eta_AfterCuts","signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_eta_AfterCuts"], 0.2, "log"],
         ]],
         ["Electrons", [
-            [histoDir+"/GlobalElectronVeto/GlobalElectronPt", 5, "log"],
-            [histoDir+"/GlobalElectronVeto/GlobalElectronEta", 0.1, "log"]
+            ["signalAnalysis/GlobalElectronVeto/GlobalElectronPt", 5, "log"],
+            ["signalAnalysis/GlobalElectronVeto/GlobalElectronEta", 0.1, "log"]
         ]],
         ["Muons", [
-            [histoDir+"/GlobalMuonVeto/GlobalMuonPt", 5, "log"],
-            [histoDir+"/GlobalMuonVeto/GlobalMuonEta", 0.1, "log"]
+            ["signalAnalysis/GlobalMuonVeto/GlobalMuonPt", 5, "log"],
+            ["signalAnalysis/GlobalMuonVeto/GlobalMuonEta", 0.1, "log"]
         ]],
         ["All jets", [
-            [histoDir+"/JetSelection/jet_pt", 10, "log"],
-            [histoDir+"/JetSelection/jet_pt_central", 5, "log"],
-            [histoDir+"/JetSelection/jet_eta", 0.2, "log"],
-            [histoDir+"/JetSelection/jet_phi", 3.14159265 / 36, "log"],
-            [histoDir+"/JetSelection/jetEMFraction", 0.05, "log"],
-            [histoDir+"/JetSelection/firstJet_pt", 10, "log"],
-            [histoDir+"/JetSelection/firstJet_eta", 0.2, "log"],
-            [histoDir+"/JetSelection/firstJet_phi", 3.14159265 / 36, "log"],
-            [histoDir+"/JetSelection/secondJet_pt", 10, "log"],
-            [histoDir+"/JetSelection/secondJet_eta", 0.2, "log"],
-            [histoDir+"/JetSelection/secondJet_phi", 3.14159265 / 36, "log"],
-            [histoDir+"/JetSelection/thirdJet_pt", 10, "log"],
-            [histoDir+"/JetSelection/thirdJet_eta", 0.2, "log"],
-            [histoDir+"/JetSelection/thirdJet_phi", 3.14159265 / 36, "log"],
+            ["signalAnalysis/JetSelection/jet_pt", 10, "log"],
+            ["signalAnalysis/JetSelection/jet_pt_central", 5, "log"],
+            ["signalAnalysis/JetSelection/jet_eta", 0.2, "log"],
+            ["signalAnalysis/JetSelection/jet_phi", 3.14159265 / 36, "log"],
+            ["signalAnalysis/JetSelection/jetEMFraction", 0.05, "log"],
+            ["signalAnalysis/JetSelection/firstJet_pt", 10, "log"],
+            ["signalAnalysis/JetSelection/firstJet_eta", 0.2, "log"],
+            ["signalAnalysis/JetSelection/firstJet_phi", 3.14159265 / 36, "log"],
+            ["signalAnalysis/JetSelection/secondJet_pt", 10, "log"],
+            ["signalAnalysis/JetSelection/secondJet_eta", 0.2, "log"],
+            ["signalAnalysis/JetSelection/secondJet_phi", 3.14159265 / 36, "log"],
+            ["signalAnalysis/JetSelection/thirdJet_pt", 10, "log"],
+            ["signalAnalysis/JetSelection/thirdJet_eta", 0.2, "log"],
+            ["signalAnalysis/JetSelection/thirdJet_phi", 3.14159265 / 36, "log"],
         ]],
         ["Selected jets", [
-            [histoDir+"/JetSelection/NumberOfSelectedJets", 10, "log"],
-            [histoDir+"/JetSelection/SelectedJets/jet_pt", 5, "log"],
-            [histoDir+"/JetSelection/SelectedJets/jet_eta", 0.2, "log"],
-            [histoDir+"/JetSelection/SelectedJets/jet_phi", 3.14159265 / 36, "log"],
-            [histoDir+"/JetSelection/SelectedJets/jet_NeutralEmEnergyFraction", 0.05, "log"],
-            [histoDir+"/JetSelection/SelectedJets/jet_NeutralHadronFraction", 0.05, "log"],
-            [histoDir+"/JetSelection/SelectedJets/jet_NeutralHadronMultiplicity", 1, "log"],
-            [histoDir+"/JetSelection/SelectedJets/jet_PhotonEnergyFraction", 0.05, "log"],
-            [histoDir+"/JetSelection/SelectedJets/jet_PhotonMultiplicity", 1, "log"],
-            [histoDir+"/JetSelection/SelectedJets/jet_ChargedHadronEnergyFraction", 0.05, "log"],
-            [histoDir+"/JetSelection/SelectedJets/jet_ChargedMultiplicity", 1, "log"],
-            [histoDir+"/JetSelection/SelectedJets/jet_PartonFlavour", 1, "log"],
+            ["signalAnalysis/JetSelection/NumberOfSelectedJets", 10, "log"],
+            ["signalAnalysis/JetSelection/SelectedJets/jet_pt", 5, "log"],
+            ["signalAnalysis/JetSelection/SelectedJets/jet_eta", 0.2, "log"],
+            ["signalAnalysis/JetSelection/SelectedJets/jet_phi", 3.14159265 / 36, "log"],
+            ["signalAnalysis/JetSelection/SelectedJets/jet_NeutralEmEnergyFraction", 0.05, "log"],
+            ["signalAnalysis/JetSelection/SelectedJets/jet_NeutralHadronFraction", 0.05, "log"],
+            ["signalAnalysis/JetSelection/SelectedJets/jet_NeutralHadronMultiplicity", 1, "log"],
+            ["signalAnalysis/JetSelection/SelectedJets/jet_PhotonEnergyFraction", 0.05, "log"],
+            ["signalAnalysis/JetSelection/SelectedJets/jet_PhotonMultiplicity", 1, "log"],
+            ["signalAnalysis/JetSelection/SelectedJets/jet_ChargedHadronEnergyFraction", 0.05, "log"],
+            ["signalAnalysis/JetSelection/SelectedJets/jet_ChargedMultiplicity", 1, "log"],
+            ["signalAnalysis/JetSelection/SelectedJets/jet_PartonFlavour", 1, "log"],
         ]],
         ["Excluded jets, i.e. jets with DeltaR(jet, tau) < 0.5", [
-            [histoDir+"/JetSelection/ExcludedJets/jet_pt", 10, "log"],
-            [histoDir+"/JetSelection/ExcludedJets/jet_eta", 0.2, "log"],
-            [histoDir+"/JetSelection/ExcludedJets/jet_phi", 3.14159265 / 36, "log"],
-            [histoDir+"/JetSelection/ExcludedJets/jet_NeutralEmEnergyFraction", 0.05, "log"],
-            [histoDir+"/JetSelection/ExcludedJets/jet_NeutralHadronFraction", 0.05, "log"],
-            [histoDir+"/JetSelection/ExcludedJets/jet_NeutralHadronMultiplicity", 1, "log"],
-            [histoDir+"/JetSelection/ExcludedJets/jet_PhotonEnergyFraction", 0.05, "log"],
-            [histoDir+"/JetSelection/ExcludedJets/jet_PhotonMultiplicity", 1, "log"],
-            [histoDir+"/JetSelection/ExcludedJets/jet_ChargedHadronEnergyFraction", 0.05, "log"],
-            [histoDir+"/JetSelection/ExcludedJets/jet_ChargedMultiplicity", 1, "log"],
-            [histoDir+"/JetSelection/ExcludedJets/jet_PartonFlavour", 1, "log"],
+            ["signalAnalysis/JetSelection/ExcludedJets/jet_pt", 10, "log"],
+            ["signalAnalysis/JetSelection/ExcludedJets/jet_eta", 0.2, "log"],
+            ["signalAnalysis/JetSelection/ExcludedJets/jet_phi", 3.14159265 / 36, "log"],
+            ["signalAnalysis/JetSelection/ExcludedJets/jet_NeutralEmEnergyFraction", 0.05, "log"],
+            ["signalAnalysis/JetSelection/ExcludedJets/jet_NeutralHadronFraction", 0.05, "log"],
+            ["signalAnalysis/JetSelection/ExcludedJets/jet_NeutralHadronMultiplicity", 1, "log"],
+            ["signalAnalysis/JetSelection/ExcludedJets/jet_PhotonEnergyFraction", 0.05, "log"],
+            ["signalAnalysis/JetSelection/ExcludedJets/jet_PhotonMultiplicity", 1, "log"],
+            ["signalAnalysis/JetSelection/ExcludedJets/jet_ChargedHadronEnergyFraction", 0.05, "log"],
+            ["signalAnalysis/JetSelection/ExcludedJets/jet_ChargedMultiplicity", 1, "log"],
+            ["signalAnalysis/JetSelection/ExcludedJets/jet_PartonFlavour", 1, "log"],
         ]],
         ["MET", [
-            [histoDir+"/MET/met", 20, "log"],
-            [histoDir+"/MET/metSignif", 5, "log"],
-            [histoDir+"/MET/metSumEt", 20, "log"],
+            ["signalAnalysis/MET/met", 20, "log"],
+            ["signalAnalysis/MET/metSignif", 5, "log"],
+            ["signalAnalysis/MET/metSumEt", 20, "log"],
         ]],
         ["b-jet tagging", [
-            [histoDir+"/Btagging/NumberOfBtaggedJets", 1, "log"],
-            [histoDir+"/Btagging/jet_bdiscriminator", 0.1, "log"],
-            [histoDir+"/Btagging/bjet_pt", 10, "log"],
-            [histoDir+"/Btagging/bjet_eta", 0.2, "log"],
-            [histoDir+"/Btagging/bjet1_pt", 20, "log"],
-            [histoDir+"/Btagging/bjet1_eta", 0.2, "log"],
-            [histoDir+"/Btagging/bjet2_pt", 20, "log"],
-            [histoDir+"/Btagging/bjet2_eta", 0.2, "log"],
-            [histoDir+"/Btagging/MCMatchForPassedJets", 1, "log"],
+            ["signalAnalysis/Btagging/NumberOfBtaggedJets", 1, "log"],
+            ["signalAnalysis/Btagging/jet_bdiscriminator", 0.1, "log"],
+            ["signalAnalysis/Btagging/bjet_pt", 10, "log"],
+            ["signalAnalysis/Btagging/bjet_eta", 0.2, "log"],
+            ["signalAnalysis/Btagging/bjet1_pt", 20, "log"],
+            ["signalAnalysis/Btagging/bjet1_eta", 0.2, "log"],
+            ["signalAnalysis/Btagging/bjet2_pt", 20, "log"],
+            ["signalAnalysis/Btagging/bjet2_eta", 0.2, "log"],
+            ["signalAnalysis/Btagging/MCMatchForPassedJets", 1, "log"],
         ]],
         ["Transverse mass", [
             ["signalAnalysis/deltaPhi", 10, "linear"],
@@ -457,7 +457,7 @@ def validateHistograms(mydir,histoDir,dataset1,dataset2):
         ]]
     ]
     if debugstatus:
-        histolist = [["Primary vertices", [[histoDir+"/Vertices/verticesBeforeWeight", 1, "log"],[histoDir+"/TauSelection/N_TriggerMatchedTaus", 1, "log"]]]]
+        histolist = [["Primary vertices", [["signalAnalysis/Vertices/verticesBeforeWeight", 1, "log"],["signalAnalysis/tauID/N_TriggerMatchedTaus", 1, "log"]]]]
 
     mycolumns = 2
     myscale = 200.0 / float(mycolumns)
@@ -662,30 +662,13 @@ def makehtml(mydir, myoutput):
     myfile.write(myhtmlfooter)
     myfile.close()
 
-def main(argv):
-    if not len(sys.argv) == 4:
-        print "\n"
-        print "### Usage:   EventCounterValidation.py <ref multi-crab path> <new multi-crab path> era\n"
-        print "\n"
-        sys.exit()
+def main(opts,era,analysisType=None):
 
-    referenceData = sys.argv[1]
-    validateData  = sys.argv[2]
-    era           = sys.argv[3]
+    referenceData = opts.reference
+    validateData  = opts.test
 
     oldCounters = "signalAnalysisCounters"
     newCounters = "signalAnalysis/counters"
-    era = "Run2011A"
-    #newCounters = "signalAnalysisData2011A/counters"
-
-    oldCounters = "signalAnalysisCounters"
-    newCounters = "signalAnalysis/counters"
-    era = "Run2011A"
-    #newCounters = "signalAnalysisData2011A/counters"
-
-    oldCounters = "signalAnalysisCounters"
-    newCounters = "signalAnalysis/counters"
-    era = "Run2011A"
     #newCounters = "signalAnalysisData2011A/counters"
 
     mytimestamp = datetime.now().strftime("%d%m%y_%H%M%S")
@@ -697,32 +680,39 @@ def main(argv):
 
     myoutput = ""
 
-    histoDir = "signalAnalysis"+era
-    counterDir = histoDir+"/counters"
-
     print "Running script EventCounterValidation.py on"
     print
     print "          reference datasets = ",referenceData
-    print "          validated datasets = ",validateData
+    print "    datasets to be validated = ",validateData
     print
-    print "          era = ",era
-    print "          counter dir = ",counterDir
-    print
-
-
 
     ROOT.gROOT.SetBatch() # no flashing canvases
 
-    myoutput += "<b>Shell command that was run:</b>"
-    for arg in argv:
-         myoutput += " "+arg
+    #myoutput += "<b>Shell command that was run:</b>"
     myoutput += "<br><br>\n"
     myoutput += "<b>Reference multicrab directory:</b> "+referenceData+"<br>\n"
-    myoutput += "<b>New multicrab directory to be validated:</b> "+validateData+"<br><br>\n"
-    myoutput += "<b>Era: "+era+"</b><br>\n<hr><br>\n"
+    myoutput += "<b>New multicrab directory to be validated:</b> "+validateData+"<br>\n<hr><br>\n"
 
-    refDatasetNames = getDatasetNames(referenceData,counters=oldCounters,era=era,legacy=True)
-    valDatasetNames = getDatasetNames(validateData,counters=newCounters,era=era)
+    tmpRefDatasetNames = []
+    if opts.oldreference:
+        tmpRefDatasetNames = getDatasetNames(referenceData,counters=oldCounters,era=era,legacy=True)
+    else:
+        tmpRefDatasetNames = getDatasetNames(referenceData,counters=newCounters,era=era,legacy=False)
+    tmpValDatasetNames = getDatasetNames(validateData,counters=newCounters,era=era)
+
+    # Find matching names
+    refDatasetNames = []
+    valDatasetNames = []
+    if opts.dirs == None:
+        print "Warning: you are producing plots for %d datasets! Pick with -d those you like if you want less"%len(tmpRefDatasetNames)
+        refDatasetNames = tmpRefDatasetNames
+        valDatasetNames = tmpValDatasetNames
+    else:
+        for name in opts.dirs:
+            if name in tmpRefDatasetNames:
+                refDatasetNames.append(name)
+            if name in tmpValDatasetNames:
+                valDatasetNames.append(name)
 
     datasetNames = validateDatasetExistence(refDatasetNames,valDatasetNames)
     myoutput += "<h3><a name=maintop>List of datasets analysed:</a></h3><br>\n"
@@ -733,17 +723,53 @@ def main(argv):
         print "\n\n"
         print datasetname
         myoutput += "<h2><a name=dataset_"+datasetname+">Dataset: "+datasetname+"</a></h2><br>\n"
-        refDatasets = dataset.getDatasetsFromCrabDirs([referenceData+"/"+datasetname],counters=oldCounters)
+        refDatasets = []
+        if opts.oldreference:
+            refDatasets = dataset.getDatasetsFromCrabDirs([referenceData+"/"+datasetname],counters=oldCounters)
+        else:
+            refDatasets = dataset.getDatasetsFromCrabDirs([referenceData+"/"+datasetname],counters=newCounters,dataEra=era)
         valDatasets = dataset.getDatasetsFromCrabDirs([validateData+"/"+datasetname],counters=newCounters,dataEra=era)
 
         myoutput += validateCounters(refDatasets,valDatasets)
-        myoutput += validateHistograms(mydir,histoDir,refDatasets.getDataset(datasetname),valDatasets.getDataset(datasetname))
+        myoutput += validateHistograms(mydir,refDatasets.getDataset(datasetname),valDatasets.getDataset(datasetname))
         myoutput += "<hr><br>\n"
 
     print "\nResults saved into directory:",mydir
     print "To view html version, use link "+mydir+"/index.html"
     makehtml(mydir,myoutput)
 
-main(sys.argv[1:])
+if __name__ == "__main__":
+
+    parser = OptionParser(usage="Usage: %prog [options]")
+    parser.add_option("--ref", dest="reference", action="store", help="reference multicrab directory")
+    parser.add_option("--oldref", dest="oldreference", action="store_true", help="use this flag if the reference is using signalAnalysisCounters")
+    parser.add_option("--test", dest="test", action="store", help="multicrab directory to be tested/validated")
+    parser.add_option("-d", dest="dirs", action="append", help="name of sample directory inside multicrab dir (multiple directories can be specified with multiple -d arguments)")
+    parser.add_option("-v", dest="variation", action="append", help="name of variation")
+    parser.add_option("-e", dest="era", action="append", help="name of era")
+    parser.add_option("-t", dest="type", action="append", help="name of analysis type")
+    (opts, args) = parser.parse_args()
+
+    # Check that proper arguments were given
+    mystatus = True
+    if opts.reference == None:
+        print "Missing reference multicrab directory!\n"
+        mystatus = False
+    if opts.test == None:
+        print "Missing multicrab directory for testing/validation!\n"
+        mystatus = False
+    if opts.dirs == None:
+        print "Missing source for sample directories!\n"
+        mystatus = False
+    if opts.era == None:
+        print "Missing specification for era!\n"
+        mystatus = False
+    if not mystatus:
+        parser.print_help()
+        sys.exit()
+
+    # Arguments are ok, proceed to run
+    for e in opts.era:
+        main(opts,e)
 
 

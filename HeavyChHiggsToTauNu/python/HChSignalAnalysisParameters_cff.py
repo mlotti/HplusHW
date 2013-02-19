@@ -65,7 +65,8 @@ metFilters = cms.untracked.PSet(
 )
 
 primaryVertexSelection = cms.untracked.PSet(
-    src = cms.untracked.InputTag("selectedPrimaryVertex"),
+    selectedSrc = cms.untracked.InputTag("selectedPrimaryVertex"),
+    allSrc = cms.untracked.InputTag("offlinePrimaryVertices"),
     enabled = cms.untracked.bool(True)
 )
 
@@ -189,7 +190,7 @@ fakeTauSFandSystematicsAgainstElectronMVA = fakeTauSFandSystematicsBase.clone(
 )
 
 fakeTauSFandSystematics = None
-if tauSelection.againstElectronDiscriminator.value() == "againstElectronMedim":
+if tauSelection.againstElectronDiscriminator.value() == "againstElectronMedium":
     fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMedium
 elif tauSelection.againstElectronDiscriminator.value() == "againstElectronMVA":
     fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMVA
@@ -208,7 +209,7 @@ jetSelectionBase = cms.untracked.PSet(
     # Jet ID cuts
     jetIdMaxNeutralHadronEnergyFraction = cms.untracked.double(0.99),
     jetIdMaxNeutralEMEnergyFraction = cms.untracked.double(0.99),
-    jetIdMinNumberOfDaughters = cms.untracked.uint32(2),
+    jetIdMinNumberOfDaughters = cms.untracked.uint32(1),
     jetIdMinChargedHadronEnergyFraction = cms.untracked.double(0.0),
     jetIdMinChargedMultiplicity = cms.untracked.uint32(0),
     jetIdMaxChargedEMEnergyFraction = cms.untracked.double(0.99),
@@ -292,42 +293,32 @@ EvtTopology = cms.untracked.PSet(
     #discriminator = cms.untracked.string("test"),
     #discriminatorCut = cms.untracked.double(0.0),
     #alphaT = cms.untracked.double(-5.00)
-    alphaT = cms.untracked.double(-5.0)
+    alphaT = cms.untracked.double(-5.0),
+    sphericity = cms.untracked.double(-5.0),
+    aplanarity = cms.untracked.double(-5.0),
+    planarity = cms.untracked.double(-5.0),
+    circularity = cms.untracked.double(-5.0)
 )
 
-GlobalElectronVeto = cms.untracked.PSet(
+ElectronSelection = cms.untracked.PSet(
+    genParticleSrc = cms.untracked.InputTag("genParticles"),
     ElectronCollectionName = cms.untracked.InputTag("selectedPatElectrons"),
     conversionSrc = cms.untracked.InputTag("allConversions"),
     beamspotSrc = cms.untracked.InputTag("offlineBeamSpot"),
     rhoSrc = cms.untracked.InputTag("kt6PFJetsForEleIso", "rho"),
-    ElectronSelection = cms.untracked.string("VETO"), # was simpleEleId95relIso
+    ElectronSelectionVeto = cms.untracked.string("VETO"),
+    ElectronSelectionTight = cms.untracked.string("TIGHT"),
+    ElectronSelectionMedium = cms.untracked.string("MEDIUM"),
     ElectronPtCut = cms.untracked.double(15.0),
     ElectronEtaCut = cms.untracked.double(2.5)
 )
 
-NonIsolatedElectronVeto = cms.untracked.PSet(
-    ElectronCollectionName = cms.untracked.InputTag("selectedPatElectrons"),
-    ElectronSelection = cms.untracked.string("simpleEleId60relIso"),
-    ElectronPtCut = cms.untracked.double(10.0),
-    ElectronEtaCut = cms.untracked.double(2.5)
-)
-
-GlobalMuonVeto = cms.untracked.PSet(
+MuonSelection = cms.untracked.PSet(
+    genParticleSrc = cms.untracked.InputTag("genParticles"),
     MuonCollectionName = cms.untracked.InputTag("selectedPatMuons"),
-    MuonSelection = cms.untracked.string("GlobalMuonPromptTight"),
     MuonPtCut = cms.untracked.double(10.0),
-    MuonEtaCut = cms.untracked.double(2.5),  
-    MuonApplyIpz = cms.untracked.bool(False) # Apply IP-z cut
+    MuonEtaCut = cms.untracked.double(2.5),
 )
-
-NonIsolatedMuonVeto = cms.untracked.PSet(
-    MuonCollectionName = cms.untracked.InputTag("selectedPatMuons"),
-    MuonSelection = cms.untracked.string("AllGlobalMuons"),
-    MuonPtCut = cms.untracked.double(5.0),
-    MuonEtaCut = cms.untracked.double(2.5),  
-    MuonApplyIpz = cms.untracked.bool(False) # Apply IP-z cut
-)
-
 
 InvMassVetoOnJets = cms.untracked.PSet(
     ptCut = cms.untracked.double(30),
@@ -420,10 +411,15 @@ topWithMHSelection = cms.untracked.PSet(
 tree = cms.untracked.PSet(
     fill = cms.untracked.bool(True),
     fillJetEnergyFractions = cms.untracked.bool(True),
+    fillNonIsoLeptonVars = cms.untracked.bool(False),
     tauIDs = cms.untracked.vstring(
-        "byTightIsolation",
-        "byMediumIsolation",
-        "byLooseIsolation",
+        "byTightCombinedIsolationDeltaBetaCorr",
+        "byMediumCombinedIsolationDeltaBetaCorr",
+        "byLooseCombinedIsolationDeltaBetaCorr",
+        #"byTightIsolation",
+        #"byMediumIsolation",
+        #"byLooseIsolation",
+        "againstElectronMVA",
         "againstElectronLoose",
         "againstElectronMedium",
         "againstElectronTight",
@@ -435,6 +431,11 @@ tree = cms.untracked.PSet(
 
 eventCounter = cms.untracked.PSet(
     counters = cms.untracked.VInputTag()
+)
+
+prescaleWeightReader = cms.untracked.PSet(
+    weightSrc = cms.InputTag("hplusPrescaleWeightProducer"),
+    enabled = cms.bool(False),
 )
 
 wjetsWeightReader = cms.untracked.PSet(
@@ -456,11 +457,17 @@ vertexWeight = cms.untracked.PSet(
     enabled = cms.bool(False),
 )
 
-vertexWeightReader = cms.untracked.PSet(
-    PUVertexWeightSrc = cms.InputTag("PUVertexWeightNominal"),
-    vertexSrc = vertexWeight.vertexSrc,
-    enabled = cms.bool(False)
+pileupWeightReader = cms.untracked.PSet(
+    weightSrc = cms.InputTag("PUVertexWeightNominal"),
+    enabled = cms.bool(False),
 )
+
+# Default parameters for heavy H+ analysis
+def cloneForHeavyAnalysis(lightModule):
+    heavyModule = lightModule.clone()
+    # Insert here all parameter updates heavy H+ needs on top of the light H+ analysis
+    # 'lightModule' is essentially process.signalAnalysis (or equivalent)
+    return heavyModule
 
 # Set trigger efficiency / scale factor depending on tau selection params
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2012_cff as TriggerEfficiency
@@ -482,7 +489,7 @@ def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
     raise Exception("Trigger efficencies/scale factors are only available for:\n  tau isolation: 'byVLooseCombinedIsolationDeltaBetaCorr', 'byLooseCombinedIsolationDeltaBetaCorr', 'byMediumCombinedIsolationDeltaBetaCorr'\n  against electron discr.: 'againstElectronMedium', 'againstElectronMVA' (MVA not available for VLoose isol.)")
 
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
-triggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
+tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
 
 # Muon trigger+ID efficiencies, for embedding normalization
 import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTriggerIDEfficiency
@@ -511,7 +518,7 @@ def _getTriggerVertexArgs(kwargs):
         vargs["pset"] = module.vertexWeight
     return (effargs, vargs)
 
-def setDataTriggerEfficiency(dataVersion, era, pset=triggerEfficiencyScaleFactor):
+def setDataTriggerEfficiency(dataVersion, era, pset=tauTriggerEfficiencyScaleFactor):
     if dataVersion.isMC():
         if dataVersion.isS4():
             pset.mcSelect = "Summer11"
@@ -557,7 +564,7 @@ def setDataTriggerEfficiency(dataVersion, era, pset=triggerEfficiencyScaleFactor
 # See test/PUtools for tools to generate distributions and links to twiki
 # 
 
-def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, psetReader=vertexWeightReader, era="Run2011A", suffix=""):
+def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, psetReader=pileupWeightReader, era="Run2011A", suffix="", histogramAmbientLevel="Informative"):
     if dataVersion.isData():
         return
     if dataVersion.isS6():
@@ -594,6 +601,7 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
                                       vertexSrc = tmp.vertexSrc,
                                       puSummarySrc = tmp.puSummarySrc,
                                       enabled = tmp.enabled,
+                                      histogramAmbientLevel = cms.untracked.string(histogramAmbientLevel),
                                       dataPUdistribution = tmp.dataPUdistribution,
                                       dataPUdistributionLabel = tmp.dataPUdistributionLabel,
                                       mcPUdistribution = tmp.mcPUdistribution,
@@ -606,10 +614,10 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
     name = "PUWeightProducer"+era+suffix
     setattr(process, name, PUWeightProducer)
     commonSequence *= PUWeightProducer
-    psetReader.PUVertexWeightSrc = name
+    psetReader.weightSrc = name
     return name
 
-def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, psetReader, suffix):
+def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, psetReader, suffix, histogramAmbientLevel="Informative"):
     if dataVersion.isData():
         return
     if dataVersion.isS6():
@@ -638,6 +646,7 @@ def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, pset
                                       vertexSrc = pset.vertexSrc,
                                       puSummarySrc = pset.puSummarySrc,
                                       enabled = pset.enabled,
+                                      histogramAmbientLevel = cms.untracked.string(histogramAmbientLevel),
                                       dataPUdistribution = pset.dataPUdistribution,
                                       dataPUdistributionLabel = pset.dataPUdistributionLabel,
                                       mcPUdistribution = pset.mcPUdistribution,
@@ -647,10 +656,10 @@ def setPileupWeightForVariation(dataVersion, process, commonSequence, pset, pset
                                       weightDistributionEnable = pset.weightDistributionEnable,
                                       alias = cms.string("PUVertexWeight"+suffix)
     )
-    name = psetReader.PUVertexWeightSrc.value()+suffix
+    name = psetReader.weightSrc.value()+suffix
     setattr(process, name, PUWeightProducer)
     commonSequence *= PUWeightProducer
-    psetReader.PUVertexWeightSrc = name
+    psetReader.weightSrc = name
 
 # Tau selection
 def forEachTauSelection(function):

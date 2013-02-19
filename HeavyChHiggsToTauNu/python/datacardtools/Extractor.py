@@ -227,9 +227,10 @@ class MaxCounterExtractor(ExtractorBase):
         myResult = []
         for d in self._counterDirs:
             myHistoPath = d+"/weighted/counter"
-            datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoPath, quietException=True)
-            if isinstance(datasetRootHisto,str):
-                raise Exception (ErrorStyle()+"Error in extracting max counter value:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid,datasetRootHisto))
+            try:
+                datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoPath)
+            except Exception, e:
+                raise Exception (ErrorStyle()+"Error in extracting max counter value:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid, str(e)))
             datasetRootHisto.normalizeToLuminosity(luminosity)
             myHisto = datasetRootHisto.getHistogram()
             counterList = _histoToCounter(myHisto)
@@ -284,9 +285,10 @@ class PileupUncertaintyExtractor(ExtractorBase):
         # mgr.updateNAllEventsToPUWeighted(weightType=PileupWeightType.DOWN) #FIXME
         for d in self._counterDirs:
             myHistoName = datasetColumn.getDirPrefix()+d+"/counters/weighted/counter"
-            datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName, quietException=True)
-            if isinstance(datasetRootHisto,str):
-                raise Exception (ErrorStyle()+"Error in extracting PU uncertainty:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid,datasetRootHisto))
+            try:
+                datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
+            except Exception, e:
+                raise Exception (ErrorStyle()+"Error in extracting PU uncertainty:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid, str(e)))
             datasetRootHisto.normalizeToLuminosity(luminosity)
             myHisto = datasetRootHisto.getHistogram()
             counterList = _histoToCounter(myHisto)
@@ -381,17 +383,19 @@ class ScaleFactorExtractor(ExtractorBase):
             myTotal = 0.0
             mySum = 0.0
             myHistoName = datasetColumn.getDirPrefix()+"/"+self._histoDirs[i]+"/"+self._histograms[i]
-            myValueRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName, quietException=True)
-            if isinstance(myValueRootHisto,str):
-                raise Exception (ErrorStyle()+"Error in extracting scale factor uncertainty:"+NormalStyle()+" cannot find value histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid,myValueRootHisto))
+            try:
+                myValueRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
+            except Exception, e:
+                raise Exception (ErrorStyle()+"Error in extracting scale factor uncertainty:"+NormalStyle()+" cannot find value histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid, str(e)))
             myValueRootHisto.normalizeToLuminosity(luminosity)
             hValues = myValueRootHisto.getHistogram()
             if hValues == None:
                 raise Exception(ErrorStyle()+"Error in Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"':"+NormalStyle()+" Cannot open histogram '"+myHistoName+"'!")
             myHistoName = datasetColumn.getDirPrefix()+"/"+self._histoDirs[i]+"/"+self._normalisation[i]
-            myNormalisationRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName, quietException=True)
-            if isinstance(myNormalisationRootHisto,str):
-                raise Exception (ErrorStyle()+"Error in extracting scale factor uncertainty:"+NormalStyle()+" cannot find normalisation histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid,myNormalisationRootHisto))
+            try:
+                myNormalisationRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
+            except Exception, e:
+                raise Exception (ErrorStyle()+"Error in extracting scale factor uncertainty:"+NormalStyle()+" cannot find normalisation histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid, str(e)))
             myNormalisationRootHisto.normalizeToLuminosity(luminosity)
             hNormalisation = myNormalisationRootHisto.getHistogram()
             if hNormalisation == None:
@@ -468,9 +472,10 @@ class ShapeExtractor(ExtractorBase):
             myNominalRateCount = mainCounterTable.getCount(rowName=self._counterItem, colName=datasetColumn.getDatasetMgrColumn()).value()
             for i in range (0, len(self._histoDirs)):
                 myHistoName = datasetColumn.getDirPrefix()+self._histoDirs[i]+"/counters/weighted/counter"
-                datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName, quietException=True)
-                if isinstance(datasetRootHisto,str):
-                    raise Exception (ErrorStyle()+"Error in extracting shape uncertainty:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid,datasetRootHisto))
+                try:
+                    datasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
+                except Exception, e:
+                    raise Exception (ErrorStyle()+"Error in extracting shape uncertainty:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid, str(e)))
                 if datasetRootHisto.isMC():
                     datasetRootHisto.normalizeToLuminosity(luminosity)
                 myHisto = datasetRootHisto.getHistogram()
@@ -506,9 +511,10 @@ class ShapeExtractor(ExtractorBase):
             # Obtain source histogram
             myHistoName = datasetColumn.getDirPrefix()+self._histoDirs[i]+"/"+self._histograms[i]
             print "group",datasetColumn.getLabel(),"id",self._exid,"histo",myHistoName
-            myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName, quietException=True)
-            if isinstance(myDatasetRootHisto,str):
-                raise Exception (ErrorStyle()+"Error in extracting shape histogram:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid,myDatasetRootHisto))
+            try:
+                myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoName)
+            except Exception, e:
+                raise Exception (ErrorStyle()+"Error in extracting shape histogram:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  NuisanceId = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._exid, str(e)))
             if myDatasetRootHisto.isMC():
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
             hSource = myDatasetRootHisto.getHistogram()
@@ -598,9 +604,10 @@ class ControlPlotExtractor(ExtractorBase):
             print "Extractor ",self._histoDirs[i],self._histoNames[i]
             # Obtain histogram from dataset
             myHistoname = datasetColumn.getDirPrefix()+"/"+self._histoDirs[i]+"/"+self._histoNames[i]
-            myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoname, quietException=True)
-            if isinstance(myDatasetRootHisto,str):
-                raise Exception (ErrorStyle()+"Error in extracting ControlPlots:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  Histogram title = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._histoTitle,myDatasetRootHisto))
+            try:
+                myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(myHistoname)
+            except Exception, e:
+                raise Exception (ErrorStyle()+"Error in extracting ControlPlots:"+NormalStyle()+" cannot find histogram!\n  Column = %s\n  Histogram title = %s\n  Message = %s!"%(datasetColumn.getLabel(),self._histoTitle, str(e)))
             if myDatasetRootHisto.isMC():
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
             hSource = myDatasetRootHisto.getHistogram()

@@ -48,7 +48,7 @@ namespace HPlus {
     void setPileupWeight(double w)   { fPileupWeight = w; }
     void setTriggerWeight(double w, double au)  { fTriggerWeight = w; fTriggerWeightAbsUnc = au; }
     void setFillWeight(double w)  { fFillWeight = w; }
-    void enableNonIsoLeptons(bool enableNonIsoLeptons)  { fillNonIsoLeptonVars = enableNonIsoLeptons; }
+    void enableNonIsoLeptons(bool enableNonIsoLeptons)  { fFillNonIsoLeptonVars = enableNonIsoLeptons; }
     void setNvertices(unsigned int n) { fNVertices = n; }
     void setBTagging(bool passed, double scaleFactor, double scaleFactorUnc) {
       fPassedBTagging = passed;
@@ -72,6 +72,7 @@ namespace HPlus {
     void setNonIsoLeptons(edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
 
     void setAlphaT(double alphaT) { fAlphaT = alphaT; }
+    void setTauIsFake(bool tauIsFake) { bTauIsFake = tauIsFake; }
     void setMomentumTensorEigenvalues(double QOne, double QTwo, double QThree) { 
       fQOne   = QOne; 
       fQTwo   = QTwo; 
@@ -82,8 +83,12 @@ namespace HPlus {
     void setPlanarity(double planarity) { fPlanarity = planarity; }
     void setCircularity(double circularity) { fCircularity = circularity; }
     void setDeltaPhi(double deltaPhi) { fDeltaPhi = deltaPhi; }
+    void setAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets);
+    void setMHT(const XYZTLorentzVector& MHT) { fMHT = MHT; }
+    void setMHTAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets);
+    void setMHTSelJets(const edm::PtrVector<pat::Jet>& jets);
 
-    void fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
+    void fill(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau,
               const edm::PtrVector<pat::Jet>& jets);
 
   private:
@@ -100,6 +105,7 @@ namespace HPlus {
     const bool fDoFill;
     const bool fTauEmbeddingInput;
     const bool fFillJetEnergyFractions;
+    bool fFillNonIsoLeptonVars;
 
     edm::InputTag fGenParticleSource;
     edm::InputTag fTauEmbeddingGenParticleOriginalSource;
@@ -109,7 +115,6 @@ namespace HPlus {
 
     TTree *fTree;
 
-    bool fillNonIsoLeptonVars;
     TreeEventBranches fEventBranches;
 
     double fPrescaleWeight;
@@ -136,6 +141,7 @@ namespace HPlus {
     int fTauDaughterPdgId;
 
     std::vector<XYZTLorentzVector> fJets;
+    std::vector<XYZTLorentzVector> fAllIdentifiedJets;
     std::vector<double> fJetsBtags;
     std::vector<double> fJetsChf;
     std::vector<double> fJetsNhf;
@@ -215,6 +221,9 @@ namespace HPlus {
     
     // MET is really 2-vector, but let's just use this for consistency
     XYZTLorentzVector fRawMet;
+    XYZTLorentzVector fMHT;
+    XYZTLorentzVector fMHTSelJets;
+    XYZTLorentzVector fMHTAllJets;
     double fRawMetSumEt;
     double fRawMetSignificance;
     XYZTLorentzVector fType1Met;
@@ -232,6 +241,7 @@ namespace HPlus {
     double fAplanarity;
     double fPlanarity;
     double fCircularity;
+    bool bTauIsFake;
 
     double fDeltaPhi;
 

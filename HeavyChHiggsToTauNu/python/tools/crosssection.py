@@ -128,6 +128,26 @@ backgroundCrossSections = CrossSectionList(
             "7": 9611.0, # [1]
             "8": 11050.0, # [1]
             }),
+    CrossSection("DYToTauTau_M_20_", {
+            "7": 4998, # [4], NNLO
+            "8": 5745.25, # [9], NNLO
+            }),
+    CrossSection("DYToTauTau_M_100to200", {
+            "7": 0, # []
+            "8": 34.92, # [1]
+            }),
+    CrossSection("DYToTauTau_M_200to400", {
+            "7": 0, # []      
+            "8": 1.181, # [1]
+            }),
+    CrossSection("DYToTauTau_M_400to800", {
+            "7": 0, # []      
+            "8": 0.08699, # [1]
+            }),
+    CrossSection("DYToTauTau_M_800", {
+            "7": 0, # []      
+            "8": 0.004527, # [1]
+            }),
     CrossSection("T_t-channel", {
             "7": 41.92, # [5,6]
             "8": 56.4, # [8]
@@ -234,7 +254,8 @@ def whTauNuCrossSectionMSSM(mass, tanbeta, mu, energy):
 # \param energy     sqrt(s) in TeV as string
 def whTauNuCrossSection(br_tH, br_Htaunu, energy):
     ttCrossSection = backgroundCrossSections.crossSection("TTJets", energy)
-    return 2 * ttCrossSection * br_tH * (1-br_tH) * br_Htaunu
+    xsec = 2 * ttCrossSection * br_tH * (1-br_tH) * br_Htaunu
+    return (xsec, br_tH)
 
 
 ## HH, H->tau nu MSSM cross section
@@ -255,7 +276,8 @@ def hhTauNuCrossSectionMSSM(mass, tanbeta, mu, energy):
 # \param energy     sqrt(s) in TeV as string
 def hhTauNuCrossSection(br_tH, br_Htaunu, energy):
     ttCrossSection = backgroundCrossSections.crossSection("TTJets", energy)
-    return ttCrossSection * br_tH*br_tH * br_Htaunu*br_Htaunu
+    xsec = ttCrossSection * br_tH*br_tH * br_Htaunu*br_Htaunu
+    return (xsec, br_tH)
 
 
 def _setHplusCrossSectionsHelper(massList, datasets, function):
@@ -263,8 +285,10 @@ def _setHplusCrossSectionsHelper(massList, datasets, function):
         if not datasets.hasDataset(name):
             continue
         d = datasets.getDataset(name)
-        crossSection = function(mass, d.getEnergy())
+        (crossSection, BRtH) = function(mass, d.getEnergy())
         d.setCrossSection(crossSection)
+        if BRtH is not None:
+            d.setProperty("BRtH", BRtH)
         print "Setting %s cross section to %f pb" % (name, crossSection)
 
 def _setHplusCrossSections(datasets, whFunction, hhFunction):
@@ -275,7 +299,7 @@ def _setHplusCrossSections(datasets, whFunction, hhFunction):
 #
 # \param datasets  dataset.DatasetManager object
 def setHplusCrossSectionsToTop(datasets):
-    function = lambda mass, energy: backgroundCrossSections.crossSection("TTJets", energy)
+    function = lambda mass, energy: (backgroundCrossSections.crossSection("TTJets", energy), None)
     _setHplusCrossSections(datasets, function, function)
 
 ## Set signal dataset cross sections to MSSM cross section

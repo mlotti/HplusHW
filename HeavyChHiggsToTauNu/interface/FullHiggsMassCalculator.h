@@ -28,17 +28,31 @@ namespace HPlus {
   public:
     class Data {
     public:
-      Data(const FullHiggsMassCalculator* calculator, bool passEvent);
+      Data();
       ~Data();
-      bool passedEvent() const { return fPassedEvent; }
-      const edm::Ptr<pat::Jet>& getBjetHiggsSide() const { return fCalculator->BjetHiggsSide; }
-      double getHiggsMass() const { return fCalculator->fHiggsMassSolution; }
+      const bool passedEvent() const { return fPassedEvent; }
+      const edm::Ptr<pat::Jet>& getBjetHiggsSide() const { return BjetHiggsSide; }
+      const double getHiggsMass() const { return fHiggsMassSolution; }
+      const double getTopMass() const { return fTopMassSolution; }
+      const double getNeutrinoZ() const { return fNeutrinoZSolution; }
+      const double getNeutrinoPt() const { return fNeutrinoPtSolution; }
+      const double getMCNeutrinoZ() const { return fMCNeutrinoPz; }
+      
       //      const edm::Ptr<pat::Jet>& getSelectedBjet() const { return fCalculator->selectedBjet; }
 
-
+      friend class FullHiggsMassCalculator;
     private:
-      const FullHiggsMassCalculator* fCalculator;
-      const bool fPassedEvent;
+      bool fPassedEvent;
+      edm::Ptr<pat::Jet> BjetHiggsSide;
+      // Calculated results
+      double fTopMassSolution;
+      double fNeutrinoZSolution;
+      double fNeutrinoPtSolution;
+      double fHiggsMassSolution;
+      double fMCNeutrinoPz;
+      TVector3 visibleTau;
+      TVector3 mcNeutrinos;
+      TVector3 mcBjetHiggsSide;
     };
 
     FullHiggsMassCalculator(EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -53,8 +67,8 @@ namespace HPlus {
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData);
 
-    bool doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet);
-    void doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, bool myMatchStaus=false, bool doHistogramming = true);
+    bool doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet, FullHiggsMassCalculator::Data& output);
+    void doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, FullHiggsMassCalculator::Data& output, bool myMatchStaus=false, bool doHistogramming = true);
 
   private:
 
@@ -64,15 +78,6 @@ namespace HPlus {
     //edm::InputTag fVertexSrc;
     //TH1 *hWeights;
 
-    // Calculated results
-    double fTopMassSolution;
-    double fNeutrinoZSolution;
-    double fNeutrinoPtSolution;
-    double fHiggsMassSolution;
-    double NeutrinoPz;
-    TVector3 visibleTau;
-    TVector3 mcNeutrinos;
-    TVector3 mcBjetHiggsSide;
     //   edm::Ptr<pat::Jet> mcBjetHiggsSide;
 
     // Histograms
@@ -100,10 +105,6 @@ namespace HPlus {
     WrappedTH1* hNeutrinoZSolution;
     WrappedTH1* hNeutrinoPtSolution;
     WrappedTH1* hNeutrinoPtDifference;
- 
-    edm::Ptr<pat::Jet> BjetHiggsSide;
-
-   
   };
 }
 

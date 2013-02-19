@@ -4,6 +4,8 @@
 
 #include "FWCore/Utilities/interface/InputTag.h"
 
+#include<string>
+
 namespace edm {
   class ParameterSet;
   class Event;
@@ -11,9 +13,12 @@ namespace edm {
 }
 
 namespace HPlus {
+  class HistoWrapper;
+  class WrappedTH1;
+
   class WeightReader {
   public:
-    WeightReader(const edm::ParameterSet& iConfig);
+    WeightReader(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper, const std::string& directory);
     ~WeightReader();
 
     double getWeight(const edm::Event& iEvent, const edm::EventSetup& iSetup) const;
@@ -21,6 +26,11 @@ namespace HPlus {
   private:
     edm::InputTag fWeightSrc;
     bool fEnabled;
+
+    WrappedTH1 *hWeightsLow;
+    WrappedTH1 *hWeightsMedium;
+    WrappedTH1 *hWeightsHigh;
+    WrappedTH1 *hWeightsVeryHigh;
   };
 }
 

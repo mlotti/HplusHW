@@ -9,8 +9,8 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 namespace HPlus {
-  ForwardJetVeto::Data::Data(const ForwardJetVeto *forwardJetVeto, bool passedEvent):
-    fForwardJetVeto(forwardJetVeto), fPassedEvent(passedEvent) {}
+  ForwardJetVeto::Data::Data():
+    fPassedEvent(false) {}
   ForwardJetVeto::Data::~Data() {}
 
   ForwardJetVeto::ForwardJetVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
@@ -55,7 +55,7 @@ namespace HPlus {
   }
 
   ForwardJetVeto::Data ForwardJetVeto::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::MET>& met) {
-    bool passEvent = false;
+    Data output;
 
     edm::Handle<edm::View<pat::Jet> > hjets;
     iEvent.getByLabel(fSrc, hjets);
@@ -100,11 +100,11 @@ namespace HPlus {
     if (EtMetSumRatio < fEtSumRatioCut) increment(fEtMetSumRatioSubCount);
     // Make cut
   
-    passEvent = true; 
+    output.fPassedEvent = true;
     //    if (maxEt > fForwJetEtCut) passEvent = false;
   
-    if( EtSumRatio > fEtSumRatioCut ) passEvent = false;
+    if( EtSumRatio > fEtSumRatioCut ) output.fPassedEvent = false;
 
-    return Data(this, passEvent);
+    return output;
   }
 }

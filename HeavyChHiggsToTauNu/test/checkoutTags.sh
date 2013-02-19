@@ -140,9 +140,12 @@ addpkg RecoLuminosity/LumiDB V04-01-09
 cvs co -r V00-00-16 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
 cvs up -r CutBasedId_V00-00-05 EGamma/EGammaAnalysisTools/src/EGammaCutBasedEleId.cc
 cvs up -r CutBasedId_V00-00-05 EGamma/EGammaAnalysisTools/interface/EGammaCutBasedEleId.h
+
 # This gives the updated EA isolation from recommendation of
 # https://hypernews.cern.ch/HyperNews/CMS/get/higgs/1032.html
 cvs up -r V00-00-31 EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h
+# Patch ElectronEffectiveArea::kEleEAData2011 to ElectronEffectiveArea::kEleEAData2012
+sed -i 's/2011/2012/g' EGamma/EGammaAnalysisTools/src/EGammaCutBasedEleId.cc
 
 # EGammaCutBasedEleId.cc includes ElectronEffectiveArea.h, but the
 # version is the same in both tags
