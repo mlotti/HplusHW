@@ -244,7 +244,8 @@ def _setHplusCrossSectionsHelper(massList, datasets, function):
         d = datasets.getDataset(name)
         (crossSection, BRtH) = function(mass, d.getEnergy())
         d.setCrossSection(crossSection)
-        d.setProperty("BRtH", BRtH)
+        if BRtH is not None:
+            d.setProperty("BRtH", BRtH)
         print "Setting %s cross section to %f pb" % (name, crossSection)
 
 def _setHplusCrossSections(datasets, whFunction, hhFunction):
@@ -255,7 +256,7 @@ def _setHplusCrossSections(datasets, whFunction, hhFunction):
 #
 # \param datasets  dataset.DatasetManager object
 def setHplusCrossSectionsToTop(datasets):
-    function = lambda mass, energy: backgroundCrossSections.crossSection("TTJets", energy)
+    function = lambda mass, energy: (backgroundCrossSections.crossSection("TTJets", energy), None)
     _setHplusCrossSections(datasets, function, function)
 
 ## Set signal dataset cross sections to MSSM cross section
