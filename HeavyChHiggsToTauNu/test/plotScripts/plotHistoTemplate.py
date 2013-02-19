@@ -38,9 +38,24 @@ lightHplusTopBR = 0.05
 
 # main function
 def main():
-    # Read the datasets
-    #datasets = dataset.getDatasetsFromMulticrabCfg(directory="/Volumes/disk/attikis/HIG-12-037/TreeAnalysis_v44_4_130113_105229/", analysisName=analysis, dataEra=dataEra)
-    datasets = dataset.getDatasetsFromMulticrabCfg(analysisName=analysis, searchMode="Light", dataEra=dataEra, optimizationMode="OptTaupt40byMediumCombinedIsolationDeltaBetaCorrRtau07JetGEQ3Et20BetaGT02Met100BjetGEQ1Et20discr09and09Dphi160ToprecoNone")
+    # Read the datasets, see twiki page for more examples
+    # https://twiki.cern.ch/twiki/bin/view/CMS/HiggsChToTauNuFullyHadronicSoftware#Construct_datasets
+    #
+    # This one constructs datasets assuming that the multicrab
+    # directory is the working directory
+    datasets = dataset.getDatasetsFromMulticrabCfg(analysisName=analysis, dataEra=dataEra)
+
+    # This one constructs from some other multicrab directory, the
+    # path can be absolute or relative
+    #datasets = dataset.getDatasetsFromMulticrabCfg(directory="/path/to/your/multicrab/directory", analysisName=analysis, dataEra=dataEra)
+
+    # Usually you can also omit the analysisName, as it can be detected automatically
+    # datasets = dataset.getDatasetsFromMulticrabCfg(dataEra=dataEra)
+
+    # If you have both light and heavy analysis and/or optimization
+    # enabled, you have to specify searchMode and/or optimizationMode
+    # explicitly
+    # datasets = dataset.getDatasetsFromMulticrabCfg(searchMode="Light", dataEra=dataEra, optimizationMode="Opt...")
 
     if mcOnly:
         datasets.remove(datasets.getDataDatasetNames())
