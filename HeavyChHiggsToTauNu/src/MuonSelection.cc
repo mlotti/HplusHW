@@ -188,11 +188,11 @@ namespace HPlus {
       // disabled because it is not in the list in the approved objects page
       //if( !((*iMuon)->muonID( fMuonSelection )) ) continue;
       // from 4_4_0 onwards available check for PF muon
-      //if (!(*iMuon)->isPFMuon()) continue;
-      //bMuonSelection = true;
+      if (!(*iMuon)->isPFMuon()) continue;
+      bMuonSelection = true;
 
       // 3) NHits cuts (Trk, Pixel, Muon)
-      if (!(myGlobalTrackRef->hitPattern().trackerLayersWithMeasurement() > 8)) continue;
+      if (!(myGlobalTrackRef->hitPattern().trackerLayersWithMeasurement() > 5)) continue;
       bMuonNTrkerHitsCut = true;
 
       if ( myInnerTrackNPixelHits < 1) continue;
@@ -217,15 +217,13 @@ namespace HPlus {
 
       // 6) Check that muon IPz is compatible with PVz
       // remove for 2011, but enable for 2012
-      //if(fMuonApplyIpz) {
-      //if (primaryVertex.isNull())
-      //  throw cms::Exception("LogicError") << "MuonApplyIpz is true, but got null primary vertex" << std::endl;
+      if (primaryVertex.isNull())
+        throw cms::Exception("LogicError") << "MuonApplyIpz is true, but got null primary vertex" << std::endl;
       double myDeltaIPz = std::fabs(myInnerTrackRef->dz(primaryVertex->position()));
       hMuonDeltaIPz->Fill(myDeltaIPz);
-      //if (myDeltaIPz > 0.5) continue; // This is the z-impact parameter w.r.t to selected primary vertex
-      //bMuonGoodPVCut = true;
-      //}
-
+      if (myDeltaIPz > 0.5) continue; // This is the z-impact parameter w.r.t to selected primary vertex
+      bMuonGoodPVCut = true;
+      
       // Fill histos with all-Muons Pt and Eta (no requirements on muons)
       hMuonPt_BeforeIsolation->Fill(myMuonPt);
       hMuonEta_BeforeIsolation->Fill(myMuonEta);
