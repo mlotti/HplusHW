@@ -17,7 +17,7 @@ datasets = [
         # tau+met trigger
 #       "Tau_160431-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
 #       "Tau_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
-#       "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
+       "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
 #       "Tau_175860-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
         # single tau trigger
 #       "Tau_Single_165970-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
@@ -50,8 +50,8 @@ datasets = [
         # Signal MC (WH)
 #        "TTToHplusBWB_M80_Fall11",
 #        "TTToHplusBWB_M90_Fall11",
-        "TTToHplusBWB_M100_Fall11",
-#        "TTToHplusBWB_M120_Fall11",
+#        "TTToHplusBWB_M100_Fall11",
+        "TTToHplusBWB_M120_Fall11",
 #        "TTToHplusBWB_M140_Fall11",
 #        "TTToHplusBWB_M150_Fall11",
 #        "TTToHplusBWB_M155_Fall11",
@@ -59,7 +59,7 @@ datasets = [
         # Signal MC (HH)
 #        "TTToHplusBHminusB_M80_Fall11",
 #        "TTToHplusBHminusB_M90_Fall11",
-        "TTToHplusBHminusB_M100_Fall11",
+#        "TTToHplusBHminusB_M100_Fall11",
 #        "TTToHplusBHminusB_M120_Fall11",
 #        "TTToHplusBHminusB_M140_Fall11",
 #        "TTToHplusBHminusB_M150_Fall11",
@@ -107,7 +107,7 @@ datasets = [
 
 
 
-workflow = "pattuple_v44_5"
+workflow = "pattuple_v44_5_test1"
 multicrab.extendDatasets(workflow, datasets)
 
 # local_stage_out doesn't work due to denied permission because we're
@@ -132,7 +132,7 @@ multicrab.forEachDataset(addCopyConfig)
 # pattuple_v6_1 while the similar jobs stageout fine in other T2s
 multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
 
-prefix = "multicrab"
+prefix = "multicrab_"+workflow
 configOnly = False # Create task configuration only?
 # Leave configOnly as false and specify site whitelist on command line when submitting the jobs
 

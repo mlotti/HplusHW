@@ -238,6 +238,16 @@ def addPattuple_v44_4_1(datasets):
         }
     addPattuple_44X("v44_4_1", datasets, definitions)
 
+
+## Add v44_5 pattuple production workflows
+def addPattuple_v44_5_test1(datasets):
+    definitions = {
+        "Tau_173236-173692_2011A_Nov08":    TaskDef(""),
+        "TTToHplusBWB_M120_Fall11":         TaskDef(""),
+        }
+
+    addPattuple_44X("v44_5_test1", datasets, definitions)
+
 ## Add v44_5 pattuple production workflows
 def addPattuple_v44_5(datasets):
     definitions = {
