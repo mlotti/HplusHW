@@ -29,12 +29,10 @@ analysis = "signalAnalysis"
 # weights (via TDirectory name in histograms.root)
 dataEra = "Run2011A" #dataEra = "Run2011B" #dataEra = "Run2011AB"
 
-#mcOnly = False
-mcOnly = True
+mcOnly = False
+#mcOnly = True
 mcOnlyLumi = 2300 # pb
 
-
-signalPlusBackgroundLine = True
 lightHplusMassPoint = 120
 lightHplusTopBR = 0.05
 
@@ -76,14 +74,10 @@ def main():
 
     # Replace signal dataset with a signal+background dataset, where
     # the BR(t->H+) is taken into account for SM ttbar
-    if signalPlusBackgroundLine:
-        ttjets2 = datasets.getDataset("TTJets").deepCopy()
-        ttjets2.setName("TTJets2")
-        ttjets2.setCrossSection(ttjets2.getCrossSection() - datasets.getDataset("TTToHplus_M%d"%lightHplusMassPoint).getCrossSection())
-        datasets.append(ttjets2)
-        datasets.merge("BkgnoTT", ["QCD", "WJets", "DYJetsToLL", "SingleTop", "Diboson"], keepSources=True)
-        datasets.merge("TTToHplus_M%d"%lightHplusMassPoint, ["TTToHplus_M%d"%lightHplusMassPoint, "BkgnoTT", "TTJets2"])
-        plots._legendLabels["TTToHplus_M%d" % lightHplusMassPoint]  = "with H^{+}#rightarrow#tau^{+}#nu"
+    plots.replaceLightHplusWithSignalPlusBackground(datasets)
+    
+    # You can print a tree of all the merged datasets with this
+    #datasets.printDatasetTree()
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -100,18 +94,16 @@ drawPlot = plots.PlotDrawer(log=True, addLuminosityText=True, stackMCHistograms=
 
 # Define plots to draw
 def doPlots(datasets):
-    def createPlot(name, massbr_x=0.42, massbr_y=0.87, **kwargs):
+    def createPlot(name, massbr_x=0.42, massbr_y=0.87, normone_x=0.25, normone_y=0.5, **kwargs):
+        args = {}
+        args.update(kwargs)
         if mcOnly:
-            # If 'normalizeToOne' is given in kwargs, we don't need the normalizeToLumi (or actually the library raises an Exception)
-            args = {}
-            args.update(kwargs)
-            if not ("normalizeToOne" in args and args["normalizeToOne"]):
-                args["normalizeToLumi"] = mcOnlyLumi
-            p = plots.MCPlot(datasets, name, **args)
-        else:
-            p = plots.DataMCPlot(datasets, name, **kwargs)
+            args["normalizeToLumi"] = mcOnlyLumi
 
+        p = plots.DataMCPlot(datasets, name, **args)
         addMassBRText(p, massbr_x, massbr_y)
+        if kwargs.get("normalizeToOne", False):
+            p.appendPlotObject(histograms.PlotText(normone_x, normone_y, "Normalized to unit area", size=17))
         return p
 
     # drawPlot defaults can be modified also here
@@ -121,7 +113,11 @@ def doPlots(datasets):
     drawPlot(createPlot("Btagging/NumberOfBtaggedJets"), "NumberOfBJets", xlabel="Number of selected b jets", ylabel="Events", opts={"xmax": 6}, cutLine=1)
 
     # opts2 is for the ratio pad
-    drawPlot(createPlot("Met"), "Met", xlabel="Type-I corrected PF E_{T}^{miss}", ylabel="Events / %.0f GeV", rebinToWidthX=20, opts={"ymaxfactor": 10}, opts2={"ymin": 0, "ymax": 2}, cutLine=60)
+    drawPlot(createPlot("Met"), "Met", xlabel="Type-I corrected PF E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", rebinToWidthX=20, opts={"ymaxfactor": 10}, opts2={"ymin": 0, "ymax": 2}, cutLine=60)
+
+    # Normalizing to unit area
+    drawPlot(createPlot("Vertices/verticesTriggeredAfterWeight", normalizeToOne=True, massbr_x=0.65, massbr_y=0.5, normone_x=0.62, normone_y=0.4),
+             "verticesAfterWeightTriggered", xlabel="Number of reconstructed vertices", ylabel="Events", log=False, opts={"xmax": 20}, addLuminosityText=False)
 
 # Helper function to add mHplus and BR    
 def addMassBRText(plot, x, y):
