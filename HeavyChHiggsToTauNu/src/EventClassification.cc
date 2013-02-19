@@ -145,10 +145,6 @@ namespace HPlus {
     const reco::Candidate& chargedHiggs = (*genParticles)[myHiggsLine];    
     std::vector<const reco::GenParticle*> daughters = getImmediateDaughters(chargedHiggs);
     int daughterId = 9999999;
-    //double px = 0, py = 0, pz = 0, E = 0;
-    //bool tauFound = false;
-    //bool neutrinoFound = false;
-    // Loop over daughters and find tau
     for(size_t d=0; d<daughters.size(); ++d) {
       //const reco::GenParticle daughterParticle = *daughters[d];
       const reco::Candidate& daughterParticle = *daughters[d];
@@ -156,13 +152,68 @@ namespace HPlus {
       // If tau among immediate daughters
       if (abs(daughterId) == 15) {
 	//myTauFromHiggs = const_cast<reco::Candidate*>(&daughterParticle);
-	myTauFromHiggs = const_cast<reco::Candidate*>(&daughterParticle); // IS THIS DONE CORRECTLY???
-	// TODO!
+	myTauFromHiggs = const_cast<reco::Candidate*>(&daughterParticle);
 	return myTauFromHiggs;
       }
     }
     return NULL;
   }
+
+  bool decaysHadronically(const reco::Candidate& tau) {
+    std::vector<const reco::GenParticle*> tauDaughters = getImmediateDaughters(tau);
+    int tauDaughterId = 9999999;
+    for(size_t t=0; t<tauDaughters.size(); ++t) {
+      const reco::Candidate& tauDaughter = *tauDaughters[t];
+      tauDaughterId = tauDaughter.pdgId();
+      // If there is an electron or a muon among the tau daughters, return false
+      if (abs(tauDaughterId) == 11 || abs(tauDaughterId) == 13) return false;
+    }
+    return true;
+  }
+
+//   bool decaysToOneProng(reco::Candidate* tau) {
+//     std::vector<const reco::GenParticle*> tauDaughters = getImmediateDaughters(tau);
+//     int tauDaughterId = 9999999;
+//     int numberOfProngs = 0;
+//     for(size_t t=0; t<tauDaughters.size(); ++t) {
+//       const reco::Candidate& tauDaughter = *tauDaughters[t];
+//       tauDaughterId = tauDaughter.pdgId();
+//       // If tau daughter is a charged pion or kaon, increase numberOfProngs // CHECK IF THIS IS CORRECT!
+//       if (abs(tauDaughterId) == 211 || abs(tauDaughterId) == 321) numberOfProngs++;
+//       std::cout << "EventClassification: Charged pion or kaon from tau decay found -> incrementing number of prongs" << std::endl;
+//       // If tau daughter is an electron or a muon, increase numberOfProngs (I don't know if this is what we need,
+//       // but the method should do exactly what its name suggests in any case)
+//       if (abs(tauDaughterId) == 11 || abs(tauDaughterId) == 13) numberOfProngs++;
+//       std::cout << "EventClassification: Electron or muon from tau decay found -> incrementing number of prongs" << std::endl;
+//     }
+//     if (numberOfProngs == 1) return true;
+//     return false;
+//   }
+
+//   TVector3 getVisibleMomentum(reco::Candidate* tau) {
+//     std::vector<const reco::GenParticle*> tauDaughters = getImmediateDaughters(tau);
+//      int tauDaughterId = 9999999;
+//      TVector3 myVisibleTauMomentum;
+//      myVisibleTauMomentum.SetXYZ(tau->px(), tau->py(), tau->pz());
+//      for(size_t t=0; t<tauDaughters.size(); ++t) {
+//        const reco::Candidate& tauDaughter = *tauDaughters[t];
+//        tauDaughterId = tauDaughter.pdgId();
+//        // If a tau neutrino is found, subtract its momentum from the tau momentum to get the visible part
+//        if (abs(tauDaughterId) == 12 || abs(tauDaughterId) == 14 || abs(tauDaughterId) == 16) {
+// 	 myVisibleTauMomentum.SetXYZ(
+// 				     myVisibleTauMomentum.Px() - tauDaughter.px(),
+// 				     myVisibleTauMomentum.Py() - tauDaughter.py(),
+// 				     myVisibleTauMomentum.Pz() - tauDaughter.pz());
+// 	 std::cout << "EventClassification: neutrino (ID = " << tauDaughterId << ") momentum subtracted from tau momentum" << std::endl;
+//        }
+//      }
+//      return myVisibleTauMomentum;
+//   }
+
+
+
+
+
 
 
 
@@ -173,6 +224,54 @@ namespace HPlus {
 
 
 //------------------------> OLD MEMBER FUNCTIONS <----------------------------
+
+//   TVector3 getGenVisibleTauDecayingHadronicallyToOneProngFromHiggs(const edm::Event& iEvent) {
+//     edm::Handle <reco::GenParticleCollection> genParticles;
+//     iEvent.getByLabel("genParticles", genParticles);
+//     reco::Candidate* myTauFromHiggs = 0;
+//     size_t myHiggsLine = getHiggsLine(iEvent);
+//     //if (myHiggsLine == 0) return NULL;       // CHECK IF THIS IS CORRECT!!! WHAT VALUES CAN mHiggsLine GET IF A HIGGS IS FOUND?
+//     // Grab charged Higgs and get its daughters
+//     const reco::Candidate& chargedHiggs = (*genParticles)[myHiggsLine];    
+//     std::vector<const reco::GenParticle*> higgsDaughters = getImmediateDaughters(chargedHiggs);
+//     int higgsDaughterId = 9999999;
+//     for(size_t h=0; h<higgsDaughters.size(); ++h) {
+//       const reco::Candidate& higgsDaughter = *higgsDaughters[h];
+//       higgsDaughterId = higgsDaughter.pdgId();
+//       // If current daughter of Higgs is tau
+//       if (abs(higgsDaughterId) == 15) {
+// 	myTauFromHiggs = const_cast<reco::Candidate*>(&higgsDaughter);
+// 	// Get daughters of tau (= the current higgsDaughter)
+// 	std::vector<const reco::GenParticle*> tauDaughters = getImmediateDaughters(higgsDaughter);
+// 	int tauDaughterId = 9999999;
+// 	bool tauDecaysIntoOneProng = true;
+// 	bool tauDecaysHadronically = true;
+// 	int numberOfProngs = 0;
+// 	TVector3 myVisibleTauMomentum;
+// 	for(size_t t=0; t<tauDaughters.size(); ++t) {
+// 	  const reco::Candidate& tauDaughter = *tauDaughters[t];
+// 	  tauDaughterId = tauDaughter.pdgId();
+// 	  // If there is an electron or a muon among the tau daughters...
+// 	  if (abs(tauDaughterId) == 11 || abs(tauDaughterId) == 13) tauDecaysHadronically = false;
+// 	  // If a tau neutrino is found, remove its momentum 
+// 	  if (abs(tauDaughterId) == 16) {
+// 	    myVisibleTauMomentum.SetXYZ(
+// 					higgsDaughter.px() - tauDaughter.px(),
+// 					higgsDaughter.py() - tauDaughter.py(),
+// 					higgsDaughter.pz() - tauDaughter.pz());
+// 	    std::cout << "EventClassification: neutrino momentum removed from tau momentum" << std::endl;
+// 	  }
+// 	  // If tau daughter is a charged pion or kaon // CHECK IF THIS IS CORRECT!
+// 	  if (abs(tauDaughterId) == 211 || abs(tauDaughterId) == 321) {
+// 	    numberOfProngs++;
+// 	  }
+// 	}
+// 	if (numberOfProngs != 1) myVisibleTauMomentum.SetXYZ(0.0, 0.0, 0.0);
+	
+//       }
+//     }
+//     return myVisibleTauMomentum;
+//   }
 
 //   size_t getFirstHiggsLine(const edm::Event& iEvent) {
 //     edm::Handle <reco::GenParticleCollection> genParticles;

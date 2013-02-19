@@ -13,6 +13,8 @@
 #include "DataFormats/METReco/interface/GenMET.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 
+#include "TVector3.h"
+
 #include "FWCore/Framework/interface/Event.h"
 
 
@@ -36,15 +38,20 @@ namespace HPlus {
   reco::Candidate* getGenHiggsSideTop(const edm::Event& iEvent);
   reco::Candidate* getGenHiggsSideBJet(const edm::Event& iEvent);
   reco::Candidate* getGenTauFromHiggs(const edm::Event& iEvent);
+  bool decaysHadronically(const reco::Candidate& tau);
+  //  bool decaysToOneProng(reco::Candidate* tau);
+  //  TVector3 getVisibleMomentum(reco::Candidate* tau);
+
+  //  TVector3 getGenVisibleTauDecayingHadronicallyToOneProngFromHiggs(const edm::Event& iEvent);
   //  double getDeltaRGenVisibleTauRecoVisibleTau();
-  // int pdgIdOfParticleReconstructedAsTau();
-  // bool tauDecaysHadronicallyToOneProng();
-  // reco::Candidate* getTauMother ?
-  // size_t getTauMotherId ?
-  // double getDeltaR(particle 1, particle 2);
-  // double getMETDeltaPhi();
-  // double getMETDeltaMagnitude();
-  // double getMETDeltaR();
+  //  int pdgIdOfParticleReconstructedAsTau();
+  //  bool tauDecaysHadronicallyToOneProng();
+  //  reco::Candidate* getTauMother ?
+  //  size_t getTauMotherId ?
+  //  double getDeltaR(particle 1, particle 2);
+  //  double getMETDeltaPhi();
+  //  double getMETDeltaMagnitude();
+  //  double getMETDeltaR();
 
   void checkIfGenuineTau(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau);
   // Alternative way
