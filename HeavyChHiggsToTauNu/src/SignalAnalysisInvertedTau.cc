@@ -63,7 +63,7 @@ namespace HPlus {
     fRtauAfterTauIDCounter(eventCounter.addCounter("Rtau, all tau candidates")),
     fTausExistCounter(eventCounter.addCounter("Baseline, isolation, all cands")),
     fTauFakeScaleFactorCounter(eventCounter.addCounter("Baseline, tau fake scale factor, all cands")),
-    fTriggerScaleFactorCounter(eventCounter.addCounter("Baseline, trigger scale factor, all cands")),  
+    fTauTriggerScaleFactorCounter(eventCounter.addCounter("Baseline, tau trigger scale factor, all cands")),  
     fBaselineTauIDCounter(eventCounter.addCounter("Baseline, at least one tau")),
     fBaselineEvetoCounter(eventCounter.addCounter("Baseline,electron veto")),
     fBaselineMuvetoCounter(eventCounter.addCounter("Baseline,muon veto")),
@@ -132,6 +132,7 @@ namespace HPlus {
     fCorrelationAnalysis(eventCounter, fHistoWrapper, "HistoName"),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
     fTauTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("tauTriggerEfficiencyScaleFactor"), fHistoWrapper),
+    fMETTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("metTriggerEfficiencyScaleFactor"), fHistoWrapper),
     //    fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
@@ -755,8 +756,8 @@ namespace HPlus {
       if(iEvent.isRealData())
 	fTauTriggerEfficiencyScaleFactor.setRun(iEvent.id().run());
       // Apply trigger scale factor here, because it depends only on tau
-      TauTriggerEfficiencyScaleFactor::Data triggerWeight = fTauTriggerEfficiencyScaleFactor.applyEventWeight((**iTau), iEvent.isRealData(), fEventWeight);
-      increment(fTriggerScaleFactorCounter);
+      TauTriggerEfficiencyScaleFactor::Data tauTriggerWeight = fTauTriggerEfficiencyScaleFactor.applyEventWeight((**iTau), iEvent.isRealData(), fEventWeight);
+      increment(fTauTriggerScaleFactorCounter);
       
       if(fProduce) {
 	std::auto_ptr<std::vector<pat::Tau> > saveTaus(new std::vector<pat::Tau>());
@@ -812,6 +813,7 @@ namespace HPlus {
 
 	  if(jetDataBase.passedEvent()) {
 	    increment(fBaselineJetsCounter);
+
 
 	    //	    METSelection::Data metDataBase = fMETSelection.analyze(iEvent, iSetup, selectedTau, jetDataBase.getAllJets());
 

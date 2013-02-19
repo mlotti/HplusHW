@@ -21,16 +21,19 @@ namespace HPlus {
     ~ScaleFactorUncertaintyManager();
 
     void setScaleFactorUncertainties(bool isFakeTau, double eventWeight,
-                                     double triggerSF, double triggerSFAbsUncertainty,
                                      double fakeTauSF, double fakeTauAbsUncertainty,
                                      double btagSF, double btagSFAbsUncertainty);
-
+    void setTauTriggerScaleFactorUncertainty(double eventWeight, double triggerSF, double triggerSFAbsUncertainty);
+    void setMETTriggerScaleFactorUncertainty(double eventWeight, double triggerSF, double triggerSFAbsUncertainty);
     void setEmbeddingMuonEfficiencyUncertainty(double eventWeight, double muonEff, double muonEffAbsUncertainty);
 
   private:
-     WrappedTH1* hTriggerSF;
-     WrappedTH1* hTriggerSFAbsUncertainty;
-     WrappedTH1* hTriggerSFAbsUncertaintyCounts;
+     WrappedTH1* hTauTriggerSF;
+     WrappedTH1* hTauTriggerSFAbsUncertainty;
+     WrappedTH1* hTauTriggerSFAbsUncertaintyCounts;
+     WrappedTH1* hMETTriggerSF;
+     WrappedTH1* hMETTriggerSFAbsUncertainty;
+     WrappedTH1* hMETTriggerSFAbsUncertaintyCounts;
      WrappedTH1* hFakeTauSF;
      WrappedTH1* hFakeTauAbsUncertainty;
      WrappedTH1* hFakeTauAbsUncertaintyCounts;

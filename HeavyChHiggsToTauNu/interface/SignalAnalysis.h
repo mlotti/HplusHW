@@ -29,6 +29,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTriggerEfficiencyScaleFactor.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METTriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EmbeddingMuonEfficiency.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
@@ -148,7 +149,7 @@ namespace HPlus {
     Count fTausExistCounter;
     Count fTauFakeScaleFactorCounter;
     Count fOneTauCounter;
-    Count fTriggerScaleFactorCounter;
+    Count fTauTriggerScaleFactorCounter;
     Count fGenuineTauCounter;
     Count fVetoTauCounter;
     Count fElectronVetoCounter;
@@ -156,6 +157,7 @@ namespace HPlus {
     Count fMuonVetoCounter;
     Count fMetCutBeforeJetCutCounter;
     Count fNJetsCounter;
+    Count fMETTriggerScaleFactorCounter;
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
@@ -257,6 +259,7 @@ namespace HPlus {
     CorrelationAnalysis fCorrelationAnalysis;
     EvtTopology fEvtTopology;
     TauTriggerEfficiencyScaleFactor fTauTriggerEfficiencyScaleFactor;
+    METTriggerEfficiencyScaleFactor fMETTriggerEfficiencyScaleFactor;
     EmbeddingMuonEfficiency fEmbeddingMuonEfficiency;
     WeightReader fPrescaleWeightReader;
     WeightReader fPileupWeightReader;

@@ -11,6 +11,7 @@ def createEDFilter(param):
         histogramAmbientLevel = param.histogramAmbientLevel,
         trigger = param.trigger.clone(),
         tauTriggerEfficiencyScaleFactor = param.tauTriggerEfficiencyScaleFactor.clone(),
+        metTriggerEfficiencyScaleFactor = param.metTriggerEfficiencyScaleFactor.clone(),
         primaryVertexSelection = param.primaryVertexSelection.clone(),
         ElectronSelection = param.ElectronSelection.clone(),
         MuonSelection = param.MuonSelection.clone(),

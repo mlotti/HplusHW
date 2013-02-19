@@ -46,7 +46,8 @@ namespace HPlus {
 
     void setPrescaleWeight(double w) { fPrescaleWeight = w; }
     void setPileupWeight(double w)   { fPileupWeight = w; }
-    void setTriggerWeight(double w, double au)  { fTriggerWeight = w; fTriggerWeightAbsUnc = au; }
+    void setTauTriggerWeight(double w, double au)  { fTauTriggerWeight = w; fTauTriggerWeightAbsUnc = au; }
+    void setMETTriggerWeight(double w, double au)  { fMETTriggerWeight = w; fMETTriggerWeightAbsUnc = au; }
     void setFillWeight(double w)  { fFillWeight = w; }
     void enableNonIsoLeptons(bool enableNonIsoLeptons)  { fFillNonIsoLeptonVars = enableNonIsoLeptons; }
     void setNvertices(unsigned int n) { fNVertices = n; }
@@ -119,8 +120,10 @@ namespace HPlus {
 
     double fPrescaleWeight;
     double fPileupWeight;
-    double fTriggerWeight;
-    double fTriggerWeightAbsUnc;
+    double fTauTriggerWeight;
+    double fTauTriggerWeightAbsUnc;
+    double fMETTriggerWeight;
+    double fMETTriggerWeightAbsUnc;
     double fBTaggingWeight;
     double fBTaggingWeightAbsUnc;
     double fFillWeight;

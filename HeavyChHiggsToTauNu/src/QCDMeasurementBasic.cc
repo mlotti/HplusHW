@@ -25,7 +25,7 @@ namespace HPlus {
     fPrimaryVertexCounter(eventCounter.addCounter("PrimaryVertex")),
     fTausExistCounter(eventCounter.addCounter("TauCandSelection")),
     fControlPlotsMultipleTausCounter(eventCounter.addCounter("Rejected in ctrl plots (multiple taus)")),
-    fTriggerScaleFactorCounter(eventCounter.addCounter("Trg scale factor")),
+    fTauTriggerScaleFactorCounter(eventCounter.addCounter("Tau trg scale factor")),
     fVetoTauCounter(eventCounter.addCounter("VetoTauSelection")),
     fElectronVetoCounter(eventCounter.addCounter("ElectronSelection")),
     fMuonVetoCounter(eventCounter.addCounter("MuonSelection")),
@@ -70,6 +70,7 @@ namespace HPlus {
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauCandidates"),
     fTauTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("tauTriggerEfficiencyScaleFactor"), fHistoWrapper),
+    fMETTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("metTriggerEfficiencyScaleFactor"), fHistoWrapper),
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WJetsWeight"),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     fSFUncertaintyAfterStandardSelections(fHistoWrapper, "AfterStandardSelections")
@@ -337,9 +338,9 @@ namespace HPlus {
     // note: do not require here that only one tau has been found; instead take first item from mySelectedTau as the tau in the event
     increment(fTausExistCounter);
     // Apply trigger scale factor here, because it depends only on tau
-    TauTriggerEfficiencyScaleFactor::Data triggerWeight = fTauTriggerEfficiencyScaleFactor.applyEventWeight(*(tauCandidateData.getSelectedTau()), iEvent.isRealData(), fEventWeight);
-    fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
-    increment(fTriggerScaleFactorCounter);
+    TauTriggerEfficiencyScaleFactor::Data tauTriggerWeight = fTauTriggerEfficiencyScaleFactor.applyEventWeight(*(tauCandidateData.getSelectedTau()), iEvent.isRealData(), fEventWeight);
+    fTree.setTauTriggerWeight(tauTriggerWeight.getEventWeight(), tauTriggerWeight.getEventWeightAbsoluteUncertainty());
+    increment(fTauTriggerScaleFactorCounter);
     hSelectionFlow->Fill(kQCDOrderTauCandidateSelection);
     // Obtain tau pT bin index
     int myTauPtBinIndex = getTauPtBinIndex(tauCandidateData.getSelectedTau()->pt());
@@ -691,7 +692,7 @@ namespace HPlus {
     // MET leg selection passed
     if (myPassedTauLegStatus) {
       increment(fCoincidenceAfterSelectionCounter);
-      //std::cout << "first selected tau pt=" << tauCandidateData.getSelectedTau()->leadPFChargedHadrCand()->pt() << " trg SF=" << triggerWeight.getEventWeight() << "\tnjets" << jetData.getHadronicJetCount() << std::endl;
+      //std::cout << "first selected tau pt=" << tauCandidateData.getSelectedTau()->leadPFChargedHadrCand()->pt() << " trg SF=" << tauTriggerWeight.getEventWeight() << "\tnjets" << jetData.getHadronicJetCount() << std::endl;
     }
 
     hFeatureMinEtaOfSelectedJetToGapAfterMETLeg[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getMinEtaOfSelectedJetToGap());
@@ -708,11 +709,13 @@ namespace HPlus {
 
     // Uncertainties after standard selections // FIXME: is this needed?
     fSFUncertaintyAfterStandardSelections.setScaleFactorUncertainties(fEventWeight.getWeight(),
-                                                                      triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
                                                                       fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()),
                                                                       fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauCandidateData.getSelectedTau()->eta()),
                                                                       fFakeTauIdentifier.getFakeTauSystematics(tauMatchData.getTauMatchType(), tauCandidateData.getSelectedTau()->eta()),
                                                                       btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+    fSFUncertaintyAfterStandardSelections.setTauTriggerScaleFactorUncertainty(fEventWeight.getWeight(),
+                                                                              tauTriggerWeight.getEventWeight(),
+                                                                              tauTriggerWeight.getEventWeightAbsoluteUncertainty());
 
     if (tauCandidateData.selectedTauPassesNProngsAndRtauButNotIsolation()) {
       // MET leg point for ABCD

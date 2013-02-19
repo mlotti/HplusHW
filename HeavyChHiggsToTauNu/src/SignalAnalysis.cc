@@ -85,7 +85,7 @@ namespace HPlus {
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
     fTauFakeScaleFactorCounter(eventCounter.addCounter("tau fake scale factor")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
-    fTriggerScaleFactorCounter(eventCounter.addCounter("trigger scale factor")),
+    fTauTriggerScaleFactorCounter(eventCounter.addCounter("tau trigger scale factor")),
     fGenuineTauCounter(eventCounter.addCounter("Tau is genuine")),
     fVetoTauCounter(eventCounter.addCounter("tau veto")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
@@ -93,6 +93,7 @@ namespace HPlus {
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
     fMetCutBeforeJetCutCounter(eventCounter.addCounter("MET cut Before Jets")),
     fNJetsCounter(eventCounter.addCounter("njets")),
+    fMETTriggerScaleFactorCounter(eventCounter.addCounter("MET trigger scale factor")),
     fMETCounter(eventCounter.addCounter("MET")),
     //    fRtauAfterMetCounter(eventCounter.Counter("Rtau after MET")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
@@ -203,6 +204,7 @@ namespace HPlus {
     fCorrelationAnalysis(eventCounter, fHistoWrapper, "HistoName"),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
     fTauTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("tauTriggerEfficiencyScaleFactor"), fHistoWrapper),
+    fMETTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("metTriggerEfficiencyScaleFactor"), fHistoWrapper),
     fEmbeddingMuonEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingMuonEfficiency"), fHistoWrapper),
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
@@ -609,9 +611,9 @@ namespace HPlus {
     if(iEvent.isRealData())
       fTauTriggerEfficiencyScaleFactor.setRun(iEvent.id().run());
     // Apply trigger scale factor here, because it depends only on tau
-    TauTriggerEfficiencyScaleFactor::Data triggerWeight = fTauTriggerEfficiencyScaleFactor.applyEventWeight(*(tauData.getSelectedTau()), iEvent.isRealData(), fEventWeight);
-    fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
-    increment(fTriggerScaleFactorCounter);
+    TauTriggerEfficiencyScaleFactor::Data tauTriggerWeight = fTauTriggerEfficiencyScaleFactor.applyEventWeight(*(tauData.getSelectedTau()), iEvent.isRealData(), fEventWeight);
+    fTree.setTauTriggerWeight(tauTriggerWeight.getEventWeight(), tauTriggerWeight.getEventWeightAbsoluteUncertainty());
+    increment(fTauTriggerScaleFactorCounter);
     hSelectionFlow->Fill(kSignalOrderTauID);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderTauID);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderTauID);
@@ -772,6 +774,17 @@ namespace HPlus {
 
     if (myFakeTauStatus) hCtrlEWKFakeTausNjets->Fill(jetData.getHadronicJetCount());
     if(!jetData.passedEvent()) return false;
+    // For data, set the current run number (needed for tau embedding
+    // input, doesn't harm for normal data except by wasting small
+    // amount of time)
+    if(iEvent.isRealData())
+      fMETTriggerEfficiencyScaleFactor.setRun(iEvent.id().run());
+    METSelection::Data metDataTmp = fMETSelection.silentAnalyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getAllJets());
+    // Apply trigger scale factor here for now, SF calculated for tau+3 jets events
+    METTriggerEfficiencyScaleFactor::Data metTriggerWeight = fMETTriggerEfficiencyScaleFactor.applyEventWeight(*(metDataTmp.getSelectedMET()), iEvent.isRealData(), fEventWeight);
+    fTree.setMETTriggerWeight(metTriggerWeight.getEventWeight(), metTriggerWeight.getEventWeightAbsoluteUncertainty());
+    increment(fMETTriggerScaleFactorCounter);
+
     fCommonPlotsAfterJetSelection->fill();
     if (myFakeTauStatus) fCommonPlotsAfterJetSelectionFakeTaus->fill();
 
@@ -1104,11 +1117,16 @@ namespace HPlus {
     hTransverseMassVsNjets->Fill(transverseMass, jetData.getHadronicJetCount());
     fSFUncertaintiesAfterSelection.setScaleFactorUncertainties(myFakeTauStatus,
                                                             fEventWeight.getWeight(),
-                                                            triggerWeight.getEventWeight(),
-                                                            triggerWeight.getEventWeightAbsoluteUncertainty(),
                                                             fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()),
                                                             fFakeTauIdentifier.getFakeTauSystematics(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()),
                                                             btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+    fSFUncertaintiesAfterSelection.setTauTriggerScaleFactorUncertainty(fEventWeight.getWeight(),
+                                                                       tauTriggerWeight.getEventWeight(),
+                                                                       tauTriggerWeight.getEventWeightAbsoluteUncertainty());
+    fSFUncertaintiesAfterSelection.setMETTriggerScaleFactorUncertainty(fEventWeight.getWeight(),
+                                                                       metTriggerWeight.getEventWeight(),
+                                                                       metTriggerWeight.getEventWeightAbsoluteUncertainty());
+
     if(bTauEmbeddingStatus)
       fSFUncertaintiesAfterSelection.setEmbeddingMuonEfficiencyUncertainty(fEventWeight.getWeight(),
                                                                            embeddingMuonData.getEventWeight(),
@@ -1119,11 +1137,15 @@ namespace HPlus {
       hEWKFakeTausTransverseMassVsNjets->Fill(transverseMass, jetData.getHadronicJetCount());
       fEWKFakeTausSFUncertaintiesAfterSelection.setScaleFactorUncertainties(myFakeTauStatus,
                                                                             fEventWeight.getWeight(),
-                                                                            triggerWeight.getEventWeight(),
-                                                                            triggerWeight.getEventWeightAbsoluteUncertainty(),
                                                                             fFakeTauIdentifier.getFakeTauScaleFactor(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()),
                                                                             fFakeTauIdentifier.getFakeTauSystematics(tauMatchData.getTauMatchType(), tauData.getSelectedTau()->eta()),
                                                                             btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+      fEWKFakeTausSFUncertaintiesAfterSelection.setTauTriggerScaleFactorUncertainty(fEventWeight.getWeight(),
+                                                                                    tauTriggerWeight.getEventWeight(),
+                                                                                    tauTriggerWeight.getEventWeightAbsoluteUncertainty());
+      fEWKFakeTausSFUncertaintiesAfterSelection.setMETTriggerScaleFactorUncertainty(fEventWeight.getWeight(),
+                                                                                    metTriggerWeight.getEventWeight(),
+                                                                                    metTriggerWeight.getEventWeightAbsoluteUncertainty());
     }
 
 
