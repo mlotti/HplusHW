@@ -1572,6 +1572,9 @@ class Dataset:
     def setName(self, name):
         self.name = name
 
+    def forEach(self, function):
+        return [function(self)]
+
     ## Set the centre-of-mass energy (in TeV) as string
     def setEnergy(self, energy):
         if not isinstance(energy, basestring):
@@ -1611,6 +1614,12 @@ class Dataset:
             return self.info["luminosity"]
         except KeyError:
             raise Exception("Dataset %s is data, but luminosity has not been set yet. You have to explicitly set the luminosity with setLuminosity() method." % self.name)
+
+    def setProperty(self, key, value):
+        self.info[key] = value
+
+    def getProperty(self, key):
+        return self.info[key]
 
     def isData(self):
         return self._isData
@@ -1833,6 +1842,12 @@ class DatasetMerged:
 
     def setName(self, name):
         self.name = name
+
+    def forEach(self, function):
+        ret = []
+        for d in self.datasets:
+            ret.extend(d.forEach(function))
+        return ret
 
     def setEnergy(self, energy):
         for d in self.datasets:
