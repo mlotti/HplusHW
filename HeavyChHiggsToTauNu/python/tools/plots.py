@@ -33,9 +33,11 @@
 # than with datasetsd.DatasetManager, there is absolutely no problem
 # in doing so.
 
-import ROOT
+import sys
 import array
 import math
+
+import ROOT
 
 import dataset
 import histograms
@@ -1310,7 +1312,12 @@ class MCPlot(PlotSameBase):
 # class (if the required change is relatively small), or creating
 # another class (if the change is large).
 # <ul>
-# <li> There is always one histogram with the name "Data" for collision data </li>
+# <li> There can be exactly one histogram with the name "Data" for collision data
+#      <ul>
+#      <li> If the "Data" histogram is not there, this class works as
+#           plots.MCPlot, except normalization by cross section is not
+#           supported. Also the data/MC ratio is not drawn. </li>
+#      </ul></li>
 # <li> There is always at least one MC histogram </li>
 # <li> Only the MC histograms are stacked, and it should be done with the
 #      stackMCHistograms() method </li>
@@ -1356,6 +1363,10 @@ class DataMCPlot(PlotSameBase, PlotRatioBase):
     # \param createRatio  Create also the ratio pad?
     # \param kwargs       Keyword arguments, forwarded to PlotSameBase.createFrame() or PlotRatioBase._createFrameRatio()
     def createFrame(self, filename, createRatio=False, **kwargs):
+        if createRatio and not self.histoMgr.hasHisto("Data"):
+            print >> sys.stderr, "Warning: Trying to createdata/MC ratio, but there is no 'Data' histogram."
+            createRatio = False
+
         if not createRatio:
             PlotSameBase.createFrame(self, filename, **kwargs)
         else:
