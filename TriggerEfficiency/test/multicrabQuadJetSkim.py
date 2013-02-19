@@ -7,6 +7,16 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflows as multicrabWo
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTriggerEff as multicrabWorkflowsTriggerEff
 #multicrabWorkflowsTriggerEff.addQuadJetLegSkim_53X_v1(multicrabWorkflows.datasets)
 
+datasets_SingleMu = [
+    "SingleMu_190456-190738_2012A_Jul13",
+    "SingleMu_190782-190949_2012A_Aug06",
+    "SingleMu_191043-193621_2012A_Jul13",
+    "SingleMu_193834-196531_2012B_Jul13",
+    "SingleMu_198022-198523_2012C_Aug24",
+    "SingleMu_198941-203742_2012C_Prompt",
+    "SingleMu_203777-208686_2012D_Prompt",
+]
+
 datasets_Tau = [
     "Tau_190456-190738_2012A_Jul13",
     "Tau_190782-190949_2012A_Aug06",
@@ -150,10 +160,12 @@ datasets_SingleTop = [
     "Tbar_s-channel_TuneZ2star_Summer12",
 ]
 
-workflow = "analysis_quadjetleg_v53_v1"
+#workflow = "analysis_quadjetleg_v53_v1"
+workflow = "triggerQuadJet_skim_v53_v1"
+
 
 tasks = [
-     ("QuadJetLeg", datasets_MultiJet+datasets_QCD+datasets_VV+datasets_SingleTop+datasets_TT_EWK),
+     ("QuadJetLeg", datasets_SingleMu),#+datasets_QCD+datasets_VV+datasets_SingleTop+datasets_TT_EWK),
 #("QCD_tot_HLT",datasets_QCD),
 #    ("Tau", datasets_Tau),
 #    ("MultiJet", datasets_MultiJet),
