@@ -37,15 +37,15 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const ForwardJetVeto *forwardJetVeto, bool passedEvent);
+      Data();
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
       //      double closestDeltaPhi() const { return fFakeMETVeto->fClosestDeltaPhi; }
 
+      friend class ForwardJetVeto;
     private:
-      const  ForwardJetVeto *fForwardJetVeto;
-      const bool fPassedEvent;
+      bool fPassedEvent;
     };
 
     ForwardJetVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);

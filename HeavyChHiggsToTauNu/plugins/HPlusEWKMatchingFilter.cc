@@ -19,15 +19,18 @@ class HPlusEWKMatchingFilter: public edm::EDFilter {
 
   virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
-  HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
+  HPlus::HistoWrapper histoWrapper;
+  HPlus::EventCounter eventCounter;
   HPlus::EWKMatching analysis;
 };
 
 HPlusEWKMatchingFilter::HPlusEWKMatchingFilter(const edm::ParameterSet& pset):
-  eventCounter(pset), eventWeight(pset), analysis(pset, eventCounter, eventWeight)
+  eventWeight(pset),
+  histoWrapper(eventWeight, pset.getUntrackedParameter<std::string>("histogramAmbientLevel")),
+  eventCounter(pset, eventWeight, histoWrapper),
+  analysis(pset, eventCounter, eventWeight, histoWrapper)
 {
-  eventCounter.setWeightPointer(eventWeight.getWeightPtr());
   analysis.produces(this);
 }
 HPlusEWKMatchingFilter::~HPlusEWKMatchingFilter() {}

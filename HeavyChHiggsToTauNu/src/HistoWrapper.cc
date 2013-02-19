@@ -1,20 +1,36 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
+#include<iostream>
+
+namespace {
+  std::string histoLevelNames[HPlus::HistoWrapper::kNumberOfLevels] = {
+    "Systematics",
+    "Vital",
+    "Informative",
+    "Debug"
+  };
+}
+
 namespace HPlus {
 
-  HistoWrapper::HistoWrapper(EventWeight& eventWeight, std::string level):
+  HistoWrapper::HistoWrapper(const EventWeight& eventWeight, std::string level):
     fEventWeight(eventWeight),
     fIsEnabled(true)
   { 
+    for(int i=0; i<kNumberOfLevels; ++i)
+      fHistoLevelStats[i] = 0;
+
     // Find level from string
-    if (level == "Vital") {
+    if (level == "Systematics") {
+      fAmbientLevel = kSystematics;
+    } else if (level == "Vital") {
       fAmbientLevel = kVital;
     } else if (level == "Informative") {
       fAmbientLevel = kInformative;
     } else if (level == "Debug") {
-      fAmbientLevel = kDebug;
+      fAmbientLevel = kInformative;
     } else {
-      throw cms::Exception("Configuration") << "HistoWrapper: Error in ambient histogram level! Valid options are: 'Vital', 'Informative', 'Debug' (you specified: '" << level << "'";
+      throw cms::Exception("Configuration") << "HistoWrapper: Error in ambient histogram level! Valid options are: 'Systematics', 'Vital', 'Informative', 'Debug' (you specified: '" << level << "'";
     }
   }
   HistoWrapper::~HistoWrapper() {
@@ -34,6 +50,16 @@ namespace HPlus {
         return true;
     }
     return false;
+  }
+
+  void HistoWrapper::printHistoStatistics() const {
+    std::cout << "HistoWrapper:" << std::endl;
+    int total = 0;
+    for(int i=0; i<kNumberOfLevels; ++i) {
+      std::cout << "  Level " << histoLevelNames[i] << " (" << i << ") " << fHistoLevelStats[i] << " histograms" << std::endl;
+      total += fHistoLevelStats[i];
+    }
+    std::cout << "  Total " << total << " histograms booked" << std::endl;
   }
 
   WrappedTH1::WrappedTH1(HistoWrapper& histoWrapper, TH1* histo, HistoWrapper::HistoLevel level)

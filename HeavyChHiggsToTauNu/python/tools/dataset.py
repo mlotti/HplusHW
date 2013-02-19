@@ -34,25 +34,51 @@ def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
     if "namePostfix" in kwargs:
         raise Exception("'namePostfix' keyword argument not allowed")
 
-    nameList = []
+    datasets = DatasetManager()
     for d in multiDirs:
         if isinstance(d, str):
-            nameList.append( (os.path.join(d, "multicrab.cfg"), "") )
+            dset = getDatasetsFromMulticrabCfg(directory=d, **kwargs)
         else:
-            nameList.append( (os.path.join(d[0], "multicrab.cfg"), d[1]) )
+            dset = getDatasetsFromMulticrabCfg(directory=d[0], namePostfix=d[1], **kwargs)
+        datasets.extend(dset)
 
-    datasets = DatasetManager()
-    for cfg, postfix in nameList:
-        d = getDatasetsFromMulticrabCfg(cfgfile=cfg, namePostfix=postfix, **kwargs)
-        datasets.extend(d)
     return datasets
 
 ## Construct DatasetManager from a multicrab.cfg.
 #
 # \param kwargs   Keyword arguments (see below) 
 #
+# All keyword arguments are forwarded to readFromMulticrabCfg.
+#
+# All keyword arguments <b>except</b> the ones below are forwarded to
+# DatasetManagerCreator.createDatasetManager()
+# \li \a directory
+# \li \a cfgfile
+# \li \a excludeTasks
+# \li \a includeOnlyTasks
+# \li \a namePostfix
+#
+# \return DatasetManager object
+# 
+# \see dataset.readFromMulticrabCfg
+def getDatasetsFromMulticrabCfg(**kwargs):
+    _args = copy.copy(kwargs)
+    for argName in ["directory", "cfgfile", "excludeTasks", "includeOnlyTasks", "namePostfix"]:
+        try:
+            del _args[argName]
+        except KeyError:
+            pass
+
+    managerCreator = readFromMulticrabCfg(**kwargs)
+    return managerCreator.createDatasetManager(**_args)
+
+## Construct DatasetManagerConstructor from a multicrab.cfg.
+#
+# \param kwargs   Keyword arguments (see below) 
+#
 # <b>Keyword arguments</b>
 # \li \a opts              Optional OptionParser object. Should have options added with addOptions() and multicrab.addOptions().
+# \li \a directory         Directory where to look for \a cfgfile.
 # \li \a cfgfile           Path to the multicrab.cfg file (for default, see multicrab.getTaskDirectories())
 # \li \a excludeTasks      String, or list of strings, to specify regexps.
 #                          If a dataset name matches to any of the
@@ -62,26 +88,25 @@ def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
 #                          regexps. Only datasets whose name matches
 #                          to any of the regexps are kept. Conflicts
 #                          with \a excludeTasks.
-# \li \a dataEra           Optional data era string. If given, keeps data
-#                          datasets only from this era, and sets the
-#                          TDirectory path replacement scheme for MC
-#                          datasets. Forwarded to getDatasetsFromCrabDirs()
-#                          and eventually to dataset.Dataset.__init__()
-# \li Rest are forwarded to getDatasetsFromCrabDirs()
+# \li Rest are forwarded to readFromCrabDirs()
 #
-# \return DatasetManager object
+# \return DatasetManagerCreator object
 # 
 # The section names in multicrab.cfg are taken as the dataset names
 # in the DatasetManager object.
-def getDatasetsFromMulticrabCfg(**kwargs):
-    _args = copy.copy(kwargs)
+def readFromMulticrabCfg(**kwargs):
     opts = kwargs.get("opts", None)
     taskDirs = []
     dirname = ""
-    if "cfgfile" in kwargs:
-        taskDirs = multicrab.getTaskDirectories(opts, kwargs["cfgfile"])
-        dirname = os.path.dirname(kwargs["cfgfile"])
-        del _args["cfgfile"]
+    if "directory" in kwargs or "cfgfile" in kwargs:
+        _args = {}
+        if "directory" in kwargs:
+            dirname = kwargs["directory"]
+            _args["directory"] = dirname
+        if "cfgfile" in kwargs:
+            _args["filename"] = kwargs["cfgfile"]
+            dirname = os.path.dirname(os.path.join(dirname, kwargs["cfgfile"]))
+        taskDirs = multicrab.getTaskDirectories(opts, **_args)
     else:
         taskDirs = multicrab.getTaskDirectories(opts)
 
@@ -106,7 +131,6 @@ def getDatasetsFromMulticrabCfg(**kwargs):
                 continue
             tmp.append(task)
         taskDirs = tmp
-        del _args["excludeTasks"]
     if "includeOnlyTasks" in kwargs:
         include = getRe(kwargs["includeOnlyTasks"])
         tmp = []
@@ -119,57 +143,58 @@ def getDatasetsFromMulticrabCfg(**kwargs):
             if found:
                 tmp.append(task)
         taskDirs = tmp
-        del _args["includeOnlyTasks"]
 
-    dataEra = kwargs.get("dataEra", None)
-
-    datasetMgr = getDatasetsFromCrabDirs(taskDirs, **_args) # Tassa tapahtuu virhe!!!
-
-    if len(dirname) > 0:
-        datasetMgr._setBaseDirectory(dirname)
-
-    if dataEra != None:
-        if dataEra == "Run2011A":
-            datasetMgr.remove(filter(lambda name: not "2011A_" in name, datasetMgr.getDataDatasetNames()))
-        elif dataEra == "Run2011B":
-            datasetMgr.remove(filter(lambda name: not "2011B_" in name, datasetMgr.getDataDatasetNames()))
-        elif dataEra == "Run2011AB":
-            pass
-        else:
-            raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB" % dataEra)
-
-    return datasetMgr
+    managerCreator = readFromCrabDirs(taskDirs, baseDirectory=dirname, **kwargs)
+    return managerCreator
 
 ## Construct DatasetManager from a list of CRAB task directory names.
+# 
+# \param taskdirs     List of strings for the CRAB task directories (relative
+#                     to the working directory), forwarded to readFromCrabDirs()
+# \param kwargs       Keyword arguments (see below)
+#
+# All keyword arguments are forwarded to readFromCrabDirs().
+#
+# All keyword arguments <b>except</b> the ones below are forwarded to
+# DatasetManagerCreator.createDatasetManager()
+# \li \a namePostfix
+#
+# \see readFromCrabDirs()
+def getDatasetsFromCrabDirs(taskdirs, **kwargs):
+    _args = copy.copy(kwargs)
+    for argname in ["namePostfix"]:
+        try:
+            del _args[argName]
+        except KeyError:
+            pass
+    
+    managerCreator = readFromCrabDirs(taskdirs, **kwargs)
+    return managerCreator.createDatasetManager(**_args)
+
+
+## Construct DatasetManagerCreator from a list of CRAB task directory names.
 # 
 # \param taskdirs     List of strings for the CRAB task directories (relative
 #                     to the working directory)
 # \param kwargs       Keyword arguments (see below) 
 # 
-# <b>Keyword arguments</b>
+# <b>Keyword arguments</b>, all are also forwarded to readFromRootFiles()
 # \li \a opts         Optional OptionParser object. Should have options added with addOptions().
 # \li \a namePostfix  Postfix for the dataset names (default: '')
-# \li Rest are forwarded to getDatasetsFromRootFiles()
 #
-# \return DatasetManager object
+# \return DatasetManagerCreator object
 # 
-# The basename of the task directories are taken as the dataset
-# names in the DatasetManager object (e.g. for directory '../Foo',
+# The basename of the task directories are taken as the dataset names
+# in the DatasetManagerCreator object (e.g. for directory '../Foo',
 # 'Foo' will be the dataset name)
-def getDatasetsFromCrabDirs(taskdirs, **kwargs):
-    _args = copy.copy(kwargs)
+def readFromCrabDirs(taskdirs, **kwargs):
     inputFile = None
     if "opts" in kwargs:
         opts = kwargs["opts"]
-        del _args["opts"]
         inputFile = opts.input
     else:
         inputFile = _optionDefaults["input"]
     postfix = kwargs.get("namePostfix", "")
-    try:
-        del _args["namePostfix"]
-    except KeyError:
-        pass
 
     dlist = []
     noFiles = False
@@ -177,7 +202,6 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
         files = glob.glob(os.path.join(d, "res", inputFile))
         if len(files) > 1:
             raise Exception("Only one file should match the input (%d matched) for task %s" % (len(files), d))
-            return 1
         elif len(files) == 0:
             print >> sys.stderr, "Ignoring dataset %s: no files matched to '%s' in task directory %s" % (d, inputFile, os.path.join(d, "res"))
             noFiles = True
@@ -195,52 +219,68 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
     if len(dlist) == 0:
         raise Exception("No datasets from CRAB task directories %s" % ", ".join(taskdirs))
 
-    return getDatasetsFromRootFiles(dlist, **_args)
+    return readFromRootFiles(dlist, **kwargs)
 
 ## Construct DatasetManager from a list of CRAB task directory names.
 # 
 # \param rootFileList  List of (name, filename) pairs (both should be strings).
 #                     'name' is taken as the dataset name, and 'filename' as
 #                      the path to the ROOT file.
-# \param kwargs        Keyword arguments (see below) 
-# 
-# <b>Keyword arguments</b>
-# \li \a counters      String for a directory name inside the ROOT files for the event counter histograms (default: 'signalAnalysis/counters').
-# \li Rest are forwarded to dataset.Dataset.__init__()
+# \param kwargs        Keyword arguments, forwarded to readFromRootFiles() and dataset.Dataset.__init__()
 #
 # \return DatasetManager object
 def getDatasetsFromRootFiles(rootFileList, **kwargs):
-    counters = kwargs.get("counters", _optionDefaults["counterdir"])
-    # Pass the rest of the keyword arguments, except 'counters', to Dataset constructor
-    _args = copy.copy(kwargs)
-    try:
-        del _args["counters"]
-    except KeyError:
-        pass
+    managerCreator = readFromRootFiles(rootFileList, **kwargs)
+    return managerCreator.createDatasetManager(**kwargs)
 
-    datasets = DatasetManager()
-    for name, f in rootFileList:
-        dset = Dataset(name, f, counters, **_args)
-        datasets.append(dset)
-    return datasets
+## Construct DatasetManagerCreator from a list of CRAB task directory names.
+# 
+# \param rootFileList  List of (name, filename) pairs (both should be strings).
+#                     'name' is taken as the dataset name, and 'filename' as
+#                      the path to the ROOT file. Forwarded to DatasetManagerCreator.__init__()
+# \param kwargs        Keyword arguments (see below), all forwarded to DatasetManagerCreator.__init__()
+#
+# <b>Keyword arguments</b>
+# \li \a opts          Optional OptionParser object. Should have options added with addOptions().
+#
+# \return DatasetManagerCreator object
+#
+# If \a opts exists, and the \a opts.listAnalyses is set to True, list
+# all available analyses (with DatasetManagerCreator.printAnalyses()),
+# and exit.
+def readFromRootFiles(rootFileList, **kwargs):
+    creator = DatasetManagerCreator(rootFileList, **kwargs)
+    if "opts" in kwargs and kwargs["opts"].listAnalyses:
+        creator.printAnalyses()
+        sys.exit(0)
+    return creator
+        
 
 ## Default command line options
 _optionDefaults = {
     "input": "histograms-*.root",
-    "counterdir": "signalAnalysis/counters",
-    "analysisBaseName": "signalAnalysis",
 }
 
 ## Add common dataset options to OptionParser object.
 #
 # \param parser   OptionParser object
-def addOptions(parser):
+def addOptions(parser, analysisName=None, searchMode=None, dataEra=None, optimizationMode=None):
     parser.add_option("-i", dest="input", type="string", default=_optionDefaults["input"],
                       help="Pattern for input root files (note: remember to escape * and ? !) (default: '%s')" % _optionDefaults["input"])
     parser.add_option("-f", dest="files", type="string", action="append", default=[],
                       help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
-    parser.add_option("--counterDir", "-c", dest="counterdir", type="string", default=_optionDefaults["counterdir"],
-                      help="TDirectory name containing the counters (default: %s" % _optionDefaults["counterdir"])
+    parser.add_option("--analysisName", dest="analysisName", type="string", default=analysisName,
+                      help="Override default analysisName (%s, plot script specific)" % analysisName)
+    parser.add_option("--searchMode", dest="searchMode", type="string", default=searchMode,
+                      help="Override default searchMode (%s, plot script specific)" % searchMode)
+    parser.add_option("--dataEra", dest="dataEra", type="string", default=dataEra,
+                      help="Override default dataEra (%s, plot script specific)" % dataEra)
+    parser.add_option("--optimizationMode", dest="optimizationMode", type="string", default=optimizationMode,
+                      help="Override default optimizationMode (%s, plot script specific)" % optimizationMode)
+    parser.add_option("--list", dest="listAnalyses", action="store_true", default=False,
+                      help="List available analysis name information, and quit.")
+    parser.add_option("--counterDir", "-c", dest="counterDir", type="string", default=None,
+                      help="TDirectory name containing the counters, relative to the analysis directory (default: analysisDirectory+'/counters')")
 
 
 ## Represents counter count value with uncertainty.
@@ -1179,6 +1219,10 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
     # String representing the current normalization scheme
 
 
+class AnalysisNotFoundException(Exception):
+    def __init__(self, message):
+        Exception.__init__(self, message)
+
 ## Dataset class for histogram access from one ROOT file.
 # 
 # The default values for cross section/luminosity are read from
@@ -1195,9 +1239,14 @@ class Dataset:
     ## Constructor.
     # 
     # \param name              Name of the dataset (can be anything)
-    # \param fname             Path to the ROOT file of the dataset
+    # \param tfile             ROOT.TFile object for the dataset
+    # \param analysisName      Base part of the analysis directory name
+    # \param searchMode        String for search mode
+    # \param dataEra           String for data era
+    # \param optimizationMode  String for optimization mode (optional)
+    # \param weightedCounters  If True, pick the counters from the 'weighted' subdirectory
     # \param counterDir        Name of the directory in the ROOT file for
-    #                          event counter histograms. If None is given, it
+    #                          event counter histograms. If None is given,
     #                          is assumed that the dataset has no counters.
     #                          This also means that the histograms from this
     #                          dataset can not be normalized unless the
@@ -1208,10 +1257,6 @@ class Dataset:
     #                          directory. The weighted counters are taken
     #                          into account with \a useWeightedCounters
     #                          argument
-    # \param weightedCounters  If True, pick the counters from the 'weighted' subdirectory
-    # \param analysisBaseName  Base part of the analysis directory name (None for default, specified in _optionDefaults, only applicable for MC)
-    # \param dataEra           String for data era (None for not to do the replacement, only applicable for MC)
-    # \param doEraReplace      Boolean flag to indicate if the era replacement should really be done
     # 
     # Opens the ROOT file, reads 'configInfo/configInfo' histogram
     # (if it exists), and reads the main event counter
@@ -1222,22 +1267,20 @@ class Dataset:
     # workflow such that for MC we run analyzers for all data eras.
     # This means that the TDirectory names will be different for data
     # and MC, such that in MC the era name is appended to the
-    # directory name. In order to easily pick the data eras from plot
-    # scripts, Dataset supports simple replacement scheme in the
-    # TDirectory names for all histogram accesses (so this deals with
-    # histograms for both plots and counters). The information must be
-    # given in the constructor, because the counters are read in the
-    # construction time.
-    def __init__(self, name, fname, counterDir, weightedCounters=True, analysisBaseName=None, dataEra=None, doEraReplace=True):
+    # directory name. 
+    #
+    # The final directory name is
+    # data: analysisName+searchMode+optimizationMode
+    # MC:   analysisName+searchMode+dataEra+optimizationMode
+    def __init__(self, name, tfile, analysisName, searchMode=None, dataEra=None, optimizationMode=None, weightedCounters=True, counterDir="counters"):
         self.name = name
-        self._setBaseDirectory(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(fname)))))
-        self.file = ROOT.TFile.Open(fname)
-        if self.file == None:
-            raise Exception("Unable to open ROOT file '%s'"%fname)
+        self.file = tfile
+        # Now this is really an uhly hack
+        self._setBaseDirectory(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(self.file.GetName())))))
 
         configInfo = self.file.Get("configInfo")
         if configInfo == None:
-            raise Exception("configInfo directory is missing from file %s" % fname)
+            raise Exception("configInfo directory is missing from file %s" % self.file.GetName())
 
         self.info = _rescaleInfo(_histoToDict(self.file.Get("configInfo").Get("configinfo")))
         if "energy" in self.info:
@@ -1250,16 +1293,28 @@ class Dataset:
 
         self._isData = "data" in self.dataVersion
         self._weightedCounters = weightedCounters
-        if analysisBaseName == None:
-            self._analysisBaseName = _optionDefaults["analysisBaseName"]
-        else:
-            self._analysisBaseName = analysisBaseName
-        self._dataEra = dataEra
-        self._doEraReplace = doEraReplace
-        if counterDir != None:
-            self._unweightedCounterDir = counterDir
-            self._weightedCounterDir = counterDir+"/weighted"
 
+        self._analysisName = analysisName
+        self._searchMode = searchMode
+        self._dataEra = dataEra
+        self._optimizationMode = optimizationMode
+
+        self._analysisDirectoryName = self._analysisName
+        if self._searchMode is not None:
+            self._analysisDirectoryName += self._searchMode
+        if self.isMC() and self._dataEra is not None:
+            self._analysisDirectoryName += self._dataEra
+        if self._optimizationMode is not None:
+            self._analysisDirectoryName += self._optimizationMode
+
+        # Check that analysis directory exists
+        if self.file.Get(self._analysisDirectoryName) == None:
+            raise AnalysisNotFoundException("Analysis directory '%s' does not exist in file '%s'" % (self._analysisDirectoryName, self.file.GetName()))
+        self._analysisDirectoryName += "/"
+
+        self._unweightedCounterDir = counterDir
+        if counterDir is not None:
+            self._weightedCounterDir = counterDir + "/weighted"
             self._readCounters()
 
     ## Close the file
@@ -1276,29 +1331,39 @@ class Dataset:
 
     ## Clone the Dataset object
     # 
-    # Nothing is shared between the returned copy and this object.
+    # Nothing is shared between the returned copy and this object,
+    # except the ROOT file object
     #
     # Use case is creative dataset manipulations, e.g. copying ttbar
     # to another name and scaling the cross section by the BR(t->H+)
     # while also keeping the original ttbar with the original SM cross
     # section.
     def deepCopy(self):
-        d = Dataset(self.name, self.file.GetName(), self._unweightedCounterDir, self._weightedCounters, self._analysisBaseName, self._dataEra, self._doEraReplace)
+        d = Dataset(self.name, self.file, self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._weightedCounters, self._unweightedCounterDir)
         d.info.update(self.info)
         d.nAllEvents = self.nAllEvents
         return d
 
     ## Get ROOT histogram (or actually any object from the analysis directory)
     #
-    # \param name   Full path to the ROOT object within the ROOT file
+    # \param name    Path of the ROOT object relative to the analysis
+    #                root directory
     #
-    # If dataset is MC, and the data era has been set, replaces the
-    # analysis base name part in \a name with one containing the data
-    # era.
+    # If name starts with slash ('/'), it is interpreted as a absolute
+    # path within the ROOT file.
     def _getRootHisto(self, name):
-        if self.isMC() and self._dataEra != None and self._doEraReplace:
-            name = name.replace(self._analysisBaseName, self._analysisBaseName+self._dataEra, 1) # replace only the first occurrance
-        return (self.file.Get(name), name)
+        if name[0] == '/':
+            realName = name[1:]
+        else:
+            realName = self._analysisDirectoryName + name
+
+        h = self.file.Get(realName)
+        # below it is important to use '==' instead of 'is',
+        # because null TObject == None, but is not None
+        if h == None:
+            raise Exception("Unable to find histogram '%s' (requested '%s') from file '%s'" % (realName, name, self.file.GetName()))
+
+        return (h, realName)
 
     ## Read counters
     def _readCounters(self):
@@ -1306,8 +1371,6 @@ class Dataset:
         (d, realDir) = self._getRootHisto(self.counterDir)
         if d == None:
             msg = "Could not find counter directory %s from file %s." % (realDir, self.file.GetName())
-            if realDir != self.counterDir:
-                msg += "\nThe requested counter directory was %s, and the path was modified because of dataEra." % self.counterDir
             raise Exception(msg)
         if d.Get("counter") != None:
             ctr = _histoToCounter(d.Get("counter"))
@@ -1325,14 +1388,10 @@ class Dataset:
             (d, realDir) = self._getRootHisto(self.counterDir)
             if d == None:
                 msg = "Could not find counter directory %s from file %s" % (realDir, self.file.GetName())
-                if realDir != self.counterDir:
-                    msg += "\nThe requested counter directory was %s, and the path was modified because of dataEra." % self.counterDir
                 raise Exception(msg)
             h = d.Get("counter")
             if h == None:
                 msg = "No TH1 'counter' in directory '%s' of ROOT file '%s'" % (realDir, self.file.GetName())
-                if realDir != self.counterDir:
-                    msg += "\nThe requested directory was %s, and it was replaced because of dataEra." % self.counterDir
                 raise Exception(msg)
             ctr = _histoToCounter(h)
             h.Delete()
@@ -1345,6 +1404,9 @@ class Dataset:
 
     def setName(self, name):
         self.name = name
+
+    def forEach(self, function):
+        return [function(self)]
 
     ## Set the centre-of-mass energy (in TeV) as string
     def setEnergy(self, energy):
@@ -1385,6 +1447,12 @@ class Dataset:
             return self.info["luminosity"]
         except KeyError:
             raise Exception("Dataset %s is data, but luminosity has not been set yet. You have to explicitly set the luminosity with setLuminosity() method." % self.name)
+
+    def setProperty(self, key, value):
+        self.info[key] = value
+
+    def getProperty(self, key):
+        return self.info[key]
 
     def isData(self):
         return self._isData
@@ -1476,11 +1544,6 @@ class Dataset:
         else:
             pname = name
             (h, realName) = self._getRootHisto(pname)
-            if h is None:
-                msg = "Unable to find histogram '%s' from file '%s'" % (realName, self.file.GetName())
-                if realName != pname:
-                    msg += "\nThe requested histogram was %s, and the path was modified because of dataEra." % self.counterDir
-                raise Exception(msg)
             name = h.GetName()+"_"+self.name
             if modify is not None:
                 h = modify(h)
@@ -1492,33 +1555,24 @@ class Dataset:
     # \param directory   Path of the directory in the ROOT file
     # \param predicate   Append the directory name to the return list only if
     #                    predicate returns true for the name. Predicate
-    #                    should be a function taking a string as an
+    #                    should be a function taking an object in the directory as an
     #                    argument and returning a boolean.
     # 
     # \return List of names in the directory.
-    def getDirectoryContent(self, directory, predicate=lambda x: True):
+    def getDirectoryContent(self, directory, predicate=None):
         (d, realDir) = self._getRootHisto(directory)
         if d == None:
             msg = "No object %s in file %s" % (realDir, self.file.GetName())
             if realDir != d:
                 msg += "\nThe requested directory was %s, and the path was modified because of dataEra." % self.counterDir
             raise Exception(msg)
-        dirlist = d.GetListOfKeys()
 
-        # Suppress the warning message of missing dictionary for some iterator
-        backup = ROOT.gErrorIgnoreLevel
-        ROOT.gErrorIgnoreLevel = ROOT.kError
-        diriter = dirlist.MakeIterator()
-        ROOT.gErrorIgnoreLevel = backup
+        # wrap the predicate
+        wrapped = None
+        if predicate is not None:
+            wrapped = lambda key: predicate(key.ReadObj())
 
-        key = diriter.Next()
-
-        ret = []
-        while key:
-            if predicate(key.ReadObj()):
-                ret.append(key.GetName())
-            key = diriter.Next()
-        return ret
+        return aux.listDirectoryContent(d, wrapped)
 
     def _setBaseDirectory(self,base):
         self.basedir = base
@@ -1620,6 +1674,12 @@ class DatasetMerged:
 
     def setName(self, name):
         self.name = name
+
+    def forEach(self, function):
+        ret = []
+        for d in self.datasets:
+            ret.extend(d.forEach(function))
+        return ret
 
     def setEnergy(self, energy):
         for d in self.datasets:
@@ -2138,6 +2198,290 @@ class DatasetManager:
     ## \var basedir
     # Directory (absolute/relative to current working directory) where
     # the luminosity JSON file is located (see loadLuminosities())
+
+## Precursor dataset, helper class for DatasetManagerCreator
+#
+# This holds the name, ROOT file, and data/MC status of a dataset.
+class DatasetPrecursor:
+    def __init__(self, name, filename):
+        self._name = name
+        self._filename = filename
+
+        self._rootFile = ROOT.TFile.Open(self._filename)
+        # Below is important to use '==' instead of 'is' to check for
+        # null file
+        if self._rootFile == None:
+            raise Exception("Unable to open ROOT file '%s' for dataset '%s'" % (self._filename, self._name))
+
+        dataVersion = self._rootFile.Get("configInfo/dataVersion")
+        if dataVersion == None:
+            raise Exception("Unable to find 'configInfo/dataVersion' from ROOT file '%s'" % self._filename)
+
+        self._isData = "data" in dataVersion.GetTitle()
+
+    def getName(self):
+        return self._name
+
+    def getFile(self):
+        return self._rootFile
+
+    def isData(self):
+        return self._isData
+
+    def isMC(self):
+        return not self.isData()
+
+_analysisNameSkipList = ["Plus", "Minus", "configInfo", "PUWeightProducer"]
+_analysisSearchModes = ["Light", "Heavy"]
+_dataDataEra_re = re.compile("_(?P<era>201\d\S)_")
+
+## Class for listing contents of multicrab dirs, dataset ROOT files, and creating DatasetManager
+#
+# The mai is to first create an object of this class to represent a
+# multicrab directory, and then create one or many DatasetManagers,
+# which then correspond to a single analysis directory within the ROOT
+# files.
+class DatasetManagerCreator:
+    ## Constructor
+    #
+    # \param rootFileList  List of (name, filename) pairs (both should be strings).
+    #                     'name' is taken as the dataset name, and 'filename' as
+    #                      the path to the ROOT file.
+    # \param kwargs        Keyword arguments (see below)
+    #
+    # <b>Keyword arguments</b>
+    # \li \a baseDirectory    Base directory of the datasets (delivered later to DatasetManager._setBaseDirectory())
+    #
+    # Creates DatasetPrecursor objects for each ROOT file, reads the
+    # contents of first MC file to get list of available analyses.
+    def __init__(self, rootFileList, **kwargs):
+        self._precursors = [DatasetPrecursor(name, filename) for name, filename in rootFileList]
+        self._baseDirectory = kwargs.get("baseDirectory", "")
+
+        mcRead = False
+        for d in self._precursors:
+            if d.isMC():
+                self._readAnalysisContent(d)
+                mcRead = True
+                break
+
+        if not mcRead:
+            for d in self._precursors:
+                if d.isData():
+                    self._readAnalysisContent(d)
+                    break
+
+        dataEras = {}
+        for d in self._precursors:
+            if d.isData():
+                m = _dataDataEra_re.search(d.getName())
+                if m:
+                    dataEras[m.group("era")] = 1
+
+        self._dataDataEras = dataEras.keys()
+        self._dataDataEras.sort()                
+
+    def _readAnalysisContent(self, precursor):
+        contents = aux.listDirectoryContent(precursor.getFile(), lambda key: key.IsFolder())
+
+        def skipItem(name):
+            for skip in _analysisNameSkipList:
+                if skip in name:
+                    return False
+            return True
+        contents = filter(skipItem, contents)
+        if len(contents) == 0:
+            raise Exception("No analysis TDirectories found")
+
+        analyses = {}
+        searchModes = {}
+        dataEras = {}
+        optimizationModes = {}
+
+        for d in contents:
+            directoryName = d
+
+            # Look for optimization mode
+            start = directoryName.find("Opt")
+            if start >= 0:
+                optimizationModes[directoryName[start:]] = 1
+                directoryName = directoryName[:start]
+
+            # Look for data era
+            if precursor.isMC():
+                start = directoryName.find("Run")
+                if start >= 0:
+                    dataEras[directoryName[start:]] = 1
+                    directoryName = directoryName[:start]
+            
+            # Look for search mode
+            for sm in _analysisSearchModes:
+                start = directoryName.find(sm)
+                if start >= 0:
+                    searchModes[sm] = 1
+                    directoryName = directoryName[:start]
+                    break
+
+            # Whatever is left in directoryName, is our analysis name
+            analyses[directoryName] = 1
+
+        self._analyses =  analyses.keys()
+        self._searchModes = searchModes.keys()
+        self._mcDataEras = dataEras.keys()
+        self._optimizationModes = optimizationModes.keys()
+
+        self._analyses.sort()
+        self._searchModes.sort()
+        self._mcDataEras.sort()
+        self._optimizationModes.sort()
+
+    ## Create DatasetManager
+    #
+    # \param kwargs   Keyword arguments (see below)
+    #
+    # <b>Keyword arguments</b>
+    # \li \a analysisName      Base part of the analysis directory name
+    # \li \a searchMode        String for search mode
+    # \li \a dataEra           String for data era
+    # \li \a optimizationMode  String for optimization mode (optional)
+    # \li \a opts              Optional OptionParser object. Should have options added with addOptions().
+    #
+    # The values of \a analysisName, \a searchMode, \a dataEra, and \a
+    # optimizationMode are overridden from \a opts, if they are set
+    # (i.e. are non-None). Also, if any of these is not specified
+    # either explicitly or via \a opts, the value is inferred from the
+    # contents, if there exists only one of it.
+    def createDatasetManager(self, **kwargs):
+        _args = {}
+        _args.update(kwargs)
+
+
+        # First check that if some of these is not given, if there is
+        # exactly one it available, use that.
+        for arg, attr in [("analysisName", "_analyses"),
+                          ("searchMode", "_searchModes"),
+                          ("dataEra", "_mcDataEras"),
+                          ("optimizationMode", "_optimizationModes")]:
+            lst = getattr(self, attr)
+            if arg not in _args and len(lst) == 1:
+                _args[arg] = lst[0]
+
+        # Then override from command line options
+        opts = kwargs.get("opts", None)
+        if opts is not None:
+            for arg in ["analysisName", "searchMode", "dataEra", "optimizationMode", "counterDir"]:
+                o = getattr(opts, arg)
+                if o is not None:
+                    _args[arg] = o
+            del _args["opts"]
+
+        # Print the configuration
+        parameters = []
+        for name in ["analysisName", "searchMode", "dataEra", "optimizationMode"]:
+            if name in _args:
+                value = _args[name]
+                parameters.append("%s='%s'" % (name, value))
+        print "Creating DatasetManager with", ", ".join(parameters)
+
+        # Crate manager and datasets
+        dataEra = _args.get("dataEra", None)
+        manager = DatasetManager()
+        for precursor in self._precursors:
+            if dataEra is not None and precursor.isData():
+                if dataEra == "Run2011A":
+                    if not "2011A_" in precursor.getName():
+                        continue
+                elif dataEra == "Run2011B":
+                    if not "2011B_" in precursor.getName():
+                        continue
+                elif dataEra == "Run2011AB":
+                    pass
+                else:
+                    raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB" % dataEra)
+
+            try:
+                dset = Dataset(precursor.getName(), precursor.getFile(), **_args)
+            except AnalysisNotFoundException, e:
+                msg = str(e)+"\n"
+                helpFound = False
+                for arg, attr in [("analysisName", "_analyses"),
+                                  ("searchMode", "_searchModes"),
+                                  ("dataEra", "_mcDataEras"),
+                                  ("optimizationMode", "_optimizationModes")]:
+                    lst = getattr(self, attr)
+                    if arg not in _args and len(lst) > 1:
+                        msg += "You did not specify %s, while ROOT file contains %s\n" % (arg, ", ".join(lst))
+                        helpFound = True
+                    if arg in _args and len(lst) == 0:
+                        msg += "You specified %s, while ROOT file apparently has none of them\n" % arg
+                        helpFound = True
+                if not helpFound:
+                    raise e
+                raise Exception(msg)
+
+            manager.append(dset)
+
+        if len(self._baseDirectory) > 0:
+            manager._setBaseDirectory(self._baseDirectory)
+
+        return manager
+
+    def getDatasetNames(self):
+        return [d.getName() for d in self._precursors]
+
+    def getAnalyses(self):
+        return self._analyses
+
+    def getSearchModes(self):
+        return self._searchModes
+
+    def getMCDataEras(self):
+        return self._mcDataEras
+
+    def getDataDataEras(self):
+        return self._dataDataEras
+
+    def getOptimizationModes(self):
+        return self._optimizationModes
+
+    def printAnalyses(self):
+        print "Analyses (analysisName):"
+        for a in self._analyses:
+            print "  "+a
+        print
+
+        if len(self._searchModes) == 0:
+            print "No search modes"
+        else:
+            print "Search modes (searchMode):"
+            for s in self._searchModes:
+                print "  "+s
+        print
+        
+        if len(self._mcDataEras) == 0:
+            print "No data eras in MC"
+        else:
+            print "Data eras (in MC) (dataEra):"
+            for d in self._mcDataEras:
+                print "  "+d
+        print
+
+        if len(self._dataDataEras) == 0:
+            print "No data eras in data"
+        else:
+            print "Data eras (in data, the letters can be combined in almost any way) (dataEra):"
+            for d in self._dataDataEras:
+                print "  "+d
+        print
+
+        if len(self._optimizationModes) == 0:
+            print "No optimization modes"
+        else:
+            print "Optimization modes (optimizationMode):"
+            for o in self._optimizationModes:
+                print "  "+o
+        print
+
 
 ## Helper class to plug NtupleCache to the existing framework
 #

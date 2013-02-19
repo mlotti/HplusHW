@@ -60,6 +60,7 @@ def main():
     obs = limits.observedGraph()
     graphs["obs"] = obs
     graphs["exp"] = limits.expectedGraph()
+#    graphs["exp"].SetLineStyle(2)
     graphs["exp1"] = limits.expectedBandGraph(sigma=1)
     graphs["exp2"] = limits.expectedBandGraph(sigma=2)
 
@@ -76,9 +77,8 @@ def main():
     obs_th_plus = limit.getObservedPlus(obs)
     obs_th_minus = limit.getObservedMinus(obs)
     for gr in [obs_th_plus, obs_th_minus]:
-        gr.SetLineWidth(3)
-        gr.SetLineStyle(5)
-#        gr.SetLineStyle(9)
+        gr.SetLineWidth(2)
+        gr.SetLineStyle(9)
     graphs["obs_th_plus"] = obs_th_plus
     graphs["obs_th_minus"] = obs_th_minus
 
@@ -177,18 +177,27 @@ def doPlot(name, graphs, limits, xlabel):
     excluded.SetLineWidth(0)
     excluded.SetLineColor(ROOT.kWhite)
 
-
+    expected = graphs["exp"]
+    expected.SetLineStyle(2)
+    expected1 = graphs["exp1"]
+    expected1.SetLineStyle(2)
+    expected2 = graphs["exp2"]
+    expected2.SetLineStyle(2)
+        
     plot = plots.PlotBase([
             histograms.HistoGraph(graphs["obs"], "Observed", drawStyle="PL", legendStyle="lp"),
             histograms.HistoGraph(graphs["obs_th_plus"], "ObservedPlus", drawStyle="L", legendStyle="l"),
             histograms.HistoGraph(graphs["obs_th_minus"], "ObservedMinus", drawStyle="L"),
             histograms.HistoGraph(excluded, "Excluded", drawStyle="F", legendStyle="f"),
-            histograms.HistoGraph(graphs["exp"], "Expected", drawStyle="L"),
+            histograms.HistoGraph(expected, "Expected", drawStyle="L"),
+            #histograms.HistoGraph(graphs["exp"], "Expected", drawStyle="L"),
             histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{h} = 125.9#pm3.0 GeV/c^{2}", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
             histograms.HistoGraph(graphs["mintanb"], "MinTanb", drawStyle="L"),
-            histograms.HistoGraph(graphs["exp1"], "Expected1", drawStyle="F", legendStyle="fl"),
-            histograms.HistoGraph(graphs["exp2"], "Expected2", drawStyle="F", legendStyle="fl"),
+            #histograms.HistoGraph(graphs["exp1"], "Expected1", drawStyle="F", legendStyle="fl"),
+            #histograms.HistoGraph(graphs["exp2"], "Expected2", drawStyle="F", legendStyle="fl"),
+            histograms.HistoGraph(expected1, "Expected1", drawStyle="F", legendStyle="fl"),
+            histograms.HistoGraph(expected2, "Expected2", drawStyle="F", legendStyle="fl"),
             ])
 
     plot.histoMgr.setHistoLegendLabelMany({

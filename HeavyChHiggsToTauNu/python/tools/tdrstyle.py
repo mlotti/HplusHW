@@ -176,6 +176,7 @@ class TDRStyle:
         # self.tdrStyle.SetBarWidth(Float_t barwidth = 0.5);
         # self.tdrStyle.SetPaintTextFormat(const char* format = "g");
         # self.tdrStyle.SetPalette(Int_t ncolors = 0, Int_t* colors = 0);
+        self.tdrStyle.SetPalette(1); # Set pre-defined palette ranging from blue to red
         # self.tdrStyle.SetTimeOffset(Double_t toffset);
         # self.tdrStyle.SetHistMinimumZero(kTRUE);
 

@@ -40,10 +40,10 @@ DeltaPhi = "TMath::ACos(( tau_p4.X()*met_p4.px() + tau_p4.Y()*met_p4.py())/( tau
 DeltaPhiCut = DeltaPhi + "< 160"
 
 # Declarations
-treeDraw = dataset.TreeDraw("signalAnalysis/tree", weight="weightPileup*weightTrigger*weightPrescale")
+treeDraw = dataset.TreeDraw("tree", weight="weightPileup*weightTrigger*weightPrescale")
 
 def main():
-    datasets = dataset.getDatasetsFromMulticrabDirs(["/Volumes/disk/attikis/HIG-12-037/TreeAnalysis_v44_4_130113_105229/"], dataEra="Run2011A")
+    datasets = dataset.getDatasetsFromMulticrabCfg(directory="/Volumes/disk/attikis/HIG-12-037/TreeAnalysis_v44_4_130113_105229/", dataEra="Run2011A")
     datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()
 
