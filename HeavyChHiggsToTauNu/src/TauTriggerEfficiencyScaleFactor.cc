@@ -21,7 +21,7 @@ namespace HPlus {
     WrappedTH1 *hsfu = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, dir, "ScaleFactorUncertainty", "Scale factor;Tau p_{T} bin;Scale factor uncertainty", fBinned.nbins()+1, 0, fBinned.nbins()+1);
     if(hsf->getHisto()) {
       hsf->getHisto()->SetBinContent(1, 1); hsf->GetXaxis()->SetBinLabel(1, "control");
-      hsfu->getHisto()->SetBinContent(1, 1); hsf->GetXaxis()->SetBinLabel(1, "control");
+      hsfu->getHisto()->SetBinContent(1, 1); hsfu->GetXaxis()->SetBinLabel(1, "control");
       for(size_t i=0; i<fBinned.nbins(); ++i) {
         size_t bin = i+2;
         snprintf(buf, NBUF, "%.0f", fBinned.binLowEdge(i));
