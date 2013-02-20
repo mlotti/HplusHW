@@ -774,6 +774,7 @@ namespace HPlus {
 
     if (myFakeTauStatus) hCtrlEWKFakeTausNjets->Fill(jetData.getHadronicJetCount());
     if(!jetData.passedEvent()) return false;
+    increment(fNJetsCounter);
     // For data, set the current run number (needed for tau embedding
     // input, doesn't harm for normal data except by wasting small
     // amount of time)
@@ -788,7 +789,6 @@ namespace HPlus {
     fCommonPlotsAfterJetSelection->fill();
     if (myFakeTauStatus) fCommonPlotsAfterJetSelectionFakeTaus->fill();
 
-    increment(fNJetsCounter);
     hSelectionFlow->Fill(kSignalOrderJetSelection);
     hSelectionFlowVsVertices->Fill(nVertices, kSignalOrderJetSelection);
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderJetSelection);
