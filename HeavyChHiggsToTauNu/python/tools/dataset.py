@@ -613,7 +613,7 @@ class TreeDraw:
 
         (tree, treeName) = dataset._getRootHisto(self.tree)
         if tree == None:
-            raise Exception("No TTree '%s' in file %s" % (treeNAme, dataset.getRootFile().GetName()))
+            raise Exception("No TTree '%s' in file %s" % (treeName, dataset.getRootFile().GetName()))
 
         if self.varexp == "":
             nentries = tree.GetEntries(selection)
@@ -640,7 +640,7 @@ class TreeDraw:
         option = opt+"goff"
         nentries = tree.Draw(varexp, selection, option)
         if nentries < 0:
-            raise Exception("Error when calling TTree.Draw with\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (treeNAme, varexp, selection, option))
+            raise Exception("Error when calling TTree.Draw with\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (treeName, varexp, selection, option))
         h = tree.GetHistogram()
         if h != None:
             h = h.Clone(h.GetName()+"_cloned")
