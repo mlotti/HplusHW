@@ -1,15 +1,16 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CandViewDeltaRSelector.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CandViewClosestDeltaRSelector.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ViewDeltaRSelector.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ViewClosestDeltaRSelector.h"
 
+#include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 
-typedef hplus::CandViewDeltaRSelector<pat::Tau> HPlusPATTauCandViewDeltaRSelector;
+typedef HPlus::ViewDeltaRSelector<pat::Tau, reco::Candidate> HPlusPATTauCandViewDeltaRSelector;
 DEFINE_FWK_MODULE(HPlusPATTauCandViewDeltaRSelector);
 
-typedef hplus::CandViewDeltaRSelector<reco::PFCandidate> HPlusPFCandCandViewDeltaRSelector;
+typedef HPlus::ViewDeltaRSelector<reco::PFCandidate, reco::Candidate> HPlusPFCandCandViewDeltaRSelector;
 DEFINE_FWK_MODULE(HPlusPFCandCandViewDeltaRSelector);
 
 
-typedef hplus::CandViewClosestDeltaRSelector<pat::Tau> HPlusPATTauCandViewClosestDeltaRSelector;
+typedef HPlus::ViewClosestDeltaRSelector<pat::Tau, reco::Candidate> HPlusPATTauCandViewClosestDeltaRSelector;
 DEFINE_FWK_MODULE(HPlusPATTauCandViewClosestDeltaRSelector);
