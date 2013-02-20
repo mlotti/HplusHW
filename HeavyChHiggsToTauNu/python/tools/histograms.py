@@ -362,7 +362,7 @@ def moveLegend(legend, dx=0, dy=0, dw=0, dh=0):
     legend.SetY1(legend.GetY1() + dy)
     legend.SetY2(legend.GetY2() + dy)
 
-    legend.SetX1(legend.GetX1() + dw)
+    legend.SetX2(legend.GetX2() + dw)
     legend.SetY1(legend.GetY1() - dh) # negative dh should shrink the legend
     
     return legend
