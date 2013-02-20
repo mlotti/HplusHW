@@ -251,6 +251,7 @@ namespace HPlus {
     fCommonPlotsAfterMET(fCommonPlots.createCommonPlotsFilledAtEveryStep("MET",true,"E_{T}^{miss}")),
     fCommonPlotsAfterBTagging(fCommonPlots.createCommonPlotsFilledAtEveryStep("BTagging",true,"#geq1b tag")),
     fCommonPlotsSelected(fCommonPlots.createCommonPlotsFilledAtEveryStep("Selected",true,"Selected")),
+    fCommonPlotsSelectedMtTail(fCommonPlots.createCommonPlotsFilledAtEveryStep("SelectedMtTail",false,"SelectedMtTail")),
     fCommonPlotsAfterTauSelectionFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_TauSelection",false,"TauID")),
     fCommonPlotsAfterTauWeightFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_TauWeight",false,"Tau")),
     fCommonPlotsAfterElectronVetoFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_ElectronVeto",false,"e veto")),
@@ -258,7 +259,8 @@ namespace HPlus {
     fCommonPlotsAfterJetSelectionFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_JetSelection",false,"#geq3j")),
     fCommonPlotsAfterMETFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_MET",false,"E_{T}^{miss}")),
     fCommonPlotsAfterBTaggingFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_BTagging",false,"#geq1b tag")),
-    fCommonPlotsSelectedFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_Selected",false,"Selected"))
+    fCommonPlotsSelectedFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_Selected",false,"Selected")),
+    fCommonPlotsSelectedMtTailFakeTaus(fCommonPlots.createCommonPlotsFilledAtEveryStep("FakeTaus_SelectedMtTail",false,"SelectedMtTail"))
   {
     // Check parameter initialisation
     if (fTopRecoName != "None" && fTopRecoName != "chi" && fTopRecoName != "std" && fTopRecoName != "Wselection") {
@@ -1160,6 +1162,10 @@ namespace HPlus {
     if (myFakeTauStatus) hSelectionFlowVsVerticesFakeTaus->Fill(nVertices, kSignalOrderSelectedEvents);
     fCommonPlotsSelected->fill();
     if (myFakeTauStatus) fCommonPlotsSelectedFakeTaus->fill();
+    if (transverseMass > 120) {
+      fCommonPlotsSelectedMtTail->fill();
+      if (myFakeTauStatus) fCommonPlotsSelectedMtTailFakeTaus->fill();
+    }
     fCommonPlots.fillFinalPlots();
     if (myFakeTauStatus) fCommonPlots.fillFinalPlotsForFakeTaus();
 
