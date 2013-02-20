@@ -292,6 +292,14 @@ class ConfigBuilder:
                     mod = module.clone()
                     if self.applyTauTriggerScaleFactor:
                         param.setDataTriggerEfficiency(self.dataVersion, era=dataEra, pset=mod.tauTriggerEfficiencyScaleFactor)
+                    if self.applyMETTriggerScaleFactor:
+                        print "########################################"
+                        print "#"
+                        print "# MET trigger efficiency/scale factor is from the whole Run2012ABCD for the moment (dataEra was %s)." % dataEra
+                        print "# This is suitable only for preliminary testing."
+                        print "#"
+                        print "########################################"
+                        param.setDataTriggerEfficiency(self.dataVersion, era="Run2012ABCD", pset=mod.metTriggerEfficiencyScaleFactor)
                     if self.applyPUReweight:
                         param.setPileupWeight(self.dataVersion, process=process, commonSequence=process.commonSequence, pset=mod.vertexWeight, psetReader=mod.pileupWeightReader, era=dataEra)
                         if self.options.wjetsWeighting != 0:

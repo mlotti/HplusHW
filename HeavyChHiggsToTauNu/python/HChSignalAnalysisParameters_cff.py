@@ -491,13 +491,8 @@ def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
 tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
 
-metTriggerEfficiencyScaleFactor = cms.untracked.PSet(
-    dataParameters = cms.PSet(),
-    mcParameters = cms.PSet(),
-    dataSelect = cms.vstring(),
-    mcSelect = cms.string(""),
-    mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
-)
+import HiggsAnalysis.HeavyChHiggsToTauNu.metLegTriggerEfficiency2012_cff as metTriggerEfficiency
+metTriggerEfficiencyScaleFactor = metTriggerEfficiency.metLegEfficiency
 
 # Muon trigger+ID efficiencies, for embedding normalization
 import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTriggerIDEfficiency
@@ -526,7 +521,7 @@ def _getTriggerVertexArgs(kwargs):
         vargs["pset"] = module.vertexWeight
     return (effargs, vargs)
 
-def setDataTriggerEfficiency(dataVersion, era, pset=tauTriggerEfficiencyScaleFactor):
+def setDataTriggerEfficiency(dataVersion, era, pset):
     if dataVersion.isMC():
         if dataVersion.isS4():
             pset.mcSelect = "Summer11"
@@ -563,8 +558,10 @@ def setDataTriggerEfficiency(dataVersion, era, pset=tauTriggerEfficiencyScaleFac
         pset.dataSelect = ["runs_190456_196531"]
     elif era == "Run2012ABC":
         pset.dataSelect = ["runs_190456_202585"]
+    elif era == "Run2012ABCD":
+        pset.dataSelect = ["runs_190456_208686"]
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011AB', 'Run2012A', 'Run2012B', 'Run2012C', 'Run2012AB', 'Run2012ABC'")
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011AB', 'Run2012A', 'Run2012B', 'Run2012C', 'Run2012AB', 'Run2012ABC', 'Run2012ABCD'")
 
 
 # Weighting by instantaneous luminosity, and the number of true
