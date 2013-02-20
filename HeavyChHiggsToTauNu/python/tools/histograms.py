@@ -203,6 +203,7 @@ class PlotTextBox:
     # \param options  Forwarded to ROOT.TPave.Draw(), and the Draw() of the contained objects
     def Draw(self, options=""):
         self.pave = ROOT.TPave(self.xmin, self.ymin, self.xmax, self.ymax, 0, "NDC")
+        self.pave.SetFillColor(self.fillColor)
         self.pave.Draw(options)
         for t in self.texts:
             t.Draw(options)
