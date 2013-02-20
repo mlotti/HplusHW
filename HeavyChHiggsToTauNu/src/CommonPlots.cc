@@ -30,8 +30,23 @@ namespace HPlus {
       hFakeTauStatus->GetXaxis()->SetBinLabel(10, "#tau#rightarrowe#rightarrow#tau"); // subcount
       hFakeTauStatus->GetXaxis()->SetBinLabel(11, "#tau#rightarrow#mu#rightarrow#tau"); // subcount
     }
+    hTauPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "tau_pT", "tau_pT;#tau p_{T}, GeV/c;N_{events}", 100, 0.0, 500.0);
+    hTauEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "tau_eta", "tau_eta;#tau #eta;N_{events}", 50, -2.5, 2.5);
+    hTauPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "tau_phi", "tau_phi;#tau #phi;N_{events}", 72, -3.1415926, 3.1415926);
+    hRtau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "tau_Rtau", "tau_Rtau;R_{#tau};N_{events}", 60, 0.0, 1.2);
+    hSelectedElectrons = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "electrons_N", "electrons_N;N_{electrons};N_{events}", 40, 0.0, 40.);
+    hSelectedMuons = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "muons_N", "muons_N;N_{muons};N_{events}", 40, 0.0, 40.);
+    hNjets = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jets_N", "jets_N;N_{jets};N_{events}", 10, 0.0, 10.);
+    hNjetsAllIdentified = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "jets_N_allIdentified", "jets_N_allIdentified;N_{jets};N_{events}", 10, 0.0, 10.);
+    hMET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MET_MET", "MET;MET, GeV;N_{events}", 100, 0.0, 500.);
+    hMETphi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MET_phi", "MET_phi;MET #phi;N_{events}", 72, -3.1415926, 3.1415926);
+    hNbjets = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjets_N", "bjets_N;N_{b jets};N_{events}", 10, 0.0, 10.);
+    hDeltaPhiTauMET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaPhi_TauMET", "DeltaPhi_TauMET;#Delta#phi(#tau,MET);N_{events}", 36, 0.0, 180.);
+    hDeltaR_TauMETJet1MET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hDeltaR_TauMETJet1MET", "hDeltaR_TauMETJet1MET;#sqrt((180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1},MET)^{2}), ^{o};N_{events}", 52, 0.0, 260.);
+    hDeltaR_TauMETJet2MET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hDeltaR_TauMETJet2MET", "hDeltaR_TauMETJet1MET;#sqrt((180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{2},MET)^{2}), ^{o};N_{events}", 52, 0.0, 260.);
+    hDeltaR_TauMETJet3MET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hDeltaR_TauMETJet3MET", "hDeltaR_TauMETJet1MET;#sqrt((180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{3},MET)^{2}), ^{o};N_{events}", 52, 0.0, 260.);
+    hDeltaR_TauMETJet4MET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "hDeltaR_TauMETJet4MET", "hDeltaR_TauMETJet1MET;#sqrt((180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{4},MET)^{2}), ^{o};N_{events}", 52, 0.0, 260.);
     hTransverseMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events}", 80, 0., 400.);
-
   }
 
   CommonPlotsFilledAtEveryStep::~CommonPlotsFilledAtEveryStep() {}
@@ -71,7 +86,50 @@ namespace HPlus {
           hFakeTauStatus->Fill(8);
       }
     }
+    hTauPt->Fill(fTauData->getSelectedTau()->pt());
+    hTauEta->Fill(fTauData->getSelectedTau()->eta());
+    hTauPhi->Fill(fTauData->getSelectedTau()->phi());
+    hRtau->Fill(fTauData->getSelectedTauRtauValue());
+    if (fElectronData->eventContainsElectronFromCorBJet()) {
+      hSelectedElectrons->Fill(fElectronData->getSelectedElectrons().size()+10);
+      hSelectedElectrons->Fill(fElectronData->getNonIsolatedElectrons().size()+30);
+    } else {
+      hSelectedElectrons->Fill(fElectronData->getSelectedElectrons().size());
+      hSelectedElectrons->Fill(fElectronData->getNonIsolatedElectrons().size()+20);
+    }
+    if (fMuonData->eventContainsMuonFromCorBJet()) {
+      hSelectedMuons->Fill(fMuonData->getSelectedMuons().size()+10);
+      hSelectedMuons->Fill(fMuonData->getSelectedMuonsBeforeIsolation().size()+30);
+    } else {
+      hSelectedMuons->Fill(fMuonData->getSelectedMuons().size());
+      hSelectedMuons->Fill(fMuonData->getSelectedMuonsBeforeIsolation().size()+20);
+    }
+    hNjets->Fill(fJetData->getHadronicJetCount());
+    hNjetsAllIdentified->Fill(fJetData->getAllIdentifiedJets().size());
     if (fJetData->getAllJets().size() == 0) return; // Safety for MET selection data to exist
+    hMET->Fill(fMETData->getSelectedMET()->et());
+    hMET->Fill(fMETData->getSelectedMET()->phi());
+    hNbjets->Fill(fBJetData->getBJetCount());
+    double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData->getSelectedTau()), *(fMETData->getSelectedMET())) * 57.3; // converted to degrees
+    hDeltaPhiTauMET->Fill(myDeltaPhiTauMET);
+    // DeltaR_TauMETJetnMET
+    int njets = 0;
+    for (size_t i = 0; i < fJetData->getAllIdentifiedJets().size(); ++i) {
+      if (!(fJetData->getAllIdentifiedJets()[i]->pt() > 30. && (std::abs(fJetData->getAllIdentifiedJets()[i]->eta()) < 2.5))) continue;
+      double myDeltaPhi = reco::deltaPhi(*(fMETData->getSelectedMET()), *(fJetData->getAllIdentifiedJets()[i])) * 57.3;
+      double myDeltaR = std::sqrt(std::pow(180. - myDeltaPhiTauMET,2)+std::pow(myDeltaPhi,2));
+      if (njets == 0) {
+        hDeltaR_TauMETJet1MET->Fill(myDeltaR);
+      } else if (njets == 1) {
+        hDeltaR_TauMETJet2MET->Fill(myDeltaR);
+      } else if (njets == 2) {
+        hDeltaR_TauMETJet3MET->Fill(myDeltaR);
+      } else if (njets == 3) {
+        hDeltaR_TauMETJet4MET->Fill(myDeltaR);
+      }
+      ++njets;
+    }
+
     // transverse mass
     double myMT = TransverseMass::reconstruct(*(fTauData->getSelectedTau()), *(fMETData->getSelectedMET()) );
     hTransverseMass->Fill(myMT);
