@@ -59,10 +59,10 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
     #param.MET.rawSrc = "pfMet" # no PAT object at the moment
 
     # Use the muons where the original muon is removed in global muon veto
-    param.GlobalMuonVeto.MuonCollectionName.setModuleLabel("selectedPatMuonsEmbeddingMuonCleaned")
-    param.GlobalElectronVeto.ElectronCollectionName.setProcessName(skimProcessName)
-    param.GlobalElectronVeto.beamspotSrc.setProcessName(dataVersion.getRecoProcess())
-    param.GlobalElectronVeto.conversionSrc.setProcessName(dataVersion.getRecoProcess())
+    param.MuonSelection.MuonCollectionName.setModuleLabel("selectedPatMuonsEmbeddingMuonCleaned")
+    param.ElectronSelection.ElectronCollectionName.setProcessName(skimProcessName)
+    param.ElectronSelection.beamspotSrc.setProcessName(dataVersion.getRecoProcess())
+    param.ElectronSelection.conversionSrc.setProcessName(dataVersion.getRecoProcess())
 
     # Use the taus matched to the original muon in tau selections
     # Notice that only the version corresponding to PF2PATVersion is produced
@@ -488,7 +488,7 @@ def addMuonVeto(process, sequence, param, prefix="muonSelectionMuonVeto"):
     m1 = muonVetoFilter_cfi.hPlusGlobalMuonVetoFilter.clone(
         vertexSrc = "firstPrimaryVertex"
     )
-    m1.GlobalMuonVeto.MuonCollectionName = "selectedPatMuonsEmbeddingMuonCleaned"
+    m1.MuonSelection.MuonCollectionName = "selectedPatMuonsEmbeddingMuonCleaned"
     m2 = cms.EDProducer("EventCountProducer")
 
     setattr(process, filter, m1)
@@ -962,6 +962,9 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
         genTauSelected = cms.EDProducer("HPlusPATTauMostLikelyIdentifiedSelector",
             eventCounter = param.eventCounter.clone(),
             tauSelection = param.tauSelection.clone()
+            tauSelection = param.tauSelection.clone(),
+            vertexSrc = param.primaryVertexSelection.selectedSrc,
+            histogramAmbientLevel = cms.untracked.string("Debug"),
         )
         genTauSelectedName = prefix+"TauSelected"
         setattr(process, genTauSelectedName, genTauSelected)
@@ -984,22 +987,22 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     from PhysicsTools.PatAlgos.cleaningLayer1.electronCleaner_cfi import cleanPatElectrons
     from PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi import cleanPatMuons
     cleanedElectrons = cleanPatElectrons.clone(
-        src = cms.InputTag(param.GlobalElectronVeto.ElectronCollectionName.value()),
+        src = cms.InputTag(param.ElectronSelection.ElectronCollectionName.value()),
         checkOverlaps = cms.PSet(
             genTaus = genTauCleanPSet.clone()
         )
     )
     cleanedElectronsName = prefix+"CleanedElectrons"
-    param.GlobalElectronVeto.ElectronCollectionName = cleanedElectronsName
+    param.ElectronSelection.ElectronCollectionName = cleanedElectronsName
     setattr(process, cleanedElectronsName, cleanedElectrons)
     cleanedMuons = cleanPatMuons.clone(
-        src = cms.InputTag(param.GlobalMuonVeto.MuonCollectionName.value()),
+        src = cms.InputTag(param.MuonSelection.MuonCollectionName.value()),
         checkOverlaps = cms.PSet(
             genTaus = genTauCleanPSet.clone()
         )
     )
     cleanedMuonsName = prefix+"CleanedMuons"
-    param.GlobalMuonVeto.MuonCollectionName = cleanedMuonsName
+    param.MuonSelection.MuonCollectionName = cleanedMuonsName
     setattr(process, cleanedMuonsName, cleanedMuons)
     genTauSequence *= (cleanedElectrons * cleanedMuons)
 

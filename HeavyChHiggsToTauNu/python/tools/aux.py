@@ -5,6 +5,8 @@ import os
 import hashlib
 import imp
 import re
+import ROOT
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 
 def higgsAnalysisPath():
     if "HIGGSANALYSIS_BASE" in os.environ:
@@ -55,3 +57,61 @@ def swap(list,n1,n2):
     tmp = list[n1]
     list[n1] = list[n2]
     list[n2] = tmp
+
+def addConfigInfo(of, dataset):
+    d = of.mkdir("configInfo")
+    d.cd()
+
+    # configinfo histogram
+    configinfo = ROOT.TH1F("configinfo", "configinfo", 3, 0, 3)
+    axis = configinfo.GetXaxis()
+
+    def setValue(bin, name, value):
+        axis.SetBinLabel(bin, name)
+        configinfo.SetBinContent(bin, value)
+
+    setValue(1, "control", 1)
+    if dataset.isData():
+        setValue(2, "luminosity", dataset.getLuminosity())
+        setValue(3, "isData", 1)
+    elif dataset.isMC():
+        setValue(2, "crossSection", 1.0)
+        setValue(3, "isData", 0)
+
+    configinfo.Write()
+    configinfo.Delete()
+
+    # dataVersion
+    ds = dataset
+    if dataset.isData():
+        ds = dataset.datasets[0]
+
+    dataVersion = ROOT.TNamed("dataVersion", ds.dataVersion)
+    dataVersion.Write()
+    dataVersion.Delete()
+
+    # codeVersion
+    codeVersion = ROOT.TNamed("codeVersion", git.getCommitId())
+    codeVersion.Write()
+    codeVersion.Delete()
+
+    of.cd()
+
+
+def listDirectoryContent(tdirectory, predicate=None):
+    dirlist = tdirectory.GetListOfKeys()
+
+    # Suppress the warning message of missing dictionary for some iterator
+    backup = ROOT.gErrorIgnoreLevel
+    ROOT.gErrorIgnoreLevel = ROOT.kError
+    diriter = dirlist.MakeIterator()
+    ROOT.gErrorIgnoreLevel = backup
+
+    key = diriter.Next()
+
+    ret = []
+    while key:
+        if predicate is not None and predicate(key):
+            ret.append(key.GetName())
+        key = diriter.Next()
+    return ret

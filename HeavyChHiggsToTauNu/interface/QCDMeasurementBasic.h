@@ -13,9 +13,9 @@
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/InvMassVetoOnJets.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
 ////#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NonIsolatedElectronVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
 ////#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NonIsolatedMuonVeto.h"
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
@@ -30,11 +30,12 @@
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SelectedEventsAnalyzer.h"
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTriggerEfficiencyScaleFactor.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METTriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeightReader.h" // PU re-weight
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
@@ -68,7 +69,7 @@ namespace HPlus {
   };
 
   public:
-    explicit QCDMeasurementBasic(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::EventWeight& eventWeight);
+    explicit QCDMeasurementBasic(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HPlus::EventWeight& eventWeight, HPlus::HistoWrapper& histoWrapper);
     ~QCDMeasurementBasic();
 
     // Interface towards the EDProducer
@@ -90,7 +91,7 @@ namespace HPlus {
 
     // We need a reference in order to use the same object (and not a copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;
-    HistoWrapper fHistoWrapper;
+    HistoWrapper& fHistoWrapper;
     const double fDeltaPhiCutValue;
     const std::string fTopRecoName; // Name of selected top reconstruction algorithm
 
@@ -103,12 +104,14 @@ namespace HPlus {
     std::vector<double> fFullMassRangeBinLowEdges;
 
     // Counters - order is important
+    Count fAllCounter;
     Count fVertexReweighting;
+    Count fWJetsWeightCounter;
     Count fTriggerCounter;
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
     Count fControlPlotsMultipleTausCounter;
-    Count fTriggerScaleFactorCounter;
+    Count fTauTriggerScaleFactorCounter;
     Count fVetoTauCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
@@ -132,9 +135,9 @@ namespace HPlus {
     VertexSelection fPrimaryVertexSelection;
     TauSelection fTauSelection;
     VetoTauSelection fVetoTauSelection;
-    GlobalElectronVeto fGlobalElectronVeto;
+    ElectronSelection fElectronSelection;
     //NonIsolatedElectronVeto fNonIsolatedElectronVeto;
-    GlobalMuonVeto fGlobalMuonVeto;
+    MuonSelection fMuonSelection;
     //NonIsolatedMuonVeto fNonIsolatedMuonVeto;
     JetSelection fJetSelection;
     METSelection fMETSelection;
@@ -153,9 +156,12 @@ namespace HPlus {
     EvtTopology fEvtTopology;
 
     FullHiggsMassCalculator fFullHiggsMassCalculator;
-    VertexWeightReader fVertexWeightReader;
+    WeightReader fPrescaleWeightReader;
+    WeightReader fPileupWeightReader;
     FakeTauIdentifier fFakeTauIdentifier;
-    TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
+    TauTriggerEfficiencyScaleFactor fTauTriggerEfficiencyScaleFactor;
+    METTriggerEfficiencyScaleFactor fMETTriggerEfficiencyScaleFactor;
+    WeightReader fWJetsWeightReader;
 
     SignalAnalysisTree fTree;
     ScaleFactorUncertaintyManager fSFUncertaintyAfterStandardSelections;

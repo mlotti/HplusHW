@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 import PhysicsTools.PatUtils.patPFMETCorrections_cff as patPFMETCorrections
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauFilter_cfi as TauFilter
 
 def _doCommon(process, prefix, name, prototype, direction, postfix):
     if not postfix in ["", "PFlow"]:
@@ -22,31 +23,36 @@ def _doCommon(process, prefix, name, prototype, direction, postfix):
     )
     setattr(process, pathName, path)
 
-    return analysis
+    return (analysis, analysisName)
 
 def addJESVariation(process, prefix, name, prototype, direction, postfix=""):
-    analysis = _doCommon(process, prefix, name, prototype, direction, postfix)
+    (analysis, name) = _doCommon(process, prefix, name, prototype, direction, postfix)
 
     analysis.jetSelection.src = "shiftedPatJets%sEn%sForCorrMEt" % (postfix, direction)
     analysis.MET.rawSrc = "patPFMetJetEn%s" % direction
     analysis.MET.type1Src = "patType1CorrectedPFMetJetEn%s" % direction
     analysis.MET.type2Src = "patType1p2CorrectedPFMetJetEn%s" % direction
 
+    return name
+
 def addJERVariation(process, prefix, name, prototype, direction, postfix=""):
-    analysis = _doCommon(process, prefix, name, prototype, direction, postfix)
+    (analysis, name) = _doCommon(process, prefix, name, prototype, direction, postfix)
 
     analysis.jetSelection.src = "smearedPatJets%sRes%s" % (postfix, direction)
     analysis.MET.rawSrc = "patPFMetJetRes%s" % direction
     analysis.MET.type1Src = "patType1CorrectedPFMetJetRes%s" % direction
     analysis.MET.type2Src = "patType1p2CorrectedPFMetJetRes%s" % direction
 
+    return name
+
 def addUESVariation(process, prefix, name, prototype, direction, postfix=""):
-    analysis = _doCommon(process, prefix, name, prototype, direction, postfix)
+    (analysis, name) = _doCommon(process, prefix, name, prototype, direction, postfix)
 
     analysis.MET.rawSrc = "patPFMetUnclusteredEn%s" % direction
     analysis.MET.type1Src = "patType1CorrectedPFMetUnclusteredEn%s" % direction
     analysis.MET.type2Src = "patType1p2CorrectedPFMetUnclusteredEn%s" % direction
 
+    return name
 
 tauVariation = cms.EDProducer("ShiftedPATTauProducer",
     src = cms.InputTag("selectedPatTaus"),
@@ -57,7 +63,7 @@ objectVariationToMet = cms.EDProducer("ShiftedParticleMETcorrInputProducer",
     srcOriginal = cms.InputTag("selectedPatTaus"),
     srcShifted = cms.InputTag("selectedPatTausVariated")
 )
-def addTESVariation(process, prefix, name, prototype, direction, postfix=""):
+def addTESVariation(process, prefix, name, prototype, direction, postfix="", histogramAmbientLevel="Systematics"):
     tauVariationName = name+"TauVariation"
     rawMetVariationName = name+"RawMetVariation"
     type1MetVariationName = name+"Type1MetVariation"
@@ -90,10 +96,11 @@ def addTESVariation(process, prefix, name, prototype, direction, postfix=""):
     add(tauVariationName, tauv)
 
     # For tau variation for type I MET, we need the selected tau only
-    m = cms.EDFilter("HPlusTauSelectorFilter",
+    m = TauFilter.hPlusTauSelectorFilter.clone(
         tauSelection = prototype.tauSelection.clone(),
-        filter = cms.bool(False),
-        eventCounter = cms.untracked.PSet(counters=cms.untracked.VInputTag())
+        vertexSrc = prototype.primaryVertexSelection.selectedSrc.value(),
+        filter = False,
+        histogramAmbientLevel = histogramAmbientLevel
     )
     selectedTauName = add(name+"SelectedTauForVariation", m)
     m = tauVariation.clone(
@@ -143,3 +150,5 @@ def addTESVariation(process, prefix, name, prototype, direction, postfix=""):
         analysis
     )
     setattr(process, pathName, path)
+
+    return analysisName

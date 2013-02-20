@@ -2,13 +2,15 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_TopWithBSelection_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_TopWithBSelection_h
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 
 namespace edm {
+  class Event;
+  class EventSetup;
   class ParameterSet;
 }
 
@@ -16,7 +18,7 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
 
-  class TopWithBSelection {
+  class TopWithBSelection: public BaseSelection {
   public:
     typedef math::XYZTLorentzVector XYZTLorentzVector;
     /**
@@ -29,24 +31,33 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const TopWithBSelection *TopWithBSelection, bool passedEvent);
+      Data();
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
-      const double getTopMass() const { return fTopWithBSelection->topMass; }
-      const XYZTLorentzVector& getTopP4() const { return fTopWithBSelection->top; }
+      const double getTopMass() const { return top.M(); }
+      const XYZTLorentzVector& getTopP4() const { return top; }
+      const double getWMass() const { return W.M(); }
+      const XYZTLorentzVector& getWP4() const { return W; }
+
+      friend class TopWithBSelection;
 
     private:
-      const TopWithBSelection *fTopWithBSelection;
-      const bool fPassedEvent;
+      bool fPassedEvent;
+      // Variables
+      XYZTLorentzVector top;
+      XYZTLorentzVector W;
     };
     
     TopWithBSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~TopWithBSelection();
 
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> bjet);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> bjet);
 
   private:
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> bjet);
     void init();
     /*
     std::vector<const reco::GenParticle*> getImmediateMothers(const reco::Candidate&);
@@ -90,12 +101,6 @@ namespace HPlus {
     WrappedTH1 *hWMassQMatch;
     WrappedTH1 *htopMassMatchWrongB;
     WrappedTH1 *hWMassMatchWrongB;    
-  
-    // Variables
-    double topMass;
-    double wMass;
-    XYZTLorentzVector top;
-    XYZTLorentzVector W;
   };
 }
 

@@ -14,11 +14,13 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 namespace HPlus {
-  TriggerSelection::Data::Data(const TriggerSelection *triggerSelection, const TriggerPath *triggerPath, bool passedEvent):
-    fTriggerSelection(triggerSelection), fTriggerPath(triggerPath), fPassedEvent(passedEvent) {}
+  TriggerSelection::Data::Data():
+    fHasTriggerPath(false),
+    fPassedEvent(false) {}
   TriggerSelection::Data::~Data() {}
   
   TriggerSelection::TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
+    BaseSelection(eventCounter, histoWrapper),
     fTriggerSrc(iConfig.getUntrackedParameter<edm::InputTag>("triggerSrc")),
     fPatSrc(iConfig.getUntrackedParameter<edm::InputTag>("patSrc")),
     fMetCut(iConfig.getUntrackedParameter<double>("hltMetCut")),
@@ -66,36 +68,59 @@ namespace HPlus {
     for(std::vector<TriggerPath* >::const_iterator i = triggerPaths.begin(); i != triggerPaths.end(); ++i) delete *i;
   }
 
+  TriggerSelection::Data TriggerSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup);
+  }
+
   TriggerSelection::Data TriggerSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    bool passEvent = true;
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup);
+  }
+
+  TriggerSelection::Data TriggerSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    Data output;
     TriggerPath* returnPath = NULL;
     increment(fTriggerAllCount);
 
     hControlSelectionType->Fill(fTriggerSelectionType);
     if (fTriggerSelectionType == kTriggerSelectionByTriggerBit) {
-      passEvent = passedTriggerBit(iEvent, iSetup, returnPath);
+      output.fPassedEvent = passedTriggerBit(iEvent, iSetup, returnPath, output);
+    }
+    if(returnPath) {
+      output.fHasTriggerPath = true;
+      output.fHltTaus = returnPath->getTauObjects();
     }
 
     // Possible caloMET cut should not be controlled by "disabled" bit
-    if(fTriggerSelectionType == kTriggerSelectionDisabled)
-      passEvent = true;
-    
-    // Calo MET cut; needed for non QCD1, disabled for others
-    if(passEvent) {
-      increment(fTriggerBitCount);
-      TriggerMETEmulation::Data ret = fTriggerCaloMet.analyze(iEvent, iSetup);
-      passEvent = ret.passedEvent();
+    if(fTriggerSelectionType == kTriggerSelectionDisabled) {
+      output.fPassedEvent = true;
     }
 
-    if(passEvent) {
+    // Calo MET cut; needed for non QCD1, disabled for others
+    if(output.fPassedEvent) {
+      increment(fTriggerBitCount);
+      TriggerMETEmulation::Data ret = fTriggerCaloMet.analyze(iEvent, iSetup);
+      output.fPassedEvent = ret.passedEvent();
+    }
+
+    if(output.fPassedEvent) {
       increment(fTriggerCaloMetCount);
     }
-    
-    if(passEvent) increment(fTriggerCount);
-    return Data(this, returnPath, passEvent);
+
+    if(output.fPassedEvent) 
+      increment(fTriggerCount);
+
+    return output;
   }
   
-  bool TriggerSelection::passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath) {
+  bool TriggerSelection::passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath, TriggerSelection::Data& output) {
     bool passEvent = false;
     /*
     edm::Handle<edm::TriggerResults> htrigger;
@@ -144,8 +169,17 @@ namespace HPlus {
       }
       */
       pat::TriggerObjectRefVector hltMets = trigger->objects(trigger::TriggerMET);
+      /*
+      for(size_t i=0; i<hltMets.size(); ++i) {
+        std::cout << "HLT MET " << i
+                  << " et " << hltMets[i]->et()
+                  << " collection " << hltMets[i]->collection()
+                  << std::endl;
+      }
+      */
       if(hltMets.size() == 0) {
-        fHltMet = pat::TriggerObjectRef();
+        //std::cout << "HLT MET size is 0!" << std::endl;
+        output.fHltMet = pat::TriggerObjectRef();
         if(fMetCut >= 0)
           passEvent = false;
       }
@@ -164,6 +198,16 @@ namespace HPlus {
               break;
             }
           }
+          ///// HACK HACK HACK
+          if(selectedHltMet.size() == 0) {
+            for(size_t i=0; i<hltMets.size(); ++i) {
+              if(hltMets[i]->collection() == "hltMet::HLT") {
+                selectedHltMet.push_back(hltMets[i]);
+                break;
+              }
+            }
+          }
+          ////// end of hack
           if(selectedHltMet.size() == 0) {
             if(fThrowIfNoMet) {
               std::stringstream ss;
@@ -183,16 +227,16 @@ namespace HPlus {
         }
         
         increment(fTriggerHltMetExistsCount);
-        fHltMet = hltMets[0];
-        hHltMetBeforeTrigger->Fill(fHltMet->et());
+        output.fHltMet = hltMets[0];
+        hHltMetBeforeTrigger->Fill(output.fHltMet->et());
         if (passEvent)
-          hHltMetAfterTrigger->Fill(fHltMet->et());
+          hHltMetAfterTrigger->Fill(output.fHltMet->et());
 
         // Cut on HLT MET
-        if(fHltMet->et() <= fMetCut) {
+        if(output.fHltMet->et() <= fMetCut) {
           passEvent = false;
         } else if (passEvent) {
-          hHltMetSelected->Fill(fHltMet->et());
+          hHltMetSelected->Fill(output.fHltMet->et());
         }
         if(passEvent)
           increment(fTriggerHltMetPassedCount);
@@ -226,6 +270,26 @@ namespace HPlus {
       else if((*iObj)->id(trigger::TriggerMET))
         fMets.push_back(*iObj);
     }
+
+    /*
+    objs = trigger.objectRefs();
+    for(pat::TriggerObjectRefVector::const_iterator iObj = objs.begin(); iObj != objs.end(); ++iObj) {
+      std::cout << "Object " << (iObj-objs.begin()) << " " << (*iObj)->collection() << std::endl;
+    }
+    for(pat::TriggerFilterRefVector::const_iterator iFilter = filters.begin(); iFilter != filters.end(); ++iFilter) {
+      std::cout << "Filter " << (*iFilter)->label() << " object keys ";
+      std::vector<unsigned> objectKeys = (*iFilter)->objectKeys();
+      for(size_t i=0; i<objectKeys.size(); ++i) {
+        std::cout << objectKeys[i] << " ";
+      }
+      std::cout << std::endl;
+
+      pat::TriggerObjectRefVector objs = trigger.filterObjects((*iFilter)->label());
+      for(pat::TriggerObjectRefVector::const_iterator iObj = objs.begin(); iObj != objs.end(); ++iObj) {
+        std::cout << "  object " << (*iObj)->collection() << std::endl;
+      }
+    }
+    */
 
     return true;
 

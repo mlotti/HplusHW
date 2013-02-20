@@ -152,7 +152,61 @@ class PlotText:
     # Provides interface compatible with ROOT's drawable objects.
     def Draw(self, options=None):
         self.l.DrawLatex(self.x, self.y, self.text)        
-        
+
+
+## Class for drawing text and a background box
+class PlotTextBox:
+    ## Constructor
+    #
+    # \param xmin       X min coordinate of the box (NDC)
+    # \param ymin       Y min coordinate of the box (NDC)
+    # \param xmax       X max coordinate of the box (NDC)
+    # \param ymax       Y max coordinate of the box (NDC)
+    # \param fillColor  Fill color of the box
+    def __init__(self, xmin, ymin, xmax, ymax, fillColor=ROOT.kWhite):
+        # ROOT.TPave Set/GetX1NDC() etc don't seem to work as expected.
+        self.xmin = xmin
+        self.xmax = xmax
+        self.ymin = ymin
+        self.ymax = ymax
+        self.fillColor = fillColor
+        self.texts = []
+
+    ## Add PlotText object
+    def addText(self, text):
+        self.texts.append(text)
+
+    ## Move the box and the contained text objects
+    #
+    # \param dx  Movement in x (positive is to right)
+    # \param dy  Movement in y (positive is to up)
+    # \param dw  Increment of width (negative to decrease width)
+    # \param dh  Increment of height (negative to decrease height)
+    #
+    # \a dx and \a dy affect to both box and text objects, \a dw and
+    # \dh affect the box only.
+    def move(self, dx=0, dy=0, dw=0, dh=0):
+        self.xmin += dx
+        self.xmax += dx
+        self.ymin += dy
+        self.ymax += dy
+
+        self.xmax += dw
+        self.ymin -= dh
+
+        for t in self.texts:
+            t.x += dx
+            t.y += dy
+
+    ## Draw the box and the text to the current TPad
+    #
+    # \param options  Forwarded to ROOT.TPave.Draw(), and the Draw() of the contained objects
+    def Draw(self, options=""):
+        self.pave = ROOT.TPave(self.xmin, self.ymin, self.xmax, self.ymax, 0, "NDC")
+        self.pave.SetFillColor(self.fillColor)
+        self.pave.Draw(options)
+        for t in self.texts:
+            t.Draw(options)
 
 ## Draw the "CMS Preliminary" text to the current TPad
 #
@@ -186,22 +240,27 @@ def addEnergyText(x=None, y=None, s=None):
 # \param unit  Unit of the integrated luminosity value (should be fb^-1)
 def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
     (x, y) = textDefaults.getValues("lumi", x, y)
-    lumiInFb = lumi/1000.
-    log = math.log10(lumiInFb)
-    ndigis = int(log)
-    format = "%.0f" # ndigis >= 1, 10 <= lumiInFb
-    if ndigis == 0: 
-        if log >= 0: # 1 <= lumiInFb < 10
-            format = "%.1f"
-        else: # 0.1 < lumiInFb < 1
-            format = "%.2f"
-    elif ndigis <= -1:
-        format = ".%df" % (abs(ndigis)+1)
-        format = "%"+format
-    format += " %s"
-    format = "L="+format
+    lumiStr = "L="
+    if isinstance(lumi, basestring):
+        lumiStr += lumi
+    else:
+        lumiInFb = lumi/1000.
+        log = math.log10(lumiInFb)
+        ndigis = int(log)
+        format = "%.0f" # ndigis >= 1, 10 <= lumiInFb
+        if ndigis == 0: 
+            if log >= 0: # 1 <= lumiInFb < 10
+                format = "%.1f"
+            else: # 0.1 < lumiInFb < 1
+                format = "%.2f"
+        elif ndigis <= -1:
+            format = ".%df" % (abs(ndigis)+1)
+            format = "%"+format
+        lumiStr += format % (lumi/1000)
 
-    addText(x, y, format % (lumi/1000., unit), textDefaults.getSize("lumi"), bold=False)
+    lumiStr += " "+unit
+    
+    addText(x, y, lumiStr, textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
 #    l.DrawLatex(x, y, "L=%.0f %s" % (lumi, unit))
 
@@ -357,7 +416,7 @@ def moveLegend(legend, dx=0, dy=0, dw=0, dh=0):
     legend.SetY1(legend.GetY1() + dy)
     legend.SetY2(legend.GetY2() + dy)
 
-    legend.SetX1(legend.GetX1() + dw)
+    legend.SetX2(legend.GetX2() + dw)
     legend.SetY1(legend.GetY1() - dh) # negative dh should shrink the legend
     
     return legend
@@ -861,6 +920,10 @@ class Histo:
     def getRootHisto(self):
         return self.rootHisto
 
+    ## (Re)set the ROOT histogram object (TH1)
+    def setRootHisto(self, rootHisto):
+        self.rootHisto = rootHisto
+
     ## Get the histogram name
     def getName(self):
         return self.name
@@ -924,6 +987,8 @@ class Histo:
         if self.legendLabel == None:
             return
 
+        h = self.rootHisto
+
         # Hack to get the black border to the legend, only if the legend style is fill
         if "f" == self.legendStyle.lower():
             h = self.rootHisto.Clone(self.rootHisto.GetName()+"_forLegend")
@@ -933,13 +998,12 @@ class Histo:
             if self.rootHisto.GetLineColor() == self.rootHisto.GetFillColor():
                 h.SetLineColor(ROOT.kBlack)
 
-            legend.AddEntry(h, self.legendLabel, self.legendStyle)
             self.rootHistoForLegend = h # keep the reference in order to avoid segfault
-        else:
-            labels = self.legendLabel.split("\n")
-            legend.AddEntry(self.rootHisto, labels[0], self.legendStyle)
-            for lab in labels[1:]:
-                legend.AddEntry(None, lab, "")
+
+        labels = self.legendLabel.split("\n")
+        legend.AddEntry(h, labels[0], self.legendStyle)
+        for lab in labels[1:]:
+            legend.AddEntry(None, lab, "")
 
     ## Call a function with self as an argument.
     #
@@ -1079,6 +1143,9 @@ class HistoStacked(Histo):
 
         self.setIsDataMC(self.histos[0].isData(), self.histos[0].isMC())
 
+    def setRootHisto(self, rootHisto):
+        raise NotImplementedError("HistoStacked.setRootHisto() would be ill-defined")
+
     ## Get the list of original TH1 histograms.
     def getAllRootHistos(self):
         return [x.getRootHisto() for x in self.histos]
@@ -1136,6 +1203,9 @@ class HistoGraph(Histo):
 
     def getRootGraph(self):
         return self.getRootHisto()
+
+    def setRootGraph(self, rootGraph):
+        self.setRootHisto(rootGraph)
 
     def _values(self, values, func):
         return [func(values[i], i) for i in xrange(0, self.getRootGraph().GetN())]
@@ -1209,6 +1279,9 @@ class HistoEfficiency(Histo):
 
     def getRootEfficiency(self):
         return self.getRootHisto()
+
+    def setRootEfficiency(self, rootEfficiency):
+        self.setRootEfficiency(rootEfficiency)
 
     def getRootPassedHisto(self):
         return self.rootHisto.GetPassedHistogram()

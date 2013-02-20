@@ -19,6 +19,14 @@ def _addToDictList(d, name, item):
     else:
         d[name] = [item]
 
+## Helper class to get an object for Disable "constant"
+class _Constant:
+    def __init__(self, value):
+        self.value = value
+
+## Constant for marking values to be disabled
+Disable = _Constant(1)
+
 _reco_name_re = re.compile("^(?P<reco>Run[^_]+_[^_]+_v\d+_[^_]+_)")
 def updatePublishName(dataset, sourcePath, workflowName):
     path = sourcePath.split("/")
@@ -78,9 +86,10 @@ class DatasetSet:
 
     def getDataset(self, name):
         try:
+#	    print "check getDataset",name,self.datasetDict
             return self.datasetDict[name]
         except KeyError:
-            raise Exception("Invalid dataset name '%s'" % name)
+            raise Exception("Invalid dataset name '%s' (see HiggsAnalysis/HeavyChHiggsToTauNu/python/tools/multicrabWorkflows.py for definitions of all datasets)" % name)
 
     def getDatasetList(self):
         return self.datasetList
@@ -99,7 +108,7 @@ class Dataset:
     #
     # \param name         Name of the crab-dataset
     # \param dataVersion  Data version string
-    # \param energy       Centre-of-mass energy (integer, in TeV)
+    # \param energy       Centre-of-mass energy (string, in TeV)
     # \param runs         For data, two-tuple of the run range
     # \param crossSection For MC, the dataset cross section in pb
     # \param workflows    List of Workflow objects
@@ -152,7 +161,7 @@ class Dataset:
     def __str__(self):
         out = StringIO.StringIO()
 
-        out.write('Dataset("%s", dataVersion="%s", energy=%d' % (self.name, self.dataVersion, self.energy))
+        out.write('Dataset("%s", dataVersion="%s", energy=%s' % (self.name, self.dataVersion, self.energy))
         if self.runs != None:
             out.write(", runs=%s" % str(self.runs))
         if self.crossSection != None:
@@ -208,7 +217,7 @@ class Dataset:
 
         args = [
             "dataVersion=%s" % self.dataVersion,
-            "energy=%d" % self.energy,
+            "energy=%s" % self.energy,
             ]
         
         if self.crossSection != None:
@@ -258,6 +267,9 @@ class Workflow:
 
     def addArg(self, argName, argValue):
         self.args[argName] = argValue
+
+    def removeArg(self, argName):
+        del self.args[argName]
 
     def getName(self):
         return self.name
@@ -341,6 +353,13 @@ def _addIfNotNone(out, format, variable):
     if variable != None:
         out.write(format % variable)
 
+## Helper to translate Disable to None
+def _NoneIfDisable(obj):
+    if obj is Disable:
+        return None
+    else:
+        return obj
+
 ## Class representing an output of a workflow
 class Data:
     ## Constructor
@@ -351,13 +370,15 @@ class Data:
     # \param events_per_job  Default number of events per job for those who process the output (conflicts with number_of_jobs, lumis_per_job)
     # \param lumiMask        Default lumi mask for those who process the output
     # \param dbs_url         URL to the DBS reader instance
+    #
+    # If any is Disable, it is interpreted as None
     def __init__(self, datasetpath, number_of_jobs=None, lumis_per_job=None, events_per_job=None, lumiMask=None, dbs_url=None):
         self.datasetpath = datasetpath
-        self.number_of_jobs = number_of_jobs
-        self.lumis_per_job = lumis_per_job
-        self.events_per_job = events_per_job
-        self.lumiMask = lumiMask
-        self.dbs_url = dbs_url
+        self.number_of_jobs = _NoneIfDisable(number_of_jobs)
+        self.lumis_per_job = _NoneIfDisable(lumis_per_job)
+        self.events_per_job = _NoneIfDisable(events_per_job)
+        self.lumiMask = _NoneIfDisable(lumiMask)
+        self.dbs_url = _NoneIfDisable(dbs_url)
 
         self._ensureConsistency()
 
@@ -428,6 +449,9 @@ class Source:
     # \param events_per_job  If given, overrides the events_per_job of the input Data object
     # \param lumis_per_job   If given, overrides the lumis_per_job of the input Data object
     # \param lumiMask        If given, overrides the lumiMask of the input Data object
+    #
+    # If any of the four overrides is Disable, overrides the input
+    # Data object value with None
     def __init__(self, name, number_of_jobs=None, events_per_job=None, lumis_per_job=None, lumiMask=None):
         self.name = name
         self.number_of_jobs = number_of_jobs
@@ -460,7 +484,9 @@ class Source:
         data = copy.deepcopy(wf.output)
         for attr in ["number_of_jobs", "events_per_job", "lumis_per_job", "lumiMask"]:
             value = getattr(self, attr)
-            if value != None:
+            if value is Disable:
+                setattr(data, attr, None)
+            elif value is not None:
                 setattr(data, attr, copy.deepcopy(value))
         data._ensureConsistency()
         return data
@@ -474,19 +500,24 @@ class Source:
         if n > 1:
             raise Exception("Source may have only one of number_of_jobs, lumis_per_job, events_per_job set")
 
+    def _writeHelp(self, out, attr, form):
+        value = getattr(self, attr)
+        if value is not None:
+            out.write(", %s=" % attr)
+            if value is Disable:
+                out.write("Disable")
+            else:
+                out.write(form % value)
+
     ## String representation of Source
     def __str__(self):
         self._ensureConsistency()
         out = StringIO.StringIO()
         out.write('Source("%s"' % self.name)
-        if self.number_of_jobs != None:
-            out.write(", number_of_jobs=%d" % self.number_of_jobs)
-        if self.events_per_job != None:
-            out.write(", events_per_job=%d" % self.events_per_job)
-        if self.lumis_per_job != None:
-            out.write(", lumis_per_job=%d" % self.lumis_per_job)
-        if self.lumiMask != None:
-            out.write(', lumiMask="%s"' % self.lumiMask)
+        self._writeHelp(out, "number_of_jobs", "%d")
+        self._writeHelp(out, "events_per_job", "%d")
+        self._writeHelp(out, "lumis_per_job", "%d")
+        self._writeHelp(out, "lumiMask", '"%s"')
         out.write(")")
 
         ret = out.getvalue()
@@ -545,27 +576,39 @@ class TaskDef:
 
     ## Update parameters from another TaskDef object
     #
-    # Only non-None values are copied from taskDef
+    # \param taskDef  Another  TaskDef object
+    #
+    # Only non-None values are copied from taskDef.
     def update(self, taskDef):
         for a in ["outputPath"] + self.options:
             val = getattr(taskDef, a)
-            if val != None:
+            if val is not None:
                 setattr(self, a, val)
 
 ## Update task definition dictionary from another dictionary
 #
 # \param oldDefinitions   Dictionary from dataset names to TaskDef objects
 # \param newDefinitions   Dictionary from dataset names to TaskDef objects
+# \param workflowName     Name of the current workflow (for error message only)
 #
 # Updates the TaskDefs in \a oldDefinitions with the ones in \a
 # newDefinitions with the same dataset name. Removes TaskDefs from \a
 # oldDefinitions for those datasets which do not have an entry in \a
 # newDefinitions.
-def updateTaskDefinitions(oldDefinitions, newDefinitions):
+def updateTaskDefinitions(oldDefinitions, newDefinitions, workflowName=""):
+    newDefinitions_copy = {}
+    newDefinitions_copy.update(newDefinitions)
     names = oldDefinitions.keys()
     for name in names:
         if name in newDefinitions:
             oldDefinitions[name].update(newDefinitions[name])
+            del newDefinitions_copy[name]
         else:
             del oldDefinitions[name]
+
+    if len(newDefinitions_copy) > 0:
+        keys = newDefinitions_copy.keys()
+        keys.sort()
+        raise Exception("No existing task definitions for workflow %s and datasets %s" % (workflowName, ", ".join(keys)))
+
     return oldDefinitions

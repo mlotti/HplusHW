@@ -2,6 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_VetoTauSelection_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_VetoTauSelection_h
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
+
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
@@ -20,30 +22,35 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
 
-  class VetoTauSelection {
+  class VetoTauSelection: public BaseSelection {
   public:
     class Data {
     public:
-      Data(const VetoTauSelection *vetoTauSelection, bool passedEvent);
+      Data();
       ~Data();
 
       /// Returns true, if the selected tau has passed all selections
-      bool passedEvent() const { return fPassedEvent; }
+      const bool passedEvent() const { return fPassedEvent; }
 
-      const edm::PtrVector<pat::Tau>& getSelectedVetoTaus() const { return fVetoTauSelection->fSelectedVetoTaus; }
+      const edm::PtrVector<pat::Tau>& getSelectedVetoTaus() const { return fSelectedVetoTaus; }
+
+      friend class VetoTauSelection;
 
     private:
-      const VetoTauSelection *fVetoTauSelection;
-      const bool fPassedEvent;
+      bool fPassedEvent;
+      edm::PtrVector<pat::Tau> fSelectedVetoTaus;
     };
 
     VetoTauSelection(const edm::ParameterSet& iConfig, const edm::ParameterSet& fakeTauSFandSystematicsConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~VetoTauSelection();
 
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau, double vertexZ);
     /// Analyses the compatibility of the tau and the primary vertex
-    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau, double vertexZ);
 
   private:
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau, double vertexZ);
     // Parameters set in config file
     edm::InputTag fSrc;
     edm::InputTag fOneProngTauSrc;
@@ -78,8 +85,6 @@ namespace HPlus {
     WrappedTH1* hSelectedGenuineTauDiTauMass;
     WrappedTH1* hSelectedFakeTauDiTauMass;
     WrappedTH1* hSelectedTaus;
-
-    edm::PtrVector<pat::Tau> fSelectedVetoTaus;
   };
 }
 

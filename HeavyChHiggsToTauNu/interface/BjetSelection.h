@@ -2,6 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_BjetSelection_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_BjetSelection_h
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
+
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
@@ -10,7 +12,6 @@
 #include "DataFormats/METReco/interface/GenMET.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 
 
 namespace edm {
@@ -23,7 +24,7 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
 
-  class BjetSelection {
+  class BjetSelection: public BaseSelection {
   public:
     typedef math::XYZTLorentzVector XYZTLorentzVector;
     /**
@@ -36,27 +37,32 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const BjetSelection *bjetSelection, bool passedEvent);
+      Data();
       ~Data();
 
-      const edm::Ptr<pat::Jet>& getBjetTauSide() const { return fBjetSelection->BjetTauSide; }
-      const edm::Ptr<pat::Jet>& getBjetTopSide() const { return fBjetSelection->BjetTopSide; }
+      const edm::Ptr<pat::Jet>& getBjetTauSide() const { return BjetTauSide; }
+      const edm::Ptr<pat::Jet>& getBjetTopSide() const { return BjetTopSide; }
 
-      bool passedEvent() const { return fPassedEvent; }
+      const bool passedEvent() const { return fPassedEvent; }
+
+      friend class BjetSelection;
 
     private:
-      const BjetSelection *fBjetSelection;
-      const bool fPassedEvent;
+      // Variables
+      bool fPassedEvent;
+      edm::Ptr<pat::Jet> BjetTauSide;
+      edm::Ptr<pat::Jet> BjetTopSide;
+
     };
-    
+
     BjetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~BjetSelection();
 
-
-   
-    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, const edm::Ptr<reco::Candidate>& tau , const edm::Ptr<reco::MET>& met);   
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, const edm::Ptr<reco::Candidate>& tau , const edm::Ptr<reco::MET>& met);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, const edm::Ptr<reco::Candidate>& tau , const edm::Ptr<reco::MET>& met);
 
   private:
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, const edm::Ptr<reco::Candidate>& tau , const edm::Ptr<reco::MET>& met);
     void init();
     /*
     std::vector<const reco::GenParticle*> getImmediateMothers(const reco::Candidate&);
@@ -113,10 +119,6 @@ namespace HPlus {
     WrappedTH1 *hPtTopHiggs;
     WrappedTH1 *hPtW;
 
-    // Variables
-    edm::Ptr<pat::Jet> BjetTauSide;
-    edm::Ptr<pat::Jet> BjetTopSide;
-   
   };
 }
 

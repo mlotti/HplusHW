@@ -188,7 +188,7 @@ if addSignalAnalysis:
 
     for era, src in zip(puWeights, puWeightNames):
         mod = module.clone()
-        mod.vertexWeightReader.PUVertexWeightSrc = src
+        mod.pileupWeightReader.weightSrc = src
         if era == puWeights[-1]:
             mod.eventCounter.printMainCounter = cms.untracked.bool(True)
 

@@ -45,7 +45,9 @@ config = {
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
 #        "signalTrigger": "HLT_IsoPFTau35_Trk20_MET60_v2",
-        "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2011A-08Nov2011-v1/AOD/E8B13C66-A70B-E111-B8C5-001EC9B09F59.root"
+        "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2011A-08Nov2011-v1/AOD/E8B13C66-A70B-E111-B8C5-001EC9B09F59.root",
+        # trigger HLT_IsoPFTau35_Trk20_MET45_v4 
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/Tau/Run2011A_08Nov2011_v1_AOD_160431_pattuple_v44_4/22fa40c1fbac4684dd3ccb0e713bd4b5/pattuple_103_1_Gr3.root",
     },
     "44Xmc_highPU": {
         "simProcess": "SIM",
@@ -123,6 +125,12 @@ class DataVersion:
 
     def isHighPU(self):
         return self.isMC() and "highPU" in self.version
+
+    def is44X(self):
+        return "44X" in self.version
+
+    def is53X(self):
+        return "53X" in self.version
 
     def getTriggerProcess(self):
         return self.trigger

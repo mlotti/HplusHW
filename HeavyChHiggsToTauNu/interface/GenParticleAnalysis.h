@@ -2,6 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_GenParticleAnalysis_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_GenParticleAnalysis_h
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
+
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
@@ -20,30 +22,40 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
   
-  class   GenParticleAnalysis {
+  class GenParticleAnalysis: public BaseSelection {
   public:
     class Data {
     public:
-      
-      Data(const GenParticleAnalysis *analysis);
+      Data();
       ~Data();
 
+      void check() const;
+
       const edm::Ptr<reco::GenMET>& getGenMET() const {
-        return fAnalysis->fGenMet;
+	check();
+        return fGenMet;
       }
+
+      friend class GenParticleAnalysis;
+
     private:
-      const GenParticleAnalysis *fAnalysis;
+      edm::Ptr<reco::GenMET> fGenMet;
     };
 
     GenParticleAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~GenParticleAnalysis();
 
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event&, const edm::EventSetup&);
     Data analyze(const edm::Event&, const edm::EventSetup&);
+
     // edm::PtrVector<const reco::Candidate*> doQCDmAnalysis(const edm::Event&, const edm::EventSetup&); //doesn't work
     std::vector<const reco::Candidate*> doQCDmAnalysis(const edm::Event&, const edm::EventSetup&); // works
     // double doQCDmAnalysis(const edm::Event&, const edm::EventSetup&); // works
 
   private:
+    Data privateAnalyze(const edm::Event&, const edm::EventSetup&);
+
     void init(HistoWrapper& histoWrapper);
     /*
     std::vector<const reco::GenParticle*> getImmediateMothers(const reco::Candidate&);
@@ -98,6 +110,10 @@ namespace HPlus {
     WrappedTH1 *hBquarkNotFromTopEta;
     WrappedTH1 *hBquarkFromTopPt;
     WrappedTH1 *hBquarkNotFromTopPt;
+    WrappedTH1 *hBquarkFromTopEtaPtCut;
+    WrappedTH1 *hBquarkNotFromTopEtaPtCut;
+    WrappedTH1 *hBquarkFromTopPtEtaCut;
+    WrappedTH1 *hBquarkNotFromTopPtEtaCut;
     WrappedTH1 *hBquarkFromTopDeltaRTau;
     WrappedTH1 *hBquarkNotFromTopDeltaRTau;
     WrappedTH1 *hGenBquarkFromHiggsSideEta;
@@ -113,7 +129,6 @@ namespace HPlus {
     WrappedTH1 *hWEta;
     WrappedTH1 *hWPhi;
 
-    edm::Ptr<reco::GenMET> fGenMet;
   };
 }
 

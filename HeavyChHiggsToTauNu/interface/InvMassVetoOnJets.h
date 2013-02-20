@@ -25,12 +25,12 @@
 #include <iostream>
 #include <vector>
 // CMSSW libraries
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MathFunctions.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 typedef math::XYZTLorentzVector LorentzVector;
@@ -47,37 +47,38 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
 
-  class InvMassVetoOnJets {
+  class InvMassVetoOnJets: public BaseSelection {
   public:
 
     /**
-     * Class to encapsulate the access to the data members of
-     * TauSelection. If you want to add a new accessor, add it here
-     * and keep all the data of TauSelection private.
+     * Class to encapsulate the access to the data members.
      */
     class Data {
     public:
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const InvMassVetoOnJets *invMassVetoOnJets, bool passedEvent);
+      Data();
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
       // const InvMassVetoOnJets::AlphaStruc alphaT() const { return fInvMassVetoOnJets->sAlpha; }
-    
+
+      friend class InvMassVetoOnJets;
     private:
-      const InvMassVetoOnJets *fInvMassVetoOnJets;
-      const bool fPassedEvent;
+      bool fPassedEvent;
     };
 
     InvMassVetoOnJets(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~InvMassVetoOnJets();
 
-    // Data analyze( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
-    Data analyze( const edm::PtrVector<pat::Jet>& jets );
-    
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
+
   private:
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
+
     const double fPtCut;
     const double fEtaCut;
     const bool fSetTrueToUseModule;

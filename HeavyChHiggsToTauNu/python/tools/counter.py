@@ -146,10 +146,14 @@ class CellFormatBase:
     #                             valueFormat, uncertaintyFormat, and
     #                             uncertaintyPrecision
     # \li\a valueOnly             Boolean, format the value only? (default: False)
+    # \li\a beginCell             String to be inserted before the content of the cell (default: "")
+    # \li\a endCell               String to be inserted after the content of the cell (default: "")
     def __init__(self, **kwargs):
         self._valueFormat = kwargs.get("valueFormat", "%.6g")
         self._uncertaintyFormat = kwargs.get("uncertaintyFormat", self._valueFormat)
         self._valueOnly = kwargs.get("valueOnly", False)
+        self._beginCell = kwargs.get("beginCell", "")
+        self._endCell = kwargs.get("endCell", "")
 
         uncertaintyPrecision = kwargs.get("uncertaintyPrecision", 4)
         self._withPrecision = kwargs.get("withPrecision", None)
@@ -206,15 +210,18 @@ class CellFormatBase:
             uUpf = uncFmt % uUp
             uDownf = uncFmt % uDown
 
+        ret = self._beginCell
 
         if self._valueOnly or not hasUncertainty:
-            return self._formatValue(value)
-
-        if (uDown == 0.0 and uUp == 0.0) or uncertaintiesSame:
-            return self._formatValuePlusMinus(value, uUpf)
+            ret += self._formatValue(value)
         else:
-            return self._formatValuePlusHighMinusLow(value, uUpf, uDownf)
+            if (uDown == 0.0 and uUp == 0.0) or uncertaintiesSame:
+                ret += self._formatValuePlusMinus(value, uUpf)
+            else:
+                ret += self._formatValuePlusHighMinusLow(value, uUpf, uDownf)
 
+        ret += self._endCell
+        return ret
 
     ## \var _valueFormat
     # Format string for count value
