@@ -90,7 +90,7 @@ config = {
     "53Xdata24Aug2012": {
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
-        "globalTag": "FT_53_V10A_AN3::All",
+        "globalTag": "FT53_V10A_AN3::All",
 #        "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2012C-24Aug2012-v1/AOD/02698B5A-A0EE-E111-B4FB-0025901D4AF4.root",
     },
