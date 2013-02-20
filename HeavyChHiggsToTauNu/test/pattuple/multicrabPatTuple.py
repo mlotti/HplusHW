@@ -156,7 +156,7 @@ datasets_SingleTop = [
     "Tbar_s-channel_TuneZ2star_Summer12",
 ]
 
-workflow = "pattuple_v53_2"
+workflow = "pattuple_v53_2_test1"
 
 tasks = [
     ("Tau", datasets_Tau),
@@ -184,7 +184,7 @@ for midfix, datasets in tasks:
     # writing to /store/group/local ...
     #multicrab.appendLineAll("USER.local_stage_out=1")
 
-    multicrab.appendLineAll("GRID.maxtarballsize = 35")
+    #multicrab.appendLineAll("GRID.maxtarballsize = 35")
 
     #def addCopyConfig(dataset):
     #    dataset.appendLine("USER.additional_input_files = copy_cfg.py")
@@ -193,7 +193,7 @@ for midfix, datasets in tasks:
 
     multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
 
-    prefix = "multicrab_"+midfix
+    prefix = "multicrab_"+workflow+"_"+midfix
     configOnly = False # Create task configuration only?
     configOnly = True
     # Leave configOnly as false and specify site whitelist on command line when submitting the jobs

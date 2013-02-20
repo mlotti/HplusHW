@@ -1184,7 +1184,18 @@ def addPattuple_v53_1_2(datasets):
     #         analysisWf = dataset.getWorkflow("analysis_v53_1_2")
     #         dataset.addWorkflow(WorkflowAlias("analysis_v53_1", analysisWf))
 
-# Skeleton
+# Add v53_2_test1 pattuples
+def addPattuple_v53_2_test1(datasets):
+    definitions = {
+        "Tau_198022-198523_2012C_Aug24":          TaskDef(""),
+        "MultiJet_198022-198523_2012C_Aug24":     TaskDef(""),
+        "BJetPlusX_198022-198523_2012C_Aug24":    TaskDef(""),
+        "TTToHplusBWB_M120_Summer12":             TaskDef(""),
+        }
+
+    addPattuple_53X("v53_2_test1", datasets, definitions)
+
+# Add v53_2 pattuples
 def addPattuple_v53_2(datasets):
     definitions = {
         "Tau_190456-190738_2012A_Jul13":          TaskDef(""),
