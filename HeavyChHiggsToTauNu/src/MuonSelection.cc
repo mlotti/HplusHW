@@ -252,6 +252,9 @@ namespace HPlus {
       double relIsol = myIsolation / myMuonPt;
       hMuonRelIsol->Fill(relIsol);
 
+      if(myMuonPt >= fMuonPtCut && std::abs(myMuonEta) < fMuonEtaCut)
+        output.fSelectedMuonsBeforeIsolation.push_back(*iMuon);
+
       // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#Basline_muon_selections_for_2011
       if (relIsol < 0.12) {
         hTightMuonEta->Fill(myMuonEta);
