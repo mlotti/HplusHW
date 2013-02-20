@@ -19,8 +19,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
@@ -221,9 +221,9 @@ class HPlusEwkBackgroundCoverageAnalyzer: public edm::EDAnalyzer {
 
   virtual void endLuminosityBlock(const edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
-  HPlus::EventCounter eventCounter;
   HPlus::EventWeight fEventWeight;
   HPlus::HistoWrapper fHistoWrapper;
+  HPlus::EventCounter eventCounter;
 
   edm::InputTag fGenParticleSrc;
   edm::InputTag fEmbeddingMuonSrc;
@@ -236,8 +236,8 @@ class HPlusEwkBackgroundCoverageAnalyzer: public edm::EDAnalyzer {
   HPlus::TriggerSelection fTriggerSelection;
   HPlus::VertexSelection fPrimaryVertexSelection;
   HPlus::TauSelection fTauSelection;
-  HPlus::GlobalElectronVeto fGlobalElectronVeto;
-  HPlus::GlobalMuonVeto fGlobalMuonVeto;
+  HPlus::ElectronSelection fElectronSelection;
+  HPlus::MuonSelection fMuonSelection;
   HPlus::JetSelection fJetSelection;
   HPlus::METSelection fMETSelection;
   HPlus::BTagging fBTagging;
@@ -393,8 +393,9 @@ class HPlusEwkBackgroundCoverageAnalyzer: public edm::EDAnalyzer {
 };
 
 HPlusEwkBackgroundCoverageAnalyzer::HPlusEwkBackgroundCoverageAnalyzer(const edm::ParameterSet& iConfig):
-  eventCounter(iConfig), fEventWeight(iConfig),
+  fEventWeight(iConfig),
   fHistoWrapper(fEventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
+  eventCounter(iConfig, fEventWeight, fHistoWrapper),
   fGenParticleSrc(iConfig.getUntrackedParameter<edm::InputTag>("genParticleSrc")),
   fEmbeddingMuonSrc(iConfig.getUntrackedParameter<edm::InputTag>("embeddingMuonSrc")),
   fVertexSrc(iConfig.getUntrackedParameter<edm::InputTag>("vertexSrc")),
@@ -404,8 +405,8 @@ HPlusEwkBackgroundCoverageAnalyzer::HPlusEwkBackgroundCoverageAnalyzer(const edm
   fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, fHistoWrapper),
   fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, fHistoWrapper),
   fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, fHistoWrapper),
-  fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), fPrimaryVertexSelection.getSrc(), eventCounter, fHistoWrapper),
-  fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, fHistoWrapper),
+  fElectronSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("ElectronSelection"), fPrimaryVertexSelection.getSelectedSrc(), eventCounter, fHistoWrapper),
+  fMuonSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MuonSelection"), eventCounter, fHistoWrapper),
   fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, fHistoWrapper),
   fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, fHistoWrapper, "MET"),
   fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, fHistoWrapper),
@@ -425,8 +426,6 @@ HPlusEwkBackgroundCoverageAnalyzer::HPlusEwkBackgroundCoverageAnalyzer(const edm
   fResultAfterAllSelections(eventCounter, "AfterAllSelections"),
   fMuon2Branches(iConfig, "muon2")
 {
-  eventCounter.setWeightPointer(fEventWeight.getWeightPtr());
-
   edm::Service<TFileService> fs;
   // Save the module configuration to the output ROOT file as a TNamed object
   fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
@@ -479,7 +478,7 @@ void HPlusEwkBackgroundCoverageAnalyzer::endLuminosityBlock(const edm::Luminosit
 }
 
 void HPlusEwkBackgroundCoverageAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  fEventWeight.updatePrescale(iEvent); // set prescale
+  fEventWeight.beginEvent();
 
   increment(fAllCounter);
 
@@ -498,13 +497,13 @@ void HPlusEwkBackgroundCoverageAnalyzer::analyze(const edm::Event& iEvent, const
   bNvertex = hvert->size();
 
 //------ TauID
-  HPlus::TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
+  HPlus::TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex()->z());
  
 //------ Global electron veto
-  HPlus::GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
+  HPlus::ElectronSelection::Data electronSelectionData = fElectronSelection.analyze(iEvent, iSetup);
 
 //------ Global muon veto
-  HPlus::GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
+  HPlus::MuonSelection::Data muonSelectionData = fMuonSelection.analyze(iEvent, iSetup, pvData.getSelectedVertex());
 
   // Embedding-identified muons
   edm::Handle<edm::View<pat::Muon> > hembeddingmuons;
@@ -516,8 +515,8 @@ void HPlusEwkBackgroundCoverageAnalyzer::analyze(const edm::Event& iEvent, const
 
 
   const edm::PtrVector<pat::Tau>& selectedTaus = tauData.getSelectedTaus();
-  const edm::PtrVector<pat::Electron>& identifiedElectrons = electronVetoData.getSelectedElectrons();
-  const edm::PtrVector<pat::Muon>& identifiedMuons = muonVetoData.getSelectedMuons();
+  const edm::PtrVector<pat::Electron>& identifiedElectrons = electronSelectionData.getSelectedElectrons();
+  const edm::PtrVector<pat::Muon>& identifiedMuons = muonSelectionData.getSelectedMuons();
   const edm::PtrVector<pat::Muon>& embeddingIdentifiedMuons = hembeddingmuons->ptrVector();
 
   MCMatcher mcMatcher(selectedTaus,
@@ -690,7 +689,7 @@ void HPlusEwkBackgroundCoverageAnalyzer::analyze(const edm::Event& iEvent, const
   bObj2Type = obj2Type;
 
   // Find the muon2 object, insert to tree
-  const edm::PtrVector<pat::Muon> selectedMuonsNoIsolation = muonVetoData.getSelectedMuonsBeforeIsolation();
+  const edm::PtrVector<pat::Muon> selectedMuonsNoIsolation = muonSelectionData.getSelectedMuonsBeforeIsolation();
   edm::PtrVector<pat::Muon> muon2;
   for(size_t i=0; i<selectedMuonsNoIsolation.size(); ++i) {
     if(reco::deltaR(*selectedMuonsNoIsolation[i], *W2daughter1) < mcMatcher.getMatchDR()) {

@@ -5,8 +5,8 @@ def createEDAnalyze(param):
         histogramAmbientLevel = param.histogramAmbientLevel,
         trigger = param.trigger.clone(),
         primaryVertexSelection = param.primaryVertexSelection.clone(),
-        GlobalElectronVeto = param.GlobalElectronVeto.clone(),
-        GlobalMuonVeto = param.GlobalMuonVeto.clone(),
+        ElectronSelection = param.ElectronSelection.clone(),
+        MuonSelection = param.MuonSelection.clone(),
         tauSelection = param.tauSelectionHPSMediumTauBased.clone(),
         jetSelection = param.jetSelection.clone(),
         MET = param.MET.clone(),
@@ -34,9 +34,10 @@ def createEDAnalyze(param):
 
         # Options below are not really used, they're just needed to
         # use the same configuration code
-        triggerEfficiencyScaleFactor = param.triggerEfficiencyScaleFactor.clone(),
+        tauTriggerEfficiencyScaleFactor = param.tauTriggerEfficiencyScaleFactor.clone(),
+        metTriggerEfficiencyScaleFactor = param.metTriggerEfficiencyScaleFactor.clone(),
         vertexWeight = param.vertexWeight.clone(),
-        vertexWeightReader = param.vertexWeightReader.clone(),
+        pileupWeightReader = param.pileupWeightReader.clone(),
         Tree = param.tree.clone(),
         tauEmbeddingStatus = cms.untracked.bool(False),
     )
