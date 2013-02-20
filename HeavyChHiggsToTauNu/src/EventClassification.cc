@@ -58,8 +58,6 @@ namespace HPlus {
 //   // Create folder to hold histograms
 //   TFileDirectory myDir = fs->mkdir("EventClassification");
 
-
-
 //------------------------> PRIVATE MEMBER FUNCTIONS <------------------------
 
   size_t getHiggsLine(const edm::Event& iEvent) {
@@ -108,7 +106,7 @@ namespace HPlus {
     if (!myHiggsSideTop) return NULL;
     for (size_t i=0; i < genParticles->size(); ++i) {
       const reco::Candidate & p = (*genParticles)[i];
-      if (TMath::Abs(p.pdgId()) == 5) {
+      if (TMath::Abs(p.pdgId()) == 5) { // or 
 	reco::Candidate* myBMother = const_cast<reco::Candidate*>(p.mother());
         bool myStatus = true;
         while (myStatus) {
@@ -171,24 +169,26 @@ namespace HPlus {
     return true;
   }
 
-//   bool decaysToOneProng(reco::Candidate* tau) {
-//     std::vector<const reco::GenParticle*> tauDaughters = getImmediateDaughters(tau);
-//     int tauDaughterId = 9999999;
-//     int numberOfProngs = 0;
-//     for(size_t t=0; t<tauDaughters.size(); ++t) {
-//       const reco::Candidate& tauDaughter = *tauDaughters[t];
-//       tauDaughterId = tauDaughter.pdgId();
-//       // If tau daughter is a charged pion or kaon, increase numberOfProngs // CHECK IF THIS IS CORRECT!
-//       if (abs(tauDaughterId) == 211 || abs(tauDaughterId) == 321) numberOfProngs++;
-//       std::cout << "EventClassification: Charged pion or kaon from tau decay found -> incrementing number of prongs" << std::endl;
-//       // If tau daughter is an electron or a muon, increase numberOfProngs (I don't know if this is what we need,
-//       // but the method should do exactly what its name suggests in any case)
-//       if (abs(tauDaughterId) == 11 || abs(tauDaughterId) == 13) numberOfProngs++;
-//       std::cout << "EventClassification: Electron or muon from tau decay found -> incrementing number of prongs" << std::endl;
-//     }
-//     if (numberOfProngs == 1) return true;
-//     return false;
-//   }
+  // NOTE: it is not that relevant whether the reco tau was really 1-p, as long as it is the right one
+  bool decaysToOneProng(reco::Candidate* tau) {
+    std::vector<const reco::GenParticle*> tauDaughters = getImmediateDaughters(tau);
+    int tauDaughterId = 9999999;
+    int numberOfProngs = 0;
+    for(size_t t=0; t<tauDaughters.size(); ++t) {
+      const reco::Candidate& tauDaughter = *tauDaughters[t];
+      tauDaughterId = tauDaughter.pdgId();
+      // If tau daughter is a charged pion or kaon, increase numberOfProngs // CHECK IF THIS IS CORRECT!
+      // TODO: calculate charge of immediate daughters and check if there is one (and only one) charged particle
+      if (abs(tauDaughterId) == 211 || abs(tauDaughterId) == 321) numberOfProngs++;
+      std::cout << "EventClassification: Charged pion or kaon from tau decay found -> incrementing number of prongs" << std::endl;
+      // If tau daughter is an electron or a muon, increase numberOfProngs (I don't know if this is what we need,
+      // but the method should do exactly what its name suggests in any case)
+      if (abs(tauDaughterId) == 11 || abs(tauDaughterId) == 13) numberOfProngs++;
+      std::cout << "EventClassification: Electron or muon from tau decay found -> incrementing number of prongs" << std::endl;
+    }
+    if (numberOfProngs == 1) return true;
+    return false;
+  }
 
 //   TVector3 getVisibleMomentum(reco::Candidate* tau) {
 //     std::vector<const reco::GenParticle*> tauDaughters = getImmediateDaughters(tau);

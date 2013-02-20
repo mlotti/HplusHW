@@ -53,6 +53,9 @@ namespace HPlus {
   //  double getMETDeltaMagnitude();
   //  double getMETDeltaR();
 
+  // Also need methods like these:
+  // isBGenuine() etc.
+
   void checkIfGenuineTau(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau);
   // Alternative way
   //void checkIfGenuineTau(const edm::Event& iEvent, const reco::Candidate&tau);

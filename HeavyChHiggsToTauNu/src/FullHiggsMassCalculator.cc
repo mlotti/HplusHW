@@ -142,12 +142,10 @@ hHiggsMassIncorrectId = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "
 
     // 3) calculate
     doCalculate(myTauVector, myBJetVector, myMETVector, output, myMatchStatus);
-    std::cout << "Calling doCalculate for event " << "bla" << std::endl;
-    myRecoHiggsMass = doCalculate(myTauVector, myBJetVector, myMETVector, myMatchStatus);
-
+    
     // 4) calculate real mass of charged Higgs boson from MC truth
     if (!iEvent.isRealData())
-      calculateTrueHiggsMass(iEvent, myRecoHiggsMass, tauData.getSelectedTau(), myBJet);
+      calculateTrueHiggsMass(iEvent, tauData.getSelectedTau(), myBJet, output);
 
     // Print some whitespace for better readability of debug print statements
     std::cout << std::endl;
@@ -329,7 +327,7 @@ hHiggsMassIncorrectId = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "
         hHiggsMassReal->Fill(output.fHiggsMassSolution);
       } else {
         hHiggsMassImaginary->Fill(output.fHiggsMassSolution);
-      }     
+      }    
     }
   }
 
@@ -441,7 +439,7 @@ hHiggsMassIncorrectId = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "
                 myVisibleTau.SetXYZ(-p.px() + myVisibleTau.X(),
                                     -p.py() + myVisibleTau.Y(),
                                     -p.pz() + myVisibleTau.Z());
-              } else if (myId == 211) {
+              } else if (myId == 211) { // NOT the right way to count prongs
                 ++myChargedCount;
               }
             }
@@ -499,15 +497,15 @@ hHiggsMassIncorrectId = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "
   NOTE 2: This code is called for each event, even if no full Higgs mass was reconstructed. FIX this to improve efficiency!
   
   */
-  void FullHiggsMassCalculator::calculateTrueHiggsMass(const edm::Event& iEvent, double recoHiggsMass, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet) {
+  void FullHiggsMassCalculator::calculateTrueHiggsMass(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet, FullHiggsMassCalculator::Data& output) {
     // NOTE! As it is written now, this method has a BUG!!! If there is more than one charged Higgs in the event,
     // it will histogram all their masses even if only one was found in the reconstruction. (Thus leading to an incorrect
     // number of entries in the histograms.
     // This bug will be fixed once I include the requirement that the decay product of every Higgs have been identified correctly.
 
-    std::cout << "The previously reconstructed charged Higgs mass was " << recoHiggsMass << std::endl;
+    std::cout << "The previously reconstructed charged Higgs mass was " << output.fHiggsMassSolution << std::endl;
 
-    bool identificationCorrect = doMCMatching(iEvent, tau, bjet);
+    bool identificationCorrect = doMCMatching(iEvent, tau, bjet, output);
     std::cout << "Method doMCMatching returned " << identificationCorrect << std::endl;
 
 //     edm::Handle <reco::GenParticleCollection> genParticles;
@@ -590,10 +588,10 @@ hHiggsMassIncorrectId = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "
 //     }
     // THE CURRENT HISTOGRAM FILLING CRITERIA
     if ( identificationCorrect ) {
-      hHiggsMassCorrectId->Fill(recoHiggsMass);
+      hHiggsMassCorrectId->Fill(output.fHiggsMassSolution);
     }
     else {
-      hHiggsMassIncorrectId->Fill(recoHiggsMass);
+      hHiggsMassIncorrectId->Fill(output.fHiggsMassSolution);
     }
   }
 }

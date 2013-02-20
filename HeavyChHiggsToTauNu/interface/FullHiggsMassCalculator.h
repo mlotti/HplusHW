@@ -74,7 +74,7 @@ namespace HPlus {
 
     bool doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet, FullHiggsMassCalculator::Data& output);
     void doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, FullHiggsMassCalculator::Data& output, bool myMatchStaus=false, bool doHistogramming = true);
-    void calculateTrueHiggsMass(const edm::Event& iEvent, double recoHiggsMass, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet);
+    void calculateTrueHiggsMass(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet, FullHiggsMassCalculator::Data& output);
     //void calculateTrueHiggsMass(const edm::Event& iEvent);
 
   private:
