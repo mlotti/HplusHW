@@ -83,15 +83,18 @@ namespace HPlus {
     WrappedTH1* hTauEta;
     WrappedTH1* hTauPhi;
     WrappedTH1* hRtau;
-    WrappedTH1* hFakeTauCategory;
-    WrappedTH1* hElectronSelectedPt;
-    WrappedTH1* hMuonSelectedPt;
+    WrappedTH1* hSelectedElectrons;
+    WrappedTH1* hSelectedMuons;
     WrappedTH1* hNjets;
+    WrappedTH1* hNjetsAllIdentified;
     WrappedTH1* hMET;
     WrappedTH1* hMETphi;
     WrappedTH1* hNbjets;
     WrappedTH1* hDeltaPhiTauMET;
-    WrappedTH1* hDeltaPhiJetMET;
+    WrappedTH1* hDeltaR_TauMETJet1MET;
+    WrappedTH1* hDeltaR_TauMETJet2MET;
+    WrappedTH1* hDeltaR_TauMETJet3MET;
+    WrappedTH1* hDeltaR_TauMETJet4MET;
     WrappedTH1* hTransverseMass;
   };
 
