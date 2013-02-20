@@ -73,6 +73,7 @@ class ConfigBuilder:
                  doLightAnalysis = True,
                  doHeavyAnalysis = False,
 
+                 pickEvents = True, # Produce pickEvents.txt
                  doSystematics = False, # Running of systematic variations is controlled by the global flag (below), or the individual flags
                  doJESVariation = False, # Perform the signal analysis with the JES variations in addition to the "golden" analysis
                  doPUWeightVariation = False, # Perform the signal analysis with the PU weight variations
@@ -113,6 +114,7 @@ class ConfigBuilder:
         if not self.doLightAnalysis and not self.doHeavyAnalysis:
             raise Exception("At least one of doLightAnalysis and doHeavyAnalysis must be set to True (otherwise nothing is done)")
 
+        self.pickEvents = pickEvents
         self.doSystematics = doSystematics
         self.doJESVariation = doJESVariation
         self.doPUWeightVariation = doPUWeightVariation
@@ -184,6 +186,16 @@ class ConfigBuilder:
         def create(param):
             return [QCDMeasurementFactorised.createEDFilter(param)]
         return self._build(create, ["QCDMeasurement"])
+
+    ## Build configuration for EWK background coverage analysis job
+    #
+    # \return cms.Process object, should be assigned to a local
+    #         'process' variable in the analysis job configuration file
+    def buildEwkBackgroundCoverageAnalysis(self):
+        import HiggsAnalysis.HeavyChHiggsToTauNu.ewkBackgroundCoverageAnalysis as ewkBackgroundCoverageAnalysis
+        def create(param):
+            return [ewkBackgroundCoverageAnalysis.createEDAnalyze(param)]
+        return self._build(create, ["ewkBackgroundCoverageAnalysis"])
 
     ## Accumulate the number of analyzers to a category
     #
@@ -361,15 +373,16 @@ class ConfigBuilder:
 
         # Construct normal path
         if not self.doOptimisation:
-            process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
             for module, name in zip(analysisModules, analysisNames):
                 setattr(process, name, module)
                 path = cms.Path(process.commonSequence * module)
                 setattr(process, name+"Path", path)
-            # PickEvens only for the first analysis path
-            p = getattr(process, analysisNames[0]+"Path")
-            p *= process.PickEvents
-
+            if self.pickEvents:
+                process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
+                # PickEvens only for the first analysis path
+                p = getattr(process, analysisNames[0]+"Path")
+                p *= process.PickEvents
+    
             self._accumulateAnalyzers("Data eras", analysisNames)
 
             if self.doMETResolution:
@@ -584,14 +597,18 @@ class ConfigBuilder:
         #print "TauSelection algorithm:", module.tauSelection.selection.value()
         print "TauSelection algorithm:", module.tauSelection.selection.value()
         print "TauSelection src:", module.tauSelection.src.value()
-        print "TauVetoSelection src:", module.vetoTauSelection.tauSelection.src.value()
+        if hasattr(module, "vetoTauSelection"):
+            print "TauVetoSelection src:", module.vetoTauSelection.tauSelection.src.value()
         print "TauSelection isolation:", module.tauSelection.isolationDiscriminator.value()
         print "TauSelection operating mode:", module.tauSelection.operatingMode.value()
-        print "VetoTauSelection src:", module.vetoTauSelection.tauSelection.src.value()
-        print "Beta cut: ", module.jetSelection.betaCutSource.value(), module.jetSelection.betaCutDirection.value(), module.jetSelection.betaCut.value()
+        if hasattr(module, "vetoTauSelection"):
+            print "VetoTauSelection src:", module.vetoTauSelection.tauSelection.src.value()
+        if hasattr(module, "jetSelection"):
+            print "Beta cut: ", module.jetSelection.betaCutSource.value(), module.jetSelection.betaCutDirection.value(), module.jetSelection.betaCut.value()
         print "electrons: ", module.ElectronSelection
         print "muons: ", module.MuonSelection
-        print "jets: ", module.jetSelection
+        if hasattr(module, "jetSelection"):
+            print "jets: ", module.jetSelection
 
 
     ## Build array of analyzers to scan various tau againstElectron discriminators

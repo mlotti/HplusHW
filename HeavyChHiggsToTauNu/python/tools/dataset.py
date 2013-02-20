@@ -388,7 +388,7 @@ class CountAsymmetric:
 def divideBinomial(countPassed, countTotal):
     p = countPassed.value()
     t = countTotal.value()
-    value = p / t
+    value = p / float(t)
     p = int(p)
     t = int(t)
     errUp = ROOT.TEfficiency.ClopperPearson(t, p, 0.683, True)
@@ -576,16 +576,23 @@ class TreeDraw:
     # \param varexp     Expression for the variable, if given it should also include the histogram name and binning explicitly.
     # \param selection  Draw only those entries passing this selection
     # \param weight     Weight the entries with this weight
+    # \param binLabelsX X-axis bin labels (optional)
+    # \param binLabelsY Y-axis bin labels (optional)
+    # \param binLabelsZ Z-axis bin labels (optional)
     #
     # If varexp is not given, the number of entries passing selection
     # is counted (ignoring weight). In this case the returned TH1 has
     # 1 bin, which contains the event count and the uncertainty of the
     # event count (calculated as sqrt(N)).
-    def __init__(self, tree, varexp="", selection="", weight=""):
+    def __init__(self, tree, varexp="", selection="", weight="", binLabelsX=None, binLabelsY=None, binLabelsZ=None):
         self.tree = tree
         self.varexp = varexp
         self.selection = selection
         self.weight = weight
+
+        self.binLabelsX = binLabelsX
+        self.binLabelsY = binLabelsY
+        self.binLabelsZ = binLabelsZ
 
     ## Clone a TreeDraw
     #
@@ -599,7 +606,11 @@ class TreeDraw:
         args = {"tree": self.tree,
                 "varexp": self.varexp,
                 "selection": self.selection,
-                "weight": self.weight}
+                "weight": self.weight,
+                "binLabelsX": self.binLabelsX,
+                "binLabelsY": self.binLabelsY,
+                "binLabelsZ": self.binLabelsZ,
+                }
         args.update(kwargs)
 
         # Allow modification functions
@@ -627,7 +638,7 @@ class TreeDraw:
 
         (tree, treeName) = dataset._getRootHisto(self.tree)
         if tree == None:
-            raise Exception("No TTree '%s' in file %s" % (treeNAme, dataset.getRootFile().GetName()))
+            raise Exception("No TTree '%s' in file %s" % (treeName, dataset.getRootFile().GetName()))
 
         if self.varexp == "":
             nentries = tree.GetEntries(selection)
@@ -654,7 +665,7 @@ class TreeDraw:
         option = opt+"goff"
         nentries = tree.Draw(varexp, selection, option)
         if nentries < 0:
-            raise Exception("Error when calling TTree.Draw with\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (treeNAme, varexp, selection, option))
+            raise Exception("Error when calling TTree.Draw with\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (treeName, varexp, selection, option))
         h = tree.GetHistogram()
         if h != None:
             h = h.Clone(h.GetName()+"_cloned")
@@ -677,6 +688,19 @@ class TreeDraw:
 
         h.SetName(dataset.getName()+"_"+h.GetName())
         h.SetDirectory(0)
+
+        for axis in ["X", "Y", "Z"]:
+            if getattr(self, "binLabels"+axis) is not None:
+                labels = getattr(self, "binLabels"+axis)
+                nlabels = len(labels)
+                nbins = getattr(h, "GetNbins"+axis)()
+                if nlabels != nbins:
+                    raise Exception("Trying to set %s bin labels, bot %d labels, histogram has %d bins. \ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" %
+                                    (axis, nlabels, nbins, self.tree, varexp, selection, option))
+                axisObj = getattr(h, "Get"+axis+"axis")()
+                for i, label in enumerate(labels):
+                    axisObj.SetBinLabel(i+1, label)
+
         return h
 
 

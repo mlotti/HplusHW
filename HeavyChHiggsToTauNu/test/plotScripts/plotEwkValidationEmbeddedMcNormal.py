@@ -56,21 +56,22 @@ def main():
 #    tauDirEmbs = tauDirEmbs[:2]
 #    dirEmbs = dirEmbs[:2]
 
-    tauDatasetsEmb = tauEmbedding.DatasetsMany(tauDirEmbs, tauAnalysisEmb+"Counters", normalizeMCByLuminosity=True)
-    tauDatasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=tauDirSig+"/multicrab.cfg", counters=tauAnalysisSig+"Counters")
-    datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"/counters", normalizeMCByLuminosity=True)
-    datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"/counters")
+    tauDatasetsEmb = tauEmbedding.DatasetsMany(tauDirEmbs, tauAnalysisEmb+"Counters", normalizeMCByLuminosity=True, dataEra=dataEra)
+    tauDatasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=tauDirSig+"/multicrab.cfg", counters=tauAnalysisSig+"Counters", dataEra=dataEra)
+#    datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"/counters", normalizeMCByLuminosity=True, dataEra=dataEra)
+#    datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"/counters", dataEra=dataEra)
 
     tauDatasetsSig.updateNAllEventsToPUWeighted()
-    datasetsSig.updateNAllEventsToPUWeighted()
+#    datasetsSig.updateNAllEventsToPUWeighted()
 
     tauDatasetsEmb.forEach(plots.mergeRenameReorderForDataMC)
-    datasetsEmb.forEach(plots.mergeRenameReorderForDataMC)
+#    datasetsEmb.forEach(plots.mergeRenameReorderForDataMC)
 #    tauDatasetsEmb.setLumiFromData()
-    datasetsEmb.setLumiFromData()
-    tauDatasetsEmb.lumi = datasetsEmb.getLuminosity()
+#    datasetsEmb.setLumiFromData()
+#    tauDatasetsEmb.lumi = datasetsEmb.getLuminosity()
+    tauDatasetsEmb.lumi = 5049.0
     plots.mergeRenameReorderForDataMC(tauDatasetsSig)
-    plots.mergeRenameReorderForDataMC(datasetsSig)
+#    plots.mergeRenameReorderForDataMC(datasetsSig)
 
     def mergeEWK(datasets):
         datasets.merge("EWKMC", ["WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson"], keepSources=True)
@@ -96,21 +97,23 @@ def main():
     f.write(tauDatasetsSig.formatInfo())
     f.write("\n")
     f.write("Signal analysis, embedded\n")
-    f.write(datasetsEmb.getFirstDatasetManager().formatInfo())
+#    f.write(datasetsEmb.getFirstDatasetManager().formatInfo())
     f.write("\n")
     f.write("Signal analysis, normal\n")
-    f.write(datasetsSig.formatInfo())
+ #   f.write(datasetsSig.formatInfo())
     f.write("\n")
 
     
-    selectorArgs = [tauEmbedding.tauNtuple.weight[dataEra]]
-    #selectorArgs = [""]
+    #selectorArgs = [tauEmbedding.tauNtuple.weight[dataEra]]
+    selectorArgs = [""]
+    embArgs = []
+    embArgs = ["/home/mkortela/hplus/CMSSW_4_4_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/multicrab_muonAnalysis_121017_100408/embedding-wtaumuRatio-muonpt40.root", "FullChargedHadrRelIso10/TTJets"]
     process = True
-    #process = False
+#    process = False
     maxEvents = -1
-    #maxEvents = 100000
+    #maxEvents = 100
     ntupleCacheEmb = dataset.NtupleCache(tauAnalysisEmb+"/tree", "TauAnalysisSelector",
-                                         selectorArgs=selectorArgs+[True],
+                                         selectorArgs=selectorArgs+[True]+embArgs,
                                          process=process, maxEvents=maxEvents,
                                          cacheFileName="histogramCacheEmb.root"
                                          )
@@ -126,8 +129,8 @@ def main():
         doTauCounters(tauDatasetsEmb, tauDatasetsSig, name, ntupleCacheEmb, ntupleCacheSig, normalizeEmb=False)
 
 #        doPlots(datasetsEmb, datasetsSig, name)
-        doCounters(datasetsEmb, datasetsSig, name)
-        doCounters(datasetsEmb, datasetsSig, name, normalizeEmb=False)
+#        doCounters(datasetsEmb, datasetsSig, name)
+#        doCounters(datasetsEmb, datasetsSig, name, normalizeEmb=False)
 
     dop("TTJets")
 #    dop("WJets")
@@ -321,17 +324,25 @@ def doTauCounters(datasetsEmb, datasetsSig, datasetName, ntupleCacheEmb, ntupleC
     col.setName("Normal")
     table.appendColumn(col)
 
+    lastCountEmb = table.getCount(colName="Embedded", irow=table.getNrows()-1)
+    lastCountNormal = table.getCount(colName="Normal", irow=table.getNrows()-1)
+    ratio = lastCountNormal.clone()
+    ratio.divide(lastCountEmb)
+
     postfix = ""
     if not normalizeEmb:
         postfix="_notEmbNormalized"
 
     effFormat = counter.TableFormatLaTeX(counter.CellFormatTeX(valueFormat="%.4f", withPrecision=2))
-    countFormat = counter.TableFormatText(counter.CellFormatText(valueFormat="%.4f"), columnSeparator="  ;")
+    countFormat = counter.TableFormatText(counter.CellFormatText(valueFormat="%.4f"),
+                                          #columnSeparator="  ;"
+                                          )
 
     fname = "counters_tau_"+datasetName+postfix+".txt"
     f = open(fname, "w")
     f.write(table.format(countFormat))
     f.write("\n")
+    f.write("Normal/embedded = %.4f +- %.4f\n\n" % (ratio.value(), ratio.uncertainty()))
     f.close()
     print "Printed tau counters to", fname
     

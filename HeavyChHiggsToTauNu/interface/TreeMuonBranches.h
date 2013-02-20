@@ -30,15 +30,17 @@ namespace HPlus {
     ~TreeMuonBranches();
 
     void book(TTree *tree);
+
     size_t setValues(const edm::Event& iEvent);
     size_t setValues(const edm::Event& iEvent, const edm::View<reco::GenParticle>& genParticles);
+
+    void setValues(const edm::PtrVector<pat::Muon>& muons);
+
     void reset();
 
     const edm::InputTag& getInputTag() const { return fMuonSrc; }
 
   private:
-    void setValues(const edm::View<pat::Muon>& muons);
-
     edm::InputTag fMuonSrc;
     std::string fPrefix;
 
