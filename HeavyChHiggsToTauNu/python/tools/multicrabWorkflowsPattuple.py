@@ -242,8 +242,14 @@ def addPattuple_v44_4_1(datasets):
 ## Add v44_5 pattuple production workflows
 def addPattuple_v44_5_test1(datasets):
     definitions = {
-        "Tau_173236-173692_2011A_Nov08":    TaskDef(""),
-        "TTToHplusBWB_M120_Fall11":         TaskDef(""),
+        # 23189 events, 30 jobs
+        # User mean 1244.2, min 862.8, max 1367.7
+        # Mean 64.0 MB, min 59.9 MB, max 68.2 MB
+        "Tau_173236-173692_2011A_Nov08":    TaskDef("/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5_test1-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 470476 events, 131 jobs
+        # User mean 4158.8, min 1173.3, max 10329.6
+        # Mean 82.7 MB, min 35.0 MB, max 166.1 MB
+        "TTToHplusBWB_M120_Fall11":         TaskDef("/Tau/local-Run2011A_08Nov2011_v1_AOD_173236_173692_pattuple_v44_5_test1-1b3ed6acb33bc8106ac34fb558c6831f/USER"),
         }
 
     addPattuple_44X("v44_5_test1", datasets, definitions)
