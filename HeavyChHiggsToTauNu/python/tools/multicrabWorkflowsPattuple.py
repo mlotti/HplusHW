@@ -1189,6 +1189,7 @@ def addPattuple_v53_2_test1(datasets):
     definitions = {
         "Tau_198022-198523_2012C_Aug24":          TaskDef(""),
         "MultiJet_198022-198523_2012C_Aug24":     TaskDef(""),
+        "BJetPlusX_193834-194225_2012B_Jul13":    TaskDef(""),
         "BJetPlusX_198022-198523_2012C_Aug24":    TaskDef(""),
         "TTToHplusBWB_M120_Summer12":             TaskDef(""),
         }
