@@ -355,7 +355,7 @@ def addEmbeddingSkim_v44_5(datasets):
         "SingleMu_166161-173198_2011A_Nov08": TaskDef(""),
         "SingleMu_173236-173692_2011A_Nov08": TaskDef(""),
         "SingleMu_175832-180252_2011B_Nov19": TaskDef(""),
-        "TTJets_TuneZ2_Fall11":               TaskDef(""),
+        "TTJets_TuneZ2_Fall11":               TaskDef("", args={"triggerMC": 0}), # disable trigger in skim jobs for TTJets
         "WJets_TuneZ2_Fall11":                TaskDef(""),
         "W1Jets_TuneZ2_Fall11":               TaskDef(""),
         "W2Jets_TuneZ2_Fall11":               TaskDef(""),
