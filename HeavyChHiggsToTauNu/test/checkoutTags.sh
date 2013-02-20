@@ -76,14 +76,15 @@ set -e
 # 3.1.2013/M.Kortelainen CMSSW_5_3_7 Updated tau tags
 # 9.1.2013/M.Kortelainen CMSSW_5_3_7_patch4 Updated PAT tags
 # 12.2.2013/M.Kortelainen CMSSW_5_3_7_patch6 Backported technical change in pat::Jet
+# 20.2.2013/M.Kortelainen CMSSW_5_3_/_patch6 Updated PAT tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
 
 # PAT
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATReleaseNotes52X
-addpkg DataFormats/PatCandidates V06-05-06-05
-addpkg PhysicsTools/PatAlgos     V08-09-51
+addpkg DataFormats/PatCandidates V06-05-06-07
+addpkg PhysicsTools/PatAlgos     V08-09-52
 addpkg DataFormats/StdDictionaries V00-02-14
 addpkg FWCore/GuiBrowsers V00-00-70
 # We don't need the code (it's the same as in the release), but a ROOT
