@@ -28,14 +28,20 @@ if debug:
     process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 else:
     process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Tauembedding_embedding_v44_4_seed0_TTJets_TuneZ2_Fall11/e89cb1184437f798b6f9ed400ba3543f/embedded_119_1_LMb.root"
+#        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Tauembedding_embedding_v44_4_seed0_TTJets_TuneZ2_Fall11/e89cb1184437f798b6f9ed400ba3543f/embedded_119_1_LMb.root"
+#        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_muiso0/50da2d6a5b0c9c8a2f96f633ada0c1c6/embedded_499_1_xss.root"
+#         "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_seed0/2dedf078d8faded30b2dddce6fe8cdec/embedded_492_1_xUz.root",
+#         "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_seed0/2dedf078d8faded30b2dddce6fe8cdec/embedded_493_1_g1J.root",
+        # should have lumi 336953
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_4_X/TTJets_TuneZ2_Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_seed0/2dedf078d8faded30b2dddce6fe8cdec/embedded_955_1_PMC.root"
     ),
     inputCommands = cms.untracked.vstring(
         "keep *",
@@ -54,6 +60,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 if debug:
     process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
+#process.TFileService.fileName = "histograms-emb.root"
 
 # Fragment to run PAT on the fly if requested from command line
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
@@ -234,11 +241,30 @@ tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, options, dataVer
 
 #tauEmbeddingCustomisations.PF2PATVersion = PF2PATVersion
 #muons = cms.InputTag(tauEmbeddingCustomisations.addMuonIsolationEmbedding(process, process.commonSequence, muons.value()))
-additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param, enableIsolation=False))
+additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
+                                                                           enableIsolation=False,
+                                                                           tightenMuonPt=False,
+                                                                           ))
 #taus = cms.InputTag("patTaus"+PF2PATVersion+"TauEmbeddingMuonMatched")
 #taus = cms.InputTag("patTaus"+PF2PATVersion+"TauEmbeddingMuonMatched")
 taus = cms.InputTag(param.tauSelectionHPSMediumTauBased.src.value())
 
+# FIXME
+# Temporary, for ttbar only
+process.genTaus = cms.EDFilter("GenParticleSelector",
+    src = cms.InputTag("genParticles", "", "HLT"),
+    cut = cms.string("abs(pdgId()) == 15 && pt() > 40 && abs(eta()) < 2.1 && abs(mother().pdgId()) == 24")
+)
+process.patTausGenMatched= cms.EDProducer("HPlusPATTauCandViewClosestDeltaRSelector",
+    src = cms.InputTag("selectedPatTausHpsPFTau"),
+    refSrc = cms.InputTag("genTaus"),
+    maxDeltaR = cms.double(0.5),
+)
+process.mergedPatTaus = cms.EDProducer("HPlusPATTauMerger",
+    src = cms.VInputTag(taus.value(), "patTausGenMatched")
+)
+process.commonSequence *= (process.genTaus * process.patTausGenMatched * process.mergedPatTaus)
+taus = cms.InputTag("mergedPatTaus")
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.analysisConfig as analysisConfig
 ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
@@ -319,6 +345,6 @@ for label in eventCounters:
     process.globalReplace(label, prototype.clone())
 
 
-#f = open("configDumpEmbeddingAnalysis.py", "w")
-#f.write(process.dumpPython())
-#f.close()
+f = open("configDumpEmbeddingAnalysis.py", "w")
+f.write(process.dumpPython())
+f.close()
