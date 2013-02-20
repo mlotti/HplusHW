@@ -52,6 +52,10 @@ mcOnly = False
 #mcOnly = True
 mcOnlyLumi = 5000 # pb
 
+searchMode = "Light"
+#searchMode = "Heavy"
+
+
 #dataEra = "Run2011A"
 #dataEra = "Run2011B"
 dataEra = "Run2012ABC"
@@ -74,7 +78,8 @@ def main():
     dirs.append(sys.argv[1])
 
     # Read the datasets
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
+#    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra, searchMode=searchMode, analysisName=analysis) 
 #    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters)
 #    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra)
 #    datasets.updateNAllEventsToPUWeighted()
@@ -137,7 +142,7 @@ def main():
 
 # write histograms to file
 def writeTransverseMass(datasets_lands):
-    mt = plots.DataMCPlot(datasets_lands, analysis+"/transverseMass")
+    mt = plots.DataMCPlot(datasets_lands, "transverseMass")
     mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     f = ROOT.TFile.Open(output, "RECREATE")
     mt_data = mt.histoMgr.getHisto("Data").getRootHisto().Clone("mt_data")
@@ -153,9 +158,9 @@ def writeTransverseMass(datasets_lands):
 def doPlots(datasets):
     def createPlot(name, **kwargs):
         if mcOnly:
-            return plots.MCPlot(datasets, analysis+"/"+name, normalizeToLumi=mcOnlyLumi, **kwargs)
+            return plots.MCPlot(datasets, name, normalizeToLumi=mcOnlyLumi, **kwargs)
         else:
-            return plots.DataMCPlot(datasets, analysis+"/"+name, **kwargs)
+            return plots.DataMCPlot(datasets, name, **kwargs)
  
     controlPlots(datasets)
 
@@ -256,27 +261,27 @@ def controlPlots(datasets):
 ## histograms in bins, normalisation and substraction of EWK contribution
     ## mt with 2dim deltaPhi cut
     for ptbin in ptbins:
-        mt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi"+ptbin)])
+        mt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("MTInvertedTauIdPhi"+ptbin)])
         mt_tmp._setLegendStyles()
         mt_tmp._setLegendLabels()
         mt_tmp.histoMgr.setHistoDrawStyleAll("P") 
-        mt_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        mt_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
         mt = mt_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         mt.Scale(normData[ptbin])
 #        hmt.append(mt)        
-        mtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi"+ptbin)])
+        mtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("MTInvertedTauIdPhi"+ptbin)])
         mtEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         mtEWK_tmp._setLegendStyles()
         mtEWK_tmp._setLegendLabels()
         mtEWK_tmp.histoMgr.setHistoDrawStyleAll("P") 
-        mtEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        mtEWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
         mtEWK = mtEWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
         mtEWK.Scale(normEWK[ptbin])
         mt.Add(mtEWK, -1)
         hmt.append(mt)
 
         # mt after b tagging
-        mtb_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag"+ptbin)])
+        mtb_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("MTInvertedTauIdBtag"+ptbin)])
         mtb_tmp._setLegendStyles()
         mtb_tmp._setLegendLabels()
         mtb_tmp.histoMgr.setHistoDrawStyleAll("P") 
@@ -284,7 +289,7 @@ def controlPlots(datasets):
         mtb = mtb_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         mtb.Scale(normData[ptbin])
 #        hmt.append(mt)        
-        mtbEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTInvertedTauIdBtag"+ptbin)])
+        mtbEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("MTInvertedTauIdBtag"+ptbin)])
         mtbEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         mtbEWK_tmp._setLegendStyles()
         mtbEWK_tmp._setLegendLabels()
@@ -296,7 +301,7 @@ def controlPlots(datasets):
         hmtb.append(mtb)
 
         # mt after deltaPhi cut
-        mtph_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJetDphi"+ptbin)])
+        mtph_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("MTInvertedTauIdJetDphi"+ptbin)])
         mtph_tmp._setLegendStyles()
         mtph_tmp._setLegendLabels()
         mtph_tmp.histoMgr.setHistoDrawStyleAll("P") 
@@ -304,7 +309,7 @@ def controlPlots(datasets):
         mtph = mtph_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         mtph.Scale(normData[ptbin])
 #        hmt.append(mt)        
-        mtphEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTInvertedTauIdJetDphi"+ptbin)])
+        mtphEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("MTInvertedTauIdJetDphi"+ptbin)])
         mtphEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         mtphEWK_tmp._setLegendStyles()
         mtphEWK_tmp._setLegendLabels()
@@ -316,7 +321,7 @@ def controlPlots(datasets):
         hmtph.append(mtph)
 
         # mt after deltaphi vs MHTjet1 cut
-        mtphj1_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet"+ptbin)])
+        mtphj1_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("MTInvertedTauIdMet"+ptbin)])
         mtphj1_tmp._setLegendStyles()
         mtphj1_tmp._setLegendLabels()
         mtphj1_tmp.histoMgr.setHistoDrawStyleAll("P") 
@@ -324,7 +329,7 @@ def controlPlots(datasets):
         mtphj1 = mtphj1_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         mtphj1.Scale(normData[ptbin])
 #        hmt.append(mt)        
-        mtphj1EWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTInvertedTauIdMet"+ptbin)])
+        mtphj1EWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("MTInvertedTauIdMet"+ptbin)])
         mtphj1EWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         mtphj1EWK_tmp._setLegendStyles()
         mtphj1EWK_tmp._setLegendLabels()
@@ -337,27 +342,27 @@ def controlPlots(datasets):
 
         
         # mt after deltaphi vs MHTjet2 cut
-        mtphj2_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass"+ptbin)])
+        mtphj2_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("MTInvertedTauIdTopMass"+ptbin)])
         mtphj2_tmp._setLegendStyles()
         mtphj2_tmp._setLegendLabels()
         mtphj2_tmp.histoMgr.setHistoDrawStyleAll("P") 
-        mtphj2_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        mtphj2_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
         mtphj2 = mtphj2_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         mtphj2.Scale(normData[ptbin])
 #        hmt.append(mt)        
-        mtphj2EWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTInvertedTauIdTopMass"+ptbin)])
+        mtphj2EWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("MTInvertedTauIdTopMass"+ptbin)])
         mtphj2EWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         mtphj2EWK_tmp._setLegendStyles()
         mtphj2EWK_tmp._setLegendLabels()
         mtphj2EWK_tmp.histoMgr.setHistoDrawStyleAll("P") 
-        mtphj2EWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+        mtphj2EWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
         mtphj2EWK = mtphj1EWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
         mtphj2EWK.Scale(normEWK[ptbin])
         mtphj2.Add(mtphj2EWK, -1)
         hmtphj2.append(mtphj2)
                 
         ## mt with b veto cut
-        mtv_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBvetoDphi"+ptbin)])
+        mtv_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("MTInvertedTauIdBvetoDphi"+ptbin)])
         mtv_tmp._setLegendStyles()
         mtv_tmp._setLegendLabels()
         mtv_tmp.histoMgr.setHistoDrawStyleAll("P") 
@@ -365,7 +370,7 @@ def controlPlots(datasets):
         mtv = mtv_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         mtv.Scale(normData[ptbin])
 #        hmt.append(mt)        
-        mtEWKv_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTInvertedTauIdBvetoDphi"+ptbin)])
+        mtEWKv_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("MTInvertedTauIdBvetoDphi"+ptbin)])
         mtEWKv_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         mtEWKv_tmp._setLegendStyles()
         mtEWKv_tmp._setLegendLabels()
@@ -377,14 +382,14 @@ def controlPlots(datasets):
         hmtv.append(mtv)
 #        hmt.append(mt)
 # mt b veto with Dphi cut 
-        mtPhiv_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdBvetoDphi"+ptbin)])
+        mtPhiv_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("MTInvertedTauIdBvetoDphi"+ptbin)])
         mtPhiv_tmp._setLegendStyles()
         mtPhiv_tmp._setLegendLabels()
         mtPhiv_tmp.histoMgr.setHistoDrawStyleAll("P") 
         mtPhiv_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
         mtPhiv = mtPhiv_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         mtPhiv.Scale(normData[ptbin])
-        mtPhiEWKv_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTInvertedTauIdBvetoDphi"+ptbin)])
+        mtPhiEWKv_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("MTInvertedTauIdBvetoDphi"+ptbin)])
         mtPhiEWKv_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         mtPhiEWKv_tmp._setLegendStyles()
         mtPhiEWKv_tmp._setLegendLabels()
@@ -395,7 +400,7 @@ def controlPlots(datasets):
         mtPhiv.Add(mtPhiEWKv, -1)
         hmtPhiv.append(mtPhiv)       
         ### MET
-        mmt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets"+ptbin)])
+        mmt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("MET_InvertedTauIdJets"+ptbin)])
         mmt_tmp._setLegendStyles()
         mmt_tmp._setLegendLabels()
         mmt_tmp.histoMgr.setHistoDrawStyleAll("P") 
@@ -404,8 +409,8 @@ def controlPlots(datasets):
         mmt.Scale(normData[ptbin])
 #        hmt.append(mt)
 
-#        mmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi"+ptbin)])
-        mmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets"+ptbin)])
+#        mmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("MTInvertedTauIdPhi"+ptbin)])
+        mmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("MET_InvertedTauIdJets"+ptbin)])
         mmtEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         mmtEWK_tmp._setLegendStyles()
         mmtEWK_tmp._setLegendLabels()
@@ -417,7 +422,7 @@ def controlPlots(datasets):
         hmet.append(mmt)
 
         #### deltaPhi
-        fmt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiInverted"+ptbin)])
+        fmt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("deltaPhiInverted"+ptbin)])
         fmt_tmp._setLegendStyles()
         fmt_tmp._setLegendLabels()
         fmt_tmp.histoMgr.setHistoDrawStyleAll("P") 
@@ -425,7 +430,7 @@ def controlPlots(datasets):
         fmt = fmt_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         fmt.Scale(normData[ptbin])
 #        hmt.append(mt)        
-        fmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/deltaPhiInverted"+ptbin)])
+        fmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("deltaPhiInverted"+ptbin)])
         fmtEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         fmtEWK_tmp._setLegendStyles()
         fmtEWK_tmp._setLegendLabels()
@@ -437,9 +442,9 @@ def controlPlots(datasets):
         hdeltaPhi.append(fmt)
 
         ###### Higgs mass
-        hmt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass4050")])
+        hmt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("HiggsMass4050")])
 
-#        hmt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/HiggsMass"+ptbin)])
+#        hmt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("HiggsMass"+ptbin)])
         hmt_tmp._setLegendStyles()
         hmt_tmp._setLegendLabels()
         hmt_tmp.histoMgr.setHistoDrawStyleAll("P") 
@@ -447,8 +452,8 @@ def controlPlots(datasets):
         mass = hmt_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         mass.Scale(normData[ptbin])
 #        hmt.append(mt)
-        hmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/HiggsMass4050")])
-#        hmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/HiggsMass"+ptbin)])
+        hmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("HiggsMass4050")])
+#        hmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("HiggsMass"+ptbin)])
         hmtEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         hmtEWK_tmp._setLegendStyles()
         hmtEWK_tmp._setLegendLabels()
@@ -459,7 +464,7 @@ def controlPlots(datasets):
         mass.Add(massEWK, -1)
         hmass.append(mass)
 
-        bmt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NBInvertedTauIdJet"+ptbin)])
+        bmt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("NBInvertedTauIdJet"+ptbin)])
         bmt_tmp._setLegendStyles()
         bmt_tmp._setLegendLabels()
         bmt_tmp.histoMgr.setHistoDrawStyleAll("P") 
@@ -467,7 +472,7 @@ def controlPlots(datasets):
         bmt = bmt_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         bmt.Scale(normData[ptbin])
 #        hmt.append(mt)        
-        bmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/NBInvertedTauIdJet"+ptbin)])
+        bmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("NBInvertedTauIdJet"+ptbin)])
         bmtEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         bmtEWK_tmp._setLegendStyles()
         bmtEWK_tmp._setLegendLabels()
@@ -479,7 +484,7 @@ def controlPlots(datasets):
         hbjet.append(bmt)
 
 
-        jmt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJet"+ptbin)])
+        jmt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("NJetInvertedTauIdJet"+ptbin)])
         jmt_tmp._setLegendStyles()
         jmt_tmp._setLegendLabels()
         jmt_tmp.histoMgr.setHistoDrawStyleAll("P") 
@@ -487,7 +492,7 @@ def controlPlots(datasets):
         jmt = jmt_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         jmt.Scale(normData[ptbin])
 #        hmt.append(mt)        
-        jmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJet"+ptbin)])
+        jmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("NJetInvertedTauIdJet"+ptbin)])
         jmtEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         jmtEWK_tmp._setLegendStyles()
         jmtEWK_tmp._setLegendLabels()
@@ -499,7 +504,7 @@ def controlPlots(datasets):
         hjet.append(jmt)
 
         
-        jmmt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJetMet"+ptbin)])
+        jmmt_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("NJetInvertedTauIdJetMet"+ptbin)])
         jmmt_tmp._setLegendStyles()
         jmmt_tmp._setLegendLabels()
         jmmt_tmp.histoMgr.setHistoDrawStyleAll("P") 
@@ -507,7 +512,7 @@ def controlPlots(datasets):
         jmmt = jmmt_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         jmmt.Scale(normData[ptbin])
 #        hmt.append(mt)        
-        jmmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJetMet"+ptbin)])
+        jmmtEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("NJetInvertedTauIdJetMet"+ptbin)])
         jmmtEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         jmmtEWK_tmp._setLegendStyles()
         jmmtEWK_tmp._setLegendLabels()
@@ -518,7 +523,7 @@ def controlPlots(datasets):
         jmmt.Add(jmmtEWK, -1)
         hjetmet.append(jmmt)
         
-        jmmtp_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/ClosestDeltaPhiInverted"+ptbin)])
+        jmmtp_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("ClosestDeltaPhiInverted"+ptbin)])
         jmmtp_tmp._setLegendStyles()
         jmmtp_tmp._setLegendLabels()
         jmmtp_tmp.histoMgr.setHistoDrawStyleAll("P") 
@@ -526,7 +531,7 @@ def controlPlots(datasets):
         jmmtp = jmmtp_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         jmmtp.Scale(normData[ptbin])
 #        hmt.append(mt)        
-        jmmtpEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/ClosestDeltaPhiInverted"+ptbin)])
+        jmmtpEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("ClosestDeltaPhiInverted"+ptbin)])
         jmmtpEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         jmmtpEWK_tmp._setLegendStyles()
         jmmtpEWK_tmp._setLegendLabels()
@@ -538,7 +543,7 @@ def controlPlots(datasets):
         hjetmetphi.append(jmmtp)
 
 
-        phi2_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/ClosestDeltaPhiTauVSMetInverted"+ptbin)])
+        phi2_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("ClosestDeltaPhiTauVSMetInverted"+ptbin)])
         phi2_tmp._setLegendStyles()
         phi2_tmp._setLegendLabels()
         phi2_tmp.histoMgr.setHistoDrawStyleAll("P") 
@@ -546,7 +551,7 @@ def controlPlots(datasets):
         phi2 = phi2_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
         phi2.Scale(normData[ptbin])
 #        hmt.append(mt)        
-        phi2EWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/ClosestDeltaPhiTauVSMetInverted"+ptbin)])
+        phi2EWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("ClosestDeltaPhiTauVSMetInverted"+ptbin)])
         phi2EWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
         phi2EWK_tmp._setLegendStyles()
         phi2EWK_tmp._setLegendLabels()
@@ -559,7 +564,7 @@ def controlPlots(datasets):
 
         if True:
             # DeltaPhi Vs DeltaPhiMHTJet1Inverted
-            MHTJet1phi_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/DeltaPhiMHTJet1Inverted"+ptbin)])
+            MHTJet1phi_tmp = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("DeltaPhiMHTJet1Inverted"+ptbin)])
             MHTJet1phi_tmp._setLegendStyles()
             MHTJet1phi_tmp._setLegendLabels()
             MHTJet1phi_tmp.histoMgr.setHistoDrawStyleAll("P") 
@@ -567,7 +572,7 @@ def controlPlots(datasets):
             MHTJet1phi = MHTJet1phi_tmp.histoMgr.getHisto("Data").getRootHisto().Clone()
             MHTJet1phi.Scale(normData[ptbin])
             #        hmt.append(mt)        
-            MHTJet1phiEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/DeltaPhiMHTJet1Inverted"+ptbin)])
+            MHTJet1phiEWK_tmp = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("DeltaPhiMHTJet1Inverted"+ptbin)])
             MHTJet1phiEWK_tmp.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
             MHTJet1phiEWK_tmp._setLegendStyles()
             MHTJet1phiEWK_tmp._setLegendLabels()
@@ -731,24 +736,24 @@ def controlPlots(datasets):
 
  ## mt without pt bins
             
-    mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi")])
-    mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdPhi")])
-    mtvBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdBveto")])
-    mtPhivBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTBaseLineTauIdBvetoDphi")]) 
-    mtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTBaseLineTauIdPhi")])
-    mtvEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTBaseLineTauIdBveto")]) 
-    mtPhivEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTBaseLineTauIdBvetoDphi")])
-#    jmmtpEWKbaseline = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/ClosestDeltaPhiBaseline")])
+    mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("MTInvertedTauIdPhi")])
+    mtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("MTBaseLineTauIdPhi")])
+    mtvBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("MTBaseLineTauIdBveto")])
+    mtPhivBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("MTBaseLineTauIdBvetoDphi")]) 
+    mtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("MTBaseLineTauIdPhi")])
+    mtvEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("MTBaseLineTauIdBveto")]) 
+    mtPhivEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("MTBaseLineTauIdBvetoDphi")])
+#    jmmtpEWKbaseline = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("ClosestDeltaPhiBaseline")])
   
 
      
-    mtEWKinverted = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MTInvertedTauIdPhi")])
+    mtEWKinverted = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("MTInvertedTauIdPhi")])
     mtEWKinverted.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mtEWKinverted._setLegendStyles()
     mtEWKinverted._setLegendLabels()
     mtEWKinverted.histoMgr.setHistoDrawStyleAll("P")
     mtEWKinverted.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))  
-    hmtEWKinverted = mtEWKinverted.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi")
+    hmtEWKinverted = mtEWKinverted.histoMgr.getHisto("EWK").getRootHisto().Clone("MTInvertedTauIdJetPhi")
     # norm = Norm_overall *(1-QCDfract) (0.034446/0.87 * 0.13 = 0.0051
     hmtEWKinverted.Scale(normEWK_inc)
     
@@ -756,7 +761,7 @@ def controlPlots(datasets):
     mt._setLegendLabels()
     mt.histoMgr.setHistoDrawStyleAll("P")
     mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))  
-    hmt = mt.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJetPhi")
+    hmt = mt.histoMgr.getHisto("Data").getRootHisto().Clone("MTInvertedTauIdJetPhi")
     hmt.Scale(norm_inc)
 
 
@@ -818,14 +823,14 @@ def controlPlots(datasets):
     mtBaseline._setLegendLabels()
     mtBaseline.histoMgr.setHistoDrawStyleAll("P")
     mtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
-    hmtBaseline = mtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
+    hmtBaseline = mtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("MTBaselineTauIdJetPhi")
     
     mtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mtEWK._setLegendStyles()
     mtEWK._setLegendLabels()
     mtEWK.histoMgr.setHistoDrawStyleAll("P")
     mtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))  
-    hmtEWK = mtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
+    hmtEWK = mtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("MTBaselineTauIdJetPhi")
     
 
     canvas32 = ROOT.TCanvas("canvas32","",500,500)    
@@ -890,10 +895,11 @@ def controlPlots(datasets):
     
     hmtSum.GetYaxis().SetTitleOffset(1.5)
     hmtSum.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
-    hmtSum.GetYaxis().SetTitle("Events / 10 GeV/c^{2}")
-    canvas32.Print("transverseMass.png")
-    canvas32.Print("transverseMass.C")
-
+    hmtSum.GetYaxis().SetTitle("Events / 20 GeV/c^{2}")
+#    canvas32.Print("transverseMass.png")
+#    canvas32.Print("transverseMass.C")
+    canvas32.Print("transverseMassDeltaPhiVsHMTJet2Cut.png")
+    canvas32.Print("transverseMassDeltaPhiVsHMTJet2Cut.C")
 ####################################################
 # mt after b tagging
     canvas72 = ROOT.TCanvas("canvas72","",500,500)    
@@ -1053,10 +1059,12 @@ def controlPlots(datasets):
     
     mtHMTjet2Cut.GetYaxis().SetTitleOffset(1.5)
     mtHMTjet2Cut.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
-    mtHMTjet2Cut.GetYaxis().SetTitle("Events / 10 GeV/c^{2}")
-    canvas75.Print("transverseMassDeltaPhiVsHMTJet2Cut.png")
-    canvas75.Print("transverseMassDeltaPhiVsHMTJet2Cut.C")
-        
+    mtHMTjet2Cut.GetYaxis().SetTitle("Events / 20 GeV/c^{2}")
+#    canvas75.Print("transverseMassDeltaPhiVsHMTJet3Cut.png")
+#    canvas75.Print("transverseMassDeltaPhiVsHMTJet3Cut.C")
+    canvas75.Print("transverseMass.png")
+    canvas75.Print("transverseMass.C")
+       
 ####################################################    
 ##  mT with b veto 
    
@@ -1064,14 +1072,14 @@ def controlPlots(datasets):
     mtvBaseline._setLegendLabels()
     mtvBaseline.histoMgr.setHistoDrawStyleAll("P")
     mtvBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
-    hmtvBaseline = mtvBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTBaselineTauIdBveto")
+    hmtvBaseline = mtvBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("MTBaselineTauIdBveto")
     
     mtvEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mtvEWK._setLegendStyles()
     mtvEWK._setLegendLabels()
     mtvEWK.histoMgr.setHistoDrawStyleAll("P")
     mtvEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
-    hmtvEWK = mtvEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MTBaselineTauIdBveto")
+    hmtvEWK = mtvEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("MTBaselineTauIdBveto")
     
    
 
@@ -1091,14 +1099,14 @@ def controlPlots(datasets):
     mtPhivBaseline._setLegendLabels()
     mtPhivBaseline.histoMgr.setHistoDrawStyleAll("P")
     mtPhivBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
-    hmtPhivBaseline = mtPhivBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTBaselineTauIdBvetoDphi")
+    hmtPhivBaseline = mtPhivBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("MTBaselineTauIdBvetoDphi")
     
     mtPhivEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mtPhivEWK._setLegendStyles()
     mtPhivEWK._setLegendLabels()
     mtPhivEWK.histoMgr.setHistoDrawStyleAll("P")
     mtPhivEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
-    hmtPhivEWK = mtPhivEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MTBaselineTauIdBvetoDphi")
+    hmtPhivEWK = mtPhivEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("MTBaselineTauIdBvetoDphi")
     
    
 
@@ -1165,22 +1173,22 @@ def controlPlots(datasets):
     
 ################ MET
 
-    mmt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets")])        
-    mmtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_BaseLineTauIdJets")])
-    mmtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/MET_BaseLineTauIdJets")])        
+    mmt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("MET_InvertedTauIdJets")])        
+    mmtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("MET_BaseLineTauIdJets")])
+    mmtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("MET_BaseLineTauIdJets")])        
    
     mmtBaseline._setLegendStyles()
     mmtBaseline._setLegendLabels()
     mmtBaseline.histoMgr.setHistoDrawStyleAll("P")
     mmtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))  
-    hmmtBaseline = mmtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
+    hmmtBaseline = mmtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("MTBaselineTauIdJetPhi")
     
     mmtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mmtEWK._setLegendStyles()
     mmtEWK._setLegendLabels()
     mmtEWK.histoMgr.setHistoDrawStyleAll("P")
     mmtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))  
-    hmmtEWK = mmtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
+    hmmtEWK = mmtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("MTBaselineTauIdJetPhi")
     
 
        
@@ -1233,22 +1241,22 @@ def controlPlots(datasets):
 #############
 
     ###  deltaPhi
-    fmtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/deltaPhiBaseline")])
-    fmtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/deltaPhiBaseline")])        
+    fmtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("deltaPhiBaseline")])
+    fmtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("deltaPhiBaseline")])        
 
 
     fmtBaseline._setLegendStyles()
     fmtBaseline._setLegendLabels()
     fmtBaseline.histoMgr.setHistoDrawStyleAll("P")
     fmtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))  
-    hfmtBaseline = fmtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
+    hfmtBaseline = fmtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("MTBaselineTauIdJetPhi")
     
     fmtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     fmtEWK._setLegendStyles()
     fmtEWK._setLegendLabels()
     fmtEWK.histoMgr.setHistoDrawStyleAll("P")
     fmtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))  
-    hfmtEWK = fmtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MTBaselineTauIdJetPhi")
+    hfmtEWK = fmtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("MTBaselineTauIdJetPhi")
     
 
        
@@ -1392,7 +1400,7 @@ def controlPlots(datasets):
     
 ######## deltaPhi(jet,Met) vs deltaPhi(tau,Met) after 2dim cut
     if True:    
-        phi2AfterCut = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/ClosestDeltaPhiTauVSMetInvertedAfterCut")])
+        phi2AfterCut = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("ClosestDeltaPhiTauVSMetInvertedAfterCut")])
         phi2AfterCut._setLegendStyles()
         phi2AfterCut._setLegendLabels()
         phi2AfterCut.histoMgr.setHistoDrawStyleAll("P") 
@@ -1426,7 +1434,7 @@ def controlPlots(datasets):
 
 ######## deltaPhi(jet,Met) vs deltaPhi(tau,Met) after 2dim cut
         
-    phi2AfterCut2 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/DeltaPhiVsDeltaPhiMHTJet1Inverted")])
+    phi2AfterCut2 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("DeltaPhiVsDeltaPhiMHTJet1Inverted")])
     phi2AfterCut2._setLegendStyles()
     phi2AfterCut2._setLegendLabels()
     phi2AfterCut2.histoMgr.setHistoDrawStyleAll("P")
@@ -1460,7 +1468,7 @@ def controlPlots(datasets):
     
 ######## deltaPhi(jet,Met) vs deltaPhi(tau,Met) after 2dim cut
 
-    phi2AfterCut3 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/DeltaPhiVsDeltaPhiMHTJet2Inverted")])
+    phi2AfterCut3 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("DeltaPhiVsDeltaPhiMHTJet2Inverted")])
     phi2AfterCut3._setLegendStyles()
     phi2AfterCut3._setLegendLabels()
     phi2AfterCut3.histoMgr.setHistoDrawStyleAll("P")
@@ -1493,7 +1501,7 @@ def controlPlots(datasets):
     
     ######## deltaPhi(jet,Met) vs deltaPhi(tau,Met) after 2dim cut
 
-    phi2AfterCut4 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/DeltaPhiVsDeltaPhiMHTJet3Inverted")])
+    phi2AfterCut4 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("DeltaPhiVsDeltaPhiMHTJet3Inverted")])
     phi2AfterCut4._setLegendStyles()
     phi2AfterCut4._setLegendLabels()
     phi2AfterCut4.histoMgr.setHistoDrawStyleAll("P")
@@ -1525,7 +1533,7 @@ def controlPlots(datasets):
     
 ######## deltaPhi(jet,Met) vs deltaPhi(tau,MHT) after 2dim cut
 
-    phiTauMHT = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/DeltaPhiMHTTauVsDeltaPhiMHTJet1Inverted")])
+    phiTauMHT = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("DeltaPhiMHTTauVsDeltaPhiMHTJet1Inverted")])
     phiTauMHT._setLegendStyles()
     phiTauMHT._setLegendLabels()
     phiTauMHT.histoMgr.setHistoDrawStyleAll("P")
@@ -1556,22 +1564,22 @@ def controlPlots(datasets):
     canvas59.Print("DeltaPhiHMTVSdeltaPhiMHTjet1.C")                                                                                                    
 ################## N bjets
     
-    bhmt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NBInvertedTauIdJet")])
-    bhmtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NBBaselineTauIdJet")])
-    bhmtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/NBBaselineTauIdJet")])
+    bhmt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("NBInvertedTauIdJet")])
+    bhmtBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("NBBaselineTauIdJet")])
+    bhmtEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("NBBaselineTauIdJet")])
  
     bhmtBaseline._setLegendStyles()
     bhmtBaseline._setLegendLabels()
     bhmtBaseline.histoMgr.setHistoDrawStyleAll("P")
     bhmtBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
-    hbhmtBaseline = bhmtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NBBaselineTauIdJet")
+    hbhmtBaseline = bhmtBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("NBBaselineTauIdJet")
     
     bhmtEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     bhmtEWK._setLegendStyles()
     bhmtEWK._setLegendLabels()
     bhmtEWK.histoMgr.setHistoDrawStyleAll("P")
     bhmtEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))  
-    hbhmtEWK =  bhmtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/NBBaselineTauIdJet")
+    hbhmtEWK =  bhmtEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("NBBaselineTauIdJet")
     
 
        
@@ -1634,22 +1642,22 @@ def controlPlots(datasets):
 ################## N jets
       
  
-    jBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetBaselineTauIdJet")])
-    jEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/NJetBaselineTauIdJet")])
+    jBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("NJetBaselineTauIdJet")])
+    jEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("NJetBaselineTauIdJet")])
  
     
     jBaseline._setLegendStyles()
     jBaseline._setLegendLabels()
     jBaseline.histoMgr.setHistoDrawStyleAll("P")
     jBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
-    hjBaseline = jBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NBBaselineTauIdJet")
+    hjBaseline = jBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("NBBaselineTauIdJet")
     
     jEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     jEWK._setLegendStyles()
     jEWK._setLegendLabels()
     jEWK.histoMgr.setHistoDrawStyleAll("P")
     jEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
-    hjEWK =  jEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/NBBaselineTauIdJet")
+    hjEWK =  jEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("NBBaselineTauIdJet")
     
 
        
@@ -1711,23 +1719,23 @@ def controlPlots(datasets):
 ################## N jets after MET
     
 
-    jm = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetInvertedTauIdJetMet")])
-    jmBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/NJetBaselineTauIdJetMet")])
-    jmEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto(analysis+"/NJetBaselineTauIdJetMet")])
+    jm = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("NJetInvertedTauIdJetMet")])
+    jmBaseline = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto("NJetBaselineTauIdJetMet")])
+    jmEWK = plots.PlotBase([datasets.getDataset("EWK").getDatasetRootHisto("NJetBaselineTauIdJetMet")])
  
  
     jmBaseline._setLegendStyles()
     jmBaseline._setLegendLabels()
     jmBaseline.histoMgr.setHistoDrawStyleAll("P")
     jmBaseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
-    hjmBaseline = jmBaseline.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/NBBaselineTauIdJet")
+    hjmBaseline = jmBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("NBBaselineTauIdJet")
     
     jmEWK.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     jmEWK._setLegendStyles()
     jmEWK._setLegendLabels()
     jmEWK.histoMgr.setHistoDrawStyleAll("P")
     jmEWK.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))  
-    hjmEWK =  jmEWK.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/NBBaselineTauIdJet")
+    hjmEWK =  jmEWK.histoMgr.getHisto("EWK").getRootHisto().Clone("NBBaselineTauIdJet")
     
 
        

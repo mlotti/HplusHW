@@ -95,7 +95,7 @@ namespace HPlus {
     fNJetsCounter(eventCounter.addCounter("njets")),
     fMETCounter(eventCounter.addCounter("MET")),
     //    fRtauAfterMetCounter(eventCounter.Counter("Rtau after MET")),
-    fDeltaPhiVSDeltaPhiMHTJet1CutCounter(eventCounter.addCounter("DeltaPhi(Jet1,MHT) vs DeltaPhi cut")),
+    fDeltaPhiVSeltaPhiMHTJet1CutCounter(eventCounter.addCounter("DeltaPhi(Jet1,MHT) vs DeltaPhi cut")),
     fDeltaPhiVSDeltaPhiMHTJet2CutCounter(eventCounter.addCounter("DeltaPhi(Jet2,MHT) vs DeltaPhi cut")),
     fDeltaPhiVSDeltaPhiMHTJet3CutCounter(eventCounter.addCounter("DeltaPhi(Jet3,MHT) vs DeltaPhi cut")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
@@ -336,20 +336,23 @@ namespace HPlus {
     htransverseMassNoLeptonNotInTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassNoLeptonNotInTau", "transverseMassNoLeptonNotInTau", 200, 0., 400.);
     htransverseMassLeptonRealSignalTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassLeptonRealSignalTau", "transverseMassLeptonRealSignalTau", 200, 0., 400.);
     htransverseMassLeptonFakeSignalTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassLeptonFakeSignalTau", "transverseMassLeptonFakeSignalTau", 200, 0., 400.);
-    htransverseMassNoLeptonGoodMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassNoLeptonGoodMet", "transverseMassNoLeptonGoodMet", 200, 0., 400.);
-    htransverseMassNoLeptonGoodMetGoodTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassNoLeptonGoodMetGoodTau", "transverseMassNoLeptonGoodMetGoodTau", 200, 0., 400.);
+    htransverseMassNoLeptonGoodMet = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassNoLeptonRealTau", "transverseMassNoLeptonRealTau", 200, 0., 400.);
+    htransverseMassNoLeptonGoodMetGoodTau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassNoLeptonFakeTau", "transverseMassNoLeptonFakeTau", 200, 0., 400.);
     htransverseMassNoObservableLeptons= fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseNoMassObservableLeptons", "transverseMassNoObservableLeptons", 200, 0., 400.);
     htransverseMassObservableLeptons= fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassObservableLeptons", "transverseMassObservableLeptons", 200, 0., 400.);
 
     hTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
-    hTransverseMassDeltaPtCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassDeltaPtCut", "transverseMassDeltaPtCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
+    hTransverseMassDeltaPhiJet1 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassDeltaPhiJet1", "transverseMassDeltaPhiJet1;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
+    hTransverseMassDeltaPhiJet2 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassDeltaPhiJet2", "transverseMassDeltaPhiJet1;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
+    
+    hTransverseMassAfterBtagging = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassAfterBtagging", "transverseMassAfterBtagging;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.); 
     hTransverseMassPhi30 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassPhi30", "transverseMassPhi30;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassPhi60 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassPhi60", "transverseMassPhi60;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassSecondBveto = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassSecondBveto", "transverseMassSecondBveto;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassMet80 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassMet80", "transverseMassMet80;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassMet100 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassMet100", "transverseMassMet100;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassNoBtagging = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassNoBtagging", "transverseMassNoBtagging;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
-    hTransverseMassNoBtaggingWithRtau = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "transverseMassNoBtaggingWithRtau", "transverseMassNoBtaggingWithRtau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
+
     hTransverseMassTopSelection = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "transverseMassTopSelection", "transverseMassTopSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
    hTransverseMassWmassCut = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "transverseMassWmassCut", "transverseMassWmassCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
     hTransverseMassTopChiSelection = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "transverseMassTopChiSelection", "transverseMassTopChiSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 200, 0., 400.);
@@ -386,9 +389,7 @@ namespace HPlus {
     hDeltaPhiVsDeltaPhiMHTJet1 = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "DeltaPhiVsDeltaPhiMHTJet1","DeltaPhiVsDeltaPhiMHTJet1", 180, 0., 180., 180,0,180. );
     hDeltaPhiVsDeltaPhiMHTJet2 = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "DeltaPhiVsDeltaPhiMHTJet2","DeltaPhiVsDeltaPhiMHTJet2", 180, 0., 180., 180,0,180. );
     hDeltaPhiVsDeltaPhiMHTJet3 = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "DeltaPhiVsDeltaPhiMHTJet3","DeltaPhiVsDeltaPhiMHTJet3", 180, 0., 180., 180,0,180. );
-    hDeltaPhiMHTTauVsDeltaPhiMHTJet1 = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "DeltaPhiMHTTau1","DeltaPhiMHTJet1", 180, 0., 180., 180,0,180. );
-    hDeltaPhiMHTTauVsDeltaPhiMHTJet2 = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "DeltaPhiMHTTau2","DeltaPhiMHTJet2", 180, 0., 180., 180,0,180. );
-    hDeltaPhiMHTTauVsDeltaPhiMHTJet3 = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, *fs, "DeltaPhiMHTTau3","DeltaPhiMHTJet3", 180, 0., 180., 180,0,180. );
+  
     hDeltaPhiMHTJet1 = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, *fs, "DeltaPhiMHTJet1","DeltaPhiMHTJet1" , 180,0,180. );
 
     TFileDirectory mySelectedTauDir = fs->mkdir("SelectedTau");
@@ -470,8 +471,8 @@ namespace HPlus {
     hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "SelectedTau_LeadingTrackP_AfterStandardSelections", "SelectedTau_LeadingTrackP_AfterStandardSelections;#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
     hCtrlEWKFakeTausIdentifiedElectronPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "IdentifiedElectronPt_AfterStandardSelections", "IdentifiedElectronPt_AfterStandardSelections;Identified electron p_{T}, GeV/c;N_{events} / 1 GeV", 20, 0., 20.);;
     hCtrlEWKFakeTausIdentifiedMuonPtAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "IdentifiedMuonPt_AfterStandardSelections", "IdentifiedMuonPt_AfterStandardSelections;Identified muon p_{T}, GeV/c;N_{events} / 1 GeV", 20, 0., 20.);
-    hCtrlEWKFakeTausNjetsAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "Njets_AfterStandardSelections", "Njets_AfterStandardSelections;Number of selected jets;N_{events}", 7, 3., 10.);
-    hCtrlEWKFakeTausMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "MET", "MET;MET, GeV;N_{events} / 10 GeV", 100, 0., 500.);
+    hCtrlEWKFakeTausNjetsAfterStandardSelections = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "Njets_AfterStandardSelections", "Njets_AfterStandardSelections;Number of selected jets;N_{events}", 7, 3., 10.); 
+   hCtrlEWKFakeTausMET = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "MET", "MET;MET, GeV;N_{events} / 10 GeV", 100, 0., 500.);
     hCtrlEWKFakeTausNbjets = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myCtrlEWKFakeTausDir, "NBjets", "NBjets;Number of identified b-jets;N_{events}", 10, 0., 10.);
 
     hCtrlJetMatrixAfterJetSelection = fHistoWrapper.makeTH<TH2F>(HistoWrapper::kVital, myCtrlDir, "JetMatrixAfterJetSelection", "JetMatrixAfterJetSelection;Number of selected jets;Number of selected b jets", 7, 3., 10.,7, 0., 7.);
@@ -916,7 +917,7 @@ namespace HPlus {
 //------ Delta phi(tau,MET) cut
 //    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(metData.getSelectedMET())) * 57.3; // converted to degrees
     hDeltaPhiNoBtagging->Fill(deltaPhi);
-    if (tauData.selectedTauPassesRtau()) hTransverseMassNoBtaggingWithRtau->Fill(transverseMass); 
+
 
     // Plot jet matrix
     if (transverseMass > 40 && transverseMass < 100) {
@@ -942,6 +943,7 @@ namespace HPlus {
     fCommonPlotsAfterBTagging->fill();
     if (myFakeTauStatus) fCommonPlotsAfterBTaggingFakeTaus->fill();
     increment(fBTaggingCounter);
+    hTransverseMassAfterBtagging->Fill(transverseMass);
 
     // Apply scale factor as weight to event
     if (!iEvent.isRealData()) {
@@ -992,10 +994,7 @@ namespace HPlus {
     }
     hMaxDeltaPhiJetMet->Fill(myMaxDeltaPhiJetMET);
 
-    if (jetData.getDeltaPtJetTau() < 10 ) {
-      hTransverseMassDeltaPtCut->Fill(transverseMass);
-      increment(fDeltaPtJetTauCounter);
-    }
+
     // test lower bound of deltaPhi
     if (deltaPhi > 30) {
       increment(fDeltaPhiLow30Counter);
@@ -1024,39 +1023,38 @@ namespace HPlus {
       if (ijet == 3) deltaPhiMetJet3 = jetDeltaPhi;
     }
 
-    
-    hDeltaPhiMHTTauVsDeltaPhiMHTJet1->Fill(jetData.getDeltaPhiMHTTau(),jetData.getDeltaPhiMHTJet1());
-    hDeltaPhiMHTTauVsDeltaPhiMHTJet2->Fill(jetData.getDeltaPhiMHTTau(),jetData.getDeltaPhiMHTJet2());
-    hDeltaPhiMHTTauVsDeltaPhiMHTJet3->Fill(jetData.getDeltaPhiMHTTau(),jetData.getDeltaPhiMHTJet3());
-    
+
+    /*    
     hDeltaPhiVsDeltaPhiMHTJet1->Fill(deltaPhi,jetData.getDeltaPhiMHTJet1());
     hDeltaPhiMHTJet1->Fill(jetData.getDeltaPhiMHTJet1());
-   
-    /*
+    */
+    
     hDeltaPhiVsDeltaPhiMHTJet1->Fill(deltaPhi,deltaPhiMetJet1);
     hDeltaPhiMHTJet1->Fill(deltaPhiMetJet1);
-    */
+    
 
 
     // 2 dim. deltaPhi cuts
    
-    if ( deltaPhi > 120 && jetData.getDeltaPhiMHTJet1() < 60 ) return false;
-    //    if ( deltaPhi > 120 && deltaPhiMetJet1 < 60 ) return false;   
+    // if ( deltaPhi > 120 && jetData.getDeltaPhiMHTJet1() < 60 ) return false;
+    if ( deltaPhi > 120 && deltaPhiMetJet1 < 60 ) return false;   
     increment(fDeltaPhiVSDeltaPhiMHTJet1CutCounter);
-   
-    hDeltaPhiVsDeltaPhiMHTJet2->Fill(deltaPhi,jetData.getDeltaPhiMHTJet2());
-    //    hDeltaPhiVsDeltaPhiMHTJet2->Fill(deltaPhi,deltaPhiMetJet2);
+    hTransverseMassDeltaPhiJet1->Fill(transverseMass);  
+    //    hDeltaPhiVsDeltaPhiMHTJet2->Fill(deltaPhi,jetData.getDeltaPhiMHTJet2());
+     hDeltaPhiVsDeltaPhiMHTJet2->Fill(deltaPhi,deltaPhiMetJet2);
   
 
 
-    if ( deltaPhi > 120 && jetData.getDeltaPhiMHTJet2() < 60 ) return false;   
-    //    if ( deltaPhi > 120 && deltaPhiMetJet2 < 60 ) return false;   
+     //    if ( deltaPhi > 120 && jetData.getDeltaPhiMHTJet2() < 60 ) return false;   
+    if ( deltaPhi > 120 && deltaPhiMetJet2 < 60 ) return false;   
     increment(fDeltaPhiVSDeltaPhiMHTJet2CutCounter);
-    //    hDeltaPhiVsDeltaPhiMHTJet3->Fill(deltaPhi,deltaPhiMetJet3); 
-    hDeltaPhiVsDeltaPhiMHTJet3->Fill(deltaPhi,jetData.getDeltaPhiMHTJet3());
+    hTransverseMassDeltaPhiJet2->Fill(transverseMass);
+    hDeltaPhiVsDeltaPhiMHTJet3->Fill(deltaPhi,deltaPhiMetJet3); 
+    //    hDeltaPhiVsDeltaPhiMHTJet3->Fill(deltaPhi,jetData.getDeltaPhiMHTJet3());
 
-    if ( deltaPhi > 120 && jetData.getDeltaPhiMHTJet3() < 60 ) return false; 
-    //    if ( deltaPhi > 120 && deltaPhiMetJet3 < 60 ) return false;     
+
+    //    if ( deltaPhi > 120 && jetData.getDeltaPhiMHTJet3() < 60 ) return false; 
+    if ( deltaPhi > 120 && deltaPhiMetJet3 < 60 ) return false;     
     increment(fDeltaPhiVSDeltaPhiMHTJet3CutCounter);
 
 
@@ -1212,7 +1210,7 @@ namespace HPlus {
 
 //------ Experimental cuts, counters, and histograms
     if (!iEvent.isRealData()) {
-      ///      doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData, metData, genData);
+      doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData, metData, genData);
     }
 
    // transverse mass and inv mass with tau veto
@@ -1471,6 +1469,8 @@ namespace HPlus {
     if (!otherTauFound && !electronFound && !muonFound ) {
       //      increment(fTauNotInTauCounter);
       htransverseMassNoLeptonNotInTau->Fill(transverseMass);
+      if (myTauFoundStatus ) htransverseMassNoLeptonGoodMet->Fill(transverseMass);
+      if (!myTauFoundStatus ) htransverseMassNoLeptonGoodMetGoodTau->Fill(transverseMass); 
     }
 
     if (observableOtherTauFound || observableElectronFound || observableMuonFound ) {
@@ -1482,17 +1482,19 @@ namespace HPlus {
       //      increment(fTauNotInTauCounter);                                                                                                                                               
       htransverseMassNoObservableLeptons->Fill(transverseMass);
     }
-
+    /*
     if ((fabs(genData.getGenMET()->pt() - metData.getSelectedMET()->pt())/genData.getGenMET()->pt()) < 0.2) {
       if (!otherTauFound && !electronFound && !muonFound ) {
 	//      increment(fTauNotInTauCounter);
-	htransverseMassNoLeptonGoodMet->Fill(transverseMass);
+	//	htransverseMassNoLeptonGoodMet->Fill(transverseMass);
 	if (myTauFoundStatus ) {
 	  //      increment(fTauNotInTauCounter);
 	  htransverseMassNoLeptonGoodMetGoodTau->Fill(transverseMass);
 	}
       }
     }
+    */
+
 
     std::vector<const reco::GenParticle*> mothers = getMothers(parton);
     int motherId=9999;      

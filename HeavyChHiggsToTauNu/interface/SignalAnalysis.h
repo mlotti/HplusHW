@@ -329,9 +329,7 @@ namespace HPlus {
 
 
     // MCAnalysis histograms
-    WrappedTH2 *hDeltaPhiMHTTauVsDeltaPhiMHTJet1;
-    WrappedTH2 *hDeltaPhiMHTTauVsDeltaPhiMHTJet2;
-    WrappedTH2 *hDeltaPhiMHTTauVsDeltaPhiMHTJet3;
+    
     WrappedTH2 *hDeltaPhiVsDeltaPhiMHTJet1;
     WrappedTH2 *hDeltaPhiVsDeltaPhiMHTJet2;
     WrappedTH2 *hDeltaPhiVsDeltaPhiMHTJet3;
@@ -355,14 +353,15 @@ namespace HPlus {
     
     // Transverse mass histograms
     WrappedTH1 *hTransverseMass;
-    WrappedTH1 *hTransverseMassDeltaPtCut;
+    WrappedTH1 *hTransverseMassAfterBtagging;
+    WrappedTH1 *hTransverseMassDeltaPhiJet1;
+    WrappedTH1 *hTransverseMassDeltaPhiJet2;    
     WrappedTH1 *hTransverseMassSecondBveto;
     WrappedTH1 *hTransverseMassPhi30;
     WrappedTH1 *hTransverseMassPhi60;
     WrappedTH1 *hTransverseMassMet80;
     WrappedTH1 *hTransverseMassMet100;
     WrappedTH1 *hTransverseMassNoBtagging;
-    WrappedTH1 *hTransverseMassNoBtaggingWithRtau;
     WrappedTH1 *hTransverseMassTopSelection;
     WrappedTH1 *hTransverseMassTopChiSelection;
     WrappedTH1 *hTransverseMassWmassCut;
