@@ -123,11 +123,12 @@ class ConfigBuilder:
 
         self.inputWorkflow = inputWorkflow
 
-        if self.applyTriggerScaleFactor:
+        if self.applyTauTriggerScaleFactor or self.applyMETTriggerScaleFactor:
             for trg in self.options.trigger:
                 if not "IsoPFTau" in trg:
-                    print "applyTriggerScaleFactor=True and got non-tau trigger, setting applyTriggerScaleFactor=False"
-                    self.applyTriggerScaleFactor = False
+                    print "applyTauTriggerScaleFactor=True or applyMETTriggerScaleFactor=True, and got non-tau trigger, setting applyTauTriggerScaleFactor=False and applyMETTriggerScaleFactor=False"
+                    self.applyTauTriggerScaleFactor = False
+                    self.applyMETTriggerScaleFactor = False
 
         if self.doMETResolution and self.doOptimisation:
             raise Exception("doMETResolution and doOptimisation conflict")
