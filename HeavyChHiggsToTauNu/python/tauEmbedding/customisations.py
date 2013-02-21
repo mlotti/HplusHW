@@ -824,7 +824,7 @@ def addGeneratorTauFilter(process, sequence, filterInaccessible=False, prefix="g
 
     return counters
 
-def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPreselection", pileupWeight=None):
+def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPreselection", pileupWeight=None, maxGenTaus=None):
     counters = []
 
     genTauSequence = cms.Sequence()
@@ -854,10 +854,17 @@ def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPresel
     genTausName = prefix+"GenTau"
     setattr(process, genTausName, genTaus)
 
-    genTausFilter = cms.EDFilter("CandViewCountFilter",
-        src = cms.InputTag(genTausName),
-        minNumber = cms.uint32(1),
-    )
+    if maxGenTaus is not None:
+        genTausFilter = cms.EDFilter("PATCandViewCountFilter",
+            src = cms.InputTag(genTausName),
+            minNumber = cms.uint32(1),
+            maxNumber = cms.uint32(maxGenTaus),
+        )
+    else:
+        genTausFilter = cms.EDFilter("CandViewCountFilter",
+            src = cms.InputTag(genTausName),
+            minNumber = cms.uint32(1),
+        )
     setattr(process, prefix+"GenTauFilter", genTausFilter)
 
     genTausCount = counterPrototype.clone()
@@ -873,7 +880,7 @@ def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPresel
 
     return counters
 
-def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLikePreselection", disableTrigger=True, pileupWeight=None, selectOnlyFirstGenTau=False):
+def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLikePreselection", disableTrigger=True, pileupWeight=None, selectOnlyFirstGenTau=False, maxGenTaus=None):
     counters = []
 
     genTauSequence = cms.Sequence()
@@ -933,10 +940,17 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
          genTauSequence *= genTauFirst
          genTausName = genTauFirstName
 
-    genTausFilter = cms.EDFilter("CandViewCountFilter",
-        src = cms.InputTag(genTausName),
-        minNumber = cms.uint32(1),
-    )
+    if maxGenTaus is not None:
+        genTausFilter = cms.EDFilter("PATCandViewCountFilter",
+            src = cms.InputTag(genTausName),
+            minNumber = cms.uint32(1),
+            maxNumber = cms.uint32(maxGenTaus),
+        )
+    else:
+        genTausFilter = cms.EDFilter("CandViewCountFilter",
+            src = cms.InputTag(genTausName),
+            minNumber = cms.uint32(1),
+        )
     setattr(process, prefix+"GenTauFilter", genTausFilter)
     genTauSequence *= genTausFilter
 

@@ -174,35 +174,57 @@ if addSignalAnalysis:
     import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
     module = signalAnalysis.createEDFilter(param)
     module.Tree.fill = cms.untracked.bool(False)
+#    module.histogramAmbientLevel = "Vital"
 
     # Counters
-    if len(additionalCounters) > 0:
+    if len(preselectionCounters) > 0:
         module.eventCounter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in preselectionCounters])
+
+    def addModule(mod, postfix="", sequence=None):
+        for era, src in zip(puWeights, puWeightNames):
+            m = mod.clone()
+            m.pileupWeightReader.weightSrc = src
+            if era == puWeights[-1]:
+                m.eventCounter.printMainCounter = cms.untracked.bool(True)
+
+            setattr(process, "signalAnalysisTauEmbeddingLikePreselection"+postfix+era, m)
+            p = cms.Path(process.preselectionSequence)
+            if sequence is not None:
+                p += sequence
+            p += m
+            setattr(process, "signalAnalysis"+postfix+era+"Path", p)
+
+    # Nominal
+    addModule(module)
+
+    # Add sequence for exactly one gen tau
+    process.oneGenTau40Sequence = cms.Sequence()
+    oneGenTau40Counters = preselectionCounters[:]
+    oneGenTau40Counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.oneGenTau40Sequence, param, pileupWeight=puWeightNames[-1],
+                                                                                       prefix="embeddingLikePresectionOneGenTau40", maxGenTaus=1))
+    mod = module.clone()
+    mod.eventCounter.counters = [cms.InputTag(c) for c in oneGenTau40Counters]
+    addModule(mod, "OneGenTau40", process.oneGenTau40Sequence)
 
     # Add sequence for generator tau pt>41 selection
     process.genTau41Sequence = cms.Sequence()
-    genTau41Counters = additionalCounters[:]
+    genTau41Counters = preselectionCounters[:]
     tauEmbeddingCustomisations.generatorTauPt = 41
     genTau41Counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.genTau41Sequence, param, pileupWeight=puWeightNames[-1],
                                                                                     prefix="embeddingLikePreselectionGenTau41"))
 
-    for era, src in zip(puWeights, puWeightNames):
-        mod = module.clone()
-        mod.pileupWeightReader.weightSrc = src
-        if era == puWeights[-1]:
-            mod.eventCounter.printMainCounter = cms.untracked.bool(True)
+    mod = module.clone()
+    mod.eventCounter.counters = [cms.InputTag(c) for c in genTau41Counters]
+    addModule(mod, "GenTau41", process.genTau41Sequence)
 
-        # Nominal
-        setattr(process, "signalAnalysisTauEmbeddingLikePreselection"+era, mod)
-        p = cms.Path(process.preselectionSequence * mod)
-        setattr(process, "signalAnalysis"+era+"Path", p)
-
-        # Generator tau 41
-        mod = mod.clone()
-        mod.eventCounter.counters = [cms.InputTag(c) for c in genTau41Counters]
-        setattr(process, "signalAnalysisTauEmbeddingLikePreselectionGenTau41"+era, mod)
-        p = cms.Path(process.commonSequence * process.genTau41Sequence * mod)
-        setattr(process, "signalAnalysisGenTau41"+era+"Path", p)
+    # Add sequence for exactly one generator tau pt>41 selection
+    process.oneGenTau41Sequence = cms.Sequence()
+    oneGenTau41Counters = preselectionCounters[:]
+    oneGenTau41Counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.oneGenTau41Sequence, param, pileupWeight=puWeightNames[-1],
+                                                                                       prefix="embeddingLikePreselectionOneGenTau41", maxGenTaus=1))
+    mod = module.clone()
+    mod.eventCounter.counters = [cms.InputTag(c) for c in oneGenTau41Counters]
+    addModule(mod, "OneGenTau41", process.oneGenTau41Sequence)
 
 # Replace all event counters with the weighted one
 eventCounters = []
