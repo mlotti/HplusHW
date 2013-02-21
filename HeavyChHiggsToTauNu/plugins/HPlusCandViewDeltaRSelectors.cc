@@ -14,3 +14,6 @@ DEFINE_FWK_MODULE(HPlusPFCandCandViewDeltaRSelector);
 
 typedef HPlus::ViewClosestDeltaRSelector<pat::Tau, reco::Candidate> HPlusPATTauCandViewClosestDeltaRSelector;
 DEFINE_FWK_MODULE(HPlusPATTauCandViewClosestDeltaRSelector);
+
+typedef HPlus::ViewClosestDeltaRSelector<pat::Tau, math::XYZTLorentzVector> HPlusPATTauLorentzVectorViewClosestDeltaRSelector;
+DEFINE_FWK_MODULE(HPlusPATTauLorentzVectorViewClosestDeltaRSelector);

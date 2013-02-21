@@ -48,11 +48,14 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
     if len(tauTrigger) == 0:
         tauTrigger = "HLT_IsoPFTau35_Trk20_EPS"
 
+    # FIXME: this will not quite work in 2012
     param.trigger.selectionType = "disabled"
-    param.triggerEfficiencyScaleFactor.mode = "disabled"
+    param.tauTriggerEfficiencyScaleFactor.mode = "disabled"
+    param.metTriggerEfficiencyScaleFactor.mode = "disabled"
     # For data, we have "select" all run periods for tau+MET trigger efficiency
     if dataVersion.isData():
-        param.triggerEfficiencyScaleFactor.dataSelect = param.triggerEfficiencyScaleFactor.dataParameters.parameterNames_()
+        param.tauTriggerEfficiencyScaleFactor.dataSelect = param.tauTriggerEfficiencyScaleFactor.dataParameters.parameterNames_()
+        param.metTriggerEfficiencyScaleFactor.dataSelect = param.metTriggerEfficiencyScaleFactor.dataParameters.parameterNames_()
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets"+PF2PATVersion) # these are really AK5PF
@@ -891,7 +894,8 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     # Disable trigger
     if disableTrigger:
         param.trigger.selectionType = "disabled"
-        param.triggerEfficiencyScaleFactor.mode = "disabled"
+        param.tauTriggerEfficiencyScaleFactor.mode = "disabled"
+        param.metTriggerEfficiencyScaleFactor.mode = "disabled"
 
     allCount = counterPrototype.clone()
     setattr(process, prefix+"AllCount", allCount)
@@ -921,10 +925,10 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
 
     if selectOnlyFirstGenTau:
         # Select first generator tau for the jet cleaning and tau selection
-         genTauFirst = cms.EDProducer("HPlusFirstCandidateSelector",
+         genTauFirst = cms.EDProducer("HPlusFirstGenParticleSelector",
              src = cms.InputTag(genTausName)
          )
-         genTauFirstName = prefix+"First"
+         genTauFirstName = prefix+"GenTauFirst"
          setattr(process, genTauFirstName, genTauFirst)
          genTauSequence *= genTauFirst
          genTausName = genTauFirstName
@@ -941,13 +945,27 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     genTauSequence *= genTausCount
     counters.append(prefix+"GenTauCount")
 
+
+    genTausVisible = cms.EDProducer("HPlusGenVisibleTauComputer",
+        src = cms.InputTag(genTausName)
+    )
+    genTausVisibleName = prefix+"GenTauVisible"
+    setattr(process, genTausVisibleName, genTausVisible)
+    genTauSequence *= genTausVisible
+    
     # Tau selection
-    genTauReco = cms.EDProducer("HPlusPATTauCandViewClosestDeltaRSelector",
+    # genTauReco = cms.EDProducer("HPlusPATTauCandViewClosestDeltaRSelector",
+    #     src = cms.InputTag("selectedPatTausHpsPFTau"),
+    #     refSrc = cms.InputTag(genTausName),
+    #     maxDeltaR = cms.double(0.5),
+    # )
+    genTauReco = cms.EDProducer("HPlusPATTauLorentzVectorViewClosestDeltaRSelector",
 #        src = cms.InputTag("selectedPatTaus"+PF2PATVersion), # not trigger matched
         src = cms.InputTag("selectedPatTausHpsPFTau"),
-        refSrc = cms.InputTag(genTausName),
+        refSrc = cms.InputTag(genTausVisibleName),
         maxDeltaR = cms.double(0.5),
     )
+
 #     if PF2PATVersion != "":
 #         raise Exception("I don't support PF2PAT at the moment")
     if not disableTrigger:
@@ -962,7 +980,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
         genTauSelected = cms.EDProducer("HPlusPATTauMostLikelyIdentifiedSelector",
             eventCounter = param.eventCounter.clone(),
             tauSelection = param.tauSelection.clone(),
-            vertexSrc = param.primaryVertexSelection.selectedSrc,
+            vertexSrc = cms.InputTag(param.primaryVertexSelection.selectedSrc.value()),
             histogramAmbientLevel = cms.untracked.string("Debug"),
         )
         genTauSelectedName = prefix+"TauSelected"
