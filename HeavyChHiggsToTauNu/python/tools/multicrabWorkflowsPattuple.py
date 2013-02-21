@@ -328,7 +328,7 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
             "MultiJet_200961-202504_2012C_Prompt": ["HLT_QuadJet80_v6"],
             "MultiJet_202792-203742_2012C_Prompt": ["HLT_QuadJet80_v6"],
             # Below is a combination of the three above ones
-            "MultiJet_198941-200601_2012C_Prompt": ["HLT_QuadJet80_v4",  # 198941-199608
+            "MultiJet_198941-203742_2012C_Prompt": ["HLT_QuadJet80_v4",  # 198941-199608
                                                     "HLT_QuadJet80_v6"], # 199698-203002
             "MultiJet_203777-208686_2012D_Prompt": ["HLT_QuadJet80_v6"],
         }
