@@ -13,7 +13,7 @@ def addEmbeddingAodAnalysis_44X(datasets):
 #        "W2Jets_TuneZ2_Fall11":              TaskDef(njobsIn=300),
 #        "W3Jets_TuneZ2_Fall11":              TaskDef(njobsIn=120),
 #        "W4Jets_TuneZ2_Fall11":              TaskDef(njobsIn=200),
-        "TTJets_TuneZ2_Fall11":              TaskDef(njobsIn=490),
+        "TTJets_TuneZ2_Fall11":              TaskDef(njobsIn=1000),
         "DYJetsToLL_M50_TuneZ2_Fall11":      TaskDef(njobsIn=350),
         "T_t-channel_TuneZ2_Fall11":         TaskDef(njobsIn=50),
         "Tbar_t-channel_TuneZ2_Fall11":      TaskDef(njobsIn=50),
