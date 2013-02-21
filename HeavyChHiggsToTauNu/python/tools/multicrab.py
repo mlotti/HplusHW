@@ -169,6 +169,7 @@ defaultSeBlacklist_noStageout = [
     "kbfi.ee", # Files are not found, added 2012-09-28
     "cscs.ch", # Files are not found, added 2012-09-28
     "roma1.infn.it", # Jobs don't finish, added 2012-10-26
+    "kiae.ru", # Jobs fail by some missing grid libraries, added 2013-02-20
     ]
 
 ## Default Storage Element (SE) black list for stageout jobs
