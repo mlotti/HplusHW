@@ -89,23 +89,23 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
                                               ], triggerThrow=False),
 
         # MC, triggered with mcTrigger
-        "TTToHplusBWB_M80_Fall11":        TaskDefMC(njobsIn=30, njobsOut=2),
-        "TTToHplusBWB_M90_Fall11":        TaskDefMC(njobsIn=30, njobsOut=2),
-        "TTToHplusBWB_M100_Fall11":       TaskDefMC(njobsIn=30, njobsOut=2),
-        "TTToHplusBWB_M120_Fall11":       TaskDefMC(njobsIn=30, njobsOut=2),
-        "TTToHplusBWB_M140_Fall11":       TaskDefMC(njobsIn=30, njobsOut=2),
-        "TTToHplusBWB_M150_Fall11":       TaskDefMC(njobsIn=30, njobsOut=2),
-        "TTToHplusBWB_M155_Fall11":       TaskDefMC(njobsIn=30, njobsOut=2),
-        "TTToHplusBWB_M160_Fall11":       TaskDefMC(njobsIn=30, njobsOut=2),
+        "TTToHplusBWB_M80_Fall11":        TaskDefMC(njobsIn=15, njobsOut=2),
+        "TTToHplusBWB_M90_Fall11":        TaskDefMC(njobsIn=15, njobsOut=2),
+        "TTToHplusBWB_M100_Fall11":       TaskDefMC(njobsIn=15, njobsOut=2),
+        "TTToHplusBWB_M120_Fall11":       TaskDefMC(njobsIn=15, njobsOut=2),
+        "TTToHplusBWB_M140_Fall11":       TaskDefMC(njobsIn=15, njobsOut=2),
+        "TTToHplusBWB_M150_Fall11":       TaskDefMC(njobsIn=15, njobsOut=2),
+        "TTToHplusBWB_M155_Fall11":       TaskDefMC(njobsIn=15, njobsOut=2),
+        "TTToHplusBWB_M160_Fall11":       TaskDefMC(njobsIn=15, njobsOut=2),
 
-        "TTToHplusBHminusB_M80_Fall11":        TaskDefMC(njobsIn=30, njobsOut=2),
-        "TTToHplusBHminusB_M90_Fall11":        TaskDefMC(njobsIn=30, njobsOut=2),
-        "TTToHplusBHminusB_M100_Fall11":       TaskDefMC(njobsIn=30, njobsOut=2),
-        "TTToHplusBHminusB_M120_Fall11":       TaskDefMC(njobsIn=30, njobsOut=2),
-        "TTToHplusBHminusB_M140_Fall11":       TaskDefMC(njobsIn=30, njobsOut=2),
-        "TTToHplusBHminusB_M150_Fall11":       TaskDefMC(njobsIn=30, njobsOut=2),
-        "TTToHplusBHminusB_M155_Fall11":       TaskDefMC(njobsIn=30, njobsOut=2),
-        "TTToHplusBHminusB_M160_Fall11":       TaskDefMC(njobsIn=30, njobsOut=2),
+        "TTToHplusBHminusB_M80_Fall11":        TaskDefMC(njobsIn=15, njobsOut=2),
+        "TTToHplusBHminusB_M90_Fall11":        TaskDefMC(njobsIn=15, njobsOut=2),
+        "TTToHplusBHminusB_M100_Fall11":       TaskDefMC(njobsIn=15, njobsOut=2),
+        "TTToHplusBHminusB_M120_Fall11":       TaskDefMC(njobsIn=15, njobsOut=2),
+        "TTToHplusBHminusB_M140_Fall11":       TaskDefMC(njobsIn=15, njobsOut=2),
+        "TTToHplusBHminusB_M150_Fall11":       TaskDefMC(njobsIn=15, njobsOut=2),
+        "TTToHplusBHminusB_M155_Fall11":       TaskDefMC(njobsIn=15, njobsOut=2),
+        "TTToHplusBHminusB_M160_Fall11":       TaskDefMC(njobsIn=15, njobsOut=2),
 
         "HplusTB_M180_Fall11":       TaskDefMC(njobsIn=40, njobsOut=2),
         "HplusTB_M190_Fall11":       TaskDefMC(njobsIn=40, njobsOut=2),
@@ -242,13 +242,13 @@ def addPattuple_v44_4_1(datasets):
 ## Add v44_5 pattuple production workflows
 def addPattuple_v44_5_test1(datasets):
     definitions = {
-        # 23189 events, 30 jobs
-        # User mean 1244.2, min 862.8, max 1367.7
-        # Mean 64.0 MB, min 59.9 MB, max 68.2 MB
-        "Tau_173236-173692_2011A_Nov08":    TaskDef("/Tau/local-Run2011A_08Nov2011_v1_AOD_173236_173692_pattuple_v44_5_test1-1b3ed6acb33bc8106ac34fb558c6831f/USER"),
         # 470476 events, 131 jobs
         # User mean 4158.8, min 1173.3, max 10329.6
         # Mean 82.7 MB, min 35.0 MB, max 166.1 MB
+        "Tau_173236-173692_2011A_Nov08":    TaskDef("/Tau/local-Run2011A_08Nov2011_v1_AOD_173236_173692_pattuple_v44_5_test1-1b3ed6acb33bc8106ac34fb558c6831f/USER"),
+        # 23189 events, 30 jobs
+        # User mean 1244.2, min 862.8, max 1367.7
+        # Mean 64.0 MB, min 59.9 MB, max 68.2 MB
         "TTToHplusBWB_M120_Fall11":         TaskDef("/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5_test1-778bc6993dea1b89668515c3036cbe70/USER"),
         }
 
