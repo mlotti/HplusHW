@@ -152,7 +152,61 @@ class PlotText:
     # Provides interface compatible with ROOT's drawable objects.
     def Draw(self, options=None):
         self.l.DrawLatex(self.x, self.y, self.text)        
-        
+
+
+## Class for drawing text and a background box
+class PlotTextBox:
+    ## Constructor
+    #
+    # \param xmin       X min coordinate of the box (NDC)
+    # \param ymin       Y min coordinate of the box (NDC)
+    # \param xmax       X max coordinate of the box (NDC)
+    # \param ymax       Y max coordinate of the box (NDC)
+    # \param fillColor  Fill color of the box
+    def __init__(self, xmin, ymin, xmax, ymax, fillColor=ROOT.kWhite):
+        # ROOT.TPave Set/GetX1NDC() etc don't seem to work as expected.
+        self.xmin = xmin
+        self.xmax = xmax
+        self.ymin = ymin
+        self.ymax = ymax
+        self.fillColor = fillColor
+        self.texts = []
+
+    ## Add PlotText object
+    def addText(self, text):
+        self.texts.append(text)
+
+    ## Move the box and the contained text objects
+    #
+    # \param dx  Movement in x (positive is to right)
+    # \param dy  Movement in y (positive is to up)
+    # \param dw  Increment of width (negative to decrease width)
+    # \param dh  Increment of height (negative to decrease height)
+    #
+    # \a dx and \a dy affect to both box and text objects, \a dw and
+    # \dh affect the box only.
+    def move(self, dx=0, dy=0, dw=0, dh=0):
+        self.xmin += dx
+        self.xmax += dx
+        self.ymin += dy
+        self.ymax += dy
+
+        self.xmax += dw
+        self.ymin -= dh
+
+        for t in self.texts:
+            t.x += dx
+            t.y += dy
+
+    ## Draw the box and the text to the current TPad
+    #
+    # \param options  Forwarded to ROOT.TPave.Draw(), and the Draw() of the contained objects
+    def Draw(self, options=""):
+        self.pave = ROOT.TPave(self.xmin, self.ymin, self.xmax, self.ymax, 0, "NDC")
+        self.pave.SetFillColor(self.fillColor)
+        self.pave.Draw(options)
+        for t in self.texts:
+            t.Draw(options)
 
 ## Draw the "CMS Preliminary" text to the current TPad
 #
@@ -362,7 +416,7 @@ def moveLegend(legend, dx=0, dy=0, dw=0, dh=0):
     legend.SetY1(legend.GetY1() + dy)
     legend.SetY2(legend.GetY2() + dy)
 
-    legend.SetX1(legend.GetX1() + dw)
+    legend.SetX2(legend.GetX2() + dw)
     legend.SetY1(legend.GetY1() - dh) # negative dh should shrink the legend
     
     return legend

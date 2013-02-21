@@ -64,6 +64,8 @@ namespace HPlus {
       const edm::PtrVector<pat::Muon>& getNonIsolatedMuons() const { return fSelectedNonIsolatedMuons; }
       /// Muon collection after all selections except pt and eta cuts
       const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforePtAndEtaCuts() { return fSelectedMuonsBeforePtAndEtaCuts; }
+      /// Muon collection after all selections except isolation, needed for embedding studies (a custom isolation is calculated)
+      const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforeIsolation() { return fSelectedMuonsBeforeIsolation; }
 
       friend class MuonSelection;
 
@@ -80,6 +82,7 @@ namespace HPlus {
       edm::PtrVector<pat::Muon> fSelectedMuonsLoose;
       edm::PtrVector<pat::Muon> fSelectedNonIsolatedMuons;
       edm::PtrVector<pat::Muon> fSelectedMuonsBeforePtAndEtaCuts;
+      edm::PtrVector<pat::Muon> fSelectedMuonsBeforeIsolation;
 
     };
 

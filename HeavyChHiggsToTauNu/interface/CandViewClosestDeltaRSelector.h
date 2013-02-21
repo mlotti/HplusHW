@@ -70,8 +70,9 @@ namespace hplus {
       }
       if(iSel != hcand->end()) {
         /*
-        std::cout << "Reference object " << (iRef-href->begin()) << " pt " << iRef->pt() << " eta " << iRef->eta()
-                  << " selected object " << (iSel-hcand->end()) << " pt " << iSel->pt() << " eta " << iSel->eta()
+        std::cout << "Reference object " << (iRef-href->begin()) << " (pt,eta,phi) " << iRef->pt() << ", " << iRef->eta() << ", " << iRef->phi()
+                  << ") selected object " << (iSel-hcand->end()) << " (pt,eta,phi) " << iSel->pt() << ", " << iSel->eta() << ", " << iSel->phi()
+                  << ") deltaR " << selDR
                   << std::endl;
         */
         ret->push_back(*iSel);

@@ -27,6 +27,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeElectronBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeJetBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeVertexBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeGenBranches.h"
 
 #include "TTree.h"
 
@@ -51,9 +52,9 @@ private:
   typedef HPlus::EventItem<bool> BoolItem;
 
   edm::InputTag fPatTriggerSrc;
-  edm::InputTag fGenParticleSrc;
 
   HPlus::TreeEventBranches fEventBranches;
+  HPlus::TreeGenBranches fGenBranches;
   HPlus::TreeVertexBranches fSelectedVertexBranches;
   HPlus::TreeVertexBranches fGoodVertexBranches;
   HPlus::TreeMuonBranches fMuonBranches;
@@ -69,7 +70,7 @@ private:
 
 HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfig):
   fPatTriggerSrc(iConfig.getParameter<edm::InputTag>("patTriggerEvent")),
-  fGenParticleSrc(iConfig.getParameter<edm::InputTag>("genParticleSrc")),
+  fGenBranches(iConfig),
   fSelectedVertexBranches(iConfig, "selectedPrimaryVertex", "selectedPrimaryVertexSrc"),
   fGoodVertexBranches(iConfig, "goodPrimaryVertex", "goodPrimaryVertexSrc"),
   fMuonBranches(iConfig),
@@ -99,6 +100,7 @@ HPlusMuonNtupleAnalyzer::HPlusMuonNtupleAnalyzer(const edm::ParameterSet& iConfi
   fTree = fs->make<TTree>("tree", "Tree");
 
   fEventBranches.book(fTree);
+  fGenBranches.book(fTree);
   fSelectedVertexBranches.book(fTree);
   fGoodVertexBranches.book(fTree);
   fMuonBranches.book(fTree);
@@ -124,6 +126,7 @@ void HPlusMuonNtupleAnalyzer::reset() {
   double nan = std::numeric_limits<double>::quiet_NaN();
  
   fEventBranches.reset();
+  fGenBranches.reset();
   fSelectedVertexBranches.reset();
   fGoodVertexBranches.reset();
   fMuonBranches.reset();
@@ -150,9 +153,6 @@ void HPlusMuonNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::Event
   edm::Handle<pat::TriggerEvent> htrigger;
   iEvent.getByLabel(fPatTriggerSrc, htrigger);
 
-  edm::Handle<edm::View<reco::GenParticle> > hgenparticles;
-  if(!iEvent.isRealData())
-    iEvent.getByLabel(fGenParticleSrc, hgenparticles);
 
   // Muons
   if(iEvent.isRealData()) {
@@ -160,6 +160,10 @@ void HPlusMuonNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::Event
     //fElectronBranches.setValues(iEvent);
   }
   else {
+    edm::Handle<edm::View<reco::GenParticle> > hgenparticles;
+    iEvent.getByLabel(fGenBranches.getInputTag(), hgenparticles);
+
+    fGenBranches.setValues(iEvent);
     fMuonBranches.setValues(iEvent, *hgenparticles);
     //fElectronBranches.setValues(iEvent, *hgenparticles);
   }

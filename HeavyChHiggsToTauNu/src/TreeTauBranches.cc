@@ -61,10 +61,10 @@ namespace HPlus {
       const pat::Tau& tau = htaus->at(i);
       const reco::GenParticle *gen = GenParticleTools::findMatching(genParticles.begin(), genParticles.end(), 15, tau, 0.5);
       if(!gen) {
-        const reco::GenParticle *gen = GenParticleTools::findMatching(genParticles.begin(), genParticles.end(), 13, tau, 0.5);
+        gen = GenParticleTools::findMatching(genParticles.begin(), genParticles.end(), 13, tau, 0.5);
       }
       if(!gen) {
-        const reco::GenParticle *gen = GenParticleTools::findMatching(genParticles.begin(), genParticles.end(), 11, tau, 0.5);
+        gen = GenParticleTools::findMatching(genParticles.begin(), genParticles.end(), 11, tau, 0.5);
       }
 
       int pdgId = 0;
