@@ -266,19 +266,17 @@ namespace HPlus {
     // std::cout << "fill: 2" << std::endl;
     // MC matching of tau
     
-    // FIXME buggy code, fix it (match to visible taus instead of tau lepton, muons and electrons have no effect (gen is local variable)
-    
     if(!iEvent.isRealData()) {
       edm::Handle<edm::View<reco::GenParticle> > hgenparticles;
       iEvent.getByLabel(fGenParticleSource, hgenparticles);
 
       // Try first genuine tau
-      const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 15, *tau, 0.5);
+      const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 15, *tau, 0.5, true); // true for visible tau matching
       if(!gen) { // then muon
-        const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 13, *tau, 0.5);
+        gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 13, *tau, 0.5);
       }
       if(!gen) { // finally electron
-        const reco::GenParticle *gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 11, *tau, 0.5);
+        gen = GenParticleTools::findMatching(hgenparticles->begin(), hgenparticles->end(), 11, *tau, 0.5);
       }
       // std::cout << "fill: 3" << std::endl;
       if(gen) {
