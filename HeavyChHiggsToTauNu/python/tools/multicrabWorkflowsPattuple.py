@@ -351,42 +351,42 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         "Tau_190456-190738_2012A_Jul13":  TaskDef(njobsIn=  35, njobsOut=  1),
         "Tau_190782-190949_2012A_Aug06":  TaskDef(njobsIn=  10, njobsOut=  1),
         "Tau_191043-193621_2012A_Jul13":  TaskDef(njobsIn= 150, njobsOut=  3),
-        "Tau_193834-196531_2012B_Jul13":  TaskDef(njobsIn=2000, njobsOut= 20),
+        "Tau_193834-196531_2012B_Jul13":  TaskDef(nlumisPerJobIn=1, njobsOut= 20),
         "Tau_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 200, njobsOut=  2),
         # The following three could be combined in the subsequent pattuple processings
         "Tau_198941-200601_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 10),
         "Tau_200961-202504_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 12),
         "Tau_202792-203742_2012C_Prompt": TaskDef(njobsIn= 150, njobsOut=  1),
         # Below is the combination of the above two, plus the third one with modified first run
-        "Tau_198941-202504_2012C_Prompt": TaskDef(njobsIn=3000, njobsOut= 25),# FIXME: set njobsOut
-        "Tau_202972-203742_2012C_Prompt": TaskDef(njobsIn= 150, njobsOut=  1),
-        "Tau_201191-201191_2012C_Dec11":  TaskDef(njobsIn=  60, njobsOut=  1),
-        "Tau_203777-208686_2012D_Prompt": TaskDef(njobsIn=4000, njobsOut= 40), # FIXME: set njobsOut
+        "Tau_198941-202504_2012C_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut= 25),# FIXME: set njobsOut
+        "Tau_201191-201191_2012C_Dec11":  TaskDef(nlumisPerJobIn=1, njobsOut=  1),
+        "Tau_202972-203742_2012C_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut=  1),
+        "Tau_203777-208686_2012D_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut= 40), # FIXME: set njobsOut
 
         ## MultiJet
         # njobsOut is just a guess
-        "MultiJet_190456-190738_2012A_Jul13":  TaskDef(njobsIn= 490, njobsOut= 4),
-        "MultiJet_190782-190949_2012A_Aug06":  TaskDef(njobsIn= 120, njobsOut= 2),
-        "MultiJet_191043-193621_2012A_Jul13":  TaskDef(njobsIn=1500, njobsOut=20),
-        "MultiJet_193834-194225_2012B_Jul13":  TaskDef(njobsIn= 600, njobsOut= 6),
-        "MultiJet_194270-196531_2012B_Jul13":  TaskDef(njobsIn=3000, njobsOut=40),
-        "MultiJet_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 250, njobsOut= 5),
+        "MultiJet_190456-190738_2012A_Jul13":  TaskDef(nlumisPerJobIn=1, njobsOut= 4),
+        "MultiJet_190782-190949_2012A_Aug06":  TaskDef(nlumisPerJobIn=1, njobsOut= 2),
+        "MultiJet_191043-193621_2012A_Jul13":  TaskDef(nlumisPerJobIn=1, njobsOut=20),
+        "MultiJet_193834-194225_2012B_Jul13":  TaskDef(nlumisPerJobIn=1, njobsOut= 6),
+        "MultiJet_194270-196531_2012B_Jul13":  TaskDef(nlumisPerJobIn=1, njobsOut=40),
+        "MultiJet_198022-198523_2012C_Aug24":  TaskDef(nlumisPerJobIn=1, njobsOut= 5),
         # FIXME: the following three could be combined in the subsequent pattuple processings
         "MultiJet_198941-200601_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=35),
         "MultiJet_200961-202504_2012C_Prompt": TaskDef(njobsIn=1700, njobsOut=30),
         "MultiJet_202792-203742_2012C_Prompt": TaskDef(njobsIn= 170, njobsOut= 3),
         # Below is the combination of the above three
-        "MultiJet_198941-203742_2012C_Prompt": TaskDef(njobsIn=4500, njobsOut=80), # FIXME: set njobsOut
-        "MultiJet_203777-208686_2012D_Prompt": TaskDef(njobsIn=4900, njobsOut=40), # FIXME: set njobsOut
+        "MultiJet_198941-203742_2012C_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut=80), # FIXME: set njobsOut
+        "MultiJet_203777-208686_2012D_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut=40), # FIXME: set njobsOut
 
         ## BJetsPlusX
         # njobsOut is just a guess
-        "BJetPlusX_193834-194225_2012B_Jul13":  TaskDef(njobsIn= 400, njobsOut= 6),
-        "BJetPlusX_194270-196531_2012B_Jul13":  TaskDef(njobsIn=2200, njobsOut=40),
-        "BJetPlusX_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 300, njobsOut= 5),
-        "BJetPlusX_198941-203742_2012C_Prompt": TaskDef(njobsIn=3500, njobsOut=80),
-        "BJetPlusX_201191-201191_2012C_Dec11":  TaskDef(njobsIn= 100, njobsOut= 1),
-        "BJetPlusX_203777-208686_2012D_Prompt": TaskDef(njobsIn=4900, njobsOut=40),
+        "BJetPlusX_193834-194225_2012B_Jul13":  TaskDef(nlumisPerJobIn=1, njobsOut= 6),
+        "BJetPlusX_194270-196531_2012B_Jul13":  TaskDef(nlumisPerJobIn=1, njobsOut=40),
+        "BJetPlusX_198022-198523_2012C_Aug24":  TaskDef(nlumisPerJobIn=1, njobsOut= 5),
+        "BJetPlusX_198941-203742_2012C_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut=80),
+        "BJetPlusX_201191-201191_2012C_Dec11":  TaskDef(nlumisPerJobIn=1, njobsOut= 1),
+        "BJetPlusX_203777-208686_2012D_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut=40),
 
         # MC, triggered with mcTrigger
         "TTToHplusBWB_M80_Summer12":        TaskDefMC(njobsIn=25, njobsOut=1),
@@ -842,15 +842,15 @@ def addPattuple_v53_1(datasets):
         # 64775 events, 69 jobs
         # 1526.7, min 111.7, max 4328.0
         # Mean 33.7 MB, min 4.7 MB, max 66.5 MB
-        "Tau_190456-190738_2012A_Jul13":          TaskDef("/Tau/local-Run2012A_13Jul2012_v1_AOD_190456_190738_pattuple_v53_1-00fb6a0648e9082988536b8287ce18fd/USER", njobsIn=150),
+        "Tau_190456-190738_2012A_Jul13":          TaskDef("/Tau/local-Run2012A_13Jul2012_v1_AOD_190456_190738_pattuple_v53_1-00fb6a0648e9082988536b8287ce18fd/USER"),
         # 42028 events, 15 jobs
         # User mean 4284.1, min 1746.4, max 6808.0
         # Mean 85.4 MB, min 37.3 MB, max 120.4 MB
-        "Tau_190782-190949_2012A_Aug06":          TaskDef("/Tau/local-Run2012A_recover_06Aug2012_v1_AOD_190782_190949_pattuple_v53_1-1be0c628538f5a4dae541da3c11eb60c/USER", njobsIn=30),
+        "Tau_190782-190949_2012A_Aug06":          TaskDef("/Tau/local-Run2012A_recover_06Aug2012_v1_AOD_190782_190949_pattuple_v53_1-1be0c628538f5a4dae541da3c11eb60c/USER"),
         # 368031 events, 208 jobs
         # User mean 2552.0, min 490.3, max 7832.9
         # Mean 55.9 MB, min 20.1 MB, max 114.5 MB
-        "Tau_191043-193621_2012A_Jul13":          TaskDef("/Tau/local-Run2012A_13Jul2012_v1_AOD_191043_193621_pattuple_v53_1-39e2e8832bb5d7b032f2b5c9a80e534a/USER", njobsIn=400),
+        "Tau_191043-193621_2012A_Jul13":          TaskDef("/Tau/local-Run2012A_13Jul2012_v1_AOD_191043_193621_pattuple_v53_1-39e2e8832bb5d7b032f2b5c9a80e534a/USER"),
         # 2822552 events, 1223 jobs
         # User mean 3862.7, min 870.5, max 12606.2
         # MEan 71.0 MB, min 30.0 MB, max 200.5 MB
@@ -883,7 +883,7 @@ def addPattuple_v53_1(datasets):
         # 2954598 events, 582 jobs
         # User mean 11544.0, min 87.4, max 31691.4
         # Mean 144.6 MB, min 1.6 MB, max 309.0 MB
-        "MultiJet_191043-193621_2012A_Jul13":     TaskDef("/MultiJet/local-Run2012A_13Jul2012_v1_AOD_191043_193621_pattuple_v53_1c-e7b040c48519314dbf67cfc22f9c91f7/USER", njobsIn=1200),
+        "MultiJet_191043-193621_2012A_Jul13":     TaskDef("/MultiJet/local-Run2012A_13Jul2012_v1_AOD_191043_193621_pattuple_v53_1c-e7b040c48519314dbf67cfc22f9c91f7/USER"),
         # 830720 events, 230 jobs
         # User mean 6722.4, min 975.6, max 14102.3
         # Mean 115.3 MB, min 19.4 MB, max 189.1 MB
@@ -891,7 +891,7 @@ def addPattuple_v53_1(datasets):
         # 5766837 events, 1221 jobs
         # User mean 7562.7, min 634.7, max 22387.1
         # Mean 156.7 MB, min 19.7 MB, max 283.0 MB
-        "MultiJet_194270-196531_2012B_Jul13":     TaskDef("/MultiJet/local-Run2012B_13Jul2012_v1_AOD_194270_196531_pattuple_v53_1b-13eab0232030eb0def83f54eafd8085d/USER", njobsIn=2200),
+        "MultiJet_194270-196531_2012B_Jul13":     TaskDef("/MultiJet/local-Run2012B_13Jul2012_v1_AOD_194270_196531_pattuple_v53_1b-13eab0232030eb0def83f54eafd8085d/USER"),
         # 715141 events, 144 jobs
         # User mean 8308.8, min 2863.4, max 18322.6
         # Mean 159.7 MB, min 67.0 MB, max 285.3 MB
@@ -912,77 +912,77 @@ def addPattuple_v53_1(datasets):
         # 27900-37203 events, 41 jobs
         # User mean 1880.2, min 70.3, max 2354.6
         # Mean 81.3 MB, min 3.5 MB, max 89.0 MB
-        "TTToHplusBWB_M80_Summer12":              TaskDef("/TTToHplusBWB_M-80_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "TTToHplusBWB_M80_Summer12":              TaskDef("/TTToHplusBWB_M-80_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 2402.1, min 667.7, max 3310.3
         # Mean 85.3 MB, min 35.2 MB, max 93.6 MB
-        "TTToHplusBWB_M90_Summer12":              TaskDef("/TTToHplusBWB_M-90_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "TTToHplusBWB_M90_Summer12":              TaskDef("/TTToHplusBWB_M-90_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 1843.8, min 31.9, max 2950.7
         # Mean 74.6 MB, min 1.6 MB, max 81.0 MB
-        "TTToHplusBWB_M100_Summer12":             TaskDef("/TTToHplusBWB_M-100_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "TTToHplusBWB_M100_Summer12":             TaskDef("/TTToHplusBWB_M-100_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 2112.0, min 69.4, max 3256.6
         # Mean 84.0 MB, min 3.0 MB, max 91.1 MB
-        "TTToHplusBWB_M120_Summer12":             TaskDef("/TTToHplusBWB_M-120_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "TTToHplusBWB_M120_Summer12":             TaskDef("/TTToHplusBWB_M-120_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 1933.6, min 833.5, max 2879.1
         # Mean 86.7 MB, min 42.5 MB, max 93.5 MB
-        "TTToHplusBWB_M140_Summer12":             TaskDef("/TTToHplusBWB_M-140_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "TTToHplusBWB_M140_Summer12":             TaskDef("/TTToHplusBWB_M-140_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 2191.8, min 1148.9, max 3310.1
         # Mean 86.3 MB, min 46.7 MB, max 96.2 MB
-        "TTToHplusBWB_M150_Summer12":             TaskDef("/TTToHplusBWB_M-150_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "TTToHplusBWB_M150_Summer12":             TaskDef("/TTToHplusBWB_M-150_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 2310.1, min 566.4, max 3343.5
         # Mean 89.7 MB, min 29.9 MB, max 100.3 MB
-        "TTToHplusBWB_M155_Summer12":             TaskDef("/TTToHplusBWB_M-155_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40), 
+        "TTToHplusBWB_M155_Summer12":             TaskDef("/TTToHplusBWB_M-155_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"), 
         # User mean 2377.2, min 381.0, max 3628.7
         # Mean 91.1 MB, min 12.2 MB, max 101.4 MB
-        "TTToHplusBWB_M160_Summer12":             TaskDef("/TTToHplusBWB_M-160_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "TTToHplusBWB_M160_Summer12":             TaskDef("/TTToHplusBWB_M-160_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
 
         # 29908-40068 events 40 jobs
         # User mean 1864.4, min 1339.7, max 2824.3
         # Mean 78.1 MB, min 74.8 MB, max 83.1 MB
-        "TTToHplusBHminusB_M80_Summer12":         TaskDef("/TTToHplusBHminusB_M-80_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "TTToHplusBHminusB_M80_Summer12":         TaskDef("/TTToHplusBHminusB_M-80_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 2055.7, min 1398.1, max 2986.4
         # Mean 78.3 MB, min 72.4 MB, max 84.2 MB
-        "TTToHplusBHminusB_M100_Summer12":        TaskDef("/TTToHplusBHminusB_M-100_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "TTToHplusBHminusB_M100_Summer12":        TaskDef("/TTToHplusBHminusB_M-100_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 1849.9, min 261.0, max 2491.6
         # Mean 78.5 MB, min 13.0 MB, max 85.6 MB
-        "TTToHplusBHminusB_M120_Summer12":        TaskDef("/TTToHplusBHminusB_M-120_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "TTToHplusBHminusB_M120_Summer12":        TaskDef("/TTToHplusBHminusB_M-120_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 2086.1, min 1435.3, max 3003.0
         # Mean 82.8 MB, min 78.8 MB, max 87.2 M
-        "TTToHplusBHminusB_M140_Summer12":        TaskDef("/TTToHplusBHminusB_M-140_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "TTToHplusBHminusB_M140_Summer12":        TaskDef("/TTToHplusBHminusB_M-140_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 2064.8, min 563.6, max 2974.9
         # Mean 82.8 MB, min 23.4 MB, max 89.4 MB
-        "TTToHplusBHminusB_M150_Summer12":        TaskDef("/TTToHplusBHminusB_M-150_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "TTToHplusBHminusB_M150_Summer12":        TaskDef("/TTToHplusBHminusB_M-150_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 2005.8, min 1434.7, max 3196.9
         # Mean 86.4 MB, min 79.7 MB, max 91.6 MB
-        "TTToHplusBHminusB_M155_Summer12":        TaskDef("/TTToHplusBHminusB_M-155_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "TTToHplusBHminusB_M155_Summer12":        TaskDef("/TTToHplusBHminusB_M-155_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 2016.6, min 1670.6, max 2451.4
         # Mean 88.0 MB, min 83.2 MB, max 93.5 MB        
-        "TTToHplusBHminusB_M160_Summer12":        TaskDef("/TTToHplusBHminusB_M-160_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "TTToHplusBHminusB_M160_Summer12":        TaskDef("/TTToHplusBHminusB_M-160_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
 
         # 10275-17098 events 40-41 jobs
         # User mean 709.9, min 33.7, max 973.2
         # Mean 28.6 MB, min 1.6 MB, max 33.9 MB
-        "Hplus_taunu_s-channel_M80_Summer12":     TaskDef("/Hplus_taunu_s-channel_M-80_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "Hplus_taunu_s-channel_M80_Summer12":     TaskDef("/Hplus_taunu_s-channel_M-80_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # Mean 28.0 MB, min 1.6 MB, max 31.6 MB
         # User mean 672.5, min 31.9, max 856.0
-        "Hplus_taunu_s-channel_M90_Summer12":     TaskDef("/Hplus_taunu_s-channel_M-90_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "Hplus_taunu_s-channel_M90_Summer12":     TaskDef("/Hplus_taunu_s-channel_M-90_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 782.6, min 69.8, max 1038.3
         # Mean 31.7 MB, min 2.8 MB, max 36.1 MB
-        "Hplus_taunu_s-channel_M100_Summer12":    TaskDef("/Hplus_taunu_s-channel_M-100_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "Hplus_taunu_s-channel_M100_Summer12":    TaskDef("/Hplus_taunu_s-channel_M-100_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 752.7, min 87.9, max 950.5
         # Mean 29.7 MB, min 2.8 MB, max 35.7 MB
-        "Hplus_taunu_s-channel_M120_Summer12":    TaskDef("/Hplus_taunu_s-channel_M-120_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "Hplus_taunu_s-channel_M120_Summer12":    TaskDef("/Hplus_taunu_s-channel_M-120_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 966.4, min 724.2, max 1137.2
         # Mean 39.9 MB, min 36.1 MB, max 43.4 MB
-        "Hplus_taunu_s-channel_M140_Summer12":    TaskDef("/Hplus_taunu_s-channel_M-140_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "Hplus_taunu_s-channel_M140_Summer12":    TaskDef("/Hplus_taunu_s-channel_M-140_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 995.3, min 62.8, max 1188.5
         # Mean 41.5 MB, min 2.6 MB, max 45.4 MB
-        "Hplus_taunu_s-channel_M150_Summer12":    TaskDef("/Hplus_taunu_s-channel_M-150_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "Hplus_taunu_s-channel_M150_Summer12":    TaskDef("/Hplus_taunu_s-channel_M-150_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 886.9, min 63.4, max 1216.1
         # Mean 40.5 MB, min 2.8 MB, max 45.6 MB
-        "Hplus_taunu_s-channel_M155_Summer12":    TaskDef("/Hplus_taunu_s-channel_M-155_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "Hplus_taunu_s-channel_M155_Summer12":    TaskDef("/Hplus_taunu_s-channel_M-155_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # User mean 1111.6, min 885.4, max 1424.6
         # Mean 46.9 MB, min 42.2 MB, max 50.2 MB
-        "Hplus_taunu_s-channel_M160_Summer12":    TaskDef("/Hplus_taunu_s-channel_M-160_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=40),
+        "Hplus_taunu_s-channel_M160_Summer12":    TaskDef("/Hplus_taunu_s-channel_M-160_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
 
         # 53759-78988 events, 40-43 jobs
         # User mean 3247.1, min 2359.6, max 4081.3
@@ -1007,11 +1007,11 @@ def addPattuple_v53_1(datasets):
         # 114 events, 23 jobs
         # User mean 1073.6, min 35.1, max 1520.2
         # Mean 6.0 MB, min 1.7 MB, max 7.2 MB
-        "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDef("/QCD_Pt-30to50_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=20),
+        "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDef("/QCD_Pt-30to50_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # 2749 events, 22 jobs
         # User mean 1422.9, min 244.0, max 2176.0
         # Mean 19.2 MB, min 4.7 MB, max 22.1 MB
-        "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDef("/QCD_Pt-50to80_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=20),
+        "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDef("/QCD_Pt-50to80_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # 21951 events, 21 jobs
         # User mean 4850.8, min 1613.3, max 6008.9
         # Mean 104.5 MB, min 32.8 MB, max 115.7 MB
@@ -1023,23 +1023,23 @@ def addPattuple_v53_1(datasets):
         # 232796 events, 82 jobs
         # User mean 8065.4, min 373.4, max 12142.1
         # Mean 280.1 MB, min 15.0 MB, max 298.4 MB
-        "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDef("/QCD_Pt-170to300_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=80),
+        "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDef("/QCD_Pt-170to300_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # 797355 events, 305 jobs
         # User mean 6733.4, min 737.7, max 17064.5
         # Mean 258.6 MB, min 27.0 MB, max 276.6 MB
-        "QCD_Pt170to300_TuneZ2star_v2_Summer12":  TaskDef("/QCD_Pt-170to300_TuneZ2star_8TeV_pythia6_v2/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=300),
+        "QCD_Pt170to300_TuneZ2star_v2_Summer12":  TaskDef("/QCD_Pt-170to300_TuneZ2star_8TeV_pythia6_v2/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # 616204 events, 251 jobs
         # User mean 5354.8, min 1467.4, max 8339.4
         # Mean 258.3 MB, min 85.4 MB, max 272.3 MB
-        "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDef("/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_pattuple_v53_1b-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=250),
+        "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDef("/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_pattuple_v53_1b-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # 359260 events, 151 jobs
         # User mean 5180.3, min 948.1, max 7609.2
         # Mean 250.5 MB, min 58.2 MB, max 265.4 MB
-        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDef("/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6_v2/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=150),
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDef("/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6_v2/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # 2045846 events, 854 jobs
         # User mean 5627.8, min 252.5, max 21303.3
         # Mean 252.4 MB, min 19.4 MB, max 269.9 MB
-        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDef("/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6_v3/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=850),
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDef("/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6_v3/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
 
         # 288671 events, 152 jobs
         # User mean 5456.2, min 173.2, max 7120.2
@@ -1060,15 +1060,15 @@ def addPattuple_v53_1(datasets):
         # 94009 events, 103 jobs
         # User mean 2322.5, min 831.9, max 4019.9
         # Mean 81.3 MB, min 32.6 MB, max 88.8 MB
-        "WJets_TuneZ2star_v1_Summer12":           TaskDef("/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=100),
+        "WJets_TuneZ2star_v1_Summer12":           TaskDef("/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # 285149 events, 257 jobs
         # User mean 3017.1, min 231.8, max 5345.6
         # Mean 99.3 MB, min 6.2 MB, max 110.6 MB
-        "WJets_TuneZ2star_v2_Summer12":           TaskDef("/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=250),
+        "WJets_TuneZ2star_v2_Summer12":           TaskDef("/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/local-Summer12_DR53X_PU_S10_START53_V7A_v2_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # 203841 events, 154 jobs
         # User mean 2991.6, min 97.7, max 3952.6
         # Mean 107.9 MB, min 5.8 MB, max 117.0 MB
-        "W1Jets_TuneZ2star_Summer12":             TaskDef("/W1JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=150),
+        "W1Jets_TuneZ2star_Summer12":             TaskDef("/W1JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # 752423 events, 407 jobs
         # User mean 3997.5, min 173.9, max 6244.6
         # Mean 153.1 MB, min 7.2 MB, max 168.7 MB
@@ -1076,7 +1076,7 @@ def addPattuple_v53_1(datasets):
         # 616480 events, 494 jobs
         # User mean 2729.3, min 146.2, max 4887.5
         # Mean 114.8 MB, min 6.9 MB, max 125.0 MB
-        "W3Jets_TuneZ2star_Summer12":             TaskDef("/W3JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=490),
+        "W3Jets_TuneZ2star_Summer12":             TaskDef("/W3JetsToLNu_TuneZ2Star_8TeV-madgraph/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # 1002056 events, 551 jobs
         # User mean 4245.6, min 1247.0, max 6472.4
         # Mean 178.0 MB, min 76.2 MB, max 194.2 MB
@@ -1084,7 +1084,7 @@ def addPattuple_v53_1(datasets):
         # 180247 events, 354 jobs
         # User mean 1396.3, min 225.2, max 2209.5
         # Mean 52.3 MB, min 8.6 MB, max 59.7 MB
-        "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDef("/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=350),
+        "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDef("/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # 4476 events, 52 jobs
         # User mean 3143.5, min 53.1, max 7003.0
         # Mean 21.3 MB, min 1.7 MB, max 29.6 MB
@@ -1092,7 +1092,7 @@ def addPattuple_v53_1(datasets):
         # 222877 events, 51 jobs
         # User mean 9109.8, min 4861.2, max 12412.2
         # Mean 395.6 MB, min 161.4 MB, max 414.6 MB
-        "T_t-channel_TuneZ2star_Summer12":        TaskDef("/T_t-channel_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=50),
+        "T_t-channel_TuneZ2star_Summer12":        TaskDef("/T_t-channel_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # 27667 events, 51 jobs
         # User mean 5100.9, min 39.9, max 6981.7
         # Mean 191.4 MB, min 1.6 MB, max 206.7 MB
@@ -1100,11 +1100,11 @@ def addPattuple_v53_1(datasets):
         # 61356 events, 
         # User mean 7621.3, min 101.0, max 10203.7
         # Mean 285.5 MB, min 2.8 MB, max 311.0 MB
-        "T_tW-channel_TuneZ2star_Summer12":       TaskDef("/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=20),
+        "T_tW-channel_TuneZ2star_Summer12":       TaskDef("/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # 60272 events, 22 jobs
         # User mean 8464.9, min 309.9, max 12849.3
         # Mean 268.7 MB, min 12.9 MB, max 303.4 MB
-        "Tbar_tW-channel_TuneZ2star_Summer12":    TaskDef("/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=20),
+        "Tbar_tW-channel_TuneZ2star_Summer12":    TaskDef("/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         # 11203 events, 11 jobs
         # User mean 3459.9, min 56.5, max 4188.3
         # Mean 102.3 MB, min 1.6 MB, max 115.7 MB
@@ -1112,7 +1112,7 @@ def addPattuple_v53_1(datasets):
         # 5345 events, 11 jobs
         # User mean 1592.8, min 41.1, max 2063.5
         # Mean 52.0 MB, min 1.6 MB, max 59.9 MB
-        "Tbar_s-channel_TuneZ2star_Summer12":     TaskDef("/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER", njobsIn=10),
+        "Tbar_s-channel_TuneZ2star_Summer12":     TaskDef("/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1-cad8d1056ca20d363262a3efa1d97a74/USER"),
         }
 
     quadPFJetBTagTriggers = {
