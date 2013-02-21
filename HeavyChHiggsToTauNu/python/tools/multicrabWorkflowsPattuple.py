@@ -1191,8 +1191,14 @@ def addPattuple_v53_2_test1(datasets):
         # User mean 2905.2, min 890.5, max 8800.0
         # Mean 63.9 MB, min 32.9 MB, max 137.7 MB
         "Tau_198022-198523_2012C_Aug24":          TaskDef("/Tau/local-Run2012C_24Aug2012_v1_AOD_pattuple_v53_2_198022_198523_test1-63ff13540867be423a0bd89ddcd239a1/USER"),
-        "MultiJet_198022-198523_2012C_Aug24":     TaskDef(""),
-        "BJetPlusX_193834-194225_2012B_Jul13":    TaskDef(""),
+        # 697510 events, 144 files
+        # User mean 8802.5, min 2592.2, max 21963.7
+        # Mean 151.7 MB, min 64.1 MB, max 268.8 MB
+        "MultiJet_198022-198523_2012C_Aug24":     TaskDef("/MultiJet/local-Run2012C_24Aug2012_v1_AOD_pattuple_v53_2_198022_198523_test1-389fad6151d6b75810dbdb3bf32c8d9d/USER"),
+        # 1410641 events, 231 jobs
+        # User mean 7468.0, min 495.3, max 25221.8
+        # Sys mean 67.8, min 8.4, max 308.3
+        "BJetPlusX_193834-194225_2012B_Jul13":    TaskDef("/BJetPlusX/local-Run2012B_13Jul2012_v1_AOD_pattuple_v53_2_193834_194225_test1-7015323d816155eb71c1e8ab78d8837b/USER"),
         "BJetPlusX_198022-198523_2012C_Aug24":    TaskDef(""),
         # 32322 events, 26 jobs
         # User mean 2502.9, min 55.3, max 3725.0
