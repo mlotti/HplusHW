@@ -1187,11 +1187,17 @@ def addPattuple_v53_1_2(datasets):
 # Add v53_2_test1 pattuples
 def addPattuple_v53_2_test1(datasets):
     definitions = {
-        "Tau_198022-198523_2012C_Aug24":          TaskDef(""),
+        # 258977 events, 123 jobs
+        # User mean 2905.2, min 890.5, max 8800.0
+        # Mean 63.9 MB, min 32.9 MB, max 137.7 MB
+        "Tau_198022-198523_2012C_Aug24":          TaskDef("/Tau/local-Run2012C_24Aug2012_v1_AOD_pattuple_v53_2_198022_198523_test1-63ff13540867be423a0bd89ddcd239a1/USER"),
         "MultiJet_198022-198523_2012C_Aug24":     TaskDef(""),
         "BJetPlusX_193834-194225_2012B_Jul13":    TaskDef(""),
         "BJetPlusX_198022-198523_2012C_Aug24":    TaskDef(""),
-        "TTToHplusBWB_M120_Summer12":             TaskDef(""),
+        # 32322 events, 26 jobs
+        # User mean 2502.9, min 55.3, max 3725.0
+        # Mean 125.7 MB, min 3.1 MB, max 140.0 MB
+        "TTToHplusBWB_M120_Summer12":             TaskDef("/TTToHplusBWB_M-120_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_2_test1-f3f6db3988d554ca655ef290b2e69c3e/USER"),
         }
 
     addPattuple_53X("v53_2_test1", datasets, definitions)
