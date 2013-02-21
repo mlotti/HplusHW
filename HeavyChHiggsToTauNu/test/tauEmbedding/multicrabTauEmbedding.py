@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import re
 from optparse import OptionParser
 
@@ -196,8 +197,13 @@ def main():
 def createTasks(opts, step, version=None):
     # Pick crab.cfg
     crabcfg = "crab.cfg"
+    crabcfgtemplate = None
+    scheduler = "arc"
     if step in ["analysis", "analysisTau", "signalAnalysis", "signalAnalysisGenTau", "muonAnalysis", "caloMetEfficiency","EWKMatching", "ewkBackgroundCoverageAnalysis"]:
-        crabcfg = "../crab_analysis.cfg"
+        crabcfg = None
+        if "lxplus" in os.environ["HOST"]:
+            scheduler = "remoteGlidein"
+        crabcfgtemplate = crabCfgTemplate(scheduler=scheduler, return_data=True)
 
     # Setup directory naming
     dirName = ""
@@ -206,7 +212,7 @@ def createTasks(opts, step, version=None):
     dirName += opts.midfix
 
     # Create multicrab
-    multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
+    multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..", crabConfigTemplate=crabcfgtemplate)
 
 
     # Select the datasets based on the processing step and data era
@@ -230,7 +236,8 @@ def createTasks(opts, step, version=None):
 
     multicrab.extendDatasets(workflow, datasets)
 
-    multicrab.appendLineAll("GRID.maxtarballsize = 30")
+    if scheduler == "arc":
+        multicrab.appendLineAll("GRID.maxtarballsize = 30")
 #    if not step in ["skim", "analysisTau"]:
 #        multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
     if step in ["ewkBackgroundCoverageAnalysis"]:
@@ -251,12 +258,11 @@ def createTasks(opts, step, version=None):
 
     # Create multicrab task(s)
     prefix = "multicrab_"+step+dirName
-    taskDirs = multicrab.createTasks(configOnly = opts.configOnly, prefix=prefix, over500JobsMode=Multicrab.SPLIT)
+    taskDirs = multicrab.createTasks(configOnly = opts.configOnly, prefix=prefix)
         
     # patch CMSSW.sh
     if not opts.configOnly and step in ["skim", "embedding"]:
         import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
-        import os
         for td, dsets in taskDirs:
             os.chdir(td)
             patch.main(Wrapper(dirs=dsets, input={"skim": "skim",
