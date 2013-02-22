@@ -4,6 +4,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
@@ -208,6 +209,17 @@ namespace HPlus {
 
   JetSelection::~JetSelection() {}
 
+  JetSelection::Data JetSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices) {
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup, edm::Ptr<pat::Tau>(), nVertices);
+  }
+
   JetSelection::Data JetSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr< reco::Candidate >& tau, int nVertices) {
     ensureSilentAnalyzeAllowed(iEvent);
 
@@ -221,6 +233,8 @@ namespace HPlus {
 
   JetSelection::Data JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr< reco::Candidate >& tau, int nVertices) {
     ensureAnalyzeAllowed(iEvent);
+    if (tau.isNull())
+      throw cms::Exception("LogicError") << "JetSelection::analyze was called with tau == zero pointer. Make sure a tau is found before calling JetSelection::analyze()" << std::endl;
     return privateAnalyze(iEvent, iSetup, tau, nVertices);
   }
 
@@ -321,18 +335,20 @@ namespace HPlus {
       }
 
       // remove jets too close to tau jet
-      hDeltaRJetTau->Fill(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()));
-      bool match = false;
-      if(!(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()) > fMaxDR)) {
-        match = true;
-        output.fDeltaPtJetTau = iJet->pt()- (tau)->pt();
-        hDeltaPtJetTau->Fill(iJet->pt()- (tau)->pt());
-      }
-      if(match) {
-        if (iJet->pt() > fPtCut && (std::abs(iJet->eta()) < fEtaCut)) {
-          plotExcludedJetHistograms(iJet, iEvent.isRealData());
+      if (tau.isNonnull()) {
+        hDeltaRJetTau->Fill(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()));
+        bool match = false;
+        if(!(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()) > fMaxDR)) {
+          match = true;
+          output.fDeltaPtJetTau = iJet->pt()- (tau)->pt();
+          hDeltaPtJetTau->Fill(iJet->pt()- (tau)->pt());
         }
-        continue;
+        if(match) {
+          if (iJet->pt() > fPtCut && (std::abs(iJet->eta()) < fEtaCut)) {
+            plotExcludedJetHistograms(iJet, iEvent.isRealData());
+          }
+          continue;
+        }
       }
       increment(fCleanCutSubCount);
       ++cleanPassed;
@@ -362,8 +378,10 @@ namespace HPlus {
       plotSelectedJetHistograms(iJet, iEvent.isRealData());
 
       // Min DeltaR reversed to tau
-      math::XYZTLorentzVectorD myReversedTau = -tau->p4();
-      //     math::XYZTLorentzVectorD myReversedTau = -tau.p4();
+      math::XYZTLorentzVectorD myReversedTau;
+      if (tau.isNonnull()) {
+        myReversedTau = -tau->p4();
+      }
       double myDeltaR = ROOT::Math::VectorUtil::DeltaR(myReversedTau, iJet->p4());
       if (myDeltaR < output.fMinDeltaRToOppositeDirectionOfTau)
         output.fMinDeltaRToOppositeDirectionOfTau = myDeltaR;
@@ -462,7 +480,8 @@ namespace HPlus {
     output.fEtaSpreadOfSelectedJets = myMaxEta - myMinEta;
     if (myMegaJet.pz() > 0.0) {
       output.fAverageEtaOfSelectedJets = myMegaJet.eta();
-      output.fAverageSelectedJetsEtaDistanceToTauEta = std::abs(myMegaJet.eta() - tau->eta());
+      if (tau.isNonnull())
+        output.fAverageSelectedJetsEtaDistanceToTauEta = std::abs(myMegaJet.eta() - tau->eta());
     }
 
     // Analyze reference jet of selected tau
@@ -523,9 +542,18 @@ namespace HPlus {
   }
 
   void JetSelection::obtainReferenceJetToTau(const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::Candidate>& tau, JetSelection::Data& output) {
+    if (tau.isNull()) {
+      increment(fJetToTauReferenceJetNotIdentifiedCount);
+      return;
+    }
+    const pat::Tau *tauObject = dynamic_cast<const pat::Tau *>(tau.get());
+    if (!tauObject) {
+      increment(fJetToTauReferenceJetNotIdentifiedCount);
+      return;
+    }
     double myMinDeltaR = 999.;
     for (edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
-      double myDeltaR = reco::deltaR(*tau, **iter);
+      double myDeltaR = reco::deltaR(tauObject->p4Jet(), **iter);
       if (myDeltaR < myMinDeltaR) {
         myMinDeltaR = myDeltaR;
         if (myDeltaR < 0.1) {
@@ -574,8 +602,10 @@ namespace HPlus {
       }
       ++njets;
     }
-    output.fDeltaPhiMHTTau = reco::deltaPhi(output.fMHT, *tau) * 57.3;
-    hDeltaPhiMHTTau->Fill(output.fDeltaPhiMHTTau);
+    if (tau.isNonnull()) {
+      output.fDeltaPhiMHTTau = reco::deltaPhi(output.fMHT, *tau) * 57.3;
+      hDeltaPhiMHTTau->Fill(output.fDeltaPhiMHTTau);
+    }
   }
 
   void JetSelection::plotSelectedJetHistograms(const edm::Ptr<pat::Jet>& jet, const bool isRealData) {
