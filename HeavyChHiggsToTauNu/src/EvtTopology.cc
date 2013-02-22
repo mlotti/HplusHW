@@ -111,8 +111,7 @@ namespace{
       }
     } ///eof:  for ( unsigned l=0; l < iNJets; l++ ) {
     
-    /// Determine in which of the two pseudo-jets the tau-jet is found. Start with PseudoJetA.
-    // for(unsigned i = 0; i < vJetsInPseudoJetA.size(); i++){
+    /// Determine in which of the two pseudo-jets the tau-jet is found; Start with PseudoJetA.
     for (vector<TLorentzVector>::const_iterator iJet = vJetsInPseudoJetA.begin(); iJet != vJetsInPseudoJetA.end(); ++iJet) {
 
       float fDeltaR = reco::deltaR( tau.eta(), tau.phi(), (*iJet).Eta(), (*iJet).Phi() ); 
@@ -124,19 +123,21 @@ namespace{
       }
     }
 
-    if(bTauJetInGroupA=0){
-      /// Determine in which of the two pseudo-jets the tau-jet is found; Continue with PseudoJetB.
-      for (vector<TLorentzVector>::const_iterator iJet = vJetsInPseudoJetB.begin(); iJet != vJetsInPseudoJetB.end(); ++iJet) {
-
-	float fDeltaR = reco::deltaR( tau.eta(), tau.phi(), (*iJet).Eta(), (*iJet).Phi() );
-	if( fabs(fDeltaR) < 0.1 ){
-	  bTauJetInGroupB = 1;
-	  break;
-	}
+    /// Determine in which of the two pseudo-jets the tau-jet is found; Continue with PseudoJetB.
+    for (vector<TLorentzVector>::const_iterator iJet = vJetsInPseudoJetB.begin(); iJet != vJetsInPseudoJetB.end(); ++iJet) {
+      
+      float fDeltaR = reco::deltaR( tau.eta(), tau.phi(), (*iJet).Eta(), (*iJet).Phi() );
+      if( fabs(fDeltaR) < 0.1 ){
+	bTauJetInGroupB = 1;
+	break;
       }
     }
-
-    if(bTauJetInGroupA*bTauJetInGroupB==0) return vEmpty;
+    
+    
+    /// In case the pseudo-jet with the tau is not found or found twice return an empty vector
+    if ( (bTauJetInGroupA==1 && bTauJetInGroupB==1) || (bTauJetInGroupA==0 && bTauJetInGroupB==0) ){
+      return vEmpty;
+    }
 
     if(bTauJetInGroupA){
       // std::cout << "Tau-jet found in Pseudo-Jet A" << std::endl;

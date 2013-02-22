@@ -265,6 +265,10 @@ def setHplusCrossSectionsToTop(datasets):
 # \param tanbeta   tanbeta parameter
 # \param mu        mu parameter
 def setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=defaultMu):
+    import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
+    histograms.createSignalText.set(tanbeta=tanbeta)
+    if mu != defaultMu:
+        histograms.createSignalText.set(mu=mu)
     _setHplusCrossSections(datasets,
                            lambda mass, energy: whTauNuCrossSectionMSSM(mass, tanbeta, mu, energy),
                            lambda mass, energy: hhTauNuCrossSectionMSSM(mass, tanbeta, mu, energy))
@@ -275,6 +279,8 @@ def setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=defaultMu):
 # \param br_tH      BR(t -> b H+)
 # \param br_Htaunu  BR(H+ -> tau nu)
 def setHplusCrossSectionsToBR(datasets, br_tH, br_Htaunu):
+    import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
+    histograms.createSignalText.set(br_tH=br_tH)
     _setHplusCrossSections(datasets,
                            lambda mass, energy: whTauNuCrossSection(br_tH, br_Htaunu, energy),
                            lambda mass, energy: hhTauNuCrossSection(br_tH, br_Htaunu, energy))
