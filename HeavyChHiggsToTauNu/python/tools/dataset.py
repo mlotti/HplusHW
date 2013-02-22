@@ -1414,6 +1414,10 @@ class AnalysisNotFoundException(Exception):
     def __init__(self, message):
         Exception.__init__(self, message)
 
+class HistogramNotFoundException(Exception):
+    def __init__(self, message):
+        Exception.__init__(self, message)
+
 ## Dataset class for histogram access from one ROOT file.
 # 
 # The default values for cross section/luminosity are read from
@@ -1552,23 +1556,23 @@ class Dataset:
         # below it is important to use '==' instead of 'is',
         # because null TObject == None, but is not None
         if h == None:
-            raise Exception("Unable to find histogram '%s' (requested '%s') from file '%s'" % (realName, name, self.file.GetName()))
+            raise HistogramNotFoundException("Unable to find histogram '%s' (requested '%s') from file '%s'" % (realName, name, self.file.GetName()))
 
         return (h, realName)
 
     ## Read counters
     def _readCounters(self):
         self.counterDir = self._unweightedCounterDir
-        (d, realDir) = self._getRootHisto(self.counterDir)
-        if d == None:
-            msg = "Could not find counter directory %s from file %s." % (realDir, self.file.GetName())
-            raise Exception(msg)
+        try:
+            (d, realDir) = self._getRootHisto(self.counterDir)
+        except HistogramNotFoundException, e:
+            raise Exception("Could not find counter histogram, message: %s" % str(e))
         if d.Get("counter") != None:
             ctr = _histoToCounter(d.Get("counter"))
             self.nAllEventsUnweighted = ctr[0][1].value() # first counter, second element of the tuple
         else:
             if not self._weightedCounters:
-                raise Exception("Could not find counter histogram in directory %s from file %s" % (self.counterDir, self.file.GetName()))
+                raise Exception("Could not find counter histogram in directory %s from file %s" % (realDir, self.file.GetName()))
             self.nAllEventsUnweighted = -1
         self.nAllEventsWeighted = None
 
@@ -1576,10 +1580,10 @@ class Dataset:
 
         if self._weightedCounters:
             self.counterDir = self._weightedCounterDir
-            (d, realDir) = self._getRootHisto(self.counterDir)
-            if d == None:
-                msg = "Could not find counter directory %s from file %s" % (realDir, self.file.GetName())
-                raise Exception(msg)
+            try:
+                (d, realDir) = self._getRootHisto(self.counterDir)
+            except HistogramNotFoundException, e:
+                raise Exception("Could not find counter directory, message: %s" % str(e))
             h = d.Get("counter")
             if h == None:
                 msg = "No TH1 'counter' in directory '%s' of ROOT file '%s'" % (realDir, self.file.GetName())
@@ -1715,14 +1719,11 @@ class Dataset:
     def hasRootHisto(self, name):
         if hasattr(name, "draw"):
             return True
-        pname = name
-        #return self._getRootHisto(pname)[0] != None
-        # Hack, self._getRootHisto would throw exception for zero pointer
-        if pname[0] == '/':
-            realName = pname[1:]
-        else:
-            realName = self._analysisDirectoryName + pname
-        return self.file.Get(realName) != None
+
+        try:
+            return self._getRootHisto(name)[0] != None
+        except HistogramNotFoundException:
+            return False
 
     ## Get the dataset.DatasetRootHisto object for a named histogram.
     # 

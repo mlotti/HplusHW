@@ -83,6 +83,7 @@ def main():
     xsect.setHplusCrossSectionsToBR(datasets, br_tH=lightHplusTopBR, br_Htaunu=1)
     # Example how to set cross section to a specific MSSM point
     #xsect.setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=200)
+    histograms.createSignalText.set(mass=lightHplusMassPoint)
 
     # Merge signals into one dataset (per mass point)
     plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section
@@ -109,14 +110,14 @@ drawPlot = plots.PlotDrawer(log=True, addLuminosityText=True, stackMCHistograms=
 
 # Define plots to draw
 def doPlots(datasets):
-    def createPlot(name, massbr_x=0.42, massbr_y=0.87, normone_x=0.25, normone_y=0.5, **kwargs):
+    def createPlot(name, massbr_x=0.42, massbr_y=0.9, normone_x=0.25, normone_y=0.5, **kwargs):
         args = {}
         args.update(kwargs)
         if mcOnly:
             args["normalizeToLumi"] = mcOnlyLumi
 
         p = plots.DataMCPlot(datasets, name, **args)
-        addMassBRText(p, massbr_x, massbr_y)
+        p.appendPlotObject(histograms.createSignalText(xmin=massbr_x, ymax=massbr_y))
         if kwargs.get("normalizeToOne", False):
             p.appendPlotObject(histograms.PlotText(normone_x, normone_y, "Normalized to unit area", size=17))
         return p
@@ -131,20 +132,10 @@ def doPlots(datasets):
     drawPlot(createPlot("Met"), "Met", xlabel="Type-I corrected PF E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV", rebinToWidthX=20, opts={"ymaxfactor": 10}, opts2={"ymin": 0, "ymax": 2}, cutLine=60)
 
     # Normalizing to unit area
-    drawPlot(createPlot("Vertices/verticesTriggeredAfterWeight", normalizeToOne=True, massbr_x=0.65, massbr_y=0.5, normone_x=0.62, normone_y=0.4),
+    drawPlot(createPlot("Vertices/verticesTriggeredAfterWeight", normalizeToOne=True, massbr_x=0.65, massbr_y=0.6, normone_x=0.62, normone_y=0.4),
              "verticesAfterWeightTriggered", xlabel="Number of reconstructed vertices", ylabel="Events", log=False, opts={"xmax": 20}, addLuminosityText=False)
 
-# Helper function to add mHplus and BR    
-def addMassBRText(plot, x, y):
-    size = 20
-    separation = 0.04
-
-    massText = "m_{H^{+}} = %d GeV/c^{2}" % lightHplusMassPoint
-    brText = "#it{B}(t #rightarrow bH^{+})=%.2f" % lightHplusTopBR
-
-    plot.appendPlotObject(histograms.PlotText(x, y, massText, size=size))
-    plot.appendPlotObject(histograms.PlotText(x, y-separation, brText, size=size))
-    
+   
 # Call the main function if the script is executed (i.e. not imported)
 if __name__ == "__main__":
     main()
