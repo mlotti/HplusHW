@@ -178,24 +178,36 @@ class PlotTextBox:
     ## Constructor
     #
     # \param xmin       X min coordinate of the box (NDC)
-    # \param ymin       Y min coordinate of the box (NDC)
+    # \param ymin       Y min coordinate of the box (NDC) (if None, deduced automatically)
     # \param xmax       X max coordinate of the box (NDC)
     # \param ymax       Y max coordinate of the box (NDC)
+    # \param lineheight Line height
     # \param fillColor  Fill color of the box
     # \param transparent  Should the box be transparent? (in practive the TPave is not created)
-    def __init__(self, xmin, ymin, xmax, ymax, fillColor=ROOT.kWhite, transparent=True):
+    # \param kwargs       Forwarded to histograms.PlotText.__init__()
+    def __init__(self, xmin, ymin, xmax, ymax, lineheight=0.04, fillColor=ROOT.kWhite, transparent=True, **kwargs):
         # ROOT.TPave Set/GetX1NDC() etc don't seem to work as expected.
         self.xmin = xmin
         self.xmax = xmax
         self.ymin = ymin
         self.ymax = ymax
+        self.lineheight = lineheight
         self.fillColor = fillColor
         self.transparent = transparent
         self.texts = []
+        self.textArgs = {}
+        self.textArgs.update(kwargs)
+
+        self.currenty = ymax
+
+    ## Add text to current position
+    def addText(self, text):
+        self.currenty -= self.lineheight
+        self.addPlotObject(PlotText(self.xmin+0.01, self.currenty, text, **self.textArgs))
 
     ## Add PlotText object
-    def addText(self, text):
-        self.texts.append(text)
+    def addPlotObject(self, obj):
+        self.texts.append(obj)
 
     ## Move the box and the contained text objects
     #
@@ -209,11 +221,13 @@ class PlotTextBox:
     def move(self, dx=0, dy=0, dw=0, dh=0):
         self.xmin += dx
         self.xmax += dx
-        self.ymin += dy
+        if self.ymin is not None:
+            self.ymin += dy
         self.ymax += dy
 
         self.xmax += dw
-        self.ymin -= dh
+        if self.ymin is not None:
+            self.ymin -= dh
 
         for t in self.texts:
             t.x += dx
@@ -224,6 +238,9 @@ class PlotTextBox:
     # \param options  Forwarded to ROOT.TPave.Draw(), and the Draw() of the contained objects
     def Draw(self, options=""):
         if not self.transparent:
+            ymin = self.ymin
+            if ymin is None:
+                ymin = self.currenty - 0.01
             self.pave = ROOT.TPave(self.xmin, self.ymin, self.xmax, self.ymax, 0, "NDC")
             self.pave.SetFillColor(self.fillColor)
             self.pave.Draw(options)
@@ -316,10 +333,7 @@ class SignalTextCreator:
         lineheight = self.settings.get("lineheight", kwargs)
         width = self.settings.get("width", kwargs)
 
-        x = xmin + 0.01
-        y = ymax
-
-        texts = []
+        box = PlotTextBox(xmin, None, xmin+width, ymax, lineheight=lineheight, size=size, **self.boxArgs)
 
         for attr, text in [
             ("mass", "m_{H^{+}}=%d GeV/c^{2}"),
@@ -331,14 +345,7 @@ class SignalTextCreator:
 
             value = self.settings.get(attr, kwargs)
             if value is not None:
-                y -= lineheight
-                texts.append(PlotText(x, y, text % value, size=size))
-
-        y -= 0.01
-
-        box = PlotTextBox(xmin, y, xmin+width, ymax, **self.boxArgs)
-        for t in texts:
-            box.addText(t)
+                box.addText(text % value)
 
         return box
 
