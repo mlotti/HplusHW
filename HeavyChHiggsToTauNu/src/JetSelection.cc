@@ -316,6 +316,9 @@ namespace HPlus {
 
       // Jet identification and beta cuts done, store jet to list of all jets
       output.fAllIdentifiedJets.push_back(iJet);
+      if (iJet->pt() > fPtCut && (std::abs(iJet->eta()) < fEtaCut)) {
+        output.fSelectedJetsIncludingTau.push_back(iJet);
+      }
 
       // remove jets too close to tau jet
       hDeltaRJetTau->Fill(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()));
