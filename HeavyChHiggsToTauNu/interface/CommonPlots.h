@@ -87,6 +87,7 @@ namespace HPlus {
     WrappedTH1* hSelectedMuons;
     WrappedTH1* hNjets;
     WrappedTH1* hNjetsAllIdentified;
+    WrappedTH1* hMETRaw;
     WrappedTH1* hMET;
     WrappedTH1* hMETphi;
     WrappedTH1* hNbjets;

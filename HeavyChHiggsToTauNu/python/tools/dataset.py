@@ -176,7 +176,7 @@ def readFromMulticrabCfg(**kwargs):
 # \see readFromCrabDirs()
 def getDatasetsFromCrabDirs(taskdirs, **kwargs):
     _args = copy.copy(kwargs)
-    for argname in ["namePostfix"]:
+    for argName in ["namePostfix"]:
         try:
             del _args[argName]
         except KeyError:
@@ -1716,7 +1716,13 @@ class Dataset:
         if hasattr(name, "draw"):
             return True
         pname = name
-        return self._getRootHisto(pname)[0] != None
+        #return self._getRootHisto(pname)[0] != None
+        # Hack, self._getRootHisto would throw exception for zero pointer
+        if pname[0] == '/':
+            realName = pname[1:]
+        else:
+            realName = self._analysisDirectoryName + pname
+        return self.file.Get(realName) != None
 
     ## Get the dataset.DatasetRootHisto object for a named histogram.
     # 
