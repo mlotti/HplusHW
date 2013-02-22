@@ -410,7 +410,7 @@ namespace HPlus {
       // Obtain btagging data
       BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
       // Obtain alphaT
-      EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauCandidateData.getSelectedTau()), jetData.getSelectedJets());
+      EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauCandidateData.getSelectedTau()), jetData.getSelectedJetsIncludingTau());
       // Top reconstruction in different versions
       TopSelection::Data topSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
       BjetSelection::Data bjetSelectionData = fBjetSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets(), tauCandidateData.getSelectedTau(), metData.getSelectedMET());
