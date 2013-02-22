@@ -198,31 +198,30 @@ if addSignalAnalysis:
     addModule(module)
 
     # Add sequence for exactly one gen tau
+    mod = module.clone()
     process.oneGenTau40Sequence = cms.Sequence()
     oneGenTau40Counters = preselectionCounters[:]
-    oneGenTau40Counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.oneGenTau40Sequence, param, pileupWeight=puWeightNames[-1],
+    oneGenTau40Counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.oneGenTau40Sequence, mod, pileupWeight=puWeightNames[-1],
                                                                                        prefix="embeddingLikePresectionOneGenTau40", maxGenTaus=1))
-    mod = module.clone()
     mod.eventCounter.counters = [cms.InputTag(c) for c in oneGenTau40Counters]
     addModule(mod, "OneGenTau40", process.oneGenTau40Sequence)
 
     # Add sequence for generator tau pt>41 selection
+    mod = module.clone()
     process.genTau41Sequence = cms.Sequence()
     genTau41Counters = preselectionCounters[:]
     tauEmbeddingCustomisations.generatorTauPt = 41
-    genTau41Counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.genTau41Sequence, param, pileupWeight=puWeightNames[-1],
+    genTau41Counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.genTau41Sequence, mod, pileupWeight=puWeightNames[-1],
                                                                                     prefix="embeddingLikePreselectionGenTau41"))
-
-    mod = module.clone()
     mod.eventCounter.counters = [cms.InputTag(c) for c in genTau41Counters]
     addModule(mod, "GenTau41", process.genTau41Sequence)
 
     # Add sequence for exactly one generator tau pt>41 selection
+    mod = module.clone()
     process.oneGenTau41Sequence = cms.Sequence()
     oneGenTau41Counters = preselectionCounters[:]
-    oneGenTau41Counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.oneGenTau41Sequence, param, pileupWeight=puWeightNames[-1],
+    oneGenTau41Counters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.oneGenTau41Sequence, mod, pileupWeight=puWeightNames[-1],
                                                                                        prefix="embeddingLikePreselectionOneGenTau41", maxGenTaus=1))
-    mod = module.clone()
     mod.eventCounter.counters = [cms.InputTag(c) for c in oneGenTau41Counters]
     addModule(mod, "OneGenTau41", process.oneGenTau41Sequence)
 
