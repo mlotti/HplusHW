@@ -309,7 +309,7 @@ namespace HPlus {
 
   const edm::Ptr<pat::Tau> TauSelection::Data::getSelectedTau() const {
     if (!fPassedEvent)
-      throw cms::Exception("Assert") << "TauSelection::Data::getSelectedTau() was called even though TauSelection::Data::passedEvent() is false. Please add to your code requirement that passedEvent is true before asking for getSelectedTau!";
+      throw cms::Exception("Assert") << "TauSelection::Data::getSelectedTau() was called even though TauSelection::Data::passedEvent() is false. Please add to your code requirement that passedEvent is true before asking for getSelectedTau!" << __FILE__ << ":" << __LINE__;
     return fSelectedTau;
   }
 
