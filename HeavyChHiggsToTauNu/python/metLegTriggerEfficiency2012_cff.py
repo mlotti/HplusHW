@@ -35,6 +35,7 @@ metLegEfficiency = cms.untracked.PSet(
             lastRun = cms.uint32(208686),
             luminosity = cms.double(19296), # 1/pb
             bins = cms.VPSet(
+                triggerBin(0.0, 0.0, 0.0), # hack to suppress MET 0-5
                 triggerBin(5.0, 0.00553111250786, 0.000831537337386),
                 triggerBin(20.0, 0.0071012381646, 0.00113306352584),
                 triggerBin(30.0, 0.00959097320169, 0.00163693152987),
@@ -53,6 +54,7 @@ metLegEfficiency = cms.untracked.PSet(
     mcParameters = cms.PSet(
         Summer12_PU_2012ABCD = cms.PSet(
             bins = cms.VPSet(
+                triggerBin(0.0, 1.0, 0.0), # hack to suppress MET 0-5
                 triggerBin(5.0, 0.0202739477504, 0.000949154453197),
                 triggerBin(20.0, 0.0294101948225, 0.00123435467047),
                 triggerBin(30.0, 0.0442361650051, 0.00158870646195),
