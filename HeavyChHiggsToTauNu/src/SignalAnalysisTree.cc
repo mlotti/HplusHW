@@ -88,6 +88,7 @@ namespace HPlus {
      
     fTree->Branch("jets_p4", &fJets);
     fTree->Branch("allIdentifiedJets_p4", &fAllIdentifiedJets);
+    fTree->Branch("selJetsInclTau_p4", &fSelJetsInclTau);
     fTree->Branch("jets_btag", &fJetsBtags);
     if(fFillJetEnergyFractions) {
       fTree->Branch("jets_chf", &fJetsChf); // charged hadron
@@ -130,6 +131,7 @@ namespace HPlus {
     fTree->Branch("MHT_p4", &fMHT);
     fTree->Branch("MHT_SelJets_p4", &fMHTSelJets);
     fTree->Branch("MHT_AllJets_p4", &fMHTAllJets);
+    fTree->Branch("vDiJetMassesNoTau", &vDiJetMassesNoTau);
 
     fTree->Branch("deltaPhi", &fDeltaPhi);
     fTree->Branch("passedBTagging", &fPassedBTagging);
@@ -222,6 +224,11 @@ namespace HPlus {
   void SignalAnalysisTree::setAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets){
     for(size_t i=0; i<allIdentifiedJets.size(); ++i) {
       fAllIdentifiedJets.push_back(allIdentifiedJets[i]->p4());}
+  }
+  
+  void SignalAnalysisTree::setSelJetsInclTau(const edm::PtrVector<pat::Jet>& selJetsInclTau){
+    for(size_t i=0; i<selJetsInclTau.size(); ++i) {
+      fSelJetsInclTau.push_back(selJetsInclTau[i]->p4());}
   }
   
 
@@ -691,6 +698,7 @@ namespace HPlus {
 
     fJets.clear();
     fAllIdentifiedJets.clear();
+    fSelJetsInclTau.clear();
     fJetsBtags.clear();
     fJetsFlavour.clear();
 
@@ -737,6 +745,7 @@ namespace HPlus {
     fPlanarity = nan;
     fCircularity = nan;
     bTauIsFake = false;
+    vDiJetMassesNoTau.clear();
   
     fDeltaPhi = nan;
 
