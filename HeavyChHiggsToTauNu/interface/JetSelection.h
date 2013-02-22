@@ -118,6 +118,7 @@ namespace HPlus {
 
     // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate
     // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, int nVertices = 1);
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau, int nVertices = 1);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau, int nVertices = 1);
 

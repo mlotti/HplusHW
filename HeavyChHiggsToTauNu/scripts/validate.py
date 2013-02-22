@@ -475,75 +475,79 @@ def validateHistograms(mydir,dataset1,dataset2):
     myList = []
     for item in myCommonPlots:
         myList.append(["CommonPlots/AtEveryStep/%s/nVertices"%item, 1, "log"])
-    histolist.append(["Common_everystep_vertices",myList])
+    histolist.append(["CommonPlots_everystep_vertices",myList])
     myList = []
     for item in myCommonPlots:
         myList.append(["CommonPlots/AtEveryStep/%s/tau_fakeStatus"%item, 1, "log"])
-    histolist.append(["Common_everystep_tau_fakeStatus",myList])
+    histolist.append(["CommonPlots_everystep_tau_fakeStatus",myList])
     myList = []
     for item in myCommonPlots:
         myList.append(["CommonPlots/AtEveryStep/%s/tau_pT"%item, 5, "log"])
-    histolist.append(["Common_everystep_tau_pT",myList])
+    histolist.append(["CommonPlots_everystep_tau_pT",myList])
     myList = []
     for item in myCommonPlots:
         myList.append(["CommonPlots/AtEveryStep/%s/tau_eta"%item, 0.1, "log"])
-    histolist.append(["Common_everystep_tau_eta",myList])
+    histolist.append(["CommonPlots_everystep_tau_eta",myList])
     myList = []
     for item in myCommonPlots:
         myList.append(["CommonPlots/AtEveryStep/%s/tau_phi"%item, 0.0873, "log"])
-    histolist.append(["Common_everystep_tau_phi",myList])
+    histolist.append(["CommonPlots_everystep_tau_phi",myList])
     myList = []
     for item in myCommonPlots:
         myList.append(["CommonPlots/AtEveryStep/%s/tau_Rtau"%item, 0.05, "log"])
-    histolist.append(["Common_everystep_tau_Rtau",myList])
+    histolist.append(["CommonPlots_everystep_tau_Rtau",myList])
     myList = []
     for item in myCommonPlots:
         myList.append(["CommonPlots/AtEveryStep/%s/electrons_N"%item, 1, "log"])
-    histolist.append(["Common_everystep_electrons_N",myList])
+    histolist.append(["CommonPlots_everystep_electrons_N",myList])
     myList = []
     for item in myCommonPlots:
         myList.append(["CommonPlots/AtEveryStep/%s/muons_N"%item, 1, "log"])
-    histolist.append(["Common_everystep_muons_N",myList])
+    histolist.append(["CommonPlots_everystep_muons_N",myList])
     myList = []
     for item in myCommonPlots:
         myList.append(["CommonPlots/AtEveryStep/%s/jets_N"%item, 1, "log"])
-    histolist.append(["Common_everystep_jets_N",myList])
+    histolist.append(["CommonPlots_everystep_jets_N",myList])
     myList = []
     for item in myCommonPlots:
         myList.append(["CommonPlots/AtEveryStep/%s/jets_N_allIdentified"%item, 1, "log"])
-    histolist.append(["Common_everystep_jets_N_allIdentified",myList])
+    histolist.append(["CommonPlots_everystep_jets_N_allIdentified",myList])
     myList = []
     for item in myCommonPlots:
-        myList.append(["CommonPlots/AtEveryStep/%s/MET_MET"%item, 1, "log"])
-    histolist.append(["Common_everystep_MET_MET",myList])
+        myList.append(["CommonPlots/AtEveryStep/%s/MET_Raw"%item, 10, "log"])
+    histolist.append(["CommonPlots_everystep_MET_Raw",myList])
+    myList = []
+    for item in myCommonPlots:
+        myList.append(["CommonPlots/AtEveryStep/%s/MET_MET"%item, 10, "log"])
+    histolist.append(["CommonPlots_everystep_MET_MET",myList])
     myList = []
     for item in myCommonPlots:
         myList.append(["CommonPlots/AtEveryStep/%s/MET_phi"%item, 0.0873, "log"])
-    histolist.append(["Common_everystep_MET_phi",myList])
+    histolist.append(["CommonPlots_everystep_MET_phi",myList])
     myList = []
     for item in myCommonPlots:
         myList.append(["CommonPlots/AtEveryStep/%s/bjets_N"%item, 1, "log"])
-    histolist.append(["Common_everystep_bjets_N",myList])
+    histolist.append(["CommonPlots_everystep_bjets_N",myList])
     myList = []
     for item in myCommonPlots:
         myList.append(["CommonPlots/AtEveryStep/%s/DeltaPhi_TauMET"%item, 10, "log"])
-    histolist.append(["Common_everystep_DeltaPhi_TauMET",myList])
+    histolist.append(["CommonPlots_everystep_DeltaPhi_TauMET",myList])
     myList = []
     for item in myCommonPlots:
         myList.append(["CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet1MET"%item, 10, "log"])
-    histolist.append(["Common_everystep_hDeltaR_TauMETJet1MET",myList])
+    histolist.append(["CommonPlots_everystep_hDeltaR_TauMETJet1MET",myList])
     myList = []
     for item in myCommonPlots:
         myList.append(["CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet2MET"%item, 10, "log"])
-    histolist.append(["Common_everystep_hDeltaR_TauMETJet1MET",myList])
+    histolist.append(["CommonPlots_everystep_hDeltaR_TauMETJet2MET",myList])
     myList = []
     for item in myCommonPlots:
         myList.append(["CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet3MET"%item, 10, "log"])
-    histolist.append(["Common_everystep_hDeltaR_TauMETJet1MET",myList])
+    histolist.append(["CommonPlots_everystep_hDeltaR_TauMETJet3MET",myList])
     myList = []
     for item in myCommonPlots:
         myList.append(["CommonPlots/AtEveryStep/%s/transverseMass"%item, 20, "linear"])
-    histolist.append(["Common_everystep_transverseMass",myList])
+    histolist.append(["CommonPlots_everystep_transverseMass",myList])
 
     if debugstatus:
         histolist = [["Primary vertices", [["Vertices/verticesBeforeWeight", 1, "log"],["tauID/N_TriggerMatchedTaus", 1, "log"]]]]

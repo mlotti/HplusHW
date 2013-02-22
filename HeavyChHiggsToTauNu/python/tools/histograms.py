@@ -7,6 +7,7 @@ import os, sys
 import glob
 import array
 import math
+import copy
 
 from optparse import OptionParser
 
@@ -33,6 +34,23 @@ cmsText = {
 
 ## Default energy text
 energyText = "7 TeV"
+
+## Generic settings class
+class Settings:
+    def __init__(self, **defaults):
+        self.data = copy.deepcopy(defaults)
+
+    def set(self, **kwargs):
+        for key, value in kwargs.iteritems():
+            if not key in self.data:
+                raise Exception("Not allowed to insert '%s', available settings: %s" % (key, ", ".join(self.data.keys())))
+            self.data[key] = value
+
+    def get(self, key, args=None):
+        if args is None:
+            return self.data[key]
+        else:
+            return args.get(key, self.data[key])
 
 ## Class to provide default positions of the various texts.
 #
@@ -119,6 +137,7 @@ def addText(x, y, text, *args, **kwargs):
     t = PlotText(x, y, text, *args, **kwargs)
     t.Draw()
 
+
 ## Class for drawing text to current TPad with TLaTeX
 #
 # Text can be added to plots in object-oriented way. Mainly intended
@@ -159,22 +178,36 @@ class PlotTextBox:
     ## Constructor
     #
     # \param xmin       X min coordinate of the box (NDC)
-    # \param ymin       Y min coordinate of the box (NDC)
+    # \param ymin       Y min coordinate of the box (NDC) (if None, deduced automatically)
     # \param xmax       X max coordinate of the box (NDC)
     # \param ymax       Y max coordinate of the box (NDC)
+    # \param lineheight Line height
     # \param fillColor  Fill color of the box
-    def __init__(self, xmin, ymin, xmax, ymax, fillColor=ROOT.kWhite):
+    # \param transparent  Should the box be transparent? (in practive the TPave is not created)
+    # \param kwargs       Forwarded to histograms.PlotText.__init__()
+    def __init__(self, xmin, ymin, xmax, ymax, lineheight=0.04, fillColor=ROOT.kWhite, transparent=True, **kwargs):
         # ROOT.TPave Set/GetX1NDC() etc don't seem to work as expected.
         self.xmin = xmin
         self.xmax = xmax
         self.ymin = ymin
         self.ymax = ymax
+        self.lineheight = lineheight
         self.fillColor = fillColor
+        self.transparent = transparent
         self.texts = []
+        self.textArgs = {}
+        self.textArgs.update(kwargs)
+
+        self.currenty = ymax
+
+    ## Add text to current position
+    def addText(self, text):
+        self.currenty -= self.lineheight
+        self.addPlotObject(PlotText(self.xmin+0.01, self.currenty, text, **self.textArgs))
 
     ## Add PlotText object
-    def addText(self, text):
-        self.texts.append(text)
+    def addPlotObject(self, obj):
+        self.texts.append(obj)
 
     ## Move the box and the contained text objects
     #
@@ -188,11 +221,13 @@ class PlotTextBox:
     def move(self, dx=0, dy=0, dw=0, dh=0):
         self.xmin += dx
         self.xmax += dx
-        self.ymin += dy
+        if self.ymin is not None:
+            self.ymin += dy
         self.ymax += dy
 
         self.xmax += dw
-        self.ymin -= dh
+        if self.ymin is not None:
+            self.ymin -= dh
 
         for t in self.texts:
             t.x += dx
@@ -202,9 +237,13 @@ class PlotTextBox:
     #
     # \param options  Forwarded to ROOT.TPave.Draw(), and the Draw() of the contained objects
     def Draw(self, options=""):
-        self.pave = ROOT.TPave(self.xmin, self.ymin, self.xmax, self.ymax, 0, "NDC")
-        self.pave.SetFillColor(self.fillColor)
-        self.pave.Draw(options)
+        if not self.transparent:
+            ymin = self.ymin
+            if ymin is None:
+                ymin = self.currenty - 0.01
+            self.pave = ROOT.TPave(self.xmin, self.ymin, self.xmax, self.ymax, 0, "NDC")
+            self.pave.SetFillColor(self.fillColor)
+            self.pave.Draw(options)
         for t in self.texts:
             t.Draw(options)
 
@@ -263,6 +302,55 @@ def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
     addText(x, y, lumiStr, textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
 #    l.DrawLatex(x, y, "L=%.0f %s" % (lumi, unit))
+
+## Class to create signal information box on plots
+class SignalTextCreator:
+    ## Constructor
+    #
+    # \param xmin       xmin coordinate of the box (NDC)
+    # \param ymax       ymax coordinate of the box (NDC)
+    # \param size       Text size
+    # \param lineheight Height of one line
+    # \param width      Width of the box
+    # \param kwargs     Keyword arguments, forwarded to histograms.PlotTextBox.__init__()
+    def __init__(self, xmin=0.6, ymax=0.9, size=20, lineheight=0.04, width=0.3, **kwargs):
+        self.settings = Settings(xmin=xmin, ymax=ymax, size=size, lineheight=lineheight, width=width,
+                                 mass=None, tanbeta=None, mu=None,
+                                 br_tH=None,
+                                 sigma_H=None, br_Htaunu=None)
+        self.boxArgs = {}
+        self.boxArgs.update(kwargs)
+
+    ## Set the signal information
+    def set(self, **kwargs):
+        self.settings.set(**kwargs)
+
+    ## Function call syntax to create histograms.PlotTextBox
+    def __call__(self, **kwargs):
+        xmin = self.settings.get("xmin", kwargs)
+        ymax = self.settings.get("ymax", kwargs)
+        size = self.settings.get("size", kwargs)
+        lineheight = self.settings.get("lineheight", kwargs)
+        width = self.settings.get("width", kwargs)
+
+        box = PlotTextBox(xmin, None, xmin+width, ymax, lineheight=lineheight, size=size, **self.boxArgs)
+
+        for attr, text in [
+            ("mass", "m_{H^{+}}=%d GeV/c^{2}"),
+            ("br_tH", "#it{B}(t #rightarrow bH^{+})=%.2f"),
+            ("sigma_H", "#sigma(H^{+})=%.1f pb"),
+            ("br_Htaunu", "#it{B}(H^{+} #rightarrow #tau#nu_{#tau})=%.2f"),
+            ("tanbeta", "tan#beta=%d"),
+            ("mu", "#mu=%d")]:
+
+            value = self.settings.get(attr, kwargs)
+            if value is not None:
+                box.addText(text % value)
+
+        return box
+
+createSignalText = SignalTextCreator()
+
 
 ## Class for generating legend creation functions with default positions.
 #

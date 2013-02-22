@@ -25,17 +25,17 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
+from optparse import OptionParser
+
 # Configuration
-analysis = "signalAnalysis"
 #analysis = "signalOptimisation"TauID_Rtau.png
 #analysis = "signalAnalysisJESMinus03eta02METMinus10"
 #analysis = "EWKFakeTauAnalysisJESMinus03eta02METMinus10"
 #analysis = "signalOptimisation/QCDAnalysisVariation_tauPt40_rtau0_btag2_METcut60_FakeMETCut0"
 #analysis = "signalAnalysisTauSelectionHPSTightTauBased2"
 #analysis = "signalAnalysisBtaggingTest2"
-counters = analysis+"/counters"
 
-treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger*weightPrescale")
+#treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger*weightPrescale")
 
 #QCDfromData = True
 QCDfromData = False
@@ -48,14 +48,10 @@ mcOnly = False
 #mcOnly = True
 mcOnlyLumi = 5000 # pb
 
-#dataEra = "Run2011A"
-#dataEra = "Run2011B"
-dataEra = "Run2011AB"
-
 # main function
-def main():
+def main(opts,era):
     # Read the datasets
-    datasets = dataset.getDatasetsFromMulticrabCfg(dataEra=dataEra)
+    datasets = dataset.getDatasetsFromMulticrabCfg(dataEra=era)
     if mcOnly:
         datasets.remove(datasets.getDataDatasetNames())
         histograms.cmsTextMode = histograms.CMSMode.SIMULATION
@@ -152,15 +148,18 @@ def main():
     
 def doPlots(datasets):
     def createPlot(name, **kwargs):
+        print "Creating plot:",name
         if mcOnly:
             # If 'normalizeToOne' is given in kwargs, we don't need the normalizeToLumi (or actually the library raises an Exception)
             args = {}
             args.update(kwargs)
             if not ("normalizeToOne" in args and args["normalizeToOne"]):
                 args["normalizeToLumi"] = mcOnlyLumi
-            return plots.MCPlot(datasets, analysis+"/"+name, **args)
+            #return plots.MCPlot(datasets, analysis+"/"+name, **args)
+            return plots.MCPlot(datasets, name, **args)
         else:
-            return plots.DataMCPlot(datasets, analysis+"/"+name, **kwargs)
+            return plots.DataMCPlot(datasets, name, **kwargs)
+            #return plots.DataMCPlot(datasets, analysis+"/"+name, **kwargs)
 
     def pickSliceX(th2, ybinName):
         th1 = ROOT.TH1D(th2.GetName(), th2.GetTitle(), th2.GetNbinsX(), histograms.th1Xmin(th2), histograms.th1Xmax(th2))
@@ -179,6 +178,31 @@ def doPlots(datasets):
 
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
+    
+        # Common plots
+    myCommonPlotDirs = ["VertexSelection","TauSelection","TauWeight","ElectronVeto","MuonVeto","JetSelection","MET","BTagging","Selected","FakeTaus_BTagging","FakeTaus_Selected"]
+    for item in myCommonPlotDirs:
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/nVertices"%item), "CommonPlot_EveryStep_nVertices_%s"%item, xlabel="Step", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/tau_fakeStatus"%item), "CommonPlot_EveryStep_tau_fakeStatus_%s"%item, xlabel="Step", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/tau_pT"%item), "CommonPlot_EveryStep_tau_pT_%s"%item, xlabel="Step", ylabel="N_{events}", log=True, rebinToWidthX=10, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/tau_eta"%item), "CommonPlot_EveryStep_tau_eta_%s"%item, xlabel="Step", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/tau_phi"%item), "CommonPlot_EveryStep_tau_phi_%s"%item, xlabel="Step", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/tau_Rtau"%item), "CommonPlot_EveryStep_tau_Rtau_%s"%item, xlabel="Step", ylabel="N_{events}", log=True, rebinToWidthX=0.5, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/electrons_N"%item), "CommonPlot_EveryStep_electrons_N_%s"%item, xlabel="Step", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/muons_N"%item), "CommonPlot_EveryStep_muons_N_%s"%item, xlabel="Step", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/jets_N"%item), "CommonPlot_EveryStep_jets_N_%s"%item, xlabel="Step", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/jets_N_allIdentified"%item), "CommonPlot_EveryStep_jets_N_allIdentified_%s"%item, xlabel="Step", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        #drawPlot(createPlot("CommonPlots/AtEveryStep/%s/MET_Raw"%item), "CommonPlot_EveryStep_MET_Raw_%s"%item, xlabel="Step", ylabel="N_{events}", rebinToWidthX=10, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/MET_MET"%item), "CommonPlot_EveryStep_MET_MET_%s"%item, xlabel="Step", ylabel="N_{events}", rebinToWidthX=10, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/MET_phi"%item), "CommonPlot_EveryStep_MET_phi_%s"%item, xlabel="Step", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/bjets_N"%item), "CommonPlot_EveryStep_bjets_N_%s"%item, xlabel="Step", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/DeltaPhi_TauMET"%item), "CommonPlot_EveryStep_DeltaPhi_TauMET_%s"%item, xlabel="Step", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet1MET"%item), "CommonPlot_EveryStep_DeltaR_TauMETJet1MET_%s"%item, xlabel="Step", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet2MET"%item), "CommonPlot_EveryStep_DeltaR_TauMETJet2MET_%s"%item, xlabel="Step", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet3MET"%item), "CommonPlot_EveryStep_DeltaR_TauMETJet3MET_%s"%item, xlabel="Step", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/hDeltaR_TauMETJet4MET"%item), "CommonPlot_EveryStep_DeltaR_TauMETJet4MET_%s"%item, xlabel="Step", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+        drawPlot(createPlot("CommonPlots/AtEveryStep/%s/transverseMass"%item), "CommonPlot_EveryStep_transverseMass_%s"%item, xlabel="Step", ylabel="N_{events}", rebinToWidthX=20, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+
     myDir = "Vertices"
     drawPlot(createPlot(myDir+"/verticesBeforeWeight"), "verticesBeforeWeight", xlabel="N_{vertices}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     drawPlot(createPlot(myDir+"/verticesAfterWeight"), "verticesAfterWeight", xlabel="N_{vertices}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
@@ -283,9 +307,13 @@ def doPlots(datasets):
     drawPlot(createPlot(myDir+"/jet_PhotonMultiplicity"), "JetRejected_PhotonMultiplicity", xlabel="PhotonMultiplicity of rejected jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     drawPlot(createPlot(myDir+"/jet_ChargedMultiplicity"), "JetRejected_ChargedMultiplicity", xlabel="ChargedMultiplicity of rejected jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     drawPlot(createPlot(myDir+"/jet_PartonFlavour"), "JetRejected_PartonFlavour", xlabel="PartonFlavour of rejected jets", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    myDir = "JetSelection/ReferenceJetToTau"
+    drawPlot(createPlot(myDir+"/MatchingDeltaR"), "JetMatchToTau_MatchingDeltaR", xlabel="#DeltaR(#tau,ref.jet)", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/PartonFlavour"), "JetMatchToTau_PartonFlavour", xlabel="pdgID", ylabel="N_{jets}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/PtRatio"), "JetMatchToTau_pTRatio", xlabel="p_{T}^{#tau} / p_{T}^{ref.jet}", ylabel="N_{jets}", rebinToWidthX=0.05,log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     myDir = "MET"
     drawPlot(createPlot(myDir+"/met"), "MET_MET", xlabel="MET, GeV", ylabel="N_{events}", rebin=4, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
-    drawPlot(createPlot(myDir+"/metPhi"), "MET_Phi", xlabel="MET #phi", ylabel="N_{events}", rebin=5, log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    drawPlot(createPlot(myDir+"/metPhi"), "MET_Phi", xlabel="MET #phi", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     drawPlot(createPlot(myDir+"/metSignif"), "MET_significance", xlabel="MET significance", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     drawPlot(createPlot(myDir+"/metSumEt"), "MET_SumET", xlabel="MET #sum E_{T}, GeV", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     myDir = "Btagging"
@@ -330,8 +358,8 @@ def doPlots(datasets):
     drawPlot(createPlot("deltaPhiJetMet"), "DeltaPhi_minJetMET", xlabel="min #Delta#phi(jet, MET), ^{o}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     drawPlot(createPlot("maxDeltaPhiJetMet"), "DeltaPhi_maxJetMET", xlabel="max #Delta#phi(#tau jet, MET), ^{o}", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     drawPlot(createPlot("SignalSelectionFlow"), "SelectionFlow", xlabel="Step", ylabel="N_{events}", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
-    drawPlot(createPlot("SignalSelectionFlowVsVertices"), "SelectionFlow_vsVertices", xlabel="N_{vertices}", ylabel="Step", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
-    drawPlot(createPlot("SignalSelectionFlowVsVerticesFakeTaus"), "SelectionFlow_vsVerticesFakeTaus", xlabel="N_{vertices}", ylabel="Step", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    #drawPlot(createPlot("SignalSelectionFlowVsVertices"), "SelectionFlow_vsVertices", xlabel="N_{vertices}", ylabel="Step", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
+    #drawPlot(createPlot("SignalSelectionFlowVsVerticesFakeTaus"), "SelectionFlow_vsVerticesFakeTaus", xlabel="N_{vertices}", ylabel="Step", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     
     return
 #        [["signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_pT_AfterCuts","signalAnalysis/SelectedTau/NonQCDTypeII_SelectedTau_pT_AfterCuts"], 10, "log"],
@@ -1748,4 +1776,21 @@ addMassBRText = AddMassBRText()
     
 # Call the main function if the script is executed (i.e. not imported)
 if __name__ == "__main__":
-    main()
+    parser = OptionParser(usage="Usage: %prog [options]")
+    parser.add_option("-v", dest="variation", action="append", help="name of variation")
+    parser.add_option("-e", dest="era", action="append", help="name of era")
+    parser.add_option("-t", dest="type", action="append", help="name of analysis type")
+    (opts, args) = parser.parse_args()
+
+    # Check that proper arguments were given
+    mystatus = True
+    if opts.era == None:
+        print "Missing specification for era!\n"
+        mystatus = False
+    if not mystatus:
+        parser.print_help()
+        sys.exit()
+
+    # Arguments are ok, proceed to run
+    for e in opts.era:
+        main(opts,e)
