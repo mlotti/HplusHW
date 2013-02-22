@@ -7,6 +7,32 @@ from multicrabWorkflowsTools import Dataset, Workflow, Data, Source, updatePubli
 import multicrabDatasetsCommon as common
 from multicrabWorkflowsPattuple import constructProcessingWorkflow_44X
 
+def addEmbeddingAodAnalysis_44X(datasets):
+    njobs = {
+        "WJets_TuneZ2_Fall11":               TaskDef(njobsIn=490),
+#        "W2Jets_TuneZ2_Fall11":              TaskDef(njobsIn=300),
+#        "W3Jets_TuneZ2_Fall11":              TaskDef(njobsIn=120),
+#        "W4Jets_TuneZ2_Fall11":              TaskDef(njobsIn=200),
+        "TTJets_TuneZ2_Fall11":              TaskDef(njobsIn=490),
+        "DYJetsToLL_M50_TuneZ2_Fall11":      TaskDef(njobsIn=350),
+        "T_t-channel_TuneZ2_Fall11":         TaskDef(njobsIn=50),
+        "Tbar_t-channel_TuneZ2_Fall11":      TaskDef(njobsIn=50),
+        "T_tW-channel_TuneZ2_Fall11":        TaskDef(njobsIn=20),
+        "Tbar_tW-channel_TuneZ2_Fall11":     TaskDef(njobsIn=20),
+        "T_s-channel_TuneZ2_Fall11":         TaskDef(njobsIn=10),
+        "Tbar_s-channel_TuneZ2_Fall11":      TaskDef(njobsIn=10),
+        "WW_TuneZ2_Fall11":                  TaskDef(njobsIn=50),
+        "WZ_TuneZ2_Fall11":                  TaskDef(njobsIn=50),
+        "ZZ_TuneZ2_Fall11":                  TaskDef(njobsIn=50),
+#        "QCD_Pt20_MuEnriched_TuneZ2_Fall11": TaskDef(njobsIn=20),
+        }
+
+    for datasetName, taskDef in njobs.iteritems():
+        dataset = datasets.getDataset(datasetName)
+        source = Source("AOD", number_of_jobs=taskDef.njobsIn)
+        wf = Workflow("embeddingAodAnalysis_44X", source=source, output_file="histograms.root")
+        dataset.addWorkflow(wf)
+
 def getDefaultDefinitions_44X():
     mcTrigger = "HLT_Mu40_eta2p1_v1"
     def TaskDefMC():

@@ -29,6 +29,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTriggerEfficiencyScaleFactor.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METTriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EmbeddingMuonEfficiency.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
@@ -148,7 +149,7 @@ namespace HPlus {
     Count fTausExistCounter;
     Count fTauFakeScaleFactorCounter;
     Count fOneTauCounter;
-    Count fTriggerScaleFactorCounter;
+    Count fTauTriggerScaleFactorCounter;
     Count fGenuineTauCounter;
     Count fVetoTauCounter;
     Count fElectronVetoCounter;
@@ -156,6 +157,7 @@ namespace HPlus {
     Count fMuonVetoCounter;
     Count fMetCutBeforeJetCutCounter;
     Count fNJetsCounter;
+    Count fMETTriggerScaleFactorCounter;
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
@@ -170,9 +172,9 @@ namespace HPlus {
     Count fMetCut80Counter;
     Count fMetCut100Counter;
     Count fHiggsMassCutCounter;
-    Count fTransverseMass80CutCounter;
     Count fTransverseMass100CutCounter;
     Count fTransverseMass120CutCounter;
+    Count fTransverseMass150CutCounter;
     Count fTransverseMass100CutPhiLow30Counter;
     Count fTransverseMass100CutPhiLow60Counter;
     Count fTauVetoAfterDeltaPhiCounter;
@@ -260,6 +262,7 @@ namespace HPlus {
     CorrelationAnalysis fCorrelationAnalysis;
     EvtTopology fEvtTopology;
     TauTriggerEfficiencyScaleFactor fTauTriggerEfficiencyScaleFactor;
+    METTriggerEfficiencyScaleFactor fMETTriggerEfficiencyScaleFactor;
     EmbeddingMuonEfficiency fEmbeddingMuonEfficiency;
     WeightReader fPrescaleWeightReader;
     WeightReader fPileupWeightReader;
@@ -350,7 +353,22 @@ namespace HPlus {
     WrappedTH1 *htransverseMassLeptonFakeSignalTau;
     WrappedTH1 *htransverseMassNoObservableLeptons;
     WrappedTH1 *htransverseMassObservableLeptons;
-    
+    WrappedTH1 *htransverseMassElectronFromTauFound;
+    WrappedTH1 *htransverseMassElectronFromWFound;
+    WrappedTH1 *htransverseMassElectronFromBottomFound;
+    WrappedTH1 *htransverseMassElectronFound;
+    WrappedTH1 *htransverseMassMuonFromTauFound;
+    WrappedTH1 *htransverseMassMuonFromWFound;
+    WrappedTH1 *htransverseMassMuonFromBottomFound;
+    WrappedTH1 *htransverseMassMuonFound;
+    WrappedTH1 *htransverseMassTauFromWFound;
+    WrappedTH1 *htransverseMassTauFound;
+    WrappedTH1 *hDeltaR_TauMETJet1MET;
+    WrappedTH1 *hDeltaR_TauMETJet2MET;
+    WrappedTH1 *hDeltaR_TauMETJet3MET;
+    WrappedTH1 *hDeltaR_TauMETJet4MET;
+    WrappedTH1 *hDeltaPhiTauMET;
+
     // Transverse mass histograms
     WrappedTH1 *hTransverseMass;
     WrappedTH1 *hTransverseMassAfterBtagging;

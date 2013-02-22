@@ -356,7 +356,7 @@ def controlPlots(datasets):
         mtphj2EWK_tmp._setLegendLabels()
         mtphj2EWK_tmp.histoMgr.setHistoDrawStyleAll("P") 
         mtphj2EWK_tmp.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
-        mtphj2EWK = mtphj1EWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
+        mtphj2EWK = mtphj2EWK_tmp.histoMgr.getHisto("EWK").getRootHisto().Clone()
         mtphj2EWK.Scale(normEWK[ptbin])
         mtphj2.Add(mtphj2EWK, -1)
         hmtphj2.append(mtphj2)

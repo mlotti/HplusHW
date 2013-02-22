@@ -470,26 +470,29 @@ def cloneForHeavyAnalysis(lightModule):
     return heavyModule
 
 # Set trigger efficiency / scale factor depending on tau selection params
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2012_cff as TriggerEfficiency
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2012_cff as tauTriggerEfficiency
 def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
     print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
     if tausele.isolationDiscriminator.value() == "byVLooseCombinedIsolationDeltaBetaCorr":
         if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
-            return TriggerEfficiency.tauLegEfficiency_byVLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium
+            return tauTriggerEfficiency.tauLegEfficiency_byVLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium
     elif tausele.isolationDiscriminator.value() == "byLooseCombinedIsolationDeltaBetaCorr":
         if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
-            return TriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium
+            return tauTriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium
         elif tausele.againstElectronDiscriminator.value() == "againstElectronMVA":
-            return TriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA
+            return tauTriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA
     elif tausele.isolationDiscriminator.value() == "byMediumCombinedIsolationDeltaBetaCorr":
         if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
-            return TriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium
+            return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium
         elif tausele.againstElectronDiscriminator.value() == "againstElectronMVA":
-            return TriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA
-    raise Exception("Trigger efficencies/scale factors are only available for:\n  tau isolation: 'byVLooseCombinedIsolationDeltaBetaCorr', 'byLooseCombinedIsolationDeltaBetaCorr', 'byMediumCombinedIsolationDeltaBetaCorr'\n  against electron discr.: 'againstElectronMedium', 'againstElectronMVA' (MVA not available for VLoose isol.)")
+            return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA
+    raise Exception("Tau trigger efficencies/scale factors are only available for:\n  tau isolation: 'byVLooseCombinedIsolationDeltaBetaCorr', 'byLooseCombinedIsolationDeltaBetaCorr', 'byMediumCombinedIsolationDeltaBetaCorr'\n  against electron discr.: 'againstElectronMedium', 'againstElectronMVA' (MVA not available for VLoose isol.)")
 
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
 tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
+
+import HiggsAnalysis.HeavyChHiggsToTauNu.metLegTriggerEfficiency2012_cff as metTriggerEfficiency
+metTriggerEfficiencyScaleFactor = metTriggerEfficiency.metLegEfficiency
 
 # Muon trigger+ID efficiencies, for embedding normalization
 import HiggsAnalysis.HeavyChHiggsToTauNu.muonTriggerIDEfficiency_cff as muonTriggerIDEfficiency
@@ -518,7 +521,7 @@ def _getTriggerVertexArgs(kwargs):
         vargs["pset"] = module.vertexWeight
     return (effargs, vargs)
 
-def setDataTriggerEfficiency(dataVersion, era, pset=tauTriggerEfficiencyScaleFactor):
+def setDataTriggerEfficiency(dataVersion, era, pset):
     if dataVersion.isMC():
         if dataVersion.isS4():
             pset.mcSelect = "Summer11"
@@ -555,8 +558,10 @@ def setDataTriggerEfficiency(dataVersion, era, pset=tauTriggerEfficiencyScaleFac
         pset.dataSelect = ["runs_190456_196531"]
     elif era == "Run2012ABC":
         pset.dataSelect = ["runs_190456_202585"]
+    elif era == "Run2012ABCD":
+        pset.dataSelect = ["runs_190456_208686"]
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011AB', 'Run2012A', 'Run2012B', 'Run2012C', 'Run2012AB', 'Run2012ABC'")
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011AB', 'Run2012A', 'Run2012B', 'Run2012C', 'Run2012AB', 'Run2012ABC', 'Run2012ABCD'")
 
 
 # Weighting by instantaneous luminosity, and the number of true

@@ -94,6 +94,13 @@ def main():
     tauEmbedding.normalize=True
     tauEmbedding.era = "Run2011AB"
 
+    datasetNames = ["Data"]
+    if opts.residual:
+        datasetNames.extend([
+                "DYJetsToLL_M50_TuneZ2_Fall11",
+                "WW_TuneZ2_Fall11"
+                ])
+
 
     taskDir = multicrab.createTaskDir("embedded")
 
@@ -105,6 +112,12 @@ def main():
     f.close()
     f = open(os.path.join(taskDir, "codeDiff.txt"), "w")
     f.write(git.getDiff()+"\n")
+    f.close()
+    # A bit of a kludgy way to indicate for datacard generator that this directory is from embedding
+    f = open(os.path.join(taskDir, "multicrab.cfg"), "w")
+    for name in datasetNames:
+        f.write("[%s]\n" % name)
+        f.write("dummy = embedded\n\n")
     f.close()
     f = open(os.path.join(taskDir, "inputInfo.txt"), "w")
     f.write("Embedded directories:\n%s\n\n" % "\n".join(dirEmbs))
@@ -120,12 +133,8 @@ def main():
     json.dump(data, f, indent=2)
     f.close()            
 
-    operate = lambda dn: operateDataset(taskDir, datasetsEmb, datasetsSig, dn)
-
-    operate("Data")
-    if opts.residual:
-        operate("DYJetsToLL_M50_TuneZ2_Fall11")
-        operate("WW_TuneZ2_Fall11")
+    for name in datasetNames:
+        operateDataset(taskDir, datasetsEmb, datasetsSig, name)
 
 def operateDataset(taskDir, datasetsEmb, datasetsSig, datasetName):
     directory = os.path.join(taskDir, datasetName, "res")

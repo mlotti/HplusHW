@@ -4,7 +4,6 @@
 
 #include "FWCore/Utilities/interface/InputTag.h"
 
-#include "DataFormats/Common/interface/View.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 
@@ -15,9 +14,6 @@
 namespace edm {
   class ParameterSet;
   class Event;
-}
-namespace reco {
-  class GenParticle;
 }
 
 class TTree;
@@ -35,8 +31,6 @@ namespace HPlus {
     const edm::InputTag& getInputTag() const { return fJetSrc; }
 
   private:
-    void setValues(const edm::View<pat::Jet>& muons);
-
     edm::InputTag fJetSrc;
     bool fJetComposition;
 

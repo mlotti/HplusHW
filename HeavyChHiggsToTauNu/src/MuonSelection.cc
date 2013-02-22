@@ -175,7 +175,7 @@ namespace HPlus {
       //int myInnerTrackNTrkHits   = myInnerTrackRef->hitPattern().numberOfValidTrackerHits();
       int myInnerTrackNPixelHits = myInnerTrackRef->hitPattern().numberOfValidPixelHits();
       //int myGlobalTrackNMuonHits  = myGlobalTrackRef->hitPattern().numberOfValidMuonHits(); 
-      int myMatchedSegments = (*iMuon)->numberOfMatchedStations();
+      //int myMatchedSegments = (*iMuon)->numberOfMatches();
       // Note: It is possible for a Global Muon to have zero muon hits. This happens because once the inner and outter tracks used to create
       // global fit to the muon track that covers all of the detector, hits that are incompatible to the new trajectory are removed 
       // (i.e. de-associated from the muon). This is the so called "outlier rejection". 
@@ -192,7 +192,7 @@ namespace HPlus {
       bMuonSelection = true;
 
       // 3) NHits cuts (Trk, Pixel, Muon)
-      if (!(myGlobalTrackRef->hitPattern().trackerLayersWithMeasurement() > 5)) continue; // 8 in 2011, 5 in 2012
+      if (!(myGlobalTrackRef->hitPattern().trackerLayersWithMeasurement() > 5)) continue;
       bMuonNTrkerHitsCut = true;
 
       if ( myInnerTrackNPixelHits < 1) continue;
@@ -202,7 +202,7 @@ namespace HPlus {
       if (!(myGlobalTrackRef->hitPattern().numberOfValidMuonHits() > 0)) continue;
 
       // std::cout << "myGlobalTrackNMuonHits = " << myGlobalTrackNMuonHits << std::endl;
-      if(myMatchedSegments < 2) continue;
+      if (!((*iMuon)->numberOfMatchedStations() > 1)) continue;
       bMuonNMuonlHitsCut = true;
 
       // 4) Global Track Chi Square / ndof must be less than 10
@@ -217,15 +217,13 @@ namespace HPlus {
 
       // 6) Check that muon IPz is compatible with PVz
       // remove for 2011, but enable for 2012
-      //if(fMuonApplyIpz) {
       if (primaryVertex.isNull())
         throw cms::Exception("LogicError") << "MuonApplyIpz is true, but got null primary vertex" << std::endl;
       double myDeltaIPz = std::fabs((*iMuon)->muonBestTrack()->dz(primaryVertex->position()));
       hMuonDeltaIPz->Fill(myDeltaIPz);
       if (myDeltaIPz > 0.5) continue; // This is the z-impact parameter w.r.t to selected primary vertex
       bMuonGoodPVCut = true;
-      //}
-
+      
       // Fill histos with all-Muons Pt and Eta (no requirements on muons)
       hMuonPt_BeforeIsolation->Fill(myMuonPt);
       hMuonEta_BeforeIsolation->Fill(myMuonEta);
@@ -251,6 +249,9 @@ namespace HPlus {
       double myIsolation = myChHadronIso + std::max(myNeutralHadronIso + myPhotonIso - 0.5 * myPUChHadronIso, 0.0);
       double relIsol = myIsolation / myMuonPt;
       hMuonRelIsol->Fill(relIsol);
+
+      if(myMuonPt >= fMuonPtCut && std::abs(myMuonEta) < fMuonEtaCut)
+        output.fSelectedMuonsBeforeIsolation.push_back(*iMuon);
 
       // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#Basline_muon_selections_for_2011
       if (relIsol < 0.12) {

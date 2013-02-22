@@ -38,7 +38,7 @@ treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger
 QCDfromData = False
 
 mcOnly = False
-#mcOnly = True
+mcOnly = True
 mcOnlyLumi = 12000 # pb
 
 searchMode = "Light"
@@ -107,7 +107,9 @@ def main():
 
     # sigma x BR for tanbeta=40 at 8 TeV (using tanbeta^2 dep)
     datasets.getDataset("HplusTB_M180").setCrossSection(0.9637) # pb
-    datasets.getDataset("HplusTB_M200").setCrossSection(0.5136) # pb  
+    datasets.getDataset("HplusTB_M190").setCrossSection(0.9637) # pb
+    datasets.getDataset("HplusTB_M200").setCrossSection(0.5136) # pb
+    datasets.getDataset("HplusTB_M220").setCrossSection(0.5136) # pb  
     datasets.getDataset("HplusTB_M250").setCrossSection(0.1394) # pb
     datasets.getDataset("HplusTB_M300").setCrossSection(0.0594) # pb
 
@@ -368,7 +370,11 @@ def doPlots(datasets):
 #    deltaPhi2(createPlot("deltaPhiNoBtagging"), "DeltaPhiTauMetNoBtagging", rebin=10, ratio=True, opts={"ymaxfactor": 100}, moveLegend={"dx":-0.21}, textFunction=lambda: addMassBRText(x=0.2, y=0.87), cutLine=[160, 130])
 #    deltaPhi2(createPlot("FakeMETVeto/Closest_DeltaPhi_of_MET_and_selected_jets"), "DeltaPhiJetMet", rebin=2, opts={"ymaxfactor": 20}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
 
-
+    drawPlot(createPlot("DeltaR_TauMETJet1MET"), "DeltaR_TauMETJet1MET", rebin=5, log=False,xlabel="#DeltaR (#tauMet,jet1Met)", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
+    drawPlot(createPlot("DeltaR_TauMETJet2MET"), "DeltaR_TauMETJet2MET", rebin=5, log=False,xlabel="#DeltaR (#tauMet,jet1Met)", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
+    drawPlot(createPlot("DeltaR_TauMETJet3MET"), "DeltaR_TauMETJet3MET", rebin=5, log=False,xlabel="#DeltaR (#tauMet,jet1Met)", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
+    drawPlot(createPlot("DeltaR_TauMETJet4MET"), "DeltaR_TauMETJet4MET", rebin=5, log=False,xlabel="#DeltaR (#tauMet,jet1Met)", ylabel="Events / %.0f GeV", ratio=False, opts={"ymaxfactor": 1.2}, textFunction=lambda: addMassBRText(x=0.2, y=0.87))
+        
     # Set temporarily the signal cross sections to a value from MSSM
 #    xsect.setHplusCrossSections(datasets, tanbeta=20, mu=200)
 #    datasets.getDataset("TTToHplusBHminusB_M120").setCrossSection(0.2*165)
@@ -423,10 +429,10 @@ def doPlots(datasets):
 #    zMassComparison(datasets)
 #    genQuarkComparison(datasets)
 #    topMassComparison(datasets)
-    deltaPhiCorrelation(datasets)      
+##    deltaPhiCorrelation(datasets)      
 #    topMassPurity(datasets) 
 #    vertexComparison(datasets)
-    mtComparison(datasets)
+##    mtComparison(datasets)
 #    MetComparison(datasets)
 #    BetaComparison(datasets)
 #    HiggsMassComparison(datasets)
@@ -662,38 +668,45 @@ def deltaPhiCorrelation(datasets):
 
 
 def mtComparison(datasets):
-    mt = plots.PlotBase([
-#        datasets.getDataset("TTToHplusBWB_M150").getDatasetRootHisto("transverseMass"),
-#        datasets.getDataset("TTToHplusBWB_M90").getDatasetRootHisto("transverseMass"),
-#        datasets.getDataset("TTToHplusBWB_M100").getDatasetRootHisto("transverseMass"),
-        datasets.getDataset("HplusTB_M200").getDatasetRootHisto("transverseMass"),
-#        datasets.getDataset("HplusTB_M200").getDatasetRootHisto("transverseMassTopChiSelection"),
-#        datasets.getDataset("TTToHplusBWB_M140").getDatasetRootHisto("transverseMass"),
-#        datasets.getDataset("TTToHplusBWB_M150").getDatasetRootHisto("transverseMass"),
-#        datasets.getDataset("TTToHplusBWB_M155").getDatasetRootHisto("transverseMass"),
-#        datasets.getDataset("TTToHplusBWB_M160").getDatasetRootHisto("transverseMass"),
-        ############ 
-#        datasets.getDataset("QCD").getDatasetRootHisto("transverseMassNoBtagging"),
-#        datasets.getDataset("QCD").getDatasetRootHisto("transverseMassNoBtaggingWithRtau"),        
-        ])
+    massPoints = [
+        #"TTToHplusBWB_M150",
+        #"TTToHplusBWB_M90",
+        #"TTToHplusBWB_M100",
+        "HplusTB_M180",
+        "HplusTB_M200",
+        "HplusTB_M250",
+        "HplusTB_M300",
+        ]
+    
+#    mt = plots.PlotBase([datasets.getDataset(m).getDatasetRootHisto("transverseMass") for m in massPoints])
+    mt = plots.PlotBase([datasets.getDataset(m).getDatasetRootHisto("transverseMassAfterBtagging") for m in massPoints])
+    mt.setEnergy(datasets.getEnergies())
     
     #   plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section MUST BE OFF
     mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
 #    mt.histoMgr.normalizeMCToOne(datasets.getDataset("Data").getLuminosity())    
     mt._setLegendStyles()
     mt._setLegendLabels()
-    st1 = styles.StyleCompound([styles.styles[2]])
-    st2 = styles.StyleCompound([styles.styles[1]])
-    st3 = styles.StyleCompound([styles.styles[0]])
-    st1.append(styles.StyleLine(lineWidth=3))
-    st2.append(styles.StyleLine(lineStyle=2, lineWidth=3))
-    st3.append(styles.StyleLine(lineStyle=3, lineWidth=3))
-    mt.histoMgr.forHisto("TTToHplus_M200", st1)
-#    mt.histoMgr.forHisto("TTToHplus_M120", st2)
-#    mt.histoMgr.forHisto("TTToHplus_M160", st3)
+    st = [
+        styles.StyleCompound([styles.styles[3]]),
+        styles.StyleCompound([styles.styles[2]]),
+        styles.StyleCompound([styles.styles[1]]),
+        styles.StyleCompound([styles.styles[0]]),
+        ]
+    st[0].append(styles.StyleLine(lineWidth=3))
+    st[1].append(styles.StyleLine(lineStyle=2, lineWidth=3))
+    st[2].append(styles.StyleLine(lineStyle=3, lineWidth=3))
+    st[3].append(styles.StyleLine(lineStyle=4, lineWidth=3))
+
+    if len(massPoints) > len(st):
+        raise Exception("So far supporting max %d mass points" % len(st))
+
+    for i, histoName in enumerate(massPoints):
+        mt.histoMgr.forHisto(histoName, st[i])
+
 #    mt.histoMgr.setHistoDrawStyleAll("P")
 #    rtauGen(mt, "transverseMass_vs_mH", rebin=20, defaultStyles=False)
-    rtauGen(mt, "transverseMass_signal200", rebin=10, defaultStyles=False)
+    rtauGen(mt, "transverseMassAfterBtagging_signal", rebin=10, defaultStyles=False)
 #    rtauGen(mt, "transverseRtau", rebin=5, ratio=True, defaultStyles=False)
 
     
@@ -1177,6 +1190,8 @@ def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
         histograms.addText(0.75, 0.9, "Data", 22) 
         plots._legendLabels["Data"] = "vertex3"
 
+        
+    h.histoMgr.addLuminosityText()
     common(h, xlabel, ylabel, addLuminosityText=False)
 
     

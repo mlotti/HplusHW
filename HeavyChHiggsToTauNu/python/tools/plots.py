@@ -33,9 +33,11 @@
 # than with datasetsd.DatasetManager, there is absolutely no problem
 # in doing so.
 
-import ROOT
+import sys
 import array
 import math
+
+import ROOT
 
 import dataset
 import histograms
@@ -484,6 +486,47 @@ def mergeWHandHH(datasetMgr):
     for signalWH, signalHH, target in _signalMerge:
         if signalWH in names and signalHH in names:
             datasetMgr.merge(target, [signalWH, signalHH])
+
+
+def replaceLightHplusWithSignalPlusBackground(datasetMgr, backgroundsWithoutTT=None):
+    if backgroundsWithoutTT is None:
+        backgroundsWithoutTT=["WJets", "DYJetsToLL", "SingleTop", "Diboson", "QCD"]
+
+    signalDatasetNames = filter(lambda name: "TTToHplus_M" in name, datasetMgr.getAllDatasetNames())
+    if len(signalDatasetNames) == 0:
+        raise Exception("Did not find any light H+ signal dataset (containing 'TTToHplus_M' string), maybe something is wrong in your datasets? List of available datasets: %s" % ", ".join(datasetMgr.getAllDatasetNames()))
+
+    def extractBR(dset):
+        try:
+            tmp = dset.getProperty("BRtH")
+        except KeyError:
+            raise Exception("Did not find propery 'BRtH' from signal datasets %s, did you run crosssection.setHplusCrossSectionsTo*() function?" % dset.getName())
+        return (tmp, dset.getName())
+
+    BRtH = None
+    for name in signalDatasetNames:
+        d = datasetMgr.getDataset(name)
+        lst = d.forEach(extractBR)
+        for br, rawname in lst:
+            if BRtH is None:
+                BRtH = br
+            else:
+                if abs(br-BRtH)/max(abs(br), abs(BRtH)) > 0.001:
+                    raise Exception("There are signal datasets with different BR(t->H+), got %f in %s, was before %f" % (br, rawname, BRtH))
+
+    ttjets2 = datasetMgr.getDataset("TTJets").deepCopy()
+    ttjets2.setName("TTJetsScaledByBR")
+    scaledXsect = (1-BRtH)*(1-BRtH) * ttjets2.getCrossSection()
+    ttjets2.setCrossSection(scaledXsect)
+    print "Setting TTJetsScaledByBR cross section to %f pb (scaled with BR(t->H+)=%f" % (scaledXsect, BRtH)
+
+    datasetMgr.append(ttjets2)
+    datasetMgr.merge("BkgNoTT", backgroundsWithoutTT, keepSources=True)
+    for name in signalDatasetNames:
+        isLast = (name == signalDatasetNames[-1])
+        datasetMgr.merge(name, [name, "BkgNoTT","TTJetsScaledByBR"], keepSources=not isLast)
+        _legendLabels[name] = "with H^{+}#rightarrow#tau^{+}#nu"
+
 
 def replaceQCDFromData(datasetMgr, datasetQCDdata):
     names = datasetMgr.getAllDatasetNames()
@@ -1295,7 +1338,12 @@ class MCPlot(PlotSameBase):
 # class (if the required change is relatively small), or creating
 # another class (if the change is large).
 # <ul>
-# <li> There is always one histogram with the name "Data" for collision data </li>
+# <li> There can be exactly one histogram with the name "Data" for collision data
+#      <ul>
+#      <li> If the "Data" histogram is not there, this class works as
+#           plots.MCPlot, except normalization by cross section is not
+#           supported. Also the data/MC ratio is not drawn. </li>
+#      </ul></li>
 # <li> There is always at least one MC histogram </li>
 # <li> Only the MC histograms are stacked, and it should be done with the
 #      stackMCHistograms() method </li>
@@ -1341,6 +1389,10 @@ class DataMCPlot(PlotSameBase, PlotRatioBase):
     # \param createRatio  Create also the ratio pad?
     # \param kwargs       Keyword arguments, forwarded to PlotSameBase.createFrame() or PlotRatioBase._createFrameRatio()
     def createFrame(self, filename, createRatio=False, **kwargs):
+        if createRatio and not self.histoMgr.hasHisto("Data"):
+            print >> sys.stderr, "Warning: Trying to createdata/MC ratio, but there is no 'Data' histogram."
+            createRatio = False
+
         if not createRatio:
             PlotSameBase.createFrame(self, filename, **kwargs)
         else:
@@ -1663,6 +1715,7 @@ class PlotDrawer:
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
     # \param customizeBeforeDraw Function to customize the plot before drawing it
+    # \param customizeBeforeSave Function to customize the plot before saving it
     # \param addLuminosityText   Should luminosity text be drawn?
     # \param stackMCHistograms   Should MC histograms be stacked?
     # \param addMCUncertainty    Should MC total (stat) uncertainty be drawn()
@@ -1678,6 +1731,7 @@ class PlotDrawer:
                  optsLog={},
                  opts2={},
                  customizeBeforeDraw=None,
+                 customizeBeforeSave=None,
                  addLuminosityText=False,
                  stackMCHistograms=False,
                  addMCUncertainty=False,
@@ -1687,19 +1741,20 @@ class PlotDrawer:
         self.logDefault = log
         self.ratioDefault = ratio
         self.ratioYlabelDefault = ratioYlabel
-        self.ratioInvert = ratioInvert
-        self.ratioIsBinomial = ratioIsBinomial
+        self.ratioInvertDefault = ratioInvert
+        self.ratioIsBinomialDefault = ratioIsBinomial
         self.optsDefault = {"ymin": 0, "ymaxfactor": 1.1}
         self.optsDefault.update(opts)
         self.optsLogDefault = {"ymin": 0.01, "ymaxfactor": 2}
         self.optsLogDefault.update(optsLog)
         self.opts2Default = {"ymin": 0.5, "ymax": 1.5}
         self.opts2Default.update(opts2)
-        self.customizeBeforeDraw = customizeBeforeDraw
+        self.customizeBeforeDrawDefault = customizeBeforeDraw
+        self.customizeBeforeSaveDefault = customizeBeforeSave
         self.addLuminosityTextDefault = addLuminosityText
         self.stackMCHistogramsDefault = stackMCHistograms
-        self.addMCUncertainty = addMCUncertainty
-        self.cmsText = cmsText
+        self.addMCUncertaintyDefault = addMCUncertainty
+        self.cmsTextDefault = cmsText
 
     ## Modify the defaults
     #
@@ -1799,7 +1854,7 @@ class PlotDrawer:
         stack = kwargs.get("stackMCHistograms", self.stackMCHistogramsDefault)
         if stack:
             p.stackMCHistograms()
-            if kwargs.get("addMCUncertainty", self.addMCUncertainty):
+            if kwargs.get("addMCUncertainty", self.addMCUncertaintyDefault):
                 p.addMCUncertainty()
 
     ## Stack MC histograms
@@ -1840,9 +1895,9 @@ class PlotDrawer:
         ratio = kwargs.get("ratio", self.ratioDefault)
         if ratio:
             args["createRatio"] = True
-        if kwargs.get("ratioInvert", self.ratioInvert):
+        if kwargs.get("ratioInvert", self.ratioInvertDefault):
             args["invertRatio"] = True
-        if kwargs.get("ratioIsBinomial", self.ratioIsBinomial):
+        if kwargs.get("ratioIsBinomial", self.ratioIsBinomialDefault):
             args["ratioIsBinomial"] = True
 
         # Create frame
@@ -1918,7 +1973,8 @@ class PlotDrawer:
     # <b>Keyword arguments</b>
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
-    # \lu\a customieBeforeDraw  Function to customize the plot object before drawing the plopt
+    # \lu\a customizeBeforeDraw Function to customize the plot object before drawing the plot
+    # \lu\a customizeBeforeSave Function to customize the plot object before saving the plot
     # \li\a cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis (default given in __init__()/setDefaults())
     #
     # In addition of drawing and saving the plot, handles the X and Y
@@ -1932,16 +1988,21 @@ class PlotDrawer:
         p.frame.GetXaxis().SetTitle(xlabel)
         p.frame.GetYaxis().SetTitle(ylab)
 
-        customize = kwargs.get("customizeBeforeDraw", self.customizeBeforeDraw)
+        customize = kwargs.get("customizeBeforeDraw", self.customizeBeforeDrawDefault)
         if customize != None:
             customize(p)
         
         p.draw()
-        cmsText = kwargs.get("cmsText", self.cmsText)
+        cmsText = kwargs.get("cmsText", self.cmsTextDefault)
         histograms.addCmsPreliminaryText(text=cmsText)
         p.addEnergyText()
         if kwargs.get("addLuminosityText", self.addLuminosityTextDefault):
             p.addLuminosityText()
+
+        customize2 = kwargs.get("customizeBeforeSave", self.customizeBeforeSaveDefault)
+        if customize2 is not None:
+            customize2(p)
+
         p.save()
 
 

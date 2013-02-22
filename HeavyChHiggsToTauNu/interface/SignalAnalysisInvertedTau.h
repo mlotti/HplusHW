@@ -26,6 +26,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTriggerEfficiencyScaleFactor.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METTriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METFilters.h"
@@ -147,7 +148,7 @@ namespace HPlus {
     Count fRtauAfterTauIDCounter;
     Count fTausExistCounter;
     Count fTauFakeScaleFactorCounter;
-    Count fTriggerScaleFactorCounter;
+    Count fTauTriggerScaleFactorCounter;
     Count fBaselineTauIDCounter;
     Count fBaselineEvetoCounter;
     Count fBaselineMuvetoCounter;
@@ -223,6 +224,7 @@ namespace HPlus {
     CorrelationAnalysis fCorrelationAnalysis;
     EvtTopology fEvtTopology;
     TauTriggerEfficiencyScaleFactor fTauTriggerEfficiencyScaleFactor;
+    METTriggerEfficiencyScaleFactor fMETTriggerEfficiencyScaleFactor;
 
     WeightReader fPrescaleWeightReader;
     WeightReader fPileupWeightReader;
@@ -275,6 +277,11 @@ namespace HPlus {
     WrappedTH1 *hMETBaselineTauIdJets6070;
     WrappedTH1 *hMETBaselineTauIdJets5060;
     WrappedTH1 *hMETBaselineTauIdJets4050;
+
+    WrappedTH1 *hDeltaR_TauMETJet1MET;
+    WrappedTH1 *hDeltaR_TauMETJet2MET;
+    WrappedTH1 *hDeltaR_TauMETJet3MET;
+    WrappedTH1 *hDeltaR_TauMETJet4MET;
 
     WrappedTH1 *hNBBaselineTauIdJet;    
     WrappedTH1 *hNJetBaselineTauId;
