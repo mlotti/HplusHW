@@ -37,6 +37,7 @@
 #include "TLorentzVector.h"
 #include "TMatrixDSym.h"
 #include "TMatrixDSymEigen.h"
+#include "DataFormats/Math/interface/deltaR.h"
 
 namespace reco {
   class Candidate;
@@ -110,11 +111,11 @@ namespace HPlus {
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
     bool CalcAlphaT(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output);
-    vector<float> CalcMomentumTensorEigenValues(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output);
+    vector<float> CalcMomentumTensorEigenValues(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output);
     bool CalcSphericity(vector<float> eigenvalues, EvtTopology::Data& output);
     bool CalcAplanarity(vector<float> eigenvalues, EvtTopology::Data& output);
     bool CalcPlanarity(vector<float> eigenvalues, EvtTopology::Data& output);
-    bool CalcCircularity(const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output);
+    bool CalcCircularity(const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output);
     // Input parameters
     // std::string fDiscriminator;
     // double fDiscrCut;
@@ -145,8 +146,6 @@ namespace HPlus {
       WrappedTH1 *hDiJetInvMassWCutFail;
     */
     
-    // Other variables
-    MathFunctions oMath;
   };
 }
 

@@ -316,6 +316,9 @@ namespace HPlus {
 
       // Jet identification and beta cuts done, store jet to list of all jets
       output.fAllIdentifiedJets.push_back(iJet);
+      if (iJet->pt() > fPtCut && (std::abs(iJet->eta()) < fEtaCut)) {
+        output.fSelectedJetsIncludingTau.push_back(iJet);
+      }
 
       // remove jets too close to tau jet
       hDeltaRJetTau->Fill(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()));
@@ -551,22 +554,25 @@ namespace HPlus {
     }
     hMHT->Fill(output.fMHT.pt());
     hMHTphi->Fill(output.fMHT.phi());
-    // Calculate angles between MHT and the jets
-    for (size_t i = 0; i < output.fSelectedJets.size(); ++i) {
-      double myDeltaPhi = reco::deltaPhi(output.fMHT, *(output.fSelectedJets[i])) * 57.3;
-      if (i == 0) {
+    // Calculate angles between MHT and the jets (overlap with tau not considered)
+    int njets = 0;
+    for (size_t i = 0; i < output.fAllIdentifiedJets.size(); ++i) {
+      if (!(output.fAllIdentifiedJets[i]->pt() > fPtCut && (std::abs(output.fAllIdentifiedJets[i]->eta()) < fEtaCut))) continue;
+      double myDeltaPhi = reco::deltaPhi(output.fMHT, *(output.fAllIdentifiedJets[i])) * 57.3;
+      if (njets == 0) {
         output.fDeltaPhiMHTJet1 = myDeltaPhi;
         hDeltaPhiMHTJet1->Fill(myDeltaPhi);
-      } else if (i == 1) {
+      } else if (njets == 1) {
         output.fDeltaPhiMHTJet2 = myDeltaPhi;
         hDeltaPhiMHTJet2->Fill(myDeltaPhi);
-      } else if (i == 2) {
+      } else if (njets == 2) {
         output.fDeltaPhiMHTJet3 = myDeltaPhi;
         hDeltaPhiMHTJet3->Fill(myDeltaPhi);
-      } else if (i == 3) {
+      } else if (njets == 3) {
         output.fDeltaPhiMHTJet4 = myDeltaPhi;
         hDeltaPhiMHTJet4->Fill(myDeltaPhi);
       }
+      ++njets;
     }
     output.fDeltaPhiMHTTau = reco::deltaPhi(output.fMHT, *tau) * 57.3;
     hDeltaPhiMHTTau->Fill(output.fDeltaPhiMHTTau);

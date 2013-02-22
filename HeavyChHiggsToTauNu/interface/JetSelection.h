@@ -47,6 +47,7 @@ namespace HPlus {
       const edm::PtrVector<pat::Jet>& getAllJets() const { return fAllJets; }
       const edm::PtrVector<pat::Jet>& getAllIdentifiedJets() const { return fAllIdentifiedJets; }
       const edm::PtrVector<pat::Jet>& getSelectedJets() const { return fSelectedJets; }
+      const edm::PtrVector<pat::Jet>& getSelectedJetsIncludingTau() const { return fSelectedJetsIncludingTau; }
       const edm::PtrVector<pat::Jet>& getSelectedJetsPt20() const { return fSelectedJetsPt20; }
       const int getHadronicJetCount() const { return iNHadronicJets; }
       const int getHadronicJetCountInFwdDir() const { return iNHadronicJetsInFwdDir; }
@@ -83,6 +84,7 @@ namespace HPlus {
       edm::PtrVector<pat::Jet> fAllIdentifiedJets;
       // Selected jets
       edm::PtrVector<pat::Jet> fSelectedJets;
+      edm::PtrVector<pat::Jet> fSelectedJetsIncludingTau;
       edm::PtrVector<pat::Jet> fSelectedJetsPt20;
       // Not Selected jets
       edm::PtrVector<pat::Jet> fNotSelectedJets;
