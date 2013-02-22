@@ -1738,8 +1738,8 @@ namespace HPlus {
 
     //    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(selectedInvertedTau), jetDataInverted.getSelectedJets()); 
     //    FakeMETVeto::Data fakeMETDataInverted = fFakeMETVeto.analyze(iEvent, iSetup, selectedInvertedTau, jetDataInverted.getSelectedJets(), metDataInverted.getSelectedMET());
-    //    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJets()); 
-      //    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJets(), metData.getSelectedMET());
+    //    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJetsIncludingTau()); 
+    //    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJets(), metData.getSelectedMET());
 
    
     hClosestDeltaPhiInverted->Fill(fakeMETDataInverted.closestDeltaPhi());
