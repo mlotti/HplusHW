@@ -4,21 +4,6 @@ import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-multicrab = Multicrab("crab_pat.cfg", lumiMaskDir="..")
-
-datasets = [
-########
-#
-# 44X
-#
-########
-
-        # Data 2011
-        # tau+met trigger
-#       "Tau_160431-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
-#       "Tau_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
-       "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
-#       "Tau_175860-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
         # single tau trigger
 #       "Tau_Single_165970-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
 #       "Tau_Single_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
@@ -46,98 +31,84 @@ datasets = [
 #       "SingleMu_178871-179889_2011B_Nov19",     # 2011B
 #       "SingleMu_179959-180252_2011B_Nov19",     # 2011B
 
-        # Fall11
-        # Signal MC (WH)
-#        "TTToHplusBWB_M80_Fall11",
-#        "TTToHplusBWB_M90_Fall11",
-#        "TTToHplusBWB_M100_Fall11",
-        "TTToHplusBWB_M120_Fall11",
-#        "TTToHplusBWB_M140_Fall11",
-#        "TTToHplusBWB_M150_Fall11",
-#        "TTToHplusBWB_M155_Fall11",
-#        "TTToHplusBWB_M160_Fall11",
-        # Signal MC (HH)
-#        "TTToHplusBHminusB_M80_Fall11",
-#        "TTToHplusBHminusB_M90_Fall11",
-#        "TTToHplusBHminusB_M100_Fall11",
-#        "TTToHplusBHminusB_M120_Fall11",
-#        "TTToHplusBHminusB_M140_Fall11",
-#        "TTToHplusBHminusB_M150_Fall11",
-#        "TTToHplusBHminusB_M155_Fall11",
-#        "TTToHplusBHminusB_M160_Fall11",
-        # Signal MC (Heavy)
-#        "HplusTB_M180_Fall11",
-#        "HplusTB_M190_Fall11",
-#        "HplusTB_M200_Fall11",
-#        "HplusTB_M220_Fall11",
-#        "HplusTB_M250_Fall11",
-#        "HplusTB_M300_Fall11",
-        # Background MC
-#        "TTJets_TuneZ2_Fall11",
-#        "WJets_TuneZ2_Fall11",
-#        "W1Jets_TuneZ2_Fall11",
-#        "W2Jets_TuneZ2_Fall11",
-#        "W3Jets_TuneZ2_Fall11",
-#        "W4Jets_TuneZ2_Fall11",
-#        "DYJetsToLL_M10to50_TuneZ2_Fall11",
-#        "DYJetsToLL_M50_TuneZ2_Fall11",
-#        "T_t-channel_TuneZ2_Fall11",
-#        "Tbar_t-channel_TuneZ2_Fall11",
-#        "T_tW-channel_TuneZ2_Fall11",
-#        "Tbar_tW-channel_TuneZ2_Fall11",
-#        "T_s-channel_TuneZ2_Fall11",
-#        "Tbar_s-channel_TuneZ2_Fall11",
-#        "WW_TuneZ2_Fall11",
-#        "WZ_TuneZ2_Fall11",
-#        "ZZ_TuneZ2_Fall11",
-#        "QCD_Pt20_MuEnriched_TuneZ2_Fall11",
-#         "QCD_Pt30to50_TuneZ2_Fall11",
-#         "QCD_Pt50to80_TuneZ2_Fall11",
-#         "QCD_Pt80to120_TuneZ2_Fall11",
-#         "QCD_Pt120to170_TuneZ2_Fall11",
-#         "QCD_Pt170to300_TuneZ2_Fall11",
-#         "QCD_Pt300to470_TuneZ2_Fall11",
+datasets_Tau = [
+    "Tau_160431-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
+    "Tau_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
+    "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
+    "Tau_175832-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
+]
 
-######
-# 44X high PU
-#         "TTToHplusBWB_M90_Fall11_HighPU",
-#         "TTToHplusBWB_M160_Fall11_HighPU",
-#         "TTJets_TuneZ2_Fall11_HighPU",
+datasets_Signal = [
+    "TTToHplusBWB_M80_Fall11",
+    "TTToHplusBWB_M90_Fall11",
+    "TTToHplusBWB_M100_Fall11",
+    "TTToHplusBWB_M120_Fall11",
+    "TTToHplusBWB_M140_Fall11",
+    "TTToHplusBWB_M150_Fall11",
+    "TTToHplusBWB_M155_Fall11",
+    "TTToHplusBWB_M160_Fall11",
+
+    "TTToHplusBHminusB_M80_Fall11",
+    "TTToHplusBHminusB_M90_Fall11",
+    "TTToHplusBHminusB_M100_Fall11",
+    "TTToHplusBHminusB_M120_Fall11",
+    "TTToHplusBHminusB_M140_Fall11",
+    "TTToHplusBHminusB_M150_Fall11",
+    "TTToHplusBHminusB_M155_Fall11",
+    "TTToHplusBHminusB_M160_Fall11",
+
+    "HplusTB_M180_Fall11",
+    "HplusTB_M190_Fall11",
+    "HplusTB_M200_Fall11",
+    "HplusTB_M220_Fall11",
+    "HplusTB_M250_Fall11",
+    "HplusTB_M300_Fall11",
+]
+
+datasets_QCD = [
+    "QCD_Pt30to50_TuneZ2_Fall11",
+    "QCD_Pt50to80_TuneZ2_Fall11",
+    "QCD_Pt80to120_TuneZ2_Fall11",
+    "QCD_Pt120to170_TuneZ2_Fall11",
+    "QCD_Pt170to300_TuneZ2_Fall11",
+    "QCD_Pt300to470_TuneZ2_Fall11",
+]
+
+datasets_TT_EWK = [
+    "TTJets_TuneZ2_Fall11",
+    "WJets_TuneZ2_Fall11",
+    "W1Jets_TuneZ2_Fall11",
+    "W2Jets_TuneZ2_Fall11",
+    "W3Jets_TuneZ2_Fall11",
+    "W4Jets_TuneZ2_Fall11",
+#    "DYJetsToLL_M10to50_TuneZ2_Fall11",
+    "DYJetsToLL_M50_TuneZ2_Fall11",
+]
+
+datasets_SingleTop = [
+    "T_t-channel_TuneZ2_Fall11",
+    "Tbar_t-channel_TuneZ2_Fall11",
+    "T_tW-channel_TuneZ2_Fall11",
+    "Tbar_tW-channel_TuneZ2_Fall11",
+    "T_s-channel_TuneZ2_Fall11",
+    "Tbar_s-channel_TuneZ2_Fall11",
+]
+
+datasets_VV = [
+    "WW_TuneZ2_Fall11",
+    "WZ_TuneZ2_Fall11",
+    "ZZ_TuneZ2_Fall11",
 ]
 
 
+workflow = "pattuple_v44_5"
 
-workflow = "pattuple_v44_5_test1"
-multicrab.extendDatasets(workflow, datasets)
-
-# local_stage_out doesn't work due to denied permission because we're
-# writing to /store/group/local ...
-#multicrab.appendLineAll("USER.local_stage_out=1")
-
-multicrab.appendLineAll("GRID.maxtarballsize = 15")
-
-def addCopyConfig(dataset):
-    dataset.appendLine("USER.additional_input_files = copy_cfg.py")
-    dataset.appendCopyFile("../copy_cfg.py")
-multicrab.forEachDataset(addCopyConfig)
-
-# For collision data stageout from US doesn't seem to be a problem
-#allowUS = ["TT", "TTJets", "TTToHplusBWB_M90", "TTToHplusBWB_M100", "TTToHplusBWB_M120", "TTToHplusBWB_M140", "TTToHplusBWB_M160"]
-#def blacklistUS(dataset):
-#    if dataset.isMC() and not dataset.getName() in allowUS:
-#        dataset.extendBlackWhiteList("se_black_list", ["T2_US"])
-#multicrab.forEachDataset(blacklistUS)
-
-# Many failures with 60307 and 70500 from T2_UK_London_Brunel for
-# pattuple_v6_1 while the similar jobs stageout fine in other T2s
-multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
-
-prefix = "multicrab_"+workflow
-configOnly = False # Create task configuration only?
-# Leave configOnly as false and specify site whitelist on command line when submitting the jobs
-
-# Create multicrab task configuration and run 'multicrab -create'
-taskDir = multicrab.createTasks(prefix=prefix, configOnly=configOnly)
+tasks = [
+    ("Tau", datasets_Tau),
+    ("Signal", datasets_Signal),
+    ("QCD_VV_SingleTop", datasets_QCD+datasets_VV+datasets_SingleTop),
+    ("TT_EWK", datasets_TT_EWK),
+]
 
 # patch CMSSW.sh
 #
@@ -146,10 +117,45 @@ taskDir = multicrab.createTasks(prefix=prefix, configOnly=configOnly)
 class Wrapper:
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
+def addCopyConfig(dataset):
+    dataset.appendLine("USER.additional_input_files = copy_cfg.py")
+    dataset.appendCopyFile("../copy_cfg.py")
 
-if not configOnly:
-    import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
-    import os
-    os.chdir(taskDir)
-    patch.main(Wrapper(dirs=datasets, input="pattuple"))
-    os.chdir("..")
+for midfix, datasets in tasks:
+    multicrab = Multicrab("crab_pat.cfg", lumiMaskDir="..")
+    multicrab.extendDatasets(workflow, datasets)
+
+    # local_stage_out doesn't work due to denied permission because we're
+    # writing to /store/group/local ...
+    #multicrab.appendLineAll("USER.local_stage_out=1")
+
+    #multicrab.appendLineAll("GRID.maxtarballsize = 15")
+
+    multicrab.forEachDataset(addCopyConfig)
+
+    # For collision data stageout from US doesn't seem to be a problem
+    #allowUS = ["TT", "TTJets", "TTToHplusBWB_M90", "TTToHplusBWB_M100", "TTToHplusBWB_M120", "TTToHplusBWB_M140", "TTToHplusBWB_M160"]
+    #def blacklistUS(dataset):
+    #    if dataset.isMC() and not dataset.getName() in allowUS:
+    #        dataset.extendBlackWhiteList("se_black_list", ["T2_US"])
+    #multicrab.forEachDataset(blacklistUS)
+    
+    # Many failures with 60307 and 70500 from T2_UK_London_Brunel for
+    # pattuple_v6_1 while the similar jobs stageout fine in other T2s
+    multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
+    
+    prefix = "multicrab_"+workflow+"_"+midfix
+    configOnly = False # Create task configuration only?
+#    configOnly = True
+    # Leave configOnly as false and specify site whitelist on command line when submitting the jobs
+    
+    # Create multicrab task configuration and run 'multicrab -create'
+    taskDirs = multicrab.createTasks(prefix=prefix, configOnly=configOnly)
+
+    if not configOnly:
+        import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
+        import os
+        for taskDir, dsetNames in taskDirs:
+            os.chdir(taskDir)
+            patch.main(Wrapper(dirs=datasets, input="pattuple"))
+            os.chdir("..")
