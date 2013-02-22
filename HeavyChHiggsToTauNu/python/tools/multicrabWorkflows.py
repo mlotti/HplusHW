@@ -170,6 +170,7 @@ datasets.extend([
     MCDataset("W1Jets_TuneZ2_Fall11",             aod="/W1Jet_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # 76051609 events
     MCDataset("W2Jets_TuneZ2_Fall11",             aod="/W2Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
     MCDataset("W3Jets_TuneZ2_Fall11",             aod="/W3Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
+    MCDataset("W3Jets_TuneZ2_v2_Fall11",          aod="/W3Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v2/AODSIM"), # has replaced v1
     MCDataset("W4Jets_TuneZ2_Fall11",             aod="/W4Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"),
     MCDataset("DYJetsToLL_M50_TuneZ2_Fall11",     aod="/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # 36264432 events
     MCDataset("DYJetsToLL_M10to50_TuneZ2_Fall11", aod="/DYJetsToLL_M-10To50_TuneZ2_7TeV-madgraph/Fall11-PU_S6_START44_V9B-v1/AODSIM"), # 31480628 events

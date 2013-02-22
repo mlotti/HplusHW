@@ -47,6 +47,7 @@ datasets = [
         "W1Jets_TuneZ2_Fall11",
         "W2Jets_TuneZ2_Fall11",
         "W3Jets_TuneZ2_Fall11",
+        "W3Jets_TuneZ2_v2_Fall11",
         "W4Jets_TuneZ2_Fall11",
         "DYJetsToLL_M50_TuneZ2_Fall11",
         "T_t-channel_TuneZ2_Fall11",
