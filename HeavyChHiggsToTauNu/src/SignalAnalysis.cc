@@ -821,7 +821,7 @@ namespace HPlus {
       TopChiSelection::Data TopChiSelectionData = fTopChiSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     
       // Calculate event topology variables (alphaT, sphericity, aplanarity etc..)
-      EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJets());   
+      EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJetsIncludingTau());
       
       FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJets(), metData.getSelectedMET());
 
@@ -840,6 +840,7 @@ namespace HPlus {
       fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
       fTree.setTop(TopSelectionData.getTopP4());
       // Sphericity, Aplanarity, Planarity, alphaT
+      fTree.setDiJetMassesNoTau(evtTopologyData.alphaT().vDiJetMassesNoTau);
       fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
       fTree.setSphericity(evtTopologyData.Kinematics().fSphericity);
       fTree.setAplanarity(evtTopologyData.Kinematics().fAplanarity);
@@ -848,6 +849,7 @@ namespace HPlus {
       fTree.setMomentumTensorEigenvalues(evtTopologyData.Kinematics().fQOne, evtTopologyData.Kinematics().fQTwo, evtTopologyData.Kinematics().fQThree);
 
       fTree.setAllJets(jetData.getAllIdentifiedJets());
+      fTree.setSelJetsInclTau(jetData.getSelectedJetsIncludingTau());
       fTree.setMHT(jetData.getMHTvector());
       fTree.setMHTSelJets(jetData.getSelectedJets());
       fTree.setMHTAllJets(jetData.getAllIdentifiedJets());
@@ -1188,7 +1190,7 @@ namespace HPlus {
 <<<<<<< HEAD
 
     // Calculate alphaT
-    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJets());   
+    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJetsIncludingTau());
 
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTau(), jetData.getSelectedJets(), metData.getSelectedMET());
 
@@ -1256,7 +1258,7 @@ namespace HPlus {
     hDeltaPhiVsTransverseMass->Fill(fakeMETData.closestDeltaPhi(),transverseMass); 
 
     // Calculate alphaT
-    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJets());   
+    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(iEvent, iSetup, *(tauData.getSelectedTau()), jetData.getSelectedJetsIncludingTau());
     // Correlation analysis
     fCorrelationAnalysis.analyze(iEvent, iSetup, tauData.getSelectedTaus(), btagData.getSelectedJets(),"BCorrelationAnalysis");
     // Alpha T

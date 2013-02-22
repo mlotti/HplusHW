@@ -71,7 +71,11 @@ namespace HPlus {
 
     void setHltTaus(const pat::TriggerObjectRefVector& hltTaus);
     void setNonIsoLeptons(edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
-
+    
+    void setDiJetMassesNoTau(std::vector<float> DiJetMassesNoTau){     
+      // vDiJetMassesNoTau.clear();
+      vDiJetMassesNoTau = DiJetMassesNoTau;
+    }
     void setAlphaT(double alphaT) { fAlphaT = alphaT; }
     void setTauIsFake(bool tauIsFake) { bTauIsFake = tauIsFake; }
     void setMomentumTensorEigenvalues(double QOne, double QTwo, double QThree) { 
@@ -85,6 +89,7 @@ namespace HPlus {
     void setCircularity(double circularity) { fCircularity = circularity; }
     void setDeltaPhi(double deltaPhi) { fDeltaPhi = deltaPhi; }
     void setAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets);
+    void setSelJetsInclTau(const edm::PtrVector<pat::Jet>& selJetsInclTau);
     void setMHT(const XYZTLorentzVector& MHT) { fMHT = MHT; }
     void setMHTAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets);
     void setMHTSelJets(const edm::PtrVector<pat::Jet>& jets);
@@ -145,6 +150,7 @@ namespace HPlus {
 
     std::vector<XYZTLorentzVector> fJets;
     std::vector<XYZTLorentzVector> fAllIdentifiedJets;
+    std::vector<XYZTLorentzVector> fSelJetsInclTau;
     std::vector<double> fJetsBtags;
     std::vector<double> fJetsChf;
     std::vector<double> fJetsNhf;
@@ -245,7 +251,7 @@ namespace HPlus {
     double fPlanarity;
     double fCircularity;
     bool bTauIsFake;
-
+    std::vector<float> vDiJetMassesNoTau;
     double fDeltaPhi;
 
     bool fPassedBTagging;

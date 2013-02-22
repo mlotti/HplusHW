@@ -58,7 +58,7 @@
 
 namespace{
   
-  vector<float> AlphaTAux( const unsigned iNJets, int iCombinationIndex, const std::vector<Float_t> vEt, const std::vector<Float_t> vPx, const std::vector<Float_t> vPy, const std::vector<Float_t> vPz, const TLorentzVector& tau, bool bTauJetExists ){
+  vector<float> AlphaTAux( const unsigned iNJets, int iCombinationIndex, const std::vector<Float_t> vEt, const std::vector<Float_t> vPx, const std::vector<Float_t> vPy, const std::vector<Float_t> vPz, const reco::Candidate& tau){
     
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// Description                                                                                              
@@ -67,12 +67,12 @@ namespace{
     /// DeltaHt = |Ht_pseudoJet1 - Ht_pseudoJet2| of the pseudo-jets.                                            
     /// The function then loops over the jets of the "winning combination" and puts the jets into two groups     
     /// differentiated by which one contains the "Tau-jet". Then, for each PseudoJetGroup it loops over all      
-    /// possible DiJets combinations and calculates their DiJet mass and stores them in a vector of floats       
-    /// It is worth stating here that the number of possible DiJets that can be formed from a pool of iJets is:  
+    /// possible DiJets combinations and calculates their DiJet mass and stores them in a vector of floats.       
+    /// NOTE: The number of possible DiJets that can be formed from a pool of iJets is:  
     /// nCr = iNJets! / (iNJtets-2)!2!                                                                         
     /// so, for example: iNJets = 5, nCr = 5! / (3!2!) = 5x2 = 10                                              
-    /// so, for example: iNJets = 4, nCr = 4! / (2!2!) = 3x2 = 6                                              
-    /// so, for example: iNJets = 3, nCr = 3! / (1!2!) = 3x1 = 3                                             
+    ///                  iNJets = 4, nCr = 4! / (2!2!) = 3x2 = 6                                              
+    ///                  iNJets = 3, nCr = 3! / (1!2!) = 3x1 = 3                                             
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     /// Variable Declaration
@@ -81,14 +81,10 @@ namespace{
     bool bTauJetInGroupB   = 0;
     vector<float> vDiJetMassesNoTau;
     vector<float> vEmpty;
-    MathFunctions oMath;
     vector<TLorentzVector> vJetsInTauPseudoJet;
     vector<TLorentzVector> vJetsInNonTauPseudoJet;
     vector<TLorentzVector> vJetsInPseudoJetA;
     vector<TLorentzVector> vJetsInPseudoJetB;
-    
-    /// The calculation only takes place if a "Tau-jet" exists in the Event.
-    if(!bTauJetExists){return vEmpty;}
     
     /// Get the "winning combination"
     const int k = iCombinationIndex;
@@ -105,43 +101,62 @@ namespace{
 	tmpJet.SetPy( vPy[l] );
 	tmpJet.SetPz( vPz[l] );
 	vJetsInPseudoJetA.push_back(tmpJet);
-      } //eof: if(bPseudoJetsGroupA){
+      } 
       else{ /// If current jet is in groupB (0's)
 	TLorentzVector tmpJet;
 	tmpJet.SetPx( vPx[l] );
 	tmpJet.SetPy( vPy[l] );
 	tmpJet.SetPz( vPz[l] );
 	vJetsInPseudoJetB.push_back(tmpJet);
-      } //eof: else{
-    } //eof:  for ( unsigned l=0; l < iNJets; l++ ) {
+      }
+    } ///eof:  for ( unsigned l=0; l < iNJets; l++ ) {
     
-    /// Determine in which of the two pseudo-jets the tau-jet is found.
-    for(unsigned i = 0; i < vJetsInPseudoJetA.size(); i++){
-      TLorentzVector tauJetCandidate;
-      tauJetCandidate.SetXYZM(vJetsInPseudoJetA[i].Px(), vJetsInPseudoJetA[i].Py(),vJetsInPseudoJetA[i].Pz(), 1.777);
-      float fDeltaR = oMath.getDeltaR( oMath.getDeltaPhi(tauJetCandidate.Phi(),tau.Phi()), oMath.getDeltaEta(tauJetCandidate.Eta(),tau.Eta()) );      
-      /// make sure that it is indeed the tau-jet. Comapare Et and deltaR
-      //      if( (fabs(tau.Et() - tauJetCandidate.Et()) < 2.0) && (fabs(fDeltaR) < 0.5) ){bTauJetInGroupA = 1;}
-      if( fabs(fDeltaR) < 0.4 ) bTauJetInGroupA = 1;
-      else bTauJetInGroupA = 0;
-    }//eof: for(unsigned i = 0; i < vJetsInPseudoJetA.size(); i++){
+    /// Determine in which of the two pseudo-jets the tau-jet is found. Start with PseudoJetA.
+    // for(unsigned i = 0; i < vJetsInPseudoJetA.size(); i++){
+    for (vector<TLorentzVector>::const_iterator iJet = vJetsInPseudoJetA.begin(); iJet != vJetsInPseudoJetA.end(); ++iJet) {
+
+      float fDeltaR = reco::deltaR( tau.eta(), tau.phi(), (*iJet).Eta(), (*iJet).Phi() ); 
+      // inline double deltaR(double eta1, double phi1, double eta2, double phi2) {
+
+      if( fabs(fDeltaR) < 0.1 ){
+	bTauJetInGroupA = 1;
+	break;
+      }
+    }
+
+    if(bTauJetInGroupA=0){
+      /// Determine in which of the two pseudo-jets the tau-jet is found; Continue with PseudoJetB.
+      for (vector<TLorentzVector>::const_iterator iJet = vJetsInPseudoJetB.begin(); iJet != vJetsInPseudoJetB.end(); ++iJet) {
+
+	float fDeltaR = reco::deltaR( tau.eta(), tau.phi(), (*iJet).Eta(), (*iJet).Phi() );
+	if( fabs(fDeltaR) < 0.1 ){
+	  bTauJetInGroupB = 1;
+	  break;
+	}
+      }
+    }
+
+    if(bTauJetInGroupA*bTauJetInGroupB==0) return vEmpty;
+
     if(bTauJetInGroupA){
       // std::cout << "Tau-jet found in Pseudo-Jet A" << std::endl;
       vJetsInTauPseudoJet    = vJetsInPseudoJetA;
       vJetsInNonTauPseudoJet = vJetsInPseudoJetB;
-    }else{
+    }
+    else{
       // std::cout << "Tau-jet found in Pseudo-Jet B" << std::endl;
       vJetsInTauPseudoJet    = vJetsInPseudoJetB;
       vJetsInNonTauPseudoJet = vJetsInPseudoJetA;
     }
+    
     /// We now have a vector containing the Jets comprising each PseudoJet. We want to calculate the DiJet mass for all combination for the 
-    /// PseudoJet that doesn't contain the Tau-Jet, hoping to reconstruct the W mass. Use a double loop with the outside index "m" and the 
-    /// inside index "n=m+1" to avoid double counting.
+    /// PseudoJet that does NOT contain the Tau-Jet, hoping to reconstruct the W mass. 
     int iJetsInNonTauPseudoJet = vJetsInNonTauPseudoJet.size();
     
     /// If the PseudoJet has less than 2 jets (impossible to calculate InvMass), abort calculation and return an empty vector
     if(iJetsInNonTauPseudoJet<2){return vEmpty;}
     
+    /// Try to reconstruct W mass. Use a double loop with the outside index "m" and the  inside index "n=m+1" (to avoid double counting).
     for(int m = 0; m < iJetsInNonTauPseudoJet; m++){
       for(int n = m+1; n < iJetsInNonTauPseudoJet; n++){
 	
@@ -153,8 +168,8 @@ namespace{
 	
 	float fDiJetMassNoTau =  sqrt( (E1+E2)*(E1+E2) - (P1+P2).Mag2() );
 	vDiJetMassesNoTau.push_back(fDiJetMassNoTau);
-      } //eof: for(int n = m+1; m < vJetsInNonTauPseudoJet.size(); n++){
-    } //eof: for(int m = 0; m < vJetsInNonTauPseudoJet.size(); m++){
+      }
+    }
     
     /// Reset variables
     bTauJetInGroupA = 0;
@@ -231,12 +246,14 @@ namespace HPlus {
   EvtTopology::Data EvtTopology::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
     Data output;
     /// Calcuate standard event-shape-variables (e.g sphericity, aplanarity, planarity, alphaT)
-    vector<float> EigenValues = CalcMomentumTensorEigenValues(iEvent, iSetup, tau, jets, output);
-    bool bPassedSphericity = CalcSphericity(EigenValues, output);
-    bool bPassedAplanarity = CalcAplanarity(EigenValues, output);
-    bool bPassedPlanarity = CalcPlanarity(EigenValues, output);
-    bool bPassedCircularity = CalcCircularity(tau, jets, output);
-    bool bPassedAlphaT = CalcAlphaT(iEvent, iSetup, tau, jets, output);
+
+    vector<float> EigenValues = CalcMomentumTensorEigenValues(iEvent, iSetup, jets, output);
+    // return output;
+    bool bPassedSphericity    = CalcSphericity(EigenValues, output);
+    bool bPassedAplanarity    = CalcAplanarity(EigenValues, output);
+    bool bPassedPlanarity     = CalcPlanarity(EigenValues, output);
+    bool bPassedCircularity   = CalcCircularity(jets, output);
+    bool bPassedAlphaT        = CalcAlphaT(iEvent, iSetup, tau, jets, output); // tau is used in W invariant mass reconstruction in the pseudo-jets created for alphaT
 
     /// Determine if event has passed the Event-Topology cuts
     bool bPassedCuts = false;
@@ -246,7 +263,7 @@ namespace HPlus {
       increment(fEvtTopologyCount);
     }
     output.fPassedEvent = bPassedCuts;
-    // std::cout << "AlphaT = " << sAlpha.fAlphaT << "; Sphericity = " << sKinematics.fSphericity << "; Aplanarity = " << sKinematics.fAplanarity << "; Planarity = " << sKinematics.fPlanarity << "; Circularity = " << sKinematics.fCircularity << std::endl;
+    
     return output;
   }
 
@@ -259,20 +276,12 @@ namespace HPlus {
     /// one another in Ht. The two pseudo-jets are formed from the combination of the N objects that minimizes the
     /// DeltaHt = |Ht_pseudoJet1 - Ht_pseudoJet2| of the pseudo-jets.                                             
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     /// Declaration of variables 
     std::vector<float> vEt, vPx, vPy, vPz;
     std::vector<bool> vPseudo_jet1;
     const bool bList = true;
-    const bool bTauJetExists = true;
     bool bPassedCut = false;
-    /// Tau
-    TLorentzVector myTau;
-    myTau.SetXYZM(tau.px(), tau.py(), tau.pz(), 1.777); 
-    /// Fill vectors with Tau-jet information
-    vEt.push_back( myTau.Et() );
-    vPx.push_back( myTau.Px() );
-    vPy.push_back( myTau.Py() );
-    vPz.push_back( myTau.Pz() );
 
     /// Loop over all selected jets
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {    
@@ -326,9 +335,9 @@ namespace HPlus {
     }
     
     /// Get DiJet information from Pseudo-jets
-    vector<float> vDiJetMassesNoTau =  AlphaTAux(iNJets, iCombinationIndex, vEt, vPx, vPy, vPz, myTau, bTauJetExists );
+    vector<float> vDiJetMassesNoTau =  AlphaTAux(iNJets, iCombinationIndex, vEt, vPx, vPy, vPz, tau);
     /// In the case something goes wrong...
-    if ( ( fMin_delta_sum_et < 0.0 ) || (!bTauJetExists) ){ 
+    if ( ( fMin_delta_sum_et < 0.0 ) ){ 
       /// Fill the function structure with -1.0
       output.sAlpha.fAlphaT  = -1.0;
       output.sAlpha.fJt      = -1.0;
@@ -363,7 +372,7 @@ namespace HPlus {
   }  
 
 
-  vector<float> EvtTopology::CalcMomentumTensorEigenValues(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output){
+  vector<float> EvtTopology::CalcMomentumTensorEigenValues(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output){
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// Sphericity, Aplanarity, Planarity
@@ -372,7 +381,7 @@ namespace HPlus {
     /// and: http://inspirehep.net/record/887920/files/Banerjee.MSc.pdf
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /* Change jet+taujet loops to tracks-loop once Track collection is available in pattuples
+    /* Change jets-loop to tracks-loop once Track collection is available in pattuples
     // Create and attach handle to All Tracks collection
     edm::Handle<reco::TrackCollection> myTracksHandle;
     iEvent.getByLabel("generalTracks", myTracksHandle);
@@ -382,9 +391,9 @@ namespace HPlus {
     TMatrixDSym MomentumTensor(3);
     MomentumTensor.Zero();
 
-    /// Sanity check: at least 1 jet and 1 tau exist (2 objects in total)
-    if( (jets.size() + 1 ) < 2 ){
-      throw cms::Exception("LogicError") << "Expected at least two objects (jets + taujet) for the normalised momentum tensor, only found " << jets.size() + 1 << " at " << __FILE__ << ":" << __LINE__ << std::endl;
+    /// Sanity check: at least 3 jets
+    if( (jets.size()) < 3 ){
+      throw cms::Exception("LogicError") << "Expected at least 3 jets for the normalised momentum tensor, only found " << jets.size() + 1 << " at " << __FILE__ << ":" << __LINE__ << std::endl;
     }
 
     /// Declare momentum vector to be filled with jet's momentum components
@@ -407,24 +416,11 @@ namespace HPlus {
       }
     }//eof: jet loop
     
-    /// Don't forget about the tau-jet as well
-    float tauMomentum[3];
-    for(int j = 0; j < 3; j++) tauMomentum[j]=0;
-    
-    /// Fill tauMomentum vector will taujet's momentum components
-    tauMomentum[0] = tau.px();
-    tauMomentum[1] = tau.py();
-    tauMomentum[2] = tau.pz();
-    for (unsigned int i=0; i < 3; i++){
-      for (unsigned int j=0; j <= i; j++){
-	MomentumTensor[i][j] += tauMomentum[i]*tauMomentum[j];
-      }
-    }
-    
     /// Calculate the normalised-to-1 momentum tensor =  sum{p_j[a]*p_j[b]}/sum{p_j**2} 
     /// Thus the MomentumTensor has a unit trace: Mxx + Myy + Mzz = 1, 
     /// and is symmetric: Mij = Mji
     MomentumTensor*=1/(MomentumTensor[0][0]+MomentumTensor[1][1]+MomentumTensor[2][2]);
+
     /// Find the EigenValues Q1 + Q2 + Q3 = 1  0 <= Q1 <= Q2 <= Q3
     TMatrixDSymEigen eigen(MomentumTensor);
     TVectorD eigenvals = eigen.GetEigenValues();
@@ -444,15 +440,9 @@ namespace HPlus {
     }
     
     /// Sanity check on eigenvalues: Q1 + Q2 + Q3 = 1
-    //const float normCheck = eigenvalues[0] + eigenvalues[1] + eigenvalues[2];
-    // std::cout << "Q1 + Q2 + Q3 = " << eigenvalues[0] << " + " << eigenvalues[1] << " + " << eigenvalues[2] << " = " << normCheck << std::endl;
     output.sKinematics.fQOne   = eigenvalues[0];
     output.sKinematics.fQTwo   = eigenvalues[1];
     output.sKinematics.fQThree = eigenvalues[2];
-
-    // if( normCheck != 1){
-    //   throw cms::Exception("LogicError") << "Expected sum of normalised momentum tensor eigenvalues to be one (Q1+Q2+Q3=1), was " << normCheck << " at " << __FILE__ << ":" << __LINE__ << std::endl;
-    // }
 
     return eigenvalues;
   
@@ -543,7 +533,7 @@ namespace HPlus {
   }
   
   
-  bool EvtTopology::CalcCircularity(const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output){
+  bool EvtTopology::CalcCircularity(const edm::PtrVector<pat::Jet>& jets, EvtTopology::Data& output){
 
     /// Circularity (C) = 2*min(Q1,Q2)/(Q1+Q2)  0 <= C <= 1
     /// C = 1 for spherical, C = 0 for linear events
@@ -560,10 +550,7 @@ namespace HPlus {
       edm::Ptr<pat::Jet> iJet = *iter;
       area+=TMath::Sqrt( iJet->px()*iJet->px() + iJet->py()*iJet->py() );
     }//eof: jet loop
-    
-    /// Don't forget about the tau-jet as well
-    area+=TMath::Sqrt( tau.px()*tau.px() + tau.py()*tau.py() );
-    
+        
     /// Loop over number of steps
     for(int i=0; i< nSteps; ++i){
       phi+=deltaPhi;
@@ -574,8 +561,6 @@ namespace HPlus {
 	edm::Ptr<pat::Jet> iJet = *iter;
 	sum+=TMath::Abs(TMath::Cos(phi)*iJet->px()+TMath::Sin(phi)*iJet->py());
       }
-      /// Don't forget about the tau-jet as well
-      sum+=TMath::Abs(TMath::Cos(phi)*tau.px()+TMath::Sin(phi)*tau.py());
       tmp=TMath::Pi()/2*sum/area;
       if( circularity<0 || tmp<circularity ){
 	circularity=tmp;
@@ -586,18 +571,18 @@ namespace HPlus {
       throw cms::Exception("LogicError") << "Expected circularity to be in range  0 <= C <=1.0, was " << circularity << " at " << __FILE__ << ":" << __LINE__ << std::endl;
     }
     output.sKinematics.fCircularity = circularity;
-
+    
     /// Check whether cut is passed
     if( output.sKinematics.fCircularity > fCircularityCut){
       bPassedCut = true;
       increment(fCircularityCutCount);
     }
-          
+    
     /// Fill Histos
     hCircularity->Fill(output.sKinematics.fCircularity);
-
+    
     return bPassedCut;
   }
-
-
+  
+  
 }
