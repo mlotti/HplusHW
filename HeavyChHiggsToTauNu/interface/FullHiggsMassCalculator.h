@@ -35,29 +35,42 @@ namespace HPlus {
     public:
       Data();
       ~Data();
-      const bool passedEvent() const { return fPassedEvent; }
-      const edm::Ptr<pat::Jet>& getBjetHiggsSide() const { return BjetHiggsSide; }
+      const bool passedEvent() const { return bPassedEvent; }
+      //const edm::Ptr<pat::Jet>& getBjetHiggsSide() const { return BjetHiggsSide; }
+      const edm::Ptr<pat::Jet>& getHiggsSideBJet() const { return HiggsSideBJet; }
+      const double getDiscriminant() const { return fDiscriminant; }
       const double getHiggsMass() const { return fHiggsMassSolution; }
       const double getTopMass() const { return fTopMassSolution; }
       const double getNeutrinoZ() const { return fNeutrinoZSolution; }
       const double getNeutrinoPt() const { return fNeutrinoPtSolution; }
       const double getMCNeutrinoZ() const { return fMCNeutrinoPz; }
+      const double getPhysicalTopMass() const { return c_fPhysicalTopMass; }
+      const double getPhysicalTauMass() const { return c_fPhysicalTauMass; }
+      const double getPhysicalBeautyMass() const { return c_fPhysicalBeautyMass; }
+      // string getEventClass()
       
       //      const edm::Ptr<pat::Jet>& getSelectedBjet() const { return fCalculator->selectedBjet; }
 
       friend class FullHiggsMassCalculator;
     private:
-      bool fPassedEvent;
-      edm::Ptr<pat::Jet> BjetHiggsSide;
+      bool bPassedEvent;
+      edm::Ptr<pat::Jet> HiggsSideBJet;
       // Calculated results
+      double fDiscriminant;
       double fTopMassSolution;
       double fNeutrinoZSolution;
       double fNeutrinoPtSolution;
       double fHiggsMassSolution;
       double fMCNeutrinoPz;
-      TVector3 visibleTau;
+      TVector3 visibleTau; // TODO: make notation Hungarian
       TVector3 mcNeutrinos;
       TVector3 mcBjetHiggsSide;
+      // Event classification results
+      //string eventClass;
+      // Physical parameters of the particles
+      const double c_fPhysicalTopMass;
+      const double c_fPhysicalTauMass;
+      const double c_fPhysicalBeautyMass;
     };
 
     FullHiggsMassCalculator(EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -72,10 +85,17 @@ namespace HPlus {
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData);
 
+    edm::Ptr<pat::Jet> findHiggsSideBJet(const BTagging::Data bData, const TauSelection::Data tauData);
+
     bool doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet, FullHiggsMassCalculator::Data& output);
-    void doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, FullHiggsMassCalculator::Data& output, bool myMatchStaus=false, bool doHistogramming = true);
-    void calculateTrueHiggsMass(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet, FullHiggsMassCalculator::Data& output);
-    //void calculateTrueHiggsMass(const edm::Event& iEvent);
+
+    void calculateNeutrinoPz(TVector3& pTau, TVector3& pB, TVector3& MET, FullHiggsMassCalculator::Data& physicalParameters, 
+			     FullHiggsMassCalculator::Data& output);
+
+    void doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, FullHiggsMassCalculator::Data& output);
+
+    //void calculateTrueHiggsMass(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet, FullHiggsMassCalculator::Data& output);
+    
 
   private:
 
