@@ -36,28 +36,28 @@ namespace {
     
     // FIXME change to delta beta discriminators or eventually to continuous discriminator
     
-    if(a->tauID("byTightIsolation") > 0.5 && b->tauID("byTightIsolation") < 0.5)
+    if(a->tauID("byTightCombinedIsolationDeltaBetaCorr") > 0.5 && b->tauID("byTightCombinedIsolationDeltaBetaCorr") < 0.5)
       return true;
 
-    if(a->tauID("byMediumIsolation") > 0.5) {
-      if(b->tauID("byTightIsolation") > 0.5)
+    if(a->tauID("byMediumCombinedIsolationDeltaBetaCorr") > 0.5) {
+      if(b->tauID("byTightCombinedIsolationDeltaBetaCorr") > 0.5)
         return false;
-      if(b->tauID("byMediumIsolation") < 0.5)
+      if(b->tauID("byMediumCombinedIsolationDeltaBetaCorr") < 0.5)
         return true;
     }
 
-    if(a->tauID("byLooseIsolation") > 0.5) {
+    if(a->tauID("byLooseCombinedIsolationDeltaBetaCorr") > 0.5) {
       // assume that if tau is medium isolated, it is also tight isolated
-      if(b->tauID("byMediumIsolation") > 0.5)
+      if(b->tauID("byMediumCombinedIsolationDeltaBetaCorr") > 0.5)
         return false;
-      if(b->tauID("byLooseIsolation") < 0.5)
+      if(b->tauID("byLooseCombinedIsolationDeltaBetaCorr") < 0.5)
         return true;
     }
 
-    if(a->tauID("byVLooseIsolation") > 0.5) {
-      if(b->tauID("byLooseIsolation") > 0.5)
+    if(a->tauID("byVLooseCombinedIsolationDeltaBetaCorr") > 0.5) {
+      if(b->tauID("byLooseCombinedIsolationDeltaBetaCorr") > 0.5)
         return false;
-      if(b->tauID("byVLooseIsolation") < 0.5)
+      if(b->tauID("byVLooseCombinedIsolationDeltaBetaCorr") < 0.5)
         return true;
     }
 

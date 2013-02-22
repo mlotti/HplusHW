@@ -500,6 +500,7 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMET;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTagging;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelected;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTail;
 
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelectionFakeTaus;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeightFakeTaus;
@@ -509,6 +510,7 @@ namespace HPlus {
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETFakeTaus;
     CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTaggingFakeTaus;
     CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFakeTaus;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTailFakeTaus;
 
   };
 }
