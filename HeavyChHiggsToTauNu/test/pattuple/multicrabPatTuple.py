@@ -13,7 +13,7 @@ datasets_Tau = [
     "Tau_198941-202504_2012C_Prompt",
     "Tau_201191-201191_2012C_Dec11",
     "Tau_202972-203742_2012C_Prompt",
-    "Tau_203777-208407_2012D_Prompt",
+    "Tau_203777-208686_2012D_Prompt",
 ]
 
 datasets_MultiJet = [
@@ -24,7 +24,7 @@ datasets_MultiJet = [
     "MultiJet_194270-196531_2012B_Jul13",
     "MultiJet_198022-198523_2012C_Aug24",
     "MultiJet_198941-203742_2012C_Prompt",
-    "MultiJet_203777-208407_2012D_Prompt",
+    "MultiJet_203777-208686_2012D_Prompt",
 ]
 
 datasets_BJetPlusX = [
@@ -156,7 +156,7 @@ datasets_SingleTop = [
     "Tbar_s-channel_TuneZ2star_Summer12",
 ]
 
-workflow = "pattuple_v53_2_test1"
+workflow = "pattuple_v53_2"
 
 tasks = [
     ("Tau", datasets_Tau),
