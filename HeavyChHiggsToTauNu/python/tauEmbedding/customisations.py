@@ -761,6 +761,34 @@ def addTauEmbeddingMuonTaus(process):
 
     return seq
 
+def addTauEmbeddingMuonTausUsingVisible(process, prefix = "tauEmbeddingGenTauVisibleMatch"):
+    seq = cms.Sequence()
+
+    m = cms.EDFilter("GenParticleSelector",
+        src = cms.InputTag("genParticles", "", "EMBEDDING"),
+        cut = cms.string(generatorTauSelection % generatorTauPt)
+    )
+    genTausName = prefix+"GenTaus"
+    setattr(process, genTausName, m)
+    seq *= m
+
+    m = cms.EDProducer("HPlusGenVisibleTauComputer",
+        src = cms.InputTag(genTausName)
+    )
+    visibleName = prefix+"GenTausVisible"
+    setattr(process, visibleName, m)
+    seq *= m
+
+    m = cms.EDProducer("HPlusPATTauLorentzVectorViewClosestDeltaRSelector",
+#        src = cms.InputTag("selectedPatTaus"+PF2PATVersion), # not trigger matched
+        src = cms.InputTag("selectedPatTausHpsPFTau", "", "EMBEDDING"),
+        refSrc = cms.InputTag(visibleName),
+        maxDeltaR = cms.double(0.5),
+    )
+    setattr(process, prefix+"TauMatched", m)
+    seq *= m
+
+    return seq
 
 def addGeneratorTauFilter(process, sequence, filterInaccessible=False, prefix="generatorTaus"):
     counters = []
