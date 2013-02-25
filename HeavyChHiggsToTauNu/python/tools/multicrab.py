@@ -147,6 +147,7 @@
 # additional documentation.
 
 import os, re
+import sys
 import subprocess, errno
 import time
 import math
