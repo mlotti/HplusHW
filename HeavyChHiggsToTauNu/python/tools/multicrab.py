@@ -168,7 +168,7 @@ defaultSeBlacklist_noStageout = [
 #    "mit.edu", # MIT has some problems? added 2011-12-02, commented 2012-09-28
     "kbfi.ee", # Files are not found, added 2012-09-28
     "cscs.ch", # Files are not found, added 2012-09-28
-    "roma1.infn.it", # Jobs don't finish, added 2012-10-26
+#    "roma1.infn.it", # Jobs don't finish, added 2012-10-26, commented 2013-02-25
     ]
 
 ## Default Storage Element (SE) black list for stageout jobs
@@ -181,7 +181,7 @@ defaultSeBlacklist_stageout = [
 #    "ingrid.pt", # Stageout failures, added 2011-10-26, commented 2011-12-02
     "ucsd.edu", # Stageout failures, added 2011-10-26 
     "pi.infn.it", # Stageout failures, added 2011-10-26
-    "lnl.infn.it", # Stageout failures, added 2011-12-02
+#    "lnl.infn.it", # Stageout failures, added 2011-12-02, commented 2013-02-25
 #    "mit.edu", # MIT has some problems? added 2011-12-02, commented 2012-09-28
     "sprace.org.br", # Stageout failures. added 2011-12-02
     "knu.ac.kr", # Stageout failures, added 2011-12-02
