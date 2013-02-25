@@ -218,8 +218,10 @@ def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitio
             args.update(wf.args)
             args["tauEmbeddingInput"] = "1"
             del args["overrideBeamSpot"] # this is needed only for embedding jobs
-            dataset.addWorkflow(Workflow("tauembedding_analysis_"+version, source=Source("tauembedding_embedding_"+version),
-                                         triggerOR=taskDef.triggerOR, args=args, output_file="histograms.root"))
+            wf_analysis = Workflow("tauembedding_analysis_"+version, source=Source("tauembedding_embedding_"+version),
+                                   triggerOR=taskDef.triggerOR, args=args, output_file="histograms.root")
+            wf_analysis.addCrabLine("CMSSW.total_number_of_lumis = -1")
+            dataset.addWorkflow(wf_analysis)
  
 def addEmbeddingSkim_v44_4_2(datasets):
     definitions = {

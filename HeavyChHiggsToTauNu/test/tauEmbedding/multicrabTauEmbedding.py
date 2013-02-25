@@ -201,7 +201,7 @@ def createTasks(opts, step, version=None):
     scheduler = "arc"
     if step in ["analysis", "analysisTau", "signalAnalysis", "signalAnalysisGenTau", "muonAnalysis", "caloMetEfficiency","EWKMatching", "ewkBackgroundCoverageAnalysis"]:
         crabcfg = None
-        if "lxplus" in os.environ["HOST"]:
+        if "HOST" in os.environ and "lxplus" in os.environ["HOST"]:
             scheduler = "remoteGlidein"
         crabcfgtemplate = crabCfgTemplate(scheduler=scheduler, return_data=True)
 
