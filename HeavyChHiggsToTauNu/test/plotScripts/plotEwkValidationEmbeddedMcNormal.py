@@ -56,8 +56,8 @@ def main():
 #    tauDirEmbs = tauDirEmbs[:2]
 #    dirEmbs = dirEmbs[:2]
 
-    tauDatasetsEmb = tauEmbedding.DatasetsMany(tauDirEmbs, tauAnalysisEmb+"Counters", normalizeMCByLuminosity=True, dataEra=dataEra)
-    tauDatasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=tauDirSig+"/multicrab.cfg", counters=tauAnalysisSig+"Counters", dataEra=dataEra)
+    tauDatasetsEmb = tauEmbedding.DatasetsMany(tauDirEmbs, counterDir="/"+tauAnalysisEmb+"Counters", normalizeMCByLuminosity=True, dataEra=dataEra)
+    tauDatasetsSig = dataset.getDatasetsFromMulticrabCfg(directory=tauDirSig, counterDir="/"+tauAnalysisSig+"Counters", dataEra=dataEra)
 #    datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"/counters", normalizeMCByLuminosity=True, dataEra=dataEra)
 #    datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"/counters", dataEra=dataEra)
 
@@ -107,7 +107,7 @@ def main():
     #selectorArgs = [tauEmbedding.tauNtuple.weight[dataEra]]
     selectorArgs = [""]
     embArgs = []
-    embArgs = ["/home/mkortela/hplus/CMSSW_4_4_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/multicrab_muonAnalysis_121017_100408/embedding-wtaumuRatio-muonpt40.root", "FullChargedHadrRelIso10/TTJets"]
+#    embArgs = ["/home/mkortela/hplus/CMSSW_4_4_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/multicrab_muonAnalysis_121017_100408/embedding-wtaumuRatio-muonpt40.root", "FullChargedHadrRelIso10/TTJets"]
     process = True
 #    process = False
     maxEvents = -1
@@ -302,8 +302,8 @@ def doTauCounters(datasetsEmb, datasetsSig, datasetName, ntupleCacheEmb, ntupleC
     lumi = datasetsEmb.getLuminosity()
 
     # Take unweighted counters for embedded, to get a handle on the muon isolation efficiency
-    eventCounterEmb = tauEmbedding.EventCounterMany(datasetsEmb, counters=tauAnalysisEmb+"Counters", normalize=normalizeEmb)
-    eventCounterSig = counter.EventCounter(datasetsSig, counters=tauAnalysisEmb+"Counters")
+    eventCounterEmb = tauEmbedding.EventCounterMany(datasetsEmb, counters="/"+tauAnalysisEmb+"Counters", normalize=normalizeEmb)
+    eventCounterSig = counter.EventCounter(datasetsSig, counters="/"+tauAnalysisEmb+"Counters")
 
     def isNotThis(name):
         return name != datasetName

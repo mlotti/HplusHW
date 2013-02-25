@@ -370,16 +370,15 @@ class DatasetsMany:
     ## Constructor
     #
     # \param dirs                      List of paths multicrab directories, either absolute or relative to working directory
-    # \param counters                  Directory in dataset TFiles containing the event counters
     # \param normalizeMCByCrossSection Normalize MC to cross section
     # \param normalizeMCByLuminosity   Normalize MC to data luminosity?
     # \param kwargs                    Keyword arguments, forwarded to dataset.getDatasetsFromMulticrabCfg()
     #
     # Construct a dataset.DatasetManager object from each multicrab directory
-    def __init__(self, dirs, counters, normalizeMCByCrossSection=False, normalizeMCByLuminosity=False, **kwargs):
+    def __init__(self, dirs, normalizeMCByCrossSection=False, normalizeMCByLuminosity=False, **kwargs):
         self.datasetManagers = []
         for d in dirs:
-            datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=d+"/multicrab.cfg", counters=counters, **kwargs)
+            datasets = dataset.getDatasetsFromMulticrabCfg(directory=d, **kwargs)
             datasets.updateNAllEventsToPUWeighted()
             datasets.loadLuminosities()
             self.datasetManagers.append(datasets)
