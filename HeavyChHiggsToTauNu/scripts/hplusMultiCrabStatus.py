@@ -52,10 +52,21 @@ def main(opts):
     for task in taskDirs:
         if not os.path.exists(task):
             if opts.showMissing:
-                print "%s: Task directory missing" % task
+                print >>sys.stderr, "%s: Task directory missing" % task
             continue
-        
-        jobs = multicrab.crabStatusToJobs(task, opts.printCrab)
+
+        # For some reason in lxplus sometimes the crab output is
+        # garbled. In case of value errors try 4 times.
+        for iter in xrange(0, 4):
+            try:
+                jobs = multicrab.crabStatusToJobs(task, opts.printCrab)
+                break
+            except ValueError:
+                again = "trying again"
+                if iter == 3:
+                    again = "giving up"
+                print >>sys.stderr, "%s: Got garbled output from 'crab -status', %s" % (task, again)
+                pass
 
         jobSummaries = {}
         njobs = 0
