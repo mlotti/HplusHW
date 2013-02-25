@@ -2641,9 +2641,7 @@ class NtupleCache:
         argsNamed.Write()
 
 
-        tree = rootFile.Get(self.treeName)
-        if not tree:
-            raise Exception("TTree '%s' not found from file %s" % (self.treeName, rootFile.GetName()))
+        (tree, treeName) = dataset._getRootHisto(self.tree)
 
         N = tree.GetEntries()
         useMaxEvents = False
@@ -2672,7 +2670,6 @@ class NtupleCache:
                 raise Exception("Assert: for some reason the cache file %s does not exist yet. Did you set 'process=True' in the constructor of NtupleCache?" % self.cacheFileName)
             self.cacheFile = ROOT.TFile.Open(self.cacheFileName)
 
-        rootFile = dataset.getRootFile()
         path = "%s/%s/%s" % (hashlib.sha1(dataset.getBaseDirectory()).hexdigest(), dataset.getName(), histoName)
         h = self.cacheFile.Get(path)
         if not h:
