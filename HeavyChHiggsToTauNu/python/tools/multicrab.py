@@ -505,6 +505,11 @@ def crabStatusOutput(task, printCrab):
             raise Exception("Command '%s' failed with exit code %d, output:\n%s" % (" ".join(command), p.returncode, output))
     return output
 
+## Exception for something being wrong in the crab output
+class CrabOutputException(Exception):
+    def __init__(self, message):
+        Exception.__init__(self, message)
+
 ## Transform 'crab -status' output to list of multicrab.CrabJob objects
 #
 # \param task    CRAB task directory
@@ -513,12 +518,25 @@ def crabStatusOutput(task, printCrab):
 # \return List of multicrab.CrabJob objects
 def crabOutputToJobs(task, output):
     status_re = re.compile("(?P<id>\d+)\s+(?P<end>\S)\s+(?P<status>\S+)(\s+\(.*?\))?\s+(?P<action>\S+)\s+(?P<execode>\S+)?\s+(?P<jobcode>\S+)?\s+(?P<host>\S+)?")
+    total_re = re.compile("crab:\s+(?P<njobs>\d+)\s+Total\s+Jobs")
     jobs = {}
+    njobs = 0
+    total = None
     for line in output.split("\n"):
         m = status_re.search(line)
         if m:
             job = CrabJob(task, m)
             multicrabWorkflowsTools._addToDictList(jobs, job.status, job)
+            njobs += 1
+            continue
+        m = total_re.search(line)
+        if m:
+            total = int(m.group("njobs"))
+
+    if total is None:
+        raise CrabOutputException("Did not find total number of jobs from the crab output")
+    if total != njobs:
+        raise CrabOutputException("Crab says total number of jobs is %d, but only %d was found from the input" % (total, njobs))
     return jobs
 
 ## Convert argument to int if it is not None
@@ -540,14 +558,17 @@ def crabStatusToJobs(task, printCrab):
     for i in xrange(0, maxTrials):
         try:
             output = crabStatusOutput(task, printCrab)
-        except ValueError:
-            again = "trying again"
-            if iter == 3:
-                again = "giving up"
-            print >>sys.stderr, "%s: Got garbled output from 'crab -status', %s" % (task, again)
-            pass
+            return crabOutputToJobs(task, output)
+        except ValueError, e:
+            if i == maxTrials-1:
+                raise e
+            print >>sys.stderr, "%s: Got garbled output from 'crab -status' (parse error), trying again" % task
+        except CrabOutputException, e:
+            if i == maxTrials-1:
+                raise e
+            print >>sys.stderr, "%s: Got garbled output from 'crab -status' (mismatch in number of jobs), trying again" % task
 
-    return crabOutputToJobs(task, output)
+    raise Exception("Assetion, this line should never be reached")
 
 ## Class for containing the information of finished CRAB job
 class CrabJob:
