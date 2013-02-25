@@ -547,7 +547,19 @@ def _intIfNotNone(n):
 #
 # \return List of multicrab.CrabJob objects
 def crabStatusToJobs(task, printCrab):
-    output = crabStatusOutput(task, printCrab)
+    # For some reason in lxplus sometimes the crab output is
+    # garbled. In case of value errors try 4 times.
+    maxTrials = 4
+    for i in xrange(0, maxTrials):
+        try:
+            output = crabStatusOutput(task, printCrab)
+        except ValueError:
+            again = "trying again"
+            if iter == 3:
+                again = "giving up"
+            print >>sys.stderr, "%s: Got garbled output from 'crab -status', %s" % (task, again)
+            pass
+
     return crabOutputToJobs(task, output)
 
 ## Class for containing the information of finished CRAB job
