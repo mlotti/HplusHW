@@ -642,6 +642,10 @@ def th1ApplyBin(th1, function):
     for bin in xrange(0, th1.GetNbinsX()+2):
         th1.SetBinContent(bin, function(th1.GetBinContent(bin)))
 
+def th1ApplyBinError(th1, function):
+    for bin in xrange(0, th1.GetNbinsX()+2):
+        th1.SetBinError(bin, function(th1.GetBinError(bin)))
+                
 ## Convert TH1 distribution to TH1 of efficiency as a function of cut value
 #
 # \param hdist  TH1 distribution
@@ -650,6 +654,7 @@ def dist2eff(hdist, **kwargs):
     hpass = dist2pass(hdist, **kwargs)
     total = hdist.Integral(0, hdist.GetNbinsX()+1)
     th1ApplyBin(hpass, lambda value: value/total)
+    th1ApplyBinError(hpass, lambda value: math.sqrt(value)/total)
     return hpass
 
 ## Convert TH1 distribution to TH1 of 1-efficiency as a function of cut value
