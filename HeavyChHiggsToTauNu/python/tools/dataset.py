@@ -200,14 +200,12 @@ def readFromCrabDirs(taskdirs, **kwargs):
     noFiles = False
     for d in taskdirs:
         files = glob.glob(os.path.join(d, "res", inputFile))
-        if len(files) > 1:
-            raise Exception("Only one file should match the input (%d matched) for task %s" % (len(files), d))
-        elif len(files) == 0:
+        if len(files) == 0:
             print >> sys.stderr, "Ignoring dataset %s: no files matched to '%s' in task directory %s" % (d, inputFile, os.path.join(d, "res"))
             noFiles = True
             continue
 
-        dlist.append( (os.path.basename(d)+postfix, files[0]) )
+        dlist.append( (os.path.basename(d)+postfix, files) )
 
     if noFiles:
         print >> sys.stderr, ""
@@ -223,9 +221,11 @@ def readFromCrabDirs(taskdirs, **kwargs):
 
 ## Construct DatasetManager from a list of CRAB task directory names.
 # 
-# \param rootFileList  List of (name, filename) pairs (both should be strings).
-#                     'name' is taken as the dataset name, and 'filename' as
-#                      the path to the ROOT file.
+# \param rootFileList  List of (\a name, \a filenames) pairs (\a name
+#                      should be string, \a filenames can be string or
+#                      list of strings). \a name is taken as the
+#                      dataset name, and \a filenames as the path(s)
+#                      to the ROOT file(s).
 # \param kwargs        Keyword arguments, forwarded to readFromRootFiles() and dataset.Dataset.__init__()
 #
 # \return DatasetManager object
@@ -235,9 +235,11 @@ def getDatasetsFromRootFiles(rootFileList, **kwargs):
 
 ## Construct DatasetManagerCreator from a list of CRAB task directory names.
 # 
-# \param rootFileList  List of (name, filename) pairs (both should be strings).
-#                     'name' is taken as the dataset name, and 'filename' as
-#                      the path to the ROOT file. Forwarded to DatasetManagerCreator.__init__()
+# \param rootFileList  List of (\a name, \a filenames) pairs (\a name
+#                      should be string, \a filenames can be string or
+#                      list of strings). \a name is taken as the
+#                      dataset name, and \a filenames as the path(s)
+#                      to the ROOT file(s). Forwarded to DatasetManagerCreator.__init__()
 # \param kwargs        Keyword arguments (see below), all forwarded to DatasetManagerCreator.__init__()
 #
 # <b>Keyword arguments</b>
@@ -622,7 +624,7 @@ class TreeDraw:
             else:
                 selection = self.weight
 
-        (tree, treeName) = dataset._getRootHisto(self.tree)
+        (tree, treeName) = dataset.createRootChain(self.tree)
         if tree == None:
             raise Exception("No TTree '%s' in file %s" % (treeName, dataset.getRootFile().GetName()))
 
@@ -1267,7 +1269,7 @@ class Dataset:
     ## Constructor.
     # 
     # \param name              Name of the dataset (can be anything)
-    # \param tfile             ROOT.TFile object for the dataset
+    # \param tfiles            List of ROOT.TFile objects for the dataset
     # \param analysisName      Base part of the analysis directory name
     # \param searchMode        String for search mode
     # \param dataEra           String for data era
@@ -1300,24 +1302,45 @@ class Dataset:
     # The final directory name is
     # data: analysisName+searchMode+optimizationMode
     # MC:   analysisName+searchMode+dataEra+optimizationMode
-    def __init__(self, name, tfile, analysisName, searchMode=None, dataEra=None, optimizationMode=None, weightedCounters=True, counterDir="counters"):
+    def __init__(self, name, tfiles, analysisName, searchMode=None, dataEra=None, optimizationMode=None, weightedCounters=True, counterDir="counters"):
         self.name = name
-        self.file = tfile
+        self.files = tfiles
+        if len(self.files) == 0:
+            raise Exception("Expecting at least one TFile, jot 0")
+
         # Now this is really an uhly hack
-        self._setBaseDirectory(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(self.file.GetName())))))
+        self._setBaseDirectory(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(self.files[0].GetName())))))
 
-        configInfo = self.file.Get("configInfo")
-        if configInfo == None:
-            raise Exception("configInfo directory is missing from file %s" % self.file.GetName())
+        # Extract configInfo and dataVersion, check for consistency
+        # that all files have the same values
+        self.info = None
+        self.dataVersion = None
+        for f in self.files:
+            configInfo = f.Get("configInfo")
+            if configInfo == None:
+                raise Exception("configInfo directory is missing from file %s" % f.GetName())
 
-        self.info = _rescaleInfo(_histoToDict(self.file.Get("configInfo").Get("configinfo")))
-        if "energy" in self.info:
-            self.info["energy"] = str(int(round(self.info["energy"])))
+            info = _rescaleInfo(_histoToDict(configInfo.Get("configinfo")))
+            if "energy" in info:
+                info["energy"] = str(int(round(info["energy"])))
+            if self.info is None:
+                self.info = info
+            else:
+                for key, value in self.info:
+                    valnew = info[key]
+                    if valnew == 0 and value == 0:
+                        continue
+                    if math.abs(value-valnew)/max(value, valnew) > 0.001:
+                        raise Exception("Mismatched values in configInfo/configinfo, label %s, got %f from file %s, and %f from file %s" % (key, value, self.files[0].GetName(), valnew, f.GetName()))
 
-        dataVersion = configInfo.Get("dataVersion")
-        if dataVersion == None:
-            raise Exception("Unable to determine dataVersion for dataset %s from file %s" % (name, fname))
-        self.dataVersion = dataVersion.GetTitle()
+            dataVersion = configInfo.Get("dataVersion")
+            if dataVersion == None:
+                raise Exception("Unable to determine dataVersion for dataset %s from file %s" % (name, f.GetName()))
+            if self.dataVersion is None:
+                self.dataVersion = dataVersion.GetTitle()
+            else:
+                if self.dataVersion != dataVersion.GetTitle():
+                    raise Exception("Mismatched values in configInfo/dataVersion, got %s from file %s, and %s from file %s" % (self.dataVersion, self.files[0].GetName(), dataVersion.GetTitle(), f.GetName()))
 
         self._isData = "data" in self.dataVersion
         self._weightedCounters = weightedCounters
@@ -1336,8 +1359,9 @@ class Dataset:
             self._analysisDirectoryName += self._optimizationMode
 
         # Check that analysis directory exists
-        if self.file.Get(self._analysisDirectoryName) == None:
-            raise AnalysisNotFoundException("Analysis directory '%s' does not exist in file '%s'" % (self._analysisDirectoryName, self.file.GetName()))
+        for f in self.files:
+            if f.Get(self._analysisDirectoryName) == None:
+                raise AnalysisNotFoundException("Analysis directory '%s' does not exist in file '%s'" % (self._analysisDirectoryName, f.GetName()))
         self._analysisDirectoryName += "/"
 
         self._unweightedCounterDir = counterDir
@@ -1345,17 +1369,16 @@ class Dataset:
             self._weightedCounterDir = counterDir + "/weighted"
             self._readCounters()
 
-    ## Close the file
+    ## Close the files
     #
     # Can be useful when opening very many files in order to reduce
     # the memory footprint and not hit the limit of number of open
     # files
     def close(self):
-        if self.file != None:
-            self.file.Close("R")
-            self.file.Delete()
-            del self.file
-            self.file = None
+        for f in self.files:
+            f.Close("R")
+            f.Delete()
+        self.files = []
 
     ## Clone the Dataset object
     # 
@@ -1367,65 +1390,129 @@ class Dataset:
     # while also keeping the original ttbar with the original SM cross
     # section.
     def deepCopy(self):
-        d = Dataset(self.name, self.file, self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._weightedCounters, self._unweightedCounterDir)
+        d = Dataset(self.name, self.files, self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._weightedCounters, self._unweightedCounterDir)
         d.info.update(self.info)
         d.nAllEvents = self.nAllEvents
         return d
 
-    ## Get ROOT histogram (or actually any object from the analysis directory)
+    ## Translate a logical name to a physical name in the file
+    #
+    # If name starts with slash ('/'), it is interpreted as a absolute
+    # path within the ROOT file.
+    def _translateName(self, name):
+        if name[0] == '/':
+            return name[1:]
+        else:
+            return self._analysisDirectoryName + name
+
+    ## Get ROOT histogram
+    #
+    # \param name    Path of the ROOT histogram relative to the analysis
+    #                root directory
+    #
+    # \return pair (\a histogram, \a realName)
+    #
+    # If name starts with slash ('/'), it is interpreted as a absolute
+    # path within the ROOT file.
+    #
+    # If dataset consists of multiple files, the histograms are added
+    # with the ROOT.TH1.Add() method.
+    def getRootHisto(self, name):
+        (histos, realName) = self.getRootObjects(name)
+        if len(histos) == 1:
+            h = histos[0]
+        else:
+            h = histos[0]
+            for h2 in histos[1:]:
+                h.Add(h2)
+
+        return (h, realName)
+
+    ## Create ROOT TChain
+    # 
+    # \param name    Path of the ROOT TTree relative to the analysis
+    #                root directory
+    #
+    # \return ROOT.TChain
+    #
+    # If name starts with slash ('/'), it is interpreted as a absolute
+    # path within the ROOT file.
+    def createRootChain(self, treeName):
+        chain = ROOT.TChain(self._translateName(treeName))
+        for f in self.files:
+            chain.Add(f.GetName())
+        return chain
+
+    ## Get arbitrary ROOT object from the file
     #
     # \param name    Path of the ROOT object relative to the analysis
     #                root directory
     #
+    # \return pair (\a object, \a realName)
+    #
     # If name starts with slash ('/'), it is interpreted as a absolute
     # path within the ROOT file.
-    def _getRootHisto(self, name):
-        if name[0] == '/':
-            realName = name[1:]
-        else:
-            realName = self._analysisDirectoryName + name
+    #
+    # If the dataset consists of multiple files, raise an Exception.
+    # User should use getRootObjects() method instead.
+    def getRootObject(self, name):
+        if len(self.files) > 1:
+            raise Exception("You asked for a single ROOT object, but the Dataset %s consists of multiple ROOT files. You should call getRootObjects() instead, and deal with the multiple objects by yourself.")
+        (lst, realName) = self.getRootObjects()
+        return (lst[0], realName)
 
-        h = self.file.Get(realName)
-        # below it is important to use '==' instead of 'is',
-        # because null TObject == None, but is not None
-        if h == None:
-            raise HistogramNotFoundException("Unable to find histogram '%s' (requested '%s') from file '%s'" % (realName, name, self.file.GetName()))
-
-        return (h, realName)
+    ## Get list of arbitrary ROOT objects from the file
+    #
+    # \param name    Path of the ROOT object relative to the analysis
+    #                root directory
+    #
+    # \return pair (\a list, \a realName), where \a list is the list
+    #         of ROOT objects, one per file, and \a realName is the
+    #         physical name of the objects
+    #
+    # If name starts with slash ('/'), it is interpreted as a absolute
+    # path within the ROOT file.
+    def getRootObjects(self, name):
+        realName = self._translateName(name)
+        ret = []
+        for f in self.files:
+            o = f.Get(realName)
+            # below it is important to use '==' instead of 'is',
+            # because null TObject == None, but is not None
+            if o == None:
+                raise HistogramNotFoundException("Unable to find object '%s' (requested '%s') from file '%s'" % (realName, name, self.files[0].GetName()))
+            ret.append(o)
+        return (ret, realName)
 
     ## Read counters
     def _readCounters(self):
         self.counterDir = self._unweightedCounterDir
-        try:
-            (d, realDir) = self._getRootHisto(self.counterDir)
-        except HistogramNotFoundException, e:
-            raise Exception("Could not find counter histogram, message: %s" % str(e))
-        if d.Get("counter") != None:
-            ctr = _histoToCounter(d.Get("counter"))
-            self.nAllEventsUnweighted = ctr[0][1].value() # first counter, second element of the tuple
-        else:
-            if not self._weightedCounters:
-                raise Exception("Could not find counter histogram in directory %s from file %s" % (realDir, self.file.GetName()))
-            self.nAllEventsUnweighted = -1
-        self.nAllEventsWeighted = None
 
+        # Read unweighted counters
+        # The unweighted counters are allowed to not exist unless
+        # weightedCounters are also enabled
+        try:
+            (counter, realName) = self.getRootHisto(self.counterDir+"/counter")
+            ctr = _histoToCounter(counter)
+            self.nAllEventsUnweighted = ctr[0][1].value() # first counter, second element of the tuple
+        except HistogramNotFoundException, e:
+            if not self._weightedCounters:
+                raise Exception("Could not find counter histogram, message: %s" % str(e))
+            self.nAllEventsUnweighted = -1
+
+        self.nAllEventsWeighted = None
         self.nAllEvents = self.nAllEventsUnweighted
 
+        # Read weighted counters
         if self._weightedCounters:
             self.counterDir = self._weightedCounterDir
             try:
-                (d, realDir) = self._getRootHisto(self.counterDir)
+                (counter, realName) = self.getRootHisto(self.counterDir+"/counter")
+                ctr = _histoToCounter(counter)
+                self.nAllEventsWeighted = ctr[0][1].value() # first counter, second element of the tuple
+                self.nAllEvents = self.nAllEventsWeighted
             except HistogramNotFoundException, e:
-                raise Exception("Could not find counter directory, message: %s" % str(e))
-            h = d.Get("counter")
-            if h == None:
-                msg = "No TH1 'counter' in directory '%s' of ROOT file '%s'" % (realDir, self.file.GetName())
-                raise Exception(msg)
-            ctr = _histoToCounter(h)
-            h.Delete()
-            self.nAllEventsWeighted = ctr[0][1].value() # first counter, second element of the tuple
-
-            self.nAllEvents = self.nAllEventsWeighted
+                raise Exception("Could not find counter histogram, message: %s" % str(e))
 
     def getName(self):
         return self.name
@@ -1492,7 +1579,12 @@ class Dataset:
         return self.counterDir
 
     def getRootFile(self):
-        return self.file
+        if len(self.files) > 1:
+            raise Exception("Dataset %s consists of %d files, you should use getRootFiles() method instead." % (self.getName(), len(self.files)))
+        return self.files[0]
+
+    def getRootFiles(self):
+        return self.files
 
     ## Set the number of all events (for normalization).
     #
@@ -1553,7 +1645,7 @@ class Dataset:
             return True
 
         try:
-            return self._getRootHisto(name)[0] != None
+            return len(self.getRootObjects(name)) > 0
         except HistogramNotFoundException:
             return False
 
@@ -1574,7 +1666,7 @@ class Dataset:
             h = name.draw(self)
         else:
             pname = name
-            (h, realName) = self._getRootHisto(pname)
+            (h, realName) = self.getRootHisto(pname)
             name = h.GetName()+"_"+self.name
             if modify is not None:
                 h = modify(h)
@@ -1590,20 +1682,18 @@ class Dataset:
     #                    argument and returning a boolean.
     # 
     # \return List of names in the directory.
+    #
+    # If the dataset consists of multiple files, the listing of the
+    # first file is given.
     def getDirectoryContent(self, directory, predicate=None):
-        (d, realDir) = self._getRootHisto(directory)
-        if d == None:
-            msg = "No object %s in file %s" % (realDir, self.file.GetName())
-            if realDir != d:
-                msg += "\nThe requested directory was %s, and the path was modified because of dataEra." % self.counterDir
-            raise Exception(msg)
+        (dirs, realDir) = self.getRootObjects(directory)
 
         # wrap the predicate
         wrapped = None
         if predicate is not None:
             wrapped = lambda key: predicate(key.ReadObj())
 
-        return aux.listDirectoryContent(d, wrapped)
+        return aux.listDirectoryContent(dirs[0], wrapped)
 
     def _setBaseDirectory(self,base):
         self.basedir = base
@@ -1613,12 +1703,12 @@ class Dataset:
         return self.basedir
 
     def formatDatasetTree(self, indent):
-        return '%sDataset("%s", "%s", ...),\n' % (indent, self.getName(), self.file.GetName())
+        return '%sDataset("%s", %s, ...),\n' % (indent, self.getName(), ", ".join(['"%s"' % f.GetName() for f in self.files]))
         
     ## \var name
     # Name of the dataset
-    ## \var file
-    # TFile object of the dataset
+    ## \var files
+    # List of TFile objects of the dataset
     ## \var info
     # Dictionary containing the configInfo histogram
     ## \var dataVersion
@@ -2234,27 +2324,40 @@ class DatasetManager:
 #
 # This holds the name, ROOT file, and data/MC status of a dataset.
 class DatasetPrecursor:
-    def __init__(self, name, filename):
+    def __init__(self, name, filenames):
         self._name = name
-        self._filename = filename
+        if isinstance(filenames, basestring):
+            self._filenames = [filenames]
+        else:
+            self._filenames = filenames
 
-        self._rootFile = ROOT.TFile.Open(self._filename)
-        # Below is important to use '==' instead of 'is' to check for
-        # null file
-        if self._rootFile == None:
-            raise Exception("Unable to open ROOT file '%s' for dataset '%s'" % (self._filename, self._name))
+        self._rootFiles = []
+        dataVersion = None
+        for name in self._filenames:
+            rf = ROOT.TFile.Open(name)
+            # Below is important to use '==' instead of 'is' to check for
+            # null file
+            if rf == None:
+                raise Exception("Unable to open ROOT file '%s' for dataset '%s'" % (name, self._name))
+            self._rootFiles.append(rf)
 
-        dataVersion = self._rootFile.Get("configInfo/dataVersion")
-        if dataVersion == None:
-            raise Exception("Unable to find 'configInfo/dataVersion' from ROOT file '%s'" % self._filename)
+            dv = rf.Get("configInfo/dataVersion")
+            if dv == None:
+                raise Exception("Unable to find 'configInfo/dataVersion' from ROOT file '%s'" % name)
+                
+            if dataVersion is None:
+                dataVersion = dv.GetTitle()
+            else:
+                if dataVersion != dv.GetTitle():
+                    raise Exception("Mismatch in dataVersion when creating multi-file DatasetPrecursor, got %s from file %s, and %s from %s" % (dataVersion, self._filenames[0], dv.GetTitle(), name))
 
-        self._isData = "data" in dataVersion.GetTitle()
+        self._isData = "data" in dataVersion
 
     def getName(self):
         return self._name
 
-    def getFile(self):
-        return self._rootFile
+    def getFiles(self):
+        return self._rootFiles
 
     def isData(self):
         return self._isData
@@ -2275,9 +2378,11 @@ _dataDataEra_re = re.compile("_(?P<era>201\d\S)_")
 class DatasetManagerCreator:
     ## Constructor
     #
-    # \param rootFileList  List of (name, filename) pairs (both should be strings).
-    #                     'name' is taken as the dataset name, and 'filename' as
-    #                      the path to the ROOT file.
+    # \param rootFileList  List of (\a name, \a filenames) pairs (\a
+    #                      name should be string, \a filenames can be
+    #                      string or list of strings). \a name is taken
+    #                      as the dataset name, and \a filenames as the
+    #                      path(s) to the ROOT file(s).
     # \param kwargs        Keyword arguments (see below)
     #
     # <b>Keyword arguments</b>
@@ -2286,7 +2391,7 @@ class DatasetManagerCreator:
     # Creates DatasetPrecursor objects for each ROOT file, reads the
     # contents of first MC file to get list of available analyses.
     def __init__(self, rootFileList, **kwargs):
-        self._precursors = [DatasetPrecursor(name, filename) for name, filename in rootFileList]
+        self._precursors = [DatasetPrecursor(name, filenames) for name, filenames in rootFileList]
         self._baseDirectory = kwargs.get("baseDirectory", "")
 
         mcRead = False
@@ -2313,7 +2418,7 @@ class DatasetManagerCreator:
         self._dataDataEras.sort()                
 
     def _readAnalysisContent(self, precursor):
-        contents = aux.listDirectoryContent(precursor.getFile(), lambda key: key.IsFolder())
+        contents = aux.listDirectoryContent(precursor.getFiles()[0], lambda key: key.IsFolder())
 
         def skipItem(name):
             for skip in _analysisNameSkipList:
@@ -2431,7 +2536,7 @@ class DatasetManagerCreator:
                     raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB" % dataEra)
 
             try:
-                dset = Dataset(precursor.getName(), precursor.getFile(), **_args)
+                dset = Dataset(precursor.getName(), precursor.getFiles(), **_args)
             except AnalysisNotFoundException, e:
                 msg = str(e)+"\n"
                 helpFound = False
@@ -2647,8 +2752,7 @@ class NtupleCache:
         argsNamed = ROOT.TNamed("selectorArgs", str(selectorArgs))
         argsNamed.Write()
 
-
-        (tree, treeName) = dataset._getRootHisto(self.tree)
+        tree = dataset.createRootChain(self.tree)
 
         N = tree.GetEntries()
         useMaxEvents = False
