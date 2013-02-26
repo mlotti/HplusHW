@@ -50,8 +50,9 @@ namespace HPlus {
   //  size_t getTauMotherId ?
   //  double getDeltaR(particle 1, particle 2);
   //  double getMETDeltaPhi();
-  //  double getMETDeltaMagnitude();
-  //  double getMETDeltaR();
+  //  double getMETDeltaMagnitude(); // return difference RECOMET-GENMET
+  //  double getMETDeltaR(); // ?????????
+  //  double getMETRatio(); // return ratio RECOMET/GENMET
 
   // Also need methods like these:
   // isBGenuine() etc.

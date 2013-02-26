@@ -20,7 +20,6 @@
 #include "TVector3.h"
 #include "TMath.h"
 
-
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
@@ -129,8 +128,8 @@ namespace HPlus {
       }
     }
     if (!myHiggsSideBJet) return NULL;
-    return myHiggsSideBJet;
     std::cout << "FullMass: Higgs side bjet found, pt=" << myHiggsSideBJet->pt() << ", eta=" << myHiggsSideBJet->eta() << std::endl;
+    return myHiggsSideBJet;
   }
 
   reco::Candidate* getGenTauFromHiggs(const edm::Event& iEvent) {

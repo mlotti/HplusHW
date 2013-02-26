@@ -15,7 +15,9 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 
+#include "TString.h"
 #include "TVector3.h"
+#include "TLorentzVector.h"
 
 namespace edm {
   class ParameterSet;
@@ -23,7 +25,8 @@ namespace edm {
   class EventSetup;
 }
 
-class TVector3;
+//class TVector3;
+class TLorentzVector;
 
 namespace HPlus {
   class HistoWrapper;
@@ -65,6 +68,9 @@ namespace HPlus {
       TVector3 visibleTau; // TODO: make notation Hungarian
       TVector3 mcNeutrinos;
       TVector3 mcBjetHiggsSide;
+      TLorentzVector LorentzVector_bJetFourMomentum;
+      TLorentzVector LorentzVector_visibleTauFourMomentum;
+      TLorentzVector LorentzVector_neutrinosFourMomentum;
       // Event classification results
       //string eventClass;
       // Physical parameters of the particles
@@ -84,18 +90,19 @@ namespace HPlus {
 
   private:
     Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData);
-
     edm::Ptr<pat::Jet> findHiggsSideBJet(const BTagging::Data bData, const TauSelection::Data tauData);
-
-    bool doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet, FullHiggsMassCalculator::Data& output);
-
-    void calculateNeutrinoPz(TVector3& pTau, TVector3& pB, TVector3& MET, FullHiggsMassCalculator::Data& physicalParameters, 
-			     FullHiggsMassCalculator::Data& output);
-
-    void doCalculate(TVector3& tau, TVector3& bjet, TVector3& met, FullHiggsMassCalculator::Data& output);
-
-    //void calculateTrueHiggsMass(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet, FullHiggsMassCalculator::Data& output);
-    
+    //bool doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet, FullHiggsMassCalculator::Data& output);
+    void calculateNeutrinoPz(TVector3& pTau, TVector3& pB, TVector3& MET,
+			     FullHiggsMassCalculator::Data& physicalParameters, FullHiggsMassCalculator::Data& output);
+    void constructFourMomenta(TVector3& pTau, TVector3& pB, TVector3& MET,
+			      FullHiggsMassCalculator::Data& physicalParameters,
+			      FullHiggsMassCalculator::Data& output);
+    void calculateTopMass(FullHiggsMassCalculator::Data& output);
+    void calculateHiggsMass(FullHiggsMassCalculator::Data& output);
+    void doEventClassification(const edm::Event& iEvent, edm::Ptr<pat::Jet> recoHiggsSideBJet);
+    void fillHistograms_MC(FullHiggsMassCalculator::Data& output);
+    void fillHistograms_Data(FullHiggsMassCalculator::Data& output);
+    void print(TString infoText);
 
   private:
 
