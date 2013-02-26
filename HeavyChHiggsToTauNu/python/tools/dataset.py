@@ -846,7 +846,7 @@ def treeDrawToNumEntries(treeDraw):
 # normalized to the cross section.
 #
 # The histogram wrapper classes also abstract the signel histogram, and
-# merged data and MC histograms behind a common interface.
+# mergeddata and MC histograms behind a common interface.
 class DatasetRootHistoBase:
     def __init__(self, dataset):
         self.dataset = dataset
@@ -2535,6 +2535,8 @@ class DatasetManagerCreator:
                 else:
                     raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB" % dataEra)
 
+            if not "analysisName" in _args:
+                raise Exception("You did not specify AnalysisName, and it was not automatically detected from ROOT file")
             try:
                 dset = Dataset(precursor.getName(), precursor.getFiles(), **_args)
             except AnalysisNotFoundException, e:
