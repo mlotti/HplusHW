@@ -252,6 +252,12 @@ process.genTauVisibleSequence = tauEmbeddingCustomisations.addTauEmbeddingMuonTa
 process.commonSequence *= process.genTauVisibleSequence
 taus = cms.InputTag("tauEmbeddingGenTauVisibleMatchTauMatched")
 
+process.genTausOriginal = cms.EDFilter("GenParticleSelector",
+    src = cms.InputTag("genParticles", "", "HLT"),
+    cut = cms.string(tauEmbeddingCustomisations.generatorTauSelection % tauEmbeddingCustomisations.generatorTauPt)
+)
+process.commonSequence *= process.genTausOriginal
+
 # FIXME
 lookOriginalGenTaus = False
 if lookOriginalGenTaus:
@@ -314,6 +320,8 @@ ntuple = cms.EDAnalyzer("HPlusTauEmbeddingNtupleAnalyzer",
 
     genParticleOriginalSrc = cms.InputTag("genParticles", "", "HLT"),
     genParticleEmbeddedSrc = cms.InputTag("genParticles"),
+    genTauOriginalSrc = cms.InputTag("genTausOriginal"),
+    genTauEmbeddedSrc = cms.InputTag("tauEmbeddingGenTauVisibleMatchGenTaus"),
     mets = cms.PSet(
         pfMet_p4 = cms.InputTag(pfMET.value()),
         pfMetOriginal_p4 = cms.InputTag(pfMETOriginal.value()),

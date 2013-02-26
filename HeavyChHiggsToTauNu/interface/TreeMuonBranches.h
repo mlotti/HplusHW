@@ -9,6 +9,7 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeFunctionBranch.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeGenParticleBranches.h"
 
 #include<vector>
 #include<string>
@@ -49,9 +50,7 @@ namespace HPlus {
 
     std::vector<XYZTLorentzVector> fMuons;
     std::vector<MuonFunctionBranch> fMuonsFunctions;
-    std::vector<int> fMuonsPdgId;
-    std::vector<int> fMuonsMotherPdgId;
-    std::vector<int> fMuonsGrandMotherPdgId;
+    TreeGenParticleBranches fMuonsGenMatch;
   };
 }
 
