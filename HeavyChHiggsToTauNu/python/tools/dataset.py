@@ -1326,11 +1326,15 @@ class Dataset:
             if self.info is None:
                 self.info = info
             else:
-                for key, value in self.info:
+                for key, value in self.info.iteritems():
                     valnew = info[key]
+                    if isinstance(value, basestring):
+                        if value == valnew:
+                            continue
+                        raise Exception("Mismatched values in configInfo/configinfo, label %s, got %s from file %s, and %s from file %s" % (key, value, self.files[0].GetName(), valenew, f.GetName()))
                     if valnew == 0 and value == 0:
                         continue
-                    if math.abs(value-valnew)/max(value, valnew) > 0.001:
+                    if abs(value-valnew)/max(value, valnew) > 0.001:
                         raise Exception("Mismatched values in configInfo/configinfo, label %s, got %f from file %s, and %f from file %s" % (key, value, self.files[0].GetName(), valnew, f.GetName()))
 
             dataVersion = configInfo.Get("dataVersion")
@@ -2705,15 +2709,12 @@ class NtupleCache:
     ## Process selector for a dataset
     #
     # \param dataset  Dataset object
-    #
-    # Processes the self.treeName TTree from the rootFile.
     def process(self, dataset):
         #if not self.forceProcess and not self._isMacroNewerThanCacheFile():
         #    return
         if not self.doProcess:
             return
 
-        rootFile = dataset.getRootFile()
         datasetName = dataset.getName()
 
         pathDigest = hashlib.sha1(dataset.getBaseDirectory()).hexdigest() # I hope this is good-enough
@@ -2754,7 +2755,7 @@ class NtupleCache:
         argsNamed = ROOT.TNamed("selectorArgs", str(selectorArgs))
         argsNamed.Write()
 
-        tree = dataset.createRootChain(self.tree)
+        tree = dataset.createRootChain(self.treeName)
 
         N = tree.GetEntries()
         useMaxEvents = False
