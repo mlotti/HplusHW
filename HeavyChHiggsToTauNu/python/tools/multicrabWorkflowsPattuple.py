@@ -324,7 +324,7 @@ def addPattuple_v44_5(datasets):
         "TTToHplusBHminusB_M150_Fall11":    TaskDef("/TTToHplusBHminusB_M-150_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
         # User mean 3107.8, min 1203.1, max 3873.1
         # Mean 175.7 MB, min 70.1 MB, max 193.0 MB
-        "TTToHplusBHminusB_M155_Fall11":    TaskDef("~/work/hplus/pattuple/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple/multicrab_pattuple_v44_5_Signal_130222_110928"),
+        "TTToHplusBHminusB_M155_Fall11":    TaskDef("/TTToHplusBHminusB_M-155_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
         # User mean 2664.3, min 958.2, max 4995.6
         # Mean 169.6 MB, min 49.6 MB, max 197.8 MB
         "TTToHplusBHminusB_M160_Fall11":    TaskDef("/TTToHplusBHminusB_M-160_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
