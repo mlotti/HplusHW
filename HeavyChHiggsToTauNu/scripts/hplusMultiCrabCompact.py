@@ -27,6 +27,10 @@ def main(opts, args):
                 print output
                 return 1
 
+        if os.path.exists(os.path.join(d, "task.tar.gz")):
+            print "Skipping %s, task.tar.gz already exists" % d
+            continue
+
         # Go to task directory (in order to get the paths in the archive correctly easily)
         os.chdir(d)
 
@@ -46,7 +50,8 @@ def main(opts, args):
         #print "\n".join(files)
 
         for f in files:
-            tar.add(f)
+            if os.path.exists(f):
+                tar.add(f)
         tar.close()
 
         # Keep share/crab.cfg
