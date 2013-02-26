@@ -1287,6 +1287,8 @@ class Dataset:
     #                          directory. The weighted counters are taken
     #                          into account with \a useWeightedCounters
     #                          argument
+    # \param useAnalysisNameOnly Should the analysis directory be
+    #                            inferred only from analysisName?
     # 
     # Opens the ROOT file, reads 'configInfo/configInfo' histogram
     # (if it exists), and reads the main event counter
@@ -1299,10 +1301,14 @@ class Dataset:
     # and MC, such that in MC the era name is appended to the
     # directory name. 
     #
-    # The final directory name is
+    # The final directory name is (if \a useAnalysisNameOnly is False)
     # data: analysisName+searchMode+optimizationMode
     # MC:   analysisName+searchMode+dataEra+optimizationMode
-    def __init__(self, name, tfiles, analysisName, searchMode=None, dataEra=None, optimizationMode=None, weightedCounters=True, counterDir="counters"):
+    #
+    # The \a useAnalysisNameOnly parameter is needed e.g. for ntuples
+    # which store the era-specific weights to the tree itself, and
+    # therefore the 
+    def __init__(self, name, tfiles, analysisName, searchMode=None, dataEra=None, optimizationMode=None, weightedCounters=True, counterDir="counters", useAnalysisNameOnly=False):
         self.name = name
         self.files = tfiles
         if len(self.files) == 0:
@@ -1353,15 +1359,17 @@ class Dataset:
         self._searchMode = searchMode
         self._dataEra = dataEra
         self._optimizationMode = optimizationMode
+        self._useAnalysisNameOnly = useAnalysisNameOnly
 
         self._analysisDirectoryName = self._analysisName
-        if self._searchMode is not None:
-            self._analysisDirectoryName += self._searchMode
-        if self.isMC() and self._dataEra is not None:
-            self._analysisDirectoryName += self._dataEra
-        if self._optimizationMode is not None:
-            self._analysisDirectoryName += self._optimizationMode
-
+        if not self._useAnalysisNameOnly:
+            if self._searchMode is not None:
+                self._analysisDirectoryName += self._searchMode
+            if self.isMC() and self._dataEra is not None:
+                self._analysisDirectoryName += self._dataEra
+            if self._optimizationMode is not None:
+                self._analysisDirectoryName += self._optimizationMode
+    
         # Check that analysis directory exists
         for f in self.files:
             if f.Get(self._analysisDirectoryName) == None:
@@ -1394,7 +1402,7 @@ class Dataset:
     # while also keeping the original ttbar with the original SM cross
     # section.
     def deepCopy(self):
-        d = Dataset(self.name, self.files, self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._weightedCounters, self._unweightedCounterDir)
+        d = Dataset(self.name, self.files, self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._weightedCounters, self._unweightedCounterDir, self._useAnalysisNameOnly)
         d.info.update(self.info)
         d.nAllEvents = self.nAllEvents
         return d
