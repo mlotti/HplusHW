@@ -9,7 +9,7 @@ cfg = "signalAnalysis_cfg.py"
 multicrab = Multicrab("crab_analysis.cfg", cfg)
 
 # Select the workflow (version corresponds to pattuples)
-workflow = "analysis_v44_4"
+workflow = "analysis_v44_5"
 
 # Do W+jets weighting?
 doWJetsWeighting = False
@@ -71,11 +71,11 @@ datasetsMC = [
         "QCD_Pt120to170_TuneZ2_Fall11",
         "QCD_Pt170to300_TuneZ2_Fall11",
         "QCD_Pt300to470_TuneZ2_Fall11",
-#       "QCD_Pt20_MuEnriched_TuneZ2_Fall11",
         "TTJets_TuneZ2_Fall11",
         "WJets_TuneZ2_Fall11",
+        "W1Jets_TuneZ2_Fall11",
         "W2Jets_TuneZ2_Fall11",
-        "W3Jets_TuneZ2_Fall11",
+        "W3Jets_TuneZ2_v2_Fall11",
         "W4Jets_TuneZ2_Fall11",
         "DYJetsToLL_M50_TuneZ2_Fall11",
         "T_t-channel_TuneZ2_Fall11",
@@ -93,13 +93,13 @@ datasets = []
 datasets.extend(datasetsData)
 datasets.extend(datasetsMC)
 
-
 # Disable W+jets weighting if requested
 if not doWJetsWeighting:
     for name in [
         "WJets_TuneZ2_Fall11",
+        "W1Jets_TuneZ2_Fall11",
         "W2Jets_TuneZ2_Fall11",
-        "W3Jets_TuneZ2_Fall11",
+        "W3Jets_TuneZ2_v2_Fall11",
         "W4Jets_TuneZ2_Fall11",
         ]:
 
