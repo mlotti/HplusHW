@@ -9,12 +9,36 @@
 #include "Math/VectorUtil.h"
 
 #include<stdexcept>
+#include<sstream>
+
+namespace {
+  enum MCTauMode {
+    kMCTauOneTau,
+    kMCTauTwoTaus,
+    kMCTauNone
+  };
+
+  MCTauMode parseMCTauMode(const std::string& mode) {
+    if(mode == "" || mode == "none")
+      return kMCTauNone;
+    if(mode == "oneTau")
+      return kMCTauOneTau;
+    if(mode == "twoTaus")
+      return kMCTauTwoTaus;
+
+    std::stringstream ss;
+    ss << "Gor mcTauMode " << mode << " which is not valid. Valid options are '', 'none', 'oneTau', 'twoTaus'";
+
+    throw std::runtime_error(ss.str());
+  }
+}
 
 // TauAnalysisSelector
 class TauAnalysisSelector: public BaseSelector {
 public:
   TauAnalysisSelector(const std::string& puWeight = "", bool isEmbedded=false,
-                      const std::string& embeddingWTauMuFile="", const std::string& embeddingWTauMuPath="");
+                      const std::string& embeddingWTauMuFile="", const std::string& embeddingWTauMuPath="",
+                      const std::string& mcTauMode="");
   ~TauAnalysisSelector();
 
   void setOutput(TDirectory *dir);
@@ -28,6 +52,7 @@ private:
   //ElectronCollection fElectrons;
   JetCollection fJets;
   TauCollection fTaus;
+  GenParticleCollection fGenTaus; // from original event in embedded, for all in normal
 
   std::string fPuWeightName;
   Branch<double> fPuWeight;
@@ -37,6 +62,7 @@ private:
 
   const bool fIsEmbedded;
   TH1 *fEmbeddingWTauMuWeights;
+  const MCTauMode fMCTauMode;
 
   TH1 *makeEta(const char *name);
   TH1 *makePt(const char *name);
@@ -47,6 +73,7 @@ private:
   // Counts
   EventCounter::Count cAll;
   //EventCounter::Count cElectronVeto;
+  EventCounter::Count cTauMCSelection;
   EventCounter::Count cOnlyWMu;
   EventCounter::Count cWTauMuWeight;
   EventCounter::Count cJetSelection;
@@ -93,14 +120,18 @@ private:
 };
 
 TauAnalysisSelector::TauAnalysisSelector(const std::string& puWeight, bool isEmbedded,
-                                         const std::string& embeddingWTauMuFile, const std::string& embeddingWTauMuPath):
+                                         const std::string& embeddingWTauMuFile, const std::string& embeddingWTauMuPath,
+                                         const std::string& mcTauMode):
   BaseSelector(),
   //fMuons("Emb"),
+  fGenTaus(isEmbedded ? "gentausOriginal" : "gentaus"),
   fPuWeightName(puWeight),
   fIsEmbedded(isEmbedded),
   fEmbeddingWTauMuWeights(0),
+  fMCTauMode(parseMCTauMode(mcTauMode)),
   cAll(fEventCounter.addCounter("All events")),
   //cElectronVeto(fEventCounter.addCounter("Electron veto")),
+  cTauMCSelection(fEventCounter.addCounter("Tau MC requirement")),
   cOnlyWMu(fEventCounter.addCounter("Only W->mu")),
   cWTauMuWeight(fEventCounter.addCounter("W->tau->mu weighting")),
   cJetSelection(fEventCounter.addCounter("Jet selection")),
@@ -179,18 +210,16 @@ void TauAnalysisSelector::setupBranches(TTree *tree) {
     fJets.setupBranches(tree);
   }
   fTaus.setupBranches(tree, isMC() && !fIsEmbedded);
+  if(isMC())
+    fGenTaus.setupBranches(tree);
+
   if(!fPuWeightName.empty())
     fPuWeight.setupBranch(tree, fPuWeightName.c_str());
-  if(fIsEmbedded) { // stupid mistake in the tauAnalysis...
-    fSelectedVertexCount.setupBranch(tree, "selectedPrimaryVertex_count");
-    fVertexCount.setupBranch(tree, "goodPrimaryVertex_count");
-  }
-  else {
-    fSelectedVertexCount.setupBranch(tree, "selectedPrimaryVertices_n");
-    fVertexCount.setupBranch(tree, "goodPrimaryVertices_n");
-  }
+  fSelectedVertexCount.setupBranch(tree, "selectedPrimaryVertex_count");
+  fVertexCount.setupBranch(tree, "goodPrimaryVertex_count");
 
   //fElectronVetoPassed.setupBranch(tree, "ElectronVetoPassed");
+
 }
 
 bool TauAnalysisSelector::process(Long64_t entry) {
@@ -199,6 +228,7 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   //fElectrons.setEntry(entry);
   fJets.setEntry(entry);
   fTaus.setEntry(entry);
+  fGenTaus.setEntry(entry);
   fPuWeight.setEntry(entry);
   fSelectedVertexCount.setEntry(entry);
   fVertexCount.setEntry(entry);
@@ -244,17 +274,48 @@ bool TauAnalysisSelector::process(Long64_t entry) {
   cElectronVeto.increment();
   */
 
+  // MC status
+  if(isMC() && fMCTauMode != kMCTauNone) {
+    size_t ntaus = 0;
+    for(size_t i=0; i<fGenTaus.size(); ++i) {
+      GenParticleCollection::GenParticle gen = fGenTaus.get(i);
+      if(std::abs(gen.motherPdgId()) == 24 && std::abs(gen.grandMotherPdgId()) == 6) {
+        ++ntaus;
+      }
+    }
+
+    if(fIsEmbedded) {
+      // For embedded the embedded tau is counted as one
+      if(fMCTauMode == kMCTauOneTau && ntaus != 0) return true;
+      if(fMCTauMode == kMCTauTwoTaus && ntaus != 1) return true;
+    }
+    else {
+      if(fMCTauMode == kMCTauOneTau && ntaus != 1) return true;
+      if(fMCTauMode == kMCTauTwoTaus && ntaus != 2) return true;
+    }
+  }
+  cTauMCSelection.increment();
+
   bool originalMuonIsWMu = false;
   EmbeddingMuonCollection::Muon embeddingMuon;
   if(fIsEmbedded) {
     if(fMuons.size() != 1)
       throw std::runtime_error("Embedding muon collection size is not 1");
     embeddingMuon = fMuons.get(0);
-    if(embeddingMuon.p4().Pt() < 40) return true;
+    if(embeddingMuon.p4().Pt() < 41) return true;
     //std::cout << "Muon pt " << muon.p4().Pt() << std::endl;
 
     originalMuonIsWMu = std::abs(embeddingMuon.pdgId()) == 13 && std::abs(embeddingMuon.motherPdgId()) == 24;
-    //if(!originalMuonIsWMu) return true;
+    if(!originalMuonIsWMu) return true;
+  }
+  else {
+    size_t ntaus = 0;
+    for(size_t i=0; i<fGenTaus.size(); ++i) {
+      GenParticleCollection::GenParticle gen = fGenTaus.get(i);
+      if(gen.p4().Pt() < 41) continue;
+      ++ntaus;
+    }
+    if(ntaus < 1) return true;
   }
 
   cOnlyWMu.increment();

@@ -53,11 +53,14 @@ def main():
 #    dirSig = "../"+tauEmbedding.dirSig
     dirSig = "../"+tauEmbedding.tauDirSig
 
+    tauDirEmbs = ["/opt/data/matti/embedding/multicrab_analysis_v44_4_2_seed0_Muon40_130226_151543"]
+    tauDirSig = "/opt/data/matti/embedding/multicrab_analysisTau_selectOnlyFirstGenTau_130222_122221"
+
 #    tauDirEmbs = tauDirEmbs[:2]
 #    dirEmbs = dirEmbs[:2]
 
-    tauDatasetsEmb = tauEmbedding.DatasetsMany(tauDirEmbs, counterDir="/"+tauAnalysisEmb+"Counters", normalizeMCByLuminosity=True, dataEra=dataEra)
-    tauDatasetsSig = dataset.getDatasetsFromMulticrabCfg(directory=tauDirSig, counterDir="/"+tauAnalysisSig+"Counters", dataEra=dataEra)
+    tauDatasetsEmb = tauEmbedding.DatasetsMany(tauDirEmbs, analysisName=tauAnalysisEmb, counterDir="/"+tauAnalysisEmb+"Counters", normalizeMCByLuminosity=True, dataEra=dataEra, useAnalysisNameOnly=True)
+    tauDatasetsSig = dataset.getDatasetsFromMulticrabCfg(directory=tauDirSig, analysisName=tauAnalysisSig, counterDir="/"+tauAnalysisSig+"Counters", dataEra=dataEra, useAnalysisNameOnly=True)
 #    datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"/counters", normalizeMCByLuminosity=True, dataEra=dataEra)
 #    datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"/counters", dataEra=dataEra)
 
@@ -105,20 +108,22 @@ def main():
 
     
     #selectorArgs = [tauEmbedding.tauNtuple.weight[dataEra]]
-    selectorArgs = [""]
-    embArgs = []
-#    embArgs = ["/home/mkortela/hplus/CMSSW_4_4_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/multicrab_muonAnalysis_121017_100408/embedding-wtaumuRatio-muonpt40.root", "FullChargedHadrRelIso10/TTJets"]
+    selectorArgs = tauEmbedding.TauAnalysisSelectorArgs()
+    #selectorArgs.set(mcTauMode="oneTau")
+    selectorArgs.set(mcTauMode="twoTaus")
+    selectorArgsEmb = selectorArgs.clone(isEmbedded=True)
+#    selectorArgsEmb.set(embeddingWTauMuFile="/home/mkortela/hplus/CMSSW_4_4_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/multicrab_muonAnalysis_121017_100408/embedding-wtaumuRatio-muonpt40.root", embeddingWTauMuPath="FullChargedHadrRelIso10/TTJets")
     process = True
 #    process = False
     maxEvents = -1
     #maxEvents = 100
-    ntupleCacheEmb = dataset.NtupleCache(tauAnalysisEmb+"/tree", "TauAnalysisSelector",
-                                         selectorArgs=selectorArgs+[True]+embArgs,
+    ntupleCacheEmb = dataset.NtupleCache("tree", "TauAnalysisSelector",
+                                         selectorArgs=selectorArgsEmb,
                                          process=process, maxEvents=maxEvents,
                                          cacheFileName="histogramCacheEmb.root"
                                          )
-    ntupleCacheSig = dataset.NtupleCache(tauAnalysisEmb+"/tree", "TauAnalysisSelector",
-                                         selectorArgs=selectorArgs+[False],
+    ntupleCacheSig = dataset.NtupleCache("tree", "TauAnalysisSelector",
+                                         selectorArgs=selectorArgs,
                                          process=process, maxEvents=maxEvents,
                                          cacheFileName="histogramCacheSig.root"
                                          )
@@ -326,8 +331,6 @@ def doTauCounters(datasetsEmb, datasetsSig, datasetName, ntupleCacheEmb, ntupleC
 
     lastCountEmb = table.getCount(colName="Embedded", irow=table.getNrows()-1)
     lastCountNormal = table.getCount(colName="Normal", irow=table.getNrows()-1)
-    ratio = lastCountNormal.clone()
-    ratio.divide(lastCountEmb)
 
     postfix = ""
     if not normalizeEmb:
@@ -342,7 +345,14 @@ def doTauCounters(datasetsEmb, datasetsSig, datasetName, ntupleCacheEmb, ntupleC
     f = open(fname, "w")
     f.write(table.format(countFormat))
     f.write("\n")
-    f.write("Normal/embedded = %.4f +- %.4f\n\n" % (ratio.value(), ratio.uncertainty()))
+
+    try:
+        ratio = lastCountNormal.clone()
+        ratio.divide(lastCountEmb)
+        f.write("Normal/embedded = %.4f +- %.4f\n\n" % (ratio.value(), ratio.uncertainty()))
+    except ZeroDivisionError:
+        pass
+
     f.close()
     print "Printed tau counters to", fname
     

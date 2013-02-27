@@ -65,6 +65,17 @@ class MuonAnalysisSelectorArgs(dataset.SelectorArgs):
                                        ],
                                       **kwargs)
 
+class TauAnalysisSelectorArgs(dataset.SelectorArgs):
+    def __init__(self, **kwargs):
+        dataset.SelectorArgs.__init__(self,
+                                      [("puWeight", ""),
+                                       ("isEmbedded", False),
+                                       ("embeddingWTauMuFile", ""),
+                                       ("embeddingWTauMuPath", ""),
+                                       ("mcTauMode", ""),
+                                       ],
+                                      **kwargs)
+
 class Selections:
     def __init__(self, **kwargs):
         for key, value in kwargs.iteritems():
