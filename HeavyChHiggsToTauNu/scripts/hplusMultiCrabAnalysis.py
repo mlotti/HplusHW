@@ -37,13 +37,16 @@ class TimeAnalysis:
         return False
 
     def _times(self, name, lst):
-        return "  %s mean %.1f, min %.1f, max %.1f" % (name, sum(lst)/len(lst), min(lst), max(lst))
+        return "%s mean %.1f, min %.1f, max %.1f" % (name, sum(lst)/len(lst), min(lst), max(lst))
+
+    def userTime(self):
+        return self._times("User", self.user_times)
 
     def result(self):
         ret = " Time analysis:\n"
-        ret += self._times("Exe", self.exe_times) + "\n"
-        ret += self._times("User", self.user_times) + "\n"
-        ret += self._times("Sys", self.sys_times)
+        ret += "  "+self._times("Exe", self.exe_times) + "\n"
+        ret += "  "+self.userTime() + "\n"
+        ret += "  "+self._times("Sys", self.sys_times)
         return ret
 
 class SizeAnalysis:
@@ -62,14 +65,33 @@ class SizeAnalysis:
 
         return False
 
-    def result(self):
+    def size(self):
         s_mean = float(sum(self.sizes))/len(self.sizes)
         s_min = float(min(self.sizes))
         s_max = float(max(self.sizes))
-        
+        return "Mean %s, min %s, max %s" % (fileSize.pretty(s_mean), fileSize.pretty(s_min), fileSize.pretty(s_max))
+
+    def result(self):
         ret = " Size analysis:\n"
-        ret += "  Mean %s, min %s, max %s" % (fileSize.pretty(s_mean), fileSize.pretty(s_min), fileSize.pretty(s_max))
+        ret += "  "+self.size()
         return ret
+
+def analyseFiles(files, analyses):
+    for a in analyses:
+        a.reset()
+
+    for name in files:
+        f = open(name)
+        for line in f:
+            found = False
+            for a in analyses:
+                found = a.analyse(line)
+                if found:
+                    break
+            if found:
+                continue
+        f.close()
+
 
 def main(opts):
     taskDirs = multicrab.getTaskDirectories(opts)
@@ -89,20 +111,8 @@ def main(opts):
         if len(files) == 0:
             continue
 
-        for a in analyses:
-            a.reset()
+        analyseFiles(files, analyses)
 
-        for name in files:
-            f = open(name)
-            for line in f:
-                found = False
-                for a in analyses:
-                    found = a.analyse(line)
-                    if found:
-                        break
-                if found:
-                    continue
-            f.close()
         print "Task %s, %d jobs" % (task, len(files))
         for a in analyses:
             print a.result()
