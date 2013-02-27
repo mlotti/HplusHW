@@ -1435,6 +1435,7 @@ class Dataset:
             h = histos[0]
         else:
             h = histos[0]
+            h = h.Clone(h.GetName()+"_cloned")
             for h2 in histos[1:]:
                 h.Add(h2)
 
