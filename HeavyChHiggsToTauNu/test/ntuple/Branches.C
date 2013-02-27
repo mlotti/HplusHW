@@ -46,9 +46,10 @@ void MuonCollection::setupBranches(TTree *tree, bool isMC) {
   fPhotonIso.setupBranch(tree, (fPrefix+"_f_photonIso").c_str());
 
   if(isMC) {
-    fPdgId.setupBranch(tree, (fPrefix+"_pdgid").c_str());
-    fMotherPdgId.setupBranch(tree, (fPrefix+"_mother_pdgid").c_str());
-    fGrandMotherPdgId.setupBranch(tree, (fPrefix+"_grandmother_pdgid").c_str());
+    fGenMatchP4.setupBranch(tree, (fPrefix+"_genmatch_p4").c_str());
+    fPdgId.setupBranch(tree, (fPrefix+"_genmatch_pdgid").c_str());
+    fMotherPdgId.setupBranch(tree, (fPrefix+"_genmatch_mother_pdgid").c_str());
+    fGrandMotherPdgId.setupBranch(tree, (fPrefix+"_genmatch_grandmother_pdgid").c_str());
   }
 }
 
@@ -92,9 +93,10 @@ void ElectronCollection::setupBranches(TTree *tree, bool isMC) {
   fSuperClusterEta.setupBranch(tree, (fPrefix+"_f_superClusterEta").c_str());
 
   if(isMC) {
-    fPdgId.setupBranch(tree, (fPrefix+"_pdgid").c_str());
-    fMotherPdgId.setupBranch(tree, (fPrefix+"_mother_pdgid").c_str());
-    fGrandMotherPdgId.setupBranch(tree, (fPrefix+"_grandmother_pdgid").c_str());
+    fGenMatchP4.setupBranch(tree, (fPrefix+"_genmatch_p4").c_str());
+    fPdgId.setupBranch(tree, (fPrefix+"_genmatch_pdgid").c_str());
+    fMotherPdgId.setupBranch(tree, (fPrefix+"_genmatch_mother_pdgid").c_str());
+    fGrandMotherPdgId.setupBranch(tree, (fPrefix+"_genmatch_grandmother_pdgid").c_str());
   }
 }
 
@@ -161,8 +163,27 @@ void TauCollection::setupBranches(TTree *tree, bool isMC) {
 
   if(isMC) {
     fGenMatchP4.setupBranch(tree, (fPrefix+"_genmatch_p4").c_str());
-    fPdgId.setupBranch(tree, (fPrefix+"_pdgid").c_str());
-    fMotherPdgId.setupBranch(tree, (fPrefix+"_mother_pdgid").c_str());
-    fGrandMotherPdgId.setupBranch(tree, (fPrefix+"_grandmother_pdgid").c_str());
+    fGenMatchP4.setupBranch(tree, (fPrefix+"_genmatchvisible_p4").c_str());
+    fPdgId.setupBranch(tree, (fPrefix+"_genmatch_pdgid").c_str());
+    fMotherPdgId.setupBranch(tree, (fPrefix+"_genmatch_mother_pdgid").c_str());
+    fGrandMotherPdgId.setupBranch(tree, (fPrefix+"_genmatch_grandmother_pdgid").c_str());
   }
+}
+
+//////////////////// GenParticleCollection ////////////////////
+GenParticleCollection::GenParticle::GenParticle(GenParticleCollection *gpc, size_t i):
+  fCollection(gpc), fIndex(i)
+{}
+GenParticleCollection::GenParticle::~GenParticle() {}
+
+GenParticleCollection::GenParticleCollection(const std::string& prefix):
+  fPrefix(prefix)
+{}
+GenParticleCollection::~GenParticleCollection() {}
+
+void GenParticleCollection::setupBranches(TTree *tree) {
+  fP4.setupBranch(tree, (fPrefix+"_p4").c_str());
+  fPdgId.setupBranch(tree, (fPrefix+"_pdgid").c_str());
+  fMotherPdgId.setupBranch(tree, (fPrefix+"_mother_pdgid").c_str());
+  fGrandMotherPdgId.setupBranch(tree, (fPrefix+"_grandmother_pdgid").c_str());
 }
