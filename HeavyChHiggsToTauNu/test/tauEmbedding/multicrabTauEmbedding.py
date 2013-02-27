@@ -2,6 +2,7 @@
 
 import os
 import re
+import time
 from optparse import OptionParser
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
@@ -203,7 +204,16 @@ def createTasks(opts, step, version=None):
         crabcfg = None
         if "HOST" in os.environ and "lxplus" in os.environ["HOST"]:
             scheduler = "remoteGlidein"
-        crabcfgtemplate = crabCfgTemplate(scheduler=scheduler, return_data=True)
+        args = {}
+        if step in "analysisTau":
+            args["copy_data"] = True
+            args["userLines"] = [
+                "user_remote_dir = analysisTau_%s" % time.strftime("%y%m%d_%H%M%S"),
+                "storage_element = T2_FI_HIP"
+                ]
+        else:
+            args["return_data"] = True
+        crabcfgtemplate = crabCfgTemplate(scheduler=scheduler, **args)
 
     # Setup directory naming
     dirName = ""
