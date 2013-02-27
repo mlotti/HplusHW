@@ -2823,8 +2823,16 @@ class SelectorArgs:
         if len(args) >= 1:
             raise Exception("Incorrect arguments for SelectorArgs.__init__(): %s" % ", ".join(args.keys()))
 
-    def clone(self):
-        return copy.deepcopy(self)
+    def clone(self, **kwargs):
+        c = copy.deepcopy(self)
+        c.set(**kwargs)
+        return c
+
+    def set(self, **kwargs):
+        for key, value in kwargs.iteritems():
+            if not hasattr(self, key):
+                raise Exception("This SelectorArgs does not have property %s" % key)
+            setattr(self, key, value)
 
     def update(self, selectorArgs):
         for a, dv in self.optionsDefaultValues:
