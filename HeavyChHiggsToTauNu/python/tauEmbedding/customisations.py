@@ -1023,7 +1023,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
             eventCounter = param.eventCounter.clone(),
             tauSelection = param.tauSelection.clone(),
             vertexSrc = cms.InputTag(param.primaryVertexSelection.selectedSrc.value()),
-            histogramAmbientLevel = cms.untracked.string("Debug"),
+            histogramAmbientLevel = cms.untracked.string("Systematics"),
         )
         genTauSelectedName = prefix+"TauSelected"
         setattr(process, genTauSelectedName, genTauSelected)
@@ -1067,10 +1067,14 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
 
     # Electron and muon veto
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as ElectronVeto
-    eveto = ElectronVeto.hPlusGlobalElectronVetoFilter.clone()
+    eveto = ElectronVeto.hPlusGlobalElectronVetoFilter.clone(
+        histogramAmbientLevel = "Systematics"
+    )
     evetoCount = counterPrototype.clone()
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalMuonVetoFilter_cfi as MuonVeto
-    muveto = MuonVeto.hPlusGlobalMuonVetoFilter.clone() 
+    muveto = MuonVeto.hPlusGlobalMuonVetoFilter.clone(
+        histogramAmbientLevel = "Systematics"
+    )
     muvetoCount = counterPrototype.clone()
     setattr(process, prefix+"ElectronVeto", eveto)
     setattr(process, prefix+"ElectronVetoCount", evetoCount)

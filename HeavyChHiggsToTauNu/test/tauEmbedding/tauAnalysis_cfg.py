@@ -174,7 +174,7 @@ if addSignalAnalysis:
     import HiggsAnalysis.HeavyChHiggsToTauNu.signalAnalysis as signalAnalysis
     module = signalAnalysis.createEDFilter(param)
     module.Tree.fill = cms.untracked.bool(False)
-#    module.histogramAmbientLevel = "Vital"
+    module.histogramAmbientLevel = "Systematics"
 
     # Counters
     if len(preselectionCounters) > 0:
