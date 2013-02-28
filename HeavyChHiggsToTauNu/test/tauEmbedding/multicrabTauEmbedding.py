@@ -8,9 +8,9 @@ from optparse import OptionParser
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 # Default processing step
-#defaultStep = "skim"
+defaultStep = "skim"
 #defaultStep = "embedding"
-defaultStep = "analysis"
+#defaultStep = "analysis"
 #defaultStep = "analysisTau"
 #defaultStep = "signalAnalysis"
 #defaultStep = "signalAnalysisGenTau"
@@ -50,10 +50,12 @@ defaultVersions = [
 #    "v44_4_2_muiso0"
 #    "v44_4_2_muiso1"
 
-    "v44_4_2_seed0",
+#    "v44_4_2_seed0",
 #    "v44_4_2_seed1"
+
+    "v44_5" # skim version
 ]
-skimVersion = "v44_4_2"
+skimVersion = "v44_5"
 
 # Define the processing steps: input dataset, configuration file, output file
 config = {"skim":                 {"workflow": "tauembedding_skim_"+skimVersion,         "config": "muonSkim_cfg.py"},
@@ -217,7 +219,7 @@ def createTasks(opts, step, version=None):
 
     # Setup directory naming
     dirName = ""
-    if step in ["embedding", "analysis", "signalAnalysis", "EWKMatching"]:
+    if step in ["skim", "embedding", "analysis", "signalAnalysis", "EWKMatching"]:
         dirName += "_"+version
     dirName += opts.midfix
 
@@ -254,8 +256,8 @@ def createTasks(opts, step, version=None):
         multicrab.addCommonLine("CMSSW.output_file = histograms.root")
 
     # Let's do the naming like this until we get some answer from crab people
-    if step in ["skim", "embedding"]:
-        multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
+    #if step in ["skim", "embedding"]:
+    #    multicrab.addCommonLine("USER.publish_data_name = Tauembedding_%s_%s" % (step, version))
 
     # For this workflow we need one additional command line argument
     if step == "signalAnalysisGenTau":

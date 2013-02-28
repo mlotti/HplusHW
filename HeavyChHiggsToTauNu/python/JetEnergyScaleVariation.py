@@ -3,8 +3,8 @@ import PhysicsTools.PatUtils.patPFMETCorrections_cff as patPFMETCorrections
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauFilter_cfi as TauFilter
 
 def _doCommon(process, prefix, name, prototype, direction, postfix):
-    if not postfix in ["", "PFlow"]:
-        raise Exception("There are several assumptions of standard PAT, or PF2PAT with PFlow-postfix-only workflow")
+    if not postfix in ["", "Chs"]:
+        raise Exception("There are several assumptions of standard PAT, or PF2PAT with Chs-postfix-only workflow")
 
     if direction not in ["Up", "Down"]:
         raise Exception("direction should be 'Up' or 'Down', was '%s'" % direction)
@@ -28,29 +28,29 @@ def _doCommon(process, prefix, name, prototype, direction, postfix):
 def addJESVariation(process, prefix, name, prototype, direction, postfix=""):
     (analysis, name) = _doCommon(process, prefix, name, prototype, direction, postfix)
 
-    analysis.jetSelection.src = "shiftedPatJets%sEn%sForCorrMEt" % (postfix, direction)
-    analysis.MET.rawSrc = "patPFMetJetEn%s" % direction
-    analysis.MET.type1Src = "patType1CorrectedPFMetJetEn%s" % direction
-    analysis.MET.type2Src = "patType1p2CorrectedPFMetJetEn%s" % direction
+    analysis.jetSelection.src = "shiftedPatJetsEn%sForCorrMEt%s" % (direction, postfix)
+    analysis.MET.rawSrc = "patPFMetJetEn%s%s" % (direction, postfix)
+    analysis.MET.type1Src = "patType1CorrectedPFMetJetEn%s%s" % (direction, postfix)
+    analysis.MET.type2Src = "patType1p2CorrectedPFMetJetEn%s%s" % (direction, postfix)
 
     return name
 
 def addJERVariation(process, prefix, name, prototype, direction, postfix=""):
     (analysis, name) = _doCommon(process, prefix, name, prototype, direction, postfix)
 
-    analysis.jetSelection.src = "smearedPatJets%sRes%s" % (postfix, direction)
-    analysis.MET.rawSrc = "patPFMetJetRes%s" % direction
-    analysis.MET.type1Src = "patType1CorrectedPFMetJetRes%s" % direction
-    analysis.MET.type2Src = "patType1p2CorrectedPFMetJetRes%s" % direction
+    analysis.jetSelection.src = "smearedPatJetsRes%s%s" % (direction, postfix)
+    analysis.MET.rawSrc = "patPFMetJetRes%s%s" % (direction, postfix)
+    analysis.MET.type1Src = "patType1CorrectedPFMetJetRes%s%s" % (direction, postfix)
+    analysis.MET.type2Src = "patType1p2CorrectedPFMetJetRes%s%s" % (direction, postfix)
 
     return name
 
 def addUESVariation(process, prefix, name, prototype, direction, postfix=""):
     (analysis, name) = _doCommon(process, prefix, name, prototype, direction, postfix)
 
-    analysis.MET.rawSrc = "patPFMetUnclusteredEn%s" % direction
-    analysis.MET.type1Src = "patType1CorrectedPFMetUnclusteredEn%s" % direction
-    analysis.MET.type2Src = "patType1p2CorrectedPFMetUnclusteredEn%s" % direction
+    analysis.MET.rawSrc = "patPFMetUnclusteredEn%s%s" % (direction, postfix)
+    analysis.MET.type1Src = "patType1CorrectedPFMetUnclusteredEn%s%s" % (direction, postfix)
+    analysis.MET.type2Src = "patType1p2CorrectedPFMetUnclusteredEn%s%s" % (direction, postfix)
 
     return name
 

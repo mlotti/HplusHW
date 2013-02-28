@@ -63,6 +63,7 @@ class ConfigBuilder:
                  tauSelectionOperatingMode = "standard", # standard, tauCandidateSelectionOnly
                 # tauSelectionOperatingMode = "tauCandidateSelectionOnly",   
                  useTriggerMatchedTaus = True,
+                 useCHSJets = False,
                  useJERSmearedJets = True,
                  useBTagDB = False,
                  customizeLightAnalysis = None,
@@ -78,7 +79,7 @@ class ConfigBuilder:
                  doOptimisation = False, optimisationScheme=defaultOptimisation, # Do variations for optimisation
                  allowTooManyAnalyzers = False, # Allow arbitrary number of analyzers (beware, it might take looong to run and merge)
                  printAnalyzerNames = False,
-                 inputWorkflow = "pattuple_v44_4", # Name of the workflow, whose output is used as an input, needed for WJets weighting
+                 inputWorkflow = "pattuple_v44_5", # Name of the workflow, whose output is used as an input, needed for WJets weighting
                  ):
         self.options, self.dataVersion = HChOptions.getOptionsDataVersion(dataVersion)
         self.dataEras = dataEras
@@ -101,6 +102,7 @@ class ConfigBuilder:
         self.applyPUReweight = applyPUReweight
         self.tauSelectionOperatingMode = tauSelectionOperatingMode
         self.useTriggerMatchedTaus = useTriggerMatchedTaus
+        self.useCHSJets = useCHSJets
         self.useJERSmearedJets = useJERSmearedJets
         self.useBTagDB = useBTagDB
         self.customizeLightAnalysis = customizeLightAnalysis
@@ -484,6 +486,11 @@ class ConfigBuilder:
         else:
             param.setAllTauSelectionSrcSelectedPatTaus()
 
+        # CHS jets
+        if self.useCHSJets:
+            print "Using CHS jets"
+            param.changeJetCollection(moduleLabel="selectedPatJetsChs")
+
         # JER-smeared jets
         if self.useJERSmearedJets:
             param.setJERSmearedJets(self.dataVersion)
@@ -743,20 +750,24 @@ class ConfigBuilder:
         module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
         module.histogramAmbientLevel = self.histogramAmbientLevelSystematics
 
+        postfix = ""
+        if module.jetSelection.src.value()[-3:] == "Chs":
+            postfix = "Chs"
+
         names = []
         names.append(jesVariation.addTESVariation(process, name, "TESPlus",  module, "Up", histogramAmbientLevel=self.histogramAmbientLevelSystematics))
         names.append(jesVariation.addTESVariation(process, name, "TESMinus", module, "Down", histogramAmbientLevel=self.histogramAmbientLevelSystematics))
 
         if doJetUnclusteredVariation:
             # Do all variations beyond TES
-            names.append(jesVariation.addJESVariation(process, name, "JESPlus",  module, "Up"))
-            names.append(jesVariation.addJESVariation(process, name, "JESMinus", module, "Down"))
+            names.append(jesVariation.addJESVariation(process, name, "JESPlus",  module, "Up", postfix))
+            names.append(jesVariation.addJESVariation(process, name, "JESMinus", module, "Down", postfix))
     
-            names.append(jesVariation.addJERVariation(process, name, "JERPlus",  module, "Up"))
-            names.append(jesVariation.addJERVariation(process, name, "JERMinus", module, "Down"))
+            names.append(jesVariation.addJERVariation(process, name, "JERPlus",  module, "Up", postfix))
+            names.append(jesVariation.addJERVariation(process, name, "JERMinus", module, "Down", postfix))
     
-            names.append(jesVariation.addUESVariation(process, name, "METPlus",  module, "Up"))
-            names.append(jesVariation.addUESVariation(process, name, "METMinus", module, "Down"))
+            names.append(jesVariation.addUESVariation(process, name, "METPlus",  module, "Up", postfix))
+            names.append(jesVariation.addUESVariation(process, name, "METMinus", module, "Down", postfix))
 
         self._accumulateAnalyzers("JES variation", names)
 
@@ -765,6 +776,8 @@ class ConfigBuilder:
     # \param process                      cms.Process object
     # \param analysisNamesForSystematics  Names of the analysis modules for which the PU weight variation should be done
     def _buildPUWeightVariation(self, process, analysisNamesForSystematics, param):
+        if not self.applyPUReweight:
+            return
         if not (self.doPUWeightVariation or self.doSystematics):
             return
 
