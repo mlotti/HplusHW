@@ -1962,6 +1962,13 @@ class PlotDrawer:
         p.frame.GetXaxis().SetTitle(xlabel)
         p.frame.GetYaxis().SetTitle(ylab)
 
+        # Copy bin labels, if present
+        if len(p.histoMgr.getHistos()[0].getRootHisto().GetXaxis().GetBinLabel(1)) > 0:
+            firstHisto = p.histoMgr.getHistos()[0].getRootHisto()
+            # Following line is needed to make sure that the nbins on the frame is correct
+            p.frame.GetXaxis().Set(firstHisto.GetNbinsX(),firstHisto.GetXaxis().GetXmin(),firstHisto.GetXaxis().GetXmax())
+            for i in range(1,firstHisto.GetNbinsX()+1):
+                p.frame.GetXaxis().SetBinLabel(i,firstHisto.GetXaxis().GetBinLabel(i))
         customize = kwargs.get("customizeBeforeDraw", self.customizeBeforeDrawDefault)
         if customize != None:
             customize(p)
