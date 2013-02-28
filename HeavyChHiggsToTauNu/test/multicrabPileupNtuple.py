@@ -79,7 +79,7 @@ datasets_53X = [
     "TTToHplusBWB_M160_ext_Summer12",
 
     "TTToHplusBHminusB_M80_Summer12",
-#    "TTToHplusBHminusB_M90_Summer12",
+    "TTToHplusBHminusB_M90_Summer12",
     "TTToHplusBHminusB_M100_Summer12",
     "TTToHplusBHminusB_M120_Summer12",
     "TTToHplusBHminusB_M140_Summer12",
@@ -88,7 +88,6 @@ datasets_53X = [
     "TTToHplusBHminusB_M160_Summer12",
 
     "TTToHplusBHminusB_M80_ext_Summer12",
-#    "TTToHplusBHminusB_M90_ext_Summer12",
     "TTToHplusBHminusB_M100_ext_Summer12",
     "TTToHplusBHminusB_M120_ext_Summer12",
     "TTToHplusBHminusB_M140_ext_Summer12",
@@ -137,7 +136,7 @@ datasets_53X = [
     "HplusTB_M190_ext_Summer12",
     "HplusTB_M200_ext_Summer12",
     "HplusTB_M220_ext_Summer12",
-#    "HplusTB_M250_ext_Summer12",
+    "HplusTB_M250_ext_Summer12",
     "HplusTB_M300_ext_Summer12",
 
     "QCD_Pt30to50_TuneZ2star_Summer12",

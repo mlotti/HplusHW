@@ -92,7 +92,7 @@ def addNtuple_53X(datasets):
         "TTToHplusBWB_M160_ext_Summer12":         TaskDef(njobsIn=1),
 
         "TTToHplusBHminusB_M80_Summer12":         TaskDef(njobsIn=1),
-#        "TTToHplusBHminusB_M90_Summer12":         TaskDef(njobsIn=1),
+        "TTToHplusBHminusB_M90_Summer12":         TaskDef(njobsIn=1),
         "TTToHplusBHminusB_M100_Summer12":        TaskDef(njobsIn=1),
         "TTToHplusBHminusB_M120_Summer12":        TaskDef(njobsIn=1),
         "TTToHplusBHminusB_M140_Summer12":        TaskDef(njobsIn=1),
@@ -101,7 +101,6 @@ def addNtuple_53X(datasets):
         "TTToHplusBHminusB_M160_Summer12":        TaskDef(njobsIn=1),
 
         "TTToHplusBHminusB_M80_ext_Summer12":     TaskDef(njobsIn=1),
-#        "TTToHplusBHminusB_M90_ext_Summer12":     TaskDef(njobsIn=1),
         "TTToHplusBHminusB_M100_ext_Summer12":    TaskDef(njobsIn=1),
         "TTToHplusBHminusB_M120_ext_Summer12":    TaskDef(njobsIn=1),
         "TTToHplusBHminusB_M140_ext_Summer12":    TaskDef(njobsIn=1),
@@ -150,7 +149,7 @@ def addNtuple_53X(datasets):
         "HplusTB_M190_ext_Summer12":                  TaskDef(njobsIn=1),
         "HplusTB_M200_ext_Summer12":                  TaskDef(njobsIn=1),
         "HplusTB_M220_ext_Summer12":                  TaskDef(njobsIn=1),
-#        "HplusTB_M250_ext_Summer12":                  TaskDef(njobsIn=1),
+        "HplusTB_M250_ext_Summer12":                  TaskDef(njobsIn=1),
         "HplusTB_M300_ext_Summer12":                  TaskDef(njobsIn=1),
 
         "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDef(njobsIn=6),

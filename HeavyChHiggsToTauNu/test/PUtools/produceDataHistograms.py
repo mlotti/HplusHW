@@ -30,28 +30,37 @@ runsJson = [
     (["2012B"], 193834, 196531, certifiedLumi.files["13Jul2012ReReco"]),
     (["2012C"], 198022, 198523, certifiedLumi.files["24Aug2012ReReco"]),
     (["2012C"], 198941, 203742, certifiedLumi.files["PromptReco12"]),
+    (["2012D"], 203777, 208686, certifiedLumi.files["PromptReco12"]),
     ]
 for tpl in runsJson:
     if tpl[0][0] in ["2012A", "2012B"]:
         tpl[0].append("2012AB")
         tpl[0].append("2012ABC")
+        tpl[0].append("2012ABCD")
     elif tpl[0][0] in ["2012C"]:
         tpl[0].append("2012ABC")
+        tpl[0].append("2012ABCD")
+    elif tpl[0][0] in ["2012CD"]:
+        tpl[0].append("2012ABCD")
 eraPUJson = {
     "2012A": "pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt",
     "2012B": "pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt",
-    "2012C": "pileup_JSON_DCSONLY_190389-204506_corr.txt",
+    "2012C": "pileup_JSON_DCSONLY_190389-208686_corr.txt",
+    "2012D": "pileup_JSON_DCSONLY_190389-208686_corr.txt",
 
     "2012AB": "pileup_JSON_DCSONLY_190389-200041_pixelcorr.txt",
     "2012ABC": "pileup_JSON_DCSONLY_190389-200041_pixelcorr_upto196531_190389-204506_corr_from198022.txt",
+    "2012ABCD": "pileup_JSON_DCSONLY_190389-200041_pixelcorr_upto196531_190389-204506_corr_from198022.txt",
 }
 
 processEras = [
     "2012A",
     "2012B",
     "2012C",
+    "2012D",
     "2012AB",
     "2012ABC",
+    "2012ABCD",
 ]
 
 def main():

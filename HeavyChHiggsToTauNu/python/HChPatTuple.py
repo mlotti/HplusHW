@@ -552,12 +552,9 @@ class StandardPATBuilder(PATBuilderBase):
         self.process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
         self.beginSequence *= self.process.PFTau
 
-        # Switch PAT taus to HPS
-        tauTools.addTauCollection(self.process, cms.InputTag('hpsPFTauProducer'),
-                                  algoLabel = "hps",
-                                  typeLabel = "PFTau")
-        patTaus = self.process.patTausHpsPFTau
-        selectedPatTaus = self.process.selectedPatTausHpsPFTau
+        # PAT taus are now HPS by default
+        patTaus = self.process.patTaus
+        selectedPatTaus = self.process.selectedPatTaus
 
         # Set objects to embedded to pat::Tau
         setPatTauDefaults(patTaus, self.includePFCands)
@@ -604,8 +601,9 @@ class StandardPATBuilder(PATBuilderBase):
 #            self.endSequence *= HChTriggerMatching.addTauHLTMatching(self.process, self.matchingTauTrigger, collections=["patTausHpsPFTau"], outputCommands=self.outputCommands)
 
         self.outputCommands.extend([
-                "drop *_selectedPatTaus_*_*",
-                "keep *_selectedPatTausHpsPFTau_*_*",
+                "keep *_selectedPatTaus_*_*",
+#                "drop *_selectedPatTaus_*_*",
+#                "keep *_selectedPatTausHpsPFTau_*_*",
                 #"keep *_selectedPatTausHpsTancPFTau_*_*",
                 ])
 
@@ -622,23 +620,37 @@ class StandardPATBuilder(PATBuilderBase):
                 "keep *_genMetTrue_*_*", # keep generator level MET
                 ])
 
+        self.process.load("PhysicsTools.PatUtils.patPFMETCorrections_cff")
+        # For Type 0 MET hack, include the producers in the sequence,
+        # but not to the default corrected-MET producers
+        self.process.producePatPFMETCorrections.replace(self.process.patPFJetMETtype2Corr,
+                                                        (self.process.patPFJetMETtype2Corr+self.process.type0PFMEtCorrection+self.process.patPFMETtype0Corr))
+
+
         if self.dataVersion.isData():
-            self.process.load("PhysicsTools.PatUtils.patPFMETCorrections_cff")
             for postfix in jetPostfixes:
                 jets = getattr(self.process, "selectedPatJets"+postfix).src.value()
 
-                if postfix != "":
-                    patHelpers.cloneProcessingSnippet(self.process, self.process.producePatPFMETCorrections, postfix)
-                getattr(self.process, "selectedPatJetsForMETtype1p2Corr"+postfix).src = jets
-                getattr(self.process, "selectedPatJetsForMETtype2Corr"+postfix).src = jets
-                getattr(self.process, "patPFMet"+postfix).addGenMET = False
+                for pfix in [postfix, postfix+"Type0"]:
+                    if pfix != "":
+                        patHelpers.cloneProcessingSnippet(self.process, self.process.producePatPFMETCorrections, pfix)
+                    getattr(self.process, "selectedPatJetsForMETtype1p2Corr"+pfix).src = jets
+                    getattr(self.process, "selectedPatJetsForMETtype2Corr"+pfix).src = jets
+                    getattr(self.process, "patPFMet"+pfix).addGenMET = False
+                    if "Type0" in pfix:
+                        getattr(self.process, "patType1CorrectedPFMet"+pfix).srcType1Corrections.append(cms.InputTag('patPFMETtype0Corr'+pfix))
+                        getattr(self.process, "patType1p2CorrectedPFMet"+pfix).srcType1Corrections.append(cms.InputTag('patPFMETtype0Corr'+pfix))
 
-                seq *= getattr(self.process, "producePatPFMETCorrections"+postfix)
-                self.outputCommands.extend([
-                        "keep *_patPFMet%s_*_*" % postfix,
-                        "keep *_patType1CorrectedPFMet%s_*_*" % postfix,
-                        "keep *_patType1p2CorrectedPFMet%s_*_*" % postfix,
-                        ])
+                    seq *= getattr(self.process, "producePatPFMETCorrections"+pfix)
+
+                    # Type 0 correction is included only in Type1 and
+                    # Type1p2 MET objects
+                    if not "Type0" in pfix:
+                        self.outputCommands.append("keep *_patPFMet%s_*_*" % pfix)
+                    self.outputCommands.extend([
+                            "keep *_patType1CorrectedPFMet%s_*_*" % pfix,
+                            "keep *_patType1p2CorrectedPFMet%s_*_*" % pfix,
+                            ])
             return
 
         # Following is for MC only
@@ -668,6 +680,28 @@ class StandardPATBuilder(PATBuilderBase):
                                                     outputModule=outputModule,
                                                     postfix=postfix,
                                                     )
+            # Another version of MET+variations with Type 0 correction
+            metUncertaintyTools.runMEtUncertainties(self.process,
+                                                    electronCollection="",
+                                                    photonCollection="",
+                                                    muonCollection="",
+                                                    tauCollection="",
+                                                    jetCollection=jets,
+                                                    doSmearJets=self.dataVersion.isMC(),
+                                                    doApplyType0corr=True,
+                                                    outputModule=outputModule,
+                                                    postfix=postfix+"Type0",
+                                                    )
+
+            processName = self.process.name_()
+            # Drop jet collections with "Type0" in their name, their
+            # just duplicates of the usual jets. Also drop uncorrected
+            # "Type0", since Type 0 corrections are included only in
+            # Type1 and Type1p2 MET objects
+            self.process.out.outputCommands.extend([
+                    "drop patJets_*%sType0_*_%s" % (postfix, processName),
+                    "drop *_patPFMet%sType0_*_%s" % (postfix, processName),
+                    ])
 
             # Add "selected"-collections for all jets
             # "All" name "shiftedPatJetsBetaEmbeddedPFlowEnUpForCorrMEt"
@@ -706,9 +740,8 @@ class StandardPATBuilder(PATBuilderBase):
             if outputModule != "":
                 self.outputCommands.extend(getattr(self.process, outputModule).outputCommands)
                 self.process.out.outputCommands = []
-    
-    
-                processName = self.process.name_()
+
+   
                 # Drop "all" shifted/smeared jet collections in favor of
                 # the "selected" collections. We don't need the
                 # "ForRawMEt" energy variations.
@@ -790,10 +823,14 @@ class StandardPATBuilder(PATBuilderBase):
             self.process.CSCTightHaloFilterPath = cms.Path(self.process.CSCTightHaloFilter)
 
             # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#HCAL_laser_events_updated
+            # Keep still the old
             self.process.load("RecoMET.METFilters.hcalLaserEventFilter_cfi")
             self.process.hcalLaserEventFilter.taggingMode = True
             self.endSequence *= self.process.hcalLaserEventFilter
             self.outputCommands.append("keep *_hcalLaserEventFilter_*_*")
+            # New (November 2012)
+            self.process.load("EventFilter.HcalRawToDigi.hcallasereventfilter2012_cfi")
+            self.process.hcallasereventfilter2012Path = cms.Path(self.process.hcallasereventfilter2012)
 
             # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Bad_EE_Supercrystal_filter_added
             self.process.load("RecoMET.METFilters.eeBadScFilter_cfi")
@@ -819,6 +856,7 @@ class StandardPATBuilder(PATBuilderBase):
                                               "PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg")
             )
             self.logErrorTooManyClustersPath = cms.Path(self.process.logErrorTooManyClusters)
+
             self.process.logErrorTooManyTripletsPairs = cms.EDFilter("LogErrorEventFilter",
                 src = cms.InputTag("logErrorHarvester"),
                 maxErrorFractionInLumi = cms.double(1.0), 
@@ -829,6 +867,19 @@ class StandardPATBuilder(PATBuilderBase):
                                               "PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg")
             )
             self.process.logErrorTooManyTripletsPairsPath = cms.Path(self.process.logErrorTooManyTripletsPairs)
+
+            self.process.logErrorTooManyTripletsPairsMainIterations = cms.EDFilter("LogErrorEventFilter",
+                src = cms.InputTag("logErrorHarvester"),
+                maxErrorFractionInLumi = cms.double(1.0), 
+                maxErrorFractionInRun  = cms.double(1.0), 
+                maxSavedEventsPerLumiAndError = cms.uint32(100000), 
+                categoriesToWatch = cms.vstring("TooManyTriplets","TooManyPairs","PixelTripletHLTGenerator"),
+                modulesToWatch = cms.vstring("SeedGeneratorFromRegionHitsEDProducer:initialStepSeeds",
+                                             "SeedGeneratorFromRegionHitsEDProducer:pixelPairStepSeeds"
+                                             )
+                )
+            self.process.logErrorTooManyTripletsPairsMainIterationsPath = cms.Path(self.process.logErrorTooManyTripletsPairsMainIterations)
+
             self.process.logErrorTooManySeeds = cms.EDFilter("LogErrorEventFilter",
                 src = cms.InputTag("logErrorHarvester"),
                 maxErrorFractionInLumi = cms.double(1.0),
@@ -837,6 +888,52 @@ class StandardPATBuilder(PATBuilderBase):
                 categoriesToWatch = cms.vstring("TooManySeeds"),
             )
             self.process.logErrorTooManySeedsPath = cms.Path(self.process.logErrorTooManySeeds)
+
+            self.process.logErrorTooManySeedsMainIterations = cms.EDFilter("LogErrorEventFilter",
+                src = cms.InputTag("logErrorHarvester"),
+                maxErrorFractionInLumi = cms.double(1.0),
+                maxErrorFractionInRun  = cms.double(1.0),
+                maxSavedEventsPerLumiAndError = cms.uint32(100000), 
+                categoriesToWatch = cms.vstring("TooManySeeds"),
+                modulesToWatch = cms.vstring("CkfTrackCandidateMaker:initialStepTrackCandidate",
+                                             "CkfTrackCandidateMaker:pixelPairTrackCandidate"
+                                             )
+            )
+            self.process.logErrorTooManySeedsMainIterationsPath = cms.Path(self.process.logErrorTooManySeedsMainIterations)
+
+            self.process.manystripclus53X = cms.EDFilter('ByClusterSummaryMultiplicityPairEventFilter',
+                                                      multiplicityConfig = cms.PSet(
+                                                                           firstMultiplicityConfig = cms.PSet(
+                                                                                                     clusterSummaryCollection = cms.InputTag("clusterSummaryProducer"),
+                                                                                                     subDetEnum = cms.int32(5),
+                                                                                                     subDetVariable = cms.string("pHits")
+                                                                                                     ),
+                                                                           secondMultiplicityConfig = cms.PSet(
+                                                                                                      clusterSummaryCollection = cms.InputTag("clusterSummaryProducer"),
+                                                                                                      subDetEnum = cms.int32(0),
+                                                                                                      subDetVariable = cms.string("cHits")
+                                                                                                      ),
+                                                                           ),
+                                                      cut = cms.string("( mult2 > 20000+7*mult1)")
+                                                      )
+            self.process.manystripclus53XPath = cms.Path(self.process.manystripclus53X)
+
+            self.process.toomanystripclus53X = cms.EDFilter('ByClusterSummaryMultiplicityPairEventFilter',
+                                                      multiplicityConfig = cms.PSet(
+                                                                           firstMultiplicityConfig = cms.PSet(
+                                                                                                     clusterSummaryCollection = cms.InputTag("clusterSummaryProducer"),
+                                                                                                     subDetEnum = cms.int32(5),
+                                                                                                     subDetVariable = cms.string("pHits")
+                                                                                                     ),
+                                                                           secondMultiplicityConfig = cms.PSet(
+                                                                                                      clusterSummaryCollection = cms.InputTag("clusterSummaryProducer"),
+                                                                                                      subDetEnum = cms.int32(0),
+                                                                                                      subDetVariable = cms.string("cHits")
+                                                                                                      ),
+                                                                           ),
+                                                      cut = cms.string("(mult2>50000) && ( mult2 > 20000+7*mult1)")
+                                                      )
+            self.process.toomanystripclus53XPath = cms.Path(self.process.toomanystripclus53X)
 
             # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#Muons_with_wrong_momenta_PF_only
             self.process.load('RecoMET.METFilters.inconsistentMuonPFCandidateFilter_cfi')
