@@ -31,6 +31,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeJetBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeVertexBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeTriggerBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeGenParticleBranches.h"
 
 #include "TTree.h"
 
@@ -56,6 +57,8 @@ private:
 
   edm::InputTag fGenParticleOriginalSrc;
   edm::InputTag fGenParticleEmbeddedSrc;
+  edm::InputTag fGenTauOriginalSrc;
+  edm::InputTag fGenTauEmbeddedSrc;
 
   HPlus::EventWeight fEventWeight;
   HPlus::HistoWrapper fHistoWrapper;
@@ -70,6 +73,9 @@ private:
   HPlus::TreeTauBranches fTauBranches;
   //HPlus::TreeJetBranches fJetBranches;
 
+  HPlus::TreeGenParticleBranches fGenTausOriginal;
+  HPlus::TreeGenParticleBranches fGenTausEmbedded;
+
   std::vector<MetItem> fMets;
   std::vector<DoubleItem> fDoubles;
   std::vector<BoolItem> fBools;
@@ -80,6 +86,8 @@ private:
 HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::ParameterSet& iConfig):
   fGenParticleOriginalSrc(iConfig.getParameter<edm::InputTag>("genParticleOriginalSrc")),
   fGenParticleEmbeddedSrc(iConfig.getParameter<edm::InputTag>("genParticleEmbeddedSrc")),
+  fGenTauOriginalSrc(iConfig.getParameter<edm::InputTag>("genTauOriginalSrc")),
+  fGenTauEmbeddedSrc(iConfig.getParameter<edm::InputTag>("genTauEmbeddedSrc")),
   fEventWeight(iConfig),
   fHistoWrapper(fEventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
   fEmbeddingMuonEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingMuonEfficiency"), fHistoWrapper),
@@ -88,8 +96,10 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   fTriggerBranches(iConfig),
   fMuonBranches(iConfig),
   //fElectronBranches(iConfig, fSelectedVertexBranches.getInputTag()),
-  fTauBranches(iConfig)
+  fTauBranches(iConfig),
   //fJetBranches(iConfig, true)
+  fGenTausOriginal("gentausOriginal"),
+  fGenTausEmbedded("gentausEmbedded")
 {
 
   edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("mets");
@@ -122,6 +132,9 @@ HPlusTauEmbeddingNtupleAnalyzer::HPlusTauEmbeddingNtupleAnalyzer(const edm::Para
   fTauBranches.book(fTree);
   //fJetBranches.book(fTree);
 
+  fGenTausOriginal.book(fTree);
+  fGenTausEmbedded.book(fTree);
+
   for(size_t i=0; i<fMets.size(); ++i) {
     fTree->Branch(fMets[i].name.c_str(), &(fMets[i].value));
   }
@@ -149,6 +162,9 @@ void HPlusTauEmbeddingNtupleAnalyzer::reset() {
   fTauBranches.reset();
   //fJetBranches.reset();
 
+  fGenTausOriginal.reset();
+  fGenTausEmbedded.reset();
+
   for(size_t i=0; i<fMets.size(); ++i) {
     fMets[i].value.SetXYZT(nan, nan, nan, nan);
   }
@@ -172,9 +188,14 @@ void HPlusTauEmbeddingNtupleAnalyzer::analyze(const edm::Event& iEvent, const ed
 
   edm::Handle<edm::View<reco::GenParticle> > hgenparticlesOriginal;
   edm::Handle<edm::View<reco::GenParticle> > hgenparticlesEmbedded;
-  if(!iEvent.isRealData())
+  edm::Handle<edm::View<reco::GenParticle> > hgentausOriginal;
+  edm::Handle<edm::View<reco::GenParticle> > hgentausEmbedded;
+  if(!iEvent.isRealData()) {
     iEvent.getByLabel(fGenParticleOriginalSrc, hgenparticlesOriginal);
+    iEvent.getByLabel(fGenTauOriginalSrc, hgentausOriginal);
+  }
   iEvent.getByLabel(fGenParticleEmbeddedSrc, hgenparticlesEmbedded);
+  iEvent.getByLabel(fGenTauEmbeddedSrc, hgentausEmbedded);
 
   // Muons
   if(iEvent.isRealData()) {
@@ -184,8 +205,18 @@ void HPlusTauEmbeddingNtupleAnalyzer::analyze(const edm::Event& iEvent, const ed
   else {
     fMuonBranches.setValues(iEvent, *hgenparticlesOriginal);
     //fElectronBranches.setValues(iEvent, *hgenparticlesOriginal);
+    for(edm::View<reco::GenParticle>::const_iterator iGen = hgentausOriginal->begin(); iGen != hgentausOriginal->end(); ++iGen) {
+      if(std::abs(iGen->pdgId()) == 15) {
+        fGenTausOriginal.addValue(&(*iGen));
+      }
+    }
   }
   fTauBranches.setValues(iEvent, *hgenparticlesEmbedded);
+  for(edm::View<reco::GenParticle>::const_iterator iGen = hgentausEmbedded->begin(); iGen != hgentausEmbedded->end(); ++iGen) {
+    if(std::abs(iGen->pdgId()) == 15) {
+      fGenTausEmbedded.addValue(&(*iGen));
+    }
+  }
 
   //fJetBranches.setValues(iEvent);
 

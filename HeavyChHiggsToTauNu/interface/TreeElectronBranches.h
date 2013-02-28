@@ -12,6 +12,7 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeFunctionBranch.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeGenParticleBranches.h"
 
 #include<vector>
 #include<string>
@@ -59,9 +60,7 @@ namespace HPlus {
 
     std::vector<XYZTLorentzVector> fElectrons;
     std::vector<ElectronFunctionBranch> fElectronsFunctions;
-    std::vector<int> fElectronsPdgId;
-    std::vector<int> fElectronsMotherPdgId;
-    std::vector<int> fElectronsGrandMotherPdgId;
+    TreeGenParticleBranches fElectronsGenMatch;
     std::vector<bool> fElectronsHasGsfTrack;
     std::vector<bool> fElectronsHasSuperCluster;
     std::vector<bool> fElectronsCutBasedIdVeto;

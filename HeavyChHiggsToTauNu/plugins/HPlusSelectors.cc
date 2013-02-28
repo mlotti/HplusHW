@@ -9,6 +9,7 @@
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIsolationSelectorOld.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIsolationSelector.h"
@@ -151,9 +152,11 @@ DEFINE_FWK_MODULE( HPlusTauIsolationPATMuonRefSelector );
 
 typedef HPlus::FirstObjectSelector<reco::Vertex, reco::VertexCollection> HPlusFirstVertexSelector;
 typedef HPlus::FirstObjectSelector<reco::Candidate, edm::PtrVector<reco::Candidate> > HPlusFirstCandidateSelector;
+typedef HPlus::FirstObjectSelector<reco::GenParticle, reco::GenParticleCollection> HPlusFirstGenParticleSelector;
 
 DEFINE_FWK_MODULE( HPlusFirstVertexSelector );
 DEFINE_FWK_MODULE( HPlusFirstCandidateSelector );
+DEFINE_FWK_MODULE( HPlusFirstGenParticleSelector );
 
 
 typedef HPlus::TriggerMatchSelector<

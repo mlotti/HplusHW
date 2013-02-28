@@ -13,7 +13,7 @@ namespace HPlus {
     const reco::GenParticle *rewindChainDown(const reco::GenParticle *particle);
 
     template <typename I, typename R>
-    const reco::GenParticle *findMatching(const I& begin, const I& end, unsigned pdgId, const R& reference, double deltaR) {
+    const reco::GenParticle *findMatching(const I& begin, const I& end, unsigned pdgId, const R& reference, double deltaR, bool visibleTau=false) {
       const reco::GenParticle *found = 0;
 
       double maxDR = deltaR;
@@ -22,7 +22,14 @@ namespace HPlus {
           if(iter->mother() && iter->mother()->pdgId() == iter->pdgId())
             continue;
 
-          double dR = reco::deltaR(*iter, reference);
+          double dR;
+          if(visibleTau) {
+            dR = reco::deltaR(calculateVisibleTau(&(*iter)), reference);
+          }
+          else {
+            dR = reco::deltaR(*iter, reference);
+          }
+
           if(dR < maxDR) {
             maxDR = dR;
             found = dynamic_cast<const reco::GenParticle *>(&(*iter));

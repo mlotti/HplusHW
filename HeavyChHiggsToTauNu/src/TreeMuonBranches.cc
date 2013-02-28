@@ -14,7 +14,8 @@
 namespace HPlus {
   TreeMuonBranches::TreeMuonBranches(const edm::ParameterSet& iConfig, const std::string& prefix):
     fMuonSrc(iConfig.getParameter<edm::InputTag>("muonSrc")),
-    fPrefix(prefix+"_")
+    fPrefix(prefix+"_"),
+    fMuonsGenMatch(fPrefix+"genmatch")
   {
     edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("muonFunctions");
     std::vector<std::string> names = pset.getParameterNames();
@@ -31,9 +32,7 @@ namespace HPlus {
     for(size_t i=0; i<fMuonsFunctions.size(); ++i) {
       fMuonsFunctions[i].book(tree);
     }
-    tree->Branch((fPrefix+"pdgid").c_str(), &fMuonsPdgId);
-    tree->Branch((fPrefix+"mother_pdgid").c_str(), &fMuonsMotherPdgId);
-    tree->Branch((fPrefix+"grandmother_pdgid").c_str(), &fMuonsGrandMotherPdgId);
+    fMuonsGenMatch.book(tree);
   }
 
   size_t TreeMuonBranches::setValues(const edm::Event& iEvent) {
@@ -54,24 +53,7 @@ namespace HPlus {
     for(size_t i=0; i<hmuons->size(); ++i) {
       const pat::Muon& muon = hmuons->at(i);
       const reco::GenParticle *gen = GenParticleTools::findMatching(genParticles.begin(), genParticles.end(), 13, muon, 0.5);
-
-      int pdgId = 0;
-      int motherPdgId = 0;
-      int grandMotherPdgId = 0;
-      if(gen) {
-        pdgId = gen->pdgId();
-        const reco::GenParticle *mother = GenParticleTools::findMother(gen);
-        if(mother) {
-          motherPdgId = mother->pdgId();
-          const reco::GenParticle *grandMother = GenParticleTools::findMother(mother);
-          if(grandMother)
-            grandMotherPdgId = grandMother->pdgId();
-        }
-      }
-
-      fMuonsPdgId.push_back(pdgId);
-      fMuonsMotherPdgId.push_back(motherPdgId);
-      fMuonsGrandMotherPdgId.push_back(grandMotherPdgId);
+      fMuonsGenMatch.addValue(gen);
     }
 
     return hmuons->size();
@@ -91,8 +73,6 @@ namespace HPlus {
     fMuons.clear();
     for(size_t i=0; i<fMuonsFunctions.size(); ++i)
       fMuonsFunctions[i].reset();
-    fMuonsPdgId.clear();
-    fMuonsMotherPdgId.clear();
-    fMuonsGrandMotherPdgId.clear();
+    fMuonsGenMatch.reset();
   }
 }
