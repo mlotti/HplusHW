@@ -66,7 +66,12 @@ def main(opts,era):
     # Take QCD from data
     if opts.noMCQCD:
         datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
-    
+    # Remove signal
+    if opts.noSignal:
+        datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
+        datasets.remove(filter(lambda name: "Hplus_taunu" in name, datasets.getAllDatasetNames()))
+        datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
+
 #Rtau =0
 #    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110804_104313/multicrab.cfg", counters=counters)
 
@@ -85,7 +90,8 @@ def main(opts,era):
         print "Int.Lumi (manually set)",mcOnlyLumi
     else:
         print "Int.Lumi",datasets.getDataset("Data").getLuminosity()
-    print "norm=",datasets.getDataset("TTToHplusBWB_M120").getNormFactor()
+    if not opts.noSignal:
+        print "norm=",datasets.getDataset("TTToHplusBWB_M120").getNormFactor()
 
     # Remove signals other than M120
 #    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
@@ -95,11 +101,9 @@ def main(opts,era):
     datasets.remove(filter(lambda name: "QCD_Pt20_MuEnriched" in name, datasets.getAllDatasetNames()))
     
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "Hplus_taunu" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     
-    # Remove QCD
-    if removeQCD:
-        datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
     histograms.createLegend.moveDefaults(dx=-0.02)
     histograms.createLegend.moveDefaults(dh=-0.03)
     
@@ -623,6 +627,7 @@ if __name__ == "__main__":
     parser.add_option("-e", dest="era", action="append", help="name of era")
     parser.add_option("-t", dest="type", action="append", help="name of analysis type")
     parser.add_option("--noMCQCD", dest="noMCQCD", action="store_true", default=False, help="remove MC QCD")
+    parser.add_option("--noSignal", dest="noSignal", action="store_true", default=False, help="remove MC QCD")
     (opts, args) = parser.parse_args()
 
     # Check that proper arguments were given
