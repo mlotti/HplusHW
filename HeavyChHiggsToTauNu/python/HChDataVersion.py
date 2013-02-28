@@ -93,6 +93,7 @@ config = {
         "globalTag": "FT53_V10A_AN3::All",
 #        "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2012C-24Aug2012-v1/AOD/02698B5A-A0EE-E111-B4FB-0025901D4AF4.root",
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_5_3_X/Tau_198022-198523_2012C_Aug24/Tau/Run2012C_24Aug2012_v1_AOD_198022_198523_pattuple_v53_2/63ff13540867be423a0bd89ddcd239a1/pattuple_98_1_c19.root",
     },
     "53XdataPromptCv2": {"triggerProcess": "HLT", "recoProcess": "RECO",
         "globalTag": "GR_P_V42_AN3::All",
@@ -110,7 +111,7 @@ config = {
         "globalTag": "START53_V15::All",
         "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/TTToHplusBWB_M-120_8TeV-pythia6-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM/E6FBC572-20F5-E111-9CBD-00215E21DC60.root",
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_5_3_X/TTToHplusBWB_M120_Summer12/TTToHplusBWB_M-120_8TeV-pythia6-tauola/Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_1_test1/cad8d1056ca20d363262a3efa1d97a74/pattuple_9_1_sH1.root"
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_5_3_X/TTToHplusBWB_M120_Summer12/TTToHplusBWB_M-120_8TeV-pythia6-tauola/Summer12_DR53X_PU_S10_START53_V7A_v1_AODSIM_pattuple_v53_2/f3f6db3988d554ca655ef290b2e69c3e/pattuple_2_1_mkW.root"
     }
 }
 
