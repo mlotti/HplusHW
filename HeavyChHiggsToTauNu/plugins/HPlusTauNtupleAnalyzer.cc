@@ -24,6 +24,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeVertexBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeTriggerBranches.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeGenBranches.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeGenParticleBranches.h"
 
 #include "TTree.h"
 
@@ -58,6 +59,8 @@ private:
   HPlus::TreeTauBranches fTauBranches;
   HPlus::TreeJetBranches fJetBranches;
 
+  HPlus::TreeGenParticleBranches fGenTaus;
+
   std::vector<MetItem> fMets;
   std::vector<DoubleItem> fDoubles;
 
@@ -72,7 +75,8 @@ HPlusTauNtupleAnalyzer::HPlusTauNtupleAnalyzer(const edm::ParameterSet& iConfig)
   fGoodVertexBranches(iConfig, "goodPrimaryVertex", "goodPrimaryVertexSrc"),
   fTriggerBranches(iConfig),
   fTauBranches(iConfig),
-  fJetBranches(iConfig, false)
+  fJetBranches(iConfig, false),
+  fGenTaus("gentaus")
 {
 
   edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("mets");
@@ -98,6 +102,8 @@ HPlusTauNtupleAnalyzer::HPlusTauNtupleAnalyzer(const edm::ParameterSet& iConfig)
   fTauBranches.book(fTree);
   fJetBranches.book(fTree);
 
+  fGenTaus.book(fTree);
+
   for(size_t i=0; i<fMets.size(); ++i) {
     fTree->Branch(fMets[i].name.c_str(), &(fMets[i].value));
   }
@@ -118,6 +124,8 @@ void HPlusTauNtupleAnalyzer::reset() {
   fTriggerBranches.reset();
   fTauBranches.reset();
   fJetBranches.reset();
+
+  fGenTaus.reset();
 
   for(size_t i=0; i<fMets.size(); ++i) {
     fMets[i].value.SetXYZT(nan, nan, nan, nan);
@@ -147,6 +155,12 @@ void HPlusTauNtupleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventS
   else {
     fGenBranches.setValues(iEvent);
     fTauBranches.setValues(iEvent, *hgenparticlestau);
+
+    for(edm::View<reco::GenParticle>::const_iterator iGen = hgenparticlestau->begin(); iGen != hgenparticlestau->end(); ++iGen) {
+      if(std::abs(iGen->pdgId()) == 15) {
+        fGenTaus.addValue(&(*iGen));
+      }
+    }
   }
 
   fJetBranches.setValues(iEvent);

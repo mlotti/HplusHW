@@ -13,7 +13,7 @@ def addEmbeddingAodAnalysis_44X(datasets):
 #        "W2Jets_TuneZ2_Fall11":              TaskDef(njobsIn=300),
 #        "W3Jets_TuneZ2_Fall11":              TaskDef(njobsIn=120),
 #        "W4Jets_TuneZ2_Fall11":              TaskDef(njobsIn=200),
-        "TTJets_TuneZ2_Fall11":              TaskDef(njobsIn=490),
+        "TTJets_TuneZ2_Fall11":              TaskDef(njobsIn=1000),
         "DYJetsToLL_M50_TuneZ2_Fall11":      TaskDef(njobsIn=350),
         "T_t-channel_TuneZ2_Fall11":         TaskDef(njobsIn=50),
         "Tbar_t-channel_TuneZ2_Fall11":      TaskDef(njobsIn=50),
@@ -31,6 +31,7 @@ def addEmbeddingAodAnalysis_44X(datasets):
         dataset = datasets.getDataset(datasetName)
         source = Source("AOD", number_of_jobs=taskDef.njobsIn)
         wf = Workflow("embeddingAodAnalysis_44X", source=source, output_file="histograms.root")
+        wf.addCrabLine("CMSSW.total_number_of_lumis = -1")
         dataset.addWorkflow(wf)
 
 def getDefaultDefinitions_44X():
@@ -217,8 +218,10 @@ def addEmbeddingEmbedding_44X(sourceWorkflow, version, datasets, updateDefinitio
             args.update(wf.args)
             args["tauEmbeddingInput"] = "1"
             del args["overrideBeamSpot"] # this is needed only for embedding jobs
-            dataset.addWorkflow(Workflow("tauembedding_analysis_"+version, source=Source("tauembedding_embedding_"+version),
-                                         triggerOR=taskDef.triggerOR, args=args, output_file="histograms.root"))
+            wf_analysis = Workflow("tauembedding_analysis_"+version, source=Source("tauembedding_embedding_"+version),
+                                   triggerOR=taskDef.triggerOR, args=args, output_file="histograms.root")
+            wf_analysis.addCrabLine("CMSSW.total_number_of_lumis = -1")
+            dataset.addWorkflow(wf_analysis)
  
 def addEmbeddingSkim_v44_4_2(datasets):
     definitions = {

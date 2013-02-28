@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_CandViewClosestDeltaRSelector_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_CandViewClosestDeltaRSelector_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_ViewClosestDeltaRSelector_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_ViewClosestDeltaRSelector_h
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDProducer.h"
@@ -11,21 +11,20 @@
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
-#include "DataFormats/Candidate/interface/Candidate.h"
 
 #include "DataFormats/Math/interface/deltaR.h"
 
 //#include<iostream>
 
-namespace hplus {
-  template <typename T>
-  class CandViewClosestDeltaRSelector: public edm::EDProducer {
+namespace HPlus {
+  template <typename CandType, typename RefType>
+  class ViewClosestDeltaRSelector: public edm::EDProducer {
   public:
-    explicit CandViewClosestDeltaRSelector(const edm::ParameterSet&);
-    ~CandViewClosestDeltaRSelector();
+    explicit ViewClosestDeltaRSelector(const edm::ParameterSet&);
+    ~ViewClosestDeltaRSelector();
 
   private:
-    typedef std::vector<T> CollectionType;
+    typedef std::vector<CandType> CollectionType;
 
     virtual void produce(edm::Event&, const edm::EventSetup&);
 
@@ -34,8 +33,8 @@ namespace hplus {
     const double maxDR_;
   };
 
-  template <typename T>
-  CandViewClosestDeltaRSelector<T>::CandViewClosestDeltaRSelector(const edm::ParameterSet& iConfig):
+  template <typename CandType, typename RefType>
+  ViewClosestDeltaRSelector<CandType, RefType>::ViewClosestDeltaRSelector(const edm::ParameterSet& iConfig):
     srcCand_(iConfig.getParameter<edm::InputTag>("src")),
     srcRef_(iConfig.getParameter<edm::InputTag>("refSrc")),
     maxDR_(iConfig.getParameter<double>("maxDeltaR"))
@@ -43,25 +42,25 @@ namespace hplus {
     this->template produces<CollectionType>();
   }
 
-  template <typename T>
-  CandViewClosestDeltaRSelector<T>::~CandViewClosestDeltaRSelector() {}
+  template <typename CandType, typename RefType>
+  ViewClosestDeltaRSelector<CandType, RefType>::~ViewClosestDeltaRSelector() {}
 
-  template <typename T>
-  void CandViewClosestDeltaRSelector<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    edm::Handle<edm::View<T> > hcand;
+  template <typename CandType, typename RefType>
+  void ViewClosestDeltaRSelector<CandType, RefType>::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    edm::Handle<edm::View<CandType> > hcand;
     iEvent.getByLabel(srcCand_, hcand);
 
-    edm::Handle<edm::View<reco::Candidate> > href;
+    edm::Handle<edm::View<RefType> > href;
     iEvent.getByLabel(srcRef_, href);
 
     std::auto_ptr<CollectionType> ret(new CollectionType());
 
     // The ordering is important, it is employed in the embedding validation
-    // I.e. the order of selected T objects should match to the order of reference candidates
-    for(edm::View<reco::Candidate>::const_iterator iRef = href->begin(); iRef != href->end(); ++iRef) {
-      typename edm::View<T>::const_iterator iSel = hcand->end();
+    // I.e. the order of selected CandType objects should match to the order of reference candidates
+    for(typename edm::View<RefType>::const_iterator iRef = href->begin(); iRef != href->end(); ++iRef) {
+      typename edm::View<CandType>::const_iterator iSel = hcand->end();
       double selDR = maxDR_;
-      for(typename edm::View<T>::const_iterator iCand = hcand->begin(); iCand != hcand->end(); ++iCand) {
+      for(typename edm::View<CandType>::const_iterator iCand = hcand->begin(); iCand != hcand->end(); ++iCand) {
         double DR = reco::deltaR(*iCand, *iRef);
         if(DR < selDR) {
           selDR = DR;

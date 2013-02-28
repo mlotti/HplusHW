@@ -284,7 +284,7 @@ def createTaskDir(prefix="multicrab", postfix="", path=None):
         break
     return dirname
 
-def crabCfgTemplate(scheduler="arc", return_data=None, copy_data=None):
+def crabCfgTemplate(scheduler="arc", return_data=None, copy_data=None, crabLines=[], cmsswLines=[], userLines=[], gridLines=[]):
     if return_data is None and copy_data is None:
         raise Exception("You must give either return_data or copy_data, you gave neither")
     if return_data is not None and copy_data is not None:
@@ -302,14 +302,24 @@ def crabCfgTemplate(scheduler="arc", return_data=None, copy_data=None):
         "[CRAB]",
         "jobtype = cmssw",
         "scheduler = %s" % scheduler,
+        ]
+    lines.extend(crabLines)
+    if len(cmsswLines) > 0:
+        lines.extend(["", "[CMSSW"])
+        lines.extend(cmsswLines)
+    lines.extend([
         "",
         "[USER]",
         "return_data = %d" % r,
         "copy_data = %d" % c,
+        ])
+    lines.extend(userLines)
+    lines.extend([
         "",
         "[GRID]",
         "virtual_organization = cms"
-        ]
+        ])
+    lines.extend(gridLines)
 
     return "\n".join(lines)
 
