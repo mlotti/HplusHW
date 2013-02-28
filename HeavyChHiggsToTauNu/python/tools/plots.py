@@ -1006,6 +1006,9 @@ class PlotRatioBase:
     def getFrame2(self):
         return self.cf.frame2
 
+    def hasFrame2(self):
+        return hasattr(self.cf, "frame2")
+
     ## Get the upper TPad
     def getPad1(self):
         return self.cf.pad1
@@ -1013,6 +1016,9 @@ class PlotRatioBase:
     ## Get the lower TPad
     def getPad2(self):
         return self.cf.pad2
+
+    def hasPad2(self):
+        return hasattr(self.cf, "pad2")
 
     ## Set the ratio histograms
     #
@@ -1802,12 +1808,14 @@ class PlotDrawer:
                 xmin = histograms.th1Xmin(th1)
                 xmax = histograms.th1Xmax(th1)
                 nbins = (xmax-xmin)/rebinWidth
+                intbins = int(nbins+0.5)
                 # Check that the number of bins is integer
-                if abs(int(nbins) - nbins) > 1e-10:
-                    print "Warning: Trying to rebin histogram '%s' of plot '%s' for bin width %g, the X axis minimum is %g, maximum %g => number of bins would be %g, which is not integer" % (h.getName(), name, rebinWidth, xmin, xmax, nbins)
+                diff = abs(intbins - nbins)
+                if diff > 1e-3:
+                    print "Warning: Trying to rebin histogram '%s' of plot '%s' for bin width %g, the X axis minimum is %g, maximum %g => number of bins would be %g, which is not integer (diff is %g)" % (h.getName(), name, rebinWidth, xmin, xmax, nbins, diff)
                     return
 
-                nbins = int(nbins)
+                nbins = intbins
                 binLowEdgeList = [xmin + (xmax-xmin)/nbins*i for i in range(0, nbins+1)]
                 rebinned = th1.Rebin(nbins, th1.GetName(), array.array("d", binLowEdgeList))
                 h.setRootHisto(rebinned)
@@ -1881,7 +1889,7 @@ class PlotDrawer:
 
         # Override ratio ytitle
         ratioYlabel = kwargs.get("ratioYlabel", self.ratioYlabelDefault)
-        if ratio and ratioYlabel != None:
+        if ratio and ratioYlabel is not None and p.hasFrame2():
             p.getFrame2().GetYaxis().SetTitle(ratioYlabel)
 
 
