@@ -95,6 +95,8 @@ namespace HPlus {
 
 
     // Counters
+    Count fTypeIAllEvents;
+    Count fTypeITauRefJetFound;
     Count fMetCutCount;
 
     // Histograms
