@@ -140,7 +140,7 @@ def decayModeCheckCustomize(h):
     n = 16
     if hasattr(h, "getFrame1"):
         h.getFrame1().GetXaxis().SetNdivisions(n)
-        h.getFrame1().GetXaxis().SetNdivisions(n)
+        h.getFrame2().GetXaxis().SetNdivisions(n)
     else:
         h.getFrame().GetXaxis().SetNdivisions(n)
 
