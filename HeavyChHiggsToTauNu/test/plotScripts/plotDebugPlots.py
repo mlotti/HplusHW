@@ -284,7 +284,7 @@ def doPlots(datasets, opts):
     myDir = "JetSelection/SelectedJets"
     createDrawPlot(myDir+"/jet_pt", xlabel="p_{T} of accepted jets, GeV/c", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_eta", xlabel="#eta of accepted jets", ylabel="N_{jets}")
-    createDrawPlot(myDir+"/jet_phi", xlabel="#phi of accepted jets", ylabel="N_{jets}", rebinToWidthX=phiBinWidth)
+    createDrawPlot(myDir+"/jet_phi", xlabel="#phi of accepted jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_NeutralEmEnergyFraction", xlabel="NeutralEmEnergyFraction of accepted jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_NeutralHadronFraction", xlabel="NeutralHadronFraction of accepted jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_PhotonEnergyFraction", xlabel="PhotonEnergyFraction of accepted jets", ylabel="N_{jets}")
@@ -296,7 +296,7 @@ def doPlots(datasets, opts):
     myDir = "JetSelection/ExcludedJets"
     createDrawPlot(myDir+"/jet_pt", xlabel="p_{T} of rejected jets, GeV/c", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_eta", xlabel="#eta of rejected jets", ylabel="N_{jets}")
-    createDrawPlot(myDir+"/jet_phi", xlabel="#phi of rejected jets", ylabel="N_{jets}", rebinToWidthX=phiBinWidth)
+    createDrawPlot(myDir+"/jet_phi", xlabel="#phi of rejected jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_NeutralEmEnergyFraction", xlabel="NeutralEmEnergyFraction of rejected jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_NeutralHadronFraction", xlabel="NeutralHadronFraction of rejected jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_PhotonEnergyFraction", xlabel="PhotonEnergyFraction of rejected jets", ylabel="N_{jets}")
