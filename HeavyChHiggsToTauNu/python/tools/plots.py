@@ -1694,6 +1694,7 @@ class PlotDrawer:
     # \param opts                Default frame bounds linear scale (see histograms._boundsArgs())
     # \param optsLog             Default frame bounds for log scale (see histograms._boundsArgs())
     # \param opts2               Default bounds for ratio pad (see histograms.CanvasFrameTwo and histograms._boundsArgs())
+    # \param customizeBeforeFrame Function customize the plot before creating the canvas and frame
     # \param customizeBeforeDraw Function to customize the plot before drawing it
     # \param customizeBeforeSave Function to customize the plot before saving it
     # \param addLuminosityText   Should luminosity text be drawn?
@@ -1710,6 +1711,7 @@ class PlotDrawer:
                  opts={},
                  optsLog={},
                  opts2={},
+                 customizeBeforeFrame=None,
                  customizeBeforeDraw=None,
                  customizeBeforeSave=None,
                  addLuminosityText=False,
@@ -1729,6 +1731,7 @@ class PlotDrawer:
         self.optsLogDefault.update(optsLog)
         self.opts2Default = {"ymin": 0.5, "ymax": 1.5}
         self.opts2Default.update(opts2)
+        self.customizeBeforeFrameDefault = customizeBeforeFrame
         self.customizeBeforeDrawDefault = customizeBeforeDraw
         self.customizeBeforeSaveDefault = customizeBeforeSave
         self.addLuminosityTextDefault = addLuminosityText
@@ -1853,7 +1856,12 @@ class PlotDrawer:
     # \li\a ratioYlabel  The Y axis title for the ratio pad (None for default)
     # \li\a ratioInvert  Should the ratio be inverted?
     # \li\a ratioIsBinomial  Is the ratio a binomial?
+    # \li\a customizeBeforeFrame Function customize the plot before creating the canvas and frame
     def createFrame(self, p, name, **kwargs):
+        customize = kwargs.get("customizeBeforeFrame", self.customizeBeforeFrameDefault)
+        if customize is not None:
+            customize(p)
+
         log = kwargs.get("log", self.logDefault)
 
         # Default values
