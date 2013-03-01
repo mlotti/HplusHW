@@ -58,6 +58,15 @@ _physicalMcAdd = {
     "QCD_Pt300to470_TuneZ2star_v2_Summer12": "QCD_Pt300to470_TuneZ2star_Summer12",
     "QCD_Pt300to470_TuneZ2star_v3_Summer12": "QCD_Pt300to470_TuneZ2star_Summer12",
 }
+for mass in [80, 90, 100, 120, 140, 150, 155, 160]:
+    _physicalMcAdd["TTToHplusBWB_M%d_Summer12"%mass] = "TTToHplusBWB_M%d_Summer12"%mass
+    _physicalMcAdd["TTToHplusBWB_M%d_ext_Summer12"%mass] = "TTToHplusBWB_M%d_Summer12"%mass
+    if mass != 90:
+        _physicalMcAdd["TTToHplusBHminusB_M%d_Summer12"%mass] = "TTToHplusBHminusB_M%d_Summer12"%mass
+        _physicalMcAdd["TTToHplusBHminusB_M%d_ext_Summer12"%mass] = "TTToHplusBHminusB_M%d_Summer12"%mass
+for mass in [180, 190, 200, 220, 250, 300]:
+    _physicalMcAdd["HplusTB_M%d_Summer12"%mass] = "HplusTB_M%d_Summer12"%mass
+    _physicalMcAdd["HplusTB_M%d_ext_Summer12"%mass] = "HplusTB_M%d_Summer12"%mass
 
 ## Map the physical dataset names to logical names
 #
@@ -72,32 +81,16 @@ _physicalToLogical = {
     "W3Jets_TuneZ2_Summer11": "W3Jets",
 }
 for mcEra in ["Summer11", "Fall11", "Summer12"]:
-    _physicalToLogical.update({
-    "TTToHplusBWB_M80_%s"%mcEra:  "TTToHplusBWB_M80",
-    "TTToHplusBWB_M90_%s"%mcEra:  "TTToHplusBWB_M90",
-    "TTToHplusBWB_M100_%s"%mcEra: "TTToHplusBWB_M100",
-    "TTToHplusBWB_M120_%s"%mcEra: "TTToHplusBWB_M120",
-    "TTToHplusBWB_M140_%s"%mcEra: "TTToHplusBWB_M140",
-    "TTToHplusBWB_M150_%s"%mcEra: "TTToHplusBWB_M150",
-    "TTToHplusBWB_M155_%s"%mcEra: "TTToHplusBWB_M155",
-    "TTToHplusBWB_M160_%s"%mcEra: "TTToHplusBWB_M160",
+    for mass in [80, 90, 100, 120, 140, 150, 155, 160]:
+        _physicalToLogical["TTToHplusBWB_M%d_%s"%(mass, mcEra)] = "TTToHplusBWB_M%d" % mass
+        _physicalToLogical["TTToHplusBHminusB_M%d_%s"%(mass, mcEra)] = "TTToHplusBHminusB_M%d" % mass
+        _physicalToLogical["Hplus_taunu_s-channel_M%d_%s"%(mass, mcEra)] = "Hplus_taunu_s-channel_M%d" % mass
+        _physicalToLogical["Hplus_taunu_t-channel_M%d_%s"%(mass, mcEra)] = "Hplus_taunu_t-channel_M%d" % mass
+        _physicalToLogical["Hplus_taunu_tW-channel_M%d_%s"%(mass, mcEra)] = "Hplus_taunu_tW-channel_M%d" % mass
 
-    "TTToHplusBHminusB_M80_%s"%mcEra: "TTToHplusBHminusB_M80",
-    "TTToHplusBHminusB_M90_%s"%mcEra: "TTToHplusBHminusB_M90",
-    "TTToHplusBHminusB_M100_%s"%mcEra: "TTToHplusBHminusB_M100",
-    "TTToHplusBHminusB_M120_%s"%mcEra: "TTToHplusBHminusB_M120",
-    "TTToHplusBHminusB_M140_%s"%mcEra: "TTToHplusBHminusB_M140",
-    "TTToHplusBHminusB_M150_%s"%mcEra: "TTToHplusBHminusB_M150",
-    "TTToHplusBHminusB_M155_%s"%mcEra: "TTToHplusBHminusB_M155",
-    "TTToHplusBHminusB_M160_%s"%mcEra: "TTToHplusBHminusB_M160",
+    for mass in [180, 190, 200, 220, 250, 300, 400, 500, 600]:
+        _physicalToLogical["HplusTB_M%d_%s"%(mass, mcEra)] = "HplusTB_M%d" % mass
 
-    "HplusTB_M180_%s"%mcEra: "HplusTB_M180",
-    "HplusTB_M190_%s"%mcEra: "HplusTB_M190",
-    "HplusTB_M200_%s"%mcEra: "HplusTB_M200",
-    "HplusTB_M220_%s"%mcEra: "HplusTB_M220",
-    "HplusTB_M250_%s"%mcEra: "HplusTB_M250",
-    "HplusTB_M300_%s"%mcEra: "HplusTB_M300",
-    })
 for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
     _physicalToLogical.update({
     "TTJets_%s"%mcEra: "TTJets",
@@ -131,16 +124,20 @@ for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
     })
 
 ## Map the datasets to be merged to the name of the merged dataset.
-_signalMerge = [
-    ("TTToHplusBWB_M80",  "TTToHplusBHminusB_M80",  "TTToHplus_M80"),
-    ("TTToHplusBWB_M90",  "TTToHplusBHminusB_M90",  "TTToHplus_M90"),
-    ("TTToHplusBWB_M100", "TTToHplusBHminusB_M100", "TTToHplus_M100"),
-    ("TTToHplusBWB_M120", "TTToHplusBHminusB_M120", "TTToHplus_M120"),
-    ("TTToHplusBWB_M140", "TTToHplusBHminusB_M140", "TTToHplus_M140"),
-    ("TTToHplusBWB_M150", "TTToHplusBHminusB_M150", "TTToHplus_M150"),
-    ("TTToHplusBWB_M155", "TTToHplusBHminusB_M155", "TTToHplus_M155"),
-    ("TTToHplusBWB_M160", "TTToHplusBHminusB_M160", "TTToHplus_M160"),
-]
+_ttSignalMerge = {}
+_tSignalMerge = {}
+_lightSignalMerge = {}
+for mass in [80, 90, 100, 120, 140, 150, 155, 160]:
+    _ttSignalMerge["TTToHplusBWB_M%d"%mass] = "TTToHplus_M%d"%mass
+    _ttSignalMerge["TTToHplusBHminusB_M%d"%mass] = "TTToHplus_M%d"%mass
+
+    _tSignalMerge["Hplus_taunu_s-channel_M%d"%mass] = "Hplus_taunu_M%d" % mass
+    _tSignalMerge["Hplus_taunu_t-channel_M%d"%mass] = "Hplus_taunu_M%d" % mass
+    _tSignalMerge["Hplus_taunu_tW-channel_M%d"%mass] = "Hplus_taunu_M%d" % mass
+
+    _lightSignalMerge["TTToHplus_M%d"%mass] = "TTOrTToHplus_M%d"%mass
+    _lightSignalMerge["Hplus_taunu_M%d" % mass] = "TTOrTToHplus_M%d"%mass
+    
 _datasetMerge = {
     "QCD_Pt30to50":   "QCD",
     "QCD_Pt50to80":   "QCD",
@@ -259,6 +256,9 @@ _legendLabels = {
     "HplusTB_M220": "H^{#pm} m_{H^{#pm}}=220",
     "HplusTB_M250": "H^{#pm} m_{H^{#pm}}=250",
     "HplusTB_M300": "H^{#pm} m_{H^{#pm}}=300",
+    "HplusTB_M400": "H^{#pm} m_{H^{#pm}}=400",
+    "HplusTB_M500": "H^{#pm} m_{H^{#pm}}=500",
+    "HplusTB_M600": "H^{#pm} m_{H^{#pm}}=600",
 
     "TTJets":                "t#bar{t}+jets",
     "TT":                    "t#bar{t}",
@@ -332,6 +332,9 @@ _plotStyles = {
     "HplusTB_M220": styles.signal220Style,
     "HplusTB_M250": styles.signal250Style,
     "HplusTB_M300": styles.signal300Style,
+    "HplusTB_M400": styles.signal400Style,
+    "HplusTB_M500": styles.signal500Style,
+    "HplusTB_M600": styles.signal600Style,
 
     "TTJets":                styles.ttStyle,
     "TT":                    styles.ttStyle,
@@ -480,13 +483,17 @@ def mergeRenameReorderForDataMC(datasetMgr, keepSourcesMC=False):
 
 ## Merge WH and HH datasets for each mass point
 #
-# The dataset names to be merged are defined in plots._signalMerge list
+# The dataset names to be merged are defined in plots._ttSignalMerge list
 def mergeWHandHH(datasetMgr):
-    names = datasetMgr.getAllDatasetNames()
-    for signalWH, signalHH, target in _signalMerge:
-        if signalWH in names and signalHH in names:
-            datasetMgr.merge(target, [signalWH, signalHH])
+    datasetMgr.mergeMany(_ttSignalMerge)
 
+def mergeSingleTopHplus(datasetMgr):
+    datasetMgr.mergeMany(_tSignalMerge)
+
+def mergeLightHplus(datasetMgr):
+    mergeWHandHH(datasetMgr)
+    mergeSingleTopHplus(datasetMgr)
+    datasetMgr.mergeMany(_lightSignalMerge)    
 
 def replaceLightHplusWithSignalPlusBackground(datasetMgr, backgroundsWithoutTT=None):
     if backgroundsWithoutTT is None:

@@ -2012,6 +2012,12 @@ class DatasetMerged:
             raise Exception("Dataset %s is MC, no luminosity available" % self.name)
         return self.info["luminosity"]
 
+    def setProperty(self, key, value):
+        self.info[key] = value
+
+    def getProperty(self, key):
+        return self.info[key]
+
     def isData(self):
         return self.datasets[0].isData()
 
@@ -2133,6 +2139,18 @@ class DatasetAddedMC(DatasetMerged):
         dm = DatasetAddedMC(self.name, [d.deepCopy() for d in self.datasets])
         dm.info.update(self.info)
         return dm
+
+    ## Set cross section of MC dataset (in pb).
+    def setCrossSection(self, value):
+        if not self.isMC():
+            raise Exception("Should not set cross section for data dataset %s" % self.name)
+        self.info["crossSection"] = value
+        for d in self.datasets:
+            d.setCrossSection(value)
+
+    def setProperty(self, key, value):
+        for d in self.datasets:
+            d.setProperty(key, value)
 
     ## Get the DatasetRootHistoMergedMC/DatasetRootHistoMergedData object for a named histogram.
     #
