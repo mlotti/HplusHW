@@ -28,6 +28,7 @@ namespace HPlus {
     //fType2ScaleFactor(iConfig.getUntrackedParameter<double>("type2ScaleFactor")),
     fTauIsolationDiscriminator(tauIsolationDiscriminator),
     fTypeIAllEvents(eventCounter.addSubCounter(label+"_MET", "MET TypeI correction all events")),
+    fTypeITauRefJetFound(eventCounter.addSubCounter(label+"_MET", "MET TypeI correction tau reference jet found")),
     fTypeITauIsolated(eventCounter.addSubCounter(label+"_MET", "MET TypeI correction tau treated as isolated")),
     fMetCutCount(eventCounter.addSubCounter(label+"_MET","MET cut"))
   {
@@ -213,13 +214,29 @@ namespace HPlus {
     edm::Ptr<pat::Jet> selectedJet;
     for(size_t i=0; i<allJets.size(); ++i) {
       double dr = reco::deltaR(*selectedTau, *(allJets[i]));
+
+      /*
+      std::cout << "Jet         pt " << allJets[i]->pt()  << " eta " << allJets[i]->eta()  << " phi " << allJets[i]->phi() << std::endl
+                << "   tau      pt " << selectedTau->pt() << " eta " << selectedTau->eta() << " phi " << selectedTau->phi() << " DR " << dr << std::endl
+                << "   tau rjet pt " << tau->p4Jet().pt() << " eta " << tau->p4Jet().eta() << " phi " << tau->p4Jet().phi() << " DR " << reco::deltaR(tau->p4Jet(), *(allJets[i])) << std::endl;
+      */
+
       if(dr < minDR) {
         minDR = dr;
         selectedJet = allJets[i];
       }
     }
-    if(selectedJet.isNull())
-      throw cms::Exception("Assert") << "METSelection: Did not find the hadronic jet corresponding to the selected tau jet" << std::endl;
+    // It can happen that the JER smearing causes the tau reference
+    // jet to have pt < 10, which is not stored in our pattuples. Here
+    // it is assumed that this is what happens if the reference jet is
+    // not found. The frequency of this must be monitored with the
+    // counters.
+    if(selectedJet.isNull()) {
+      //throw cms::Exception("Assert") << "METSelection: Did not find the hadronic jet corresponding to the selected tau jet" << std::endl;
+      return *met;
+    }
+
+    increment(fTypeITauRefJetFound);
 
     // The code doing the correction is at
     // JetMETCorrections/Type1MET/interface/PFJetMETcorrInputProducerT.h
