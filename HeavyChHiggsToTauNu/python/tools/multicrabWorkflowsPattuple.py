@@ -350,18 +350,18 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         # njobsOut is just a guess
         "Tau_190456-190738_2012A_Jul13":  TaskDef(njobsIn=  35, njobsOut=  1),
         "Tau_190782-190949_2012A_Aug06":  TaskDef(njobsIn=  10, njobsOut=  1),
-        "Tau_191043-193621_2012A_Jul13":  TaskDef(njobsIn= 150, njobsOut=  3),
-        "Tau_193834-196531_2012B_Jul13":  TaskDef(nlumisPerJobIn=1, njobsOut= 20),
-        "Tau_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 200, njobsOut=  2),
+        "Tau_191043-193621_2012A_Jul13":  TaskDef(njobsIn= 150, njobsOut=  4),
+        "Tau_193834-196531_2012B_Jul13":  TaskDef(nlumisPerJobIn=1, njobsOut= 25),
+        "Tau_198022-198523_2012C_Aug24":  TaskDef(njobsIn= 200, njobsOut=  3),
         # The following three could be combined in the subsequent pattuple processings
         "Tau_198941-200601_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 10),
         "Tau_200961-202504_2012C_Prompt": TaskDef(njobsIn=1500, njobsOut= 12),
         "Tau_202792-203742_2012C_Prompt": TaskDef(njobsIn= 150, njobsOut=  1),
         # Below is the combination of the above two, plus the third one with modified first run
-        "Tau_198941-202504_2012C_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut= 25),# FIXME: set njobsOut
+        "Tau_198941-202504_2012C_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut= 40),
         "Tau_201191-201191_2012C_Dec11":  TaskDef(nlumisPerJobIn=1, njobsOut=  1),
         "Tau_202972-203742_2012C_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut=  1),
-        "Tau_203777-208686_2012D_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut= 40), # FIXME: set njobsOut
+        "Tau_203777-208686_2012D_Prompt": TaskDef(nlumisPerJobIn=1, njobsOut= 50),
 
         ## MultiJet
         # njobsOut is just a guess
@@ -393,54 +393,54 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         "TTToHplusBWB_M90_Summer12":        TaskDefMC(njobsIn=25, njobsOut=1),
         "TTToHplusBWB_M100_Summer12":       TaskDefMC(njobsIn=25, njobsOut=1),
         "TTToHplusBWB_M120_Summer12":       TaskDefMC(njobsIn=25, njobsOut=1),
-        "TTToHplusBWB_M140_Summer12":       TaskDefMC(njobsIn=25, njobsOut=1),
-        "TTToHplusBWB_M150_Summer12":       TaskDefMC(njobsIn=25, njobsOut=1),
-        "TTToHplusBWB_M155_Summer12":       TaskDefMC(njobsIn=25, njobsOut=1),
-        "TTToHplusBWB_M160_Summer12":       TaskDefMC(njobsIn=25, njobsOut=1),
+        "TTToHplusBWB_M140_Summer12":       TaskDefMC(njobsIn=25, njobsOut=2),
+        "TTToHplusBWB_M150_Summer12":       TaskDefMC(njobsIn=25, njobsOut=2),
+        "TTToHplusBWB_M155_Summer12":       TaskDefMC(njobsIn=25, njobsOut=2),
+        "TTToHplusBWB_M160_Summer12":       TaskDefMC(njobsIn=25, njobsOut=2),
 
-        "TTToHplusBWB_M80_ext_Summer12":    TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
-        "TTToHplusBWB_M90_ext_Summer12":    TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
-        "TTToHplusBWB_M100_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
-        "TTToHplusBWB_M120_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
-        "TTToHplusBWB_M140_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
-        "TTToHplusBWB_M150_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
-        "TTToHplusBWB_M155_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
-        "TTToHplusBWB_M160_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=1), # FIXME out
+        "TTToHplusBWB_M80_ext_Summer12":    TaskDefMC(njobsIn=130, njobsOut=7),
+        "TTToHplusBWB_M90_ext_Summer12":    TaskDefMC(njobsIn=130, njobsOut=7),
+        "TTToHplusBWB_M100_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=15),
+        "TTToHplusBWB_M120_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=7),
+        "TTToHplusBWB_M140_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=9),
+        "TTToHplusBWB_M150_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=9),
+        "TTToHplusBWB_M155_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=9),
+        "TTToHplusBWB_M160_ext_Summer12":   TaskDefMC(njobsIn=130, njobsOut=15),
 
         "TTToHplusBHminusB_M80_Summer12":        TaskDefMC(njobsIn=20, njobsOut=1),
-        "TTToHplusBHminusB_M90_Summer12":        TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
+        "TTToHplusBHminusB_M90_Summer12":        TaskDefMC(njobsIn=100, njobsOut=7),
         "TTToHplusBHminusB_M100_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
         "TTToHplusBHminusB_M120_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
-        "TTToHplusBHminusB_M140_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
-        "TTToHplusBHminusB_M150_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
-        "TTToHplusBHminusB_M155_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
-        "TTToHplusBHminusB_M160_Summer12":       TaskDefMC(njobsIn=20, njobsOut=1),
+        "TTToHplusBHminusB_M140_Summer12":       TaskDefMC(njobsIn=20, njobsOut=2),
+        "TTToHplusBHminusB_M150_Summer12":       TaskDefMC(njobsIn=20, njobsOut=2),
+        "TTToHplusBHminusB_M155_Summer12":       TaskDefMC(njobsIn=20, njobsOut=2),
+        "TTToHplusBHminusB_M160_Summer12":       TaskDefMC(njobsIn=20, njobsOut=2),
 
-        "TTToHplusBHminusB_M80_ext_Summer12":    TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
-        "TTToHplusBHminusB_M100_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
-        "TTToHplusBHminusB_M120_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
-        "TTToHplusBHminusB_M140_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
-        "TTToHplusBHminusB_M150_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
-        "TTToHplusBHminusB_M155_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
-        "TTToHplusBHminusB_M160_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=1), # FIXME out
+        "TTToHplusBHminusB_M80_ext_Summer12":    TaskDefMC(njobsIn=100, njobsOut=7),
+        "TTToHplusBHminusB_M100_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=7),
+        "TTToHplusBHminusB_M120_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=7),
+        "TTToHplusBHminusB_M140_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=10),
+        "TTToHplusBHminusB_M150_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=10),
+        "TTToHplusBHminusB_M155_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=10),
+        "TTToHplusBHminusB_M160_ext_Summer12":   TaskDefMC(njobsIn=100, njobsOut=10),
 
-        "Hplus_taunu_t-channel_M80_Summer12":    TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
-        "Hplus_taunu_t-channel_M90_Summer12":    TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
-        "Hplus_taunu_t-channel_M100_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
-        "Hplus_taunu_t-channel_M120_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
-        "Hplus_taunu_t-channel_M140_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
-        "Hplus_taunu_t-channel_M150_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
-        "Hplus_taunu_t-channel_M155_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
-        "Hplus_taunu_t-channel_M160_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_t-channel_M80_Summer12":    TaskDefMC(njobsIn=20, njobsOut=1),
+        "Hplus_taunu_t-channel_M90_Summer12":    TaskDefMC(njobsIn=20, njobsOut=1),
+        "Hplus_taunu_t-channel_M100_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1),
+        "Hplus_taunu_t-channel_M120_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1),
+        "Hplus_taunu_t-channel_M140_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1),
+        "Hplus_taunu_t-channel_M150_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1),
+        "Hplus_taunu_t-channel_M155_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1),
+        "Hplus_taunu_t-channel_M160_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1),
 
-        "Hplus_taunu_tW-channel_M80_Summer12":    TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
-        "Hplus_taunu_tW-channel_M90_Summer12":    TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
-        "Hplus_taunu_tW-channel_M100_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
-        "Hplus_taunu_tW-channel_M120_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
-        "Hplus_taunu_tW-channel_M140_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
-        "Hplus_taunu_tW-channel_M150_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
-        "Hplus_taunu_tW-channel_M155_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
-        "Hplus_taunu_tW-channel_M160_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1), # FIXME out
+        "Hplus_taunu_tW-channel_M80_Summer12":    TaskDefMC(njobsIn=20, njobsOut=1),
+        "Hplus_taunu_tW-channel_M90_Summer12":    TaskDefMC(njobsIn=20, njobsOut=1),
+        "Hplus_taunu_tW-channel_M100_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1),
+        "Hplus_taunu_tW-channel_M120_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1),
+        "Hplus_taunu_tW-channel_M140_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1),
+        "Hplus_taunu_tW-channel_M150_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1),
+        "Hplus_taunu_tW-channel_M155_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1),
+        "Hplus_taunu_tW-channel_M160_Summer12":   TaskDefMC(njobsIn=20, njobsOut=1),
 
         "Hplus_taunu_s-channel_M80_Summer12":       TaskDefMC(njobsIn=10, njobsOut=1),
         "Hplus_taunu_s-channel_M90_Summer12":       TaskDefMC(njobsIn=10, njobsOut=1),
@@ -451,22 +451,22 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         "Hplus_taunu_s-channel_M155_Summer12":      TaskDefMC(njobsIn=10, njobsOut=1),
         "Hplus_taunu_s-channel_M160_Summer12":      TaskDefMC(njobsIn=10, njobsOut=1),
 
-        "HplusTB_M180_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "HplusTB_M190_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "HplusTB_M200_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "HplusTB_M220_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "HplusTB_M250_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "HplusTB_M300_Summer12":       TaskDefMC(njobsIn=40, njobsOut=2),
-        "HplusTB_M400_Summer12":       TaskDefMC(njobsIn=250, njobsOut=2), # FIXME out
-        "HplusTB_M500_Summer12":       TaskDefMC(njobsIn=250, njobsOut=2), # FIXME out
-        "HplusTB_M600_Summer12":       TaskDefMC(njobsIn=250, njobsOut=2), # FIXME out
+        "HplusTB_M180_Summer12":       TaskDefMC(njobsIn=40, njobsOut=3),
+        "HplusTB_M190_Summer12":       TaskDefMC(njobsIn=40, njobsOut=3),
+        "HplusTB_M200_Summer12":       TaskDefMC(njobsIn=40, njobsOut=3),
+        "HplusTB_M220_Summer12":       TaskDefMC(njobsIn=40, njobsOut=4),
+        "HplusTB_M250_Summer12":       TaskDefMC(njobsIn=40, njobsOut=4),
+        "HplusTB_M300_Summer12":       TaskDefMC(njobsIn=40, njobsOut=5),
+        "HplusTB_M400_Summer12":       TaskDefMC(njobsIn=250, njobsOut=30),
+        "HplusTB_M500_Summer12":       TaskDefMC(njobsIn=250, njobsOut=30),
+        "HplusTB_M600_Summer12":       TaskDefMC(njobsIn=250, njobsOut=30),
 
-        "HplusTB_M180_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=2), # FIXME out
-        "HplusTB_M190_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=2), # FIXME out
-        "HplusTB_M200_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=2), # FIXME out
-        "HplusTB_M220_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=2), # FIXME out
-        "HplusTB_M250_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=2), # FIXME out
-        "HplusTB_M300_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=2), # FIXME out
+        "HplusTB_M180_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=15),
+        "HplusTB_M190_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=15),
+        "HplusTB_M200_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=20),
+        "HplusTB_M220_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=20),
+        "HplusTB_M250_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=20),
+        "HplusTB_M300_ext_Summer12":       TaskDefMC(njobsIn=200, njobsOut=20),
 
         "QCD_Pt30to50_TuneZ2star_Summer12":       TaskDefMC(njobsIn=  5, njobsOut=1),
         "QCD_Pt50to80_TuneZ2star_Summer12":       TaskDefMC(njobsIn=  5, njobsOut=1),
@@ -474,26 +474,26 @@ def addPattuple_53X(version, datasets, updateDefinitions, skim=None,
         "QCD_Pt120to170_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 40, njobsOut=1),
         "QCD_Pt170to300_TuneZ2star_Summer12":     TaskDefMC(njobsIn=130, njobsOut=2),
         "QCD_Pt170to300_TuneZ2star_v2_Summer12":  TaskDefMC(njobsIn=450, njobsOut=6),
-        "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDefMC(njobsIn=350, njobsOut=4),
-        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDefMC(njobsIn=200, njobsOut=3),
-        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDefMC(njobsIn=1100, njobsOut=14),
+        "QCD_Pt300to470_TuneZ2star_Summer12":     TaskDefMC(njobsIn=350, njobsOut=6),
+        "QCD_Pt300to470_TuneZ2star_v2_Summer12":  TaskDefMC(njobsIn=200, njobsOut=4),
+        "QCD_Pt300to470_TuneZ2star_v3_Summer12":  TaskDefMC(njobsIn=1100, njobsOut=22),
                                             
-        "WW_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut= 8),
-        "WZ_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut= 8),
-        "ZZ_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut= 8),
-        "TTJets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=700, njobsOut=30),
+        "WW_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut=16),
+        "WZ_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut=13),
+        "ZZ_TuneZ2star_Summer12":                 TaskDefMC(njobsIn=150, njobsOut=10),
+        "TTJets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=700, njobsOut=50),
         "WJets_TuneZ2star_v1_Summer12":           TaskDefMC(njobsIn= 50, njobsOut= 4, args={"wjetsWeighting": 1, "wjetBin": -1}),
-        "WJets_TuneZ2star_v2_Summer12":           TaskDefMC(njobsIn=150, njobsOut= 8, args={"wjetsWeighting": 1, "wjetBin": -1}),
-        "W1Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=100, njobsOut= 8, args={"wjetsWeighting": 1, "wjetBin": 1}),
-        "W2Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=400, njobsOut=20, args={"wjetsWeighting": 1, "wjetBin": 2}),
-        "W3Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=400, njobsOut=20, args={"wjetsWeighting": 1, "wjetBin": 3}),
-        "W4Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=550, njobsOut=30, args={"wjetsWeighting": 1, "wjetBin": 4}),
-        "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDefMC(njobsIn=150, njobsOut= 6),
+        "WJets_TuneZ2star_v2_Summer12":           TaskDefMC(njobsIn=150, njobsOut=17, args={"wjetsWeighting": 1, "wjetBin": -1}),
+        "W1Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=100, njobsOut=10, args={"wjetsWeighting": 1, "wjetBin": 1}),
+        "W2Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=400, njobsOut=40, args={"wjetsWeighting": 1, "wjetBin": 2}),
+        "W3Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=400, njobsOut=40, args={"wjetsWeighting": 1, "wjetBin": 3}),
+        "W4Jets_TuneZ2star_Summer12":             TaskDefMC(njobsIn=550, njobsOut=60, args={"wjetsWeighting": 1, "wjetBin": 4}),
+        "DYJetsToLL_M50_TuneZ2star_Summer12":     TaskDefMC(njobsIn=150, njobsOut=12),
         "DYJetsToLL_M10to50_TuneZ2star_Summer12": TaskDefMC(njobsIn= 40, njobsOut= 1),
-        "T_t-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn=100, njobsOut= 2),
-        "Tbar_t-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 50, njobsOut= 1),
-        "T_tW-channel_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 30, njobsOut= 2),
-        "Tbar_tW-channel_TuneZ2star_Summer12":    TaskDefMC(njobsIn= 30, njobsOut= 2),
+        "T_t-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn=100, njobsOut= 5),
+        "Tbar_t-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn= 50, njobsOut= 3),
+        "T_tW-channel_TuneZ2star_Summer12":       TaskDefMC(njobsIn= 30, njobsOut= 3),
+        "Tbar_tW-channel_TuneZ2star_Summer12":    TaskDefMC(njobsIn= 30, njobsOut= 3),
         "T_s-channel_TuneZ2star_Summer12":        TaskDefMC(njobsIn= 10, njobsOut= 1),
         "Tbar_s-channel_TuneZ2star_Summer12":     TaskDefMC(njobsIn=  5, njobsOut= 1),
         }
