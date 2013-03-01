@@ -98,6 +98,7 @@ for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
     "W1Jets_%s"%mcEra: "W1Jets",
     "W2Jets_%s"%mcEra: "W2Jets",
     "W3Jets_%s"%mcEra: "W3Jets",
+    "W3Jets_TuneZ2_v2_%s"%mcEra: "W3Jets",
     "W4Jets_%s"%mcEra: "W4Jets",
     "DYJetsToLL_M50_%s"%mcEra:      "DYJetsToLL_M50",
     "DYJetsToLL_M10to50_%s"%mcEra:  "DYJetsToLL_M10to50",

@@ -114,7 +114,7 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
     # - triggers
     # for all relevant Datasets
     defaultDefinitions = {
-        "Tau_160431-167913_2011A_Nov08": TaskDef(njobsIn=300, njobsOut=15, triggerOR=[
+        "Tau_160431-167913_2011A_Nov08": TaskDef(njobsIn=800, njobsOut=15, triggerOR=[
                                                     "HLT_IsoPFTau35_Trk20_MET45_v1", # 160431-161176
                                                     "HLT_IsoPFTau35_Trk20_MET45_v2", # 161216-163261
                                                     "HLT_IsoPFTau35_Trk20_MET45_v4", # 163270-163869
@@ -123,63 +123,67 @@ def addPattuple_44X(version, datasets, updateDefinitions, skim=None):
                                                     "HLT_IsoPFTau35_Trk20_MET60_v3", # 166346
                                                     "HLT_IsoPFTau35_Trk20_MET60_v4", # 167078-167913
                                                 ], triggerThrow=False),
-        "Tau_170722-173198_2011A_Nov08": TaskDef(njobsIn=70, njobsOut=3, triggerOR=["HLT_IsoPFTau35_Trk20_MET60_v6"]),
-        "Tau_173236-173692_2011A_Nov08": TaskDef(njobsIn=30, njobsOut=2, triggerOR=["HLT_MediumIsoPFTau35_Trk20_MET60_v1"]),
-        "Tau_175832-180252_2011B_Nov19": TaskDef(njobsIn=300, njobsOut=30, triggerOR=[
+        "Tau_170722-173198_2011A_Nov08": TaskDef(njobsIn=500, njobsOut=3, triggerOR=["HLT_IsoPFTau35_Trk20_MET60_v6"]),
+        "Tau_173236-173692_2011A_Nov08": TaskDef(njobsIn=250, njobsOut=2, triggerOR=["HLT_MediumIsoPFTau35_Trk20_MET60_v1"]),
+        "Tau_175832-180252_2011B_Nov19": TaskDef(njobsIn=650, njobsOut=20, triggerOR=[
                                                     "HLT_MediumIsoPFTau35_Trk20_MET60_v1", # 175832-178380
                                                     "HLT_MediumIsoPFTau35_Trk20_MET60_v5", # 178420-179889
                                                     "HLT_MediumIsoPFTau35_Trk20_MET60_v6", # 179959-180252
                                               ], triggerThrow=False),
 
         # MC, triggered with mcTrigger
-        "TTToHplusBWB_M80_Fall11":        TaskDefMC(njobsIn=50, njobsOut=2), # 53 GB, 19 files
-        "TTToHplusBWB_M90_Fall11":        TaskDefMC(njobsIn=50, njobsOut=2),
-        "TTToHplusBWB_M100_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "TTToHplusBWB_M120_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "TTToHplusBWB_M140_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "TTToHplusBWB_M150_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "TTToHplusBWB_M155_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "TTToHplusBWB_M160_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBWB_M80_Fall11":        TaskDefMC(njobsIn=15, njobsOut=1),
+        "TTToHplusBWB_M90_Fall11":        TaskDefMC(njobsIn=15, njobsOut=1),
+        "TTToHplusBWB_M100_Fall11":       TaskDefMC(njobsIn=15, njobsOut=1),
+        "TTToHplusBWB_M120_Fall11":       TaskDefMC(njobsIn=15, njobsOut=1),
+        "TTToHplusBWB_M140_Fall11":       TaskDefMC(njobsIn=15, njobsOut=1),
+        "TTToHplusBWB_M150_Fall11":       TaskDefMC(njobsIn=15, njobsOut=1),
+        "TTToHplusBWB_M155_Fall11":       TaskDefMC(njobsIn=15, njobsOut=1),
+        "TTToHplusBWB_M160_Fall11":       TaskDefMC(njobsIn=15, njobsOut=1),
 
-        "TTToHplusBHminusB_M80_Fall11":        TaskDefMC(njobsIn=50, njobsOut=2),
-        "TTToHplusBHminusB_M90_Fall11":        TaskDefMC(njobsIn=50, njobsOut=2),
-        "TTToHplusBHminusB_M100_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "TTToHplusBHminusB_M120_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "TTToHplusBHminusB_M140_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "TTToHplusBHminusB_M150_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "TTToHplusBHminusB_M155_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "TTToHplusBHminusB_M160_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
+        "TTToHplusBHminusB_M80_Fall11":        TaskDefMC(njobsIn=15, njobsOut=1),
+        "TTToHplusBHminusB_M90_Fall11":        TaskDefMC(njobsIn=15, njobsOut=1),
+        "TTToHplusBHminusB_M100_Fall11":       TaskDefMC(njobsIn=15, njobsOut=1),
+        "TTToHplusBHminusB_M120_Fall11":       TaskDefMC(njobsIn=15, njobsOut=1),
+        "TTToHplusBHminusB_M140_Fall11":       TaskDefMC(njobsIn=15, njobsOut=1),
+        "TTToHplusBHminusB_M150_Fall11":       TaskDefMC(njobsIn=15, njobsOut=1),
+        "TTToHplusBHminusB_M155_Fall11":       TaskDefMC(njobsIn=15, njobsOut=1),
+        "TTToHplusBHminusB_M160_Fall11":       TaskDefMC(njobsIn=15, njobsOut=1),
 
-        "HplusTB_M180_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "HplusTB_M190_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "HplusTB_M200_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "HplusTB_M220_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "HplusTB_M250_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
-        "HplusTB_M300_Fall11":       TaskDefMC(njobsIn=50, njobsOut=2),
+        # These are at T2_FI_HIP, hence a smaller njobsIn (file size
+        # is not that big of a problem)
+        "HplusTB_M180_Fall11":       TaskDefMC(njobsIn=5, njobsOut=1),
+        "HplusTB_M190_Fall11":       TaskDefMC(njobsIn=5, njobsOut=1),
+        "HplusTB_M200_Fall11":       TaskDefMC(njobsIn=5, njobsOut=1),
+        "HplusTB_M220_Fall11":       TaskDefMC(njobsIn=5, njobsOut=1),
+        "HplusTB_M250_Fall11":       TaskDefMC(njobsIn=5, njobsOut=1),
+        "HplusTB_M300_Fall11":       TaskDefMC(njobsIn=5, njobsOut=1),
 
         "QCD_Pt30to50_TuneZ2_Fall11":       TaskDefMC(njobsIn=10, njobsOut=1),
         "QCD_Pt50to80_TuneZ2_Fall11":       TaskDefMC(njobsIn=10, njobsOut=1),
         "QCD_Pt80to120_TuneZ2_Fall11":      TaskDefMC(njobsIn=10, njobsOut=1),
         "QCD_Pt120to170_TuneZ2_Fall11":     TaskDefMC(njobsIn=20, njobsOut=1),
-        "QCD_Pt170to300_TuneZ2_Fall11":     TaskDefMC(njobsIn=40, njobsOut=4),
-        "QCD_Pt300to470_TuneZ2_Fall11":     TaskDefMC(njobsIn=40, njobsOut=10),
+        "QCD_Pt170to300_TuneZ2_Fall11":     TaskDefMC(njobsIn=40, njobsOut=1),
+        "QCD_Pt300to470_TuneZ2_Fall11":     TaskDefMC(njobsIn=100, njobsOut=3),
                                             
-        "WW_TuneZ2_Fall11":                 TaskDefMC(njobsIn=50, njobsOut=3),   # file size 890 GB, 252-275 files, expected output max. 185 MB/file
-        "WZ_TuneZ2_Fall11":                 TaskDefMC(njobsIn=50, njobsOut=3),   # expected output max. 185 MB/file
-        "ZZ_TuneZ2_Fall11":                 TaskDefMC(njobsIn=50, njobsOut=3),   # expected output max. 185 MB/file
-        "TTJets_TuneZ2_Fall11":             TaskDefMC(njobsIn=490, njobsOut=50), # file size 15214; 3938 files, expected output max. 266 MB/file, obs 60 MB / file
-        "WJets_TuneZ2_Fall11":              TaskDefMC(njobsIn=490, njobsOut=10, args={"wjetsWeighting": 1, "wjetBin": -1}), # file size 16000 GB, 4500 files, expected output max. 37 MB/file 
-        "W2Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=300, njobsOut=20, args={"wjetsWeighting": 1, "wjetBin": 2}), # expected output max. 38 MB/file, obs 38 MB / file
-        "W3Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=120, njobsOut=10, args={"wjetsWeighting": 1, "wjetBin": 3}), # expected output max. 56 MB/file, obs 20-22 MB / file
-        "W4Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=200, njobsOut=12, args={"wjetsWeighting": 1, "wjetBin": 4}), # expected output max. 144 MB/file, obs 20-22 MB / file
-        "DYJetsToLL_M50_TuneZ2_Fall11":     TaskDefMC(njobsIn=350, njobsOut=2),  # file size 6945 GB, 1964 files, expected output max. 46 MB/file, obs 40 MB / file
-        "DYJetsToLL_M10to50_TuneZ2_Fall11": TaskDefMC(njobsIn=300, njobsOut=1),  # file size 5900 GB, 1420 files, expected output max. 47 MB/file, obs 21 MB / file
-        "T_t-channel_TuneZ2_Fall11":        TaskDefMC(njobsIn=50, njobsOut=2),   # 866 GB, 395 files, expected output max. 47 MB/file, obs 15-20 MB / file
-        "Tbar_t-channel_TuneZ2_Fall11":     TaskDefMC(njobsIn=50, njobsOut=1),   # expected output max. 47 MB/file, obs 15-20 MB / file
-        "T_tW-channel_TuneZ2_Fall11":       TaskDefMC(njobsIn=20, njobsOut=1),   # 210 GB, 69 files, expected output max. 28 MB/file, obs 15-20 MB / file
-        "Tbar_tW-channel_TuneZ2_Fall11":    TaskDefMC(njobsIn=20, njobsOut=1),   # expected output max. 15 MB/file, obs 15-20 MB / file
-        "T_s-channel_TuneZ2_Fall11":        TaskDefMC(njobsIn=10, njobsOut=1),      # 59 GB, 19 files, expected output max. 57 MB/file, obs 15-20 MB / file
-        "Tbar_s-channel_TuneZ2_Fall11":     TaskDefMC(njobsIn=10, njobsOut=1),
+        "WW_TuneZ2_Fall11":                 TaskDefMC(njobsIn=40, njobsOut=3),
+        "WZ_TuneZ2_Fall11":                 TaskDefMC(njobsIn=40, njobsOut=3),
+        "ZZ_TuneZ2_Fall11":                 TaskDefMC(njobsIn=40, njobsOut=3),   
+        "TTJets_TuneZ2_Fall11":             TaskDefMC(njobsIn=2000, njobsOut=50),
+        "WJets_TuneZ2_Fall11":              TaskDefMC(njobsIn=400, njobsOut=4, args={"wjetsWeighting": 1, "wjetBin": -1}),
+        "W1Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=300, njobsOut=6, args={"wjetsWeighting": 1, "wjetBin": 1}),
+        "W2Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=200, njobsOut=5, args={"wjetsWeighting": 1, "wjetBin": 2}),
+        "W3Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=100, njobsOut=10, args={"wjetsWeighting": 1, "wjetBin": 3}),
+        "W3Jets_TuneZ2_v2_Fall11":          TaskDefMC(njobsIn=100, njobsOut=4, args={"wjetsWeighting": 1, "wjetBin": 3}),
+        "W4Jets_TuneZ2_Fall11":             TaskDefMC(njobsIn=300, njobsOut=10, args={"wjetsWeighting": 1, "wjetBin": 4}),
+        "DYJetsToLL_M50_TuneZ2_Fall11":     TaskDefMC(njobsIn=200, njobsOut=2),
+        "DYJetsToLL_M10to50_TuneZ2_Fall11": TaskDefMC(njobsIn=200, njobsOut=1),
+        "T_t-channel_TuneZ2_Fall11":        TaskDefMC(njobsIn=40, njobsOut=1),
+        "Tbar_t-channel_TuneZ2_Fall11":     TaskDefMC(njobsIn=20, njobsOut=1),
+        "T_tW-channel_TuneZ2_Fall11":       TaskDefMC(njobsIn=30, njobsOut=1),
+        "Tbar_tW-channel_TuneZ2_Fall11":    TaskDefMC(njobsIn=30, njobsOut=1),
+        "T_s-channel_TuneZ2_Fall11":        TaskDefMC(njobsIn=5, njobsOut=1),
+        "Tbar_s-channel_TuneZ2_Fall11":     TaskDefMC(njobsIn=5, njobsOut=1),
 
         }
 
@@ -688,64 +692,64 @@ def addPattuple_v25c(datasets):
 
     addPattuple_44X("v25c", datasets, definitions)
 
-## Add v44_4 pattuple production workflows, no output yet
+## Add v44_4 pattuple production workflows
 #
 # For some reason, some of the signal samples were not triggered in
 # pattuple jobs
 def addPattuple_v44_4(datasets):
     definitions = {
-        "Tau_160431-167913_2011A_Nov08":    TaskDef("/Tau/local-Run2011A_08Nov2011_v1_AOD_160431_pattuple_v44_4-22fa40c1fbac4684dd3ccb0e713bd4b5/USER"), # 7694502 evt, 40-80 MB / file
-        "Tau_170722-173198_2011A_Nov08":    TaskDef("/Tau/local-Run2011A_08Nov2011_v1_AOD_170722_pattuple_v44_4-9ec211af2ee07b45d4ecbc81a3a92e63/USER"), # 914344 evt, 30 MB / file
-        "Tau_173236-173692_2011A_Nov08":    TaskDef("/Tau/local-Run2011A_08Nov2011_v1_AOD_173236_pattuple_v44_4-525b16261b70f8b500033d7d0afaba83/USER"), # 470476 evt
-        "Tau_175832-180252_2011B_Nov19":    TaskDef("/Tau/local-Run2011B_19Nov2011_v1_AOD_175860_pattuple_v44_4-af466d5c64c42a78ca457d4da73a4b82/USER"), # 6298060 evt, 30 MB / file
+        "Tau_160431-167913_2011A_Nov08":    TaskDef("/Tau/local-Run2011A_08Nov2011_v1_AOD_160431_pattuple_v44_4-22fa40c1fbac4684dd3ccb0e713bd4b5/USER", njobsIn=300), # 7694502 evt, min 128 MB, max 907 MB
+        "Tau_170722-173198_2011A_Nov08":    TaskDef("/Tau/local-Run2011A_08Nov2011_v1_AOD_170722_pattuple_v44_4-9ec211af2ee07b45d4ecbc81a3a92e63/USER", njobsIn=70), # 914344 evt, min 62 MB, max 498 MB
+        "Tau_173236-173692_2011A_Nov08":    TaskDef("/Tau/local-Run2011A_08Nov2011_v1_AOD_173236_pattuple_v44_4-525b16261b70f8b500033d7d0afaba83/USER", njobsIn=30), # 470476 evt, min 193 MB. max 641 MB
+        "Tau_175832-180252_2011B_Nov19":    TaskDef("/Tau/local-Run2011B_19Nov2011_v1_AOD_175860_pattuple_v44_4-af466d5c64c42a78ca457d4da73a4b82/USER", njobsIn=300), # 6298060 evt, min 142 MB, max 1390 MB
 
-        "TTToHplusBWB_M80_Fall11":          TaskDef("/TTToHplusBWB_M-80_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER"),
-        "TTToHplusBWB_M90_Fall11":          TaskDef("/TTToHplusBWB_M-90_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER"),
-        "TTToHplusBWB_M100_Fall11":         TaskDef("/TTToHplusBWB_M-100_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER"),
-        "TTToHplusBWB_M120_Fall11":         TaskDef("/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER"),
-        "TTToHplusBWB_M140_Fall11":         TaskDef("/TTToHplusBWB_M-140_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER"),
-        "TTToHplusBWB_M150_Fall11":         TaskDef("/TTToHplusBWB_M-150_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER"),
-        "TTToHplusBWB_M155_Fall11":         TaskDef("/TTToHplusBWB_M-155_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[]),
-        "TTToHplusBWB_M160_Fall11":         TaskDef("/TTToHplusBWB_M-160_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER"),
+        "TTToHplusBWB_M80_Fall11":          TaskDef("/TTToHplusBWB_M-80_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 7 files, min 37 MB, max 187 MB
+        "TTToHplusBWB_M90_Fall11":          TaskDef("/TTToHplusBWB_M-90_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 5 files, min 191 MB, max 197 MB
+        "TTToHplusBWB_M100_Fall11":         TaskDef("/TTToHplusBWB_M-100_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 5 files, min 202 MB, max 206 MB
+        "TTToHplusBWB_M120_Fall11":         TaskDef("/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 5 files, min 226 MB, max 231 MB
+        "TTToHplusBWB_M140_Fall11":         TaskDef("/TTToHplusBWB_M-140_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 6 files, min 61 MB, max 267 MB
+        "TTToHplusBWB_M150_Fall11":         TaskDef("/TTToHplusBWB_M-150_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 6 files, min 131 MB, max 287 MB
+        "TTToHplusBWB_M155_Fall11":         TaskDef("/TTToHplusBWB_M-155_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[], njobsIn=50), # 2 files, min 1072 MB, max 1260 MB
+        "TTToHplusBWB_M160_Fall11":         TaskDef("/TTToHplusBWB_M-160_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 5 files, min 292 MV. max 298 MB
 
-        "TTToHplusBHminusB_M80_Fall11":     TaskDef("/TTToHplusBHminusB_M-80_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER"),
-        "TTToHplusBHminusB_M90_Fall11":     TaskDef("/TTToHplusBHminusB_M-90_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER"),
-        "TTToHplusBHminusB_M100_Fall11":    TaskDef("/TTToHplusBHminusB_M-100_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER"),
-        "TTToHplusBHminusB_M120_Fall11":    TaskDef("/TTToHplusBHminusB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER"),
-        "TTToHplusBHminusB_M140_Fall11":    TaskDef("/TTToHplusBHminusB_M-140_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER"),
-        "TTToHplusBHminusB_M150_Fall11":    TaskDef("/TTToHplusBHminusB_M-150_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER"),
-        "TTToHplusBHminusB_M155_Fall11":    TaskDef("/TTToHplusBHminusB_M-155_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[]),
-        "TTToHplusBHminusB_M160_Fall11":    TaskDef("/TTToHplusBHminusB_M-160_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER"),
+        "TTToHplusBHminusB_M80_Fall11":     TaskDef("/TTToHplusBHminusB_M-80_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 6 files, min 60 MB, max 228 MB
+        "TTToHplusBHminusB_M90_Fall11":     TaskDef("/TTToHplusBHminusB_M-90_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 5 files, min 230 MB, max 239 MB
+        "TTToHplusBHminusB_M100_Fall11":    TaskDef("/TTToHplusBHminusB_M-100_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 7 files, min 42 MB, max 253 MB
+        "TTToHplusBHminusB_M120_Fall11":    TaskDef("/TTToHplusBHminusB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 7 files, min 74 MB, max 284 MB
+        "TTToHplusBHminusB_M140_Fall11":    TaskDef("/TTToHplusBHminusB_M-140_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 7 files, min 94 MB, max 327 MB
+        "TTToHplusBHminusB_M150_Fall11":    TaskDef("/TTToHplusBHminusB_M-150_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 6 files, min 56 MB, max 354 MB
+        "TTToHplusBHminusB_M155_Fall11":    TaskDef("/TTToHplusBHminusB_M-155_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[], njobsIn=50), # 4 files, min 378 MB, max 1668 MB
+        "TTToHplusBHminusB_M160_Fall11":    TaskDef("/TTToHplusBHminusB_M-160_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4fix-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 6 files, min 351 MB, max 373 MB
 
-        "HplusTB_M180_Fall11":              TaskDef("/HplusTB_M-180_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[]),
-        "HplusTB_M190_Fall11":              TaskDef("/HplusTB_M-190_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[]),
-        "HplusTB_M200_Fall11":              TaskDef("/HplusTB_M-200_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[]),
-        "HplusTB_M220_Fall11":              TaskDef("/HplusTB_M-220_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[]),
-        "HplusTB_M250_Fall11":              TaskDef("/HplusTB_M-250_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[]),
-        "HplusTB_M300_Fall11":              TaskDef("/HplusTB_M-300_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[]),
+        "HplusTB_M180_Fall11":              TaskDef("/HplusTB_M-180_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[], njobsIn=50), # 6 files, min 2.5 MB. max 1957 MB
+        "HplusTB_M190_Fall11":              TaskDef("/HplusTB_M-190_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[], njobsIn=50), # 5 files, min 1914 MB, max 1943 MB
+        "HplusTB_M200_Fall11":              TaskDef("/HplusTB_M-200_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[], njobsIn=50), # 5 files, min 1961 MB, max 1985 MB
+        "HplusTB_M220_Fall11":              TaskDef("/HplusTB_M-220_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[], njobsIn=50), # 5 files, min 1881 MB, max 1899 MB
+        "HplusTB_M250_Fall11":              TaskDef("/HplusTB_M-250_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[], njobsIn=50), # 5 files, min 1880 MB, max 1897 MB
+        "HplusTB_M300_Fall11":              TaskDef("/HplusTB_M-300_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[], njobsIn=50), # 6 files, min 2.5 MB, max 1911 MB
 
-        "QCD_Pt30to50_TuneZ2_Fall11":       TaskDef("/QCD_Pt-30to50_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "QCD_Pt50to80_TuneZ2_Fall11":       TaskDef("/QCD_Pt-50to80_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "QCD_Pt80to120_TuneZ2_Fall11":      TaskDef("/QCD_Pt-80to120_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "QCD_Pt120to170_TuneZ2_Fall11":     TaskDef("/QCD_Pt-120to170_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "QCD_Pt170to300_TuneZ2_Fall11":     TaskDef("/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "QCD_Pt300to470_TuneZ2_Fall11":     TaskDef("/QCD_Pt-300to470_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
+        "QCD_Pt30to50_TuneZ2_Fall11":       TaskDef("/QCD_Pt-30to50_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"), # 11 files, min 1.8 MB, max 6 MB
+        "QCD_Pt50to80_TuneZ2_Fall11":       TaskDef("/QCD_Pt-50to80_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"), # 11 files, min 1.8 MB, max 9.8 MB
+        "QCD_Pt80to120_TuneZ2_Fall11":      TaskDef("/QCD_Pt-80to120_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),# 11 files, min 15 MB, max 40 MB
+        "QCD_Pt120to170_TuneZ2_Fall11":     TaskDef("/QCD_Pt-120to170_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"), # 21 files, min 4 MB, max 68 MB
+        "QCD_Pt170to300_TuneZ2_Fall11":     TaskDef("/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"), # 41 files, min 42 MB, max 105 MB
+        "QCD_Pt300to470_TuneZ2_Fall11":     TaskDef("/QCD_Pt-300to470_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER", njobsIn=40), # 40 files, min 2.4 MB, max 273 MB
 
-        "WW_TuneZ2_Fall11":                 TaskDef("/WW_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "WZ_TuneZ2_Fall11":                 TaskDef("/WZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "ZZ_TuneZ2_Fall11":                 TaskDef("/ZZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "TTJets_TuneZ2_Fall11":             TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "WJets_TuneZ2_Fall11":              TaskDef("/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "W2Jets_TuneZ2_Fall11":             TaskDef("/W2Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "W3Jets_TuneZ2_Fall11":             TaskDef("/W3Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "W4Jets_TuneZ2_Fall11":             TaskDef("/W4Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "DYJetsToLL_M50_TuneZ2_Fall11":     TaskDef("/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "T_t-channel_TuneZ2_Fall11":        TaskDef("/T_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "Tbar_t-channel_TuneZ2_Fall11":     TaskDef("/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "T_tW-channel_TuneZ2_Fall11":       TaskDef("/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "Tbar_tW-channel_TuneZ2_Fall11":    TaskDef("/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "T_s-channel_TuneZ2_Fall11":        TaskDef("/T_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
-        "Tbar_s-channel_TuneZ2_Fall11":     TaskDef("/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER"),
+        "WW_TuneZ2_Fall11":                 TaskDef("/WW_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 41 files, min 2.4 MB, max 87 MB
+        "WZ_TuneZ2_Fall11":                 TaskDef("/WZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 41 files, min 30 MB, max 79 MB
+        "ZZ_TuneZ2_Fall11":                 TaskDef("/ZZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), #  42 files, min 7 MB, max 67 MB
+        "TTJets_TuneZ2_Fall11":             TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER", njobsIn=490), # 495 files, min 57 MB, max 371 MB
+        "WJets_TuneZ2_Fall11":              TaskDef("/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER", njobsIn=490), # 407 files, min 2.5 MB, max 41 MB
+        "W2Jets_TuneZ2_Fall11":             TaskDef("/W2Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER", njobsIn=200), # 202 files, min 6.9 MB, max 91 MB
+        "W3Jets_TuneZ2_Fall11":             TaskDef("/W3Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER", njobsIn=120), # 52 files, min 80 MB, max 165 MB
+        "W4Jets_TuneZ2_Fall11":             TaskDef("/W4Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER", njobsIn=200), # 99 files, min 8 MB, max 293 MB
+        "DYJetsToLL_M50_TuneZ2_Fall11":     TaskDef("/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER", njobsIn=350), # 302 files, min 5.3 MB, max 18 MB
+        "T_t-channel_TuneZ2_Fall11":        TaskDef("/T_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 53 files, min 16 MB, max 66 MB
+        "Tbar_t-channel_TuneZ2_Fall11":     TaskDef("/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER", njobsIn=50), # 53 files, min 9 MB, max 36 MB
+        "T_tW-channel_TuneZ2_Fall11":       TaskDef("/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER", njobsIn=20), # 22 files, min 7 MB, max 111 MB
+        "Tbar_tW-channel_TuneZ2_Fall11":    TaskDef("/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER", njobsIn=20),  # 22 files, min 18 MB, max 109 MB
+        "T_s-channel_TuneZ2_Fall11":        TaskDef("/T_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER", njobsIn=10), # 11 files, min 2.5 MB, max 27 MB
+        "Tbar_s-channel_TuneZ2_Fall11":     TaskDef("/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4-f16be938188c46248667b60f0c9e7452/USER", njobsIn=10), # 12 files, min 4 MB, max 14 MB
     }
     addPattuple_44X("v44_4", datasets, definitions)
 
@@ -754,10 +758,211 @@ def addPattuple_v44_4(datasets):
 # These are without trigger
 def addPattuple_v44_4_1(datasets):
     definitions = {
-        "TTToHplusBWB_M120_Fall11":         TaskDef("/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4_1-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[]),
+        "TTToHplusBWB_M120_Fall11":         TaskDef("/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4_1-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[], njobsIn=50),
         "QCD_Pt170to300_TuneZ2_Fall11":     TaskDef("/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4_1-a7cc08c191a8794be9ec81f73dbf125a/USER", triggerOR=[], njobsIn=600),
         }
     addPattuple_44X("v44_4_1", datasets, definitions)
+
+
+## Add v44_5 pattuple production workflows
+def addPattuple_v44_5_test1(datasets):
+    definitions = {
+        # 470476 events, 131 jobs
+        # User mean 4158.8, min 1173.3, max 10329.6
+        # Mean 82.7 MB, min 35.0 MB, max 166.1 MB
+        "Tau_173236-173692_2011A_Nov08":    TaskDef("/Tau/local-Run2011A_08Nov2011_v1_AOD_173236_173692_pattuple_v44_5_test1-1b3ed6acb33bc8106ac34fb558c6831f/USER"),
+        # 23189 events, 30 jobs
+        # User mean 1244.2, min 862.8, max 1367.7
+        # Mean 64.0 MB, min 59.9 MB, max 68.2 MB
+        "TTToHplusBWB_M120_Fall11":         TaskDef("/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5_test1-778bc6993dea1b89668515c3036cbe70/USER"),
+        }
+
+    addPattuple_44X("v44_5_test1", datasets, definitions)
+
+## Add v44_5 pattuple production workflows
+def addPattuple_v44_5(datasets):
+    definitions = {
+        # 7650822 events, 504 jobs
+        # User mean 13304.5, min 2532.2, max 37588.4
+        # Mean 224.6 MB, min 60.5 MB, max 505.2 MB
+        "Tau_160431-167913_2011A_Nov08":    TaskDef("/Tau/local-Run2011A_08Nov2011_v1_AOD_160431_167913_pattuple_v44_5-5b9e06707f537e1145c67b2d6e11cbbd/USER"),
+        # 914344 events
+        # User mean 4100.7, min 751.5, max 11620.2
+        # Mean 72.7 MB, min 20.1 MB, max 154.9 MB
+        "Tau_170722-173198_2011A_Nov08":    TaskDef("/Tau/local-Run2011A_08Nov2011_v1_AOD_170722_173198_pattuple_v44_5-29dd66960ccb0c43b9b01919e28657bd/USER"),
+        # 470476 events
+        # User mean 4748.7, min 1443.0, max 10400.2
+        # Mean 82.7 MB, min 35.0 MB, max 166.1 MB
+        "Tau_173236-173692_2011A_Nov08":    TaskDef("/Tau/local-Run2011A_08Nov2011_v1_AOD_173236_173692_pattuple_v44_5-1b3ed6acb33bc8106ac34fb558c6831f/USER"),
+        # 6298060 events
+        # User mean 18182.0, min 4722.5, max 37545.8
+        # Mean 321.7 MB, min 83.2 MB, max 529.7 MB
+        "Tau_175832-180252_2011B_Nov19":    TaskDef("/Tau/local-Run2011B_19Nov2011_v1_AOD_175832_180252_pattuple_v44_5-b5ff496274cc2d624fc6fce769142e2a/USER"),
+
+        # 18274-32151 events, 15-17 jobs
+        # User mean 1325.4, min 162.2, max 1946.4
+        # Mean 87.1 MB, min 10.4 MB, max 102.4 MB
+        "TTToHplusBWB_M80_Fall11":          TaskDef("/TTToHplusBWB_M-80_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 1739.5, min 34.5, max 2191.1
+        # Mean 97.2 MB, min 1.9 MB, max 108.0 MB
+        "TTToHplusBWB_M90_Fall11":          TaskDef("/TTToHplusBWB_M-90_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 1711.1, min 20.5, max 2329.7
+        # Mean 101.5 MB, min 1.9 MB, max 112.9 MB
+        "TTToHplusBWB_M100_Fall11":         TaskDef("/TTToHplusBWB_M-100_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 2110.6, min 1690.4, max 2525.6
+        # Mean 120.6 MB, min 116.2 MB, max 124.1 MB
+        "TTToHplusBWB_M120_Fall11":         TaskDef("/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 2117.1, min 1378.2, max 2770.5
+        # Mean 131.4 MB, min 88.3 MB, max 144.6 MB
+        "TTToHplusBWB_M140_Fall11":         TaskDef("/TTToHplusBWB_M-140_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 2035.1, min 725.4, max 2895.7
+        # Mean 139.5 MB, min 55.1 MB, max 152.9 MB
+        "TTToHplusBWB_M150_Fall11":         TaskDef("/TTToHplusBWB_M-150_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 2494.2, min 909.9, max 3100.0
+        # Mean 142.8 MB, min 55.1 MB, max 154.9 MB
+        "TTToHplusBWB_M155_Fall11":         TaskDef("/TTToHplusBWB_M-155_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 2845.7, min 2141.5, max 3300.1
+        # Mean 155.2 MB, min 150.9 MB, max 159.5 MB
+        "TTToHplusBWB_M160_Fall11":         TaskDef("/TTToHplusBWB_M-160_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+
+        # 23781-46586 events, 15-17 jobs
+        # User mean 1673.4, min 574.6, max 2414.5
+        # Mean 111.6 MB, min 41.2 MB, max 121.1 MB
+        "TTToHplusBHminusB_M80_Fall11":     TaskDef("/TTToHplusBHminusB_M-80_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 1837.1, min 1630.5, max 2533.7
+        # Mean 123.8 MB, min 117.5 MB, max 128.0 MB
+        "TTToHplusBHminusB_M90_Fall11":     TaskDef("/TTToHplusBHminusB_M-90_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 2068.6, min 226.8, max 2684.8
+        # Mean 116.4 MB, min 12.1 MB, max 134.0 MB
+        "TTToHplusBHminusB_M100_Fall11":    TaskDef("/TTToHplusBHminusB_M-100_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 2179.3, min 767.0, max 3004.3
+        # Mean 138.4 MB, min 57.0 MB, max 151.8 MB
+        "TTToHplusBHminusB_M120_Fall11":    TaskDef("/TTToHplusBHminusB_M-120_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 2577.2, min 1912.3, max 3523.5
+        # Mean 161.4 MB, min 106.6 MB, max 179.3 MB
+        "TTToHplusBHminusB_M140_Fall11":    TaskDef("/TTToHplusBHminusB_M-140_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 2598.3, min 1127.2, max 3609.8
+        # Mean 171.9 MB, min 80.3 MB, max 189.0 MB
+        "TTToHplusBHminusB_M150_Fall11":    TaskDef("/TTToHplusBHminusB_M-150_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 3107.8, min 1203.1, max 3873.1
+        # Mean 175.7 MB, min 70.1 MB, max 193.0 MB
+        "TTToHplusBHminusB_M155_Fall11":    TaskDef("/TTToHplusBHminusB_M-155_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 2664.3, min 958.2, max 4995.6
+        # Mean 169.6 MB, min 49.6 MB, max 197.8 MB
+        "TTToHplusBHminusB_M160_Fall11":    TaskDef("/TTToHplusBHminusB_M-160_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+
+        # 43034-64331 events, 5-6 jobs
+        # User mean 7573.2, min 20.0, max 9332.1
+        # Mean 529.3 MB, min 1.9 MB, max 646.5 MB
+        "HplusTB_M180_Fall11":              TaskDef("/HplusTB_M-180_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 13527.9, min 13385.7, max 13809.7
+        # Mean 674.9 MB, min 673.1 MB, max 677.4 MB
+        "HplusTB_M190_Fall11":              TaskDef("/HplusTB_M-190_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 11980.5, min 10111.3, max 14455.7
+        # Mean 720.0 MB, min 711.7 MB, max 737.7 MB
+        "HplusTB_M200_Fall11":              TaskDef("/HplusTB_M-200_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 15097.0, min 14518.4, max 15456.7
+        # Mean 754.3 MB, min 737.1 MB, max 767.8 MB
+        "HplusTB_M220_Fall11":              TaskDef("/HplusTB_M-220_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 14018.3, min 11712.5, max 22224.1
+        # Mean 834.4 MB, min 827.1 MB, max 840.8 MB
+        "HplusTB_M250_Fall11":              TaskDef("/HplusTB_M-250_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # User mean 14045.9, min 19.9, max 19703.3
+        # Mean 796.5 MB, min 1.9 MB, max 970.8 MB
+        "HplusTB_M300_Fall11":              TaskDef("/HplusTB_M-300_7TeV-pythia6-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+
+        # 32 events, 11 jobs
+        # User mean 3099.7, min 40.3, max 3883.3
+        # Mean 5.8 MB, min 1.9 MB, max 6.7 MB
+        "QCD_Pt30to50_TuneZ2_Fall11":       TaskDef("/QCD_Pt-30to50_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 677 events, 11 jobs
+        # User mean 3475.8, min 101.3, max 4757.8
+        # Mean 10.3 MB, min 2.0 MB, max 11.8 MB
+        "QCD_Pt50to80_TuneZ2_Fall11":       TaskDef("/QCD_Pt-50to80_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 6152 events, 11 jobs
+        # User mean 4673.3, min 1898.5, max 5300.7
+        # Mean 46.6 MB, min 20.9 MB, max 53.2 MB
+        "QCD_Pt80to120_TuneZ2_Fall11":      TaskDef("/QCD_Pt-80to120_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 26243 events, 21 jobs
+        # User mean 4800.8, min 193.4, max 5764.3
+        # Mean 89.9 MB, min 5.3 MB, max 97.5 MB
+        "QCD_Pt120to170_TuneZ2_Fall11":     TaskDef("/QCD_Pt-120to170_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 83237 events, 41 jobs
+        # User mean 4989.9, min 1710.9, max 6474.6
+        # Mean 144.4 MB, min 57.7 MB, max 154.4 MB
+        "QCD_Pt170to300_TuneZ2_Fall11":     TaskDef("/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 220338 events, 101 jobs
+        # User mean 4556.6, min 129.1, max 5261.4
+        # Mean 159.4 MB, min 3.3 MB, max 168.1 MB
+        "QCD_Pt300to470_TuneZ2_Fall11":     TaskDef("/QCD_Pt-300to470_TuneZ2_7TeV_pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+
+        # 77684 events, 41 jobs
+        # User mean 3842.1, min 143.5, max 4664.9
+        # Mean 118.6 MB, min 3.0 MB, max 126.7 MB
+        "WW_TuneZ2_Fall11":                 TaskDef("/WW_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 68886 events, 41 jobs
+        # User mean 3675.4, min 1405.0, max 4130.6
+        # Mean 106.5 MB, min 43.4 MB, max 113.2 MB
+        "WZ_TuneZ2_Fall11":                 TaskDef("/WZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 58071 events, 42 jobs
+        # User mean 2956.5, min 238.9, max 3601.0
+        # Mean 87.6 MB, min 9.3 MB, max 95.1 MB
+        "ZZ_TuneZ2_Fall11":                 TaskDef("/ZZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 3358608 events, 2003 jobs
+        # User mean 3018.3, min 693.0, max 4590.2
+        # Mean 139.4 MB, min 30.5 MB, max 151.1 MB
+        "TTJets_TuneZ2_Fall11":             TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 301748 events, 407 jobs
+        # User mean 2419.0, min 176.7, max 3345.0
+        # Mean 49.3 MB, min 3.3 MB, max 54.2 MB
+        "WJets_TuneZ2_Fall11":              TaskDef("/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 501106 events, 307 jobs
+        # User mean 2651.9, min 78.9, max 6659.2
+        # Mean 91.9 MB, min 3.2 MB, max 99.6 MB
+        "W1Jets_TuneZ2_Fall11":             TaskDef("/W1Jet_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 404002 events, 202 events
+        # User mean 4932.9, min 381.0, max 5728.2
+        # Mean 122.7 MB, min 9.3 MB, max 131.3 MB
+        "W2Jets_TuneZ2_Fall11":             TaskDef("/W2Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 208523 events, 101 jobs
+        # User mean 4009.9, min 126.6, max 5742.2
+        # Mean 143.6 MB, min 3.1 MB, max 152.2 MB
+        "W3Jets_TuneZ2_v2_Fall11":          TaskDef("/W3Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v2_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 604144 events, 303 jobs
+        # User mean 5153.5, min 239.9, max 8819.9
+        # Mean 149.4 MB, min 4.8 MB, max 162.4 MB
+        "W4Jets_TuneZ2_Fall11":             TaskDef("/W4Jets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 71235 events, 201 jobs
+        # User mean 1521.7, min 584.8, max 2864.9
+        # Mean 29.0 MB, min 9.3 MB, max 33.1 MB
+        "DYJetsToLL_M50_TuneZ2_Fall11":     TaskDef("/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 61815 events, 43 jobs
+        # User mean 3090.9, min 259.1, max 3932.5
+        # Mean 102.2 MB, min 9.8 MB, max 116.6 MB
+        "T_t-channel_TuneZ2_Fall11":        TaskDef("/T_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 29028 events, 23 jobs
+        # User mean 2648.3, min 372.8, max 3845.4
+        # Mean 89.9 MB, min 12.5 MB, max 108.1 MB
+        "Tbar_t-channel_TuneZ2_Fall11":     TaskDef("/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 41707 events, 31 jobs
+        # User mean 2648.8, min 1291.2, max 3468.4
+        # Mean 104.2 MB, min 52.0 MB, max 111.9 MB
+        "T_tW-channel_TuneZ2_Fall11":       TaskDef("/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 41142 events, 32 jobs
+        # User mean 2530.8, min 128.8, max 4528.9
+        # Mean 100.0 MB, min 5.2 MB, max 110.3 MB
+        "Tbar_tW-channel_TuneZ2_Fall11":    TaskDef("/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 4241 events, 6 jobs
+        # User mean 1643.2, min 1103.8, max 2191.3
+        # Mean 55.3 MB, min 35.6 MB, max 66.4 MB
+        "T_s-channel_TuneZ2_Fall11":        TaskDef("/T_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        # 1986 events, 7 jobs
+        # User mean 696.4, min 303.2, max 1101.2
+        # Mean 24.7 MB, min 8.4 MB, max 34.3 MB
+        "Tbar_s-channel_TuneZ2_Fall11":     TaskDef("/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_5-778bc6993dea1b89668515c3036cbe70/USER"),
+        }
+
+    addPattuple_44X("v44_5", datasets, definitions)
 
 # Skeleton
 def addPattuple_vNEXT_SKELETON_44X(datasets):
@@ -804,8 +1009,9 @@ def addPattuple_vNEXT_SKELETON_44X(datasets):
         "ZZ_TuneZ2_Fall11":                 TaskDef(""),
         "TTJets_TuneZ2_Fall11":             TaskDef(""),
         "WJets_TuneZ2_Fall11":              TaskDef(""),
+        "W1Jets_TuneZ2_Fall11":             TaskDef(""),
         "W2Jets_TuneZ2_Fall11":             TaskDef(""),
-        "W3Jets_TuneZ2_Fall11":             TaskDef(""),
+        "W3Jets_TuneZ2_v2_Fall11":          TaskDef(""),
         "W4Jets_TuneZ2_Fall11":             TaskDef(""),
         "DYJetsToLL_M50_TuneZ2_Fall11":     TaskDef(""),
         "T_t-channel_TuneZ2_Fall11":        TaskDef(""),

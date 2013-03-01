@@ -105,6 +105,7 @@ backgroundCrossSections = CrossSectionList(
             "8": 30400.0,
             }),
     CrossSection("PREP_W1Jets", {
+            "7": 4480.0,
             "8": 5400.0,
             }),
     CrossSection("PREP_W2Jets", {

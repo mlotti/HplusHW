@@ -123,6 +123,8 @@ _weightedAllEvents = {
         "QCD_Pt120to170_TuneZ2_Fall11": WeightedAllEvents(unweighted=6127528, weighted=6221598.645593, up=6218900.049906, down=6212658.706050),
         "QCD_Pt170to300_TuneZ2_Fall11": WeightedAllEvents(unweighted=6220160, weighted=6267144.446872, up=6268077.975866, down=6252959.749113),
         "QCD_Pt300to470_TuneZ2_Fall11": WeightedAllEvents(unweighted=6432669, weighted=6508237.455281, up=6506327.251603, down=6497639.996005),
+        "W1Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=76051609, weighted=77644362.113436, up=77583557.117218, down=77586056.500796),
+        "W3Jets_TuneZ2_v2_Fall11": WeightedAllEvents(unweighted=7541595, weighted=7537540.054457, up=7537738.468034, down=7537552.142497),
     },
     "Run2011B": {
         "TTToHplusBWB_M80_Fall11": WeightedAllEvents(unweighted=218200, weighted=216325.066231, up=217254.616614, down=215493.146064),
@@ -170,6 +172,8 @@ _weightedAllEvents = {
         "QCD_Pt120to170_TuneZ2_Fall11": WeightedAllEvents(unweighted=6127528, weighted=6096655.446293, up=6114847.606844, down=6078872.005553),
         "QCD_Pt170to300_TuneZ2_Fall11": WeightedAllEvents(unweighted=6220160, weighted=6194092.620957, up=6222731.577817, down=6167568.648234),
         "QCD_Pt300to470_TuneZ2_Fall11": WeightedAllEvents(unweighted=6432669, weighted=6360307.883080, up=6380161.481108, down=6344053.485342),
+        "W1Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=76051609, weighted=75728733.328432, up=75798599.404381, down=75648203.837487),
+        "W3Jets_TuneZ2_v2_Fall11": WeightedAllEvents(unweighted=7541595, weighted=7546266.215300, up=7546438.546617, down=7545655.045459),
     },
     "Run2011AB": {
         "TTToHplusBWB_M80_Fall11": WeightedAllEvents(unweighted=218200, weighted=219013.870316, up=219377.625194, down=218493.470983),
@@ -220,6 +224,8 @@ _weightedAllEvents = {
         "QCD_Pt120to170_TuneZ2_Fall11": WeightedAllEvents(unweighted=6127528, weighted=6153721.769562, up=6162373.241593, down=6139978.002476),
         "QCD_Pt170to300_TuneZ2_Fall11": WeightedAllEvents(unweighted=6220160, weighted=6227458.175356, up=6243443.406265, down=6206570.345192),
         "QCD_Pt300to470_TuneZ2_Fall11": WeightedAllEvents(unweighted=6432669, weighted=6427872.959324, up=6437787.310456, down=6414202.885941),
+        "W1Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=76051609, weighted=76603674.038794, up=76613873.380221, down=76533302.418103),
+        "W3Jets_TuneZ2_v2_Fall11": WeightedAllEvents(unweighted=7541595, weighted=7542280.644894, up=7542464.812360, down=7541954.109907),
     },
     ########################################
     #
