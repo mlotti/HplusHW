@@ -809,9 +809,22 @@ class CanvasFrame:
 
         _boundsArgs(histos, opts)
 
+        # Check if the first histogram has x axis bin labels
+        rootHisto = histos[0].getRootHisto()
+        hasBinLabels = isinstance(rootHisto, ROOT.TH1) and len(rootHisto.GetXaxis().GetBinLabel(1)) > 0
+        if hasBinLabels:
+            binWidth = histos[0].getBinWidth(1)
+            opts["nbinsx"] = int((opts["xmax"]-opts["xmin"])/binWidth +0.5)
+
         self.frame = _drawFrame(self.canvas, opts["xmin"], opts["ymin"], opts["xmax"], opts["ymax"], opts.get("nbins", None), opts.get("nbinsx", None), opts.get("nbinsy", None))
         self.frame.GetXaxis().SetTitle(histos[0].getXtitle())
         self.frame.GetYaxis().SetTitle(histos[0].getYtitle())
+
+        # Copy the bin labels
+        if hasBinLabels:
+            firstBin = rootHisto.FindFixBin(opts["xmin"])
+            for i in xrange(0, opts["nbinsx"]):
+                self.frame.GetXaxis().SetBinLabel(i+1, rootHisto.GetXaxis().GetBinLabel(firstBin+i))
 
     ## \var canvas
     # TCanvas for the canvas
@@ -909,13 +922,14 @@ class CanvasFrameTwo:
         opts2 = {}
         opts2.update(kwargs.get("opts2", {}))
 
-        if "xmin" in opts2 or "xmax" in opts2 or "nbins" in opts2:
-            raise Exception("No 'xmin', 'xmax', or 'nbins' allowed in opts2, values are taken from opts/opts1")
+        if "xmin" in opts2 or "xmax" in opts2 or "nbins" in opts2 or "nbinsx" in opts2:
+            raise Exception("No 'xmin', 'xmax', 'nbins', or 'nbinsy' allowed in opts2, values are taken from opts/opts1")
 
         _boundsArgs(histos1, opts1)
         opts2["xmin"] = opts1["xmin"]
         opts2["xmax"] = opts1["xmax"]
         opts2["nbins"] = opts1.get("nbins", None)
+        opts2["nbinsx"] = opts1.get("nbinsx", None)
 #        _boundsArgs([HistoWrapper(h) for h in histos2], opts2)
         _boundsArgs(histos2, opts2) # HistoWrapper not needed anymore? Ratio is Histo
 
@@ -947,8 +961,15 @@ class CanvasFrameTwo:
         #xoffsetFactor = canvasFactor*2
         xoffsetFactor = 0.5*canvasFactor/(canvasFactor-1) * 1.3
 
+        # Check if the first histogram has x axis bin labels
+        rootHisto = histos1[0].getRootHisto()
+        hasBinLabels = isinstance(rootHisto, ROOT.TH1) and len(rootHisto.GetXaxis().GetBinLabel(1)) > 0
+        if hasBinLabels:
+            binWidth = histos1[0].getBinWidth(1)
+            opts1["nbinsx"] = int((opts1["xmax"]-opts1["xmin"])/binWidth +0.5)
+            opts2["nbinsx"] = opts1["nbinsx"]
 
-        self.frame1 = _drawFrame(self.pad1, opts1["xmin"], opts1["ymin"], opts1["xmax"], opts1["ymax"], opts1.get("nbins", None))
+        self.frame1 = _drawFrame(self.pad1, opts1["xmin"], opts1["ymin"], opts1["xmax"], opts1["ymax"], opts1.get("nbins", None), opts1.get("nbinsx", None), opts1.get("nbinsy", None))
         (labelSize, titleSize) = (self.frame1.GetXaxis().GetLabelSize(), self.frame1.GetXaxis().GetTitleSize())
         self.frame1.GetXaxis().SetLabelSize(0)
         self.frame1.GetXaxis().SetTitleSize(0)
@@ -956,7 +977,7 @@ class CanvasFrameTwo:
         self.frame1.GetYaxis().SetTitleOffset(self.frame1.GetYaxis().GetTitleOffset()*yoffsetFactor)
 
         self.canvas.cd(2)
-        self.frame2 = _drawFrame(self.pad2, opts2["xmin"], opts2["ymin"], opts2["xmax"], opts2["ymax"], opts2.get("nbins", None))
+        self.frame2 = _drawFrame(self.pad2, opts2["xmin"], opts2["ymin"], opts2["xmax"], opts2["ymax"], opts2.get("nbins", None), opts2.get("nbinsx", None))
         self.frame2.GetXaxis().SetTitle(histos1[0].getXtitle())
         self.frame2.GetYaxis().SetTitle(histos2[0].getYtitle())
         self.frame2.GetYaxis().SetTitleOffset(self.frame2.GetYaxis().GetTitleOffset()*yoffsetFactor)
@@ -966,6 +987,12 @@ class CanvasFrameTwo:
         self.canvas.cd(1)
         self.frame = FrameWrapper(self.pad1, self.frame1, self.pad2, self.frame2)
         self.pad = self.pad1
+
+        # Copy the bin labels
+        if hasBinLabels:
+            firstBin = rootHisto.FindFixBin(opts1["xmin"])
+            for i in xrange(0, opts1["nbinsx"]):
+                self.frame.GetXaxis().SetBinLabel(i+1, rootHisto.GetXaxis().GetBinLabel(firstBin+i))
 
     ## \var frame1
     # TH1 for the upper frame
