@@ -136,26 +136,37 @@ def doPlots(datasets, opts):
         # Draw the plot
         drawPlot(p, filename, **kwargs)
 
-    def partiallyBlindMt(plot):
+    def partiallyBlind(plot, maxShownValue=None, minShownValue=None, moveBlindedText={}):
         if not plot.histoMgr.hasHisto("Data"):
             return
 
         dataHisto = plot.histoMgr.getHisto("Data")
         th1 = dataHisto.getRootHisto()
-        maxShownValue = 60
-        maxBin = th1.FindFixBin(maxShownValue)-1
 
-        newMt = ROOT.TH1F("mt", "mt", maxBin, 0, maxShownValue)
-        for i in xrange(1, maxBin+1):
-            newMt.SetBinContent(i, th1.GetBinContent(i))
-            newMt.SetBinError(i, th1.GetBinError(i))
+        if minShownValue is None:
+            firstShownBin = 1
+        else:
+            firstShownBin = th1.FindFixBin(minShownValue)
 
-        dataHisto.setRootHisto(newMt)
+        if maxShownValue is None:
+            lastShownBin = th1.GetNbinsX()
+        else:
+            lastShownBin = th1.FindFixBin(maxShownValue)-1
+        
+        for i in xrange(1, th1.GetNbinsX()+1):
+            if i >= firstShownBin and i <= lastShownBin:
+                continue
+
+            th1.SetBinContent(i, 0)
+            th1.SetBinError(i, 0)
+
         tb = histograms.PlotTextBox(xmin=0.4, ymin=None, xmax=0.6, ymax=0.84, size=17, lineheight=0.035)
         tb.addText("Data blinded in")
         tb.addText("signal region")
+        tb.move(**moveBlindedText)
         plot.appendPlotObject(tb)
 
+            
     # common arguments for plots which make sense only for MC
     mcArgs = {"fullyBlinded": True, "addBlindedText": False}
 
@@ -167,7 +178,7 @@ def doPlots(datasets, opts):
             args.update(kwargs)
             if "transverseMass" in path:
                 if "BTagging" in plotDir or "Selected" in plotDir:
-                    args["customizeBeforeFrame"] = partiallyBlindMt
+                    args["customizeBeforeFrame"] = lambda p: partiallyBlind(p, maxShownValue=60)
             elif "Selected" in plotDir:
                 args["fullyBlinded"] = True
             if "FakeTaus" in plotDir:
@@ -284,7 +295,7 @@ def doPlots(datasets, opts):
     myDir = "JetSelection/SelectedJets"
     createDrawPlot(myDir+"/jet_pt", xlabel="p_{T} of accepted jets, GeV/c", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_eta", xlabel="#eta of accepted jets", ylabel="N_{jets}")
-    createDrawPlot(myDir+"/jet_phi", xlabel="#phi of accepted jets", ylabel="N_{jets}", rebinToWidthX=phiBinWidth)
+    createDrawPlot(myDir+"/jet_phi", xlabel="#phi of accepted jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_NeutralEmEnergyFraction", xlabel="NeutralEmEnergyFraction of accepted jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_NeutralHadronFraction", xlabel="NeutralHadronFraction of accepted jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_PhotonEnergyFraction", xlabel="PhotonEnergyFraction of accepted jets", ylabel="N_{jets}")
@@ -292,11 +303,11 @@ def doPlots(datasets, opts):
     createDrawPlot(myDir+"/jet_NeutralHadronMultiplicity", xlabel="NeutralHadronMultiplicity of accepted jets", ylabel="N_{jets}", opts={"xmax": 10})
     createDrawPlot(myDir+"/jet_PhotonMultiplicity", xlabel="PhotonMultiplicity of accepted jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_ChargedMultiplicity", xlabel="ChargedMultiplicity of accepted jets", ylabel="N_{jets}")
-    createDrawPlot(myDir+"/jet_PartonFlavour", xlabel="PartonFlavour of accepted jets", ylabel="N_{jets}")
+    createDrawPlot(myDir+"/jet_PartonFlavour", xlabel="PartonFlavour of accepted jets", ylabel="N_{jets}", **mcArgs)
     myDir = "JetSelection/ExcludedJets"
     createDrawPlot(myDir+"/jet_pt", xlabel="p_{T} of rejected jets, GeV/c", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_eta", xlabel="#eta of rejected jets", ylabel="N_{jets}")
-    createDrawPlot(myDir+"/jet_phi", xlabel="#phi of rejected jets", ylabel="N_{jets}", rebinToWidthX=phiBinWidth)
+    createDrawPlot(myDir+"/jet_phi", xlabel="#phi of rejected jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_NeutralEmEnergyFraction", xlabel="NeutralEmEnergyFraction of rejected jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_NeutralHadronFraction", xlabel="NeutralHadronFraction of rejected jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_PhotonEnergyFraction", xlabel="PhotonEnergyFraction of rejected jets", ylabel="N_{jets}")
@@ -304,10 +315,10 @@ def doPlots(datasets, opts):
     createDrawPlot(myDir+"/jet_NeutralHadronMultiplicity", xlabel="NeutralHadronMultiplicity of rejected jets", ylabel="N_{jets}", opts={"xmax": 10})
     createDrawPlot(myDir+"/jet_PhotonMultiplicity", xlabel="PhotonMultiplicity of rejected jets", ylabel="N_{jets}")
     createDrawPlot(myDir+"/jet_ChargedMultiplicity", xlabel="ChargedMultiplicity of rejected jets", ylabel="N_{jets}")
-    createDrawPlot(myDir+"/jet_PartonFlavour", xlabel="PartonFlavour of rejected jets", ylabel="N_{jets}")
+    createDrawPlot(myDir+"/jet_PartonFlavour", xlabel="PartonFlavour of rejected jets", ylabel="N_{jets}", **mcArgs)
     myDir = "JetSelection/ReferenceJetToTau"
     createDrawPlot(myDir+"/MatchingDeltaR", xlabel="#DeltaR(#tau,ref.jet)", ylabel="N_{jets}")
-    createDrawPlot(myDir+"/PartonFlavour", xlabel="pdgID", ylabel="N_{jets}")
+    createDrawPlot(myDir+"/PartonFlavour", xlabel="pdgID", ylabel="N_{jets}", **mcArgs)
     createDrawPlot(myDir+"/PtRatio", xlabel="p_{T}^{#tau} / p_{T}^{ref.jet}", ylabel="N_{jets}")
     myDir = "MET"
     createDrawPlot(myDir+"/met", xlabel="MET, GeV", ylabel="N_{events}", rebin=4)
@@ -336,11 +347,11 @@ def doPlots(datasets, opts):
     createDrawPlot(myDir+"/etotau_taupT_decayMode2", xlabel="#tau p_{T} / GeV/c")
     # main directory
     createDrawPlot("deltaPhi", xlabel="#Delta#phi(#tau jet, MET), ^{o}", ylabel="N_{events}", rebin=20)
-    createDrawPlot("transverseMass", xlabel="Transverse mass, GeV/c^{2}", ylabel="N_{events}", rebin=10, customizeBeforeDraw=partiallyBlindMt)
+    createDrawPlot("transverseMass", xlabel="Transverse mass, GeV/c^{2}", ylabel="N_{events}", rebinToWidthX=20, customizeBeforeFrame=lambda p: partiallyBlind(p, maxShownValue=60))
     createDrawPlot("EWKFakeTausTransverseMass", xlabel="Transverse mass EWK fake taus, GeV/c^{2}", ylabel="N_{events}", rebin=10, **mcArgs)
     createDrawPlot("fullMass", xlabel="Invariant mass, GeV/c^{2}", ylabel="N_{events}", rebin=4, fullyBlinded=True)
     createDrawPlot("EWKFakeTausFullMass", xlabel="Invariant mass EWK fake taus, GeV/c^{2}", ylabel="N_{events}", rebin=4, **mcArgs)
-    createDrawPlot("alphaT", xlabel="#alpha_{T}", opts={"xmax": 2}, fullyBlinded=True)
+    createDrawPlot("alphaT", xlabel="#alpha_{T}", opts={"xmax": 2}, customizeBeforeFrame=lambda p: partiallyBlind(p, maxShownValue=0.5))
     createDrawPlot("deltaPhiJetMet", xlabel="min #Delta#phi(jet, MET), ^{o}", fullyBlinded=True)
     createDrawPlot("maxDeltaPhiJetMet", xlabel="max #Delta#phi(#tau jet, MET), ^{o}", fullyBlinded=True)
     createDrawPlot("SignalSelectionFlow", xlabel="Step")
