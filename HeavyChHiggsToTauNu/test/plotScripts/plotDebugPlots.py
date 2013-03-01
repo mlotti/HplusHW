@@ -358,7 +358,7 @@ def doPlots(datasets):
     myDrawer(createPlot("alphaT"), "AlphaT", xlabel="#alpha_{T}", textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     myDrawer(createPlot("deltaPhiJetMet"), "DeltaPhi_minJetMET", xlabel="min #Delta#phi(jet, MET), ^{o}", textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     myDrawer(createPlot("maxDeltaPhiJetMet"), "DeltaPhi_maxJetMET", xlabel="max #Delta#phi(#tau jet, MET), ^{o}", textFunction=lambda: addMassBRText(x=0.31, y=0.22))
-    myDrawer(createPlot("SignalSelectionFlow"), "SelectionFlow", xlabel="Step", textFunction=lambda: addMassBRText(x=0.31, y=0.22))    
+    myDrawer(createPlot("SignalSelectionFlow"), "SelectionFlow", xlabel="Step", opts={"xmax": 7}, textFunction=lambda: addMassBRText(x=0.31, y=0.22))    
     #myDrawer(createPlot("SignalSelectionFlowVsVertices"), "SelectionFlow_vsVertices", xlabel="N_{vertices}", ylabel="Step", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     #myDrawer(createPlot("SignalSelectionFlowVsVerticesFakeTaus"), "SelectionFlow_vsVerticesFakeTaus", xlabel="N_{vertices}", ylabel="Step", log=True, ratio=True, textFunction=lambda: addMassBRText(x=0.31, y=0.22))
     
