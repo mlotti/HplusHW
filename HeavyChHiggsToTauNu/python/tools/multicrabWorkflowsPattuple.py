@@ -1454,21 +1454,63 @@ def addPattuple_v53_2(datasets):
         # Mean 51.8 MB, min 1.6 MB, max 258.8 MB
         "Tau_203777-208686_2012D_Prompt":         TaskDef("/Tau/local-Run2012D_PromptReco_v1_AOD_203777_208686_pattuple_v53_2-9919151a95171e2529c62b18141b7812/USER"),
 
-        "MultiJet_190456-190738_2012A_Jul13":     TaskDef(""),
-        "MultiJet_190782-190949_2012A_Aug06":     TaskDef(""),
-        "MultiJet_191043-193621_2012A_Jul13":     TaskDef(""),
-        "MultiJet_193834-194225_2012B_Jul13":     TaskDef(""),
-        "MultiJet_194270-196531_2012B_Jul13":     TaskDef(""),
-        "MultiJet_198022-198523_2012C_Aug24":     TaskDef(""),
-        "MultiJet_198941-203742_2012C_Prompt":    TaskDef(""),
-        "MultiJet_203777-208686_2012D_Prompt":    TaskDef(""),
+        # 466504 events, 303 jobs
+        # User mean 3830.4, min 86.0, max 11200.2
+        # Mean 49.2 MB, min 2.3 MB, max 128.2 MB
+        "MultiJet_190456-190738_2012A_Jul13":     TaskDef("/MultiJet/local-Run2012A_13Jul2012_v1_AOD_190456_190738_pattuple_v53_2-96fa41b5518123a49a7bd0a10242f655/USER"),
+        # 313212 events, 87 jobs
+        # User mean 9209.7, min 1136.1, max 11791.8
+        # Mean 106.2 MB, min 23.0 MB, max 134.5 MB
+        "MultiJet_190782-190949_2012A_Aug06":     TaskDef("/MultiJet/local-Run2012A_recover_06Aug2012_v1_AOD_190782_190949_pattuple_v53_2-bb265e7302d9b49716536ffced4d3f49/USER"),
+        # 2954598 events, 741 jobs
+        # User mean 10021.1, min 101.0, max 16330.2
+        # Mean 112.7 MB, min 1.6 MB, max 178.4 MB
+        "MultiJet_191043-193621_2012A_Jul13":     TaskDef("/MultiJet/local-Run2012A_13Jul2012_v1_AOD_191043_193621_pattuple_v53_2-64312c92df34a8b6e9825d5a9e1bcc2b/USER"),
+        # 798715 events, 355 jobs
+        # User mean 5707.0, min 47.1, max 13716.8
+        # Mean 72.5 MB, min 1.9 MB, max 170.1 MB
+        "MultiJet_193834-194225_2012B_Jul13":     TaskDef("/MultiJet/local-Run2012B_13Jul2012_v1_AOD_193834_194225_pattuple_v53_2-e3b0bb8440b8da4278373fdaf94275dd/USER"),
+        # 5623320 events, 1492 jobs
+        # User mean 9233.1, min 781.7, max 15737.5
+        # Mean 123.1 MB, min 12.0 MB, max 184.0 MB
+        "MultiJet_194270-196531_2012B_Jul13":     TaskDef("/MultiJet/local-Run2012B_13Jul2012_v1_AOD_194270_196531_pattuple_v53_2-7c9474a941817679a02e1d102c31cfd3/USER"),
+        # 697510 events, 180 jobs
+        # User mean 6095.4, min 2322.4, max 25521.5
+        # Mean 123.3 MB, min 56.2 MB, max 167.5 MB
+        "MultiJet_198022-198523_2012C_Aug24":     TaskDef("/MultiJet/local-Run2012C_24Aug2012_v1_AOD_198022_198523_pattuple_v53_2-389fad6151d6b75810dbdb3bf32c8d9d/USER"),
+        # 9269418 events, 2631 jobs
+        # User mean 5685.4, min 29.8, max 23573.2
+        # Mean 116.1 MB, min 1.5 MB, max 207.0 MB
+        "MultiJet_198941-203742_2012C_Prompt":    TaskDef("/MultiJet/local-Run2012C_PromptReco_v2_AOD_198941_203742_pattuple_v53_2-94a08ec1d35323f7ecbc0315d255c89f/USER"),
+        # 10483973 events, 3406 jobs
+        # User mean 5007.4, min 25.8, max 14880.7
+        # Mean 105.9 MB, min 1.6 MB, max 208.5 MB
+        "MultiJet_203777-208686_2012D_Prompt":    TaskDef("/MultiJet/local-Run2012D_PromptReco_v1_AOD_203777_208686_pattuple_v53_2-05231082982f84c324e0b5a0459a13ec/USER"),
 
-        "BJetPlusX_193834-194225_2012B_Jul13":    TaskDef(""),
-        "BJetPlusX_194270-196531_2012B_Jul13":    TaskDef(""),
-        "BJetPlusX_198022-198523_2012C_Aug24":    TaskDef(""),
-        "BJetPlusX_198941-203742_2012C_Prompt":   TaskDef(""),
-        "BJetPlusX_201191-201191_2012C_Dec11":    TaskDef(""),
-        "BJetPlusX_203777-208686_2012D_Prompt":   TaskDef(""),
+        # 1410641 events, 322 jobs
+        # User mean 5481.3, min 155.8, max 12547.0
+        # Mean 113.3 MB, min 5.4 MB, max 161.5 MB
+        "BJetPlusX_193834-194225_2012B_Jul13":    TaskDef("/BJetPlusX/local-Run2012B_13Jul2012_v1_AOD_193834_194225_pattuple_v53_2-7015323d816155eb71c1e8ab78d8837b/USER"),
+        # 5490992 events, 1987 jobs
+        # User mean 3690.8, min 190.4, max 14455.0
+        # Mean 78.7 MB, min 7.2 MB, max 128.4 MB
+        "BJetPlusX_194270-196531_2012B_Jul13":    TaskDef("/BJetPlusX/local-Run2012B_13Jul2012_v1_AOD_194270_196531_pattuple_v53_2-faed90fb0d556327eb3d97d0f51eda56/USER"),
+        # 601483 events, 276 jobs
+        # User mean 2706.4, min 1093.7, max 7827.4
+        # Mean 63.3 MB, min 13.5 MB, max 104.2 MB
+        "BJetPlusX_198022-198523_2012C_Aug24":    TaskDef("/BJetPlusX/local-Run2012C_24Aug2012_v2_AOD_198022_198523_pattuple_v53_2-0151fff8069c712325474b9273eb8f16/USER"),
+        # 8162590 events, 3225 jobs
+        # User mean 3456.8, min 22.1, max 12126.7
+        # Mean 73.4 MB, min 1.5 MB, max 138.1 MB
+        "BJetPlusX_198941-203742_2012C_Prompt":   TaskDef("/BJetPlusX/local-Run2012C_PromptReco_v2_AOD_198941_203742_pattuple_v53_2-56d78678cf2082b71cbc845a1eb5b3d8/USER"),
+        # 161224 events, 76 jobs
+        # User mean 3832.7, min 1380.0, max 10219.6
+        # Mean 64.8 MB, min 37.6 MB, max 94.6 MB
+        "BJetPlusX_201191-201191_2012C_Dec11":    TaskDef("/BJetPlusX/local-Run2012C_EcalRecover_11Dec2012_v1_AOD_201191_201191_pattuple_v53_2-3a3b7e72eb1ebaba962c79a446e93dc1/USER"),
+        # 9122210 events, 4180 jobs
+        # User mean 3361.6, min 23.1, max 12128.2
+        # Mean 66.7 MB, min 1.6 MB, max 133.7 MB
+        "BJetPlusX_203777-208686_2012D_Prompt":   TaskDef("/BJetPlusX/local-Run2012D_PromptReco_v1_AOD_203777_208686_pattuple_v53_2-f6bb0dc7e2833904d68de61382eb29fb/USER"),
 
         # 27900-37203 events, 26 jobs
         # User mean 3088.7, min 39.2, max 3945.0
