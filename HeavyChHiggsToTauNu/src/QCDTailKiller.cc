@@ -153,16 +153,16 @@ namespace HPlus {
       myStream << "BackToBackJet" << i+1;
       fBackToBackJetCut.push_back(CutItem(eventCounter, myStream.str(), QCDTailKiller::kCutLowerRightCorner));
       std::stringstream myShapeStream;
-      myShapeStream << "backToBackJet" << i << "CutShape";
+      myShapeStream << "backToBackJet" << i+1 << "CutShape";
       std::stringstream myXCutStream;
-      myXCutStream << "backToBackJet" << i << "CutX";
+      myXCutStream << "backToBackJet" << i+1 << "CutX";
       std::stringstream myYCutStream;
-      myYCutStream << "backToBackJet" << i << "CutY";
+      myYCutStream << "backToBackJet" << i+1 << "CutY";
       fBackToBackJetCut[i].initialise(histoWrapper, myDir, 
                                       iConfig.getUntrackedParameter<std::string>(myShapeStream.str()),
                                       iConfig.getUntrackedParameter<double>(myXCutStream.str()),
                                       iConfig.getUntrackedParameter<double>(myYCutStream.str()),
-                                      i);
+                                      i+1);
     }
     // Create and initialise cut items for collinear system
     for (int i = 0; i < fMaxEntries; ++i) {
@@ -170,16 +170,16 @@ namespace HPlus {
       myStream << "CollinearJet" << i+1;
       fCollinearJetCut.push_back(CutItem(eventCounter, myStream.str(), QCDTailKiller::kCutUpperLeftCorner));
       std::stringstream myShapeStream;
-      myShapeStream << "collinearJet" << i << "CutShape";
+      myShapeStream << "collinearJet" << i+1 << "CutShape";
       std::stringstream myXCutStream;
-      myXCutStream << "collinearJet" << i << "CutX";
+      myXCutStream << "collinearJet" << i+1 << "CutX";
       std::stringstream myYCutStream;
-      myYCutStream << "collinearJet" << i << "CutY";
+      myYCutStream << "collinearJet" << i+1 << "CutY";
       fCollinearJetCut[i].initialise(histoWrapper, myDir, 
                                      iConfig.getUntrackedParameter<std::string>(myShapeStream.str()),
                                      iConfig.getUntrackedParameter<double>(myXCutStream.str()),
                                      iConfig.getUntrackedParameter<double>(myYCutStream.str()),
-                                     i);
+                                     i+1);
     }
   }
 
