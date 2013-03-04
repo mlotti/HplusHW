@@ -58,7 +58,7 @@ metFilters = cms.untracked.PSet(
     HBHENoiseFilterMETWGSrc = cms.untracked.InputTag("HBHENoiseFilterResultProducerMETWG", "HBHENoiseFilterResult"),
     HBHENoiseFilterMETWGEnabled = cms.untracked.bool(False),
     trackingFailureFilterSrc = cms.untracked.InputTag("trackingFailureFilter"),
-    trackingFailureFilterEnabled = cms.untracked.bool(False),
+    trackingFailureFilterEnabled = cms.untracked.bool(True),
     EcalDeadCellEventFilterSrc = cms.untracked.InputTag("EcalDeadCellEventFilter"),
     EcalDeadCellEventFilterEnabled = cms.untracked.bool(False), 
 )
@@ -79,11 +79,11 @@ tauSelectionBase = cms.untracked.PSet(
     ptCut = cms.untracked.double(41), # jet pt > value
     etaCut = cms.untracked.double(2.1), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
-    againstElectronDiscriminator = cms.untracked.string("againstElectronMVA"), # discriminator against electrons
-    againstMuonDiscriminator = cms.untracked.string("againstMuonTight"), # discriminator for against muons
+    againstElectronDiscriminator = cms.untracked.string("againstElectronTightMVA3"), # discriminator against electrons
+    againstMuonDiscriminator = cms.untracked.string("againstMuonTight2"), # discriminator for against muons
     applyVetoForDeadECALCells = cms.untracked.bool(False), # set to true to exclude taus that are pointing to a dead ECAL cell
     deadECALCellsDeltaR = cms.untracked.double(0.01), # min allowed DeltaR to a dead ECAL cell
-    isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr"), # discriminator for isolation
+    isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr3Hits"), # discriminator for isolation
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1.0), # cut point for continuous isolation discriminator, applied only if it is non-zero
     rtauCut = cms.untracked.double(0.7), # rtau > value
     nprongs = cms.untracked.uint32(1), # number of prongs (options: 1, 3, or 13 == 1 || 3)
@@ -95,30 +95,31 @@ tauSelectionBase = cms.untracked.PSet(
 tauSelectionHPSTightTauBased = tauSelectionBase.clone(
     src = "selectedPatTausHpsPFTau",
     selection = "HPSTauBased",
-    isolationDiscriminator = "byTightCombinedIsolationDeltaBetaCorr",
+    isolationDiscriminator = "byTightCombinedIsolationDeltaBetaCorr3Hits",
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
 tauSelectionHPSMediumTauBased = tauSelectionBase.clone(
     src = "selectedPatTausHpsPFTau",
     selection = "HPSTauBased",
-    isolationDiscriminator = "byMediumCombinedIsolationDeltaBetaCorr",
+    isolationDiscriminator = "byMediumCombinedIsolationDeltaBetaCorr3Hits",
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
 tauSelectionHPSLooseTauBased = tauSelectionBase.clone(
     src = "selectedPatTausHpsPFTau",
     selection = "HPSTauBased",
-    isolationDiscriminator = "byLooseCombinedIsolationDeltaBetaCorr",
+    isolationDiscriminator = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
-tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsPFTau",
-    selection = "HPSTauBased",
-    isolationDiscriminator = "byVLooseCombinedIsolationDeltaBetaCorr",
-    isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
-)
+# Very loose working point is no longer supported
+#tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
+    #src = "selectedPatTausHpsPFTau",
+    #selection = "HPSTauBased",
+    #isolationDiscriminator = "byVLooseCombinedIsolationDeltaBetaCorr",
+    #isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
+#)
 
 vetoTauBase = tauSelectionHPSVeryLooseTauBased.clone(
     src = "selectedPatTausHpsPFTau",
