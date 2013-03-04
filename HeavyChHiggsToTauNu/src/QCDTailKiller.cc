@@ -146,6 +146,8 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("QCDTailKiller");
+    TFileDirectory myBackToBackDir = myDir.mkdir("BackToBackSystem");
+    TFileDirectory myCollinearDir = myDir.mkdir("CollinearSystem");
 
     // Create and initialise cut items for back to back system
     for (int i = 0; i < fMaxEntries; ++i) {
@@ -158,7 +160,7 @@ namespace HPlus {
       myXCutStream << "backToBackJet" << i+1 << "CutX";
       std::stringstream myYCutStream;
       myYCutStream << "backToBackJet" << i+1 << "CutY";
-      fBackToBackJetCut[i].initialise(histoWrapper, myDir, 
+      fBackToBackJetCut[i].initialise(histoWrapper, myBackToBackDir,
                                       iConfig.getUntrackedParameter<std::string>(myShapeStream.str()),
                                       iConfig.getUntrackedParameter<double>(myXCutStream.str()),
                                       iConfig.getUntrackedParameter<double>(myYCutStream.str()),
@@ -175,7 +177,7 @@ namespace HPlus {
       myXCutStream << "collinearJet" << i+1 << "CutX";
       std::stringstream myYCutStream;
       myYCutStream << "collinearJet" << i+1 << "CutY";
-      fCollinearJetCut[i].initialise(histoWrapper, myDir, 
+      fCollinearJetCut[i].initialise(histoWrapper, myCollinearDir,
                                      iConfig.getUntrackedParameter<std::string>(myShapeStream.str()),
                                      iConfig.getUntrackedParameter<double>(myXCutStream.str()),
                                      iConfig.getUntrackedParameter<double>(myYCutStream.str()),
@@ -205,7 +207,7 @@ namespace HPlus {
     Data output(fMaxEntries);
     increment(fSubCountAllEvents);
     // Obtain delta phi between tau and MET
-    double myDeltaPhiTauMET = DeltaPhi::reconstruct(*tau, *met);
+    double myDeltaPhiTauMET = DeltaPhi::reconstruct(*tau, *met) * 57.3;
     output.fDeltaPhiTauMET = myDeltaPhiTauMET;
 
     // Back to back topology
@@ -214,7 +216,7 @@ namespace HPlus {
     size_t i = 0;
     while (i < jets.size() && static_cast<int>(i) < fMaxEntries && output.fPassedEvent) {
       // Obtain delta phi between jet and MET
-      double myDeltaPhiJetMET = DeltaPhi::reconstruct(*(jets[i]), *met);
+      double myDeltaPhiJetMET = DeltaPhi::reconstruct(*(jets[i]), *met) * 57.3;
       if (fBackToBackJetCut[i].passedCut(myDeltaPhiTauMET, myDeltaPhiJetMET)) {
         // passed
         output.fDeltaPhiJetMET[i] = myDeltaPhiJetMET;
@@ -228,7 +230,7 @@ namespace HPlus {
     i = 0;
     while (i < jets.size() && static_cast<int>(i) < fMaxEntries && output.fPassedEvent) {
       // Obtain delta phi between jet and MET
-      double myDeltaPhiJetMET = DeltaPhi::reconstruct(*(jets[i]), *met);
+      double myDeltaPhiJetMET = DeltaPhi::reconstruct(*(jets[i]), *met) * 57.3;
       if (fCollinearJetCut[i].passedCut(myDeltaPhiTauMET, myDeltaPhiJetMET)) {
         // passed
         output.fPassedCollinearJet[i] = true;

@@ -254,6 +254,7 @@ namespace HPlus {
     double myDeltaPt = jetData.getReferenceJetToTauDeltaPt();
     int myFlavor = std::abs(jetData.getReferenceJetToTauPartonFlavour());
     hTauVsJetDeltaPt->Fill(myDeltaPt);
+    hTauVsJetDeltaR->Fill(jetData.getReferenceJetToTauMatchDeltaR());
     hTauVsJetMCFlavor->Fill(myFlavor);
     if (myFlavor >= 4 && myFlavor <= 5) {
       hTauVsJetDeltaPtHeavyFlavor->Fill(myDeltaPt);
