@@ -99,7 +99,7 @@ namespace HPlus {
 			      FullHiggsMassCalculator::Data& output);
     void calculateTopMass(FullHiggsMassCalculator::Data& output);
     void calculateHiggsMass(FullHiggsMassCalculator::Data& output);
-    void doEventClassification(const edm::Event& iEvent, edm::Ptr<pat::Jet> recoHiggsSideBJet);
+    void doEventClassification(const edm::Event& iEvent, TVector3 myBJetVector, TVector3 myVisibleTauVector, TVector3 myMETVector);
     void fillHistograms_MC(FullHiggsMassCalculator::Data& output);
     void fillHistograms_Data(FullHiggsMassCalculator::Data& output);
     void print(TString infoText);
@@ -118,8 +118,8 @@ namespace HPlus {
 
 
     Count fAllSolutionsCutSubCount;
-    Count fRealDiscriminantCutSubCount;
-    Count fImaginarySolutionCutSubCount;
+    Count fPositiveDiscriminantCutSubCount;
+    Count fNegativeDiscriminantCutSubCount;
  
     WrappedTH1* hSolution1PzDifference;
     WrappedTH1* hSolution2PzDifference;

@@ -21,7 +21,10 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configurations
-multicrabDir = "../multicrab_130220_105309"
+
+multicrabDir = "../multicrab_130226_161611" # Higgs mass calculated using the old algorithm ("OldSchool")
+#multicrabDir = "../multicrab_130226_170317" # Higgs mass calculated using the new algorithm ("Stefan's")
+#multicrabDir = "../multicrab_130220_105309"
 #multicrabDir = "../multicrab_130219_143046"
 #multicrabDir = "../multicrab_130213_201254"
 analysis = "signalAnalysis"

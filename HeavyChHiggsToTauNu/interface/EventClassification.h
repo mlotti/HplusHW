@@ -37,10 +37,14 @@ namespace HPlus {
   size_t getLastHiggsLine(const edm::Event& iEvent);
   reco::Candidate* getGenHiggsSideTop(const edm::Event& iEvent);
   reco::Candidate* getGenHiggsSideBJet(const edm::Event& iEvent);
+  //  reco::Candidate* getGenTauFromHiggs(const edm::Event& iEvent);
   reco::Candidate* getGenTauFromHiggs(const edm::Event& iEvent);
+  TVector3 getGenTauFromHiggsVector(const edm::Event& iEvent);
   bool decaysHadronically(const reco::Candidate& tau);
   //  bool decaysToOneProng(reco::Candidate* tau);
-  //  TVector3 getVisibleMomentum(reco::Candidate* tau);
+  TVector3 getVisibleMomentum(reco::Candidate& tau);
+  TVector3 getGenMETVector(const edm::Event& iEvent);
+  bool foundGenVisibleTopWithinDeltaR(const edm::Event& iEvent, const edm::Ptr<pat::Tau> recoTau, double deltaRCut);
 
   //  TVector3 getGenVisibleTauDecayingHadronicallyToOneProngFromHiggs(const edm::Event& iEvent);
   //  double getDeltaRGenVisibleTauRecoVisibleTau();

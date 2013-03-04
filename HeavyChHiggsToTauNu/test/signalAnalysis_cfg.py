@@ -7,15 +7,15 @@ dataVersion="44XmcS6"     # Fall11 MC
 
 dataEras = [
     "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job
-    "Run2011A",
-    "Run2011B",
+#    "Run2011A",
+#    "Run2011B",
 ]
 
 
 # Note: Keep number of variations below 200 to keep file sizes reasonable
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
-myOptimisation = HPlusOptimisationScheme()
+#myOptimisation = HPlusOptimisationScheme()
 
 #myOptimisation.addTauPtVariation([40.0, 50.0, 60.0, 70., 80.])
 #myOptimisation.addTauIsolationVariation([])

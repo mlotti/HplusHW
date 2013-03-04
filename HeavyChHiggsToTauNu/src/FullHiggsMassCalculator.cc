@@ -66,7 +66,7 @@ namespace HPlus {
     LorentzVector_neutrinosFourMomentum(),
     // Set the physical particle masses required in the calculation (in GeV)
     //c_fPhysicalTopMass(173.4),
-    c_fPhysicalTopMass(172.5), // Use the same as in the generator!!!
+    c_fPhysicalTopMass(172.4), // Use the same as in the generator!!!
     c_fPhysicalTauMass(1.778),
     c_fPhysicalBeautyMass(4.19)
   { }
@@ -77,9 +77,10 @@ namespace HPlus {
     // Define counters to be incremented during this analysis
     BaseSelection(eventCounter, histoWrapper),
     fAllSolutionsCutSubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "All solutions")),
-    fRealDiscriminantCutSubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Real Discriminant")),
-    fImaginarySolutionCutSubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Imaginary solution"))
-						  // TODO: add counters for (mis-)identefication of particles
+    fPositiveDiscriminantCutSubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Real Discriminant")),
+    fNegativeDiscriminantCutSubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Imaginary solution"))
+    
+    
   {
     // Add a new directory ("FullHiggsMass") for the histograms produced in this code to the output file
     edm::Service<TFileService> fs;
@@ -158,9 +159,8 @@ namespace HPlus {
   const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData) {
     Data output;
     Data physicalParameters; // this contains particles masses etc.
-    // FOR DEBUGGING:
-    //    double test = physicalParameters.c_fPhysicalTopMass;
-    //    std::cout << "The physical top mass is " << test << std::endl;
+
+    std::cout << "==================================================================" << std::endl;
 
     // 1) Find the b-jet that is closest to the selected tau in (eta, phi) space
     //    This b-jet is assumed to come from the same top quark as a charged Higgs (hence, it belongs to the "Higgs side")
@@ -173,15 +173,23 @@ namespace HPlus {
       print("Reco Higgs side b-jet found");
     }
 
+//     // 1b) Get the reco tau
+//     edm::Ptr<pat::Tau> myTau;
+//     myTau = tauData.getSelectedTau();
+
     // 2) Define b-jet, visible tau, and MET momentum vectors
+    // TODO: check this
+    std::cout << "####### b-jet energy: " << myHiggsSideBJet->energy() << std::endl;
+
     TVector3 myBJetVector(myHiggsSideBJet->px(), myHiggsSideBJet->py(), myHiggsSideBJet->pz());
     std::cout << "myBJetVector components: " << myBJetVector.Px() << ", " << myBJetVector.Py() << ", " << myBJetVector.Pz() 
 	      << std::endl;
+    // TODO: "visibleTau" is only used in MC. Invent a different name
     TVector3 myVisibleTauVector(tauData.getSelectedTau()->px(), tauData.getSelectedTau()->py(),
 				      tauData.getSelectedTau()->pz());
     std::cout << "myVisibleTauVector components: " << myVisibleTauVector.Px() << ", " << myVisibleTauVector.Py() << ", "
 	      << myVisibleTauVector.Pz() << std::endl;
-    // TODO: what MET is this? RAW, Type 1 PF corrected, ? What is the z-component of SelectedMET?
+    // This is the same MET as in the rest of the analysis (as it should be), by default: Type 1 PF
     TVector3 myMETVector(metData.getSelectedMET()->px(), metData.getSelectedMET()->py(), metData.getSelectedMET()->pz());
     std::cout << "myMETVector components: " << myMETVector.Px() << ", " << myMETVector.Py() << ", " << myMETVector.Pz() 
 	      << std::endl;
@@ -194,15 +202,19 @@ namespace HPlus {
 
     // 4) If MC: Classify event according to what was identified correctly and what was not
     //    (the classification results are stored in output)
-    if (!iEvent.isRealData())
+    if (!iEvent.isRealData()) {
       print("Doing event classification");
-      doEventClassification(iEvent, myHiggsSideBJet);
+      doEventClassification(iEvent, myBJetVector, myVisibleTauVector, myMETVector);
+    }
 
     // 5) Histograms are filled accordingly. There is a separate method to do this for MC and data
-    if (!iEvent.isRealData()) {
-      fillHistograms_MC(output);
-    } else {
-      fillHistograms_Data(output);
+    //    NOTE: events with no real neutrino p_z solutions are ignored at histogramming stage!
+    if  (output.fDiscriminant >= 0.0) {
+      if (!iEvent.isRealData()) {
+	fillHistograms_MC(output);
+      } else {
+	fillHistograms_Data(output);
+      }
     }
     
     // Return data object
@@ -240,6 +252,7 @@ namespace HPlus {
   void FullHiggsMassCalculator::calculateNeutrinoPz(TVector3& pTau, TVector3& pB, TVector3& MET, 
 						    FullHiggsMassCalculator::Data& physicalParameters, 
 						    FullHiggsMassCalculator::Data& output) {
+    increment(fAllSolutionsCutSubCount);
     /*
       Variable naming examples:
       *************************
@@ -254,62 +267,62 @@ namespace HPlus {
     const double mTop = physicalParameters.c_fPhysicalTopMass;
     const double mTau = physicalParameters.c_fPhysicalTauMass;
     const double mB = physicalParameters.c_fPhysicalBeautyMass;
+    std::cout << "Top, tau, and beauty mass: " << mTop << ", " << mTau << ", " << mB << std::endl;
 
-    // Initializing the solutions
+    // Initialize the solutions
     double neutrinoPzSolution1 = -999.0;
     double neutrinoPzSolution2 = -999.0;
     double neutrinoPzSolutionMax = -1.0;
     double neutrinoPzSolutionDiff = -999.0;
 
-    // Calculate the different quantities appearing in the calculation
-    TVector3 pTauPlusB = pTau + pB;
-    double myDeltaSquared = TMath::Power(mTop,2) - TMath::Power(mTau,2) - TMath::Power(mB,2);
-    std::cout << "myDeltaSquared: " << myDeltaSquared << std::endl;
-    double a = 2.0 * (MET.X()*pTauPlusB.X() + MET.Y()*pTauPlusB.Y() +
-		      pTau.X()*pB.X() + pTau.Y()*pB.Y() + pTau.Z()*pB.Z() - 
-		      TMath::Sqrt(TMath::Power(pTau.Mag(),2)  + TMath::Power(mTau,2)) *
-		      TMath::Sqrt(TMath::Power(pB.Mag(),2) + TMath::Power(mB,2))) + myDeltaSquared;
-    std::cout << "a: " << a << std::endl;
-    double tauPlusBEnergy = TMath::Sqrt(TMath::Power(pTauPlusB.Mag(),2) + TMath::Power(mTau + mB,2));
-    std::cout << "tauPlusBEnergy: " << tauPlusBEnergy << std::endl;
-    double discriminant = TMath::Power(a,2) + 4.0 * TMath::Power(pTauPlusB.Z(),2) * TMath::Power(MET.Perp(),2)
-                          - 4.0 * TMath::Power(MET.Perp(),2) * (TMath::Power(tauPlusBEnergy,2));
-    std::cout << "discriminant: " << discriminant << std::endl;
+    // Calculate quantities appearing in the calculation
+    double bEnergy = TMath::Sqrt(mB * mB + pB.Mag2());
+    double visibleTauEnergy = TMath::Sqrt(mTau * mTau + pTau.Mag2());
+    double deltaSquaredMasses = mTop * mTop - mB * mB - mTau * mTau;
+    double A = (deltaSquaredMasses / 2.0 - bEnergy * visibleTauEnergy + pB.Dot(pTau) +
+		pB.XYvector() * MET.XYvector() + pTau.XYvector() * MET.XYvector()) / (bEnergy + visibleTauEnergy);
+    double B = (pB.Pz() + pTau.Pz()) / (bEnergy + visibleTauEnergy);
+    double discriminantStefan = A*A - MET.Perp2() * (1 - B*B);
 
-    increment(fAllSolutionsCutSubCount); // increment the counter for all solutions
-    // If the determinant is positive, there are two real solutions for the neutrino's longitudinal momentum
-    // If the determinant is zero, there is one real solution (in this case, neutrinoPzSolution1 == neutrinoPzSolution2)
-    if (discriminant >= 0.0) {
-      increment(fRealDiscriminantCutSubCount); // increment the counter for a real discriminant
-      // TODO: the above should be "real neutrino p_z"!
-      //increment(fRealNeutrinoPzSolutionCutSubCount);
-      neutrinoPzSolution1 = (-a * pTauPlusB.Z() - tauPlusBEnergy * TMath::Sqrt(discriminant))
-        / (2.0 * (TMath::Power(pTauPlusB.Z(),2) - TMath::Power(tauPlusBEnergy,2)));
-      neutrinoPzSolution2 = (-a * pTauPlusB.Z() + tauPlusBEnergy * TMath::Sqrt(discriminant))
-        / (2.0 * (TMath::Power(pTauPlusB.Z(),2) - TMath::Power(tauPlusBEnergy,2)));
+    // Initialize solutions
+    double neutrinoPzSolutionStefan1 = -999999.0;
+    double neutrinoPzSolutionStefan2 = -999999.0;
+
+    // Calculate
+    if (discriminantStefan >= 0.0) {
+      increment(fPositiveDiscriminantCutSubCount);
+      neutrinoPzSolutionStefan1 = (A*B + TMath::Sqrt(A*A - MET.Perp2() * (1 - B*B)))/(1 - B*B);
+      neutrinoPzSolutionStefan2 = (A*B - TMath::Sqrt(A*A - MET.Perp2() * (1 - B*B)))/(1 - B*B);
     }
     // If the determinant is negative, there are two imaginary solutions
     else {
-      increment(fImaginarySolutionCutSubCount); // increment the counter for imaginary solution
-      //increment(fImaginaryNeutrinoPzSolutionCutSubCount);
+      increment(fNegativeDiscriminantCutSubCount);
+      std::cout << "STEFAN'S DISCRIMINANT < 0!!!" << std::endl;
       // ***Strategy***
-      // Take real solutions as solution for neutrino Z and solve neutrino pT from discriminant = 0 equation
-      output.fNeutrinoZSolution = (-a*pTauPlusB.Z())
-        / (2.0 * (TMath::Power(pTauPlusB.Z(),2) - TMath::Power(tauPlusBEnergy,2)));
-      // Solutions from discriminant = 0 equation for neutrino pT
-      double alpha = (pTauPlusB.X() * MET.X() + pTauPlusB.Y() * MET.Y()) / MET.Perp();
-      neutrinoPzSolution1 = (-alpha * myDeltaSquared + myDeltaSquared *
-			    TMath::Sqrt(TMath::Power(tauPlusBEnergy,2) - TMath::Power(pTauPlusB.Z(),2)))
-        / (2.0 * (TMath::Power(alpha,2) + TMath::Power(pTauPlusB.Z(),2) - TMath::Power(tauPlusBEnergy,2)));
-      neutrinoPzSolution2 = (-alpha * myDeltaSquared - myDeltaSquared *
-			    TMath::Sqrt(TMath::Power(tauPlusBEnergy,2) - TMath::Power(pTauPlusB.Z(),2)))
-        / (2.0 * (TMath::Power(alpha,2) + TMath::Power(pTauPlusB.Z(),2) - TMath::Power(tauPlusBEnergy,2)));
+      // Set discriminant to zero
+      neutrinoPzSolutionStefan1 = A*B / (1 - B*B);
+      neutrinoPzSolutionStefan2 = A*B / (1 - B*B);
     }
-    
-    // Set output member variables to calculated values
-    output.fDiscriminant = discriminant;
-    output.fNeutrinoZSolution = neutrinoPzSolution1; // TODO: which solution should be selected??? Check with EventClassification
-    std::cout << "output.fNeutrinoZSolution: " << output.fNeutrinoZSolution << std::endl;
+
+    // SET output.fNeutrinoZSolutionStefan TO VALUE CALCULATED USING STEFAN'S METHOD:
+    output.fDiscriminant = discriminantStefan;
+    output.fNeutrinoZSolution = neutrinoPzSolutionStefan1;
+
+    // Print information about the calculation steps
+    std::cout << "FullHiggsMassCalculator: Reconstructing the neutrino p_z..." << std::endl;
+    std::cout << "--- Tau reconstructed momentum = (" << pTau.Px() << ", " << pTau.Py() << ", " << pTau.Pz() << ")" << std::endl;
+    std::cout << "--- B-jet reconstructed momentum = (" << pB.Px() << ", " << pB.Py() << ", " << pB.Pz() << ")" << std::endl;
+    std::cout << "--- Neutrinos reconstructed momentum = (" << MET.Px() << ", " << MET.Py() << ", " << MET.Pz() << ")" << std::endl;
+    std::cout << "--- bEnergy = " << bEnergy << std::endl;
+    std::cout << "--- visibleTauEnergy = " << visibleTauEnergy << std::endl;
+    std::cout << "--- deltaSquaredMasses = " << deltaSquaredMasses << std::endl;    
+    std::cout << "--- A = " << A << std::endl;
+    std::cout << "--- B = " << B << std::endl;
+    std::cout << "--- discriminantStefan = " << discriminantStefan << std::endl;
+    std::cout << "--- Y/X = " << A*B / (1 - B*B) << std::endl;
+    std::cout << "--- Z/X = " << TMath::Sqrt(A*A - MET.Perp2() * (1 - B*B)) / (1 - B*B) << std::endl;
+    std::cout << "--- neutrinoPzSolutionStefan1 = " << neutrinoPzSolutionStefan1 << std::endl;
+    std::cout << "--- neutrinoPzSolutionStefan2 = " << neutrinoPzSolutionStefan2 << std::endl;
   }
 
   void FullHiggsMassCalculator::constructFourMomenta(TVector3& pTau, TVector3& pB, TVector3& MET, 
@@ -346,32 +359,85 @@ namespace HPlus {
     std::cout << "output.fHiggsMassSolution: " << output.fHiggsMassSolution << std::endl;
   }
 
-  void FullHiggsMassCalculator::doEventClassification(const edm::Event& iEvent, edm::Ptr<pat::Jet> recoHiggsSideBJet) {
-    //bool selectSmallerNeutrinoPzSolution = true;
-    //if (selectSmallerNeutrinoPzSolution) myNeutrinoPz = ...
+  void FullHiggsMassCalculator::doEventClassification(const edm::Event& iEvent, TVector3 recoBJetVector,
+						      TVector3 recoTauVector, TVector3 recoMETVector) {
+    // Declare variables used to classify events
+    double bDeltaR     = 9999999;
+    double tauDeltaR   = 9999999;
+    double metDeltaPt  = 9999999;
+    double metDeltaPhi = 9999999;
 
-    // Get the GEN b-jet on the Higgs side (= the branch of the Feynman diagram containing the H+)
+    // B-jet information
     reco::Candidate* genHiggsSideBJet = getGenHiggsSideBJet(iEvent);
-    // TODO: Get other things ;)
-    //METRatio = getMETRatio(iEvent);
-    //METDeltaPhi = getMETDeltaPhi(RECOMET, GENMET)
-
-    // Event class "Pure":
-    // conditions: deltaR(genHiggsSideBJet, recoHiggsSideBJet) < 0.4
-    //             deltaR(genVisibleTau, recoVisibleTau) < 0.1
-    //             METRatio < 1.2 && METRatio > 0.8
-    //             TMath::Abs(METDeltaPhi) < ???
+    if (genHiggsSideBJet == NULL) {
+      std::cout << "genHiggsSideBJet == NULL ---> no GEN b-jet found" << std::endl;
+    } else {
+      TVector3 genBJetVector(genHiggsSideBJet->px(), genHiggsSideBJet->py(), genHiggsSideBJet->pz());
+      bDeltaR = recoBJetVector.DeltaR(genBJetVector);
+      std::cout << "****** bDeltaR: " << bDeltaR << std::endl;
+    }
+    // Tau information
+    TVector3 genTauVector = getGenTauFromHiggsVector(iEvent);
+    if (genTauVector.Mag() < 0.00001) {
+      std::cout << "****** The event did not have a tau from Higgs." << std::endl;
+    } else {
+      tauDeltaR = recoTauVector.DeltaR(genTauVector);
+      std::cout << "****** tauDeltaR: " << tauDeltaR << std::endl;
+    }
+    // MET information
+    TVector3 genMETVector = getGenMETVector(iEvent);
+    metDeltaPt = recoMETVector.Pt() - genMETVector.Pt();
+    metDeltaPhi = recoMETVector.DeltaPhi(genMETVector);
+    std::cout << "****** metDeltaPt = " << metDeltaPt << std::endl;
+    std::cout << "****** metDeltaPhi (in degrees) = " << metDeltaPhi * 180.0 / TMath::Pi() << std::endl;
     
+    // -------> Define event classes <-------
+    double bDeltaRCut     = 0.4;
+    double tauDeltaRCut   = 0.1;
+    double metDeltaPtCut  = 20.0; // GeV
+    double metDeltaPhiCut = 10.0 * TMath::DegToRad(); // Give angle in degrees, it will be converted to radians
+    // EventClass "PURE" (= "111")
+    // Event classification step 1: B
+    if (bDeltaR < bDeltaRCut) {
+      // misidentificationCode <- "0"
+    } else {
+      // misidentificationCode <- "1"
+    }
+    if (tauDeltaR < tauDeltaRCut) {
+      // misidentificationCode <- "0"
+    } else {
+      // misidentificationCode <- "1"
+    }
+    if (TMath::Abs(metDeltaPt) < metDeltaPtCut && TMath::Abs(metDeltaPhi) < metDeltaPhiCut) {
+      // misidentificationCode <- "0"
+    } else {
+      // misidentificationCode <- "1"
+    }
+//     std::cout << "Event classified as PURE" << std::endl;
+//       //increment();
+//       // fill histogram mass
+//       // fill histogram determinant
+//     } else {
+//       std::cout << "Event classified as IMPURE" << std::endl;
+//       //increment();
+//       // fill histogram mass
+//       // fill histogram determinant
+//     }
+    // BMT event class code scheme (Why B-M-T? Alphabetic order and bacon-mozzarella-tomato sandwich)
+    
+
   }
   
   void FullHiggsMassCalculator::fillHistograms_MC(FullHiggsMassCalculator::Data& output) {
     hHiggsMass->Fill(output.fHiggsMassSolution);
     hTopMass->Fill(output.fTopMassSolution);
+    hNeutrinoZSolution->Fill(output.fNeutrinoZSolution);
   }
 
   void FullHiggsMassCalculator::fillHistograms_Data(FullHiggsMassCalculator::Data& output) {
     hHiggsMass->Fill(output.fHiggsMassSolution);
     hTopMass->Fill(output.fTopMassSolution);
+    hNeutrinoZSolution->Fill(output.fNeutrinoZSolution);
   }
 
   // This is an auxiliary function whose purpose is to facilitate debugging. Print statements can be enabled or disabled
@@ -381,10 +447,119 @@ namespace HPlus {
       std::cout << "FullHiggsMassCalculator: " << infoText << std::endl;
     }
   }
+}
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//     std::cout << "---------------------> OLD METHOD <---------------------" << std::endl;
+//     // Calculate the different quantities appearing in the calculation
+//     TVector3 pTauPlusB = pTau + pB;
+//     std::cout << "--- pTauPlusB = (" << pTauPlusB.Px() << ", " << pTauPlusB.Py() << ", " << pTauPlusB.Pz() << ")" << std::endl;
+//     double myDeltaSquared = TMath::Power(mTop,2) - TMath::Power(mTau,2) - TMath::Power(mB,2);
+//     std::cout << "--- myDeltaSquared = " << myDeltaSquared << std::endl;
+//     double a = 2.0 * (MET.X()*pTauPlusB.X() + MET.Y()*pTauPlusB.Y() +
+// 		      pTau.X()*pB.X() + pTau.Y()*pB.Y() + pTau.Z()*pB.Z() - 
+// 		      TMath::Sqrt(TMath::Power(pTau.Mag(),2)  + TMath::Power(mTau,2)) *
+// 		      TMath::Sqrt(TMath::Power(pB.Mag(),2) + TMath::Power(mB,2))) + myDeltaSquared;
+//     std::cout << "--- a = " << a << std::endl;
+//     double tauPlusBEnergy = TMath::Sqrt(TMath::Power(pTau.Mag(),2)  + TMath::Power(mTau,2)) +
+//                             TMath::Sqrt(TMath::Power(pB.Mag(),2) + TMath::Power(mB,2)); //FIXED!
+//     //double tauPlusBEnergy = TMath::Sqrt(TMath::Power(pTauPlusB.Mag(),2) + TMath::Power(mTau + mB,2));
+//     std::cout << "--- tauPlusBEnergy = " << tauPlusBEnergy << std::endl;
+//     double OLD_tauPlusBEnergy = TMath::Sqrt(TMath::Power(pTauPlusB.Mag(),2) + TMath::Power(mTau + mB,2));
+//     std::cout << "--- OLD_tauPlusBEnergy = " << OLD_tauPlusBEnergy << std::endl;
+
+//     double discriminant = TMath::Power(a,2) + 4.0 * TMath::Power(pTauPlusB.Z(),2) * TMath::Power(MET.Perp(),2)
+//                           - 4.0 * TMath::Power(MET.Perp(),2) * (TMath::Power(tauPlusBEnergy,2));
+//     std::cout << "--- discriminant = " << discriminant << std::endl;
+
+//     std::cout << "--- Y/X = " << (-a * pTauPlusB.Z()) / (2.0 * (TMath::Power(pTauPlusB.Z(),2) - TMath::Power(tauPlusBEnergy,2))) << std::endl;
+//     std::cout << "--- Z/X = " << (tauPlusBEnergy * TMath::Sqrt(discriminant)) / (2.0 * (TMath::Power(pTauPlusB.Z(),2) - TMath::Power(tauPlusBEnergy,2))) << std::endl;
+
+//     increment(fAllSolutionsCutSubCount); // increment the counter for all solutions
+//     // If the determinant is positive, there are two real solutions for the neutrino's longitudinal momentum
+//     // If the determinant is zero, there is one real solution (in this case, neutrinoPzSolution1 == neutrinoPzSolution2)
+//     if (discriminant >= 0.0) {
+//       increment(fRealDiscriminantCutSubCount); // increment the counter for a real discriminant
+//       // TODO: the above should be "real neutrino p_z"!
+//       //increment(fRealNeutrinoPzSolutionCutSubCount);
+//       neutrinoPzSolution1 = (-a * pTauPlusB.Z() - tauPlusBEnergy * TMath::Sqrt(discriminant))
+//         / (2.0 * (TMath::Power(pTauPlusB.Z(),2) - TMath::Power(tauPlusBEnergy,2)));
+//       std::cout << "--- neutrinoPzSolution1 = " << neutrinoPzSolution1 << std::endl;
+//       neutrinoPzSolution2 = (-a * pTauPlusB.Z() + tauPlusBEnergy * TMath::Sqrt(discriminant))
+//         / (2.0 * (TMath::Power(pTauPlusB.Z(),2) - TMath::Power(tauPlusBEnergy,2)));
+//       std::cout << "--- neutrinoPzSolution2 = " << neutrinoPzSolution2 << std::endl;
+//     }
+//     // If the determinant is negative, there are two imaginary solutions
+//     else {
+//       increment(fImaginarySolutionCutSubCount); // increment the counter for imaginary solution
+//       //increment(fImaginaryNeutrinoPzSolutionCutSubCount);
+//       // ***Strategy***
+//       // Take real solutions as solution for neutrino Z and solve neutrino pT from discriminant = 0 equation
+//       output.fNeutrinoZSolution = (-a*pTauPlusB.Z())
+//         / (2.0 * (TMath::Power(pTauPlusB.Z(),2) - TMath::Power(tauPlusBEnergy,2)));
+//       // Solutions from discriminant = 0 equation for neutrino pT
+//       double alpha = (pTauPlusB.X() * MET.X() + pTauPlusB.Y() * MET.Y()) / MET.Perp();
+//       neutrinoPzSolution1 = (-alpha * myDeltaSquared + myDeltaSquared *
+// 			    TMath::Sqrt(TMath::Power(tauPlusBEnergy,2) - TMath::Power(pTauPlusB.Z(),2)))
+//         / (2.0 * (TMath::Power(alpha,2) + TMath::Power(pTauPlusB.Z(),2) - TMath::Power(tauPlusBEnergy,2)));
+//       neutrinoPzSolution2 = (-alpha * myDeltaSquared - myDeltaSquared *
+// 			    TMath::Sqrt(TMath::Power(tauPlusBEnergy,2) - TMath::Power(pTauPlusB.Z(),2)))
+//         / (2.0 * (TMath::Power(alpha,2) + TMath::Power(pTauPlusB.Z(),2) - TMath::Power(tauPlusBEnergy,2)));
+//     }
+
+
+    
+//     // Set output member variables to calculated values
+// //     output.fDiscriminant = discriminant;
+// //     output.fNeutrinoZSolution = neutrinoPzSolution1; // TODO: which solution should be selected??? Check with EventClassification
 
 
 
@@ -734,7 +909,7 @@ namespace HPlus {
 
 //     return true;
 //   }
-}
+
 
 
 
