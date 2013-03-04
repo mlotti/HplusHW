@@ -38,6 +38,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingMuonIsolationQuantifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CommonPlots.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METFilters.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METPhiOscillationCorrection.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
@@ -161,6 +162,7 @@ namespace HPlus {
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
+    Count fQCDTailKillerCounter;
     Count fDeltaPhiTauMETCounter;
     Count fDeltaPtJetTauCounter;
     Count fDeltaPhiLow30Counter;
@@ -267,6 +269,7 @@ namespace HPlus {
     VertexAssignmentAnalysis fVertexAssignmentAnalysis;
     FakeTauIdentifier fFakeTauIdentifier;
     METFilters fMETFilters;
+    QCDTailKiller fQCDTailKiller;
     METPhiOscillationCorrection fMETPhiOscillationCorrection;
     TauEmbeddingMuonIsolationQuantifier fTauEmbeddingMuonIsolationQuantifier;
 

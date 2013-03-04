@@ -21,6 +21,7 @@ namespace HPlus {
     fAllCounter(eventCounter.addCounter("Offline selection begins")),
     fVertexReweighting(eventCounter.addCounter("Vertex reweighting")),
     fWJetsWeightCounter(eventCounter.addCounter("WJets inc+exl weight")),
+    fMETFiltersCounter(eventCounter.addCounter("MET filters")),
     fTriggerCounter(eventCounter.addCounter("Trigger_and_HLT_MET")),
     fPrimaryVertexCounter(eventCounter.addCounter("PrimaryVertex")),
     fTausExistCounter(eventCounter.addCounter("TauCandSelection")),
@@ -36,6 +37,7 @@ namespace HPlus {
     fMETCounter(eventCounter.addCounter("MET")),
     fBTaggingCounter(eventCounter.addCounter("bTagging")),
     fBTaggingScaleFactorCounter(eventCounter.addCounter("btag scale factor")),
+    fQCDTailKillerCounter(eventCounter.addCounter("QCD tail killer")),
     fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhiTauMET")),
     fMaxDeltaPhiJetMETCounter(eventCounter.addCounter("maxDeltaPhiJetMET")),
     fTopSelectionCounter(eventCounter.addCounter("top selection")),
@@ -66,6 +68,8 @@ namespace HPlus {
     fBjetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("bjetSelection"), eventCounter, fHistoWrapper),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, fHistoWrapper),
     fFullHiggsMassCalculator(eventCounter, fHistoWrapper),
+    fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
+    fQCDTailKiller(iConfig.getUntrackedParameter<edm::ParameterSet>("QCDTailKiller"), eventCounter, fHistoWrapper),
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauCandidates"),
@@ -301,6 +305,12 @@ namespace HPlus {
     }
     increment(fWJetsWeightCounter);
 
+//------ MET (noise) filters for data (reject events with instrumental fake MET)
+    if(iEvent.isRealData()) {
+      if(!fMETFilters.passedEvent(iEvent, iSetup)) return false;
+    }
+    increment(fMETFiltersCounter);
+
 //------ Apply trigger and HLT_MET cut or trigger parametrisation
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if (!triggerData.passedEvent()) return false;
@@ -402,6 +412,13 @@ namespace HPlus {
     hFeatureEtaSpreadOfSelectedJetsAfterBasicSelection[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getEtaSpreadOfSelectedJets());
     hFeatureAverageEtaOfSelectedJetsAfterBasicSelection[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getAverageEtaOfSelectedJets());
     hFeatureAverageSelectedJetsEtaDistanceToTauEtaAfterBasicSelection[getShapeBinIndex(myTauPtBinIndex, myTauEtaBinIndex, myNVerticesBinIndex)]->Fill(jetData.getAverageSelectedJetsEtaDistanceToTauEta());
+
+//------ Improved delta phi cut, a.k.a. QCD tail killer // FIXME: place of cut still to be determined
+    METSelection::Data metDataTmp = fMETSelection.silentAnalyze(iEvent, iSetup, tauCandidateData.getSelectedTau(), jetData.getAllJets());
+
+    const QCDTailKiller::Data qcdTailKillerData = fQCDTailKiller.analyze(iEvent, iSetup, tauCandidateData.getSelectedTau(), jetData.getSelectedJetsIncludingTau(), metDataTmp.getSelectedMET());
+    if (!qcdTailKillerData.passedEvent()) return false;
+    increment(fQCDTailKillerCounter);
 
 //------ Standard selections is done, obtain data objects, fill tree, and loop over analysis variations
     if (fTree.isActive()) {
