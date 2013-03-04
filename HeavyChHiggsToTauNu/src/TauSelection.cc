@@ -1280,14 +1280,18 @@ namespace HPlus {
     // Disable histogram filling and counter incrementing until the return call
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
-    return tau->tauID(isolationString) > 0.5;
+    if (isolationString.size())
+      return tau->tauID(isolationString) > 0.5;
+    return fTauID->passIsolation(tau) > 0.5;
   }
 
   const double TauSelection::getIsolationValueOfTauObject(const edm::Ptr<pat::Tau>& tau, std::string isolationString) const {
     // Disable histogram filling and counter incrementing until the return call
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
-    return tau->tauID(isolationString);
+    if (isolationString.size())
+      return tau->tauID(isolationString);
+    return fTauID->passIsolation(tau);
   }
 
   const bool TauSelection::getPassesNProngsStatusOfTauObject(const edm::Ptr<pat::Tau>& tau) const {

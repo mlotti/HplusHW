@@ -38,6 +38,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingMuonIsolationQuantifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CommonPlots.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METFilters.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METPhiOscillationCorrection.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
@@ -121,8 +122,6 @@ namespace HPlus {
     CounterGroup* getCounterGroupByTauMatch(FakeTauIdentifier::MCSelectedTauMatchType tauMatch);
     void fillEWKFakeTausCounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData);
     void doMCAnalysisOfSelectedEvents(edm::Event& iEvent, const TauSelection::Data& tauData, const VetoTauSelection::Data& vetoTauData, const METSelection::Data& metData, const GenParticleAnalysis::Data& genData);
-    void analyseJetMatchingToTau(const TauSelection::Data& tauData, const JetSelection::Data& jetData);
-    void analyseTauFakeRateByParton(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData);
     bool selectTailEvents(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
     // We need a reference in order to use the same object (and not a
@@ -161,6 +160,7 @@ namespace HPlus {
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
+    Count fQCDTailKillerCounter;
     Count fDeltaPhiTauMETCounter;
     Count fDeltaPtJetTauCounter;
     Count fDeltaPhiLow30Counter;
@@ -267,6 +267,7 @@ namespace HPlus {
     VertexAssignmentAnalysis fVertexAssignmentAnalysis;
     FakeTauIdentifier fFakeTauIdentifier;
     METFilters fMETFilters;
+    QCDTailKiller fQCDTailKiller;
     METPhiOscillationCorrection fMETPhiOscillationCorrection;
     TauEmbeddingMuonIsolationQuantifier fTauEmbeddingMuonIsolationQuantifier;
 
@@ -285,48 +286,6 @@ namespace HPlus {
     WrappedTH1 *hVerticesAfterWeight;
     WrappedTH1 *hVerticesTriggeredBeforeWeight;
     WrappedTH1 *hVerticesTriggeredAfterWeight;
-
-    // tau investating histograms -- temporary
-    WrappedTH1 *hTauVsJetDeltaPt;
-    WrappedTH1 *hTauVsJetDeltaR;
-    WrappedTH1 *hTauVsJetMCFlavor;
-    WrappedTH1 *hTauVsJetDeltaPtGenuineTaus;
-    WrappedTH1 *hTauVsJetDeltaPtElectrons;
-    WrappedTH1 *hTauVsJetDeltaPtHeavyFlavor;
-    WrappedTH1 *hTauVsJetDeltaRHeavyFlavor;
-    WrappedTH1 *hTauVsJetDeltaPtLightFlavor;
-    WrappedTH1 *hTauVsJetDeltaRLightFlavor;
-
-    WrappedTH1 *hTauVsJetTauPtbBefore;
-    WrappedTH1 *hTauVsJetTauPtbleptonicBefore;
-    WrappedTH1 *hTauVsJetTauPtcBefore;
-    WrappedTH1 *hTauVsJetTauPtudsBefore;
-    WrappedTH1 *hTauVsJetTauPtgBefore;
-    WrappedTH1 *hTauVsJetTauPteBefore;
-    WrappedTH1 *hTauVsJetTauPtmuBefore;
-    WrappedTH1 *hTauVsJetTauPtbAfter;
-    WrappedTH1 *hTauVsJetTauPtbleptonicAfter;
-    WrappedTH1 *hTauVsJetTauPtcAfter;
-    WrappedTH1 *hTauVsJetTauPtudsAfter;
-    WrappedTH1 *hTauVsJetTauPtgAfter;
-    WrappedTH1 *hTauVsJetTauPteAfter;
-    WrappedTH1 *hTauVsJetTauPtmuAfter;
-    
-    WrappedTH1 *hTauVsJetTauPtbByJetPtBefore;
-    WrappedTH1 *hTauVsJetTauPtbleptonicByJetPtBefore;
-    WrappedTH1 *hTauVsJetTauPtcByJetPtBefore;
-    WrappedTH1 *hTauVsJetTauPtudsByJetPtBefore;
-    WrappedTH1 *hTauVsJetTauPtgByJetPtBefore;
-    WrappedTH1 *hTauVsJetTauPteByJetPtBefore;
-    WrappedTH1 *hTauVsJetTauPtmuByJetPtBefore;
-    WrappedTH1 *hTauVsJetTauPtbByJetPtAfter;
-    WrappedTH1 *hTauVsJetTauPtbleptonicByJetPtAfter;
-    WrappedTH1 *hTauVsJetTauPtcByJetPtAfter;
-    WrappedTH1 *hTauVsJetTauPtudsByJetPtAfter;
-    WrappedTH1 *hTauVsJetTauPtgByJetPtAfter;
-    WrappedTH1 *hTauVsJetTauPteByJetPtAfter;
-    WrappedTH1 *hTauVsJetTauPtmuByJetPtAfter;
-
 
     // MCAnalysis histograms
     WrappedTH1 *hgenWmass;

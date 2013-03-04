@@ -226,6 +226,8 @@ namespace HPlus {
                                BTagging& bJetSelection,
                                TopChiSelection& topChiSelection,
                                EvtTopology& evtTopology) {
+    fTauSelection = &tauSelection;
+    fFakeTauIdentifier = &fakeTauIdentifier;
     // Obtain data objects only, if they have not yet been cached
     //if (bDataObjectsCached) return;
     //bDataObjectsCached = true;
@@ -272,9 +274,9 @@ namespace HPlus {
     
   }
 
-  void CommonPlots::fillControlPlots(const VertexSelection::Data& data) {
+  void CommonPlots::fillControlPlots(const edm::Event& iEvent, const VertexSelection::Data& data) {
     //fVertexData = data;
-    
+    fNormalisationAnalysis.analyseTauFakeRate(iEvent, fVertexData, *fTauSelection, fTauData, *fFakeTauIdentifier, fJetData);
   }
 
   void CommonPlots::fillControlPlots(const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData) {
