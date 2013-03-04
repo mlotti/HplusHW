@@ -127,7 +127,7 @@ namespace HPlus {
 
     /// unique filling methods (to be called before return statement)
     void fillControlPlots(const TriggerSelection::Data& data);
-    void fillControlPlots(const VertexSelection::Data& data);
+    void fillControlPlots(const edm::Event& iEvent, const VertexSelection::Data& data);
     void fillControlPlots(const TauSelection::Data& tauData, const FakeTauIdentifier::Data& fakeTauData);
     void fillControlPlots(const ElectronSelection::Data& data);
     void fillControlPlots(const MuonSelection::Data& data);
@@ -155,6 +155,9 @@ namespace HPlus {
     TFileDirectory fEveryStepDirectory;
     /// Normalisation analysis object
     NormalisationAnalysis fNormalisationAnalysis;
+    /// Selection objects
+    TauSelection* fTauSelection;
+    FakeTauIdentifier* fFakeTauIdentifier;
     /// Cached data objects from silent analyze
     VertexSelection::Data fVertexData;
     TauSelection::Data fTauData;

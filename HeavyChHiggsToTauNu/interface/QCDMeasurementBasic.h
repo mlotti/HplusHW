@@ -36,6 +36,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METFilters.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
@@ -122,6 +124,7 @@ namespace HPlus {
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
+    Count fQCDTailKillerCounter;
     Count fDeltaPhiTauMETCounter;
     Count fMaxDeltaPhiJetMETCounter;
     Count fTopSelectionCounter;
@@ -159,6 +162,8 @@ namespace HPlus {
     EvtTopology fEvtTopology;
 
     FullHiggsMassCalculator fFullHiggsMassCalculator;
+    METFilters fMETFilters;
+    QCDTailKiller fQCDTailKiller;
     WeightReader fPrescaleWeightReader;
     WeightReader fPileupWeightReader;
     FakeTauIdentifier fFakeTauIdentifier;

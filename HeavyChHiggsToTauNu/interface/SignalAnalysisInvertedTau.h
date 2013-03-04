@@ -30,6 +30,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METFilters.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 
 
@@ -177,7 +178,8 @@ namespace HPlus {
     Count fBvetoCounter;
     Count fBvetoDeltaPhiCounter;
     Count fBTaggingCounter;
-    Count fBTaggingScaleFactorInvertedCounter;    
+    Count fBTaggingScaleFactorInvertedCounter;
+    Count fQCDTailKillerCounter;
     Count fDeltaPhiTauMETCounter;
     Count fDeltaPhiVSDeltaPhiMetJetCutCounter;
     Count fDeltaPhiVSDeltaPhiMHTJet1CutCounter;
@@ -229,6 +231,7 @@ namespace HPlus {
     WeightReader fPrescaleWeightReader;
     WeightReader fPileupWeightReader;
     METFilters fMETFilters;
+    QCDTailKiller fQCDTailKiller;
     WeightReader fWJetsWeightReader;
     FakeTauIdentifier fFakeTauIdentifier;
     SignalAnalysisTree fTree;
