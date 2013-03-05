@@ -72,7 +72,8 @@ namespace HPlus {
       TLorentzVector LorentzVector_visibleTauFourMomentum;
       TLorentzVector LorentzVector_neutrinosFourMomentum;
       // Event classification results
-      //string eventClass;
+      int iMisidentificationCode;
+      TString strEventClassName;
       // Physical parameters of the particles
       const double c_fPhysicalTopMass;
       const double c_fPhysicalTauMass;
@@ -99,28 +100,29 @@ namespace HPlus {
 			      FullHiggsMassCalculator::Data& output);
     void calculateTopMass(FullHiggsMassCalculator::Data& output);
     void calculateHiggsMass(FullHiggsMassCalculator::Data& output);
-    void doEventClassification(const edm::Event& iEvent, TVector3 myBJetVector, TVector3 myVisibleTauVector, TVector3 myMETVector);
+    void doEventClassification(const edm::Event& iEvent, TVector3 myBJetVector, TVector3 myVisibleTauVector, TVector3 myMETVector,
+			       FullHiggsMassCalculator::Data& output);
     void fillHistograms_MC(FullHiggsMassCalculator::Data& output);
     void fillHistograms_Data(FullHiggsMassCalculator::Data& output);
     void print(TString infoText);
 
   private:
-
-
-    // EventWeight object
-    /////////////////////////////////////////////    EventWeight& fEventWeight;
-    //edm::InputTag fVertexSrc;
-    //TH1 *hWeights;
-
-    //   edm::Ptr<pat::Jet> mcBjetHiggsSide;
-
-    // Histograms
-
-
+    // Counters
     Count fAllSolutionsCutSubCount;
     Count fPositiveDiscriminantCutSubCount;
     Count fNegativeDiscriminantCutSubCount;
- 
+
+    Count eventClass_Pure_SubCount;
+    Count eventClass_Impure_SubCount;
+    Count eventClass_BadTau_SubCount;
+    Count eventClass_BadMET_SubCount;
+    Count eventClass_BadTauAndMET_SubCount;
+    Count eventClass_BadBjet_SubCount;
+    Count eventClass_BadBjetAndTau_SubCount;
+    Count eventClass_MassBadBjetAndMET_SubCount;
+    Count eventClass_MassBadBjetAndMETAndTau_SubCount;
+
+    // Histograms 
     WrappedTH1* hSolution1PzDifference;
     WrappedTH1* hSolution2PzDifference;
     WrappedTH2* hSolution12PzDifference;
@@ -128,21 +130,42 @@ namespace HPlus {
     WrappedTH1* hHiggsMassDPz100;
     WrappedTH1* hHiggsMass_TauBmatch;
     WrappedTH1* hHiggsMass_TauBMETmatch;
-    WrappedTH1* hHiggsMassReal;
-    WrappedTH1* hHiggsMassImaginary;
+    //WrappedTH1* hHiggsMassReal;
+    //WrappedTH1* hHiggsMassImaginary;
     WrappedTH1* hTopMass;
-    WrappedTH1* hTopMassRejected;
-    WrappedTH1* hTopMassReal;
-    WrappedTH1* hTopMassRealRejected;
-    WrappedTH1* hTopMassImaginary;
-    WrappedTH1* hTopMassImaginaryRejected;
+    //WrappedTH1* hTopMassRejected;
+    //WrappedTH1* hTopMassReal;
+    //WrappedTH1* hTopMassRealRejected;
+    //WrappedTH1* hTopMassImaginary;
+    //WrappedTH1* hTopMassImaginaryRejected;
+    
+    // Neutrino longitudinal momentum histograms
     WrappedTH1* hNeutrinoZSolution;
     WrappedTH1* hNeutrinoPtSolution;
     WrappedTH1* hNeutrinoPtDifference;
-    WrappedTH1* hTrueHiggsMass;
-    WrappedTH1* hHiggsMassNoActualHiggs;
-    WrappedTH1* hHiggsMassCorrectId;
-    WrappedTH1* hHiggsMassIncorrectId;
+    //WrappedTH1* hTrueHiggsMass;
+    //WrappedTH1* hHiggsMassNoActualHiggs;
+    //WrappedTH1* hHiggsMassCorrectId;
+    //WrappedTH1* hHiggsMassIncorrectId;
+
+    // Higgs mass histograms
+    WrappedTH1* hHiggsMassPure;
+    WrappedTH1* hHiggsMassImpure;
+    WrappedTH1* hHiggsMassBadTau;
+    WrappedTH1* hHiggsMassBadMET;
+    WrappedTH1* hHiggsMassBadTauAndMET;
+    WrappedTH1* hHiggsMassBadBjet;
+    WrappedTH1* hHiggsMassBadBjetAndTau;
+    WrappedTH1* hHiggsMassBadBjetAndMET;
+    WrappedTH1* hHiggsMassBadBjetAndMETAndTau;
+    WrappedTH1* hDiscriminantPure;
+    WrappedTH1* hDiscriminantImpure;
+
+    // Event classification variable histograms
+    WrappedTH1* hBDeltaR;
+    WrappedTH1* hTauDeltaR;
+    WrappedTH1* hMETDeltaPt;
+    WrappedTH1* hMETDeltaPhi;
   };
 }
 
