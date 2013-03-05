@@ -436,7 +436,10 @@ class ConfigBuilder:
             fileNames = cms.untracked.vstring()
         )
         if self.useDefaultInputFiles:
-            process.source.fileNames.append(self.dataVersion.getAnalysisDefaultFileMadhatter())
+            if self.options.doPat == 0:
+                process.source.fileNames.append(self.dataVersion.getAnalysisDefaultFileMadhatter())
+            else:
+                process.source.fileNames.append(self.dataVersion.getPatDefaultFileMadhatter())
         if self.options.tauEmbeddingInput != 0:
             if self.options.doPat != 0:
                 raise Exception("In tau embedding input mode, doPat must be 0 (from v44_4 onwards)")
