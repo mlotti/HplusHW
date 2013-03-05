@@ -1,5 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
+genTauPtCut = 41
+genTauEtaCut = 2.1
+
 def createEDAnalyze(param):
     return cms.EDAnalyzer("HPlusEwkBackgroundCoverageAnalyzer",
         histogramAmbientLevel = param.histogramAmbientLevel,
@@ -18,8 +21,8 @@ def createEDAnalyze(param):
 #        embeddingMuonSrc = cms.untracked.InputTag(param.GlobalMuonVeto.MuonCollectionName.value()),
         embeddingMuonSrc = cms.untracked.InputTag("tauEmbeddingMuons"), # it is the responsibility of _cfg.py to make sure "tauEmbeddingMuons" exists
         vertexSrc = cms.untracked.InputTag("offlinePrimaryVertices"),
-        tauPtCut = cms.untracked.double(41.0),
-        tauEtaCut = cms.untracked.double(2.1),
+        tauPtCut = cms.untracked.double(genTauPtCut),
+        tauEtaCut = cms.untracked.double(genTauEtaCut),
 
         # for tree
         muonSrc = cms.InputTag("dummy"),
