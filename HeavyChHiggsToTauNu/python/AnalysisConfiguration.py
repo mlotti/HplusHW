@@ -215,9 +215,7 @@ class ConfigBuilder:
 
         if self.printAnalyzerNames:
             print "Analyzer module names:"
-            names = []
-            for x in self.numberOfAnalyzers.itervalues():
-                names.extend(x)
+            names = self.getAnalyzerModuleNames()
             names.sort()
             for name in names:
                 print "  %s" % name
@@ -229,6 +227,12 @@ class ConfigBuilder:
                 print "Total number of analyzers (%d) is over the suggested limit (%d), it might take loong to run and merge output" % (s, tooManyAnalyzersLimit)
             else:
                 raise Exception("Total number of analyzers (%d) exceeds the suggested limit (%d). If you're sure you want to run so many analyzers, add 'allowTooManyAnalyzers=True' to the ConfigBuilder() constructor call." % (s, tooManyAnalyzersLimit))
+
+    def getAnalyzerModuleNames(self):
+        names = []
+        for x in self.numberOfAnalyzers.itervalues():
+            names.extend(x)
+        return names        
 
     ## Do the actual building of the configuration
     #
