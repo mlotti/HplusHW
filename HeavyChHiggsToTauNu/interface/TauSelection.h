@@ -218,7 +218,7 @@ namespace HPlus {
     WrappedTH1 *hTightGammaSumPtAfterIsolation;
     WrappedTH1 *hTightGammaOccupancyAfterIsolation;
 
-    WrappedTH1 *hVLooseIsoNcands;
+    //WrappedTH1 *hVLooseIsoNcands;
     WrappedTH1 *hLooseIsoNcands;
     WrappedTH1 *hMediumIsoNcands;
     WrappedTH1 *hTightIsoNcands;

@@ -623,7 +623,8 @@ class ConfigBuilder:
 
         myTauIsolation = [
             "byLooseCombinedIsolationDeltaBetaCorr3Hits",
-            "byMediumCombinedIsolationDeltaBetaCorr3Hits"
+            "byMediumCombinedIsolationDeltaBetaCorr3Hits",
+            "byMediumIsolationMVA2"
             ]
         muonDiscriminators = [
             "againstMuonLoose2",

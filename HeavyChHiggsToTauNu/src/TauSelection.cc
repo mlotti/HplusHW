@@ -34,8 +34,6 @@ namespace {
     // they are bullet proof way of using exactly the same isolation
     // defitions as in the discriminators
     
-    // FIXME change to delta beta discriminators or eventually to continuous discriminator
-    
     if(a->tauID("byTightCombinedIsolationDeltaBetaCorr3Hits") > 0.5 && b->tauID("byTightCombinedIsolationDeltaBetaCorr3Hits") < 0.5)
       return true;
 
@@ -54,12 +52,13 @@ namespace {
         return true;
     }
 
-    if(a->tauID("byVLooseCombinedIsolationDeltaBetaCorr3Hits") > 0.5) {
-      if(b->tauID("byLooseCombinedIsolationDeltaBetaCorr3Hits") > 0.5)
-        return false;
-      if(b->tauID("byVLooseCombinedIsolationDeltaBetaCorr3Hits") < 0.5)
-        return true;
-    }
+    // VLoose isolation does not exist anymore
+//     if(a->tauID("byVLooseCombinedIsolationDeltaBetaCorr3Hits") > 0.5) {
+//       if(b->tauID("byLooseCombinedIsolationDeltaBetaCorr3Hits") > 0.5)
+//         return false;
+//       if(b->tauID("byVLooseCombinedIsolationDeltaBetaCorr3Hits") < 0.5)
+//         return true;
+//     }
 
     // At this point both a and b are in the same isolation class, and
     // we need a continous isolation variable. This is calculated by
@@ -465,7 +464,7 @@ namespace HPlus {
     }
 
     // Isolation variables
-    hVLooseIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauSelection_all_tau_candidates_VLooseIsoNCands", "Number of isolation candidates in VLoose", 100, 0, 100);
+    //hVLooseIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauSelection_all_tau_candidates_VLooseIsoNCands", "Number of isolation candidates in VLoose", 100, 0, 100);
     hLooseIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauSelection_all_tau_candidates_LooseIsoNCands", "Number of isolation candidates in Loose", 100, 0, 100);
     hMediumIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauSelection_all_tau_candidates_MediumIsoNCands", "Number of isolation candidates in Medium", 100, 0, 100);
     hTightIsoNcands = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauSelection_all_tau_candidates_TightIsoNCands", "Number of isolation candidates in Tight", 100, 0, 100);
@@ -997,7 +996,7 @@ namespace HPlus {
       ObtainMCPurity(tau, iEvent, hMCPurityOfTauCandidates);
     }
 
-    hVLooseIsoNcands->Fill(tau->userInt("byVLooseOccupancy"));
+    //hVLooseIsoNcands->Fill(tau->userInt("byVLooseOccupancy"));
     hLooseIsoNcands->Fill(tau->userInt("byLooseOccupancy"));
     hMediumIsoNcands->Fill(tau->userInt("byMediumOccupancy"));
     hTightIsoNcands->Fill(tau->userInt("byTightOccupancy"));
