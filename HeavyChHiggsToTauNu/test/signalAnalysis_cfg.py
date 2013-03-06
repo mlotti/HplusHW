@@ -64,31 +64,32 @@ process = builder.buildSignalAnalysis()
     #         "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_3_2_f6k.root"
     #         ]
 
-process.source.fileNames = [
-        "root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_5_2_D2c.root",
+#process.source.fileNames = [
+#        "root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_5_2_D2c.root",
 #         "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_4_2_90j.root",
 #             "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_2_2_i1O.root",
 #         "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_3_2_f6k.root",
 #         "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_5_2_D2c.root"
-    ]
+#    ]
     
 # process.maxEvents.input = 500
 
 
 
 #     if builder.dataVersion.isMC():
-#         process.source.fileNames = [
-# #            "root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/f16be938188c46248667b60f0c9e7452/pattuple_490_1_kHI.root"
-# #            "file:/afs/cern.ch/work/s/strichte/data/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/pattuple_7_1_ozc.root"
-#             #prefix_TTToHplusBWB_M-120+"pattuple_5_2_D2c.root",
-#             "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_4_2_90j.root",
-#             "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_2_2_i1O.root",
-#             "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_3_2_f6k.root",
-#             "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_5_2_D2c.root",
-#             #prefix_TTToHplusBWB_M-120+"pattuple_2_2_i1O.root",
-#             #prefix_TTToHplusBWB_M-120+"pattuple_3_2_f6k.root",
-# #            "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_3_2_f6k.root"
-#             ]
+process.source.fileNames = [
+    "root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/f16be938188c46248667b60f0c9e7452/pattuple_302_1_OII.root",
+    #            "root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/f16be938188c46248667b60f0c9e7452/pattuple_490_1_kHI.root"
+    # #            "file:/afs/cern.ch/work/s/strichte/data/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/pattuple_7_1_ozc.root"
+    #             #prefix_TTToHplusBWB_M-120+"pattuple_5_2_D2c.root",
+    #             "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_4_2_90j.root",
+    #             "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_2_2_i1O.root",
+    #             "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_3_2_f6k.root",
+    #             "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_5_2_D2c.root",
+    #             #prefix_TTToHplusBWB_M-120+"pattuple_2_2_i1O.root",
+    #             #prefix_TTToHplusBWB_M-120+"pattuple_3_2_f6k.root",
+    # #            "root://madhatter.csc.fi:8443/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_4_X/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11_PU_S6_START44_V9B_v1_AODSIM_pattuple_v44_4/a7cc08c191a8794be9ec81f73dbf125a/pattuple_3_2_f6k.root"
+    ]
 #     else:
 #         # HLT_Mu40_eta2p1_v1
 #         process.source.fileNames = [

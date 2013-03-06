@@ -93,15 +93,17 @@ namespace HPlus {
     eventClass_Pure_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Good identification of b-jet, tau, and MET")),
     eventClass_Impure_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator",
 							  "Misidentification of b-jet and/or tau and/or MET")),
-    eventClass_BadTau_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Bad ID tau")),
-    eventClass_BadMET_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Bad ID MET")),
-    eventClass_BadTauAndMET_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Bad ID tau && MET")),
-    eventClass_BadBjet_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Bad ID b-jet")),
-    eventClass_BadBjetAndTau_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Bad ID b-jet && tau")),
-    eventClass_MassBadBjetAndMET_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Bad ID b-jet && MET")),
-    eventClass_MassBadBjetAndMETAndTau_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Bad ID b-jet && MET && tau"))
-    
-    
+    eventClass_OnlyBadTau_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Only bad ID tau")),
+    eventClass_OnlyBadMET_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Only bad ID MET")),
+    eventClass_OnlyBadTauAndMET_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Only bad ID tau && MET")),
+    eventClass_OnlyBadBjet_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Only bad ID b-jet")),
+    eventClass_OnlyBadBjetAndTau_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Only bad ID b-jet && tau")),
+    eventClass_OnlyBadBjetAndMET_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Only bad ID b-jet && MET")),
+    eventClass_OnlyBadBjetAndMETAndTau_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "Only bad ID b-jet && MET && tau")),
+
+    eventClass_AllBadTau_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "All bad ID tau")),
+    eventClass_AllBadMET_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "All bad ID MET")),
+    eventClass_AllBadBjet_SubCount(eventCounter.addSubCounter("FullHiggsMassCalculator", "All bad ID b-jet"))
   {
     // Add a new directory ("FullHiggsMass") for the histograms produced in this code to the output file
     edm::Service<TFileService> fs;
@@ -164,7 +166,6 @@ namespace HPlus {
                                                           "MET #Delta p_T;#Delta p_T (GeV)", 100, -200, 200);
     hMETDeltaPhi              = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "METDeltaPhi",
                                                           "MET #Delta #phi;#Delta #phi (degrees)", 180, -180, 180);
-      
     //edm::FileInPath myDataPUdistribution = iConfig.getParameter<edm::FileInPath>("dataPUdistribution");
   }
 
@@ -177,17 +178,37 @@ namespace HPlus {
     // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
-    return privateAnalyze(iEvent, iSetup, tauData, bData, metData);
+    // If this method is called with tauData as an argument, get the selected tau from it and pass it on to privateAnalyze():
+    const edm::Ptr<pat::Tau> myTau = tauData.getSelectedTau();
+    return privateAnalyze(iEvent, iSetup, myTau, bData, metData);
   }
-  
+
+  FullHiggsMassCalculator::Data FullHiggsMassCalculator::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, 
+  const edm::Ptr<pat::Tau> myTau, const BTagging::Data bData, const METSelection::Data metData) {
+    ensureSilentAnalyzeAllowed(iEvent);
+    // Disable histogram filling and counter incrementing until the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+    return privateAnalyze(iEvent, iSetup, myTau, bData, metData);
+  }
+
   FullHiggsMassCalculator::Data FullHiggsMassCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, 
   const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData) {
     ensureAnalyzeAllowed(iEvent);
-    return privateAnalyze(iEvent, iSetup, tauData, bData, metData);
+    // If this method is called with tauData as an argument, get the selected tau from it and pass it on to privateAnalyze():
+    const edm::Ptr<pat::Tau> myTau = tauData.getSelectedTau();
+    return privateAnalyze(iEvent, iSetup, myTau, bData, metData);
+  }
+
+  FullHiggsMassCalculator::Data FullHiggsMassCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, 
+  const edm::Ptr<pat::Tau> myTau, const BTagging::Data bData, const METSelection::Data metData) {
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup, myTau, bData, metData);
   }
 
   FullHiggsMassCalculator::Data FullHiggsMassCalculator::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, 
-  const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData) {
+  const edm::Ptr<pat::Tau> myTau, const BTagging::Data bData, const METSelection::Data metData) {
     Data output;
     Data physicalParameters; // this contains particles masses etc.
 
@@ -196,17 +217,13 @@ namespace HPlus {
     // 1) Find the b-jet that is closest to the selected tau in (eta, phi) space
     //    This b-jet is assumed to come from the same top quark as a charged Higgs (hence, it belongs to the "Higgs side")
     edm::Ptr<pat::Jet> myHiggsSideBJet;
-    myHiggsSideBJet = FullHiggsMassCalculator::findHiggsSideBJet(bData, tauData);
+    myHiggsSideBJet = FullHiggsMassCalculator::findHiggsSideBJet(bData, myTau);
     output.HiggsSideBJet = myHiggsSideBJet;
     if (output.HiggsSideBJet.isNull()) {
-      print("No reco Higgs side b-jet found!");
+      std::cout << "No reco Higgs side b-jet found!" << std::endl;
     } else {
-      print("Reco Higgs side b-jet found");
+      std::cout << "Reco Higgs side b-jet found" << std::endl;
     }
-
-//     // 1b) Get the reco tau
-//     edm::Ptr<pat::Tau> myTau;
-//     myTau = tauData.getSelectedTau();
 
     // 2) Define b-jet, visible tau, and MET momentum vectors
     // TODO: check this
@@ -216,8 +233,7 @@ namespace HPlus {
     std::cout << "myBJetVector components: " << myBJetVector.Px() << ", " << myBJetVector.Py() << ", " << myBJetVector.Pz() 
 	      << std::endl;
     // TODO: "visibleTau" is only used in MC. Invent a different name
-    TVector3 myVisibleTauVector(tauData.getSelectedTau()->px(), tauData.getSelectedTau()->py(),
-				      tauData.getSelectedTau()->pz());
+    TVector3 myVisibleTauVector(myTau->px(), myTau->py(), myTau->pz());
     std::cout << "myVisibleTauVector components: " << myVisibleTauVector.Px() << ", " << myVisibleTauVector.Py() << ", "
 	      << myVisibleTauVector.Pz() << std::endl;
     // This is the same MET as in the rest of the analysis (as it should be), by default: Type 1 PF
@@ -234,7 +250,7 @@ namespace HPlus {
     // 4) If MC: Classify event according to what was identified correctly and what was not
     //    (the classification results are stored in output)
     if (!iEvent.isRealData()) {
-      print("Doing event classification");
+      std::cout << "Doing event classification" << std::endl;
       doEventClassification(iEvent, myBJetVector, myVisibleTauVector, myMETVector, output);
     }
 
@@ -253,7 +269,7 @@ namespace HPlus {
     return output;
   }
 
-  edm::Ptr<pat::Jet> FullHiggsMassCalculator::findHiggsSideBJet(const BTagging::Data bData, const TauSelection::Data tauData) {
+  edm::Ptr<pat::Jet> FullHiggsMassCalculator::findHiggsSideBJet(const BTagging::Data bData, const edm::Ptr<pat::Tau> myTau) {
     double currentDeltaR = 1000.0;
     double smallestDeltaR = 999.0;
     edm::Ptr<pat::Jet> myHiggsSideBJet;
@@ -261,7 +277,7 @@ namespace HPlus {
     for (edm::PtrVector<pat::Jet>::iterator iBjet = bData.getSelectedJets().begin();
 	 iBjet != bData.getSelectedJets().end(); ++iBjet) {
       // Calculate the distance in (eta, phi) space between them and the selected tau. Choose the b-jet that is closest to the tau
-      currentDeltaR = ROOT::Math::VectorUtil::DeltaR((*iBjet)->p4(), tauData.getSelectedTau()->p4());
+      currentDeltaR = ROOT::Math::VectorUtil::DeltaR((*iBjet)->p4(), myTau->p4());
       if (currentDeltaR < smallestDeltaR) {
         smallestDeltaR = currentDeltaR;
         myHiggsSideBJet = *iBjet;
@@ -270,7 +286,7 @@ namespace HPlus {
     // Loop over b-jets with looser tag (selected sub-leading jets), doing the same as above
     for (edm::PtrVector<pat::Jet>::iterator iBjet = bData.getSelectedSubLeadingJets().begin();
 	 iBjet != bData.getSelectedSubLeadingJets().end(); ++iBjet) {
-      currentDeltaR = ROOT::Math::VectorUtil::DeltaR((*iBjet)->p4(), tauData.getSelectedTau()->p4());
+      currentDeltaR = ROOT::Math::VectorUtil::DeltaR((*iBjet)->p4(), myTau->p4());
       if (currentDeltaR < smallestDeltaR) {
         smallestDeltaR = currentDeltaR;
         myHiggsSideBJet = *iBjet;
@@ -318,7 +334,7 @@ namespace HPlus {
     }
     // Set output
     output.fDiscriminant = discriminant;
-    output.fNeutrinoZSolution = neutrinoPzSolution1; // Which solution should be selected?
+    output.fNeutrinoZSolution = neutrinoPzSolution2; // Which solution should be selected?
     // Print information about the calculation steps
     std::cout << "FullHiggsMassCalculator: Reconstructing the neutrino p_z..." << std::endl;
     std::cout << "--- Tau reconstructed momentum = (" << pTau.Px() << ", " << pTau.Py() << ", " << pTau.Pz() << ")" << std::endl;
@@ -378,27 +394,20 @@ namespace HPlus {
     double metDeltaPt  = 9999999;
     double metDeltaPhi = 9999999;
     // Specify the cuts used to classify events
-    double bDeltaRCut     = 0.4;
-    double tauDeltaRCut   = 0.1;
-    double metDeltaPtCut  = 20.0; // GeV
-    double metDeltaPhiCut = 10.0 * TMath::DegToRad(); // The first number is the cut angle in deg, which is then converted to rad
+    double bDeltaRCut       =   0.6;
+    double tauDeltaRCut     =   0.1;
+    double metDeltaPtLoCut  = -20.0; // GeV
+    double metDeltaPtHiCut  =  40.0; // GeV
+    double metDeltaPhiCut   =  15.0 * TMath::DegToRad(); // The first number is the cut angle in deg, which is then converted to rad
+
+    //bool myEventHasGenChargedHiggs = eventHasGenChargedHiggs(iEvent);
     // B-jet: compare RECO and GEN information
-    reco::Candidate* genHiggsSideBJet = getGenHiggsSideBJet(iEvent);
-    if (genHiggsSideBJet == NULL) {
-      std::cout << "genHiggsSideBJet == NULL ---> no GEN b-jet found" << std::endl;
-    } else {
-      TVector3 genBJetVector(genHiggsSideBJet->px(), genHiggsSideBJet->py(), genHiggsSideBJet->pz());
-      bDeltaR = recoBJetVector.DeltaR(genBJetVector);
-      std::cout << "****** bDeltaR: " << bDeltaR << std::endl;
-    }
+    bDeltaR = getClosestGenBQuarkDeltaR(iEvent, recoBJetVector);
+    std::cout << "****** bDeltaR: " << bDeltaR << std::endl;
     // Tau: compare RECO and GEN information
-    TVector3 genTauVector = getGenTauFromHiggsVector(iEvent);
-    if (genTauVector.Mag() < 0.00001) {
-      std::cout << "****** The event did not have a tau from Higgs." << std::endl;
-    } else {
-      tauDeltaR = recoTauVector.DeltaR(genTauVector);
-      std::cout << "****** tauDeltaR: " << tauDeltaR << std::endl;
-    }
+    tauDeltaR = getClosestGenVisibleTauDeltaR(iEvent, recoTauVector);
+    std::cout << "****** tauDeltaR: " << tauDeltaR << std::endl;
+  
     // MET: compare RECO and GEN information
     TVector3 genMETVector = getGenMETVector(iEvent);
     metDeltaPt = recoMETVector.Pt() - genMETVector.Pt();
@@ -415,12 +424,15 @@ namespace HPlus {
     // NOTE: the if-statements check if something does NOT pass the cuts!
     if (bDeltaR >= bDeltaRCut) {
       output.iMisidentificationCode += 100;
+      increment(eventClass_AllBadBjet_SubCount);
     }
-    if (TMath::Abs(metDeltaPt) >= metDeltaPtCut || TMath::Abs(metDeltaPhi) >= metDeltaPhiCut) {
+    if (metDeltaPt <= metDeltaPtLoCut || metDeltaPt >= metDeltaPtHiCut || TMath::Abs(metDeltaPhi) >= metDeltaPhiCut) {
       output.iMisidentificationCode += 10;
+      increment(eventClass_AllBadMET_SubCount);
     }
     if (tauDeltaR >= tauDeltaRCut) {
       output.iMisidentificationCode += 1;
+      increment(eventClass_AllBadTau_SubCount);
     }
     std::cout << "HAHAAAAHAHAHAHAHAHAAAAHAAHAHAHAAAAAAAAAAAAAAA: " << output.iMisidentificationCode << std::endl;
     // Define and set the event classes. Informative histograms are filled and counters incremented for each class
@@ -428,43 +440,43 @@ namespace HPlus {
     case 0:
       output.strEventClassName = "Pure";
       increment(eventClass_Pure_SubCount);
-      hHiggsMassPure->Fill(output.fHiggsMassSolution);
+      if (output.fDiscriminant >= 0) hHiggsMassPure->Fill(output.fHiggsMassSolution);
       hDiscriminantPure->Fill(output.fDiscriminant);
       break;
     case 1:
-      output.strEventClassName = "BadTau";
-      increment(eventClass_BadTau_SubCount);
-      hHiggsMassBadTau->Fill(output.fHiggsMassSolution);
+      output.strEventClassName = "OnlyBadTau";
+      increment(eventClass_OnlyBadTau_SubCount);
+      if (output.fDiscriminant >= 0) hHiggsMassBadTau->Fill(output.fHiggsMassSolution);
       break;
     case 10:
-      output.strEventClassName = "BadMET";
-      increment(eventClass_BadMET_SubCount);
-      hHiggsMassBadMET->Fill(output.fHiggsMassSolution);
+      output.strEventClassName = "OnlyBadMET";
+      increment(eventClass_OnlyBadMET_SubCount);
+      if (output.fDiscriminant >= 0) hHiggsMassBadMET->Fill(output.fHiggsMassSolution);
       break;
     case 11:
-      output.strEventClassName = "BadTauAndMET";
-      increment(eventClass_BadTauAndMET_SubCount);
-      hHiggsMassBadTauAndMET->Fill(output.fHiggsMassSolution);
+      output.strEventClassName = "OnlyBadTauAndMET";
+      increment(eventClass_OnlyBadTauAndMET_SubCount);
+      if (output.fDiscriminant >= 0) hHiggsMassBadTauAndMET->Fill(output.fHiggsMassSolution);
       break;
     case 100:
-      output.strEventClassName = "BadBjet";
-      increment(eventClass_BadBjet_SubCount);
-      hHiggsMassBadBjet->Fill(output.fHiggsMassSolution);
+      output.strEventClassName = "OnlyBadBjet";
+      increment(eventClass_OnlyBadBjet_SubCount);
+      if (output.fDiscriminant >= 0) hHiggsMassBadBjet->Fill(output.fHiggsMassSolution);
       break;
     case 101:
-      output.strEventClassName = "BadBjetAndTau";
-      increment(eventClass_BadBjetAndTau_SubCount);
-      hHiggsMassBadBjetAndTau->Fill(output.fHiggsMassSolution);
+      output.strEventClassName = "OnlyBadBjetAndTau";
+      increment(eventClass_OnlyBadBjetAndTau_SubCount);
+      if (output.fDiscriminant >= 0) hHiggsMassBadBjetAndTau->Fill(output.fHiggsMassSolution);
       break;
     case 110:
-      output.strEventClassName = "BadBjetAndMET";
-      increment(eventClass_MassBadBjetAndMET_SubCount);
-      hHiggsMassBadBjetAndMET->Fill(output.fHiggsMassSolution);
+      output.strEventClassName = "OnlyBadBjetAndMET";
+      increment(eventClass_OnlyBadBjetAndMET_SubCount);
+      if (output.fDiscriminant >= 0) hHiggsMassBadBjetAndMET->Fill(output.fHiggsMassSolution);
       break;
     case 111:
-      output.strEventClassName = "BadBjetAndMETAndTau";
-      increment(eventClass_MassBadBjetAndMETAndTau_SubCount);
-      hHiggsMassBadBjetAndMETAndTau->Fill(output.fHiggsMassSolution);
+      output.strEventClassName = "OnlyBadBjetAndMETAndTau";
+      increment(eventClass_OnlyBadBjetAndMETAndTau_SubCount);
+      if (output.fDiscriminant >= 0) hHiggsMassBadBjetAndMETAndTau->Fill(output.fHiggsMassSolution);
       break;
     default:
       output.strEventClassName = "######";
@@ -474,7 +486,7 @@ namespace HPlus {
     // Also do histogramming and counting for the set of events, in which ANYTHING was misidentified ("impure events")
     if (output.iMisidentificationCode > 0) {
       increment(eventClass_Impure_SubCount);
-      hHiggsMassImpure->Fill(output.fHiggsMassSolution);
+      if (output.fDiscriminant >= 0) hHiggsMassImpure->Fill(output.fHiggsMassSolution);
       hDiscriminantImpure->Fill(output.fDiscriminant);
     }
   }
@@ -489,13 +501,5 @@ namespace HPlus {
     hHiggsMass->Fill(output.fHiggsMassSolution);
     hTopMass->Fill(output.fTopMassSolution);
     hNeutrinoZSolution->Fill(output.fNeutrinoZSolution);
-  }
-
-  // This is an auxiliary function whose purpose is to facilitate debugging. Print statements can be enabled or disabled
-  void FullHiggsMassCalculator::print(TString infoText) {
-    bool debug = true;
-    if (debug) {
-      std::cout << "FullHiggsMassCalculator: " << infoText << std::endl;
-    }
   }
 }

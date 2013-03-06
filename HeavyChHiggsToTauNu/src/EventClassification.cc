@@ -77,6 +77,20 @@ namespace HPlus {
 
 //------------------------> PUBLIC MEMBER FUNCTIONS <-------------------------
 
+  bool eventHasGenChargedHiggs(const edm::Event& iEvent) {
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      if (TMath::Abs(p.pdgId()) == 37) {
+	std::cout << "Event has a genuine charged Higgs boson!" << std::endl;
+	return true;
+      }
+    }
+    std::cout << "Event does not have a genuine charged Higgs boson." << std::endl;
+    return false;
+  }
+
   // Improvement: return HiggsSideTopLine instead of pointer to reco::Candidate?
   reco::Candidate* getGenHiggsSideTop(const edm::Event& iEvent) {
     edm::Handle <reco::GenParticleCollection> genParticles;
@@ -101,7 +115,7 @@ namespace HPlus {
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
     // Look at Higgs side top daughters to find b-jet.    
-    reco::Candidate* myHiggsSideBJet = 0;
+    reco::Candidate* myHiggsSideBJet = NULL;
     reco::Candidate* myHiggsSideTop = getGenHiggsSideTop(iEvent);
     if (!myHiggsSideTop) return NULL;
     for (size_t i=0; i < genParticles->size(); ++i) {
@@ -133,6 +147,43 @@ namespace HPlus {
     return myHiggsSideBJet;
   }
 
+//   reco::Candidate* getGenHiggsSideBJetVector(const edm::Event& iEvent) {
+//     edm::Handle <reco::GenParticleCollection> genParticles;
+//     iEvent.getByLabel("genParticles", genParticles);
+//     TVector3 myGenHiggsSideBJetVector(0.0, 0.0, 0.0);
+//     // Look at Higgs side top daughters to find b-jet.    
+//     reco::Candidate* myHiggsSideTop = getGenHiggsSideTop(iEvent); // ->CHECK!
+//     if (!myHiggsSideTop) return myGenHiggsSideBJetVector;
+//     for (size_t i=0; i < genParticles->size(); ++i) {
+//       const reco::Candidate & p = (*genParticles)[i];
+//       if (TMath::Abs(p.pdgId()) == 5) { // or 
+// 	reco::Candidate* myBMother = const_cast<reco::Candidate*>(p.mother());
+//         bool myStatus = true;
+//         while (myStatus) {
+//           if (!myBMother)  myStatus = false;
+//           else {
+// 	    std::cout << "EventClassification: B quark mother = " << myBMother->pdgId() << std::endl;
+//             if (TMath::Abs(myBMother->pdgId()) == 6) {
+//               myStatus = false;
+//               // Below is where we check if the b jet comes from the Higgs side top.   
+// 	      double myDeltaR = ROOT::Math::VectorUtil::DeltaR(myBMother->p4(), myHiggsSideTop->p4());
+//               if (myDeltaR < 0.01) {
+// 		myGenHiggsSideBJetVector.SetXYZ(p.px(), p.py(), p.pz());
+//                 myHiggsSideBJet = const_cast<reco::Candidate*>(&p);
+//                 i = genParticles->size(); // to end the enclosing for loop
+//               }
+//             }
+//             if (myStatus)
+//               myBMother = const_cast<reco::Candidate*>(myBMother->mother());
+//           }
+//         }
+//       }
+//     }
+//     std::cout << "FullMass: Higgs side bjet found, pt=" << std::endl;
+//     //<< myHiggsSideBJet->pt() << ", eta=" << myHiggsSideBJet->eta() << std::endl;
+//     return myGenHiggsSideBJetVector;
+//   }
+  
   //bool eventHasTauFromHiggs() {}
 
   reco::Candidate* getGenTauFromHiggs(const edm::Event& iEvent) {
@@ -219,7 +270,7 @@ namespace HPlus {
 //     return false;
 //   }
 
-  TVector3 getVisibleMomentum(reco::Candidate& tau) {
+  TVector3 getVisibleMomentum(const reco::Candidate& tau) {
     std::vector<const reco::GenParticle*> tauDaughters = getImmediateDaughters(tau);
     int tauDaughterId = 9999999;
     TVector3 myVisibleTauMomentum;
@@ -244,37 +295,131 @@ namespace HPlus {
     iEvent.getByLabel("genParticles", genParticles);
     int pId = 9999999;
     TVector3 myGenMET(0.0, 0.0, 0.0);
+    TVector3 oldGenMET(0.0, 0.0, 0.0);
     TVector3 currentNeutrinoVector(0.0, 0.0, 0.0); // auxiliary
     // Find neutrinos in the event and sum their transverse momenta. This will be the "GenNeutrinoMET"
     for (size_t i=0; i < genParticles->size(); ++i) {
       const reco::Candidate & p = (*genParticles)[i];
       pId = p.pdgId();
       // Ignore daughters of neutrinos (to avoid multiple counting of neutrinos)
-      if (hasImmediateMother(p,12) || hasImmediateMother(p,14) || hasImmediateMother(p,16)) continue;
+      if (hasImmediateMother(p,12) || hasImmediateMother(p,14) || hasImmediateMother(p,16)) {
+	// do nothing
+      } else {
+	if (TMath::Abs(pId) == 12 || TMath::Abs(pId) == 14 || TMath::Abs(pId) == 16) {
+	  currentNeutrinoVector.SetXYZ(p.px(), p.py(), p.pz());
+	  oldGenMET += currentNeutrinoVector;
+	}
+      }
+      if (hasImmediateMother(p,12) || hasImmediateMother(p,14) || hasImmediateMother(p,16) ||
+	  hasImmediateMother(p,-12) || hasImmediateMother(p,-14) || hasImmediateMother(p,-16)) continue;
       if (TMath::Abs(pId) == 12 || TMath::Abs(pId) == 14 || TMath::Abs(pId) == 16) {
 	currentNeutrinoVector.SetXYZ(p.px(), p.py(), p.pz());
 	myGenMET += currentNeutrinoVector;
       }
+
+//       if (hasImmediateMother(p,12) || hasImmediateMother(p,14) || hasImmediateMother(p,16) ||
+// 	  hasImmediateMother(p,-12) || hasImmediateMother(p,-14) || hasImmediateMother(p,-16)) continue;
+//       if (TMath::Abs(pId) == 12 || TMath::Abs(pId) == 14 || TMath::Abs(pId) == 16) {
+// 	currentNeutrinoVector.SetXYZ(p.px(), p.py(), p.pz());
+// 	myGenMET += currentNeutrinoVector;
+//       }
     }
+    std::cout << "EventClassification:   Old GenMET.Pt() = " << oldGenMET.Pt() << std::endl;
+    std::cout << "EventClassification:   New GenMET.Pt() = " << myGenMET.Pt() << std::endl;
     return myGenMET;
   }
   
-  bool foundGenVisibleTopWithinDeltaR(const edm::Event& iEvent, const edm::Ptr<pat::Tau> recoTau, double deltaRCut) {
-    // Get the (three-)momentum vector of the RECO tau
-    TVector3 recoTauVector(recoTau->px(), recoTau->py(), recoTau->pz());
-    // Get the GEN tau and its visible momentum
-    reco::Candidate* genTauPointer = getGenTauFromHiggs(iEvent);
-    if (genTauPointer == NULL) return false;
-    reco::Candidate& genTau = const_cast<reco::Candidate&>(*genTauPointer);
-    TVector3 genTauVector = getVisibleMomentum(genTau);
-    // If the two tau momentum vectors are withing a specified distance in (eta, phi) space of each other, return true
-    if (recoTauVector.DeltaR(genTauVector) < deltaRCut) {
-      return true;
-    } else {
-      return false;
+  bool hasGenVisibleTauWithinDeltaR(const edm::Event& iEvent, TVector3 recoTauVector, double deltaRCut) {
+    TVector3 genVisibleTauVector(0.0, 0.0, 0.0);
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    int pId = 9999999;
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      pId = p.pdgId();
+      // Ignore daughters of taus
+      if (hasImmediateMother(p,15) || hasImmediateMother(p,-15)) continue;
+      if (abs(pId) == 15) {
+	genVisibleTauVector = getVisibleMomentum(p);
+	if (recoTauVector.DeltaR(genVisibleTauVector) < deltaRCut) return true;
+      }
     }
+    return false;
   }
 
+  double getClosestGenVisibleTauDeltaR(const edm::Event& iEvent, TVector3 recoTauVector) {
+    TVector3 genVisibleTauVector(0.0, 0.0, 0.0);
+    double currentDeltaR = 999999.9;
+    double smallestDeltaR = 9999.9;
+    int pId = 9999999;
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      pId = p.pdgId();
+      // Ignore daughters of taus
+      if (hasImmediateMother(p,15) || hasImmediateMother(p,-15)) continue;
+      if (abs(pId) == 15) {
+	genVisibleTauVector = getVisibleMomentum(p);
+	currentDeltaR = recoTauVector.DeltaR(genVisibleTauVector);
+	if (currentDeltaR < smallestDeltaR) smallestDeltaR = currentDeltaR;
+      }
+    }
+    return smallestDeltaR; // will return a very large (initialization) value if no GEN tau is found
+  }
+
+  bool hasGenBQuarkWithinDeltaR(const edm::Event& iEvent, TVector3 recoBJetVector, double deltaRCut) {
+    // DESCRIPTION: Loop over all gen particles in event. If a b quark is found (that is not the daughter
+    //              of a b quark), check if its momentum vector is within deltaRCut of the reconstructed
+    //              b-jet momentum vector. As soon as a b-jet is found for which this is the case, return
+    //              true.
+    TVector3 genBQuarkVector(0.0, 0.0, 0.0);
+    int pId = 9999999;
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      pId = p.pdgId();
+      // Ignore daughters of b quarks
+      if (hasImmediateMother(p,5) || hasImmediateMother(p,-5)) continue;
+      if (abs(pId) == 5) {
+	genBQuarkVector.SetXYZ(p.px(), p.py(), p.pz());
+	if (recoBJetVector.DeltaR(genBQuarkVector) < deltaRCut) return true;
+      }
+    }
+    return false;
+  }
+
+  double getClosestGenBQuarkDeltaR(const edm::Event& iEvent, TVector3 recoBJetVector) {
+    TVector3 genBQuarkVector(0.0, 0.0, 0.0);
+    double currentDeltaR = 999999.9;
+    double smallestDeltaR = 999.9;
+    int pId = 9999999;
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      pId = p.pdgId();
+      // Ignore daughters of b quarks
+      if (hasImmediateMother(p,5) || hasImmediateMother(p,-5)) continue;
+      if (abs(pId) == 5) {
+	genBQuarkVector.SetXYZ(p.px(), p.py(), p.pz());
+	currentDeltaR = recoBJetVector.DeltaR(genBQuarkVector);
+	if (currentDeltaR < smallestDeltaR) smallestDeltaR = currentDeltaR;
+      }
+    }
+    return smallestDeltaR; // will return a very large (initialization) value if no GEN b quark is found
+  }
+
+  
+//   bool tauIsFromChargedHiggs() {
+    
+//   }
+
+//   bool tauIsFromChargedHiggs() {
+    
+//   }
+}
 
 
 
@@ -355,39 +500,6 @@ namespace HPlus {
 //   }
 
 // tau decay produces neutrino; use visibleTau (1-prong)
-  void checkIfGenuineTau(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau) {
-    // These counts are for test purposes only. They will not be able to do what their name suggests, because
-    // this method is called separately for each event (reference iEvent)
-    int identifiedGenuineTauCount = 0;
-    int unidentifiedGenuineTauCount = 0;
-    int fakeTauInEventWithGenuineTauCount = 0;
-    
-    edm::Handle <reco::GenParticleCollection> genParticles;
-    iEvent.getByLabel("genParticles", genParticles);
-    //std::cout << "matchfinding:" << std::endl;
-    for (size_t i=0; i < genParticles->size(); ++i) {
-      const reco::Candidate & p = (*genParticles)[i];
-      // If a GEN tau is found...
-      if (std::abs(p.pdgId()) == 15) {
-	// ... check if there is a RECO tau within deltaR < 0.1
-	if (tau.isNonnull() && reco::deltaR(p, *tau) < 0.1) {
-	  std::cout << "RECO tau corresponds to GEN tau!" << std::endl;
-	  identifiedGenuineTauCount++;
- 	}
-	// ... or if there is no reconstructed tau (i.e. tau is null pointer)
-	else if (tau.isNull()) {
-	  unidentifiedGenuineTauCount++;
-	}
-	// ... else the tau was faked
-	else if (tau.isNonnull()) {
-	  fakeTauInEventWithGenuineTauCount++;
-	}
-      }
-    }
-    //   std::cout << "identified genuine taus:              " << identifiedGenuineTauCount << std::endl;
-    //   std::cout << "unidentified genuine taus:            " << unidentifiedGenuineTauCount << std::endl;
-    //   std::cout << "fake taus in event with genuine taus: " << fakeTauInEventWithGenuineTauCount << std::endl;
-  }
 
 //   // Alternative way:
 //   void checkIfGenuineTau(const edm::Event& iEvent, const reco::Candidate *tau) {
@@ -423,4 +535,3 @@ namespace HPlus {
 //     std::cout << "fake taus in event with genuine taus: " << fakeTauInEventWithGenuineTauCount << std::endl;
 //   }
 
-}

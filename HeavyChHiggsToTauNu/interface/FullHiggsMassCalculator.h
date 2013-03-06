@@ -85,13 +85,15 @@ namespace HPlus {
 
     // Use silentAnalyze if you do not want to fill histograms or increment counters
     Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData);
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> myTau, const BTagging::Data bData, const METSelection::Data metData);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> myTau, const BTagging::Data bData, const METSelection::Data metData);
 
     void myBJet();
 
   private:
-    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection::Data tauData, const BTagging::Data bData, const METSelection::Data metData);
-    edm::Ptr<pat::Jet> findHiggsSideBJet(const BTagging::Data bData, const TauSelection::Data tauData);
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> myTau, const BTagging::Data bData, const METSelection::Data metData);
+    edm::Ptr<pat::Jet> findHiggsSideBJet(const BTagging::Data bData, const edm::Ptr<pat::Tau> myTau);
     //bool doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet, FullHiggsMassCalculator::Data& output);
     void calculateNeutrinoPz(TVector3& pTau, TVector3& pB, TVector3& MET,
 			     FullHiggsMassCalculator::Data& physicalParameters, FullHiggsMassCalculator::Data& output);
@@ -111,16 +113,22 @@ namespace HPlus {
     Count fAllSolutionsCutSubCount;
     Count fPositiveDiscriminantCutSubCount;
     Count fNegativeDiscriminantCutSubCount;
-
+    // two main categories of events (pure or impure):
     Count eventClass_Pure_SubCount;
     Count eventClass_Impure_SubCount;
-    Count eventClass_BadTau_SubCount;
-    Count eventClass_BadMET_SubCount;
-    Count eventClass_BadTauAndMET_SubCount;
-    Count eventClass_BadBjet_SubCount;
-    Count eventClass_BadBjetAndTau_SubCount;
-    Count eventClass_MassBadBjetAndMET_SubCount;
-    Count eventClass_MassBadBjetAndMETAndTau_SubCount;
+    // detailed, mutually exclusive event classes:
+    Count eventClass_OnlyBadTau_SubCount;
+    Count eventClass_OnlyBadMET_SubCount;
+    Count eventClass_OnlyBadTauAndMET_SubCount;
+    Count eventClass_OnlyBadBjet_SubCount;
+    Count eventClass_OnlyBadBjetAndTau_SubCount;
+    Count eventClass_OnlyBadBjetAndMET_SubCount;
+    Count eventClass_OnlyBadBjetAndMETAndTau_SubCount;
+    // counts of all misidentifications of some object
+    Count eventClass_AllBadTau_SubCount;
+    Count eventClass_AllBadMET_SubCount;
+    Count eventClass_AllBadBjet_SubCount;
+
 
     // Histograms 
     WrappedTH1* hSolution1PzDifference;
