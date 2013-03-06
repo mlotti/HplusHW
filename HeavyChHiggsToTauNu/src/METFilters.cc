@@ -36,6 +36,8 @@ namespace HPlus {
   METFilters::~METFilters() {}
 
   bool METFilters::passedEvent(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    if (!iEvent.isRealData()) return true;
+
     increment(fAllEventCounter);
     // Obtain trigger results object (some filters have been stored as paths there)
     // TriggerResults not needed for 2011
