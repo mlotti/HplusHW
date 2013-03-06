@@ -59,6 +59,11 @@ def modify(filename):
     origName = filename.replace(".root",".root_orig")
 
     fIN = ROOT.TFile.Open(filename)
+
+    if not fIN.FindKey("analysis") == Null:
+        print "File",filename,"already processed, doing nothing.."
+        return
+
     fOUT = ROOT.TFile.Open(newName,"RECREATE")
     fOUT.cd()
     anadir = fOUT.mkdir("analysis")
