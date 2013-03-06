@@ -106,7 +106,6 @@ namespace HPlus {
 			       FullHiggsMassCalculator::Data& output);
     void fillHistograms_MC(FullHiggsMassCalculator::Data& output);
     void fillHistograms_Data(FullHiggsMassCalculator::Data& output);
-    void print(TString infoText);
 
   private:
     // Counters
