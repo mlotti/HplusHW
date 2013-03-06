@@ -10,6 +10,38 @@ def triggerBin(pt, efficiency, uncertainty):
         uncertainty = cms.double(uncertainty)
     )
 
+tauLegEfficiency_noscalefactors = cms.untracked.PSet(
+    dataParameters = cms.PSet(
+        runs_160404_180252 = cms.PSet(
+            firstRun = cms.uint32(160404),
+            lastRun = cms.uint32(180252),
+            luminosity = cms.double(1),
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0)
+            ),
+        ),
+    ),
+    mcParameters = cms.PSet(
+        Fall11_PU_2011A = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+        Fall11_PU_2011B = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+        Fall11_PU_2011AB = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(20.0, 1.0, 0.0),
+            ),
+        ),
+    ),
+    dataSelect = cms.vstring(),
+    mcSelect = cms.string("Fall11_PU_2011AB"),
+    mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
+)
 
 tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium = cms.untracked.PSet(
     # The selected triggers for the efficiency. If one trigger is

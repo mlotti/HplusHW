@@ -604,8 +604,8 @@ class ConfigBuilder:
         print "TauSelection operating mode:", module.tauSelection.operatingMode.value()
         if hasattr(module, "vetoTauSelection"):
             print "VetoTauSelection src:", module.vetoTauSelection.tauSelection.src.value()
-        if hasattr(module, "jetSelection"):
-            print "Beta cut: ", module.jetSelection.betaCutSource.value(), module.jetSelection.betaCutDirection.value(), module.jetSelection.betaCut.value()
+        #if hasattr(module, "jetSelection"):
+        #    print "Beta cut: ", module.jetSelection.betaCutSource.value(), module.jetSelection.betaCutDirection.value(), module.jetSelection.betaCut.value()
         print "electrons: ", module.ElectronSelection
         print "muons: ", module.MuonSelection
         if hasattr(module, "jetSelection"):
@@ -621,25 +621,36 @@ class ConfigBuilder:
         if not self.doAgainstElectronScan:
             return
 
-        myTauIsolation = "byMediumCombinedIsolationDeltaBetaCorr"
+        myTauIsolation = [
+            "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+            "byMediumCombinedIsolationDeltaBetaCorr3Hits"
+            ]
+        muonDiscriminators = [
+            "againstMuonLoose2",
+            "againstMuonMedium2",
+            "againstMuonTight2"
+            ]
         electronDiscriminators = [
-            "againstElectronLoose",
-            "againstElectronMedium",
-            "againstElectronTight",
-            "againstElectronMVA"
+            "againstElectronLooseMVA3",
+            "againstElectronMediumMVA3",
+            "againstElectronTightMVA3",
+            "againstElectronVTightMVA3"
             ]
         names = []
         for module, name in zip(analysisModules, analysisNames):
             for eleDisc in electronDiscriminators:
-                mod = module.clone()
-                mod.tauSelection.isolationDiscriminator = myTauIsolation
-                mod.tauSelection.againstElectronDiscriminator = eleDisc
-                modName = name+eleDisc[0].upper()+eleDisc[1:]
-                setattr(process, modName, mod)
-                names.append(modName)
-                path = cms.Path(process.commonSequence * mod)
-                setattr(process, modName+"Path", path)
-        self._accumulateAnalyzers("AgainstElectron scan", names)
+                for muonDisc in muonDiscriminators:
+                    for tauIsol in myTauIsolation:
+                        mod = module.clone()
+                        mod.tauSelection.isolationDiscriminator = tauIsol
+                        mod.tauSelection.againstElectronDiscriminator = eleDisc
+                        mod.tauSelection.againstMuonDiscriminator = muonDisc
+                        modName = name+eleDisc[0].upper()+eleDisc[1:]+muonDisc[0].upper()+muonDisc[1:]+tauIsol[0].upper()+tauIsol[1:]
+                        setattr(process, modName, mod)
+                        names.append(modName)
+                        path = cms.Path(process.commonSequence * mod)
+                        setattr(process, modName+"Path", path)
+        self._accumulateAnalyzers("AgainstElectron/AgainstMuon scan", names)
  
     ## Build "tau embedding"-like preselection for normal MC
     #

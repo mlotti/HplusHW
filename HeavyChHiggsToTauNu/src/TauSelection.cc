@@ -36,28 +36,28 @@ namespace {
     
     // FIXME change to delta beta discriminators or eventually to continuous discriminator
     
-    if(a->tauID("byTightCombinedIsolationDeltaBetaCorr") > 0.5 && b->tauID("byTightCombinedIsolationDeltaBetaCorr") < 0.5)
+    if(a->tauID("byTightCombinedIsolationDeltaBetaCorr3Hits") > 0.5 && b->tauID("byTightCombinedIsolationDeltaBetaCorr3Hits") < 0.5)
       return true;
 
-    if(a->tauID("byMediumCombinedIsolationDeltaBetaCorr") > 0.5) {
-      if(b->tauID("byTightCombinedIsolationDeltaBetaCorr") > 0.5)
+    if(a->tauID("byMediumCombinedIsolationDeltaBetaCorr3Hits") > 0.5) {
+      if(b->tauID("byTightCombinedIsolationDeltaBetaCorr3Hits") > 0.5)
         return false;
-      if(b->tauID("byMediumCombinedIsolationDeltaBetaCorr") < 0.5)
+      if(b->tauID("byMediumCombinedIsolationDeltaBetaCorr3Hits") < 0.5)
         return true;
     }
 
-    if(a->tauID("byLooseCombinedIsolationDeltaBetaCorr") > 0.5) {
+    if(a->tauID("byLooseCombinedIsolationDeltaBetaCorr3Hits") > 0.5) {
       // assume that if tau is medium isolated, it is also tight isolated
-      if(b->tauID("byMediumCombinedIsolationDeltaBetaCorr") > 0.5)
+      if(b->tauID("byMediumCombinedIsolationDeltaBetaCorr3Hits") > 0.5)
         return false;
-      if(b->tauID("byLooseCombinedIsolationDeltaBetaCorr") < 0.5)
+      if(b->tauID("byLooseCombinedIsolationDeltaBetaCorr3Hits") < 0.5)
         return true;
     }
 
-    if(a->tauID("byVLooseCombinedIsolationDeltaBetaCorr") > 0.5) {
-      if(b->tauID("byLooseCombinedIsolationDeltaBetaCorr") > 0.5)
+    if(a->tauID("byVLooseCombinedIsolationDeltaBetaCorr3Hits") > 0.5) {
+      if(b->tauID("byLooseCombinedIsolationDeltaBetaCorr3Hits") > 0.5)
         return false;
-      if(b->tauID("byVLooseCombinedIsolationDeltaBetaCorr") < 0.5)
+      if(b->tauID("byVLooseCombinedIsolationDeltaBetaCorr3Hits") < 0.5)
         return true;
     }
 
@@ -132,15 +132,15 @@ namespace {
       bool resA = fTauID->passIsolation(tauA);
       bool resB = fTauID->passIsolation(tauB);
       /*
-      std::cout << "  Isolation " << resA << " (" << tauA->tauID("byRawCombinedIsolationDeltaBetaCorr")
-                << ") " << resB << " (" << tauB->tauID("byRawCombinedIsolationDeltaBetaCorr")
+      std::cout << "  Isolation " << resA << " (" << tauA->tauID("byRawCombinedIsolationDeltaBetaCorr3Hits")
+                << ") " << resB << " (" << tauB->tauID("byRawCombinedIsolationDeltaBetaCorr3Hits")
                 << ")" << std::endl;
       */
       if(resA != resB)
         return resA;
       if(!resA && !resB)
         // Both fail isolation, comparison by isolation is ok
-        return tauA->tauID("byRawCombinedIsolationDeltaBetaCorr") < tauB->tauID("byRawCombinedIsolationDeltaBetaCorr");
+        return tauA->tauID("byRawCombinedIsolationDeltaBetaCorr3Hits") < tauB->tauID("byRawCombinedIsolationDeltaBetaCorr3Hits");
 
       // Both pass isolation, compare by pt
       return tauA->pt() > tauB->pt();
@@ -254,14 +254,14 @@ namespace {
       resA = fTauID->passIsolation(tauA);
       resB = fTauID->passIsolation(tauB);
       /*
-      std::cout << "Isolation " << resA << " (" << tauA->tauID("byRawCombinedIsolationDeltaBetaCorr")
-                << ") " << resB << " (" << tauB->tauID("byRawCombinedIsolationDeltaBetaCorr")
+      std::cout << "Isolation " << resA << " (" << tauA->tauID("byRawCombinedIsolationDeltaBetaCorr3Hits")
+                << ") " << resB << " (" << tauB->tauID("byRawCombinedIsolationDeltaBetaCorr3Hits")
                 << ")" << std::endl;
       */
       if(resA != resB)
         return resA;
       if(!resA && !resB)
-        return tauA->tauID("byRawCombinedIsolationDeltaBetaCorr") < tauB->tauID("byRawCombinedIsolationDeltaBetaCorr");
+        return tauA->tauID("byRawCombinedIsolationDeltaBetaCorr3Hits") < tauB->tauID("byRawCombinedIsolationDeltaBetaCorr3Hits");
 
       // nprongs
       resA = fTauID->passNProngsCut(tauA);
@@ -1280,14 +1280,18 @@ namespace HPlus {
     // Disable histogram filling and counter incrementing until the return call
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
-    return tau->tauID(isolationString) > 0.5;
+    if (isolationString.size())
+      return tau->tauID(isolationString) > 0.5;
+    return fTauID->passIsolation(tau) > 0.5;
   }
 
   const double TauSelection::getIsolationValueOfTauObject(const edm::Ptr<pat::Tau>& tau, std::string isolationString) const {
     // Disable histogram filling and counter incrementing until the return call
     HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
     EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
-    return tau->tauID(isolationString);
+    if (isolationString.size())
+      return tau->tauID(isolationString);
+    return fTauID->passIsolation(tau);
   }
 
   const bool TauSelection::getPassesNProngsStatusOfTauObject(const edm::Ptr<pat::Tau>& tau) const {

@@ -117,9 +117,9 @@ namespace HPlus {
     // Horror getters - these should never be used in analysis for other purposes than testing / debugging !!!
     // If you use these for analysis, you forget about the sorting in the case of multiple taus -> physics results will not be accurate
     /// Use only for testing/debugging !!!
-    const bool getPassesIsolationStatusOfTauObject(const edm::Ptr<pat::Tau>& tau, std::string isolationString) const;
+    const bool getPassesIsolationStatusOfTauObject(const edm::Ptr<pat::Tau>& tau, std::string isolationString = "") const;
     /// Use only for testing/debugging !!!
-    const double getIsolationValueOfTauObject(const edm::Ptr<pat::Tau>& tau, std::string isolationString) const;
+    const double getIsolationValueOfTauObject(const edm::Ptr<pat::Tau>& tau, std::string isolationString = "") const;
     /// Use only for testing/debugging !!!
     const bool getPassesNProngsStatusOfTauObject(const edm::Ptr<pat::Tau>& tau) const;
     /// Use only for testing/debugging !!!

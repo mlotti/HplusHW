@@ -354,7 +354,7 @@ def doPlots(datasets, opts):
     createDrawPlot("alphaT", xlabel="#alpha_{T}", opts={"xmax": 2}, customizeBeforeFrame=lambda p: partiallyBlind(p, maxShownValue=0.5))
     createDrawPlot("deltaPhiJetMet", xlabel="min #Delta#phi(jet, MET), ^{o}", fullyBlinded=True)
     createDrawPlot("maxDeltaPhiJetMet", xlabel="max #Delta#phi(#tau jet, MET), ^{o}", fullyBlinded=True)
-    createDrawPlot("SignalSelectionFlow", xlabel="Step")
+    createDrawPlot("SignalSelectionFlow", xlabel="Step", opts={"xmax": 7})
 
     #createDrawPlot("SignalSelectionFlowVsVertices"", xlabel="N_{vertices}", ylabel="Step",)
     #createDrawPlot("SignalSelectionFlowVsVerticesFakeTaus", xlabel="N_{vertices}", ylabel="Step")

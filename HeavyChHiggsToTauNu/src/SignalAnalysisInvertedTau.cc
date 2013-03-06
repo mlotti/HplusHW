@@ -90,6 +90,7 @@ namespace HPlus {
     fBvetoDeltaPhiCounter(eventCounter.addCounter("Veto on b jets after MET and Dphi")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fBTaggingScaleFactorInvertedCounter(eventCounter.addCounter("btagging scale factor inverted")),
+    fQCDTailKillerCounter(eventCounter.addCounter("QCD tail killer")),
     fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhi(Tau,MET) upper limit")),
     fDeltaPhiVSDeltaPhiMetJetCutCounter(eventCounter.addCounter("DeltaPhi(Jet,MET) vs DeltaPhi cut")),
     fDeltaPhiVSDeltaPhiMHTJet1CutCounter(eventCounter.addCounter("DeltaPhi(Jet1,MHT) vs DeltaPhi cut")),
@@ -145,6 +146,7 @@ namespace HPlus {
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
     fMETFilters(iConfig.getUntrackedParameter<edm::ParameterSet>("metFilters"), eventCounter),
+    fQCDTailKiller(iConfig.getUntrackedParameter<edm::ParameterSet>("QCDTailKiller"), eventCounter, fHistoWrapper),
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WjetsWeight"),
     fFakeTauIdentifier(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeTauSFandSystematics"), fHistoWrapper, "TauID"),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
@@ -820,7 +822,7 @@ namespace HPlus {
     //    if (!tauData.selectedTauPassesRtau()) return false;
     
     
-    std::string myTauIsolation = "byMediumCombinedIsolationDeltaBetaCorr";
+    std::string myTauIsolation = "byMediumCombinedIsolationDeltaBetaCorr3Hits";
     
     /*    edm::PtrVector<pat::Tau> myBestTauCandidate;    
     if (myOneProngRtauPassedTaus.size())
@@ -852,7 +854,7 @@ namespace HPlus {
       
       if ( (*iTau)->tauID(myTauIsolation) < 0.5 ) continue;
 	//	std::cout <<"PASSES TAU DISCR" << std::endl;
-      hTauDiscriminator->Fill((*iTau)->tauID("byRawCombinedIsolationDeltaBetaCorr"));
+      hTauDiscriminator->Fill((*iTau)->tauID("byMediumCombinedIsolationDeltaBetaCorr3Hits"));
       increment(fTausExistCounter);
   
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, (**iTau));

@@ -71,6 +71,7 @@ namespace HPlus {
       const double getDeltaPhiMHTTau() const { return fDeltaPhiMHTTau; }
       // Jet corresponding to tau
       const edm::Ptr<pat::Jet> getReferenceJetToTau() const { return fReferenceJetToTau; }
+      const double getReferenceJetToTauMatchDeltaR() const { return fReferenceJetToTauDeltaR; }
       const int getReferenceJetToTauPartonFlavour() const;
       const double getReferenceJetToTauDeltaPt() const { return fReferenceJetToTauDeltaPt; }
       const double getReferenceJetToTauPtRatio() const { return fReferenceJetToTauPtRatio; }
@@ -109,6 +110,7 @@ namespace HPlus {
       double fDeltaPhiMHTTau;
       // Jet corresponding to tau
       edm::Ptr<pat::Jet> fReferenceJetToTau;
+      double fReferenceJetToTauDeltaR;
       double fReferenceJetToTauDeltaPt;
       double fReferenceJetToTauPtRatio;
     };

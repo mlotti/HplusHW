@@ -54,14 +54,19 @@ trigger = cms.untracked.PSet(
 from HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEmulationEfficiency_cfi import *
 
 metFilters = cms.untracked.PSet(
+    beamHaloSrc = cms.untracked.InputTag("BeamHaloSummary"),
+    beamHaloEnabled = cms.untracked.bool(True),
     HBHENoiseFilterSrc = cms.untracked.InputTag("HBHENoiseFilterResultProducer", "HBHENoiseFilterResult"),
-    HBHENoiseFilterEnabled = cms.untracked.bool(False),
+    HBHENoiseFilterEnabled = cms.untracked.bool(True),
     HBHENoiseFilterMETWGSrc = cms.untracked.InputTag("HBHENoiseFilterResultProducerMETWG", "HBHENoiseFilterResult"),
-    HBHENoiseFilterMETWGEnabled = cms.untracked.bool(False),
+    HBHENoiseFilterMETWGEnabled = cms.untracked.bool(True),
     trackingFailureFilterSrc = cms.untracked.InputTag("trackingFailureFilter"),
-    trackingFailureFilterEnabled = cms.untracked.bool(False),
+    trackingFailureFilterEnabled = cms.untracked.bool(True),
     EcalDeadCellEventFilterSrc = cms.untracked.InputTag("EcalDeadCellEventFilter"),
-    EcalDeadCellEventFilterEnabled = cms.untracked.bool(False), 
+    EcalDeadCellEventFilterEnabled = cms.untracked.bool(True),
+    EcalDeadCellTPFilterSrc = cms.untracked.InputTag("ecalDeadCellTPfilter"),
+    EcalDeadCellTPFilterEnabled = cms.untracked.bool(True),
+    triggerResultsSrc = cms.untracked.InputTag("TriggerResults", "", "HChPatTuple"),
 )
 
 primaryVertexSelection = cms.untracked.PSet(
@@ -80,11 +85,11 @@ tauSelectionBase = cms.untracked.PSet(
     ptCut = cms.untracked.double(41), # jet pt > value
     etaCut = cms.untracked.double(2.1), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
-    againstElectronDiscriminator = cms.untracked.string("againstElectronMVA"), # discriminator against electrons
-    againstMuonDiscriminator = cms.untracked.string("againstMuonTight"), # discriminator for against muons
+    againstElectronDiscriminator = cms.untracked.string("againstElectronTightMVA3"), # discriminator against electrons
+    againstMuonDiscriminator = cms.untracked.string("againstMuonTight2"), # discriminator for against muons
     applyVetoForDeadECALCells = cms.untracked.bool(False), # set to true to exclude taus that are pointing to a dead ECAL cell
     deadECALCellsDeltaR = cms.untracked.double(0.01), # min allowed DeltaR to a dead ECAL cell
-    isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr"), # discriminator for isolation
+    isolationDiscriminator = cms.untracked.string("byMediumCombinedIsolationDeltaBetaCorr3Hits"), # discriminator for isolation
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1.0), # cut point for continuous isolation discriminator, applied only if it is non-zero
     rtauCut = cms.untracked.double(0.7), # rtau > value
     nprongs = cms.untracked.uint32(1), # number of prongs (options: 1, 3, or 13 == 1 || 3)
@@ -96,33 +101,34 @@ tauSelectionBase = cms.untracked.PSet(
 tauSelectionHPSTightTauBased = tauSelectionBase.clone(
     src = "selectedPatTaus",
     selection = "HPSTauBased",
-    isolationDiscriminator = "byTightCombinedIsolationDeltaBetaCorr",
+    isolationDiscriminator = "byTightCombinedIsolationDeltaBetaCorr3Hits",
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
 tauSelectionHPSMediumTauBased = tauSelectionBase.clone(
     src = "selectedPatTaus",
     selection = "HPSTauBased",
-    isolationDiscriminator = "byMediumCombinedIsolationDeltaBetaCorr",
+    isolationDiscriminator = "byMediumCombinedIsolationDeltaBetaCorr3Hits",
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
 tauSelectionHPSLooseTauBased = tauSelectionBase.clone(
     src = "selectedPatTaus",
     selection = "HPSTauBased",
-    isolationDiscriminator = "byLooseCombinedIsolationDeltaBetaCorr",
+    isolationDiscriminator = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
     isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 )
 
-tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
-    src = "selectedPatTaus",
-    selection = "HPSTauBased",
-    isolationDiscriminator = "byVLooseCombinedIsolationDeltaBetaCorr",
-    isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
-)
+# Very loose working point is no longer supported
+#tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
+    #src = "selectedPatTausHpsPFTau",
+    #selection = "HPSTauBased",
+    #isolationDiscriminator = "byVLooseCombinedIsolationDeltaBetaCorr",
+    #isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
+#)
 
-vetoTauBase = tauSelectionHPSVeryLooseTauBased.clone(
-    src = "selectedPatTaus",
+vetoTauBase = tauSelectionHPSLooseTauBased.clone(
+    src = "selectedPatTausHpsPFTau",
 #    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     ptCut = cms.untracked.double(20), # jet pt > value
     etaCut = cms.untracked.double(2.4), # jet |eta| < value
@@ -190,6 +196,7 @@ fakeTauSFandSystematicsAgainstElectronMVA = fakeTauSFandSystematicsBase.clone(
 )
 
 fakeTauSFandSystematics = None
+# FIXME: add scale factors for MVA3 against electron discriminators
 if tauSelection.againstElectronDiscriminator.value() == "againstElectronMedium":
     fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMedium
 elif tauSelection.againstElectronDiscriminator.value() == "againstElectronMVA":
@@ -283,7 +290,36 @@ bTagging = cms.untracked.PSet(
 oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng")
  
 #deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees
-deltaPhiTauMET = cms.untracked.double(160.0) # less than this value in degrees, for heavy charged Higgs
+deltaPhiTauMET = cms.untracked.double(180.0) # less than this value in degrees, for heavy charged Higgs
+
+QCDTailKiller = cms.untracked.PSet(
+    # Back to back (bottom right corner of 2D plane tau,MET vs. jet,MET)
+    backToBackJet1CutShape = cms.untracked.string("circular"), # options: noCut, rectangular, triangular, circular
+    backToBackJet1CutX = cms.untracked.double(40.0),
+    backToBackJet1CutY = cms.untracked.double(40.0),
+    backToBackJet2CutShape = cms.untracked.string("circular"),
+    backToBackJet2CutX = cms.untracked.double(30.0),
+    backToBackJet2CutY = cms.untracked.double(30.0),
+    backToBackJet3CutShape = cms.untracked.string("circular"),
+    backToBackJet3CutX = cms.untracked.double(30.0),
+    backToBackJet3CutY = cms.untracked.double(30.0),
+    backToBackJet4CutShape = cms.untracked.string("circular"),
+    backToBackJet4CutX = cms.untracked.double(30.0),
+    backToBackJet4CutY = cms.untracked.double(30.0),
+    # Collinear topology (top left corner of 2D plane tau,MET vs. jet,MET)
+    collinearJet1CutShape = cms.untracked.string("circular"),
+    collinearJet1CutX = cms.untracked.double(30.0),
+    collinearJet1CutY = cms.untracked.double(30.0),
+    collinearJet2CutShape = cms.untracked.string("circular"),
+    collinearJet2CutX = cms.untracked.double(30.0),
+    collinearJet2CutY = cms.untracked.double(30.0),
+    collinearJet3CutShape = cms.untracked.string("circular"),
+    collinearJet3CutX = cms.untracked.double(30.0),
+    collinearJet3CutY = cms.untracked.double(30.0),
+    collinearJet4CutShape = cms.untracked.string("circular"),
+    collinearJet4CutX = cms.untracked.double(30.0),
+    collinearJet4CutY = cms.untracked.double(30.0),
+)
 
 topReconstruction = cms.untracked.string("None") # Options: None
 
@@ -473,20 +509,21 @@ def cloneForHeavyAnalysis(lightModule):
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2012_cff as tauTriggerEfficiency
 def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
     print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
-    if tausele.isolationDiscriminator.value() == "byVLooseCombinedIsolationDeltaBetaCorr":
-        if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
-            return tauTriggerEfficiency.tauLegEfficiency_byVLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium
-    elif tausele.isolationDiscriminator.value() == "byLooseCombinedIsolationDeltaBetaCorr":
+    if tausele.isolationDiscriminator.value() == "byLooseCombinedIsolationDeltaBetaCorr3Hits":
+        return tauTriggerEfficiency.tauLegEfficiency_noscalefactors
+        # FIXME
         if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
             return tauTriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium
         elif tausele.againstElectronDiscriminator.value() == "againstElectronMVA":
             return tauTriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA
-    elif tausele.isolationDiscriminator.value() == "byMediumCombinedIsolationDeltaBetaCorr":
+    elif tausele.isolationDiscriminator.value() == "byMediumCombinedIsolationDeltaBetaCorr3Hits":
+        return tauTriggerEfficiency.tauLegEfficiency_noscalefactors
+        # FIXME
         if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
             return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium
         elif tausele.againstElectronDiscriminator.value() == "againstElectronMVA":
             return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA
-    raise Exception("Tau trigger efficencies/scale factors are only available for:\n  tau isolation: 'byVLooseCombinedIsolationDeltaBetaCorr', 'byLooseCombinedIsolationDeltaBetaCorr', 'byMediumCombinedIsolationDeltaBetaCorr'\n  against electron discr.: 'againstElectronMedium', 'againstElectronMVA' (MVA not available for VLoose isol.)")
+    raise Exception("Tau trigger efficencies/scale factors are only available for:\n  tau isolation: 'byLooseCombinedIsolationDeltaBetaCorr3Hits', 'byMediumCombinedIsolationDeltaBetaCorr3Hits'\n  against electron discr.: 'againstElectronMedium', 'againstElectronMVA' (MVA not available for VLoose isol.)")
 
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
 tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
