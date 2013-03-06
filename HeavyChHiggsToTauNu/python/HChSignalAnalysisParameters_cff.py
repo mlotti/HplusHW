@@ -53,14 +53,19 @@ trigger = cms.untracked.PSet(
 from HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEmulationEfficiency_cfi import *
 
 metFilters = cms.untracked.PSet(
+    beamHaloSrc = cms.untracked.InputTag("BeamHaloSummary"),
+    beamHaloEnabled = cms.untracked.bool(True),
     HBHENoiseFilterSrc = cms.untracked.InputTag("HBHENoiseFilterResultProducer", "HBHENoiseFilterResult"),
-    HBHENoiseFilterEnabled = cms.untracked.bool(False),
+    HBHENoiseFilterEnabled = cms.untracked.bool(True),
     HBHENoiseFilterMETWGSrc = cms.untracked.InputTag("HBHENoiseFilterResultProducerMETWG", "HBHENoiseFilterResult"),
-    HBHENoiseFilterMETWGEnabled = cms.untracked.bool(False),
+    HBHENoiseFilterMETWGEnabled = cms.untracked.bool(True),
     trackingFailureFilterSrc = cms.untracked.InputTag("trackingFailureFilter"),
     trackingFailureFilterEnabled = cms.untracked.bool(True),
     EcalDeadCellEventFilterSrc = cms.untracked.InputTag("EcalDeadCellEventFilter"),
-    EcalDeadCellEventFilterEnabled = cms.untracked.bool(False), 
+    EcalDeadCellEventFilterEnabled = cms.untracked.bool(True),
+    EcalDeadCellTPFilterSrc = cms.untracked.InputTag("ecalDeadCellTPfilter"),
+    EcalDeadCellTPFilterEnabled = cms.untracked.bool(True),
+    triggerResultsSrc = cms.untracked.InputTag("TriggerResults", "", "HChPatTuple"),
 )
 
 primaryVertexSelection = cms.untracked.PSet(
@@ -121,7 +126,7 @@ tauSelectionHPSLooseTauBased = tauSelectionBase.clone(
     #isolationDiscriminatorContinuousCutPoint = cms.untracked.double(-1)
 #)
 
-vetoTauBase = tauSelectionHPSVeryLooseTauBased.clone(
+vetoTauBase = tauSelectionHPSLooseTauBased.clone(
     src = "selectedPatTausHpsPFTau",
 #    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     ptCut = cms.untracked.double(20), # jet pt > value
@@ -190,6 +195,7 @@ fakeTauSFandSystematicsAgainstElectronMVA = fakeTauSFandSystematicsBase.clone(
 )
 
 fakeTauSFandSystematics = None
+# FIXME: add scale factors for MVA3 against electron discriminators
 if tauSelection.againstElectronDiscriminator.value() == "againstElectronMedium":
     fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMedium
 elif tauSelection.againstElectronDiscriminator.value() == "againstElectronMVA":
@@ -497,20 +503,21 @@ def cloneForHeavyAnalysis(lightModule):
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency
 def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
     print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
-    if tausele.isolationDiscriminator.value() == "byVLooseCombinedIsolationDeltaBetaCorr":
-        if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
-            return tauTriggerEfficiency.tauLegEfficiency_byVLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium
-    elif tausele.isolationDiscriminator.value() == "byLooseCombinedIsolationDeltaBetaCorr":
+    if tausele.isolationDiscriminator.value() == "byLooseCombinedIsolationDeltaBetaCorr3Hits":
+        return tauTriggerEfficiency.tauLegEfficiency_noscalefactors
+        # FIXME
         if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
             return tauTriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium
         elif tausele.againstElectronDiscriminator.value() == "againstElectronMVA":
             return tauTriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA
-    elif tausele.isolationDiscriminator.value() == "byMediumCombinedIsolationDeltaBetaCorr":
+    elif tausele.isolationDiscriminator.value() == "byMediumCombinedIsolationDeltaBetaCorr3Hits":
+        return tauTriggerEfficiency.tauLegEfficiency_noscalefactors
+        # FIXME
         if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
             return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium
         elif tausele.againstElectronDiscriminator.value() == "againstElectronMVA":
             return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMVA
-    raise Exception("Tau trigger efficencies/scale factors are only available for:\n  tau isolation: 'byVLooseCombinedIsolationDeltaBetaCorr', 'byLooseCombinedIsolationDeltaBetaCorr', 'byMediumCombinedIsolationDeltaBetaCorr'\n  against electron discr.: 'againstElectronMedium', 'againstElectronMVA' (MVA not available for VLoose isol.)")
+    raise Exception("Tau trigger efficencies/scale factors are only available for:\n  tau isolation: 'byLooseCombinedIsolationDeltaBetaCorr3Hits', 'byMediumCombinedIsolationDeltaBetaCorr3Hits'\n  against electron discr.: 'againstElectronMedium', 'againstElectronMVA' (MVA not available for VLoose isol.)")
 
 #triggerEfficiencyScaleFactor = TriggerEfficiency.tauLegEfficiency
 tauTriggerEfficiencyScaleFactor = setTriggerEfficiencyScaleFactorBasedOnTau(tauSelection)
