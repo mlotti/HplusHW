@@ -60,7 +60,7 @@ def modify(filename):
 
     fIN = ROOT.TFile.Open(filename)
 
-    if not fIN.FindKey("analysis") == Null:
+    if not fIN.FindKey("analysis") == None:
         print "File",filename,"already processed, doing nothing.."
         return
 
