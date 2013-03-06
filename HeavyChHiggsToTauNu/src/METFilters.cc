@@ -38,7 +38,8 @@ namespace HPlus {
   bool METFilters::passedEvent(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     increment(fAllEventCounter);
     // Obtain trigger results object (some filters have been stored as paths there)
-    edm::Handle<edm::TriggerResults> triggerResults;
+    // TriggerResults not needed for 2011
+    /*edm::Handle<edm::TriggerResults> triggerResults;
     iEvent.getByLabel(fTriggerResultsSrc, triggerResults);
     if (!triggerResults.isValid())
       throw cms::Exception("Assert") << "METFilters: edm::TriggerResults object is not valid!";
@@ -47,17 +48,16 @@ namespace HPlus {
     for (unsigned int i = 0; i < triggerResults->size(); ++i) {
       std::cout << "  " <<  triggerNames.triggerName(i) << " status=" << triggerResults->accept(i) << std::endl;
     }
-    //const edm::TriggerNames& triggerNames = iEvent.triggerNames(*htrigger);
-    //for(std::vector<TriggerPath *>::const_iterator i = triggerPaths.begin(); i != triggerPaths.end(); ++i) {
-
+    */
 
 //----- Beam halo filter
     if (fBeamHaloFilterEnabled) {
       edm::Handle<reco::BeamHaloSummary> hbeamhalo;
       iEvent.getByLabel(fBeamHaloFilterSrc, hbeamhalo);
-      if (!hbeamhalo->CSCTightHaloId())
+      if (hbeamhalo->CSCTightHaloId()) // Returns true if event has been identified as a halo event
         return false;
     }
+    increment(fBeamHaloFilterCounter);
 
 //----- HBHE noise filter
     if(fHBHENoiseFilterEnabled) {
@@ -100,6 +100,7 @@ namespace HPlus {
       if(! *hresult)
         return false;
     }
+    increment(fEcalDeadCellTPFilterCounter);
 
     // Filters passed 
     increment(fAllPassedCounter);
