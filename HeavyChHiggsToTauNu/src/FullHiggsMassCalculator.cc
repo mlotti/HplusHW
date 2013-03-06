@@ -434,7 +434,7 @@ namespace HPlus {
       output.iMisidentificationCode += 1;
       increment(eventClass_AllBadTau_SubCount);
     }
-    std::cout << "HAHAAAAHAHAHAHAHAHAAAAHAAHAHAHAAAAAAAAAAAAAAA: " << output.iMisidentificationCode << std::endl;
+    std::cout << "FullHiggsMassCalculator:   output.iMisidentificationCode = " << output.iMisidentificationCode << std::endl;
     // Define and set the event classes. Informative histograms are filled and counters incremented for each class
     switch (output.iMisidentificationCode) {
     case 0:
