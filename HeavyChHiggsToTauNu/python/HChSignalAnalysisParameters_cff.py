@@ -196,13 +196,15 @@ fakeTauSFandSystematicsAgainstElectronMVA = fakeTauSFandSystematicsBase.clone(
 
 fakeTauSFandSystematics = None
 # FIXME: add scale factors for MVA3 against electron discriminators
-if tauSelection.againstElectronDiscriminator.value() == "againstElectronMedium":
-    fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMedium
-elif tauSelection.againstElectronDiscriminator.value() == "againstElectronMVA":
-    fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMVA
-else:
-    print "Warning: You used as againstElectronDiscriminator in tauSelection '%s', for which the fake tau systematics are not supported!"%tauSelection.againstElectronDiscriminator.value()
-    fakeTauSFandSystematics = fakeTauSFandSystematicsBase
+print "Warning: You used as againstElectronDiscriminator in tauSelection '%s', for which the fake tau systematics are not supported!"%tauSelection.againstElectronDiscriminator.value()
+fakeTauSFandSystematics = fakeTauSFandSystematicsBase
+#if tauSelection.againstElectronDiscriminator.value() == "againstElectronMedium":
+    #fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMedium
+#elif tauSelection.againstElectronDiscriminator.value() == "againstElectronMVA":
+    #fakeTauSFandSystematics = fakeTauSFandSystematicsAgainstElectronMVA
+#else:
+    #print "Warning: You used as againstElectronDiscriminator in tauSelection '%s', for which the fake tau systematics are not supported!"%tauSelection.againstElectronDiscriminator.value()
+    #fakeTauSFandSystematics = fakeTauSFandSystematicsBase
 
 jetSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatJets"),  # PF jets
@@ -503,16 +505,14 @@ def cloneForHeavyAnalysis(lightModule):
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2011_cff as tauTriggerEfficiency
 def setTriggerEfficiencyScaleFactorBasedOnTau(tausele):
     print "Trigger efficiency / scalefactor set according to tau isolation '"+tausele.isolationDiscriminator.value()+"' and tau against electron discr. '"+tausele.againstElectronDiscriminator.value()+"'"
+    return tauTriggerEfficiency.tauLegEfficiency_noscalefactors
+    # FIXME
     if tausele.isolationDiscriminator.value() == "byLooseCombinedIsolationDeltaBetaCorr3Hits":
-        return tauTriggerEfficiency.tauLegEfficiency_noscalefactors
-        # FIXME
         if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
             return tauTriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMedium
         elif tausele.againstElectronDiscriminator.value() == "againstElectronMVA":
             return tauTriggerEfficiency.tauLegEfficiency_byLooseCombinedIsolationDeltaBetaCorr_againstElectronMVA
     elif tausele.isolationDiscriminator.value() == "byMediumCombinedIsolationDeltaBetaCorr3Hits":
-        return tauTriggerEfficiency.tauLegEfficiency_noscalefactors
-        # FIXME
         if tausele.againstElectronDiscriminator.value() == "againstElectronMedium":
             return tauTriggerEfficiency.tauLegEfficiency_byMediumCombinedIsolationDeltaBetaCorr_againstElectronMedium
         elif tausele.againstElectronDiscriminator.value() == "againstElectronMVA":
