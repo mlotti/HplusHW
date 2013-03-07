@@ -129,9 +129,20 @@ datasetsData_MultiJet_2012 = [
     "MultiJet_193834-194225_2012B_Jul13",
     "MultiJet_194270-196531_2012B_Jul13",
     "MultiJet_198022-198523_2012C_Aug24",
-    "MultiJet_198941-200601_2012C_Prompt",
-    "MultiJet_200961-202504_2012C_Prompt",
-    "MultiJet_202792-203742_2012C_Prompt",
+    "MultiJet_198941-203742_2012C_Prompt",
+    "MultiJet_203777-208686_2012D_Prompt",
+]
+
+datasetsData_BJetPlusX_2012 = [
+    "MultiJet_190456-190738_2012A_Jul13",
+    "MultiJet_190782-190949_2012A_Aug06",
+    "MultiJet_191043-193621_2012A_Jul13",
+    "BJetPlusX_193834-194225_2012B_Jul13",
+    "BJetPlusX_194270-196531_2012B_Jul13",
+    "BJetPlusX_198022-198523_2012C_Aug24",
+    "BJetPlusX_198941-203742_2012C_Prompt",
+    "BJetPlusX_201191-201191_2012C_Dec11",
+    "BJetPlusX_203777-208686_2012D_Prompt",
 ]
 
 datasetsMC_2012 = []
@@ -277,11 +288,14 @@ elif "v53" in workflow:
     if "taumet" in workflow:
         datasets.extend(datasetsData_Tau_2012)
         datasets.extend(datasetsMC_2012)
-    elif "quadjet" in workflow:
+    elif "quadjet_" in workflow:
         datasets.extend(datasetsData_MultiJet_2012)
         datasets.extend(datasetsMC_2012)
-    elif "quadpfjet" in workflow:
-        datasets.extend(datasetsData_MultiJet_2012)
+    elif "quadjetbtag" in workflow:
+        datasets.extend(datasetsData_BJetPlusX_2012)
+        datasets.extend(datasetsMC_2012)
+    elif "quadpfjetbtag" in workflow:
+        datasets.extend(datasetsData_BJetPlusX_2012)
     else:
         raise Exception("Unsupported workflow %s" % workflow)
 
