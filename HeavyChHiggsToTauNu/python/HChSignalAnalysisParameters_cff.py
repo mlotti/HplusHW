@@ -582,7 +582,10 @@ def setDataTriggerEfficiency(dataVersion, era, pset):
     elif era == "Run2012B":
         pset.dataSelect = ["runs_193834_196531"]
     elif era == "Run2012C":
-        pset.dataSelect = ["runs_198022_202585"]
+#        pset.dataSelect = ["runs_198022_202585"]
+        pset.dataSelect = ["runs_198022_203742"] # FIXME: temporary fix
+    elif era == "Run2012D":
+        pset.dataSelect = ["runs_202807_208686"]
     elif era == "Run2012AB":
         pset.dataSelect = ["runs_190456_196531"]
     elif era == "Run2012ABC":
@@ -590,7 +593,7 @@ def setDataTriggerEfficiency(dataVersion, era, pset):
     elif era == "Run2012ABCD":
         pset.dataSelect = ["runs_190456_208686"]
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011AB', 'Run2012A', 'Run2012B', 'Run2012C', 'Run2012AB', 'Run2012ABC', 'Run2012ABCD'")
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011AB', 'Run2012A', 'Run2012B', 'Run2012C', 'Run2012AB', 'Run2012ABC', 'Run2012ABCD'" % era)
 
 
 # Weighting by instantaneous luminosity, and the number of true
@@ -615,11 +618,12 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
         psetReader.enabled = False
         return
     else:
-        raise Exception("No PU reweighting support for anything else than Fall11 S6 scenario at the moment")
+        raise Exception("No PU reweighting support for anything else than Fall11 S6 or Summer12 S10 scenarios at the moment")
     pset.enabled = True
     psetReader.enabled = True
 
-    if era in ["Run2011A", "Run2011B", "Run2012A", "Run2012B", "Run2012C", "Run2012AB", "Run2012ABC"]:
+    list2012 = ["Run2011A", "Run2011B", "Run2012A", "Run2012B", "Run2012C", "Run2012D", "Run2012AB", "Run2012ABC", "Run2012ABCD"]
+    if era in list2012:
         pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData"+era.replace("Run","")+suffix+".root"
         if "Run2011" in era:
             pset.weightDistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_"+era.replace("Run","")+".root"
@@ -627,7 +631,7 @@ def setPileupWeight(dataVersion, process, commonSequence, pset=vertexWeight, pse
         pset.dataPUdistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/PileupHistogramData2011"+suffix+".root"
         pset.weightDistribution = "HiggsAnalysis/HeavyChHiggsToTauNu/data/weights_2011AB.root"
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'Run2011A', 'Run2011B', 'Run2011AB', 'Run2012A', 'Run2012B', 'Run2012C', 'Run2012ABC' " % era)
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'Run2011A', 'Run2011B', %s" % (era, ", ".join(["'%s'"%x for x in list2012])))
     pset.dataPUdistributionLabel = "pileup"
     # Make procuder for weights and add it to common sequence
     tmp = pset.clone()
