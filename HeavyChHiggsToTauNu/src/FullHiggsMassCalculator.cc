@@ -64,7 +64,9 @@ namespace HPlus {
     bPassedEvent(false),
     fDiscriminant(0),
     fTopMassSolution(0),
-    fNeutrinoZSolution(0),
+    fNeutrinoPzSolution1(0),
+    fNeutrinoPzSolution2(0),
+    fSelectedNeutrinoPzSolution(0),
     fNeutrinoPtSolution(0),
     fHiggsMassSolution(0),
     fMCNeutrinoPz(0),
@@ -121,7 +123,7 @@ namespace HPlus {
     // Informative histograms
     hTopMass                  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TopMass", 
 							  "Top mass;m_{top} (GeV)", 100, 0, 500);
-    hNeutrinoZSolution        = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NeutrinoZSolution", 
+    hSelectedNeutrinoPzSolution = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedNeutrinoPzSolution", 
 							  "Neutrino Z solution;p_{#nu,z} (GeV)", 100, -500, 500);
     hNeutrinoPtSolution       = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NeutrinoPtSolution", 
 							  "Neutrino pT solution;p_{#nu,T} (GeV)", 100, 0, 500);
@@ -133,7 +135,6 @@ namespace HPlus {
 							  "Neutrino/MaxSolution pz difference;(GeV)", 200, 0, 1000);
     hSolution12PzDifference   = histoWrapper.makeTH<TH2F>(HistoWrapper::kInformative, myDir, "MinSolution", "MaxSolution ",
 							  100, 0, 1000, 100, 0, 1000);
-
     hHiggsMassPure            = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMassPure",
                                                           "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
     hHiggsMassImpure          = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMassImpure",
@@ -152,11 +153,15 @@ namespace HPlus {
                                                           "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
     hHiggsMassBadBjetAndMETAndTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HiggsMassBadBjetAndMETAndTau",
                                                           "Higgs mass;m_{H^{+}} (GeV)", 100, 0, 500);
-    // The discriminant using in the neutrino longitudinal momentum calculation
+    // Quantities related to the neutrino longitudinal momentum calculation and solution selection
     hDiscriminantPure         = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DiscriminantPure",
 							  "DiscriminantPure", 100, -50000, 50000);
     hDiscriminantImpure       = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DiscriminantImpure",
 							"DiscriminantImpure", 100, -50000, 50000);
+    hNeutrinosTauAngle1       = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NeutrinosTauAngle1",
+							  "Angle between neutrinos and tau;(degrees)", 180, -180, 180);
+    hNeutrinosTauAngle2       = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "NeutrinosTauAngle2",
+							  "Angle between neutrinos and tau;(degrees)", 180, -180, 180);
     // Variables describing the quality of the reconstruction (used for event classification)
     hBDeltaR                  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "BDeltaR",
                                                           "B-jet #Delta R;#Delta R", 100, 0, 10);
@@ -332,9 +337,23 @@ namespace HPlus {
       neutrinoPzSolution1 = A*B / (1 - B*B);
       neutrinoPzSolution2 = A*B / (1 - B*B);
     }
+
     // Set output
     output.fDiscriminant = discriminant;
-    output.fNeutrinoZSolution = neutrinoPzSolution1; // Which solution should be selected?
+    output.fNeutrinoPzSolution1 = neutrinoPzSolution1;
+    output.fNeutrinoPzSolution2 = neutrinoPzSolution2;
+    // To determine which solution should be selected, calculate the angle (deltaR?) between the 
+    // two neutrino vectors and the tau vector. The solution giving the smaller angle is selected.
+    double angle1 = getAngleBetweenNeutrinosAndTau(pTau, MET, neutrinoPzSolution1);
+    double angle2 = getAngleBetweenNeutrinosAndTau(pTau, MET, neutrinoPzSolution2);
+    hNeutrinosTauAngle1->Fill(angle1 * TMath::RadToDeg());
+    hNeutrinosTauAngle2->Fill(angle2 * TMath::RadToDeg());
+    if (angle1 < angle2) {
+      output.fSelectedNeutrinoPzSolution = neutrinoPzSolution1;
+    } else {
+      output.fSelectedNeutrinoPzSolution = neutrinoPzSolution2;
+    }
+
     // Print information about the calculation steps
     std::cout << "FullHiggsMassCalculator: Reconstructing the neutrino p_z..." << std::endl;
     std::cout << "--- Tau reconstructed momentum = (" << pTau.Px() << ", " << pTau.Py() << ", " << pTau.Pz() << ")" << std::endl;
@@ -350,6 +369,13 @@ namespace HPlus {
     std::cout << "--- Z/X = " << TMath::Sqrt(A*A - MET.Perp2() * (1 - B*B)) / (1 - B*B) << std::endl;
     std::cout << "--- neutrinoPzSolution1 = " << neutrinoPzSolution1 << std::endl;
     std::cout << "--- neutrinoPzSolution2 = " << neutrinoPzSolution2 << std::endl;
+    std::cout << "--- angle1 = " << angle1 << std::endl;
+    std::cout << "--- angle2 = " << angle2 << std::endl;
+  }
+
+  double FullHiggsMassCalculator::getAngleBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPz) {
+    TVector3 neutrinoVector(MET.Px(), MET.Py(), neutrinoPz);
+    return neutrinoVector.Angle(pTau);
   }
 
   void FullHiggsMassCalculator::constructFourMomenta(TVector3& pTau, TVector3& pB, TVector3& MET, 
@@ -363,10 +389,10 @@ namespace HPlus {
     double bJetEnergy = TMath::Sqrt(TMath::Power(physicalParameters.c_fPhysicalBeautyMass,2) + TMath::Power(pB.Px(),2) +
 				    TMath::Power(pB.Py(),2) + TMath::Power(pB.Pz(),2));
     double neutrinosEnergy = TMath::Sqrt(TMath::Power(MET.Px(),2) + TMath::Power(MET.Py(),2) +
-					 TMath::Power(output.fNeutrinoZSolution,2));
+					 TMath::Power(output.fSelectedNeutrinoPzSolution,2));
     visibleTauMomentum.SetPxPyPzE(pTau.Px(), pTau.Py(), pTau.Pz(), visibleTauEnergy);
     bJetMomentum.SetPxPyPzE(pB.Px(), pB.Py(), pB.Pz(), bJetEnergy);
-    neutrinosMomentum.SetPxPyPzE(MET.Px(), MET.Py(), output.fNeutrinoZSolution, neutrinosEnergy);
+    neutrinosMomentum.SetPxPyPzE(MET.Px(), MET.Py(), output.fSelectedNeutrinoPzSolution, neutrinosEnergy);
     output.LorentzVector_visibleTauFourMomentum = visibleTauMomentum;
     output.LorentzVector_bJetFourMomentum = bJetMomentum;
     output.LorentzVector_neutrinosFourMomentum = neutrinosMomentum;
@@ -494,12 +520,12 @@ namespace HPlus {
   void FullHiggsMassCalculator::fillHistograms_MC(FullHiggsMassCalculator::Data& output) {
     hHiggsMass->Fill(output.fHiggsMassSolution);
     hTopMass->Fill(output.fTopMassSolution);
-    hNeutrinoZSolution->Fill(output.fNeutrinoZSolution);
+    hSelectedNeutrinoPzSolution->Fill(output.fSelectedNeutrinoPzSolution);
   }
 
   void FullHiggsMassCalculator::fillHistograms_Data(FullHiggsMassCalculator::Data& output) {
     hHiggsMass->Fill(output.fHiggsMassSolution);
     hTopMass->Fill(output.fTopMassSolution);
-    hNeutrinoZSolution->Fill(output.fNeutrinoZSolution);
+    hSelectedNeutrinoPzSolution->Fill(output.fSelectedNeutrinoPzSolution);
   }
 }

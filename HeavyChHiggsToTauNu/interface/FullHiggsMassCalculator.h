@@ -44,9 +44,9 @@ namespace HPlus {
       const double getDiscriminant() const { return fDiscriminant; }
       const double getHiggsMass() const { return fHiggsMassSolution; }
       const double getTopMass() const { return fTopMassSolution; }
-      const double getNeutrinoZ() const { return fNeutrinoZSolution; }
-      const double getNeutrinoPt() const { return fNeutrinoPtSolution; }
-      const double getMCNeutrinoZ() const { return fMCNeutrinoPz; }
+      const double getSelectedNeutrinoPzSolution() const { return fSelectedNeutrinoPzSolution; }
+      const double getNeutrinoPtSolution() const { return fNeutrinoPtSolution; }
+      const double getMCNeutrinoPz() const { return fMCNeutrinoPz; }
       const double getPhysicalTopMass() const { return c_fPhysicalTopMass; }
       const double getPhysicalTauMass() const { return c_fPhysicalTauMass; }
       const double getPhysicalBeautyMass() const { return c_fPhysicalBeautyMass; }
@@ -61,11 +61,13 @@ namespace HPlus {
       // Calculated results
       double fDiscriminant;
       double fTopMassSolution;
-      double fNeutrinoZSolution;
+      double fNeutrinoPzSolution1;
+      double fNeutrinoPzSolution2;
+      double fSelectedNeutrinoPzSolution;
       double fNeutrinoPtSolution;
       double fHiggsMassSolution;
       double fMCNeutrinoPz;
-      TVector3 visibleTau; // TODO: make notation Hungarian
+      TVector3 visibleTau;
       TVector3 mcNeutrinos;
       TVector3 mcBjetHiggsSide;
       TLorentzVector LorentzVector_bJetFourMomentum;
@@ -97,6 +99,7 @@ namespace HPlus {
     //bool doMCMatching(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau, const edm::Ptr<pat::Jet>& bjet, FullHiggsMassCalculator::Data& output);
     void calculateNeutrinoPz(TVector3& pTau, TVector3& pB, TVector3& MET,
 			     FullHiggsMassCalculator::Data& physicalParameters, FullHiggsMassCalculator::Data& output);
+    double getAngleBetweenNeutrinosAndTau(TVector3& pTau, TVector3& MET, double neutrinoPz);
     void constructFourMomenta(TVector3& pTau, TVector3& pB, TVector3& MET,
 			      FullHiggsMassCalculator::Data& physicalParameters,
 			      FullHiggsMassCalculator::Data& output);
@@ -147,7 +150,7 @@ namespace HPlus {
     //WrappedTH1* hTopMassImaginaryRejected;
     
     // Neutrino longitudinal momentum histograms
-    WrappedTH1* hNeutrinoZSolution;
+    WrappedTH1* hSelectedNeutrinoPzSolution;
     WrappedTH1* hNeutrinoPtSolution;
     WrappedTH1* hNeutrinoPtDifference;
     //WrappedTH1* hTrueHiggsMass;
@@ -167,6 +170,10 @@ namespace HPlus {
     WrappedTH1* hHiggsMassBadBjetAndMETAndTau;
     WrappedTH1* hDiscriminantPure;
     WrappedTH1* hDiscriminantImpure;
+
+    // Neutrino solution selection histograms
+    WrappedTH1* hNeutrinosTauAngle1;
+    WrappedTH1* hNeutrinosTauAngle2;
 
     // Event classification variable histograms
     WrappedTH1* hBDeltaR;

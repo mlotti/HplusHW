@@ -21,7 +21,7 @@
 #into a subdirectory called "old_plots" or similar
 
 # Copy new plots into public folder
-cp ./*.png ~strichte/public/html/plots/
+cp ./*.png ~strichte/public/html/plots/plot_repository/
 
 # Write update information to log file
 #TODO: optional message that can be put into log
